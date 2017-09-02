@@ -6,6 +6,8 @@
 #include "Hardware/Mouse.hpp"
 #include "Hardware/Keyboard.hpp"
 
+class World;
+
 class Context {
    public:
       Display display;
@@ -16,7 +18,7 @@ class Context {
       // TODO : Set world + default
       // TODO : arg <optional value> booleans or something
 
-      int init(/* TODO : world */);
+      int init(World *);
       int processArgs(int, char**);
       void printError(int);
       void update();

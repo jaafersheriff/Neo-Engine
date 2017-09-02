@@ -9,10 +9,7 @@ static void resize_callback(GLFWwindow *window, int width, int height) {
    glViewport(0, 0, width, height);
 }
 
-int Display::init(const int width, const int height) {
-   this->width = width;
-   this->height = height;
-   
+int Display::init() {
    if (initGLFW()) {
       return 1;
    }
@@ -29,31 +26,34 @@ int Display::initGLFW() {
    glfwSetErrorCallback(error_callback);
    if(!glfwInit()) {
       std::cerr << "Error initializing GLFW" << std::endl;
-      return 1;
+      return 2;
    }
 
    // Request version 3.2 of OpenGl
    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 
    window = glfwCreateWindow(this->width, this->height, "Neo", NULL, NULL);
    if (!window) {
       std::cerr << "Failed to create window" << std::endl;
       glfwTerminate();
-      return 1;
+      return 2;
    }
    glfwMakeContextCurrent(window);
 
    // GLEW
    glewExperimental = GL_FALSE;
-   if (glGetError() != GL_NO_ERROR) {
-      std::cout << "OpenGL Error" << std::endl;
+   GLenum error = glGetError();
+   if (error != GL_NO_ERROR) {
+      std::cout << "OpenGL Error: " << error << std::endl;
+      return 2;
    }
-   if (glewInit() != GLEW_OK) {
+   error = glewInit();
+   if (error != GLEW_OK) {
       std::cerr << "Failed to init GLEW" << std::endl;
-      return 1;
+      return 2;
    }
    glGetError();
 
@@ -67,6 +67,10 @@ int Display::initGLFW() {
    return 0;
 }
 
+void Display::setTitle(const char *name) {
+   glfwSetWindowTitle(window, name);
+}
+
 void Display::update() { 
    glfwGetFramebufferSize(window, &width, &height);
    glViewport(0, 0, width, height);
@@ -75,7 +79,7 @@ void Display::update() {
    double currTime = glfwGetTime();
    nbFrames++;
    if (currTime - lastTime >= 1.0) {
-      std::cout << 1000.0 / double(nbFrames) << std::endl;
+      std::cout << "FPS: " << double(nbFrames) << std::endl;
       nbFrames = 0;
       lastTime = currTime;
    }

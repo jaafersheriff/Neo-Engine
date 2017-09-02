@@ -13,7 +13,8 @@ class Display {
 
       GLFWwindow *window;     
 
-      int init(const int, const int);
+      int init();
+      void setTitle(const char *);
       int shouldClose();
       void update();
       void cleanUp();

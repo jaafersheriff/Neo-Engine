@@ -11,6 +11,7 @@ void Mouse::update(GLFWwindow *window) {
    dy = newX - this->yPos;
 
    // Set current positions
+   // TODO: if newX > 0 and newY > 0
    this->xPos = newX;
    this->yPos = newY;
 
