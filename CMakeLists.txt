@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.7)
 
 # Name of the project
-project(NeoEngine)
+project(Neo)
 
 # Use glob to get the list of all source files.
 file(GLOB_RECURSE SOURCES "src/*.cpp")
@@ -10,18 +10,20 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 set(GLEW_DIR "$ENV{GLEW_DIR}")
 if(NOT GLEW_DIR)
   message(FATAL_ERROR "Please point the environment variable GLEW_DIR to the root directory of your GLEW installation.")
+else()
+  message(${GLEW_DIR})
 endif()
 
 if(WIN32)
   # With prebuilt binaries
-  link_directories(${GLEW_DIR}/lib/Release/Win32)
+  # link_directories(${GLEW_DIR}/lib/Release/Win32)
 endif()
 
 # We don't really need to include header and resource files to build, but it's
 # nice to have them show up in IDEs.
 file(GLOB_RECURSE HEADERS "src/*.h")
 file(GLOB_RECURSE HEADERS "src/*.hpp")
-file(GLOB_RECURSE GLSL "src/*.glsl")
+file(GLOB_RECURSE GLSL "resources/*.glsl")
 
 # Set the executable.
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${GLSL})
@@ -31,6 +33,8 @@ add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${GLSL})
 set(GLM_INCLUDE_DIR "$ENV{GLM_INCLUDE_DIR}")
 if(NOT GLM_INCLUDE_DIR)
   MESSAGE(FATAL_ERROR "Please point the environment variable GLM_INCLUDE_DIR to the include directory of your GLM installation.")
+else()
+  message(${GLM_INCLUDE_DIR})
 endif()
 include_directories(${GLM_INCLUDE_DIR})
 
@@ -39,6 +43,8 @@ include_directories(${GLM_INCLUDE_DIR})
 set(GLFW_DIR "$ENV{GLFW_DIR}")
 if(NOT GLFW_DIR)
   message(FATAL_ERROR "Please point the environment variable GLFW_DIR to the root directory of your GLFW3 installation.")
+else()
+   message(${GLFW_DIR})
 endif()
 option(GLFW_BUILD_EXAMPLES "GLFW_BUILD_EXAMPLES" OFF)
 option(GLFW_BUILD_TESTS "GLFW_BUILD_TESTS" OFF)
@@ -54,7 +60,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME} glfw ${GLFW_LIBRARIES})
 # Get the GLEW environment variable.
 include_directories(${GLEW_DIR}/include)
 if(WIN32)
-  target_link_libraries(${CMAKE_PROJECT_NAME} ${GLEW_DIR}/lib/Release/Win32/glew32s.lib)
+  target_link_libraries(${CMAKE_PROJECT_NAME} C:/MinGW/msys/1.0/lib/glew-2.1.0/lib/glew32.dll)
+  #target_link_libraries(${CMAKE_PROJECT_NAME} C:/Users/jaafe/Documents/Code/libs/glew-2.0.0/lib/Release/Win32/glew32s.lib)
 else()
   target_link_libraries(${CMAKE_PROJECT_NAME} ${GLEW_DIR}/lib/libGLEW.a)
 endif()
@@ -76,3 +83,6 @@ else()
     target_link_libraries(${CMAKE_PROJECT_NAME} "GL")
   endif()
 endif()
+
+
+include_directories(${PROJECT_SOURCE_DIR}/src)

@@ -1,0 +1,6 @@
+.git/
+.vscode/
+build/
+other/
+Win32/
+
