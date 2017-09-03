@@ -8,26 +8,27 @@
 #include "Worlds/World.hpp"
 
 int main(int argc, char **argv) {
-
-   int ret;
    Context context;
    World *world;
+   // TODO: MR mr
 
    // Process args
-   ret = context.processArgs(argc, argv);
-   if (ret) {
-      context.printError(ret);
-      return ret;
+   if (context.processArgs(argc, argv)) {
+      std::cerr << "Invalid args " << std::endl;
+      std::cerr << "Usage: ./Neo.exe" << std::endl;
+      std::cerr <<"\t-s <window width> <window height>" << std::endl;
    }
 
-   // Init context
-   ret = context.init(world);
-   if (ret) {
-      context.printError(ret);
-      return ret;
+   // Init display
+   if (context.display.init()) {
+      std::cerr << "Failed to init display" << std::endl;
    }
    
-   // TODO: world.preprenderer
+   // Create world
+   world = context.createWorld();
+
+   // Prep MR for rendering of a specific world class
+   // TODO: world.prepRenderer(MR)
 
    // Main loop
    while(!context.shouldClose()) {

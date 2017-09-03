@@ -7,7 +7,6 @@
 #include "Hardware/Keyboard.hpp"
 
 class World;
-
 class Context {
    public:
       Display display;
@@ -18,9 +17,8 @@ class Context {
       // TODO : Set world + default
       // TODO : arg <optional value> booleans or something
 
-      int init(World *);
       int processArgs(int, char**);
-      void printError(int);
+      World* createWorld(); 
       void update();
       bool shouldClose();
       void cleanUp();

@@ -6,19 +6,6 @@
 #include <string.h>  // strcmp
 #include <iostream>  // cout
 
-int Context::init(World *world) {
-   int ret = display.init();
-   if (ret) {
-      return ret; 
-   }
-
-   // TODO: world = processargs.world
-   world = new HelloWorld();
-   display.setTitle(world->name.c_str());
-
-   return 0;
-}
-
 int Context::processArgs(int argc, char **argv) {
    for (int i = 0; i < argc; i++) {
       char *arg = argv[i];
@@ -37,17 +24,11 @@ int Context::processArgs(int argc, char **argv) {
    return 0;
 }
 
-void Context::printError(int error) {
-   std::cout << "Error " << error << std::endl;
-   switch(error) {
-      case 1:
-         std::cout << "Invalid arguments" << std::endl;
-         break;
-      case 2:
-         std::cout << "Error initializing display" << std::endl;
-      default:
-         break;
-   }
+World* Context::createWorld() {
+   // TODO: create world based on enum
+   World *world = new HelloWorld();
+   display.setTitle(world->name.c_str());
+   return world;
 }
 
 void Context::update() { 

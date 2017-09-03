@@ -2,31 +2,19 @@
 #include <iostream>
 
 static void error_callback(int error, const char *desc) {
-   std:: cerr << "Error: " << desc << std::endl;
+   std::cerr << "Error: " << desc << std::endl;
 }
 
 static void resize_callback(GLFWwindow *window, int width, int height) {
    glViewport(0, 0, width, height);
+   std::cout << "Resizing: [" << width << ", " << height << "]" << std::endl;
 }
 
 int Display::init() {
-   if (initGLFW()) {
-      return 1;
-   }
-
-   lastTime = glfwGetTime();
-   nbFrames = 0;
-
-   std::cout << "Display initialized" << std::endl;
-
-   return 0;
-}
-
-int Display::initGLFW() {
    glfwSetErrorCallback(error_callback);
    if(!glfwInit()) {
       std::cerr << "Error initializing GLFW" << std::endl;
-      return 2;
+      return 1;
    }
 
    // Request version 3.2 of OpenGl
@@ -39,7 +27,7 @@ int Display::initGLFW() {
    if (!window) {
       std::cerr << "Failed to create window" << std::endl;
       glfwTerminate();
-      return 2;
+      return 1;
    }
    glfwMakeContextCurrent(window);
 
@@ -48,12 +36,12 @@ int Display::initGLFW() {
    GLenum error = glGetError();
    if (error != GL_NO_ERROR) {
       std::cout << "OpenGL Error: " << error << std::endl;
-      return 2;
+      return 1;
    }
    error = glewInit();
    if (error != GLEW_OK) {
       std::cerr << "Failed to init GLEW" << std::endl;
-      return 2;
+      return 1;
    }
    glGetError();
 
@@ -63,6 +51,9 @@ int Display::initGLFW() {
 
    // Resize callback
    glfwSetFramebufferSizeCallback(window, resize_callback);
+
+   lastTime = glfwGetTime();
+   nbFrames = 0;
 
    return 0;
 }
@@ -79,7 +70,7 @@ void Display::update() {
    double currTime = glfwGetTime();
    nbFrames++;
    if (currTime - lastTime >= 1.0) {
-      std::cout << "FPS: " << double(nbFrames) << std::endl;
+      fps = double(nbFrames); 
       nbFrames = 0;
       lastTime = currTime;
    }

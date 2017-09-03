@@ -6,14 +6,30 @@
 
 class HelloWorld : public World {
    public:
-      HelloWorld() : World("Hello World") { }
-      void init(/*TODO: Loader*/);
-      void prepareRenderer(/*TODO: MR*/);
-      void update(Context &);
-      void cleanUp();
+      HelloWorld() : World("Hello World") {
+
+      }
+      
+      void init(/*TODO: Loader*/) {
+
+      }
+
+      void prepareRenderer(/*TODO: MR*/) {
+
+      }
+
+      void update(Context &context) {
+
+      }
+
+      void cleanUp() {
+
+      }
 
    private:
-      void takeInput(Mouse &, Keyboard &);
+      void takeInput(Mouse &, Keyboard &) {
+
+      }
 };
 
 #endif

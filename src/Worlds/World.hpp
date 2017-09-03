@@ -5,6 +5,7 @@
 
 #include "Context/Context.hpp"
 
+#include <iostream>
 #include <string> // name
 
 class World {

@@ -10,6 +10,7 @@ class Display {
    public:
       int width = 1280;
       int height = 960;
+      double fps = 0;
 
       GLFWwindow *window;     
 
@@ -20,8 +21,6 @@ class Display {
       void cleanUp();
 
    private:
-      int initGLFW();
-      const int FPSCAP = 60;
       double lastTime;
       double nbFrames;
 };
