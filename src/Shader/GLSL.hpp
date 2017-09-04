@@ -35,9 +35,6 @@ namespace GLSL {
 	void checkVersion();
 	int textFileWrite(const char *filename, char *s);
 	char *textFileRead(const char *filename);
-	void enableVertexAttribArray(const GLint handle);
-	void disableVertexAttribArray(const GLint handle);
-	void vertexAttribPointer(const GLint handle, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
 }
 
 #endif

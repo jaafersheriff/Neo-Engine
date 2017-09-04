@@ -5,13 +5,13 @@
 
 #include <iostream>
 #include "Context/Context.hpp"
-#include "Worlds/World.hpp"
-#include "Renderers/Renderer.hpp" // TODO: qREMOVE
+#include "World/World.hpp"
+#include "Renderer/MasterRenderer.hpp"
 
 int main(int argc, char **argv) {
-   Context context;
    World *world;
-   Renderer renderer;// TODO: MR mr
+   Context context;
+   MasterRenderer mr;
 
    // Process args
    if (context.processArgs(argc, argv)) {
@@ -29,13 +29,15 @@ int main(int argc, char **argv) {
    world = context.createWorld();
 
    // Prep MR for rendering of a specific world class
-   // TODO: world.prepRenderer(MR)
+   world->init();
+   world->prepareRenderer(mr);
 
    // Main loop
    while(!context.shouldClose()) {
       context.update();
       world->update(context);
-      // TODO: mr->render
+      
+      mr.render();
 
       // OpenGL things
       glfwSwapBuffers(context.display.window);

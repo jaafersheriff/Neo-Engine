@@ -13,7 +13,7 @@
 
 class Shader {
    public:
-      Shader(std::string &v, std::string &f) : vShaderName(v), fShaderName(f) { }
+      Shader(std::string v = "", std::string f = "") : vShaderName(v), fShaderName(f) { }
 
       GLuint pid = 0;
 

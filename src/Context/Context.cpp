@@ -1,6 +1,6 @@
 #include "Context.hpp"
-#include "Worlds/World.hpp"
-#include "Worlds/HelloWorld.hpp"
+#include "World/World.hpp"
+#include "TriangleWorld/TriangleWorld.hpp"
 
 #include <stdlib.h>  // atoi
 #include <string.h>  // strcmp
@@ -26,7 +26,7 @@ int Context::processArgs(int argc, char **argv) {
 
 World* Context::createWorld() {
    // TODO: create world based on enum
-   World *world = new HelloWorld();
+   World *world = new TriangleWorld();
    display.setTitle(world->name.c_str());
    return world;
 }

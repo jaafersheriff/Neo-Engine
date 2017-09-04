@@ -1,6 +1,5 @@
-#!/usr/bin/bash
+#!/usr/bin/bash 
 
-clear
 echo "Building..."
 cd build
 

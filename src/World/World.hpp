@@ -3,6 +3,7 @@
 #ifndef _WORLD_HPP_
 #define _WORLD_HPP_
 
+#include "Renderer/MasterRenderer.hpp"
 #include "Context/Context.hpp"
 
 #include <iostream>
@@ -17,7 +18,7 @@ class World {
 
       // Abstract functions
       virtual void init(/* TODO: Loader loader*/) = 0;
-      virtual void prepareRenderer(/* TODO: &MasterRenderer */) = 0;
+      virtual void prepareRenderer(MasterRenderer &) = 0;
       virtual void update(Context &) = 0;
       virtual void cleanUp() = 0;
 

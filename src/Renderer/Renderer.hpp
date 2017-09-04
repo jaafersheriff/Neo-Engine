@@ -3,8 +3,12 @@
 #ifndef _RENDERER_HPP_
 #define _RENDERER_HPP_
 
+#include "Shader/Shader.hpp"
+
 class Renderer {
    public:
+      virtual void setGlobals(/* TODO: MR **/) = 0;
+      virtual void render() = 0;
 };
 
 #endif

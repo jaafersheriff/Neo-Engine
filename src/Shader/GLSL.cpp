@@ -147,26 +147,4 @@ int textFileWrite(const char *fn, char *s)
 	}
 	return(status);
 }
-
-void enableVertexAttribArray(const GLint handle)
-{
-	if(handle >= 0) {
-		glEnableVertexAttribArray(handle);
-	}
-}
-
-void disableVertexAttribArray(const GLint handle)
-{
-	if(handle >= 0) {
-		glDisableVertexAttribArray(handle);
-	}
-}
-
-void vertexAttribPointer(const GLint handle, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer)
-{
-	if(handle >= 0) {
-		glVertexAttribPointer(handle, size, type, normalized, stride, pointer);
-	}
-}
-
 }
