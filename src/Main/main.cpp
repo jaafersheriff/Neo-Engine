@@ -6,11 +6,12 @@
 #include <iostream>
 #include "Context/Context.hpp"
 #include "Worlds/World.hpp"
+#include "Renderers/Renderer.hpp" // TODO: qREMOVE
 
 int main(int argc, char **argv) {
    Context context;
    World *world;
-   // TODO: MR mr
+   Renderer renderer;// TODO: MR mr
 
    // Process args
    if (context.processArgs(argc, argv)) {

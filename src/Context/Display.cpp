@@ -1,4 +1,5 @@
 #include "Display.hpp"
+
 #include <iostream>
 
 static void error_callback(int error, const char *desc) {

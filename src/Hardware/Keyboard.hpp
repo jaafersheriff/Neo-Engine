@@ -7,7 +7,6 @@
 class Keyboard {
    public: 
       bool isKeyPressed(GLFWwindow *, const char);
-
 };
 
 #endif
