@@ -14,7 +14,6 @@
 class TriangleRenderer : public Renderer {
    public:
       Triangle *tri;
-      TriangleShader *shader;
       void activate(Triangle *);
       void setGlobals();
       void render();

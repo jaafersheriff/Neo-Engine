@@ -7,6 +7,8 @@
 
 class Renderer {
    public:
+      Shader *shader;
+
       virtual void setGlobals(/* TODO: MR **/) = 0;
       virtual void render() = 0;
 };
