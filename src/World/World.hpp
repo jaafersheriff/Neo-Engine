@@ -5,6 +5,7 @@
 
 #include "Renderer/MasterRenderer.hpp"
 #include "Context/Context.hpp"
+#include "Cameras/Camera.hpp"
 
 #include <iostream>
 #include <string> // name
@@ -13,7 +14,7 @@ class World {
    public:
       World(std::string n) : name(n) { }
       std::string name;
-      // TODO: Camera camera;
+      Camera camera;
       // TODO: std::vector<Light> lights;
 
       // Abstract functions
