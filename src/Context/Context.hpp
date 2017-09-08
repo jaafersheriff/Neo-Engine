@@ -18,6 +18,7 @@ class Context {
       // TODO : arg <optional value> booleans or something
 
       int processArgs(int, char**);
+      void init();
       World* createWorld(); 
       void update();
       bool shouldClose();

@@ -1,7 +1,7 @@
 #include "Mouse.hpp"
 #include <iostream>
 
-void Mouse::update(GLFWwindow *window) {
+void Mouse::update() {
    // Get new x and y positions on screen
    double newX, newY;
    glfwGetCursorPos(window, &newX, &newY);
@@ -18,6 +18,6 @@ void Mouse::update(GLFWwindow *window) {
    // TODO : dw = scroll whell
 }
 
-bool Mouse::isButtonPressed(GLFWwindow* window, const int button) {
+bool Mouse::isButtonPressed(const int button) {
    return glfwGetMouseButton(window, button) == GLFW_PRESS;
 }

@@ -9,7 +9,9 @@
 int Context::processArgs(int argc, char **argv) {
    for (int i = 0; i < argc; i++) {
       char *arg = argv[i];
-      if (strcmp(arg, "-s") == 0) {
+      
+      // Window size 
+      if (!strcmp(arg, "-s")) {
          if (i > argc - 2) {
             return 1;
          }
@@ -24,6 +26,10 @@ int Context::processArgs(int argc, char **argv) {
    return 0;
 }
 
+void Context::init() {
+   mouse.window = keyboard.window = display.window;
+}
+
 World* Context::createWorld() {
    // TODO: create world based on enum
    World *world = new TriangleWorld();
@@ -33,7 +39,7 @@ World* Context::createWorld() {
 
 void Context::update() { 
    display.update();
-   mouse.update(display.window);
+   mouse.update();
 }
 
 bool Context::shouldClose() {
