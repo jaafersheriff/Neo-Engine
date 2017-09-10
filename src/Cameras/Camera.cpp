@@ -10,7 +10,7 @@ Camera::Camera() {
 }
 
 // dx and dy correspond to mouse movement 
-void Camera::update(float dx, float dy) {
+void Camera::update(const float dx, const float dy) {
    // Update look at point
    theta += dx * moveSpeed;
    phi += dy * moveSpeed;
@@ -26,6 +26,9 @@ void Camera::update(float dx, float dy) {
    v = glm::normalize(glm::cross(u, w));
 }
 
+/* 
+ * All movement is based on UVW basis-vectors
+ */
 void Camera::moveForward() { 
    position += w;
    lookAt += w;

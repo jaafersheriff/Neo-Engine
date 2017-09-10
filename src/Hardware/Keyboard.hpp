@@ -7,7 +7,7 @@
 class Keyboard {
    public: 
       GLFWwindow *window;
-      bool isKeyPressed(const char);
+      bool isKeyPressed(const char) const;
 };
 
 #endif

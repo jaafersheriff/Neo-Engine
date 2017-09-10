@@ -18,7 +18,7 @@ class Camera {
       Camera();
       Camera(glm::vec3);
 
-      void update(float, float);
+      void update(const float, const float);
       void moveForward();
       void moveBackward();
       void moveLeft();
