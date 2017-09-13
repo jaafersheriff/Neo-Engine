@@ -14,10 +14,6 @@
 // TODO: comments explaining each texture/material property
 class ModelTexture {
    public:
-      void loadTexture(Loader *loader, std::string fileName) {
-         this->textureId = loader->loadPngTexture(fileName);
-      }
-
       // Texture properties
       GLint textureId = 0;
       float shineDamper = 1.f;

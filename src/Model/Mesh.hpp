@@ -10,14 +10,13 @@ class Mesh {
       Mesh();
       void init();
 
-   protected:
-      unsigned int vaoId;
-
       std::vector<float> vertBuf;
       std::vector<float> norBuf;
       std::vector<float> texBuf;
       std::vector<unsigned int> eleBuf;
 
+   protected:
+      unsigned int vaoId;
       unsigned int vertBufId;
       unsigned int norBufId;
       unsigned int texBufId;
