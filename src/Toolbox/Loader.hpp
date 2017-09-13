@@ -1,5 +1,5 @@
 // Loader class - loads meshes and textures
-// Contains collection of textures and meshes so they are only loaded once 
+// Contains a collection of textures and meshes so they are only loaded once 
 #pragma once
 #ifndef _LOADER_HPP_
 #define _LOADER_HPP_
