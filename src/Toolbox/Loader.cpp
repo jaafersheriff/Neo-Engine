@@ -46,36 +46,36 @@ Mesh* Loader::loadObjMesh(const std::string fileName) {
    return mesh;
 }
 
-   // Provided function to resize a mesh so all vertex positions are [0, 1.f]
-   void Loader::resize(Mesh *mesh) {
-      float minX, minY, minZ;
-      float maxX, maxY, maxZ;
-      float scaleX, scaleY, scaleZ;
-      float shiftX, shiftY, shiftZ;
-      float epsilon = 0.001;
+// Provided function to resize a mesh so all vertex positions are [0, 1.f]
+void Loader::resize(Mesh *mesh) {
+   float minX, minY, minZ;
+   float maxX, maxY, maxZ;
+   float scaleX, scaleY, scaleZ;
+   float shiftX, shiftY, shiftZ;
+   float epsilon = 0.001;
 
-      minX = minY = minZ = 1.1754E+38F;
-      maxX = maxY = maxZ = -1.1754E+38F;
+   minX = minY = minZ = 1.1754E+38F;
+   maxX = maxY = maxZ = -1.1754E+38F;
 
-      //Go through all vertices to determine min and max of each dimension
-      for (size_t v = 0; v < mesh->vertBuf.size() / 3; v++) {
-         if(mesh->vertBuf[3*v+0] < minX) minX = mesh->vertBuf[3*v+0];
-         if(mesh->vertBuf[3*v+0] > maxX) maxX = mesh->vertBuf[3*v+0];
+   //Go through all vertices to determine min and max of each dimension
+   for (size_t v = 0; v < mesh->vertBuf.size() / 3; v++) {
+      if(mesh->vertBuf[3*v+0] < minX) minX = mesh->vertBuf[3*v+0];
+      if(mesh->vertBuf[3*v+0] > maxX) maxX = mesh->vertBuf[3*v+0];
 
-         if(mesh->vertBuf[3*v+1] < minY) minY = mesh->vertBuf[3*v+1];
-         if(mesh->vertBuf[3*v+1] > maxY) maxY = mesh->vertBuf[3*v+1];
+      if(mesh->vertBuf[3*v+1] < minY) minY = mesh->vertBuf[3*v+1];
+      if(mesh->vertBuf[3*v+1] > maxY) maxY = mesh->vertBuf[3*v+1];
 
-         if(mesh->vertBuf[3*v+2] < minZ) minZ = mesh->vertBuf[3*v+2];
-         if(mesh->vertBuf[3*v+2] > maxZ) maxZ = mesh->vertBuf[3*v+2];
-      }
+      if(mesh->vertBuf[3*v+2] < minZ) minZ = mesh->vertBuf[3*v+2];
+      if(mesh->vertBuf[3*v+2] > maxZ) maxZ = mesh->vertBuf[3*v+2];
+   }
 
-      //From min and max compute necessary scale and shift for each dimension
-      float maxExtent, xExtent, yExtent, zExtent;
-      xExtent = maxX-minX;
-      yExtent = maxY-minY;
-      zExtent = maxZ-minZ;
-      if (xExtent >= yExtent && xExtent >= zExtent) {
-      maxExtent = xExtent;
+   //From min and max compute necessary scale and shift for each dimension
+   float maxExtent, xExtent, yExtent, zExtent;
+   xExtent = maxX-minX;
+   yExtent = maxY-minY;
+   zExtent = maxZ-minZ;
+   if (xExtent >= yExtent && xExtent >= zExtent) {
+   maxExtent = xExtent;
    }
    if (yExtent >= xExtent && yExtent >= zExtent) {
       maxExtent = yExtent;
