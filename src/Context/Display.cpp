@@ -1,4 +1,5 @@
 #include "Display.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 #include <iostream>
 
@@ -66,6 +67,12 @@ void Display::setTitle(const char *name) {
 void Display::update() { 
    glfwGetFramebufferSize(window, &width, &height);
    glViewport(0, 0, width, height);
+
+   projectionMatrix = glm::perspective(
+           45.f,                 // fovy
+           width/(float)height,  // aspect
+           0.01f,                // near
+           250.f);               // far
 
    // Update fps
    double currTime = glfwGetTime();

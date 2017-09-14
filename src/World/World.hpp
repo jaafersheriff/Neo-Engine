@@ -32,7 +32,7 @@ class World {
       std::vector<Light> lights;
 
       // Abstract functions
-      virtual void init(Loader *) = 0;
+      virtual void init(Loader &) = 0;
       virtual void prepareRenderer(MasterRenderer &) = 0;
       virtual void update(Context &) = 0;
       virtual void cleanUp() = 0;

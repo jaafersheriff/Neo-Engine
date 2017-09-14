@@ -1,5 +1,4 @@
 #include "Mouse.hpp"
-#include <iostream>
 
 void Mouse::update() {
    // Get new x and y positions on screen

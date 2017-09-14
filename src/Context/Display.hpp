@@ -6,6 +6,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "glm/glm.hpp"
+
 class Display {
    public:
       int width = 1280;
@@ -13,6 +15,7 @@ class Display {
       double fps = 0;
 
       GLFWwindow *window;     
+      glm::mat4 projectionMatrix;
 
       int init();
       void setTitle(const char *);

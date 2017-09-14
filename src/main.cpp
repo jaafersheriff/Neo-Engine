@@ -10,7 +10,7 @@
 
 int main(int argc, char **argv) {
    Context context;     // GLFWwindow, Mouse, Keyboard
-   Loader loader;       // Load .boj models and .png textures
+   Loader loader;       // Load .obj models and .png textures
    World *world;        // Application - collection of features
    MasterRenderer mr;   // Renderer
 
@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
    world = context.createWorld();
 
    // Prep MR for rendering of a specific world class
-   world->init(&loader);
+   world->init(loader);
    world->prepareRenderer(mr);
 
    // Main loop
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
    mr.cleanUp();
    delete world;
 
-	return 0;
+   return 0;   
 }
 
 
