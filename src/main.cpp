@@ -9,9 +9,10 @@
 #include "Renderer/MasterRenderer.hpp"
 
 int main(int argc, char **argv) {
-   World *world;
-   Context context;
-   MasterRenderer mr;
+   Context context;     // GLFWwindow, Mouse, Keyboard
+   Loader loader;       // Load .boj models and .png textures
+   World *world;        // Application - collection of features
+   MasterRenderer mr;   // Renderer
 
    // Process args
    if (context.processArgs(argc, argv)) {
@@ -24,12 +25,13 @@ int main(int argc, char **argv) {
    if (context.display.init()) {
       std::cerr << "Failed to init display" << std::endl;
    }
+   context.init();
    
    // Create world
    world = context.createWorld();
 
    // Prep MR for rendering of a specific world class
-   world->init();
+   world->init(&loader);
    world->prepareRenderer(mr);
 
    // Main loop
@@ -37,7 +39,7 @@ int main(int argc, char **argv) {
       context.update();
       world->update(context);
       
-      mr.render();
+      mr.render(context.display, world);
 
       // OpenGL things
       glfwSwapBuffers(context.display.window);
@@ -46,6 +48,7 @@ int main(int argc, char **argv) {
 
    context.cleanUp();
    world->cleanUp();
+   mr.cleanUp();
    delete world;
 
 	return 0;
