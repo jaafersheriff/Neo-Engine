@@ -1,6 +1,6 @@
 #include "Context.hpp"
 #include "World/World.hpp"
-#include "TriangleWorld/TriangleWorld.hpp"
+#include "World/EntityWorld.hpp"
 
 #include <stdlib.h>  // atoi
 #include <string.h>  // strcmp
@@ -32,7 +32,7 @@ void Context::init() {
 
 World* Context::createWorld() {
    // TODO: create world based on enum
-   World *world = new TriangleWorld();
+   World *world = new EntityWorld;
    display.setTitle(world->name.c_str());
    return world;
 }

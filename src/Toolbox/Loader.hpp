@@ -15,9 +15,9 @@ class Loader {
    public:
       GLint loadPngTexture(const std::string);
       Mesh* loadObjMesh(const std::string);
-      void resize(Mesh*);
       
    private:
+      void resize(Mesh*);
       // Collections that prevent loading textures/meshes more than once 
       std::map<std::string, GLint> textures;
       std::map<std::string, Mesh*> meshes;

@@ -1,17 +1,40 @@
 #include "MasterRenderer.hpp"
+#include "World/World.hpp"
+#include "Shader/GLSL.hpp"
 
-void MasterRenderer::activateTriangleRenderer(Triangle *t) {
-   TriangleRenderer *tR = new TriangleRenderer;
-   tR->activate(t);
-   renderers.push_back(tR);
+#include "Renderer/EntityRenderer/EntityRenderer.hpp"
+
+#include "glm/gtc/matrix_transform.hpp"
+
+MasterRenderer::MasterRenderer() {
+   glEnable(GL_DEPTH_TEST);
 }
 
-void MasterRenderer::render() {
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void MasterRenderer::render(const Display &display, World *world) {
 
-   std::vector<Renderer *>::const_iterator renderer;
-   for (renderer = renderers.begin(); renderer != renderers.end(); renderer++) {
-      (*renderer)->setGlobals();
-      (*renderer)->render();
+   // Reset rendering display
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   glClearColor(0.f, 0.f, 0.f, 1.f);
+
+   // Create view matrix
+   const glm::mat4 v = glm::lookAt(world->camera.position, world->camera.lookAt, glm::vec3(0, 1, 0));
+
+   for (auto renderer = renderers.begin(); renderer != renderers.end(); renderer++) {
+      (*renderer)->shader->bind();
+      (*renderer)->setGlobals(&display.projectionMatrix, &v);
+      (*renderer)->render(world);
+      (*renderer)->shader->unbind();
+   }
+}
+
+void MasterRenderer::activateEntityRenderer(std::vector<Entity> *entities) {
+   EntityRenderer *eR = new EntityRenderer;
+   eR->activate(entities);
+   renderers.push_back(eR);
+}
+
+void MasterRenderer::cleanUp() {
+   for (auto renderer = renderers.begin(); renderer != renderers.end(); renderer++) {
+      (*renderer)->cleanUp();
    }
 }

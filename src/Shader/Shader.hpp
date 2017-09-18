@@ -1,4 +1,11 @@
-// Shader abstract parent class
+/////////////////////////////////////////////////////////////////////////////////////////
+//                           Abstract parent Shader class                              //
+//                                                                                     //
+// How to create a derived shader:                                                     //
+//    Constructor(): call parent constructor with shader names                         //
+//    init(): call parent constructor, add uniforms, add attributes                    //
+//    shader-specific load functions                                                   //
+/////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 #ifndef _SHADER_HPP_
 #define _SHADER_HPP_
@@ -16,6 +23,8 @@ class Shader {
       Shader(std::string v = "", std::string f = "") : vShaderName(v), fShaderName(f) { }
 
       GLuint pid = 0;
+      GLint vShaderId;
+      GLint fShaderId;
 
       virtual bool init();
       virtual GLuint createShader(std::string, GLenum);
@@ -27,10 +36,12 @@ class Shader {
       GLint getAttribute(const std::string &);
       GLint getUniform(const std::string &);
 
-      void loadFloat(int location, float);
-      void loadVec2(int location, glm::vec2);
-      void loadVec3(int location, glm::vec3);
-      void loadMat4(int location, glm::mat4);
+      void loadFloat(const int, const float) const;
+      void loadVec2(const int, const glm::vec2) const;
+      void loadVec3(const int, const glm::vec3) const;
+      void loadMat4(const int, const glm::mat4*) const;
+
+      void cleanUp();
 
    protected:
       const std::string vShaderName;

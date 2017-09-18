@@ -3,6 +3,7 @@
 #ifndef _MESH_HPP_
 #define _MESH_HPP_
 
+#include <string>
 #include <vector>
 
 class Mesh {
@@ -10,13 +11,18 @@ class Mesh {
       Mesh();
       void init();
 
+      std::string name = "";
+
+      // Data buffers
       std::vector<float> vertBuf;
       std::vector<float> norBuf;
       std::vector<float> texBuf;
       std::vector<unsigned int> eleBuf;
 
-   protected:
+      // VAO ID
       unsigned int vaoId;
+
+      // VBO ID's
       unsigned int vertBufId;
       unsigned int norBufId;
       unsigned int texBufId;

@@ -37,10 +37,12 @@ Mesh* Loader::loadObjMesh(const std::string fileName) {
    // TODO: Expand this function to return all the avilable meshes   //
    ////////////////////////////////////////////////////////////////////
    Mesh *mesh = new Mesh;
+   mesh->name = fileName;
    mesh->vertBuf = shapes[0].mesh.positions;
    mesh->norBuf  = shapes[0].mesh.normals;
    mesh->texBuf  = shapes[0].mesh.texcoords;
    mesh->eleBuf  = shapes[0].mesh.indices;
+   resize(mesh);
    mesh->init();
    meshes.insert(std::map<std::string, Mesh*>::value_type(fileName, mesh));
    return mesh;
