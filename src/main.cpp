@@ -11,8 +11,8 @@
 int main(int argc, char **argv) {
    Context context;     // GLFWwindow, Mouse, Keyboard
    Loader loader;       // Load .obj models and .png textures
-   World *world;        // Application - collection of features
    MasterRenderer mr;   // Renderer
+   World *world;        // Application - collection of features
 
    // Process args
    if (context.processArgs(argc, argv)) {

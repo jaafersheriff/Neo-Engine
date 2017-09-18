@@ -10,15 +10,19 @@
 
 class Camera {
    public:
-      float moveSpeed = 1.f;
-      float phi, theta;
+      float lookSpeed = 0.005f;
+      float moveSpeed = 0.1f;
       glm::vec3 position;
       glm::vec3 lookAt;
 
-      Camera();
-      Camera(glm::vec3);
+      Camera(const glm::vec3);
+      Camera() : Camera(glm::vec3(0, 0, 0)) { }
 
-      void update(const float, const float);
+      // Update
+      void update();
+      void updateLookAt(const float, const float);
+
+      // Move according to UVW
       void moveForward();
       void moveBackward();
       void moveLeft();
@@ -27,6 +31,8 @@ class Camera {
       void moveDown();
 
    private:
+      double phi = 0.0;
+      double theta = 0.0;
       glm::vec3 u, v, w;
 };
 

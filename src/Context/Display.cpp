@@ -1,4 +1,5 @@
 #include "Display.hpp"
+#include "Shader/GLSL.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <iostream>
@@ -23,7 +24,7 @@ int Display::init() {
    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 
    window = glfwCreateWindow(this->width, this->height, "Neo", NULL, NULL);
    if (!window) {
@@ -46,6 +47,8 @@ int Display::init() {
       return 1;
    }
    glGetError();
+
+   GLSL::checkVersion();
 
    // Vsync
    glfwMakeContextCurrent(window);

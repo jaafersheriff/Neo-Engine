@@ -5,9 +5,9 @@ void Mouse::update() {
    double newX, newY;
    glfwGetCursorPos(window, &newX, &newY);
 
-   // Calculate d
+   // Calculate position difference
    dx = newX - this->xPos;
-   dy = newX - this->yPos;
+   dy = newY - this->yPos;
 
    // Set current positions
    // TODO: if newX > 0 and newY > 0
