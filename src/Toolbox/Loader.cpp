@@ -41,10 +41,13 @@ Mesh* Loader::loadObjMesh(const std::string fileName) {
    mesh->vertBuf = shapes[0].mesh.positions;
    mesh->norBuf  = shapes[0].mesh.normals;
    mesh->texBuf  = shapes[0].mesh.texcoords;
-   mesh->eleBuf  = shapes[0].mesh.indices;
+   mesh->eleBuf  = shapes[0].mesh.indices; 
    resize(mesh);
    mesh->init();
    meshes.insert(std::map<std::string, Mesh*>::value_type(fileName, mesh));
+
+   std::cout << "Loaded mesh (" << mesh->vertBuf.size()/3 << "): " << fileName << std::endl;
+
    return mesh;
 }
 

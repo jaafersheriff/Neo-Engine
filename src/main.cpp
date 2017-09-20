@@ -4,6 +4,8 @@
 #include "glm/glm.hpp"
 
 #include <iostream>
+#include <time.h>
+
 #include "Context/Context.hpp"
 #include "World/World.hpp"
 #include "Renderer/MasterRenderer.hpp"
@@ -26,7 +28,8 @@ int main(int argc, char **argv) {
       std::cerr << "Failed to init display" << std::endl;
    }
    context.init();
-   
+   srand(time(0));
+
    // Create world
    world = context.createWorld();
 

@@ -25,24 +25,18 @@ void Mesh::init() {
 
    // Copy element array
    glGenBuffers(1, &eleBufId);
-   glBindBuffer(GL_ARRAY_BUFFER, eleBufId);
-   glBufferData(GL_ARRAY_BUFFER, eleBuf.size()*sizeof(float), &eleBuf[0], GL_STATIC_DRAW);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eleBufId);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, eleBuf.size()*sizeof(unsigned int), &eleBuf[0], GL_STATIC_DRAW);
 
    // Copy normal array if it exists
-   if (norBuf.empty()) {
-      norBufId = 0;
-   }
-   else {
+   if (!norBuf.empty()) {
       glGenBuffers(1, &norBufId);
       glBindBuffer(GL_ARRAY_BUFFER, norBufId);
       glBufferData(GL_ARRAY_BUFFER, norBuf.size()*sizeof(float), &norBuf[0], GL_STATIC_DRAW);
    }
 
    // Copy texture array if it exists
-   if (texBuf.empty()) {
-      texBufId = 0;
-   }
-   else {
+   if (!texBuf.empty()) {
       glGenBuffers(1, &texBufId);
       glBindBuffer(GL_ARRAY_BUFFER, texBufId);
       glBufferData(GL_ARRAY_BUFFER, texBuf.size()*sizeof(float), &texBuf[0], GL_STATIC_DRAW);

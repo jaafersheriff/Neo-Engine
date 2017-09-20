@@ -51,7 +51,6 @@ int Display::init() {
    GLSL::checkVersion();
 
    // Vsync
-   glfwMakeContextCurrent(window);
    glfwSwapInterval(1);
 
    // Resize callback
@@ -85,6 +84,8 @@ void Display::update() {
       nbFrames = 0;
       lastTime = currTime;
    }
+
+   std::cout << fps << std::endl;
 }
 
 int Display::shouldClose() { 

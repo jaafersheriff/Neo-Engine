@@ -11,6 +11,10 @@ public:
    static inline float genRandom() {
       return rand() / (float) RAND_MAX;
    }
+
+   static inline float genRandom(float min, float max) {
+      return ((float(rand()) / float(RAND_MAX)) * (max - min)) + min;
+   }
 };
 
 

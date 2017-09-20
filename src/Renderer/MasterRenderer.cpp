@@ -7,10 +7,12 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 MasterRenderer::MasterRenderer() {
-   glEnable(GL_DEPTH_TEST);
 }
 
 void MasterRenderer::render(const Display &display, World *world) {
+   glEnable(GL_DEPTH_TEST);
+   glEnable(GL_CULL_FACE);
+   glCullFace(GL_BACK);
 
    // Reset rendering display
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

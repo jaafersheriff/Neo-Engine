@@ -11,7 +11,7 @@
 class Camera {
    public:
       float lookSpeed = 0.005f;
-      float moveSpeed = 0.1f;
+      float moveSpeed = 3.f;
       glm::vec3 position;
       glm::vec3 lookAt;
 

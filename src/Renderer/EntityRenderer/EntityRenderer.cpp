@@ -47,9 +47,9 @@ void EntityRenderer::render(World *world) {
       // Model matrix
       M = glm::mat4(1.f);
       M *= glm::translate(glm::mat4(1.f), e->position);
-      M *= glm::rotate(glm::mat4(1.f), e->rotation.x, glm::vec3(1, 0, 0));
-      M *= glm::rotate(glm::mat4(1.f), e->rotation.y, glm::vec3(0, 1, 0));
-      M *= glm::rotate(glm::mat4(1.f), e->rotation.z, glm::vec3(0, 0, 1));
+      M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.x), glm::vec3(1, 0, 0));
+      M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.y), glm::vec3(0, 1, 0));
+      M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.z), glm::vec3(0, 0, 1));
       M *= glm::scale(glm::mat4(1.f), e->scale);
 
       eShader->loadM(&M);
@@ -95,6 +95,7 @@ void EntityRenderer::unPrepareMesh(Mesh *mesh) {
    if (pos != -1) {
       glDisableVertexAttribArray(shader->getAttribute("vertexNormal"));
    }
+   // TODO : texture
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
