@@ -2,6 +2,7 @@
 #ifndef _TOOLBOX_HPP_
 #define _TOOLBOX_HPP_
 
+#include "glm/glm.hpp"
 #include <stdlib.h>
 
 class Toolbox {
@@ -14,6 +15,10 @@ public:
 
    static inline float genRandom(float min, float max) {
       return ((float(rand()) / float(RAND_MAX)) * (max - min)) + min;
+   }
+
+   static inline glm::vec3 genRandomVec3() {
+      return glm::vec3(genRandom(), genRandom(), genRandom());
    }
 };
 

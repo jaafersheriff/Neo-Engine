@@ -84,8 +84,6 @@ void Display::update() {
       nbFrames = 0;
       lastTime = currTime;
    }
-
-   std::cout << fps << std::endl;
 }
 
 int Display::shouldClose() { 

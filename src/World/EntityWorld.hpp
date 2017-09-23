@@ -10,21 +10,26 @@
 
 class EntityWorld : public World {
    public:
-      std::vector<Entity> entities; // TODO - map<mesh, entity>
+      std::vector<Entity> entities;
+      bool isPaused = false;
 
       EntityWorld() : World("Entity World") { }
 
       void init(Loader &loader) {
          // Create mesh
-         Mesh *bunnyMesh = loader.loadObjMesh("../resources/penguinhat.obj");
+         Mesh *bunnyMesh = loader.loadObjMesh("../resources/bunny.obj");
 
          // Add entity to scene
-         Entity e(bunnyMesh, glm::vec3(5, 0, 0), glm::vec3(0, -90, 0), glm::vec3(1, 1, 1));
-         e.texture.ambientColor = e.texture.diffuseColor = glm::vec3(0.41f, 0.12f, 0.77f);
-         e.texture.specularColor = glm::vec3(0.f, 0.f, 1.f);
-         e.texture.shineDamper = 2.f;
-         entities.push_back(e);
-
+         for (int i = 0; i < 300; i++) {
+            Entity e(bunnyMesh, glm::vec3(Toolbox::genRandom(-20.f, 20.f), Toolbox::genRandom(-20.f, 20.f), Toolbox::genRandom(-20.f, 20.f)), 
+               glm::vec3(0, 0, 0), glm::vec3(2, 2, 2));
+            e.dRotation = Toolbox::genRandomVec3();
+            e.texture.ambientColor = e.texture.diffuseColor = glm::vec3(Toolbox::genRandom(), Toolbox::genRandom(), 
+               Toolbox::genRandom());
+            e.texture.specularColor = glm::vec3(1.f, 1.f, 1.f);
+            e.texture.shineDamper = 2.f;
+            entities.push_back(e);
+         }
          // Add light
          lights.push_back(Light(glm::vec3(1000, 1000, 0)));
       }
@@ -34,16 +39,25 @@ class EntityWorld : public World {
       }  
       
       void update(Context &ctx) {
-         camera.update();
          takeInput(ctx.mouse, ctx.keyboard);
-         
+         if (isPaused) {
+            return;
+         }
+      
+         camera.update();
+      
          for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i].update();
          }
-
       }
 
       void takeInput(Mouse &mouse, Keyboard &keyboard) {
+         if (keyboard.isKeyPressed(' ')) {
+            isPaused = !isPaused;
+         }
+         if (isPaused) {
+            return;
+         }
          if (mouse.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
             camera.updateLookAt(mouse.dx, mouse.dy);
          }
@@ -65,7 +79,6 @@ class EntityWorld : public World {
          if (keyboard.isKeyPressed('r')) {
             camera.moveUp();
          }
-
       }
 
       void cleanUp() {
