@@ -70,6 +70,10 @@ void Display::update() {
    glfwGetFramebufferSize(window, &width, &height);
    glViewport(0, 0, width, height);
 
+   // Skip calculating projection matrix and FPS if window is minimized
+   if (!width && !height) {
+      return;
+   }
    projectionMatrix = glm::perspective(
            45.f,                 // fovy
            width/(float)height,  // aspect

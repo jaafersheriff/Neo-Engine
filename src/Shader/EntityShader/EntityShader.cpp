@@ -23,6 +23,7 @@ bool EntityShader::init() {
    // Light
    addUniform("lightPos");
    addUniform("lightCol");
+   addUniform("lightAtt");
 
    return true;
 }
@@ -56,4 +57,5 @@ void EntityShader::loadReflectivity(float r) {
 void EntityShader::loadLight(const Light &light) {
    this->loadVec3(getUniform("lightPos"), light.position);
    this->loadVec3(getUniform("lightCol"), light.color);
+   this->loadVec3(getUniform("lightAtt"), light.attenuation);
 }

@@ -12,6 +12,6 @@ out vec3 worldPos;
 
 void main() {
    gl_Position = P * V * M * vertexPos;
-   fragNormal = normalize((V * M * vec4(vertexNormal, 0.0)).xyz);
+   fragNormal = normalize((M * vec4(vertexNormal, 0.0)).xyz);
    worldPos = vec3(V * M * vertexPos);
 }

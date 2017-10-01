@@ -1,7 +1,5 @@
 #include "Entity.hpp"
 
-#include <iostream> // TODO : delete
-
 Entity::Entity(const glm::vec3 p, const glm::vec3 r, const glm::vec3 s) {
    this->mesh = NULL;
    this->position = p;
@@ -15,5 +13,4 @@ Entity::Entity(Mesh *m, const glm::vec3 p, const glm::vec3 r, const glm::vec3 s)
 }
 
 void Entity::update() {
-
 }
