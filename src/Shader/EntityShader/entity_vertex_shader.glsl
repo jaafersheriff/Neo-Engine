@@ -8,10 +8,10 @@ uniform mat4 M;
 uniform mat4 V;
 
 out vec3 fragNormal;
-out vec3 worldPos;
+out vec4 worldPos;
 
 void main() {
-   gl_Position = P * V * M * vertexPos;
+   vec4 worldPos = M * vertexPos;
+   gl_Position = P * V * worldPos;
    fragNormal = normalize((M * vec4(vertexNormal, 0.0)).xyz);
-   worldPos = vec3(V * M * vertexPos);
 }

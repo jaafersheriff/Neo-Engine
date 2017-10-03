@@ -1,11 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-//                           Abstract parent Shader class                              //
-//                                                                                     //
-// How to create a derived shader:                                                     //
-//    Constructor(): call parent constructor with shader names                         //
-//    init(): call parent constructor, add uniforms, add attributes                    //
-//    shader-specific load functions                                                   //
-/////////////////////////////////////////////////////////////////////////////////////////
+// Abstract parent Shader class
 #pragma once
 #ifndef _SHADER_HPP_
 #define _SHADER_HPP_
@@ -20,34 +13,41 @@
 
 class Shader {
    public:
+      /* Empty constructor
+       * Only used to set GLSL shader names
+       */
       Shader(std::string v = "", std::string f = "") : vShaderName(v), fShaderName(f) { }
 
       GLuint pid = 0;
       GLint vShaderId;
       GLint fShaderId;
 
+      /* Call parent Shader::init()
+       * Add uniforms and attributes to GLSL shaders
+       */
       virtual bool init();
-      virtual GLuint createShader(std::string, GLenum);
-      virtual void bind();
-      virtual void unbind();
 
+      /* Utility functions */
+      void bind();
+      void unbind();
       void addAttribute(const std::string &);
       void addUniform(const std::string &);
       GLint getAttribute(const std::string &);
       GLint getUniform(const std::string &);
+      void cleanUp();
 
+      /* Load functions */
       void loadFloat(const int, const float) const;
       void loadVec2(const int, const glm::vec2) const;
       void loadVec3(const int, const glm::vec3) const;
       void loadMat4(const int, const glm::mat4*) const;
-
-      void cleanUp();
 
    protected:
       const std::string vShaderName;
       const std::string fShaderName;
    
    private:
+      GLuint createShader(std::string, GLenum);
       std::map<std::string, GLint> attributes;
       std::map<std::string, GLint> uniforms;
 };

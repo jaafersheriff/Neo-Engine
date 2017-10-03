@@ -15,6 +15,7 @@ class EntityRenderer : public Renderer {
       std::vector<Entity> *entitiesPointer;
 
       void activate(std::vector<Entity> *);
+      void prepare();
       void setGlobals(const glm::mat4*, const glm::mat4*);
       void render(World *);
       void cleanUp();

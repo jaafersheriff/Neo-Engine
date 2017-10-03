@@ -23,6 +23,7 @@ void MasterRenderer::render(const Display &display, World *world) {
 
    for (auto renderer = renderers.begin(); renderer != renderers.end(); renderer++) {
       (*renderer)->shader->bind();
+      (*renderer)->prepare();
       (*renderer)->setGlobals(&display.projectionMatrix, &v);
       (*renderer)->render(world);
       (*renderer)->shader->unbind();

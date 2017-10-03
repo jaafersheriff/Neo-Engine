@@ -18,6 +18,10 @@ void EntityRenderer::setGlobals(const glm::mat4 *projection, const glm::mat4 *vi
    eShader->loadV(view);
 }
 
+void EntityRenderer::prepare() {
+   // TODO : batched render
+}
+
 void EntityRenderer::render(World *world) {
    EntityShader *eShader = dynamic_cast<EntityShader*>(shader);
    EntityWorld *eWorld = dynamic_cast<EntityWorld*>(world);
@@ -26,6 +30,7 @@ void EntityRenderer::render(World *world) {
    eShader->loadLight(eWorld->lights[0]);
 
    glm::mat4 M;
+   // TODO : batched render
    for (unsigned int i = 0; i < entitiesPointer->size(); i++) {
       Entity *e = &(*entitiesPointer)[i];
 
@@ -34,7 +39,6 @@ void EntityRenderer::render(World *world) {
       }
 
       // Bind mesh to shader
-      // TODO : organized instanced rendering for textured meshes
       prepareMesh(e->mesh);
 
       // Material

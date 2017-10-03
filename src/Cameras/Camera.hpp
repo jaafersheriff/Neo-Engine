@@ -11,7 +11,7 @@
 class Camera {
    public:
       float lookSpeed = 0.005f;
-      float moveSpeed = 3.f;
+      float moveSpeed = 0.5f;
       glm::vec3 position;
       glm::vec3 lookAt;
 
@@ -30,7 +30,7 @@ class Camera {
       void moveUp();
       void moveDown();
 
-   private:
+   protected:
       double phi = 0.0;
       double theta = 0.0;
       glm::vec3 u, v, w;

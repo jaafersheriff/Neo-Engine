@@ -20,6 +20,10 @@ public:
    static inline glm::vec3 genRandomVec3() {
       return glm::vec3(genRandom(), genRandom(), genRandom());
    }
+   
+   static inline glm::vec3 genRandomVec3(float min, float max) {
+      return glm::vec3(genRandom(min, max), genRandom(min, max), genRandom(min, max));
+   }
 };
 
 

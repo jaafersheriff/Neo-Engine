@@ -11,7 +11,7 @@ void Camera::updateLookAt(const float dx, const float dy) {
    // Update look at point
    theta += dx * lookSpeed;
    phi -= dy * lookSpeed;
-   glm::vec3 sphere = glm::vec3(
+   glm::vec3 sphere(
                   glm::cos(phi)*glm::cos(theta), 
                   glm::sin(phi), 
                   glm::cos(phi)*glm::cos((Toolbox::PI/2.f)-theta));
