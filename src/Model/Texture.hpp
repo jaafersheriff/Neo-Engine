@@ -10,7 +10,7 @@
 class Texture {
    public:
       GLuint textureId = 0;
-      void init(int, int, char *);
+      void init(int, int, int, unsigned char *);
 };
 
 #endif

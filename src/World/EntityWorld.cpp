@@ -1,24 +1,21 @@
 #include "EntityWorld.hpp"
 
 void EntityWorld::init(Loader &loader) {
-   // Create mesh
+   // Load obj meshes
    Mesh *bunnyMesh = loader.loadObjMesh("../resources/Model.obj");
    Mesh *cubeMesh  = loader.loadObjMesh("../resources/cube.obj");
-   // TODO: create texture
 
-   // Add entity to scene
-   for (int i = 1; i < 2; i++) {
-      for (int j = 2; j < 3; j++) {
-         for (int k = 5; k < 6; k++) {
-            Entity e(bunnyMesh, glm::vec3(i*3, j*3, k*3), glm::vec3(180, 0, 0), glm::vec3(10, 10, 10));
-            // TODO : attach texture to entity
-            e.texture.ambientColor = e.texture.diffuseColor = glm::vec3(0.7f, 0.7f, 0.7f);
-            e.texture.specularColor = glm::vec3(1.f, 1.f, 1.f);
-            e.texture.shineDamper = 1.f;
-            entities.push_back(e);
-         }
-      }
-   }
+   // Create texture
+   ModelTexture texture;
+   texture.ambientColor = texture.diffuseColor = glm::vec3(0.7f, 0.7f, 0.7f);
+   texture.specularColor = glm::vec3(1.f, 1.f, 1.f);
+   texture.shineDamper = 1.f;
+   // Load png texture
+   // texture.textureImage = loader.loadPngTexture("../resources/Model.png");
+
+   // entities.push_back(Entity(bunnyMesh, texture, glm::vec3(6, 20, 30), glm::vec3(180, 0, 0), glm::vec3(10, 10, 10)));
+
+   // entities.push_back(Entity(bunnyMesh, glm::vec3(60, 20, 60), glm::vec3(180, 0, 0), glm::vec3(10, 10, 10)));
 
    // Add light
    glm::vec3 lightPos(6, 20, 45);

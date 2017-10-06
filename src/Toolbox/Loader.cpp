@@ -4,6 +4,8 @@
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #include <iostream>
 #include <vector>
@@ -15,11 +17,14 @@ Texture Loader::loadPngTexture(const std::string fileName) {
       texture.textureId = it->second;
    }
    else {
-      char *data; // TODO : load in a png image
-      int sizeX, sizeY;
+      int sizeX, sizeY, comp;
+      unsigned char *data = stbi_load(fileName.c_str(), &sizeX, &sizeY, &comp, STBI_rgb_alpha);
+      if(data != nullptr) {
+         //texture.init(sizeX, sizeY, comp, data);
+         stbi_image_free(data);
 
-      texture.init(sizeX, sizeY, data);
-      textures.insert(std::map<std::string, GLint>::value_type(fileName, texture.textureId));
+         textures.insert(std::map<std::string, GLint>::value_type(fileName, texture.textureId));
+      }
    }
    return texture;
 }

@@ -15,7 +15,7 @@
 class ModelTexture {
    public:
       // Texture properties
-      Texture texture;
+      Texture textureImage;
       float shineDamper = 1.f;
       bool hasTranspency = false;
       bool hasFakeLighting = false;

@@ -11,9 +11,10 @@
 #include <map>    
 
 class Mesh;
+class Texture;
 class Loader {
    public:
-      GLint loadPngTexture(const std::string);
+      Texture loadPngTexture(const std::string);
       Mesh* loadObjMesh(const std::string);
       
    private:
