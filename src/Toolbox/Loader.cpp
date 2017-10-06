@@ -1,18 +1,27 @@
 #include "Loader.hpp"
 #include "Model/Mesh.hpp"
+#include "Model/Texture.hpp"
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
 #include <iostream>
 #include <vector>
 
-GLint Loader::loadPngTexture(const std::string fileName) {
+Texture Loader::loadPngTexture(const std::string fileName) {
+   Texture texture;
    std::map<std::string, GLint>::iterator it = textures.find(fileName);
    if (it != textures.end()) {
-      return it->second;
+      texture.textureId = it->second;
    }
+   else {
+      char *data; // TODO : load in a png image
+      int sizeX, sizeY;
 
-   // TODO
+      texture.init(sizeX, sizeY, data);
+      textures.insert(std::map<std::string, GLint>::value_type(fileName, texture.textureId));
+   }
+   return texture;
 }
 
 // Load geometry from .obj
