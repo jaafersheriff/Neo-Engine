@@ -37,6 +37,7 @@ class Shader {
       void cleanUp();
 
       /* Load functions */
+      void loadBool(const int, const bool) const;
       void loadFloat(const int, const float) const;
       void loadVec2(const int, const glm::vec2) const;
       void loadVec3(const int, const glm::vec3) const;

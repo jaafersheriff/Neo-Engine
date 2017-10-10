@@ -11,6 +11,8 @@
 #include "Renderer/MasterRenderer.hpp"
 
 int main(int argc, char **argv) {
+   srand(time(0));
+   
    Context context;     // GLFWwindow, Mouse, Keyboard
    Loader loader;       // Load .obj models and .png textures
    MasterRenderer mr;   // Renderer
@@ -28,7 +30,6 @@ int main(int argc, char **argv) {
       std::cerr << "Failed to init display" << std::endl;
    }
    context.init();
-   srand(time(0));
 
    // Create world
    world = context.createWorld();

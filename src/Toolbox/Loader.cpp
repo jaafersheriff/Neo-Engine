@@ -18,12 +18,18 @@ Texture Loader::loadPngTexture(const std::string fileName) {
    }
    else {
       int sizeX, sizeY, comp;
+      stbi_set_flip_vertically_on_load(true);
       unsigned char *data = stbi_load(fileName.c_str(), &sizeX, &sizeY, &comp, STBI_rgb_alpha);
-      if(data != nullptr) {
-         //texture.init(sizeX, sizeY, comp, data);
+      if(data) {
+         std::cout << "Loaded texture (" << sizeX << ", " << sizeY << "): " << fileName << std::endl;
+         texture.init(sizeX, sizeY, comp, data);
+         if (texture.textureId) {
+            textures.insert(std::map<std::string, GLint>::value_type(fileName, texture.textureId));
+         }
          stbi_image_free(data);
-
-         textures.insert(std::map<std::string, GLint>::value_type(fileName, texture.textureId));
+      }
+      else {
+         std::cerr << "Could not find " << fileName << std::endl;
       }
    }
    return texture;
@@ -60,7 +66,7 @@ Mesh* Loader::loadObjMesh(const std::string fileName) {
    mesh->init();
    meshes.insert(std::map<std::string, Mesh*>::value_type(fileName, mesh));
 
-   std::cout << "Loaded mesh (" << mesh->vertBuf.size()/3 << "): " << fileName << std::endl;
+   std::cout << "Loaded mesh (" << mesh->vertBuf.size()/3 << " vertices): " << fileName << std::endl;
 
    return mesh;
 }

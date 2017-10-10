@@ -9,8 +9,12 @@ uniform vec3 lightPos;
 uniform vec3 lightCol;
 uniform vec3 lightAtt;
 
+uniform sampler2D textureImage;
+uniform bool usesTexture;
+
 in vec3 fragNormal;
 in vec4 worldPos;
+in vec2 pass_textureCoords;
 
 out vec4 color;
 
@@ -18,16 +22,22 @@ void main() {
    vec3 lightDir = lightPos - worldPos.xyz;
    vec3 unitViewDir = normalize(-worldPos.xyz);
    vec3 unitLightDir = normalize(lightDir);
+   vec3 unitNormal = normalize(fragNormal);
 
    float lightDistance = length(lightDir);
    float attFactor = lightAtt.x + lightAtt.y * lightDistance + lightAtt.z * lightDistance * lightDistance;
 
-   vec3 ambientContrib = matAmbient * lightCol / attFactor;
-   vec3 diffuseContrib = matDiffuse * max(dot(unitLightDir, fragNormal), 0) * lightCol / attFactor;
+   vec3 ambientContrib = lightCol / attFactor;
+   vec3 diffuseContrib = max(dot(unitLightDir, unitNormal), 0) * lightCol / attFactor;
 
    // Blinn-Phong
    vec3 H = (unitLightDir + unitViewDir) / 2;
-   vec3 specularContrib = matSpecular * pow(max(dot(H, fragNormal), 0), shine) * lightCol / attFactor;
+   vec3 specularContrib = pow(max(dot(H, unitNormal), 0), shine) * lightCol / attFactor;
 
-   color = vec4(ambientContrib*matAmbient + diffuseContrib*matDiffuse + specularContrib*matSpecular, 1.0);
+   vec3 diffuseColor = matDiffuse;
+   if (usesTexture) {
+      diffuseColor = vec3(texture(textureImage, pass_textureCoords));
+   }
+      
+   color = vec4(ambientContrib*matAmbient + diffuseContrib*diffuseColor + specularContrib*matSpecular, 1.0);
 }

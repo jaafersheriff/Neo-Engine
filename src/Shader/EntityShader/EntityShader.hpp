@@ -4,6 +4,7 @@
 
 #include "Shader/Shader.hpp"
 #include "Lights/Light.hpp"
+#include "Model/Texture.hpp"
 
 class EntityShader : public Shader {
    public:
@@ -17,8 +18,9 @@ class EntityShader : public Shader {
       void loadV(const glm::mat4 *);
       void loadMaterial(glm::vec3, glm::vec3, glm::vec3);
       void loadShine(float);
-      void loadReflectivity(float);
       void loadLight(const Light &);
+      void loadUsesTexture(const bool);
+      void loadTexture(const Texture &);
 };
 
 #endif

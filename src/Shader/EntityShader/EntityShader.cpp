@@ -8,11 +8,16 @@ bool EntityShader::init() {
    // Attributes
    addAttribute("vertexPos");
    addAttribute("vertexNormal");
+   addAttribute("vertexTexture");
 
    // Matrix uniforms
    addUniform("P");
    addUniform("M");
    addUniform("V");
+
+   // Denote if a texture is used
+   addUniform("usesTexture");
+   addUniform("textureImage");
 
    // Material uniforms
    addUniform("matAmbient");
@@ -50,12 +55,18 @@ void EntityShader::loadShine(float s) {
    this->loadFloat(getUniform("shine"), s);
 }
 
-void EntityShader::loadReflectivity(float r) {
-   this->loadFloat(getUniform("reflectivity"), r);
-}
-
 void EntityShader::loadLight(const Light &light) {
    this->loadVec3(getUniform("lightPos"), light.position);
    this->loadVec3(getUniform("lightCol"), light.color);
    this->loadVec3(getUniform("lightAtt"), light.attenuation);
+}
+
+void EntityShader::loadUsesTexture(const bool b) {
+   this->loadBool(getUniform("usesTexture"), b);
+}
+
+void EntityShader::loadTexture(const Texture &texture) {
+   glActiveTexture(GL_TEXTURE0 + texture.textureId);
+   glUniform1i(getUniform("textureImage"), texture.textureId);
+   glBindTexture(GL_TEXTURE_2D, texture.textureId);
 }

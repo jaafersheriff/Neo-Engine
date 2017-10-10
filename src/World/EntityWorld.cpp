@@ -1,30 +1,21 @@
 #include "EntityWorld.hpp"
 
 void EntityWorld::init(Loader &loader) {
-   // Load obj meshes
-   Mesh *bunnyMesh = loader.loadObjMesh("../resources/Model.obj");
-   Mesh *cubeMesh  = loader.loadObjMesh("../resources/cube.obj");
+   // Create entity
+   Entity e(loader.loadObjMesh("../resources/sphere.obj"), glm::vec3(30, -5, -5), glm::vec3(0, 90, 0), glm::vec3(10, 10, 10));
+   e.texture.textureImage = loader.loadPngTexture("../resources/world.bmp");
+   entities.push_back(e);
+   
+   e = Entity(loader.loadObjMesh("../resources/Model.obj"), glm::vec3(30, -5, 10), glm::vec3(180, 90, 0), glm::vec3(10, 10, 10));
+   e.texture.textureImage = loader.loadPngTexture("../resources/Model.png");
+   entities.push_back(e);
 
-   // Create texture
-   ModelTexture texture;
-   texture.ambientColor = texture.diffuseColor = glm::vec3(0.7f, 0.7f, 0.7f);
-   texture.specularColor = glm::vec3(1.f, 1.f, 1.f);
-   texture.shineDamper = 1.f;
-   // Load png texture
-   // texture.textureImage = loader.loadPngTexture("../resources/Model.png");
+   e = Entity(loader.loadObjMesh("../resources/mr_krab.obj"), glm::vec3(30, 8, 5), glm::vec3(0, 270, 0), glm::vec3(10, 10, 10));
+   e.texture.textureImage = loader.loadPngTexture("../resources/mr_krab.png");
+   entities.push_back(e);
 
-   // entities.push_back(Entity(bunnyMesh, texture, glm::vec3(6, 20, 30), glm::vec3(180, 0, 0), glm::vec3(10, 10, 10)));
-
-   // entities.push_back(Entity(bunnyMesh, glm::vec3(60, 20, 60), glm::vec3(180, 0, 0), glm::vec3(10, 10, 10)));
-
-   // Add light
-   glm::vec3 lightPos(6, 20, 45);
-   Light light(lightPos, glm::vec3(1.f, 1.f, 1.f));
-   light.attenuation = glm::vec3(1.f, 0.0f, 0.0f);
-   Entity lightModel(cubeMesh, lightPos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f));
-   lightModel.texture.ambientColor = lightModel.texture.diffuseColor = lightModel.texture.specularColor = glm::vec3(1.f, 1.f, 1.f);
-   lights.push_back(light);
-   entities.push_back(lightModel);
+   // Set up light
+   light.position = glm::vec3(10, 10, 0);
 }
 
 void EntityWorld::prepareRenderer(MasterRenderer &mr) {

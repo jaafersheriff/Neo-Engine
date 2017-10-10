@@ -24,7 +24,7 @@ class ModelTexture {
       // Material properties
       glm::vec3 ambientColor = glm::vec3(0.f, 0.f, 0.f);
       glm::vec3 diffuseColor = glm::vec3(0.f, 0.f, 0.f);
-      glm::vec3 specularColor = glm::vec3(0.f, 0.f, 0.f);
+      glm::vec3 specularColor = glm::vec3(1.f, 1.f, 1.f);
 };
 
 #endif

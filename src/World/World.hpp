@@ -1,11 +1,4 @@
 // Abstract parent World class
-//    Constructor(): include name of world                                             //
-//    Init(): Create objects and initialize rendering data struct                      //
-//    prepareRenderer(): activate feature renderers and pass in proper data struct     //
-//    update(): Update features, call takeInput()                                      //
-//    takeInput(): update camera and features based on hardware input                  //
-//    cleanUp(): Clean up features                                                     //
-
 #pragma once
 #ifndef _WORLD_HPP_
 #define _WORLD_HPP_
@@ -16,6 +9,7 @@
 #include "Lights/Light.hpp"
 #include "Toolbox/Loader.hpp"
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -27,7 +21,7 @@ class World {
       std::string name;
 
       Camera camera;
-      std::vector<Light> lights;
+      Light light;
 
       /* Create objects, initialize rendering data structure */
       virtual void init(Loader &) = 0;

@@ -21,7 +21,9 @@ class EntityRenderer : public Renderer {
       void cleanUp();
    private:
       void prepareMesh(Mesh *);
+      void prepareTexture(ModelTexture &);
       void unPrepareMesh(Mesh *);
+      void unPrepareTexture(ModelTexture &);
 };
 
 #endif

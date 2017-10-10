@@ -101,6 +101,10 @@ void Shader::cleanUp() {
    glDeleteProgram(pid);
 }
 
+void Shader::loadBool(const int location, const bool b) const {
+   glUniform1i(location, b);
+}
+
 void Shader::loadFloat(const int location, const float f) const { 
    glUniform1f(location, f);
 }

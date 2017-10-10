@@ -27,7 +27,7 @@ void EntityRenderer::render(World *world) {
    EntityWorld *eWorld = dynamic_cast<EntityWorld*>(world);
 
    // There's only one light as of now
-   eShader->loadLight(eWorld->lights[0]);
+   eShader->loadLight(eWorld->light);
 
    glm::mat4 M;
    // TODO : batched render
@@ -41,12 +41,8 @@ void EntityRenderer::render(World *world) {
       // Bind mesh to shader
       prepareMesh(e->mesh);
 
-      // Material
-      eShader->loadMaterial(e->texture.ambientColor, 
-                            e->texture.diffuseColor, 
-                            e->texture.specularColor);
-      eShader->loadShine(e->texture.shineDamper);
-
+      // Bind texture/material to shader
+      prepareTexture(e->texture);
 
       // Model matrix
       M = glm::mat4(1.f);
@@ -57,18 +53,20 @@ void EntityRenderer::render(World *world) {
       M *= glm::scale(glm::mat4(1.f), e->scale);
 
       eShader->loadM(&M);
-      
+
       // Draw
       glDrawElements(GL_TRIANGLES, (int)e->mesh->eleBuf.size(), GL_UNSIGNED_INT, (const void *)0);
 
       // Unbind mesh
       unPrepareMesh(e->mesh);
+
+      // Unbind texture
+      unPrepareTexture(e->texture);
    }
 }
 
 // All Meshes are assumed to have valid vertices and element indices
 // For Entities we assume meshes to include normal data
-// TODO : allow for texture coords 
 void EntityRenderer::prepareMesh(Mesh *mesh) {
 
    glBindVertexArray(mesh->vaoId);
@@ -87,21 +85,56 @@ void EntityRenderer::prepareMesh(Mesh *mesh) {
       glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
    }
 
-   // TODO : texture coords
+   // Bind texture buffer
+   pos = shader->getAttribute("vertexTexture");
+   if (pos != -1 && mesh->texBufId != 0) {
+      glEnableVertexAttribArray(pos);
+      glBindBuffer(GL_ARRAY_BUFFER, mesh->texBufId);
+      glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0);
+   }
 
    // Bind element buffer
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId);
 }
 
+void EntityRenderer::prepareTexture(ModelTexture &texture) {
+   EntityShader *eShader = dynamic_cast<EntityShader*>(shader);
+
+   if(texture.textureImage.textureId != 0) {
+      eShader->loadUsesTexture(true);
+      eShader->loadTexture(texture.textureImage);
+   }
+   else {
+      eShader->loadUsesTexture(false);
+   }
+
+   // Material
+   eShader->loadMaterial(texture.ambientColor, 
+                         texture.diffuseColor, 
+                         texture.specularColor);
+   eShader->loadShine(texture.shineDamper);
+}
+
 void EntityRenderer::unPrepareMesh(Mesh *mesh) {
    glDisableVertexAttribArray(shader->getAttribute("vertexPos"));
+
    int pos = shader->getAttribute("vertexNormal");
    if (pos != -1) {
-      glDisableVertexAttribArray(shader->getAttribute("vertexNormal"));
+      glDisableVertexAttribArray(pos);
    }
-   // TODO : texture
+
+   pos = shader->getAttribute("vertexTexture");
+   if (pos != -1) {
+      glDisableVertexAttribArray(pos);
+   }
+
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void EntityRenderer::unPrepareTexture(ModelTexture &texture) {
+   glActiveTexture(GL_TEXTURE0 + texture.textureImage.textureId);
+   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void EntityRenderer::cleanUp() {
