@@ -1,21 +1,15 @@
 #include "EntityWorld.hpp"
 
 void EntityWorld::init(Loader &loader) {
-   // Create entity
-   Entity e(loader.loadObjMesh("../resources/sphere.obj"), glm::vec3(30, -5, -5), glm::vec3(0, 90, 0), glm::vec3(10, 10, 10));
-   e.texture.textureImage = loader.loadPngTexture("../resources/world.bmp");
-   entities.push_back(e);
-   
-   e = Entity(loader.loadObjMesh("../resources/Model.obj"), glm::vec3(30, -5, 10), glm::vec3(180, 90, 0), glm::vec3(10, 10, 10));
-   e.texture.textureImage = loader.loadPngTexture("../resources/Model.png");
-   entities.push_back(e);
-
-   e = Entity(loader.loadObjMesh("../resources/mr_krab.obj"), glm::vec3(30, 8, 5), glm::vec3(0, 270, 0), glm::vec3(10, 10, 10));
-   e.texture.textureImage = loader.loadPngTexture("../resources/mr_krab.png");
+   Entity e = Entity(loader.loadObjMesh("../resources/millenium-falcon.obj"), glm::vec3(-10, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0.05f, 0.05f, 0.05f));
+   e.texture.textureImage = loader.loadTexture("../resources/falcon.jpg");
+   e.texture.specularColor = glm::vec3(0.3f);
+   e.texture.shineDamper = 0.8f;
    entities.push_back(e);
 
    // Set up light
-   light.position = glm::vec3(10, 10, 0);
+   light.position = glm::vec3(-10, 100, 0);
+   light.attenuation = glm::vec3(1.f, 0.0f, 0.0f);
 }
 
 void EntityWorld::prepareRenderer(MasterRenderer &mr) {
@@ -32,6 +26,7 @@ void EntityWorld::update(Context &ctx) {
 
    for (unsigned int i = 0; i < entities.size(); i++) {
       entities[i].update();
+      entities[i].rotation.z += 1.f;
    }
 }
 

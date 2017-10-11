@@ -8,13 +8,16 @@ uniform mat4 P;
 uniform mat4 M;
 uniform mat4 V;
 
-out vec3 fragNormal;
 out vec4 worldPos;
+out vec3 fragNormal;
+out vec4 viewDir;
 out vec2 pass_textureCoords;
 
 void main() {
    vec4 worldPos = M * vertexPos;
    gl_Position = P * V * worldPos;
+
    fragNormal = vec3(M * vec4(vertexNormal, 0.0));
+   viewDir = (inverse(V) * vec4(0.0, 0.0, 0.0, 1.0)) - worldPos;
    pass_textureCoords = vertexTexture;
 }

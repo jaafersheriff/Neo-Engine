@@ -20,7 +20,6 @@ bool EntityShader::init() {
    addUniform("textureImage");
 
    // Material uniforms
-   addUniform("matAmbient");
    addUniform("matDiffuse");
    addUniform("matSpecular");
    addUniform("shine");
@@ -45,8 +44,7 @@ void EntityShader::loadV(const glm::mat4 *v) {
    this->loadMat4(getUniform("V"), v);
 }
 
-void EntityShader::loadMaterial(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular) {
-   this->loadVec3(getUniform("matAmbient"), ambient);
+void EntityShader::loadMaterial(glm::vec3 diffuse, glm::vec3 specular) {
    this->loadVec3(getUniform("matDiffuse"), diffuse);
    this->loadVec3(getUniform("matSpecular"), specular);
 }

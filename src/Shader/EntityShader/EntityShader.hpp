@@ -16,7 +16,7 @@ class EntityShader : public Shader {
       void loadP(const glm::mat4 *);
       void loadM(const glm::mat4 *);
       void loadV(const glm::mat4 *);
-      void loadMaterial(glm::vec3, glm::vec3, glm::vec3);
+      void loadMaterial(glm::vec3, glm::vec3);
       void loadShine(float);
       void loadLight(const Light &);
       void loadUsesTexture(const bool);

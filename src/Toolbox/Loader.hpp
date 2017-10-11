@@ -7,21 +7,22 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
-#include <string> // file name string
+#include <string>
 #include <map>    
+#include <vector>
 
 class Mesh;
 class Texture;
 class Loader {
    public:
-      Texture loadPngTexture(const std::string);
-      Mesh* loadObjMesh(const std::string);
+      Texture loadTexture(const std::string);
+      std::vector<Mesh*> loadObjMesh(const std::string);
       
    private:
       void resize(Mesh*);
       // Collections that prevent loading textures/meshes more than once 
       std::map<std::string, GLint> textures;
-      std::map<std::string, Mesh*> meshes;
+      std::map<std::string, std::vector<Mesh*>> meshes;
 };
 
 #endif

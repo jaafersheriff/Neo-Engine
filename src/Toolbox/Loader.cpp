@@ -10,7 +10,7 @@
 #include <iostream>
 #include <vector>
 
-Texture Loader::loadPngTexture(const std::string fileName) {
+Texture Loader::loadTexture(const std::string fileName) {
    Texture texture;
    std::map<std::string, GLint>::iterator it = textures.find(fileName);
    if (it != textures.end()) {
@@ -36,8 +36,8 @@ Texture Loader::loadPngTexture(const std::string fileName) {
 }
 
 // Load geometry from .obj
-Mesh* Loader::loadObjMesh(const std::string fileName) {
-   std::map<std::string, Mesh*>::iterator it = meshes.find(fileName);
+std::vector<Mesh*> Loader::loadObjMesh(const std::string fileName) {
+   std::map<std::string, std::vector<Mesh*>>::iterator it = meshes.find(fileName);
    if (it != meshes.end()) {
       return it->second;
    }
@@ -50,25 +50,27 @@ Mesh* Loader::loadObjMesh(const std::string fileName) {
       std::cerr << errString << std::endl;
       exit(1);
    }
-      
-   //////////////////////////// NOTICE ////////////////////////////////
-   // tiny_obj_loader creates meshes for every shape in the obj file //
-   // This function will return only the first loaded mesh           //
-   // TODO: Expand this function to return all the avilable meshes   //
-   ////////////////////////////////////////////////////////////////////
-   Mesh *mesh = new Mesh;
-   mesh->name = fileName;
-   mesh->vertBuf = shapes[0].mesh.positions;
-   mesh->norBuf  = shapes[0].mesh.normals;
-   mesh->texBuf  = shapes[0].mesh.texcoords;
-   mesh->eleBuf  = shapes[0].mesh.indices; 
-   resize(mesh);
-   mesh->init();
-   meshes.insert(std::map<std::string, Mesh*>::value_type(fileName, mesh));
+ 
+   std::vector<Mesh*> meshList;
+   int vertCount = 0;
+   for (int i = 0; i < shapes.size(); i++) {
+      Mesh *mesh = new Mesh;
+      mesh->name = fileName;
+      mesh->vertBuf = shapes[i].mesh.positions;
+      mesh->norBuf  = shapes[i].mesh.normals;
+      mesh->texBuf  = shapes[i].mesh.texcoords;
+      mesh->eleBuf  = shapes[i].mesh.indices; 
+      //resize(mesh);
+      mesh->init();
+      meshList.push_back(mesh);
+      vertCount += mesh->vertBuf.size()/3;
+   }
+     
+   meshes.insert(std::map<std::string, std::vector<Mesh*>>::value_type(fileName, meshList));
 
-   std::cout << "Loaded mesh (" << mesh->vertBuf.size()/3 << " vertices): " << fileName << std::endl;
+   std::cout << "Loaded mesh (" << vertCount << " vertices): " << fileName << std::endl;
 
-   return mesh;
+   return meshList;
 }
 
 // Provided function to resize a mesh so all vertex positions are [0, 1.f]

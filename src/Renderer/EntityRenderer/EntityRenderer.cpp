@@ -34,31 +34,31 @@ void EntityRenderer::render(World *world) {
    for (unsigned int i = 0; i < entitiesPointer->size(); i++) {
       Entity *e = &(*entitiesPointer)[i];
 
-      if (e->mesh == NULL) {
+      if (!e->mesh.size()) {
          continue;
       }
 
-      // Bind mesh to shader
-      prepareMesh(e->mesh);
-
-      // Bind texture/material to shader
-      prepareTexture(e->texture);
-
       // Model matrix
       M = glm::mat4(1.f);
-      M *= glm::translate(glm::mat4(1.f), e->position);
       M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.x), glm::vec3(1, 0, 0));
       M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.y), glm::vec3(0, 1, 0));
       M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.z), glm::vec3(0, 0, 1));
       M *= glm::scale(glm::mat4(1.f), e->scale);
+      M *= glm::translate(glm::mat4(1.f), e->position);
 
+      // Bind texture/material to shader
+      prepareTexture(e->texture);
       eShader->loadM(&M);
 
-      // Draw
-      glDrawElements(GL_TRIANGLES, (int)e->mesh->eleBuf.size(), GL_UNSIGNED_INT, (const void *)0);
-
-      // Unbind mesh
-      unPrepareMesh(e->mesh);
+      // Loop through all shapes in mesh
+      for (int i = 0; i < e->mesh.size(); i++) {
+         // Bind shape
+         prepareMesh(e->mesh[i]);
+         // Draw shape
+         glDrawElements(GL_TRIANGLES, (int)e->mesh[i]->eleBuf.size(), GL_UNSIGNED_INT, (const void *)0);
+         // Unbind shape
+         unPrepareMesh(e->mesh[i]);
+      }
 
       // Unbind texture
       unPrepareTexture(e->texture);
@@ -109,8 +109,7 @@ void EntityRenderer::prepareTexture(ModelTexture &texture) {
    }
 
    // Material
-   eShader->loadMaterial(texture.ambientColor, 
-                         texture.diffuseColor, 
+   eShader->loadMaterial(texture.diffuseColor, 
                          texture.specularColor);
    eShader->loadShine(texture.shineDamper);
 }
