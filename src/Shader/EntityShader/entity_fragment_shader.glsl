@@ -11,8 +11,8 @@ uniform vec3 lightAtt;
 uniform sampler2D textureImage;
 uniform bool usesTexture;
 
-in vec3 fragNormal;
 in vec4 worldPos;
+in vec3 fragNormal;
 in vec4 viewDir;
 in vec2 pass_textureCoords;
 

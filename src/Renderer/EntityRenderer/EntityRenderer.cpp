@@ -40,11 +40,11 @@ void EntityRenderer::render(World *world) {
 
       // Model matrix
       M = glm::mat4(1.f);
+      M *= glm::translate(glm::mat4(1.f), e->position);
       M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.x), glm::vec3(1, 0, 0));
       M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.y), glm::vec3(0, 1, 0));
       M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.z), glm::vec3(0, 0, 1));
       M *= glm::scale(glm::mat4(1.f), e->scale);
-      M *= glm::translate(glm::mat4(1.f), e->position);
 
       // Bind texture/material to shader
       prepareTexture(e->texture);
@@ -100,6 +100,7 @@ void EntityRenderer::prepareMesh(Mesh *mesh) {
 void EntityRenderer::prepareTexture(ModelTexture &texture) {
    EntityShader *eShader = dynamic_cast<EntityShader*>(shader);
 
+   // Texture
    if(texture.textureImage.textureId != 0) {
       eShader->loadUsesTexture(true);
       eShader->loadTexture(texture.textureImage);

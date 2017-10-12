@@ -14,7 +14,7 @@ out vec4 viewDir;
 out vec2 pass_textureCoords;
 
 void main() {
-   vec4 worldPos = M * vertexPos;
+   worldPos = M * vertexPos;
    gl_Position = P * V * worldPos;
 
    fragNormal = vec3(M * vec4(vertexNormal, 0.0));
