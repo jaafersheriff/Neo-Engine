@@ -19,7 +19,7 @@ class Loader {
       std::vector<Mesh*> loadObjMesh(const std::string);
       
    private:
-      void resize(Mesh*);
+      void resize(std::vector<Mesh*>);
       // Collections that prevent loading textures/meshes more than once 
       std::map<std::string, GLint> textures;
       std::map<std::string, std::vector<Mesh*>> meshes;

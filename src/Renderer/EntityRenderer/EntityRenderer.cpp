@@ -110,7 +110,8 @@ void EntityRenderer::prepareTexture(ModelTexture &texture) {
    }
 
    // Material
-   eShader->loadMaterial(texture.diffuseColor, 
+   eShader->loadMaterial(texture.ambientColor, 
+                         texture.diffuseColor, 
                          texture.specularColor);
    eShader->loadShine(texture.shineDamper);
 }

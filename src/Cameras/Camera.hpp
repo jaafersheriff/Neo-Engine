@@ -16,7 +16,7 @@ class Camera {
       glm::vec3 lookAt;
 
       Camera(const glm::vec3);
-      Camera() : Camera(glm::vec3(0, 0, 0)) { }
+      Camera() : Camera(glm::vec3(0)) { }
 
       // Update
       void update();

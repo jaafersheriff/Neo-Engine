@@ -1,5 +1,6 @@
 #version 330 core
 
+uniform float matAmbient;
 uniform vec3 matDiffuse;
 uniform vec3 matSpecular;
 uniform float shine;
@@ -27,7 +28,7 @@ void main() {
    float lightDistance = length(lightDir);
    float attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
 
-   vec3 diffuseContrib = max(dot(unitLightDir, unitNormal), 0.0) * lightCol / attFactor;
+   vec3 diffuseContrib = max(dot(unitLightDir, unitNormal), matAmbient) * lightCol / attFactor;
 
    // Blinn-Phong
    vec3 H = (unitLightDir + unitViewDir) / 2;

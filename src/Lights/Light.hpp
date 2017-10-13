@@ -22,12 +22,12 @@ class Light {
       }
 
       Light(glm::vec3 pos) :
-         Light(pos, glm::vec3(1.f, 1.f, 1.f))
+         Light(pos, glm::vec3(1.f))
       {
       }
 
       Light() :
-         Light(glm::vec3(0.f, 0.f, 0.f))
+         Light(glm::vec3(0.f))
       {
       }
 };

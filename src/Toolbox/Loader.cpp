@@ -51,6 +51,7 @@ std::vector<Mesh*> Loader::loadObjMesh(const std::string fileName) {
       exit(1);
    }
  
+   /* Organize all submeshes in the provided .obj file */
    std::vector<Mesh*> meshList;
    int vertCount = 0;
    for (int i = 0; i < shapes.size(); i++) {
@@ -60,12 +61,18 @@ std::vector<Mesh*> Loader::loadObjMesh(const std::string fileName) {
       mesh->norBuf  = shapes[i].mesh.normals;
       mesh->texBuf  = shapes[i].mesh.texcoords;
       mesh->eleBuf  = shapes[i].mesh.indices; 
-      //resize(mesh);
-      mesh->init();
       meshList.push_back(mesh);
       vertCount += mesh->vertBuf.size()/3;
    }
-     
+
+   /* Resize the submeshes */
+   resize(meshList);
+
+   /* Copy mesh data to the gpu */
+   for (Mesh *mesh : meshList) {
+      mesh->init();
+   }
+   
    meshes.insert(std::map<std::string, std::vector<Mesh*>>::value_type(fileName, meshList));
 
    std::cout << "Loaded mesh (" << vertCount << " vertices): " << fileName << std::endl;
@@ -74,7 +81,7 @@ std::vector<Mesh*> Loader::loadObjMesh(const std::string fileName) {
 }
 
 // Provided function to resize a mesh so all vertex positions are [0, 1.f]
-void Loader::resize(Mesh *mesh) {
+void Loader::resize(std::vector<Mesh *> meshes) {
    float minX, minY, minZ;
    float maxX, maxY, maxZ;
    float scaleX, scaleY, scaleZ;
@@ -84,18 +91,19 @@ void Loader::resize(Mesh *mesh) {
    minX = minY = minZ = 1.1754E+38F;
    maxX = maxY = maxZ = -1.1754E+38F;
 
-   //Go through all vertices to determine min and max of each dimension
-   for (size_t v = 0; v < mesh->vertBuf.size() / 3; v++) {
-      if(mesh->vertBuf[3*v+0] < minX) minX = mesh->vertBuf[3*v+0];
-      if(mesh->vertBuf[3*v+0] > maxX) maxX = mesh->vertBuf[3*v+0];
+   for (Mesh *mesh : meshes) {
+      //Go through all vertices to determine min and max of each dimension
+      for (size_t v = 0; v < mesh->vertBuf.size() / 3; v++) {
+         if(mesh->vertBuf[3*v+0] < minX) minX = mesh->vertBuf[3*v+0];
+         if(mesh->vertBuf[3*v+0] > maxX) maxX = mesh->vertBuf[3*v+0];
 
-      if(mesh->vertBuf[3*v+1] < minY) minY = mesh->vertBuf[3*v+1];
-      if(mesh->vertBuf[3*v+1] > maxY) maxY = mesh->vertBuf[3*v+1];
+         if(mesh->vertBuf[3*v+1] < minY) minY = mesh->vertBuf[3*v+1];
+         if(mesh->vertBuf[3*v+1] > maxY) maxY = mesh->vertBuf[3*v+1];
 
-      if(mesh->vertBuf[3*v+2] < minZ) minZ = mesh->vertBuf[3*v+2];
-      if(mesh->vertBuf[3*v+2] > maxZ) maxZ = mesh->vertBuf[3*v+2];
+         if(mesh->vertBuf[3*v+2] < minZ) minZ = mesh->vertBuf[3*v+2];
+         if(mesh->vertBuf[3*v+2] > maxZ) maxZ = mesh->vertBuf[3*v+2];
+      }
    }
-
    //From min and max compute necessary scale and shift for each dimension
    float maxExtent, xExtent, yExtent, zExtent;
    xExtent = maxX-minX;
@@ -118,15 +126,17 @@ void Loader::resize(Mesh *mesh) {
    shiftZ = minZ + (zExtent)/2.0;
 
    //Go through all verticies shift and scale them
-	for (size_t v = 0; v < mesh->vertBuf.size() / 3; v++) {
-		mesh->vertBuf[3*v+0] = (mesh->vertBuf[3*v+0] - shiftX) * scaleX;
-		assert(mesh->vertBuf[3*v+0] >= -1.0 - epsilon);
-		assert(mesh->vertBuf[3*v+0] <= 1.0 + epsilon);
-		mesh->vertBuf[3*v+1] = (mesh->vertBuf[3*v+1] - shiftY) * scaleY;
-		assert(mesh->vertBuf[3*v+1] >= -1.0 - epsilon);
-		assert(mesh->vertBuf[3*v+1] <= 1.0 + epsilon);
-		mesh->vertBuf[3*v+2] = (mesh->vertBuf[3*v+2] - shiftZ) * scaleZ;
-		assert(mesh->vertBuf[3*v+2] >= -1.0 - epsilon);
-		assert(mesh->vertBuf[3*v+2] <= 1.0 + epsilon);
-	}
+   for (Mesh *mesh : meshes) {
+   	for (size_t v = 0; v < mesh->vertBuf.size() / 3; v++) {
+   		mesh->vertBuf[3*v+0] = (mesh->vertBuf[3*v+0] - shiftX) * scaleX;
+   		assert(mesh->vertBuf[3*v+0] >= -1.0 - epsilon);
+   		assert(mesh->vertBuf[3*v+0] <= 1.0 + epsilon);
+   		mesh->vertBuf[3*v+1] = (mesh->vertBuf[3*v+1] - shiftY) * scaleY;
+   		assert(mesh->vertBuf[3*v+1] >= -1.0 - epsilon);
+   		assert(mesh->vertBuf[3*v+1] <= 1.0 + epsilon);
+   		mesh->vertBuf[3*v+2] = (mesh->vertBuf[3*v+2] - shiftZ) * scaleZ;
+   		assert(mesh->vertBuf[3*v+2] >= -1.0 - epsilon);
+         assert(mesh->vertBuf[3*v+2] <= 1.0 + epsilon);
+   	}
+   }
 }

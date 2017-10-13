@@ -22,8 +22,9 @@ class ModelTexture {
       int numRows = 1;
 
       // Material properties
-      glm::vec3 diffuseColor = glm::vec3(0.f, 0.f, 0.f);
-      glm::vec3 specularColor = glm::vec3(0.f, 0.f, 0.f);
+      float ambientColor = 0.f;
+      glm::vec3 diffuseColor = glm::vec3(0.f);
+      glm::vec3 specularColor = glm::vec3(0.f);
 };
 
 #endif

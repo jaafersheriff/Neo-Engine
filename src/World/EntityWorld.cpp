@@ -1,14 +1,17 @@
 #include "EntityWorld.hpp"
 
 void EntityWorld::init(Loader &loader) {
-   Entity e = Entity(loader.loadObjMesh("../resources/millenium-falcon.obj"), glm::vec3(-10, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0.05f, 0.05f, 0.05f));
-   e.texture.textureImage = loader.loadTexture("../resources/falcon.jpg");
-   e.texture.specularColor = glm::vec3(0.3f);
-   e.texture.shineDamper = 0.8f;
+   Entity e = Entity(loader.loadObjMesh("../resources/cube.obj"), glm::vec3(0), glm::vec3(0), glm::vec3(50.f, 1, 50.f));
+   e.texture.diffuseColor = glm::vec3(1.f);
    entities.push_back(e);
 
    // Set up light
-   light.position = glm::vec3(-10, 100, 0);
+   light.position = glm::vec3(0, 10, 0);
+   e = Entity(loader.loadObjMesh("../resources/sphere.obj"), light.position, glm::vec3(0), glm::vec3(1, 1, 1));
+   e.texture.diffuseColor = e.texture.specularColor = glm::vec3(1.f);
+   e.texture.shineDamper = 0.2f;
+   //entities.push_back(e);
+   light.color = glm::vec3(1.f);
    light.attenuation = glm::vec3(1.f, 0.0f, 0.0f);
 }
 
@@ -26,7 +29,6 @@ void EntityWorld::update(Context &ctx) {
 
    for (unsigned int i = 0; i < entities.size(); i++) {
       entities[i].update();
-      entities[i].rotation.z += 1.f;
    }
 }
 
