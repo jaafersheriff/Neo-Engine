@@ -36,8 +36,8 @@ Texture Loader::loadTexture(const std::string fileName) {
 }
 
 // Load geometry from .obj
-std::vector<Mesh*> Loader::loadObjMesh(const std::string fileName) {
-   std::map<std::string, std::vector<Mesh*>>::iterator it = meshes.find(fileName);
+Mesh* Loader::loadObjMesh(const std::string fileName) {
+   std::map<std::string, Mesh*>::iterator it = meshes.find(fileName);
    if (it != meshes.end()) {
       return it->second;
    }
@@ -51,37 +51,47 @@ std::vector<Mesh*> Loader::loadObjMesh(const std::string fileName) {
       exit(1);
    }
  
-   /* Organize all submeshes in the provided .obj file */
-   std::vector<Mesh*> meshList;
+   /* Create a new empty mesh */
+   Mesh *mesh = new Mesh;
+   mesh->name = fileName;
    int vertCount = 0;
+   /* For every shape in the loaded file */
    for (int i = 0; i < shapes.size(); i++) {
-      Mesh *mesh = new Mesh;
-      mesh->name = fileName;
-      mesh->vertBuf = shapes[i].mesh.positions;
-      mesh->norBuf  = shapes[i].mesh.normals;
-      mesh->texBuf  = shapes[i].mesh.texcoords;
-      mesh->eleBuf  = shapes[i].mesh.indices; 
-      meshList.push_back(mesh);
-      vertCount += mesh->vertBuf.size()/3;
+      /* Concatenate the shape's vertices to the new mesh */
+      for (float f : shapes[i].mesh.positions) {
+         mesh->vertBuf.push_back(f);
+      }
+      /* Concatenate the shape's normals to the new mesh */
+      for (float f : shapes[i].mesh.normals) {
+         mesh->norBuf.push_back(f);
+      }
+      /* Concatenate the shape's texture coordinates to the new mesh */
+      for (float f : shapes[i].mesh.texcoords) {
+         mesh->texBuf.push_back(f);
+      }
+      /* Concatenate the shape's indices to the new mesh */
+      /* Indices need to be incremented as we concatenate shapes */
+      for (unsigned int i : shapes[i].mesh.indices) {
+         mesh->eleBuf.push_back(i + vertCount);
+      }
+      vertCount += shapes[i].mesh.positions.size() / 3;
    }
 
-   /* Resize the submeshes */
-   resize(meshList);
+   /* Resize the mesh to be centered around origin and have vertex values [0, 1.0] */
+   resize(mesh);
 
    /* Copy mesh data to the gpu */
-   for (Mesh *mesh : meshList) {
-      mesh->init();
-   }
+   mesh->init();
    
-   meshes.insert(std::map<std::string, std::vector<Mesh*>>::value_type(fileName, meshList));
+   meshes.insert(std::map<std::string, Mesh*>::value_type(fileName, mesh));
 
    std::cout << "Loaded mesh (" << vertCount << " vertices): " << fileName << std::endl;
 
-   return meshList;
+   return mesh;
 }
 
 // Provided function to resize a mesh so all vertex positions are [0, 1.f]
-void Loader::resize(std::vector<Mesh *> meshes) {
+void Loader::resize(Mesh * mesh) {
    float minX, minY, minZ;
    float maxX, maxY, maxZ;
    float scaleX, scaleY, scaleZ;
@@ -91,19 +101,18 @@ void Loader::resize(std::vector<Mesh *> meshes) {
    minX = minY = minZ = 1.1754E+38F;
    maxX = maxY = maxZ = -1.1754E+38F;
 
-   for (Mesh *mesh : meshes) {
-      //Go through all vertices to determine min and max of each dimension
-      for (size_t v = 0; v < mesh->vertBuf.size() / 3; v++) {
-         if(mesh->vertBuf[3*v+0] < minX) minX = mesh->vertBuf[3*v+0];
-         if(mesh->vertBuf[3*v+0] > maxX) maxX = mesh->vertBuf[3*v+0];
+   //Go through all vertices to determine min and max of each dimension
+   for (size_t v = 0; v < mesh->vertBuf.size() / 3; v++) {
+      if(mesh->vertBuf[3*v+0] < minX) minX = mesh->vertBuf[3*v+0];
+      if(mesh->vertBuf[3*v+0] > maxX) maxX = mesh->vertBuf[3*v+0];
 
-         if(mesh->vertBuf[3*v+1] < minY) minY = mesh->vertBuf[3*v+1];
-         if(mesh->vertBuf[3*v+1] > maxY) maxY = mesh->vertBuf[3*v+1];
+      if(mesh->vertBuf[3*v+1] < minY) minY = mesh->vertBuf[3*v+1];
+      if(mesh->vertBuf[3*v+1] > maxY) maxY = mesh->vertBuf[3*v+1];
 
-         if(mesh->vertBuf[3*v+2] < minZ) minZ = mesh->vertBuf[3*v+2];
-         if(mesh->vertBuf[3*v+2] > maxZ) maxZ = mesh->vertBuf[3*v+2];
-      }
+      if(mesh->vertBuf[3*v+2] < minZ) minZ = mesh->vertBuf[3*v+2];
+      if(mesh->vertBuf[3*v+2] > maxZ) maxZ = mesh->vertBuf[3*v+2];
    }
+
    //From min and max compute necessary scale and shift for each dimension
    float maxExtent, xExtent, yExtent, zExtent;
    xExtent = maxX-minX;
@@ -126,17 +135,15 @@ void Loader::resize(std::vector<Mesh *> meshes) {
    shiftZ = minZ + (zExtent)/2.0;
 
    //Go through all verticies shift and scale them
-   for (Mesh *mesh : meshes) {
-   	for (size_t v = 0; v < mesh->vertBuf.size() / 3; v++) {
-   		mesh->vertBuf[3*v+0] = (mesh->vertBuf[3*v+0] - shiftX) * scaleX;
-   		assert(mesh->vertBuf[3*v+0] >= -1.0 - epsilon);
-   		assert(mesh->vertBuf[3*v+0] <= 1.0 + epsilon);
-   		mesh->vertBuf[3*v+1] = (mesh->vertBuf[3*v+1] - shiftY) * scaleY;
-   		assert(mesh->vertBuf[3*v+1] >= -1.0 - epsilon);
-   		assert(mesh->vertBuf[3*v+1] <= 1.0 + epsilon);
-   		mesh->vertBuf[3*v+2] = (mesh->vertBuf[3*v+2] - shiftZ) * scaleZ;
-   		assert(mesh->vertBuf[3*v+2] >= -1.0 - epsilon);
-         assert(mesh->vertBuf[3*v+2] <= 1.0 + epsilon);
-   	}
-   }
+	for (size_t v = 0; v < mesh->vertBuf.size() / 3; v++) {
+		mesh->vertBuf[3*v+0] = (mesh->vertBuf[3*v+0] - shiftX) * scaleX;
+		assert(mesh->vertBuf[3*v+0] >= -1.0 - epsilon);
+		assert(mesh->vertBuf[3*v+0] <= 1.0 + epsilon);
+		mesh->vertBuf[3*v+1] = (mesh->vertBuf[3*v+1] - shiftY) * scaleY;
+		assert(mesh->vertBuf[3*v+1] >= -1.0 - epsilon);
+		assert(mesh->vertBuf[3*v+1] <= 1.0 + epsilon);
+		mesh->vertBuf[3*v+2] = (mesh->vertBuf[3*v+2] - shiftZ) * scaleZ;
+		assert(mesh->vertBuf[3*v+2] >= -1.0 - epsilon);
+      assert(mesh->vertBuf[3*v+2] <= 1.0 + epsilon);
+	}
 }

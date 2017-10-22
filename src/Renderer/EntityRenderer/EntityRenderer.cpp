@@ -33,7 +33,7 @@ void EntityRenderer::render(World *world) {
    for (unsigned int i = 0; i < entitiesPointer->size(); i++) {
       Entity *e = &(*entitiesPointer)[i];
 
-      if (!e->mesh.size()) {
+      if (!e->mesh || !e->mesh.vertBuf.size()) {
          continue;
       }
 
@@ -44,20 +44,17 @@ void EntityRenderer::render(World *world) {
       M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.y), glm::vec3(0, 1, 0));
       M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.z), glm::vec3(0, 0, 1));
       M *= glm::scale(glm::mat4(1.f), e->scale);
-      prepareTexture(e->texture);
-
-      // Bind texture/material to shader
       eShader->loadM(&M);
 
-      // Loop through all shapes in mesh
-      for (int i = 0; i < e->mesh.size(); i++) {
-         // Bind shape
-         prepareMesh(e->mesh[i]);
-         // Draw shape
-         glDrawElements(GL_TRIANGLES, (int)e->mesh[i]->eleBuf.size(), GL_UNSIGNED_INT, (const void *)0);
-         // Unbind shape
-         unPrepareMesh(e->mesh[i]);
-      }
+      // Bind texture/material to shader
+      prepareTexture(e->texture);
+
+      // Bind shape
+      prepareMesh(e->mesh);
+      // Draw shape
+      glDrawElements(GL_TRIANGLES, (int)e->mesh->eleBuf.size(), GL_UNSIGNED_INT, (const void *)0);
+      // Unbind shape
+      unPrepareMesh(e->mesh);
 
       // Unbind texture
       unPrepareTexture(e->texture);

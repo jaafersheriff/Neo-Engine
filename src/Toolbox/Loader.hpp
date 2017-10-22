@@ -16,13 +16,13 @@ class Texture;
 class Loader {
    public:
       Texture loadTexture(const std::string);
-      std::vector<Mesh*> loadObjMesh(const std::string);
+      Mesh* loadObjMesh(const std::string);
       
    private:
-      void resize(std::vector<Mesh*>);
+      void resize(Mesh*);
       // Collections that prevent loading textures/meshes more than once 
       std::map<std::string, GLint> textures;
-      std::map<std::string, std::vector<Mesh*>> meshes;
+      std::map<std::string, Mesh*> meshes;
 };
 
 #endif
