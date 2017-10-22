@@ -24,10 +24,9 @@ void EntityRenderer::prepare() {
 
 void EntityRenderer::render(World *world) {
    EntityShader *eShader = dynamic_cast<EntityShader*>(shader);
-   EntityWorld *eWorld = dynamic_cast<EntityWorld*>(world);
 
    // There's only one light as of now
-   eShader->loadLight(eWorld->light);
+   eShader->loadLight(world->light);
 
    glm::mat4 M;
    // TODO : batched render
@@ -45,9 +44,9 @@ void EntityRenderer::render(World *world) {
       M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.y), glm::vec3(0, 1, 0));
       M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.z), glm::vec3(0, 0, 1));
       M *= glm::scale(glm::mat4(1.f), e->scale);
+      prepareTexture(e->texture);
 
       // Bind texture/material to shader
-      prepareTexture(e->texture);
       eShader->loadM(&M);
 
       // Loop through all shapes in mesh
@@ -68,7 +67,6 @@ void EntityRenderer::render(World *world) {
 // All Meshes are assumed to have valid vertices and element indices
 // For Entities we assume meshes to include normal data
 void EntityRenderer::prepareMesh(Mesh *mesh) {
-
    glBindVertexArray(mesh->vaoId);
    
    // Bind position buffer

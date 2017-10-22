@@ -14,6 +14,16 @@
 // TODO: comments explaining each texture/material property
 class ModelTexture {
    public:
+      ModelTexture() 
+      {}
+
+      ModelTexture(Texture t, float a, glm::vec3 d, glm::vec3 s) :
+         textureImage(t), 
+         ambientColor(a),
+         diffuseColor(d),
+         specularColor(s)
+      {}
+
       // Texture properties
       Texture textureImage;
       float shineDamper = 1.f;

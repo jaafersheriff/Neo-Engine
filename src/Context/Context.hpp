@@ -12,6 +12,7 @@ class Context {
       Display display;
       Mouse mouse;
       Keyboard keyboard;
+      float runningTime;
 
       // TODO : world type enum 
       // TODO : Set world + default

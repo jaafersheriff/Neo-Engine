@@ -5,6 +5,7 @@
 #include <stdlib.h>  // atoi
 #include <string.h>  // strcmp
 #include <iostream>  // cout
+#include <time.h>    // clock
 
 int Context::processArgs(int argc, char **argv) {
    for (int i = 0; i < argc; i++) {
@@ -40,6 +41,7 @@ World* Context::createWorld() {
 void Context::update() { 
    display.update();
    mouse.update();
+   runningTime = clock()/(CLOCKS_PER_SEC/1000.f);
 }
 
 bool Context::shouldClose() {
