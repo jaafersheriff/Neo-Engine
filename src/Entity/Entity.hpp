@@ -13,7 +13,7 @@ class Entity {
       glm::vec3 rotation;
       glm::vec3 scale;
 
-      Mesh * mesh;
+      Mesh *mesh;
       ModelTexture texture;
       
       Entity(const glm::vec3, const glm::vec3, const glm::vec3);

@@ -23,10 +23,12 @@ void Mesh::init() {
    glBindBuffer(GL_ARRAY_BUFFER, vertBufId);
    glBufferData(GL_ARRAY_BUFFER, vertBuf.size()*sizeof(float), &vertBuf[0], GL_STATIC_DRAW);
 
-   // Copy element array
-   glGenBuffers(1, &eleBufId);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eleBufId);
-   glBufferData(GL_ELEMENT_ARRAY_BUFFER, eleBuf.size()*sizeof(unsigned int), &eleBuf[0], GL_STATIC_DRAW);
+   // Copy element array if it exists
+   if (!eleBuf.empty()) {
+      glGenBuffers(1, &eleBufId);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eleBufId);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, eleBuf.size()*sizeof(unsigned int), &eleBuf[0], GL_STATIC_DRAW);
+   }
 
    // Copy normal array if it exists
    if (!norBuf.empty()) {

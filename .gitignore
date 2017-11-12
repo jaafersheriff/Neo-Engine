@@ -2,6 +2,7 @@
 .gitignore
 .vscode/
 build/
+resources/
 other/
 Win32/
 

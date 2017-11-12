@@ -7,7 +7,6 @@
 #define _MASTER_RENDERER_HPP_
 
 #include "Context/Display.hpp"
-#include "Renderer.hpp"
 
 #include "Entity/Entity.hpp"
 
@@ -16,6 +15,7 @@
 #include <vector>
 
 class World;
+class Renderer;
 class MasterRenderer {
    public:
       MasterRenderer();

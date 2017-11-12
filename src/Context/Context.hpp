@@ -2,7 +2,7 @@
 #ifndef _CONTEXT_HPP_
 #define _CONTEXT_HPP_
 
-#include "Display.hpp"
+#include "Context/Display.hpp"
 #include "Hardware/Mouse.hpp"
 #include "Hardware/Keyboard.hpp"
 

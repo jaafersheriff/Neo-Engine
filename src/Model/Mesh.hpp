@@ -11,8 +11,6 @@ class Mesh {
       Mesh();
       void init();
 
-      std::string name = "";
-
       // Data buffers
       std::vector<float> vertBuf;
       std::vector<float> norBuf;

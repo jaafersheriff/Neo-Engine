@@ -9,7 +9,6 @@
 
 #include <vector>
 
-class EntityWorld;
 class EntityRenderer : public Renderer {
    public:
       std::vector<Entity> *entitiesPointer;

@@ -1,8 +1,11 @@
 #include "MasterRenderer.hpp"
+
 #include "World/World.hpp"
-#include "Shader/GLSL.hpp"
+#include "Renderer/Renderer.hpp"
 
 #include "Renderer/EntityRenderer/EntityRenderer.hpp"
+
+#include "Shader/GLSL.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 

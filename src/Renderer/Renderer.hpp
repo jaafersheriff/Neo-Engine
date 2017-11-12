@@ -3,10 +3,10 @@
 #ifndef _RENDERER_HPP_
 #define _RENDERER_HPP_
 
+#include "World/World.hpp"
 #include "Shader/Shader.hpp"
 #include "glm/glm.hpp"
 
-class World;
 class Renderer {
    public:
       /* Subrenderers need a pointer of a data structure to be rendered

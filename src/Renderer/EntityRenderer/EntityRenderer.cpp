@@ -1,9 +1,8 @@
 #include "EntityRenderer.hpp"
-#include "World/EntityWorld.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
-
 #include "glm/gtx/string_cast.hpp"
+
 #include <iostream>
 
 void EntityRenderer::activate(std::vector<Entity> *ep) {
@@ -30,34 +29,35 @@ void EntityRenderer::render(World *world) {
 
    glm::mat4 M;
    // TODO : batched render
-   for (unsigned int i = 0; i < entitiesPointer->size(); i++) {
-      Entity *e = &(*entitiesPointer)[i];
+   for(auto e : *entitiesPointer) {
 
-      if (!e->mesh || !e->mesh.vertBuf.size()) {
+      if (!e.mesh || !e.mesh->vertBuf.size()) {
          continue;
       }
 
       // Model matrix
       M = glm::mat4(1.f);
-      M *= glm::translate(glm::mat4(1.f), e->position);
-      M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.x), glm::vec3(1, 0, 0));
-      M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.y), glm::vec3(0, 1, 0));
-      M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.z), glm::vec3(0, 0, 1));
-      M *= glm::scale(glm::mat4(1.f), e->scale);
+      M *= glm::translate(glm::mat4(1.f), e.position);
+      M *= glm::rotate(glm::mat4(1.f), glm::radians(e.rotation.x), glm::vec3(1, 0, 0));
+      M *= glm::rotate(glm::mat4(1.f), glm::radians(e.rotation.y), glm::vec3(0, 1, 0));
+      M *= glm::rotate(glm::mat4(1.f), glm::radians(e.rotation.z), glm::vec3(0, 0, 1));
+      M *= glm::scale(glm::mat4(1.f), e.scale);
       eShader->loadM(&M);
 
       // Bind texture/material to shader
-      prepareTexture(e->texture);
+      prepareTexture(e.texture);
 
       // Bind shape
-      prepareMesh(e->mesh);
+      prepareMesh(e.mesh);
+
       // Draw shape
-      glDrawElements(GL_TRIANGLES, (int)e->mesh->eleBuf.size(), GL_UNSIGNED_INT, (const void *)0);
+      glDrawElements(GL_TRIANGLES, (int)e.mesh->eleBuf.size(), GL_UNSIGNED_INT, (const void *)0);
+
       // Unbind shape
-      unPrepareMesh(e->mesh);
+      unPrepareMesh(e.mesh);
 
       // Unbind texture
-      unPrepareTexture(e->texture);
+      unPrepareTexture(e.texture);
    }
 }
 
