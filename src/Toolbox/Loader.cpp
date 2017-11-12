@@ -64,12 +64,11 @@ Mesh* Loader::loadObjMesh(const std::string fileName) {
       /* Concatenate the shape's vertices to the new mesh */
       mesh->vertBuf.insert(mesh->vertBuf.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
       /* Concatenate the shape's normals to the new mesh */
-      /* Concatenate the shape's vertices to the new mesh */
       mesh->norBuf.insert(mesh->norBuf.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
       /* Concatenate the shape's texture coordinates to the new mesh */
       mesh->texBuf.insert(mesh->texBuf.end(), shapes[i].mesh.texcoords.begin(), shapes[i].mesh.texcoords.end());
-      /* Concatenate the shape's indices to the new mesh */
-      /* Indices need to be incremented as we concatenate shapes */
+      /* Concatenate the shape's indices to the new mesh
+       * Indices need to be incremented as we concatenate shapes */
       for (unsigned int i : shapes[i].mesh.indices) {
          mesh->eleBuf.push_back(i + vertCount);
       }
