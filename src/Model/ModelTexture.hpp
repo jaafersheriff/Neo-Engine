@@ -16,6 +16,13 @@ class ModelTexture {
    public:
       ModelTexture() 
       {}
+   
+      ModelTexture(float a, glm::vec3 d, glm::vec3 s) :
+         ambientColor(a),
+         diffuseColor(d),
+         specularColor(s)
+      {}
+
 
       ModelTexture(Texture t, float a, glm::vec3 d, glm::vec3 s) :
          textureImage(t), 

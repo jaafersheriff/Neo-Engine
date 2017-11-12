@@ -9,8 +9,15 @@
 
 class Texture {
    public:
+      struct TextureData {
+         int width;
+         int height;
+         int components;
+         unsigned char *data;
+      };
+      
       GLuint textureId = 0;
-      void init(int, int, int, unsigned char *);
+      void init(TextureData);
 };
 
 #endif

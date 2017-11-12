@@ -1,6 +1,5 @@
 #include "Loader.hpp"
 #include "Model/Mesh.hpp"
-#include "Model/Texture.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -10,6 +9,18 @@
 #include <iostream>
 #include <vector>
 
+Texture::TextureData Loader::getTextureData(const std::string fileName) {
+   Texture::TextureData td;
+   stbi_set_flip_vertically_on_load(true);
+   td.data = stbi_load(fileName.c_str(), &td.width, &td.height, &td.components, STBI_rgb_alpha);
+   if (td.data) {
+      std::cout << "Loaded texture (" << td.width << ", " << td.height << "): " << fileName << std::endl;
+   }
+   else {
+      std::cerr << "Could not find " << fileName << std::endl;
+   }
+}
+
 Texture Loader::loadTexture(const std::string fileName) {
    Texture texture;
    std::map<std::string, GLint>::iterator it = textures.find(fileName);
@@ -17,19 +28,13 @@ Texture Loader::loadTexture(const std::string fileName) {
       texture.textureId = it->second;
    }
    else {
-      int sizeX, sizeY, comp;
-      stbi_set_flip_vertically_on_load(true);
-      unsigned char *data = stbi_load(fileName.c_str(), &sizeX, &sizeY, &comp, STBI_rgb_alpha);
-      if(data) {
-         std::cout << "Loaded texture (" << sizeX << ", " << sizeY << "): " << fileName << std::endl;
-         texture.init(sizeX, sizeY, comp, data);
+      Texture::TextureData td = getTextureData(fileName);
+      if(td.data) {
+         texture.init(td);
          if (texture.textureId) {
             textures.insert(std::map<std::string, GLint>::value_type(fileName, texture.textureId));
          }
-         stbi_image_free(data);
-      }
-      else {
-         std::cerr << "Could not find " << fileName << std::endl;
+         stbi_image_free(td.data);
       }
    }
    return texture;
@@ -53,22 +58,16 @@ Mesh* Loader::loadObjMesh(const std::string fileName) {
  
    /* Create a new empty mesh */
    Mesh *mesh = new Mesh;
-   mesh->name = fileName;
    int vertCount = 0;
    /* For every shape in the loaded file */
    for (int i = 0; i < shapes.size(); i++) {
       /* Concatenate the shape's vertices to the new mesh */
-      for (float f : shapes[i].mesh.positions) {
-         mesh->vertBuf.push_back(f);
-      }
+      mesh->vertBuf.insert(mesh->vertBuf.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
       /* Concatenate the shape's normals to the new mesh */
-      for (float f : shapes[i].mesh.normals) {
-         mesh->norBuf.push_back(f);
-      }
+      /* Concatenate the shape's vertices to the new mesh */
+      mesh->norBuf.insert(mesh->norBuf.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
       /* Concatenate the shape's texture coordinates to the new mesh */
-      for (float f : shapes[i].mesh.texcoords) {
-         mesh->texBuf.push_back(f);
-      }
+      mesh->texBuf.insert(mesh->texBuf.end(), shapes[i].mesh.texcoords.begin(), shapes[i].mesh.texcoords.end());
       /* Concatenate the shape's indices to the new mesh */
       /* Indices need to be incremented as we concatenate shapes */
       for (unsigned int i : shapes[i].mesh.indices) {

@@ -1,6 +1,6 @@
 #include "Texture.hpp"
 
-void Texture::init(int sizeX, int sizeY, int components, unsigned char *data) {
+void Texture::init(TextureData td) {
    // Set active texture unit 0
    glActiveTexture(GL_TEXTURE0);
 
@@ -11,7 +11,7 @@ void Texture::init(int sizeX, int sizeY, int components, unsigned char *data) {
    glBindTexture(GL_TEXTURE_2D, textureId);
 
    // Load texture data to cpu
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sizeX, sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, td.width, td.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, td.data);
 
    // Generate image pyramid
    glGenerateMipmap(GL_TEXTURE_2D);
