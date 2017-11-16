@@ -3,7 +3,7 @@
 #define _ENTITY_RENDERER_HPP_
 
 #include "Renderer/Renderer.hpp"
-#include "Shader/EntityShader/EntityShader.hpp"
+#include "Entity/EntityShader/EntityShader.hpp"
 
 #include "Entity/Entity.hpp"
 

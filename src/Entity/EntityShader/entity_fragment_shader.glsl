@@ -1,5 +1,10 @@
 #version 330 core
 
+in vec4 worldPos;
+in vec3 fragNormal;
+in vec4 viewDir;
+in vec2 pass_textureCoords;
+
 uniform float matAmbient;
 uniform vec3 matDiffuse;
 uniform vec3 matSpecular;
@@ -11,11 +16,6 @@ uniform vec3 lightAtt;
 
 uniform sampler2D textureImage;
 uniform bool usesTexture;
-
-in vec4 worldPos;
-in vec3 fragNormal;
-in vec4 viewDir;
-in vec2 pass_textureCoords;
 
 out vec4 color;
 
@@ -35,6 +35,7 @@ void main() {
    vec3 specularContrib = pow(max(dot(H, unitNormal), 0), shine) * lightCol / attFactor;
 
    vec3 diffuseColor = matDiffuse;
+
    if (usesTexture) {
       diffuseColor = vec3(texture(textureImage, pass_textureCoords));
    }

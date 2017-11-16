@@ -7,12 +7,19 @@
 #include "Toolbox/Toolbox.hpp"
 
 class EntityWorld : public World {
-   public:
+public:
+      // Render targets
       std::vector<Entity> entities;
-      bool isPaused = false;
+      //Skybox *sb;
 
+      // World-specific members
+      bool isPaused = false;
+      float uTime = 0.f;
+
+      // Constructors
       EntityWorld() : World("Entity World") { }
 
+      // Derived functions
       void init(Loader &);
       void prepareRenderer(MasterRenderer &);
       void update(Context &);

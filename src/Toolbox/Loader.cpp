@@ -19,6 +19,8 @@ Texture::TextureData Loader::getTextureData(const std::string fileName) {
    else {
       std::cerr << "Could not find " << fileName << std::endl;
    }
+
+   return td;
 }
 
 Texture Loader::loadTexture(const std::string fileName) {

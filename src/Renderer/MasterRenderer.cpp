@@ -3,7 +3,7 @@
 #include "World/World.hpp"
 #include "Renderer/Renderer.hpp"
 
-#include "Renderer/EntityRenderer/EntityRenderer.hpp"
+#include "Entity/EntityRenderer/EntityRenderer.hpp"
 
 #include "Shader/GLSL.hpp"
 

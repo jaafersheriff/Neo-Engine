@@ -7,6 +7,7 @@ layout(location = 2) in vec2 vertexTexture;
 uniform mat4 P;
 uniform mat4 M;
 uniform mat4 V;
+uniform float uTime;
 
 out vec4 worldPos;
 out vec3 fragNormal;

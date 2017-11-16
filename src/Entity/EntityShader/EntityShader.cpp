@@ -30,6 +30,9 @@ bool EntityShader::init() {
    addUniform("lightCol");
    addUniform("lightAtt");
 
+   // Time
+   addUniform("uTime");
+
    return true;
 }
 
@@ -69,4 +72,8 @@ void EntityShader::loadTexture(const Texture &texture) {
    glActiveTexture(GL_TEXTURE0 + texture.textureId);
    glUniform1i(getUniform("textureImage"), texture.textureId);
    glBindTexture(GL_TEXTURE_2D, texture.textureId);
+}
+
+void EntityShader::loadTime(float t) {
+   this->loadFloat(getUniform("uTime"), t);
 }

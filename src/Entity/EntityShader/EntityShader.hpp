@@ -8,8 +8,8 @@
 
 class EntityShader : public Shader {
    public:
-      EntityShader() : Shader("../src/Shader/EntityShader/entity_vertex_shader.glsl",
-                              "../src/Shader/EntityShader/entity_fragment_shader.glsl") { }
+      EntityShader() : Shader("../src/Entity/EntityShader/entity_vertex_shader.glsl",
+                              "../src/Entity/EntityShader/entity_fragment_shader.glsl") { }
       
       bool init();
 
@@ -21,6 +21,7 @@ class EntityShader : public Shader {
       void loadLight(const Light &);
       void loadUsesTexture(const bool);
       void loadTexture(const Texture &);
+      void loadTime(const float);
 };
 
 #endif
