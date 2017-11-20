@@ -25,7 +25,7 @@ class MasterRenderer {
         void activateEntityRenderer(std::vector<Entity> *);
         
         void init();
-        void render(const Display &, World *);
+        void render(const Display &, const World *);
         void cleanUp();
 };
 

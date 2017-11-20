@@ -33,7 +33,7 @@ class Renderer {
         /* Render provided data structure in the proper way 
          * TODO : fix dyanmic cast shader. Use templates 
          */
-        virtual void render(World *) = 0;
+        virtual void render(const World *) = 0;
 
         /* Opposite of prepare()
          * Includes shader clean up

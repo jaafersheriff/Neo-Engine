@@ -12,7 +12,7 @@
 MasterRenderer::MasterRenderer() {
 }
 
-void MasterRenderer::render(const Display &display, World *world) {
+void MasterRenderer::render(const Display &display, const World *world) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);

@@ -13,7 +13,7 @@ public:
         return rand() / (float) RAND_MAX;
     }
 
-    static inline float genRandom(float min, float max) {
+    static inline float genRandom(const float min, const float max) {
         return ((float(rand()) / float(RAND_MAX)) * (max - min)) + min;
     }
 
@@ -21,7 +21,7 @@ public:
         return glm::vec3(genRandom(), genRandom(), genRandom());
     }
     
-    static inline glm::vec3 genRandomVec3(float min, float max) {
+    static inline glm::vec3 genRandomVec3(const float min, const float max) {
         return glm::vec3(genRandom(min, max), genRandom(min, max), genRandom(min, max));
     }
 };

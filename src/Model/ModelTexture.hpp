@@ -17,18 +17,18 @@ class ModelTexture {
         ModelTexture() 
         {}
     
-        ModelTexture(float a, glm::vec3 d, glm::vec3 s) :
-            ambientColor(a),
-            diffuseColor(d),
-            specularColor(s)
+        ModelTexture(const float ambient, const glm::vec3 diffuse, const glm::vec3 specular) :
+            ambientColor(ambient),
+            diffuseColor(diffuse),
+            specularColor(specular)
         {}
 
 
-        ModelTexture(Texture t, float a, glm::vec3 d, glm::vec3 s) :
-            textureImage(t), 
-            ambientColor(a),
-            diffuseColor(d),
-            specularColor(s)
+        ModelTexture(const Texture texture, const float ambient, const glm::vec3 diffuse, const glm::vec3 specular) :
+            textureImage(texture), 
+            ambientColor(ambient),
+            diffuseColor(diffuse),
+            specularColor(specular)
         {}
 
         // Texture properties

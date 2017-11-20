@@ -16,13 +16,13 @@ class EntityRenderer : public Renderer {
         void activate(std::vector<Entity> *);
         void prepare();
         void setGlobals(const glm::mat4*, const glm::mat4*);
-        void render(World *);
+        void render(const World *);
         void cleanUp();
     private:
-        void prepareMesh(Mesh *);
-        void prepareTexture(ModelTexture &);
-        void unPrepareMesh(Mesh *);
-        void unPrepareTexture(ModelTexture &);
+        void prepareMesh(const Mesh *);
+        void prepareTexture(const ModelTexture &);
+        void unPrepareMesh(const Mesh *);
+        void unPrepareTexture(const ModelTexture &);
 };
 
 #endif

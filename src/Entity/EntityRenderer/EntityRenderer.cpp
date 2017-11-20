@@ -22,7 +22,7 @@ void EntityRenderer::prepare() {
     // TODO : batched render
 }
 
-void EntityRenderer::render(World *world) {
+void EntityRenderer::render(const World *world) {
     EntityShader *eShader = dynamic_cast<EntityShader*>(shader);
 
     // There's only one light as of now
@@ -63,7 +63,7 @@ void EntityRenderer::render(World *world) {
 
 // All Meshes are assumed to have valid vertices and element indices
 // For Entities we assume meshes to include normal data
-void EntityRenderer::prepareMesh(Mesh *mesh) {
+void EntityRenderer::prepareMesh(const Mesh *mesh) {
     glBindVertexArray(mesh->vaoId);
     
     // Bind position buffer
@@ -92,7 +92,7 @@ void EntityRenderer::prepareMesh(Mesh *mesh) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId);
 }
 
-void EntityRenderer::prepareTexture(ModelTexture &texture) {
+void EntityRenderer::prepareTexture(const ModelTexture &texture) {
     EntityShader *eShader = dynamic_cast<EntityShader*>(shader);
 
     // Texture
@@ -111,7 +111,7 @@ void EntityRenderer::prepareTexture(ModelTexture &texture) {
     eShader->loadShine(texture.shineDamper);
 }
 
-void EntityRenderer::unPrepareMesh(Mesh *mesh) {
+void EntityRenderer::unPrepareMesh(const Mesh *mesh) {
     glDisableVertexAttribArray(shader->getAttribute("vertexPos"));
 
     int pos = shader->getAttribute("vertexNormal");
@@ -128,7 +128,7 @@ void EntityRenderer::unPrepareMesh(Mesh *mesh) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void EntityRenderer::unPrepareTexture(ModelTexture &texture) {
+void EntityRenderer::unPrepareTexture(const ModelTexture &texture) {
     glActiveTexture(GL_TEXTURE0 + texture.textureImage.textureId);
     glBindTexture(GL_TEXTURE_2D, 0);
 }

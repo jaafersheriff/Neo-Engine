@@ -10,19 +10,19 @@ class Light {
         glm::vec3 color;
         glm::vec3 attenuation;
 
-        Light(glm::vec3 p, glm::vec3 c, glm::vec3 a) {
-            this->position = p;
-            this->color = c;
-            this->attenuation = a;
+        Light(const glm::vec3 position, const glm::vec3 color, const glm::vec3 attenuation) {
+            this->position = position;
+            this->color = color;
+            this->attenuation = attenuation;
         }
 
-        Light(glm::vec3 pos, glm::vec3 col) :
-            Light(pos, col, glm::vec3(1.f, 0.f, 0.f))
+        Light(const glm::vec3 position, const glm::vec3 color) :
+            Light(position, color, glm::vec3(1.f, 0.f, 0.f))
         {
         }
 
-        Light(glm::vec3 pos) :
-            Light(pos, glm::vec3(1.f))
+        Light(const glm::vec3 position) :
+            Light(position, glm::vec3(1.f))
         {
         }
 

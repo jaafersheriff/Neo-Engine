@@ -48,13 +48,13 @@ void EntityShader::loadV(const glm::mat4 *v) {
     this->loadMat4(getUniform("V"), v);
 }
 
-void EntityShader::loadMaterial(float ambient, glm::vec3 diffuse, glm::vec3 specular) {
+void EntityShader::loadMaterial(const float ambient, const glm::vec3 diffuse, const glm::vec3 specular) {
     this->loadFloat(getUniform("matAmbient"), ambient);
     this->loadVec3(getUniform("matDiffuse"), diffuse);
     this->loadVec3(getUniform("matSpecular"), specular);
 }
 
-void EntityShader::loadShine(float s) {
+void EntityShader::loadShine(const float s) {
     this->loadFloat(getUniform("shine"), s);
 }
 
@@ -74,6 +74,6 @@ void EntityShader::loadTexture(const Texture &texture) {
     glBindTexture(GL_TEXTURE_2D, texture.textureId);
 }
 
-void EntityShader::loadTime(float t) {
+void EntityShader::loadTime(const float t) {
     this->loadFloat(getUniform("uTime"), t);
 }
