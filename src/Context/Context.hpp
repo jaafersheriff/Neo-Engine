@@ -8,22 +8,30 @@
 
 class World;
 class Context {
-   public:
-      Display display;
-      Mouse mouse;
-      Keyboard keyboard;
-      float runningTime;
+    public:
+        Display display;
+        Mouse mouse;
+        Keyboard keyboard;
 
-      // TODO : world type enum 
-      // TODO : Set world + default
-      // TODO : arg <optional value> booleans or something
+        /* Global window timer */
+        float runningTime;
 
-      int processArgs(int, char**);
-      void init();
-      World* createWorld(); 
-      void update();
-      bool shouldClose();
-      void cleanUp();
+        // TODO : world type enum 
+        // TODO : Set world + default
+        // TODO : arg <optional value> booleans or something
+
+        int processArgs(int, char**);
+        void init();
+        World* createWorld(); 
+        void update();
+        bool shouldClose();
+        void cleanUp();
+
+    private: 
+        /* FPS */
+        double fps = 0.0;
+        double lastTime; 
+        double nbFrames; 
 };
 
 #endif 

@@ -9,23 +9,18 @@
 #include "glm/glm.hpp"
 
 class Display {
-   public:
-      int width = 1280;
-      int height = 960;
-      double fps = 0;
+    public:
+        int width = 1280;
+        int height = 960;
 
-      GLFWwindow *window;     
-      glm::mat4 projectionMatrix;
+        GLFWwindow *window;
+        glm::mat4 projectionMatrix;
 
-      int init();
-      void setTitle(const char *);
-      int shouldClose();
-      void update();
-      void cleanUp();
-
-   private:
-      double lastTime;
-      double nbFrames;
+        int init();
+        void setTitle(const char *);
+        int shouldClose();
+        void update();
+        void cleanUp();
 };
 
 #endif
