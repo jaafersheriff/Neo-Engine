@@ -1,4 +1,5 @@
-// Abstract parent Renderer class
+/* Abstract parent Renderer class 
+ * Every feature will have its own derived Renderer */
 #pragma once
 #ifndef _RENDERER_HPP_
 #define _RENDERER_HPP_

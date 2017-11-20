@@ -1,27 +1,29 @@
 #include "Texture.hpp"
 
+/* Copy TextureData to GPU */
 void Texture::init(TextureData td) {
-    // Set active texture unit 0
+    /* Set active texture unit 0 */
     glActiveTexture(GL_TEXTURE0);
 
-    // Generate texture buffer object
+    /* Generate texture buffer object */
     glGenTextures(1, &textureId);
 
-    // Bind new texture buffer object to active texture
+    /* Bind new texture buffer object to active texture */
     glBindTexture(GL_TEXTURE_2D, textureId);
 
-    // Load texture data to cpu
+    /* Load texture data to GPU */
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, td.width, td.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, td.data);
 
-    // Generate image pyramid
+    /* Generate image pyramid */
     glGenerateMipmap(GL_TEXTURE_2D);
     
-    // Set filtering mode for magnification and minimification
+    /* Set filtering mode for magnification and minimification */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
+    /* LOD */
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.5f); 
 
-    // Unbind
+    /* Unbind */
     glBindTexture(GL_TEXTURE_2D, 0);
 }

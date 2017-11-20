@@ -1,3 +1,5 @@
+/* Entity Shader class derives Shader
+ * Maintains entity shader */
 #pragma once
 #ifndef _ENTITY_SHADER_HPP_
 #define _ENTITY_SHADER_HPP_
@@ -8,11 +10,14 @@
 
 class EntityShader : public Shader {
     public:
+        /* Define shader locations */
         EntityShader() : Shader("../src/Entity/EntityShader/entity_vertex_shader.glsl",
                                 "../src/Entity/EntityShader/entity_fragment_shader.glsl") { }
         
+        /* Init local shaders */
         bool init();
 
+        /* Load functions */
         void loadP(const glm::mat4 *);
         void loadM(const glm::mat4 *);
         void loadV(const glm::mat4 *);

@@ -1,4 +1,4 @@
-// Abstract parent World class
+/* Abstract parent World class */
 #pragma once
 #ifndef _WORLD_HPP_
 #define _WORLD_HPP_
@@ -9,14 +9,12 @@
 #include "Lights/Light.hpp"
 #include "Toolbox/Loader.hpp"
 
-#include <iostream>
 #include <string>
 #include <vector>
 
 class World {
     public:
-        /* Include world-specific data structure to be rendered 
-         */
+        /* Include world-specific data structure to be rendered  */
         World(const std::string n) : name(n) { }
         std::string name;
 
@@ -27,8 +25,7 @@ class World {
         virtual void init(Loader &) = 0;
 
         /* Activate feature renderers in MasterRenderer and pass in proper
-         * data structure 
-         */
+         * data structure */
         virtual void prepareRenderer(MasterRenderer &) = 0;
 
         /* Update features, call takeInput() */

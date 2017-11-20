@@ -1,7 +1,6 @@
-// Master Renderer class
-// Contains all subrenderers
-// World class activates different subrenderers
-// Master Renderer only renders active subrenderers 
+/* Master Renderer class
+ * World class activates needed subrenderers which are organized here
+ * Master Renderer only renders active subrenderers  */
 #pragma once
 #ifndef _MASTER_RENDERER_HPP_
 #define _MASTER_RENDERER_HPP_
@@ -16,16 +15,25 @@
 
 class World;
 class Renderer;
+
 class MasterRenderer {
     public:
+        /* Constructor */
         MasterRenderer();
         
+        /* List of active renderers */
         std::vector<Renderer *> renderers;
 
+        /* Activate entity renderer */
         void activateEntityRenderer(std::vector<Entity> *);
         
+        /* Init */
         void init();
+
+        /* Render function */
         void render(const Display &, const World *);
+
+        /* Wrap up */
         void cleanUp();
 };
 

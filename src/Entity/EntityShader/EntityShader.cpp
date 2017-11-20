@@ -1,36 +1,37 @@
 #include "EntityShader.hpp"
 
 bool EntityShader::init() {
+    /* Parent init */
     if (!Shader::init()) {
         return false;
     }
 
-    // Attributes
+    /* Add attributes */
     addAttribute("vertexPos");
     addAttribute("vertexNormal");
     addAttribute("vertexTexture");
 
-    // Matrix uniforms
+    /* Add matrix transforms */
     addUniform("P");
     addUniform("M");
     addUniform("V");
 
-    // Denote if a texture is used
+    /* Add texture info */
     addUniform("usesTexture");
     addUniform("textureImage");
 
-    // Material uniforms
+    /* Add material properties */
     addUniform("matAmbient");
     addUniform("matDiffuse");
     addUniform("matSpecular");
     addUniform("shine");
 
-    // Light
+    /* Add light */
     addUniform("lightPos");
     addUniform("lightCol");
     addUniform("lightAtt");
 
-    // Time
+    /* Add time */
     addUniform("uTime");
 
     return true;

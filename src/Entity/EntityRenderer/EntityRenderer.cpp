@@ -4,8 +4,6 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/string_cast.hpp"
 
-#include <iostream>
-
 void EntityRenderer::activate(std::vector<Entity> *ep) {
     this->entitiesPointer = ep;
     shader = new EntityShader;
@@ -25,17 +23,19 @@ void EntityRenderer::prepare() {
 void EntityRenderer::render(const World *world) {
     EntityShader *eShader = dynamic_cast<EntityShader*>(shader);
 
-    // There's only one light as of now
+    /* There's only one light in world */
     eShader->loadLight(world->light);
 
-    glm::mat4 M;
+    /* Loop through every entity */
     // TODO : batched render
+    glm::mat4 M;
     for(auto e : *entitiesPointer) {
+        /* If entity mesh doesn't contain geometry, skip it */
         if (!e.mesh || !e.mesh->vertBuf.size()) {
             continue;
         }
 
-        // Model matrix
+        /* Create model matrix for this entity */
         M = glm::mat4(1.f);
         M *= glm::translate(glm::mat4(1.f), e.position);
         M *= glm::rotate(glm::mat4(1.f), glm::radians(e.rotation.x), glm::vec3(1, 0, 0));
@@ -44,35 +44,36 @@ void EntityRenderer::render(const World *world) {
         M *= glm::scale(glm::mat4(1.f), e.scale);
         eShader->loadM(&M);
 
-        // Bind texture/material to shader
+        /* Prepare texture/material */
         prepareTexture(e.texture);
 
-        // Bind shape
+        /* Prepare mesh */
         prepareMesh(e.mesh);
 
-        // Draw shape
+        /* render */
         glDrawElements(GL_TRIANGLES, (int)e.mesh->eleBuf.size(), GL_UNSIGNED_INT, (const void *)0);
 
-        // Unbind shape
+        /* Clean up mesh */
         unPrepareMesh(e.mesh);
 
-        // Unbind texture
+        /* Clean up texture */
         unPrepareTexture(e.texture);
     }
 }
 
-// All Meshes are assumed to have valid vertices and element indices
-// For Entities we assume meshes to include normal data
+/* All Meshes are assumed to have valid vertices and element indices
+ * For Entities we assume meshes to include normal data */
 void EntityRenderer::prepareMesh(const Mesh *mesh) {
+    /* Bind mesh VAO */
     glBindVertexArray(mesh->vaoId);
     
-    // Bind position buffer
+    /* Bind vertex buffer VBO */
     int pos = shader->getAttribute("vertexPos");
     glEnableVertexAttribArray(pos);
     glBindBuffer(GL_ARRAY_BUFFER, mesh->vertBufId);
     glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
 
-    // Bind normal buffer
+    /* Bind normal buffer VBO */
     pos = shader->getAttribute("vertexNormal");
     if (pos != -1 && mesh->norBufId != 0) {
         glEnableVertexAttribArray(pos);
@@ -80,7 +81,7 @@ void EntityRenderer::prepareMesh(const Mesh *mesh) {
         glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
     }
 
-    // Bind texture buffer
+    /* Bind texture coordinate buffer VBO */
     pos = shader->getAttribute("vertexTexture");
     if (pos != -1 && mesh->texBufId != 0) {
         glEnableVertexAttribArray(pos);
@@ -88,14 +89,14 @@ void EntityRenderer::prepareMesh(const Mesh *mesh) {
         glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0);
     }
 
-    // Bind element buffer
+    /* Bind indices buffer VBO */
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId);
 }
 
 void EntityRenderer::prepareTexture(const ModelTexture &texture) {
     EntityShader *eShader = dynamic_cast<EntityShader*>(shader);
 
-    // Texture
+    /* Bind texture if it exists */
     if(texture.textureImage.textureId != 0) {
         eShader->loadUsesTexture(true);
         eShader->loadTexture(texture.textureImage);
@@ -104,7 +105,7 @@ void EntityRenderer::prepareTexture(const ModelTexture &texture) {
         eShader->loadUsesTexture(false);
     }
 
-    // Material
+    /* Bind materials */
     eShader->loadMaterial(texture.ambientColor, 
                           texture.diffuseColor, 
                           texture.specularColor);

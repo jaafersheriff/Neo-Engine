@@ -1,3 +1,5 @@
+/* Display class
+ * Maintains GLFW window */
 #pragma once
 #ifndef _DISPLAY_HPP_
 #define _DISPLAY_HPP_
@@ -8,18 +10,34 @@
 
 #include "glm/glm.hpp"
 
+#define DEFAULT_WIDTH 1280
+#define DEFAULT_HEIGHT 960
+
 class Display {
     public:
-        int width = 1280;
-        int height = 960;
+        /* Default window size */
+        int width = DEFAULT_WIDTH;
+        int height = DEFAULT_HEIGHT;
 
+        /* Reference to GLFW window */
         GLFWwindow *window;
+
+        // TODO : why does display contain reference to projection matrix?
         glm::mat4 projectionMatrix;
 
+        /* Init */
         int init();
+
+        /* Set window title */
         void setTitle(const char *);
+
+        /* Return if window should close */
         int shouldClose();
+
+        /* Update */
         void update();
+
+        /* Shut down */
         void cleanUp();
 };
 

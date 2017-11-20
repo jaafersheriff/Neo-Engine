@@ -1,26 +1,29 @@
-// Mesh class
+/* Mesh class
+ * Contains geometry for a singular mesh */
 #pragma once
 #ifndef _MESH_HPP_
 #define _MESH_HPP_
 
-#include <string>
-#include <vector>
+#include <vector>   /* vector */
 
 class Mesh {
     public:
+        /* Constructor */
         Mesh();
+
+        /* Copy data buffers to GPU */
         void init();
 
-        // Data buffers
+        /* Data buffers */
         std::vector<float> vertBuf;
         std::vector<float> norBuf;
         std::vector<float> texBuf;
         std::vector<unsigned int> eleBuf;
 
-        // VAO ID
+        /* VAO ID */
         unsigned int vaoId;
 
-        // VBO ID's
+        /* VBO IDs */
         unsigned int vertBufId;
         unsigned int norBufId;
         unsigned int texBufId;

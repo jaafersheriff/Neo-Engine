@@ -1,5 +1,5 @@
-// Texture class
-// Contains the OpenGL portion of textures
+/* Texture class
+ * Contains all texture information */
 #pragma once
 #ifndef _TEXTURE_HPP_
 #define _TEXTURE_HPP_
@@ -9,6 +9,8 @@
 
 class Texture {
     public:
+        /* Struct describing image
+         * Includes pointer to raw image data */
         struct TextureData {
             int width;
             int height;
@@ -16,7 +18,10 @@ class Texture {
             unsigned char *data;
         };
         
+        /* GL texture ID */
         GLuint textureId = 0;
+
+        /* Copy TextureData to GPU */
         void init(TextureData);
 };
 

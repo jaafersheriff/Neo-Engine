@@ -1,3 +1,4 @@
+/* General point light class */
 #pragma once
 #ifndef _LIGHT_HPP_
 #define _LIGHT_HPP_
@@ -6,10 +7,12 @@
 
 class Light {
     public:
+        /* Point light attributes */
         glm::vec3 position;
         glm::vec3 color;
         glm::vec3 attenuation;
 
+        /* Constructors */
         Light(const glm::vec3 position, const glm::vec3 color, const glm::vec3 attenuation) {
             this->position = position;
             this->color = color;

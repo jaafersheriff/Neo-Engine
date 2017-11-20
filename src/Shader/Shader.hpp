@@ -1,4 +1,4 @@
-// Abstract parent Shader class
+/* Abstract parent Shader class */
 #pragma once
 #ifndef _SHADER_HPP_
 #define _SHADER_HPP_
@@ -14,8 +14,7 @@
 class Shader {
     public:
         /* Empty constructor
-         * Only used to set GLSL shader names
-         */
+         * Only used to set GLSL shader names */
         Shader(std::string v = "", std::string f = "") : vShaderName(v), fShaderName(f) { }
 
         GLuint pid = 0;
@@ -23,8 +22,7 @@ class Shader {
         GLint fShaderId;
 
         /* Call parent Shader::init()
-         * Add uniforms and attributes to GLSL shaders
-         */
+         * Add uniforms and attributes to GLSL shaders */
         virtual bool init();
 
         /* Utility functions */
