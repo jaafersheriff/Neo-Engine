@@ -5,9 +5,9 @@
 #include <GLFW/glfw3.h>
 
 class Keyboard {
-   public: 
-      GLFWwindow *window;
-      bool isKeyPressed(const char) const;
+    public: 
+        GLFWwindow *window;
+        bool isKeyPressed(const char) const;
 };
 
 #endif

@@ -10,21 +10,21 @@
 #include "Model/Texture.hpp"
 
 #include <string>
-#include <map>    
+#include <map>
 #include <vector>
 
 class Mesh;
 class Loader {
-   public:
-      Texture::TextureData getTextureData(const std::string);
-      Texture loadTexture(const std::string);
-      Mesh* loadObjMesh(const std::string);
-      
-   private:
-      void resize(Mesh*);
-      // Collections that prevent loading textures/meshes more than once 
-      std::map<std::string, GLint> textures;
-      std::map<std::string, Mesh*> meshes;
+    public:
+        Texture::TextureData getTextureData(const std::string);
+        Texture loadTexture(const std::string);
+        Mesh* loadObjMesh(const std::string);
+        
+    private:
+        void resize(Mesh*);
+        // Collections that prevent loading textures/meshes more than once 
+        std::map<std::string, GLint> textures;
+        std::map<std::string, Mesh*> meshes;
 };
 
 #endif

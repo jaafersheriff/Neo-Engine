@@ -8,16 +8,16 @@
 #include <GL/glew.h>
 
 class Texture {
-   public:
-      struct TextureData {
-         int width;
-         int height;
-         int components;
-         unsigned char *data;
-      };
-      
-      GLuint textureId = 0;
-      void init(TextureData);
+    public:
+        struct TextureData {
+            int width;
+            int height;
+            int components;
+            unsigned char *data;
+        };
+        
+        GLuint textureId = 0;
+        void init(TextureData);
 };
 
 #endif

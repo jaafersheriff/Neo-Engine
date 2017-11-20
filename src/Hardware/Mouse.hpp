@@ -5,13 +5,13 @@
 #include <GLFW/glfw3.h>
 
 class Mouse {
-   public:
-      GLFWwindow *window;
-      double xPos, yPos;
-      double dx, dy;
+    public:
+        GLFWwindow *window;
+        double xPos, yPos;
+        double dx, dy;
 
-      void update();
-      bool isButtonPressed(const int);
+        void update();
+        bool isButtonPressed(const int);
 };
 
 #endif

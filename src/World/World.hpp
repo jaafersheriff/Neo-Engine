@@ -14,31 +14,31 @@
 #include <vector>
 
 class World {
-   public:
-      /* Include world-specific data structure to be rendered 
-       */
-      World(const std::string n) : name(n) { }
-      std::string name;
+    public:
+        /* Include world-specific data structure to be rendered 
+         */
+        World(const std::string n) : name(n) { }
+        std::string name;
 
-      Camera camera;
-      Light light;
+        Camera camera;
+        Light light;
 
-      /* Create objects, initialize rendering data structure */
-      virtual void init(Loader &) = 0;
+        /* Create objects, initialize rendering data structure */
+        virtual void init(Loader &) = 0;
 
-      /* Activate feature renderers in MasterRenderer and pass in proper
-       * data structure 
-       */
-      virtual void prepareRenderer(MasterRenderer &) = 0;
+        /* Activate feature renderers in MasterRenderer and pass in proper
+         * data structure 
+         */
+        virtual void prepareRenderer(MasterRenderer &) = 0;
 
-      /* Update features, call takeInput() */
-      virtual void update(Context &) = 0;
+        /* Update features, call takeInput() */
+        virtual void update(Context &) = 0;
 
-      /* Any necessary clean up */
-      virtual void cleanUp() = 0;
+        /* Any necessary clean up */
+        virtual void cleanUp() = 0;
 
-   private:
-      virtual void takeInput(Mouse &, Keyboard &) = 0;
+    private:
+        virtual void takeInput(Mouse &, Keyboard &) = 0;
 };
 
 #endif

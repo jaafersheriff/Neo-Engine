@@ -10,19 +10,19 @@
 #include <vector>
 
 class EntityRenderer : public Renderer {
-   public:
-      std::vector<Entity> *entitiesPointer;
+    public:
+        std::vector<Entity> *entitiesPointer;
 
-      void activate(std::vector<Entity> *);
-      void prepare();
-      void setGlobals(const glm::mat4*, const glm::mat4*);
-      void render(World *);
-      void cleanUp();
-   private:
-      void prepareMesh(Mesh *);
-      void prepareTexture(ModelTexture &);
-      void unPrepareMesh(Mesh *);
-      void unPrepareTexture(ModelTexture &);
+        void activate(std::vector<Entity> *);
+        void prepare();
+        void setGlobals(const glm::mat4*, const glm::mat4*);
+        void render(World *);
+        void cleanUp();
+    private:
+        void prepareMesh(Mesh *);
+        void prepareTexture(ModelTexture &);
+        void unPrepareMesh(Mesh *);
+        void unPrepareTexture(ModelTexture &);
 };
 
 #endif

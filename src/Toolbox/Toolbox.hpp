@@ -7,23 +7,23 @@
 
 class Toolbox {
 public:
-   static constexpr double PI = 3.14159265359;
+    static constexpr double PI = 3.14159265359;
 
-   static inline float genRandom() {
-      return rand() / (float) RAND_MAX;
-   }
+    static inline float genRandom() {
+        return rand() / (float) RAND_MAX;
+    }
 
-   static inline float genRandom(float min, float max) {
-      return ((float(rand()) / float(RAND_MAX)) * (max - min)) + min;
-   }
+    static inline float genRandom(float min, float max) {
+        return ((float(rand()) / float(RAND_MAX)) * (max - min)) + min;
+    }
 
-   static inline glm::vec3 genRandomVec3() {
-      return glm::vec3(genRandom(), genRandom(), genRandom());
-   }
-   
-   static inline glm::vec3 genRandomVec3(float min, float max) {
-      return glm::vec3(genRandom(min, max), genRandom(min, max), genRandom(min, max));
-   }
+    static inline glm::vec3 genRandomVec3() {
+        return glm::vec3(genRandom(), genRandom(), genRandom());
+    }
+    
+    static inline glm::vec3 genRandomVec3(float min, float max) {
+        return glm::vec3(genRandom(min, max), genRandom(min, max), genRandom(min, max));
+    }
 };
 
 

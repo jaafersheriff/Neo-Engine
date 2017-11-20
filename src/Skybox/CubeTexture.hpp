@@ -6,7 +6,7 @@
 #include "Model/Texture.hpp"
 
 class CubeTexture : public Texture {
-   void init(Loader &, const std::string, const std::string, const std::string, const std::string, const std::string, const std::string);
+    void init(Loader &, const std::string, const std::string, const std::string, const std::string, const std::string, const std::string);
 };
 
 #endif

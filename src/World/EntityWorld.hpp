@@ -8,23 +8,23 @@
 
 class EntityWorld : public World {
 public:
-      // Render targets
-      std::vector<Entity> entities;
-      //Skybox *sb;
+        // Render targets
+        std::vector<Entity> entities;
+        //Skybox *sb;
 
-      // World-specific members
-      bool isPaused = false;
-      float uTime = 0.f;
+        // World-specific members
+        bool isPaused = false;
+        float uTime = 0.f;
 
-      // Constructors
-      EntityWorld() : World("Entity World") { }
+        // Constructors
+        EntityWorld() : World("Entity World") { }
 
-      // Derived functions
-      void init(Loader &);
-      void prepareRenderer(MasterRenderer &);
-      void update(Context &);
-      void takeInput(Mouse &, Keyboard &);
-      void cleanUp();
+        // Derived functions
+        void init(Loader &);
+        void prepareRenderer(MasterRenderer &);
+        void update(Context &);
+        void takeInput(Mouse &, Keyboard &);
+        void cleanUp();
 };
 
 #endif

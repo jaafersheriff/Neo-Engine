@@ -17,16 +17,16 @@
 class World;
 class Renderer;
 class MasterRenderer {
-   public:
-      MasterRenderer();
-      
-      std::vector<Renderer *> renderers;
+    public:
+        MasterRenderer();
+        
+        std::vector<Renderer *> renderers;
 
-      void activateEntityRenderer(std::vector<Entity> *);
-      
-      void init();
-      void render(const Display &, World *);
-      void cleanUp();
+        void activateEntityRenderer(std::vector<Entity> *);
+        
+        void init();
+        void render(const Display &, World *);
+        void cleanUp();
 };
 
 #endif

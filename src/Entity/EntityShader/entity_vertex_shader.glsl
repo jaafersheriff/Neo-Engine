@@ -15,10 +15,10 @@ out vec4 viewDir;
 out vec2 pass_textureCoords;
 
 void main() {
-   worldPos = M * vertexPos;
-   gl_Position = P * V * worldPos;
+    worldPos = M * vertexPos;
+    gl_Position = P * V * worldPos;
 
-   fragNormal = vec3(M * vec4(vertexNormal, 0.0));
-   viewDir = (inverse(V) * vec4(0.0, 0.0, 0.0, 1.0)) - worldPos;
-   pass_textureCoords = vertexTexture;
+    fragNormal = vec3(M * vec4(vertexNormal, 0.0));
+    viewDir = (inverse(V) * vec4(0.0, 0.0, 0.0, 1.0)) - worldPos;
+    pass_textureCoords = vertexTexture;
 }
