@@ -35,6 +35,7 @@ int main(int argc, char **argv) {
     world = context.createWorld();
 
     // Prep MR for rendering of a specific world class
+    mr.init();
     world->init(loader);
     world->prepareRenderer(mr);
 

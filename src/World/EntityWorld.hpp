@@ -1,3 +1,5 @@
+/* Basic world for playing with entities
+ * Derives World interface */
 #pragma once
 #ifndef _ENTITY_WORLD_HPP_
 #define _ENTITY_WORLD_HPP_
@@ -8,18 +10,17 @@
 
 class EntityWorld : public World {
 public:
-        // Render targets
+        /* Render targets */
         std::vector<Entity> entities;
-        //Skybox *sb;
+        // TODO : Skybox *sb;
 
-        // World-specific members
+        /* World-specific members */
         bool isPaused = false;
-        float uTime = 0.f;
 
-        // Constructors
+        /* Constructor */
         EntityWorld() : World("Entity World") { }
 
-        // Derived functions
+        /* Derived functions */
         void init(Loader &);
         void prepareRenderer(MasterRenderer &);
         void update(Context &);

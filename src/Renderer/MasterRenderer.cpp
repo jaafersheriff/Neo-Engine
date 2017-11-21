@@ -14,12 +14,6 @@ MasterRenderer::MasterRenderer() {
 
 /* Master render function */
 void MasterRenderer::render(const Display &display, const World *world) {
-    /* State setting */
-    // TODO : why call this every frame? 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
     /* Reset rendering display */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -40,6 +34,12 @@ void MasterRenderer::render(const Display &display, const World *world) {
         /* Unbind subrenderer's shader */
         (*renderer)->shader->unbind();
     }
+}
+
+void MasterRenderer::init() {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 }
 
 void MasterRenderer::activateEntityRenderer(std::vector<Entity> *entities) {
