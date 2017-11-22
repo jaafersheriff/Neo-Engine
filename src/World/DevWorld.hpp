@@ -1,14 +1,14 @@
-/* Basic world for playing with entities
+/* Basic world for general development
  * Derives World interface */
 #pragma once
-#ifndef _ENTITY_WORLD_HPP_
-#define _ENTITY_WORLD_HPP_
+#ifndef _DEV_WORLD_HPP_
+#define _DEV_WORLD_HPP_
 
 #include "World/World.hpp"
 #include "Entity/Entity.hpp"
 #include "Toolbox/Toolbox.hpp"
 
-class EntityWorld : public World {
+class DevWorld : public World {
 public:
         /* Render targets */
         std::vector<Entity> entities;
@@ -18,7 +18,7 @@ public:
         bool isPaused = false;
 
         /* Constructor */
-        EntityWorld() : World("Entity World") { }
+        DevWorld() : World("Entity World") { }
 
         /* Derived functions */
         void init(Loader &);

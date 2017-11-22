@@ -1,8 +1,12 @@
-#include "EntityWorld.hpp"
+#include "DevWorld.hpp"
 
-void EntityWorld::init(Loader &loader) {
-    Entity e = Entity(loader.loadObjMesh("../resources/bunny.obj"), glm::vec3(5.f, 0.f, 0.f), glm::vec3(0), glm::vec3(10.f, 10, 10.f));
-    e.texture.diffuseColor = glm::vec3(0.f, 0.f, 1.f);
+void DevWorld::init(Loader &loader) {
+    // Load Meshes/Textures
+    Mesh *bunnyMesh = loader.loadObjMesh("../resources/bunny.obj");
+
+    // Create entities
+    Entity e = Entity(bunnyMesh, glm::vec3(5.f, 0.f, 0.f), glm::vec3(0), glm::vec3(10.f, 10, 10.f));
+    e.texture.diffuseColor = glm::vec3(2.f, 0.f, 0.f);
     entities.push_back(e);
 
     // Set up light
@@ -11,11 +15,11 @@ void EntityWorld::init(Loader &loader) {
     light.attenuation = glm::vec3(1.f, 0.0f, 0.0f);
 }
 
-void EntityWorld::prepareRenderer(MasterRenderer &mr) {
+void DevWorld::prepareRenderer(MasterRenderer &mr) {
     mr.activateEntityRenderer(&entities);
 }
 
-void EntityWorld::update(Context &ctx) {
+void DevWorld::update(Context &ctx) {
     takeInput(ctx.mouse, ctx.keyboard);
     if (isPaused) {
         return;
@@ -28,7 +32,7 @@ void EntityWorld::update(Context &ctx) {
     }
 }
 
-void EntityWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
+void DevWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
     if (keyboard.isKeyPressed(' ')) {
         isPaused = !isPaused;
     }
@@ -56,8 +60,11 @@ void EntityWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
     if (keyboard.isKeyPressed('r')) {
         camera.moveUp();
     }
+    if (keyboard.isKeyPressed('~')) {
+        // TODO : enable/disable GUI
+    }
 }
 
-void EntityWorld::cleanUp() {
+void DevWorld::cleanUp() {
     
 }

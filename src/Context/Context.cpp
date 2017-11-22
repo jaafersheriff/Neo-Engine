@@ -1,6 +1,6 @@
 #include "Context.hpp"
 #include "World/World.hpp"
-#include "World/EntityWorld.hpp"
+#include "World/DevWorld.hpp"
 
 #include <stdlib.h>  /* atoi */
 #include <string.h>  /* strcmp */
@@ -38,7 +38,7 @@ void Context::init() {
 World* Context::createWorld() {
     /* Create world */
     // TODO: create world based on enum
-    World *world = new EntityWorld;
+    World *world = new DevWorld;
 
     /* Set window name to application name */
     display.setTitle(world->name.c_str());

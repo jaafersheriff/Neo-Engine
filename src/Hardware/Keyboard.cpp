@@ -1,6 +1,5 @@
 #include "Keyboard.hpp"
 
-/* Only supports 0-9 and a-z */
 bool Keyboard::isKeyPressed(const char key) const {
     /* Numbers */
     if (key >= '0' && key <= '9') { 
@@ -10,9 +9,13 @@ bool Keyboard::isKeyPressed(const char key) const {
     else if (key >= 'a' && key <= 'z') {
         return glfwGetKey(window, GLFW_KEY_A + key - 'a') == GLFW_PRESS;
     }
-    /* Other - space */
+    /* Space */
     else if (key == ' ') {
         return glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
+    }
+    /* Tilda */
+    else if (key == '~') {
+        return glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS;
     }
  
     return false;
