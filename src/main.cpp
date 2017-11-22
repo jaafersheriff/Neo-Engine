@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
         std::cerr << "Invalid args " << std::endl;
         std::cerr << "Usage: ./Neo.exe" << std::endl;
         std::cerr <<"\t-s <window width> <window height>" << std::endl;
+        return 1;
     }
 
     // Init display

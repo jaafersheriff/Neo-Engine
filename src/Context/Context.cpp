@@ -2,21 +2,24 @@
 #include "World/World.hpp"
 #include "World/DevWorld.hpp"
 
-#include <stdlib.h>  /* atoi */
-#include <string.h>  /* strcmp */
-#include <iostream>  /* cout */
+#include <string.h>  /* strcmp, strlen */
+#include <iostream>  /* cout, stoi */
 
-int Context::processArgs(int argc, char **argv) {
+#define BASE_DECIMAL 10
 
     for (int i = 0; i < argc; i++) {
         char *arg = argv[i];
+
         /* Process window size */
         if (!strcmp(arg, "-s")) {
+            /* Catch invalid number of args */
             if (i > argc - 2) {
                 return 1;
             }
-            display.width = atoi(argv[++i]);
-            display.height = atoi(argv[++i]);
+            /* Load size 
+             * std::stoi will catch invalid arguments */
+            display.width = std::stoi(argv[++i], nullptr);
+            display.height = std::stoi(argv[++i], nullptr); 
             std::cout << "[" << display.width << ", " << display.height << "]" << std::endl;
         }
     }

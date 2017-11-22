@@ -9,13 +9,6 @@ static void error_callback(int error, const char *desc) {
     std::cerr << "Error: " << desc << std::endl;
 }
 
-/* GLFW resize callback */
-static void resize_callback(GLFWwindow *window, int width, int height) {
-    glViewport(0, 0, width, height);
-    std::cout << "Resizing: [" << width << ", " << height << "]" << std::endl;
-}
-
-
 int Display::init() {
     /* Set error callback */
     glfwSetErrorCallback(error_callback);
@@ -61,9 +54,6 @@ int Display::init() {
     /* Vsync */
     glfwSwapInterval(1);
 
-    /* Resize callback */
-    glfwSetFramebufferSizeCallback(window, resize_callback);
-
     return 0;
 }
 
@@ -90,7 +80,8 @@ void Display::update() {
 }
 
 int Display::shouldClose() { 
-    return glfwWindowShouldClose(window);
+    return glfwWindowShouldClose(window) || 
+           glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
 }
 
 void Display::cleanUp() {
