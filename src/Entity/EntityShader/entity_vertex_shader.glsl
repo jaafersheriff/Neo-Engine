@@ -36,6 +36,6 @@ void main() {
     diffuseContrib = max(dot(L, N), matAmbient) * lightCol / attFactor;
     specularContrib = pow(max(dot(H, N), 0), shine) * lightCol / attFactor;
     pass_textureCoords = vertexTexture;
-    
+
     gl_Position = P * V * worldPos;
 }

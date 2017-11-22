@@ -8,7 +8,13 @@
 void Context::printUsage() {
     std::cerr << "Invalid args" << std::endl;
     std::cerr << "Usage: ./Neo.exe" << std::endl;
+
     std::cerr << "\t-s <window width> <window height>" << std::endl;
+
+    std::cerr << "\t-w <world_name>" << std::endl;
+    std::cerr << "\t\tDEV_WORLD" << std::endl;
+    // TODO : add more worlds
+
 }
 
 int Context::processArgs(int argc, char **argv) {
@@ -33,9 +39,26 @@ int Context::processArgs(int argc, char **argv) {
             }
             std::cout << "[" << display.width << ", " << display.height << "]" << std::endl;
         }
+        /* Store chosen world */
+        if (!strcmp(argv[i], "-w")) {
+            /* Catch invalid number of args */
+            if (++i >= argc) {
+                printUsage();
+                return 1;
+            }
+
+            /* Dev world */
+            if(!strcmp(argv[i], "DEV_WORLD")) {
+                selected_world = dev_world;
+            }
+            // TODO : add more worlds
+            /* Invalid world chosen */
+            else {
+                printUsage();
+                return 1;
+            }
+        }
     }
-    // TODO : set world emum
-    // TODO : catch errors along the way 
 
     return 0;
 }

@@ -57,10 +57,5 @@ void MasterRenderer::cleanUp() {
 
 void MasterRenderer::toggleWireFrameMode() {
     wireFrame = !wireFrame;
-    if (wireFrame) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
-    else {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
+    glPolygonMode(GL_FRONT_AND_BACK, wireFrame ? GL_LINE : GL_FILL);
 }
