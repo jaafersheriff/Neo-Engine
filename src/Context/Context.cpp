@@ -5,8 +5,7 @@
 #include <string.h>  /* strcmp, strlen */
 #include <iostream>  /* cout, stoi */
 
-#define BASE_DECIMAL 10
-
+int Context::processArgs(int argc, char **argv) {
     for (int i = 0; i < argc; i++) {
         char *arg = argv[i];
 

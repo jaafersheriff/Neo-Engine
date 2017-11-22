@@ -35,6 +35,10 @@ class MasterRenderer {
 
         /* Wrap up */
         void cleanUp();
+
+        /* Utility functions */
+        bool wireFrame = false;
+        void toggleWireFrameMode();
 };
 
 #endif

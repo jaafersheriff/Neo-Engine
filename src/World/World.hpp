@@ -18,15 +18,19 @@ class World {
         World(const std::string n) : name(n) { }
         std::string name;
 
+        /* World objects */
         Camera camera;
         Light light;
+
+        /* Reference to MasterRenderer for any world-specific rendering needs */
+        MasterRenderer *mr;
 
         /* Create objects, initialize rendering data structure */
         virtual void init(Loader &) = 0;
 
         /* Activate feature renderers in MasterRenderer and pass in proper
          * data structure */
-        virtual void prepareRenderer(MasterRenderer &) = 0;
+        virtual void prepareRenderer(MasterRenderer *) = 0;
 
         /* Update features, call takeInput() */
         virtual void update(Context &) = 0;

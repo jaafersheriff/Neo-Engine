@@ -16,13 +16,14 @@ public:
 
         /* World-specific members */
         bool isPaused = false;
+        bool wireFrame = false;
 
         /* Constructor */
         DevWorld() : World("Entity World") { }
 
         /* Derived functions */
         void init(Loader &);
-        void prepareRenderer(MasterRenderer &);
+        void prepareRenderer(MasterRenderer *);
         void update(Context &);
         void takeInput(Mouse &, Keyboard &);
         void cleanUp();

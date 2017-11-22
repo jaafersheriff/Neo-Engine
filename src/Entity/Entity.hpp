@@ -24,6 +24,7 @@ class Entity {
         Entity(const glm::vec3, const glm::vec3, const glm::vec3);
         Entity(Mesh *, const glm::vec3, const glm::vec3, const glm::vec3);
         Entity(Mesh *, ModelTexture, const glm::vec3, const glm::vec3, const glm::vec3);
+        Entity(Mesh *, Texture, const glm::vec3, const glm::vec3, const glm::vec3);
 
         /* Update */
         virtual void update();

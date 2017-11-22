@@ -2,21 +2,23 @@
 
 void DevWorld::init(Loader &loader) {
     // Load Meshes/Textures
-    Mesh *bunnyMesh = loader.loadObjMesh("../resources/bunny.obj");
+    Mesh *mesh = loader.loadObjMesh("../resources/bunny.obj");
+    Texture texture = loader.loadTexture("../resources/falcon.jpg");
 
     // Create entities
-    Entity e = Entity(bunnyMesh, glm::vec3(5.f, 0.f, 0.f), glm::vec3(0), glm::vec3(10.f, 10, 10.f));
+    Entity e = Entity(mesh, texture, glm::vec3(5.f, 0.f, 0.f), glm::vec3(0), glm::vec3(10.f, 10, 10.f));
     e.texture.diffuseColor = glm::vec3(2.f, 0.f, 0.f);
     entities.push_back(e);
 
     // Set up light
-    light.position = glm::vec3(100, 100, 0);
+    light.position = glm::vec3(-1000, 1000, 1000);
     light.color = glm::vec3(1.f);
     light.attenuation = glm::vec3(1.f, 0.0f, 0.0f);
 }
 
-void DevWorld::prepareRenderer(MasterRenderer &mr) {
-    mr.activateEntityRenderer(&entities);
+void DevWorld::prepareRenderer(MasterRenderer *mr) {
+    this->mr = mr;
+    mr->activateEntityRenderer(&entities);
 }
 
 void DevWorld::update(Context &ctx) {
@@ -59,6 +61,10 @@ void DevWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
     }
     if (keyboard.isKeyPressed('r')) {
         camera.moveUp();
+    }
+    // TODO : put this in the GUI
+    if (keyboard.isKeyPressed('m')) {
+        mr->toggleWireFrameMode();
     }
     if (keyboard.isKeyPressed('~')) {
         // TODO : enable/disable GUI
