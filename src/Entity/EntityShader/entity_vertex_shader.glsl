@@ -26,9 +26,9 @@ void main() {
     vec4 worldPos = M * vertexPos;
     vec3 lightDir = lightPos - worldPos.xyz;
     vec3 L = normalize(lightDir);
-    vec3 V = normalize(vec3((inverse(V) * vec4(0.0, 0.0, 0.0, 1.0)) - worldPos));
+    vec3 Vi = normalize(vec3((inverse(V) * vec4(0.0, 0.0, 0.0, 1.0)) - worldPos));
     vec3 N = normalize(vec3(M * vec4(vertexNormal, 0.0)));
-    vec3 H = (L + V) / 2;
+    vec3 H = (L + Vi) / 2;
     
     float lightDistance = length(lightDir);
     float attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;

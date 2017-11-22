@@ -13,11 +13,11 @@ class World;
 class Context {
     public:
         /* Enum for world types */
-        enum worlds {
-            dev_world
+        enum WorldTypes {
+            DEV_WORLD_TYPE
         };
         /* Default world type is dev world */
-        worlds selected_world = dev_world;
+        WorldTypes selectedWorld = DEV_WORLD_TYPE;
 
         /* References */
         Display display;

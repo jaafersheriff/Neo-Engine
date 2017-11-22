@@ -49,9 +49,8 @@ int Context::processArgs(int argc, char **argv) {
 
             /* Dev world */
             if(!strcmp(argv[i], "DEV_WORLD")) {
-                selected_world = dev_world;
+                selectedWorld = DEV_WORLD_TYPE;
             }
-            // TODO : add more worlds
             /* Invalid world chosen */
             else {
                 printUsage();
@@ -74,8 +73,16 @@ void Context::init() {
 
 World* Context::createWorld() {
     /* Create world */
-    // TODO: create world based on enum
-    World *world = new DevWorld;
+    World *world;
+    switch(selectedWorld) {
+        case(DEV_WORLD_TYPE):
+            world = new DevWorld;
+            break;
+        /* Error state -- we should never get here */
+        default:
+            return nullptr;
+            break;
+    }
 
     /* Set window name to application name */
     display.setTitle(world->name.c_str());

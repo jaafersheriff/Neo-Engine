@@ -22,17 +22,17 @@ void MasterRenderer::render(const Display &display, const World *world) {
     const glm::mat4 v = glm::lookAt(world->camera.position, world->camera.lookAt, glm::vec3(0, 1, 0));
 
     /* Loop through active subrenderers */
-    for (auto renderer = renderers.begin(); renderer != renderers.end(); renderer++) {
+    for (auto &renderer : renderers) {
         /* Bind subrenderer's shader */
-        (*renderer)->shader->bind();
+        renderer->shader->bind();
         /* Do any subrenderer-specific prep */
-        (*renderer)->prepare();
+        renderer->prepare();
         /* Set global params */
-        (*renderer)->setGlobals(&display.projectionMatrix, &v);
+        renderer->setGlobals(&display.projectionMatrix, &v);
         /* Subrenderer render */
-        (*renderer)->render(world);
+        renderer->render(world);
         /* Unbind subrenderer's shader */
-        (*renderer)->shader->unbind();
+        renderer->shader->unbind();
     }
 }
 

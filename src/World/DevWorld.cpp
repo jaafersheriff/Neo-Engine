@@ -3,7 +3,7 @@
 void DevWorld::init(Loader &loader) {
     // Create entities
     Entity e = Entity(loader.loadObjMesh("../resources/bunny.obj"),
-                      glm::vec3(5.f, 0.f, 0.f), 
+                      glm::vec3(15.f, 0.f, 0.f), 
                       glm::vec3(0), 
                       glm::vec3(10.f, 10, 10.f));
     e.texture.diffuseColor = glm::vec3(0.77f, 0.1f, 1.f);
@@ -22,11 +22,11 @@ void DevWorld::prepareRenderer(MasterRenderer *mr) {
 
 void DevWorld::update(Context &ctx) {
     takeInput(ctx.mouse, ctx.keyboard);
+    camera.update();
+    
     if (isPaused) {
         return;
     }
-
-    camera.update();
 
     for (unsigned int i = 0; i < entities.size(); i++) {
         entities[i].update();
@@ -36,9 +36,6 @@ void DevWorld::update(Context &ctx) {
 void DevWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
     if (keyboard.isKeyPressed(' ')) {
         isPaused = !isPaused;
-    }
-    if (isPaused) {
-        return;
     }
     if (mouse.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
         camera.updateLookAt(mouse.dx, mouse.dy);

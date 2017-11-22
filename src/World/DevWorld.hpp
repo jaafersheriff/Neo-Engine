@@ -16,7 +16,6 @@ public:
 
         /* World-specific members */
         bool isPaused = false;
-        bool wireFrame = false;
 
         /* Constructor */
         DevWorld() : World("Entity World") { }
