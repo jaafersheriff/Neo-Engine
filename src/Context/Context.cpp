@@ -5,20 +5,32 @@
 #include <string.h>  /* strcmp, strlen */
 #include <iostream>  /* cout, stoi */
 
+void Context::printUsage() {
+    std::cerr << "Invalid args" << std::endl;
+    std::cerr << "Usage: ./Neo.exe" << std::endl;
+    std::cerr << "\t-s <window width> <window height>" << std::endl;
+}
+
 int Context::processArgs(int argc, char **argv) {
     for (int i = 0; i < argc; i++) {
-        char *arg = argv[i];
 
         /* Process window size */
-        if (!strcmp(arg, "-s")) {
+        if (!strcmp(argv[i], "-s")) {
             /* Catch invalid number of args */
-            if (i > argc - 2) {
+            if (i + 2 >= argc) {
+                printUsage();
                 return 1;
             }
             /* Load size 
              * std::stoi will catch invalid arguments */
+            // TODO : use strtol and catch invalid args myself so I can use printUsage()
             display.width = std::stoi(argv[++i], nullptr);
             display.height = std::stoi(argv[++i], nullptr); 
+
+            if (display.width <= 0 || display.height <= 0) {
+                printUsage();
+                return 1;
+            }
             std::cout << "[" << display.width << ", " << display.height << "]" << std::endl;
         }
     }

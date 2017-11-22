@@ -1,13 +1,12 @@
 #include "DevWorld.hpp"
 
 void DevWorld::init(Loader &loader) {
-    // Load Meshes/Textures
-    Mesh *mesh = loader.loadObjMesh("../resources/bunny.obj");
-    Texture texture = loader.loadTexture("../resources/falcon.jpg");
-
     // Create entities
-    Entity e = Entity(mesh, texture, glm::vec3(5.f, 0.f, 0.f), glm::vec3(0), glm::vec3(10.f, 10, 10.f));
-    e.texture.diffuseColor = glm::vec3(2.f, 0.f, 0.f);
+    Entity e = Entity(loader.loadObjMesh("../resources/bunny.obj"),
+                      glm::vec3(5.f, 0.f, 0.f), 
+                      glm::vec3(0), 
+                      glm::vec3(10.f, 10, 10.f));
+    e.texture.diffuseColor = glm::vec3(0.77f, 0.1f, 1.f);
     entities.push_back(e);
 
     // Set up light

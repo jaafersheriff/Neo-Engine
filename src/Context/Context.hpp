@@ -47,6 +47,9 @@ class Context {
         double fps = 0.0;
         double lastTime; 
         double nbFrames; 
+        
+        /* Utility functions */
+        void printUsage();
 };
 
 #endif 

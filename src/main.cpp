@@ -13,16 +13,13 @@
 int main(int argc, char **argv) {
     srand(time(0));
     
-    Context context;    // GLFWwindow, Mouse, Keyboard
-    Loader loader;      // Load .obj models and .png textures
-    MasterRenderer mr;  // Renderer
-    World *world;       // Application - collection of features
+    Context context;    /* GLFWwindow, Mouse, Keyboard */
+    Loader loader;      /* Load .obj models and .png textures */
+    MasterRenderer mr;  /* Renderer */
+    World *world;       /* Application - collection of features */
 
-    // Process args
+    /* Process args */
     if (context.processArgs(argc, argv)) {
-        std::cerr << "Invalid args " << std::endl;
-        std::cerr << "Usage: ./Neo.exe" << std::endl;
-        std::cerr <<"\t-s <window width> <window height>" << std::endl;
         return 1;
     }
 
@@ -38,7 +35,7 @@ int main(int argc, char **argv) {
     // Prep MR for rendering of a specific world class
     mr.init();
     world->init(loader);
-    world->prepareRenderer(mr);
+    world->prepareRenderer(&mr);
 
     // Main loop
     while(!context.shouldClose()) {
