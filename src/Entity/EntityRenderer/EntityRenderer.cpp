@@ -1,7 +1,6 @@
 #include "EntityRenderer.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtx/string_cast.hpp"
 
 void EntityRenderer::activate(std::vector<Entity> *ep) {
     this->entitiesPointer = ep;
@@ -99,6 +98,8 @@ void EntityRenderer::prepareTexture(const ModelTexture &texture) {
     if(texture.textureImage.textureId != 0) {
         eShader->loadUsesTexture(true);
         eShader->loadTexture(texture.textureImage);
+        glActiveTexture(GL_TEXTURE0 + texture.textureImage.textureId);
+        glBindTexture(GL_TEXTURE_2D, texture.textureImage.textureId);
     }
     else {
         eShader->loadUsesTexture(false);

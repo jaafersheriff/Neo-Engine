@@ -1,5 +1,5 @@
 /* Texture class
- * Contains all texture information */
+ * Contains GL texture ID */
 #pragma once
 #ifndef _TEXTURE_HPP_
 #define _TEXTURE_HPP_
@@ -22,7 +22,7 @@ class Texture {
         GLuint textureId = 0;
 
         /* Copy TextureData to GPU */
-        void init(TextureData);
+        void init(const TextureData);
 };
 
 #endif

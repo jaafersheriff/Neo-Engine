@@ -70,9 +70,7 @@ void EntityShader::loadUsesTexture(const bool b) {
 }
 
 void EntityShader::loadTexture(const Texture &texture) {
-    glActiveTexture(GL_TEXTURE0 + texture.textureId);
-    glUniform1i(getUniform("textureImage"), texture.textureId);
-    glBindTexture(GL_TEXTURE_2D, texture.textureId);
+    this->loadInt(getUniform("textureImage"), texture.textureId);
 }
 
 void EntityShader::loadTime(const float t) {

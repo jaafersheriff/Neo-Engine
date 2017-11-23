@@ -1,7 +1,7 @@
 #include "Texture.hpp"
 
 /* Copy TextureData to GPU */
-void Texture::init(TextureData td) {
+void Texture::init(const TextureData td) {
     /* Set active texture unit 0 */
     glActiveTexture(GL_TEXTURE0);
 
