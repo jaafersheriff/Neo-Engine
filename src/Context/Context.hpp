@@ -24,8 +24,9 @@ class Context {
         Mouse mouse;
         Keyboard keyboard;
 
-        /* Global window timer */
-        float runningTime;
+        float runningTime;  /* Global timer */
+        double lastTime;    /* Time at which last frame was rendered */
+        float displayTime;  /* Time to render last frame in seconds */
 
         // TODO : world type enum 
         // TODO : Set world + default
@@ -50,10 +51,10 @@ class Context {
         void cleanUp();
 
     private: 
-        /* FPS */
-        double fps = 0.0;
-        double lastTime; 
-        double nbFrames; 
+        /* Utility vars */
+        double fps = 0.0;       /* FPS */
+        double lastFpsTime;     /* Time at which last FPS was calculated */
+        double nbFrames;        /* Number of frames in current second */
         
         /* Utility functions */
         void printUsage();

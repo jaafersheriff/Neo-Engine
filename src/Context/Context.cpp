@@ -68,7 +68,7 @@ void Context::init() {
 
     /* Init local */
     lastTime = runningTime = glfwGetTime();
-    nbFrames = 0.0;
+    nbFrames = displayTime = lastFpsTime = 0.0;
 }
 
 World* Context::createWorld() {
@@ -97,13 +97,15 @@ void Context::update() {
 
     /* Update time */
     runningTime = glfwGetTime();
+    displayTime = (runningTime - lastTime);
+    lastTime = runningTime;
 
     /* Update FPS */
     nbFrames++;
-    if (runningTime - lastTime >= 1.0) {
+    if (runningTime - lastFpsTime >= 1.0) {
         fps = double(nbFrames);
         nbFrames = 0.0;
-        lastTime = runningTime;
+        lastFpsTime = runningTime;
     }
 }
 
