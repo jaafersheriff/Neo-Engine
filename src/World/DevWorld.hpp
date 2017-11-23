@@ -12,7 +12,7 @@ class DevWorld : public World {
 public:
         /* Render targets */
         std::vector<Entity> entities;
-        // TODO : Skybox *sb;
+        Skybox sb;
 
         /* World-specific members */
         bool isPaused = false;

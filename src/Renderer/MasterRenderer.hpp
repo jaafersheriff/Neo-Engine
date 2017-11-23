@@ -8,6 +8,7 @@
 #include "Context/Display.hpp"
 
 #include "Entity/Entity.hpp"
+#include "Skybox/Skybox.hpp"
 
 #include "glm/glm.hpp"
 
@@ -24,8 +25,9 @@ class MasterRenderer {
         /* List of active renderers */
         std::vector<Renderer *> renderers;
 
-        /* Activate entity renderer */
+        /* Activate subrenderers */
         void activateEntityRenderer(std::vector<Entity> *);
+        void activateSkyboxRenderer(Skybox *);
         
         /* Init */
         void init();

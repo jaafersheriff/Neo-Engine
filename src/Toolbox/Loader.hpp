@@ -7,6 +7,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
+#include "Skybox/CubeTexture.hpp"
 #include "Model/Texture.hpp"
 
 #include <map>      /* map */
@@ -16,14 +17,17 @@ class Mesh;
 class Loader {
     public:
         /* Create TextureData for a provided file name */
-        Texture::TextureData getTextureData(const std::string);
+        Texture::TextureData getTextureData(const std::string, const bool);
 
         /* Create a texture for a provided file name */
         Texture loadTexture(const std::string);
 
         /* Create a mesh for a provided file name */
         Mesh* loadObjMesh(const std::string);
-        
+
+        /* Create entire skybox with cube texture generated from provided file names */ 
+        CubeTexture loadCubeTexture(const std::string[6]);
+
     private:
         /* Resize a mesh so all of the vertices are [0, 1] */
         void resize(Mesh*);

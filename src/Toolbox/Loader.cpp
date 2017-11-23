@@ -9,15 +9,15 @@
 #include <iostream>
 #include <vector>
 
-Texture::TextureData Loader::getTextureData(const std::string fileName) {
+Texture::TextureData Loader::getTextureData(const std::string fileName, const bool flip) {
     Texture::TextureData td;
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(flip);
     td.data = stbi_load(fileName.c_str(), &td.width, &td.height, &td.components, STBI_rgb_alpha);
     if (td.data) {
         std::cout << "Loaded texture (" << td.width << ", " << td.height << "): " << fileName << std::endl;
     }
     else {
-        std::cerr << "Could not find " << fileName << std::endl;
+        std::cerr << "Could not find texture file " << fileName << std::endl;
     }
 
     return td;
@@ -30,7 +30,7 @@ Texture Loader::loadTexture(const std::string fileName) {
         texture.textureId = it->second;
     }
     else {
-        Texture::TextureData td = getTextureData(fileName);
+        Texture::TextureData td = getTextureData(fileName, true);
         if(td.data) {
             texture.init(td);
             if (texture.textureId) {
@@ -42,7 +42,6 @@ Texture Loader::loadTexture(const std::string fileName) {
     return texture;
 }
 
-// Load geometry from .obj
 Mesh* Loader::loadObjMesh(const std::string fileName) {
     std::map<std::string, Mesh*>::iterator it = meshes.find(fileName);
     if (it != meshes.end()) {
@@ -90,7 +89,36 @@ Mesh* Loader::loadObjMesh(const std::string fileName) {
     return mesh;
 }
 
-// Provided function to resize a mesh so all vertex positions are [0, 1.f]
+CubeTexture Loader::loadCubeTexture(const std::string fileNames[6]) {
+    CubeTexture cubeTexture;
+
+    /* If texture has already been loaded, just return it */
+    std::map<std::string, GLint>::iterator it = textures.find(fileNames[0]);
+    if (it != textures.end()) {
+        cubeTexture.textureId = it->second;
+    }
+    else {
+        /* Load in texture data to CPU */
+        Texture::TextureData tds[6];
+        for (int i = 0; i < 6; i++) {
+            tds[i] = getTextureData(fileNames[i], false);
+        }
+        /* Copy cube texture data to CPU */
+        cubeTexture.init(tds);
+        /* Add to map based on first file name */
+        if (cubeTexture.textureId) {
+            textures.insert(std::map<std::string, GLint>::value_type(fileNames[0], cubeTexture.textureId));
+        }
+        /* Free data from CPU */
+        for (int i = 0; i < 6; i++) {
+            stbi_image_free(tds[i].data);
+        }
+    }
+    
+    return cubeTexture;
+}
+
+/* Provided function to resize a mesh so all vertex positions are [0, 1.f] */
 void Loader::resize(Mesh * mesh) {
     float minX, minY, minZ;
     float maxX, maxY, maxZ;

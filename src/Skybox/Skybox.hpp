@@ -7,16 +7,19 @@
 
 #include <vector>
 
-#define SIZE 1000.f
+#define SIZE 100.f
+#define ROTATE_SPEED 10.f
 
 class Skybox {
     public: 
+        Skybox();
+        void update(const float);
+        
         Mesh *mesh;
-        CubeTexture texture;
+        CubeTexture cubeTexture;
 
-        Skybox(const std::string textureNames[6]);
+        float rotation = 0.f;
 
-    private:
         std::vector<float> verts = {
             -SIZE,  SIZE, -SIZE,
             -SIZE, -SIZE, -SIZE,

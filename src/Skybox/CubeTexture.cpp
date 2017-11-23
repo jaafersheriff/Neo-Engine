@@ -1,13 +1,6 @@
 #include "CubeTexture.hpp"
 
-void CubeTexture::init(Loader &loader, const std::string texName1, const std::string texName2, const std::string texName3, const std::string texName4, const std::string texName5, const std::string texName6) {
-    Texture::TextureData td[6];
-    td[0] = loader.getTextureData(texName1);
-    td[1] = loader.getTextureData(texName2);
-    td[2] = loader.getTextureData(texName3);
-    td[3] = loader.getTextureData(texName4);
-    td[4] = loader.getTextureData(texName5);
-    td[5] = loader.getTextureData(texName6);
+void CubeTexture::init(const TextureData td[6]) {
 
     glActiveTexture(GL_TEXTURE0);
 

@@ -1,15 +1,26 @@
 #include "DevWorld.hpp"
 
 void DevWorld::init(Loader &loader) {
-    // Create entities
-    Entity e = Entity(loader.loadObjMesh("../resources/bunny.obj"),
+    /* Create entities */
+    Entity e = Entity(loader.loadObjMesh("../resources/mr_krab.obj"),
+                      loader.loadTexture("../resources/mr_krab.png"),
                       glm::vec3(15.f, 0.f, 0.f), 
                       glm::vec3(0), 
                       glm::vec3(10.f, 10, 10.f));
     e.texture.diffuseColor = glm::vec3(0.77f, 0.1f, 1.f);
     entities.push_back(e);
 
-    // Set up light
+    /* Skybox */
+    std::string textureNames[6] = {
+                           "../resources/arctic_ft.tga", 
+                           "../resources/arctic_bk.tga", 
+                           "../resources/arctic_up.tga", 
+                           "../resources/arctic_dn.tga", 
+                           "../resources/arctic_rt.tga", 
+                           "../resources/arctic_lf.tga"};
+    sb.cubeTexture = loader.loadCubeTexture(textureNames);
+
+    /* Set up light */
     light.position = glm::vec3(-1000, 1000, 1000);
     light.color = glm::vec3(1.f);
     light.attenuation = glm::vec3(1.f, 0.0f, 0.0f);
@@ -18,6 +29,7 @@ void DevWorld::init(Loader &loader) {
 void DevWorld::prepareRenderer(MasterRenderer *mr) {
     this->mr = mr;
     mr->activateEntityRenderer(&entities);
+    mr->activateSkyboxRenderer(&sb);
 }
 
 void DevWorld::update(Context &ctx) {
@@ -31,6 +43,7 @@ void DevWorld::update(Context &ctx) {
     for (unsigned int i = 0; i < entities.size(); i++) {
         entities[i].update();
     }
+    sb.update(ctx.displayTime);
 }
 
 void DevWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
@@ -57,6 +70,12 @@ void DevWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
     }
     if (keyboard.isKeyPressed('r')) {
         camera.moveUp();
+    }
+    if (keyboard.isKeyPressed('1')) {
+        camera.updateLookAt(4.f, 0.f);
+    }
+    if (keyboard.isKeyPressed('2')) {
+        camera.updateLookAt(-4.f, 0.f);
     }
     // TODO : put this in the GUI
     if (keyboard.isKeyPressed('m')) {
