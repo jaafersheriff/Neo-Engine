@@ -2,8 +2,8 @@
 #include "World/World.hpp"
 #include "World/DevWorld.hpp"
 
-#include <string.h>  /* strcmp, strlen */
-#include <iostream>  /* cout, stoi */
+#include <string.h>  /* strcmp, strlen  */
+#include <iostream>  /* cout, stoi      */
 
 void Context::printUsage() {
     std::cerr << "Invalid args" << std::endl;

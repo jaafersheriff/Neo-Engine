@@ -10,8 +10,8 @@
 #include "Skybox/CubeTexture.hpp"
 #include "Model/Texture.hpp"
 
-#include <map>      /* map */
-#include <vector>   /* vector */
+#include <map>      /* map      */
+#include <vector>   /* vector   */
 
 class Mesh;
 class Loader {

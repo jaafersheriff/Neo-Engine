@@ -73,10 +73,10 @@ void Display::update() {
     
     /* Update projection matrix */
     projectionMatrix = glm::perspective(
-              45.f,                 // fovy
-              width/(float)height,  // aspect
-              0.01f,                // near
-              250.f);               // far
+              45.f,                 /* fovy     */
+              width/(float)height,  /* aspect   */
+              0.01f,                /* near     */
+              250.f);               /* far      */
 }
 
 int Display::shouldClose() { 

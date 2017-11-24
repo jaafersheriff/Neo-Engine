@@ -24,13 +24,9 @@ class Context {
         Mouse mouse;
         Keyboard keyboard;
 
-        float runningTime;  /* Global timer */
-        double lastTime;    /* Time at which last frame was rendered */
-        float displayTime;  /* Time to render last frame in seconds */
-
-        // TODO : world type enum 
-        // TODO : Set world + default
-        // TODO : arg <optional value> booleans or something
+        float runningTime;  /* Global timer                             */
+        double lastTime;    /* Time at which last frame was rendered    */
+        float displayTime;  /* Time to render last frame in seconds     */
 
         /* Process command line args */
         int processArgs(int, char**);
@@ -52,9 +48,9 @@ class Context {
 
     private: 
         /* Utility vars */
-        double fps = 0.0;       /* FPS */
-        double lastFpsTime;     /* Time at which last FPS was calculated */
-        double nbFrames;        /* Number of frames in current second */
+        double fps = 0.0;       /* FPS                                      */
+        double lastFpsTime;     /* Time at which last FPS was calculated    */
+        double nbFrames;        /* Number of frames in current second       */
         
         /* Utility functions */
         void printUsage();

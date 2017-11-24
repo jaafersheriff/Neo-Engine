@@ -13,9 +13,9 @@
 int main(int argc, char **argv) {
     srand(time(0));
     
-    Context context;    /* GLFWwindow, Mouse, Keyboard */
-    Loader loader;      /* Load .obj models and .png textures */
-    MasterRenderer mr;  /* Renderer */
+    Context context;    /* GLFWwindow, Mouse, Keyboard          */
+    Loader loader;      /* Load .obj models and .png textures   */
+    MasterRenderer mr;  /* Renderer                             */
     World *world;       /* Application - collection of features */
 
     /* Process args */
@@ -23,28 +23,28 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // Init display
+    /* Init display */
     if (context.display.init()) {
         std::cerr << "Failed to init display" << std::endl;
     }
     context.init();
 
-    // Create world
+    /* Create world */
     world = context.createWorld();
 
-    // Prep MR for rendering of a specific world class
+    /* Prep MR for rendering of a specific world class */
     mr.init();
     world->init(loader);
     world->prepareRenderer(&mr);
 
-    // Main loop
+    /* Main loop */
     while(!context.shouldClose()) {
         context.update();
         world->update(context);
         
         mr.render(context.display, world);
 
-        // OpenGL things
+        /* OpenGL things */
         glfwSwapBuffers(context.display.window);
         glfwPollEvents();
     }
