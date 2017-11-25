@@ -31,9 +31,6 @@ bool EntityShader::init() {
     addUniform("lightCol");
     addUniform("lightAtt");
 
-    /* Add time */
-    addUniform("uTime");
-
     return true;
 }
 
@@ -71,8 +68,4 @@ void EntityShader::loadUsesTexture(const bool b) {
 
 void EntityShader::loadTexture(const Texture &texture) {
     this->loadInt(getUniform("textureImage"), texture.textureId);
-}
-
-void EntityShader::loadTime(const float t) {
-    this->loadFloat(getUniform("uTime"), t);
 }

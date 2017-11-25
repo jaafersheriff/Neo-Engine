@@ -8,8 +8,6 @@ uniform mat4 P;
 uniform mat4 M;
 uniform mat4 V;
 
-uniform float uTime;
-
 uniform float matAmbient;
 uniform float shine;
 

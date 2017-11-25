@@ -103,8 +103,10 @@ CubeTexture Loader::loadCubeTexture(const std::string fileNames[6]) {
         for (int i = 0; i < 6; i++) {
             tds[i] = getTextureData(fileNames[i], false);
         }
-        /* Copy cube texture data to CPU */
+
+        /* Copy cube texture data to GPU */
         cubeTexture.init(tds);
+        
         /* Add to map based on first file name */
         if (cubeTexture.textureId) {
             textures.insert(std::map<std::string, GLint>::value_type(fileNames[0], cubeTexture.textureId));

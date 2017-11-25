@@ -18,7 +18,7 @@ void DevWorld::init(Loader &loader) {
                            "../resources/arctic_dn.tga", 
                            "../resources/arctic_rt.tga", 
                            "../resources/arctic_lf.tga"};
-    sb.cubeTexture = loader.loadCubeTexture(textureNames);
+    sb = Skybox(loader.loadCubeTexture(textureNames));
 
     /* Set up light */
     light.position = glm::vec3(-1000, 1000, 1000);

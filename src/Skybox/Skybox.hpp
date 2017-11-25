@@ -12,7 +12,8 @@
 
 class Skybox {
     public: 
-        Skybox();
+        Skybox() {}
+        Skybox(CubeTexture);
         void update(const float);
         
         Mesh *mesh;

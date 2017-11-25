@@ -23,7 +23,6 @@ void SkyboxRenderer::prepare() {
     /* Nothing to prepare */
 }
 
-#include <iostream>
 void SkyboxRenderer::render(const World *world) {
     SkyboxShader *sShader = dynamic_cast<SkyboxShader*>(shader);
 
