@@ -6,19 +6,25 @@
 #include <iostream>  /* cout, stoi      */
 
 void Context::printUsage() {
-    std::cerr << "Invalid args" << std::endl;
-    std::cerr << "Usage: ./Neo.exe" << std::endl;
+    std::cout << "Usage: Neo" << std::endl;
 
-    std::cerr << "\t-s <window width> <window height>" << std::endl;
+    std::cout << "    -s <window width> <window height>";
+    std::cout << "\tSet window size" << std::endl;
 
-    std::cerr << "\t-w <world_name>" << std::endl;
-    std::cerr << "\t\tDEV_WORLD" << std::endl;
-    // TODO : add more worlds
-
+    std::cout << "    -w <world_name>";
+    std::cout << "\t\t\tSet world/application type" << std::endl;
+    std::cout << "      DEV_WORLD";
+    std::cout << "\t\t\t\tWorld used for development purposes" << std::endl;
 }
 
 int Context::processArgs(int argc, char **argv) {
     for (int i = 0; i < argc; i++) {
+
+        /* Help */
+        if (!strcmp(argv[i], "-h")) {
+            printUsage();
+            return 1;
+        }
 
         /* Process window size */
         if (!strcmp(argv[i], "-s")) {

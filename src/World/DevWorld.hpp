@@ -10,7 +10,7 @@
 
 class DevWorld : public World {
 public:
-        /* Render targets */
+        /* World-specific render targets */
         std::vector<Entity> entities;
         Skybox sb;
 
