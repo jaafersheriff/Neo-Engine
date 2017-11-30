@@ -76,7 +76,7 @@ void Display::update() {
               45.f,                 /* fovy     */
               width/(float)height,  /* aspect   */
               0.01f,                /* near     */
-              250.f);               /* far      */
+              2500.f);              /* far      */
 }
 
 int Display::shouldClose() { 

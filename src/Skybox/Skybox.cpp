@@ -7,7 +7,7 @@ Skybox::Skybox(CubeTexture cb) {
     mesh->init();
 
     /* Set cube texture */
-    this->cubeTexture = cb;
+    cubeTexture = cb;
 }
 
 void Skybox::update(const float frameTime) {

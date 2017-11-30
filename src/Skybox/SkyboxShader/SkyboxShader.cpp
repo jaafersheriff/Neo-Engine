@@ -1,6 +1,5 @@
 #include "SkyboxShader.hpp"
 
-#include <iostream>
 bool SkyboxShader::init() {
     if (!Shader::init()) {
         return false;
