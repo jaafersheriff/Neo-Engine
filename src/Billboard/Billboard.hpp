@@ -9,8 +9,6 @@
 
 #include "glm/glm.hpp"
 
-
-
 class Billboard {
     public: 
         /* Center of billboard */
@@ -26,4 +24,6 @@ class Billboard {
         /* Constructors */
         Billboard(const glm::vec3, const glm::vec2);
         Billboard(Texture, const glm::vec3, const glm::vec2);
-}
+};
+
+#endif

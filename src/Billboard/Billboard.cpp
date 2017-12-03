@@ -1,7 +1,8 @@
-#include "Billboard.cpp"
+#include "Billboard.hpp"
 
 #define SQUARE_SIZE 0.5f
-Billboard::Billboard(glm::vec3 c, glm::vec2 s) {
+
+Billboard::Billboard(const glm::vec3 c, const glm::vec2 s) {
     this->center = c;
     this->size = s;
 
@@ -16,7 +17,7 @@ Billboard::Billboard(glm::vec3 c, glm::vec2 s) {
     mesh->init();
 }
 
-Billboard::Billboard(Texture t, glm::vec3 c, glm::vec2 s) :
+Billboard::Billboard(Texture t, const glm::vec3 c, const glm::vec2 s) :
     Billboard(c, s) {
     this->texture = t;
 }
