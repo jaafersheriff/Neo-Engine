@@ -14,10 +14,10 @@
 class EntityRenderer : public Renderer {
     public:
         /* Data structure to be rendered */
-        std::vector<Entity *> entitiesPointer;
+        std::vector<Entity *> *entitiesPointer;
 
         /* Activate self and shader */
-        void activate(std::vector<Entity *>);
+        void activate(std::vector<Entity *> *);
 
         /* Set any global variables in shader */
         void setGlobals(const glm::mat4*, const glm::mat4*);

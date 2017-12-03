@@ -2,7 +2,7 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
-void EntityRenderer::activate(std::vector<Entity *> ep) {
+void EntityRenderer::activate(std::vector<Entity *> *ep) {
     this->entitiesPointer = ep;
     shader = new EntityShader;
     shader->init();
@@ -19,6 +19,10 @@ void EntityRenderer::prepare() {
 }
 
 void EntityRenderer::render(const World *world) {
+    if(!entitiesPointer->size()) {
+        return;
+    }
+    
     EntityShader *eShader = dynamic_cast<EntityShader*>(shader);
 
     /* There's only one light in world */
@@ -27,7 +31,7 @@ void EntityRenderer::render(const World *world) {
     /* Loop through every entity */
     // TODO : batched render
     glm::mat4 M;
-    for(auto e : entitiesPointer) {
+    for(auto e : *entitiesPointer) {
         /* If entity mesh doesn't contain geometry, skip it */
         if (!e->mesh || !e->mesh->vertBuf.size()) {
             continue;

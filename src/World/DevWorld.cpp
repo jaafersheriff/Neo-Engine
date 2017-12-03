@@ -1,5 +1,7 @@
 #include "DevWorld.hpp"
 
+#include <iostream>
+
 void DevWorld::init(Loader &loader) {
     /* Create entities */
     Entity *e = new Entity(loader.loadObjMesh("../resources/mr_krab.obj"),
@@ -21,10 +23,12 @@ void DevWorld::init(Loader &loader) {
     sb = new Skybox(loader.loadCubeTexture(textureNames));
 
     /* Billboards */
-    billboards.push_back(new Billboard(
-                             loader.loadTexture("../resources/Tatooine.jpg"), 
-                             glm::vec3(0.f), 
-                             glm::vec2(10.f, 10.f)));
+    for (int i = 0; i < 30; i++) {
+        billboards.push_back(new Billboard(
+                                loader.loadTexture("../resources/world.bmp"),
+                                Toolbox::genRandomVec3(-30.f, 30.f),
+                                glm::vec2(Toolbox::genRandom(3.f, 10.f), Toolbox::genRandom(3.f, 10.f))));
+    }
         
     /* Set up light */
     light.position = glm::vec3(-1000, 1000, 1000);
@@ -37,14 +41,14 @@ void DevWorld::prepareRenderer(MasterRenderer *mr) {
     if (sb) {
         mr->activateSkyboxRenderer(sb);
     }
-    mr->activateEntityRenderer(entities);
-    mr->activateBillboardRenderer(billboards);
+    mr->activateEntityRenderer(&entities);
+    mr->activateBillboardRenderer(&billboards);
 }
 
 void DevWorld::update(Context &ctx) {
     takeInput(ctx.mouse, ctx.keyboard);
     camera.update();
-    
+  
     if (isPaused) {
         return;
     }

@@ -1,6 +1,6 @@
 #include "BillboardRenderer.hpp"
 
-void BillboardRenderer::activate(std::vector<Billboard *> billboards) {
+void BillboardRenderer::activate(std::vector<Billboard *> *billboards) {
     this->billboards = billboards;
     shader = new BillboardShader;
     shader->init();
@@ -18,22 +18,23 @@ void BillboardRenderer::prepare() {
 }
 
 void BillboardRenderer::render(const World *world) {
-    if(!billboards.size()) {
+    if(!billboards->size()) {
         return;
     }
 
     BillboardShader *bShader = dynamic_cast<BillboardShader *>(shader);
 
-    /* Bind vertices */
-    glBindVertexArray(billboards[0]->mesh->vaoId);
-    int pos = shader->getAttribute("vertexPos");
-    glEnableVertexAttribArray(pos);
-    glBindBuffer(GL_ARRAY_BUFFER, billboards[0]->mesh->vertBufId);
-    glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
-
     /* Iterate through billboards */
-    for (auto billboard : billboards) {
-        /* Load billboard's position and size */
+    for (auto billboard : *billboards) {
+        /* Bind vertices */
+        // TODO : why do i need to do this per billboard?
+        glBindVertexArray(billboard->mesh->vaoId);
+        int pos = shader->getAttribute("vertexPos");
+        glEnableVertexAttribArray(pos);
+        glBindBuffer(GL_ARRAY_BUFFER, billboard->mesh->vertBufId);
+        glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
+
+       /* Load billboard's position and size */
         bShader->loadCenter(billboard->center);
         bShader->loadSize(billboard->size);
 

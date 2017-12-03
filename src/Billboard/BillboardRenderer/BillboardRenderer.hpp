@@ -9,9 +9,9 @@
 
 class BillboardRenderer : public Renderer {
     public:
-        std::vector<Billboard *> billboards;
+        std::vector<Billboard *> *billboards;
 
-        void activate(std::vector<Billboard *>);
+        void activate(std::vector<Billboard *> *);
         void prepare();
         void setGlobals(const glm::mat4 *, const glm::mat4 *);
         void render(const World *);

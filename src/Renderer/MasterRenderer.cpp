@@ -42,9 +42,11 @@ void MasterRenderer::init() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+    glEnable (GL_BLEND); 
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void MasterRenderer::activateEntityRenderer(std::vector<Entity *> entities) {
+void MasterRenderer::activateEntityRenderer(std::vector<Entity *> *entities) {
     EntityRenderer *eR = new EntityRenderer;
     eR->activate(entities);
     renderers.push_back(eR);
@@ -56,7 +58,7 @@ void MasterRenderer::activateSkyboxRenderer(Skybox *sb) {
     renderers.push_back(sbR);
 }
 
-void MasterRenderer::activateBillboardRenderer(std::vector<Billboard *> billboards) {
+void MasterRenderer::activateBillboardRenderer(std::vector<Billboard *> *billboards) {
     BillboardRenderer *bR = new BillboardRenderer;
     bR->activate(billboards);
     renderers.push_back(bR);
@@ -64,8 +66,8 @@ void MasterRenderer::activateBillboardRenderer(std::vector<Billboard *> billboar
 
 void MasterRenderer::cleanUp() {
     /* Clean up all active subrenderers */
-    for (auto renderer = renderers.begin(); renderer != renderers.end(); renderer++) {
-        (*renderer)->cleanUp();
+    for (auto &renderer : renderers) {
+        renderer->cleanUp();
     }
 }
 

@@ -62,12 +62,11 @@ Mesh* Loader::loadObjMesh(const std::string fileName) {
     int vertCount = 0;
     /* For every shape in the loaded file */
     for (int i = 0; i < shapes.size(); i++) {
-        /* Concatenate the shape's vertices to the new mesh */
+        /* Concatenate the shape's vertices, normals, and textures to the mesh */
         mesh->vertBuf.insert(mesh->vertBuf.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
-        /* Concatenate the shape's normals to the new mesh */
         mesh->norBuf.insert(mesh->norBuf.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
-        /* Concatenate the shape's texture coordinates to the new mesh */
         mesh->texBuf.insert(mesh->texBuf.end(), shapes[i].mesh.texcoords.begin(), shapes[i].mesh.texcoords.end());
+
         /* Concatenate the shape's indices to the new mesh
          * Indices need to be incremented as we concatenate shapes */
         for (unsigned int i : shapes[i].mesh.indices) {
@@ -121,7 +120,7 @@ CubeTexture Loader::loadCubeTexture(const std::string fileNames[6]) {
 }
 
 /* Provided function to resize a mesh so all vertex positions are [0, 1.f] */
-void Loader::resize(Mesh * mesh) {
+void Loader::resize(Mesh *mesh) {
     float minX, minY, minZ;
     float maxX, maxY, maxZ;
     float scaleX, scaleY, scaleZ;
