@@ -2,12 +2,12 @@
 
 void DevWorld::init(Loader &loader) {
     /* Create entities */
-    Entity e = Entity(loader.loadObjMesh("../resources/mr_krab.obj"),
+    Entity *e = new Entity(loader.loadObjMesh("../resources/mr_krab.obj"),
                       loader.loadTexture("../resources/mr_krab.png"),
                       glm::vec3(15.f, 0.f, 0.f), 
                       glm::vec3(0), 
                       glm::vec3(10.f, 10, 10.f));
-    e.texture.diffuseColor = glm::vec3(0.77f, 0.1f, 1.f);
+    e->texture.diffuseColor = glm::vec3(0.77f, 0.1f, 1.f);
     entities.push_back(e);
 
     /* Skybox */
@@ -18,8 +18,14 @@ void DevWorld::init(Loader &loader) {
                            "../resources/arctic_dn.tga", 
                            "../resources/arctic_rt.tga", 
                            "../resources/arctic_lf.tga"};
-    sb = Skybox(loader.loadCubeTexture(textureNames));
+    sb = new Skybox(loader.loadCubeTexture(textureNames));
 
+    /* Billboards */
+    billboards.push_back(new Billboard(
+                             loader.loadTexture("../resources/Tatooine.jpg"), 
+                             glm::vec3(0.f), 
+                             glm::vec2(10.f, 10.f)));
+        
     /* Set up light */
     light.position = glm::vec3(-1000, 1000, 1000);
     light.color = glm::vec3(1.f);
@@ -28,8 +34,11 @@ void DevWorld::init(Loader &loader) {
 
 void DevWorld::prepareRenderer(MasterRenderer *mr) {
     this->mr = mr;
-    mr->activateEntityRenderer(&entities);
-    mr->activateSkyboxRenderer(&sb);
+    if (sb) {
+        mr->activateSkyboxRenderer(sb);
+    }
+    mr->activateEntityRenderer(entities);
+    mr->activateBillboardRenderer(billboards);
 }
 
 void DevWorld::update(Context &ctx) {
@@ -41,9 +50,11 @@ void DevWorld::update(Context &ctx) {
     }
 
     for (unsigned int i = 0; i < entities.size(); i++) {
-        entities[i].update();
+        entities[i]->update();
     }
-    sb.update(ctx.displayTime);
+    if (sb) {
+        sb->update(ctx.displayTime);
+    }
 }
 
 void DevWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {

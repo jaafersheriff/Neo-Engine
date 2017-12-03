@@ -2,7 +2,7 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
-void EntityRenderer::activate(std::vector<Entity> *ep) {
+void EntityRenderer::activate(std::vector<Entity *> ep) {
     this->entitiesPointer = ep;
     shader = new EntityShader;
     shader->init();
@@ -27,35 +27,35 @@ void EntityRenderer::render(const World *world) {
     /* Loop through every entity */
     // TODO : batched render
     glm::mat4 M;
-    for(auto e : *entitiesPointer) {
+    for(auto e : entitiesPointer) {
         /* If entity mesh doesn't contain geometry, skip it */
-        if (!e.mesh || !e.mesh->vertBuf.size()) {
+        if (!e->mesh || !e->mesh->vertBuf.size()) {
             continue;
         }
 
         /* Create model matrix for this entity */
         M = glm::mat4(1.f);
-        M *= glm::translate(glm::mat4(1.f), e.position);
-        M *= glm::rotate(glm::mat4(1.f), glm::radians(e.rotation.x), glm::vec3(1, 0, 0));
-        M *= glm::rotate(glm::mat4(1.f), glm::radians(e.rotation.y), glm::vec3(0, 1, 0));
-        M *= glm::rotate(glm::mat4(1.f), glm::radians(e.rotation.z), glm::vec3(0, 0, 1));
-        M *= glm::scale(glm::mat4(1.f), e.scale);
+        M *= glm::translate(glm::mat4(1.f), e->position);
+        M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.x), glm::vec3(1, 0, 0));
+        M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.y), glm::vec3(0, 1, 0));
+        M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.z), glm::vec3(0, 0, 1));
+        M *= glm::scale(glm::mat4(1.f), e->scale);
         eShader->loadM(&M);
 
         /* Prepare texture/material */
-        prepareTexture(e.texture);
+        prepareTexture(e->texture);
 
         /* Prepare mesh */
-        prepareMesh(e.mesh);
+        prepareMesh(e->mesh);
 
         /* render */
-        glDrawElements(GL_TRIANGLES, (int)e.mesh->eleBuf.size(), GL_UNSIGNED_INT, (const void *)0);
+        glDrawElements(GL_TRIANGLES, (int)e->mesh->eleBuf.size(), GL_UNSIGNED_INT, (const void *)0);
 
         /* Clean up mesh */
-        unPrepareMesh(e.mesh);
+        unPrepareMesh(e->mesh);
 
         /* Clean up texture */
-        unPrepareTexture(e.texture);
+        unPrepareTexture(e->texture);
     }
 }
 

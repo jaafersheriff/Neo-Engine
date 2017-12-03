@@ -5,8 +5,8 @@
 
 #include "Renderer/MasterRenderer.hpp"
 #include "Context/Context.hpp"
-#include "Cameras/Camera.hpp"
-#include "Lights/Light.hpp"
+#include "Camera/Camera.hpp"
+#include "Light/Light.hpp"
 #include "Toolbox/Loader.hpp"
 
 #include <string>

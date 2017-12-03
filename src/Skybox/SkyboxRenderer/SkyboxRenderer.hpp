@@ -16,8 +16,6 @@ class SkyboxRenderer : public Renderer {
         void setGlobals(const glm::mat4 *, const glm::mat4 *);
         void render(const World *);
         void cleanUp();
-    private:
-        /* Any local functions */
 };
 
 #endif

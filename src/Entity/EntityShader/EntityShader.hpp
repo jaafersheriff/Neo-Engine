@@ -5,7 +5,7 @@
 #define _ENTITY_SHADER_HPP_
 
 #include "Shader/Shader.hpp"
-#include "Lights/Light.hpp"
+#include "Light/Light.hpp"
 #include "Model/Texture.hpp"
 
 class EntityShader : public Shader {

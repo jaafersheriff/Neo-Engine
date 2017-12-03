@@ -5,14 +5,14 @@ bool SkyboxShader::init() {
         return false;
     }
 
-    // Attributes
+    /* Attributes */
     addAttribute("vertexPos");
 
-    // Matrix uniforms
+    /* Matrix uniforms */
     addUniform("P");
     addUniform("V");
 
-    // Cube texture
+    /* Cube texture */
     addUniform("cubeMap");
 
     return true;

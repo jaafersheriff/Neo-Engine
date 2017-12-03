@@ -11,8 +11,9 @@
 class DevWorld : public World {
 public:
         /* World-specific render targets */
-        std::vector<Entity> entities;
-        Skybox sb;
+        std::vector<Entity *> entities;
+        Skybox *sb;
+        std::vector<Billboard *> billboards;
 
         /* World-specific members */
         bool isPaused = false;

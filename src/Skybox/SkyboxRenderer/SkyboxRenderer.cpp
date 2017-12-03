@@ -34,6 +34,7 @@ void SkyboxRenderer::render(const World *world) {
     glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, (const void *) 0);
 
     /* Bind texture */
+    sShader->loadCubeTexture(skybox->cubeTexture);
     glActiveTexture(GL_TEXTURE0 + skybox->cubeTexture.textureId);
     glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->cubeTexture.textureId);
     

@@ -5,6 +5,7 @@
 
 #include "Entity/EntityRenderer/EntityRenderer.hpp"
 #include "Skybox/SkyboxRenderer/SkyboxRenderer.hpp"
+#include "Billboard/BillboardRenderer/BillboardRenderer.hpp"
 
 #include "Shader/GLSL.hpp"
 
@@ -43,7 +44,7 @@ void MasterRenderer::init() {
     glCullFace(GL_BACK);
 }
 
-void MasterRenderer::activateEntityRenderer(std::vector<Entity> *entities) {
+void MasterRenderer::activateEntityRenderer(std::vector<Entity *> entities) {
     EntityRenderer *eR = new EntityRenderer;
     eR->activate(entities);
     renderers.push_back(eR);
@@ -53,6 +54,12 @@ void MasterRenderer::activateSkyboxRenderer(Skybox *sb) {
     SkyboxRenderer *sbR = new SkyboxRenderer;
     sbR->activate(sb);
     renderers.push_back(sbR);
+}
+
+void MasterRenderer::activateBillboardRenderer(std::vector<Billboard *> billboards) {
+    BillboardRenderer *bR = new BillboardRenderer;
+    bR->activate(billboards);
+    renderers.push_back(bR);
 }
 
 void MasterRenderer::cleanUp() {

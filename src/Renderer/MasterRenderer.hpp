@@ -9,6 +9,7 @@
 
 #include "Entity/Entity.hpp"
 #include "Skybox/Skybox.hpp"
+#include "Billboard/Billboard.hpp"
 
 #include "glm/glm.hpp"
 
@@ -26,7 +27,8 @@ class MasterRenderer {
         std::vector<Renderer *> renderers;
 
         /* Activate subrenderers */
-        void activateEntityRenderer(std::vector<Entity> *);
+        void activateEntityRenderer(std::vector<Entity *>);
+        void activateBillboardRenderer(std::vector<Billboard *>);
         void activateSkyboxRenderer(Skybox *);
         
         /* Init */
