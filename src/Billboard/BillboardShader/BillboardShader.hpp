@@ -13,11 +13,12 @@ class BillboardShader : public Shader {
 
         void loadP(const glm::mat4 *);
         void loadV(const glm::mat4 *);
+        void loadM(const glm::mat4 *);
 
         void loadCenter(const glm::vec3);
         void loadSize(const glm::vec2);
 
-        void loadTexture(const Texture &);
+        void loadTexture(const Texture *);
 };
 
 #endif

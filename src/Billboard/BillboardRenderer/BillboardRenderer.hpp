@@ -16,6 +16,8 @@ class BillboardRenderer : public Renderer {
         void setGlobals(const glm::mat4 *, const glm::mat4 *);
         void render(const World *);
         void cleanUp();
+    private:
+        void sort();
 };
 
 #endif

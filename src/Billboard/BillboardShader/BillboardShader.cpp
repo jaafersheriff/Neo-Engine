@@ -11,6 +11,7 @@ bool BillboardShader::init() {
     /* Projection and view */
     addUniform("P");
     addUniform("V");
+    addUniform("M");
 
     /* Billboard things */
     addUniform("center");
@@ -30,6 +31,10 @@ void BillboardShader::loadV(const glm::mat4 *v) {
     this->loadMat4(getUniform("V"), v);
 }
 
+void BillboardShader::loadM(const glm::mat4 *m) {
+    this->loadMat4(getUniform("M"), m);
+}
+
 void BillboardShader::loadCenter(const glm::vec3 c) {
     this->loadVec3(getUniform("center"), c);
 }
@@ -38,6 +43,6 @@ void BillboardShader::loadSize(const glm::vec2 s) {
     this->loadVec2(getUniform("size"), s);
 }
 
-void BillboardShader::loadTexture(const Texture &texture) {
-    this->loadInt(getUniform("textureImage"), texture.textureId);
+void BillboardShader::loadTexture(const Texture *texture) {
+    this->loadInt(getUniform("textureImage"), texture->textureId);
 }

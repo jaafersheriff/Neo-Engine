@@ -5,12 +5,12 @@
 void DevWorld::init(Loader &loader) {
     /* Create entities */
     Entity *e = new Entity(loader.loadObjMesh("../resources/mr_krab.obj"),
-                      loader.loadTexture("../resources/mr_krab.png"),
-                      glm::vec3(15.f, 0.f, 0.f), 
-                      glm::vec3(0), 
-                      glm::vec3(10.f, 10, 10.f));
-    e->texture.diffuseColor = glm::vec3(0.77f, 0.1f, 1.f);
-    entities.push_back(e);
+                           loader.loadTexture("../resources/mr_krab.png"),
+                           glm::vec3(15.f, 0.f, 0.f), 
+                           glm::vec3(0), 
+                           glm::vec3(10.f, 10, 10.f));
+    e->modelTexture.diffuseColor = glm::vec3(0.77f, 0.1f, 1.f);
+    // entities.push_back(e);
 
     /* Skybox */
     std::string textureNames[6] = {
@@ -20,14 +20,21 @@ void DevWorld::init(Loader &loader) {
                            "../resources/arctic_dn.tga", 
                            "../resources/arctic_rt.tga", 
                            "../resources/arctic_lf.tga"};
-    sb = new Skybox(loader.loadCubeTexture(textureNames));
+    // sb = new Skybox(loader.loadCubeTexture(textureNames));
 
     /* Billboards */
+    Texture *cloudTexture = loader.loadTexture("../resources/cloud.png");
     for (int i = 0; i < 30; i++) {
-        billboards.push_back(new Billboard(
-                                loader.loadTexture("../resources/world.bmp"),
-                                Toolbox::genRandomVec3(-30.f, 30.f),
-                                glm::vec2(Toolbox::genRandom(3.f, 10.f), Toolbox::genRandom(3.f, 10.f))));
+        Billboard *b = new Billboard(
+                        cloudTexture,
+                        glm::vec3(
+                            Toolbox::genRandom(-8.f, 8.f),
+                            Toolbox::genRandom(0.f, 4.f),
+                            Toolbox::genRandom(-12.f, 12.f)),
+                        glm::vec2(cloudTexture->width/75.f, cloudTexture->height/75.f)
+                    );
+        b->rotation = 360.f * Toolbox::genRandom();
+        billboards.push_back(b);
     }
         
     /* Set up light */
@@ -41,8 +48,8 @@ void DevWorld::prepareRenderer(MasterRenderer *mr) {
     if (sb) {
         mr->activateSkyboxRenderer(sb);
     }
-    mr->activateEntityRenderer(&entities);
     mr->activateBillboardRenderer(&billboards);
+    mr->activateEntityRenderer(&entities);
 }
 
 void DevWorld::update(Context &ctx) {
@@ -53,11 +60,17 @@ void DevWorld::update(Context &ctx) {
         return;
     }
 
-    for (unsigned int i = 0; i < entities.size(); i++) {
-        entities[i]->update();
+    /* Update entities */
+    for (auto entity : entities) {
+        entity->update();
     }
+    /* Update skybox */
     if (sb) {
         sb->update(ctx.displayTime);
+    }
+    /* Update billboards */
+    for (auto billboard : billboards) {
+        billboard->update(this->camera);
     }
 }
 

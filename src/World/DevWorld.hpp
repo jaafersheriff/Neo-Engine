@@ -19,7 +19,7 @@ public:
         bool isPaused = false;
 
         /* Constructor */
-        DevWorld() : World("Entity World") { }
+        DevWorld() : World("Dev World") { }
 
         /* Derived functions */
         void init(Loader &);
