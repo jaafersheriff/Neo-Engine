@@ -9,6 +9,7 @@
 
 #include "Skybox/CubeTexture.hpp"
 #include "Model/Texture.hpp"
+#include "Context/Context.hpp"
 
 #include <map>      /* map      */
 #include <vector>   /* vector   */
@@ -16,25 +17,29 @@
 class Mesh;
 class Loader {
     public:
-        /* Create TextureData for a provided file name */
-        Texture::TextureData getTextureData(const std::string, const bool);
+        void init(Context &);
 
         /* Create a texture for a provided file name */
-        Texture loadTexture(const std::string);
+        Texture* loadTexture(const std::string);
+
+        /* Create entire skybox with cube texture generated from provided file names */ 
+        CubeTexture* loadCubeTexture(const std::string[6]);
 
         /* Create a mesh for a provided file name */
         Mesh* loadObjMesh(const std::string);
-
-        /* Create entire skybox with cube texture generated from provided file names */ 
-        CubeTexture loadCubeTexture(const std::string[6]);
-
     private:
         /* Resize a mesh so all of the vertices are [0, 1] */
         void resize(Mesh*);
 
+        /* Return pointer to loaded stbi_image data 
+         * Update members in Texture pointer */ 
+        uint8_t* loadTextureData(Texture *, const std::string, const bool);
+
         /* Collections that prevent loading textures/meshes more than once  */
-        std::map<std::string, GLint> textures;
+        std::map<std::string, Texture*> textures;
         std::map<std::string, Mesh*> meshes;
+
+        bool verbose;
 };
 
 #endif

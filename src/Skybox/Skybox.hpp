@@ -13,11 +13,11 @@
 class Skybox {
     public: 
         Skybox() {}
-        Skybox(CubeTexture);
+        Skybox(CubeTexture *);
         void update(const float);
         
         Mesh *mesh;
-        CubeTexture cubeTexture;
+        CubeTexture *cubeTexture;
 
         float rotation = 0.f;
 

@@ -6,7 +6,7 @@
 
 class CubeTexture : public Texture {
     public:
-        void init(const TextureData[6]);
+        void init(uint8_t *data[6]);
 };
 
 #endif

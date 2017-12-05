@@ -9,35 +9,40 @@
 #include <iostream>
 #include <vector>
 
-Texture::TextureData Loader::getTextureData(const std::string fileName, const bool flip) {
-    Texture::TextureData td;
-    stbi_set_flip_vertically_on_load(flip);
-    td.data = stbi_load(fileName.c_str(), &td.width, &td.height, &td.components, STBI_rgb_alpha);
-    if (td.data) {
-        std::cout << "Loaded texture (" << td.width << ", " << td.height << "): " << fileName << std::endl;
-    }
-    else {
-        std::cerr << "Could not find texture file " << fileName << std::endl;
-    }
-
-    return td;
+void Loader::init(Context &ctx) {
+    this->verbose = ctx.verbose;
 }
 
-Texture Loader::loadTexture(const std::string fileName) {
-    Texture texture;
-    std::map<std::string, GLint>::iterator it = textures.find(fileName);
-    if (it != textures.end()) {
-        texture.textureId = it->second;
-    }
-    else {
-        Texture::TextureData td = getTextureData(fileName, true);
-        if(td.data) {
-            texture.init(td);
-            if (texture.textureId) {
-                textures.insert(std::map<std::string, GLint>::value_type(fileName, texture.textureId));
-            }
-            stbi_image_free(td.data);
+uint8_t* Loader::loadTextureData(Texture *tex, const std::string fileName, const bool flip) {
+    uint8_t *data;
+
+    stbi_set_flip_vertically_on_load(flip);
+    data = stbi_load(fileName.c_str(), &tex->width, &tex->height, &tex->components, STBI_rgb_alpha);
+
+    if (verbose) {
+        if (data) {
+            std::cout << "Loaded texture (" << tex->width << ", " << tex->height << "): " << fileName << std::endl;
         }
+       else {
+           std::cerr << "Could not find texture file " << fileName << std::endl;
+       }
+    }
+    return data;
+}
+
+Texture* Loader::loadTexture(const std::string fileName) {
+    std::map<std::string, Texture *>::iterator it = textures.find(fileName);
+    if (it != textures.end()) {
+        return it->second;
+    }
+    Texture *texture = new Texture;
+    uint8_t *data = loadTextureData(texture, fileName, true);
+    if(data) {
+        texture->init(data);
+        if (texture->textureId) {
+            textures.insert(std::map<std::string, Texture*>::value_type(fileName, texture));
+        }
+        stbi_image_free(data);
     }
     return texture;
 }
@@ -83,37 +88,38 @@ Mesh* Loader::loadObjMesh(const std::string fileName) {
     
     meshes.insert(std::map<std::string, Mesh*>::value_type(fileName, mesh));
 
-    std::cout << "Loaded mesh (" << vertCount << " vertices): " << fileName << std::endl;
+    if (verbose) {
+        std::cout << "Loaded mesh (" << vertCount << " vertices): " << fileName << std::endl;
+    }
 
     return mesh;
 }
 
-CubeTexture Loader::loadCubeTexture(const std::string fileNames[6]) {
-    CubeTexture cubeTexture;
+CubeTexture* Loader::loadCubeTexture(const std::string fileNames[6]) {
 
     /* If texture has already been loaded, just return it */
-    std::map<std::string, GLint>::iterator it = textures.find(fileNames[0]);
+    std::map<std::string, Texture *>::iterator it = textures.find(fileNames[0]);
     if (it != textures.end()) {
-        cubeTexture.textureId = it->second;
+        return (CubeTexture *) it->second;
     }
-    else {
-        /* Load in texture data to CPU */
-        Texture::TextureData tds[6];
-        for (int i = 0; i < 6; i++) {
-            tds[i] = getTextureData(fileNames[i], false);
-        }
 
-        /* Copy cube texture data to GPU */
-        cubeTexture.init(tds);
-        
-        /* Add to map based on first file name */
-        if (cubeTexture.textureId) {
-            textures.insert(std::map<std::string, GLint>::value_type(fileNames[0], cubeTexture.textureId));
-        }
-        /* Free data from CPU */
-        for (int i = 0; i < 6; i++) {
-            stbi_image_free(tds[i].data);
-        }
+    CubeTexture *cubeTexture = new CubeTexture;
+    /* Load in texture data to CPU */
+    uint8_t* data[6];
+    for (int i = 0; i < 6; i++) {
+        data[i] = loadTextureData(cubeTexture, fileNames[i], false);
+    }
+
+    /* Copy cube texture data to GPU */
+    cubeTexture->init(data);
+    
+    /* Add to map based on first file name */
+    if (cubeTexture->textureId) {
+        textures.insert(std::map<std::string, Texture*>::value_type(fileNames[0], cubeTexture));
+    }
+    /* Free data from CPU */
+    for (int i = 0; i < 6; i++) {
+        stbi_image_free(data[i]);
     }
     
     return cubeTexture;

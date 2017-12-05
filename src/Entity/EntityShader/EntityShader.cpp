@@ -66,6 +66,6 @@ void EntityShader::loadUsesTexture(const bool b) {
     this->loadBool(getUniform("usesTexture"), b);
 }
 
-void EntityShader::loadTexture(const Texture &texture) {
-    this->loadInt(getUniform("textureImage"), texture.textureId);
+void EntityShader::loadTexture(const Texture *texture) {
+    this->loadInt(getUniform("textureImage"), texture->textureId);
 }

@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
         std::cerr << "Failed to init display" << std::endl;
     }
     context.init();
+    loader.init(context);
 
     /* Create world */
     world = context.createWorld();

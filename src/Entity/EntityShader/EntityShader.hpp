@@ -25,7 +25,7 @@ class EntityShader : public Shader {
         void loadShine(const float);
         void loadLight(const Light &);
         void loadUsesTexture(const bool);
-        void loadTexture(const Texture &);
+        void loadTexture(const Texture *);
         void loadTime(const float);
 };
 

@@ -47,7 +47,7 @@ void EntityRenderer::render(const World *world) {
         eShader->loadM(&M);
 
         /* Prepare texture/material */
-        prepareTexture(e->texture);
+        prepareTexture(e->modelTexture);
 
         /* Prepare mesh */
         prepareMesh(e->mesh);
@@ -59,7 +59,7 @@ void EntityRenderer::render(const World *world) {
         unPrepareMesh(e->mesh);
 
         /* Clean up texture */
-        unPrepareTexture(e->texture);
+        unPrepareTexture(e->modelTexture);
     }
 }
 
@@ -95,25 +95,25 @@ void EntityRenderer::prepareMesh(const Mesh *mesh) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId);
 }
 
-void EntityRenderer::prepareTexture(const ModelTexture &texture) {
+void EntityRenderer::prepareTexture(const ModelTexture &modelTexture) {
     EntityShader *eShader = dynamic_cast<EntityShader*>(shader);
 
     /* Bind texture if it exists */
-    if(texture.textureImage.textureId != 0) {
+    if(modelTexture.texture->textureId != 0) {
         eShader->loadUsesTexture(true);
-        eShader->loadTexture(texture.textureImage);
-        glActiveTexture(GL_TEXTURE0 + texture.textureImage.textureId);
-        glBindTexture(GL_TEXTURE_2D, texture.textureImage.textureId);
+        eShader->loadTexture(modelTexture.texture);
+        glActiveTexture(GL_TEXTURE0 + modelTexture.texture->textureId);
+        glBindTexture(GL_TEXTURE_2D, modelTexture.texture->textureId);
     }
     else {
         eShader->loadUsesTexture(false);
     }
 
     /* Bind materials */
-    eShader->loadMaterial(texture.ambientColor, 
-                          texture.diffuseColor, 
-                          texture.specularColor);
-    eShader->loadShine(texture.shineDamper);
+    eShader->loadMaterial(modelTexture.ambientColor, 
+                          modelTexture.diffuseColor, 
+                          modelTexture.specularColor);
+    eShader->loadShine(modelTexture.shineDamper);
 }
 
 void EntityRenderer::unPrepareMesh(const Mesh *mesh) {
@@ -133,8 +133,8 @@ void EntityRenderer::unPrepareMesh(const Mesh *mesh) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void EntityRenderer::unPrepareTexture(const ModelTexture &texture) {
-    glActiveTexture(GL_TEXTURE0 + texture.textureImage.textureId);
+void EntityRenderer::unPrepareTexture(const ModelTexture &modelTexture) {
+    glActiveTexture(GL_TEXTURE0 + modelTexture.texture->textureId);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 

@@ -14,7 +14,7 @@ void SkyboxRenderer::setGlobals(const glm::mat4 *projection, const glm::mat4 *vi
 
     /* Create skybox view matrix */
     glm::mat4 skyboxV = glm::mat4(*view);
-    skyboxV[3][0] = skyboxV[3][1] = skyboxV[3][2] = 0;
+    // skyboxV[3][0] = skyboxV[3][1] = skyboxV[3][2] = 0;
     skyboxV *= glm::rotate(glm::mat4(1.f), glm::radians(skybox->rotation), glm::vec3(0, 1, 0));
     sShader->loadV(&skyboxV);
 }
@@ -35,8 +35,8 @@ void SkyboxRenderer::render(const World *world) {
 
     /* Bind texture */
     sShader->loadCubeTexture(skybox->cubeTexture);
-    glActiveTexture(GL_TEXTURE0 + skybox->cubeTexture.textureId);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->cubeTexture.textureId);
+    glActiveTexture(GL_TEXTURE0 + skybox->cubeTexture->textureId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->cubeTexture->textureId);
     
     /* Draw */
     glDrawArrays(GL_TRIANGLES, 0, skybox->mesh->vertBuf.size() / 3);

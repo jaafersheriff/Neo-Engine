@@ -25,6 +25,10 @@ int Context::processArgs(int argc, char **argv) {
             printUsage();
             return 1;
         }
+        /* Set verbose */
+        if (!strcmp(argv[i], "-v")) {
+            verbose = true;
+        }
 
         /* Process window size */
         if (!strcmp(argv[i], "-s")) {
@@ -112,6 +116,9 @@ void Context::update() {
         fps = double(nbFrames);
         nbFrames = 0.0;
         lastFpsTime = runningTime;
+        if (verbose) {
+            std::cout << fps << std::endl;
+        }
     }
 }
 

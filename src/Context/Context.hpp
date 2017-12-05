@@ -24,9 +24,10 @@ class Context {
         Mouse mouse;
         Keyboard keyboard;
 
-        float runningTime;  /* Global timer                             */
-        double lastTime;    /* Time at which last frame was rendered    */
-        float displayTime;  /* Time to render last frame in seconds     */
+        float runningTime;      /* Global timer                             */
+        double lastTime;        /* Time at which last frame was rendered    */
+        float displayTime;      /* Time to render last frame in seconds     */
+        bool verbose = false;   /* Print things as they happen */
 
         /* Process command line args */
         int processArgs(int, char**);

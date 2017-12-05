@@ -1,7 +1,7 @@
 #include "Texture.hpp"
 
 /* Copy TextureData to GPU */
-void Texture::init(const TextureData td) {
+void Texture::init(const uint8_t *data) {
     /* Set active texture unit 0 */
     glActiveTexture(GL_TEXTURE0);
 
@@ -12,7 +12,7 @@ void Texture::init(const TextureData td) {
     glBindTexture(GL_TEXTURE_2D, textureId);
 
     /* Load texture data to GPU */
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, td.width, td.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, td.data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
     /* Generate image pyramid */
     glGenerateMipmap(GL_TEXTURE_2D);

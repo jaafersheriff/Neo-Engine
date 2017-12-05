@@ -26,6 +26,6 @@ void SkyboxShader::loadV(const glm::mat4 *v) {
     this->loadMat4(getUniform("V"), v);
 }
 
-void SkyboxShader::loadCubeTexture(const CubeTexture &ct) {
-    this->loadInt(getUniform("cubeMap"), ct.textureId);
+void SkyboxShader::loadCubeTexture(const CubeTexture *ct) {
+    this->loadInt(getUniform("cubeMap"), ct->textureId);
 }

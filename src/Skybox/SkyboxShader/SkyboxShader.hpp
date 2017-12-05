@@ -14,7 +14,7 @@ class SkyboxShader : public Shader {
 
         void loadP(const glm::mat4 *);
         void loadV(const glm::mat4 *);
-        void loadCubeTexture(const CubeTexture &);
+        void loadCubeTexture(const CubeTexture *);
 };
 
 #endif

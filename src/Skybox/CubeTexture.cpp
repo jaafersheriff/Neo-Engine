@@ -1,6 +1,6 @@
 #include "CubeTexture.hpp"
 
-void CubeTexture::init(const TextureData td[6]) {
+void CubeTexture::init(uint8_t *data[6]) {
 
     glActiveTexture(GL_TEXTURE0);
 
@@ -9,12 +9,13 @@ void CubeTexture::init(const TextureData td[6]) {
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
 
     for(int i = 0; i < 6; i++) {
-        if (td[i].data) {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, td[i].width, td[i].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, td[i].data);
+        if (data[i]) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, this->width, this->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data[i]);
         }
     }
 
-    // TODO : update wrap clamp
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }

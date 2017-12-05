@@ -13,7 +13,7 @@ class ModelTexture {
     public:
         /* Constructors */
         ModelTexture() 
-        {}
+        { }
     
         ModelTexture(const float ambient, const glm::vec3 diffuse, const glm::vec3 specular) :
             ambientColor(ambient),
@@ -22,8 +22,8 @@ class ModelTexture {
         {}
 
 
-        ModelTexture(const Texture texture, const float ambient, const glm::vec3 diffuse, const glm::vec3 specular) :
-            textureImage(texture), 
+        ModelTexture(Texture *texture, const float ambient, const glm::vec3 diffuse, const glm::vec3 specular) :
+            texture(texture), 
             ambientColor(ambient),
             diffuseColor(diffuse),
             specularColor(specular)
@@ -31,7 +31,7 @@ class ModelTexture {
 
         /* Texture properties */
         // TODO : comments describing what each of these do
-        Texture textureImage;       
+        Texture *texture;       
         float shineDamper = 1.f;
         bool hasTranspency = false;
         bool hasFakeLighting = false;
