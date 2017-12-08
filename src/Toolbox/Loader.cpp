@@ -19,13 +19,13 @@ uint8_t* Loader::loadTextureData(Texture *tex, const std::string fileName, const
     stbi_set_flip_vertically_on_load(flip);
     data = stbi_load(fileName.c_str(), &tex->width, &tex->height, &tex->components, STBI_rgb_alpha);
 
-    if (verbose) {
-        if (data) {
+    if (data) {
+        if (verbose) {
             std::cout << "Loaded texture (" << tex->width << ", " << tex->height << "): " << fileName << std::endl;
         }
-       else {
-           std::cerr << "Could not find texture file " << fileName << std::endl;
-       }
+    }
+    else {
+        std::cerr << "Could not find texture file " << fileName << std::endl;
     }
     return data;
 }

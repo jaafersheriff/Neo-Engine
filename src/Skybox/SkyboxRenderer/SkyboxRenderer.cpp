@@ -14,7 +14,7 @@ void SkyboxRenderer::setGlobals(const glm::mat4 *projection, const glm::mat4 *vi
 
     /* Create skybox view matrix */
     glm::mat4 skyboxV = glm::mat4(*view);
-    // skyboxV[3][0] = skyboxV[3][1] = skyboxV[3][2] = 0;
+    skyboxV[3][0] = skyboxV[3][1] = skyboxV[3][2] = 0;
     skyboxV *= glm::rotate(glm::mat4(1.f), glm::radians(skybox->rotation), glm::vec3(0, 1, 0));
     sShader->loadV(&skyboxV);
 }
