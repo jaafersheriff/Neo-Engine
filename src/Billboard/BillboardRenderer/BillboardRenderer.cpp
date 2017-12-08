@@ -42,6 +42,7 @@ void BillboardRenderer::render(const World *world) {
     BillboardShader *bShader = dynamic_cast<BillboardShader *>(shader);
     glDisable(GL_DEPTH_TEST);
 
+    bShader->loadCameraPosition(world->camera.position);
     /* Iterate through billboards */
     glm::mat4 M;
     for (auto billboard : *billboards) {
@@ -58,8 +59,7 @@ void BillboardRenderer::render(const World *world) {
         bShader->loadSize(billboard->size);
 
         /* Load billboard's rotation */
-        M = glm::mat4(1.f);
-        M *= glm::rotate(glm::mat4(1.f), glm::radians(billboard->rotation), glm::vec3(0, 0, 1));
+        M = glm::rotate(glm::mat4(1.f), glm::radians(billboard->rotation), glm::vec3(0, 0, 1));
         bShader->loadM(&M);
 
         /* Load texture */

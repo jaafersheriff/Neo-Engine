@@ -12,6 +12,7 @@ bool BillboardShader::init() {
     addUniform("P");
     addUniform("V");
     addUniform("M");
+    addUniform("cameraPosition");
 
     /* Billboard things */
     addUniform("center");
@@ -29,6 +30,10 @@ void BillboardShader::loadP(const glm::mat4 *p) {
 
 void BillboardShader::loadV(const glm::mat4 *v) {
     this->loadMat4(getUniform("V"), v);
+}
+
+void BillboardShader::loadCameraPosition(const glm::vec3 c) {
+    this->loadVec3(getUniform("cameraPosition"), c);
 }
 
 void BillboardShader::loadM(const glm::mat4 *m) {

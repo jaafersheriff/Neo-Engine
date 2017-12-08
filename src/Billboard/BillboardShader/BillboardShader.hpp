@@ -14,6 +14,7 @@ class BillboardShader : public Shader {
         void loadP(const glm::mat4 *);
         void loadV(const glm::mat4 *);
         void loadM(const glm::mat4 *);
+        void loadCameraPosition(const glm::vec3);
 
         void loadCenter(const glm::vec3);
         void loadSize(const glm::vec2);
