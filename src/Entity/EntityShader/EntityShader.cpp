@@ -15,6 +15,7 @@ bool EntityShader::init() {
     addUniform("P");
     addUniform("M");
     addUniform("V");
+    addUniform("cameraPosition");
 
     /* Add texture info */
     addUniform("usesTexture");
@@ -44,6 +45,10 @@ void EntityShader::loadM(const glm::mat4 *m) {
 
 void EntityShader::loadV(const glm::mat4 *v) {
     this->loadMat4(getUniform("V"), v);
+}
+
+void EntityShader::loadCameraPos(const glm::vec3 c) {
+    this->loadVec3(getUniform("cameraPosition"), c);
 }
 
 void EntityShader::loadMaterial(const float ambient, const glm::vec3 diffuse, const glm::vec3 specular) {

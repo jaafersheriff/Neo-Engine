@@ -2,7 +2,7 @@
 
 in vec4 worldPos;
 in vec3 fragNormal;
-in vec4 viewDir;
+in vec3 viewDir;
 in vec2 textureCoords;
 
 uniform float matAmbient;
@@ -21,7 +21,7 @@ out vec4 color;
 
 void main() {
     vec3 lightDir = lightPos - worldPos.xyz;
-    vec3 V = normalize(viewDir.xyz);
+    vec3 V = normalize(viewDir);
     vec3 L = normalize(lightDir);
     vec3 N = normalize(fragNormal);
 

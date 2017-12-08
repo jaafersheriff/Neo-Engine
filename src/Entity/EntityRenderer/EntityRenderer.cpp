@@ -27,6 +27,7 @@ void EntityRenderer::render(const World *world) {
 
     /* There's only one light in world */
     eShader->loadLight(world->light);
+    eShader->loadCameraPos(world->camera.position);
 
     /* Loop through every entity */
     // TODO : batched render
@@ -99,7 +100,7 @@ void EntityRenderer::prepareTexture(const ModelTexture &modelTexture) {
     EntityShader *eShader = dynamic_cast<EntityShader*>(shader);
 
     /* Bind texture if it exists */
-    if(modelTexture.texture->textureId != 0) {
+    if(modelTexture.texture && modelTexture.texture->textureId != 0) {
         eShader->loadUsesTexture(true);
         eShader->loadTexture(modelTexture.texture);
         glActiveTexture(GL_TEXTURE0 + modelTexture.texture->textureId);
@@ -134,7 +135,10 @@ void EntityRenderer::unPrepareMesh(const Mesh *mesh) {
 }
 
 void EntityRenderer::unPrepareTexture(const ModelTexture &modelTexture) {
-    glActiveTexture(GL_TEXTURE0 + modelTexture.texture->textureId);
+    if (modelTexture.texture) {
+        glActiveTexture(GL_TEXTURE0 + modelTexture.texture->textureId);
+
+    }
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 

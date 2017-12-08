@@ -7,17 +7,18 @@ layout(location = 2) in vec2 vertexTexture;
 uniform mat4 P;
 uniform mat4 M;
 uniform mat4 V;
+uniform vec3 cameraPosition;
 
 out vec4 worldPos;
 out vec3 fragNormal;
-out vec4 viewDir;
+out vec3 viewDir;
 out vec2 textureCoords;
 
 void main() {
     worldPos = M * vertexPos;
     gl_Position = P * V * worldPos;
 
-    viewDir = (inverse(V) * vec4(0.0, 0.0, 0.0, 1.0)) - worldPos;
+    viewDir = cameraPosition - worldPos.xyz;
     fragNormal = vec3(M * vec4(vertexNormal, 0.0));
     textureCoords = vertexTexture;
 }
