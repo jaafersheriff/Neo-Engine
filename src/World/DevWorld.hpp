@@ -5,7 +5,6 @@
 #define _DEV_WORLD_HPP_
 
 #include "World/World.hpp"
-#include "Entity/Entity.hpp"
 #include "Toolbox/Toolbox.hpp"
 
 class DevWorld : public World {
@@ -14,6 +13,7 @@ public:
         std::vector<Entity *> entities;
         Skybox *sb;
         std::vector<CloudBillboard *> cloudBoards;
+        Sun *sun;
 
         /* World-specific members */
         bool isPaused = false;

@@ -34,8 +34,11 @@ void DevWorld::init(Loader &loader) {
                     );
         c->rotation = 360.f * Toolbox::genRandom();
         cloudBoards.push_back(c);
-  }
-        
+    }
+
+    /* Sun */
+    sun = new Sun(loader.loadTexture("moon.png"));
+
     /* Set up light */
     light.position = glm::vec3(-1000, 1000, 1000);
     light.color = glm::vec3(1.f);

@@ -10,6 +10,7 @@
 #include "Entity/Entity.hpp"
 #include "Skybox/Skybox.hpp"
 #include "Cloud/CloudBillboard.hpp"
+#include "Sun/Sun.hpp"
 
 #include "glm/glm.hpp"
 
