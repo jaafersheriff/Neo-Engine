@@ -31,7 +31,7 @@ class ModelTexture {
 
         /* Texture properties */
         // TODO : comments describing what each of these do
-        Texture *texture;       
+        Texture *texture = nullptr;
         float shineDamper = 1.f;
         bool hasTranspency = false;
         bool hasFakeLighting = false;

@@ -5,11 +5,10 @@
 void DevWorld::init(Loader &loader) {
     /* Create entities */
     Entity *e = new Entity(loader.loadObjMesh("../resources/mr_krab.obj"),
-                           loader.loadTexture("../resources/mr_krab.png"),
-                           glm::vec3(15.f, 0.f, 0.f), 
+                        //    loader.loadTexture("../resources/mr_krab.png"),
+                           glm::vec3(15.f, 15.f, 0.f), 
                            glm::vec3(0), 
                            glm::vec3(10.f, 10, 10.f));
-    e->modelTexture.diffuseColor = glm::vec3(0.77f, 0.1f, 1.f);
     // entities.push_back(e);
 
     /* Skybox */
@@ -24,18 +23,18 @@ void DevWorld::init(Loader &loader) {
 
     /* Billboards */
     Texture *cloudTexture = loader.loadTexture("../resources/cloud.png");
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < 1; i++) {
         Billboard *b = new Billboard(
                         cloudTexture,
                         glm::vec3(
-                            Toolbox::genRandom(-8.f, 8.f),
-                            Toolbox::genRandom(0.f, 4.f),
-                            Toolbox::genRandom(-12.f, 12.f)),
-                        glm::vec2(cloudTexture->width/75.f, cloudTexture->height/75.f)
+                            Toolbox::genRandom(25.f, 35.f),
+                            Toolbox::genRandom(0.f, 10.f),
+                            Toolbox::genRandom(-7.f, 7.f)),
+                        glm::vec2(cloudTexture->width, cloudTexture->height)/75.f
                     );
         b->rotation = 360.f * Toolbox::genRandom();
         billboards.push_back(b);
-    }
+  }
         
     /* Set up light */
     light.position = glm::vec3(-1000, 1000, 1000);
