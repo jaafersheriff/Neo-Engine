@@ -28,7 +28,7 @@ class MasterRenderer {
 
         /* Activate subrenderers */
         void activateEntityRenderer(std::vector<Entity *> *);
-        void activateBillboardRenderer(std::vector<Billboard *> *);
+        void activateCloudRenderer(std::vector<Billboard *> *);
         void activateSkyboxRenderer(Skybox *);
         
         /* Init */

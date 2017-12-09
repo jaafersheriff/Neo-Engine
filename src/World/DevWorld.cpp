@@ -33,7 +33,7 @@ void DevWorld::init(Loader &loader) {
                         glm::vec2(cloudTexture->width, cloudTexture->height)/75.f
                     );
         b->rotation = 360.f * Toolbox::genRandom();
-        billboards.push_back(b);
+        cloudBoards.push_back(b);
   }
         
     /* Set up light */
@@ -47,7 +47,7 @@ void DevWorld::prepareRenderer(MasterRenderer *mr) {
     if (sb) {
         mr->activateSkyboxRenderer(sb);
     }
-    mr->activateBillboardRenderer(&billboards);
+    mr->activateCloudRenderer(&cloudBoards);
     mr->activateEntityRenderer(&entities);
 }
 
@@ -67,8 +67,8 @@ void DevWorld::update(Context &ctx) {
     if (sb) {
         sb->update(ctx.displayTime);
     }
-    /* Update billboards */
-    for (auto billboard : billboards) {
+    /* Update cloudBoards */
+    for (auto billboard : cloudBoards) {
         billboard->update(this->camera);
     }
 }

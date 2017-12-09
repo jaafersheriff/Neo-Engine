@@ -1,14 +1,14 @@
 #pragma once
-#ifndef _BILLBOARD_SHADER_HPP_
-#define _BILLBOARD_SHADER_HPP_
+#ifndef _CLOUD_SHADER_HPP_
+#define _CLOUD_SHADER_HPP_
 
 #include "Shader/Shader.hpp"
 #include "Model/Texture.hpp"
 
-class BillboardShader : public Shader {
+class CloudShader : public Shader {
     public:
-        BillboardShader() : Shader("../src/Billboard/BillboardShader/billboard_vertex_shader.glsl",
-                                   "../src/Billboard/BillboardShader/billboard_fragment_shader.glsl") { }
+        CloudShader() : Shader("../src/Cloud/CloudShader/cloud_vertex_shader.glsl",
+                               "../src/Cloud/CloudShader/cloud_fragment_shader.glsl") { }
         bool init();
 
         void loadP(const glm::mat4 *);

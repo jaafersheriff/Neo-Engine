@@ -5,7 +5,7 @@
 
 #include "Entity/EntityRenderer/EntityRenderer.hpp"
 #include "Skybox/SkyboxRenderer/SkyboxRenderer.hpp"
-#include "Billboard/BillboardRenderer/BillboardRenderer.hpp"
+#include "Cloud/CloudRenderer/CloudRenderer.hpp"
 
 #include "Shader/GLSL.hpp"
 
@@ -60,10 +60,10 @@ void MasterRenderer::activateSkyboxRenderer(Skybox *sb) {
     }
 }
 
-void MasterRenderer::activateBillboardRenderer(std::vector<Billboard *> *billboards) {
-    BillboardRenderer *bR = new BillboardRenderer;
-    if (bR->activate(billboards)) {
-        renderers.push_back(bR);
+void MasterRenderer::activateCloudRenderer(std::vector<Billboard *> *billboards) {
+    CloudRenderer *cR = new CloudRenderer;
+    if (cR->activate(billboards)) {
+        renderers.push_back(cR);
     }
 }
 
