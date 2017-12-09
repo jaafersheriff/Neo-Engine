@@ -7,17 +7,16 @@
 
 #include "Context/Display.hpp"
 
-#include "Entity/Entity.hpp"
-#include "Skybox/Skybox.hpp"
-#include "Cloud/CloudBillboard.hpp"
-#include "Sun/Sun.hpp"
-
 #include "glm/glm.hpp"
 
 #include <vector>
 
 class World;
 class Renderer;
+class Entity;
+class Skybox;
+class CloudBillboard;
+class Sun;
 
 class MasterRenderer {
     public:

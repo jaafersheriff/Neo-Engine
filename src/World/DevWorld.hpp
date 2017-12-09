@@ -7,6 +7,11 @@
 #include "World/World.hpp"
 #include "Toolbox/Toolbox.hpp"
 
+#include "Entity/Entity.hpp"
+#include "Skybox/Skybox.hpp"
+#include "Cloud/CloudBillboard.hpp"
+#include "Sun/Sun.hpp"
+
 class DevWorld : public World {
 public:
         /* World-specific render targets */
