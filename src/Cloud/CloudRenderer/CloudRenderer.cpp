@@ -1,7 +1,7 @@
 #include "CloudRenderer.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-bool CloudRenderer::activate(std::vector<Billboard *> *billboards) {
+bool CloudRenderer::activate(std::vector<CloudBillboard *> *billboards) {
     this->billboards = billboards;
     shader = new CloudShader;
     return shader->init();
@@ -24,7 +24,7 @@ void CloudRenderer::prepare() {
             }
         }
         if (minSize != i) {
-            Billboard *tmp = billboards->at(i);
+            CloudBillboard *tmp = billboards->at(i);
             billboards->at(i) = billboards->at(minSize);
             billboards->at(minSize) = tmp;
         }

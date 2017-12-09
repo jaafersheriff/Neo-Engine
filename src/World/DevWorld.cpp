@@ -24,7 +24,7 @@ void DevWorld::init(Loader &loader) {
     /* Billboards */
     Texture *cloudTexture = loader.loadTexture("../resources/cloud.png");
     for (int i = 0; i < 1; i++) {
-        Billboard *b = new Billboard(
+        CloudBillboard *c = new CloudBillboard(
                         cloudTexture,
                         glm::vec3(
                             Toolbox::genRandom(25.f, 35.f),
@@ -32,8 +32,8 @@ void DevWorld::init(Loader &loader) {
                             Toolbox::genRandom(-7.f, 7.f)),
                         glm::vec2(cloudTexture->width, cloudTexture->height)/75.f
                     );
-        b->rotation = 360.f * Toolbox::genRandom();
-        cloudBoards.push_back(b);
+        c->rotation = 360.f * Toolbox::genRandom();
+        cloudBoards.push_back(c);
   }
         
     /* Set up light */

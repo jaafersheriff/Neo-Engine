@@ -9,7 +9,7 @@
 
 #include "Entity/Entity.hpp"
 #include "Skybox/Skybox.hpp"
-#include "Billboard/Billboard.hpp"
+#include "Cloud/CloudBillboard.hpp"
 
 #include "glm/glm.hpp"
 
@@ -28,7 +28,7 @@ class MasterRenderer {
 
         /* Activate subrenderers */
         void activateEntityRenderer(std::vector<Entity *> *);
-        void activateCloudRenderer(std::vector<Billboard *> *);
+        void activateCloudRenderer(std::vector<CloudBillboard *> *);
         void activateSkyboxRenderer(Skybox *);
         
         /* Init */

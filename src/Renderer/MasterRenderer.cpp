@@ -60,7 +60,7 @@ void MasterRenderer::activateSkyboxRenderer(Skybox *sb) {
     }
 }
 
-void MasterRenderer::activateCloudRenderer(std::vector<Billboard *> *billboards) {
+void MasterRenderer::activateCloudRenderer(std::vector<CloudBillboard *> *billboards) {
     CloudRenderer *cR = new CloudRenderer;
     if (cR->activate(billboards)) {
         renderers.push_back(cR);

@@ -5,13 +5,13 @@
 #include "Renderer/Renderer.hpp"
 #include "Cloud/CloudShader/CloudShader.hpp"
 
-#include "Billboard/Billboard.hpp"
+#include "Cloud/CloudBillboard.hpp"
 
 class CloudRenderer : public Renderer {
     public:
-        std::vector<Billboard *> *billboards;
+        std::vector<CloudBillboard *> *billboards;
 
-        bool activate(std::vector<Billboard *> *);
+        bool activate(std::vector<CloudBillboard *> *);
         void prepare();
         void setGlobals(const glm::mat4 *, const glm::mat4 *);
         void render(const World *);

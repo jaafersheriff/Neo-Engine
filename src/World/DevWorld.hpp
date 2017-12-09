@@ -13,7 +13,7 @@ public:
         /* World-specific render targets */
         std::vector<Entity *> entities;
         Skybox *sb;
-        std::vector<Billboard *> cloudBoards;
+        std::vector<CloudBillboard *> cloudBoards;
 
         /* World-specific members */
         bool isPaused = false;

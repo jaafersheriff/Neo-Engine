@@ -1,6 +1,5 @@
 #include "Billboard.hpp"
 
-
 Billboard::Billboard(const glm::vec3 c, const glm::vec2 s) {
     this->center = c;
     this->size = s;
@@ -19,8 +18,4 @@ Billboard::Billboard(const glm::vec3 c, const glm::vec2 s) {
 Billboard::Billboard(Texture *t, const glm::vec3 c, const glm::vec2 s) :
     Billboard(c, s) {
     this->texture = t;
-}
-
-void Billboard::update(const Camera &camera) {
-    this->distance = glm::distance(this->center, camera.position);
 }
