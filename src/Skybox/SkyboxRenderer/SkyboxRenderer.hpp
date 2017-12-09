@@ -11,7 +11,7 @@ class SkyboxRenderer : public Renderer {
     public:
         Skybox *skybox;
 
-        void activate(Skybox *);
+        bool activate(Skybox *);
         void prepare();
         void setGlobals(const glm::mat4 *, const glm::mat4 *);
         void render(const World *);

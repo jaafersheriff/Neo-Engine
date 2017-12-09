@@ -17,7 +17,7 @@ class EntityRenderer : public Renderer {
         std::vector<Entity *> *entitiesPointer;
 
         /* Activate self and shader */
-        void activate(std::vector<Entity *> *);
+        bool activate(std::vector<Entity *> *);
 
         /* Set any global variables in shader */
         void setGlobals(const glm::mat4*, const glm::mat4*);

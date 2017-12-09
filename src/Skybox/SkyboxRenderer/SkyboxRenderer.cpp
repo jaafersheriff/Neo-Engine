@@ -2,7 +2,7 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
-void SkyboxRenderer::activate(Skybox *skybox) {
+bool SkyboxRenderer::activate(Skybox *skybox) {
     this->skybox = skybox;
     shader = new SkyboxShader;
     shader->init();

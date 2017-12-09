@@ -2,10 +2,10 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
-void EntityRenderer::activate(std::vector<Entity *> *ep) {
+bool EntityRenderer::activate(std::vector<Entity *> *ep) {
     this->entitiesPointer = ep;
     shader = new EntityShader;
-    shader->init();
+    return shader->init();
 }
 
 void EntityRenderer::setGlobals(const glm::mat4 *projection, const glm::mat4 *view) {

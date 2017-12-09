@@ -1,10 +1,10 @@
 #include "BillboardRenderer.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-void BillboardRenderer::activate(std::vector<Billboard *> *billboards) {
+bool BillboardRenderer::activate(std::vector<Billboard *> *billboards) {
     this->billboards = billboards;
     shader = new BillboardShader;
-    shader->init();
+    return shader->init();
 }
 
 void BillboardRenderer::setGlobals(const glm::mat4 *projection, const glm::mat4 *view) {

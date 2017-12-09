@@ -48,20 +48,23 @@ void MasterRenderer::init() {
 
 void MasterRenderer::activateEntityRenderer(std::vector<Entity *> *entities) {
     EntityRenderer *eR = new EntityRenderer;
-    eR->activate(entities);
-    renderers.push_back(eR);
+    if (eR->activate(entities)) {
+        renderers.push_back(eR);
+    }
 }
 
 void MasterRenderer::activateSkyboxRenderer(Skybox *sb) {
     SkyboxRenderer *sbR = new SkyboxRenderer;
-    sbR->activate(sb);
-    renderers.push_back(sbR);
+    if (sbR->activate(sb)) {
+        renderers.push_back(sbR);
+    }
 }
 
 void MasterRenderer::activateBillboardRenderer(std::vector<Billboard *> *billboards) {
     BillboardRenderer *bR = new BillboardRenderer;
-    bR->activate(billboards);
-    renderers.push_back(bR);
+    if (bR->activate(billboards)) {
+        renderers.push_back(bR);
+    }
 }
 
 void MasterRenderer::cleanUp() {
