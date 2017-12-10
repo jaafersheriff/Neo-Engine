@@ -43,7 +43,7 @@ void CloudRenderer::render(const World *world) {
     glm::mat4 M;
 
     for (auto billboard : *billboards) {
-        /* Bind vertices & texture coords */
+        /* Bind vertices */
         // TODO : why do i need to do this per billboard?
         glBindVertexArray(billboard->mesh->vaoId);
         int pos = shader->getAttribute("vertexPos");

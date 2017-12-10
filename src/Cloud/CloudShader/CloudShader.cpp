@@ -14,7 +14,7 @@ bool CloudShader::init() {
     addUniform("M");
     addUniform("cameraPosition");
 
-    /* Cloud things */
+    /* Billboard things */
     addUniform("center");
     addUniform("size");
 

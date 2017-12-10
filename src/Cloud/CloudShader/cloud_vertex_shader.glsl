@@ -9,13 +9,12 @@ uniform vec3 cameraPosition;
 
 uniform vec3 center;
 uniform vec2 size;
-uniform float rotation;
 
 out vec3 worldPos;
 out vec3 viewDir;
 out vec2 textureCoords;
 
-void main(void) {
+void main() {
     vec3 cameraRight = vec3(V[0][0], V[1][0], V[2][0]);
     vec3 cameraUp = vec3(V[0][1], V[1][1], V[2][1]);
     vec4 rotatedPos = M * vec4(vertexPos, 1.0);
