@@ -9,6 +9,6 @@ Sun::Sun(Texture *t, float scale) :
     this->size *= scale;
 }
 
-void update(const Camera &camera) {
-    // TODO: update sun's positions based on distance to camera
+void Sun::update(const Camera &camera, const Light &light) {
+    this->center = light.position;
 }

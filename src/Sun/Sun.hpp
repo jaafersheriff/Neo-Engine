@@ -12,15 +12,12 @@
 
 class Sun : public Billboard {
     public:
-        /* Reference to light source */
-        Light *light;
-
         /* Constructors */
         Sun(Texture *);
         Sun(Texture *, float);
     
         /* Move position according to light source */
-        void update(const Camera &);
+        void update(const Camera &, const Light &);
 };
 
 #endif

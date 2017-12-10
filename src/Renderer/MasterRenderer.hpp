@@ -30,6 +30,7 @@ class MasterRenderer {
         void activateEntityRenderer(std::vector<Entity *> *);
         void activateCloudRenderer(std::vector<CloudBillboard *> *);
         void activateSkyboxRenderer(Skybox *);
+        void activateSunRenderer(Sun *);
         
         /* Init */
         void init();

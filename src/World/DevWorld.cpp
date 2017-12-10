@@ -33,11 +33,11 @@ void DevWorld::init(Loader &loader) {
                         glm::vec2(cloudTexture->width, cloudTexture->height)/75.f
                     );
         c->rotation = 360.f * Toolbox::genRandom();
-        cloudBoards.push_back(c);
+        // cloudBoards.push_back(c);
     }
 
     /* Sun */
-    sun = new Sun(loader.loadTexture("moon.png"));
+    sun = new Sun(loader.loadTexture("../resources/moon.png"));
 
     /* Set up light */
     light.position = glm::vec3(-1000, 1000, 1000);
@@ -52,6 +52,9 @@ void DevWorld::prepareRenderer(MasterRenderer *mr) {
     }
     mr->activateCloudRenderer(&cloudBoards);
     mr->activateEntityRenderer(&entities);
+    if (sun) {
+        mr->activateSunRenderer(sun);
+    }
 }
 
 void DevWorld::update(Context &ctx) {
@@ -73,6 +76,10 @@ void DevWorld::update(Context &ctx) {
     /* Update cloudBoards */
     for (auto billboard : cloudBoards) {
         billboard->update(this->camera);
+    }
+    /* Update sun */
+    if (sun) {
+        sun->update(camera, light);
     }
 }
 

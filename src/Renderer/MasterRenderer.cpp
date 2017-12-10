@@ -6,6 +6,7 @@
 #include "Entity/EntityRenderer/EntityRenderer.hpp"
 #include "Skybox/SkyboxRenderer/SkyboxRenderer.hpp"
 #include "Cloud/CloudRenderer/CloudRenderer.hpp"
+#include "Sun/SunRenderer/SunRenderer.hpp"
 
 #include "Shader/GLSL.hpp"
 
@@ -64,6 +65,13 @@ void MasterRenderer::activateCloudRenderer(std::vector<CloudBillboard *> *billbo
     CloudRenderer *cR = new CloudRenderer;
     if (cR->activate(billboards)) {
         renderers.push_back(cR);
+    }
+}
+
+void MasterRenderer::activateSunRenderer(Sun *sun) {
+    SunRenderer *sR = new SunRenderer;
+    if (sR->activate(sun)) {
+        renderers.push_back(sR);
     }
 }
 

@@ -16,8 +16,8 @@ class DevWorld : public World {
 public:
         /* World-specific render targets */
         std::vector<Entity *> entities;
-        Skybox *sb;
         std::vector<CloudBillboard *> cloudBoards;
+        Skybox *sb;
         Sun *sun;
 
         /* World-specific members */
