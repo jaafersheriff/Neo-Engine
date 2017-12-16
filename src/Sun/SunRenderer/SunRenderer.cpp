@@ -33,10 +33,19 @@ void SunRenderer::render(const World *world) {
     sShader->loadCenter(sun->center);
     sShader->loadSize(sun->size);
 
-    /* Load texture */
-    sShader->loadTexture(sun->texture);
-    glActiveTexture(GL_TEXTURE0 + sun->texture->textureId);
-    glBindTexture(GL_TEXTURE_2D, sun->texture->textureId);
+    if(sun->texture) {
+        sShader->loadUsesTexture(true);
+        sShader->loadTexture(sun->texture);
+        glActiveTexture(GL_TEXTURE0 + sun->texture->textureId);
+        glBindTexture(GL_TEXTURE_2D, sun->texture->textureId);
+    }
+    else {
+        sShader->loadUsesTexture(false);
+        sShader->loadInnerColor(sun->innerColor);
+        sShader->loadOuterColor(sun->outerColor);
+        sShader->loadInnerRadius(sun->innerRadius);
+        sShader->loadOuterRadius(sun->outerRadius);
+    }
 
     /* Draw */
     glDrawArrays(GL_TRIANGLE_STRIP, 0, sun->mesh->vertBuf.size() / 3);

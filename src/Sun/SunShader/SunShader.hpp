@@ -18,7 +18,13 @@ class SunShader : public Shader {
         void loadCenter(const glm::vec3);
         void loadSize(const glm::vec2);
 
+        void loadUsesTexture(bool);
         void loadTexture(const Texture *);
+
+        void loadInnerColor(glm::vec3);
+        void loadOuterColor(glm::vec3);
+        void loadInnerRadius(float);
+        void loadOuterRadius(float);
 };
 
 #endif

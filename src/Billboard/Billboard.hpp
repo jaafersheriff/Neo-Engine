@@ -16,7 +16,7 @@ class Billboard {
 
         /* References to billboard mesh and texture */
         Mesh *mesh;
-        Texture *texture;
+        Texture *texture = nullptr;
 
         /* Constructors */
         Billboard(const glm::vec3, const glm::vec2);
