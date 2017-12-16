@@ -17,7 +17,14 @@ bool SunShader::init() {
     addUniform("size");
 
     /* Texture */
+    addUniform("usesTexture");
     addUniform("textureImage");
+
+    /* Untextured */
+    addUniform("innerColor");
+    addUniform("outerColor");
+    addUniform("innerRadius");
+    addUniform("outerRadius");
 
     return true;
 }
@@ -40,4 +47,24 @@ void SunShader::loadSize(const glm::vec2 s) {
 
 void SunShader::loadTexture(const Texture *texture) {
     this->loadInt(getUniform("textureImage"), texture->textureId);
+}
+
+void SunShader::loadUsesTexture(bool b) {
+    this->loadBool(getUniform("usesTexture"), b);
+}
+
+void SunShader::loadInnerColor(glm::vec3 col) {
+    this->loadVec3(getUniform("innerColor"), col);
+}
+
+void SunShader::loadOuterColor(glm::vec3 col) {
+    this->loadVec3(getUniform("outerColor"), col);
+}
+
+void SunShader::loadInnerRadius(float in) {
+    this->loadFloat(getUniform("innerRadius"), in);
+}
+
+void SunShader::loadOuterRadius(float out) {
+    this->loadFloat(getUniform("outerRadius"), out);
 }
