@@ -19,7 +19,7 @@ void CloudRenderer::prepare() {
     for (int i = 0; i < billboards->size(); i++) {
         int minSize = i; 
         for (int j = i; j < billboards->size(); j++) {
-            if (billboards->at(j)->distance > billboards->at(i)->distance) {
+            if (billboards->at(j)->distance > billboards->at(minSize)->distance) {
                 minSize = j;
             }
         }
@@ -37,7 +37,7 @@ void CloudRenderer::render(const World *world) {
     }
 
     CloudShader *cShader = dynamic_cast<CloudShader *>(shader);
-    cShader->loadCameraPosition(world->camera.position);
+    cShader->loadCameraPosition(world->camera->position);
 
     glDisable(GL_DEPTH_TEST);
     glm::mat4 M;

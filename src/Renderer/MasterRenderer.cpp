@@ -22,7 +22,7 @@ void MasterRenderer::render(const Display &display, const World *world) {
     glClearColor(0.f, 0.f, 0.f, 1.f);
 
     /* Create view matrix */
-    const glm::mat4 v = glm::lookAt(world->camera.position, world->camera.lookAt, glm::vec3(0, 1, 0));
+    const glm::mat4 v = glm::lookAt(world->camera->position, world->camera->lookAt, glm::vec3(0, 1, 0));
 
     /* Loop through active subrenderers */
     for (auto &renderer : renderers) {

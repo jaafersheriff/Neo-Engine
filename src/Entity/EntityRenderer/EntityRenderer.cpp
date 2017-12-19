@@ -27,7 +27,7 @@ void EntityRenderer::render(const World *world) {
 
     /* There's only one light in world */
     eShader->loadLight(world->light);
-    eShader->loadCameraPos(world->camera.position);
+    eShader->loadCameraPos(world->camera->position);
 
     /* Loop through every entity */
     // TODO : batched render

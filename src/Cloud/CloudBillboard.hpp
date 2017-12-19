@@ -18,7 +18,7 @@ class CloudBillboard : public Billboard {
         CloudBillboard(Texture *, const glm::vec3, const glm::vec2);
 
         /* Update distance to camera */
-        void update(const Camera &);
+        void update(const Camera *);
 };
 
 #endif

@@ -18,9 +18,9 @@ class World {
         World(const std::string n) : name(n) { }
         std::string name;
 
-        /* World objects */
-        Camera camera;
-        Light light;
+        /* World members */
+        Camera *camera;
+        Light *light;
 
         /* Reference to MasterRenderer for any world-specific rendering needs */
         MasterRenderer *mr;

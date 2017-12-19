@@ -23,7 +23,7 @@ class Camera {
 
         /* Update */
         virtual void update();
-        virtual void updateLookAt(const float, const float);
+        virtual void takeMouseInput(const float, const float);
 
         /* Move according to UVW */
         virtual void moveForward();
@@ -35,10 +35,13 @@ class Camera {
 
     protected:
         /* Used for look at calculation */
-        double phi = 0.0;
-        double theta = 0.0;
+        float phi = 0.f;
+        float theta = 0.f;
         /* UVW basis vectors */
         glm::vec3 u, v, w;
+
+        void updateUVW();
+        virtual void updateLookAt();
 };
 
 #endif
