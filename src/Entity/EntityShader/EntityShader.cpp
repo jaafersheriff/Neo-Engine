@@ -61,10 +61,10 @@ void EntityShader::loadShine(const float s) {
     this->loadFloat(getUniform("shine"), s);
 }
 
-void EntityShader::loadLight(const Light &light) {
-    this->loadVec3(getUniform("lightPos"), light.position);
-    this->loadVec3(getUniform("lightCol"), light.color);
-    this->loadVec3(getUniform("lightAtt"), light.attenuation);
+void EntityShader::loadLight(const Light *light) {
+    this->loadVec3(getUniform("lightPos"), light->position);
+    this->loadVec3(getUniform("lightCol"), light->color);
+    this->loadVec3(getUniform("lightAtt"), light->attenuation);
 }
 
 void EntityShader::loadUsesTexture(const bool b) {

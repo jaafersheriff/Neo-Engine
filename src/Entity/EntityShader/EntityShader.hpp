@@ -24,7 +24,7 @@ class EntityShader : public Shader {
         void loadCameraPos(const glm::vec3);
         void loadMaterial(const float, const glm::vec3, const glm::vec3);
         void loadShine(const float);
-        void loadLight(const Light &);
+        void loadLight(const Light *);
         void loadUsesTexture(const bool);
         void loadTexture(const Texture *);
         void loadTime(const float);

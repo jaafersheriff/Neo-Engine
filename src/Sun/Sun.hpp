@@ -17,7 +17,7 @@ class Sun : public Billboard {
         
     
         /* Move position according to light source */
-        void update(const Light &);
+        void update(const Light *);
 
         /* Members used if no texture is provided */
         glm::vec3 innerColor;   /* Inner opaque color */

@@ -3,7 +3,6 @@
 #define _THIRD_PERSON_CAMERA_HPP_
 
 #include "Camera/Camera.hpp"
-#include <algorithm>
 
 #define MIN_DISTANCE 5
 #define MAX_DISTANCE 100
