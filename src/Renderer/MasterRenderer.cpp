@@ -7,6 +7,7 @@
 #include "Skybox/SkyboxRenderer/SkyboxRenderer.hpp"
 #include "Cloud/CloudRenderer/CloudRenderer.hpp"
 #include "Sun/SunRenderer/SunRenderer.hpp"
+#include "Atmosphere/AtmosphereRenderer/AtmosphereRenderer.hpp"
 
 #include "Shader/GLSL.hpp"
 
@@ -72,6 +73,13 @@ void MasterRenderer::activateSunRenderer(Sun *sun) {
     SunRenderer *sR = new SunRenderer;
     if (sR->activate(sun)) {
         renderers.push_back(sR);
+    }
+}
+
+void MasterRenderer::activateAtmosphereRenderer(Atmosphere *atm) {
+    AtmosphereRenderer *aR = new AtmosphereRenderer;
+    if (aR->activate(atm)) {
+        renderers.push_back(aR);
     }
 }
 

@@ -17,6 +17,7 @@ class Entity;
 class Skybox;
 class CloudBillboard;
 class Sun;
+class Atmosphere;
 
 class MasterRenderer {
     public:
@@ -31,7 +32,8 @@ class MasterRenderer {
         void activateCloudRenderer(std::vector<CloudBillboard *> *);
         void activateSkyboxRenderer(Skybox *);
         void activateSunRenderer(Sun *);
-        
+        void activateAtmosphereRenderer(Atmosphere *);
+
         /* Init */
         void init();
 
