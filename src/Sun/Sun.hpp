@@ -7,7 +7,6 @@
 
 #include "Billboard/Billboard.hpp"
 
-#include "Light/Light.hpp"
 #include "Camera/Camera.hpp"
 
 class Sun : public Billboard {
@@ -17,7 +16,9 @@ class Sun : public Billboard {
         
     
         /* Move position according to light source */
-        void update(const Light *);
+        void update(const glm::vec3);
+        void updateInnerRadius(const float);
+        void updateOuterRadius(const float);
 
         /* Members used if no texture is provided */
         glm::vec3 innerColor;   /* Inner opaque color */
