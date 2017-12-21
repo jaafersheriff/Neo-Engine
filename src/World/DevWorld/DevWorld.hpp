@@ -8,20 +8,17 @@
 #include "Toolbox/Toolbox.hpp"
 
 #include "Entity/Entity.hpp"
-#include "Skybox/Skybox.hpp"
 #include "Cloud/CloudBillboard.hpp"
-#include "Sun/Sun.hpp"
 
 class DevWorld : public World {
-public:
+    public:
         /* World-specific render targets */
         std::vector<Entity *> entities;
         std::vector<CloudBillboard *> cloudBoards;
-        Skybox *sb;
-        Sun *sun;
 
         /* World-specific members */
         bool isPaused = false;
+        float gameTime = 0.f;
 
         /* Constructor */
         DevWorld() : World("Dev World") { }

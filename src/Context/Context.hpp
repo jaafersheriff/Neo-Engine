@@ -14,7 +14,8 @@ class Context {
     public:
         /* Enum for world types */
         enum WorldTypes {
-            DEV_WORLD_TYPE
+            DEV_WORLD_TYPE,
+            SKY_WORLD_TYPE
         };
         /* Default world type is dev world */
         WorldTypes selectedWorld = DEV_WORLD_TYPE;

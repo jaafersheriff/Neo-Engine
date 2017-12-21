@@ -1,6 +1,7 @@
 #include "Context.hpp"
 #include "World/World.hpp"
-#include "World/DevWorld.hpp"
+#include "World/DevWorld/DevWorld.hpp"
+#include "World/SkyWorld/SkyWorld.hpp"
 
 #include <string.h>  /* strcmp, strlen  */
 #include <iostream>  /* cout, stoi      */
@@ -14,6 +15,7 @@ void Context::printUsage() {
     std::cout << "    -w <world_name>";
     std::cout << "\t\t\tSet world/application type" << std::endl;
     std::cout << "      DEV_WORLD";
+    std::cout << "      SKY_WORLD";
     std::cout << "\t\t\t\tWorld used for development purposes" << std::endl;
 }
 
@@ -29,7 +31,6 @@ int Context::processArgs(int argc, char **argv) {
         if (!strcmp(argv[i], "-v")) {
             verbose = true;
         }
-
         /* Process window size */
         if (!strcmp(argv[i], "-s")) {
             /* Catch invalid number of args */
@@ -42,7 +43,6 @@ int Context::processArgs(int argc, char **argv) {
             // TODO : use strtol and catch invalid args myself so I can use printUsage()
             display.width = std::stoi(argv[++i], nullptr);
             display.height = std::stoi(argv[++i], nullptr); 
-
             if (display.width <= 0 || display.height <= 0) {
                 printUsage();
                 return 1;
@@ -56,10 +56,13 @@ int Context::processArgs(int argc, char **argv) {
                 printUsage();
                 return 1;
             }
-
             /* Dev world */
             if(!strcmp(argv[i], "DEV_WORLD")) {
                 selectedWorld = DEV_WORLD_TYPE;
+            }
+            /* Sky world */
+            else if(!strcmp(argv[i], "SKY_WORLD")) {
+                selectedWorld = SKY_WORLD_TYPE;
             }
             /* Invalid world chosen */
             else {
@@ -87,6 +90,9 @@ World* Context::createWorld() {
     switch(selectedWorld) {
         case(DEV_WORLD_TYPE):
             world = new DevWorld;
+            break;
+        case(SKY_WORLD_TYPE):
+            world = new SkyWorld;
             break;
         /* Error state -- we should never get here */
         default:

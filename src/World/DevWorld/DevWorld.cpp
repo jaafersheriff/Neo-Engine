@@ -7,38 +7,25 @@ void DevWorld::init(Loader &loader) {
     /* Create entities */
     Entity *e = new Entity(loader.loadObjMesh("../resources/mr_krab.obj"),
                            loader.loadTexture("../resources/mr_krab.png"),
-                           glm::vec3(15.f, 15.f, 0.f), 
+                           glm::vec3(15.f, 0.f, 0.f), 
                            glm::vec3(0), 
-                           glm::vec3(10.f, 10, 10.f));
+                           glm::vec3(10.f, 10.f, 10.f));
     entities.push_back(e);
-
-    /* Skybox */
-    std::string textureNames[6] = {
-                           "../resources/arctic_ft.tga", 
-                           "../resources/arctic_bk.tga", 
-                           "../resources/arctic_up.tga", 
-                           "../resources/arctic_dn.tga", 
-                           "../resources/arctic_rt.tga", 
-                           "../resources/arctic_lf.tga"};
-    // sb = new Skybox(loader.loadCubeTexture(textureNames));
-
+    
     /* Billboards */
     Texture *cloudTexture = loader.loadTexture("../resources/cloud.png");
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < 130; i++) {
         CloudBillboard *c = new CloudBillboard(
                         cloudTexture,
                         glm::vec3(
-                            Toolbox::genRandom(15.f, 35.f),
-                            Toolbox::genRandom(5.f, 20.f),
-                            Toolbox::genRandom(-7.f, 7.f)),
+                            Toolbox::genRandom(-45.f, 75.f),
+                            Toolbox::genRandom(-5.f, 5.f),
+                            Toolbox::genRandom(-25.f, 25.f)),
                         glm::vec2(cloudTexture->width, cloudTexture->height)/75.f
                     );
         c->rotation = 360.f * Toolbox::genRandom();
-        cloudBoards.push_back(c);
+        // cloudBoards.push_back(c);
     }
-
-    /* Sun */
-    // sun = new Sun(glm::vec3(1, 1, 1), glm::vec3(1, 1, 0.5), 150, 300);
 
     /* Set up light */
     this->light = new Light;
@@ -46,17 +33,11 @@ void DevWorld::init(Loader &loader) {
     light->color = glm::vec3(1.f);
     light->attenuation = glm::vec3(1.f, 0.0f, 0.0f);
 
-    camera = new ThirdPersonCamera(&entities[0]->position, glm::vec3(0, 20, 0));
+    /* Set up camera */
+    this->camera = new Camera();
 }
 
 void DevWorld::prepareRenderer(MasterRenderer *mr) {
-    this->mr = mr;
-    if (sb) {
-        mr->activateSkyboxRenderer(sb);
-    }
-    if (sun) {
-        mr->activateSunRenderer(sun);
-    }
     mr->activateCloudRenderer(&cloudBoards);
     mr->activateEntityRenderer(&entities);
 }
@@ -74,17 +55,9 @@ void DevWorld::update(Context &ctx) {
     for (auto entity : entities) {
         entity->update();
     }
-    /* Update skybox */
-    if (sb) {
-        sb->update(ctx.displayTime);
-    }
     /* Update cloudBoards */
     for (auto billboard : cloudBoards) {
         billboard->update(this->camera);
-    }
-    /* Update sun */
-    if (sun) {
-        sun->update(light);
     }
 }
 
@@ -116,10 +89,6 @@ void DevWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
     }
     if (keyboard.isKeyPressed('r')) {
         camera->moveUp();
-    }
-    // TODO : put this in the GUI
-    if (keyboard.isKeyPressed('m')) {
-        mr->toggleWireFrameMode();
     }
     if (keyboard.isKeyPressed('~')) {
         // TODO : enable/disable GUI

@@ -22,9 +22,6 @@ class World {
         Camera *camera;
         Light *light;
 
-        /* Reference to MasterRenderer for any world-specific rendering needs */
-        MasterRenderer *mr;
-
         /* Create objects, initialize rendering data structure */
         virtual void init(Loader &) = 0;
 
