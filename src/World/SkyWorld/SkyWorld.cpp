@@ -9,12 +9,12 @@ void SkyWorld::init(Loader &loader) {
 
     /* Skybox */
     std::string textureNames[6] = {
-        "../resources/arctic_ft.tga",
-        "../resources/arctic_bk.tga",
-        "../resources/arctic_up.tga",
-        "../resources/arctic_dn.tga",
-        "../resources/arctic_rt.tga",
-        "../resources/arctic_lf.tga",
+        "arctic_ft.tga",
+        "arctic_bk.tga",
+        "arctic_up.tga",
+        "arctic_dn.tga",
+        "arctic_rt.tga",
+        "arctic_lf.tga",
 
     };
     skybox = new Skybox(loader.loadCubeTexture(textureNames));
@@ -23,9 +23,9 @@ void SkyWorld::init(Loader &loader) {
     sun = new Sun(glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 0.f), 250, 150);
 
     /* Atmosphere */
-    atmosphere = new Atmosphere(loader.loadObjMesh("../resources/geodisc.obj"), 
-                                loader.loadTexture("../resources/atcolor.png"), 
-                                loader.loadTexture("../resources/atglow.png"));
+    atmosphere = new Atmosphere(loader.loadObjMesh("geodisc.obj"), 
+                                loader.loadTexture("atcolor.png"), 
+                                loader.loadTexture("atglow.png"));
 }
 
 void SkyWorld::prepareRenderer(MasterRenderer *mr) {

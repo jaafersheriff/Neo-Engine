@@ -9,6 +9,8 @@
 #include "Hardware/Mouse.hpp"
 #include "Hardware/Keyboard.hpp"
 
+#include <string>
+
 class World;
 class Context {
     public:
@@ -17,8 +19,9 @@ class Context {
             DEV_WORLD_TYPE,
             SKY_WORLD_TYPE
         };
-        /* Default world type is dev world */
-        WorldTypes selectedWorld = DEV_WORLD_TYPE;
+        /* Default members */
+        WorldTypes selectedWorld = DEV_WORLD_TYPE;  /* World type */
+        std::string RESOURCE_DIR = "../resources/"; /* Resrouce dir */
 
         /* References */
         Display display;

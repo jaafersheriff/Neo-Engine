@@ -9,6 +9,9 @@
 void Context::printUsage() {
     std::cout << "Usage: Neo" << std::endl;
 
+    std::cout << "    -r <resources dir>";
+    std::cout << "\tSet the resource directory" << std::endl;
+
     std::cout << "    -s <window width> <window height>";
     std::cout << "\tSet window size" << std::endl;
 
@@ -31,6 +34,14 @@ int Context::processArgs(int argc, char **argv) {
         /* Set verbose */
         if (!strcmp(argv[i], "-v")) {
             verbose = true;
+        }
+        /* Set resources dir */
+        if (!strcmp(argv[i], "-r")) {
+            if (i + 1 >= argc) {
+                printUsage();
+                return 1;
+            }
+            RESOURCE_DIR = argv[i+1];
         }
         /* Process window size */
         if (!strcmp(argv[i], "-s")) {

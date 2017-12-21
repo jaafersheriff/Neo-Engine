@@ -5,15 +5,15 @@
 
 void DevWorld::init(Loader &loader) {
     /* Create entities */
-    Entity *e = new Entity(loader.loadObjMesh("../resources/mr_krab.obj"),
-                           loader.loadTexture("../resources/mr_krab.png"),
+    Entity *e = new Entity(loader.loadObjMesh("mr_krab.obj"),
+                           loader.loadTexture("mr_krab.png"),
                            glm::vec3(15.f, 0.f, 0.f), 
                            glm::vec3(0), 
                            glm::vec3(10.f, 10.f, 10.f));
     entities.push_back(e);
     
     /* Billboards */
-    Texture *cloudTexture = loader.loadTexture("../resources/cloud.png");
+    Texture *cloudTexture = loader.loadTexture("cloud.png");
     for (int i = 0; i < 130; i++) {
         CloudBillboard *c = new CloudBillboard(
                         cloudTexture,

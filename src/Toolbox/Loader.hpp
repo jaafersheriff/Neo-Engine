@@ -40,6 +40,7 @@ class Loader {
         std::map<std::string, Mesh*> meshes;
 
         bool verbose;
+        std::string RESOURCE_DIR;
 };
 
 #endif

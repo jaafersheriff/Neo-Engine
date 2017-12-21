@@ -11,13 +11,14 @@
 
 void Loader::init(Context &ctx) {
     this->verbose = ctx.verbose;
+    this->RESOURCE_DIR = ctx.RESOURCE_DIR;
 }
 
 uint8_t* Loader::loadTextureData(Texture *tex, const std::string fileName, const bool flip) {
     uint8_t *data;
 
     stbi_set_flip_vertically_on_load(flip);
-    data = stbi_load(fileName.c_str(), &tex->width, &tex->height, &tex->components, STBI_rgb_alpha);
+    data = stbi_load((RESOURCE_DIR + fileName).c_str(), &tex->width, &tex->height, &tex->components, STBI_rgb_alpha);
 
     if (data) {
         if (verbose) {
@@ -25,7 +26,7 @@ uint8_t* Loader::loadTextureData(Texture *tex, const std::string fileName, const
         }
     }
     else {
-        std::cerr << "Could not find texture file " << fileName << std::endl;
+        std::cerr << "Could not find texture file " << RESOURCE_DIR << fileName << std::endl;
     }
     return data;
 }
@@ -56,7 +57,7 @@ Mesh* Loader::loadObjMesh(const std::string fileName) {
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> objMaterials;
     std::string errString;
-    bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, fileName.c_str());
+    bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, (RESOURCE_DIR + fileName).c_str());
     if (!rc) {
         std::cerr << errString << std::endl;
         exit(1);
