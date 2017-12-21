@@ -5,7 +5,7 @@
 bool SkyboxRenderer::activate(Skybox *skybox) {
     this->skybox = skybox;
     shader = new SkyboxShader;
-    shader->init();
+    return shader->init();
 }
 
 void SkyboxRenderer::setGlobals(const glm::mat4 *projection, const glm::mat4 *view) {

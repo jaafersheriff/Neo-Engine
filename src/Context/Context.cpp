@@ -15,8 +15,9 @@ void Context::printUsage() {
     std::cout << "    -w <world_name>";
     std::cout << "\t\t\tSet world/application type" << std::endl;
     std::cout << "      DEV_WORLD";
-    std::cout << "      SKY_WORLD";
     std::cout << "\t\t\t\tWorld used for development purposes" << std::endl;
+    std::cout << "      SKY_WORLD";
+    std::cout << "\t\t\t\tWorld used for sky objects" << std::endl;
 }
 
 int Context::processArgs(int argc, char **argv) {

@@ -26,7 +26,7 @@ void AtmosphereShader::loadP(const glm::mat4 *p) {
     this->loadMat4(getUniform("P"), p);
 }
 
-void AtmosphereShader::loadP(const glm::mat4 *v) {
+void AtmosphereShader::loadV(const glm::mat4 *v) {
     this->loadMat4(getUniform("V"), v);
 }
 

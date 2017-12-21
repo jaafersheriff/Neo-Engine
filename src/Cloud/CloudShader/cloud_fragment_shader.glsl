@@ -1,7 +1,6 @@
 #version 330 core
 
 in vec3 worldPos;
-in vec3 viewDir;
 in vec2 textureCoords;
 
 uniform sampler2D textureImage;
@@ -22,5 +21,5 @@ void main() {
     vec3 diffuseContrib = max(dot(N, L), 0.0) * vec3(1, 1, 1);
     vec4 texel = texture(textureImage, textureCoords);
 
-    color = vec4(N, 1.0);
+    color = texel;
 }
