@@ -11,6 +11,7 @@ bool AtmosphereShader::init() {
     /* Projection and view */
     addUniform("P");
     addUniform("V");
+    addUniform("M");
 
     /* Light */
     addUniform("lightPos");
@@ -28,6 +29,10 @@ void AtmosphereShader::loadP(const glm::mat4 *p) {
 
 void AtmosphereShader::loadV(const glm::mat4 *v) {
     this->loadMat4(getUniform("V"), v);
+}
+
+void AtmosphereShader::loadM(const glm::mat4 *m) {
+    this->loadMat4(getUniform("M"), m);
 }
 
 void AtmosphereShader::loadLight(const Light *l) {

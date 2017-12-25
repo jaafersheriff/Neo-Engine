@@ -16,9 +16,9 @@
 class SkyWorld : public World {
     public:
         /* World-specific render targets */
-        Skybox *skybox;
-        Sun *sun;
-        Atmosphere *atmosphere;
+        Skybox *skybox = nullptr;
+        Sun *sun = nullptr;
+        Atmosphere *atmosphere = nullptr;
 
         /* Constructor */
         SkyWorld() : World("Sky World") { }

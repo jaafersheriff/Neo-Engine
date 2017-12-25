@@ -16,6 +16,7 @@ class AtmosphereShader : public Shader {
 
         void loadP(const glm::mat4 *);
         void loadV(const glm::mat4 *);
+        void loadM(const glm::mat4 *);
 
         void loadLight(const Light *);
 

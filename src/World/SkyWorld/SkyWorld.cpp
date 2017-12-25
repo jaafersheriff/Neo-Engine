@@ -5,7 +5,7 @@ void SkyWorld::init(Loader &loader) {
     this->camera = new Camera();
 
     /* Main light source */
-    this->light = new Light(glm::vec3(-1000, 1000, 1000), glm::vec3(1.f));
+    this->light = new Light(glm::vec3(-1000, 0, 1000), glm::vec3(1.f));
 
     /* Skybox */
     std::string textureNames[6] = {
@@ -17,26 +17,26 @@ void SkyWorld::init(Loader &loader) {
         "arctic_lf.tga",
 
     };
-    skybox = new Skybox(loader.loadCubeTexture(textureNames));
+    // skybox = new Skybox(loader.loadCubeTexture(textureNames));
 
     /* Sun */
-    sun = new Sun(glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 0.f), 250, 150);
+    sun = new Sun(glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);
 
     /* Atmosphere */
-    atmosphere = new Atmosphere(loader.loadObjMesh("geodisc.obj"), 
-                                loader.loadTexture("atcolor.png"), 
-                                loader.loadTexture("atglow.png"));
+    atmosphere = new Atmosphere(loader.loadObjMesh("geodesic_dome.obj"), 
+                                loader.loadTexture("sky.png"), 
+                                loader.loadTexture("glow.png"));
 }
 
 void SkyWorld::prepareRenderer(MasterRenderer *mr) {
     if(skybox) {
         mr->activateSkyboxRenderer(skybox);
     }
-    if (sun) {
-        mr->activateSunRenderer(sun);
-    }
     if (atmosphere) {
         mr->activateAtmosphereRenderer(atmosphere);
+    }
+    if (sun) {
+        mr->activateSunRenderer(sun);
     }
 }
 
@@ -46,6 +46,9 @@ void SkyWorld::update(Context &ctx) {
 
     if (skybox) {
         skybox->update(ctx.displayTime);
+    }
+    if (sun) {
+        sun->update(light);
     }
 }
 
@@ -73,6 +76,18 @@ void SkyWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
     }
     if (keyboard.isKeyPressed('r')) {
         camera->moveUp();
+    }
+    if (keyboard.isKeyPressed('z')) {
+        light->position.y += 5.f;
+    }
+    if (keyboard.isKeyPressed('x')) {
+        light->position.y -= 5.f;
+    }
+    if (keyboard.isKeyPressed('c')) {
+        sun->updateInnerRadius(-5.f);
+    }
+    if (keyboard.isKeyPressed('v')) {
+        sun->updateOuterRadius(-5.f);
     }
 }
 
