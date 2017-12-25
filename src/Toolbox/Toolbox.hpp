@@ -6,6 +6,7 @@
 
 #include "glm/glm.hpp"
 #include <stdlib.h>
+#include <string>
 
 // TODO : Rewrite this so it's up to C++ standards
 class Toolbox {
@@ -31,6 +32,14 @@ public:
     /* Generate random vec3 with values [0, 1] */
     static inline glm::vec3 genRandomVec3(const float min, const float max) {
         return glm::vec3(genRandom(min, max), genRandom(min, max), genRandom(min, max));
+    }
+
+    /* Generate string representation of a vector */
+    static inline std::string vectorToString(const glm::vec3 in) {
+        return "<" + std::to_string(in.x) + ", " + 
+                     std::to_string(in.y) + ", " + 
+                     std::to_string(in.z) + ">";
+
     }
 };
 
