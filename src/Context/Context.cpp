@@ -92,8 +92,8 @@ void Context::init() {
     mouse.window = keyboard.window = display.window;
 
     /* Init local */
-    lastTime = runningTime = glfwGetTime();
-    nbFrames = displayTime = lastFpsTime = 0.0;
+    lastTime = runningTime = (float) glfwGetTime();
+    nbFrames = displayTime = lastFpsTime = 0.f;
 }
 
 World* Context::createWorld() {
@@ -124,7 +124,7 @@ void Context::update() {
     mouse.update();
 
     /* Update time */
-    runningTime = glfwGetTime();
+    runningTime = (float) glfwGetTime();
     displayTime = (runningTime - lastTime);
     lastTime = runningTime;
 

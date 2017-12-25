@@ -7,6 +7,8 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
+#include <cstdint>
+
 class Texture {
     public:
         /* GL texture ID */
