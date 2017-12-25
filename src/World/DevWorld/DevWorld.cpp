@@ -1,5 +1,4 @@
 #include "DevWorld.hpp"
-#include "Camera/ThirdPersonCamera.hpp"
 
 #include <iostream>
 
@@ -27,9 +26,11 @@ void DevWorld::init(Loader &loader) {
         // cloudBoards.push_back(c);
     }
 
+    sun = new Sun(glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 150, 250);
+
     /* Set up light */
     this->light = new Light;
-    light->position = glm::vec3(-1000, 1000, 1000);
+    light->position = glm::vec3(-7, 1000, 1000);
     light->color = glm::vec3(1.f);
     light->attenuation = glm::vec3(1.f, 0.0f, 0.0f);
 
@@ -39,6 +40,9 @@ void DevWorld::init(Loader &loader) {
 
 void DevWorld::prepareRenderer(MasterRenderer *mr) {
     mr->activateCloudRenderer(&cloudBoards);
+    if (sun) {
+        mr->activateSunRenderer(sun);
+    }
     mr->activateEntityRenderer(&entities);
 }
 
@@ -58,6 +62,15 @@ void DevWorld::update(Context &ctx) {
     /* Update cloudBoards */
     for (auto billboard : cloudBoards) {
         billboard->update(this->camera);
+    }
+    if (sun) {
+        sun->update(light);
+        sun->innerColor = glm::vec3((1+glm::cos(glm::radians(ctx.runningTime*12.90)))/2, 
+                                    (1+glm::cos(glm::radians(ctx.runningTime*37.98)))/2, 
+                                    (1+glm::cos(glm::radians(ctx.runningTime*15.89)))/2);
+        sun->outerColor = glm::vec3((1+glm::cos(glm::radians(ctx.runningTime*75.61)))/2, 
+                                    (1+glm::cos(glm::radians(ctx.runningTime*67.89)))/2, 
+                                    (1+glm::cos(glm::radians(ctx.runningTime*86.49)))/2);
     }
 }
 
@@ -92,6 +105,18 @@ void DevWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
     }
     if (keyboard.isKeyPressed('~')) {
         // TODO : enable/disable GUI
+    }
+    if (keyboard.isKeyPressed('z')) {
+        sun->updateInnerRadius(-5.f);
+    }
+    if (keyboard.isKeyPressed('x')) {
+        sun->updateInnerRadius(5.f);
+    }
+    if (keyboard.isKeyPressed('c')) {
+        sun->updateOuterRadius(-5.f);
+    }
+    if (keyboard.isKeyPressed('v')) {
+        sun->updateOuterRadius(5.f);
     }
 }
 

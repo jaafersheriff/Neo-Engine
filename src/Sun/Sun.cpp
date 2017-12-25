@@ -12,8 +12,8 @@ Sun::Sun(glm::vec3 c1, glm::vec3 c2, float in, float out) :
     this->outerRadius = out;
 }
 
-void Sun::update(const glm::vec3 pos) {
-    this->center = pos;
+void Sun::update(const Light *light) {
+    this->center = light->position;
 }
 
 void Sun::updateInnerRadius(const float in) {
@@ -24,8 +24,10 @@ void Sun::updateInnerRadius(const float in) {
 
 void Sun::updateOuterRadius(const float in) {
     if (outerRadius + in <= innerRadius) {
-        innerRadius += in;
+        updateInnerRadius(in);
     }
-    outerRadius += in;
-    this->size += in;
+    if (outerRadius += in >= 0) {
+        outerRadius += in;
+    }
+    this->size = glm::vec2(outerRadius);
 }
