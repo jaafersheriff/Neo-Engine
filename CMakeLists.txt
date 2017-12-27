@@ -7,16 +7,20 @@ project(Neo)
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 #Set up link targets
-set(GLEW_DIR "$ENV{GLEW_DIR}")
+if(MINGWW) 
+    set(GLEW_DIR "$ENV{GLEW_DIR_MINGW}")
+else()
+    set(GLEW_DIR "$ENV{GLEW_DIR}")
+endif()
 if(NOT GLEW_DIR)
   message(FATAL_ERROR "Please point the environment variable GLEW_DIR to the root directory of your GLEW installation.")
 else()
   message(${GLEW_DIR})
 endif()
 
-if(WIN32)
+if(WIN32 AND NOT MINGW)
   # With prebuilt binaries
-  # link_directories(${GLEW_DIR}/lib/Release/Win32)
+  link_directories(${GLEW_DIR}/lib/Release/Win32)
 endif()
 
 # We don't really need to include header and resource files to build, but it's
@@ -60,7 +64,11 @@ target_link_libraries(${CMAKE_PROJECT_NAME} glfw ${GLFW_LIBRARIES})
 # Get the GLEW environment variable.
 include_directories(${GLEW_DIR}/include)
 if(WIN32)
-  target_link_libraries(${CMAKE_PROJECT_NAME} ${GLEW_DIR}/lib/glew32.dll)
+  if(MINGW)
+    target_link_libraries(${CMAKE_PROJECT_NAME} C:/MinGW/msys/1.0/lib/glew-2.1.0/lib/glew32.dll)
+  else()
+    target_link_libraries(${CMAKE_PROJECT_NAME} ${GLEW_DIR}/lib/Release/Win32/glew32s.lib)
+  endif()
 else()
   target_link_libraries(${CMAKE_PROJECT_NAME} ${GLEW_DIR}/lib/libGLEW.a)
 endif()
@@ -83,5 +91,7 @@ else()
   endif()
 endif()
 
-
 include_directories(${PROJECT_SOURCE_DIR}/src)
+
+# Set C++11
+set (CMAKE_CXX_STANDARD 11)
