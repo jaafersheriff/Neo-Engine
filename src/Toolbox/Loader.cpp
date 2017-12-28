@@ -32,6 +32,10 @@ uint8_t* Loader::loadTextureData(Texture *tex, const std::string fileName, const
 }
 
 Texture* Loader::loadTexture(const std::string fileName) {
+    return loadTexture(fileName, Texture::WRAP_MODE::REPEAT);
+}
+
+Texture * Loader::loadTexture(const std::string fileName, Texture::WRAP_MODE mode) {
     std::map<std::string, Texture *>::iterator it = textures.find(fileName);
     if (it != textures.end()) {
         return it->second;
@@ -39,7 +43,7 @@ Texture* Loader::loadTexture(const std::string fileName) {
     Texture *texture = new Texture;
     uint8_t *data = loadTextureData(texture, fileName, true);
     if(data) {
-        texture->init(data);
+        texture->init(data, mode);
         if (texture->textureId) {
             textures.insert(std::map<std::string, Texture*>::value_type(fileName, texture));
         }

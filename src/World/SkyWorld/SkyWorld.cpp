@@ -9,23 +9,23 @@ void SkyWorld::init(Loader &loader) {
 
     /* Skybox */
     std::string textureNames[6] = {
-        "arctic_ft.tga",
-        "arctic_bk.tga",
-        "arctic_up.tga",
-        "arctic_dn.tga",
-        "arctic_rt.tga",
-        "arctic_lf.tga",
+        "ame_nebula/purplenebula_ft.tga",
+        "ame_nebula/purplenebula_bk.tga",
+        "ame_nebula/purplenebula_up.tga",
+        "ame_nebula/purplenebula_dn.tga",
+        "ame_nebula/purplenebula_rt.tga",
+        "ame_nebula/purplenebula_lf.tga",
 
     };
-    // skybox = new Skybox(loader.loadCubeTexture(textureNames));
+    skybox = new Skybox(loader.loadCubeTexture(textureNames));
 
     /* Sun */
     sun = new Sun(glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);
 
     /* Atmosphere */
     atmosphere = new Atmosphere(loader.loadObjMesh("geodesic_dome.obj"), 
-                                loader.loadTexture("sky.png"), 
-                                loader.loadTexture("glow.png"));
+                                loader.loadTexture("sky.png", Texture::WRAP_MODE::CLAMP), 
+                                loader.loadTexture("glow.png", Texture::WRAP_MODE::CLAMP));
 }
 
 void SkyWorld::prepareRenderer(MasterRenderer *mr) {
@@ -78,10 +78,10 @@ void SkyWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
         camera->moveUp();
     }
     if (keyboard.isKeyPressed('z')) {
-        light->position.y += 5.f;
+        light->position.y += 4.f;
     }
     if (keyboard.isKeyPressed('x')) {
-        light->position.y -= 5.f;
+        light->position.y -= 4.f;
     }
     if (keyboard.isKeyPressed('c')) {
         sun->updateInnerRadius(-5.f);
