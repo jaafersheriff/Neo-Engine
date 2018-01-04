@@ -20,7 +20,7 @@ void SkyWorld::init(Loader &loader) {
     skybox = new Skybox(loader.loadCubeTexture(textureNames));
 
     /* Sun */
-    sun = new Sun(glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);
+    sun = new Sun(this->light, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);
 
     /* Atmosphere */
     atmosphere = new Atmosphere(loader.loadObjMesh("geodesic_dome.obj"), 
@@ -48,7 +48,7 @@ void SkyWorld::update(Context &ctx) {
         skybox->update(ctx.displayTime);
     }
     if (sun) {
-        sun->update(light);
+        sun->update();
     }
 }
 

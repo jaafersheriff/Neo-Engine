@@ -12,12 +12,15 @@
 
 class Sun : public Billboard {
     public: 
-        Sun(Texture *, float);                      /* Textured sun constructor */
-        Sun(glm::vec3, glm::vec3, float, float);    /* Untextuerd sun contsructor */
+        Sun(Light *, Texture *, float);                      /* Textured sun constructor */
+        Sun(Light *, glm::vec3, glm::vec3, float, float);    /* Untextuerd sun contsructor */
         
-    
+        /* Reference to light object */
+        Light *light;
+
+
         /* Move position according to light source */
-        void update(const Light *);
+        void update();
         void updateInnerRadius(const float);
         void updateOuterRadius(const float);
 
