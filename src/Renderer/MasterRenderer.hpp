@@ -5,6 +5,7 @@
 #ifndef _MASTER_RENDERER_HPP_
 #define _MASTER_RENDERER_HPP_
 
+#include "Context/Context.hpp"
 #include "Context/Display.hpp"
 
 #include "glm/glm.hpp"
@@ -35,7 +36,7 @@ class MasterRenderer {
         void activateAtmosphereRenderer(Atmosphere *);
 
         /* Init */
-        void init();
+        void init(const Context &);
 
         /* Render function */
         void render(const Display &, const World *);
@@ -44,8 +45,12 @@ class MasterRenderer {
         void cleanUp();
 
         /* Utility functions */
-        bool wireFrame = false;
         void toggleWireFrameMode();
+
+    private:
+        /* Utility members */
+        bool wireFrame = false;
+        bool verbose = false;
 };
 
 #endif

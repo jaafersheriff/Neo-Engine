@@ -13,6 +13,8 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
+#include <iostream>
+
 MasterRenderer::MasterRenderer() {
 }
 
@@ -40,7 +42,9 @@ void MasterRenderer::render(const Display &display, const World *world) {
     }
 }
 
-void MasterRenderer::init() {
+void MasterRenderer::init(const Context &ctx) {
+    this->verbose = ctx.verbose;
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -53,12 +57,36 @@ void MasterRenderer::activateEntityRenderer(std::vector<Entity *> *entities) {
     if (eR->activate(entities)) {
         renderers.push_back(eR);
     }
+    else {
+        delete eR;
+        eR = nullptr;
+    }
+    if (verbose) {
+        if (eR) {
+            std::cout << "Entity Renderer activated" << std::endl;
+        }
+        else {
+            std::cout << "Entity Renderer failed to activate" << std::endl;
+        }
+    }
 }
 
 void MasterRenderer::activateSkyboxRenderer(Skybox *sb) {
     SkyboxRenderer *sbR = new SkyboxRenderer;
     if (sbR->activate(sb)) {
         renderers.push_back(sbR);
+    }
+    else {
+        delete sbR;
+        sbR = nullptr;
+    }
+    if (verbose) {
+        if (sbR) {
+            std::cout << "Skybox Renderer activated" << std::endl;
+        }
+        else {
+            std::cout << "Skybox Renderer failed to activate" << std::endl;
+        }
     }
 }
 
@@ -67,6 +95,18 @@ void MasterRenderer::activateCloudRenderer(std::vector<CloudBillboard *> *billbo
     if (cR->activate(billboards)) {
         renderers.push_back(cR);
     }
+    else {
+        delete cR;
+        cR = nullptr;
+    }
+    if (verbose) {
+        if (cR) {
+            std::cout << "Cloud Renderer activated" << std::endl;
+        }
+        else {
+            std::cout << "Cloud Renderer failed to activate" << std::endl;
+        }
+    }
 }
 
 void MasterRenderer::activateSunRenderer(Sun *sun) {
@@ -74,12 +114,36 @@ void MasterRenderer::activateSunRenderer(Sun *sun) {
     if (sR->activate(sun)) {
         renderers.push_back(sR);
     }
+    else {
+        delete sR;
+        sR = nullptr;
+    }
+    if (verbose) {
+        if (sR) {
+            std::cout << "Sun Renderer activated" << std::endl;
+        }
+        else {
+            std::cout << "Sun Renderer failed to activate" << std::endl;
+        }
+    }
 }
 
 void MasterRenderer::activateAtmosphereRenderer(Atmosphere *atm) {
     AtmosphereRenderer *aR = new AtmosphereRenderer;
     if (aR->activate(atm)) {
         renderers.push_back(aR);
+    }
+    else {
+        delete aR;
+        aR = nullptr;
+    }
+    if (verbose) {
+        if (aR) {
+            std::cout << "Atmosphere Renderer activated" << std::endl;
+        }
+        else {
+            std::cout << "Atmosphere Renderer failed to activate" << std::endl;
+        }
     }
 }
 
