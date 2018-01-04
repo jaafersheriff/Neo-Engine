@@ -15,21 +15,20 @@ void CloudRenderer::setGlobals(const glm::mat4 *projection, const glm::mat4 *vie
 }
 
 void CloudRenderer::prepare() {
-    // Sort - disabled because depth testing is turned off so render order shouldn't matter
-    // I might turn it back on when shading calculations happen 
-    // for (int i = 0; i < billboards->size(); i++) {
-    //     int minSize = i; 
-    //     for (int j = i; j < billboards->size(); j++) {
-    //         if (billboards->at(j)->distance > billboards->at(minSize)->distance) {
-    //             minSize = j;
-    //         }
-    //     }
-    //     if (minSize != i) {
-    //         CloudBillboard *tmp = billboards->at(i);
-    //         billboards->at(i) = billboards->at(minSize);
-    //         billboards->at(minSize) = tmp;
-    //     }
-    // }
+     /* Sort */
+     for (int i = 0; i < billboards->size(); i++) {
+         int minSize = i; 
+         for (int j = i; j < billboards->size(); j++) {
+             if (billboards->at(j)->distance > billboards->at(minSize)->distance) {
+                 minSize = j;
+             }
+         }
+         if (minSize != i) {
+             CloudBillboard *tmp = billboards->at(i);
+             billboards->at(i) = billboards->at(minSize);
+             billboards->at(minSize) = tmp;
+         }
+     }
 }
 
 void CloudRenderer::render(const World *world) {
@@ -38,7 +37,8 @@ void CloudRenderer::render(const World *world) {
     }
 
     CloudShader *cShader = dynamic_cast<CloudShader *>(shader);
-    cShader->loadCameraPosition(world->camera->position);
+
+    cShader->loadLight(world->light);
 
     glDisable(GL_DEPTH_TEST);
     glm::mat4 M;

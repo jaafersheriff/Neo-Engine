@@ -20,6 +20,10 @@ bool CloudShader::init() {
     /* Texture */
     addUniform("textureImage");
 
+    /* Light */
+    addUniform("lightPos");
+    addUniform("lightCol");
+
     return true;
 }
 
@@ -29,10 +33,6 @@ void CloudShader::loadP(const glm::mat4 *p) {
 
 void CloudShader::loadV(const glm::mat4 *v) {
     this->loadMat4(getUniform("V"), v);
-}
-
-void CloudShader::loadCameraPosition(const glm::vec3 c) {
-    this->loadVec3(getUniform("cameraPosition"), c);
 }
 
 void CloudShader::loadM(const glm::mat4 *m) {
@@ -49,4 +49,9 @@ void CloudShader::loadSize(const glm::vec2 s) {
 
 void CloudShader::loadTexture(const Texture *texture) {
     this->loadInt(getUniform("textureImage"), texture->textureId);
+}
+
+void CloudShader::loadLight(const Light *light) {
+    this->loadVec3(getUniform("lightPos"), light->position);
+    this->loadVec3(getUniform("lightCol"), light->color);
 }

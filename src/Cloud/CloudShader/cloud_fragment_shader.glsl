@@ -4,22 +4,22 @@ in vec3 worldPos;
 in vec2 textureCoords;
 
 uniform sampler2D textureImage;
+uniform vec3 lightPos;
+uniform vec3 lightCol;
 
 out vec4 color;
 
 #define PI 3.1415926
 
 void main() {
-    vec3 lightPos = vec3(-10, 100, 10);
     vec3 lightDir = lightPos - worldPos;
     vec3 L = normalize(lightDir);
-    vec3 sphereNormal = vec3( 
-        -cos(textureCoords.x * PI),
-        -cos(textureCoords.y * PI),
-        sin(textureCoords.x * PI) * sin(textureCoords.y * PI));
-    vec3 N = normalize(sphereNormal);
-    vec3 diffuseContrib = max(dot(N, L), 0.0) * vec3(1, 1, 1);
+	vec3 N = (vec3(
+				-cos(textureCoords.x * PI),
+				-cos(textureCoords.y * PI),
+				sin(textureCoords.x * PI) * sin(textureCoords.y * PI)));
+    vec3 diffuseContrib = max(dot(N, L), 0.0) * lightCol;
     vec4 texel = texture(textureImage, textureCoords);
 
-    color = texel;
+    color = texel * vec4(diffuseContrib, distance(diffuseContrib, vec3(0, 0, 0)));
 }
