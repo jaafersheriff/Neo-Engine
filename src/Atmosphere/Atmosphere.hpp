@@ -5,11 +5,10 @@
 #include "Model/Mesh.hpp"
 #include "Model/Texture.hpp"
 
-#define SIZE 1000.f 
-
 class Atmosphere {
     public:
-        Atmosphere(Mesh *, Texture *, Texture *);
+        Atmosphere(Mesh *, Texture *, Texture *, float);
+        float size;
         Mesh *mesh;
         Texture *colorTexture;
         Texture *glowTexture;
