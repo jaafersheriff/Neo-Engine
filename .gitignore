@@ -1,6 +1,7 @@
 .git/
 .gitignore
 .vscode/
+.vs/
 build/
 resources/
 other/
