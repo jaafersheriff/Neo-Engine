@@ -13,7 +13,7 @@
 
 class EntityShader : public Shader {
     public:
-        /* Define shader locations */
+        /* Define GLSL shader locations */
         EntityShader() : Shader("../src/Entity/EntityShader/entity_vertex_shader.glsl",
                                 "../src/Entity/EntityShader/entity_fragment_shader.glsl") { }
         

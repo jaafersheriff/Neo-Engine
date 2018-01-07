@@ -101,6 +101,16 @@ void Shader::cleanUp() {
     glDeleteProgram(pid);
 }
 
+void Shader::unloadMesh() {
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Shader::unloadTexture(int texId) {
+    glActiveTexture(GL_TEXTURE0 + texId);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void Shader::loadBool(const int location, const bool b) const {
     glUniform1i(location, b);
 }

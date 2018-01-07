@@ -31,6 +31,8 @@ class Shader {
         void bind();
         void unbind();
         void cleanUp();
+        void unloadMesh();
+        void unloadTexture(int);
 
         /* Render functions */
         // TODO : give worlds their own global map 

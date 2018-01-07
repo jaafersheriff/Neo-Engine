@@ -157,16 +157,18 @@ void EntityShader::unloadMesh(const Mesh *mesh) {
         glDisableVertexAttribArray(pos);
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    Shader::unloadMesh();
 }
 
 /* Unbind model/texture*/
 void EntityShader::unloadTexture(const ModelTexture &modelTexture) {
     if (modelTexture.texture) {
-        glActiveTexture(GL_TEXTURE0 + modelTexture.texture->textureId);
+        Shader::unloadTexture(modelTexture.texture->textureId);
     }
-    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void EntityShader::cleanUp() {
+    Shader::cleanUp();
 }
 
 void EntityShader::loadP(const glm::mat4 *p) {
