@@ -13,7 +13,7 @@
 #include <vector>
 
 class World;
-class Renderer;
+class Shader;
 class Entity;
 class Skybox;
 class CloudBillboard;
@@ -26,14 +26,14 @@ class MasterRenderer {
         MasterRenderer();
         
         /* List of active renderers */
-        std::vector<Renderer *> renderers;
+        std::vector<Shader *> shaders;
 
         /* Activate subrenderers */
-        void activateEntityRenderer(std::vector<Entity *> *);
-        void activateCloudRenderer(std::vector<CloudBillboard *> *);
-        void activateSkyboxRenderer(Skybox *);
-        void activateSunRenderer(Sun *);
-        void activateAtmosphereRenderer(Atmosphere *);
+        void activateEntityShader(std::vector<Entity *> *);
+        void activateCloudShader(std::vector<CloudBillboard *> *);
+        void activateSkyboxShader(Skybox *);
+        void activateSunShader(Sun *);
+        void activateAtmosphereShader(Atmosphere *);
 
         /* Init */
         void init(const Context &);

@@ -3,11 +3,11 @@
 #include "World/World.hpp"
 #include "Renderer/Renderer.hpp"
 
-#include "Entity/EntityRenderer/EntityRenderer.hpp"
-#include "Skybox/SkyboxRenderer/SkyboxRenderer.hpp"
-#include "Cloud/CloudRenderer/CloudRenderer.hpp"
-#include "Sun/SunRenderer/SunRenderer.hpp"
-#include "Atmosphere/AtmosphereRenderer/AtmosphereRenderer.hpp"
+#include "Entity/EntityShader/EntityShader.hpp"
+#include "Skybox/SkyboxShader/SkyboxShader.hpp"
+#include "Cloud/CloudShader/CloudShader.hpp"
+#include "Sun/SunShader/SunShader.hpp"
+#include "Atmosphere/AtmosphereShader/AtmosphereShader.hpp"
 
 #include "Shader/GLSL.hpp"
 
@@ -28,17 +28,15 @@ void MasterRenderer::render(const Display &display, const World *world) {
     const glm::mat4 v = glm::lookAt(world->camera->position, world->camera->lookAt, glm::vec3(0, 1, 0));
 
     /* Loop through active subrenderers */
-    for (auto &renderer : renderers) {
+    for (auto &shader : shaders) {
         /* Bind subrenderer's shader */
-        renderer->shader->bind();
-        /* Do any subrenderer-specific prep */
-        renderer->prepare();
+        shader->bind();
         /* Set global params */
-        renderer->setGlobals(&display.projectionMatrix, &v);
+        shader->setGlobals(&display.projectionMatrix, &v);
         /* Subrenderer render */
-        renderer->render(world);
+        shader->render(world);
         /* Unbind subrenderer's shader */
-        renderer->shader->unbind();
+        shader->unbind();
     }
 }
 
@@ -52,105 +50,105 @@ void MasterRenderer::init(const Context &ctx) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void MasterRenderer::activateEntityRenderer(std::vector<Entity *> *entities) {
-    EntityRenderer *eR = new EntityRenderer;
-    if (eR->activate(entities)) {
-        renderers.push_back(eR);
+void MasterRenderer::activateEntityShader(std::vector<Entity *> *entities) {
+    EntityShader *eShader = new EntityShader;
+    if (eShader->init(entities)) {
+        shaders.push_back(eShader);
     }
     else {
-        delete eR;
-        eR = nullptr;
+        delete eShader;
+        eShader = nullptr;
     }
     if (verbose) {
-        if (eR) {
-            std::cout << "Entity Renderer activated" << std::endl;
+        if (eShader) {
+            std::cout << "Entity Shader activated" << std::endl;
         }
         else {
-            std::cout << "Entity Renderer failed to activate" << std::endl;
+            std::cout << "Entity Shader failed to activate" << std::endl;
         }
     }
 }
 
-void MasterRenderer::activateSkyboxRenderer(Skybox *sb) {
-    SkyboxRenderer *sbR = new SkyboxRenderer;
-    if (sbR->activate(sb)) {
-        renderers.push_back(sbR);
+void MasterRenderer::activateSkyboxShader(Skybox *sb) {
+    SkyboxShader *sShader = new SkyboxShader;
+    if (sShader->init(sb)) {
+        shaders.push_back(sShader);
     }
     else {
-        delete sbR;
-        sbR = nullptr;
+        delete sShader;
+        sShader = nullptr;
     }
     if (verbose) {
-        if (sbR) {
-            std::cout << "Skybox Renderer activated" << std::endl;
+        if (sShader) {
+            std::cout << "Skybox Shader activated" << std::endl;
         }
         else {
-            std::cout << "Skybox Renderer failed to activate" << std::endl;
+            std::cout << "Skybox Shader failed to activate" << std::endl;
         }
     }
 }
 
-void MasterRenderer::activateCloudRenderer(std::vector<CloudBillboard *> *billboards) {
-    CloudRenderer *cR = new CloudRenderer;
-    if (cR->activate(billboards)) {
-        renderers.push_back(cR);
+void MasterRenderer::activateCloudShader(std::vector<CloudBillboard *> *billboards) {
+    CloudShader *cShader = new CloudShader;
+    if (cShader->init(billboards)) {
+        shaders.push_back(cShader);
     }
     else {
-        delete cR;
-        cR = nullptr;
+        delete cShader;
+        cShader = nullptr;
     }
     if (verbose) {
-        if (cR) {
-            std::cout << "Cloud Renderer activated" << std::endl;
+        if (cShader) {
+            std::cout << "Cloud Shader activated" << std::endl;
         }
         else {
-            std::cout << "Cloud Renderer failed to activate" << std::endl;
+            std::cout << "Cloud Shader failed to activate" << std::endl;
         }
     }
 }
 
-void MasterRenderer::activateSunRenderer(Sun *sun) {
-    SunRenderer *sR = new SunRenderer;
-    if (sR->activate(sun)) {
-        renderers.push_back(sR);
+void MasterRenderer::activateSunShader(Sun *sun) {
+    SunShader *sShader = new SunShader;
+    if (sShader->init(sun)) {
+        shaders.push_back(sShader);
     }
     else {
-        delete sR;
-        sR = nullptr;
+        delete sShader;
+        sShader = nullptr;
     }
     if (verbose) {
-        if (sR) {
-            std::cout << "Sun Renderer activated" << std::endl;
+        if (sShader) {
+            std::cout << "Sun Shader activated" << std::endl;
         }
         else {
-            std::cout << "Sun Renderer failed to activate" << std::endl;
+            std::cout << "Sun Shader failed to activate" << std::endl;
         }
     }
 }
 
-void MasterRenderer::activateAtmosphereRenderer(Atmosphere *atm) {
-    AtmosphereRenderer *aR = new AtmosphereRenderer;
-    if (aR->activate(atm)) {
-        renderers.push_back(aR);
+void MasterRenderer::activateAtmosphereShader(Atmosphere *atm) {
+    AtmosphereShader *aShader = new AtmosphereShader;
+    if (aShader->init(atm)) {
+        shaders.push_back(aShader);
     }
     else {
-        delete aR;
-        aR = nullptr;
+        delete aShader;
+        aShader = nullptr;
     }
     if (verbose) {
-        if (aR) {
-            std::cout << "Atmosphere Renderer activated" << std::endl;
+        if (aShader) {
+            std::cout << "Atmosphere Shader activated" << std::endl;
         }
         else {
-            std::cout << "Atmosphere Renderer failed to activate" << std::endl;
+            std::cout << "Atmosphere Shader failed to activate" << std::endl;
         }
     }
 }
 
 void MasterRenderer::cleanUp() {
     /* Clean up all active subrenderers */
-    for (auto &renderer : renderers) {
-        renderer->cleanUp();
+    for (auto &shader : shaders) {
+        shader->cleanUp();
     }
 }
 
