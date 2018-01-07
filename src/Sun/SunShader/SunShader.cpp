@@ -1,10 +1,20 @@
 #include "SunShader.hpp"
 
-bool SunShader::init() {
+bool SunShader::init(Sun *sun) {
+    /* Parent init */
     if (!Shader::init()) {
         return false;
     }
 
+    /* Set render target */
+    this->sun = sun;
+
+    addAllLocations();
+
+    return true;
+}
+
+void SunShader::addAllLocations() {
     /* Attributes */
     addAttribute("vertexPos");
 
@@ -25,8 +35,50 @@ bool SunShader::init() {
     addUniform("outerColor");
     addUniform("innerRadius");
     addUniform("outerRadius");
+}
 
-    return true;
+void SunShader::setGlobals(const glm::mat4 *projection, const glm::mat4 *view) {
+    loadP(projection);
+    loadV(view);
+}
+
+void SunShader::render(const World *world) {
+    /* Bind vertices */
+    glBindVertexArray(sun->mesh->vaoId);
+    int pos = getAttribute("vertexPos");
+    glEnableVertexAttribArray(pos);
+    glBindBuffer(GL_ARRAY_BUFFER, sun->mesh->vertBufId);
+    glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
+
+    /* Load billboard's position and size */
+    loadCenter(sun->center);
+    loadSize(sun->size);
+
+    if(sun->texture) {
+        loadUsesTexture(true);
+        loadTexture(sun->texture);
+        glActiveTexture(GL_TEXTURE0 + sun->texture->textureId);
+        glBindTexture(GL_TEXTURE_2D, sun->texture->textureId);
+    }
+    else {
+        loadUsesTexture(false);
+        loadInnerColor(sun->innerColor);
+        loadOuterColor(sun->outerColor);
+        loadInnerRadius(sun->innerRadius);
+        loadOuterRadius(sun->outerRadius);
+    }
+
+    /* Draw */
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, sun->mesh->vertBuf.size() / 3);
+
+    /* Unbind */
+    glDisableVertexAttribArray(getAttribute("vertexPos"));
+    Shader::unloadMesh();
+    Shader::unloadTexture(sun->texture->textureId);
+}
+
+void SunShader::cleanUp() {
+    Shader::cleanUp();
 }
 
 void SunShader::loadP(const glm::mat4 *p) {
