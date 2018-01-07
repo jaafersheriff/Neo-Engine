@@ -74,7 +74,9 @@ void SunShader::render(const World *world) {
     /* Unbind */
     glDisableVertexAttribArray(getAttribute("vertexPos"));
     Shader::unloadMesh();
-    Shader::unloadTexture(sun->texture->textureId);
+    if (sun->texture) {
+        Shader::unloadTexture(sun->texture->textureId);
+    }
 }
 
 void SunShader::cleanUp() {

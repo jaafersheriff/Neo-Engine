@@ -17,26 +17,28 @@ void SkyWorld::init(Loader &loader) {
         "ame_nebula/purplenebula_lf.tga",
 
     };
-    skybox = new Skybox(loader.loadCubeTexture(textureNames));
+    //skybox = new Skybox(loader.loadCubeTexture(textureNames));
 
     /* Sun */
-    sun = new Sun(this->light, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);
+    //sun = new Sun(this->light, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);
+    sun = new Sun(this->light, loader.loadTexture("moon.png"), 1.f);
 
     /* Atmosphere */
-    atmosphere = new Atmosphere(loader.loadObjMesh("geodesic_dome.obj"), 
-                                loader.loadTexture("sky.png", Texture::WRAP_MODE::CLAMP), 
-                                loader.loadTexture("glow.png", Texture::WRAP_MODE::CLAMP));
+    //atmosphere = new Atmosphere(loader.loadObjMesh("geodesic_dome.obj"), 
+    //                            loader.loadTexture("sky.png", Texture::WRAP_MODE::CLAMP), 
+    //                            loader.loadTexture("glow.png", Texture::WRAP_MODE::CLAMP), 
+    //                            1000.f);
 }
 
 void SkyWorld::prepareRenderer(MasterRenderer *mr) {
     if(skybox) {
-        mr->activateSkyboxRenderer(skybox);
+        mr->activateSkyboxShader(skybox);
     }
     if (atmosphere) {
-        mr->activateAtmosphereRenderer(atmosphere);
+        mr->activateAtmosphereShader(atmosphere);
     }
     if (sun) {
-        mr->activateSunRenderer(sun);
+        mr->activateSunShader(sun);
     }
 }
 

@@ -14,7 +14,7 @@ class Camera {
     public:
         /* Position in 3-D world */
         glm::vec3 position;
-        /* Position looking at in 3-D world -- located 1u away from position */
+        /* Position looking at in 3-D world */
         glm::vec3 lookAt;
 
         /* Constructors */

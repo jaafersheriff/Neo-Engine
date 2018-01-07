@@ -17,6 +17,6 @@ if [ $? -ne 0 ]; then
    exit 1
 fi
 
-echo "Running.."
+echo "Running..."; echo
 ./Neo.exe $@
 cd ..
