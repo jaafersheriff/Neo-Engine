@@ -14,10 +14,10 @@ out vec4 color;
 void main() {
     vec3 lightDir = lightPos - worldPos;
     vec3 L = normalize(lightDir);
-	vec3 N = (vec3(
-				-cos(textureCoords.x * PI),
-				-cos(textureCoords.y * PI),
-				sin(textureCoords.x * PI) * sin(textureCoords.y * PI)));
+    vec3 N = (vec3(
+                -cos(textureCoords.x * PI),
+                -cos(textureCoords.y * PI),
+                sin(textureCoords.x * PI) * sin(textureCoords.y * PI)));
     vec3 diffuseContrib = max(dot(N, L), 0.0) * lightCol;
     vec4 texel = texture(textureImage, textureCoords);
 

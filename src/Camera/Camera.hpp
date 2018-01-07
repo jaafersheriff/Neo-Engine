@@ -19,7 +19,7 @@ class Camera {
 
         /* Constructors */
         Camera(const glm::vec3);
-        Camera() : Camera(glm::vec3(0)) { }
+        Camera() : Camera(glm::vec3(0.f)) { }
 
         /* Update */
         virtual void update();

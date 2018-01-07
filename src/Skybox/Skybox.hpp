@@ -8,7 +8,7 @@
 #include <vector>
 
 #define SIZE 1000.f
-#define ROTATE_SPEED 10.f
+#define ROTATE_SPEED 5.f
 
 class Skybox {
     public: 
