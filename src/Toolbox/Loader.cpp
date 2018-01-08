@@ -159,7 +159,7 @@ void Loader::resize(Mesh *mesh) {
     yExtent = maxY-minY;
     zExtent = maxZ-minZ;
     if (xExtent >= yExtent && xExtent >= zExtent) {
-    maxExtent = xExtent;
+        maxExtent = xExtent;
     }
     if (yExtent >= xExtent && yExtent >= zExtent) {
         maxExtent = yExtent;

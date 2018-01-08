@@ -4,7 +4,7 @@
 #ifndef _CLOUD_SHADER_HPP_
 #define _CLOUD_SHADER_HPP_
 
-#include "Shader/Shader.hpp"
+#include "Renderer/Shader.hpp"
 #include "Cloud/CloudBillboard.hpp"
 #include "Model/Texture.hpp"
 #include "Light/Light.hpp"

@@ -4,7 +4,7 @@
 #ifndef _SUN_SHADER_CPP_
 #define _SUN_SHADER_CPP_
 
-#include "Shader/Shader.hpp"
+#include "Renderer/Shader.hpp"
 #include "Sun/Sun.hpp"
 #include "Model/Texture.hpp"
 

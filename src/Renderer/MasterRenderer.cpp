@@ -1,7 +1,6 @@
 #include "MasterRenderer.hpp"
 
 #include "World/World.hpp"
-#include "Renderer/Renderer.hpp"
 
 #include "Entity/EntityShader/EntityShader.hpp"
 #include "Skybox/SkyboxShader/SkyboxShader.hpp"
@@ -9,14 +8,11 @@
 #include "Sun/SunShader/SunShader.hpp"
 #include "Atmosphere/AtmosphereShader/AtmosphereShader.hpp"
 
-#include "Shader/GLSL.hpp"
+#include "Renderer/GLSL.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <iostream>
-
-MasterRenderer::MasterRenderer() {
-}
 
 /* Master render function */
 void MasterRenderer::render(const Display &display, const World *world) {
@@ -54,16 +50,13 @@ void MasterRenderer::activateEntityShader(std::vector<Entity *> *entities) {
     EntityShader *eShader = new EntityShader;
     if (eShader->init(entities)) {
         shaders.push_back(eShader);
+        if (verbose) {
+            std::cout << "Entity Shader activated" << std::endl;
+        }
     }
     else {
         delete eShader;
-        eShader = nullptr;
-    }
-    if (verbose) {
-        if (eShader) {
-            std::cout << "Entity Shader activated" << std::endl;
-        }
-        else {
+        if (verbose) {
             std::cout << "Entity Shader failed to activate" << std::endl;
         }
     }
@@ -73,18 +66,15 @@ void MasterRenderer::activateSkyboxShader(Skybox *sb) {
     SkyboxShader *sShader = new SkyboxShader;
     if (sShader->init(sb)) {
         shaders.push_back(sShader);
+        if (verbose) {
+            std::cout << "Skybox Shader activated" << std::endl;
+        }
     }
     else {
         delete sShader;
-        sShader = nullptr;
-    }
-    if (verbose) {
-        if (sShader) {
-            std::cout << "Skybox Shader activated" << std::endl;
-        }
-        else {
+        if (verbose) {
             std::cout << "Skybox Shader failed to activate" << std::endl;
-        }
+       }
     }
 }
 
@@ -92,16 +82,13 @@ void MasterRenderer::activateCloudShader(std::vector<CloudBillboard *> *billboar
     CloudShader *cShader = new CloudShader;
     if (cShader->init(billboards)) {
         shaders.push_back(cShader);
+        if (verbose) {
+            std::cout << "Cloud Shader activated" << std::endl;
+        }
     }
     else {
         delete cShader;
-        cShader = nullptr;
-    }
-    if (verbose) {
-        if (cShader) {
-            std::cout << "Cloud Shader activated" << std::endl;
-        }
-        else {
+        if (verbose) {
             std::cout << "Cloud Shader failed to activate" << std::endl;
         }
     }
@@ -111,16 +98,13 @@ void MasterRenderer::activateSunShader(Sun *sun) {
     SunShader *sShader = new SunShader;
     if (sShader->init(sun)) {
         shaders.push_back(sShader);
+        if (verbose) {
+            std::cout << "Sun Shader activated" << std::endl;
+        }
     }
     else {
         delete sShader;
-        sShader = nullptr;
-    }
-    if (verbose) {
-        if (sShader) {
-            std::cout << "Sun Shader activated" << std::endl;
-        }
-        else {
+        if (verbose) {
             std::cout << "Sun Shader failed to activate" << std::endl;
         }
     }
@@ -130,16 +114,13 @@ void MasterRenderer::activateAtmosphereShader(Atmosphere *atm) {
     AtmosphereShader *aShader = new AtmosphereShader;
     if (aShader->init(atm)) {
         shaders.push_back(aShader);
+        if (verbose) {
+            std::cout << "Atmosphere Shader activated" << std::endl;
+        }
     }
     else {
         delete aShader;
-        aShader = nullptr;
-    }
-    if (verbose) {
-        if (aShader) {
-            std::cout << "Atmosphere Shader activated" << std::endl;
-        }
-        else {
+        if (verbose) {
             std::cout << "Atmosphere Shader failed to activate" << std::endl;
         }
     }

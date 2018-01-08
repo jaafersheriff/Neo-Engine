@@ -4,7 +4,7 @@
 #ifndef _SKYBOX_SHADER_HPP_
 #define _SKYBOX_SHADER_HPP_
 
-#include "Shader/Shader.hpp"
+#include "Renderer/Shader.hpp"
 #include "Skybox/Skybox.hpp"
 #include "Skybox/CubeTexture.hpp"
 

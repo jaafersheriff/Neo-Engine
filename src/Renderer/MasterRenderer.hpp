@@ -22,9 +22,6 @@ class Atmosphere;
 
 class MasterRenderer {
     public:
-        /* Constructor */
-        MasterRenderer();
-        
         /* List of active renderers */
         std::vector<Shader *> shaders;
 

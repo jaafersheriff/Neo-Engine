@@ -5,7 +5,7 @@
 #define _ENTITY_SHADER_HPP_
 
 #include "Entity/Entity.hpp"
-#include "Shader/Shader.hpp"
+#include "Renderer/Shader.hpp"
 #include "Light/Light.hpp"
 #include "Model/Texture.hpp"
 

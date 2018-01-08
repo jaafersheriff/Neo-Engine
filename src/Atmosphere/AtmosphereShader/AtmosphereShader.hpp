@@ -4,7 +4,7 @@
 #ifndef _ATMOSPHERE_SHADER_HPP_
 #define _ATMOSPHERE_SHADER_HPP_
 
-#include "Shader/Shader.hpp"
+#include "Renderer/Shader.hpp"
 
 #include "Atmosphere/Atmosphere.hpp"
 #include "Light/Light.hpp"
