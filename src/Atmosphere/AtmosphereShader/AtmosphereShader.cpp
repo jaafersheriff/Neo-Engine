@@ -4,7 +4,7 @@
 
 bool AtmosphereShader::init(Atmosphere *atm) {
     /* Parent init */
-    if (!Shader::init()) {
+    if (!atm || !Shader::init()) {
         return false;
     }
 

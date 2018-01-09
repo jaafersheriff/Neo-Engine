@@ -3,7 +3,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 bool SkyboxShader::init(Skybox *sb) {
-    if (!Shader::init()) {
+    if (!sb || !Shader::init()) {
         return false;
     }
 

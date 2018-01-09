@@ -1,11 +1,13 @@
 #include "SkyWorld.hpp"
 
+#include <iostream>
+
 void SkyWorld::init(Loader &loader) {
     /* Camera */
     this->camera = new Camera();
 
     /* Main light source */
-    this->light = new Light(glm::vec3(-1000, 0, 1000), glm::vec3(1.f));
+    this->light = new Light(glm::vec3(-500, 0, 500), glm::vec3(1.f));
 
     /* Skybox */
     std::string textureNames[6] = {
@@ -20,26 +22,19 @@ void SkyWorld::init(Loader &loader) {
     //skybox = new Skybox(loader.loadCubeTexture(textureNames));
 
     /* Sun */
-    //sun = new Sun(this->light, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);
-    sun = new Sun(this->light, loader.loadTexture("moon.png"), 1.f);
+    sun = new Sun(this->light, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);
 
     /* Atmosphere */
-    //atmosphere = new Atmosphere(loader.loadObjMesh("geodesic_dome.obj"), 
-    //                            loader.loadTexture("sky.png", Texture::WRAP_MODE::CLAMP), 
-    //                            loader.loadTexture("glow.png", Texture::WRAP_MODE::CLAMP), 
-    //                            1000.f);
+    atmosphere = new Atmosphere(loader.loadObjMesh("geodesic_dome.obj"), 
+                                loader.loadTexture("sky.png", Texture::WRAP_MODE::CLAMP), 
+                                loader.loadTexture("glow.png", Texture::WRAP_MODE::CLAMP), 
+                                1000.f);
 }
 
 void SkyWorld::prepareRenderer(MasterRenderer *mr) {
-    if(skybox) {
-        mr->activateSkyboxShader(skybox);
-    }
-    if (atmosphere) {
-        mr->activateAtmosphereShader(atmosphere);
-    }
-    if (sun) {
-        mr->activateSunShader(sun);
-    }
+    mr->activateSkyboxShader(skybox);
+    mr->activateAtmosphereShader(atmosphere);
+    mr->activateSunShader(sun);
 }
 
 void SkyWorld::update(Context &ctx) {

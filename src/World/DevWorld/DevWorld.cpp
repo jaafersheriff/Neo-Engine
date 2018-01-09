@@ -34,9 +34,7 @@ void DevWorld::init(Loader &loader) {
 }
 
 void DevWorld::prepareRenderer(MasterRenderer *mr) {
-    if (sun) {
-        mr->activateSunShader(sun);
-    }
+    mr->activateSunShader(sun);
     mr->activateCloudShader(&cloudBoards);
     mr->activateEntityShader(&entities);
 }

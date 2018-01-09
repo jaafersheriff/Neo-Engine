@@ -2,14 +2,14 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
-bool EntityShader::init(std::vector<Entity *> *ep) {
+bool EntityShader::init(std::vector<Entity *> *entities) {
     /* Parent init */
-    if (!Shader::init()) {
+    if (!entities || !Shader::init()) {
         return false;
     }
     
     /* Set render target */
-    this->entitiesPointer = ep;
+    this->entitiesPointer = entities;
 
     addAllLocations();
         

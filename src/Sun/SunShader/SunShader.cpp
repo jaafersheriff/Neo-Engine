@@ -2,7 +2,7 @@
 
 bool SunShader::init(Sun *sun) {
     /* Parent init */
-    if (!Shader::init()) {
+    if (!sun || !Shader::init()) {
         return false;
     }
 

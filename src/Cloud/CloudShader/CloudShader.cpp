@@ -4,7 +4,7 @@
 
 bool CloudShader::init(std::vector<CloudBillboard *> *billboards) {
     /* Parent init */
-    if (!Shader::init()) {
+    if (!billboards || !Shader::init()) {
         return false;
     }
 
