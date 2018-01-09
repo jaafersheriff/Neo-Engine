@@ -3,6 +3,7 @@
 Sun::Sun(Light *l, Texture *t, float scale) : 
     Billboard(t, glm::vec3(0.f, 0.f, 0.f), glm::vec2(t->width, t->height)*scale) {
     this->light = l;
+    this->outerRadius = size.x;
 }
 
 Sun::Sun(Light *l, glm::vec3 c1, glm::vec3 c2, float in, float out) :
@@ -25,11 +26,12 @@ void Sun::updateInnerRadius(const float in) {
 }
 
 void Sun::updateOuterRadius(const float in) {
-    if (outerRadius + in <= innerRadius) {
-        updateInnerRadius(in);
-    }
     if (outerRadius += in >= 0) {
         outerRadius += in;
     }
+    if (!texture && outerRadius + in <= innerRadius) {
+        updateInnerRadius(in);
+    }
+    
     this->size = glm::vec2(outerRadius);
 }
