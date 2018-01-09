@@ -3,14 +3,14 @@
 echo "Building..."
 cd build
 
-cmake .. -G 'MinGW Makefiles'
+cmake .. -G 'MSYS Makefiles'
 if [ $? -ne 0 ]; then
    echo "Failed cmake"
    cd ..
    exit 1
 fi
 
-mingw32-make
+make
 if [ $? -ne 0 ]; then
    echo "Failed make"
    cd ..
