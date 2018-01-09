@@ -26,7 +26,7 @@ class ThirdPersonCamera : public Camera {
         virtual void moveDown();
 
       private:
-         glm::vec3 *lookRef;
+         const glm::vec3 *lookRef;
          float distanceFromBase;
          float angleAroundBase;
 };
