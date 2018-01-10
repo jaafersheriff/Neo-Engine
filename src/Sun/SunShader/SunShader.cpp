@@ -43,6 +43,8 @@ void SunShader::setGlobals(const glm::mat4 *projection, const glm::mat4 *view) {
 }
 
 void SunShader::render(const World *world) {
+    glDisable(GL_DEPTH_TEST);
+
     /* Bind vertices */
     glBindVertexArray(sun->mesh->vaoId);
     int pos = getAttribute("vertexPos");
@@ -77,6 +79,7 @@ void SunShader::render(const World *world) {
     if (sun->texture) {
         Shader::unloadTexture(sun->texture->textureId);
     }
+    glDisable(GL_DEPTH_TEST);
 }
 
 void SunShader::cleanUp() {

@@ -86,6 +86,18 @@ void SkyWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
     if (keyboard.isKeyPressed('v')) {
         sun->updateOuterRadius(-5.f);
     }
+    if (keyboard.isKeyPressed('b')) {
+        sun->updateInnerRadius(5.f);
+    }
+    if (keyboard.isKeyPressed('n')) {
+        sun->updateOuterRadius(5.f);
+    }
+    if (keyboard.isKeyPressed('1')) {
+        sun->innerColor += Toolbox::genRandomVec3(-1.f, 1.f);
+    }
+    if (keyboard.isKeyPressed('2')) {
+        sun->outerColor += Toolbox::genRandomVec3(-1.f, 1.f);
+    }
 }
 
 void SkyWorld::cleanUp() {

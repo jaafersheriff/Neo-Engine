@@ -9,13 +9,6 @@ void DevWorld::init(Loader &loader) {
     /* Set up camera */
     this->camera = new Camera;
 
-    /* Create entities */
-    Entity *e = new Entity(loader.loadObjMesh("geodesic_dome.obj"),
-                           glm::vec3(15.f, 0.f, 0.f), 
-                           glm::vec3(0), 
-                           glm::vec3(10.f, 10.f, 10.f));
-    entities.push_back(e);
-    
     /* Billboards */
     Texture *cloudTexture = loader.loadTexture("cloud.png");
     for (int i = 0; i < 50; i++) {
@@ -30,7 +23,8 @@ void DevWorld::init(Loader &loader) {
         cloudBoards.push_back(c);
     }
 
-    sun = new Sun(this->light, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 150, 250);
+    /* Sun */    
+    sun = new Sun(this->light, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);
 }
 
 void DevWorld::prepareRenderer(MasterRenderer *mr) {
@@ -96,21 +90,27 @@ void DevWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
     }
     if (keyboard.isKeyPressed('z')) {
         light->position.x += 35.f;
+        std::cout << Toolbox::vectorToString(light->position) << std::endl;
     }
     if (keyboard.isKeyPressed('x')) {
         light->position.x -= 35.f;
+        std::cout << Toolbox::vectorToString(light->position) << std::endl;
     }
     if (keyboard.isKeyPressed('c')) {
         light->position.y += 35.f;
+        std::cout << Toolbox::vectorToString(light->position) << std::endl;
     }
     if (keyboard.isKeyPressed('v')) {
         light->position.y -= 35.f;
+        std::cout << Toolbox::vectorToString(light->position) << std::endl;
     }
     if (keyboard.isKeyPressed('b')) {
         light->position.z += 35.f;
+        std::cout << Toolbox::vectorToString(light->position) << std::endl;
     }
     if (keyboard.isKeyPressed('n')) {
         light->position.z -= 35.f;
+        std::cout << Toolbox::vectorToString(light->position) << std::endl;
     }
 }
 

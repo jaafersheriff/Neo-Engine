@@ -21,5 +21,5 @@ void main() {
     vec3 diffuseContrib = max(dot(N, L), 0.0) * lightCol;
     vec4 texel = texture(textureImage, textureCoords);
 
-    color = texel * vec4(diffuseContrib, distance(diffuseContrib, vec3(0, 0, 0)));
+    color = texel; //* vec4(diffuseContrib, distance(diffuseContrib, vec3(0, 0, 0)));
 }
