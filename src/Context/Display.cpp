@@ -1,5 +1,5 @@
 #include "Display.hpp"
-#include "Shader/GLSL.hpp"
+#include "Renderer/GLSL.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <iostream> /* cout, cerr */
@@ -82,6 +82,11 @@ void Display::update() {
 int Display::shouldClose() { 
     return glfwWindowShouldClose(window) || 
            glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+}
+
+void Display::swap() {
+    glfwSwapBuffers(window);
+    glfwPollEvents();
 }
 
 void Display::cleanUp() {

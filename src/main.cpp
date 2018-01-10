@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
     /* Init display */
     if (context.display.init()) {
         std::cerr << "Failed to init display" << std::endl;
+        return 1;
     }
     context.init();
     loader.init(context);
@@ -41,13 +42,11 @@ int main(int argc, char **argv) {
     /* Main loop */
     while(!context.shouldClose()) {
         context.update();
+
         world->update(context);
-        
         mr.render(context.display, world);
 
-        /* OpenGL things */
-        glfwSwapBuffers(context.display.window);
-        glfwPollEvents();
+        context.display.swap();
     }
 
     context.cleanUp();

@@ -37,6 +37,9 @@ class Display {
         /* Update */
         void update();
 
+        /* Swap buffers, poll events */
+        void swap();
+
         /* Shut down */
         void cleanUp();
 };
