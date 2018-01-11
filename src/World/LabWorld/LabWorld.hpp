@@ -4,11 +4,15 @@
 
 #include "World/World.hpp"
 #include "Entity/Entity.hpp"
+#include "Player.hpp"
 
 #define MAX_GAME_OBJECTS 10
 
 class LabWorld : public World {
     public:
+        /* World-specific members */
+        Player *player;
+
         /* World-specific render targets */
         std::vector<Entity *> entities;
 

@@ -1,6 +1,7 @@
 #include "LabWorld.hpp"
 
 #include "Block.hpp"
+#include "Player.hpp"
 
 void LabWorld::init(Loader &loader) {
     this->loader = &loader;
@@ -20,6 +21,8 @@ void LabWorld::init(Loader &loader) {
                                   glm::vec3(0.f, -1.f, 0.f),
                                   glm::vec3(0.f),
                                   glm::vec3(100.f, 0.f, 100.f)));
+    /* Player */
+    // player = new Player(camera, AABB(loader.loadObjMesh("cube.obj")));
 }
 
 void LabWorld::prepareRenderer(MasterRenderer *mr) {
@@ -31,7 +34,8 @@ void LabWorld::update(Context &ctx) {
     camera->update();
 
     /* Add game objects at a certain time step */
-    if (!((int) ctx.runningTime % 5) && gameObjects < MAX_GAME_OBJECTS) {
+    // TODO : timestep
+    if (gameObjects < MAX_GAME_OBJECTS) {
         /* Randomize position*/
         glm::vec3 pos = glm::vec3(Toolbox::genRandom(100.f), 0.f, Toolbox::genRandom(100.f));
         float rotation = Toolbox::genRandom(0.f, 360.f);
@@ -43,8 +47,9 @@ void LabWorld::update(Context &ctx) {
         gameObjects++;
     }
 
+    // player->update();
     for (auto b : entities) {
-
+      //  ((Block *) b)->update(entities[0], player->boundingBox);
     }
 }
 
