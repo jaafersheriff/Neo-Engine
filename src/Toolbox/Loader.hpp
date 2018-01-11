@@ -28,6 +28,7 @@ class Loader {
 
         /* Create a mesh for a provided file name */
         Mesh* loadObjMesh(const std::string);
+
     private:
         /* Resize a mesh so all of the vertices are [0, 1] */
         void resize(Mesh*);
