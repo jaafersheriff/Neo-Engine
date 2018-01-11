@@ -5,6 +5,8 @@ project(Neo)
 
 # Use glob to get the list of all source files.
 file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE HEADERS "src/*.h" "src/*.hpp")
+file(GLOB_RECURSE GLSL "resources/*.glsl" "src/*.glsl")
 
 #Set up link targets
 if(MINGWW) 
@@ -23,11 +25,21 @@ if(WIN32 AND NOT MINGW)
   link_directories(${GLEW_DIR}/lib/Release/Win32)
 endif()
 
-# We don't really need to include header and resource files to build, but it's
-# nice to have them show up in IDEs.
-file(GLOB_RECURSE HEADERS "src/*.h")
-file(GLOB_RECURSE HEADERS "src/*.hpp")
-file(GLOB_RECURSE GLSL "resources/*.glsl")
+macro(GroupSources curdir)
+    file(GLOB children RELATIVE ${PROJECT_SOURCE_DIR}/${curdir} ${PROJECT_SOURCE_DIR}/${curdir}/*)
+    foreach(child ${children})
+        if(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/${curdir}/${child})
+            GroupSources(${curdir}/${child})
+        else()
+            string(REPLACE "/" "\\" groupname ${curdir})
+            # I would like to call the src root folder in a different name, only in visual studio (not mandatory requirement)
+            source_group(${groupname} FILES ${PROJECT_SOURCE_DIR}/${curdir}/${child})
+        endif()
+    endforeach()
+endmacro()
+
+ # Execute the macro
+ GroupSources(src)
 
 # Set the executable.
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${GLSL})
