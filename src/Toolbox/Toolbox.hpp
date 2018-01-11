@@ -18,7 +18,12 @@ public:
     static inline float genRandom() {
         return rand() / (float) RAND_MAX;
     }
-
+    
+    /* Generate a scaled random value */
+    static inline float genRandom(const float val) {
+        return genRandom() * val;
+    }
+   
     /* Generate a random value in a range [min, max] */
     static inline float genRandom(const float min, const float max) {
         return genRandom() * (max - min) + min;
