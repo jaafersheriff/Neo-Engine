@@ -3,6 +3,8 @@
 #include "Block.hpp"
 
 void LabWorld::init(Loader &loader) {
+    this->loader = &loader;
+
     /* Camera */
     this->camera = new Camera();
 
@@ -28,6 +30,22 @@ void LabWorld::update(Context &ctx) {
     takeInput(ctx.mouse, ctx.keyboard);
     camera->update();
 
+    /* Add game objects at a certain time step */
+    if (!((int) ctx.runningTime % 5) && gameObjects < MAX_GAME_OBJECTS) {
+        /* Randomize position*/
+        glm::vec3 pos = glm::vec3(Toolbox::genRandom(100.f), 0.f, Toolbox::genRandom(100.f));
+        float rotation = Toolbox::genRandom(0.f, 360.f);
+        entities.push_back(new Block(loader->loadObjMesh("cube.obj"),   /* Mesh */
+                                     pos,                               /* Position */
+                                     glm::vec3(0.f, rotation, 0.f),     /* Rotation */
+                                     glm::vec3(10.f),                   /* Scale */
+                                     Toolbox::genRandom(10.f, 20.f)));   /* Velocity */
+        gameObjects++;
+    }
+
+    for (auto b : entities) {
+
+    }
 }
 
 void LabWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {

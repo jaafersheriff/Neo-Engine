@@ -5,6 +5,8 @@
 #include "World/World.hpp"
 #include "Entity/Entity.hpp"
 
+#define MAX_GAME_OBJECTS 10
+
 class LabWorld : public World {
     public:
         /* World-specific render targets */
@@ -19,6 +21,9 @@ class LabWorld : public World {
         void update(Context &);
         void takeInput(Mouse &, Keyboard &);
         void cleanUp();
+    private:
+        Loader *loader;
+        int gameObjects = 0;
 };
 
 #endif
