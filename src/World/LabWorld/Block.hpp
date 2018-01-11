@@ -17,9 +17,7 @@ class Block : public Entity {
         ModelTexture alive = ModelTexture(0.3f, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f));
         ModelTexture dead = ModelTexture(0.3f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 0.f));
 
-
-
-        void update();
+        void update(Entity *, AABB);
 };
 
 #endif
