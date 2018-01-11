@@ -4,19 +4,17 @@ echo "Building..."
 cd build
 
 cmake .. -G 'MSYS Makefiles'
-if [ $? -ne 0 ]; then
+if [ $? -eq 0 ]; then
+   make
+   if [ $? -eq 0 ]; then
+      echo "Running..."; echo
+      ./Neo.exe $@
+   else
+      echo "Failed make"
+   fi
+else 
    echo "Failed cmake"
-   cd ..
-   exit 1
 fi
 
-make
-if [ $? -ne 0 ]; then
-   echo "Failed make"
-   cd ..
-   exit 1
-fi
-
-echo "Running..."; echo
-./Neo.exe $@
 cd ..
+
