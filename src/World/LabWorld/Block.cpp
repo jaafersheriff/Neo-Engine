@@ -3,7 +3,7 @@ Block::Block(Mesh *m, const glm::vec3 p, const glm::vec3 r, const glm::vec3 s, f
     Entity(m, alive, p, r, s) {
     this->velocity = vel;
     this->isHit = false;
-    this->boundingBox = AABB(m);
+    this->boundingBox = AABB(m, p);
 }
 
 void Block::update() {
