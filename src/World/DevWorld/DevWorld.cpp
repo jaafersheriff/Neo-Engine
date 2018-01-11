@@ -35,7 +35,6 @@ void DevWorld::prepareRenderer(MasterRenderer *mr) {
 
 void DevWorld::update(Context &ctx) {
     takeInput(ctx.mouse, ctx.keyboard);
-    gameTime = ctx.displayTime;
     camera->update();
   
     if (isPaused) {

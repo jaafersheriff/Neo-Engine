@@ -20,7 +20,6 @@ class DevWorld : public World {
 
         /* World-specific members */
         bool isPaused = false;
-        float gameTime = 0.f;
 
         /* Constructor */
         DevWorld() : World("Dev World") { }

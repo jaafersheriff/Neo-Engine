@@ -28,10 +28,8 @@ class Context {
         Mouse mouse;
         Keyboard keyboard;
 
-        float runningTime;      /* Global timer                             */
-        double lastTime;        /* Time at which last frame was rendered    */
-        float displayTime;      /* Time to render last frame in seconds     */
-        bool verbose = false;   /* Print things as they happen */
+        double timeStep;        /* Time to render last frame in seconds     */
+        bool verbose = false;   /* Print things as they happen              */
 
         /* Process command line args */
         int processArgs(int, char**);
@@ -55,8 +53,10 @@ class Context {
         /* Utility vars */
         double fps = 0.0;       /* FPS                                      */
         double lastFpsTime;     /* Time at which last FPS was calculated    */
-        double nbFrames;        /* Number of frames in current second       */
-        
+        int nFrames;            /* Number of frames in current second       */
+        double lastFrameTime;   /* Time at which last frame was rendered    */
+        double runTime;         /* Global timer                             */
+
         /* Utility functions */
         void printUsage();
 };

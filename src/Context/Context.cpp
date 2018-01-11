@@ -92,8 +92,9 @@ void Context::init() {
     mouse.window = keyboard.window = display.window;
 
     /* Init local */
-    lastTime = runningTime = (float) glfwGetTime();
-    nbFrames = displayTime = lastFpsTime = 0.f;
+    lastFrameTime = runTime = (float) glfwGetTime();
+    timeStep = lastFpsTime = 0.f;
+    nFrames = 0;
 }
 
 World* Context::createWorld() {
@@ -124,16 +125,16 @@ void Context::update() {
     mouse.update();
 
     /* Update time */
-    runningTime = (float) glfwGetTime();
-    displayTime = (runningTime - lastTime);
-    lastTime = runningTime;
+    runTime = (float) glfwGetTime();
+    timeStep = (runTime - lastFrameTime);
+    lastFrameTime = runTime;
 
     /* Update FPS */
-    nbFrames++;
-    if (runningTime - lastFpsTime >= 1.0) {
-        fps = double(nbFrames);
-        nbFrames = 0.0;
-        lastFpsTime = runningTime;
+    nFrames++;
+    if (runTime - lastFpsTime >= 1.0) {
+        fps = double(nFrames);
+        nFrames = 0;
+        lastFpsTime = runTime;
         if (verbose) {
             std::cout << fps << std::endl;
         }
