@@ -2,6 +2,7 @@
 #include "World/World.hpp"
 #include "World/CloudWorld/CloudWorld.hpp"
 #include "World/SkyWorld/SkyWorld.hpp"
+#include "World/LabWorld/LabWorld.hpp"
 
 #include <string.h>  /* strcmp, strlen  */
 #include <iostream>  /* cout, stoi      */
@@ -77,6 +78,10 @@ int Context::processArgs(int argc, char **argv) {
             else if(!strcmp(argv[i], "SKY_WORLD")) {
                 selectedWorld = SKY_WORLD;
             }
+            /* Lab world */
+            else if(!strcmp(argv[i], "LAB_WORLD")) {
+                selectedWorld = LAB_WORLD_TYPE;
+            }
             /* Invalid world chosen */
             else {
                 printUsage();
@@ -112,6 +117,9 @@ World* Context::createWorld() {
             break;
         case(SKY_WORLD):
             world = new SkyWorld;
+            break;
+        case(LAB_WORLD_TYPE):
+            world = new LabWorld;
             break;
         /* Error state -- we should never get here */
         default:
