@@ -22,11 +22,12 @@ void LabWorld::init(Loader &loader) {
                                   glm::vec3(0.f),
                                   glm::vec3(100.f, 0.f, 100.f)));
     /* Player */
-    // player = new Player(camera, AABB(loader.loadObjMesh("cube.obj")));
+    player = new Player(camera, AABB(loader.loadObjMesh("cube.obj")));
 }
 
 void LabWorld::prepareRenderer(MasterRenderer *mr) {
     mr->activateEntityShader(&entities);
+    mr->activateAABBShader(&blocks);
 }
 
 void LabWorld::update(Context &ctx) {
@@ -36,18 +37,21 @@ void LabWorld::update(Context &ctx) {
     /* Add game objects at a certain time step */
     // TODO : timestep
     if (gameObjects < MAX_GAME_OBJECTS) {
-        /* Randomize position*/
+        // /* Randomize position*/
         glm::vec3 pos = glm::vec3(Toolbox::genRandom(100.f), 0.f, Toolbox::genRandom(100.f));
         float rotation = Toolbox::genRandom(0.f, 360.f);
-        entities.push_back(new Block(loader->loadObjMesh("cube.obj"),   /* Mesh */
+        Block *b = new Block(loader->loadObjMesh("cube.obj"),   /* Mesh */
+                                     alive,                             /* Texture */
                                      pos,                               /* Position */
                                      glm::vec3(0.f, rotation, 0.f),     /* Rotation */
-                                     glm::vec3(10.f),                   /* Scale */
-                                     Toolbox::genRandom(10.f, 20.f)));   /* Velocity */
+                                     glm::vec3(5.f),                    /* Scale */
+                                     Toolbox::genRandom(10.f, 20.f)));  /* Velocity */
+        entities.push_back(b);
+        blocks.push_back(b);
         gameObjects++;
     }
 
-    // player->update();
+    player->update();
     for (auto b : entities) {
       //  ((Block *) b)->update(entities[0], player->boundingBox);
     }

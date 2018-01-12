@@ -15,6 +15,7 @@ class LabWorld : public World {
 
         /* World-specific render targets */
         std::vector<Entity *> entities;
+        std::vector<Block *> block;
 
         /* Constructor */
         LabWorld() : World("CSC 476 Lab") { }
@@ -28,6 +29,7 @@ class LabWorld : public World {
     private:
         Loader *loader;
         int gameObjects = 0;
+        ModelTexture alive = ModelTexture(0.3f, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f));
 };
 
 #endif
