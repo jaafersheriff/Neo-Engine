@@ -2,6 +2,7 @@
 #ifndef _AABB_SHADER_HPP_
 #define _AABB_SHADER_HPP_
 
+#include "Renderer/Shader.hpp"
 #include "World/LabWorld/Block.hpp"
 
 #include <vector>
@@ -24,6 +25,11 @@ class AABBShader : public Shader {
         void cleanUp();
 
     private:
+        /* AABB VAO/VBO */
+        float vertices[24];
+        unsigned int vaoId;
+        unsigned int vertexId;
+        
         /* GLSL load functions */
         void addAllLocations();
         void setGlobals(const glm::mat4 *, const glm::mat4 *);

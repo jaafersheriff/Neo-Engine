@@ -2,15 +2,9 @@
 
 AABB::AABB() {
     this->min = this->max = this->worldMin = this->worldMax = glm::vec3(0.f);
-    this->entity = nullptr;
 }
 
-AABB::AABB(Entity *entity) {
-    Mesh *m = entity->mesh;
-    if (!m) {
-        AABB();
-        return;
-    }
+AABB::ABBB(Mesh *mesh) : AABB() {
     float minX, minY, minZ;
     float maxX, maxY, maxZ;
     minX = minY = minZ = 1.1754E+38F;
@@ -30,13 +24,21 @@ AABB::AABB(Entity *entity) {
 
     this->min = this->worldMin = glm::vec3(minX, minY, minZ);
     this->max = this->worldMax = glm::vec3(maxX, maxY, maxZ);
-    this->entity = entity;
 }
 
-bool AABB::intersect(const AABB &other) {
+AABB::AABB(Entity *entity) : AABB() {
+    if (entity->mesh) {
+        AABB(entity->mesh);
+    }
+}
+
+void AABB::update(const glm::mat4 *M) {
     // TODO : use entity->M
     // this->worldMin = M * min
     // this->worldMax = M * max
+}
+
+bool AABB::intersect(const AABB &other) {
     return (worldMin.x <= other.worldMax.x && worldMax.x >= other.worldMin.x) &&
            (worldMin.y <= other.worldMax.y && worldMax.y >= other.worldMin.y) &&
            (worldMin.z <= other.worldMax.z && worldMax.z >= other.worldMin.z);
