@@ -1,7 +1,5 @@
 #include "EntityShader.hpp"
 
-#include "glm/gtc/matrix_transform.hpp"
-
 bool EntityShader::init(std::vector<Entity *> *entities) {
     /* Parent init */
     if (!entities || !Shader::init()) {
@@ -57,13 +55,8 @@ void EntityShader::render() {
             continue;
         }
 
-        /* Create and load model matrix */
-        M = glm::translate(glm::mat4(1.f), e->position);
-        M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.x), glm::vec3(1, 0, 0));
-        M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.y), glm::vec3(0, 1, 0));
-        M *= glm::rotate(glm::mat4(1.f), glm::radians(e->rotation.z), glm::vec3(0, 0, 1));
-        M *= glm::scale(glm::mat4(1.f), e->scale);
-        loadM(&M);
+        /* Load model matrix */
+        loadM(&e->M);
 
         /* Load texture/material */
         loadTexture(e->modelTexture);
