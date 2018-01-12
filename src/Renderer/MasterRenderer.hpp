@@ -15,6 +15,7 @@
 class World;
 class Shader;
 class Entity;
+class Block;
 class Skybox;
 class CloudBillboard;
 class Sun;
@@ -36,7 +37,7 @@ class MasterRenderer {
 
         /* Activate subrenderers */
         void activateEntityShader(std::vector<Entity *> *);
-        void activateAABBShader(std::vector<Entity *> *);
+        void activateAABBShader(std::vector<Block *> *);
         void activateCloudShader(std::vector<CloudBillboard *> *);
         void activateSkyboxShader(Skybox *);
         void activateSunShader(Sun *);

@@ -3,7 +3,7 @@
 #include "World/World.hpp"
 
 #include "Entity/EntityShader/EntityShader.hpp"
-#include "Entity/AABB/AABBShader/AABBShader.hpp"
+#include "AABB/AABBShader/AABBShader.hpp"
 #include "Skybox/SkyboxShader/SkyboxShader.hpp"
 #include "Cloud/CloudShader/CloudShader.hpp"
 #include "Sun/SunShader/SunShader.hpp"
@@ -114,9 +114,9 @@ void MasterRenderer::activateEntityShader(std::vector<Entity *> *entities) {
     }
 }
 
-void MasterRenderer::activateAABBShader(std::vector<Entity *> *entities) {
+void MasterRenderer::activateAABBShader(std::vector<Block *> *blocks) {
     AABBShader *aShader = new AABBShader;
-    if (aShader->init(entities)) {
+    if (aShader->init(blocks)) {
         shaders.push_back(aShader);
         if (verbose) {
             std::cout << "AABB Shader activated" << std::endl;
