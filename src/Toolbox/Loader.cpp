@@ -1,6 +1,6 @@
 #include "Loader.hpp"
 #include "Model/Mesh.hpp"
-#include "Application/AABB.hpp"
+#include "AABB/AABB.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"

@@ -3,7 +3,7 @@
 #define _BLOCK_HPP_
 
 #include "Entity/Entity.hpp"
-#include "Application/AABB.hpp"
+#include "AABB/AABB.hpp"
 
 class Block : public Entity {
     public:

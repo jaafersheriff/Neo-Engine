@@ -3,7 +3,7 @@
 #define _PLAYER_HPP_
 
 #include "Camera/Camera.hpp"
-#include "Application/AABB.hpp"
+#include "AABB/AABB.hpp"
 
 class Player {
     public:
