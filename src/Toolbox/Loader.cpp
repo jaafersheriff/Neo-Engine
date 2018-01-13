@@ -1,6 +1,6 @@
 #include "Loader.hpp"
 #include "Model/Mesh.hpp"
-#include "AABB/AABB.hpp"
+#include "BoundingBox/BoundingBox.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -137,8 +137,8 @@ void Loader::resize(Mesh *mesh) {
     float shiftX, shiftY, shiftZ;
     float epsilon = 0.001;
 
-    /* Find AABB from mesh */
-    AABB boundingBox(mesh);
+    /* Find BoundingBox from mesh */
+    BoundingBox boundingBox(mesh);
 
     //From min and max compute necessary scale and shift for each dimension
     float maxExtent, xExtent, yExtent, zExtent;
@@ -174,4 +174,10 @@ void Loader::resize(Mesh *mesh) {
 		assert(mesh->vertBuf[3*v+2] >= -1.0 - epsilon);
         assert(mesh->vertBuf[3*v+2] <= 1.0 + epsilon);
 	}
+}
+
+Mesh* Loader::loadCubeMesh(const float scale) {
+    Mesh *cube = meshGenerator.generateCube(scale);
+    cube->init();
+    return cube;
 }

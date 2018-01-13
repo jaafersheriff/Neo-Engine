@@ -1,10 +1,8 @@
 #include "Skybox.hpp"
 
-Skybox::Skybox(CubeTexture *cb) {
+Skybox::Skybox(Mesh *m, CubeTexture *cb) {
     /* Create mesh */
-    mesh = new Mesh;
-    mesh->vertBuf = this->verts;
-    mesh->init();
+    this->mesh = m;
 
     /* Set cube texture */
     cubeTexture = cb;

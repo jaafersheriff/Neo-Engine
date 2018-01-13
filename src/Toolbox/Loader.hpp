@@ -10,6 +10,7 @@
 #include "Skybox/CubeTexture.hpp"
 #include "Model/Texture.hpp"
 #include "Context/Context.hpp"
+#include "Toolbox/MeshGenerator.hpp"
 
 #include <map>      /* map      */
 #include <vector>   /* vector   */
@@ -26,10 +27,14 @@ class Loader {
         /* Create entire skybox with cube texture generated from provided file names */ 
         CubeTexture* loadCubeTexture(const std::string[6]);
 
-        /* Create a mesh for a provided file name */
+        /* Load meshes */
         Mesh* loadObjMesh(const std::string);
+        Mesh* loadCubeMesh(const float);
 
     private:
+        /* Mesh generator object */
+        MeshGenerator meshGenerator;
+
         /* Resize a mesh so all of the vertices are [0, 1] */
         void resize(Mesh*);
 

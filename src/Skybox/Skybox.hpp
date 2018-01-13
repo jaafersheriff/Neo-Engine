@@ -7,13 +7,12 @@
 
 #include <vector>
 
-#define SIZE 1000.f
 #define ROTATE_SPEED 5.f
 
 class Skybox {
     public: 
         Skybox() {}
-        Skybox(CubeTexture *);
+        Skybox(Mesh *, CubeTexture *);
         void update(const float);
         
         Mesh *mesh;
@@ -21,49 +20,7 @@ class Skybox {
 
         float rotation = 0.f;
 
-        std::vector<float> verts = {
-            -SIZE,  SIZE, -SIZE,
-            -SIZE, -SIZE, -SIZE,
-             SIZE, -SIZE, -SIZE,
-             SIZE, -SIZE, -SIZE,
-             SIZE,  SIZE, -SIZE,
-            -SIZE,  SIZE, -SIZE,
-            
-            -SIZE, -SIZE,  SIZE,
-            -SIZE, -SIZE, -SIZE,
-            -SIZE,  SIZE, -SIZE,
-            -SIZE,  SIZE, -SIZE,
-            -SIZE,  SIZE,  SIZE,
-            -SIZE, -SIZE,  SIZE,
-            
-             SIZE, -SIZE, -SIZE,
-             SIZE, -SIZE,  SIZE,
-             SIZE,  SIZE,  SIZE,
-             SIZE,  SIZE,  SIZE,
-             SIZE,  SIZE, -SIZE,
-             SIZE, -SIZE, -SIZE,
-            
-            -SIZE, -SIZE,  SIZE,
-            -SIZE,  SIZE,  SIZE,
-             SIZE,  SIZE,  SIZE,
-             SIZE,  SIZE,  SIZE,
-             SIZE, -SIZE,  SIZE,
-            -SIZE, -SIZE,  SIZE,
-            
-            -SIZE,  SIZE, -SIZE,
-             SIZE,  SIZE, -SIZE,
-             SIZE,  SIZE,  SIZE,
-             SIZE,  SIZE,  SIZE,
-            -SIZE,  SIZE,  SIZE,
-            -SIZE,  SIZE, -SIZE,
-            
-            -SIZE, -SIZE, -SIZE,
-            -SIZE, -SIZE,  SIZE,
-             SIZE, -SIZE, -SIZE,
-             SIZE, -SIZE, -SIZE,
-            -SIZE, -SIZE,  SIZE,
-             SIZE, -SIZE,  SIZE
-        };
+        
 };
 
 #endif
