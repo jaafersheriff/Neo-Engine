@@ -63,7 +63,7 @@ void SkyWorld::update(Context &ctx) {
     camera->update();
 
     if (skybox) {
-        skybox->update(ctx.timeStep);
+        skybox->update((float) ctx.timeStep);
     }
     if (sun) {
         sun->update();

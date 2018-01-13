@@ -1,8 +1,10 @@
 #include "Camera.hpp"
 
 Camera::Camera(const glm::vec3 position) {
-    /* Set position */
+    /* Init */
     this->position = position;
+    phi = theta = 0.0;
+
     /* Set UVW vector and lookAt */
     updateUVW();
     updateLookAt();
@@ -10,7 +12,7 @@ Camera::Camera(const glm::vec3 position) {
 
 /* Update look at point
  * dx and dy correspond to mouse movement */
-void Camera::takeMouseInput(const float dx, const float dy) {
+void Camera::takeMouseInput(const double dx, const double dy) {
     theta += dx * LOOK_SPEED;
     phi -= dy * LOOK_SPEED;
 }

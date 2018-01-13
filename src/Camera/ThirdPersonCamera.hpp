@@ -1,4 +1,4 @@
-#pragma ocne
+#pragma once
 #ifndef _THIRD_PERSON_CAMERA_HPP_
 #define _THIRD_PERSON_CAMERA_HPP_
 
@@ -15,7 +15,7 @@ class ThirdPersonCamera : public Camera {
         /* Update */
         virtual void update();
         virtual void updateLookAt();
-        virtual void takeMouseInput(const float, const float);
+        virtual void takeMouseInput(const double, const double);
 
         /* Move according to UVW */
         virtual void moveForward();

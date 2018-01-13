@@ -15,8 +15,8 @@ void ThirdPersonCamera::update() {
     updateLookAt();
     distanceFromBase = glm::distance(position, lookAt);
     
-    float thetaR = glm::radians(theta);
-    float phiR = glm::radians(phi);
+    float thetaR = (float) glm::radians(theta);
+    float phiR = (float) glm::radians(phi);
     float horz = distanceFromBase * glm::cos(phiR);
     float vert = distanceFromBase * glm::sin(phiR);
     
@@ -25,9 +25,8 @@ void ThirdPersonCamera::update() {
     position.y = lookAt.y + vert;
 }
 
-void ThirdPersonCamera::takeMouseInput(const float dx, const float dy) {
-    theta -= dx * MOVE_SPEED; // angle around base
-    phi += dy * MOVE_SPEED;   // pitch
+void ThirdPersonCamera::takeMouseInput(const double  dx, const double dy) {
+    Camera::takeMouseInput(dx, dy);
 }
 
 void ThirdPersonCamera::updateLookAt() {

@@ -1,6 +1,6 @@
 #include "MeshGenerator.hpp"
 
-Mesh* generateCube(float scale) {
+Mesh * MeshGenerator::generateCube(float scale) {
     Mesh *mesh = new Mesh;
     mesh->vertBuf = { 
             -scale,  scale, -scale,
@@ -48,3 +48,4 @@ Mesh* generateCube(float scale) {
 
     return mesh;
 }
+

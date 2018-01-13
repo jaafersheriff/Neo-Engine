@@ -6,7 +6,7 @@
 
 class MeshGenerator {
     public:
-        Mesh* generateCube(float scale);
+        Mesh* generateCube(float);
 };
 
 #endif

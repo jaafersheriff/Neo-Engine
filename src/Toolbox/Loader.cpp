@@ -72,7 +72,7 @@ Mesh* Loader::loadObjMesh(const std::string fileName) {
     Mesh *mesh = new Mesh;
     int vertCount = 0;
     /* For every shape in the loaded file */
-    for (int i = 0; i < shapes.size(); i++) {
+    for (unsigned int i = 0; i < shapes.size(); i++) {
         /* Concatenate the shape's vertices, normals, and textures to the mesh */
         mesh->vertBuf.insert(mesh->vertBuf.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
         mesh->norBuf.insert(mesh->norBuf.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
@@ -135,7 +135,7 @@ CubeTexture* Loader::loadCubeTexture(const std::string fileNames[6]) {
 void Loader::resize(Mesh *mesh) {
     float scaleX, scaleY, scaleZ;
     float shiftX, shiftY, shiftZ;
-    float epsilon = 0.001;
+    float epsilon = 0.001f;
 
     /* Find BoundingBox from mesh */
     BoundingBox boundingBox(mesh);
@@ -155,12 +155,12 @@ void Loader::resize(Mesh *mesh) {
     if (zExtent >= xExtent && zExtent >= yExtent) {
         maxExtent = zExtent;
     }
-    scaleX = 2.0 /maxExtent;
-    shiftX = boundingBox.min.x + (xExtent/ 2.0);
-    scaleY = 2.0 / maxExtent;
-    shiftY = boundingBox.min.y + (yExtent / 2.0);
-    scaleZ = 2.0/ maxExtent;
-    shiftZ = boundingBox.min.z + (zExtent)/2.0;
+    scaleX = 2.f /maxExtent;
+    shiftX = boundingBox.min.x + (xExtent/ 2.f);
+    scaleY = 2.f / maxExtent;
+    shiftY = boundingBox.min.y + (yExtent / 2.f);
+    scaleZ = 2.f/ maxExtent;
+    shiftZ = boundingBox.min.z + (zExtent)/2.f;
 
     //Go through all verticies shift and scale them
 	for (size_t v = 0; v < mesh->vertBuf.size() / 3; v++) {

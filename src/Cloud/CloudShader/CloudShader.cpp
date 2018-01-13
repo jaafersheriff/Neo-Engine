@@ -42,9 +42,9 @@ void CloudShader::addAllLocations() {
 
 /* Painters algorithm */
 void CloudShader::sortByDistance() {
-     for (int i = 0; i < billboards->size(); i++) {
+     for (unsigned int i = 0; i < billboards->size(); i++) {
          int minSize = i; 
-         for (int j = i; j < billboards->size(); j++) {
+         for (unsigned int j = i; j < billboards->size(); j++) {
              if (billboards->at(j)->distance > billboards->at(minSize)->distance) {
                  minSize = j;
              }

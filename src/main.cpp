@@ -11,7 +11,7 @@
 #include "Renderer/MasterRenderer.hpp"
 
 int main(int argc, char **argv) {
-    srand(time(0));
+    srand((unsigned int) time(0));
     
     Context context;    /* GLFWwindow, Mouse, Keyboard          */
     Loader loader;      /* Load .obj models and .png textures   */
