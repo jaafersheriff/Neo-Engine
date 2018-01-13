@@ -5,8 +5,9 @@
 #include "World/World.hpp"
 #include "Entity/Entity.hpp"
 #include "Player.hpp"
+#include "Block.hpp"
 
-#define MAX_GAME_OBJECTS 10
+#define MAX_GAME_OBJECTS 1
 
 class LabWorld : public World {
     public:
@@ -15,7 +16,7 @@ class LabWorld : public World {
 
         /* World-specific render targets */
         std::vector<Entity *> entities;
-        std::vector<Block *> block;
+        std::vector<Block *> blocks;
 
         /* Constructor */
         LabWorld() : World("CSC 476 Lab") { }

@@ -1,12 +1,23 @@
 #include "Shader.hpp"
 #include "GLSL.hpp"
 
+#include <fstream>
 #include <iostream>
 
 bool Shader::init() {
     this->type = MasterRenderer::ShaderTypes::ERROR;
 
     GLint rc;
+
+    std::ifstream v(vShaderName.c_str());
+    std::ifstream f(fShaderName.c_str());
+    if (!v.good() || !f.good()) {
+        std::cerr << "Shader(s) don't exist" << std::endl;
+        std::cerr << "\t" << vShaderName << std::endl;
+        std::cerr << "\t" << fShaderName << std::endl;
+        return false;
+    }
+
 
     vShaderId = createShader(vShaderName, GL_VERTEX_SHADER);
     if (vShaderId < 0) {

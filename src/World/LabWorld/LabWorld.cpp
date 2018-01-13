@@ -3,6 +3,8 @@
 #include "Block.hpp"
 #include "Player.hpp"
 
+#include <iostream>
+
 void LabWorld::init(Loader &loader) {
     this->loader = &loader;
 
@@ -16,18 +18,19 @@ void LabWorld::init(Loader &loader) {
     ModelTexture mt(0.3f,
                     glm::vec3(1.f, 0.f, 0.f), 
                     glm::vec3(0.f, 0.f, 1.f));
-    entities.push_back(new Entity(loader.loadObjMesh("cube.obj"),
-                                  mt, 
-                                  glm::vec3(0.f, -1.f, 0.f),
-                                  glm::vec3(0.f),
-                                  glm::vec3(100.f, 0.f, 100.f)));
+    // entities.push_back(new Entity(loader.loadObjMesh("cube.obj"),
+    //                               mt, 
+    //                               glm::vec3(0.f, -1.f, 0.f),
+    //                               glm::vec3(0.f),
+    //                               glm::vec3(100.f, 0.f, 100.f)));
+    // entities[0]->update();
     /* Player */
-    player = new Player(camera, AABB(loader.loadObjMesh("cube.obj")));
+    player = new Player(camera, BoundingBox(loader.loadObjMesh("cube.obj")));
 }
 
 void LabWorld::prepareRenderer(MasterRenderer *mr) {
     mr->activateEntityShader(&entities);
-    mr->activateAABBShader(&blocks);
+    mr->activateBoundingBoxShader(&blocks);
 }
 
 void LabWorld::update(Context &ctx) {
@@ -37,23 +40,23 @@ void LabWorld::update(Context &ctx) {
     /* Add game objects at a certain time step */
     // TODO : timestep
     if (gameObjects < MAX_GAME_OBJECTS) {
-        // /* Randomize position*/
-        glm::vec3 pos = glm::vec3(Toolbox::genRandom(100.f), 0.f, Toolbox::genRandom(100.f));
+        /* Randomize position*/
+        glm::vec3 pos = glm::vec3(Toolbox::genRandom(-50, 50.f), 2.f, Toolbox::genRandom(-50.f, 50.f));
         float rotation = Toolbox::genRandom(0.f, 360.f);
-        Block *b = new Block(loader->loadObjMesh("cube.obj"),   /* Mesh */
+        Block *b = new Block(loader->loadObjMesh("bunny.obj"),           /* Mesh */
                                      alive,                             /* Texture */
                                      pos,                               /* Position */
                                      glm::vec3(0.f, rotation, 0.f),     /* Rotation */
                                      glm::vec3(5.f),                    /* Scale */
-                                     Toolbox::genRandom(10.f, 20.f)));  /* Velocity */
+                                     Toolbox::genRandom(10.f, 20.f));   /* Velocity */
         entities.push_back(b);
         blocks.push_back(b);
         gameObjects++;
     }
 
     player->update();
-    for (auto b : entities) {
-      //  ((Block *) b)->update(entities[0], player->boundingBox);
+    for (auto block : blocks) {
+        block->update(entities[0], player->boundingBox);
     }
 }
 

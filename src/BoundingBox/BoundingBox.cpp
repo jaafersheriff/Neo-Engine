@@ -1,10 +1,12 @@
-#include "AABB.hpp"
+#include "BoundingBox.hpp"
 
-AABB::AABB() {
+BoundingBox::BoundingBox() {
     this->min = this->max = this->worldMin = this->worldMax = glm::vec3(0.f);
+    this->m = nullptr;
 }
 
-AABB::ABBB(Mesh *mesh) : AABB() {
+BoundingBox::BoundingBox(Mesh *mesh) {
+    BoundingBox();
     float minX, minY, minZ;
     float maxX, maxY, maxZ;
     minX = minY = minZ = 1.1754E+38F;
@@ -26,19 +28,13 @@ AABB::ABBB(Mesh *mesh) : AABB() {
     this->max = this->worldMax = glm::vec3(maxX, maxY, maxZ);
 }
 
-AABB::AABB(Entity *entity) : AABB() {
-    if (entity->mesh) {
-        AABB(entity->mesh);
-    }
+void BoundingBox::update(glm::mat4 *M) {
+    this->m = M;
+    this->worldMin = glm::vec3(*m * glm::vec4(min, 1.0));
+    this->worldMax = glm::vec3(*m * glm::vec4(max, 1.0));
 }
 
-void AABB::update(const glm::mat4 *M) {
-    // TODO : use entity->M
-    // this->worldMin = M * min
-    // this->worldMax = M * max
-}
-
-bool AABB::intersect(const AABB &other) {
+bool BoundingBox::intersect(const BoundingBox &other) {
     return (worldMin.x <= other.worldMax.x && worldMax.x >= other.worldMin.x) &&
            (worldMin.y <= other.worldMax.y && worldMax.y >= other.worldMin.y) &&
            (worldMin.z <= other.worldMax.z && worldMax.z >= other.worldMin.z);

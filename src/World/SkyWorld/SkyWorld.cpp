@@ -20,7 +20,7 @@ void SkyWorld::init(Context &ctx, Loader &loader) {
         "ame_nebula/purplenebula_lf.tga",
 
     };
-    //skybox = new Skybox(loader.loadCubeTexture(textureNames));
+    skybox = new Skybox(loader.loadCubeMesh(1000.f), loader.loadCubeTexture(textureNames));
 
     /* Sun */
     sun = new Sun(this->light, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);

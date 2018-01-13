@@ -35,8 +35,8 @@ int main(int argc, char **argv) {
     world = context.createWorld();
 
     /* Prep MR for rendering of a specific world class */
-    mr.init(context);
-    world->init(context, loader);
+    mr.init(context, &loader);
+    world->init(loader);
     world->prepareRenderer(&mr);
     world->prepareUniforms();
 

@@ -7,6 +7,7 @@
 
 #include "Context/Context.hpp"
 #include "Context/Display.hpp"
+#include "Toolbox/Loader.hpp"
 
 #include "glm/glm.hpp"
 
@@ -37,14 +38,14 @@ class MasterRenderer {
 
         /* Activate subrenderers */
         void activateEntityShader(std::vector<Entity *> *);
-        void activateAABBShader(std::vector<Block *> *);
+        void activateBoundingBoxShader(std::vector<Block *> *);
         void activateCloudShader(std::vector<CloudBillboard *> *);
         void activateSkyboxShader(Skybox *);
         void activateSunShader(Sun *);
         void activateAtmosphereShader(Atmosphere *);
 
         /* Init */
-        void init(const Context &);
+        void init(const Context &, Loader *);
 
         /* Render function */
         void render(const World *);
@@ -61,6 +62,7 @@ class MasterRenderer {
         /* Utility members */
         bool wireFrame = false;
         bool verbose = false;
+        Loader *loader;
 };
 
 #endif

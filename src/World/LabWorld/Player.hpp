@@ -3,14 +3,14 @@
 #define _PLAYER_HPP_
 
 #include "Camera/Camera.hpp"
-#include "AABB/AABB.hpp"
+#include "BoundingBox/BoundingBox.hpp"
 
 class Player {
     public:
-        Player(Camera *, AABB);
+        Player(Camera *, BoundingBox);
 
         Camera *camera;
-        AABB boundingBox;
+        BoundingBox boundingBox;
 
         void update();
 };

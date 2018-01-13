@@ -6,6 +6,7 @@ Entity::Entity(const glm::vec3 p, const glm::vec3 r, const glm::vec3 s) {
     this->position = p;
     this->rotation = r;
     this->scale    = s;
+    update();
 }
 
 Entity::Entity(Mesh *m, const glm::vec3 p, const glm::vec3 r, const glm::vec3 s) : 

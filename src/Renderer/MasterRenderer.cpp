@@ -3,7 +3,7 @@
 #include "World/World.hpp"
 
 #include "Entity/EntityShader/EntityShader.hpp"
-#include "AABB/AABBShader/AABBShader.hpp"
+#include "BoundingBox/BoundingBoxShader/BoundingBoxShader.hpp"
 #include "Skybox/SkyboxShader/SkyboxShader.hpp"
 #include "Cloud/CloudShader/CloudShader.hpp"
 #include "Sun/SunShader/SunShader.hpp"
@@ -88,8 +88,9 @@ void MasterRenderer::bindWorldUniforms(const World *world, Shader *shader) {
     }
 }
 
-void MasterRenderer::init(const Context &ctx) {
+void MasterRenderer::init(const Context &ctx, Loader *loader) {
     this->verbose = ctx.verbose;
+    this->loader = loader;
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -114,18 +115,19 @@ void MasterRenderer::activateEntityShader(std::vector<Entity *> *entities) {
     }
 }
 
-void MasterRenderer::activateAABBShader(std::vector<Block *> *blocks) {
-    AABBShader *aShader = new AABBShader;
-    if (aShader->init(blocks)) {
-        shaders.push_back(aShader);
+void MasterRenderer::activateBoundingBoxShader(std::vector<Block *> *blocks) {
+    BoundingBoxShader *bShader = new BoundingBoxShader;
+    if (bShader->init(blocks)) {
+        bShader->cube = loader->loadCubeMesh(1.f);
+        shaders.push_back(bShader);
         if (verbose) {
-            std::cout << "AABB Shader activated" << std::endl;
+            std::cout << "BoundingBox Shader activated" << std::endl;
         }
     }
     else {
-        delete aShader;
+        delete bShader;
         if (verbose) {
-            std::cout << "AABB Shader failed to activate" << std::endl;
+            std::cout << "BoundingBox Shader failed to activate" << std::endl;
         }
     }
 }
