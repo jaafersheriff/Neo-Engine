@@ -11,6 +11,9 @@ bool EntityShader::init(std::vector<Entity *> *entities) {
     /* Set render target */
     this->entitiesPointer = entities;
 
+    /* Set enum type */
+    this->type = MasterRenderer::ShaderTypes::ENTITY_SHADER;
+
     addAllLocations();
         
     return true;
@@ -44,18 +47,7 @@ void EntityShader::addAllLocations() {
     addUniform("lightAtt");
 }
 
-void EntityShader::setGlobals(const glm::mat4 *projection, const glm::mat4 *view) {
-    loadP(projection);
-    loadV(view);
-}
-
 void EntityShader::render(const World *world) {
-    /* Load world members */
-    // TODO : each world has a map of uniforms
-    /* Forward render -- there's only one light in the world */
-    loadLight(world->light);
-    loadCameraPos(world->camera->position);
-
     /* Loop through every entity */
     // TODO : batched render
     glm::mat4 M;
@@ -171,20 +163,8 @@ void EntityShader::cleanUp() {
     Shader::cleanUp();
 }
 
-void EntityShader::loadP(const glm::mat4 *p) {
-    this->loadMat4(getUniform("P"), p);
-}
-
 void EntityShader::loadM(const glm::mat4 *m) {
     this->loadMat4(getUniform("M"), m);
-}
-
-void EntityShader::loadV(const glm::mat4 *v) {
-    this->loadMat4(getUniform("V"), v);
-}
-
-void EntityShader::loadCameraPos(const glm::vec3 c) {
-    this->loadVec3(getUniform("cameraPosition"), c);
 }
 
 void EntityShader::loadMaterial(const float ambient, const glm::vec3 diffuse, const glm::vec3 specular) {
@@ -195,12 +175,6 @@ void EntityShader::loadMaterial(const float ambient, const glm::vec3 diffuse, co
 
 void EntityShader::loadShine(const float s) {
     this->loadFloat(getUniform("shine"), s);
-}
-
-void EntityShader::loadLight(const Light *light) {
-    this->loadVec3(getUniform("lightPos"), light->position);
-    this->loadVec3(getUniform("lightCol"), light->color);
-    this->loadVec3(getUniform("lightAtt"), light->attenuation);
 }
 
 void EntityShader::loadUsesTexture(const bool b) {

@@ -40,14 +40,9 @@ class EntityShader : public Shader {
 
         /* GLSL Load functions */
         void addAllLocations();
-        void setGlobals(const glm::mat4 *, const glm::mat4 *);
-        void loadP(const glm::mat4 *);
         void loadM(const glm::mat4 *);
-        void loadV(const glm::mat4 *);
-        void loadCameraPos(const glm::vec3);
         void loadMaterial(const float, const glm::vec3, const glm::vec3);
         void loadShine(const float);
-        void loadLight(const Light *);
         void loadUsesTexture(const bool);
         void loadTexture(const Texture *);
 };
