@@ -10,6 +10,9 @@ bool SkyboxShader::init(Skybox *sb) {
     /* Set render target */
     this->skybox = sb;
 
+    /* Set enum type */
+    this->type = MasterRenderer::ShaderTypes::SKYBOX_SHADER;
+
     addAllLocations();
 
     return true;
@@ -25,16 +28,6 @@ void SkyboxShader::addAllLocations() {
 
     /* Cube texture */
     addUniform("cubeMap");
-}
-
-void SkyboxShader::setGlobals(const glm::mat4 *projection, const glm::mat4 *view) {
-    loadP(projection);
-
-    /* Center skybox areound camera */
-    glm::mat4 newView = glm::mat4(*view);
-    newView[3][0] = newView[3][1] = newView[3][2] = 0.f;
-    newView *= glm::rotate(glm::mat4(1.f), glm::radians(skybox->rotation), glm::vec3(0, 1, 0));
-    loadV(&newView);
 }
 
 void SkyboxShader::render(const World *world) {
@@ -61,14 +54,6 @@ void SkyboxShader::render(const World *world) {
 
 void SkyboxShader::cleanUp() {
     Shader::cleanUp();
-}
-
-void SkyboxShader::loadP(const glm::mat4 *p) {
-    this->loadMat4(getUniform("P"), p);
-}
-
-void SkyboxShader::loadV(const glm::mat4 *v) {
-    this->loadMat4(getUniform("V"), v);
 }
 
 void SkyboxShader::loadCubeTexture(const CubeTexture *ct) {
