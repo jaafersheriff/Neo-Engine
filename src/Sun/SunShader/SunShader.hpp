@@ -29,9 +29,6 @@ class SunShader : public Shader {
     private:
         /* GLSL load functions */
         void addAllLocations();
-        void setGlobals(const glm::mat4 *, const glm::mat4 *);
-        void loadP(const glm::mat4 *);
-        void loadV(const glm::mat4 *);
         void loadCenter(const glm::vec3);
         void loadSize(const glm::vec2);
         void loadUsesTexture(bool);

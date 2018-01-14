@@ -9,6 +9,9 @@ bool SunShader::init(Sun *sun) {
     /* Set render target */
     this->sun = sun;
 
+    /* Set enum type */
+    this->type = MasterRenderer::ShaderTypes::SUN_SHADER;
+
     addAllLocations();
 
     return true;
@@ -35,11 +38,6 @@ void SunShader::addAllLocations() {
     addUniform("outerColor");
     addUniform("innerRadius");
     addUniform("outerRadius");
-}
-
-void SunShader::setGlobals(const glm::mat4 *projection, const glm::mat4 *view) {
-    loadP(projection);
-    loadV(view);
 }
 
 void SunShader::render(const World *world) {
@@ -84,14 +82,6 @@ void SunShader::render(const World *world) {
 
 void SunShader::cleanUp() {
     Shader::cleanUp();
-}
-
-void SunShader::loadP(const glm::mat4 *p) {
-    this->loadMat4(getUniform("P"), p);
-}
-
-void SunShader::loadV(const glm::mat4 *v) {
-    this->loadMat4(getUniform("V"), v);
 }
 
 void SunShader::loadCenter(const glm::vec3 c) {
