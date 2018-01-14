@@ -11,6 +11,9 @@ bool CloudShader::init(std::vector<CloudBillboard *> *billboards) {
     /* Set render target */
     this->billboards = billboards;
 
+    /* Set enum type */
+    this->type = MasterRenderer::ShaderTypes::CLOUD_SHADER;
+
     addAllLocations();
 
     return true;
@@ -37,11 +40,6 @@ void CloudShader::addAllLocations() {
     addUniform("lightCol");
 }
 
-void CloudShader::setGlobals(const glm::mat4 *projection, const glm::mat4 *view) {
-    loadP(projection);
-    loadV(view);
-}
-
 /* Painters algorithm */
 void CloudShader::sortByDistance() {
      for (int i = 0; i < billboards->size(); i++) {
@@ -64,9 +62,6 @@ void CloudShader::render(const World *world) {
     if (!billboards->size()) {
         return;
     }
-
-    /* Forward render - single light source */
-    loadLight(world->light);
 
     /* Handle stacked transparency */
     glDisable(GL_DEPTH_TEST);
@@ -109,14 +104,6 @@ void CloudShader::cleanUp() {
     Shader::cleanUp();
 }
 
-void CloudShader::loadP(const glm::mat4 *p) {
-    this->loadMat4(getUniform("P"), p);
-}
-
-void CloudShader::loadV(const glm::mat4 *v) {
-    this->loadMat4(getUniform("V"), v);
-}
-
 void CloudShader::loadM(const glm::mat4 *m) {
     this->loadMat4(getUniform("M"), m);
 }
@@ -131,9 +118,4 @@ void CloudShader::loadSize(const glm::vec2 s) {
 
 void CloudShader::loadTexture(const Texture *texture) {
     this->loadInt(getUniform("textureImage"), texture->textureId);
-}
-
-void CloudShader::loadLight(const Light *light) {
-    this->loadVec3(getUniform("lightPos"), light->position);
-    this->loadVec3(getUniform("lightCol"), light->color);
 }
