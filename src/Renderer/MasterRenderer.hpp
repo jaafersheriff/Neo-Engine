@@ -22,6 +22,14 @@ class Atmosphere;
 
 class MasterRenderer {
     public:
+        /* Enum for shader types*/
+        enum ShaderTypes {
+            ENTITY_SHADER,
+            CLOUD_SHADER,
+            SKYBOX_SHADER,
+            SUN_SHADER,
+            ATMOSPHERE_SHADER
+        };
         /* List of active renderers */
         std::vector<Shader *> shaders;
 

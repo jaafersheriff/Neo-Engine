@@ -8,12 +8,20 @@
 #include "Camera/Camera.hpp"
 #include "Light/Light.hpp"
 #include "Toolbox/Loader.hpp"
+#include "Toolbox/Enum.hpp"
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 class World {
     public:
+        struct UniformData {
+            UniformType type;
+            std::string location;
+            void *dataptr;
+        };
+
         /* Include world-specific data structure to be rendered  */
         World(const std::string n) : name(n) { }
         std::string name;
@@ -22,8 +30,12 @@ class World {
         Camera *camera;
         Light *light;
 
+        /* Uniform map */
+        std::unordered_map<MasterRenderer::ShaderTypes, std::vector<UniformData *>> uniforms;
+        virtual void prepareUniforms() = 0;
+
         /* Create objects, initialize rendering data structure */
-        virtual void init(Loader &) = 0;
+        virtual void init(Context &, Loader &) = 0;
 
         /* Activate feature renderers in MasterRenderer and pass in proper
          * data structure */
@@ -34,7 +46,6 @@ class World {
 
         /* Any necessary clean up */
         virtual void cleanUp() = 0;
-
     private:
         /* Process any user input */
         virtual void takeInput(Mouse &, Keyboard &) = 0;
