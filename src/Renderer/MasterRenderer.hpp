@@ -24,6 +24,7 @@ class MasterRenderer {
     public:
         /* Enum for shader types*/
         enum ShaderTypes {
+            ERROR,
             ENTITY_SHADER,
             CLOUD_SHADER,
             SKYBOX_SHADER,
@@ -44,7 +45,7 @@ class MasterRenderer {
         void init(const Context &);
 
         /* Render function */
-        void render(const Display &, const World *);
+        void render(const World *);
 
         /* Wrap up */
         void cleanUp();
@@ -53,6 +54,9 @@ class MasterRenderer {
         void toggleWireFrameMode();
 
     private:
+        /* Utility functions */
+        void loadUniforms(const World *, Shader *);
+
         /* Utility members */
         bool wireFrame = false;
         bool verbose = false;

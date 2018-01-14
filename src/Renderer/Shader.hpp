@@ -27,6 +27,9 @@ class Shader {
          * Add uniforms and attributes to GLSL shaders */
         virtual bool init();
 
+        /* Type */
+        MasterRenderer::ShaderTypes type;
+
         /* Utility functions */
         void bind();
         void unbind();
@@ -36,22 +39,7 @@ class Shader {
 
         /* Render functions */
         // TODO : give worlds their own global map 
-        virtual void setGlobals(const glm::mat4 *, const glm::mat4 *) = 0;
         virtual void render(const World *) = 0;
-
-    protected:
-        /* GLSL shader names */
-        const std::string vShaderName;
-        const std::string fShaderName;
-
-        /* Shared GLSL utility functions */
-        void addAttribute(const std::string &);
-        void addUniform(const std::string &);
-        GLint getAttribute(const std::string &);
-        GLint getUniform(const std::string &);
-
-        /* Virtual function for adding all uniforms and attributes */
-        virtual void addAllLocations() = 0;
 
         /* Parent load functions */
         void loadBool(const int, const bool) const;
@@ -61,6 +49,20 @@ class Shader {
         void loadVec3(const int, const glm::vec3) const;
         void loadMat4(const int, const glm::mat4*) const;
 
+        /* Get shader location */
+        GLint getAttribute(const std::string &);
+        GLint getUniform(const std::string &);
+    protected:
+        /* GLSL shader names */
+        const std::string vShaderName;
+        const std::string fShaderName;
+
+        /* Shared GLSL utility functions */
+        void addAttribute(const std::string &);
+        void addUniform(const std::string &);
+
+        /* Virtual function for adding all uniforms and attributes */
+        virtual void addAllLocations() = 0;
     private:    
         /* GLSL shader attributes */
         GLuint pid = 0;

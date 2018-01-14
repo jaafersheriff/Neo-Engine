@@ -10,29 +10,80 @@
 
 #include "Renderer/GLSL.hpp"
 
-#include "glm/gtc/matrix_transform.hpp"
 
 #include <iostream>
 
 /* Master render function */
-void MasterRenderer::render(const Display &display, const World *world) {
+void MasterRenderer::render(const World *world) {
     /* Reset rendering display */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.f, 0.f, 0.f, 1.f);
-
-    /* Create view matrix */
-    const glm::mat4 v = glm::lookAt(world->camera->position, world->camera->lookAt, glm::vec3(0, 1, 0));
 
     /* Loop through active subrenderers */
     for (auto &shader : shaders) {
         /* Bind subrenderer's shader */
         shader->bind();
-        /* Set global params */
-        shader->setGlobals(&display.projectionMatrix, &v);
+        /* Load world-shader uniforms */
+        loadUniforms(world, shader);
         /* Subrenderer render */
         shader->render(world);
         /* Unbind subrenderer's shader */
         shader->unbind();
+    }
+}
+
+void MasterRenderer::loadUniforms(const World *world, Shader *shader) {
+    if (shader->type == ERROR) {
+        return;
+    }
+
+    std::vector<World::UniformData *> uniforms = world->uniforms.at(shader->type);
+    for (auto uniformData : uniforms) {
+        if (uniformData->dataptr) {
+            switch (uniformData->type) {
+                case(UniformType::Bool):
+                    shader->loadBool(shader->getUniform(uniformData->location), (bool)uniformData->dataptr);
+                    break;
+                case(UniformType::SignedInt8):
+                    // TODO 
+                    break;
+                case(UniformType::SignedInt16):
+                    // TODO
+                    break;
+                case(UniformType::SignedInt32):
+                    // TODO 
+                    break;
+                case(UniformType::UnsignedInt8):
+                    // TODO
+                    break;
+                case(UniformType::UnsignedInt16):
+                    // TODO
+                    break;
+                case(UniformType::UnsignedInt32):
+                    // TODO
+                    break;
+                case(UniformType::Float):
+                    shader->loadFloat(shader->getUniform(uniformData->location), *(float *) uniformData->dataptr);
+                    break;
+                case(UniformType::Vec2):
+                    shader->loadVec2(shader->getUniform(uniformData->location), *(glm::vec2 *)uniformData->dataptr);
+                    break;
+                case(UniformType::Vec3):
+                    shader->loadVec3(shader->getUniform(uniformData->location), *(glm::vec3 *)uniformData->dataptr);
+                    break;
+                case(UniformType::Vec4):
+                    // TODO
+                    break;
+                case(UniformType::Mat3):
+                    // TODO
+                    break;
+                case(UniformType::Mat4):
+                    shader->loadMat4(shader->getUniform(uniformData->location), (glm::mat4 *)uniformData->dataptr);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
 

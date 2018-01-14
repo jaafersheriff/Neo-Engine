@@ -4,6 +4,8 @@
 #include <iostream>
 
 bool Shader::init() {
+    this->type = MasterRenderer::ShaderTypes::ERROR;
+
     GLint rc;
 
     vShaderId = createShader(vShaderName, GL_VERTEX_SHADER);

@@ -38,14 +38,14 @@ int main(int argc, char **argv) {
     mr.init(context);
     world->init(context, loader);
     world->prepareRenderer(&mr);
-    world->prepareUniforms(&mr);
+    world->prepareUniforms();
 
     /* Main loop */
     while(!context.shouldClose()) {
         context.update();
 
         world->update(context);
-        mr.render(context.display, world);
+        mr.render(world);
 
         context.display.swap();
     }
