@@ -28,7 +28,7 @@ class SkyWorld : public World {
         SkyWorld() : World("Sky World") { }
 
         /* Derived functions */
-        void init(Loader &);
+        void init(Context &, Loader &);
         void prepareRenderer(MasterRenderer *);
         void prepareUniforms();
         void update(Context &);

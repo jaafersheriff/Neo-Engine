@@ -1,8 +1,9 @@
 #include "SkyWorld.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 #include <iostream>
 
-void SkyWorld::init(Loader &loader) {
+void SkyWorld::init(Context &ctx, Loader &loader) {
     /* Camera */
     this->camera = new Camera();
 
@@ -29,6 +30,9 @@ void SkyWorld::init(Loader &loader) {
                                 loader.loadTexture("sky.png", Texture::WRAP_MODE::CLAMP), 
                                 loader.loadTexture("glow.png", Texture::WRAP_MODE::CLAMP), 
                                 1000.f);
+
+    this->P = ctx.display.projectionMatrix;
+    this->V = glm::lookAt(camera->position, camera->lookAt, glm::vec3(0, 1, 0));
 }
 
 void SkyWorld::prepareRenderer(MasterRenderer *mr) {
@@ -60,6 +64,7 @@ void SkyWorld::prepareUniforms() {
 }
 
 void SkyWorld::update(Context &ctx) {
+    this->V = glm::lookAt(camera->position, camera->lookAt, glm::vec3(0, 1, 0));
     takeInput(ctx.mouse, ctx.keyboard);
     camera->update();
 
