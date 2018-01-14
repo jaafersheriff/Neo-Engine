@@ -11,6 +11,9 @@ bool AtmosphereShader::init(Atmosphere *atm) {
     /* Set render target */
     this->atmosphere = atm;
 
+    /* Set type */
+    this->type = MasterRenderer::ShaderTypes::ATMOSPHERE_SHADER;
+
     addAllLocations();
 
     return true;
@@ -33,19 +36,7 @@ void AtmosphereShader::addAllLocations() {
     addUniform("colorTexture");
 }
 
-void AtmosphereShader::setGlobals(const glm::mat4 *projection, const glm::mat4 *view) {
-    loadP(projection);
-
-    /* Update view matrix so geodisc is always centered at camera */
-    glm::mat4 newView = glm::mat4(*view);
-    newView[3][0] = newView[3][1] = newView[3][2] = 0.f;
-    loadV(&newView);
-}
-
 void AtmosphereShader::render(const World *world) {
-    /* World light */
-    loadLight(world->light);
-
     /* Model matrix */
     glm::mat4 M = glm::scale(glm::mat4(1.f), glm::vec3(atmosphere->size));
     loadM(&M);
@@ -83,21 +74,8 @@ void AtmosphereShader::render(const World *world) {
 void AtmosphereShader::cleanUp() {
     Shader::cleanUp();
 }
-
-void AtmosphereShader::loadP(const glm::mat4 *p) {
-    this->loadMat4(getUniform("P"), p);
-}
-
-void AtmosphereShader::loadV(const glm::mat4 *v) {
-    this->loadMat4(getUniform("V"), v);
-}
-
 void AtmosphereShader::loadM(const glm::mat4 *m) {
     this->loadMat4(getUniform("M"), m);
-}
-
-void AtmosphereShader::loadLight(const Light *l) {
-    this->loadVec3(getUniform("lightPos"), l->position);
 }
 
 void AtmosphereShader::loadColorTexture(const Texture *t) {

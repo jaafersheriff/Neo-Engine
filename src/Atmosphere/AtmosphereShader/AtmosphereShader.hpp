@@ -31,11 +31,7 @@ class AtmosphereShader : public Shader {
     private:
         /* GLSL load functions */
         void addAllLocations();
-        void setGlobals(const glm::mat4 *, const glm::mat4 *);
-        void loadP(const glm::mat4 *);
-        void loadV(const glm::mat4 *);
         void loadM(const glm::mat4 *);
-        void loadLight(const Light *);
         void loadColorTexture(const Texture *);
         void loadGlowTexture(const Texture *);
 };
