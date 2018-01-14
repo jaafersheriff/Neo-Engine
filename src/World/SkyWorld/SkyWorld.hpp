@@ -20,12 +20,17 @@ class SkyWorld : public World {
         Sun *sun = nullptr;
         Atmosphere *atmosphere = nullptr;
 
+        /* World-specific members */
+        glm::mat4 P;
+        glm::mat4 V;
+
         /* Constructor */
         SkyWorld() : World("Sky World") { }
 
         /* Derived functions */
         void init(Loader &);
         void prepareRenderer(MasterRenderer *);
+        void prepareUniforms();
         void update(Context &);
         void takeInput(Mouse &, Keyboard &);
         void cleanUp();

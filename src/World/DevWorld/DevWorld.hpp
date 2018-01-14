@@ -19,14 +19,17 @@ class DevWorld : public World {
         Sun *sun = nullptr;
 
         /* World-specific members */
+        glm::mat4 P;
+        glm::mat4 V;
         bool isPaused = false;
 
         /* Constructor */
         DevWorld() : World("Dev World") { }
 
         /* Derived functions */
-        void init(Loader &);
+        void init(Context &, Loader &);
         void prepareRenderer(MasterRenderer *);
+        void prepareUniforms();
         void update(Context &);
         void takeInput(Mouse &, Keyboard &);
         void cleanUp();
