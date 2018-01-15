@@ -10,6 +10,7 @@ out vec3 vertPos;
 
 void main() {
     vertPos = vertexPos;
-    V[3][0] = V[3][1] = V[3][2] = 0.0;
-    gl_Position = P * V * M * vec4(vertexPos, 1.0);
+    mat4 atmV = V;
+    atmV[3][0] = atmV[3][1] = atmV[3][2] = 0.0;
+    gl_Position = P * atmV * M * vec4(vertexPos, 1.0);
 }
