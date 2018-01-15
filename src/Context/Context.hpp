@@ -16,11 +16,12 @@ class Context {
     public:
         /* Enum for world types */
         enum WorldTypes {
-            DEV_WORLD_TYPE,
-            SKY_WORLD_TYPE
+            ERROR,
+            CLOUD_WORLD,
+            SKY_WORLD
         };
         /* Default members */
-        WorldTypes selectedWorld = DEV_WORLD_TYPE;  /* World type */
+        WorldTypes selectedWorld = ERROR;           /* World type */
         std::string RESOURCE_DIR = "../resources/"; /* Resrouce dir */
 
         /* References */

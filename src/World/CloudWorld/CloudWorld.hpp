@@ -1,8 +1,8 @@
 /* Basic world for general development
  * Derives World interface */
 #pragma once
-#ifndef _DEV_WORLD_HPP_
-#define _DEV_WORLD_HPP_
+#ifndef _CLOUD_WORLD_HPP_
+#define _CLOUD_WORLD_HPP_
 
 #include "World/World.hpp"
 #include "Toolbox/Toolbox.hpp"
@@ -11,10 +11,9 @@
 #include "Cloud/CloudBillboard.hpp"
 #include "Sun/Sun.hpp"
 
-class DevWorld : public World {
+class CloudWorld : public World {
     public:
         /* World-specific render targets */
-        std::vector<Entity *> entities;
         std::vector<CloudBillboard *> cloudBoards;
         Sun *sun = nullptr;
 
@@ -24,7 +23,7 @@ class DevWorld : public World {
         bool isPaused = false;
 
         /* Constructor */
-        DevWorld() : World("Dev World") { }
+        CloudWorld() : World("Cloud World") { }
 
         /* Derived functions */
         void init(Context &, Loader &);

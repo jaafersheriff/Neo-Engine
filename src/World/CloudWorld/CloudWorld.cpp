@@ -1,9 +1,9 @@
-#include "DevWorld.hpp"
+#include "CloudWorld.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <iostream>
 
-void DevWorld::init(Context &ctx, Loader &loader) {
+void CloudWorld::init(Context &ctx, Loader &loader) {
     /* Set up light */
     this->light = new Light(glm::vec3(-1000, 1000, 1000), glm::vec3(1.f), glm::vec3(1.f, 0.0f, 0.0f));
 
@@ -32,13 +32,12 @@ void DevWorld::init(Context &ctx, Loader &loader) {
     this->V = glm::lookAt(camera->position, camera->lookAt, glm::vec3(0, 1, 0));
 }
 
-void DevWorld::prepareRenderer(MasterRenderer *mr) {
+void CloudWorld::prepareRenderer(MasterRenderer *mr) {
     mr->activateSunShader(sun);
     mr->activateCloudShader(&cloudBoards);
-    mr->activateEntityShader(&entities);
 }
 
-void DevWorld::prepareUniforms() {
+void CloudWorld::prepareUniforms() {
     UniformData *PData = new UniformData{ UniformType::Mat4, "P", (void *)&P };
     UniformData *VData = new UniformData{ UniformType::Mat4, "V", (void *)&V };
     UniformData *cameraPos = new UniformData{ UniformType::Vec3, "cameraPos", (void *)&camera->position };
@@ -46,40 +45,20 @@ void DevWorld::prepareUniforms() {
     UniformData *lightCol = new UniformData{ UniformType::Vec3, "lightCol", (void *)&light->color };
     UniformData *lightAtt = new UniformData{ UniformType::Vec3, "lightAtt", (void *)&light->attenuation };
     
-    std::vector<UniformData *> sunData;
-    sunData.push_back(PData);
-    sunData.push_back(VData);
-    uniforms[MasterRenderer::ShaderTypes::SUN_SHADER] = sunData;
+    uniforms[MasterRenderer::ShaderTypes::SUN_SHADER].push_back(PData);
+    uniforms[MasterRenderer::ShaderTypes::SUN_SHADER].push_back(VData);
 
-    std::vector<UniformData *> cloudData;
-    cloudData.push_back(PData);
-    cloudData.push_back(VData);
-    cloudData.push_back(lightPos);
-    cloudData.push_back(lightCol);
-    uniforms[MasterRenderer::ShaderTypes::CLOUD_SHADER] = cloudData;
-
-    std::vector<UniformData *> entityData;
-    entityData.push_back(PData);
-    entityData.push_back(VData);
-    entityData.push_back(lightPos);
-    entityData.push_back(lightCol);
-    entityData.push_back(lightAtt);
-    uniforms[MasterRenderer::ShaderTypes::ENTITY_SHADER] = entityData;
+    uniforms[MasterRenderer::ShaderTypes::CLOUD_SHADER].push_back(PData);
+    uniforms[MasterRenderer::ShaderTypes::CLOUD_SHADER].push_back(VData);
+    uniforms[MasterRenderer::ShaderTypes::CLOUD_SHADER].push_back(lightPos);
+    uniforms[MasterRenderer::ShaderTypes::CLOUD_SHADER].push_back(lightCol);
 }
 
-void DevWorld::update(Context &ctx) {
+void CloudWorld::update(Context &ctx) {
     this->V = glm::lookAt(camera->position, camera->lookAt, glm::vec3(0, 1, 0));
     takeInput(ctx.mouse, ctx.keyboard);
     camera->update();
   
-    if (isPaused) {
-        return;
-    }
-
-    /* Update entities */
-    for (auto entity : entities) {
-        entity->update();
-    }
     /* Update cloudBoards */
     for (auto billboard : cloudBoards) {
         billboard->update(this->camera);
@@ -90,7 +69,7 @@ void DevWorld::update(Context &ctx) {
     }
 }
 
-void DevWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
+void CloudWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
     if (keyboard.isKeyPressed(' ')) {
         isPaused = !isPaused;
     }
@@ -148,6 +127,7 @@ void DevWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
     }
 }
 
-void DevWorld::cleanUp() {
+void CloudWorld::cleanUp() {
     
 }
+

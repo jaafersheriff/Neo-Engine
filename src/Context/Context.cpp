@@ -1,29 +1,30 @@
 #include "Context.hpp"
 #include "World/World.hpp"
-#include "World/DevWorld/DevWorld.hpp"
+#include "World/CloudWorld/CloudWorld.hpp"
 #include "World/SkyWorld/SkyWorld.hpp"
 
 #include <string.h>  /* strcmp, strlen  */
 #include <iostream>  /* cout, stoi      */
 
 void Context::printUsage() {
-    std::cout << "Usage: Neo" << std::endl;
+    std::cout << "Usage: Neo -w <world_name>" << std::endl;
+
+    std::cout << "    -w <world_name>";
+    std::cout << "\t\t\tSet world/application type" << std::endl;
 
     std::cout << "    -r <resources dir>";
     std::cout << "\tSet the resource directory" << std::endl;
 
     std::cout << "    -s <window width> <window height>";
     std::cout << "\tSet window size" << std::endl;
-
-    std::cout << "    -w <world_name>";
-    std::cout << "\t\t\tSet world/application type" << std::endl;
-    std::cout << "      DEV_WORLD";
-    std::cout << "\t\t\t\tWorld used for development purposes" << std::endl;
-    std::cout << "      SKY_WORLD";
-    std::cout << "\t\t\t\tWorld used for sky objects" << std::endl;
 }
 
 int Context::processArgs(int argc, char **argv) {
+    if (argc < 3) {
+        printUsage();
+        return 1;
+    }
+
     for (int i = 0; i < argc; i++) {
 
         /* Help */
@@ -69,12 +70,12 @@ int Context::processArgs(int argc, char **argv) {
                 return 1;
             }
             /* Dev world */
-            if(!strcmp(argv[i], "DEV_WORLD")) {
-                selectedWorld = DEV_WORLD_TYPE;
+            if(!strcmp(argv[i], "CLOUD_WORLD")) {
+                selectedWorld = CLOUD_WORLD;
             }
             /* Sky world */
             else if(!strcmp(argv[i], "SKY_WORLD")) {
-                selectedWorld = SKY_WORLD_TYPE;
+                selectedWorld = SKY_WORLD;
             }
             /* Invalid world chosen */
             else {
@@ -82,6 +83,11 @@ int Context::processArgs(int argc, char **argv) {
                 return 1;
             }
         }
+    }
+
+    if (selectedWorld == ERROR) {
+        printUsage();
+        return 1;
     }
 
     return 0;
@@ -101,10 +107,10 @@ World* Context::createWorld() {
     /* Create world */
     World *world;
     switch(selectedWorld) {
-        case(DEV_WORLD_TYPE):
-            world = new DevWorld;
+        case(CLOUD_WORLD):
+            world = new CloudWorld;
             break;
-        case(SKY_WORLD_TYPE):
+        case(SKY_WORLD):
             world = new SkyWorld;
             break;
         /* Error state -- we should never get here */
