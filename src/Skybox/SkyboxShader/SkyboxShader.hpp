@@ -21,7 +21,7 @@ class SkyboxShader : public Shader {
         bool init(Skybox *);
 
         /* Render */
-        void render(const World *);
+        void render();
 
         /* Wrap up and shut down */
         void cleanUp();

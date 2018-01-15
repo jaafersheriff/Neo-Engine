@@ -36,7 +36,7 @@ void AtmosphereShader::addAllLocations() {
     addUniform("colorTexture");
 }
 
-void AtmosphereShader::render(const World *world) {
+void AtmosphereShader::render() {
     /* Model matrix */
     glm::mat4 M = glm::scale(glm::mat4(1.f), glm::vec3(atmosphere->size));
     loadM(&M);

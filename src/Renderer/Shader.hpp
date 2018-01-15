@@ -4,7 +4,7 @@
 #ifndef _SHADER_HPP_
 #define _SHADER_HPP_
 
-#include "World/World.hpp"
+#include "MasterRenderer.hpp"
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -39,7 +39,7 @@ class Shader {
 
         /* Render functions */
         // TODO : give worlds their own global map 
-        virtual void render(const World *) = 0;
+        virtual void render() = 0;
 
         /* Parent load functions */
         void loadBool(const int, const bool) const;

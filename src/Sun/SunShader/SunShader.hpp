@@ -21,7 +21,7 @@ class SunShader : public Shader {
         bool init(Sun *);
 
         /* Render */
-        void render(const World *);
+        void render();
 
         /* Wrap up and shut down */
         void cleanUp();

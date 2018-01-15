@@ -30,7 +30,7 @@ void SkyboxShader::addAllLocations() {
     addUniform("cubeMap");
 }
 
-void SkyboxShader::render(const World *world) {
+void SkyboxShader::render() {
     /* Bind vertices */
     glBindVertexArray(skybox->mesh->vaoId);
     int pos = getAttribute("vertexPos");

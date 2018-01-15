@@ -24,7 +24,7 @@ class EntityShader : public Shader {
         bool init(std::vector<Entity *> *);
 
         /* Render */
-        void render(const World *);
+        void render();
 
         /* Wrap up and shut down */
         void cleanUp();

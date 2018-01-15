@@ -40,7 +40,7 @@ void SunShader::addAllLocations() {
     addUniform("outerRadius");
 }
 
-void SunShader::render(const World *world) {
+void SunShader::render() {
     glDisable(GL_DEPTH_TEST);
 
     /* Bind vertices */

@@ -55,8 +55,7 @@ class MasterRenderer {
 
     private:
         /* Utility functions */
-        void loadUniforms(const World *, Shader *);
-
+        void bindWorldUniforms(const World *, Shader *);
         /* Utility members */
         bool wireFrame = false;
         bool verbose = false;

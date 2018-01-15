@@ -47,7 +47,7 @@ void EntityShader::addAllLocations() {
     addUniform("lightAtt");
 }
 
-void EntityShader::render(const World *world) {
+void EntityShader::render() {
     /* Loop through every entity */
     // TODO : batched render
     glm::mat4 M;

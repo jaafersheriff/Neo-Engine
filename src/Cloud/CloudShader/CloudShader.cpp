@@ -57,7 +57,7 @@ void CloudShader::sortByDistance() {
      }
 }
 
-void CloudShader::render(const World *world) {
+void CloudShader::render() {
     /* Skip rendering if no billboards exist */
     if (!billboards->size()) {
         return;

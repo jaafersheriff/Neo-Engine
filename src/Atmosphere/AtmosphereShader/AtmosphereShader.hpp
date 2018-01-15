@@ -23,7 +23,7 @@ class AtmosphereShader : public Shader {
         bool init(Atmosphere *);
 
         /* Render */
-        void render(const World *);
+        void render();
 
         /* Wrap up and shut down */
         void cleanUp();

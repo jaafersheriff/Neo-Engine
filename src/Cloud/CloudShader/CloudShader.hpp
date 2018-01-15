@@ -22,7 +22,7 @@ class CloudShader : public Shader {
         bool init(std::vector<CloudBillboard *> *);
 
         /* Render */
-        void render(const World *);
+        void render();
 
         /* Wrap up and shut down */
         void cleanUp();
