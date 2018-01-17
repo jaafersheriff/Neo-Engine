@@ -1,6 +1,6 @@
 #include "Loader.hpp"
 #include "Model/Mesh.hpp"
-#include "BoundingBox/BoundingBox.hpp"
+#include "Collision/BoundingBox.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"

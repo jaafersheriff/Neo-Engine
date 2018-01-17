@@ -38,7 +38,6 @@ class MasterRenderer {
 
         /* Activate subrenderers */
         void activateEntityShader(std::vector<Entity *> *);
-        void activateBoundingBoxShader(std::vector<Block *> *);
         void activateCloudShader(std::vector<CloudBillboard *> *);
         void activateSkyboxShader(Skybox *);
         void activateSunShader(Sun *);

@@ -3,7 +3,6 @@
 #include "World/World.hpp"
 
 #include "Entity/EntityShader/EntityShader.hpp"
-#include "BoundingBox/BoundingBoxShader/BoundingBoxShader.hpp"
 #include "Skybox/SkyboxShader/SkyboxShader.hpp"
 #include "Cloud/CloudShader/CloudShader.hpp"
 #include "Sun/SunShader/SunShader.hpp"
@@ -111,23 +110,6 @@ void MasterRenderer::activateEntityShader(std::vector<Entity *> *entities) {
         delete eShader;
         if (verbose) {
             std::cout << "Entity Shader failed to activate" << std::endl;
-        }
-    }
-}
-
-void MasterRenderer::activateBoundingBoxShader(std::vector<Block *> *blocks) {
-    BoundingBoxShader *bShader = new BoundingBoxShader;
-    if (bShader->init(blocks)) {
-        bShader->cube = loader->loadCubeMesh(1.f);
-        shaders.push_back(bShader);
-        if (verbose) {
-            std::cout << "BoundingBox Shader activated" << std::endl;
-        }
-    }
-    else {
-        delete bShader;
-        if (verbose) {
-            std::cout << "BoundingBox Shader failed to activate" << std::endl;
         }
     }
 }
