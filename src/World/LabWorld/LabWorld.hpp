@@ -7,7 +7,7 @@
 #include "Player.hpp"
 #include "Block.hpp"
 
-#define MAX_GAME_OBJECTS 1
+#define MAX_GAME_OBJECTS 15
 
 class LabWorld : public World {
     public:
@@ -30,7 +30,7 @@ class LabWorld : public World {
     private:
         Loader *loader;
         int gameObjects = 0;
-        ModelTexture alive = ModelTexture(0.3f, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f));
+        ModelTexture alive = ModelTexture(0.3f, glm::vec3(0.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f));
 };
 
 #endif

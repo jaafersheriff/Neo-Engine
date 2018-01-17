@@ -16,9 +16,7 @@ class BoundingBox {
         glm::vec3 worldMin;
         glm::vec3 worldMax;
 
-        glm::mat4 *m;
-
-        void update(glm::mat4 *);
+        void update(glm::mat4 &);
 
         bool intersect(const BoundingBox &);
 };

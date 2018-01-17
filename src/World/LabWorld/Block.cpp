@@ -1,14 +1,15 @@
 #include "Block.hpp"
+
 Block::Block(Mesh *m, ModelTexture mt, const glm::vec3 p, const glm::vec3 r, const glm::vec3 s, float vel) : 
     Entity(m, mt, p, r, s) {
     this->velocity = vel;
     this->isHit = false;
-    this->boundingBox = BoundingBox(m);
+    this->boundingSphere = BoundingSphere(m);
 }
 
-void Block::update(Entity *terrain, BoundingBox player) {
+void Block::update(Entity *terrain, BoundingSphere player) {
     Entity::update();
-    this->boundingBox.update(&this->M);
+    this->boundingSphere.update(this->position);
 
     /* If already hit, skip */
     if (isHit) {
@@ -16,7 +17,7 @@ void Block::update(Entity *terrain, BoundingBox player) {
     }
 
     /* Test for player collsiion */
-    if (this->boundingBox.intersect(player)) {
+    if (this->boundingSphere.intersect(player)) {
         isHit = true;
         this->modelTexture.diffuseColor = glm::vec3(1.f, 0.f, 0.f);
         return;

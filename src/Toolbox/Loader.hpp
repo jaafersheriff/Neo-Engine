@@ -15,7 +15,6 @@
 #include <map>      /* map      */
 #include <vector>   /* vector   */
 
-class Mesh;
 class Loader {
     public:
         void init(Context &);

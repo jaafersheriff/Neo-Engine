@@ -1,8 +1,8 @@
 #include "BoundingBox.hpp"
 
 BoundingBox::BoundingBox() {
-    this->min = this->max = this->worldMin = this->worldMax = glm::vec3(0.f);
-    this->m = nullptr;
+    this->min = this->worldMin = glm::vec3(-1.f);
+    this->max = this->worldMax = glm::vec3(1.f);
 }
 
 BoundingBox::BoundingBox(Mesh *mesh) {
@@ -28,14 +28,13 @@ BoundingBox::BoundingBox(Mesh *mesh) {
     this->max = this->worldMax = glm::vec3(maxX, maxY, maxZ);
 }
 
-void BoundingBox::update(glm::mat4 *M) {
-    this->m = M;
-    this->worldMin = glm::vec3(*m * glm::vec4(min, 1.0));
-    this->worldMax = glm::vec3(*m * glm::vec4(max, 1.0));
+void BoundingBox::update(glm::mat4 &M) {
+    this->worldMin = glm::vec3(M * glm::vec4(min, 1.0));
+    this->worldMax = glm::vec3(M * glm::vec4(max, 1.0));
 }
 
 bool BoundingBox::intersect(const BoundingBox &other) {
-    return (worldMin.x <= other.worldMax.x && worldMax.x >= other.worldMin.x) &&
-           (worldMin.y <= other.worldMax.y && worldMax.y >= other.worldMin.y) &&
-           (worldMin.z <= other.worldMax.z && worldMax.z >= other.worldMin.z);
+    return (this->worldMin.x <= other.worldMax.x && this->worldMax.x >= other.worldMin.x) &&
+           (this->worldMin.y <= other.worldMax.y && this->worldMax.y >= other.worldMin.y) &&
+           (this->worldMin.z <= other.worldMax.z && this->worldMax.z >= other.worldMin.z);
 }
