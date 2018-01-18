@@ -21,6 +21,7 @@ class Skybox;
 class CloudBillboard;
 class Sun;
 class Atmosphere;
+class BoundingSphere;
 
 class MasterRenderer {
     public:
@@ -42,6 +43,7 @@ class MasterRenderer {
         void activateSkyboxShader(Skybox *);
         void activateSunShader(Sun *);
         void activateAtmosphereShader(Atmosphere *);
+        void activateBoundingSphereShader(std::vector<BoundingSphere *> *);
 
         /* Init */
         void init(const Context &, Loader *);

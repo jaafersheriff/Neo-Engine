@@ -7,6 +7,7 @@
 #include "Cloud/CloudShader/CloudShader.hpp"
 #include "Sun/SunShader/SunShader.hpp"
 #include "Atmosphere/AtmosphereShader/AtmosphereShader.hpp"
+#include "Collision/BoundingSphereShader/BoundingSphereShader.hpp"
 
 #include "Renderer/GLSL.hpp"
 
@@ -174,6 +175,22 @@ void MasterRenderer::activateAtmosphereShader(Atmosphere *atm) {
         delete aShader;
         if (verbose) {
             std::cout << "Atmosphere Shader failed to activate" << std::endl;
+        }
+    }
+}
+
+void MasterRenderer::activateBoundingSphereShader(std::vector<BoundingSphere *> *spheres) {
+    BoundingSphereShader *bShader = new BoundingSphereShader;
+    if (bShader->init(spheres)) {
+        shaders.push_back(bShader);
+        if (verbose) {
+            std::cout << "BoundingSphere Shader activated" << std::endl;
+        }
+    }
+    else {
+        delete bShader;
+        if (verbose) {
+            std::cout << "BoundingSphere Shader failed to activate" << std::endl;
         }
     }
 }
