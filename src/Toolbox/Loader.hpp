@@ -28,14 +28,10 @@ class Loader {
 
         /* Load meshes */
         Mesh* loadObjMesh(const std::string);
-        Mesh* loadCubeMesh(const float);
 
     private:
         /* Mesh generator object */
         MeshGenerator meshGenerator;
-
-        /* Resize a mesh so all of the vertices are [0, 1] */
-        void resize(Mesh*);
 
         /* Return pointer to loaded stbi_image data 
          * Update members in Texture pointer */ 
