@@ -26,12 +26,15 @@ class LabWorld : public World {
         void init(Loader &);
         void prepareRenderer(MasterRenderer *);
         void update(Context &);
-        void takeInput(Mouse &, Keyboard &);
+        void takeInput(Mouse &, Keyboard &, const float);
         void cleanUp();
     private:
-        Loader *loader;
+        Loader * loader;
+        double spawnTimer = 0.0;
         int gameObjects = 0;
+        int hitObjects = 0;
         ModelTexture alive = ModelTexture(0.3f, glm::vec3(0.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f));
+        Mesh *gameObjectMesh;
 };
 
 #endif

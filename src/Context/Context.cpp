@@ -150,7 +150,7 @@ void Context::update() {
         nFrames = 0;
         lastFpsTime = runTime;
         if (verbose) {
-            std::cout << fps << std::endl;
+            std::cout << "FPS: " << fps << std::endl;
         }
     }
 }

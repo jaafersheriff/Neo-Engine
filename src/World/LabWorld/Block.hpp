@@ -16,7 +16,7 @@ class Block : public Entity {
         
         /* Define model textures for dead and alive game objects*/
 
-        void update(Entity *, BoundingSphere, std::vector<Block *>);
+        void update(const float, const float, const float, const BoundingSphere &, std::vector<BoundingSphere *>);
 };
 
 #endif

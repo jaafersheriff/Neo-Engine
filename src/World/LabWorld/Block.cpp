@@ -15,7 +15,8 @@ Block::Block(Mesh *m, ModelTexture mt, const glm::vec3 p, const float r, const g
     this->boundingSphere = BoundingSphere(m);
 }
 
-void Block::update(Entity *terrain, BoundingSphere player, std::vector<Block *> blocks) {
+void Block::update(const float timeStep, const float tXBound, const float tZBound, const BoundingSphere &player, 
+        std::vector<BoundingSphere *> spheres) {
     Entity::update();
     this->boundingSphere.update(this->position);
 
@@ -31,13 +32,16 @@ void Block::update(Entity *terrain, BoundingSphere player, std::vector<Block *> 
         return;
     }
 
-    glm::vec3 newPos = this->position + this->direction * velocity;
-    this->position = newPos;
+    /* Calculate new position */
+    glm::vec3 newPos = this->position + this->direction * velocity * timeStep;
 
-    bool collision = newPos.x > terrain->scale.x || newPos.x < -terrain->scale.z ||
-                     newPos.z > terrain->scale.x || newPos.z < -terrain->scale.z;
-    for(auto block : blocks) {
-        if (block != this && block->boundingSphere.intersect(this->boundingSphere)) {
+    /* Test for terrain collision */
+    bool collision = newPos.x > tXBound || newPos.x < -tXBound ||
+                     newPos.z > tZBound || newPos.z < -tZBound;
+
+    /* Test for block collision */
+    for (auto sphere : spheres) {
+        if (collision || (sphere != &this->boundingSphere && this->boundingSphere.intersect(*sphere))) {
             collision = true;
             break;
         }
@@ -45,9 +49,9 @@ void Block::update(Entity *terrain, BoundingSphere player, std::vector<Block *> 
 
     if (collision) {
         this->velocity = -this->velocity;
+        newPos = this->position + this->direction * velocity * timeStep;
         this->rotation.y += 180.f;
     }
 
-    // TODO : collision w other blocks
-    // TODO : collision w terrain
+    this->position = newPos;
 }
