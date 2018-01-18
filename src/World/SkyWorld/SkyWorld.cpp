@@ -46,21 +46,15 @@ void SkyWorld::prepareUniforms() {
     UniformData *VData = new UniformData{ UniformType::Mat4, "V", (void *)&V };
     UniformData *lightPos = new UniformData{ UniformType::Vec3, "lightPos", (void *)&light->position };
 
-    std::vector<UniformData *> skyboxData;
-    skyboxData.push_back(PData);
-    skyboxData.push_back(VData);
-    uniforms[MasterRenderer::ShaderTypes::SKYBOX_SHADER] = skyboxData;
+    uniforms[MasterRenderer::ShaderTypes::SKYBOX_SHADER].push_back(PData);
+    uniforms[MasterRenderer::ShaderTypes::SKYBOX_SHADER].push_back(VData);
 
-    std::vector<UniformData *> atmData;
-    atmData.push_back(PData);
-    atmData.push_back(VData);
-    atmData.push_back(lightPos);
-    uniforms[MasterRenderer::ShaderTypes::ATMOSPHERE_SHADER] = atmData;   
+    uniforms[MasterRenderer::ShaderTypes::ATMOSPHERE_SHADER].push_back(PData);
+    uniforms[MasterRenderer::ShaderTypes::ATMOSPHERE_SHADER].push_back(VData);
+    uniforms[MasterRenderer::ShaderTypes::ATMOSPHERE_SHADER].push_back(lightPos);
 
-    std::vector<UniformData *> sunData;
-    sunData.push_back(PData);
-    sunData.push_back(VData);
-    uniforms[MasterRenderer::ShaderTypes::SUN_SHADER] = sunData;   
+    uniforms[MasterRenderer::ShaderTypes::SUN_SHADER].push_back(PData);
+    uniforms[MasterRenderer::ShaderTypes::SUN_SHADER].push_back(VData);
 }
 
 void SkyWorld::update(Context &ctx) {
