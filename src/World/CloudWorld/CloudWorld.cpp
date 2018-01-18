@@ -55,8 +55,9 @@ void CloudWorld::prepareUniforms() {
 }
 
 void CloudWorld::update(Context &ctx) {
+    this->P = ctx.display.projectionMatrix;
     this->V = glm::lookAt(camera->position, camera->lookAt, glm::vec3(0, 1, 0));
-    takeInput(ctx.mouse, ctx.keyboard);
+    takeInput(ctx.mouse, ctx.keyboard, ctx.timeStep);
     camera->update();
   
     /* Update cloudBoards */
@@ -69,7 +70,7 @@ void CloudWorld::update(Context &ctx) {
     }
 }
 
-void CloudWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
+void CloudWorld::takeInput(Mouse &mouse, Keyboard &keyboard, const float timeStep) {
     if (keyboard.isKeyPressed(' ')) {
         isPaused = !isPaused;
     }
@@ -81,22 +82,22 @@ void CloudWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
         camera->takeMouseInput(0.f, 0.f);
     }
     if (keyboard.isKeyPressed('w')) {
-        camera->moveForward();
+        camera->moveForward(timeStep);
     }
     if (keyboard.isKeyPressed('a')) {
-        camera->moveLeft();
+        camera->moveLeft(timeStep);
     }
     if (keyboard.isKeyPressed('s')) {
-        camera->moveBackward();
+        camera->moveBackward(timeStep);
     }
     if (keyboard.isKeyPressed('d')) {
-        camera->moveRight();
+        camera->moveRight(timeStep);
     }
     if (keyboard.isKeyPressed('e')) {
-        camera->moveDown();
+        camera->moveDown(timeStep);
     }
     if (keyboard.isKeyPressed('r')) {
-        camera->moveUp();
+        camera->moveUp(timeStep);
     }
     if (keyboard.isKeyPressed('~')) {
         // TODO : enable/disable GUI

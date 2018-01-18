@@ -30,7 +30,7 @@ class CloudWorld : public World {
         void prepareRenderer(MasterRenderer *);
         void prepareUniforms();
         void update(Context &);
-        void takeInput(Mouse &, Keyboard &);
+        void takeInput(Mouse &, Keyboard &, const float);
         void cleanUp();
 };
 

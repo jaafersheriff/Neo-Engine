@@ -33,33 +33,33 @@ void ThirdPersonCamera::updateLookAt() {
     lookAt = *lookRef;
 }
 
-void ThirdPersonCamera::moveForward() {
-    glm::vec3 newPos = position + w * MOVE_SPEED;
+void ThirdPersonCamera::moveForward(const float timeStep) {
+    glm::vec3 newPos = position + w * MOVE_SPEED * timeStep;
     if (glm::distance(newPos, lookAt) > MIN_DISTANCE) {
         position = newPos;
     }
 }
 
-void ThirdPersonCamera::moveBackward() {
-    glm::vec3 newPos = position - w * MOVE_SPEED;
+void ThirdPersonCamera::moveBackward(const float timeStep) {
+    glm::vec3 newPos = position - w * MOVE_SPEED * timeStep;
     if (glm::distance(newPos, lookAt) < MAX_DISTANCE) {
         position = newPos;
     }
 }
 
-void ThirdPersonCamera::moveLeft() {
-    theta -= MOVE_SPEED;
+void ThirdPersonCamera::moveLeft(const float timeStep) {
+    theta -= MOVE_SPEED * timeStep;
 }
 
-void ThirdPersonCamera::moveRight() {
-    theta += MOVE_SPEED;
+void ThirdPersonCamera::moveRight(const float timeStep) {
+    theta += MOVE_SPEED * timeStep;
 }
 
-void ThirdPersonCamera::moveUp() {
-    phi += MOVE_SPEED;
+void ThirdPersonCamera::moveUp(const float timeStep) {
+    phi += MOVE_SPEED * timeStep;
 }
 
-void ThirdPersonCamera::moveDown() {
-    phi -= MOVE_SPEED;
+void ThirdPersonCamera::moveDown(const float timeStep) {
+    phi -= MOVE_SPEED * timeStep;
 }
 

@@ -20,7 +20,7 @@ void SkyWorld::init(Context &ctx, Loader &loader) {
         "ame_nebula/purplenebula_lf.tga",
 
     };
-    skybox = new Skybox(loader.loadCubeMesh(1000.f), loader.loadCubeTexture(textureNames));
+    // skybox = new Skybox(loader.loadCubeMesh(1000.f), loader.loadCubeTexture(textureNames));
 
     /* Sun */
     sun = new Sun(this->light, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);
@@ -59,7 +59,7 @@ void SkyWorld::prepareUniforms() {
 
 void SkyWorld::update(Context &ctx) {
     this->V = glm::lookAt(camera->position, camera->lookAt, glm::vec3(0, 1, 0));
-    takeInput(ctx.mouse, ctx.keyboard);
+    takeInput(ctx.mouse, ctx.keyboard, ctx.timeStep);
     camera->update();
 
     if (skybox) {
@@ -70,7 +70,7 @@ void SkyWorld::update(Context &ctx) {
     }
 }
 
-void SkyWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
+void SkyWorld::takeInput(Mouse &mouse, Keyboard &keyboard, const float timeStep) {
     if (mouse.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
         camera->takeMouseInput(mouse.dx, mouse.dy);
     }
@@ -78,22 +78,22 @@ void SkyWorld::takeInput(Mouse &mouse, Keyboard &keyboard) {
         camera->takeMouseInput(0.f, 0.f);
     }
     if (keyboard.isKeyPressed('w')) {
-        camera->moveForward();
+        camera->moveForward(timeStep);
     }
     if (keyboard.isKeyPressed('a')) {
-        camera->moveLeft();
+        camera->moveLeft(timeStep);
     }
     if (keyboard.isKeyPressed('s')) {
-        camera->moveBackward();
+        camera->moveBackward(timeStep);
     }
     if (keyboard.isKeyPressed('d')) {
-        camera->moveRight();
+        camera->moveRight(timeStep);
     }
     if (keyboard.isKeyPressed('e')) {
-        camera->moveDown();
+        camera->moveDown(timeStep);
     }
     if (keyboard.isKeyPressed('r')) {
-        camera->moveUp();
+        camera->moveUp(timeStep);
     }
     if (keyboard.isKeyPressed('z')) {
         light->position.y += 4.f;

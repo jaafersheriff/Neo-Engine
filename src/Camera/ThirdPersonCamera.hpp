@@ -18,12 +18,12 @@ class ThirdPersonCamera : public Camera {
         virtual void takeMouseInput(const double, const double);
 
         /* Move according to UVW */
-        virtual void moveForward();
-        virtual void moveBackward();
-        virtual void moveLeft();
-        virtual void moveRight();
-        virtual void moveUp();
-        virtual void moveDown();
+        virtual void moveForward(const float);
+        virtual void moveBackward(const float);
+        virtual void moveLeft(const float);
+        virtual void moveRight(const float);
+        virtual void moveUp(const float);
+        virtual void moveDown(const float);
 
       private:
          const glm::vec3 *lookRef;

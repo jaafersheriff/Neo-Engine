@@ -26,7 +26,7 @@ class BoundingSphereShader : public  Shader {
         void cleanUp();
     private:
         /* Sphere mesh */
-        Mesh *sphere;
+        Mesh *sphereMesh;
 
         /* GLSL Load functions */
         void addAllLocations();

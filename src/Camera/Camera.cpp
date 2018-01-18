@@ -37,32 +37,32 @@ void Camera::updateLookAt() {
 }
 
 /* All movement is based on UVW basis-vectors */
-void Camera::moveForward() { 
-    position += w * MOVE_SPEED;
-    lookAt += w * MOVE_SPEED;
+void Camera::moveForward(const float timeStep) { 
+    position += w * MOVE_SPEED * timeStep;
+    lookAt += w * MOVE_SPEED * timeStep;
 }
 
-void Camera::moveBackward() { 
-    position -= w * MOVE_SPEED;
-    lookAt -= w * MOVE_SPEED;
+void Camera::moveBackward(const float timeStep) { 
+    position -= w * MOVE_SPEED * timeStep;
+    lookAt -= w * MOVE_SPEED * timeStep;
 }
 
-void Camera::moveRight() { 
-    position += u * MOVE_SPEED;
-    lookAt += u * MOVE_SPEED;
+void Camera::moveRight(const float timeStep) { 
+    position += u * MOVE_SPEED * timeStep;
+    lookAt += u * MOVE_SPEED * timeStep;
 }
 
-void Camera::moveLeft() { 
-    position -= u * MOVE_SPEED;
-    lookAt -= u * MOVE_SPEED;
+void Camera::moveLeft(const float timeStep) { 
+    position -= u * MOVE_SPEED * timeStep;
+    lookAt -= u * MOVE_SPEED * timeStep;
 }
 
-void Camera::moveUp() { 
-    position += v * MOVE_SPEED;
-    lookAt += v * MOVE_SPEED;
+void Camera::moveUp(const float timeStep) { 
+    position += v * MOVE_SPEED * timeStep;
+    lookAt += v * MOVE_SPEED * timeStep;
 }
 
-void Camera::moveDown() { 
-    position -= v * MOVE_SPEED;
-    lookAt -= v * MOVE_SPEED;
+void Camera::moveDown(const float timeStep) { 
+    position -= v * MOVE_SPEED * timeStep;
+    lookAt -= v * MOVE_SPEED * timeStep;
 }

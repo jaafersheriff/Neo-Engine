@@ -48,7 +48,7 @@ class World {
         virtual void cleanUp() = 0;
     private:
         /* Process any user input */
-        virtual void takeInput(Mouse &, Keyboard &) = 0;
+        virtual void takeInput(Mouse &, Keyboard &, const float) = 0;
 };
 
 #endif
