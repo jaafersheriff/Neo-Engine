@@ -7,6 +7,7 @@
 #include "glm/glm.hpp"
 #include <stdlib.h>
 #include <string>
+#include <algorithm>
 
 // TODO : Rewrite this so it's up to C++ standards
 class Toolbox {
@@ -50,6 +51,13 @@ public:
         return "<" + std::to_string(in.x) + ", " + 
                      std::to_string(in.y) + ">";
 
+    }
+
+    /* Clamp */
+    static inline float clamp(float &input, const float min, const float max) {
+        input = std::max(min, input);
+        input = std::min(max, input);
+        return input;
     }
 };
 
