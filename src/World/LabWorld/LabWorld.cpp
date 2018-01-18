@@ -30,6 +30,7 @@ void LabWorld::init(Loader &loader) {
 
 void LabWorld::prepareRenderer(MasterRenderer *mr) {
     mr->activateEntityShader(&entities);
+    //mr->activateBoundingSphereShader(&spheres);
 }
 
 void LabWorld::update(Context &ctx) {
@@ -59,7 +60,7 @@ void LabWorld::update(Context &ctx) {
 
     player->update();
     for (auto block : blocks) {
-        block->update(entities[0], player->boundingSphere);
+        block->update(entities[0], player->boundingSphere, blocks);
     }
 }
 

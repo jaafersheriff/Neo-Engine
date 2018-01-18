@@ -15,7 +15,7 @@ Block::Block(Mesh *m, ModelTexture mt, const glm::vec3 p, const float r, const g
     this->boundingSphere = BoundingSphere(m);
 }
 
-void Block::update(Entity *terrain, BoundingSphere player) {
+void Block::update(Entity *terrain, BoundingSphere player, std::vector<Block *> blocks) {
     Entity::update();
     this->boundingSphere.update(this->position);
 
@@ -31,13 +31,21 @@ void Block::update(Entity *terrain, BoundingSphere player) {
         return;
     }
 
-
     glm::vec3 newPos = this->position + this->direction * velocity;
     this->position = newPos;
 
-    if (newPos.x > terrain->scale.x || newPos.x < -terrain->scale.z ||
-        newPos.z > terrain->scale.x || newPos.z < -terrain->scale.z) {
+    bool collision = newPos.x > terrain->scale.x || newPos.x < -terrain->scale.z ||
+                     newPos.z > terrain->scale.x || newPos.z < -terrain->scale.z;
+    for(auto block : blocks) {
+        if (block != this && block->boundingSphere.intersect(this->boundingSphere)) {
+            collision = true;
+            break;
+        }
+    }
+
+    if (collision) {
         this->velocity = -this->velocity;
+        this->rotation.y += 180.f;
     }
 
     // TODO : collision w other blocks
