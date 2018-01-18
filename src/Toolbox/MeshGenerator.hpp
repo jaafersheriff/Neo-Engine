@@ -6,7 +6,8 @@
 
 class MeshGenerator {
     public:
-        Mesh* generateCube(float);
+        static Mesh* generateCube(float scale);
+        static Mesh* generateSphere(int smoothness);
 };
 
 #endif
