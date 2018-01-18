@@ -44,15 +44,16 @@ void LabWorld::update(Context &ctx) {
         float rotation = Toolbox::genRandom(0.f, 360.f);
 
         /* Create game object */
-        Block *b = new Block(loader->loadObjMesh("cube.obj"),           /* Mesh */
+        Block *b = new Block(loader->loadObjMesh("bunny.obj"),          /* Mesh */
                                      alive,                             /* Texture */
                                      pos,                               /* Position */
-                                     glm::vec3(0.f, rotation, 0.f),     /* Rotation */
+                                     rotation,                          /* Rotation */
                                      glm::vec3(2.f),                    /* Scale */
-                                     Toolbox::genRandom(10.f, 20.f));   /* Velocity */
+                                     Toolbox::genRandom(0.2f, 0.9f));   /* Velocity */
 
         entities.push_back(b);
         blocks.push_back(b);
+        spheres.push_back(&b->boundingSphere);
         gameObjects++;
     }
 

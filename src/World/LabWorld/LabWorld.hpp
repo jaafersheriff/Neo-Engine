@@ -17,6 +17,7 @@ class LabWorld : public World {
         /* World-specific render targets */
         std::vector<Entity *> entities;
         std::vector<Block *> blocks;
+        std::vector<BoundingSphere *> spheres;
 
         /* Constructor */
         LabWorld() : World("CSC 476 Lab") { }
