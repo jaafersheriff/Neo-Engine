@@ -19,8 +19,6 @@ class Skybox {
         CubeTexture *cubeTexture;
 
         float rotation = 0.f;
-
-        
 };
 
 #endif

@@ -18,6 +18,8 @@ class CloudWorld : public World {
         Sun *sun = nullptr;
 
         /* World-specific members */
+        Camera *camera;
+        Light *light;
         glm::mat4 P;
         glm::mat4 V;
         bool isPaused = false;

@@ -17,7 +17,6 @@ bool BoundingSphereShader::init(std::vector<BoundingSphere *> *spheres) {
     /* Create sphere mesh */
     this->sphereMesh = MeshGenerator::generateSphere(10);
 
-    // TODO
     return true;
 }
 
@@ -29,12 +28,7 @@ void BoundingSphereShader::addAllLocations() {
     addUniform("V");
 }
 
-void BoundingSphereShader::setGlobals(const glm::mat4 *P, const glm::mat4 *V) {
-    loadP(P);
-    loadV(V);
-}
-
-void BoundingSphereShader::render(const World *world) {
+void BoundingSphereShader::render() {
     /* Bind mesh VAO */
     glBindVertexArray(sphereMesh->vaoId);
     
@@ -66,15 +60,6 @@ void BoundingSphereShader::render(const World *world) {
 void BoundingSphereShader::cleanUp() {
     Shader::cleanUp();
 }
-
-void BoundingSphereShader::loadP(const glm::mat4 *p) {
-    this->loadMat4(getUniform("P"), p);
-}
-
-void BoundingSphereShader::loadV(const glm::mat4 *v) {
-    this->loadMat4(getUniform("V"), v);
-}
-
 
 void BoundingSphereShader::loadM(const glm::mat4 *m) {
     this->loadMat4(getUniform("M"), m);

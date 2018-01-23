@@ -58,6 +58,7 @@ void SkyWorld::prepareUniforms() {
 }
 
 void SkyWorld::update(Context &ctx) {
+    this->P = ctx.display.projectionMatrix;
     this->V = glm::lookAt(camera->position, camera->lookAt, glm::vec3(0, 1, 0));
     takeInput(ctx.mouse, ctx.keyboard, ctx.timeStep);
     camera->update();

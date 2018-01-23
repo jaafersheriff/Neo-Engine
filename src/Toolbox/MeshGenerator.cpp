@@ -101,7 +101,8 @@ Mesh* MeshGenerator::generateSphere(int smoothness) {
          8,  6,  7,
          9,  8,  1
     };
-}
+
+    // TODO : add refinements 
 
     resize(mesh);
     mesh->init();

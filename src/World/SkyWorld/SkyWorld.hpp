@@ -21,6 +21,8 @@ class SkyWorld : public World {
         Atmosphere *atmosphere = nullptr;
 
         /* World-specific members */
+        Camera *camera;
+        Light *light;
         glm::mat4 P;
         glm::mat4 V;
 

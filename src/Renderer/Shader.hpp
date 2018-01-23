@@ -38,7 +38,6 @@ class Shader {
         void unloadTexture(int);
 
         /* Render functions */
-        // TODO : give worlds their own global map 
         virtual void render() = 0;
 
         /* Parent load functions */

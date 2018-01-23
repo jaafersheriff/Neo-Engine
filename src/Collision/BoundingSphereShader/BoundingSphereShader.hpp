@@ -20,7 +20,7 @@ class BoundingSphereShader : public  Shader {
         bool init(std::vector<BoundingSphere *> *);
 
         /* Render */
-        void render(const World *);
+        void render();
 
         /* Wrap up and shut down */
         void cleanUp();
@@ -30,9 +30,6 @@ class BoundingSphereShader : public  Shader {
 
         /* GLSL Load functions */
         void addAllLocations();
-        void setGlobals(const glm::mat4 *, const glm::mat4 *);
-        void loadP(const glm::mat4 *);
-        void loadV(const glm::mat4 *);
         void loadM(const glm::mat4 *);
 };
 
