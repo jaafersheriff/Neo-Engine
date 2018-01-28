@@ -1,5 +1,6 @@
 #include "Loader.hpp"
 #include "Model/Mesh.hpp"
+#include "MeshGenerator.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"

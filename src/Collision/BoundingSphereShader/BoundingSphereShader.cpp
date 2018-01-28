@@ -15,7 +15,7 @@ bool BoundingSphereShader::init(std::vector<BoundingSphere *> *spheres) {
     addAllLocations();
 
     /* Create sphere mesh */
-    this->sphereMesh = MeshGenerator::generateSphere(10);
+    this->sphereMesh = MeshGenerator::generateSphere(0);
 
     return true;
 }
