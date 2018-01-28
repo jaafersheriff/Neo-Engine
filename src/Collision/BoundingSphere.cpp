@@ -1,15 +1,18 @@
 #include "BoundingSphere.hpp"
 #include "BoundingBox.hpp"
 
-#include <math.h>
-
 BoundingSphere::BoundingSphere() {
     this->position = glm::vec3(0.f, 0.f, 0.f);
     this->radius = 0.f;
 }
 
-BoundingSphere::BoundingSphere(Mesh *mesh) {
-    BoundingSphere();
+BoundingSphere::BoundingSphere(float size) : 
+    BoundingSphere() {
+    this->radius = size;
+}
+
+BoundingSphere::BoundingSphere(Mesh *mesh) :    
+    BoundingSphere() {
 
     BoundingBox box(mesh);
     this->radius = glm::distance(box.max, box.min);

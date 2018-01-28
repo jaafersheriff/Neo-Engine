@@ -8,6 +8,7 @@
 class BoundingSphere {
     public:
         BoundingSphere();
+        BoundingSphere(float);
         BoundingSphere(Mesh *);
 
         glm::vec3 position;
