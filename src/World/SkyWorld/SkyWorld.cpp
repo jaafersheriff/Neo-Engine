@@ -1,4 +1,6 @@
 #include "SkyWorld.hpp"
+
+
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <iostream>
@@ -23,13 +25,15 @@ void SkyWorld::init(Context &ctx, Loader &loader) {
     // skybox = new Skybox(loader.loadCubeMesh(1000.f), loader.loadCubeTexture(textureNames));
 
     /* Sun */
-    sun = new Sun(this->light, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);
+    // sun = new Sun(this->light, glm::vec3(1.f), glm::vec3(1.f, 1.f, 0.f), 75, 150);
 
     /* Atmosphere */
-    atmosphere = new Atmosphere(loader.loadObjMesh("geodesic_dome.obj"), 
-                                loader.loadTexture("sky.png", Texture::WRAP_MODE::CLAMP), 
-                                loader.loadTexture("glow.png", Texture::WRAP_MODE::CLAMP), 
-                                1000.f);
+    // atmosphere = new Atmosphere(loader.loadObjMesh("geodesic_dome.obj"), 
+    //                             loader.loadTexture("sky.png", Texture::WRAP_MODE::CLAMP), 
+    //                             loader.loadTexture("glow.png", Texture::WRAP_MODE::CLAMP), 
+    //                             1000.f);
+
+    spheres.push_back(new BoundingSphere(loader.loadObjMesh("bunny.obj")));
 
     this->P = ctx.display.projectionMatrix;
     this->V = glm::lookAt(camera->position, camera->lookAt, glm::vec3(0, 1, 0));
@@ -39,6 +43,7 @@ void SkyWorld::prepareRenderer(MasterRenderer *mr) {
     mr->activateSkyboxShader(skybox);
     mr->activateAtmosphereShader(atmosphere);
     mr->activateSunShader(sun);
+    mr->activateBoundingSphereShader(&spheres);
 }
 
 void SkyWorld::prepareUniforms() {
@@ -55,6 +60,9 @@ void SkyWorld::prepareUniforms() {
 
     uniforms[MasterRenderer::ShaderTypes::SUN_SHADER].push_back(PData);
     uniforms[MasterRenderer::ShaderTypes::SUN_SHADER].push_back(VData);
+
+    uniforms[MasterRenderer::ShaderTypes::BOUNDING_SPHERE_SHADER].push_back(PData);
+    uniforms[MasterRenderer::ShaderTypes::BOUNDING_SPHERE_SHADER].push_back(VData);
 }
 
 void SkyWorld::update(Context &ctx) {
@@ -95,30 +103,6 @@ void SkyWorld::takeInput(Mouse &mouse, Keyboard &keyboard, const float timeStep)
     }
     if (keyboard.isKeyPressed('r')) {
         camera->moveUp(timeStep);
-    }
-    if (keyboard.isKeyPressed('z')) {
-        light->position.y += 4.f;
-    }
-    if (keyboard.isKeyPressed('x')) {
-        light->position.y -= 4.f;
-    }
-    if (keyboard.isKeyPressed('c')) {
-        sun->updateInnerRadius(-5.f);
-    }
-    if (keyboard.isKeyPressed('v')) {
-        sun->updateOuterRadius(-5.f);
-    }
-    if (keyboard.isKeyPressed('b')) {
-        sun->updateInnerRadius(5.f);
-    }
-    if (keyboard.isKeyPressed('n')) {
-        sun->updateOuterRadius(5.f);
-    }
-    if (keyboard.isKeyPressed('1')) {
-        sun->innerColor += Toolbox::genRandomVec3(-1.f, 1.f);
-    }
-    if (keyboard.isKeyPressed('2')) {
-        sun->outerColor += Toolbox::genRandomVec3(-1.f, 1.f);
     }
 }
 

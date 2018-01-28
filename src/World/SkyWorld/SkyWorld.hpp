@@ -12,6 +12,7 @@
 #include "Skybox/Skybox.hpp"
 #include "Sun/Sun.hpp"
 #include "Atmosphere/Atmosphere.hpp"
+#include "Collision/BoundingSphere.hpp"
 
 class SkyWorld : public World {
     public:
@@ -19,6 +20,7 @@ class SkyWorld : public World {
         Skybox *skybox = nullptr;
         Sun *sun = nullptr;
         Atmosphere *atmosphere = nullptr;
+        std::vector<BoundingSphere *> spheres;
 
         /* World-specific members */
         Camera *camera;
