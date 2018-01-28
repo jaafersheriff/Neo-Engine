@@ -10,6 +10,8 @@
 #include <algorithm>
 
 // TODO : Rewrite this so it's up to C++ standards
+// TODO : templates
+
 class Toolbox {
 public:
     /* PI */
@@ -58,6 +60,12 @@ public:
         input = std::max(min, input);
         input = std::min(max, input);
         return input;
+    }
+
+    /* Interpolate */
+    template<class T>
+    static T interpolate(const T a, const T b, const float t) {
+        return a * (1.f - t) + b * t;
     }
 };
 
