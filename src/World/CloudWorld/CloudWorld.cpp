@@ -20,7 +20,7 @@ void CloudWorld::init(Context &ctx, Loader &loader) {
                             Toolbox::genRandom(-5.f, 5.f),
                             Toolbox::genRandom(-25.f, 25.f)),
                         glm::vec2(cloudTexture->width, cloudTexture->height)/75.f);
-        c->rotation = 0.f; // 360.f * Toolbox::genRandom();
+        c->rotation = 360.f * Toolbox::genRandom();
         cloudBoards.push_back(c);
     }
 

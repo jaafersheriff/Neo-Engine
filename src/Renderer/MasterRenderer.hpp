@@ -32,8 +32,7 @@ class MasterRenderer {
             CLOUD_SHADER,
             SKYBOX_SHADER,
             SUN_SHADER,
-            ATMOSPHERE_SHADER,
-            BOUNDING_SPHERE_SHADER
+            ATMOSPHERE_SHADER
         };
         /* List of active renderers */
         std::vector<Shader *> shaders;

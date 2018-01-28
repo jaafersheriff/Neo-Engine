@@ -10,8 +10,6 @@
 #include <algorithm>
 
 // TODO : Rewrite this so it's up to C++ standards
-// TODO : templates
-
 class Toolbox {
 public:
     /* PI */
@@ -60,15 +58,6 @@ public:
         input = std::max(min, input);
         input = std::min(max, input);
         return input;
-    }
-
-    /* Interpolate */
-    static inline float interpolate(float a, float b, float t) {
-        return a * (1.f - t) + b * t;
-    }
-
-    static inline glm::vec3 interpolate(glm::vec3 a, glm::vec3 b, float t) {
-        return a * (1.f - t) + b * t;
     }
 };
 

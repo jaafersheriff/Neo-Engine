@@ -19,7 +19,6 @@ class SkyWorld : public World {
         Skybox *skybox = nullptr;
         Sun *sun = nullptr;
         Atmosphere *atmosphere = nullptr;
-        std::vector<BoundingSphere *> spheres;
 
         /* World-specific members */
         Camera *camera;

@@ -7,10 +7,10 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
-#include "Model/Mesh.hpp"
 #include "Skybox/CubeTexture.hpp"
 #include "Model/Texture.hpp"
 #include "Context/Context.hpp"
+#include "Toolbox/MeshGenerator.hpp"
 
 #include <map>      /* map      */
 #include <vector>   /* vector   */
@@ -30,6 +30,9 @@ class Loader {
         Mesh* loadObjMesh(const std::string);
 
     private:
+        /* Mesh generator object */
+        MeshGenerator meshGenerator;
+
         /* Return pointer to loaded stbi_image data 
          * Update members in Texture pointer */ 
         uint8_t* loadTextureData(Texture *, const std::string, const bool);
