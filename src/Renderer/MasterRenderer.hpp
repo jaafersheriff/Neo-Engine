@@ -18,7 +18,6 @@ class Shader;
 class Entity;
 class Block;
 class Skybox;
-class CloudBillboard;
 class Sun;
 class Atmosphere;
 class BoundingSphere;
@@ -29,7 +28,6 @@ class MasterRenderer {
         enum ShaderTypes {
             ERROR,
             ENTITY_SHADER,
-            CLOUD_SHADER,
             SKYBOX_SHADER,
             SUN_SHADER,
             ATMOSPHERE_SHADER,
@@ -40,7 +38,6 @@ class MasterRenderer {
 
         /* Activate subrenderers */
         void activateEntityShader(std::vector<Entity *> *);
-        void activateCloudShader(std::vector<CloudBillboard *> *);
         void activateSkyboxShader(Skybox *);
         void activateSunShader(Sun *);
         void activateAtmosphereShader(Atmosphere *);

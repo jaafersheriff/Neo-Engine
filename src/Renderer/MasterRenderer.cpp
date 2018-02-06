@@ -4,7 +4,6 @@
 
 #include "Entity/EntityShader/EntityShader.hpp"
 #include "Skybox/SkyboxShader/SkyboxShader.hpp"
-#include "Cloud/CloudShader/CloudShader.hpp"
 #include "Sun/SunShader/SunShader.hpp"
 #include "Atmosphere/AtmosphereShader/AtmosphereShader.hpp"
 #include "Collision/BoundingSphereShader/BoundingSphereShader.hpp"
@@ -128,22 +127,6 @@ void MasterRenderer::activateSkyboxShader(Skybox *sb) {
         if (verbose) {
             std::cout << "Skybox Shader failed to activate" << std::endl;
        }
-    }
-}
-
-void MasterRenderer::activateCloudShader(std::vector<CloudBillboard *> *billboards) {
-    CloudShader *cShader = new CloudShader;
-    if (cShader->init(billboards)) {
-        shaders.push_back(cShader);
-        if (verbose) {
-            std::cout << "Cloud Shader activated" << std::endl;
-        }
-    }
-    else {
-        delete cShader;
-        if (verbose) {
-            std::cout << "Cloud Shader failed to activate" << std::endl;
-        }
     }
 }
 

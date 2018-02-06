@@ -1,6 +1,5 @@
 #include "Context.hpp"
 #include "World/World.hpp"
-#include "World/CloudWorld/CloudWorld.hpp"
 #include "World/SkyWorld/SkyWorld.hpp"
 
 #include <string.h>  /* strcmp, strlen  */
@@ -69,10 +68,6 @@ int Context::processArgs(int argc, char **argv) {
                 printUsage();
                 return 1;
             }
-            /* Dev world */
-            if(!strcmp(argv[i], "CLOUD_WORLD")) {
-                selectedWorld = CLOUD_WORLD;
-            }
             /* Sky world */
             else if(!strcmp(argv[i], "SKY_WORLD")) {
                 selectedWorld = SKY_WORLD;
@@ -107,9 +102,6 @@ World* Context::createWorld() {
     /* Create world */
     World *world;
     switch(selectedWorld) {
-        case(CLOUD_WORLD):
-            world = new CloudWorld;
-            break;
         case(SKY_WORLD):
             world = new SkyWorld;
             break;

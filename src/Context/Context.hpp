@@ -17,7 +17,6 @@ class Context {
         /* Enum for world types */
         enum WorldTypes {
             ERROR,
-            CLOUD_WORLD,
             SKY_WORLD
         };
         /* Default members */
