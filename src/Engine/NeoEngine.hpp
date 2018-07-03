@@ -4,7 +4,7 @@
 
 namespace neo {
 
-    class Engine {
+    class NeoEngine {
     
         public:
             static void init(const std::string &, const int, const int);

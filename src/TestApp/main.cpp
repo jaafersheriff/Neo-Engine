@@ -1,9 +1,9 @@
-#include <Engine.hpp>
+#include <NeoEngine.hpp>
 
 using namespace neo;
 
 int main() {
-    Engine::init("", 1280, 720);
-    Engine::run();
+    NeoEngine::init("TestApp", 1280, 720);
+    NeoEngine::run();
     return 0;
 }
