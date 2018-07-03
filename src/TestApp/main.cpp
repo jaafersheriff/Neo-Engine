@@ -1,8 +1,8 @@
 
-#include <NeoEngine.hpp>
+#include <Engine.hpp>
+
+using namespace neo;
 
 int main() {
-    Window window;
-    window.a = 5;
-    return window.a;
+    Engine::run();
 }

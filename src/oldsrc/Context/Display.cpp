@@ -1,13 +1,5 @@
-#include "Display.hpp"
 #include "Renderer/GLSL.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-
-#include <iostream> /* cout, cerr */
-
-/* GLFW error callback */
-static void error_callback(int error, const char *desc) {
-    std::cerr << "Error: " << desc << std::endl;
-}
 
 int Display::init() {
     /* Set error callback */
