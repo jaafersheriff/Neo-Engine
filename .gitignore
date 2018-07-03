@@ -6,4 +6,8 @@ build/
 resources/
 other/
 Win32/
-
+/Debug/
+/Release/
+*/*/Debug
+*/*/Release
+src/oldsrc/
