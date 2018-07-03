@@ -1,88 +1,117 @@
 #include "Renderer/GLSL.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "ThirdParty/imgui/imgui.h"
+#include "ThirdParty/imgui/imgui_impl_glfw_gl3.h"
+
+#include "Scene/Scene.hpp"
+bool Window::s_cursorEnabled = true;
+bool Window::s_imGuiEnabled = false;
 
 int Display::init() {
-    /* Set error callback */
-    glfwSetErrorCallback(error_callback);
+    /* Init ImGui */
+    ImGui_ImplGlfwGL3_Init(s_window, false);
+}
 
-    /* Init GLFW */
-    if(!glfwInit()) {
-        std::cerr << "Error initializing GLFW" << std::endl;
-        return 1;
+void Window::update() {
+        /* Update mouse */
+        if (!cursorEnabled) {
+            double x, y;
+            glfwGetCursorPos(window, &x, &y);
+            Mouse::update(x, y);
+        }
+        /* Update ImGui */
+        if (isImGuiEnabled()) {
+            ImGui_ImplGlfwGL3_NewFrame(s_cursorEnabled);
+        }
+}
+
+void Window::toggleImGui() {
+    s_imGuiEnabled = !s_imGuiEnabled;
+    if (!s_imGuiEnabled) {
+        setCursorEnabled(false);
+    }
+}
+
+void Window::setCursorEnabled(bool enabled) {
+    s_cursorEnabled = enabled;
+    glfwSetInputMode(s_window, GLFW_CURSOR, s_cursorEnabled ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+    if (enabled) {
+        Mouse::reset();
+        Keyboard::reset();
+    }
+}
+
+void Window::toggleCursorEnabled() {
+    setCursorEnabled(!s_cursorEnabled);
+}
+
+void Window::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+    // toggle fullscreen (f11 or alt+enter)
+    if ((key == GLFW_KEY_F11 || key == GLFW_KEY_ENTER && mods & GLFW_MOD_ALT) && action == GLFW_PRESS) {
+        // currently fullscreen
+        if (glfwGetWindowMonitor(window)) {
+            Mouse::reset();
+        }
+        // currently windowed
+        else {
+            Mouse::reset();
+        }
     }
 
-    /* Request version 3.3 of OpenGL */
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-
-    /* Create GLFW window */
-    window = glfwCreateWindow(this->width, this->height, "Neo", NULL, NULL);
-    if (!window) {
-        std::cerr << "Failed to create window" << std::endl;
-        glfwTerminate();
-        return 1;
+    if (key == GLFW_KEY_GRAVE_ACCENT && mods & GLFW_MOD_CONTROL && action == GLFW_PRESS) {
+        toggleImGui();
     }
-    glfwMakeContextCurrent(window);
-
-    /* Init GLEW */
-    glewExperimental = GL_FALSE;
-    GLenum error = glGetError();
-    if (error != GL_NO_ERROR) {
-        std::cout << "OpenGL Error: " << error << std::endl;
-        return 1;
+    else if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS && isImGuiEnabled()) {
+        toggleCursorEnabled();
     }
-    error = glewInit();
-    if (error != GLEW_OK) {
-        std::cerr << "Failed to init GLEW" << std::endl;
-        return 1;
+    else if (isImGuiEnabled() && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+        ImGui_ImplGlfwGL3_KeyCallback(window, key, scancode, action, mods);
     }
-    glGetError();
-
-    /* Error check */
-    GLSL::checkVersion();
-
-    /* Vsync */
-    glfwSwapInterval(1);
-
-    return 0;
-}
-
-void Display::setTitle(const char *name) {
-    glfwSetWindowTitle(window, name);
-}
-
-void Display::update() { 
-    /* Set viewport to window size */
-    glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
-
-    /* Don't update display if window is minimized */
-    if (!width && !height) {
-        return;
+    else
+    {
+        if (!s_cursorEnabled) {
+            Keyboard::setKeyStatus(key, action);
+            Scene::sendMessage<KeyMessage>(nullptr, key, action, mods);
+        }
     }
-    
-    /* Update projection matrix */
-    projectionMatrix = glm::perspective(
-              45.f,                 /* fovy     */
-              width/(float)height,  /* aspect   */
-              0.01f,                /* near     */
-              2500.f);              /* far      */
 }
 
-int Display::shouldClose() { 
-    return glfwWindowShouldClose(window) || 
-           glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+void Window::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
+    if (isImGuiEnabled() && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow()) && s_cursorEnabled) {
+        ImGui_ImplGlfwGL3_MouseButtonCallback(window, button, action, mods);
+    }
+    else 
+    {
+        if (!s_cursorEnabled) {
+            Mouse::setButtonStatus(button, action);
+            Scene::sendMessage<MouseMessage>(nullptr, button, action, mods);
+        }
+    }
 }
 
-void Display::swap() {
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+void Window::scrollCallback(GLFWwindow * window, double dx, double dy) {
+    if (isImGuiEnabled() && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow()) && s_cursorEnabled) {
+        ImGui_ImplGlfwGL3_ScrollCallback(window, dx, dy);
+    }
+    else
+    {
+        Mouse::scrollDX += dx;
+        Mouse::scrollDY += dy;
+        Scene::sendMessage<ScrollMessage>(nullptr, float(dx), float(dy));
+    }
 }
 
-void Display::cleanUp() {
-    /* Clean up GLFW */
-    glfwDestroyWindow(window);
-    glfwTerminate();
+void Window::characterCallback(GLFWwindow *window, unsigned int c) {
+    if (isImGuiEnabled() && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow()) && s_cursorEnabled) {
+        ImGui_ImplGlfwGL3_CharCallback(window, c);
+    }
 }
+
+void Window::framebufferSizeCallback(GLFWwindow * window, int width, int height) {
+    Scene::sendMessage<WindowFrameSizeMessage>(nullptr, s_frameSize);
+}
+
+void Window::cursorEnterCallback(GLFWwindow * window, int entered) {
+    Mouse::reset();
+}
+
