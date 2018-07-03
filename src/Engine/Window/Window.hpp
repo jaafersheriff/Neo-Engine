@@ -16,7 +16,7 @@ namespace neo {
         public:
             static int initGLFW(const std::string &);
             static void setWindowTitle(const std::string &);
-            static void update(float);
+            static void update();
             static int shouldClose();
             static void shutDown();
 

@@ -140,7 +140,7 @@ namespace neo {
         return 0;
     }
 
-    void Window::update(float dt) {
+    void Window::update() {
         /* Don't update display if window is minimized */
         if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
             return;
