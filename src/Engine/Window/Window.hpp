@@ -2,8 +2,12 @@
  * Static GLFW wrapper */
 #pragma once
 
-#include <GLFW/glfw3.h>
+#define GLEW_STATIC
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
+
+#include <string>
 
 namespace neo {
 
@@ -17,7 +21,7 @@ namespace neo {
             static void shutDown();
 
             static void setSize(const glm::ivec2 &);
-            static glm::ivec2 getSize() { return isFullscreen ? fullscreenSize : windowSize; }
+            static glm::ivec2 getSize() { return fullscreen ? fullscreenSize : windowSize; }
             static glm::ivec2 getFrameSize() { return frameSize; }
             static float getAspectRatio() { return float(frameSize.x / frameSize.y); }
 
