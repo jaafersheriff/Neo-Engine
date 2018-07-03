@@ -19,6 +19,7 @@ void main() {
     gl_Position = P * V * worldPos;
 
     viewDir = cameraPos - worldPos.xyz;
-    fragNormal = vec3(M * vec4(vertexNormal, 0.0));
+    // TODO : move these to CPU
+    fragNormal = vec3(transpose(inverse(M)) * vec4(vertexNormal, 0.0));
     textureCoords = vertexTexture;
 }
