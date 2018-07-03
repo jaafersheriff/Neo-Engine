@@ -11,6 +11,7 @@ namespace neo {
     glm::ivec2 Window::frameSize;
     glm::ivec2 Window::fullscreenSize;
     glm::ivec2 Window::windowSize(DEFAULT_WITH, DEFAULT_HEIGHT);
+    glm::ivec2 Window::windowPos(0, 0);
     bool Window::fullscreen = false;
     bool Window::vSyncEnabled = true;
 
@@ -19,8 +20,6 @@ namespace neo {
     }
 
     void Window::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-        static glm::ivec2 windowPos;
-
         /* Exit */
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
@@ -85,7 +84,6 @@ namespace neo {
     void Window::cursorEnterCallback(GLFWwindow * window, int entered) {
     }
 
-
     int Window::initGLFW(const std::string &name) {
         /* Set error callback */
         glfwSetErrorCallback(errorCallback);
@@ -95,6 +93,7 @@ namespace neo {
             std::cerr << "Error initializing GLFW" << std::endl;
             return 1;
         }
+
         /* Request version 3.3 of OpenGL */
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -176,6 +175,4 @@ namespace neo {
         glfwDestroyWindow(window);
         glfwTerminate();
     }
-
-    
 }

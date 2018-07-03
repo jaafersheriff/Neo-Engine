@@ -35,6 +35,7 @@ namespace neo {
             static GLFWwindow * window;
             static glm::ivec2 frameSize;
             static glm::ivec2 windowSize;
+            static glm::ivec2 windowPos;
             static glm::ivec2 fullscreenSize;
             static bool fullscreen;
             static bool vSyncEnabled;
