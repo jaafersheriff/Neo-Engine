@@ -156,6 +156,8 @@ namespace neo {
 
     void Window::setSize(const glm::ivec2 & size) {
         if (!fullscreen) {
+            windowSize.x = size.x;
+            windowSize.y = size.y;
             glfwSetWindowSize(window, windowSize.x, windowSize.y);
         }
     }
