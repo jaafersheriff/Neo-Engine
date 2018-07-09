@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GameObject\GameObject.hpp" />
     <ClInclude Include="NeoEngine.hpp" />
     <ClInclude Include="Window\Window.hpp" />
   </ItemGroup>
