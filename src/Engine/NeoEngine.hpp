@@ -7,11 +7,12 @@ namespace neo {
     class NeoEngine {
     
         public:
-            static void init(const std::string &, const int, const int);
+            static void init(const std::string &, const std::string &, int, const int);
             static void run();
             static void shutDown();
 
-            static std::string RESOURCE_DIR;    /* Resource directory */
+            static std::string ENGINE_RES_DIR;  /* Engine's resource directory */
+            static std::string APP_RES_DIR;     /* App's resource directory */
             static std::string APP_NAME;        /* Name of application */
             static int FPS;                     /* Frames per second */
             static double timeStep;             /* Delta time */

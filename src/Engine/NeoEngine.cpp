@@ -5,7 +5,8 @@
 
 namespace neo {
 
-    std::string NeoEngine::RESOURCE_DIR = "../res/";
+    std::string NeoEngine::ENGINE_RES_DIR = "../res/";
+    std::string NeoEngine::APP_RES_DIR = "../res/";
     std::string NeoEngine::APP_NAME = "Neo Engine";
 
     /* FPS */
@@ -16,16 +17,20 @@ namespace neo {
     double NeoEngine::lastFrameTime = 0.0;
     double NeoEngine::runTime = 0.0;
 
-    void NeoEngine::init(const std::string &title, const int width, const int height) {
+    void NeoEngine::init(const std::string &title, const std::string &app_res, const int width, const int height) {
         srand((unsigned int)(time(0)));
 
         APP_NAME = title;
+        APP_RES_DIR = app_res;
 
         /* Init window*/
         if (Window::initGLFW(APP_NAME)) {
             std::cerr << "Failed initializing Window" << std::endl;
         }
         Window::setSize(glm::ivec2(width, height));
+
+        /* Init FPS */
+        lastFrameTime = runTime = glfwGetTime();
     }
 
     void NeoEngine::run() {
