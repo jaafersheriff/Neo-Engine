@@ -8,17 +8,17 @@ namespace neo {
 
         public:
             Component(GameObject &go) : gameObject(&go) {};
-            virtual void init() = 0;
+            virtual void init() {};
+            virtual void update(float) {};
 
             /* Remove copy constructors */
             Component(const Component &) = delete;
-            Component(Component &&) = delete;
             Component & operator=(const Component &) = delete;
-            Component & operator=(Component &&) = delete;
+            Component(Component &&) = default;
+            Component & operator=(Component &&) = default;
             
             /* Virtual destructor necessary for polymorphic destruction */
             virtual ~Component() = default;
-            virtual void update(float) = 0;
 
             GameObject & getGameObject() { return *gameObject; }
             const GameObject & getGameObject() const { return *gameObject; }
