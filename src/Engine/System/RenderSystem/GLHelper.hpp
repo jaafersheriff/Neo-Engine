@@ -12,6 +12,7 @@
 #include <sstream>
 #include <iostream>
 #include <cassert>
+#include <stdio.h>
 
 namespace neo {
 
@@ -110,7 +111,7 @@ namespace neo {
             int minor = 0;
             const char *verstr = (const char *)glGetString(GL_VERSION);
 
-            if ((verstr == NULL) || (sscanf(verstr, "%d.%d", &major, &minor) != 2)) {
+            if ((verstr == NULL) || (sscanf_s(verstr, "%d.%d", &major, &minor) != 2)) {
                 printf("Invalid GL_VERSION format %d.%d\n", major, minor);
             }
             if (major < 2) {
@@ -125,7 +126,7 @@ namespace neo {
             char *content = NULL;
             int count = 0;
             if (fn != NULL) {
-                fp = fopen(fn, "rt");
+                fopen_s(&fp, fn, "rt");
                 if (fp != NULL) {
                     fseek(fp, 0, SEEK_END);
                     count = (int)ftell(fp);
@@ -148,7 +149,7 @@ namespace neo {
             FILE *fp;
             int status = 0;
             if (fn != NULL) {
-                fp = fopen(fn, "w");
+                fopen_s(&fp, fn, "w");
                 if (fp != NULL) {
                     if (fwrite(s, sizeof(char), strlen(s), fp) == strlen(s)) {
                         status = 1;
