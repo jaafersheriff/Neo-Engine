@@ -3,7 +3,7 @@
 #include "Window/Window.hpp"
 #include "GameObject/GameObject.hpp"
 #include "Component/Component.hpp"
-#include "System/System.hpp"
+// #include "System/System.hpp"
 
 #include <vector>
 #include <unordered_map>
@@ -42,11 +42,11 @@ namespace neo {
             template <typename CompT> static void removeComponent(CompT &);
 
             /* Attach a system */
-            template <typename SysT, typename... Args> static SysT & addSystem(System &, Args &&...);
+            // template <typename SysT, typename... Args> static SysT & addSystem(Args &&...);
 
             /* Getters */
             static const std::vector<GameObject *> & getGameObjects() { return reinterpret_cast<const std::vector<GameObject *> &>(gameObjects); }
-            static const std::vector<System *> & getSystems() { return reinterpret_cast<const std::vector<System *> &>(systems); }
+            // static const std::vector<System *> & getSystems() { return reinterpret_cast<const std::vector<System *> &>(systems); }
             template <typename CompT> static const std::vector<CompT *> & getComponents();
 
         private:
@@ -65,7 +65,7 @@ namespace neo {
             /* Active containers */
             static std::vector<std::unique_ptr<GameObject>> gameObjects;
             static std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> components;
-            static std::vector<std::unique_ptr<System>> systems;
+            // static std::vector<std::unique_ptr<System>> systems;
 
         /* FPS*/
         public:
@@ -95,12 +95,13 @@ namespace neo {
         return static_cast<CompT &>(*componentInitQueue.back().second);
     }
 
-    template <typename SysT, typename... Args> static SysT & addSystem(System &, Args &&...) {
-        static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived system type");
-        static_assert(!std::is_same<System, SysT>::value, "SysT must be a derived system type");
-        systems.emplace_back(std::make_unique<SysT>(SysT(std::forward<Args>(args)...)));
-        return static_cast<SysT &>(*system.back());
-    }
+    // template <typename SysT, typename... Args> 
+    // SysT & NeoEngine::addSystem(Args &&... args) {
+    //     static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived system type");
+    //     static_assert(!std::is_same<System, SysT>::value, "SysT must be a derived system type");
+    //     systems.emplace_back(std::make_unique<SysT>(SysT(std::forward<Args>(args)...)));
+    //     return static_cast<SysT &>(*system.back());
+    // }
 
     template <typename CompT>
     void NeoEngine::removeComponent(CompT & component) {

@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Component/Component.hpp"
-
 #include <unordered_map>
 #include <typeindex>
 
+
 namespace neo {
+
+    class Component;
 
     class GameObject {
 

@@ -18,7 +18,7 @@ namespace neo {
             
             /* Virtual destructor necessary for polymorphic destruction */
             virtual ~Component() = default;
-            virtual void update(float) {};
+            virtual void update(float) = 0;
 
             GameObject & getGameObject() { return *gameObject; }
             const GameObject & getGameObject() const { return *gameObject; }

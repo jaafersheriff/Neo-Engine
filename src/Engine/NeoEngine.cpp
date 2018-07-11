@@ -49,9 +49,9 @@ namespace neo {
         lastFrameTime = runTime = glfwGetTime();
 
         /* Init systems */
-        for (auto & system : systems) {
-            system.get()->init();
-        }
+        // for (auto & system : systems) {
+        //     system.get()->init();
+        // }
     }
 
     void NeoEngine::run() {
@@ -67,9 +67,9 @@ namespace neo {
             processInitQueue();
 
             /* Update each system */
-            for (auto & system : systems) {
-                system.get()->update((float)timeStep);
-            }
+            // for (auto & system : systems) {
+            //     system.get()->update((float)timeStep);
+            // }
 
             /* Kill deleted objects and components */
             processKillQueue();
