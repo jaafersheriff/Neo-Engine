@@ -10,13 +10,10 @@ namespace neo {
     std::string NeoEngine::APP_RES_DIR = "../res/";
     std::string NeoEngine::APP_NAME = "Neo Engine";
 
-    /* Base systems */
-    // GameSystem NeoEngine::gameSystem;
-    // RenderSystem NeoEngine::renderSystem;
-
     /* ECS */
     std::vector<std::unique_ptr<GameObject>> NeoEngine::gameObjects;
     std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> NeoEngine::components;
+    std::vector<std::unique_ptr<System>> NeoEngine::systems;
 
     std::vector<std::unique_ptr<GameObject>> NeoEngine::gameObjectInitQueue;
     std::vector<GameObject *> NeoEngine::gameObjectKillQueue;
@@ -36,8 +33,6 @@ namespace neo {
         srand((unsigned int)(time(0)));
         APP_NAME = title;
         APP_RES_DIR = app_res;
-        // addSystem(gameSystem);
-        // addSystem(renderSystem);
 
         /* Init window*/
         if (Window::initGLFW(APP_NAME)) {
@@ -49,9 +44,9 @@ namespace neo {
         lastFrameTime = runTime = glfwGetTime();
 
         /* Init systems */
-        // for (auto & system : systems) {
-        //     system.get()->init();
-        // }
+        for (auto & system : systems) {
+            system.get()->init();
+        }
     }
 
     void NeoEngine::run() {
@@ -67,9 +62,9 @@ namespace neo {
             processInitQueue();
 
             /* Update each system */
-            // for (auto & system : systems) {
-            //     system.get()->update((float)timeStep);
-            // }
+            for (auto & system : systems) {
+                system.get()->update((float)timeStep);
+            }
 
             /* Kill deleted objects and components */
             processKillQueue();
