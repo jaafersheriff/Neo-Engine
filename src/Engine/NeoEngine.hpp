@@ -76,8 +76,6 @@ namespace neo {
             static int nFrames;             /* Number of frames in current second */
             static double lastFrameTime;    /* Time at which last frame was rendered */
             static double runTime;          /* Global timer */
-
-
     };
 
     /* Template implementation */
