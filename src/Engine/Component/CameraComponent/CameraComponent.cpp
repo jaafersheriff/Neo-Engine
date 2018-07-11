@@ -7,7 +7,7 @@
 
 namespace neo {
 
-    neo::CameraComponent::CameraComponent(GameObject &gameObject, float fov, float, float, glm::vec3 pos, glm::vec3 lookAt) : 
+    CameraComponent::CameraComponent(GameObject &gameObject, float fov, float, float, glm::vec3 pos, glm::vec3 lookAt) : 
          Component(gameObject),
          position(position),
          lookAt(lookAt),
