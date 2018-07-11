@@ -1,4 +1,5 @@
 #include "Shader.hpp"
+#include "System/RenderSystem/GLHelper.hpp"
 
 #include <fstream>
 #include <vector>

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "System/RenderSystem/GLHelper.hpp"
-
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include "glm/glm.hpp"
