@@ -3,4 +3,20 @@
   <ItemGroup>
     <ClCompile Include="TestApp.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TriangleShader.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{861f2661-d07d-4bd1-b2e1-0cf755e9ba62}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\shaders\triangle.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="res\shaders\triangle.frag">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
 </Project>

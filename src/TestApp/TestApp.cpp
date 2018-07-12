@@ -1,5 +1,7 @@
 #include <NeoEngine.hpp>
 
+#include "TriangleShader.hpp"
+
 using namespace neo;
 
 /* Common system */
@@ -16,16 +18,22 @@ struct Camera {
     }
 };
 
+/* Custom shader */
+TriangleShader * tShader;
+
 int main() {
-    /* Create camera */
+    /* Init components */
     Camera camera;
     camera.init(45.f, 0.01f, 100.f, glm::vec3(0, 0, -5), glm::vec3(0));
 
-    /* Init render system */
+    /* Init systems */
     renderSystem = &NeoEngine::addSystem<RenderSystem>();
+    NeoEngine::init("TestApp", "res/", 1280, 720);
+
+    /* Init shaders */
+    tShader = &renderSystem->addShader<TriangleShader>("shaders/triangle.vert", "shaders/triangle.frag");
 
     /* Run */
-    NeoEngine::init("TestApp", "", 1280, 720);
     NeoEngine::run();
 
     return 0;

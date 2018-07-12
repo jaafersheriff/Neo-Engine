@@ -1,4 +1,5 @@
 #include "RenderSystem.hpp"
+#include "Shader/Shader.hpp"
 #include "System/RenderSystem/GLHelper.hpp"
 
 #include "Window/Window.hpp"
@@ -6,7 +7,7 @@
 namespace neo {
 
     void RenderSystem::init() {
-        /* Init GL state */
+        /* Init default GL state */
         CHECK_GL(glEnable(GL_DEPTH_TEST));
         CHECK_GL(glEnable(GL_CULL_FACE));
         CHECK_GL(glCullFace(GL_BACK));
@@ -23,6 +24,11 @@ namespace neo {
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         glm::ivec2 size = Window::getFrameSize();
         CHECK_GL(glViewport(0, 0, size.x, size.y));
+
+        /* Render all shaders */
+        for (auto & shader : shaders) {
+            shader.get()->render();
+        }
     }
 
 }

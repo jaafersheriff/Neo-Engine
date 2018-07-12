@@ -73,7 +73,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)src\$(ProjectName)\build\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)src\$(ProjectName)\build\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)src\$(ProjectName)\build\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\src\Engine\</OutDir>
