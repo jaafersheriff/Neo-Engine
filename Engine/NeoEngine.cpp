@@ -46,7 +46,9 @@ namespace neo {
 
         /* Init FPS */
         lastFrameTime = runTime = glfwGetTime();
+   }
 
+    void NeoEngine::initSystems() {
         /* Init systems */
         for (auto & system : systems) {
             system.get()->init();
