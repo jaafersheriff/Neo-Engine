@@ -8,6 +8,8 @@ namespace neo {
 
         public:
             Component(GameObject &go) : gameObject(&go) {};
+
+            /* Overridden functions */
             virtual void init() {};
             virtual void update(float) {};
 

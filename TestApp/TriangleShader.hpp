@@ -1,6 +1,6 @@
 #pragma once
 
-#include "System/RenderSystem/Shader/Shader.hpp"
+#include "System/RenderSystem/Shader.hpp"
 
 using namespace neo;
 

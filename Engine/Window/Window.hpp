@@ -24,6 +24,7 @@ namespace neo {
             static glm::ivec2 getSize() { return fullscreen ? fullscreenSize : windowSize; }
             static glm::ivec2 getFrameSize() { return frameSize; }
             static float getAspectRatio() { return float(frameSize.x / frameSize.y); }
+            static GLFWwindow * getWindow() { return window; }
 
             static bool isFullscreen() { return fullscreen; }
 

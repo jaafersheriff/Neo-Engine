@@ -18,6 +18,39 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Component\CameraComponent\CameraComponent.hpp" />
+    <ClInclude Include="Component\Component.hpp" />
+    <ClInclude Include="Component\Components.hpp" />
+    <ClInclude Include="ext\imgui\imconfig.h" />
+    <ClInclude Include="ext\imgui\imgui.h" />
+    <ClInclude Include="ext\imgui\imgui_impl_glfw_gl3.h" />
+    <ClInclude Include="ext\imgui\imgui_internal.h" />
+    <ClInclude Include="ext\imgui\stb_rect_pack.h" />
+    <ClInclude Include="ext\imgui\stb_textedit.h" />
+    <ClInclude Include="ext\imgui\stb_truetype.h" />
+    <ClInclude Include="GameObject\GameObject.hpp" />
+    <ClInclude Include="NeoEngine.hpp" />
+    <ClInclude Include="System\RenderSystem\GLHelper.hpp" />
+    <ClInclude Include="System\RenderSystem\RenderSystem.hpp" />
+    <ClInclude Include="System\RenderSystem\Shader.hpp" />
+    <ClInclude Include="System\System.hpp" />
+    <ClInclude Include="System\Systems.hpp" />
+    <ClInclude Include="Window\Window.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
+    <ClCompile Include="ext\imgui\imgui.cpp" />
+    <ClCompile Include="ext\imgui\imgui_demo.cpp" />
+    <ClCompile Include="ext\imgui\imgui_draw.cpp" />
+    <ClCompile Include="ext\imgui\imgui_impl_glfw_gl3.cpp" />
+    <ClCompile Include="GameObject\GameObject.cpp" />
+    <ClCompile Include="NeoEngine.cpp" />
+    <ClCompile Include="System\RenderSystem\GLHelper.cpp" />
+    <ClCompile Include="System\RenderSystem\RenderSystem.cpp" />
+    <ClCompile Include="System\RenderSystem\Shader.cpp" />
+    <ClCompile Include="Window\Window.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{2C8EFE39-BFDB-4561-A025-B086D478161C}</ProjectGuid>
@@ -40,7 +73,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -72,12 +105,16 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)src\$(ProjectName)\build\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)src\$(ProjectName)\build\</IntDir>
+    <OutDir>$(SolutionDir)$(ProjectName)\build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\build\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\src\Engine\</OutDir>
     <IntDir>$(Configuration)\src\Engine</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(ProjectName)\build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\build\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -102,7 +139,8 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\OpenGL\glm-0.9.8.5;C:\OpenGL\glfw-3.2.1\include;C:\OpenGL\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\OpenGL\glm-0.9.8.5;C:\OpenGL\glfw-3.2.1\include;$(ProjectDir);C:\OpenGL\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);DEBUG_MODE</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>C:\OpenGL\glfw-3.2.1\debug\src\Debug\glfw3.lib;C:\OpenGL\glew\lib\Release\Win32\glew32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -137,28 +175,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="Component\CameraComponent\CameraComponent.hpp" />
-    <ClInclude Include="Component\Component.hpp" />
-    <ClInclude Include="Component\Components.hpp" />
-    <ClInclude Include="GameObject\GameObject.hpp" />
-    <ClInclude Include="NeoEngine.hpp" />
-    <ClInclude Include="System\RenderSystem\GLHelper.hpp" />
-    <ClInclude Include="System\RenderSystem\RenderSystem.hpp" />
-    <ClInclude Include="System\RenderSystem\Shader\Shader.hpp" />
-    <ClInclude Include="System\System.hpp" />
-    <ClInclude Include="System\Systems.hpp" />
-    <ClInclude Include="Window\Window.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
-    <ClCompile Include="GameObject\GameObject.cpp" />
-    <ClCompile Include="NeoEngine.cpp" />
-    <ClCompile Include="System\RenderSystem\GLHelper.cpp" />
-    <ClCompile Include="System\RenderSystem\RenderSystem.cpp" />
-    <ClCompile Include="System\RenderSystem\Shader\Shader.cpp" />
-    <ClCompile Include="Window\Window.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

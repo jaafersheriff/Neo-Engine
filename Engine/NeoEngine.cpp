@@ -6,8 +6,8 @@
 namespace neo {
 
     /* Base Engine */
-    std::string NeoEngine::ENGINE_RES_DIR = "../res/";
-    std::string NeoEngine::APP_RES_DIR = "../res/";
+    std::string NeoEngine::ENGINE_RES_DIR;
+    std::string NeoEngine::APP_RES_DIR;
     std::string NeoEngine::APP_NAME = "Neo Engine";
 
     /* ECS */
@@ -28,6 +28,10 @@ namespace neo {
     double NeoEngine::lastFrameTime = 0.0;
     double NeoEngine::runTime = 0.0;
 
+    /* ImGui */
+    bool NeoEngine::imGuiEnabled = true;
+    std::vector<std::function<void()>> NeoEngine::imGuiFuncs;
+
     void NeoEngine::init(const std::string &title, const std::string &app_res, const int width, const int height) {
         /* Init base engine */
         srand((unsigned int)(time(0)));
@@ -42,8 +46,9 @@ namespace neo {
 
         /* Init FPS */
         lastFrameTime = runTime = glfwGetTime();
+   }
 
-        /* Init systems */
+    void NeoEngine::initSystems() {
         for (auto & system : systems) {
             system.get()->init();
         }
@@ -61,9 +66,21 @@ namespace neo {
             /* Initialize new objects and components */
             processInitQueue();
 
+            /* Update imgui functions */
+            if (imGuiEnabled) {
+                for (auto func : imGuiFuncs) {
+                    func();
+                }
+            }
+
             /* Update each system */
             for (auto & system : systems) {
                 system.get()->update((float)timeStep);
+            }
+
+            /* Render imgui */
+            if (imGuiEnabled) {
+                ImGui::Render();
             }
 
             /* Kill deleted objects and components */

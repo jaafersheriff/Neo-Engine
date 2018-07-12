@@ -1,6 +1,5 @@
 #include "RenderSystem.hpp"
-#include "Shader/Shader.hpp"
-#include "System/RenderSystem/GLHelper.hpp"
+#include "GLHelper.hpp"
 
 #include "Window/Window.hpp"
 

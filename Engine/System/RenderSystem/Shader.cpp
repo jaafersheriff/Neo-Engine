@@ -1,24 +1,24 @@
 #include "Shader.hpp"
-#include "System/RenderSystem/GLHelper.hpp"
+#include "GLHelper.hpp"
 
 #include <fstream>
 #include <vector>
 
 namespace neo {
 
-    Shader::Shader(const std::string &res, const std::string &v, const std::string &f) :
-        Shader(res, v, f, "")
+    Shader::Shader(const std::string &dir, const std::string &v, const std::string &f) :
+        Shader(dir, v, f, "")
     { }
 
-    Shader::Shader(const std::string &res, const std::string &vName, const std::string &fName, const std::string &gName) {
+    Shader::Shader(const std::string &dir, const std::string &vName, const std::string &fName, const std::string &gName) {
         pid = glCreateProgram();
-        if (vName.size() && (vShaderId = compileShader(GL_VERTEX_SHADER, res, vName))) {
+        if (vName.size() && (vShaderId = compileShader(GL_VERTEX_SHADER, dir, vName))) {
             CHECK_GL(glAttachShader(pid, vShaderId));
         }
-        if (fName.size() && (fShaderId = compileShader(GL_FRAGMENT_SHADER, res, fName))) {
+        if (fName.size() && (fShaderId = compileShader(GL_FRAGMENT_SHADER, dir, fName))) {
             CHECK_GL(glAttachShader(pid, fShaderId));
         }
-        if (gName.size() && (gShaderId = compileShader(GL_GEOMETRY_SHADER, res, gName))) {
+        if (gName.size() && (gShaderId = compileShader(GL_GEOMETRY_SHADER, dir, gName))) {
             CHECK_GL(glAttachShader(pid, gShaderId));
         }
         CHECK_GL(glLinkProgram(pid));
@@ -40,22 +40,22 @@ namespace neo {
         }
 
         if (vShaderId) {
-            findAttributesAndUniforms(res, vName);
+            findAttributesAndUniforms(dir, vName);
         }
         if (fShaderId) {
-            findAttributesAndUniforms(res, fName);
+            findAttributesAndUniforms(dir, fName);
         }
         if (gShaderId) {
-            findAttributesAndUniforms(res, gName);
+            findAttributesAndUniforms(dir, gName);
         }
     }
 
-    GLuint Shader::compileShader(GLenum shaderType, const std::string &res, const std::string &shaderName) {
+    GLuint Shader::compileShader(GLenum shaderType, const std::string &dir, const std::string &shaderName) {
         // Read the shader source file into a string
-        char *shaderString = GLHelper::textFileRead((res + shaderName).c_str());
+        char *shaderString = GLHelper::textFileRead((dir + shaderName).c_str());
         // Stop if there was an error reading the shader source file
         if (shaderString == NULL) {
-            std::cout << "Could not read shader: " << res << shaderName << std::endl;
+            std::cout << "Could not read shader: " << dir << shaderName << std::endl;
             std::cin.get();
             exit(EXIT_FAILURE);
         }
@@ -70,7 +70,7 @@ namespace neo {
         CHECK_GL(glGetShaderiv(shader, GL_COMPILE_STATUS, &compileSuccess));
         if (!compileSuccess) {
             GLHelper::printShaderInfoLog(shader);
-            std::cout << "Error compiling shader: " << res << shaderName << std::endl;
+            std::cout << "Error compiling shader: " << dir << shaderName << std::endl;
             std::cin.get();
             exit(EXIT_FAILURE);
         }
