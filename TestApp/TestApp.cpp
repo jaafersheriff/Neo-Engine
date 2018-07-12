@@ -15,7 +15,7 @@ struct Camera {
     void init(float fov, float near, float far, glm::vec3 pos, glm::vec3 lookAt) {
         gameObject = &NeoEngine::createGameObject();
         cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far, pos, lookAt);
-        NeoEngine::attachGuiFunc([&]() {
+        NeoEngine::addImGuiFunc([&]() {
             ImGui::Begin("Camera");
             float fov = cameraComp->getFOV();
             ImGui::SliderFloat("FOV", &fov, 0.f, 90.f);
@@ -43,6 +43,15 @@ TriangleShader * tShader;
 
 int main() {
     NeoEngine::init("TestApp", "res/", 1280, 720);
+    NeoEngine::addImGuiFunc([&]() {
+        ImGui::Begin("Stats");
+        ImGui::Text("FPS: %d", NeoEngine::FPS);
+        ImGui::Text("dt: %0.5f", NeoEngine::timeStep);
+        if (ImGui::Button("VSync")) {
+            Window::toggleVSync();
+        }
+        ImGui::End();
+    });
     
     /* Init systems */
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");

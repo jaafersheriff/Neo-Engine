@@ -56,7 +56,7 @@ namespace neo {
             static bool imGuiEnabled;
             static void toggleImGui() { imGuiEnabled = !imGuiEnabled; }
             static std::vector<std::function<void()>> imGuiFuncs;
-            static void attachGuiFunc(std::function<void()> func) { imGuiFuncs.push_back(func); }
+            static void addImGuiFunc(std::function<void()> func) { imGuiFuncs.push_back(func); }
 
         private:
             /* Initialize / kill queues */
