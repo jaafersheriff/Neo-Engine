@@ -18,6 +18,28 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Component\CameraComponent\CameraComponent.hpp" />
+    <ClInclude Include="Component\Component.hpp" />
+    <ClInclude Include="Component\Components.hpp" />
+    <ClInclude Include="GameObject\GameObject.hpp" />
+    <ClInclude Include="NeoEngine.hpp" />
+    <ClInclude Include="System\RenderSystem\GLHelper.hpp" />
+    <ClInclude Include="System\RenderSystem\RenderSystem.hpp" />
+    <ClInclude Include="System\RenderSystem\Shader.hpp" />
+    <ClInclude Include="System\System.hpp" />
+    <ClInclude Include="System\Systems.hpp" />
+    <ClInclude Include="Window\Window.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
+    <ClCompile Include="GameObject\GameObject.cpp" />
+    <ClCompile Include="NeoEngine.cpp" />
+    <ClCompile Include="System\RenderSystem\GLHelper.cpp" />
+    <ClCompile Include="System\RenderSystem\RenderSystem.cpp" />
+    <ClCompile Include="System\RenderSystem\Shader.cpp" />
+    <ClCompile Include="Window\Window.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{2C8EFE39-BFDB-4561-A025-B086D478161C}</ProjectGuid>
@@ -137,28 +159,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="Component\CameraComponent\CameraComponent.hpp" />
-    <ClInclude Include="Component\Component.hpp" />
-    <ClInclude Include="Component\Components.hpp" />
-    <ClInclude Include="GameObject\GameObject.hpp" />
-    <ClInclude Include="NeoEngine.hpp" />
-    <ClInclude Include="System\RenderSystem\GLHelper.hpp" />
-    <ClInclude Include="System\RenderSystem\RenderSystem.hpp" />
-    <ClInclude Include="System\RenderSystem\Shader\Shader.hpp" />
-    <ClInclude Include="System\System.hpp" />
-    <ClInclude Include="System\Systems.hpp" />
-    <ClInclude Include="Window\Window.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
-    <ClCompile Include="GameObject\GameObject.cpp" />
-    <ClCompile Include="NeoEngine.cpp" />
-    <ClCompile Include="System\RenderSystem\GLHelper.cpp" />
-    <ClCompile Include="System\RenderSystem\RenderSystem.cpp" />
-    <ClCompile Include="System\RenderSystem\Shader\Shader.cpp" />
-    <ClCompile Include="Window\Window.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

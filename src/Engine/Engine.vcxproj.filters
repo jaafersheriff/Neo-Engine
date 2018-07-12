@@ -1,39 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="Window\Window.hpp">
-      <Filter>Window</Filter>
-    </ClInclude>
-    <ClInclude Include="NeoEngine.hpp" />
-    <ClInclude Include="GameObject\GameObject.hpp">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Component\Component.hpp">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="System\System.hpp">
-      <Filter>System</Filter>
-    </ClInclude>
-    <ClInclude Include="Component\CameraComponent\CameraComponent.hpp">
-      <Filter>Component\CameraComponent</Filter>
-    </ClInclude>
-    <ClInclude Include="Component\Components.hpp">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Systems.hpp">
-      <Filter>System</Filter>
-    </ClInclude>
-    <ClInclude Include="System\RenderSystem\RenderSystem.hpp">
-      <Filter>System\RenderSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="System\RenderSystem\GLHelper.hpp">
-      <Filter>System\RenderSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="System\RenderSystem\Shader\Shader.hpp">
-      <Filter>System\RenderSystem\Shader</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Window">
       <UniqueIdentifier>{18b51e33-f238-4ecc-a85b-8b42e3fa7faf}</UniqueIdentifier>
     </Filter>
@@ -57,24 +24,25 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Window\Window.cpp">
-      <Filter>Window</Filter>
-    </ClCompile>
+    <ClInclude Include="Component\Component.hpp" />
+    <ClInclude Include="Component\Components.hpp" />
+    <ClInclude Include="Component\CameraComponent\CameraComponent.hpp" />
+    <ClInclude Include="GameObject\GameObject.hpp" />
+    <ClInclude Include="System\System.hpp" />
+    <ClInclude Include="System\Systems.hpp" />
+    <ClInclude Include="System\RenderSystem\GLHelper.hpp" />
+    <ClInclude Include="System\RenderSystem\RenderSystem.hpp" />
+    <ClInclude Include="System\RenderSystem\Shader.hpp" />
+    <ClInclude Include="NeoEngine.hpp" />
+    <ClInclude Include="Window\Window.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
+    <ClCompile Include="GameObject\GameObject.cpp" />
+    <ClCompile Include="System\RenderSystem\GLHelper.cpp" />
+    <ClCompile Include="System\RenderSystem\RenderSystem.cpp" />
+    <ClCompile Include="System\RenderSystem\Shader.cpp" />
     <ClCompile Include="NeoEngine.cpp" />
-    <ClCompile Include="GameObject\GameObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Component\CameraComponent\CameraComponent.cpp">
-      <Filter>Component\CameraComponent</Filter>
-    </ClCompile>
-    <ClCompile Include="System\RenderSystem\RenderSystem.cpp">
-      <Filter>System\RenderSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="System\RenderSystem\Shader\Shader.cpp">
-      <Filter>System\RenderSystem\Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="System\RenderSystem\GLHelper.cpp">
-      <Filter>System\RenderSystem</Filter>
-    </ClCompile>
+    <ClCompile Include="Window\Window.cpp" />
   </ItemGroup>
 </Project>
