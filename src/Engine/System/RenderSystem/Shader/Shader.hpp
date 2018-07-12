@@ -17,6 +17,8 @@ namespace neo {
         Shader(const std::string &, const std::string &, const std::string &, const std::string &);
         Shader(const std::string &, const std::string &, const std::string &);
 
+        virtual void render() {};
+
         /* Utility functions */
         void bind();
         void unbind();

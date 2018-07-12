@@ -154,6 +154,7 @@
     <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="NeoEngine.cpp" />
+    <ClCompile Include="System\RenderSystem\GLHelper.cpp" />
     <ClCompile Include="System\RenderSystem\RenderSystem.cpp" />
     <ClCompile Include="System\RenderSystem\Shader\Shader.cpp" />
     <ClCompile Include="Window\Window.cpp" />

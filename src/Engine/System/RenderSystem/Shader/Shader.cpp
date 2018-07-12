@@ -54,7 +54,11 @@ namespace neo {
         // Read the shader source file into a string
         char *shaderString = GLHelper::textFileRead((res + shaderName).c_str());
         // Stop if there was an error reading the shader source file
-        if (shaderString == NULL) return 0;
+        if (shaderString == NULL) {
+            std::cout << "Could not read shader: " << res << shaderName << std::endl;
+            std::cin.get();
+            exit(EXIT_FAILURE);
+        }
 
         // Create the shader, assign source code, and compile it
         GLuint shader = glCreateShader(shaderType);

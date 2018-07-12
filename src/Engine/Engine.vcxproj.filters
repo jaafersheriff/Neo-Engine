@@ -73,5 +73,8 @@
     <ClCompile Include="System\RenderSystem\Shader\Shader.cpp">
       <Filter>System\RenderSystem\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="System\RenderSystem\GLHelper.cpp">
+      <Filter>System\RenderSystem</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
