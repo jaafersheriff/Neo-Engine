@@ -1,44 +1,40 @@
+//
+//    Many useful helper functions for GLSL shaders - gleaned from various sources including orange book
+//    Created by zwood on 2/21/10.
+//    Modified by sueda 10/15/15.
+//
+
 #pragma once
 
 #define GLEW_STATIC
 #include "GL/glew.h"
 
+#include <sstream>
 #include <iostream>
+#include <cassert>
+#include <stdio.h>
 
 namespace neo {
 
-    namespace GLHelper {
-
-        const char * errorString(GLenum err) {
-            switch (err) {
-            case GL_NO_ERROR:
-                return "No error";
-            case GL_INVALID_ENUM:
-                return "Invalid enum";
-            case GL_INVALID_VALUE:
-                return "Invalid value";
-            case GL_INVALID_OPERATION:
-                return "Invalid operation";
-            case GL_STACK_OVERFLOW:
-                return "Stack overflow";
-            case GL_STACK_UNDERFLOW:
-                return "Stack underflow";
-            case GL_OUT_OF_MEMORY:
-                return "Out of memory";
-            default:
-                return "No error";
-            }
+        /* For printing out the current file and line number */
+        template <typename T>
+        std::string NumberToString(T x)
+        {
+        	std::ostringstream ss;
+        	ss << x;
+        	return ss.str();
         }
+        #define GET_FILE_LINE (std::string(__FILE__) + ":" + NumberToString(__LINE__)).c_str()
 
-        void printOpenGLErrors(char const * const Function, char const * const File, int const Line) {
-            GLenum Error = glGetError();
-            if (Error != GL_NO_ERROR)
-            {
-                const char *const ErrorString = errorString(Error);
-                printf("OpenGL error in file '%s' at line %d calling function '%s': '%s' '%d 0x%X'\n", File, Line, Function, ErrorString, Error, Error);
-            }
+        namespace GLHelper {
+
+            void printOpenGLErrors(char const * const Function, char const * const File, int const Line);
+            void printProgramInfoLog(GLuint program);
+            void printShaderInfoLog(GLuint shader);
+            void checkVersion();
+            int textFileWrite(const char *filename, char *s);
+            char *textFileRead(const char *filename);
         }
-    }
 
     #ifdef DEBUG_MODE
     #define CHECK_GL(x) do { GLHelper::printOpenGLErrors("{{BEFORE}} "#x, __FILE__, __LINE__); (x); GLHelper::printOpenGLErrors(#x, __FILE__, __LINE__); } while (0)
