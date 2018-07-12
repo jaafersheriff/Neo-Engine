@@ -1,5 +1,4 @@
 #include "RenderSystem.hpp"
-#include "Shader.hpp"
 #include "GLHelper.hpp"
 
 #include "Window/Window.hpp"

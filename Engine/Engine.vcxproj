@@ -22,6 +22,13 @@
     <ClInclude Include="Component\CameraComponent\CameraComponent.hpp" />
     <ClInclude Include="Component\Component.hpp" />
     <ClInclude Include="Component\Components.hpp" />
+    <ClInclude Include="ext\imgui\imconfig.h" />
+    <ClInclude Include="ext\imgui\imgui.h" />
+    <ClInclude Include="ext\imgui\imgui_impl_glfw_gl3.h" />
+    <ClInclude Include="ext\imgui\imgui_internal.h" />
+    <ClInclude Include="ext\imgui\stb_rect_pack.h" />
+    <ClInclude Include="ext\imgui\stb_textedit.h" />
+    <ClInclude Include="ext\imgui\stb_truetype.h" />
     <ClInclude Include="GameObject\GameObject.hpp" />
     <ClInclude Include="NeoEngine.hpp" />
     <ClInclude Include="System\RenderSystem\GLHelper.hpp" />
@@ -33,6 +40,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
+    <ClCompile Include="ext\imgui\imgui.cpp" />
+    <ClCompile Include="ext\imgui\imgui_demo.cpp" />
+    <ClCompile Include="ext\imgui\imgui_draw.cpp" />
+    <ClCompile Include="ext\imgui\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="NeoEngine.cpp" />
     <ClCompile Include="System\RenderSystem\GLHelper.cpp" />

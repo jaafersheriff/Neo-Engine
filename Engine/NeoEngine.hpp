@@ -8,9 +8,12 @@
 #include "Component/Components.hpp"
 #include "System/Systems.hpp"
 
+#include "ext/imgui/imgui.h"
+
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
+#include <functional>
 
 namespace neo {
 
@@ -47,6 +50,12 @@ namespace neo {
             static const std::vector<GameObject *> & getGameObjects() { return reinterpret_cast<const std::vector<GameObject *> &>(gameObjects); }
             static const std::vector<System *> & getSystems() { return reinterpret_cast<const std::vector<System *> &>(systems); }
             template <typename CompT> static const std::vector<CompT *> & getComponents();
+
+            /* ImGui */
+            static bool imGuiEnabled;
+            static void toggleImGui() { imGuiEnabled = !imGuiEnabled; }
+            static std::vector<std::function<void()>> imGuiFuncs;
+            static void attachGuiFunc(std::function<void()> func) { imGuiFuncs.push_back(func); }
 
         private:
             /* Initialize / kill queues */

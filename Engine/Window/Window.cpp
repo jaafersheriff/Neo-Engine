@@ -1,4 +1,7 @@
 #include "Window.hpp"
+#include "NeoEngine.hpp"
+
+#include "ext/imgui/imgui_impl_glfw_gl3.h"
 
 #include <iostream>
 
@@ -41,19 +44,32 @@ namespace neo {
                 const GLFWvidmode * video(glfwGetVideoMode(monitor));
                 glfwSetWindowMonitor(window, monitor, 0, 0, video->width, video->height, video->refreshRate);
             }
-
             return;
         }
-
+        if (key == GLFW_KEY_GRAVE_ACCENT && mods && action == GLFW_PRESS) {
+            NeoEngine::toggleImGui();
+        }
+        else if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+            ImGui_ImplGlfwGL3_KeyCallback(window, key, scancode, action, mods);
+        }
     }
 
     void Window::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
+        if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+            ImGui_ImplGlfwGL3_MouseButtonCallback(window, button, action, mods);
+        }
     }
 
     void Window::scrollCallback(GLFWwindow * window, double dx, double dy) {
+        if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+            ImGui_ImplGlfwGL3_ScrollCallback(window, dx, dy);
+        }
     }
 
     void Window::characterCallback(GLFWwindow *window, unsigned int c) {
+        if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+            ImGui_ImplGlfwGL3_CharCallback(window, c);
+        }
     }
 
     void Window::windowSizeCallback(GLFWwindow * window, int width, int height) {
@@ -136,6 +152,9 @@ namespace neo {
 
         glfwGetFramebufferSize(window, &frameSize.x, &frameSize.y);
 
+        /* Init ImGui */
+        ImGui_ImplGlfwGL3_Init(Window::getWindow(), false);
+
         return 0;
     }
 
@@ -143,6 +162,10 @@ namespace neo {
         /* Don't update display if window is minimized */
         if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
             return;
+        }
+
+        if (NeoEngine::imGuiEnabled) {
+            ImGui_ImplGlfwGL3_NewFrame(true);
         }
 
         glfwPollEvents();

@@ -35,6 +35,13 @@
     <ClInclude Include="System\RenderSystem\Shader.hpp" />
     <ClInclude Include="NeoEngine.hpp" />
     <ClInclude Include="Window\Window.hpp" />
+    <ClInclude Include="ext\imgui\imconfig.h" />
+    <ClInclude Include="ext\imgui\imgui.h" />
+    <ClInclude Include="ext\imgui\imgui_impl_glfw_gl3.h" />
+    <ClInclude Include="ext\imgui\imgui_internal.h" />
+    <ClInclude Include="ext\imgui\stb_rect_pack.h" />
+    <ClInclude Include="ext\imgui\stb_textedit.h" />
+    <ClInclude Include="ext\imgui\stb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
@@ -44,5 +51,9 @@
     <ClCompile Include="System\RenderSystem\Shader.cpp" />
     <ClCompile Include="NeoEngine.cpp" />
     <ClCompile Include="Window\Window.cpp" />
+    <ClCompile Include="ext\imgui\imgui.cpp" />
+    <ClCompile Include="ext\imgui\imgui_demo.cpp" />
+    <ClCompile Include="ext\imgui\imgui_draw.cpp" />
+    <ClCompile Include="ext\imgui\imgui_impl_glfw_gl3.cpp" />
   </ItemGroup>
 </Project>
