@@ -6,7 +6,6 @@ layout (location = 1) in vec3 vertNor;
 uniform mat4 P;
 uniform mat4 V;
 uniform mat4 M;
-uniform mat3 N;
 
 out vec3 fragPos;
 out vec3 fragNor;
@@ -15,5 +14,5 @@ void main() {
     vec4 worldPos = M * vec4(vertPos, 1.0);
     gl_Position = P * V * worldPos;
     fragPos = worldPos.xyz;
-    fragNor = N * vertNor;
+    fragNor = (M * vec4(vertNor, 1.0)).xyz;
 }

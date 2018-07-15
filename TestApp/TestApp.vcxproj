@@ -140,6 +140,7 @@
     <ClCompile Include="TestApp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DiffuseRenderable.hpp" />
     <ClInclude Include="DiffuseShader.hpp" />
   </ItemGroup>
   <ItemGroup>
