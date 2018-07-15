@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Window/Window.hpp"
+#include "Loader/Loader.hpp"
 #include "GameObject/GameObject.hpp"
-#include "Component/Component.hpp"
-#include "System/System.hpp"
 
+#include "Component/Component.hpp"
 #include "Component/Components.hpp"
+
+#include "System/System.hpp"
 #include "System/Systems.hpp"
 
 #include "ext/imgui/imgui.h"

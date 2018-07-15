@@ -1,7 +1,5 @@
 #include "NeoEngine.hpp"
 
-#include "Loader/Loader.hpp"
-
 #include <time.h>
 #include <iostream>
 
