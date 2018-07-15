@@ -17,10 +17,10 @@ namespace neo {
             /* Retrieve Mesh pointer from an .obj file*/
             static Mesh * getMesh(const std::string &);
 
-        private:
             /* Resize mesh vertex buffers so all the vertices are [-1, 1] */
             static void resize(Mesh::MeshBuffers &);
 
+        private:
             /* GL Loaders */
             static void uploadMesh(const Mesh &);
 
