@@ -80,12 +80,12 @@ namespace neo {
         public:
             static int FPS;                 /* Frames per second */
             static double timeStep;         /* Delta time */
+            static double runTime;          /* Global timer */
         private:
             static void updateFPS();
             static double lastFPSTime;      /* Time at which last FPS was calculated */
             static int nFrames;             /* Number of frames in current second */
             static double lastFrameTime;    /* Time at which last frame was rendered */
-            static double runTime;          /* Global timer */
     };
 
     /* Template implementation */

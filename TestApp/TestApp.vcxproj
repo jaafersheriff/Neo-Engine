@@ -137,15 +137,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="TestApp.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="DiffuseRenderable.hpp" />
     <ClInclude Include="DiffuseShader.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="imgui.ini" />
+    <None Include="README.md" />
     <None Include="shaders\diffuse.frag" />
     <None Include="shaders\diffuse.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
