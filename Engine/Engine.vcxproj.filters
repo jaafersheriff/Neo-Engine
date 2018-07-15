@@ -59,4 +59,7 @@
     <ClCompile Include="Loader\Loader.cpp" />
     <ClCompile Include="GLHelper.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
 </Project>

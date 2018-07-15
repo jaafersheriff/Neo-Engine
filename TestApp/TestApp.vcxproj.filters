@@ -1,23 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="TestApp.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Shaders">
       <UniqueIdentifier>{861f2661-d07d-4bd1-b2e1-0cf755e9ba62}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\diffuse.vert">
+    <None Include="imgui.ini" />
+    <None Include="README.md" />
+    <None Include="shaders\custom.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\diffuse.frag">
+    <None Include="shaders\custom.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DiffuseShader.hpp" />
-    <ClInclude Include="DiffuseRenderable.hpp" />
+    <ClInclude Include="CustomShader.hpp" />
+    <ClInclude Include="CustomRenderable.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
 </Project>

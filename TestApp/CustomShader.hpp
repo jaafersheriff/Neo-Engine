@@ -1,15 +1,15 @@
 #pragma once
 
-#include "DiffuseRenderable.hpp"
+#include "CustomRenderable.hpp"
 #include "System/RenderSystem/Shader.hpp"
 #include "GLHelper.hpp"
 
 using namespace neo;
 
-class DiffuseShader : public Shader {
+class CustomShader : public Shader {
 
     public:
-        DiffuseShader(const std::string &res, const std::string &vert, const std::string &frag) :
+        CustomShader(const std::string &res, const std::string &vert, const std::string &frag) :
             Shader(res, vert, frag)
         {}
 
@@ -20,7 +20,7 @@ class DiffuseShader : public Shader {
             loadMatrix(getUniform("P"), camera->getProj());
             loadMatrix(getUniform("V"), camera->getView());
 
-            auto renderables = NeoEngine::getComponents<DiffuseRenderable>();
+            auto renderables = NeoEngine::getComponents<CustomRenderable>();
             for (auto dr : renderables) {
                 /* Update should happen in some game-logic system before this */
                 dr->update(dt);

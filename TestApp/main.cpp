@@ -1,7 +1,7 @@
 #include <NeoEngine.hpp>
 
-#include "DiffuseShader.hpp"
-#include "DiffuseRenderable.hpp"
+#include "CustomShader.hpp"
+#include "CustomRenderable.hpp"
 
 using namespace neo;
 
@@ -13,7 +13,7 @@ struct Camera {
     GameObject *gameObject;
     CameraComponent * cameraComp;
 
-    void init(float fov, float near, float far, glm::vec3 pos, glm::vec3 lookAt) {
+    Camera(float fov, float near, float far, glm::vec3 pos, glm::vec3 lookAt) {
         gameObject = &NeoEngine::createGameObject();
         cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far, pos, lookAt);
 
@@ -40,29 +40,31 @@ struct Camera {
     }
 };
 
-/* Cube */
-struct Cube {
+/* Basic renderable object */
+struct Renderable {
     GameObject *gameObject;
-    DiffuseRenderable *diffComponent;
+    CustomRenderable *renderComponent;
 
-    void init(std::string name, glm::vec3 p, float s, glm::vec3 r) {
+    Renderable(std::string name, glm::vec3 p, float s, glm::vec3 r) {
         Mesh *mesh = Loader::getMesh(name);
 
         gameObject = &NeoEngine::createGameObject();
-        diffComponent = &NeoEngine::addComponent<DiffuseRenderable>(*gameObject, mesh, p, s, r);
+        renderComponent = &NeoEngine::addComponent<CustomRenderable>(*gameObject, mesh, p, s, r);
+    }
 
+    void attachImGui(const std::string & name) {
         NeoEngine::addImGuiFunc([&]() {
-            ImGui::Begin("Cube");
-            ImGui::SliderFloat3("Position", glm::value_ptr(diffComponent->position), -10.f, 10.f);
-            ImGui::SliderFloat("Scale", &diffComponent->scale, 0.f, 10.f);
-            ImGui::SliderFloat3("Rotation", glm::value_ptr(diffComponent->rotation), -4.f, 4.f);
+            ImGui::Begin(name.c_str());
+            ImGui::SliderFloat3("Position", glm::value_ptr(renderComponent->position), -10.f, 10.f);
+            ImGui::SliderFloat("Scale", &renderComponent->scale, 0.f, 10.f);
+            ImGui::SliderFloat3("Rotation", glm::value_ptr(renderComponent->rotation), -4.f, 4.f);
             ImGui::End();
         });
     }
 };
 
 /* Custom shader */
-DiffuseShader * dShader;
+CustomShader * dShader;
 
 int main() {
     NeoEngine::init("TestApp", "res/", 1280, 720);
@@ -77,17 +79,16 @@ int main() {
     });
 
     /* Init components */
-    Camera camera;
-    camera.init(45.f, 0.01f, 100.f, glm::vec3(0, 0, -5), glm::vec3(0));
-    Cube cube;
-    cube.init("cube.obj", glm::vec3(0.f), 1.f, glm::vec3(-0.707f, 0.f, 0.f));
+    Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0, -5), glm::vec3(0));
+    Renderable cube("cube.obj", glm::vec3(0.f), 1.f, glm::vec3(-0.707f, 0.f, 0.f));
+    cube.attachImGui("Cube");
     
     /* Init systems */
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
     NeoEngine::initSystems();
 
     /* Attach shaders */
-    dShader = &renderSystem->addShader<DiffuseShader>("diffuse.vert", "diffuse.frag");
+    dShader = &renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
 
     /* Run */
     NeoEngine::run();
