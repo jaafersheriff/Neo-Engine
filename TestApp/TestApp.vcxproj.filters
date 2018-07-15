@@ -12,10 +12,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\triangle.vert">
+    <None Include="shaders\triangle.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="res\shaders\triangle.frag">
+    <None Include="shaders\triangle.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

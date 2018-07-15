@@ -143,8 +143,8 @@
     <ClInclude Include="TriangleShader.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\triangle.frag" />
-    <None Include="res\shaders\triangle.vert" />
+    <None Include="shaders\triangle.frag" />
+    <None Include="shaders\triangle.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
