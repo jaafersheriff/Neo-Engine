@@ -1,6 +1,6 @@
 #include <NeoEngine.hpp>
 
-#include "TriangleShader.hpp"
+#include "DiffuseShader.hpp"
 
 using namespace neo;
 
@@ -39,7 +39,7 @@ struct Camera {
 };
 
 /* Custom shader */
-TriangleShader * tShader;
+DiffuseShader * dShader;
 
 int main() {
     NeoEngine::init("TestApp", "res/", 1280, 720);
@@ -58,7 +58,7 @@ int main() {
     NeoEngine::initSystems();
 
     /* Attach shaders */
-    tShader = &renderSystem->addShader<TriangleShader>("triangle.vert", "triangle.frag");
+    dShader = &renderSystem->addShader<DiffuseShader>("diffuse.vert", "diffuse.frag");
 
     /* Init components */
     Camera camera;

@@ -4,10 +4,10 @@
 
 using namespace neo;
 
-class TriangleShader : public Shader {
+class DiffuseShader : public Shader {
 
     public:
-        TriangleShader(const std::string &res, const std::string &vert, const std::string &frag) :
+        DiffuseShader(const std::string &res, const std::string &vert, const std::string &frag) :
             Shader(res, vert, frag)
         {}
 
