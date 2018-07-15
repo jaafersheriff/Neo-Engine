@@ -6,18 +6,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\diffuse.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\diffuse.frag">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="imgui.ini" />
     <None Include="README.md" />
+    <None Include="shaders\custom.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\custom.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DiffuseShader.hpp" />
-    <ClInclude Include="DiffuseRenderable.hpp" />
+    <ClInclude Include="CustomShader.hpp" />
+    <ClInclude Include="CustomRenderable.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

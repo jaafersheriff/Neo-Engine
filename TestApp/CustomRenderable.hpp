@@ -7,9 +7,9 @@
 
 namespace neo {
 
-    class DiffuseRenderable : public Component {
+    class CustomRenderable : public Component {
     public:
-        DiffuseRenderable(GameObject &go, Mesh *m, glm::vec3 p, float s, glm::vec3 r) :
+        CustomRenderable(GameObject &go, Mesh *m, glm::vec3 p, float s, glm::vec3 r) :
             Component(go),
             mesh(m),
             position(p),
@@ -21,6 +21,7 @@ namespace neo {
             update(0.f);
         }
         virtual void update(float dt) override {
+            rotation.y += dt;
             M = glm::mat4(1.f);
             M *= glm::translate(glm::mat4(1.f), position);
             M *= glm::scale(glm::mat4(1.f), glm::vec3(scale));

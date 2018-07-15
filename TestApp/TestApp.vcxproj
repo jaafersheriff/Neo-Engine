@@ -137,14 +137,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DiffuseRenderable.hpp" />
-    <ClInclude Include="DiffuseShader.hpp" />
+    <ClInclude Include="CustomRenderable.hpp" />
+    <ClInclude Include="CustomShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />
     <None Include="README.md" />
-    <None Include="shaders\diffuse.frag" />
-    <None Include="shaders\diffuse.vert" />
+    <None Include="shaders\custom.frag" />
+    <None Include="shaders\custom.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
