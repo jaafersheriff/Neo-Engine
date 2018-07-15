@@ -35,18 +35,6 @@ struct Camera {
             ImGui::Text("lookAt:  %0.2f, %0.2f, %0.2f", lookAt.x, lookAt.y, lookAt.z);
             glm::vec3 lookDir  = cameraComp->getLookDir();
             ImGui::Text("lookDir: %0.2f, %0.2f, %0.2f", lookDir.x, lookDir.y, lookDir.z);
-
-            glm::mat4 P(cameraComp->getProj());
-            glm::mat4 V(cameraComp->getView());
-            ImGui::Text("Projection: {%0.2f  %0.2f  %02.f  %0.2f", P[0][0], P[1][0], P[2][0], P[3][0]);
-            ImGui::Text("             %0.2f  %0.2f  %02.f  %0.2f", P[0][1], P[1][1], P[2][1], P[3][1]); 
-            ImGui::Text("             %0.2f  %0.2f  %02.f  %0.2f", P[0][2], P[1][2], P[2][2], P[3][2]); 
-            ImGui::Text("             %0.2f  %0.2f  %02.f  %0.2f", P[0][3], P[1][3], P[2][3], P[3][3]); 
-            ImGui::Text("View:       {%0.2f  %0.2f  %02.f  %0.2f", V[0][0], V[1][0], V[2][0], V[3][0]);
-            ImGui::Text("             %0.2f  %0.2f  %02.f  %0.2f", V[0][1], V[1][1], V[2][1], V[3][1]); 
-            ImGui::Text("             %0.2f  %0.2f  %02.f  %0.2f", V[0][2], V[1][2], V[2][2], V[3][2]); 
-            ImGui::Text("             %0.2f  %0.2f  %02.f  %0.2f", V[0][3], V[1][3], V[2][3], V[3][3]); 
-         
             ImGui::End();
         });
     }
@@ -67,12 +55,7 @@ struct Cube {
             ImGui::Begin("Cube");
             ImGui::SliderFloat3("Position", glm::value_ptr(diffComponent->position), -10.f, 10.f);
             ImGui::SliderFloat("Scale", &diffComponent->scale, 0.f, 10.f);
-            ImGui::SliderFloat3("Rotation", glm::value_ptr(diffComponent->rotation), 0.f, 4.f);
-            glm::mat4 M(diffComponent->M);
-            ImGui::Text("Mrojection: {%0.2f  %0.2f  %02.f  %0.2f", M[0][0], M[1][0], M[2][0], M[3][0]);
-            ImGui::Text("             %0.2f  %0.2f  %02.f  %0.2f", M[0][1], M[1][1], M[2][1], M[3][1]); 
-            ImGui::Text("             %0.2f  %0.2f  %02.f  %0.2f", M[0][2], M[1][2], M[2][2], M[3][2]); 
-            ImGui::Text("             %0.2f  %0.2f  %02.f  %0.2f", M[0][3], M[1][3], M[2][3], M[3][3]); 
+            ImGui::SliderFloat3("Rotation", glm::value_ptr(diffComponent->rotation), -4.f, 4.f);
             ImGui::End();
         });
     }
@@ -97,7 +80,7 @@ int main() {
     Camera camera;
     camera.init(45.f, 0.01f, 100.f, glm::vec3(0, 0, -5), glm::vec3(0));
     Cube cube;
-    cube.init("cube.obj", glm::vec3(0.f), 10.f, glm::vec3(0.f));
+    cube.init("cube.obj", glm::vec3(0.f), 1.f, glm::vec3(-0.707f, 0.f, 0.f));
     
     /* Init systems */
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);

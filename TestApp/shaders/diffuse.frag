@@ -1,10 +1,16 @@
 #version 330 core
 
 in vec3 fragPos;
-in vec3 fragNor;
+
+uniform bool useOutline;
 
 out vec4 color;
 
 void main() {
-    color = vec4(fragPos,1);
+    if (useOutline) {
+        color = vec4(0.5, 0.5, 0.5, 1.0);
+    }
+    else {
+        color = vec4(fragPos,1);
+    }
 }

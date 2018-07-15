@@ -22,54 +22,25 @@ class DiffuseShader : public Shader {
 
             auto renderables = NeoEngine::getComponents<DiffuseRenderable>();
             for (auto dr : renderables) {
+                /* Update should happen in some game-logic system before this */
                 dr->update(dt);
 
                 /* Bind mesh */
                 const Mesh & mesh(*dr->mesh);
                 glBindVertexArray(mesh.vaoId);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId);
 
                 loadMatrix(getUniform("M"), dr->M);
 
-                /* Bind vertex buffer VBO */
-                int pos = getAttribute("vertPos");
-                glEnableVertexAttribArray(pos);
-                glBindBuffer(GL_ARRAY_BUFFER, mesh.vertBufId);
-                glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
-
-                /* Bind normal buffer VBO */
-                pos = getAttribute("vertNor");
-                if (pos != -1 && mesh.norBufId != 0) {
-                    glEnableVertexAttribArray(pos);
-                    glBindBuffer(GL_ARRAY_BUFFER, mesh.norBufId);
-                    glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
-                }
-
-                /* Bind texture coordinate buffer VBO */
-                pos = getAttribute("vertTex");
-                if (pos != -1 && mesh.texBufId != 0) {
-                    glEnableVertexAttribArray(pos);
-                    glBindBuffer(GL_ARRAY_BUFFER, mesh.texBufId);
-                    glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0);
-                }
-
-                /* Bind indices buffer VBO */
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId);
-
                 /* DRAW */
+                loadBool(getUniform("useOutline"), false);
                 glDrawElements(GL_TRIANGLES, (int)mesh.eleBufSize, GL_UNSIGNED_INT, nullptr);
 
-                /* Unload mesh */
-                glDisableVertexAttribArray(getAttribute("vertPos"));
-                pos = getAttribute("vertNor");
-                if (pos != -1) {
-                    glDisableVertexAttribArray(pos);
-                }
-                pos = getAttribute("vertTex");
-                if (pos != -1) {
-                    glDisableVertexAttribArray(pos);
-                }
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-                glBindBuffer(GL_ARRAY_BUFFER, 0);
+                /* Draw wireframe */
+                loadBool(getUniform("useOutline"), true);
+                CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+                glDrawElements(GL_TRIANGLES, (int)mesh.eleBufSize, GL_UNSIGNED_INT, nullptr);
+                CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
             }
 
             CHECK_GL(glBindVertexArray(0));
