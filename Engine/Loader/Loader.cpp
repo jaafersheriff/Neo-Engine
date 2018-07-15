@@ -143,12 +143,18 @@ namespace neo {
         CHECK_GL(glGenBuffers(1, (GLuint *) &mesh.vertBufId));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.vertBufId));
         CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mesh.buffers.vertBuf.size() * sizeof(float), &mesh.buffers.vertBuf[0], GL_STATIC_DRAW));
+        // CHECK_GL(glEnableVertexAttribArray(0));
+        // CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.vertBufId));
+        // CHECK_GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
 
         /* Copy element array if it exists */
         if (!mesh.buffers.eleBuf.empty()) {
             CHECK_GL(glGenBuffers(1, (GLuint *) &mesh.eleBufId));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
             CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.buffers.eleBuf.size() * sizeof(unsigned int), &mesh.buffers.eleBuf[0], GL_STATIC_DRAW));
+            ;//  CHECK_GL(glEnableVertexAttribArray(1));
+            ;// CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.norBufId));
+            ;// CHECK_GL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
         }
 
         /* Copy normal array if it exists */
@@ -156,6 +162,9 @@ namespace neo {
             CHECK_GL(glGenBuffers(1, (GLuint *) &mesh.norBufId));
             CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.norBufId));
             CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mesh.buffers.norBuf.size() * sizeof(float), &mesh.buffers.norBuf[0], GL_STATIC_DRAW));
+            // CHECK_GL(glEnableVertexAttribArray(2));
+            // CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.texBufId));
+            // CHECK_GL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0));
         }
 
         /* Copy texture array if it exists */
@@ -163,6 +172,7 @@ namespace neo {
             CHECK_GL(glGenBuffers(1, (GLuint *) &mesh.texBufId));
             CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.texBufId));
             CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mesh.buffers.texBuf.size() * sizeof(float), &mesh.buffers.texBuf[0], GL_STATIC_DRAW));
+            // CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
         }
 
         /* Unbind  */

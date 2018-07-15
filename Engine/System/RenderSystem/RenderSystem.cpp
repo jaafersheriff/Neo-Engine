@@ -26,7 +26,7 @@ namespace neo {
 
         /* Render all shaders */
         for (auto & shader : shaders) {
-            shader.get()->render();
+            shader.get()->render(dt, camera);
         }
     }
 
