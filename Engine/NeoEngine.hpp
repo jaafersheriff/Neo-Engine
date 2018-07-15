@@ -25,8 +25,6 @@ namespace neo {
             static void run();
             static void shutDown();
 
-            static std::string ENGINE_RES_DIR;  /* Engine's resource directory */
-            static std::string APP_RES_DIR;     /* App's resource directory */
             static std::string APP_NAME;        /* Name of application */
 
         /* ECS */
