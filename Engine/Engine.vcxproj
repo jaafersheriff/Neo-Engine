@@ -30,8 +30,10 @@
     <ClInclude Include="ext\imgui\stb_textedit.h" />
     <ClInclude Include="ext\imgui\stb_truetype.h" />
     <ClInclude Include="GameObject\GameObject.hpp" />
+    <ClInclude Include="Loader\Loader.hpp" />
+    <ClInclude Include="Model\Mesh.hpp" />
     <ClInclude Include="NeoEngine.hpp" />
-    <ClInclude Include="System\RenderSystem\GLHelper.hpp" />
+    <ClInclude Include="GLHelper.hpp" />
     <ClInclude Include="System\RenderSystem\RenderSystem.hpp" />
     <ClInclude Include="System\RenderSystem\Shader.hpp" />
     <ClInclude Include="System\System.hpp" />
@@ -45,8 +47,9 @@
     <ClCompile Include="ext\imgui\imgui_draw.cpp" />
     <ClCompile Include="ext\imgui\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
+    <ClCompile Include="Loader\Loader.cpp" />
     <ClCompile Include="NeoEngine.cpp" />
-    <ClCompile Include="System\RenderSystem\GLHelper.cpp" />
+    <ClCompile Include="GLHelper.cpp" />
     <ClCompile Include="System\RenderSystem\RenderSystem.cpp" />
     <ClCompile Include="System\RenderSystem\Shader.cpp" />
     <ClCompile Include="Window\Window.cpp" />
@@ -123,7 +126,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\OpenGL\glm-0.9.8.5;C:\OpenGL\glfw-3.2.1\include;$(ProjectDir);C:\OpenGL\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DEBUG_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG_MODE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>C:\OpenGL\glfw-3.2.1\debug\src\Debug\glfw3.lib;C:\OpenGL\glew-2.1.0\lib\Release\Win32\glew32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>

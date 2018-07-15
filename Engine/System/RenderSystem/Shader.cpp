@@ -89,16 +89,17 @@ namespace neo {
         std::vector<char *> lines;
 
         // Read the first line
-        strtok_s(fileText, ";\n", &token);
+        token = strtok(fileText, ";\n");
         lines.push_back(token);
         // Read all subsequent lines
-        while ((strtok_s(NULL, ";\n", &token)) != NULL) {
+        while ((token = strtok(NULL, ";\n")) != NULL) {
             lines.push_back(token);
         }
 
         // Look for keywords per line
         for (char *line : lines) {
-            if (strtok_s(line, " (\n", &token) == NULL) {
+            token = strtok(line, " (\n");
+            if (token == NULL) {
                 continue;
             }
             if (!strcmp(token, "uniform")) {
@@ -119,7 +120,7 @@ namespace neo {
                 addUniform(lineEnding + (lastDelimiter + 1));
             }
             else if (!strcmp(token, "layout")) {
-                while ((strtok_s(NULL, " ", &token)) != NULL) {
+                while ((token = strtok(NULL, " ")) != NULL) {
                     lastToken = token;
                 }
                 if (lastToken) {

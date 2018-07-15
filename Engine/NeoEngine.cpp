@@ -6,8 +6,6 @@
 namespace neo {
 
     /* Base Engine */
-    std::string NeoEngine::ENGINE_RES_DIR;
-    std::string NeoEngine::APP_RES_DIR;
     std::string NeoEngine::APP_NAME = "Neo Engine";
 
     /* ECS */
@@ -36,7 +34,7 @@ namespace neo {
         /* Init base engine */
         srand((unsigned int)(time(0)));
         APP_NAME = title;
-        APP_RES_DIR = app_res;
+        Loader::init(app_res, true);
 
         /* Init window*/
         if (Window::initGLFW(APP_NAME)) {

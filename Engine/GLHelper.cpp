@@ -103,7 +103,7 @@ namespace neo {
             char *content = NULL;
             int count = 0;
             if (fn != NULL) {
-                fopen_s(&fp, fn, "rt");
+                fp = fopen(fn, "rt");
                 if (fp != NULL) {
                     fseek(fp, 0, SEEK_END);
                     count = (int)ftell(fp);

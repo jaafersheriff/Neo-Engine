@@ -3,6 +3,8 @@
 #include "System/System.hpp"
 #include "Shader.hpp"
 
+#include "Component/CameraComponent/CameraComponent.hpp"
+
 #include <vector>
 #include <memory>
 
@@ -11,8 +13,9 @@ namespace neo {
     class RenderSystem : public System {
 
         public:
-            RenderSystem(const std::string &dir) :
-                APP_SHADER_DIR(dir)
+            RenderSystem(const std::string &dir, const CameraComponent *camera) :
+                APP_SHADER_DIR(dir),
+                camera(camera)
             {}
 
             virtual void init() override;
@@ -23,6 +26,7 @@ namespace neo {
 
         private:
             const std::string APP_SHADER_DIR;
+            const CameraComponent *camera;
     };
 
 

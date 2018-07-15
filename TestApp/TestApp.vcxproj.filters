@@ -4,19 +4,20 @@
     <ClCompile Include="TestApp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TriangleShader.hpp" />
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Shaders">
       <UniqueIdentifier>{861f2661-d07d-4bd1-b2e1-0cf755e9ba62}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\triangle.vert">
+    <None Include="shaders\diffuse.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="res\shaders\triangle.frag">
+    <None Include="shaders\diffuse.frag">
       <Filter>Shaders</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DiffuseShader.hpp" />
+    <ClInclude Include="DiffuseRenderable.hpp" />
   </ItemGroup>
 </Project>

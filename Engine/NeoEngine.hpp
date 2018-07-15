@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Window/Window.hpp"
+#include "Loader/Loader.hpp"
 #include "GameObject/GameObject.hpp"
-#include "Component/Component.hpp"
-#include "System/System.hpp"
 
+#include "Component/Component.hpp"
 #include "Component/Components.hpp"
+
+#include "System/System.hpp"
 #include "System/Systems.hpp"
 
 #include "ext/imgui/imgui.h"
@@ -25,8 +27,6 @@ namespace neo {
             static void run();
             static void shutDown();
 
-            static std::string ENGINE_RES_DIR;  /* Engine's resource directory */
-            static std::string APP_RES_DIR;     /* App's resource directory */
             static std::string APP_NAME;        /* Name of application */
 
         /* ECS */
