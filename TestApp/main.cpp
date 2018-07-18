@@ -14,9 +14,9 @@ struct Camera {
     SpatialComponent *spatial;
     CameraComponent *cameraComp;
 
-    Camera(float fov, float near, float far, glm::vec3 pos, glm::vec3 lookAt) {
+    Camera(float fov, float near, float far, glm::vec3 pos) {
         gameObject = &NeoEngine::createGameObject();
-        spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, glm::vec3(0.f), glm::vec3(1.f));
+        spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(1.f));
         cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far, spatial);
 
         NeoEngine::addImGuiFunc([&]() {
@@ -59,15 +59,15 @@ struct Renderable {
         NeoEngine::addImGuiFunc([&]() {
             ImGui::Begin(name.c_str());
             glm::vec3 pos = spatial->getPosition();
-            glm::vec3 scale = spatial->getScale();
+            float scale = spatial->getScale().x;
             glm::vec3 u = spatial->getU();
             glm::vec3 v = spatial->getV();
             glm::vec3 w = spatial->getW();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 spatial->setPosition(pos);
             }
-            if (ImGui::SliderFloat3("Scale", glm::value_ptr(scale), 0.f, 10.f)) {
-                spatial->setScale(scale);
+            if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
+                spatial->setScale(glm::vec3(scale));
             }
             ImGui::SliderFloat3("RotationU", glm::value_ptr(u), 0.f, 1.f);
             ImGui::SliderFloat3("RotationV", glm::value_ptr(v), 0.f, 1.f);
@@ -94,7 +94,7 @@ int main() {
     });
 
     /* Init components */
-    Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0, -5), glm::vec3(0));
+    Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0, 5));
     Renderable cube("cube.obj", glm::vec3(0.f), 1.f);
     cube.attachImGui("Cube");
     
