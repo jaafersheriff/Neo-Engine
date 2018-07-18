@@ -1,7 +1,7 @@
 #pragma once
 
 #include "System/System.hpp"
-#include "Shader.hpp"
+#include "Shader/Shader.hpp"
 
 #include "Component/CameraComponent/CameraComponent.hpp"
 

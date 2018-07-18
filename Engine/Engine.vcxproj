@@ -33,9 +33,9 @@
     <ClInclude Include="Loader\Loader.hpp" />
     <ClInclude Include="Model\Mesh.hpp" />
     <ClInclude Include="NeoEngine.hpp" />
-    <ClInclude Include="GLHelper.hpp" />
+    <ClInclude Include="Shader\GLHelper.hpp" />
     <ClInclude Include="System\RenderSystem\RenderSystem.hpp" />
-    <ClInclude Include="System\RenderSystem\Shader.hpp" />
+    <ClInclude Include="Shader\Shader.hpp" />
     <ClInclude Include="System\System.hpp" />
     <ClInclude Include="System\Systems.hpp" />
     <ClInclude Include="Window\Window.hpp" />
@@ -49,9 +49,9 @@
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="Loader\Loader.cpp" />
     <ClCompile Include="NeoEngine.cpp" />
-    <ClCompile Include="GLHelper.cpp" />
+    <ClCompile Include="Shader\GLHelper.cpp" />
     <ClCompile Include="System\RenderSystem\RenderSystem.cpp" />
-    <ClCompile Include="System\RenderSystem\Shader.cpp" />
+    <ClCompile Include="Shader\Shader.cpp" />
     <ClCompile Include="Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>

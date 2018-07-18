@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CustomRenderable.hpp"
-#include "System/RenderSystem/Shader.hpp"
-#include "GLHelper.hpp"
+#include "Shader/Shader.hpp"
+#include "Shader/GLHelper.hpp"
 
 using namespace neo;
 
