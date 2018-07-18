@@ -11,7 +11,7 @@ RenderSystem * renderSystem;
 /* Common game objects */
 struct Camera {
     GameObject *gameObject;
-    CameraComponent * cameraComp;
+    CameraComponent *cameraComp;
 
     Camera(float fov, float near, float far, glm::vec3 pos, glm::vec3 lookAt) {
         gameObject = &NeoEngine::createGameObject();
@@ -19,13 +19,14 @@ struct Camera {
 
         NeoEngine::addImGuiFunc([&]() {
             ImGui::Begin("Camera");
+
             float fov = cameraComp->getFOV();
             ImGui::SliderFloat("FOV", &fov, 0.f, 90.f);
             cameraComp->setFOV(fov);
 
             float near = cameraComp->getNear();
-            ImGui::SliderFloat("Near", &near, 0.f, 2.f);
             float far = cameraComp->getFar();
+            ImGui::SliderFloat("Near", &near, 0.f, 2.f);
             ImGui::SliderFloat("Far", &far, 10.f, 10000.f);
             cameraComp->setNearFar(near, far);
 
@@ -64,7 +65,7 @@ struct Renderable {
 };
 
 /* Custom shader */
-CustomShader * dShader;
+CustomShader *dShader;
 
 int main() {
     NeoEngine::init("TestApp", "res/", 1280, 720);
