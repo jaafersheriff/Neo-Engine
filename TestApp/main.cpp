@@ -11,11 +11,13 @@ RenderSystem * renderSystem;
 /* Common game objects */
 struct Camera {
     GameObject *gameObject;
+    SpatialComponent *spatial;
     CameraComponent *cameraComp;
 
     Camera(float fov, float near, float far, glm::vec3 pos, glm::vec3 lookAt) {
         gameObject = &NeoEngine::createGameObject();
-        cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far, pos, lookAt);
+        spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, glm::vec3(0.f), glm::vec3(1.f));
+        cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far, spatial);
 
         NeoEngine::addImGuiFunc([&]() {
             ImGui::Begin("Camera");
@@ -30,10 +32,8 @@ struct Camera {
             ImGui::SliderFloat("Far", &far, 10.f, 10000.f);
             cameraComp->setNearFar(near, far);
 
-            glm::vec3 position = cameraComp->getPosition();
+            glm::vec3 position = spatial->getPosition();
             ImGui::Text("Pos:     %0.2f, %0.2f, %0.2f", position.x, position.y, position.z);
-            glm::vec3 lookAt   = cameraComp->getLookAt();
-            ImGui::Text("lookAt:  %0.2f, %0.2f, %0.2f", lookAt.x, lookAt.y, lookAt.z);
             glm::vec3 lookDir  = cameraComp->getLookDir();
             ImGui::Text("lookDir: %0.2f, %0.2f, %0.2f", lookDir.x, lookDir.y, lookDir.z);
             ImGui::End();
@@ -44,21 +44,35 @@ struct Camera {
 /* Basic renderable object */
 struct Renderable {
     GameObject *gameObject;
+    SpatialComponent *spatial;
     CustomRenderable *renderComponent;
 
-    Renderable(std::string name, glm::vec3 p, float s, glm::vec3 r) {
+    Renderable(std::string name, glm::vec3 p, float s) {
         Mesh *mesh = Loader::getMesh(name);
 
         gameObject = &NeoEngine::createGameObject();
-        renderComponent = &NeoEngine::addComponent<CustomRenderable>(*gameObject, mesh, p, s, r);
+        spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s));
+        renderComponent = &NeoEngine::addComponent<CustomRenderable>(*gameObject, mesh, spatial);
     }
 
     void attachImGui(const std::string & name) {
         NeoEngine::addImGuiFunc([&]() {
             ImGui::Begin(name.c_str());
-            ImGui::SliderFloat3("Position", glm::value_ptr(renderComponent->position), -10.f, 10.f);
-            ImGui::SliderFloat("Scale", &renderComponent->scale, 0.f, 10.f);
-            ImGui::SliderFloat3("Rotation", glm::value_ptr(renderComponent->rotation), -4.f, 4.f);
+            glm::vec3 pos = spatial->getPosition();
+            glm::vec3 scale = spatial->getScale();
+            glm::vec3 u = spatial->getU();
+            glm::vec3 v = spatial->getV();
+            glm::vec3 w = spatial->getW();
+            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
+                spatial->setPosition(pos);
+            }
+            if (ImGui::SliderFloat3("Scale", glm::value_ptr(scale), 0.f, 10.f)) {
+                spatial->setScale(scale);
+            }
+            ImGui::SliderFloat3("RotationU", glm::value_ptr(u), 0.f, 1.f);
+            ImGui::SliderFloat3("RotationV", glm::value_ptr(v), 0.f, 1.f);
+            ImGui::SliderFloat3("RotationW", glm::value_ptr(w), 0.f, 1.f);
+            spatial->setUVW(u, v, w);
             ImGui::End();
         });
     }
@@ -81,7 +95,7 @@ int main() {
 
     /* Init components */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0, -5), glm::vec3(0));
-    Renderable cube("cube.obj", glm::vec3(0.f), 1.f, glm::vec3(-0.707f, 0.f, 0.f));
+    Renderable cube("cube.obj", glm::vec3(0.f), 1.f);
     cube.attachImGui("Cube");
     
     /* Init systems */

@@ -7,6 +7,7 @@
 namespace neo {
 
     class Component;
+    class SpatialComponent;
 
     class GameObject {
 
@@ -17,10 +18,7 @@ namespace neo {
             GameObject & operator=(const GameObject &) = delete;
 
             GameObject();
-
-            /* Containers */
-            std::vector<Component *> allComponents;
-            std::unordered_map<std::type_index, std::vector<Component *>> compsByCompT;
+            SpatialComponent * getSpatial() const { return spatial; }
 
             /* Add/remove components */
             template<typename CompT> void addComponent(CompT &);
@@ -32,6 +30,12 @@ namespace neo {
             /* Get First component by type */
             template <typename CompT> CompT * getComponentByType() const;
 
+            std::unordered_map<std::type_index, std::vector<Component *>> compsByCompT;
+
+        private:
+            /* Containers */
+            SpatialComponent * spatial;
+            std::vector<Component *> allComponents;
     };
 
     /* Template implementation */

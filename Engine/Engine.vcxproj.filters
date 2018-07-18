@@ -44,6 +44,8 @@
     <ClInclude Include="Loader\Loader.hpp" />
     <ClInclude Include="Shader\Shader.hpp" />
     <ClInclude Include="Shader\GLHelper.hpp" />
+    <ClInclude Include="Component\SpatialComponent\SpatialComponent.hpp" />
+    <ClInclude Include="Component\SpatialComponent\Orientable.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
@@ -58,6 +60,7 @@
     <ClCompile Include="Loader\Loader.cpp" />
     <ClCompile Include="Shader\Shader.cpp" />
     <ClCompile Include="Shader\GLHelper.cpp" />
+    <ClCompile Include="Component\SpatialComponent\SpatialComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

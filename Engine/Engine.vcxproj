@@ -22,6 +22,8 @@
     <ClInclude Include="Component\CameraComponent\CameraComponent.hpp" />
     <ClInclude Include="Component\Component.hpp" />
     <ClInclude Include="Component\Components.hpp" />
+    <ClInclude Include="Component\SpatialComponent\Orientable.hpp" />
+    <ClInclude Include="Component\SpatialComponent\SpatialComponent.hpp" />
     <ClInclude Include="ext\imgui\imconfig.h" />
     <ClInclude Include="ext\imgui\imgui.h" />
     <ClInclude Include="ext\imgui\imgui_impl_glfw_gl3.h" />
@@ -42,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
+    <ClCompile Include="Component\SpatialComponent\SpatialComponent.cpp" />
     <ClCompile Include="ext\imgui\imgui.cpp" />
     <ClCompile Include="ext\imgui\imgui_demo.cpp" />
     <ClCompile Include="ext\imgui\imgui_draw.cpp" />
