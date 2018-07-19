@@ -1,4 +1,7 @@
 #include "Window.hpp"
+#include "Mouse.hpp"
+#include "Keyboard.hpp"
+
 #include "NeoEngine.hpp"
 
 #include "ext/imgui/imgui_impl_glfw_gl3.h"
@@ -52,11 +55,17 @@ namespace neo {
         else if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             ImGui_ImplGlfwGL3_KeyCallback(window, key, scancode, action, mods);
         }
+        else {
+            Keyboard::setKeyStatus(key, action);
+        }
     }
 
     void Window::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
         if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             ImGui_ImplGlfwGL3_MouseButtonCallback(window, button, action, mods);
+        }
+        else {
+            Mouse::setButtonStatus(button, action);
         }
     }
 
@@ -64,7 +73,7 @@ namespace neo {
         if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             ImGui_ImplGlfwGL3_ScrollCallback(window, dx, dy);
         }
-    }
+   }
 
     void Window::characterCallback(GLFWwindow *window, unsigned int c) {
         if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
@@ -98,6 +107,7 @@ namespace neo {
     }
 
     void Window::cursorEnterCallback(GLFWwindow * window, int entered) {
+        Mouse::reset();
     }
 
     int Window::initGLFW(const std::string &name) {
@@ -163,6 +173,10 @@ namespace neo {
         if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
             return;
         }
+
+        double x, y;
+        glfwGetCursorPos(window, &x, &y);
+        Mouse::update(x, y);
 
         if (NeoEngine::imGuiEnabled) {
             ImGui_ImplGlfwGL3_NewFrame(true);

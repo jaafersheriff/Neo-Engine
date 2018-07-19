@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Window/Window.hpp"
+#include "Window/Mouse.hpp"
+#include "Window/Keyboard.hpp"
 #include "Loader/Loader.hpp"
 #include "GameObject/GameObject.hpp"
 
@@ -55,8 +57,8 @@ namespace neo {
             /* ImGui */
             static bool imGuiEnabled;
             static void toggleImGui() { imGuiEnabled = !imGuiEnabled; }
-            static std::vector<std::function<void()>> imGuiFuncs;
-            static void addImGuiFunc(std::function<void()> func) { imGuiFuncs.push_back(func); }
+            static std::unordered_map<std::string, std::function<void()>> imGuiFuncs;
+            static void addImGuiFunc(std::string name, std::function<void()> func) { imGuiFuncs.insert({ name, func}); }
 
         private:
             /* Initialize / kill queues */
