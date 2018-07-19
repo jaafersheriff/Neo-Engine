@@ -29,7 +29,7 @@ namespace neo {
 
     /* ImGui */
     bool NeoEngine::imGuiEnabled = true;
-    std::vector<std::function<void()>> NeoEngine::imGuiFuncs;
+    std::unordered_map<std::string, std::function<void()>> NeoEngine::imGuiFuncs;
 
     void NeoEngine::init(const std::string &title, const std::string &app_res, const int width, const int height) {
         /* Init base engine */
@@ -67,8 +67,10 @@ namespace neo {
 
             /* Update imgui functions */
             if (imGuiEnabled) {
-                for (auto func : imGuiFuncs) {
-                    func();
+                for (auto it = imGuiFuncs.begin(); it != imGuiFuncs.end(); ++it) {
+                    ImGui::Begin(it->first.c_str());
+                    it->second();
+                    ImGui::End();
                 }
             }
 
