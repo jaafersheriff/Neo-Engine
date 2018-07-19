@@ -73,7 +73,6 @@ struct Renderable {
             if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
                 spatial->setScale(glm::vec3(scale));
             }
-            ImGui::SliderFloat("Spin", &renderComponent->spin, 0.f, 1.f);
             ImGui::SliderFloat3("RotationU", glm::value_ptr(u), 0.f, 1.f);
             ImGui::SliderFloat3("RotationV", glm::value_ptr(v), 0.f, 1.f);
             ImGui::SliderFloat3("RotationW", glm::value_ptr(w), 0.f, 1.f);
