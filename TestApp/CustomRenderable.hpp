@@ -22,7 +22,7 @@ namespace neo {
             }
 
             virtual void update(float dt) override {
-                // spatial->rotate(glm::rotate(glm::mat4(spatial->getOrientation()), 5.f, glm::vec3(0, 1, 0)));
+                spatial->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), dt, glm::vec3(0, 1, 0))));
             }
 
             Mesh *mesh;

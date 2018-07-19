@@ -29,7 +29,6 @@ namespace neo {
             const CameraComponent *camera;
     };
 
-
     /* Template implementation */
     template <typename ShaderT, typename... Args>
     ShaderT & RenderSystem::addShader(Args &&... args) {

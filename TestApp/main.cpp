@@ -2,13 +2,18 @@
 
 #include "CustomShader.hpp"
 #include "CustomRenderable.hpp"
+#include "CustomSystem.hpp"
 
 using namespace neo;
 
-/* Common system */
+/* Systems */
 RenderSystem * renderSystem;
+CustomSystem * customSystem;
 
-/* Common game objects */
+/* Shaders */
+CustomShader * customShader;
+
+/* Game object definitions */
 struct Camera {
     GameObject *gameObject;
     SpatialComponent *spatial;
@@ -41,17 +46,16 @@ struct Camera {
     }
 };
 
-/* Basic renderable object */
 struct Renderable {
     GameObject *gameObject;
     SpatialComponent *spatial;
     CustomRenderable *renderComponent;
 
-    Renderable(std::string name, glm::vec3 p, float s) {
+    Renderable(std::string name, glm::vec3 p, float s, glm::mat3 o = glm::mat3()) {
         Mesh *mesh = Loader::getMesh(name);
 
         gameObject = &NeoEngine::createGameObject();
-        spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s));
+        spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
         renderComponent = &NeoEngine::addComponent<CustomRenderable>(*gameObject, mesh, spatial);
     }
 
@@ -69,6 +73,7 @@ struct Renderable {
             if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
                 spatial->setScale(glm::vec3(scale));
             }
+            ImGui::SliderFloat("Spin", &renderComponent->spin, 0.f, 1.f);
             ImGui::SliderFloat3("RotationU", glm::value_ptr(u), 0.f, 1.f);
             ImGui::SliderFloat3("RotationV", glm::value_ptr(v), 0.f, 1.f);
             ImGui::SliderFloat3("RotationW", glm::value_ptr(w), 0.f, 1.f);
@@ -77,9 +82,6 @@ struct Renderable {
         });
     }
 };
-
-/* Custom shader */
-CustomShader *dShader;
 
 int main() {
     NeoEngine::init("TestApp", "res/", 1280, 720);
@@ -95,17 +97,18 @@ int main() {
 
     /* Init components */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0, 5));
-    Renderable cube("cube.obj", glm::vec3(0.f), 1.f);
+    Renderable cube("cube.obj", glm::vec3(0.f), 1.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
     cube.attachImGui("Cube");
     
-    /* Init systems */
+    /* Systems - order matters! */
+    customSystem = &NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
-    NeoEngine::initSystems();
 
-    /* Attach shaders */
-    dShader = &renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
+    /* Shaders */
+    customShader = &renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
 
     /* Run */
+    NeoEngine::initSystems();
     NeoEngine::run();
 
     return 0;

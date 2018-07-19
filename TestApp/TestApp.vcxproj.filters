@@ -18,6 +18,7 @@
   <ItemGroup>
     <ClInclude Include="CustomShader.hpp" />
     <ClInclude Include="CustomRenderable.hpp" />
+    <ClInclude Include="CustomSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
