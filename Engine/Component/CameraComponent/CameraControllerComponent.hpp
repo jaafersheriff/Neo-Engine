@@ -10,7 +10,7 @@ namespace neo {
     class CameraControllerComponent : public Component {
 
         public: 
-            CameraControllerComponent(GameObject &, float ls, float min, float max);
+            CameraControllerComponent(GameObject &, float ls, float ms);
             CameraControllerComponent(CameraControllerComponent && other) = default;
 
             virtual void init() override;

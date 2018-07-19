@@ -8,15 +8,13 @@
 
 namespace neo {
 
-    CameraControllerComponent::CameraControllerComponent(GameObject &go, float lookSpeed, float minMoveSpeed, float maxMoveSpeed) :
+    CameraControllerComponent::CameraControllerComponent(GameObject &go, float lookSpeed, float moveSpeed) :
         Component(go),
         spatial(nullptr),
-        theta(0.f), 
+        theta(0.f),
         phi(Util::PI() * 0.5f),
         lookSpeed(lookSpeed),
-        minMoveSpeed(glm::max(0.f, minMoveSpeed)),
-        maxMoveSpeed(glm::min(maxMoveSpeed, minMoveSpeed)),
-        moveSpeed(glm::mix(minMoveSpeed, maxMoveSpeed, 0.5f)) {
+        moveSpeed(moveSpeed) {
         setButtons(GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_E, GLFW_KEY_R);
     }
 
@@ -26,7 +24,7 @@ namespace neo {
         rightButton    = l;
         leftButton     = r;
         upButton       = u;
-        downButton     =d;
+        downButton     = d;
     }
 
     void CameraControllerComponent::init() {
