@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Window/Window.hpp"
+#include "Window/Mouse.hpp"
+#include "Window/Keyboard.hpp"
 #include "Loader/Loader.hpp"
 #include "GameObject/GameObject.hpp"
 

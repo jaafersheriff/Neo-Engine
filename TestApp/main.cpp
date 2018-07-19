@@ -80,6 +80,18 @@ int main() {
         }
     });
 
+    NeoEngine::addImGuiFunc("Mouse/Keyboard", [&]() {
+        ImGui::Text("Mouse X, Y  : %0.2f, %0.2f", Mouse::x, Mouse::y);
+        ImGui::Text("Mouse dx, dy: %0.2f, %0.2f", Mouse::dx, Mouse::dy);
+        int count = 0;
+        for (int i = 0; i < NUM_KEYS; i++) {
+            if (Keyboard::keyStatus[i]) {
+                count++;
+            }
+        }
+        ImGui::Text("Keys pressed: %d", count);
+    });
+
     /* Init components */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5));
     Renderable cube(Loader::getMesh("cube.obj"), glm::vec3(0.f), 1.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
