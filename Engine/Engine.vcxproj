@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\CameraComponent\CameraComponent.hpp" />
+    <ClInclude Include="Component\CameraComponent\CameraControllerComponent.hpp" />
     <ClInclude Include="Component\Component.hpp" />
     <ClInclude Include="Component\Components.hpp" />
     <ClInclude Include="Component\SpatialComponent\Orientable.hpp" />
@@ -40,12 +41,14 @@
     <ClInclude Include="Shader\Shader.hpp" />
     <ClInclude Include="System\System.hpp" />
     <ClInclude Include="System\Systems.hpp" />
+    <ClInclude Include="Util\Util.hpp" />
     <ClInclude Include="Window\Keyboard.hpp" />
     <ClInclude Include="Window\Mouse.hpp" />
     <ClInclude Include="Window\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
+    <ClCompile Include="Component\CameraComponent\CameraControllerComponent.cpp" />
     <ClCompile Include="Component\SpatialComponent\SpatialComponent.cpp" />
     <ClCompile Include="ext\imgui\imgui.cpp" />
     <ClCompile Include="ext\imgui\imgui_demo.cpp" />

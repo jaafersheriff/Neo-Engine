@@ -48,6 +48,8 @@
     <ClInclude Include="Component\SpatialComponent\Orientable.hpp" />
     <ClInclude Include="Window\Mouse.hpp" />
     <ClInclude Include="Window\Keyboard.hpp" />
+    <ClInclude Include="Component\CameraComponent\CameraControllerComponent.hpp" />
+    <ClInclude Include="Util\Util.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
@@ -65,6 +67,7 @@
     <ClCompile Include="Component\SpatialComponent\SpatialComponent.cpp" />
     <ClCompile Include="Window\Mouse.cpp" />
     <ClCompile Include="Window\Keyboard.cpp" />
+    <ClCompile Include="Component\CameraComponent\CameraControllerComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
