@@ -21,6 +21,7 @@ namespace neo {
     /* FPS */
     int NeoEngine::FPS = 0;
     int NeoEngine::nFrames = 0;
+    int NeoEngine::totalFrames = 0;
     double NeoEngine::timeStep = 0.0;
     double NeoEngine::lastFPSTime = 0.0;
     double NeoEngine::lastFrameTime = 0.0;
@@ -204,6 +205,7 @@ namespace neo {
 
     void NeoEngine::updateFPS() {
         runTime = glfwGetTime();
+        totalFrames++;
         timeStep = runTime - lastFrameTime;
         lastFrameTime = runTime;
         nFrames++;

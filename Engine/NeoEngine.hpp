@@ -81,6 +81,7 @@ namespace neo {
             static int FPS;                 /* Frames per second */
             static double timeStep;         /* Delta time */
             static double runTime;          /* Global timer */
+            static int totalFrames;         /* Total frames since start up */
         private:
             static void updateFPS();
             static double lastFPSTime;      /* Time at which last FPS was calculated */
