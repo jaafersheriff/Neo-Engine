@@ -17,12 +17,14 @@ CustomShader * customShader;
 struct Camera {
     GameObject *gameObject;
     SpatialComponent *spatial;
+    CameraControllerComponent *cameraController;
     CameraComponent *cameraComp;
 
-    Camera(float fov, float near, float far, glm::vec3 pos) {
+    Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         gameObject = &NeoEngine::createGameObject();
         spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(1.f));
         cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far, spatial);
+        cameraController = &NeoEngine::addComponent<CameraControllerComponent>(*gameObject, ls, ms);
 
         NeoEngine::addImGuiFunc("Camera", [&]() {
             float fov = cameraComp->getFOV();
@@ -85,12 +87,12 @@ int main() {
     });
 
     /* Init components */
-    Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5));
+    Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 2.f, 5.f);
     Renderable cube(Loader::getMesh("cube.obj"), glm::vec3(0.f), 1.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
     cube.attachImGui("Cube");
     
     /* Systems - order matters! */
-    customSystem = &NeoEngine::addSystem<CustomSystem>();
+    customSystem = &NeoEngine::addSystem<CustomSystem>(camera.cameraController);
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
 
     /* Shaders */

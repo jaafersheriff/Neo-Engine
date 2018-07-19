@@ -10,16 +10,23 @@ using namespace neo;
 class CustomSystem : public System {
 
     public:
+        CustomSystem(CameraControllerComponent *cc) :
+            camera(cc) {
+            renderables = &NeoEngine::getComponents<CustomRenderable>();
+        }
+
         virtual void update(float dt) override {
+            camera->update(dt);
             if (!active) {
                 return;
             }
 
-            auto renderables = NeoEngine::getComponents<CustomRenderable>();
-            for (auto r : renderables) {
+            for (auto r : *renderables) {
                 r->update(dt);
             }
         }
 
         bool active = true;
+        const std::vector<CustomRenderable *> *renderables;
+        CameraControllerComponent *camera;
 };
