@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CustomRenderable.hpp"
-#include "System/RenderSystem/Shader.hpp"
-#include "GLHelper.hpp"
+#include "Shader/Shader.hpp"
+#include "Shader/GLHelper.hpp"
 
 using namespace neo;
 
@@ -21,16 +21,13 @@ class CustomShader : public Shader {
             loadMatrix(getUniform("V"), camera->getView());
 
             auto renderables = NeoEngine::getComponents<CustomRenderable>();
-            for (auto dr : renderables) {
-                /* Update should happen in some game-logic system before this */
-                dr->update(dt);
-
+            for (auto r : renderables) {
                 /* Bind mesh */
-                const Mesh & mesh(*dr->mesh);
+                const Mesh & mesh(*r->mesh);
                 glBindVertexArray(mesh.vaoId);
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId);
 
-                loadMatrix(getUniform("M"), dr->M);
+                loadMatrix(getUniform("M"), r->spatial->getModelMatrix());
 
                 /* DRAW */
                 loadBool(getUniform("useOutline"), false);

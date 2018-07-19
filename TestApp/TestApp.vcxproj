@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClInclude Include="CustomRenderable.hpp" />
     <ClInclude Include="CustomShader.hpp" />
+    <ClInclude Include="CustomSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />

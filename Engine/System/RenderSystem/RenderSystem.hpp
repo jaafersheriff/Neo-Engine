@@ -1,7 +1,7 @@
 #pragma once
 
 #include "System/System.hpp"
-#include "Shader.hpp"
+#include "Shader/Shader.hpp"
 
 #include "Component/CameraComponent/CameraComponent.hpp"
 
@@ -28,7 +28,6 @@ namespace neo {
             const std::string APP_SHADER_DIR;
             const CameraComponent *camera;
     };
-
 
     /* Template implementation */
     template <typename ShaderT, typename... Args>
