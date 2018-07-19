@@ -79,17 +79,9 @@ int main() {
             Window::toggleVSync();
         }
     });
-
-    NeoEngine::addImGuiFunc("Mouse/Keyboard", [&]() {
+    NeoEngine::addImGuiFunc("Mouse", [&]() {
         ImGui::Text("Mouse X, Y  : %0.2f, %0.2f", Mouse::x, Mouse::y);
         ImGui::Text("Mouse dx, dy: %0.2f, %0.2f", Mouse::dx, Mouse::dy);
-        int count = 0;
-        for (int i = 0; i < NUM_KEYS; i++) {
-            if (Keyboard::keyStatus[i]) {
-                count++;
-            }
-        }
-        ImGui::Text("Keys pressed: %d", count);
     });
 
     /* Init components */
