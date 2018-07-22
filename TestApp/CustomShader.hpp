@@ -1,7 +1,5 @@
 #pragma once
 
-#include "NeoEngine.hpp"
-
 #include "CustomRenderable.hpp"
 #include "Shader/Shader.hpp"
 #include "Shader/GLHelper.hpp"
@@ -15,15 +13,14 @@ class CustomShader : public Shader {
             Shader(res, vert, frag)
         {}
 
-        virtual void render(float dt, const CameraComponent *camera) override {
+        virtual void render(float dt, const RenderSystem &renderSystem) override {
             bind();
 
             /* Load PV */
-            loadMatrix(getUniform("P"), camera->getProj());
-            loadMatrix(getUniform("V"), camera->getView());
+            loadMatrix(getUniform("P"), renderSystem.getCamera().getProj());
+            loadMatrix(getUniform("V"), renderSystem.getCamera().getView());
 
-            auto renderables = NeoEngine::getComponents<CustomRenderable>();
-            for (auto r : renderables) {
+            for (auto r : renderSystem.getRenderables<CustomShader, CustomRenderable>()) {
                 /* Bind mesh */
                 const Mesh & mesh(*r->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.vaoId));

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Component/CameraComponent/CameraComponent.hpp"
-
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include "glm/glm.hpp"
@@ -13,7 +11,7 @@
 
 namespace neo {
 
-    class CameraComponent;
+    class RenderSystem;
 
     class Shader {
 
@@ -22,7 +20,7 @@ namespace neo {
         Shader(const std::string &, const std::string &, const std::string &);
         virtual ~Shader() = default;
 
-        virtual void render(float, const CameraComponent *) {};
+        virtual void render(float, const RenderSystem &) {};
 
         /* Utility functions */
         void bind();

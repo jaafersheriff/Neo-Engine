@@ -55,8 +55,29 @@ struct Renderable {
         renderComponent = &NeoEngine::addComponent<CustomRenderable>(*gameObject, mesh);
     }
 
+    bool customShader = false;
+    bool wireShader = false;
     void attachImGui(const std::string & name) {
         NeoEngine::addImGuiFunc(name, [&]() {
+            ImGui::Text("# Shaders: %d", renderComponent->getShaders().size());
+            if (ImGui::Button("Custom Shader")) {
+                customShader = !customShader;
+                if (customShader) {
+                    renderSystem->attachShaderToComp<CustomShader>(renderComponent);
+                }
+                else {
+                    renderSystem->removeShaderToComp<CustomShader>(renderComponent);
+                }
+            }
+            if (ImGui::Button("Wire Shader")) {
+                wireShader = !wireShader;
+                if (wireShader) {
+                    renderSystem->attachShaderToComp<WireShader>(renderComponent);
+                }
+                else {
+                    renderSystem->removeShaderToComp<WireShader>(renderComponent);
+                }
+            }
             glm::vec3 pos = spatial->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 spatial->setPosition(pos);
@@ -82,6 +103,10 @@ int main() {
         ImGui::Text("Mouse X, Y  : %0.2f, %0.2f", Mouse::x, Mouse::y);
         ImGui::Text("Mouse dx, dy: %0.2f, %0.2f", Mouse::dx, Mouse::dy);
     });
+    NeoEngine::addImGuiFunc("Engine", [&]() {
+        ImGui::Text("# GameObjects:  %d", NeoEngine::getGameObjects().size());
+        ImGui::Text("# Systems: %d", NeoEngine::getSystems().size());
+    });
 
     /* Init components */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 2.f, 5.f);
@@ -89,12 +114,22 @@ int main() {
     cube.attachImGui("Cube");
     
     /* Systems - order matters! */
-    &NeoEngine::addSystem<CustomSystem>(camera.cameraController);
+    NeoEngine::addSystem<CustomSystem>(camera.cameraController);
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
+    NeoEngine::addImGuiFunc("Render System", [&]() {
+        ImGui::Text("# Shaders:  %d", renderSystem->shaders.size());
+
+        int size = 0;
+        for (auto it(renderSystem->renderables.begin()); it != renderSystem->renderables.end(); ++it) {
+            size += it->second->size();
+        }
+        ImGui::Text("# Renderables: [%d, %d]", renderSystem->renderables.size(), size);
+    });
 
     /* Shaders */
-    &renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
-    &renderSystem->addShader<WireShader>("wire.vert", "wire.frag");
+    renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
+    renderSystem->addShader<WireShader>("wire.vert", "wire.frag");
+
 
     /* Run */
     NeoEngine::initSystems();
