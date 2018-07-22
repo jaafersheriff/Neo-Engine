@@ -26,7 +26,7 @@ namespace neo {
             const GameObject & getGameObject() const { return *gameObject; }
             void removeGameObject() { gameObject = nullptr; }
                  
-        private:
+        protected:
             GameObject * gameObject;
     };
 }

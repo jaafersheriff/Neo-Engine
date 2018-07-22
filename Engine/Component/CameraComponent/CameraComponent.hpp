@@ -9,7 +9,7 @@ namespace neo {
     class CameraComponent : public Component {
 
         public:
-            CameraComponent(GameObject &, float fov, float near, float far, SpatialComponent *spatial);
+            CameraComponent(GameObject &, float fov, float near, float far);
             CameraComponent(CameraComponent &&) = default;
 
             virtual void init() override;
@@ -27,7 +27,6 @@ namespace neo {
             const glm::mat4 & getProj() const;
 
         private:
-            SpatialComponent * spatial;
             float fov;
             float near, far;
 

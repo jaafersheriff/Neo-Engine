@@ -9,23 +9,18 @@ namespace neo {
 
     class CustomRenderable : public Component {
         public:
-            CustomRenderable(GameObject &go, Mesh *m, SpatialComponent *spat = nullptr) :
+            CustomRenderable(GameObject &go, Mesh *m) :
                 Component(go),
-                mesh(m),
-                spatial(spat)
+                mesh(m)
             {}
 
             virtual void init() override {
-                if (spatial) assert(&spatial->getGameObject() == &getGameObject());
-                else assert(spatial = getGameObject().getSpatial());
-                update(0.f);
             }
 
             virtual void update(float dt) override {
-                spatial->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), dt, glm::vec3(0, 1, 0))));
+                gameObject->getSpatial()->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), dt, glm::vec3(0, 1, 0))));
             }
 
             Mesh *mesh;
-            SpatialComponent *spatial;
     };
 }

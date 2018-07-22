@@ -27,7 +27,7 @@ class CustomShader : public Shader {
                 glBindVertexArray(mesh.vaoId);
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId);
 
-                loadMatrix(getUniform("M"), r->spatial->getModelMatrix());
+                loadMatrix(getUniform("M"), r->getGameObject().getSpatial()->getModelMatrix());
 
                 /* DRAW */
                 loadBool(getUniform("useOutline"), false);

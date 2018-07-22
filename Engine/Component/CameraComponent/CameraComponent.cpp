@@ -9,9 +9,8 @@
 
 namespace neo {
 
-    CameraComponent::CameraComponent(GameObject &gameObject, float fov, float near, float far, SpatialComponent *spatial = nullptr) :
+    CameraComponent::CameraComponent(GameObject &gameObject, float fov, float near, float far) :
          Component(gameObject),
-         spatial(spatial),
          fov(fov),
          near(near),
          far(far),
@@ -22,9 +21,6 @@ namespace neo {
     {}
 
     void CameraComponent::init() {
-        if (spatial) assert(&spatial->getGameObject() == &getGameObject());
-        else assert(spatial = getGameObject().getSpatial());
-        
         viewMatDirty = true;
         projMatDirty = true;
     }
@@ -41,7 +37,7 @@ namespace neo {
     }
 
     const glm::vec3 CameraComponent::getLookDir() const {
-        return -spatial->getW();
+        return -gameObject->getSpatial()->getW();
     }
 
     const glm::mat4 & CameraComponent::getView() const {
@@ -59,6 +55,7 @@ namespace neo {
     }
 
     void CameraComponent::detView() const {
+        auto spatial = gameObject->getSpatial();
         glm::vec3 t(-spatial->getPosition());
         const glm::vec3 & u = spatial->getU();
         const glm::vec3 & v = spatial->getV();

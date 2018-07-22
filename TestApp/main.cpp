@@ -23,7 +23,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         gameObject = &NeoEngine::createGameObject();
         spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(1.f));
-        cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far, spatial);
+        cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far);
         cameraController = &NeoEngine::addComponent<CameraControllerComponent>(*gameObject, ls, ms);
 
         NeoEngine::addImGuiFunc("Camera", [&]() {
@@ -55,7 +55,7 @@ struct Renderable {
 
         gameObject = &NeoEngine::createGameObject();
         spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
-        renderComponent = &NeoEngine::addComponent<CustomRenderable>(*gameObject, mesh, spatial);
+        renderComponent = &NeoEngine::addComponent<CustomRenderable>(*gameObject, mesh);
     }
 
     void attachImGui(const std::string & name) {
