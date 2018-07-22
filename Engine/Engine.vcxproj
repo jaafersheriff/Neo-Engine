@@ -23,6 +23,7 @@
     <ClInclude Include="Component\CameraComponent\CameraControllerComponent.hpp" />
     <ClInclude Include="Component\Component.hpp" />
     <ClInclude Include="Component\Components.hpp" />
+    <ClInclude Include="Component\RenderableComponent\RenderableComponent.hpp" />
     <ClInclude Include="Component\SpatialComponent\Orientable.hpp" />
     <ClInclude Include="Component\SpatialComponent\SpatialComponent.hpp" />
     <ClInclude Include="ext\imgui\imconfig.h" />

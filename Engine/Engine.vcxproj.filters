@@ -50,6 +50,7 @@
     <ClInclude Include="Window\Keyboard.hpp" />
     <ClInclude Include="Component\CameraComponent\CameraControllerComponent.hpp" />
     <ClInclude Include="Util\Util.hpp" />
+    <ClInclude Include="Component\RenderableComponent\RenderableComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />

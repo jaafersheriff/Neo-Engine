@@ -23,7 +23,7 @@ class CustomShader : public Shader {
             auto renderables = NeoEngine::getComponents<CustomRenderable>();
             for (auto r : renderables) {
                 /* Bind mesh */
-                const Mesh & mesh(*r->mesh);
+                const Mesh & mesh(*r->getMesh());
                 glBindVertexArray(mesh.vaoId);
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId);
 
