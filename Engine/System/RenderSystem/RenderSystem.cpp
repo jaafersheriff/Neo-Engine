@@ -26,7 +26,9 @@ namespace neo {
 
         /* Render all shaders */
         for (auto & shader : shaders) {
-            shader.get()->render(dt, *this);
+            if (shader.get()->active) {
+                shader.get()->render(dt, *this);
+            }
         }
     }
 

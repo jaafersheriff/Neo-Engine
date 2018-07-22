@@ -123,6 +123,9 @@ int main() {
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
     NeoEngine::addImGuiFunc("Render System", [&]() {
         ImGui::Text("# Shaders:  %d", renderSystem->shaders.size());
+        for (auto it(renderSystem->shaders.begin()); it != renderSystem->shaders.end(); ++it) {
+            ImGui::Checkbox(it->get()->name().c_str(), &it->get()->active);
+        }
 
         int size = 0;
         for (auto it(renderSystem->renderables.begin()); it != renderSystem->renderables.end(); ++it) {

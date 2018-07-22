@@ -20,7 +20,9 @@ namespace neo {
         Shader(const std::string &, const std::string &, const std::string &);
         virtual ~Shader() = default;
 
+        virtual std::string name() = 0;
         virtual void render(float, const RenderSystem &) {};
+        bool active = true;
 
         /* Utility functions */
         void bind();

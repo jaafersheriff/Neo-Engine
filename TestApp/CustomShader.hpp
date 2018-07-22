@@ -13,6 +13,9 @@ class CustomShader : public Shader {
             Shader(res, vert, frag)
         {}
 
+        virtual std::string name() { return "Custom Shader"; }
+
+
         virtual void render(float dt, const RenderSystem &renderSystem) override {
             bind();
 

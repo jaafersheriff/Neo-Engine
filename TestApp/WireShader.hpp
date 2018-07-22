@@ -13,6 +13,8 @@ class WireShader : public Shader {
             Shader(res, vert, frag)
         {}
 
+        virtual std::string name() { return "Wire Shader"; }
+        
         virtual void render(float dt, const RenderSystem &renderSystem) override {
             bind();
 
