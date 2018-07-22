@@ -55,8 +55,8 @@ struct Renderable {
         renderComponent = &NeoEngine::addComponent<CustomRenderable>(*gameObject, mesh);
     }
 
-    bool customShader = true;
-    bool wireShader = true;
+    bool customShader = false;
+    bool wireShader = false;
     void attachImGui(const std::string & name) {
         NeoEngine::addImGuiFunc(name, [&]() {
             ImGui::Text("# Shaders: %d", renderComponent->getShaders().size());
