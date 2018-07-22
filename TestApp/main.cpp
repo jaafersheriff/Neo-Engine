@@ -1,6 +1,7 @@
 #include <NeoEngine.hpp>
 
 #include "CustomShader.hpp"
+#include "WireShader.hpp"
 #include "CustomRenderable.hpp"
 #include "CustomSystem.hpp"
 
@@ -8,10 +9,6 @@ using namespace neo;
 
 /* Systems */
 RenderSystem * renderSystem;
-CustomSystem * customSystem;
-
-/* Shaders */
-CustomShader * customShader;
 
 /* Game object definitions */
 struct Camera {
@@ -92,11 +89,12 @@ int main() {
     cube.attachImGui("Cube");
     
     /* Systems - order matters! */
-    customSystem = &NeoEngine::addSystem<CustomSystem>(camera.cameraController);
+    &NeoEngine::addSystem<CustomSystem>(camera.cameraController);
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
 
     /* Shaders */
-    customShader = &renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
+    &renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
+    &renderSystem->addShader<WireShader>("wire.vert", "wire.frag");
 
     /* Run */
     NeoEngine::initSystems();

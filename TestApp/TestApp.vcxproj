@@ -140,12 +140,15 @@
     <ClInclude Include="CustomRenderable.hpp" />
     <ClInclude Include="CustomShader.hpp" />
     <ClInclude Include="CustomSystem.hpp" />
+    <ClInclude Include="WireShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />
     <None Include="README.md" />
     <None Include="shaders\custom.frag" />
     <None Include="shaders\custom.vert" />
+    <None Include="shaders\wire.frag" />
+    <None Include="shaders\wire.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
