@@ -55,8 +55,8 @@ struct Renderable {
         renderComponent = &NeoEngine::addComponent<CustomRenderable>(*gameObject, mesh);
     }
 
-    bool customShader = false;
-    bool wireShader = false;
+    bool customShader = true;
+    bool wireShader = true;
     void attachImGui(const std::string & name) {
         NeoEngine::addImGuiFunc(name, [&]() {
             ImGui::Text("# Shaders: %d", renderComponent->getShaders().size());
@@ -107,6 +107,11 @@ int main() {
         ImGui::Text("# GameObjects:  %d", NeoEngine::getGameObjects().size());
         ImGui::Text("# Systems: %d", NeoEngine::getSystems().size());
     });
+    NeoEngine::addImGuiFunc("Systems", [&]() {
+        for (auto sys : NeoEngine::getSystems()) {
+            ImGui::Checkbox(sys->name().c_str(), &sys->active);
+        }
+    });
 
     /* Init components */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 2.f, 5.f);
@@ -129,7 +134,6 @@ int main() {
     /* Shaders */
     renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
     renderSystem->addShader<WireShader>("wire.vert", "wire.frag");
-
 
     /* Run */
     NeoEngine::initSystems();

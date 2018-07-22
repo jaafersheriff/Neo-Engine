@@ -19,6 +19,7 @@ namespace neo {
                 camera(camera)
             {}
 
+            virtual std::string name() { return "Render System"; }
             virtual void init() override;
             virtual void update(float) override;
 

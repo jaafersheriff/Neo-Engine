@@ -15,18 +15,16 @@ class CustomSystem : public System {
             renderables = &NeoEngine::getComponents<CustomRenderable>();
         }
 
+        virtual std::string name() { return "Custom System"; }
+
         virtual void update(float dt) override {
             camera->update(dt);
-            if (!active) {
-                return;
-            }
 
             for (auto r : *renderables) {
                 r->update(dt);
             }
         }
 
-        bool active = true;
         const std::vector<CustomRenderable *> *renderables;
         CameraControllerComponent *camera;
 };

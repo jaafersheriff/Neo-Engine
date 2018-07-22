@@ -76,7 +76,9 @@ namespace neo {
 
             /* Update each system */
             for (auto & system : systems) {
-                system.get()->update((float)timeStep);
+                if (system.get()->active) {
+                    system.get()->update((float)timeStep);
+                }
             }
 
             /* Render imgui */
