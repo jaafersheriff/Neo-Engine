@@ -6,10 +6,13 @@
 
 namespace neo {
 
+    class NeoEngine;
     class Component;
     class SpatialComponent;
 
     class GameObject {
+
+        friend NeoEngine;
 
         public:
             /* Don't copy GameObjects */
@@ -30,12 +33,13 @@ namespace neo {
             /* Get First component by type */
             template <typename CompT> CompT * getComponentByType() const;
 
-            std::unordered_map<std::type_index, std::vector<Component *>> compsByCompT;
+            int getNumberComponents() { return allComponents.size(); }
 
         private:
             /* Containers */
             SpatialComponent * spatial;
             std::vector<Component *> allComponents;
+            std::unordered_map<std::type_index, std::vector<Component *>> compsByCompT;
     };
 
     /* Template implementation */
