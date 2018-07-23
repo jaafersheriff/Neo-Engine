@@ -11,7 +11,7 @@ namespace neo {
     /* ECS */
     std::vector<std::unique_ptr<GameObject>> NeoEngine::gameObjects;
     std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> NeoEngine::components;
-    std::vector<std::unique_ptr<System>> NeoEngine::systems;
+    std::unordered_map<std::type_index, std::unique_ptr<System>> NeoEngine::systems;
 
     std::vector<std::unique_ptr<GameObject>> NeoEngine::gameObjectInitQueue;
     std::vector<GameObject *> NeoEngine::gameObjectKillQueue;
@@ -49,7 +49,7 @@ namespace neo {
 
     void NeoEngine::initSystems() {
         for (auto & system : systems) {
-            system.get()->init();
+            system.second->init();
         }
     }
 
@@ -76,8 +76,8 @@ namespace neo {
 
             /* Update each system */
             for (auto & system : systems) {
-                if (system.get()->active) {
-                    system.get()->update((float)timeStep);
+                if (system.second->active) {
+                    system.second->update((float)timeStep);
                 }
             }
 

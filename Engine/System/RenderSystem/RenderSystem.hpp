@@ -25,7 +25,6 @@ namespace neo {
 
             const CameraComponent & getCamera() const { return *camera; }
 
-
             /* Shaders */
             std::vector<std::unique_ptr<Shader>> shaders;
             template <typename ShaderT, typename... Args> ShaderT & addShader(Args &&...);

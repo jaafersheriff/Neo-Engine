@@ -13,13 +13,12 @@ RenderSystem * renderSystem;
 /* Game object definitions */
 struct Camera {
     GameObject *gameObject;
-    SpatialComponent *spatial;
     CameraControllerComponent *cameraController;
     CameraComponent *cameraComp;
 
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         gameObject = &NeoEngine::createGameObject();
-        spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(1.f));
+        NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(1.f));
         cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far);
         cameraController = &NeoEngine::addComponent<CameraControllerComponent>(*gameObject, ls, ms);
 
@@ -34,7 +33,7 @@ struct Camera {
             ImGui::SliderFloat("Far", &far, 10.f, 10000.f);
             cameraComp->setNearFar(near, far);
 
-            glm::vec3 position = spatial->getPosition();
+            glm::vec3 position = gameObject->getSpatial()->getPosition();
             ImGui::Text("Pos:     %0.2f, %0.2f, %0.2f", position.x, position.y, position.z);
             glm::vec3 lookDir  = cameraComp->getLookDir();
             ImGui::Text("lookDir: %0.2f, %0.2f, %0.2f", lookDir.x, lookDir.y, lookDir.z);
@@ -44,19 +43,21 @@ struct Camera {
 
 struct Renderable {
     GameObject *gameObject;
+    RenderableComponent *renderComp;
 
     Renderable(Mesh *m, glm::vec3 p, float s, glm::mat3 o = glm::mat3()) {
         Mesh *mesh = m;
 
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
-        NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh);
+        renderComp = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh);
     }
 
-    bool customShader = false;
-    bool wireShader = false;
+    bool customShaderEnabled = true;
+    bool wireShaderEnabled = true;
     void attachImGui(const std::string & name) {
         NeoEngine::addImGuiFunc(name, [&]() {
+            ImGui::Text("Components: %d", gameObject->getNumberComponents());
             if (ImGui::Button("Add custom component")) {
                 NeoEngine::addComponent<CustomComponent>(*gameObject);
             }
@@ -64,11 +65,10 @@ struct Renderable {
                 NeoEngine::removeComponent<CustomComponent>(*gameObject->getComponentByType<CustomComponent>());
             }
  
-            RenderableComponent *renderComp = gameObject->getComponentByType<RenderableComponent>();
             ImGui::Text("Shaders: %d", renderComp->getShaders().size());
             if (ImGui::Button("Custom Shader")) {
-                customShader = !customShader;
-                if (customShader) {
+                customShaderEnabled = !customShaderEnabled;
+                if (customShaderEnabled) {
                     renderSystem->attachShaderToComp<CustomShader>(renderComp);
                 }
                 else {
@@ -76,8 +76,8 @@ struct Renderable {
                 }
             }
             if (ImGui::Button("Wire Shader")) {
-                wireShader = !wireShader;
-                if (wireShader) {
+                wireShaderEnabled = !wireShaderEnabled;
+                if (wireShaderEnabled) {
                     renderSystem->attachShaderToComp<WireShader>(renderComp);
                 }
                 else {
@@ -99,18 +99,23 @@ struct Renderable {
 int main() {
     NeoEngine::init("TestApp", "res/", 1280, 720);
 
-    /* Init components */
+    /* Init engine-necessary components */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 2.f, 5.f);
-    Renderable cube(Loader::getMesh("cube.obj"), glm::vec3(0.f), 1.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
-    cube.attachImGui("Cube");
    
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>(camera.cameraController);
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
+    NeoEngine::initSystems();
 
     /* Shaders */
     renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
     renderSystem->addShader<WireShader>("wire.vert", "wire.frag");
+
+    /* Init app components */
+    Renderable cube(Loader::getMesh("cube.obj"), glm::vec3(0.f), 1.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
+    cube.attachImGui("Cube");
+    renderSystem->attachShaderToComp<CustomShader>(cube.renderComp);
+    renderSystem->attachShaderToComp<WireShader>(cube.renderComp);
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
@@ -135,7 +140,7 @@ int main() {
     });
     NeoEngine::addImGuiFunc("Systems", [&]() {
         for (auto sys : NeoEngine::getSystems()) {
-            ImGui::Checkbox(sys->name().c_str(), &sys->active);
+            ImGui::Checkbox(sys.second->name().c_str(), &sys.second->active);
         }
     });
     NeoEngine::addImGuiFunc("Render System", [&]() {
@@ -151,10 +156,7 @@ int main() {
         ImGui::Text("Renderables: %d", size);
     });
 
-
-
     /* Run */
-    NeoEngine::initSystems();
     NeoEngine::run();
 
     return 0;
