@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CustomRenderable.hpp"
+#include "CustomComponent.hpp"
 #include "Shader/Shader.hpp"
 #include "Shader/GLHelper.hpp"
 
@@ -23,7 +23,7 @@ class CustomShader : public Shader {
             loadMatrix(getUniform("P"), renderSystem.getCamera().getProj());
             loadMatrix(getUniform("V"), renderSystem.getCamera().getView());
 
-            for (auto r : renderSystem.getRenderables<CustomShader, CustomRenderable>()) {
+            for (auto r : renderSystem.getRenderables<CustomShader, RenderableComponent>()) {
                 /* Bind mesh */
                 const Mesh & mesh(*r->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.vaoId));

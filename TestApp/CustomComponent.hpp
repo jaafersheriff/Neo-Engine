@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Component/RenderableComponent/RenderableComponent.hpp"
+#include "Component/Component.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
 namespace neo {
 
-    class CustomRenderable : public RenderableComponent {
+    class CustomComponent : public Component {
         public:
-            CustomRenderable(GameObject &go, Mesh *m) :
-                RenderableComponent(go, m)
+            CustomComponent(GameObject &go) :
+                Component(go)
             {}
 
             virtual void update(float dt) override {

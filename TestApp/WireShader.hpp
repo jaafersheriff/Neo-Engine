@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CustomRenderable.hpp"
+#include "CustomComponent.hpp"
 #include "Shader/Shader.hpp"
 #include "Shader/GLHelper.hpp"
 
@@ -22,7 +22,7 @@ class WireShader : public Shader {
             loadMatrix(getUniform("P"), renderSystem.getCamera().getProj());
             loadMatrix(getUniform("V"), renderSystem.getCamera().getView());
 
-            for (auto r : renderSystem.getRenderables<WireShader, CustomRenderable>()) {
+            for (auto r : renderSystem.getRenderables<WireShader, RenderableComponent>()) {
                 /* Bind mesh */
                 const Mesh & mesh(*r->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.vaoId));

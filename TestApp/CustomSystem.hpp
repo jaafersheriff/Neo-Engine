@@ -3,7 +3,7 @@
 #include <NeoEngine.hpp>
 #include "System/System.hpp"
 
-#include "CustomRenderable.hpp" 
+#include "CustomComponent.hpp" 
 
 using namespace neo;
 
@@ -12,19 +12,20 @@ class CustomSystem : public System {
     public:
         CustomSystem(CameraControllerComponent *cc) :
             camera(cc) {
-            renderables = &NeoEngine::getComponents<CustomRenderable>();
+            comps = &NeoEngine::getComponents<CustomComponent>();
         }
+
+        const std::vector<CustomComponent *> *comps;
+        CameraControllerComponent *camera;
 
         virtual std::string name() { return "Custom System"; }
 
         virtual void update(float dt) override {
             camera->update(dt);
 
-            for (auto r : *renderables) {
-                r->update(dt);
+            for (auto c : *comps) {
+                c->update(dt);
             }
         }
 
-        const std::vector<CustomRenderable *> *renderables;
-        CameraControllerComponent *camera;
 };
