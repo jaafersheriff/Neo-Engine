@@ -117,6 +117,9 @@ namespace neo {
 
     template <typename CompT>
     void NeoEngine::removeComponent(CompT & component) {
+        if (!&component) {
+            return;
+        }
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
