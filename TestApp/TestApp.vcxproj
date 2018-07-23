@@ -137,7 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CustomRenderable.hpp" />
+    <ClInclude Include="CustomComponent.hpp" />
     <ClInclude Include="CustomShader.hpp" />
     <ClInclude Include="CustomSystem.hpp" />
     <ClInclude Include="WireShader.hpp" />

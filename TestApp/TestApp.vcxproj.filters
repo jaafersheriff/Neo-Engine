@@ -18,10 +18,10 @@
     <None Include="shaders\wire.frag" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CustomRenderable.hpp" />
     <ClInclude Include="CustomSystem.hpp" />
     <ClInclude Include="CustomShader.hpp" />
     <ClInclude Include="WireShader.hpp" />
+    <ClInclude Include="CustomComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

@@ -2,7 +2,7 @@
 
 #include "CustomShader.hpp"
 #include "WireShader.hpp"
-#include "CustomRenderable.hpp"
+#include "CustomComponent.hpp"
 #include "CustomSystem.hpp"
 
 using namespace neo;
@@ -44,47 +44,53 @@ struct Camera {
 
 struct Renderable {
     GameObject *gameObject;
-    SpatialComponent *spatial;
-    CustomRenderable *renderComponent;
 
     Renderable(Mesh *m, glm::vec3 p, float s, glm::mat3 o = glm::mat3()) {
         Mesh *mesh = m;
 
         gameObject = &NeoEngine::createGameObject();
-        spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
-        renderComponent = &NeoEngine::addComponent<CustomRenderable>(*gameObject, mesh);
+        NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
+        NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh);
     }
 
     bool customShader = false;
     bool wireShader = false;
     void attachImGui(const std::string & name) {
         NeoEngine::addImGuiFunc(name, [&]() {
-            ImGui::Text("# Shaders: %d", renderComponent->getShaders().size());
+            if (ImGui::Button("Add custom component")) {
+                NeoEngine::addComponent<CustomComponent>(*gameObject);
+            }
+            if (ImGui::Button("Remove custom component")) {
+                NeoEngine::removeComponent<CustomComponent>(*gameObject->getComponentByType<CustomComponent>());
+            }
+ 
+            RenderableComponent *renderComp = gameObject->getComponentByType<RenderableComponent>();
+            ImGui::Text("Shaders: %d", renderComp->getShaders().size());
             if (ImGui::Button("Custom Shader")) {
                 customShader = !customShader;
                 if (customShader) {
-                    renderSystem->attachShaderToComp<CustomShader>(renderComponent);
+                    renderSystem->attachShaderToComp<CustomShader>(renderComp);
                 }
                 else {
-                    renderSystem->removeShaderToComp<CustomShader>(renderComponent);
+                    renderSystem->removeShaderToComp<CustomShader>(renderComp);
                 }
             }
             if (ImGui::Button("Wire Shader")) {
                 wireShader = !wireShader;
                 if (wireShader) {
-                    renderSystem->attachShaderToComp<WireShader>(renderComponent);
+                    renderSystem->attachShaderToComp<WireShader>(renderComp);
                 }
                 else {
-                    renderSystem->removeShaderToComp<WireShader>(renderComponent);
+                    renderSystem->removeShaderToComp<WireShader>(renderComp);
                 }
             }
-            glm::vec3 pos = spatial->getPosition();
+            glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
-                spatial->setPosition(pos);
+                gameObject->getSpatial()->setPosition(pos);
             }
-            float scale = spatial->getScale().x;
+            float scale = gameObject->getSpatial()->getScale().x;
             if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
-                spatial->setScale(glm::vec3(scale));
+                gameObject->getSpatial()->setScale(glm::vec3(scale));
             }
         });
     }
@@ -92,6 +98,21 @@ struct Renderable {
 
 int main() {
     NeoEngine::init("TestApp", "res/", 1280, 720);
+
+    /* Init components */
+    Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 2.f, 5.f);
+    Renderable cube(Loader::getMesh("cube.obj"), glm::vec3(0.f), 1.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
+    cube.attachImGui("Cube");
+   
+    /* Systems - order matters! */
+    NeoEngine::addSystem<CustomSystem>(camera.cameraController);
+    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
+
+    /* Shaders */
+    renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
+    renderSystem->addShader<WireShader>("wire.vert", "wire.frag");
+
+    /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
         ImGui::Text("FPS: %d", NeoEngine::FPS);
         ImGui::Text("dt: %0.4f", NeoEngine::timeStep);
@@ -104,25 +125,21 @@ int main() {
         ImGui::Text("Mouse dx, dy: %0.2f, %0.2f", Mouse::dx, Mouse::dy);
     });
     NeoEngine::addImGuiFunc("Engine", [&]() {
-        ImGui::Text("# GameObjects:  %d", NeoEngine::getGameObjects().size());
-        ImGui::Text("# Systems: %d", NeoEngine::getSystems().size());
+        ImGui::Text("GameObjects:  %d", NeoEngine::getGameObjects().size());
+        int count = 0;
+        for (auto go : NeoEngine::getGameObjects()) {
+            count += go->getNumberComponents();
+        }
+        ImGui::Text("Components:  %d", count);
+        ImGui::Text("Systems: %d", NeoEngine::getSystems().size());
     });
     NeoEngine::addImGuiFunc("Systems", [&]() {
         for (auto sys : NeoEngine::getSystems()) {
             ImGui::Checkbox(sys->name().c_str(), &sys->active);
         }
     });
-
-    /* Init components */
-    Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 2.f, 5.f);
-    Renderable cube(Loader::getMesh("cube.obj"), glm::vec3(0.f), 1.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
-    cube.attachImGui("Cube");
-    
-    /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>(camera.cameraController);
-    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
     NeoEngine::addImGuiFunc("Render System", [&]() {
-        ImGui::Text("# Shaders:  %d", renderSystem->shaders.size());
+        ImGui::Text("Shaders:  %d", renderSystem->shaders.size());
         for (auto it(renderSystem->shaders.begin()); it != renderSystem->shaders.end(); ++it) {
             ImGui::Checkbox(it->get()->name().c_str(), &it->get()->active);
         }
@@ -131,12 +148,10 @@ int main() {
         for (auto it(renderSystem->renderables.begin()); it != renderSystem->renderables.end(); ++it) {
             size += it->second->size();
         }
-        ImGui::Text("# Renderables: [%d, %d]", renderSystem->renderables.size(), size);
+        ImGui::Text("Renderables: %d", size);
     });
 
-    /* Shaders */
-    renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
-    renderSystem->addShader<WireShader>("wire.vert", "wire.frag");
+
 
     /* Run */
     NeoEngine::initSystems();
