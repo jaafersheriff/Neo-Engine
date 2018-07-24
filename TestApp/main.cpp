@@ -72,7 +72,7 @@ struct Renderable {
                     renderSystem->attachShaderToComp<CustomShader>(renderComp);
                 }
                 else {
-                    renderSystem->removeShaderToComp<CustomShader>(renderComp);
+                    renderSystem->detachShaderFromComp<CustomShader>(renderComp);
                 }
             }
             if (ImGui::Button("Wire Shader")) {
@@ -81,7 +81,7 @@ struct Renderable {
                     renderSystem->attachShaderToComp<WireShader>(renderComp);
                 }
                 else {
-                    renderSystem->removeShaderToComp<WireShader>(renderComp);
+                    renderSystem->detachShaderFromComp<WireShader>(renderComp);
                 }
             }
             glm::vec3 pos = gameObject->getSpatial()->getPosition();

@@ -33,7 +33,7 @@ namespace neo {
             mutable std::unordered_map<std::type_index, std::unique_ptr<std::vector<RenderableComponent *>>> renderables;
             template <typename ShaderT, typename CompT> const std::vector<CompT *> & getRenderables() const;
             template <typename ShaderT> void attachShaderToComp(RenderableComponent *);
-            template <typename ShaderT> void removeShaderToComp(RenderableComponent *);
+            template <typename ShaderT> void detachShaderFromComp(RenderableComponent *);
 
         private:
             const std::string APP_SHADER_DIR;
@@ -77,7 +77,7 @@ namespace neo {
     }
 
     template <typename ShaderT> 
-    void RenderSystem::removeShaderToComp(RenderableComponent *renderable) {
+    void RenderSystem::detachShaderFromComp(RenderableComponent *renderable) {
         std::type_index typeI(typeid(ShaderT));
         assert(renderables.count(typeI));
         /* Look in active components in reverse order */
