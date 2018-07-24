@@ -15,11 +15,11 @@ namespace neo {
 
         public:
             RenderSystem(const std::string &dir, const CameraComponent *camera) :
+                System("Render System"),
                 APP_SHADER_DIR(dir),
                 camera(camera)
             {}
 
-            virtual std::string name() { return "Render System"; }
             virtual void init() override;
             virtual void update(float) override;
 

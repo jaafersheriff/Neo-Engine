@@ -113,11 +113,11 @@ int main() {
 
     /* Init app components */
     Renderable cube(Loader::getMesh("cube.obj"), glm::vec3(0.f), 1.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
-    cube.attachImGui("Cube");
     renderSystem->attachShaderToComp<CustomShader>(cube.renderComp);
     renderSystem->attachShaderToComp<WireShader>(cube.renderComp);
 
     /* Attach ImGui panes */
+    cube.attachImGui("Cube");
     NeoEngine::addImGuiFunc("Stats", [&]() {
         ImGui::Text("FPS: %d", NeoEngine::FPS);
         ImGui::Text("dt: %0.4f", NeoEngine::timeStep);
@@ -140,7 +140,7 @@ int main() {
     });
     NeoEngine::addImGuiFunc("Systems", [&]() {
         for (auto sys : NeoEngine::getSystems()) {
-            ImGui::Checkbox(sys.second->name().c_str(), &sys.second->active);
+            ImGui::Checkbox(sys.second->name.c_str(), &sys.second->active);
         }
     });
     NeoEngine::addImGuiFunc("Render System", [&]() {

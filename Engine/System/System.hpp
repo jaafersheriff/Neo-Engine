@@ -7,10 +7,13 @@ namespace neo {
     class System {
 
         public:
-            virtual std::string name() = 0;
+            System(const std::string & name) :
+                name(name)
+            {}
+
             virtual void init() {};
             virtual void update(float) {};
             bool active = true;
-
+            const std::string name;
     };
 }
