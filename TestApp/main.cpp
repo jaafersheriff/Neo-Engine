@@ -146,7 +146,7 @@ int main() {
     NeoEngine::addImGuiFunc("Render System", [&]() {
         ImGui::Text("Shaders:  %d", renderSystem->shaders.size());
         for (auto it(renderSystem->shaders.begin()); it != renderSystem->shaders.end(); ++it) {
-            ImGui::Checkbox(it->get()->name().c_str(), &it->get()->active);
+            ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
         }
 
         int size = 0;

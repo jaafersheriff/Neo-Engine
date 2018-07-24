@@ -16,13 +16,18 @@ namespace neo {
     class Shader {
 
     public:
+        Shader(const std::string &, const std::string &, const std::string &, const std::string &, const std::string &);
         Shader(const std::string &, const std::string &, const std::string &, const std::string &);
-        Shader(const std::string &, const std::string &, const std::string &);
         virtual ~Shader() = default;
 
-        virtual std::string name() = 0;
         virtual void render(float, const RenderSystem &) {};
         bool active = true;
+
+        /* Names */
+        const std::string name;
+        const std::string vShaderName;
+        const std::string gShaderName;
+        const std::string fShaderName;
 
         /* Utility functions */
         void bind();

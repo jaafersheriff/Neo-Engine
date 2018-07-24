@@ -10,10 +10,8 @@ class WireShader : public Shader {
 
     public:
         WireShader(const std::string &res, const std::string &vert, const std::string &frag) :
-            Shader(res, vert, frag)
+            Shader("Wire Shader", res, vert, frag)
         {}
-
-        virtual std::string name() { return "Wire Shader"; }
         
         virtual void render(float dt, const RenderSystem &renderSystem) override {
             bind();

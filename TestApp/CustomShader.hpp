@@ -10,11 +10,8 @@ class CustomShader : public Shader {
 
     public:
         CustomShader(const std::string &res, const std::string &vert, const std::string &frag) :
-            Shader(res, vert, frag)
+            Shader("Custom Shader", res, vert, frag)
         {}
-
-        virtual std::string name() { return "Custom Shader"; }
-
 
         virtual void render(float dt, const RenderSystem &renderSystem) override {
             bind();
