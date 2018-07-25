@@ -51,7 +51,7 @@ namespace neo {
 
             /* Getters */
             static const std::vector<GameObject *> & getGameObjects() { return reinterpret_cast<const std::vector<GameObject *> &>(gameObjects); }
-            template <typename SysT>  static SysT & getSystem();
+            template <typename SysT> static SysT & getSystem();
             static const std::unordered_map<std::type_index, System *> & getSystems() { return reinterpret_cast<const std::unordered_map<std::type_index, System *> &>(systems); }
             template <typename CompT> static const std::vector<CompT *> & getComponents();
 

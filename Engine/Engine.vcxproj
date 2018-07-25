@@ -50,6 +50,7 @@
   <ItemGroup>
     <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
     <ClCompile Include="Component\CameraComponent\CameraControllerComponent.cpp" />
+    <ClCompile Include="Component\RenderableComponent\RenderableComponent.cpp" />
     <ClCompile Include="Component\SpatialComponent\SpatialComponent.cpp" />
     <ClCompile Include="ext\imgui\imgui.cpp" />
     <ClCompile Include="ext\imgui\imgui_demo.cpp" />

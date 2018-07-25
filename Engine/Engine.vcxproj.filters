@@ -69,6 +69,7 @@
     <ClCompile Include="Window\Mouse.cpp" />
     <ClCompile Include="Window\Keyboard.cpp" />
     <ClCompile Include="Component\CameraComponent\CameraControllerComponent.cpp" />
+    <ClCompile Include="Component\RenderableComponent\RenderableComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
