@@ -177,6 +177,7 @@ namespace neo {
         for (auto & killE : componentKillQueue) {
             std::type_index typeI(killE.first);
             Component * comp(killE.second);
+            comp->kill();
             bool found(false);
             /* Look in active components in reverse order */
             if (components.count(typeI)) {
