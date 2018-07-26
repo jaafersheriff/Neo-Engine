@@ -44,6 +44,7 @@ struct Camera {
 struct Renderable {
     GameObject *gameObject;
     RenderableComponent *renderComp;
+    bool alive = false;
 
     Renderable(Mesh *m, glm::vec3 p, float s, glm::mat3 o = glm::mat3()) {
         Mesh *mesh = m;
@@ -51,12 +52,24 @@ struct Renderable {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
         renderComp = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh);
+        renderComp->addShaderType<CustomShader>(*renderSystem);
+        renderComp->addShaderType<WireShader>(*renderSystem);
+
+        alive = true;
     }
 
     bool customShaderEnabled = true;
     bool wireShaderEnabled = true;
     void attachImGui(const std::string & name) {
         NeoEngine::addImGuiFunc(name, [&]() {
+            if (!alive) {
+                return;
+            }
+            if (ImGui::Button("Destroy")) {
+                NeoEngine::removeGameObject(*gameObject);
+                alive = false;
+                return;
+            }
             ImGui::Text("Components: %d", gameObject->getNumberComponents());
             if (ImGui::Button("Add custom component")) {
                 NeoEngine::addComponent<CustomComponent>(*gameObject);
@@ -69,19 +82,19 @@ struct Renderable {
             if (ImGui::Button("Custom Shader")) {
                 customShaderEnabled = !customShaderEnabled;
                 if (customShaderEnabled) {
-                    renderSystem->attachShaderToComp<CustomShader>(renderComp);
+                    renderComp->addShaderType<CustomShader>(*renderSystem);
                 }
                 else {
-                    renderSystem->detachShaderFromComp<CustomShader>(renderComp);
+                    renderComp->removeShaderType<CustomShader>(*renderSystem);
                 }
             }
             if (ImGui::Button("Wire Shader")) {
                 wireShaderEnabled = !wireShaderEnabled;
                 if (wireShaderEnabled) {
-                    renderSystem->attachShaderToComp<WireShader>(renderComp);
+                    renderComp->addShaderType<WireShader>(*renderSystem);
                 }
                 else {
-                    renderSystem->detachShaderFromComp<WireShader>(renderComp);
+                    renderComp->removeShaderType<WireShader>(*renderSystem);
                 }
             }
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -113,8 +126,6 @@ int main() {
 
     /* Init app components */
     Renderable cube(Loader::getMesh("cube.obj"), glm::vec3(0.f), 1.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
-    renderSystem->attachShaderToComp<CustomShader>(cube.renderComp);
-    renderSystem->attachShaderToComp<WireShader>(cube.renderComp);
 
     /* Attach ImGui panes */
     cube.attachImGui("Cube");

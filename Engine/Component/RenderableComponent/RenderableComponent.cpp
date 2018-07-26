@@ -1,5 +1,7 @@
 #include "RenderableComponent.hpp"
 
+#include "NeoEngine.hpp"
+
 namespace neo {
 
     RenderableComponent::RenderableComponent(GameObject &go, Mesh *m) :
@@ -7,25 +9,18 @@ namespace neo {
         mesh(m)
     {}
 
-    void RenderableComponent::kill() {
-        // RenderSystem & rSystem = NeoEngine::getSystem<RenderSystem>();
-        // for (auto shaderT : shaderTypes) {
-        // }
-    }
-
-    bool RenderableComponent::addShaderType(std::type_index shaderT) {
-        auto it = std::find(shaderTypes.begin(), shaderTypes.end(), shaderT);
-        if (it == shaderTypes.end()) {
-            shaderTypes.emplace_back(shaderT);
-            return true;
+    void RenderableComponent::init() {
+        isInit = true;
+        RenderSystem & rSystem = NeoEngine::getSystem<RenderSystem>();
+        for (auto shaderT : shaderTypes) {
+            rSystem.attachCompToShader(shaderT, this);
         }
-        return false;
     }
 
-    void RenderableComponent::removeShaderType(std::type_index shaderT) {
-        auto it = std::find(shaderTypes.begin(), shaderTypes.end(), shaderT);
-        if (it != shaderTypes.end()) {
-            shaderTypes.erase(it);
+    void RenderableComponent::kill() {
+        RenderSystem & rSystem = NeoEngine::getSystem<RenderSystem>();
+        for (auto shaderT : shaderTypes) {
+            rSystem.detachCompFromShader(shaderT, this);
         }
     }
 
