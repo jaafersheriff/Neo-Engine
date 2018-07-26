@@ -3,7 +3,6 @@
 #include <unordered_map>
 #include <typeindex>
 
-
 namespace neo {
 
     class NeoEngine;

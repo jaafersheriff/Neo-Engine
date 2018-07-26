@@ -96,7 +96,7 @@ namespace neo {
         return *gameObjectInitQueue.back().get();
     }
 
-    void NeoEngine::killGameObject(GameObject &go) {
+    void NeoEngine::removeGameObject(GameObject &go) {
         gameObjectKillQueue.push_back(&go);
     }
 

@@ -35,7 +35,7 @@ namespace neo {
         public:
             /* Create & destroy GameObjects */
             static GameObject & createGameObject();
-            static void killGameObject(GameObject &);
+            static void removeGameObject(GameObject &);
 
             /* Create a Component and attach it to a GameObject */
             template <typename CompT, typename... Args> static CompT & addComponent(GameObject &, Args &&...);
@@ -123,7 +123,7 @@ namespace neo {
     }
 
     template <typename SysT> 
-    SysT & NeoEngine::getSystem() {
+    SysT & NeoEngine::getSystem(void) {
         static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived system type");
         static_assert(!std::is_same<System, SysT>::value, "SysT must be a derived system type");
 
