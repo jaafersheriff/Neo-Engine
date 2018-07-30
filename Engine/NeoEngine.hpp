@@ -4,12 +4,8 @@
 #include "Window/Mouse.hpp"
 #include "Window/Keyboard.hpp"
 #include "Loader/Loader.hpp"
-#include "GameObject/GameObject.hpp"
 
-#include "Component/Component.hpp"
 #include "Component/Components.hpp"
-
-#include "System/System.hpp"
 #include "System/Systems.hpp"
 
 #include "ext/imgui/imgui.h"

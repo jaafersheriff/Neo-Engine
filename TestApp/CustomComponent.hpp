@@ -2,6 +2,8 @@
 
 #include "Component/Component.hpp"
 
+#include "GameObject/GameObject.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 namespace neo {

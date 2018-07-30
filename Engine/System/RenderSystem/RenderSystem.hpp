@@ -5,6 +5,8 @@
 
 #include "Component/CameraComponent/CameraComponent.hpp"
 
+#include <unordered_map>
+#include <typeindex>
 #include <vector>
 #include <memory>
 

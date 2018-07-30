@@ -1,5 +1,7 @@
 #include "NeoEngine.hpp"
 
+#include "GameObject/GameObject.hpp"
+
 #include <time.h>
 #include <iostream>
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GameObject/GameObject.hpp"
-
 namespace neo {
+
+    class GameObject;
 
     class Component {
 

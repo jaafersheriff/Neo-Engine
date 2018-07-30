@@ -1,6 +1,8 @@
 #include "CameraControllerComponent.hpp"
 #include "Component/SpatialComponent/SpatialComponent.hpp"
 
+#include "GameObject/GameObject.hpp"
+
 #include "Window/Mouse.hpp"
 #include "Window/Keyboard.hpp"
 

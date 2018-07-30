@@ -52,8 +52,8 @@ struct Renderable {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
         renderComp = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh);
-        renderComp->addShaderType<CustomShader>(*renderSystem);
-        renderComp->addShaderType<WireShader>(*renderSystem);
+        renderComp->addShaderType<CustomShader>();
+        renderComp->addShaderType<WireShader>();
 
         alive = true;
     }
@@ -82,19 +82,19 @@ struct Renderable {
             if (ImGui::Button("Custom Shader")) {
                 customShaderEnabled = !customShaderEnabled;
                 if (customShaderEnabled) {
-                    renderComp->addShaderType<CustomShader>(*renderSystem);
+                    renderComp->addShaderType<CustomShader>();
                 }
                 else {
-                    renderComp->removeShaderType<CustomShader>(*renderSystem);
+                    renderComp->removeShaderType<CustomShader>();
                 }
             }
             if (ImGui::Button("Wire Shader")) {
                 wireShaderEnabled = !wireShaderEnabled;
                 if (wireShaderEnabled) {
-                    renderComp->addShaderType<WireShader>(*renderSystem);
+                    renderComp->addShaderType<WireShader>();
                 }
                 else {
-                    renderComp->removeShaderType<WireShader>(*renderSystem);
+                    renderComp->removeShaderType<WireShader>();
                 }
             }
             glm::vec3 pos = gameObject->getSpatial()->getPosition();

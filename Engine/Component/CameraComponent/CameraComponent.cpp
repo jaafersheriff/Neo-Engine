@@ -1,7 +1,7 @@
 #include "CameraComponent.hpp"
+#include "Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "GameObject/GameObject.hpp"
-#include "Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "Window/Window.hpp"
 
