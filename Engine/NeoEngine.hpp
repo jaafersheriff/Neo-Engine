@@ -4,12 +4,8 @@
 #include "Window/Mouse.hpp"
 #include "Window/Keyboard.hpp"
 #include "Loader/Loader.hpp"
-#include "GameObject/GameObject.hpp"
 
-#include "Component/Component.hpp"
 #include "Component/Components.hpp"
-
-#include "System/System.hpp"
 #include "System/Systems.hpp"
 
 #include "ext/imgui/imgui.h"
@@ -35,7 +31,7 @@ namespace neo {
         public:
             /* Create & destroy GameObjects */
             static GameObject & createGameObject();
-            static void killGameObject(GameObject &);
+            static void removeGameObject(GameObject &);
 
             /* Create a Component and attach it to a GameObject */
             template <typename CompT, typename... Args> static CompT & addComponent(GameObject &, Args &&...);
@@ -51,7 +47,8 @@ namespace neo {
 
             /* Getters */
             static const std::vector<GameObject *> & getGameObjects() { return reinterpret_cast<const std::vector<GameObject *> &>(gameObjects); }
-            static const std::vector<System *> & getSystems() { return reinterpret_cast<const std::vector<System *> &>(systems); }
+            template <typename SysT> static SysT & getSystem();
+            static const std::unordered_map<std::type_index, System *> & getSystems() { return reinterpret_cast<const std::unordered_map<std::type_index, System *> &>(systems); }
             template <typename CompT> static const std::vector<CompT *> & getComponents();
 
             /* ImGui */
@@ -76,7 +73,7 @@ namespace neo {
             /* Active containers */
             static std::vector<std::unique_ptr<GameObject>> gameObjects;
             static std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> components;
-            static std::vector<std::unique_ptr<System>> systems;
+            static std::unordered_map<std::type_index, std::unique_ptr<System>> systems;
 
         /* FPS*/
         public:
@@ -111,12 +108,32 @@ namespace neo {
     SysT & NeoEngine::addSystem(Args &&... args) {
         static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived system type");
         static_assert(!std::is_same<System, SysT>::value, "SysT must be a derived system type");
-        systems.emplace_back(std::make_unique<SysT>(std::forward<Args>(args)...));
-        return static_cast<SysT &>(*systems.back());
+        std::type_index typeI(typeid(SysT));
+        auto it(systems.find(typeI));
+        if (it == systems.end()) {
+            systems.emplace(typeI, std::make_unique<SysT>(std::forward<Args>(args)...));
+            it = systems.find(typeI);
+        }
+ 
+        return static_cast<SysT &>(*systems.find(typeI)->second);
+    }
+
+    template <typename SysT> 
+    SysT & NeoEngine::getSystem(void) {
+        static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived system type");
+        static_assert(!std::is_same<System, SysT>::value, "SysT must be a derived system type");
+
+        std::type_index typeI(typeid(SysT));
+        assert(systems.count(typeI));
+        // this is valid because unique_ptr<T> is exactly the same data as T *
+        return reinterpret_cast<SysT &>(*(systems.find(typeI)->second));
     }
 
     template <typename CompT>
     void NeoEngine::removeComponent(CompT & component) {
+        if (!&component) {
+            return;
+        }
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 

@@ -1,6 +1,8 @@
 #include "CameraControllerComponent.hpp"
 #include "Component/SpatialComponent/SpatialComponent.hpp"
 
+#include "GameObject/GameObject.hpp"
+
 #include "Window/Mouse.hpp"
 #include "Window/Keyboard.hpp"
 
@@ -10,7 +12,6 @@ namespace neo {
 
     CameraControllerComponent::CameraControllerComponent(GameObject &go, float lookSpeed, float moveSpeed) :
         Component(go),
-        spatial(nullptr),
         theta(0.f),
         phi(Util::PI() * 0.5f),
         lookSpeed(lookSpeed),
@@ -25,10 +26,6 @@ namespace neo {
         leftButton     = r;
         upButton       = u;
         downButton     = d;
-    }
-
-    void CameraControllerComponent::init() {
-        assert(spatial = getGameObject().getSpatial());
     }
 
     void CameraControllerComponent::update(float dt) {
@@ -52,8 +49,12 @@ namespace neo {
         );
 
         if (dir != glm::vec3()) {
+            auto spatial = gameObject->getSpatial();
             dir = glm::normalize(dir);
-            dir = glm::normalize(spatial->getU() * dir.x + glm::vec3(0.f, 1.f, 0.f) * dir.y + spatial->getW() * dir.z);
+            dir = glm::normalize(
+                spatial->getU() * dir.x + 
+                glm::vec3(0.f, 1.f, 0.f) * dir.y + 
+                spatial->getW() * dir.z);
             spatial->move(dir * moveSpeed * dt);
         }
     }
@@ -80,6 +81,6 @@ namespace neo {
         glm::vec3 v(Util::sphericalToCartesian(1.0f, theta, phi - Util::PI() * 0.5f));
         v = glm::vec3(-v.y, v.z, -v.x);
         glm::vec3 u(glm::cross(v, w));
-        spatial->setUVW(u, v, w);
+        gameObject->getSpatial()->setUVW(u, v, w);
     }
 }

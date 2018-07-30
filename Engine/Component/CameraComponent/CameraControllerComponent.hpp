@@ -13,7 +13,6 @@ namespace neo {
             CameraControllerComponent(GameObject &, float ls, float ms);
             CameraControllerComponent(CameraControllerComponent && other) = default;
 
-            virtual void init() override;
             virtual void update(float) override;
 
             void setOrientation(float p, float t);
@@ -24,7 +23,6 @@ namespace neo {
         private:
             void updateSpatialOrientation();
 
-            SpatialComponent *spatial;
             float theta, phi;
             float lookSpeed;
             float minMoveSpeed, maxMoveSpeed;

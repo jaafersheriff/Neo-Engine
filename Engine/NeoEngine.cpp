@@ -1,5 +1,7 @@
 #include "NeoEngine.hpp"
 
+#include "GameObject/GameObject.hpp"
+
 #include <time.h>
 #include <iostream>
 
@@ -11,7 +13,7 @@ namespace neo {
     /* ECS */
     std::vector<std::unique_ptr<GameObject>> NeoEngine::gameObjects;
     std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> NeoEngine::components;
-    std::vector<std::unique_ptr<System>> NeoEngine::systems;
+    std::unordered_map<std::type_index, std::unique_ptr<System>> NeoEngine::systems;
 
     std::vector<std::unique_ptr<GameObject>> NeoEngine::gameObjectInitQueue;
     std::vector<GameObject *> NeoEngine::gameObjectKillQueue;
@@ -49,7 +51,7 @@ namespace neo {
 
     void NeoEngine::initSystems() {
         for (auto & system : systems) {
-            system.get()->init();
+            system.second->init();
         }
     }
 
@@ -76,7 +78,9 @@ namespace neo {
 
             /* Update each system */
             for (auto & system : systems) {
-                system.get()->update((float)timeStep);
+                if (system.second->active) {
+                    system.second->update((float)timeStep);
+                }
             }
 
             /* Render imgui */
@@ -94,7 +98,7 @@ namespace neo {
         return *gameObjectInitQueue.back().get();
     }
 
-    void NeoEngine::killGameObject(GameObject &go) {
+    void NeoEngine::removeGameObject(GameObject &go) {
         gameObjectKillQueue.push_back(&go);
     }
 
@@ -175,6 +179,7 @@ namespace neo {
         for (auto & killE : componentKillQueue) {
             std::type_index typeI(killE.first);
             Component * comp(killE.second);
+            comp->kill();
             bool found(false);
             /* Look in active components in reverse order */
             if (components.count(typeI)) {

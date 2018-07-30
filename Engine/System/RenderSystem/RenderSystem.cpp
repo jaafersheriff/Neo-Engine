@@ -1,6 +1,7 @@
 #include "RenderSystem.hpp"
 #include "Shader/GLHelper.hpp"
 
+#include "Component/RenderableComponent/RenderableComponent.hpp"
 #include "Window/Window.hpp"
 
 namespace neo {
@@ -26,7 +27,34 @@ namespace neo {
 
         /* Render all shaders */
         for (auto & shader : shaders) {
-            shader.get()->render(dt, camera);
+            if (shader.get()->active) {
+                shader.get()->render(dt, *this);
+            }
+        }
+    }
+
+    void RenderSystem::attachCompToShader(const std::type_index &typeI, RenderableComponent *rComp) {
+        /* Get vector<RenderableComponent *> that matches this shader */
+        auto it(renderables.find(typeI));
+        if (it == renderables.end()) {
+            renderables.emplace(typeI, std::make_unique<std::vector<RenderableComponent *>>());
+            it = renderables.find(typeI);
+        }
+
+        it->second->emplace_back(rComp);
+    }
+
+    void RenderSystem::detachCompFromShader(const std::type_index &typeI, RenderableComponent *rComp) {
+        assert(renderables.count(typeI));
+        /* Look in active components in reverse order */
+        if (renderables.count(typeI)) {
+            auto & comps(*renderables.at(typeI));
+            for (int i = int(comps.size()) - 1; i >= 0; --i) {
+                if (comps[i] == rComp) {
+                    comps.erase(comps.begin() + i);
+                    break;
+                }
+            }
         }
     }
 

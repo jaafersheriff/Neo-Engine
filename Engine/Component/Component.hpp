@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GameObject/GameObject.hpp"
-
 namespace neo {
+
+    class GameObject;
 
     class Component {
 
@@ -12,6 +12,7 @@ namespace neo {
             /* Overridden functions */
             virtual void init() {};
             virtual void update(float) {};
+            virtual void kill() {};
 
             /* Remove copy constructors */
             Component(const Component &) = delete;
@@ -26,7 +27,7 @@ namespace neo {
             const GameObject & getGameObject() const { return *gameObject; }
             void removeGameObject() { gameObject = nullptr; }
                  
-        private:
+        protected:
             GameObject * gameObject;
     };
 }

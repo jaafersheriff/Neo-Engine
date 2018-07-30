@@ -6,19 +6,23 @@
 
 namespace neo {
 
-    Shader::Shader(const std::string &dir, const std::string &v, const std::string &f) :
-        Shader(dir, v, f, "")
+    Shader::Shader(const std::string &name, const std::string &dir, const std::string &v, const std::string &f) :
+        Shader(name, dir, v, f, "")
     { }
 
-    Shader::Shader(const std::string &dir, const std::string &vName, const std::string &fName, const std::string &gName) {
+    Shader::Shader(const std::string &name, const std::string &dir, const std::string &vName, const std::string &fName, const std::string &gName) :
+        name(name),
+        vShaderName(vName),
+        fShaderName(fName),
+        gShaderName(gName) {
         pid = glCreateProgram();
-        if (vName.size() && (vShaderId = compileShader(GL_VERTEX_SHADER, dir, vName))) {
+        if (vShaderName.size() && (vShaderId = compileShader(GL_VERTEX_SHADER, dir, vShaderName))) {
             CHECK_GL(glAttachShader(pid, vShaderId));
         }
-        if (fName.size() && (fShaderId = compileShader(GL_FRAGMENT_SHADER, dir, fName))) {
+        if (fShaderName.size() && (fShaderId = compileShader(GL_FRAGMENT_SHADER, dir, fShaderName))) {
             CHECK_GL(glAttachShader(pid, fShaderId));
         }
-        if (gName.size() && (gShaderId = compileShader(GL_GEOMETRY_SHADER, dir, gName))) {
+        if (gShaderName.size() && (gShaderId = compileShader(GL_GEOMETRY_SHADER, dir, gShaderName))) {
             CHECK_GL(glAttachShader(pid, gShaderId));
         }
         CHECK_GL(glLinkProgram(pid));
@@ -28,9 +32,9 @@ namespace neo {
         CHECK_GL(glGetProgramiv(pid, GL_LINK_STATUS, &linkSuccess));
         if (!linkSuccess) {
             GLHelper::printProgramInfoLog(pid);
-            std::cout << "Error linking shaders " << vName << " and " << fName;
+            std::cout << "Error linking shaders " << vShaderName << " and " << fShaderName;
             if (gShaderId) {
-                std::cout << " and " << gName << std::endl;
+                std::cout << " and " << gShaderName << std::endl;
             }
             else {
                 std::cout << std::endl;
@@ -40,13 +44,13 @@ namespace neo {
         }
 
         if (vShaderId) {
-            findAttributesAndUniforms(dir, vName);
+            findAttributesAndUniforms(dir, vShaderName);
         }
         if (fShaderId) {
-            findAttributesAndUniforms(dir, fName);
+            findAttributesAndUniforms(dir, fShaderName);
         }
         if (gShaderId) {
-            findAttributesAndUniforms(dir, gName);
+            findAttributesAndUniforms(dir, gShaderName);
         }
     }
 
