@@ -60,6 +60,15 @@ namespace neo {
         virtual ~Message() = default;
     };
 
+
+
+    // // a game object was initialized. This is sent out after Scene's init queue is finished
+    // struct ObjectInitMessage : public Message {
+    //     ObjectInitMessage() {}
+    // };
+
+
+
     /* A spatiality was changed in some way */
     struct SpatialChangeMessage : public Message {
         const SpatialComponent & spatial;
@@ -67,11 +76,56 @@ namespace neo {
     };
 
 
+
+    // // a camera was rotated
+    // struct CameraRotatedMessage : public Message {
+    //     const CameraComponent & camera;
+    //     CameraRotatedMessage(const CameraComponent & camera) : camera(camera) {}
+    // };
+
+
+
     /* The window was resized */
     struct WindowFrameSizeMessage : public Message {
         glm::ivec2 frameSize;
         WindowFrameSizeMessage(const glm::ivec2 & frameSize) : frameSize(frameSize) {}
     };
+
+
+
+    // // key input
+    // struct KeyMessage : public Message {
+    //     int key, action, mods;
+    //     KeyMessage(int key, int action, int mods) : key(key), action(action), mods(mods) {}
+    // };
+
+    // // mouse input
+    // struct MouseMessage : public Message {
+    //     int button, action, mods;
+    //     MouseMessage(int button, int action, int mods) : button(button), action(action), mods(mods) {}
+    // };
+
+    // // scroll input
+    // struct ScrollMessage : public Message {
+    //     float dx, dy;
+    //     ScrollMessage(float dx, float dy) : dx(dx), dy(dy) {}
+    // };
+
+
+
+    // // component has put through the init queue and added to the scene
+    // struct ComponentAddedMessage : public Message {
+    //     Component & comp;
+    //     std::type_index typeI;
+    //     ComponentAddedMessage(Component & comp, std::type_index typeI) : comp(comp), typeI(typeI) {}
+    // };
+
+    // // component has been added to kill queue and will be removed from the scene
+    // struct ComponentRemovedMessage : public Message {
+    //     std::unique_ptr<Component> comp;
+    //     std::type_index typeI;
+    //     ComponentRemovedMessage(std::unique_ptr<Component> && comp, std::type_index typeI) : comp(std::move(comp)), typeI(typeI) {}
+    // };
 
 
 }

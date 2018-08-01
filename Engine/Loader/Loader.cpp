@@ -34,6 +34,7 @@ namespace neo {
         bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, (RES_DIR + fileName).c_str());
         if (!rc) {
             std::cerr << errString << std::endl;
+            std::cin.get();
             exit(1);
         }
 
