@@ -1,17 +1,21 @@
 #pragma once
 
 #include <unordered_map>
+#include <functional>
 #include <typeindex>
 
 namespace neo {
 
     class NeoEngine;
+    class Messenger;
     class Component;
     class SpatialComponent;
+    struct Message;
 
     class GameObject {
 
         friend NeoEngine;
+        friend Messenger;
 
         public:
             /* Don't copy GameObjects */
@@ -39,6 +43,7 @@ namespace neo {
             SpatialComponent * spatial;
             std::vector<Component *> allComponents;
             std::unordered_map<std::type_index, std::vector<Component *>> compsByCompT;
+            std::unordered_map<std::type_index, std::vector<std::function<void (const Message &)>>> receivers;
     };
 
     /* Template implementation */

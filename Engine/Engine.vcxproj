@@ -35,6 +35,8 @@
     <ClInclude Include="ext\imgui\stb_truetype.h" />
     <ClInclude Include="GameObject\GameObject.hpp" />
     <ClInclude Include="Loader\Loader.hpp" />
+    <ClInclude Include="Messaging\Message.hpp" />
+    <ClInclude Include="Messaging\Messenger.hpp" />
     <ClInclude Include="Model\Mesh.hpp" />
     <ClInclude Include="NeoEngine.hpp" />
     <ClInclude Include="Shader\GLHelper.hpp" />
@@ -58,6 +60,7 @@
     <ClCompile Include="ext\imgui\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="Loader\Loader.cpp" />
+    <ClCompile Include="Messaging\Messenger.cpp" />
     <ClCompile Include="NeoEngine.cpp" />
     <ClCompile Include="Shader\GLHelper.cpp" />
     <ClCompile Include="System\RenderSystem\RenderSystem.cpp" />

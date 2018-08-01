@@ -51,6 +51,8 @@
     <ClInclude Include="Component\CameraComponent\CameraControllerComponent.hpp" />
     <ClInclude Include="Util\Util.hpp" />
     <ClInclude Include="Component\RenderableComponent\RenderableComponent.hpp" />
+    <ClInclude Include="Messaging\Message.hpp" />
+    <ClInclude Include="Messaging\Messenger.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
@@ -70,6 +72,7 @@
     <ClCompile Include="Window\Keyboard.cpp" />
     <ClCompile Include="Component\CameraComponent\CameraControllerComponent.cpp" />
     <ClCompile Include="Component\RenderableComponent\RenderableComponent.cpp" />
+    <ClCompile Include="Messaging\Messenger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

@@ -1,6 +1,7 @@
 #include "NeoEngine.hpp"
 
 #include "GameObject/GameObject.hpp"
+#include "Messaging/Messenger.hpp"
 
 #include <time.h>
 #include <iostream>
@@ -66,6 +67,7 @@ namespace neo {
 
             /* Initialize new objects and components */
             processInitQueue();
+            Messenger::relayMessages();
 
             /* Update imgui functions */
             if (imGuiEnabled) {
@@ -80,6 +82,7 @@ namespace neo {
             for (auto & system : systems) {
                 if (system.second->active) {
                     system.second->update((float)timeStep);
+                    Messenger::relayMessages();
                 }
             }
 
@@ -90,6 +93,7 @@ namespace neo {
 
             /* Kill deleted objects and components */
             processKillQueue();
+            Messenger::relayMessages();
         }
     }
 
