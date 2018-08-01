@@ -2,6 +2,7 @@
 #include "Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "GameObject/GameObject.hpp"
+#include "Messaging/Messenger.hpp"
 
 #include "Window/Window.hpp"
 
@@ -23,6 +24,10 @@ namespace neo {
     void CameraComponent::init() {
         viewMatDirty = true;
         projMatDirty = true;
+
+        Messenger::addReceiver<SpatialChangeMessage>(gameObject, [&](const Message & msg_) {
+            viewMatDirty = true;
+        });
     }
 
     void CameraComponent::setFOV(float fov) {

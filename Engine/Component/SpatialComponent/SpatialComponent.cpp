@@ -1,5 +1,7 @@
 #include "SpatialComponent.hpp"
 
+#include "Messaging/Messenger.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 namespace neo {
@@ -34,41 +36,48 @@ namespace neo {
     void SpatialComponent::move(const glm::vec3 & delta) {
         position += delta;
         modelMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
     }
 
     void SpatialComponent::resize(const glm::vec3 & factor) {
         scale *= factor;
         modelMatrixDirty = true;
         normalMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
     }
 
     void SpatialComponent::rotate(const glm::mat3 & mat) {
         Orientable::rotate(mat);
         modelMatrixDirty = true;
         normalMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
     }
 
     void SpatialComponent::setPosition(const glm::vec3 & loc) {
         position = loc;
         modelMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
     }
 
     void SpatialComponent::setScale(const glm::vec3 & scale) {
         this->scale = scale;
         modelMatrixDirty = true;
         normalMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
     }
 
     void SpatialComponent::setOrientation(const glm::mat3 & orient) {
         Orientable::setOrientation(orient);
         modelMatrixDirty = true;
         normalMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
     }
 
     void SpatialComponent::setUVW(const glm::vec3 & u, const glm::vec3 & v, const glm::vec3 & w) {
         Orientable::setUVW(u, v, w);
         modelMatrixDirty = true;
         normalMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
     }
         
     const glm::mat4 & SpatialComponent::getModelMatrix() const {

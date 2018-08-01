@@ -60,4 +60,18 @@ namespace neo {
         virtual ~Message() = default;
     };
 
+    /* A spatiality was changed in some way */
+    struct SpatialChangeMessage : public Message {
+        const SpatialComponent & spatial;
+        SpatialChangeMessage(const SpatialComponent & spatial) : spatial(spatial) {}
+    };
+
+
+    /* The window was resized */
+    struct WindowFrameSizeMessage : public Message {
+        glm::ivec2 frameSize;
+        WindowFrameSizeMessage(const glm::ivec2 & frameSize) : frameSize(frameSize) {}
+    };
+
+
 }
