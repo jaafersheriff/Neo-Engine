@@ -16,22 +16,22 @@ namespace neo {
         phi(Util::PI() * 0.5f),
         lookSpeed(lookSpeed),
         moveSpeed(moveSpeed) {
-        setButtons(GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_E, GLFW_KEY_R);
+        setButtons(GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_R, GLFW_KEY_E);
     }
 
     void CameraControllerComponent::setButtons(int f, int b, int l, int r, int u, int d) {
         forwardButton  = f;
         backwardButton = b;
-        rightButton    = l;
-        leftButton     = r;
+        rightButton    = r;
+        leftButton     = l;
         upButton       = u;
         downButton     = d;
     }
 
     void CameraControllerComponent::update(float dt) {
-        if (Mouse::dx || Mouse::dy) {
-            theta -= float(Mouse::dx) * lookSpeed;
-            phi   += float(Mouse::dy) * lookSpeed;
+        if (Mouse::isDown(GLFW_MOUSE_BUTTON_1) && (Mouse::dx || Mouse::dy)) {
+            theta -= float(Mouse::dx) * lookSpeed * dt;
+            phi   += float(Mouse::dy) * lookSpeed * dt;
             updateSpatialOrientation();
         }
 

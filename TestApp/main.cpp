@@ -33,6 +33,9 @@ struct Camera {
             ImGui::SliderFloat("Far", &far, 10.f, 10000.f);
             cameraComp->setNearFar(near, far);
 
+            ImGui::SliderFloat("Look speed", &cameraController->lookSpeed, 0.f, 10.f);
+            ImGui::SliderFloat("Move speed", &cameraController->moveSpeed, 0.f, 10.f);
+
             glm::vec3 position = gameObject->getSpatial()->getPosition();
             ImGui::Text("Pos:     %0.2f, %0.2f, %0.2f", position.x, position.y, position.z);
             glm::vec3 lookDir  = cameraComp->getLookDir();
@@ -113,7 +116,7 @@ int main() {
     NeoEngine::init("TestApp", "res/", 1280, 720);
 
     /* Init engine-necessary components */
-    Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 2.f, 5.f);
+    Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.7f, 7.f);
    
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>(camera.cameraController);

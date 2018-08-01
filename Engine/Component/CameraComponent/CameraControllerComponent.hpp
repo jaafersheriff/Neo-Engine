@@ -15,6 +15,9 @@ namespace neo {
 
             virtual void update(float) override;
 
+            float lookSpeed;
+            float moveSpeed;
+
             void setOrientation(float p, float t);
             void setButtons(int, int, int, int, int, int);
             float getTheta() const { return theta; }
@@ -24,9 +27,6 @@ namespace neo {
             void updateSpatialOrientation();
 
             float theta, phi;
-            float lookSpeed;
-            float minMoveSpeed, maxMoveSpeed;
-            float moveSpeed;
 
             int forwardButton;
             int backwardButton;
