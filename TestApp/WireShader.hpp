@@ -17,8 +17,11 @@ class WireShader : public Shader {
             bind();
 
             /* Load PV */
-            loadMatrix(getUniform("P"), renderSystem.getCamera().getProj());
-            loadMatrix(getUniform("V"), renderSystem.getCamera().getView());
+            const std::vector<CameraComponent *> cameras = NeoEngine::getComponents<CameraComponent>();
+            if (cameras.size()) {
+                loadMatrix(getUniform("P"), cameras.at(0)->getProj());
+                loadMatrix(getUniform("V"), cameras.at(0)->getView());
+            }
 
             for (auto r : renderSystem.getRenderables<WireShader, RenderableComponent>()) {
                 /* Bind mesh */

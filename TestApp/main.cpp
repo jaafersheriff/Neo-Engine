@@ -120,7 +120,7 @@ int main() {
    
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>(camera.cameraController);
-    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
+    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
     NeoEngine::initSystems();
 
     /* Shaders */

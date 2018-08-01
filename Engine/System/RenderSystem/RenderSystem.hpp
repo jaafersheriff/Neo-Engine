@@ -17,16 +17,13 @@ namespace neo {
     class RenderSystem : public System {
 
         public:
-            RenderSystem(const std::string &dir, const CameraComponent *camera) :
+            RenderSystem(const std::string &dir) :
                 System("Render System"),
-                APP_SHADER_DIR(dir),
-                camera(camera)
+                APP_SHADER_DIR(dir)
             {}
 
             virtual void init() override;
             virtual void update(float) override;
-
-            const CameraComponent & getCamera() const { return *camera; }
 
             /* Shaders */
             std::vector<std::unique_ptr<Shader>> shaders;
@@ -40,7 +37,6 @@ namespace neo {
 
         private:
             const std::string APP_SHADER_DIR;
-            const CameraComponent *camera;
     };
 
     /* Template implementation */
