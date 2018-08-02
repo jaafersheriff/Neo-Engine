@@ -7,6 +7,9 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ext/tiny_obj_loader.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "ext/stb_image.h"
+
 #include <iostream>
 
 namespace neo {
@@ -14,6 +17,7 @@ namespace neo {
     bool Loader::verbose = false;
     std::string Loader::RES_DIR = "";
     std::unordered_map<std::string, Mesh *> Loader::meshes;
+    std::unordered_map<std::string, Texture *> Loader::textures;
 
     void Loader::init(const std::string &res, bool v) {
         RES_DIR = res;
@@ -74,6 +78,32 @@ namespace neo {
         }
 
         return mesh;
+    }
+
+    Texture * Loader::getTexture(const std::string &fileName, GLenum mode) {
+        /* Search map first */
+        auto it = textures.find(fileName);
+        if (it != textures.end()) {
+            return it->second;
+        }
+
+        Texture *texture = new Texture;
+        uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
+        if (data) {
+            uploadTexture(texture, data, mode);
+            if (texture->textureId) {
+                textures.insert(std::make_pair(fileName, texture));
+            }
+            stbi_image_free(data);
+            if (verbose) {
+                std::cout << "Loaded texture " << fileName << " [" << texture->width << ", " << texture->height << "]" << std::endl;
+            }
+        }
+        else if (verbose) {
+            std::cerr << "Could not find texture file " << fileName << std::endl;
+        }
+
+        return texture;
     }
 
 /* Provided function to resize a mesh so all vertex positions are [0, 1.f] */
@@ -179,6 +209,41 @@ namespace neo {
         /* Unbind  */
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
         CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
+        /* Error check */
+        assert(glGetError() == GL_NO_ERROR);
+    }
+
+    void Loader::uploadTexture(Texture *texture, uint8_t *data, GLuint mode) {
+        /* Generate texture buffer object */
+        CHECK_GL(glGenTextures(1, &texture->textureId));
+
+        /* Set active texture unit */
+        CHECK_GL(glActiveTexture(texture->textureId));
+
+        /* Bind new texture buffer object to active texture */
+        CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture->textureId));
+
+        /* Load texture data to GPU */
+        CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+
+        /* Generate image pyramid */
+        CHECK_GL(glGenerateMipmap(GL_TEXTURE_2D));
+
+        /* Set filtering mode for magnification and minimification */
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+
+        /* Set wrap mode */
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mode));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mode));
+            
+        /* LOD */
+        CHECK_GL(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.5f));
+
+        /* Unbind */
+        CHECK_GL(glActiveTexture(0));
+        CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
 
         /* Error check */
         assert(glGetError() == GL_NO_ERROR);
