@@ -53,6 +53,9 @@
     <ClInclude Include="Component\RenderableComponent\RenderableComponent.hpp" />
     <ClInclude Include="Messaging\Message.hpp" />
     <ClInclude Include="Messaging\Messenger.hpp" />
+    <ClInclude Include="Model\ModelTexture.hpp" />
+    <ClInclude Include="ext\stb_image.h" />
+    <ClInclude Include="Component\LightComponent\LightComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
