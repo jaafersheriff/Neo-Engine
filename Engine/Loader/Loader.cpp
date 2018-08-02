@@ -88,6 +88,7 @@ namespace neo {
         }
 
         Texture *texture = new Texture;
+        stbi_set_flip_vertically_on_load(true);
         uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
         if (data) {
             uploadTexture(texture, data, mode);
@@ -178,24 +179,14 @@ namespace neo {
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.vertBufId));
         CHECK_GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
 
-        /* Copy element array if it exists */
-        if (!mesh.buffers.eleBuf.empty()) {
-            CHECK_GL(glGenBuffers(1, (GLuint *) &mesh.eleBufId));
-            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
-            CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.buffers.eleBuf.size() * sizeof(unsigned int), &mesh.buffers.eleBuf[0], GL_STATIC_DRAW));
-            CHECK_GL(glEnableVertexAttribArray(1));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.norBufId));
-            CHECK_GL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
-        }
-
         /* Copy normal array if it exists */
         if (!mesh.buffers.norBuf.empty()) {
             CHECK_GL(glGenBuffers(1, (GLuint *) &mesh.norBufId));
             CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.norBufId));
             CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mesh.buffers.norBuf.size() * sizeof(float), &mesh.buffers.norBuf[0], GL_STATIC_DRAW));
-            CHECK_GL(glEnableVertexAttribArray(2));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.texBufId));
-            CHECK_GL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0));
+            CHECK_GL(glEnableVertexAttribArray(1));
+            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.norBufId));
+            CHECK_GL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
         }
 
         /* Copy texture array if it exists */
@@ -203,7 +194,16 @@ namespace neo {
             CHECK_GL(glGenBuffers(1, (GLuint *) &mesh.texBufId));
             CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.texBufId));
             CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mesh.buffers.texBuf.size() * sizeof(float), &mesh.buffers.texBuf[0], GL_STATIC_DRAW));
+            CHECK_GL(glEnableVertexAttribArray(2));
+            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.texBufId));
+            CHECK_GL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0));
+        }
+
+        /* Copy element array if it exists */
+        if (!mesh.buffers.eleBuf.empty()) {
+            CHECK_GL(glGenBuffers(1, (GLuint *) &mesh.eleBufId));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
+            CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.buffers.eleBuf.size() * sizeof(unsigned int), &mesh.buffers.eleBuf[0], GL_STATIC_DRAW));
         }
 
         /* Unbind  */
@@ -217,9 +217,6 @@ namespace neo {
     void Loader::uploadTexture(Texture *texture, uint8_t *data, GLuint mode) {
         /* Generate texture buffer object */
         CHECK_GL(glGenTextures(1, &texture->textureId));
-
-        /* Set active texture unit */
-        CHECK_GL(glActiveTexture(texture->textureId));
 
         /* Bind new texture buffer object to active texture */
         CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture->textureId));
@@ -242,7 +239,6 @@ namespace neo {
         CHECK_GL(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.5f));
 
         /* Unbind */
-        CHECK_GL(glActiveTexture(0));
         CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
 
         /* Error check */

@@ -42,9 +42,14 @@ class DiffuseShader : public Shader {
                 CHECK_GL(glBindVertexArray(mesh->vaoId));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId));
 
-                /* Bind texture */
-                // TODO
-
+                /* Bind texture and materials */
+                ModelTexture & modelTexture(diffuse->getModelTexture());
+                CHECK_GL(glActiveTexture(GL_TEXTURE0 + modelTexture.getTexture()->textureId));
+                CHECK_GL(glBindTexture(GL_TEXTURE_2D, modelTexture.getTexture()->textureId));
+                loadInt(getUniform("diffuseMap"), modelTexture.getTexture()->textureId);
+                loadVector(getUniform("diffuseContribution"), modelTexture.getMaterial()->diffuse);
+                loadVector(getUniform("specularColor"), modelTexture.getMaterial()->specular);
+                loadFloat(getUniform("shine"), modelTexture.getMaterial()->shine);
 
                 /* DRAW */
                 CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh->eleBufSize, GL_UNSIGNED_INT, nullptr));
@@ -52,7 +57,8 @@ class DiffuseShader : public Shader {
 
             CHECK_GL(glBindVertexArray(0));
             CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-            // TODO : clean up texture
+            CHECK_GL(glActiveTexture(GL_TEXTURE0));
+            CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
             unbind();
         }
 };

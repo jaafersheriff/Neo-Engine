@@ -47,6 +47,10 @@ struct Renderable {
             if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
                 gameObject->getSpatial()->setScale(glm::vec3(scale));
             }
+            auto material = renderComp->getModelTexture().getMaterial();
+            ImGui::SliderFloat3("Diffuse Color", glm::value_ptr(material->diffuse), 0.f, 1.f);
+            ImGui::SliderFloat3("Specular Color", glm::value_ptr(material->specular), 0.f, 1.f);
+            ImGui::SliderFloat("Shine", &material->shine, 0.f, 100.f);
         });
     }
 };
@@ -55,7 +59,7 @@ int main() {
     NeoEngine::init("Diffuse Rendering", "res/", 1280, 720);
 
     /* Init engine-necessary components */
-    Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.7f, 7.f);
+    Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
    
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraSystem>(camera.cameraController);
@@ -63,7 +67,8 @@ int main() {
     renderSystem->addShader<DiffuseShader>("diffuse.vert", "diffuse.frag");
     NeoEngine::initSystems();
 
-    Renderable model = Renderable(Loader::getMesh("mr_krab.obj"), Loader::getTexture("mr_krab.png"), glm::vec3(0.f), 1.f);
+    Renderable krab = Renderable(Loader::getMesh("mr_krab.obj"), Loader::getTexture("mr_krab.png"), glm::vec3(0.f), 1.f);
+    krab.attachImGui("Krab");
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {

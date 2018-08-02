@@ -53,8 +53,11 @@ namespace neo {
                 material(mat)
             {}
 
+            const Texture * getTexture() const { return texture; }
+            Material * getMaterial() { return &material; }
+
         private:
             const Texture * texture;
-            const Material material;
+            Material material;
     };
 }

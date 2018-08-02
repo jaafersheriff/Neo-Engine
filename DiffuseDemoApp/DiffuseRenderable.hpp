@@ -11,14 +11,13 @@ class DiffuseRenderable : public RenderableComponent {
     public:
         DiffuseRenderable(GameObject &go, Mesh *m, ModelTexture t) :
             RenderableComponent(go, m),
-            texture(t)
+            modelTexture(t)
         {}
 
-        const ModelTexture & getTexture() const { return texture; }
-        void replaceTexture(ModelTexture & t) {
-            //this->texture = t;
-        }
+        ModelTexture & getModelTexture() { return modelTexture; }
 
-        ModelTexture texture;
+    private:
+
+        ModelTexture modelTexture;
         
 };
