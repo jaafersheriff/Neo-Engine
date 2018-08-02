@@ -1,6 +1,10 @@
 #include <NeoEngine.hpp>
 #include "GameObject/GameObject.hpp"
 
+#include "DiffuseRenderable.hpp"
+#include "DiffuseShader.hpp"
+#include "CameraSystem.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace neo;
@@ -19,59 +23,22 @@ struct Camera {
         NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(1.f));
         cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far);
         cameraController = &NeoEngine::addComponent<CameraControllerComponent>(*gameObject, ls, ms);
-
-        NeoEngine::addImGuiFunc("Camera", [&]() {
-            float fov = cameraComp->getFOV();
-            ImGui::SliderFloat("FOV", &fov, 0.f, 90.f);
-            cameraComp->setFOV(fov);
-
-            float near = cameraComp->getNear();
-            float far = cameraComp->getFar();
-            ImGui::SliderFloat("Near", &near, 0.f, 2.f);
-            ImGui::SliderFloat("Far", &far, 10.f, 10000.f);
-            cameraComp->setNearFar(near, far);
-
-            ImGui::SliderFloat("Look speed", &cameraController->lookSpeed, 0.f, 10.f);
-            ImGui::SliderFloat("Move speed", &cameraController->moveSpeed, 0.f, 10.f);
-
-            glm::vec3 position = gameObject->getSpatial()->getPosition();
-            ImGui::Text("Pos:     %0.2f, %0.2f, %0.2f", position.x, position.y, position.z);
-            glm::vec3 lookDir  = cameraComp->getLookDir();
-            ImGui::Text("lookDir: %0.2f, %0.2f, %0.2f", lookDir.x, lookDir.y, lookDir.z);
-        });
     }
 };
 
 struct Renderable {
     GameObject *gameObject;
-    RenderableComponent *renderComp;
-    bool alive = false;
+    DiffuseRenderable *renderComp;
 
-    Renderable(Mesh *m, glm::vec3 p, float s, glm::mat3 o = glm::mat3()) {
-        Mesh *mesh = m;
-
+    Renderable(Mesh *m, Texture *t, glm::vec3 p, float s, glm::mat3 o = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
-        renderComp = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh);
-
-        alive = true;
+        renderComp = &NeoEngine::addComponent<DiffuseRenderable>(*gameObject, m, t);
+        renderComp->addShaderType<DiffuseShader>();
     }
 
-    bool customShaderEnabled = true;
-    bool wireShaderEnabled = true;
     void attachImGui(const std::string & name) {
         NeoEngine::addImGuiFunc(name, [&]() {
-            if (!alive) {
-                return;
-            }
-            if (ImGui::Button("Destroy")) {
-                NeoEngine::removeGameObject(*gameObject);
-                alive = false;
-                return;
-            }
-            ImGui::Text("Components: %d", gameObject->getNumberComponents());
- 
-            ImGui::Text("Shaders: %d", renderComp->getShaders().size());
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);
@@ -85,14 +52,18 @@ struct Renderable {
 };
 
 int main() {
-    NeoEngine::init("TestApp", "res/", 1280, 720);
+    NeoEngine::init("Diffuse Rendering", "res/", 1280, 720);
 
     /* Init engine-necessary components */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.7f, 7.f);
    
     /* Systems - order matters! */
+    NeoEngine::addSystem<CameraSystem>(camera.cameraController);
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
+    renderSystem->addShader<DiffuseShader>("diffuse.vert", "diffuse.frag");
     NeoEngine::initSystems();
+
+    Renderable model = Renderable(Loader::getMesh("mr_krab.obj"), Loader::getTexture("mr_krab.png"), glm::vec3(0.f), 1.f);
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
@@ -101,36 +72,6 @@ int main() {
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
         }
-    });
-    NeoEngine::addImGuiFunc("Mouse", [&]() {
-        ImGui::Text("Mouse X, Y  : %0.2f, %0.2f", Mouse::x, Mouse::y);
-        ImGui::Text("Mouse dx, dy: %0.2f, %0.2f", Mouse::dx, Mouse::dy);
-    });
-    NeoEngine::addImGuiFunc("Engine", [&]() {
-        ImGui::Text("GameObjects:  %d", NeoEngine::getGameObjects().size());
-        int count = 0;
-        for (auto go : NeoEngine::getGameObjects()) {
-            count += go->getNumberComponents();
-        }
-        ImGui::Text("Components:  %d", count);
-        ImGui::Text("Systems: %d", NeoEngine::getSystems().size());
-    });
-    NeoEngine::addImGuiFunc("Systems", [&]() {
-        for (auto sys : NeoEngine::getSystems()) {
-            ImGui::Checkbox(sys.second->name.c_str(), &sys.second->active);
-        }
-    });
-    NeoEngine::addImGuiFunc("Render System", [&]() {
-        ImGui::Text("Shaders:  %d", renderSystem->shaders.size());
-        for (auto it(renderSystem->shaders.begin()); it != renderSystem->shaders.end(); ++it) {
-            ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
-        }
-
-        int size = 0;
-        for (auto it(renderSystem->renderables.begin()); it != renderSystem->renderables.end(); ++it) {
-            size += it->second->size();
-        }
-        ImGui::Text("Renderables: %d", size);
     });
 
     /* Run */

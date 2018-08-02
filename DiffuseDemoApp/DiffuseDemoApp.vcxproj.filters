@@ -3,4 +3,25 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DiffuseRenderable.hpp" />
+    <ClInclude Include="DiffuseShader.hpp" />
+    <ClInclude Include="CameraSystem.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{46a21a96-2996-4276-a8c0-26c9ccb5c2e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="res">
+      <UniqueIdentifier>{8e5952ef-0aa8-4fcf-89f0-f836221bb810}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\diffuse.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\diffuse.frag">
+      <Filter>shaders</Filter>
+    </None>
+  </ItemGroup>
 </Project>
