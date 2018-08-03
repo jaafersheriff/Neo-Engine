@@ -19,16 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="CameraSystem.hpp" />
-    <ClInclude Include="DiffuseRenderable.hpp" />
-    <ClInclude Include="DiffuseShader.hpp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="shaders\diffuse.frag" />
     <None Include="shaders\diffuse.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\CameraSystem.hpp" />
+    <ClInclude Include="src\DiffuseRenderable.hpp" />
+    <ClInclude Include="src\DiffuseShader.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

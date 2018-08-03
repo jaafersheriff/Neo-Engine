@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="DiffuseRenderable.hpp" />
-    <ClInclude Include="DiffuseShader.hpp" />
-    <ClInclude Include="CameraSystem.hpp" />
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="shaders">
       <UniqueIdentifier>{46a21a96-2996-4276-a8c0-26c9ccb5c2e3}</UniqueIdentifier>
     </Filter>
@@ -23,5 +15,13 @@
     <None Include="shaders\diffuse.frag">
       <Filter>shaders</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\DiffuseRenderable.hpp" />
+    <ClInclude Include="src\DiffuseShader.hpp" />
+    <ClInclude Include="src\CameraSystem.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
 </Project>
