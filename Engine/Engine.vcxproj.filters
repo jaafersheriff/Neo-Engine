@@ -1,83 +1,58 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Window">
-      <UniqueIdentifier>{18b51e33-f238-4ecc-a85b-8b42e3fa7faf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GameObject">
-      <UniqueIdentifier>{34c3aa6c-1b3c-43de-a47c-a58720d63f37}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Component">
-      <UniqueIdentifier>{688265f6-5ae0-4d31-935d-9a7c120e5769}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="System">
-      <UniqueIdentifier>{85d523cc-f284-48d7-8450-df1d191c1eb3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Component\CameraComponent">
-      <UniqueIdentifier>{00ab05d8-e3f8-4f19-820b-b87d4bb35419}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="System\RenderSystem">
-      <UniqueIdentifier>{ac9bd996-0d8c-459f-9dec-b9ff28fdd580}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="System\RenderSystem\Shader">
-      <UniqueIdentifier>{224e083c-293a-4802-897c-d5fe6afcd272}</UniqueIdentifier>
-    </Filter>
+    <ClInclude Include="src\NeoEngine.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\CameraComponent.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\CameraControllerComponent.hpp" />
+    <ClInclude Include="src\Component\Component.hpp" />
+    <ClInclude Include="src\Component\Components.hpp" />
+    <ClInclude Include="src\Component\LightComponent\LightComponent.hpp" />
+    <ClInclude Include="src\Component\RenderableComponent\RenderableComponent.hpp" />
+    <ClInclude Include="src\Component\SpatialComponent\Orientable.hpp" />
+    <ClInclude Include="src\Component\SpatialComponent\SpatialComponent.hpp" />
+    <ClInclude Include="src\ext\imgui\imconfig.h" />
+    <ClInclude Include="src\ext\imgui\imgui.h" />
+    <ClInclude Include="src\ext\imgui\imgui_impl_glfw_gl3.h" />
+    <ClInclude Include="src\ext\imgui\imgui_internal.h" />
+    <ClInclude Include="src\ext\imgui\stb_rect_pack.h" />
+    <ClInclude Include="src\ext\imgui\stb_textedit.h" />
+    <ClInclude Include="src\ext\imgui\stb_truetype.h" />
+    <ClInclude Include="src\ext\stb_image.h" />
+    <ClInclude Include="src\ext\tiny_obj_loader.h" />
+    <ClInclude Include="src\GameObject\GameObject.hpp" />
+    <ClInclude Include="src\Loader\Loader.hpp" />
+    <ClInclude Include="src\Messaging\Message.hpp" />
+    <ClInclude Include="src\Messaging\Messenger.hpp" />
+    <ClInclude Include="src\Model\Mesh.hpp" />
+    <ClInclude Include="src\Model\ModelTexture.hpp" />
+    <ClInclude Include="src\Shader\GLHelper.hpp" />
+    <ClInclude Include="src\Shader\Shader.hpp" />
+    <ClInclude Include="src\System\RenderSystem\RenderSystem.hpp" />
+    <ClInclude Include="src\System\System.hpp" />
+    <ClInclude Include="src\System\Systems.hpp" />
+    <ClInclude Include="src\Util\Util.hpp" />
+    <ClInclude Include="src\Window\Keyboard.hpp" />
+    <ClInclude Include="src\Window\Mouse.hpp" />
+    <ClInclude Include="src\Window\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Component\Component.hpp" />
-    <ClInclude Include="Component\Components.hpp" />
-    <ClInclude Include="Component\CameraComponent\CameraComponent.hpp" />
-    <ClInclude Include="GameObject\GameObject.hpp" />
-    <ClInclude Include="System\System.hpp" />
-    <ClInclude Include="System\Systems.hpp" />
-    <ClInclude Include="System\RenderSystem\RenderSystem.hpp" />
-    <ClInclude Include="NeoEngine.hpp" />
-    <ClInclude Include="Window\Window.hpp" />
-    <ClInclude Include="ext\imgui\imconfig.h" />
-    <ClInclude Include="ext\imgui\imgui.h" />
-    <ClInclude Include="ext\imgui\imgui_impl_glfw_gl3.h" />
-    <ClInclude Include="ext\imgui\imgui_internal.h" />
-    <ClInclude Include="ext\imgui\stb_rect_pack.h" />
-    <ClInclude Include="ext\imgui\stb_textedit.h" />
-    <ClInclude Include="ext\imgui\stb_truetype.h" />
-    <ClInclude Include="Model\Mesh.hpp" />
-    <ClInclude Include="Loader\Loader.hpp" />
-    <ClInclude Include="Shader\Shader.hpp" />
-    <ClInclude Include="Shader\GLHelper.hpp" />
-    <ClInclude Include="Component\SpatialComponent\SpatialComponent.hpp" />
-    <ClInclude Include="Component\SpatialComponent\Orientable.hpp" />
-    <ClInclude Include="Window\Mouse.hpp" />
-    <ClInclude Include="Window\Keyboard.hpp" />
-    <ClInclude Include="Component\CameraComponent\CameraControllerComponent.hpp" />
-    <ClInclude Include="Util\Util.hpp" />
-    <ClInclude Include="Component\RenderableComponent\RenderableComponent.hpp" />
-    <ClInclude Include="Messaging\Message.hpp" />
-    <ClInclude Include="Messaging\Messenger.hpp" />
-    <ClInclude Include="Model\ModelTexture.hpp" />
-    <ClInclude Include="ext\stb_image.h" />
-    <ClInclude Include="Component\LightComponent\LightComponent.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
-    <ClCompile Include="GameObject\GameObject.cpp" />
-    <ClCompile Include="System\RenderSystem\RenderSystem.cpp" />
-    <ClCompile Include="NeoEngine.cpp" />
-    <ClCompile Include="Window\Window.cpp" />
-    <ClCompile Include="ext\imgui\imgui.cpp" />
-    <ClCompile Include="ext\imgui\imgui_demo.cpp" />
-    <ClCompile Include="ext\imgui\imgui_draw.cpp" />
-    <ClCompile Include="ext\imgui\imgui_impl_glfw_gl3.cpp" />
-    <ClCompile Include="Loader\Loader.cpp" />
-    <ClCompile Include="Shader\Shader.cpp" />
-    <ClCompile Include="Shader\GLHelper.cpp" />
-    <ClCompile Include="Component\SpatialComponent\SpatialComponent.cpp" />
-    <ClCompile Include="Window\Mouse.cpp" />
-    <ClCompile Include="Window\Keyboard.cpp" />
-    <ClCompile Include="Component\CameraComponent\CameraControllerComponent.cpp" />
-    <ClCompile Include="Component\RenderableComponent\RenderableComponent.cpp" />
-    <ClCompile Include="Messaging\Messenger.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="README.md" />
+    <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
+    <ClCompile Include="src\Component\CameraComponent\CameraControllerComponent.cpp" />
+    <ClCompile Include="src\Component\RenderableComponent\RenderableComponent.cpp" />
+    <ClCompile Include="src\Component\SpatialComponent\SpatialComponent.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_impl_glfw_gl3.cpp" />
+    <ClCompile Include="src\GameObject\GameObject.cpp" />
+    <ClCompile Include="src\Loader\Loader.cpp" />
+    <ClCompile Include="src\Messaging\Messenger.cpp" />
+    <ClCompile Include="src\Shader\GLHelper.cpp" />
+    <ClCompile Include="src\Shader\Shader.cpp" />
+    <ClCompile Include="src\System\RenderSystem\RenderSystem.cpp" />
+    <ClCompile Include="src\Window\Keyboard.cpp" />
+    <ClCompile Include="src\Window\Mouse.cpp" />
+    <ClCompile Include="src\Window\Window.cpp" />
+    <ClCompile Include="src\NeoEngine.cpp" />
   </ItemGroup>
 </Project>
