@@ -8,7 +8,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\OpenGL\glew-2.1.0\include;C:\OpenGL\glfw-3.2.1\include;C:\OpenGL\glm-0.9.8.5;$(SolutionDir)\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\OpenGL\glew-2.1.0\include;C:\OpenGL\glfw-3.2.1\include;C:\OpenGL\glm-0.9.8.5;$(SolutionDir)\Engine\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
