@@ -24,7 +24,7 @@ namespace neo {
         verbose = v;
     }
 
-    Mesh * Loader::getMesh(const std::string &fileName) {
+    Mesh * Loader::getMesh(const std::string &fileName, bool doResize) {
         /* Search map first */
         auto it = meshes.find(fileName);
         if (it != meshes.end()) {
@@ -66,6 +66,11 @@ namespace neo {
         mesh->norBufSize = int(mesh->buffers.norBuf.size());
         mesh->texBufSize = int(mesh->buffers.texBuf.size());
         mesh->eleBufSize = int(mesh->buffers.eleBuf.size());
+
+        /* Optional resize */
+        if (doResize) {
+            resize(mesh->buffers);
+        }
 
         /* Add new mesh to library */
         meshes.insert({ fileName, mesh });
