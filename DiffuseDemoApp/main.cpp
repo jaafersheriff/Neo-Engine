@@ -26,6 +26,23 @@ struct Camera {
     }
 };
 
+struct Light {
+    GameObject *gameObject;
+
+    Light(glm::vec3 p) {
+        gameObject = &NeoEngine::createGameObject();
+        NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3());
+        NeoEngine::addComponent<LightComponent>(*gameObject);
+
+        NeoEngine::addImGuiFunc("Light", [&]() {
+            glm::vec3 pos = gameObject->getSpatial()->getPosition();
+            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
+                gameObject->getSpatial()->setPosition(pos);
+            }
+        });
+    }
+};
+
 struct Renderable {
     GameObject *gameObject;
     DiffuseRenderable *renderComp;
@@ -48,6 +65,7 @@ struct Renderable {
                 gameObject->getSpatial()->setScale(glm::vec3(scale));
             }
             auto material = renderComp->getModelTexture().getMaterial();
+            ImGui::SliderFloat("Ambient ", &material->ambient, 0.f, 1.f);
             ImGui::SliderFloat3("Diffuse Color", glm::value_ptr(material->diffuse), 0.f, 1.f);
             ImGui::SliderFloat3("Specular Color", glm::value_ptr(material->specular), 0.f, 1.f);
             ImGui::SliderFloat("Shine", &material->shine, 0.f, 100.f);
@@ -67,8 +85,9 @@ int main() {
     renderSystem->addShader<DiffuseShader>("diffuse.vert", "diffuse.frag");
     NeoEngine::initSystems();
 
-    Renderable krab = Renderable(Loader::getMesh("mr_krab.obj"), Loader::getTexture("mr_krab.png"), glm::vec3(0.f), 1.f);
+    Renderable krab = Renderable(Loader::getMesh("mr_krab.obj", true), Loader::getTexture("mr_krab.png"), glm::vec3(0.f), 1.f);
     krab.attachImGui("Krab");
+    Light(glm::vec3(0.f));
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
