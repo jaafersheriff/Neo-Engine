@@ -8,17 +8,20 @@ namespace neo {
 
     struct Material {
         Material() :
+            ambient(1.f),
             diffuse(glm::vec3(0.75f)),
             specular(glm::vec3(0.75f)),
             shine(16.f)
         {}
 
-        Material(const glm::vec3 & dif, const glm::vec3 & spec, const float shine) :
+        Material(const float amb, const glm::vec3 & dif, const glm::vec3 & spec, const float shine) :
+            ambient(amb),
             diffuse(dif),
             specular(spec),
             shine(shine)
         {}
 
+        float ambient;
         glm::vec3 diffuse;
         glm::vec3 specular;
         float shine;
