@@ -47,7 +47,7 @@ class DiffuseShader : public Shader {
                 CHECK_GL(glActiveTexture(GL_TEXTURE0 + modelTexture.getTexture()->textureId));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, modelTexture.getTexture()->textureId));
                 loadInt(getUniform("diffuseMap"), modelTexture.getTexture()->textureId);
-                loadVector(getUniform("diffuseContribution"), modelTexture.getMaterial()->diffuse);
+                loadFloat(getUniform("ambient"), modelTexture.getMaterial()->ambient);
                 loadVector(getUniform("specularColor"), modelTexture.getMaterial()->specular);
                 loadFloat(getUniform("shine"), modelTexture.getMaterial()->shine);
 
