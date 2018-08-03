@@ -29,9 +29,9 @@ struct Camera {
 struct Light {
     GameObject *gameObject;
 
-    Light(glm::vec3 p) {
+    Light(glm::vec3 pos) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3());
+        NeoEngine::addComponent<SpatialComponent>(*gameObject, pos);
         NeoEngine::addComponent<LightComponent>(*gameObject);
 
         NeoEngine::addImGuiFunc("Light", [&]() {

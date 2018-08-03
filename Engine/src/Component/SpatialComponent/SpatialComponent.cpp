@@ -9,7 +9,7 @@ namespace neo {
     SpatialComponent::SpatialComponent(GameObject & go) :
         Component(go),
         Orientable(),
-        position(),
+        position(0.f),
         scale(1.f),
         modelMatrix(),
         normalMatrix(),
@@ -17,16 +17,15 @@ namespace neo {
         normalMatrixDirty(true)
     {}
 
+    SpatialComponent::SpatialComponent(GameObject & go, const glm::vec3 & p) :
+        SpatialComponent(go) {
+        position = p;
+    }
+
     SpatialComponent::SpatialComponent(GameObject & go, const glm::vec3 & p, const glm::vec3 & s) :
-        Component(go),
-        Orientable(),
-        position(p),
-        scale(s),
-        modelMatrix(),
-        normalMatrix(),
-        modelMatrixDirty(true),
-        normalMatrixDirty(true)
-    {}
+        SpatialComponent(go, p) {
+        scale = s;
+    }
 
     SpatialComponent::SpatialComponent(GameObject &go, const glm::vec3 & p, const glm::vec3 & s, const glm::mat3 & o) :
         SpatialComponent(go, p, s) {
