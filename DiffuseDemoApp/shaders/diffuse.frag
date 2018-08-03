@@ -10,7 +10,10 @@ uniform vec3 specularColor;
 uniform float shine;
 
 uniform vec3 camPos;
+
 uniform vec3 lightPos;
+uniform vec3 lightCol;
+uniform vec3 lightAtt;
 
 out vec4 color;
 
@@ -29,11 +32,11 @@ void main() {
 
     float lambert = dot(L, N);
     vec3 H = normalize(L + V);
-    float diffuseContrib = max(lambert, 0.0f);
-    float specularContrib = pow(max(dot(H, N), 0.0), shine);
+    vec3 diffuseContrib  = lightCol * max(lambert, 0.0f);
+    vec3 specularContrib = lightCol * pow(max(dot(H, N), 0.0), shine);
 
-    color = texColor * ambient + // ambient
-            texColor * diffuseContrib + // diffuse
-            vec4(specularColor, 0) * specularContrib;  // specular
-    color.a = 1;
+    color.rgb = texColor.rgb * ambient + // ambient
+                texColor.rgb * diffuseContrib + // diffuse
+                specularColor * specularContrib;  // specular
+    color.a = texColor.a;
 }

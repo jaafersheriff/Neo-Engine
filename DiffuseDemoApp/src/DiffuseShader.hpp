@@ -31,6 +31,8 @@ class DiffuseShader : public Shader {
             auto lights = NeoEngine::getComponents<LightComponent>();
             if (lights.size()) {
                 loadVector(getUniform("lightPos"), lights.at(0)->getGameObject().getSpatial()->getPosition());
+                loadVector(getUniform("lightCol"), lights.at(0)->getColor());
+                loadVector(getUniform("lightAtt"), lights.at(0)->getAttenuation());
             }
 
             for (auto diffuse : renderSystem.getRenderables<DiffuseShader, DiffuseRenderable>()) {

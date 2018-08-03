@@ -28,16 +28,25 @@ struct Camera {
 
 struct Light {
     GameObject *gameObject;
+    LightComponent *light;
 
     Light(glm::vec3 pos) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, pos);
-        NeoEngine::addComponent<LightComponent>(*gameObject);
+        light = &NeoEngine::addComponent<LightComponent>(*gameObject);
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);
+            }
+            glm::vec3 col = light->getColor();
+            if (ImGui::SliderFloat3("Color", glm::value_ptr(col), 0.f, 1.f)) {
+                light->setColor(col);
+            }
+            glm::vec3 att = light->getAttenuation();
+            if (ImGui::SliderFloat3("Attenuation", glm::value_ptr(att), 0.f, 100.f)) {
+                light->setAttenuation(att);
             }
         });
     }
