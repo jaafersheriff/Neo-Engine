@@ -45,9 +45,8 @@ struct Light {
                 light->setColor(col);
             }
             glm::vec3 att = light->getAttenuation();
-            if (ImGui::SliderFloat3("Attenuation", glm::value_ptr(att), 0.f, 100.f)) {
-                light->setAttenuation(att);
-            }
+            ImGui::SliderFloat3("Attenuation", glm::value_ptr(att), 0.f, 1.f);
+            light->setAttenuation(att);
         });
     }
 };
