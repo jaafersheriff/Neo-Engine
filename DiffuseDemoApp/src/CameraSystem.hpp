@@ -8,15 +8,12 @@ using namespace neo;
 class CameraSystem : public System {
 
     public:
-        CameraSystem(CameraControllerComponent *cc) :
-            System("Custom System"),
-            camera(cc) {
-        }
-
-        CameraControllerComponent *camera;
+        CameraSystem() :
+            System("Camera System")
+        {}
 
         virtual void update(float dt) override {
-            camera->update(dt);
+            NeoEngine::getComponents<CameraControllerComponent>()[0]->update(dt);
         }
 
 };

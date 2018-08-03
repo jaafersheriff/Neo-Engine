@@ -80,11 +80,12 @@ int main() {
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
    
     /* Systems - order matters! */
-    NeoEngine::addSystem<CameraSystem>(camera.cameraController);
+    NeoEngine::addSystem<CameraSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
     renderSystem->addShader<DiffuseShader>("diffuse.vert", "diffuse.frag");
     NeoEngine::initSystems();
 
+    /* Game objects */
     Renderable krab = Renderable(Loader::getMesh("mr_krab.obj", true), Loader::getTexture("mr_krab.png"), glm::vec3(0.f), 1.f);
     krab.attachImGui("Krab");
     Light(glm::vec3(0.f));
