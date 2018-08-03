@@ -81,12 +81,16 @@ namespace neo {
     }
         
     const glm::mat4 & SpatialComponent::getModelMatrix() const {
-        if (modelMatrixDirty) detModelMatrix();
+        if (modelMatrixDirty) {
+            detModelMatrix();
+        }
         return modelMatrix;
     }
 
     const glm::mat3 & SpatialComponent::getNormalMatrix() const {
-        if (normalMatrixDirty) detNormalMatrix();
+        if (normalMatrixDirty) {
+            detNormalMatrix();
+        }
         return normalMatrix;
     }
 
@@ -96,7 +100,12 @@ namespace neo {
     }
 
     void SpatialComponent::detNormalMatrix() const {
-        normalMatrix = getOrientation() * glm::mat3(glm::scale(glm::mat4(), 1.0f / scale));
+        if (scale.x == scale.y && scale.y == scale.z) {
+            normalMatrix = glm::mat3(modelMatrix);
+        }
+        else {
+            normalMatrix = getOrientation() * glm::mat3(glm::scale(glm::mat4(), 1.0f / scale));
+        }
         normalMatrixDirty = false;
     }
 }
