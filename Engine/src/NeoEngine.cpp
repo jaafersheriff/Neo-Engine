@@ -86,11 +86,6 @@ namespace neo {
                 }
             }
 
-            /* Render imgui */
-            if (imGuiEnabled) {
-                ImGui::Render();
-            }
-
             /* Kill deleted objects and components */
             processKillQueue();
             Messenger::relayMessages();

@@ -1,5 +1,5 @@
 #include "RenderSystem.hpp"
-#include "Shader/GLHelper.hpp"
+#include "Util/GLHelper.hpp"
 
 #include "Component/RenderableComponent/RenderableComponent.hpp"
 #include "Window/Window.hpp"
@@ -31,6 +31,13 @@ namespace neo {
                 shader.get()->render(dt, *this);
             }
         }
+
+        /* Render imgui */
+        if (NeoEngine::imGuiEnabled) {
+            ImGui::Render();
+        }
+
+        glfwSwapBuffers(Window::getWindow());
     }
 
     void RenderSystem::attachCompToShader(const std::type_index &typeI, RenderableComponent *rComp) {
