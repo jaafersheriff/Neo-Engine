@@ -1,29 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Shaders">
+    <Filter Include="shaders">
       <UniqueIdentifier>{861f2661-d07d-4bd1-b2e1-0cf755e9ba62}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="imgui.ini" />
-    <None Include="README.md" />
     <None Include="shaders\custom.vert">
-      <Filter>Shaders</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="shaders\custom.frag">
-      <Filter>Shaders</Filter>
+      <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\wire.vert" />
-    <None Include="shaders\wire.frag" />
+    <None Include="shaders\wire.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\wire.frag">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CustomSystem.hpp" />
-    <ClInclude Include="CustomShader.hpp" />
-    <ClInclude Include="WireShader.hpp" />
-    <ClInclude Include="CustomComponent.hpp" />
+    <ClInclude Include="src\CustomComponent.hpp" />
+    <ClInclude Include="src\CustomShader.hpp" />
+    <ClInclude Include="src\CustomSystem.hpp" />
+    <ClInclude Include="src\WireShader.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
 </Project>

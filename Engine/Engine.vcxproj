@@ -19,61 +19,62 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Component\CameraComponent\CameraComponent.hpp" />
-    <ClInclude Include="Component\CameraComponent\CameraControllerComponent.hpp" />
-    <ClInclude Include="Component\Component.hpp" />
-    <ClInclude Include="Component\Components.hpp" />
-    <ClInclude Include="Component\LightComponent\LightComponent.hpp" />
-    <ClInclude Include="Component\RenderableComponent\RenderableComponent.hpp" />
-    <ClInclude Include="Component\SpatialComponent\Orientable.hpp" />
-    <ClInclude Include="Component\SpatialComponent\SpatialComponent.hpp" />
-    <ClInclude Include="ext\imgui\imconfig.h" />
-    <ClInclude Include="ext\imgui\imgui.h" />
-    <ClInclude Include="ext\imgui\imgui_impl_glfw_gl3.h" />
-    <ClInclude Include="ext\imgui\imgui_internal.h" />
-    <ClInclude Include="ext\imgui\stb_rect_pack.h" />
-    <ClInclude Include="ext\imgui\stb_textedit.h" />
-    <ClInclude Include="ext\imgui\stb_truetype.h" />
-    <ClInclude Include="ext\stb_image.h" />
-    <ClInclude Include="GameObject\GameObject.hpp" />
-    <ClInclude Include="Loader\Loader.hpp" />
-    <ClInclude Include="Messaging\Message.hpp" />
-    <ClInclude Include="Messaging\Messenger.hpp" />
-    <ClInclude Include="Model\Mesh.hpp" />
-    <ClInclude Include="Model\ModelTexture.hpp" />
-    <ClInclude Include="NeoEngine.hpp" />
-    <ClInclude Include="Shader\GLHelper.hpp" />
-    <ClInclude Include="System\RenderSystem\RenderSystem.hpp" />
-    <ClInclude Include="Shader\Shader.hpp" />
-    <ClInclude Include="System\System.hpp" />
-    <ClInclude Include="System\Systems.hpp" />
-    <ClInclude Include="Util\Util.hpp" />
-    <ClInclude Include="Window\Keyboard.hpp" />
-    <ClInclude Include="Window\Mouse.hpp" />
-    <ClInclude Include="Window\Window.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\CameraComponent.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\CameraControllerComponent.hpp" />
+    <ClInclude Include="src\Component\Component.hpp" />
+    <ClInclude Include="src\Component\Components.hpp" />
+    <ClInclude Include="src\Component\LightComponent\LightComponent.hpp" />
+    <ClInclude Include="src\Component\RenderableComponent\RenderableComponent.hpp" />
+    <ClInclude Include="src\Component\SpatialComponent\Orientable.hpp" />
+    <ClInclude Include="src\Component\SpatialComponent\SpatialComponent.hpp" />
+    <ClInclude Include="src\ext\imgui\imconfig.h" />
+    <ClInclude Include="src\ext\imgui\imgui.h" />
+    <ClInclude Include="src\ext\imgui\imgui_impl_glfw_gl3.h" />
+    <ClInclude Include="src\ext\imgui\imgui_internal.h" />
+    <ClInclude Include="src\ext\imgui\stb_rect_pack.h" />
+    <ClInclude Include="src\ext\imgui\stb_textedit.h" />
+    <ClInclude Include="src\ext\imgui\stb_truetype.h" />
+    <ClInclude Include="src\ext\stb_image.h" />
+    <ClInclude Include="src\ext\tiny_obj_loader.h" />
+    <ClInclude Include="src\GameObject\GameObject.hpp" />
+    <ClInclude Include="src\Loader\Loader.hpp" />
+    <ClInclude Include="src\Loader\MeshGenerator.hpp" />
+    <ClInclude Include="src\Messaging\Message.hpp" />
+    <ClInclude Include="src\Messaging\Messenger.hpp" />
+    <ClInclude Include="src\Model\Mesh.hpp" />
+    <ClInclude Include="src\Model\ModelTexture.hpp" />
+    <ClInclude Include="src\NeoEngine.hpp" />
+    <ClInclude Include="src\Shader\GLHelper.hpp" />
+    <ClInclude Include="src\Shader\Shader.hpp" />
+    <ClInclude Include="src\System\RenderSystem\RenderSystem.hpp" />
+    <ClInclude Include="src\System\System.hpp" />
+    <ClInclude Include="src\System\Systems.hpp" />
+    <ClInclude Include="src\Util\Util.hpp" />
+    <ClInclude Include="src\Window\Keyboard.hpp" />
+    <ClInclude Include="src\Window\Mouse.hpp" />
+    <ClInclude Include="src\Window\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Component\CameraComponent\CameraComponent.cpp" />
-    <ClCompile Include="Component\CameraComponent\CameraControllerComponent.cpp" />
-    <ClCompile Include="Component\RenderableComponent\RenderableComponent.cpp" />
-    <ClCompile Include="Component\SpatialComponent\SpatialComponent.cpp" />
-    <ClCompile Include="ext\imgui\imgui.cpp" />
-    <ClCompile Include="ext\imgui\imgui_demo.cpp" />
-    <ClCompile Include="ext\imgui\imgui_draw.cpp" />
-    <ClCompile Include="ext\imgui\imgui_impl_glfw_gl3.cpp" />
-    <ClCompile Include="GameObject\GameObject.cpp" />
-    <ClCompile Include="Loader\Loader.cpp" />
-    <ClCompile Include="Messaging\Messenger.cpp" />
-    <ClCompile Include="NeoEngine.cpp" />
-    <ClCompile Include="Shader\GLHelper.cpp" />
-    <ClCompile Include="System\RenderSystem\RenderSystem.cpp" />
-    <ClCompile Include="Shader\Shader.cpp" />
-    <ClCompile Include="Window\Keyboard.cpp" />
-    <ClCompile Include="Window\Mouse.cpp" />
-    <ClCompile Include="Window\Window.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="README.md" />
+    <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
+    <ClCompile Include="src\Component\CameraComponent\CameraControllerComponent.cpp" />
+    <ClCompile Include="src\Component\RenderableComponent\RenderableComponent.cpp" />
+    <ClCompile Include="src\Component\SpatialComponent\SpatialComponent.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_impl_glfw_gl3.cpp" />
+    <ClCompile Include="src\GameObject\GameObject.cpp" />
+    <ClCompile Include="src\Loader\Loader.cpp" />
+    <ClCompile Include="src\Messaging\Messenger.cpp" />
+    <ClCompile Include="src\Model\Mesh.cpp" />
+    <ClCompile Include="src\Model\ModelTexture.cpp" />
+    <ClCompile Include="src\NeoEngine.cpp" />
+    <ClCompile Include="src\Shader\GLHelper.cpp" />
+    <ClCompile Include="src\Shader\Shader.cpp" />
+    <ClCompile Include="src\System\RenderSystem\RenderSystem.cpp" />
+    <ClCompile Include="src\Window\Keyboard.cpp" />
+    <ClCompile Include="src\Window\Mouse.cpp" />
+    <ClCompile Include="src\Window\Window.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -90,7 +91,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -133,8 +134,8 @@
     <IntDir>$(SolutionDir)$(ProjectName)\build\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)\src\Engine\</OutDir>
-    <IntDir>$(Configuration)\src\Engine</IntDir>
+    <OutDir>$(SolutionDir)$(ProjectName)\build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\build\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)$(ProjectName)\build\$(Configuration)\</OutDir>
@@ -146,7 +147,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\OpenGL\glm-0.9.8.5;C:\OpenGL\glfw-3.2.1\include;$(ProjectDir);C:\OpenGL\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\OpenGL\glm-0.9.8.5;C:\OpenGL\glfw-3.2.1\include;$(ProjectDir)\src;C:\OpenGL\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG_MODE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -179,6 +180,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\OpenGL\glm-0.9.8.5\;C:\OpenGL\glfw-3.2.1\include;$(ProjectDir)\src\;C:\OpenGL\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

@@ -10,16 +10,29 @@ uniform vec3 specularColor;
 uniform float shine;
 
 uniform vec3 camPos;
+
 uniform vec3 lightPos;
+uniform vec3 lightCol;
+uniform vec3 lightAtt;
 
 out vec4 color;
 
 void main() {
-    vec3 viewDir = camPos - fragPos.xyz;
-    vec3 lightDir = lightPos - fragPos.xyz;
-    vec3 V = normalize(viewDir);
-    vec3 L = normalize(lightDir);
+    /* Normal */
     vec3 N = normalize(fragNor);
+
+    /* View */
+    vec3 viewDir = camPos - fragPos.xyz;
+    vec3 V = normalize(viewDir);
+
+    /* Light */
+    vec3 lightDir = lightPos - fragPos.xyz;
+    float lightDistance = length(lightDir);
+    vec3 L = normalize(lightDir);
+    float attFactor = 1;
+    if (length(lightAtt) > 0) {
+        attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
+    }
 
     /* Base color */
     vec4 texColor = texture(diffuseMap, fragTex);
@@ -29,11 +42,11 @@ void main() {
 
     float lambert = dot(L, N);
     vec3 H = normalize(L + V);
-    float diffuseContrib = max(lambert, 0.0f);
-    float specularContrib = pow(max(dot(H, N), 0.0), shine);
+    vec3 diffuseContrib  = lightCol * max(lambert, 0.0f) / attFactor;
+    vec3 specularContrib = lightCol * pow(max(dot(H, N), 0.0), shine) / attFactor;
 
-    color = texColor * ambient + // ambient
-            texColor * diffuseContrib + // diffuse
-            vec4(specularColor, 0) * specularContrib;  // specular
-    color.a = 1;
+    color.rgb = texColor.rgb * ambient + // ambient
+                texColor.rgb * diffuseContrib + // diffuse
+                specularColor * specularContrib;  // specular
+    color.a = texColor.a;
 }

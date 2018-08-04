@@ -5,7 +5,6 @@
   <PropertyGroup>
     <OutDir>$(SolutionDir)$(ProjectName)\build\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)\build\</IntDir>
-    <_PropertySheetDisplayName>AppDebugProperties</_PropertySheetDisplayName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

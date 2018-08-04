@@ -40,5 +40,8 @@ namespace neo {
             int norBufSize;
             int texBufSize;
             int eleBufSize;
+
+            /* Copy data to GPU */
+            void upload();
     };
 }

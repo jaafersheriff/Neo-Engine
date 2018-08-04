@@ -6,7 +6,7 @@ namespace neo {
 
     class LightComponent : public Component {
         public:
-            LightComponent(GameObject &go, const glm::vec3 &col = glm::vec3(1.f), const glm::vec3 att = glm::vec3(0.f)) :
+            LightComponent(GameObject &go, const glm::vec3 &col = glm::vec3(1.f), const glm::vec3 att = glm::vec3(1.f)) :
                 Component(go),
                 color(col),
                 attenuation(att)

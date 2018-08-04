@@ -1,8 +1,6 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#define GLEW_STATIC
-#include "GL/glew.h"
 
 namespace neo {
 
@@ -28,9 +26,12 @@ namespace neo {
     };
 
     struct Texture {
-        GLuint textureId;
+        unsigned int textureId;
 
         int width, height, components;
+
+        /* Upload to GPU */
+        void upload(uint8_t *, unsigned int);
     };
 
     class ModelTexture {
