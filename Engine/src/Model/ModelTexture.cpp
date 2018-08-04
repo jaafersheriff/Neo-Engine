@@ -1,10 +1,12 @@
 #include "ModelTexture.hpp"
 
+#define GLEW_STATIC
+#include "GL/glew.h"
 #include "Shader/GLHelper.hpp"
 
 namespace neo {
 
-    void Texture::upload(uint8_t *data, GLuint mode) {
+    void Texture::upload(uint8_t *data, unsigned int mode) {
         /* Generate texture buffer object */
         CHECK_GL(glGenTextures(1, &textureId));
 
@@ -22,8 +24,8 @@ namespace neo {
         CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
 
         /* Set wrap mode */
-        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mode));
-        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mode));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLenum) mode));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLenum) mode));
             
         /* LOD */
         CHECK_GL(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.5f));

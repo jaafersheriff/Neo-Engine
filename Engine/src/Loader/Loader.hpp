@@ -24,7 +24,7 @@ namespace neo {
             /* Retrieve Mesh pointer from an .obj file*/
             static Mesh * getMesh(const std::string &, bool = false);
             /* Retrieve Texture pointer from an image file*/
-            static Texture * getTexture(const std::string &, GLenum = GL_REPEAT);
+            static Texture * getTexture(const std::string &, unsigned int);
 
             /* Resize mesh vertex buffers so all the vertices are [-1, 1] */
             static void resize(Mesh::MeshBuffers &);

@@ -84,7 +84,7 @@ int main() {
             renderables.push_back(
                 new Renderable(
                     Loader::getMesh("mr_krab.obj", true), 
-                    Loader::getTexture("mr_krab.png"), 
+                    Loader::getTexture("mr_krab.png", GL_REPEAT), 
                     glm::vec3(x*2, 0, y*2), 
                     1.f)
             );

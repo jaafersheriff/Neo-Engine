@@ -95,7 +95,7 @@ namespace neo {
         return mesh;
     }
 
-    Texture * Loader::getTexture(const std::string &fileName, GLenum mode) {
+    Texture * Loader::getTexture(const std::string &fileName, unsigned int mode) {
         /* Search map first */
         auto it = textures.find(fileName);
         if (it != textures.end()) {
