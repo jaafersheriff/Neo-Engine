@@ -16,6 +16,8 @@ namespace neo {
 
     bool Loader::verbose = false;
     std::string Loader::RES_DIR = "";
+
+    /* Library */
     std::unordered_map<std::string, Mesh *> Loader::meshes;
     std::unordered_map<std::string, Texture *> Loader::textures;
 
@@ -76,7 +78,7 @@ namespace neo {
         meshes.insert({ fileName, mesh });
 
         /* Load mesh to GPU */
-        uploadMesh(*mesh);
+        mesh->upload();
 
         if (verbose) {
             std::cout << "Loaded mesh (" << vertCount << " vertices): " << fileName << std::endl;
@@ -96,7 +98,7 @@ namespace neo {
         stbi_set_flip_vertically_on_load(true);
         uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
         if (data) {
-            uploadTexture(texture, data, mode);
+            texture->upload(data, mode);
             if (texture->textureId) {
                 textures.insert(std::make_pair(fileName, texture));
             }
@@ -168,85 +170,5 @@ namespace neo {
             assert(buffers.vertBuf[3 * v + 2] >= -1.0 - epsilon);
             assert(buffers.vertBuf[3 * v + 2] <= 1.0 + epsilon);
         }
-    }
-
-
-    void Loader::uploadMesh(const Mesh & mesh) {
-        /* Initialize VAO */
-        CHECK_GL(glGenVertexArrays(1, (GLuint *) &mesh.vaoId));
-        CHECK_GL(glBindVertexArray(mesh.vaoId));
-
-        /* Copy vertex array */
-        CHECK_GL(glGenBuffers(1, (GLuint *) &mesh.vertBufId));
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.vertBufId));
-        CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mesh.buffers.vertBuf.size() * sizeof(float), &mesh.buffers.vertBuf[0], GL_STATIC_DRAW));
-        CHECK_GL(glEnableVertexAttribArray(0));
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.vertBufId));
-        CHECK_GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
-
-        /* Copy normal array if it exists */
-        if (!mesh.buffers.norBuf.empty()) {
-            CHECK_GL(glGenBuffers(1, (GLuint *) &mesh.norBufId));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.norBufId));
-            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mesh.buffers.norBuf.size() * sizeof(float), &mesh.buffers.norBuf[0], GL_STATIC_DRAW));
-            CHECK_GL(glEnableVertexAttribArray(1));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.norBufId));
-            CHECK_GL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
-        }
-
-        /* Copy texture array if it exists */
-        if (!mesh.buffers.texBuf.empty()) {
-            CHECK_GL(glGenBuffers(1, (GLuint *) &mesh.texBufId));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.texBufId));
-            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mesh.buffers.texBuf.size() * sizeof(float), &mesh.buffers.texBuf[0], GL_STATIC_DRAW));
-            CHECK_GL(glEnableVertexAttribArray(2));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.texBufId));
-            CHECK_GL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0));
-        }
-
-        /* Copy element array if it exists */
-        if (!mesh.buffers.eleBuf.empty()) {
-            CHECK_GL(glGenBuffers(1, (GLuint *) &mesh.eleBufId));
-            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
-            CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.buffers.eleBuf.size() * sizeof(unsigned int), &mesh.buffers.eleBuf[0], GL_STATIC_DRAW));
-        }
-
-        /* Unbind  */
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-
-        /* Error check */
-        assert(glGetError() == GL_NO_ERROR);
-    }
-
-    void Loader::uploadTexture(Texture *texture, uint8_t *data, GLuint mode) {
-        /* Generate texture buffer object */
-        CHECK_GL(glGenTextures(1, &texture->textureId));
-
-        /* Bind new texture buffer object to active texture */
-        CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture->textureId));
-
-        /* Load texture data to GPU */
-        CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
-
-        /* Generate image pyramid */
-        CHECK_GL(glGenerateMipmap(GL_TEXTURE_2D));
-
-        /* Set filtering mode for magnification and minimification */
-        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-
-        /* Set wrap mode */
-        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mode));
-        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mode));
-            
-        /* LOD */
-        CHECK_GL(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.5f));
-
-        /* Unbind */
-        CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
-
-        /* Error check */
-        assert(glGetError() == GL_NO_ERROR);
     }
 }

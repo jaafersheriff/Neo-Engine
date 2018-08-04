@@ -31,6 +31,9 @@ namespace neo {
         GLuint textureId;
 
         int width, height, components;
+
+        /* Upload to GPU */
+        void upload(uint8_t *, GLuint);
     };
 
     class ModelTexture {

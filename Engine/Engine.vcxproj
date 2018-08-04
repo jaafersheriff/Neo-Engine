@@ -65,6 +65,8 @@
     <ClCompile Include="src\GameObject\GameObject.cpp" />
     <ClCompile Include="src\Loader\Loader.cpp" />
     <ClCompile Include="src\Messaging\Messenger.cpp" />
+    <ClCompile Include="src\Model\Mesh.cpp" />
+    <ClCompile Include="src\Model\ModelTexture.cpp" />
     <ClCompile Include="src\NeoEngine.cpp" />
     <ClCompile Include="src\Shader\GLHelper.cpp" />
     <ClCompile Include="src\Shader\Shader.cpp" />
@@ -88,7 +90,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -131,8 +133,8 @@
     <IntDir>$(SolutionDir)$(ProjectName)\build\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)\src\Engine\</OutDir>
-    <IntDir>$(Configuration)\src\Engine</IntDir>
+    <OutDir>$(SolutionDir)$(ProjectName)\build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\build\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)$(ProjectName)\build\$(Configuration)\</OutDir>
@@ -177,6 +179,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\OpenGL\glm-0.9.8.5\;C:\OpenGL\glfw-3.2.1\include;$(ProjectDir)\src\;C:\OpenGL\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

@@ -13,6 +13,7 @@ namespace neo {
         public:
             static void init(const std::string &, bool);
 
+            /* Library */
             static std::unordered_map<std::string, Mesh *> meshes;
             static std::unordered_map<std::string, Texture *> textures;
 
@@ -25,10 +26,6 @@ namespace neo {
             static void resize(Mesh::MeshBuffers &);
 
         private:
-            /* GL Loaders */
-            static void uploadMesh(const Mesh &);
-            static void uploadTexture(Texture *, uint8_t *, GLenum);
-
             /* Private members */
             static std::string RES_DIR;
             static bool verbose;
