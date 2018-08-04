@@ -2,7 +2,7 @@
 
 #define GLEW_STATIC
 #include "GL/glew.h"
-#include "Shader/GLHelper.hpp"
+#include "Util/GLHelper.hpp"
 
 namespace neo {
 
