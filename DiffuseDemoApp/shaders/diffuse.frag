@@ -29,7 +29,10 @@ void main() {
     vec3 lightDir = lightPos - fragPos.xyz;
     float lightDistance = length(lightDir);
     vec3 L = normalize(lightDir);
-    float attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
+    float attFactor = 1;
+    if (length(lightAtt) > 0) {
+        attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
+    }
 
     /* Base color */
     vec4 texColor = texture(diffuseMap, fragTex);
