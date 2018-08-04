@@ -17,6 +17,10 @@ namespace neo {
             static std::unordered_map<std::string, Mesh *> meshes;
             static std::unordered_map<std::string, Texture *> textures;
 
+            /* Static meshes */
+            static const Mesh * getCube() { return cube; }
+            static const Mesh * getQuad() { return quad; }
+
             /* Retrieve Mesh pointer from an .obj file*/
             static Mesh * getMesh(const std::string &, bool = false);
             /* Retrieve Texture pointer from an image file*/
@@ -29,5 +33,9 @@ namespace neo {
             /* Private members */
             static std::string RES_DIR;
             static bool verbose;
+
+            /* Static meshes */
+            static const Mesh * cube;
+            static const Mesh * quad;
     };
 }

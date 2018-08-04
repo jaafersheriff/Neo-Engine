@@ -38,6 +38,7 @@
     <ClInclude Include="src\ext\tiny_obj_loader.h" />
     <ClInclude Include="src\GameObject\GameObject.hpp" />
     <ClInclude Include="src\Loader\Loader.hpp" />
+    <ClInclude Include="src\Loader\MeshGenerator.hpp" />
     <ClInclude Include="src\Messaging\Message.hpp" />
     <ClInclude Include="src\Messaging\Messenger.hpp" />
     <ClInclude Include="src\Model\Mesh.hpp" />

@@ -1,5 +1,7 @@
 #include "Loader.hpp"
 
+#include "MeshGenerator.hpp"
+
 #define GLEW_STATIC
 #include "GL/glew.h"
 #include "Shader/GLHelper.hpp"
@@ -21,9 +23,15 @@ namespace neo {
     std::unordered_map<std::string, Mesh *> Loader::meshes;
     std::unordered_map<std::string, Texture *> Loader::textures;
 
+    /* Static meshes */
+    const Mesh * Loader::cube;
+    const Mesh * Loader::quad;
+
     void Loader::init(const std::string &res, bool v) {
         RES_DIR = res;
         verbose = v;
+        cube = MeshGenerator::createCube();
+        quad = MeshGenerator::createQuad();
     }
 
     Mesh * Loader::getMesh(const std::string &fileName, bool doResize) {
