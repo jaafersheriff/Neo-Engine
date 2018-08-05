@@ -1,4 +1,5 @@
 #include "Shader.hpp"
+#include "Util/Util.hpp"
 #include "Util/GLHelper.hpp"
 
 #include <fstream>
@@ -13,9 +14,9 @@ namespace neo {
     Shader::Shader(const std::string &name, const std::string &dir, const std::string &v, const std::string &f, const std::string &g) :
         Shader(
             name,
-            (v.size() ? GLHelper::textFileRead((dir + v).c_str()) : NULL), // memory leak
-            (f.size() ? GLHelper::textFileRead((dir + f).c_str()) : NULL),
-            (g.size() ? GLHelper::textFileRead((dir + g).c_str()) : NULL))
+            (v.size() ? Util::textFileRead((dir + v).c_str()) : NULL), // memory leak
+            (f.size() ? Util::textFileRead((dir + f).c_str()) : NULL),
+            (g.size() ? Util::textFileRead((dir + g).c_str()) : NULL))
     {}
 
     Shader::Shader(const std::string &name, char *vTex, char *fTex) :

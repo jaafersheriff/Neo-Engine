@@ -32,8 +32,6 @@ namespace neo {
             void printProgramInfoLog(GLuint program);
             void printShaderInfoLog(GLuint shader);
             void checkVersion();
-            int textFileWrite(const char *filename, char *s);
-            char *textFileRead(const char *filename);
         }
 
     #ifdef DEBUG_MODE
