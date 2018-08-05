@@ -16,8 +16,10 @@ namespace neo {
     class Shader {
 
     public:
-        Shader(const std::string &, const std::string &, const std::string &, const std::string &, const std::string &);
         Shader(const std::string &, const std::string &, const std::string &, const std::string &);
+        Shader(const std::string &, const std::string &, const std::string &, const std::string &, const std::string &);
+        Shader(const std::string &, char *, char *);
+        Shader(const std::string &, char *, char *, char *);
         virtual ~Shader() = default;
 
         virtual void render(float, const RenderSystem &) {};
@@ -25,9 +27,6 @@ namespace neo {
 
         /* Names */
         const std::string name;
-        const std::string vShaderName;
-        const std::string gShaderName;
-        const std::string fShaderName;
 
         /* Utility functions */
         void bind();
@@ -53,13 +52,13 @@ namespace neo {
     private:
         /* GLSL shader attributes */
         GLuint pid = 0;
-        GLint vShaderId;
-        GLint fShaderId;
-        GLint gShaderId;
+        GLint vShaderId = 0;
+        GLint fShaderId = 0;
+        GLint gShaderId = 0;
         std::map<std::string, GLint> attributes;
         std::map<std::string, GLint> uniforms;
 
-        GLuint compileShader(GLenum, const std::string &, const std::string &);
-        void findAttributesAndUniforms(const std::string &, const std::string &);
+        GLuint compileShader(GLenum, char *);
+        void findAttributesAndUniforms(char *);
     };
 }
