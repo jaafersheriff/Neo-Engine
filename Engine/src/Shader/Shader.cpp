@@ -153,7 +153,7 @@ namespace neo {
     void Shader::addAttribute(const std::string &name) {
         GLint r = glGetAttribLocation(pid, name.c_str());
         if (r < 0) {
-            std::cerr << "WARN: " << name << " cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it\n" << std::endl;
+            std::cerr << this->name << " WARN: " << name << " cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it\n" << std::endl;
         }
         attributes[name] = r;
     }
@@ -161,7 +161,7 @@ namespace neo {
     void Shader::addUniform(const std::string &name) {
         GLint r = glGetUniformLocation(pid, name.c_str());
         if (r < 0) {
-            std::cerr << "WARN: " << name << " cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it\n" << std::endl;
+            std::cerr << this->name << " WARN: " << name << " cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it\n" << std::endl;
         }
         uniforms[name] = r;
     }
