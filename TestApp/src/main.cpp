@@ -1,9 +1,9 @@
 #include <NeoEngine.hpp>
 
 #include "CustomShader.hpp"
-#include "WireShader.hpp"
 #include "CustomComponent.hpp"
 #include "CustomSystem.hpp"
+#include "Shader/WireShader.hpp"
 
 using namespace neo;
 
