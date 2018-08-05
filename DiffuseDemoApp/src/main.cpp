@@ -59,7 +59,7 @@ struct Renderable {
     GameObject *gameObject;
     DiffuseRenderable *renderComp;
 
-    Renderable(Mesh *m, Texture *t, glm::vec3 p, float s, glm::mat3 o = glm::mat3()) {
+    Renderable(Mesh *m, Texture *t, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
         renderComp = &NeoEngine::addComponent<DiffuseRenderable>(*gameObject, m, t);
@@ -83,13 +83,12 @@ int main() {
 
     std::vector<Renderable *> renderables;
     for (int x = -2; x < 3; x++) {
-        for (int y = 0; y < 10; y++) {
+        for (int z = 0; z < 10; z++) {
             renderables.push_back(
                 new Renderable(
                     Loader::getMesh("mr_krab.obj", true), 
                     Loader::getTexture("mr_krab.png", GL_REPEAT), 
-                    glm::vec3(x*2, 0, y*2), 
-                    1.f)
+                    glm::vec3(x*2, 0, z*2))
             );
         }
     }
