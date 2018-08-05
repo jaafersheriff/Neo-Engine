@@ -32,10 +32,10 @@ struct Light {
     LightComponent *light;
     RenderableComponent *cube;
 
-    Light(glm::vec3 pos) {
+    Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, pos);
-        light = &NeoEngine::addComponent<LightComponent>(*gameObject);
+        light = &NeoEngine::addComponent<LightComponent>(*gameObject, col, att);
         cube = &NeoEngine::addComponent<RenderableComponent>(*gameObject, Loader::getMesh("cube"));
         cube->addShaderType<WireFrameShader>();
 
@@ -70,18 +70,16 @@ struct Renderable {
 int main() {
     NeoEngine::init("Diffuse Rendering", "res/", 1280, 720);
 
-    /* Init engine-necessary components */
+    /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-   
+    Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
     renderSystem->addShader<DiffuseShader>("diffuse.vert", "diffuse.frag");
     renderSystem->addShader<WireFrameShader>();
     NeoEngine::initSystems();
-
-    /* Game objects */
-    Light(glm::vec3(0.f, 10.f, 10.f));
 
     std::vector<Renderable *> renderables;
     for (int x = -2; x < 3; x++) {
