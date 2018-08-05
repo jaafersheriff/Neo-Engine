@@ -21,11 +21,21 @@ struct Camera {
     }
 };
 
+struct Skybox {
+    GameObject *gameObject;
+
+    Skybox(Texture *tex) {
+        gameObject = &NeoEngine::createGameObject();
+        NeoEngine::addComponent<CubeMapComponent>(*gameObject, tex);
+    }
+};
+
 int main() {
     NeoEngine::init("Skybox", "res/", 1280, 720);
 
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+    Skybox(Loader::getTexture("nebula_skybox", {"purplenebula_rt.tga", "purplenebula_lf.tga", "purplenebula_up.tga", "purplenebula_dn.tga", "purplenebula_ft.tga", "purplenebula_bk.tga"}, GL_CLAMP_TO_EDGE));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraSystem>();
