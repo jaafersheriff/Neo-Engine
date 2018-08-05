@@ -5,10 +5,10 @@
 
 namespace neo {
 
-    class WireShader : public Shader {
+    class WireFrameShader : public Shader {
 
         public:
-            WireShader(std::string res) :
+            WireFrameShader(std::string res) :
                 Shader("Wire Shader",
                     _strdup("\
                         #version 330 core\n\
@@ -41,7 +41,7 @@ namespace neo {
                     loadMatrix(getUniform("V"), cameras.at(0)->getView());
                 }
 
-                for (auto r : renderSystem.getRenderables<WireShader, RenderableComponent>()) {
+                for (auto r : renderSystem.getRenderables<WireFrameShader, RenderableComponent>()) {
                     /* Bind mesh */
                     const Mesh & mesh(*r->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.vaoId));
