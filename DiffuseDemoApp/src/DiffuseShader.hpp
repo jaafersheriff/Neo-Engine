@@ -44,14 +44,17 @@ class DiffuseShader : public Shader {
                 CHECK_GL(glBindVertexArray(mesh->vaoId));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId));
 
-                /* Bind texture and materials */
-                ModelTexture & modelTexture(diffuse->getModelTexture());
-                CHECK_GL(glActiveTexture(GL_TEXTURE0 + modelTexture.getTexture()->textureId));
-                CHECK_GL(glBindTexture(GL_TEXTURE_2D, modelTexture.getTexture()->textureId));
-                loadInt(getUniform("diffuseMap"), modelTexture.getTexture()->textureId);
-                loadFloat(getUniform("ambient"), modelTexture.getMaterial()->ambient);
-                loadVector(getUniform("specularColor"), modelTexture.getMaterial()->specular);
-                loadFloat(getUniform("shine"), modelTexture.getMaterial()->shine);
+                /* Bind texture */
+                const Texture & texture(diffuse->getTexture());
+                CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.textureId));
+                CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.textureId));
+                loadInt(getUniform("diffuseMap"), texture.textureId);
+
+                /* Bind material */
+                const Material & material(diffuse->getMaterial());
+                loadFloat(getUniform("ambient"), material.ambient);
+                loadVector(getUniform("specularColor"), material.specular);
+                loadFloat(getUniform("shine"), material.shine);
 
                 /* DRAW */
                 CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh->eleBufSize, GL_UNSIGNED_INT, nullptr));

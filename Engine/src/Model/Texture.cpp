@@ -1,7 +1,8 @@
-#include "ModelTexture.hpp"
+#include "Model/Texture.hpp"
 
 #define GLEW_STATIC
 #include "GL/glew.h"
+
 #include "Util/GLHelper.hpp"
 
 namespace neo {
@@ -24,9 +25,9 @@ namespace neo {
         CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
 
         /* Set wrap mode */
-        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLenum) mode));
-        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLenum) mode));
-            
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLenum)mode));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLenum)mode));
+
         /* LOD */
         CHECK_GL(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.5f));
 

@@ -41,8 +41,9 @@
     <ClInclude Include="src\Loader\MeshGenerator.hpp" />
     <ClInclude Include="src\Messaging\Message.hpp" />
     <ClInclude Include="src\Messaging\Messenger.hpp" />
+    <ClInclude Include="src\Model\Material.hpp" />
     <ClInclude Include="src\Model\Mesh.hpp" />
-    <ClInclude Include="src\Model\ModelTexture.hpp" />
+    <ClInclude Include="src\Model\Texture.hpp" />
     <ClInclude Include="src\NeoEngine.hpp" />
     <ClInclude Include="src\Shader\WireFrameShader.hpp" />
     <ClInclude Include="src\Util\GLHelper.hpp" />
@@ -68,7 +69,7 @@
     <ClCompile Include="src\Loader\Loader.cpp" />
     <ClCompile Include="src\Messaging\Messenger.cpp" />
     <ClCompile Include="src\Model\Mesh.cpp" />
-    <ClCompile Include="src\Model\ModelTexture.cpp" />
+    <ClCompile Include="src\Model\Texture.cpp" />
     <ClCompile Include="src\NeoEngine.cpp" />
     <ClCompile Include="src\Util\GLHelper.cpp" />
     <ClCompile Include="src\Shader\Shader.cpp" />

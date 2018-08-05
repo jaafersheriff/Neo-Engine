@@ -2,6 +2,8 @@
 
 #include "MeshGenerator.hpp"
 
+#include "Model/Texture.hpp"
+
 #define GLEW_STATIC
 #include "GL/glew.h"
 #include "Util/GLHelper.hpp"

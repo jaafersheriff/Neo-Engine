@@ -55,6 +55,8 @@ struct Light {
     }
 };
 
+// Global material
+Material material;
 struct Renderable {
     GameObject *gameObject;
     DiffuseRenderable *renderComp;
@@ -62,7 +64,7 @@ struct Renderable {
     Renderable(Mesh *m, Texture *t, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
-        renderComp = &NeoEngine::addComponent<DiffuseRenderable>(*gameObject, m, t);
+        renderComp = &NeoEngine::addComponent<DiffuseRenderable>(*gameObject, m, t, &material);
         renderComp->addShaderType<DiffuseShader>();
     }
 };
@@ -102,18 +104,10 @@ int main() {
         }
     });
     NeoEngine::addImGuiFunc("Material", [&]() {
-        auto material = renderables[0]->renderComp->getModelTexture().getMaterial();
-        ImGui::SliderFloat("Ambient ", &material->ambient, 0.f, 1.f);
-        ImGui::SliderFloat3("Diffuse Color", glm::value_ptr(material->diffuse), 0.f, 1.f);
-        ImGui::SliderFloat3("Specular Color", glm::value_ptr(material->specular), 0.f, 1.f);
-        ImGui::SliderFloat("Shine", &material->shine, 0.f, 100.f);
-        for (auto renderable : renderables) {
-            auto setMaterial = renderable->renderComp->getModelTexture().getMaterial();
-            setMaterial->ambient = material->ambient;
-            setMaterial->diffuse = material->diffuse;
-            setMaterial->specular = material->specular;
-            setMaterial->shine = material->shine;
-        }
+        ImGui::SliderFloat("Ambient ", &material.ambient, 0.f, 1.f);
+        ImGui::SliderFloat3("Diffuse Color", glm::value_ptr(material.diffuse), 0.f, 1.f);
+        ImGui::SliderFloat3("Specular Color", glm::value_ptr(material.specular), 0.f, 1.f);
+        ImGui::SliderFloat("Shine", &material.shine, 0.f, 100.f);
     });
 
     /* Run */
