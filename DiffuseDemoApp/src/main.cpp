@@ -29,11 +29,13 @@ struct Camera {
 struct Light {
     GameObject *gameObject;
     LightComponent *light;
+    RenderableComponent *cube;
 
     Light(glm::vec3 pos) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, pos);
         light = &NeoEngine::addComponent<LightComponent>(*gameObject);
+        cube = &NeoEngine::addComponent<RenderableComponent>(*gameObject, Loader::getMesh("cube"));
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();

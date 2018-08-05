@@ -139,8 +139,6 @@
   <ItemGroup>
     <None Include="shaders\custom.frag" />
     <None Include="shaders\custom.vert" />
-    <None Include="shaders\wire.frag" />
-    <None Include="shaders\wire.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CustomComponent.hpp" />

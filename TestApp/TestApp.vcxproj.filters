@@ -12,12 +12,6 @@
     <None Include="shaders\custom.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\wire.vert">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\wire.frag">
-      <Filter>shaders</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CustomComponent.hpp" />
