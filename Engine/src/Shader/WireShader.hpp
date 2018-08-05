@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CustomComponent.hpp"
 #include "Shader/Shader.hpp"
 #include "Util/GLHelper.hpp"
 
