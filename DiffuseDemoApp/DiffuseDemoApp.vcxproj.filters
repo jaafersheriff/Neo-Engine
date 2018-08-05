@@ -15,6 +15,7 @@
     <None Include="shaders\diffuse.frag">
       <Filter>shaders</Filter>
     </None>
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DiffuseRenderable.hpp" />

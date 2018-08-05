@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="README.md" />
     <None Include="shaders\diffuse.frag" />
     <None Include="shaders\diffuse.vert" />
   </ItemGroup>
