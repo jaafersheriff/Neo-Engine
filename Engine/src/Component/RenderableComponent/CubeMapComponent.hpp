@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Model/Texture.hpp"
+
 #include "RenderableComponent.hpp"
 
 namespace neo {
@@ -8,15 +10,15 @@ namespace neo {
 
         public:
 
-            CubeMapComponent(GameObject &go, CubeTexture *tex) :
+            CubeMapComponent(GameObject &go, Texture *tex) :
                 RenderableComponent(go, Loader::getMesh("cube")),
                 texture(tex)
             {}
                 
-            const CubeTexture *getTexture() const { return texture; }
+            const Texture *getTexture() const { return texture; }
 
          private:
-             CubeTexture * texture;
+             Texture * texture;
 
     };
 }

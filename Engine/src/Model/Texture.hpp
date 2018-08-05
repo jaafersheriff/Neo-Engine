@@ -13,7 +13,8 @@ namespace neo {
             int width, height, components;
 
             /* Upload to GPU */
-            virtual void upload(uint8_t **, unsigned int);
+            void upload(uint8_t **, unsigned int);
+            void uploadCubeMap(uint8_t **, unsigned int);
     };
 
 
