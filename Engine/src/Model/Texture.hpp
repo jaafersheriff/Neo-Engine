@@ -13,7 +13,7 @@ namespace neo {
             int width, height, components;
 
             /* Upload to GPU */
-            void upload(uint8_t *, unsigned int);
+            virtual void upload(uint8_t **, unsigned int);
     };
 
 

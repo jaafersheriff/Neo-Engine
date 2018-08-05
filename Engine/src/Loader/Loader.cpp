@@ -106,7 +106,7 @@ namespace neo {
         stbi_set_flip_vertically_on_load(true);
         uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
         if (data) {
-            texture->upload(data, mode);
+            texture->upload(&data, mode);
             if (texture->textureId) {
                 textures.insert(std::make_pair(fileName, texture));
             }

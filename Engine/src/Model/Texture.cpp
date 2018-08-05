@@ -7,7 +7,7 @@
 
 namespace neo {
 
-    void Texture::upload(uint8_t *data, unsigned int mode) {
+    void Texture::upload(uint8_t **data, unsigned int mode) {
         /* Generate texture buffer object */
         CHECK_GL(glGenTextures(1, &textureId));
 
@@ -15,7 +15,7 @@ namespace neo {
         CHECK_GL(glBindTexture(GL_TEXTURE_2D, textureId));
 
         /* Load texture data to GPU */
-        CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+        CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, *data));
 
         /* Generate image pyramid */
         CHECK_GL(glGenerateMipmap(GL_TEXTURE_2D));

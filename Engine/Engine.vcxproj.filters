@@ -37,6 +37,8 @@
     <ClInclude Include="src\Model\Material.hpp" />
     <ClInclude Include="src\Model\Texture.hpp" />
     <ClInclude Include="src\Shader\WireframeShader.hpp" />
+    <ClInclude Include="src\Component\RenderableComponent\CubeMapComponent.hpp" />
+    <ClInclude Include="src\Model\CubeTexture.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -59,5 +61,6 @@
     <ClCompile Include="src\Model\Mesh.cpp" />
     <ClCompile Include="src\Util\GLHelper.cpp" />
     <ClCompile Include="src\Model\Texture.cpp" />
+    <ClCompile Include="src\Model\CubeTexture.cpp" />
   </ItemGroup>
 </Project>
