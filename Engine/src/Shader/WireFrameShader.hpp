@@ -13,12 +13,9 @@ namespace neo {
                     _strdup("\
                         #version 330 core\n\
                         layout (location = 0) in vec3 vertPos;\
-                        uniform mat4 P;\
-                        uniform mat4 V;\
-                        uniform mat4 M;\
+                        uniform mat4 P, V, M;\
                         void main() {\
-                            vec4 worldPos = M * vec4(vertPos, 1.0);\
-                            gl_Position = P * V * worldPos;\
+                            gl_Position = P * V * M * vec4(vertPos, 1);\
                         }"),
                     _strdup("\
                         #version 330 core\n\
