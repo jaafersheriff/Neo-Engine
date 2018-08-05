@@ -2,7 +2,7 @@
 
 #include "CustomComponent.hpp"
 #include "Shader/Shader.hpp"
-#include "Shader/GLHelper.hpp"
+#include "Util/GLHelper.hpp"
 
 using namespace neo;
 
