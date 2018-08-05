@@ -1,5 +1,5 @@
 
-#Diffuse Demo App
+# Diffuse Demo App
 
 Demo app that showcases diffused and attenuated shading on texture models
 
