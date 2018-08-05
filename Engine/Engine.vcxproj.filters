@@ -34,9 +34,9 @@
     <ClInclude Include="src\Window\Window.hpp" />
     <ClInclude Include="src\Loader\MeshGenerator.hpp" />
     <ClInclude Include="src\Util\GLHelper.hpp" />
-    <ClInclude Include="src\Shader\WireFrameShader.hpp" />
     <ClInclude Include="src\Model\Material.hpp" />
     <ClInclude Include="src\Model\Texture.hpp" />
+    <ClInclude Include="src\Shader\WireframeShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />

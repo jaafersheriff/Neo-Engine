@@ -3,7 +3,7 @@
 #include "CustomShader.hpp"
 #include "CustomComponent.hpp"
 #include "CustomSystem.hpp"
-#include "Shader/WireFrameShader.hpp"
+#include "Shader/WireframeShader.hpp"
 
 using namespace neo;
 
@@ -56,7 +56,7 @@ struct Renderable {
         NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
         renderComp = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh);
         renderComp->addShaderType<CustomShader>();
-        renderComp->addShaderType<WireFrameShader>();
+        renderComp->addShaderType<WireframeShader>();
 
         alive = true;
     }
@@ -94,10 +94,10 @@ struct Renderable {
             if (ImGui::Button("Wire Shader")) {
                 wireShaderEnabled = !wireShaderEnabled;
                 if (wireShaderEnabled) {
-                    renderComp->addShaderType<WireFrameShader>();
+                    renderComp->addShaderType<WireframeShader>();
                 }
                 else {
-                    renderComp->removeShaderType<WireFrameShader>();
+                    renderComp->removeShaderType<WireframeShader>();
                 }
             }
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -126,7 +126,7 @@ int main() {
 
     /* Shaders */
     renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
-    renderSystem->addShader<WireFrameShader>();
+    renderSystem->addShader<WireframeShader>();
 
     /* Attach ImGui panes */
     cube.attachImGui("Cube");
