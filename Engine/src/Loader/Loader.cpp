@@ -4,7 +4,7 @@
 
 #define GLEW_STATIC
 #include "GL/glew.h"
-#include "Shader/GLHelper.hpp"
+#include "Util/GLHelper.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ext/tiny_obj_loader.h"
