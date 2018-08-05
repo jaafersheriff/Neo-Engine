@@ -117,7 +117,7 @@ int main() {
 
     /* Init components */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.7f, 7.f);
-    Renderable cube(Loader::getMesh("cube.obj"), glm::vec3(0.f), 1.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
+    Renderable cube(Loader::getMesh("cube"), glm::vec3(0.f), 2.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>(camera.cameraController);
