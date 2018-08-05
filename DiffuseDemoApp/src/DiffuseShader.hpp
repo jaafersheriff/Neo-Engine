@@ -4,7 +4,7 @@
 
 #include "DiffuseRenderable.hpp"
 #include "Shader/Shader.hpp"
-#include "Shader/GlHelper.hpp"
+#include "Util/GlHelper.hpp"
 
 using namespace neo;
 

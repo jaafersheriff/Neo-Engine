@@ -25,7 +25,6 @@
     <ClInclude Include="src\Messaging\Messenger.hpp" />
     <ClInclude Include="src\Model\Mesh.hpp" />
     <ClInclude Include="src\Model\ModelTexture.hpp" />
-    <ClInclude Include="src\Shader\GLHelper.hpp" />
     <ClInclude Include="src\Shader\Shader.hpp" />
     <ClInclude Include="src\System\RenderSystem\RenderSystem.hpp" />
     <ClInclude Include="src\System\System.hpp" />
@@ -35,6 +34,7 @@
     <ClInclude Include="src\Window\Mouse.hpp" />
     <ClInclude Include="src\Window\Window.hpp" />
     <ClInclude Include="src\Loader\MeshGenerator.hpp" />
+    <ClInclude Include="src\Util\GLHelper.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -48,7 +48,6 @@
     <ClCompile Include="src\GameObject\GameObject.cpp" />
     <ClCompile Include="src\Loader\Loader.cpp" />
     <ClCompile Include="src\Messaging\Messenger.cpp" />
-    <ClCompile Include="src\Shader\GLHelper.cpp" />
     <ClCompile Include="src\Shader\Shader.cpp" />
     <ClCompile Include="src\System\RenderSystem\RenderSystem.cpp" />
     <ClCompile Include="src\Window\Keyboard.cpp" />
@@ -57,5 +56,6 @@
     <ClCompile Include="src\NeoEngine.cpp" />
     <ClCompile Include="src\Model\Mesh.cpp" />
     <ClCompile Include="src\Model\ModelTexture.cpp" />
+    <ClCompile Include="src\Util\GLHelper.cpp" />
   </ItemGroup>
 </Project>

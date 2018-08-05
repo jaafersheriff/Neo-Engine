@@ -1,9 +1,9 @@
 #include <NeoEngine.hpp>
 
 #include "CustomShader.hpp"
-#include "WireShader.hpp"
 #include "CustomComponent.hpp"
 #include "CustomSystem.hpp"
+#include "Shader/WireShader.hpp"
 
 using namespace neo;
 
@@ -125,7 +125,7 @@ int main() {
 
     /* Shaders */
     renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
-    renderSystem->addShader<WireShader>("wire.vert", "wire.frag");
+    renderSystem->addShader<WireShader>();
 
     /* Init app components */
     Renderable cube(Loader::getMesh("cube.obj"), glm::vec3(0.f), 1.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));

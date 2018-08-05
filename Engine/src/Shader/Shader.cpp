@@ -1,5 +1,6 @@
 #include "Shader.hpp"
-#include "GLHelper.hpp"
+#include "Util/Util.hpp"
+#include "Util/GLHelper.hpp"
 
 #include <fstream>
 #include <vector>
@@ -8,21 +9,30 @@ namespace neo {
 
     Shader::Shader(const std::string &name, const std::string &dir, const std::string &v, const std::string &f) :
         Shader(name, dir, v, f, "")
-    { }
+    {}
 
-    Shader::Shader(const std::string &name, const std::string &dir, const std::string &vName, const std::string &fName, const std::string &gName) :
-        name(name),
-        vShaderName(vName),
-        fShaderName(fName),
-        gShaderName(gName) {
+    Shader::Shader(const std::string &name, const std::string &dir, const std::string &v, const std::string &f, const std::string &g) :
+        Shader(
+            name,
+            (v.size() ? Util::textFileRead((dir + v).c_str()) : NULL), // memory leak
+            (f.size() ? Util::textFileRead((dir + f).c_str()) : NULL),
+            (g.size() ? Util::textFileRead((dir + g).c_str()) : NULL))
+    {}
+
+    Shader::Shader(const std::string &name, char *vTex, char *fTex) :
+        Shader(name, vTex, fTex, NULL)
+    {}
+
+    Shader::Shader(const std::string &name, char *vTex, char *fTex, char *gTex) :
+        name(name) {
         pid = glCreateProgram();
-        if (vShaderName.size() && (vShaderId = compileShader(GL_VERTEX_SHADER, dir, vShaderName))) {
+        if (vTex && (vShaderId = compileShader(GL_VERTEX_SHADER, vTex))) {
             CHECK_GL(glAttachShader(pid, vShaderId));
         }
-        if (fShaderName.size() && (fShaderId = compileShader(GL_FRAGMENT_SHADER, dir, fShaderName))) {
+        if (fTex && (fShaderId = compileShader(GL_FRAGMENT_SHADER, fTex))) {
             CHECK_GL(glAttachShader(pid, fShaderId));
         }
-        if (gShaderName.size() && (gShaderId = compileShader(GL_GEOMETRY_SHADER, dir, gShaderName))) {
+        if (gTex && (gShaderId = compileShader(GL_GEOMETRY_SHADER, gTex))) {
             CHECK_GL(glAttachShader(pid, gShaderId));
         }
         CHECK_GL(glLinkProgram(pid));
@@ -32,38 +42,23 @@ namespace neo {
         CHECK_GL(glGetProgramiv(pid, GL_LINK_STATUS, &linkSuccess));
         if (!linkSuccess) {
             GLHelper::printProgramInfoLog(pid);
-            std::cout << "Error linking shaders " << vShaderName << " and " << fShaderName;
-            if (gShaderId) {
-                std::cout << " and " << gShaderName << std::endl;
-            }
-            else {
-                std::cout << std::endl;
-            }
+            std::cout << "Error linking shader " << name << std::endl;
             std::cin.get();
             exit(EXIT_FAILURE);
         }
 
         if (vShaderId) {
-            findAttributesAndUniforms(dir, vShaderName);
+            findAttributesAndUniforms(vTex);
         }
         if (fShaderId) {
-            findAttributesAndUniforms(dir, fShaderName);
+            findAttributesAndUniforms(fTex);
         }
         if (gShaderId) {
-            findAttributesAndUniforms(dir, gShaderName);
+            findAttributesAndUniforms(gTex);
         }
     }
 
-    GLuint Shader::compileShader(GLenum shaderType, const std::string &dir, const std::string &shaderName) {
-        // Read the shader source file into a string
-        char *shaderString = GLHelper::textFileRead((dir + shaderName).c_str());
-        // Stop if there was an error reading the shader source file
-        if (shaderString == NULL) {
-            std::cout << "Could not read shader: " << dir << shaderName << std::endl;
-            std::cin.get();
-            exit(EXIT_FAILURE);
-        }
-
+    GLuint Shader::compileShader(GLenum shaderType, char *shaderString) {
         // Create the shader, assign source code, and compile it
         GLuint shader = glCreateShader(shaderType);
         CHECK_GL(glShaderSource(shader, 1, &shaderString, NULL));
@@ -74,26 +69,35 @@ namespace neo {
         CHECK_GL(glGetShaderiv(shader, GL_COMPILE_STATUS, &compileSuccess));
         if (!compileSuccess) {
             GLHelper::printShaderInfoLog(shader);
-            std::cout << "Error compiling shader: " << dir << shaderName << std::endl;
+            std::cout << "Error compiling " << name;
+            switch (shaderType) {
+                case GL_VERTEX_SHADER:
+                    std::cout << " vertex shader";
+                    break;
+                case GL_FRAGMENT_SHADER:
+                    std::cout << " fragment shader";
+                    break;
+                case GL_GEOMETRY_SHADER:
+                    std::cout << " geometry shader";
+                    break;
+                default:
+                    break;
+            }
+            std::cout << std::endl;
             std::cin.get();
             exit(EXIT_FAILURE);
         }
 
-        // Free the memory
-        free(shaderString);
-
         return shader;
     }
 
-    void Shader::findAttributesAndUniforms(const std::string &res, const std::string &shaderName) {
-        char *fileText = GLHelper::textFileRead((res + shaderName).c_str());
-        char *token;
-        char *lastToken = nullptr;
-
+    void Shader::findAttributesAndUniforms(char *shaderString) {
+        char fileText[32768];
+        strcpy(fileText, shaderString);
         std::vector<char *> lines;
 
         // Read the first line
-        token = strtok(fileText, ";\n");
+        char * token = strtok(fileText, ";\n");
         lines.push_back(token);
         // Read all subsequent lines
         while ((token = strtok(NULL, ";\n")) != NULL) {
@@ -124,6 +128,7 @@ namespace neo {
                 addUniform(lineEnding + (lastDelimiter + 1));
             }
             else if (!strcmp(token, "layout")) {
+                char *lastToken = nullptr;
                 while ((token = strtok(NULL, " ")) != NULL) {
                     lastToken = token;
                 }
@@ -135,9 +140,6 @@ namespace neo {
                 continue;
             }
         }
-
-        // Free the memory
-        free(fileText);
     }
 
     void Shader::bind() {

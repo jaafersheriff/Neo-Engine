@@ -38,13 +38,15 @@ namespace neo {
         /* Init base engine */
         srand((unsigned int)(time(0)));
         APP_NAME = title;
-        Loader::init(app_res, true);
 
         /* Init window*/
         if (Window::initGLFW(APP_NAME)) {
             std::cerr << "Failed initializing Window" << std::endl;
         }
         Window::setSize(glm::ivec2(width, height));
+
+        /* Init loader after initializing GL*/
+        Loader::init(app_res, true);
 
         /* Init FPS */
         lastFrameTime = runTime = glfwGetTime();
@@ -84,11 +86,6 @@ namespace neo {
                     system.second->update((float)timeStep);
                     Messenger::relayMessages();
                 }
-            }
-
-            /* Render imgui */
-            if (imGuiEnabled) {
-                ImGui::Render();
             }
 
             /* Kill deleted objects and components */

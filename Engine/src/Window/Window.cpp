@@ -183,7 +183,6 @@ namespace neo {
         }
 
         glfwPollEvents();
-        glfwSwapBuffers(window);
     }
 
     void Window::setWindowTitle(const std::string &name) {

@@ -12,18 +12,11 @@
     <None Include="shaders\custom.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\wire.vert">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\wire.frag">
-      <Filter>shaders</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CustomComponent.hpp" />
     <ClInclude Include="src\CustomShader.hpp" />
     <ClInclude Include="src\CustomSystem.hpp" />
-    <ClInclude Include="src\WireShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />

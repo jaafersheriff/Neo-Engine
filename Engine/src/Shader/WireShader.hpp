@@ -1,16 +1,35 @@
 #pragma once
 
-#include "CustomComponent.hpp"
 #include "Shader/Shader.hpp"
-#include "Shader/GLHelper.hpp"
+#include "Util/GLHelper.hpp"
 
 using namespace neo;
 
 class WireShader : public Shader {
 
+private:
     public:
-        WireShader(const std::string &res, const std::string &vert, const std::string &frag) :
-            Shader("Wire Shader", res, vert, frag)
+        WireShader(std::string res) :
+            Shader("Wire Shader", 
+                _strdup("\
+                    #version 330 core\n\
+                    layout (location = 0) in vec3 vertPos;\
+                    layout (location = 1) in vec3 vertNor;\
+                    layout (location = 2) in vec2 vertTex;\
+                    uniform mat4 P;\
+                    uniform mat4 V;\
+                    uniform mat4 M;\
+                    void main() {\
+                        vec4 worldPos = M * vec4(vertPos, 1.0);\
+                        gl_Position = P * V * worldPos;\
+                    }"), 
+                _strdup("\
+                    #version 330 core\n\
+                    out vec4 color;\
+                    void main() {\
+                        color = vec4(1.0);\
+                    }")
+            )
         {}
         
         virtual void render(float dt, const RenderSystem &renderSystem) override {

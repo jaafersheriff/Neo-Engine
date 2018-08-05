@@ -5,6 +5,8 @@
 #include "DiffuseShader.hpp"
 #include "CameraSystem.hpp"
 
+#include "Shader/WireShader.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace neo;
@@ -29,11 +31,14 @@ struct Camera {
 struct Light {
     GameObject *gameObject;
     LightComponent *light;
+    RenderableComponent *cube;
 
     Light(glm::vec3 pos) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, pos);
         light = &NeoEngine::addComponent<LightComponent>(*gameObject);
+        cube = &NeoEngine::addComponent<RenderableComponent>(*gameObject, Loader::getMesh("cube"));
+        cube->addShaderType<WireShader>();
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -73,6 +78,7 @@ int main() {
     NeoEngine::addSystem<CameraSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
     renderSystem->addShader<DiffuseShader>("diffuse.vert", "diffuse.frag");
+    renderSystem->addShader<WireShader>();
     NeoEngine::initSystems();
 
     /* Game objects */
