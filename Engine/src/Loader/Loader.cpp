@@ -23,15 +23,13 @@ namespace neo {
     std::unordered_map<std::string, Mesh *> Loader::meshes;
     std::unordered_map<std::string, Texture *> Loader::textures;
 
-    /* Static meshes */
-    const Mesh * Loader::cube;
-    const Mesh * Loader::quad;
-
     void Loader::init(const std::string &res, bool v) {
         RES_DIR = res;
         verbose = v;
-        cube = MeshGenerator::createCube();
-        quad = MeshGenerator::createQuad();
+
+        /* Static meshes */
+        meshes.insert({ "cube", MeshGenerator::createCube() });
+        meshes.insert({ "quad", MeshGenerator::createQuad() });
     }
 
     Mesh * Loader::getMesh(const std::string &fileName, bool doResize) {
