@@ -2,7 +2,6 @@
 
 #include "MeshGenerator.hpp"
 
-#include "Model/CubeTexture.hpp"
 #include "Model/Texture.hpp"
 
 #define GLEW_STATIC
@@ -123,15 +122,14 @@ namespace neo {
         return texture;
     }
 
-
-    Texture * Loader::getTexture(const std::string &name, const std::string * files, unsigned int mode) {
+    Texture * Loader::getTexture(const std::string name, const std::vector<std::string> & files, unsigned int mode) {
         /* Search map first */
         auto it = textures.find(name);
         if (it != textures.end()) {
             return it->second;
         }
 
-        CubeTexture *texture = new CubeTexture;
+        Texture *texture = new Texture;
         /* Load in texture data to CPU */
         uint8_t* data[6];
         stbi_set_flip_vertically_on_load(true);
