@@ -15,6 +15,8 @@
 #include <typeindex>
 #include <functional>
 
+#include "GameObject/GameObject.hpp"
+
 namespace neo {
 
     class NeoEngine {

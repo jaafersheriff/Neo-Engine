@@ -35,6 +35,7 @@
     <ClInclude Include="src\Window\Window.hpp" />
     <ClInclude Include="src\Loader\MeshGenerator.hpp" />
     <ClInclude Include="src\Util\GLHelper.hpp" />
+    <ClInclude Include="src\Shader\WireFrameShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />

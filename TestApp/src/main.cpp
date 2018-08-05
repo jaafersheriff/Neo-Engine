@@ -3,7 +3,7 @@
 #include "CustomShader.hpp"
 #include "CustomComponent.hpp"
 #include "CustomSystem.hpp"
-#include "Shader/WireShader.hpp"
+#include "Shader/WireFrameShader.hpp"
 
 using namespace neo;
 
@@ -56,7 +56,7 @@ struct Renderable {
         NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
         renderComp = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh);
         renderComp->addShaderType<CustomShader>();
-        renderComp->addShaderType<WireShader>();
+        renderComp->addShaderType<WireFrameShader>();
 
         alive = true;
     }
@@ -94,10 +94,10 @@ struct Renderable {
             if (ImGui::Button("Wire Shader")) {
                 wireShaderEnabled = !wireShaderEnabled;
                 if (wireShaderEnabled) {
-                    renderComp->addShaderType<WireShader>();
+                    renderComp->addShaderType<WireFrameShader>();
                 }
                 else {
-                    renderComp->removeShaderType<WireShader>();
+                    renderComp->removeShaderType<WireFrameShader>();
                 }
             }
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -115,9 +115,10 @@ struct Renderable {
 int main() {
     NeoEngine::init("TestApp", "res/", 1280, 720);
 
-    /* Init engine-necessary components */
+    /* Init components */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.7f, 7.f);
-   
+    Renderable cube(Loader::getMesh("cube"), glm::vec3(0.f), 2.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
+
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>(camera.cameraController);
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
@@ -125,10 +126,7 @@ int main() {
 
     /* Shaders */
     renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
-    renderSystem->addShader<WireShader>();
-
-    /* Init app components */
-    Renderable cube(Loader::getMesh("cube.obj"), glm::vec3(0.f), 1.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
+    renderSystem->addShader<WireFrameShader>();
 
     /* Attach ImGui panes */
     cube.attachImGui("Cube");

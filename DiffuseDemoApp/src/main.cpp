@@ -1,11 +1,10 @@
 #include <NeoEngine.hpp>
-#include "GameObject/GameObject.hpp"
 
 #include "DiffuseRenderable.hpp"
 #include "DiffuseShader.hpp"
 #include "CameraSystem.hpp"
 
-#include "Shader/WireShader.hpp"
+#include "Shader/WireFrameShader.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -33,12 +32,12 @@ struct Light {
     LightComponent *light;
     RenderableComponent *cube;
 
-    Light(glm::vec3 pos) {
+    Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, pos);
-        light = &NeoEngine::addComponent<LightComponent>(*gameObject);
+        light = &NeoEngine::addComponent<LightComponent>(*gameObject, col, att);
         cube = &NeoEngine::addComponent<RenderableComponent>(*gameObject, Loader::getMesh("cube"));
-        cube->addShaderType<WireShader>();
+        cube->addShaderType<WireFrameShader>();
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -60,7 +59,7 @@ struct Renderable {
     GameObject *gameObject;
     DiffuseRenderable *renderComp;
 
-    Renderable(Mesh *m, Texture *t, glm::vec3 p, float s, glm::mat3 o = glm::mat3()) {
+    Renderable(Mesh *m, Texture *t, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
         renderComp = &NeoEngine::addComponent<DiffuseRenderable>(*gameObject, m, t);
@@ -71,28 +70,25 @@ struct Renderable {
 int main() {
     NeoEngine::init("Diffuse Rendering", "res/", 1280, 720);
 
-    /* Init engine-necessary components */
+    /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-   
+    Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
     renderSystem->addShader<DiffuseShader>("diffuse.vert", "diffuse.frag");
-    renderSystem->addShader<WireShader>();
+    renderSystem->addShader<WireFrameShader>();
     NeoEngine::initSystems();
-
-    /* Game objects */
-    Light(glm::vec3(0.f, 10.f, 10.f));
 
     std::vector<Renderable *> renderables;
     for (int x = -2; x < 3; x++) {
-        for (int y = 0; y < 10; y++) {
+        for (int z = 0; z < 10; z++) {
             renderables.push_back(
                 new Renderable(
                     Loader::getMesh("mr_krab.obj", true), 
                     Loader::getTexture("mr_krab.png", GL_REPEAT), 
-                    glm::vec3(x*2, 0, y*2), 
-                    1.f)
+                    glm::vec3(x*2, 0, z*2))
             );
         }
     }

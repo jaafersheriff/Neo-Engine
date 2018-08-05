@@ -1,5 +1,7 @@
 
 # Test App
-Application to test Neo Engine's architecture
+Application to test Neo Engine's architecture 
 
-All rendering features will be explored in other applications
+Rendering features will be explored in other applications
+
+<img src="res/readme.png">
