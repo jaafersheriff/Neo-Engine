@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NeoEngine.hpp"
+#include "Component/Component.hpp"
 
 #include "Model/Mesh.hpp"
 

@@ -1,6 +1,8 @@
 #include "RenderSystem.hpp"
 #include "Util/GLHelper.hpp"
 
+#include "NeoEngine.hpp"
+
 #include "Component/RenderableComponent/RenderableComponent.hpp"
 #include "Window/Window.hpp"
 
