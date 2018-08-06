@@ -72,6 +72,7 @@ struct Refraction {
         renderComp->addShaderType<RefractionShader>();
 
         NeoEngine::addImGuiFunc("Refraction", [&]() {
+            ImGui::SliderFloat("Index", &renderComp->ratio, 0.f, 1.f);
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);

@@ -35,6 +35,7 @@ class RefractionShader : public Shader {
             for (auto model : renderSystem.getRenderables<RefractionShader, RefractionRenderable>()) {
                 loadMatrix(getUniform("M"), model->getGameObject().getSpatial()->getModelMatrix());
                 loadMatrix(getUniform("N"), model->getGameObject().getSpatial()->getNormalMatrix());
+                loadFloat(getUniform("ratio"), model->ratio);
 
                 /* Bind mesh */
                 const Mesh * mesh(model->getMesh());
