@@ -132,7 +132,6 @@ namespace neo {
         Texture *texture = new Texture;
         /* Load in texture data to CPU */
         uint8_t* data[6];
-        stbi_set_flip_vertically_on_load(true);
         for (int i = 0; i < 6; i++) {
             data[i] = stbi_load((RES_DIR + files[i]).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
             if (data[i]) {

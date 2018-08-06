@@ -42,6 +42,7 @@ namespace neo {
         CHECK_GL(glGenTextures(1, &textureId));
         CHECK_GL(glActiveTexture(GL_TEXTURE0 + textureId));
 
+        // F, B, U, D, R, L
         for(int i = 0; i < 6; i++) {
             if (data[i]) {
                 CHECK_GL(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, this->width, this->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data[i]));

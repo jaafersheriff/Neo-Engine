@@ -39,7 +39,7 @@ int main() {
 
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-    Skybox(Loader::getTexture("nebula_skybox", {"purplenebula_rt.tga", "purplenebula_lf.tga", "purplenebula_up.tga", "purplenebula_dn.tga", "purplenebula_ft.tga", "purplenebula_bk.tga"}, GL_CLAMP_TO_EDGE));
+    Skybox(Loader::getTexture("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}, GL_CLAMP_TO_EDGE));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraSystem>();
