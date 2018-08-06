@@ -8,6 +8,8 @@
 #include "ReflectionShader.hpp"
 #include "RefractionShader.hpp"
 
+#include "Shader/WireframeShader.hpp"
+
 using namespace neo;
 
 /* Systems */
@@ -47,6 +49,7 @@ struct Reflection {
         NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(scale));
         renderComp = &NeoEngine::addComponentAs<ReflectionRenderable, RenderableComponent>(*gameObject, m);
         renderComp->addShaderType<ReflectionShader>();
+        renderComp->addShaderType<WireframeShader>();
 
         NeoEngine::addImGuiFunc("Reflection", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -70,6 +73,7 @@ struct Refraction {
         NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(scale));
         renderComp = &NeoEngine::addComponentAs<RefractionRenderable, RenderableComponent>(*gameObject, m);
         renderComp->addShaderType<RefractionShader>();
+        renderComp->addShaderType<WireframeShader>();
 
         NeoEngine::addImGuiFunc("Refraction", [&]() {
             ImGui::SliderFloat("Index", &renderComp->ratio, 0.f, 1.f);
@@ -103,6 +107,7 @@ int main() {
     renderSystem->addShader<ReflectionShader>("model.vert", "reflect.frag");
     renderSystem->addShader<RefractionShader>("model.vert", "refract.frag");
     renderSystem->addShader<SkyboxShader>("skybox.vert", "skybox.frag");
+    renderSystem->addShader<WireframeShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
