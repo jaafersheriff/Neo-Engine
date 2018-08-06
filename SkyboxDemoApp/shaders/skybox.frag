@@ -2,10 +2,10 @@
 
 in vec3 fragTex;
 
-uniform samplerCube cube;
+uniform samplerCube cubeMap;
 
 out vec4 color;
 
 void main() {
-    color = texture(cube, fragTex);
+    color = texture(cubeMap, fragTex);
 }

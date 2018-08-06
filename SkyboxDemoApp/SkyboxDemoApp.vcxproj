@@ -116,13 +116,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\CameraSystem.hpp" />
+    <ClCompile Include="src\CustomSystem.hpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ReflectionRenderable.hpp" />
+    <ClInclude Include="src\ReflectionShader.hpp" />
+    <ClInclude Include="src\RefractionRenderable.hpp" />
+    <ClInclude Include="src\RefractionShader.hpp" />
     <ClInclude Include="src\SkyboxShader.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\model.vert" />
+    <None Include="shaders\reflect.frag" />
+    <None Include="shaders\refract.frag" />
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\skybox.vert" />
   </ItemGroup>

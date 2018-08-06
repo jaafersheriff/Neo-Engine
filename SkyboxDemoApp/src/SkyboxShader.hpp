@@ -3,7 +3,7 @@
 #include "Component/RenderableComponent/CubeMapComponent.hpp"
 #include "Shader/Shader.hpp"
 
-#include "util/GLHelper.hpp"
+#include "Util/GLHelper.hpp"
 
 using namespace neo;
 
@@ -21,6 +21,8 @@ class SkyboxShader : public Shader {
                 return;
             }
 
+            CHECK_GL(glDisable(GL_CULL_FACE));
+            CHECK_GL(glDepthFunc(GL_LEQUAL));
             bind();
 
             /* Load PV */
@@ -37,15 +39,16 @@ class SkyboxShader : public Shader {
 
             /* Bind texture */
             const Texture *tex = cube->getTexture();
-            loadInt(getUniform("cube"), tex->textureId);
+            loadInt(getUniform("cubeMap"), tex->textureId);
 
-            CHECK_GL(glDisable(GL_CULL_FACE));
             CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh->eleBufSize, GL_UNSIGNED_INT, nullptr));
-            CHECK_GL(glEnable(GL_CULL_FACE));
 
             CHECK_GL(glBindVertexArray(0));
             CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 
             unbind();
+
+            CHECK_GL(glEnable(GL_CULL_FACE));
+            CHECK_GL(glDepthFunc(GL_LESS));
         }
 };
