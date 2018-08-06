@@ -4,6 +4,8 @@
 
 #include "RenderableComponent.hpp"
 
+#include "Loader/Loader.hpp"
+
 namespace neo {
 
     class CubeMapComponent : public RenderableComponent {

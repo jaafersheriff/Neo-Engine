@@ -2,6 +2,8 @@
 
 #include "CameraSystem.hpp"
 
+#include "SkyboxShader.hpp"
+
 using namespace neo;
 
 /* Systems */
@@ -23,10 +25,12 @@ struct Camera {
 
 struct Skybox {
     GameObject *gameObject;
+    CubeMapComponent *cubeMap;
 
     Skybox(Texture *tex) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<CubeMapComponent>(*gameObject, tex);
+        cubeMap = &NeoEngine::addComponent<CubeMapComponent>(*gameObject, tex);
+        cubeMap->addShaderType<SkyboxShader>();
     }
 };
 
@@ -41,6 +45,9 @@ int main() {
     NeoEngine::addSystem<CameraSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
     NeoEngine::initSystems();
+
+    /* Shaders */
+    renderSystem->addShader<SkyboxShader>("skybox.vert", "skybox.frag");
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {

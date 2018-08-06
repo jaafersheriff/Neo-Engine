@@ -118,9 +118,14 @@
   <ItemGroup>
     <ClCompile Include="src\CameraSystem.hpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\SkyboxShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\SkyboxShader.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\skybox.frag" />
+    <None Include="shaders\skybox.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

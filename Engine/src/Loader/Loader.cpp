@@ -146,7 +146,7 @@ namespace neo {
         }
 
         /* Copy cube texture data to GPU */
-        texture->upload(data, mode);
+        texture->uploadCubeMap(data, mode);
     
         /* Add to map */
         if (texture->textureId) {

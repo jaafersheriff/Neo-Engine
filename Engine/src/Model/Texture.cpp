@@ -38,10 +38,9 @@ namespace neo {
         assert(glGetError() == GL_NO_ERROR);
     }
 
-    void Texture::uploadCubeMap(uint8_t *data[6], unsigned int mode) {
+    void Texture::uploadCubeMap(uint8_t **data, unsigned int mode) {
         CHECK_GL(glGenTextures(1, &textureId));
-
-        CHECK_GL(glBindTexture(GL_TEXTURE_CUBE_MAP, textureId));
+        CHECK_GL(glActiveTexture(GL_TEXTURE0 + textureId));
 
         for(int i = 0; i < 6; i++) {
             if (data[i]) {
@@ -55,7 +54,7 @@ namespace neo {
         CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, (GLenum) mode));
         CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, (GLenum) mode));
 
-        CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
+        CHECK_GL(glActiveTexture(GL_TEXTURE0));
 
         /* Error check */
         assert(glGetError() == GL_NO_ERROR);
