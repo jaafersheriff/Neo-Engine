@@ -4,9 +4,10 @@
 #include <unordered_map>
 
 #include "Model/Mesh.hpp"
-#include "Model/ModelTexture.hpp"
 
 namespace neo {
+
+    class Texture;
 
     class Loader {
 
@@ -21,11 +22,12 @@ namespace neo {
             static Mesh * getMesh(const std::string &, bool = false);
             /* Retrieve Texture pointer from an image file*/
             static Texture * getTexture(const std::string &, unsigned int);
+            static Texture * getTexture(const std::string, const std::vector<std::string> &, unsigned int);
 
+        private:
             /* Resize mesh vertex buffers so all the vertices are [-1, 1] */
             static void resize(Mesh::MeshBuffers &);
 
-        private:
             /* Private members */
             static std::string RES_DIR;
             static bool verbose;

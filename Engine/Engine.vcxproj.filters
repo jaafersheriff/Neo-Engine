@@ -24,7 +24,6 @@
     <ClInclude Include="src\Messaging\Message.hpp" />
     <ClInclude Include="src\Messaging\Messenger.hpp" />
     <ClInclude Include="src\Model\Mesh.hpp" />
-    <ClInclude Include="src\Model\ModelTexture.hpp" />
     <ClInclude Include="src\Shader\Shader.hpp" />
     <ClInclude Include="src\System\RenderSystem\RenderSystem.hpp" />
     <ClInclude Include="src\System\System.hpp" />
@@ -35,7 +34,10 @@
     <ClInclude Include="src\Window\Window.hpp" />
     <ClInclude Include="src\Loader\MeshGenerator.hpp" />
     <ClInclude Include="src\Util\GLHelper.hpp" />
-    <ClInclude Include="src\Shader\WireFrameShader.hpp" />
+    <ClInclude Include="src\Model\Material.hpp" />
+    <ClInclude Include="src\Model\Texture.hpp" />
+    <ClInclude Include="src\Shader\WireframeShader.hpp" />
+    <ClInclude Include="src\Component\RenderableComponent\CubeMapComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -56,7 +58,7 @@
     <ClCompile Include="src\Window\Window.cpp" />
     <ClCompile Include="src\NeoEngine.cpp" />
     <ClCompile Include="src\Model\Mesh.cpp" />
-    <ClCompile Include="src\Model\ModelTexture.cpp" />
     <ClCompile Include="src\Util\GLHelper.cpp" />
+    <ClCompile Include="src\Model\Texture.cpp" />
   </ItemGroup>
 </Project>

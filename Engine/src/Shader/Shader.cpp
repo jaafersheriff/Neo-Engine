@@ -56,6 +56,8 @@ namespace neo {
         if (gShaderId) {
             findAttributesAndUniforms(gTex);
         }
+
+        std::cout << "Successfully compiled and linked " << name << std::endl;
     }
 
     GLuint Shader::compileShader(GLenum shaderType, char *shaderString) {

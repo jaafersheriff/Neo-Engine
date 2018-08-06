@@ -2,6 +2,8 @@
 
 #include "MeshGenerator.hpp"
 
+#include "Model/Texture.hpp"
+
 #define GLEW_STATIC
 #include "GL/glew.h"
 #include "Util/GLHelper.hpp"
@@ -104,7 +106,7 @@ namespace neo {
         stbi_set_flip_vertically_on_load(true);
         uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
         if (data) {
-            texture->upload(data, mode);
+            texture->upload(&data, mode);
             if (texture->textureId) {
                 textures.insert(std::make_pair(fileName, texture));
             }
@@ -117,6 +119,44 @@ namespace neo {
             std::cerr << "Could not find texture file " << fileName << std::endl;
         }
 
+        return texture;
+    }
+
+    Texture * Loader::getTexture(const std::string name, const std::vector<std::string> & files, unsigned int mode) {
+        /* Search map first */
+        auto it = textures.find(name);
+        if (it != textures.end()) {
+            return it->second;
+        }
+
+        Texture *texture = new Texture;
+        /* Load in texture data to CPU */
+        uint8_t* data[6];
+        for (int i = 0; i < 6; i++) {
+            data[i] = stbi_load((RES_DIR + files[i]).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
+            if (data[i]) {
+                if (verbose) {
+                    std::cout << "Loaded texture " << files[i] << " [" << texture->width << ", " << texture->height << "]" << std::endl;
+                }
+            }
+            else if (verbose) {
+                std::cerr << "Could not find texture file " << files[i] << std::endl;
+            }
+        }
+
+        /* Copy cube texture data to GPU */
+        texture->uploadCubeMap(data, mode);
+    
+        /* Add to map */
+        if (texture->textureId) {
+            textures.insert(std::map<std::string, Texture*>::value_type(name, texture));
+        }
+
+        /* Free data from CPU */
+        for (int i = 0; i < 6; i++) {
+            stbi_image_free(data[i]);
+        }
+    
         return texture;
     }
 

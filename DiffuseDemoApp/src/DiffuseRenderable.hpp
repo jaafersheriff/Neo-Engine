@@ -2,22 +2,26 @@
 
 #include "Component/RenderableComponent/RenderableComponent.hpp"
 
-#include "Model/ModelTexture.hpp"
+#include "Model/Texture.hpp"
+#include "Model/Material.hpp"
 
 using namespace neo;
 
 class DiffuseRenderable : public RenderableComponent {
 
     public:
-        DiffuseRenderable(GameObject &go, Mesh *m, ModelTexture t) :
-            RenderableComponent(go, m),
-            modelTexture(t)
+        DiffuseRenderable(GameObject &go, Mesh *mesh, Texture *tex, Material *mat) :
+            RenderableComponent(go, mesh),
+            texture(tex),
+            material(mat)
         {}
 
-        ModelTexture & getModelTexture() { return modelTexture; }
+        Texture & getTexture() { return *texture; }
+        Material & getMaterial() { return *material; }
 
     private:
 
-        ModelTexture modelTexture;
+        Texture *texture;
+        Material *material;
         
 };

@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Loader/Loader.hpp"
 #include "Window/Window.hpp"
 #include "Window/Mouse.hpp"
 #include "Window/Keyboard.hpp"
-#include "Loader/Loader.hpp"
 
 #include "Component/Components.hpp"
 #include "System/Systems.hpp"
