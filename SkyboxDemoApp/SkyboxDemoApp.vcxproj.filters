@@ -17,6 +17,6 @@
     <None Include="shaders\model.vert" />
     <None Include="shaders\reflect.frag" />
     <None Include="shaders\refract.frag" />
-    <None Include="src\README.md" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>
