@@ -37,6 +37,7 @@ class CustomShader : public Shader {
 
             CHECK_GL(glBindVertexArray(0));
             CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
             unbind();
         }
 };
