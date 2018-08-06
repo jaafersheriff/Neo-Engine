@@ -73,7 +73,7 @@ struct Renderable {
                 alive = false;
                 return;
             }
-            ImGui::Text("Components: %d", gameObject->getNumberComponents());
+            ImGui::Text("Components: %d", gameObject->getAllComponents().size());
             if (ImGui::Button("Add custom component")) {
                 NeoEngine::addComponent<CustomComponent>(*gameObject);
             }
@@ -120,7 +120,7 @@ int main() {
     Renderable cube(Loader::getMesh("cube"), glm::vec3(0.f), 2.f, glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(1, 0, 0))));
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>(camera.cameraController);
+    NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
     NeoEngine::initSystems();
 
@@ -145,7 +145,7 @@ int main() {
         ImGui::Text("GameObjects:  %d", NeoEngine::getGameObjects().size());
         int count = 0;
         for (auto go : NeoEngine::getGameObjects()) {
-            count += go->getNumberComponents();
+            count += go->getAllComponents().size();
         }
         ImGui::Text("Components:  %d", count);
         ImGui::Text("Systems: %d", NeoEngine::getSystems().size());

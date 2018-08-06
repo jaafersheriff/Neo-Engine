@@ -9,14 +9,14 @@ class CustomSystem : public System {
 
     public:
         CustomSystem() :
-            System("Camera System")
+            System("Custom System")
         {}
 
         virtual void update(float dt) override {
-            NeoEngine::getComponents<CameraControllerComponent>()[0]->update(dt);
-            for (auto renderable : NeoEngine::getComponents<RenderableComponent>()) {
-                renderable->update(dt);
+            /* Update components */
+            for (auto go : NeoEngine::getGameObjects())
+                for (auto comp : go->getAllComponents()) {
+                    comp->update(dt);
             }
         }
-
 };

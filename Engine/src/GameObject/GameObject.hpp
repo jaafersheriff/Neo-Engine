@@ -36,7 +36,7 @@ namespace neo {
             /* Get First component by type */
             template <typename CompT> CompT * getComponentByType() const;
 
-            int getNumberComponents() { return allComponents.size(); }
+            const std::vector<Component *> getAllComponents() const { return allComponents; }
 
         private:
             /* Containers */
