@@ -60,6 +60,21 @@ struct Reflection {
             if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
                 gameObject->getSpatial()->setScale(glm::vec3(scale));
             }
+
+            if (ImGui::Button("Add reflection")) {
+                renderComp->addShaderType<ReflectionShader>();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Add wireframe")) {
+                renderComp->addShaderType<WireframeShader>();
+            }
+            if (ImGui::Button("Remove reflection")) {
+                renderComp->removeShaderType<ReflectionShader>();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Remove wireframe")) {
+                renderComp->removeShaderType<WireframeShader>();
+            }
         });
     }
 };
@@ -85,6 +100,22 @@ struct Refraction {
             if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
                 gameObject->getSpatial()->setScale(glm::vec3(scale));
             }
+
+            if (ImGui::Button("Add refraction")) {
+                renderComp->addShaderType<RefractionShader>();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Add wireframe")) {
+                renderComp->addShaderType<WireframeShader>();
+            }
+            if (ImGui::Button("Remove refraction")) {
+                renderComp->removeShaderType<RefractionShader>();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Remove wireframe")) {
+                renderComp->removeShaderType<WireframeShader>();
+            }
+ 
         });
     }
 };
