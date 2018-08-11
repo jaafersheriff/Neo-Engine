@@ -17,9 +17,9 @@ namespace neo {
                     _strdup("\
                         #version 330 core\n\
                         layout (location = 0) in vec3 vertPos;\
-                        uniform mat4 P, V;\
+                        uniform mat4 P, V, M;\
                         void main() {\
-                            gl_Position = P * V * vec4(vertPos, 1);\
+                            gl_Position = P * V * M * vec4(vertPos, 1);\
                         }"),
                     _strdup("\
                         #version 330 core\n\
@@ -47,6 +47,8 @@ namespace neo {
                     CHECK_GL(glBindVertexArray(mesh.vaoId));
                     CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.vertBufId));
 
+                    auto spatial = line->getGameObject().getSpatial();
+                    loadMatrix(getUniform("M"), spatial ? spatial->getModelMatrix() : glm::mat4(1.f));
                     loadVector(getUniform("lineColor"), line->lineColor);
 
                     CHECK_GL(glDrawArrays(GL_LINE_STRIP, 0, line->getNodes().size()));
