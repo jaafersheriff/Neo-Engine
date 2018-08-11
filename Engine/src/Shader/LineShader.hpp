@@ -43,7 +43,7 @@ namespace neo {
 
                 for (auto line : renderSystem.getRenderables<LineShader, LineRenderable>()) {
                     /* Bind mesh */
-                    const Mesh & mesh(*line->getMesh());
+                    const Mesh & mesh(line->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.vaoId));
                     CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.vertBufId));
 

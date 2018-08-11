@@ -25,7 +25,7 @@ class CustomShader : public Shader {
 
             for (auto r : renderSystem.getRenderables<CustomShader, RenderableComponent>()) {
                 /* Bind mesh */
-                const Mesh & mesh(*r->getMesh());
+                const Mesh & mesh(r->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.vaoId));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 

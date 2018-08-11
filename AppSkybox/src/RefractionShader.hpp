@@ -38,12 +38,12 @@ class RefractionShader : public Shader {
                 loadFloat(getUniform("ratio"), model->ratio);
 
                 /* Bind mesh */
-                const Mesh * mesh(model->getMesh());
-                CHECK_GL(glBindVertexArray(mesh->vaoId));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId));
+                const Mesh & mesh(model->getMesh());
+                CHECK_GL(glBindVertexArray(mesh.vaoId));
+                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
                 /* DRAW */
-                CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh->eleBufSize, GL_UNSIGNED_INT, nullptr));
+                CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh.eleBufSize, GL_UNSIGNED_INT, nullptr));
             }
 
             CHECK_GL(glBindVertexArray(0));

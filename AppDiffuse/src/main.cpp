@@ -34,7 +34,7 @@ struct Light {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, pos);
         light = &NeoEngine::addComponent<LightComponent>(*gameObject, col, att);
-        cube = &NeoEngine::addComponent<RenderableComponent>(*gameObject, Loader::getMesh("cube"), nullptr);
+        cube = &NeoEngine::addComponent<RenderableComponent>(*gameObject, Loader::getMesh("cube"), new Material);
         cube->addShaderType<WireframeShader>();
 
         NeoEngine::addImGuiFunc("Light", [&]() {

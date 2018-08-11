@@ -11,7 +11,7 @@ class RefractionRenderable : public RenderableComponent {
     public:
 
         RefractionRenderable(GameObject &go, Mesh *m, float r = 0.5f) :
-            RenderableComponent(go, m),
+            RenderableComponent(go, m, nullptr),
             ratio(r)
         {}
 

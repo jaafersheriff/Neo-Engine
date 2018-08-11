@@ -11,7 +11,7 @@ namespace neo {
         public:
 
             LineRenderable(GameObject &go, glm::vec3 color = glm::vec3(1.f)) :
-                RenderableComponent(go, new Mesh),
+                RenderableComponent(go, new Mesh, nullptr),
                 lineColor(color) {
                 CHECK_GL(glGenVertexArrays(1, (GLuint *) &mesh->vaoId));
                 CHECK_GL(glBindVertexArray(mesh->vaoId));
@@ -23,16 +23,16 @@ namespace neo {
                 CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
             }
 
-            virtual const Mesh * getMesh() const override {
+            virtual const Mesh & getMesh() const override {
                 if (isDirty) {
                     /* Copy vertex array */
                     CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh->vertBufId));
                     CHECK_GL(glBufferData(GL_ARRAY_BUFFER, nodes.size() * sizeof(glm::vec3), nodes.data(), GL_STATIC_DRAW));
                     CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-                    // isDirty = false;
+                    isDirty = false;
                 }
 
-                return mesh;
+                return *mesh;
             }
 
             const std::vector<glm::vec3> & getNodes() const { return nodes; }
@@ -56,7 +56,7 @@ namespace neo {
             }
 
             void removeNode(const int index) {
-                if (index >= 0 && index < nodes.size()) {
+                if (index >= 0 && index < (int)nodes.size()) {
                     nodes.erase(nodes.begin() + index);
                     isDirty = true;
                 }
@@ -66,7 +66,7 @@ namespace neo {
 
         private:
 
-            bool isDirty = false;
+            mutable bool isDirty = false;
             std::vector<glm::vec3> nodes;
 
     };

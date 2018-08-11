@@ -85,7 +85,7 @@ struct Orient {
     Orient(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
         spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        renderable = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh);
+        renderable = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh, nullptr);
         renderable->addShaderType<WireframeShader>();
         uLine = &NeoEngine::addComponent<LineRenderable>(*gameObject);
         uLine->addShaderType<LineShader>();

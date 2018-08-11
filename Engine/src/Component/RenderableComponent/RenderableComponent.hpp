@@ -20,8 +20,8 @@ namespace neo {
             template <typename ShaderT> void addShaderType();
             template <typename ShaderT> void removeShaderType();
 
-            virtual const Mesh * getMesh() const { return mesh; }
-            virtual const Material * getMaterial() const { return material; }
+            virtual const Mesh & getMesh() const { return *mesh; }
+            virtual const Material & getMaterial() const { return *material; }
             void replaceMesh(Mesh *m) { this->mesh = m; }
             void replaceMaterial(Material *m) { this->material = m; }
             const std::vector<std::type_index> & getShaders() { return shaderTypes; }

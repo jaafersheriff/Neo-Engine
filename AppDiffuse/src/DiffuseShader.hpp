@@ -40,9 +40,9 @@ class DiffuseShader : public Shader {
                 loadMatrix(getUniform("N"), diffuse->getGameObject().getSpatial()->getNormalMatrix());
 
                 /* Bind mesh */
-                const Mesh * mesh(diffuse->getMesh());
-                CHECK_GL(glBindVertexArray(mesh->vaoId));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId));
+                const Mesh & mesh(diffuse->getMesh());
+                CHECK_GL(glBindVertexArray(mesh.vaoId));
+                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
                 /* Bind texture */
                 const Texture & texture(diffuse->getTexture());
@@ -51,13 +51,13 @@ class DiffuseShader : public Shader {
                 loadInt(getUniform("diffuseMap"), texture.textureId);
 
                 /* Bind material */
-                const Material * material(diffuse->getMaterial());
-                loadFloat(getUniform("ambient"), material->ambient);
-                loadVector(getUniform("specularColor"), material->specular);
-                loadFloat(getUniform("shine"), material->shine);
+                const Material & material(diffuse->getMaterial());
+                loadFloat(getUniform("ambient"), material.ambient);
+                loadVector(getUniform("specularColor"), material.specular);
+                loadFloat(getUniform("shine"), material.shine);
 
                 /* DRAW */
-                CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh->eleBufSize, GL_UNSIGNED_INT, nullptr));
+                CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh.eleBufSize, GL_UNSIGNED_INT, nullptr));
             }
 
             CHECK_GL(glBindVertexArray(0));
