@@ -3,7 +3,7 @@
 #include "CustomSystem.hpp"
 
 #include "Shader/LineShader.hpp"
-#include "Shader/WireframeShader.hpp"
+#include "Shader/DiffuseShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -25,6 +25,33 @@ struct Camera {
         cameraController = &NeoEngine::addComponent<CameraControllerComponent>(*gameObject, ls, ms);
     }
 };
+
+struct Light {
+    GameObject *gameObject;
+    LightComponent *light;
+
+    Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
+        gameObject = &NeoEngine::createGameObject();
+        NeoEngine::addComponent<SpatialComponent>(*gameObject, pos);
+        light = &NeoEngine::addComponent<LightComponent>(*gameObject, col, att);
+
+        NeoEngine::addImGuiFunc("Light", [&]() {
+            glm::vec3 pos = gameObject->getSpatial()->getPosition();
+            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
+                gameObject->getSpatial()->setPosition(pos);
+            }
+            glm::vec3 col = light->getColor();
+            if (ImGui::SliderFloat3("Color", glm::value_ptr(col), 0.f, 1.f)) {
+                light->setColor(col);
+            }
+            glm::vec3 att = light->getAttenuation();
+            ImGui::SliderFloat3("Attenuation", glm::value_ptr(att), 0.f, 1.f);
+            light->setAttenuation(att);
+        });
+    }
+};
+
+
 
 struct Line {
     GameObject *gameObject;
@@ -85,8 +112,8 @@ struct Orient {
     Orient(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
         spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        renderable = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh, nullptr);
-        renderable->addShaderType<WireframeShader>();
+        renderable = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh, new Material);
+        renderable->addShaderType<DiffuseShader>();
         uLine = &NeoEngine::addComponent<LineRenderable>(*gameObject);
         uLine->addShaderType<LineShader>();
         uLine->lineColor = glm::vec3(1.f, 0.f, 0.f);
@@ -129,13 +156,14 @@ int main() {
 
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+    Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
     Orient(Loader::getMesh("cube"));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
     renderSystem->addShader<LineShader>();
-    renderSystem->addShader<WireframeShader>();
+    renderSystem->addShader<DiffuseShader>();
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */
