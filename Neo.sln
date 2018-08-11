@@ -20,6 +20,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppSkybox", "AppSkybox\AppS
 		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppLine", "AppLine\AppLine.vcxproj", "{25E0A549-D63A-43DC-8B10-6ECC80E8B87B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -60,6 +62,14 @@ Global
 		{910191AF-336B-422E-9B1A-7786E1D3A625}.Release|x64.Build.0 = Release|x64
 		{910191AF-336B-422E-9B1A-7786E1D3A625}.Release|x86.ActiveCfg = Release|Win32
 		{910191AF-336B-422E-9B1A-7786E1D3A625}.Release|x86.Build.0 = Release|Win32
+		{25E0A549-D63A-43DC-8B10-6ECC80E8B87B}.Debug|x64.ActiveCfg = Debug|x64
+		{25E0A549-D63A-43DC-8B10-6ECC80E8B87B}.Debug|x64.Build.0 = Debug|x64
+		{25E0A549-D63A-43DC-8B10-6ECC80E8B87B}.Debug|x86.ActiveCfg = Debug|Win32
+		{25E0A549-D63A-43DC-8B10-6ECC80E8B87B}.Debug|x86.Build.0 = Debug|Win32
+		{25E0A549-D63A-43DC-8B10-6ECC80E8B87B}.Release|x64.ActiveCfg = Release|x64
+		{25E0A549-D63A-43DC-8B10-6ECC80E8B87B}.Release|x64.Build.0 = Release|x64
+		{25E0A549-D63A-43DC-8B10-6ECC80E8B87B}.Release|x86.ActiveCfg = Release|Win32
+		{25E0A549-D63A-43DC-8B10-6ECC80E8B87B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

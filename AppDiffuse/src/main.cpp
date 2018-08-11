@@ -6,10 +6,6 @@
 
 #include "Shader/WireframeShader.hpp"
 
-#include "Shader/LineShader.hpp"
-
-#include <glm/gtc/matrix_transform.hpp>
-
 using namespace neo;
 
 /* Systems */
@@ -57,17 +53,6 @@ struct Light {
     }
 };
 
-struct Line {
-    GameObject *gameObject;
-    LineRenderable *line;
-
-    Line() {
-        gameObject = &NeoEngine::createGameObject();
-        line = &NeoEngine::addComponent<LineRenderable>(*gameObject);
-        line->addShaderType<LineShader>();
-    }
-};
-
 // Global material
 Material material;
 struct Renderable {
@@ -88,17 +73,12 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Line line;
-    line.line->addNode(glm::vec3(0.f));
-    line.line->addNode(glm::vec3(0.f, 10.f, 0.f));
-    line.line->addNode(glm::vec3(10.f, 10.f, 0.f));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
     renderSystem->addShader<DiffuseShader>("diffuse.vert", "diffuse.frag");
     renderSystem->addShader<WireframeShader>();
-    renderSystem->addShader<LineShader>();
     NeoEngine::initSystems();
 
     std::vector<Renderable *> renderables;
