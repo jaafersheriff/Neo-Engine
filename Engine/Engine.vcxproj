@@ -24,7 +24,7 @@
     <ClInclude Include="src\Component\Component.hpp" />
     <ClInclude Include="src\Component\Components.hpp" />
     <ClInclude Include="src\Component\LightComponent\LightComponent.hpp" />
-    <ClInclude Include="src\Component\RenderableComponent\CubeMapComponent.hpp" />
+    <ClInclude Include="src\Component\RenderableComponent\TexturedRenderable.hpp" />
     <ClInclude Include="src\Component\RenderableComponent\LineRenderable.hpp" />
     <ClInclude Include="src\Component\RenderableComponent\RenderableComponent.hpp" />
     <ClInclude Include="src\Component\SpatialComponent\Orientable.hpp" />

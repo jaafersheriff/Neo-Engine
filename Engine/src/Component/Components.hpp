@@ -6,4 +6,5 @@
 #include "SpatialComponent/SpatialComponent.hpp"
 
 #include "RenderableComponent/RenderableComponent.hpp"
-#include "RenderableComponent/CubeMapComponent.hpp"
+#include "RenderableComponent/TexturedRenderable.hpp"
+#include "RenderableComponent/LineRenderable.hpp"

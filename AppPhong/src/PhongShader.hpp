@@ -2,18 +2,17 @@
 
 #include "NeoEngine.hpp"
 
-#include "DiffuseRenderable.hpp"
 #include "Shader/Shader.hpp"
 #include "Util/GlHelper.hpp"
 
 using namespace neo;
 
-class DiffuseShader : public Shader {
+class PhongShader : public Shader {
 
     public: 
     
-        DiffuseShader(const std::string &res, const std::string &vert, const std::string &frag) :
-            Shader("Diffuse Shader", res, vert, frag) 
+        PhongShader(const std::string &res, const std::string &vert, const std::string &frag) :
+            Shader("Phong Shader", res, vert, frag) 
         {}
 
         virtual void render(float dt, const RenderSystem &renderSystem) override {
@@ -35,7 +34,7 @@ class DiffuseShader : public Shader {
                 loadVector(getUniform("lightAtt"), lights.at(0)->getAttenuation());
             }
 
-            for (auto diffuse : renderSystem.getRenderables<DiffuseShader, DiffuseRenderable>()) {
+            for (auto diffuse : renderSystem.getRenderables<PhongShader, TexturedRenderable>()) {
                 loadMatrix(getUniform("M"), diffuse->getGameObject().getSpatial()->getModelMatrix());
                 loadMatrix(getUniform("N"), diffuse->getGameObject().getSpatial()->getNormalMatrix());
 

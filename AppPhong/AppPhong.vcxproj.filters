@@ -9,18 +9,17 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\diffuse.vert">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\diffuse.frag">
-      <Filter>shaders</Filter>
-    </None>
     <None Include="README.md" />
+    <None Include="shaders\phong.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\phong.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\DiffuseRenderable.hpp" />
-    <ClInclude Include="src\DiffuseShader.hpp" />
     <ClInclude Include="src\CameraSystem.hpp" />
+    <ClInclude Include="src\PhongShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />

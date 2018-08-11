@@ -20,13 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="shaders\diffuse.frag" />
-    <None Include="shaders\diffuse.vert" />
+    <None Include="shaders\phong.frag" />
+    <None Include="shaders\phong.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CameraSystem.hpp" />
-    <ClInclude Include="src\DiffuseRenderable.hpp" />
-    <ClInclude Include="src\DiffuseShader.hpp" />
+    <ClInclude Include="src\PhongShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
@@ -34,9 +33,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{8E56D559-A4E8-4FCE-8D6C-8A82B59438EF}</ProjectGuid>
-    <RootNamespace>AppDiffuse</RootNamespace>
+    <RootNamespace>AppPhong</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
-    <ProjectName>AppDiffuse</ProjectName>
+    <ProjectName>AppPhong</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -1,7 +1,6 @@
 #include <NeoEngine.hpp>
 
-#include "DiffuseRenderable.hpp"
-#include "DiffuseShader.hpp"
+#include "PhongShader.hpp"
 #include "CameraSystem.hpp"
 
 #include "Shader/WireframeShader.hpp"
@@ -34,7 +33,7 @@ struct Light {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, pos);
         light = &NeoEngine::addComponent<LightComponent>(*gameObject, col, att);
-        cube = &NeoEngine::addComponent<RenderableComponent>(*gameObject, Loader::getMesh("cube"), new Material);
+        cube = &NeoEngine::addComponent<RenderableComponent>(*gameObject, Loader::getMesh("cube"), nullptr);
         cube->addShaderType<WireframeShader>();
 
         NeoEngine::addImGuiFunc("Light", [&]() {
@@ -57,18 +56,18 @@ struct Light {
 Material material;
 struct Renderable {
     GameObject *gameObject;
-    DiffuseRenderable *renderComp;
+    TexturedRenderable *renderComp;
 
     Renderable(Mesh *m, Texture *t, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
-        renderComp = &NeoEngine::addComponent<DiffuseRenderable>(*gameObject, m, &material, t);
-        renderComp->addShaderType<DiffuseShader>();
+        renderComp = &NeoEngine::addComponent<TexturedRenderable>(*gameObject, m, &material, t);
+        renderComp->addShaderType<PhongShader>();
     }
 };
 
 int main() {
-    NeoEngine::init("Diffuse Rendering", "res/", 1280, 720);
+    NeoEngine::init("Phong Rendering", "res/", 1280, 720);
 
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
@@ -77,7 +76,7 @@ int main() {
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
-    renderSystem->addShader<DiffuseShader>("diffuse.vert", "diffuse.frag");
+    renderSystem->addShader<PhongShader>("phong.vert", "phong.frag");
     renderSystem->addShader<WireframeShader>();
     NeoEngine::initSystems();
 
