@@ -19,14 +19,16 @@ namespace neo {
             template <typename ShaderT> void addShaderType();
             template <typename ShaderT> void removeShaderType();
 
-            const Mesh *getMesh() const { return mesh; }
+            virtual const Mesh *getMesh() const { return mesh; }
             void replaceMesh(Mesh *m) { this->mesh = m; }
             const std::vector<std::type_index> & getShaders() { return shaderTypes; }
 
-        private:
-            bool isInit = false;
+        protected:
             Mesh * mesh;
             std::vector<std::type_index> shaderTypes;
+
+        private:
+            bool isInit = false;
     };
 
     /* Template implementation */

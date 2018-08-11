@@ -25,6 +25,7 @@
     <ClInclude Include="src\Component\Components.hpp" />
     <ClInclude Include="src\Component\LightComponent\LightComponent.hpp" />
     <ClInclude Include="src\Component\RenderableComponent\CubeMapComponent.hpp" />
+    <ClInclude Include="src\Component\RenderableComponent\LineRenderable.hpp" />
     <ClInclude Include="src\Component\RenderableComponent\RenderableComponent.hpp" />
     <ClInclude Include="src\Component\SpatialComponent\Orientable.hpp" />
     <ClInclude Include="src\Component\SpatialComponent\SpatialComponent.hpp" />
@@ -46,6 +47,7 @@
     <ClInclude Include="src\Model\Mesh.hpp" />
     <ClInclude Include="src\Model\Texture.hpp" />
     <ClInclude Include="src\NeoEngine.hpp" />
+    <ClInclude Include="src\Shader\LineShader.hpp" />
     <ClInclude Include="src\Shader\WireframeShader.hpp" />
     <ClInclude Include="src\Util\GLHelper.hpp" />
     <ClInclude Include="src\Shader\Shader.hpp" />
