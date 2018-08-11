@@ -20,10 +20,10 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{910191AF-336B-422E-9B1A-7786E1D3A625}</ProjectGuid>
-    <RootNamespace>SkyboxDemoApp</RootNamespace>
+    <ProjectGuid>{72873250-A4D1-4F4C-A75B-0DFFAE74E70F}</ProjectGuid>
+    <RootNamespace>AppECS</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
-    <ProjectName>AppSkybox</ProjectName>
+    <ProjectName>AppECS</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -59,7 +59,6 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\AppDebugProperties.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -71,14 +70,31 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\src\AppECS</OutDir>
+    <IntDir>$(Configuration)\src\AppECS</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(ProjectName)\build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\build\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(ProjectName)\build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\build\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Engine\src;C:\OpenGL\glm-0.9.8.5;C:\OpenGL\glfw-3.2.1\include;C:\OpenGL\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>$(SolutionDir)\Engine\build\Debug\Engine.lib;C:\OpenGL\glfw-3.2.1\debug\src\Debug\glfw3.lib;C:\OpenGL\glew-2.1.0\lib\Release\Win32\glew32s.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -86,7 +102,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)/Engine;C:\OpenGL\glm-0.9.8.5;C:\OpenGL\glfw-3.2.1\include;C:\OpenGL\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);DEBUG_MODE</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(SolutionDir)\Engine\build\Debug\Engine.lib;C:\OpenGL\glfw-3.2.1\debug\src\Debug\glfw3.lib;C:\OpenGL\glew-2.1.0\lib\Release\x64\glew32s.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -117,23 +138,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\CustomSystem.hpp" />
+    <None Include="shaders\custom.frag" />
+    <None Include="shaders\custom.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\CustomComponent.hpp" />
+    <ClInclude Include="src\CustomShader.hpp" />
+    <ClInclude Include="src\CustomSystem.hpp" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\ReflectionRenderable.hpp" />
-    <ClInclude Include="src\ReflectionShader.hpp" />
-    <ClInclude Include="src\RefractionRenderable.hpp" />
-    <ClInclude Include="src\RefractionShader.hpp" />
-    <ClInclude Include="src\SkyboxShader.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shaders\model.vert" />
-    <None Include="shaders\reflect.frag" />
-    <None Include="shaders\refract.frag" />
-    <None Include="shaders\skybox.frag" />
-    <None Include="shaders\skybox.vert" />
-    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

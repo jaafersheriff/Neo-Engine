@@ -5,17 +5,17 @@ VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{2C8EFE39-BFDB-4561-A025-B086D478161C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestApp", "TestApp\TestApp.vcxproj", "{72873250-A4D1-4F4C-A75B-0DFFAE74E70F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppECS", "AppECS\AppECS.vcxproj", "{72873250-A4D1-4F4C-A75B-0DFFAE74E70F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DiffuseDemoApp", "DiffuseDemoApp\DiffuseDemoApp.vcxproj", "{8E56D559-A4E8-4FCE-8D6C-8A82B59438EF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppDiffuse", "AppDiffuse\AppDiffuse.vcxproj", "{8E56D559-A4E8-4FCE-8D6C-8A82B59438EF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SkyboxDemoApp", "SkyboxDemoApp\SkyboxDemoApp.vcxproj", "{910191AF-336B-422E-9B1A-7786E1D3A625}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppSkybox", "AppSkybox\AppSkybox.vcxproj", "{910191AF-336B-422E-9B1A-7786E1D3A625}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
 	EndProjectSection
