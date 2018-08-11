@@ -10,6 +10,7 @@
     <ClInclude Include="src\ReflectionRenderable.hpp" />
     <ClInclude Include="src\RefractionRenderable.hpp" />
     <ClInclude Include="src\RefractionShader.hpp" />
+    <ClInclude Include="src\SkyboxComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\skybox.vert" />

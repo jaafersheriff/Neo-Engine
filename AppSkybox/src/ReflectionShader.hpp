@@ -1,12 +1,13 @@
 #pragma once
 
-#include "ReflectionRenderable.hpp"
-#include "Component/RenderableComponent/CubeMapComponent.hpp"
 #include "Shader/Shader.hpp"
 
 #include "Util/GLHelper.hpp"
 
 #include "NeoEngine.hpp"
+
+#include "ReflectionRenderable.hpp"
+#include "SkyboxComponent.hpp"
 
 using namespace neo;
 
@@ -30,7 +31,7 @@ class ReflectionShader : public Shader {
             }
 
             /* Load environment map */
-            loadInt(getUniform("cubeMap"), NeoEngine::getComponents<CubeMapComponent>()[0]->getTexture()->textureId);
+            loadInt(getUniform("cubeMap"), NeoEngine::getComponents<SkyboxComponent>()[0]->getTexture().textureId);
 
             for (auto model : renderSystem.getRenderables<ReflectionShader, ReflectionRenderable>()) {
                 loadMatrix(getUniform("M"), model->getGameObject().getSpatial()->getModelMatrix());

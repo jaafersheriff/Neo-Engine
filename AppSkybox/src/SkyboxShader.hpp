@@ -1,9 +1,11 @@
 #pragma once
 
-#include "Component/RenderableComponent/CubeMapComponent.hpp"
+#include "Component/RenderableComponent/TexturedRenderable.hpp"
 #include "Shader/Shader.hpp"
 
 #include "Util/GLHelper.hpp"
+
+#include "SkyboxComponent.hpp"
 
 using namespace neo;
 
@@ -16,7 +18,7 @@ class SkyboxShader : public Shader {
         {}
 
         virtual void render(float dt, const RenderSystem &renderSystem) override {
-            const auto cubes = renderSystem.getRenderables<SkyboxShader, CubeMapComponent>();
+            const auto cubes = renderSystem.getRenderables<SkyboxShader, SkyboxComponent>();
             if (!cubes.size()) {
                 return;
             }
@@ -38,8 +40,8 @@ class SkyboxShader : public Shader {
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
             /* Bind texture */
-            const Texture *tex = cube->getTexture();
-            loadInt(getUniform("cubeMap"), tex->textureId);
+            const Texture & tex = cube->getTexture();
+            loadInt(getUniform("cubeMap"), tex.textureId);
 
             CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh.eleBufSize, GL_UNSIGNED_INT, nullptr));
 

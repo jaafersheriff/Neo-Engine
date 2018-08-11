@@ -4,6 +4,7 @@
 #include "ReflectionRenderable.hpp"
 #include "RefractionRenderable.hpp"
 
+#include "SkyboxComponent.hpp"
 #include "SkyboxShader.hpp"
 #include "ReflectionShader.hpp"
 #include "RefractionShader.hpp"
@@ -31,12 +32,12 @@ struct Camera {
 
 struct Skybox {
     GameObject *gameObject;
-    CubeMapComponent *cubeMap;
+    SkyboxComponent *skybox;
 
     Skybox(Texture *tex) {
         gameObject = &NeoEngine::createGameObject();
-        cubeMap = &NeoEngine::addComponent<CubeMapComponent>(*gameObject, tex);
-        cubeMap->addShaderType<SkyboxShader>();
+        skybox = &NeoEngine::addComponent<SkyboxComponent>(*gameObject, tex);
+        skybox->addShaderType<SkyboxShader>();
     }
 };
 
