@@ -8,7 +8,7 @@ namespace neo {
 
         public:
 
-            unsigned int textureId;
+            unsigned int textureId = 0;
 
             int width, height, components;
 
