@@ -51,10 +51,10 @@ class DiffuseShader : public Shader {
                 loadInt(getUniform("diffuseMap"), texture.textureId);
 
                 /* Bind material */
-                const Material & material(diffuse->getMaterial());
-                loadFloat(getUniform("ambient"), material.ambient);
-                loadVector(getUniform("specularColor"), material.specular);
-                loadFloat(getUniform("shine"), material.shine);
+                const Material * material(diffuse->getMaterial());
+                loadFloat(getUniform("ambient"), material->ambient);
+                loadVector(getUniform("specularColor"), material->specular);
+                loadFloat(getUniform("shine"), material->shine);
 
                 /* DRAW */
                 CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh->eleBufSize, GL_UNSIGNED_INT, nullptr));

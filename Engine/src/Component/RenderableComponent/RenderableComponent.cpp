@@ -4,9 +4,10 @@
 
 namespace neo {
 
-    RenderableComponent::RenderableComponent(GameObject &go, Mesh *m) :
+    RenderableComponent::RenderableComponent(GameObject &go, Mesh *mesh, Material *mat) :
         Component(go),
-        mesh(m)
+        mesh(mesh),
+        material(mat)
     {}
 
     void RenderableComponent::init() {

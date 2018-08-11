@@ -34,7 +34,7 @@ struct Light {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, pos);
         light = &NeoEngine::addComponent<LightComponent>(*gameObject, col, att);
-        cube = &NeoEngine::addComponent<RenderableComponent>(*gameObject, Loader::getMesh("cube"));
+        cube = &NeoEngine::addComponent<RenderableComponent>(*gameObject, Loader::getMesh("cube"), nullptr);
         cube->addShaderType<WireframeShader>();
 
         NeoEngine::addImGuiFunc("Light", [&]() {
@@ -62,7 +62,7 @@ struct Renderable {
     Renderable(Mesh *m, Texture *t, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
-        renderComp = &NeoEngine::addComponent<DiffuseRenderable>(*gameObject, m, t, &material);
+        renderComp = &NeoEngine::addComponent<DiffuseRenderable>(*gameObject, m, &material, t);
         renderComp->addShaderType<DiffuseShader>();
     }
 };

@@ -13,7 +13,7 @@ namespace neo {
         public:
 
             CubeMapComponent(GameObject &go, Texture *tex) :
-                RenderableComponent(go, Loader::getMesh("cube")),
+                RenderableComponent(go, Loader::getMesh("cube"), nullptr),
                 texture(tex)
             {}
                 
