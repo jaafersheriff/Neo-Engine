@@ -24,9 +24,9 @@ struct Camera {
 
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(1.f));
-        cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far);
-        cameraController = &NeoEngine::addComponent<CameraControllerComponent>(*gameObject, ls, ms);
+        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        cameraComp = &NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        cameraController = &NeoEngine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
 
@@ -36,7 +36,7 @@ struct Skybox {
 
     Skybox(Texture *tex) {
         gameObject = &NeoEngine::createGameObject();
-        skybox = &NeoEngine::addComponent<SkyboxComponent>(*gameObject, tex);
+        skybox = &NeoEngine::addComponent<SkyboxComponent>(gameObject, tex);
         skybox->addShaderType<SkyboxShader>();
     }
 };
@@ -47,8 +47,8 @@ struct Reflection {
 
     Reflection(Mesh *m, glm::vec3 pos, float scale = 1.f) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(scale));
-        renderComp = &NeoEngine::addComponentAs<ReflectionRenderable, RenderableComponent>(*gameObject, m);
+        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(scale));
+        renderComp = &NeoEngine::addComponentAs<ReflectionRenderable, RenderableComponent>(gameObject, m);
         renderComp->addShaderType<ReflectionShader>();
         renderComp->addShaderType<WireframeShader>();
 
@@ -86,8 +86,8 @@ struct Refraction {
 
     Refraction(Mesh *m, glm::vec3 pos, float scale = 1.f) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(scale));
-        renderComp = &NeoEngine::addComponentAs<RefractionRenderable, RenderableComponent>(*gameObject, m);
+        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(scale));
+        renderComp = &NeoEngine::addComponentAs<RefractionRenderable, RenderableComponent>(gameObject, m);
         renderComp->addShaderType<RefractionShader>();
         renderComp->addShaderType<WireframeShader>();
 

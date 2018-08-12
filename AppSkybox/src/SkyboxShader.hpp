@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Component/RenderableComponent/TexturedRenderable.hpp"
 #include "Shader/Shader.hpp"
 
 #include "Util/GLHelper.hpp"

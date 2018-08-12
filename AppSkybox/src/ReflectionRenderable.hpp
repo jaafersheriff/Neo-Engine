@@ -10,8 +10,8 @@ class ReflectionRenderable : public RenderableComponent {
 
     public:
 
-        ReflectionRenderable(GameObject &go, Mesh *m) :
-            RenderableComponent(go, m, nullptr)
+        ReflectionRenderable(GameObject *go, Mesh *m) :
+            RenderableComponent(go, m)
         {}
 
         virtual void update(float dt) override {
