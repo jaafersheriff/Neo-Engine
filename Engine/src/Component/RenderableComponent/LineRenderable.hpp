@@ -11,7 +11,7 @@ namespace neo {
         public:
 
             LineRenderable(GameObject &go, glm::vec3 color = glm::vec3(1.f)) :
-                RenderableComponent(go, new Mesh, nullptr),
+                RenderableComponent(go, new Mesh),
                 lineColor(color) {
                 CHECK_GL(glGenVertexArrays(1, (GLuint *) &mesh->vaoId));
                 CHECK_GL(glBindVertexArray(mesh->vaoId));
