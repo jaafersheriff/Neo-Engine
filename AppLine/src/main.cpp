@@ -104,7 +104,7 @@ struct Line {
 struct Orient {
     GameObject *gameObject;
     SpatialComponent *spatial;
-    RenderableComponent *renderable;
+    MaterialRenderable *renderable;
     LineRenderable *uLine;
     LineRenderable *vLine;
     LineRenderable *wLine;
@@ -112,22 +112,16 @@ struct Orient {
     Orient(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
         spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        renderable = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh, new Material);
+        renderable = &NeoEngine::addComponent<MaterialRenderable>(*gameObject, mesh, new Material);
         renderable->addShaderType<DiffuseShader>();
-        uLine = &NeoEngine::addComponent<LineRenderable>(*gameObject);
+        uLine = &NeoEngine::addComponent<LineRenderable>(*gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addShaderType<LineShader>();
-        uLine->lineColor = glm::vec3(1.f, 0.f, 0.f);
-        uLine->addNode(glm::vec3(0.f));
-        uLine->addNode(glm::vec3(1.f, 0.f, 0.f));
-        vLine = &NeoEngine::addComponent<LineRenderable>(*gameObject);
-        vLine->lineColor = glm::vec3(0.f, 1.f, 0.f);
-        vLine->addNode(glm::vec3(0.f));
-        vLine->addNode(glm::vec3(0.f, 1.f, 0.f));
+        uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
+        vLine = &NeoEngine::addComponent<LineRenderable>(*gameObject, glm::vec3(0.f, 1.f, 0.f));
+        vLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
         vLine->addShaderType<LineShader>();
-        wLine = &NeoEngine::addComponent<LineRenderable>(*gameObject);
-        wLine->lineColor = glm::vec3(0.f, 0.f, 1.f);
-        wLine->addNode(glm::vec3(0.f));
-        wLine->addNode(glm::vec3(0.f, 0.f, 1.f));
+        wLine = &NeoEngine::addComponent<LineRenderable>(*gameObject, glm::vec3(0.f, 0.f, 1.f));
+        wLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f) });
         wLine->addShaderType<LineShader>();
 
         NeoEngine::addImGuiFunc("Orient", [&]() {

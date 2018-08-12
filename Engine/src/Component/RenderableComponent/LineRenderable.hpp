@@ -42,7 +42,7 @@ namespace neo {
                 isDirty = true;
             }
 
-            void addNode(const std::vector<glm::vec3> &oNodes) {
+            void addNodes(const std::vector<glm::vec3> &oNodes) {
                 nodes.insert(nodes.end(), oNodes.begin(), oNodes.end());
                 isDirty = true;
             }
