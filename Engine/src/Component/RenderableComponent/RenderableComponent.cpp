@@ -4,12 +4,6 @@
 
 namespace neo {
 
-    RenderableComponent::RenderableComponent(GameObject &go, Mesh *mesh, Material *mat) :
-        Component(go),
-        mesh(mesh),
-        material(mat)
-    {}
-
     void RenderableComponent::init() {
         isInit = true;
         RenderSystem & rSystem = NeoEngine::getSystem<RenderSystem>();

@@ -3,7 +3,6 @@
 #include "Component/Component.hpp"
 
 #include "Model/Mesh.hpp"
-#include "Model/Material.hpp"
 
 #include <typeindex>
 
@@ -12,7 +11,10 @@ namespace neo {
     class RenderableComponent : public Component {
 
         public:
-            RenderableComponent(GameObject &, Mesh *, Material *);
+            RenderableComponent(GameObject &go, Mesh *m) :
+                Component(go),
+                mesh(m)
+            {}
 
             virtual void init() override;
             virtual void kill() override;
@@ -21,14 +23,11 @@ namespace neo {
             template <typename ShaderT> void removeShaderType();
 
             virtual const Mesh & getMesh() const { return *mesh; }
-            virtual const Material & getMaterial() const { return *material; }
             void replaceMesh(Mesh *m) { this->mesh = m; }
-            void replaceMaterial(Material *m) { this->material = m; }
             const std::vector<std::type_index> & getShaders() { return shaderTypes; }
 
         protected:
             Mesh * mesh;
-            Material * material;
             std::vector<std::type_index> shaderTypes;
 
         private:
