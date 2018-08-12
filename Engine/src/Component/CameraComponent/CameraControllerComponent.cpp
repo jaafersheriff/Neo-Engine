@@ -10,7 +10,7 @@
 
 namespace neo {
 
-    CameraControllerComponent::CameraControllerComponent(GameObject &go, float lookSpeed, float moveSpeed) :
+    CameraControllerComponent::CameraControllerComponent(GameObject *go, float lookSpeed, float moveSpeed) :
         Component(go),
         theta(0.f),
         phi(Util::PI() * 0.5f),

@@ -9,7 +9,7 @@ namespace neo {
     class CameraComponent : public Component {
 
         public:
-            CameraComponent(GameObject &, float fov, float near, float far);
+            CameraComponent(GameObject *, float fov, float near, float far);
             CameraComponent(CameraComponent &&) = default;
 
             virtual void init() override;

@@ -11,7 +11,7 @@ namespace neo {
     class RenderableComponent : public Component {
 
         public:
-            RenderableComponent(GameObject &go, Mesh *m) :
+            RenderableComponent(GameObject *go, Mesh *m) :
                 Component(go),
                 mesh(m)
             {}

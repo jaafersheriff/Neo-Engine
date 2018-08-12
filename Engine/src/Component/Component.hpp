@@ -7,7 +7,7 @@ namespace neo {
     class Component {
 
         public:
-            Component(GameObject &go) : gameObject(&go) {};
+            Component(GameObject *go) : gameObject(go) {};
 
             /* Overridden functions */
             virtual void init() {};

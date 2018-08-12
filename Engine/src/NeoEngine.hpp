@@ -36,9 +36,9 @@ namespace neo {
             static void removeGameObject(GameObject &);
 
             /* Create a Component and attach it to a GameObject */
-            template <typename CompT, typename... Args> static CompT & addComponent(GameObject &, Args &&...);
+            template <typename CompT, typename... Args> static CompT & addComponent(GameObject *, Args &&...);
             /* Like addComponent by register component as SuperType */
-            template <typename CompT, typename SuperType, typename... Args> static CompT & addComponentAs(GameObject &, Args &&...);
+            template <typename CompT, typename SuperType, typename... Args> static CompT & addComponentAs(GameObject *, Args &&...);
 
             /* Remove the component from the engine and its game object */
             template <typename CompT> static void removeComponent(CompT &);
@@ -92,18 +92,18 @@ namespace neo {
 
     /* Template implementation */
     template <typename CompT, typename... Args>
-    CompT & NeoEngine::addComponent(GameObject & gameObject, Args &&... args) {
+    CompT & NeoEngine::addComponent(GameObject * gameObject, Args &&... args) {
         return addComponentAs<CompT, CompT, Args...>(gameObject, std::forward<Args>(args)...);
     }
 
     template <typename CompT, typename SuperT, typename... Args>
-    CompT & NeoEngine::addComponentAs(GameObject & gameObject, Args &&... args) {
+    CompT & NeoEngine::addComponentAs(GameObject * gameObject, Args &&... args) {
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
         componentInitQueue.emplace_back(typeid(SuperT), std::make_unique<CompT>(CompT(gameObject, std::forward<Args>(args)...)));
-        return static_cast<CompT &>(*componentInitQueue.back().second);
+        return dynamic_cast<CompT &>(*componentInitQueue.back().second);
     }
 
     template <typename SysT, typename... Args> 

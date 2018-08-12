@@ -10,7 +10,7 @@
 
 namespace neo {
 
-    CameraComponent::CameraComponent(GameObject &gameObject, float fov, float near, float far) :
+    CameraComponent::CameraComponent(GameObject *gameObject, float fov, float near, float far) :
          Component(gameObject),
          fov(fov),
          near(near),

@@ -10,7 +10,7 @@ namespace neo {
 
         public:
 
-            LineRenderable(GameObject &go, glm::vec3 color = glm::vec3(1.f)) :
+            LineRenderable(GameObject *go, glm::vec3 color = glm::vec3(1.f)) :
                 RenderableComponent(go, new Mesh),
                 lineColor(color)
             {}

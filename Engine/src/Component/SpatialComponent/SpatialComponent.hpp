@@ -11,10 +11,10 @@ namespace neo {
 
         public:
 
-            SpatialComponent(GameObject &);
-            SpatialComponent(GameObject &, const glm::vec3 &);
-            SpatialComponent(GameObject &, const glm::vec3 &, const glm::vec3 &);
-            SpatialComponent(GameObject &, const glm::vec3 &, const glm::vec3 &, const glm::mat3 &);
+            SpatialComponent(GameObject *);
+            SpatialComponent(GameObject *, const glm::vec3 &);
+            SpatialComponent(GameObject *, const glm::vec3 &, const glm::vec3 &);
+            SpatialComponent(GameObject *, const glm::vec3 &, const glm::vec3 &, const glm::mat3 &);
 
             SpatialComponent(SpatialComponent && other) = default;
 
