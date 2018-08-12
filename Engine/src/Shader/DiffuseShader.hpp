@@ -81,17 +81,17 @@ namespace neo {
                     loadVector(getUniform("lightAtt"), lights.at(0)->getAttenuation());
                 }
 
-                for (auto diffuse : renderSystem.getRenderables<DiffuseShader, RenderableComponent>()) {
-                    loadMatrix(getUniform("M"), diffuse->getGameObject().getSpatial()->getModelMatrix());
-                    loadMatrix(getUniform("N"), diffuse->getGameObject().getSpatial()->getNormalMatrix());
+                for (auto model : renderSystem.getRenderables<DiffuseShader, MaterialRenderable>()) {
+                    loadMatrix(getUniform("M"), model->getGameObject().getSpatial()->getModelMatrix());
+                    loadMatrix(getUniform("N"), model->getGameObject().getSpatial()->getNormalMatrix());
 
                     /* Bind mesh */
-                    const Mesh & mesh(diffuse->getMesh());
+                    const Mesh & mesh(model->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.vaoId));
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
                     /* Bind material */
-                    const Material & material(diffuse->getMaterial());
+                    const Material & material(model->getMaterial());
                     loadFloat(getUniform("ambient"), material.ambient);
                     loadVector(getUniform("diffuseColor"), material.diffuse);
                     loadVector(getUniform("specularColor"), material.specular);

@@ -7,3 +7,4 @@
 
 #include "RenderableComponent/RenderableComponent.hpp"
 #include "RenderableComponent/LineRenderable.hpp"
+#include "RenderableComponent/RenderableModel.hpp"
