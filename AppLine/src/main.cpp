@@ -20,9 +20,9 @@ struct Camera {
 
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(1.f));
-        cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far);
-        cameraController = &NeoEngine::addComponent<CameraControllerComponent>(*gameObject, ls, ms);
+        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        cameraComp = &NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        cameraController = &NeoEngine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
 
@@ -32,8 +32,8 @@ struct Light {
 
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(*gameObject, pos);
-        light = &NeoEngine::addComponent<LightComponent>(*gameObject, col, att);
+        NeoEngine::addComponent<SpatialComponent>(gameObject, pos);
+        light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -59,7 +59,7 @@ struct Line {
 
     Line() {
         gameObject = &NeoEngine::createGameObject();
-        line = &NeoEngine::addComponent<LineRenderable>(*gameObject);
+        line = &NeoEngine::addComponent<LineRenderable>(gameObject);
         line->addShaderType<LineShader>();
 
         NeoEngine::addImGuiFunc("Line", [&]() {
@@ -72,7 +72,7 @@ struct Line {
             }
             if (!gameObject->getSpatial()) {
                 if (ImGui::Button("Add Spatial")) {
-                    NeoEngine::addComponent<SpatialComponent>(*gameObject);
+                    NeoEngine::addComponent<SpatialComponent>(gameObject);
                 }
             }
             else {
@@ -111,14 +111,14 @@ struct Orient {
 
     Orient(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
-        spatial = &NeoEngine::addComponent<SpatialComponent>(*gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        renderable = &NeoEngine::addComponent<MaterialRenderable>(*gameObject, mesh, new Material);
+        spatial = &NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
+        renderable = &NeoEngine::addComponent<MaterialRenderable>(gameObject, mesh, new Material);
         renderable->addShaderType<DiffuseShader>();
-        uLine = &NeoEngine::addComponent<LineRenderable>(*gameObject, glm::vec3(1.f, 0.f, 0.f));
+        uLine = &NeoEngine::addComponent<LineRenderable>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
-        vLine = &NeoEngine::addComponent<LineRenderable>(*gameObject, glm::vec3(0.f, 1.f, 0.f));
+        vLine = &NeoEngine::addComponent<LineRenderable>(gameObject, glm::vec3(0.f, 1.f, 0.f));
         vLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
-        wLine = &NeoEngine::addComponent<LineRenderable>(*gameObject, glm::vec3(0.f, 0.f, 1.f));
+        wLine = &NeoEngine::addComponent<LineRenderable>(gameObject, glm::vec3(0.f, 0.f, 1.f));
         wLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f) });
 
         NeoEngine::addImGuiFunc("Orient", [&]() {
