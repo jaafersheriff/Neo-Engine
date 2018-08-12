@@ -10,7 +10,7 @@ namespace neo {
 
     class CustomComponent : public Component {
         public:
-            CustomComponent(GameObject &go) :
+            CustomComponent(GameObject *go) :
                 Component(go)
             {}
 

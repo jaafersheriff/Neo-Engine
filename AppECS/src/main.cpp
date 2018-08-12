@@ -18,9 +18,9 @@ struct Camera {
 
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(*gameObject, pos, glm::vec3(1.f));
-        cameraComp = &NeoEngine::addComponent<CameraComponent>(*gameObject, fov, near, far);
-        cameraController = &NeoEngine::addComponent<CameraControllerComponent>(*gameObject, ls, ms);
+        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        cameraComp = &NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        cameraController = &NeoEngine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
 
         NeoEngine::addImGuiFunc("Camera", [&]() {
             float fov = cameraComp->getFOV();
@@ -53,8 +53,8 @@ struct Renderable {
         Mesh *mesh = m;
 
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
-        renderComp = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh);
+        NeoEngine::addComponent<SpatialComponent>(gameObject, p, glm::vec3(s), o);
+        renderComp = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderComp->addShaderType<CustomShader>();
         renderComp->addShaderType<WireframeShader>();
 
@@ -75,7 +75,7 @@ struct Renderable {
             }
             ImGui::Text("Components: %d", gameObject->getAllComponents().size());
             if (ImGui::Button("Add custom component")) {
-                NeoEngine::addComponent<CustomComponent>(*gameObject);
+                NeoEngine::addComponent<CustomComponent>(gameObject);
             }
             if (ImGui::Button("Remove custom component")) {
                 NeoEngine::removeComponent<CustomComponent>(*gameObject->getComponentByType<CustomComponent>());
