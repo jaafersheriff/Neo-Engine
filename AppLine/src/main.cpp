@@ -115,14 +115,11 @@ struct Orient {
         renderable = &NeoEngine::addComponent<MaterialRenderable>(*gameObject, mesh, new Material);
         renderable->addShaderType<DiffuseShader>();
         uLine = &NeoEngine::addComponent<LineRenderable>(*gameObject, glm::vec3(1.f, 0.f, 0.f));
-        uLine->addShaderType<LineShader>();
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
         vLine = &NeoEngine::addComponent<LineRenderable>(*gameObject, glm::vec3(0.f, 1.f, 0.f));
         vLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
-        vLine->addShaderType<LineShader>();
         wLine = &NeoEngine::addComponent<LineRenderable>(*gameObject, glm::vec3(0.f, 0.f, 1.f));
         wLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f) });
-        wLine->addShaderType<LineShader>();
 
         NeoEngine::addImGuiFunc("Orient", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
