@@ -51,56 +51,6 @@ struct Light {
     }
 };
 
-
-
-struct Line {
-    GameObject *gameObject;
-    LineRenderable *line;
-
-    Line() {
-        gameObject = &NeoEngine::createGameObject();
-        line = &NeoEngine::addComponent<LineRenderable>(gameObject);
-        line->addShaderType<LineShader>();
-
-        NeoEngine::addImGuiFunc("Line", [&]() {
-            ImGui::ColorEdit3("Color", glm::value_ptr(line->lineColor));
-            static glm::vec3 node(0.f);
-            ImGui::SliderFloat3("Node", glm::value_ptr(node), -10.f, 10.f);
-            ImGui::SameLine();
-            if (ImGui::Button("Add")) {
-                line->addNode(node);
-            }
-            if (!gameObject->getSpatial()) {
-                if (ImGui::Button("Add Spatial")) {
-                    NeoEngine::addComponent<SpatialComponent>(gameObject);
-                }
-            }
-            else {
-                if (ImGui::Button("Remove Spatial")) {
-                    NeoEngine::removeComponent(*gameObject->getSpatial());
-                }
-                auto spatial = gameObject->getSpatial();
-                auto pos = spatial->getPosition();
-                if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
-                    spatial->setPosition(pos);
-                }
-                auto scale = spatial->getScale();
-                if (ImGui::SliderFloat3("Scale", glm::value_ptr(scale), 0.f, 10.f)) {
-                    spatial->setScale(scale);
-                }
-                auto u = spatial->getU();
-                auto v = spatial->getV();
-                auto w = spatial->getW();
-                if (ImGui::SliderFloat3("U", glm::value_ptr(u), 0.f, 1.f) ||
-                    ImGui::SliderFloat3("V", glm::value_ptr(v), 0.f, 1.f) ||
-                    ImGui::SliderFloat3("W", glm::value_ptr(w), 0.f, 1.f)) {
-                    spatial->setUVW(u, v, w);
-                }
-            }
-        });
-    }
-};
-
 struct Orient {
     GameObject *gameObject;
     SpatialComponent *spatial;
