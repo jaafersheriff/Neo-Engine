@@ -11,6 +11,6 @@
     <None Include="shaders\normal.vert" />
     <None Include="shaders\normal.geom" />
     <None Include="shaders\normal.frag" />
-    <None Include="src\README.md" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>
