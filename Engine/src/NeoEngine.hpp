@@ -103,7 +103,7 @@ namespace neo {
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
         componentInitQueue.emplace_back(typeid(SuperT), std::make_unique<CompT>(CompT(gameObject, std::forward<Args>(args)...)));
-        return dynamic_cast<CompT &>(*componentInitQueue.back().second);
+        return static_cast<CompT &>(*componentInitQueue.back().second);
     }
 
     template <typename SysT, typename... Args> 

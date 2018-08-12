@@ -34,23 +34,23 @@ class PhongShader : public Shader {
                 loadVector(getUniform("lightAtt"), lights.at(0)->getAttenuation());
             }
 
-            for (auto diffuse : renderSystem.getRenderables<PhongShader, TexturedRenderable>()) {
-                loadMatrix(getUniform("M"), diffuse->getGameObject().getSpatial()->getModelMatrix());
-                loadMatrix(getUniform("N"), diffuse->getGameObject().getSpatial()->getNormalMatrix());
+            for (auto model : renderSystem.getRenderables<PhongShader, MatTexturedRenderable>()) {
+                loadMatrix(getUniform("M"), model->getGameObject().getSpatial()->getModelMatrix());
+                loadMatrix(getUniform("N"), model->getGameObject().getSpatial()->getNormalMatrix());
 
                 /* Bind mesh */
-                const Mesh & mesh(diffuse->getMesh());
+                const Mesh & mesh(model->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.vaoId));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
                 /* Bind texture */
-                const Texture & texture(diffuse->getTexture());
+                const Texture & texture(model->getTexture());
                 CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.textureId));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.textureId));
                 loadInt(getUniform("diffuseMap"), texture.textureId);
 
                 /* Bind material */
-                const Material & material(diffuse->getMaterial());
+                const Material & material(model->getMaterial());
                 loadFloat(getUniform("ambient"), material.ambient);
                 loadVector(getUniform("specularColor"), material.specular);
                 loadFloat(getUniform("shine"), material.shine);
