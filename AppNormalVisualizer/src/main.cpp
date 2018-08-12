@@ -2,8 +2,9 @@
 
 #include "CustomSystem.hpp"
 
-#include "Shader/LineShader.hpp"
 #include "Shader/DiffuseShader.hpp"
+#include "Shader/WireframeShader.hpp"
+#include "NormalShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -11,6 +12,9 @@ using namespace neo;
 
 /* Systems */
 RenderSystem * renderSystem;
+
+/* Shaders */
+NormalShader *normalShader;
 
 /* Game object definitions */
 struct Camera {
@@ -55,23 +59,24 @@ struct Orient {
     GameObject *gameObject;
     SpatialComponent *spatial;
     MaterialRenderable *renderable;
-    LineRenderable *uLine;
-    LineRenderable *vLine;
-    LineRenderable *wLine;
+    Material material;
 
     Orient(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
         spatial = &NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        renderable = &NeoEngine::addComponent<MaterialRenderable>(gameObject, mesh, new Material);
+        renderable = &NeoEngine::addComponent<MaterialRenderable>(gameObject, mesh, &material);
         renderable->addShaderType<DiffuseShader>();
-        uLine = &NeoEngine::addComponent<LineRenderable>(gameObject, glm::vec3(1.f, 0.f, 0.f));
-        uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
-        vLine = &NeoEngine::addComponent<LineRenderable>(gameObject, glm::vec3(0.f, 1.f, 0.f));
-        vLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
-        wLine = &NeoEngine::addComponent<LineRenderable>(gameObject, glm::vec3(0.f, 0.f, 1.f));
-        wLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f) });
+        renderable->addShaderType<WireframeShader>();
+        renderable->addShaderType<NormalShader>();
 
-        NeoEngine::addImGuiFunc("Orient", [&]() {
+        NeoEngine::addImGuiFunc("Material", [&]() {
+            ImGui::SliderFloat("Ambient ", &material.ambient, 0.f, 1.f);
+            ImGui::SliderFloat3("Diffuse Color", glm::value_ptr(material.diffuse), 0.f, 1.f);
+            ImGui::SliderFloat3("Specular Color", glm::value_ptr(material.specular), 0.f, 1.f);
+            ImGui::SliderFloat("Shine", &material.shine, 0.f, 100.f);
+        });
+
+        NeoEngine::addImGuiFunc("Spatial", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);
@@ -93,18 +98,19 @@ struct Orient {
 };
 
 int main() {
-    NeoEngine::init("Line Rendering", "res/", 1280, 720);
+    NeoEngine::init("Normal Rendering", "res/", 1280, 720);
 
     /* Game objects */
-    Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+    Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Orient(Loader::getMesh("cube"));
+    Orient(Loader::getMesh("Cup.obj"));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
-    renderSystem->addShader<LineShader>();
     renderSystem->addShader<DiffuseShader>();
+    renderSystem->addShader<WireframeShader>();
+    normalShader = &renderSystem->addShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */
@@ -114,6 +120,10 @@ int main() {
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
         }
+    });
+    NeoEngine::addImGuiFunc("Normals", [&]() {
+        ImGui::Checkbox("Active", &normalShader->active);
+        ImGui::SliderFloat("Magnitude", &normalShader->magnitude, 0.f, 1.f);
     });
 
     /* Run */
