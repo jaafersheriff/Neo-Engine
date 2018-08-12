@@ -54,7 +54,7 @@ struct Renderable {
 
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(*gameObject, p, glm::vec3(s), o);
-        renderComp = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh, nullptr);
+        renderComp = &NeoEngine::addComponent<RenderableComponent>(*gameObject, mesh);
         renderComp->addShaderType<CustomShader>();
         renderComp->addShaderType<WireframeShader>();
 
