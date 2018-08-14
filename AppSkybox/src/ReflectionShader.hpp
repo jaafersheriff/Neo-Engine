@@ -31,7 +31,7 @@ class ReflectionShader : public Shader {
             }
 
             /* Load environment map */
-            loadInt(getUniform("cubeMap"), NeoEngine::getComponents<SkyboxComponent>()[0]->getTexture().textureId);
+            loadInt(getUniform("cubeMap"), NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<TextureComponent>()->getTexture().textureId);
 
             for (auto model : renderSystem.getRenderables<ReflectionShader, ReflectionRenderable>()) {
                 loadMatrix(getUniform("M"), model->getGameObject().getSpatial()->getModelMatrix());

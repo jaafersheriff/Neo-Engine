@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component/RenderableComponent/RenderableComponent.hpp"
+#include "Component/ModelComponent/RenderableComponent.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 

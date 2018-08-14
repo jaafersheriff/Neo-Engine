@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Component/RenderableComponent/RenderableModel.hpp"
+#include "Component/ModelComponent/RenderableComponent.hpp"
 
 #include "Loader/Loader.hpp"
 
 using namespace neo;
 
-class SkyboxComponent : public TexturedRenderable {
+class SkyboxComponent : public RenderableComponent {
     public:
-        SkyboxComponent(GameObject *go, Texture *tex) :
-            TexturedRenderable(go, Loader::getMesh("cube"), tex)
+        SkyboxComponent(GameObject *go) :
+            RenderableComponent(go, Loader::getMesh("cube"))
         {}
 };

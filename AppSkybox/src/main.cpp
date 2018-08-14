@@ -18,15 +18,11 @@ RenderSystem * renderSystem;
 
 /* Game object definitions */
 struct Camera {
-    GameObject *gameObject;
-    CameraControllerComponent *cameraController;
-    CameraComponent *cameraComp;
-
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        gameObject = &NeoEngine::createGameObject();
+        GameObject *gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        cameraComp = &NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
-        cameraController = &NeoEngine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
+        NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        NeoEngine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
 
@@ -36,8 +32,9 @@ struct Skybox {
 
     Skybox(Texture *tex) {
         gameObject = &NeoEngine::createGameObject();
-        skybox = &NeoEngine::addComponent<SkyboxComponent>(gameObject, tex);
+        skybox = &NeoEngine::addComponent<SkyboxComponent>(gameObject);
         skybox->addShaderType<SkyboxShader>();
+        NeoEngine::addComponent<TextureComponent>(gameObject, tex);
     }
 };
 
