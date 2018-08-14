@@ -6,7 +6,7 @@
 
 namespace neo {
 
-    class MaterialComponent : Component {
+    class MaterialComponent : public Component {
 
         public:
             MaterialComponent(GameObject *go, Material *mat) :

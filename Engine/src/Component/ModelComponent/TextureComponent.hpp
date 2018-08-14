@@ -6,7 +6,7 @@
 
 namespace neo {
 
-    class TextureComponent : Component {
+    class TextureComponent : public Component {
 
         public:
             TextureComponent(GameObject *go, Texture *tex) :
