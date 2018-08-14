@@ -52,17 +52,17 @@ struct Light {
     }
 };
 
-// Global material
-Material material;
 struct Renderable {
     GameObject *gameObject;
-    MatTexturedRenderable *renderComp;
+    RenderableComponent *renderComp;
 
-    Renderable(Mesh *m, Texture *t, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
+    Renderable(Mesh *mesh, Material *mat, Texture *tex, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, p, glm::vec3(s), o);
-        renderComp = &NeoEngine::addComponent<MatTexturedRenderable>(gameObject, m, &material, t);
+        renderComp = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderComp->addShaderType<PhongShader>();
+        NeoEngine::addComponent<MaterialComponent>(gameObject, mat);
+        NeoEngine::addComponent<TextureComponent>(gameObject, tex);
     }
 };
 
@@ -72,12 +72,14 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+    Material material;
     std::vector<Renderable *> renderables;
     for (int x = -2; x < 3; x++) {
         for (int z = 0; z < 10; z++) {
             renderables.push_back(
                 new Renderable(
                     Loader::getMesh("mr_krab.obj", true), 
+                    &material,
                     Loader::getTexture("mr_krab.png", GL_REPEAT), 
                     glm::vec3(x*2, 0, z*2))
             );
