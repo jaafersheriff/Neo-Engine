@@ -10,3 +10,4 @@
 #include "ModelComponent/TextureComponent.hpp"
 
 #include "AnimationComponent/LineRenderable.hpp"
+#include "AnimationComponent/LineComponent.hpp"

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Component\AnimationComponent\LineComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\CameraComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\CameraControllerComponent.hpp" />
     <ClInclude Include="src\Component\Component.hpp" />
