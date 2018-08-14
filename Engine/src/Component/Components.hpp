@@ -6,6 +6,7 @@
 #include "SpatialComponent/SpatialComponent.hpp"
 
 #include "ModelComponent/RenderableComponent.hpp"
-#include "ModelComponent/RenderableModel.hpp"
+#include "ModelComponent/MaterialComponent.hpp"
+#include "ModelComponent/TextureComponent.hpp"
 
 #include "AnimationComponent/LineRenderable.hpp"

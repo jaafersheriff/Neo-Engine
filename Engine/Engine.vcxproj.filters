@@ -39,8 +39,9 @@
     <ClInclude Include="src\Shader\LineShader.hpp" />
     <ClInclude Include="src\Shader\DiffuseShader.hpp" />
     <ClInclude Include="src\Component\ModelComponent\RenderableComponent.hpp" />
-    <ClInclude Include="src\Component\ModelComponent\RenderableModel.hpp" />
     <ClInclude Include="src\Component\AnimationComponent\LineRenderable.hpp" />
+    <ClInclude Include="src\Component\ModelComponent\MaterialComponent.hpp" />
+    <ClInclude Include="src\Component\ModelComponent\TextureComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
