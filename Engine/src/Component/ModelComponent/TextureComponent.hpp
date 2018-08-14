@@ -9,16 +9,16 @@ namespace neo {
     class TextureComponent : Component {
 
         public:
-            TextureComponent(GameObject *go, Texture *mat) :
+            TextureComponent(GameObject *go, Texture *tex) :
                 Component(go),
-                material(mat)
+                texture(tex)
             {}
 
-            const Texture & getTexture() const { return *material; }
+            const Texture & getTexture() const { return *texture; }
 
         protected:
 
-            const Texture *material;
+            const Texture *texture;
 
     };
 }
