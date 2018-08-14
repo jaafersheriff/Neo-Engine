@@ -20,15 +20,11 @@ WireframeShader *wireframeShader;
 
 /* Game object definitions */
 struct Camera {
-    GameObject *gameObject;
-    CameraControllerComponent *cameraController;
-    CameraComponent *cameraComp;
-
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        gameObject = &NeoEngine::createGameObject();
+        GameObject *gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        cameraComp = &NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
-        cameraController = &NeoEngine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
+        NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        NeoEngine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
 
@@ -59,17 +55,17 @@ struct Light {
 
 struct Orient {
     GameObject *gameObject;
-    SpatialComponent *spatial;
-    MaterialRenderable *renderable;
+    RenderableComponent *renderable;
     Material material;
 
     Orient(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
-        spatial = &NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        renderable = &NeoEngine::addComponent<MaterialRenderable>(gameObject, mesh, &material);
+        NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
+        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderable->addShaderType<DiffuseShader>();
         renderable->addShaderType<WireframeShader>();
         renderable->addShaderType<NormalShader>();
+        NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
             ImGui::SliderFloat("Ambient ", &material.ambient, 0.f, 1.f);
