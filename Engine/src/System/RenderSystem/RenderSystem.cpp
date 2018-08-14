@@ -3,7 +3,7 @@
 
 #include "NeoEngine.hpp"
 
-#include "Component/RenderableComponent/RenderableComponent.hpp"
+#include "Component/ModelComponent/RenderableComponent.hpp"
 #include "Window/Window.hpp"
 
 namespace neo {

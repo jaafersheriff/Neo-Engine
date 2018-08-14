@@ -5,6 +5,7 @@
 
 #include "SpatialComponent/SpatialComponent.hpp"
 
-#include "RenderableComponent/RenderableComponent.hpp"
-#include "RenderableComponent/LineRenderable.hpp"
-#include "RenderableComponent/RenderableModel.hpp"
+#include "ModelComponent/RenderableComponent.hpp"
+#include "ModelComponent/RenderableModel.hpp"
+
+#include "AnimationComponent/LineRenderable.hpp"

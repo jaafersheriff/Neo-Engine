@@ -24,9 +24,9 @@
     <ClInclude Include="src\Component\Component.hpp" />
     <ClInclude Include="src\Component\Components.hpp" />
     <ClInclude Include="src\Component\LightComponent\LightComponent.hpp" />
-    <ClInclude Include="src\Component\RenderableComponent\RenderableModel.hpp" />
-    <ClInclude Include="src\Component\RenderableComponent\LineRenderable.hpp" />
-    <ClInclude Include="src\Component\RenderableComponent\RenderableComponent.hpp" />
+    <ClInclude Include="src\Component\ModelComponent\RenderableModel.hpp" />
+    <ClInclude Include="src\Component\AnimationComponent\LineRenderable.hpp" />
+    <ClInclude Include="src\Component\ModelComponent\RenderableComponent.hpp" />
     <ClInclude Include="src\Component\SpatialComponent\Orientable.hpp" />
     <ClInclude Include="src\Component\SpatialComponent\SpatialComponent.hpp" />
     <ClInclude Include="src\ext\imgui\imconfig.h" />
@@ -63,8 +63,8 @@
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
     <ClCompile Include="src\Component\CameraComponent\CameraControllerComponent.cpp" />
-    <ClCompile Include="src\Component\RenderableComponent\LineRenderable.cpp" />
-    <ClCompile Include="src\Component\RenderableComponent\RenderableComponent.cpp" />
+    <ClCompile Include="src\Component\AnimationComponent\LineRenderable.cpp" />
+    <ClCompile Include="src\Component\ModelComponent\RenderableComponent.cpp" />
     <ClCompile Include="src\Component\SpatialComponent\SpatialComponent.cpp" />
     <ClCompile Include="src\ext\imgui\imgui.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_demo.cpp" />

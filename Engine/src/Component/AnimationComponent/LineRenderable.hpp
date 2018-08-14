@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RenderableComponent.hpp"
+#include "Component/ModelComponent/RenderableComponent.hpp"
 
 #include "Util/GLHelper.hpp"
 

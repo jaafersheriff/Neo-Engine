@@ -5,7 +5,7 @@
 #include "Shader/Shader.hpp"
 #include "Util/GLHelper.hpp"
 
-#include "Component/RenderableComponent/LineRenderable.hpp"
+#include "Component/AnimationComponent/LineRenderable.hpp"
 
 namespace neo {
 
