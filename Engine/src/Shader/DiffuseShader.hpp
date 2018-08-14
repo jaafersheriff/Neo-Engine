@@ -81,7 +81,7 @@ namespace neo {
                     loadVector(getUniform("lightAtt"), lights.at(0)->getAttenuation());
                 }
 
-                for (auto model : renderSystem.getRenderables<DiffuseShader, MaterialRenderable>()) {
+                for (auto model : renderSystem.getRenderables<DiffuseShader, RenderableComponent>()) {
                     loadMatrix(getUniform("M"), model->getGameObject().getSpatial()->getModelMatrix());
                     loadMatrix(getUniform("N"), model->getGameObject().getSpatial()->getNormalMatrix());
 
@@ -91,11 +91,14 @@ namespace neo {
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
                     /* Bind material */
-                    const Material & material(model->getMaterial());
-                    loadFloat(getUniform("ambient"), material.ambient);
-                    loadVector(getUniform("diffuseColor"), material.diffuse);
-                    loadVector(getUniform("specularColor"), material.specular);
-                    loadFloat(getUniform("shine"), material.shine);
+                    auto materialComp = model->getGameObject().getComponentByType<MaterialComponent>();
+                    if (materialComp) {
+                        const Material &material = materialComp->getMaterial();
+                        loadFloat(getUniform("ambient"), material.ambient);
+                        loadVector(getUniform("diffuseColor"), material.diffuse);
+                        loadVector(getUniform("specularColor"), material.specular);
+                        loadFloat(getUniform("shine"), material.shine);
+                    }
 
                     /* DRAW */
                     CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh.eleBufSize, GL_UNSIGNED_INT, nullptr));
