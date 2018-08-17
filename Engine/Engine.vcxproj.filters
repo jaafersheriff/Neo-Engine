@@ -43,6 +43,7 @@
     <ClInclude Include="src\Component\ModelComponent\MaterialComponent.hpp" />
     <ClInclude Include="src\Component\ModelComponent\TextureComponent.hpp" />
     <ClInclude Include="src\Component\AnimationComponent\LineComponent.hpp" />
+    <ClInclude Include="src\System\RenderSystem\Framebuffer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />

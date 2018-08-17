@@ -2,8 +2,7 @@
 
 #include "System/System.hpp"
 #include "Shader/Shader.hpp"
-
-#include "Component/CameraComponent/CameraComponent.hpp"
+#include "Framebuffer.hpp"
 
 #include <unordered_map>
 #include <typeindex>
@@ -13,6 +12,7 @@
 namespace neo {
 
     class RenderableComponent;
+    class CameraComponent;
 
     class RenderSystem : public System {
 
@@ -40,6 +40,7 @@ namespace neo {
         private:
             const std::string APP_SHADER_DIR;
             CameraComponent *defaultCamera;
+            Framebuffer *defaultFBO;
     };
 
     /* Template implementation */

@@ -19,10 +19,15 @@ namespace neo {
 
         /* Init GL window */
         CHECK_GL(glViewport(0, 0, Window::getFrameSize().x, Window::getFrameSize().y));
+
+        /* Init default FBO */
+        defaultFBO = new Framebuffer;
+        defaultFBO->fboId = 0;
     }
 
     void RenderSystem::update(float dt) {
         /* Reset state */
+        defaultFBO->bind();
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         glm::ivec2 size = Window::getFrameSize();
         CHECK_GL(glViewport(0, 0, size.x, size.y));
