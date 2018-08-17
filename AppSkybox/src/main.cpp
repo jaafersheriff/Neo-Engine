@@ -123,7 +123,7 @@ int main() {
 
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-    Skybox(Loader::getTexture("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}, GL_CLAMP_TO_EDGE));
+    Skybox(Loader::getTexture("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}));
     Reflection(Loader::getMesh("male.obj", true), glm::vec3(-5.f, 0.f, 0.f), 5.f);
     Refraction(Loader::getMesh("male.obj", true), glm::vec3(5.f, 0.f, 0.f), 5.f);
 

@@ -1,13 +1,10 @@
 #include "Model/Texture.hpp"
 
-#define GLEW_STATIC
-#include "GL/glew.h"
-
 #include "Util/GLHelper.hpp"
 
 namespace neo {
 
-    void Texture::upload(uint8_t **data, unsigned int mode) {
+    void Texture::upload(GLint inFormat, GLenum format, GLint filter, GLenum mode, uint8_t *data) {
         /* Generate texture buffer object */
         CHECK_GL(glGenTextures(1, &textureId));
 
@@ -15,18 +12,18 @@ namespace neo {
         CHECK_GL(glBindTexture(GL_TEXTURE_2D, textureId));
 
         /* Load texture data to GPU */
-        CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, *data));
+        CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, inFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data));
 
         /* Generate image pyramid */
         CHECK_GL(glGenerateMipmap(GL_TEXTURE_2D));
 
         /* Set filtering mode for magnification and minimification */
-        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter));
 
         /* Set wrap mode */
-        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLenum)mode));
-        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLenum)mode));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mode));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mode));
 
         /* LOD */
         CHECK_GL(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.5f));
@@ -38,7 +35,7 @@ namespace neo {
         assert(glGetError() == GL_NO_ERROR);
     }
 
-    void Texture::uploadCubeMap(uint8_t **data, unsigned int mode) {
+    void Texture::uploadCubeMap(uint8_t **data) {
         CHECK_GL(glGenTextures(1, &textureId));
         CHECK_GL(glActiveTexture(GL_TEXTURE0 + textureId));
 
@@ -51,9 +48,9 @@ namespace neo {
 
         CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
         CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-        CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, (GLenum) mode));
-        CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, (GLenum) mode));
-        CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, (GLenum) mode));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
 
         CHECK_GL(glActiveTexture(GL_TEXTURE0));
 

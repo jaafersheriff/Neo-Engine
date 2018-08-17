@@ -1,5 +1,7 @@
 #pragma once
 
+#define GLEW_STATIC
+#include "GL/glew.h"
 #include <glm/glm.hpp>
 
 namespace neo {
@@ -8,13 +10,13 @@ namespace neo {
 
         public:
 
-            unsigned int textureId = 0;
+            GLuint textureId = 0;
 
             int width, height, components;
 
             /* Upload to GPU */
-            void upload(uint8_t **, unsigned int);
-            void uploadCubeMap(uint8_t **, unsigned int);
+            void upload(GLint, GLenum, GLint, GLenum, uint8_t * = nullptr);
+            void uploadCubeMap(uint8_t **);
     };
 
 
