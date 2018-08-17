@@ -27,12 +27,8 @@ namespace neo {
         glm::ivec2 size = Window::getFrameSize();
         CHECK_GL(glViewport(0, 0, size.x, size.y));
 
-        /* Render all shaders */
-        for (auto & shader : shaders) {
-            if (shader.get()->active) {
-                shader.get()->render(dt, *this);
-            }
-        }
+        /* Render all scene shaders */
+        renderScene(*defaultCamera);
 
         /* Render imgui */
         if (NeoEngine::imGuiEnabled) {
@@ -40,6 +36,14 @@ namespace neo {
         }
 
         glfwSwapBuffers(Window::getWindow());
+    }
+
+    void RenderSystem::renderScene(const CameraComponent &camera) {
+        for (auto & shader : shaders) {
+            if (shader.get()->active) {
+                shader.get()->render(*this, camera);
+            }
+        }
     }
 
     void RenderSystem::attachCompToShader(const std::type_index &typeI, RenderableComponent *rComp) {

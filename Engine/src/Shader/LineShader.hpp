@@ -31,15 +31,12 @@ namespace neo {
                 )
             {}
 
-            virtual void render(float dt, const RenderSystem &renderSystem) override {
+            virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
                 bind();
 
                 /* Load PV */
-                const std::vector<CameraComponent *> cameras = NeoEngine::getComponents<CameraComponent>();
-                if (cameras.size()) {
-                    loadMatrix(getUniform("P"), cameras.at(0)->getProj());
-                    loadMatrix(getUniform("V"), cameras.at(0)->getView());
-                }
+                loadMatrix(getUniform("P"), camera.getProj());
+                loadMatrix(getUniform("V"), camera.getView());
 
                 for (auto lineR : renderSystem.getRenderables<LineShader, LineRenderable>()) {
                     /* Bind mesh */
