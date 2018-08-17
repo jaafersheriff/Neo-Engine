@@ -13,7 +13,7 @@ namespace neo {
 
             DiffuseShader(const std::string &res) :
                 Shader("Diffuse Shader",
-                    _strdup("\
+                        "\
                         #version 330 core\n\
                         layout(location = 0) in vec3 vertPos;\
                         layout(location = 1) in vec3 vertNor;\
@@ -25,8 +25,8 @@ namespace neo {
                             fragPos = M * vec4(vertPos, 1.0);\
                             fragNor = N * vertNor;\
                             gl_Position = P * V * fragPos;\
-                        }"),
-                    _strdup("\
+                        }",
+                        "\
                         #version 330 core\n\
                         in vec4 fragPos;\
                         in vec3 fragNor;\
@@ -58,7 +58,7 @@ namespace neo {
                                         diffuseColor * diffuseContrib +\
                                         specularColor * specularContrib;\
                             color.a = 1;\
-                        }")
+                        }"
                 )
             {}
 

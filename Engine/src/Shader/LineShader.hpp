@@ -14,20 +14,20 @@ namespace neo {
         public:
             LineShader(std::string res) :
                 Shader("Line Shader",
-                    _strdup("\
+                        "\
                         #version 330 core\n\
                         layout (location = 0) in vec3 vertPos;\
                         uniform mat4 P, V, M;\
                         void main() {\
                             gl_Position = P * V * M * vec4(vertPos, 1);\
-                        }"),
-                    _strdup("\
+                        }",
+                        "\
                         #version 330 core\n\
                         uniform vec3 lineColor;\
                         out vec4 color;\
                         void main() {\
                             color = vec4(lineColor, 1.0);\
-                        }")
+                        }"
                 )
             {}
 

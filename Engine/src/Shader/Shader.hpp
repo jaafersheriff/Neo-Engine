@@ -19,8 +19,8 @@ namespace neo {
     public:
         Shader(const std::string &, const std::string &, const std::string &, const std::string &);
         Shader(const std::string &, const std::string &, const std::string &, const std::string &, const std::string &);
-        Shader(const std::string &, char *, char *);
-        Shader(const std::string &, char *, char *, char *);
+        Shader(const std::string &, const char *, const char *);
+        Shader(const std::string &, const char *, const char *, const char *);
         virtual ~Shader() = default;
 
         virtual void render(const RenderSystem &, const CameraComponent &) {};
@@ -59,7 +59,7 @@ namespace neo {
         std::map<std::string, GLint> attributes;
         std::map<std::string, GLint> uniforms;
 
-        GLuint compileShader(GLenum, char *);
-        void findAttributesAndUniforms(char *);
+        GLuint compileShader(GLenum, const char *);
+        void findAttributesAndUniforms(const char *);
     };
 }

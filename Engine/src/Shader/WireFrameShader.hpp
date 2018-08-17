@@ -10,19 +10,19 @@ namespace neo {
         public:
             WireframeShader(std::string res) :
                 Shader("Wire Shader",
-                    _strdup("\
+                        "\
                         #version 330 core\n\
                         layout (location = 0) in vec3 vertPos;\
                         uniform mat4 P, V, M;\
                         void main() {\
                             gl_Position = P * V * M * vec4(vertPos, 1);\
-                        }"),
-                    _strdup("\
+                        }",
+                        "\
                         #version 330 core\n\
                         out vec4 color;\
                         void main() {\
                             color = vec4(1.0);\
-                        }")
+                        }"
                 )
             {}
 
