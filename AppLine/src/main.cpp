@@ -14,10 +14,11 @@ RenderSystem * renderSystem;
 
 /* Game object definitions */
 struct Camera {
+    CameraComponent *camera;
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
         NeoEngine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -101,7 +102,7 @@ int main() {
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
-    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
+    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
     renderSystem->addShader<LineShader>();
     renderSystem->addShader<DiffuseShader>();
     NeoEngine::initSystems();
