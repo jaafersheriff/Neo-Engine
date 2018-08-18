@@ -35,6 +35,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppFramebuffers", "AppFrame
 		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppShadows", "AppShadows\AppShadows.vcxproj", "{4AF39B53-9AEC-4367-ABAC-F35D25AA7B83}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -99,6 +104,14 @@ Global
 		{7E0C9D28-DBAE-4B89-B810-E95621CEC72F}.Release|x64.Build.0 = Release|x64
 		{7E0C9D28-DBAE-4B89-B810-E95621CEC72F}.Release|x86.ActiveCfg = Release|Win32
 		{7E0C9D28-DBAE-4B89-B810-E95621CEC72F}.Release|x86.Build.0 = Release|Win32
+		{4AF39B53-9AEC-4367-ABAC-F35D25AA7B83}.Debug|x64.ActiveCfg = Debug|x64
+		{4AF39B53-9AEC-4367-ABAC-F35D25AA7B83}.Debug|x64.Build.0 = Debug|x64
+		{4AF39B53-9AEC-4367-ABAC-F35D25AA7B83}.Debug|x86.ActiveCfg = Debug|Win32
+		{4AF39B53-9AEC-4367-ABAC-F35D25AA7B83}.Debug|x86.Build.0 = Debug|Win32
+		{4AF39B53-9AEC-4367-ABAC-F35D25AA7B83}.Release|x64.ActiveCfg = Release|x64
+		{4AF39B53-9AEC-4367-ABAC-F35D25AA7B83}.Release|x64.Build.0 = Release|x64
+		{4AF39B53-9AEC-4367-ABAC-F35D25AA7B83}.Release|x86.ActiveCfg = Release|Win32
+		{4AF39B53-9AEC-4367-ABAC-F35D25AA7B83}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
