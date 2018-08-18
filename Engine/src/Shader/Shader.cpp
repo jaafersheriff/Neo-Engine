@@ -6,6 +6,9 @@
 #include <vector>
 
 namespace neo {
+    Shader::Shader(const std::string &name) :
+        name(name)
+    {}
 
     Shader::Shader(const std::string &name, const std::string &dir, const std::string &v, const std::string &f) :
         Shader(name, dir, v, f, "")
