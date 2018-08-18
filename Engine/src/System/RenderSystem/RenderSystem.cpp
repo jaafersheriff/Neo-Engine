@@ -26,11 +26,12 @@ namespace neo {
     }
 
     void RenderSystem::update(float dt) {
-        /* Reset state */
-        defaultFBO->bind();
-        CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-        glm::ivec2 size = Window::getFrameSize();
-        CHECK_GL(glViewport(0, 0, size.x, size.y));
+        /* Render all preprocesses */
+        for (auto & shader : preShaders) {
+            if (shader.get()->active) {
+                shader.get()->render(*this, *defaultCamera);
+            }
+        }
 
         /* Render all scene shaders */
         renderScene(*defaultCamera);
@@ -44,6 +45,12 @@ namespace neo {
     }
 
     void RenderSystem::renderScene(const CameraComponent &camera) {
+        /* Reset state */
+        defaultFBO->bind();
+        CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+        glm::ivec2 size = Window::getFrameSize();
+        CHECK_GL(glViewport(0, 0, size.x, size.y));
+
         for (auto & shader : sceneShaders) {
             if (shader.get()->active) {
                 shader.get()->render(*this, camera);
