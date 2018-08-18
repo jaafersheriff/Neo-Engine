@@ -26,6 +26,16 @@ namespace neo {
                 CHECK_GL(glBindFramebuffer(GL_FRAMEBUFFER, fboId));
             }
 
+            void disableDraw() {
+                bind();
+                CHECK_GL(glDrawBuffer(GL_NONE));
+            }
+
+            void disableRead() {
+                bind();
+                CHECK_GL(glReadBuffer(GL_NONE));
+            }
+
             // TODO - ability to add multiple color attachments 
             // TODO - ability to add color render buffers
             void attachColorTexture(const Texture &texture) {

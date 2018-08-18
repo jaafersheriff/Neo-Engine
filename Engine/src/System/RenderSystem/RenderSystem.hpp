@@ -30,7 +30,8 @@ namespace neo {
             void renderScene(const CameraComponent &) const;
 
             /* FBO */
-            std::unordered_map<std::string, Framebuffer *> framebuffers;
+            std::unordered_map<std::string, std::unique_ptr<Framebuffer>> framebuffers;
+            Framebuffer * createFBO(const std::string &);
 
             /* Shaders */
             std::vector<std::unique_ptr<Shader>> preShaders;

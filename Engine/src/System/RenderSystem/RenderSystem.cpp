@@ -21,9 +21,8 @@ namespace neo {
         CHECK_GL(glViewport(0, 0, Window::getFrameSize().x, Window::getFrameSize().y));
 
         /* Init default FBO */
-        defaultFBO = new Framebuffer;
+        defaultFBO = createFBO("default");
         defaultFBO->fboId = 0;
-        framebuffers.emplace("default", defaultFBO);
     }
 
     void RenderSystem::update(float dt) {
@@ -58,6 +57,15 @@ namespace neo {
                 shader.get()->render(*this, camera);
             }
         }
+    }
+
+    Framebuffer * RenderSystem::createFBO(const std::string &name) {
+        auto it = framebuffers.find(name);
+        if (it == framebuffers.end()) {
+            framebuffers.emplace(name, std::make_unique<Framebuffer>());
+            it = framebuffers.find(name);
+        }
+        return it->second.get();
     }
 
     void RenderSystem::attachCompToShader(const std::type_index &typeI, RenderableComponent *rComp) {
