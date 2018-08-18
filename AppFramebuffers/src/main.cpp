@@ -80,6 +80,20 @@ struct Renderable {
     }
 };
 
+struct Surveillance {
+    GameObject *gameObject;
+    RenderableComponent *quad;
+    CameraComponent *camera;
+
+    Surveillance(glm::vec3 pos, glm::vec3 scale, glm::mat3 orientation) {
+        gameObject = &NeoEngine::createGameObject();
+        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale, orientation);
+        quad = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("quad"));
+        //quad->addShaderType<SurveillanceShader>();
+        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, 45.f, 1.f, 100.f);
+    }
+};
+
 int main() {
     NeoEngine::init("Framebuffers", "res/", 1280, 720);
 
@@ -87,6 +101,7 @@ int main() {
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
     Renderable(Loader::getMesh("cube"));
+    Surveillance(glm::vec3(-3, 0, 0), glm::vec3(1.f, 2.f, 1.f), glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(0, 1, 0))));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
