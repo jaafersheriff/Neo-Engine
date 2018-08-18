@@ -21,10 +21,19 @@
     <ClInclude Include="src\ShadowCasterShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\ShadowReceiverShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\caster.vert" />
+    <None Include="shaders\caster.frag" />
+    <None Include="shaders\receiver.vert" />
+    <None Include="shaders\receiver.frag" />
   </ItemGroup>
 </Project>

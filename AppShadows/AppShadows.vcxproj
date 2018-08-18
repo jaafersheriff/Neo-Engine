@@ -118,9 +118,16 @@
   <ItemGroup>
     <ClInclude Include="src\CustomSystem.hpp" />
     <ClInclude Include="src\ShadowCasterShader.hpp" />
+    <ClInclude Include="src\ShadowReceiverShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\caster.frag" />
+    <None Include="shaders\caster.vert" />
+    <None Include="shaders\receiver.frag" />
+    <None Include="shaders\receiver.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
