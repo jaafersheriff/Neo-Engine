@@ -21,11 +21,12 @@ namespace neo {
             static std::unordered_map<std::string, Mesh *> meshes;
             static std::unordered_map<std::string, Texture *> textures;
 
-            /* Retrieve Mesh pointer from an .obj file*/
+            /* Retrieve Mesh pointer from an .obj file */
             static Mesh * getMesh(const std::string &, bool = false);
-            /* Retrieve Texture pointer from an image file*/
-            static Texture * getTexture(const std::string &, GLint inFormat = GL_RGBA, GLenum format = GL_RGBA, GLint filter = GL_LINEAR, GLenum mode = GL_REPEAT);
-            static Texture * getTexture(const std::string, const std::vector<std::string> &);
+            /* Retrieve Texture pointer from an image file */
+            static Texture * addTexture(const std::string &, GLint inFormat = GL_RGBA, GLenum format = GL_RGBA, GLint filter = GL_LINEAR, GLenum mode = GL_REPEAT);
+            static Texture * addTexture(const std::string &, const std::vector<std::string> &);
+            static Texture * getTexture(const std::string &);
 
         private:
             /* Resize mesh vertex buffers so all the vertices are [-1, 1] */

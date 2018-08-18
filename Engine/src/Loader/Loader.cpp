@@ -93,7 +93,7 @@ namespace neo {
         return mesh;
     }
 
-    Texture * Loader::getTexture(const std::string &fileName, GLint inFormat, GLenum format, GLint filter, GLenum mode) {
+    Texture * Loader::addTexture(const std::string &fileName, GLint inFormat, GLenum format, GLint filter, GLenum mode) {
         /* Search map first */
         auto it = textures.find(fileName);
         if (it != textures.end()) {
@@ -120,7 +120,7 @@ namespace neo {
         return texture;
     }
 
-    Texture * Loader::getTexture(const std::string name, const std::vector<std::string> & files) {
+    Texture * Loader::addTexture(const std::string &name, const std::vector<std::string> & files) {
         /* Search map first */
         auto it = textures.find(name);
         if (it != textures.end()) {
@@ -156,6 +156,15 @@ namespace neo {
         }
     
         return texture;
+    }
+
+    Texture * Loader::getTexture(const std::string &name) {
+        auto it = textures.find(name);
+        if (it == textures.end()) {
+            textures.emplace(name, new Texture);
+            it = textures.find(name);
+        }
+        return it->second;
     }
 
 /* Provided function to resize a mesh so all vertex positions are [0, 1.f] */
