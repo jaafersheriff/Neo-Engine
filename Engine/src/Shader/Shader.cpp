@@ -2,8 +2,6 @@
 #include "Util/Util.hpp"
 #include "Util/GLHelper.hpp"
 
-#include "System/RenderSystem/RenderSystem.hpp"
-
 #include <fstream>
 #include <vector>
 
@@ -12,16 +10,16 @@ namespace neo {
         name(name)
     {}
 
-    Shader::Shader(const std::string &name, RenderSystem &r, const std::string &v, const std::string &f) :
-        Shader(name, r, v, f, "")
+    Shader::Shader(const std::string &name, const std::string &res, const std::string &v, const std::string &f) :
+        Shader(name, res, v, f, "")
     {}
 
-    Shader::Shader(const std::string &name, RenderSystem &r, const std::string &v, const std::string &f, const std::string &g) :
+    Shader::Shader(const std::string &name, const std::string &res, const std::string &v, const std::string &f, const std::string &g) :
         Shader(
             name,
-            (v.size() ? Util::textFileRead((r.APP_SHADER_DIR + v).c_str()) : NULL), // memory leak
-            (f.size() ? Util::textFileRead((r.APP_SHADER_DIR + f).c_str()) : NULL),
-            (g.size() ? Util::textFileRead((r.APP_SHADER_DIR + g).c_str()) : NULL))
+            (v.size() ? Util::textFileRead((res + v).c_str()) : NULL), // memory leak
+            (f.size() ? Util::textFileRead((res + f).c_str()) : NULL),
+            (g.size() ? Util::textFileRead((res + g).c_str()) : NULL))
     {}
 
     Shader::Shader(const std::string &name, const char *vTex, const char *fTex) :

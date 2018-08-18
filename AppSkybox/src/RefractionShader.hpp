@@ -15,8 +15,8 @@ class RefractionShader : public Shader {
 
     public:
 
-        RefractionShader(const std::string &res, const std::string &vert, const std::string &frag) :
-            Shader("Refraction Shader", res, vert, frag)
+        RefractionShader(RenderSystem &r, const std::string &vert, const std::string &frag) :
+            Shader("Refraction Shader", r.APP_SHADER_DIR, vert, frag)
         {}
 
         virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {

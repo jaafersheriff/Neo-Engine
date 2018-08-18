@@ -15,8 +15,8 @@ class ReflectionShader : public Shader {
 
     public:
 
-        ReflectionShader(const std::string &res, const std::string &vert, const std::string &frag) :
-            Shader("Reflection Shader", res, vert, frag)
+        ReflectionShader(RenderSystem &r, const std::string &vert, const std::string &frag) :
+            Shader("Reflection Shader", r.APP_SHADER_DIR, vert, frag)
         {}
 
         virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {

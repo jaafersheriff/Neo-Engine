@@ -12,8 +12,8 @@ class SkyboxShader : public Shader {
 
     public:
 
-        SkyboxShader(const std::string &res, const std::string &vert, const std::string &frag) :
-            Shader("Skybox Shader", res, vert, frag)
+        SkyboxShader(RenderSystem &r, const std::string &vert, const std::string &frag) :
+            Shader("Skybox Shader", r.APP_SHADER_DIR, vert, frag)
         {}
 
         virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
