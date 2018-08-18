@@ -80,7 +80,7 @@ int main() {
                 new Renderable(
                     Loader::getMesh("mr_krab.obj", true), 
                     &material,
-                    Loader::getTexture("mr_krab.png", GL_REPEAT), 
+                    Loader::getTexture("mr_krab.png"), 
                     glm::vec3(x*2, 0, z*2))
             );
         }
@@ -88,7 +88,7 @@ int main() {
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraSystem>();
-    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
+    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
     renderSystem->addShader<PhongShader>("phong.vert", "phong.frag");
     renderSystem->addShader<WireframeShader>();
     NeoEngine::initSystems();
