@@ -5,6 +5,8 @@
 
 #include "Util/GLHelper.hpp"
 
+#include "Model/Texture.hpp"
+
 namespace neo {
 
     class Framebuffer {
@@ -12,8 +14,19 @@ namespace neo {
         public: 
             GLuint fboId;
 
+            void generate() {
+                CHECK_GL(glGenFramebuffers(1, &fboId));
+            }
+
             void bind() {
                 CHECK_GL(glBindFramebuffer(GL_FRAMEBUFFER, fboId));
+            }
+
+            // TODO - ability to add multiple color attachments 
+            // TODO - ability to add color render buffers
+            void attachColorTexture(const Texture &texture) {
+                bind();
+                CHECK_GL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0));
             }
     };
 }
