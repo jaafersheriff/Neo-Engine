@@ -40,7 +40,7 @@ struct Light {
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
         renderable->addShaderType<DiffuseShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
-        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, 45.f, 1.f, 100.f);
+        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, 45.f, 1.f, 1000.f);
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -75,11 +75,11 @@ int main() {
     NeoEngine::init("Shadows", "res/", 1280, 720);
 
     /* Game objects */
-    Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
+    Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
     for (int i = 0; i < 100; i++) {
-        glm::vec3 pos = glm::vec3(Util::genRandom(-25.f, 25.f), Util::genRandom(0.f, 25.f), Util::genRandom(-25.f, 25.f));
-        glm::vec3 scale = Util::genRandomVec3(0.2f, 3.5f);
+        glm::vec3 pos = glm::vec3(Util::genRandom(-50.f, 50.f), Util::genRandom(0.f, 25.f), Util::genRandom(-50.f, 50.f));
+        glm::vec3 scale = Util::genRandomVec3(0.2f, 5.f);
         Renderable caster = Renderable(Loader::getMesh("cube"), pos, scale);
         caster.material.diffuse = Util::genRandomVec3();
         caster.renderable->addShaderType<ShadowCasterShader>();

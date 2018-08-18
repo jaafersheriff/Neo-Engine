@@ -18,7 +18,11 @@ class ShadowCasterShader : public Shader {
             depthTexture->width = 1024;
             depthTexture->height = 1024;
             depthTexture->components = 1;
-            depthTexture->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_NEAREST, GL_REPEAT);
+            depthTexture->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_NEAREST, GL_CLAMP_TO_BORDER);
+            CHECK_GL(glBindTexture(GL_TEXTURE_2D, depthTexture->textureId));
+            float buffer[] = {1.f, 1.f, 1.f, 1.f};
+            CHECK_GL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, buffer));
+            CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
 
             Framebuffer *depthFBO = rSystem.createFBO("depthMap");
             depthFBO->generate();
@@ -32,6 +36,7 @@ class ShadowCasterShader : public Shader {
             auto depthTexture = Loader::getTexture("depthTexture");
             CHECK_GL(glClear(GL_DEPTH_BUFFER_BIT));
             CHECK_GL(glViewport(0, 0, depthTexture->width, depthTexture->height));
+            CHECK_GL(glCullFace(GL_FRONT));
             bind();
 
             auto cameras = NeoEngine::getComponents<LightComponent>()[0]->getGameObject().getComponentsByType<CameraComponent>();
@@ -56,6 +61,7 @@ class ShadowCasterShader : public Shader {
             CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
             unbind();
+            CHECK_GL(glCullFace(GL_BACK));
         }
 };
 
