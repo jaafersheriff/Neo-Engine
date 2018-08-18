@@ -5,5 +5,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CustomSystem.hpp" />
+    <ClInclude Include="src\SurveillanceCamera.hpp" />
+    <ClInclude Include="src\SurveillanceWriteShader.hpp" />
   </ItemGroup>
 </Project>

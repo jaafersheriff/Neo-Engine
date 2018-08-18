@@ -1,9 +1,12 @@
 #include <NeoEngine.hpp>
 
+#include "SurveillanceCamera.hpp"
+
 #include "CustomSystem.hpp"
 
 #include "Shader/DiffuseShader.hpp"
 #include "Shader/LineShader.hpp"
+#include "SurveillanceWriteShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -83,15 +86,14 @@ struct Renderable {
 
 struct Surveillance {
     GameObject *gameObject;
-    RenderableComponent *quad;
-    CameraComponent *camera;
+    SurveillanceCamera *camera;
+    // RenderableComponent *quad;
 
     Surveillance(glm::vec3 pos, glm::vec3 scale, glm::mat3 orientation) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale, orientation);
-        quad = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("quad"));
-        //quad->addShaderType<SurveillanceShader>();
-        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, 45.f, 1.f, 100.f);
+        camera = &NeoEngine::addComponent<SurveillanceCamera>(gameObject, 45.f, 1.f, 100.f);
+        // quad = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("quad"));
         // Line
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
@@ -138,6 +140,7 @@ int main() {
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
+    renderSystem->addShader<SurveillanceWriteShader, ShaderTypes::PREPROCESS>();
     renderSystem->addShader<DiffuseShader>();
     renderSystem->addShader<LineShader>();
     NeoEngine::initSystems();
