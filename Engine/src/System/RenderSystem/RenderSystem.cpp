@@ -44,7 +44,7 @@ namespace neo {
         glfwSwapBuffers(Window::getWindow());
     }
 
-    void RenderSystem::renderScene(const CameraComponent &camera) {
+    void RenderSystem::renderScene(const CameraComponent &camera) const {
         /* Reset state */
         defaultFBO->bind();
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));

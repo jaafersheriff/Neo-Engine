@@ -25,7 +25,7 @@ namespace neo {
 
             virtual void init() override;
             virtual void update(float) override;
-            void renderScene(const CameraComponent &);
+            void renderScene(const CameraComponent &) const;
 
             /* Shaders */
             std::vector<std::unique_ptr<Shader>> preShaders;
