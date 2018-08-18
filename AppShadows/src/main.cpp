@@ -3,8 +3,11 @@
 #include "CustomSystem.hpp"
 
 #include "Shader/DiffuseShader.hpp"
+#include "ShadowCasterShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
+
+#include "util/Util.hpp"
 
 using namespace neo;
 
@@ -25,11 +28,16 @@ struct Camera {
 struct Light {
     GameObject *gameObject;
     LightComponent *light;
+    RenderableComponent *renderable;
+    Material material = Material(1.f, glm::vec3(1.f));
 
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, pos);
+        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(2.f));
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
+        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
+        renderable->addShaderType<DiffuseShader>();
+        NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -52,9 +60,9 @@ struct Renderable {
     RenderableComponent *renderable;
     Material material = Material(0.2f, glm::vec3(1,0,1));
 
-    Renderable(Mesh *mesh) {
+    Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
+        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderable->addShaderType<DiffuseShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
@@ -86,7 +94,16 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable(Loader::getMesh("cube"));
+    for (int i = 0; i < 100; i++) {
+        glm::vec3 pos = glm::vec3(Util::genRandom(-25.f, 25.f), Util::genRandom(0.f, 25.f), Util::genRandom(-25.f, 25.f));
+        glm::vec3 scale = Util::genRandomVec3(0.2f, 3.5f);
+        Renderable caster = Renderable(Loader::getMesh("cube"), pos, scale);
+        caster.material.diffuse = Util::genRandomVec3();
+        caster.renderable->addShaderType<ShadowCasterShader>();
+    }
+    Renderable receiver(Loader::getMesh("cube"), glm::vec3(0.f, -0.5f, 0.f), glm::vec3(100.f, 0.f, 100.f));
+    receiver.material.diffuse = glm::vec3(0.7f);
+    // TODO - receiver.renderable->addShaderType<ShadowReceiverShader>();
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
@@ -94,6 +111,7 @@ int main() {
     NeoEngine::initSystems();
 
     /* Add shaders */
+    // TODO - renderSystem->addShader<ShadowCasterShader, ShaderTypes::PREPROCESS>();
     renderSystem->addShader<DiffuseShader>();
 
     /* Attach ImGui panes */
