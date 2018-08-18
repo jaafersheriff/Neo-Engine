@@ -7,6 +7,7 @@
 #include "Shader/DiffuseShader.hpp"
 #include "Shader/LineShader.hpp"
 #include "SurveillanceWriteShader.hpp"
+#include "SurveillanceReadShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -87,13 +88,11 @@ struct Renderable {
 struct Surveillance {
     GameObject *gameObject;
     SurveillanceCamera *camera;
-    // RenderableComponent *quad;
 
     Surveillance(glm::vec3 pos, glm::vec3 scale, glm::mat3 orientation) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale, orientation);
         camera = &NeoEngine::addComponent<SurveillanceCamera>(gameObject, 45.f, 1.f, 100.f);
-        // quad = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("quad"));
         // Line
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
@@ -135,15 +134,18 @@ int main() {
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
     Renderable(Loader::getMesh("cube"));
-    Surveillance(glm::vec3(-3, 0, 0), glm::vec3(1.f, 2.f, 1.f), glm::mat3(glm::rotate(glm::mat4(1.f), 0.707f, glm::vec3(0, 1, 0))));
+    Surveillance s(glm::vec3(-3, 0, 0), glm::vec3(1.f, 2.f, 1.f), glm::mat3(glm::rotate(glm::mat4(1.f), 1.4f, glm::vec3(0, 1, 0))));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
-    renderSystem->addShader<SurveillanceWriteShader, ShaderTypes::PREPROCESS>();
-    renderSystem->addShader<DiffuseShader>();
-    renderSystem->addShader<LineShader>();
     NeoEngine::initSystems();
+
+    /* Add shaders */
+    renderSystem->addShader<SurveillanceWriteShader, ShaderTypes::PREPROCESS>();
+    renderSystem->addShader<LineShader>();
+    renderSystem->addShader<DiffuseShader>();
+    renderSystem->addShader<SurveillanceReadShader>("read.vert", "read.frag");
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {

@@ -28,6 +28,7 @@ namespace neo {
 
             // TODO - ability to add multiple color attachments 
             // TODO - ability to add color render buffers
+            // TODO - if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             void attachColorTexture(const Texture &texture) {
                 bind();
                 CHECK_GL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0));

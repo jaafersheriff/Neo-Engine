@@ -7,5 +7,10 @@
     <ClInclude Include="src\CustomSystem.hpp" />
     <ClInclude Include="src\SurveillanceCamera.hpp" />
     <ClInclude Include="src\SurveillanceWriteShader.hpp" />
+    <ClInclude Include="src\SurveillanceReadShader.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\read.vert" />
+    <None Include="shaders\read.frag" />
   </ItemGroup>
 </Project>
