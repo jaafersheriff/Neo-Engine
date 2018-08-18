@@ -83,7 +83,7 @@ int main() {
         Renderable caster = Renderable(Loader::getMesh("cube"), pos, scale);
         caster.material.diffuse = Util::genRandomVec3();
         caster.renderable->addShaderType<ShadowCasterShader>();
-        caster.renderable->addShaderType<DiffuseShader>();
+        caster.renderable->addShaderType<ShadowReceiverShader>();
     }
     Renderable receiver(Loader::getMesh("cube"), glm::vec3(0.f, -0.5f, 0.f), glm::vec3(100.f, 0.f, 100.f));
     receiver.material.diffuse = glm::vec3(0.7f);
