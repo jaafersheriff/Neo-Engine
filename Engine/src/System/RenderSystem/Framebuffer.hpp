@@ -14,6 +14,10 @@ namespace neo {
         public: 
             GLuint fboId;
 
+            virtual ~Framebuffer() {
+                CHECK_GL(glDeleteFramebuffers(1, &fboId));
+            }
+
             void generate() {
                 CHECK_GL(glGenFramebuffers(1, &fboId));
             }

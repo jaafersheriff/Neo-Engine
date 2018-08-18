@@ -9,6 +9,9 @@ namespace neo {
     class Texture {
 
         public:
+            virtual ~Texture() {
+                // TODO - delete textureId
+            }
 
             GLuint textureId = 0;
 
