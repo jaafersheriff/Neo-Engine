@@ -8,7 +8,7 @@ namespace neo {
     class WireframeShader : public Shader {
 
         public:
-            WireframeShader(std::string res) :
+            WireframeShader(RenderSystem &rSystem) :
                 Shader("Wire Shader",
                         "\
                         #version 330 core\n\

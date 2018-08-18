@@ -11,7 +11,7 @@ namespace neo {
 
         public:
 
-            DiffuseShader(const std::string &res) :
+            DiffuseShader(RenderSystem &rSystem) :
                 Shader("Diffuse Shader",
                         "\
                         #version 330 core\n\

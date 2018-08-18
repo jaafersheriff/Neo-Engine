@@ -24,8 +24,8 @@ namespace neo {
 
         public:
             Shader(const std::string &);
-            Shader(const std::string &, const std::string &, const std::string &, const std::string &);
-            Shader(const std::string &, const std::string &, const std::string &, const std::string &, const std::string &);
+            Shader(const std::string &, RenderSystem &, const std::string &, const std::string &);
+            Shader(const std::string &, RenderSystem &, const std::string &, const std::string &, const std::string &);
             Shader(const std::string &, const char *, const char *);
             Shader(const std::string &, const char *, const char *, const char *);
             virtual ~Shader() = default;

@@ -23,6 +23,8 @@ namespace neo {
                 defaultCamera(cam)
             {}
 
+            const std::string APP_SHADER_DIR;
+
             virtual void init() override;
             virtual void update(float) override;
             void renderScene(const CameraComponent &) const;
@@ -42,7 +44,6 @@ namespace neo {
             void detachCompFromShader(const std::type_index &, RenderableComponent *);
 
         private:
-            const std::string APP_SHADER_DIR;
             CameraComponent *defaultCamera;
             Framebuffer *defaultFBO;
     };
@@ -54,13 +55,13 @@ namespace neo {
         static_assert(!std::is_same<Shader, ShaderT>::value, "ShaderT must be a derived Shader type");
         switch (type) {
             case ShaderTypes::PREPROCESS:
-                preShaders.emplace_back(std::make_unique<ShaderT>(APP_SHADER_DIR, std::forward<Args>(args)...));
+                preShaders.emplace_back(std::make_unique<ShaderT>(*this, std::forward<Args>(args)...));
                 return static_cast<ShaderT &>(*preShaders.back());
             case ShaderTypes::POSTPROCESS:
                 // TODO
             case ShaderTypes::SCENE:
             default:
-                sceneShaders.emplace_back(std::make_unique<ShaderT>(APP_SHADER_DIR, std::forward<Args>(args)...));
+                sceneShaders.emplace_back(std::make_unique<ShaderT>(*this, std::forward<Args>(args)...));
                 return static_cast<ShaderT &>(*sceneShaders.back());
         }
     }

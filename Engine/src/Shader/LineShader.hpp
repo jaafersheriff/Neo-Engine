@@ -12,7 +12,7 @@ namespace neo {
     class LineShader : public Shader {
 
         public:
-            LineShader(std::string res) :
+            LineShader(RenderSystem &rSystem) :
                 Shader("Line Shader",
                         "\
                         #version 330 core\n\
