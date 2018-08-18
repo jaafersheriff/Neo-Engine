@@ -23,6 +23,7 @@ namespace neo {
         /* Init default FBO */
         defaultFBO = new Framebuffer;
         defaultFBO->fboId = 0;
+        framebuffers.emplace("default", defaultFBO);
     }
 
     void RenderSystem::update(float dt) {

@@ -27,6 +27,9 @@ namespace neo {
             virtual void update(float) override;
             void renderScene(const CameraComponent &) const;
 
+            /* FBO */
+            std::unordered_map<std::string, Framebuffer *> framebuffers;
+
             /* Shaders */
             std::vector<std::unique_ptr<Shader>> preShaders;
             std::vector<std::unique_ptr<Shader>> sceneShaders;
