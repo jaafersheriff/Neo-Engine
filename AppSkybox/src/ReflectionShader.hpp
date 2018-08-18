@@ -19,16 +19,13 @@ class ReflectionShader : public Shader {
             Shader("Reflection Shader", res, vert, frag)
         {}
 
-        virtual void render(float dt, const RenderSystem &renderSystem) override {
+        virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
             bind();
 
             /* Load PV */
-            const auto cameras = NeoEngine::getComponents<CameraComponent>();
-            if (cameras.size()) {
-                loadMatrix(getUniform("P"), cameras.at(0)->getProj());
-                loadMatrix(getUniform("V"), cameras.at(0)->getView());
-                loadVector(getUniform("camPos"), cameras.at(0)->getGameObject().getSpatial()->getPosition());
-            }
+            loadMatrix(getUniform("P"), camera.getProj());
+            loadMatrix(getUniform("V"), camera.getView());
+            loadVector(getUniform("camPos"), camera.getGameObject().getSpatial()->getPosition());
 
             /* Load environment map */
             loadInt(getUniform("cubeMap"), NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<TextureComponent>()->getTexture().textureId);

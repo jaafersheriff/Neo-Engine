@@ -16,7 +16,7 @@ class SkyboxShader : public Shader {
             Shader("Skybox Shader", res, vert, frag)
         {}
 
-        virtual void render(float dt, const RenderSystem &renderSystem) override {
+        virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
             const auto cubes = renderSystem.getRenderables<SkyboxShader, SkyboxComponent>();
             if (!cubes.size()) {
                 return;
@@ -27,11 +27,8 @@ class SkyboxShader : public Shader {
             bind();
 
             /* Load PV */
-            const auto cameras = NeoEngine::getComponents<CameraComponent>();
-            if (cameras.size()) {
-                loadMatrix(getUniform("P"), cameras.at(0)->getProj());
-                loadMatrix(getUniform("V"), cameras.at(0)->getView());
-            }
+            loadMatrix(getUniform("P"), camera.getProj());
+            loadMatrix(getUniform("V"), camera.getView());
 
             const auto cube = cubes[0];
             const Mesh & mesh = cube->getMesh();

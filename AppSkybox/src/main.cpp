@@ -18,10 +18,11 @@ RenderSystem * renderSystem;
 
 /* Game object definitions */
 struct Camera {
+    CameraComponent *camera;
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
         NeoEngine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -129,7 +130,7 @@ int main() {
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
-    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
+    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
     NeoEngine::initSystems();
 
     /* Shaders - order matters! */
@@ -147,8 +148,11 @@ int main() {
         }
     });
     NeoEngine::addImGuiFunc("Render System", [&]() {
-        ImGui::Text("Shaders:  %d", renderSystem->shaders.size());
-        for (auto it(renderSystem->shaders.begin()); it != renderSystem->shaders.end(); ++it) {
+        ImGui::Text("Shaders:  %d", renderSystem->preShaders.size() + renderSystem->sceneShaders.size());
+        for (auto it(renderSystem->preShaders.begin()); it != renderSystem->preShaders.end(); ++it) {
+            ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
+        }
+        for (auto it(renderSystem->sceneShaders.begin()); it != renderSystem->sceneShaders.end(); ++it) {
             ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
         }
     });
