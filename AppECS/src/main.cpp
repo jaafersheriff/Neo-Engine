@@ -121,7 +121,7 @@ int main() {
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
-    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/");
+    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
     NeoEngine::initSystems();
 
     /* Shaders */
@@ -156,8 +156,11 @@ int main() {
         }
     });
     NeoEngine::addImGuiFunc("Render System", [&]() {
-        ImGui::Text("Shaders:  %d", renderSystem->shaders.size());
-        for (auto it(renderSystem->shaders.begin()); it != renderSystem->shaders.end(); ++it) {
+        ImGui::Text("Shaders:  %d", renderSystem->preShaders.size() + renderSystem->sceneShaders.size());
+        for (auto it(renderSystem->preShaders.begin()); it != renderSystem->preShaders.end(); ++it) {
+            ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
+        }
+        for (auto it(renderSystem->sceneShaders.begin()); it != renderSystem->sceneShaders.end(); ++it) {
             ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
         }
 
