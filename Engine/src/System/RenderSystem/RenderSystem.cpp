@@ -44,7 +44,7 @@ namespace neo {
     }
 
     void RenderSystem::renderScene(const CameraComponent &camera) {
-        for (auto & shader : shaders) {
+        for (auto & shader : sceneShaders) {
             if (shader.get()->active) {
                 shader.get()->render(*this, camera);
             }
