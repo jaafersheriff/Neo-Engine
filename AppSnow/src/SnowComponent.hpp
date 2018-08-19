@@ -13,18 +13,26 @@ class SnowComponent : public Component{
     public:
         
         SnowComponent(GameObject *gameObject) :
-            Component(gameObject) {
-        }
+            Component(gameObject),
+            snowAngle(glm::vec3(0.f, 1.f, 0.f)),
+            snowSize(0.36),
+            snowColor(0.36, 0.48, 0.56),
+            height(0.07),
+            rimColor(glm::vec3(1.f)),
+            rimPower(0.25)
+        {}
 
         virtual void update(float dt) override {
             snowAngle = gameObject->getSpatial()->getV();
+            snowAngle.x = -snowAngle.x;
+            snowAngle.z = -snowAngle.z;
         }
 
         glm::vec3 snowAngle;
-        float snowSize = 0.36f;
-        glm::vec3 snowColor = glm::vec3(0.39f, 0.6f, 0.7f);
-        float height = 0.07f;
-        glm::vec3 rimColor = glm::vec3(1.f);
-        float rimPower = 0.373f;
+        float snowSize;
+        glm::vec3 snowColor;
+        float height;
+        glm::vec3 rimColor;
+        float rimPower;
 };
 

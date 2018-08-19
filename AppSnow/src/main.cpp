@@ -3,7 +3,9 @@
 #include "CustomSystem.hpp"
 
 #include "SnowShader.hpp"
-#include "Shader/WireframeShader.hpp"
+#include "Shader/LineShader.hpp"
+
+#include "Util/Util.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -58,7 +60,6 @@ struct Renderable {
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderable->addShaderType<SnowShader>();
-        renderable->addShaderType<WireframeShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
@@ -90,16 +91,24 @@ struct Snow {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject);
         snow = &NeoEngine::addComponent<SnowComponent>(gameObject);
-
+        // Line
+        LineComponent *vLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 0.f));
+        vLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
+        NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
         NeoEngine::addImGuiFunc("Snow", [&]() {
-            // if (ImGui::SliderFloat3("Snow angle", glm::value_ptr(snow->snowAngle), -1.f, 1.f)) {
-            //     snow->snowAngle = glm::normalize(snow->snowAngle);
-            // }
             ImGui::SliderFloat("Snow size", &snow->snowSize, 0.f, 1.f);
             ImGui::SliderFloat3("Snow color", glm::value_ptr(snow->snowColor), 0.f, 1.f);
             ImGui::SliderFloat("Height", &snow->height, 0.f, .25f);
             ImGui::SliderFloat3("Rim color", glm::value_ptr(snow->rimColor), 0.f, 1.f);
             ImGui::SliderFloat("Rim power", &snow->rimPower, 0.f, 25.f);
+            static glm::vec3 rot(0.f);
+            if (ImGui::SliderFloat3("Rotation", glm::value_ptr(rot), -Util::PI(), Util::PI())) {
+                glm::mat4 R;
+                R = glm::rotate(glm::mat4(1.f), rot.x, glm::vec3(1, 0, 0));
+                R *= glm::rotate(glm::mat4(1.f), rot.y, glm::vec3(0, 1, 0));
+                R *= glm::rotate(glm::mat4(1.f), rot.z, glm::vec3(0, 0, 1));
+                gameObject->getSpatial()->setOrientation(glm::mat3(R));
+            }
         });
     }
 };
@@ -117,8 +126,7 @@ int main() {
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
     auto snowShader = &renderSystem->addShader<SnowShader>("snow.vert", "snow.frag");
-    auto wireShader = renderSystem->addShader<WireframeShader>();
-    wireShader.active = false;
+    renderSystem->addShader<LineShader>();
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */
