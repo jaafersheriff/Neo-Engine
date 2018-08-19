@@ -21,6 +21,7 @@ namespace neo {
 
                 /* Load snow */
                 auto snow = NeoEngine::getComponents<SnowComponent>()[0];
+                loadVector(getUniform("snowAngle"), snow->snowAngle);
                 loadVector(getUniform("snowColor"), snow->snowColor);
                 loadFloat(getUniform("snowSize"), snow->snowSize);
                 loadFloat(getUniform("height"), snow->height);
