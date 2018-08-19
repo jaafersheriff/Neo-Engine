@@ -96,7 +96,7 @@ struct Snow {
         vLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
         NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
         NeoEngine::addImGuiFunc("Snow", [&]() {
-            ImGui::SliderFloat("Snow size", &snow->snowSize, 0.f, 1.f);
+            ImGui::SliderFloat("Snow size", &snow->snowSize, 1.f, 0.f);
             ImGui::SliderFloat3("Snow color", glm::value_ptr(snow->snowColor), 0.f, 1.f);
             ImGui::SliderFloat("Height", &snow->height, 0.f, .25f);
             ImGui::SliderFloat3("Rim color", glm::value_ptr(snow->rimColor), 0.f, 1.f);

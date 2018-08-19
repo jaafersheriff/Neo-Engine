@@ -26,6 +26,7 @@ class SnowComponent : public Component{
             snowAngle = gameObject->getSpatial()->getV();
             snowAngle.x = -snowAngle.x;
             snowAngle.z = -snowAngle.z;
+            height = -0.19f * snowSize + 0.17f;
         }
 
         glm::vec3 snowAngle;
