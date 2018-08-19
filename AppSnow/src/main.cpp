@@ -113,6 +113,8 @@ int main() {
         ImGui::SliderFloat("Snow size", &snowShader->snowSize, 0.f, 1.f);
         ImGui::SliderFloat3("Snow color", glm::value_ptr(snowShader->snowColor), 0.f, 1.f);
         ImGui::SliderFloat("Height", &snowShader->height, 0.f, .25f);
+        ImGui::SliderFloat3("Rim color", glm::value_ptr(snowShader->rimColor), 0.f, 1.f);
+        ImGui::SliderFloat("Rim power", &snowShader->rimPower, 0.f, 25.f);
     });
     NeoEngine::addImGuiFunc("Render System", [&]() {
         ImGui::Text("Shaders:  %d", renderSystem->preShaders.size() + renderSystem->sceneShaders.size());
