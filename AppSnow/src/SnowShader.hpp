@@ -12,9 +12,9 @@ namespace neo {
         public:
 
             glm::vec3 snowAngle = glm::vec3(0.f, 1.f, 0.f);   // todo - attach to a spatial or messaging
-            float snowSize = 0.f;
+            float snowSize = 0.36f;
             glm::vec3 snowColor = glm::vec3(1.f);
-            float height = 0.f;
+            float height = 0.07f;
 
             SnowShader(RenderSystem &rSystem, const std::string &vert, const std::string &frag) :
                 Shader("Snow Shader", rSystem.APP_SHADER_DIR, vert, frag)

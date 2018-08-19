@@ -3,6 +3,7 @@
 #include "CustomSystem.hpp"
 
 #include "SnowShader.hpp"
+#include "Shader/WireframeShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -10,9 +11,6 @@ using namespace neo;
 
 /* Systems */
 RenderSystem * renderSystem;
-
-/* Shaders */
-SnowShader *snowShader;
 
 /* Game object definitions */
 struct Camera {
@@ -53,13 +51,14 @@ struct Light {
 struct Renderable {
     GameObject *gameObject;
     RenderableComponent *renderable;
-    Material material = Material(0.2f, glm::vec3(1, 0, 1));
+    Material material = Material(0.2f, glm::vec3(1.f, 0.f, 0.f));
 
     Renderable(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderable->addShaderType<SnowShader>();
+        renderable->addShaderType<WireframeShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
@@ -88,13 +87,15 @@ int main() {
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-    Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable(Loader::getMesh("sphere.obj"));
+    Light(glm::vec3(0.f, 15.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+    Renderable(Loader::getMesh("male.obj"));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
-    snowShader = &renderSystem->addShader<SnowShader>("snow.vert", "snow.frag");
+    auto snowShader = &renderSystem->addShader<SnowShader>("snow.vert", "snow.frag");
+    auto wireShader = renderSystem->addShader<WireframeShader>();
+    wireShader.active = false;
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */
@@ -106,11 +107,21 @@ int main() {
         }
     });
     NeoEngine::addImGuiFunc("Snow", [&]() {
-        ImGui::SliderFloat3("Snow angle", glm::value_ptr(snowShader->snowAngle), -1.f, 1.f);
-        glm::normalize(snowShader->snowAngle);
+        if (ImGui::SliderFloat3("Snow angle", glm::value_ptr(snowShader->snowAngle), -1.f, 1.f)) {
+            snowShader->snowAngle = glm::normalize(snowShader->snowAngle);
+        }
         ImGui::SliderFloat("Snow size", &snowShader->snowSize, 0.f, 1.f);
         ImGui::SliderFloat3("Snow color", glm::value_ptr(snowShader->snowColor), 0.f, 1.f);
-        ImGui::SliderFloat("Height", &snowShader->height, 0.f, 5.f);
+        ImGui::SliderFloat("Height", &snowShader->height, 0.f, .25f);
+    });
+    NeoEngine::addImGuiFunc("Render System", [&]() {
+        ImGui::Text("Shaders:  %d", renderSystem->preShaders.size() + renderSystem->sceneShaders.size());
+        for (auto it(renderSystem->preShaders.begin()); it != renderSystem->preShaders.end(); ++it) {
+            ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
+        }
+        for (auto it(renderSystem->sceneShaders.begin()); it != renderSystem->sceneShaders.end(); ++it) {
+            ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
+        }
     });
 
     /* Run */
