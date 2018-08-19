@@ -11,8 +11,8 @@ class NormalShader : public Shader {
 
     public: 
     
-        NormalShader(const std::string &res, const std::string &vert, const std::string &frag, const std::string &geom) :
-            Shader("Normal Shader", res, vert, frag, geom) 
+        NormalShader(RenderSystem &r, const std::string &vert, const std::string &frag, const std::string &geom) :
+            Shader("Normal Shader", r.APP_SHADER_DIR, vert, frag, geom) 
         {}
 
         virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
