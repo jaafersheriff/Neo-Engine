@@ -29,6 +29,8 @@ namespace neo {
             virtual void update(float) override;
             void renderScene(const CameraComponent &) const;
 
+            void setDefaultCamera(CameraComponent *cam) { defaultCamera = cam; }
+
             /* FBO */
             std::unordered_map<std::string, std::unique_ptr<Framebuffer>> framebuffers;
             Framebuffer * createFBO(const std::string &);
