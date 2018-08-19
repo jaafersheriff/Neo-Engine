@@ -110,6 +110,7 @@ int main() {
         glm::normalize(snowShader->snowAngle);
         ImGui::SliderFloat("Snow size", &snowShader->snowSize, 0.f, 1.f);
         ImGui::SliderFloat3("Snow color", glm::value_ptr(snowShader->snowColor), 0.f, 1.f);
+        ImGui::SliderFloat("Height", &snowShader->height, 0.f, 5.f);
     });
 
     /* Run */
