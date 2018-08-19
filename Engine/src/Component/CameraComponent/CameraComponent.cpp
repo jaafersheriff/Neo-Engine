@@ -85,30 +85,13 @@ namespace neo {
 
     void CameraComponent::detView() const {
         auto spatial = gameObject->getSpatial();
-        glm::vec3 t(-spatial->getPosition());
-        const glm::vec3 & u = spatial->getU();
-        const glm::vec3 & v = spatial->getV();
-        const glm::vec3 & w = spatial->getW();
-        viewMat = glm::mat4(
-                       u.x,            v.x,            w.x, 0.f,
-                       u.y,            v.y,            w.y, 0.f,
-                       u.z,            v.z,            w.z, 0.f,
-            glm::dot(u, t), glm::dot(v, t), glm::dot(w, t), 1.f
-        );
+        viewMat = glm::lookAt(spatial->getPosition(), spatial->getPosition() + getLookDir(), spatial->getV());
         viewMatDirty = false;
     }
 
     void CameraComponent::detProj() const {
         if (isOrtho) {
-            /* Emulate glm::ortho without translation */
-            float width = horizBounds.y - horizBounds.x;
-            float height = vertBounds.y - vertBounds.x;
-            float length = far - near;
-            projMat = glm::mat4(1.f);
-            projMat[0][0] = 2.f / width;
-            projMat[1][1] = 2.f / height;
-            projMat[2][2] = -2.f / length;
-            projMat[3][3] = 1.f;
+            projMat = glm::ortho(horizBounds.x, horizBounds.y, vertBounds.x, vertBounds.y, near, far);
         }
         else {
             projMat = glm::perspective(fov, Window::getAspectRatio(), near, far);
