@@ -82,13 +82,36 @@ struct Renderable {
     }
 };
 
+struct Snow {
+    GameObject *gameObject;
+    SnowComponent *snow;
+
+    Snow() {
+        gameObject = &NeoEngine::createGameObject();
+        NeoEngine::addComponent<SpatialComponent>(gameObject);
+        snow = &NeoEngine::addComponent<SnowComponent>(gameObject);
+
+        NeoEngine::addImGuiFunc("Snow", [&]() {
+            // if (ImGui::SliderFloat3("Snow angle", glm::value_ptr(snow->snowAngle), -1.f, 1.f)) {
+            //     snow->snowAngle = glm::normalize(snow->snowAngle);
+            // }
+            ImGui::SliderFloat("Snow size", &snow->snowSize, 0.f, 1.f);
+            ImGui::SliderFloat3("Snow color", glm::value_ptr(snow->snowColor), 0.f, 1.f);
+            ImGui::SliderFloat("Height", &snow->height, 0.f, .25f);
+            ImGui::SliderFloat3("Rim color", glm::value_ptr(snow->rimColor), 0.f, 1.f);
+            ImGui::SliderFloat("Rim power", &snow->rimPower, 0.f, 25.f);
+        });
+    }
+};
+
 int main() {
-    NeoEngine::init("Framebuffers", "res/", 1280, 720);
+    NeoEngine::init("Snow", "res/", 1280, 720);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 15.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
     Renderable(Loader::getMesh("male.obj"));
+    Snow();
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
@@ -105,16 +128,6 @@ int main() {
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
         }
-    });
-    NeoEngine::addImGuiFunc("Snow", [&]() {
-        if (ImGui::SliderFloat3("Snow angle", glm::value_ptr(snowShader->snowAngle), -1.f, 1.f)) {
-            snowShader->snowAngle = glm::normalize(snowShader->snowAngle);
-        }
-        ImGui::SliderFloat("Snow size", &snowShader->snowSize, 0.f, 1.f);
-        ImGui::SliderFloat3("Snow color", glm::value_ptr(snowShader->snowColor), 0.f, 1.f);
-        ImGui::SliderFloat("Height", &snowShader->height, 0.f, .25f);
-        ImGui::SliderFloat3("Rim color", glm::value_ptr(snowShader->rimColor), 0.f, 1.f);
-        ImGui::SliderFloat("Rim power", &snowShader->rimPower, 0.f, 25.f);
     });
     NeoEngine::addImGuiFunc("Render System", [&]() {
         ImGui::Text("Shaders:  %d", renderSystem->preShaders.size() + renderSystem->sceneShaders.size());

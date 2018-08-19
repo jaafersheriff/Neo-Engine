@@ -15,11 +15,10 @@ out vec4 fragPos;
 out vec3 fragNor;
 
 void main() {
-    vec3 vert = vertPos;
-    if (dot(vertNor, snowAngle) >= snowSize) {
-        vert += vertNor * height;
-    }
-    fragPos = M * vec4(vert, 1.0);
+    fragPos = M * vec4(vertPos, 1.0);
     fragNor = N * vertNor;
+    if (dot(normalize(fragNor), snowAngle) >= snowSize) {
+        fragPos.xyz += fragNor * height;
+    }
     gl_Position = P * V * fragPos;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "NeoEngine.hpp"
+#include "SnowComponent.hpp"
 
 #include "Shader/Shader.hpp"
 #include "Util/GlHelper.hpp"
@@ -11,13 +12,6 @@ namespace neo {
 
         public:
 
-            glm::vec3 snowAngle = glm::vec3(0.f, 1.f, 0.f);   // todo - attach to a spatial or messaging
-            float snowSize = 0.36f;
-            glm::vec3 snowColor = glm::vec3(0.39f, 0.6f, 0.7f);
-            float height = 0.07f;
-            glm::vec3 rimColor = glm::vec3(1.f);
-            float rimPower = 0.373f;
-
             SnowShader(RenderSystem &rSystem, const std::string &vert, const std::string &frag) :
                 Shader("Snow Shader", rSystem.APP_SHADER_DIR, vert, frag)
             {}
@@ -26,12 +20,12 @@ namespace neo {
                 bind();
 
                 /* Load snow */
-                loadVector(getUniform("snowAngle"), snowAngle);
-                loadVector(getUniform("snowColor"), snowColor);
-                loadFloat(getUniform("snowSize"), snowSize);
-                loadFloat(getUniform("height"), height);
-                loadVector(getUniform("rimColor"), rimColor);
-                loadFloat(getUniform("rimPower"), rimPower);
+                auto snow = NeoEngine::getComponents<SnowComponent>()[0];
+                loadVector(getUniform("snowColor"), snow->snowColor);
+                loadFloat(getUniform("snowSize"), snow->snowSize);
+                loadFloat(getUniform("height"), snow->height);
+                loadVector(getUniform("rimColor"), snow->rimColor);
+                loadFloat(getUniform("rimPower"), snow->rimPower);
 
                 /* Load Camera */
                 loadMatrix(getUniform("P"), camera.getProj());
