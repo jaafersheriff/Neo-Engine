@@ -11,7 +11,7 @@ class ShadowCasterShader : public Shader {
     public:
 
         ShadowCasterShader(RenderSystem &rSystem, const std::string &vert, const std::string &frag) :
-            Shader("Shadow Caster", rSystem, vert, frag) {
+            Shader("Shadow Caster", rSystem.APP_SHADER_DIR, vert, frag) {
 
             /* Init shadow map */
             Texture *depthTexture = Loader::getTexture("depthTexture");
@@ -20,8 +20,7 @@ class ShadowCasterShader : public Shader {
             depthTexture->components = 1;
             depthTexture->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_NEAREST, GL_CLAMP_TO_BORDER);
             CHECK_GL(glBindTexture(GL_TEXTURE_2D, depthTexture->textureId));
-            float buffer[] = {1.f, 1.f, 1.f, 1.f};
-            CHECK_GL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, buffer));
+            CHECK_GL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data()));
             CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
 
             Framebuffer *depthFBO = rSystem.createFBO("depthMap");
