@@ -11,12 +11,21 @@ namespace neo {
 
         public:
 
+            glm::vec3 snowAngle = glm::vec3(0.f, 1.f, 0.f);   // todo - attach to a spatial or messaging
+            float snowSize = 0.f;
+            glm::vec3 snowColor = glm::vec3(1.f);
+
             SnowShader(RenderSystem &rSystem, const std::string &vert, const std::string &frag) :
                 Shader("Snow Shader", rSystem.APP_SHADER_DIR, vert, frag)
             {}
 
             virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
                 bind();
+
+                /* Load snow */
+                loadVector(getUniform("snowAngle"), snowAngle);
+                loadVector(getUniform("snowColor"), snowColor);
+                loadFloat(getUniform("snowSize"), snowSize);
 
                 /* Load Camera */
                 loadMatrix(getUniform("P"), camera.getProj());

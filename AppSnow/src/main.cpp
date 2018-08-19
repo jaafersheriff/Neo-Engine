@@ -11,6 +11,9 @@ using namespace neo;
 /* Systems */
 RenderSystem * renderSystem;
 
+/* Shaders */
+SnowShader *snowShader;
+
 /* Game object definitions */
 struct Camera {
     CameraComponent *camera;
@@ -86,12 +89,12 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Orient(Loader::getMesh("cube"));
+    Orient(Loader::getMesh("sphere.obj"));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
-    renderSystem->addShader<SnowShader>("snow.vert", "snow.frag");
+    snowShader = &renderSystem->addShader<SnowShader>("snow.vert", "snow.frag");
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */
@@ -101,6 +104,12 @@ int main() {
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
         }
+    });
+    NeoEngine::addImGuiFunc("Snow", [&]() {
+        ImGui::SliderFloat3("Snow angle", glm::value_ptr(snowShader->snowAngle), -1.f, 1.f);
+        glm::normalize(snowShader->snowAngle);
+        ImGui::SliderFloat("Snow size", &snowShader->snowSize, 0.f, 1.f);
+        ImGui::SliderFloat3("Snow color", glm::value_ptr(snowShader->snowColor), 0.f, 1.f);
     });
 
     /* Run */

@@ -14,6 +14,10 @@ uniform vec3 lightPos;
 uniform vec3 lightCol;
 uniform vec3 lightAtt;
 
+uniform vec3 snowAngle;
+uniform vec3 snowColor;
+uniform float snowSize;
+
 out vec4 color;
 
 void main() {
@@ -35,8 +39,14 @@ void main() {
     vec3 diffuseContrib  = lightCol * max(lambert, 0.0f) / attFactor;
     vec3 specularContrib = lightCol * pow(max(dot(H, N), 0.0), shine) / attFactor;
 
-    color.rgb = diffuseColor * ambient +
-                diffuseColor * diffuseContrib +
+    vec3 albedo = diffuseColor;
+    if (dot(N, snowAngle) >= snowSize) {
+        albedo = snowColor;
+    }
+
+    color.rgb = albedo * ambient +
+                albedo * diffuseContrib +
                 specularColor * specularContrib;
     color.a = 1;
+
 }
