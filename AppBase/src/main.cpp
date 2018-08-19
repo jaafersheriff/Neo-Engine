@@ -47,12 +47,12 @@ struct Light {
     }
 };
 
-struct Orient {
+struct Renderable {
     GameObject *gameObject;
     RenderableComponent *renderable;
     Material material = Material(0.2f, glm::vec3(1, 0, 1));
 
-    Orient(Mesh *mesh) {
+    Renderable(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
@@ -86,7 +86,7 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Orient(Loader::getMesh("cube"));
+    Renderable(Loader::getMesh("cube"));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
