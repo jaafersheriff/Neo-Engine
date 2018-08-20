@@ -43,7 +43,7 @@ namespace neo {
 
                     /* Draw outline */
                     CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-                    CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh.eleBufSize, GL_UNSIGNED_INT, nullptr));
+                    mesh.draw();
                     CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
                 }
 

@@ -58,7 +58,7 @@ class PhongShader : public Shader {
                 }
 
                 /* DRAW */
-                CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh.eleBufSize, GL_UNSIGNED_INT, nullptr));
+                mesh.draw();
             }
 
             CHECK_GL(glBindVertexArray(0));

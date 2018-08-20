@@ -27,10 +27,10 @@ namespace neo {
                 auto lights = NeoEngine::getComponents<LightComponent>();
                 if (lights.size()) {
                     auto light = lights[0];
+                    auto lightCam = light->getGameObject().getComponentByType<CameraComponent>();
                     loadVector(getUniform("lightPos"), light->getGameObject().getSpatial()->getPosition());
                     loadVector(getUniform("lightCol"), light->getColor());
                     loadVector(getUniform("lightAtt"), light->getAttenuation());
-                    auto lightCam = light->getGameObject().getComponentByType<CameraComponent>();
                     loadMatrix(getUniform("lightP"), lightCam->getProj());
                     loadMatrix(getUniform("lightV"), lightCam->getView());
                 }
@@ -61,7 +61,7 @@ namespace neo {
                     }
 
                     /* DRAW */
-                    CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh.eleBufSize, GL_UNSIGNED_INT, nullptr));
+                    mesh.draw();
                 }
 
                 CHECK_GL(glBindVertexArray(0));

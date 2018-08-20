@@ -14,7 +14,7 @@ class ShadowCasterShader : public Shader {
             Shader("Shadow Caster", rSystem.APP_SHADER_DIR, vert, frag) {
 
             /* Init shadow map */
-            Texture *depthTexture = Loader::getTexture("depthTexture");
+            Texture *depthTexture = Loader::create2DTexture("depthTexture");
             depthTexture->width = 1024;
             depthTexture->height = 1024;
             depthTexture->components = 1;
@@ -53,7 +53,7 @@ class ShadowCasterShader : public Shader {
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
                 /* DRAW */
-                CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh.eleBufSize, GL_UNSIGNED_INT, nullptr));
+                mesh.draw();
             }
 
             CHECK_GL(glBindVertexArray(0));

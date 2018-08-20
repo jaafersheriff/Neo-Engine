@@ -7,13 +7,13 @@
 
 namespace neo {
 
-    void Mesh::draw() {
+    void Mesh::draw(unsigned size) const {
         if (eleBufSize) {
             // TODO - instanced?
-            CHECK_GL(glDrawElements(mode, eleBufSize, GL_UNSIGNED_INT, nullptr));
+            CHECK_GL(glDrawElements(mode, size ? size : eleBufSize, GL_UNSIGNED_INT, nullptr));
         }
         else {
-            CHECK_GL(glDrawArrays(mode, 0, vertBufSize));
+            CHECK_GL(glDrawArrays(mode, 0, size ? size : vertBufSize));
         }
     }
 
@@ -27,7 +27,9 @@ namespace neo {
         /* Copy vertex array */
         CHECK_GL(glGenBuffers(1, (GLuint *) &vertBufId));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertBufId));
-        CHECK_GL(glBufferData(GL_ARRAY_BUFFER, buffers.vertBuf.size() * sizeof(float), &buffers.vertBuf[0], GL_STATIC_DRAW));
+        if (buffers.vertBuf.size()) {
+            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, buffers.vertBuf.size() * sizeof(float), &buffers.vertBuf[0], GL_STATIC_DRAW));
+        }
         CHECK_GL(glEnableVertexAttribArray(0));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertBufId));
         CHECK_GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));

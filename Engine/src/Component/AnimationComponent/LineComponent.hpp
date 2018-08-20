@@ -15,10 +15,11 @@ namespace neo {
 
             LineComponent(GameObject *go, glm::vec3 color = glm::vec3(1.f)) :
                 Component(go),
-                lineColor(color)
+                lineColor(color),
+                isDirty(false)
             {}
 
-            mutable bool isDirty = false;
+            mutable bool isDirty;
             glm::vec3 lineColor;
 
             const std::vector<glm::vec3> & getNodes() const { return nodes; }

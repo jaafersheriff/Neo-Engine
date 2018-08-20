@@ -48,7 +48,7 @@ namespace neo {
                     loadMatrix(getUniform("M"), spatial ? spatial->getModelMatrix() : glm::mat4(1.f));
                     loadVector(getUniform("lineColor"), lineR->line->lineColor);
 
-                    CHECK_GL(glDrawArrays(GL_LINE_STRIP, 0, lineR->line->getNodes().size()));
+                    mesh.draw(lineR->line->getNodes().size());
                 }
 
                 CHECK_GL(glBindVertexArray(0));

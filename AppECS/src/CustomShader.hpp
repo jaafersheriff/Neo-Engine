@@ -29,7 +29,7 @@ class CustomShader : public Shader {
                 loadMatrix(getUniform("M"), r->getGameObject().getSpatial()->getModelMatrix());
 
                 /* DRAW */
-                CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh.eleBufSize, GL_UNSIGNED_INT, nullptr));
+                mesh.draw();
             }
 
             CHECK_GL(glBindVertexArray(0));

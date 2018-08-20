@@ -41,7 +41,7 @@ class RefractionShader : public Shader {
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
                 /* DRAW */
-                CHECK_GL(glDrawElements(GL_TRIANGLES, (int)mesh.eleBufSize, GL_UNSIGNED_INT, nullptr));
+                mesh.draw();
             }
 
             CHECK_GL(glBindVertexArray(0));

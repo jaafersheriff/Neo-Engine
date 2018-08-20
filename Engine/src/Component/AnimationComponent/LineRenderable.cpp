@@ -5,14 +5,7 @@
 namespace neo {
 
     void LineRenderable::init() {
-        CHECK_GL(glGenVertexArrays(1, (GLuint *)&mesh->vaoId));
-        CHECK_GL(glBindVertexArray(mesh->vaoId));
-        CHECK_GL(glGenBuffers(1, (GLuint *)&mesh->vertBufId));
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh->vertBufId));
-        CHECK_GL(glEnableVertexAttribArray(0));
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh->vertBufId));
-        CHECK_GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        mesh->upload(GL_LINE_STRIP);
         addShaderType<LineShader>();
         RenderableComponent::init();
     }

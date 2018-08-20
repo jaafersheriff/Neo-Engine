@@ -23,6 +23,10 @@ namespace neo {
                 norBufId(0),
                 texBufId(0),
                 eleBufId(0),
+                vertBufSize(0),
+                norBufSize(0),
+                texBufSize(0),
+                eleBufSize(0),
                 mode(0)
             {}
 
@@ -49,6 +53,6 @@ namespace neo {
             void upload(unsigned = 0);
 
             /* Call the appropriate draw function */
-            void draw();
+            void draw(unsigned = 0) const;
     };
 }
