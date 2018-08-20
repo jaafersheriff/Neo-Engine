@@ -9,8 +9,8 @@ using namespace neo;
 class CustomShader : public Shader {
 
     public:
-        CustomShader(const std::string &res, const std::string &vert, const std::string &frag) :
-            Shader("Custom Shader", res, vert, frag)
+        CustomShader(RenderSystem &r, const std::string &vert, const std::string &frag) :
+            Shader("Custom Shader", r.APP_SHADER_DIR, vert, frag)
         {}
 
         virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {

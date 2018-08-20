@@ -19,7 +19,7 @@ namespace neo {
             int width, height, components;
 
             /* Upload to GPU */
-            virtual void upload(GLint, GLenum, GLint, GLenum, uint8_t ** = 0) = 0;
+            virtual void upload(GLint, GLenum, GLint, GLenum, bool = false, uint8_t ** = 0) = 0;
 
             virtual void bind() = 0;
 
@@ -33,7 +33,7 @@ namespace neo {
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, textureId));
             }
 
-            void upload(GLint inFormat, GLenum format, GLint filter, GLenum mode, uint8_t **data) {
+            void upload(GLint inFormat, GLenum format, GLint filter, GLenum mode, bool upload, uint8_t **data) {
                 /* Generate texture buffer object */
                 CHECK_GL(glGenTextures(1, &textureId));
 
@@ -41,7 +41,9 @@ namespace neo {
                 bind();
 
                 /* Load texture data to GPU */
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, inFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data[0]));
+                if (upload) {
+                    CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, inFormat, width, height, 0, format, GL_UNSIGNED_BYTE, *data));
+                }
 
                 /* Set filtering mode for magnification and minimification */
                 CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter));
@@ -66,14 +68,16 @@ namespace neo {
 
             }
             
-            void upload(GLint inFormat, GLenum format, GLint filter, GLenum mode, uint8_t **data) {
+            void upload(GLint inFormat, GLenum format, GLint filter, GLenum mode, bool upload, uint8_t **data) {
                 CHECK_GL(glGenTextures(1, &textureId));
                 CHECK_GL(glActiveTexture(GL_TEXTURE0 + textureId));
 
                 // F, B, U, D, R, L
-                for(int i = 0; i < 6; i++) {
-                    if (data[i]) {
-                        CHECK_GL(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, inFormat, this->width, this->height, 0, format, GL_UNSIGNED_BYTE, data[i]));
+                if (upload) {
+                    for (int i = 0; i < 6; i++) {
+                        if (data[i]) {
+                            CHECK_GL(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, inFormat, this->width, this->height, 0, format, GL_UNSIGNED_BYTE, data[i]));
+                        }
                     }
                 }
 
