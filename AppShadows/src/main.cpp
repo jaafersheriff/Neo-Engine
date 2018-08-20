@@ -31,7 +31,7 @@ struct Light {
     GameObject *gameObject;
     LightComponent *light;
     RenderableComponent *renderable;
-    Material material = Material(1.f, glm::vec3(1.f));
+    Material material = Material(1.f, glm::vec3(1.f, 0.f, 1.f));
     CameraComponent *camera;
 
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
@@ -41,7 +41,7 @@ struct Light {
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
         renderable->addShaderType<DiffuseShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
-        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, -50.f, 50.f, -50.f, 50.f, 1.f, 1000.f);
+        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, -20.f, 20.f, -20.f, 20.f, 1.f, 1000.f);
         // Line
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
@@ -115,7 +115,7 @@ int main() {
     Light light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
     for (int i = 0; i < 100; i++) {
         glm::vec3 pos = glm::vec3(Util::genRandom(-2.f, 2.f), i * 2, 0.f);
-        Renderable caster = Renderable(Loader::getMesh("cube"), pos, glm::vec3(1.f));
+        Renderable caster = Renderable(Loader::getMesh("mr_krab.obj"), pos, glm::vec3(1.f));
         caster.material.diffuse = Util::genRandomVec3();
         caster.renderable->addShaderType<ShadowCasterShader>();
         caster.renderable->addShaderType<DiffuseShader>();
