@@ -7,7 +7,19 @@
 
 namespace neo {
 
-    void Mesh::upload() {
+    void Mesh::draw() {
+        if (eleBufSize) {
+            // TODO - instanced?
+            CHECK_GL(glDrawElements(mode, eleBufSize, GL_UNSIGNED_INT, nullptr));
+        }
+        else {
+            CHECK_GL(glDrawArrays(mode, 0, vertBufSize));
+        }
+    }
+
+    void Mesh::upload(unsigned type) {
+        this->mode = type;
+
         /* Initialize VAO */
         CHECK_GL(glGenVertexArrays(1, (GLuint *) &vaoId));
         CHECK_GL(glBindVertexArray(vaoId));
@@ -40,11 +52,18 @@ namespace neo {
             CHECK_GL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0));
         }
 
-        /* Copy element array if it exists */
+        /* Copy element array if it exists -- also set mode */
         if (!buffers.eleBuf.empty()) {
             CHECK_GL(glGenBuffers(1, (GLuint *) &eleBufId));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eleBufId));
             CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffers.eleBuf.size() * sizeof(unsigned int), &buffers.eleBuf[0], GL_STATIC_DRAW));
+
+            if (!mode) {
+                mode = GL_TRIANGLES;
+            }
+            else {
+                mode = GL_TRIANGLE_STRIP;
+            }
         }
 
         /* Unbind  */

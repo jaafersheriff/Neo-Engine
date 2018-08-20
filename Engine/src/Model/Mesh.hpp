@@ -22,7 +22,8 @@ namespace neo {
                 vertBufId(0),
                 norBufId(0),
                 texBufId(0),
-                eleBufId(0)
+                eleBufId(0),
+                mode(0)
             {}
 
             /* VAO ID */
@@ -41,7 +42,13 @@ namespace neo {
             int texBufSize;
             int eleBufSize;
 
+            /* Primitive type */
+            unsigned mode;
+
             /* Copy data to GPU */
-            void upload();
+            void upload(unsigned = 0);
+
+            /* Call the appropriate draw function */
+            void draw();
     };
 }
