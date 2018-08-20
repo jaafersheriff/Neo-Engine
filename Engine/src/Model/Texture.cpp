@@ -14,9 +14,6 @@ namespace neo {
         /* Load texture data to GPU */
         CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, inFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data));
 
-        /* Generate image pyramid */
-        CHECK_GL(glGenerateMipmap(GL_TEXTURE_2D));
-
         /* Set filtering mode for magnification and minimification */
         CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter));
         CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter));

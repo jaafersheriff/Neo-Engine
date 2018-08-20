@@ -4,6 +4,8 @@
 #include "GL/glew.h"
 #include <glm/glm.hpp>
 
+#include "Util/GLHelper.hpp"
+
 namespace neo {
 
     class Texture {
@@ -11,6 +13,10 @@ namespace neo {
         public:
             virtual ~Texture() {
                 CHECK_GL(glDeleteTextures(1, &textureId));
+            }
+
+            void generateMipMaps() {
+                CHECK_GL(glGenerateTextureMipmap(textureId));
             }
 
             GLuint textureId = 0;
