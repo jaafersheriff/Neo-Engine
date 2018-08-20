@@ -13,7 +13,21 @@ namespace neo {
             CHECK_GL(glDrawElements(mode, size ? size : eleBufSize, GL_UNSIGNED_INT, nullptr));
         }
         else {
-            CHECK_GL(glDrawArrays(mode, 0, size ? size : vertBufSize));
+            int vSize = size;
+            if (!vSize) {
+                switch (mode) {
+                case GL_POINTS:
+                case GL_LINE_STRIP:
+                    vertBufSize / 3;
+                case GL_LINES:
+                    vertBufSize / 6;
+                case GL_TRIANGLES:
+                    vertBufSize / 9;
+                default:
+                    vSize = vertBufSize;
+                }
+            }
+            CHECK_GL(glDrawArrays(mode, 0, vSize));
         }
     }
 
