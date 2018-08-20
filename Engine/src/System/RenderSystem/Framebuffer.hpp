@@ -46,8 +46,30 @@ namespace neo {
             void attachTexture(GLuint component, GLuint id) {
                 bind();
                 CHECK_GL(glFramebufferTexture2D(GL_FRAMEBUFFER, component, GL_TEXTURE_2D, id, 0));
-                if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-                    CHECK_GL(glCheckFramebufferStatus(GL_FRAMEBUFFER));
+                GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+                if (err != GL_FRAMEBUFFER_COMPLETE) {
+                    std::string errString;
+                    switch (err) {
+                    case GL_FRAMEBUFFER_UNDEFINED:
+                        errString = "Framebuffer undefined";
+                    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                        errString = "Incomplete attachment";
+                    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                        errString = "Incomplete or missing attachment";
+                    case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                        errString = "Incomplete draw buffer";
+                    case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                        errString = "Incomplete read buffer";
+                    case GL_FRAMEBUFFER_UNSUPPORTED:
+                        errString = "Framebuffer unsupported";
+                    case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+                        errString = "Incomplete multisample";
+                    case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+                        errString = "Incomplete layer targets";
+                    default:
+                        errString = "Framebuffer undefined";
+                    }
+                    printf("Framebuffer error: '%s'\n", errString.c_str());
                 }
             }
     };

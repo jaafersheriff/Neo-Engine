@@ -11,8 +11,8 @@ using namespace neo;
 class SurveillanceReadShader : public Shader {
 
     public:
-        SurveillanceReadShader(const std::string &res, const std::string &vert, const std::string &frag) :
-            Shader("Surveillance Read", res, vert, frag)
+        SurveillanceReadShader(RenderSystem &renderer, const std::string &vert, const std::string &frag) :
+            Shader("Surveillance Read", renderer.APP_SHADER_DIR, vert, frag)
         {}
 
         virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
@@ -30,13 +30,12 @@ class SurveillanceReadShader : public Shader {
                 loadMatrix(getUniform("M"), camera->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind texture */
-                const Texture & texture(*camera->fboTex);
-                CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.textureId));
-                CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.textureId));
+                const Texture2D & texture(*camera->colorBuffer);
+                texture.bind();
                 loadInt(getUniform("fbo"), texture.textureId);
 
                 /* DRAW */
-                CHECK_GL(glDrawArrays(GL_TRIANGLE_STRIP, 0, mesh->vertBufSize));
+                mesh->draw();
             }
 
             CHECK_GL(glBindVertexArray(0));
