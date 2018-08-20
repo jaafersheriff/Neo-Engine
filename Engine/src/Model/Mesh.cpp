@@ -18,11 +18,11 @@ namespace neo {
                 switch (mode) {
                 case GL_POINTS:
                 case GL_LINE_STRIP:
-                    vertBufSize / 3;
+                    vSize = vertBufSize / 3;
                 case GL_LINES:
-                    vertBufSize / 6;
+                    vSize = vertBufSize / 6;
                 case GL_TRIANGLES:
-                    vertBufSize / 9;
+                    vSize = vertBufSize / 9;
                 default:
                     vSize = vertBufSize;
                 }
@@ -32,8 +32,6 @@ namespace neo {
     }
 
     void Mesh::upload(unsigned type) {
-        this->mode = type;
-
         /* Initialize VAO */
         CHECK_GL(glGenVertexArrays(1, (GLuint *) &vaoId));
         CHECK_GL(glBindVertexArray(vaoId));
@@ -73,13 +71,16 @@ namespace neo {
             CHECK_GL(glGenBuffers(1, (GLuint *) &eleBufId));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eleBufId));
             CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffers.eleBuf.size() * sizeof(unsigned int), &buffers.eleBuf[0], GL_STATIC_DRAW));
+        }
 
-            if (!mode) {
-                mode = GL_TRIANGLES;
-            }
-            else {
-                mode = GL_TRIANGLE_STRIP;
-            }
+        if (type) {
+            mode = type;
+        }
+        else if (!buffers.eleBuf.empty()) {
+            mode = GL_TRIANGLES;
+        }
+        else {
+            mode = GL_TRIANGLE_STRIP;
         }
 
         /* Unbind  */

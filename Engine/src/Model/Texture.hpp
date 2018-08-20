@@ -21,19 +21,19 @@ namespace neo {
             /* Upload to GPU */
             virtual void upload(GLint, GLenum, GLint, GLenum, bool = false, uint8_t ** = 0) = 0;
 
-            virtual void bind() = 0;
+            virtual void bind() const = 0;
 
     };
 
     class Texture2D : public Texture {
 
         public:
-            void bind() {
+            void bind() const {
                 CHECK_GL(glActiveTexture(GL_TEXTURE0 + textureId));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, textureId));
             }
 
-            void upload(GLint inFormat, GLenum format, GLint filter, GLenum mode, bool upload, uint8_t **data) {
+            void upload(GLint inFormat, GLenum format, GLint filter, GLenum mode, bool upload = false, uint8_t **data = 0) {
                 /* Generate texture buffer object */
                 CHECK_GL(glGenTextures(1, &textureId));
 
@@ -64,7 +64,7 @@ namespace neo {
     class TextureCubeMap : public Texture {
 
         public:
-            void bind() {
+            void bind() const {
 
             }
             
