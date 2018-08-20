@@ -16,10 +16,6 @@ namespace neo {
             GLuint fboId;
             int colorAttachments = 0;
 
-            virtual ~Framebuffer() {
-                CHECK_GL(glDeleteFramebuffers(1, &fboId));
-            }
-
             void generate() {
                 CHECK_GL(glGenFramebuffers(1, &fboId));
             }

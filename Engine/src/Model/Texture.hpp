@@ -11,10 +11,6 @@ namespace neo {
     class Texture {
 
         public:
-            virtual ~Texture() {
-                CHECK_GL(glDeleteTextures(1, &textureId));
-            }
-
             void generateMipMaps() {
                 CHECK_GL(glGenerateTextureMipmap(textureId));
             }
@@ -25,20 +21,27 @@ namespace neo {
             /* Upload to GPU */
             virtual void upload(GLint, GLenum, GLint, GLenum, uint8_t ** = 0) = 0;
 
+            virtual void bind() = 0;
+
     };
 
     class Texture2D : public Texture {
 
         public:
-            virtual void upload(GLint inFormat, GLenum format, GLint filter, GLenum mode, uint8_t **data) {
+            void bind() {
+                CHECK_GL(glActiveTexture(GL_TEXTURE0 + textureId));
+                CHECK_GL(glBindTexture(GL_TEXTURE_2D, textureId));
+            }
+
+            void upload(GLint inFormat, GLenum format, GLint filter, GLenum mode, uint8_t **data) {
                 /* Generate texture buffer object */
                 CHECK_GL(glGenTextures(1, &textureId));
 
                 /* Bind new texture buffer object to active texture */
-                CHECK_GL(glBindTexture(GL_TEXTURE_2D, textureId));
+                bind();
 
                 /* Load texture data to GPU */
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, inFormat, width, height, 0, format, GL_UNSIGNED_BYTE, *data));
+                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, inFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data[0]));
 
                 /* Set filtering mode for magnification and minimification */
                 CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter));
@@ -59,7 +62,11 @@ namespace neo {
     class TextureCubeMap : public Texture {
 
         public:
-            virtual void upload(GLint inFormat, GLenum format, GLint filter, GLenum mode, uint8_t **data) {
+            void bind() {
+
+            }
+            
+            void upload(GLint inFormat, GLenum format, GLint filter, GLenum mode, uint8_t **data) {
                 CHECK_GL(glGenTextures(1, &textureId));
                 CHECK_GL(glActiveTexture(GL_TEXTURE0 + textureId));
 
