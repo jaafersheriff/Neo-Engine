@@ -2,8 +2,7 @@
 
 #include "System/System.hpp"
 #include "Shader/Shader.hpp"
-
-#include "Component/CameraComponent/CameraComponent.hpp"
+#include "Framebuffer.hpp"
 
 #include <unordered_map>
 #include <typeindex>
@@ -13,21 +12,33 @@
 namespace neo {
 
     class RenderableComponent;
+    class CameraComponent;
 
     class RenderSystem : public System {
 
         public:
-            RenderSystem(const std::string &dir) :
+            RenderSystem(const std::string &dir, CameraComponent *cam) :
                 System("Render System"),
-                APP_SHADER_DIR(dir)
+                APP_SHADER_DIR(dir),
+                defaultCamera(cam)
             {}
+
+            const std::string APP_SHADER_DIR;
 
             virtual void init() override;
             virtual void update(float) override;
+            void renderScene(const CameraComponent &) const;
+
+            void setDefaultCamera(CameraComponent *cam) { defaultCamera = cam; }
+
+            /* FBO */
+            std::unordered_map<std::string, std::unique_ptr<Framebuffer>> framebuffers;
+            Framebuffer * createFBO(const std::string &);
 
             /* Shaders */
-            std::vector<std::unique_ptr<Shader>> shaders;
-            template <typename ShaderT, typename... Args> ShaderT & addShader(Args &&...);
+            std::vector<std::unique_ptr<Shader>> preShaders;
+            std::vector<std::unique_ptr<Shader>> sceneShaders;
+            template <typename ShaderT, ShaderTypes = SCENE, typename... Args> ShaderT & addShader(Args &&...);
 
             /* Map of Shader type to vector<RenderableComponent *> */
             mutable std::unordered_map<std::type_index, std::unique_ptr<std::vector<RenderableComponent *>>> renderables;
@@ -36,16 +47,26 @@ namespace neo {
             void detachCompFromShader(const std::type_index &, RenderableComponent *);
 
         private:
-            const std::string APP_SHADER_DIR;
+            CameraComponent *defaultCamera;
+            Framebuffer *defaultFBO;
     };
 
     /* Template implementation */
-    template <typename ShaderT, typename... Args>
+    template <typename ShaderT, ShaderTypes type, typename... Args>
     ShaderT & RenderSystem::addShader(Args &&... args) {
         static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
         static_assert(!std::is_same<Shader, ShaderT>::value, "ShaderT must be a derived Shader type");
-        shaders.emplace_back(std::make_unique<ShaderT>(APP_SHADER_DIR, std::forward<Args>(args)...));
-        return static_cast<ShaderT &>(*shaders.back());
+        switch (type) {
+            case ShaderTypes::PREPROCESS:
+                preShaders.emplace_back(std::make_unique<ShaderT>(*this, std::forward<Args>(args)...));
+                return static_cast<ShaderT &>(*preShaders.back());
+            case ShaderTypes::POSTPROCESS:
+                // TODO
+            case ShaderTypes::SCENE:
+            default:
+                sceneShaders.emplace_back(std::make_unique<ShaderT>(*this, std::forward<Args>(args)...));
+                return static_cast<ShaderT &>(*sceneShaders.back());
+        }
     }
 
     template <typename ShaderT, typename CompT> 

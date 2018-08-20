@@ -8,33 +8,30 @@ namespace neo {
     class WireframeShader : public Shader {
 
         public:
-            WireframeShader(std::string res) :
+            WireframeShader(RenderSystem &rSystem) :
                 Shader("Wire Shader",
-                    _strdup("\
+                        "\
                         #version 330 core\n\
                         layout (location = 0) in vec3 vertPos;\
                         uniform mat4 P, V, M;\
                         void main() {\
                             gl_Position = P * V * M * vec4(vertPos, 1);\
-                        }"),
-                    _strdup("\
+                        }",
+                        "\
                         #version 330 core\n\
                         out vec4 color;\
                         void main() {\
                             color = vec4(1.0);\
-                        }")
+                        }"
                 )
             {}
 
-            virtual void render(float dt, const RenderSystem &renderSystem) override {
+            virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) {
                 bind();
 
                 /* Load PV */
-                const std::vector<CameraComponent *> cameras = NeoEngine::getComponents<CameraComponent>();
-                if (cameras.size()) {
-                    loadMatrix(getUniform("P"), cameras.at(0)->getProj());
-                    loadMatrix(getUniform("V"), cameras.at(0)->getView());
-                }
+                loadMatrix(getUniform("P"), camera.getProj());
+                loadMatrix(getUniform("V"), camera.getView());
 
                 for (auto r : renderSystem.getRenderables<WireframeShader, RenderableComponent>()) {
                     /* Bind mesh */

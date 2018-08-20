@@ -19,20 +19,29 @@ namespace neo {
 
         /* Init GL window */
         CHECK_GL(glViewport(0, 0, Window::getFrameSize().x, Window::getFrameSize().y));
+
+        /* Init default FBO */
+        defaultFBO = createFBO("default");
+        defaultFBO->fboId = 0;
     }
 
     void RenderSystem::update(float dt) {
+        /* Render all preprocesses */
+        for (auto & shader : preShaders) {
+            if (shader.get()->active) {
+                shader.get()->render(*this, *defaultCamera);
+            }
+        }
+
         /* Reset state */
+        defaultFBO->bind();
+        CHECK_GL(glClearColor(0.2f, 0.3f, 0.4f, 1.f));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         glm::ivec2 size = Window::getFrameSize();
         CHECK_GL(glViewport(0, 0, size.x, size.y));
-
-        /* Render all shaders */
-        for (auto & shader : shaders) {
-            if (shader.get()->active) {
-                shader.get()->render(dt, *this);
-            }
-        }
+ 
+        /* Render all scene shaders */
+        renderScene(*defaultCamera);
 
         /* Render imgui */
         if (NeoEngine::imGuiEnabled) {
@@ -40,6 +49,23 @@ namespace neo {
         }
 
         glfwSwapBuffers(Window::getWindow());
+    }
+
+    void RenderSystem::renderScene(const CameraComponent &camera) const {
+       for (auto & shader : sceneShaders) {
+            if (shader.get()->active) {
+                shader.get()->render(*this, camera);
+            }
+        }
+    }
+
+    Framebuffer * RenderSystem::createFBO(const std::string &name) {
+        auto it = framebuffers.find(name);
+        if (it == framebuffers.end()) {
+            framebuffers.emplace(name, std::make_unique<Framebuffer>());
+            it = framebuffers.find(name);
+        }
+        return it->second.get();
     }
 
     void RenderSystem::attachCompToShader(const std::type_index &typeI, RenderableComponent *rComp) {

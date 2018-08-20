@@ -4,8 +4,6 @@
 
 #include "Model/Texture.hpp"
 
-#define GLEW_STATIC
-#include "GL/glew.h"
 #include "Util/GLHelper.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -95,7 +93,7 @@ namespace neo {
         return mesh;
     }
 
-    Texture * Loader::getTexture(const std::string &fileName, unsigned int mode) {
+    Texture * Loader::addTexture(const std::string &fileName, GLint inFormat, GLenum format, GLint filter, GLenum mode) {
         /* Search map first */
         auto it = textures.find(fileName);
         if (it != textures.end()) {
@@ -104,9 +102,9 @@ namespace neo {
 
         Texture *texture = new Texture;
         stbi_set_flip_vertically_on_load(true);
-        uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
+        uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
         if (data) {
-            texture->upload(&data, mode);
+            texture->upload(inFormat, format, filter, mode, data);
             if (texture->textureId) {
                 textures.insert(std::make_pair(fileName, texture));
             }
@@ -122,7 +120,7 @@ namespace neo {
         return texture;
     }
 
-    Texture * Loader::getTexture(const std::string name, const std::vector<std::string> & files, unsigned int mode) {
+    Texture * Loader::addTexture(const std::string &name, const std::vector<std::string> & files) {
         /* Search map first */
         auto it = textures.find(name);
         if (it != textures.end()) {
@@ -145,7 +143,7 @@ namespace neo {
         }
 
         /* Copy cube texture data to GPU */
-        texture->uploadCubeMap(data, mode);
+        texture->uploadCubeMap(data);
     
         /* Add to map */
         if (texture->textureId) {
@@ -158,6 +156,15 @@ namespace neo {
         }
     
         return texture;
+    }
+
+    Texture * Loader::getTexture(const std::string &name) {
+        auto it = textures.find(name);
+        if (it == textures.end()) {
+            textures.emplace(name, new Texture);
+            it = textures.find(name);
+        }
+        return it->second;
     }
 
 /* Provided function to resize a mesh so all vertex positions are [0, 1.f] */

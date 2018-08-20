@@ -11,26 +11,23 @@ class NormalShader : public Shader {
 
     public: 
     
-        NormalShader(const std::string &res, const std::string &vert, const std::string &frag, const std::string &geom) :
-            Shader("Normal Shader", res, vert, frag, geom) 
+        NormalShader(RenderSystem &r, const std::string &vert, const std::string &frag, const std::string &geom) :
+            Shader("Normal Shader", r.APP_SHADER_DIR, vert, frag, geom) 
         {}
 
-        virtual void render(float dt, const RenderSystem &renderSystem) override {
+        virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
             bind();
 
             loadFloat(getUniform("magnitude"), magnitude);
 
             /* Load PV */
-            auto cameras = NeoEngine::getComponents<CameraComponent>();
-            if (cameras.size()) {
-                loadMatrix(getUniform("P"), cameras.at(0)->getProj());
-                loadMatrix(getUniform("V"), cameras.at(0)->getView());
-            }
+            loadMatrix(getUniform("P"), camera.getProj());
+            loadMatrix(getUniform("V"), camera.getView());
 
             for (auto model : renderSystem.getRenderables<NormalShader, RenderableComponent>()) {
                 glm::mat4 M = model->getGameObject().getSpatial()->getModelMatrix();
                 loadMatrix(getUniform("M"), M);
-                glm::mat4 N = glm::transpose(glm::inverse(cameras.at(0)->getView() * M));
+                glm::mat4 N = glm::transpose(glm::inverse(camera.getView() * M));
                 loadMatrix(getUniform("N"), glm::mat3(N));
 
                 /* Bind mesh */

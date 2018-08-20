@@ -6,24 +6,27 @@
 #include <vector>
 
 namespace neo {
-
-    Shader::Shader(const std::string &name, const std::string &dir, const std::string &v, const std::string &f) :
-        Shader(name, dir, v, f, "")
+    Shader::Shader(const std::string &name) :
+        name(name)
     {}
 
-    Shader::Shader(const std::string &name, const std::string &dir, const std::string &v, const std::string &f, const std::string &g) :
+    Shader::Shader(const std::string &name, const std::string &res, const std::string &v, const std::string &f) :
+        Shader(name, res, v, f, "")
+    {}
+
+    Shader::Shader(const std::string &name, const std::string &res, const std::string &v, const std::string &f, const std::string &g) :
         Shader(
             name,
-            (v.size() ? Util::textFileRead((dir + v).c_str()) : NULL), // memory leak
-            (f.size() ? Util::textFileRead((dir + f).c_str()) : NULL),
-            (g.size() ? Util::textFileRead((dir + g).c_str()) : NULL))
+            (v.size() ? Util::textFileRead((res + v).c_str()) : NULL), // memory leak
+            (f.size() ? Util::textFileRead((res + f).c_str()) : NULL),
+            (g.size() ? Util::textFileRead((res + g).c_str()) : NULL))
     {}
 
-    Shader::Shader(const std::string &name, char *vTex, char *fTex) :
+    Shader::Shader(const std::string &name, const char *vTex, const char *fTex) :
         Shader(name, vTex, fTex, NULL)
     {}
 
-    Shader::Shader(const std::string &name, char *vTex, char *fTex, char *gTex) :
+    Shader::Shader(const std::string &name, const char *vTex, const char *fTex, const char *gTex) :
         name(name) {
         pid = glCreateProgram();
         if (vTex && (vShaderId = compileShader(GL_VERTEX_SHADER, vTex))) {
@@ -60,7 +63,7 @@ namespace neo {
         std::cout << "Successfully compiled and linked " << name << std::endl;
     }
 
-    GLuint Shader::compileShader(GLenum shaderType, char *shaderString) {
+    GLuint Shader::compileShader(GLenum shaderType, const char *shaderString) {
         // Create the shader, assign source code, and compile it
         GLuint shader = glCreateShader(shaderType);
         CHECK_GL(glShaderSource(shader, 1, &shaderString, NULL));
@@ -93,7 +96,7 @@ namespace neo {
         return shader;
     }
 
-    void Shader::findAttributesAndUniforms(char *shaderString) {
+    void Shader::findAttributesAndUniforms(const char *shaderString) {
         char fileText[32768];
         strcpy(fileText, shaderString);
         std::vector<char *> lines;

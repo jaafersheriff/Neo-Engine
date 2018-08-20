@@ -11,14 +11,31 @@
 namespace neo {
 
     CameraComponent::CameraComponent(GameObject *gameObject, float fov, float near, float far) :
-         Component(gameObject),
-         fov(fov),
-         near(near),
-         far(far),
-         viewMat(),
-         projMat(),
-         viewMatDirty(true),
-         projMatDirty(true)
+        Component(gameObject),
+        fov(fov),
+        near(near),
+        far(far),
+        isOrtho(false),
+        horizBounds(),
+        vertBounds(),
+        viewMat(),
+        projMat(),
+        viewMatDirty(true),
+        projMatDirty(true)
+    {}
+
+    CameraComponent::CameraComponent(GameObject *gameObject, float horizMin, float horizMax, float vertMin, float vertMax, float near, float far) :
+        Component(gameObject),
+        fov(0.f),
+        near(near),
+        far(far),
+        isOrtho(true),
+        horizBounds(glm::vec2(horizMin, horizMax)),
+        vertBounds(glm::vec2(vertMin, vertMax)),
+        viewMat(),
+        projMat(),
+        viewMatDirty(true),
+        projMatDirty(true)
     {}
 
     void CameraComponent::init() {
@@ -41,6 +58,13 @@ namespace neo {
         projMatDirty = true;
     }
 
+    void CameraComponent::setOrthoBounds(const glm::vec2 &h, const glm::vec2 &v) {
+        this->horizBounds = h;
+        this->vertBounds = v;
+        projMatDirty = true;
+        viewMatDirty = true;
+    }
+
     const glm::vec3 CameraComponent::getLookDir() const {
         return -gameObject->getSpatial()->getW();
     }
@@ -61,21 +85,17 @@ namespace neo {
 
     void CameraComponent::detView() const {
         auto spatial = gameObject->getSpatial();
-        glm::vec3 t(-spatial->getPosition());
-        const glm::vec3 & u = spatial->getU();
-        const glm::vec3 & v = spatial->getV();
-        const glm::vec3 & w = spatial->getW();
-        viewMat = glm::mat4(
-                       u.x,            v.x,            w.x, 0.f,
-                       u.y,            v.y,            w.y, 0.f,
-                       u.z,            v.z,            w.z, 0.f,
-            glm::dot(u, t), glm::dot(v, t), glm::dot(w, t), 1.f
-        );
+        viewMat = glm::lookAt(spatial->getPosition(), spatial->getPosition() + getLookDir(), spatial->getV());
         viewMatDirty = false;
     }
 
     void CameraComponent::detProj() const {
-        projMat = glm::perspective(fov, Window::getAspectRatio(), near, far);
+        if (isOrtho) {
+            projMat = glm::ortho(horizBounds.x, horizBounds.y, vertBounds.x, vertBounds.y, near, far);
+        }
+        else {
+            projMat = glm::perspective(fov, Window::getAspectRatio(), near, far);
+        }
         projMatDirty = false;
     }
 }
