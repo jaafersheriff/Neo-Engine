@@ -100,11 +100,11 @@ namespace neo {
             return it->second;
         }
 
-        Texture *texture = new Texture;
+        Texture *texture = new Texture2D;
         stbi_set_flip_vertically_on_load(true);
         uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
         if (data) {
-            texture->upload(inFormat, format, filter, mode, data);
+            texture->upload(inFormat, format, filter, mode, &data);
             texture->generateMipMaps();
             if (texture->textureId) {
                 textures.insert(std::make_pair(fileName, texture));
@@ -128,7 +128,7 @@ namespace neo {
             return it->second;
         }
 
-        Texture *texture = new Texture;
+        Texture *texture = new TextureCubeMap;
         /* Load in texture data to CPU */
         uint8_t* data[6];
         for (int i = 0; i < 6; i++) {
@@ -144,7 +144,7 @@ namespace neo {
         }
 
         /* Copy cube texture data to GPU */
-        texture->uploadCubeMap(data);
+        texture->upload(GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
     
         /* Add to map */
         if (texture->textureId) {
@@ -162,7 +162,7 @@ namespace neo {
     Texture * Loader::getTexture(const std::string &name) {
         auto it = textures.find(name);
         if (it == textures.end()) {
-            textures.emplace(name, new Texture);
+            textures.emplace(name, new Texture2D);
             it = textures.find(name);
         }
         return it->second;

@@ -66,6 +66,5 @@
     <ClCompile Include="src\Util\GLHelper.cpp" />
     <ClCompile Include="src\Component\ModelComponent\RenderableComponent.cpp" />
     <ClCompile Include="src\Component\AnimationComponent\LineRenderable.cpp" />
-    <ClCompile Include="src\Model\Texture.cpp" />
   </ItemGroup>
 </Project>
