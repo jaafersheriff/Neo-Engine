@@ -12,7 +12,7 @@ class SurveillanceCamera : public CameraComponent {
 
         Framebuffer * fbo;
         Texture2D * colorBuffer;
-        Texture * depthBuffer;
+        Texture2D * depthBuffer;
 
         SurveillanceCamera(GameObject *go, float near, float far) :
             CameraComponent(go, -10.f, 10.f, -10.f, 10.f, near, far) {
