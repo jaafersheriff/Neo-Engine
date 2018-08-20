@@ -29,6 +29,7 @@ namespace neo {
         namespace GLHelper {
 
             void printOpenGLErrors(char const * const Function, char const * const File, int const Line);
+            void checkFrameBuffer();
             void printProgramInfoLog(GLuint program);
             void printShaderInfoLog(GLuint shader);
             void checkVersion();
@@ -36,7 +37,9 @@ namespace neo {
 
     #ifdef DEBUG_MODE
     #define CHECK_GL(x) do { GLHelper::printOpenGLErrors("{{BEFORE}} "#x, __FILE__, __LINE__); (x); GLHelper::printOpenGLErrors(#x, __FILE__, __LINE__); } while (0)
+    #define CHECK_GL_FRAMEBUFFER() do {GLHelper::checkFrameBuffer(); } while(0)
     #else
     #define CHECK_GL(x) (x)
+    #define CHECK_GL_FRAMEBUFFER()
     #endif
 }

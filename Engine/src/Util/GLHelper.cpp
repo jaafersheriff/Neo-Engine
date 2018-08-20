@@ -21,6 +21,22 @@ namespace neo {
                 return "Stack underflow";
             case GL_OUT_OF_MEMORY:
                 return "Out of memory";
+            case GL_FRAMEBUFFER_UNDEFINED:
+                return "Framebuffer undefined";
+            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                return "Incomplete attachment";
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                return "Incomplete or missing attachment";
+            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                return "Incomplete draw buffer";
+            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                return "Incomplete read buffer";
+            case GL_FRAMEBUFFER_UNSUPPORTED:
+                return "Framebuffer unsupported";
+            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+                return "Incomplete multisample";
+            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+                return "Incomplete layer targets";
             default:
                 return "No error";
             }
@@ -104,6 +120,14 @@ namespace neo {
             {
                 const char *const ErrorString = errorString(Error);
                 printf("OpenGL error in file '%s' at line %d calling function '%s': '%s' '%d 0x%X'\n", File, Line, Function, ErrorString, Error, Error);
+            }
+        }
+
+        void checkFrameBuffer() {
+            GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+            if (err != GL_FRAMEBUFFER_COMPLETE) {
+                const char *const errString = errorString(err);
+                printf("OpenGL error '%s' '%d 0x%X'\n", errString, err, err);
             }
         }
     }
