@@ -72,6 +72,7 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+
     Material material;
     std::vector<Renderable *> renderables;
     for (int x = -2; x < 3; x++) {
@@ -80,7 +81,7 @@ int main() {
                 new Renderable(
                     Loader::getMesh("mr_krab.obj", true), 
                     &material,
-                    Loader::getTexture("mr_krab.png"), 
+                    Loader::addTexture("mr_krab.png"),
                     glm::vec3(x*2, 0, z*2))
             );
         }

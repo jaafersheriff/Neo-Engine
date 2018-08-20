@@ -11,8 +11,8 @@ class PhongShader : public Shader {
 
     public: 
     
-        PhongShader(const std::string &res, const std::string &vert, const std::string &frag) :
-            Shader("Phong Shader", res, vert, frag) 
+        PhongShader(RenderSystem &r, const std::string &vert, const std::string &frag) :
+            Shader("Phong Shader", r.APP_SHADER_DIR, vert, frag) 
         {}
 
         virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
@@ -43,9 +43,8 @@ class PhongShader : public Shader {
                 /* Bind texture */
                 auto texComp = model->getGameObject().getComponentByType<TextureComponent>();
                 if (texComp) {
-                    const Texture & texture(texComp->getTexture());
-                    CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.textureId));
-                    CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.textureId));
+                    auto texture = (Texture2D &) (texComp->getTexture());
+                    texture.bind();
                     loadInt(getUniform("diffuseMap"), texture.textureId);
                 }
 

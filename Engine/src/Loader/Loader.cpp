@@ -159,15 +159,6 @@ namespace neo {
         return texture;
     }
 
-    Texture * Loader::getTexture(const std::string &name) {
-        auto it = textures.find(name);
-        if (it == textures.end()) {
-            textures.emplace(name, new Texture2D);
-            it = textures.find(name);
-        }
-        return it->second;
-    }
-
 /* Provided function to resize a mesh so all vertex positions are [0, 1.f] */
     void Loader::resize(Mesh::MeshBuffers & buffers) {
         float minX, minY, minZ;
