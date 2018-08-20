@@ -12,7 +12,7 @@ class SurveillanceCamera : public CameraComponent {
 
         Framebuffer * fbo;
         Texture2D * colorBuffer;
-        // Texture * depthBuffer;
+        Texture * depthBuffer;
 
         SurveillanceCamera(GameObject *go, float near, float far) :
             CameraComponent(go, -10.f, 10.f, -10.f, 10.f, near, far) {
@@ -22,16 +22,16 @@ class SurveillanceCamera : public CameraComponent {
             colorBuffer->components = 4;
             colorBuffer->upload(GL_RGBA, GL_RGBA, GL_LINEAR, GL_REPEAT);
 
-            // depthBuffer = new Texture2D;
-            // depthBuffer->width = Window::getFrameSize().x;
-            // depthBuffer->height = Window::getFrameSize().y;
-            // depthBuffer->components = 1;
-            // depthBuffer->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_NEAREST, GL_REPEAT);
+            depthBuffer = new Texture2D;
+            depthBuffer->width = Window::getFrameSize().x;
+            depthBuffer->height = Window::getFrameSize().y;
+            depthBuffer->components = 1;
+            depthBuffer->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_NEAREST, GL_REPEAT);
 
             fbo = new Framebuffer;
             fbo->generate();
             fbo->attachColorTexture(*colorBuffer);
-            // fbo->attachDepthTexture(*depthBuffer);
+            fbo->attachDepthTexture(*depthBuffer);
         }
 
         virtual void update(float dt) override {
@@ -41,8 +41,8 @@ class SurveillanceCamera : public CameraComponent {
         }
 
         virtual void kill() override {
-            // delete colorBuffer;
-            // delete depthBuffer;
-            // delete fbo;
+            delete colorBuffer;
+            delete depthBuffer;
+            delete fbo;
         }
 };

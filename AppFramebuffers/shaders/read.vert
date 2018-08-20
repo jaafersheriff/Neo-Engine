@@ -11,4 +11,5 @@ out vec2 fragTex;
 void main() {
     gl_Position = P * V * M * vec4(vertPos, 1);
     fragTex = vertPos.xy + 0.5;
+    fragTex.x = -(fragTex.x-1); // flip x to mimic a camera
 }
