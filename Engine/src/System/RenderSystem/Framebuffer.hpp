@@ -11,8 +11,10 @@ namespace neo {
 
     class Framebuffer {
     
+        // TODO - ability to add color render buffers
         public: 
             GLuint fboId;
+            int colorAttachments = 0;
 
             virtual ~Framebuffer() {
                 CHECK_GL(glDeleteFramebuffers(1, &fboId));
@@ -36,10 +38,8 @@ namespace neo {
                 CHECK_GL(glReadBuffer(GL_NONE));
             }
 
-            // TODO - ability to add multiple color attachments 
-            // TODO - ability to add color render buffers
             void attachColorTexture(const Texture &texture) {
-                attachTexture(GL_COLOR_ATTACHMENT0, texture.textureId);
+                attachTexture(GL_COLOR_ATTACHMENT0 + colorAttachments++, texture.textureId);
             }
 
             void attachDepthTexture(const Texture &texture) {
