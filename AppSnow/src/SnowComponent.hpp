@@ -15,12 +15,12 @@ class SnowComponent : public Component{
         
         SnowComponent(GameObject *gameObject) :
             Component(gameObject),
-            snowAngle(glm::vec3(0.f, 1.f, 0.f)),
-            snowSize(0.36),
-            snowColor(0.36, 0.48, 0.56),
-            height(0.07),
-            rimColor(glm::vec3(1.f)),
-            rimPower(0.25)
+            snowAngle(0.f, 1.f, 0.f),
+            snowSize(0.36f),
+            snowColor(0.36f, 0.48f, 0.56f),
+            height(0.07f),
+            rimColor(1.f),
+            rimPower(0.25f)
         {}
 
         virtual void update(float dt) override {

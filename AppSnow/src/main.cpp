@@ -91,7 +91,6 @@ struct Snow {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject);
         snow = &NeoEngine::addComponent<SnowComponent>(gameObject);
-        // Line
         LineComponent *vLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 0.f));
         vLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
         NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
