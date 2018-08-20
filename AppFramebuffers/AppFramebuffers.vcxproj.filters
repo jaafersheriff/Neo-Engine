@@ -12,5 +12,6 @@
   <ItemGroup>
     <None Include="shaders\read.vert" />
     <None Include="shaders\read.frag" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>

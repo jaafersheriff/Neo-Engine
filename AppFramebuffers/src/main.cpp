@@ -124,7 +124,10 @@ struct Surveillance {
                 R *= glm::rotate(glm::mat4(1.f), rot.z, glm::vec3(0, 0, 1));
                 gameObject->getSpatial()->setOrientation(glm::mat3(R));
             }
-            ImGui::Image((ImTextureID)camera->colorBuffer->textureId, ImVec2(0.2f * camera->colorBuffer->width, 0.2f * camera->colorBuffer->height));
+            float imscale = 0.12f;
+            ImGui::Image((ImTextureID)camera->colorBuffer->textureId, ImVec2(imscale * camera->colorBuffer->width, imscale * camera->colorBuffer->height));
+            ImGui::SameLine();
+            ImGui::Image((ImTextureID)camera->depthBuffer->textureId, ImVec2(imscale * camera->depthBuffer->width, imscale * camera->depthBuffer->height));
         });
     }
 };
@@ -135,7 +138,7 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable(Loader::getMesh("cube"));
+    Renderable(Loader::getMesh("millenium-falcon.obj", true));
     Surveillance a(glm::vec3(-3, 0, 0), glm::vec3(1.f, 2.f, 1.f), glm::mat3(glm::rotate(glm::mat4(1.f), 1.4f, glm::vec3(0, 1, 0))));
     a.addImGui("CamA");
     Surveillance b(glm::vec3(3, 0, 0), glm::vec3(1.f, 2.f, 1.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.4f, glm::vec3(0, 1, 0))));

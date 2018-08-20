@@ -125,6 +125,7 @@
     <ClInclude Include="src\SurveillanceWriteShader.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="README.md" />
     <None Include="shaders\read.frag" />
     <None Include="shaders\read.vert" />
   </ItemGroup>
