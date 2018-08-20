@@ -81,7 +81,7 @@ int main() {
                 new Renderable(
                     Loader::getMesh("mr_krab.obj", true), 
                     &material,
-                    Loader::addTexture("mr_krab.png"),
+                    Loader::getTexture("mr_krab.png"),
                     glm::vec3(x*2, 0, z*2))
             );
         }
