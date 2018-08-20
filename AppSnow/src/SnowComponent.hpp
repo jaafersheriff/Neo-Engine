@@ -3,6 +3,7 @@
 #include "Component/Component.hpp"
 #include "GameObject/GameObject.hpp"
 #include "Component/SpatialComponent/SpatialComponent.hpp"
+#include "Component/AnimationComponent/LineComponent.hpp"
 
 #include <glm/glm.hpp>
 
@@ -26,6 +27,11 @@ class SnowComponent : public Component{
             snowAngle = gameObject->getSpatial()->getV();
             snowAngle.x = -snowAngle.x;
             snowAngle.z = -snowAngle.z;
+            auto line = gameObject->getComponentByType<LineComponent>();
+            if (line) {
+                line->removeNode(1);
+                line->addNode(snowAngle);
+            }
             height = -0.19f * snowSize + 0.17f;
         }
 
