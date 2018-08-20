@@ -12,7 +12,7 @@ namespace neo {
         public:
 
             ShadowReceiverShader(RenderSystem &rSystem, const std::string &vert, const std::string &frag) :
-                Shader("ShadowReceiver Shader", rSystem, vert, frag)
+                Shader("ShadowReceiver Shader", rSystem.APP_SHADER_DIR, vert, frag)
             {}
 
             virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
