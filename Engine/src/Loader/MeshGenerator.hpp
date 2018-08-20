@@ -6,7 +6,7 @@ namespace neo {
     class MeshGenerator {
 
     private:
-        static Mesh *createMesh(const std::vector<float> &vert, const std::vector<float> &norm, const std::vector<float> &tex, const std::vector<unsigned> &ele) {
+        static Mesh *createMesh(const std::vector<float> &vert, const std::vector<float> &norm, const std::vector<float> &tex, const std::vector<unsigned> &ele, unsigned mode = GL_TRIANGLES) {
             Mesh *mesh = new Mesh;
             mesh->buffers.vertBuf.insert(mesh->buffers.vertBuf.begin(), vert.begin(), vert.end());
             mesh->buffers.norBuf.insert(mesh->buffers.norBuf.begin(), norm.begin(), norm.end());
@@ -16,7 +16,7 @@ namespace neo {
             mesh->norBufSize = mesh->buffers.norBuf.size();
             mesh->texBufSize = mesh->buffers.texBuf.size();
             mesh->eleBufSize = mesh->buffers.eleBuf.size();
-            mesh->upload();
+            mesh->upload(mode);
             return mesh;
         }
 
@@ -121,7 +121,7 @@ namespace neo {
                      0.f, 0.f, 1.f,
                      0.f, 0.f, 1.f,
                      0.f, 0.f, 1.f
-                    }, {}, {});
+                    }, {}, {}, GL_TRIANGLE_STRIP);
             }
 
     };
