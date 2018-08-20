@@ -24,15 +24,18 @@ class SnowComponent : public Component{
         {}
 
         virtual void update(float dt) override {
+            height = -0.19f * snowSize + 0.17f;
+
             snowAngle = gameObject->getSpatial()->getV();
             snowAngle.x = -snowAngle.x;
             snowAngle.z = -snowAngle.z;
+
+            // TODO - messaging...
             auto line = gameObject->getComponentByType<LineComponent>();
             if (line) {
                 line->removeNode(1);
                 line->addNode(snowAngle);
             }
-            height = -0.19f * snowSize + 0.17f;
         }
 
         glm::vec3 snowAngle;
