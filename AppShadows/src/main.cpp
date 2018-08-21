@@ -38,7 +38,7 @@ struct Light {
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
         renderable->addShaderType<DiffuseShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
-        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, -55.f, 55.f, -20.f, 45.f, -1.f, 1000.f);
+        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, -10.f, 10.f, -10.f, 10.f, -1.f, 1000.f);
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
         LineComponent *vLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 0.f));
@@ -54,14 +54,11 @@ struct Light {
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
-            static glm::vec3 lookAt;
-            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
-                gameObject->getSpatial()->setPosition(pos);
-                camera->setLookDir(lookAt - gameObject->getSpatial()->getPosition());
-            }
-            if (ImGui::SliderFloat3("Look At", glm::value_ptr(lookAt), -100.f, 100.f)) {
-                camera->setLookDir(lookAt - gameObject->getSpatial()->getPosition());
-            }
+            static glm::vec3 lookAt = glm::vec3(0.f);
+            ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f);
+            ImGui::SliderFloat3("Look At", glm::value_ptr(lookAt), -100.f, 100.f);
+            gameObject->getSpatial()->setPosition(pos);
+            camera->setLookDir(lookAt - gameObject->getSpatial()->getPosition());
             glm::vec2 h = camera->getHorizontalBounds();
             glm::vec2 v = camera->getVerticalBounds();
             if (ImGui::SliderFloat2("Horizontal", glm::value_ptr(h), 5.f, 50.f)) {
@@ -128,15 +125,15 @@ int main() {
 
     /* Game objects */
     Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
-    Light light(glm::vec3(0.f, 43.75f, 76.41f), glm::vec3(1.f), glm::vec3(0.6, 0.04, 0.f));
+    Light light(glm::vec3(37.5f, 37.5f, 11.8f), glm::vec3(1.f), glm::vec3(0.6, 0.04, 0.f));
     Renderable casterA(Loader::getMesh("mr_krab.obj"), glm::vec3(0.f, 3.f, 0.f), glm::vec3(3.f));
     casterA.renderable->addShaderType<ShadowCasterShader>();
     casterA.renderable->addShaderType<ShadowReceiverShader>();
-    casterA.attachImGui("A");
+    casterA.attachImGui("CasterA");
     Renderable casterB(Loader::getMesh("mr_krab.obj"), glm::vec3(0.f, 3.f, -5.f), glm::vec3(3.f));
     casterB.renderable->addShaderType<ShadowCasterShader>();
     casterB.renderable->addShaderType<ShadowReceiverShader>();
-    casterB.attachImGui("B");
+    casterB.attachImGui("CasterB");
     Renderable receiver(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
     receiver.material.diffuse = glm::vec3(0.7f);
     receiver.renderable->addShaderType<ShadowReceiverShader>();
@@ -164,7 +161,7 @@ int main() {
     NeoEngine::addImGuiFunc("Shadow Map", [&]() {
         ImGui::SliderFloat("Bias", &receiverShader.bias, -0.005f, 0.005f);
         auto texture = Loader::getTexture("depthTexture");
-        static float scale = 0.2f;
+        static float scale = 0.1f;
         ImGui::SliderFloat("Scale", &scale, 0.f, 1.f);
         ImGui::Image((ImTextureID)texture->textureId, ImVec2(scale * texture->width, scale * texture->height), ImVec2(0, 1), ImVec2(1, 0));
         static bool useLightCam = false;

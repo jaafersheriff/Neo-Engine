@@ -41,8 +41,10 @@ void main() {
     vec3 specularContrib = lightCol * pow(max(dot(H, N), 0.0), shine) / attFactor;
 
     // Shadow
+    float Tbias = bias*tan(acos(clamp(lambert, 0, 1)));
+    Tbias = clamp(Tbias, 0,0.01);
     float visibility = 1.f;
-    if (texture(shadowMap, shadowCoord.xy).r < shadowCoord.z - bias) {
+    if (texture(shadowMap, shadowCoord.xy).r < shadowCoord.z - Tbias) {
         visibility = 0.f;
     }
     color.rgb = diffuseColor * ambient + 
