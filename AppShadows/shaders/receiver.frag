@@ -1,9 +1,11 @@
 #version 330 core
 
 in vec4 fragPos;
-in vec4 fragPosLight;
 in vec3 fragNor;
 in vec2 fragTex;
+in vec4 shadowCoord;
+
+uniform float bias;
 
 uniform float ambient;
 uniform vec3 diffuseColor;
@@ -39,15 +41,12 @@ void main() {
     vec3 specularContrib = lightCol * pow(max(dot(H, N), 0.0), shine) / attFactor;
 
     // Shadow
-    vec3 pCoords = (fragPosLight.xyz / fragPosLight.w) * 0.5 + 0.5;
-    float closestDepth = texture(shadowMap, pCoords.xy).r;
-    float currentDepth = pCoords.z;
-
-    color.rgb = vec3(0);
-    if (currentDepth + 0.02 <= closestDepth) {
-        color.rgb = diffuseColor * ambient + 
-                    diffuseColor * diffuseContrib + 
-                    specularColor * specularContrib;
+    float visibility = 1.f;
+    if (texture(shadowMap, shadowCoord.xy).r < shadowCoord.z - bias) {
+        visibility = 0.f;
     }
+    color.rgb = diffuseColor * ambient + 
+                visibility * diffuseColor * diffuseContrib + 
+                visibility * specularColor * specularContrib;
     color.a = 1;
 }

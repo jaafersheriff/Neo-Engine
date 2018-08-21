@@ -5,15 +5,20 @@
 #include "Shader/Shader.hpp"
 #include "Util/GlHelper.hpp"
 
+#include "glm/gtc/matrix_transform.hpp"
+
 namespace neo {
 
     class ShadowReceiverShader : public Shader {
 
         public:
 
-            ShadowReceiverShader(RenderSystem &rSystem, const std::string &vert, const std::string &frag) :
-                Shader("ShadowReceiver Shader", rSystem.APP_SHADER_DIR, vert, frag)
+            ShadowReceiverShader(RenderSystem &rSystem, const std::string &vert, const std::string &frag, float b = 0.f) :
+                Shader("ShadowReceiver Shader", rSystem.APP_SHADER_DIR, vert, frag),
+                bias(b)
             {}
+
+            float bias;
 
             virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
                 bind();
@@ -34,6 +39,9 @@ namespace neo {
                     loadMatrix(getUniform("lightP"), lightCam->getProj());
                     loadMatrix(getUniform("lightV"), lightCam->getView());
                 }
+
+                /* Bias */
+                loadFloat(getUniform("bias"), bias);
 
                 /* Bind shadow map */
                 const Texture & texture(*Loader::getTexture("depthTexture"));
