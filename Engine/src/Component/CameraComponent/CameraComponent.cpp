@@ -65,6 +65,14 @@ namespace neo {
         viewMatDirty = true;
     }
 
+    void CameraComponent::setLookDir(glm::vec3 dir) {
+        auto spatial = gameObject->getSpatial();
+        glm::vec3 w = -glm::normalize(dir);
+        glm::vec3 u = glm::cross(w, spatial->getV());
+        glm::vec3 v = glm::cross(u, w);
+        spatial->setUVW(u, v, w);
+    }
+
     const glm::vec3 CameraComponent::getLookDir() const {
         return -gameObject->getSpatial()->getW();
     }
@@ -86,7 +94,6 @@ namespace neo {
     void CameraComponent::detView() const {
         auto spatial = gameObject->getSpatial();
         viewMat = glm::lookAt(spatial->getPosition(), spatial->getPosition() + getLookDir(), spatial->getV());
-        // TODO - this is being weird 
         viewMatDirty = false;
     }
 

@@ -19,6 +19,7 @@ namespace neo {
             void setFOV(float);
             void setNearFar(float, float);
             void setOrthoBounds(const glm::vec2 &, const glm::vec2 &);
+            void setLookDir(glm::vec3);
 
             /* Getters */
             const float getFOV() const { return fov; }
