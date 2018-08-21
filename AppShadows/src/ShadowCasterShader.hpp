@@ -15,8 +15,7 @@ class ShadowCasterShader : public Shader {
 
             /* Init shadow map */
             Texture *depthTexture = Loader::create2DTexture("depthTexture");
-            depthTexture->width = 1024;
-            depthTexture->height = 1024;
+            depthTexture->width = depthTexture->height = 2048;
             depthTexture->components = 1;
             depthTexture->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_NEAREST, GL_CLAMP_TO_BORDER);
             CHECK_GL(glBindTexture(GL_TEXTURE_2D, depthTexture->textureId));
