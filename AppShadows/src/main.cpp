@@ -2,6 +2,8 @@
 
 #include "CustomSystem.hpp"
 
+#include "SinMoveComponent.hpp"
+
 #include "Shader/LineShader.hpp"
 #include "Shader/DiffuseShader.hpp"
 #include "ShadowCasterShader.hpp"
@@ -34,6 +36,7 @@ struct Light {
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
         gameObject = &NeoEngine::createGameObject();
         auto spatial = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(2.f), glm::mat3(glm::rotate(glm::mat4(1.f), 0.6f, glm::vec3(1, 0, 0))));
+        NeoEngine::addComponent<SinMoveComponent>(gameObject, pos, glm::vec3(-pos.x, pos.y, pos.z));
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
         renderable->addShaderType<DiffuseShader>();
