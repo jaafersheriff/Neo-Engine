@@ -21,7 +21,8 @@ namespace neo {
         viewMat(),
         projMat(),
         viewMatDirty(true),
-        projMatDirty(true)
+        projMatDirty(true),
+        lookAt(nullptr)
     {}
 
     CameraComponent::CameraComponent(GameObject *gameObject, float horizMin, float horizMax, float vertMin, float vertMax, float near, float far) :
@@ -35,7 +36,8 @@ namespace neo {
         viewMat(),
         projMat(),
         viewMatDirty(true),
-        projMatDirty(true)
+        projMatDirty(true),
+        lookAt(nullptr)
     {}
 
     void CameraComponent::init() {
@@ -45,6 +47,28 @@ namespace neo {
         Messenger::addReceiver<SpatialChangeMessage>(gameObject, [&](const Message & msg_) {
             viewMatDirty = true;
         });
+    }
+
+    void CameraComponent::setLookAt(SpatialComponent *spat) {
+        if (lookAt) {
+            // remove receiver functions
+        }
+
+        lookAt = spat;
+
+        auto lookAtCallback([&](const Message & msg_) {
+            glm::vec3 lookPos = lookAt->getPosition();
+            glm::vec3 thisPos = this->getGameObject().getSpatial()->getPosition();
+            glm::vec3 diff = lookPos - thisPos;
+            setLookDir(diff);
+        });
+
+        Messenger::addReceiver<SpatialChangeMessage>(&spat->getGameObject(), lookAtCallback);
+        Messenger::addReceiver<SpatialChangeMessage>(gameObject, lookAtCallback);
+    }
+
+    const glm::vec3 CameraComponent::getLookPos() const {
+        return lookAt ? lookAt->getPosition() : glm::vec3(0.f);
     }
 
     void CameraComponent::setFOV(float fov) {
@@ -68,8 +92,9 @@ namespace neo {
     void CameraComponent::setLookDir(glm::vec3 dir) {
         auto spatial = gameObject->getSpatial();
         glm::vec3 w = -glm::normalize(dir);
-        glm::vec3 u = glm::cross(w, spatial->getV());
+        glm::vec3 u = glm::cross(w, glm::vec3(0,1,0));
         glm::vec3 v = glm::cross(u, w);
+        u = glm::cross(v, w);
         spatial->setUVW(u, v, w);
     }
 

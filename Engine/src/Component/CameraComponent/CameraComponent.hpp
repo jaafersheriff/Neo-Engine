@@ -6,6 +6,8 @@
 
 namespace neo {
 
+    class SpatialComponent;
+
     class CameraComponent : public Component {
 
         public:
@@ -19,6 +21,7 @@ namespace neo {
             void setFOV(float);
             void setNearFar(float, float);
             void setOrthoBounds(const glm::vec2 &, const glm::vec2 &);
+            void setLookAt(SpatialComponent *);
             void setLookDir(glm::vec3);
 
             /* Getters */
@@ -28,6 +31,7 @@ namespace neo {
             const glm::vec2 getHorizontalBounds() const { return horizBounds; }
             const glm::vec2 getVerticalBounds() const { return vertBounds; }
             const glm::vec3 getLookDir() const;
+            const glm::vec3 getLookPos() const;
             const glm::mat4 & getView() const;
             const glm::mat4 & getProj() const;
 
@@ -37,6 +41,8 @@ namespace neo {
             glm::vec2 horizBounds;
             glm::vec2 vertBounds;
             bool isOrtho;
+
+            SpatialComponent *lookAt;
 
             void detView() const;
             void detProj() const;
