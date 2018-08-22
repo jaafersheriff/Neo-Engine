@@ -6,6 +6,7 @@
 
 #include "Shader/LineShader.hpp"
 #include "Shader/DiffuseShader.hpp"
+#include "Shader/WireframeShader.hpp"
 #include "ShadowCasterShader.hpp"
 #include "ShadowReceiverShader.hpp"
 
@@ -32,11 +33,13 @@ struct Light {
     RenderableComponent *renderable;
     Material material = Material(1.f, glm::vec3(1.f));
     CameraComponent *camera;
+    SpatialComponent *camSpatial;
+
+    SpatialComponent *lookAtSpatial;
 
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
         gameObject = &NeoEngine::createGameObject();
-        auto spatial = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(2.f), glm::mat3(glm::rotate(glm::mat4(1.f), 0.6f, glm::vec3(1, 0, 0))));
-        NeoEngine::addComponent<SinMoveComponent>(gameObject, pos, glm::vec3(-pos.x, pos.y, pos.z));
+        camSpatial = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(2.f), glm::mat3(glm::rotate(glm::mat4(1.f), 0.6f, glm::vec3(1, 0, 0))));
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
         renderable->addShaderType<DiffuseShader>();
@@ -49,25 +52,35 @@ struct Light {
         LineComponent *wLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 0.f, 1.f));
         wLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f) });
         LineComponent *lookLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 1.f, 1.f));
-        lookLine->addNodes({ glm::vec3(0.f), glm::normalize(-spatial->getW()) });
         NeoEngine::addComponent<LineRenderable>(gameObject, uLine);
         NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
         NeoEngine::addComponent<LineRenderable>(gameObject, wLine);
-        NeoEngine::addComponent<LineRenderable>(gameObject, lookLine);
+
+        // Separate game object for look at
+        auto gameO = &NeoEngine::createGameObject();
+        lookAtSpatial = &NeoEngine::addComponent<SpatialComponent>(gameO, glm::vec3(0.f), glm::vec3(1.f));
+        auto cube = &NeoEngine::addComponent<RenderableComponent>(gameO, Loader::getMesh("cube"));
+        cube->addShaderType<WireframeShader>();
+        camera->setLookAt(lookAtSpatial);
 
         NeoEngine::addImGuiFunc("Light", [&]() {
-            glm::vec3 pos = gameObject->getSpatial()->getPosition();
-            static glm::vec3 lookAt = glm::vec3(0.f);
-            ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f);
-            ImGui::SliderFloat3("Look At", glm::value_ptr(lookAt), -100.f, 100.f);
-            gameObject->getSpatial()->setPosition(pos);
-            camera->setLookDir(lookAt - gameObject->getSpatial()->getPosition());
+            glm::vec3 pos = camSpatial->getPosition();
+            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
+                camSpatial->setPosition(pos);
+            }
+            pos = lookAtSpatial->getPosition();
+            if (ImGui::SliderFloat3("look pos", glm::value_ptr(pos), -100.f, 100.f)) {
+                lookAtSpatial->setPosition(pos);
+            }
+            auto lookDir = camera->getLookDir();
+            ImGui::Text("Look at dir : %0.2f, %0.2f, %0.2f", lookDir.x, lookDir.y, lookDir.z);
+
             glm::vec2 h = camera->getHorizontalBounds();
             glm::vec2 v = camera->getVerticalBounds();
-            if (ImGui::SliderFloat2("Horizontal", glm::value_ptr(h), 5.f, 50.f)) {
+            if (ImGui::SliderFloat2("Horizontal", glm::value_ptr(h), -50.f, 50.f)) {
                 camera->setOrthoBounds(h, v);
             }
-            if (ImGui::SliderFloat2("Vertical", glm::value_ptr(v), 5.f, 50.f)) {
+            if (ImGui::SliderFloat2("Vertical", glm::value_ptr(v), -50.f, 50.f)) {
                 camera->setOrthoBounds(h, v);
             }
             float near = camera->getNear();
@@ -137,6 +150,7 @@ int main() {
     casterB.renderable->addShaderType<ShadowCasterShader>();
     casterB.renderable->addShaderType<ShadowReceiverShader>();
     casterB.attachImGui("CasterB");
+
     Renderable receiver(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
     receiver.material.diffuse = glm::vec3(0.7f);
     receiver.renderable->addShaderType<ShadowReceiverShader>();
@@ -152,6 +166,7 @@ int main() {
     renderSystem->addShader<LineShader>();
     renderSystem->addShader<DiffuseShader>();
     ShadowReceiverShader & receiverShader = renderSystem->addShader<ShadowReceiverShader>("receiver.vert", "receiver.frag");
+    renderSystem->addShader<WireframeShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
@@ -162,7 +177,7 @@ int main() {
         }
     });
     NeoEngine::addImGuiFunc("Shadow Map", [&]() {
-        ImGui::SliderFloat("Bias", &receiverShader.bias, -0.005f, 0.005f);
+        ImGui::SliderFloat("Bias", &receiverShader.bias, -0.002f, 0.002f);
         auto texture = Loader::getTexture("depthTexture");
         static float scale = 0.1f;
         ImGui::SliderFloat("Scale", &scale, 0.f, 1.f);
