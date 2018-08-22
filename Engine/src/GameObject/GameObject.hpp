@@ -37,6 +37,16 @@ namespace neo {
             template <typename CompT> CompT * getComponentByType() const;
 
             const std::vector<Component *> getAllComponents() const { return allComponents; }
+            int getNumReceiverTypes() { return receivers.size(); }
+            int getNumReceivers() {
+                int count = 0;
+                auto it = receivers.begin();
+                while (it != receivers.end()) {
+                    count += it->second.size();
+                    it++;
+                }
+                return count;
+            }
 
         private:
             /* Containers */
