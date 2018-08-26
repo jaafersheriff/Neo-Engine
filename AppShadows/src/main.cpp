@@ -34,7 +34,9 @@ struct Light {
     Material material = Material(1.f, glm::vec3(1.f));
     CameraComponent *camera;
     SpatialComponent *camSpatial;
+    SinMoveComponent *sin = nullptr;
 
+    GameObject *gameO;
     SpatialComponent *lookAtSpatial;
 
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
@@ -55,22 +57,36 @@ struct Light {
         NeoEngine::addComponent<LineRenderable>(gameObject, uLine);
         NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
         NeoEngine::addComponent<LineRenderable>(gameObject, wLine);
+        sin = &NeoEngine::addComponent<SinMoveComponent>(gameObject, camSpatial->getPosition(), camSpatial->getPosition());
 
         // Separate game object for look at
-        auto gameO = &NeoEngine::createGameObject();
+        gameO = &NeoEngine::createGameObject();
         lookAtSpatial = &NeoEngine::addComponent<SpatialComponent>(gameO, glm::vec3(0.f), glm::vec3(1.f));
         auto cube = &NeoEngine::addComponent<RenderableComponent>(gameO, Loader::getMesh("cube"));
         cube->addShaderType<WireframeShader>();
         camera->setLookAt(lookAtSpatial);
 
         NeoEngine::addImGuiFunc("Light", [&]() {
+            ImGui::Text("CamReceivers: [%d, %d]", gameObject->getNumReceiverTypes(), gameObject->getNumReceivers());
+            ImGui::Text("LookAtReceivers: [%d, %d]", gameO->getNumReceiverTypes(), gameO->getNumReceivers());
+ 
             glm::vec3 pos = camSpatial->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
                 camSpatial->setPosition(pos);
             }
+            if (sin) {
+                ImGui::Checkbox("Sin", &sin->active);
+                if (sin->active) {
+                    ImGui::SliderFloat3("PosA", glm::value_ptr(sin->maxPos), -100.f, 100.f);
+                    ImGui::SliderFloat3("PosB", glm::value_ptr(sin->minPos), -100.f, 100.f);
+                }
+            }
             pos = lookAtSpatial->getPosition();
             if (ImGui::SliderFloat3("look pos", glm::value_ptr(pos), -100.f, 100.f)) {
                 lookAtSpatial->setPosition(pos);
+            }
+            if (ImGui::Button("Set look at")) {
+                camera->setLookAt(lookAtSpatial);
             }
             auto lookDir = camera->getLookDir();
             ImGui::Text("Look at dir : %0.2f, %0.2f, %0.2f", lookDir.x, lookDir.y, lookDir.z);
@@ -117,6 +133,8 @@ struct Renderable {
 
     void attachImGui(std::string name) {
         NeoEngine::addImGuiFunc(name, [&]() {
+            ImGui::Text("CamReceivers: [%d, %d]", gameObject->getNumReceiverTypes(), gameObject->getNumReceivers());
+            
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);
@@ -146,10 +164,6 @@ int main() {
     casterA.renderable->addShaderType<ShadowCasterShader>();
     casterA.renderable->addShaderType<ShadowReceiverShader>();
     casterA.attachImGui("CasterA");
-    Renderable casterB(Loader::getMesh("mr_krab.obj"), glm::vec3(0.f, 3.f, -5.f), glm::vec3(3.f));
-    casterB.renderable->addShaderType<ShadowCasterShader>();
-    casterB.renderable->addShaderType<ShadowReceiverShader>();
-    casterB.attachImGui("CasterB");
 
     Renderable receiver(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
     receiver.material.diffuse = glm::vec3(0.7f);
@@ -185,16 +199,9 @@ int main() {
         static bool useLightCam = false;
         if (ImGui::Button("Switch Camera")) {
             useLightCam = !useLightCam;
-            if (useLightCam) {
-                renderSystem->setDefaultCamera(light.camera);
-            }
-            else {
-                renderSystem->setDefaultCamera(camera.camera);
-            }
+            renderSystem->setDefaultCamera(useLightCam ? light.camera : camera.camera);
         }
     });
-
-
 
     /* Run */
     NeoEngine::run();

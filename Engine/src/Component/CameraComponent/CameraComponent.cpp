@@ -10,12 +10,11 @@
 
 namespace neo {
 
-    CameraComponent::CameraComponent(GameObject *gameObject, float fov, float near, float far) :
+    CameraComponent::CameraComponent(GameObject *gameObject, float near, float far) :
         Component(gameObject),
-        fov(fov),
         near(near),
         far(far),
-        isOrtho(false),
+        fov(0.f),
         horizBounds(),
         vertBounds(),
         viewMat(),
@@ -25,20 +24,17 @@ namespace neo {
         lookAt(nullptr)
     {}
 
+    CameraComponent::CameraComponent(GameObject *gameObject, float fov, float near, float far) :
+        CameraComponent(gameObject, near, far) {
+        setFOV(fov);
+        isOrtho = false;
+    }
+
     CameraComponent::CameraComponent(GameObject *gameObject, float horizMin, float horizMax, float vertMin, float vertMax, float near, float far) :
-        Component(gameObject),
-        fov(0.f),
-        near(near),
-        far(far),
-        isOrtho(true),
-        horizBounds(glm::vec2(horizMin, horizMax)),
-        vertBounds(glm::vec2(vertMin, vertMax)),
-        viewMat(),
-        projMat(),
-        viewMatDirty(true),
-        projMatDirty(true),
-        lookAt(nullptr)
-    {}
+        CameraComponent(gameObject, near, far) {
+        setOrthoBounds(glm::vec2(horizMin, horizMax), glm::vec2(vertMin, vertMax));
+        isOrtho = true;
+    }
 
     void CameraComponent::init() {
         viewMatDirty = true;
@@ -50,39 +46,51 @@ namespace neo {
     }
 
     void CameraComponent::setLookAt(SpatialComponent *spat) {
-        if (lookAt) {
-            // remove receiver functions
-        }
-
-        lookAt = spat;
-
-        auto lookAtCallback([&](const Message & msg_) {
+        auto lookAtCallback([&](const Message &msg) {
+            // TODO - pull data from spatial message
+            // const SpatialChangeMessage & m(static_cast<const SpatialChangeMessage &>(msg));
+            // auto & oSpatial = m.spatial;
+            // glm::vec3 lookPos = oSpatial.getPosition();
             glm::vec3 lookPos = lookAt->getPosition();
-            glm::vec3 thisPos = this->getGameObject().getSpatial()->getPosition();
-            glm::vec3 diff = lookPos - thisPos;
-            setLookDir(diff);
+            if (auto spatial = this->getGameObject().getSpatial()) {
+                glm::vec3 thisPos = spatial->getPosition();
+                setLookDir(lookPos - thisPos);
+            }
         });
+
+        if (lookAt) {
+            // TODO : remove existing receivers 
+        }
+        lookAt = spat;
 
         Messenger::addReceiver<SpatialChangeMessage>(&spat->getGameObject(), lookAtCallback);
         Messenger::addReceiver<SpatialChangeMessage>(gameObject, lookAtCallback);
     }
 
-    const glm::vec3 CameraComponent::getLookPos() const {
-        return lookAt ? lookAt->getPosition() : glm::vec3(0.f);
-    }
-
     void CameraComponent::setFOV(float fov) {
+        if (fov == this->fov) {
+            return;
+        }
+
         this->fov = fov;
         projMatDirty = true;
     }
 
     void CameraComponent::setNearFar(float near, float far) {
+        if (near == this->near || far == this->far) {
+            return;
+        }
+
         this->near = near;
         this->far = far;
         projMatDirty = true;
     }
 
     void CameraComponent::setOrthoBounds(const glm::vec2 &h, const glm::vec2 &v) {
+        if (h == this->horizBounds || v == this->vertBounds) {
+            return;
+        }
+
         this->horizBounds = h;
         this->vertBounds = v;
         projMatDirty = true;
@@ -90,9 +98,12 @@ namespace neo {
     }
 
     void CameraComponent::setLookDir(glm::vec3 dir) {
-        auto spatial = gameObject->getSpatial();
         glm::vec3 w = -glm::normalize(dir);
-        glm::vec3 u = glm::cross(w, glm::vec3(0,1,0));
+        auto spatial = gameObject->getSpatial();
+        if (w == spatial->getW()) {
+            return;
+        }
+        glm::vec3 u = glm::cross(w, glm::vec3(0, 1, 0));
         glm::vec3 v = glm::cross(u, w);
         u = glm::cross(v, w);
         spatial->setUVW(u, v, w);
@@ -131,4 +142,5 @@ namespace neo {
         }
         projMatDirty = false;
     }
+
 }
