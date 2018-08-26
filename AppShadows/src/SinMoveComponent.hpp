@@ -21,8 +21,13 @@ class SinMoveComponent : public Component {
         glm::vec3 minPos;
         glm::vec3 maxPos;
         float c = 0.f;
+        bool active = true;
 
         virtual void update(float dt) override {
+            if (!active) {
+                return;
+            }
+
             c += dt;    // could also use neoengine::getcurrtime
             float val = (glm::sin(c) + 1.f) / 2.f;
             glm::vec3 newPos = val * (maxPos - minPos) + minPos;
