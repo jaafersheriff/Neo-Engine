@@ -19,9 +19,9 @@ namespace neo {
              * If gameObject is not null, first sends the message locally to receivers of only that object. */
             template <typename MsgT, typename... Args> static void sendMessage(const GameObject * gameObject, Args &&... args);
 
-            /* Adds a receiver for a message type. If gameObject is null, the receiver will pick up all messages 
-            of that type. If gameObject is not null, the receiver will pick up only messages sent to that object */
-            template <typename MsgT> static void addReceiver(const GameObject * gameObject, const std::function<void (const Message &)> & receiver);
+            /* Adds a receiver for a message type. If gameObject is null, the function will be called for all messages 
+            of that type. If gameObject is not null, the function will be called for only messages of that type sent to that object */
+            template <typename MsgT> static void addReceiver(const GameObject * gameObject, const std::function<void(const Message &)> & func);
 
             static void relayMessages();
 
@@ -37,15 +37,18 @@ namespace neo {
     }
 
     template <typename MsgT>
-    void Messenger::addReceiver(const GameObject *gameObject, const std::function<void(const Message &)> & receiver) {
+    void Messenger::addReceiver(const GameObject *gameObject, const std::function<void(const Message &)> & func) {
         static_assert(std::is_base_of<Message, MsgT>::value, "MsgT must be a message type");
 
-        if (gameObject) {
-            const_cast<GameObject *>(gameObject)->receivers[std::type_index(typeid(MsgT))].emplace_back(receiver);
-        }
-        else {
-            receivers[std::type_index(typeid(MsgT))].emplace_back(receiver);
-        }
+        auto & receiver =  gameObject ? const_cast<GameObject *>(gameObject)->receivers : receivers;
+        receiver[std::type_index(typeid(MsgT))].emplace_back(func);
+
+        // if (gameObject) {
+        //     const_cast<GameObject *>(gameObject)->receivers[std::type_index(typeid(MsgT))].emplace_back(func);
+        // }
+        // else {
+        //     receivers[std::type_index(typeid(MsgT))].emplace_back(func);
+        // }
 
     }
 
