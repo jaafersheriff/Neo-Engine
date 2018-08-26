@@ -79,6 +79,7 @@ namespace neo {
                     ImGui::End();
                 }
             }
+            Messenger::relayMessages();
 
             /* Update each system */
             for (auto & system : systems) {
