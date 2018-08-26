@@ -3,7 +3,7 @@
 #include "CustomSystem.hpp"
 
 #include "Shader/LineShader.hpp"
-#include "Shader/DiffuseShader.hpp"
+#include "Shader/PhongShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -57,7 +57,7 @@ struct Orient {
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         // Cube
         RenderableComponent *renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<DiffuseShader>();
+        renderable->addShaderType<PhongShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, new Material);
         // Line
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
@@ -104,7 +104,7 @@ int main() {
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
     renderSystem->addShader<LineShader>();
-    renderSystem->addShader<DiffuseShader>();
+    renderSystem->addShader<PhongShader>();
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */

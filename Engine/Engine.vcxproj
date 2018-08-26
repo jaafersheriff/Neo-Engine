@@ -49,7 +49,6 @@
     <ClInclude Include="src\Model\Mesh.hpp" />
     <ClInclude Include="src\Model\Texture.hpp" />
     <ClInclude Include="src\NeoEngine.hpp" />
-    <ClInclude Include="src\Shader\DiffuseShader.hpp" />
     <ClInclude Include="src\Shader\LineShader.hpp" />
     <ClInclude Include="src\Shader\PhongShader.hpp" />
     <ClInclude Include="src\Shader\WireframeShader.hpp" />

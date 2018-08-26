@@ -4,7 +4,7 @@
 
 #include "CustomSystem.hpp"
 
-#include "Shader/DiffuseShader.hpp"
+#include "Shader/PhongShader.hpp"
 #include "Shader/LineShader.hpp"
 #include "SurveillanceWriteShader.hpp"
 #include "SurveillanceReadShader.hpp"
@@ -61,7 +61,7 @@ struct Renderable {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<DiffuseShader>();
+        renderable->addShaderType<PhongShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
@@ -152,7 +152,7 @@ int main() {
     /* Add shaders */
     renderSystem->addShader<SurveillanceWriteShader, ShaderTypes::PREPROCESS>();
     renderSystem->addShader<LineShader>();
-    renderSystem->addShader<DiffuseShader>();
+    renderSystem->addShader<PhongShader>();
     renderSystem->addShader<SurveillanceReadShader>("read.vert", "read.frag");
 
     /* Attach ImGui panes */

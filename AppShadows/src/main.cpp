@@ -5,7 +5,7 @@
 #include "SinMoveComponent.hpp"
 
 #include "Shader/LineShader.hpp"
-#include "Shader/DiffuseShader.hpp"
+#include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
 #include "ShadowCasterShader.hpp"
 #include "ShadowReceiverShader.hpp"
@@ -44,7 +44,7 @@ struct Light {
         camSpatial = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(2.f), glm::mat3(glm::rotate(glm::mat4(1.f), 0.6f, glm::vec3(1, 0, 0))));
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
-        renderable->addShaderType<DiffuseShader>();
+        renderable->addShaderType<PhongShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
         camera = &NeoEngine::addComponent<CameraComponent>(gameObject, -10.f, 10.f, -10.f, 10.f, -1.f, 1000.f);
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
@@ -178,7 +178,7 @@ int main() {
     /* Add shaders */
     renderSystem->addShader<ShadowCasterShader, ShaderTypes::PREPROCESS>("caster.vert", "caster.frag");
     renderSystem->addShader<LineShader>();
-    renderSystem->addShader<DiffuseShader>();
+    renderSystem->addShader<PhongShader>();
     ShadowReceiverShader & receiverShader = renderSystem->addShader<ShadowReceiverShader>("receiver.vert", "receiver.frag");
     renderSystem->addShader<WireframeShader>();
 

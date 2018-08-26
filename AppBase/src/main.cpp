@@ -2,7 +2,7 @@
 
 #include "CustomSystem.hpp"
 
-#include "Shader/DiffuseShader.hpp"
+#include "Shader/PhongShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -56,7 +56,7 @@ struct Renderable {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<DiffuseShader>();
+        renderable->addShaderType<PhongShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
@@ -91,7 +91,7 @@ int main() {
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
-    renderSystem->addShader<DiffuseShader>();
+    renderSystem->addShader<PhongShader>();
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */

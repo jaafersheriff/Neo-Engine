@@ -37,7 +37,6 @@
     <ClInclude Include="src\Model\Texture.hpp" />
     <ClInclude Include="src\Shader\WireframeShader.hpp" />
     <ClInclude Include="src\Shader\LineShader.hpp" />
-    <ClInclude Include="src\Shader\DiffuseShader.hpp" />
     <ClInclude Include="src\Component\ModelComponent\RenderableComponent.hpp" />
     <ClInclude Include="src\Component\AnimationComponent\LineRenderable.hpp" />
     <ClInclude Include="src\Component\ModelComponent\MaterialComponent.hpp" />
