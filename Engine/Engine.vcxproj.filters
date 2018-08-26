@@ -44,6 +44,7 @@
     <ClInclude Include="src\Component\ModelComponent\TextureComponent.hpp" />
     <ClInclude Include="src\Component\AnimationComponent\LineComponent.hpp" />
     <ClInclude Include="src\System\RenderSystem\Framebuffer.hpp" />
+    <ClInclude Include="src\Shader\PhongShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />

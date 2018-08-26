@@ -1,6 +1,6 @@
 #include <NeoEngine.hpp>
 
-#include "PhongShader.hpp"
+#include "Shader/PhongShader.hpp"
 #include "CameraSystem.hpp"
 
 #include "Shader/WireframeShader.hpp"
@@ -90,7 +90,7 @@ int main() {
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
-    renderSystem->addShader<PhongShader>("phong.vert", "phong.frag");
+    renderSystem->addShader<PhongShader>();
     renderSystem->addShader<WireframeShader>();
     NeoEngine::initSystems();
 

@@ -51,6 +51,7 @@
     <ClInclude Include="src\NeoEngine.hpp" />
     <ClInclude Include="src\Shader\DiffuseShader.hpp" />
     <ClInclude Include="src\Shader\LineShader.hpp" />
+    <ClInclude Include="src\Shader\PhongShader.hpp" />
     <ClInclude Include="src\Shader\WireframeShader.hpp" />
     <ClInclude Include="src\System\RenderSystem\Framebuffer.hpp" />
     <ClInclude Include="src\Util\GLHelper.hpp" />
