@@ -109,8 +109,8 @@ int main() {
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", NeoEngine::FPS);
-        ImGui::Text("dt: %0.4f", NeoEngine::timeStep);
+        ImGui::Text("FPS: %d", Util::FPS);
+        ImGui::Text("dt: %0.4f", Util::timeStep);
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
         }

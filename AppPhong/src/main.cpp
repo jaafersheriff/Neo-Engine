@@ -1,8 +1,8 @@
 #include <NeoEngine.hpp>
 
-#include "Shader/PhongShader.hpp"
 #include "CameraSystem.hpp"
 
+#include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
 
 using namespace neo;
@@ -96,8 +96,8 @@ int main() {
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", NeoEngine::FPS);
-        ImGui::Text("dt: %0.4f", NeoEngine::timeStep);
+        ImGui::Text("FPS: %d", Util::FPS);
+        ImGui::Text("dt: %0.4f", Util::timeStep);
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
         }
