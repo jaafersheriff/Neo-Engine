@@ -138,7 +138,7 @@ namespace neo {
             projMat = glm::ortho(horizBounds.x, horizBounds.y, vertBounds.x, vertBounds.y, near, far);
         }
         else {
-            projMat = glm::perspective(fov, Window::getAspectRatio(), near, far);
+            projMat = glm::perspective(glm::radians(fov), Window::getAspectRatio(), near, far);
         }
         projMatDirty = false;
     }
