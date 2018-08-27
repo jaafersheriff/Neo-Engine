@@ -14,7 +14,7 @@ class ShadowCasterShader : public Shader {
             Shader("Shadow Caster", rSystem.APP_SHADER_DIR, vert, frag) {
 
             /* Init shadow map */
-            Texture *depthTexture = Loader::create2DTexture("depthTexture");
+            Texture *depthTexture = new Texture2D;
             depthTexture->width = depthTexture->height = 2048;
             depthTexture->components = 1;
             depthTexture->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_NEAREST, GL_CLAMP_TO_BORDER);
@@ -30,11 +30,14 @@ class ShadowCasterShader : public Shader {
         }
 
         virtual void render(const RenderSystem &rSystem, const CameraComponent &camera) override {
-            rSystem.framebuffers.find("depthMap")->second->bind();
-            auto depthTexture = Loader::getTexture("depthTexture");
+            auto fbo = rSystem.framebuffers.find("depthMap")->second.get();
+            auto depthTexture = fbo->textures[0];
+
+            fbo->bind();
             CHECK_GL(glClear(GL_DEPTH_BUFFER_BIT));
             CHECK_GL(glViewport(0, 0, depthTexture->width, depthTexture->height));
             CHECK_GL(glCullFace(GL_FRONT));
+
             bind();
 
             auto cameras = NeoEngine::getComponents<LightComponent>()[0]->getGameObject().getComponentsByType<CameraComponent>();

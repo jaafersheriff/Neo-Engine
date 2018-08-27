@@ -44,7 +44,7 @@ namespace neo {
                 loadFloat(getUniform("bias"), bias);
 
                 /* Bind shadow map */
-                const Texture & texture(*Loader::getTexture("depthTexture"));
+                const Texture & texture(*renderSystem.framebuffers.find("depthMap")->second.get()->textures[0]);
                 CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.textureId));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.textureId));
                 loadInt(getUniform("shadowMap"), texture.textureId);

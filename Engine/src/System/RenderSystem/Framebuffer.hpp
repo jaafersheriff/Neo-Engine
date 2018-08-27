@@ -7,14 +7,16 @@
 
 #include "Model/Texture.hpp"
 
+#include <vector>
+
 namespace neo {
 
     class Framebuffer {
     
-        // TODO - ability to add color render buffers
-        public: 
+       public: 
             GLuint fboId;
             int colorAttachments = 0;
+            std::vector<Texture *> textures;
 
             void generate() {
                 CHECK_GL(glGenFramebuffers(1, &fboId));
@@ -34,18 +36,19 @@ namespace neo {
                 CHECK_GL(glReadBuffer(GL_NONE));
             }
 
-            void attachColorTexture(const Texture &texture) {
-                attachTexture(GL_COLOR_ATTACHMENT0 + colorAttachments++, texture.textureId);
+            void attachColorTexture(Texture &texture) {
+                attachTexture(GL_COLOR_ATTACHMENT0 + colorAttachments++, texture);
             }
 
-            void attachDepthTexture(const Texture &texture) {
-                attachTexture(GL_DEPTH_ATTACHMENT, texture.textureId);
+            void attachDepthTexture(Texture &texture) {
+                attachTexture(GL_DEPTH_ATTACHMENT, texture);
             }
 
         private:
-            void attachTexture(GLuint component, GLuint id) {
+            void attachTexture(GLuint component, Texture &texture) {
+                textures.emplace_back(&texture);
                 bind();
-                CHECK_GL(glFramebufferTexture2D(GL_FRAMEBUFFER, component, GL_TEXTURE_2D, id, 0));
+                CHECK_GL(glFramebufferTexture2D(GL_FRAMEBUFFER, component, GL_TEXTURE_2D, texture.textureId, 0));
                 CHECK_GL_FRAMEBUFFER();
            }
     };

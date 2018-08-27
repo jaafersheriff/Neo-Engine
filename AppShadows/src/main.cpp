@@ -190,7 +190,7 @@ int main() {
     });
     NeoEngine::addImGuiFunc("Shadow Map", [&]() {
         ImGui::SliderFloat("Bias", &receiverShader.bias, -0.002f, 0.002f);
-        auto texture = Loader::getTexture("depthTexture");
+        const Texture * texture(renderSystem->framebuffers.find("depthMap")->second.get()->textures[0]);
         static float scale = 0.1f;
         ImGui::SliderFloat("Scale", &scale, 0.f, 1.f);
         ImGui::Image((ImTextureID)texture->textureId, ImVec2(scale * texture->width, scale * texture->height), ImVec2(0, 1), ImVec2(1, 0));
