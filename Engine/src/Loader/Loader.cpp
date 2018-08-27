@@ -30,6 +30,7 @@ namespace neo {
         /* Static meshes */
         meshes.insert({ "cube", MeshGenerator::createCube() });
         meshes.insert({ "quad", MeshGenerator::createQuad() });
+        meshes.insert({ "sphere", MeshGenerator::createSphere() });
     }
 
     Mesh * Loader::getMesh(const std::string &fileName, bool doResize) {

@@ -1,6 +1,8 @@
 
 #include "Model/Mesh.hpp"
 
+#include "Util/Util.hpp"
+
 namespace neo {
 
     class MeshGenerator {
@@ -124,6 +126,47 @@ namespace neo {
                     }, {}, {}, GL_TRIANGLE_STRIP);
             }
 
+            // From https://stackoverflow.com/questions/5988686/creating-a-3d-sphere-in-opengl-using-visual-c/5989676#5989676
+            static Mesh * createSphere(float radius = 1.f, int rings = 30, int sectors = 30) {
+                std::vector<float> vertices, normals, texcoords;
+                std::vector<unsigned> indices;
+
+                float const R = 1.f/(float)(rings-1);
+                float const S = 1.f/(float)(sectors-1);
+
+                for(int r = 0; r < rings; ++r) {
+                    for(int s = 0; s < sectors; ++s) {
+                        texcoords.push_back(s*S);
+                        texcoords.push_back(r*R);
+
+                        glm::vec3 vert = glm::normalize(glm::vec3(
+                            glm::cos(2*Util::PI() * s * S) * glm::sin( Util::PI() * r * R ),
+                            glm::sin( -Util::PI()/2 + Util::PI() * r * R ),
+                            glm::sin(2*Util::PI() * s * S) * glm::sin( Util::PI() * r * R )));
+
+                        vertices.push_back(vert.x * radius);
+                        vertices.push_back(vert.y * radius);
+                        vertices.push_back(vert.z * radius);
+                        normals.push_back(vert.x);
+                        normals.push_back(vert.y);
+                        normals.push_back(vert.z);
+
+                        int curRow = r * sectors;
+                        int nextRow = (r+1) * sectors;
+
+                        indices.push_back(curRow + s);
+                        indices.push_back(nextRow + s);
+                        indices.push_back(nextRow + (s+1));
+
+                        indices.push_back(curRow + s);
+                        indices.push_back(nextRow + (s+1));
+                        indices.push_back(curRow + (s+1));
+                    }
+                }
+
+                return createMesh(vertices, normals, texcoords, indices);
+ 
+            }
     };
 
 }
