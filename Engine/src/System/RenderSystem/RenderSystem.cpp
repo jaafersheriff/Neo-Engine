@@ -43,6 +43,8 @@ namespace neo {
         /* Render all scene shaders */
         renderScene(*defaultCamera);
 
+        // TODO : post process stack
+
         /* Render imgui */
         if (NeoEngine::imGuiEnabled) {
             ImGui::Render();

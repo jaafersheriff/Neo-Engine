@@ -174,11 +174,11 @@ int main() {
     NeoEngine::initSystems();
 
     /* Add shaders */
-    renderSystem->addShader<ShadowCasterShader, ShaderTypes::PREPROCESS>("caster.vert", "caster.frag");
-    renderSystem->addShader<LineShader>();
-    renderSystem->addShader<PhongShader>();
-    ShadowReceiverShader & receiverShader = renderSystem->addShader<ShadowReceiverShader>("receiver.vert", "receiver.frag");
-    renderSystem->addShader<WireframeShader>();
+    renderSystem->addPreProcessShader<ShadowCasterShader>("caster.vert", "caster.frag");
+    renderSystem->addSceneShader<LineShader>();
+    renderSystem->addSceneShader<PhongShader>();
+    ShadowReceiverShader & receiverShader = renderSystem->addSceneShader<ShadowReceiverShader>("receiver.vert", "receiver.frag");
+    renderSystem->addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {

@@ -14,12 +14,6 @@ namespace neo {
     class RenderSystem;
     class CameraComponent;
 
-    enum ShaderTypes {
-        PREPROCESS,
-        SCENE,
-        POSTPROCESS
-    };
-
     class Shader {
 
         public:
