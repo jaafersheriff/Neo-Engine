@@ -30,8 +30,8 @@ namespace neo {
                 bind();
 
                 /* Load PV */
-                loadMatrix(getUniform("P"), camera.getProj());
-                loadMatrix(getUniform("V"), camera.getView());
+                loadUniform("P", camera.getProj());
+                loadUniform("V", camera.getView());
 
                 for (auto r : renderSystem.getRenderables<WireframeShader, RenderableComponent>()) {
                     /* Bind mesh */
@@ -39,7 +39,7 @@ namespace neo {
                     CHECK_GL(glBindVertexArray(mesh.vaoId));
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
-                    loadMatrix(getUniform("M"), r->getGameObject().getSpatial()->getModelMatrix());
+                    loadUniform("M", r->getGameObject().getSpatial()->getModelMatrix());
 
                     /* Draw outline */
                     CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));

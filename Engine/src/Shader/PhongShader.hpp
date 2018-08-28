@@ -78,21 +78,21 @@ class PhongShader : public Shader {
             bind();
 
             /* Load PV */
-            loadMatrix(getUniform("P"), camera.getProj());
-            loadMatrix(getUniform("V"), camera.getView());
-            loadVector(getUniform("camPos"), camera.getGameObject().getSpatial()->getPosition());
+            loadUniform("P", camera.getProj());
+            loadUniform("V", camera.getView());
+            loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load light */
             auto lights = NeoEngine::getComponents<LightComponent>();
             if (lights.size()) {
-                loadVector(getUniform("lightPos"), lights.at(0)->getGameObject().getSpatial()->getPosition());
-                loadVector(getUniform("lightCol"), lights.at(0)->getColor());
-                loadVector(getUniform("lightAtt"), lights.at(0)->getAttenuation());
+                loadUniform("lightPos", lights.at(0)->getGameObject().getSpatial()->getPosition());
+                loadUniform("lightCol", lights.at(0)->getColor());
+                loadUniform("lightAtt", lights.at(0)->getAttenuation());
             }
 
             for (auto model : renderSystem.getRenderables<PhongShader, RenderableComponent>()) {
-                loadMatrix(getUniform("M"), model->getGameObject().getSpatial()->getModelMatrix());
-                loadMatrix(getUniform("N"), model->getGameObject().getSpatial()->getNormalMatrix());
+                loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
+                loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
 
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());
@@ -104,21 +104,21 @@ class PhongShader : public Shader {
                 if (texComp) {
                     auto texture = (Texture2D &) (texComp->getTexture());
                     texture.bind();
-                    loadInt(getUniform("diffuseMap"), texture.textureId);
-                    loadBool(getUniform("useTexture"), true);
+                    loadUniform("diffuseMap", texture.textureId);
+                    loadUniform("useTexture", true);
                 }
                 else {
-                    loadBool(getUniform("useTexture"), false);
+                    loadUniform("useTexture", false);
                 }
 
                 /* Bind material */
                 auto matComp = model->getGameObject().getComponentByType<MaterialComponent>();
                 if (matComp) {
                     const Material & material(matComp->getMaterial());
-                    loadFloat(getUniform("ambient"), material.ambient);
-                    loadVector(getUniform("diffuseColor"), material.diffuse);
-                    loadVector(getUniform("specularColor"), material.specular);
-                    loadFloat(getUniform("shine"), material.shine);
+                    loadUniform("ambient", material.ambient);
+                    loadUniform("diffuseColor", material.diffuse);
+                    loadUniform("specularColor", material.specular);
+                    loadUniform("shine", material.shine);
                 }
 
                 /* DRAW */

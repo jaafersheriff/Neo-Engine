@@ -171,7 +171,7 @@ namespace neo {
         uniforms[name] = r;
     }
 
-    GLint Shader::getAttribute(const std::string &name) {
+    GLint Shader::getAttribute(const std::string &name) const {
         std::map<std::string, GLint>::const_iterator attribute = attributes.find(name.c_str());
         if (attribute == attributes.end()) {
             std::cerr << name << " is not an attribute variable" << std::endl;
@@ -180,7 +180,7 @@ namespace neo {
         return attribute->second;
     }
 
-    GLint Shader::getUniform(const std::string &name) {
+    GLint Shader::getUniform(const std::string &name) const {
         std::map<std::string, GLint>::const_iterator uniform = uniforms.find(name.c_str());
         if (uniform == uniforms.end()) {
             std::cerr << name << " is not an uniform variable" << std::endl;
@@ -200,35 +200,39 @@ namespace neo {
         CHECK_GL(glDeleteProgram(pid));
     }
 
-    void Shader::loadBool(const int location, const bool b) const {
-        CHECK_GL(glUniform1i(location, b));
+    void Shader::loadUniform(const std::string &loc, const bool b) const {
+        CHECK_GL(glUniform1i(getUniform(loc), b));
     }
 
-    void Shader::loadInt(const int location, const int i) const {
-        CHECK_GL(glUniform1i(location, i));
+    void Shader::loadUniform(const std::string &loc, const int i) const {
+        CHECK_GL(glUniform1i(getUniform(loc), i));
     }
 
-    void Shader::loadFloat(const int location, const float f) const {
-        CHECK_GL(glUniform1f(location, f));
+    void Shader::loadUniform(const std::string &loc, const GLuint i) const {
+        CHECK_GL(glUniform1i(getUniform(loc), i));
     }
 
-    void Shader::loadVector(const int location, const glm::vec2 & v) const {
-        CHECK_GL(glUniform2f(location, v.x, v.y));
+    void Shader::loadUniform(const std::string &loc, const float f) const {
+        CHECK_GL(glUniform1f(getUniform(loc), f));
     }
 
-    void Shader::loadVector(const int location, const glm::vec3 & v) const {
-        CHECK_GL(glUniform3f(location, v.x, v.y, v.z));
+    void Shader::loadUniform(const std::string &loc, const glm::vec2 & v) const {
+        CHECK_GL(glUniform2f(getUniform(loc), v.x, v.y));
     }
 
-    void Shader::loadVector(const int location, const glm::vec4 & v) const {
-        CHECK_GL(glUniform4f(location, v.r, v.g, v.b, v.a));
+    void Shader::loadUniform(const std::string &loc, const glm::vec3 & v) const {
+        CHECK_GL(glUniform3f(getUniform(loc), v.x, v.y, v.z));
     }
 
-    void Shader::loadMatrix(const int location, const glm::mat3 & m) const {
-        CHECK_GL(glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(m)));
+    void Shader::loadUniform(const std::string &loc, const glm::vec4 & v) const {
+        CHECK_GL(glUniform4f(getUniform(loc), v.r, v.g, v.b, v.a));
     }
 
-    void Shader::loadMatrix(const int location, const glm::mat4 & m) const {
-        CHECK_GL(glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m)));
+    void Shader::loadUniform(const std::string &loc, const glm::mat3 & m) const {
+        CHECK_GL(glUniformMatrix3fv(getUniform(loc), 1, GL_FALSE, glm::value_ptr(m)));
+    }
+
+    void Shader::loadUniform(const std::string &loc, const glm::mat4 & m) const {
+        CHECK_GL(glUniformMatrix4fv(getUniform(loc), 1, GL_FALSE, glm::value_ptr(m)));
     }
 }

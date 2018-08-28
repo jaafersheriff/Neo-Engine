@@ -35,8 +35,8 @@ namespace neo {
                 bind();
 
                 /* Load PV */
-                loadMatrix(getUniform("P"), camera.getProj());
-                loadMatrix(getUniform("V"), camera.getView());
+                loadUniform("P", camera.getProj());
+                loadUniform("V", camera.getView());
 
                 for (auto lineR : renderSystem.getRenderables<LineShader, LineRenderable>()) {
                     /* Bind mesh */
@@ -45,8 +45,8 @@ namespace neo {
                     CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.vertBufId));
 
                     auto spatial = lineR->getGameObject().getSpatial();
-                    loadMatrix(getUniform("M"), spatial ? spatial->getModelMatrix() : glm::mat4(1.f));
-                    loadVector(getUniform("lineColor"), lineR->line->lineColor);
+                    loadUniform("M", spatial ? spatial->getModelMatrix() : glm::mat4(1.f));
+                    loadUniform("lineColor", lineR->line->lineColor);
 
                     mesh.draw(lineR->line->getNodes().size());
                 }
