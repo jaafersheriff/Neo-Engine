@@ -21,9 +21,11 @@
       <SDLCheck>true</SDLCheck>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions); _CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)\Engine\build\Release\Engine.lib;C:\OpenGL\glfw-3.2.1\debug\src\Debug\glfw3.lib;C:\OpenGL\glew-2.1.0\lib\Release\Win32\glew32s.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)\Engine\build\Release\Engine.lib;C:\OpenGL\glfw-3.2.1\debug\src\Release\glfw3.lib;C:\OpenGL\glew-2.1.0\lib\Release\Win32\glew32s.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />
