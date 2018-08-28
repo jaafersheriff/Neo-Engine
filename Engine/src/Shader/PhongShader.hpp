@@ -9,11 +9,11 @@ using namespace neo;
 
 class PhongShader : public Shader {
 
-    public: 
-    
-        PhongShader(RenderSystem &r) :
-            Shader("Phong Shader", 
-                "#version 330 core\n\
+public:
+
+    PhongShader(RenderSystem &r) :
+        Shader("Phong Shader",
+            "#version 330 core\n\
                 layout(location = 0) in vec3 vertPos;\
                 layout(location = 1) in vec3 vertNor;\
                 layout(location = 2) in vec2 vertTex;\
@@ -28,7 +28,7 @@ class PhongShader : public Shader {
                     fragTex = vertTex;\
                     gl_Position = P * V * fragPos;\
                 }",
-                "#version 330 core\n\
+            "#version 330 core\n\
                 in vec4 fragPos;\
                 in vec3 fragNor;\
                 in vec2 fragTex;\
@@ -44,6 +44,15 @@ class PhongShader : public Shader {
                 uniform vec3 lightAtt;\
                 out vec4 color;\
                 void main() {\
+                    vec3 albedo = diffuseColor;\
+                    if (useTexture) {\
+                        vec4 texColor = texture(diffuseMap, fragTex);\
+                        if (texColor.a < 0.1f) {\
+                            discard;\
+                        }\
+                        albedo = texColor.rgb;\
+                    }\
+                    color.a = 1.f;\
                     vec3 N = normalize(fragNor);\
                     vec3 viewDir = camPos - fragPos.xyz;\
                     vec3 V = normalize(viewDir);\
@@ -58,18 +67,8 @@ class PhongShader : public Shader {
                     vec3 H = normalize(L + V);\
                     vec3 diffuseContrib  = lightCol * max(lambert, 0.0f) / attFactor;\
                     vec3 specularContrib = lightCol * pow(max(dot(H, N), 0.0), shine) / attFactor;\
-                    vec3 diffColor = diffuseColor;\
-                    color.a = 1.f;\
-                    if (useTexture) {\
-                        vec4 texColor = texture(diffuseMap, fragTex);\
-                        if (texColor.a < 0.1) {\
-                            discard;\
-                        }\
-                        diffColor = texColor.rgb;\
-                        color.a = texColor.a;\
-                    }\
-                    color.rgb = diffColor.rgb * ambient +\
-                                diffColor.rgb * diffuseContrib +\
+                    color.rgb = albedo * ambient +\
+                                albedo * diffuseContrib +\
                                 specularColor * specularContrib;\
                     }")
         {}
