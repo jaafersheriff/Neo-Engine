@@ -46,11 +46,10 @@ public:
                 void main() {\
                     vec4 albedo = vec4(diffuseColor, 1.f);\
                     if (useTexture) {\
-                        vec4 texColor = texture(diffuseMap, fragTex);\
-                        if (texColor.a < 0.1f) {\
+                        albedo = texture(diffuseMap, fragTex);\
+                        if (albedo.a < 0.1f) {\
                             discard;\
                         }\
-                        albedo = texColor;\
                     }\
                     vec3 N = normalize(fragNor);\
                     vec3 viewDir = camPos - fragPos.xyz;\
