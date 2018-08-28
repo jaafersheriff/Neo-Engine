@@ -44,15 +44,14 @@ public:
                 uniform vec3 lightAtt;\
                 out vec4 color;\
                 void main() {\
-                    vec3 albedo = diffuseColor;\
+                    vec4 albedo = vec4(diffuseColor, 1.f);\
                     if (useTexture) {\
                         vec4 texColor = texture(diffuseMap, fragTex);\
                         if (texColor.a < 0.1f) {\
                             discard;\
                         }\
-                        albedo = texColor.rgb;\
+                        albedo = texColor;\
                     }\
-                    color.a = 1.f;\
                     vec3 N = normalize(fragNor);\
                     vec3 viewDir = camPos - fragPos.xyz;\
                     vec3 V = normalize(viewDir);\
@@ -67,9 +66,10 @@ public:
                     vec3 H = normalize(L + V);\
                     vec3 diffuseContrib  = lightCol * max(lambert, 0.0f) / attFactor;\
                     vec3 specularContrib = lightCol * pow(max(dot(H, N), 0.0), shine) / attFactor;\
-                    color.rgb = albedo * ambient +\
-                                albedo * diffuseContrib +\
+                    color.rgb = albedo.rgb * ambient +\
+                                albedo.rgb * diffuseContrib +\
                                 specularColor * specularContrib;\
+                    color.a = albedo.a;\
                     }")
         {}
 
