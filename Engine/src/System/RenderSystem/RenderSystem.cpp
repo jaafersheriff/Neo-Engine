@@ -21,7 +21,7 @@ namespace neo {
         CHECK_GL(glViewport(0, 0, Window::getFrameSize().x, Window::getFrameSize().y));
 
         /* Init default FBO */
-        defaultFBO = createFBO("default");
+        defaultFBO = getFBO("default");
         defaultFBO->fboId = 0;
     }
 
@@ -61,7 +61,7 @@ namespace neo {
         }
     }
 
-    Framebuffer * RenderSystem::createFBO(const std::string &name) {
+    Framebuffer * RenderSystem::getFBO(const std::string &name) {
         auto it = framebuffers.find(name);
         if (it == framebuffers.end()) {
             framebuffers.emplace(name, std::make_unique<Framebuffer>());

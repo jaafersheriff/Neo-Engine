@@ -22,7 +22,7 @@ class ShadowCasterShader : public Shader {
             CHECK_GL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data()));
             CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
 
-            Framebuffer *depthFBO = rSystem.createFBO("depthMap");
+            Framebuffer *depthFBO = rSystem.getFBO("depthMap");
             depthFBO->generate();
             depthFBO->attachDepthTexture(*depthTexture);
             depthFBO->disableDraw();

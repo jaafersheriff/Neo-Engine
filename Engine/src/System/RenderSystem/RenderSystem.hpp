@@ -33,7 +33,7 @@ namespace neo {
 
             /* FBO */
             std::unordered_map<std::string, std::unique_ptr<Framebuffer>> framebuffers;
-            Framebuffer * createFBO(const std::string &);
+            Framebuffer * getFBO(const std::string &);
 
             /* Shaders */
             std::vector<std::unique_ptr<Shader>> preShaders;
