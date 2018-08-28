@@ -52,29 +52,30 @@ namespace neo {
         private:
             CameraComponent *defaultCamera;
             Framebuffer *defaultFBO;
+            template <typename ShaderT, typename... Args> std::unique_ptr<ShaderT> createShader(Args &&...);
     };
 
     /* Template implementation */
     template <typename ShaderT, typename... Args>
     ShaderT & RenderSystem::addPreProcessShader(Args &&... args) {
-        static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
-        static_assert(!std::is_same<Shader, ShaderT>::value, "ShaderT must be a derived Shader type");
-        preShaders.emplace_back(std::make_unique<ShaderT>(*this, std::forward<Args>(args)...));
+        preShaders.emplace_back(createShader<ShaderT>(std::forward<Args>(args)...));
         return static_cast<ShaderT &>(*preShaders.back());
     }
     template <typename ShaderT, typename... Args>
     ShaderT & RenderSystem::addSceneShader(Args &&... args) {
-        static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
-        static_assert(!std::is_same<Shader, ShaderT>::value, "ShaderT must be a derived Shader type");
-        sceneShaders.emplace_back(std::make_unique<ShaderT>(*this, std::forward<Args>(args)...));
+        sceneShaders.emplace_back(createShader<ShaderT>(std::forward<Args>(args)...));
         return static_cast<ShaderT &>(*sceneShaders.back());
     }
     template <typename ShaderT, typename... Args>
     ShaderT & RenderSystem::addPostProcessShader(Args &&... args) {
+        postShaders.emplace_back(createShader<ShaderT>(std::forward<Args>(args)...));
+        return static_cast<ShaderT &>(*postShaders.back());
+    }
+    template <typename ShaderT, typename... Args>
+    std::unique_ptr<ShaderT> RenderSystem::createShader(Args &&... args) {
         static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
         static_assert(!std::is_same<Shader, ShaderT>::value, "ShaderT must be a derived Shader type");
-        postShaders.emplace_back(std::make_unique<ShaderT>(*this, std::forward<Args>(args)...));
-        return static_cast<ShaderT &>(*postShaders.back());
+        return std::make_unique<ShaderT>(*this, std::forward<Args>(args)...);
     }
 
     template <typename ShaderT, typename CompT> 
