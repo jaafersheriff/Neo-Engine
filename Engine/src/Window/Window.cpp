@@ -3,6 +3,7 @@
 #include "Keyboard.hpp"
 
 #include "NeoEngine.hpp"
+#include "Messaging/Messenger.hpp"
 
 #include "ext/imgui/imgui_impl_glfw_gl3.h"
 
@@ -102,8 +103,7 @@ namespace neo {
         }
 
         frameSize.x = width; frameSize.y = height;
-        /* Set viewport to window size */
-        glViewport(0, 0, width, height);
+        Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, frameSize);
     }
 
     void Window::cursorEnterCallback(GLFWwindow * window, int entered) {

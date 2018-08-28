@@ -2,6 +2,7 @@
 #include "GLHelper/GLHelper.hpp"
 
 #include "NeoEngine.hpp"
+#include "Messaging/Messenger.hpp"
 
 #include "Component/ModelComponent/RenderableComponent.hpp"
 #include "Window/Window.hpp"
@@ -19,6 +20,10 @@ namespace neo {
 
         /* Init GL window */
         CHECK_GL(glViewport(0, 0, Window::getFrameSize().x, Window::getFrameSize().y));
+        Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+            const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+            CHECK_GL(glViewport(0, 0, m.frameSize.x, m.frameSize.y));
+        });
 
         /* Init default FBO */
         defaultFBO = getFBO("default");
@@ -37,8 +42,6 @@ namespace neo {
         defaultFBO->bind();
         CHECK_GL(glClearColor(0.2f, 0.3f, 0.4f, 1.f));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-        glm::ivec2 size = Window::getFrameSize();
-        CHECK_GL(glViewport(0, 0, size.x, size.y));
  
         /* Render all scene shaders */
         renderScene(*defaultCamera);

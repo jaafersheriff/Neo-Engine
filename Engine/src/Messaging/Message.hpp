@@ -62,28 +62,12 @@ namespace neo {
 
 
 
-    // // a game object was initialized. This is sent out after Scene's init queue is finished
-    // struct ObjectInitMessage : public Message {
-    //     ObjectInitMessage() {}
-    // };
-
-
 
     /* A spatiality was changed in some way */
     struct SpatialChangeMessage : public Message {
         const SpatialComponent & spatial;
         SpatialChangeMessage(const SpatialComponent & spatial) : spatial(spatial) {}
     };
-
-
-
-    // // a camera was rotated
-    // struct CameraRotatedMessage : public Message {
-    //     const CameraComponent & camera;
-    //     CameraRotatedMessage(const CameraComponent & camera) : camera(camera) {}
-    // };
-
-
 
     /* The window was resized */
     struct WindowFrameSizeMessage : public Message {

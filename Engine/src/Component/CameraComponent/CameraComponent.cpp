@@ -43,6 +43,12 @@ namespace neo {
         Messenger::addReceiver<SpatialChangeMessage>(gameObject, [&](const Message & msg_) {
             viewMatDirty = true;
         });
+
+        if (!isOrtho) {
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&] (const Message & msg_) {
+                projMatDirty = true;
+            });
+        }
     }
 
     void CameraComponent::setLookAt(SpatialComponent *spat) {
