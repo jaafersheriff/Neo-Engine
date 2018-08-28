@@ -1,3 +1,11 @@
+// allows program to be run on dedicated graphics processor for laptops with
+// both integrated and dedicated graphics using Nvidia Optimus
+#ifdef _WIN32
+extern "C" {
+    _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
+}
+#endif
+
 #include "NeoEngine.hpp"
 
 #include "GameObject/GameObject.hpp"
