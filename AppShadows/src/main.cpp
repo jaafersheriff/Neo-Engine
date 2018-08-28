@@ -161,6 +161,7 @@ int main() {
     Renderable casterA(Loader::getMesh("mr_krab.obj"), glm::vec3(0.f, 3.f, 0.f), glm::vec3(3.f));
     casterA.renderable->addShaderType<ShadowCasterShader>();
     casterA.renderable->addShaderType<ShadowReceiverShader>();
+    NeoEngine::addComponent<TextureComponent>(casterA.gameObject, Loader::getTexture("mr_krab.png"));
     casterA.attachImGui("CasterA");
 
     Renderable receiver(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));

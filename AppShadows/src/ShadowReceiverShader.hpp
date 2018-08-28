@@ -58,6 +58,18 @@ namespace neo {
                     CHECK_GL(glBindVertexArray(mesh.vaoId));
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
+                    /* Bind texture */
+                    auto texComp = model->getGameObject().getComponentByType<TextureComponent>();
+                    if (texComp) {
+                        auto texture = (Texture2D &) (texComp->getTexture());
+                        texture.bind();
+                        loadUniform("diffuseMap", texture.textureId);
+                        loadUniform("useTexture", true);
+                    }
+                    else {
+                        loadUniform("useTexture", false);
+                    }
+
                     /* Bind material */
                     auto materialComp = model->getGameObject().getComponentByType<MaterialComponent>();
                     if (materialComp) {

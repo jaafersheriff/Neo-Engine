@@ -5,12 +5,13 @@ in vec3 fragNor;
 in vec2 fragTex;
 in vec4 shadowCoord;
 
-uniform float bias;
-
 uniform float ambient;
 uniform vec3 diffuseColor;
 uniform vec3 specularColor;
 uniform float shine;
+
+uniform bool useTexture;
+uniform sampler2D diffuseMap;
 
 uniform vec3 camPos;
 
@@ -19,10 +20,19 @@ uniform vec3 lightCol;
 uniform vec3 lightAtt;
 
 uniform sampler2D shadowMap;
+uniform float bias;
 
 out vec4 color;
 
 void main() {
+    vec4 albedo = vec4(diffuseColor, 1.f);
+    if (useTexture) {
+        albedo = texture(diffuseMap, fragTex);
+        if (albedo.a < 0.1f) {
+            discard;
+        }
+    }
+
     vec3 N = normalize(fragNor);
     vec3 viewDir = camPos - fragPos.xyz;
     vec3 V = normalize(viewDir);
@@ -47,8 +57,9 @@ void main() {
     if (texture(shadowMap, shadowCoord.xy).r < shadowCoord.z - Tbias) {
         visibility = 0.f;
     }
-    color.rgb = diffuseColor * ambient + 
-                visibility * diffuseColor * diffuseContrib + 
+
+    color.rgb = albedo.rgb * ambient + 
+                visibility * albedo.rgb * diffuseContrib + 
                 visibility * specularColor * specularContrib;
-    color.a = 1;
+    color.a = albedo.a;
 }
