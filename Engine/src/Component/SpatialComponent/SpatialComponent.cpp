@@ -33,12 +33,20 @@ namespace neo {
     }
 
     void SpatialComponent::move(const glm::vec3 & delta) {
+        if (glm::length(delta) == 0.f) {
+            return;
+        }
+
         position += delta;
         modelMatrixDirty = true;
         Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
     }
 
     void SpatialComponent::resize(const glm::vec3 & factor) {
+        if (factor == glm::vec3(1.f)) {
+            return;
+        }
+
         scale *= factor;
         modelMatrixDirty = true;
         normalMatrixDirty = true;
@@ -53,12 +61,20 @@ namespace neo {
     }
 
     void SpatialComponent::setPosition(const glm::vec3 & loc) {
+        if (position == loc) {
+            return;
+        }
+
         position = loc;
         modelMatrixDirty = true;
         Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
     }
 
     void SpatialComponent::setScale(const glm::vec3 & scale) {
+        if (this->scale == scale) {
+            return;
+        }
+
         this->scale = scale;
         modelMatrixDirty = true;
         normalMatrixDirty = true;

@@ -5,8 +5,6 @@
 #include "SnowShader.hpp"
 #include "Shader/LineShader.hpp"
 
-#include "Util/Util.hpp"
-
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -125,14 +123,14 @@ int main() {
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
-    auto snowShader = &renderSystem->addShader<SnowShader>("snow.vert", "snow.frag");
-    renderSystem->addShader<LineShader>();
+    auto snowShader = &renderSystem->addSceneShader<SnowShader>("snow.vert", "snow.frag");
+    renderSystem->addSceneShader<LineShader>();
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", NeoEngine::FPS);
-        ImGui::Text("dt: %0.4f", NeoEngine::timeStep);
+        ImGui::Text("FPS: %d", Util::FPS);
+        ImGui::Text("dt: %0.4f", Util::timeStep);
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
         }

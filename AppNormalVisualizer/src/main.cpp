@@ -2,8 +2,9 @@
 
 #include "CustomSystem.hpp"
 
-#include "Shader/DiffuseShader.hpp"
+#include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
+
 #include "NormalShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -14,7 +15,7 @@ using namespace neo;
 RenderSystem * renderSystem;
 
 /* Shaders */
-DiffuseShader *diffuseShader;
+PhongShader *phongShader;
 NormalShader *normalShader;
 WireframeShader *wireframeShader;
 
@@ -63,14 +64,14 @@ struct Orient {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<DiffuseShader>();
+        renderable->addShaderType<PhongShader>();
         renderable->addShaderType<WireframeShader>();
         renderable->addShaderType<NormalShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
             ImGui::SliderFloat("Ambient ", &material.ambient, 0.f, 1.f);
-            ImGui::SliderFloat3("Diffuse Color", glm::value_ptr(material.diffuse), 0.f, 1.f);
+            ImGui::SliderFloat3("Phong Color", glm::value_ptr(material.diffuse), 0.f, 1.f);
             ImGui::SliderFloat3("Specular Color", glm::value_ptr(material.specular), 0.f, 1.f);
             ImGui::SliderFloat("Shine", &material.shine, 0.f, 100.f);
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -104,21 +105,21 @@ int main() {
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
-    diffuseShader = &renderSystem->addShader<DiffuseShader>();
-    wireframeShader = &renderSystem->addShader<WireframeShader>();
-    normalShader = &renderSystem->addShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
+    phongShader = &renderSystem->addSceneShader<PhongShader>();
+    wireframeShader = &renderSystem->addSceneShader<WireframeShader>();
+    normalShader = &renderSystem->addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", NeoEngine::FPS);
-        ImGui::Text("dt: %0.4f", NeoEngine::timeStep);
+        ImGui::Text("FPS: %d", Util::FPS);
+        ImGui::Text("dt: %0.4f", Util::timeStep);
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
         }
     });
     NeoEngine::addImGuiFunc("Renderer", [&]() {
-        ImGui::Checkbox("Diffuse", &diffuseShader->active);
+        ImGui::Checkbox("Phong", &phongShader->active);
         ImGui::Checkbox("Wire", &wireframeShader->active);
         ImGui::Checkbox("Normal", &normalShader->active);
         if (normalShader->active) {

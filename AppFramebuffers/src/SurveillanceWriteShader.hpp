@@ -1,11 +1,11 @@
 #pragma once
 
-using namespace neo;
-
 #include <NeoEngine.hpp>
 #include "Shader/Shader.hpp"
 
 #include "SurveillanceCamera.hpp"
+
+using namespace neo;
 
 class SurveillanceWriteShader : public Shader {
     public: 

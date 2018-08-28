@@ -22,13 +22,13 @@ namespace neo {
     std::vector<std::pair<std::type_index, Component *>> NeoEngine::componentKillQueue;
 
     /* FPS */
-    int NeoEngine::FPS = 0;
-    int NeoEngine::nFrames = 0;
-    int NeoEngine::totalFrames = 0;
-    double NeoEngine::timeStep = 0.0;
-    double NeoEngine::lastFPSTime = 0.0;
-    double NeoEngine::lastFrameTime = 0.0;
-    double NeoEngine::runTime = 0.0;
+    int Util::FPS = 0;
+    int Util::nFrames = 0;
+    int Util::totalFrames = 0;
+    double Util::timeStep = 0.0;
+    double Util::lastFPSTime = 0.0;
+    double Util::lastFrameTime = 0.0;
+    double Util::runTime = 0.0;
 
     /* ImGui */
     bool NeoEngine::imGuiEnabled = true;
@@ -48,8 +48,8 @@ namespace neo {
         /* Init loader after initializing GL*/
         Loader::init(app_res, true);
 
-        /* Init FPS */
-        lastFrameTime = runTime = glfwGetTime();
+        /* Init Util */
+        Util::init();
    }
 
     void NeoEngine::initSystems() {
@@ -61,8 +61,8 @@ namespace neo {
     void NeoEngine::run() {
 
         while (!Window::shouldClose()) {
-            /* Update delta time and FPS */
-            updateFPS();
+            /* Update Util */
+            Util::update();
 
             /* Update display, mouse, keyboard */
             Window::update();
@@ -79,11 +79,12 @@ namespace neo {
                     ImGui::End();
                 }
             }
+            Messenger::relayMessages();
 
             /* Update each system */
             for (auto & system : systems) {
                 if (system.second->active) {
-                    system.second->update((float)timeStep);
+                    system.second->update((float)Util::timeStep);
                     Messenger::relayMessages();
                 }
             }
@@ -211,16 +212,4 @@ namespace neo {
         Window::shutDown();
     }
 
-    void NeoEngine::updateFPS() {
-        runTime = glfwGetTime();
-        totalFrames++;
-        timeStep = runTime - lastFrameTime;
-        lastFrameTime = runTime;
-        nFrames++;
-        if (runTime - lastFPSTime >= 1.0) {
-            FPS = nFrames;
-            nFrames = 0;
-            lastFPSTime = runTime;
-        }
-    }
 }

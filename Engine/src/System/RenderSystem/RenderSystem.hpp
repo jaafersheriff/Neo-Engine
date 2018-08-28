@@ -2,7 +2,7 @@
 
 #include "System/System.hpp"
 #include "Shader/Shader.hpp"
-#include "Framebuffer.hpp"
+#include "GLHelper/Framebuffer.hpp"
 
 #include <unordered_map>
 #include <typeindex>
@@ -38,7 +38,10 @@ namespace neo {
             /* Shaders */
             std::vector<std::unique_ptr<Shader>> preShaders;
             std::vector<std::unique_ptr<Shader>> sceneShaders;
-            template <typename ShaderT, ShaderTypes = SCENE, typename... Args> ShaderT & addShader(Args &&...);
+            std::vector<std::unique_ptr<Shader>> postShaders;
+            template <typename ShaderT, typename... Args> ShaderT & addPreProcessShader(Args &&...);
+            template <typename ShaderT, typename... Args> ShaderT & addSceneShader(Args &&...);
+            template <typename ShaderT, typename... Args> ShaderT & addPostProcessShader(Args &&...);
 
             /* Map of Shader type to vector<RenderableComponent *> */
             mutable std::unordered_map<std::type_index, std::unique_ptr<std::vector<RenderableComponent *>>> renderables;
@@ -49,24 +52,30 @@ namespace neo {
         private:
             CameraComponent *defaultCamera;
             Framebuffer *defaultFBO;
+            template <typename ShaderT, typename... Args> std::unique_ptr<ShaderT> createShader(Args &&...);
     };
 
     /* Template implementation */
-    template <typename ShaderT, ShaderTypes type, typename... Args>
-    ShaderT & RenderSystem::addShader(Args &&... args) {
+    template <typename ShaderT, typename... Args>
+    ShaderT & RenderSystem::addPreProcessShader(Args &&... args) {
+        preShaders.emplace_back(createShader<ShaderT>(std::forward<Args>(args)...));
+        return static_cast<ShaderT &>(*preShaders.back());
+    }
+    template <typename ShaderT, typename... Args>
+    ShaderT & RenderSystem::addSceneShader(Args &&... args) {
+        sceneShaders.emplace_back(createShader<ShaderT>(std::forward<Args>(args)...));
+        return static_cast<ShaderT &>(*sceneShaders.back());
+    }
+    template <typename ShaderT, typename... Args>
+    ShaderT & RenderSystem::addPostProcessShader(Args &&... args) {
+        postShaders.emplace_back(createShader<ShaderT>(std::forward<Args>(args)...));
+        return static_cast<ShaderT &>(*postShaders.back());
+    }
+    template <typename ShaderT, typename... Args>
+    std::unique_ptr<ShaderT> RenderSystem::createShader(Args &&... args) {
         static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
         static_assert(!std::is_same<Shader, ShaderT>::value, "ShaderT must be a derived Shader type");
-        switch (type) {
-            case ShaderTypes::PREPROCESS:
-                preShaders.emplace_back(std::make_unique<ShaderT>(*this, std::forward<Args>(args)...));
-                return static_cast<ShaderT &>(*preShaders.back());
-            case ShaderTypes::POSTPROCESS:
-                // TODO
-            case ShaderTypes::SCENE:
-            default:
-                sceneShaders.emplace_back(std::make_unique<ShaderT>(*this, std::forward<Args>(args)...));
-                return static_cast<ShaderT &>(*sceneShaders.back());
-        }
+        return std::make_unique<ShaderT>(*this, std::forward<Args>(args)...);
     }
 
     template <typename ShaderT, typename CompT> 

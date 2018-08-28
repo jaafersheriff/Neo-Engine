@@ -14,12 +14,6 @@ namespace neo {
     class RenderSystem;
     class CameraComponent;
 
-    enum ShaderTypes {
-        PREPROCESS,
-        SCENE,
-        POSTPROCESS
-    };
-
     class Shader {
 
         public:
@@ -44,18 +38,19 @@ namespace neo {
             void addUniform(const std::string &);
 
             /* Parent load functions */
-            void loadBool(const int, const bool) const;
-            void loadInt(const int, const int) const;
-            void loadFloat(const int, const float) const;
-            void loadVector(const int, const glm::vec2 &) const;
-            void loadVector(const int, const glm::vec3 &) const;
-            void loadVector(const int, const glm::vec4 &) const;
-            void loadMatrix(const int, const glm::mat4 &) const;
-            void loadMatrix(const int, const glm::mat3 &) const;
+            void loadUniform(const std::string &, const bool) const;          // bool
+            void loadUniform(const std::string &, const int) const;           // int
+            void loadUniform(const std::string &, const GLuint) const;        // GLuint
+            void loadUniform(const std::string &, const float) const;         // float
+            void loadUniform(const std::string &, const glm::vec2 &) const;   // vec2
+            void loadUniform(const std::string &, const glm::vec3 &) const;   // vec3
+            void loadUniform(const std::string &, const glm::vec4 &) const;   // vec4
+            void loadUniform(const std::string &, const glm::mat3 &) const;   // mat3
+            void loadUniform(const std::string &, const glm::mat4 &) const;   // mat4
 
             /* Get shader location */
-            GLint getAttribute(const std::string &);
-            GLint getUniform(const std::string &);
+            GLint getAttribute(const std::string &) const;
+            GLint getUniform(const std::string &) const;
 
         private:
             /* GLSL shader attributes */

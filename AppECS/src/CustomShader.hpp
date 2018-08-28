@@ -2,7 +2,7 @@
 
 #include "CustomComponent.hpp"
 #include "Shader/Shader.hpp"
-#include "Util/GLHelper.hpp"
+#include "GLHelper/GLHelper.hpp"
 
 using namespace neo;
 
@@ -17,8 +17,8 @@ class CustomShader : public Shader {
             bind();
 
             /* Load PV */
-            loadMatrix(getUniform("P"), camera.getProj());
-            loadMatrix(getUniform("V"), camera.getView());
+            loadUniform("P", camera.getProj());
+            loadUniform("V", camera.getView());
 
             for (auto r : renderSystem.getRenderables<CustomShader, RenderableComponent>()) {
                 /* Bind mesh */
@@ -26,7 +26,7 @@ class CustomShader : public Shader {
                 CHECK_GL(glBindVertexArray(mesh.vaoId));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
-                loadMatrix(getUniform("M"), r->getGameObject().getSpatial()->getModelMatrix());
+                loadUniform("M", r->getGameObject().getSpatial()->getModelMatrix());
 
                 /* DRAW */
                 mesh.draw();

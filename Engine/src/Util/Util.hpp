@@ -1,14 +1,33 @@
 #pragma once
 
+#include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/constants.hpp"
 
 namespace neo {
 
     struct Util {
+        
+        static void init() {
+            lastFrameTime = runTime = glfwGetTime();
+        }
+
+        static void update() {
+            /* Update delta time and FPS */
+            runTime = glfwGetTime();
+            totalFrames++;
+            timeStep = runTime - lastFrameTime;
+            lastFrameTime = runTime;
+            nFrames++;
+            if (runTime - lastFPSTime >= 1.0) {
+                FPS = nFrames;
+                nFrames = 0;
+                lastFPSTime = runTime;
+            }
+ 
+        }
 
         static float PI() { return glm::pi<float>(); }
-
 
         /* Generate a random float [0, 1] */
         static inline float genRandom() {
@@ -34,7 +53,6 @@ namespace neo {
         static inline glm::vec3 genRandomVec3(const float min, const float max) {
             return glm::vec3(genRandom(min, max), genRandom(min, max), genRandom(min, max));
         }
-
 
         // rad is the sphere's radius
         // theta is CCW angle on xy plane
@@ -95,5 +113,18 @@ namespace neo {
             }
             return(status);
         }
+
+        /* FPS*/
+        public:
+            static int FPS;                 /* Frames per second */
+            static double timeStep;         /* Delta time */
+            static double runTime;          /* Global timer */
+            static int totalFrames;         /* Total frames since start up */
+        private:
+            static double lastFPSTime;      /* Time at which last FPS was calculated */
+            static int nFrames;             /* Number of frames in current second */
+            static double lastFrameTime;    /* Time at which last frame was rendered */
+
+ 
     };
 }

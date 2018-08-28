@@ -3,7 +3,9 @@
 #include "NeoEngine.hpp"
 
 #include "Shader/Shader.hpp"
-#include "Util/GlHelper.hpp"
+#include "GLHelper/GlHelper.hpp"
+
+#include "glm/gtc/matrix_transform.hpp"
 
 namespace neo {
 
@@ -11,39 +13,45 @@ namespace neo {
 
         public:
 
-            ShadowReceiverShader(RenderSystem &rSystem, const std::string &vert, const std::string &frag) :
-                Shader("ShadowReceiver Shader", rSystem.APP_SHADER_DIR, vert, frag)
+            ShadowReceiverShader(RenderSystem &rSystem, const std::string &vert, const std::string &frag, float b = 0.f) :
+                Shader("ShadowReceiver Shader", rSystem.APP_SHADER_DIR, vert, frag),
+                bias(b)
             {}
+
+            float bias;
 
             virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
                 bind();
 
                 /* Load Camera */
-                loadMatrix(getUniform("P"), camera.getProj());
-                loadMatrix(getUniform("V"), camera.getView());
-                loadVector(getUniform("camPos"), camera.getGameObject().getSpatial()->getPosition());
+                loadUniform("P", camera.getProj());
+                loadUniform("V", camera.getView());
+                loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
                 /* Load light */
                 auto lights = NeoEngine::getComponents<LightComponent>();
                 if (lights.size()) {
                     auto light = lights[0];
                     auto lightCam = light->getGameObject().getComponentByType<CameraComponent>();
-                    loadVector(getUniform("lightPos"), light->getGameObject().getSpatial()->getPosition());
-                    loadVector(getUniform("lightCol"), light->getColor());
-                    loadVector(getUniform("lightAtt"), light->getAttenuation());
-                    loadMatrix(getUniform("lightP"), lightCam->getProj());
-                    loadMatrix(getUniform("lightV"), lightCam->getView());
+                    loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
+                    loadUniform("lightCol", light->getColor());
+                    loadUniform("lightAtt", light->getAttenuation());
+                    loadUniform("lightP", lightCam->getProj());
+                    loadUniform("lightV", lightCam->getView());
                 }
 
+                /* Bias */
+                loadUniform("bias", bias);
+
                 /* Bind shadow map */
-                const Texture & texture(*Loader::getTexture("depthTexture"));
+                const Texture & texture(*renderSystem.framebuffers.find("depthMap")->second.get()->textures[0]);
                 CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.textureId));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.textureId));
-                loadInt(getUniform("shadowMap"), texture.textureId);
+                loadUniform("shadowMap", texture.textureId);
 
                 for (auto model : renderSystem.getRenderables<ShadowReceiverShader, RenderableComponent>()) {
-                    loadMatrix(getUniform("M"), model->getGameObject().getSpatial()->getModelMatrix());
-                    loadMatrix(getUniform("N"), model->getGameObject().getSpatial()->getNormalMatrix());
+                    loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
+                    loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
 
                     /* Bind mesh */
                     const Mesh & mesh(model->getMesh());
@@ -54,10 +62,10 @@ namespace neo {
                     auto materialComp = model->getGameObject().getComponentByType<MaterialComponent>();
                     if (materialComp) {
                         const Material &material = materialComp->getMaterial();
-                        loadFloat(getUniform("ambient"), material.ambient);
-                        loadVector(getUniform("diffuseColor"), material.diffuse);
-                        loadVector(getUniform("specularColor"), material.specular);
-                        loadFloat(getUniform("shine"), material.shine);
+                        loadUniform("ambient", material.ambient);
+                        loadUniform("diffuseColor", material.diffuse);
+                        loadUniform("specularColor", material.specular);
+                        loadUniform("shine", material.shine);
                     }
 
                     /* DRAW */

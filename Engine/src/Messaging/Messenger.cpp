@@ -10,7 +10,7 @@ namespace neo {
     void Messenger::relayMessages() {
         static std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> messageBuffer;
 
-        while (messages.size()) {
+        if (messages.size()) {
             /* Corrections for messages sent from receivers */
             std::swap(messages, messageBuffer);
 
@@ -37,8 +37,7 @@ namespace neo {
                     }
                 }
             }
+            messageBuffer.clear();
         }
-
-        messageBuffer.clear();
     }
 }

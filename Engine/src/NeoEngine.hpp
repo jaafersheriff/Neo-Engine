@@ -4,6 +4,7 @@
 #include "Window/Window.hpp"
 #include "Window/Mouse.hpp"
 #include "Window/Keyboard.hpp"
+#include "Util/Util.hpp"
 
 #include "Component/Components.hpp"
 #include "System/Systems.hpp"
@@ -77,17 +78,7 @@ namespace neo {
             static std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> components;
             static std::unordered_map<std::type_index, std::unique_ptr<System>> systems;
 
-        /* FPS*/
-        public:
-            static int FPS;                 /* Frames per second */
-            static double timeStep;         /* Delta time */
-            static double runTime;          /* Global timer */
-            static int totalFrames;         /* Total frames since start up */
-        private:
-            static void updateFPS();
-            static double lastFPSTime;      /* Time at which last FPS was calculated */
-            static int nFrames;             /* Number of frames in current second */
-            static double lastFrameTime;    /* Time at which last frame was rendered */
+
     };
 
     /* Template implementation */

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-#include "System/RenderSystem/Framebuffer.hpp"
+#include "GLHelper/Framebuffer.hpp"
 #include "System/RenderSystem/RenderSystem.hpp"
 
 using namespace neo;
@@ -14,9 +14,8 @@ class ShadowCasterShader : public Shader {
             Shader("Shadow Caster", rSystem.APP_SHADER_DIR, vert, frag) {
 
             /* Init shadow map */
-            Texture *depthTexture = Loader::create2DTexture("depthTexture");
-            depthTexture->width = 1024;
-            depthTexture->height = 1024;
+            Texture *depthTexture = new Texture2D;
+            depthTexture->width = depthTexture->height = 2048;
             depthTexture->components = 1;
             depthTexture->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_NEAREST, GL_CLAMP_TO_BORDER);
             CHECK_GL(glBindTexture(GL_TEXTURE_2D, depthTexture->textureId));
@@ -31,21 +30,24 @@ class ShadowCasterShader : public Shader {
         }
 
         virtual void render(const RenderSystem &rSystem, const CameraComponent &camera) override {
-            rSystem.framebuffers.find("depthMap")->second->bind();
-            auto depthTexture = Loader::getTexture("depthTexture");
+            auto fbo = rSystem.framebuffers.find("depthMap")->second.get();
+            auto depthTexture = fbo->textures[0];
+
+            fbo->bind();
             CHECK_GL(glClear(GL_DEPTH_BUFFER_BIT));
             CHECK_GL(glViewport(0, 0, depthTexture->width, depthTexture->height));
             CHECK_GL(glCullFace(GL_FRONT));
+
             bind();
 
             auto cameras = NeoEngine::getComponents<LightComponent>()[0]->getGameObject().getComponentsByType<CameraComponent>();
             if (cameras.size()) {
-                loadMatrix(getUniform("P"), cameras[0]->getProj());
-                loadMatrix(getUniform("V"), cameras[0]->getView());
+                loadUniform("P", cameras[0]->getProj());
+                loadUniform("V", cameras[0]->getView());
             }
 
             for (auto model : rSystem.getRenderables<ShadowCasterShader, RenderableComponent>()) {
-                loadMatrix(getUniform("M"), model->getGameObject().getSpatial()->getModelMatrix());
+                loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());

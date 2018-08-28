@@ -134,15 +134,15 @@ int main() {
     NeoEngine::initSystems();
 
     /* Shaders - order matters! */
-    renderSystem->addShader<ReflectionShader>("model.vert", "reflect.frag");
-    renderSystem->addShader<RefractionShader>("model.vert", "refract.frag");
-    renderSystem->addShader<SkyboxShader>("skybox.vert", "skybox.frag");
-    renderSystem->addShader<WireframeShader>();
+    renderSystem->addSceneShader<ReflectionShader>("model.vert", "reflect.frag");
+    renderSystem->addSceneShader<RefractionShader>("model.vert", "refract.frag");
+    renderSystem->addSceneShader<SkyboxShader>("skybox.vert", "skybox.frag");
+    renderSystem->addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", NeoEngine::FPS);
-        ImGui::Text("dt: %0.4f", NeoEngine::timeStep);
+        ImGui::Text("FPS: %d", Util::FPS);
+        ImGui::Text("dt: %0.4f", Util::timeStep);
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
         }

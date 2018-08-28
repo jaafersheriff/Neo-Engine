@@ -6,9 +6,12 @@
 
 namespace neo {
 
+    class SpatialComponent;
+
     class CameraComponent : public Component {
 
         public:
+            CameraComponent(GameObject *gameObject, float near, float far);
             CameraComponent(GameObject *, float fov, float near, float far);
             CameraComponent(GameObject *, float hMin, float hMax, float vMin, float vMax, float near, float far);
             CameraComponent(CameraComponent &&) = default;
@@ -19,6 +22,8 @@ namespace neo {
             void setFOV(float);
             void setNearFar(float, float);
             void setOrthoBounds(const glm::vec2 &, const glm::vec2 &);
+            void setLookAt(SpatialComponent *);
+            void setLookDir(glm::vec3);
 
             /* Getters */
             const float getFOV() const { return fov; }
@@ -46,6 +51,8 @@ namespace neo {
             mutable bool viewMatDirty;
             mutable bool projMatDirty;
 
+
+            SpatialComponent *lookAt;
     };
 
 }

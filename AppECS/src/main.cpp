@@ -3,6 +3,7 @@
 #include "CustomShader.hpp"
 #include "CustomComponent.hpp"
 #include "CustomSystem.hpp"
+
 #include "Shader/WireframeShader.hpp"
 
 using namespace neo;
@@ -125,14 +126,14 @@ int main() {
     NeoEngine::initSystems();
 
     /* Shaders */
-    renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
-    renderSystem->addShader<WireframeShader>();
+    renderSystem->addSceneShader<CustomShader>("custom.vert", "custom.frag");
+    renderSystem->addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     cube.attachImGui("Cube");
     NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", NeoEngine::FPS);
-        ImGui::Text("dt: %0.4f", NeoEngine::timeStep);
+        ImGui::Text("FPS: %d", Util::FPS);
+        ImGui::Text("dt: %0.4f", Util::timeStep);
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
         }

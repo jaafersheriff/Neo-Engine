@@ -1,8 +1,8 @@
 #include <NeoEngine.hpp>
 
-#include "PhongShader.hpp"
 #include "CameraSystem.hpp"
 
+#include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
 
 using namespace neo;
@@ -90,14 +90,14 @@ int main() {
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
-    renderSystem->addShader<PhongShader>("phong.vert", "phong.frag");
-    renderSystem->addShader<WireframeShader>();
+    renderSystem->addSceneShader<PhongShader>();
+    renderSystem->addSceneShader<WireframeShader>();
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", NeoEngine::FPS);
-        ImGui::Text("dt: %0.4f", NeoEngine::timeStep);
+        ImGui::Text("FPS: %d", Util::FPS);
+        ImGui::Text("dt: %0.4f", Util::timeStep);
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
         }

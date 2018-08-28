@@ -19,20 +19,20 @@ class SurveillanceReadShader : public Shader {
             bind();
 
             /* Load PV */
-            loadMatrix(getUniform("P"), camera.getProj());
-            loadMatrix(getUniform("V"), camera.getView());
+            loadUniform("P", camera.getProj());
+            loadUniform("V", camera.getView());
 
             /* Bind mesh */
             auto mesh(Loader::getMesh("quad"));
             CHECK_GL(glBindVertexArray(mesh->vaoId));
 
             for (auto camera : NeoEngine::getComponents<SurveillanceCamera>()) {
-                loadMatrix(getUniform("M"), camera->getGameObject().getSpatial()->getModelMatrix());
+                loadUniform("M", camera->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind texture */
                 const Texture2D & texture(*camera->colorBuffer);
                 texture.bind();
-                loadInt(getUniform("fbo"), texture.textureId);
+                loadUniform("fbo", texture.textureId);
 
                 /* DRAW */
                 mesh->draw();

@@ -2,7 +2,7 @@
 
 #include "Shader/Shader.hpp"
 
-#include "Util/GLHelper.hpp"
+#include "GLHelper/GLHelper.hpp"
 
 #include "SkyboxComponent.hpp"
 
@@ -27,8 +27,8 @@ class SkyboxShader : public Shader {
             bind();
 
             /* Load PV */
-            loadMatrix(getUniform("P"), camera.getProj());
-            loadMatrix(getUniform("V"), camera.getView());
+            loadUniform("P", camera.getProj());
+            loadUniform("V", camera.getView());
 
             const auto cube = cubes[0];
             const Mesh & mesh = cube->getMesh();
@@ -36,7 +36,7 @@ class SkyboxShader : public Shader {
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
             /* Bind texture */
-            loadInt(getUniform("cubeMap"), cube->getGameObject().getComponentByType<TextureComponent>()->getTexture().textureId);
+            loadUniform("cubeMap", cube->getGameObject().getComponentByType<TextureComponent>()->getTexture().textureId);
 
             /* Draw */
             mesh.draw();

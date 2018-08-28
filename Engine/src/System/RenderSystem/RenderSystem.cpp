@@ -1,5 +1,5 @@
 #include "RenderSystem.hpp"
-#include "Util/GLHelper.hpp"
+#include "GLHelper/GLHelper.hpp"
 
 #include "NeoEngine.hpp"
 
@@ -42,6 +42,8 @@ namespace neo {
  
         /* Render all scene shaders */
         renderScene(*defaultCamera);
+
+        // TODO : post process stack
 
         /* Render imgui */
         if (NeoEngine::imGuiEnabled) {

@@ -2,9 +2,8 @@
 
 #include "MeshGenerator.hpp"
 
-#include "Model/Texture.hpp"
-
-#include "Util/GLHelper.hpp"
+#include "GLHelper/Texture.hpp"
+#include "GLHelper/GLHelper.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ext/tiny_obj_loader.h"
@@ -30,6 +29,7 @@ namespace neo {
         /* Static meshes */
         meshes.insert({ "cube", MeshGenerator::createCube() });
         meshes.insert({ "quad", MeshGenerator::createQuad() });
+        meshes.insert({ "sphere", MeshGenerator::createSphere() });
     }
 
     Mesh * Loader::getMesh(const std::string &fileName, bool doResize) {

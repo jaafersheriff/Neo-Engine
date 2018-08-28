@@ -2,7 +2,7 @@
 
 #include "Shader/Shader.hpp"
 
-#include "Util/GLHelper.hpp"
+#include "GLHelper/GLHelper.hpp"
 
 #include "NeoEngine.hpp"
 
@@ -23,16 +23,16 @@ class ReflectionShader : public Shader {
             bind();
 
             /* Load PV */
-            loadMatrix(getUniform("P"), camera.getProj());
-            loadMatrix(getUniform("V"), camera.getView());
-            loadVector(getUniform("camPos"), camera.getGameObject().getSpatial()->getPosition());
+            loadUniform("P", camera.getProj());
+            loadUniform("V", camera.getView());
+            loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load environment map */
-            loadInt(getUniform("cubeMap"), NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<TextureComponent>()->getTexture().textureId);
+            loadUniform("cubeMap", NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<TextureComponent>()->getTexture().textureId);
 
             for (auto model : renderSystem.getRenderables<ReflectionShader, ReflectionRenderable>()) {
-                loadMatrix(getUniform("M"), model->getGameObject().getSpatial()->getModelMatrix());
-                loadMatrix(getUniform("N"), model->getGameObject().getSpatial()->getNormalMatrix());
+                loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
+                loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
 
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());

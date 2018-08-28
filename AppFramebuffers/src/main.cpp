@@ -4,7 +4,7 @@
 
 #include "CustomSystem.hpp"
 
-#include "Shader/DiffuseShader.hpp"
+#include "Shader/PhongShader.hpp"
 #include "Shader/LineShader.hpp"
 #include "SurveillanceWriteShader.hpp"
 #include "SurveillanceReadShader.hpp"
@@ -61,7 +61,7 @@ struct Renderable {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<DiffuseShader>();
+        renderable->addShaderType<PhongShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
@@ -138,7 +138,7 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable(Loader::getMesh("millenium-falcon.obj", true));
+    Renderable(Loader::getMesh("cube"));
     Surveillance a(glm::vec3(-3, 0, 0), glm::vec3(1.f, 2.f, 1.f), glm::mat3(glm::rotate(glm::mat4(1.f), 1.4f, glm::vec3(0, 1, 0))));
     a.addImGui("CamA");
     Surveillance b(glm::vec3(3, 0, 0), glm::vec3(1.f, 2.f, 1.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.4f, glm::vec3(0, 1, 0))));
@@ -150,15 +150,15 @@ int main() {
     NeoEngine::initSystems();
 
     /* Add shaders */
-    renderSystem->addShader<SurveillanceWriteShader, ShaderTypes::PREPROCESS>();
-    renderSystem->addShader<LineShader>();
-    renderSystem->addShader<DiffuseShader>();
-    renderSystem->addShader<SurveillanceReadShader>("read.vert", "read.frag");
+    renderSystem->addPreProcessShader<SurveillanceWriteShader>();
+    renderSystem->addSceneShader<LineShader>();
+    renderSystem->addSceneShader<PhongShader>();
+    renderSystem->addSceneShader<SurveillanceReadShader>("read.vert", "read.frag");
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", NeoEngine::FPS);
-        ImGui::Text("dt: %0.4f", NeoEngine::timeStep);
+        ImGui::Text("FPS: %d", Util::FPS);
+        ImGui::Text("dt: %0.4f", Util::timeStep);
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
         }

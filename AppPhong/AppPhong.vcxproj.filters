@@ -10,16 +10,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="shaders\phong.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\phong.vert">
-      <Filter>shaders</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CameraSystem.hpp" />
-    <ClInclude Include="src\PhongShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />

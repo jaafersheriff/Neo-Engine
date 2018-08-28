@@ -3,7 +3,7 @@
 #include "NeoEngine.hpp"
 
 #include "Shader/Shader.hpp"
-#include "Util/GlHelper.hpp"
+#include "GLHelper/GlHelper.hpp"
 
 using namespace neo;
 
@@ -18,17 +18,17 @@ class NormalShader : public Shader {
         virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
             bind();
 
-            loadFloat(getUniform("magnitude"), magnitude);
+            loadUniform("magnitude", magnitude);
 
             /* Load PV */
-            loadMatrix(getUniform("P"), camera.getProj());
-            loadMatrix(getUniform("V"), camera.getView());
+            loadUniform("P", camera.getProj());
+            loadUniform("V", camera.getView());
 
             for (auto model : renderSystem.getRenderables<NormalShader, RenderableComponent>()) {
                 glm::mat4 M = model->getGameObject().getSpatial()->getModelMatrix();
-                loadMatrix(getUniform("M"), M);
+                loadUniform("M", M);
                 glm::mat4 N = glm::transpose(glm::inverse(camera.getView() * M));
-                loadMatrix(getUniform("N"), glm::mat3(N));
+                loadUniform("N", glm::mat3(N));
 
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());

@@ -4,7 +4,7 @@
 #define GLEW_STATIC
 #include "GL/glew.h"
 
-#include "Model/Mesh.hpp"
+#include "GLHelper/Mesh.hpp"
 
 #include <unordered_map>
 
