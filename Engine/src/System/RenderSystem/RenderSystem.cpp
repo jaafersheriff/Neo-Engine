@@ -1,5 +1,5 @@
 #include "RenderSystem.hpp"
-#include "Util/GLHelper.hpp"
+#include "GLHelper/GLHelper.hpp"
 
 #include "NeoEngine.hpp"
 

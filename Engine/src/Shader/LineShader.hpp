@@ -3,7 +3,7 @@
 #include "NeoEngine.hpp"
 
 #include "Shader/Shader.hpp"
-#include "Util/GLHelper.hpp"
+#include "GLHelper/GLHelper.hpp"
 
 #include "Component/AnimationComponent/LineRenderable.hpp"
 

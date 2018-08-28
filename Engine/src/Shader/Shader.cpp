@@ -1,6 +1,6 @@
 #include "Shader.hpp"
 #include "Util/Util.hpp"
-#include "Util/GLHelper.hpp"
+#include "GLHelper/GLHelper.hpp"
 
 #include <fstream>
 #include <vector>

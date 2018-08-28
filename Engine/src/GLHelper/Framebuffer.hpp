@@ -3,9 +3,9 @@
 #define GLEW_STATIC
 #include "GL/glew.h"
 
-#include "Util/GLHelper.hpp"
+#include "GLHelper.hpp"
 
-#include "Model/Texture.hpp"
+#include "Texture.hpp"
 
 #include <vector>
 

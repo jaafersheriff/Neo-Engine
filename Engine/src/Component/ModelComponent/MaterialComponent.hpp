@@ -2,7 +2,7 @@
 
 #include "Component/Component.hpp"
 
-#include "Model/Material.hpp"
+#include "Material/Material.hpp"
 
 namespace neo {
 

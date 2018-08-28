@@ -3,7 +3,7 @@
 #include "Component/ModelComponent/RenderableComponent.hpp"
 #include "LineComponent.hpp"
 
-#include "Util/GLHelper.hpp"
+#include "GLHelper/GLHelper.hpp"
 
 namespace neo {
 

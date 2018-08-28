@@ -2,9 +2,8 @@
 
 #include "MeshGenerator.hpp"
 
-#include "Model/Texture.hpp"
-
-#include "Util/GLHelper.hpp"
+#include "GLHelper/Texture.hpp"
+#include "GLHelper/GLHelper.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ext/tiny_obj_loader.h"

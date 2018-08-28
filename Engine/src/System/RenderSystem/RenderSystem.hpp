@@ -2,7 +2,7 @@
 
 #include "System/System.hpp"
 #include "Shader/Shader.hpp"
-#include "Framebuffer.hpp"
+#include "GLHelper/Framebuffer.hpp"
 
 #include <unordered_map>
 #include <typeindex>

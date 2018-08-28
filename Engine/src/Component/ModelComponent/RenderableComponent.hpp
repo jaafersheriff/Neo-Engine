@@ -2,7 +2,7 @@
 
 #include "Component/Component.hpp"
 
-#include "Model/Mesh.hpp"
+#include "GLHelper/Mesh.hpp"
 
 #include <typeindex>
 

@@ -3,7 +3,7 @@
 #include "NeoEngine.hpp"
 
 #include "Shader/Shader.hpp"
-#include "Util/GlHelper.hpp"
+#include "GLHelper/GlHelper.hpp"
 
 using namespace neo;
 
