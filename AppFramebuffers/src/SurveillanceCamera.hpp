@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Component/CameraComponent/CameraComponent.hpp"
-#include "System/RenderSystem/Framebuffer.hpp"
+#include "GLHelper/Framebuffer.hpp"
 
 #include "Messaging/Messenger.hpp"
 

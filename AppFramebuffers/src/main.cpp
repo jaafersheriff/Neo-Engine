@@ -150,10 +150,10 @@ int main() {
     NeoEngine::initSystems();
 
     /* Add shaders */
-    renderSystem->addShader<SurveillanceWriteShader, ShaderTypes::PREPROCESS>();
-    renderSystem->addShader<LineShader>();
-    renderSystem->addShader<PhongShader>();
-    renderSystem->addShader<SurveillanceReadShader>("read.vert", "read.frag");
+    renderSystem->addPreProcessShader<SurveillanceWriteShader>();
+    renderSystem->addSceneShader<LineShader>();
+    renderSystem->addSceneShader<PhongShader>();
+    renderSystem->addSceneShader<SurveillanceReadShader>("read.vert", "read.frag");
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {

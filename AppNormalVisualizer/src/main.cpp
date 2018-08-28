@@ -4,6 +4,7 @@
 
 #include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
+
 #include "NormalShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -104,9 +105,9 @@ int main() {
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
-    phongShader = &renderSystem->addShader<PhongShader>();
-    wireframeShader = &renderSystem->addShader<WireframeShader>();
-    normalShader = &renderSystem->addShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
+    phongShader = &renderSystem->addSceneShader<PhongShader>();
+    wireframeShader = &renderSystem->addSceneShader<WireframeShader>();
+    normalShader = &renderSystem->addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */

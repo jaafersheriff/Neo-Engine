@@ -123,8 +123,8 @@ int main() {
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
-    auto snowShader = &renderSystem->addShader<SnowShader>("snow.vert", "snow.frag");
-    renderSystem->addShader<LineShader>();
+    auto snowShader = &renderSystem->addSceneShader<SnowShader>("snow.vert", "snow.frag");
+    renderSystem->addSceneShader<LineShader>();
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */

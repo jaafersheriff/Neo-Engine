@@ -90,8 +90,8 @@ int main() {
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraSystem>();
     renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
-    renderSystem->addShader<PhongShader>();
-    renderSystem->addShader<WireframeShader>();
+    renderSystem->addSceneShader<PhongShader>();
+    renderSystem->addSceneShader<WireframeShader>();
     NeoEngine::initSystems();
 
     /* Attach ImGui panes */

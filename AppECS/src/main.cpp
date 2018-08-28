@@ -3,6 +3,7 @@
 #include "CustomShader.hpp"
 #include "CustomComponent.hpp"
 #include "CustomSystem.hpp"
+
 #include "Shader/WireframeShader.hpp"
 
 using namespace neo;
@@ -125,8 +126,8 @@ int main() {
     NeoEngine::initSystems();
 
     /* Shaders */
-    renderSystem->addShader<CustomShader>("custom.vert", "custom.frag");
-    renderSystem->addShader<WireframeShader>();
+    renderSystem->addSceneShader<CustomShader>("custom.vert", "custom.frag");
+    renderSystem->addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     cube.attachImGui("Cube");

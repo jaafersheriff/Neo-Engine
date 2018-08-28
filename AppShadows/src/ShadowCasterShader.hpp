@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-#include "System/RenderSystem/Framebuffer.hpp"
+#include "GLHelper/Framebuffer.hpp"
 #include "System/RenderSystem/RenderSystem.hpp"
 
 using namespace neo;
@@ -42,12 +42,12 @@ class ShadowCasterShader : public Shader {
 
             auto cameras = NeoEngine::getComponents<LightComponent>()[0]->getGameObject().getComponentsByType<CameraComponent>();
             if (cameras.size()) {
-                loadMatrix(getUniform("P"), cameras[0]->getProj());
-                loadMatrix(getUniform("V"), cameras[0]->getView());
+                loadUniform("P", cameras[0]->getProj());
+                loadUniform("V", cameras[0]->getView());
             }
 
             for (auto model : rSystem.getRenderables<ShadowCasterShader, RenderableComponent>()) {
-                loadMatrix(getUniform("M"), model->getGameObject().getSpatial()->getModelMatrix());
+                loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());

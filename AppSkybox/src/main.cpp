@@ -134,10 +134,10 @@ int main() {
     NeoEngine::initSystems();
 
     /* Shaders - order matters! */
-    renderSystem->addShader<ReflectionShader>("model.vert", "reflect.frag");
-    renderSystem->addShader<RefractionShader>("model.vert", "refract.frag");
-    renderSystem->addShader<SkyboxShader>("skybox.vert", "skybox.frag");
-    renderSystem->addShader<WireframeShader>();
+    renderSystem->addSceneShader<ReflectionShader>("model.vert", "reflect.frag");
+    renderSystem->addSceneShader<RefractionShader>("model.vert", "refract.frag");
+    renderSystem->addSceneShader<SkyboxShader>("skybox.vert", "skybox.frag");
+    renderSystem->addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
