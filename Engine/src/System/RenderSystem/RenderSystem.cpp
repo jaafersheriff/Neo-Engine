@@ -31,15 +31,20 @@ namespace neo {
     }
 
     void RenderSystem::update(float dt) {
-        /* Render all preprocesses */
-        for (auto & shader : preShaders) {
-            if (shader.get()->active) {
-                shader.get()->render(*this, *defaultCamera);
+        if (preShaders.size()) {
+            /* Render all preprocesses */
+            for (auto & shader : preShaders) {
+                if (shader.get()->active) {
+                    shader.get()->render(*this, *defaultCamera);
+                }
             }
+            /* Reset default FBO */
+            defaultFBO->bind();
+            glm::vec2 frameSize = Window::getFrameSize();
+            CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
         }
 
         /* Reset state */
-        defaultFBO->bind();
         CHECK_GL(glClearColor(0.2f, 0.3f, 0.4f, 1.f));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
  
