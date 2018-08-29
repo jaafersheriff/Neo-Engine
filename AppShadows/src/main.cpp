@@ -118,14 +118,15 @@ struct Light {
 struct Renderable {
     GameObject *gameObject;
     RenderableComponent *renderable;
-    Material material = Material(0.1f, glm::vec3(1,0,1));
+    Material *material;
     glm::vec3 rot = glm::vec3(0.f);
 
     Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale, glm::mat4 ori = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale, ori);
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
+        material = new Material;
+        NeoEngine::addComponent<MaterialComponent>(gameObject, material);
     }
 
     void attachImGui(std::string name) {
@@ -157,14 +158,23 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
     Light light(glm::vec3(37.5f, 37.5f, 11.8f), glm::vec3(1.f), glm::vec3(0.6, 0.04, 0.f));
-    Renderable casterA(Loader::getMesh("mr_krab.obj"), glm::vec3(0.f, 3.f, 0.f), glm::vec3(3.f));
-    casterA.renderable->addShaderType<ShadowCasterShader>();
-    casterA.renderable->addShaderType<ShadowReceiverShader>();
-    NeoEngine::addComponent<TextureComponent>(casterA.gameObject, Loader::getTexture("mr_krab.png"));
-    casterA.attachImGui("CasterA");
 
+    // Spheres and blocks 
+    for (int i = 0; i < 50; i++) {
+        Renderable r(
+            Util::genRandomBool() ? Loader::getMesh("cube") : Loader::getMesh("sphere"),
+            glm::vec3(Util::genRandom(-45.f, 45.f), Util::genRandom(2.f, 5.f), Util::genRandom(-45.f, 45.f)),
+            glm::vec3(Util::genRandom(5.f)));
+        r.renderable->addShaderType<ShadowCasterShader>();
+        r.renderable->addShaderType<ShadowReceiverShader>();
+        r.material->ambient = 0.5f;
+        r.material->diffuse = Util::genRandomVec3();
+    }
+
+
+    // Terrain receiver 
     Renderable receiver(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
-    receiver.material.diffuse = glm::vec3(0.7f);
+    receiver.material->diffuse = glm::vec3(0.7f);
     receiver.renderable->addShaderType<ShadowReceiverShader>();
     receiver.attachImGui("Receiver");
 
