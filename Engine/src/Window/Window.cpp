@@ -54,6 +54,7 @@ namespace neo {
             NeoEngine::toggleImGui();
         }
         else if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+            Keyboard::reset();
             ImGui_ImplGlfwGL3_KeyCallback(window, key, scancode, action, mods);
         }
         else {
