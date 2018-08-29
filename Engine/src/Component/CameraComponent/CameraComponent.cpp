@@ -60,7 +60,7 @@ namespace neo {
     }
 
     void CameraComponent::setNearFar(float near, float far) {
-        if (near == this->near || far == this->far) {
+        if (near == this->near && far == this->far) {
             return;
         }
 
@@ -70,7 +70,7 @@ namespace neo {
     }
 
     void CameraComponent::setOrthoBounds(const glm::vec2 &h, const glm::vec2 &v) {
-        if (h == this->horizBounds || v == this->vertBounds) {
+        if (h == this->horizBounds && v == this->vertBounds) {
             return;
         }
 
