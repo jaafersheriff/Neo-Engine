@@ -40,7 +40,7 @@ namespace neo {
             }
             /* Reset default FBO */
             defaultFBO->bind();
-            glm::vec2 frameSize = Window::getFrameSize();
+            glm::ivec2 frameSize = Window::getFrameSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
         }
 
