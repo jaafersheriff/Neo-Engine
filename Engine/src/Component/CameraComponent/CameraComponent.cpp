@@ -20,8 +20,7 @@ namespace neo {
         viewMat(),
         projMat(),
         viewMatDirty(true),
-        projMatDirty(true),
-        lookAt(nullptr)
+        projMatDirty(true)
     {}
 
     CameraComponent::CameraComponent(GameObject *gameObject, float fov, float near, float far) :
@@ -49,28 +48,6 @@ namespace neo {
                 projMatDirty = true;
             });
         }
-    }
-
-    void CameraComponent::setLookAt(SpatialComponent *spat) {
-        auto lookAtCallback([&](const Message &msg) {
-            // TODO - pull data from spatial message
-            // const SpatialChangeMessage & m(static_cast<const SpatialChangeMessage &>(msg));
-            // auto & oSpatial = m.spatial;
-            // glm::vec3 lookPos = oSpatial.getPosition();
-            glm::vec3 lookPos = lookAt->getPosition();
-            if (auto spatial = this->getGameObject().getSpatial()) {
-                glm::vec3 thisPos = spatial->getPosition();
-                setLookDir(lookPos - thisPos);
-            }
-        });
-
-        if (lookAt) {
-            // TODO : remove existing receivers 
-        }
-        lookAt = spat;
-
-        Messenger::addReceiver<SpatialChangeMessage>(&spat->getGameObject(), lookAtCallback);
-        Messenger::addReceiver<SpatialChangeMessage>(gameObject, lookAtCallback);
     }
 
     void CameraComponent::setFOV(float fov) {

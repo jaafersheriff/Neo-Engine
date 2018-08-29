@@ -3,6 +3,7 @@
 #include "CustomSystem.hpp"
 
 #include "SinMoveComponent.hpp"
+#include "LookAtCameraController.hpp"
 
 #include "Shader/LineShader.hpp"
 #include "Shader/PhongShader.hpp"
@@ -62,7 +63,8 @@ struct Light {
         lookAtSpatial = &NeoEngine::addComponent<SpatialComponent>(gameO, glm::vec3(0.f), glm::vec3(1.f));
         auto cube = &NeoEngine::addComponent<RenderableComponent>(gameO, Loader::getMesh("cube"));
         cube->addShaderType<WireframeShader>();
-        camera->setLookAt(lookAtSpatial);
+
+        NeoEngine::addComponent<LookAtCameraController>(gameObject, camera, lookAtSpatial);
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             ImGui::Text("CamReceivers: [%d, %d]", gameObject->getNumReceiverTypes(), gameObject->getNumReceivers());
@@ -82,9 +84,6 @@ struct Light {
             pos = lookAtSpatial->getPosition();
             if (ImGui::SliderFloat3("look pos", glm::value_ptr(pos), -100.f, 100.f)) {
                 lookAtSpatial->setPosition(pos);
-            }
-            if (ImGui::Button("Set look at")) {
-                camera->setLookAt(lookAtSpatial);
             }
             auto lookDir = camera->getLookDir();
             ImGui::Text("Look at dir : %0.2f, %0.2f, %0.2f", lookDir.x, lookDir.y, lookDir.z);
