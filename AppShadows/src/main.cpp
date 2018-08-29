@@ -199,7 +199,8 @@ int main() {
         }
     });
     NeoEngine::addImGuiFunc("Shadow Map", [&]() {
-        ImGui::SliderFloat("Bias", &receiverShader.bias, -0.002f, 0.002f);
+        ImGui::SliderFloat("Bias", &receiverShader.bias, 0.f, 0.005f, "%0.4f");
+        ImGui::Checkbox("Dot bias", &receiverShader.useDotBias);
         const Texture * texture(renderSystem->framebuffers.find("depthMap")->second.get()->textures[0]);
         static float scale = 0.1f;
         ImGui::SliderFloat("Scale", &scale, 0.f, 1.f);

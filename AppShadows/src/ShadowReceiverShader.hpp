@@ -18,6 +18,7 @@ namespace neo {
                 bias(b)
             {}
 
+            bool useDotBias = true;
             float bias;
             const glm::mat4 biasMatrix = glm::mat4(
                 0.5f, 0.0f, 0.0f, 0.0f,
@@ -46,6 +47,7 @@ namespace neo {
 
                 /* Bias */
                 loadUniform("bias", bias);
+                loadUniform("useDotBias", useDotBias);
 
                 /* Bind shadow map */
                 const Texture & texture(*renderSystem.framebuffers.find("depthMap")->second.get()->textures[0]);

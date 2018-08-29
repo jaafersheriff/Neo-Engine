@@ -19,6 +19,7 @@ uniform vec3 lightPos;
 uniform vec3 lightCol;
 uniform vec3 lightAtt;
 
+uniform bool useDotBias;
 uniform sampler2D shadowMap;
 uniform float bias;
 
@@ -51,8 +52,13 @@ void main() {
     vec3 specularContrib = lightCol * pow(max(dot(H, N), 0.0), shine) / attFactor;
 
     // Shadow
-    float Tbias = bias*tan(acos(clamp(lambert, 0, 1)));
-    Tbias = clamp(Tbias, 0,0.01);
+    float Tbias = bias;
+
+    if (useDotBias) {
+        Tbias = bias*tan(acos(clamp(lambert, 0, 1)));
+        Tbias = clamp(Tbias, 0,0.01);
+    }
+
     float visibility = 1.f;
     if (texture(shadowMap, shadowCoord.xy).r < shadowCoord.z - Tbias) {
         visibility = 0.f;
