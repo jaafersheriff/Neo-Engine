@@ -54,6 +54,11 @@ namespace neo {
             return glm::vec3(genRandom(min, max), genRandom(min, max), genRandom(min, max));
         }
 
+        /* Generate random bool */
+        static inline bool genRandomBool() {
+            return genRandom() < 0.5f;
+        }
+
         // rad is the sphere's radius
         // theta is CCW angle on xy plane
         // phi is angle from +z axis
