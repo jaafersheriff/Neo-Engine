@@ -19,6 +19,11 @@ namespace neo {
             {}
 
             float bias;
+            const glm::mat4 biasMatrix = glm::mat4(
+                0.5f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.5f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.5f, 0.0f,
+                0.5f, 0.5f, 0.5f, 1.0f);
 
             virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
                 bind();
@@ -36,8 +41,7 @@ namespace neo {
                     loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
                     loadUniform("lightCol", light->getColor());
                     loadUniform("lightAtt", light->getAttenuation());
-                    loadUniform("lightP", lightCam->getProj());
-                    loadUniform("lightV", lightCam->getView());
+                    loadUniform("L", biasMatrix * lightCam->getProj() * lightCam->getView());
                 }
 
                 /* Bias */
