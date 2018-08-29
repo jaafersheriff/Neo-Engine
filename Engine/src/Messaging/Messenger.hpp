@@ -33,7 +33,7 @@ namespace neo {
     template <typename MsgT, typename... Args>
     void Messenger::sendMessage(const GameObject *gameObject, Args &&... args) {
         static_assert(std::is_base_of<Message, MsgT>::value, "MsgT must be a message type");
-        messages.emplace_back(gameObject, typeid(MsgT), std::make_unique<Message>(MsgT(std::forward<Args>(args)...)));
+        messages.emplace_back(gameObject, typeid(MsgT), std::make_unique<MsgT>(std::forward<Args>(args)...));
     }
 
     template <typename MsgT>
