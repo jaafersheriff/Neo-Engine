@@ -22,6 +22,8 @@ uniform vec3 lightAtt;
 uniform bool useDotBias;
 uniform sampler2D shadowMap;
 uniform float bias;
+uniform int pcfSize;
+uniform bool usePCF;
 
 out vec4 color;
 
@@ -60,7 +62,19 @@ void main() {
     }
 
     float visibility = 1.f;
-    if (texture(shadowMap, shadowCoord.xy).r < shadowCoord.z - Tbias) {
+    if (usePCF) {
+        float shadow = 0.f;
+        vec2 texelSize = 1.f / textureSize(shadowMap, 0);
+        for (int x = -pcfSize; x <= pcfSize; x++) {
+            for (int y = -pcfSize; y <= pcfSize; y++) {
+                float pcfDepth = texture(shadowMap, shadowCoord.xy + vec2(x, y) * texelSize).r;
+                shadow += shadowCoord.z - Tbias > pcfDepth ? 1.f : 0.f;
+            }
+        }
+        shadow /= (2 * pcfSize + 1) * (2 * pcfSize + 1);
+        visibility = 1.f - shadow;
+    }
+    else if (texture(shadowMap, shadowCoord.xy).r < shadowCoord.z - Tbias) {
         visibility = 0.f;
     }
 

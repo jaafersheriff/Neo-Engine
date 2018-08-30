@@ -25,6 +25,8 @@ namespace neo {
                 0.0f, 0.5f, 0.0f, 0.0f,
                 0.0f, 0.0f, 0.5f, 0.0f,
                 0.5f, 0.5f, 0.5f, 1.0f);
+            bool usePCF = true;
+            int pcfSize = 2;
 
             virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
                 bind();
@@ -48,6 +50,10 @@ namespace neo {
                 /* Bias */
                 loadUniform("bias", bias);
                 loadUniform("useDotBias", useDotBias);
+
+                /* PCF */
+                loadUniform("usePCF", usePCF);
+                loadUniform("pcfSize", pcfSize);
 
                 /* Bind shadow map */
                 const Texture & texture(*renderSystem.framebuffers.find("depthMap")->second.get()->textures[0]);
