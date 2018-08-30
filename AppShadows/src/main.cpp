@@ -8,7 +8,7 @@
 #include "Shader/LineShader.hpp"
 #include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
-#include "ShadowCasterShader.hpp"
+#include "Shader/ShadowCasterShader.hpp"
 #include "ShadowReceiverShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -184,7 +184,7 @@ int main() {
     NeoEngine::initSystems();
 
     /* Add shaders */
-    renderSystem->addPreProcessShader<ShadowCasterShader>("caster.vert", "caster.frag");
+    renderSystem->addPreProcessShader<ShadowCasterShader>();
     renderSystem->addSceneShader<LineShader>();
     renderSystem->addSceneShader<PhongShader>();
     ShadowReceiverShader & receiverShader = renderSystem->addSceneShader<ShadowReceiverShader>("receiver.vert", "receiver.frag");

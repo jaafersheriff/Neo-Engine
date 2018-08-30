@@ -44,6 +44,7 @@
     <ClInclude Include="src\GLHelper\GLHelper.hpp" />
     <ClInclude Include="src\GLHelper\Mesh.hpp" />
     <ClInclude Include="src\GLHelper\Texture.hpp" />
+    <ClInclude Include="src\Shader\ShadowCasterShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />

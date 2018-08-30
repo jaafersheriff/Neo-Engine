@@ -119,7 +119,6 @@
   <ItemGroup>
     <ClInclude Include="src\CustomSystem.hpp" />
     <ClInclude Include="src\LookAtCameraController.hpp" />
-    <ClInclude Include="src\ShadowCasterShader.hpp" />
     <ClInclude Include="src\ShadowReceiverShader.hpp" />
     <ClInclude Include="src\SinMoveComponent.hpp" />
   </ItemGroup>
@@ -128,8 +127,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="shaders\caster.frag" />
-    <None Include="shaders\caster.vert" />
     <None Include="shaders\receiver.frag" />
     <None Include="shaders\receiver.vert" />
   </ItemGroup>
