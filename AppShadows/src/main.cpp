@@ -9,7 +9,7 @@
 #include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
 #include "Shader/ShadowCasterShader.hpp"
-#include "ShadowReceiverShader.hpp"
+#include "Shader/PhongShadowedShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -166,7 +166,7 @@ int main() {
             glm::vec3(Util::genRandom(-45.f, 45.f), Util::genRandom(2.f, 5.f), Util::genRandom(-45.f, 45.f)),
             glm::vec3(Util::genRandom(5.f)));
         r.renderable->addShaderType<ShadowCasterShader>();
-        r.renderable->addShaderType<ShadowReceiverShader>();
+        r.renderable->addShaderType<PhongShadowedShader>();
         r.material->ambient = 0.5f;
         r.material->diffuse = Util::genRandomVec3();
     }
@@ -175,7 +175,7 @@ int main() {
     // Terrain receiver 
     Renderable receiver(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
     receiver.material->diffuse = glm::vec3(0.7f);
-    receiver.renderable->addShaderType<ShadowReceiverShader>();
+    receiver.renderable->addShaderType<PhongShadowedShader>();
     receiver.attachImGui("Receiver");
 
     /* Systems - order matters! */
@@ -187,7 +187,7 @@ int main() {
     renderSystem->addPreProcessShader<ShadowCasterShader>();
     renderSystem->addSceneShader<LineShader>();
     renderSystem->addSceneShader<PhongShader>();
-    ShadowReceiverShader & receiverShader = renderSystem->addSceneShader<ShadowReceiverShader>("receiver.vert", "receiver.frag");
+    PhongShadowedShader & receiverShader = renderSystem->addSceneShader<PhongShadowedShader>();
     renderSystem->addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */

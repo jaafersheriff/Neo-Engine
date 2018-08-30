@@ -52,6 +52,7 @@
     <ClInclude Include="src\Shader\LineShader.hpp" />
     <ClInclude Include="src\Shader\PhongShader.hpp" />
     <ClInclude Include="src\Shader\ShadowCasterShader.hpp" />
+    <ClInclude Include="src\Shader\PhongShadowedShader.hpp" />
     <ClInclude Include="src\Shader\WireframeShader.hpp" />
     <ClInclude Include="src\GLHelper\Framebuffer.hpp" />
     <ClInclude Include="src\GLHelper\GLHelper.hpp" />

@@ -119,7 +119,6 @@
   <ItemGroup>
     <ClInclude Include="src\CustomSystem.hpp" />
     <ClInclude Include="src\LookAtCameraController.hpp" />
-    <ClInclude Include="src\ShadowReceiverShader.hpp" />
     <ClInclude Include="src\SinMoveComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -127,8 +126,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="shaders\receiver.frag" />
-    <None Include="shaders\receiver.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

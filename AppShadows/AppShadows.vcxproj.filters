@@ -24,9 +24,6 @@
     <ClInclude Include="src\LookAtCameraController.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ShadowReceiverShader.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -34,8 +31,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\receiver.vert" />
-    <None Include="shaders\receiver.frag" />
     <None Include="README.md" />
   </ItemGroup>
 </Project>
