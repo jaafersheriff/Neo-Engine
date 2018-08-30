@@ -34,6 +34,7 @@ namespace neo {
             /* FBO */
             std::unordered_map<std::string, std::unique_ptr<Framebuffer>> framebuffers;
             Framebuffer * getFBO(const std::string &);
+            void setDefaultFBO(const std::string &);
 
             /* Shaders */
             std::vector<std::unique_ptr<Shader>> preShaders;
@@ -53,6 +54,7 @@ namespace neo {
             CameraComponent *defaultCamera;
             Framebuffer *defaultFBO;
             template <typename ShaderT, typename... Args> std::unique_ptr<ShaderT> createShader(Args &&...);
+            Framebuffer * findFBO(const std::string &name);
     };
 
     /* Template implementation */

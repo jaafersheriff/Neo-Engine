@@ -70,12 +70,27 @@ namespace neo {
     }
 
     Framebuffer * RenderSystem::getFBO(const std::string &name) {
-        auto it = framebuffers.find(name);
-        if (it == framebuffers.end()) {
+        auto fb = findFBO(name);
+        if (!fb) {
             framebuffers.emplace(name, std::make_unique<Framebuffer>());
-            it = framebuffers.find(name);
+            fb = framebuffers.find(name)->second.get();
         }
-        return it->second.get();
+        return fb;
+    }
+
+    void RenderSystem::setDefaultFBO(const std::string &name) {
+        auto fb = findFBO(name);
+        if (fb) {
+            defaultFBO = fb;
+        }
+    }
+
+    Framebuffer * RenderSystem::findFBO(const std::string &name) {
+        auto it = framebuffers.find(name);
+        if (it != framebuffers.end()) {
+            return it->second.get();
+        }
+        return nullptr;
     }
 
     void RenderSystem::attachCompToShader(const std::type_index &typeI, RenderableComponent *rComp) {
