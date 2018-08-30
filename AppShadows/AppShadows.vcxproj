@@ -127,6 +127,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="README.md" />
     <None Include="shaders\caster.frag" />
     <None Include="shaders\caster.vert" />
     <None Include="shaders\receiver.frag" />

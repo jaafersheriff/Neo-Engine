@@ -41,5 +41,6 @@
     <None Include="shaders\caster.frag" />
     <None Include="shaders\receiver.vert" />
     <None Include="shaders\receiver.frag" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>
