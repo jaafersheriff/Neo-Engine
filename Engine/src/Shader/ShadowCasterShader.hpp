@@ -16,10 +16,19 @@ namespace neo {
                 Shader("Shadow Caster",
                     "#version 330 core\n\
                         layout (location = 0) in vec3 vertPos;\
+                        layout (location = 2) in vec2 vertTex;\
                         uniform mat4 P, V, M;\
-                        void main() { gl_Position = P * V * M * vec4(vertPos, 1); }",
+                        out vec2 fragTex;\
+                        void main() { gl_Position = P * V * M * vec4(vertPos, 1); fragTex = vertTex; }",
                     "#version 330 core\n\
-                        void main() {}") {
+                        in vec2 fragTex;\
+                        uniform bool useTexture;\
+                        uniform sampler2D diffuseMap;\
+                        void main() {\
+                            if (useTexture && texture(diffuseMap, fragTex).a < 0.1) {\
+                                discard;\
+                            }\
+                        }") {
                 /* Init shadow map */
                 Texture *depthTexture = new Texture2D;
                 depthTexture->width = depthTexture->height = 2048;
@@ -60,6 +69,20 @@ namespace neo {
                     const Mesh & mesh(model->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.vaoId));
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
+
+                    /* Bind texture */
+                    auto texComp = model->getGameObject().getComponentByType<TextureComponent>();
+                    if (texComp) {
+                        auto texture = (Texture2D &) (texComp->getTexture());
+                        texture.bind();
+                        loadUniform("diffuseMap", texture.textureId);
+                        loadUniform("useTexture", true);
+                    }
+                    else {
+                        loadUniform("useTexture", false);
+                    }
+
+                    /* Bind texture */
 
                     /* DRAW */
                     mesh.draw();
