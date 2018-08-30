@@ -44,9 +44,7 @@ namespace neo {
                     uniform bool useTexture;\
                     uniform sampler2D diffuseMap;\
                     uniform vec3 camPos;\
-                    uniform vec3 lightPos;\
-                    uniform vec3 lightCol;\
-                    uniform vec3 lightAtt;\
+                    uniform vec3 lightPos, lightCol, lightAtt;\
                     uniform bool useDotBias;\
                     uniform sampler2D shadowMap;\
                     uniform float bias;\
