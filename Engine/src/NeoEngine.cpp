@@ -99,7 +99,8 @@ namespace neo {
             }
 
             /* Render */
-            // TODO - only run this at 60FPS
+            // TODO - only run this at 60FPS in its own thread
+            // TODO - should this go after processkillqueue?
             MasterRenderer::render((float)Util::timeStep);
 
             /* Kill deleted objects and components */
