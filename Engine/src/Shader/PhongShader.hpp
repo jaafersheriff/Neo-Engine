@@ -3,6 +3,7 @@
 #include "NeoEngine.hpp"
 
 #include "Shader/Shader.hpp"
+#include "MasterRenderer/MasterRenderer.hpp"
 #include "GLHelper/GlHelper.hpp"
 
 using namespace neo;
@@ -11,7 +12,7 @@ class PhongShader : public Shader {
 
 public:
 
-    PhongShader(RenderSystem &r) :
+    PhongShader() :
         Shader("Phong Shader",
             "#version 330 core\n\
                 layout(location = 0) in vec3 vertPos;\
@@ -72,7 +73,7 @@ public:
                     }")
         {}
 
-        virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
+        virtual void render(const CameraComponent &camera) override {
             bind();
 
             /* Load PV */
@@ -88,7 +89,7 @@ public:
                 loadUniform("lightAtt", lights.at(0)->getAttenuation());
             }
 
-            for (auto model : renderSystem.getRenderables<PhongShader, RenderableComponent>()) {
+            for (auto model : MasterRenderer::getRenderables<PhongShader, RenderableComponent>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
                 loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
 

@@ -3,6 +3,7 @@
 #include "NeoEngine.hpp"
 
 #include "Shader/Shader.hpp"
+#include "MasterRenderer/MasterRenderer.hpp"
 #include "GLHelper/GLHelper.hpp"
 
 #include "Component/AnimationComponent/LineRenderable.hpp"
@@ -12,7 +13,7 @@ namespace neo {
     class LineShader : public Shader {
 
         public:
-            LineShader(RenderSystem &rSystem) :
+            LineShader() :
                 Shader("Line Shader",
                         "\
                         #version 330 core\n\
@@ -31,14 +32,14 @@ namespace neo {
                 )
             {}
 
-            virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
+            virtual void render(const CameraComponent &camera) override {
                 bind();
 
                 /* Load PV */
                 loadUniform("P", camera.getProj());
                 loadUniform("V", camera.getView());
 
-                for (auto lineR : renderSystem.getRenderables<LineShader, LineRenderable>()) {
+                for (auto lineR : MasterRenderer::getRenderables<LineShader, LineRenderable>()) {
                     /* Bind mesh */
                     const Mesh & mesh(lineR->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.vaoId));

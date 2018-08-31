@@ -44,7 +44,7 @@ namespace neo {
         if (it == shaderTypes.end()) {
             shaderTypes.emplace_back(typeI);
             if (isInit) {
-                NeoEngine::template getSystem<RenderSystem>().attachCompToShader(typeI, this);
+                MasterRenderer::attachCompToShader(typeI, this);
             }
         }
     }
@@ -58,7 +58,7 @@ namespace neo {
         if (it != shaderTypes.end()) {
             shaderTypes.erase(it);
             if (isInit) {
-                NeoEngine::template getSystem<RenderSystem>().detachCompFromShader(typeI, this);
+                MasterRenderer::detachCompFromShader(typeI, this);
             }
         }
     }

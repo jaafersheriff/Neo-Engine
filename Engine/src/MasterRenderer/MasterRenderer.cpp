@@ -1,4 +1,4 @@
-#include "RenderSystem.hpp"
+#include "MasterRenderer.hpp"
 #include "GLHelper/GLHelper.hpp"
 
 #include "NeoEngine.hpp"
@@ -9,7 +9,19 @@
 
 namespace neo {
 
-    void RenderSystem::init() {
+    std::string MasterRenderer::APP_SHADER_DIR;
+    CameraComponent *MasterRenderer::defaultCamera;
+    std::unordered_map<std::string, std::unique_ptr<Framebuffer>> MasterRenderer::framebuffers;
+    Framebuffer *MasterRenderer::defaultFBO;
+    std::vector<std::unique_ptr<Shader>> MasterRenderer::preShaders;
+    std::vector<std::unique_ptr<Shader>> MasterRenderer::sceneShaders;
+    std::vector<std::unique_ptr<Shader>> MasterRenderer::postShaders;
+    std::unordered_map<std::type_index, std::unique_ptr<std::vector<RenderableComponent *>>> MasterRenderer::renderables;
+
+    void MasterRenderer::init(const std::string &dir, CameraComponent *cam) {
+        APP_SHADER_DIR = dir;
+        setDefaultCamera(cam);
+
         /* Init default GL state */
         CHECK_GL(glEnable(GL_DEPTH_TEST));
         CHECK_GL(glEnable(GL_CULL_FACE));
@@ -30,12 +42,12 @@ namespace neo {
         defaultFBO->fboId = 0;
     }
 
-    void RenderSystem::update(float dt) {
+    void MasterRenderer::render(float dt) {
         if (preShaders.size()) {
             /* Render all preprocesses */
             for (auto & shader : preShaders) {
                 if (shader.get()->active) {
-                    shader.get()->render(*this, *defaultCamera);
+                    shader.get()->render(*defaultCamera);
                 }
             }
             /* Reset default FBO */
@@ -61,15 +73,15 @@ namespace neo {
         glfwSwapBuffers(Window::getWindow());
     }
 
-    void RenderSystem::renderScene(const CameraComponent &camera) const {
+    void MasterRenderer::renderScene(const CameraComponent &camera) {
        for (auto & shader : sceneShaders) {
             if (shader.get()->active) {
-                shader.get()->render(*this, camera);
+                shader.get()->render(camera);
             }
         }
     }
 
-    Framebuffer * RenderSystem::getFBO(const std::string &name) {
+    Framebuffer * MasterRenderer::getFBO(const std::string &name) {
         auto fb = findFBO(name);
         if (!fb) {
             framebuffers.emplace(name, std::make_unique<Framebuffer>());
@@ -78,14 +90,14 @@ namespace neo {
         return fb;
     }
 
-    void RenderSystem::setDefaultFBO(const std::string &name) {
+    void MasterRenderer::setDefaultFBO(const std::string &name) {
         auto fb = findFBO(name);
         if (fb) {
             defaultFBO = fb;
         }
     }
 
-    Framebuffer * RenderSystem::findFBO(const std::string &name) {
+    Framebuffer * MasterRenderer::findFBO(const std::string &name) {
         auto it = framebuffers.find(name);
         if (it != framebuffers.end()) {
             return it->second.get();
@@ -93,7 +105,7 @@ namespace neo {
         return nullptr;
     }
 
-    void RenderSystem::attachCompToShader(const std::type_index &typeI, RenderableComponent *rComp) {
+    void MasterRenderer::attachCompToShader(const std::type_index &typeI, RenderableComponent *rComp) {
         /* Get vector<RenderableComponent *> that matches this shader */
         auto it(renderables.find(typeI));
         if (it == renderables.end()) {
@@ -104,7 +116,7 @@ namespace neo {
         it->second->emplace_back(rComp);
     }
 
-    void RenderSystem::detachCompFromShader(const std::type_index &typeI, RenderableComponent *rComp) {
+    void MasterRenderer::detachCompFromShader(const std::type_index &typeI, RenderableComponent *rComp) {
         assert(renderables.count(typeI));
         /* Look in active components in reverse order */
         if (renderables.count(typeI)) {

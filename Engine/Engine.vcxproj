@@ -57,7 +57,7 @@
     <ClInclude Include="src\GLHelper\Framebuffer.hpp" />
     <ClInclude Include="src\GLHelper\GLHelper.hpp" />
     <ClInclude Include="src\Shader\Shader.hpp" />
-    <ClInclude Include="src\System\RenderSystem\RenderSystem.hpp" />
+    <ClInclude Include="src\MasterRenderer\MasterRenderer.hpp" />
     <ClInclude Include="src\System\System.hpp" />
     <ClInclude Include="src\System\Systems.hpp" />
     <ClInclude Include="src\Util\Util.hpp" />
@@ -82,7 +82,7 @@
     <ClCompile Include="src\NeoEngine.cpp" />
     <ClCompile Include="src\GLHelper\GLHelper.cpp" />
     <ClCompile Include="src\Shader\Shader.cpp" />
-    <ClCompile Include="src\System\RenderSystem\RenderSystem.cpp" />
+    <ClCompile Include="src\MasterRenderer\MasterRenderer.cpp" />
     <ClCompile Include="src\Window\Keyboard.cpp" />
     <ClCompile Include="src\Window\Mouse.cpp" />
     <ClCompile Include="src\Window\Window.cpp" />

@@ -7,6 +7,7 @@ extern "C" {
 #endif
 
 #include "NeoEngine.hpp"
+#include "MasterRenderer/MasterRenderer.hpp"
 
 #include "GameObject/GameObject.hpp"
 #include "Messaging/Messenger.hpp"
@@ -96,6 +97,10 @@ namespace neo {
                     Messenger::relayMessages();
                 }
             }
+
+            /* Render */
+            // TODO - only run this at 60FPS
+            MasterRenderer::render((float)Util::timeStep);
 
             /* Kill deleted objects and components */
             processKillQueue();

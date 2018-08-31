@@ -7,6 +7,7 @@
 #include "Util/Util.hpp"
 
 #include "Component/Components.hpp"
+#include "System/System.hpp"    // Necessary because there are no common systems in the engine
 #include "System/Systems.hpp"
 
 #include "ext/imgui/imgui.h"

@@ -3,6 +3,7 @@
 #include "NeoEngine.hpp"
 
 #include "Shader/Shader.hpp"
+#include "MasterRenderer/MasterRenderer.hpp"
 #include "GLHelper/GlHelper.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -13,7 +14,7 @@ namespace neo {
 
         public:
 
-            PhongShadowedShader(RenderSystem &rSystem, float b = 0.f) :
+            PhongShadowedShader(float b = 0.f) :
                 Shader("PhongShadowed Shader", 
                     "#version 330 core\n\
                     layout(location = 0) in vec3 vertPos;\
@@ -112,7 +113,7 @@ namespace neo {
             bool usePCF = true;
             int pcfSize = 2;
 
-            virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
+            virtual void render(const CameraComponent &camera) override {
                 bind();
 
                 /* Load Camera */
@@ -140,12 +141,12 @@ namespace neo {
                 loadUniform("pcfSize", pcfSize);
 
                 /* Bind shadow map */
-                const Texture & texture(*renderSystem.framebuffers.find("depthMap")->second.get()->textures[0]);
+                const Texture & texture(*MasterRenderer::getFBO("depthMap")->textures[0]); 
                 CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.textureId));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.textureId));
                 loadUniform("shadowMap", texture.textureId);
 
-                for (auto model : renderSystem.getRenderables<PhongShadowedShader, RenderableComponent>()) {
+                for (auto model : MasterRenderer::getRenderables<PhongShadowedShader, RenderableComponent>()) {
                     loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
                     loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
 

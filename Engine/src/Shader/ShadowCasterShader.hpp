@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
+#include "MasterRenderer/MasterRenderer.hpp"
 #include "GLHelper/Framebuffer.hpp"
-#include "System/RenderSystem/RenderSystem.hpp"
 
 #include "NeoEngine.hpp"
 
@@ -12,7 +12,7 @@ namespace neo {
 
         public:
 
-            ShadowCasterShader(RenderSystem &rSystem) :
+            ShadowCasterShader() :
                 Shader("Shadow Caster",
                     "#version 330 core\n\
                         layout (location = 0) in vec3 vertPos;\
@@ -38,15 +38,15 @@ namespace neo {
                 CHECK_GL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data()));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
 
-                Framebuffer *depthFBO = rSystem.getFBO("depthMap");
+                Framebuffer *depthFBO = MasterRenderer::getFBO("depthMap");
                 depthFBO->generate();
                 depthFBO->attachDepthTexture(*depthTexture);
                 depthFBO->disableDraw();
                 depthFBO->disableRead();
             }
 
-            virtual void render(const RenderSystem &rSystem, const CameraComponent &camera) override {
-                auto fbo = rSystem.framebuffers.find("depthMap")->second.get();
+            virtual void render(const CameraComponent &camera) override {
+                auto fbo = MasterRenderer::getFBO("depthMap");
                 auto depthTexture = fbo->textures[0];
 
                 fbo->bind();
@@ -62,7 +62,7 @@ namespace neo {
                     loadUniform("V", cameras[0]->getView());
                 }
 
-                for (auto model : rSystem.getRenderables<ShadowCasterShader, RenderableComponent>()) {
+                for (auto model : MasterRenderer::getRenderables<ShadowCasterShader, RenderableComponent>()) {
                     loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
 
                     /* Bind mesh */

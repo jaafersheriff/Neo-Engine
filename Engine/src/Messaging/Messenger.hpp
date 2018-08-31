@@ -43,13 +43,6 @@ namespace neo {
         auto & receiver =  gameObject ? const_cast<GameObject *>(gameObject)->receivers : receivers;
         receiver[std::type_index(typeid(MsgT))].emplace_back(func);
 
-        // if (gameObject) {
-        //     const_cast<GameObject *>(gameObject)->receivers[std::type_index(typeid(MsgT))].emplace_back(func);
-        // }
-        // else {
-        //     receivers[std::type_index(typeid(MsgT))].emplace_back(func);
-        // }
-
     }
 
 }

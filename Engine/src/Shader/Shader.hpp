@@ -11,7 +11,6 @@
 
 namespace neo {
 
-    class RenderSystem;
     class CameraComponent;
 
     class Shader {
@@ -24,7 +23,7 @@ namespace neo {
             Shader(const std::string &, const char *, const char *, const char *);
             virtual ~Shader() = default;
 
-            virtual void render(const RenderSystem &, const CameraComponent &) {};
+            virtual void render(const CameraComponent &) {};
             bool active = true;
 
             /* Names */

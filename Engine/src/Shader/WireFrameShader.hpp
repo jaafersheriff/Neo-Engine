@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
+#include "MasterRenderer/MasterRenderer.hpp"
 #include "GLHelper/GLHelper.hpp"
 
 namespace neo {
@@ -8,7 +9,7 @@ namespace neo {
     class WireframeShader : public Shader {
 
         public:
-            WireframeShader(RenderSystem &rSystem) :
+            WireframeShader() :
                 Shader("Wire Shader",
                         "\
                         #version 330 core\n\
@@ -26,14 +27,14 @@ namespace neo {
                 )
             {}
 
-            virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) {
+            virtual void render(const CameraComponent &camera) {
                 bind();
 
                 /* Load PV */
                 loadUniform("P", camera.getProj());
                 loadUniform("V", camera.getView());
 
-                for (auto r : renderSystem.getRenderables<WireframeShader, RenderableComponent>()) {
+                for (auto r : MasterRenderer::getRenderables<WireframeShader, RenderableComponent>()) {
                     /* Bind mesh */
                     const Mesh & mesh(r->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.vaoId));

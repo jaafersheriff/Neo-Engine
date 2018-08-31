@@ -23,7 +23,6 @@
     <ClInclude Include="src\Messaging\Message.hpp" />
     <ClInclude Include="src\Messaging\Messenger.hpp" />
     <ClInclude Include="src\Shader\Shader.hpp" />
-    <ClInclude Include="src\System\RenderSystem\RenderSystem.hpp" />
     <ClInclude Include="src\System\System.hpp" />
     <ClInclude Include="src\System\Systems.hpp" />
     <ClInclude Include="src\Util\Util.hpp" />
@@ -46,6 +45,7 @@
     <ClInclude Include="src\GLHelper\Texture.hpp" />
     <ClInclude Include="src\Shader\ShadowCasterShader.hpp" />
     <ClInclude Include="src\Shader\PhongShadowedShader.hpp" />
+    <ClInclude Include="src\MasterRenderer\MasterRenderer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -59,7 +59,6 @@
     <ClCompile Include="src\Loader\Loader.cpp" />
     <ClCompile Include="src\Messaging\Messenger.cpp" />
     <ClCompile Include="src\Shader\Shader.cpp" />
-    <ClCompile Include="src\System\RenderSystem\RenderSystem.cpp" />
     <ClCompile Include="src\Window\Keyboard.cpp" />
     <ClCompile Include="src\Window\Mouse.cpp" />
     <ClCompile Include="src\Window\Window.cpp" />
@@ -68,5 +67,6 @@
     <ClCompile Include="src\Component\AnimationComponent\LineRenderable.cpp" />
     <ClCompile Include="src\GLHelper\GLHelper.cpp" />
     <ClCompile Include="src\GLHelper\Mesh.cpp" />
+    <ClCompile Include="src\MasterRenderer\MasterRenderer.cpp" />
   </ItemGroup>
 </Project>
