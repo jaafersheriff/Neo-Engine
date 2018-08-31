@@ -4,6 +4,7 @@
 
 #include "Shader/Shader.hpp"
 #include "GLHelper/GlHelper.hpp"
+#include "MasterRenderer/MasterRenderer.hpp"
 
 using namespace neo;
 
@@ -11,11 +12,11 @@ class NormalShader : public Shader {
 
     public: 
     
-        NormalShader(RenderSystem &r, const std::string &vert, const std::string &frag, const std::string &geom) :
-            Shader("Normal Shader", r.APP_SHADER_DIR, vert, frag, geom) 
+        NormalShader(const std::string &vert, const std::string &frag, const std::string &geom) :
+            Shader("Normal Shader", vert, frag, geom) 
         {}
 
-        virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
+        virtual void render(const CameraComponent &camera) override {
             bind();
 
             loadUniform("magnitude", magnitude);
@@ -24,7 +25,7 @@ class NormalShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto model : renderSystem.getRenderables<NormalShader, RenderableComponent>()) {
+            for (auto model : MasterRenderer::getRenderables<NormalShader, RenderableComponent>()) {
                 glm::mat4 M = model->getGameObject().getSpatial()->getModelMatrix();
                 loadUniform("M", M);
                 glm::mat4 N = glm::transpose(glm::inverse(camera.getView() * M));

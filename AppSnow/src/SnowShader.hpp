@@ -5,6 +5,7 @@
 
 #include "Shader/Shader.hpp"
 #include "GLHelper/GlHelper.hpp"
+#include "MasterRenderer/MasterRenderer.hpp"
 
 namespace neo {
 
@@ -12,11 +13,11 @@ namespace neo {
 
         public:
 
-            SnowShader(RenderSystem &rSystem, const std::string &vert, const std::string &frag) :
-                Shader("Snow Shader", rSystem.APP_SHADER_DIR, vert, frag)
+            SnowShader(const std::string &vert, const std::string &frag) :
+                Shader("Snow Shader", vert, frag)
             {}
 
-            virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
+            virtual void render(const CameraComponent &camera) override {
                 bind();
 
                 /* Load snow */
@@ -41,7 +42,7 @@ namespace neo {
                     loadUniform("lightAtt", lights.at(0)->getAttenuation());
                 }
 
-                for (auto model : renderSystem.getRenderables<SnowShader, RenderableComponent>()) {
+                for (auto model : MasterRenderer::getRenderables<SnowShader, RenderableComponent>()) {
                     loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
                     loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-
 #include "GLHelper/GLHelper.hpp"
 
 #include "NeoEngine.hpp"
@@ -15,11 +14,11 @@ class ReflectionShader : public Shader {
 
     public:
 
-        ReflectionShader(RenderSystem &r, const std::string &vert, const std::string &frag) :
-            Shader("Reflection Shader", r.APP_SHADER_DIR, vert, frag)
+        ReflectionShader(const std::string &vert, const std::string &frag) :
+            Shader("Reflection Shader", vert, frag)
         {}
 
-        virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
+        virtual void render(const CameraComponent &camera) override {
             bind();
 
             /* Load PV */
@@ -30,7 +29,7 @@ class ReflectionShader : public Shader {
             /* Load environment map */
             loadUniform("cubeMap", NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<TextureComponent>()->getTexture().textureId);
 
-            for (auto model : renderSystem.getRenderables<ReflectionShader, ReflectionRenderable>()) {
+            for (auto model : MasterRenderer::getRenderables<ReflectionShader, ReflectionRenderable>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
                 loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
 

@@ -9,9 +9,6 @@
 
 using namespace neo;
 
-/* Systems */
-RenderSystem * renderSystem;
-
 /* Game object definitions */
 struct Camera {
     CameraComponent *camera;
@@ -122,10 +119,12 @@ int main() {
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
-    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
-    auto snowShader = &renderSystem->addSceneShader<SnowShader>("snow.vert", "snow.frag");
-    renderSystem->addSceneShader<LineShader>();
     NeoEngine::initSystems();
+
+    /* Init renderer */
+    MasterRenderer::init("shaders/", camera.camera);
+    auto snowShader = &MasterRenderer::addSceneShader<SnowShader>("snow.vert", "snow.frag");
+    MasterRenderer::addSceneShader<LineShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
@@ -133,15 +132,6 @@ int main() {
         ImGui::Text("dt: %0.4f", Util::timeStep);
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
-        }
-    });
-    NeoEngine::addImGuiFunc("Render System", [&]() {
-        ImGui::Text("Shaders:  %d", renderSystem->preShaders.size() + renderSystem->sceneShaders.size());
-        for (auto it(renderSystem->preShaders.begin()); it != renderSystem->preShaders.end(); ++it) {
-            ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
-        }
-        for (auto it(renderSystem->sceneShaders.begin()); it != renderSystem->sceneShaders.end(); ++it) {
-            ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
         }
     });
 

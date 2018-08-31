@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-
 #include "GLHelper/GLHelper.hpp"
+#include "MasterRenderer/MasterRenderer.hpp"
 
 #include "NeoEngine.hpp"
 
@@ -15,11 +15,11 @@ class RefractionShader : public Shader {
 
     public:
 
-        RefractionShader(RenderSystem &r, const std::string &vert, const std::string &frag) :
-            Shader("Refraction Shader", r.APP_SHADER_DIR, vert, frag)
+        RefractionShader(const std::string &vert, const std::string &frag) :
+            Shader("Refraction Shader", vert, frag)
         {}
 
-        virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
+        virtual void render(const CameraComponent &camera) override {
             bind();
 
             /* Load PV */
@@ -30,7 +30,7 @@ class RefractionShader : public Shader {
             /* Load environment map */
             loadUniform("cubeMap", NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<TextureComponent>()->getTexture().textureId);
 
-            for (auto model : renderSystem.getRenderables<RefractionShader, RefractionRenderable>()) {
+            for (auto model : MasterRenderer::getRenderables<RefractionShader, RefractionRenderable>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
                 loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
                 loadUniform("ratio", model->ratio);

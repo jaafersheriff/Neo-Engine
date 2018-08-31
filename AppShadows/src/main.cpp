@@ -180,15 +180,15 @@ int main() {
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
-    RenderSystem * renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
     NeoEngine::initSystems();
 
-    /* Add shaders */
-    renderSystem->addPreProcessShader<ShadowCasterShader>();
-    renderSystem->addSceneShader<LineShader>();
-    renderSystem->addSceneShader<PhongShader>();
-    PhongShadowedShader & receiverShader = renderSystem->addSceneShader<PhongShadowedShader>();
-    renderSystem->addSceneShader<WireframeShader>();
+    /* Init renderer */
+    MasterRenderer::init("shaders/", camera.camera);
+    MasterRenderer::addPreProcessShader<ShadowCasterShader>();
+    MasterRenderer::addSceneShader<LineShader>();
+    MasterRenderer::addSceneShader<PhongShader>();
+    PhongShadowedShader & receiverShader = MasterRenderer::addSceneShader<PhongShadowedShader>();
+    MasterRenderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
@@ -205,14 +205,14 @@ int main() {
         if (receiverShader.usePCF) {
             ImGui::SliderInt("PCF Size", &receiverShader.pcfSize, 0, 5);
         }
-        const Texture * texture(renderSystem->framebuffers.find("depthMap")->second.get()->textures[0]);
+        const Texture * texture(MasterRenderer::getFBO("depthMap")->textures[0]);
         static float scale = 0.1f;
         ImGui::SliderFloat("Scale", &scale, 0.f, 1.f);
         ImGui::Image((ImTextureID)texture->textureId, ImVec2(scale * texture->width, scale * texture->height), ImVec2(0, 1), ImVec2(1, 0));
         static bool useLightCam = false;
         if (ImGui::Button("Switch Camera")) {
             useLightCam = !useLightCam;
-            renderSystem->setDefaultCamera(useLightCam ? light.camera : camera.camera);
+            MasterRenderer::setDefaultCamera(useLightCam ? light.camera : camera.camera);
         }
     });
 

@@ -11,9 +11,6 @@
 
 using namespace neo;
 
-/* Systems */
-RenderSystem * renderSystem;
-
 /* Shaders */
 PhongShader *phongShader;
 NormalShader *normalShader;
@@ -104,11 +101,14 @@ int main() {
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
-    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
-    phongShader = &renderSystem->addSceneShader<PhongShader>();
-    wireframeShader = &renderSystem->addSceneShader<WireframeShader>();
-    normalShader = &renderSystem->addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
     NeoEngine::initSystems();
+
+    /* Init renderer */
+    MasterRenderer::init("shaders/", camera.camera);
+    phongShader = &MasterRenderer::addSceneShader<PhongShader>();
+    wireframeShader = &MasterRenderer::addSceneShader<WireframeShader>();
+    normalShader = &MasterRenderer::addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
+ 
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {

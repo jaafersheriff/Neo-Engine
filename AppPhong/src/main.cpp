@@ -7,9 +7,6 @@
 
 using namespace neo;
 
-/* Systems */
-RenderSystem * renderSystem;
-
 /* Game object definitions */
 struct Camera {
     GameObject *gameObject;
@@ -89,10 +86,12 @@ int main() {
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraSystem>();
-    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
-    renderSystem->addSceneShader<PhongShader>();
-    renderSystem->addSceneShader<WireframeShader>();
     NeoEngine::initSystems();
+
+    /* Init renderer */
+    MasterRenderer::init("shaders/", camera.cameraComp);
+    MasterRenderer::addSceneShader<PhongShader>();
+    MasterRenderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {

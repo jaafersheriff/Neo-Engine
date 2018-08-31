@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-
 #include "GLHelper/GLHelper.hpp"
+#include "MasterRenderer/MasterRenderer.hpp"
 
 #include "SkyboxComponent.hpp"
 
@@ -12,12 +12,12 @@ class SkyboxShader : public Shader {
 
     public:
 
-        SkyboxShader(RenderSystem &r, const std::string &vert, const std::string &frag) :
-            Shader("Skybox Shader", r.APP_SHADER_DIR, vert, frag)
+        SkyboxShader(const std::string &vert, const std::string &frag) :
+            Shader("Skybox Shader", vert, frag)
         {}
 
-        virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
-            const auto cubes = renderSystem.getRenderables<SkyboxShader, SkyboxComponent>();
+        virtual void render(const CameraComponent &camera) override {
+            const auto cubes = MasterRenderer::getRenderables<SkyboxShader, SkyboxComponent>();
             if (!cubes.size()) {
                 return;
             }

@@ -8,9 +8,6 @@
 
 using namespace neo;
 
-/* Systems */
-RenderSystem * renderSystem;
-
 /* Game object definitions */
 struct Camera {
     GameObject *gameObject;
@@ -122,12 +119,12 @@ int main() {
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
-    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.cameraComp);
     NeoEngine::initSystems();
 
-    /* Shaders */
-    renderSystem->addSceneShader<CustomShader>("custom.vert", "custom.frag");
-    renderSystem->addSceneShader<WireframeShader>();
+    /* Init renderer */
+    MasterRenderer::init("shaders/", camera.cameraComp);
+    MasterRenderer::addSceneShader<CustomShader>("custom.vert", "custom.frag");
+    MasterRenderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     cube.attachImGui("Cube");
@@ -155,21 +152,6 @@ int main() {
         for (auto sys : NeoEngine::getSystems()) {
             ImGui::Checkbox(sys.second->name.c_str(), &sys.second->active);
         }
-    });
-    NeoEngine::addImGuiFunc("Render System", [&]() {
-        ImGui::Text("Shaders:  %d", renderSystem->preShaders.size() + renderSystem->sceneShaders.size());
-        for (auto it(renderSystem->preShaders.begin()); it != renderSystem->preShaders.end(); ++it) {
-            ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
-        }
-        for (auto it(renderSystem->sceneShaders.begin()); it != renderSystem->sceneShaders.end(); ++it) {
-            ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
-        }
-
-        int size = 0;
-        for (auto it(renderSystem->renderables.begin()); it != renderSystem->renderables.end(); ++it) {
-            size += it->second->size();
-        }
-        ImGui::Text("Renderables: %d", size);
     });
 
     /* Run */

@@ -3,24 +3,25 @@
 #include "CustomComponent.hpp"
 #include "Shader/Shader.hpp"
 #include "GLHelper/GLHelper.hpp"
+#include "MasterRenderer/MasterRenderer.hpp"
 
 using namespace neo;
 
 class CustomShader : public Shader {
 
     public:
-        CustomShader(RenderSystem &r, const std::string &vert, const std::string &frag) :
-            Shader("Custom Shader", r.APP_SHADER_DIR, vert, frag)
+        CustomShader(const std::string &vert, const std::string &frag) :
+            Shader("Custom Shader", vert, frag)
         {}
 
-        virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
+        virtual void render(const CameraComponent &camera) override {
             bind();
 
             /* Load PV */
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto r : renderSystem.getRenderables<CustomShader, RenderableComponent>()) {
+            for (auto r : MasterRenderer::getRenderables<CustomShader, RenderableComponent>()) {
                 /* Bind mesh */
                 const Mesh & mesh(r->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.vaoId));

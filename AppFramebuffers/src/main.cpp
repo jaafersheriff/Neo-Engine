@@ -13,9 +13,6 @@
 
 using namespace neo;
 
-/* Systems */
-RenderSystem * renderSystem;
-
 /* Game object definitions */
 struct Camera {
     CameraComponent *camera;
@@ -146,14 +143,14 @@ int main() {
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
-    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
     NeoEngine::initSystems();
 
-    /* Add shaders */
-    renderSystem->addPreProcessShader<SurveillanceWriteShader>();
-    renderSystem->addSceneShader<LineShader>();
-    renderSystem->addSceneShader<PhongShader>();
-    renderSystem->addSceneShader<SurveillanceReadShader>("read.vert", "read.frag");
+    /* Init Renderer */
+    MasterRenderer::init("shaders/", camera.camera);
+    MasterRenderer::addPreProcessShader<SurveillanceWriteShader>();
+    MasterRenderer::addSceneShader<LineShader>();
+    MasterRenderer::addSceneShader<PhongShader>();
+    MasterRenderer::addSceneShader<SurveillanceReadShader>("read.vert", "read.frag");
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {

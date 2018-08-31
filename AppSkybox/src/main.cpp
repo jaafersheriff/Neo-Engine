@@ -8,13 +8,9 @@
 #include "SkyboxShader.hpp"
 #include "ReflectionShader.hpp"
 #include "RefractionShader.hpp"
-
 #include "Shader/WireframeShader.hpp"
 
 using namespace neo;
-
-/* Systems */
-RenderSystem * renderSystem;
 
 /* Game object definitions */
 struct Camera {
@@ -130,14 +126,14 @@ int main() {
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
-    renderSystem = &NeoEngine::addSystem<RenderSystem>("shaders/", camera.camera);
     NeoEngine::initSystems();
 
-    /* Shaders - order matters! */
-    renderSystem->addSceneShader<ReflectionShader>("model.vert", "reflect.frag");
-    renderSystem->addSceneShader<RefractionShader>("model.vert", "refract.frag");
-    renderSystem->addSceneShader<SkyboxShader>("skybox.vert", "skybox.frag");
-    renderSystem->addSceneShader<WireframeShader>();
+    /* Init renderer and shaders - order matters! */
+    MasterRenderer::init("shaders/", camera.camera);
+    MasterRenderer::addSceneShader<ReflectionShader>("model.vert", "reflect.frag");
+    MasterRenderer::addSceneShader<RefractionShader>("model.vert", "refract.frag");
+    MasterRenderer::addSceneShader<SkyboxShader>("skybox.vert", "skybox.frag");
+    MasterRenderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
@@ -147,15 +143,7 @@ int main() {
             Window::toggleVSync();
         }
     });
-    NeoEngine::addImGuiFunc("Render System", [&]() {
-        ImGui::Text("Shaders:  %d", renderSystem->preShaders.size() + renderSystem->sceneShaders.size());
-        for (auto it(renderSystem->preShaders.begin()); it != renderSystem->preShaders.end(); ++it) {
-            ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
-        }
-        for (auto it(renderSystem->sceneShaders.begin()); it != renderSystem->sceneShaders.end(); ++it) {
-            ImGui::Checkbox(it->get()->name.c_str(), &it->get()->active);
-        }
-    });
+
     /* Run */
     NeoEngine::run();
 

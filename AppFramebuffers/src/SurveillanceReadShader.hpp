@@ -11,11 +11,11 @@ using namespace neo;
 class SurveillanceReadShader : public Shader {
 
     public:
-        SurveillanceReadShader(RenderSystem &renderer, const std::string &vert, const std::string &frag) :
-            Shader("Surveillance Read", renderer.APP_SHADER_DIR, vert, frag)
+        SurveillanceReadShader(const std::string &vert, const std::string &frag) :
+            Shader("Surveillance Read", vert, frag)
         {}
 
-        virtual void render(const RenderSystem &renderSystem, const CameraComponent &camera) override {
+        virtual void render(const CameraComponent &camera) override {
             bind();
 
             /* Load PV */
