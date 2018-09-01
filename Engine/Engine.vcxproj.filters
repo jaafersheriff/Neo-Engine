@@ -35,7 +35,6 @@
     <ClInclude Include="src\Component\ModelComponent\RenderableComponent.hpp" />
     <ClInclude Include="src\Component\AnimationComponent\LineRenderable.hpp" />
     <ClInclude Include="src\Component\ModelComponent\MaterialComponent.hpp" />
-    <ClInclude Include="src\Component\ModelComponent\TextureComponent.hpp" />
     <ClInclude Include="src\Component\AnimationComponent\LineComponent.hpp" />
     <ClInclude Include="src\Shader\PhongShader.hpp" />
     <ClInclude Include="src\Material\Material.hpp" />
@@ -46,6 +45,9 @@
     <ClInclude Include="src\Shader\ShadowCasterShader.hpp" />
     <ClInclude Include="src\Shader\PhongShadowedShader.hpp" />
     <ClInclude Include="src\MasterRenderer\MasterRenderer.hpp" />
+    <ClInclude Include="src\Component\ModelComponent\NormalMapComponent.hpp" />
+    <ClInclude Include="src\Component\ModelComponent\DiffuseMapComponent.hpp" />
+    <ClInclude Include="src\Component\ModelComponent\SpecularMapComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
