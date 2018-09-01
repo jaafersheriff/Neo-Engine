@@ -7,7 +7,9 @@
 
 #include "ModelComponent/RenderableComponent.hpp"
 #include "ModelComponent/MaterialComponent.hpp"
-#include "ModelComponent/TextureComponent.hpp"
+#include "ModelComponent/DiffuseMapComponent.hpp"
+#include "ModelComponent/NormalMapComponent.hpp"
+#include "ModelComponent/SpecularMapComponent.hpp"
 
 #include "AnimationComponent/LineRenderable.hpp"
 #include "AnimationComponent/LineComponent.hpp"

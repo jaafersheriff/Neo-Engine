@@ -55,12 +55,8 @@ namespace neo {
                 CHECK_GL(glCullFace(GL_FRONT));
 
                 bind();
-
-                auto cameras = NeoEngine::getComponents<LightComponent>()[0]->getGameObject().getComponentsByType<CameraComponent>();
-                if (cameras.size()) {
-                    loadUniform("P", cameras[0]->getProj());
-                    loadUniform("V", cameras[0]->getView());
-                }
+                loadUniform("P", camera.getProj());
+                loadUniform("V", camera.getView());
 
                 for (auto model : MasterRenderer::getRenderables<ShadowCasterShader, RenderableComponent>()) {
                     loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
@@ -81,8 +77,6 @@ namespace neo {
                     else {
                         loadUniform("useTexture", false);
                     }
-
-                    /* Bind texture */
 
                     /* DRAW */
                     mesh.draw();

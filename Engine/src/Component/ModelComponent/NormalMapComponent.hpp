@@ -6,10 +6,10 @@
 
 namespace neo {
 
-    class TextureComponent : public Component {
+    class NormalMapComponent : public Component {
 
         public:
-            TextureComponent(GameObject *go, Texture *tex) :
+            NormalMapComponent(GameObject *go, Texture *tex) :
                 Component(go),
                 texture(tex)
             {}

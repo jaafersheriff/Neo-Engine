@@ -99,9 +99,9 @@ public:
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
                 /* Bind texture */
-                auto texComp = model->getGameObject().getComponentByType<TextureComponent>();
-                if (texComp) {
-                    auto texture = (Texture2D &) (texComp->getTexture());
+                auto diffuseMap = model->getGameObject().getComponentByType<DiffuseMapComponent>();
+                if (diffuseMap) {
+                    auto texture = (Texture2D &) (diffuseMap->getTexture());
                     texture.bind();
                     loadUniform("diffuseMap", texture.textureId);
                     loadUniform("useTexture", true);
