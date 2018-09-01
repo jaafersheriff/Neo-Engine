@@ -23,5 +23,12 @@
     <ClInclude Include="src\CustomSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\GBufferShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\gbuffer.vert" />
+    <None Include="shaders\gbuffer.frag" />
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@
 
 #include "CustomSystem.hpp"
 
+#include "GBufferShader.hpp"
 #include "Shader/PhongShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -53,7 +54,6 @@ struct Renderable {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<PhongShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
@@ -83,7 +83,9 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable(Loader::getMesh("cube"));
+    Renderable r(Loader::getMesh("cube"));
+    r.renderable->addShaderType<GBufferShader>();
+    r.renderable->addShaderType<PhongShader>();
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
@@ -91,6 +93,7 @@ int main() {
 
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
+    MasterRenderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
     MasterRenderer::addSceneShader<PhongShader>();
 
     /* Attach ImGui panes */
@@ -99,6 +102,12 @@ int main() {
         ImGui::Text("dt: %0.4f", Util::timeStep);
         if (ImGui::Button("VSync")) {
             Window::toggleVSync();
+        }
+    });
+    NeoEngine::addImGuiFunc("GBuffer", [&]() {
+        auto gbuffer = MasterRenderer::getFBO("gbuffer");
+        for (auto texture : gbuffer->textures) {
+            ImGui::Image((ImTextureID)texture->textureId, ImVec2(0.1f * texture->width, 0.1f * texture->height), ImVec2(0, 1), ImVec2(1, 0));
         }
     });
 

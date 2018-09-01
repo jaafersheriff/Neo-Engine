@@ -121,6 +121,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CustomSystem.hpp" />
+    <ClInclude Include="src\GBufferShader.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\gbuffer.frag" />
+    <None Include="shaders\gbuffer.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

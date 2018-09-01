@@ -40,6 +40,19 @@ namespace neo {
                 attachTexture(GL_COLOR_ATTACHMENT0 + colorAttachments++, texture);
             }
 
+            void initDrawBuffers() {
+                if (!colorAttachments) {
+                    return;
+                }
+
+                bind();
+                std::vector<unsigned int> attachments;
+                for (int i = 0; i < colorAttachments; i++) {
+                    attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
+                }
+                CHECK_GL(glDrawBuffers(colorAttachments, attachments.data()));
+            }
+
             void attachDepthTexture(Texture &texture) {
                 attachTexture(GL_DEPTH_ATTACHMENT, texture);
             }
