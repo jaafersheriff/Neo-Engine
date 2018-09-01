@@ -122,8 +122,11 @@ namespace neo {
                     {0.f, 0.f, 1.f,
                      0.f, 0.f, 1.f,
                      0.f, 0.f, 1.f,
-                     0.f, 0.f, 1.f
-                    }, {}, {}, GL_TRIANGLE_STRIP);
+                     0.f, 0.f, 1.f }, 
+                    {0.f, 0.f, 
+                     1.f, 0.f,
+                     0.f, 1.f,
+                     1.f, 1.f }, {}, GL_TRIANGLE_STRIP);
             }
 
             // From https://stackoverflow.com/questions/5988686/creating-a-3d-sphere-in-opengl-using-visual-c/5989676#5989676
