@@ -14,16 +14,13 @@ uniform vec3 diffuseMaterial;
 uniform bool useSpecularMap;
 uniform sampler2D specularMap;
 
-// layout (location = 0) out vec3 gPosition;
-// layout (location = 1) out vec3 gNormal;
-// layout (location = 2) out vec4 gAlbedoSpec;
+layout (location = 0) out vec4 gPosition;
+layout (location = 1) out vec4 gNormal;
+layout (location = 2) out vec4 gAlbedoSpec;
 
-out vec4 color;
-
-void main() {    
-    color = vec4(1,0,1,1);
-    // gPosition = vec3(1,0,0); //fragPos.xyz;
-    // gNormal = useNormalMap ? texture(normalMap, fragTex).rgb : normalize(fragNor);
-    // gAlbedoSpec.rgb = useDiffuseMap ? texture(diffuseMap, fragTex).rgb : diffuseMaterial;
-    // gAlbedoSpec.a = useSpecularMap ? texture(specularMap, fragTex).r : 0.f;
+void main() {
+    gPosition = vec4(fragPos.xyz, 1);
+    gNormal = vec4(useNormalMap ? texture(normalMap, fragTex).rgb : normalize(fragNor), 1.f);
+    gAlbedoSpec.rgb = useDiffuseMap ? texture(diffuseMap, fragTex).rgb : diffuseMaterial;
+    gAlbedoSpec.a = useSpecularMap ? texture(specularMap, fragTex).r : 1.f;
 }  

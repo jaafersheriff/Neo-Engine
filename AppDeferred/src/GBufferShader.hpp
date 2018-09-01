@@ -14,18 +14,18 @@ class GBufferShader : public Shader {
         GBufferShader(const std::string &vert, const std::string &frag) :
             Shader("GBufferShader", vert, frag) {
             // Position buffer 
-            // Texture2D *positionBuffer = new Texture2D;
-            // positionBuffer->width = Window::getFrameSize().x;
-            // positionBuffer->height = Window::getFrameSize().y;
-            // positionBuffer->components = 3;
-            // positionBuffer->upload(GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT);
+            Texture2D *positionBuffer = new Texture2D;
+            positionBuffer->width = Window::getFrameSize().x;
+            positionBuffer->height = Window::getFrameSize().y;
+            positionBuffer->components = 3;
+            positionBuffer->upload(GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
 
             // Normal buffer
-            // Texture2D *normalBuffer = new Texture2D;
-            // normalBuffer->width = Window::getFrameSize().x;
-            // normalBuffer->height = Window::getFrameSize().y;
-            // normalBuffer->components = 3;
-            // normalBuffer->upload(GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT);
+            Texture2D *normalBuffer = new Texture2D;
+            normalBuffer->width = Window::getFrameSize().x;
+            normalBuffer->height = Window::getFrameSize().y;
+            normalBuffer->components = 3;
+            normalBuffer->upload(GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
 
             // Color + specular buffer
             Texture2D *albedoSpecBuffer = new Texture2D;
@@ -44,11 +44,11 @@ class GBufferShader : public Shader {
             // Create gbuffer 
             auto gbuffer = MasterRenderer::getFBO("gbuffer");
             gbuffer->generate();
-            // gbuffer->attachColorTexture(*positionBuffer);
-            // gbuffer->attachColorTexture(*normalBuffer);
+            gbuffer->attachColorTexture(*positionBuffer);
+            gbuffer->attachColorTexture(*normalBuffer);
             gbuffer->attachColorTexture(*albedoSpecBuffer);
             gbuffer->attachDepthTexture(*depthBuffer);
-            // gbuffer->initDrawBuffers();
+            gbuffer->initDrawBuffers();
         }
 
         virtual void render(const CameraComponent &camera) override {
