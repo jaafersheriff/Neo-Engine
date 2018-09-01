@@ -3,6 +3,7 @@
 #include "CustomSystem.hpp"
 
 #include "GBufferShader.hpp"
+#include "LightShader.hpp"
 #include "Shader/PhongShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -108,6 +109,7 @@ int main() {
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
     MasterRenderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
+    MasterRenderer::addSceneShader<LightShader>("lightpass.vert", "lightpass.frag");
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
