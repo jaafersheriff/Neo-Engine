@@ -6,6 +6,7 @@
 #include "Shader/PhongShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
+#include "Util/Util.hpp"
 
 using namespace neo;
 
@@ -48,13 +49,13 @@ struct Light {
 struct Renderable {
     GameObject *gameObject;
     RenderableComponent *renderable;
-    Material material = Material(0.2f, glm::vec3(1, 0, 1));
+    Material *material = new Material;
 
-    Renderable(Mesh *mesh) {
+    Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
+        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
+        NeoEngine::addComponent<MaterialComponent>(gameObject, material);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -83,9 +84,15 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable r(Loader::getMesh("cube"));
-    r.renderable->addShaderType<GBufferShader>();
-    r.renderable->addShaderType<PhongShader>();
+    for (int i = 0; i < 50; i++) {
+        Renderable r(
+            Util::genRandomBool() ? Loader::getMesh("cube") : Loader::getMesh("sphere"),
+            glm::vec3(Util::genRandom(-45.f, 45.f), Util::genRandom(2.f, 5.f), Util::genRandom(-45.f, 45.f)),
+            glm::vec3(Util::genRandom(5.f)));
+        r.renderable->addShaderType<GBufferShader>();
+        r.material->ambient = 0.5f;
+        r.material->diffuse = Util::genRandomVec3();
+    }
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
@@ -94,7 +101,6 @@ int main() {
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
     MasterRenderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
-    MasterRenderer::addSceneShader<PhongShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
