@@ -46,7 +46,7 @@ namespace neo {
                 }
 
                 bind();
-                std::vector<unsigned int> attachments;
+                std::vector<GLenum> attachments;
                 for (int i = 0; i < colorAttachments; i++) {
                     attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
                 }
