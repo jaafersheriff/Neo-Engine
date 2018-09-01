@@ -171,7 +171,6 @@ int main() {
         r.material->diffuse = Util::genRandomVec3();
     }
 
-
     // Terrain receiver 
     Renderable receiver(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
     receiver.material->diffuse = glm::vec3(0.7f);
