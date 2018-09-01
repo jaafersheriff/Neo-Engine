@@ -48,12 +48,13 @@ struct Light {
 
 struct Renderable {
     GameObject *gameObject;
+    SpatialComponent *spat;
     RenderableComponent *renderable;
     Material *material = new Material;
 
     Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
+        spat = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         NeoEngine::addComponent<MaterialComponent>(gameObject, material);
 
@@ -93,6 +94,12 @@ int main() {
         r.material->ambient = 0.5f;
         r.material->diffuse = Util::genRandomVec3();
     }
+
+    // Terrain 
+    Renderable terrain(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f));
+    terrain.spat->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
+    terrain.material->diffuse = glm::vec3(0.7f);
+    terrain.renderable->addShaderType<GBufferShader>();
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
