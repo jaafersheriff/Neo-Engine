@@ -19,6 +19,7 @@ namespace neo {
             static std::string APP_SHADER_DIR;
 
             static void init(const std::string &, CameraComponent *);
+            static void resetState();
             static void render(float);
             static void renderScene(const CameraComponent &);
 
