@@ -4,6 +4,7 @@
 
 #include "GBufferShader.hpp"
 #include "CombineShader.hpp"
+#include "LightPassShader.hpp"
 #include "Shader/PhongShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -26,24 +27,10 @@ struct Light {
     GameObject *gameObject;
     LightComponent *light;
 
-    Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
+    Light(glm::vec3 pos, glm::vec3 col, glm::vec3 scale) {
         gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, pos);
-        light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
-
-        NeoEngine::addImGuiFunc("Light", [&]() {
-            glm::vec3 pos = gameObject->getSpatial()->getPosition();
-            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
-                gameObject->getSpatial()->setPosition(pos);
-            }
-            glm::vec3 col = light->getColor();
-            if (ImGui::SliderFloat3("Color", glm::value_ptr(col), 0.f, 1.f)) {
-                light->setColor(col);
-            }
-            glm::vec3 att = light->getAttenuation();
-            ImGui::SliderFloat3("Attenuation", glm::value_ptr(att), 0.f, 1.f);
-            light->setAttenuation(att);
-        });
+        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
+        light = &NeoEngine::addComponent<LightComponent>(gameObject, col);
     }
 };
 
@@ -87,6 +74,14 @@ int main() {
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
     for (int i = 0; i < 50; i++) {
+        Light(
+            glm::vec3(Util::genRandom(-45.f, 45.f), Util::genRandom(6.f, 15.f), Util::genRandom(-45.f, 45.f)),
+            Util::genRandomVec3(0.f, 1.f),
+            glm::vec3(Util::genRandom(2.f, 5.f))
+        );
+    }
+
+    for (int i = 0; i < 50; i++) {
         Renderable r(
             Util::genRandomBool() ? Loader::getMesh("cube") : Loader::getMesh("sphere"),
             glm::vec3(Util::genRandom(-45.f, 45.f), Util::genRandom(2.f, 5.f), Util::genRandom(-45.f, 45.f)),
@@ -109,7 +104,8 @@ int main() {
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
     MasterRenderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
-    MasterRenderer::addSceneShader<CombineShader>("combine.vert", "combine.frag");
+    // MasterRenderer::addSceneShader<CombineShader>("combine.vert", "combine.frag");
+    MasterRenderer::addSceneShader<LightPassShader>("lightpass.vert", "lightpass.frag");
 
     /* Attach ImGui panes */
     NeoEngine::addImGuiFunc("Stats", [&]() {
