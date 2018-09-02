@@ -27,12 +27,19 @@ class GBufferShader : public Shader {
             normalBuffer->components = 3;
             normalBuffer->upload(GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
 
-            // Color + specular buffer
-            Texture2D *albedoSpecBuffer = new Texture2D;
-            albedoSpecBuffer->width = Window::getFrameSize().x;
-            albedoSpecBuffer->height = Window::getFrameSize().y;
-            albedoSpecBuffer->components = 4;
-            albedoSpecBuffer->upload(GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
+            // Diffuse 
+            Texture2D *diffuseBuffer = new Texture2D;
+            diffuseBuffer->width = Window::getFrameSize().x;
+            diffuseBuffer->height = Window::getFrameSize().y;
+            diffuseBuffer->components = 4;
+            diffuseBuffer->upload(GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
+
+            // Specular
+            Texture2D *specularBuffer = new Texture2D;
+            specularBuffer->width = Window::getFrameSize().x;
+            specularBuffer->height = Window::getFrameSize().y;
+            specularBuffer->components = 4;
+            specularBuffer->upload(GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
 
             // Depth buffer
             Texture2D *depthBuffer = new Texture2D;
@@ -46,7 +53,8 @@ class GBufferShader : public Shader {
             gbuffer->generate();
             gbuffer->attachColorTexture(*positionBuffer);
             gbuffer->attachColorTexture(*normalBuffer);
-            gbuffer->attachColorTexture(*albedoSpecBuffer);
+            gbuffer->attachColorTexture(*diffuseBuffer);
+            gbuffer->attachColorTexture(*specularBuffer);
             gbuffer->attachDepthTexture(*depthBuffer);
             gbuffer->initDrawBuffers();
         }
@@ -70,6 +78,7 @@ class GBufferShader : public Shader {
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
                 /* Bind diffuse map or material */
+                auto matComp = model->getGameObject().getComponentByType<MaterialComponent>();
                 auto diffMap = model->getGameObject().getComponentByType<DiffuseMapComponent>();
                 if (diffMap) {
                     diffMap->getTexture().bind();
@@ -78,9 +87,23 @@ class GBufferShader : public Shader {
                 }
                 else {
                     loadUniform("useDiffuseMap", false);
-                    auto matComp = model->getGameObject().getComponentByType<MaterialComponent>();
                     if (matComp) {
                         loadUniform("diffuseMaterial", matComp->getMaterial().diffuse);
+                    }
+                }
+
+                /* Bind specular map */
+                auto specularMap = model->getGameObject().getComponentByType<SpecularMapComponent>();
+                if (specularMap) {
+                    specularMap->getTexture().bind();
+                    loadUniform("useSpecularMap", true);
+                    loadUniform("specularMap", specularMap->getTexture().textureId);
+                }
+                else {
+                    loadUniform("useSpecularMap", false);
+                    if (matComp) {
+                        loadUniform("specularMaterial", matComp->getMaterial().specular);
+                        loadUniform("shine", matComp->getMaterial().shine);
                     }
                 }
 
@@ -94,17 +117,6 @@ class GBufferShader : public Shader {
                 else {
                     loadUniform("useNormalMap", false);
                     loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
-                }
-
-                /* Bind specular map */
-                auto specularMap = model->getGameObject().getComponentByType<SpecularMapComponent>();
-                if (specularMap) {
-                    specularMap->getTexture().bind();
-                    loadUniform("useSpecularMap", true);
-                    loadUniform("specularMap", specularMap->getTexture().textureId);
-                }
-                else {
-                    loadUniform("useSpecularMap", false);
                 }
 
                 /* DRAW */
