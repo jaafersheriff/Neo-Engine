@@ -8,12 +8,12 @@
 
 using namespace neo;
 
-class LightShader : public Shader {
+class CombineShader : public Shader {
 
     public:
 
-        LightShader(const std::string &vert, const std::string &frag) :
-            Shader("LightShader", vert, frag) 
+        CombineShader(const std::string &vert, const std::string &frag) :
+            Shader("CombineShader", vert, frag) 
         {}
 
         virtual void render(const CameraComponent &camera) override {
@@ -23,6 +23,10 @@ class LightShader : public Shader {
             auto mesh = Loader::getMesh("quad");
             CHECK_GL(glBindVertexArray(mesh->vaoId));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId));
+
+            /* Bind lights */
+            // TODO : upload lights into a 1D texture 
+
 
             mesh->draw();
 
