@@ -47,7 +47,6 @@ class GBufferShader : public Shader {
         virtual void render(const CameraComponent &camera) override {
             auto fbo = MasterRenderer::getFBO("gbuffer");
             fbo->bind();
-            glClearColor(0.f, 0.f, 0.f, 0.f);
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
             CHECK_GL(glViewport(0, 0, fbo->textures[0]->width, fbo->textures[0]->height));  // TODO : windowresize receiver
 

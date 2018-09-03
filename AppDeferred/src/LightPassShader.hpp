@@ -13,11 +13,12 @@ class LightPassShader : public Shader {
 
     public:
 
+        bool showLights = false;
+
         // TODO : add this to post process stack
         LightPassShader(const std::string &vert, const std::string &frag) :
             Shader("LightPassShader", vert, frag) 
-        {
-        }
+        {}
 
         virtual void render(const CameraComponent &camera) override {
             bind();
@@ -26,12 +27,14 @@ class LightPassShader : public Shader {
             CHECK_GL(glDisable(GL_DEPTH_TEST));
             CHECK_GL(glEnable(GL_CULL_FACE));
 
+            loadUniform("showLights", showLights);
+
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Bind sphere volume */
-            auto mesh = Loader::getMesh("sphere.obj");
+            auto mesh = Loader::getMesh("sphere.obj", true);
             CHECK_GL(glBindVertexArray(mesh->vaoId));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId));
 
@@ -67,6 +70,9 @@ class LightPassShader : public Shader {
             CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
             unbind();
-            MasterRenderer::resetState();
+            CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+            CHECK_GL(glEnable(GL_DEPTH_TEST));
+            CHECK_GL(glEnable(GL_CULL_FACE));
+            CHECK_GL(glCullFace(GL_BACK));
     }
 };

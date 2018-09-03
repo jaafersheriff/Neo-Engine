@@ -11,10 +11,13 @@ uniform vec3 lightPos;
 uniform vec3 lightCol;
 uniform float lightRadius;
 
+uniform bool showLights;
+
 // TODO : output diffuse, then output specular
 // TODO : then attach then to frame buffers
 // TODO : then combine then in combine shader
 // TODO : then set up post process shaders - that shouldn't be too hard 
+// TODO : handle window resize 
 out vec4 color;
 
 float raySphereIntersect(vec3 r0, vec3 rd, vec3 s0, float sr)
@@ -51,9 +54,17 @@ void main() {
     vec2 fragTex = gl_FragCoord.xy / vec2(textureSize(gDepth, 0));
     
     /* Access gbuffer */
-    vec3 fragNor = normalize(texture(gNormal, fragTex).rgb * 2.f - vec3(1.f));
+    vec3 fragNor = normalize(texture(gNormal, fragTex).rgb);
     vec4 albedo = texture(gDiffuse, fragTex);
     vec3 fragPos = reconstructWorldPos(fragTex);
+
+    if (showLights) {
+        float rayDist = raySphereIntersect(camPos, normalize(fragPos - camPos), lightPos, 0.1f);
+        if (rayDist > 0.0 && rayDist < length(fragPos - camPos)) {
+            color = vec4(lightCol, 1.f);
+            return;
+        }
+    }
 
     vec3 light = lightPos - fragPos;
     float lightDist = length(light);
@@ -72,6 +83,6 @@ void main() {
     vec3 diffuse = lightCol * lambert * attenuation;
     vec3 specular = lightCol * s * attenuation * 0.33f;
     color.a = 1.f;
-    color.rgb = diffuse * 0.2f + diffuse * 0.7f;
-
+    color.rgb = diffuse * 0.2f + diffuse * albedo.rgb + specular;
+    gl_FragDepth = texture(gDepth, fragTex).r;
 }
