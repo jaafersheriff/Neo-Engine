@@ -29,6 +29,7 @@ namespace neo {
 
             virtual void render(const CameraComponent &camera) {
                 bind();
+                CHECK_GL(glDisable(GL_CULL_FACE));
 
                 /* Load PV */
                 loadUniform("P", camera.getProj());
@@ -51,6 +52,7 @@ namespace neo {
                 CHECK_GL(glBindVertexArray(0));
                 CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
                 unbind();
+                CHECK_GL(glEnable(GL_CULL_FACE));
             }
         };
 
