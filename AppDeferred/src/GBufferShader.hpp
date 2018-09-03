@@ -13,12 +13,6 @@ class GBufferShader : public Shader {
 
         GBufferShader(const std::string &vert, const std::string &frag) :
             Shader("GBufferShader", vert, frag) {
-            // Position buffer 
-            Texture2D *positionBuffer = new Texture2D;
-            positionBuffer->width = Window::getFrameSize().x;
-            positionBuffer->height = Window::getFrameSize().y;
-            positionBuffer->components = 3;
-            positionBuffer->upload(GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
 
             // Normal buffer
             Texture2D *normalBuffer = new Texture2D;
@@ -34,13 +28,6 @@ class GBufferShader : public Shader {
             diffuseBuffer->components = 4;
             diffuseBuffer->upload(GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
 
-            // Specular
-            Texture2D *specularBuffer = new Texture2D;
-            specularBuffer->width = Window::getFrameSize().x;
-            specularBuffer->height = Window::getFrameSize().y;
-            specularBuffer->components = 4;
-            specularBuffer->upload(GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
-
             // Depth buffer
             Texture2D *depthBuffer = new Texture2D;
             depthBuffer->width = Window::getFrameSize().x;
@@ -51,10 +38,8 @@ class GBufferShader : public Shader {
             // Create gbuffer 
             auto gbuffer = MasterRenderer::getFBO("gbuffer");
             gbuffer->generate();
-            gbuffer->attachColorTexture(*positionBuffer);
             gbuffer->attachColorTexture(*normalBuffer);
             gbuffer->attachColorTexture(*diffuseBuffer);
-            gbuffer->attachColorTexture(*specularBuffer);
             gbuffer->attachDepthTexture(*depthBuffer);
             gbuffer->initDrawBuffers();
         }
@@ -62,6 +47,7 @@ class GBufferShader : public Shader {
         virtual void render(const CameraComponent &camera) override {
             auto fbo = MasterRenderer::getFBO("gbuffer");
             fbo->bind();
+            glClearColor(0.f, 0.f, 0.f, 0.f);
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
             CHECK_GL(glViewport(0, 0, fbo->textures[0]->width, fbo->textures[0]->height));  // TODO : windowresize receiver
 
@@ -69,7 +55,7 @@ class GBufferShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto model : MasterRenderer::getRenderables<GBufferShader, RenderableComponent>()) {
+            for (auto & model : MasterRenderer::getRenderables<GBufferShader, RenderableComponent>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind mesh */
@@ -79,6 +65,9 @@ class GBufferShader : public Shader {
 
                 /* Bind diffuse map or material */
                 auto matComp = model->getGameObject().getComponentByType<MaterialComponent>();
+                if (matComp) {
+                    loadUniform("ambient", matComp->getMaterial().ambient);
+                }
                 auto diffMap = model->getGameObject().getComponentByType<DiffuseMapComponent>();
                 if (diffMap) {
                     diffMap->getTexture().bind();
@@ -89,21 +78,6 @@ class GBufferShader : public Shader {
                     loadUniform("useDiffuseMap", false);
                     if (matComp) {
                         loadUniform("diffuseMaterial", matComp->getMaterial().diffuse);
-                    }
-                }
-
-                /* Bind specular map */
-                auto specularMap = model->getGameObject().getComponentByType<SpecularMapComponent>();
-                if (specularMap) {
-                    specularMap->getTexture().bind();
-                    loadUniform("useSpecularMap", true);
-                    loadUniform("specularMap", specularMap->getTexture().textureId);
-                }
-                else {
-                    loadUniform("useSpecularMap", false);
-                    if (matComp) {
-                        loadUniform("specularMaterial", matComp->getMaterial().specular);
-                        loadUniform("shine", matComp->getMaterial().shine);
                     }
                 }
 
