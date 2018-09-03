@@ -15,7 +15,6 @@ class LightPassShader : public Shader {
 
         bool showLights = false;
 
-        // TODO : add this to post process stack
         LightPassShader(const std::string &vert, const std::string &frag) :
             Shader("LightPassShader", vert, frag) 
         {}

@@ -13,11 +13,6 @@ uniform float lightRadius;
 
 uniform bool showLights;
 
-// TODO : output diffuse, then output specular
-// TODO : then attach then to frame buffers
-// TODO : then combine then in combine shader
-// TODO : then set up post process shaders - that shouldn't be too hard 
-// TODO : handle window resize 
 out vec4 color;
 
 float raySphereIntersect(vec3 r0, vec3 rd, vec3 s0, float sr)
