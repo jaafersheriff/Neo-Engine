@@ -44,7 +44,7 @@ namespace neo {
         CHECK_GL(glEnable(GL_BLEND));
         CHECK_GL(glBlendEquation(GL_FUNC_ADD));
         CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        CHECK_GL(glClearColor(0.2f, 0.3f, 0.4f, 1.f));
+        CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
     }
 
     void MasterRenderer::render(float dt) {
@@ -62,7 +62,6 @@ namespace neo {
         }
 
         /* Reset state */
-        CHECK_GL(glClearColor(0.2f, 0.3f, 0.4f, 1.f));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
  
         /* Render all scene shaders */
