@@ -122,14 +122,11 @@
   <ItemGroup>
     <ClInclude Include="src\CustomSystem.hpp" />
     <ClInclude Include="src\GBufferShader.hpp" />
-    <ClInclude Include="src\CombineShader.hpp" />
     <ClInclude Include="src\LightPassShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\gbuffer.frag" />
     <None Include="shaders\gbuffer.vert" />
-    <None Include="shaders\combine.frag" />
-    <None Include="shaders\combine.vert" />
     <None Include="shaders\lightpass.frag" />
     <None Include="shaders\lightpass.vert" />
   </ItemGroup>
