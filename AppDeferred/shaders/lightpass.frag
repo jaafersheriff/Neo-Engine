@@ -49,7 +49,7 @@ void main() {
     vec2 fragTex = gl_FragCoord.xy / vec2(textureSize(gDepth, 0));
     
     /* Access gbuffer */
-    vec3 fragNor = normalize(texture(gNormal, fragTex).rgb);
+    vec3 fragNor = normalize(texture(gNormal, fragTex).rgb * 2.f - vec3(1.f));
     vec4 albedo = texture(gDiffuse, fragTex);
     vec3 fragPos = reconstructWorldPos(fragTex);
 

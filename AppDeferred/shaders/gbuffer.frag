@@ -16,6 +16,6 @@ layout (location = 0) out vec4 gNormal;
 layout (location = 1) out vec4 gDiffuse;
 
 void main() {
-    gNormal = vec4(useNormalMap ? texture(normalMap, fragTex).rgb : normalize(fragNor), 1.f);
+    gNormal = vec4(0.5 + 0.5 * (useNormalMap ? texture(normalMap, fragTex).rgb : normalize(fragNor)), 1.f);
     gDiffuse = vec4(useDiffuseMap ? texture(diffuseMap, fragTex).rgb : diffuseMaterial, 1.f);
 }  
