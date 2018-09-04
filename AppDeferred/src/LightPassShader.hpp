@@ -14,6 +14,7 @@ class LightPassShader : public Shader {
     public:
 
         bool showLights = false;
+        float showRadius = 0.1f;
 
         LightPassShader(const std::string &vert, const std::string &frag) :
             Shader("LightPassShader", vert, frag) 
@@ -27,6 +28,7 @@ class LightPassShader : public Shader {
             CHECK_GL(glEnable(GL_CULL_FACE));
 
             loadUniform("showLights", showLights);
+            loadUniform("showRadius", showRadius);
 
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());

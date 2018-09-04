@@ -12,6 +12,7 @@ uniform vec3 lightCol;
 uniform float lightRadius;
 
 uniform bool showLights;
+uniform float showRadius;
 
 out vec4 color;
 
@@ -54,7 +55,7 @@ void main() {
     vec3 fragPos = reconstructWorldPos(vec3(fragTex, depth));
 
     if (showLights) {
-        float rayDist = raySphereIntersect(camPos, normalize(fragPos - camPos), lightPos, 0.1f);
+        float rayDist = raySphereIntersect(camPos, normalize(fragPos - camPos), lightPos, lightRadius * showRadius);
         if (rayDist > 0.0 && rayDist < length(fragPos - camPos)) {
             color = vec4(lightCol, 1.f);
             return;

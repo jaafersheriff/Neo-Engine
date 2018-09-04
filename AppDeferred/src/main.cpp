@@ -96,6 +96,10 @@ int main() {
     });
     NeoEngine::addImGuiFunc("Lights", [&]() {
         ImGui::Checkbox("Show lights", &lightPassShader.showLights);
+        if (lightPassShader.showLights) {
+            ImGui::SameLine();
+            ImGui::SliderFloat("Show radius", &lightPassShader.showRadius, 0.f, 1.f);
+        }
         static glm::vec3 pos(0.f);
         static float size(15.f);
         static glm::vec3 color(1.f);
@@ -130,7 +134,7 @@ int main() {
             spat->setScale(glm::vec3(size));
         }
         color = l->light->getColor();
-        if (ImGui::SliderFloat3("Color", glm::value_ptr(color), 0.f, 1.f)) {
+        if (ImGui::SliderFloat3("Color", glm::value_ptr(color), 0.01f, 1.f)) {
             l->light->setColor(color);
         }
     });
