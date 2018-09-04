@@ -45,6 +45,8 @@ struct Renderable {
         gameObject = &NeoEngine::createGameObject();
         spat = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
+        renderable->addShaderType<GBufferShader>();
+        material->diffuse = Util::genRandomVec3();
         NeoEngine::addComponent<MaterialComponent>(gameObject, material);
     }
 };
@@ -54,20 +56,19 @@ int main() {
 
     /* Game objects */
     Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
+
     std::vector<Light *> lights;
-    for (int i = 0; i < 50; i++) {
-        Renderable r(
-            Loader::getMesh("cube"),
-            glm::vec3(Util::genRandom(-45.f, 45.f), Util::genRandom(2.f, 5.f), Util::genRandom(-45.f, 45.f)),
-            glm::vec3(Util::genRandom(5.f)));
-        r.renderable->addShaderType<GBufferShader>();
-        r.material->ambient = 0.7f;
-        r.material->diffuse = Util::genRandomVec3();
-        r.material->specular = Util::genRandomVec3();
+    lights.push_back(new Light(glm::vec3(25.f, 25.f, 0.f), glm::vec3(1.f), glm::vec3(100.f)));
+    Renderable cube(Loader::getMesh("cube"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
+    Renderable dragon(Loader::getMesh("dragon10k.obj", true), glm::vec3(-4.f, 10.f, -5.f), glm::vec3(10.f));
+    Renderable stairs(Loader::getMesh("staircase.obj", true), glm::vec3(5.f, 10.f, 9.f), glm::vec3(10.f));
+    for (int i = 0; i < 20; i++) {
+        Renderable tree(Loader::getMesh("PineTree3.obj", true), glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
+        NeoEngine::addComponent<DiffuseMapComponent>(tree.gameObject, Loader::getTexture("PineTexture.png"));
     }
 
     // Terrain 
-    Renderable terrain(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f));
+    Renderable terrain(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
     terrain.spat->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
     terrain.material->diffuse = glm::vec3(0.7f);
     terrain.material->ambient = 0.7f;
@@ -96,6 +97,7 @@ int main() {
             ImGui::Image((ImTextureID)texture->textureId, ImVec2(0.1f * texture->width, 0.1f * texture->height), ImVec2(0, 1), ImVec2(1, 0));
         }
     });
+
     NeoEngine::addImGuiFunc("Create Lights", [&]() {
         ImGui::Checkbox("Show lights", &lightPassShader.showLights);
         if (lightPassShader.showLights) {
@@ -112,7 +114,9 @@ int main() {
         ImGui::SliderFloat("Offset", &yOffset, 0.f, 25.f);
         if (ImGui::Button("Create light")) {
             auto light = new Light(pos, color, glm::vec3(size));
-            NeoEngine::addComponent<SinMoveComponent>(light->gameObject, yOffset, pos.y);
+            if (yOffset) {
+                NeoEngine::addComponent<SinMoveComponent>(light->gameObject, yOffset, pos.y);
+            }
             lights.push_back(light);
         }
     });
@@ -166,8 +170,8 @@ int main() {
         static float minSinOffset(0.f);
         static float maxSinOffset(0.f);
         ImGui::SliderInt("Num lights", &numLights, 0, 1000);
-        ImGui::SliderFloat3("Min offset", glm::value_ptr(minOffset), -50.f, 50.f);
-        ImGui::SliderFloat3("Max offset", glm::value_ptr(maxOffset), -50.f, 50.f);
+        ImGui::SliderFloat3("Min offset", glm::value_ptr(minOffset), -100.f, 100.f);
+        ImGui::SliderFloat3("Max offset", glm::value_ptr(maxOffset), -100.f, 100.f);
         ImGui::SliderFloat("Min scale", &minScale, 0.f, maxScale);
         ImGui::SliderFloat("Max scale", &maxScale, minScale, 100.f);
         ImGui::SliderFloat("Min sin", &minSinOffset, 0.f, 15.f);
