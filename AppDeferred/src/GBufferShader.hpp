@@ -5,6 +5,8 @@
 #include "MasterRenderer/MasterRenderer.hpp"
 #include "Window/Window.hpp"
 
+#include "Messaging/Messenger.hpp"
+
 using namespace neo;
 
 class GBufferShader : public Shader {
@@ -42,6 +44,21 @@ class GBufferShader : public Shader {
             gbuffer->attachColorTexture(*diffuseBuffer);
             gbuffer->attachDepthTexture(*depthBuffer);
             gbuffer->initDrawBuffers();
+
+            // Handle frame size changing
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+                glm::vec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
+                auto gbuffer = MasterRenderer::getFBO("gbuffer");
+                gbuffer->textures[0]->width = gbuffer->textures[1]->width = gbuffer->textures[2]->width = frameSize.x;
+                gbuffer->textures[0]->height = gbuffer->textures[1]->height = gbuffer->textures[2]->height = frameSize.y;
+                gbuffer->textures[0]->bind();
+                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+                gbuffer->textures[1]->bind();
+                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+                gbuffer->textures[2]->bind();
+                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, frameSize.x, frameSize.y, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr));
+            });
         }
 
         virtual void render(const CameraComponent &camera) override {
