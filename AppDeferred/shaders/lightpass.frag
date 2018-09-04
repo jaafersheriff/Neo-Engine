@@ -4,7 +4,7 @@ uniform sampler2D gNormal;
 uniform sampler2D gDiffuse;
 uniform sampler2D gDepth;
 
-uniform mat4 P, V;
+uniform mat4 invP, invV;
 
 uniform vec3 camPos;
 uniform vec3 lightPos;
@@ -38,9 +38,9 @@ float raySphereIntersect(vec3 r0, vec3 rd, vec3 s0, float sr)
 vec3 reconstructWorldPos(vec2 texCoords) {
 	float depth = texture(gDepth, texCoords).r;
 	vec3 ndc = vec3(texCoords, depth) * 2.0 - vec3(1.0);
-	vec4 view = inverse(P) * vec4(ndc, 1.0);
+	vec4 view = invP * vec4(ndc, 1.0);
 	view.xyz /= view.w;
-	vec4 world = inverse(V) * vec4(view.xyz, 1.0);
+	vec4 world = invV * vec4(view.xyz, 1.0);
 	return world.xyz;
 }
 

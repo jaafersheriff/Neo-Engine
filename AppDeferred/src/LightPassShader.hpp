@@ -30,6 +30,8 @@ class LightPassShader : public Shader {
 
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
+            loadUniform("invP", glm::inverse(camera.getProj()));
+            loadUniform("invV", glm::inverse(camera.getView()));
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Bind sphere volume */
