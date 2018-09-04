@@ -100,22 +100,24 @@ int main() {
             ImGui::SameLine();
             ImGui::SliderFloat("Show radius", &lightPassShader.showRadius, 0.f, 1.f);
         }
+        static int index = 0;
         static glm::vec3 pos(0.f);
         static float size(15.f);
         static glm::vec3 color(1.f);
         if (ImGui::Button("Create light")) {
             lights.push_back(new Light(pos, color, glm::vec3(size)));
+            index = lights.size() - 1;
         }
         if (!lights.size()) {
             return;
         }
 
-        static int index = 0;
         ImGui::SliderInt("Index", &index, 0, lights.size()-1);
         auto l = lights[index];
         if (ImGui::Button("Delete light")) {
             NeoEngine::removeGameObject(*l->gameObject);
             lights.erase(lights.begin() + index);
+            index--;
             if (!lights.size()) {
                 return;
             }
@@ -130,7 +132,7 @@ int main() {
             spat->setPosition(pos);
         }
         size = spat->getScale().x;
-        if (ImGui::SliderFloat("Scale", &size, 15.f, 50.f)) {
+        if (ImGui::SliderFloat("Scale", &size, 15.f, 100.f)) {
             spat->setScale(glm::vec3(size));
         }
         color = l->light->getColor();
