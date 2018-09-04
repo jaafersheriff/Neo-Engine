@@ -2,6 +2,8 @@
 
 #include "CustomSystem.hpp"
 
+#include "SinMoveComponent.hpp"
+
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
 #include "Shader/WireframeShader.hpp"
@@ -94,21 +96,30 @@ int main() {
             ImGui::Image((ImTextureID)texture->textureId, ImVec2(0.1f * texture->width, 0.1f * texture->height), ImVec2(0, 1), ImVec2(1, 0));
         }
     });
-    NeoEngine::addImGuiFunc("Lights", [&]() {
+    NeoEngine::addImGuiFunc("Create Lights", [&]() {
         ImGui::Checkbox("Show lights", &lightPassShader.showLights);
         if (lightPassShader.showLights) {
             ImGui::SameLine();
             ImGui::SliderFloat("Show radius", &lightPassShader.showRadius, 0.f, 1.f);
         }
-        static int index = 0;
         static glm::vec3 pos(0.f);
         static float size(15.f);
         static glm::vec3 color(1.f);
+        static float yOffset(10.f);
+        ImGui::SliderFloat3("Position", glm::value_ptr(pos), -25.f, 25.f);
+        ImGui::SliderFloat("Scale", &size, 15.f, 100.f);
+        ImGui::SliderFloat3("Color", glm::value_ptr(color), 0.01f, 1.f);
+        ImGui::SliderFloat("Offset", &yOffset, 0.f, 25.f);
         if (ImGui::Button("Create light")) {
-            lights.push_back(new Light(pos, color, glm::vec3(size)));
-            index = lights.size() - 1;
+            auto light = new Light(pos, color, glm::vec3(size));
+            NeoEngine::addComponent<SinMoveComponent>(light->gameObject, yOffset, pos.y);
+            lights.push_back(light);
         }
+    });
+    NeoEngine::addImGuiFunc("Edit Lights", [&]() {
+        static int index = 0;
         if (!lights.size()) {
+            index = 0;
             return;
         }
 
@@ -127,17 +138,53 @@ int main() {
         if (!spat) {
             return;
         }
-        pos = spat->getPosition();
+        glm::vec3 pos = spat->getPosition();
         if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -25.f, 25.f)) {
             spat->setPosition(pos);
         }
-        size = spat->getScale().x;
+        float size = spat->getScale().x;
         if (ImGui::SliderFloat("Scale", &size, 15.f, 100.f)) {
             spat->setScale(glm::vec3(size));
         }
-        color = l->light->getColor();
+        glm::vec3 color = l->light->getColor();
         if (ImGui::SliderFloat3("Color", glm::value_ptr(color), 0.01f, 1.f)) {
             l->light->setColor(color);
+        }
+    });
+    NeoEngine::addImGuiFunc("Random lights", [&]() {
+        if (ImGui::Button("Clear lights")) {
+            for (auto & l : lights) {
+                NeoEngine::removeGameObject(*l->gameObject);
+            }
+            lights.clear();
+        }
+        static int numLights = 10;
+        static glm::vec3 minOffset(0.f);
+        static glm::vec3 maxOffset(0.f);
+        static float minScale(0.f);
+        static float maxScale(10.f);
+        static float minSinOffset(0.f);
+        static float maxSinOffset(0.f);
+        ImGui::SliderInt("Num lights", &numLights, 0, 1000);
+        ImGui::SliderFloat3("Min offset", glm::value_ptr(minOffset), -50.f, 50.f);
+        ImGui::SliderFloat3("Max offset", glm::value_ptr(maxOffset), -50.f, 50.f);
+        ImGui::SliderFloat("Min scale", &minScale, 0.f, maxScale);
+        ImGui::SliderFloat("Max scale", &maxScale, minScale, 100.f);
+        ImGui::SliderFloat("Min sin", &minSinOffset, 0.f, 15.f);
+        ImGui::SliderFloat("Max sin", &maxSinOffset, 0.f, 15.f);
+        if (ImGui::Button("Create light")) {
+            for (int i = 0; i < numLights; i++) {
+                glm::vec3 position = glm::vec3(
+                    Util::genRandom(minOffset.x, maxOffset.x),
+                    Util::genRandom(minOffset.y, maxOffset.y),
+                    Util::genRandom(minOffset.z, maxOffset.z)
+                );
+                glm::vec3 color = Util::genRandomVec3();
+                float size = Util::genRandom(minScale, maxScale);
+                auto light = new Light(position, color, glm::vec3(size));
+                NeoEngine::addComponent<SinMoveComponent>(light->gameObject, Util::genRandom(minSinOffset, maxSinOffset), position.y);
+                lights.push_back(light);
+            }
         }
     });
 
