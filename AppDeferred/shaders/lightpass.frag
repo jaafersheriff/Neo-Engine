@@ -35,9 +35,8 @@ float raySphereIntersect(vec3 r0, vec3 rd, vec3 s0, float sr)
 	return (-b - sqrt((b*b) - 4.0*a*c))/(2.0*a);
 }
 
-vec3 reconstructWorldPos(vec2 texCoords) {
-	float depth = texture(gDepth, texCoords).r;
-	vec3 ndc = vec3(texCoords, depth) * 2.0 - vec3(1.0);
+vec3 reconstructWorldPos(vec3 coords) {
+	vec3 ndc = coords * 2.0 - vec3(1.0);
 	vec4 view = invP * vec4(ndc, 1.0);
 	view.xyz /= view.w;
 	vec4 world = invV * vec4(view.xyz, 1.0);
@@ -51,7 +50,8 @@ void main() {
     /* Access gbuffer */
     vec3 fragNor = normalize(texture(gNormal, fragTex).rgb * 2.f - vec3(1.f));
     vec4 albedo = texture(gDiffuse, fragTex);
-    vec3 fragPos = reconstructWorldPos(fragTex);
+    float depth = texture(gDepth, fragTex).r;
+    vec3 fragPos = reconstructWorldPos(vec3(fragTex, depth));
 
     if (showLights) {
         float rayDist = raySphereIntersect(camPos, normalize(fragPos - camPos), lightPos, 0.1f);
@@ -79,5 +79,5 @@ void main() {
     vec3 specular = lightCol * s * attenuation * 0.33f;
     color.a = 1.f;
     color.rgb = diffuse * 0.2f + diffuse * albedo.rgb + specular;
-    gl_FragDepth = texture(gDepth, fragTex).r;
+    gl_FragDepth = depth;
 }
