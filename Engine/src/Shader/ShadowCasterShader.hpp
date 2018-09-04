@@ -33,7 +33,7 @@ namespace neo {
                 Texture *depthTexture = new Texture2D;
                 depthTexture->width = depthTexture->height = 2048;
                 depthTexture->components = 1;
-                depthTexture->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_NEAREST, GL_CLAMP_TO_BORDER);
+                depthTexture->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_LINEAR, GL_CLAMP_TO_BORDER);
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, depthTexture->textureId));
                 CHECK_GL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data()));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));

@@ -132,7 +132,7 @@ int main() {
         if (ImGui::Button("Delete light")) {
             NeoEngine::removeGameObject(*l->gameObject);
             lights.erase(lights.begin() + index);
-            index--;
+            index = glm::max(0, index - 1);
             if (!lights.size()) {
                 return;
             }
