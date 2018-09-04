@@ -48,9 +48,7 @@ void main() {
     /* Generate tex coords [0, 1] */
     vec2 fragTex = gl_FragCoord.xy / vec2(textureSize(gDepth, 0));
     
-    /* Access gbuffer */
-    vec3 fragNor = normalize(texture(gNormal, fragTex).rgb * 2.f - vec3(1.f));
-    vec4 albedo = texture(gDiffuse, fragTex);
+    /* Calculate fragment's world position */
     float depth = texture(gDepth, fragTex).r;
     vec3 fragPos = reconstructWorldPos(vec3(fragTex, depth));
 
@@ -62,23 +60,28 @@ void main() {
         }
     }
 
-    vec3 light = lightPos - fragPos;
-    float lightDist = length(light);
-    float attenuation = 1.f - clamp(lightDist / lightRadius, 0.f, 1.f);
-    if (attenuation == 0.f) {
+    /* Calculate attenuation 
+     * Early discard if fragment is outside of light volume */
+    vec3 lightDir = lightPos - fragPos;
+    float lightDist = length(lightDir);
+    float attFactor = 1.f - clamp(lightDist / lightRadius, 0.f, 1.f);
+    if (attFactor == 0.f) {
         discard;
     }
 
-    vec3 inc = normalize(lightPos - fragPos);
-    vec3 viewDir = normalize(camPos - fragPos);
-    vec3 halfDir = normalize(inc + viewDir);
-    float lambert = clamp(dot(inc, fragNor), 0.f, 1.f);
-    float r = clamp(dot(halfDir, fragNor), 0.f, 1.f);
-    float s = pow(r, 33.f);
-
-    vec3 diffuse = lightCol * lambert * attenuation;
-    vec3 specular = lightCol * s * attenuation * 0.33f;
+    /* Retrieve remaining data from gbuffer */
+    vec3 fragNor = texture(gNormal, fragTex).rgb * 2.f - vec3(1.f);
+    vec4 albedo = texture(gDiffuse, fragTex);
+ 
+    vec3 L = normalize(lightDir);
+    vec3 V = normalize(camPos - fragPos);
+    vec3 N = normalize(fragNor);
+    vec3 H = normalize(L + V);
+    float lambert = clamp(dot(L, N), 0.f, 1.f);
+    vec3 diffuseContrib = lightCol * lambert * attFactor;
+    float s = pow(clamp(dot(H, N), 0.f, 1.f), 33.f);
+    vec3 specularContrib = lightCol * s * attFactor * 0.33f;
     color.a = 1.f;
-    color.rgb = diffuse * 0.2f + diffuse * albedo.rgb + specular;
+    color.rgb = diffuseContrib * 0.2f + diffuseContrib * albedo.rgb + specularContrib;
     gl_FragDepth = depth;
 }

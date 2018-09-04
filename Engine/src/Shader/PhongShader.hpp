@@ -53,8 +53,7 @@ public:
                         }\
                     }\
                     vec3 N = normalize(fragNor);\
-                    vec3 viewDir = camPos - fragPos.xyz;\
-                    vec3 V = normalize(viewDir);\
+                    vec3 V = normalize(camPos - fragPos.xyz);\
                     vec3 lightDir = lightPos - fragPos.xyz;\
                     float lightDistance = length(lightDir);\
                     vec3 L = normalize(lightDir);\
