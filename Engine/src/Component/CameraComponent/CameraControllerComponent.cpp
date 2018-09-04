@@ -16,7 +16,7 @@ namespace neo {
         phi(Util::PI() * 0.5f),
         lookSpeed(lookSpeed),
         moveSpeed(moveSpeed) {
-        setButtons(GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_R, GLFW_KEY_E);
+        setButtons(GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_E, GLFW_KEY_Q);
     }
 
     void CameraControllerComponent::setButtons(int f, int b, int l, int r, int u, int d) {
