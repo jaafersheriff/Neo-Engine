@@ -273,13 +273,16 @@ namespace neo {
                     }
                     ImGui::TreePop();
                 }
+            }
+            if (ImGui::CollapsingHeader("Library")) {
+                // TODO : move fbos to library
                 if (ImGui::TreeNode("FBOs")) {
                     for (auto & fbo : MasterRenderer::framebuffers) {
-                        std::string title = fbo.first + " (" + std::to_string(fbo.second->fboId) + ")";
-                        if (ImGui::TreeNode(title.c_str())) {
+                        if (ImGui::TreeNode((fbo.first + " (" + std::to_string(fbo.second->fboId) + ")").c_str())) {
                             for (auto & t : fbo.second->textures) {
                                 if (ImGui::TreeNode(std::to_string(t->textureId).c_str())) {
-                                    ImGui::Image((ImTextureID)t->textureId, ImVec2(0.1f * t->width, 0.1f * t->height), ImVec2(0, 1), ImVec2(1, 0));
+                                    float scale = 100.f / (t->width > t->height ? t->width : t->height);
+                                    ImGui::Image((ImTextureID)t->textureId, ImVec2(scale * t->width, scale * t->height), ImVec2(0, 1), ImVec2(1, 0));
                                     ImGui::TreePop();
                                 }
                             }
@@ -288,9 +291,22 @@ namespace neo {
                     }
                     ImGui::TreePop();
                 }
-            }
-            if (ImGui::CollapsingHeader("Library")) {
-                // TODO
+                if (Loader::meshes.size() && ImGui::TreeNode("Meshes")) {
+                    for (auto & m : Loader::meshes) {
+                        ImGui::Text("%s (%d)", m.first.c_str(), m.second->vertBufSize);
+                    }
+                    ImGui::TreePop();
+                }
+                if (Loader::textures.size() && ImGui::TreeNode("Textures")) {
+                    for (auto & t : Loader::textures) {
+                        if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->textureId) + ")").c_str())) {
+                            float scale = 100.f / (t.second->width > t.second->height ? t.second->width : t.second->height);
+                            ImGui::Image((ImTextureID)t.second->textureId, ImVec2(scale * t.second->width, scale * t.second->height), ImVec2(0, 1), ImVec2(1, 0));
+                            ImGui::TreePop();
+                        }
+                    }
+                    ImGui::TreePop();
+                }
             }
         });
     }
