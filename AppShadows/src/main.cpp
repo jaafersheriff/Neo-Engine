@@ -190,13 +190,7 @@ int main() {
     MasterRenderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
-    NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", Util::FPS);
-        ImGui::Text("dt: %0.4f", Util::timeStep);
-        if (ImGui::Button("VSync")) {
-            Window::toggleVSync();
-        }
-    });
+    NeoEngine::addDefaultImGuiFunc();
     NeoEngine::addImGuiFunc("Shadow Map", [&]() {
         ImGui::SliderFloat("Bias", &receiverShader.bias, 0.f, 0.005f, "%0.4f");
         ImGui::Checkbox("Dot bias", &receiverShader.useDotBias);
@@ -204,10 +198,6 @@ int main() {
         if (receiverShader.usePCF) {
             ImGui::SliderInt("PCF Size", &receiverShader.pcfSize, 0, 5);
         }
-        const Texture * texture(MasterRenderer::getFBO("depthMap")->textures[0]);
-        static float scale = 0.1f;
-        ImGui::SliderFloat("Scale", &scale, 0.f, 1.f);
-        ImGui::Image((ImTextureID)texture->textureId, ImVec2(scale * texture->width, scale * texture->height), ImVec2(0, 1), ImVec2(1, 0));
         static bool useLightCam = false;
         if (ImGui::Button("Switch Camera")) {
             useLightCam = !useLightCam;

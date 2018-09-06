@@ -156,7 +156,7 @@ namespace neo {
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
                     /* Bind texture */
-                    auto texComp = model->getGameObject().getComponentByType<TextureComponent>();
+                    auto texComp = model->getGameObject().getComponentByType<DiffuseMapComponent>();
                     if (texComp) {
                         auto texture = (Texture2D &) (texComp->getTexture());
                         texture.bind();

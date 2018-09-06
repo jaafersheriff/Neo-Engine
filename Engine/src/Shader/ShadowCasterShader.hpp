@@ -45,9 +45,9 @@ namespace neo {
                 depthFBO->disableRead();
             }
 
-            virtual void render(const CameraComponent &camera) override {
+            virtual void render(const CameraComponent &) override {
                 auto fbo = MasterRenderer::getFBO("depthMap");
-                auto depthTexture = fbo->textures[0];
+                auto & depthTexture = fbo->textures[0];
 
                 fbo->bind();
                 CHECK_GL(glClear(GL_DEPTH_BUFFER_BIT));
@@ -55,8 +55,9 @@ namespace neo {
                 CHECK_GL(glCullFace(GL_FRONT));
 
                 bind();
-                loadUniform("P", camera.getProj());
-                loadUniform("V", camera.getView());
+                auto & cameras = NeoEngine::getComponents<LightComponent>()[0]->getGameObject().getComponentsByType<CameraComponent>();
+                loadUniform("P", cameras[0]->getProj());
+                loadUniform("V", cameras[0]->getView());
 
                 for (auto model : MasterRenderer::getRenderables<ShadowCasterShader, RenderableComponent>()) {
                     loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
@@ -67,7 +68,7 @@ namespace neo {
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
 
                     /* Bind texture */
-                    auto texComp = model->getGameObject().getComponentByType<TextureComponent>();
+                    auto texComp = model->getGameObject().getComponentByType<DiffuseMapComponent>();
                     if (texComp) {
                         auto texture = (Texture2D &) (texComp->getTexture());
                         texture.bind();
