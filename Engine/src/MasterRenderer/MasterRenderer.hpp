@@ -12,8 +12,11 @@ namespace neo {
 
     class RenderableComponent;
     class CameraComponent;
+    class NeoEngine;
 
     class MasterRenderer {
+
+        friend NeoEngine;
 
         public:
             static std::string APP_SHADER_DIR;

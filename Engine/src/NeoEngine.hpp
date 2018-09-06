@@ -60,6 +60,7 @@ namespace neo {
             static void toggleImGui() { imGuiEnabled = !imGuiEnabled; }
             static std::unordered_map<std::string, std::function<void()>> imGuiFuncs;
             static void addImGuiFunc(std::string name, std::function<void()> func) { imGuiFuncs.insert({ name, func}); }
+            static void addDefaultImGuiFunc();
 
         private:
             /* Initialize / kill queues */

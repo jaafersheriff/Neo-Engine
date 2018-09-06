@@ -83,7 +83,7 @@ namespace neo {
             /* Update imgui functions */
             if (imGuiEnabled) {
                 for (auto it = imGuiFuncs.begin(); it != imGuiFuncs.end(); ++it) {
-                    ImGui::Begin(it->first.c_str());
+                    ImGui::Begin(it->first.c_str(), nullptr, ImVec2(0.f, 0.f), 0.5f, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_AlwaysAutoResize);
                     it->second();
                     ImGui::End();
                 }
@@ -220,6 +220,59 @@ namespace neo {
             }
         }
         componentKillQueue.clear();
+    }
+
+    void NeoEngine::addDefaultImGuiFunc() {
+        addImGuiFunc("Neo", [&]() {
+            ImGui::Text("FPS: %d", Util::FPS);
+            ImGui::Text("dt: %0.4f", Util::timeStep);
+            if (ImGui::Button("VSync")) {
+                Window::toggleVSync();
+            }
+            if (ImGui::CollapsingHeader("Engine")) {
+                if (ImGui::TreeNode("ECS")) {
+                    ImGui::Text("GameObjects:  %d", NeoEngine::getGameObjects().size());
+                    int count = 0;
+                    for (auto go : NeoEngine::getGameObjects()) {
+                        count += go->getAllComponents().size();
+                    }
+                    ImGui::Text("Components:  %d", count);
+                    if (ImGui::TreeNode("Systems")) {
+                        for (auto sys : NeoEngine::getSystems()) {
+                            ImGui::Checkbox(sys.second->name.c_str(), &sys.second->active);
+                        }
+                        ImGui::TreePop();
+                    }
+                    ImGui::TreePop();
+                }
+            }
+            if (ImGui::CollapsingHeader("Renderer")) {
+                // TODO : renderables
+                // TODO : fbos
+                // TODO : camera
+                if (MasterRenderer::preShaders.size() && ImGui::TreeNode("Pre process shaders")) {
+                    for (auto & shader : MasterRenderer::preShaders) {
+                        ImGui::Checkbox(shader->name.c_str(), &shader->active);
+                    }
+                    ImGui::TreePop();
+                }
+                if (MasterRenderer::sceneShaders.size() && ImGui::TreeNode("Scene process shaders")) {
+                    for (auto & shader : MasterRenderer::sceneShaders) {
+                        ImGui::Checkbox(shader->name.c_str(), &shader->active);
+                    }
+                    ImGui::TreePop();
+                }
+                 if (MasterRenderer::postShaders.size() && ImGui::TreeNode("Post process shaders")) {
+                    for (auto & shader : MasterRenderer::postShaders) {
+                        ImGui::Checkbox(shader->name.c_str(), &shader->active);
+                    }
+                    ImGui::TreePop();
+                }
+            }
+            if (ImGui::CollapsingHeader("Library")) {
+                // TODO
+            }
+        });
     }
 
     void NeoEngine::shutDown() {
