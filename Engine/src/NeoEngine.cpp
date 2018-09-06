@@ -252,7 +252,12 @@ namespace neo {
                     ImGui::TreePop();
                 }
                 if (ImGui::TreeNode("Shaders")) {
-                    // TODO : renderables
+                    // TODO : list renderable count per shader 
+                    int count = 0;
+                    for (auto & r : MasterRenderer::renderables) {
+                        count += r.second->size();
+                    }
+                    ImGui::Text("Renderables: %d", count);
                     if (MasterRenderer::preShaders.size() && ImGui::TreeNode("Pre process")) {
                         for (auto & shader : MasterRenderer::preShaders) {
                             ImGui::Checkbox(shader->name.c_str(), &shader->active);
