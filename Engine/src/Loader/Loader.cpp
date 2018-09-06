@@ -53,6 +53,7 @@ namespace neo {
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> objMaterials;
         std::string errString;
+        // TODO : use assimp or another optimized asset loader
         bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, (RES_DIR + fileName).c_str());
         if (!rc) {
             std::cerr << errString << std::endl;

@@ -19,7 +19,7 @@ namespace neo {
                 isDirty(false)
             {}
 
-            mutable bool isDirty;
+            bool isDirty;
             glm::vec3 lineColor;
 
             const std::vector<glm::vec3> & getNodes() const { return nodes; }
