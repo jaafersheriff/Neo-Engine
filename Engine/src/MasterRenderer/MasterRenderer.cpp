@@ -10,7 +10,7 @@
 namespace neo {
 
     std::string MasterRenderer::APP_SHADER_DIR;
-    CameraComponent *MasterRenderer::defaultCamera;
+    CameraComponent *MasterRenderer::defaultCamera(nullptr);
     std::unordered_map<std::string, std::unique_ptr<Framebuffer>> MasterRenderer::framebuffers;
     Framebuffer *MasterRenderer::defaultFBO;
     std::vector<std::unique_ptr<Shader>> MasterRenderer::preShaders;

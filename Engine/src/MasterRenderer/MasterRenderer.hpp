@@ -46,7 +46,7 @@ namespace neo {
             static CameraComponent *defaultCamera;
 
             static std::unordered_map<std::string, std::unique_ptr<Framebuffer>> framebuffers;
-            static Framebuffer *defaultFBO;
+            static Framebuffer * defaultFBO;
             static Framebuffer * findFBO(const std::string &name);
 
             static std::vector<std::unique_ptr<Shader>> preShaders;
