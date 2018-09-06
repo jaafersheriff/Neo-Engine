@@ -229,42 +229,62 @@ namespace neo {
             if (ImGui::Button("VSync")) {
                 Window::toggleVSync();
             }
-            if (ImGui::CollapsingHeader("Engine")) {
-                if (ImGui::TreeNode("ECS")) {
-                    ImGui::Text("GameObjects:  %d", NeoEngine::getGameObjects().size());
-                    int count = 0;
-                    for (auto go : NeoEngine::getGameObjects()) {
-                        count += go->getAllComponents().size();
-                    }
-                    ImGui::Text("Components:  %d", count);
-                    if (ImGui::TreeNode("Systems")) {
-                        for (auto sys : NeoEngine::getSystems()) {
-                            ImGui::Checkbox(sys.second->name.c_str(), &sys.second->active);
-                        }
-                        ImGui::TreePop();
+            if (ImGui::CollapsingHeader("ECS")) {
+                ImGui::Text("GameObjects:  %d", NeoEngine::getGameObjects().size());
+                int count = 0;
+                for (auto go : NeoEngine::getGameObjects()) {
+                    count += go->getAllComponents().size();
+                }
+                ImGui::Text("Components:  %d", count);
+                if (ImGui::TreeNode("Systems")) {
+                    for (auto sys : NeoEngine::getSystems()) {
+                        ImGui::Checkbox(sys.second->name.c_str(), &sys.second->active);
                     }
                     ImGui::TreePop();
                 }
             }
             if (ImGui::CollapsingHeader("Renderer")) {
-                // TODO : renderables
-                // TODO : fbos
-                // TODO : camera
-                if (MasterRenderer::preShaders.size() && ImGui::TreeNode("Pre process shaders")) {
-                    for (auto & shader : MasterRenderer::preShaders) {
-                        ImGui::Checkbox(shader->name.c_str(), &shader->active);
+                if (MasterRenderer::defaultCamera && ImGui::TreeNode("Camera")) {
+                    auto pos = MasterRenderer::defaultCamera->getGameObject().getSpatial()->getPosition();
+                    auto look = MasterRenderer::defaultCamera->getLookDir();
+                    ImGui::Text("Position: %0.2f, %0.2f, %0.2f", pos.x, pos.y, pos.z);
+                    ImGui::Text("Look Dir: %0.2f, %0.2f, %0.2f", look.x, look.y, look.z);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Shaders")) {
+                    // TODO : renderables
+                    if (MasterRenderer::preShaders.size() && ImGui::TreeNode("Pre process")) {
+                        for (auto & shader : MasterRenderer::preShaders) {
+                            ImGui::Checkbox(shader->name.c_str(), &shader->active);
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (MasterRenderer::sceneShaders.size() && ImGui::TreeNode("Scene")) {
+                        for (auto & shader : MasterRenderer::sceneShaders) {
+                            ImGui::Checkbox(shader->name.c_str(), &shader->active);
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (MasterRenderer::postShaders.size() && ImGui::TreeNode("Post process")) {
+                        for (auto & shader : MasterRenderer::postShaders) {
+                            ImGui::Checkbox(shader->name.c_str(), &shader->active);
+                        }
+                        ImGui::TreePop();
                     }
                     ImGui::TreePop();
                 }
-                if (MasterRenderer::sceneShaders.size() && ImGui::TreeNode("Scene process shaders")) {
-                    for (auto & shader : MasterRenderer::sceneShaders) {
-                        ImGui::Checkbox(shader->name.c_str(), &shader->active);
-                    }
-                    ImGui::TreePop();
-                }
-                 if (MasterRenderer::postShaders.size() && ImGui::TreeNode("Post process shaders")) {
-                    for (auto & shader : MasterRenderer::postShaders) {
-                        ImGui::Checkbox(shader->name.c_str(), &shader->active);
+                if (ImGui::TreeNode("FBOs")) {
+                    for (auto & fbo : MasterRenderer::framebuffers) {
+                        std::string title = fbo.first + " (" + std::to_string(fbo.second->fboId) + ")";
+                        if (ImGui::TreeNode(title.c_str())) {
+                            for (auto & t : fbo.second->textures) {
+                                if (ImGui::TreeNode(std::to_string(t->textureId).c_str())) {
+                                    ImGui::Image((ImTextureID)t->textureId, ImVec2(0.1f * t->width, 0.1f * t->height), ImVec2(0, 1), ImVec2(1, 0));
+                                    ImGui::TreePop();
+                                }
+                            }
+                            ImGui::TreePop();
+                        }
                     }
                     ImGui::TreePop();
                 }
