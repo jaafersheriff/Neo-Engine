@@ -27,10 +27,8 @@
     <ClInclude Include="src\Component\LightComponent\LightComponent.hpp" />
     <ClInclude Include="src\Component\AnimationComponent\LineRenderable.hpp" />
     <ClInclude Include="src\Component\ModelComponent\MaterialComponent.hpp" />
-    <ClInclude Include="src\Component\ModelComponent\NormalMapComponent.hpp" />
     <ClInclude Include="src\Component\ModelComponent\RenderableComponent.hpp" />
-    <ClInclude Include="src\Component\ModelComponent\DiffuseMapComponent.hpp" />
-    <ClInclude Include="src\Component\ModelComponent\SpecularMapComponent.hpp" />
+    <ClInclude Include="src\Component\ModelComponent\TextureComponent.hpp" />
     <ClInclude Include="src\Component\SpatialComponent\Orientable.hpp" />
     <ClInclude Include="src\Component\SpatialComponent\SpatialComponent.hpp" />
     <ClInclude Include="src\ext\imgui\imconfig.h" />

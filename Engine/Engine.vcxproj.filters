@@ -45,9 +45,7 @@
     <ClInclude Include="src\Shader\ShadowCasterShader.hpp" />
     <ClInclude Include="src\Shader\PhongShadowedShader.hpp" />
     <ClInclude Include="src\MasterRenderer\MasterRenderer.hpp" />
-    <ClInclude Include="src\Component\ModelComponent\NormalMapComponent.hpp" />
-    <ClInclude Include="src\Component\ModelComponent\DiffuseMapComponent.hpp" />
-    <ClInclude Include="src\Component\ModelComponent\SpecularMapComponent.hpp" />
+    <ClInclude Include="src\Component\ModelComponent\TextureComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />

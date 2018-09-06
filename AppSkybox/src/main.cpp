@@ -31,7 +31,7 @@ struct Skybox {
         gameObject = &NeoEngine::createGameObject();
         skybox = &NeoEngine::addComponent<SkyboxComponent>(gameObject);
         skybox->addShaderType<SkyboxShader>();
-        NeoEngine::addComponent<TextureComponent>(gameObject, tex);
+        NeoEngine::addComponent<CubeMapComponent>(gameObject, tex);
     }
 };
 
@@ -136,13 +136,7 @@ int main() {
     MasterRenderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
-    NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", Util::FPS);
-        ImGui::Text("dt: %0.4f", Util::timeStep);
-        if (ImGui::Button("VSync")) {
-            Window::toggleVSync();
-        }
-    });
+    NeoEngine::addDefaultImGuiFunc();
 
     /* Run */
     NeoEngine::run();
