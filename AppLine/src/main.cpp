@@ -45,17 +45,19 @@ struct Light {
     }
 };
 
-struct Orient {
+struct Cube {
     GameObject *gameObject;
 
-    Orient(Mesh *mesh) {
+    Cube(Mesh *mesh) {
         // GO
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         // Cube
         RenderableComponent *renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderable->addShaderType<PhongShader>();
-        NeoEngine::addComponent<MaterialComponent>(gameObject, new Material);
+        auto mat = new Material;
+        mat->diffuse = glm::vec3(1.f, 0.f, 1.f);
+        NeoEngine::addComponent<MaterialComponent>(gameObject, mat);
         // Line
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
@@ -68,7 +70,7 @@ struct Orient {
         NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
         NeoEngine::addComponent<LineRenderable>(gameObject, wLine);
 
-        NeoEngine::addImGuiFunc("Orient", [&]() {
+        NeoEngine::addImGuiFunc("Mesh", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);
@@ -95,7 +97,7 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Orient(Loader::getMesh("cube"));
+    Cube(Loader::getMesh("cube"));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
@@ -107,13 +109,7 @@ int main() {
     MasterRenderer::addSceneShader<PhongShader>();
 
     /* Attach ImGui panes */
-    NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", Util::FPS);
-        ImGui::Text("dt: %0.4f", Util::timeStep);
-        if (ImGui::Button("VSync")) {
-            Window::toggleVSync();
-        }
-    });
+    NeoEngine::addDefaultImGuiFunc();
 
     /* Run */
     NeoEngine::run();
