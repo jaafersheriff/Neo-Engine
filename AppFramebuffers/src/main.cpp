@@ -86,10 +86,10 @@ struct Surveillance {
     GameObject *gameObject;
     SurveillanceCamera *camera;
 
-    Surveillance(glm::vec3 pos, glm::vec3 scale, glm::mat3 orientation) {
+    Surveillance(std::string name, glm::vec3 pos, glm::vec3 scale, glm::mat3 orientation) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale, orientation);
-        camera = &NeoEngine::addComponent<SurveillanceCamera>(gameObject, 1.f, 100.f);
+        camera = &NeoEngine::addComponent<SurveillanceCamera>(gameObject, name, 1.f, 100.f);
         // Line
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
@@ -101,9 +101,7 @@ struct Surveillance {
         NeoEngine::addComponent<LineRenderable>(gameObject, uLine);
         NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
         NeoEngine::addComponent<LineRenderable>(gameObject, wLine);
-    }
 
-    void addImGui(std::string name) {
         NeoEngine::addImGuiFunc(name, [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
@@ -121,10 +119,6 @@ struct Surveillance {
                 R *= glm::rotate(glm::mat4(1.f), rot.z, glm::vec3(0, 0, 1));
                 gameObject->getSpatial()->setOrientation(glm::mat3(R));
             }
-            float imscale = 0.12f;
-            ImGui::Image((ImTextureID)camera->colorBuffer->textureId, ImVec2(imscale * camera->colorBuffer->width, imscale * camera->colorBuffer->height));
-            ImGui::SameLine();
-            ImGui::Image((ImTextureID)camera->depthBuffer->textureId, ImVec2(imscale * camera->depthBuffer->width, imscale * camera->depthBuffer->height));
         });
     }
 };
@@ -136,10 +130,8 @@ int main() {
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
     Renderable(Loader::getMesh("cube"));
-    Surveillance a(glm::vec3(-3, 0, 0), glm::vec3(1.f, 2.f, 1.f), glm::mat3(glm::rotate(glm::mat4(1.f), 1.4f, glm::vec3(0, 1, 0))));
-    a.addImGui("CamA");
-    Surveillance b(glm::vec3(3, 0, 0), glm::vec3(1.f, 2.f, 1.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.4f, glm::vec3(0, 1, 0))));
-    b.addImGui("CamB");
+    Surveillance("CamA", glm::vec3(-3, 0, 0), glm::vec3(1.f, 2.f, 1.f), glm::mat3(glm::rotate(glm::mat4(1.f), 1.4f, glm::vec3(0, 1, 0))));
+    Surveillance("CamB", glm::vec3(3, 0, 0), glm::vec3(1.f, 2.f, 1.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.4f, glm::vec3(0, 1, 0))));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
@@ -153,13 +145,7 @@ int main() {
     MasterRenderer::addSceneShader<SurveillanceReadShader>("read.vert", "read.frag");
 
     /* Attach ImGui panes */
-    NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", Util::FPS);
-        ImGui::Text("dt: %0.4f", Util::timeStep);
-        if (ImGui::Button("VSync")) {
-            Window::toggleVSync();
-        }
-    });
+    NeoEngine::addDefaultImGuiFunc();
 
     /* Run */
     NeoEngine::run();

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Component/CameraComponent/CameraComponent.hpp"
-#include "GLHelper/Framebuffer.hpp"
+#include "MasterRenderer/MasterRenderer.hpp"
 
 #include "Messaging/Messenger.hpp"
 
@@ -14,7 +14,7 @@ class SurveillanceCamera : public CameraComponent {
         Texture2D * colorBuffer;
         Texture2D * depthBuffer;
 
-        SurveillanceCamera(GameObject *go, float near, float far) :
+        SurveillanceCamera(GameObject *go, std::string name, float near, float far) :
             CameraComponent(go, -10.f, 10.f, -10.f, 10.f, near, far) {
             colorBuffer =  new Texture2D;
             colorBuffer->width = Window::getFrameSize().x;
@@ -28,7 +28,7 @@ class SurveillanceCamera : public CameraComponent {
             depthBuffer->components = 1;
             depthBuffer->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_NEAREST, GL_REPEAT);
 
-            fbo = new Framebuffer;
+            fbo = MasterRenderer::getFBO(name);
             fbo->generate();
             fbo->attachColorTexture(*colorBuffer);
             fbo->attachDepthTexture(*depthBuffer);
