@@ -37,8 +37,8 @@ namespace neo {
     /* Template implementation */
     template <typename ShaderT>
     void RenderableComponent::addShaderType() {
+        static_assert(std::is_base_of<Shader, ShaderT>::value, "ShaderT must be a Shader type");
         static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
-        static_assert(!std::is_same<Shader, ShaderT>::value, "ShaderT must be a derived Shader type");
         std::type_index typeI(typeid(ShaderT));
         auto it = std::find(shaderTypes.begin(), shaderTypes.end(), typeI);
         if (it == shaderTypes.end()) {
@@ -51,8 +51,8 @@ namespace neo {
 
     template <typename ShaderT>
     void RenderableComponent::removeShaderType() {
+        static_assert(std::is_base_of<Shader, ShaderT>::value, "ShaderT must be a Shader type");
         static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
-        static_assert(!std::is_same<Shader, ShaderT>::value, "ShaderT must be a derived Shader type");
         std::type_index typeI(typeid(ShaderT));
         auto it = std::find(shaderTypes.begin(), shaderTypes.end(), typeI);
         if (it != shaderTypes.end()) {

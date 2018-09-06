@@ -75,8 +75,8 @@ namespace neo {
     }
     template <typename ShaderT, typename... Args>
     std::unique_ptr<ShaderT> MasterRenderer::createShader(Args &&... args) {
+        static_assert(std::is_base_of<Shader, ShaderT>::value, "ShaderT must be a Shader type");
         static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
-        static_assert(!std::is_same<Shader, ShaderT>::value, "ShaderT must be a derived Shader type");
         return std::make_unique<ShaderT>(std::forward<Args>(args)...);
     }
 

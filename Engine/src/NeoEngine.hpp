@@ -101,8 +101,8 @@ namespace neo {
 
     template <typename SysT, typename... Args> 
     SysT & NeoEngine::addSystem(Args &&... args) {
-        static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived system type");
-        static_assert(!std::is_same<System, SysT>::value, "SysT must be a derived system type");
+        static_assert(std::is_base_of<System, SysT>::value, "SysT must be a System type");
+        static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived System type");
         std::type_index typeI(typeid(SysT));
         auto it(systems.find(typeI));
         if (it == systems.end()) {
@@ -115,8 +115,8 @@ namespace neo {
 
     template <typename SysT> 
     SysT & NeoEngine::getSystem(void) {
-        static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived system type");
-        static_assert(!std::is_same<System, SysT>::value, "SysT must be a derived system type");
+        static_assert(std::is_base_of<System, SysT>::value, "SysT must be a System type");
+        static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived System type");
 
         std::type_index typeI(typeid(SysT));
         assert(systems.count(typeI));
