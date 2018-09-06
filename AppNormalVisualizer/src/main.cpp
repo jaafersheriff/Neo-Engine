@@ -12,9 +12,7 @@
 using namespace neo;
 
 /* Shaders */
-PhongShader *phongShader;
 NormalShader *normalShader;
-WireframeShader *wireframeShader;
 
 /* Game object definitions */
 struct Camera {
@@ -105,27 +103,15 @@ int main() {
 
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
-    phongShader = &MasterRenderer::addSceneShader<PhongShader>();
-    wireframeShader = &MasterRenderer::addSceneShader<WireframeShader>();
+    MasterRenderer::addSceneShader<PhongShader>();
+    MasterRenderer::addSceneShader<WireframeShader>();
     normalShader = &MasterRenderer::addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
  
 
     /* Attach ImGui panes */
-    NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", Util::FPS);
-        ImGui::Text("dt: %0.4f", Util::timeStep);
-        if (ImGui::Button("VSync")) {
-            Window::toggleVSync();
-        }
-    });
-    NeoEngine::addImGuiFunc("Renderer", [&]() {
-        ImGui::Checkbox("Phong", &phongShader->active);
-        ImGui::Checkbox("Wire", &wireframeShader->active);
-        ImGui::Checkbox("Normal", &normalShader->active);
-        if (normalShader->active) {
-            ImGui::SameLine();
-            ImGui::SliderFloat("Magnitude", &normalShader->magnitude, 0.f, 1.f);
-        }
+    NeoEngine::addDefaultImGuiFunc();
+    NeoEngine::addImGuiFunc("Normals", [&]() {
+        ImGui::SliderFloat("Magnitude", &normalShader->magnitude, 0.f, 1.f);
     });
 
     /* Run */
