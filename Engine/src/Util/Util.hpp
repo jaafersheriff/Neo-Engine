@@ -23,18 +23,13 @@ namespace neo {
             nFrames++;
             if (runTime - lastFPSTime >= 1.0) {
                 FPS = nFrames;
-                if (FPSs.size() == 25) {
-                    FPSs.erase(FPSs.begin());
+                if (FPSList.size() == 25) {
+                    FPSList.erase(FPSList.begin());
                 }
-                FPSs.push_back(FPS);
+                FPSList.push_back(FPS);
                 nFrames = 0;
                 lastFPSTime = runTime;
             }
-
-            std::swap(oldPerfs, newPerfs);
-            newPerfs.clear();
-            oldTotalTimer = newTotalTimer;
-            newTotalTimer = 0.0;
         }
 
         static float PI() { return glm::pi<float>(); }
@@ -133,28 +128,9 @@ namespace neo {
             return glfwGetTime();
         }
 
-        static void startTimer() {
-            timer = getRunTime();
-        }
-
-        static void endTimer(const std::string &name) {
-            double diff = getRunTime() - timer;
-            newTotalTimer += diff;
-            newPerfs.emplace_back(name, diff);
-        }
-
-        /* Timer */
-        public:
-            static std::vector<std::pair<std::string, double>> oldPerfs;
-            static double oldTotalTimer;
-        private:
-            static double timer;
-            static double newTotalTimer;
-            static std::vector<std::pair<std::string, double>> newPerfs;
- 
         /* FPS*/
         public:
-            static std::vector<int> FPSs;
+            static std::vector<int> FPSList;
             static int FPS;                 /* Frames per second */
             static double timeStep;         /* Delta time */
             static int totalFrames;         /* Total frames since start up */

@@ -87,6 +87,12 @@ int main() {
     NeoEngine::addDefaultImGuiFunc();
 
     NeoEngine::addImGuiFunc("Lights", [&]() {
+        ImGui::Checkbox("Show lights", &lightPassShader.showLights);
+        if (lightPassShader.showLights) {
+            ImGui::SameLine();
+            ImGui::SliderFloat("Show radius", &lightPassShader.showRadius, 0.01f, 1.f);
+        }
+ 
         static int index;
         if (ImGui::CollapsingHeader("Create Lights")) {
             if (ImGui::TreeNode("Single")) {
@@ -146,15 +152,10 @@ int main() {
                 ImGui::TreePop();
             }
         }
+        if (lights.empty()) {
+            return;
+        }
         if (ImGui::CollapsingHeader("Edit Lights")) {
-            ImGui::Checkbox("Show lights", &lightPassShader.showLights);
-            if (lightPassShader.showLights) {
-                ImGui::SameLine();
-                ImGui::SliderFloat("Show radius", &lightPassShader.showRadius, 0.01f, 1.f);
-            }
-            if (lights.empty()) {
-                return;
-            }
             ImGui::SliderInt("Index", &index, 0, lights.size() - 1);
             auto l = lights[index];
             if (ImGui::Button("Delete light")) {
