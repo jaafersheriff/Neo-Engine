@@ -26,10 +26,6 @@ namespace neo {
         RES_DIR = res;
         verbose = v;
 
-        /* Static meshes */
-        meshes.insert({ "cube", MeshGenerator::createCube() });
-        meshes.insert({ "quad", MeshGenerator::createQuad() });
-        meshes.insert({ "sphere", MeshGenerator::createSphere() });
     }
 
     Mesh * Loader::getMesh(const std::string &fileName, bool doResize) {
@@ -37,6 +33,20 @@ namespace neo {
         auto it = meshes.find(fileName);
         if (it != meshes.end()) {
             return it->second;
+        }
+
+        /* Check with static meshes first */
+        if (!std::strcmp(fileName.c_str(), "cube")) {
+            meshes.insert({ "cube", MeshGenerator::createCube() });
+            return meshes.find(fileName)->second;
+        }
+        if (!std::strcmp(fileName.c_str(), "quad")) {
+            meshes.insert({ "quad", MeshGenerator::createQuad() });
+            return meshes.find(fileName)->second;
+        }
+        if (!std::strcmp(fileName.c_str(), "sphere")) {
+            meshes.insert({ "sphere", MeshGenerator::createSphere() });
+            return meshes.find(fileName)->second;
         }
 
         /* If mesh was not found in map, read it in */
