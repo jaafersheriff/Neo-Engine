@@ -59,7 +59,7 @@ struct Renderable {
         renderComp = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderComp->addShaderType<PhongShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, mat);
-        NeoEngine::addComponent<TextureComponent>(gameObject, tex);
+        NeoEngine::addComponent<DiffuseMapComponent>(gameObject, tex);
     }
 };
 
@@ -94,13 +94,7 @@ int main() {
     MasterRenderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
-    NeoEngine::addImGuiFunc("Stats", [&]() {
-        ImGui::Text("FPS: %d", Util::FPS);
-        ImGui::Text("dt: %0.4f", Util::timeStep);
-        if (ImGui::Button("VSync")) {
-            Window::toggleVSync();
-        }
-    });
+    NeoEngine::addDefaultImGuiFunc();
     NeoEngine::addImGuiFunc("Material", [&]() {
         ImGui::SliderFloat("Ambient ", &material.ambient, 0.f, 1.f);
         ImGui::SliderFloat3("Diffuse Color", glm::value_ptr(material.diffuse), 0.f, 1.f);
