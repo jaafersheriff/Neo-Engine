@@ -4,27 +4,37 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/constants.hpp"
 
+#include <vector>
+
 namespace neo {
 
     struct Util {
         
         static void init() {
-            lastFrameTime = runTime = glfwGetTime();
+            lastFrameTime = getRunTime();
         }
 
         static void update() {
             /* Update delta time and FPS */
-            runTime = glfwGetTime();
+            float runTime = (float)getRunTime();
             totalFrames++;
             timeStep = runTime - lastFrameTime;
             lastFrameTime = runTime;
             nFrames++;
             if (runTime - lastFPSTime >= 1.0) {
                 FPS = nFrames;
+                if (FPSs.size() == 25) {
+                    FPSs.erase(FPSs.begin());
+                }
+                FPSs.push_back(FPS);
                 nFrames = 0;
                 lastFPSTime = runTime;
             }
- 
+
+            std::swap(oldPerfs, newPerfs);
+            newPerfs.clear();
+            oldTotalTimer = newTotalTimer;
+            newTotalTimer = 0.0;
         }
 
         static float PI() { return glm::pi<float>(); }
@@ -119,17 +129,40 @@ namespace neo {
             return(status);
         }
 
+        static double getRunTime() {
+            return glfwGetTime();
+        }
+
+        static void startTimer() {
+            timer = getRunTime();
+        }
+
+        static void endTimer(const std::string &name) {
+            double diff = getRunTime() - timer;
+            newTotalTimer += diff;
+            newPerfs.emplace_back(name, diff);
+        }
+
+        /* Timer */
+        public:
+            static std::vector<std::pair<std::string, double>> oldPerfs;
+            static double oldTotalTimer;
+        private:
+            static double timer;
+            static double newTotalTimer;
+            static std::vector<std::pair<std::string, double>> newPerfs;
+ 
         /* FPS*/
         public:
+            static std::vector<int> FPSs;
             static int FPS;                 /* Frames per second */
             static double timeStep;         /* Delta time */
-            static double runTime;          /* Global timer */
             static int totalFrames;         /* Total frames since start up */
         private:
             static double lastFPSTime;      /* Time at which last FPS was calculated */
             static int nFrames;             /* Number of frames in current second */
             static double lastFrameTime;    /* Time at which last frame was rendered */
 
- 
+
     };
 }

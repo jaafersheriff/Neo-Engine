@@ -51,8 +51,10 @@ namespace neo {
         if (preShaders.size()) {
             /* Render all preprocesses */
             for (auto & shader : preShaders) {
-                if (shader.get()->active) {
-                    shader.get()->render(*defaultCamera);
+                if (shader->active) {
+                    Util::startTimer();
+                    shader->render(*defaultCamera);
+                    Util::endTimer(shader->name);
                 }
             }
             /* Reset default FBO */
@@ -71,7 +73,9 @@ namespace neo {
 
         /* Render imgui */
         if (NeoEngine::imGuiEnabled) {
+            Util::startTimer();
             ImGui::Render();
+            Util::endTimer("ImGui Render");
         }
 
         glfwSwapBuffers(Window::getWindow());
@@ -79,8 +83,10 @@ namespace neo {
 
     void MasterRenderer::renderScene(const CameraComponent &camera) {
        for (auto & shader : sceneShaders) {
-            if (shader.get()->active) {
-                shader.get()->render(camera);
+            if (shader->active) {
+                Util::startTimer();
+                shader->render(camera);
+                Util::endTimer(shader->name);
             }
         }
     }

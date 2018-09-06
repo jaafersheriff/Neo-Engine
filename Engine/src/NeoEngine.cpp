@@ -37,7 +37,12 @@ namespace neo {
     double Util::timeStep = 0.0;
     double Util::lastFPSTime = 0.0;
     double Util::lastFrameTime = 0.0;
-    double Util::runTime = 0.0;
+    double Util::timer = 0.0;
+    double Util::oldTotalTimer = 0.0;
+    double Util::newTotalTimer = 0.0;
+    std::vector<std::pair<std::string, double>> Util::oldPerfs;
+    std::vector<std::pair<std::string, double>> Util::newPerfs;
+    std::vector<int> Util::FPSs;
 
     /* ImGui */
     bool NeoEngine::imGuiEnabled = true;
@@ -71,30 +76,40 @@ namespace neo {
 
         while (!Window::shouldClose()) {
             /* Update Util */
+            Util::startTimer();
             Util::update();
+            Util::endTimer("Util");
 
             /* Update display, mouse, keyboard */
+            Util::startTimer();
             Window::update();
+            Util::endTimer("Window");
 
             /* Initialize new objects and components */
+            Util::startTimer();
             processInitQueue();
             Messenger::relayMessages();
+            Util::endTimer("Init");
 
             /* Update imgui functions */
             if (imGuiEnabled) {
+                Util::startTimer();
                 for (auto it = imGuiFuncs.begin(); it != imGuiFuncs.end(); ++it) {
                     ImGui::Begin(it->first.c_str(), nullptr, ImVec2(0.f, 0.f), 0.5f, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_AlwaysAutoResize);
                     it->second();
                     ImGui::End();
                 }
+                Messenger::relayMessages();
+                Util::endTimer("ImGui Update");
             }
-            Messenger::relayMessages();
 
             /* Update each system */
             for (auto & system : systems) {
                 if (system.second->active) {
+                    Util::startTimer();
                     system.second->update((float)Util::timeStep);
                     Messenger::relayMessages();
+                    Util::endTimer(system.second->name);
                 }
             }
 
@@ -104,8 +119,10 @@ namespace neo {
             MasterRenderer::render((float)Util::timeStep);
 
             /* Kill deleted objects and components */
+            Util::startTimer();
             processKillQueue();
             Messenger::relayMessages();
+            Util::endTimer("Kill");
         }
     }
 
@@ -224,10 +241,18 @@ namespace neo {
 
     void NeoEngine::addDefaultImGuiFunc() {
         addImGuiFunc("Neo", [&]() {
-            ImGui::Text("FPS: %d", Util::FPS);
-            ImGui::Text("dt: %0.4f", Util::timeStep);
-            if (ImGui::Button("VSync")) {
-                Window::toggleVSync();
+            if (ImGui::CollapsingHeader("Performance")) {
+                ImGui::PlotLines("FPS", (float *)Util::FPSs.data(), Util::FPSs.size(), 0, std::to_string(Util::FPS).c_str(), 0.f, 60.f*FLT_TRUE_MIN, ImVec2(0,0), sizeof(int));
+                ImGui::Text("dt: %0.3fms", 1000.0 * Util::timeStep);
+                if (ImGui::Button("VSync")) {
+                    Window::toggleVSync();
+                }
+                if (ImGui::TreeNode("Times")) {
+                    for (auto a : Util::oldPerfs) {
+                        ImGui::Text("%20s %5.3fms %5.2f%%", a.first.c_str(), 1000.0 * a.second, 100.0 * a.second / Util::oldTotalTimer);
+                    }
+                    ImGui::TreePop();
+                }
             }
             if (ImGui::CollapsingHeader("ECS")) {
                 ImGui::Text("GameObjects:  %d", NeoEngine::getGameObjects().size());
