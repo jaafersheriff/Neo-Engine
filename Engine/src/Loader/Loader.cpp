@@ -4,6 +4,7 @@
 
 #include "GLHelper/Texture.hpp"
 #include "GLHelper/GLHelper.hpp"
+#include "GLHelper/Framebuffer.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ext/tiny_obj_loader.h"
@@ -21,6 +22,7 @@ namespace neo {
     /* Library */
     std::unordered_map<std::string, Mesh *> Loader::meshes;
     std::unordered_map<std::string, Texture *> Loader::textures;
+    std::unordered_map<std::string, Framebuffer *> Loader::framebuffers;
 
     void Loader::init(const std::string &res, bool v) {
         RES_DIR = res;
@@ -169,6 +171,15 @@ namespace neo {
         }
     
         return (TextureCubeMap *) texture;
+    }
+
+    Framebuffer * Loader::getFBO(const std::string &name) {
+        auto it = framebuffers.find(name);
+        if (it == framebuffers.end()) {
+            framebuffers.emplace(name, new Framebuffer);
+            it = framebuffers.find(name);
+        }
+        return it->second;
     }
 
     Texture * Loader::findTexture(const std::string &name) {

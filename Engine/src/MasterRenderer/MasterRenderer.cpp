@@ -11,7 +11,6 @@ namespace neo {
 
     std::string MasterRenderer::APP_SHADER_DIR;
     CameraComponent *MasterRenderer::defaultCamera(nullptr);
-    std::unordered_map<std::string, std::unique_ptr<Framebuffer>> MasterRenderer::framebuffers;
     Framebuffer *MasterRenderer::defaultFBO;
     std::vector<std::unique_ptr<Shader>> MasterRenderer::preShaders;
     std::vector<std::unique_ptr<Shader>> MasterRenderer::sceneShaders;
@@ -33,7 +32,7 @@ namespace neo {
         });
 
         /* Init default FBO */
-        defaultFBO = getFBO("default");
+        defaultFBO = Loader::getFBO("default");
         defaultFBO->fboId = 0;
     }
 
@@ -85,28 +84,11 @@ namespace neo {
         }
     }
 
-    Framebuffer * MasterRenderer::getFBO(const std::string &name) {
-        auto fb = findFBO(name);
-        if (!fb) {
-            framebuffers.emplace(name, std::make_unique<Framebuffer>());
-            fb = framebuffers.find(name)->second.get();
-        }
-        return fb;
-    }
-
     void MasterRenderer::setDefaultFBO(const std::string &name) {
-        auto fb = findFBO(name);
+        auto fb = Loader::getFBO(name);
         if (fb) {
             defaultFBO = fb;
         }
-    }
-
-    Framebuffer * MasterRenderer::findFBO(const std::string &name) {
-        auto it = framebuffers.find(name);
-        if (it != framebuffers.end()) {
-            return it->second.get();
-        }
-        return nullptr;
     }
 
     void MasterRenderer::attachCompToShader(const std::type_index &typeI, RenderableComponent *rComp) {

@@ -284,7 +284,7 @@ namespace neo {
             if (ImGui::CollapsingHeader("Library")) {
                 // TODO : move fbos to library
                 if (ImGui::TreeNode("FBOs")) {
-                    for (auto & fbo : MasterRenderer::framebuffers) {
+                    for (auto & fbo : Loader::framebuffers) {
                         if (ImGui::TreeNode((fbo.first + " (" + std::to_string(fbo.second->fboId) + ")").c_str())) {
                             for (auto & t : fbo.second->textures) {
                                 if (ImGui::TreeNode(std::to_string(t->textureId).c_str())) {
