@@ -42,7 +42,7 @@ class LightPassShader : public Shader {
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId));
 
             /* Bind gbuffer */
-            auto fbo = MasterRenderer::getFBO("gbuffer");
+            auto fbo = Loader::getFBO("gbuffer");
             fbo->textures[0]->bind();
             loadUniform("gNormal", fbo->textures[0]->textureId);
             fbo->textures[1]->bind();

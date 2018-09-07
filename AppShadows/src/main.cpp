@@ -30,7 +30,6 @@ struct Light {
     GameObject *gameObject;
     LightComponent *light;
     RenderableComponent *renderable;
-    Material material = Material(1.f, glm::vec3(1.f));
     CameraComponent *camera;
     SpatialComponent *camSpatial;
     SinMoveComponent *sin = nullptr;
@@ -44,7 +43,7 @@ struct Light {
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
         renderable->addShaderType<PhongShader>();
-        NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
+        NeoEngine::addComponent<MaterialComponent>(gameObject, Loader::getMaterial("LightMat", 1.f, glm::vec3(1.f)));
         camera = &NeoEngine::addComponent<CameraComponent>(gameObject, -10.f, 10.f, -10.f, 10.f, -1.f, 1000.f);
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
@@ -118,15 +117,12 @@ struct Light {
 struct Renderable {
     GameObject *gameObject;
     RenderableComponent *renderable;
-    Material *material;
     glm::vec3 rot = glm::vec3(0.f);
 
     Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale, glm::mat4 ori = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale, ori);
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        material = new Material;
-        NeoEngine::addComponent<MaterialComponent>(gameObject, material);
     }
 
     void attachImGui(std::string name) {
@@ -167,13 +163,12 @@ int main() {
             glm::vec3(Util::genRandom(5.f)));
         r.renderable->addShaderType<ShadowCasterShader>();
         r.renderable->addShaderType<PhongShadowedShader>();
-        r.material->ambient = 0.5f;
-        r.material->diffuse = Util::genRandomVec3();
+        NeoEngine::addComponent<MaterialComponent>(r.gameObject, new Material(0.3f, Util::genRandomVec3(), glm::vec3(1.f), 20.f));
     }
 
     // Terrain receiver 
     Renderable receiver(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
-    receiver.material->diffuse = glm::vec3(0.7f);
+    NeoEngine::addComponent<MaterialComponent>(receiver.gameObject, new Material(0.2f, glm::vec3(0.7f), glm::vec3(1.f), 20.f));
     receiver.renderable->addShaderType<PhongShadowedShader>();
     receiver.attachImGui("Receiver");
 

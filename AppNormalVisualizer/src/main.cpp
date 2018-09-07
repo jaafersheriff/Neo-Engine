@@ -53,7 +53,6 @@ struct Light {
 struct Orient {
     GameObject *gameObject;
     RenderableComponent *renderable;
-    Material material;
 
     Orient(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
@@ -62,13 +61,9 @@ struct Orient {
         renderable->addShaderType<PhongShader>();
         renderable->addShaderType<WireframeShader>();
         renderable->addShaderType<NormalShader>();
-        NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
+        NeoEngine::addComponent<MaterialComponent>(gameObject, Loader::getMaterial("mat"));
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
-            ImGui::SliderFloat("Ambient ", &material.ambient, 0.f, 1.f);
-            ImGui::SliderFloat3("Phong Color", glm::value_ptr(material.diffuse), 0.f, 1.f);
-            ImGui::SliderFloat3("Specular Color", glm::value_ptr(material.specular), 0.f, 1.f);
-            ImGui::SliderFloat("Shine", &material.shine, 0.f, 100.f);
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);

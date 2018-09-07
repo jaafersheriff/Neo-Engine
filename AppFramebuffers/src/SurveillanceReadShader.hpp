@@ -30,9 +30,8 @@ class SurveillanceReadShader : public Shader {
                 loadUniform("M", camera->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind texture */
-                const Texture2D & texture(*camera->colorBuffer);
-                texture.bind();
-                loadUniform("fbo", texture.textureId);
+                camera->fbo->textures[0]->bind();
+                loadUniform("fbo", camera->fbo->textures[0]->textureId);
 
                 /* DRAW */
                 mesh->draw();

@@ -70,14 +70,13 @@ int main() {
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
-    Material material;
     std::vector<Renderable *> renderables;
     for (int x = -2; x < 3; x++) {
         for (int z = 0; z < 10; z++) {
             renderables.push_back(
                 new Renderable(
                     Loader::getMesh("mr_krab.obj", true), 
-                    &material,
+                    Loader::getMaterial("krab"),
                     Loader::getTexture("mr_krab.png"),
                     glm::vec3(x*2, 0, z*2))
             );
@@ -95,12 +94,6 @@ int main() {
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();
-    NeoEngine::addImGuiFunc("Material", [&]() {
-        ImGui::SliderFloat("Ambient ", &material.ambient, 0.f, 1.f);
-        ImGui::SliderFloat3("Diffuse Color", glm::value_ptr(material.diffuse), 0.f, 1.f);
-        ImGui::SliderFloat3("Specular Color", glm::value_ptr(material.specular), 0.f, 1.f);
-        ImGui::SliderFloat("Shine", &material.shine, 0.f, 100.f);
-    });
 
     /* Run */
     NeoEngine::run();

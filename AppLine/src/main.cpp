@@ -55,9 +55,7 @@ struct Cube {
         // Cube
         RenderableComponent *renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderable->addShaderType<PhongShader>();
-        auto mat = new Material;
-        mat->diffuse = glm::vec3(1.f, 0.f, 1.f);
-        NeoEngine::addComponent<MaterialComponent>(gameObject, mat);
+        NeoEngine::addComponent<MaterialComponent>(gameObject, Loader::getMaterial("cubeMat", 0.2f, glm::vec3(1.f, 0.f, 1.f)));
         // Line
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });

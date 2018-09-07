@@ -39,15 +39,12 @@ struct Renderable {
     GameObject *gameObject;
     SpatialComponent *spat;
     RenderableComponent *renderable;
-    Material *material = new Material;
 
     Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale) {
         gameObject = &NeoEngine::createGameObject();
         spat = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderable->addShaderType<GBufferShader>();
-        material->diffuse = Util::genRandomVec3();
-        NeoEngine::addComponent<MaterialComponent>(gameObject, material);
     }
 };
 
@@ -60,8 +57,11 @@ int main() {
     std::vector<Light *> lights;
     lights.push_back(new Light(glm::vec3(25.f, 25.f, 0.f), glm::vec3(1.f), glm::vec3(100.f)));
     Renderable cube(Loader::getMesh("cube"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
+    NeoEngine::addComponent<MaterialComponent>(cube.gameObject, Loader::getMaterial("cube mat", 0.2f, Util::genRandomVec3()));
     Renderable dragon(Loader::getMesh("dragon10k.obj", true), glm::vec3(-4.f, 10.f, -5.f), glm::vec3(10.f));
+    NeoEngine::addComponent<MaterialComponent>(dragon.gameObject, Loader::getMaterial("dragon mat", 0.2f, Util::genRandomVec3()));
     Renderable stairs(Loader::getMesh("staircase.obj", true), glm::vec3(5.f, 10.f, 9.f), glm::vec3(10.f));
+    NeoEngine::addComponent<MaterialComponent>(stairs.gameObject, Loader::getMaterial("stairs mat", 0.2f, Util::genRandomVec3()));
     for (int i = 0; i < 20; i++) {
         Renderable tree(Loader::getMesh("PineTree3.obj", true), glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
         NeoEngine::addComponent<DiffuseMapComponent>(tree.gameObject, Loader::getTexture("PineTexture.png"));
@@ -70,8 +70,7 @@ int main() {
     // Terrain 
     Renderable terrain(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
     terrain.spat->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
-    terrain.material->diffuse = glm::vec3(0.7f);
-    terrain.material->ambient = 0.7f;
+    NeoEngine::addComponent<MaterialComponent>(terrain.gameObject, Loader::getMaterial("terrain mat", 0.7f, glm::vec3(0.7f)));
     terrain.renderable->addShaderType<GBufferShader>();
 
     /* Systems - order matters! */

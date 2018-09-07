@@ -52,14 +52,13 @@ struct Light {
 struct Renderable {
     GameObject *gameObject;
     RenderableComponent *renderable;
-    Material material = Material(0.2f, glm::vec3(1,0,1));
 
     Renderable(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderable->addShaderType<PhongShader>();
-        NeoEngine::addComponent<MaterialComponent>(gameObject, &material);
+        NeoEngine::addComponent<MaterialComponent>(gameObject, Loader::getMaterial("mat", 0.2f, glm::vec3(1.f, 0.f, 1.f)));
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();

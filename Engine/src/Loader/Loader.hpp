@@ -38,7 +38,7 @@ namespace neo {
             static Framebuffer * getFBO(const std::string &);
 
             /* Retrieve material */
-            static Material * getMaterial(const std::string &, float = 0.2f, glm::vec3 = glm::vec3(0.f), glm::vec3 = glm::vec3(0.f), float = 20.f);
+            static Material * getMaterial(const std::string &, float = 0.2f, glm::vec3 = glm::vec3(0.f), glm::vec3 = glm::vec3(1.f), float = 20.f);
 
         private:
             /* Resize mesh vertex buffers so all the vertices are [-1, 1] */

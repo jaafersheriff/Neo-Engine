@@ -147,7 +147,7 @@ namespace neo {
 
             /* Use stbi if name is an existing file */
             FILE *f;
-            if (!fopen_s(&f, name.c_str(), "rb")) {
+            if (fopen_s(&f, name.c_str(), "rb")) {
                 uint8_t* data[6];
                 for (int i = 0; i < 6; i++) {
                     data[i] = stbi_load((RES_DIR + files[i]).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
