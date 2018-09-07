@@ -170,6 +170,72 @@ namespace neo {
                 return createMesh(vertices, normals, texcoords, indices);
  
             }
+
+            static Mesh * createIco(int recursions) {
+	            float t = (float) (1.f + (glm::sqrt(5.0)) / 2.f);
+                float length = glm::length(glm::vec3(1, 0, t));
+                std::vector<float> verts = {
+                    -1.f / length,    t / length,  0.f / length,
+                     1.f / length,    t / length,  0.f / length,
+                    -1.f / length,   -t / length,  0.f / length,
+                     1.f / length,   -t / length,  0.f / length,
+                     0.f / length, -1.f / length,    t / length,
+                     0.f / length,  1.f / length,    t / length,
+                     0.f / length, -1.f / length,   -t / length,
+                     0.f / length,  1.f / length,   -t / length,
+                       t / length,  0.f / length, -1.f / length,
+                       t / length,  0.f / length,  1.f / length,
+                      -t / length,  0.f / length, -1.f / length,
+                      -t / length,  0.f / length,  1.f / length
+                };
+
+
+                std::vector<unsigned> ele = {
+                     0, 11,  5,
+                     0,  5,  1,
+                     0,  1,  7,
+                     0,  7, 10,
+                     0, 10, 11,
+                     1,  5,  9,
+                     5, 11,  4,
+                    11, 10,  2,
+                    10,  7,  6,
+                     7,  1,  8,
+                     3,  9,  4,
+                     3,  4,  2,
+                     3,  2,  6,
+                     3,  6,  8,
+                     3,  8,  9,
+                     4,  9,  5,
+                     2,  4, 11,
+                     6,  2, 10,
+                     8,  6,  7,
+                     9,  8,  1,
+                };
+
+                for (int i = 0; i < recursions; i++) {
+                    // TODO
+                }
+
+                std::vector<float> normals;
+                std::vector<float> tex;
+                for (int i = 0; i < verts.size(); i += 3) {
+                    glm::vec3 n = glm::normalize(glm::vec3(verts[i], verts[i + 1], verts[i + 2]));
+                    normals.push_back(n.x);
+                    normals.push_back(n.y);
+                    normals.push_back(n.z);
+
+                    tex.push_back(glm::clamp(0.5f + std::atan2(n.z, n.x) / (2.f * Util::PI()), 0.f, 1.f));
+                    tex.push_back(glm::clamp(0.5f + std::asin(n.y) / Util::PI(), 0.f, 1.f));
+                }
+
+                return createMesh(
+                    verts,
+                    normals,
+                    tex,
+                    ele
+                );
+            }
     };
 
 }
