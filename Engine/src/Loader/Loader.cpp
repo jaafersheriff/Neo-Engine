@@ -117,7 +117,7 @@ namespace neo {
 
             /* Use stbi if name is an existing file */
             FILE *f;
-            if (!fopen_s(&f, fileName.c_str(), "rb")) {
+            if (fopen_s(&f, fileName.c_str(), "rb")) {
                 stbi_set_flip_vertically_on_load(true);
                 uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
                 if (data) {
