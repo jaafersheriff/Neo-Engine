@@ -14,6 +14,7 @@ namespace neo {
     class Texture2D;
     class TextureCubeMap;
     class Framebuffer;
+    class Material;
 
     class Loader {
 
@@ -24,6 +25,7 @@ namespace neo {
             static std::unordered_map<std::string, Mesh *> meshes;
             static std::unordered_map<std::string, Texture *> textures;
             static std::unordered_map<std::string, Framebuffer *> framebuffers;
+            static std::unordered_map<std::string, Material *> materials;
 
             /* Retrieve Mesh pointer from an .obj file */
             static Mesh * getMesh(const std::string &, bool = false);
@@ -34,6 +36,9 @@ namespace neo {
 
             /* Retrieve FBO */
             static Framebuffer * getFBO(const std::string &);
+
+            /* Retrieve material */
+            static Material * getMaterial(const std::string &, float = 0.2f, glm::vec3 = glm::vec3(0.f), glm::vec3 = glm::vec3(0.f), float = 20.f);
 
         private:
             /* Resize mesh vertex buffers so all the vertices are [-1, 1] */

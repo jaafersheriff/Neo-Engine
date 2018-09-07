@@ -8,7 +8,7 @@ namespace neo {
 
         public:
 
-            Material(const float amb = 0.f, const glm::vec3 & dif = glm::vec3(1.f), const glm::vec3 & spec = glm::vec3(1.f), const float shine = 20.f) :
+            Material(const float amb, const glm::vec3 & dif, const glm::vec3 & spec, const float shine) :
                 ambient(amb),
                 diffuse(dif),
                 specular(spec),
