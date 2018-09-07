@@ -107,82 +107,68 @@ namespace neo {
     Texture2D * Loader::getTexture(const std::string &fileName, GLint inFormat, GLenum format, GLint filter, GLenum mode) {
         Texture *texture = findTexture(fileName);
 
+        /* Create an empty texture if it is not already exist in the library */
         if (!texture) {
             texture = new Texture2D;
-            stbi_set_flip_vertically_on_load(true);
-            uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
-            if (data) {
-                texture->upload(inFormat, format, filter, mode, true, &data);
-                texture->generateMipMaps();
-                if (texture->textureId) {
-                    textures.insert(std::make_pair(fileName, texture));
-                }
-                stbi_image_free(data);
-                if (verbose) {
-                    std::cout << "Loaded texture " << fileName << " [" << texture->width << ", " << texture->height << "]" << std::endl;
-                }
-            }
-            else if (verbose) {
-                std::cerr << "Could not find texture file " << fileName << std::endl;
-            }
-        }
 
-        return (Texture2D *) texture;
+            /* Use stbi if name is an existing file */
+            FILE *f;
+            if (!fopen_s(&f, fileName.c_str(), "rb")) {
+                stbi_set_flip_vertically_on_load(true);
+                uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
+                if (data) {
+                    texture->upload(inFormat, format, filter, mode, true, &data);
+                    texture->generateMipMaps();
+                    stbi_image_free(data);
+                    if (verbose) {
+                        std::cout << "Loaded texture " << fileName << " [" << texture->width << ", " << texture->height << "]" << std::endl;
+                    }
+                }
+                else {
+                    std::cerr << "Error opening texture file " << fileName << std::endl;
+                }
+            }
+
+            textures.insert({ fileName, texture });
+        }
+        return (Texture2D *)texture;
     }
 
     TextureCubeMap * Loader::getTexture(const std::string &name, const std::vector<std::string> & files) {
         Texture *texture = findTexture(name);
 
+        /* Create an empty texture if it is not already exist in the library */
         if (!texture) {
-
-            /* Load in texture data to CPU */
             texture = new TextureCubeMap;
-            uint8_t* data[6];
-            for (int i = 0; i < 6; i++) {
-                data[i] = stbi_load((RES_DIR + files[i]).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
-                if (data[i]) {
-                    if (verbose) {
-                        std::cout << "Loaded texture " << files[i] << " [" << texture->width << ", " << texture->height << "]" << std::endl;
+
+            /* Use stbi if name is an existing file */
+            FILE *f;
+            if (!fopen_s(&f, name.c_str(), "rb")) {
+                uint8_t* data[6];
+                for (int i = 0; i < 6; i++) {
+                    data[i] = stbi_load((RES_DIR + files[i]).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
+                    if (data[i]) {
+                        if (verbose) {
+                            std::cout << "Loaded texture " << files[i] << " [" << texture->width << ", " << texture->height << "]" << std::endl;
+                        }
+                    }
+                    else {
+                        std::cerr << "Could not find texture file " << files[i] << std::endl;
                     }
                 }
-                else if (verbose) {
-                    std::cerr << "Could not find texture file " << files[i] << std::endl;
+
+                /* Upload data to GPU and free from CPU */
+                texture->upload(GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE, true, data);
+                for (int i = 0; i < 6; i++) {
+                    stbi_image_free(data[i]);
                 }
             }
 
-            /* Copy cube texture data to GPU */
-            texture->upload(GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE, true, data);
+            textures.insert({ name, texture });
 
-            /* Add to map */
-            if (texture->textureId) {
-                textures.insert(std::map<std::string, Texture*>::value_type(name, texture));
-            }
-
-            /* Free data from CPU */
-            for (int i = 0; i < 6; i++) {
-                stbi_image_free(data[i]);
-            }
         }
     
         return (TextureCubeMap *) texture;
-    }
-
-    Texture2D * Loader::create2DTexture(const std::string &name) {
-        Texture *tex = findTexture(name);
-        if (!tex) {
-            tex = new Texture2D;
-            textures.emplace(name, tex);
-        }
-        return (Texture2D *) tex;
-    }
-
-    TextureCubeMap * Loader::createCubeMap(const std::string &name) {
-        Texture *tex = findTexture(name);
-        if (!tex) {
-            tex = new TextureCubeMap;
-            textures.emplace(name, tex);
-        }
-        return (TextureCubeMap *) tex;
     }
 
     Texture * Loader::findTexture(const std::string &name) {

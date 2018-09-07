@@ -28,8 +28,6 @@ namespace neo {
             /* Retrieve Texture pointer from an image file */
             static Texture2D * getTexture(const std::string &, GLint = GL_RGBA, GLenum = GL_RGBA, GLint = GL_LINEAR, GLenum = GL_REPEAT);
             static TextureCubeMap * getTexture(const std::string &, const std::vector<std::string> &);
-            static Texture2D * create2DTexture(const std::string &);
-            static TextureCubeMap * createCubeMap(const std::string &);
 
         private:
             /* Resize mesh vertex buffers so all the vertices are [-1, 1] */
