@@ -282,7 +282,6 @@ namespace neo {
                 }
             }
             if (ImGui::CollapsingHeader("Library")) {
-                // TODO : move fbos to library
                 if (ImGui::TreeNode("FBOs")) {
                     for (auto & fbo : Loader::framebuffers) {
                         if (ImGui::TreeNode((fbo.first + " (" + std::to_string(fbo.second->fboId) + ")").c_str())) {
@@ -309,6 +308,18 @@ namespace neo {
                         if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->textureId) + ")").c_str())) {
                             float scale = 150.f / (t.second->width > t.second->height ? t.second->width : t.second->height);
                             ImGui::Image((ImTextureID)t.second->textureId, ImVec2(scale * t.second->width, scale * t.second->height), ImVec2(0, 1), ImVec2(1, 0));
+                            ImGui::TreePop();
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+                if (Loader::materials.size() && ImGui::TreeNode("Materials")) {
+                    for (auto & mat : Loader::materials) {
+                        if (ImGui::TreeNode(mat.first.c_str())) {
+                            ImGui::SliderFloat("Ambient", &mat.second->ambient, 0.f, 1.f);
+                            ImGui::SliderFloat3("Diffuse", glm::value_ptr(mat.second->diffuse), 0.f, 1.f);
+                            ImGui::SliderFloat3("Specular", glm::value_ptr(mat.second->specular), 0.f, 1.f);
+                            ImGui::SliderFloat("Shine", &mat.second->shine, 0.f, 100.f);
                             ImGui::TreePop();
                         }
                     }
