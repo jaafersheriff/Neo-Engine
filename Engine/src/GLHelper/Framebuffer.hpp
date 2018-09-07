@@ -36,8 +36,22 @@ namespace neo {
                 CHECK_GL(glReadBuffer(GL_NONE));
             }
 
-            void attachColorTexture(Texture &texture) {
-                attachTexture(GL_COLOR_ATTACHMENT0 + colorAttachments++, texture);
+            void attachColorTexture(glm::ivec2 size, int comp, GLint inFormat, GLenum format, GLint filter, GLenum mode) {
+                Texture *t = new Texture2D;
+                t->width = size.x;
+                t->height = size.y;
+                t->components = comp;
+                t->upload(inFormat, format, filter, mode);
+                attachTexture(GL_COLOR_ATTACHMENT0 + colorAttachments++, *t);
+            }
+
+            void attachDepthTexture(glm::ivec2 size, GLint filter, GLenum mode) {
+                Texture *t = new Texture2D;
+                t->width = size.x;
+                t->height = size.y;
+                t->components = 1;
+                t->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, filter, mode);
+                attachTexture(GL_DEPTH_ATTACHMENT, *t);
             }
 
             void initDrawBuffers() {
@@ -51,10 +65,6 @@ namespace neo {
                     attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
                 }
                 CHECK_GL(glDrawBuffers(colorAttachments, attachments.data()));
-            }
-
-            void attachDepthTexture(Texture &texture) {
-                attachTexture(GL_DEPTH_ATTACHMENT, texture);
             }
 
         private:

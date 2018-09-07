@@ -16,40 +16,19 @@ class GBufferShader : public Shader {
         GBufferShader(const std::string &vert, const std::string &frag) :
             Shader("GBufferShader", vert, frag) {
 
-            // Normal buffer
-            Texture2D *normalBuffer = new Texture2D;
-            normalBuffer->width = Window::getFrameSize().x;
-            normalBuffer->height = Window::getFrameSize().y;
-            normalBuffer->components = 3;
-            normalBuffer->upload(GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
-
-            // Diffuse 
-            Texture2D *diffuseBuffer = new Texture2D;
-            diffuseBuffer->width = Window::getFrameSize().x;
-            diffuseBuffer->height = Window::getFrameSize().y;
-            diffuseBuffer->components = 4;
-            diffuseBuffer->upload(GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
-
-            // Depth buffer
-            Texture2D *depthBuffer = new Texture2D;
-            depthBuffer->width = Window::getFrameSize().x;
-            depthBuffer->height = Window::getFrameSize().y;
-            depthBuffer->components = 1;
-            depthBuffer->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_NEAREST, GL_REPEAT);
-
             // Create gbuffer 
-            auto gbuffer = MasterRenderer::getFBO("gbuffer");
+            auto gbuffer = Loader::getFBO("gbuffer");
             gbuffer->generate();
-            gbuffer->attachColorTexture(*normalBuffer);
-            gbuffer->attachColorTexture(*diffuseBuffer);
-            gbuffer->attachDepthTexture(*depthBuffer);
+            gbuffer->attachColorTexture(Window::getFrameSize(), 3, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // color
+            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // diffuse
+            gbuffer->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
             gbuffer->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                auto gbuffer = MasterRenderer::getFBO("gbuffer");
+                auto gbuffer = Loader::getFBO("gbuffer");
                 gbuffer->textures[0]->width = gbuffer->textures[1]->width = gbuffer->textures[2]->width = frameSize.x;
                 gbuffer->textures[0]->height = gbuffer->textures[1]->height = gbuffer->textures[2]->height = frameSize.y;
                 gbuffer->textures[0]->bind();
@@ -62,7 +41,7 @@ class GBufferShader : public Shader {
         }
 
         virtual void render(const CameraComponent &camera) override {
-            auto fbo = MasterRenderer::getFBO("gbuffer");
+            auto fbo = Loader::getFBO("gbuffer");
             fbo->bind();
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
             CHECK_GL(glViewport(0, 0, fbo->textures[0]->width, fbo->textures[0]->height));
