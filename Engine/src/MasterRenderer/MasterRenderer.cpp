@@ -17,6 +17,13 @@ namespace neo {
     std::vector<std::unique_ptr<Shader>> MasterRenderer::postShaders;
     std::unordered_map<std::type_index, std::unique_ptr<std::vector<RenderableComponent *>>> MasterRenderer::renderables;
 
+    const char * MasterRenderer::POST_PROCESS_VERT_FILE =
+        "#version 330 core\n\
+        layout (location = 0) in vec3 vertPos;\
+        layout (location = 2) in vec2 vertTex;\
+        out vec2 fragTex;\
+        void main() { gl_Position = vec4(2 * vertPos, 1); fragTex = vertTex; }";
+
     void MasterRenderer::init(const std::string &dir, CameraComponent *cam) {
         APP_SHADER_DIR = dir;
         setDefaultCamera(cam);
@@ -32,7 +39,7 @@ namespace neo {
         });
 
         /* Init default FBO */
-        defaultFBO = Loader::getFBO("default");
+        defaultFBO = Loader::getFBO("0");
         defaultFBO->fboId = 0;
     }
 
@@ -54,19 +61,56 @@ namespace neo {
                     shader->render(*defaultCamera);
                 }
             }
-            /* Reset default FBO */
+        }
+
+        /* Reset default FBO state */
+        if (postShaders.size()) {
             defaultFBO->bind();
             glm::ivec2 frameSize = Window::getFrameSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
         }
-
-        /* Reset state */
+        else if (preShaders.size()) {
+            Loader::getFBO("0")->bind();
+            glm::ivec2 frameSize = Window::getFrameSize();
+            CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+        }
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
  
         /* Render all scene shaders */
         renderScene(*defaultCamera);
 
-        // TODO : post process stack
+        /* Post process with ping & pong */
+        if (postShaders.size()) {
+            CHECK_GL(glDisable(GL_DEPTH_TEST));
+
+            /* A single post process shader will render directly from default FBO to FBO 0*/
+            if (postShaders.size() == 1) {
+                renderPostProcess(*postShaders[0], defaultFBO, Loader::getFBO("0"));
+            }
+            /* Multiple post process shaders will use ping & pong*/
+            else {
+                /* First post process shader reads in from default FBO and writes to ping*/
+                renderPostProcess(*postShaders[0], defaultFBO, Loader::getFBO("ping"));
+
+                /* [1, n-1] shaders iteratively use ping & pong for input and output */
+                Framebuffer *inputFBO = Loader::getFBO("ping");
+                Framebuffer *outputFBO = Loader::getFBO("pong");
+                for (int i = 1; i < postShaders.size() - 1; i++) {
+                    renderPostProcess(*postShaders[i], inputFBO, outputFBO);
+
+                    /* Swap ping & pong */
+                    Framebuffer *temp = inputFBO;
+                    inputFBO = outputFBO;
+                    outputFBO = temp;
+                }
+
+                /* nth shader writes out to FBO 0 */
+                if (postShaders.size() > 1) {
+                    renderPostProcess(*postShaders[postShaders.size() - 1], inputFBO, Loader::getFBO("0"));
+                }
+            }
+            CHECK_GL(glEnable(GL_DEPTH_TEST));
+        }
 
         /* Render imgui */
         if (NeoEngine::imGuiEnabled) {
@@ -74,6 +118,32 @@ namespace neo {
         }
 
         glfwSwapBuffers(Window::getWindow());
+    }
+
+    void MasterRenderer::renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output) {
+        // Reset output FBO
+        output->bind();
+        CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+        // TODO : messaging to resize fbo
+        glm::ivec2 frameSize = Window::getFrameSize();
+        CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+
+        // Bind quad 
+        shader.bind();
+        auto mesh = Loader::getMesh("quad");
+        CHECK_GL(glBindVertexArray(mesh->vaoId));
+
+        // Bind input fbo texture
+        input->textures[0]->bind();
+        shader.loadUniform("inputFBO", input->textures[0]->textureId);
+
+        // Allow shader to do any prep (eg. bind uniforms)
+        shader.render(*defaultCamera);
+
+        // Render post process effect
+        mesh->draw();
+
+        shader.unbind();
     }
 
     void MasterRenderer::renderScene(const CameraComponent &camera) {

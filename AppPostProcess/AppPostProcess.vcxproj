@@ -118,9 +118,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\CustomSystem.hpp" />
+    <ClInclude Include="src\PostProcessShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\pp.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

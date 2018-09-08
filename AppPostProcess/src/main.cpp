@@ -3,6 +3,7 @@
 #include "CustomSystem.hpp"
 
 #include "Shader/PhongShader.hpp"
+#include "PostProcessShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -91,6 +92,7 @@ int main() {
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
     MasterRenderer::addSceneShader<PhongShader>();
+    MasterRenderer::addPostProcessShader<PostProcessShader>("pp.frag");
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();

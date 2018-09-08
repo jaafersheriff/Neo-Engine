@@ -18,8 +18,10 @@ namespace neo {
 
         friend NeoEngine;
 
+
         public:
             static std::string APP_SHADER_DIR;
+            static const char * POST_PROCESS_VERT_FILE;
 
             static void init(const std::string &, CameraComponent *);
             static void resetState();
@@ -43,13 +45,14 @@ namespace neo {
 
         private:
             static CameraComponent *defaultCamera;
-
             static Framebuffer * defaultFBO;
 
             static std::vector<std::unique_ptr<Shader>> preShaders;
             static std::vector<std::unique_ptr<Shader>> sceneShaders;
             static std::vector<std::unique_ptr<Shader>> postShaders;
             template <typename ShaderT, typename... Args> static std::unique_ptr<ShaderT> createShader(Args &&...);
+
+            static void renderPostProcess(Shader &, Framebuffer *, Framebuffer *);
 
             static std::unordered_map<std::type_index, std::unique_ptr<std::vector<RenderableComponent *>>> renderables;
     };
@@ -67,6 +70,28 @@ namespace neo {
     }
     template <typename ShaderT, typename... Args>
     ShaderT & MasterRenderer::addPostProcessShader(Args &&... args) {
+        // Generate fbos if a post process shader exists
+        if (!postShaders.size()) {
+            // New default FBO so we're not rendering to 0
+            defaultFBO = Loader::getFBO("1");
+            defaultFBO->generate();
+            defaultFBO->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
+            defaultFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT);
+ 
+            // Ping & pong 
+            auto ping = Loader::getFBO("ping");
+            ping->generate();
+            ping->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
+            auto pong = Loader::getFBO("pong");
+            pong->generate();
+            pong->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
+
+            // TODO 
+            // Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+            //     const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+            //     CHECK_GL(glViewport(0, 0, m.frameSize.x, m.frameSize.y));
+            // });
+        }
         postShaders.emplace_back(createShader<ShaderT>(std::forward<Args>(args)...));
         return static_cast<ShaderT &>(*postShaders.back());
     }
