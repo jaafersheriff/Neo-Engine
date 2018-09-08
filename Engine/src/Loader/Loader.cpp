@@ -49,7 +49,15 @@ namespace neo {
             return meshes.find(fileName)->second;
         }
         if (!std::strcmp(fileName.c_str(), "sphere")) {
-            meshes.insert({ "sphere", MeshGenerator::createSphere() });
+            Mesh *mesh = MeshGenerator::createSphere(3);
+            meshes.insert({ "sphere", mesh });
+            // sphere defaults to ico_2
+            meshes.insert({ "ico_2", mesh });
+            return meshes.find(fileName)->second;
+        }
+        if (!std::strncmp(fileName.c_str(), "ico_", 4)) {
+            int recursions = std::stoi(fileName.c_str() + 4);
+            meshes.insert({ "ico_" + std::to_string(recursions), MeshGenerator::createSphere(recursions) });
             return meshes.find(fileName)->second;
         }
 
