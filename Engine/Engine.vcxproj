@@ -33,8 +33,12 @@
     <ClInclude Include="src\Component\SpatialComponent\SpatialComponent.hpp" />
     <ClInclude Include="src\ext\imgui\imconfig.h" />
     <ClInclude Include="src\ext\imgui\imgui.h" />
-    <ClInclude Include="src\ext\imgui\imgui_impl_glfw_gl3.h" />
+    <ClInclude Include="src\ext\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="src\ext\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="src\ext\imgui\imgui_internal.h" />
+    <ClInclude Include="src\ext\imgui\imstb_rectpack.h" />
+    <ClInclude Include="src\ext\imgui\imstb_textedit.h" />
+    <ClInclude Include="src\ext\imgui\imstb_truetype.h" />
     <ClInclude Include="src\ext\imgui\stb_rect_pack.h" />
     <ClInclude Include="src\ext\imgui\stb_textedit.h" />
     <ClInclude Include="src\ext\imgui\stb_truetype.h" />
@@ -74,7 +78,9 @@
     <ClCompile Include="src\ext\imgui\imgui.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_draw.cpp" />
-    <ClCompile Include="src\ext\imgui\imgui_impl_glfw_gl3.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\GameObject\GameObject.cpp" />
     <ClCompile Include="src\Loader\Loader.cpp" />
     <ClCompile Include="src\Messaging\Messenger.cpp" />
@@ -86,6 +92,9 @@
     <ClCompile Include="src\Window\Keyboard.cpp" />
     <ClCompile Include="src\Window\Mouse.cpp" />
     <ClCompile Include="src\Window\Window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\ext\imgui\LICENSE.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

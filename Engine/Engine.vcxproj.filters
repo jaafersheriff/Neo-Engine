@@ -9,10 +9,6 @@
     <ClInclude Include="src\Component\LightComponent\LightComponent.hpp" />
     <ClInclude Include="src\Component\SpatialComponent\Orientable.hpp" />
     <ClInclude Include="src\Component\SpatialComponent\SpatialComponent.hpp" />
-    <ClInclude Include="src\ext\imgui\imconfig.h" />
-    <ClInclude Include="src\ext\imgui\imgui.h" />
-    <ClInclude Include="src\ext\imgui\imgui_impl_glfw_gl3.h" />
-    <ClInclude Include="src\ext\imgui\imgui_internal.h" />
     <ClInclude Include="src\ext\imgui\stb_rect_pack.h" />
     <ClInclude Include="src\ext\imgui\stb_textedit.h" />
     <ClInclude Include="src\ext\imgui\stb_truetype.h" />
@@ -46,15 +42,19 @@
     <ClInclude Include="src\Shader\PhongShadowedShader.hpp" />
     <ClInclude Include="src\MasterRenderer\MasterRenderer.hpp" />
     <ClInclude Include="src\Component\ModelComponent\TextureComponent.hpp" />
+    <ClInclude Include="src\ext\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="src\ext\imgui\imgui_internal.h" />
+    <ClInclude Include="src\ext\imgui\imconfig.h" />
+    <ClInclude Include="src\ext\imgui\imgui.h" />
+    <ClInclude Include="src\ext\imgui\imstb_textedit.h" />
+    <ClInclude Include="src\ext\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\ext\imgui\imstb_rectpack.h" />
+    <ClInclude Include="src\ext\imgui\imgui_impl_opengl3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
     <ClCompile Include="src\Component\CameraComponent\CameraControllerComponent.cpp" />
     <ClCompile Include="src\Component\SpatialComponent\SpatialComponent.cpp" />
-    <ClCompile Include="src\ext\imgui\imgui.cpp" />
-    <ClCompile Include="src\ext\imgui\imgui_demo.cpp" />
-    <ClCompile Include="src\ext\imgui\imgui_draw.cpp" />
-    <ClCompile Include="src\ext\imgui\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="src\GameObject\GameObject.cpp" />
     <ClCompile Include="src\Loader\Loader.cpp" />
     <ClCompile Include="src\Messaging\Messenger.cpp" />
@@ -68,5 +68,14 @@
     <ClCompile Include="src\GLHelper\GLHelper.cpp" />
     <ClCompile Include="src\GLHelper\Mesh.cpp" />
     <ClCompile Include="src\MasterRenderer\MasterRenderer.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_impl_opengl3.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\ext\imgui\LICENSE.txt" />
   </ItemGroup>
 </Project>

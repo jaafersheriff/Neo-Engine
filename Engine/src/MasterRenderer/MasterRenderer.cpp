@@ -7,6 +7,8 @@
 #include "Component/ModelComponent/RenderableComponent.hpp"
 #include "Window/Window.hpp"
 
+#include "ext/imgui/imgui_impl_opengl3.h"
+
 namespace neo {
 
     std::string MasterRenderer::APP_SHADER_DIR;
@@ -115,6 +117,7 @@ namespace neo {
         /* Render imgui */
         if (NeoEngine::imGuiEnabled) {
             ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
 
         glfwSwapBuffers(Window::getWindow());

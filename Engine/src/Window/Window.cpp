@@ -5,7 +5,8 @@
 #include "NeoEngine.hpp"
 #include "Messaging/Messenger.hpp"
 
-#include "ext/imgui/imgui_impl_glfw_gl3.h"
+#include "ext/imgui/imgui_impl_glfw.h"
+#include "ext/imgui/imgui_impl_opengl3.h"
 
 #include <iostream>
 
@@ -55,7 +56,7 @@ namespace neo {
         }
         else if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             Keyboard::reset();
-            ImGui_ImplGlfwGL3_KeyCallback(window, key, scancode, action, mods);
+            ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
         }
         else {
             Keyboard::setKeyStatus(key, action);
@@ -64,7 +65,7 @@ namespace neo {
 
     void Window::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
         if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
-            ImGui_ImplGlfwGL3_MouseButtonCallback(window, button, action, mods);
+            ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
         }
         else {
             Mouse::setButtonStatus(button, action);
@@ -73,13 +74,13 @@ namespace neo {
 
     void Window::scrollCallback(GLFWwindow * window, double dx, double dy) {
         if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
-            ImGui_ImplGlfwGL3_ScrollCallback(window, dx, dy);
+            ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
         }
    }
 
     void Window::characterCallback(GLFWwindow *window, unsigned int c) {
         if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
-            ImGui_ImplGlfwGL3_CharCallback(window, c);
+            ImGui_ImplGlfw_CharCallback(window, c);
         }
     }
 
@@ -126,6 +127,7 @@ namespace neo {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        const char *glsl_version = "#version 330";
         glfwWindowHint(GLFW_AUTO_ICONIFY, false);
 
         /* Create GLFW window */
@@ -164,7 +166,10 @@ namespace neo {
         glfwGetFramebufferSize(window, &frameSize.x, &frameSize.y);
 
         /* Init ImGui */
-        ImGui_ImplGlfwGL3_Init(Window::getWindow(), false);
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGui_ImplGlfw_InitForOpenGL(window, false);
+        ImGui_ImplOpenGL3_Init(glsl_version);
 
         return 0;
     }
@@ -180,7 +185,9 @@ namespace neo {
         Mouse::update(x, y);
 
         if (NeoEngine::imGuiEnabled) {
-            ImGui_ImplGlfwGL3_NewFrame(true);
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
         }
 
         glfwPollEvents();
@@ -208,6 +215,11 @@ namespace neo {
     }
 
     void Window::shutDown() {
+        /* Clean up ImGui */
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
         /* Clean up GLFW */
         glfwDestroyWindow(window);
         glfwTerminate();
