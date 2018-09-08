@@ -14,6 +14,6 @@ namespace neo {
             virtual void init() {};
             virtual void update(float) {};
             bool active = true;
-            const std::string name;
+            const std::string name = 0;
     };
 }

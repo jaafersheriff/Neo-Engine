@@ -23,11 +23,11 @@ namespace neo {
             Shader(const std::string &, const char *, const char *, const char *);
             virtual ~Shader() = default;
 
-            virtual void render(const CameraComponent &) {};
+            virtual void render(const CameraComponent &) = 0;
             bool active = true;
 
             /* Names */
-            const std::string name;
+            const std::string name = 0;
 
             /* Utility functions */
             void bind();
