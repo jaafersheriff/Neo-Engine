@@ -171,9 +171,9 @@ namespace neo {
                       9,  8,  1,
                 };
 
-                for (int i = 0; i <= recursions; i++) {
-                    std::vector<unsigned> ele2 = ele;
-                    for (int j = 0; j < ele.size() - 3; j += 3) {
+                for (unsigned i = 1; i <= recursions; i++) {
+                    std::vector<unsigned> ele2;
+                    for (unsigned j = 0; j <= ele.size() - 3; j += 3) {
                         // find 3 verts of old face
                         glm::vec3 v1(verts[3 * ele[j + 0] + 0], verts[3 * ele[j + 0] + 1], verts[3 * ele[j + 0] + 2]);
                         glm::vec3 v2(verts[3 * ele[j + 1] + 0], verts[3 * ele[j + 1] + 1], verts[3 * ele[j + 1] + 2]);
