@@ -37,7 +37,7 @@ class LightPassShader : public Shader {
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Bind sphere volume */
-            auto mesh = Loader::getMesh("sphere.obj", true);
+            auto mesh = Loader::getMesh("sphere", true);
             CHECK_GL(glBindVertexArray(mesh->vaoId));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId));
 

@@ -18,7 +18,6 @@ namespace neo {
 
         friend NeoEngine;
 
-
         public:
             static std::string APP_SHADER_DIR;
             static const char * POST_PROCESS_VERT_FILE;
