@@ -54,22 +54,22 @@ namespace neo {
     }
 
     void MasterRenderer::render(float dt) {
-        if (preShaders.size()) {
-            /* Render all preprocesses */
-            for (auto & shader : preShaders) {
-                if (shader->active) {
-                    shader->render(*defaultCamera);
-                }
-            }
+        /* Get active shaders */
+        std::vector<Shader *> activePreShaders = getActiveShaders(preShaders);
+        std::vector<Shader *> activePostShaders = getActiveShaders(postShaders);
+
+        /* Render all preprocesses */
+        for (auto & shader : activePreShaders) {
+            shader->render(*defaultCamera);
         }
 
         /* Reset default FBO state */
-        if (postShaders.size()) {
+        if (activePostShaders.size()) {
             defaultFBO->bind();
             glm::ivec2 frameSize = Window::getFrameSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
         }
-        else if (preShaders.size()) {
+        else if (activePreShaders.size()) {
             Loader::getFBO("0")->bind();
             glm::ivec2 frameSize = Window::getFrameSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
@@ -80,23 +80,23 @@ namespace neo {
         renderScene(*defaultCamera);
 
         /* Post process with ping & pong */
-        if (postShaders.size()) {
+        if (activePostShaders.size()) {
             CHECK_GL(glDisable(GL_DEPTH_TEST));
 
             /* A single post process shader will render directly from default FBO to FBO 0*/
-            if (postShaders.size() == 1) {
-                renderPostProcess(*postShaders[0], defaultFBO, Loader::getFBO("0"));
+            if (activePostShaders.size() == 1) {
+                renderPostProcess(*activePostShaders[0], defaultFBO, Loader::getFBO("0"));
             }
             /* Multiple post process shaders will use ping & pong*/
             else {
                 /* First post process shader reads in from default FBO and writes to ping*/
-                renderPostProcess(*postShaders[0], defaultFBO, Loader::getFBO("ping"));
+                renderPostProcess(*activePostShaders[0], defaultFBO, Loader::getFBO("ping"));
 
                 /* [1, n-1] shaders iteratively use ping & pong for input and output */
                 Framebuffer *inputFBO = Loader::getFBO("ping");
                 Framebuffer *outputFBO = Loader::getFBO("pong");
-                for (int i = 1; i < postShaders.size() - 1; i++) {
-                    renderPostProcess(*postShaders[i], inputFBO, outputFBO);
+                for (int i = 1; i < activePostShaders.size() - 1; i++) {
+                    renderPostProcess(*activePostShaders[i], inputFBO, outputFBO);
 
                     /* Swap ping & pong */
                     Framebuffer *temp = inputFBO;
@@ -105,8 +105,8 @@ namespace neo {
                 }
 
                 /* nth shader writes out to FBO 0 */
-                if (postShaders.size() > 1) {
-                    renderPostProcess(*postShaders[postShaders.size() - 1], inputFBO, Loader::getFBO("0"));
+                if (activePostShaders.size() > 1) {
+                    renderPostProcess(*activePostShaders[activePostShaders.size() - 1], inputFBO, Loader::getFBO("0"));
                 }
             }
             CHECK_GL(glEnable(GL_DEPTH_TEST));
@@ -159,6 +159,17 @@ namespace neo {
         if (fb) {
             defaultFBO = fb;
         }
+    }
+
+    std::vector<Shader *> MasterRenderer::getActiveShaders(std::vector<std::unique_ptr<Shader>> &shaders) {
+        std::vector<Shader *> ret;
+        for (auto & s : shaders) {
+            if (s->active) {
+                ret.emplace_back(s.get());
+            }
+        }
+
+        return ret;
     }
 
     void MasterRenderer::attachCompToShader(const std::type_index &typeI, RenderableComponent *rComp) {

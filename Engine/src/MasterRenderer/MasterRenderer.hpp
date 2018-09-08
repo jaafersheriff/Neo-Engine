@@ -51,6 +51,7 @@ namespace neo {
             static std::vector<std::unique_ptr<Shader>> sceneShaders;
             static std::vector<std::unique_ptr<Shader>> postShaders;
             template <typename ShaderT, typename... Args> static std::unique_ptr<ShaderT> createShader(Args &&...);
+            static std::vector<Shader *> getActiveShaders(std::vector<std::unique_ptr<Shader>> &);
 
             static void renderPostProcess(Shader &, Framebuffer *, Framebuffer *);
 
