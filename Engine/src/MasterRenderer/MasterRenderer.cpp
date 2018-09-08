@@ -97,7 +97,7 @@ namespace neo {
                 /* [1, n-1] shaders iteratively use ping & pong for input and output */
                 Framebuffer *inputFBO = Loader::getFBO("ping");
                 Framebuffer *outputFBO = Loader::getFBO("pong");
-                for (int i = 1; i < activePostShaders.size() - 1; i++) {
+                for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
                     renderPostProcess(*activePostShaders[i], inputFBO, outputFBO);
 
                     /* Swap ping & pong */

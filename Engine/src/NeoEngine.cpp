@@ -254,27 +254,77 @@ namespace neo {
                     ImGui::TreePop();
                 }
                 if (ImGui::TreeNode("Shaders")) {
-                    // TODO : list renderable count per shader 
                     int count = 0;
                     for (auto & r : MasterRenderer::renderables) {
                         count += r.second->size();
                     }
-                    ImGui::Text("Renderables: %d", count);
+                    ImGui::Text("Renderables: %d", count); // TODO : list renderable count per shader 
                     if (MasterRenderer::preShaders.size() && ImGui::TreeNode("Pre process")) {
-                        for (auto & shader : MasterRenderer::preShaders) {
+                        for (unsigned i = 0; i < MasterRenderer::preShaders.size(); i++) {
+                            auto & shader = MasterRenderer::preShaders[i];
+                            ImGui::PushID(i);
                             ImGui::Checkbox(shader->name.c_str(), &shader->active);
+
+                            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+                                ImGui::SetDragDropPayload("PRESHADER_SWAP", &i, sizeof(unsigned));
+                                ImGui::Text("Swap %s", shader->name.c_str());
+                                ImGui::EndDragDropSource();
+                            }
+                            if (ImGui::BeginDragDropTarget()) {
+                                if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload("PRESHADER_SWAP")) {
+                                    IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
+                                    unsigned payload_n = *(const unsigned *)payLoad->Data;
+                                    MasterRenderer::preShaders[i].swap(MasterRenderer::preShaders[payload_n]);
+                                }
+                                ImGui::EndDragDropTarget();
+                            }
+                            ImGui::PopID();
                         }
                         ImGui::TreePop();
                     }
                     if (MasterRenderer::sceneShaders.size() && ImGui::TreeNode("Scene")) {
-                        for (auto & shader : MasterRenderer::sceneShaders) {
+                        for (unsigned i = 0; i < MasterRenderer::sceneShaders.size(); i++) {
+                            auto & shader = MasterRenderer::sceneShaders[i];
+                            ImGui::PushID(i);
                             ImGui::Checkbox(shader->name.c_str(), &shader->active);
+
+                            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+                                ImGui::SetDragDropPayload("SCENESHADER_SWAP", &i, sizeof(unsigned));
+                                ImGui::Text("Swap %s", shader->name.c_str());
+                                ImGui::EndDragDropSource();
+                            }
+                            if (ImGui::BeginDragDropTarget()) {
+                                if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload("SCENESHADER_SWAP")) {
+                                    IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
+                                    unsigned payload_n = *(const unsigned *)payLoad->Data;
+                                    MasterRenderer::sceneShaders[i].swap(MasterRenderer::sceneShaders[payload_n]);
+                                }
+                                ImGui::EndDragDropTarget();
+                            }
+                            ImGui::PopID();
                         }
                         ImGui::TreePop();
                     }
                     if (MasterRenderer::postShaders.size() && ImGui::TreeNode("Post process")) {
-                        for (auto & shader : MasterRenderer::postShaders) {
+                        for (unsigned i = 0; i < MasterRenderer::postShaders.size(); i++) {
+                            auto & shader = MasterRenderer::postShaders[i];
+                            ImGui::PushID(i);
                             ImGui::Checkbox(shader->name.c_str(), &shader->active);
+
+                            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+                                ImGui::SetDragDropPayload("POSTSHADER_SWAP", &i, sizeof(unsigned));
+                                ImGui::Text("Swap %s", shader->name.c_str());
+                                ImGui::EndDragDropSource();
+                            }
+                            if (ImGui::BeginDragDropTarget()) {
+                                if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload("POSTSHADER_SWAP")) {
+                                    IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
+                                    unsigned payload_n = *(const unsigned *)payLoad->Data;
+                                    MasterRenderer::postShaders[i].swap(MasterRenderer::postShaders[payload_n]);
+                                }
+                                ImGui::EndDragDropTarget();
+                            }
+                            ImGui::PopID();
                         }
                         ImGui::TreePop();
                     }
