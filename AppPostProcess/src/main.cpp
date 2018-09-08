@@ -92,7 +92,9 @@ int main() {
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
     MasterRenderer::addSceneShader<PhongShader>();
-    MasterRenderer::addPostProcessShader<PostProcessShader>("pp.frag");
+    MasterRenderer::addPostProcessShader<RedShader>("red.frag");
+    MasterRenderer::addPostProcessShader<BlueShader>("green.frag");
+    MasterRenderer::addPostProcessShader<GreenShader>("blue.frag");
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();

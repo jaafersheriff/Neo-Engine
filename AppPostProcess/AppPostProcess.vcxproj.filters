@@ -28,6 +28,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\pp.frag" />
+    <None Include="shaders\red.frag" />
+    <None Include="shaders\green.frag" />
+    <None Include="shaders\blue.frag" />
   </ItemGroup>
 </Project>

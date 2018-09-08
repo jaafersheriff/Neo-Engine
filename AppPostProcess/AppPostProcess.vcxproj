@@ -124,7 +124,9 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\pp.frag" />
+    <None Include="shaders\blue.frag" />
+    <None Include="shaders\green.frag" />
+    <None Include="shaders\red.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

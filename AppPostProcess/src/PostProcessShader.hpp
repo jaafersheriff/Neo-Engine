@@ -5,9 +5,23 @@
 
 using namespace neo;
 
-class PostProcessShader : public Shader {
+class RedShader : public Shader {
     public: 
-        PostProcessShader(const std::string &frag) :
-            Shader("PostProcessShader", MasterRenderer::POST_PROCESS_VERT_FILE, frag)
+        RedShader(const std::string &frag) :
+            Shader("RedShader", MasterRenderer::POST_PROCESS_VERT_FILE, frag)
+        {}
+};
+
+class GreenShader : public Shader {
+    public: 
+        GreenShader(const std::string &frag) :
+            Shader("GreenShader", MasterRenderer::POST_PROCESS_VERT_FILE, frag)
+        {}
+};
+
+class BlueShader : public Shader {
+    public: 
+        BlueShader(const std::string &frag) :
+            Shader("BlueShader", MasterRenderer::POST_PROCESS_VERT_FILE, frag)
         {}
 };
