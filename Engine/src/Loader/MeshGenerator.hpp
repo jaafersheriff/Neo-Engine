@@ -171,7 +171,7 @@ namespace neo {
                       9,  8,  1,
                 };
 
-                for (unsigned i = 1; i <= recursions; i++) {
+                for (int i = 1; i <= recursions; i++) {
                     std::vector<unsigned> ele2;
                     for (unsigned j = 0; j <= ele.size() - 3; j += 3) {
                         // find 3 verts of old face
@@ -216,7 +216,7 @@ namespace neo {
 
                 // calculate UV coords
                 std::vector<float> tex;
-                for (int i = 0; i < verts.size(); i += 3) {
+                for (unsigned i = 0; i < verts.size(); i += 3) {
                     tex.push_back(glm::clamp(0.5f + std::atan2(verts[i + 2], verts[i]) / (2.f * Util::PI()), 0.f, 1.f));
                     tex.push_back(glm::clamp(0.5f + std::asin(verts[i+1]) / Util::PI(), 0.f, 1.f));
                 }
