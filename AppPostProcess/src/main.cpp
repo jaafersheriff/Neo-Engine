@@ -83,7 +83,8 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable(Loader::getMesh("cube"), Loader::getMaterial("defaultMat", 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f)));
+    Renderable r(Loader::getMesh("mr_krab.obj"), Loader::getMaterial("defaultMat", 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f)));
+    NeoEngine::addComponent<DiffuseMapComponent>(r.gameObject, Loader::getTexture("mr_krab.png"));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
@@ -92,9 +93,10 @@ int main() {
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
     MasterRenderer::addSceneShader<PhongShader>();
-    MasterRenderer::addPostProcessShader<RedShader>("red.frag");
-    MasterRenderer::addPostProcessShader<BlueShader>("green.frag");
-    MasterRenderer::addPostProcessShader<GreenShader>("blue.frag");
+    MasterRenderer::addPostProcessShader<InvertShader>("invert.frag");
+    MasterRenderer::addPostProcessShader<BWShader>("bw.frag");
+    MasterRenderer::addPostProcessShader<BlueShader>("blue.frag");
+    MasterRenderer::addPostProcessShader<DepthShader>("depth.frag");
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();

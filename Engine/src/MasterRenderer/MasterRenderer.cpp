@@ -139,6 +139,8 @@ namespace neo {
         // Bind input fbo texture
         input->textures[0]->bind();
         shader.loadUniform("inputFBO", input->textures[0]->textureId);
+        input->textures[1]->bind();
+        shader.loadUniform("inputDepth", input->textures[1]->textureId);
 
         // Allow shader to do any prep (eg. bind uniforms)
         shader.render(*defaultCamera);

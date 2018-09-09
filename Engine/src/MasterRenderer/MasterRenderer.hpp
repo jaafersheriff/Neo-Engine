@@ -82,9 +82,11 @@ namespace neo {
             auto ping = Loader::getFBO("ping");
             ping->generate();
             ping->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
+            ping->textures.push_back(defaultFBO->textures[1]);
             auto pong = Loader::getFBO("pong");
             pong->generate();
             pong->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
+            pong->textures.push_back(defaultFBO->textures[1]);
 
             // TODO 
             // Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {

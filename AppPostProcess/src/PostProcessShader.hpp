@@ -5,17 +5,17 @@
 
 using namespace neo;
 
-class RedShader : public Shader {
+class InvertShader : public Shader {
     public: 
-        RedShader(const std::string &frag) :
-            Shader("RedShader", MasterRenderer::POST_PROCESS_VERT_FILE, frag)
+        InvertShader(const std::string &frag) :
+            Shader("InvertShader", MasterRenderer::POST_PROCESS_VERT_FILE, frag)
         {}
 };
 
-class GreenShader : public Shader {
+class BWShader : public Shader {
     public: 
-        GreenShader(const std::string &frag) :
-            Shader("GreenShader", MasterRenderer::POST_PROCESS_VERT_FILE, frag)
+        BWShader(const std::string &frag) :
+            Shader("BWShader", MasterRenderer::POST_PROCESS_VERT_FILE, frag)
         {}
 };
 
@@ -23,5 +23,12 @@ class BlueShader : public Shader {
     public: 
         BlueShader(const std::string &frag) :
             Shader("BlueShader", MasterRenderer::POST_PROCESS_VERT_FILE, frag)
+        {}
+};
+
+class DepthShader : public Shader {
+    public: 
+        DepthShader(const std::string &frag) :
+            Shader("DepthShader", MasterRenderer::POST_PROCESS_VERT_FILE, frag)
         {}
 };

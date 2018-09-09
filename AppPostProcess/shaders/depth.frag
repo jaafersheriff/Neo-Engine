@@ -8,6 +8,6 @@ uniform sampler2D inputDepth;
 out vec4 color;
 
 void main() {
-    color = texture(inputFBO, fragTex);
-    color.b += 0.5f;
+    float depthCol = texture(inputDepth, fragTex).r;
+    color = vec4(vec3(depthCol), 1.f);
 }

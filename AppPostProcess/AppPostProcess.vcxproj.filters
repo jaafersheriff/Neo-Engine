@@ -28,8 +28,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\red.frag" />
-    <None Include="shaders\green.frag" />
     <None Include="shaders\blue.frag" />
+    <None Include="shaders\invert.frag" />
+    <None Include="shaders\bw.frag" />
+    <None Include="shaders\depth.frag" />
   </ItemGroup>
 </Project>
