@@ -85,31 +85,26 @@ namespace neo {
         if (activePostShaders.size()) {
             CHECK_GL(glDisable(GL_DEPTH_TEST));
 
-            /* A single post process shader will render directly from default FBO to FBO 0*/
-            if (activePostShaders.size() == 1) {
-                renderPostProcess(*activePostShaders[0], defaultFBO, Loader::getFBO("0"));
+            /* Render first post process shader into appropriate output buffer */
+            Framebuffer *inputFBO = defaultFBO;
+            Framebuffer *outputFBO = activePostShaders.size() == 1 ? Loader::getFBO("0") : Loader::getFBO("pong");
+            renderPostProcess(*activePostShaders[0], inputFBO, outputFBO);
+
+            /* [2, n-1] shaders use ping & pong */
+            inputFBO = Loader::getFBO("pong");
+            outputFBO = Loader::getFBO("ping");
+            for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
+                renderPostProcess(*activePostShaders[i], inputFBO, outputFBO);
+
+                /* Swap ping & pong */
+                Framebuffer *temp = inputFBO;
+                inputFBO = outputFBO;
+                outputFBO = temp;
             }
-            /* Multiple post process shaders will use ping & pong*/
-            else {
-                /* First post process shader reads in from default FBO and writes to pong*/
-                renderPostProcess(*activePostShaders[0], defaultFBO, Loader::getFBO("pong"));
 
-                /* [1, n-1] shaders iteratively use ping & pong for input and output */
-                Framebuffer *inputFBO = Loader::getFBO("pong");
-                Framebuffer *outputFBO = Loader::getFBO("ping");
-                for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
-                    renderPostProcess(*activePostShaders[i], inputFBO, outputFBO);
-
-                    /* Swap ping & pong */
-                    Framebuffer *temp = inputFBO;
-                    inputFBO = outputFBO;
-                    outputFBO = temp;
-                }
-
-                /* nth shader writes out to FBO 0 */
-                if (activePostShaders.size() > 1) {
-                    renderPostProcess(*activePostShaders.back(), inputFBO, Loader::getFBO("0"));
-                }
+            /* nth shader writes out to FBO 0 if it hasn't already been done */
+            if (activePostShaders.size() > 1) {
+                renderPostProcess(*activePostShaders.back(), inputFBO, Loader::getFBO("0"));
             }
             CHECK_GL(glEnable(GL_DEPTH_TEST));
         }
