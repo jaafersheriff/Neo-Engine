@@ -91,12 +91,12 @@ namespace neo {
             }
             /* Multiple post process shaders will use ping & pong*/
             else {
-                /* First post process shader reads in from default FBO and writes to ping*/
-                renderPostProcess(*activePostShaders[0], defaultFBO, Loader::getFBO("ping"));
+                /* First post process shader reads in from default FBO and writes to pong*/
+                renderPostProcess(*activePostShaders[0], defaultFBO, Loader::getFBO("pong"));
 
                 /* [1, n-1] shaders iteratively use ping & pong for input and output */
-                Framebuffer *inputFBO = Loader::getFBO("ping");
-                Framebuffer *outputFBO = Loader::getFBO("pong");
+                Framebuffer *inputFBO = Loader::getFBO("pong");
+                Framebuffer *outputFBO = Loader::getFBO("ping");
                 for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
                     renderPostProcess(*activePostShaders[i], inputFBO, outputFBO);
 
@@ -108,7 +108,7 @@ namespace neo {
 
                 /* nth shader writes out to FBO 0 */
                 if (activePostShaders.size() > 1) {
-                    renderPostProcess(*activePostShaders[activePostShaders.size() - 1], inputFBO, Loader::getFBO("0"));
+                    renderPostProcess(*activePostShaders.back(), inputFBO, Loader::getFBO("0"));
                 }
             }
             CHECK_GL(glEnable(GL_DEPTH_TEST));
@@ -126,7 +126,7 @@ namespace neo {
     void MasterRenderer::renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output) {
         // Reset output FBO
         output->bind();
-        CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+        CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
         // TODO : messaging to resize fbo
         glm::ivec2 frameSize = Window::getFrameSize();
         CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));

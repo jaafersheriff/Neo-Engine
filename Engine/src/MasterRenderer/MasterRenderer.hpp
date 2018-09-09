@@ -72,21 +72,18 @@ namespace neo {
     ShaderT & MasterRenderer::addPostProcessShader(Args &&... args) {
         // Generate fbos if a post process shader exists
         if (!postShaders.size()) {
-            // New default FBO so we're not rendering to 0
-            defaultFBO = Loader::getFBO("1");
-            defaultFBO->generate();
-            defaultFBO->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
-            defaultFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT);
- 
             // Ping & pong 
             auto ping = Loader::getFBO("ping");
             ping->generate();
             ping->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
-            ping->textures.push_back(defaultFBO->textures[1]);
+            ping->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT);
             auto pong = Loader::getFBO("pong");
             pong->generate();
             pong->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
-            pong->textures.push_back(defaultFBO->textures[1]);
+            pong->textures.push_back(ping->textures[1]);
+
+            // Use ping as temporary fbo
+            defaultFBO = ping;
 
             // TODO 
             // Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
