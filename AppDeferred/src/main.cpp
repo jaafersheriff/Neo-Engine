@@ -89,9 +89,17 @@ int main() {
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();
     NeoEngine::addImGuiFunc("AO", [&]() {
-        int size = aoShader.kernel.size();
-        if (ImGui::SliderInt("Kernel", &size, 1, 128)) {
-            aoShader.generateKernel(size);
+        {
+            int size = aoShader.kernel.size();
+            if (ImGui::SliderInt("Kernel", &size, 1, 128)) {
+                aoShader.generateKernel(size);
+            }
+        }
+        {
+            int size = Loader::getTexture("aoNoise")->width;
+            if (ImGui::SliderInt("Noise", &size, 1, 32)) {
+                aoShader.generateNoise(size);
+            }
         }
     });
     NeoEngine::addImGuiFunc("Lights", [&]() {

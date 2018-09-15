@@ -36,6 +36,13 @@ class AOShader : public Shader {
 
             // generate kernel
             generateKernel(64);
+
+            // generate 4x4 noise texture
+            Texture *noiseTex = Loader::getTexture("aoNoise");
+            noiseTex->width = noiseTex->height = 4;
+            noiseTex->components = 3;
+            noiseTex->upload(GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT);
+            generateNoise(4);
         }
 
         void generateKernel(unsigned size) {
@@ -48,8 +55,25 @@ class AOShader : public Shader {
                 )) * Util::genRandom(0.f, 1.f);
                 float scale = 1.f / (float)size;
                 scale = Util::lerp(0.1f, 1.f, scale * scale);
-                kernel.push_back(sample * scale);
+                sample *= scale;
+                kernel.push_back(sample);
             };
+        }
+
+        void generateNoise(unsigned dim) {
+            std::vector<glm::vec3> noise;
+            for (unsigned i = 0; i < dim*dim; i++) {
+                noise.push_back(glm::vec3(
+                    Util::genRandom(-1.f, 1.f),
+                    Util::genRandom(-1.f, 1.f),
+                    0.f
+                ));
+            }
+            Texture *noiseTex = Loader::getTexture("aoNoise");
+            noiseTex->width = noiseTex->height = dim;
+            noiseTex->components = 3;
+            noiseTex->bind();
+            CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, dim, dim, 0, GL_RGB, GL_FLOAT, &noise[0]));
         }
 
         virtual void render(const CameraComponent &camera) override {
