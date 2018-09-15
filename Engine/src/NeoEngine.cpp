@@ -239,9 +239,26 @@ namespace neo {
                     count += go->getAllComponents().size();
                 }
                 ImGui::Text("Components:  %d", count);
-                if (ImGui::TreeNode("Systems")) {
-                    for (auto sys : NeoEngine::getSystems()) {
-                        ImGui::Checkbox(sys.second->name.c_str(), &sys.second->active);
+                if (systems.size() && ImGui::TreeNode("Systems")) {
+                    for (unsigned i = 0; i < systems.size(); i++) {
+                        auto & sys = systems[i].second;
+                        ImGui::PushID(i);
+                        ImGui::Checkbox(sys->name.c_str(), &sys->active);
+
+                        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+                            ImGui::SetDragDropPayload("SYSTEM_SWAP", &i, sizeof(unsigned));
+                            ImGui::Text("Swap %s", sys->name.c_str());
+                            ImGui::EndDragDropSource();
+                        }
+                        if (ImGui::BeginDragDropTarget()) {
+                            if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload("SYSTEM_SWAP")) {
+                                IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
+                                unsigned payload_n = *(const unsigned *)payLoad->Data;
+                                systems[i].swap(systems[payload_n]);
+                            }
+                            ImGui::EndDragDropTarget();
+                        }
+                        ImGui::PopID();
                     }
                     ImGui::TreePop();
                 }
