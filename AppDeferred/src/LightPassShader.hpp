@@ -17,7 +17,7 @@ class LightPassShader : public Shader {
         float showRadius = 0.1f;
 
         LightPassShader(const std::string &vert, const std::string &frag) :
-            Shader("LightPassShader", vert, frag) 
+            Shader("LightPass Shader", vert, frag) 
         {
             // Create render target
             auto lightFBO = Loader::getFBO("lightpass");
@@ -35,7 +35,7 @@ class LightPassShader : public Shader {
                 lightFBO->textures[0]->bind();
                 CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
                 lightFBO->textures[1]->bind();
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, frameSize.x, frameSize.y, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr));
             });
         }
 

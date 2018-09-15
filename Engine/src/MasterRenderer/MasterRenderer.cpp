@@ -137,7 +137,8 @@ namespace neo {
         input->textures[1]->bind();
         shader.loadUniform("inputDepth", input->textures[1]->textureId);
 
-        // Allow shader to do any prep (eg. bind uniforms)
+        // Allow shader to do any prep (eg. bind uniforms) 
+        // Also allows shader to override output render target (user responsible for handling)
         shader.render(*defaultCamera);
 
         // Render post process effect

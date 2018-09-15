@@ -14,7 +14,7 @@ class GBufferShader : public Shader {
     public:
 
         GBufferShader(const std::string &vert, const std::string &frag) :
-            Shader("GBufferShader", vert, frag) {
+            Shader("GBuffer Shader", vert, frag) {
 
             // Create gbuffer 
             auto gbuffer = Loader::getFBO("gbuffer");

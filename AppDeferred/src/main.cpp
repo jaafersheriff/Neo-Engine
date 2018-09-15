@@ -4,9 +4,11 @@
 
 #include "SinMoveComponent.hpp"
 
+#include "Shader/WireframeShader.hpp"
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
-#include "Shader/WireframeShader.hpp"
+#include "AOShader.hpp"
+#include "CombineShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "Util/Util.hpp"
@@ -81,10 +83,11 @@ int main() {
     MasterRenderer::init("shaders/", camera.camera);
     MasterRenderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
     auto & lightPassShader = MasterRenderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag");  // run light pass after generating gbuffer
+    auto & aoShader = MasterRenderer::addPostProcessShader<AOShader>("ao.frag");    // generate ssao map in post
+    MasterRenderer::addPostProcessShader<CombineShader>("combine.frag");    // combine render targets into final output
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();
-
     NeoEngine::addImGuiFunc("Lights", [&]() {
         ImGui::Checkbox("Show lights", &lightPassShader.showLights);
         if (lightPassShader.showLights) {
