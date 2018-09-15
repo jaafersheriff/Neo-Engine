@@ -20,7 +20,7 @@ class AOShader : public Shader {
             // Create render target
             auto aoFBO = Loader::getFBO("AO");
             aoFBO->generate();
-            aoFBO->attachColorTexture(Window::getFrameSize(), 1, GL_R, GL_RED, GL_NEAREST, GL_REPEAT); // ao
+            aoFBO->attachColorTexture(Window::getFrameSize(), 1, GL_R16, GL_RED, GL_NEAREST, GL_REPEAT); // ao
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
@@ -30,7 +30,7 @@ class AOShader : public Shader {
                 aoFBO->textures[0]->width  = frameSize.x;
                 aoFBO->textures[0]->height = frameSize.y;
                 aoFBO->textures[0]->bind();
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_R, frameSize.x, frameSize.y, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr));
+                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, frameSize.x, frameSize.y, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr));
             });
         }
 
