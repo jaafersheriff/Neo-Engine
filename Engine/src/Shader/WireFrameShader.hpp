@@ -35,7 +35,7 @@ namespace neo {
                 loadUniform("P", camera.getProj());
                 loadUniform("V", camera.getView());
 
-                for (auto r : MasterRenderer::getRenderables<WireframeShader, RenderableComponent>()) {
+                for (auto & r : MasterRenderer::getRenderables<WireframeShader, RenderableComponent>()) {
                     /* Bind mesh */
                     const Mesh & mesh(r->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.vaoId));

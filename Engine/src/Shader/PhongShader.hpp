@@ -88,7 +88,7 @@ public:
                 loadUniform("lightAtt", lights.at(0)->getAttenuation());
             }
 
-            for (auto model : MasterRenderer::getRenderables<PhongShader, RenderableComponent>()) {
+            for (auto & model : MasterRenderer::getRenderables<PhongShader, RenderableComponent>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
                 loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
 

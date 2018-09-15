@@ -54,7 +54,7 @@ namespace neo {
                 loadUniform("P", cameras[0]->getProj());
                 loadUniform("V", cameras[0]->getView());
 
-                for (auto model : MasterRenderer::getRenderables<ShadowCasterShader, RenderableComponent>()) {
+                for (auto & model : MasterRenderer::getRenderables<ShadowCasterShader, RenderableComponent>()) {
                     loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
 
                     /* Bind mesh */

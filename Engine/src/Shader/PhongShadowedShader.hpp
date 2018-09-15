@@ -146,7 +146,7 @@ namespace neo {
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.textureId));
                 loadUniform("shadowMap", texture.textureId);
 
-                for (auto model : MasterRenderer::getRenderables<PhongShadowedShader, RenderableComponent>()) {
+                for (auto & model : MasterRenderer::getRenderables<PhongShadowedShader, RenderableComponent>()) {
                     loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
                     loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
 
