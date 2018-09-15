@@ -15,8 +15,7 @@ class AOShader : public Shader {
     public:
 
         AOShader(const std::string &frag) :
-            Shader("AO Shader", MasterRenderer::POST_PROCESS_VERT_FILE, frag) 
-        {
+            Shader("AO Shader", MasterRenderer::POST_PROCESS_VERT_FILE, frag) {
             // Create render target
             auto aoFBO = Loader::getFBO("AO");
             aoFBO->generate();
@@ -35,6 +34,28 @@ class AOShader : public Shader {
         }
 
         virtual void render(const CameraComponent &camera) override {
-            // TODO - set up post process 
+            CHECK_GL(glDisable(GL_DEPTH_TEST));
+
+            // bind output
+            Loader::getFBO("AO")->bind();
+            CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
+            glm::ivec2 frameSize = Window::getFrameSize();
+            CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+            bind();
+
+            // bind gbuffer
+            auto gbuffer = Loader::getFBO("gbuffer");
+            gbuffer->textures[0]->bind();
+            loadUniform("gNormal", gbuffer->textures[0]->textureId);
+
+            // bind quad
+            auto mesh = Loader::getMesh("quad");
+            CHECK_GL(glBindVertexArray(mesh->vaoId));
+
+            // render
+            mesh->draw();
+
+            unbind();
+            CHECK_GL(glEnable(GL_DEPTH_TEST));
         }
 };

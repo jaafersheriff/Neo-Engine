@@ -11,5 +11,6 @@ uniform sampler2D aoOutput;
 out vec4 color;
 
 void main() {
-    color = texture(lightOutput, fragTex);
+    color.rgb = vec3(texture(aoOutput, fragTex).r);
+    color.a = 1.f;
 }
