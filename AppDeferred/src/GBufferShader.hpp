@@ -19,8 +19,8 @@ class GBufferShader : public Shader {
             // Create gbuffer 
             auto gbuffer = Loader::getFBO("gbuffer");
             gbuffer->generate();
-            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // normal
-            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // color
+            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGB, GL_RGB, GL_NEAREST, GL_REPEAT); // normal
+            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGB, GL_RGB, GL_NEAREST, GL_REPEAT); // color
             gbuffer->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT);                      // depth
             gbuffer->initDrawBuffers();
 
@@ -32,9 +32,9 @@ class GBufferShader : public Shader {
                 gbuffer->textures[0]->width = gbuffer->textures[1]->width = gbuffer->textures[2]->width = frameSize.x;
                 gbuffer->textures[0]->height = gbuffer->textures[1]->height = gbuffer->textures[2]->height = frameSize.y;
                 gbuffer->textures[0]->bind();
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameSize.x, frameSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr));
                 gbuffer->textures[1]->bind();
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameSize.x, frameSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr));
                 gbuffer->textures[2]->bind();
                 CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, frameSize.x, frameSize.y, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr));
             });

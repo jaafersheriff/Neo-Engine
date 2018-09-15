@@ -71,7 +71,7 @@ void main() {
 
     /* Retrieve remaining data from gbuffer */
     vec3 fragNor = texture(gNormal, fragTex).rgb * 2.f - vec3(1.f);
-    vec4 albedo = texture(gDiffuse, fragTex);
+    vec3 albedo = texture(gDiffuse, fragTex).rgb;
  
     vec3 L = normalize(lightDir);
     vec3 V = normalize(camPos - fragPos);
@@ -82,5 +82,5 @@ void main() {
     float s = pow(clamp(dot(H, N), 0.f, 1.f), 33.f);
     vec3 specularContrib = lightCol * s * attFactor * 0.33f;
     color.a = 1.f;
-    color.rgb = diffuseContrib * 0.2f + diffuseContrib * albedo.rgb + specularContrib;
+    color.rgb = diffuseContrib * 0.2f + diffuseContrib * albedo + specularContrib;
 }
