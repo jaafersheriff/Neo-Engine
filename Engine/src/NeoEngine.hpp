@@ -52,7 +52,7 @@ namespace neo {
             /* Getters */
             static const std::vector<GameObject *> & getGameObjects() { return reinterpret_cast<const std::vector<GameObject *> &>(gameObjects); }
             template <typename SysT> static SysT & getSystem();
-            static const std::unordered_map<std::type_index, System *> & getSystems() { return reinterpret_cast<const std::unordered_map<std::type_index, System *> &>(systems); }
+            static const std::vector<std::pair<std::type_index, System *>> & getSystems() { return reinterpret_cast<const std::vector<std::pair<std::type_index, System *>> &>(systems); }
             template <typename CompT> static const std::vector<CompT *> & getComponents();
 
             /* ImGui */
@@ -78,9 +78,7 @@ namespace neo {
             /* Active containers */
             static std::vector<std::unique_ptr<GameObject>> gameObjects;
             static std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> components;
-            static std::unordered_map<std::type_index, std::unique_ptr<System>> systems;
-
-
+            static std::vector<std::pair<std::type_index, std::unique_ptr<System>>> systems;
     };
 
     /* Template implementation */
@@ -104,13 +102,14 @@ namespace neo {
         static_assert(std::is_base_of<System, SysT>::value, "SysT must be a System type");
         static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived System type");
         std::type_index typeI(typeid(SysT));
-        auto it(systems.find(typeI));
-        if (it == systems.end()) {
-            systems.emplace(typeI, std::make_unique<SysT>(std::forward<Args>(args)...));
-            it = systems.find(typeI);
+        for (auto & sys : systems) {
+            if (sys.first == typeI) {
+                return static_cast<SysT &>(*sys.second);
+            }
         }
- 
-        return static_cast<SysT &>(*systems.find(typeI)->second);
+
+        systems.push_back({ typeI, std::make_unique<SysT>(std::forward<Args>(args)...) });
+        return static_cast<SysT &>(*systems.back().second);
     }
 
     template <typename SysT> 
@@ -119,9 +118,14 @@ namespace neo {
         static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived System type");
 
         std::type_index typeI(typeid(SysT));
-        assert(systems.count(typeI));
-        // this is valid because unique_ptr<T> is exactly the same data as T *
-        return reinterpret_cast<SysT &>(*(systems.find(typeI)->second));
+        for (auto & sys : systems) {
+            if (sys.first == typeI) {
+                // this is valid because unique_ptr<T> is exactly the same data as T *
+                return reinterpret_cast<SysT &>(*sys.second);
+            }
+        }
+
+        assert(false);
     }
 
     template <typename CompT>

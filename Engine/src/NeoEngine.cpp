@@ -23,7 +23,7 @@ namespace neo {
     /* ECS */
     std::vector<std::unique_ptr<GameObject>> NeoEngine::gameObjects;
     std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> NeoEngine::components;
-    std::unordered_map<std::type_index, std::unique_ptr<System>> NeoEngine::systems;
+    std::vector<std::pair<std::type_index, std::unique_ptr<System>>> NeoEngine::systems;
 
     std::vector<std::unique_ptr<GameObject>> NeoEngine::gameObjectInitQueue;
     std::vector<GameObject *> NeoEngine::gameObjectKillQueue;
@@ -82,9 +82,9 @@ namespace neo {
 
             /* Update imgui functions */
             if (imGuiEnabled) {
-                for (auto it = imGuiFuncs.begin(); it != imGuiFuncs.end(); ++it) {
-                    ImGui::Begin(it->first.c_str(), nullptr, ImVec2(0.f, 0.f), 0.5f, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_AlwaysAutoResize);
-                    it->second();
+                for (auto & it : imGuiFuncs) {
+                    ImGui::Begin(it.first.c_str(), nullptr, ImVec2(0.f, 0.f), 0.5f, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_AlwaysAutoResize);
+                    it.second();
                     ImGui::End();
                 }
                 Messenger::relayMessages();
@@ -131,6 +131,7 @@ namespace neo {
     }
 
     void NeoEngine::initComponents() {
+
         for (int i = 0; i < int(componentInitQueue.size()); i++) {
             auto & type(componentInitQueue[i].first);
             auto & comp(componentInitQueue[i].second);
