@@ -85,11 +85,13 @@ namespace neo {
             // Use ping as temporary fbo
             defaultFBO = ping;
 
-            // TODO 
-            // Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
-            //     const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-            //     CHECK_GL(glViewport(0, 0, m.frameSize.x, m.frameSize.y));
-            // });
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+                Loader::getFBO("ping")->bind();
+                CHECK_GL(glViewport(0, 0, m.frameSize.x, m.frameSize.y));
+                Loader::getFBO("pong")->bind();
+                CHECK_GL(glViewport(0, 0, m.frameSize.x, m.frameSize.y));
+            });
         }
         postShaders.emplace_back(createShader<ShaderT>(std::forward<Args>(args)...));
         return static_cast<ShaderT &>(*postShaders.back());
