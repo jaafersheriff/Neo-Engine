@@ -83,5 +83,4 @@ void main() {
     vec3 specularContrib = lightCol * s * attFactor * 0.33f;
     color.a = 1.f;
     color.rgb = diffuseContrib * 0.2f + diffuseContrib * albedo.rgb + specularContrib;
-    gl_FragDepth = depth;
 }
