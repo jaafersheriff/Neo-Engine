@@ -44,7 +44,6 @@ class GBufferShader : public Shader {
             auto fbo = Loader::getFBO("gbuffer");
             fbo->bind();
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-            CHECK_GL(glViewport(0, 0, fbo->textures[0]->width, fbo->textures[0]->height));
 
             bind();
             loadUniform("P", camera.getProj());

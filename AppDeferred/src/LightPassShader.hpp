@@ -18,9 +18,32 @@ class LightPassShader : public Shader {
 
         LightPassShader(const std::string &vert, const std::string &frag) :
             Shader("LightPassShader", vert, frag) 
-        {}
+        {
+            // Create render target
+            auto lightFBO = Loader::getFBO("lightpass");
+            lightFBO->generate();
+            lightFBO->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // color
+            lightFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
+
+            // Handle frame size changing
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+                glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
+                auto lightFBO = Loader::getFBO("lightpass");
+                lightFBO->textures[0]->width  = lightFBO->textures[1]->width  = frameSize.x;
+                lightFBO->textures[0]->height = lightFBO->textures[1]->height = frameSize.y;
+                lightFBO->textures[0]->bind();
+                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+                lightFBO->textures[1]->bind();
+                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+            });
+        }
 
         virtual void render(const CameraComponent &camera) override {
+            auto fbo = Loader::getFBO("lightpass");
+            fbo->bind();
+            CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+
             bind();
 
             CHECK_GL(glBlendFunc(GL_ONE, GL_ONE));
@@ -42,13 +65,13 @@ class LightPassShader : public Shader {
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId));
 
             /* Bind gbuffer */
-            auto fbo = Loader::getFBO("gbuffer");
-            fbo->textures[0]->bind();
-            loadUniform("gNormal", fbo->textures[0]->textureId);
-            fbo->textures[1]->bind();
-            loadUniform("gDiffuse", fbo->textures[1]->textureId);
-            fbo->textures[2]->bind();
-            loadUniform("gDepth", fbo->textures[2]->textureId);
+            auto gbuffer = Loader::getFBO("gbuffer");
+            gbuffer->textures[0]->bind();
+            loadUniform("gNormal", gbuffer->textures[0]->textureId);
+            gbuffer->textures[1]->bind();
+            loadUniform("gDiffuse", gbuffer->textures[1]->textureId);
+            gbuffer->textures[2]->bind();
+            loadUniform("gDepth", gbuffer->textures[2]->textureId);
 
             /* Render light volumes */
             for (auto & light : NeoEngine::getComponents<LightComponent>()) {

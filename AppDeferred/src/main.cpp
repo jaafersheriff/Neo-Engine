@@ -80,7 +80,7 @@ int main() {
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
     MasterRenderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
-    auto & lightPassShader = MasterRenderer::addSceneShader<LightPassShader>("lightpass.vert", "lightpass.frag");
+    auto & lightPassShader = MasterRenderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag");  // run light pass after generating gbuffer
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();
