@@ -64,6 +64,10 @@ namespace neo {
             return genRandom() < 0.5f;
         }
 
+        static inline float lerp(float a, float b, float t) {
+            return a + t * (b - a);
+        }
+
         // rad is the sphere's radius
         // theta is CCW angle on xy plane
         // phi is angle from +z axis

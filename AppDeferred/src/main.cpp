@@ -88,6 +88,12 @@ int main() {
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();
+    NeoEngine::addImGuiFunc("AO", [&]() {
+        int size = aoShader.kernel.size();
+        if (ImGui::SliderInt("Kernel", &size, 1, 128)) {
+            aoShader.generateKernel(size);
+        }
+    });
     NeoEngine::addImGuiFunc("Lights", [&]() {
         ImGui::Checkbox("Show lights", &lightPassShader.showLights);
         if (lightPassShader.showLights) {

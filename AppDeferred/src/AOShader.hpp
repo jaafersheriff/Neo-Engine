@@ -14,6 +14,8 @@ class AOShader : public Shader {
 
     public:
 
+        std::vector<glm::vec3> kernel;
+
         AOShader(const std::string &frag) :
             Shader("AO Shader", MasterRenderer::POST_PROCESS_VERT_FILE, frag) {
             // Create render target
@@ -31,6 +33,23 @@ class AOShader : public Shader {
                 aoFBO->textures[0]->bind();
                 CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, frameSize.x, frameSize.y, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr));
             });
+
+            // generate kernel
+            generateKernel(64);
+        }
+
+        void generateKernel(unsigned size) {
+            kernel.clear();
+            for (unsigned i = 0; i < size; i++) {
+                glm::vec3 sample = glm::normalize(glm::vec3(
+                    Util::genRandom(-1.f, 1.f),
+                    Util::genRandom(-1.f, 1.f),
+                    Util::genRandom( 0.f, 1.f)
+                )) * Util::genRandom(0.f, 1.f);
+                float scale = 1.f / (float)size;
+                scale = Util::lerp(0.1f, 1.f, scale * scale);
+                kernel.push_back(sample * scale);
+            };
         }
 
         virtual void render(const CameraComponent &camera) override {
