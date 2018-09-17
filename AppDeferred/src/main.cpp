@@ -89,18 +89,16 @@ int main() {
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();
     NeoEngine::addImGuiFunc("AO", [&]() {
-        {
-            int size = aoShader.kernel.size();
-            if (ImGui::SliderInt("Kernel", &size, 1, 128)) {
-                aoShader.generateKernel(size);
-            }
+        int size = Loader::getTexture("aoKernel")->width;
+        if (ImGui::SliderInt("Kernel", &size, 1, 128)) {
+            aoShader.generateKernel(size);
         }
-        {
-            int size = Loader::getTexture("aoNoise")->width;
-            if (ImGui::SliderInt("Noise", &size, 1, 32)) {
-                aoShader.generateNoise(size);
-            }
+        size = Loader::getTexture("aoNoise")->width;
+        if (ImGui::SliderInt("Noise", &size, 1, 32)) {
+            aoShader.generateNoise(size);
         }
+        ImGui::SliderFloat("Radius", &aoShader.radius, 0.f, 1.f);
+        ImGui::SliderFloat("Bias", &aoShader.bias, 0.f, 1.f);
     });
     NeoEngine::addImGuiFunc("Lights", [&]() {
         ImGui::Checkbox("Show lights", &lightPassShader.showLights);
