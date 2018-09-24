@@ -38,6 +38,9 @@
     <ClInclude Include="src\CombineShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\BlurShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\gbuffer.vert" />
@@ -46,5 +49,6 @@
     <None Include="shaders\lightpass.frag" />
     <None Include="shaders\ao.frag" />
     <None Include="shaders\combine.frag" />
+    <None Include="shaders\blur.frag" />
   </ItemGroup>
 </Project>

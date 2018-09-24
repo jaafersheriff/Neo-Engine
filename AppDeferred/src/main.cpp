@@ -9,6 +9,7 @@
 #include "LightPassShader.hpp"
 #include "AOShader.hpp"
 #include "CombineShader.hpp"
+#include "BlurShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "Util/Util.hpp"
@@ -84,7 +85,8 @@ int main() {
     MasterRenderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
     auto & lightPassShader = MasterRenderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag");  // run light pass after generating gbuffer
     auto & aoShader = MasterRenderer::addPostProcessShader<AOShader>("ao.frag");    // first post process - generate ssao map 
-    MasterRenderer::addPostProcessShader<CombineShader>("combine.frag");    // combine render targets into final output
+    auto & blurShader = MasterRenderer::addPostProcessShader<BlurShader>("blur.frag"); // blur ssao map
+    MasterRenderer::addPostProcessShader<CombineShader>("combine.frag");    // combine light pass and ssao 
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();
