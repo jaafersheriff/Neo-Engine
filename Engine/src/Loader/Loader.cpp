@@ -124,8 +124,8 @@ namespace neo {
             texture = new Texture2D;
 
             /* Use stbi if name is an existing file */
-            FILE *f = fopen(fileName.c_str(), "rb");
-            if (f) {
+            FILE *f;
+            if (fopen_s(&f, (RES_DIR + fileName).c_str(), "rb")) {
                 stbi_set_flip_vertically_on_load(true);
                 uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
                 if (data) {
@@ -155,7 +155,7 @@ namespace neo {
 
             /* Use stbi if name is an existing file */
             FILE *f;
-            if (fopen_s(&f, name.c_str(), "rb")) {
+            if (fopen_s(&f, (RES_DIR + name).c_str(), "rb")) {
                 uint8_t* data[6];
                 for (int i = 0; i < 6; i++) {
                     data[i] = stbi_load((RES_DIR + files[i]).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
