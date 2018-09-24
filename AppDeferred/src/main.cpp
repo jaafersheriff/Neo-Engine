@@ -101,6 +101,7 @@ int main() {
         }
         ImGui::SliderFloat("Radius", &aoShader.radius, 0.f, 1.f);
         ImGui::SliderFloat("Bias", &aoShader.bias, 0.f, 1.f);
+        ImGui::SliderInt("Blur", &blurShader.blurAmount, 0, 10);
     });
     NeoEngine::addImGuiFunc("Lights", [&]() {
         ImGui::Checkbox("Show lights", &lightPassShader.showLights);
