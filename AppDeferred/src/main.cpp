@@ -82,8 +82,8 @@ int main() {
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
     MasterRenderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
-    auto & aoShader = MasterRenderer::addPreProcessShader<AOShader>("ao.frag");    // generate ssao map after gbuffer
     auto & lightPassShader = MasterRenderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag");  // run light pass after generating gbuffer
+    auto & aoShader = MasterRenderer::addPostProcessShader<AOShader>("ao.frag");    // first post process - generate ssao map 
     MasterRenderer::addPostProcessShader<CombineShader>("combine.frag");    // combine render targets into final output
 
     /* Attach ImGui panes */

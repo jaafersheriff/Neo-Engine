@@ -19,10 +19,6 @@ class AOShader : public Shader {
 
         AOShader(const std::string &frag) :
             Shader("AO Shader", MasterRenderer::POST_PROCESS_VERT_FILE, frag) {
-            // Create render target
-            auto aoFBO = Loader::getFBO("AO");
-            aoFBO->generate();
-            aoFBO->attachColorTexture(Window::getFrameSize(), 1, GL_R16, GL_RED, GL_NEAREST, GL_REPEAT); // ao
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
@@ -96,15 +92,6 @@ class AOShader : public Shader {
         }
 
         virtual void render(const CameraComponent &camera) override {
-            CHECK_GL(glDisable(GL_DEPTH_TEST));
-
-            // bind output
-            Loader::getFBO("AO")->bind();
-            CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
-            glm::ivec2 frameSize = Window::getFrameSize();
-            CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
-
-            bind();
 
             loadUniform("radius", radius);
             loadUniform("bias", bias);
@@ -126,15 +113,5 @@ class AOShader : public Shader {
 
             loadUniform("P", camera.getProj());
             loadUniform("invP", glm::inverse(camera.getProj()));
-
-            // bind quad
-            auto mesh = Loader::getMesh("quad");
-            CHECK_GL(glBindVertexArray(mesh->vaoId));
-
-            // render
-            mesh->draw();
-
-            unbind();
-            CHECK_GL(glEnable(GL_DEPTH_TEST));
         }
 };

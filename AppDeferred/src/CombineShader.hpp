@@ -19,11 +19,9 @@ class CombineShader : public Shader {
         {}
 
         virtual void render(const CameraComponent &camera) override {
+            // Bind light pass output
             auto lightFBO = Loader::getFBO("lightpass");
             lightFBO->textures[0]->bind();
             loadUniform("lightOutput", lightFBO->textures[0]->textureId);
-            auto aoFBO = Loader::getFBO("AO");
-            aoFBO->textures[0]->bind();
-            loadUniform("aoOutput", aoFBO->textures[0]->textureId);
         }
 };

@@ -2,6 +2,9 @@
 
 in vec2 fragTex;
 
+uniform sampler2D inputFBO;
+uniform sampler2D inputDepth;
+
 uniform sampler2D gNormal;
 uniform sampler2D gDepth;
 
