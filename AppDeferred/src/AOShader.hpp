@@ -14,15 +14,15 @@ class AOShader : public Shader {
 
     public:
 
-        float radius = 0.5f;
-        float bias = 0.025f;
+        float radius = 0.925f;
+        float bias = 0.5f;
 
         AOShader(const std::string &frag) :
             Shader("AO Shader", MasterRenderer::POST_PROCESS_VERT_FILE, frag) {
 
             // generate kernel
             Texture *kernelTex = Loader::getTexture("aoKernel");
-            kernelTex->width = 64;
+            kernelTex->width = 32;
             kernelTex->height = 1;
             kernelTex->components = 3;
             CHECK_GL(glGenTextures(1, &kernelTex->textureId));
@@ -33,7 +33,7 @@ class AOShader : public Shader {
             CHECK_GL(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT));
             CHECK_GL(glBindTexture(GL_TEXTURE_1D, 0));
             assert(glGetError() == GL_NO_ERROR);;
-            generateKernel(64);
+            generateKernel(32);
 
             // generate 4x4 noise texture
             Texture *noiseTex = Loader::getTexture("aoNoise");
@@ -68,11 +68,11 @@ class AOShader : public Shader {
         void generateNoise(unsigned dim) {
             std::vector<glm::vec3> noise;
             for (unsigned i = 0; i < dim*dim; i++) {
-                noise.push_back(glm::vec3(
+                noise.push_back(glm::normalize(glm::vec3(
                     Util::genRandom(-1.f, 1.f),
                     Util::genRandom(-1.f, 1.f),
                     0.f
-                ));
+                )));
             }
             Texture *noiseTex = Loader::getTexture("aoNoise");
             noiseTex->width = noiseTex->height = dim;

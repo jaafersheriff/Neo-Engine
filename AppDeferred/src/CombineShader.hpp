@@ -14,11 +14,22 @@ class CombineShader : public Shader {
 
     public:
 
+        bool showAO = true;
+        float diffuseAmount = 0.2f;
+
         CombineShader(const std::string &frag) :
             Shader("Combine Shader", MasterRenderer::POST_PROCESS_VERT_FILE, frag) 
         {}
 
         virtual void render(const CameraComponent &camera) override {
+            loadUniform("showAO", showAO);
+            loadUniform("diffuseAmount", diffuseAmount);
+
+            // Bind diffuse output
+            auto gBuffer = Loader::getFBO("gbuffer");
+            gBuffer->textures[1]->bind();
+            loadUniform("gDiffuse", gBuffer->textures[1]->textureId);
+
             // Bind light pass output
             auto lightFBO = Loader::getFBO("lightpass");
             lightFBO->textures[0]->bind();

@@ -82,5 +82,5 @@ void main() {
     float s = pow(clamp(dot(H, N), 0.f, 1.f), 33.f);
     vec3 specularContrib = lightCol * s * attFactor * 0.33f;
     color.a = 1.f;
-    color.rgb = diffuseContrib * 0.2f + diffuseContrib * albedo + specularContrib;
+    color.rgb = diffuseContrib * albedo + specularContrib;
 }

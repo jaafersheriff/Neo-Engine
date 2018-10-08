@@ -10,7 +10,7 @@ class BlurShader : public Shader {
 
     public:
 
-        int blurAmount = 1;
+        int blurAmount = 6;
 
         BlurShader(const std::string &frag) :
             Shader("Blur Shader", MasterRenderer::POST_PROCESS_VERT_FILE, frag) 
