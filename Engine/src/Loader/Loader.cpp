@@ -125,7 +125,7 @@ namespace neo {
 
             /* Use stbi if name is an existing file */
             FILE *f;
-            if (fopen_s(&f, (RES_DIR + fileName).c_str(), "rb")) {
+            if (!fopen_s(&f, (RES_DIR + fileName).c_str(), "rb")) {
                 stbi_set_flip_vertically_on_load(true);
                 uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
                 if (data) {
@@ -139,6 +139,9 @@ namespace neo {
                 else {
                     std::cerr << "Error opening texture file " << fileName << std::endl;
                 }
+            }
+            else {
+                std::cout << "Creating empty texture " << fileName << std::endl;
             }
 
             textures.insert({ fileName, texture });
@@ -155,7 +158,7 @@ namespace neo {
 
             /* Use stbi if name is an existing file */
             FILE *f;
-            if (fopen_s(&f, (RES_DIR + name).c_str(), "rb")) {
+            if (!fopen_s(&f, (RES_DIR + name).c_str(), "rb")) {
                 uint8_t* data[6];
                 for (int i = 0; i < 6; i++) {
                     data[i] = stbi_load((RES_DIR + files[i]).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
