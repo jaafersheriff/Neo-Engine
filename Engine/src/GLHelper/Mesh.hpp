@@ -30,6 +30,9 @@ namespace neo {
                 mode(0)
             {}
 
+            /* Destructor */
+            ~Mesh();
+
             /* VAO ID */
             unsigned int vaoId;
 

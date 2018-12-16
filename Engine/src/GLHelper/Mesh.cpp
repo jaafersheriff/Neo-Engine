@@ -7,6 +7,14 @@
 
 namespace neo {
 
+    Mesh::~Mesh() {
+        CHECK_GL(glDeleteBuffers(1, (GLuint *)&vertBufId));
+        CHECK_GL(glDeleteBuffers(1, (GLuint *)&norBufId));
+        CHECK_GL(glDeleteBuffers(1, (GLuint *)&texBufId));
+        CHECK_GL(glDeleteBuffers(1, (GLuint *)&eleBufId));
+        CHECK_GL(glDeleteVertexArrays(1, (GLuint *) &vaoId));
+    }
+
     void Mesh::draw(unsigned size) const {
         if (eleBufSize) {
             // TODO - instanced?
@@ -66,13 +74,14 @@ namespace neo {
             CHECK_GL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0));
         }
 
-        /* Copy element array if it exists -- also set mode */
+        /* Copy element array if it exists */
         if (!buffers.eleBuf.empty()) {
             CHECK_GL(glGenBuffers(1, (GLuint *) &eleBufId));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eleBufId));
             CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffers.eleBuf.size() * sizeof(unsigned int), &buffers.eleBuf[0], GL_STATIC_DRAW));
         }
 
+        /* Set draw mode */
         if (type) {
             mode = type;
         }
