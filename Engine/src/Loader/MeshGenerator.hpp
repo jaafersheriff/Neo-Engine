@@ -8,7 +8,7 @@ namespace neo {
     class MeshGenerator {
 
     private:
-        static Mesh *createMesh(const std::vector<float> &vert, const std::vector<float> &norm, const std::vector<float> &tex, const std::vector<unsigned> &ele, unsigned mode = GL_TRIANGLES) {
+        static Mesh* createMesh(const std::vector<float> &vert, const std::vector<float> &norm, const std::vector<float> &tex, const std::vector<unsigned> &ele, unsigned mode = GL_TRIANGLES) {
             Mesh *mesh = new Mesh;
             mesh->buffers.vertBuf.insert(mesh->buffers.vertBuf.begin(), vert.begin(), vert.end());
             mesh->buffers.norBuf.insert(mesh->buffers.norBuf.begin(), norm.begin(), norm.end());
@@ -226,6 +226,63 @@ namespace neo {
                     verts,
                     tex,
                     ele
+                );
+            }
+
+            // TODOs
+            //  Take height map as input
+            //  Move this to its own terrain generator class?
+            //  Calculate normals based on verts
+            static Mesh * createPlane(float h, int VERTEX_COUNT, int SIZE) {
+                int count = VERTEX_COUNT * VERTEX_COUNT;
+                std::vector<std::vector<float>> heights;
+                std::vector<float> vertices;
+                vertices.resize(count * 3);
+                std::vector<float> normals;
+                normals.resize(count * 3);
+                std::vector<float> textureCoords;
+                textureCoords.resize(count * 2);
+                std::vector<unsigned> indices;
+                indices.resize(6 * (VERTEX_COUNT - 1) * (VERTEX_COUNT * 1));
+                int vertexPointer = 0;
+                for (int i = 0; i < VERTEX_COUNT; i++) {
+                    heights.push_back(std::vector<float>());
+                    heights[i].resize(VERTEX_COUNT);
+                    for (int j = 0; j < VERTEX_COUNT; j++) {
+                        vertices[vertexPointer * 3] = (float)j / ((float)VERTEX_COUNT - 1) * SIZE;
+                        float height = Util::genRandom(0.f, h); // getHeight(j, i, image);
+                        heights[i][j] = height;
+                        vertices[vertexPointer * 3 + 1] = height;
+                        vertices[vertexPointer * 3 + 2] = (float)i / ((float)VERTEX_COUNT - 1) * SIZE;
+                        glm::vec3 normal = glm::vec3(0.f, 1.f, 0.f); // calculateNormal(j, i, image);
+                        normals[vertexPointer * 3] = normal.x;
+                        normals[vertexPointer * 3 + 1] = normal.y;
+                        normals[vertexPointer * 3 + 2] = normal.z;
+                        textureCoords[vertexPointer * 2] = (float)j / ((float)VERTEX_COUNT - 1);
+                        textureCoords[vertexPointer * 2 + 1] = (float)i / ((float)VERTEX_COUNT - 1);
+                        vertexPointer++;
+                    }
+                }
+                int pointer = 0;
+                for (int gz = 0; gz < VERTEX_COUNT - 1; gz++) {
+                    for (int gx = 0; gx < VERTEX_COUNT - 1; gx++) {
+                        int topLeft = (gz*VERTEX_COUNT) + gx;
+                        int topRight = topLeft + 1;
+                        int bottomLeft = ((gz + 1)*VERTEX_COUNT) + gx;
+                        int bottomRight = bottomLeft + 1;
+                        indices[pointer++] = topLeft;
+                        indices[pointer++] = bottomLeft;
+                        indices[pointer++] = topRight;
+                        indices[pointer++] = topRight;
+                        indices[pointer++] = bottomLeft;
+                        indices[pointer++] = bottomRight;
+                    }
+                }
+                return createMesh(
+                    vertices,
+                    normals,
+                    textureCoords,
+                    indices
                 );
             }
     };
