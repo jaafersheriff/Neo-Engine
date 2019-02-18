@@ -2,7 +2,6 @@
 #include "GLHelper/GLHelper.hpp"
 
 #include "NeoEngine.hpp"
-#include "Messaging/Messenger.hpp"
 
 #include "Component/ModelComponent/RenderableComponent.hpp"
 #include "Window/Window.hpp"

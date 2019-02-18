@@ -11,10 +11,14 @@ namespace neo {
         }
     }
 
-    void RenderableComponent::kill() {
+    void RenderableComponent::clearShaderTypes() {
         for (auto & shaderT : shaderTypes) {
             MasterRenderer::detachCompFromShader(shaderT, this);
         }
+    }
+
+    void RenderableComponent::kill() {
+        clearShaderTypes();
     }
 
 }

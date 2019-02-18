@@ -8,6 +8,8 @@
 
 namespace neo {
 
+    class Shader;
+
     class RenderableComponent : public Component {
 
         public:
@@ -21,6 +23,7 @@ namespace neo {
 
             template <typename ShaderT> void addShaderType();
             template <typename ShaderT> void removeShaderType();
+            void clearShaderTypes();
 
             virtual const Mesh & getMesh() const { return *mesh; }
             void replaceMesh(Mesh *m) { this->mesh = m; }

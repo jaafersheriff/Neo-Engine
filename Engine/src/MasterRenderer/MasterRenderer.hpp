@@ -3,6 +3,8 @@
 #include "Shader/Shader.hpp"
 #include "GLHelper/Framebuffer.hpp"
 
+#include "Messaging/Messenger.hpp"
+
 #include <unordered_map>
 #include <typeindex>
 #include <vector>
