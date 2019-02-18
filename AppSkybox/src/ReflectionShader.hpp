@@ -27,7 +27,7 @@ class ReflectionShader : public Shader {
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load environment map */
-            loadUniform("cubeMap", NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<CubeMapComponent>()->getTexture().textureId);
+            loadUniform("cubeMap", NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<CubeMapComponent>()->getTexture().mTextureID);
 
             for (auto model : MasterRenderer::getRenderables<ReflectionShader, ReflectionRenderable>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());

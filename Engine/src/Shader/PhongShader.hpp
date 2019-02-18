@@ -102,7 +102,7 @@ public:
                 if (diffuseMap) {
                     auto texture = (Texture2D &) (diffuseMap->getTexture());
                     texture.bind();
-                    loadUniform("diffuseMap", texture.textureId);
+                    loadUniform("diffuseMap", texture.mTextureID);
                     loadUniform("useTexture", true);
                 }
                 else {

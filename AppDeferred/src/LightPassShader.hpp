@@ -28,8 +28,8 @@ class LightPassShader : public Shader {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
                 auto lightFBO = Loader::getFBO("lightpass");
-                lightFBO->textures[0]->width  = frameSize.x;
-                lightFBO->textures[0]->height = frameSize.y;
+                lightFBO->textures[0]->mWidth  = frameSize.x;
+                lightFBO->textures[0]->mHeight = frameSize.y;
                 lightFBO->textures[0]->bind();
                 CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
             });
@@ -63,11 +63,11 @@ class LightPassShader : public Shader {
             /* Bind gbuffer */
             auto gbuffer = Loader::getFBO("gbuffer");
             gbuffer->textures[0]->bind();
-            loadUniform("gNormal", gbuffer->textures[0]->textureId);
+            loadUniform("gNormal", gbuffer->textures[0]->mTextureID);
             gbuffer->textures[1]->bind();
-            loadUniform("gDiffuse", gbuffer->textures[1]->textureId);
+            loadUniform("gDiffuse", gbuffer->textures[1]->mTextureID);
             gbuffer->textures[2]->bind();
-            loadUniform("gDepth", gbuffer->textures[2]->textureId);
+            loadUniform("gDepth", gbuffer->textures[2]->mTextureID);
 
             /* Render light volumes */
             for (auto & light : NeoEngine::getComponents<LightComponent>()) {

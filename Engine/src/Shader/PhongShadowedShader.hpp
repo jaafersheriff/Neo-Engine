@@ -144,7 +144,7 @@ namespace neo {
                 const Texture & texture(*Loader::getFBO("depthMap")->textures[0]); 
                 CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.textureId));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.textureId));
-                loadUniform("shadowMap", texture.textureId);
+                loadUniform("shadowMap", texture.mTextureID);
 
                 for (auto & model : MasterRenderer::getRenderables<PhongShadowedShader, RenderableComponent>()) {
                     loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
@@ -160,7 +160,7 @@ namespace neo {
                     if (texComp) {
                         auto texture = (Texture2D &) (texComp->getTexture());
                         texture.bind();
-                        loadUniform("diffuseMap", texture.textureId);
+                        loadUniform("diffuseMap", texture.mTextureID);
                         loadUniform("useTexture", true);
                     }
                     else {

@@ -95,11 +95,11 @@ int main() {
         if (!combineShader.showAO) {
             return;
         }
-        int size = Loader::getTexture("aoKernel")->width;
+        int size = Loader::getTexture("aoKernel")->mWidth;
         if (ImGui::SliderInt("Kernel", &size, 1, 128)) {
             aoShader.generateKernel(size);
         }
-        size = Loader::getTexture("aoNoise")->width;
+        size = Loader::getTexture("aoNoise")->mWidth;
         if (ImGui::SliderInt("Noise", &size, 1, 32)) {
             aoShader.generateNoise(size);
         }

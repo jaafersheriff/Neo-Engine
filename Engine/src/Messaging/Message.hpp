@@ -71,8 +71,8 @@ namespace neo {
 
     /* The window was resized */
     struct WindowFrameSizeMessage : public Message {
-        glm::ivec2 frameSize;
-        WindowFrameSizeMessage(const glm::ivec2 & frameSize) : frameSize(frameSize) {}
+        glm::uvec2 frameSize;
+        WindowFrameSizeMessage(const glm::uvec2 & frameSize) : frameSize(frameSize) {}
     };
 
 

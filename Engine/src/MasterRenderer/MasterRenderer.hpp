@@ -89,10 +89,8 @@ namespace neo {
 
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                Loader::getFBO("ping")->bind();
-                CHECK_GL(glViewport(0, 0, m.frameSize.x, m.frameSize.y));
-                Loader::getFBO("pong")->bind();
-                CHECK_GL(glViewport(0, 0, m.frameSize.x, m.frameSize.y));
+                Loader::getFBO("ping")->resize(m.frameSize);
+                Loader::getFBO("pong")->resize(m.frameSize);
             });
         }
         postShaders.emplace_back(createShader<ShaderT>(std::forward<Args>(args)...));

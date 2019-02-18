@@ -22,10 +22,10 @@ class AOShader : public Shader {
 
             // generate kernel
             Texture *kernelTex = Loader::getTexture("aoKernel");
-            kernelTex->width = 32;
-            kernelTex->height = 1;
-            kernelTex->components = 3;
-            CHECK_GL(glGenTextures(1, &kernelTex->textureId));
+            kernelTex->mWidth = 32;
+            kernelTex->mHeight = 1;
+            kernelTex->mComponents = 3;
+            CHECK_GL(glGenTextures(1, &kernelTex->mTextureID));
             kernelTex->bind();
             CHECK_GL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB16F, 64, 0, GL_RGB, GL_FLOAT, nullptr));
             CHECK_GL(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
@@ -37,8 +37,8 @@ class AOShader : public Shader {
 
             // generate 4x4 noise texture
             Texture *noiseTex = Loader::getTexture("aoNoise");
-            noiseTex->width = noiseTex->height = 4;
-            noiseTex->components = 3;
+            noiseTex->mWidth = noiseTex->mHeight = 4;
+            noiseTex->mComponents = 3;
             noiseTex->upload(GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT);
             generateNoise(4);
         }
@@ -59,8 +59,8 @@ class AOShader : public Shader {
                 kernel.push_back(sample);
             };
             Texture *kernelTex = Loader::getTexture("aoKernel");
-            kernelTex->width = size;
-            kernelTex->height = 1;
+            kernelTex->mWidth = size;
+            kernelTex->mHeight = 1;
             kernelTex->bind();
             CHECK_GL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB16F, kernel.size(), 0, GL_RGB, GL_FLOAT, &kernel[0]));
         }
@@ -75,7 +75,7 @@ class AOShader : public Shader {
                 )));
             }
             Texture *noiseTex = Loader::getTexture("aoNoise");
-            noiseTex->width = noiseTex->height = dim;
+            noiseTex->mWidth = noiseTex->mHeight = dim;
             noiseTex->bind();
             CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, dim, dim, 0, GL_RGB, GL_FLOAT, &noise[0]));
         }
@@ -88,17 +88,17 @@ class AOShader : public Shader {
             // bind gbuffer
             auto gbuffer = Loader::getFBO("gbuffer");
             gbuffer->textures[0]->bind();
-            loadUniform("gNormal", gbuffer->textures[0]->textureId);
+            loadUniform("gNormal", gbuffer->textures[0]->mTextureID);
             gbuffer->textures[2]->bind();
-            loadUniform("gDepth", gbuffer->textures[2]->textureId);
+            loadUniform("gDepth", gbuffer->textures[2]->mTextureID);
 
             // bind kernel and noise
             auto noise = Loader::getTexture("aoNoise");
             noise->bind();
-            loadUniform("noise", noise->textureId);
+            loadUniform("noise", noise->mTextureID);
             auto kernel = Loader::getTexture("aoKernel");
             kernel->bind();
-            loadUniform("kernel", kernel->textureId);
+            loadUniform("kernel", kernel->mTextureID);
 
             loadUniform("P", camera.getProj());
             loadUniform("invP", glm::inverse(camera.getProj()));

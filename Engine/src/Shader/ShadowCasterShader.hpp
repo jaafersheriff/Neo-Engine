@@ -35,7 +35,7 @@ namespace neo {
                 depthFBO->attachDepthTexture(glm::ivec2(2048), GL_LINEAR, GL_CLAMP_TO_BORDER);
                 depthFBO->disableDraw();
                 depthFBO->disableRead();
-                CHECK_GL(glBindTexture(GL_TEXTURE_2D, depthFBO->textures[0]->textureId));
+                CHECK_GL(glBindTexture(GL_TEXTURE_2D, depthFBO->textures[0]->mTextureID));
                 CHECK_GL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data()));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
             }
@@ -67,7 +67,7 @@ namespace neo {
                     if (texComp) {
                         auto texture = (Texture2D &) (texComp->getTexture());
                         texture.bind();
-                        loadUniform("diffuseMap", texture.textureId);
+                        loadUniform("diffuseMap", texture.mTextureID);
                         loadUniform("useTexture", true);
                     }
                     else {

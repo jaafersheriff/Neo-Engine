@@ -354,9 +354,9 @@ namespace neo {
                     for (auto & fbo : Loader::framebuffers) {
                         if (ImGui::TreeNode((fbo.first + " (" + std::to_string(fbo.second->fboId) + ")").c_str())) {
                             for (auto & t : fbo.second->textures) {
-                                if (ImGui::TreeNode(std::to_string(t->textureId).c_str())) {
-                                    float scale = 150.f / (t->width > t->height ? t->width : t->height);
-                                    ImGui::Image((ImTextureID)t->textureId, ImVec2(scale * t->width, scale * t->height), ImVec2(0, 1), ImVec2(1, 0));
+                                if (ImGui::TreeNode(std::to_string(t->mTextureID).c_str())) {
+                                    float scale = 150.f / (t->mWidth > t->mHeight ? t->mWidth : t->mHeight);
+                                    ImGui::Image((ImTextureID)t->mTextureID, ImVec2(scale * t->mWidth, scale * t->mHeight), ImVec2(0, 1), ImVec2(1, 0));
                                     ImGui::TreePop();
                                 }
                             }
@@ -373,9 +373,9 @@ namespace neo {
                 }
                 if (Loader::textures.size() && ImGui::TreeNode("Textures")) {
                     for (auto & t : Loader::textures) {
-                        if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->textureId) + ")").c_str())) {
-                            float scale = 150.f / (t.second->width > t.second->height ? t.second->width : t.second->height);
-                            ImGui::Image((ImTextureID)t.second->textureId, ImVec2(scale * t.second->width, scale * t.second->height), ImVec2(0, 1), ImVec2(1, 0));
+                        if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->mTextureID) + ")").c_str())) {
+                            float scale = 150.f / (t.second->mWidth > t.second->mHeight ? t.second->mWidth : t.second->mHeight);
+                            ImGui::Image((ImTextureID)t.second->mTextureID, ImVec2(scale * t.second->mWidth, scale * t.second->mHeight), ImVec2(0, 1), ImVec2(1, 0));
                             ImGui::TreePop();
                         }
                     }

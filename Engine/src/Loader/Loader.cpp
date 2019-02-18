@@ -127,13 +127,13 @@ namespace neo {
             FILE *f;
             if (!fopen_s(&f, (RES_DIR + fileName).c_str(), "rb")) {
                 stbi_set_flip_vertically_on_load(true);
-                uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
+                uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->mWidth, &texture->mHeight, &texture->mComponents, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
                 if (data) {
                     texture->upload(inFormat, format, filter, mode, true, &data);
                     texture->generateMipMaps();
                     stbi_image_free(data);
                     if (verbose) {
-                        std::cout << "Loaded texture " << fileName << " [" << texture->width << ", " << texture->height << "]" << std::endl;
+                        std::cout << "Loaded texture " << fileName << " [" << texture->mWidth << ", " << texture->mHeight << "]" << std::endl;
                     }
                 }
                 else {
@@ -161,10 +161,10 @@ namespace neo {
             if (!fopen_s(&f, (RES_DIR + name).c_str(), "rb")) {
                 uint8_t* data[6];
                 for (int i = 0; i < 6; i++) {
-                    data[i] = stbi_load((RES_DIR + files[i]).c_str(), &texture->width, &texture->height, &texture->components, STBI_rgb_alpha);
+                    data[i] = stbi_load((RES_DIR + files[i]).c_str(), &texture->mWidth, &texture->mHeight, &texture->mComponents, STBI_rgb_alpha);
                     if (data[i]) {
                         if (verbose) {
-                            std::cout << "Loaded texture " << files[i] << " [" << texture->width << ", " << texture->height << "]" << std::endl;
+                            std::cout << "Loaded texture " << files[i] << " [" << texture->mWidth << ", " << texture->mHeight << "]" << std::endl;
                         }
                     }
                     else {

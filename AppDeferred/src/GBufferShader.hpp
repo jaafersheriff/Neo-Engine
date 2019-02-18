@@ -29,8 +29,8 @@ class GBufferShader : public Shader {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
                 auto gbuffer = Loader::getFBO("gbuffer");
-                gbuffer->textures[0]->width = gbuffer->textures[1]->width = gbuffer->textures[2]->width = frameSize.x;
-                gbuffer->textures[0]->height = gbuffer->textures[1]->height = gbuffer->textures[2]->height = frameSize.y;
+                gbuffer->textures[0]->mWidth = gbuffer->textures[1]->mWidth = gbuffer->textures[2]->mWidth = frameSize.x;
+                gbuffer->textures[0]->mHeight = gbuffer->textures[1]->mHeight = gbuffer->textures[2]->mHeight = frameSize.y;
                 gbuffer->textures[0]->bind();
                 CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameSize.x, frameSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr));
                 gbuffer->textures[1]->bind();
@@ -66,7 +66,7 @@ class GBufferShader : public Shader {
                 if (diffMap) {
                     diffMap->getTexture().bind();
                     loadUniform("useDiffuseMap", true);
-                    loadUniform("diffuseMap", diffMap->getTexture().textureId);
+                    loadUniform("diffuseMap", diffMap->getTexture().mTextureID);
                 }
                 else {
                     loadUniform("useDiffuseMap", false);
@@ -80,7 +80,7 @@ class GBufferShader : public Shader {
                 if (normalMap) {
                     normalMap->getTexture().bind();
                     loadUniform("useNormalMap", true);
-                    loadUniform("normalMap", normalMap->getTexture().textureId);
+                    loadUniform("normalMap", normalMap->getTexture().mTextureID);
                 }
                 else {
                     loadUniform("useNormalMap", false);

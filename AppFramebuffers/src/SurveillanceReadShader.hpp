@@ -31,7 +31,7 @@ class SurveillanceReadShader : public Shader {
 
                 /* Bind texture */
                 camera->fbo->textures[0]->bind();
-                loadUniform("fbo", camera->fbo->textures[0]->textureId);
+                loadUniform("fbo", camera->fbo->textures[0]->mTextureID);
 
                 /* DRAW */
                 mesh->draw();
