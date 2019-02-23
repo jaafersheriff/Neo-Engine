@@ -142,8 +142,8 @@ namespace neo {
 
                 /* Bind shadow map */
                 const Texture & texture(*Loader::getFBO("depthMap")->textures[0]); 
-                CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.textureId));
-                CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.textureId));
+                CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.mTextureID));
+                CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.mTextureID));
                 loadUniform("shadowMap", texture.mTextureID);
 
                 for (auto & model : MasterRenderer::getRenderables<PhongShadowedShader, RenderableComponent>()) {

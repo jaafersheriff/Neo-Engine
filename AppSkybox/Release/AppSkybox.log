@@ -1,0 +1,4 @@
+﻿  CustomSystem.hpp
+c:\users\jaafe\onedrive\code\c\neo\appskybox\src\customsystem.hpp(3): fatal error C1083: Cannot open include file: 'NeoEngine.hpp': No such file or directory
+  main.cpp
+c:\users\jaafe\onedrive\code\c\neo\appskybox\src\main.cpp(1): fatal error C1083: Cannot open include file: 'NeoEngine.hpp': No such file or directory
