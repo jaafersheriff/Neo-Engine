@@ -1,5 +1,5 @@
 
-# Deferred Shading App
-Demo Application showcasing deferred shading
+# Screen Space Ambient Occlusion App
+Demo Application showcasing SSAO
 
 <img src="res/readme.png">
