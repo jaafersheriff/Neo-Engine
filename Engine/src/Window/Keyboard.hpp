@@ -15,6 +15,6 @@ namespace neo {
             static void reset();
 
         private:
-            static int keyStatus[NUM_KEYS];
+            static int mKeyStatus[NUM_KEYS];
         };
 }

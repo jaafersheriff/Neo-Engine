@@ -15,7 +15,7 @@ namespace neo {
         public:
             RenderableComponent(GameObject *go, Mesh *m) :
                 Component(go),
-                mesh(m)
+                mMesh(m)
             {}
 
             virtual void init() override;
@@ -25,16 +25,16 @@ namespace neo {
             template <typename ShaderT> void removeShaderType();
             void clearShaderTypes();
 
-            virtual const Mesh & getMesh() const { return *mesh; }
-            void replaceMesh(Mesh *m) { this->mesh = m; }
-            const std::vector<std::type_index> & getShaders() { return shaderTypes; }
+            virtual const Mesh & getMesh() const { return *mMesh; }
+            void replaceMesh(Mesh *m) { this->mMesh = m; }
+            const std::vector<std::type_index> & getShaders() { return mShaderTypes; }
 
         protected:
-            Mesh * mesh;
-            std::vector<std::type_index> shaderTypes;
+            Mesh * mMesh;
+            std::vector<std::type_index> mShaderTypes;
 
         private:
-            bool isInit = false;
+            bool mIsInit = false;
     };
 
     /* Template implementation */
@@ -43,10 +43,10 @@ namespace neo {
         static_assert(std::is_base_of<Shader, ShaderT>::value, "ShaderT must be a Shader type");
         static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
         std::type_index typeI(typeid(ShaderT));
-        auto it = std::find(shaderTypes.begin(), shaderTypes.end(), typeI);
-        if (it == shaderTypes.end()) {
-            shaderTypes.emplace_back(typeI);
-            if (isInit) {
+        auto it = std::find(mShaderTypes.begin(), mShaderTypes.end(), typeI);
+        if (it == mShaderTypes.end()) {
+            mShaderTypes.emplace_back(typeI);
+            if (mIsInit) {
                 MasterRenderer::attachCompToShader(typeI, this);
             }
         }
@@ -57,10 +57,10 @@ namespace neo {
         static_assert(std::is_base_of<Shader, ShaderT>::value, "ShaderT must be a Shader type");
         static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
         std::type_index typeI(typeid(ShaderT));
-        auto it = std::find(shaderTypes.begin(), shaderTypes.end(), typeI);
-        if (it != shaderTypes.end()) {
-            shaderTypes.erase(it);
-            if (isInit) {
+        auto it = std::find(mShaderTypes.begin(), mShaderTypes.end(), typeI);
+        if (it != mShaderTypes.end()) {
+            mShaderTypes.erase(it);
+            if (mIsInit) {
                 MasterRenderer::detachCompFromShader(typeI, this);
             }
         }

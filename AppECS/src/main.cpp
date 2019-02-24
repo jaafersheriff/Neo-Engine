@@ -117,8 +117,10 @@ int main() {
     cube.attachImGui("Cube");
     NeoEngine::addDefaultImGuiFunc();
     NeoEngine::addImGuiFunc("Mouse", [&]() {
-        ImGui::Text("Mouse X, Y  : %0.2f, %0.2f", Mouse::x, Mouse::y);
-        ImGui::Text("Mouse dx, dy: %0.2f, %0.2f", Mouse::dx, Mouse::dy);
+        glm::vec2 mousePos = Mouse::getPos();
+        glm::vec2 mouseSpeed = Mouse::getSpeed();
+        ImGui::Text("Mouse X, Y  : %0.2f, %0.2f", mousePos.x, mousePos.y);
+        ImGui::Text("Mouse dx, dy: %0.2f, %0.2f", mouseSpeed.x, mouseSpeed.y);
     });
 
     /* Run */

@@ -11,12 +11,12 @@
 namespace neo {
 
     std::string MasterRenderer::APP_SHADER_DIR;
-    CameraComponent *MasterRenderer::defaultCamera(nullptr);
-    Framebuffer *MasterRenderer::defaultFBO;
-    std::vector<std::unique_ptr<Shader>> MasterRenderer::preShaders;
-    std::vector<std::unique_ptr<Shader>> MasterRenderer::sceneShaders;
-    std::vector<std::unique_ptr<Shader>> MasterRenderer::postShaders;
-    std::unordered_map<std::type_index, std::unique_ptr<std::vector<RenderableComponent *>>> MasterRenderer::renderables;
+    CameraComponent *MasterRenderer::mDefaultCamera(nullptr);
+    Framebuffer *MasterRenderer::mDefaultFBO;
+    std::vector<std::unique_ptr<Shader>> MasterRenderer::mPreProcessShaders;
+    std::vector<std::unique_ptr<Shader>> MasterRenderer::mSceneShaders;
+    std::vector<std::unique_ptr<Shader>> MasterRenderer::mPostShaders;
+    std::unordered_map<std::type_index, std::unique_ptr<std::vector<RenderableComponent *>>> MasterRenderer::mRenderables;
 
     const char * MasterRenderer::POST_PROCESS_VERT_FILE =
         "#version 330 core\n\
@@ -40,8 +40,8 @@ namespace neo {
         });
 
         /* Init default FBO */
-        defaultFBO = Loader::getFBO("0");
-        defaultFBO->fboId = 0;
+        mDefaultFBO = Loader::getFBO("0");
+        mDefaultFBO->mFBOID = 0;
     }
 
     void MasterRenderer::resetState() {
@@ -56,17 +56,17 @@ namespace neo {
 
     void MasterRenderer::render(float dt) {
         /* Get active shaders */
-        std::vector<Shader *> activePreShaders = getActiveShaders(preShaders);
-        std::vector<Shader *> activePostShaders = getActiveShaders(postShaders);
+        std::vector<Shader *> activePreShaders = _getActiveShaders(mPreProcessShaders);
+        std::vector<Shader *> activePostShaders = _getActiveShaders(mPostShaders);
 
         /* Render all preprocesses */
         for (auto & shader : activePreShaders) {
-            shader->render(*defaultCamera);
+            shader->render(*mDefaultCamera);
         }
 
         /* Reset default FBO state */
         if (activePostShaders.size()) {
-            defaultFBO->bind();
+            mDefaultFBO->bind();
             glm::ivec2 frameSize = Window::getFrameSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
         }
@@ -78,22 +78,22 @@ namespace neo {
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
  
         /* Render all scene shaders */
-        renderScene(*defaultCamera);
+        renderScene(*mDefaultCamera);
 
         /* Post process with ping & pong */
         if (activePostShaders.size()) {
             CHECK_GL(glDisable(GL_DEPTH_TEST));
 
             /* Render first post process shader into appropriate output buffer */
-            Framebuffer *inputFBO = defaultFBO;
+            Framebuffer *inputFBO = mDefaultFBO;
             Framebuffer *outputFBO = activePostShaders.size() == 1 ? Loader::getFBO("0") : Loader::getFBO("pong");
-            renderPostProcess(*activePostShaders[0], inputFBO, outputFBO);
+            _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO);
 
             /* [2, n-1] shaders use ping & pong */
             inputFBO = Loader::getFBO("pong");
             outputFBO = Loader::getFBO("ping");
             for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
-                renderPostProcess(*activePostShaders[i], inputFBO, outputFBO);
+                _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO);
 
                 /* Swap ping & pong */
                 Framebuffer *temp = inputFBO;
@@ -103,7 +103,7 @@ namespace neo {
 
             /* nth shader writes out to FBO 0 if it hasn't already been done */
             if (activePostShaders.size() > 1) {
-                renderPostProcess(*activePostShaders.back(), inputFBO, Loader::getFBO("0"));
+                _renderPostProcess(*activePostShaders.back(), inputFBO, Loader::getFBO("0"));
             }
             CHECK_GL(glEnable(GL_DEPTH_TEST));
         }
@@ -117,7 +117,7 @@ namespace neo {
         glfwSwapBuffers(Window::getWindow());
     }
 
-    void MasterRenderer::renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output) {
+    void MasterRenderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output) {
         // Reset output FBO
         output->bind();
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
@@ -128,17 +128,17 @@ namespace neo {
         // Bind quad 
         shader.bind();
         auto mesh = Loader::getMesh("quad");
-        CHECK_GL(glBindVertexArray(mesh->vaoId));
+        CHECK_GL(glBindVertexArray(mesh->mVAOID));
 
         // Bind input fbo texture
-        input->textures[0]->bind();
-        shader.loadUniform("inputFBO", input->textures[0]->mTextureID);
-        input->textures[1]->bind();
-        shader.loadUniform("inputDepth", input->textures[1]->mTextureID);
+        input->mTextures[0]->bind();
+        shader.loadUniform("inputFBO", input->mTextures[0]->mTextureID);
+        input->mTextures[1]->bind();
+        shader.loadUniform("inputDepth", input->mTextures[1]->mTextureID);
 
         // Allow shader to do any prep (eg. bind uniforms) 
         // Also allows shader to override output render target (user responsible for handling)
-        shader.render(*defaultCamera);
+        shader.render(*mDefaultCamera);
 
         // Render post process effect
         mesh->draw();
@@ -147,8 +147,8 @@ namespace neo {
     }
 
     void MasterRenderer::renderScene(const CameraComponent &camera) {
-       for (auto & shader : sceneShaders) {
-            if (shader->active) {
+       for (auto & shader : mSceneShaders) {
+            if (shader->mActive) {
                 shader->render(camera);
             }
         }
@@ -157,14 +157,14 @@ namespace neo {
     void MasterRenderer::setDefaultFBO(const std::string &name) {
         auto fb = Loader::getFBO(name);
         if (fb) {
-            defaultFBO = fb;
+            mDefaultFBO = fb;
         }
     }
 
-    std::vector<Shader *> MasterRenderer::getActiveShaders(std::vector<std::unique_ptr<Shader>> &shaders) {
+    std::vector<Shader *> MasterRenderer::_getActiveShaders(std::vector<std::unique_ptr<Shader>> &shaders) {
         std::vector<Shader *> ret;
         for (auto & s : shaders) {
-            if (s->active) {
+            if (s->mActive) {
                 ret.emplace_back(s.get());
             }
         }
@@ -174,20 +174,20 @@ namespace neo {
 
     void MasterRenderer::attachCompToShader(const std::type_index &typeI, RenderableComponent *rComp) {
         /* Get vector<RenderableComponent *> that matches this shader */
-        auto it(renderables.find(typeI));
-        if (it == renderables.end()) {
-            renderables.emplace(typeI, std::make_unique<std::vector<RenderableComponent *>>());
-            it = renderables.find(typeI);
+        auto it(mRenderables.find(typeI));
+        if (it == mRenderables.end()) {
+            mRenderables.emplace(typeI, std::make_unique<std::vector<RenderableComponent *>>());
+            it = mRenderables.find(typeI);
         }
 
         it->second->emplace_back(rComp);
     }
 
     void MasterRenderer::detachCompFromShader(const std::type_index &typeI, RenderableComponent *rComp) {
-        assert(renderables.count(typeI));
+        assert(mRenderables.count(typeI));
         /* Look in active components in reverse order */
-        if (renderables.count(typeI)) {
-            auto & comps(*renderables.at(typeI));
+        if (mRenderables.count(typeI)) {
+            auto & comps(*mRenderables.at(typeI));
             for (int i = int(comps.size()) - 1; i >= 0; --i) {
                 if (comps[i] == rComp) {
                     comps.erase(comps.begin() + i);

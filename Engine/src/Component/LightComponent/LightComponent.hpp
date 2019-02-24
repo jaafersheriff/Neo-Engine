@@ -8,19 +8,19 @@ namespace neo {
         public:
             LightComponent(GameObject *go, const glm::vec3 &col = glm::vec3(1.f), const glm::vec3 att = glm::vec3(1.f)) :
                 Component(go),
-                color(col),
-                attenuation(att)
+                mColor(col),
+                mAttenuation(att)
             {}
 
             /* Getters */
-            const glm::vec3 & getColor() const { return color; }
-            const glm::vec3 & getAttenuation() const { return attenuation; }
+            const glm::vec3 & getColor() const { return mColor; }
+            const glm::vec3 & getAttenuation() const { return mAttenuation; }
 
             /* Setters */
-            void setColor(const glm::vec3 col) { this->color = col; }
-            void setAttenuation(const glm::vec3 att) { this->attenuation = att; }
+            void setColor(const glm::vec3 col) { this->mColor = col; }
+            void setAttenuation(const glm::vec3 att) { this->mAttenuation = att; }
         private:
-            glm::vec3 color;
-            glm::vec3 attenuation;
+            glm::vec3 mColor;
+            glm::vec3 mAttenuation;
     };
 }

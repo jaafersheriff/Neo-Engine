@@ -13,45 +13,45 @@ namespace neo {
 
         public:
 
+            bool mDirty;
+            glm::vec3 mColor;
+
             LineComponent(GameObject *go, glm::vec3 color = glm::vec3(1.f)) :
                 Component(go),
-                lineColor(color),
-                isDirty(false)
+                mColor(color),
+                mDirty(false)
             {}
 
-            bool isDirty;
-            glm::vec3 lineColor;
-
-            const std::vector<glm::vec3> & getNodes() const { return nodes; }
+            const std::vector<glm::vec3> & getNodes() const { return mNodes; }
 
             void addNode(const glm::vec3 &node) {
-                nodes.push_back(node);
-                isDirty = true;
+                mNodes.push_back(node);
+                mDirty = true;
             }
 
             void addNodes(const std::vector<glm::vec3> &oNodes) {
-                nodes.insert(nodes.end(), oNodes.begin(), oNodes.end());
-                isDirty = true;
+                mNodes.insert(mNodes.end(), oNodes.begin(), oNodes.end());
+                mDirty = true;
             }
 
             void removeNode(const glm::vec3 &node) {
-                auto it = std::find(nodes.begin(), nodes.end(), node);
-                if (it != nodes.end()) {
-                    nodes.erase(it);
-                    isDirty = true;
+                auto it = std::find(mNodes.begin(), mNodes.end(), node);
+                if (it != mNodes.end()) {
+                    mNodes.erase(it);
+                    mDirty = true;
                 }
             }
 
             void removeNode(const int index) {
-                if (index >= 0 && index < (int)nodes.size()) {
-                    nodes.erase(nodes.begin() + index);
-                    isDirty = true;
+                if (index >= 0 && index < (int)mNodes.size()) {
+                    mNodes.erase(mNodes.begin() + index);
+                    mDirty = true;
                 }
             }
 
         private:
 
-            std::vector<glm::vec3> nodes;
+            std::vector<glm::vec3> mNodes;
 
     };
 }

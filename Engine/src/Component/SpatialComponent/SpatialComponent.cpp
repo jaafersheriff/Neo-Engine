@@ -9,22 +9,22 @@ namespace neo {
     SpatialComponent::SpatialComponent(GameObject *go) :
         Component(go),
         Orientable(),
-        position(0.f),
-        scale(1.f),
-        modelMatrix(),
-        normalMatrix(),
-        modelMatrixDirty(true),
-        normalMatrixDirty(true)
+        mPosition(0.f),
+        mScale(1.f),
+        mModelMatrix(),
+        mNormalMatrix(),
+        mModelMatrixDirty(true),
+        mNormalMatrixDirty(true)
     {}
 
     SpatialComponent::SpatialComponent(GameObject *go, const glm::vec3 & p) :
         SpatialComponent(go) {
-        position = p;
+        mPosition = p;
     }
 
     SpatialComponent::SpatialComponent(GameObject *go, const glm::vec3 & p, const glm::vec3 & s) :
         SpatialComponent(go, p) {
-        scale = s;
+        mScale = s;
     }
 
     SpatialComponent::SpatialComponent(GameObject *go, const glm::vec3 & p, const glm::vec3 & s, const glm::mat3 & o) :
@@ -37,9 +37,9 @@ namespace neo {
             return;
         }
 
-        position += delta;
-        modelMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
+        mPosition += delta;
+        mModelMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
     }
 
     void SpatialComponent::resize(const glm::vec3 & factor) {
@@ -47,80 +47,80 @@ namespace neo {
             return;
         }
 
-        scale *= factor;
-        modelMatrixDirty = true;
-        normalMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
+        mScale *= factor;
+        mModelMatrixDirty = true;
+        mNormalMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
     }
 
     void SpatialComponent::rotate(const glm::mat3 & mat) {
         Orientable::rotate(mat);
-        modelMatrixDirty = true;
-        normalMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
+        mModelMatrixDirty = true;
+        mNormalMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
     }
 
     void SpatialComponent::setPosition(const glm::vec3 & loc) {
-        if (position == loc) {
+        if (mPosition == loc) {
             return;
         }
 
-        position = loc;
-        modelMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
+        mPosition = loc;
+        mModelMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
     }
 
     void SpatialComponent::setScale(const glm::vec3 & scale) {
-        if (this->scale == scale) {
+        if (this->mScale == scale) {
             return;
         }
 
-        this->scale = scale;
-        modelMatrixDirty = true;
-        normalMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
+        this->mScale = scale;
+        mModelMatrixDirty = true;
+        mNormalMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
     }
 
     void SpatialComponent::setOrientation(const glm::mat3 & orient) {
         Orientable::setOrientation(orient);
-        modelMatrixDirty = true;
-        normalMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
+        mModelMatrixDirty = true;
+        mNormalMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
     }
 
     void SpatialComponent::setUVW(const glm::vec3 & u, const glm::vec3 & v, const glm::vec3 & w) {
         Orientable::setUVW(u, v, w);
-        modelMatrixDirty = true;
-        normalMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(gameObject, *this);
+        mModelMatrixDirty = true;
+        mNormalMatrixDirty = true;
+        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
     }
         
     const glm::mat4 & SpatialComponent::getModelMatrix() const {
-        if (modelMatrixDirty) {
-            detModelMatrix();
+        if (mModelMatrixDirty) {
+            _detModelMatrix();
         }
-        return modelMatrix;
+        return mModelMatrix;
     }
 
     const glm::mat3 & SpatialComponent::getNormalMatrix() const {
-        if (normalMatrixDirty) {
-            detNormalMatrix();
+        if (mNormalMatrixDirty) {
+            _detNormalMatrix();
         }
-        return normalMatrix;
+        return mNormalMatrix;
     }
 
-    void SpatialComponent::detModelMatrix() const {
-        modelMatrix = glm::scale(glm::translate(glm::mat4(), position) * glm::mat4(getOrientation()), scale);
-        modelMatrixDirty = false;
+    void SpatialComponent::_detModelMatrix() const {
+        mModelMatrix = glm::scale(glm::translate(glm::mat4(), mPosition) * glm::mat4(getOrientation()), mScale);
+        mModelMatrixDirty = false;
     }
 
-    void SpatialComponent::detNormalMatrix() const {
-        if (scale.x == scale.y && scale.y == scale.z) {
-            normalMatrix = glm::mat3(modelMatrix);
+    void SpatialComponent::_detNormalMatrix() const {
+        if (mScale.x == mScale.y && mScale.y == mScale.z) {
+            mNormalMatrix = glm::mat3(mModelMatrix);
         }
         else {
-            normalMatrix = getOrientation() * glm::mat3(glm::scale(glm::mat4(), 1.0f / scale));
+            mNormalMatrix = getOrientation() * glm::mat3(glm::scale(glm::mat4(), 1.0f / mScale));
         }
-        normalMatrixDirty = false;
+        mNormalMatrixDirty = false;
     }
 }

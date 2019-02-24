@@ -32,8 +32,8 @@ class SkyboxShader : public Shader {
 
             const auto cube = cubes[0];
             const Mesh & mesh = cube->getMesh();
-            CHECK_GL(glBindVertexArray(mesh.vaoId));
-            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
+            CHECK_GL(glBindVertexArray(mesh.mVAOID));
+            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
             /* Bind texture */
             loadUniform("cubeMap", cube->getGameObject().getComponentByType<CubeMapComponent>()->getTexture().mTextureID);

@@ -141,7 +141,7 @@ namespace neo {
                 loadUniform("pcfSize", pcfSize);
 
                 /* Bind shadow map */
-                const Texture & texture(*Loader::getFBO("depthMap")->textures[0]); 
+                const Texture & texture(*Loader::getFBO("depthMap")->mTextures[0]); 
                 CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.mTextureID));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.mTextureID));
                 loadUniform("shadowMap", texture.mTextureID);
@@ -152,8 +152,8 @@ namespace neo {
 
                     /* Bind mesh */
                     const Mesh & mesh(model->getMesh());
-                    CHECK_GL(glBindVertexArray(mesh.vaoId));
-                    CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
+                    CHECK_GL(glBindVertexArray(mesh.mVAOID));
+                    CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                     /* Bind texture */
                     auto texComp = model->getGameObject().getComponentByType<DiffuseMapComponent>();
@@ -171,10 +171,10 @@ namespace neo {
                     auto materialComp = model->getGameObject().getComponentByType<MaterialComponent>();
                     if (materialComp) {
                         const Material &material = materialComp->getMaterial();
-                        loadUniform("ambient", material.ambient);
-                        loadUniform("diffuseColor", material.diffuse);
-                        loadUniform("specularColor", material.specular);
-                        loadUniform("shine", material.shine);
+                        loadUniform("ambient", material.mAmbient);
+                        loadUniform("diffuseColor", material.mDiffuse);
+                        loadUniform("specularColor", material.mSpecular);
+                        loadUniform("shine", material.mShine);
                     }
 
                     /* DRAW */

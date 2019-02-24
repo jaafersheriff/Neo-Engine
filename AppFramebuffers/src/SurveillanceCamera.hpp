@@ -21,7 +21,7 @@ class SurveillanceCamera : public CameraComponent {
         }
 
         virtual void update(float dt) override {
-            float scale = gameObject->getSpatial()->getScale().x;
+            float scale = mGameObject->getSpatial()->getScale().x;
             glm::vec2 bounds(-scale, scale);
             setOrthoBounds(bounds, bounds);
         }

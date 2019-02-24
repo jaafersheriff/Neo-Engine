@@ -5,14 +5,14 @@
 namespace neo {
 
     void RenderableComponent::init() {
-        isInit = true;
-        for (auto & shaderT : shaderTypes) {
+        mIsInit = true;
+        for (auto & shaderT : mShaderTypes) {
             MasterRenderer::attachCompToShader(shaderT, this);
         }
     }
 
     void RenderableComponent::clearShaderTypes() {
-        for (auto & shaderT : shaderTypes) {
+        for (auto & shaderT : mShaderTypes) {
             MasterRenderer::detachCompFromShader(shaderT, this);
         }
     }

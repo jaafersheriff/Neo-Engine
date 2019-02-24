@@ -25,30 +25,30 @@ namespace neo {
             void setLookDir(glm::vec3);
 
             /* Getters */
-            const float getFOV() const { return fov; }
-            const float getNear() const { return near; }
-            const float getFar() const { return far; }
-            const glm::vec2 getHorizontalBounds() const { return horizBounds; }
-            const glm::vec2 getVerticalBounds() const { return vertBounds; }
+            const float getFOV() const { return mFOV; }
+            const float getNear() const { return mNear; }
+            const float getFar() const { return mFar; }
+            const glm::vec2 getHorizontalBounds() const { return mHorizBounds; }
+            const glm::vec2 getVerticalBounds() const { return mVertBounds; }
             const glm::vec3 getLookDir() const;
             const glm::mat4 & getView() const;
             const glm::mat4 & getProj() const;
 
         private:
-            float fov;
-            float near, far;
-            glm::vec2 horizBounds;
-            glm::vec2 vertBounds;
-            bool isOrtho;
+            float mFOV;
+            float mNear, mFar;
+            glm::vec2 mHorizBounds;
+            glm::vec2 mVertBounds;
+            bool mIsOrtho;
 
-            void detView() const;
-            void detProj() const;
+            void _detView() const;
+            void _detProj() const;
 
             /* Should never be used directly -- call getters */
-            mutable glm::mat4 viewMat;
-            mutable glm::mat4 projMat;
-            mutable bool viewMatDirty;
-            mutable bool projMatDirty;
+            mutable glm::mat4 mViewMat;
+            mutable glm::mat4 mProjMat;
+            mutable bool mViewMatDirty;
+            mutable bool mProjMatDirty;
 
     };
 

@@ -21,35 +21,35 @@ namespace neo {
             static void shutDown();
 
             static void setSize(const glm::ivec2 &);
-            static glm::ivec2 getSize() { return fullscreen ? fullscreenSize : windowSize; }
-            static glm::ivec2 getFrameSize() { return frameSize; }
-            static float getAspectRatio() { return frameSize.x / (float)frameSize.y; }
-            static GLFWwindow * getWindow() { return window; }
+            static glm::ivec2 getSize() { return mFullscreen ? mFullscreenSize : mWindowSize; }
+            static glm::ivec2 getFrameSize() { return mFrameSize; }
+            static float getAspectRatio() { return mFrameSize.x / (float)mFrameSize.y; }
+            static GLFWwindow * getWindow() { return mWindow; }
 
-            static bool isFullscreen() { return fullscreen; }
+            static bool isFullscreen() { return mFullscreen; }
 
             static void toggleVSync();
-            static bool isVSyncEnabled() { return vSyncEnabled; }
+            static bool isVSyncEnabled() { return mVSyncEnabled; }
 
         private:
             /* GLFW Window */
-            static GLFWwindow * window;
-            static glm::ivec2 frameSize;
-            static glm::ivec2 windowSize;
-            static glm::ivec2 windowPos;
-            static glm::ivec2 fullscreenSize;
-            static bool fullscreen;
-            static bool vSyncEnabled;
+            static GLFWwindow* mWindow;
+            static glm::ivec2 mFrameSize;
+            static glm::ivec2 mWindowSize;
+            static glm::ivec2 mWindowPos;
+            static glm::ivec2 mFullscreenSize;
+            static bool mFullscreen;
+            static bool mVSyncEnabled;
 
             /* Callbacks */
-            static void errorCallback(int, const char *);
-            static void keyCallback(GLFWwindow *, int, int, int, int);
-            static void mouseButtonCallback(GLFWwindow *, int, int, int);
-            static void scrollCallback(GLFWwindow *, double dx, double dy);
-            static void characterCallback(GLFWwindow *, unsigned int);
-            static void windowSizeCallback(GLFWwindow *, int width, int height);
-            static void framebufferSizeCallback(GLFWwindow *, int width, int height);
-            static void cursorEnterCallback(GLFWwindow * window, int entered);
+            static void _errorCallback(int, const char *);
+            static void _keyCallback(GLFWwindow *, int, int, int, int);
+            static void _mouseButtonCallback(GLFWwindow *, int, int, int);
+            static void _scrollCallback(GLFWwindow *, double dx, double dy);
+            static void _characterCallback(GLFWwindow *, unsigned int);
+            static void _windowSizeCallback(GLFWwindow *, int width, int height);
+            static void _framebufferSizeCallback(GLFWwindow *, int width, int height);
+            static void _cursorEnterCallback(GLFWwindow * window, int entered);
 
 
     };

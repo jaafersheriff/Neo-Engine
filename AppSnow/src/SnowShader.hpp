@@ -48,17 +48,17 @@ namespace neo {
 
                     /* Bind mesh */
                     const Mesh & mesh(model->getMesh());
-                    CHECK_GL(glBindVertexArray(mesh.vaoId));
-                    CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
+                    CHECK_GL(glBindVertexArray(mesh.mVAOID));
+                    CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                     /* Bind material */
                     auto materialComp = model->getGameObject().getComponentByType<MaterialComponent>();
                     if (materialComp) {
                         const Material &material = materialComp->getMaterial();
-                        loadUniform("ambient", material.ambient);
-                        loadUniform("diffuseColor", material.diffuse);
-                        loadUniform("specularColor", material.specular);
-                        loadUniform("shine", material.shine);
+                        loadUniform("ambient", material.mAmbient);
+                        loadUniform("diffuseColor", material.mDiffuse);
+                        loadUniform("specularColor", material.mSpecular);
+                        loadUniform("shine", material.mShine);
                     }
 
                     /* DRAW */

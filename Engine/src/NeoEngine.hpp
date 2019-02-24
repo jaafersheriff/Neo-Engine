@@ -50,9 +50,9 @@ namespace neo {
             static void initSystems();
 
             /* Getters */
-            static const std::vector<GameObject *> & getGameObjects() { return reinterpret_cast<const std::vector<GameObject *> &>(gameObjects); }
+            static const std::vector<GameObject *> & getGameObjects() { return reinterpret_cast<const std::vector<GameObject *> &>(mGameObjects); }
             template <typename SysT> static SysT & getSystem();
-            static const std::vector<std::pair<std::type_index, System *>> & getSystems() { return reinterpret_cast<const std::vector<std::pair<std::type_index, System *>> &>(systems); }
+            static const std::vector<std::pair<std::type_index, System *>> & getSystems() { return reinterpret_cast<const std::vector<std::pair<std::type_index, System *>> &>(mSystems); }
             template <typename CompT> static const std::vector<CompT *> & getComponents();
 
             /* ImGui */
@@ -64,21 +64,21 @@ namespace neo {
 
         private:
             /* Initialize / kill queues */
-            static std::vector<std::unique_ptr<GameObject>> gameObjectInitQueue;
-            static std::vector<std::pair<std::type_index, std::unique_ptr<Component>>> componentInitQueue;
-            static void processInitQueue();
-            static void initGameObjects();
-            static void initComponents();
-            static std::vector<GameObject *> gameObjectKillQueue;
-            static std::vector<std::pair<std::type_index, Component *>> componentKillQueue;
-            static void processKillQueue();
-            static void killGameObjects();
-            static void killComponents();
+            static std::vector<std::unique_ptr<GameObject>> mGameObjectInitQueue;
+            static std::vector<std::pair<std::type_index, std::unique_ptr<Component>>> mComponentInitQueue;
+            static void _processInitQueue();
+            static void _initGameObjects();
+            static void _initComponents();
+            static std::vector<GameObject *> mGameObjectKillQueue;
+            static std::vector<std::pair<std::type_index, Component *>> mComponentKillQueue;
+            static void _processKillQueue();
+            static void _killGameObjects();
+            static void _killComponents();
 
             /* Active containers */
-            static std::vector<std::unique_ptr<GameObject>> gameObjects;
-            static std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> components;
-            static std::vector<std::pair<std::type_index, std::unique_ptr<System>>> systems;
+            static std::vector<std::unique_ptr<GameObject>> mGameObjects;
+            static std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> mComponents;
+            static std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
     };
 
     /* Template implementation */
@@ -93,8 +93,8 @@ namespace neo {
         static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
-        componentInitQueue.emplace_back(typeid(SuperT), std::make_unique<CompT>(CompT(gameObject, std::forward<Args>(args)...)));
-        return static_cast<CompT &>(*componentInitQueue.back().second);
+        mComponentInitQueue.emplace_back(typeid(SuperT), std::make_unique<CompT>(CompT(gameObject, std::forward<Args>(args)...)));
+        return static_cast<CompT &>(*mComponentInitQueue.back().second);
     }
 
     template <typename SysT, typename... Args> 
@@ -102,14 +102,14 @@ namespace neo {
         static_assert(std::is_base_of<System, SysT>::value, "SysT must be a System type");
         static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived System type");
         std::type_index typeI(typeid(SysT));
-        for (auto & sys : systems) {
+        for (auto & sys : mSystems) {
             if (sys.first == typeI) {
                 return static_cast<SysT &>(*sys.second);
             }
         }
 
-        systems.push_back({ typeI, std::make_unique<SysT>(std::forward<Args>(args)...) });
-        return static_cast<SysT &>(*systems.back().second);
+        mSystems.push_back({ typeI, std::make_unique<SysT>(std::forward<Args>(args)...) });
+        return static_cast<SysT &>(*mSystems.back().second);
     }
 
     template <typename SysT> 
@@ -118,7 +118,7 @@ namespace neo {
         static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived System type");
 
         std::type_index typeI(typeid(SysT));
-        for (auto & sys : systems) {
+        for (auto & sys : mSystems) {
             if (sys.first == typeI) {
                 // this is valid because unique_ptr<T> is exactly the same data as T *
                 return reinterpret_cast<SysT &>(*sys.second);
@@ -136,8 +136,8 @@ namespace neo {
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
-        assert(components.count(typeid(CompT))); // trying to remove a type of component that was never added
-        componentKillQueue.emplace_back(typeid(CompT), static_cast<Component *>(&component));
+        assert(mComponents.count(typeid(CompT))); // trying to remove a type of component that was never added
+        mComponentKillQueue.emplace_back(typeid(CompT), static_cast<Component *>(&component));
     }
 
     template <typename CompT>
@@ -146,10 +146,10 @@ namespace neo {
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
         std::type_index typeI(typeid(CompT));
-        auto it(components.find(typeI));
-        if (it == components.end()) {
-            components.emplace(typeI, std::make_unique<std::vector<std::unique_ptr<Component>>>());
-            it = components.find(typeI);
+        auto it(mComponents.find(typeI));
+        if (it == mComponents.end()) {
+            mComponents.emplace(typeI, std::make_unique<std::vector<std::unique_ptr<Component>>>());
+            it = mComponents.find(typeI);
         }
         // this is valid because unique_ptr<T> is exactly the same data as T *
         return reinterpret_cast<const std::vector<CompT *> &>(*(it->second));

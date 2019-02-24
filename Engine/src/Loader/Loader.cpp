@@ -21,44 +21,43 @@ namespace neo {
     std::string Loader::RES_DIR = "";
 
     /* Library */
-    std::unordered_map<std::string, Mesh *> Loader::meshes;
-    std::unordered_map<std::string, Texture *> Loader::textures;
-    std::unordered_map<std::string, Framebuffer *> Loader::framebuffers;
-    std::unordered_map<std::string, Material *> Loader::materials;
+    std::unordered_map<std::string, Mesh *> Loader::mMeshes;
+    std::unordered_map<std::string, Texture *> Loader::mTextures;
+    std::unordered_map<std::string, Framebuffer *> Loader::mFramebuffers;
+    std::unordered_map<std::string, Material *> Loader::mMaterials;
 
     void Loader::init(const std::string &res, bool v) {
         RES_DIR = res;
         verbose = v;
-
     }
 
-    Mesh * Loader::getMesh(const std::string &fileName, bool doResize) {
+    Mesh* Loader::getMesh(const std::string &fileName, bool doResize) {
         /* Search map first */
-        auto it = meshes.find(fileName);
-        if (it != meshes.end()) {
+        auto it = mMeshes.find(fileName);
+        if (it != mMeshes.end()) {
             return it->second;
         }
 
         /* Check with static meshes first */
         if (!std::strcmp(fileName.c_str(), "cube")) {
-            meshes.insert({ "cube", MeshGenerator::createCube() });
-            return meshes.find(fileName)->second;
+            mMeshes.insert({ "cube", MeshGenerator::createCube() });
+            return mMeshes.find(fileName)->second;
         }
         if (!std::strcmp(fileName.c_str(), "quad")) {
-            meshes.insert({ "quad", MeshGenerator::createQuad() });
-            return meshes.find(fileName)->second;
+            mMeshes.insert({ "quad", MeshGenerator::createQuad() });
+            return mMeshes.find(fileName)->second;
         }
         if (!std::strcmp(fileName.c_str(), "sphere")) {
             Mesh *mesh = MeshGenerator::createSphere(3);
-            meshes.insert({ "sphere", mesh });
+            mMeshes.insert({ "sphere", mesh });
             // sphere defaults to ico_2
-            meshes.insert({ "ico_2", mesh });
-            return meshes.find(fileName)->second;
+            mMeshes.insert({ "ico_2", mesh });
+            return mMeshes.find(fileName)->second;
         }
         if (!std::strncmp(fileName.c_str(), "ico_", 4)) {
             int recursions = std::stoi(fileName.c_str() + 4);
-            meshes.insert({ "ico_" + std::to_string(recursions), MeshGenerator::createSphere(recursions) });
-            return meshes.find(fileName)->second;
+            mMeshes.insert({ "ico_" + std::to_string(recursions), MeshGenerator::createSphere(recursions) });
+            return mMeshes.find(fileName)->second;
         }
 
         /* If mesh was not found in map, read it in */
@@ -80,31 +79,31 @@ namespace neo {
         /* For every shape in the loaded file */
         for (unsigned int i = 0; i < shapes.size(); i++) {
             /* Concatenate the shape's vertices, normals, and textures to the mesh */
-            mesh->buffers.vertBuf.insert(mesh->buffers.vertBuf.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
-            mesh->buffers.norBuf.insert(mesh->buffers.norBuf.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
-            mesh->buffers.texBuf.insert(mesh->buffers.texBuf.end(), shapes[i].mesh.texcoords.begin(), shapes[i].mesh.texcoords.end());
+            mesh->mBuffers.vertBuf.insert(mesh->mBuffers.vertBuf.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
+            mesh->mBuffers.norBuf.insert(mesh->mBuffers.norBuf.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
+            mesh->mBuffers.texBuf.insert(mesh->mBuffers.texBuf.end(), shapes[i].mesh.texcoords.begin(), shapes[i].mesh.texcoords.end());
 
             /* Concatenate the shape's indices to the new mesh
              * Indices need to be incremented as we concatenate shapes */
             for (unsigned int i : shapes[i].mesh.indices) {
-                mesh->buffers.eleBuf.push_back(i + vertCount);
+                mesh->mBuffers.eleBuf.push_back(i + vertCount);
             }
             vertCount += int(shapes[i].mesh.positions.size()) / 3;
         }
 
         /* Provide VBO info */
-        mesh->vertBufSize = int(mesh->buffers.vertBuf.size());
-        mesh->norBufSize = int(mesh->buffers.norBuf.size());
-        mesh->texBufSize = int(mesh->buffers.texBuf.size());
-        mesh->eleBufSize = int(mesh->buffers.eleBuf.size());
+        mesh->mVertexBufferSize = int(mesh->mBuffers.vertBuf.size());
+        mesh->mNormalBufferSize = int(mesh->mBuffers.norBuf.size());
+        mesh->mTextureBufferSize = int(mesh->mBuffers.texBuf.size());
+        mesh->mElementBufferSize = int(mesh->mBuffers.eleBuf.size());
 
         /* Optional resize */
         if (doResize) {
-            resize(mesh->buffers);
+            _resize(mesh->mBuffers);
         }
 
         /* Add new mesh to library */
-        meshes.insert({ fileName, mesh });
+        mMeshes.insert({ fileName, mesh });
 
         /* Load mesh to GPU */
         mesh->upload();
@@ -116,8 +115,8 @@ namespace neo {
         return mesh;
     }
 
-    Texture2D * Loader::getTexture(const std::string &fileName, GLint inFormat, GLenum format, GLint filter, GLenum mode) {
-        Texture *texture = findTexture(fileName);
+    Texture2D* Loader::getTexture(const std::string &fileName, GLint inFormat, GLenum format, GLint filter, GLenum mode) {
+        Texture *texture = _findTexture(fileName);
 
         /* Create an empty texture if it is not already exist in the library */
         if (!texture) {
@@ -144,13 +143,13 @@ namespace neo {
                 std::cout << "Creating empty texture " << fileName << std::endl;
             }
 
-            textures.insert({ fileName, texture });
+            mTextures.insert({ fileName, texture });
         }
         return (Texture2D *)texture;
     }
 
-    TextureCubeMap * Loader::getTexture(const std::string &name, const std::vector<std::string> & files) {
-        Texture *texture = findTexture(name);
+    TextureCubeMap* Loader::getTexture(const std::string &name, const std::vector<std::string> & files) {
+        Texture *texture = _findTexture(name);
 
         /* Create an empty texture if it is not already exist in the library */
         if (!texture) {
@@ -179,40 +178,40 @@ namespace neo {
                 }
             }
 
-            textures.insert({ name, texture });
+            mTextures.insert({ name, texture });
 
         }
     
         return (TextureCubeMap *) texture;
     }
 
-    Framebuffer * Loader::getFBO(const std::string &name) {
-        auto it = framebuffers.find(name);
-        if (it == framebuffers.end()) {
-            framebuffers.emplace(name, new Framebuffer);
-            it = framebuffers.find(name);
+    Framebuffer* Loader::getFBO(const std::string &name) {
+        auto it = mFramebuffers.find(name);
+        if (it == mFramebuffers.end()) {
+            mFramebuffers.emplace(name, new Framebuffer);
+            it = mFramebuffers.find(name);
         }
         return it->second;
     }
 
-    Material * Loader::getMaterial(const std::string &name, float amb, glm::vec3 dif, glm::vec3 spec, float shine) {
-        auto it = materials.find(name);
-        if (it == materials.end()) {    
-            materials.emplace(name, new Material(amb, dif, spec, shine));
-            it = materials.find(name);
+    Material* Loader::getMaterial(const std::string &name, float amb, glm::vec3 dif, glm::vec3 spec, float shine) {
+        auto it = mMaterials.find(name);
+        if (it == mMaterials.end()) {    
+            mMaterials.emplace(name, new Material(amb, dif, spec, shine));
+            it = mMaterials.find(name);
         }
         else {
-            it->second->ambient = amb;
-            it->second->diffuse = dif;
-            it->second->specular = spec;
-            it->second->shine = shine;
+            it->second->mAmbient = amb;
+            it->second->mDiffuse = dif;
+            it->second->mSpecular = spec;
+            it->second->mShine = shine;
         }
         return it->second;
     }
 
-    Texture * Loader::findTexture(const std::string &name) {
-        auto it = textures.find(name);
-        if (it == textures.end()) {
+    Texture* Loader::_findTexture(const std::string &name) {
+        auto it = mTextures.find(name);
+        if (it == mTextures.end()) {
             return nullptr;
         }
         else {
@@ -221,7 +220,7 @@ namespace neo {
     }
 
     /* Provided function to resize a mesh so all vertex positions are [0, 1.f] */
-    void Loader::resize(Mesh::MeshBuffers & buffers) {
+    void Loader::_resize(Mesh::MeshBuffers & buffers) {
         float minX, minY, minZ;
         float maxX, maxY, maxZ;
         float scaleX, scaleY, scaleZ;

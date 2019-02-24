@@ -24,8 +24,8 @@ class SinMoveComponent : public Component {
 
         virtual void update(float dt) override {
             c += dt;    // could also use neoengine::getcurrtime
-            glm::vec3 oldPos = gameObject->getSpatial()->getPosition();
+            glm::vec3 oldPos = mGameObject->getSpatial()->getPosition();
             oldPos.y = baseY + glm::cos(c) * offset;
-            gameObject->getSpatial()->setPosition(oldPos);
+            mGameObject->getSpatial()->setPosition(oldPos);
         }
 };

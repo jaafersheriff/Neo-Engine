@@ -8,70 +8,70 @@ namespace neo {
 
         public:
             Orientable() :
-                u(1.f, 0.f, 0.f),
-                v(0.f, 1.f, 0.f),
-                w(0.f, 0.f, 1.f),
-                orientation(),
-                orientationDirty(false)
+                mU(1.f, 0.f, 0.f),
+                mV(0.f, 1.f, 0.f),
+                mW(0.f, 0.f, 1.f),
+                mOrientation(),
+                mOrientationDirty(false)
             {}
 
             Orientable(const glm::vec3 & u, const glm::vec3 & v, const glm::vec3 & w) :
-                u(u),
-                v(v),
-                w(w),
-                orientation(),
-                orientationDirty(true)
+                mU(u),
+                mV(v),
+                mW(w),
+                mOrientation(),
+                mOrientationDirty(true)
             {}
 
             virtual ~Orientable() = default;
 
             /* Update */
             virtual void rotate(const glm::mat3 & mat) {
-                orientation = mat * orientation;
-                orientationDirty = false;
-                detUVW();
+                mOrientation = mat * mOrientation;
+                mOrientationDirty = false;
+                _detUVW();
             }
 
             /* Setters */
             virtual void setOrientation(const glm::mat3 & o) {
-                orientation = o;
-                orientationDirty = false;
-                detUVW();
+                mOrientation = o;
+                mOrientationDirty = false;
+                _detUVW();
             }
             virtual void setUVW(const glm::vec3 & u, const glm::vec3 & v, const glm::vec3 & w) {
-                this->u = glm::normalize(u);
-                this->v = glm::normalize(v);
-                this->w = glm::normalize(w);
-                orientationDirty = true;
+                this->mU = glm::normalize(u);
+                this->mV = glm::normalize(v);
+                this->mW = glm::normalize(w);
+                mOrientationDirty = true;
             }
 
             /* Getters */
-            virtual const glm::vec3 & getU() const { return u; }
-            virtual const glm::vec3 & getV() const { return v; }
-            virtual const glm::vec3 & getW() const { return w; }
+            virtual const glm::vec3 & getU() const { return mU; }
+            virtual const glm::vec3 & getV() const { return mV; }
+            virtual const glm::vec3 & getW() const { return mW; }
             virtual const glm::mat3 & getOrientation() const {
-                if (orientationDirty) {
-                    detOrientation();
+                if (mOrientationDirty) {
+                    _detOrientation();
                 }
-                return orientation;
+                return mOrientation;
             }
 
         private:    
-            void detOrientation() const {
-                orientation = glm::mat3(u, v, w);
-                orientationDirty = false;
+            void _detOrientation() const {
+                mOrientation = glm::mat3(mU, mV, mW);
+                mOrientationDirty = false;
             }
 
-            void detUVW() {
-                glm::mat3 trans(glm::transpose(orientation));
-                u = glm::normalize(trans[0]);
-                v = glm::normalize(trans[1]);
-                w = glm::normalize(trans[2]);
+            void _detUVW() {
+                glm::mat3 trans(glm::transpose(mOrientation));
+                mU = glm::normalize(trans[0]);
+                mV = glm::normalize(trans[1]);
+                mW = glm::normalize(trans[2]);
             }
 
-            glm::vec3 u, v, w;
-            mutable glm::mat3 orientation;
-            mutable bool orientationDirty;
+            glm::vec3 mU, mV, mW;
+            mutable glm::mat3 mOrientation;
+            mutable bool mOrientationDirty;
 
     };
 

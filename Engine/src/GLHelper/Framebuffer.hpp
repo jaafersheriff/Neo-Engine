@@ -14,16 +14,16 @@ namespace neo {
     class Framebuffer {
     
        public: 
-            GLuint fboId;
-            int colorAttachments = 0;
-            std::vector<Texture *> textures;
+            GLuint mFBOID;
+            int mColorAttachments = 0;
+            std::vector<Texture *> mTextures;
 
             void generate() {
-                CHECK_GL(glGenFramebuffers(1, &fboId));
+                CHECK_GL(glGenFramebuffers(1, &mFBOID));
             }
 
             void bind() {
-                CHECK_GL(glBindFramebuffer(GL_FRAMEBUFFER, fboId));
+                CHECK_GL(glBindFramebuffer(GL_FRAMEBUFFER, mFBOID));
             }
 
             void disableDraw() {
@@ -42,7 +42,7 @@ namespace neo {
                 t->mHeight = size.y;
                 t->mComponents = comp;
                 t->upload(inFormat, format, filter, mode);
-                attachTexture(GL_COLOR_ATTACHMENT0 + colorAttachments++, *t);
+                attachTexture(GL_COLOR_ATTACHMENT0 + mColorAttachments++, *t);
             }
 
             void attachDepthTexture(glm::ivec2 size, GLint filter, GLenum mode) {
@@ -55,29 +55,29 @@ namespace neo {
             }
 
             void initDrawBuffers() {
-                if (!colorAttachments) {
+                if (!mColorAttachments) {
                     return;
                 }
 
                 bind();
                 std::vector<GLenum> attachments;
-                for (int i = 0; i < colorAttachments; i++) {
+                for (int i = 0; i < mColorAttachments; i++) {
                     attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
                 }
-                CHECK_GL(glDrawBuffers(colorAttachments, attachments.data()));
+                CHECK_GL(glDrawBuffers(mColorAttachments, attachments.data()));
             }
 
             void resize(const glm::uvec2 size) {
                 bind();
                 CHECK_GL(glViewport(0, 0, size.x, size.y));
-                for (auto& texture : textures) {
+                for (auto& texture : mTextures) {
                     texture->resize(size);
                 }
             }
 
         private:
             void attachTexture(GLuint component, Texture &texture) {
-                textures.emplace_back(&texture);
+                mTextures.emplace_back(&texture);
                 bind();
                 CHECK_GL(glFramebufferTexture2D(GL_FRAMEBUFFER, component, GL_TEXTURE_2D, texture.mTextureID, 0));
                 CHECK_GL_FRAMEBUFFER();

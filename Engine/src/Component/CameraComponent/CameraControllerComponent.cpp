@@ -12,35 +12,37 @@ namespace neo {
 
     CameraControllerComponent::CameraControllerComponent(GameObject *go, float lookSpeed, float moveSpeed) :
         Component(go),
-        theta(0.f),
-        phi(Util::PI() * 0.5f),
-        lookSpeed(lookSpeed),
-        moveSpeed(moveSpeed) {
+        mTheta(0.f),
+        mPhi(Util::PI() * 0.5f),
+        mLookSpeed(lookSpeed),
+        mMoveSpeed(moveSpeed) {
         setButtons(GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_E, GLFW_KEY_Q);
     }
 
     void CameraControllerComponent::setButtons(int f, int b, int l, int r, int u, int d) {
-        forwardButton  = f;
-        backwardButton = b;
-        rightButton    = r;
-        leftButton     = l;
-        upButton       = u;
-        downButton     = d;
+        mForwardButton  = f;
+        mBackwardButton = b;
+        mRightButton    = r;
+        mLeftButton     = l;
+        mUpButton       = u;
+        mDownButton     = d;
     }
 
     void CameraControllerComponent::update(float dt) {
-        if (Mouse::isDown(GLFW_MOUSE_BUTTON_1) && (Mouse::dx || Mouse::dy)) {
-            theta -= float(Mouse::dx) * lookSpeed * dt;
-            phi   += float(Mouse::dy) * lookSpeed * dt;
-            updateSpatialOrientation();
+        glm::vec2 mousePos = Mouse::getPos();
+        glm::vec2 mouseSpeed = Mouse::getSpeed();
+        if (Mouse::isDown(GLFW_MOUSE_BUTTON_1) && (mousePos.x || mousePos.y)) {
+            mTheta -= mouseSpeed.x * mLookSpeed * dt;
+            mPhi   += mouseSpeed.y * mLookSpeed * dt;
+            _updateSpatialOrientation();
         }
 
-        int forward(Keyboard::isKeyPressed(forwardButton));
-        int backward(Keyboard::isKeyPressed(backwardButton));
-        int right(Keyboard::isKeyPressed(rightButton));
-        int left(Keyboard::isKeyPressed(leftButton));
-        int up(Keyboard::isKeyPressed(upButton));
-        int down(Keyboard::isKeyPressed(downButton));
+        int forward(Keyboard::isKeyPressed(mForwardButton));
+        int backward(Keyboard::isKeyPressed(mBackwardButton));
+        int right(Keyboard::isKeyPressed(mRightButton));
+        int left(Keyboard::isKeyPressed(mLeftButton));
+        int up(Keyboard::isKeyPressed(mUpButton));
+        int down(Keyboard::isKeyPressed(mDownButton));
 
         glm::vec3 dir(
             float(right - left),
@@ -49,38 +51,38 @@ namespace neo {
         );
 
         if (dir != glm::vec3()) {
-            auto spatial = gameObject->getSpatial();
+            auto spatial = mGameObject->getSpatial();
             dir = glm::normalize(dir);
             dir = glm::normalize(
                 spatial->getU() * dir.x + 
                 glm::vec3(0.f, 1.f, 0.f) * dir.y + 
                 spatial->getW() * dir.z);
-            spatial->move(dir * moveSpeed * dt);
+            spatial->move(dir * mMoveSpeed * dt);
         }
     }
 
     void CameraControllerComponent::setOrientation(float theta, float phi) {
-        this->theta = theta;
-        this->phi = phi;
-        updateSpatialOrientation();
+        this->mTheta = theta;
+        this->mPhi = phi;
+        _updateSpatialOrientation();
     }
 
-    void CameraControllerComponent::updateSpatialOrientation() {
-        if (theta > Util::PI()) {
-            theta = std::fmod(theta, Util::PI()) - Util::PI();
+    void CameraControllerComponent::_updateSpatialOrientation() {
+        if (mTheta > Util::PI()) {
+            mTheta = std::fmod(mTheta, Util::PI()) - Util::PI();
         }
-        else if (theta < -Util::PI()) {
-            theta = Util::PI() - std::fmod(-theta, Util::PI());
+        else if (mTheta < -Util::PI()) {
+            mTheta = Util::PI() - std::fmod(-mTheta, Util::PI());
         }
 
         /* phi [0.f, pi] */
-        phi = glm::max(glm::min(phi, Util::PI()), 0.f);
+        mPhi = glm::max(glm::min(mPhi, Util::PI()), 0.f);
 
-        glm::vec3 w(-Util::sphericalToCartesian(1.0f, theta, phi));
+        glm::vec3 w(-Util::sphericalToCartesian(1.0f, mTheta, mPhi));
         w = glm::vec3(-w.y, w.z, -w.x); // one of the many reasons I like z to be up
-        glm::vec3 v(Util::sphericalToCartesian(1.0f, theta, phi - Util::PI() * 0.5f));
+        glm::vec3 v(Util::sphericalToCartesian(1.0f, mTheta, mPhi - Util::PI() * 0.5f));
         v = glm::vec3(-v.y, v.z, -v.x);
         glm::vec3 u(glm::cross(v, w));
-        gameObject->getSpatial()->setUVW(u, v, w);
+        mGameObject->getSpatial()->setUVW(u, v, w);
     }
 }

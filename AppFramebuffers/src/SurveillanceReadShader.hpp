@@ -24,14 +24,14 @@ class SurveillanceReadShader : public Shader {
 
             /* Bind mesh */
             auto mesh(Loader::getMesh("quad"));
-            CHECK_GL(glBindVertexArray(mesh->vaoId));
+            CHECK_GL(glBindVertexArray(mesh->mVAOID));
 
             for (auto camera : NeoEngine::getComponents<SurveillanceCamera>()) {
                 loadUniform("M", camera->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind texture */
-                camera->fbo->textures[0]->bind();
-                loadUniform("fbo", camera->fbo->textures[0]->mTextureID);
+                camera->fbo->mTextures[0]->bind();
+                loadUniform("fbo", camera->fbo->mTextures[0]->mTextureID);
 
                 /* DRAW */
                 mesh->draw();

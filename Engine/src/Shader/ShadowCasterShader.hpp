@@ -35,14 +35,14 @@ namespace neo {
                 depthFBO->attachDepthTexture(glm::ivec2(2048), GL_LINEAR, GL_CLAMP_TO_BORDER);
                 depthFBO->disableDraw();
                 depthFBO->disableRead();
-                CHECK_GL(glBindTexture(GL_TEXTURE_2D, depthFBO->textures[0]->mTextureID));
+                CHECK_GL(glBindTexture(GL_TEXTURE_2D, depthFBO->mTextures[0]->mTextureID));
                 CHECK_GL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data()));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
             }
 
             virtual void render(const CameraComponent &) override {
                 auto fbo = Loader::getFBO("depthMap");
-                auto & depthTexture = fbo->textures[0];
+                auto & depthTexture = fbo->mTextures[0];
 
                 fbo->bind();
                 CHECK_GL(glClear(GL_DEPTH_BUFFER_BIT));
@@ -59,8 +59,8 @@ namespace neo {
 
                     /* Bind mesh */
                     const Mesh & mesh(model->getMesh());
-                    CHECK_GL(glBindVertexArray(mesh.vaoId));
-                    CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
+                    CHECK_GL(glBindVertexArray(mesh.mVAOID));
+                    CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                     /* Bind texture */
                     auto texComp = model->getGameObject().getComponentByType<DiffuseMapComponent>();

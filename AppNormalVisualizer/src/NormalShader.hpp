@@ -33,8 +33,8 @@ class NormalShader : public Shader {
 
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());
-                CHECK_GL(glBindVertexArray(mesh.vaoId));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
+                CHECK_GL(glBindVertexArray(mesh.mVAOID));
+                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                 /* DRAW */
                 mesh.draw();

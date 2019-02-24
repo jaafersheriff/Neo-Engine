@@ -11,24 +11,24 @@ namespace neo {
     struct Util {
         
         static void init() {
-            lastFrameTime = getRunTime();
+            mLastFrameTime = getRunTime();
         }
 
         static void update() {
             /* Update delta time and FPS */
             float runTime = (float)getRunTime();
-            totalFrames++;
-            timeStep = runTime - lastFrameTime;
-            lastFrameTime = runTime;
-            nFrames++;
-            if (runTime - lastFPSTime >= 1.0) {
-                FPS = nFrames;
-                if (FPSList.size() == 25) {
-                    FPSList.erase(FPSList.begin());
+            mTotalFrames++;
+            mTimeStep = runTime - mLastFrameTime;
+            mLastFrameTime = runTime;
+            mFramesInCount++;
+            if (runTime - mLastFPSTime >= 1.0) {
+                mFPS = mFramesInCount;
+                if (mFPSList.size() == 25) {
+                    mFPSList.erase(mFPSList.begin());
                 }
-                FPSList.push_back(FPS);
-                nFrames = 0;
-                lastFPSTime = runTime;
+                mFPSList.push_back(mFPS);
+                mFramesInCount = 0;
+                mLastFPSTime = runTime;
             }
         }
 
@@ -134,14 +134,14 @@ namespace neo {
 
         /* FPS*/
         public:
-            static std::vector<int> FPSList;
-            static int FPS;                 /* Frames per second */
-            static double timeStep;         /* Delta time */
-            static int totalFrames;         /* Total frames since start up */
+            static std::vector<int> mFPSList;
+            static int mFPS;                 /* Frames per second */
+            static double mTimeStep;         /* Delta time */
+            static int mTotalFrames;         /* Total frames since start up */
         private:
-            static double lastFPSTime;      /* Time at which last FPS was calculated */
-            static int nFrames;             /* Number of frames in current second */
-            static double lastFrameTime;    /* Time at which last frame was rendered */
+            static double mLastFPSTime;      /* Time at which last FPS was calculated */
+            static int mFramesInCount;       /* Number of frames in current second */
+            static double mLastFrameTime;    /* Time at which last frame was rendered */
 
 
     };

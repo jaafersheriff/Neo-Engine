@@ -8,24 +8,24 @@ namespace neo {
     class MeshGenerator {
 
     private:
-        static Mesh* createMesh(const std::vector<float> &vert, const std::vector<float> &norm, const std::vector<float> &tex, const std::vector<unsigned> &ele, unsigned mode = GL_TRIANGLES) {
+        static Mesh* _createMesh(const std::vector<float> &vert, const std::vector<float> &norm, const std::vector<float> &tex, const std::vector<unsigned> &ele, unsigned mode = GL_TRIANGLES) {
             Mesh *mesh = new Mesh;
-            mesh->buffers.vertBuf.insert(mesh->buffers.vertBuf.begin(), vert.begin(), vert.end());
-            mesh->buffers.norBuf.insert(mesh->buffers.norBuf.begin(), norm.begin(), norm.end());
-            mesh->buffers.texBuf.insert(mesh->buffers.texBuf.begin(), tex.begin(), tex.end());
-            mesh->buffers.eleBuf.insert(mesh->buffers.eleBuf.begin(), ele.begin(), ele.end());
-            mesh->vertBufSize = mesh->buffers.vertBuf.size();
-            mesh->norBufSize = mesh->buffers.norBuf.size();
-            mesh->texBufSize = mesh->buffers.texBuf.size();
-            mesh->eleBufSize = mesh->buffers.eleBuf.size();
+            mesh->mBuffers.vertBuf.insert(mesh->mBuffers.vertBuf.begin(), vert.begin(), vert.end());
+            mesh->mBuffers.norBuf.insert(mesh->mBuffers.norBuf.begin(), norm.begin(), norm.end());
+            mesh->mBuffers.texBuf.insert(mesh->mBuffers.texBuf.begin(), tex.begin(), tex.end());
+            mesh->mBuffers.eleBuf.insert(mesh->mBuffers.eleBuf.begin(), ele.begin(), ele.end());
+            mesh->mVertexBufferSize = mesh->mBuffers.vertBuf.size();
+            mesh->mNormalBufferSize = mesh->mBuffers.norBuf.size();
+            mesh->mTextureBufferSize = mesh->mBuffers.texBuf.size();
+            mesh->mElementBufferSize = mesh->mBuffers.eleBuf.size();
             mesh->upload(mode);
             return mesh;
         }
 
         public:
 
-            static Mesh * createCube() {
-                return createMesh(
+            static Mesh* createCube() {
+                return _createMesh(
                     {-0.5f, -0.5f, -0.5f,
                       0.5f,  0.5f, -0.5f,
                       0.5f, -0.5f, -0.5f,
@@ -113,8 +113,8 @@ namespace neo {
                 );
             }
 
-            static Mesh * createQuad() {
-                return createMesh(
+            static Mesh* createQuad() {
+                return _createMesh(
                     {-0.5f, -0.5f,  0.f,
                       0.5f, -0.5f,  0.f,
                      -0.5f,  0.5f,  0.f,
@@ -130,7 +130,7 @@ namespace neo {
             }
 
             // http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
-            static Mesh * createSphere(int recursions) {
+            static Mesh* createSphere(int recursions) {
 	            float t = (float) (1.f + (glm::sqrt(5.0)) / 2.f);
                 float length = glm::length(glm::vec3(1, 0, t));
                 std::vector<float> verts = {
@@ -221,7 +221,7 @@ namespace neo {
                     tex.push_back(glm::clamp(0.5f + std::asin(verts[i+1]) / Util::PI(), 0.f, 1.f));
                 }
 
-                return createMesh(
+                return _createMesh(
                     verts,
                     verts,
                     tex,
@@ -233,7 +233,7 @@ namespace neo {
             //  Take height map as input
             //  Move this to its own terrain generator class?
             //  Calculate normals based on verts
-            static Mesh * createPlane(float h, int VERTEX_COUNT, int SIZE) {
+            static Mesh* createPlane(float h, int VERTEX_COUNT, int SIZE) {
                 int count = VERTEX_COUNT * VERTEX_COUNT;
                 std::vector<std::vector<float>> heights;
                 std::vector<float> vertices;
@@ -278,7 +278,7 @@ namespace neo {
                         indices[pointer++] = bottomRight;
                     }
                 }
-                return createMesh(
+                return _createMesh(
                     vertices,
                     normals,
                     textureCoords,

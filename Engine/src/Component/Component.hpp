@@ -7,7 +7,7 @@ namespace neo {
     class Component {
 
         public:
-            Component(GameObject *go) : gameObject(go) {};
+            Component(GameObject *go) : mGameObject(go) {};
 
             /* Overridden functions */
             virtual void init() {};
@@ -23,11 +23,11 @@ namespace neo {
             /* Virtual destructor necessary for polymorphic destruction */
             virtual ~Component() = default;
 
-            GameObject & getGameObject() { return *gameObject; }
-            const GameObject & getGameObject() const { return *gameObject; }
-            void removeGameObject() { gameObject = nullptr; }
+            GameObject & getGameObject() { return *mGameObject; }
+            const GameObject & getGameObject() const { return *mGameObject; }
+            void removeGameObject() { mGameObject = nullptr; }
                  
         protected:
-            GameObject * gameObject;
+            GameObject* mGameObject;
     };
 }

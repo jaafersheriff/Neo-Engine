@@ -17,7 +17,7 @@ class RefractionRenderable : public RenderableComponent {
 
         virtual void update(float dt) override {
             rotation += dt;
-            gameObject->getSpatial()->setOrientation(glm::mat3(glm::rotate(glm::mat4(1.f), rotation, glm::vec3(0,1,0))));
+            mGameObject->getSpatial()->setOrientation(glm::mat3(glm::rotate(glm::mat4(1.f), rotation, glm::vec3(0,1,0))));
         }
 
         float ratio;

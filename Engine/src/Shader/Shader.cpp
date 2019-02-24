@@ -8,7 +8,7 @@
 
 namespace neo {
     Shader::Shader(const std::string &name) :
-        name(name)
+        mName(name)
     {}
 
     Shader::Shader(const std::string &name, const std::string &v, const std::string &f) :
@@ -32,43 +32,43 @@ namespace neo {
     {}
 
     Shader::Shader(const std::string &name, const char *vTex, const char *fTex, const char *gTex) :
-        name(name) {
-        pid = glCreateProgram();
-        if (vTex && (vShaderId = compileShader(GL_VERTEX_SHADER, vTex))) {
-            CHECK_GL(glAttachShader(pid, vShaderId));
+        mName(name) {
+        mPID = glCreateProgram();
+        if (vTex && (mVertexID = _compileShader(GL_VERTEX_SHADER, vTex))) {
+            CHECK_GL(glAttachShader(mPID, mVertexID));
         }
-        if (fTex && (fShaderId = compileShader(GL_FRAGMENT_SHADER, fTex))) {
-            CHECK_GL(glAttachShader(pid, fShaderId));
+        if (fTex && (mFragmentID = _compileShader(GL_FRAGMENT_SHADER, fTex))) {
+            CHECK_GL(glAttachShader(mPID, mFragmentID));
         }
-        if (gTex && (gShaderId = compileShader(GL_GEOMETRY_SHADER, gTex))) {
-            CHECK_GL(glAttachShader(pid, gShaderId));
+        if (gTex && (mGeometryID = _compileShader(GL_GEOMETRY_SHADER, gTex))) {
+            CHECK_GL(glAttachShader(mPID, mGeometryID));
         }
-        CHECK_GL(glLinkProgram(pid));
+        CHECK_GL(glLinkProgram(mPID));
 
         // See whether link was successful
         GLint linkSuccess;
-        CHECK_GL(glGetProgramiv(pid, GL_LINK_STATUS, &linkSuccess));
+        CHECK_GL(glGetProgramiv(mPID, GL_LINK_STATUS, &linkSuccess));
         if (!linkSuccess) {
-            GLHelper::printProgramInfoLog(pid);
+            GLHelper::printProgramInfoLog(mPID);
             std::cout << "Error linking shader " << name << std::endl;
             std::cin.get();
             exit(EXIT_FAILURE);
         }
 
-        if (vShaderId) {
-            findAttributesAndUniforms(vTex);
+        if (mVertexID) {
+            _findAttributesAndUniforms(vTex);
         }
-        if (fShaderId) {
-            findAttributesAndUniforms(fTex);
+        if (mFragmentID) {
+            _findAttributesAndUniforms(fTex);
         }
-        if (gShaderId) {
-            findAttributesAndUniforms(gTex);
+        if (mGeometryID) {
+            _findAttributesAndUniforms(gTex);
         }
 
         std::cout << "Successfully compiled and linked " << name << std::endl;
     }
 
-    GLuint Shader::compileShader(GLenum shaderType, const char *shaderString) {
+    GLuint Shader::_compileShader(GLenum shaderType, const char *shaderString) {
         // Create the shader, assign source code, and compile it
         GLuint shader = glCreateShader(shaderType);
         CHECK_GL(glShaderSource(shader, 1, &shaderString, NULL));
@@ -79,7 +79,7 @@ namespace neo {
         CHECK_GL(glGetShaderiv(shader, GL_COMPILE_STATUS, &compileSuccess));
         if (!compileSuccess) {
             GLHelper::printShaderInfoLog(shader);
-            std::cout << "Error compiling " << name;
+            std::cout << "Error compiling " << mName;
             switch (shaderType) {
                 case GL_VERTEX_SHADER:
                     std::cout << " vertex shader";
@@ -101,7 +101,7 @@ namespace neo {
         return shader;
     }
 
-    void Shader::findAttributesAndUniforms(const char *shaderString) {
+    void Shader::_findAttributesAndUniforms(const char *shaderString) {
         char fileText[32768];
         strcpy(fileText, shaderString);
         std::vector<char *> lines;
@@ -153,7 +153,7 @@ namespace neo {
     }
 
     void Shader::bind() {
-        CHECK_GL(glUseProgram(pid));
+        CHECK_GL(glUseProgram(mPID));
     }
 
     void Shader::unbind() {
@@ -161,24 +161,24 @@ namespace neo {
     }
 
     void Shader::addAttribute(const std::string &name) {
-        GLint r = glGetAttribLocation(pid, name.c_str());
+        GLint r = glGetAttribLocation(mPID, name.c_str());
         if (r < 0) {
-            std::cerr << this->name << " WARN: " << name << " cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it\n" << std::endl;
+            std::cerr << this->mName << " WARN: " << name << " cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it\n" << std::endl;
         }
-        attributes[name] = r;
+        mAttributes[name] = r;
     }
 
     void Shader::addUniform(const std::string &name) {
-        GLint r = glGetUniformLocation(pid, name.c_str());
+        GLint r = glGetUniformLocation(mPID, name.c_str());
         if (r < 0) {
-            std::cerr << this->name << " WARN: " << name << " cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it\n" << std::endl;
+            std::cerr << this->mName << " WARN: " << name << " cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it\n" << std::endl;
         }
-        uniforms[name] = r;
+        mUniforms[name] = r;
     }
 
     GLint Shader::getAttribute(const std::string &name) const {
-        std::map<std::string, GLint>::const_iterator attribute = attributes.find(name.c_str());
-        if (attribute == attributes.end()) {
+        std::map<std::string, GLint>::const_iterator attribute = mAttributes.find(name.c_str());
+        if (attribute == mAttributes.end()) {
             std::cerr << name << " is not an attribute variable" << std::endl;
             return -1;
         }
@@ -186,8 +186,8 @@ namespace neo {
     }
 
     GLint Shader::getUniform(const std::string &name) const {
-        std::map<std::string, GLint>::const_iterator uniform = uniforms.find(name.c_str());
-        if (uniform == uniforms.end()) {
+        std::map<std::string, GLint>::const_iterator uniform = mUniforms.find(name.c_str());
+        if (uniform == mUniforms.end()) {
             std::cerr << name << " is not an uniform variable" << std::endl;
             return -1;
         }
@@ -196,13 +196,13 @@ namespace neo {
 
     void Shader::cleanUp() {
         unbind();
-        CHECK_GL(glDetachShader(pid, vShaderId));
-        CHECK_GL(glDetachShader(pid, fShaderId));
-        CHECK_GL(glDetachShader(pid, gShaderId));
-        CHECK_GL(glDeleteShader(vShaderId));
-        CHECK_GL(glDeleteShader(fShaderId));
-        CHECK_GL(glDeleteShader(gShaderId));
-        CHECK_GL(glDeleteProgram(pid));
+        CHECK_GL(glDetachShader(mPID, mVertexID));
+        CHECK_GL(glDetachShader(mPID, mFragmentID));
+        CHECK_GL(glDetachShader(mPID, mGeometryID));
+        CHECK_GL(glDeleteShader(mVertexID));
+        CHECK_GL(glDeleteShader(mFragmentID));
+        CHECK_GL(glDeleteShader(mGeometryID));
+        CHECK_GL(glDeleteProgram(mPID));
     }
 
     void Shader::loadUniform(const std::string &loc, const bool b) const {

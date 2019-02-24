@@ -11,14 +11,14 @@ namespace neo {
         public:
             MaterialComponent(GameObject *go, Material *mat) :
                 Component(go),
-                material(mat)
+                mMaterial(mat)
             {}
 
-            const Material & getMaterial() const { return *material; }
+            const Material & getMaterial() const { return *mMaterial; }
 
         protected:
 
-            const Material *material;
+            const Material *mMaterial;
 
     };
 }

@@ -25,10 +25,10 @@ namespace neo {
             virtual ~Shader() = default;
 
             virtual void render(const CameraComponent &) {}
-            bool active = true;
+            bool mActive = true;
 
             /* Names */
-            const std::string name = 0;
+            const std::string mName = 0;
 
             /* Utility functions */
             void bind();
@@ -54,14 +54,14 @@ namespace neo {
 
         private:
             /* GLSL shader attributes */
-            GLuint pid = 0;
-            GLint vShaderId = 0;
-            GLint fShaderId = 0;
-            GLint gShaderId = 0;
-            std::map<std::string, GLint> attributes;
-            std::map<std::string, GLint> uniforms;
+            GLuint mPID = 0;
+            GLint mVertexID = 0;
+            GLint mFragmentID = 0;
+            GLint mGeometryID = 0;
+            std::map<std::string, GLint> mAttributes;
+            std::map<std::string, GLint> mUniforms;
 
-            GLuint compileShader(GLenum, const char *);
-            void findAttributesAndUniforms(const char *);
+            GLuint _compileShader(GLenum, const char *);
+            void _findAttributesAndUniforms(const char *);
     };
 }

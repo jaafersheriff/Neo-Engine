@@ -15,36 +15,36 @@
 
 namespace neo {
 
-    GLFWwindow *Window::window = nullptr;
-    glm::ivec2 Window::frameSize;
-    glm::ivec2 Window::fullscreenSize;
-    glm::ivec2 Window::windowSize(DEFAULT_WITH, DEFAULT_HEIGHT);
-    glm::ivec2 Window::windowPos(0, 0);
-    bool Window::fullscreen = false;
-    bool Window::vSyncEnabled = true;
+    GLFWwindow *Window::mWindow = nullptr;
+    glm::ivec2 Window::mFrameSize;
+    glm::ivec2 Window::mFullscreenSize;
+    glm::ivec2 Window::mWindowSize(DEFAULT_WITH, DEFAULT_HEIGHT);
+    glm::ivec2 Window::mWindowPos(0, 0);
+    bool Window::mFullscreen = false;
+    bool Window::mVSyncEnabled = true;
 
-    void Window::errorCallback(int error, const char *desc) {
+    void Window::_errorCallback(int error, const char *desc) {
         std::cerr << "Error " << error << ": " << desc << std::endl;
     }
 
-    void Window::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+    void Window::_keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
         /* Exit */
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
             return;
         }
 
-        /* Toggle fullscreen (f11 or alt+enter) */
+        /* Toggle mFullscreen (f11 or alt+enter) */
         if ((key == GLFW_KEY_F11 || key == GLFW_KEY_ENTER && mods & GLFW_MOD_ALT) && action == GLFW_PRESS) {
             /* If already full screen */
             if (glfwGetWindowMonitor(window)) {
-                fullscreen = false;
-                glfwSetWindowMonitor(window, nullptr, windowPos.x, windowPos.y, windowSize.x, windowSize.y, GLFW_DONT_CARE);
+                mFullscreen = false;
+                glfwSetWindowMonitor(window, nullptr, mWindowPos.x, mWindowPos.y, mWindowSize.x, mWindowSize.y, GLFW_DONT_CARE);
             }
             /* If windowed */
             else {
-                glfwGetWindowPos(window, &windowPos.x, &windowPos.y);
-                fullscreen = true;
+                glfwGetWindowPos(window, &mWindowPos.x, &mWindowPos.y);
+                mFullscreen = true;
                 GLFWmonitor * monitor(glfwGetPrimaryMonitor());
                 const GLFWvidmode * video(glfwGetVideoMode(monitor));
                 glfwSetWindowMonitor(window, monitor, 0, 0, video->width, video->height, video->refreshRate);
@@ -63,7 +63,7 @@ namespace neo {
         }
     }
 
-    void Window::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
+    void Window::_mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
         if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
         }
@@ -72,49 +72,49 @@ namespace neo {
         }
     }
 
-    void Window::scrollCallback(GLFWwindow * window, double dx, double dy) {
+    void Window::_scrollCallback(GLFWwindow * window, double dx, double dy) {
         if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
         }
    }
 
-    void Window::characterCallback(GLFWwindow *window, unsigned int c) {
+    void Window::_characterCallback(GLFWwindow *window, unsigned int c) {
         if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             ImGui_ImplGlfw_CharCallback(window, c);
         }
     }
 
-    void Window::windowSizeCallback(GLFWwindow * window, int width, int height) {
+    void Window::_windowSizeCallback(GLFWwindow * window, int width, int height) {
         if (width == 0 || height == 0) {
             return;
         }
 
-        if (fullscreen) {
-            fullscreenSize.x = width;
-            fullscreenSize.y = height;
+        if (mFullscreen) {
+            mFullscreenSize.x = width;
+            mFullscreenSize.y = height;
         }
         else {
-            windowSize.x = width;
-            windowSize.y = height;
+            mWindowSize.x = width;
+            mWindowSize.y = height;
         }
     }
 
-    void Window::framebufferSizeCallback(GLFWwindow * window, int width, int height) {
+    void Window::_framebufferSizeCallback(GLFWwindow * window, int width, int height) {
         if (width == 0 || height == 0) {
             return;
         }
 
-        frameSize.x = width; frameSize.y = height;
-        Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, frameSize);
+        mFrameSize.x = width; mFrameSize.y = height;
+        Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, mFrameSize);
     }
 
-    void Window::cursorEnterCallback(GLFWwindow * window, int entered) {
+    void Window::_cursorEnterCallback(GLFWwindow * window, int entered) {
         Mouse::reset();
     }
 
     int Window::initGLFW(const std::string &name) {
         /* Set error callback */
-        glfwSetErrorCallback(errorCallback);
+        glfwSetErrorCallback(_errorCallback);
 
         /* Init GLFW */
         if (!glfwInit()) {
@@ -131,22 +131,22 @@ namespace neo {
         glfwWindowHint(GLFW_AUTO_ICONIFY, false);
 
         /* Create GLFW window */
-        window = glfwCreateWindow(windowSize.x, windowSize.y, name.c_str(), NULL, NULL);
-        if (!window) {
+        mWindow = glfwCreateWindow(mWindowSize.x, mWindowSize.y, name.c_str(), NULL, NULL);
+        if (!mWindow) {
             std::cerr << "Failed to create window" << std::endl;
             glfwTerminate();
             return 1;
         }
-        glfwMakeContextCurrent(window);
+        glfwMakeContextCurrent(mWindow);
 
         /* Set callbacks */
-        glfwSetKeyCallback(window, keyCallback);
-        glfwSetMouseButtonCallback(window, mouseButtonCallback);
-        glfwSetScrollCallback(window, scrollCallback);
-        glfwSetCharCallback(window, characterCallback);
-        glfwSetWindowSizeCallback(window, windowSizeCallback);
-        glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-        glfwSetCursorEnterCallback(window, cursorEnterCallback);
+        glfwSetKeyCallback(mWindow, _keyCallback);
+        glfwSetMouseButtonCallback(mWindow, _mouseButtonCallback);
+        glfwSetScrollCallback(mWindow, _scrollCallback);
+        glfwSetCharCallback(mWindow, _characterCallback);
+        glfwSetWindowSizeCallback(mWindow, _windowSizeCallback);
+        glfwSetFramebufferSizeCallback(mWindow, _framebufferSizeCallback);
+        glfwSetCursorEnterCallback(mWindow, _cursorEnterCallback);
 
         /* Init GLEW */
         glewExperimental = GL_FALSE;
@@ -161,14 +161,14 @@ namespace neo {
             return 1;
         }
         glGetError();
-        glfwSwapInterval(vSyncEnabled);
+        glfwSwapInterval(mVSyncEnabled);
 
-        glfwGetFramebufferSize(window, &frameSize.x, &frameSize.y);
+        glfwGetFramebufferSize(mWindow, &mFrameSize.x, &mFrameSize.y);
 
         /* Init ImGui */
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGui_ImplGlfw_InitForOpenGL(window, false);
+        ImGui_ImplGlfw_InitForOpenGL(mWindow, false);
         ImGui_ImplOpenGL3_Init(glsl_version);
 
         return 0;
@@ -176,12 +176,12 @@ namespace neo {
 
     void Window::update() {
         /* Don't update display if window is minimized */
-        if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
+        if (glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED)) {
             return;
         }
 
         double x, y;
-        glfwGetCursorPos(window, &x, &y);
+        glfwGetCursorPos(mWindow, &x, &y);
         Mouse::update(x, y);
 
         if (NeoEngine::imGuiEnabled) {
@@ -194,24 +194,24 @@ namespace neo {
     }
 
     void Window::setWindowTitle(const std::string &name) {
-        glfwSetWindowTitle(window, name.c_str());
+        glfwSetWindowTitle(mWindow, name.c_str());
     }
 
     void Window::setSize(const glm::ivec2 & size) {
-        if (!fullscreen) {
-            windowSize.x = size.x;
-            windowSize.y = size.y;
-            glfwSetWindowSize(window, windowSize.x, windowSize.y);
+        if (!mFullscreen) {
+            mWindowSize.x = size.x;
+            mWindowSize.y = size.y;
+            glfwSetWindowSize(mWindow, mWindowSize.x, mWindowSize.y);
         }
     }
 
     void Window::toggleVSync() {
-        vSyncEnabled = !vSyncEnabled;
-        glfwSwapInterval(vSyncEnabled);
+        mVSyncEnabled = !mVSyncEnabled;
+        glfwSwapInterval(mVSyncEnabled);
     }
 
     int Window::shouldClose() {
-        return glfwWindowShouldClose(window);
+        return glfwWindowShouldClose(mWindow);
     }
 
     void Window::shutDown() {
@@ -221,7 +221,7 @@ namespace neo {
         ImGui::DestroyContext();
 
         /* Clean up GLFW */
-        glfwDestroyWindow(window);
+        glfwDestroyWindow(mWindow);
         glfwTerminate();
     }
 }

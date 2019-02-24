@@ -31,6 +31,6 @@ class SinMoveComponent : public Component {
             c += dt;    // could also use neoengine::getcurrtime
             float val = (glm::sin(c) + 1.f) / 2.f;
             glm::vec3 newPos = val * (maxPos - minPos) + minPos;
-            gameObject->getSpatial()->setPosition(newPos);
+            mGameObject->getSpatial()->setPosition(newPos);
         }
 };

@@ -4,15 +4,15 @@
 
 namespace neo {
 
-    std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> Messenger::messages;
-    std::unordered_map<std::type_index, std::vector<std::function<void (const Message &)>>> Messenger::receivers;
+    std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> Messenger::mMessages;
+    std::unordered_map<std::type_index, std::vector<std::function<void (const Message &)>>> Messenger::mReceivers;
 
     void Messenger::relayMessages() {
         static std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> messageBuffer;
 
-        if (messages.size()) {
+        if (mMessages.size()) {
             /* Corrections for messages sent from receivers */
-            std::swap(messages, messageBuffer);
+            std::swap(mMessages, messageBuffer);
 
             for (auto & message : messageBuffer) {
                 const GameObject * gameObject(std::get<0>(message));
@@ -21,8 +21,8 @@ namespace neo {
 
                 /* Send object-level messages */
                 if (gameObject) {
-                    auto objectReceivers(gameObject->receivers.find(msgTypeI));
-                    if (objectReceivers != gameObject->receivers.end()) {
+                    auto objectReceivers(gameObject->mReceivers.find(msgTypeI));
+                    if (objectReceivers != gameObject->mReceivers.end()) {
                         for (auto & receiver : objectReceivers->second) {
                             receiver(*msg);
                         }
@@ -30,8 +30,8 @@ namespace neo {
                 }
 
                 /* Send scene-level messages */
-                auto localReceivers(receivers.find(msgTypeI));
-                if (localReceivers != receivers.end()) {
+                auto localReceivers(mReceivers.find(msgTypeI));
+                if (localReceivers != mReceivers.end()) {
                     for (auto & receiver : localReceivers->second) {
                         receiver(*msg);
                     }

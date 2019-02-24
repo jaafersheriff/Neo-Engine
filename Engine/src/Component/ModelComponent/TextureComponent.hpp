@@ -12,14 +12,14 @@ namespace neo {
         public:
             DiffuseMapComponent(GameObject *go, Texture *tex) :
                 Component(go),
-                texture(tex)
+                mTexture(tex)
             {}
 
-            const Texture & getTexture() const { return *texture; }
+            const Texture & getTexture() const { return *mTexture; }
 
         protected:
 
-            const Texture *texture;
+            const Texture *mTexture;
 
     };
 

@@ -9,16 +9,16 @@ namespace neo {
         public:
 
             Material(const float amb, const glm::vec3 & dif, const glm::vec3 & spec, const float shine) :
-                ambient(amb),
-                diffuse(dif),
-                specular(spec),
-                shine(shine)
+                mAmbient(amb),
+                mDiffuse(dif),
+                mSpecular(spec),
+                mShine(shine)
             {}
 
-            float ambient;
-            glm::vec3 diffuse;
-            glm::vec3 specular;
-            float shine;
+            float mAmbient;
+            glm::vec3 mDiffuse;
+            glm::vec3 mSpecular;
+            float mShine;
     };
 
 }

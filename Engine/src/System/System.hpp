@@ -8,12 +8,12 @@ namespace neo {
 
         public:
             System(const std::string & name) :
-                name(name)
+                mName(name)
             {}
 
             virtual void init() {};
             virtual void update(float) {};
-            bool active = true;
-            const std::string name = 0;
+            bool mActive = true;
+            const std::string mName = 0;
     };
 }

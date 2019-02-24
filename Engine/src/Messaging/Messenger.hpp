@@ -26,21 +26,21 @@ namespace neo {
             static void relayMessages();
 
         private:
-            static std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> messages;
-            static std::unordered_map<std::type_index, std::vector<std::function<void(const Message &)>>> receivers;
+            static std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> mMessages;
+            static std::unordered_map<std::type_index, std::vector<std::function<void(const Message &)>>> mReceivers;
     };
 
     template <typename MsgT, typename... Args>
     void Messenger::sendMessage(const GameObject *gameObject, Args &&... args) {
         static_assert(std::is_base_of<Message, MsgT>::value, "MsgT must be a message type");
-        messages.emplace_back(gameObject, typeid(MsgT), std::make_unique<MsgT>(std::forward<Args>(args)...));
+        mMessages.emplace_back(gameObject, typeid(MsgT), std::make_unique<MsgT>(std::forward<Args>(args)...));
     }
 
     template <typename MsgT>
     void Messenger::addReceiver(const GameObject *gameObject, const std::function<void(const Message &)> & func) {
         static_assert(std::is_base_of<Message, MsgT>::value, "MsgT must be a message type");
 
-        auto & receiver =  gameObject ? const_cast<GameObject *>(gameObject)->receivers : receivers;
+        auto & receiver =  gameObject ? const_cast<GameObject *>(gameObject)->mReceivers : mReceivers;
         receiver[std::type_index(typeid(MsgT))].emplace_back(func);
 
     }

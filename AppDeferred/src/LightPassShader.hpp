@@ -30,11 +30,11 @@ class LightPassShader : public Shader {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
                 auto lightFBO = Loader::getFBO("lightpass");
-                lightFBO->textures[0]->mWidth  = lightFBO->textures[1]->mWidth  = frameSize.x;
-                lightFBO->textures[0]->mHeight = lightFBO->textures[1]->mHeight = frameSize.y;
-                lightFBO->textures[0]->bind();
+                lightFBO->mTextures[0]->mWidth  = lightFBO->mTextures[1]->mWidth  = frameSize.x;
+                lightFBO->mTextures[0]->mHeight = lightFBO->mTextures[1]->mHeight = frameSize.y;
+                lightFBO->mTextures[0]->bind();
                 CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
-                lightFBO->textures[1]->bind();
+                lightFBO->mTextures[1]->bind();
                 CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
             });
         }
@@ -61,17 +61,17 @@ class LightPassShader : public Shader {
 
             /* Bind sphere volume */
             auto mesh = Loader::getMesh("ico_2", true);
-            CHECK_GL(glBindVertexArray(mesh->vaoId));
-            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->eleBufId));
+            CHECK_GL(glBindVertexArray(mesh->mVAOID));
+            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mElementBufferID));
 
             /* Bind gbuffer */
             auto gbuffer = Loader::getFBO("gbuffer");
-            gbuffer->textures[0]->bind();
-            loadUniform("gNormal", gbuffer->textures[0]->mTextureID);
-            gbuffer->textures[1]->bind();
-            loadUniform("gDiffuse", gbuffer->textures[1]->mTextureID);
-            gbuffer->textures[2]->bind();
-            loadUniform("gDepth", gbuffer->textures[2]->mTextureID);
+            gbuffer->mTextures[0]->bind();
+            loadUniform("gNormal", gbuffer->mTextures[0]->mTextureID);
+            gbuffer->mTextures[1]->bind();
+            loadUniform("gDiffuse", gbuffer->mTextures[1]->mTextureID);
+            gbuffer->mTextures[2]->bind();
+            loadUniform("gDepth", gbuffer->mTextures[2]->mTextureID);
 
             /* Render light volumes */
             for (auto & light : NeoEngine::getComponents<LightComponent>()) {

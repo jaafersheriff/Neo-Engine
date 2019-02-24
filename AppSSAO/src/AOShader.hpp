@@ -87,10 +87,10 @@ class AOShader : public Shader {
 
             // bind gbuffer
             auto gbuffer = Loader::getFBO("gbuffer");
-            gbuffer->textures[0]->bind();
-            loadUniform("gNormal", gbuffer->textures[0]->mTextureID);
-            gbuffer->textures[2]->bind();
-            loadUniform("gDepth", gbuffer->textures[2]->mTextureID);
+            gbuffer->mTextures[0]->bind();
+            loadUniform("gNormal", gbuffer->mTextures[0]->mTextureID);
+            gbuffer->mTextures[2]->bind();
+            loadUniform("gDepth", gbuffer->mTextures[2]->mTextureID);
 
             // bind kernel and noise
             auto noise = Loader::getTexture("aoNoise");

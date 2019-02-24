@@ -27,12 +27,12 @@ class CombineShader : public Shader {
 
             // Bind diffuse output
             auto gBuffer = Loader::getFBO("gbuffer");
-            gBuffer->textures[1]->bind();
-            loadUniform("gDiffuse", gBuffer->textures[1]->mTextureID);
+            gBuffer->mTextures[1]->bind();
+            loadUniform("gDiffuse", gBuffer->mTextures[1]->mTextureID);
 
             // Bind light pass output
             auto lightFBO = Loader::getFBO("lightpass");
-            lightFBO->textures[0]->bind();
-            loadUniform("lightOutput", lightFBO->textures[0]->mTextureID);
+            lightFBO->mTextures[0]->bind();
+            loadUniform("lightOutput", lightFBO->mTextures[0]->mTextureID);
         }
 };

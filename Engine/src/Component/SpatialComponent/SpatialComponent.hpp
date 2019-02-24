@@ -30,21 +30,21 @@ namespace neo {
             void setUVW(const glm::vec3 &, const glm::vec3 &, const glm::vec3 &);
 
             /* Getters */
-            const glm::vec3 & getPosition() const { return position; }
-            const glm::vec3 & getScale() const { return scale; }
+            const glm::vec3 & getPosition() const { return mPosition; }
+            const glm::vec3 & getScale() const { return mScale; }
             const glm::mat4 & getModelMatrix() const;
             const glm::mat3 & getNormalMatrix() const;
 
         private:
-            glm::vec3 position;
-            glm::vec3 scale;
+            glm::vec3 mPosition;
+            glm::vec3 mScale;
 
-            void detModelMatrix() const;
-            void detNormalMatrix() const;
-            mutable glm::mat4 modelMatrix;
-            mutable glm::mat3 normalMatrix;
-            mutable bool modelMatrixDirty;
-            mutable bool normalMatrixDirty;
+            void _detModelMatrix() const;
+            void _detNormalMatrix() const;
+            mutable glm::mat4 mModelMatrix;
+            mutable glm::mat3 mNormalMatrix;
+            mutable bool mModelMatrixDirty;
+            mutable bool mNormalMatrixDirty;
     };
 
 };

@@ -21,23 +21,23 @@ namespace neo {
     std::string NeoEngine::APP_NAME = "Neo Engine";
 
     /* ECS */
-    std::vector<std::unique_ptr<GameObject>> NeoEngine::gameObjects;
-    std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> NeoEngine::components;
-    std::vector<std::pair<std::type_index, std::unique_ptr<System>>> NeoEngine::systems;
+    std::vector<std::unique_ptr<GameObject>> NeoEngine::mGameObjects;
+    std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> NeoEngine::mComponents;
+    std::vector<std::pair<std::type_index, std::unique_ptr<System>>> NeoEngine::mSystems;
 
-    std::vector<std::unique_ptr<GameObject>> NeoEngine::gameObjectInitQueue;
-    std::vector<GameObject *> NeoEngine::gameObjectKillQueue;
-    std::vector<std::pair<std::type_index, std::unique_ptr<Component>>> NeoEngine::componentInitQueue;
-    std::vector<std::pair<std::type_index, Component *>> NeoEngine::componentKillQueue;
+    std::vector<std::unique_ptr<GameObject>> NeoEngine::mGameObjectInitQueue;
+    std::vector<GameObject *> NeoEngine::mGameObjectKillQueue;
+    std::vector<std::pair<std::type_index, std::unique_ptr<Component>>> NeoEngine::mComponentInitQueue;
+    std::vector<std::pair<std::type_index, Component *>> NeoEngine::mComponentKillQueue;
 
     /* FPS */
-    int Util::FPS = 0;
-    int Util::nFrames = 0;
-    int Util::totalFrames = 0;
-    double Util::timeStep = 0.0;
-    double Util::lastFPSTime = 0.0;
-    double Util::lastFrameTime = 0.0;
-    std::vector<int> Util::FPSList;
+    int Util::mFPS = 0;
+    int Util::mFramesInCount = 0;
+    int Util::mTotalFrames = 0;
+    double Util::mTimeStep = 0.0;
+    double Util::mLastFPSTime = 0.0;
+    double Util::mLastFrameTime = 0.0;
+    std::vector<int> Util::mFPSList;
 
     /* ImGui */
     bool NeoEngine::imGuiEnabled = true;
@@ -62,7 +62,7 @@ namespace neo {
    }
 
     void NeoEngine::initSystems() {
-        for (auto & system : systems) {
+        for (auto & system : mSystems) {
             system.second->init();
         }
     }
@@ -77,7 +77,7 @@ namespace neo {
             Window::update();
 
             /* Initialize new objects and components */
-            processInitQueue();
+            _processInitQueue();
             Messenger::relayMessages();
 
             /* Update imgui functions */
@@ -91,9 +91,9 @@ namespace neo {
             }
 
             /* Update each system */
-            for (auto & system : systems) {
-                if (system.second->active) {
-                    system.second->update((float)Util::timeStep);
+            for (auto & system : mSystems) {
+                if (system.second->mActive) {
+                    system.second->update((float)Util::mTimeStep);
                     Messenger::relayMessages();
                 }
             }
@@ -101,106 +101,106 @@ namespace neo {
             /* Render */
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
-            MasterRenderer::render((float)Util::timeStep);
+            MasterRenderer::render((float)Util::mTimeStep);
 
             /* Kill deleted objects and components */
-            processKillQueue();
+            _processKillQueue();
             Messenger::relayMessages();
         }
     }
 
     GameObject & NeoEngine::createGameObject() {
-        gameObjectInitQueue.emplace_back(std::make_unique<GameObject>());
-        return *gameObjectInitQueue.back().get();
+        mGameObjectInitQueue.emplace_back(std::make_unique<GameObject>());
+        return *mGameObjectInitQueue.back().get();
     }
 
     void NeoEngine::removeGameObject(GameObject &go) {
-        gameObjectKillQueue.push_back(&go);
+        mGameObjectKillQueue.push_back(&go);
     }
 
-    void NeoEngine::processInitQueue() {
-        initGameObjects();
-        initComponents();
+    void NeoEngine::_processInitQueue() {
+        _initGameObjects();
+        _initComponents();
     }
 
-    void NeoEngine::initGameObjects() {
-        for (auto & object : gameObjectInitQueue) {
-            gameObjects.emplace_back(std::move(object));
+    void NeoEngine::_initGameObjects() {
+        for (auto & object : mGameObjectInitQueue) {
+            mGameObjects.emplace_back(std::move(object));
         }
-        gameObjectInitQueue.clear();
+        mGameObjectInitQueue.clear();
     }
 
-    void NeoEngine::initComponents() {
+    void NeoEngine::_initComponents() {
 
-        for (int i = 0; i < int(componentInitQueue.size()); i++) {
-            auto & type(componentInitQueue[i].first);
-            auto & comp(componentInitQueue[i].second);
+        for (int i = 0; i < int(mComponentInitQueue.size()); i++) {
+            auto & type(mComponentInitQueue[i].first);
+            auto & comp(mComponentInitQueue[i].second);
             /* Add Component to respective GameObjects */
             comp.get()->getGameObject().addComponent(*comp.get(), type);
 
             /* Add Component to active engine */
-            auto it(components.find(type));
-            if (it == components.end()) {
-                components.emplace(type, std::make_unique<std::vector<std::unique_ptr<Component>>>());
-                it = components.find(type);
+            auto it(mComponents.find(type));
+            if (it == mComponents.end()) {
+                mComponents.emplace(type, std::make_unique<std::vector<std::unique_ptr<Component>>>());
+                it = mComponents.find(type);
             }
             it->second->emplace_back(std::move(comp));
             it->second->back()->init();
         }
-        componentInitQueue.clear();
+        mComponentInitQueue.clear();
     }
 
-    void NeoEngine::processKillQueue() {
+    void NeoEngine::_processKillQueue() {
         /* Remove Components from GameObjects */
-        for (auto & comp : componentKillQueue) {
+        for (auto & comp : mComponentKillQueue) {
             comp.second->getGameObject().removeComponent(*(comp.second), comp.first);
         }
 
-        killGameObjects();
-        killComponents();
+        _killGameObjects();
+        _killComponents();
     }
 
-    void NeoEngine::killGameObjects() {
-        for (auto killIt(gameObjectKillQueue.begin()); killIt != gameObjectKillQueue.end(); ++killIt) {
+    void NeoEngine::_killGameObjects() {
+        for (auto killIt(mGameObjectKillQueue.begin()); killIt != mGameObjectKillQueue.end(); ++killIt) {
             bool found = false;
             /* Look in active game objects in reverse order */
-            for (int i = int(gameObjects.size()) - 1; i >= 0; --i) {
-                GameObject * go(gameObjects[i].get());
+            for (int i = int(mGameObjects.size()) - 1; i >= 0; --i) {
+                GameObject * go(mGameObjects[i].get());
                 if (go == *killIt) {
                     /* Add game object's components to kill queue */
-                    for (auto compTIt(go->compsByCompT.begin()); compTIt != go->compsByCompT.end(); ++compTIt) {
+                    for (auto compTIt(go->mComponentsByType.begin()); compTIt != go->mComponentsByType.end(); ++compTIt) {
                         for (auto & comp : compTIt->second) {
                             comp->removeGameObject();
-                            componentKillQueue.emplace_back(compTIt->first, comp);
+                            mComponentKillQueue.emplace_back(compTIt->first, comp);
                         }
                     }
-                    gameObjects.erase(gameObjects.begin() + i);
+                    mGameObjects.erase(mGameObjects.begin() + i);
                     found = true;
                     break;
                 }
             }
             if (!found) {
                 /* Look in game object initialization queue, in reverse order */
-                for (int i = int(gameObjectInitQueue.size()) - 1; i >= 0; --i) {
-                    if (gameObjectInitQueue[i].get() == *killIt) {
-                        gameObjectInitQueue.erase(gameObjectInitQueue.begin() + i);
+                for (int i = int(mGameObjectInitQueue.size()) - 1; i >= 0; --i) {
+                    if (mGameObjectInitQueue[i].get() == *killIt) {
+                        mGameObjectInitQueue.erase(mGameObjectInitQueue.begin() + i);
                         break;
                     }
                 }
             }
         }
-        gameObjectKillQueue.clear();
+        mGameObjectKillQueue.clear();
     }
 
-    void NeoEngine::killComponents() {
-        for (auto & killE : componentKillQueue) {
+    void NeoEngine::_killComponents() {
+        for (auto & killE : mComponentKillQueue) {
             std::type_index typeI(killE.first);
             Component * comp(killE.second);
             comp->kill();
             bool found(false);
             /* Look in active components in reverse order */
-            if (components.count(typeI)) {
-                auto & comps(*components.at(typeI));
+            if (mComponents.count(typeI)) {
+                auto & comps(*mComponents.at(typeI));
                 for (int i = int(comps.size()) - 1; i >= 0; --i) {
                     if (comps[i].get() == comp) {
                         auto it(comps.begin() + i);
@@ -212,22 +212,22 @@ namespace neo {
             }
             if (!found) {
                 /* Look in component initialization queue in reverse order */
-                for (int i = int(componentInitQueue.size()) - 1; i >= 0; --i) {
-                    if (componentInitQueue[i].second.get() == comp) {
-                        componentInitQueue.erase(componentInitQueue.begin() + i);
+                for (int i = int(mComponentInitQueue.size()) - 1; i >= 0; --i) {
+                    if (mComponentInitQueue[i].second.get() == comp) {
+                        mComponentInitQueue.erase(mComponentInitQueue.begin() + i);
                         break;
                     }
                 }
             }
         }
-        componentKillQueue.clear();
+        mComponentKillQueue.clear();
     }
 
     void NeoEngine::addDefaultImGuiFunc() {
         addImGuiFunc("Neo", [&]() {
             if (ImGui::CollapsingHeader("Performance")) {
-                ImGui::PlotLines("FPS", (float *)Util::FPSList.data(), Util::FPSList.size(), 0, std::to_string(Util::FPS).c_str(), FLT_MAX, FLT_MAX, ImVec2(0,0), sizeof(int));
-                ImGui::Text("dt: %0.3fms", 1000.0 * Util::timeStep);
+                ImGui::PlotLines("FPS", (float *)Util::mFPSList.data(), Util::mFPSList.size(), 0, std::to_string(Util::mFPS).c_str(), FLT_MAX, FLT_MAX, ImVec2(0,0), sizeof(int));
+                ImGui::Text("dt: %0.3fms", 1000.0 * Util::mTimeStep);
                 if (ImGui::Button("VSync")) {
                     Window::toggleVSync();
                 }
@@ -239,22 +239,22 @@ namespace neo {
                     count += go->getAllComponents().size();
                 }
                 ImGui::Text("Components:  %d", count);
-                if (systems.size() && ImGui::TreeNode("Systems")) {
-                    for (unsigned i = 0; i < systems.size(); i++) {
-                        auto & sys = systems[i].second;
+                if (mSystems.size() && ImGui::TreeNode("Systems")) {
+                    for (unsigned i = 0; i < mSystems.size(); i++) {
+                        auto & sys = mSystems[i].second;
                         ImGui::PushID(i);
-                        ImGui::Checkbox(sys->name.c_str(), &sys->active);
+                        ImGui::Checkbox(sys->mName.c_str(), &sys->mActive);
 
                         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                             ImGui::SetDragDropPayload("SYSTEM_SWAP", &i, sizeof(unsigned));
-                            ImGui::Text("Swap %s", sys->name.c_str());
+                            ImGui::Text("Swap %s", sys->mName.c_str());
                             ImGui::EndDragDropSource();
                         }
                         if (ImGui::BeginDragDropTarget()) {
                             if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload("SYSTEM_SWAP")) {
                                 IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
                                 unsigned payload_n = *(const unsigned *)payLoad->Data;
-                                systems[i].swap(systems[payload_n]);
+                                mSystems[i].swap(mSystems[payload_n]);
                             }
                             ImGui::EndDragDropTarget();
                         }
@@ -264,35 +264,35 @@ namespace neo {
                 }
             }
             if (ImGui::CollapsingHeader("Renderer")) {
-                if (MasterRenderer::defaultCamera && ImGui::TreeNode("Camera")) {
-                    auto pos = MasterRenderer::defaultCamera->getGameObject().getSpatial()->getPosition();
-                    auto look = MasterRenderer::defaultCamera->getLookDir();
+                if (MasterRenderer::mDefaultCamera && ImGui::TreeNode("Camera")) {
+                    auto pos = MasterRenderer::mDefaultCamera->getGameObject().getSpatial()->getPosition();
+                    auto look = MasterRenderer::mDefaultCamera->getLookDir();
                     ImGui::Text("Position: %0.2f, %0.2f, %0.2f", pos.x, pos.y, pos.z);
                     ImGui::Text("Look Dir: %0.2f, %0.2f, %0.2f", look.x, look.y, look.z);
                     ImGui::TreePop();
                 }
                 if (ImGui::TreeNode("Shaders")) {
                     int count = 0;
-                    for (auto & r : MasterRenderer::renderables) {
+                    for (auto & r : MasterRenderer::mRenderables) {
                         count += r.second->size();
                     }
                     ImGui::Text("Renderables: %d", count); // TODO : list renderable count per shader 
-                    if (MasterRenderer::preShaders.size() && ImGui::TreeNode("Pre process")) {
-                        for (unsigned i = 0; i < MasterRenderer::preShaders.size(); i++) {
-                            auto & shader = MasterRenderer::preShaders[i];
+                    if (MasterRenderer::mPreProcessShaders.size() && ImGui::TreeNode("Pre process")) {
+                        for (unsigned i = 0; i < MasterRenderer::mPreProcessShaders.size(); i++) {
+                            auto & shader = MasterRenderer::mPreProcessShaders[i];
                             ImGui::PushID(i);
-                            ImGui::Checkbox(shader->name.c_str(), &shader->active);
+                            ImGui::Checkbox(shader->mName.c_str(), &shader->mActive);
 
                             if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                                 ImGui::SetDragDropPayload("PRESHADER_SWAP", &i, sizeof(unsigned));
-                                ImGui::Text("Swap %s", shader->name.c_str());
+                                ImGui::Text("Swap %s", shader->mName.c_str());
                                 ImGui::EndDragDropSource();
                             }
                             if (ImGui::BeginDragDropTarget()) {
                                 if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload("PRESHADER_SWAP")) {
                                     IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
                                     unsigned payload_n = *(const unsigned *)payLoad->Data;
-                                    MasterRenderer::preShaders[i].swap(MasterRenderer::preShaders[payload_n]);
+                                    MasterRenderer::mPreProcessShaders[i].swap(MasterRenderer::mPreProcessShaders[payload_n]);
                                 }
                                 ImGui::EndDragDropTarget();
                             }
@@ -300,22 +300,22 @@ namespace neo {
                         }
                         ImGui::TreePop();
                     }
-                    if (MasterRenderer::sceneShaders.size() && ImGui::TreeNode("Scene")) {
-                        for (unsigned i = 0; i < MasterRenderer::sceneShaders.size(); i++) {
-                            auto & shader = MasterRenderer::sceneShaders[i];
+                    if (MasterRenderer::mSceneShaders.size() && ImGui::TreeNode("Scene")) {
+                        for (unsigned i = 0; i < MasterRenderer::mSceneShaders.size(); i++) {
+                            auto & shader = MasterRenderer::mSceneShaders[i];
                             ImGui::PushID(i);
-                            ImGui::Checkbox(shader->name.c_str(), &shader->active);
+                            ImGui::Checkbox(shader->mName.c_str(), &shader->mActive);
 
                             if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                                 ImGui::SetDragDropPayload("SCENESHADER_SWAP", &i, sizeof(unsigned));
-                                ImGui::Text("Swap %s", shader->name.c_str());
+                                ImGui::Text("Swap %s", shader->mName.c_str());
                                 ImGui::EndDragDropSource();
                             }
                             if (ImGui::BeginDragDropTarget()) {
                                 if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload("SCENESHADER_SWAP")) {
                                     IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
                                     unsigned payload_n = *(const unsigned *)payLoad->Data;
-                                    MasterRenderer::sceneShaders[i].swap(MasterRenderer::sceneShaders[payload_n]);
+                                    MasterRenderer::mSceneShaders[i].swap(MasterRenderer::mSceneShaders[payload_n]);
                                 }
                                 ImGui::EndDragDropTarget();
                             }
@@ -323,22 +323,22 @@ namespace neo {
                         }
                         ImGui::TreePop();
                     }
-                    if (MasterRenderer::postShaders.size() && ImGui::TreeNode("Post process")) {
-                        for (unsigned i = 0; i < MasterRenderer::postShaders.size(); i++) {
-                            auto & shader = MasterRenderer::postShaders[i];
+                    if (MasterRenderer::mPostShaders.size() && ImGui::TreeNode("Post process")) {
+                        for (unsigned i = 0; i < MasterRenderer::mPostShaders.size(); i++) {
+                            auto & shader = MasterRenderer::mPostShaders[i];
                             ImGui::PushID(i);
-                            ImGui::Checkbox(shader->name.c_str(), &shader->active);
+                            ImGui::Checkbox(shader->mName.c_str(), &shader->mActive);
 
                             if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                                 ImGui::SetDragDropPayload("POSTSHADER_SWAP", &i, sizeof(unsigned));
-                                ImGui::Text("Swap %s", shader->name.c_str());
+                                ImGui::Text("Swap %s", shader->mName.c_str());
                                 ImGui::EndDragDropSource();
                             }
                             if (ImGui::BeginDragDropTarget()) {
                                 if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload("POSTSHADER_SWAP")) {
                                     IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
                                     unsigned payload_n = *(const unsigned *)payLoad->Data;
-                                    MasterRenderer::postShaders[i].swap(MasterRenderer::postShaders[payload_n]);
+                                    MasterRenderer::mPostShaders[i].swap(MasterRenderer::mPostShaders[payload_n]);
                                 }
                                 ImGui::EndDragDropTarget();
                             }
@@ -351,9 +351,9 @@ namespace neo {
             }
             if (ImGui::CollapsingHeader("Library")) {
                 if (ImGui::TreeNode("FBOs")) {
-                    for (auto & fbo : Loader::framebuffers) {
-                        if (ImGui::TreeNode((fbo.first + " (" + std::to_string(fbo.second->fboId) + ")").c_str())) {
-                            for (auto & t : fbo.second->textures) {
+                    for (auto & fbo : Loader::mFramebuffers) {
+                        if (ImGui::TreeNode((fbo.first + " (" + std::to_string(fbo.second->mFBOID) + ")").c_str())) {
+                            for (auto & t : fbo.second->mTextures) {
                                 if (ImGui::TreeNode(std::to_string(t->mTextureID).c_str())) {
                                     float scale = 150.f / (t->mWidth > t->mHeight ? t->mWidth : t->mHeight);
                                     ImGui::Image((ImTextureID)t->mTextureID, ImVec2(scale * t->mWidth, scale * t->mHeight), ImVec2(0, 1), ImVec2(1, 0));
@@ -365,14 +365,14 @@ namespace neo {
                     }
                     ImGui::TreePop();
                 }
-                if (Loader::meshes.size() && ImGui::TreeNode("Meshes")) {
-                    for (auto & m : Loader::meshes) {
-                        ImGui::Text("%s (%d)", m.first.c_str(), m.second->vertBufSize);
+                if (Loader::mMeshes.size() && ImGui::TreeNode("Meshes")) {
+                    for (auto & m : Loader::mMeshes) {
+                        ImGui::Text("%s (%d)", m.first.c_str(), m.second->mVertexBufferSize);
                     }
                     ImGui::TreePop();
                 }
-                if (Loader::textures.size() && ImGui::TreeNode("Textures")) {
-                    for (auto & t : Loader::textures) {
+                if (Loader::mTextures.size() && ImGui::TreeNode("Textures")) {
+                    for (auto & t : Loader::mTextures) {
                         if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->mTextureID) + ")").c_str())) {
                             float scale = 150.f / (t.second->mWidth > t.second->mHeight ? t.second->mWidth : t.second->mHeight);
                             ImGui::Image((ImTextureID)t.second->mTextureID, ImVec2(scale * t.second->mWidth, scale * t.second->mHeight), ImVec2(0, 1), ImVec2(1, 0));
@@ -381,13 +381,13 @@ namespace neo {
                     }
                     ImGui::TreePop();
                 }
-                if (Loader::materials.size() && ImGui::TreeNode("Materials")) {
-                    for (auto & mat : Loader::materials) {
+                if (Loader::mMaterials.size() && ImGui::TreeNode("Materials")) {
+                    for (auto & mat : Loader::mMaterials) {
                         if (ImGui::TreeNode(mat.first.c_str())) {
-                            ImGui::SliderFloat("Ambient", &mat.second->ambient, 0.f, 1.f);
-                            ImGui::SliderFloat3("Diffuse", glm::value_ptr(mat.second->diffuse), 0.f, 1.f);
-                            ImGui::SliderFloat3("Specular", glm::value_ptr(mat.second->specular), 0.f, 1.f);
-                            ImGui::SliderFloat("Shine", &mat.second->shine, 0.f, 100.f);
+                            ImGui::SliderFloat("Ambient", &mat.second->mAmbient, 0.f, 1.f);
+                            ImGui::SliderFloat3("Diffuse", glm::value_ptr(mat.second->mDiffuse), 0.f, 1.f);
+                            ImGui::SliderFloat3("Specular", glm::value_ptr(mat.second->mSpecular), 0.f, 1.f);
+                            ImGui::SliderFloat("Shine", &mat.second->mShine, 0.f, 100.f);
                             ImGui::TreePop();
                         }
                     }

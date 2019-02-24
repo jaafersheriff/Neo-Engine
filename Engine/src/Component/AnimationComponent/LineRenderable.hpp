@@ -13,14 +13,14 @@ namespace neo {
 
             LineRenderable(GameObject *go, LineComponent *line) :
                 RenderableComponent(go, new Mesh),
-                line(line)
+                mLine(line)
             {}
 
             virtual void init() override;
 
             virtual const Mesh & getMesh() const override;
 
-            LineComponent * line;
+            LineComponent * mLine;
 
     };
 }

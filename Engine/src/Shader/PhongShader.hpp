@@ -94,8 +94,8 @@ public:
 
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());
-                CHECK_GL(glBindVertexArray(mesh.vaoId));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
+                CHECK_GL(glBindVertexArray(mesh.mVAOID));
+                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                 /* Bind texture */
                 auto diffuseMap = model->getGameObject().getComponentByType<DiffuseMapComponent>();
@@ -113,10 +113,10 @@ public:
                 auto matComp = model->getGameObject().getComponentByType<MaterialComponent>();
                 if (matComp) {
                     const Material & material(matComp->getMaterial());
-                    loadUniform("ambient", material.ambient);
-                    loadUniform("diffuseColor", material.diffuse);
-                    loadUniform("specularColor", material.specular);
-                    loadUniform("shine", material.shine);
+                    loadUniform("ambient", material.mAmbient);
+                    loadUniform("diffuseColor", material.mDiffuse);
+                    loadUniform("specularColor", material.mSpecular);
+                    loadUniform("shine", material.mShine);
                 }
 
                 /* DRAW */

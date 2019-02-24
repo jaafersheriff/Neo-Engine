@@ -24,7 +24,7 @@ namespace neo {
             GameObject & operator=(const GameObject &) = delete;
 
             GameObject();
-            SpatialComponent * getSpatial() const { return spatial; }
+            SpatialComponent * getSpatial() const { return mSpatial; }
 
             /* Add/remove components */
             template<typename CompT> void addComponent(CompT &);
@@ -36,12 +36,12 @@ namespace neo {
             /* Get First component by type */
             template <typename CompT> CompT * getComponentByType() const;
 
-            const std::vector<Component *> getAllComponents() const { return allComponents; }
-            int getNumReceiverTypes() { return receivers.size(); }
+            const std::vector<Component *> getAllComponents() const { return mComponents; }
+            int getNumReceiverTypes() { return mReceivers.size(); }
             int getNumReceivers() {
                 int count = 0;
-                auto it = receivers.begin();
-                while (it != receivers.end()) {
+                auto it = mReceivers.begin();
+                while (it != mReceivers.end()) {
                     count += it->second.size();
                     it++;
                 }
@@ -50,10 +50,10 @@ namespace neo {
 
         private:
             /* Containers */
-            SpatialComponent * spatial;
-            std::vector<Component *> allComponents;
-            std::unordered_map<std::type_index, std::vector<Component *>> compsByCompT;
-            std::unordered_map<std::type_index, std::vector<std::function<void (const Message &)>>> receivers;
+            SpatialComponent* mSpatial;
+            std::vector<Component *> mComponents;
+            std::unordered_map<std::type_index, std::vector<Component *>> mComponentsByType;
+            std::unordered_map<std::type_index, std::vector<std::function<void (const Message &)>>> mReceivers;
     };
 
     /* Template implementation */
@@ -72,8 +72,8 @@ namespace neo {
 
         static const std::vector<CompT *> emptyList;
 
-        auto it(compsByCompT.find(std::type_index(typeid(CompT))));
-        if (it != compsByCompT.end()) {
+        auto it(mComponentsByType.find(std::type_index(typeid(CompT))));
+        if (it != mComponentsByType.end()) {
             return reinterpret_cast<const std::vector<CompT *> &>(it->second);
         }
         return emptyList;
@@ -84,8 +84,8 @@ namespace neo {
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
-        auto it(compsByCompT.find(std::type_index(typeid(CompT))));
-        if (it != compsByCompT.end() && it->second.size()) {
+        auto it(mComponentsByType.find(std::type_index(typeid(CompT))));
+        if (it != mComponentsByType.end() && it->second.size()) {
             return static_cast<CompT *>(it->second.front());
         }
         return nullptr;

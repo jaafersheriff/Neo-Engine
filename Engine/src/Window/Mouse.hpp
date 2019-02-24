@@ -2,24 +2,31 @@
 
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+
 namespace neo {
 
     class Mouse {
 
         public:
-            /* x-y position and speed */
-            static double x, y;
-            static double dx, dy;
-
             /* Update */
             static void update(double, double);
+
+            static glm::vec2 getPos();
+            static glm::vec2 getSpeed();
 
             /* Denotes if mouse buttons are pressed */
             static void setButtonStatus(int, int);
             static bool isDown(int);
             static void reset();
         private:
-            static int mouseButtons[GLFW_MOUSE_BUTTON_LAST];
-            static bool isReset;
+            static int mMouseButtons[GLFW_MOUSE_BUTTON_LAST];
+            static bool mIsReset;
+
+            /* x-y position and speed */
+            static double mX, mY;
+            static double mDX, mDY;
+
+
     };
 }

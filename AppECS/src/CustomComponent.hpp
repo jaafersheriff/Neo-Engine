@@ -15,7 +15,7 @@ namespace neo {
             {}
 
             virtual void update(float dt) override {
-                gameObject->getSpatial()->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), dt, glm::vec3(0, 1, 0))));
+                mGameObject->getSpatial()->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), dt, glm::vec3(0, 1, 0))));
             }
     };
 }

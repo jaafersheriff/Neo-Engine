@@ -18,39 +18,39 @@ namespace neo {
 
             /* Constructor */
             Mesh() :
-                vaoId(0),
-                vertBufId(0),
-                norBufId(0),
-                texBufId(0),
-                eleBufId(0),
-                vertBufSize(0),
-                norBufSize(0),
-                texBufSize(0),
-                eleBufSize(0),
-                mode(0)
+                mVAOID(0),
+                mVertexBufferID(0),
+                mNormalBufferID(0),
+                mTextureBufferID(0),
+                mElementBufferID(0),
+                mVertexBufferSize(0),
+                mNormalBufferSize(0),
+                mTextureBufferSize(0),
+                mElementBufferSize(0),
+                mPrimitiveType(0)
             {}
 
             /* Destructor */
             ~Mesh();
 
             /* VAO ID */
-            unsigned int vaoId;
+            unsigned int mVAOID;
 
             /* VBO IDs */
-            unsigned int vertBufId;
-            unsigned int norBufId;
-            unsigned int texBufId;
-            unsigned int eleBufId;
+            unsigned int mVertexBufferID;
+            unsigned int mNormalBufferID;
+            unsigned int mTextureBufferID;
+            unsigned int mElementBufferID;
 
             /* VBO Info */
-            MeshBuffers buffers;
-            int vertBufSize;
-            int norBufSize;
-            int texBufSize;
-            int eleBufSize;
+            MeshBuffers mBuffers;
+            int mVertexBufferSize;
+            int mNormalBufferSize;
+            int mTextureBufferSize;
+            int mElementBufferSize;
 
             /* Primitive type */
-            unsigned mode;
+            unsigned mPrimitiveType;
 
             /* Copy data to GPU */
             void upload(unsigned = 0);

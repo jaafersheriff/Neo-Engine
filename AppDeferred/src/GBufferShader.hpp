@@ -29,13 +29,13 @@ class GBufferShader : public Shader {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
                 auto gbuffer = Loader::getFBO("gbuffer");
-                gbuffer->textures[0]->mWidth = gbuffer->textures[1]->mWidth = gbuffer->textures[2]->mWidth = frameSize.x;
-                gbuffer->textures[0]->mHeight = gbuffer->textures[1]->mHeight = gbuffer->textures[2]->mHeight = frameSize.y;
-                gbuffer->textures[0]->bind();
+                gbuffer->mTextures[0]->mWidth = gbuffer->mTextures[1]->mWidth = gbuffer->mTextures[2]->mWidth = frameSize.x;
+                gbuffer->mTextures[0]->mHeight = gbuffer->mTextures[1]->mHeight = gbuffer->mTextures[2]->mHeight = frameSize.y;
+                gbuffer->mTextures[0]->bind();
                 CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
-                gbuffer->textures[1]->bind();
+                gbuffer->mTextures[1]->bind();
                 CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
-                gbuffer->textures[2]->bind();
+                gbuffer->mTextures[2]->bind();
                 CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, frameSize.x, frameSize.y, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr));
             });
         }
@@ -54,13 +54,13 @@ class GBufferShader : public Shader {
 
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());
-                CHECK_GL(glBindVertexArray(mesh.vaoId));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.eleBufId));
+                CHECK_GL(glBindVertexArray(mesh.mVAOID));
+                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                 /* Bind diffuse map or material */
                 auto matComp = model->getGameObject().getComponentByType<MaterialComponent>();
                 if (matComp) {
-                    loadUniform("ambient", matComp->getMaterial().ambient);
+                    loadUniform("ambient", matComp->getMaterial().mAmbient);
                 }
                 auto diffMap = model->getGameObject().getComponentByType<DiffuseMapComponent>();
                 if (diffMap) {
@@ -71,7 +71,7 @@ class GBufferShader : public Shader {
                 else {
                     loadUniform("useDiffuseMap", false);
                     if (matComp) {
-                        loadUniform("diffuseMaterial", matComp->getMaterial().diffuse);
+                        loadUniform("diffuseMaterial", matComp->getMaterial().mDiffuse);
                     }
                 }
 

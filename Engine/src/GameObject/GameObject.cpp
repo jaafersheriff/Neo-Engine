@@ -6,30 +6,30 @@
 namespace neo {
 
     GameObject::GameObject() :
-        allComponents(),
-        compsByCompT(),
-        spatial(nullptr)
+        mComponents(),
+        mComponentsByType(),
+        mSpatial(nullptr)
     {}
 
     void GameObject::addComponent(Component & component, std::type_index typeI) {
-        allComponents.push_back(&component);
-        compsByCompT[typeI].push_back(&component);
-        if (!spatial && typeI == std::type_index(typeid(SpatialComponent))) {
-            spatial = dynamic_cast<SpatialComponent *>(&component);
+        mComponents.push_back(&component);
+        mComponentsByType[typeI].push_back(&component);
+        if (!mSpatial && typeI == std::type_index(typeid(SpatialComponent))) {
+            mSpatial = dynamic_cast<SpatialComponent *>(&component);
         }
     }
 
     void GameObject::removeComponent(Component & component, std::type_index typeI) {
         /* Remove from allComponents */
-        for (auto it(allComponents.begin()); it != allComponents.end(); ++it) {
+        for (auto it(mComponents.begin()); it != mComponents.end(); ++it) {
             if (*it == &component) {
-                allComponents.erase(it);
+                mComponents.erase(it);
                 break;
             }
         }
         /* Remove from compsByCompT in reverse order */
-        auto compsIt(compsByCompT.find(typeI));
-        if (compsIt != compsByCompT.end()) {
+        auto compsIt(mComponentsByType.find(typeI));
+        if (compsIt != mComponentsByType.end()) {
             auto & comps(compsIt->second);
             for (int i(int(comps.size()) - 1); i >= 0; --i) {
                 if (comps[i] == &component) {
@@ -38,8 +38,8 @@ namespace neo {
                 }
             }
         }
-        if (spatial == &component) {
-            spatial = nullptr;
+        if (mSpatial == &component) {
+            mSpatial = nullptr;
         }
     }
 }
