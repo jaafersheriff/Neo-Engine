@@ -32,7 +32,13 @@
     <ClInclude Include="src\SinMoveComponent.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\AOShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\CombineShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BlurShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,6 +47,8 @@
     <None Include="shaders\gbuffer.frag" />
     <None Include="shaders\lightpass.vert" />
     <None Include="shaders\lightpass.frag" />
+    <None Include="shaders\ao.frag" />
     <None Include="shaders\combine.frag" />
+    <None Include="shaders\blur.frag" />
   </ItemGroup>
 </Project>

@@ -14,6 +14,7 @@ class CombineShader : public Shader {
 
     public:
 
+        bool showAO = true;
         float diffuseAmount = 0.2f;
 
         CombineShader(const std::string &frag) :
@@ -21,6 +22,7 @@ class CombineShader : public Shader {
         {}
 
         virtual void render(const CameraComponent &camera) override {
+            loadUniform("showAO", showAO);
             loadUniform("diffuseAmount", diffuseAmount);
 
             // Bind diffuse output

@@ -14,14 +14,14 @@ class GBufferShader : public Shader {
     public:
 
         GBufferShader(const std::string &vert, const std::string &frag) :
-            Shader("GBufferShader", vert, frag) {
+            Shader("GBuffer Shader", vert, frag) {
 
             // Create gbuffer 
             auto gbuffer = Loader::getFBO("gbuffer");
             gbuffer->generate();
-            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // color
-            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // diffuse
-            gbuffer->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
+            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGB, GL_RGB, GL_NEAREST, GL_CLAMP_TO_EDGE); // normal
+            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGB, GL_RGB, GL_NEAREST, GL_CLAMP_TO_EDGE); // color
+            gbuffer->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_CLAMP_TO_EDGE);                    // depth
             gbuffer->initDrawBuffers();
 
             // Handle frame size changing
@@ -32,9 +32,9 @@ class GBufferShader : public Shader {
                 gbuffer->textures[0]->mWidth = gbuffer->textures[1]->mWidth = gbuffer->textures[2]->mWidth = frameSize.x;
                 gbuffer->textures[0]->mHeight = gbuffer->textures[1]->mHeight = gbuffer->textures[2]->mHeight = frameSize.y;
                 gbuffer->textures[0]->bind();
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameSize.x, frameSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr));
                 gbuffer->textures[1]->bind();
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameSize.x, frameSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr));
                 gbuffer->textures[2]->bind();
                 CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, frameSize.x, frameSize.y, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr));
             });

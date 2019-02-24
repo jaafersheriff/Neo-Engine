@@ -20,9 +20,10 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{5411D9D3-BAA5-4D2F-9966-C552AE38ACB0}</ProjectGuid>
-    <RootNamespace>AppDeferred</RootNamespace>
+    <ProjectGuid>{0016C6FB-D8FF-46E4-8D65-7C84529DE12D}</ProjectGuid>
+    <RootNamespace>AppSSAO</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <ProjectName>AppSSAO</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -69,6 +70,7 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\AppReleaseProperties.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
@@ -120,6 +122,8 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\AOShader.hpp" />
+    <ClInclude Include="src\BlurShader.hpp" />
     <ClInclude Include="src\CombineShader.hpp" />
     <ClInclude Include="src\CustomSystem.hpp" />
     <ClInclude Include="src\GBufferShader.hpp" />
@@ -127,6 +131,8 @@
     <ClInclude Include="src\SinMoveComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\ao.frag" />
+    <None Include="shaders\blur.frag" />
     <None Include="shaders\combine.frag" />
     <None Include="shaders\gbuffer.frag" />
     <None Include="shaders\gbuffer.vert" />
