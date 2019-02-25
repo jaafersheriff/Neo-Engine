@@ -20,7 +20,6 @@ uniform mat4 invP;
 out vec4 color;
 
 // Position in view space
-// TODO - broken
 vec3 reconstructViewPos(vec2 texCoord) {
     float depth = texture(gDepth, texCoord).r;
     vec3 ndc = vec3(texCoord, depth) * 2.0 - vec3(1.0);

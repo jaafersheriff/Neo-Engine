@@ -14,6 +14,7 @@ namespace neo {
     class Window {
 
         public:
+
             static int initGLFW(const std::string &);
             static void setWindowTitle(const std::string &);
             static void update();
