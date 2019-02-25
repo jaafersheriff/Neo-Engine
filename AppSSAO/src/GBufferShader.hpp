@@ -27,16 +27,8 @@ class GBufferShader : public Shader {
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                auto gbuffer = Loader::getFBO("gbuffer");
-                gbuffer->mTextures[0]->mWidth = gbuffer->mTextures[1]->mWidth = gbuffer->mTextures[2]->mWidth = frameSize.x;
-                gbuffer->mTextures[0]->mHeight = gbuffer->mTextures[1]->mHeight = gbuffer->mTextures[2]->mHeight = frameSize.y;
-                gbuffer->mTextures[0]->bind();
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameSize.x, frameSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr));
-                gbuffer->mTextures[1]->bind();
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameSize.x, frameSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr));
-                gbuffer->mTextures[2]->bind();
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, frameSize.x, frameSize.y, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr));
+                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
+                Loader::getFBO("gbuffer")->resize(frameSize);
             });
         }
 

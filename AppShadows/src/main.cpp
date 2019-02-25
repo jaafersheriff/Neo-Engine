@@ -2,7 +2,6 @@
 
 #include "CustomSystem.hpp"
 
-#include "SinMoveComponent.hpp"
 #include "LookAtCameraController.hpp"
 
 #include "Shader/LineShader.hpp"
@@ -32,7 +31,7 @@ struct Light {
     RenderableComponent *renderable;
     CameraComponent *camera;
     SpatialComponent *camSpatial;
-    SinMoveComponent *sin = nullptr;
+    SinTranslateComponent *sin = nullptr;
 
     GameObject *gameO;
     SpatialComponent *lookAtSpatial;
@@ -55,7 +54,7 @@ struct Light {
         NeoEngine::addComponent<LineRenderable>(gameObject, uLine);
         NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
         NeoEngine::addComponent<LineRenderable>(gameObject, wLine);
-        sin = &NeoEngine::addComponent<SinMoveComponent>(gameObject, camSpatial->getPosition(), camSpatial->getPosition());
+        sin = &NeoEngine::addComponent<SinTranslateComponent>(gameObject, glm::vec3(0.f, 0.f, 20.f), camSpatial->getPosition());
 
         // Separate game object for look at
         gameO = &NeoEngine::createGameObject();
@@ -74,10 +73,10 @@ struct Light {
                 camSpatial->setPosition(pos);
             }
             if (sin) {
-                ImGui::Checkbox("Sin", &sin->active);
-                if (sin->active) {
-                    ImGui::SliderFloat3("PosA", glm::value_ptr(sin->maxPos), -100.f, 100.f);
-                    ImGui::SliderFloat3("PosB", glm::value_ptr(sin->minPos), -100.f, 100.f);
+                ImGui::Checkbox("Sin", &sin->mActive);
+                if (sin->mActive) {
+                    ImGui::SliderFloat3("Base", glm::value_ptr(sin->mBasePosition), -100.f, 100.f);
+                    ImGui::SliderFloat3("Offset", glm::value_ptr(sin->mOffset), -100.f, 100.f);
                 }
             }
             pos = lookAtSpatial->getPosition();

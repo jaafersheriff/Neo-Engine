@@ -120,7 +120,6 @@
   <ItemGroup>
     <ClInclude Include="src\CustomSystem.hpp" />
     <ClInclude Include="src\LookAtCameraController.hpp" />
-    <ClInclude Include="src\SinMoveComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />

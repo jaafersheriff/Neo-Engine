@@ -2,8 +2,6 @@
 
 #include "CustomSystem.hpp"
 
-#include "SinMoveComponent.hpp"
-
 #include "Shader/WireframeShader.hpp"
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
@@ -129,7 +127,7 @@ int main() {
                 if (ImGui::Button("Create")) {
                     auto light = new Light(pos, color, glm::vec3(size));
                     if (yOffset) {
-                        NeoEngine::addComponent<SinMoveComponent>(light->gameObject, yOffset, pos.y);
+                        NeoEngine::addComponent<SinTranslateComponent>(light->gameObject, glm::vec3(0.f, yOffset, 0.f), pos);
                     }
                     lights.push_back(light);
                     index = lights.size() - 1;
@@ -167,7 +165,7 @@ int main() {
                         glm::vec3 color = Util::genRandomVec3();
                         float size = Util::genRandom(minScale, maxScale);
                         auto light = new Light(position, color, glm::vec3(size));
-                        NeoEngine::addComponent<SinMoveComponent>(light->gameObject, Util::genRandom(minSinOffset, maxSinOffset), position.y);
+                        NeoEngine::addComponent<SinTranslateComponent>(light->gameObject, glm::vec3(0.f, Util::genRandom(minSinOffset, maxSinOffset), 0.f), position);
                         lights.push_back(light);
                     }
                 }

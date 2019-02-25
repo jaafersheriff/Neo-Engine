@@ -18,9 +18,6 @@
     <ClInclude Include="src\CustomSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\SinMoveComponent.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\LookAtCameraController.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -11,3 +11,6 @@
 
 #include "AnimationComponent/LineRenderable.hpp"
 #include "AnimationComponent/LineComponent.hpp"
+
+#include "TranslationComponent/RotationComponent.hpp"
+#include "TranslationComponent/SinTranslateComponent.hpp"

@@ -128,7 +128,6 @@
     <ClInclude Include="src\CustomSystem.hpp" />
     <ClInclude Include="src\GBufferShader.hpp" />
     <ClInclude Include="src\LightPassShader.hpp" />
-    <ClInclude Include="src\SinMoveComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\ao.frag" />

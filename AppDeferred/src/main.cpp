@@ -2,8 +2,6 @@
 
 #include "CustomSystem.hpp"
 
-#include "SinMoveComponent.hpp"
-
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
 #include "CombineShader.hpp"
@@ -100,15 +98,15 @@ int main() {
                 static glm::vec3 pos(0.f);
                 static float size(15.f);
                 static glm::vec3 color(1.f);
-                static float yOffset(10.f);
+                static glm::vec3 yOffset(0.f, 10.f, 0.f);
                 ImGui::SliderFloat3("Position", glm::value_ptr(pos), -25.f, 25.f);
                 ImGui::SliderFloat("Scale", &size, 15.f, 100.f);
                 ImGui::SliderFloat3("Color", glm::value_ptr(color), 0.01f, 1.f);
-                ImGui::SliderFloat("Offset", &yOffset, 0.f, 25.f);
+                ImGui::SliderFloat("Offset", &yOffset.y, 0.f, 25.f);
                 if (ImGui::Button("Create")) {
                     auto light = new Light(pos, color, glm::vec3(size));
-                    if (yOffset) {
-                        NeoEngine::addComponent<SinMoveComponent>(light->gameObject, yOffset, pos.y);
+                    if (yOffset.y) {
+                        NeoEngine::addComponent<SinTranslateComponent>(light->gameObject, yOffset, pos);
                     }
                     lights.push_back(light);
                     index = lights.size() - 1;
@@ -146,7 +144,8 @@ int main() {
                         glm::vec3 color = Util::genRandomVec3();
                         float size = Util::genRandom(minScale, maxScale);
                         auto light = new Light(position, color, glm::vec3(size));
-                        NeoEngine::addComponent<SinMoveComponent>(light->gameObject, Util::genRandom(minSinOffset, maxSinOffset), position.y);
+                        glm::vec3 sinMove(0.f, Util::genRandom(minSinOffset, maxSinOffset), 0.f);
+                        NeoEngine::addComponent<SinTranslateComponent>(light->gameObject, sinMove, position);
                         lights.push_back(light);
                     }
                 }

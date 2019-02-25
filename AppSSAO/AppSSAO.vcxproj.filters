@@ -29,9 +29,6 @@
     <ClInclude Include="src\LightPassShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\SinMoveComponent.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\AOShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

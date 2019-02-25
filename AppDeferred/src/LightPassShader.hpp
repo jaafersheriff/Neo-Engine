@@ -28,14 +28,8 @@ class LightPassShader : public Shader {
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                auto lightFBO = Loader::getFBO("lightpass");
-                lightFBO->mTextures[0]->mWidth  = lightFBO->mTextures[1]->mWidth  = frameSize.x;
-                lightFBO->mTextures[0]->mHeight = lightFBO->mTextures[1]->mHeight = frameSize.y;
-                lightFBO->mTextures[0]->bind();
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
-                lightFBO->mTextures[1]->bind();
-                CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameSize.x, frameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
+                Loader::getFBO("lightpass")->resize(frameSize);
             });
         }
 
