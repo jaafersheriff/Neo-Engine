@@ -136,11 +136,11 @@ namespace neo {
                     }
                 }
                 else {
-                    std::cerr << "Error opening texture file " << fileName << std::endl;
+                    std::cerr << "Error reading texture file " << fileName << std::endl;
                 }
             }
             else {
-                std::cout << "Creating empty texture " << fileName << std::endl;
+                std::cout << "Error opening texture file" << fileName << std::endl;
             }
 
             mTextures.insert({ fileName, texture });
@@ -156,26 +156,26 @@ namespace neo {
             texture = new TextureCubeMap;
 
             /* Use stbi if name is an existing file */
-            FILE *f;
-            if (!fopen_s(&f, (RES_DIR + name).c_str(), "rb")) {
-                uint8_t* data[6];
-                for (int i = 0; i < 6; i++) {
-                    data[i] = stbi_load((RES_DIR + files[i]).c_str(), &texture->mWidth, &texture->mHeight, &texture->mComponents, STBI_rgb_alpha);
-                    if (data[i]) {
-                        if (verbose) {
-                            std::cout << "Loaded texture " << files[i] << " [" << texture->mWidth << ", " << texture->mHeight << "]" << std::endl;
-                        }
-                    }
-                    else {
-                        std::cerr << "Could not find texture file " << files[i] << std::endl;
-                    }
+            uint8_t* data[6];
+            for (int i = 0; i < 6; i++) {
+                FILE *f;
+                if (fopen_s(&f, (RES_DIR + files[i]).c_str(), "rb")) {
+                    std::cerr << "Error opening texture file " << files[i] << std::endl;
+                    continue;
                 }
+                data[i] = stbi_load((RES_DIR + files[i]).c_str(), &texture->mWidth, &texture->mHeight, &texture->mComponents, STBI_rgb_alpha);
+                if (!data[i]) {
+                    std::cerr << "Error loading texture file " << files[i] << std::endl;
+                }
+                else if (verbose) {
+                    std::cout << "Loaded texture " << files[i] << " [" << texture->mWidth << ", " << texture->mHeight << "]" << std::endl;
+                }
+            }
 
-                /* Upload data to GPU and free from CPU */
-                texture->upload(GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE, true, data);
-                for (int i = 0; i < 6; i++) {
-                    stbi_image_free(data[i]);
-                }
+            /* Upload data to GPU and free from CPU */
+            texture->upload(GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE, true, data);
+            for (int i = 0; i < 6; i++) {
+                stbi_image_free(data[i]);
             }
 
             mTextures.insert({ name, texture });
