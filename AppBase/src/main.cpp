@@ -3,10 +3,8 @@
 #include "CustomSystem.hpp"
 
 #include "Shader/PhongShader.hpp"
-#include "Shader/WireframeShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
-#include "Loader/MeshGenerator.hpp"
 
 using namespace neo;
 
@@ -46,11 +44,6 @@ struct Light {
     }
 };
 
-// TODO
-// Mesh generator todos
-// Disable culling?
-// move this to its own class 
-// fix imgui things 
 struct Renderable {
     GameObject *gameObject;
     RenderableComponent *renderable;
@@ -60,7 +53,6 @@ struct Renderable {
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderable->addShaderType<PhongShader>();
-        renderable->addShaderType<WireframeShader>();
         NeoEngine::addComponent<MaterialComponent>(gameObject, mat);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
@@ -90,8 +82,7 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Mesh *m = MeshGenerator::createPlane(0, 4, 5);
-    Renderable r = { m, Loader::getMaterial("defaultMat", 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f)) };
+    Renderable(Loader::getMesh("cube"), Loader::getMaterial("defaultMat", 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f)));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CustomSystem>();
@@ -100,44 +91,9 @@ int main() {
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
     MasterRenderer::addSceneShader<PhongShader>();
-    MasterRenderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();
-    NeoEngine::addImGuiFunc("Wireframe", [&]() {
-        //         unsigned flag = 0;
-        //         if (ImGui::Button("Show Shaded")) {
-        //             flag = 1;
-        //         }
-        //         if (ImGui::Button("Show Wireframe")) {
-        //             flag = 2;
-        //         }
-        //         if (ImGui::Button("Show Shaded and Wireframe")) {
-        //             flag = 3;
-        //         }
-        //         if (flag) {
-        //             for (auto renderable : NeoEngine::getComponents<RenderableComponent>()) {
-        //                 renderable->clearShaderTypes();
-        //                 if (flag == 1 || flag == 3) {
-        //                     renderable->addShaderType<PhongShader>();
-        //                 }
-        //                 if (flag == 2 || flag == 3) {
-        //                     renderable->addShaderType<WireframeShader>();
-        //                 }
-        //             }
-        //         }
-        static float h = 0.f;
-        static int vertices = 3;
-        static int s = 3;
-        bool b = ImGui::SliderFloat("Height", &h, 0.f, 5.f);
-        b |= ImGui::SliderInt("Vertex count", &vertices, 0, 50);
-        b |= ImGui::SliderInt("Size", &s, 0, 50);
-        if (b) {
-            delete m;
-            m = MeshGenerator::createPlane(h, vertices, s);
-            r.renderable->replaceMesh(m);
-        }
-    });
 
     /* Run */
     NeoEngine::run();
