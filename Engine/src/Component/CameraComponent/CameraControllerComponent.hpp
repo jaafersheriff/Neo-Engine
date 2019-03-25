@@ -12,20 +12,6 @@ namespace neo {
         public: 
             float mLookSpeed;
             float mMoveSpeed;
-
-            CameraControllerComponent(GameObject *, float ls, float ms);
-            CameraControllerComponent(CameraControllerComponent && other) = default;
-
-            virtual void update(float) override;
-
-            void setOrientation(float p, float t);
-            void setButtons(int, int, int, int, int, int);
-            float getTheta() const { return mTheta; }
-            float getPhi() const { return mPhi; }
-
-        private:
-            void _updateSpatialOrientation();
-
             float mTheta, mPhi;
 
             int mForwardButton;
@@ -34,5 +20,18 @@ namespace neo {
             int mLeftButton;
             int mUpButton;
             int mDownButton;
-    };
+ 
+
+            CameraControllerComponent(GameObject *, float ls, float ms);
+            CameraControllerComponent(CameraControllerComponent && other) = default;
+
+            virtual void update(float) override;
+
+            void setOrientation(float p, float t);
+            void setButtons(int, int, int, int, int, int);
+
+        private:
+            void _updateSpatialOrientation();
+
+   };
 }

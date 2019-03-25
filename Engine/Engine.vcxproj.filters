@@ -19,8 +19,6 @@
     <ClInclude Include="src\Messaging\Message.hpp" />
     <ClInclude Include="src\Messaging\Messenger.hpp" />
     <ClInclude Include="src\Shader\Shader.hpp" />
-    <ClInclude Include="src\System\System.hpp" />
-    <ClInclude Include="src\System\Systems.hpp" />
     <ClInclude Include="src\Util\Util.hpp" />
     <ClInclude Include="src\Window\Keyboard.hpp" />
     <ClInclude Include="src\Window\Mouse.hpp" />
@@ -52,6 +50,9 @@
     <ClInclude Include="src\ext\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="src\Component\TranslationComponent\RotationComponent.hpp" />
     <ClInclude Include="src\Component\TranslationComponent\SinTranslateComponent.hpp" />
+    <ClInclude Include="src\Systems\CameraSystems\CameraControllerSystem.hpp" />
+    <ClInclude Include="src\Systems\System.hpp" />
+    <ClInclude Include="src\Systems\Systems.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -76,6 +77,7 @@
     <ClCompile Include="src\ext\imgui\imgui.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\Systems\CameraSystems\CameraControllerSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />

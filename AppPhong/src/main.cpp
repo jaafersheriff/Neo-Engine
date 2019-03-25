@@ -1,7 +1,5 @@
 #include <NeoEngine.hpp>
 
-#include "CameraSystem.hpp"
-
 #include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
 
@@ -84,7 +82,7 @@ int main() {
     }
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CameraSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */

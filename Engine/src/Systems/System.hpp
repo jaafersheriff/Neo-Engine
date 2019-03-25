@@ -12,7 +12,7 @@ namespace neo {
             {}
 
             virtual void init() {};
-            virtual void update(float) {};
+            virtual void update(const float) {};
             bool mActive = true;
             const std::string mName = 0;
     };
