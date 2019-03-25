@@ -1,7 +1,5 @@
 #include <NeoEngine.hpp>
 
-#include "CustomSystem.hpp"
-
 #include "Shader/WireframeShader.hpp"
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
@@ -75,7 +73,7 @@ int main() {
     terrain.renderable->addShaderType<GBufferShader>();
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */

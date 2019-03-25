@@ -1,7 +1,5 @@
 #include <NeoEngine.hpp>
 
-#include "CustomSystem.hpp"
-
 #include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
 
@@ -93,7 +91,7 @@ int main() {
     Orient(Loader::getMesh("bunny.obj"));
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */

@@ -8,7 +8,7 @@ class RotationSystem : public System {
 
     public:
         RotationSystem() :
-            System("Camera System")
+            System("Rotation System")
         {}
 
         virtual void update(const float dt) override;

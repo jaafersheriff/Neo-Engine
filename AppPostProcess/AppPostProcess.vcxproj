@@ -117,7 +117,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\CustomSystem.hpp" />
     <ClInclude Include="src\PostProcessShader.hpp" />
   </ItemGroup>
   <ItemGroup>

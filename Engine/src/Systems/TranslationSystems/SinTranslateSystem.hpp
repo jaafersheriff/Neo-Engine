@@ -8,7 +8,7 @@ class SinTranslateSystem : public System {
 
     public:
         SinTranslateSystem() :
-            System("Camera System")
+            System("SinTranslate System")
         {}
 
         virtual void update(const float dt) override;

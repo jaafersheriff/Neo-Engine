@@ -1,7 +1,5 @@
 #include <NeoEngine.hpp>
 
-#include "CustomSystem.hpp"
-
 #include "DecalShader.hpp"
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
@@ -95,7 +93,8 @@ int main() {
     Decal decal(Loader::getTexture("texture.png"), glm::vec3(0.f, 0.f, -25.f), glm::vec3(15.f));
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
+    NeoEngine::addSystem<RotationSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */

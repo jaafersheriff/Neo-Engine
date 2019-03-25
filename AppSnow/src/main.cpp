@@ -1,8 +1,7 @@
 #include <NeoEngine.hpp>
 
-#include "CustomSystem.hpp"
-
 #include "SnowShader.hpp"
+#include "SnowSystem.hpp"
 #include "Shader/LineShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -117,7 +116,8 @@ int main() {
     Snow();
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
+    NeoEngine::addSystem<SnowSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */

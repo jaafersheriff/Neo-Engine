@@ -1,7 +1,5 @@
 #include <NeoEngine.hpp>
 
-#include "CustomSystem.hpp"
-
 #include "Shader/LineShader.hpp"
 #include "Shader/PhongShader.hpp"
 
@@ -98,7 +96,7 @@ int main() {
     Cube(Loader::getMesh("cube"));
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */

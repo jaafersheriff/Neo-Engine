@@ -1,7 +1,5 @@
 #include <NeoEngine.hpp>
 
-#include "CustomSystem.hpp"
-
 #include "Shader/PhongShader.hpp"
 #include "PostProcessShader.hpp"
 
@@ -87,7 +85,7 @@ int main() {
     NeoEngine::addComponent<DiffuseMapComponent>(r.gameObject, Loader::getTexture("mr_krab.png"));
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */

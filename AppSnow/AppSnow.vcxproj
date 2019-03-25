@@ -121,9 +121,9 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\CustomSystem.hpp" />
     <ClInclude Include="src\SnowComponent.hpp" />
     <ClInclude Include="src\SnowShader.hpp" />
+    <ClInclude Include="src\SnowSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

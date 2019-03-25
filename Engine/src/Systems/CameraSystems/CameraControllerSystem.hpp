@@ -8,7 +8,7 @@ class CameraControllerSystem : public System {
 
     public:
         CameraControllerSystem() :
-            System("Camera System")
+            System("CameraController System")
         {}
 
         virtual void update(const float dt) override;
