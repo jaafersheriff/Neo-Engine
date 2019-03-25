@@ -21,14 +21,10 @@ namespace neo {
             int mUpButton;
             int mDownButton;
  
-
             CameraControllerComponent(GameObject *, float ls, float ms);
             CameraControllerComponent(CameraControllerComponent && other) = default;
 
-            virtual void update(float) override;
-
             void setOrientation(float p, float t);
-            void setButtons(int, int, int, int, int, int);
 
         private:
             void _updateSpatialOrientation();

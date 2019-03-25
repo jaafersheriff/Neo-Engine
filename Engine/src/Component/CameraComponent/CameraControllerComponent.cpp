@@ -15,20 +15,13 @@ namespace neo {
         mTheta(0.f),
         mPhi(Util::PI() * 0.5f),
         mLookSpeed(lookSpeed),
-        mMoveSpeed(moveSpeed) {
-        setButtons(GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_E, GLFW_KEY_Q);
-    }
-
-    void CameraControllerComponent::setButtons(int f, int b, int l, int r, int u, int d) {
-        mForwardButton  = f;
-        mBackwardButton = b;
-        mRightButton    = r;
-        mLeftButton     = l;
-        mUpButton       = u;
-        mDownButton     = d;
-    }
-
-    void CameraControllerComponent::update(float dt) {
+        mMoveSpeed(moveSpeed),
+        mForwardButton(GLFW_KEY_W),
+        mBackwardButton(GLFW_KEY_S),
+        mRightButton(GLFW_KEY_D),
+        mLeftButton(GLFW_KEY_A),
+        mUpButton(GLFW_KEY_E),
+        mDownButton(GLFW_KEY_Q) {
 
     }
 

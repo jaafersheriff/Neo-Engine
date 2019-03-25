@@ -1,7 +1,5 @@
 #include <NeoEngine.hpp>
 
-#include "CustomSystem.hpp"
-
 #include "Shader/PhongShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -85,7 +83,7 @@ int main() {
     Renderable(Loader::getMesh("cube"), Loader::getMaterial("defaultMat", 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f)));
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */

@@ -53,6 +53,8 @@
     <ClInclude Include="src\Systems\CameraSystems\CameraControllerSystem.hpp" />
     <ClInclude Include="src\Systems\System.hpp" />
     <ClInclude Include="src\Systems\Systems.hpp" />
+    <ClInclude Include="src\Systems\TranslationSystems\RotationSystem.hpp" />
+    <ClInclude Include="src\Systems\TranslationSystems\SinTranslateSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -78,6 +80,8 @@
     <ClCompile Include="src\ext\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\CameraControllerSystem.cpp" />
+    <ClCompile Include="src\Systems\TranslationSystems\RotationSystem.cpp" />
+    <ClCompile Include="src\Systems\TranslationSystems\SinTranslateSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />

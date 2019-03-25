@@ -22,14 +22,4 @@ class SinTranslateComponent : public Component {
 
         glm::vec3 mOffset;
         glm::vec3 mBasePosition;
-        bool mActive = true;
-
-        virtual void update(float dt) override {
-            if (mActive) {
-                double time = Util::getRunTime();
-                glm::vec3 oldPos = mGameObject->getSpatial()->getPosition();
-                oldPos = mBasePosition + (float)glm::cos(time) * mOffset;
-                mGameObject->getSpatial()->setPosition(oldPos);
-            }
-        }
 };
