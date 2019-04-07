@@ -30,6 +30,9 @@ struct Light {
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
 
         NeoEngine::addImGuiFunc("Light", [&]() {
+            if (!light) {
+                return;
+            }
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
                 gameObject->getSpatial()->setPosition(pos);
