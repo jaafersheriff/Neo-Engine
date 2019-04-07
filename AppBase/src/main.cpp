@@ -27,17 +27,12 @@ struct Light {
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
 
         NeoEngine::addImGuiFunc("Light", [&]() {
-            glm::vec3 pos = gameObject->getSpatial()->getPosition();
+            glm::vec3 pos = gameObject->getSpatial()->mPosition;
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
                 gameObject->getSpatial()->setPosition(pos);
             }
-            glm::vec3 col = light->getColor();
-            if (ImGui::SliderFloat3("Color", glm::value_ptr(col), 0.f, 1.f)) {
-                light->setColor(col);
-            }
-            glm::vec3 att = light->getAttenuation();
-            ImGui::SliderFloat3("Attenuation", glm::value_ptr(att), 0.f, 1.f);
-            light->setAttenuation(att);
+            ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
+            ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
         });
     }
 };
@@ -46,19 +41,19 @@ struct Renderable {
     GameObject *gameObject;
     RenderableComponent *renderable;
 
-    Renderable(Mesh *mesh, Material *mat) {
+    Renderable(Mesh *mesh, float amb, glm::vec3 diffuse, glm::vec3 specular) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderable->addShaderType<PhongShader>();
-        NeoEngine::addComponent<MaterialComponent>(gameObject, mat);
+        NeoEngine::addComponent<MaterialComponent>(gameObject, amb, diffuse, specular);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
-            glm::vec3 pos = gameObject->getSpatial()->getPosition();
+            glm::vec3 pos = gameObject->getSpatial()->mPosition;
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);
             }
-            float scale = gameObject->getSpatial()->getScale().x;
+            float scale = gameObject->getSpatial()->mScale.x;
             if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
                 gameObject->getSpatial()->setScale(glm::vec3(scale));
             }
@@ -80,7 +75,7 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable(Loader::getMesh("cube"), Loader::getMaterial("defaultMat", 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f)));
+    Renderable(Loader::getMesh("cube"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraControllerSystem>();

@@ -13,7 +13,7 @@ namespace neo {
     class RenderableComponent : public Component {
 
         public:
-            RenderableComponent(GameObject *go, Mesh *m) :
+            RenderableComponent(GameObject* go, Mesh* m) :
                 Component(go),
                 mMesh(m)
             {}
@@ -25,9 +25,9 @@ namespace neo {
             template <typename ShaderT> void removeShaderType();
             void clearShaderTypes();
 
-            virtual const Mesh & getMesh() const { return *mMesh; }
-            void replaceMesh(Mesh *m) { this->mMesh = m; }
-            const std::vector<std::type_index> & getShaders() { return mShaderTypes; }
+            virtual const Mesh& getMesh() const { return* mMesh; }
+            void replaceMesh(Mesh* m) { mMesh = m; }
+            const std::vector<std::type_index>& getShaders() { return mShaderTypes; }
 
         protected:
             Mesh * mMesh;

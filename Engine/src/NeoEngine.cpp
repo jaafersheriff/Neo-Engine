@@ -265,7 +265,7 @@ namespace neo {
             }
             if (ImGui::CollapsingHeader("Renderer")) {
                 if (MasterRenderer::mDefaultCamera && ImGui::TreeNode("Camera")) {
-                    auto pos = MasterRenderer::mDefaultCamera->getGameObject().getSpatial()->getPosition();
+                    auto pos = MasterRenderer::mDefaultCamera->getGameObject().getSpatial()->mPosition;
                     auto look = MasterRenderer::mDefaultCamera->getLookDir();
                     ImGui::Text("Position: %0.2f, %0.2f, %0.2f", pos.x, pos.y, pos.z);
                     ImGui::Text("Look Dir: %0.2f, %0.2f, %0.2f", look.x, look.y, look.z);
@@ -376,18 +376,6 @@ namespace neo {
                         if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->mTextureID) + ")").c_str())) {
                             float scale = 150.f / (t.second->mWidth > t.second->mHeight ? t.second->mWidth : t.second->mHeight);
                             ImGui::Image((ImTextureID)t.second->mTextureID, ImVec2(scale * t.second->mWidth, scale * t.second->mHeight), ImVec2(0, 1), ImVec2(1, 0));
-                            ImGui::TreePop();
-                        }
-                    }
-                    ImGui::TreePop();
-                }
-                if (Loader::mMaterials.size() && ImGui::TreeNode("Materials")) {
-                    for (auto & mat : Loader::mMaterials) {
-                        if (ImGui::TreeNode(mat.first.c_str())) {
-                            ImGui::SliderFloat("Ambient", &mat.second->mAmbient, 0.f, 1.f);
-                            ImGui::SliderFloat3("Diffuse", glm::value_ptr(mat.second->mDiffuse), 0.f, 1.f);
-                            ImGui::SliderFloat3("Specular", glm::value_ptr(mat.second->mSpecular), 0.f, 1.f);
-                            ImGui::SliderFloat("Shine", &mat.second->mShine, 0.f, 100.f);
                             ImGui::TreePop();
                         }
                     }

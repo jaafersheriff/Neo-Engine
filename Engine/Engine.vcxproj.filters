@@ -31,7 +31,6 @@
     <ClInclude Include="src\Component\ModelComponent\MaterialComponent.hpp" />
     <ClInclude Include="src\Component\AnimationComponent\LineComponent.hpp" />
     <ClInclude Include="src\Shader\PhongShader.hpp" />
-    <ClInclude Include="src\Material\Material.hpp" />
     <ClInclude Include="src\GLHelper\Framebuffer.hpp" />
     <ClInclude Include="src\GLHelper\GLHelper.hpp" />
     <ClInclude Include="src\GLHelper\Mesh.hpp" />
@@ -69,7 +68,6 @@
     <ClCompile Include="src\Window\Window.cpp" />
     <ClCompile Include="src\NeoEngine.cpp" />
     <ClCompile Include="src\Component\ModelComponent\RenderableComponent.cpp" />
-    <ClCompile Include="src\Component\AnimationComponent\LineRenderable.cpp" />
     <ClCompile Include="src\GLHelper\GLHelper.cpp" />
     <ClCompile Include="src\GLHelper\Mesh.cpp" />
     <ClCompile Include="src\MasterRenderer\MasterRenderer.cpp" />
@@ -82,6 +80,7 @@
     <ClCompile Include="src\Systems\CameraSystems\CameraControllerSystem.cpp" />
     <ClCompile Include="src\Systems\TranslationSystems\RotationSystem.cpp" />
     <ClCompile Include="src\Systems\TranslationSystems\SinTranslateSystem.cpp" />
+    <ClCompile Include="src\Component\AnimationComponent\LineRenderable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />

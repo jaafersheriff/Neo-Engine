@@ -41,7 +41,7 @@ class GBufferShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto & model : MasterRenderer::getRenderables<GBufferShader, RenderableComponent>()) {
+            for (auto& model : MasterRenderer::getRenderables<GBufferShader, RenderableComponent>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind mesh */
@@ -54,8 +54,7 @@ class GBufferShader : public Shader {
                 if (matComp) {
                     loadUniform("ambient", matComp->getMaterial().mAmbient);
                 }
-                auto diffMap = model->getGameObject().getComponentByType<DiffuseMapComponent>();
-                if (diffMap) {
+                if (auto diffMap = model->getGameObject().getComponentByType<DiffuseMapComponent>()) {
                     diffMap->getTexture().bind();
                     loadUniform("useDiffuseMap", true);
                     loadUniform("diffuseMap", diffMap->getTexture().mTextureID);
@@ -68,8 +67,7 @@ class GBufferShader : public Shader {
                 }
 
                 /* Bind normal map */
-                auto normalMap = model->getGameObject().getComponentByType<NormalMapComponent>();
-                if (normalMap) {
+                if (auto normalMap = model->getGameObject().getComponentByType<NormalMapComponent>()) {
                     normalMap->getTexture().bind();
                     loadUniform("useNormalMap", true);
                     loadUniform("normalMap", normalMap->getTexture().mTextureID);

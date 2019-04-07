@@ -29,9 +29,9 @@ void CameraControllerSystem::update(const float dt) {
             auto spatial = comp->getGameObject().getSpatial();
             dir = glm::normalize(dir);
             dir = glm::normalize(
-                spatial->getU() * dir.x +
+                spatial->mU * dir.x +
                 glm::vec3(0.f, 1.f, 0.f) * dir.y +
-                spatial->getW() * dir.z);
+                spatial->mW * dir.z);
             comp->getGameObject().getSpatial()->move(dir * comp->mMoveSpeed * dt);
         }
     }

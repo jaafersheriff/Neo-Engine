@@ -51,7 +51,6 @@
     <ClInclude Include="src\Loader\MeshGenerator.hpp" />
     <ClInclude Include="src\Messaging\Message.hpp" />
     <ClInclude Include="src\Messaging\Messenger.hpp" />
-    <ClInclude Include="src\Material\Material.hpp" />
     <ClInclude Include="src\GLHelper\Mesh.hpp" />
     <ClInclude Include="src\GLHelper\Texture.hpp" />
     <ClInclude Include="src\NeoEngine.hpp" />
@@ -75,9 +74,9 @@
     <ClInclude Include="src\Window\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Component\AnimationComponent\LineRenderable.cpp" />
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
     <ClCompile Include="src\Component\CameraComponent\CameraControllerComponent.cpp" />
-    <ClCompile Include="src\Component\AnimationComponent\LineRenderable.cpp" />
     <ClCompile Include="src\Component\ModelComponent\RenderableComponent.cpp" />
     <ClCompile Include="src\Component\SpatialComponent\SpatialComponent.cpp" />
     <ClCompile Include="src\ext\imgui\imgui.cpp" />

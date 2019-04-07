@@ -52,8 +52,7 @@ namespace neo {
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                     /* Bind material */
-                    auto materialComp = model->getGameObject().getComponentByType<MaterialComponent>();
-                    if (materialComp) {
+                    if (auto materialComp = model->getGameObject().getComponentByType<MaterialComponent>()) {
                         const Material &material = materialComp->getMaterial();
                         loadUniform("ambient", material.mAmbient);
                         loadUniform("diffuseColor", material.mDiffuse);

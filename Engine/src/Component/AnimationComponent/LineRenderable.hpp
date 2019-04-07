@@ -18,7 +18,18 @@ namespace neo {
 
             virtual void init() override;
 
-            virtual const Mesh & getMesh() const override;
+            virtual const Mesh & getMesh() const override {
+                if (mLine->mDirty) {
+                    /* Copy vertex array */
+                    CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mMesh->mVertexBufferID));
+                    CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mLine->getNodes().size() * sizeof(glm::vec3), mLine->getNodes().data(), GL_STATIC_DRAW));
+                    CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+                    mLine->mDirty = false;
+                }
+
+                return RenderableComponent::getMesh();
+
+            }
 
             LineComponent * mLine;
 

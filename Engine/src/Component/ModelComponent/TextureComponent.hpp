@@ -15,10 +15,6 @@ namespace neo {
                 mTexture(tex)
             {}
 
-            const Texture & getTexture() const { return *mTexture; }
-
-        protected:
-
             const Texture *mTexture;
 
     };
@@ -30,10 +26,6 @@ namespace neo {
                 Component(go),
                 texture(tex)
             {}
-
-            const Texture & getTexture() const { return *texture; }
-
-        protected:
 
             const Texture *texture;
 
@@ -47,10 +39,6 @@ namespace neo {
                 texture(tex)
             {}
 
-            const Texture & getTexture() const { return *texture; }
-
-        protected:
-
             const Texture *texture;
 
     };
@@ -62,10 +50,6 @@ namespace neo {
                 Component(go),
                 texture(tex)
             {}
-
-            const Texture & getTexture() const { return *texture; }
-
-        protected:
 
             const Texture *texture;
 
