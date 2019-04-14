@@ -5,7 +5,7 @@
 
 #include "NeoEngine.hpp"
 
-#include "ReflectionRenderable.hpp"
+#include "ReflectionComponent.hpp"
 #include "SkyboxComponent.hpp"
 
 using namespace neo;
@@ -27,9 +27,9 @@ class ReflectionShader : public Shader {
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load environment map */
-            loadUniform("cubeMap", NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<CubeMapComponent>()->getTexture().mTextureID);
+            loadUniform("cubeMap", NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<CubeMapComponent>()->mTexture->mTextureID);
 
-            for (auto model : MasterRenderer::getRenderables<ReflectionShader, ReflectionRenderable>()) {
+            for (auto model : MasterRenderer::getRenderables<ReflectionShader, RenderableComponent>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
                 loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
 

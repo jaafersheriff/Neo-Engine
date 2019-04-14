@@ -36,7 +36,7 @@ class SkyboxShader : public Shader {
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
             /* Bind texture */
-            loadUniform("cubeMap", cube->getGameObject().getComponentByType<CubeMapComponent>()->getTexture().mTextureID);
+            loadUniform("cubeMap", cube->getGameObject().getComponentByType<CubeMapComponent>()->mTexture->mTextureID);
 
             /* Draw */
             mesh.draw();

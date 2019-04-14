@@ -6,7 +6,7 @@
 
 #include "NeoEngine.hpp"
 
-#include "RefractionRenderable.hpp"
+#include "RefractionComponent.hpp"
 #include "SkyboxComponent.hpp"
 
 using namespace neo;
@@ -28,12 +28,15 @@ class RefractionShader : public Shader {
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load environment map */
-            loadUniform("cubeMap", NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<CubeMapComponent>()->getTexture().mTextureID);
+            loadUniform("cubeMap", NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<CubeMapComponent>()->mTexture->mTextureID);
 
-            for (auto model : MasterRenderer::getRenderables<RefractionShader, RefractionRenderable>()) {
+            for (auto model : MasterRenderer::getRenderables<RefractionShader, RenderableComponent>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
                 loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
-                loadUniform("ratio", model->ratio);
+                
+                if (auto refraction = model->getGameObject().getComponentByType<RefractionComponent>()) {
+                    loadUniform("ratio", refraction->ratio);
+                }
 
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());
