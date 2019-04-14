@@ -1,7 +1,7 @@
 #include <NeoEngine.hpp>
 
 #include "Shader/PhongShader.hpp"
-#include "PostProcessShader.hpp"
+#include "Shader/PostProcessShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -73,7 +73,7 @@ struct Renderable {
 };
 
 int main() {
-    NeoEngine::init("Base", "res/", 1280, 720);
+    NeoEngine::init("Post Process", "res/", 1280, 720);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
@@ -88,9 +88,9 @@ int main() {
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
     MasterRenderer::addSceneShader<PhongShader>();
-    MasterRenderer::addPostProcessShader<DepthShader>("depth.frag");
-    MasterRenderer::addPostProcessShader<BlueShader>("blue.frag");
-    MasterRenderer::addPostProcessShader<InvertShader>("invert.frag");
+    MasterRenderer::addPostProcessShader<PostProcessShader>("DepthShader", "depth.frag");
+    MasterRenderer::addPostProcessShader<PostProcessShader>("BlueShader", "blue.frag");
+    MasterRenderer::addPostProcessShader<PostProcessShader>("InvertShader", "invert.frag");
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();

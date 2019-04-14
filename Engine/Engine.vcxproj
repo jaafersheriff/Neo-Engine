@@ -60,6 +60,7 @@
     <ClInclude Include="src\NeoEngine.hpp" />
     <ClInclude Include="src\Shader\LineShader.hpp" />
     <ClInclude Include="src\Shader\PhongShader.hpp" />
+    <ClInclude Include="src\Shader\PostProcessShader.hpp" />
     <ClInclude Include="src\Shader\ShadowCasterShader.hpp" />
     <ClInclude Include="src\Shader\PhongShadowShader.hpp" />
     <ClInclude Include="src\Shader\WireframeShader.hpp" />

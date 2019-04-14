@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Shader/Shader.hpp"
+#include "Shader/PostProcessShader.hpp"
 #include "GLHelper/GLHelper.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
 
 #include "Loader/Loader.hpp"
 #include "Window/Window.hpp"
@@ -10,14 +9,14 @@
 
 using namespace neo;
 
-class CombineShader : public Shader {
+class CombineShader : public PostProcessShader {
 
     public:
 
         float diffuseAmount = 0.2f;
 
         CombineShader(const std::string &frag) :
-            Shader("Combine Shader", MasterRenderer::POST_PROCESS_VERT_FILE, frag) 
+            PostProcessShader("Combine Shader", frag) 
         {}
 
         virtual void render(const CameraComponent &camera) override {

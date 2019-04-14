@@ -12,8 +12,9 @@
 
 namespace neo {
 
-    class CameraComponent;
     class NeoEngine;
+    class CameraComponent;
+    class PostProcessShader;
 
     class MasterRenderer {
 
@@ -21,7 +22,6 @@ namespace neo {
 
         public:
             static std::string APP_SHADER_DIR;
-            static const char* POST_PROCESS_VERT_FILE;
 
             static void init(const std::string &, CameraComponent *, glm::vec3 clearColor = glm::vec3(0.f));
             static void resetState();
@@ -65,6 +65,8 @@ namespace neo {
     }
     template <typename ShaderT, typename... Args>
     ShaderT & MasterRenderer::addPostProcessShader(Args &&... args) {
+        static_assert(std::is_base_of<PostProcessShader, ShaderT>::value, "ShaderT must be derived from PostProcessShader");
+
         // Generate fbos if a post process shader exists
         if (!mPostShaders.size()) {
             // Ping & pong 

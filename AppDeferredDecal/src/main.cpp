@@ -57,7 +57,7 @@ struct Decal {
 };
 
 int main() {
-    NeoEngine::init("Deferred", "res/", 1280, 720);
+    NeoEngine::init("DeferredDecal", "res/", 1280, 720);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);

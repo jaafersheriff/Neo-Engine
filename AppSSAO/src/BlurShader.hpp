@@ -1,19 +1,18 @@
 #pragma once
 
-#include "Shader/Shader.hpp"
+#include "Shader/PostProcessShader.hpp"
 #include "GLHelper/GLHelper.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
 
 using namespace neo;
 
-class BlurShader : public Shader {
+class BlurShader : public PostProcessShader {
 
     public:
 
         int blurAmount = 6;
 
         BlurShader(const std::string &frag) :
-            Shader("Blur Shader", MasterRenderer::POST_PROCESS_VERT_FILE, frag) 
+            PostProcessShader("Blur Shader", frag) 
         {}
 
         virtual void render(const CameraComponent &camera) override {

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Shader/Shader.hpp"
+#include "Shader/PostProcessShader.hpp"
 #include "GLHelper/GLHelper.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
 
 #include "Loader/Loader.hpp"
 #include "Window/Window.hpp"
@@ -10,7 +9,7 @@
 
 using namespace neo;
 
-class AOShader : public Shader {
+class AOShader : public PostProcessShader {
 
     public:
 
@@ -18,7 +17,7 @@ class AOShader : public Shader {
         float bias = 0.5f;
 
         AOShader(const std::string &frag) :
-            Shader("AO Shader", MasterRenderer::POST_PROCESS_VERT_FILE, frag) {
+            PostProcessShader("AO Shader", frag) {
 
             // generate kernel
             Texture *kernelTex = Loader::getTexture("aoKernel");

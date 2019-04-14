@@ -17,13 +17,6 @@ namespace neo {
     std::vector<std::unique_ptr<Shader>> MasterRenderer::mPostShaders;
     glm::vec3 MasterRenderer::mClearColor;
 
-    const char * MasterRenderer::POST_PROCESS_VERT_FILE =
-        "#version 330 core\n\
-        layout (location = 0) in vec3 vertPos;\
-        layout (location = 2) in vec2 vertTex;\
-        out vec2 fragTex;\
-        void main() { gl_Position = vec4(2 * vertPos, 1); fragTex = vertTex; }";
-
     void MasterRenderer::init(const std::string &dir, CameraComponent *cam, glm::vec3 clearColor) {
         APP_SHADER_DIR = dir;
         setDefaultCamera(cam);
