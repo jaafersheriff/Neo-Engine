@@ -130,7 +130,7 @@ namespace neo {
     }
 
     template <typename CompT>
-    void NeoEngine::removeComponent(CompT & component) {
+    void NeoEngine::removeComponent(CompT& component) {
         if (!&component) {
             return;
         }

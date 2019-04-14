@@ -61,11 +61,11 @@ struct Reflection {
                 NeoEngine::addComponent<renderable::WireframeRenderable>(gameObject);
             }
             if (ImGui::Button("Remove reflection")) {
-                NeoEngine::addComponent<ReflectionComponent>(gameObject);
+                NeoEngine::removeComponent<ReflectionComponent>(*gameObject->getComponentByType<ReflectionComponent>());
             }
             ImGui::SameLine();
             if (ImGui::Button("Remove wireframe")) {
-                // renderComp->removeShaderType<WireframeShader>();
+                NeoEngine::removeComponent<renderable::WireframeRenderable>(*gameObject->getComponentByType<renderable::WireframeRenderable>());
             }
         });
     }
@@ -102,11 +102,11 @@ struct Refraction {
                 NeoEngine::addComponent<renderable::WireframeRenderable>(gameObject);
             }
             if (ImGui::Button("Remove refraction")) {
-                // renderComp->removeShaderType<RefractionShader>();
+                NeoEngine::removeComponent<RefractionComponent>(*gameObject->getComponentByType<RefractionComponent>());
             }
             ImGui::SameLine();
             if (ImGui::Button("Remove wireframe")) {
-                // renderComp->removeShaderType<WireframeShader>();
+                NeoEngine::removeComponent<renderable::WireframeRenderable>(*gameObject->getComponentByType<renderable::WireframeRenderable>());
             }
  
         });
