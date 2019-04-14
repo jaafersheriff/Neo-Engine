@@ -119,14 +119,14 @@ namespace neo {
                 /* Load Camera */
                 loadUniform("P", camera.getProj());
                 loadUniform("V", camera.getView());
-                loadUniform("camPos", camera.getGameObject().getSpatial()->mPosition);
+                loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
                 /* Load light */
                 auto lights = NeoEngine::getComponents<LightComponent>();
                 if (lights.size()) {
                     auto light = lights[0];
                     auto lightCam = light->getGameObject().getComponentByType<CameraComponent>();
-                    loadUniform("lightPos", light->getGameObject().getSpatial()->mPosition);
+                    loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
                     loadUniform("lightCol", light->mColor);
                     loadUniform("lightAtt", light->mAttenuation);
                     loadUniform("L", biasMatrix * lightCam->getProj() * lightCam->getView());

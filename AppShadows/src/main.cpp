@@ -1,14 +1,13 @@
 #include <NeoEngine.hpp>
 
-#include "CustomSystem.hpp"
-
-#include "LookAtCameraController.hpp"
-
 #include "Shader/LineShader.hpp"
 #include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
 #include "Shader/ShadowCasterShader.hpp"
 #include "Shader/PhongShadowedShader.hpp"
+
+#include "LookAtCameraReceiver.hpp"
+#include "LookAtCameraSystem.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -56,13 +55,14 @@ struct Light {
         NeoEngine::addComponent<LineRenderable>(gameObject, wLine);
         sin = &NeoEngine::addComponent<SinTranslateComponent>(gameObject, glm::vec3(0.f, 0.f, 20.f), camSpatial->getPosition());
 
+        NeoEngine::addComponent<ShadowCameraComponent>(gameObject);
+
         // Separate game object for look at
         gameO = &NeoEngine::createGameObject();
         lookAtSpatial = &NeoEngine::addComponent<SpatialComponent>(gameO, glm::vec3(0.f), glm::vec3(1.f));
         auto cube = &NeoEngine::addComponent<RenderableComponent>(gameO, Loader::getMesh("cube"));
         cube->addShaderType<WireframeShader>();
-
-        NeoEngine::addComponent<LookAtCameraController>(gameObject, camera, lookAtSpatial);
+        NeoEngine::addComponent<LookAtCameraReceiver>(gameO);
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             ImGui::Text("CamReceivers: [%d, %d]", gameObject->getNumReceiverTypes(), gameObject->getNumReceivers());
@@ -83,29 +83,21 @@ struct Light {
             auto lookDir = camera->getLookDir();
             ImGui::Text("Look at dir : %0.2f, %0.2f, %0.2f", lookDir.x, lookDir.y, lookDir.z);
 
-            glm::vec2 h = camera->mHorizBounds;
-            glm::vec2 v = camera->mVertBounds;
+            glm::vec2 h = camera->getHorizontalBounds();
+            glm::vec2 v = camera->getVerticalBounds();
             if (ImGui::SliderFloat2("Horizontal", glm::value_ptr(h), -50.f, 50.f)) {
                 camera->setOrthoBounds(h, v);
             }
             if (ImGui::SliderFloat2("Vertical", glm::value_ptr(v), -50.f, 50.f)) {
                 camera->setOrthoBounds(h, v);
             }
-            float near = camera->getNear();
-            float far = camera->getFar();
-            if (ImGui::SliderFloat("Near", &near, 0.f, 1.f)) {
-                camera->setNearFar(near, far);
+            glm::vec2 nearFar = camera->getNearFar();
+            if (ImGui::SliderFloat("Near", &nearFar.x, 0.f, 1.f) ||
+               ImGui::SliderFloat("Far", &nearFar.y, 100.f, 1000.f)) {
+                camera->setNearFar(nearFar.x, nearFar.y);
             }
-            if (ImGui::SliderFloat("Far", &far, 100.f, 1000.f)) {
-                camera->setNearFar(near, far);
-            }
-            glm::vec3 col = light->getColor();
-            if (ImGui::SliderFloat3("Color", glm::value_ptr(col), 0.f, 1.f)) {
-                light->setColor(col);
-            }
-            glm::vec3 att = light->getAttenuation();
-            ImGui::SliderFloat3("Attenuation", glm::value_ptr(att), 0.f, 1.f);
-            light->setAttenuation(att);
+            ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
+            ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
         });
     }
 };
@@ -159,17 +151,18 @@ int main() {
             glm::vec3(Util::genRandom(5.f)));
         r.renderable->addShaderType<ShadowCasterShader>();
         r.renderable->addShaderType<PhongShadowedShader>();
-        NeoEngine::addComponent<MaterialComponent>(r.gameObject, new Material(0.3f, Util::genRandomVec3(), glm::vec3(1.f), 20.f));
+        NeoEngine::addComponent<MaterialComponent>(r.gameObject, 0.3f, Util::genRandomVec3(), glm::vec3(1.f), 20.f);
     }
 
     // Terrain receiver 
     Renderable receiver(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
-    NeoEngine::addComponent<MaterialComponent>(receiver.gameObject, new Material(0.2f, glm::vec3(0.7f), glm::vec3(1.f), 20.f));
+    NeoEngine::addComponent<MaterialComponent>(receiver.gameObject, 0.2f, glm::vec3(0.7f), glm::vec3(1.f), 20.f);
     receiver.renderable->addShaderType<PhongShadowedShader>();
     receiver.attachImGui("Receiver");
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
+    NeoEngine::addSystem<LookAtCameraSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */

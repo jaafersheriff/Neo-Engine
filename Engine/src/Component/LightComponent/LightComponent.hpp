@@ -17,5 +17,5 @@ namespace neo {
                 mAttenuation(att)
             {}
 
-                };
+    };
 }

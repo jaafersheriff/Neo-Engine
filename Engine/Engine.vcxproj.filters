@@ -54,6 +54,7 @@
     <ClInclude Include="src\Systems\Systems.hpp" />
     <ClInclude Include="src\Systems\TranslationSystems\RotationSystem.hpp" />
     <ClInclude Include="src\Systems\TranslationSystems\SinTranslateSystem.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\ShadowCameraComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
