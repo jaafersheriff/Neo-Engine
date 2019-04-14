@@ -35,13 +35,14 @@ class GBufferShader : public Shader {
         virtual void render(const CameraComponent &camera) override {
             auto fbo = Loader::getFBO("gbuffer");
             fbo->bind();
+            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
             bind();
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto & model : MasterRenderer::getRenderables<GBufferShader, RenderableComponent>()) {
+            for (auto& model : NeoEngine::getComponents<MeshComponent>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind mesh */

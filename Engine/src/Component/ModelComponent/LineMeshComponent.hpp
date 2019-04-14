@@ -1,22 +1,30 @@
 #pragma once
 
-#include "Component/ModelComponent/RenderableComponent.hpp"
-#include "LineComponent.hpp"
+#include "Component/AnimationComponent/LineComponent.hpp"
+#include "Component/ModelComponent/MeshComponent.hpp"
 
 #include "GLHelper/GLHelper.hpp"
 
+// TODO - this should be a generic renderable component tag like the rest
+
 namespace neo {
 
-    class LineRenderable : public RenderableComponent {
+    namespace renderable {
+
+        class LineMeshComponent : public MeshComponent {
 
         public:
 
-            LineRenderable(GameObject *go, LineComponent *line) :
-                RenderableComponent(go, new Mesh),
+            LineComponent* mLine;
+
+            LineMeshComponent(GameObject *go, LineComponent *line) :
+                MeshComponent(go, new Mesh),
                 mLine(line)
             {}
 
-            virtual void init() override;
+            virtual void init() override {
+                mMesh->upload(GL_LINE_STRIP);
+            }
 
             virtual const Mesh & getMesh() const override {
                 if (mLine->mDirty) {
@@ -27,11 +35,10 @@ namespace neo {
                     mLine->mDirty = false;
                 }
 
-                return RenderableComponent::getMesh();
+                return MeshComponent::getMesh();
 
             }
 
-            LineComponent * mLine;
-
-    };
+        };
+    }
 }

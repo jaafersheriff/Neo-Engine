@@ -40,13 +40,12 @@ struct Light {
 
 struct Renderable {
     GameObject *gameObject;
-    RenderableComponent *renderable;
 
     Renderable(Mesh *mesh, float amb, glm::vec3 diffuse, glm::vec3 spec) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<PhongShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
+        NeoEngine::addComponent<renderable::PhongRenderable>(gameObject);
         NeoEngine::addComponent<MaterialComponent>(gameObject, amb, diffuse, spec);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
@@ -86,10 +85,9 @@ int main() {
     /* Init renderer */
     MasterRenderer::init("shaders/", camera.camera);
     MasterRenderer::addSceneShader<PhongShader>();
-    MasterRenderer::addPostProcessShader<InvertShader>("invert.frag");
-    MasterRenderer::addPostProcessShader<BWShader>("bw.frag");
-    MasterRenderer::addPostProcessShader<BlueShader>("blue.frag");
     MasterRenderer::addPostProcessShader<DepthShader>("depth.frag");
+    MasterRenderer::addPostProcessShader<BlueShader>("blue.frag");
+    MasterRenderer::addPostProcessShader<InvertShader>("invert.frag");
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();

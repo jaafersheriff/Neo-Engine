@@ -3,7 +3,6 @@
 #include "Component/Component.hpp"
 
 using namespace neo;
-
 class ReflectionComponent : public Component {
 
     public:

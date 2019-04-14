@@ -44,13 +44,12 @@ struct Light {
 
 struct Renderable {
     GameObject *gameObject;
-    RenderableComponent *renderable;
 
     Renderable(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<PhongShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
+        NeoEngine::addComponent<renderable::PhongRenderable>(gameObject);
         NeoEngine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f));
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
@@ -90,9 +89,9 @@ struct Surveillance {
         LineComponent *wLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 0.f, 1.f));
         wLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f) });
         // Line renderable
-        NeoEngine::addComponent<LineRenderable>(gameObject, uLine);
-        NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
-        NeoEngine::addComponent<LineRenderable>(gameObject, wLine);
+        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, uLine);
+        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, vLine);
+        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, wLine);
 
         NeoEngine::addImGuiFunc(name, [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -130,7 +129,7 @@ int main() {
     NeoEngine::initSystems();
 
     /* Init Renderer */
-    MasterRenderer::init("shaders/", camera.camera);
+    MasterRenderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));
     MasterRenderer::addPreProcessShader<SurveillanceWriteShader>();
     MasterRenderer::addSceneShader<LineShader>();
     MasterRenderer::addSceneShader<PhongShader>();

@@ -10,12 +10,12 @@
 
 namespace neo {
 
-    class PhongShadowedShader : public Shader {
+    class PhongShadowShader : public Shader {
 
         public:
 
-            PhongShadowedShader(float b = 0.f) :
-                Shader("PhongShadowed Shader", 
+            PhongShadowShader(float b = 0.f) :
+                Shader("PhongShadow Shader", 
                     "#version 330 core\n\
                     layout(location = 0) in vec3 vertPos;\
                     layout(location = 1) in vec3 vertNor;\
@@ -146,17 +146,22 @@ namespace neo {
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.mTextureID));
                 loadUniform("shadowMap", texture.mTextureID);
 
-                for (auto & model : MasterRenderer::getRenderables<PhongShadowedShader, RenderableComponent>()) {
-                    loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
-                    loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
+                for (auto& renderable : NeoEngine::getComponents<renderable::PhongShadowRenderable>()) {
+                    auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
+                    if (!meshComponent) {
+                        continue;
+                    }
 
                     /* Bind mesh */
-                    const Mesh & mesh(model->getMesh());
+                    const Mesh & mesh(meshComponent->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.mVAOID));
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
+                    loadUniform("M", renderable->getGameObject().getSpatial()->getModelMatrix());
+                    loadUniform("N", renderable->getGameObject().getSpatial()->getNormalMatrix());
+
                     /* Bind texture */
-                    auto texComp = model->getGameObject().getComponentByType<DiffuseMapComponent>();
+                    auto texComp = renderable->getGameObject().getComponentByType<DiffuseMapComponent>();
                     if (texComp) {
                         auto texture = (const Texture2D *)(texComp->mTexture);
                         texture->bind();
@@ -168,7 +173,7 @@ namespace neo {
                     }
 
                     /* Bind material */
-                    if (auto material = model->getGameObject().getComponentByType<MaterialComponent>()) {
+                    if (auto material = renderable->getGameObject().getComponentByType<MaterialComponent>()) {
                         loadUniform("ambient", material->mAmbient);
                         loadUniform("diffuseColor", material->mDiffuse);
                         loadUniform("specularColor", material->mSpecular);

@@ -35,26 +35,27 @@ class GBufferShader : public Shader {
         virtual void render(const CameraComponent &camera) override {
             auto fbo = Loader::getFBO("gbuffer");
             fbo->bind();
+            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
             bind();
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto & model : MasterRenderer::getRenderables<GBufferShader, RenderableComponent>()) {
-                loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
-                
+            for (auto& renderable : NeoEngine::getComponents<MeshComponent>()) {
                 /* Bind mesh */
-                const Mesh & mesh(model->getMesh());
+                const Mesh& mesh(renderable->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
+                loadUniform("M", renderable->getGameObject().getSpatial()->getModelMatrix());
+
                 /* Bind diffuse map or material */
-                auto matComp = model->getGameObject().getComponentByType<MaterialComponent>();
+                auto matComp = renderable->getGameObject().getComponentByType<MaterialComponent>();
                 if (matComp) {
                     loadUniform("ambient", matComp->mAmbient);
                 }
-                if (auto diffMap = model->getGameObject().getComponentByType<DiffuseMapComponent>()) {
+                if (auto diffMap = renderable->getGameObject().getComponentByType<DiffuseMapComponent>()) {
                     diffMap->mTexture->bind();
                     loadUniform("useDiffuseMap", true);
                     loadUniform("diffuseMap", diffMap->mTexture->mTextureID);
@@ -67,14 +68,14 @@ class GBufferShader : public Shader {
                 }
 
                 /* Bind normal map */
-                if (auto normalMap = model->getGameObject().getComponentByType<NormalMapComponent>()) {
+                if (auto normalMap = renderable->getGameObject().getComponentByType<NormalMapComponent>()) {
                     normalMap->mTexture->bind();
                     loadUniform("useNormalMap", true);
                     loadUniform("normalMap", normalMap->mTexture->mTextureID);
                 }
                 else {
                     loadUniform("useNormalMap", false);
-                    loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
+                    loadUniform("N", renderable->getGameObject().getSpatial()->getNormalMatrix());
                 }
 
                 /* DRAW */

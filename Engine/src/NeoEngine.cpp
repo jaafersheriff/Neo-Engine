@@ -272,11 +272,6 @@ namespace neo {
                     ImGui::TreePop();
                 }
                 if (ImGui::TreeNode("Shaders")) {
-                    int count = 0;
-                    for (auto & r : MasterRenderer::mRenderables) {
-                        count += r.second->size();
-                    }
-                    ImGui::Text("Renderables: %d", count); // TODO : list renderable count per shader 
                     if (MasterRenderer::mPreProcessShaders.size() && ImGui::TreeNode("Pre process")) {
                         for (unsigned i = 0; i < MasterRenderer::mPreProcessShaders.size(); i++) {
                             auto & shader = MasterRenderer::mPreProcessShaders[i];

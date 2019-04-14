@@ -24,26 +24,22 @@ struct Camera {
 
 struct Skybox {
     GameObject *gameObject;
-    SkyboxComponent *skybox;
 
     Skybox(Texture *tex) {
         gameObject = &NeoEngine::createGameObject();
-        skybox = &NeoEngine::addComponent<SkyboxComponent>(gameObject);
-        skybox->addShaderType<SkyboxShader>();
+        NeoEngine::addComponent<SkyboxComponent>(gameObject);
         NeoEngine::addComponent<CubeMapComponent>(gameObject, tex);
     }
 };
 
 struct Reflection {
     GameObject *gameObject;
-    RenderableComponent *renderComp;
 
     Reflection(Mesh *m, glm::vec3 pos, float scale = 1.f) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(scale));
-        renderComp = &NeoEngine::addComponent<RenderableComponent>(gameObject, m);
-        renderComp->addShaderType<ReflectionShader>();
-        renderComp->addShaderType<WireframeShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, m);
+        NeoEngine::addComponent<renderable::WireframeRenderable>(gameObject);
         NeoEngine::addComponent<ReflectionComponent>(gameObject);
         NeoEngine::addComponent<RotationComponent>(gameObject, glm::vec3(0.f, 0.3f, 0.f));
 
@@ -58,18 +54,18 @@ struct Reflection {
             }
 
             if (ImGui::Button("Add reflection")) {
-                renderComp->addShaderType<ReflectionShader>();
+                NeoEngine::addComponent<ReflectionComponent>(gameObject);
             }
             ImGui::SameLine();
             if (ImGui::Button("Add wireframe")) {
-                renderComp->addShaderType<WireframeShader>();
+                NeoEngine::addComponent<renderable::WireframeRenderable>(gameObject);
             }
             if (ImGui::Button("Remove reflection")) {
-                renderComp->removeShaderType<ReflectionShader>();
+                NeoEngine::addComponent<ReflectionComponent>(gameObject);
             }
             ImGui::SameLine();
             if (ImGui::Button("Remove wireframe")) {
-                renderComp->removeShaderType<WireframeShader>();
+                // renderComp->removeShaderType<WireframeShader>();
             }
         });
     }
@@ -77,16 +73,14 @@ struct Reflection {
 
 struct Refraction {
     GameObject *gameObject;
-    RenderableComponent *renderComp;
     RefractionComponent *refraction;
 
     Refraction(Mesh *m, glm::vec3 pos, float scale = 1.f) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(scale));
-        renderComp = &NeoEngine::addComponent<RenderableComponent>(gameObject, m);
-        renderComp->addShaderType<RefractionShader>();
-        renderComp->addShaderType<WireframeShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, m);
         refraction = &NeoEngine::addComponent<RefractionComponent>(gameObject);
+        NeoEngine::addComponent<renderable::WireframeRenderable>(gameObject);
         NeoEngine::addComponent<RotationComponent>(gameObject, glm::vec3(0.f, 0.3f, 0.f));
 
         NeoEngine::addImGuiFunc("Refraction", [&]() {
@@ -101,18 +95,18 @@ struct Refraction {
             }
 
             if (ImGui::Button("Add refraction")) {
-                renderComp->addShaderType<RefractionShader>();
+                refraction = &NeoEngine::addComponent<RefractionComponent>(gameObject);
             }
             ImGui::SameLine();
             if (ImGui::Button("Add wireframe")) {
-                renderComp->addShaderType<WireframeShader>();
+                NeoEngine::addComponent<renderable::WireframeRenderable>(gameObject);
             }
             if (ImGui::Button("Remove refraction")) {
-                renderComp->removeShaderType<RefractionShader>();
+                // renderComp->removeShaderType<RefractionShader>();
             }
             ImGui::SameLine();
             if (ImGui::Button("Remove wireframe")) {
-                renderComp->removeShaderType<WireframeShader>();
+                // renderComp->removeShaderType<WireframeShader>();
             }
  
         });

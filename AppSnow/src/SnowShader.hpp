@@ -42,7 +42,7 @@ namespace neo {
                     loadUniform("lightAtt", lights.at(0)->mAttenuation);
                 }
 
-                for (auto model : MasterRenderer::getRenderables<SnowShader, RenderableComponent>()) {
+                for (auto& model : NeoEngine::getComponents<MeshComponent>()) {
                     loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
                     loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
 

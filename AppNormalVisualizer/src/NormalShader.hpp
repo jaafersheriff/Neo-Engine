@@ -25,16 +25,16 @@ class NormalShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto model : MasterRenderer::getRenderables<NormalShader, RenderableComponent>()) {
-                glm::mat4 M = model->getGameObject().getSpatial()->getModelMatrix();
-                loadUniform("M", M);
-                glm::mat4 N = glm::transpose(glm::inverse(camera.getView() * M));
-                loadUniform("N", glm::mat3(N));
-
+            for (auto& model : NeoEngine::getComponents<MeshComponent>()) {
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
+
+                glm::mat4 M = model->getGameObject().getSpatial()->getModelMatrix();
+                loadUniform("M", M);
+                glm::mat4 N = glm::transpose(glm::inverse(camera.getView() * M));
+                loadUniform("N", glm::mat3(N));
 
                 /* DRAW */
                 mesh.draw();

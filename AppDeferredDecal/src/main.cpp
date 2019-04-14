@@ -4,7 +4,6 @@
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
 #include "CombineShader.hpp"
-#include "Shader/WireframeShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "Util/Util.hpp"
@@ -36,26 +35,22 @@ struct Light {
 struct Renderable {
     GameObject *gameObject;
     SpatialComponent *spat;
-    RenderableComponent *renderable;
 
     Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale) {
         gameObject = &NeoEngine::createGameObject();
         spat = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
-        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<GBufferShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
     }
 };
 
 struct Decal {
     GameObject *gameObject;
     SpatialComponent *spat;
-    RenderableComponent *renderable;
 
     Decal(Texture2D* texture, glm::vec3 pos, glm::vec3 scale) {
         gameObject = &NeoEngine::createGameObject();
         spat = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
-        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
-        renderable->addShaderType<DecalShader>();
+        NeoEngine::addComponent<DecalRenderable>(gameObject);
         NeoEngine::addComponent<DiffuseMapComponent>(gameObject, texture);
         NeoEngine::addComponent<RotationComponent>(gameObject, glm::vec3(0, 1, 0));
     }
@@ -88,7 +83,6 @@ int main() {
     Renderable terrain(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
     terrain.spat->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
     NeoEngine::addComponent<MaterialComponent>(terrain.gameObject, 0.7f, glm::vec3(0.7f));
-    terrain.renderable->addShaderType<GBufferShader>();
 
     Decal decal(Loader::getTexture("texture.png"), glm::vec3(0.f, 0.f, -25.f), glm::vec3(15.f));
 
@@ -103,7 +97,6 @@ int main() {
     MasterRenderer::addPreProcessShader<DecalShader>("decal.vert", "decal.frag"); 
     auto & lightPassShader = MasterRenderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag"); 
     auto & combineShader = MasterRenderer::addPostProcessShader<CombineShader>("combine.frag"); 
-    MasterRenderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();
@@ -116,15 +109,6 @@ int main() {
         }
         if (ImGui::SliderFloat3("Scale", glm::value_ptr(scale), 0.f, 50.f)) {
             decal.spat->setScale(scale);
-        }
-        static bool showBox = false;
-        if (ImGui::Checkbox("Show box", &showBox)) {
-            if (showBox) {
-                decal.renderable->addShaderType<WireframeShader>();
-            }
-            else {
-                decal.renderable->removeShaderType<WireframeShader>();
-            }
         }
     });
 
@@ -150,7 +134,6 @@ int main() {
                 lights.push_back(light);
                 index = lights.size() - 1;
             }
-            ImGui::TreePop();
         }
         if (lights.empty()) {
             return;

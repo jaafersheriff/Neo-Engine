@@ -35,13 +35,11 @@ struct Light {
 struct Renderable {
     GameObject *gameObject;
     SpatialComponent *spat;
-    RenderableComponent *renderable;
 
     Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale) {
         gameObject = &NeoEngine::createGameObject();
         spat = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
-        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<GBufferShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
     }
 };
 
@@ -68,10 +66,10 @@ int main() {
     Renderable terrain(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
     terrain.spat->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
     NeoEngine::addComponent<MaterialComponent>(terrain.gameObject, 0.7f, glm::vec3(0.7f));
-    terrain.renderable->addShaderType<GBufferShader>();
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraControllerSystem>();
+    NeoEngine::addSystem<SinTranslateSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */

@@ -41,13 +41,11 @@ struct Light {
 
 struct Renderable {
     GameObject *gameObject;
-    RenderableComponent *renderable;
 
     Renderable(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<SnowShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
         NeoEngine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 0.f));
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
@@ -81,7 +79,7 @@ struct Snow {
         snow = &NeoEngine::addComponent<SnowComponent>(gameObject);
         LineComponent *vLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 0.f));
         vLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
-        NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
+        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, vLine);
         
         NeoEngine::addImGuiFunc("Snow", [&]() {
             ImGui::SliderFloat("Snow size", &snow->snowSize, 1.f, 0.f);
@@ -116,7 +114,7 @@ int main() {
     NeoEngine::initSystems();
 
     /* Init renderer */
-    MasterRenderer::init("shaders/", camera.camera);
+    MasterRenderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));
     auto snowShader = &MasterRenderer::addSceneShader<SnowShader>("snow.vert", "snow.frag");
     MasterRenderer::addSceneShader<LineShader>();
 

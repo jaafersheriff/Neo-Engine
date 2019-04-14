@@ -22,14 +22,12 @@ struct Camera {
 struct Light {
     GameObject *gameObject;
     LightComponent *light;
-    RenderableComponent *cube;
 
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos);
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
-        cube = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
-        cube->addShaderType<WireframeShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, Loader::getMesh("cube"));
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -44,13 +42,12 @@ struct Light {
 
 struct Renderable {
     GameObject *gameObject;
-    RenderableComponent *renderComp;
 
     Renderable(Mesh *mesh, Texture *tex, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, p, glm::vec3(s), o);
-        renderComp = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderComp->addShaderType<PhongShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
+        NeoEngine::addComponent<renderable::PhongRenderable>(gameObject);
         NeoEngine::addComponent<MaterialComponent>(gameObject);
         NeoEngine::addComponent<DiffuseMapComponent>(gameObject, tex);
     }

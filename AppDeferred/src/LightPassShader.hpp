@@ -36,6 +36,7 @@ class LightPassShader : public Shader {
         virtual void render(const CameraComponent &camera) override {
             auto fbo = Loader::getFBO("lightpass");
             fbo->bind();
+            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
             bind();

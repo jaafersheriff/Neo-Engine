@@ -6,7 +6,7 @@
 #include "MasterRenderer/MasterRenderer.hpp"
 #include "GLHelper/GLHelper.hpp"
 
-#include "Component/AnimationComponent/LineRenderable.hpp"
+#include "Component/ModelComponent/LineMeshComponent.hpp"
 
 namespace neo {
 
@@ -39,7 +39,7 @@ namespace neo {
                 loadUniform("P", camera.getProj());
                 loadUniform("V", camera.getView());
 
-                for (auto& renderable : MasterRenderer::getRenderables<LineShader, LineRenderable>()) {
+                for (auto& renderable : NeoEngine::getComponents<renderable::LineMeshComponent>()) {
                     /* Bind mesh */
                     const Mesh & mesh(renderable->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.mVAOID));

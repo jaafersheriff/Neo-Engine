@@ -4,7 +4,7 @@
 #include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
 #include "Shader/ShadowCasterShader.hpp"
-#include "Shader/PhongShadowedShader.hpp"
+#include "Shader/PhongShadowShader.hpp"
 
 #include "LookAtCameraReceiver.hpp"
 #include "LookAtCameraSystem.hpp"
@@ -27,7 +27,6 @@ struct Camera {
 struct Light {
     GameObject *gameObject;
     LightComponent *light;
-    RenderableComponent *renderable;
     CameraComponent *camera;
     SpatialComponent *camSpatial;
     SinTranslateComponent *sin = nullptr;
@@ -39,10 +38,10 @@ struct Light {
         gameObject = &NeoEngine::createGameObject();
         camSpatial = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(2.f), glm::mat3(glm::rotate(glm::mat4(1.f), 0.6f, glm::vec3(1, 0, 0))));
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
-        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
-        renderable->addShaderType<PhongShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, Loader::getMesh("cube"));
+        NeoEngine::addComponent<renderable::PhongRenderable>(gameObject);
         NeoEngine::addComponent<MaterialComponent>(gameObject, 1.f, glm::vec3(1.f));
-        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, -10.f, 10.f, -10.f, 10.f, -1.f, 1000.f);
+        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, -100.f, 100.f, -100.f, 100.f, -1.f, 1000.f);
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
         LineComponent *vLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 0.f));
@@ -50,9 +49,9 @@ struct Light {
         LineComponent *wLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 0.f, 1.f));
         wLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f) });
         LineComponent *lookLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 1.f, 1.f));
-        NeoEngine::addComponent<LineRenderable>(gameObject, uLine);
-        NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
-        NeoEngine::addComponent<LineRenderable>(gameObject, wLine);
+        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, uLine);
+        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, vLine);
+        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, wLine);
         sin = &NeoEngine::addComponent<SinTranslateComponent>(gameObject, glm::vec3(0.f, 0.f, 20.f), camSpatial->getPosition());
 
         NeoEngine::addComponent<ShadowCameraComponent>(gameObject);
@@ -60,8 +59,8 @@ struct Light {
         // Separate game object for look at
         gameO = &NeoEngine::createGameObject();
         lookAtSpatial = &NeoEngine::addComponent<SpatialComponent>(gameO, glm::vec3(0.f), glm::vec3(1.f));
-        auto cube = &NeoEngine::addComponent<RenderableComponent>(gameO, Loader::getMesh("cube"));
-        cube->addShaderType<WireframeShader>();
+        NeoEngine::addComponent<MeshComponent>(gameO, Loader::getMesh("cube"));
+        NeoEngine::addComponent<renderable::WireframeRenderable>(gameO);
         NeoEngine::addComponent<LookAtCameraReceiver>(gameO);
 
         NeoEngine::addImGuiFunc("Light", [&]() {
@@ -104,13 +103,12 @@ struct Light {
 
 struct Renderable {
     GameObject *gameObject;
-    RenderableComponent *renderable;
     glm::vec3 rot = glm::vec3(0.f);
 
     Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale, glm::mat4 ori = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale, ori);
-        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
+        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
     }
 
     void attachImGui(std::string name) {
@@ -149,20 +147,21 @@ int main() {
             Util::genRandomBool() ? Loader::getMesh("cube") : Loader::getMesh("sphere"),
             glm::vec3(Util::genRandom(-45.f, 45.f), Util::genRandom(2.f, 5.f), Util::genRandom(-45.f, 45.f)),
             glm::vec3(Util::genRandom(5.f)));
-        r.renderable->addShaderType<ShadowCasterShader>();
-        r.renderable->addShaderType<PhongShadowedShader>();
+        NeoEngine::addComponent<renderable::ShadowCasterRenderable>(r.gameObject);
+        NeoEngine::addComponent<renderable::PhongShadowRenderable>(r.gameObject);
         NeoEngine::addComponent<MaterialComponent>(r.gameObject, 0.3f, Util::genRandomVec3(), glm::vec3(1.f), 20.f);
     }
 
     // Terrain receiver 
     Renderable receiver(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
     NeoEngine::addComponent<MaterialComponent>(receiver.gameObject, 0.2f, glm::vec3(0.7f), glm::vec3(1.f), 20.f);
-    receiver.renderable->addShaderType<PhongShadowedShader>();
+    NeoEngine::addComponent<renderable::PhongShadowRenderable>(receiver.gameObject);
     receiver.attachImGui("Receiver");
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraControllerSystem>();
     NeoEngine::addSystem<LookAtCameraSystem>();
+    NeoEngine::addSystem<SinTranslateSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */
@@ -170,7 +169,7 @@ int main() {
     MasterRenderer::addPreProcessShader<ShadowCasterShader>();
     MasterRenderer::addSceneShader<LineShader>();
     MasterRenderer::addSceneShader<PhongShader>();
-    PhongShadowedShader & receiverShader = MasterRenderer::addSceneShader<PhongShadowedShader>();
+    PhongShadowShader& receiverShader = MasterRenderer::addSceneShader<PhongShadowShader>();
     MasterRenderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */

@@ -41,7 +41,7 @@ class GBufferShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto& model : MasterRenderer::getRenderables<GBufferShader, RenderableComponent>()) {
+            for (auto& model : NeoEngine::getComponents<MeshComponent>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind mesh */

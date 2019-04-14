@@ -45,15 +45,13 @@ struct Light {
 
 struct Orient {
     GameObject *gameObject;
-    RenderableComponent *renderable;
 
     Orient(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<PhongShader>();
-        renderable->addShaderType<WireframeShader>();
-        renderable->addShaderType<NormalShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
+        NeoEngine::addComponent<renderable::PhongRenderable>(gameObject);
+        NeoEngine::addComponent<renderable::WireframeRenderable>(gameObject);
         NeoEngine::addComponent<MaterialComponent>(gameObject);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
@@ -90,7 +88,7 @@ int main() {
     NeoEngine::initSystems();
 
     /* Init renderer */
-    MasterRenderer::init("shaders/", camera.camera);
+    MasterRenderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));
     MasterRenderer::addSceneShader<PhongShader>();
     MasterRenderer::addSceneShader<WireframeShader>();
     normalShader = &MasterRenderer::addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");

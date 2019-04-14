@@ -88,17 +88,22 @@ public:
                 loadUniform("lightAtt", lights.at(0)->mAttenuation);
             }
 
-            for (auto & model : MasterRenderer::getRenderables<PhongShader, RenderableComponent>()) {
-                loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
-                loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
+            for (auto& renderable : NeoEngine::getComponents<renderable::PhongRenderable>()) {
+                auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
+                if (!meshComponent) {
+                    continue;
+                }
 
                 /* Bind mesh */
-                const Mesh & mesh(model->getMesh());
+                const Mesh & mesh(meshComponent->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
+                loadUniform("M", renderable->getGameObject().getSpatial()->getModelMatrix());
+                loadUniform("N", renderable->getGameObject().getSpatial()->getNormalMatrix());
+
                 /* Bind texture */
-                if (auto diffuseMap = model->getGameObject().getComponentByType<DiffuseMapComponent>()) {
+                if (auto diffuseMap = renderable->getGameObject().getComponentByType<DiffuseMapComponent>()) {
                     auto texture = (const Texture2D *) (diffuseMap->mTexture);
                     texture->bind();
                     loadUniform("diffuseMap", texture->mTextureID);
@@ -109,7 +114,7 @@ public:
                 }
 
                 /* Bind material */
-                if (auto matComp = model->getGameObject().getComponentByType<MaterialComponent>()) {
+                if (auto matComp = renderable->getGameObject().getComponentByType<MaterialComponent>()) {
                     loadUniform("ambient", matComp->mAmbient);
                     loadUniform("diffuseColor", matComp->mDiffuse);
                     loadUniform("specularColor", matComp->mSpecular);
