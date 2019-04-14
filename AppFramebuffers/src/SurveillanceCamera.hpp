@@ -21,6 +21,6 @@ class SurveillanceCamera : public CameraComponent {
         }
 
         virtual void kill() override {
-            // TODO : delete fbo
+            fbo->destroy();
         }
 };

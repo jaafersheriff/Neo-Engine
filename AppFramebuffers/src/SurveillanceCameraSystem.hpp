@@ -3,6 +3,8 @@
 #include "Systems/System.hpp"
 #include "NeoEngine.hpp"
 
+#include "SurveillanceCamera.hpp"
+
 using namespace neo;
 
 class SurveillanceCameraSystem : public System {
@@ -13,8 +15,8 @@ class SurveillanceCameraSystem : public System {
         {}
 
         virtual void update(const float dt) override {
-            for (auto comp : NeoEngine::getComponents<SurveillanceCameraSystem>()) {
-                float scale = comp->getGameObject()->getSpatial()->getScale().x;
+            for (auto& comp : NeoEngine::getComponents<SurveillanceCamera>()) {
+                float scale = comp->getGameObject().getSpatial()->getScale().x;
                 glm::vec2 bounds(-scale, scale);
                 comp->setOrthoBounds(bounds, bounds);
             }
