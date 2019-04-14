@@ -1,7 +1,7 @@
 #pragma once
 
 #include <NeoEngine.hpp>
-#include "System/System.hpp"
+#include "Systems/System.hpp"
 
 using namespace neo;
 

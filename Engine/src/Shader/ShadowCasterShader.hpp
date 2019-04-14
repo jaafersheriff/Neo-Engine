@@ -65,9 +65,9 @@ namespace neo {
                     /* Bind texture */
                     auto texComp = model->getGameObject().getComponentByType<DiffuseMapComponent>();
                     if (texComp) {
-                        auto texture = (Texture2D &) (texComp->getTexture());
-                        texture.bind();
-                        loadUniform("diffuseMap", texture.mTextureID);
+                        auto texture = (const Texture2D *)(texComp->mTexture);
+                        texture->bind();
+                        loadUniform("diffuseMap", texture->mTextureID);
                         loadUniform("useTexture", true);
                     }
                     else {

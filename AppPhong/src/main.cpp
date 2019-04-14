@@ -36,13 +36,8 @@ struct Light {
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
                 gameObject->getSpatial()->setPosition(pos);
             }
-            glm::vec3 col = light->getColor();
-            if (ImGui::SliderFloat3("Color", glm::value_ptr(col), 0.f, 1.f)) {
-                light->setColor(col);
-            }
-            glm::vec3 att = light->getAttenuation();
-            ImGui::SliderFloat3("Attenuation", glm::value_ptr(att), 0.f, 1.f);
-            light->setAttenuation(att);
+            ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
+            ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
         });
     }
 };
@@ -51,12 +46,12 @@ struct Renderable {
     GameObject *gameObject;
     RenderableComponent *renderComp;
 
-    Renderable(Mesh *mesh, Material *mat, Texture *tex, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
+    Renderable(Mesh *mesh, Texture *tex, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, p, glm::vec3(s), o);
         renderComp = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
         renderComp->addShaderType<PhongShader>();
-        NeoEngine::addComponent<MaterialComponent>(gameObject, mat);
+        NeoEngine::addComponent<MaterialComponent>(gameObject);
         NeoEngine::addComponent<DiffuseMapComponent>(gameObject, tex);
     }
 };
@@ -74,7 +69,6 @@ int main() {
             renderables.push_back(
                 new Renderable(
                     Loader::getMesh("mr_krab.obj", true), 
-                    Loader::getMaterial("krab"),
                     Loader::getTexture("mr_krab.png"),
                     glm::vec3(x*2, 0, z*2))
             );

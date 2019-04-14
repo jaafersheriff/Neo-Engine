@@ -71,11 +71,11 @@ class LightPassShader : public Shader {
                 loadUniform("M", spat->getModelMatrix());
                 loadUniform("lightPos", spat->getPosition());
                 loadUniform("lightRadius", spat->getScale().x);
-                loadUniform("lightCol", light->getColor());
+                loadUniform("lightCol", light->mColor);
 
                 // If camera is inside light 
                 float dist = glm::distance(spat->getPosition(), camera.getGameObject().getSpatial()->getPosition());
-                if (dist - camera.getNear() < spat->getScale().x) {
+                if (dist - camera.getNearFar().x < spat->getScale().x) {
                     CHECK_GL(glCullFace(GL_FRONT));
                 }
                 else {

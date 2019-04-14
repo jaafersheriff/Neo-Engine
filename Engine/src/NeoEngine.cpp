@@ -265,7 +265,7 @@ namespace neo {
             }
             if (ImGui::CollapsingHeader("Renderer")) {
                 if (MasterRenderer::mDefaultCamera && ImGui::TreeNode("Camera")) {
-                    auto pos = MasterRenderer::mDefaultCamera->getGameObject().getSpatial()->mPosition;
+                    auto pos = MasterRenderer::mDefaultCamera->getGameObject().getSpatial()->getPosition();
                     auto look = MasterRenderer::mDefaultCamera->getLookDir();
                     ImGui::Text("Position: %0.2f, %0.2f, %0.2f", pos.x, pos.y, pos.z);
                     ImGui::Text("Look Dir: %0.2f, %0.2f, %0.2f", look.x, look.y, look.z);

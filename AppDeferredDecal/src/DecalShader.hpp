@@ -62,9 +62,9 @@ class DecalShader : public Shader {
 
                 auto diffuseMap = decal->getGameObject().getComponentByType<DiffuseMapComponent>();
                 if (diffuseMap) {
-                    auto texture = (Texture2D &)(diffuseMap->getTexture());
-                    texture.bind();
-                    loadUniform("decalTexture", texture.mTextureID);
+                    auto texture = (const Texture2D *)(diffuseMap->mTexture);
+                    texture->bind();
+                    loadUniform("decalTexture", texture->mTextureID);
                 }
 
                 mesh.draw();

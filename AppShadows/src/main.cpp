@@ -42,7 +42,7 @@ struct Light {
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
         renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
         renderable->addShaderType<PhongShader>();
-        NeoEngine::addComponent<MaterialComponent>(gameObject, Loader::getMaterial("LightMat", 1.f, glm::vec3(1.f)));
+        NeoEngine::addComponent<MaterialComponent>(gameObject, 1.f, glm::vec3(1.f));
         camera = &NeoEngine::addComponent<CameraComponent>(gameObject, -10.f, 10.f, -10.f, 10.f, -1.f, 1000.f);
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
@@ -73,11 +73,8 @@ struct Light {
                 camSpatial->setPosition(pos);
             }
             if (sin) {
-                ImGui::Checkbox("Sin", &sin->mActive);
-                if (sin->mActive) {
-                    ImGui::SliderFloat3("Base", glm::value_ptr(sin->mBasePosition), -100.f, 100.f);
-                    ImGui::SliderFloat3("Offset", glm::value_ptr(sin->mOffset), -100.f, 100.f);
-                }
+                ImGui::SliderFloat3("Base", glm::value_ptr(sin->mBasePosition), -100.f, 100.f);
+                ImGui::SliderFloat3("Offset", glm::value_ptr(sin->mOffset), -100.f, 100.f);
             }
             pos = lookAtSpatial->getPosition();
             if (ImGui::SliderFloat3("look pos", glm::value_ptr(pos), -100.f, 100.f)) {
@@ -86,8 +83,8 @@ struct Light {
             auto lookDir = camera->getLookDir();
             ImGui::Text("Look at dir : %0.2f, %0.2f, %0.2f", lookDir.x, lookDir.y, lookDir.z);
 
-            glm::vec2 h = camera->getHorizontalBounds();
-            glm::vec2 v = camera->getVerticalBounds();
+            glm::vec2 h = camera->mHorizBounds;
+            glm::vec2 v = camera->mVertBounds;
             if (ImGui::SliderFloat2("Horizontal", glm::value_ptr(h), -50.f, 50.f)) {
                 camera->setOrthoBounds(h, v);
             }

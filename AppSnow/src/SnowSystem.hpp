@@ -18,7 +18,7 @@ class SnowSystem : public System {
             for (auto comp : NeoEngine::getComponents<SnowComponent>()) {
                 comp->height = -0.19f * comp->snowSize + 0.17f;
 
-                comp->snowAngle = comp->getGameObject().getSpatial()->getV();
+                comp->snowAngle = comp->getGameObject().getSpatial()->mV;
                 comp->snowAngle.x = -comp->snowAngle.x;
                 comp->snowAngle.z = -comp->snowAngle.z;
 

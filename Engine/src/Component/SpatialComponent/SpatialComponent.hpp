@@ -10,8 +10,6 @@ namespace neo {
     class SpatialComponent : public Component, public Orientable {
 
         public:
-            glm::vec3 mPosition;
-            glm::vec3 mScale;
 
             SpatialComponent(GameObject *);
             SpatialComponent(GameObject *, const glm::vec3 &);
@@ -32,10 +30,15 @@ namespace neo {
             void setUVW(const glm::vec3 &, const glm::vec3 &, const glm::vec3 &);
 
             /* Getters */
+            const glm::vec3 getPosition() { return mPosition; }
+            const glm::vec3 getScale() { return mScale; }
             const glm::mat4 & getModelMatrix() const;
             const glm::mat3 & getNormalMatrix() const;
 
         private:
+            glm::vec3 mPosition;
+            glm::vec3 mScale;
+
             void _detModelMatrix() const;
             void _detNormalMatrix() const;
             mutable glm::mat4 mModelMatrix;

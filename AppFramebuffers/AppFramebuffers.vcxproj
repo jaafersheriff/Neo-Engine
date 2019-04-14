@@ -121,8 +121,8 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\CustomSystem.hpp" />
     <ClInclude Include="src\SurveillanceCamera.hpp" />
+    <ClInclude Include="src\SurveillanceCameraSystem.hpp" />
     <ClInclude Include="src\SurveillanceReadShader.hpp" />
     <ClInclude Include="src\SurveillanceWriteShader.hpp" />
   </ItemGroup>

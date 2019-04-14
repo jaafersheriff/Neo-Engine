@@ -27,7 +27,7 @@ struct Light {
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
 
         NeoEngine::addImGuiFunc("Light", [&]() {
-            glm::vec3 pos = gameObject->getSpatial()->mPosition;
+            glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
                 gameObject->getSpatial()->setPosition(pos);
             }
@@ -49,11 +49,11 @@ struct Renderable {
         NeoEngine::addComponent<MaterialComponent>(gameObject, amb, diffuse, specular);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
-            glm::vec3 pos = gameObject->getSpatial()->mPosition;
+            glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);
             }
-            float scale = gameObject->getSpatial()->mScale.x;
+            float scale = gameObject->getSpatial()->getScale().x;
             if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
                 gameObject->getSpatial()->setScale(glm::vec3(scale));
             }

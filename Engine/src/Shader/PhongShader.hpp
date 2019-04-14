@@ -78,12 +78,12 @@ public:
             /* Load PV */
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
-            loadUniform("camPos", camera.getGameObject().getSpatial()->mPosition);
+            loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load light */
             auto lights = NeoEngine::getComponents<LightComponent>();
             if (lights.size()) {
-                loadUniform("lightPos", lights.at(0)->getGameObject().getSpatial()->mPosition);
+                loadUniform("lightPos", lights.at(0)->getGameObject().getSpatial()->getPosition());
                 loadUniform("lightCol", lights.at(0)->mColor);
                 loadUniform("lightAtt", lights.at(0)->mAttenuation);
             }
@@ -99,9 +99,9 @@ public:
 
                 /* Bind texture */
                 if (auto diffuseMap = model->getGameObject().getComponentByType<DiffuseMapComponent>()) {
-                    auto texture = (Texture2D &) (diffuseMap->mTexture);
-                    texture.bind();
-                    loadUniform("diffuseMap", texture.mTextureID);
+                    auto texture = (const Texture2D *) (diffuseMap->mTexture);
+                    texture->bind();
+                    loadUniform("diffuseMap", texture->mTextureID);
                     loadUniform("useTexture", true);
                 }
                 else {

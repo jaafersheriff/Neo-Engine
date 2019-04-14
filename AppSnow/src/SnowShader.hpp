@@ -38,8 +38,8 @@ namespace neo {
                 auto lights = NeoEngine::getComponents<LightComponent>();
                 if (lights.size()) {
                     loadUniform("lightPos", lights.at(0)->getGameObject().getSpatial()->getPosition());
-                    loadUniform("lightCol", lights.at(0)->getColor());
-                    loadUniform("lightAtt", lights.at(0)->getAttenuation());
+                    loadUniform("lightCol", lights.at(0)->mColor);
+                    loadUniform("lightAtt", lights.at(0)->mAttenuation);
                 }
 
                 for (auto model : MasterRenderer::getRenderables<SnowShader, RenderableComponent>()) {
@@ -52,12 +52,11 @@ namespace neo {
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                     /* Bind material */
-                    if (auto materialComp = model->getGameObject().getComponentByType<MaterialComponent>()) {
-                        const Material &material = materialComp->getMaterial();
-                        loadUniform("ambient", material.mAmbient);
-                        loadUniform("diffuseColor", material.mDiffuse);
-                        loadUniform("specularColor", material.mSpecular);
-                        loadUniform("shine", material.mShine);
+                    if (auto material = model->getGameObject().getComponentByType<MaterialComponent>()) {
+                        loadUniform("ambient", material->mAmbient);
+                        loadUniform("diffuseColor", material->mDiffuse);
+                        loadUniform("specularColor", material->mSpecular);
+                        loadUniform("shine", material->mShine);
                     }
 
                     /* DRAW */

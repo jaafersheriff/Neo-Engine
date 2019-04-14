@@ -111,7 +111,7 @@ namespace neo {
 
     void CameraComponent::_detView() const {
         auto spatial = mGameObject->getSpatial();
-        mViewMat = glm::lookAt(spatial->mPosition, spatial->mPosition + getLookDir(), spatial->mV);
+        mViewMat = glm::lookAt(spatial->getPosition(), spatial->getPosition() + getLookDir(), spatial->mV);
         mViewMatDirty = false;
     }
 
