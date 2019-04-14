@@ -75,6 +75,13 @@ namespace neo {
                 }
             }
 
+            void destroy() {
+                for (auto texture : mTextures) {
+                    texture->destroy();
+                }
+                CHECK_GL(glDeleteFramebuffers(1, &mFBOID));
+            }
+
         private:
             void attachTexture(GLuint component, Texture &texture) {
                 mTextures.emplace_back(&texture);
