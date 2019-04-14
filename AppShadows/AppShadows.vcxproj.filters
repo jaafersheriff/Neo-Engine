@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\CustomSystem.hpp">
+    <ClInclude Include="src\LookAtCameraReceiver.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\LookAtCameraController.hpp">
+    <ClInclude Include="src\LookAtCameraSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

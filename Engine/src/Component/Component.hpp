@@ -11,7 +11,6 @@ namespace neo {
 
             /* Overridden functions */
             virtual void init() {};
-            virtual void update(float) {};
             virtual void kill() {};
 
             /* Remove copy constructors */

@@ -1,7 +1,5 @@
 #include <NeoEngine.hpp>
 
-#include "CameraSystem.hpp"
-
 #include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
 
@@ -24,41 +22,33 @@ struct Camera {
 struct Light {
     GameObject *gameObject;
     LightComponent *light;
-    RenderableComponent *cube;
 
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos);
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
-        cube = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
-        cube->addShaderType<WireframeShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, Loader::getMesh("cube"));
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
                 gameObject->getSpatial()->setPosition(pos);
             }
-            glm::vec3 col = light->getColor();
-            if (ImGui::SliderFloat3("Color", glm::value_ptr(col), 0.f, 1.f)) {
-                light->setColor(col);
-            }
-            glm::vec3 att = light->getAttenuation();
-            ImGui::SliderFloat3("Attenuation", glm::value_ptr(att), 0.f, 1.f);
-            light->setAttenuation(att);
+            ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
+            ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
         });
     }
 };
 
 struct Renderable {
     GameObject *gameObject;
-    RenderableComponent *renderComp;
 
-    Renderable(Mesh *mesh, Material *mat, Texture *tex, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
+    Renderable(Mesh *mesh, Texture *tex, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, p, glm::vec3(s), o);
-        renderComp = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderComp->addShaderType<PhongShader>();
-        NeoEngine::addComponent<MaterialComponent>(gameObject, mat);
+        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
+        NeoEngine::addComponent<renderable::PhongRenderable>(gameObject);
+        NeoEngine::addComponent<MaterialComponent>(gameObject);
         NeoEngine::addComponent<DiffuseMapComponent>(gameObject, tex);
     }
 };
@@ -76,7 +66,6 @@ int main() {
             renderables.push_back(
                 new Renderable(
                     Loader::getMesh("mr_krab.obj", true), 
-                    Loader::getMaterial("krab"),
                     Loader::getTexture("mr_krab.png"),
                     glm::vec3(x*2, 0, z*2))
             );
@@ -84,7 +73,7 @@ int main() {
     }
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CameraSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */

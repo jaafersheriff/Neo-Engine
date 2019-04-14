@@ -117,7 +117,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\CustomSystem.hpp" />
     <ClInclude Include="src\PostProcessShader.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -125,7 +124,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\blue.frag" />
-    <None Include="shaders\bw.frag" />
     <None Include="shaders\depth.frag" />
     <None Include="shaders\invert.frag" />
   </ItemGroup>

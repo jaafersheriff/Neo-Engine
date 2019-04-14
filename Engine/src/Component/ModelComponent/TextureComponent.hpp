@@ -15,10 +15,6 @@ namespace neo {
                 mTexture(tex)
             {}
 
-            const Texture & getTexture() const { return *mTexture; }
-
-        protected:
-
             const Texture *mTexture;
 
     };
@@ -28,14 +24,10 @@ namespace neo {
         public:
             SpecularMapComponent(GameObject *go, Texture *tex) :
                 Component(go),
-                texture(tex)
+                mTexture(tex)
             {}
 
-            const Texture & getTexture() const { return *texture; }
-
-        protected:
-
-            const Texture *texture;
+            const Texture *mTexture;
 
     };
 
@@ -44,14 +36,10 @@ namespace neo {
         public:
             NormalMapComponent(GameObject *go, Texture *tex) :
                 Component(go),
-                texture(tex)
+                mTexture(tex)
             {}
 
-            const Texture & getTexture() const { return *texture; }
-
-        protected:
-
-            const Texture *texture;
+            const Texture *mTexture;
 
     };
 
@@ -60,14 +48,10 @@ namespace neo {
         public:
             CubeMapComponent(GameObject *go, Texture *tex) :
                 Component(go),
-                texture(tex)
+                mTexture(tex)
             {}
 
-            const Texture & getTexture() const { return *texture; }
-
-        protected:
-
-            const Texture *texture;
+            const Texture *mTexture;
 
     };
 }

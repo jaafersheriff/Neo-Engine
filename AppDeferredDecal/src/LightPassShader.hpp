@@ -36,6 +36,7 @@ class LightPassShader : public Shader {
         virtual void render(const CameraComponent &camera) override {
             auto fbo = Loader::getFBO("lightpass");
             fbo->bind();
+            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
             bind();
@@ -73,11 +74,11 @@ class LightPassShader : public Shader {
                 loadUniform("M", spat->getModelMatrix());
                 loadUniform("lightPos", spat->getPosition());
                 loadUniform("lightRadius", spat->getScale().x);
-                loadUniform("lightCol", light->getColor());
+                loadUniform("lightCol", light->mColor);
 
                 // If camera is inside light 
                 float dist = glm::distance(spat->getPosition(), camera.getGameObject().getSpatial()->getPosition());
-                if (dist - camera.getNear() < spat->getScale().x) {
+                if (dist - camera.getNearFar().x < spat->getScale().x) {
                     CHECK_GL(glCullFace(GL_FRONT));
                 }
                 else {

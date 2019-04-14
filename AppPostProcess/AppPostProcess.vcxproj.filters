@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\CustomSystem.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\PostProcessShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -30,7 +27,6 @@
   <ItemGroup>
     <None Include="shaders\blue.frag" />
     <None Include="shaders\invert.frag" />
-    <None Include="shaders\bw.frag" />
     <None Include="shaders\depth.frag" />
   </ItemGroup>
 </Project>

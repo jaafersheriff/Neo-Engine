@@ -5,7 +5,6 @@
 #include "GLHelper/Texture.hpp"
 #include "GLHelper/GLHelper.hpp"
 #include "GLHelper/Framebuffer.hpp"
-#include "Material/Material.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ext/tiny_obj_loader.h"
@@ -24,7 +23,6 @@ namespace neo {
     std::unordered_map<std::string, Mesh *> Loader::mMeshes;
     std::unordered_map<std::string, Texture *> Loader::mTextures;
     std::unordered_map<std::string, Framebuffer *> Loader::mFramebuffers;
-    std::unordered_map<std::string, Material *> Loader::mMaterials;
 
     void Loader::init(const std::string &res, bool v) {
         RES_DIR = res;
@@ -190,21 +188,6 @@ namespace neo {
         if (it == mFramebuffers.end()) {
             mFramebuffers.emplace(name, new Framebuffer);
             it = mFramebuffers.find(name);
-        }
-        return it->second;
-    }
-
-    Material* Loader::getMaterial(const std::string &name, float amb, glm::vec3 dif, glm::vec3 spec, float shine) {
-        auto it = mMaterials.find(name);
-        if (it == mMaterials.end()) {    
-            mMaterials.emplace(name, new Material(amb, dif, spec, shine));
-            it = mMaterials.find(name);
-        }
-        else {
-            it->second->mAmbient = amb;
-            it->second->mDiffuse = dif;
-            it->second->mSpecular = spec;
-            it->second->mShine = shine;
         }
         return it->second;
     }

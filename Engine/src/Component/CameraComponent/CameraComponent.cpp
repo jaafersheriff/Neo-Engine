@@ -10,7 +10,7 @@
 
 namespace neo {
 
-    CameraComponent::CameraComponent(GameObject *gameObject, float near, float far) :
+    CameraComponent::CameraComponent(GameObject *gameObject, float near, float far, bool isOrtho = false) :
         Component(gameObject),
         mNear(near),
         mFar(far),
@@ -20,19 +20,18 @@ namespace neo {
         mViewMat(),
         mProjMat(),
         mViewMatDirty(true),
-        mProjMatDirty(true)
+        mProjMatDirty(true),
+        mIsOrtho(isOrtho)
     {}
 
     CameraComponent::CameraComponent(GameObject *gameObject, float fov, float near, float far) :
-        CameraComponent(gameObject, near, far) {
+        CameraComponent(gameObject, near, far, false) {
         setFOV(fov);
-        mIsOrtho = false;
     }
 
-    CameraComponent::CameraComponent(GameObject *gameObject, float horizMin, float horizMax, float vertMin, float vertMax, float near, float far) :
-        CameraComponent(gameObject, near, far) {
+    CameraComponent::CameraComponent(GameObject *gameObject, float horizMin, float horizMax, float vertMin, float vertMax, float near, float far) 
+        : CameraComponent(gameObject, near, far, true) {
         setOrthoBounds(glm::vec2(horizMin, horizMax), glm::vec2(vertMin, vertMax));
-        mIsOrtho = true;
     }
 
     void CameraComponent::init() {
@@ -51,31 +50,31 @@ namespace neo {
     }
 
     void CameraComponent::setFOV(float fov) {
-        if (fov == this->mFOV) {
+        if (fov == mFOV) {
             return;
         }
 
-        this->mFOV = fov;
+        mFOV = fov;
         mProjMatDirty = true;
     }
 
     void CameraComponent::setNearFar(float near, float far) {
-        if (near == this->mNear && far == this->mFar) {
+        if (near == mNear && far == mFar) {
             return;
         }
 
-        this->mNear = near;
-        this->mFar = far;
+        mNear = near;
+        mFar = far;
         mProjMatDirty = true;
     }
 
     void CameraComponent::setOrthoBounds(const glm::vec2 &h, const glm::vec2 &v) {
-        if (h == this->mHorizBounds && v == this->mVertBounds) {
+        if (h == mHorizBounds && v == mVertBounds) {
             return;
         }
 
-        this->mHorizBounds = h;
-        this->mVertBounds = v;
+        mHorizBounds = h;
+        mVertBounds = v;
         mProjMatDirty = true;
         mViewMatDirty = true;
     }
@@ -83,7 +82,7 @@ namespace neo {
     void CameraComponent::setLookDir(glm::vec3 dir) {
         glm::vec3 w = -glm::normalize(dir);
         auto spatial = mGameObject->getSpatial();
-        if (w == spatial->getW()) {
+        if (w == spatial->mW) {
             return;
         }
         glm::vec3 u = glm::cross(w, glm::vec3(0, 1, 0));
@@ -93,7 +92,7 @@ namespace neo {
     }
 
     const glm::vec3 CameraComponent::getLookDir() const {
-        return -mGameObject->getSpatial()->getW();
+        return -mGameObject->getSpatial()->mW;
     }
 
     const glm::mat4 & CameraComponent::getView() const {
@@ -112,7 +111,7 @@ namespace neo {
 
     void CameraComponent::_detView() const {
         auto spatial = mGameObject->getSpatial();
-        mViewMat = glm::lookAt(spatial->getPosition(), spatial->getPosition() + getLookDir(), spatial->getV());
+        mViewMat = glm::lookAt(spatial->getPosition(), spatial->getPosition() + getLookDir(), spatial->mV);
         mViewMatDirty = false;
     }
 

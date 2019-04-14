@@ -2,15 +2,14 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\CustomSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\SkyboxShader.hpp" />
     <ClInclude Include="src\ReflectionShader.hpp" />
-    <ClInclude Include="src\ReflectionRenderable.hpp" />
-    <ClInclude Include="src\RefractionRenderable.hpp" />
     <ClInclude Include="src\RefractionShader.hpp" />
     <ClInclude Include="src\SkyboxComponent.hpp" />
+    <ClInclude Include="src\ReflectionComponent.hpp" />
+    <ClInclude Include="src\RefractionComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\skybox.vert" />

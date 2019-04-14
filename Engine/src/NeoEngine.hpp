@@ -7,8 +7,8 @@
 #include "Util/Util.hpp"
 
 #include "Component/Components.hpp"
-#include "System/System.hpp"    // Necessary because there are no common systems in the engine
-#include "System/Systems.hpp"
+#include "Systems/System.hpp"    // Necessary because there are no common systems in the engine
+#include "Systems/Systems.hpp"
 
 #include "ext/imgui/imgui.h"
 
@@ -54,6 +54,7 @@ namespace neo {
             template <typename SysT> static SysT & getSystem();
             static const std::vector<std::pair<std::type_index, System *>> & getSystems() { return reinterpret_cast<const std::vector<std::pair<std::type_index, System *>> &>(mSystems); }
             template <typename CompT> static const std::vector<CompT *> & getComponents();
+            template <typename CompT> static CompT* getSingleComponent();
 
             /* ImGui */
             static bool imGuiEnabled;
@@ -153,5 +154,15 @@ namespace neo {
         }
         // this is valid because unique_ptr<T> is exactly the same data as T *
         return reinterpret_cast<const std::vector<CompT *> &>(*(it->second));
+    }
+
+    template <typename CompT>
+    CompT* NeoEngine::getSingleComponent() {
+        auto components = getComponents<CompT>();
+        if (!components.size()) {
+            return nullptr;
+        }
+
+        return components[0];
     }
 }

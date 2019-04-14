@@ -17,8 +17,8 @@ class SkyboxShader : public Shader {
         {}
 
         virtual void render(const CameraComponent &camera) override {
-            const auto cubes = MasterRenderer::getRenderables<SkyboxShader, SkyboxComponent>();
-            if (!cubes.size()) {
+            const auto cube = NeoEngine::getSingleComponent<SkyboxComponent>();
+            if (!cube) {
                 return;
             }
 
@@ -30,13 +30,12 @@ class SkyboxShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            const auto cube = cubes[0];
-            const Mesh & mesh = cube->getMesh();
+            const Mesh& mesh = *Loader::getMesh("cube");
             CHECK_GL(glBindVertexArray(mesh.mVAOID));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
             /* Bind texture */
-            loadUniform("cubeMap", cube->getGameObject().getComponentByType<CubeMapComponent>()->getTexture().mTextureID);
+            loadUniform("cubeMap", cube->getGameObject().getComponentByType<CubeMapComponent>()->mTexture->mTextureID);
 
             /* Draw */
             mesh.draw();

@@ -20,13 +20,7 @@ class SurveillanceCamera : public CameraComponent {
             fbo->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT);
         }
 
-        virtual void update(float dt) override {
-            float scale = mGameObject->getSpatial()->getScale().x;
-            glm::vec2 bounds(-scale, scale);
-            setOrthoBounds(bounds, bounds);
-        }
-
         virtual void kill() override {
-            // TODO : delete fbo
+            fbo->destroy();
         }
 };

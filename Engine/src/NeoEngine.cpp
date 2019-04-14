@@ -272,11 +272,6 @@ namespace neo {
                     ImGui::TreePop();
                 }
                 if (ImGui::TreeNode("Shaders")) {
-                    int count = 0;
-                    for (auto & r : MasterRenderer::mRenderables) {
-                        count += r.second->size();
-                    }
-                    ImGui::Text("Renderables: %d", count); // TODO : list renderable count per shader 
                     if (MasterRenderer::mPreProcessShaders.size() && ImGui::TreeNode("Pre process")) {
                         for (unsigned i = 0; i < MasterRenderer::mPreProcessShaders.size(); i++) {
                             auto & shader = MasterRenderer::mPreProcessShaders[i];
@@ -376,18 +371,6 @@ namespace neo {
                         if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->mTextureID) + ")" + " [" + std::to_string(t.second->mWidth) + ", " + std::to_string(t.second->mHeight) + "]").c_str())) {
                             float scale = 150.f / (t.second->mWidth > t.second->mHeight ? t.second->mWidth : t.second->mHeight);
                             ImGui::Image((ImTextureID)t.second->mTextureID, ImVec2(scale * t.second->mWidth, scale * t.second->mHeight), ImVec2(0, 1), ImVec2(1, 0));
-                            ImGui::TreePop();
-                        }
-                    }
-                    ImGui::TreePop();
-                }
-                if (Loader::mMaterials.size() && ImGui::TreeNode("Materials")) {
-                    for (auto & mat : Loader::mMaterials) {
-                        if (ImGui::TreeNode(mat.first.c_str())) {
-                            ImGui::SliderFloat("Ambient", &mat.second->mAmbient, 0.f, 1.f);
-                            ImGui::SliderFloat3("Diffuse", glm::value_ptr(mat.second->mDiffuse), 0.f, 1.f);
-                            ImGui::SliderFloat3("Specular", glm::value_ptr(mat.second->mSpecular), 0.f, 1.f);
-                            ImGui::SliderFloat("Shine", &mat.second->mShine, 0.f, 100.f);
                             ImGui::TreePop();
                         }
                     }

@@ -1,7 +1,5 @@
 #include <NeoEngine.hpp>
 
-#include "CustomSystem.hpp"
-
 #include "Shader/LineShader.hpp"
 #include "Shader/PhongShader.hpp"
 
@@ -34,13 +32,8 @@ struct Light {
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
                 gameObject->getSpatial()->setPosition(pos);
             }
-            glm::vec3 col = light->getColor();
-            if (ImGui::SliderFloat3("Color", glm::value_ptr(col), 0.f, 1.f)) {
-                light->setColor(col);
-            }
-            glm::vec3 att = light->getAttenuation();
-            ImGui::SliderFloat3("Attenuation", glm::value_ptr(att), 0.f, 1.f);
-            light->setAttenuation(att);
+            ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
+            ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
         });
     }
 };
@@ -53,9 +46,9 @@ struct Cube {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         // Cube
-        RenderableComponent *renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<PhongShader>();
-        NeoEngine::addComponent<MaterialComponent>(gameObject, Loader::getMaterial("cubeMat", 0.2f, glm::vec3(1.f, 0.f, 1.f)));
+        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
+        NeoEngine::addComponent<renderable::PhongRenderable>(gameObject);
+        NeoEngine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f));
         // Line
         LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
@@ -64,9 +57,9 @@ struct Cube {
         LineComponent *wLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 0.f, 1.f));
         wLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f) });
         // Line renderable
-        NeoEngine::addComponent<LineRenderable>(gameObject, uLine);
-        NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
-        NeoEngine::addComponent<LineRenderable>(gameObject, wLine);
+        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, uLine);
+        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, vLine);
+        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, wLine);
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -98,11 +91,11 @@ int main() {
     Cube(Loader::getMesh("cube"));
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */
-    MasterRenderer::init("shaders/", camera.camera);
+    MasterRenderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));
     MasterRenderer::addSceneShader<LineShader>();
     MasterRenderer::addSceneShader<PhongShader>();
 

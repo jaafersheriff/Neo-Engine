@@ -35,13 +35,18 @@ namespace neo {
                 loadUniform("P", camera.getProj());
                 loadUniform("V", camera.getView());
 
-                for (auto & r : MasterRenderer::getRenderables<WireframeShader, RenderableComponent>()) {
+                for (auto& renderable : NeoEngine::getComponents<renderable::WireframeRenderable>()) {
+                    auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
+                    if (!meshComponent) {
+                        continue; // TODO - assert? 
+                    }
+
                     /* Bind mesh */
-                    const Mesh & mesh(r->getMesh());
+                    const Mesh & mesh(meshComponent->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.mVAOID));
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
-                    loadUniform("M", r->getGameObject().getSpatial()->getModelMatrix());
+                    loadUniform("M", renderable->getGameObject().getSpatial()->getModelMatrix());
 
                     /* Draw outline */
                     CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));

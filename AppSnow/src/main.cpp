@@ -1,8 +1,7 @@
 #include <NeoEngine.hpp>
 
-#include "CustomSystem.hpp"
-
 #include "SnowShader.hpp"
+#include "SnowSystem.hpp"
 #include "Shader/LineShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -34,27 +33,20 @@ struct Light {
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
                 gameObject->getSpatial()->setPosition(pos);
             }
-            glm::vec3 col = light->getColor();
-            if (ImGui::SliderFloat3("Color", glm::value_ptr(col), 0.f, 1.f)) {
-                light->setColor(col);
-            }
-            glm::vec3 att = light->getAttenuation();
-            ImGui::SliderFloat3("Attenuation", glm::value_ptr(att), 0.f, 1.f);
-            light->setAttenuation(att);
+            ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
+            ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
         });
     }
 };
 
 struct Renderable {
     GameObject *gameObject;
-    RenderableComponent *renderable;
 
     Renderable(Mesh *mesh) {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<SnowShader>();
-        NeoEngine::addComponent<MaterialComponent>(gameObject, Loader::getMaterial("defMat", 0.2f, glm::vec3(1.f, 0.f, 0.f)));
+        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
+        NeoEngine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 0.f));
 
         NeoEngine::addImGuiFunc("Mesh", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -87,7 +79,7 @@ struct Snow {
         snow = &NeoEngine::addComponent<SnowComponent>(gameObject);
         LineComponent *vLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 0.f));
         vLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
-        NeoEngine::addComponent<LineRenderable>(gameObject, vLine);
+        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, vLine);
         
         NeoEngine::addImGuiFunc("Snow", [&]() {
             ImGui::SliderFloat("Snow size", &snow->snowSize, 1.f, 0.f);
@@ -117,11 +109,12 @@ int main() {
     Snow();
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
+    NeoEngine::addSystem<SnowSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */
-    MasterRenderer::init("shaders/", camera.camera);
+    MasterRenderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));
     auto snowShader = &MasterRenderer::addSceneShader<SnowShader>("snow.vert", "snow.frag");
     MasterRenderer::addSceneShader<LineShader>();
 
