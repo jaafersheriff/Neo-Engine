@@ -12,13 +12,6 @@ class InvertShader : public Shader {
         {}
 };
 
-class BWShader : public Shader {
-    public: 
-        BWShader(const std::string &frag) :
-            Shader("BWShader", MasterRenderer::POST_PROCESS_VERT_FILE, frag)
-        {}
-};
-
 class BlueShader : public Shader {
     public: 
         BlueShader(const std::string &frag) :

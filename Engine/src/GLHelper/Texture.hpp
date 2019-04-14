@@ -26,6 +26,10 @@ namespace neo {
                 _upload(shouldUpload, data);
             }
 
+            void destroy() {
+                CHECK_GL(glDeleteTextures(1, &mTextureID));
+            }
+
             void generateMipMaps() {
                 CHECK_GL(glGenerateTextureMipmap(mTextureID));
             }
@@ -85,7 +89,8 @@ namespace neo {
 
         public:
             void bind() const {
-                // TODO
+                CHECK_GL(glActiveTexture(GL_TEXTURE0 + mTextureID));
+                CHECK_GL(glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureID));
             }
             
             void _upload(bool shouldUpload, uint8_t **data) {

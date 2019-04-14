@@ -119,13 +119,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\CustomSystem.hpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\ReflectionRenderable.hpp" />
+    <ClInclude Include="src\ReflectionComponent.hpp" />
     <ClInclude Include="src\ReflectionShader.hpp" />
-    <ClInclude Include="src\RefractionRenderable.hpp" />
+    <ClInclude Include="src\RefractionComponent.hpp" />
     <ClInclude Include="src\RefractionShader.hpp" />
     <ClInclude Include="src\SkyboxComponent.hpp" />
     <ClInclude Include="src\SkyboxShader.hpp" />

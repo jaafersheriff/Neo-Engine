@@ -22,6 +22,8 @@ namespace neo {
             Shader(const std::string &, const char *, const char *);
             Shader(const std::string &, const char *, const std::string &);
             Shader(const std::string &, const char *, const char *, const char *);
+            Shader(Shader&& rhs) = default;
+
             virtual ~Shader() = default;
 
             virtual void render(const CameraComponent &) {}

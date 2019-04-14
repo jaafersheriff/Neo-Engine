@@ -5,7 +5,7 @@
 
 #include "NeoEngine.hpp"
 
-#include "ReflectionRenderable.hpp"
+#include "ReflectionComponent.hpp"
 #include "SkyboxComponent.hpp"
 
 using namespace neo;
@@ -27,16 +27,25 @@ class ReflectionShader : public Shader {
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load environment map */
-            loadUniform("cubeMap", NeoEngine::getComponents<SkyboxComponent>()[0]->getGameObject().getComponentByType<CubeMapComponent>()->getTexture().mTextureID);
+            if (auto skybox = NeoEngine::getSingleComponent<SkyboxComponent>()) {
+                if (auto cubemap = skybox->getGameObject().getComponentByType<CubeMapComponent>()) {
+                    loadUniform("cubeMap", cubemap->mTexture->mTextureID);
+                }
+            }
 
-            for (auto model : MasterRenderer::getRenderables<ReflectionShader, ReflectionRenderable>()) {
-                loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
-                loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
+            for (auto& renderable : NeoEngine::getComponents<ReflectionComponent>()) {
+                auto model = renderable->getGameObject().getComponentByType<MeshComponent>();
+                if (!model) {
+                    continue;
+                }
 
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
+
+                loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
+                loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
 
                 /* DRAW */
                 mesh.draw();

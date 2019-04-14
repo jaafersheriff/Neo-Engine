@@ -3,7 +3,6 @@
 
 #include "NeoEngine.hpp"
 
-#include "Component/ModelComponent/RenderableComponent.hpp"
 #include "Window/Window.hpp"
 
 #include "ext/imgui/imgui_impl_opengl3.h"
@@ -16,7 +15,7 @@ namespace neo {
     std::vector<std::unique_ptr<Shader>> MasterRenderer::mPreProcessShaders;
     std::vector<std::unique_ptr<Shader>> MasterRenderer::mSceneShaders;
     std::vector<std::unique_ptr<Shader>> MasterRenderer::mPostShaders;
-    std::unordered_map<std::type_index, std::unique_ptr<std::vector<RenderableComponent *>>> MasterRenderer::mRenderables;
+    glm::vec3 MasterRenderer::mClearColor;
 
     const char * MasterRenderer::POST_PROCESS_VERT_FILE =
         "#version 330 core\n\
@@ -25,9 +24,10 @@ namespace neo {
         out vec2 fragTex;\
         void main() { gl_Position = vec4(2 * vertPos, 1); fragTex = vertTex; }";
 
-    void MasterRenderer::init(const std::string &dir, CameraComponent *cam) {
+    void MasterRenderer::init(const std::string &dir, CameraComponent *cam, glm::vec3 clearColor) {
         APP_SHADER_DIR = dir;
         setDefaultCamera(cam);
+        mClearColor = clearColor;
 
         /* Init default GL state */
         resetState();
@@ -51,30 +51,35 @@ namespace neo {
         CHECK_GL(glEnable(GL_BLEND));
         CHECK_GL(glBlendEquation(GL_FUNC_ADD));
         CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
+        CHECK_GL(glClearColor(0.0f, 0.0f, 0.0f, 1.f));
     }
 
     void MasterRenderer::render(float dt) {
+        resetState();
+
         /* Get active shaders */
         std::vector<Shader *> activePreShaders = _getActiveShaders(mPreProcessShaders);
         std::vector<Shader *> activePostShaders = _getActiveShaders(mPostShaders);
 
         /* Render all preprocesses */
         for (auto & shader : activePreShaders) {
+            resetState();
             shader->render(*mDefaultCamera);
         }
 
         /* Reset default FBO state */
         if (activePostShaders.size()) {
             mDefaultFBO->bind();
-            glm::ivec2 frameSize = Window::getFrameSize();
-            CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
         }
-        else if (activePreShaders.size()) {
-            Loader::getFBO("0")->bind();
-            glm::ivec2 frameSize = Window::getFrameSize();
-            CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+        else {
+            CHECK_GL(glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f));
+            if (activePreShaders.size()) {
+                Loader::getFBO("0")->bind();
+            }
         }
+        glm::ivec2 frameSize = Window::getFrameSize();
+        CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
  
         /* Render all scene shaders */
@@ -87,6 +92,7 @@ namespace neo {
             /* Render first post process shader into appropriate output buffer */
             Framebuffer *inputFBO = mDefaultFBO;
             Framebuffer *outputFBO = activePostShaders.size() == 1 ? Loader::getFBO("0") : Loader::getFBO("pong");
+
             _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO);
 
             /* [2, n-1] shaders use ping & pong */
@@ -120,6 +126,7 @@ namespace neo {
     void MasterRenderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output) {
         // Reset output FBO
         output->bind();
+        CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
         // TODO : messaging to resize fbo
         glm::ivec2 frameSize = Window::getFrameSize();
@@ -149,6 +156,7 @@ namespace neo {
     void MasterRenderer::renderScene(const CameraComponent &camera) {
        for (auto & shader : mSceneShaders) {
             if (shader->mActive) {
+                resetState();
                 shader->render(camera);
             }
         }
@@ -171,30 +179,4 @@ namespace neo {
 
         return ret;
     }
-
-    void MasterRenderer::attachCompToShader(const std::type_index &typeI, RenderableComponent *rComp) {
-        /* Get vector<RenderableComponent *> that matches this shader */
-        auto it(mRenderables.find(typeI));
-        if (it == mRenderables.end()) {
-            mRenderables.emplace(typeI, std::make_unique<std::vector<RenderableComponent *>>());
-            it = mRenderables.find(typeI);
-        }
-
-        it->second->emplace_back(rComp);
-    }
-
-    void MasterRenderer::detachCompFromShader(const std::type_index &typeI, RenderableComponent *rComp) {
-        assert(mRenderables.count(typeI));
-        /* Look in active components in reverse order */
-        if (mRenderables.count(typeI)) {
-            auto & comps(*mRenderables.at(typeI));
-            for (int i = int(comps.size()) - 1; i >= 0; --i) {
-                if (comps[i] == rComp) {
-                    comps.erase(comps.begin() + i);
-                    break;
-                }
-            }
-        }
-    }
-
 }

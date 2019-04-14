@@ -7,6 +7,8 @@
 #include "Loader/Loader.hpp"
 #include "NeoEngine.hpp"
 
+#include "DecalRenderable.hpp"
+
 using namespace neo;
 
 class DecalShader : public Shader {
@@ -33,6 +35,7 @@ class DecalShader : public Shader {
         virtual void render(const CameraComponent &camera) override {
             auto fbo = Loader::getFBO("decals");
             fbo->bind();
+            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 
             CHECK_GL(glDisable(GL_CULL_FACE));
@@ -51,8 +54,8 @@ class DecalShader : public Shader {
             loadUniform("gDepth", gbuffer->mTextures[2]->mTextureID);
 
             /* Render decals */
-            for (auto& decal : MasterRenderer::getRenderables<DecalShader, RenderableComponent>()) {
-                auto& mesh = decal->getMesh();
+            for (auto& decal : NeoEngine::getComponents<DecalRenderable>()) {
+                auto& mesh = *Loader::getMesh("cube");
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
  
@@ -62,9 +65,9 @@ class DecalShader : public Shader {
 
                 auto diffuseMap = decal->getGameObject().getComponentByType<DiffuseMapComponent>();
                 if (diffuseMap) {
-                    auto texture = (Texture2D &)(diffuseMap->getTexture());
-                    texture.bind();
-                    loadUniform("decalTexture", texture.mTextureID);
+                    auto texture = (const Texture2D *)(diffuseMap->mTexture);
+                    texture->bind();
+                    loadUniform("decalTexture", texture->mTextureID);
                 }
 
                 mesh.draw();

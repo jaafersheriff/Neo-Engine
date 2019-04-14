@@ -27,9 +27,6 @@
     <ClInclude Include="src\CombineShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CustomSystem.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\GBufferShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -37,6 +34,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\DecalShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DecalRenderable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

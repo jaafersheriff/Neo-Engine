@@ -30,8 +30,8 @@ namespace neo {
             void setUVW(const glm::vec3 &, const glm::vec3 &, const glm::vec3 &);
 
             /* Getters */
-            const glm::vec3 & getPosition() const { return mPosition; }
-            const glm::vec3 & getScale() const { return mScale; }
+            const glm::vec3 getPosition() { return mPosition; }
+            const glm::vec3 getScale() { return mScale; }
             const glm::mat4 & getModelMatrix() const;
             const glm::mat3 & getNormalMatrix() const;
 

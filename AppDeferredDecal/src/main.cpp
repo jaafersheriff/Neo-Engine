@@ -1,12 +1,9 @@
 #include <NeoEngine.hpp>
 
-#include "CustomSystem.hpp"
-
 #include "DecalShader.hpp"
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
 #include "CombineShader.hpp"
-#include "Shader/WireframeShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "Util/Util.hpp"
@@ -38,26 +35,22 @@ struct Light {
 struct Renderable {
     GameObject *gameObject;
     SpatialComponent *spat;
-    RenderableComponent *renderable;
 
     Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale) {
         gameObject = &NeoEngine::createGameObject();
         spat = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
-        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, mesh);
-        renderable->addShaderType<GBufferShader>();
+        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
     }
 };
 
 struct Decal {
     GameObject *gameObject;
     SpatialComponent *spat;
-    RenderableComponent *renderable;
 
     Decal(Texture2D* texture, glm::vec3 pos, glm::vec3 scale) {
         gameObject = &NeoEngine::createGameObject();
         spat = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
-        renderable = &NeoEngine::addComponent<RenderableComponent>(gameObject, Loader::getMesh("cube"));
-        renderable->addShaderType<DecalShader>();
+        NeoEngine::addComponent<DecalRenderable>(gameObject);
         NeoEngine::addComponent<DiffuseMapComponent>(gameObject, texture);
         NeoEngine::addComponent<RotationComponent>(gameObject, glm::vec3(0, 1, 0));
     }
@@ -73,13 +66,13 @@ int main() {
     lights.push_back(new Light(glm::vec3(25.f, 25.f, 0.f), glm::vec3(1.f), glm::vec3(100.f)));
 
     Renderable cube(Loader::getMesh("cube"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
-    NeoEngine::addComponent<MaterialComponent>(cube.gameObject, Loader::getMaterial("cube mat", 0.2f, Util::genRandomVec3()));
+    NeoEngine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, Util::genRandomVec3());
 
     Renderable dragon(Loader::getMesh("dragon10k.obj", true), glm::vec3(-4.f, 10.f, -5.f), glm::vec3(10.f));
-    NeoEngine::addComponent<MaterialComponent>(dragon.gameObject, Loader::getMaterial("dragon mat", 0.2f, Util::genRandomVec3()));
+    NeoEngine::addComponent<MaterialComponent>(dragon.gameObject, 0.2f, Util::genRandomVec3());
 
     Renderable stairs(Loader::getMesh("staircase.obj", true), glm::vec3(5.f, 10.f, 9.f), glm::vec3(10.f));
-    NeoEngine::addComponent<MaterialComponent>(stairs.gameObject, Loader::getMaterial("stairs mat", 0.2f, Util::genRandomVec3()));
+    NeoEngine::addComponent<MaterialComponent>(stairs.gameObject, 0.2f, Util::genRandomVec3());
 
     for (int i = 0; i < 20; i++) {
         Renderable tree(Loader::getMesh("PineTree3.obj", true), glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
@@ -89,13 +82,13 @@ int main() {
     // Terrain 
     Renderable terrain(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
     terrain.spat->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
-    NeoEngine::addComponent<MaterialComponent>(terrain.gameObject, Loader::getMaterial("terrain mat", 0.7f, glm::vec3(0.7f)));
-    terrain.renderable->addShaderType<GBufferShader>();
+    NeoEngine::addComponent<MaterialComponent>(terrain.gameObject, 0.7f, glm::vec3(0.7f));
 
     Decal decal(Loader::getTexture("texture.png"), glm::vec3(0.f, 0.f, -25.f), glm::vec3(15.f));
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CustomSystem>();
+    NeoEngine::addSystem<CameraControllerSystem>();
+    NeoEngine::addSystem<RotationSystem>();
     NeoEngine::initSystems();
 
     /* Init renderer */
@@ -104,7 +97,6 @@ int main() {
     MasterRenderer::addPreProcessShader<DecalShader>("decal.vert", "decal.frag"); 
     auto & lightPassShader = MasterRenderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag"); 
     auto & combineShader = MasterRenderer::addPostProcessShader<CombineShader>("combine.frag"); 
-    MasterRenderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     NeoEngine::addDefaultImGuiFunc();
@@ -117,15 +109,6 @@ int main() {
         }
         if (ImGui::SliderFloat3("Scale", glm::value_ptr(scale), 0.f, 50.f)) {
             decal.spat->setScale(scale);
-        }
-        static bool showBox = false;
-        if (ImGui::Checkbox("Show box", &showBox)) {
-            if (showBox) {
-                decal.renderable->addShaderType<WireframeShader>();
-            }
-            else {
-                decal.renderable->removeShaderType<WireframeShader>();
-            }
         }
     });
 
@@ -151,7 +134,6 @@ int main() {
                 lights.push_back(light);
                 index = lights.size() - 1;
             }
-            ImGui::TreePop();
         }
         if (lights.empty()) {
             return;
@@ -176,11 +158,7 @@ int main() {
             if (ImGui::SliderFloat("Scale", &size, 15.f, 100.f)) {
                 spat->setScale(glm::vec3(size));
             }
-            glm::vec3 color = l->light->getColor();
-            if (ImGui::SliderFloat3("Color", glm::value_ptr(color), 0.f, 1.f)) {
-                l->light->setColor(color);
-
-            }
+            ImGui::SliderFloat3("Color", glm::value_ptr(l->light->mColor), 0.f, 1.f);
         }
     });
 

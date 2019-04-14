@@ -54,20 +54,25 @@ namespace neo {
                 loadUniform("P", cameras[0]->getProj());
                 loadUniform("V", cameras[0]->getView());
 
-                for (auto & model : MasterRenderer::getRenderables<ShadowCasterShader, RenderableComponent>()) {
-                    loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
+                for (auto& renderable : NeoEngine::getComponents<renderable::ShadowCasterRenderable>()) {
+                    auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
+                    if (!meshComponent) {
+                        continue;
+                    }
 
                     /* Bind mesh */
-                    const Mesh & mesh(model->getMesh());
+                    const Mesh& mesh(meshComponent->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.mVAOID));
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
+                    loadUniform("M", renderable->getGameObject().getSpatial()->getModelMatrix());
+
                     /* Bind texture */
-                    auto texComp = model->getGameObject().getComponentByType<DiffuseMapComponent>();
+                    auto texComp = renderable->getGameObject().getComponentByType<DiffuseMapComponent>();
                     if (texComp) {
-                        auto texture = (Texture2D &) (texComp->getTexture());
-                        texture.bind();
-                        loadUniform("diffuseMap", texture.mTextureID);
+                        auto texture = (const Texture2D *)(texComp->mTexture);
+                        texture->bind();
+                        loadUniform("diffuseMap", texture->mTextureID);
                         loadUniform("useTexture", true);
                     }
                     else {
