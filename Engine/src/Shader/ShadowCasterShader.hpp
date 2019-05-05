@@ -2,7 +2,7 @@
 
 #include "Shader/Shader.hpp"
 #include "MasterRenderer/MasterRenderer.hpp"
-#include "GLHelper/Framebuffer.hpp"
+#include "GLObjects/Framebuffer.hpp"
 
 #include "NeoEngine.hpp"
 

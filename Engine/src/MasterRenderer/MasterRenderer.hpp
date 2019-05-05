@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-#include "GLHelper/Framebuffer.hpp"
+#include "GLObjects/Framebuffer.hpp"
 
 #include "Messaging/Messenger.hpp"
 

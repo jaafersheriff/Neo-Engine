@@ -1,5 +1,5 @@
 
-#include "GLHelper/Mesh.hpp"
+#include "GLObjects/Mesh.hpp"
 
 #include "Util/Util.hpp"
 

@@ -2,7 +2,7 @@
 
 #include "Shader/Shader.hpp"
 #include "MasterRenderer/MasterRenderer.hpp"
-#include "GLHelper/GLHelper.hpp"
+#include "GLObjects/GLHelper.hpp"
 
 namespace neo {
 

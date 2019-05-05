@@ -1,8 +1,7 @@
 #include "MasterRenderer.hpp"
-#include "GLHelper/GLHelper.hpp"
+#include "GLObjects/GLHelper.hpp"
 
 #include "NeoEngine.hpp"
-
 #include "Window/Window.hpp"
 
 #include "ext/imgui/imgui_impl_opengl3.h"
@@ -33,7 +32,7 @@ namespace neo {
         });
 
         /* Init default FBO */
-        mDefaultFBO = Loader::getFBO("0");
+        mDefaultFBO = Library::getFBO("0");
         mDefaultFBO->mFBOID = 0;
     }
 
@@ -68,7 +67,7 @@ namespace neo {
         else {
             CHECK_GL(glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f));
             if (activePreShaders.size()) {
-                Loader::getFBO("0")->bind();
+                Library::getFBO("0")->bind();
             }
         }
         glm::ivec2 frameSize = Window::getFrameSize();
@@ -84,13 +83,13 @@ namespace neo {
 
             /* Render first post process shader into appropriate output buffer */
             Framebuffer *inputFBO = mDefaultFBO;
-            Framebuffer *outputFBO = activePostShaders.size() == 1 ? Loader::getFBO("0") : Loader::getFBO("pong");
+            Framebuffer *outputFBO = activePostShaders.size() == 1 ? Library::getFBO("0") : Library::getFBO("pong");
 
             _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO);
 
             /* [2, n-1] shaders use ping & pong */
-            inputFBO = Loader::getFBO("pong");
-            outputFBO = Loader::getFBO("ping");
+            inputFBO = Library::getFBO("pong");
+            outputFBO = Library::getFBO("ping");
             for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
                 _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO);
 
@@ -102,7 +101,7 @@ namespace neo {
 
             /* nth shader writes out to FBO 0 if it hasn't already been done */
             if (activePostShaders.size() > 1) {
-                _renderPostProcess(*activePostShaders.back(), inputFBO, Loader::getFBO("0"));
+                _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("0"));
             }
             CHECK_GL(glEnable(GL_DEPTH_TEST));
         }
@@ -127,7 +126,7 @@ namespace neo {
 
         // Bind quad 
         shader.bind();
-        auto mesh = Loader::getMesh("quad");
+        auto mesh = Library::getMesh("quad");
         CHECK_GL(glBindVertexArray(mesh->mVAOID));
 
         // Bind input fbo texture
@@ -156,7 +155,7 @@ namespace neo {
     }
 
     void MasterRenderer::setDefaultFBO(const std::string &name) {
-        auto fb = Loader::getFBO(name);
+        auto fb = Library::getFBO(name);
         if (fb) {
             mDefaultFBO = fb;
         }

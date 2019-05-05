@@ -12,6 +12,8 @@ extern "C" {
 #include "GameObject/GameObject.hpp"
 #include "Messaging/Messenger.hpp"
 
+#include "Loader/Loader.hpp"
+
 #include <time.h>
 #include <iostream>
 
@@ -345,8 +347,8 @@ namespace neo {
                 }
             }
             if (ImGui::CollapsingHeader("Library")) {
-                if (ImGui::TreeNode("FBOs")) {
-                    for (auto & fbo : Loader::mFramebuffers) {
+                if (Library::mFramebuffers.size() && ImGui::TreeNode("FBOs")) {
+                    for (auto & fbo : Library::mFramebuffers) {
                         if (ImGui::TreeNode((fbo.first + " (" + std::to_string(fbo.second->mFBOID) + ")").c_str())) {
                             for (auto & t : fbo.second->mTextures) {
                                 if (ImGui::TreeNode((std::to_string(t->mTextureID) + " [" + std::to_string(t->mWidth) + ", " + std::to_string(t->mHeight) + "]").c_str())) {
@@ -360,14 +362,14 @@ namespace neo {
                     }
                     ImGui::TreePop();
                 }
-                if (Loader::mMeshes.size() && ImGui::TreeNode("Meshes")) {
-                    for (auto & m : Loader::mMeshes) {
+                if (Library::mMeshes.size() && ImGui::TreeNode("Meshes")) {
+                    for (auto & m : Library::mMeshes) {
                         ImGui::Text("%s (%d)", m.first.c_str(), m.second->mVertexBufferSize);
                     }
                     ImGui::TreePop();
                 }
-                if (Loader::mTextures.size() && ImGui::TreeNode("Textures")) {
-                    for (auto & t : Loader::mTextures) {
+                if (Library::mTextures.size() && ImGui::TreeNode("Textures")) {
+                    for (auto & t : Library::mTextures) {
                         if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->mTextureID) + ")" + " [" + std::to_string(t.second->mWidth) + ", " + std::to_string(t.second->mHeight) + "]").c_str())) {
                             float scale = 150.f / (t.second->mWidth > t.second->mHeight ? t.second->mWidth : t.second->mHeight);
                             ImGui::Image((ImTextureID)t.second->mTextureID, ImVec2(scale * t.second->mWidth, scale * t.second->mHeight), ImVec2(0, 1), ImVec2(1, 0));

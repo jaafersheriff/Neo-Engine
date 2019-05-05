@@ -4,7 +4,7 @@
 
 #include "Shader/Shader.hpp"
 #include "MasterRenderer/MasterRenderer.hpp"
-#include "GLHelper/GlHelper.hpp"
+#include "GLObjects/GlHelper.hpp"
 
 using namespace neo;
 
@@ -81,11 +81,10 @@ public:
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load light */
-            auto lights = NeoEngine::getComponents<LightComponent>();
-            if (lights.size()) {
-                loadUniform("lightPos", lights.at(0)->getGameObject().getSpatial()->getPosition());
-                loadUniform("lightCol", lights.at(0)->mColor);
-                loadUniform("lightAtt", lights.at(0)->mAttenuation);
+            if (auto light = NeoEngine::getSingleComponent<LightComponent>()) {
+                loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
+                loadUniform("lightCol", light->mColor);
+                loadUniform("lightAtt", light->mAttenuation);
             }
 
             for (auto& renderable : NeoEngine::getComponents<renderable::PhongRenderable>()) {

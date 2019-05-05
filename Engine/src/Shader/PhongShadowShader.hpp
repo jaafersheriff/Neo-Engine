@@ -4,7 +4,7 @@
 
 #include "Shader/Shader.hpp"
 #include "MasterRenderer/MasterRenderer.hpp"
-#include "GLHelper/GlHelper.hpp"
+#include "GLObjects/GlHelper.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -122,9 +122,7 @@ namespace neo {
                 loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
                 /* Load light */
-                auto lights = NeoEngine::getComponents<LightComponent>();
-                if (lights.size()) {
-                    auto light = lights[0];
+                if (auto light = NeoEngine::getSingleComponent<LightComponent>()) {
                     auto lightCam = light->getGameObject().getComponentByType<CameraComponent>();
                     loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
                     loadUniform("lightCol", light->mColor);
