@@ -12,13 +12,13 @@
 
 namespace neo {
 
-    class NeoEngine;
+    class Engine;
     class CameraComponent;
     class PostProcessShader;
 
-    class MasterRenderer {
+    class Renderer {
 
-        friend NeoEngine;
+        friend Engine;
 
         public:
             static std::string APP_SHADER_DIR;
@@ -54,17 +54,17 @@ namespace neo {
 
     /* Template implementation */
     template <typename ShaderT, typename... Args>
-    ShaderT & MasterRenderer::addPreProcessShader(Args &&... args) {
+    ShaderT & Renderer::addPreProcessShader(Args &&... args) {
         mPreProcessShaders.emplace_back(_createShader<ShaderT>(std::forward<Args>(args)...));
         return static_cast<ShaderT &>(*mPreProcessShaders.back());
     }
     template <typename ShaderT, typename... Args>
-    ShaderT & MasterRenderer::addSceneShader(Args &&... args) {
+    ShaderT & Renderer::addSceneShader(Args &&... args) {
         mSceneShaders.emplace_back(_createShader<ShaderT>(std::forward<Args>(args)...));
         return static_cast<ShaderT &>(*mSceneShaders.back());
     }
     template <typename ShaderT, typename... Args>
-    ShaderT & MasterRenderer::addPostProcessShader(Args &&... args) {
+    ShaderT & Renderer::addPostProcessShader(Args &&... args) {
         static_assert(std::is_base_of<PostProcessShader, ShaderT>::value, "ShaderT must be derived from PostProcessShader");
 
         // Generate fbos if a post process shader exists
@@ -95,7 +95,7 @@ namespace neo {
         return static_cast<ShaderT &>(*mPostShaders.back());
     }
     template <typename ShaderT, typename... Args>
-    std::unique_ptr<ShaderT> MasterRenderer::_createShader(Args &&... args) {
+    std::unique_ptr<ShaderT> Renderer::_createShader(Args &&... args) {
         static_assert(std::is_base_of<Shader, ShaderT>::value, "ShaderT must be a Shader type");
         static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
         return std::make_unique<ShaderT>(std::forward<Args>(args)...);

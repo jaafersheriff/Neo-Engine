@@ -1,22 +1,22 @@
-#include "MasterRenderer.hpp"
+#include "Renderer.hpp"
 #include "GLObjects/GLHelper.hpp"
 
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 #include "Window/Window.hpp"
 
 #include "ext/imgui/imgui_impl_opengl3.h"
 
 namespace neo {
 
-    std::string MasterRenderer::APP_SHADER_DIR;
-    CameraComponent *MasterRenderer::mDefaultCamera(nullptr);
-    Framebuffer *MasterRenderer::mDefaultFBO;
-    std::vector<std::unique_ptr<Shader>> MasterRenderer::mPreProcessShaders;
-    std::vector<std::unique_ptr<Shader>> MasterRenderer::mSceneShaders;
-    std::vector<std::unique_ptr<Shader>> MasterRenderer::mPostShaders;
-    glm::vec3 MasterRenderer::mClearColor;
+    std::string Renderer::APP_SHADER_DIR;
+    CameraComponent *Renderer::mDefaultCamera(nullptr);
+    Framebuffer *Renderer::mDefaultFBO;
+    std::vector<std::unique_ptr<Shader>> Renderer::mPreProcessShaders;
+    std::vector<std::unique_ptr<Shader>> Renderer::mSceneShaders;
+    std::vector<std::unique_ptr<Shader>> Renderer::mPostShaders;
+    glm::vec3 Renderer::mClearColor;
 
-    void MasterRenderer::init(const std::string &dir, CameraComponent *cam, glm::vec3 clearColor) {
+    void Renderer::init(const std::string &dir, CameraComponent *cam, glm::vec3 clearColor) {
         APP_SHADER_DIR = dir;
         setDefaultCamera(cam);
         mClearColor = clearColor;
@@ -36,7 +36,7 @@ namespace neo {
         mDefaultFBO->mFBOID = 0;
     }
 
-    void MasterRenderer::resetState() {
+    void Renderer::resetState() {
         CHECK_GL(glEnable(GL_DEPTH_TEST));
         CHECK_GL(glEnable(GL_CULL_FACE));
         CHECK_GL(glCullFace(GL_BACK));
@@ -46,7 +46,7 @@ namespace neo {
         CHECK_GL(glClearColor(0.0f, 0.0f, 0.0f, 1.f));
     }
 
-    void MasterRenderer::render(float dt) {
+    void Renderer::render(float dt) {
         resetState();
 
         /* Get active shaders */
@@ -107,7 +107,7 @@ namespace neo {
         }
 
         /* Render imgui */
-        if (NeoEngine::imGuiEnabled) {
+        if (Engine::imGuiEnabled) {
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
@@ -115,7 +115,7 @@ namespace neo {
         glfwSwapBuffers(Window::getWindow());
     }
 
-    void MasterRenderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output) {
+    void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output) {
         // Reset output FBO
         output->bind();
         CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
@@ -145,7 +145,7 @@ namespace neo {
         shader.unbind();
     }
 
-    void MasterRenderer::renderScene(const CameraComponent &camera) {
+    void Renderer::renderScene(const CameraComponent &camera) {
        for (auto & shader : mSceneShaders) {
             if (shader->mActive) {
                 resetState();
@@ -154,14 +154,14 @@ namespace neo {
         }
     }
 
-    void MasterRenderer::setDefaultFBO(const std::string &name) {
+    void Renderer::setDefaultFBO(const std::string &name) {
         auto fb = Library::getFBO(name);
         if (fb) {
             mDefaultFBO = fb;
         }
     }
 
-    std::vector<Shader *> MasterRenderer::_getActiveShaders(std::vector<std::unique_ptr<Shader>> &shaders) {
+    std::vector<Shader *> Renderer::_getActiveShaders(std::vector<std::unique_ptr<Shader>> &shaders) {
         std::vector<Shader *> ret;
         for (auto & s : shaders) {
             if (s->mActive) {

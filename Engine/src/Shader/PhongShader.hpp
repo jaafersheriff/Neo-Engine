@@ -1,9 +1,9 @@
 #pragma once
 
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 #include "Shader/Shader.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
+#include "Renderer/Renderer.hpp"
 #include "GLObjects/GlHelper.hpp"
 
 namespace neo {
@@ -81,13 +81,13 @@ namespace neo {
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load light */
-            if (auto light = NeoEngine::getSingleComponent<LightComponent>()) {
+            if (auto light = Engine::getSingleComponent<LightComponent>()) {
                 loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
                 loadUniform("lightCol", light->mColor);
                 loadUniform("lightAtt", light->mAttenuation);
             }
 
-            for (auto& renderable : NeoEngine::getComponents<renderable::PhongRenderable>()) {
+            for (auto& renderable : Engine::getComponents<renderable::PhongRenderable>()) {
                 auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
                 if (!meshComponent) {
                     continue;

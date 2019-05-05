@@ -6,7 +6,7 @@
 
 namespace neo {
 
-    class NeoEngine;
+    class Engine;
     class Messenger;
     class Component;
     class SpatialComponent;
@@ -14,7 +14,7 @@ namespace neo {
 
     class GameObject {
 
-        friend NeoEngine;
+        friend Engine;
         friend Messenger;
 
         public:

@@ -6,13 +6,13 @@
 
 namespace neo {
 
-    class NeoEngine;
+    class Engine;
     class Mesh;
     class Framebuffer;
 
     class Library {
 
-        friend NeoEngine;
+        friend Engine;
 
         public:
             static Mesh* getMesh(const std::string&, bool = false);

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 #include "Shader/Shader.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
+#include "Renderer/Renderer.hpp"
 #include "GLObjects/GlHelper.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -122,7 +122,7 @@ namespace neo {
                 loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
                 /* Load light */
-                if (auto light = NeoEngine::getSingleComponent<LightComponent>()) {
+                if (auto light = Engine::getSingleComponent<LightComponent>()) {
                     auto lightCam = light->getGameObject().getComponentByType<CameraComponent>();
                     loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
                     loadUniform("lightCol", light->mColor);
@@ -144,7 +144,7 @@ namespace neo {
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.mTextureID));
                 loadUniform("shadowMap", texture.mTextureID);
 
-                for (auto& renderable : NeoEngine::getComponents<renderable::PhongShadowRenderable>()) {
+                for (auto& renderable : Engine::getComponents<renderable::PhongShadowRenderable>()) {
                     auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
                     if (!meshComponent) {
                         continue;

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
+#include "Renderer/Renderer.hpp"
 #include "GLObjects/Framebuffer.hpp"
 
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 namespace neo {
 
@@ -50,11 +50,11 @@ namespace neo {
                 CHECK_GL(glCullFace(GL_FRONT));
 
                 bind();
-                auto & cameras = NeoEngine::getComponents<LightComponent>()[0]->getGameObject().getComponentsByType<CameraComponent>();
+                auto & cameras = Engine::getComponents<LightComponent>()[0]->getGameObject().getComponentsByType<CameraComponent>();
                 loadUniform("P", cameras[0]->getProj());
                 loadUniform("V", cameras[0]->getView());
 
-                for (auto& renderable : NeoEngine::getComponents<renderable::ShadowCasterRenderable>()) {
+                for (auto& renderable : Engine::getComponents<renderable::ShadowCasterRenderable>()) {
                     auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
                     if (!meshComponent) {
                         continue;

@@ -58,7 +58,7 @@
     <ClInclude Include="src\Messaging\Messenger.hpp" />
     <ClInclude Include="src\GLObjects\Mesh.hpp" />
     <ClInclude Include="src\GLObjects\Texture.hpp" />
-    <ClInclude Include="src\NeoEngine.hpp" />
+    <ClInclude Include="src\Engine.hpp" />
     <ClInclude Include="src\Shader\LineShader.hpp" />
     <ClInclude Include="src\Shader\PhongShader.hpp" />
     <ClInclude Include="src\Shader\PostProcessShader.hpp" />
@@ -68,7 +68,7 @@
     <ClInclude Include="src\GLObjects\Framebuffer.hpp" />
     <ClInclude Include="src\GLObjects\GLHelper.hpp" />
     <ClInclude Include="src\Shader\Shader.hpp" />
-    <ClInclude Include="src\MasterRenderer\MasterRenderer.hpp" />
+    <ClInclude Include="src\Renderer\Renderer.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\CameraControllerSystem.hpp" />
     <ClInclude Include="src\Systems\System.hpp" />
     <ClInclude Include="src\Systems\Systems.hpp" />
@@ -95,10 +95,10 @@
     <ClCompile Include="src\Loader\Loader.cpp" />
     <ClCompile Include="src\Messaging\Messenger.cpp" />
     <ClCompile Include="src\GLObjects\Mesh.cpp" />
-    <ClCompile Include="src\NeoEngine.cpp" />
+    <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\GLObjects\GLHelper.cpp" />
     <ClCompile Include="src\Shader\Shader.cpp" />
-    <ClCompile Include="src\MasterRenderer\MasterRenderer.cpp" />
+    <ClCompile Include="src\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\CameraControllerSystem.cpp" />
     <ClCompile Include="src\Systems\TranslationSystems\RotationSystem.cpp" />
     <ClCompile Include="src\Systems\TranslationSystems\SinTranslateSystem.cpp" />

@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="src\NeoEngine.hpp" />
     <ClInclude Include="src\Component\CameraComponent\CameraComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\CameraControllerComponent.hpp" />
     <ClInclude Include="src\Component\Component.hpp" />
@@ -30,7 +29,6 @@
     <ClInclude Include="src\Component\AnimationComponent\LineComponent.hpp" />
     <ClInclude Include="src\Shader\PhongShader.hpp" />
     <ClInclude Include="src\Shader\ShadowCasterShader.hpp" />
-    <ClInclude Include="src\MasterRenderer\MasterRenderer.hpp" />
     <ClInclude Include="src\Component\ModelComponent\TextureComponent.hpp" />
     <ClInclude Include="src\ext\imgui\imgui_impl_glfw.h" />
     <ClInclude Include="src\ext\imgui\imgui_internal.h" />
@@ -60,6 +58,8 @@
     <ClInclude Include="src\GLObjects\GLHelper.hpp" />
     <ClInclude Include="src\GLObjects\Mesh.hpp" />
     <ClInclude Include="src\GLObjects\Texture.hpp" />
+    <ClInclude Include="src\Engine.hpp" />
+    <ClInclude Include="src\Renderer\Renderer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -72,8 +72,6 @@
     <ClCompile Include="src\Window\Keyboard.cpp" />
     <ClCompile Include="src\Window\Mouse.cpp" />
     <ClCompile Include="src\Window\Window.cpp" />
-    <ClCompile Include="src\NeoEngine.cpp" />
-    <ClCompile Include="src\MasterRenderer\MasterRenderer.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_widgets.cpp" />
@@ -87,6 +85,8 @@
     <ClCompile Include="src\GLObjects\GLHelper.cpp" />
     <ClCompile Include="src\GLObjects\Mesh.cpp" />
     <ClCompile Include="src\Loader\Library.cpp" />
+    <ClCompile Include="src\Engine.cpp" />
+    <ClCompile Include="src\Renderer\Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />
