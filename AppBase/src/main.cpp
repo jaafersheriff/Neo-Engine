@@ -1,6 +1,7 @@
 #include <Engine.hpp>
 
 #include "Shader/PhongShader.hpp"
+#include "Shader/AlphaTestShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -40,12 +41,10 @@ struct Light {
 struct Renderable {
     GameObject *gameObject;
 
-    Renderable(Mesh *mesh, float amb, glm::vec3 diffuse, glm::vec3 specular) {
+    Renderable(Mesh *mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
         gameObject = &Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
         Engine::addComponent<MeshComponent>(gameObject, mesh);
-        Engine::addComponent<renderable::PhongRenderable>(gameObject);
-        Engine::addComponent<MaterialComponent>(gameObject, amb, diffuse, specular);
+        Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
 
         Engine::addImGuiFunc("Mesh", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -74,7 +73,16 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable(Library::getMesh("cube"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+
+    /* Cube object */
+    Renderable cube(Library::getMesh("cube"), glm::vec3(0.f, 0.5f, 0.f));
+    Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
+    Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+
+    /* Ground plane */
+    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
+    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
+    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, Library::getTexture("grid.png"));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
@@ -83,6 +91,7 @@ int main() {
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
     Renderer::addSceneShader<PhongShader>();
+    Renderer::addSceneShader<AlphaTestShader>();
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();

@@ -60,6 +60,8 @@
     <ClInclude Include="src\GLObjects\Texture.hpp" />
     <ClInclude Include="src\Engine.hpp" />
     <ClInclude Include="src\Renderer\Renderer.hpp" />
+    <ClInclude Include="src\Component\RenderableComponent\AlphaTestRenderable.hpp" />
+    <ClInclude Include="src\Shader\AlphaTestShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />

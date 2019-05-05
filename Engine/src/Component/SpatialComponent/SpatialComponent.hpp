@@ -14,6 +14,7 @@ namespace neo {
             SpatialComponent(GameObject *);
             SpatialComponent(GameObject *, const glm::vec3 &);
             SpatialComponent(GameObject *, const glm::vec3 &, const glm::vec3 &);
+            SpatialComponent(GameObject *, const glm::vec3 &, const glm::vec3 &, const glm::vec3 &);
             SpatialComponent(GameObject *, const glm::vec3 &, const glm::vec3 &, const glm::mat3 &);
 
             SpatialComponent(SpatialComponent && other) = default;
@@ -26,6 +27,7 @@ namespace neo {
             /* Setters */
             void setPosition(const glm::vec3 &);
             void setScale(const glm::vec3 &);
+            void setScale(const float);
             void setOrientation(const glm::mat3 &);
             void setUVW(const glm::vec3 &, const glm::vec3 &, const glm::vec3 &);
 

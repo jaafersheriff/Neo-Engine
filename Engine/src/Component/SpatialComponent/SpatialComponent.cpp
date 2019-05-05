@@ -27,6 +27,16 @@ namespace neo {
         mScale = s;
     }
 
+    SpatialComponent::SpatialComponent(GameObject *go, const glm::vec3 & p, const glm::vec3 & s, const glm::vec3 & r) :
+        SpatialComponent(go, p) {
+        mScale = s;
+        glm::mat4 rotation(1.f);
+        rotation = glm::rotate(rotation, r.x, glm::vec3(1, 0, 0));
+        rotation = glm::rotate(rotation, r.y, glm::vec3(0, 1, 0));
+        rotation = glm::rotate(rotation, r.z, glm::vec3(0, 0, 1));
+        setOrientation(glm::mat3(rotation));
+    }
+
     SpatialComponent::SpatialComponent(GameObject *go, const glm::vec3 & p, const glm::vec3 & s, const glm::mat3 & o) :
         SpatialComponent(go, p, s) {
         setOrientation(o);
@@ -79,6 +89,10 @@ namespace neo {
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
         Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
+    }
+
+    void SpatialComponent::setScale(const float scale) {
+        setScale(glm::vec3(scale));
     }
 
     void SpatialComponent::setOrientation(const glm::mat3 & orient) {

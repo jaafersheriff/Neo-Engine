@@ -16,6 +16,7 @@
 #include "TransformationComponent/RotationComponent.hpp"
 #include "TransformationComponent/SinTranslateComponent.hpp"
 
+#include "RenderableComponent/AlphaTestRenderable.hpp"
 #include "RenderableComponent/PhongRenderable.hpp"
 #include "RenderableComponent/PhongShadowRenderable.hpp"
 #include "RenderableComponent/ShadowCasterRenderable.hpp"

@@ -126,7 +126,10 @@ namespace neo {
                     {0.f, 0.f, 
                      1.f, 0.f,
                      0.f, 1.f,
-                     1.f, 1.f }, {}, GL_TRIANGLE_STRIP);
+                     1.f, 1.f }, 
+                    {0, 1, 2,
+                     1, 3, 2}
+                );
             }
 
             // http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
