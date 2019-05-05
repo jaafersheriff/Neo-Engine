@@ -2,12 +2,12 @@
 
 #include <unordered_map>
 
+#include "GLObjects/Texture.hpp"
+
 namespace neo {
 
     class NeoEngine;
     class Mesh;
-    class Texture;
-    struct TextureFormat;
     class Framebuffer;
 
     class Library {
@@ -16,7 +16,8 @@ namespace neo {
 
         public:
             static Mesh* getMesh(const std::string&, bool = false);
-            static Texture* getTexture(const std::string&, TextureFormat);
+            static Texture* getTexture(const std::string&, TextureFormat = TextureFormat{});
+            static Texture* getEmptyTexture(const std::string&);
             static Texture* getCubemap(const std::string&, const std::vector<std::string> &);
             static Framebuffer* getFBO(const std::string&);
 
@@ -27,6 +28,9 @@ namespace neo {
 
             static void _insertMesh(const std::string&, Mesh*);
             static void _insertTexture(const std::string&, Texture*);
+
+            // TODO 
+            // template <typename T> static T* _find(const std::string&);
 
     };
 

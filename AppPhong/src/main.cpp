@@ -66,7 +66,7 @@ int main() {
             renderables.push_back(
                 new Renderable(
                     Library::getMesh("mr_krab.obj", true), 
-                    Library::getTexture("mr_krab.png", TextureFormat{}),
+                    Library::getTexture("mr_krab.png"),
                     glm::vec3(x*2, 0, z*2))
             );
         }

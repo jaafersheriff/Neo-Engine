@@ -76,7 +76,7 @@ int main() {
 
     for (int i = 0; i < 20; i++) {
         Renderable tree(Library::getMesh("PineTree3.obj", true), glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
-        NeoEngine::addComponent<DiffuseMapComponent>(tree.gameObject, Library::getTexture("PineTexture.png", TextureFormat{}));
+        NeoEngine::addComponent<DiffuseMapComponent>(tree.gameObject, Library::getTexture("PineTexture.png"));
     }
 
     // Terrain 
@@ -84,7 +84,7 @@ int main() {
     terrain.spat->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
     NeoEngine::addComponent<MaterialComponent>(terrain.gameObject, 0.7f, glm::vec3(0.7f));
 
-    Decal decal(Library::getTexture("texture.png", TextureFormat{}), glm::vec3(0.f, 0.f, -25.f), glm::vec3(15.f));
+    Decal decal(Library::getTexture("texture.png"), glm::vec3(0.f, 0.f, -25.f), glm::vec3(15.f));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraControllerSystem>();

@@ -61,7 +61,7 @@ int main() {
     NeoEngine::addComponent<MaterialComponent>(stairs.gameObject, 0.2f, Util::genRandomVec3());
     for (int i = 0; i < 20; i++) {
         Renderable tree(Library::getMesh("PineTree3.obj", true), glm::vec3(50.f - i * 5.f, 5.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
-        NeoEngine::addComponent<DiffuseMapComponent>(tree.gameObject, Loader::getTexture("PineTexture.png"));
+        NeoEngine::addComponent<DiffuseMapComponent>(tree.gameObject, Library::getTexture("PineTexture.png"));
     }
 
     // Terrain 
@@ -88,11 +88,11 @@ int main() {
         if (!combineShader.showAO) {
             return;
         }
-        int size = Loader::getTexture("aoKernel")->mWidth;
+        int size = Library::getTexture("aoKernel")->mWidth;
         if (ImGui::SliderInt("Kernel", &size, 1, 128)) {
             aoShader.generateKernel(size);
         }
-        size = Loader::getTexture("aoNoise")->mWidth;
+        size = Library::getTexture("aoNoise")->mWidth;
         if (ImGui::SliderInt("Noise", &size, 1, 32)) {
             aoShader.generateNoise(size);
         }

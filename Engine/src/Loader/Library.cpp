@@ -36,6 +36,12 @@ namespace neo {
         return texture;
     }
 
+    Texture* Library::getEmptyTexture(const std::string& fileName) {
+        Texture* texture = new Texture2D;
+        _insertTexture(fileName, texture);
+        return texture;
+    }
+
     Texture* Library::getCubemap(const std::string& name, const std::vector<std::string> &files) {
         auto it = mTextures.find(name);
         if (it != mTextures.end()) {
@@ -47,8 +53,6 @@ namespace neo {
 
         return texture;
     }
-
-
 
     Framebuffer* Library::getFBO(const std::string &name) {
         auto it = mFramebuffers.find(name);
