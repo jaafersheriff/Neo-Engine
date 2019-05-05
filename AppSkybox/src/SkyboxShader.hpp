@@ -30,7 +30,7 @@ class SkyboxShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            const Mesh& mesh = *Loader::getMesh("cube");
+            const Mesh& mesh = *Library::getMesh("cube");
             CHECK_GL(glBindVertexArray(mesh.mVAOID));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 

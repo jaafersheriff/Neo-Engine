@@ -27,7 +27,7 @@ struct Light {
         gameObject = &NeoEngine::createGameObject();
         NeoEngine::addComponent<SpatialComponent>(gameObject, pos);
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
-        NeoEngine::addComponent<MeshComponent>(gameObject, Loader::getMesh("cube"));
+        NeoEngine::addComponent<MeshComponent>(gameObject, Library::getMesh("cube"));
 
         NeoEngine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
@@ -65,7 +65,7 @@ int main() {
         for (int z = 0; z < 10; z++) {
             renderables.push_back(
                 new Renderable(
-                    Loader::getMesh("mr_krab.obj", true), 
+                    Library::getMesh("mr_krab.obj", true), 
                     Loader::getTexture("mr_krab.png"),
                     glm::vec3(x*2, 0, z*2))
             );

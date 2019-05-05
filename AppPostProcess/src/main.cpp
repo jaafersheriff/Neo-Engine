@@ -78,7 +78,7 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable r(Loader::getMesh("mr_krab.obj"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+    Renderable r(Library::getMesh("mr_krab.obj"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
     NeoEngine::addComponent<DiffuseMapComponent>(r.gameObject, Loader::getTexture("mr_krab.png"));
 
     /* Systems - order matters! */

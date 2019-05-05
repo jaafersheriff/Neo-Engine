@@ -85,7 +85,7 @@ class AOShader : public PostProcessShader {
             loadUniform("bias", bias);
 
             // bind gbuffer
-            auto gbuffer = Loader::getFBO("gbuffer");
+            auto gbuffer = Library::getFBO("gbuffer");
             gbuffer->mTextures[0]->bind();
             loadUniform("gNormal", gbuffer->mTextures[0]->mTextureID);
             gbuffer->mTextures[2]->bind();

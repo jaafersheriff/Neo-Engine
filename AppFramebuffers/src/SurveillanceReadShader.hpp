@@ -23,7 +23,7 @@ class SurveillanceReadShader : public Shader {
             loadUniform("V", camera.getView());
 
             /* Bind mesh */
-            auto mesh(Loader::getMesh("quad"));
+            auto mesh(Library::getMesh("quad"));
             CHECK_GL(glBindVertexArray(mesh->mVAOID));
 
             for (auto camera : NeoEngine::getComponents<SurveillanceCamera>()) {

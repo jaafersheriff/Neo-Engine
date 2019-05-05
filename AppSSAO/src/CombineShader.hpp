@@ -25,12 +25,12 @@ class CombineShader : public PostProcessShader {
             loadUniform("diffuseAmount", diffuseAmount);
 
             // Bind diffuse output
-            auto gBuffer = Loader::getFBO("gbuffer");
+            auto gBuffer = Library::getFBO("gbuffer");
             gBuffer->mTextures[1]->bind();
             loadUniform("gDiffuse", gBuffer->mTextures[1]->mTextureID);
 
             // Bind light pass output
-            auto lightFBO = Loader::getFBO("lightpass");
+            auto lightFBO = Library::getFBO("lightpass");
             lightFBO->mTextures[0]->bind();
             loadUniform("lightOutput", lightFBO->mTextures[0]->mTextureID);
         }

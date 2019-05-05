@@ -30,7 +30,7 @@ namespace neo {
                             }\
                         }") {
                 /* Init shadow map */
-                Framebuffer *depthFBO = Loader::getFBO("depthMap");
+                Framebuffer *depthFBO = Library::getFBO("depthMap");
                 depthFBO->generate();
                 depthFBO->attachDepthTexture(glm::ivec2(2048), GL_LINEAR, GL_CLAMP_TO_BORDER);
                 depthFBO->disableDraw();
@@ -41,7 +41,7 @@ namespace neo {
             }
 
             virtual void render(const CameraComponent &) override {
-                auto fbo = Loader::getFBO("depthMap");
+                auto fbo = Library::getFBO("depthMap");
                 auto & depthTexture = fbo->mTextures[0];
 
                 fbo->bind();

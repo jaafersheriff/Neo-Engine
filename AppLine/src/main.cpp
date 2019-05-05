@@ -88,7 +88,7 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Cube(Loader::getMesh("cube"));
+    Cube(Library::getMesh("cube"));
 
     /* Systems - order matters! */
     NeoEngine::addSystem<CameraControllerSystem>();

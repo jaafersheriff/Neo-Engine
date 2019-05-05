@@ -38,7 +38,7 @@ struct Light {
         gameObject = &NeoEngine::createGameObject();
         camSpatial = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(2.f), glm::mat3(glm::rotate(glm::mat4(1.f), 0.6f, glm::vec3(1, 0, 0))));
         light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
-        NeoEngine::addComponent<MeshComponent>(gameObject, Loader::getMesh("cube"));
+        NeoEngine::addComponent<MeshComponent>(gameObject, Library::getMesh("cube"));
         NeoEngine::addComponent<renderable::PhongRenderable>(gameObject);
         NeoEngine::addComponent<MaterialComponent>(gameObject, 1.f, glm::vec3(1.f));
         camera = &NeoEngine::addComponent<CameraComponent>(gameObject, -100.f, 100.f, -100.f, 100.f, -1.f, 1000.f);
@@ -59,7 +59,7 @@ struct Light {
         // Separate game object for look at
         gameO = &NeoEngine::createGameObject();
         lookAtSpatial = &NeoEngine::addComponent<SpatialComponent>(gameO, glm::vec3(0.f), glm::vec3(1.f));
-        NeoEngine::addComponent<MeshComponent>(gameO, Loader::getMesh("cube"));
+        NeoEngine::addComponent<MeshComponent>(gameO, Library::getMesh("cube"));
         NeoEngine::addComponent<renderable::WireframeRenderable>(gameO);
         NeoEngine::addComponent<LookAtCameraReceiver>(gameO);
 
@@ -144,7 +144,7 @@ int main() {
     // Spheres and blocks 
     for (int i = 0; i < 50; i++) {
         Renderable r(
-            Util::genRandomBool() ? Loader::getMesh("cube") : Loader::getMesh("sphere"),
+            Util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere"),
             glm::vec3(Util::genRandom(-45.f, 45.f), Util::genRandom(2.f, 5.f), Util::genRandom(-45.f, 45.f)),
             glm::vec3(Util::genRandom(5.f)));
         NeoEngine::addComponent<renderable::ShadowCasterRenderable>(r.gameObject);
@@ -153,7 +153,7 @@ int main() {
     }
 
     // Terrain receiver 
-    Renderable receiver(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
+    Renderable receiver(Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
     NeoEngine::addComponent<MaterialComponent>(receiver.gameObject, 0.2f, glm::vec3(0.7f), glm::vec3(1.f), 20.f);
     NeoEngine::addComponent<renderable::PhongShadowRenderable>(receiver.gameObject);
     receiver.attachImGui("Receiver");
