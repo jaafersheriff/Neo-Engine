@@ -36,7 +36,7 @@ namespace neo {
         }
 
     #ifdef DEBUG_MODE
-    #define CHECK_GL(x) do { GLHelper::printOpenGLErrors("{{BEFORE}} "#x, __FILE__, __LINE__); (x); GLHelper::printOpenGLErrors(#x, __FILE__, __LINE__); } while (0)
+    #define CHECK_GL(x) do { neo::GLHelper::printOpenGLErrors("{{BEFORE}} "#x, __FILE__, __LINE__); (x); neo::GLHelper::printOpenGLErrors(#x, __FILE__, __LINE__); } while (0)
     #define CHECK_GL_FRAMEBUFFER() do {GLHelper::checkFrameBuffer(); } while(0)
     #else
     #define CHECK_GL(x) (x)

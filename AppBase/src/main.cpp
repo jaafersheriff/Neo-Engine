@@ -4,27 +4,29 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
+using namespace neo;
+
 /* Game object definitions */
 struct Camera {
-    neo::CameraComponent *camera;
+    CameraComponent *camera;
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        neo::GameObject *gameObject = &neo::Engine::createGameObject();
-        neo::Engine::addComponent<neo::SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &neo::Engine::addComponent<neo::CameraComponent>(gameObject, fov, near, far);
-        neo::Engine::addComponent<neo::CameraControllerComponent>(gameObject, ls, ms);
+        GameObject *gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        camera = &Engine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
 
 struct Light {
-    neo::GameObject *gameObject;
-    neo::LightComponent *light;
+    GameObject *gameObject;
+    LightComponent *light;
 
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        gameObject = &neo::Engine::createGameObject();
-        neo::Engine::addComponent<neo::SpatialComponent>(gameObject, pos);
-        light = &neo::Engine::addComponent<neo::LightComponent>(gameObject, col, att);
+        gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, pos);
+        light = &Engine::addComponent<LightComponent>(gameObject, col, att);
 
-        neo::Engine::addImGuiFunc("Light", [&]() {
+        Engine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
                 gameObject->getSpatial()->setPosition(pos);
@@ -36,16 +38,16 @@ struct Light {
 };
 
 struct Renderable {
-    neo::GameObject *gameObject;
+    GameObject *gameObject;
 
-    Renderable(neo::Mesh *mesh, float amb, glm::vec3 diffuse, glm::vec3 specular) {
-        gameObject = &neo::Engine::createGameObject();
-        neo::Engine::addComponent<neo::SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        neo::Engine::addComponent<neo::MeshComponent>(gameObject, mesh);
-        neo::Engine::addComponent<neo::renderable::PhongRenderable>(gameObject);
-        neo::Engine::addComponent<neo::MaterialComponent>(gameObject, amb, diffuse, specular);
+    Renderable(Mesh *mesh, float amb, glm::vec3 diffuse, glm::vec3 specular) {
+        gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
+        Engine::addComponent<MeshComponent>(gameObject, mesh);
+        Engine::addComponent<renderable::PhongRenderable>(gameObject);
+        Engine::addComponent<MaterialComponent>(gameObject, amb, diffuse, specular);
 
-        neo::Engine::addImGuiFunc("neo::Mesh", [&]() {
+        Engine::addImGuiFunc("Mesh", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);
@@ -67,25 +69,25 @@ struct Renderable {
 };
 
 int main() {
-    neo::Engine::init("Base", "res/", 1280, 720);
+    Engine::init("Base", "res/", 1280, 720);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable(neo::Library::getMesh("cube"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+    Renderable(Library::getMesh("cube"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
 
     /* Systems - order matters! */
-    neo::Engine::addSystem<neo::CameraControllerSystem>();
-    neo::Engine::initSystems();
+    Engine::addSystem<CameraControllerSystem>();
+    Engine::initSystems();
 
     /* Init renderer */
-    neo::Renderer::init("shaders/", camera.camera);
-    neo::Renderer::addSceneShader<neo::PhongShader>();
+    Renderer::init("shaders/", camera.camera);
+    Renderer::addSceneShader<PhongShader>();
 
     /* Attach ImGui panes */
-    neo::Engine::addDefaultImGuiFunc();
+    Engine::addDefaultImGuiFunc();
 
     /* Run */
-    neo::Engine::run();
+    Engine::run();
     return 0;
 }

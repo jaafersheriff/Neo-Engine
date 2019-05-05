@@ -6,28 +6,26 @@
 #include "Window/Window.hpp"
 #include "Messaging/Messenger.hpp"
 
-using namespace neo;
-
-class CombineShader : public PostProcessShader {
+class CombineShader : public neo::PostProcessShader {
 
     public:
 
         float diffuseAmount = 0.2f;
 
         CombineShader(const std::string &frag) :
-            PostProcessShader("Combine Shader", frag) 
+            neo::PostProcessShader("Combine Shader", frag) 
         {}
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render(const neo::CameraComponent &camera) override {
             loadUniform("diffuseAmount", diffuseAmount);
 
             // Bind diffuse output
-            auto gBuffer = Library::getFBO("gbuffer");
+            auto gBuffer = neo::Library::getFBO("gbuffer");
             gBuffer->mTextures[1]->bind();
             loadUniform("gDiffuse", gBuffer->mTextures[1]->mTextureID);
 
             // Bind light pass output
-            auto lightFBO = Library::getFBO("lightpass");
+            auto lightFBO = neo::Library::getFBO("lightpass");
             lightFBO->mTextures[0]->bind();
             loadUniform("lightOutput", lightFBO->mTextures[0]->mTextureID);
         }
