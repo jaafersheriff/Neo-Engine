@@ -31,7 +31,7 @@ namespace neo {
             static void _resize(Mesh&);
 
             /* Load a single texture file */
-            static uint8_t* _loadSingleTexture(Texture*, const std::string&);
+            static uint8_t* _loadSingleTexture(Texture*, const std::string&, bool = true);
             static void _cleanSingleTexture(uint8_t*);
 
             /* Private members */

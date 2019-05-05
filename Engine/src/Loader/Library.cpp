@@ -36,6 +36,20 @@ namespace neo {
         return texture;
     }
 
+    Texture* Library::getCubemap(const std::string& name, const std::vector<std::string> &files) {
+        auto it = mTextures.find(name);
+        if (it != mTextures.end()) {
+            return it->second;
+        }
+
+        auto texture = Loader::loadTexture(name, files);
+        _insertTexture(name, texture);
+
+        return texture;
+    }
+
+
+
     Framebuffer* Library::getFBO(const std::string &name) {
         auto it = mFramebuffers.find(name);
         if (it == mFramebuffers.end()) {

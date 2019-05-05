@@ -119,7 +119,7 @@ namespace neo {
         /* Use stbi if name is an existing file */
         uint8_t* data[6];
         for (int i = 0; i < 6; i++) {
-            data[i] = _loadSingleTexture(texture, files[i]);
+            data[i] = _loadSingleTexture(texture, files[i], false);
         }
 
         /* Upload data to GPU and free from CPU */
@@ -133,12 +133,12 @@ namespace neo {
         return texture;
     }
 
-    uint8_t* Loader::_loadSingleTexture(Texture* texture, const std::string& fileName) {
+    uint8_t* Loader::_loadSingleTexture(Texture* texture, const std::string& fileName, bool flip) {
         /* Use stbi if name is an existing file */
         FILE *f;
         assert(!fopen_s(&f, (RES_DIR + fileName).c_str(), "rb"), "Error opening texture file");
 
-        stbi_set_flip_vertically_on_load(true);
+        stbi_set_flip_vertically_on_load(flip);
         uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->mWidth, &texture->mHeight, &texture->mComponents, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
         assert(data, "Error reading texture file");
 
