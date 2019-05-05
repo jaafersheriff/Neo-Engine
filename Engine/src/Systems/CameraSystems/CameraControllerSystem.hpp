@@ -2,9 +2,9 @@
 
 #include "Systems/System.hpp"
 
-using namespace neo;
+namespace neo {
 
-class CameraControllerSystem : public System {
+    class CameraControllerSystem : public System {
 
     public:
         CameraControllerSystem() :
@@ -13,4 +13,5 @@ class CameraControllerSystem : public System {
 
         virtual void update(const float dt) override;
 
-};
+    };
+}

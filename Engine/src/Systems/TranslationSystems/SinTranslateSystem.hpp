@@ -2,9 +2,9 @@
 
 #include "Systems/System.hpp"
 
-using namespace neo;
+namespace neo {
 
-class SinTranslateSystem : public System {
+    class SinTranslateSystem : public System {
 
     public:
         SinTranslateSystem() :
@@ -13,4 +13,5 @@ class SinTranslateSystem : public System {
 
         virtual void update(const float dt) override;
 
-};
+    };
+}

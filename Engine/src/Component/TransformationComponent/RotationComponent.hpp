@@ -10,9 +10,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-using namespace neo;
+namespace neo {
 
-class RotationComponent : public Component {
+    class RotationComponent : public Component {
 
     public:
         RotationComponent(GameObject *go, glm::vec3 speed) :
@@ -22,4 +22,6 @@ class RotationComponent : public Component {
 
         glm::vec3 mSpeed;
 
-};
+    };
+
+}

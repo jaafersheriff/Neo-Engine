@@ -6,15 +6,15 @@
 #include "MasterRenderer/MasterRenderer.hpp"
 #include "GLObjects/GlHelper.hpp"
 
-using namespace neo;
+namespace neo {
 
-class PhongShader : public Shader {
+    class PhongShader : public Shader {
 
-public:
+    public:
 
-    PhongShader() :
-        Shader("Phong Shader",
-            "#version 330 core\n\
+        PhongShader() :
+            Shader("Phong Shader",
+                "#version 330 core\n\
                 layout(location = 0) in vec3 vertPos;\
                 layout(location = 1) in vec3 vertNor;\
                 layout(location = 2) in vec2 vertTex;\
@@ -29,7 +29,7 @@ public:
                     fragTex = vertTex;\
                     gl_Position = P * V * fragPos;\
                 }",
-            "#version 330 core\n\
+                "#version 330 core\n\
                 in vec4 fragPos;\
                 in vec3 fragNor;\
                 in vec2 fragTex;\
@@ -103,7 +103,7 @@ public:
 
                 /* Bind texture */
                 if (auto diffuseMap = renderable->getGameObject().getComponentByType<DiffuseMapComponent>()) {
-                    auto texture = (const Texture2D *) (diffuseMap->mTexture);
+                    auto texture = (const Texture2D *)(diffuseMap->mTexture);
                     texture->bind();
                     loadUniform("diffuseMap", texture->mTextureID);
                     loadUniform("useTexture", true);
@@ -131,4 +131,5 @@ public:
             CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
             unbind();
         }
-};
+    };
+}
