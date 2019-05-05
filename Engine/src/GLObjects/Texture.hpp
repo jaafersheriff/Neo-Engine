@@ -4,7 +4,7 @@
 #include "GL/glew.h"
 #include <glm/glm.hpp>
 
-#include "GLHelper/GLHelper.hpp"
+#include "GLObjects/GLHelper.hpp"
 
 namespace neo {
 
