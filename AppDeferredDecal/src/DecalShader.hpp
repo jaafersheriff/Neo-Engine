@@ -19,21 +19,21 @@ class DecalShader : public Shader {
             Shader("DecalShader", vert, frag) 
         {
             // Create render target
-            auto decalFBO = Loader::getFBO("decals");
+            auto decalFBO = Library::getFBO("decals");
             decalFBO->generate();
-            decalFBO->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // color
+            decalFBO->attachColorTexture(Window::getFrameSize(), 4, TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
             decalFBO->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Loader::getFBO("decals")->resize(frameSize);
+                Library::getFBO("decals")->resize(frameSize);
             });
         }
 
         virtual void render(const CameraComponent &camera) override {
-            auto fbo = Loader::getFBO("decals");
+            auto fbo = Library::getFBO("decals");
             fbo->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
@@ -47,7 +47,7 @@ class DecalShader : public Shader {
             loadUniform("V", camera.getView());
 
             /* Bind gbuffer */
-            auto gbuffer = Loader::getFBO("gbuffer");
+            auto gbuffer = Library::getFBO("gbuffer");
             gbuffer->mTextures[0]->bind();
             loadUniform("gNormal", gbuffer->mTextures[0]->mTextureID);
             gbuffer->mTextures[2]->bind();
@@ -55,7 +55,7 @@ class DecalShader : public Shader {
 
             /* Render decals */
             for (auto& decal : NeoEngine::getComponents<DecalRenderable>()) {
-                auto& mesh = *Loader::getMesh("cube");
+                auto& mesh = *Library::getMesh("cube");
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
  
