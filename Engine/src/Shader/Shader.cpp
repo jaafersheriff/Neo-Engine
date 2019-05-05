@@ -1,6 +1,6 @@
 #include "Shader.hpp"
 #include "Util/Util.hpp"
-#include "GLHelper/GLHelper.hpp"
+#include "GLObjects/GLHelper.hpp"
 #include "MasterRenderer/MasterRenderer.hpp"
 
 #include <fstream>

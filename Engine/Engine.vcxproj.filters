@@ -29,10 +29,6 @@
     <ClInclude Include="src\Component\ModelComponent\MaterialComponent.hpp" />
     <ClInclude Include="src\Component\AnimationComponent\LineComponent.hpp" />
     <ClInclude Include="src\Shader\PhongShader.hpp" />
-    <ClInclude Include="src\GLHelper\Framebuffer.hpp" />
-    <ClInclude Include="src\GLHelper\GLHelper.hpp" />
-    <ClInclude Include="src\GLHelper\Mesh.hpp" />
-    <ClInclude Include="src\GLHelper\Texture.hpp" />
     <ClInclude Include="src\Shader\ShadowCasterShader.hpp" />
     <ClInclude Include="src\MasterRenderer\MasterRenderer.hpp" />
     <ClInclude Include="src\Component\ModelComponent\TextureComponent.hpp" />
@@ -59,6 +55,11 @@
     <ClInclude Include="src\Component\ModelComponent\MeshComponent.hpp" />
     <ClInclude Include="src\Component\ModelComponent\LineMeshComponent.hpp" />
     <ClInclude Include="src\Shader\PostProcessShader.hpp" />
+    <ClInclude Include="src\Loader\Library.hpp" />
+    <ClInclude Include="src\GLObjects\Framebuffer.hpp" />
+    <ClInclude Include="src\GLObjects\GLHelper.hpp" />
+    <ClInclude Include="src\GLObjects\Mesh.hpp" />
+    <ClInclude Include="src\GLObjects\Texture.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -72,8 +73,6 @@
     <ClCompile Include="src\Window\Mouse.cpp" />
     <ClCompile Include="src\Window\Window.cpp" />
     <ClCompile Include="src\NeoEngine.cpp" />
-    <ClCompile Include="src\GLHelper\GLHelper.cpp" />
-    <ClCompile Include="src\GLHelper\Mesh.cpp" />
     <ClCompile Include="src\MasterRenderer\MasterRenderer.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_impl_glfw.cpp" />
@@ -85,6 +84,9 @@
     <ClCompile Include="src\Systems\TranslationSystems\RotationSystem.cpp" />
     <ClCompile Include="src\Systems\TranslationSystems\SinTranslateSystem.cpp" />
     <ClCompile Include="src\Component\RenderableComponent\PhongShadowRenderable.hpp" />
+    <ClCompile Include="src\GLObjects\GLHelper.cpp" />
+    <ClCompile Include="src\GLObjects\Mesh.cpp" />
+    <ClCompile Include="src\Loader\Library.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />

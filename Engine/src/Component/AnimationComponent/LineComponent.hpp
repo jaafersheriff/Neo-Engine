@@ -2,7 +2,7 @@
 
 #include "Component/Component.hpp"
 
-#include "GLHelper/GLHelper.hpp"
+#include "GLObjects/GLHelper.hpp"
 
 #include <glm/glm.hpp>
 #include <vector>

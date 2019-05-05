@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-#include "GLHelper/GLHelper.hpp"
+#include "GLObjects/GLHelper.hpp"
 
 #include "NeoEngine.hpp"
 

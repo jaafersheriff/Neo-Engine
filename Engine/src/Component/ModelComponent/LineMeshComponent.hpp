@@ -3,7 +3,7 @@
 #include "Component/AnimationComponent/LineComponent.hpp"
 #include "Component/ModelComponent/MeshComponent.hpp"
 
-#include "GLHelper/GLHelper.hpp"
+#include "GLObjects/GLHelper.hpp"
 
 // TODO - this should be a generic renderable component tag like the rest
 

@@ -4,7 +4,7 @@
 #include "SnowComponent.hpp"
 
 #include "Shader/Shader.hpp"
-#include "GLHelper/GlHelper.hpp"
+#include "GLObjects/GlHelper.hpp"
 #include "MasterRenderer/MasterRenderer.hpp"
 
 namespace neo {
