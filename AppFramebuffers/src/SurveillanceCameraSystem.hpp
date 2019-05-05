@@ -5,15 +5,17 @@
 
 #include "SurveillanceCamera.hpp"
 
-class SurveillanceCameraSystem : public neo::System {
+using namespace neo;
+
+class SurveillanceCameraSystem : public System {
 
     public:
         SurveillanceCameraSystem() :
-            neo::System("SurveillanceCamera System")
+            System("SurveillanceCamera System")
         {}
 
         virtual void update(const float dt) override {
-            for (auto& comp : neo::Engine::getComponents<SurveillanceCamera>()) {
+            for (auto& comp : Engine::getComponents<SurveillanceCamera>()) {
                 float scale = comp->getGameObject().getSpatial()->getScale().x;
                 glm::vec2 bounds(-scale, scale);
                 comp->setOrthoBounds(bounds, bounds);

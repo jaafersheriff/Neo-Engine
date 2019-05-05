@@ -7,21 +7,23 @@
 #include "Component/CameraComponent/CameraComponent.hpp"
 #include "Component/SpatialComponent/SpatialComponent.hpp"
 
-class LookAtCameraSystem : public neo::System {
+using namespace neo;
+
+class LookAtCameraSystem : public System {
 
     public:
         LookAtCameraSystem() :
-            neo::System("LookAtCamera System")
+            System("LookAtCamera System")
         {}
 
         virtual void update(const float dt) override {
-            auto cameraLookPos = neo::Engine::getSingleComponent<LookAtCameraReceiver>();
-            auto shadowCamera = neo::Engine::getSingleComponent<neo::ShadowCameraComponent>();
+            auto cameraLookPos = Engine::getSingleComponent<LookAtCameraReceiver>();
+            auto shadowCamera = Engine::getSingleComponent<ShadowCameraComponent>();
             if (!cameraLookPos || !shadowCamera) {
                 return;
             }
 
-            auto camera = shadowCamera->getGameObject().getComponentByType<neo::CameraComponent>();
+            auto camera = shadowCamera->getGameObject().getComponentByType<CameraComponent>();
             if (!camera) {
                 return;
             }

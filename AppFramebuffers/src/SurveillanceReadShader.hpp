@@ -6,14 +6,16 @@
 
 #include "SurveillanceCamera.hpp"
 
-class SurveillanceReadShader : public neo::Shader {
+using namespace neo;
+
+class SurveillanceReadShader : public Shader {
 
     public:
         SurveillanceReadShader(const std::string &vert, const std::string &frag) :
-            neo::Shader("Surveillance Read", vert, frag)
+            Shader("Surveillance Read", vert, frag)
         {}
 
-        virtual void render(const neo::CameraComponent &camera) override {
+        virtual void render(const CameraComponent &camera) override {
             bind();
 
             /* Load PV */
@@ -21,10 +23,10 @@ class SurveillanceReadShader : public neo::Shader {
             loadUniform("V", camera.getView());
 
             /* Bind mesh */
-            auto mesh(neo::Library::getMesh("quad"));
+            auto mesh(Library::getMesh("quad"));
             CHECK_GL(glBindVertexArray(mesh->mVAOID));
 
-            for (auto camera : neo::Engine::getComponents<SurveillanceCamera>()) {
+            for (auto camera : Engine::getComponents<SurveillanceCamera>()) {
                 loadUniform("M", camera->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind texture */

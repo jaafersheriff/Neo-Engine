@@ -6,7 +6,9 @@
 
 #include "Engine.hpp"
 
-class LightPassShader : public neo::Shader {
+using namespace neo;
+
+class LightPassShader : public Shader {
 
     public:
 
@@ -14,22 +16,22 @@ class LightPassShader : public neo::Shader {
         float showRadius = 0.1f;
 
         LightPassShader(const std::string &vert, const std::string &frag) :
-            neo::Shader("LightPass Shader", vert, frag) {
+            Shader("LightPass Shader", vert, frag) {
             // Create render target
-            auto lightFBO = neo::Library::getFBO("lightpass");
+            auto lightFBO = Library::getFBO("lightpass");
             lightFBO->generate();
-            lightFBO->attachColorTexture(neo::Window::getFrameSize(), 4, neo::TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
+            lightFBO->attachColorTexture(Window::getFrameSize(), 4, TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
 
             // Handle frame size changing
-            neo::Messenger::addReceiver<neo::WindowFrameSizeMessage>(nullptr, [&](const neo::Message &msg) {
-                const neo::WindowFrameSizeMessage & m(static_cast<const neo::WindowFrameSizeMessage &>(msg));
-                glm::uvec2 frameSize = (static_cast<const neo::WindowFrameSizeMessage &>(msg)).frameSize;
-                neo::Library::getFBO("lightpass")->resize(frameSize);
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
+                Library::getFBO("lightpass")->resize(frameSize);
             });
         }
 
-        virtual void render(const neo::CameraComponent &camera) override {
-            auto fbo = neo::Library::getFBO("lightpass");
+        virtual void render(const CameraComponent &camera) override {
+            auto fbo = Library::getFBO("lightpass");
             fbo->bind();
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 
@@ -49,12 +51,12 @@ class LightPassShader : public neo::Shader {
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Bind sphere volume */
-            auto mesh = neo::Library::getMesh("ico_2", true);
+            auto mesh = Library::getMesh("ico_2", true);
             CHECK_GL(glBindVertexArray(mesh->mVAOID));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mElementBufferID));
 
             /* Bind gbuffer */
-            auto gbuffer = neo::Library::getFBO("gbuffer");
+            auto gbuffer = Library::getFBO("gbuffer");
             gbuffer->mTextures[0]->bind();
             loadUniform("gNormal", gbuffer->mTextures[0]->mTextureID);
             gbuffer->mTextures[1]->bind();
@@ -63,7 +65,7 @@ class LightPassShader : public neo::Shader {
             loadUniform("gDepth", gbuffer->mTextures[2]->mTextureID);
 
             /* Render light volumes */
-            for (auto & light : neo::Engine::getComponents<neo::LightComponent>()) {
+            for (auto & light : Engine::getComponents<LightComponent>()) {
                 auto spat = light->getGameObject().getSpatial();
                 loadUniform("M", spat->getModelMatrix());
                 loadUniform("lightPos", spat->getPosition());

@@ -6,17 +6,18 @@
 
 #include "SkyboxComponent.hpp"
 
+using namespace neo;
 
-class SkyboxShader : public neo::Shader {
+class SkyboxShader : public Shader {
 
     public:
 
         SkyboxShader(const std::string &vert, const std::string &frag) :
-            neo::Shader("Skybox Shader", vert, frag)
+            Shader("Skybox Shader", vert, frag)
         {}
 
-        virtual void render(const neo::CameraComponent &camera) override {
-            const auto cube = neo::Engine::getSingleComponent<SkyboxComponent>();
+        virtual void render(const CameraComponent &camera) override {
+            const auto cube = Engine::getSingleComponent<SkyboxComponent>();
             if (!cube) {
                 return;
             }
@@ -29,12 +30,12 @@ class SkyboxShader : public neo::Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            const neo::Mesh& mesh = *neo::Library::getMesh("cube");
+            const Mesh& mesh = *Library::getMesh("cube");
             CHECK_GL(glBindVertexArray(mesh.mVAOID));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
             /* Bind texture */
-            loadUniform("cubeMap", cube->getGameObject().getComponentByType<neo::CubeMapComponent>()->mTexture->mTextureID);
+            loadUniform("cubeMap", cube->getGameObject().getComponentByType<CubeMapComponent>()->mTexture->mTextureID);
 
             /* Draw */
             mesh.draw();

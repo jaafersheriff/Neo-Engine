@@ -2,11 +2,13 @@
 
 #include "Component/Component.hpp"
 
-class ReflectionComponent : public neo::Component {
+using namespace neo;
+
+class ReflectionComponent : public Component {
 
     public:
 
-        ReflectionComponent(neo::GameObject *go) :
-            neo::Component(go)
+        ReflectionComponent(GameObject *go) :
+            Component(go)
         {}
 };

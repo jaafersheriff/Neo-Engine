@@ -8,28 +8,30 @@
 
 #include "DecalRenderable.hpp"
 
-class DecalShader : public neo::Shader {
+using namespace neo;
+
+class DecalShader : public Shader {
 
     public:
 
         DecalShader(const std::string &vert, const std::string &frag) :
-            neo::Shader("DecalShader", vert, frag) {
+            Shader("DecalShader", vert, frag) {
             // Create render target
-            auto decalFBO = neo::Library::getFBO("decals");
+            auto decalFBO = Library::getFBO("decals");
             decalFBO->generate();
-            decalFBO->attachColorTexture(neo::Window::getFrameSize(), 4, neo::TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
+            decalFBO->attachColorTexture(Window::getFrameSize(), 4, TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
             decalFBO->initDrawBuffers();
 
             // Handle frame size changing
-            neo::Messenger::addReceiver<neo::WindowFrameSizeMessage>(nullptr, [&](const neo::Message &msg) {
-                const neo::WindowFrameSizeMessage & m(static_cast<const neo::WindowFrameSizeMessage &>(msg));
-                glm::uvec2 frameSize = (static_cast<const neo::WindowFrameSizeMessage &>(msg)).frameSize;
-                neo::Library::getFBO("decals")->resize(frameSize);
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
+                Library::getFBO("decals")->resize(frameSize);
             });
         }
 
-        virtual void render(const neo::CameraComponent &camera) override {
-            auto fbo = neo::Library::getFBO("decals");
+        virtual void render(const CameraComponent &camera) override {
+            auto fbo = Library::getFBO("decals");
             fbo->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
@@ -43,15 +45,15 @@ class DecalShader : public neo::Shader {
             loadUniform("V", camera.getView());
 
             /* Bind gbuffer */
-            auto gbuffer = neo::Library::getFBO("gbuffer");
+            auto gbuffer = Library::getFBO("gbuffer");
             gbuffer->mTextures[0]->bind();
             loadUniform("gNormal", gbuffer->mTextures[0]->mTextureID);
             gbuffer->mTextures[2]->bind();
             loadUniform("gDepth", gbuffer->mTextures[2]->mTextureID);
 
             /* Render decals */
-            for (auto& decal : neo::Engine::getComponents<DecalRenderable>()) {
-                auto& mesh = *neo::Library::getMesh("cube");
+            for (auto& decal : Engine::getComponents<DecalRenderable>()) {
+                auto& mesh = *Library::getMesh("cube");
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
  
@@ -59,9 +61,9 @@ class DecalShader : public neo::Shader {
                 loadUniform("M", spat->getModelMatrix());
                 loadUniform("invM", glm::inverse(spat->getModelMatrix()));
 
-                auto diffuseMap = decal->getGameObject().getComponentByType<neo::DiffuseMapComponent>();
+                auto diffuseMap = decal->getGameObject().getComponentByType<DiffuseMapComponent>();
                 if (diffuseMap) {
-                    auto texture = (const neo::Texture2D *)(diffuseMap->mTexture);
+                    auto texture = (const Texture2D *)(diffuseMap->mTexture);
                     texture->bind();
                     loadUniform("decalTexture", texture->mTextureID);
                 }

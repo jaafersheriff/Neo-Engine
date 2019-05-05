@@ -17,7 +17,7 @@ namespace neo {
         public:
             static Mesh* getMesh(const std::string&, bool = false);
             static Texture* getTexture(const std::string&, TextureFormat = TextureFormat{});
-            static Texture* getEmptyTexture(const std::string&);
+            static Texture* createEmptyTexture(const std::string&);
             static Texture* getCubemap(const std::string&, const std::vector<std::string> &);
             static Framebuffer* getFBO(const std::string&);
 

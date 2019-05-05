@@ -1,8 +1,10 @@
 #pragma once
 
-class SkyboxComponent : public neo::Component {
+using namespace neo;
+
+class SkyboxComponent : public Component {
     public:
-        SkyboxComponent(neo::GameObject *go) :
-            neo::Component(go) 
+        SkyboxComponent(GameObject *go) :
+            Component(go) 
         {}
 };

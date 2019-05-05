@@ -7,33 +7,35 @@
 
 #include "Messaging/Messenger.hpp"
 
-class GBufferShader : public neo::Shader {
+using namespace neo;
+
+class GBufferShader : public Shader {
 
     public:
 
         GBufferShader(const std::string &vert, const std::string &frag) :
-            neo::Shader("GBuffer Shader", vert, frag) {
+            Shader("GBuffer Shader", vert, frag) {
 
             // Create gbuffer 
-            auto gbuffer = neo::Library::getFBO("gbuffer");
+            auto gbuffer = Library::getFBO("gbuffer");
             gbuffer->generate();
 
-            neo::TextureFormat format{ GL_RGB, GL_RGB, GL_NEAREST, GL_CLAMP_TO_EDGE };
-            gbuffer->attachColorTexture(neo::Window::getFrameSize(), 4, format); // normal
-            gbuffer->attachColorTexture(neo::Window::getFrameSize(), 4, format); // color
-            gbuffer->attachDepthTexture(neo::Window::getFrameSize(), GL_NEAREST, GL_CLAMP_TO_EDGE);                    // depth
+            TextureFormat format{ GL_RGB, GL_RGB, GL_NEAREST, GL_CLAMP_TO_EDGE };
+            gbuffer->attachColorTexture(Window::getFrameSize(), 4, format); // normal
+            gbuffer->attachColorTexture(Window::getFrameSize(), 4, format); // color
+            gbuffer->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_CLAMP_TO_EDGE);  // depth
             gbuffer->initDrawBuffers();
 
             // Handle frame size changing
-            neo::Messenger::addReceiver<neo::WindowFrameSizeMessage>(nullptr, [&](const neo::Message &msg) {
-                const neo::WindowFrameSizeMessage & m(static_cast<const neo::WindowFrameSizeMessage &>(msg));
-                glm::uvec2 frameSize = (static_cast<const neo::WindowFrameSizeMessage &>(msg)).frameSize;
-                neo::Library::getFBO("gbuffer")->resize(frameSize);
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
+                Library::getFBO("gbuffer")->resize(frameSize);
             });
         }
 
-        virtual void render(const neo::CameraComponent &camera) override {
-            auto fbo = neo::Library::getFBO("gbuffer");
+        virtual void render(const CameraComponent &camera) override {
+            auto fbo = Library::getFBO("gbuffer");
             fbo->bind();
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
@@ -41,20 +43,20 @@ class GBufferShader : public neo::Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto& model : neo::Engine::getComponents<neo::MeshComponent>()) {
+            for (auto& model : Engine::getComponents<MeshComponent>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind mesh */
-                const neo::Mesh & mesh(model->getMesh());
+                const Mesh & mesh(model->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                 /* Bind diffuse map or material */
-                auto matComp = model->getGameObject().getComponentByType<neo::MaterialComponent>();
+                auto matComp = model->getGameObject().getComponentByType<MaterialComponent>();
                 if (matComp) {
                     loadUniform("ambient", matComp->mAmbient);
                 }
-                if (auto diffMap = model->getGameObject().getComponentByType<neo::DiffuseMapComponent>()) {
+                if (auto diffMap = model->getGameObject().getComponentByType<DiffuseMapComponent>()) {
                     diffMap->mTexture->bind();
                     loadUniform("useDiffuseMap", true);
                     loadUniform("diffuseMap", diffMap->mTexture->mTextureID);
@@ -67,7 +69,7 @@ class GBufferShader : public neo::Shader {
                 }
 
                 /* Bind normal map */
-                if (auto normalMap = model->getGameObject().getComponentByType<neo::NormalMapComponent>()) {
+                if (auto normalMap = model->getGameObject().getComponentByType<NormalMapComponent>()) {
                     normalMap->mTexture->bind();
                     loadUniform("useNormalMap", true);
                     loadUniform("normalMap", normalMap->mTexture->mTextureID);
