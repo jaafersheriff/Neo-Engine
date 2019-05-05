@@ -36,21 +36,23 @@ namespace neo {
                 CHECK_GL(glReadBuffer(GL_NONE));
             }
 
-            void attachColorTexture(glm::ivec2 size, int comp, GLint inFormat, GLenum format, GLint filter, GLenum mode) {
+            void attachColorTexture(glm::ivec2 size, int comp, TextureFormat format) {
                 Texture *t = new Texture2D;
+                t->mFormat = format;
                 t->mWidth = size.x;
                 t->mHeight = size.y;
                 t->mComponents = comp;
-                t->upload(inFormat, format, filter, mode);
+                t->upload();
                 attachTexture(GL_COLOR_ATTACHMENT0 + mColorAttachments++, *t);
             }
 
             void attachDepthTexture(glm::ivec2 size, GLint filter, GLenum mode) {
                 Texture *t = new Texture2D;
+                t->mFormat = TextureFormat{ GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, filter, mode };
                 t->mWidth = size.x;
                 t->mHeight = size.y;
                 t->mComponents = 1;
-                t->upload(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, filter, mode);
+                t->upload();
                 attachTexture(GL_DEPTH_ATTACHMENT, *t);
             }
 

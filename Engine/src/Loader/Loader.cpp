@@ -93,13 +93,14 @@ namespace neo {
         return mesh;
     }
 
-    Texture2D* Loader::loadTexture(const std::string &fileName, GLint inFormat, GLenum format, GLint filter, GLenum mode) {
+    Texture2D* Loader::loadTexture(const std::string &fileName, TextureFormat format) {
         /* Create an empty texture if it is not already exist in the library */
         Texture2D* texture = new Texture2D;
+        texture->mFormat = format;
 
         uint8_t* data = _loadSingleTexture(texture, fileName);
 
-        texture->upload(inFormat, format, filter, mode, true, &data);
+        texture->upload(true, &data);
         texture->generateMipMaps();
 
         _cleanSingleTexture(data);
@@ -112,6 +113,8 @@ namespace neo {
 
         /* Create an empty texture if it is not already exist in the library */
         TextureCubeMap* texture = new TextureCubeMap;
+        TextureFormat format = { GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE };
+        texture->mFormat = format;
 
         /* Use stbi if name is an existing file */
         uint8_t* data[6];
@@ -120,7 +123,7 @@ namespace neo {
         }
 
         /* Upload data to GPU and free from CPU */
-        texture->upload(GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE, true, data);
+        texture->upload(true, data);
 
         /* Clean */
         for (int i = 0; i < 6; i++) {

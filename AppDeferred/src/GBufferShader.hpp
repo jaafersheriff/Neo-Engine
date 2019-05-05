@@ -17,7 +17,7 @@ class GBufferShader : public Shader {
             Shader("GBufferShader", vert, frag) {
 
             // Create gbuffer 
-            auto gbuffer = Loader::getFBO("gbuffer");
+            auto gbuffer = Library::getFBO("gbuffer");
             gbuffer->generate();
             gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // color
             gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // diffuse
@@ -28,12 +28,12 @@ class GBufferShader : public Shader {
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Loader::getFBO("gbuffer")->resize(frameSize);
+                Library::getFBO("gbuffer")->resize(frameSize);
             });
         }
 
         virtual void render(const CameraComponent &camera) override {
-            auto fbo = Loader::getFBO("gbuffer");
+            auto fbo = Library::getFBO("gbuffer");
             fbo->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));

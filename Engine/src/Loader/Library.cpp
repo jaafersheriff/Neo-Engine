@@ -24,6 +24,18 @@ namespace neo {
         return mesh;
     }
 
+    Texture* Library::getTexture(const std::string& fileName, TextureFormat format) {
+        auto it = mTextures.find(fileName);
+        if (it != mTextures.end()) {
+            return it->second;
+        }
+
+        auto texture = Loader::loadTexture(fileName, format);
+        _insertTexture(fileName, texture);
+
+        return texture;
+    }
+
     Framebuffer* Library::getFBO(const std::string &name) {
         auto it = mFramebuffers.find(name);
         if (it == mFramebuffers.end()) {
@@ -36,6 +48,12 @@ namespace neo {
     void Library::_insertMesh(const std::string& name, Mesh* mesh) {
         if (mesh) {
             mMeshes.insert({ name, mesh });
+        }
+    }
+
+    void Library::_insertTexture(const std::string& name, Texture* texture) {
+        if (texture) {
+            mTextures.insert({ name, texture });
         }
     }
 

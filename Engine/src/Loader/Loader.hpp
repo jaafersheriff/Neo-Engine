@@ -7,12 +7,11 @@
 #include <string>
 #include <vector>
 
+#include "GLObjects/Texture.hpp"
+
 namespace neo {
 
     class Mesh;
-    class Texture;
-    class Texture2D;
-    class TextureCubeMap;
     class Framebuffer;
 
     class Loader {
@@ -24,7 +23,7 @@ namespace neo {
             static Mesh* loadMesh(const std::string &, bool = false);
 
             /* Retrieve Texture pointer from an image file */
-            static Texture2D* loadTexture(const std::string &, GLint = GL_RGBA, GLenum = GL_RGBA, GLint = GL_LINEAR, GLenum = GL_REPEAT);
+            static Texture2D* loadTexture(const std::string &, TextureFormat);
             static TextureCubeMap* loadTexture(const std::string &, const std::vector<std::string> &);
 
         private:

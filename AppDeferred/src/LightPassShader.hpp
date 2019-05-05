@@ -4,7 +4,7 @@
 #include "GLObjects/GLHelper.hpp"
 #include "MasterRenderer/MasterRenderer.hpp"
 
-#include "Loader/Loader.hpp"
+#include "Loader/Library.hpp"
 #include "NeoEngine.hpp"
 
 using namespace neo;
@@ -20,7 +20,7 @@ class LightPassShader : public Shader {
             Shader("LightPassShader", vert, frag) 
         {
             // Create render target
-            auto lightFBO = Loader::getFBO("lightpass");
+            auto lightFBO = Library::getFBO("lightpass");
             lightFBO->generate();
             lightFBO->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // color
             lightFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
@@ -29,12 +29,12 @@ class LightPassShader : public Shader {
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Loader::getFBO("lightpass")->resize(frameSize);
+                Library::getFBO("lightpass")->resize(frameSize);
             });
         }
 
         virtual void render(const CameraComponent &camera) override {
-            auto fbo = Loader::getFBO("lightpass");
+            auto fbo = Library::getFBO("lightpass");
             fbo->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
@@ -55,12 +55,12 @@ class LightPassShader : public Shader {
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Bind sphere volume */
-            auto mesh = Loader::getMesh("ico_2", true);
+            auto mesh = Library::getMesh("ico_2", true);
             CHECK_GL(glBindVertexArray(mesh->mVAOID));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mElementBufferID));
 
             /* Bind gbuffer */
-            auto gbuffer = Loader::getFBO("gbuffer");
+            auto gbuffer = Library::getFBO("gbuffer");
             gbuffer->mTextures[0]->bind();
             loadUniform("gNormal", gbuffer->mTextures[0]->mTextureID);
             gbuffer->mTextures[1]->bind();
