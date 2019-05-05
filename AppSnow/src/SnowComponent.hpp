@@ -5,14 +5,12 @@
 
 #include <glm/glm.hpp>
 
-using namespace neo;
-
-class SnowComponent : public Component{
+class SnowComponent : public neo::Component{
 
     public:
         
-        SnowComponent(GameObject *gameObject) :
-            Component(gameObject),
+        SnowComponent(neo::GameObject *gameObject) :
+            neo::Component(gameObject),
             snowAngle(0.f, 1.f, 0.f),
             snowSize(0.36f),
             snowColor(0.36f, 0.48f, 0.56f),

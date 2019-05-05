@@ -1,4 +1,4 @@
-#include <NeoEngine.hpp>
+#include <Engine.hpp>
 
 #include "SurveillanceCamera.hpp"
 
@@ -15,10 +15,10 @@ using namespace neo;
 struct Camera {
     CameraComponent *camera;
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        GameObject *gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
-        NeoEngine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
+        GameObject *gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        camera = &Engine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
 
@@ -27,11 +27,11 @@ struct Light {
     LightComponent *light;
 
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, pos);
-        light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
+        gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, pos);
+        light = &Engine::addComponent<LightComponent>(gameObject, col, att);
 
-        NeoEngine::addImGuiFunc("Light", [&]() {
+        Engine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
                 gameObject->getSpatial()->setPosition(pos);
@@ -46,13 +46,13 @@ struct Renderable {
     GameObject *gameObject;
 
     Renderable(Mesh *mesh) {
-        gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
-        NeoEngine::addComponent<renderable::PhongRenderable>(gameObject);
-        NeoEngine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f));
+        gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
+        Engine::addComponent<MeshComponent>(gameObject, mesh);
+        Engine::addComponent<renderable::PhongRenderable>(gameObject);
+        Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f));
 
-        NeoEngine::addImGuiFunc("Mesh", [&]() {
+        Engine::addImGuiFunc("Mesh", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);
@@ -78,22 +78,22 @@ struct Surveillance {
     SurveillanceCamera *camera;
 
     Surveillance(std::string name, glm::vec3 pos, glm::vec3 scale, glm::mat3 orientation) {
-        gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale, orientation);
-        camera = &NeoEngine::addComponent<SurveillanceCamera>(gameObject, name, 1.f, 100.f);
+        gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, pos, scale, orientation);
+        camera = &Engine::addComponent<SurveillanceCamera>(gameObject, name, 1.f, 100.f);
         // Line
-        LineComponent *uLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
+        LineComponent *uLine = &Engine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
-        LineComponent *vLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 0.f));
+        LineComponent *vLine = &Engine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 0.f));
         vLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
-        LineComponent *wLine = &NeoEngine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 0.f, 1.f));
+        LineComponent *wLine = &Engine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 0.f, 1.f));
         wLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f) });
         // Line renderable
-        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, uLine);
-        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, vLine);
-        NeoEngine::addComponent<renderable::LineMeshComponent>(gameObject, wLine);
+        Engine::addComponent<renderable::LineMeshComponent>(gameObject, uLine);
+        Engine::addComponent<renderable::LineMeshComponent>(gameObject, vLine);
+        Engine::addComponent<renderable::LineMeshComponent>(gameObject, wLine);
 
-        NeoEngine::addImGuiFunc(name, [&]() {
+        Engine::addImGuiFunc(name, [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);
@@ -115,7 +115,7 @@ struct Surveillance {
 };
 
 int main() {
-    NeoEngine::init("Framebuffers", "res/", 1280, 720);
+    Engine::init("Framebuffers", "res/", 1280, 720);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
@@ -125,21 +125,21 @@ int main() {
     Surveillance("CamB", glm::vec3(3, 0, 0), glm::vec3(1.f, 2.f, 1.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.4f, glm::vec3(0, 1, 0))));
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CameraControllerSystem>();
-    NeoEngine::initSystems();
+    Engine::addSystem<CameraControllerSystem>();
+    Engine::initSystems();
 
     /* Init Renderer */
-    MasterRenderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));
-    MasterRenderer::addPreProcessShader<SurveillanceWriteShader>();
-    MasterRenderer::addSceneShader<LineShader>();
-    MasterRenderer::addSceneShader<PhongShader>();
-    MasterRenderer::addSceneShader<SurveillanceReadShader>("read.vert", "read.frag");
+    Renderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));
+    Renderer::addPreProcessShader<SurveillanceWriteShader>();
+    Renderer::addSceneShader<LineShader>();
+    Renderer::addSceneShader<PhongShader>();
+    Renderer::addSceneShader<SurveillanceReadShader>("read.vert", "read.frag");
 
     /* Attach ImGui panes */
-    NeoEngine::addDefaultImGuiFunc();
+    Engine::addDefaultImGuiFunc();
 
     /* Run */
-    NeoEngine::run();
+    Engine::run();
 
     return 0;
 }

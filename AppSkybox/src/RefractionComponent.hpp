@@ -2,14 +2,13 @@
 
 #include "Component/Component.hpp"
 
-using namespace neo;
 
-class RefractionComponent : public Component {
+class RefractionComponent : public neo::Component {
 
     public:
 
-        RefractionComponent(GameObject *go, float r = 0.5f) :
-            Component(go),
+        RefractionComponent(neo::GameObject *go, float r = 0.5f) :
+            neo::Component(go),
             ratio(r)
         {}
 

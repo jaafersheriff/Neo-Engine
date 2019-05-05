@@ -3,19 +3,17 @@
 #include "Shader/PostProcessShader.hpp"
 #include "GLObjects/GLHelper.hpp"
 
-using namespace neo;
-
-class BlurShader : public PostProcessShader {
+class BlurShader : public neo::PostProcessShader {
 
     public:
 
         int blurAmount = 6;
 
         BlurShader(const std::string &frag) :
-            PostProcessShader("Blur Shader", frag) 
+            neo::PostProcessShader("Blur Shader", frag) 
         {}
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render(const neo::CameraComponent &camera) override {
             loadUniform("blurAmount", blurAmount);
         }
 };

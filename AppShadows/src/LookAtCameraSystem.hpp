@@ -1,29 +1,27 @@
 #pragma once
 
 #include "Systems/System.hpp"
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 #include "LookAtCameraReceiver.hpp"
 #include "Component/CameraComponent/CameraComponent.hpp"
 #include "Component/SpatialComponent/SpatialComponent.hpp"
 
-using namespace neo;
-
-class LookAtCameraSystem : public System {
+class LookAtCameraSystem : public neo::System {
 
     public:
         LookAtCameraSystem() :
-            System("LookAtCamera System")
+            neo::System("LookAtCamera System")
         {}
 
         virtual void update(const float dt) override {
-            auto cameraLookPos = NeoEngine::getSingleComponent<LookAtCameraReceiver>();
-            auto shadowCamera = NeoEngine::getSingleComponent<ShadowCameraComponent>();
+            auto cameraLookPos = neo::Engine::getSingleComponent<LookAtCameraReceiver>();
+            auto shadowCamera = neo::Engine::getSingleComponent<neo::ShadowCameraComponent>();
             if (!cameraLookPos || !shadowCamera) {
                 return;
             }
 
-            auto camera = shadowCamera->getGameObject().getComponentByType<CameraComponent>();
+            auto camera = shadowCamera->getGameObject().getComponentByType<neo::CameraComponent>();
             if (!camera) {
                 return;
             }

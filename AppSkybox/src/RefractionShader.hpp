@@ -2,24 +2,23 @@
 
 #include "Shader/Shader.hpp"
 #include "GLObjects/GLHelper.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
+#include "Renderer/Renderer.hpp"
 
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 #include "RefractionComponent.hpp"
 #include "SkyboxComponent.hpp"
 
-using namespace neo;
 
-class RefractionShader : public Shader {
+class RefractionShader : public neo::Shader {
 
     public:
 
         RefractionShader(const std::string &vert, const std::string &frag) :
-            Shader("Refraction Shader", vert, frag)
+            neo::Shader("Refraction Shader", vert, frag)
         {}
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render(const neo::CameraComponent &camera) override {
             bind();
 
             /* Load PV */
@@ -28,20 +27,20 @@ class RefractionShader : public Shader {
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load environment map */
-            if (auto skybox = NeoEngine::getSingleComponent<SkyboxComponent>()) {
-                if (auto cubemap = skybox->getGameObject().getComponentByType<CubeMapComponent>()) {
+            if (auto skybox = neo::Engine::getSingleComponent<SkyboxComponent>()) {
+                if (auto cubemap = skybox->getGameObject().getComponentByType<neo::CubeMapComponent>()) {
                     loadUniform("cubeMap", cubemap->mTexture->mTextureID);
                 }
             }
 
-            for (auto& renderable : NeoEngine::getComponents<RefractionComponent>()) {
-                auto model = renderable->getGameObject().getComponentByType<MeshComponent>();
+            for (auto& renderable : neo::Engine::getComponents<RefractionComponent>()) {
+                auto model = renderable->getGameObject().getComponentByType<neo::MeshComponent>();
                 if (!model) {
                     continue;
                 }
 
                 /* Bind mesh */
-                const Mesh & mesh(model->getMesh());
+                const neo::Mesh & mesh(model->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 

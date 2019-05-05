@@ -2,12 +2,10 @@
 
 #include "Component/Component.hpp"
 
-using namespace neo;
-
-class DecalRenderable: public Component {
+class DecalRenderable: public neo::Component {
 public:
-     DecalRenderable(GameObject *go) :
-        Component(go)
+     DecalRenderable(neo::GameObject *go) :
+        neo::Component(go)
     {}
 
 };

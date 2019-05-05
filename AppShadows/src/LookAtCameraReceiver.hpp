@@ -2,12 +2,10 @@
 
 #include "Component/Component.hpp"
 
-using namespace neo;
-
-class LookAtCameraReceiver : public Component {
+class LookAtCameraReceiver : public neo::Component {
 public:
-     LookAtCameraReceiver(GameObject *go) :
-        Component(go)
+     LookAtCameraReceiver(neo::GameObject *go) :
+        neo::Component(go)
     {}
 
 };
