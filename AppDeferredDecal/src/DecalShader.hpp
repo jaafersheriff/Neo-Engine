@@ -4,7 +4,6 @@
 #include "GLObjects/GLHelper.hpp"
 #include "MasterRenderer/MasterRenderer.hpp"
 
-#include "Loader/Loader.hpp"
 #include "NeoEngine.hpp"
 
 #include "DecalRenderable.hpp"

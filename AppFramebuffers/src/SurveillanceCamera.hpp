@@ -16,7 +16,7 @@ class SurveillanceCamera : public CameraComponent {
             CameraComponent(go, -10.f, 10.f, -10.f, 10.f, near, far) {
             fbo = Library::getFBO(name);
             fbo->generate();
-            fbo->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_LINEAR, GL_REPEAT);
+            fbo->attachColorTexture(Window::getFrameSize(), 4, TextureFormat{ GL_RGBA, GL_RGBA, GL_LINEAR, GL_REPEAT });
             fbo->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT);
         }
 

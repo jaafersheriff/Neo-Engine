@@ -3,7 +3,6 @@
 #include "Shader/PostProcessShader.hpp"
 #include "GLObjects/GLHelper.hpp"
 
-#include "Loader/Loader.hpp"
 #include "Window/Window.hpp"
 #include "Messaging/Messenger.hpp"
 
