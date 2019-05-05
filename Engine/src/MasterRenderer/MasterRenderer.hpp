@@ -69,14 +69,17 @@ namespace neo {
 
         // Generate fbos if a post process shader exists
         if (!mPostShaders.size()) {
+            TextureFormat format{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT };
+
             // Ping & pong 
-            auto ping = Loader::getFBO("ping");
+            auto ping = Library::getFBO("ping");
             ping->generate();
-            ping->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
+            ping->attachColorTexture(Window::getFrameSize(), 4, format);
             ping->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT);
-            auto pong = Loader::getFBO("pong");
+
+            auto pong = Library::getFBO("pong");
             pong->generate();
-            pong->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT);
+            pong->attachColorTexture(Window::getFrameSize(), 4, format);
             pong->mTextures.push_back(ping->mTextures[1]);
 
             // Use ping as temporary fbo
@@ -84,8 +87,8 @@ namespace neo {
 
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                Loader::getFBO("ping")->resize(m.frameSize);
-                Loader::getFBO("pong")->resize(m.frameSize);
+                Library::getFBO("ping")->resize(m.frameSize);
+                Library::getFBO("pong")->resize(m.frameSize);
             });
         }
         mPostShaders.emplace_back(_createShader<ShaderT>(std::forward<Args>(args)...));

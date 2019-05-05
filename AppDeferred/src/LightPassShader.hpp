@@ -22,7 +22,7 @@ class LightPassShader : public Shader {
             // Create render target
             auto lightFBO = Library::getFBO("lightpass");
             lightFBO->generate();
-            lightFBO->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // color
+            lightFBO->attachColorTexture(Window::getFrameSize(), 4, TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
             lightFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
 
             // Handle frame size changing

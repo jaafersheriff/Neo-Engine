@@ -19,8 +19,11 @@ class GBufferShader : public Shader {
             // Create gbuffer 
             auto gbuffer = Library::getFBO("gbuffer");
             gbuffer->generate();
-            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // color
-            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT); // diffuse
+
+            // Format for color buffers
+            TextureFormat format = { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT };
+            gbuffer->attachColorTexture(Window::getFrameSize(), 4, format); // color
+            gbuffer->attachColorTexture(Window::getFrameSize(), 4, format); // diffuse
             gbuffer->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
             gbuffer->initDrawBuffers();
 
