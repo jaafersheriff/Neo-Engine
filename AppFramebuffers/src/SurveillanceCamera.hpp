@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Component/CameraComponent/CameraComponent.hpp"
-#include "Renderer/Renderer.hpp"
 
 #include "Messaging/Messenger.hpp"
 

@@ -3,7 +3,6 @@
 #include "Engine.hpp"
 
 #include "Shader/Shader.hpp"
-#include "Renderer/Renderer.hpp"
 #include "GLObjects/GlHelper.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"

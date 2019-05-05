@@ -2,7 +2,6 @@
 
 #include "Shader/Shader.hpp"
 #include "GLObjects/GLHelper.hpp"
-#include "Renderer/Renderer.hpp"
 #include "Window/Window.hpp"
 
 #include "Messaging/Messenger.hpp"

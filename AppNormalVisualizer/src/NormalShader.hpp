@@ -4,7 +4,6 @@
 
 #include "Shader/Shader.hpp"
 #include "GLObjects/GlHelper.hpp"
-#include "Renderer/Renderer.hpp"
 
 using namespace neo;
 

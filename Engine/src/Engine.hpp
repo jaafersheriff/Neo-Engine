@@ -4,6 +4,7 @@
 #include "Window/Mouse.hpp"
 #include "Window/Keyboard.hpp"
 
+#include "Renderer/Renderer.hpp"
 #include "Loader/Library.hpp"
 #include "Util/Util.hpp"
 
