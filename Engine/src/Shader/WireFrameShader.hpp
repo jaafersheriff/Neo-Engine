@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
-#include "GLHelper/GLHelper.hpp"
+#include "Renderer/Renderer.hpp"
+#include "GLObjects/GLHelper.hpp"
 
 namespace neo {
 
@@ -35,7 +35,7 @@ namespace neo {
                 loadUniform("P", camera.getProj());
                 loadUniform("V", camera.getView());
 
-                for (auto& renderable : NeoEngine::getComponents<renderable::WireframeRenderable>()) {
+                for (auto& renderable : Engine::getComponents<renderable::WireframeRenderable>()) {
                     auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
                     if (!meshComponent) {
                         continue; // TODO - assert? 

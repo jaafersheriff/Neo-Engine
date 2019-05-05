@@ -2,9 +2,10 @@
 
 #include "MeshGenerator.hpp"
 
-#include "GLHelper/Texture.hpp"
-#include "GLHelper/GLHelper.hpp"
-#include "GLHelper/Framebuffer.hpp"
+#include "GLObjects/Mesh.hpp"
+#include "GLObjects/Texture.hpp"
+#include "GLObjects/GLHelper.hpp"
+#include "GLObjects/Framebuffer.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ext/tiny_obj_loader.h"
@@ -16,46 +17,28 @@
 
 namespace neo {
 
-    bool Loader::verbose = false;
+    bool Loader::mVerbose = false;
     std::string Loader::RES_DIR = "";
-
-    /* Library */
-    std::unordered_map<std::string, Mesh *> Loader::mMeshes;
-    std::unordered_map<std::string, Texture *> Loader::mTextures;
-    std::unordered_map<std::string, Framebuffer *> Loader::mFramebuffers;
 
     void Loader::init(const std::string &res, bool v) {
         RES_DIR = res;
-        verbose = v;
+        mVerbose = v;
     }
 
-    Mesh* Loader::getMesh(const std::string &fileName, bool doResize) {
-        /* Search map first */
-        auto it = mMeshes.find(fileName);
-        if (it != mMeshes.end()) {
-            return it->second;
-        }
-
+    Mesh* Loader::loadMesh(const std::string &fileName, bool doResize) {
         /* Check with static meshes first */
         if (!std::strcmp(fileName.c_str(), "cube")) {
-            mMeshes.insert({ "cube", MeshGenerator::createCube() });
-            return mMeshes.find(fileName)->second;
+            return MeshGenerator::createCube();
         }
         if (!std::strcmp(fileName.c_str(), "quad")) {
-            mMeshes.insert({ "quad", MeshGenerator::createQuad() });
-            return mMeshes.find(fileName)->second;
+            return MeshGenerator::createQuad();
         }
-        if (!std::strcmp(fileName.c_str(), "sphere")) {
-            Mesh *mesh = MeshGenerator::createSphere(3);
-            mMeshes.insert({ "sphere", mesh });
-            // sphere defaults to ico_2
-            mMeshes.insert({ "ico_2", mesh });
-            return mMeshes.find(fileName)->second;
+        if (!std::strcmp(fileName.c_str(), "sphere") || !std::strcmp(fileName.c_str(), "ico_2")) {
+            return MeshGenerator::createSphere(2);
         }
         if (!std::strncmp(fileName.c_str(), "ico_", 4)) {
             int recursions = std::stoi(fileName.c_str() + 4);
-            mMeshes.insert({ "ico_" + std::to_string(recursions), MeshGenerator::createSphere(recursions) });
-            return mMeshes.find(fileName)->second;
+            return MeshGenerator::createSphere(recursions);
         }
 
         /* If mesh was not found in map, read it in */
@@ -97,113 +80,82 @@ namespace neo {
 
         /* Optional resize */
         if (doResize) {
-            _resize(mesh->mBuffers);
+            _resize(*mesh);
         }
-
-        /* Add new mesh to library */
-        mMeshes.insert({ fileName, mesh });
 
         /* Load mesh to GPU */
         mesh->upload();
 
-        if (verbose) {
+        if (mVerbose) {
             std::cout << "Loaded mesh (" << vertCount << " vertices): " << fileName << std::endl;
         }
 
         return mesh;
     }
 
-    Texture2D* Loader::getTexture(const std::string &fileName, GLint inFormat, GLenum format, GLint filter, GLenum mode) {
-        Texture *texture = _findTexture(fileName);
+    Texture2D* Loader::loadTexture(const std::string &fileName, TextureFormat format) {
+        /* Create an empty texture if it is not already exist in the library */
+        Texture2D* texture = new Texture2D;
+        texture->mFormat = format;
+
+        uint8_t* data = _loadSingleTexture(texture, fileName);
+
+        texture->upload(true, &data);
+        texture->generateMipMaps();
+
+        _cleanSingleTexture(data);
+
+        return texture;
+
+    }
+
+    TextureCubeMap* Loader::loadTexture(const std::string &name, const std::vector<std::string> & files) {
 
         /* Create an empty texture if it is not already exist in the library */
-        if (!texture) {
-            texture = new Texture2D;
+        TextureCubeMap* texture = new TextureCubeMap;
+        TextureFormat format = { GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE };
+        texture->mFormat = format;
 
-            /* Use stbi if name is an existing file */
-            FILE *f;
-            if (!fopen_s(&f, (RES_DIR + fileName).c_str(), "rb")) {
-                stbi_set_flip_vertically_on_load(true);
-                uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->mWidth, &texture->mHeight, &texture->mComponents, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
-                if (data) {
-                    texture->upload(inFormat, format, filter, mode, true, &data);
-                    texture->generateMipMaps();
-                    stbi_image_free(data);
-                    if (verbose) {
-                        std::cout << "Loaded texture " << fileName << " [" << texture->mWidth << ", " << texture->mHeight << "]" << std::endl;
-                    }
-                }
-                else {
-                    std::cerr << "Error reading texture file " << fileName << std::endl;
-                }
-            }
-            else {
-                std::cout << "Error opening texture file" << fileName << std::endl;
-            }
-
-            mTextures.insert({ fileName, texture });
+        /* Use stbi if name is an existing file */
+        uint8_t* data[6];
+        for (int i = 0; i < 6; i++) {
+            data[i] = _loadSingleTexture(texture, files[i], false);
         }
-        return (Texture2D *)texture;
+
+        /* Upload data to GPU and free from CPU */
+        texture->upload(true, data);
+
+        /* Clean */
+        for (int i = 0; i < 6; i++) {
+            _cleanSingleTexture(data[i]);
+        }
+
+        return texture;
     }
 
-    TextureCubeMap* Loader::getTexture(const std::string &name, const std::vector<std::string> & files) {
-        Texture *texture = _findTexture(name);
+    uint8_t* Loader::_loadSingleTexture(Texture* texture, const std::string& fileName, bool flip) {
+        /* Use stbi if name is an existing file */
+        FILE *f;
+        assert(!fopen_s(&f, (RES_DIR + fileName).c_str(), "rb"), "Error opening texture file");
 
-        /* Create an empty texture if it is not already exist in the library */
-        if (!texture) {
-            texture = new TextureCubeMap;
+        stbi_set_flip_vertically_on_load(flip);
+        uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->mWidth, &texture->mHeight, &texture->mComponents, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
+        assert(data, "Error reading texture file");
 
-            /* Use stbi if name is an existing file */
-            uint8_t* data[6];
-            for (int i = 0; i < 6; i++) {
-                FILE *f;
-                if (fopen_s(&f, (RES_DIR + files[i]).c_str(), "rb")) {
-                    std::cerr << "Error opening texture file " << files[i] << std::endl;
-                    continue;
-                }
-                data[i] = stbi_load((RES_DIR + files[i]).c_str(), &texture->mWidth, &texture->mHeight, &texture->mComponents, STBI_rgb_alpha);
-                if (!data[i]) {
-                    std::cerr << "Error loading texture file " << files[i] << std::endl;
-                }
-                else if (verbose) {
-                    std::cout << "Loaded texture " << files[i] << " [" << texture->mWidth << ", " << texture->mHeight << "]" << std::endl;
-                }
-            }
-
-            /* Upload data to GPU and free from CPU */
-            texture->upload(GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE, true, data);
-            for (int i = 0; i < 6; i++) {
-                stbi_image_free(data[i]);
-            }
-
-            mTextures.insert({ name, texture });
-
+        if (mVerbose) {
+            std::cout << "Loaded texture " << fileName << " [" << texture->mWidth << ", " << texture->mHeight << "]" << std::endl;
         }
-    
-        return (TextureCubeMap *) texture;
+
+        return data;
     }
 
-    Framebuffer* Loader::getFBO(const std::string &name) {
-        auto it = mFramebuffers.find(name);
-        if (it == mFramebuffers.end()) {
-            mFramebuffers.emplace(name, new Framebuffer);
-            it = mFramebuffers.find(name);
-        }
-        return it->second;
-    }
-
-    Texture* Loader::_findTexture(const std::string &name) {
-        auto it = mTextures.find(name);
-        if (it == mTextures.end()) {
-            return nullptr;
-        }
-        else {
-            return it->second;
-        }
+    void Loader::_cleanSingleTexture(uint8_t* data) {
+        stbi_image_free(data);
     }
 
     /* Provided function to resize a mesh so all vertex positions are [0, 1.f] */
-    void Loader::_resize(Mesh::MeshBuffers & buffers) {
+    void Loader::_resize(Mesh& mesh) {
+        Mesh::MeshBuffers& buffers = mesh.mBuffers;
         float minX, minY, minZ;
         float maxX, maxY, maxZ;
         float scaleX, scaleY, scaleZ;

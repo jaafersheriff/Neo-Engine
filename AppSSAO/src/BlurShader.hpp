@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Shader/PostProcessShader.hpp"
-#include "GLHelper/GLHelper.hpp"
+#include "GLObjects/GLHelper.hpp"
 
 using namespace neo;
 

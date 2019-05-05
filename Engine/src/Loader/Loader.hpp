@@ -4,15 +4,14 @@
 #define GLEW_STATIC
 #include "GL/glew.h"
 
-#include "GLHelper/Mesh.hpp"
+#include <string>
+#include <vector>
 
-#include <unordered_map>
+#include "GLObjects/Texture.hpp"
 
 namespace neo {
 
-    class Texture;
-    class Texture2D;
-    class TextureCubeMap;
+    class Mesh;
     class Framebuffer;
 
     class Loader {
@@ -20,31 +19,24 @@ namespace neo {
         public:
             static void init(const std::string &, bool);
 
-            /* Library */
-            static std::unordered_map<std::string, Mesh*> mMeshes;
-            static std::unordered_map<std::string, Texture*> mTextures;
-            static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
-
-            /* Retrieve Mesh pointer from an .obj file */
-            static Mesh* getMesh(const std::string &, bool = false);
+            /* Load Mesh pointer from an .obj file */
+            static Mesh* loadMesh(const std::string &, bool = false);
 
             /* Retrieve Texture pointer from an image file */
-            static Texture2D* getTexture(const std::string &, GLint = GL_RGBA, GLenum = GL_RGBA, GLint = GL_LINEAR, GLenum = GL_REPEAT);
-            static TextureCubeMap * getTexture(const std::string &, const std::vector<std::string> &);
-
-            /* Retrieve FBO */
-            static Framebuffer* getFBO(const std::string &);
+            static Texture2D* loadTexture(const std::string &, TextureFormat);
+            static TextureCubeMap* loadTexture(const std::string &, const std::vector<std::string> &);
 
         private:
             /* Resize mesh vertex buffers so all the vertices are [-1, 1] */
-            static void _resize(Mesh::MeshBuffers &);
+            static void _resize(Mesh&);
 
-            /* Find in library */
-            static Texture* _findTexture(const std::string &name);
+            /* Load a single texture file */
+            static uint8_t* _loadSingleTexture(Texture*, const std::string&, bool = true);
+            static void _cleanSingleTexture(uint8_t*);
 
             /* Private members */
             static std::string RES_DIR;
-            static bool verbose;
+            static bool mVerbose;
 
 
     };

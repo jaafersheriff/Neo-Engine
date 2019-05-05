@@ -2,7 +2,7 @@
 
 #include "Component/Component.hpp"
 
-#include "GLHelper/Texture.hpp"
+#include "GLObjects/Texture.hpp"
 
 // TODO : template class..
 namespace neo {

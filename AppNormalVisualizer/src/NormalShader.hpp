@@ -1,10 +1,10 @@
 #pragma once
 
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 #include "Shader/Shader.hpp"
-#include "GLHelper/GlHelper.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
+#include "GLObjects/GlHelper.hpp"
+#include "Renderer/Renderer.hpp"
 
 using namespace neo;
 
@@ -25,7 +25,7 @@ class NormalShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto& model : NeoEngine::getComponents<MeshComponent>()) {
+            for (auto& model : Engine::getComponents<MeshComponent>()) {
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));

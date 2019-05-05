@@ -2,7 +2,7 @@
 #include "Mouse.hpp"
 #include "Keyboard.hpp"
 
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 #include "Messaging/Messenger.hpp"
 
 #include "ext/imgui/imgui_impl_glfw.h"
@@ -52,9 +52,9 @@ namespace neo {
             return;
         }
         if (key == GLFW_KEY_GRAVE_ACCENT && mods && action == GLFW_PRESS) {
-            NeoEngine::toggleImGui();
+            Engine::toggleImGui();
         }
-        else if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+        else if (Engine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             Keyboard::reset();
             ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
         }
@@ -64,7 +64,7 @@ namespace neo {
     }
 
     void Window::_mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
-        if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+        if (Engine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
         }
         else {
@@ -73,13 +73,13 @@ namespace neo {
     }
 
     void Window::_scrollCallback(GLFWwindow * window, double dx, double dy) {
-        if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+        if (Engine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
         }
    }
 
     void Window::_characterCallback(GLFWwindow *window, unsigned int c) {
-        if (NeoEngine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+        if (Engine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             ImGui_ImplGlfw_CharCallback(window, c);
         }
     }
@@ -188,7 +188,7 @@ namespace neo {
         glfwGetCursorPos(mWindow, &x, &y);
         Mouse::update(x, y);
 
-        if (NeoEngine::imGuiEnabled) {
+        if (Engine::imGuiEnabled) {
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();

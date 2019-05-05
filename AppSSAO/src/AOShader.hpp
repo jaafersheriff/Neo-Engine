@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Shader/PostProcessShader.hpp"
-#include "GLHelper/GLHelper.hpp"
+#include "GLObjects/GLHelper.hpp"
 
-#include "Loader/Loader.hpp"
 #include "Window/Window.hpp"
 #include "Messaging/Messenger.hpp"
 
@@ -20,7 +19,7 @@ class AOShader : public PostProcessShader {
             PostProcessShader("AO Shader", frag) {
 
             // generate kernel
-            Texture *kernelTex = Loader::getTexture("aoKernel");
+            Texture *kernelTex = Library::createEmptyTexture("aoKernel");
             kernelTex->mWidth = 32;
             kernelTex->mHeight = 1;
             kernelTex->mComponents = 3;
@@ -35,10 +34,11 @@ class AOShader : public PostProcessShader {
             generateKernel(32);
 
             // generate 4x4 noise texture
-            Texture *noiseTex = Loader::getTexture("aoNoise");
+            Texture *noiseTex = Library::createEmptyTexture("aoNoise");
+            noiseTex->mFormat = { GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT };
             noiseTex->mWidth = noiseTex->mHeight = 4;
             noiseTex->mComponents = 3;
-            noiseTex->upload(GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT);
+            noiseTex->upload();
             generateNoise(4);
         }
 
@@ -57,7 +57,7 @@ class AOShader : public PostProcessShader {
                 sample *= scale;
                 kernel.push_back(sample);
             };
-            Texture *kernelTex = Loader::getTexture("aoKernel");
+            Texture *kernelTex = Library::getTexture("aoKernel");
             kernelTex->mWidth = size;
             kernelTex->mHeight = 1;
             kernelTex->bind();
@@ -73,7 +73,7 @@ class AOShader : public PostProcessShader {
                     0.f
                 )));
             }
-            Texture *noiseTex = Loader::getTexture("aoNoise");
+            Texture *noiseTex = Library::getTexture("aoNoise");
             noiseTex->mWidth = noiseTex->mHeight = dim;
             noiseTex->bind();
             CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, dim, dim, 0, GL_RGB, GL_FLOAT, &noise[0]));
@@ -85,17 +85,17 @@ class AOShader : public PostProcessShader {
             loadUniform("bias", bias);
 
             // bind gbuffer
-            auto gbuffer = Loader::getFBO("gbuffer");
+            auto gbuffer = Library::getFBO("gbuffer");
             gbuffer->mTextures[0]->bind();
             loadUniform("gNormal", gbuffer->mTextures[0]->mTextureID);
             gbuffer->mTextures[2]->bind();
             loadUniform("gDepth", gbuffer->mTextures[2]->mTextureID);
 
             // bind kernel and noise
-            auto noise = Loader::getTexture("aoNoise");
+            auto noise = Library::getTexture("aoNoise");
             noise->bind();
             loadUniform("noise", noise->mTextureID);
-            auto kernel = Loader::getTexture("aoKernel");
+            auto kernel = Library::getTexture("aoKernel");
             kernel->bind();
             loadUniform("kernel", kernel->mTextureID);
 

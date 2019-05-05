@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-#include "GLHelper/GLHelper.hpp"
+#include "GLObjects/GLHelper.hpp"
 
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 #include "ReflectionComponent.hpp"
 #include "SkyboxComponent.hpp"
@@ -27,13 +27,13 @@ class ReflectionShader : public Shader {
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load environment map */
-            if (auto skybox = NeoEngine::getSingleComponent<SkyboxComponent>()) {
+            if (auto skybox = Engine::getSingleComponent<SkyboxComponent>()) {
                 if (auto cubemap = skybox->getGameObject().getComponentByType<CubeMapComponent>()) {
                     loadUniform("cubeMap", cubemap->mTexture->mTextureID);
                 }
             }
 
-            for (auto& renderable : NeoEngine::getComponents<ReflectionComponent>()) {
+            for (auto& renderable : Engine::getComponents<ReflectionComponent>()) {
                 auto model = renderable->getGameObject().getComponentByType<MeshComponent>();
                 if (!model) {
                     continue;

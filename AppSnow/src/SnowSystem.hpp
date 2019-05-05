@@ -1,6 +1,6 @@
 #pragma once
 
-#include <NeoEngine.hpp>
+#include <Engine.hpp>
 #include "Systems/System.hpp"
 
 #include "SnowComponent.hpp"
@@ -15,7 +15,7 @@ class SnowSystem : public System {
         {}
 
         virtual void update(const float dt) override {
-            for (auto comp : NeoEngine::getComponents<SnowComponent>()) {
+            for (auto comp : Engine::getComponents<SnowComponent>()) {
                 comp->height = -0.19f * comp->snowSize + 0.17f;
 
                 comp->snowAngle = comp->getGameObject().getSpatial()->mV;

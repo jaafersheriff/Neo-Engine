@@ -2,9 +2,9 @@
 
 #include "Systems/System.hpp"
 
-using namespace neo;
+namespace neo {
 
-class RotationSystem : public System {
+    class RotationSystem : public System {
 
     public:
         RotationSystem() :
@@ -13,4 +13,5 @@ class RotationSystem : public System {
 
         virtual void update(const float dt) override;
 
-};
+    };
+}

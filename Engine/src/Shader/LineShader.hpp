@@ -1,10 +1,10 @@
 #pragma once
 
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 #include "Shader/Shader.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
-#include "GLHelper/GLHelper.hpp"
+#include "Renderer/Renderer.hpp"
+#include "GLObjects/GLHelper.hpp"
 
 #include "Component/ModelComponent/LineMeshComponent.hpp"
 
@@ -39,7 +39,7 @@ namespace neo {
                 loadUniform("P", camera.getProj());
                 loadUniform("V", camera.getView());
 
-                for (auto& renderable : NeoEngine::getComponents<renderable::LineMeshComponent>()) {
+                for (auto& renderable : Engine::getComponents<renderable::LineMeshComponent>()) {
                     /* Bind mesh */
                     const Mesh & mesh(renderable->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.mVAOID));

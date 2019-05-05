@@ -1,4 +1,4 @@
-#include <NeoEngine.hpp>
+#include <Engine.hpp>
 
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
@@ -14,10 +14,10 @@ using namespace neo;
 struct Camera {
     CameraComponent *camera;
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        GameObject *gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
-        NeoEngine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
+        GameObject *gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        camera = &Engine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
 
@@ -26,9 +26,9 @@ struct Light {
     LightComponent *light;
 
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 scale) {
-        gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
-        light = &NeoEngine::addComponent<LightComponent>(gameObject, col);
+        gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, pos, scale);
+        light = &Engine::addComponent<LightComponent>(gameObject, col);
     }
 };
 
@@ -37,51 +37,51 @@ struct Renderable {
     SpatialComponent *spat;
 
     Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale) {
-        gameObject = &NeoEngine::createGameObject();
-        spat = &NeoEngine::addComponent<SpatialComponent>(gameObject, pos, scale);
-        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
+        gameObject = &Engine::createGameObject();
+        spat = &Engine::addComponent<SpatialComponent>(gameObject, pos, scale);
+        Engine::addComponent<MeshComponent>(gameObject, mesh);
     }
 };
 
 int main() {
-    NeoEngine::init("Deferred", "res/", 1280, 720);
+    Engine::init("Deferred", "res/", 1280, 720);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
 
     std::vector<Light *> lights;
     lights.push_back(new Light(glm::vec3(25.f, 25.f, 0.f), glm::vec3(1.f), glm::vec3(100.f)));
-    Renderable cube(Loader::getMesh("cube"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
-    NeoEngine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, Util::genRandomVec3());
-    Renderable dragon(Loader::getMesh("dragon10k.obj", true), glm::vec3(-4.f, 10.f, -5.f), glm::vec3(10.f));
-    NeoEngine::addComponent<MaterialComponent>(dragon.gameObject, 0.2f, Util::genRandomVec3());
-    Renderable stairs(Loader::getMesh("staircase.obj", true), glm::vec3(5.f, 10.f, 9.f), glm::vec3(10.f));
-    NeoEngine::addComponent<MaterialComponent>(stairs.gameObject, 0.2f, Util::genRandomVec3());
+    Renderable cube(Library::getMesh("cube"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
+    Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, Util::genRandomVec3());
+    Renderable dragon(Library::getMesh("dragon10k.obj", true), glm::vec3(-4.f, 10.f, -5.f), glm::vec3(10.f));
+    Engine::addComponent<MaterialComponent>(dragon.gameObject, 0.2f, Util::genRandomVec3());
+    Renderable stairs(Library::getMesh("staircase.obj", true), glm::vec3(5.f, 10.f, 9.f), glm::vec3(10.f));
+    Engine::addComponent<MaterialComponent>(stairs.gameObject, 0.2f, Util::genRandomVec3());
     for (int i = 0; i < 20; i++) {
-        Renderable tree(Loader::getMesh("PineTree3.obj", true), glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
-        NeoEngine::addComponent<DiffuseMapComponent>(tree.gameObject, Loader::getTexture("PineTexture.png"));
+        Renderable tree(Library::getMesh("PineTree3.obj", true), glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
+        Engine::addComponent<DiffuseMapComponent>(tree.gameObject, Library::getTexture("PineTexture.png"));
     }
 
     // Terrain 
-    Renderable terrain(Loader::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
+    Renderable terrain(Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
     terrain.spat->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
-    NeoEngine::addComponent<MaterialComponent>(terrain.gameObject, 0.7f, glm::vec3(0.7f));
+    Engine::addComponent<MaterialComponent>(terrain.gameObject, 0.7f, glm::vec3(0.7f));
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CameraControllerSystem>();
-    NeoEngine::addSystem<SinTranslateSystem>();
-    NeoEngine::initSystems();
+    Engine::addSystem<CameraControllerSystem>();
+    Engine::addSystem<SinTranslateSystem>();
+    Engine::initSystems();
 
     /* Init renderer */
-    MasterRenderer::init("shaders/", camera.camera);
-    MasterRenderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
-    auto & lightPassShader = MasterRenderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag"); 
-    auto & combineShader = MasterRenderer::addPostProcessShader<CombineShader>("combine.frag"); 
+    Renderer::init("shaders/", camera.camera);
+    Renderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
+    auto & lightPassShader = Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag"); 
+    auto & combineShader = Renderer::addPostProcessShader<CombineShader>("combine.frag"); 
 
     /* Attach ImGui panes */
-    NeoEngine::addDefaultImGuiFunc();
+    Engine::addDefaultImGuiFunc();
 
-    NeoEngine::addImGuiFunc("Lights", [&]() {
+    Engine::addImGuiFunc("Lights", [&]() {
         ImGui::Checkbox("Show lights", &lightPassShader.showLights);
         if (lightPassShader.showLights) {
             ImGui::SameLine();
@@ -102,7 +102,7 @@ int main() {
                 if (ImGui::Button("Create")) {
                     auto light = new Light(pos, color, glm::vec3(size));
                     if (yOffset.y) {
-                        NeoEngine::addComponent<SinTranslateComponent>(light->gameObject, yOffset, pos);
+                        Engine::addComponent<SinTranslateComponent>(light->gameObject, yOffset, pos);
                     }
                     lights.push_back(light);
                     index = lights.size() - 1;
@@ -112,7 +112,7 @@ int main() {
             if (ImGui::TreeNode("Random Lights")) {
                 if (ImGui::Button("Clear lights")) {
                     for (auto & l : lights) {
-                        NeoEngine::removeGameObject(*l->gameObject);
+                        Engine::removeGameObject(*l->gameObject);
                     }
                     lights.clear();
                 }
@@ -141,7 +141,7 @@ int main() {
                         float size = Util::genRandom(minScale, maxScale);
                         auto light = new Light(position, color, glm::vec3(size));
                         glm::vec3 sinMove(0.f, Util::genRandom(minSinOffset, maxSinOffset), 0.f);
-                        NeoEngine::addComponent<SinTranslateComponent>(light->gameObject, sinMove, position);
+                        Engine::addComponent<SinTranslateComponent>(light->gameObject, sinMove, position);
                         lights.push_back(light);
                     }
                 }
@@ -155,7 +155,7 @@ int main() {
             ImGui::SliderInt("Index", &index, 0, lights.size() - 1);
             auto l = lights[index];
             if (ImGui::Button("Delete light")) {
-                NeoEngine::removeGameObject(*l->gameObject);
+                Engine::removeGameObject(*l->gameObject);
                 lights.erase(lights.begin() + index);
                 index = glm::max(0, index - 1);
             }
@@ -176,6 +176,6 @@ int main() {
     });
 
     /* Run */
-    NeoEngine::run();
+    Engine::run();
     return 0;
 }

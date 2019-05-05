@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Loader/Loader.hpp"
 #include "Window/Window.hpp"
 #include "Window/Mouse.hpp"
 #include "Window/Keyboard.hpp"
+
+#include "Loader/Library.hpp"
 #include "Util/Util.hpp"
 
 #include "Component/Components.hpp"
-#include "Systems/System.hpp"    // Necessary because there are no common systems in the engine
 #include "Systems/Systems.hpp"
 
 #include "ext/imgui/imgui.h"
@@ -21,7 +21,7 @@
 
 namespace neo {
 
-    class NeoEngine {
+    class Engine {
 
         /* Base Engine */
         public:
@@ -84,12 +84,12 @@ namespace neo {
 
     /* Template implementation */
     template <typename CompT, typename... Args>
-    CompT & NeoEngine::addComponent(GameObject * gameObject, Args &&... args) {
+    CompT & Engine::addComponent(GameObject * gameObject, Args &&... args) {
         return addComponentAs<CompT, CompT, Args...>(gameObject, std::forward<Args>(args)...);
     }
 
     template <typename CompT, typename SuperT, typename... Args>
-    CompT & NeoEngine::addComponentAs(GameObject * gameObject, Args &&... args) {
+    CompT & Engine::addComponentAs(GameObject * gameObject, Args &&... args) {
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
@@ -99,7 +99,7 @@ namespace neo {
     }
 
     template <typename SysT, typename... Args> 
-    SysT & NeoEngine::addSystem(Args &&... args) {
+    SysT & Engine::addSystem(Args &&... args) {
         static_assert(std::is_base_of<System, SysT>::value, "SysT must be a System type");
         static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived System type");
         std::type_index typeI(typeid(SysT));
@@ -114,7 +114,7 @@ namespace neo {
     }
 
     template <typename SysT> 
-    SysT & NeoEngine::getSystem(void) {
+    SysT & Engine::getSystem(void) {
         static_assert(std::is_base_of<System, SysT>::value, "SysT must be a System type");
         static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived System type");
 
@@ -130,7 +130,7 @@ namespace neo {
     }
 
     template <typename CompT>
-    void NeoEngine::removeComponent(CompT& component) {
+    void Engine::removeComponent(CompT& component) {
         if (!&component) {
             return;
         }
@@ -142,7 +142,7 @@ namespace neo {
     }
 
     template <typename CompT>
-    const std::vector<CompT *> & NeoEngine::getComponents() {
+    const std::vector<CompT *> & Engine::getComponents() {
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
@@ -157,7 +157,7 @@ namespace neo {
     }
 
     template <typename CompT>
-    CompT* NeoEngine::getSingleComponent() {
+    CompT* Engine::getSingleComponent() {
         auto components = getComponents<CompT>();
         if (!components.size()) {
             return nullptr;

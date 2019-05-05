@@ -1,10 +1,10 @@
 #pragma once
 
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 #include "Shader/Shader.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
-#include "GLHelper/GlHelper.hpp"
+#include "Renderer/Renderer.hpp"
+#include "GLObjects/GlHelper.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -122,9 +122,7 @@ namespace neo {
                 loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
                 /* Load light */
-                auto lights = NeoEngine::getComponents<LightComponent>();
-                if (lights.size()) {
-                    auto light = lights[0];
+                if (auto light = Engine::getSingleComponent<LightComponent>()) {
                     auto lightCam = light->getGameObject().getComponentByType<CameraComponent>();
                     loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
                     loadUniform("lightCol", light->mColor);
@@ -141,12 +139,12 @@ namespace neo {
                 loadUniform("pcfSize", pcfSize);
 
                 /* Bind shadow map */
-                const Texture & texture(*Loader::getFBO("depthMap")->mTextures[0]); 
+                const Texture & texture(*Library::getFBO("depthMap")->mTextures[0]); 
                 CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.mTextureID));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.mTextureID));
                 loadUniform("shadowMap", texture.mTextureID);
 
-                for (auto& renderable : NeoEngine::getComponents<renderable::PhongShadowRenderable>()) {
+                for (auto& renderable : Engine::getComponents<renderable::PhongShadowRenderable>()) {
                     auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
                     if (!meshComponent) {
                         continue;

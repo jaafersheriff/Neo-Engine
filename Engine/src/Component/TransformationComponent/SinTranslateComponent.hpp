@@ -9,9 +9,9 @@
 
 #include <glm/glm.hpp>
 
-using namespace neo;
+namespace neo {
 
-class SinTranslateComponent : public Component {
+    class SinTranslateComponent : public Component {
 
     public:
         SinTranslateComponent(GameObject *go, glm::vec3 offset, glm::vec3 base) :
@@ -22,4 +22,5 @@ class SinTranslateComponent : public Component {
 
         glm::vec3 mOffset;
         glm::vec3 mBasePosition;
-};
+    };
+}

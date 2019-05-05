@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
-#include "GLHelper/Framebuffer.hpp"
+#include "Renderer/Renderer.hpp"
+#include "GLObjects/Framebuffer.hpp"
 
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 namespace neo {
 
@@ -30,7 +30,7 @@ namespace neo {
                             }\
                         }") {
                 /* Init shadow map */
-                Framebuffer *depthFBO = Loader::getFBO("depthMap");
+                Framebuffer *depthFBO = Library::getFBO("depthMap");
                 depthFBO->generate();
                 depthFBO->attachDepthTexture(glm::ivec2(2048), GL_LINEAR, GL_CLAMP_TO_BORDER);
                 depthFBO->disableDraw();
@@ -41,7 +41,7 @@ namespace neo {
             }
 
             virtual void render(const CameraComponent &) override {
-                auto fbo = Loader::getFBO("depthMap");
+                auto fbo = Library::getFBO("depthMap");
                 auto & depthTexture = fbo->mTextures[0];
 
                 fbo->bind();
@@ -50,11 +50,11 @@ namespace neo {
                 CHECK_GL(glCullFace(GL_FRONT));
 
                 bind();
-                auto & cameras = NeoEngine::getComponents<LightComponent>()[0]->getGameObject().getComponentsByType<CameraComponent>();
+                auto & cameras = Engine::getComponents<LightComponent>()[0]->getGameObject().getComponentsByType<CameraComponent>();
                 loadUniform("P", cameras[0]->getProj());
                 loadUniform("V", cameras[0]->getView());
 
-                for (auto& renderable : NeoEngine::getComponents<renderable::ShadowCasterRenderable>()) {
+                for (auto& renderable : Engine::getComponents<renderable::ShadowCasterRenderable>()) {
                     auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
                     if (!meshComponent) {
                         continue;

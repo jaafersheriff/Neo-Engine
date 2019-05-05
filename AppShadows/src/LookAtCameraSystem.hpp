@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Systems/System.hpp"
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 #include "LookAtCameraReceiver.hpp"
 #include "Component/CameraComponent/CameraComponent.hpp"
@@ -17,8 +17,8 @@ class LookAtCameraSystem : public System {
         {}
 
         virtual void update(const float dt) override {
-            auto cameraLookPos = NeoEngine::getSingleComponent<LookAtCameraReceiver>();
-            auto shadowCamera = NeoEngine::getSingleComponent<ShadowCameraComponent>();
+            auto cameraLookPos = Engine::getSingleComponent<LookAtCameraReceiver>();
+            auto shadowCamera = Engine::getSingleComponent<ShadowCameraComponent>();
             if (!cameraLookPos || !shadowCamera) {
                 return;
             }

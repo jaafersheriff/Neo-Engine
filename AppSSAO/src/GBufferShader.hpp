@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-#include "GLHelper/GLHelper.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
+#include "GLObjects/GLHelper.hpp"
+#include "Renderer/Renderer.hpp"
 #include "Window/Window.hpp"
 
 #include "Messaging/Messenger.hpp"
@@ -17,23 +17,25 @@ class GBufferShader : public Shader {
             Shader("GBuffer Shader", vert, frag) {
 
             // Create gbuffer 
-            auto gbuffer = Loader::getFBO("gbuffer");
+            auto gbuffer = Library::getFBO("gbuffer");
             gbuffer->generate();
-            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGB, GL_RGB, GL_NEAREST, GL_CLAMP_TO_EDGE); // normal
-            gbuffer->attachColorTexture(Window::getFrameSize(), 4, GL_RGB, GL_RGB, GL_NEAREST, GL_CLAMP_TO_EDGE); // color
-            gbuffer->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_CLAMP_TO_EDGE);                    // depth
+
+            TextureFormat format{ GL_RGB, GL_RGB, GL_NEAREST, GL_CLAMP_TO_EDGE };
+            gbuffer->attachColorTexture(Window::getFrameSize(), 4, format); // normal
+            gbuffer->attachColorTexture(Window::getFrameSize(), 4, format); // color
+            gbuffer->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_CLAMP_TO_EDGE);  // depth
             gbuffer->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Loader::getFBO("gbuffer")->resize(frameSize);
+                Library::getFBO("gbuffer")->resize(frameSize);
             });
         }
 
         virtual void render(const CameraComponent &camera) override {
-            auto fbo = Loader::getFBO("gbuffer");
+            auto fbo = Library::getFBO("gbuffer");
             fbo->bind();
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
@@ -41,7 +43,7 @@ class GBufferShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto& model : NeoEngine::getComponents<MeshComponent>()) {
+            for (auto& model : Engine::getComponents<MeshComponent>()) {
                 loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
 
                 /* Bind mesh */

@@ -1,4 +1,4 @@
-#include <NeoEngine.hpp>
+#include <Engine.hpp>
 
 #include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
@@ -16,10 +16,10 @@ NormalShader *normalShader;
 struct Camera {
     CameraComponent *camera;
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        GameObject *gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &NeoEngine::addComponent<CameraComponent>(gameObject, fov, near, far);
-        NeoEngine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
+        GameObject *gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        camera = &Engine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
 
@@ -28,11 +28,11 @@ struct Light {
     LightComponent *light;
 
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, pos);
-        light = &NeoEngine::addComponent<LightComponent>(gameObject, col, att);
+        gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, pos);
+        light = &Engine::addComponent<LightComponent>(gameObject, col, att);
 
-        NeoEngine::addImGuiFunc("Light", [&]() {
+        Engine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
                 gameObject->getSpatial()->setPosition(pos);
@@ -47,14 +47,14 @@ struct Orient {
     GameObject *gameObject;
 
     Orient(Mesh *mesh) {
-        gameObject = &NeoEngine::createGameObject();
-        NeoEngine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        NeoEngine::addComponent<MeshComponent>(gameObject, mesh);
-        NeoEngine::addComponent<renderable::PhongRenderable>(gameObject);
-        NeoEngine::addComponent<renderable::WireframeRenderable>(gameObject);
-        NeoEngine::addComponent<MaterialComponent>(gameObject);
+        gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
+        Engine::addComponent<MeshComponent>(gameObject, mesh);
+        Engine::addComponent<renderable::PhongRenderable>(gameObject);
+        Engine::addComponent<renderable::WireframeRenderable>(gameObject);
+        Engine::addComponent<MaterialComponent>(gameObject);
 
-        NeoEngine::addImGuiFunc("Mesh", [&]() {
+        Engine::addImGuiFunc("Mesh", [&]() {
             glm::vec3 pos = gameObject->getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
                 gameObject->getSpatial()->setPosition(pos);
@@ -76,32 +76,32 @@ struct Orient {
 };
 
 int main() {
-    NeoEngine::init("Normal Rendering", "res/", 1280, 720);
+    Engine::init("Normal Rendering", "res/", 1280, 720);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Orient(Loader::getMesh("bunny.obj"));
+    Orient(Library::getMesh("bunny.obj"));
 
     /* Systems - order matters! */
-    NeoEngine::addSystem<CameraControllerSystem>();
-    NeoEngine::initSystems();
+    Engine::addSystem<CameraControllerSystem>();
+    Engine::initSystems();
 
     /* Init renderer */
-    MasterRenderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));
-    MasterRenderer::addSceneShader<PhongShader>();
-    MasterRenderer::addSceneShader<WireframeShader>();
-    normalShader = &MasterRenderer::addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
+    Renderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));
+    Renderer::addSceneShader<PhongShader>();
+    Renderer::addSceneShader<WireframeShader>();
+    normalShader = &Renderer::addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
  
 
     /* Attach ImGui panes */
-    NeoEngine::addDefaultImGuiFunc();
-    NeoEngine::addImGuiFunc("Normals", [&]() {
+    Engine::addDefaultImGuiFunc();
+    Engine::addImGuiFunc("Normals", [&]() {
         ImGui::SliderFloat("Magnitude", &normalShader->magnitude, 0.f, 1.f);
     });
 
     /* Run */
-    NeoEngine::run();
+    Engine::run();
 
     return 0;
 }

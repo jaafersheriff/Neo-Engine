@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Systems/System.hpp"
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 #include "SurveillanceCamera.hpp"
 
@@ -15,7 +15,7 @@ class SurveillanceCameraSystem : public System {
         {}
 
         virtual void update(const float dt) override {
-            for (auto& comp : NeoEngine::getComponents<SurveillanceCamera>()) {
+            for (auto& comp : Engine::getComponents<SurveillanceCamera>()) {
                 float scale = comp->getGameObject().getSpatial()->getScale().x;
                 glm::vec2 bounds(-scale, scale);
                 comp->setOrthoBounds(bounds, bounds);

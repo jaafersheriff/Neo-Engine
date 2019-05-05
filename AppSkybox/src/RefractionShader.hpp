@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-#include "GLHelper/GLHelper.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
+#include "GLObjects/GLHelper.hpp"
+#include "Renderer/Renderer.hpp"
 
-#include "NeoEngine.hpp"
+#include "Engine.hpp"
 
 #include "RefractionComponent.hpp"
 #include "SkyboxComponent.hpp"
@@ -28,13 +28,13 @@ class RefractionShader : public Shader {
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load environment map */
-            if (auto skybox = NeoEngine::getSingleComponent<SkyboxComponent>()) {
+            if (auto skybox = Engine::getSingleComponent<SkyboxComponent>()) {
                 if (auto cubemap = skybox->getGameObject().getComponentByType<CubeMapComponent>()) {
                     loadUniform("cubeMap", cubemap->mTexture->mTextureID);
                 }
             }
 
-            for (auto& renderable : NeoEngine::getComponents<RefractionComponent>()) {
+            for (auto& renderable : Engine::getComponents<RefractionComponent>()) {
                 auto model = renderable->getGameObject().getComponentByType<MeshComponent>();
                 if (!model) {
                     continue;

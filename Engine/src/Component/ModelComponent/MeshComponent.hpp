@@ -2,7 +2,7 @@
 
 #include "Component/Component.hpp"
 
-#include "GLHelper/Mesh.hpp"
+#include "GLObjects/Mesh.hpp"
 
 namespace neo {
 

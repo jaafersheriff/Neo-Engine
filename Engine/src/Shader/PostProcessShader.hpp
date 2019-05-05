@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
+#include "Renderer/Renderer.hpp"
 
 namespace neo {
 

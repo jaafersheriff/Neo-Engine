@@ -1,6 +1,5 @@
 #include "GLHelper.hpp"
 
-
 namespace neo {
 
     namespace GLHelper {

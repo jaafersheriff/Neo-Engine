@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Shader/Shader.hpp"
-#include "GLHelper/GLHelper.hpp"
-#include "MasterRenderer/MasterRenderer.hpp"
+#include "GLObjects/GLHelper.hpp"
+#include "Renderer/Renderer.hpp"
 
 #include "SkyboxComponent.hpp"
 
@@ -17,7 +17,7 @@ class SkyboxShader : public Shader {
         {}
 
         virtual void render(const CameraComponent &camera) override {
-            const auto cube = NeoEngine::getSingleComponent<SkyboxComponent>();
+            const auto cube = Engine::getSingleComponent<SkyboxComponent>();
             if (!cube) {
                 return;
             }
@@ -30,7 +30,7 @@ class SkyboxShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            const Mesh& mesh = *Loader::getMesh("cube");
+            const Mesh& mesh = *Library::getMesh("cube");
             CHECK_GL(glBindVertexArray(mesh.mVAOID));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
