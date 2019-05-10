@@ -86,6 +86,7 @@ namespace neo {
             if (imGuiEnabled) {
                 for (auto & it : imGuiFuncs) {
                     ImGui::Begin(it.first.c_str(), nullptr, ImVec2(0.f, 0.f), 0.5f, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_AlwaysAutoResize);
+                    ImGui::SetWindowFontScale(1.3f);
                     it.second();
                     ImGui::End();
                 }
