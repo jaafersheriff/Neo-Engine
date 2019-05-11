@@ -32,7 +32,7 @@ namespace neo {
                 dir = glm::normalize(dir);
                 dir = glm::normalize(
                     spatial->mU * dir.x +
-                    glm::vec3(0.f, 1.f, 0.f) * dir.y +
+                    spatial->mV * dir.y +
                     spatial->mW * dir.z);
                 comp->getGameObject().getSpatial()->move(dir * comp->mMoveSpeed * dt);
             }

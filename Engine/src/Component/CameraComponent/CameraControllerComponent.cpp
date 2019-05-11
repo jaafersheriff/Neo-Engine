@@ -20,8 +20,8 @@ namespace neo {
         mBackwardButton(GLFW_KEY_S),
         mRightButton(GLFW_KEY_D),
         mLeftButton(GLFW_KEY_A),
-        mUpButton(GLFW_KEY_E),
-        mDownButton(GLFW_KEY_Q) {
+        mUpButton(GLFW_KEY_SPACE),
+        mDownButton(GLFW_KEY_LEFT_CONTROL) {
 
     }
 
