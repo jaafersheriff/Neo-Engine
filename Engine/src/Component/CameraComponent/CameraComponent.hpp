@@ -32,6 +32,8 @@ namespace neo {
             const glm::vec2 getHorizontalBounds() const { return mHorizBounds; }
             const glm::vec2 getVerticalBounds() const { return mVertBounds; }
             const glm::vec3 getLookDir() const;
+            const glm::vec3 getUpDir() const;
+            const glm::vec3 getRightDir() const;
             const glm::mat4 & getView() const;
             const glm::mat4 & getProj() const;
 

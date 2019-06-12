@@ -95,6 +95,14 @@ namespace neo {
         return -mGameObject->getSpatial()->mW;
     }
 
+    const glm::vec3 CameraComponent::getUpDir() const {
+        return mGameObject->getSpatial()->mV;
+    }
+
+    const glm::vec3 CameraComponent::getRightDir() const {
+        return mGameObject->getSpatial()->mU;
+    }
+
     const glm::mat4 & CameraComponent::getView() const {
         if (mViewMatDirty) {
             _detView();

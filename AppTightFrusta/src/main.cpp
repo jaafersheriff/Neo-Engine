@@ -58,7 +58,7 @@ int main() {
     Camera sceneCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
     Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
     
-    Camera mockCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
+    Camera mockCamera(50.f, 0.1f, 5.f, glm::vec3(0.f, 1.f, 0.f));
     auto* line = &Engine::addComponent<LineComponent>(mockCamera.gameObject, glm::vec3(1, 0, 1));
     Engine::addComponent<renderable::LineMeshComponent>(mockCamera.gameObject, line);
 
