@@ -2,6 +2,7 @@
 
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
+#include "Shader/LineShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -9,32 +10,13 @@ using namespace neo;
 
 /* Game object definitions */
 struct Camera {
+    GameObject *gameObject;
     CameraComponent *camera;
-    Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        GameObject *gameObject = &Engine::createGameObject();
+
+    Camera(float fov, float near, float far, glm::vec3 pos) {
+        gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
         camera = &Engine::addComponent<CameraComponent>(gameObject, fov, near, far);
-        Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
-    }
-};
-
-struct Light {
-    GameObject *gameObject;
-    LightComponent *light;
-
-    Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        gameObject = &Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(gameObject, pos);
-        light = &Engine::addComponent<LightComponent>(gameObject, col, att);
-
-        Engine::addImGuiFunc("Light", [&]() {
-            glm::vec3 pos = gameObject->getSpatial()->getPosition();
-            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
-                gameObject->getSpatial()->setPosition(pos);
-            }
-            ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
-            ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
-        });
     }
 };
 
@@ -71,13 +53,14 @@ int main() {
     Engine::init("Base", "res/", 1280, 720);
 
     /* Game objects */
-    Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-    Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-
-    /* Cube object */
-    Renderable cube(Library::getMesh("cube"), glm::vec3(0.f, 0.5f, 0.f));
-    Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
-    Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+    Camera sceneCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
+    Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
+    
+    Camera mockCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
+    auto* line = &Engine::addComponent<LineComponent>(mockCamera.gameObject, glm::vec3(1, 0, 1));
+    line->addNode(glm::vec3(0.f));
+    line->addNode(glm::vec3(1.f));
+    Engine::addComponent<renderable::LineMeshComponent>(mockCamera.gameObject, line);
 
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
@@ -89,9 +72,10 @@ int main() {
     Engine::initSystems();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.camera);
+    Renderer::init("shaders/", sceneCamera.camera);
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
+    Renderer::addSceneShader<LineShader>();
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();

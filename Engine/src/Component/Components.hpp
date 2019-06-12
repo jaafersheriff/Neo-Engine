@@ -6,10 +6,10 @@
 
 #include "SpatialComponent/SpatialComponent.hpp"
 
+#include "ModelComponent/LineMeshComponent.hpp"
 #include "ModelComponent/MaterialComponent.hpp"
 #include "ModelComponent/TextureComponent.hpp"
 #include "ModelComponent/MeshComponent.hpp"
-#include "ModelComponent/LineMeshComponent.hpp"
 
 #include "AnimationComponent/LineComponent.hpp"
 

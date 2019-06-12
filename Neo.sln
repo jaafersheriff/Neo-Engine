@@ -65,6 +65,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppDeferredDecal", "AppDefe
 		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppTightFrusta", "AppTightFrusta\AppTightFrusta.vcxproj", "{33E252AF-5FB8-4B8D-A41D-7FF99B3EACB0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -177,6 +182,14 @@ Global
 		{F5F89B78-1155-4814-9DCF-C049ED296980}.Release|x64.Build.0 = Release|x64
 		{F5F89B78-1155-4814-9DCF-C049ED296980}.Release|x86.ActiveCfg = Release|Win32
 		{F5F89B78-1155-4814-9DCF-C049ED296980}.Release|x86.Build.0 = Release|Win32
+		{33E252AF-5FB8-4B8D-A41D-7FF99B3EACB0}.Debug|x64.ActiveCfg = Debug|x64
+		{33E252AF-5FB8-4B8D-A41D-7FF99B3EACB0}.Debug|x64.Build.0 = Debug|x64
+		{33E252AF-5FB8-4B8D-A41D-7FF99B3EACB0}.Debug|x86.ActiveCfg = Debug|Win32
+		{33E252AF-5FB8-4B8D-A41D-7FF99B3EACB0}.Debug|x86.Build.0 = Debug|Win32
+		{33E252AF-5FB8-4B8D-A41D-7FF99B3EACB0}.Release|x64.ActiveCfg = Release|x64
+		{33E252AF-5FB8-4B8D-A41D-7FF99B3EACB0}.Release|x64.Build.0 = Release|x64
+		{33E252AF-5FB8-4B8D-A41D-7FF99B3EACB0}.Release|x86.ActiveCfg = Release|Win32
+		{33E252AF-5FB8-4B8D-A41D-7FF99B3EACB0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
