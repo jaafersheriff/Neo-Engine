@@ -1,5 +1,7 @@
 #include <Engine.hpp>
 
+#include "CameraLineSystem.hpp"
+
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
 #include "Shader/LineShader.hpp"
@@ -58,8 +60,6 @@ int main() {
     
     Camera mockCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
     auto* line = &Engine::addComponent<LineComponent>(mockCamera.gameObject, glm::vec3(1, 0, 1));
-    line->addNode(glm::vec3(0.f));
-    line->addNode(glm::vec3(1.f));
     Engine::addComponent<renderable::LineMeshComponent>(mockCamera.gameObject, line);
 
     /* Ground plane */
@@ -69,6 +69,7 @@ int main() {
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
+    Engine::addSystem<CameraLineSystem>();
     Engine::initSystems();
 
     /* Init renderer */
