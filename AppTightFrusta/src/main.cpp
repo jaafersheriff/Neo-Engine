@@ -6,6 +6,7 @@
 
 #include "CameraLineSystem.hpp"
 #include "FrustaBoundsSystem.hpp"
+#include "FrustaFittingSystem.hpp"
 
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
@@ -52,7 +53,7 @@ int main() {
 
     GameObject* go = &Engine::createGameObject();
     Engine::addComponent<SpatialComponent>(go, glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f));
-    Engine::addComponent<CameraComponent>(go, -2.f, 2.f, -2.f, 2.f, 0.1f, 5.f);
+    Engine::addComponent<CameraComponent>(go, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
     Engine::addComponent<renderable::LineMeshComponent>(go, &Engine::addComponent<LineComponent>(go, glm::vec3(0.f, 1.f, 1.f)));
     Engine::addComponent<FrustaBoundsComponent>(go);
     Engine::addComponent<MockOrthoComponent>(go);
@@ -63,9 +64,10 @@ int main() {
     Engine::addComponent<DiffuseMapComponent>(plane.gameObject, Library::getTexture("grid.png"));
 
     /* Systems - order matters! */
-    Engine::addSystem<CameraControllerSystem>();
-    Engine::addSystem<FrustaBoundsSystem>();
-    Engine::addSystem<CameraLineSystem>();
+    Engine::addSystem<CameraControllerSystem>(); // Update camera
+    Engine::addSystem<FrustaBoundsSystem>(); // Calculate original frusta bounds
+    Engine::addSystem<FrustaFittingSystem>(); // Fit one frusta into another
+    Engine::addSystem<CameraLineSystem>(); // Create line mesh
     Engine::initSystems();
 
     /* Init renderer */
@@ -76,6 +78,17 @@ int main() {
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();
+    Engine::addImGuiFunc("Renderer", [&]() {
+        if (ImGui::Button("Set scene")) {
+            Renderer::setDefaultCamera(sceneCamera.camera);
+        }
+        if (ImGui::Button("Set perspective")) {
+            Renderer::setDefaultCamera(mockCamera.camera);
+        }
+        if (ImGui::Button("Set ortho")) {
+            Renderer::setDefaultCamera(go->getComponentByType<CameraComponent>());
+        }
+    });
 
     /* Run */
     Engine::run();
