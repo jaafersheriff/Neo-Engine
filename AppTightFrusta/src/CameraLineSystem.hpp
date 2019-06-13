@@ -26,7 +26,7 @@ public:
         glm::vec3 FarRightTop;
     };
 
-    IntersectionPoints getPoints(const CameraComponent *camera) {
+    IntersectionPoints getPerspectivePoints(const CameraComponent *camera) {
         float nDis = camera->getNearFar().x;
         float fDis = camera->getNearFar().y;
         float fov = camera->getFOV();
@@ -55,20 +55,48 @@ public:
         return points;
     }
 
+    IntersectionPoints getOrthoPoints(const CameraComponent *camera) {
+        float nDis = camera->getNearFar().x;
+        float fDis = camera->getNearFar().y;
+        float ar = 1.f;
+        glm::vec3 P = camera->getGameObject().getSpatial()->getPosition();
+        glm::vec3 v = camera->getLookDir();
+        glm::vec3 up = camera->getUpDir();
+        glm::vec3 w = camera->getRightDir();
+
+        glm::vec3 Cnear = P + v * nDis;
+        glm::vec3 Cfar = P + v * fDis;
+
+        IntersectionPoints points;
+        points.NearLeftTop = Cnear + (up * camera->getHorizontalBounds().y) + (w * camera->getHorizontalBounds().x);
+        points.NearRightTop = Cnear + (up * camera->getHorizontalBounds().y) + (w * camera->getHorizontalBounds().y);
+        points.NearLeftBottom = Cnear + (up * camera->getHorizontalBounds().x) + (w * camera->getHorizontalBounds().x);
+        points.NearRightBottom = Cnear + (up * camera->getHorizontalBounds().x) + (w * camera->getHorizontalBounds().y);
+        points.FarLeftTop = Cfar + (up * camera->getHorizontalBounds().y) + (w * camera->getHorizontalBounds().x);
+        points.FarRightTop = Cfar + (up * camera->getHorizontalBounds().y) + (w * camera->getHorizontalBounds().y);
+        points.FarLeftBottom = Cfar + (up * camera->getHorizontalBounds().x) + (w * camera->getHorizontalBounds().x);
+        points.FarRightBottom = Cfar + (up * camera->getHorizontalBounds().x) + (w * camera->getHorizontalBounds().y);
+        return points;
+    }
 
     virtual void update(const float dt) override {
         for (auto camera : Engine::getComponents<CameraComponent>()) {
             if (auto line = camera->getGameObject().getComponentByType<LineComponent>()) {
+
+                IntersectionPoints points;
+                if (camera->mIsOrtho) {
+                    points = getOrthoPoints(camera);
+                }
+                else {
+                    points = getPerspectivePoints(camera);
+                }
+
                 line->clearNodes();
-
-                IntersectionPoints points = getPoints(camera);
-
                 line->addNode(points.NearLeftBottom);
                 line->addNode(points.NearLeftTop);
                 line->addNode(points.NearRightTop);
                 line->addNode(points.NearRightBottom);
                 line->addNode(points.NearLeftBottom);
-
                 line->addNode(points.FarLeftBottom);
                 line->addNode(points.FarLeftTop);
                 line->addNode(points.NearLeftTop);
