@@ -29,10 +29,11 @@ struct Renderable {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<MeshComponent>(gameObject, mesh);
         Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
+    }
 };
 
 int main() {
-    Engine::init("Base", "res/", 1280, 720);
+    Engine::init("TightFrusta", "res/", 1280, 720);
 
     /* Game objects */
     Camera sceneCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
