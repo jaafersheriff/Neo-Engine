@@ -20,10 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{33E252AF-5FB8-4B8D-A41D-7FF99B3EACB0}</ProjectGuid>
-    <RootNamespace>AppTightFrusta</RootNamespace>
+    <ProjectGuid>{6EC037EE-4CF7-4C35-B0F7-4D4E6DEA7E1A}</ProjectGuid>
+    <RootNamespace>AppFrustaFitting</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
-    <ProjectName>AppFrustaFitting</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -120,15 +119,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="src\CameraLineSystem.hpp" />
     <ClInclude Include="src\FrustaBoundsComponent.hpp" />
     <ClInclude Include="src\FrustaBoundsSystem.hpp" />
     <ClInclude Include="src\FrustaFittingSystem.hpp" />
     <ClInclude Include="src\MockOrthoComponent.hpp" />
     <ClInclude Include="src\MockPerspectiveComponent.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="imgui.ini" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
