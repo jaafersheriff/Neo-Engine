@@ -23,6 +23,7 @@
     <ProjectGuid>{33E252AF-5FB8-4B8D-A41D-7FF99B3EACB0}</ProjectGuid>
     <RootNamespace>AppTightFrusta</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <ProjectName>AppFrustaFitting</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -123,6 +124,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CameraLineSystem.hpp" />
+    <ClInclude Include="src\MockOrthoComponent.hpp" />
+    <ClInclude Include="src\MockPerspectiveComponent.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

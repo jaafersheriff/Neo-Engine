@@ -92,6 +92,8 @@ public:
                 }
 
                 line->clearNodes();
+
+                // We have to do this ridiculousness because line strip (:
                 line->addNode(points.NearLeftBottom);
                 line->addNode(points.NearLeftTop);
                 line->addNode(points.NearRightTop);
