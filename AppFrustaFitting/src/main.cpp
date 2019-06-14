@@ -45,7 +45,7 @@ int main() {
     Camera sceneCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
     Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
     
-    Camera mockCamera(50.f, 0.1f, 5.f, glm::vec3(0.f, 1.f, 0.f));
+    Camera mockCamera(50.f, 0.f, 5.f, glm::vec3(0.f, 1.f, 0.f));
     auto* line = &Engine::addComponent<LineComponent>(mockCamera.gameObject, glm::vec3(1, 0, 1));
     Engine::addComponent<renderable::LineMeshComponent>(mockCamera.gameObject, line);
     Engine::addComponent<FrustaBoundsComponent>(mockCamera.gameObject);
@@ -53,7 +53,7 @@ int main() {
 
     GameObject* go = &Engine::createGameObject();
     Engine::addComponent<SpatialComponent>(go, glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f));
-    Engine::addComponent<CameraComponent>(go, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
+    Engine::addComponent<CameraComponent>(go, -2.f, 2.f, -4.f, 2.f, 0.f, 5.f);
     Engine::addComponent<renderable::LineMeshComponent>(go, &Engine::addComponent<LineComponent>(go, glm::vec3(0.f, 1.f, 1.f)));
     Engine::addComponent<FrustaBoundsComponent>(go);
     Engine::addComponent<MockOrthoComponent>(go);
@@ -66,7 +66,7 @@ int main() {
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>(); // Update camera
     Engine::addSystem<FrustaBoundsSystem>(); // Calculate original frusta bounds
-    Engine::addSystem<FrustaFittingSystem>(); // Fit one frusta into another
+    auto& fitSystem = Engine::addSystem<FrustaFittingSystem>(); // Fit one frusta into another
     Engine::addSystem<CameraLineSystem>(); // Create line mesh
     Engine::initSystems();
 
@@ -78,7 +78,7 @@ int main() {
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();
-    Engine::addImGuiFunc("Renderer", [&]() {
+    Engine::addImGuiFunc("SceneCamera", [&]() {
         if (ImGui::Button("Set scene")) {
             Renderer::setDefaultCamera(sceneCamera.camera);
         }
@@ -89,6 +89,54 @@ int main() {
             Renderer::setDefaultCamera(go->getComponentByType<CameraComponent>());
         }
     });
+    Engine::addImGuiFunc("PerspectiveCamera", [&]() {
+        auto spatial = mockCamera.gameObject->getSpatial();
+        auto camera = mockCamera.camera;
+        {
+            glm::vec3 camPos = spatial->getPosition();
+            ImGui::SliderFloat3("Position", &camPos[0], -4.f, 4.f);
+            spatial->setPosition(camPos);
+        }
+        {
+            ImGui::Checkbox("Auto update", &fitSystem.updatePerspective);
+            if (!fitSystem.updatePerspective) {
+                glm::vec3 lookDir = camera->getLookDir();
+                ImGui::SliderFloat3("Look", &lookDir[0], -1.f, 1.f);
+                camera->setLookDir(lookDir);
+            }
+        }
+        {
+            float fov = camera->getFOV();
+            glm::vec2 nearfar = camera->getNearFar();
+            if (ImGui::SliderFloat("FOV", &fov, 15.f, 110.f)) {
+                camera->setFOV(fov);
+            }
+            if (ImGui::SliderFloat("Near", &nearfar[0], 0.f, 2.f)) {
+                camera->setNearFar(nearfar.x, nearfar.y);
+            }
+            if (ImGui::SliderFloat("Far", &nearfar[1], 2.f, 6.f)) {
+                camera->setNearFar(nearfar.x, nearfar.y);
+            }
+        }
+    });
+    Engine::addImGuiFunc("OrthoCamera", [&]() {
+        auto spatial = go->getSpatial();
+        auto camera = go->getComponentByType<CameraComponent>();
+        {
+            glm::vec3 camPos = spatial->getPosition();
+            ImGui::SliderFloat3("Position", &camPos[0], -4.f, 4.f);
+            spatial->setPosition(camPos);
+        }
+        {
+            ImGui::Checkbox("Auto update", &fitSystem.updateOrtho);
+            if (!fitSystem.updateOrtho) {
+                glm::vec3 lookDir = camera->getLookDir();
+                ImGui::SliderFloat3("Look", &lookDir[0], -1.f, 1.f);
+                camera->setLookDir(lookDir);
+            }
+        }
+    });
+
 
     /* Run */
     Engine::run();

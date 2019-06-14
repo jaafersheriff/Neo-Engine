@@ -11,7 +11,7 @@ namespace neo {
             glm::vec3 mColor;
             glm::vec3 mAttenuation;
 
-            LightComponent(GameObject *go, const glm::vec3 &col = glm::vec3(1.f), const glm::vec3 att = glm::vec3(1.f)) :
+            LightComponent(GameObject *go, const glm::vec3 &col = glm::vec3(1.f), const glm::vec3 att = glm::vec3(0.f)) :
                 Component(go),
                 mColor(col),
                 mAttenuation(att)

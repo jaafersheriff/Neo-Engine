@@ -20,11 +20,11 @@ public:
             if (auto bounds = camera->getGameObject().getComponentByType<FrustaBoundsComponent>()) {
                 float nDis = camera->getNearFar().x;
                 float fDis = camera->getNearFar().y;
-                float fov = camera->getFOV();
+                float fov = glm::radians(camera->getFOV());
                 glm::vec3 P = camera->getGameObject().getSpatial()->getPosition();
-                glm::vec3 v = camera->getLookDir();
-                glm::vec3 up = camera->getUpDir();
-                glm::vec3 w = camera->getRightDir();
+                glm::vec3 v = glm::normalize(camera->getLookDir());
+                glm::vec3 up = glm::normalize(camera->getUpDir());
+                glm::vec3 w = glm::normalize(camera->getRightDir());
                 glm::vec3 Cnear = P + v * nDis;
                 glm::vec3 Cfar = P + v * fDis;
 

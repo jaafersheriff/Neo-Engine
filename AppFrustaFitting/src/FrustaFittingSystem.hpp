@@ -15,6 +15,9 @@ public:
         System("FrustaFitting System")
     {}
 
+    bool updatePerspective = true;
+    bool updateOrtho = true;
+
     virtual void update(const float dt) override {
         auto mockOrthoCamera = Engine::getSingleComponent<MockOrthoComponent>();
         auto mockPerspectiveCamera = Engine::getSingleComponent<MockPerspectiveComponent>();
@@ -26,9 +29,15 @@ public:
         if (!orthoCamera || !perspectiveCamera) {
             return;
         }
-        float f = glm::sin(Util::getRunTime());
-        float g = glm::cos(Util::getRunTime());
-        perspectiveCamera->setLookDir(glm::vec3(f, -0.2f, g));
-        orthoCamera->setLookDir(glm::vec3(f, -0.2f, g));
+
+        if (updatePerspective) {
+            float f = glm::sin(Util::getRunTime());
+            float g = glm::cos(Util::getRunTime());
+            perspectiveCamera->setLookDir(glm::vec3(f, 0.f, g));
+        }
+
+        if (updateOrtho) {
+            // TODO
+        }
     }
 };
