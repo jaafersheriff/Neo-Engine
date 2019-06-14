@@ -19,9 +19,10 @@ namespace neo {
                         }",
                         "\
                         #version 330 core\n\
+                        uniform vec3 wireColor;\
                         out vec4 color;\
                         void main() {\
-                            color = vec4(1.0);\
+                            color = vec4(wireColor, 1.0);\
                         }"
                 )
             {}
@@ -29,6 +30,7 @@ namespace neo {
             virtual void render(const CameraComponent &camera) {
                 bind();
                 CHECK_GL(glDisable(GL_CULL_FACE));
+                CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 
                 /* Load PV */
                 loadUniform("P", camera.getProj());
@@ -46,17 +48,15 @@ namespace neo {
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                     loadUniform("M", renderable->getGameObject().getSpatial()->getModelMatrix());
+                    loadUniform("wireColor", renderable->color);
 
                     /* Draw outline */
-                    CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
                     mesh.draw();
-                    CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
                 }
 
-                CHECK_GL(glBindVertexArray(0));
-                CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
                 unbind();
                 CHECK_GL(glEnable(GL_CULL_FACE));
+                CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
             }
         };
 

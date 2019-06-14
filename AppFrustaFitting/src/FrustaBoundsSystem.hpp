@@ -29,14 +29,14 @@ public:
                 glm::vec3 Cfar = P + v * fDis;
 
                 if (camera->mIsOrtho) {
-                    bounds->NearLeftTop = Cnear + (up * camera->getHorizontalBounds().y) + (w * camera->getHorizontalBounds().x);
-                    bounds->NearRightTop = Cnear + (up * camera->getHorizontalBounds().y) + (w * camera->getHorizontalBounds().y);
-                    bounds->NearLeftBottom = Cnear + (up * camera->getHorizontalBounds().x) + (w * camera->getHorizontalBounds().x);
-                    bounds->NearRightBottom = Cnear + (up * camera->getHorizontalBounds().x) + (w * camera->getHorizontalBounds().y);
-                    bounds->FarLeftTop = Cfar + (up * camera->getHorizontalBounds().y) + (w * camera->getHorizontalBounds().x);
-                    bounds->FarRightTop = Cfar + (up * camera->getHorizontalBounds().y) + (w * camera->getHorizontalBounds().y);
-                    bounds->FarLeftBottom = Cfar + (up * camera->getHorizontalBounds().x) + (w * camera->getHorizontalBounds().x);
-                    bounds->FarRightBottom = Cfar + (up * camera->getHorizontalBounds().x) + (w * camera->getHorizontalBounds().y);
+                    bounds->NearLeftTop = Cnear + (up * camera->getVerticalBounds().y) + (w * camera->getHorizontalBounds().x);
+                    bounds->NearRightTop = Cnear + (up * camera->getVerticalBounds().y) + (w * camera->getHorizontalBounds().y);
+                    bounds->NearLeftBottom = Cnear + (up * camera->getVerticalBounds().x) + (w * camera->getHorizontalBounds().x);
+                    bounds->NearRightBottom = Cnear + (up * camera->getVerticalBounds().x) + (w * camera->getHorizontalBounds().y);
+                    bounds->FarLeftTop = Cfar + (up * camera->getVerticalBounds().y) + (w * camera->getHorizontalBounds().x);
+                    bounds->FarRightTop = Cfar + (up * camera->getVerticalBounds().y) + (w * camera->getHorizontalBounds().y);
+                    bounds->FarLeftBottom = Cfar + (up * camera->getVerticalBounds().x) + (w * camera->getHorizontalBounds().x);
+                    bounds->FarRightBottom = Cfar + (up * camera->getVerticalBounds().x) + (w * camera->getHorizontalBounds().y);
                 }
                 else {
                     float ar = 1.f;
