@@ -36,7 +36,7 @@ struct Light {
     Light(glm::vec3 position, bool attachCube = true) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, position);
-        camera = &Engine::addComponent<CameraComponent>(gameObject, -2.f, 2.f, -4.f, 2.f, 0.f, 5.f);
+        camera = &Engine::addComponent<CameraComponent>(gameObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
         Engine::addComponent<renderable::LineMeshComponent>(gameObject, &Engine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 1.f)));
         Engine::addComponent<FrustaBoundsComponent>(gameObject);
         Engine::addComponent<MockOrthoComponent>(gameObject, glm::length(position));
@@ -69,7 +69,7 @@ int main() {
     Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
     
     // Perspective camera
-    Camera mockCamera(50.f, 0.f, 5.f, glm::vec3(0.f, 2.f, -0.f));
+    Camera mockCamera(50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
     auto* line = &Engine::addComponent<LineComponent>(mockCamera.gameObject, glm::vec3(1, 0, 1));
     Engine::addComponent<renderable::LineMeshComponent>(mockCamera.gameObject, line);
     Engine::addComponent<FrustaBoundsComponent>(mockCamera.gameObject);
@@ -110,12 +110,13 @@ int main() {
     Engine::addImGuiFunc("SceneCamera", [&]() {
         if (ImGui::Button("Set scene")) {
             Renderer::setDefaultCamera(sceneCamera.camera);
+            Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
+            Engine::removeComponent(*mockCamera.gameObject->getComponentByType<CameraControllerComponent>());
         }
         if (ImGui::Button("Set perspective")) {
             Renderer::setDefaultCamera(mockCamera.camera);
-        }
-        if (ImGui::Button("Set ortho")) {
-            Renderer::setDefaultCamera(light.camera);
+            Engine::addComponent<CameraControllerComponent>(mockCamera.gameObject, 0.4f, 7.f);
+            Engine::removeComponent(*sceneCamera.gameObject->getComponentByType<CameraControllerComponent>());
         }
     });
     Engine::addImGuiFunc("PerspectiveCamera", [&]() {
@@ -140,10 +141,10 @@ int main() {
             if (ImGui::SliderFloat("FOV", &fov, 15.f, 110.f)) {
                 camera->setFOV(fov);
             }
-            if (ImGui::SliderFloat("Near", &nearfar[0], 0.f, 2.f)) {
+            if (ImGui::SliderFloat("Near", &nearfar[0], 0.f, 3.f)) {
                 camera->setNearFar(nearfar.x, nearfar.y);
             }
-            if (ImGui::SliderFloat("Far", &nearfar[1], 2.f, 6.f)) {
+            if (ImGui::SliderFloat("Far", &nearfar[1], 2.f, 20.f)) {
                 camera->setNearFar(nearfar.x, nearfar.y);
             }
         }

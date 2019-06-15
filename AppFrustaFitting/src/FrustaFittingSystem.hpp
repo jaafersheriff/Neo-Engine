@@ -69,6 +69,7 @@ public:
 
                 glm::vec3 center = perspectiveSpat->getPosition() + perspectiveCamera->getLookDir() * (perspectiveCamera->getNearFar().y - perspectiveCamera->getNearFar().x) / 2.f;
 
+                // TODO - this is broken -- treating it as point light when it should be a directional light
                 orthoSpat->setPosition(center - orthoCamera->getLookDir() * mockOrthoCamera->distance);
 
                 glm::vec3 nearPos = center - orthoCamera->getLookDir() * dif / 2.f;
