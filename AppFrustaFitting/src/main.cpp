@@ -8,8 +8,8 @@
 #include "FrustaBoundsSystem.hpp"
 #include "FrustaFittingSystem.hpp"
 
-#include "Shader/PhongShader.hpp"
-#include "Shader/AlphaTestShader.hpp"
+#include "Shader/ShadowCasterShader.hpp"
+#include "Shader/PhongShadowShader.hpp"
 #include "Shader/LineShader.hpp"
 #include "Shader/WireFrameShader.hpp"
 
@@ -40,6 +40,7 @@ struct Light {
         Engine::addComponent<renderable::LineMeshComponent>(gameObject, &Engine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 1.f)));
         Engine::addComponent<FrustaBoundsComponent>(gameObject);
         Engine::addComponent<MockOrthoComponent>(gameObject, glm::length(position));
+        Engine::addComponent<LightComponent>(gameObject, glm::vec3(1.f), glm::vec3(0.4f, 0.2f, 0.f));
 
         // give ortho a source cube because it's hard to tell what's the near and far side
         if (attachCube) {
@@ -66,18 +67,18 @@ int main() {
     Camera sceneCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
     Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
     
-    Camera mockCamera(50.f, 0.f, 5.f, glm::vec3(0.f, 1.f, 0.f));
+    Camera mockCamera(50.f, 0.f, 5.f, glm::vec3(10.f, 5.f, -10.f));
     auto* line = &Engine::addComponent<LineComponent>(mockCamera.gameObject, glm::vec3(1, 0, 1));
     Engine::addComponent<renderable::LineMeshComponent>(mockCamera.gameObject, line);
     Engine::addComponent<FrustaBoundsComponent>(mockCamera.gameObject);
     Engine::addComponent<MockPerspectiveComponent>(mockCamera.gameObject);
 
-    Light light(glm::vec3(10.f, 10.f, 0.f), true);
+    Light light(glm::vec3(10.f, 20.f, 0.f), true);
     
     /* Ground plane */
-    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(18.75f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
-    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
-    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, Library::getTexture("grid.png"));
+    Renderable receiver(Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::vec3(-1.56f, 0, 0));
+    Engine::addComponent<MaterialComponent>(receiver.gameObject, 0.2f, glm::vec3(0.7f), glm::vec3(1.f), 20.f);
+    Engine::addComponent<renderable::PhongShadowRenderable>(receiver.gameObject);
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>(); // Update camera
@@ -88,8 +89,8 @@ int main() {
 
     /* Init renderer */
     Renderer::init("shaders/", sceneCamera.camera);
-    Renderer::addSceneShader<PhongShader>();
-    Renderer::addSceneShader<AlphaTestShader>();
+    Renderer::addPreProcessShader<ShadowCasterShader>();
+    Renderer::addSceneShader<PhongShadowShader>();
     Renderer::addSceneShader<LineShader>();
     Renderer::addSceneShader<WireframeShader>();
 
