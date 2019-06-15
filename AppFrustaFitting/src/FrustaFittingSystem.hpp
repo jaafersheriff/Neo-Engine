@@ -68,11 +68,12 @@ public:
                 float diflen = glm::length(dif);
 
                 glm::vec3 center = perspectiveSpat->getPosition() + perspectiveCamera->getLookDir() * (perspectiveCamera->getNearFar().y - perspectiveCamera->getNearFar().x) / 2.f;
-                orthoCamera->setLookDir(center - orthoSpat->getPosition());
 
                 glm::vec3 nearPos = center - orthoCamera->getLookDir() * dif / 2.f;
+                orthoSpat->setPosition(nearPos);
+
                 float near = glm::distance(orthoSpat->getPosition(), nearPos);
-                orthoCamera->setNearFar(near,  near + diflen);
+                orthoCamera->setNearFar(near, near + diflen);
                 orthoCamera->setOrthoBounds(glm::vec2(-diflen / 2.f, diflen / 2.f), glm::vec2(-diflen / 2.f, diflen / 2.f));
             }
         }
