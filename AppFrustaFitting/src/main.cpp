@@ -41,6 +41,7 @@ struct Light {
         Engine::addComponent<FrustaBoundsComponent>(gameObject);
         Engine::addComponent<MockOrthoComponent>(gameObject, glm::length(position));
         Engine::addComponent<LightComponent>(gameObject, glm::vec3(1.f), glm::vec3(0.4f, 0.2f, 0.f));
+        Engine::addComponent<ShadowCameraComponent>(gameObject);
 
         // give ortho a source cube because it's hard to tell what's the near and far side
         if (attachCube) {
@@ -67,16 +68,26 @@ int main() {
     Camera sceneCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
     Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
     
-    Camera mockCamera(50.f, 0.f, 5.f, glm::vec3(10.f, 5.f, -10.f));
+    // Perspective camera
+    Camera mockCamera(50.f, 0.f, 5.f, glm::vec3(0.f, 2.f, -0.f));
     auto* line = &Engine::addComponent<LineComponent>(mockCamera.gameObject, glm::vec3(1, 0, 1));
     Engine::addComponent<renderable::LineMeshComponent>(mockCamera.gameObject, line);
     Engine::addComponent<FrustaBoundsComponent>(mockCamera.gameObject);
     Engine::addComponent<MockPerspectiveComponent>(mockCamera.gameObject);
 
+    // Ortho camera, shadow camera, light
     Light light(glm::vec3(10.f, 20.f, 0.f), true);
-    
+
+    // Renderable
+    for (int i = 0; i < 10; i++) {
+        Renderable sphere(Util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere"), glm::vec3(Util::genRandom(-4.f, 4.f), Util::genRandom(0.5f, 1.f), Util::genRandom(-4.f, 4.f)), glm::vec3(0.5f));
+        Engine::addComponent<renderable::ShadowCasterRenderable>(sphere.gameObject);
+        Engine::addComponent<renderable::PhongShadowRenderable>(sphere.gameObject);
+        Engine::addComponent<MaterialComponent>(sphere.gameObject, 0.3f, Util::genRandomVec3(), glm::vec3(1.f), 20.f);
+    }
+
     /* Ground plane */
-    Renderable receiver(Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::vec3(-1.56f, 0, 0));
+    Renderable receiver(Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(10.f), glm::vec3(-1.56f, 0, 0));
     Engine::addComponent<MaterialComponent>(receiver.gameObject, 0.2f, glm::vec3(0.7f), glm::vec3(1.f), 20.f);
     Engine::addComponent<renderable::PhongShadowRenderable>(receiver.gameObject);
 
