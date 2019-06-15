@@ -6,6 +6,8 @@
 #include "Component/CameraComponent/CameraComponent.hpp"
 #include "Component/SpatialComponent/SpatialComponent.hpp"
 
+#include <limits>
+
 using namespace neo;
 
 class FrustaFittingSystem : public System {
@@ -18,6 +20,15 @@ public:
     bool updatePerspective = true;
     bool updateOrtho = true;
 
+    void getMinMax(glm::vec3& min, glm::vec3& max, glm::vec3 other) {
+        if (other.x < min.x) { min.x = other.x; }
+        if (other.y < min.y) { min.y = other.y; }
+        if (other.z < min.z) { min.z = other.z; }
+        if (other.x > max.x) { max.x = other.x; }
+        if (other.y > max.y) { max.y = other.y; }
+        if (other.z > max.z) { max.z = other.z; }
+    }
+
     virtual void update(const float dt) override {
         auto mockOrthoCamera = Engine::getSingleComponent<MockOrthoComponent>();
         auto mockPerspectiveCamera = Engine::getSingleComponent<MockPerspectiveComponent>();
@@ -29,6 +40,11 @@ public:
         if (!orthoCamera || !perspectiveCamera) {
             return;
         }
+        auto orthoSpat = mockOrthoCamera->getGameObject().getSpatial();
+        auto perspectiveSpat = mockPerspectiveCamera->getGameObject().getSpatial();
+        if (!orthoSpat || !perspectiveSpat) {
+            return;
+        }
 
         if (updatePerspective) {
             float f = glm::sin(Util::getRunTime());
@@ -37,7 +53,28 @@ public:
         }
 
         if (updateOrtho) {
-            // TODO
+            if (auto perspectiveBounds = perspectiveCamera->getGameObject().getComponentByType<FrustaBoundsComponent>()) {
+                glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
+                glm::vec3 max = glm::vec3(std::numeric_limits<float>::min());
+                getMinMax(min, max, perspectiveBounds->FarLeftBottom - perspectiveSpat->getPosition());
+                getMinMax(min, max, perspectiveBounds->FarLeftTop - perspectiveSpat->getPosition());
+                getMinMax(min, max, perspectiveBounds->FarRightBottom - perspectiveSpat->getPosition());
+                getMinMax(min, max, perspectiveBounds->FarRightTop - perspectiveSpat->getPosition());
+                getMinMax(min, max, perspectiveBounds->NearLeftBottom - perspectiveSpat->getPosition());
+                getMinMax(min, max, perspectiveBounds->NearLeftTop - perspectiveSpat->getPosition());
+                getMinMax(min, max, perspectiveBounds->NearRightBottom - perspectiveSpat->getPosition());
+                getMinMax(min, max, perspectiveBounds->NearRightTop - perspectiveSpat->getPosition());
+                glm::vec3 dif = (max - min);
+                float diflen = glm::length(dif);
+
+                glm::vec3 center = perspectiveSpat->getPosition() + perspectiveCamera->getLookDir() * (perspectiveCamera->getNearFar().y - perspectiveCamera->getNearFar().x) / 2.f;
+                orthoCamera->setLookDir(center - orthoSpat->getPosition());
+
+                glm::vec3 nearPos = center - orthoCamera->getLookDir() * dif / 2.f;
+                float near = glm::distance(orthoSpat->getPosition(), nearPos);
+                orthoCamera->setNearFar(near,  near + diflen);
+                orthoCamera->setOrthoBounds(glm::vec2(-diflen / 2.f, diflen / 2.f), glm::vec2(-diflen / 2.f, diflen / 2.f));
+            }
         }
     }
 };

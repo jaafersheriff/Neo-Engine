@@ -53,7 +53,7 @@ int main() {
     Engine::addComponent<MockPerspectiveComponent>(mockCamera.gameObject);
     
     GameObject* go = &Engine::createGameObject();
-    Engine::addComponent<SpatialComponent>(go, glm::vec3(1.f, 1.f, 0.f), glm::vec3(0.6f));
+    Engine::addComponent<SpatialComponent>(go, glm::vec3(10.f, 10.f, 0.f));
     Engine::addComponent<CameraComponent>(go, -2.f, 2.f, -4.f, 2.f, 0.f, 5.f);
     Engine::addComponent<renderable::LineMeshComponent>(go, &Engine::addComponent<LineComponent>(go, glm::vec3(0.f, 1.f, 1.f)));
     Engine::addComponent<FrustaBoundsComponent>(go);
@@ -105,7 +105,7 @@ int main() {
         auto camera = mockCamera.camera;
         {
             glm::vec3 camPos = spatial->getPosition();
-            ImGui::SliderFloat3("Position", &camPos[0], -4.f, 4.f);
+            ImGui::SliderFloat3("Position", &camPos[0], -20.f, 20.f);
             spatial->setPosition(camPos);
         }
         {
@@ -135,7 +135,7 @@ int main() {
         auto camera = go->getComponentByType<CameraComponent>();
         {
             glm::vec3 camPos = spatial->getPosition();
-            ImGui::SliderFloat3("Position", &camPos[0], -4.f, 4.f);
+            ImGui::SliderFloat3("Position", &camPos[0], -20.f, 20.f);
             spatial->setPosition(camPos);
         }
         {
