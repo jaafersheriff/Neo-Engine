@@ -6,7 +6,7 @@ namespace neo {
     void CameraControllerSystem::update(const float dt) {
         glm::vec2 mousePos = Mouse::getPos();
         glm::vec2 mouseSpeed = Mouse::getSpeed();
-
+ 
         for (auto comp : Engine::getComponents<CameraControllerComponent>()) {
             if (Mouse::isDown(GLFW_MOUSE_BUTTON_1) && (mousePos.x || mousePos.y)) {
                 float theta = comp->mTheta - mouseSpeed.x * comp->mLookSpeed * dt;
@@ -20,6 +20,7 @@ namespace neo {
             int left(Keyboard::isKeyPressed(comp->mLeftButton));
             int up(Keyboard::isKeyPressed(comp->mUpButton));
             int down(Keyboard::isKeyPressed(comp->mDownButton));
+            int speed(Keyboard::isKeyPressed(GLFW_KEY_LEFT_SHIFT));
 
             glm::vec3 dir(
                 float(right - left),
@@ -34,7 +35,7 @@ namespace neo {
                     spatial->mU * dir.x +
                     spatial->mV * dir.y +
                     spatial->mW * dir.z);
-                comp->getGameObject().getSpatial()->move(dir * comp->mMoveSpeed * dt);
+                comp->getGameObject().getSpatial()->move(dir * comp->mMoveSpeed * dt * (speed ? 2.5f : 1.f));
             }
         }
     }
