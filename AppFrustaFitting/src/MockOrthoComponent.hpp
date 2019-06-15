@@ -4,7 +4,9 @@ using namespace neo;
 
 class MockOrthoComponent : public Component {
     public:
-        MockOrthoComponent(GameObject *go) :
-            Component(go) 
+        float distance;
+        MockOrthoComponent(GameObject *go, float dist = 10.f) :
+            Component(go), 
+            distance(dist)
         {}
 };
