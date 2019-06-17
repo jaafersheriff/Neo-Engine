@@ -13,7 +13,7 @@ namespace neo {
 
         public:
 
-            PhongShadowShader(float b = 0.f) :
+            PhongShadowShader(float b = 0.f, bool usePCF = true, int pcfSize = 2) :
                 Shader("PhongShadow Shader", 
                     "#version 330 core\n\
                     layout(location = 0) in vec3 vertPos;\
@@ -99,18 +99,20 @@ namespace neo {
                                     visibility * specularColor * specularContrib;\
                         color.a = albedo.a;\
                     }"),
-                bias(b)
+                bias(b),
+                usePCF(usePCF),
+                pcfSize(pcfSize)
             {}
 
             bool useDotBias = true;
             float bias;
+            bool usePCF;
+            int pcfSize;
             const glm::mat4 biasMatrix = glm::mat4(
                 0.5f, 0.0f, 0.0f, 0.0f,
                 0.0f, 0.5f, 0.0f, 0.0f,
                 0.0f, 0.0f, 0.5f, 0.0f,
                 0.5f, 0.5f, 0.5f, 1.0f);
-            bool usePCF = true;
-            int pcfSize = 2;
 
             virtual void render(const CameraComponent &camera) override {
                 bind();
