@@ -20,6 +20,33 @@ public:
     bool updatePerspective = true;
     bool updateOrtho = true;
 
+    enum Method {
+        Naive,
+        A
+    } method = Naive;
+
+    void methodNaive(CameraComponent* perspectiveCamera, SpatialComponent* perspectiveSpat, FrustaBoundsComponent* perspectiveBounds, 
+               CameraComponent* orthoCamera, SpatialComponent* orthoSpat, MockOrthoComponent* mockOrthoCamera) {
+        FrustaBoundsComponent::BoundingBox box = perspectiveBounds->getBoundingBox();
+        glm::vec3 dif = (box.max - box.min);
+        float diflen = glm::length(dif);
+
+        glm::vec3 center = perspectiveSpat->getPosition() + perspectiveCamera->getLookDir() * (perspectiveCamera->getNearFar().y - perspectiveCamera->getNearFar().x) / 2.f;
+
+        // TODO - this is broken -- treating it as point light when it should be a directional light
+        //      this will need its own phong shadow shader that uses a directional light
+        orthoSpat->setPosition(center - orthoCamera->getLookDir() * mockOrthoCamera->distance);
+
+        glm::vec3 nearPos = center - orthoCamera->getLookDir() * diflen / 2.f;
+        float near = glm::distance(orthoSpat->getPosition(), nearPos);
+        orthoCamera->setNearFar(near, near + diflen);
+        orthoCamera->setOrthoBounds(glm::vec2(-diflen / 2.f, diflen / 2.f), glm::vec2(-diflen / 2.f, diflen / 2.f));
+
+    }
+
+    void methodA() {
+        std::cout << "A" << std::endl;
+    }
 
     virtual void update(const float dt) override {
         auto mockOrthoCamera = Engine::getSingleComponent<MockOrthoComponent>();
@@ -46,22 +73,16 @@ public:
 
         if (updateOrtho) {
             if (auto perspectiveBounds = perspectiveCamera->getGameObject().getComponentByType<FrustaBoundsComponent>()) {
-                FrustaBoundsComponent::BoundingBox box = perspectiveBounds->getBoundingBox();
-                glm::vec3 dif = (box.max - box.min);
-                float diflen = glm::length(dif);
+                switch (method) {
+                    case A:
+                        methodA();
+                        break;
+                    case Naive:
+                    default:
+                        methodNaive(perspectiveCamera, perspectiveSpat, perspectiveBounds,
+                            orthoCamera, orthoSpat, mockOrthoCamera);
 
-                // TODO - resize the scene so its not tiny and i can move around in it
-                // TODO - fix oversampling at shadow map edges
-                glm::vec3 center = perspectiveSpat->getPosition() + perspectiveCamera->getLookDir() * (perspectiveCamera->getNearFar().y - perspectiveCamera->getNearFar().x) / 2.f;
-
-                // TODO - this is broken -- treating it as point light when it should be a directional light
-                //      this will need its own phong shadow shader that uses a directional light
-                orthoSpat->setPosition(center - orthoCamera->getLookDir() * mockOrthoCamera->distance);
-
-                glm::vec3 nearPos = center - orthoCamera->getLookDir() * diflen / 2.f;
-                float near = glm::distance(orthoSpat->getPosition(), nearPos);
-                orthoCamera->setNearFar(near, near + diflen);
-                orthoCamera->setOrthoBounds(glm::vec2(-diflen / 2.f, diflen / 2.f), glm::vec2(-diflen / 2.f, diflen / 2.f));
+                }
             }
         }
     }

@@ -180,6 +180,14 @@ int main() {
                     camera->setOrthoBounds(hBounds, vBounds);
                 }
             }
+            else {
+                if (ImGui::RadioButton("Naive", fitSystem.method == FrustaFittingSystem::Method::Naive)) {
+                    fitSystem.method = FrustaFittingSystem::Method::Naive;
+                }
+                if (ImGui::RadioButton("A", fitSystem.method == FrustaFittingSystem::Method::A)) {
+                    fitSystem.method = FrustaFittingSystem::Method::A;
+                }
+            }
         }
     });
 
