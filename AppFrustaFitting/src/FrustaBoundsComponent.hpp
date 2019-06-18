@@ -31,7 +31,7 @@ class FrustaBoundsComponent : public Component {
         glm::vec3 FarRightBottom;
         glm::vec3 FarRightTop;
 
-        BoundingBox getBoundingBox() {
+        const BoundingBox getBoundingBox() const {
 
             glm::vec3 offset(0.f);
             if (auto spatial = this->getGameObject().getSpatial()) {
