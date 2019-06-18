@@ -15,15 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\CameraLineSystem.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\FrustaBoundsComponent.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\FrustaBoundsSystem.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\FrustaFittingSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -31,6 +22,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\MockPerspectiveComponent.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FrustaBoundsSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FrustumBoundsComponent.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FrustumBoundsToLineSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

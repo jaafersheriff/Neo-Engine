@@ -4,7 +4,7 @@
 #include "Engine.hpp"
 
 #include "Component/CameraComponent/CameraComponent.hpp"
-#include "FrustaBoundsComponent.hpp"
+#include "FrustumBoundsComponent.hpp"
 
 using namespace neo;
 
@@ -17,7 +17,7 @@ public:
 
     virtual void update(const float dt) override {
         for (auto camera : Engine::getComponents<CameraComponent>()) {
-            if (auto bounds = camera->getGameObject().getComponentByType<FrustaBoundsComponent>()) {
+            if (auto bounds = camera->getGameObject().getComponentByType<FrustumBoundsComponent>()) {
                 float nDis = camera->getNearFar().x;
                 float fDis = camera->getNearFar().y;
                 float fov = glm::radians(camera->getFOV());

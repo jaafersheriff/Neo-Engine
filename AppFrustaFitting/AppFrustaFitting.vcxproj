@@ -119,8 +119,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\CameraLineSystem.hpp" />
-    <ClInclude Include="src\FrustaBoundsComponent.hpp" />
+    <ClInclude Include="src\FrustumBoundsToLineSystem.hpp" />
+    <ClInclude Include="src\FrustumBoundsComponent.hpp" />
     <ClInclude Include="src\FrustaBoundsSystem.hpp" />
     <ClInclude Include="src\FrustaFittingSystem.hpp" />
     <ClInclude Include="src\MockOrthoComponent.hpp" />

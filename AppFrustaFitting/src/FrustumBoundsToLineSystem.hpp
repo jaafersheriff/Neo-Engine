@@ -4,22 +4,22 @@
 #include "Engine.hpp"
 
 #include "Component/CameraComponent/CameraComponent.hpp"
-#include "FrustaBoundsComponent.hpp"
+#include "FrustumBoundsComponent.hpp"
 
 using namespace neo;
 
-class CameraLineSystem : public System {
+class FrustumBoundsToLineSystem : public System {
 
 public:
-    CameraLineSystem() :
-        System("CameraLine System")
+    FrustumBoundsToLineSystem() :
+        System("FrustumBoundsToLine System")
     {}
 
 
     virtual void update(const float dt) override {
         for (auto camera : Engine::getComponents<CameraComponent>()) {
             if (auto line = camera->getGameObject().getComponentByType<LineComponent>()) {
-                if (auto bounds = camera->getGameObject().getComponentByType<FrustaBoundsComponent>()) {
+                if (auto bounds = camera->getGameObject().getComponentByType<FrustumBoundsComponent>()) {
 
 
                     line->clearNodes();
