@@ -153,7 +153,7 @@ int main() {
         auto spatial = light.gameObject->getSpatial();
         auto camera = light.camera;
         {
-            ImGui::SliderFloat("Distance", &light.gameObject->getComponentByType<MockOrthoComponent>()->distance, 1.f, 25.f);
+            ImGui::SliderFloat("Distance", &light.gameObject->getComponentByType<MockOrthoComponent>()->distance, 1.f, 75.f);
             glm::vec3 camPos = spatial->getPosition();
         }
         {
