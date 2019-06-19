@@ -87,7 +87,8 @@ public:
         // mat4 invview
         // Notes - finds the bounding box in light space
         {
-            glm::mat4 M = glm::inverse(orthoCamera->getView());
+            glm::mat4 M = glm::inverse(orthoSpat->getModelMatrix());
+
             dummyNearLeftBottom  = glm::vec3(M * glm::vec4(dummyNearLeftBottom, 1.f));
             dummyNearLeftTop     = glm::vec3(M * glm::vec4(dummyNearLeftTop, 1.f));
             dummyNearRightBottom = glm::vec3(M * glm::vec4(dummyNearRightBottom, 1.f));
@@ -109,22 +110,32 @@ public:
         box.addNewPosition(dummyFarRightBottom);
         box.addNewPosition(dummyFarRightTop);
 
-        // translate back 
-
+        // just visualize transformations for now
         if (auto orthoBounds = orthoSpat->getGameObject().getComponentByType<FrustumBoundsComponent>()) {
-            orthoBounds->NearLeftBottom = glm::vec3(box.min);
-            orthoBounds->NearLeftTop = glm::vec3(box.min.x, box.max.y, box.min.z);
-            orthoBounds->NearRightBottom = glm::vec3(box.max.x, box.min.y, box.min.z);
-            orthoBounds->NearRightTop = glm::vec3(box.max.x, box.max.y, box.min.z);
-            orthoBounds->FarLeftBottom = glm::vec3(box.min.x, box.min.y, box.max.z);
-            orthoBounds->FarLeftTop = glm::vec3(box.min.x, box.max.y, box.max.z);
-            orthoBounds->FarRightBottom = glm::vec3(box.max.x, box.min.y, box.max.z);
-            orthoBounds->FarRightTop = glm::vec3(box.max);
+            // orthoBounds->NearLeftBottom = glm::vec3(box.min);
+            // orthoBounds->NearLeftTop = glm::vec3(box.min.x, box.max.y, box.min.z);
+            // orthoBounds->NearRightBottom = glm::vec3(box.max.x, box.min.y, box.min.z);
+            // orthoBounds->NearRightTop = glm::vec3(box.max.x, box.max.y, box.min.z);
+            // orthoBounds->FarLeftBottom = glm::vec3(box.min.x, box.min.y, box.max.z);
+            // orthoBounds->FarLeftTop = glm::vec3(box.min.x, box.max.y, box.max.z);
+            // orthoBounds->FarRightBottom = glm::vec3(box.max.x, box.min.y, box.max.z);
+            // orthoBounds->FarRightTop = glm::vec3(box.max);
         }
 
+
         // set ortho camera extents to be the bounding box
-        // orthoCamera->setNearFar(box.min.z, box.max.z);
-        // orthoCamera->setOrthoBounds(glm::vec2(box.min.x, box.max.x), glm::vec2(box.min.y, box.max.y));
+        orthoCamera->setOrthoBounds(glm::vec2(box.min.x, box.max.x), 
+                                    glm::vec2(box.min.y, box.max.y));
+
+
+        glm::vec3 center = perspectiveSpat->getPosition() + perspectiveCamera->getLookDir() * perspectiveCamera->getNearFar().y / 2.f;
+        orthoSpat->setPosition(center - orthoCamera->getLookDir() * mockOrthoCamera->distance);
+
+        // this is the only part thats broken
+        glm::vec3 nearPos = center - orthoCamera->getLookDir() * (box.max.z-box.min.z) / 2.f;
+        float near = glm::distance(orthoSpat->getPosition(), nearPos);
+        orthoCamera->setNearFar(near, near + (box.max.z-box.min.z));
+
     }
 
     virtual void update(const float dt) override {
