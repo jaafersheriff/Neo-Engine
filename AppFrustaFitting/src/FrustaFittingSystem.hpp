@@ -21,6 +21,7 @@ public:
     bool updateOrtho = true;
 
     enum Method {
+        Dumb,
         Naive,
         A
     } method = Naive;
@@ -52,6 +53,14 @@ public:
             if (other.z > max.z) { max.z = other.z; }
         }
     };
+
+    void methodDumb(CameraComponent* perspectiveCamera, SpatialComponent* perspectiveSpat, FrustumBoundsComponent* perspectiveBounds,
+            CameraComponent* orthoCamera, SpatialComponent* orthoSpat, MockOrthoComponent* mockOrthoCamera) {
+        glm::vec3 source = orthoSpat->getPosition();
+        glm::vec3 destination = perspectiveSpat->getPosition();
+        orthoCamera->setLookDir(destination - source);
+        orthoSpat->setPosition(destination - orthoCamera->getLookDir() * mockOrthoCamera->distance);
+    }
 
     void methodNaive(CameraComponent* perspectiveCamera, SpatialComponent* perspectiveSpat, FrustumBoundsComponent* perspectiveBounds, 
                CameraComponent* orthoCamera, SpatialComponent* orthoSpat, MockOrthoComponent* mockOrthoCamera) {
@@ -89,6 +98,15 @@ public:
         {
             glm::mat4 M = glm::inverse(orthoSpat->getModelMatrix());
 
+//             perspectiveBounds->NearLeftBottom  = glm::vec3(M * glm::vec4(dummyNearLeftBottom, 1.f));
+//             perspectiveBounds->NearLeftTop     = glm::vec3(M * glm::vec4(dummyNearLeftTop, 1.f));
+//             perspectiveBounds->NearRightBottom = glm::vec3(M * glm::vec4(dummyNearRightBottom, 1.f));
+//             perspectiveBounds->NearRightTop    = glm::vec3(M * glm::vec4(dummyNearRightTop, 1.f));
+//             perspectiveBounds->FarLeftBottom   = glm::vec3(M * glm::vec4(dummyFarLeftBottom, 1.f));
+//             perspectiveBounds->FarLeftTop      = glm::vec3(M * glm::vec4(dummyFarLeftTop, 1.f));
+//             perspectiveBounds->FarRightBottom  = glm::vec3(M * glm::vec4(dummyFarRightBottom, 1.f));
+//             perspectiveBounds->FarRightTop     = glm::vec3(M * glm::vec4(dummyFarRightTop, 1.f));
+
             dummyNearLeftBottom  = glm::vec3(M * glm::vec4(dummyNearLeftBottom, 1.f));
             dummyNearLeftTop     = glm::vec3(M * glm::vec4(dummyNearLeftTop, 1.f));
             dummyNearRightBottom = glm::vec3(M * glm::vec4(dummyNearRightBottom, 1.f));
@@ -111,18 +129,30 @@ public:
         box.addNewPosition(dummyFarRightTop);
 
 
-        // set ortho camera extents to be the bounding box
-        orthoCamera->setOrthoBounds(glm::vec2(box.min.x, box.max.x), 
-                                    glm::vec2(box.min.y, box.max.y));
+                // just visualize transformations for now
+        if (auto orthoBounds = orthoSpat->getGameObject().getComponentByType<FrustumBoundsComponent>()) {
+            // orthoBounds->NearLeftBottom = glm::vec3(box.min);
+            // orthoBounds->NearLeftTop = glm::vec3(box.min.x, box.max.y, box.min.z);
+            // orthoBounds->NearRightBottom = glm::vec3(box.max.x, box.min.y, box.min.z);
+            // orthoBounds->NearRightTop = glm::vec3(box.max.x, box.max.y, box.min.z);
+            // orthoBounds->FarLeftBottom = glm::vec3(box.min.x, box.min.y, box.max.z);
+            // orthoBounds->FarLeftTop = glm::vec3(box.min.x, box.max.y, box.max.z);
+            // orthoBounds->FarRightBottom = glm::vec3(box.max.x, box.min.y, box.max.z);
+            // orthoBounds->FarRightTop = glm::vec3(box.max);
+        }
 
 
+        // // set ortho camera extents to be the bounding box
         glm::vec3 center = perspectiveSpat->getPosition() + perspectiveCamera->getLookDir() * perspectiveCamera->getNearFar().x + perspectiveCamera->getLookDir() * (perspectiveCamera->getNearFar().y - perspectiveCamera->getNearFar().x) / 2.f;
+        orthoCamera->setOrthoBounds(glm::vec2(box.min.x, box.max.x), 
+        glm::vec2(box.min.y, box.max.y));
         orthoSpat->setPosition(center - orthoCamera->getLookDir() * mockOrthoCamera->distance);
 
-        // this is the only part thats broken
+        // // this is the only part thats broken
         glm::vec3 nearPos = center - orthoCamera->getLookDir() * (box.max.z-box.min.z) / 2.f;
         float near = glm::distance(orthoSpat->getPosition(), nearPos);
-        orthoCamera->setNearFar(near, near + (box.max.z - box.min.z));
+        float centerdist = glm::distance(orthoSpat->getPosition(), center);
+        orthoCamera->setNearFar(centerdist- (box.max.z-box.min.z)/2.f, centerdist + (box.max.z-box.min.z)/2.f);
     }
 
     virtual void update(const float dt) override {
@@ -151,6 +181,10 @@ public:
         if (updateOrtho) {
             if (auto perspectiveBounds = perspectiveCamera->getGameObject().getComponentByType<FrustumBoundsComponent>()) {
                 switch (method) {
+                    case Dumb:
+                        methodDumb(perspectiveCamera, perspectiveSpat, perspectiveBounds,
+                            orthoCamera, orthoSpat, mockOrthoCamera);
+                        break;
                     case A:
                         methodA(perspectiveCamera, perspectiveSpat, perspectiveBounds,
                             orthoCamera, orthoSpat, mockOrthoCamera);

@@ -55,8 +55,6 @@ namespace neo {
                 }
 
                 unbind();
-                CHECK_GL(glEnable(GL_CULL_FACE));
-                CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
             }
         };
 

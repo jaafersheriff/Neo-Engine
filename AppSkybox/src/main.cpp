@@ -33,10 +33,8 @@ struct Skybox {
 };
 
 struct Reflection {
-    GameObject *gameObject;
-
     Reflection(Mesh *m, glm::vec3 pos, float scale = 1.f) {
-        gameObject = &Engine::createGameObject();
+        auto gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(scale));
         Engine::addComponent<MeshComponent>(gameObject, m);
         Engine::addComponent<renderable::WireframeRenderable>(gameObject);
@@ -44,71 +42,57 @@ struct Reflection {
         Engine::addComponent<RotationComponent>(gameObject, glm::vec3(0.f, 0.3f, 0.f));
 
         Engine::addImGuiFunc("Reflection", [&]() {
-            glm::vec3 pos = gameObject->getSpatial()->getPosition();
-            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
-                gameObject->getSpatial()->setPosition(pos);
-            }
-            float scale = gameObject->getSpatial()->getScale().x;
-            if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
-                gameObject->getSpatial()->setScale(glm::vec3(scale));
-            }
-
-            if (ImGui::Button("Add reflection")) {
-                Engine::addComponent<ReflectionComponent>(gameObject);
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Add wireframe")) {
-                Engine::addComponent<renderable::WireframeRenderable>(gameObject);
-            }
-            if (ImGui::Button("Remove reflection")) {
-                Engine::removeComponent<ReflectionComponent>(*gameObject->getComponentByType<ReflectionComponent>());
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Remove wireframe")) {
-                Engine::removeComponent<renderable::WireframeRenderable>(*gameObject->getComponentByType<renderable::WireframeRenderable>());
+            if (auto reflection = Engine::getSingleComponent<ReflectionComponent>()) {
+                glm::vec3 pos = reflection->getGameObject().getSpatial()->getPosition();
+                if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
+                    reflection->getGameObject().getSpatial()->setPosition(pos);
+                }
+                float scale = reflection->getGameObject().getSpatial()->getScale().x;
+                if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
+                    reflection->getGameObject().getSpatial()->setScale(glm::vec3(scale));
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Add wireframe")) {
+                    Engine::addComponent<renderable::WireframeRenderable>(&reflection->getGameObject());
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Remove wireframe")) {
+                    Engine::removeComponent<renderable::WireframeRenderable>(*reflection->getGameObject().getComponentByType<renderable::WireframeRenderable>());
+                }
             }
         });
     }
 };
 
 struct Refraction {
-    GameObject *gameObject;
-    RefractionComponent *refraction;
-
     Refraction(Mesh *m, glm::vec3 pos, float scale = 1.f) {
-        gameObject = &Engine::createGameObject();
+        auto gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(scale));
         Engine::addComponent<MeshComponent>(gameObject, m);
-        refraction = &Engine::addComponent<RefractionComponent>(gameObject);
+        Engine::addComponent<RefractionComponent>(gameObject);
         Engine::addComponent<renderable::WireframeRenderable>(gameObject);
         Engine::addComponent<RotationComponent>(gameObject, glm::vec3(0.f, 0.3f, 0.f));
 
         Engine::addImGuiFunc("Refraction", [&]() {
-            ImGui::SliderFloat("Index", &refraction->ratio, 0.f, 1.f);
-            glm::vec3 pos = gameObject->getSpatial()->getPosition();
-            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
-                gameObject->getSpatial()->setPosition(pos);
+            if (auto refraction = Engine::getSingleComponent<RefractionComponent>()) {
+                ImGui::SliderFloat("Index", &refraction->ratio, 0.f, 1.f);
+                glm::vec3 pos = refraction->getGameObject().getSpatial()->getPosition();
+                if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
+                    refraction->getGameObject().getSpatial()->setPosition(pos);
+                }
+                float scale = refraction->getGameObject().getSpatial()->getScale().x;
+                if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
+                    refraction->getGameObject().getSpatial()->setScale(glm::vec3(scale));
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Add wireframe")) {
+                    Engine::addComponent<renderable::WireframeRenderable>(&refraction->getGameObject());
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Remove wireframe")) {
+                    Engine::removeComponent<renderable::WireframeRenderable>(*refraction->getGameObject().getComponentByType<renderable::WireframeRenderable>());
+                }
             }
-            float scale = gameObject->getSpatial()->getScale().x;
-            if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
-                gameObject->getSpatial()->setScale(glm::vec3(scale));
-            }
-
-            if (ImGui::Button("Add refraction")) {
-                refraction = &Engine::addComponent<RefractionComponent>(gameObject);
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Add wireframe")) {
-                Engine::addComponent<renderable::WireframeRenderable>(gameObject);
-            }
-            if (ImGui::Button("Remove refraction")) {
-                Engine::removeComponent<RefractionComponent>(*gameObject->getComponentByType<RefractionComponent>());
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Remove wireframe")) {
-                Engine::removeComponent<renderable::WireframeRenderable>(*gameObject->getComponentByType<renderable::WireframeRenderable>());
-            }
- 
         });
     }
 };

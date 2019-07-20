@@ -23,18 +23,16 @@ struct Camera {
 };
 
 struct Light {
-    GameObject *gameObject;
-    LightComponent *light;
-
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        gameObject = &Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(gameObject, pos);
-        light = &Engine::addComponent<LightComponent>(gameObject, col, att);
+        auto& gameObject = Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(&gameObject, pos);
+        Engine::addComponent<LightComponent>(&gameObject, col, att);
 
         Engine::addImGuiFunc("Light", [&]() {
-            glm::vec3 pos = gameObject->getSpatial()->getPosition();
+            auto light = Engine::getSingleComponent<LightComponent>();
+            glm::vec3 pos = light->getGameObject().getSpatial()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
-                gameObject->getSpatial()->setPosition(pos);
+                light->getGameObject().getSpatial()->setPosition(pos);
             }
             ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
             ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);

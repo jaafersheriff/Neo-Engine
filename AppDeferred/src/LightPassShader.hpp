@@ -21,7 +21,7 @@ class LightPassShader : public Shader {
             auto lightFBO = Library::getFBO("lightpass");
             lightFBO->generate();
             lightFBO->attachColorTexture(Window::getFrameSize(), 4, TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
-            lightFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
+            // lightFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
@@ -85,13 +85,6 @@ class LightPassShader : public Shader {
                 mesh->draw();
             }
 
-            CHECK_GL(glBindVertexArray(0));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
             unbind();
-            CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-            CHECK_GL(glEnable(GL_DEPTH_TEST));
-            CHECK_GL(glEnable(GL_CULL_FACE));
-            CHECK_GL(glCullFace(GL_BACK));
     }
 };

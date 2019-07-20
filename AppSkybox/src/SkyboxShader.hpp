@@ -39,12 +39,6 @@ class SkyboxShader : public Shader {
             /* Draw */
             mesh.draw();
 
-            CHECK_GL(glBindVertexArray(0));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-
             unbind();
-
-            CHECK_GL(glEnable(GL_CULL_FACE));
-            CHECK_GL(glDepthFunc(GL_LESS));
         }
 };

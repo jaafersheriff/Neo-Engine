@@ -190,6 +190,9 @@ int main() {
                 }
             }
             else {
+                if (ImGui::RadioButton("Dumb", fitSystem.method == FrustaFittingSystem::Method::Dumb)) {
+                    fitSystem.method = FrustaFittingSystem::Method::Dumb;
+                }
                 if (ImGui::RadioButton("Naive", fitSystem.method == FrustaFittingSystem::Method::Naive)) {
                     fitSystem.method = FrustaFittingSystem::Method::Naive;
                 }

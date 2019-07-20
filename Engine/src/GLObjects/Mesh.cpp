@@ -20,10 +20,12 @@ namespace neo {
             // TODO - instanced?
             CHECK_GL(glDrawElements(mPrimitiveType, size ? size : mElementBufferSize, GL_UNSIGNED_INT, nullptr));
         }
+        else if (size) {
+            CHECK_GL(glDrawArrays(mPrimitiveType, 0, size));
+        }
         else {
-            int vSize = size;
-            if (!vSize) {
-                switch (mPrimitiveType) {
+            int vSize = 0;
+            switch (mPrimitiveType) {
                 case GL_POINTS:
                 case GL_LINE_STRIP:
                     vSize = mVertexBufferSize / 3;
@@ -33,7 +35,6 @@ namespace neo {
                     vSize = mVertexBufferSize / 9;
                 default:
                     vSize = mVertexBufferSize;
-                }
             }
             CHECK_GL(glDrawArrays(mPrimitiveType, 0, vSize));
         }

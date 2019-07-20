@@ -25,6 +25,8 @@ class SurveillanceReadShader : public Shader {
             /* Bind mesh */
             auto mesh(Library::getMesh("quad"));
             CHECK_GL(glBindVertexArray(mesh->mVAOID));
+            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh->mVertexBufferID));
+            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mElementBufferID));
 
             for (auto camera : Engine::getComponents<SurveillanceCamera>()) {
                 loadUniform("M", camera->getGameObject().getSpatial()->getModelMatrix());

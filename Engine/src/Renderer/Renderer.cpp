@@ -37,13 +37,25 @@ namespace neo {
     }
 
     void Renderer::resetState() {
+        CHECK_GL(glClearColor(0.0f, 0.0f, 0.0f, 1.f));
+
         CHECK_GL(glEnable(GL_DEPTH_TEST));
+        CHECK_GL(glDepthFunc(GL_LESS));
+
         CHECK_GL(glEnable(GL_CULL_FACE));
         CHECK_GL(glCullFace(GL_BACK));
+
+        CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+
         CHECK_GL(glEnable(GL_BLEND));
         CHECK_GL(glBlendEquation(GL_FUNC_ADD));
         CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        CHECK_GL(glClearColor(0.0f, 0.0f, 0.0f, 1.f));
+
+        CHECK_GL(glBindVertexArray(0));
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+        CHECK_GL(glActiveTexture(GL_TEXTURE0));
+        CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
     }
 
     void Renderer::render(float dt) {
@@ -79,8 +91,6 @@ namespace neo {
 
         /* Post process with ping & pong */
         if (activePostShaders.size()) {
-            CHECK_GL(glDisable(GL_DEPTH_TEST));
-
             /* Render first post process shader into appropriate output buffer */
             Framebuffer *inputFBO = mDefaultFBO;
             Framebuffer *outputFBO = activePostShaders.size() == 1 ? Library::getFBO("0") : Library::getFBO("pong");
@@ -103,7 +113,6 @@ namespace neo {
             if (activePostShaders.size() > 1) {
                 _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("0"));
             }
-            CHECK_GL(glEnable(GL_DEPTH_TEST));
         }
 
         /* Render imgui */
@@ -118,6 +127,8 @@ namespace neo {
     void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output) {
         // Reset output FBO
         output->bind();
+        resetState();
+        CHECK_GL(glDisable(GL_DEPTH_TEST));
         CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
         // TODO : messaging to resize fbo
@@ -128,6 +139,8 @@ namespace neo {
         shader.bind();
         auto mesh = Library::getMesh("quad");
         CHECK_GL(glBindVertexArray(mesh->mVAOID));
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh->mVertexBufferID));
+        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mElementBufferID));
 
         // Bind input fbo texture
         input->mTextures[0]->bind();
