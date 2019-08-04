@@ -6,6 +6,7 @@
 #include "Component/CameraComponent/CameraComponent.hpp"
 #include "Component/SpatialComponent/SpatialComponent.hpp"
 
+#include <algorithm>
 #include <limits>
 
 using namespace neo;
@@ -23,7 +24,8 @@ public:
     enum Method {
         Dumb,
         Naive,
-        A
+        A,
+        B
     } method = Naive;
 
     struct BoundingBox {
@@ -51,6 +53,22 @@ public:
             if (other.x > max.x) { max.x = other.x; }
             if (other.y > max.y) { max.y = other.y; }
             if (other.z > max.z) { max.z = other.z; }
+        }
+
+        glm::vec3 center() {
+            return glm::mix(min, max, 0.5f);
+        }
+
+        float width() {
+            return max.x - min.x;
+        }
+
+        float height() {
+            return max.y - min.y;
+        }
+
+        float depth() {
+            return max.z - min.z;
         }
     };
 
@@ -155,6 +173,63 @@ public:
         orthoCamera->setNearFar(centerdist- (box.max.z-box.min.z)/2.f, centerdist + (box.max.z-box.min.z)/2.f);
     }
 
+    void methodB(CameraComponent* perspectiveCamera, SpatialComponent* perspectiveSpat, FrustumBoundsComponent* perspectiveBounds,
+            CameraComponent* orthoCamera, SpatialComponent* orthoSpat, MockOrthoComponent* mockOrthoCamera) {
+        const float bias = 0.0002f;
+
+        const glm::vec3 lightDir = glm::normalize(-orthoCamera->getLookDir());
+        const glm::vec3 up = orthoCamera->getUpDir();
+
+        const auto& sceneView = perspectiveCamera->getView();
+        const auto& sceneProj = perspectiveCamera->getProj();
+        const auto& worldToLight = glm::lookAt(orthoSpat->getPosition(), glm::vec3(0.f), up);
+        const auto& lightToWorld = glm::inverse(worldToLight);
+
+        const float aspect = sceneProj[1][1] / sceneProj[0][0];
+        const float fov = 2.f * glm::atan(1.f / sceneProj[1][1]);
+        const float zNear = sceneProj[3][2] / (sceneProj[2][2] - 1.f);
+        const float zFar = sceneProj[3][2] / (sceneProj[2][2] + 1.f);
+        const float zRange = std::min(mockOrthoCamera->range, zFar - zNear);
+        const float depthMin = -1.f; // GL things?
+
+        const std::vector<glm::vec4> corners = { // screen space ortho box 
+            { -1.f,  1.f, depthMin, 1.f }, // corners of near plane
+            {  1.f,  1.f, depthMin, 1.f },
+            { -1.f, -1.f, depthMin, 1.f },
+            {  1.f, -1.f, depthMin, 1.f },
+            { -1.f,  1.f,      1.f, 1.f }, // corners of far plane
+            {  1.f,  1.f,      1.f, 1.f },
+            { -1.f, -1.f,      1.f, 1.f },
+            {  1.f, -1.f,      1.f, 1.f }
+        };
+
+        float cNear = zNear;
+        float cFar = zNear + zFar; // * 1.f
+        glm::mat4 shadowProj = glm::perspective(fov, aspect, cNear, cFar);
+        glm::mat4 shadowViewProj = shadowProj * sceneView;
+        glm::mat4 shadowToWorld = glm::inverse(shadowViewProj);
+
+        BoundingBox orthoBox;
+        for (const auto& corner : corners) {
+            glm::vec4 worldPos = shadowToWorld * corner;
+            worldPos = worldPos / worldPos.w;
+            worldPos = worldToLight * worldPos;
+            orthoBox.addNewPosition(worldPos);
+        }
+
+        glm::vec3 center = lightToWorld * glm::vec4(orthoBox.center(), 1.f);
+        const float boxWidth = orthoBox.width() * 0.5f;
+        const float boxHeight = orthoBox.height() * 0.5f;
+        const float boxDepth = orthoBox.depth() * 0.5f;
+
+        glm::vec3 shadowViewPos = glm::vec3(center) - (lightDir * mockOrthoCamera->distance);
+        orthoSpat->setPosition(shadowViewPos);
+        orthoCamera->setLookDir(shadowViewPos - center);
+        orthoCamera->setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
+        orthoCamera->setNearFar(0.f, mockOrthoCamera->distance + boxDepth);
+    }
+
+
     virtual void update(const float dt) override {
         auto mockOrthoCamera = Engine::getSingleComponent<MockOrthoComponent>();
         auto mockPerspectiveCamera = Engine::getSingleComponent<MockPerspectiveComponent>();
@@ -187,6 +262,10 @@ public:
                         break;
                     case A:
                         methodA(perspectiveCamera, perspectiveSpat, perspectiveBounds,
+                            orthoCamera, orthoSpat, mockOrthoCamera);
+                        break;
+                    case B:
+                        methodB(perspectiveCamera, perspectiveSpat, perspectiveBounds,
                             orthoCamera, orthoSpat, mockOrthoCamera);
                         break;
                     case Naive:

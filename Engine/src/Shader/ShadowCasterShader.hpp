@@ -11,7 +11,7 @@ namespace neo {
 
         public:
 
-            ShadowCasterShader() :
+            ShadowCasterShader(const int dimension) :
                 Shader("Shadow Caster",
                     "#version 330 core\n\
                         layout (location = 0) in vec3 vertPos;\
@@ -31,7 +31,7 @@ namespace neo {
                 /* Init shadow map */
                 Framebuffer *depthFBO = Library::getFBO("depthMap");
                 depthFBO->generate();
-                depthFBO->attachDepthTexture(glm::ivec2(2048), GL_LINEAR, GL_CLAMP_TO_BORDER);
+                depthFBO->attachDepthTexture(glm::ivec2(dimension), GL_LINEAR, GL_CLAMP_TO_BORDER);
                 depthFBO->disableDraw();
                 depthFBO->disableRead();
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, depthFBO->mTextures[0]->mTextureID));

@@ -39,7 +39,7 @@ struct Light {
         camera = &Engine::addComponent<CameraComponent>(gameObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
         Engine::addComponent<renderable::LineMeshComponent>(gameObject, &Engine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 1.f)));
         Engine::addComponent<FrustumBoundsComponent>(gameObject);
-        Engine::addComponent<MockOrthoComponent>(gameObject, glm::length(position));
+        Engine::addComponent<MockOrthoComponent>(gameObject);
         Engine::addComponent<LightComponent>(gameObject, glm::vec3(1.f), glm::vec3(0.4f, 0.2f, 0.f));
         Engine::addComponent<ShadowCameraComponent>(gameObject);
 
@@ -100,7 +100,7 @@ int main() {
 
     /* Init renderer */
     Renderer::init("shaders/", sceneCamera.camera);
-    Renderer::addPreProcessShader<ShadowCasterShader>();
+    Renderer::addPreProcessShader<ShadowCasterShader>(2048);
     Renderer::addSceneShader<PhongShadowShader>();
     Renderer::addSceneShader<LineShader>();
     Renderer::addSceneShader<WireframeShader>();
@@ -159,7 +159,8 @@ int main() {
         auto spatial = light.gameObject->getSpatial();
         auto camera = light.camera;
         {
-            ImGui::SliderFloat("Distance", &light.gameObject->getComponentByType<MockOrthoComponent>()->distance, 1.f, 75.f);
+            ImGui::SliderFloat("Range", &light.gameObject->getComponentByType<MockOrthoComponent>()->distance, 0.01f, 75.f);
+            ImGui::SliderFloat("Distance", &light.gameObject->getComponentByType<MockOrthoComponent>()->range, 0.f, 512.f);
             glm::vec3 camPos = spatial->getPosition();
             if (ImGui::SliderFloat3("Position", &camPos[0], -10.f, 10.f)) {
                 spatial->setPosition(camPos);
@@ -198,6 +199,9 @@ int main() {
                 }
                 if (ImGui::RadioButton("A", fitSystem.method == FrustaFittingSystem::Method::A)) {
                     fitSystem.method = FrustaFittingSystem::Method::A;
+                }
+                if (ImGui::RadioButton("B", fitSystem.method == FrustaFittingSystem::Method::B)) {
+                    fitSystem.method = FrustaFittingSystem::Method::B;
                 }
             }
         }
