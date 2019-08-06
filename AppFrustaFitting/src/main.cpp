@@ -17,6 +17,8 @@
 
 using namespace neo;
 
+static constexpr int shadowMapSize = 2048;
+
 /* Game object definitions */
 struct Camera {
     GameObject *gameObject;
@@ -94,13 +96,13 @@ int main() {
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>(); // Update camera
     Engine::addSystem<FrustaBoundsSystem>(); // Calculate original frusta bounds
-    auto& fitSystem = Engine::addSystem<FrustaFittingSystem>(); // Fit one frusta into another
+    auto& fitSystem = Engine::addSystem<FrustaFittingSystem>(1.f / shadowMapSize); // Fit one frusta into another
     Engine::addSystem<FrustumBoundsToLineSystem>(); // Create line mesh
     Engine::initSystems();
 
     /* Init renderer */
     Renderer::init("shaders/", sceneCamera.camera);
-    Renderer::addPreProcessShader<ShadowCasterShader>(2048);
+    Renderer::addPreProcessShader<ShadowCasterShader>(shadowMapSize);
     Renderer::addSceneShader<PhongShadowShader>();
     Renderer::addSceneShader<LineShader>();
     Renderer::addSceneShader<WireframeShader>();

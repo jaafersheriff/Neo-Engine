@@ -14,16 +14,11 @@ using namespace neo;
 class FrustaFittingSystem : public System {
 
 public:
-    FrustaFittingSystem() :
-        System("FrustaFitting System")
-    {}
-
-    bool updatePerspective = true;
-    bool updateOrtho = true;
 
     struct BoundingBox {
         glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
         glm::vec3 max = glm::vec3(-std::numeric_limits<float>::max());
+        std::vector<glm::vec3> points;
 
         BoundingBox() {}
 
@@ -46,6 +41,7 @@ public:
             if (other.x > max.x) { max.x = other.x; }
             if (other.y > max.y) { max.y = other.y; }
             if (other.z > max.z) { max.z = other.z; }
+            points.push_back(other);
         }
 
         glm::vec3 center() {
@@ -64,6 +60,25 @@ public:
             return max.z - min.z;
         }
     };
+
+    bool updatePerspective = true;
+    bool updateOrtho = true;
+    BoundingBox oldCorners;
+    float texelSize;
+
+    FrustaFittingSystem(float texelSize) :
+        System("FrustaFitting System"),
+        texelSize(texelSize) {
+        // add 8 dummy corners
+        oldCorners.addNewPosition(glm::vec3(FLT_MAX));
+        oldCorners.addNewPosition(glm::vec3(FLT_MAX));
+        oldCorners.addNewPosition(glm::vec3(FLT_MAX));
+        oldCorners.addNewPosition(glm::vec3(FLT_MAX));
+        oldCorners.addNewPosition(glm::vec3(FLT_MIN));
+        oldCorners.addNewPosition(glm::vec3(FLT_MIN));
+        oldCorners.addNewPosition(glm::vec3(FLT_MIN));
+        oldCorners.addNewPosition(glm::vec3(FLT_MIN));
+    }
 
     virtual void update(const float dt) override {
         auto mockOrthoCamera = Engine::getSingleComponent<MockOrthoComponent>();
@@ -123,6 +138,20 @@ public:
             worldPos = worldToLight * worldPos; // rotate corners with light's world rotation
             orthoBox.addNewPosition(worldPos);
         }
+
+        // quantize shadow box updates
+        // TODO - this is in world space..it should probably be in shadow space?
+        if (glm::distance(orthoBox.points[0], oldCorners.points[0]) < texelSize ||
+            glm::distance(orthoBox.points[1], oldCorners.points[1]) < texelSize ||
+            glm::distance(orthoBox.points[2], oldCorners.points[2]) < texelSize ||
+            glm::distance(orthoBox.points[3], oldCorners.points[3]) < texelSize ||
+            glm::distance(orthoBox.points[4], oldCorners.points[4]) < texelSize ||
+            glm::distance(orthoBox.points[5], oldCorners.points[5]) < texelSize ||
+            glm::distance(orthoBox.points[6], oldCorners.points[6]) < texelSize ||
+            glm::distance(orthoBox.points[7], oldCorners.points[7]) < texelSize) {
+            return;
+        }
+        oldCorners = orthoBox;
 
         glm::vec3 center = lightToWorld * glm::vec4(orthoBox.center(), 1.f); // orthos center back in light space
         const float boxWidth = orthoBox.width() * 0.5f;
