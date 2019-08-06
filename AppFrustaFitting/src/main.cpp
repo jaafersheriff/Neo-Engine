@@ -190,20 +190,6 @@ int main() {
                     camera->setOrthoBounds(hBounds, vBounds);
                 }
             }
-            else {
-                if (ImGui::RadioButton("Dumb", fitSystem.method == FrustaFittingSystem::Method::Dumb)) {
-                    fitSystem.method = FrustaFittingSystem::Method::Dumb;
-                }
-                if (ImGui::RadioButton("Naive", fitSystem.method == FrustaFittingSystem::Method::Naive)) {
-                    fitSystem.method = FrustaFittingSystem::Method::Naive;
-                }
-                if (ImGui::RadioButton("A", fitSystem.method == FrustaFittingSystem::Method::A)) {
-                    fitSystem.method = FrustaFittingSystem::Method::A;
-                }
-                if (ImGui::RadioButton("B", fitSystem.method == FrustaFittingSystem::Method::B)) {
-                    fitSystem.method = FrustaFittingSystem::Method::B;
-                }
-            }
         }
     });
 
