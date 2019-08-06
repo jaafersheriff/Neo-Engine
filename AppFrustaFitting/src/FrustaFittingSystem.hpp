@@ -132,6 +132,9 @@ public:
         glm::vec3 shadowViewPos = glm::vec3(center) + (lightDir * mockOrthoCamera->distance);
         orthoSpat->setPosition(shadowViewPos);
         orthoCamera->setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
-        orthoCamera->setNearFar(0.f, boxDepth * mockOrthoCamera->distance); // this part is still broken ;|
+
+        glm::vec3 midSceneView = perspectiveSpat->getPosition() + perspectiveCamera->getLookDir() * perspectiveCamera->getNearFar().y / 2.f;
+        float shadowToSceneDistance = glm::distance(shadowViewPos, midSceneView);
+        orthoCamera->setNearFar(-boxDepth + shadowToSceneDistance, boxDepth + shadowToSceneDistance);
     }
 };
