@@ -17,7 +17,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -78,7 +78,7 @@ struct Surveillance {
     Surveillance(std::string name, glm::vec3 pos, glm::vec3 scale, glm::mat3 orientation) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, scale, orientation);
-        camera = &Engine::addComponent<SurveillanceCamera>(gameObject, name, 1.f, 100.f);
+        camera = &Engine::addComponent<SurveillanceCamera>(gameObject, name, 1.f, 20.f);
         // Line
         LineComponent *uLine = &Engine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });

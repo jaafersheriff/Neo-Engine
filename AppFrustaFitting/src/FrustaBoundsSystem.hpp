@@ -20,7 +20,6 @@ public:
             if (auto bounds = camera->getGameObject().getComponentByType<FrustumBoundsComponent>()) {
                 float nDis = camera->getNearFar().x;
                 float fDis = camera->getNearFar().y;
-                float fov = glm::radians(camera->getFOV());
                 glm::vec3 P = camera->getGameObject().getSpatial()->getPosition();
                 glm::vec3 v = glm::normalize(camera->getLookDir());
                 glm::vec3 up = glm::normalize(camera->getUpDir());
@@ -28,17 +27,19 @@ public:
                 glm::vec3 Cnear = P + v * nDis;
                 glm::vec3 Cfar = P + v * fDis;
 
-                if (camera->mIsOrtho) {
-                    bounds->NearLeftTop = Cnear + (up * camera->getVerticalBounds().y) + (w * camera->getHorizontalBounds().x);
-                    bounds->NearRightTop = Cnear + (up * camera->getVerticalBounds().y) + (w * camera->getHorizontalBounds().y);
-                    bounds->NearLeftBottom = Cnear + (up * camera->getVerticalBounds().x) + (w * camera->getHorizontalBounds().x);
-                    bounds->NearRightBottom = Cnear + (up * camera->getVerticalBounds().x) + (w * camera->getHorizontalBounds().y);
-                    bounds->FarLeftTop = Cfar + (up * camera->getVerticalBounds().y) + (w * camera->getHorizontalBounds().x);
-                    bounds->FarRightTop = Cfar + (up * camera->getVerticalBounds().y) + (w * camera->getHorizontalBounds().y);
-                    bounds->FarLeftBottom = Cfar + (up * camera->getVerticalBounds().x) + (w * camera->getHorizontalBounds().x);
-                    bounds->FarRightBottom = Cfar + (up * camera->getVerticalBounds().x) + (w * camera->getHorizontalBounds().y);
+                if (auto orthoCam = dynamic_cast<OrthoCameraComponent*>(camera)) {
+                    bounds->NearLeftTop = Cnear + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().x);
+                    bounds->NearRightTop = Cnear + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().y);
+                    bounds->NearLeftBottom = Cnear + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().x);
+                    bounds->NearRightBottom = Cnear + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().y);
+                    bounds->FarLeftTop = Cfar + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().x);
+                    bounds->FarRightTop = Cfar + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().y);
+                    bounds->FarLeftBottom = Cfar + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().x);
+                    bounds->FarRightBottom = Cfar + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().y);
                 }
                 else {
+                    auto perspectiveCam = dynamic_cast<PerspectiveCameraComponent*>(camera);
+                    float fov = glm::radians(perspectiveCam->getFOV());
                     float ar = 1.f;
                     float Hnear = 2 * glm::tan(fov / 2) * nDis;
                     float Wnear = Hnear * ar;

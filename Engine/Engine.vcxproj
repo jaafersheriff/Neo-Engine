@@ -22,7 +22,8 @@
     <ClInclude Include="src\Component\AnimationComponent\LineComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\CameraComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\CameraControllerComponent.hpp" />
-    <ClInclude Include="src\Component\CameraComponent\ShadowCameraComponent.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\OrthoCameraComponent.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\PerspectiveCameraComponent.hpp" />
     <ClInclude Include="src\Component\Component.hpp" />
     <ClInclude Include="src\Component\Components.hpp" />
     <ClInclude Include="src\Component\LightComponent\LightComponent.hpp" />
@@ -84,6 +85,9 @@
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
     <ClCompile Include="src\Component\CameraComponent\CameraControllerComponent.cpp" />
+    <ClCompile Include="src\Component\CameraComponent\OrthoCameraComponent.cpp" />
+    <ClCompile Include="src\Component\CameraComponent\PerspectiveCameraComponent.cpp" />
+    <ClInclude Include="src\Component\CameraComponent\ShadowCameraComponent.hpp" />
     <ClCompile Include="src\Component\RenderableComponent\PhongShadowRenderable.hpp" />
     <ClCompile Include="src\Component\SpatialComponent\SpatialComponent.cpp" />
     <ClCompile Include="src\ext\imgui\imgui.cpp" />

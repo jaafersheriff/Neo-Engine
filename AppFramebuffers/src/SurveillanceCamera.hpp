@@ -1,19 +1,17 @@
 #pragma once
 
-#include "Component/CameraComponent/CameraComponent.hpp"
-
-#include "Messaging/Messenger.hpp"
+#include "Component/CameraComponent/OrthoCameraComponent.hpp"
 
 using namespace neo;
 
 // Wow this is hacky
-class SurveillanceCamera : public CameraComponent {
+class SurveillanceCamera : public OrthoCameraComponent {
     public:
 
         Framebuffer * fbo;
 
         SurveillanceCamera(GameObject *go, std::string name, float near, float far) :
-            CameraComponent(go, -10.f, 10.f, -10.f, 10.f, near, far) {
+            OrthoCameraComponent(go, near, far, -5.f, 5.f, -5.f, 5.f) {
             fbo = Library::getFBO(name);
             fbo->generate();
             fbo->attachColorTexture(Window::getFrameSize(), 4, TextureFormat{ GL_RGBA, GL_RGBA, GL_LINEAR, GL_REPEAT });

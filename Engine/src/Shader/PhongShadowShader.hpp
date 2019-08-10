@@ -140,7 +140,7 @@ namespace neo {
                 loadUniform("pcfSize", pcfSize);
 
                 /* Bind shadow map */
-                const Texture & texture(*Library::getFBO("depthMap")->mTextures[0]); 
+                const Texture & texture(*Library::getFBO("shadowMap")->mTextures[0]); 
                 CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.mTextureID));
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.mTextureID));
                 loadUniform("shadowMap", texture.mTextureID);

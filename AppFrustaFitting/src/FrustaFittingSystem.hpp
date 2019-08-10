@@ -86,8 +86,8 @@ public:
         if (!mockOrthoCamera || !mockPerspectiveCamera) {
             return;
         }
-        auto orthoCamera = mockOrthoCamera->getGameObject().getComponentByType<CameraComponent>();
-        auto perspectiveCamera = mockPerspectiveCamera->getGameObject().getComponentByType<CameraComponent>();
+        auto orthoCamera = dynamic_cast<OrthoCameraComponent*>(mockOrthoCamera->getGameObject().getComponentByType<CameraComponent>());
+        auto perspectiveCamera = dynamic_cast<PerspectiveCameraComponent*>(mockPerspectiveCamera->getGameObject().getComponentByType<CameraComponent>());
         if (!orthoCamera || !perspectiveCamera) {
             return;
         }

@@ -27,7 +27,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
     }
 };
 
@@ -38,7 +38,7 @@ struct Light {
     Light(glm::vec3 position, bool attachCube = true) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, position, glm::vec3(1.f));
-        camera = &Engine::addComponent<CameraComponent>(gameObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
+        camera = &Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(gameObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
         Engine::addComponent<renderable::LineMeshComponent>(gameObject, &Engine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 1.f)));
         Engine::addComponent<FrustumBoundsComponent>(gameObject);
         Engine::addComponent<MockOrthoComponent>(gameObject);
@@ -129,7 +129,7 @@ int main() {
     });
     Engine::addImGuiFunc("PerspectiveCamera", [&]() {
         auto spatial = mockCamera.gameObject->getSpatial();
-        auto camera = mockCamera.camera;
+        auto camera = dynamic_cast<PerspectiveCameraComponent*>(mockCamera.camera);
         {
             glm::vec3 camPos = spatial->getPosition();
             ImGui::SliderFloat3("Position", &camPos[0], -20.f, 20.f);
@@ -159,7 +159,7 @@ int main() {
     });
     Engine::addImGuiFunc("OrthoCamera", [&]() {
         auto spatial = light.gameObject->getSpatial();
-        auto camera = light.camera;
+        auto camera = dynamic_cast<OrthoCameraComponent*>(light.camera);
         {
             ImGui::SliderFloat("Range", &light.gameObject->getComponentByType<MockOrthoComponent>()->distance, 0.01f, 75.f);
             ImGui::SliderFloat("Distance", &light.gameObject->getComponentByType<MockOrthoComponent>()->range, 0.f, 512.f);

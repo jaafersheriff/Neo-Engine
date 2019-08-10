@@ -21,7 +21,6 @@ public:
             if (auto line = camera->getGameObject().getComponentByType<LineComponent>()) {
                 if (auto bounds = camera->getGameObject().getComponentByType<FrustumBoundsComponent>()) {
 
-
                     line->clearNodes();
 
                     // We have to do this ridiculousness because line strip (:

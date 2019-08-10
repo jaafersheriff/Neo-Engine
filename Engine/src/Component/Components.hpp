@@ -1,5 +1,7 @@
 #include "CameraComponent/CameraControllerComponent.hpp"
 #include "CameraComponent/CameraComponent.hpp"
+#include "CameraComponent/OrthoCameraComponent.hpp"
+#include "CameraComponent/PerspectiveCameraComponent.hpp"
 #include "CameraComponent/ShadowCameraComponent.hpp"
 
 #include "LightComponent/LightComponent.hpp"

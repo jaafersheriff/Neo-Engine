@@ -19,7 +19,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponent<CameraComponent>(gameObject, fov, near, far);
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -41,7 +41,7 @@ struct Light {
         Engine::addComponent<MeshComponent>(gameObject, Library::getMesh("cube"));
         Engine::addComponent<renderable::PhongRenderable>(gameObject);
         Engine::addComponent<MaterialComponent>(gameObject, 1.f, glm::vec3(1.f));
-        camera = &Engine::addComponent<CameraComponent>(gameObject, -100.f, 100.f, -100.f, 100.f, -1.f, 1000.f);
+        camera = &Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(gameObject, -1.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
         LineComponent *uLine = &Engine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
         LineComponent *vLine = &Engine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 0.f));
@@ -82,18 +82,22 @@ struct Light {
             auto lookDir = camera->getLookDir();
             ImGui::Text("Look at dir : %0.2f, %0.2f, %0.2f", lookDir.x, lookDir.y, lookDir.z);
 
-            glm::vec2 h = camera->getHorizontalBounds();
-            glm::vec2 v = camera->getVerticalBounds();
-            if (ImGui::SliderFloat2("Horizontal", glm::value_ptr(h), -50.f, 50.f)) {
-                camera->setOrthoBounds(h, v);
-            }
-            if (ImGui::SliderFloat2("Vertical", glm::value_ptr(v), -50.f, 50.f)) {
-                camera->setOrthoBounds(h, v);
-            }
             glm::vec2 nearFar = camera->getNearFar();
             if (ImGui::SliderFloat("Near", &nearFar.x, 0.f, 1.f) ||
-               ImGui::SliderFloat("Far", &nearFar.y, 100.f, 1000.f)) {
+                ImGui::SliderFloat("Far", &nearFar.y, 100.f, 1000.f)) {
                 camera->setNearFar(nearFar.x, nearFar.y);
+            }
+
+            if (auto shadowCamera = dynamic_cast<OrthoCameraComponent*>(camera)) {
+                glm::vec2 h = shadowCamera->getHorizontalBounds();
+                glm::vec2 v = shadowCamera->getVerticalBounds();
+                if (ImGui::SliderFloat2("Horizontal", glm::value_ptr(h), -50.f, 50.f)) {
+                    shadowCamera->setOrthoBounds(h, v);
+                }
+                if (ImGui::SliderFloat2("Vertical", glm::value_ptr(v), -50.f, 50.f)) {
+                    shadowCamera->setOrthoBounds(h, v);
+                }
+
             }
             ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
             ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
@@ -166,7 +170,7 @@ int main() {
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
-    Renderer::addPreProcessShader<ShadowCasterShader>();
+    Renderer::addPreProcessShader<ShadowCasterShader>(2048);
     Renderer::addSceneShader<LineShader>();
     Renderer::addSceneShader<PhongShader>();
     PhongShadowShader& receiverShader = Renderer::addSceneShader<PhongShadowShader>();
