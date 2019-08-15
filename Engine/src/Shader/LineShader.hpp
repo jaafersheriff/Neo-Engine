@@ -16,9 +16,9 @@ namespace neo {
                 Shader("Line Shader",
                         R"(#version 330 core
                         layout (location = 0) in vec3 vertPos;
-                        uniform mat4 P, V;
+                        uniform mat4 P, V, M;
                         void main() {
-                            gl_Position = P * V * vec4(vertPos, 1);
+                            gl_Position = P * V * M * vec4(vertPos, 1);
                         })",
                         R"(#version 330 core
                         uniform vec3 lineColor;
@@ -35,6 +35,7 @@ namespace neo {
                 /* Load PV */
                 loadUniform("P", camera.getProj());
                 loadUniform("V", camera.getView());
+                loadUniform("M", camera.getView());
 
                 for (auto& renderable : Engine::getComponents<renderable::LineMeshComponent>()) {
                     /* Bind mesh */
@@ -43,11 +44,16 @@ namespace neo {
                     CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.mVertexBufferID));
 
                     auto spatial = renderable->getGameObject().getSpatial();
+                    loadUniform("M", spatial ? spatial->getModelMatrix() : glm::mat4(1.f));
+
                     loadUniform("lineColor", renderable->mLine->mColor);
 
                     mesh.draw(renderable->mLine->getNodes().size());
                 }
 
+
+                CHECK_GL(glBindVertexArray(0));	
+                CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
                 unbind();
             }
         };

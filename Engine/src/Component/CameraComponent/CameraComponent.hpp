@@ -20,9 +20,6 @@ namespace neo {
 
             /* Getters */
             const glm::vec2 getNearFar() const { return glm::vec2(mNear, mFar); }
-            const glm::vec3 getLookDir() const;
-            const glm::vec3 getUpDir() const;
-            const glm::vec3 getRightDir() const;
             const glm::mat4 & getView() const;
             const glm::mat4 & getProj() const;
 

@@ -79,7 +79,7 @@ struct Light {
             if (ImGui::SliderFloat3("look pos", glm::value_ptr(pos), -100.f, 100.f)) {
                 lookAtSpatial->setPosition(pos);
             }
-            auto lookDir = camera->getLookDir();
+            auto lookDir = camSpatial->getLookDir();
             ImGui::Text("Look at dir : %0.2f, %0.2f, %0.2f", lookDir.x, lookDir.y, lookDir.z);
 
             glm::vec2 nearFar = camera->getNearFar();

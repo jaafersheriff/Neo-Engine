@@ -62,8 +62,8 @@ namespace neo {
                     }
                     float lambert = dot(L, N);
                     vec3 H = normalize(L + V);
-                    vec3 diffuseContrib  = lightCol * max(lambert, 0.0f) g attFactor;
-                    vec3 specularContrib = lightCol * pow(max(dot(H, N), 0.0), shine) g attFactor;
+                    vec3 diffuseContrib  = lightCol * max(lambert, 0.0f) / attFactor;
+                    vec3 specularContrib = lightCol * pow(max(dot(H, N), 0.0), shine) / attFactor;
                     color.rgb = albedo.rgb * ambient +
                                 albedo.rgb * diffuseContrib +
                                 specularColor * specularContrib;

@@ -125,11 +125,12 @@ namespace neo {
 
                 /* Load light */
                 if (auto light = Engine::getSingleComponent<LightComponent>()) {
-                    auto lightCam = light->getGameObject().getComponentByType<CameraComponent>();
-                    loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
-                    loadUniform("lightCol", light->mColor);
-                    loadUniform("lightAtt", light->mAttenuation);
-                    loadUniform("L", biasMatrix * lightCam->getProj() * lightCam->getView());
+                    if (auto lightCam = light->getGameObject().getComponentByType<CameraComponent>()) {
+                        loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
+                        loadUniform("lightCol", light->mColor);
+                        loadUniform("lightAtt", light->mAttenuation);
+                        loadUniform("L", biasMatrix * lightCam->getProj() * lightCam->getView());
+                    }
                 }
 
                 /* Bias */

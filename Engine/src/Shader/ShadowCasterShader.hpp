@@ -41,6 +41,15 @@ namespace neo {
             }
 
             virtual void render(const CameraComponent &) override {
+                auto shadowCamera = Engine::getSingleComponent<ShadowCameraComponent>();
+                if (!shadowCamera) {
+                    return;
+                }
+                auto camera = shadowCamera->getGameObject().getComponentByType<CameraComponent>();
+                if (!camera) {
+                    return;
+                }
+
                 auto fbo = Library::getFBO("shadowMap");
                 auto & depthTexture = fbo->mTextures[0];
 
@@ -50,7 +59,6 @@ namespace neo {
                 CHECK_GL(glCullFace(GL_FRONT));
 
                 bind();
-                auto camera = Engine::getSingleComponent<ShadowCameraComponent>()->getGameObject().getComponentByType<CameraComponent>();
                 loadUniform("P", camera->getProj());
                 loadUniform("V", camera->getView());
 

@@ -7,7 +7,6 @@ namespace neo {
     class Orientable {
 
         public:
-            glm::vec3 mU, mV, mW;
 
             Orientable() :
                 mU(1.f, 0.f, 0.f),
@@ -32,7 +31,7 @@ namespace neo {
                 mOrientationDirty = false;
                 _detUVW();
             }
-
+            
             /* Setters */
             virtual void setOrientation(const glm::mat3 & o) {
                 mOrientation = o;
@@ -54,6 +53,26 @@ namespace neo {
                 return mOrientation;
             }
 
+            const glm::vec3 getLookDir() const {
+                if (mOrientationDirty) {
+                    _detOrientation();
+                }
+                return -mW;
+            }
+            const glm::vec3 getUpDir() const {
+                if (mOrientationDirty) {
+                    _detOrientation();
+                }
+                return mV;
+ 
+            }
+            const glm::vec3 getRightDir() const {
+                if (mOrientationDirty) {
+                    _detOrientation();
+                }
+                return mU;
+            }
+
         private:    
             void _detOrientation() const {
                 mOrientation = glm::mat3(mU, mV, mW);
@@ -67,6 +86,7 @@ namespace neo {
                 mW = glm::normalize(trans[2]);
             }
 
+            glm::vec3 mU, mV, mW;
             mutable glm::mat3 mOrientation;
             mutable bool mOrientationDirty;
 

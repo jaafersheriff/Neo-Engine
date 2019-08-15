@@ -32,9 +32,9 @@ namespace neo {
                 auto spatial = comp->getGameObject().getSpatial();
                 dir = glm::normalize(dir);
                 dir = glm::normalize(
-                    spatial->mU * dir.x +
-                    spatial->mV * dir.y +
-                    spatial->mW * dir.z);
+                    spatial->getRightDir() * dir.x +
+                    spatial->getUpDir() * dir.y +
+                    -spatial->getLookDir() * dir.z);
                 comp->getGameObject().getSpatial()->move(dir * comp->mMoveSpeed * dt * (speed ? 2.5f : 1.f));
             }
         }
