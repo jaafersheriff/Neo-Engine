@@ -33,7 +33,7 @@ namespace neo {
                         fragTex = vertTex;
                         shadowCoord = L * fragPos; 
                     })", 
-                    R"(#version 330 coren
+                    R"(#version 330 core
                     in vec4 fragPos;
                     in vec3 fragNor;
                     in vec2 fragTex;

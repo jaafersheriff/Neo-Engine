@@ -13,21 +13,22 @@ namespace neo {
 
             ShadowCasterShader(const int dimension) :
                 Shader("Shadow Caster",
-                    "#version 330 core\n\
-                        layout (location = 0) in vec3 vertPos;\
-                        layout (location = 2) in vec2 vertTex;\
-                        uniform mat4 P, V, M;\
-                        out vec2 fragTex;\
-                        void main() { gl_Position = P * V * M * vec4(vertPos, 1); fragTex = vertTex; }",
-                    "#version 330 core\n\
-                        in vec2 fragTex;\
-                        uniform bool useTexture;\
-                        uniform sampler2D diffuseMap;\
-                        void main() {\
-                            if (useTexture && texture(diffuseMap, fragTex).a < 0.1) {\
-                                discard;\
-                            }\
-                        }") {
+                    R"(#version 330 core
+                        layout (location = 0) in vec3 vertPos;
+                        layout (location = 2) in vec2 vertTex;
+                        uniform mat4 P, V, M;
+                        out vec2 fragTex;
+                        void main() { gl_Position = P * V * M * vec4(vertPos, 1); fragTex = vertTex; })",
+                    R"(#version 330 core
+                        in vec2 fragTex;
+                        uniform bool useTexture;
+                        uniform sampler2D diffuseMap;
+                        void main() {
+                            if (useTexture && texture(diffuseMap, fragTex).a < 0.1) {
+                                discard;
+                            }
+                        })"
+                    ) {
                 /* Init shadow map */
                 Framebuffer *depthFBO = Library::getFBO("shadowMap");
                 depthFBO->generate();
@@ -49,9 +50,9 @@ namespace neo {
                 CHECK_GL(glCullFace(GL_FRONT));
 
                 bind();
-                auto & cameras = Engine::getComponents<LightComponent>()[0]->getGameObject().getComponentsByType<CameraComponent>();
-                loadUniform("P", cameras[0]->getProj());
-                loadUniform("V", cameras[0]->getView());
+                auto camera = Engine::getSingleComponent<ShadowCameraComponent>()->getGameObject().getComponentByType<CameraComponent>();
+                loadUniform("P", camera->getProj());
+                loadUniform("V", camera->getView());
 
                 for (auto& renderable : Engine::getComponents<renderable::ShadowCasterRenderable>()) {
                     auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
