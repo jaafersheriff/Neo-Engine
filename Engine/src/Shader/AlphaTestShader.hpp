@@ -13,26 +13,26 @@ namespace neo {
 
         AlphaTestShader() :
             Shader("AlphaTest Shader",
-                "#version 330 core\n\
-                layout(location = 0) in vec3 vertPos;\
-                layout(location = 2) in vec2 vertTex;\
-                uniform mat4 P, V, M;\
-                out vec2 fragTex;\
-                void main() {\
-                    fragTex = vertTex;\
-                    gl_Position = P * V * M * vec4(vertPos, 1.0);\
-                }",
-                "#version 330 core\n\
-                in vec2 fragTex;\
-                uniform sampler2D diffuseMap;\
-                out vec4 color;\
-                void main() {\
-                    vec4 albedo = texture(diffuseMap, fragTex);\
-                    if (albedo.a < 0.1f) {\
-                        discard;\
-                    }\
-                    color = albedo;\
-                }")
+                R"(#version 330 core
+                layout(location = 0) in vec3 vertPos;
+                layout(location = 2) in vec2 vertTex;
+                uniform mat4 P, V, M;
+                out vec2 fragTex;
+                void main() {
+                    fragTex = vertTex;
+                    gl_Position = P * V * M * vec4(vertPos, 1.0);
+                })",
+                R"(#version 330 core
+                in vec2 fragTex;
+                uniform sampler2D diffuseMap;
+                out vec4 color;
+                void main() {
+                    vec4 albedo = texture(diffuseMap, fragTex);
+                    if (albedo.a < 0.1f) {
+                        discard;
+                    }
+                    color = albedo;
+                })")
         {}
 
         virtual void render(const CameraComponent &camera) override {

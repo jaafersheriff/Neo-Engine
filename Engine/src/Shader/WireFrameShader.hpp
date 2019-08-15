@@ -10,20 +10,18 @@ namespace neo {
         public:
             WireframeShader() :
                 Shader("Wire Shader",
-                        "\
-                        #version 330 core\n\
-                        layout (location = 0) in vec3 vertPos;\
-                        uniform mat4 P, V, M;\
-                        void main() {\
-                            gl_Position = P * V * M * vec4(vertPos, 1);\
-                        }",
-                        "\
-                        #version 330 core\n\
-                        uniform vec3 wireColor;\
-                        out vec4 color;\
-                        void main() {\
-                            color = vec4(wireColor, 1.0);\
-                        }"
+                        R"(#version 330 core
+                        layout (location = 0) in vec3 vertPos;
+                        uniform mat4 P, V, M;
+                        void main() {
+                            gl_Position = P * V * M * vec4(vertPos, 1);
+                        })",
+                        R"(#version 330 core
+                        uniform vec3 wireColor;
+                        out vec4 color;
+                        void main() {
+                            color = vec4(wireColor, 1.0);
+                        })"
                 )
             {}
 
