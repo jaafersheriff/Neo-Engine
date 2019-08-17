@@ -64,6 +64,7 @@ class LightPassShader : public Shader {
             loadUniform("gDepth", gbuffer->mTextures[2]->mTextureID);
 
             /* Render light volumes */
+            // TODO : instanced?
             for (auto & light : Engine::getComponents<LightComponent>()) {
                 auto spat = light->getGameObject().getSpatial();
                 loadUniform("M", spat->getModelMatrix());

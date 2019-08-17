@@ -68,8 +68,8 @@ class AOShader : public PostProcessShader {
             std::vector<glm::vec3> noise;
             for (unsigned i = 0; i < dim*dim; i++) {
                 noise.push_back(glm::normalize(glm::vec3(
-                    Util::genRandom(-1.f, 1.f),
-                    Util::genRandom(-1.f, 1.f),
+                    Util::genRandom(0.f, 1.f),
+                    Util::genRandom(0.f, 1.f),
                     0.f
                 )));
             }
