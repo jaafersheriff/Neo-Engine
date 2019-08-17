@@ -9,15 +9,13 @@ namespace neo {
 
     private:
         static Mesh* _createMesh(const std::vector<float> &vert, const std::vector<float> &norm, const std::vector<float> &tex, const std::vector<unsigned> &ele, unsigned mode = GL_TRIANGLES) {
-            Mesh *mesh = new Mesh;
-            mesh->mBuffers.vertBuf.insert(mesh->mBuffers.vertBuf.begin(), vert.begin(), vert.end());
-            mesh->mBuffers.norBuf.insert(mesh->mBuffers.norBuf.begin(), norm.begin(), norm.end());
-            mesh->mBuffers.texBuf.insert(mesh->mBuffers.texBuf.begin(), tex.begin(), tex.end());
-            mesh->mBuffers.eleBuf.insert(mesh->mBuffers.eleBuf.begin(), ele.begin(), ele.end());
-            mesh->mVertexBufferSize = mesh->mBuffers.vertBuf.size();
-            mesh->mNormalBufferSize = mesh->mBuffers.norBuf.size();
-            mesh->mTextureBufferSize = mesh->mBuffers.texBuf.size();
-            mesh->mElementBufferSize = mesh->mBuffers.eleBuf.size();
+            Mesh::MeshBuffers buffers{
+                vert,
+                norm,
+                tex,
+                ele
+            };
+            Mesh *mesh = new Mesh(buffers);
             mesh->upload(mode);
             return mesh;
         }
@@ -26,30 +24,6 @@ namespace neo {
 
             static Mesh* createCube() {
                 return _createMesh(
-                    {-0.5f, -0.5f, -0.5f,
-                      0.5f,  0.5f, -0.5f,
-                      0.5f, -0.5f, -0.5f,
-                     -0.5f,  0.5f, -0.5f,
-                     -0.5f, -0.5f, -0.5f,
-                     -0.5f,  0.5f,  0.5f,
-                     -0.5f,  0.5f, -0.5f,
-                     -0.5f, -0.5f,  0.5f,
-                     -0.5f,  0.5f, -0.5f,
-                      0.5f,  0.5f,  0.5f,
-                      0.5f,  0.5f, -0.5f,
-                     -0.5f,  0.5f,  0.5f,
-                      0.5f, -0.5f, -0.5f,
-                      0.5f,  0.5f, -0.5f,
-                      0.5f,  0.5f,  0.5f,
-                      0.5f, -0.5f,  0.5f,
-                     -0.5f, -0.5f, -0.5f,
-                      0.5f, -0.5f, -0.5f,
-                      0.5f, -0.5f,  0.5f,
-                     -0.5f, -0.5f,  0.5f,
-                     -0.5f, -0.5f,  0.5f,
-                      0.5f, -0.5f,  0.5f,
-                      0.5f,  0.5f,  0.5f,
-                     -0.5f,  0.5f,  0.5f },
                     {-0.5f, -0.5f, -0.5f,
                       0.5f,  0.5f, -0.5f,
                       0.5f, -0.5f, -0.5f,
@@ -98,6 +72,30 @@ namespace neo {
                       0,  0,  1,
                       0,  0,  1,
                       0,  0,  1 },
+                    {0.f, 0.f,
+                     1.f, 1.f,
+                     1.f, 0.f,
+                     1.f, 0.f,
+                     0.f, 0.f,
+                     1.f, 1.f,
+                     1.f, 0.f,
+                     0.f, 1.f,
+                     1.f, 0.f,
+                     1.f, 1.f,
+                     1.f, 0.f,
+                     0.f, 1.f,
+                     0.f, 0.f,
+                     1.f, 0.f,
+                     1.f, 1.f,
+                     1.f, 1.f,
+                     0.f, 0.f,
+                     1.f, 0.f,
+                     1.f, 1.f,
+                     0.f, 1.f,
+                     0.f, 1.f,
+                     1.f, 0.f,
+                     1.f, 1.f,
+                     0.f, 1.f},
                     { 0,  1,  2,
                       0,  3,  1,
                       4,  5,  6,

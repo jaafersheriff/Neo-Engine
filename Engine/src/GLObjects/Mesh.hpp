@@ -10,10 +10,10 @@ namespace neo {
 
         public:
             struct MeshBuffers {
-                std::vector<float> vertBuf;
-                std::vector<float> norBuf;
-                std::vector<float> texBuf;
-                std::vector<unsigned int> eleBuf;
+                std::vector<float> vertices;
+                std::vector<float> normals;
+                std::vector<float> texCoords;
+                std::vector<unsigned int> indices;
             };
 
             /* Constructor */
@@ -21,14 +21,22 @@ namespace neo {
                 mVAOID(0),
                 mVertexBufferID(0),
                 mNormalBufferID(0),
-                mTextureBufferID(0),
+                mUVBufferID(0),
                 mElementBufferID(0),
                 mVertexBufferSize(0),
                 mNormalBufferSize(0),
-                mTextureBufferSize(0),
+                mUVBufferSize(0),
                 mElementBufferSize(0),
                 mPrimitiveType(0)
             {}
+
+            Mesh(MeshBuffers& buffers) {
+                mVertexBufferSize = buffers.vertices.size();
+                mNormalBufferSize = buffers.normals.size();
+                mUVBufferSize = buffers.texCoords.size();
+                mElementBufferSize = buffers.indices.size();
+                mBuffers = buffers;
+            }
 
             /* Destructor */
             ~Mesh();
@@ -39,14 +47,14 @@ namespace neo {
             /* VBO IDs */
             unsigned int mVertexBufferID;
             unsigned int mNormalBufferID;
-            unsigned int mTextureBufferID;
+            unsigned int mUVBufferID;
             unsigned int mElementBufferID;
 
             /* VBO Info */
             MeshBuffers mBuffers;
             int mVertexBufferSize;
             int mNormalBufferSize;
-            int mTextureBufferSize;
+            int mUVBufferSize;
             int mElementBufferSize;
 
             /* Primitive type */

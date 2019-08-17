@@ -60,23 +60,23 @@ namespace neo {
         /* For every shape in the loaded file */
         for (unsigned int i = 0; i < shapes.size(); i++) {
             /* Concatenate the shape's vertices, normals, and textures to the mesh */
-            mesh->mBuffers.vertBuf.insert(mesh->mBuffers.vertBuf.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
-            mesh->mBuffers.norBuf.insert(mesh->mBuffers.norBuf.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
-            mesh->mBuffers.texBuf.insert(mesh->mBuffers.texBuf.end(), shapes[i].mesh.texcoords.begin(), shapes[i].mesh.texcoords.end());
+            mesh->mBuffers.vertices.insert(mesh->mBuffers.vertices.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
+            mesh->mBuffers.normals.insert(mesh->mBuffers.normals.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
+            mesh->mBuffers.texCoords.insert(mesh->mBuffers.texCoords.end(), shapes[i].mesh.texcoords.begin(), shapes[i].mesh.texcoords.end());
 
             /* Concatenate the shape's indices to the new mesh
              * Indices need to be incremented as we concatenate shapes */
             for (unsigned int i : shapes[i].mesh.indices) {
-                mesh->mBuffers.eleBuf.push_back(i + vertCount);
+                mesh->mBuffers.indices.push_back(i + vertCount);
             }
             vertCount += int(shapes[i].mesh.positions.size()) / 3;
         }
 
         /* Provide VBO info */
-        mesh->mVertexBufferSize = int(mesh->mBuffers.vertBuf.size());
-        mesh->mNormalBufferSize = int(mesh->mBuffers.norBuf.size());
-        mesh->mTextureBufferSize = int(mesh->mBuffers.texBuf.size());
-        mesh->mElementBufferSize = int(mesh->mBuffers.eleBuf.size());
+        mesh->mVertexBufferSize = int(mesh->mBuffers.vertices.size());
+        mesh->mNormalBufferSize = int(mesh->mBuffers.normals.size());
+        mesh->mUVBufferSize = int(mesh->mBuffers.texCoords.size());
+        mesh->mElementBufferSize = int(mesh->mBuffers.indices.size());
 
         /* Optional resize */
         if (doResize) {
@@ -166,15 +166,15 @@ namespace neo {
         maxX = maxY = maxZ = -1.1754E+38F;
 
         //Go through all vertices to determine min and max of each dimension
-        for (size_t v = 0; v < buffers.vertBuf.size() / 3; v++) {
-            if (buffers.vertBuf[3 * v + 0] < minX) minX = buffers.vertBuf[3 * v + 0];
-            if (buffers.vertBuf[3 * v + 0] > maxX) maxX = buffers.vertBuf[3 * v + 0];
+        for (size_t v = 0; v < buffers.vertices.size() / 3; v++) {
+            if (buffers.vertices[3 * v + 0] < minX) minX = buffers.vertices[3 * v + 0];
+            if (buffers.vertices[3 * v + 0] > maxX) maxX = buffers.vertices[3 * v + 0];
 
-            if (buffers.vertBuf[3 * v + 1] < minY) minY = buffers.vertBuf[3 * v + 1];
-            if (buffers.vertBuf[3 * v + 1] > maxY) maxY = buffers.vertBuf[3 * v + 1];
+            if (buffers.vertices[3 * v + 1] < minY) minY = buffers.vertices[3 * v + 1];
+            if (buffers.vertices[3 * v + 1] > maxY) maxY = buffers.vertices[3 * v + 1];
 
-            if (buffers.vertBuf[3 * v + 2] < minZ) minZ = buffers.vertBuf[3 * v + 2];
-            if (buffers.vertBuf[3 * v + 2] > maxZ) maxZ = buffers.vertBuf[3 * v + 2];
+            if (buffers.vertices[3 * v + 2] < minZ) minZ = buffers.vertices[3 * v + 2];
+            if (buffers.vertices[3 * v + 2] > maxZ) maxZ = buffers.vertices[3 * v + 2];
         }
 
         //From min and max compute necessary scale and shift for each dimension
@@ -199,16 +199,16 @@ namespace neo {
         shiftZ = minZ + (zExtent) / 2.f;
 
         //Go through all verticies shift and scale them
-        for (size_t v = 0; v < buffers.vertBuf.size() / 3; v++) {
-            buffers.vertBuf[3 * v + 0] = (buffers.vertBuf[3 * v + 0] - shiftX) * scaleX;
-            assert(buffers.vertBuf[3 * v + 0] >= -1.0 - epsilon);
-            assert(buffers.vertBuf[3 * v + 0] <= 1.0 + epsilon);
-            buffers.vertBuf[3 * v + 1] = (buffers.vertBuf[3 * v + 1] - shiftY) * scaleY;
-            assert(buffers.vertBuf[3 * v + 1] >= -1.0 - epsilon);
-            assert(buffers.vertBuf[3 * v + 1] <= 1.0 + epsilon);
-            buffers.vertBuf[3 * v + 2] = (buffers.vertBuf[3 * v + 2] - shiftZ) * scaleZ;
-            assert(buffers.vertBuf[3 * v + 2] >= -1.0 - epsilon);
-            assert(buffers.vertBuf[3 * v + 2] <= 1.0 + epsilon);
+        for (size_t v = 0; v < buffers.vertices.size() / 3; v++) {
+            buffers.vertices[3 * v + 0] = (buffers.vertices[3 * v + 0] - shiftX) * scaleX;
+            assert(buffers.vertices[3 * v + 0] >= -1.0 - epsilon);
+            assert(buffers.vertices[3 * v + 0] <= 1.0 + epsilon);
+            buffers.vertices[3 * v + 1] = (buffers.vertices[3 * v + 1] - shiftY) * scaleY;
+            assert(buffers.vertices[3 * v + 1] >= -1.0 - epsilon);
+            assert(buffers.vertices[3 * v + 1] <= 1.0 + epsilon);
+            buffers.vertices[3 * v + 2] = (buffers.vertices[3 * v + 2] - shiftZ) * scaleZ;
+            assert(buffers.vertices[3 * v + 2] >= -1.0 - epsilon);
+            assert(buffers.vertices[3 * v + 2] <= 1.0 + epsilon);
         }
     }
 }

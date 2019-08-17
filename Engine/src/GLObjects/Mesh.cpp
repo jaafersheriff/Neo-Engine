@@ -10,7 +10,7 @@ namespace neo {
     Mesh::~Mesh() {
         CHECK_GL(glDeleteBuffers(1, (GLuint *)&mVertexBufferID));
         CHECK_GL(glDeleteBuffers(1, (GLuint *)&mNormalBufferID));
-        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mTextureBufferID));
+        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mUVBufferID));
         CHECK_GL(glDeleteBuffers(1, (GLuint *)&mElementBufferID));
         CHECK_GL(glDeleteVertexArrays(1, (GLuint *) &mVAOID));
     }
@@ -48,45 +48,45 @@ namespace neo {
         /* Copy vertex array */
         CHECK_GL(glGenBuffers(1, (GLuint *) &mVertexBufferID));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferID));
-        if (mBuffers.vertBuf.size()) {
-            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mBuffers.vertBuf.size() * sizeof(float), &mBuffers.vertBuf[0], GL_STATIC_DRAW));
+        if (mBuffers.vertices.size()) {
+            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mBuffers.vertices.size() * sizeof(float), &mBuffers.vertices[0], GL_STATIC_DRAW));
         }
         CHECK_GL(glEnableVertexAttribArray(0));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferID));
         CHECK_GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
 
         /* Copy normal array if it exists */
-        if (!mBuffers.norBuf.empty()) {
+        if (!mBuffers.normals.empty()) {
             CHECK_GL(glGenBuffers(1, (GLuint *) &mNormalBufferID));
             CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mNormalBufferID));
-            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mBuffers.norBuf.size() * sizeof(float), &mBuffers.norBuf[0], GL_STATIC_DRAW));
+            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mBuffers.normals.size() * sizeof(float), &mBuffers.normals[0], GL_STATIC_DRAW));
             CHECK_GL(glEnableVertexAttribArray(1));
             CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mNormalBufferID));
             CHECK_GL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
         }
 
         /* Copy texture array if it exists */
-        if (!mBuffers.texBuf.empty()) {
-            CHECK_GL(glGenBuffers(1, (GLuint *) &mTextureBufferID));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mTextureBufferID));
-            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mBuffers.texBuf.size() * sizeof(float), &mBuffers.texBuf[0], GL_STATIC_DRAW));
+        if (!mBuffers.texCoords.empty()) {
+            CHECK_GL(glGenBuffers(1, (GLuint *) &mUVBufferID));
+            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mUVBufferID));
+            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mBuffers.texCoords.size() * sizeof(float), &mBuffers.texCoords[0], GL_STATIC_DRAW));
             CHECK_GL(glEnableVertexAttribArray(2));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mTextureBufferID));
+            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mUVBufferID));
             CHECK_GL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0));
         }
 
         /* Copy element array if it exists */
-        if (!mBuffers.eleBuf.empty()) {
+        if (!mBuffers.indices.empty()) {
             CHECK_GL(glGenBuffers(1, (GLuint *) &mElementBufferID));
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementBufferID));
-            CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, mBuffers.eleBuf.size() * sizeof(unsigned int), &mBuffers.eleBuf[0], GL_STATIC_DRAW));
+            CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, mBuffers.indices.size() * sizeof(unsigned int), &mBuffers.indices[0], GL_STATIC_DRAW));
         }
 
         /* Set draw mode */
         if (type) {
             mPrimitiveType = type;
         }
-        else if (!mBuffers.eleBuf.empty()) {
+        else if (!mBuffers.indices.empty()) {
             mPrimitiveType = GL_TRIANGLES;
         }
         else {
