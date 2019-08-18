@@ -18,12 +18,13 @@ public:
     virtual void update(const float dt) override {
         for (auto camera : Engine::getComponents<CameraComponent>()) {
             if (auto bounds = camera->getGameObject().getComponentByType<FrustumBoundsComponent>()) {
+                auto spatial = camera->getGameObject().getSpatial();
                 float nDis = camera->getNearFar().x;
                 float fDis = camera->getNearFar().y;
-                glm::vec3 P = camera->getGameObject().getSpatial()->getPosition();
-                glm::vec3 v = glm::normalize(camera->getLookDir());
-                glm::vec3 up = glm::normalize(camera->getUpDir());
-                glm::vec3 w = glm::normalize(camera->getRightDir());
+                glm::vec3 P = spatial->getPosition();
+                glm::vec3 v = glm::normalize(spatial->getLookDir());
+                glm::vec3 up = glm::normalize(spatial->getUpDir());
+                glm::vec3 w = glm::normalize(spatial->getRightDir());
                 glm::vec3 Cnear = P + v * nDis;
                 glm::vec3 Cfar = P + v * fDis;
 
@@ -37,8 +38,7 @@ public:
                     bounds->FarLeftBottom = Cfar + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().x);
                     bounds->FarRightBottom = Cfar + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().y);
                 }
-                else {
-                    auto perspectiveCam = dynamic_cast<PerspectiveCameraComponent*>(camera);
+                else if (auto perspectiveCam = dynamic_cast<PerspectiveCameraComponent*>(camera)) {
                     float fov = glm::radians(perspectiveCam->getFOV());
                     float ar = 1.f;
                     float Hnear = 2 * glm::tan(fov / 2) * nDis;

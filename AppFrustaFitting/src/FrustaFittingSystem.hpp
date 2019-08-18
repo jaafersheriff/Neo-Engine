@@ -104,20 +104,24 @@ public:
         }
 
         /////////////////////// Do the fitting! ///////////////////////////////
-        const glm::vec3 lightDir = glm::normalize(-orthoCamera->getLookDir());
-        const glm::vec3 up = orthoCamera->getUpDir();
+        auto light = Engine::getSingleComponent<LightComponent>();
+        if (!light) {
+            return;
+        }
+        const glm::vec3 lightDir = light->getGameObject().getSpatial()->getLookDir();
+        const glm::vec3 up = light->getGameObject().getSpatial()->getUpDir();
 
         const auto& sceneView = perspectiveCamera->getView();
         const auto& sceneProj = perspectiveCamera->getProj();
-        const auto& worldToLight = glm::lookAt(orthoCamera->getLookDir(), glm::vec3(0.f), up);
+        const auto& worldToLight = glm::lookAt(lightDir, glm::vec3(0.f), up);
         const auto& lightToWorld = glm::inverse(worldToLight);
 
         const float aspect = sceneProj[1][1] / sceneProj[0][0];
         const float fov = 2.f * glm::atan(1.f / sceneProj[1][1]);
         const float zNear = sceneProj[3][2] / (sceneProj[2][2] - 1.f);
         const float zFar = sceneProj[3][2] / (sceneProj[2][2] + 1.f);
-        const float zRange = zFar - zNear; // std::min(mockOrthoCamera->range, zFar - zNear);
-        const float depthMin = -1.f; // GL things?
+        const float zRange = zFar - zNear;
+        const float depthMin = -1.f; // GL things
 
         const std::vector<glm::vec4> corners = { // screen space ortho box 
             { -1.f,  1.f, depthMin, 1.f }, // corners of near plane
@@ -140,7 +144,7 @@ public:
         }
 
         // quantize shadow box updates
-        // TODO - this is in world space..it should probably be in shadow space?
+        // TODO - this is in world space..it should probably be in shadow view space?
         if (glm::distance(orthoBox.points[0], oldCorners.points[0]) < texelSize ||
             glm::distance(orthoBox.points[1], oldCorners.points[1]) < texelSize ||
             glm::distance(orthoBox.points[2], oldCorners.points[2]) < texelSize ||
@@ -162,8 +166,9 @@ public:
         orthoSpat->setPosition(shadowViewPos);
         orthoCamera->setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
 
-        glm::vec3 midSceneView = perspectiveSpat->getPosition() + perspectiveCamera->getLookDir() * perspectiveCamera->getNearFar().y / 2.f;
-        float shadowToSceneDistance = glm::distance(shadowViewPos, midSceneView);
-        orthoCamera->setNearFar(-boxDepth + shadowToSceneDistance, boxDepth + shadowToSceneDistance);
+        glm::vec3 midSceneView = perspectiveSpat->getPosition() + perspectiveCamera->getGameObject().getSpatial()->getLookDir() * perspectiveCamera->getNearFar().y / 2.f;
+        // center?
+        float shadowToSceneDistance = glm::distance(light->getGameObject().getSpatial()->getPosition(), midSceneView);
+        orthoCamera->setNearFar(-boxDepth, boxDepth);
     }
 };
