@@ -11,5 +11,6 @@
     <None Include="shaders\normal.geom" />
     <None Include="shaders\normal.frag" />
     <None Include="README.md" />
+    <None Include="shaders\a.glsl" />
   </ItemGroup>
 </Project>

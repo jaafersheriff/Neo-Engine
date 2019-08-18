@@ -70,8 +70,8 @@ int main() {
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));
-    Renderer::addSceneShader<PhongShader>();
-    Renderer::addSceneShader<WireframeShader>();
+    // Renderer::addSceneShader<PhongShader>();
+    // Renderer::addSceneShader<WireframeShader>();
     normalShader = &Renderer::addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
  
 

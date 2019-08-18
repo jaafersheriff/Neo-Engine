@@ -64,6 +64,7 @@ namespace neo {
             std::map<std::string, GLint> mUniforms;
 
             GLuint _compileShader(GLenum, const char *);
+            const char* _processShader(const char **);
             void _findAttributesAndUniforms(const char *);
     };
 }

@@ -124,6 +124,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\a.glsl" />
     <None Include="shaders\normal.frag" />
     <None Include="shaders\normal.geom" />
     <None Include="shaders\normal.vert" />

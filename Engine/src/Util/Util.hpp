@@ -89,6 +89,20 @@ namespace neo {
             return sphericalToCartesian(v.x, v.y, v.z);
         }
 
+        static bool fileExists(const char *fn) {
+            FILE *fp;
+            char *content = NULL;
+            int count = 0;
+            if (fn != NULL) {
+                fp = fopen(fn, "rt");
+                if (fp != NULL) {
+                    fclose(fp);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         static char *textFileRead(const char *fn) {
             FILE *fp;
             char *content = NULL;

@@ -18,7 +18,7 @@ namespace neo {
     Shader::Shader(const std::string &name, const std::string &v, const std::string &f, const std::string &g) :
         Shader(
             name,
-            (v.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + v).c_str()) : NULL), // memory leak
+            (v.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + v).c_str()) : NULL),
             (f.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + f).c_str()) : NULL),
             (g.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + g).c_str()) : NULL))
     {}
@@ -34,13 +34,18 @@ namespace neo {
     Shader::Shader(const std::string &name, const char *vTex, const char *fTex, const char *gTex) :
         mName(name) {
         mPID = glCreateProgram();
-        if (vTex && (mVertexID = _compileShader(GL_VERTEX_SHADER, vTex))) {
+
+        const char* processedVertex = _processShader(&vTex);
+        const char* processedFragment = _processShader(&fTex);
+        const char* processedGeometry = _processShader(&gTex);
+
+        if (processedVertex && (mVertexID = _compileShader(GL_VERTEX_SHADER, processedVertex))) {
             CHECK_GL(glAttachShader(mPID, mVertexID));
         }
-        if (fTex && (mFragmentID = _compileShader(GL_FRAGMENT_SHADER, fTex))) {
+        if (processedFragment && (mFragmentID = _compileShader(GL_FRAGMENT_SHADER, processedFragment))) {
             CHECK_GL(glAttachShader(mPID, mFragmentID));
         }
-        if (gTex && (mGeometryID = _compileShader(GL_GEOMETRY_SHADER, gTex))) {
+        if (processedGeometry && (mGeometryID = _compileShader(GL_GEOMETRY_SHADER, processedGeometry))) {
             CHECK_GL(glAttachShader(mPID, mGeometryID));
         }
         CHECK_GL(glLinkProgram(mPID));
@@ -56,16 +61,85 @@ namespace neo {
         }
 
         if (mVertexID) {
-            _findAttributesAndUniforms(vTex);
+            _findAttributesAndUniforms(processedVertex);
         }
         if (mFragmentID) {
-            _findAttributesAndUniforms(fTex);
+            _findAttributesAndUniforms(processedFragment);
         }
         if (mGeometryID) {
-            _findAttributesAndUniforms(gTex);
+            _findAttributesAndUniforms(processedGeometry);
         }
 
         std::cout << "Successfully compiled and linked " << name << std::endl;
+        // delete processedVertex;
+        // delete processedFragment;
+        // delete processedGeometry;
+    }
+
+    const char* Shader::_processShader(const char **shaderString) {
+        if (!*shaderString) {
+            return *shaderString;
+        }
+
+        std::vector<char *> append;
+
+        char baseFile[1<<16];
+        strcpy(baseFile, *shaderString);
+        std::vector<char *> lines;
+
+        // Read the first line
+        char * token = strtok(baseFile, "\n");
+        lines.push_back(token);
+        // Read all subsequent lines
+        while ((token = strtok(NULL, "\n")) != NULL) {
+            lines.push_back(token);
+        }
+
+        for (char *line : lines) {
+            token = strtok(line, "# \"\n");
+            if (token == NULL) {
+                continue;
+            }
+            if (!strcmp(token, "include")) {
+                char *fileNameStart = line + strlen(line) + 1;
+                token = strtok(NULL, " \"");
+                if (Util::fileExists((Renderer::APP_SHADER_DIR + std::string(token)).c_str())) {
+                    append.push_back(Util::textFileRead((Renderer::APP_SHADER_DIR + std::string(token)).c_str()));
+                }
+                else if (Util::fileExists(("../Engine/shaders" + std::string(token)).c_str())) {
+                    append.push_back(Util::textFileRead(("../Engine/Shaders" + std::string(token)).c_str()));
+                }
+                else if (Util::fileExists(("../Engine/src/Shaders" + std::string(token)).c_str())) {
+                    append.push_back(Util::textFileRead(("../Engine/Shader" + std::string(token)).c_str()));
+                }
+                else {
+                    std::cout << "Couldn't file file " << token << std::endl;
+                }
+            }
+        }
+
+        if (append.size()) {
+            int fileSize = 0;
+            for (char* file : append) {
+                fileSize += strlen(file);
+            }
+            fileSize += strlen(*shaderString);
+
+            char* processedShader = (char *)malloc(fileSize);
+            int index = 0;
+            for (char* file : append) {
+                strcpy(processedShader + index, file);
+                index += strlen(file);
+            }
+
+            // #include needs to be replaced inline
+            strcpy(processedShader + index, *shaderString);
+            delete *shaderString;
+            return processedShader;
+        }
+        else {
+            return *shaderString;
+        }
     }
 
     GLuint Shader::_compileShader(GLenum shaderType, const char *shaderString) {
@@ -102,7 +176,7 @@ namespace neo {
     }
 
     void Shader::_findAttributesAndUniforms(const char *shaderString) {
-        char fileText[32768];
+        char fileText[1<<16];
         strcpy(fileText, shaderString);
         std::vector<char *> lines;
 
