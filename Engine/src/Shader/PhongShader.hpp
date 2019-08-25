@@ -29,6 +29,8 @@ namespace neo {
                     gl_Position = P * V * fragPos;
                 })",
                 R"(#version 330 core
+                #include "phong.glsl"
+
                 in vec4 fragPos;
                 in vec3 fragNor;
                 in vec2 fragTex;
@@ -51,24 +53,9 @@ namespace neo {
                             discard;
                         }
                     }
-                    vec3 N = normalize(fragNor);
-                    vec3 V = normalize(camPos - fragPos.xyz);
-                    vec3 lightDir = lightPos - fragPos.xyz;
-                    float lightDistance = length(lightDir);
-                    vec3 L = normalize(lightDir);
-                    float attFactor = 1;
-                    if (length(lightAtt) > 0) {
-                        attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
-                    }
-                    float lambert = dot(L, N);
-                    vec3 H = normalize(L + V);
-                    vec3 diffuseContrib  = lightCol * max(lambert, 0.0f) / attFactor;
-                    vec3 specularContrib = lightCol * pow(max(dot(H, N), 0.0), shine) / attFactor;
-                    color.rgb = albedo.rgb * ambient +
-                                albedo.rgb * diffuseContrib +
-                                specularColor * specularContrib;
+                    color.rgb = getPhong(fragNor, fragPos.rgb, camPos, lightPos, lightAtt, lightCol, albedo.rgb, ambient, specularColor, shine);
                     color.a = albedo.a;
-                    })")
+                })")
         {}
 
         virtual void render(const CameraComponent &camera) override {

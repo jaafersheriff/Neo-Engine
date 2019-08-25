@@ -89,7 +89,7 @@ namespace neo {
             // Find name
             std::string::size_type nameStart = line.find("#include \"");
             std::string::size_type nameEnd = line.find("\"", nameStart + 10);
-            if (nameStart == 0 && nameStart != std::string::npos && nameEnd != std::string::npos && nameStart != nameEnd) {
+            if (nameStart != std::string::npos && nameEnd != std::string::npos && nameStart != nameEnd) {
                 std::string fileName = line.substr(nameStart + 10, nameEnd - nameStart - 10);
 
                 // Get full path
@@ -152,6 +152,9 @@ namespace neo {
                     break;
             }
             std::cout << std::endl;
+
+            std::cout << shaderString << std::endl;
+
             std::cin.get();
             exit(EXIT_FAILURE);
         }

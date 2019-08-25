@@ -97,4 +97,7 @@
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Shader\phong.glsl" />
+  </ItemGroup>
 </Project>
