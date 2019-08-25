@@ -180,7 +180,6 @@ int main() {
     Engine::addDefaultImGuiFunc();
     Engine::addImGuiFunc("Shadow Map", [&]() {
         ImGui::SliderFloat("Bias", &receiverShader.bias, 0.f, 0.005f, "%0.4f");
-        ImGui::Checkbox("Dot bias", &receiverShader.useDotBias);
         ImGui::Checkbox("PCF", &receiverShader.usePCF);
         if (receiverShader.usePCF) {
             ImGui::SliderInt("PCF Size", &receiverShader.pcfSize, 0, 5);
