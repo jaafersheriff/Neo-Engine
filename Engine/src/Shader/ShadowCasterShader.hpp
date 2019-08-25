@@ -20,12 +20,13 @@ namespace neo {
                         out vec2 fragTex;
                         void main() { gl_Position = P * V * M * vec4(vertPos, 1); fragTex = vertTex; })",
                     R"(#version 330 core
+                        #include "alphaDiscard.glsl"
                         in vec2 fragTex;
                         uniform bool useTexture;
                         uniform sampler2D diffuseMap;
                         void main() {
-                            if (useTexture && texture(diffuseMap, fragTex).a < 0.1) {
-                                discard;
+                            if (useTexture) {
+                                alphaDiscard(texture(diffuseMap, fragTex).a);
                             }
                         })"
                     ) {

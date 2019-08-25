@@ -35,6 +35,8 @@ namespace neo {
                     })", 
                     R"(#version 330 core
                     #include "phong.glsl"
+                    #include "alphaDiscard.glsl"
+
                     in vec4 fragPos;
                     in vec3 fragNor;
                     in vec2 fragTex;
@@ -56,9 +58,7 @@ namespace neo {
                         vec4 albedo = vec4(diffuseColor, 1.f);
                         if (useTexture) {
                             albedo = texture(diffuseMap, fragTex);
-                            if (albedo.a < 0.1f) {
-                                discard;
-                            }
+                            alphaDiscard(albedo.a);
                         }
 
                         float visibility = 1.f;

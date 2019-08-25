@@ -23,14 +23,13 @@ namespace neo {
                     gl_Position = P * V * M * vec4(vertPos, 1.0);
                 })",
                 R"(#version 330 core
+                #include "alphaDiscard.glsl"
                 in vec2 fragTex;
                 uniform sampler2D diffuseMap;
                 out vec4 color;
                 void main() {
                     vec4 albedo = texture(diffuseMap, fragTex);
-                    if (albedo.a < 0.1f) {
-                        discard;
-                    }
+                    alphaDiscard(albedo.a);
                     color = albedo;
                 })")
         {}

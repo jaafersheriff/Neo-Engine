@@ -96,8 +96,8 @@ namespace neo {
                 if (Util::fileExists((Renderer::APP_SHADER_DIR + fileName).c_str())) {
                     fileName = Renderer::APP_SHADER_DIR + fileName;
                 }
-                else if (Util::fileExists(("../Engine/src/Shader/" + fileName).c_str())) {
-                    fileName = "../Engine/src/Shader/" + fileName;
+                else if (Util::fileExists(("../Engine/shaders/" + fileName).c_str())) {
+                    fileName = "../Engine/shaders/" + fileName;
                 }
                 else {
                     assert(false, fileName + "doesn't exist");

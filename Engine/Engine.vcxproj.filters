@@ -98,6 +98,7 @@
     <Text Include="src\ext\imgui\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\Shader\phong.glsl" />
+    <None Include="shaders\phong.glsl" />
+    <None Include="shaders\alphaDiscard.glsl" />
   </ItemGroup>
 </Project>
