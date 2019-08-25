@@ -22,6 +22,8 @@ namespace neo {
             static Framebuffer* getFBO(const std::string&);
 
         private:
+            // TODO 
+            // template <typename T> static T* _find(const std::string&);
             static std::unordered_map<std::string, Mesh*> mMeshes;
             static std::unordered_map<std::string, Texture*> mTextures;
             static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
@@ -29,8 +31,6 @@ namespace neo {
             static void _insertMesh(const std::string&, Mesh*);
             static void _insertTexture(const std::string&, Texture*);
 
-            // TODO 
-            // template <typename T> static T* _find(const std::string&);
 
     };
 

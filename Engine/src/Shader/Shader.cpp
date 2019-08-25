@@ -18,7 +18,7 @@ namespace neo {
     Shader::Shader(const std::string &name, const std::string &v, const std::string &f, const std::string &g) :
         Shader(
             name,
-            (v.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + v).c_str()) : NULL),
+            (v.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + v).c_str()) : NULL), // todo : memory leak
             (f.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + f).c_str()) : NULL),
             (g.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + g).c_str()) : NULL))
     {}
@@ -35,9 +35,9 @@ namespace neo {
         mName(name) {
         mPID = glCreateProgram();
 
-        const char* processedVertex = _processShader(&vTex);
-        const char* processedFragment = _processShader(&fTex);
-        const char* processedGeometry = _processShader(&gTex);
+        const char* processedVertex = _processShader(vTex);
+        const char* processedFragment = _processShader(fTex);
+        const char* processedGeometry = _processShader(gTex);
 
         if (processedVertex && (mVertexID = _compileShader(GL_VERTEX_SHADER, processedVertex))) {
             CHECK_GL(glAttachShader(mPID, mVertexID));
@@ -71,75 +71,59 @@ namespace neo {
         }
 
         std::cout << "Successfully compiled and linked " << name << std::endl;
-        // delete processedVertex;
-        // delete processedFragment;
-        // delete processedGeometry;
     }
 
-    const char* Shader::_processShader(const char **shaderString) {
-        if (!*shaderString) {
-            return *shaderString;
+    // Handle #includes
+    const char* Shader::_processShader(const char *shaderString) {
+        if (!shaderString) {
+            return shaderString;
         }
 
-        std::vector<char *> append;
+        // Break up source by line
+        std::string sourceString(shaderString);
+        std::string::size_type start = 0;
+        std::string::size_type end = 0;
+        while ((end = sourceString.find("\n", start)) != std::string::npos) {
+            std::string line = sourceString.substr(start, end - start);
 
-        char baseFile[1<<16];
-        strcpy(baseFile, *shaderString);
-        std::vector<char *> lines;
+            // Find name
+            std::string::size_type nameStart = line.find("#include \"");
+            std::string::size_type nameEnd = line.find("\"", nameStart + 10);
+            if (nameStart == 0 && nameStart != std::string::npos && nameEnd != std::string::npos && nameStart != nameEnd) {
+                std::string fileName = line.substr(nameStart + 10, nameEnd - nameStart - 10);
 
-        // Read the first line
-        char * token = strtok(baseFile, "\n");
-        lines.push_back(token);
-        // Read all subsequent lines
-        while ((token = strtok(NULL, "\n")) != NULL) {
-            lines.push_back(token);
-        }
-
-        for (char *line : lines) {
-            token = strtok(line, "# \"\n");
-            if (token == NULL) {
-                continue;
-            }
-            if (!strcmp(token, "include")) {
-                char *fileNameStart = line + strlen(line) + 1;
-                token = strtok(NULL, " \"");
-                if (Util::fileExists((Renderer::APP_SHADER_DIR + std::string(token)).c_str())) {
-                    append.push_back(Util::textFileRead((Renderer::APP_SHADER_DIR + std::string(token)).c_str()));
+                // Get full path
+                if (Util::fileExists((Renderer::APP_SHADER_DIR + fileName).c_str())) {
+                    fileName = Renderer::APP_SHADER_DIR + fileName;
                 }
-                else if (Util::fileExists(("../Engine/shaders" + std::string(token)).c_str())) {
-                    append.push_back(Util::textFileRead(("../Engine/Shaders" + std::string(token)).c_str()));
-                }
-                else if (Util::fileExists(("../Engine/src/Shaders" + std::string(token)).c_str())) {
-                    append.push_back(Util::textFileRead(("../Engine/Shader" + std::string(token)).c_str()));
+                else if (Util::fileExists(("../Engine/src/Shader/" + fileName).c_str())) {
+                    fileName = "../Engine/src/Shader/" + fileName;
                 }
                 else {
-                    std::cout << "Couldn't file file " << token << std::endl;
+                    assert(false, fileName + "doesn't exist");
                 }
+
+                // Load file
+                char* sourceInclude = Util::textFileRead(fileName.c_str());
+
+                // Replace include with source
+                sourceString.erase(start, end - start);
+                sourceString.insert(start, sourceInclude);
+                delete sourceInclude;
+
+                // Reset processing incase there are internal #includes
+                start = end = 0;
+
             }
+            start = end + 1;
         }
 
-        if (append.size()) {
-            int fileSize = 0;
-            for (char* file : append) {
-                fileSize += strlen(file);
-            }
-            fileSize += strlen(*shaderString);
+        // TODO : memory leak
+        char* output = new char[sourceString.size()];
+        strncpy(output, sourceString.c_str(), sourceString.size());
+        output[sourceString.size()] = '\0';
 
-            char* processedShader = (char *)malloc(fileSize);
-            int index = 0;
-            for (char* file : append) {
-                strcpy(processedShader + index, file);
-                index += strlen(file);
-            }
-
-            // #include needs to be replaced inline
-            strcpy(processedShader + index, *shaderString);
-            delete *shaderString;
-            return processedShader;
-        }
-        else {
-            return *shaderString;
-        }
+        return output;
     }
 
     GLuint Shader::_compileShader(GLenum shaderType, const char *shaderString) {
