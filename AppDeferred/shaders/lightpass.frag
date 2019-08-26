@@ -1,5 +1,7 @@
 #version 330 core
 
+#include "phong.glsl"
+
 uniform sampler2D gNormal;
 uniform sampler2D gDiffuse;
 uniform sampler2D gDepth;
@@ -74,15 +76,8 @@ void main() {
     vec4 albedo = texture(gDiffuse, fragTex);
  
     /* Combine */
-    vec3 L = normalize(lightDir);
-    vec3 V = normalize(camPos - fragPos);
-    vec3 N = normalize(fragNor);
-    vec3 H = normalize(L + V);
-    float lambert = clamp(dot(L, N), 0.f, 1.f);
-    vec3 diffuseContrib = lightCol * lambert * attFactor;
-    float s = pow(clamp(dot(H, N), 0.f, 1.f), 33.f);
-    vec3 specularContrib = lightCol * s * attFactor * 0.33f;
     color.a = 1.f;
-    color.rgb = diffuseContrib * 0.2f + diffuseContrib * albedo.rgb + specularContrib;
+    color.rgb = albedo.rgb * 0.2 + 
+                attFactor * getPhong(fragNor, fragPos.rgb, camPos, lightPos, vec3(0.0), lightCol, albedo.rgb, vec3(1.0), 33.0);
     gl_FragDepth = depth;
 }
