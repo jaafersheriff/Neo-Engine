@@ -35,6 +35,7 @@ namespace neo {
             /* Utility functions */
             void bind();
             void unbind();
+            void reload();
             void cleanUp();
             void addAttribute(const std::string &);
             void addUniform(const std::string &);
@@ -63,6 +64,11 @@ namespace neo {
             std::map<std::string, GLint> mAttributes;
             std::map<std::string, GLint> mUniforms;
 
+            const char* mVertexSource = nullptr;
+            const char* mFragmentSource = nullptr;
+            const char* mGeometrySource = nullptr;
+
+            void _init();
             GLuint _compileShader(GLenum, const char *);
             const char* _processShader(const char *);
             void _findAttributesAndUniforms(const char *);

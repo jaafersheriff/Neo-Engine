@@ -275,19 +275,22 @@ namespace neo {
                     ImGui::TreePop();
                 }
                 if (ImGui::TreeNode("Shaders")) {
-                    if (Renderer::mPreProcessShaders.size() && ImGui::TreeNode("Pre process")) {
-                        for (unsigned i = 0; i < Renderer::mPreProcessShaders.size(); i++) {
-                            auto & shader = Renderer::mPreProcessShaders[i];
+                    auto shadersFunc = [&](std::vector<std::unique_ptr<Shader>>& shaders, const std::string swapName) {
+                        for (unsigned i = 0; i < shaders.size(); i++) {
+                            auto& shader = shaders[i];
                             ImGui::PushID(i);
                             ImGui::Checkbox(shader->mName.c_str(), &shader->mActive);
+                            if (ImGui::Button("Reload")) {
+                                shader->reload();
+                            }
 
                             if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-                                ImGui::SetDragDropPayload("PRESHADER_SWAP", &i, sizeof(unsigned));
+                                ImGui::SetDragDropPayload(swapName.c_str(), &i, sizeof(unsigned));
                                 ImGui::Text("Swap %s", shader->mName.c_str());
                                 ImGui::EndDragDropSource();
                             }
                             if (ImGui::BeginDragDropTarget()) {
-                                if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload("PRESHADER_SWAP")) {
+                                if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload(swapName.c_str())) {
                                     IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
                                     unsigned payload_n = *(const unsigned *)payLoad->Data;
                                     Renderer::mPreProcessShaders[i].swap(Renderer::mPreProcessShaders[payload_n]);
@@ -296,65 +299,34 @@ namespace neo {
                             }
                             ImGui::PopID();
                         }
+                    };
+
+                    if (Renderer::mPreProcessShaders.size() && ImGui::TreeNode("Pre process")) {
+                        shadersFunc(Renderer::mPreProcessShaders, "PRESHADER_SWAP");
                         ImGui::TreePop();
                     }
                     if (Renderer::mSceneShaders.size() && ImGui::TreeNode("Scene")) {
-                        for (unsigned i = 0; i < Renderer::mSceneShaders.size(); i++) {
-                            auto & shader = Renderer::mSceneShaders[i];
-                            ImGui::PushID(i);
-                            ImGui::Checkbox(shader->mName.c_str(), &shader->mActive);
-
-                            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-                                ImGui::SetDragDropPayload("SCENESHADER_SWAP", &i, sizeof(unsigned));
-                                ImGui::Text("Swap %s", shader->mName.c_str());
-                                ImGui::EndDragDropSource();
-                            }
-                            if (ImGui::BeginDragDropTarget()) {
-                                if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload("SCENESHADER_SWAP")) {
-                                    IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
-                                    unsigned payload_n = *(const unsigned *)payLoad->Data;
-                                    Renderer::mSceneShaders[i].swap(Renderer::mSceneShaders[payload_n]);
-                                }
-                                ImGui::EndDragDropTarget();
-                            }
-                            ImGui::PopID();
-                        }
+                        shadersFunc(Renderer::mSceneShaders, "SCENESHADER_SWAP");
                         ImGui::TreePop();
                     }
                     if (Renderer::mPostShaders.size() && ImGui::TreeNode("Post process")) {
-                        for (unsigned i = 0; i < Renderer::mPostShaders.size(); i++) {
-                            auto & shader = Renderer::mPostShaders[i];
-                            ImGui::PushID(i);
-                            ImGui::Checkbox(shader->mName.c_str(), &shader->mActive);
-
-                            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-                                ImGui::SetDragDropPayload("POSTSHADER_SWAP", &i, sizeof(unsigned));
-                                ImGui::Text("Swap %s", shader->mName.c_str());
-                                ImGui::EndDragDropSource();
-                            }
-                            if (ImGui::BeginDragDropTarget()) {
-                                if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload("POSTSHADER_SWAP")) {
-                                    IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
-                                    unsigned payload_n = *(const unsigned *)payLoad->Data;
-                                    Renderer::mPostShaders[i].swap(Renderer::mPostShaders[payload_n]);
-                                }
-                                ImGui::EndDragDropTarget();
-                            }
-                            ImGui::PopID();
-                        }
+                        shadersFunc(Renderer::mPostShaders, "POSTSHADER_SWAP");
                         ImGui::TreePop();
                     }
                     ImGui::TreePop();
                 }
             }
+            auto textureFunc = [&](const Texture& texture) {
+                float scale = 150.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
+                ImGui::Image((ImTextureID)texture.mTextureID, ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
+            };
             if (ImGui::CollapsingHeader("Library")) {
                 if (Library::mFramebuffers.size() && ImGui::TreeNode("FBOs")) {
                     for (auto & fbo : Library::mFramebuffers) {
                         if (ImGui::TreeNode((fbo.first + " (" + std::to_string(fbo.second->mFBOID) + ")").c_str())) {
-                            for (auto & t : fbo.second->mTextures) {
+                            for (auto& t : fbo.second->mTextures) {
                                 if (ImGui::TreeNode((std::to_string(t->mTextureID) + " [" + std::to_string(t->mWidth) + ", " + std::to_string(t->mHeight) + "]").c_str())) {
-                                    float scale = 150.f / (t->mWidth > t->mHeight ? t->mWidth : t->mHeight);
-                                    ImGui::Image((ImTextureID)t->mTextureID, ImVec2(scale * t->mWidth, scale * t->mHeight), ImVec2(0, 1), ImVec2(1, 0));
+                                    textureFunc(*t);
                                     ImGui::TreePop();
                                 }
                             }
@@ -370,10 +342,9 @@ namespace neo {
                     ImGui::TreePop();
                 }
                 if (Library::mTextures.size() && ImGui::TreeNode("Textures")) {
-                    for (auto & t : Library::mTextures) {
+                    for (auto& t : Library::mTextures) {
                         if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->mTextureID) + ")" + " [" + std::to_string(t.second->mWidth) + ", " + std::to_string(t.second->mHeight) + "]").c_str())) {
-                            float scale = 150.f / (t.second->mWidth > t.second->mHeight ? t.second->mWidth : t.second->mHeight);
-                            ImGui::Image((ImTextureID)t.second->mTextureID, ImVec2(scale * t.second->mWidth, scale * t.second->mHeight), ImVec2(0, 1), ImVec2(1, 0));
+                            textureFunc(*t.second);
                             ImGui::TreePop();
                         }
                     }

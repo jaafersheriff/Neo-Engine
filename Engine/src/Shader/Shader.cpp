@@ -18,7 +18,7 @@ namespace neo {
     Shader::Shader(const std::string &name, const std::string &v, const std::string &f, const std::string &g) :
         Shader(
             name,
-            (v.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + v).c_str()) : NULL), // todo : memory leak
+            (v.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + v).c_str()) : NULL),
             (f.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + f).c_str()) : NULL),
             (g.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + g).c_str()) : NULL))
     {}
@@ -32,12 +32,25 @@ namespace neo {
     {}
 
     Shader::Shader(const std::string &name, const char *vTex, const char *fTex, const char *gTex) :
-        mName(name) {
+        mName(name),
+        mVertexSource(vTex),
+        mFragmentSource(fTex),
+        mGeometrySource(gTex){
+
+        _init();
+   }
+
+    void Shader::reload() {
+        cleanUp();
+        _init();
+    }
+
+    void Shader::_init() {
         mPID = glCreateProgram();
 
-        const char* processedVertex = _processShader(vTex);
-        const char* processedFragment = _processShader(fTex);
-        const char* processedGeometry = _processShader(gTex);
+        const char* processedVertex = _processShader(mVertexSource);
+        const char* processedFragment = _processShader(mFragmentSource);
+        const char* processedGeometry = _processShader(mGeometrySource);
 
         if (processedVertex && (mVertexID = _compileShader(GL_VERTEX_SHADER, processedVertex))) {
             CHECK_GL(glAttachShader(mPID, mVertexID));
@@ -55,7 +68,7 @@ namespace neo {
         CHECK_GL(glGetProgramiv(mPID, GL_LINK_STATUS, &linkSuccess));
         if (!linkSuccess) {
             GLHelper::printProgramInfoLog(mPID);
-            std::cout << "Error linking shader " << name << std::endl;
+            std::cout << "Error linking shader " << mName << std::endl;
             std::cin.get();
             exit(EXIT_FAILURE);
         }
@@ -70,7 +83,12 @@ namespace neo {
             _findAttributesAndUniforms(processedGeometry);
         }
 
-        std::cout << "Successfully compiled and linked " << name << std::endl;
+        std::cout << "Successfully compiled and linked " << mName << std::endl;
+
+        // TODO : idk why this won't work
+        // delete processedVertex;
+        // delete processedFragment;
+        // delete processedGeometry;
     }
 
     // Handle #includes
@@ -256,14 +274,24 @@ namespace neo {
     }
 
     void Shader::cleanUp() {
-        unbind();
-        CHECK_GL(glDetachShader(mPID, mVertexID));
-        CHECK_GL(glDetachShader(mPID, mFragmentID));
-        CHECK_GL(glDetachShader(mPID, mGeometryID));
-        CHECK_GL(glDeleteShader(mVertexID));
-        CHECK_GL(glDeleteShader(mFragmentID));
-        CHECK_GL(glDeleteShader(mGeometryID));
+        if (mPID) {
+            unbind();
+            if (mVertexID) {
+                CHECK_GL(glDetachShader(mPID, mVertexID));
+                CHECK_GL(glDeleteShader(mVertexID));
+
+            }
+            if (mFragmentID) {
+                CHECK_GL(glDetachShader(mPID, mFragmentID));
+                CHECK_GL(glDeleteShader(mFragmentID));
+            }
+            if (mGeometryID) {
+                CHECK_GL(glDeleteShader(mGeometryID));
+                CHECK_GL(glDetachShader(mPID, mGeometryID));
+            }
+        }
         CHECK_GL(glDeleteProgram(mPID));
+        mPID = mVertexID = mFragmentID = mGeometryID = 0;
     }
 
     void Shader::loadUniform(const std::string &loc, const bool b) const {
