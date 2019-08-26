@@ -279,11 +279,7 @@ namespace neo {
                         for (unsigned i = 0; i < shaders.size(); i++) {
                             auto& shader = shaders[i];
                             ImGui::PushID(i);
-                            ImGui::Checkbox(shader->mName.c_str(), &shader->mActive);
-                            if (ImGui::Button("Reload")) {
-                                shader->reload();
-                            }
-
+                            bool treeActive = ImGui::TreeNode(shader->mName.c_str());
                             if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                                 ImGui::SetDragDropPayload(swapName.c_str(), &i, sizeof(unsigned));
                                 ImGui::Text("Swap %s", shader->mName.c_str());
@@ -293,9 +289,17 @@ namespace neo {
                                 if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload(swapName.c_str())) {
                                     IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
                                     unsigned payload_n = *(const unsigned *)payLoad->Data;
-                                    Renderer::mPreProcessShaders[i].swap(Renderer::mPreProcessShaders[payload_n]);
+                                    shaders[i].swap(shaders[payload_n]);
                                 }
                                 ImGui::EndDragDropTarget();
+                            }
+
+                            if (treeActive) {
+                                ImGui::Checkbox(shader->mName.c_str(), &shader->mActive);
+                                if (ImGui::Button("Reload")) {
+                                    shader->reload();
+                                }
+                                ImGui::TreePop();
                             }
                             ImGui::PopID();
                         }
