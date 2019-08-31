@@ -76,24 +76,15 @@ int main() {
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
     Renderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
-    auto & lightPassShader = Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag"); 
-    auto & combineShader = Renderer::addPostProcessShader<CombineShader>("combine.frag"); 
-    auto & gammaShader = Renderer::addPostProcessShader<GammaCorrectShader>();
+    Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag"); 
+    Renderer::addPostProcessShader<CombineShader>("combine.frag"); 
+    Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();
 
-    Engine::addImGuiFunc("Gamma", [&]() {
-        ImGui::SliderFloat("Gamma", &gammaShader.gamma, 0.f, 5.f);
-    });
-
     Engine::addImGuiFunc("Lights", [&]() {
-        ImGui::Checkbox("Show lights", &lightPassShader.showLights);
-        if (lightPassShader.showLights) {
-            ImGui::SameLine();
-            ImGui::SliderFloat("Show radius", &lightPassShader.showRadius, 0.01f, 1.f);
-        }
- 
+
         static int index;
         if (ImGui::CollapsingHeader("Create Lights")) {
             if (ImGui::TreeNode("Single")) {

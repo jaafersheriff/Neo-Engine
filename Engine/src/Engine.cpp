@@ -305,6 +305,7 @@ namespace neo {
                                 if (ImGui::Button("Reload")) {
                                     shader->reload();
                                 }
+                                shader->imguiEditor();
                                 ImGui::TreePop();
                             }
                             ImGui::PopID();

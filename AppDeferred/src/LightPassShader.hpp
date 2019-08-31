@@ -86,5 +86,12 @@ class LightPassShader : public Shader {
             }
 
             unbind();
-    }
+        }
+
+        virtual void imguiEditor() {
+            ImGui::Checkbox("Show lights", &showLights);
+            if (showLights) {
+                ImGui::SliderFloat("Show radius", &showRadius, 0.01f, 1.f);
+            }
+        }
 };
