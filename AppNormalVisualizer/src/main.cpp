@@ -49,6 +49,7 @@ struct Orient {
     Orient(Mesh *mesh) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
+        Engine::addComponent<RotationComponent>(gameObject, glm::vec3(0.f, 0.6f, 0.f));
         Engine::addComponent<MeshComponent>(gameObject, mesh);
         Engine::addComponent<renderable::PhongRenderable>(gameObject);
         Engine::addComponent<renderable::WireframeRenderable>(gameObject);
@@ -66,21 +67,18 @@ int main() {
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
+    Engine::addSystem<RotationSystem>();
     Engine::initSystems();
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));
-    // Renderer::addSceneShader<PhongShader>();
-    // Renderer::addSceneShader<WireframeShader>();
-    normalShader = &Renderer::addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
+    Renderer::addSceneShader<PhongShader>();
+    Renderer::addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
  
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();
-    Engine::addImGuiFunc("Normals", [&]() {
-        ImGui::SliderFloat("Magnitude", &normalShader->magnitude, 0.f, 1.f);
-    });
-
+        
     /* Run */
     Engine::run();
 

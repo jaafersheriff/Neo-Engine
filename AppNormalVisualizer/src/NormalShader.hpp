@@ -44,4 +44,8 @@ class NormalShader : public Shader {
             unbind();
         }
 
+        virtual void imguiEditor() override {
+            ImGui::SliderFloat("Magnitude", &magnitude, 0.f, 1.f);
+        }
+
 };
