@@ -13,8 +13,7 @@ namespace neo {
 
         public:
 
-            // TODO : shader build system so i dont have to copy all this phong shader code
-            PhongShadowShader(float b = 0.f, bool usePCF = true, int pcfSize = 2) :
+            PhongShadowShader(float b = 0.00005f, int pcfSize = 2) :
                 Shader("PhongShadow Shader", 
                     R"(
                     layout(location = 0) in vec3 vertPos;
@@ -35,6 +34,7 @@ namespace neo {
                     })", 
                     R"(
                     #include "phong.glsl"
+                    #include "shadowreceiver.glsl"
                     #include "alphaDiscard.glsl"
 
                     in vec4 fragPos;
@@ -52,7 +52,6 @@ namespace neo {
                     uniform sampler2D shadowMap;
                     uniform float bias;
                     uniform int pcfSize;
-                    uniform bool usePCF;
                     out vec4 color;
                     void main() {
                         vec4 albedo = vec4(diffuseColor, 1.f);
@@ -61,35 +60,17 @@ namespace neo {
                             alphaDiscard(albedo.a);
                         }
 
-                        float visibility = 1.f;
-                        if (usePCF) {
-                            float shadow = 0.f;
-                            vec2 texelSize = 1.f / textureSize(shadowMap, 0);
-                            for (int x = -pcfSize; x <= pcfSize; x++) {
-                                for (int y = -pcfSize; y <= pcfSize; y++) {
-                                    float pcfDepth = texture(shadowMap, shadowCoord.xy + vec2(x, y) * texelSize).r;
-                                    shadow += shadowCoord.z - bias > pcfDepth ? 1.f : 0.f;
-                                }
-                            }
-                            shadow /= (2 * pcfSize + 1) * (2 * pcfSize + 1);
-                            visibility = 1.f - shadow;
-                        }
-                        else if (texture(shadowMap, shadowCoord.xy).r < shadowCoord.z - bias) {
-                            visibility = 0.f;
-                        }
-
+                        float visibility = getShadowVisibility(pcfSize, shadowMap, shadowCoord, bias);
                         vec3 phong = getPhong(fragNor, fragPos.rgb, camPos, lightPos, lightAtt, lightCol, albedo.rgb, specularColor, shine);
                         color.rgb = albedo.rgb * ambient + 
                                     visibility * phong;
                         color.a = albedo.a;
                     })"),
                 bias(b),
-                usePCF(usePCF),
                 pcfSize(pcfSize)
             {}
 
             float bias;
-            bool usePCF;
             int pcfSize;
             const glm::mat4 biasMatrix = glm::mat4(
                 0.5f, 0.0f, 0.0f, 0.0f,
@@ -119,7 +100,6 @@ namespace neo {
                 loadUniform("bias", bias);
 
                 /* PCF */
-                loadUniform("usePCF", usePCF);
                 loadUniform("pcfSize", pcfSize);
 
                 /* Bind shadow map */
@@ -167,6 +147,11 @@ namespace neo {
                 }
 
                 unbind();
+            }
+
+            virtual void imguiEditor() override {
+                ImGui::SliderFloat("Bias", &bias, 1e-5, 1e-2);
+                ImGui::SliderInt("PCF", &pcfSize, 0, 5);
             }
     };
 }

@@ -57,7 +57,6 @@ namespace neo {
                 fbo->bind();
                 CHECK_GL(glClear(GL_DEPTH_BUFFER_BIT));
                 CHECK_GL(glViewport(0, 0, depthTexture->mWidth, depthTexture->mHeight));
-                CHECK_GL(glCullFace(GL_FRONT));
 
                 bind();
                 loadUniform("P", camera->getProj());
