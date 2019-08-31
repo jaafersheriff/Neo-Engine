@@ -13,13 +13,13 @@ namespace neo {
 
             ShadowCasterShader(const int dimension) :
                 Shader("Shadow Caster",
-                    R"(#version 330 core
+                    R"(
                         layout (location = 0) in vec3 vertPos;
                         layout (location = 2) in vec2 vertTex;
                         uniform mat4 P, V, M;
                         out vec2 fragTex;
                         void main() { gl_Position = P * V * M * vec4(vertPos, 1); fragTex = vertTex; })",
-                    R"(#version 330 core
+                    R"(
                         #include "alphaDiscard.glsl"
                         in vec2 fragTex;
                         uniform bool useTexture;

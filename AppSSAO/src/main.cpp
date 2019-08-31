@@ -6,6 +6,7 @@
 #include "AOShader.hpp"
 #include "CombineShader.hpp"
 #include "BlurShader.hpp"
+#include "Shader/GammaCorrectShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "Util/Util.hpp"
@@ -77,12 +78,18 @@ int main() {
     Renderer::init("shaders/", camera.camera);
     Renderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
     auto & lightPassShader = Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag");  // run light pass after generating gbuffer
+    auto & combineShader = Renderer::addPostProcessShader<CombineShader>("combine.frag");    // combine light pass and ssao 
     auto & aoShader = Renderer::addPostProcessShader<AOShader>("ao.frag");    // first post process - generate ssao map 
     auto & blurShader = Renderer::addPostProcessShader<BlurShader>("blur.frag"); // blur ssao map
-    auto & combineShader = Renderer::addPostProcessShader<CombineShader>("combine.frag");    // combine light pass and ssao 
+    auto & gammaShader = Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();
+
+  Engine::addImGuiFunc("Gamma", [&]() {
+        ImGui::SliderFloat("Gamma", &gammaShader.gamma, 0.f, 5.f);
+    });
+
     Engine::addImGuiFunc("AO", [&]() {
         ImGui::Checkbox("Show AO", &combineShader.showAO);
         if (!combineShader.showAO) {

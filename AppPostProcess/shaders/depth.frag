@@ -1,9 +1,5 @@
-#version 330 core
 
-in vec2 fragTex;
-
-uniform sampler2D inputFBO;
-uniform sampler2D inputDepth;
+#include "postprocess.glsl"
 
 out vec4 color;
 

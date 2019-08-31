@@ -8,7 +8,7 @@ namespace neo {
     public:
         PostProcessShader(const std::string &name, const std::string &frag) :
             Shader(name, 
-                R"(#version 330 core
+                R"(
                 layout (location = 0) in vec3 vertPos;
                 layout (location = 2) in vec2 vertTex;
                 out vec2 fragTex;

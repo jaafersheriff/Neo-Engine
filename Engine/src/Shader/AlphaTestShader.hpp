@@ -13,7 +13,7 @@ namespace neo {
 
         AlphaTestShader() :
             Shader("AlphaTest Shader",
-                R"(#version 330 core
+                R"(
                 layout(location = 0) in vec3 vertPos;
                 layout(location = 2) in vec2 vertTex;
                 uniform mat4 P, V, M;
@@ -22,7 +22,7 @@ namespace neo {
                     fragTex = vertTex;
                     gl_Position = P * V * M * vec4(vertPos, 1.0);
                 })",
-                R"(#version 330 core
+                R"(
                 #include "alphaDiscard.glsl"
                 in vec2 fragTex;
                 uniform sampler2D diffuseMap;

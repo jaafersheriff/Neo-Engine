@@ -62,6 +62,7 @@
     <ClInclude Include="src\GLObjects\Texture.hpp" />
     <ClInclude Include="src\Engine.hpp" />
     <ClInclude Include="src\Shader\AlphaTestShader.hpp" />
+    <ClInclude Include="src\Shader\GammaCorrectShader.hpp" />
     <ClInclude Include="src\Shader\LineShader.hpp" />
     <ClInclude Include="src\Shader\PhongShader.hpp" />
     <ClInclude Include="src\Shader\PostProcessShader.hpp" />
@@ -117,7 +118,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\alphaDiscard.glsl" />
+    <None Include="shaders\gammacorrect.glsl" />
     <None Include="shaders\phong.glsl" />
+    <None Include="shaders\postprocess.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

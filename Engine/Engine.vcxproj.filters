@@ -64,6 +64,7 @@
     <ClInclude Include="src\Component\CameraComponent\PerspectiveCameraComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\OrthoCameraComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\ShadowCameraComponent.hpp" />
+    <ClInclude Include="src\Shader\GammaCorrectShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -100,5 +101,7 @@
   <ItemGroup>
     <None Include="shaders\phong.glsl" />
     <None Include="shaders\alphaDiscard.glsl" />
+    <None Include="shaders\gammacorrect.glsl" />
+    <None Include="shaders\postprocess.glsl" />
   </ItemGroup>
 </Project>

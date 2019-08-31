@@ -137,9 +137,9 @@ namespace neo {
         /* Create GLFW window */
         mWindow = glfwCreateWindow(mWindowSize.x, mWindowSize.y, name.c_str(), NULL, NULL);
         if (!mWindow) {
-            std::cerr << "Failed to create window" << std::endl;
             glfwTerminate();
-            return 1;
+            std::cin.get();
+            assert(false, "Failed to create window");
         }
         glfwMakeContextCurrent(mWindow);
 

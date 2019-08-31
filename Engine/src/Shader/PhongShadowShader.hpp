@@ -16,7 +16,7 @@ namespace neo {
             // TODO : shader build system so i dont have to copy all this phong shader code
             PhongShadowShader(float b = 0.f, bool usePCF = true, int pcfSize = 2) :
                 Shader("PhongShadow Shader", 
-                    R"(#version 330 core
+                    R"(
                     layout(location = 0) in vec3 vertPos;
                     layout(location = 1) in vec3 vertNor;
                     layout(location = 2) in vec2 vertTex;
@@ -33,7 +33,7 @@ namespace neo {
                         fragTex = vertTex;
                         shadowCoord = L * fragPos; 
                     })", 
-                    R"(#version 330 core
+                    R"(
                     #include "phong.glsl"
                     #include "alphaDiscard.glsl"
 

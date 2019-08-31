@@ -1,4 +1,3 @@
-#version 330 core
 
 in vec4 fragPos;
 in vec3 fragNor;

@@ -69,8 +69,9 @@ namespace neo {
             const char* mGeometrySource = nullptr;
 
             void _init();
+            std::string _getFullPath(const std::string&);
             GLuint _compileShader(GLenum, const char *);
-            const char* _processShader(const char *);
+            std::string _processShader(const char *);
             void _findAttributesAndUniforms(const char *);
     };
 }

@@ -11,31 +11,31 @@ namespace neo {
         mName(name)
     {}
 
-    Shader::Shader(const std::string &name, const std::string &v, const std::string &f) :
-        Shader(name, v, f, "")
+    Shader::Shader(const std::string &name, const std::string &vName, const std::string &fName) :
+        Shader(name, vName, fName, "")
     {}
 
-    Shader::Shader(const std::string &name, const std::string &v, const std::string &f, const std::string &g) :
+    Shader::Shader(const std::string &name, const std::string &vName, const std::string &fName, const std::string &gName) :
         Shader(
             name,
-            (v.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + v).c_str()) : NULL),
-            (f.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + f).c_str()) : NULL),
-            (g.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + g).c_str()) : NULL))
+            (vName.size() ? Util::textFileRead(_getFullPath(vName).c_str()) : NULL),
+            (fName.size() ? Util::textFileRead(_getFullPath(fName).c_str()) : NULL),
+            (gName.size() ? Util::textFileRead(_getFullPath(gName).c_str()) : NULL))
     {}
 
     Shader::Shader(const std::string &name, const char *vTex, const char *fTex) :
         Shader(name, vTex, fTex, NULL)
     {}
 
-    Shader::Shader(const std::string &name, const char *vTex, const std::string &f) :
-        Shader(name, vTex, (f.size() ? Util::textFileRead((Renderer::APP_SHADER_DIR + f).c_str()) : NULL), NULL)
+    Shader::Shader(const std::string &name, const char *vTex, const std::string &fName) :
+        Shader(name, vTex, (fName.size() ? Util::textFileRead(_getFullPath(fName).c_str()) : NULL), NULL)
     {}
 
     Shader::Shader(const std::string &name, const char *vTex, const char *fTex, const char *gTex) :
         mName(name),
         mVertexSource(vTex),
         mFragmentSource(fTex),
-        mGeometrySource(gTex){
+        mGeometrySource(gTex) {
 
         _init();
    }
@@ -48,17 +48,17 @@ namespace neo {
     void Shader::_init() {
         mPID = glCreateProgram();
 
-        const char* processedVertex = _processShader(mVertexSource);
-        const char* processedFragment = _processShader(mFragmentSource);
-        const char* processedGeometry = _processShader(mGeometrySource);
+        std::string processedVertex = _processShader(mVertexSource);
+        std::string processedFragment = _processShader(mFragmentSource);
+        std::string processedGeometry = _processShader(mGeometrySource);
 
-        if (processedVertex && (mVertexID = _compileShader(GL_VERTEX_SHADER, processedVertex))) {
+        if (processedVertex.size() && (mVertexID = _compileShader(GL_VERTEX_SHADER, processedVertex.c_str()))) {
             CHECK_GL(glAttachShader(mPID, mVertexID));
         }
-        if (processedFragment && (mFragmentID = _compileShader(GL_FRAGMENT_SHADER, processedFragment))) {
+        if (processedFragment.size() && (mFragmentID = _compileShader(GL_FRAGMENT_SHADER, processedFragment.c_str()))) {
             CHECK_GL(glAttachShader(mPID, mFragmentID));
         }
-        if (processedGeometry && (mGeometryID = _compileShader(GL_GEOMETRY_SHADER, processedGeometry))) {
+        if (processedGeometry.size() && (mGeometryID = _compileShader(GL_GEOMETRY_SHADER, processedGeometry.c_str()))) {
             CHECK_GL(glAttachShader(mPID, mGeometryID));
         }
         CHECK_GL(glLinkProgram(mPID));
@@ -74,31 +74,30 @@ namespace neo {
         }
 
         if (mVertexID) {
-            _findAttributesAndUniforms(processedVertex);
+            _findAttributesAndUniforms(processedVertex.c_str());
         }
         if (mFragmentID) {
-            _findAttributesAndUniforms(processedFragment);
+            _findAttributesAndUniforms(processedFragment.c_str());
         }
         if (mGeometryID) {
-            _findAttributesAndUniforms(processedGeometry);
+            _findAttributesAndUniforms(processedGeometry.c_str());
         }
 
         std::cout << "Successfully compiled and linked " << mName << std::endl;
-
-        // TODO : idk why this won't work
-        // delete processedVertex;
-        // delete processedFragment;
-        // delete processedGeometry;
     }
 
     // Handle #includes
-    const char* Shader::_processShader(const char *shaderString) {
+    std::string Shader::_processShader(const char *shaderString) {
         if (!shaderString) {
-            return shaderString;
+            return "";
         }
 
-        // Break up source by line
         std::string sourceString(shaderString);
+
+        // Prepend #version
+        sourceString.insert(0, "#version 330 core\n");
+
+        // Break up source by line
         std::string::size_type start = 0;
         std::string::size_type end = 0;
         while ((end = sourceString.find("\n", start)) != std::string::npos) {
@@ -108,18 +107,7 @@ namespace neo {
             std::string::size_type nameStart = line.find("#include \"");
             std::string::size_type nameEnd = line.find("\"", nameStart + 10);
             if (nameStart != std::string::npos && nameEnd != std::string::npos && nameStart != nameEnd) {
-                std::string fileName = line.substr(nameStart + 10, nameEnd - nameStart - 10);
-
-                // Get full path
-                if (Util::fileExists((Renderer::APP_SHADER_DIR + fileName).c_str())) {
-                    fileName = Renderer::APP_SHADER_DIR + fileName;
-                }
-                else if (Util::fileExists(("../Engine/shaders/" + fileName).c_str())) {
-                    fileName = "../Engine/shaders/" + fileName;
-                }
-                else {
-                    assert(false, fileName + "doesn't exist");
-                }
+                std::string fileName = _getFullPath(line.substr(nameStart + 10, nameEnd - nameStart - 10));
 
                 // Load file
                 char* sourceInclude = Util::textFileRead(fileName.c_str());
@@ -136,12 +124,19 @@ namespace neo {
             start = end + 1;
         }
 
-        // TODO : memory leak
-        char* output = new char[sourceString.size()];
-        strncpy(output, sourceString.c_str(), sourceString.size());
-        output[sourceString.size()] = '\0';
+        return sourceString;
+    }
 
-        return output;
+    std::string Shader::_getFullPath(const std::string& fileName) {
+        if (Util::fileExists((Renderer::APP_SHADER_DIR + fileName).c_str())) {
+            return Renderer::APP_SHADER_DIR + fileName;
+        }
+        else if (Util::fileExists(("../Engine/shaders/" + fileName).c_str())) {
+            return "../Engine/shaders/" + fileName;
+        }
+        else {
+            assert(false, fileName + "doesn't exist");
+        }
     }
 
     GLuint Shader::_compileShader(GLenum shaderType, const char *shaderString) {

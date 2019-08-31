@@ -4,6 +4,7 @@
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
 #include "CombineShader.hpp"
+#include "Shader/GammaCorrectShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "Util/Util.hpp"
@@ -97,9 +98,15 @@ int main() {
     Renderer::addPreProcessShader<DecalShader>("decal.vert", "decal.frag"); 
     auto & lightPassShader = Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag"); 
     auto & combineShader = Renderer::addPostProcessShader<CombineShader>("combine.frag"); 
+    auto & gammaShader = Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();
+
+    Engine::addImGuiFunc("Gamma", [&]() {
+        ImGui::SliderFloat("Gamma", &gammaShader.gamma, 0.f, 5.f);
+    });
+
 
     Engine::addImGuiFunc("Decal", [&]() {
         auto pos = decal.spat->getPosition();

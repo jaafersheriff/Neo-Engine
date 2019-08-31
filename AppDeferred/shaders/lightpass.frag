@@ -1,4 +1,3 @@
-#version 330 core
 
 #include "phong.glsl"
 
@@ -77,7 +76,8 @@ void main() {
  
     /* Combine */
     color.a = 1.f;
+    // TODO : these constants should come from gbuffer
     color.rgb = albedo.rgb * 0.2 + 
-                attFactor * getPhong(fragNor, fragPos.rgb, camPos, lightPos, vec3(0.0), lightCol, albedo.rgb, vec3(1.0), 33.0);
+                getPhong(fragNor, fragPos.rgb, camPos, lightPos, vec3(0.0), lightCol, albedo.rgb, vec3(1.0), 33.0);
     gl_FragDepth = depth;
 }

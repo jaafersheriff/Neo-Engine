@@ -1,9 +1,11 @@
 
 #include "postprocess.glsl"
 
+uniform float gamma;
+
 out vec4 color;
 
 void main() {
     color = texture(inputFBO, fragTex);
-    color.b += 0.5f;
+    color.rgb = pow(color.rgb, vec3(1/gamma));
 }
