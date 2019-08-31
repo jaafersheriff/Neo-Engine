@@ -36,4 +36,9 @@ class CombineShader : public PostProcessShader {
             decalFBO->mTextures[0]->bind();
             loadUniform("decals", decalFBO->mTextures[0]->mTextureID);
         }
+
+        virtual void imguiEditor() override {
+            ImGui::SliderFloat("Global diffuse", &diffuseAmount, 0.f, 1.f);
+        }
+
 };

@@ -75,39 +75,18 @@ int main() {
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
+
+    // TODO - this ordering is super broken
     Renderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
-    auto & lightPassShader = Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag");  // run light pass after generating gbuffer
-    auto & aoShader = Renderer::addPostProcessShader<AOShader>("ao.frag");    // first post process - generate ssao map 
-    auto & blurShader = Renderer::addPostProcessShader<BlurShader>("blur.frag"); // blur ssao map
-    auto & combineShader = Renderer::addPostProcessShader<CombineShader>("combine.frag");    // combine light pass and ssao 
+    Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag");  // run light pass after generating gbuffer
+    Renderer::addPostProcessShader<AOShader>("ao.frag");    // first post process - generate ssao map 
+    Renderer::addPostProcessShader<BlurShader>("blur.frag"); // blur ssao map
+    Renderer::addPostProcessShader<CombineShader>("combine.frag");    // combine light pass and ssao 
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();
-    Engine::addImGuiFunc("AO", [&]() {
-        ImGui::Checkbox("Show AO", &combineShader.showAO);
-        if (!combineShader.showAO) {
-            return;
-        }
-        int size = Library::getTexture("aoKernel")->mWidth;
-        if (ImGui::SliderInt("Kernel", &size, 1, 128)) {
-            aoShader.generateKernel(size);
-        }
-        size = Library::getTexture("aoNoise")->mWidth;
-        if (ImGui::SliderInt("Noise", &size, 1, 32)) {
-            aoShader.generateNoise(size);
-        }
-        ImGui::SliderFloat("Radius", &aoShader.radius, 0.f, 1.f);
-        ImGui::SliderFloat("Bias", &aoShader.bias, 0.f, 1.f);
-        ImGui::SliderInt("Blur", &blurShader.blurAmount, 0, 10);
-        ImGui::SliderFloat("Diffuse", &combineShader.diffuseAmount, 0.f, 1.f);
-    });
+
     Engine::addImGuiFunc("Lights", [&]() {
-        ImGui::Checkbox("Show lights", &lightPassShader.showLights);
-        if (lightPassShader.showLights) {
-            ImGui::SameLine();
-            ImGui::SliderFloat("Show radius", &lightPassShader.showRadius, 0.01f, 1.f);
-        }
- 
         static int index;
         if (ImGui::CollapsingHeader("Create Lights")) {
             if (ImGui::TreeNode("Single")) {

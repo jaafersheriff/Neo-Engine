@@ -173,14 +173,12 @@ int main() {
     Renderer::addPreProcessShader<ShadowCasterShader>(2048);
     Renderer::addSceneShader<LineShader>();
     Renderer::addSceneShader<PhongShader>();
-    PhongShadowShader& receiverShader = Renderer::addSceneShader<PhongShadowShader>();
+    Renderer::addSceneShader<PhongShadowShader>();
     Renderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();
-    Engine::addImGuiFunc("Shadow Map", [&]() {
-        ImGui::SliderFloat("Bias", &receiverShader.bias, 0.f, 0.005f, "%0.4f");
-        ImGui::SliderInt("PCF Size", &receiverShader.pcfSize, 0, 5);
+    Engine::addImGuiFunc("Shadow Camera", [&]() {
         static bool useLightCam = false;
         if (ImGui::Button("Switch Camera")) {
             useLightCam = !useLightCam;

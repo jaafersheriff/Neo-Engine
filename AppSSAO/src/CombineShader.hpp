@@ -33,4 +33,9 @@ class CombineShader : public PostProcessShader {
             lightFBO->mTextures[0]->bind();
             loadUniform("lightOutput", lightFBO->mTextures[0]->mTextureID);
         }
+
+        virtual void imguiEditor() override {
+            ImGui::Checkbox("Show AO", &showAO);
+            ImGui::SliderFloat("Diffuse", &diffuseAmount, 0.f, 1.f);
+        }
 };

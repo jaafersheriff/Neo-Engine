@@ -18,4 +18,8 @@ class BlurShader : public PostProcessShader {
         virtual void render(const CameraComponent &camera) override {
             loadUniform("blurAmount", blurAmount);
         }
+
+        virtual void imguiEditor() override {
+            ImGui::SliderInt("Blur", &blurAmount, 0, 10);
+        }
 };
