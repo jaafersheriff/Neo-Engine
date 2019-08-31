@@ -166,7 +166,12 @@ namespace neo {
             }
             std::cout << std::endl;
 
-            std::cout << shaderString << std::endl;
+            std::stringstream ss(shaderString);
+            std::string line;
+            int lineNum = 1;
+            while (shaderString && std::getline(ss, line, '\n')) {
+                std::cout << lineNum++ << " " << line << std::endl;
+            }
 
             std::cin.get();
             exit(EXIT_FAILURE);

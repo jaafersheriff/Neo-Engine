@@ -13,6 +13,7 @@ namespace neo {
 
             virtual void init() {};
             virtual void update(const float) {};
+            virtual void imguiEditor() {};
             bool mActive = true;
             const std::string mName = 0;
     };

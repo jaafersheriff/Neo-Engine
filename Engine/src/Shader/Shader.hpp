@@ -27,6 +27,7 @@ namespace neo {
             virtual ~Shader() = default;
 
             virtual void render(const CameraComponent &) {}
+            virtual void imguiEditor() {}
             bool mActive = true;
 
             /* Names */

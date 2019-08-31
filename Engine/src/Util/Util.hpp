@@ -23,7 +23,7 @@ namespace neo {
             mFramesInCount++;
             if (runTime - mLastFPSTime >= 1.0) {
                 mFPS = mFramesInCount;
-                if (mFPSList.size() == 25) {
+                if (mFPSList.size() == 100) {
                     mFPSList.erase(mFPSList.begin());
                 }
                 mFPSList.push_back(mFPS);

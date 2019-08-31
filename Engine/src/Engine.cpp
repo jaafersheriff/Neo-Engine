@@ -246,8 +246,7 @@ namespace neo {
                     for (unsigned i = 0; i < mSystems.size(); i++) {
                         auto & sys = mSystems[i].second;
                         ImGui::PushID(i);
-                        ImGui::Checkbox(sys->mName.c_str(), &sys->mActive);
-
+                        bool treeActive = ImGui::TreeNode(sys->mName.c_str());
                         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                             ImGui::SetDragDropPayload("SYSTEM_SWAP", &i, sizeof(unsigned));
                             ImGui::Text("Swap %s", sys->mName.c_str());
@@ -262,7 +261,13 @@ namespace neo {
                             ImGui::EndDragDropTarget();
                         }
                         ImGui::PopID();
+                        if (treeActive) {
+                            ImGui::Checkbox("Active", &sys->mActive);
+                            sys->imguiEditor();
+                            ImGui::TreePop();
+                        }
                     }
+
                     ImGui::TreePop();
                 }
             }
@@ -295,7 +300,8 @@ namespace neo {
                             }
 
                             if (treeActive) {
-                                ImGui::Checkbox(shader->mName.c_str(), &shader->mActive);
+                                ImGui::Checkbox("Active", &shader->mActive);
+                                ImGui::SameLine();
                                 if (ImGui::Button("Reload")) {
                                     shader->reload();
                                 }
