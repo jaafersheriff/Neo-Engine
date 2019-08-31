@@ -103,5 +103,6 @@
     <None Include="shaders\alphaDiscard.glsl" />
     <None Include="shaders\gammacorrect.glsl" />
     <None Include="shaders\postprocess.glsl" />
+    <None Include="shaders\shadowreceiver.glsl" />
   </ItemGroup>
 </Project>

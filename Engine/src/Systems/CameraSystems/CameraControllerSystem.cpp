@@ -35,9 +35,13 @@ namespace neo {
                     spatial->getRightDir() * dir.x +
                     spatial->getUpDir() * dir.y +
                     -spatial->getLookDir() * dir.z);
-                comp->getGameObject().getSpatial()->move(dir * comp->mMoveSpeed * dt * (speed ? 2.5f : 1.f));
+                comp->getGameObject().getSpatial()->move(dir * comp->mMoveSpeed * dt * (speed ? mSuperSpeed : 1.f));
             }
         }
+    }
+
+    void CameraControllerSystem::imguiEditor() {
+        ImGui::SliderFloat("SuperSpeed", &mSuperSpeed, 1.f, 10.f);
     }
 
 }

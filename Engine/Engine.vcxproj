@@ -121,6 +121,7 @@
     <None Include="shaders\gammacorrect.glsl" />
     <None Include="shaders\phong.glsl" />
     <None Include="shaders\postprocess.glsl" />
+    <None Include="shaders\shadowreceiver.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

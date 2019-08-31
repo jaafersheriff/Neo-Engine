@@ -12,6 +12,11 @@ namespace neo {
         {}
 
         virtual void update(const float dt) override;
+        virtual void imguiEditor() override;
+
+    private:
+
+        float mSuperSpeed = 2.5f;
 
     };
 }

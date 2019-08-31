@@ -20,5 +20,9 @@ class GammaCorrectShader : public PostProcessShader {
 
         virtual void render(const CameraComponent &camera) override {
             loadUniform("gamma", gamma);
-    }
+        }
+
+        virtual void imguiEditor() override {
+            ImGui::SliderFloat("Gamma", &gamma, 0.f, 5.f);
+        }
 };
