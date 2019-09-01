@@ -16,7 +16,7 @@ namespace neo {
                 mMax(FLT_MIN)
             {}
 
-            BoundingBoxComponent(GameObject *go, std::vector<float>& vertices) :
+            BoundingBoxComponent(GameObject *go, const std::vector<float>& vertices) :
                 BoundingBoxComponent(go) {
                 for (size_t v = 0; v < vertices.size() / 3; v++) {
                     mMin.x = glm::min(mMin.x, vertices[3 * v + 0]);

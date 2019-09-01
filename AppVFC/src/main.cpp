@@ -54,17 +54,20 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
     Engine::addComponent<CameraControllerComponent>(camera.gameObject, 0.4f, 7.f);
+    Engine::addComponent<FrustumPlanesComponent>(camera.gameObject);
+
     Light(glm::vec3(-100.f, 100.f, 100.f), glm::vec3(1.f), glm::vec3(0.f, 0.015f, 0.f));
 
     /* Cube object */
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10000; i++) {
         glm::vec3 position(Util::genRandom(-15.f, 15.f), 0.f, Util::genRandom(-15.f, 15.f));
         glm::vec3 size = glm::vec3(Util::genRandom(0.2f, 1.f), Util::genRandom(0.2f, 1.f), Util::genRandom(0.2f, 1.f));
+        const auto mesh = Library::getMesh("sphere");
 
-        Renderable cube(Library::getMesh("sphere"), position, size);
+        Renderable cube(mesh, position, size);
         Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
         Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::normalize(position), glm::vec3(1.f));
-        Engine::addComponent<BoundingBoxComponent>(cube.gameObject, cube.gameObject->getComponentByType<MeshComponent>()->getMesh().mBuffers.vertices);
+        Engine::addComponent<BoundingBoxComponent>(cube.gameObject, mesh->mBuffers.vertices);
     }
 
     /* Ground plane */
@@ -72,15 +75,11 @@ int main() {
     Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
     Engine::addComponent<DiffuseMapComponent>(plane.gameObject, Library::getTexture("grid.png"));
 
-    Camera mockCamera(45.f, 3.f, 30.f, glm::vec3(0.f, 2.6f, 15.f));
-    Engine::addComponent<FrustumBoundsComponent>(mockCamera.gameObject);
-    auto lineComp = &Engine::addComponent<LineComponent>(mockCamera.gameObject);
-    Engine::addComponent<renderable::LineMeshComponent>(mockCamera.gameObject, lineComp, glm::vec3(0.f, 1.f, 1.f));
-
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
     Engine::addSystem<FrustumBoundsSystem>();
     Engine::addSystem<FrustumBoundsToLineSystem>();
+    Engine::addSystem<FrustumPlanesSystem>();
     Engine::initSystems();
 
     /* Init renderer */

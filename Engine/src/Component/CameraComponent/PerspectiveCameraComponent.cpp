@@ -26,6 +26,7 @@ namespace neo {
     }
 
     void PerspectiveCameraComponent::_detProj() const {
+        // TODO - aspect ratio shouldn't ALWAYS come from window
         mProjMat = glm::perspective(glm::radians(mFOV), Window::getAspectRatio(), mNear, mFar);
         mProjMatDirty = false;
     }

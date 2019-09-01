@@ -67,25 +67,36 @@ namespace neo {
             loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
 
             /* Load light */
-            if (auto light = Engine::getSingleComponent<LightComponent>()) {
+            if (const auto light = Engine::getSingleComponent<LightComponent>()) {
                 loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
                 loadUniform("lightCol", light->mColor);
                 loadUniform("lightAtt", light->mAttenuation);
             }
 
-            for (auto& renderable : Engine::getComponents<renderable::PhongRenderable>()) {
-                auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
+            for (const auto& renderable : Engine::getComponents<renderable::PhongRenderable>()) {
+                const auto& meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
                 if (!meshComponent) {
                     continue;
                 }
+
+                const auto& renderableSpatial = renderable->getGameObject().getSpatial();
+
+                // VFC
+                if (const auto& boundingBox = renderable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
+                    if (const auto& frustumPlanes = camera.getGameObject().getComponentByType<FrustumPlanesComponent>()) {
+                        if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), glm::distance(boundingBox->mMax, boundingBox->mMin) / 2.f)) {
+                            continue;
+                    }
+                }
+            }
 
                 /* Bind mesh */
                 const Mesh & mesh(meshComponent->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
-                loadUniform("M", renderable->getGameObject().getSpatial()->getModelMatrix());
-                loadUniform("N", renderable->getGameObject().getSpatial()->getNormalMatrix());
+                loadUniform("M", renderableSpatial->getModelMatrix());
+                loadUniform("N", renderableSpatial->getNormalMatrix());
 
                 /* Bind texture */
                 if (auto diffuseMap = renderable->getGameObject().getComponentByType<DiffuseMapComponent>()) {

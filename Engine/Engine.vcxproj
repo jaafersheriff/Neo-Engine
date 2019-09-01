@@ -23,6 +23,7 @@
     <ClInclude Include="src\Component\CameraComponent\CameraComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\CameraControllerComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\FrustumBoundsComponent.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\FrustumPlanesComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\OrthoCameraComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\PerspectiveCameraComponent.hpp" />
     <ClInclude Include="src\Component\CollisionComponent\BoundingBoxComponent.hpp" />
@@ -77,6 +78,7 @@
     <ClInclude Include="src\Renderer\Renderer.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\CameraControllerSystem.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\FrustumBoundsSystem.hpp" />
+    <ClInclude Include="src\Systems\CameraSystems\FrustumPlanesSystem.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\FrustumBoundsToLineSystem.hpp" />
     <ClInclude Include="src\Systems\System.hpp" />
     <ClInclude Include="src\Systems\Systems.hpp" />
@@ -112,6 +114,7 @@
     <ClCompile Include="src\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\CameraControllerSystem.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\FrustumBoundsSystem.cpp" />
+    <ClCompile Include="src\Systems\CameraSystems\FrustumPlanesSystem.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\FrustumBoundsToLineSystem.cpp" />
     <ClCompile Include="src\Systems\TranslationSystems\RotationSystem.cpp" />
     <ClCompile Include="src\Systems\TranslationSystems\SinTranslateSystem.cpp" />

@@ -2,6 +2,7 @@
 #include "FrustumBoundsSystem.hpp"
 
 namespace neo {
+
     void FrustumBoundsSystem::update(const float dt) {
         for (auto camera : Engine::getComponents<CameraComponent>()) {
             if (auto bounds = camera->getGameObject().getComponentByType<FrustumBoundsComponent>()) {
