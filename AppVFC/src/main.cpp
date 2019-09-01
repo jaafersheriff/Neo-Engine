@@ -57,11 +57,14 @@ int main() {
     Light(glm::vec3(-100.f, 100.f, 100.f), glm::vec3(1.f), glm::vec3(0.f, 0.015f, 0.f));
 
     /* Cube object */
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 100; i++) {
         glm::vec3 position(Util::genRandom(-15.f, 15.f), 0.f, Util::genRandom(-15.f, 15.f));
-        Renderable cube(Library::getMesh("cube"), position, glm::vec3(Util::genRandom(0.2f, 1.f)));
+        glm::vec3 size = glm::vec3(Util::genRandom(0.2f, 1.f), Util::genRandom(0.2f, 1.f), Util::genRandom(0.2f, 1.f));
+
+        Renderable cube(Library::getMesh("sphere"), position, size);
         Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
         Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::normalize(position), glm::vec3(1.f));
+        Engine::addComponent<BoundingBoxComponent>(cube.gameObject, cube.gameObject->getComponentByType<MeshComponent>()->getMesh().mBuffers.vertices);
     }
 
     /* Ground plane */

@@ -5,6 +5,8 @@
 #include "CameraComponent/PerspectiveCameraComponent.hpp"
 #include "CameraComponent/ShadowCameraComponent.hpp"
 
+#include "CollisionComponent/BoundingBoxComponent.hpp"
+
 #include "LightComponent/LightComponent.hpp"
 
 #include "SpatialComponent/SpatialComponent.hpp"

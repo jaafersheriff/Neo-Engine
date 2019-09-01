@@ -30,7 +30,8 @@ namespace neo {
                 mPrimitiveType(0)
             {}
 
-            Mesh(MeshBuffers& buffers) {
+            Mesh(MeshBuffers& buffers) 
+                : Mesh() {
                 mVertexBufferSize = buffers.vertices.size();
                 mNormalBufferSize = buffers.normals.size();
                 mUVBufferSize = buffers.texCoords.size();

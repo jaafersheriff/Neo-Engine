@@ -25,6 +25,7 @@
     <ClInclude Include="src\Component\CameraComponent\FrustumBoundsComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\OrthoCameraComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\PerspectiveCameraComponent.hpp" />
+    <ClInclude Include="src\Component\CollisionComponent\BoundingBoxComponent.hpp" />
     <ClInclude Include="src\Component\Component.hpp" />
     <ClInclude Include="src\Component\Components.hpp" />
     <ClInclude Include="src\Component\LightComponent\LightComponent.hpp" />

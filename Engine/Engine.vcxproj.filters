@@ -68,6 +68,7 @@
     <ClInclude Include="src\Component\CameraComponent\FrustumBoundsComponent.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\FrustumBoundsToLineSystem.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\FrustumBoundsSystem.hpp" />
+    <ClInclude Include="src\Component\CollisionComponent\BoundingBoxComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
