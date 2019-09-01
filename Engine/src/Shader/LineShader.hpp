@@ -46,7 +46,7 @@ namespace neo {
                     auto spatial = renderable->getGameObject().getSpatial();
                     loadUniform("M", spatial ? spatial->getModelMatrix() : glm::mat4(1.f));
 
-                    loadUniform("lineColor", renderable->mLine->mColor);
+                    loadUniform("lineColor", renderable->mColor);
 
                     mesh.draw(renderable->mLine->getNodes().size());
                 }

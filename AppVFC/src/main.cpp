@@ -3,6 +3,7 @@
 #include "Shader/GammaCorrectShader.hpp"
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
+#include "Shader/LineShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -10,12 +11,12 @@ using namespace neo;
 
 /* Game object definitions */
 struct Camera {
+    GameObject *gameObject;
     CameraComponent *camera;
-    Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        GameObject *gameObject = &Engine::createGameObject();
+    Camera(float fov, float near, float far, glm::vec3 pos) {
+        gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
         camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
-        Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
 
@@ -51,7 +52,8 @@ int main() {
     Engine::init("Base", "res/", 1280, 720);
 
     /* Game objects */
-    Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+    Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
+    Engine::addComponent<CameraControllerComponent>(camera.gameObject, 0.4f, 7.f);
     Light(glm::vec3(-100.f, 100.f, 100.f), glm::vec3(1.f), glm::vec3(0.f, 0.015f, 0.f));
 
     /* Cube object */
@@ -67,14 +69,22 @@ int main() {
     Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
     Engine::addComponent<DiffuseMapComponent>(plane.gameObject, Library::getTexture("grid.png"));
 
+    Camera mockCamera(45.f, 3.f, 30.f, glm::vec3(0.f, 2.6f, 15.f));
+    Engine::addComponent<FrustumBoundsComponent>(mockCamera.gameObject);
+    auto lineComp = &Engine::addComponent<LineComponent>(mockCamera.gameObject);
+    Engine::addComponent<renderable::LineMeshComponent>(mockCamera.gameObject, lineComp, glm::vec3(0.f, 1.f, 1.f));
+
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
+    Engine::addSystem<FrustumBoundsSystem>();
+    Engine::addSystem<FrustumBoundsToLineSystem>();
     Engine::initSystems();
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
-    Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
+    Renderer::addSceneShader<PhongShader>();
+    Renderer::addSceneShader<LineShader>();
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */

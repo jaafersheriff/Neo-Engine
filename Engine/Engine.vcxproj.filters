@@ -65,6 +65,9 @@
     <ClInclude Include="src\Component\CameraComponent\OrthoCameraComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\ShadowCameraComponent.hpp" />
     <ClInclude Include="src\Shader\GammaCorrectShader.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\FrustumBoundsComponent.hpp" />
+    <ClInclude Include="src\Systems\CameraSystems\FrustumBoundsToLineSystem.hpp" />
+    <ClInclude Include="src\Systems\CameraSystems\FrustumBoundsSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -94,6 +97,8 @@
     <ClCompile Include="src\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Component\CameraComponent\PerspectiveCameraComponent.cpp" />
     <ClCompile Include="src\Component\CameraComponent\OrthoCameraComponent.cpp" />
+    <ClCompile Include="src\Systems\CameraSystems\FrustumBoundsSystem.cpp" />
+    <ClCompile Include="src\Systems\CameraSystems\FrustumBoundsToLineSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />

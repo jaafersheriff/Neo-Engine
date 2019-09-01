@@ -13,13 +13,11 @@ namespace neo {
 
         public:
 
-            glm::vec3 mColor;
             std::vector<glm::vec3> mNodes;
             mutable bool mDirty;
 
-            LineComponent(GameObject *go, glm::vec3 color = glm::vec3(1.f)) :
+            LineComponent(GameObject *go) :
                 Component(go),
-                mColor(color),
                 mDirty(false)
             {}
 

@@ -15,10 +15,13 @@ namespace neo {
 
         public:
 
+            // TODO - this should happen in a system or messaging..
             LineComponent* mLine;
+            glm::vec3 mColor;
 
-            LineMeshComponent(GameObject *go, LineComponent *line) :
+            LineMeshComponent(GameObject *go, LineComponent *line, glm::vec3 color = glm::vec3(1.f)) :
                 MeshComponent(go, new Mesh),
+                mColor(color),
                 mLine(line)
             {}
 
