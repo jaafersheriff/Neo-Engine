@@ -2,12 +2,23 @@
 
 namespace neo {
 
-    class FrustumPlanesComponent : public Component {
+    class FrustumComponent : public Component {
         public:
-            FrustumPlanesComponent(GameObject *go) :
+            FrustumComponent(GameObject *go) :
                 Component(go)
             {}
 
+            // Bounds
+            glm::vec3 NearLeftBottom;
+            glm::vec3 NearLeftTop;
+            glm::vec3 NearRightBottom;
+            glm::vec3 NearRightTop;
+            glm::vec3 FarLeftBottom;
+            glm::vec3 FarLeftTop;
+            glm::vec3 FarRightBottom;
+            glm::vec3 FarRightTop;
+
+            // Planes
             glm::vec4 mLeft;
             glm::vec4 mRight;
             glm::vec4 mTop;
@@ -15,6 +26,7 @@ namespace neo {
             glm::vec4 mNear;
             glm::vec4 mFar;
 
+            // Test if an object is inside the frustum
             bool isInFrustum(const glm::vec3 position, const float radius) {
                 if (_distanceToPlane(mLeft, position) < radius ||
                     _distanceToPlane(mRight, position) < radius ||

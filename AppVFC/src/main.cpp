@@ -55,7 +55,7 @@ int main() {
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
     Engine::addComponent<CameraControllerComponent>(camera.gameObject, 0.4f, 7.f);
-    Engine::addComponent<FrustumPlanesComponent>(camera.gameObject);
+    Engine::addComponent<FrustumComponent>(camera.gameObject);
 
     Light(glm::vec3(-100.f, 100.f, 100.f), glm::vec3(1.f), glm::vec3(0.f, 0.015f, 0.f));
 
@@ -84,9 +84,8 @@ int main() {
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
-    Engine::addSystem<FrustumBoundsSystem>();
-    Engine::addSystem<FrustumBoundsToLineSystem>();
-    Engine::addSystem<FrustumPlanesSystem>();
+    Engine::addSystem<FrustumSystem>();
+    Engine::addSystem<FrustumToLineSystem>();
     Engine::initSystems();
 
     /* Init renderer */

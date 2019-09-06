@@ -6,12 +6,13 @@
 
 namespace neo {
 
-    class FrustumBoundsSystem : public System {
+    class FrustumSystem : public System {
+
     public:
-        FrustumBoundsSystem() :
-            System("FrustumBounds System")
+        FrustumSystem() :
+            System("Frustum System")
         {}
-    
+
         virtual void update(const float dt) override;
     };
 }

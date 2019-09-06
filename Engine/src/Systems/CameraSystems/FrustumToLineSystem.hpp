@@ -3,15 +3,15 @@
 #include "Systems/System.hpp"
 
 #include "Component/CameraComponent/CameraComponent.hpp"
-#include "Component/CameraComponent/FrustumBoundsComponent.hpp"
+#include "Component/CameraComponent/FrustumComponent.hpp"
 
 namespace neo {
 
-    class FrustumBoundsToLineSystem : public System {
+    class FrustumToLineSystem : public System {
 
         public:
-            FrustumBoundsToLineSystem() :
-                System("FrustumBoundsToLine System")
+            FrustumToLineSystem() :
+                System("FrustumToLine System")
             {}
 
             virtual void update(const float dt) override;

@@ -1,13 +1,13 @@
 #include <Engine.hpp>
 
-#include "FrustumBoundsToLineSystem.hpp"
+#include "FrustumToLineSystem.hpp"
 
 namespace neo {
 
-    void FrustumBoundsToLineSystem::update(const float dt) {
+    void FrustumToLineSystem::update(const float dt) {
         for (auto camera : Engine::getComponents<CameraComponent>()) {
             if (auto line = camera->getGameObject().getComponentByType<LineComponent>()) {
-                if (auto bounds = camera->getGameObject().getComponentByType<FrustumBoundsComponent>()) {
+                if (auto bounds = camera->getGameObject().getComponentByType<FrustumComponent>()) {
 
                     line->clearNodes();
 
