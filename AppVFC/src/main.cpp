@@ -4,6 +4,7 @@
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
 #include "Shader/LineShader.hpp"
+#include "Shader/WireFrameShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -59,15 +60,21 @@ int main() {
     Light(glm::vec3(-100.f, 100.f, 100.f), glm::vec3(1.f), glm::vec3(0.f, 0.015f, 0.f));
 
     /* Cube object */
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 1; i++) {
         glm::vec3 position(Util::genRandom(-15.f, 15.f), 0.f, Util::genRandom(-15.f, 15.f));
-        glm::vec3 size = glm::vec3(Util::genRandom(0.2f, 1.f), Util::genRandom(0.2f, 1.f), Util::genRandom(0.2f, 1.f));
+        glm::vec3 size = glm::vec3(1.f, 5.f, 3.f);
         const auto mesh = Library::getMesh("sphere");
 
         Renderable cube(mesh, position, size);
         Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
         Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::normalize(position), glm::vec3(1.f));
-        Engine::addComponent<BoundingBoxComponent>(cube.gameObject, mesh->mBuffers.vertices);
+        auto boundingBox = &Engine::addComponent<BoundingBoxComponent>(cube.gameObject, mesh->mBuffers.vertices);
+
+        auto _go = &Engine::createGameObject();
+        Engine::addComponent<MeshComponent>(_go, Library::getMesh("sphere"));
+        float radius = glm::distance(boundingBox->mMax, boundingBox->mMin) * glm::max(glm::max(size.x, size.y), size.z) * 0.5f;
+        Engine::addComponent<SpatialComponent>(_go, position, glm::vec3(radius), glm::mat4(1.f));
+        Engine::addComponent<renderable::WireframeRenderable>(_go);
     }
 
     /* Ground plane */
@@ -87,6 +94,7 @@ int main() {
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<LineShader>();
+    Renderer::addSceneShader<WireframeShader>();
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
