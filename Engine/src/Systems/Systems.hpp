@@ -1,3 +1,5 @@
+#pragma once
+
 #include "CameraSystems/CameraControllerSystem.hpp"
 #include "CameraSystems/FrustumSystem.hpp"
 #include "CameraSystems/FrustumToLineSystem.hpp"

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "CameraComponent/CameraControllerComponent.hpp"
 #include "CameraComponent/CameraComponent.hpp"
 #include "CameraComponent/FrustumComponent.hpp"
