@@ -49,6 +49,33 @@ struct Renderable {
     }
 };
 
+void generateObjects(int amount) {
+    for (auto& comp : Engine::getComponents<BoundingBoxComponent>()) {
+        Engine::removeGameObject(comp->getGameObject());
+    }
+    for (auto& comp : Engine::getComponents<renderable::WireframeRenderable>()) {
+        Engine::removeGameObject(comp->getGameObject());
+    }
+ 
+    for (int i = 0; i < amount; i++) {
+        glm::vec3 position(Util::genRandom(-15.f, 15.f), 0.f, Util::genRandom(-15.f, 15.f));
+        glm::vec3 size = glm::vec3(Util::genRandom(0.5f, 2.f), Util::genRandom(0.5f, 2.f), Util::genRandom(0.5f, 2.f));
+        const auto mesh = Library::getMesh("sphere");
+
+        Renderable renderable(mesh, position, size);
+        Engine::addComponent<renderable::PhongRenderable>(renderable.gameObject);
+        Engine::addComponent<MaterialComponent>(renderable.gameObject, 0.2f, glm::normalize(position), glm::vec3(1.f));
+        auto boundingBox = &Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, mesh->mBuffers.vertices);
+
+        // create another game object for wireframe
+        auto _go = &Engine::createGameObject();
+        Engine::addComponent<MeshComponent>(_go, Library::getMesh("sphere"));
+        float radius = glm::max(glm::max(size.x, size.y), size.z);
+        Engine::addComponent<SpatialComponent>(_go, position, glm::vec3(radius), glm::mat4(1.f));
+        Engine::addComponent<renderable::WireframeRenderable>(_go);
+    }
+}
+
 int main() {
     Engine::init("Base", "res/", 1280, 720);
 
@@ -59,23 +86,7 @@ int main() {
 
     Light(glm::vec3(-100.f, 100.f, 100.f), glm::vec3(1.f), glm::vec3(0.f, 0.015f, 0.f));
 
-    /* Cube object */
-    for (int i = 0; i < 1; i++) {
-        glm::vec3 position(Util::genRandom(-15.f, 15.f), 0.f, Util::genRandom(-15.f, 15.f));
-        glm::vec3 size = glm::vec3(1.f, 5.f, 3.f);
-        const auto mesh = Library::getMesh("sphere");
-
-        Renderable cube(mesh, position, size);
-        Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
-        Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::normalize(position), glm::vec3(1.f));
-        auto boundingBox = &Engine::addComponent<BoundingBoxComponent>(cube.gameObject, mesh->mBuffers.vertices);
-
-        auto _go = &Engine::createGameObject();
-        Engine::addComponent<MeshComponent>(_go, Library::getMesh("sphere"));
-        float radius = glm::distance(boundingBox->mMax, boundingBox->mMin) * glm::max(glm::max(size.x, size.y), size.z) * 0.5f;
-        Engine::addComponent<SpatialComponent>(_go, position, glm::vec3(radius), glm::mat4(1.f));
-        Engine::addComponent<renderable::WireframeRenderable>(_go);
-    }
+    generateObjects(10);
 
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(30.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
@@ -98,6 +109,14 @@ int main() {
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();
+
+    Engine::addImGuiFunc("VFC", []() {
+        static int slider = 10;
+        ImGui::SliderInt("Num objects", &slider, 1, 10000);
+        if (ImGui::Button("Regenerate")) {
+            generateObjects(slider);
+        }
+    });
 
     /* Run */
     Engine::run();

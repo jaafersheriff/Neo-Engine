@@ -64,8 +64,19 @@ namespace neo {
 
                 for (auto& renderable : Engine::getComponents<renderable::ShadowCasterRenderable>()) {
                     auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
-                    if (!meshComponent) {
+                    auto renderableSpatial = renderable->getGameObject().getSpatial();
+                    if (!meshComponent || !renderableSpatial) {
                         continue;
+                    }
+
+                    // VFC
+                    if (const auto& boundingBox = renderable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
+                        if (const auto& frustumPlanes = camera->getGameObject().getComponentByType<FrustumComponent>()) {
+                            float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z);
+                            if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
+                                continue;
+                            }
+                        }
                     }
 
                     /* Bind mesh */
@@ -73,7 +84,7 @@ namespace neo {
                     CHECK_GL(glBindVertexArray(mesh.mVAOID));
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
-                    loadUniform("M", renderable->getGameObject().getSpatial()->getModelMatrix());
+                    loadUniform("M", renderableSpatial);
 
                     /* Bind texture */
                     auto texComp = renderable->getGameObject().getComponentByType<DiffuseMapComponent>();

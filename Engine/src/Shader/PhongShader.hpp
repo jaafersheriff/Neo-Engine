@@ -59,6 +59,8 @@ namespace neo {
         {}
 
         virtual void render(const CameraComponent &camera) override {
+            mNumDraws = 0;
+
             bind();
 
             /* Load PV */
@@ -84,14 +86,12 @@ namespace neo {
                 // VFC
                 if (const auto& boundingBox = renderable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
                     if (const auto& frustumPlanes = camera.getGameObject().getComponentByType<FrustumComponent>()) {
-                        // todo - this is broke
-                        // todo - can radius be a vec3?
-                        float radius = glm::distance(boundingBox->mMax, boundingBox->mMin) * glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * 0.5f;
+                        float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z);
                         if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
                             continue;
+                        }
                     }
                 }
-            }
 
                 /* Bind mesh */
                 const Mesh & mesh(meshComponent->getMesh());
@@ -121,10 +121,18 @@ namespace neo {
                 }
 
                 /* DRAW */
+                mNumDraws++;
                 mesh.draw();
             }
 
             unbind();
         }
+
+        virtual void imguiEditor() override {
+            ImGui::Text("Draws: %d", mNumDraws);
+        }
+
+        private:
+            int mNumDraws = 0;
     };
 }
