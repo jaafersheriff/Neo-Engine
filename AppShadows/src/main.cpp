@@ -42,16 +42,15 @@ struct Light {
         Engine::addComponent<renderable::PhongRenderable>(gameObject);
         Engine::addComponent<MaterialComponent>(gameObject, 1.f, glm::vec3(1.f));
         camera = &Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(gameObject, -1.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
-        LineComponent *uLine = &Engine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 0.f, 0.f));
+        LineComponent *uLine = &Engine::addComponent<LineComponent>(gameObject);
         uLine->addNodes({ glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.f) });
-        LineComponent *vLine = &Engine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 1.f, 0.f));
+        LineComponent *vLine = &Engine::addComponent<LineComponent>(gameObject);
         vLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
-        LineComponent *wLine = &Engine::addComponent<LineComponent>(gameObject, glm::vec3(0.f, 0.f, 1.f));
+        LineComponent *wLine = &Engine::addComponent<LineComponent>(gameObject);
         wLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f) });
-        LineComponent *lookLine = &Engine::addComponent<LineComponent>(gameObject, glm::vec3(1.f, 1.f, 1.f));
-        Engine::addComponent<renderable::LineMeshComponent>(gameObject, uLine);
-        Engine::addComponent<renderable::LineMeshComponent>(gameObject, vLine);
-        Engine::addComponent<renderable::LineMeshComponent>(gameObject, wLine);
+        Engine::addComponent<renderable::LineMeshComponent>(gameObject, uLine, glm::vec3(1.f, 0.f, 0.f));
+        Engine::addComponent<renderable::LineMeshComponent>(gameObject, vLine, glm::vec3(0.f, 1.f, 0.f));
+        Engine::addComponent<renderable::LineMeshComponent>(gameObject, wLine, glm::vec3(0.f, 0.f, 1.f));
         sin = &Engine::addComponent<SinTranslateComponent>(gameObject, glm::vec3(0.f, 0.f, 20.f), camSpatial->getPosition());
 
         Engine::addComponent<ShadowCameraComponent>(gameObject);

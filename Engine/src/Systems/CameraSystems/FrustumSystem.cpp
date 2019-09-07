@@ -16,7 +16,7 @@ namespace neo {
                 glm::vec3 Cnear = P + v * nDis;
                 glm::vec3 Cfar = P + v * fDis;
 
-                // Update frustum frustum for camera type
+                // Update frustum bounds for camera type
                 if (auto orthoCam = dynamic_cast<OrthoCameraComponent*>(camera)) {
                     frustum->NearLeftTop = Cnear + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().x);
                     frustum->NearRightTop = Cnear + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().y);
@@ -44,7 +44,7 @@ namespace neo {
                     frustum->FarRightBottom = Cfar - (up * (Hfar / 2)) + (w * (Wfar / 2));
                 }
 
-                // Update frustum frustum
+                // Update frustum planes
                 frustum->mLeft.x = PV[0][3] + PV[0][0];
                 frustum->mLeft.y = PV[1][3] + PV[1][0];
                 frustum->mLeft.z = PV[2][3] + PV[2][0];

@@ -21,7 +21,11 @@ namespace neo {
             (vName.size() ? Util::textFileRead(_getFullPath(vName).c_str()) : NULL),
             (fName.size() ? Util::textFileRead(_getFullPath(fName).c_str()) : NULL),
             (gName.size() ? Util::textFileRead(_getFullPath(gName).c_str()) : NULL))
-    {}
+    {
+        mVertexFile = vName;
+        mFragmentFile = fName;
+        mGeometryFile = gName;
+    }
 
     Shader::Shader(const std::string &name, const char *vTex, const char *fTex) :
         Shader(name, vTex, fTex, NULL)
@@ -29,7 +33,9 @@ namespace neo {
 
     Shader::Shader(const std::string &name, const char *vTex, const std::string &fName) :
         Shader(name, vTex, (fName.size() ? Util::textFileRead(_getFullPath(fName).c_str()) : NULL), NULL)
-    {}
+    {
+        mFragmentFile = fName;
+    }
 
     Shader::Shader(const std::string &name, const char *vTex, const char *fTex, const char *gTex) :
         mName(name),
@@ -42,6 +48,18 @@ namespace neo {
 
     void Shader::reload() {
         cleanUp();
+        if (mVertexFile.size()) {
+            delete mVertexSource;
+            mVertexSource = Util::textFileRead(_getFullPath(mVertexFile).c_str());
+        }
+        if (mFragmentFile.size()) {
+            delete mFragmentSource;
+            mFragmentSource = Util::textFileRead(_getFullPath(mFragmentFile).c_str());
+        }
+         if (mGeometryFile.size()) {
+            delete mGeometrySource;
+            mGeometrySource = Util::textFileRead(_getFullPath(mGeometryFile).c_str());
+        }
         _init();
     }
 

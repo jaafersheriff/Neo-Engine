@@ -65,6 +65,9 @@ namespace neo {
             std::map<std::string, GLint> mAttributes;
             std::map<std::string, GLint> mUniforms;
 
+            std::string mVertexFile = "";
+            std::string mFragmentFile = "";
+            std::string mGeometryFile = "";
             const char* mVertexSource = nullptr;
             const char* mFragmentSource = nullptr;
             const char* mGeometrySource = nullptr;
