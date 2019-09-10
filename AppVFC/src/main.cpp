@@ -86,6 +86,7 @@ int main() {
 
     Light(glm::vec3(-100.f, 100.f, 100.f), glm::vec3(1.f), glm::vec3(0.f, 0.015f, 0.f));
 
+    // random objects
     generateObjects(10);
 
     /* Ground plane */
@@ -110,7 +111,7 @@ int main() {
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();
 
-    Engine::addImGuiFunc("VFC", []() {
+    Engine::addImGuiFunc("VFC", [&]() {
         static int slider = 10;
         ImGui::SliderInt("Num objects", &slider, 1, 10000);
         if (ImGui::Button("Regenerate")) {
