@@ -229,7 +229,9 @@ namespace neo {
     void Engine::addDefaultImGuiFunc() {
         addImGuiFunc("Neo", [&]() {
             if (ImGui::CollapsingHeader("Performance")) {
-                ImGui::PlotLines("FPS", (float *)Util::mFPSList.data(), Util::mFPSList.size(), 0, std::to_string(Util::mFPS).c_str(), FLT_MAX, FLT_MAX, ImVec2(0,0), sizeof(int));
+                // Translate FPS to floats
+                std::vector<float> FPSfloats(Util::mFPSList.begin(), Util::mFPSList.end());
+                ImGui::PlotLines("FPS", FPSfloats.data(), FPSfloats.size(), 0, std::to_string(Util::mFPS).c_str());
                 ImGui::Text("dt: %0.3fms", 1000.0 * Util::mTimeStep);
                 if (ImGui::Button("VSync")) {
                     Window::toggleVSync();
