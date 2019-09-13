@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Component/Component.hpp"
+#include "GameObject/GameObject.hpp"
+#include "Component/SpatialComponent/SpatialComponent.hpp"
 
 #include <glm/glm.hpp>
 
@@ -10,14 +12,8 @@ namespace neo {
         public:
             glm::vec3 mMin, mMax;
 
-            BoundingBoxComponent(GameObject *go) :
-                Component(go),
-                mMin(FLT_MAX),
-                mMax(FLT_MIN)
-            {}
-
             BoundingBoxComponent(GameObject *go, const std::vector<float>& vertices) :
-                BoundingBoxComponent(go) {
+                Component(go) {
                 assert(vertices.size() > 0);
                 for (size_t v = 0; v < vertices.size() / 3; v++) {
                     mMin.x = glm::min(mMin.x, vertices[3 * v + 0]);
@@ -30,8 +26,12 @@ namespace neo {
                 }
             }
 
-            float getRadius() {
+            float getRadius() const {
                 return glm::distance(mMin, mMax) / 2.f;
+            }
+
+            bool intersect(const glm::vec3 position) const {
+                return glm::length(glm::vec3(glm::inverse(getGameObject().getSpatial()->getModelMatrix()) * glm::vec4(position, 1.f))) <= getRadius();
             }
     };
 }
