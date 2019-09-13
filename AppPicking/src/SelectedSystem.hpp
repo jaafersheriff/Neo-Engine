@@ -13,7 +13,7 @@ class SelectedSystem : public System {
 
 public:
     SelectedSystem() :
-        System("Selecting System")
+        System("Selected System")
     {}
 
 
