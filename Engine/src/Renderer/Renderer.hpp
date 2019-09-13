@@ -37,17 +37,18 @@ namespace neo {
             template <typename ShaderT, typename... Args> static ShaderT & addPreProcessShader(Args &&...);
             template <typename ShaderT, typename... Args> static ShaderT & addSceneShader(Args &&...);
             template <typename ShaderT, typename... Args> static ShaderT & addPostProcessShader(Args &&...);
+            template <typename ShaderT> static ShaderT& getShader();
 
         private:
             static CameraComponent* mDefaultCamera;
             static Framebuffer* mDefaultFBO;
             static glm::vec3 mClearColor;
 
-            static std::vector<std::unique_ptr<Shader>> mPreProcessShaders;
-            static std::vector<std::unique_ptr<Shader>> mSceneShaders;
-            static std::vector<std::unique_ptr<Shader>> mPostShaders;
+            static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPreProcessShaders;
+            static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mSceneShaders;
+            static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPostShaders;
             template <typename ShaderT, typename... Args> static std::unique_ptr<ShaderT> _createShader(Args &&...);
-            static std::vector<Shader *> _getActiveShaders(std::vector<std::unique_ptr<Shader>> &);
+            static std::vector<Shader *> _getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &);
 
             static void _renderPostProcess(Shader &, Framebuffer *, Framebuffer *);
     };
@@ -55,17 +56,38 @@ namespace neo {
     /* Template implementation */
     template <typename ShaderT, typename... Args>
     ShaderT & Renderer::addPreProcessShader(Args &&... args) {
-        mPreProcessShaders.emplace_back(_createShader<ShaderT>(std::forward<Args>(args)...));
-        return static_cast<ShaderT &>(*mPreProcessShaders.back());
+        std::type_index typeI(typeid(ShaderT));
+        for (auto& shader : mPreProcessShaders) {
+            if (shader.first == typeI) {
+                return static_cast<ShaderT&>(*shader.second);
+            }
+        }
+        mPreProcessShaders.emplace_back(typeI, _createShader<ShaderT>(std::forward<Args>(args)...));
+        return static_cast<ShaderT &>(*mPreProcessShaders.back().second);
     }
+
     template <typename ShaderT, typename... Args>
     ShaderT & Renderer::addSceneShader(Args &&... args) {
-        mSceneShaders.emplace_back(_createShader<ShaderT>(std::forward<Args>(args)...));
-        return static_cast<ShaderT &>(*mSceneShaders.back());
+        std::type_index typeI(typeid(ShaderT));
+        for (auto& shader : mSceneShaders) {
+            if (shader.first == typeI) {
+                return static_cast<ShaderT&>(*shader.second);
+            }
+        }
+ 
+        mSceneShaders.emplace_back(typeI, _createShader<ShaderT>(std::forward<Args>(args)...));
+        return static_cast<ShaderT &>(*mSceneShaders.back().second);
     }
+
     template <typename ShaderT, typename... Args>
     ShaderT & Renderer::addPostProcessShader(Args &&... args) {
         static_assert(std::is_base_of<PostProcessShader, ShaderT>::value, "ShaderT must be derived from PostProcessShader");
+        std::type_index typeI(typeid(ShaderT));
+        for (auto& shader : mPostShaders) {
+            if (shader.first == typeI) {
+                return static_cast<ShaderT&>(*shader.second);
+            }
+        }
 
         // Generate fbos if a post process shader exists
         if (!mPostShaders.size()) {
@@ -91,14 +113,42 @@ namespace neo {
                 Library::getFBO("pong")->resize(m.frameSize);
             });
         }
-        mPostShaders.emplace_back(_createShader<ShaderT>(std::forward<Args>(args)...));
-        return static_cast<ShaderT &>(*mPostShaders.back());
+
+        mPostShaders.emplace_back(typeI, _createShader<ShaderT>(std::forward<Args>(args)...));
+        return static_cast<ShaderT &>(*mPostShaders.back().second);
     }
+
     template <typename ShaderT, typename... Args>
     std::unique_ptr<ShaderT> Renderer::_createShader(Args &&... args) {
         static_assert(std::is_base_of<Shader, ShaderT>::value, "ShaderT must be a Shader type");
         static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
         return std::make_unique<ShaderT>(std::forward<Args>(args)...);
+    }
+
+    template <typename ShaderT> 
+    ShaderT& Renderer::getShader(void) {
+        static_assert(std::is_base_of<Shader, ShaderT>::value, "ShaderT must be a Shader type");
+        static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
+        std::type_index typeI(typeid(ShaderT));
+
+        for (auto& shader : mPreProcessShaders) {
+            if (shader.first == typeI) {
+                return reinterpret_cast<ShaderT &>(*shader.second);
+            }
+        }
+        for (auto& shader : mSceneShaders) {
+            if (shader.first == typeI) {
+                return reinterpret_cast<ShaderT &>(*shader.second);
+            }
+        }
+        for (auto& shader : mPostShaders) {
+            if (shader.first == typeI) {
+                return reinterpret_cast<ShaderT &>(*shader.second);
+            }
+        }
+
+
+        assert(false);
     }
 
 }

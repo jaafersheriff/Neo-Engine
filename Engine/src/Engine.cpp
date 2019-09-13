@@ -282,14 +282,14 @@ namespace neo {
                     ImGui::TreePop();
                 }
                 if (ImGui::TreeNode("Shaders")) {
-                    auto shadersFunc = [&](std::vector<std::unique_ptr<Shader>>& shaders, const std::string swapName) {
+                    auto shadersFunc = [&](std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>>& shaders, const std::string swapName) {
                         for (unsigned i = 0; i < shaders.size(); i++) {
                             auto& shader = shaders[i];
                             ImGui::PushID(i);
-                            bool treeActive = ImGui::TreeNode(shader->mName.c_str());
+                            bool treeActive = ImGui::TreeNode(shader.second->mName.c_str());
                             if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                                 ImGui::SetDragDropPayload(swapName.c_str(), &i, sizeof(unsigned));
-                                ImGui::Text("Swap %s", shader->mName.c_str());
+                                ImGui::Text("Swap %s", shader.second->mName.c_str());
                                 ImGui::EndDragDropSource();
                             }
                             if (ImGui::BeginDragDropTarget()) {
@@ -302,12 +302,12 @@ namespace neo {
                             }
 
                             if (treeActive) {
-                                ImGui::Checkbox("Active", &shader->mActive);
+                                ImGui::Checkbox("Active", &shader.second->mActive);
                                 ImGui::SameLine();
                                 if (ImGui::Button("Reload")) {
-                                    shader->reload();
+                                    shader.second->reload();
                                 }
-                                shader->imguiEditor();
+                                shader.second->imguiEditor();
                                 ImGui::TreePop();
                             }
                             ImGui::PopID();

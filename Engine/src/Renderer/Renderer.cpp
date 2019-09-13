@@ -11,9 +11,9 @@ namespace neo {
     std::string Renderer::APP_SHADER_DIR;
     CameraComponent *Renderer::mDefaultCamera(nullptr);
     Framebuffer *Renderer::mDefaultFBO;
-    std::vector<std::unique_ptr<Shader>> Renderer::mPreProcessShaders;
-    std::vector<std::unique_ptr<Shader>> Renderer::mSceneShaders;
-    std::vector<std::unique_ptr<Shader>> Renderer::mPostShaders;
+    std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPreProcessShaders;
+    std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mSceneShaders;
+    std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPostShaders;
     glm::vec3 Renderer::mClearColor;
 
     void Renderer::init(const std::string &dir, CameraComponent *cam, glm::vec3 clearColor) {
@@ -159,10 +159,10 @@ namespace neo {
     }
 
     void Renderer::renderScene(const CameraComponent &camera) {
-       for (auto & shader : mSceneShaders) {
-            if (shader->mActive) {
+       for (auto& shader : mSceneShaders) {
+            if (shader.second->mActive) {
                 resetState();
-                shader->render(camera);
+                shader.second->render(camera);
             }
         }
     }
@@ -174,11 +174,11 @@ namespace neo {
         }
     }
 
-    std::vector<Shader *> Renderer::_getActiveShaders(std::vector<std::unique_ptr<Shader>> &shaders) {
+    std::vector<Shader *> Renderer::_getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &shaders) {
         std::vector<Shader *> ret;
-        for (auto & s : shaders) {
-            if (s->mActive) {
-                ret.emplace_back(s.get());
+        for (auto& shader : shaders) {
+            if (shader.second->mActive) {
+                ret.emplace_back(shader.second.get());
             }
         }
 
