@@ -29,7 +29,7 @@ class LookAtCameraSystem : public System {
             }
 
             glm::vec3 lookPos = cameraLookPos->getGameObject().getSpatial()->getPosition();
-            camera->setLookDir(lookPos - camera->getGameObject().getSpatial()->getPosition());
+            cameraLookPos->getGameObject().getSpatial()->setLookDir(lookPos - camera->getGameObject().getSpatial()->getPosition());
         }
 
 };

@@ -128,7 +128,7 @@ int main() {
             if (!fitSystem.updatePerspective) {
                 glm::vec3 lookDir = spatial->getLookDir();
                 ImGui::SliderFloat3("Look", &lookDir[0], -1.f, 1.f);
-                camera->setLookDir(lookDir);
+                spatial->setLookDir(lookDir);
             }
         }
         {

@@ -66,7 +66,7 @@ namespace neo {
                 if (infoLog == NULL) {
                     puts("ERROR: Could not allocate InfoLog buffer");
                     std::cin.get();
-                    exit(1);
+                    assert(false);
                 }
                 glGetShaderInfoLog(shader, infologLength, &charsWritten, infoLog);
                 printf("Shader InfoLog:\n%s\n\n", infoLog);
@@ -89,7 +89,7 @@ namespace neo {
                 if (infoLog == NULL) {
                     puts("ERROR: Could not allocate InfoLog buffer");
                     std::cin.get();
-                    exit(1);
+                    assert(false);
                 }
                 glGetProgramInfoLog(program, infologLength, &charsWritten, infoLog);
                 printf("Program InfoLog:\n%s\n\n", infoLog);
@@ -109,7 +109,7 @@ namespace neo {
             if (major < 2) {
                 printf("This shader example will not work due to the installed Opengl version, which is %d.%d.\n", major, minor);
                 std::cin.get();
-                exit(0);
+                assert(false);
             }
         }
 
@@ -119,6 +119,8 @@ namespace neo {
             {
                 const char *const ErrorString = errorString(Error);
                 printf("OpenGL error in file '%s' at line %d calling function '%s': '%s' '%d 0x%X'\n", File, Line, Function, ErrorString, Error, Error);
+                std::cin.get();
+                assert(false);
             }
         }
 
@@ -127,6 +129,8 @@ namespace neo {
             if (err != GL_FRAMEBUFFER_COMPLETE) {
                 const char *const errString = errorString(err);
                 printf("OpenGL error '%s' '%d 0x%X'\n", errString, err, err);
+                std::cin.get();
+                assert(false);
             }
         }
     }

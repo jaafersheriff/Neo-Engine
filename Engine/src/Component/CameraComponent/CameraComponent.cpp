@@ -39,18 +39,6 @@ namespace neo {
         mProjMatDirty = true;
     }
 
-    void CameraComponent::setLookDir(glm::vec3 dir) {
-        glm::vec3 w = -glm::normalize(dir);
-        auto spatial = mGameObject->getSpatial();
-        if (w == -spatial->getLookDir()) {
-            return;
-        }
-        glm::vec3 u = glm::cross(w, glm::vec3(0, 1, 0));
-        glm::vec3 v = glm::cross(u, w);
-        u = glm::cross(v, w);
-        spatial->setUVW(u, v, w);
-    }
-
     const glm::mat4 & CameraComponent::getView() const {
         if (mViewMatDirty) {
             _detView();

@@ -100,7 +100,7 @@ public:
         if (updatePerspective) {
             float f = glm::sin(Util::getRunTime());
             float g = glm::cos(Util::getRunTime());
-            perspectiveCamera->setLookDir(glm::vec3(f, f / 2, g));
+            perspectiveSpat->setLookDir(glm::vec3(f, f / 2, g));
         }
 
         /////////////////////// Do the fitting! ///////////////////////////////

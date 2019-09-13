@@ -86,7 +86,7 @@ namespace neo {
                 // VFC
                 if (const auto& boundingBox = renderable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
                     if (const auto& frustumPlanes = camera.getGameObject().getComponentByType<FrustumComponent>()) {
-                        float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z);
+                        float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
                         if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
                             continue;
                         }

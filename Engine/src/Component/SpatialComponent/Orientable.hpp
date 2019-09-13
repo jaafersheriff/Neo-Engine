@@ -44,6 +44,16 @@ namespace neo {
                 this->mW = glm::normalize(w);
                 mOrientationDirty = true;
             }
+            void setLookDir(glm::vec3 dir) {
+                glm::vec3 w = -glm::normalize(dir);
+                if (w == -getLookDir()) {
+                    return;
+                }
+                glm::vec3 u = glm::cross(w, glm::vec3(0, 1, 0));
+                glm::vec3 v = glm::cross(u, w);
+                u = glm::cross(v, w);
+                setUVW(u, v, w);
+            }
 
             /* Getters */
             virtual const glm::mat3 & getOrientation() const {
@@ -59,6 +69,7 @@ namespace neo {
                 }
                 return -mW;
             }
+
             const glm::vec3 getUpDir() const {
                 if (mOrientationDirty) {
                     _detOrientation();
