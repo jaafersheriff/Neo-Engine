@@ -65,6 +65,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppVFC", "AppVFC\AppVFC.vcx
 		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppPicking", "AppPicking\AppPicking.vcxproj", "{6F1BC635-A7A1-4B4B-A251-258A72A27A86}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -177,6 +182,14 @@ Global
 		{E7E81B31-8C5F-4001-A125-644F95692D98}.Release|x64.Build.0 = Release|x64
 		{E7E81B31-8C5F-4001-A125-644F95692D98}.Release|x86.ActiveCfg = Release|Win32
 		{E7E81B31-8C5F-4001-A125-644F95692D98}.Release|x86.Build.0 = Release|Win32
+		{6F1BC635-A7A1-4B4B-A251-258A72A27A86}.Debug|x64.ActiveCfg = Debug|x64
+		{6F1BC635-A7A1-4B4B-A251-258A72A27A86}.Debug|x64.Build.0 = Debug|x64
+		{6F1BC635-A7A1-4B4B-A251-258A72A27A86}.Debug|x86.ActiveCfg = Debug|Win32
+		{6F1BC635-A7A1-4B4B-A251-258A72A27A86}.Debug|x86.Build.0 = Debug|Win32
+		{6F1BC635-A7A1-4B4B-A251-258A72A27A86}.Release|x64.ActiveCfg = Release|x64
+		{6F1BC635-A7A1-4B4B-A251-258A72A27A86}.Release|x64.Build.0 = Release|x64
+		{6F1BC635-A7A1-4B4B-A251-258A72A27A86}.Release|x86.ActiveCfg = Release|Win32
+		{6F1BC635-A7A1-4B4B-A251-258A72A27A86}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
