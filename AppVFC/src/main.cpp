@@ -4,7 +4,6 @@
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
 #include "Shader/LineShader.hpp"
-#include "Shader/WireFrameShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -67,12 +66,18 @@ void generateObjects(int amount) {
         Engine::addComponent<MaterialComponent>(renderable.gameObject, 0.2f, glm::normalize(position), glm::vec3(1.f));
         auto boundingBox = &Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, mesh->mBuffers.vertices);
 
-        // create another game object for wireframe
-        auto _go = &Engine::createGameObject();
-        Engine::addComponent<MeshComponent>(_go, Library::getMesh("sphere"));
-        float radius = glm::max(glm::max(size.x, size.y), size.z);
-        Engine::addComponent<SpatialComponent>(_go, position, glm::vec3(radius), glm::mat4(1.f));
-        Engine::addComponent<renderable::WireframeRenderable>(_go);
+        Engine::addImGuiFunc("Renderable", []() {
+            static glm::vec3 rot(0.f);
+            static glm::vec3 scale(0.f);
+            if (auto bb = Engine::getSingleComponent<BoundingBoxComponent>()) {
+                rot = bb->getGameObject().getSpatial()->getLookDir();
+                scale = bb->getGameObject().getSpatial()->getScale();
+                ImGui::SliderFloat3("Rot", &rot[0], -1.f, 1.f);
+                bb->getGameObject().getSpatial()->setLookDir(rot);
+                ImGui::SliderFloat3("S", &scale[0], 0.f, 10.f);
+                bb->getGameObject().getSpatial()->setScale(scale);
+            }
+        });
     }
 }
 
@@ -105,7 +110,6 @@ int main() {
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<LineShader>();
-    Renderer::addSceneShader<WireframeShader>();
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */

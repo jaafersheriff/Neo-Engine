@@ -18,6 +18,7 @@ namespace neo {
 
             BoundingBoxComponent(GameObject *go, const std::vector<float>& vertices) :
                 BoundingBoxComponent(go) {
+                assert(vertices.size() > 0);
                 for (size_t v = 0; v < vertices.size() / 3; v++) {
                     mMin.x = glm::min(mMin.x, vertices[3 * v + 0]);
                     mMin.y = glm::min(mMin.y, vertices[3 * v + 1]);
@@ -27,6 +28,10 @@ namespace neo {
                     mMax.y = glm::max(mMax.y, vertices[3 * v + 1]);
                     mMax.z = glm::max(mMax.z, vertices[3 * v + 2]);
                 }
+            }
+
+            float getRadius() {
+                return glm::distance(mMin, mMax) / 2.f;
             }
     };
 }
