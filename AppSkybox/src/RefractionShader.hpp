@@ -24,7 +24,7 @@ class RefractionShader : public Shader {
             /* Load PV */
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
-            loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
+            loadUniform("camPos", camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
             /* Load environment map */
             if (auto skybox = Engine::getSingleComponent<SkyboxComponent>()) {
@@ -44,8 +44,8 @@ class RefractionShader : public Shader {
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
-                loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
-                loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
+                loadUniform("M", model->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
+                loadUniform("N", model->getGameObject().getComponentByType<SpatialComponent>()->getNormalMatrix());
                 loadUniform("ratio", renderable->ratio);
 
                 /* DRAW */

@@ -1,22 +1,17 @@
 #include "GameObject.hpp"
 
 #include "Component/Component.hpp"
-#include "Component/SpatialComponent/SpatialComponent.hpp"
 
 namespace neo {
 
     GameObject::GameObject() :
         mComponents(),
-        mComponentsByType(),
-        mSpatial(nullptr)
+        mComponentsByType()
     {}
 
     void GameObject::addComponent(Component & component, std::type_index typeI) {
         mComponents.push_back(&component);
         mComponentsByType[typeI].push_back(&component);
-        if (!mSpatial && typeI == std::type_index(typeid(SpatialComponent))) {
-            mSpatial = dynamic_cast<SpatialComponent *>(&component);
-        }
     }
 
     void GameObject::removeComponent(Component & component, std::type_index typeI) {
@@ -37,9 +32,6 @@ namespace neo {
                     break;
                 }
             }
-        }
-        if (mSpatial == &component) {
-            mSpatial = nullptr;
         }
     }
 }

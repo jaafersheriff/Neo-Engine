@@ -33,9 +33,9 @@ struct Light {
         light = &Engine::addComponent<LightComponent>(gameObject, col, att);
 
         Engine::addImGuiFunc("Light", [&]() {
-            glm::vec3 pos = gameObject->getSpatial()->getPosition();
+            glm::vec3 pos = gameObject->getComponentByType<SpatialComponent>()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
-                gameObject->getSpatial()->setPosition(pos);
+                gameObject->getComponentByType<SpatialComponent>()->setPosition(pos);
             }
             ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
             ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);

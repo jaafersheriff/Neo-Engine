@@ -47,7 +47,7 @@ class LightPassShader : public Shader {
             loadUniform("V", camera.getView());
             loadUniform("invP", glm::inverse(camera.getProj()));
             loadUniform("invV", glm::inverse(camera.getView()));
-            loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
+            loadUniform("camPos", camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
             /* Bind sphere volume */
             auto mesh = Library::getMesh("ico_2", true);
@@ -66,14 +66,14 @@ class LightPassShader : public Shader {
             /* Render light volumes */
             // TODO : instanced?
             for (auto & light : Engine::getComponents<LightComponent>()) {
-                auto spat = light->getGameObject().getSpatial();
+                auto spat = light->getGameObject().getComponentByType<SpatialComponent>();
                 loadUniform("M", spat->getModelMatrix());
                 loadUniform("lightPos", spat->getPosition());
                 loadUniform("lightRadius", spat->getScale().x);
                 loadUniform("lightCol", light->mColor);
 
                 // If camera is inside light 
-                float dist = glm::distance(spat->getPosition(), camera.getGameObject().getSpatial()->getPosition());
+                float dist = glm::distance(spat->getPosition(), camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
                 if (dist - camera.getNearFar().x < spat->getScale().x) {
                     CHECK_GL(glCullFace(GL_FRONT));
                 }

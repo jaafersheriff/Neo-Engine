@@ -116,7 +116,7 @@ int main() {
 
     });
     Engine::addImGuiFunc("PerspectiveCamera", [&]() {
-        auto spatial = mockCamera.gameObject->getSpatial();
+        auto spatial = mockCamera.gameObject->getComponentByType<SpatialComponent>();
         auto camera = dynamic_cast<PerspectiveCameraComponent*>(mockCamera.camera);
         {
             glm::vec3 camPos = spatial->getPosition();

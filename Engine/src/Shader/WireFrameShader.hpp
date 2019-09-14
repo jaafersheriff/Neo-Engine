@@ -35,9 +35,10 @@ namespace neo {
                 loadUniform("V", camera.getView());
 
                 for (auto& renderable : Engine::getComponents<renderable::WireframeRenderable>()) {
-                    auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
-                    if (!meshComponent) {
-                        continue; // TODO - assert? 
+                    const auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
+                    const auto spatialComponent = renderable->getGameObject().getComponentByType<SpatialComponent>();
+                    if (!meshComponent || !spatialComponent) {
+                        continue;
                     }
 
                     /* Bind mesh */
@@ -45,7 +46,7 @@ namespace neo {
                     CHECK_GL(glBindVertexArray(mesh.mVAOID));
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
-                    loadUniform("M", renderable->getGameObject().getSpatial()->getModelMatrix());
+                    loadUniform("M", spatialComponent->getModelMatrix());
                     loadUniform("wireColor", renderable->color);
 
                     /* Draw outline */

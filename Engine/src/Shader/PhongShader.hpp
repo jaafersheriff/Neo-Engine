@@ -66,22 +66,25 @@ namespace neo {
             /* Load PV */
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
-            loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
+            if (const auto cameraSpatial = camera.getGameObject().getComponentByType<SpatialComponent>()) {
+                loadUniform("camPos", cameraSpatial->getPosition());
+            }
 
             /* Load light */
             if (const auto light = Engine::getSingleComponent<LightComponent>()) {
-                loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
-                loadUniform("lightCol", light->mColor);
-                loadUniform("lightAtt", light->mAttenuation);
+                if (const auto lightSpatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
+                    loadUniform("lightPos", lightSpatial->getPosition());
+                    loadUniform("lightCol", light->mColor);
+                    loadUniform("lightAtt", light->mAttenuation);
+                }
             }
 
             for (const auto& renderable : Engine::getComponents<renderable::PhongRenderable>()) {
-                const auto& meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
-                if (!meshComponent) {
+                const auto& renderableMesh = renderable->getGameObject().getComponentByType<MeshComponent>();
+                const auto& renderableSpatial = renderable->getGameObject().getComponentByType<SpatialComponent>();
+                if (!renderableMesh || !renderableSpatial) {
                     continue;
                 }
-
-                const auto& renderableSpatial = renderable->getGameObject().getSpatial();
 
                 // VFC
                 if (const auto& boundingBox = renderable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
@@ -94,7 +97,7 @@ namespace neo {
                 }
 
                 /* Bind mesh */
-                const Mesh & mesh(meshComponent->getMesh());
+                const Mesh & mesh(renderableMesh->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 

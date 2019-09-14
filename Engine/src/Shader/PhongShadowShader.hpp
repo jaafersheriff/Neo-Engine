@@ -84,15 +84,19 @@ namespace neo {
                 /* Load Camera */
                 loadUniform("P", camera.getProj());
                 loadUniform("V", camera.getView());
-                loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
+                if (const auto cameraSpatial = camera.getGameObject().getComponentByType<SpatialComponent>()) {
+                    loadUniform("camPos", cameraSpatial->getPosition());
+                }
 
                 /* Load light */
-                if (auto light = Engine::getSingleComponent<LightComponent>()) {
-                    if (auto lightCam = light->getGameObject().getComponentByType<CameraComponent>()) {
-                        loadUniform("lightPos", light->getGameObject().getSpatial()->getPosition());
-                        loadUniform("lightCol", light->mColor);
-                        loadUniform("lightAtt", light->mAttenuation);
-                        loadUniform("L", biasMatrix * lightCam->getProj() * lightCam->getView());
+                if (const auto light = Engine::getSingleComponent<LightComponent>()) {
+                    if (const auto lightCam = light->getGameObject().getComponentByType<CameraComponent>()) {
+                        if (const auto lightSpat = light->getGameObject().getComponentByType<SpatialComponent>()) {
+                            loadUniform("lightPos", lightSpat->getPosition());
+                            loadUniform("lightCol", light->mColor);
+                            loadUniform("lightAtt", light->mAttenuation);
+                            loadUniform("L", biasMatrix * lightCam->getProj() * lightCam->getView());
+                        }
                     }
                 }
 
@@ -110,7 +114,7 @@ namespace neo {
 
                 for (auto& renderable : Engine::getComponents<renderable::PhongShadowRenderable>()) {
                     auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
-                    auto renderableSpatial = renderable->getGameObject().getSpatial();
+                    auto renderableSpatial = renderable->getGameObject().getComponentByType<SpatialComponent>();
                     if (!meshComponent || !renderableSpatial) {
                         continue;
                     }

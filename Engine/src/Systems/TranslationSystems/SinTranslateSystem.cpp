@@ -4,10 +4,12 @@
 namespace neo {
     void SinTranslateSystem::update(const float dt) {
         for (auto comp : Engine::getComponents<SinTranslateComponent>()) {
-            double time = Util::getRunTime();
-            glm::vec3 oldPos = comp->getGameObject().getSpatial()->getPosition();
-            oldPos = comp->mBasePosition + (float)glm::cos(time) * comp->mOffset;
-            comp->getGameObject().getSpatial()->setPosition(oldPos);
+            if (auto spatial = comp->getGameObject().getComponentByType<SpatialComponent>()) {
+                double time = Util::getRunTime();
+                glm::vec3 oldPos = spatial->getPosition();
+                oldPos = comp->mBasePosition + (float)glm::cos(time) * comp->mOffset;
+                spatial->setPosition(oldPos);
+            }
         }
     }
 

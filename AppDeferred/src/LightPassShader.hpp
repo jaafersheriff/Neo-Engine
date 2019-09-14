@@ -32,6 +32,11 @@ class LightPassShader : public Shader {
         }
 
         virtual void render(const CameraComponent &camera) override {
+            const auto camSpatial = camera.getGameObject().getComponentByType<SpatialComponent>();
+            if (!camSpatial) {
+                return;
+            }
+
             auto fbo = Library::getFBO("lightpass");
             fbo->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
@@ -50,7 +55,7 @@ class LightPassShader : public Shader {
             loadUniform("V", camera.getView());
             loadUniform("invP", glm::inverse(camera.getProj()));
             loadUniform("invV", glm::inverse(camera.getView()));
-            loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
+            loadUniform("camPos", camSpatial->getPosition());
 
             /* Bind sphere volume */
             auto mesh = Library::getMesh("ico_2", true);
@@ -68,21 +73,22 @@ class LightPassShader : public Shader {
 
             /* Render light volumes */
             for (auto & light : Engine::getComponents<LightComponent>()) {
-                auto spat = light->getGameObject().getSpatial();
-                loadUniform("M", spat->getModelMatrix());
-                loadUniform("lightPos", spat->getPosition());
-                loadUniform("lightRadius", spat->getScale().x);
-                loadUniform("lightCol", light->mColor);
+                if (const auto spat = light->getGameObject().getComponentByType<SpatialComponent>()) {
+                    loadUniform("M", spat->getModelMatrix());
+                    loadUniform("lightPos", spat->getPosition());
+                    loadUniform("lightRadius", spat->getScale().x);
+                    loadUniform("lightCol", light->mColor);
 
-                // If camera is inside light 
-                float dist = glm::distance(spat->getPosition(), camera.getGameObject().getSpatial()->getPosition());
-                if (dist - camera.getNearFar().x < spat->getScale().x) {
-                    CHECK_GL(glCullFace(GL_FRONT));
+                    // If camera is inside light 
+                    float dist = glm::distance(spat->getPosition(), camSpatial->getPosition());
+                    if (dist - camera.getNearFar().x < spat->getScale().x) {
+                        CHECK_GL(glCullFace(GL_FRONT));
+                    }
+                    else {
+                        CHECK_GL(glCullFace(GL_BACK));
+                    }
+                    mesh->draw();
                 }
-                else {
-                    CHECK_GL(glCullFace(GL_BACK));
-                }
-                mesh->draw();
             }
 
             unbind();

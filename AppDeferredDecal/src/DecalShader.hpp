@@ -56,18 +56,19 @@ class DecalShader : public Shader {
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
  
-                auto spat = decal->getGameObject().getSpatial();
-                loadUniform("M", spat->getModelMatrix());
-                loadUniform("invM", glm::inverse(spat->getModelMatrix()));
+                if (const auto spatial = decal->getGameObject().getComponentByType<SpatialComponent>()) {
+                    loadUniform("M", spatial->getModelMatrix());
+                    loadUniform("invM", glm::inverse(spatial->getModelMatrix()));
 
-                auto diffuseMap = decal->getGameObject().getComponentByType<DiffuseMapComponent>();
-                if (diffuseMap) {
-                    auto texture = (const Texture2D *)(diffuseMap->mTexture);
-                    texture->bind();
-                    loadUniform("decalTexture", texture->mTextureID);
+                    auto diffuseMap = decal->getGameObject().getComponentByType<DiffuseMapComponent>();
+                    if (diffuseMap) {
+                        auto texture = (const Texture2D *)(diffuseMap->mTexture);
+                        texture->bind();
+                        loadUniform("decalTexture", texture->mTextureID);
+                    }
+
+                    mesh.draw();
                 }
-
-                mesh.draw();
             }
 
             unbind();

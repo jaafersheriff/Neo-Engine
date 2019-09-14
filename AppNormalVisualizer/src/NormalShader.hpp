@@ -25,19 +25,21 @@ class NormalShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto& model : Engine::getComponents<MeshComponent>()) {
-                /* Bind mesh */
-                const Mesh & mesh(model->getMesh());
-                CHECK_GL(glBindVertexArray(mesh.mVAOID));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
+            for (const auto& model : Engine::getComponents<MeshComponent>()) {
+                if (const auto spatial = model->getGameObject().getComponentByType<SpatialComponent>()) {
+                    /* Bind mesh */
+                    const Mesh & mesh(model->getMesh());
+                    CHECK_GL(glBindVertexArray(mesh.mVAOID));
+                    CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
-                glm::mat4 M = model->getGameObject().getSpatial()->getModelMatrix();
-                loadUniform("M", M);
-                glm::mat4 N = glm::transpose(glm::inverse(camera.getView() * M));
-                loadUniform("N", glm::mat3(N));
+                    glm::mat4 M = spatial->getModelMatrix();
+                    loadUniform("M", M);
+                    glm::mat4 N = glm::transpose(glm::inverse(camera.getView() * M));
+                    loadUniform("N", glm::mat3(N));
 
-                /* DRAW */
-                mesh.draw();
+                    /* DRAW */
+                    mesh.draw();
+                }
             }
 
 

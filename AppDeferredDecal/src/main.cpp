@@ -143,19 +143,17 @@ int main() {
                 lights.erase(lights.begin() + index);
                 index = glm::max(0, index - 1);
             }
-            auto spat = l->gameObject->getSpatial();
-            if (!spat) {
-                return;
+            if (auto spatial = l->gameObject->getComponentByType<SpatialComponent>()) {
+                glm::vec3 pos = spatial->getPosition();
+                if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -25.f, 25.f)) {
+                    spatial->setPosition(pos);
+                }
+                float size = spatial->getScale().x;
+                if (ImGui::SliderFloat("Scale", &size, 15.f, 100.f)) {
+                    spatial->setScale(glm::vec3(size));
+                }
+                ImGui::SliderFloat3("Color", glm::value_ptr(l->light->mColor), 0.f, 1.f);
             }
-            glm::vec3 pos = spat->getPosition();
-            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -25.f, 25.f)) {
-                spat->setPosition(pos);
-            }
-            float size = spat->getScale().x;
-            if (ImGui::SliderFloat("Scale", &size, 15.f, 100.f)) {
-                spat->setScale(glm::vec3(size));
-            }
-            ImGui::SliderFloat3("Color", glm::value_ptr(l->light->mColor), 0.f, 1.f);
         }
     });
 

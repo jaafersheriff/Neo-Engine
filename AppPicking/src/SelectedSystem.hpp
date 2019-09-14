@@ -32,11 +32,10 @@ public:
     }
 
     virtual void imguiEditor() override {
-
         if (auto selected = Engine::getSingleComponent<SelectedComponent>()) {
-            glm::vec3 scale = selected->getGameObject().getSpatial()->getScale();
+            glm::vec3 scale = selected->getGameObject().getComponentByType<SpatialComponent>()->getScale();
             ImGui::SliderFloat3("Scale", &scale[0], 0.f, 3.f);
-            selected->getGameObject().getSpatial()->setScale(scale);
+            selected->getGameObject().getComponentByType<SpatialComponent>()->setScale(scale);
         }
     }
 };

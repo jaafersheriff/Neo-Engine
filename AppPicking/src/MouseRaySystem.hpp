@@ -36,6 +36,6 @@ public:
 
         // Eye space to world space
         mouseRayComp->ray = glm::normalize(glm::vec3(glm::inverse(camera->getView()) * mouseCoordsEye));
-        mouseRayComp->position = camera->getGameObject().getSpatial()->getPosition();
+        mouseRayComp->position = camera->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
     }
 };

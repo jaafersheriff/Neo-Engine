@@ -47,6 +47,9 @@ namespace neo {
         glm::vec3 v(Util::sphericalToCartesian(1.0f, mTheta, mPhi - Util::PI() * 0.5f));
         v = glm::vec3(-v.y, v.z, -v.x);
         glm::vec3 u(glm::cross(v, w));
-        mGameObject->getSpatial()->setUVW(u, v, w);
+
+        auto spatial = mGameObject->getComponentByType<SpatialComponent>();
+        assert(spatial);
+        spatial->setUVW(u, v, w);
     }
 }

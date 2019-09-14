@@ -64,7 +64,7 @@ namespace neo {
 
                 for (auto& renderable : Engine::getComponents<renderable::ShadowCasterRenderable>()) {
                     auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
-                    auto renderableSpatial = renderable->getGameObject().getSpatial();
+                    auto renderableSpatial = renderable->getGameObject().getComponentByType<SpatialComponent>();
                     if (!meshComponent || !renderableSpatial) {
                         continue;
                     }

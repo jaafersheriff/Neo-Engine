@@ -158,7 +158,7 @@ int main() {
                 lights.erase(lights.begin() + index);
                 index = glm::max(0, index - 1);
             }
-            auto spat = l->gameObject->getSpatial();
+            auto spat = l->gameObject->getComponentByType<SpatialComponent>();
             if (!spat) {
                 return;
             }

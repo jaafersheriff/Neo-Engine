@@ -28,9 +28,9 @@ struct Light {
 
         Engine::addImGuiFunc("Light", [&]() {
             auto light = Engine::getSingleComponent<LightComponent>();
-            glm::vec3 pos = light->getGameObject().getSpatial()->getPosition();
+            glm::vec3 pos = light->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
             if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
-                light->getGameObject().getSpatial()->setPosition(pos);
+                light->getGameObject().getComponentByType<SpatialComponent>()->setPosition(pos);
             }
             ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
             ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
@@ -70,12 +70,12 @@ void generateObjects(int amount) {
             static glm::vec3 rot(0.f);
             static glm::vec3 scale(0.f);
             if (auto bb = Engine::getSingleComponent<BoundingBoxComponent>()) {
-                rot = bb->getGameObject().getSpatial()->getLookDir();
-                scale = bb->getGameObject().getSpatial()->getScale();
+                rot = bb->getGameObject().getComponentByType<SpatialComponent>()->getLookDir();
+                scale = bb->getGameObject().getComponentByType<SpatialComponent>()->getScale();
                 ImGui::SliderFloat3("Rot", &rot[0], -1.f, 1.f);
-                bb->getGameObject().getSpatial()->setLookDir(rot);
+                bb->getGameObject().getComponentByType<SpatialComponent>()->setLookDir(rot);
                 ImGui::SliderFloat3("S", &scale[0], 0.f, 10.f);
-                bb->getGameObject().getSpatial()->setScale(scale);
+                bb->getGameObject().getComponentByType<SpatialComponent>()->setScale(scale);
             }
         });
     }

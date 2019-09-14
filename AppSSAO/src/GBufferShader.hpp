@@ -43,7 +43,7 @@ class GBufferShader : public Shader {
             loadUniform("V", camera.getView());
 
             for (auto& model : Engine::getComponents<MeshComponent>()) {
-                loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
+                loadUniform("M", model->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
 
                 /* Bind mesh */
                 const Mesh & mesh(model->getMesh());
@@ -75,7 +75,7 @@ class GBufferShader : public Shader {
                 }
                 else {
                     loadUniform("useNormalMap", false);
-                    loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
+                    loadUniform("N", model->getGameObject().getComponentByType<SpatialComponent>()->getNormalMatrix());
                 }
 
                 /* DRAW */

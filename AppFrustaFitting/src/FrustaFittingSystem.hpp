@@ -91,8 +91,8 @@ public:
         if (!orthoCamera || !perspectiveCamera) {
             return;
         }
-        auto orthoSpat = mockOrthoCamera->getGameObject().getSpatial();
-        auto perspectiveSpat = mockPerspectiveCamera->getGameObject().getSpatial();
+        auto orthoSpat = mockOrthoCamera->getGameObject().getComponentByType<SpatialComponent>();
+        auto perspectiveSpat = mockPerspectiveCamera->getGameObject().getComponentByType<SpatialComponent>();
         if (!orthoSpat || !perspectiveSpat) {
             return;
         }
@@ -108,8 +108,13 @@ public:
         if (!light) {
             return;
         }
-        const glm::vec3 lightDir = light->getGameObject().getSpatial()->getLookDir();
-        const glm::vec3 up = light->getGameObject().getSpatial()->getUpDir();
+        auto lightSpatial = light->getGameObject().getComponentByType<SpatialComponent>();
+        if (!lightSpatial) {
+            return;
+        }
+
+        const glm::vec3 lightDir = lightSpatial->getLookDir();
+        const glm::vec3 up = lightSpatial->getUpDir();
 
         const auto& sceneView = perspectiveCamera->getView();
         const auto& sceneProj = perspectiveCamera->getProj();
@@ -166,9 +171,9 @@ public:
         orthoSpat->setPosition(shadowViewPos);
         orthoCamera->setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
 
-        glm::vec3 midSceneView = perspectiveSpat->getPosition() + perspectiveCamera->getGameObject().getSpatial()->getLookDir() * perspectiveCamera->getNearFar().y / 2.f;
+        glm::vec3 midSceneView = perspectiveSpat->getPosition() + perspectiveSpat->getLookDir() * perspectiveCamera->getNearFar().y / 2.f;
         // center?
-        float shadowToSceneDistance = glm::distance(light->getGameObject().getSpatial()->getPosition(), midSceneView);
+        float shadowToSceneDistance = glm::distance(lightSpatial->getPosition(), midSceneView);
         orthoCamera->setNearFar(-boxDepth, boxDepth);
     }
 };

@@ -43,44 +43,46 @@ class GBufferShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto& renderable : Engine::getComponents<MeshComponent>()) {
-                /* Bind mesh */
-                const Mesh& mesh(renderable->getMesh());
-                CHECK_GL(glBindVertexArray(mesh.mVAOID));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
+            for (const auto& renderable : Engine::getComponents<MeshComponent>()) {
+                if (const auto spatial = renderable->getGameObject().getComponentByType<SpatialComponent>()) {
+                    /* Bind mesh */
+                    const Mesh& mesh(renderable->getMesh());
+                    CHECK_GL(glBindVertexArray(mesh.mVAOID));
+                    CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
-                loadUniform("M", renderable->getGameObject().getSpatial()->getModelMatrix());
+                    loadUniform("M", spatial->getModelMatrix());
 
-                /* Bind diffuse map or material */
-                auto matComp = renderable->getGameObject().getComponentByType<MaterialComponent>();
-                if (matComp) {
-                    loadUniform("ambient", matComp->mAmbient);
-                }
-                if (auto diffMap = renderable->getGameObject().getComponentByType<DiffuseMapComponent>()) {
-                    diffMap->mTexture->bind();
-                    loadUniform("useDiffuseMap", true);
-                    loadUniform("diffuseMap", diffMap->mTexture->mTextureID);
-                }
-                else {
-                    loadUniform("useDiffuseMap", false);
+                    /* Bind diffuse map or material */
+                    auto matComp = renderable->getGameObject().getComponentByType<MaterialComponent>();
                     if (matComp) {
-                        loadUniform("diffuseMaterial", matComp->mDiffuse);
+                        loadUniform("ambient", matComp->mAmbient);
                     }
-                }
+                    if (auto diffMap = renderable->getGameObject().getComponentByType<DiffuseMapComponent>()) {
+                        diffMap->mTexture->bind();
+                        loadUniform("useDiffuseMap", true);
+                        loadUniform("diffuseMap", diffMap->mTexture->mTextureID);
+                    }
+                    else {
+                        loadUniform("useDiffuseMap", false);
+                        if (matComp) {
+                            loadUniform("diffuseMaterial", matComp->mDiffuse);
+                        }
+                    }
 
-                /* Bind normal map */
-                if (auto normalMap = renderable->getGameObject().getComponentByType<NormalMapComponent>()) {
-                    normalMap->mTexture->bind();
-                    loadUniform("useNormalMap", true);
-                    loadUniform("normalMap", normalMap->mTexture->mTextureID);
-                }
-                else {
-                    loadUniform("useNormalMap", false);
-                    loadUniform("N", renderable->getGameObject().getSpatial()->getNormalMatrix());
-                }
+                    /* Bind normal map */
+                    if (auto normalMap = renderable->getGameObject().getComponentByType<NormalMapComponent>()) {
+                        normalMap->mTexture->bind();
+                        loadUniform("useNormalMap", true);
+                        loadUniform("normalMap", normalMap->mTexture->mTextureID);
+                    }
+                    else {
+                        loadUniform("useNormalMap", false);
+                        loadUniform("N", spatial->getNormalMatrix());
+                    }
 
-                /* DRAW */
-                mesh.draw();
+                    /* DRAW */
+                    mesh.draw();
+                }
             }
 
             unbind();

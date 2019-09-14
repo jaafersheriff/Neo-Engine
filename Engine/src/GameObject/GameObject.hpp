@@ -9,7 +9,6 @@ namespace neo {
     class Engine;
     class Messenger;
     class Component;
-    class SpatialComponent;
     struct Message;
 
     class GameObject {
@@ -24,7 +23,6 @@ namespace neo {
             GameObject & operator=(const GameObject &) = delete;
 
             GameObject();
-            SpatialComponent * getSpatial() const { return mSpatial; }
 
             /* Add/remove components */
             template<typename CompT> void addComponent(CompT &);
@@ -50,7 +48,6 @@ namespace neo {
 
         private:
             /* Containers */
-            SpatialComponent* mSpatial;
             std::vector<Component *> mComponents;
             std::unordered_map<std::type_index, std::vector<Component *>> mComponentsByType;
             std::unordered_map<std::type_index, std::vector<std::function<void (const Message &)>>> mReceivers;

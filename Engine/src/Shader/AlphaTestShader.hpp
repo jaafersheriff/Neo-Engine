@@ -42,8 +42,9 @@ namespace neo {
             loadUniform("V", camera.getView());
 
             for (auto& renderable : Engine::getComponents<renderable::AlphaTestRenderable>()) {
-                auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
-                if (!meshComponent) {
+                const auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
+                const auto spatialComponent = renderable->getGameObject().getComponentByType<SpatialComponent>();
+                if (!meshComponent || !spatialComponent) {
                     continue;
                 }
 
@@ -52,7 +53,7 @@ namespace neo {
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
-                loadUniform("M", renderable->getGameObject().getSpatial()->getModelMatrix());
+                loadUniform("M", spatialComponent->getModelMatrix());
 
                 /* Bind texture */
                 if (auto diffuseMap = renderable->getGameObject().getComponentByType<DiffuseMapComponent>()) {

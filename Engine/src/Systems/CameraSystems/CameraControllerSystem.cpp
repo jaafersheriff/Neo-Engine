@@ -42,13 +42,14 @@ namespace neo {
             );
 
             if (dir != glm::vec3()) {
-                auto spatial = comp.getGameObject().getSpatial();
+                auto spatial = comp.getGameObject().getComponentByType<SpatialComponent>();
+                assert(spatial);
                 dir = glm::normalize(dir);
                 dir = glm::normalize(
                     spatial->getRightDir() * dir.x +
                     spatial->getUpDir() * dir.y +
                     -spatial->getLookDir() * dir.z);
-                comp.getGameObject().getSpatial()->move(dir * comp.mMoveSpeed * dt * (speed ? mSuperSpeed : 1.f));
+                spatial->move(dir * comp.mMoveSpeed * dt * (speed ? mSuperSpeed : 1.f));
             }
 
     }

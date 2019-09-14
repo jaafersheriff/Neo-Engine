@@ -18,7 +18,7 @@ class SnowSystem : public System {
             for (auto comp : Engine::getComponents<SnowComponent>()) {
                 comp->height = -0.19f * comp->snowSize + 0.17f;
 
-                comp->snowAngle = comp->getGameObject().getSpatial()->getUpDir();
+                comp->snowAngle = comp->getGameObject().getComponentByType<SpatialComponent>()->getUpDir();
                 comp->snowAngle.x = -comp->snowAngle.x;
                 comp->snowAngle.z = -comp->snowAngle.z;
 

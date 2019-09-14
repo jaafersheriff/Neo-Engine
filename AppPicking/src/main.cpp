@@ -36,12 +36,14 @@ struct Light {
 
         Engine::addImGuiFunc("Light", [&]() {
             auto light = Engine::getSingleComponent<LightComponent>();
-            glm::vec3 pos = light->getGameObject().getSpatial()->getPosition();
-            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
-                light->getGameObject().getSpatial()->setPosition(pos);
+            if (auto spatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
+                glm::vec3 pos = spatial->getPosition();
+                if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
+                    spatial->setPosition(pos);
+                }
+                ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
+                ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
             }
-            ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
-            ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
         });
     }
 };

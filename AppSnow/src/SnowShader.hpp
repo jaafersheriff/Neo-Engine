@@ -31,19 +31,19 @@ public:
         /* Load Camera */
         loadUniform("P", camera.getProj());
         loadUniform("V", camera.getView());
-        loadUniform("camPos", camera.getGameObject().getSpatial()->getPosition());
+        loadUniform("camPos", camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
         /* Load light */
         auto lights = Engine::getComponents<LightComponent>();
         if (lights.size()) {
-            loadUniform("lightPos", lights.at(0)->getGameObject().getSpatial()->getPosition());
+            loadUniform("lightPos", lights.at(0)->getGameObject().getComponentByType<SpatialComponent>()->getPosition());
             loadUniform("lightCol", lights.at(0)->mColor);
             loadUniform("lightAtt", lights.at(0)->mAttenuation);
         }
 
         for (auto& model : Engine::getComponents<MeshComponent>()) {
-            loadUniform("M", model->getGameObject().getSpatial()->getModelMatrix());
-            loadUniform("N", model->getGameObject().getSpatial()->getNormalMatrix());
+            loadUniform("M", model->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
+            loadUniform("N", model->getGameObject().getComponentByType<SpatialComponent>()->getNormalMatrix());
 
             /* Bind mesh */
             const Mesh & mesh(model->getMesh());
