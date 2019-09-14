@@ -82,12 +82,6 @@ namespace neo {
     template <typename ShaderT, typename... Args>
     ShaderT & Renderer::addPostProcessShader(Args &&... args) {
         static_assert(std::is_base_of<PostProcessShader, ShaderT>::value, "ShaderT must be derived from PostProcessShader");
-        std::type_index typeI(typeid(ShaderT));
-        for (auto& shader : mPostShaders) {
-            if (shader.first == typeI) {
-                return static_cast<ShaderT&>(*shader.second);
-            }
-        }
 
         // Generate fbos if a post process shader exists
         if (!mPostShaders.size()) {
@@ -114,6 +108,7 @@ namespace neo {
             });
         }
 
+        std::type_index typeI(typeid(ShaderT));
         mPostShaders.emplace_back(typeI, _createShader<ShaderT>(std::forward<Args>(args)...));
         return static_cast<ShaderT &>(*mPostShaders.back().second);
     }
