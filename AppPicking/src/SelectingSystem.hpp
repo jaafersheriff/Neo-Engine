@@ -4,11 +4,11 @@
 #include "Engine.hpp"
 
 #include "MouseRayComponent.hpp"
-#include "SelectableComponent.hpp"
 #include "SelectedComponent.hpp"
 
 using namespace neo;
 
+template <typename CompT>
 class SelectingSystem : public System {
 
 public:
@@ -25,7 +25,7 @@ public:
             return;
         }
 
-        for (auto selectable : Engine::getComponents<SelectableComponent>()) {
+        for (auto selectable : Engine::getComponents<CompT>()) {
             if (auto bb = selectable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
                 // ray march
                 int maxmarches = 100;

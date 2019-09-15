@@ -4,18 +4,18 @@
 #include "Engine.hpp"
 
 #include "MouseRayComponent.hpp"
-#include "SelectableComponent.hpp"
 #include "SelectedComponent.hpp"
 
 #include <functional>
 
 using namespace neo;
 
+template <typename CompT>
 class SelectedSystem : public System {
 
 public:
     SelectedSystem(
-        std::function<void(SelectableComponent*)> resetOperation,
+        std::function<void(CompT*)> resetOperation,
         std::function<void(SelectedComponent*)> selectOperation) :
         System("Selected System"),
         resetOperation(resetOperation),
@@ -24,7 +24,7 @@ public:
 
     virtual void update(const float dt) override {
         // Operate on unselected objects
-        for (auto selectable : Engine::getComponents<SelectableComponent>()) {
+        for (auto selectable : Engine::getComponents<CompT>()) {
             resetOperation(selectable);
         }
 
@@ -43,6 +43,6 @@ public:
     }
 
 private:
-    std::function<void(SelectableComponent*)> resetOperation;
+    std::function<void(CompT*)> resetOperation;
     std::function<void(SelectedComponent*)> selectOperation;
 };

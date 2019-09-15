@@ -9,7 +9,6 @@
 
 #include "SelectingSystem.hpp"
 #include "SelectedComponent.hpp"
-#include "SelectableComponent.hpp"
 #include "SelectedSystem.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -57,7 +56,6 @@ struct Renderable {
         Engine::addComponent<renderable::PhongRenderable>(gameObject);
         Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f), 20.f);
         Engine::addComponent<BoundingBoxComponent>(gameObject, mesh->mBuffers.vertices);
-        Engine::addComponent<SelectableComponent>(gameObject);
     }
 };
 
@@ -86,9 +84,9 @@ int main() {
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
     Engine::addSystem<MouseRaySystem>();
-    Engine::addSystem<SelectingSystem>(100, 100.f);
-    Engine::addSystem<SelectedSystem>(
-        [](SelectableComponent* selectable) {
+    Engine::addSystem<SelectingSystem<renderable::PhongRenderable>>(100, 100.f);
+    Engine::addSystem<SelectedSystem<renderable::PhongRenderable>>(
+        [](renderable::PhongRenderable* selectable) {
             if (auto material = selectable->getGameObject().getComponentByType<MaterialComponent>()) {
                 material->mDiffuse = glm::vec3(1.f);
             }
