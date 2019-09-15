@@ -27,14 +27,14 @@ public:
 
         for (auto selectable : Engine::getComponents<CompT>()) {
             if (auto bb = selectable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
-                // ray march
-                int maxmarches = 100;
-                float maxdist = 100.f;
+                float maxDistance = mMaxDist;
                 if (auto camera = Engine::getSingleComponent<CameraComponent>()) {
-                    maxdist = camera->getNearFar().y;
+                    maxDistance = glm::max(maxDistance, camera->getNearFar().y);
                 }
-                for (int i = 0; i < 20; i++) {
-                    if (bb->intersect(mouseRay->position + mouseRay->ray * (maxdist / (float)maxmarches) * (float)i)) {
+
+                // ray march
+                for (float i = 0.f; i < maxDistance; i += maxDistance / static_cast<float>(mMaxMarches)) {
+                    if (bb->intersect(mouseRay->position + mouseRay->ray * i)) {
                         if (auto selected = Engine::getSingleComponent<SelectedComponent>()) {
                             Engine::removeComponent<SelectedComponent>(*selected);
                         }
