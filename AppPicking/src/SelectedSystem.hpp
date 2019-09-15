@@ -18,19 +18,19 @@ public:
         std::function<void(CompT*)> resetOperation,
         std::function<void(SelectedComponent*)> selectOperation) :
         System("Selected System"),
-        resetOperation(resetOperation),
-        selectOperation(selectOperation)
+        mResetOperation(resetOperation),
+        mSelectOperation(selectOperation)
     {}
 
     virtual void update(const float dt) override {
         // Operate on unselected objects
         for (auto selectable : Engine::getComponents<CompT>()) {
-            resetOperation(selectable);
+            mResetOperation(selectable);
         }
 
         // Operate on selected objects
         for (auto selected : Engine::getComponents<SelectedComponent>()) {
-            selectOperation(selected);
+            mSelectOperation(selected);
         }
     }
 
@@ -43,6 +43,6 @@ public:
     }
 
 private:
-    std::function<void(CompT*)> resetOperation;
-    std::function<void(SelectedComponent*)> selectOperation;
+    std::function<void(CompT*)> mResetOperation;
+    std::function<void(SelectedComponent*)> mSelectOperation;
 };

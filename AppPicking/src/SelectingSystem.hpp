@@ -12,8 +12,9 @@ template <typename CompT>
 class SelectingSystem : public System {
 
 public:
-    SelectingSystem(int maxMarches = 100, float maxDist = 100.f) :
+    SelectingSystem(std::function<bool(SelectedComponent*)> removeDecider, int maxMarches = 100, float maxDist = 100.f) :
         System("Selecting System"),
+        mRemoveDecider(removeDecider),
         mMaxMarches(maxMarches),
         mMaxDist(maxDist)
     {}
@@ -35,8 +36,10 @@ public:
                 // ray march
                 for (float i = 0.f; i < maxDistance; i += maxDistance / static_cast<float>(mMaxMarches)) {
                     if (bb->intersect(mouseRay->position + mouseRay->ray * i)) {
-                        if (auto selected = Engine::getSingleComponent<SelectedComponent>()) {
-                            Engine::removeComponent<SelectedComponent>(*selected);
+                        for (auto selected : Engine::getComponents<SelectedComponent>()) {
+                            if (mRemoveDecider(selected)) {
+                                Engine::removeComponent<SelectedComponent>(*selected);
+                            }
                         }
                         Engine::addComponent<SelectedComponent>(&selectable->getGameObject());
                         return;
@@ -47,6 +50,7 @@ public:
     }
 
 private:
+    std::function<bool(SelectedComponent*)> mRemoveDecider;
     int mMaxMarches;
     float mMaxDist;
 };

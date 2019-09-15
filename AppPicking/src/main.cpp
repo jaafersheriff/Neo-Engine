@@ -84,18 +84,26 @@ int main() {
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
     Engine::addSystem<MouseRaySystem>();
-    Engine::addSystem<SelectingSystem<renderable::PhongRenderable>>(100, 100.f);
+    Engine::addSystem<SelectingSystem<renderable::PhongRenderable>>(
+        // Decide to remove selected components
+        [](SelectedComponent* selected) {
+            return false;
+        }
+    );
     Engine::addSystem<SelectedSystem<renderable::PhongRenderable>>(
+        // Reset unselected components
         [](renderable::PhongRenderable* selectable) {
             if (auto material = selectable->getGameObject().getComponentByType<MaterialComponent>()) {
                 material->mDiffuse = glm::vec3(1.f);
             }
-    },
+        },
+        // Operate on selected components
         [](SelectedComponent* selected) {
             if (auto material = selected->getGameObject().getComponentByType<MaterialComponent>()) {
                 material->mDiffuse = glm::vec3(1.f, 0.f, 0.f);
             }
-    });
+        }
+    );
     Engine::initSystems();
 
     /* Init renderer */
