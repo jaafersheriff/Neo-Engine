@@ -1,21 +1,9 @@
-#pragma once
+#include <Engine.hpp>
+#include "MouseRaySystem.hpp"
 
-#include "Systems/System.hpp"
-#include "Engine.hpp"
+namespace neo {
 
-#include "MouseRayComponent.hpp"
-
-using namespace neo;
-
-class MouseRaySystem : public System {
-
-public:
-    MouseRaySystem() :
-        System("MouseRay System")
-    {}
-
-
-    virtual void update(const float dt) override {
+    void MouseRaySystem::update(const float dt) {
         auto camera = Engine::getSingleComponent<MainCameraComponent>();
         auto mouseRayComp = Engine::getSingleComponent<MouseRayComponent>();
         if (!camera || !camera->getGameObject().getComponentByType<CameraComponent>()) {
@@ -47,4 +35,4 @@ public:
             Engine::removeComponent<MouseRayComponent>(*mouseRayComp);
         }
     }
-};
+}

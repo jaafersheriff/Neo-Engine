@@ -5,9 +5,9 @@
 
 #include <glm/glm.hpp>
 
-using namespace neo;
+namespace neo {
 
-class MouseRayComponent : public Component {
+    class MouseRayComponent : public Component {
     public:
         glm::vec3 position;
         glm::vec3 ray;
@@ -16,4 +16,6 @@ class MouseRayComponent : public Component {
             position(0.f),
             ray(0.f)
         {}
-};
+    };
+
+}

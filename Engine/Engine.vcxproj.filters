@@ -70,6 +70,11 @@
     <ClInclude Include="src\Systems\CameraSystems\FrustumSystem.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\FrustumToLineSystem.hpp" />
     <ClInclude Include="src\Component\CameraComponent\MainCameraComponent.hpp" />
+    <ClInclude Include="src\Component\SelectingComponent\SelectedComponent.hpp" />
+    <ClInclude Include="src\Systems\SelectingSystems\SelectingSystem.hpp" />
+    <ClInclude Include="src\Component\SelectingComponent\MouseRayComponent.hpp" />
+    <ClInclude Include="src\Component\SelectingComponent\SelectableComponent.hpp" />
+    <ClInclude Include="src\Systems\SelectingSystems\MouseRaySystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -101,6 +106,8 @@
     <ClCompile Include="src\Component\CameraComponent\OrthoCameraComponent.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\FrustumSystem.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\FrustumToLineSystem.cpp" />
+    <ClCompile Include="src\Systems\SelectingSystems\SelectingSystem.cpp" />
+    <ClCompile Include="src\Systems\SelectingSystems\MouseRaySystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />

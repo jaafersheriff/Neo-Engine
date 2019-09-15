@@ -121,12 +121,6 @@
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\MouseRayComponent.hpp" />
-    <ClInclude Include="src\SelectedComponent.hpp" />
-    <ClInclude Include="src\MouseRaySystem.hpp" />
-    <ClInclude Include="src\SelectingSystem.hpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

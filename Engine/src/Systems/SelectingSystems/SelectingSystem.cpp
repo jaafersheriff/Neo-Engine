@@ -1,39 +1,12 @@
-#pragma once
+#include <Engine.hpp>
+#include "SelectingSystem.hpp"
 
-#include "Systems/System.hpp"
-#include "Engine.hpp"
+namespace neo {
 
-#include "MouseRayComponent.hpp"
-#include "SelectedComponent.hpp"
-
-using namespace neo;
-
-template <typename CompT>
-class SelectingSystem : public System {
-
-public:
-    SelectingSystem(
-        int maxMarches = 100, 
-        int maxDist = 100.f,
-        std::function<bool(SelectedComponent*)> removeDecider = [](SelectedComponent*) { return true; }, 
-        std::function<void(CompT*)> resetOperation = [](CompT*) {},
-        std::function<void(SelectedComponent*)> selectOperation = [](SelectedComponent*) {},
-        std::function<void(std::vector<SelectedComponent*>&)> editorOperation = [](std::vector<SelectedComponent*>&) {}) :
-        
-        System("Selecting System"),
-        mMaxMarches(maxMarches),
-        mMaxDist(maxDist),
-        mRemoveDecider(removeDecider),
-        mResetOperation(resetOperation),
-        mSelectOperation(selectOperation),
-        mEditorOperation(editorOperation)
-    {}
-
-
-    virtual void update(const float dt) override {
+    void SelectingSystem::update(const float dt) {
         // Select a new object
         if (auto mouseRay = Engine::getSingleComponent<MouseRayComponent>()) {
-            for (auto selectable : Engine::getComponents<CompT>()) {
+            for (auto selectable : Engine::getComponents<SelectableComponent>()) {
                 if (auto bb = selectable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
                     float maxDistance = mMaxDist;
                     if (auto camera = Engine::getSingleComponent<CameraComponent>()) {
@@ -58,7 +31,7 @@ public:
         }
 
         // Operate on unselected objects
-        for (auto selectable : Engine::getComponents<CompT>()) {
+        for (auto selectable : Engine::getComponents<SelectableComponent>()) {
             mResetOperation(selectable);
         }
 
@@ -68,18 +41,11 @@ public:
         }
     }
 
-    virtual void imguiEditor() override {
+    void SelectingSystem::imguiEditor() {
         auto selected = Engine::getComponents<SelectedComponent>();
         if (selected.size()) {
             mEditorOperation(selected);
         }
     }
 
-private:
-    const int mMaxMarches;
-    const float mMaxDist;
-    const std::function<bool(SelectedComponent*)> mRemoveDecider;
-    const std::function<void(CompT*)> mResetOperation;
-    const std::function<void(SelectedComponent*)> mSelectOperation;
-    const std::function<void(std::vector<SelectedComponent*>&)> mEditorOperation;
-};
+}
