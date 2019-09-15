@@ -27,11 +27,6 @@ namespace neo {
             // Eye space to world space
             glm::vec3 dir = glm::normalize(glm::vec3(glm::inverse(camera->getView()) * mouseCoordsEye));
             glm::vec3 pos = camera->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
-
-            // offset pos based on dir
-            glm::vec3 v = camera->getGameObject().getComponentByType<SpatialComponent>()->getRightDir();
-            glm::vec3 u = camera->getGameObject().getComponentByType<SpatialComponent>()->getUpDir();
-            pos += glm::dot(dir, u) * u + glm::dot(dir, v) * v;
  
             // Create new mouseray if one doesnt exist
             if (!mouseRayComp) {
@@ -46,14 +41,11 @@ namespace neo {
                     line = &Engine::addComponent<LineComponent>(&mouseRayComp->getGameObject());
                     Engine::addComponent<renderable::LineMeshComponent>(&mouseRayComp->getGameObject());
                 }
-                // Offset line to be in view
-                pos += camera->getGameObject().getComponentByType<SpatialComponent>()->getLookDir() * camera->getNearFar().x;
-
                 line->clearNodes();
-                line->addNodes({ pos, pos + dir * camera->getNearFar().y});
+                line->addNodes({ pos, pos + dir * camera->getNearFar().y });
             }
         }
-        else if (mouseRayComp) {
+        else if (mouseRayComp && !mShowRay) {
             Engine::removeGameObject(mouseRayComp->getGameObject());
         }
     }

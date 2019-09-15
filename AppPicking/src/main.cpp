@@ -2,6 +2,7 @@
 
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
+#include "Shader/LineShader.hpp"
 #include "Shader/GammaCorrectShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -82,7 +83,7 @@ int main() {
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
-    Engine::addSystem<MouseRaySystem>();
+    Engine::addSystem<MouseRaySystem>(true);
     Engine::addSystem<SelectingSystem>(
         20, 
         100.f,
@@ -116,6 +117,7 @@ int main() {
     Renderer::init("shaders/", camera.camera);
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
+    Renderer::addSceneShader<LineShader>();
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */

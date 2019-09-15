@@ -50,6 +50,7 @@ namespace neo {
 
             void clearNodes() {
                 mNodes.clear();
+                mDirty = true;
             }
 
     };

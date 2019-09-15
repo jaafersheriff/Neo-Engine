@@ -31,13 +31,8 @@ namespace neo {
                     // Ray march
                     for (float i = 0.f; i < maxDistance; i += maxDistance / static_cast<float>(mMaxMarches)) {
                         if (bb->intersect(mouseRay->position + mouseRay->direction * i)) {
-                            // Add new selected
-                            Engine::addComponent<SelectedComponent>(&selectable->getGameObject());
-                            // Operate on selected objects
-                            for (auto selected : Engine::getComponents<SelectedComponent>()) {
-                                mSelectOperation(selected);
-                            }
-
+                            // Add and operate on new selected
+                            mSelectOperation(&Engine::addComponent<SelectedComponent>(&selectable->getGameObject()));
                         }
                     }
                 }
