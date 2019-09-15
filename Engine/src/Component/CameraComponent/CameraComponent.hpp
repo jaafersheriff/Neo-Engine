@@ -16,7 +16,6 @@ namespace neo {
 
             /* Setters */
             void setNearFar(float, float);
-            void setLookDir(glm::vec3);
 
             /* Getters */
             const glm::vec2 getNearFar() const { return glm::vec2(mNear, mFar); }

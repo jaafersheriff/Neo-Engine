@@ -69,6 +69,7 @@
     <ClInclude Include="src\Component\CameraComponent\FrustumComponent.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\FrustumSystem.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\FrustumToLineSystem.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\MainCameraComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />

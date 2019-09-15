@@ -120,11 +120,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\SelectableComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MouseRayComponent.hpp" />
-    <ClInclude Include="src\SelectableCameraControllerSystem.hpp" />
+    <ClInclude Include="src\SelectableComponent.hpp" />
     <ClInclude Include="src\SelectedComponent.hpp" />
     <ClInclude Include="src\MouseRaySystem.hpp" />
     <ClInclude Include="src\SelectedSystem.hpp" />

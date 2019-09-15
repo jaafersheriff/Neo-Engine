@@ -10,7 +10,6 @@
 #include "SelectingSystem.hpp"
 #include "SelectedComponent.hpp"
 #include "SelectableComponent.hpp"
-#include "SelectableCameraControllerSystem.hpp"
 #include "SelectedSystem.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -67,16 +66,13 @@ int main() {
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-
-    // New object for mouse ray
-    auto& go = Engine::createGameObject();
-    Engine::addComponent<MouseRayComponent>(&go);
+    Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
     /* Cube object */
     auto mesh = Library::getMesh("sphere");
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 10; i++) {
         Renderable(mesh, glm::vec3(Util::genRandom(-7.5, 7.5), 0.f, Util::genRandom(-7.5, 7.5)));
         Renderable(mesh, glm::vec3(Util::genRandom(-7.5, 7.5), 0.f, Util::genRandom(-7.5, 7.5)));
         Renderable(mesh, glm::vec3(Util::genRandom(-7.5, 7.5), 0.f, Util::genRandom(-7.5, 7.5)));
@@ -88,10 +84,20 @@ int main() {
     Engine::addComponent<DiffuseMapComponent>(plane.gameObject, Library::getTexture("grid.png"));
 
     /* Systems - order matters! */
+    Engine::addSystem<CameraControllerSystem>();
     Engine::addSystem<MouseRaySystem>();
-    Engine::addSystem<SelectingSystem>();
-    Engine::addSystem<SelectedSystem>();
-    Engine::addSystem<SelectableCameraControllerSystem>();
+    Engine::addSystem<SelectingSystem>(100, 100.f);
+    Engine::addSystem<SelectedSystem>(
+        [](SelectableComponent* selectable) {
+            if (auto material = selectable->getGameObject().getComponentByType<MaterialComponent>()) {
+                material->mDiffuse = glm::vec3(1.f);
+            }
+    },
+        [](SelectedComponent* selected) {
+            if (auto material = selected->getGameObject().getComponentByType<MaterialComponent>()) {
+                material->mDiffuse = glm::vec3(1.f, 0.f, 0.f);
+            }
+    });
     Engine::initSystems();
 
     /* Init renderer */

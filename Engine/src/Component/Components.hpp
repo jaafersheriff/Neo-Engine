@@ -3,6 +3,7 @@
 #include "CameraComponent/CameraControllerComponent.hpp"
 #include "CameraComponent/CameraComponent.hpp"
 #include "CameraComponent/FrustumComponent.hpp"
+#include "CameraComponent/MainCameraComponent.hpp"
 #include "CameraComponent/OrthoCameraComponent.hpp"
 #include "CameraComponent/PerspectiveCameraComponent.hpp"
 #include "CameraComponent/ShadowCameraComponent.hpp"

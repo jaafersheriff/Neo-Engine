@@ -7,27 +7,30 @@
 #include "SelectableComponent.hpp"
 #include "SelectedComponent.hpp"
 
+#include <functional>
+
 using namespace neo;
 
 class SelectedSystem : public System {
 
 public:
-    SelectedSystem() :
-        System("Selected System")
+    SelectedSystem(
+        std::function<void(SelectableComponent*)> resetOperation,
+        std::function<void(SelectedComponent*)> selectOperation) :
+        System("Selected System"),
+        resetOperation(resetOperation),
+        selectOperation(selectOperation)
     {}
 
-
     virtual void update(const float dt) override {
+        // Operate on unselected objects
         for (auto selectable : Engine::getComponents<SelectableComponent>()) {
-            if (auto material = selectable->getGameObject().getComponentByType<MaterialComponent>()) {
-                material->mDiffuse = glm::vec3(1.f);
-            }
+            resetOperation(selectable);
         }
 
-        if (auto selected = Engine::getSingleComponent<SelectedComponent>()) {
-            if (auto material = selected->getGameObject().getComponentByType<MaterialComponent>()) {
-                material->mDiffuse = glm::vec3(1.f, 0.f, 0.f);
-            }
+        // Operate on selected objects
+        for (auto selected : Engine::getComponents<SelectedComponent>()) {
+            selectOperation(selected);
         }
     }
 
@@ -38,4 +41,8 @@ public:
             selected->getGameObject().getComponentByType<SpatialComponent>()->setScale(scale);
         }
     }
+
+private:
+    std::function<void(SelectableComponent*)> resetOperation;
+    std::function<void(SelectedComponent*)> selectOperation;
 };

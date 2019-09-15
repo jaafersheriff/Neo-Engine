@@ -12,18 +12,16 @@ using namespace neo;
 class SelectingSystem : public System {
 
 public:
-    SelectingSystem() :
-        System("Selecting System")
+    SelectingSystem(int maxMarches = 100, float maxDist = 100.f) :
+        System("Selecting System"),
+        mMaxMarches(maxMarches),
+        mMaxDist(maxDist)
     {}
 
 
     virtual void update(const float dt) override {
         auto mouseRay = Engine::getSingleComponent<MouseRayComponent>();
-        if (!mouseRay) {
-            return;
-        }
-
-        if (!Mouse::isDown(GLFW_MOUSE_BUTTON_1)) {
+        if (!mouseRay || !Mouse::isDown(GLFW_MOUSE_BUTTON_1)) {
             return;
         }
 
@@ -47,4 +45,8 @@ public:
             }
         }
     }
+
+private:
+    int mMaxMarches;
+    float mMaxDist;
 };
