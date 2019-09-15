@@ -21,9 +21,9 @@ namespace neo {
                 mDirty(false)
             {}
 
-            const std::vector<glm::vec3> & getNodes() const { return mNodes; }
+            const std::vector<glm::vec3>& getNodes() const { return mNodes; }
 
-            void addNode(const glm::vec3 &node) {
+            void addNode(const glm::vec3 node) {
                 mNodes.push_back(node);
                 mDirty = true;
             }
@@ -33,7 +33,7 @@ namespace neo {
                 mDirty = true;
             }
 
-            void removeNode(const glm::vec3 &node) {
+            void removeNode(const glm::vec3 node) {
                 auto it = std::find(mNodes.begin(), mNodes.end(), node);
                 if (it != mNodes.end()) {
                     mNodes.erase(it);

@@ -3,9 +3,24 @@
 
 namespace neo {
 
+    void SelectingSystem::init() {
+        // Operate on unselected objects
+        for (auto selectable : Engine::getComponents<SelectableComponent>()) {
+            mResetOperation(selectable);
+        }
+    }
+
     void SelectingSystem::update(const float dt) {
-        // Select a new object
         if (auto mouseRay = Engine::getSingleComponent<MouseRayComponent>()) {
+            // Decide to remove unselected objects
+            for (auto selected : Engine::getComponents<SelectedComponent>()) {
+                if (mRemoveDecider(selected)) {
+                    Engine::removeComponent<SelectedComponent>(*selected);
+                }
+            }
+
+
+            // Select a new object
             for (auto selectable : Engine::getComponents<SelectableComponent>()) {
                 if (auto bb = selectable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
                     float maxDistance = mMaxDist;
@@ -15,29 +30,25 @@ namespace neo {
 
                     // Ray march
                     for (float i = 0.f; i < maxDistance; i += maxDistance / static_cast<float>(mMaxMarches)) {
-                        if (bb->intersect(mouseRay->position + mouseRay->ray * i)) {
-
-                            // Decide to remove unselected objecys
-                            for (auto selected : Engine::getComponents<SelectedComponent>()) {
-                                if (mRemoveDecider(selected)) {
-                                    Engine::removeComponent<SelectedComponent>(*selected);
-                                }
-                            }
+                        if (bb->intersect(mouseRay->position + mouseRay->direction * i)) {
+                            // Add new selected
                             Engine::addComponent<SelectedComponent>(&selectable->getGameObject());
+                            // Operate on selected objects
+                            for (auto selected : Engine::getComponents<SelectedComponent>()) {
+                                mSelectOperation(selected);
+                            }
+
                         }
                     }
                 }
             }
-        }
 
-        // Operate on unselected objects
-        for (auto selectable : Engine::getComponents<SelectableComponent>()) {
-            mResetOperation(selectable);
-        }
-
-        // Operate on selected objects
-        for (auto selected : Engine::getComponents<SelectedComponent>()) {
-            mSelectOperation(selected);
+            // Operate on unselected objects
+            for (auto selectable : Engine::getComponents<SelectableComponent>()) {
+                if (!selectable->getGameObject().getComponentByType<SelectedComponent>()) {
+                    mResetOperation(selectable);
+                }
+            }
         }
     }
 

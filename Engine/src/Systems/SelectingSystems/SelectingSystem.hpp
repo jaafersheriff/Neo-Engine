@@ -25,6 +25,7 @@ namespace neo {
         {}
 
 
+        virtual void init() override;
         virtual void update(const float dt) override;
         virtual void imguiEditor() override;
 

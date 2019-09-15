@@ -70,6 +70,11 @@ namespace neo {
     }
 
     void Engine::run() {
+        /* Initialize new objects and components */
+        _processInitQueue();
+        Messenger::relayMessages();
+
+        /* Init systems */
         _initSystems();
 
         while (!Window::shouldClose()) {
@@ -83,6 +88,18 @@ namespace neo {
             _processInitQueue();
             Messenger::relayMessages();
 
+            /* Update each system */
+            for (auto & system : mSystems) {
+                if (system.second->mActive) {
+                    system.second->update((float)Util::mTimeStep);
+                    Messenger::relayMessages();
+                }
+            }
+
+            /* Kill deleted objects and components */
+            _processKillQueue();
+            Messenger::relayMessages();
+ 
             /* Update imgui functions */
             if (imGuiEnabled) {
                 for (auto & it : imGuiFuncs) {
@@ -94,23 +111,11 @@ namespace neo {
                 Messenger::relayMessages();
             }
 
-            /* Update each system */
-            for (auto & system : mSystems) {
-                if (system.second->mActive) {
-                    system.second->update((float)Util::mTimeStep);
-                    Messenger::relayMessages();
-                }
-            }
-
             /* Render */
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
             Renderer::render((float)Util::mTimeStep);
-
-            /* Kill deleted objects and components */
-            _processKillQueue();
-            Messenger::relayMessages();
-        }
+       }
     }
 
     GameObject & Engine::createGameObject() {

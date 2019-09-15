@@ -4,18 +4,15 @@
 namespace neo {
 
     void MouseRaySystem::update(const float dt) {
-        auto camera = Engine::getSingleComponent<MainCameraComponent>();
-        auto mouseRayComp = Engine::getSingleComponent<MouseRayComponent>();
-        if (!camera || !camera->getGameObject().getComponentByType<CameraComponent>()) {
+        auto mainCamera = Engine::getSingleComponent<MainCameraComponent>();
+        if (!mainCamera) {
             return;
         }
+        auto camera = mainCamera->getGameObject().getComponentByType<CameraComponent>();
+        assert(camera);
 
+        auto mouseRayComp = Engine::getSingleComponent<MouseRayComponent>();
         if (Mouse::isDown(GLFW_MOUSE_BUTTON_1)) {
-            // Create new mouseray if one doesnt exist
-            if (!mouseRayComp) {
-                mouseRayComp = &Engine::addComponent<MouseRayComponent>(&Engine::createGameObject());
-            }
-
             // Mouse coords in viewport space
             glm::vec2 mouseCoords = Mouse::getPos();
 
@@ -23,16 +20,41 @@ namespace neo {
             mouseCoords = glm::vec2((2.f * mouseCoords.x) / Window::getSize().x - 1.f, 1.f - (2.f * mouseCoords.y) / Window::getSize().y);
 
             // Mouse coords in clip space to eye space
-            glm::vec4 mouseCoordsEye = glm::inverse(camera->getGameObject().getComponentByType<CameraComponent>()->getProj()) * glm::vec4(mouseCoords, -1.f, 1.f);
+            glm::vec4 mouseCoordsEye = glm::inverse(camera->getProj()) * glm::vec4(mouseCoords, -1.f, 1.f);
             mouseCoordsEye.z = -1.f;
             mouseCoordsEye.w = 0.f;
 
             // Eye space to world space
-            mouseRayComp->ray = glm::normalize(glm::vec3(glm::inverse(camera->getGameObject().getComponentByType<CameraComponent>()->getView()) * mouseCoordsEye));
-            mouseRayComp->position = camera->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
+            glm::vec3 dir = glm::normalize(glm::vec3(glm::inverse(camera->getView()) * mouseCoordsEye));
+            glm::vec3 pos = camera->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
+
+            // offset pos based on dir
+            glm::vec3 v = camera->getGameObject().getComponentByType<SpatialComponent>()->getRightDir();
+            glm::vec3 u = camera->getGameObject().getComponentByType<SpatialComponent>()->getUpDir();
+            pos += glm::dot(dir, u) * u + glm::dot(dir, v) * v;
+ 
+            // Create new mouseray if one doesnt exist
+            if (!mouseRayComp) {
+                mouseRayComp = &Engine::addComponent<MouseRayComponent>(&Engine::createGameObject());
+            }
+            mouseRayComp->direction = dir;
+            mouseRayComp->position = pos;
+
+            if (mShowRay) {
+                LineComponent* line = mouseRayComp->getGameObject().getComponentByType<LineComponent>();
+                if (!line) {
+                    line = &Engine::addComponent<LineComponent>(&mouseRayComp->getGameObject());
+                    Engine::addComponent<renderable::LineMeshComponent>(&mouseRayComp->getGameObject());
+                }
+                // Offset line to be in view
+                pos += camera->getGameObject().getComponentByType<SpatialComponent>()->getLookDir() * camera->getNearFar().x;
+
+                line->clearNodes();
+                line->addNodes({ pos, pos + dir * camera->getNearFar().y});
+            }
         }
-        else {
-            Engine::removeComponent<MouseRayComponent>(*mouseRayComp);
+        else if (mouseRayComp) {
+            Engine::removeGameObject(mouseRayComp->getGameObject());
         }
     }
 }

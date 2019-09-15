@@ -1,11 +1,8 @@
 #pragma once
 
-#include "Component/AnimationComponent/LineComponent.hpp"
 #include "Component/ModelComponent/MeshComponent.hpp"
 
 #include "GLObjects/GLHelper.hpp"
-
-// TODO - this should be a generic renderable component tag like the rest
 
 namespace neo {
 
@@ -15,14 +12,11 @@ namespace neo {
 
         public:
 
-            // TODO - this should happen in a system or messaging..
-            LineComponent* mLine;
             glm::vec3 mColor;
 
-            LineMeshComponent(GameObject *go, LineComponent *line, glm::vec3 color = glm::vec3(1.f)) :
+            LineMeshComponent(GameObject *go, glm::vec3 color = glm::vec3(1.f)) :
                 MeshComponent(go, new Mesh),
-                mColor(color),
-                mLine(line)
+                mColor(color)
             {}
 
             virtual void init() override {
@@ -30,12 +24,14 @@ namespace neo {
             }
 
             virtual const Mesh & getMesh() const override {
-                if (mLine->mDirty) {
-                    /* Copy vertex array */
-                    CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mMesh->mVertexBufferID));
-                    CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mLine->getNodes().size() * sizeof(glm::vec3), mLine->getNodes().data(), GL_STATIC_DRAW));
-                    CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-                    mLine->mDirty = false;
+                if (auto line = mGameObject->getComponentByType<LineComponent>()) {
+                    if (line->mDirty) {
+                        /* Copy vertex array */
+                        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mMesh->mVertexBufferID));
+                        CHECK_GL(glBufferData(GL_ARRAY_BUFFER, line->getNodes().size() * sizeof(glm::vec3), line->getNodes().data(), GL_DYNAMIC_DRAW));
+                        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+                        line->mDirty = false;
+                    }
                 }
 
                 return MeshComponent::getMesh();

@@ -37,14 +37,16 @@ namespace neo {
                 loadUniform("V", camera.getView());
 
                 for (auto& renderable : Engine::getComponents<renderable::LineMeshComponent>()) {
-                    /* Bind mesh */
-                    const Mesh & mesh(renderable->getMesh());
-                    CHECK_GL(glBindVertexArray(mesh.mVAOID));
-                    CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.mVertexBufferID));
+                    if (auto line = renderable->getGameObject().getComponentByType<LineComponent>()) {
+                        /* Bind mesh */
+                        const Mesh & mesh(renderable->getMesh());
+                        CHECK_GL(glBindVertexArray(mesh.mVAOID));
+                        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.mVertexBufferID));
 
-                    loadUniform("lineColor", renderable->mColor);
+                        loadUniform("lineColor", renderable->mColor);
 
-                    mesh.draw(renderable->mLine->getNodes().size());
+                        mesh.draw(line->getNodes().size());
+                    }
                 }
 
 
