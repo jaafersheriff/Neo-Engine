@@ -42,8 +42,9 @@ struct Light {
         Engine::addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
         Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
         Engine::addComponent<FrustumBoundsComponent>(cameraObject);
-        Engine::addComponent<LineMeshComponent>(cameraObject, glm::vec3(0.f, 1.f, 1.f));
+        Engine::addComponent<LineMeshComponent>(cameraObject);
         Engine::addComponent<ShadowCameraComponent>(cameraObject);
+        Engine::addComponent<MaterialComponent>(cameraObject, 1.f, glm::vec3(0.f, 1.f, 1.f));
     }
 };
 
@@ -67,9 +68,10 @@ int main() {
     
     // Perspective camera
     Camera mockCamera(50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
-    Engine::addComponent<LineMeshComponent>(mockCamera.gameObject, glm::vec3(1, 0, 1));
+    Engine::addComponent<LineMeshComponent>(mockCamera.gameObject);
     Engine::addComponent<FrustumBoundsComponent>(mockCamera.gameObject);
     Engine::addComponent<MockPerspectiveComponent>(mockCamera.gameObject);
+    Engine::addComponent<MaterialComponent>(mockCamera.gameObject, 1.f, glm::vec3(1.f, 0.f, 1.f));
 
     // Ortho camera, shadow camera, light
     Light light(glm::vec3(10.f, 20.f, 0.f), true);

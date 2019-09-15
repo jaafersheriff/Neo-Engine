@@ -14,18 +14,21 @@ namespace neo {
         public:
             LineShader() :
                 Shader("Line Shader",
-                        R"(
-                        layout (location = 0) in vec3 vertPos;
-                        uniform mat4 P, V, M;
-                        void main() {
-                            gl_Position = P * V * vec4(vertPos, 1);
-                        })",
-                        R"(
-                        uniform vec3 lineColor;
-                        out vec4 color;
-                        void main() {
-                            color = vec4(lineColor, 1.0);
-                        })"
+                    R"(
+                    layout (location = 0) in vec3 vertPos;
+                    layout (location = 1) in vec3 vertColor;
+                    uniform mat4 P, V, M;
+                    out vec3 vCol;
+                    void main() {
+                        gl_Position = P * V * vec4(vertPos, 1);
+                        vCol = vertColor;
+                    })",
+                    R"(
+                    in vec3 vCol;
+                    out vec4 color;
+                    void main() {
+                        color = vec4(vCol, 1.0);
+                    })"
                 )
             {}
 
@@ -40,15 +43,11 @@ namespace neo {
                     /* Bind mesh */
                     const Mesh & mesh(line->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.mVAOID));
-                    CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.mVertexBufferID));
-
-                    loadUniform("lineColor", line->mColor);
 
                     mesh.draw(line->getNodes().size());
                 }
 
                 CHECK_GL(glBindVertexArray(0));	
-                CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
                 unbind();
             }
         };

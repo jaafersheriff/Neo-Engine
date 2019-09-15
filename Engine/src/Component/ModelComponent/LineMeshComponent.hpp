@@ -8,27 +8,46 @@ namespace neo {
 
     class LineMeshComponent : public MeshComponent {
 
+        struct Node {
+            glm::vec3 position;
+            glm::vec3 color;
+        };
+
     public:
 
         glm::vec3 mColor;
-        std::vector<glm::vec3> mNodes;
+        std::vector<Node> mNodes;
         mutable bool mDirty;
 
-        LineMeshComponent(GameObject *go, glm::vec3 color = glm::vec3(1.f)) :
+        LineMeshComponent(GameObject *go) :
             MeshComponent(go, new Mesh),
-            mColor(color),
             mDirty(false)
         {}
 
         virtual void init() override {
             mMesh->upload(GL_LINE_STRIP);
+
+            // create color buffer
+            CHECK_GL(glBindVertexArray(mMesh->mVAOID));
+            CHECK_GL(glGenBuffers(1, (GLuint *)&mMesh->mNormalBufferID));
+            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mMesh->mNormalBufferID));
+            CHECK_GL(glEnableVertexAttribArray(1));
+            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mMesh->mNormalBufferID));
+            CHECK_GL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
         }
 
         virtual const Mesh & getMesh() const override {
-            if (mDirty) {
-                /* Copy vertex array */
+            if (mDirty && mNodes.size()) {
+                std::vector<glm::vec3> positions;
+                std::vector<glm::vec3> colors;
+                for (Node n : mNodes) {
+                    positions.push_back(n.position);
+                    colors.push_back(n.color);
+                }
                 CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mMesh->mVertexBufferID));
-                CHECK_GL(glBufferData(GL_ARRAY_BUFFER, getNodes().size() * sizeof(glm::vec3), getNodes().data(), GL_DYNAMIC_DRAW));
+                CHECK_GL(glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_DYNAMIC_DRAW));
+                CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mMesh->mNormalBufferID));
+                CHECK_GL(glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), colors.data(), GL_DYNAMIC_DRAW));
                 CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
                 mDirty = false;
             }
@@ -37,23 +56,24 @@ namespace neo {
 
         }
 
-        const std::vector<glm::vec3>& getNodes() const { return mNodes; }
+        const std::vector<Node>& getNodes() const { return mNodes; }
 
-        void addNode(const glm::vec3 node) {
-            mNodes.push_back(node);
+        void addNode(const glm::vec3 pos, glm::vec3 col = glm::vec3(1.f)) {
+            mNodes.push_back(Node{ pos, col });
             mDirty = true;
         }
 
-        void addNodes(const std::vector<glm::vec3> &oNodes) {
+        void addNodes(const std::vector<Node> &oNodes) {
             mNodes.insert(mNodes.end(), oNodes.begin(), oNodes.end());
             mDirty = true;
         }
 
-        void removeNode(const glm::vec3 node) {
-            auto it = std::find(mNodes.begin(), mNodes.end(), node);
-            if (it != mNodes.end()) {
-                mNodes.erase(it);
-                mDirty = true;
+        void removeNode(const glm::vec3 position) {
+            for (unsigned i = 0; i < mNodes.size(); i++) {
+                if (mNodes[i].position == position) {
+                    removeNode(i);
+                    return;
+                }
             }
         }
 
