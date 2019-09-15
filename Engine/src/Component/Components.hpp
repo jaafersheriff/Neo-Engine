@@ -1,7 +1,5 @@
 #pragma once
 
-#include "AnimationComponent/LineComponent.hpp"
-
 #include "CameraComponent/CameraControllerComponent.hpp"
 #include "CameraComponent/CameraComponent.hpp"
 #include "CameraComponent/FrustumComponent.hpp"

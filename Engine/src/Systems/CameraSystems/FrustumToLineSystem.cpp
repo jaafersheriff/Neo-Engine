@@ -6,7 +6,7 @@ namespace neo {
 
     void FrustumToLineSystem::update(const float dt) {
         for (auto camera : Engine::getComponents<CameraComponent>()) {
-            if (auto line = camera->getGameObject().getComponentByType<LineComponent>()) {
+            if (auto line = camera->getGameObject().getComponentByType<LineMeshComponent>()) {
                 if (auto bounds = camera->getGameObject().getComponentByType<FrustumComponent>()) {
 
                     line->clearNodes();

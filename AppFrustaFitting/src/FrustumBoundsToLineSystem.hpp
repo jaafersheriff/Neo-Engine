@@ -18,7 +18,7 @@ public:
 
     virtual void update(const float dt) override {
         for (auto camera : Engine::getComponents<CameraComponent>()) {
-            if (auto line = camera->getGameObject().getComponentByType<LineComponent>()) {
+            if (auto line = camera->getGameObject().getComponentByType<LineMeshComponent>()) {
                 if (auto bounds = camera->getGameObject().getComponentByType<FrustumBoundsComponent>()) {
 
                     line->clearNodes();

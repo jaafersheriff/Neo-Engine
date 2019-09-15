@@ -36,10 +36,9 @@ namespace neo {
             mouseRayComp->position = pos;
 
             if (mShowRay) {
-                LineComponent* line = mouseRayComp->getGameObject().getComponentByType<LineComponent>();
+                LineMeshComponent* line = mouseRayComp->getGameObject().getComponentByType<LineMeshComponent>();
                 if (!line) {
-                    line = &Engine::addComponent<LineComponent>(&mouseRayComp->getGameObject());
-                    Engine::addComponent<renderable::LineMeshComponent>(&mouseRayComp->getGameObject());
+                    line = &Engine::addComponent<LineMeshComponent>(&mouseRayComp->getGameObject());
                 }
                 line->clearNodes();
                 line->addNodes({ pos, pos + dir * camera->getNearFar().y });

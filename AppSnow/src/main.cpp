@@ -77,9 +77,8 @@ struct Snow {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject);
         snow = &Engine::addComponent<SnowComponent>(gameObject);
-        LineComponent *vLine = &Engine::addComponent<LineComponent>(gameObject);
-        vLine->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
-        Engine::addComponent<renderable::LineMeshComponent>(gameObject, glm::vec3(0.f, 1.f, 0.f));
+        auto line = &Engine::addComponent<LineMeshComponent>(gameObject, glm::vec3(0.f, 1.f, 0.f));
+        line->addNodes({ glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) });
         
         Engine::addImGuiFunc("Snow", [&]() {
             ImGui::SliderFloat("Snow size", &snow->snowSize, 1.f, 0.f);
