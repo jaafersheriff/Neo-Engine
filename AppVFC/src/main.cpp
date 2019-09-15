@@ -65,19 +65,6 @@ void generateObjects(int amount) {
         Engine::addComponent<renderable::PhongRenderable>(renderable.gameObject);
         Engine::addComponent<MaterialComponent>(renderable.gameObject, 0.2f, glm::normalize(position), glm::vec3(1.f));
         auto boundingBox = &Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, mesh->mBuffers.vertices);
-
-        Engine::addImGuiFunc("Renderable", []() {
-            static glm::vec3 rot(0.f);
-            static glm::vec3 scale(0.f);
-            if (auto bb = Engine::getSingleComponent<BoundingBoxComponent>()) {
-                rot = bb->getGameObject().getComponentByType<SpatialComponent>()->getLookDir();
-                scale = bb->getGameObject().getComponentByType<SpatialComponent>()->getScale();
-                ImGui::SliderFloat3("Rot", &rot[0], -1.f, 1.f);
-                bb->getGameObject().getComponentByType<SpatialComponent>()->setLookDir(rot);
-                ImGui::SliderFloat3("S", &scale[0], 0.f, 10.f);
-                bb->getGameObject().getComponentByType<SpatialComponent>()->setScale(scale);
-            }
-        });
     }
 }
 
@@ -86,6 +73,7 @@ int main() {
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
+    Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
     Engine::addComponent<CameraControllerComponent>(camera.gameObject, 0.4f, 7.f);
     Engine::addComponent<FrustumComponent>(camera.gameObject);
 

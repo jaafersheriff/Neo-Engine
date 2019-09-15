@@ -42,7 +42,8 @@ struct Light {
         Engine::addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
         Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
         Engine::addComponent<FrustumBoundsComponent>(cameraObject);
-        Engine::addComponent<renderable::LineMeshComponent>(cameraObject, &Engine::addComponent<LineComponent>(cameraObject), glm::vec3(0.f, 1.f, 1.f));
+        Engine::addComponent<LineComponent>(cameraObject);
+        Engine::addComponent<renderable::LineMeshComponent>(cameraObject, glm::vec3(0.f, 1.f, 1.f));
         Engine::addComponent<ShadowCameraComponent>(cameraObject);
     }
 };
@@ -62,12 +63,13 @@ int main() {
 
     /* Game objects */
     Camera sceneCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
+    Engine::addComponent<MainCameraComponent>(sceneCamera.gameObject);
     Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
     
     // Perspective camera
     Camera mockCamera(50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
     auto* line = &Engine::addComponent<LineComponent>(mockCamera.gameObject);
-    Engine::addComponent<renderable::LineMeshComponent>(mockCamera.gameObject, line, glm::vec3(1, 0, 1));
+    Engine::addComponent<renderable::LineMeshComponent>(mockCamera.gameObject, glm::vec3(1, 0, 1));
     Engine::addComponent<FrustumBoundsComponent>(mockCamera.gameObject);
     Engine::addComponent<MockPerspectiveComponent>(mockCamera.gameObject);
 

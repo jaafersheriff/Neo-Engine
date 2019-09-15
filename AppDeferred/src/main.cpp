@@ -49,6 +49,7 @@ int main() {
 
     /* Game objects */
     Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
+    Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
     std::vector<Light *> lights;
     lights.push_back(new Light(glm::vec3(25.f, 25.f, 0.f), glm::vec3(1.f), glm::vec3(100.f)));

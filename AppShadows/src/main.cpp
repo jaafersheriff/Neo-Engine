@@ -1,6 +1,5 @@
 #include <Engine.hpp>
 
-#include "Shader/LineShader.hpp"
 #include "Shader/PhongShader.hpp"
 #include "Shader/WireframeShader.hpp"
 #include "Shader/ShadowCasterShader.hpp"
@@ -133,6 +132,8 @@ int main() {
 
     /* Game objects */
     Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
+    Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
+
     Light light(glm::vec3(37.5f, 37.5f, 11.8f), glm::vec3(1.f), glm::vec3(0.6, 0.04, 0.f));
 
     // Spheres and blocks 
@@ -160,7 +161,6 @@ int main() {
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
     Renderer::addPreProcessShader<ShadowCasterShader>(2048);
-    Renderer::addSceneShader<LineShader>();
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<PhongShadowShader>();
     Renderer::addSceneShader<WireframeShader>();

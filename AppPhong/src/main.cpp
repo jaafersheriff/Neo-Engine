@@ -27,7 +27,10 @@ struct Light {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos);
         light = &Engine::addComponent<LightComponent>(gameObject, col, att);
-        Engine::addComponent<MeshComponent>(gameObject, Library::getMesh("cube"));
+        Engine::addComponent<MeshComponent>(gameObject, Library::getMesh("sphere"));
+        Engine::addComponent<SelectableComponent>(gameObject);
+        Engine::addComponent<BoundingBoxComponent>(gameObject, Library::getMesh("sphere")->mBuffers.vertices);
+        Engine::addComponent<renderable::WireframeRenderable>(gameObject);
 
         Engine::addImGuiFunc("Light", [&]() {
             glm::vec3 pos = gameObject->getComponentByType<SpatialComponent>()->getPosition();
@@ -58,6 +61,8 @@ int main() {
 
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+    Engine::addComponent<MainCameraComponent>(camera.gameObject);
+
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
     std::vector<Renderable *> renderables;
@@ -74,6 +79,25 @@ int main() {
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
+    Engine::addSystem<MouseRaySystem>();
+    Engine::addSystem<SelectingSystem>(
+        20, 
+        100.f,
+        // Decide to remove selected components
+        [](SelectedComponent* selected) {
+            return true;
+        },
+        // Reset operation for unselected components
+        [](SelectableComponent* selectable) {},
+        // Operate on selected components
+        [](SelectedComponent* selected) {
+            if (auto spatial = selected->getGameObject().getComponentByType<SpatialComponent>()) {
+                if (auto mouseRay = Engine::getSingleComponent<MouseRayComponent>()) {
+                    spatial->setPosition(mouseRay->position + mouseRay->direction * 5.f);
+                }
+            }
+        }
+    );
 
     /* Init renderer */
     Renderer::init("shaders/", camera.cameraComp);
