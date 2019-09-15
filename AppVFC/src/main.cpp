@@ -103,7 +103,6 @@ int main() {
     Engine::addSystem<CameraControllerSystem>();
     Engine::addSystem<FrustumSystem>();
     Engine::addSystem<FrustumToLineSystem>();
-    Engine::initSystems();
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);

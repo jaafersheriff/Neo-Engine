@@ -92,7 +92,6 @@ int main() {
     Engine::addSystem<FrustaBoundsSystem>(); // Calculate original frusta bounds
     auto& fitSystem = Engine::addSystem<FrustaFittingSystem>(1.f / shadowMapSize); // Fit one frusta into another
     Engine::addSystem<FrustumBoundsToLineSystem>(); // Create line mesh
-    Engine::initSystems();
 
     /* Init renderer */
     Renderer::init("shaders/", sceneCamera.camera);

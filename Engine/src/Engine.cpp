@@ -63,13 +63,14 @@ namespace neo {
         Util::init();
    }
 
-    void Engine::initSystems() {
+    void Engine::_initSystems() {
         for (auto & system : mSystems) {
             system.second->init();
         }
     }
 
     void Engine::run() {
+        _initSystems();
 
         while (!Window::shouldClose()) {
             /* Update Util */

@@ -54,7 +54,7 @@ struct Renderable {
 };
 
 int main() {
-    Engine::init("Picking", "res/", 1280, 720);
+    Engine::init("Selecting", "res/", 1280, 720);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
@@ -90,7 +90,7 @@ int main() {
         [](SelectedComponent* selected) {
             return false;
         },
-        // Reset unselected components
+        // Reset operation for unselected components
         [](SelectableComponent* selectable) {
             if (auto material = selectable->getGameObject().getComponentByType<MaterialComponent>()) {
                 material->mDiffuse = glm::vec3(1.f);
@@ -111,7 +111,6 @@ int main() {
             }
         }
     );
-    Engine::initSystems();
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);

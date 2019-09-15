@@ -9,7 +9,7 @@ namespace neo {
     public:
         SelectingSystem(
             int maxMarches = 100,
-            int maxDist = 100.f,
+            float maxDist = 100.f,
             std::function<bool(SelectedComponent*)> removeDecider = [](SelectedComponent*) { return true; },
             std::function<void(SelectableComponent*)> resetOperation = [](SelectableComponent*) {},
             std::function<void(SelectedComponent*)> selectOperation = [](SelectedComponent*) {},

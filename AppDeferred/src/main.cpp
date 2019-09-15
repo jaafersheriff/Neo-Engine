@@ -71,7 +71,6 @@ int main() {
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
     Engine::addSystem<SinTranslateSystem>();
-    Engine::initSystems();
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);

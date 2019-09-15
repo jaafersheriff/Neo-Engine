@@ -109,7 +109,6 @@ int main() {
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
     Engine::addSystem<RotationSystem>();
-    Engine::initSystems();
 
     /* Init renderer and shaders - order matters! */
     Renderer::init("shaders/", camera.camera);

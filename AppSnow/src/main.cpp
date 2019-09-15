@@ -111,7 +111,6 @@ int main() {
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
     Engine::addSystem<SnowSystem>();
-    Engine::initSystems();
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));

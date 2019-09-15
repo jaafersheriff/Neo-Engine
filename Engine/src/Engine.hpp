@@ -48,7 +48,6 @@ namespace neo {
 
             /* Attach a system */
             template <typename SysT, typename... Args> static SysT & addSystem(Args &&...);
-            static void initSystems();
 
             /* Getters */
             static const std::vector<GameObject *> & getGameObjects() { return reinterpret_cast<const std::vector<GameObject *> &>(mGameObjects); }
@@ -76,6 +75,8 @@ namespace neo {
             static void _processKillQueue();
             static void _killGameObjects();
             static void _killComponents();
+
+            static void _initSystems();
 
             /* Active containers */
             static std::vector<std::unique_ptr<GameObject>> mGameObjects;
