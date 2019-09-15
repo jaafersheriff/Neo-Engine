@@ -9,7 +9,6 @@
 
 #include "SelectingSystem.hpp"
 #include "SelectedComponent.hpp"
-#include "SelectedSystem.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -77,20 +76,25 @@ int main() {
     }
 
     /* Ground plane */
-    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
-    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
-    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, Library::getTexture("grid.png"));
+    {
+        GameObject *gameObject = &Engine::createGameObject();
+        Engine::addComponent<MeshComponent>(gameObject, Library::getMesh("quad"));
+        Engine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
+        Engine::addComponent<renderable::AlphaTestRenderable>(gameObject);
+        Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f), 20.f);
+        Engine::addComponent<DiffuseMapComponent>(gameObject, Library::getTexture("grid.png"));
+    }
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
     Engine::addSystem<MouseRaySystem>();
     Engine::addSystem<SelectingSystem<renderable::PhongRenderable>>(
+        20, 
+        100.f,
         // Decide to remove selected components
         [](SelectedComponent* selected) {
             return false;
-        }
-    );
-    Engine::addSystem<SelectedSystem<renderable::PhongRenderable>>(
+        },
         // Reset unselected components
         [](renderable::PhongRenderable* selectable) {
             if (auto material = selectable->getGameObject().getComponentByType<MaterialComponent>()) {
@@ -101,6 +105,14 @@ int main() {
         [](SelectedComponent* selected) {
             if (auto material = selected->getGameObject().getComponentByType<MaterialComponent>()) {
                 material->mDiffuse = glm::vec3(1.f, 0.f, 0.f);
+            }
+        },
+        // imgui editor
+        [](std::vector<SelectedComponent*> selectedComps) {
+            glm::vec3 scale = selectedComps[0]->getGameObject().getComponentByType<SpatialComponent>()->getScale();
+            ImGui::SliderFloat3("Scale", &scale[0], 0.f, 3.f);
+            for (auto selected : selectedComps) {
+                selected->getGameObject().getComponentByType<SpatialComponent>()->setScale(scale);
             }
         }
     );
