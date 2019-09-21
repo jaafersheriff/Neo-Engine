@@ -128,7 +128,6 @@
     <ClInclude Include="src\GodRaySunShader.hpp" />
     <ClInclude Include="src\SunComponent.hpp" />
     <ClInclude Include="src\SunOccluderComponent.hpp" />
-    <ClInclude Include="src\SunShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\billboard.vert" />
