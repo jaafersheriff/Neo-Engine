@@ -3,6 +3,9 @@
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
 
+#include "SunComponent.hpp"
+#include "SunShader.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -23,6 +26,7 @@ struct Light {
         auto& gameObject = Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(&gameObject, pos);
         Engine::addComponent<LightComponent>(&gameObject, col, att);
+        Engine::addComponent<SunComponent>(&gameObject);
 
         Engine::addImGuiFunc("Light", [&]() {
             auto light = Engine::getSingleComponent<LightComponent>();
@@ -30,6 +34,10 @@ struct Light {
                 glm::vec3 pos = spatial->getPosition();
                 if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
                     spatial->setPosition(pos);
+                }
+                float scale = spatial->getScale().x;
+                if (ImGui::SliderFloat("Scale", &scale, 0.f, 100.f)) {
+                    spatial->setScale(glm::vec3(scale));
                 }
                 ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
                 ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
@@ -95,6 +103,7 @@ int main() {
     Renderer::init("shaders/", camera.camera);
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
+    Renderer::addSceneShader<SunShader>("billboard.vert", "sun.frag");
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();

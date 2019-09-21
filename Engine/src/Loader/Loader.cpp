@@ -30,7 +30,7 @@ namespace neo {
         if (!std::strcmp(fileName.c_str(), "cube")) {
             return MeshGenerator::createCube();
         }
-        if (!std::strcmp(fileName.c_str(), "quad")) {
+        if (!std::strcmp(fileName.c_str(), "quad") || !std::strcmp(fileName.c_str(), "plane")) {
             return MeshGenerator::createQuad();
         }
         if (!std::strcmp(fileName.c_str(), "sphere") || !std::strcmp(fileName.c_str(), "ico_2")) {
