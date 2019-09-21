@@ -23,14 +23,14 @@ class GodRaySunShader : public Shader {
             // Format for color buffers
             // 0 used for base 
             TextureFormat format = { GL_R16, GL_RED, GL_NEAREST, GL_CLAMP };
-            godray->attachColorTexture(Window::getFrameSize(), 1, format); 
+            godray->attachColorTexture(Window::getFrameSize() / 2, 1, format); 
             godray->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Library::getFBO("godray")->resize(frameSize);
+                Library::getFBO("godray")->resize(frameSize / 2);
             });
 
         }
@@ -39,7 +39,7 @@ class GodRaySunShader : public Shader {
             auto fbo = Library::getFBO("godray");
             fbo->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
-            glm::ivec2 frameSize = Window::getFrameSize();
+            glm::ivec2 frameSize = Window::getFrameSize() / 2;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 

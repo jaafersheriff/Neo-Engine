@@ -24,14 +24,14 @@ class BlurShader : public Shader {
 
             // Format for color buffers
             TextureFormat format = { GL_R16, GL_RED, GL_NEAREST, GL_REPEAT };
-            blur->attachColorTexture(Window::getFrameSize(), 1, format); 
+            blur->attachColorTexture(Window::getFrameSize() / 2, 1, format); 
             blur->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Library::getFBO("godrayblur")->resize(frameSize);
+                Library::getFBO("godrayblur")->resize(frameSize / 2);
             });
 
         }
@@ -39,7 +39,7 @@ class BlurShader : public Shader {
         virtual void render(const CameraComponent &camera) override {
             auto fbo = Library::getFBO("godrayblur");
             fbo->bind();
-            glm::ivec2 frameSize = Window::getFrameSize();
+            glm::ivec2 frameSize = Window::getFrameSize() / 2;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();

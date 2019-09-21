@@ -21,7 +21,7 @@ class GodRayOccluderShader : public Shader {
         virtual void render(const CameraComponent &camera) override {
             auto fbo = Library::getFBO("godray");
             fbo->bind();
-            glm::ivec2 frameSize = Window::getFrameSize();
+            glm::ivec2 frameSize = Window::getFrameSize() / 2;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();
