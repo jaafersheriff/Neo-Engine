@@ -234,7 +234,7 @@ namespace neo {
 
     void Engine::addDefaultImGuiFunc() {
         addImGuiFunc("Neo", [&]() {
-            if (ImGui::CollapsingHeader("Performance")) {
+            if (ImGui::CollapsingHeader("Performance"), ImGuiTreeNodeFlags_DefaultOpen) {
                 // Translate FPS to floats
                 std::vector<float> FPSfloats(Util::mFPSList.begin(), Util::mFPSList.end());
                 ImGui::PlotLines("FPS", FPSfloats.data(), FPSfloats.size(), 0, std::to_string(Util::mFPS).c_str());
@@ -243,14 +243,14 @@ namespace neo {
                     Window::toggleVSync();
                 }
             }
-            if (ImGui::CollapsingHeader("ECS")) {
+            if (ImGui::CollapsingHeader("ECS"), ImGuiTreeNodeFlags_DefaultOpen) {
                 ImGui::Text("GameObjects:  %d", Engine::getGameObjects().size());
                 int count = 0;
                 for (auto go : Engine::getGameObjects()) {
                     count += go->getAllComponents().size();
                 }
                 ImGui::Text("Components:  %d", count);
-                if (mSystems.size() && ImGui::TreeNode("Systems")) {
+                if (mSystems.size() && ImGui::TreeNodeEx("Systems", ImGuiTreeNodeFlags_DefaultOpen)) {
                     for (unsigned i = 0; i < mSystems.size(); i++) {
                         auto & sys = mSystems[i].second;
                         ImGui::PushID(i);
@@ -279,7 +279,7 @@ namespace neo {
                     ImGui::TreePop();
                 }
             }
-            if (ImGui::CollapsingHeader("Renderer")) {
+            if (ImGui::CollapsingHeader("Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
                 if (Renderer::mDefaultCamera && ImGui::TreeNode("Camera")) {
                     auto spatial = Renderer::mDefaultCamera->getGameObject().getComponentByType<SpatialComponent>();
                     assert(spatial);
@@ -289,7 +289,7 @@ namespace neo {
                     ImGui::Text("Look Dir: %0.2f, %0.2f, %0.2f", look.x, look.y, look.z);
                     ImGui::TreePop();
                 }
-                if (ImGui::TreeNode("Shaders")) {
+                if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
                     auto shadersFunc = [&](std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>>& shaders, const std::string swapName) {
                         for (unsigned i = 0; i < shaders.size(); i++) {
                             auto& shader = shaders[i];
@@ -341,7 +341,7 @@ namespace neo {
                 float scale = 150.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
                 ImGui::Image((ImTextureID)texture.mTextureID, ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
             };
-            if (ImGui::CollapsingHeader("Library")) {
+            if (ImGui::CollapsingHeader("Library", ImGuiTreeNodeFlags_DefaultOpen)) {
                 if (Library::mFramebuffers.size() && ImGui::TreeNode("FBOs")) {
                     for (auto & fbo : Library::mFramebuffers) {
                         if (ImGui::TreeNode((fbo.first + " (" + std::to_string(fbo.second->mFBOID) + ")").c_str())) {
