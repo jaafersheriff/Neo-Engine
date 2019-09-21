@@ -65,7 +65,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppVFC", "AppVFC\AppVFC.vcx
 		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppPicking", "AppPicking\AppPicking.vcxproj", "{6F1BC635-A7A1-4B4B-A251-258A72A27A86}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppSelecting", "AppPicking\AppPicking.vcxproj", "{6F1BC635-A7A1-4B4B-A251-258A72A27A86}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppGodRays", "AppGodRays\AppGodRays.vcxproj", "{FCE15EF7-0E7F-4320-8DD4-57C916D65BCC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
 	EndProjectSection
@@ -190,6 +195,14 @@ Global
 		{6F1BC635-A7A1-4B4B-A251-258A72A27A86}.Release|x64.Build.0 = Release|x64
 		{6F1BC635-A7A1-4B4B-A251-258A72A27A86}.Release|x86.ActiveCfg = Release|Win32
 		{6F1BC635-A7A1-4B4B-A251-258A72A27A86}.Release|x86.Build.0 = Release|Win32
+		{FCE15EF7-0E7F-4320-8DD4-57C916D65BCC}.Debug|x64.ActiveCfg = Debug|x64
+		{FCE15EF7-0E7F-4320-8DD4-57C916D65BCC}.Debug|x64.Build.0 = Debug|x64
+		{FCE15EF7-0E7F-4320-8DD4-57C916D65BCC}.Debug|x86.ActiveCfg = Debug|Win32
+		{FCE15EF7-0E7F-4320-8DD4-57C916D65BCC}.Debug|x86.Build.0 = Debug|Win32
+		{FCE15EF7-0E7F-4320-8DD4-57C916D65BCC}.Release|x64.ActiveCfg = Release|x64
+		{FCE15EF7-0E7F-4320-8DD4-57C916D65BCC}.Release|x64.Build.0 = Release|x64
+		{FCE15EF7-0E7F-4320-8DD4-57C916D65BCC}.Release|x86.ActiveCfg = Release|Win32
+		{FCE15EF7-0E7F-4320-8DD4-57C916D65BCC}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
