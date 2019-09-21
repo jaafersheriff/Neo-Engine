@@ -12,9 +12,9 @@ class BlurShader : public Shader {
     public:
 
         float blurSteps = 100.f;
-        float decay=0.96815;
-        float density=0.926;
-        float weight=0.58767;
+        float decay=0.965f;
+        float density=0.756f;
+        float weight=0.238;
 
         BlurShader(const std::string &vert, const std::string &frag) :
             Shader("Blur Shader", vert, frag) {
@@ -30,7 +30,7 @@ class BlurShader : public Shader {
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
+                glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
                 Library::getFBO("godrayblur")->resize(frameSize);
             });
 

@@ -23,6 +23,9 @@
     <ClInclude Include="src\SunComponent.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\SunShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\GodRaySunShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
