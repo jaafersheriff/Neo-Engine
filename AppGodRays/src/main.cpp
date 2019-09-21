@@ -5,6 +5,7 @@
 
 #include "SunComponent.hpp"
 #include "SunShader.hpp"
+#include "GodRaySunShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -101,6 +102,7 @@ int main() {
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
+    Renderer::addPreProcessShader<GodRaySunShader>("billboard.vert", "godraysun.frag");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addSceneShader<SunShader>("billboard.vert", "sun.frag");
