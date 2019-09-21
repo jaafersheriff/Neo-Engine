@@ -2,6 +2,7 @@
 
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
+#include "Shader/GammaCorrectShader.hpp"
 
 #include "SunComponent.hpp"
 #include "SunShader.hpp"
@@ -58,6 +59,10 @@ struct Renderable {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<MeshComponent>(gameObject, mesh);
         Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
+        Engine::addComponent<renderable::PhongRenderable>(gameObject);
+        Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+        Engine::addComponent<SunOccluderComponent>(gameObject);
+
 
         Engine::addImGuiFunc("Mesh", [&]() {
             if (auto spatial = gameObject->getComponentByType<SpatialComponent>()) {
@@ -92,10 +97,10 @@ int main() {
     Light(glm::vec3(0.f, 2.f, -20.f), 12.f, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
     /* Cube object */
-    Renderable cube(Library::getMesh("cube"), glm::vec3(0.f, 0.5f, 0.f));
-    Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
-    Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
-    Engine::addComponent<SunOccluderComponent>(cube.gameObject);
+    for (int i = -2; i <= 2; i++) {
+        Renderable cube(Library::getMesh("PineTree3.obj"), glm::vec3(i * 3.f, 0.5f, 0.f));
+        Engine::addComponent<DiffuseMapComponent>(cube.gameObject, Library::getTexture("PineTexture.png"));
+    }
 
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
@@ -114,6 +119,7 @@ int main() {
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addSceneShader<SunShader>("billboard.vert", "sun.frag");
     Renderer::addPostProcessShader<CombineShader>("combine.frag");
+    Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();

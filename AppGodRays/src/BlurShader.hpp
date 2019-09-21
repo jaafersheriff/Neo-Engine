@@ -11,7 +11,8 @@ class BlurShader : public Shader {
 
     public:
 
-        float blurAmount = 1.f;
+        float blurDistance = 1.f;
+        float blurSteps = 1.f;
 
         BlurShader(const std::string &vert, const std::string &frag) :
             Shader("Blur Shader", vert, frag) {
@@ -43,7 +44,11 @@ class BlurShader : public Shader {
 
             Library::getFBO("godray")->mTextures[0]->bind();
             loadUniform("godray", Library::getFBO("godray")->mTextures[0]->mTextureID);
-            loadUniform("blurAmount", blurAmount);
+            loadUniform("blurDistance", blurDistance);
+            loadUniform("blurSteps", blurSteps);
+            loadUniform("sunPos", Engine::getSingleComponent<SunComponent>()->getGameObject().getComponentByType<SpatialComponent>()->getPosition());
+            loadUniform("P", camera.getProj());
+            loadUniform("V", camera.getView());
 
             auto mesh = Library::getMesh("quad");
             CHECK_GL(glBindVertexArray(mesh->mVAOID));
@@ -55,6 +60,7 @@ class BlurShader : public Shader {
         }
 
         virtual void imguiEditor() override {
-            ImGui::SliderFloat("Blur", &blurAmount, 0.f, 10.f);
+            ImGui::SliderFloat("Distance", &blurDistance, 0.01f, 1.f);
+            ImGui::SliderFloat("Steps", &blurSteps, 0.01f, 100.f);
         }
 };
