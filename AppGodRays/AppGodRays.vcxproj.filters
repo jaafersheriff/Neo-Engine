@@ -29,10 +29,18 @@
     <ClInclude Include="src\GodRaySunShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\GodRayOccluderShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SunOccluderComponent.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\billboard.vert" />
     <None Include="shaders\sun.frag" />
     <None Include="shaders\godraysun.frag" />
+    <None Include="shaders\model.vert" />
+    <None Include="shaders\godrayoccluder.frag" />
   </ItemGroup>
 </Project>

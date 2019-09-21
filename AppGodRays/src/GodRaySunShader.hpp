@@ -14,7 +14,7 @@ class GodRaySunShader : public Shader {
     public:
 
         GodRaySunShader(const std::string &vert, const std::string &frag) :
-            Shader("GodRay Shader", vert, frag) {
+            Shader("GodRaySun Shader", vert, frag) {
 
             // Create godray 
             auto godray = Library::getFBO("godray");
@@ -31,6 +31,7 @@ class GodRaySunShader : public Shader {
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
                 Library::getFBO("godray")->resize(frameSize);
             });
+
         }
 
         virtual void render(const CameraComponent &camera) override {

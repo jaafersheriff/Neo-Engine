@@ -5,7 +5,9 @@
 
 #include "SunComponent.hpp"
 #include "SunShader.hpp"
+#include "SunOccluderComponent.hpp"
 #include "GodRaySunShader.hpp"
+#include "GodRayOccluderShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -91,6 +93,7 @@ int main() {
     Renderable cube(Library::getMesh("cube"), glm::vec3(0.f, 0.5f, 0.f));
     Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
     Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+    Engine::addComponent<SunOccluderComponent>(cube.gameObject);
 
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
@@ -103,6 +106,7 @@ int main() {
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
     Renderer::addPreProcessShader<GodRaySunShader>("billboard.vert", "godraysun.frag");
+    Renderer::addPreProcessShader<GodRayOccluderShader>("model.vert", "godrayoccluder.frag");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addSceneShader<SunShader>("billboard.vert", "sun.frag");
