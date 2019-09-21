@@ -8,6 +8,8 @@
 #include "SunOccluderComponent.hpp"
 #include "GodRaySunShader.hpp"
 #include "GodRayOccluderShader.hpp"
+#include "BlurShader.hpp"
+#include "CombineShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -25,9 +27,9 @@ struct Camera {
 };
 
 struct Light {
-    Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
+    Light(glm::vec3 pos, float scale, glm::vec3 col, glm::vec3 att) {
         auto& gameObject = Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(&gameObject, pos);
+        Engine::addComponent<SpatialComponent>(&gameObject, pos, glm::vec3(scale));
         Engine::addComponent<LightComponent>(&gameObject, col, att);
         Engine::addComponent<SunComponent>(&gameObject);
 
@@ -87,7 +89,7 @@ int main() {
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
-    Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+    Light(glm::vec3(0.f, 2.f, -20.f), 12.f, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
     /* Cube object */
     Renderable cube(Library::getMesh("cube"), glm::vec3(0.f, 0.5f, 0.f));
@@ -107,9 +109,11 @@ int main() {
     Renderer::init("shaders/", camera.camera);
     Renderer::addPreProcessShader<GodRaySunShader>("billboard.vert", "godraysun.frag");
     Renderer::addPreProcessShader<GodRayOccluderShader>("model.vert", "godrayoccluder.frag");
+    Renderer::addPreProcessShader<BlurShader>("blur.vert", "blur.frag");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addSceneShader<SunShader>("billboard.vert", "sun.frag");
+    Renderer::addPostProcessShader<CombineShader>("combine.frag");
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();

@@ -21,7 +21,8 @@ class GodRaySunShader : public Shader {
             godray->generate();
 
             // Format for color buffers
-            TextureFormat format = { GL_R16, GL_RED, GL_NEAREST, GL_REPEAT };
+            // 0 used for base 
+            TextureFormat format = { GL_R16, GL_RED, GL_NEAREST, GL_CLAMP };
             godray->attachColorTexture(Window::getFrameSize(), 1, format); 
             godray->initDrawBuffers();
 

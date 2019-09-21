@@ -35,6 +35,12 @@
     <ClInclude Include="src\SunOccluderComponent.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\BlurShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CombineShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\billboard.vert" />
@@ -42,5 +48,8 @@
     <None Include="shaders\godraysun.frag" />
     <None Include="shaders\model.vert" />
     <None Include="shaders\godrayoccluder.frag" />
+    <None Include="shaders\blur.vert" />
+    <None Include="shaders\blur.frag" />
+    <None Include="shaders\combine.frag" />
   </ItemGroup>
 </Project>
