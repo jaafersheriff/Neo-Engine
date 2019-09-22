@@ -1,4 +1,8 @@
 # Neo-Engine
 
+Game engine that has been iterated on over the years with some nice additions by some nice people. 
+
+I use this engine to play with graphics techniques - no more no less. This engine _can_ be used for create a game -- checkout [Battle Royale with Cheese](TODO) to see that. But for the most part you won't find complex AI, animation, gameplay, or art in this engine. You will find a collection of fun rendering techniques. 
+
 Full information and development details can be found at
 https://jaafersheriff.blogspot.com/search/label/neo%20engine
