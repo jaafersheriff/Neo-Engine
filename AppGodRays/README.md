@@ -1,14 +1,14 @@
 
 # God Rays app
 
-App showcasing volumetric light scattering. Technique sourced from [GPU Gems](https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch13.html)
+App showcasing volumetric light scattering. Technique sourced from [GPU Gems](https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch13.html).
 
-Render steps:
-	Render sun to an offscreen FBO in white (GodRaySun)
-	Render all models in the scene to the same FBO as black (GodRayOccluder)
-	Radial blur that offscreen FBO (Blur)
-	Render the scene normally to the back buffer
-	Apply the blurred god rays as a post process affect (Combine)
+How it works:
+- Render sun to an offscreen FBO in white (GodRaySun)
+- Render all models in the scene to the same FBO as black (GodRayOccluder)
+- Radial blur the offscreen FBO (Blur)
+- Render the scene normally to the back buffer
+- Apply the blurred god rays as a post process affect (Combine)
 
 I wanted to use the stencil buffer for the god ray FBO but I didn't. 
 
