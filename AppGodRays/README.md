@@ -10,10 +10,9 @@ How it works:
 - Render the scene normally to the back buffer
 - Apply the blurred god rays as a post process affect (Combine)
 
+The offscreen godray FBO is at half res, because performance.
+
 I wanted to use the stencil buffer for the god ray FBO but I didn't. 
 
 I _could_ collapse the combine shader into the phong shader, but the phong shader is one of the standard shaders provided by the engine, so I don't want to have to modify/recreate it specifically for this use case. Instead, the combine shader is a post process affect. 
-
-TODO : readme image
-
 <img src="res/readme.png">
