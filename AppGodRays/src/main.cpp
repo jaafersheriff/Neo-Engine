@@ -60,7 +60,7 @@ struct Renderable {
         Engine::addComponent<MeshComponent>(gameObject, mesh);
         Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
         Engine::addComponent<renderable::PhongRenderable>(gameObject);
-        // Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+        Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
         Engine::addComponent<SunOccluderComponent>(gameObject);
     }
 };
@@ -75,11 +75,9 @@ int main() {
     Light(glm::vec3(0.f, 2.f, -20.f), 12.f, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
     /* Cube object */
-    for (int i = 0; i < 1; i++) {
-        Renderable cube(Library::getMesh("dragon10k.obj"), glm::vec3(Util::genRandom(-7.5f, 7.5f), 0.5f, Util::genRandom(-7.5f, 7.5f)), glm::vec3(Util::genRandom(3.f, 5.f)), glm::vec3(0.f, Util::genRandom(0.f, 360.f), 0.f));
-        // Engine::addComponent<DiffuseMapComponent>(cube.gameObject, Library::getTexture("PineTexture.png"));
-        Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, Util::genRandomVec3(), glm::vec3(1.f), 25.f);
-        Engine::addComponent<RotationComponent>(cube.gameObject, glm::vec3(0.f, 0.7f, 0.f));
+    for (int i = 0; i < 15; i++) {
+        Renderable cube(Library::getMesh("PineTree3.obj"), glm::vec3(Util::genRandom(-7.5f, 7.5f), 0.5f, Util::genRandom(-7.5f, 7.5f)), glm::vec3(Util::genRandom(0.7f, 1.3f)), glm::vec3(0.f, Util::genRandom(0.f, 360.f), 0.f));
+        Engine::addComponent<DiffuseMapComponent>(cube.gameObject, Library::getTexture("PineTexture.png"));
     }
 
     /* Ground plane */
