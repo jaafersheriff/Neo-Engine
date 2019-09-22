@@ -60,13 +60,13 @@ struct Renderable {
         Engine::addComponent<MeshComponent>(gameObject, mesh);
         Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
         Engine::addComponent<renderable::PhongRenderable>(gameObject);
-        Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+        // Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
         Engine::addComponent<SunOccluderComponent>(gameObject);
     }
 };
 
 int main() {
-    Engine::init("Base", "res/", 1280, 720);
+    Engine::init("God Rays", "res/", 1280, 720);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
@@ -75,9 +75,11 @@ int main() {
     Light(glm::vec3(0.f, 2.f, -20.f), 12.f, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
     /* Cube object */
-    for (int i = -2; i <= 2; i++) {
-        Renderable cube(Library::getMesh("PineTree3.obj"), glm::vec3(i * 3.f, 0.5f, 0.f));
-        Engine::addComponent<DiffuseMapComponent>(cube.gameObject, Library::getTexture("PineTexture.png"));
+    for (int i = 0; i < 1; i++) {
+        Renderable cube(Library::getMesh("dragon10k.obj"), glm::vec3(Util::genRandom(-7.5f, 7.5f), 0.5f, Util::genRandom(-7.5f, 7.5f)), glm::vec3(Util::genRandom(3.f, 5.f)), glm::vec3(0.f, Util::genRandom(0.f, 360.f), 0.f));
+        // Engine::addComponent<DiffuseMapComponent>(cube.gameObject, Library::getTexture("PineTexture.png"));
+        Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, Util::genRandomVec3(), glm::vec3(1.f), 25.f);
+        Engine::addComponent<RotationComponent>(cube.gameObject, glm::vec3(0.f, 0.7f, 0.f));
     }
 
     /* Ground plane */
@@ -87,6 +89,7 @@ int main() {
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
+    Engine::addSystem<RotationSystem>();
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
@@ -95,7 +98,8 @@ int main() {
     Renderer::addPreProcessShader<BlurShader>("blur.vert", "blur.frag");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
-    Renderer::addSceneShader<SunShader>("billboard.vert", "sun.frag");
+    auto& sunshader = Renderer::addSceneShader<SunShader>("billboard.vert", "sun.frag");
+    sunshader.mActive = false;
     Renderer::addPostProcessShader<CombineShader>("combine.frag");
     Renderer::addPostProcessShader<GammaCorrectShader>();
 

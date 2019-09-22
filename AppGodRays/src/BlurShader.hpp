@@ -11,10 +11,10 @@ class BlurShader : public Shader {
 
     public:
 
-        float blurSteps = 100.f;
-        float decay=0.965f;
-        float density=0.756f;
-        float weight=0.238;
+        float blurSteps = 67.f;
+        float decay=0.954f;
+        float density=0.78f;
+        float weight=0.69f;
 
         BlurShader(const std::string &vert, const std::string &frag) :
             Shader("Blur Shader", vert, frag) {

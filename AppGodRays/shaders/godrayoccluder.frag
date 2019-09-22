@@ -10,7 +10,9 @@ uniform bool useTexture;
 out vec4 color;
 
 void main() {
-    alphaDiscard(texture(diffuseMap, fragTex).a);
+    if (useTexture) {
+        alphaDiscard(texture(diffuseMap, fragTex).a);
+    }
 
     color = vec4(vec3(0.0), 1.0);
 }

@@ -12,7 +12,7 @@ class CombineShader : public PostProcessShader {
 
     public:
 
-        float exposure = 0.3f;
+        float exposure = 0.9f;
 
         CombineShader(const std::string &frag) :
             PostProcessShader("Combine Shader", frag) 
