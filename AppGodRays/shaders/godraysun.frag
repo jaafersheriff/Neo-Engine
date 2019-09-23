@@ -1,3 +1,4 @@
+
 in vec2 fragTex;
 
 uniform vec3 center;
@@ -9,6 +10,7 @@ void main() {
     vec2 uv = fragTex;
     // [-1,1]
     uv = (uv - 0.5) * 2.0;
-    float l = length(uv);
-    color = vec4(vec3(1.0 - (3.14 * l * l)), 1.0);
+    float l = length(uv)/0.5;
+    l = sqrt(max(0, 1 - l * l));
+    color = vec4(l);
 }

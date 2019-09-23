@@ -23,9 +23,6 @@
     <ClInclude Include="src\SunComponent.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\SunShader.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\GodRaySunShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -44,7 +41,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\billboard.vert" />
-    <None Include="shaders\sun.frag" />
     <None Include="shaders\godraysun.frag" />
     <None Include="shaders\model.vert" />
     <None Include="shaders\godrayoccluder.frag" />

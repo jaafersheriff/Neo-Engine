@@ -5,7 +5,6 @@
 #include "Shader/GammaCorrectShader.hpp"
 
 #include "SunComponent.hpp"
-#include "SunShader.hpp"
 #include "SunOccluderComponent.hpp"
 #include "GodRaySunShader.hpp"
 #include "GodRayOccluderShader.hpp"
@@ -96,8 +95,6 @@ int main() {
     Renderer::addPreProcessShader<BlurShader>("blur.vert", "blur.frag");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
-    auto& sunshader = Renderer::addSceneShader<SunShader>("billboard.vert", "sun.frag");
-    sunshader.mActive = false;
     Renderer::addPostProcessShader<CombineShader>("combine.frag");
     Renderer::addPostProcessShader<GammaCorrectShader>();
 

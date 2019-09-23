@@ -128,7 +128,6 @@
     <ClInclude Include="src\GodRaySunShader.hpp" />
     <ClInclude Include="src\SunComponent.hpp" />
     <ClInclude Include="src\SunOccluderComponent.hpp" />
-    <ClInclude Include="src\SunShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\billboard.vert" />
@@ -138,7 +137,6 @@
     <None Include="shaders\godrayoccluder.frag" />
     <None Include="shaders\godraysun.frag" />
     <None Include="shaders\model.vert" />
-    <None Include="shaders\sun.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

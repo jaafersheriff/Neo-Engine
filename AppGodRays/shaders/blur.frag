@@ -1,4 +1,4 @@
-﻿
+
 in vec2 fragTex;
 
 uniform sampler2D godray;

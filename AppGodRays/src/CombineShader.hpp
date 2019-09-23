@@ -23,6 +23,7 @@ class CombineShader : public PostProcessShader {
             godray->mTextures[0]->bind();
             loadUniform("godray", godray->mTextures[0]->mTextureID);
 
+            loadUniform("sunColor", Engine::getSingleComponent<SunComponent>()->getGameObject().getComponentByType<LightComponent>()->mColor);
             loadUniform("exposure", exposure);
         }
 
