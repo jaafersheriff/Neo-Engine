@@ -28,16 +28,12 @@ namespace neo {
 
             // Test if an object is inside the frustum
             bool isInFrustum(const glm::vec3 position, const float radius) {
-                if (_distanceToPlane(mLeft, position)   < -radius ||
-                    _distanceToPlane(mRight, position)  < -radius ||
-                    _distanceToPlane(mBottom, position) < -radius ||
-                    _distanceToPlane(mTop, position)    < -radius ||
-                    _distanceToPlane(mNear, position)   < -radius ||
-                    _distanceToPlane(mFar, position)    < -radius) {
-                    return false;
-                }
-
-                return true;
+                return _distanceToPlane(mLeft, position)   > -radius &&
+                       _distanceToPlane(mRight, position)  > -radius &&
+                       _distanceToPlane(mBottom, position) > -radius &&
+                       _distanceToPlane(mTop, position)    > -radius &&
+                       _distanceToPlane(mNear, position)   > -radius &&
+                       _distanceToPlane(mFar, position)    > -radius;
             }
 
         private:
