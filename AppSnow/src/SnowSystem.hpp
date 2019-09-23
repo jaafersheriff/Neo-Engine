@@ -23,7 +23,7 @@ class SnowSystem : public System {
                 comp->snowAngle.z = -comp->snowAngle.z;
 
                 // TODO - messaging...
-                auto line = comp->getGameObject().getComponentByType<LineComponent>();
+                auto line = comp->getGameObject().getComponentByType<LineMeshComponent>();
                 if (line) {
                     line->removeNode(1);
                     line->addNode(comp->snowAngle);
