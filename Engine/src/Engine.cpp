@@ -234,7 +234,7 @@ namespace neo {
 
     void Engine::addDefaultImGuiFunc() {
         addImGuiFunc("Neo", [&]() {
-            if (ImGui::CollapsingHeader("Performance"), ImGuiTreeNodeFlags_DefaultOpen) {
+            if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
                 // Translate FPS to floats
                 std::vector<float> FPSfloats(Util::mFPSList.begin(), Util::mFPSList.end());
                 ImGui::PlotLines("FPS", FPSfloats.data(), FPSfloats.size(), 0, std::to_string(Util::mFPS).c_str());
@@ -243,7 +243,7 @@ namespace neo {
                     Window::toggleVSync();
                 }
             }
-            if (ImGui::CollapsingHeader("ECS"), ImGuiTreeNodeFlags_DefaultOpen) {
+            if (ImGui::CollapsingHeader("ECS", ImGuiTreeNodeFlags_DefaultOpen)) {
                 ImGui::Text("GameObjects:  %d", Engine::getGameObjects().size());
                 int count = 0;
                 for (auto go : Engine::getGameObjects()) {
