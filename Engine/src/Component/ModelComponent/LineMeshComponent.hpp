@@ -4,24 +4,28 @@
 
 #include "GLObjects/GLHelper.hpp"
 
+#include <optional>
+
 namespace neo {
 
     class LineMeshComponent : public MeshComponent {
+
+    public:
 
         struct Node {
             glm::vec3 position;
             glm::vec3 color;
         };
 
-    public:
 
-        glm::vec3 mColor;
+        std::optional<glm::vec3> mOverrideColor;
         std::vector<Node> mNodes;
         mutable bool mDirty;
 
-        LineMeshComponent(GameObject *go) :
+        LineMeshComponent(GameObject *go, std::optional<glm::vec3> overrideColor = std::nullopt) :
             MeshComponent(go, new Mesh),
-            mDirty(false)
+            mDirty(false),
+            mOverrideColor(overrideColor)
         {}
 
         virtual void init() override {
@@ -59,7 +63,7 @@ namespace neo {
         const std::vector<Node>& getNodes() const { return mNodes; }
 
         void addNode(const glm::vec3 pos, glm::vec3 col = glm::vec3(1.f)) {
-            mNodes.push_back(Node{ pos, col });
+            mNodes.push_back(Node{ pos, mOverrideColor.value_or(col) });
             mDirty = true;
         }
 

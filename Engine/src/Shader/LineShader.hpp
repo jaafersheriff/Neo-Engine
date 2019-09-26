@@ -35,6 +35,8 @@ namespace neo {
             virtual void render(const CameraComponent &camera) override {
                 bind();
 
+                CHECK_GL(glEnable(GL_LINE_SMOOTH));
+
                 /* Load PV */
                 loadUniform("P", camera.getProj());
                 loadUniform("V", camera.getView());
