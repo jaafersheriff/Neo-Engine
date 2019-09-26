@@ -1,11 +1,8 @@
 #include <Engine.hpp>
 
-#include "FrustumBoundsComponent.hpp"
 #include "MockPerspectiveComponent.hpp"
 #include "MockOrthoComponent.hpp"
 
-#include "FrustumBoundsToLineSystem.hpp"
-#include "FrustaBoundsSystem.hpp"
 #include "FrustaFittingSystem.hpp"
 
 #include "Shader/ShadowCasterShader.hpp"
@@ -41,10 +38,16 @@ struct Light {
         Engine::addComponent<MockOrthoComponent>(cameraObject);
         Engine::addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
         Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
-        Engine::addComponent<FrustumBoundsComponent>(cameraObject);
-        Engine::addComponent<LineMeshComponent>(cameraObject);
+        Engine::addComponent<FrustumComponent>(cameraObject);
+        Engine::addComponent<LineMeshComponent>(cameraObject, glm::vec3(1.f, 0.f, 1.f));
         Engine::addComponent<ShadowCameraComponent>(cameraObject);
-        Engine::addComponent<MaterialComponent>(cameraObject, 1.f, glm::vec3(0.f, 1.f, 1.f));
+
+        Engine::addImGuiFunc("Light", []() {
+            auto spatial = Engine::getSingleComponent<MockOrthoComponent>()->getGameObject().getComponentByType<SpatialComponent>();
+            glm::vec3 pos = spatial->getLookDir();
+            ImGui::SliderFloat3("Position", &pos[0], -1.f, 1.f);
+            spatial->setLookDir(pos);
+        });
     }
 };
 
@@ -63,15 +66,13 @@ int main() {
 
     /* Game objects */
     Camera sceneCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
-    Engine::addComponent<MainCameraComponent>(sceneCamera.gameObject);
     Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
     
     // Perspective camera
     Camera mockCamera(50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
-    Engine::addComponent<LineMeshComponent>(mockCamera.gameObject);
-    Engine::addComponent<FrustumBoundsComponent>(mockCamera.gameObject);
+    auto* line = &Engine::addComponent<LineMeshComponent>(mockCamera.gameObject, glm::vec3(0.f, 1.f, 1.f));
+    Engine::addComponent<FrustumComponent>(mockCamera.gameObject);
     Engine::addComponent<MockPerspectiveComponent>(mockCamera.gameObject);
-    Engine::addComponent<MaterialComponent>(mockCamera.gameObject, 1.f, glm::vec3(1.f, 0.f, 1.f));
 
     // Ortho camera, shadow camera, light
     Light light(glm::vec3(10.f, 20.f, 0.f), true);
@@ -91,9 +92,9 @@ int main() {
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>(); // Update camera
-    Engine::addSystem<FrustaBoundsSystem>(); // Calculate original frusta bounds
+    Engine::addSystem<FrustumSystem>(); // Calculate original frusta bounds
     auto& fitSystem = Engine::addSystem<FrustaFittingSystem>(1.f / shadowMapSize); // Fit one frusta into another
-    Engine::addSystem<FrustumBoundsToLineSystem>(); // Create line mesh
+    Engine::addSystem<FrustumToLineSystem>(); // Create line mesh
 
     /* Init renderer */
     Renderer::init("shaders/", sceneCamera.camera);

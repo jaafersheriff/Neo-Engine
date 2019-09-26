@@ -22,7 +22,7 @@ public:
 
         BoundingBox() {}
 
-        BoundingBox(const FrustumBoundsComponent* bounds) {
+        BoundingBox(const FrustumComponent* bounds) {
             addNewPosition(bounds->NearLeftBottom);
             addNewPosition(bounds->NearLeftTop);
             addNewPosition(bounds->NearRightBottom);
@@ -63,21 +63,9 @@ public:
 
     bool updatePerspective = true;
     bool updateOrtho = true;
-    BoundingBox oldCorners;
-    float texelSize;
 
     FrustaFittingSystem(float texelSize) :
-        System("FrustaFitting System"),
-        texelSize(texelSize) {
-        // add 8 dummy corners
-        oldCorners.addNewPosition(glm::vec3(FLT_MAX));
-        oldCorners.addNewPosition(glm::vec3(FLT_MAX));
-        oldCorners.addNewPosition(glm::vec3(FLT_MAX));
-        oldCorners.addNewPosition(glm::vec3(FLT_MAX));
-        oldCorners.addNewPosition(glm::vec3(FLT_MIN));
-        oldCorners.addNewPosition(glm::vec3(FLT_MIN));
-        oldCorners.addNewPosition(glm::vec3(FLT_MIN));
-        oldCorners.addNewPosition(glm::vec3(FLT_MIN));
+        System("FrustaFitting System") {
     }
 
     virtual void update(const float dt) override {
@@ -104,17 +92,8 @@ public:
         }
 
         /////////////////////// Do the fitting! ///////////////////////////////
-        auto light = Engine::getSingleComponent<LightComponent>();
-        if (!light) {
-            return;
-        }
-        auto lightSpatial = light->getGameObject().getComponentByType<SpatialComponent>();
-        if (!lightSpatial) {
-            return;
-        }
-
-        const glm::vec3 lightDir = lightSpatial->getLookDir();
-        const glm::vec3 up = lightSpatial->getUpDir();
+        const glm::vec3 lightDir = orthoSpat->getLookDir();
+        const glm::vec3 up = orthoSpat->getUpDir();
 
         const auto& sceneView = perspectiveCamera->getView();
         const auto& sceneProj = perspectiveCamera->getProj();
@@ -148,32 +127,22 @@ public:
             orthoBox.addNewPosition(worldPos);
         }
 
-        // quantize shadow box updates
-        // TODO - this is in world space..it should probably be in shadow view space?
-        if (glm::distance(orthoBox.points[0], oldCorners.points[0]) < texelSize ||
-            glm::distance(orthoBox.points[1], oldCorners.points[1]) < texelSize ||
-            glm::distance(orthoBox.points[2], oldCorners.points[2]) < texelSize ||
-            glm::distance(orthoBox.points[3], oldCorners.points[3]) < texelSize ||
-            glm::distance(orthoBox.points[4], oldCorners.points[4]) < texelSize ||
-            glm::distance(orthoBox.points[5], oldCorners.points[5]) < texelSize ||
-            glm::distance(orthoBox.points[6], oldCorners.points[6]) < texelSize ||
-            glm::distance(orthoBox.points[7], oldCorners.points[7]) < texelSize) {
-            return;
-        }
-        oldCorners = orthoBox;
-
         glm::vec3 center = lightToWorld * glm::vec4(orthoBox.center(), 1.f); // orthos center back in light space
         const float boxWidth = orthoBox.width() * 0.5f;
         const float boxHeight = orthoBox.height() * 0.5f;
         const float boxDepth = orthoBox.depth() * 0.5f;
 
-        glm::vec3 shadowViewPos = glm::vec3(center) + (lightDir * mockOrthoCamera->distance);
+
+        // orthoSpat->setPosition(center);
+        // orthoCamera->setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
+        // orthoCamera->setNearFar(-boxDepth, boxDepth);
+
+        glm::vec3 shadowViewPos = center - (lightDir * mockOrthoCamera->distance);
+        glm::vec3 midSceneView = perspectiveSpat->getPosition() + perspectiveSpat->getLookDir() * perspectiveCamera->getNearFar().y / 2.f;
+        float shadowToSceneDistance = glm::distance(shadowViewPos, midSceneView);
         orthoSpat->setPosition(shadowViewPos);
         orthoCamera->setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
+        orthoCamera->setNearFar(shadowToSceneDistance - boxDepth, shadowToSceneDistance + boxDepth);
 
-        glm::vec3 midSceneView = perspectiveSpat->getPosition() + perspectiveSpat->getLookDir() * perspectiveCamera->getNearFar().y / 2.f;
-        // center?
-        float shadowToSceneDistance = glm::distance(lightSpatial->getPosition(), midSceneView);
-        orthoCamera->setNearFar(-boxDepth, boxDepth);
     }
 };

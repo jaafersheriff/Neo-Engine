@@ -119,9 +119,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\FrustumBoundsToLineSystem.hpp" />
-    <ClInclude Include="src\FrustumBoundsComponent.hpp" />
-    <ClInclude Include="src\FrustaBoundsSystem.hpp" />
     <ClInclude Include="src\FrustaFittingSystem.hpp" />
     <ClInclude Include="src\MockOrthoComponent.hpp" />
     <ClInclude Include="src\MockPerspectiveComponent.hpp" />
