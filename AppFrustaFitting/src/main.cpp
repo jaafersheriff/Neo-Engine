@@ -33,14 +33,12 @@ struct Light {
         auto lightObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(lightObject, position, glm::vec3(1.f));
         Engine::addComponent<LightComponent>(lightObject, glm::vec3(1.f), glm::vec3(0.4f, 0.2f, 0.f));
-
-        auto cameraObject = &Engine::createGameObject();
-        Engine::addComponent<MockOrthoComponent>(cameraObject);
-        Engine::addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
-        Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
-        Engine::addComponent<FrustumComponent>(cameraObject);
-        Engine::addComponent<LineMeshComponent>(cameraObject, glm::vec3(1.f, 0.f, 1.f));
-        Engine::addComponent<ShadowCameraComponent>(cameraObject);
+        Engine::addComponent<MockOrthoComponent>(lightObject);
+        Engine::addComponent<SpatialComponent>(lightObject, position, glm::vec3(1.f));
+        Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(lightObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
+        Engine::addComponent<FrustumComponent>(lightObject);
+        Engine::addComponent<LineMeshComponent>(lightObject, glm::vec3(1.f, 0.f, 1.f));
+        Engine::addComponent<ShadowCameraComponent>(lightObject);
 
         Engine::addImGuiFunc("Light", []() {
             auto spatial = Engine::getSingleComponent<MockOrthoComponent>()->getGameObject().getComponentByType<SpatialComponent>();
