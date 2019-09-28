@@ -1,7 +1,6 @@
-#pragma once
-
-#include "Systems/System.hpp"
 #include "Engine.hpp"
+
+#include "FrustaFittingSystem.hpp"
 
 #include "Component/CameraComponent/CameraComponent.hpp"
 #include "Component/SpatialComponent/SpatialComponent.hpp"
@@ -9,65 +8,9 @@
 #include <algorithm>
 #include <limits>
 
-using namespace neo;
+namespace neo {
 
-class FrustaFittingSystem : public System {
-
-public:
-
-    struct BoundingBox {
-        glm::vec3 mMin = glm::vec3(std::numeric_limits<float>::max());
-        glm::vec3 mMax = glm::vec3(-std::numeric_limits<float>::max());
-        std::vector<glm::vec3> points;
-
-        BoundingBox() {}
-
-        BoundingBox(const FrustumComponent* bounds) {
-            addNewPosition(bounds->NearLeftBottom);
-            addNewPosition(bounds->NearLeftTop);
-            addNewPosition(bounds->NearRightBottom);
-            addNewPosition(bounds->NearRightTop);
-            addNewPosition(bounds->FarLeftBottom);
-            addNewPosition(bounds->FarLeftTop);
-            addNewPosition(bounds->FarRightBottom);
-            addNewPosition(bounds->FarRightTop);
-
-        }
-
-        void addNewPosition(glm::vec3 other) {
-            if (other.x < mMin.x) { mMin.x = other.x; }
-            if (other.y < mMin.y) { mMin.y = other.y; }
-            if (other.z < mMin.z) { mMin.z = other.z; }
-            if (other.x > mMax.x) { mMax.x = other.x; }
-            if (other.y > mMax.y) { mMax.y = other.y; }
-            if (other.z > mMax.z) { mMax.z = other.z; }
-            points.push_back(other);
-        }
-
-        glm::vec3 center() {
-            return glm::mix(mMin, mMax, 0.5f);
-        }
-
-        float width() {
-            return mMax.x - mMin.x;
-        }
-
-        float height() {
-            return mMax.y - mMin.y;
-        }
-
-        float depth() {
-            return mMax.z - mMin.z;
-        }
-    };
-
-    bool mUpdatePerspective = true;
-
-    FrustaFittingSystem() :
-        System("FrustaFitting System") {
-    }
-
-    virtual void update(const float dt) override {
+    void FrustaFittingSystem::update(const float dt) {
         const auto shadowCamera = Engine::getSingleComponent<ShadowCameraComponent>();
         const auto mainCamera = Engine::getSingleComponent<MainCameraComponent>();
         auto light = Engine::getSingleComponent<LightComponent>();
@@ -83,12 +26,6 @@ public:
         auto perspectiveSpat = perspectiveCamera->getGameObject().getComponentByType<SpatialComponent>();
         if (!orthoSpat || !perspectiveSpat) {
             return;
-        }
-
-        if (mUpdatePerspective) {
-            float f = glm::sin(Util::getRunTime());
-            float g = glm::cos(Util::getRunTime());
-            perspectiveSpat->setLookDir(glm::vec3(f, f / 2, g));
         }
 
         /////////////////////// Do the fitting! ///////////////////////////////
@@ -110,6 +47,52 @@ public:
         const float zFar = sceneProj[3][2] / (sceneProj[2][2] + 1.f);
         const float zRange = zFar - zNear;
         const float depthMin = -1.f; // GL things
+
+        struct BoundingBox {
+            glm::vec3 mMin = glm::vec3(std::numeric_limits<float>::max());
+            glm::vec3 mMax = glm::vec3(-std::numeric_limits<float>::max());
+            std::vector<glm::vec3> points;
+
+            BoundingBox() {}
+
+            BoundingBox(const FrustumComponent* bounds) {
+                addNewPosition(bounds->NearLeftBottom);
+                addNewPosition(bounds->NearLeftTop);
+                addNewPosition(bounds->NearRightBottom);
+                addNewPosition(bounds->NearRightTop);
+                addNewPosition(bounds->FarLeftBottom);
+                addNewPosition(bounds->FarLeftTop);
+                addNewPosition(bounds->FarRightBottom);
+                addNewPosition(bounds->FarRightTop);
+
+            }
+
+            void addNewPosition(glm::vec3 other) {
+                if (other.x < mMin.x) { mMin.x = other.x; }
+                if (other.y < mMin.y) { mMin.y = other.y; }
+                if (other.z < mMin.z) { mMin.z = other.z; }
+                if (other.x > mMax.x) { mMax.x = other.x; }
+                if (other.y > mMax.y) { mMax.y = other.y; }
+                if (other.z > mMax.z) { mMax.z = other.z; }
+                points.push_back(other);
+            }
+
+            glm::vec3 center() {
+                return glm::mix(mMin, mMax, 0.5f);
+            }
+
+            float width() {
+                return mMax.x - mMin.x;
+            }
+
+            float height() {
+                return mMax.y - mMin.y;
+            }
+
+            float depth() {
+                return mMax.z - mMin.z;
+            }
+        };
 
         const std::vector<glm::vec4> corners = { // screen space ortho box 
             { -1.f,  1.f, depthMin, 1.f }, // corners of near plane
@@ -142,4 +125,4 @@ public:
         orthoCamera->setNearFar(-boxDepth, boxDepth);
 
     }
-};
+}

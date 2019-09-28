@@ -79,6 +79,7 @@
     <ClInclude Include="src\Shader\Shader.hpp" />
     <ClInclude Include="src\Renderer\Renderer.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\CameraControllerSystem.hpp" />
+    <ClInclude Include="src\Systems\CameraSystems\FrustaFittingSystem.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\FrustumSystem.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\FrustumToLineSystem.hpp" />
     <ClInclude Include="src\Systems\SelectingSystems\MouseRaySystem.hpp" />
@@ -117,6 +118,7 @@
     <ClCompile Include="src\Shader\Shader.cpp" />
     <ClCompile Include="src\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\CameraControllerSystem.cpp" />
+    <ClCompile Include="src\Systems\CameraSystems\FrustaFittingSystem.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\FrustumSystem.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\FrustumToLineSystem.cpp" />
     <ClCompile Include="src\Systems\SelectingSystems\MouseRaySystem.cpp" />

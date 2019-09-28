@@ -1,6 +1,6 @@
 #include <Engine.hpp>
 
-#include "FrustaFittingSystem.hpp"
+#include "PerspectiveUpdateSystem.hpp"
 
 #include "Shader/ShadowCasterShader.hpp"
 #include "Shader/PhongShadowShader.hpp"
@@ -91,8 +91,9 @@ int main() {
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>(); // Update camera
     Engine::addSystem<FrustumSystem>(); // Calculate original frusta bounds
-    auto& fitSystem = Engine::addSystem<FrustaFittingSystem>(); // Fit one frusta into another
+    Engine::addSystem<FrustaFittingSystem>(); // Fit one frusta into another
     Engine::addSystem<FrustumToLineSystem>(); // Create line mesh
+    auto& perspectiveUpdate = Engine::addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
 
     /* Init renderer */
     Renderer::init("shaders/", sceneCamera.camera);
@@ -124,8 +125,8 @@ int main() {
             spatial->setPosition(camPos);
         }
         {
-            ImGui::Checkbox("Auto update", &fitSystem.mUpdatePerspective);
-            if (!fitSystem.mUpdatePerspective) {
+            ImGui::Checkbox("Auto update", &perspectiveUpdate.mUpdatePerspective);
+            if (!perspectiveUpdate.mUpdatePerspective) {
                 glm::vec3 lookDir = spatial->getLookDir();
                 ImGui::SliderFloat3("Look", &lookDir[0], -1.f, 1.f);
                 spatial->setLookDir(lookDir);
