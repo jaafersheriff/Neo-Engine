@@ -21,10 +21,10 @@ struct Camera {
     GameObject *gameObject;
     CameraComponent *camera;
 
-    Camera(float fov, float near, float far, glm::vec3 pos) {
+    Camera(float fov, float near, float far, float ar, glm::vec3 pos) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, ar);
     }
 };
 
@@ -33,18 +33,21 @@ struct Light {
         auto lightObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(lightObject, position, glm::vec3(1.f));
         Engine::addComponent<LightComponent>(lightObject, glm::vec3(1.f), glm::vec3(0.4f, 0.2f, 0.f));
-        Engine::addComponent<MockOrthoComponent>(lightObject);
-        Engine::addComponent<SpatialComponent>(lightObject, position, glm::vec3(1.f));
-        Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(lightObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
-        Engine::addComponent<FrustumComponent>(lightObject);
-        Engine::addComponent<LineMeshComponent>(lightObject, glm::vec3(1.f, 0.f, 1.f));
-        Engine::addComponent<ShadowCameraComponent>(lightObject);
+        // Engine::addComponent<MockOrthoComponent>(lightObject);
+
+        // maybe this should be created per frame by frustafitsystem?
+        auto cameraObject = &Engine::createGameObject();
+        Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
+        Engine::addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
+        Engine::addComponent<FrustumComponent>(cameraObject);
+        Engine::addComponent<LineMeshComponent>(cameraObject, glm::vec3(1.f, 0.f, 1.f));
+        Engine::addComponent<ShadowCameraComponent>(cameraObject);
 
         Engine::addImGuiFunc("Light", []() {
-            auto spatial = Engine::getSingleComponent<MockOrthoComponent>()->getGameObject().getComponentByType<SpatialComponent>();
-            glm::vec3 pos = spatial->getLookDir();
-            ImGui::SliderFloat3("Position", &pos[0], -1.f, 1.f);
-            spatial->setLookDir(pos);
+            auto spatial = Engine::getSingleComponent<LightComponent>()->getGameObject().getComponentByType<SpatialComponent>();
+            glm::vec3 lookdir = spatial->getLookDir();
+            ImGui::SliderFloat3("lookdir", &lookdir[0], -1.f, 1.f);
+            spatial->setLookDir(lookdir);
         });
     }
 };
@@ -63,14 +66,15 @@ int main() {
     Engine::init("FrustaFitting", "res/", 1280, 720);
 
     /* Game objects */
-    Camera sceneCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
+    Camera sceneCamera(45.f, 1.f, 100.f, Window::getAspectRatio(), glm::vec3(0, 0.6f, 5));
     Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
     
     // Perspective camera
-    Camera mockCamera(50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
+    Camera mockCamera(50.f, 0.1f, 5.f, 1.f, glm::vec3(0.f, 2.f, -0.f));
     auto* line = &Engine::addComponent<LineMeshComponent>(mockCamera.gameObject, glm::vec3(0.f, 1.f, 1.f));
     Engine::addComponent<FrustumComponent>(mockCamera.gameObject);
     Engine::addComponent<MockPerspectiveComponent>(mockCamera.gameObject);
+    Engine::addComponent<MainCameraComponent>(mockCamera.gameObject);
 
     // Ortho camera, shadow camera, light
     Light light(glm::vec3(10.f, 20.f, 0.f), true);

@@ -69,18 +69,19 @@ public:
     }
 
     virtual void update(const float dt) override {
-        auto mockOrthoCamera = Engine::getSingleComponent<MockOrthoComponent>();
-        auto mockPerspectiveCamera = Engine::getSingleComponent<MockPerspectiveComponent>();
-        if (!mockOrthoCamera || !mockPerspectiveCamera) {
+        const auto shadowCamera = Engine::getSingleComponent<ShadowCameraComponent>();
+        const auto mainCamera = Engine::getSingleComponent<MainCameraComponent>();
+        auto light = Engine::getSingleComponent<LightComponent>();
+        if (!shadowCamera || !mainCamera || !light) {
             return;
         }
-        auto orthoCamera = dynamic_cast<OrthoCameraComponent*>(mockOrthoCamera->getGameObject().getComponentByType<CameraComponent>());
-        auto perspectiveCamera = dynamic_cast<PerspectiveCameraComponent*>(mockPerspectiveCamera->getGameObject().getComponentByType<CameraComponent>());
+        auto orthoCamera = dynamic_cast<OrthoCameraComponent*>(shadowCamera->getGameObject().getComponentByType<CameraComponent>());
+        auto perspectiveCamera = dynamic_cast<PerspectiveCameraComponent*>(mainCamera->getGameObject().getComponentByType<CameraComponent>());
         if (!orthoCamera || !perspectiveCamera) {
             return;
         }
-        auto orthoSpat = mockOrthoCamera->getGameObject().getComponentByType<SpatialComponent>();
-        auto perspectiveSpat = mockPerspectiveCamera->getGameObject().getComponentByType<SpatialComponent>();
+        auto orthoSpat = orthoCamera->getGameObject().getComponentByType<SpatialComponent>();
+        auto perspectiveSpat = perspectiveCamera->getGameObject().getComponentByType<SpatialComponent>();
         if (!orthoSpat || !perspectiveSpat) {
             return;
         }
@@ -92,8 +93,12 @@ public:
         }
 
         /////////////////////// Do the fitting! ///////////////////////////////
-        const glm::vec3 lightDir = orthoSpat->getLookDir();
-        const glm::vec3 up = orthoSpat->getUpDir();
+        const auto lightSpat = light->getGameObject().getComponentByType<SpatialComponent>();
+        if (!lightSpat) {
+            return;
+        }
+        const glm::vec3 lightDir = lightSpat->getLookDir();
+        const glm::vec3 up = lightSpat->getUpDir();
 
         const auto& sceneView = perspectiveCamera->getView();
         const auto& sceneProj = perspectiveCamera->getProj();
@@ -137,12 +142,13 @@ public:
         // orthoCamera->setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
         // orthoCamera->setNearFar(-boxDepth, boxDepth);
 
-        glm::vec3 shadowViewPos = center - (lightDir * mockOrthoCamera->distance);
         glm::vec3 midSceneView = perspectiveSpat->getPosition() + perspectiveSpat->getLookDir() * perspectiveCamera->getNearFar().y / 2.f;
-        float shadowToSceneDistance = glm::distance(shadowViewPos, midSceneView);
-        orthoSpat->setPosition(shadowViewPos);
+        float shadowToSceneDistance = glm::distance(lightSpat->getPosition(), midSceneView);
+
+        orthoSpat->setPosition(center);
+        orthoSpat->setLookDir(lightDir);
         orthoCamera->setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
-        orthoCamera->setNearFar(shadowToSceneDistance - boxDepth, shadowToSceneDistance + boxDepth);
+        orthoCamera->setNearFar(-boxDepth, boxDepth);
 
     }
 };

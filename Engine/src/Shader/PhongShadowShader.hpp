@@ -89,14 +89,16 @@ namespace neo {
                 }
 
                 /* Load light */
+                if (const auto shadowCamera = Engine::getSingleComponent<ShadowCameraComponent>()) {
+                    if (const auto camera = shadowCamera->getGameObject().getComponentByType<CameraComponent>()) {
+                        loadUniform("L", biasMatrix * camera->getProj() * camera->getView());
+                    }
+                }
                 if (const auto light = Engine::getSingleComponent<LightComponent>()) {
-                    if (const auto lightCam = light->getGameObject().getComponentByType<CameraComponent>()) {
-                        if (const auto lightSpat = light->getGameObject().getComponentByType<SpatialComponent>()) {
-                            loadUniform("lightPos", lightSpat->getPosition());
-                            loadUniform("lightCol", light->mColor);
-                            loadUniform("lightAtt", light->mAttenuation);
-                            loadUniform("L", biasMatrix * lightCam->getProj() * lightCam->getView());
-                        }
+                    if (const auto lightSpat = light->getGameObject().getComponentByType<SpatialComponent>()) {
+                        loadUniform("lightPos", lightSpat->getPosition());
+                        loadUniform("lightCol", light->mColor);
+                        loadUniform("lightAtt", light->mAttenuation);
                     }
                 }
 
