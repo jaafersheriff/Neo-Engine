@@ -4,16 +4,15 @@
 #include "GameObject/GameObject.hpp"
 #include "Messaging/Messenger.hpp"
 
-#include "Window/Window.hpp"
-
 #include "glm/gtc/matrix_transform.hpp"
 
 namespace neo {
 
-    PerspectiveCameraComponent::PerspectiveCameraComponent(GameObject *gameObject, float near, float far, float fov) :
+    PerspectiveCameraComponent::PerspectiveCameraComponent(GameObject *gameObject, float near, float far, float fov, float ar) :
         CameraComponent(gameObject) {
         setNearFar(near, far);
         setFOV(fov);
+        setAspectRatio(ar);
     }
 
     void PerspectiveCameraComponent::setFOV(float fov) {
@@ -25,9 +24,18 @@ namespace neo {
         mProjMatDirty = true;
     }
 
+    void PerspectiveCameraComponent::setAspectRatio(float ar) {
+        if (ar == mAspectRatio) {
+            return;
+        }
+
+        mAspectRatio = ar;
+        mProjMatDirty = true;
+    }
+
+
     void PerspectiveCameraComponent::_detProj() const {
-        // TODO - aspect ratio shouldn't ALWAYS come from window
-        mProjMat = glm::perspective(glm::radians(mFOV), Window::getAspectRatio(), mNear, mFar);
+        mProjMat = glm::perspective(glm::radians(mFOV), mAspectRatio, mNear, mFar);
         mProjMatDirty = false;
     }
 

@@ -86,6 +86,7 @@ namespace neo {
 
             /* Initialize new objects and components */
             _processInitQueue();
+            _processKillQueue();
             Messenger::relayMessages();
 
             /* Update each system */
@@ -95,10 +96,6 @@ namespace neo {
                     Messenger::relayMessages();
                 }
             }
-
-            /* Kill deleted objects and components */
-            _processKillQueue();
-            Messenger::relayMessages();
  
             /* Update imgui functions */
             if (imGuiEnabled) {

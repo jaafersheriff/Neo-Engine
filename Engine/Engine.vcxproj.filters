@@ -107,6 +107,7 @@
     <ClCompile Include="src\Systems\CameraSystems\FrustumToLineSystem.cpp" />
     <ClCompile Include="src\Systems\SelectingSystems\SelectingSystem.cpp" />
     <ClCompile Include="src\Systems\SelectingSystems\MouseRaySystem.cpp" />
+    <ClCompile Include="src\Component\CameraComponent\MainCameraComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />

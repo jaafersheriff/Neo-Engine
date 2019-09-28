@@ -126,6 +126,8 @@ namespace neo {
     void SpatialComponent::_detModelMatrix() const {
         mModelMatrix = glm::scale(glm::translate(glm::mat4(), mPosition) * glm::mat4(getOrientation()), mScale);
         mModelMatrixDirty = false;
+
+        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
     }
 
     void SpatialComponent::_detNormalMatrix() const {

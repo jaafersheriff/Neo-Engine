@@ -6,9 +6,6 @@ namespace neo {
 
     class MainCameraComponent : public Component {
     public:
-        MainCameraComponent(GameObject *go) :
-            Component(go)
-        {}
+        MainCameraComponent(GameObject *go);
     };
-
 }

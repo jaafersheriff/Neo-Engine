@@ -95,6 +95,7 @@
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
     <ClCompile Include="src\Component\CameraComponent\CameraControllerComponent.cpp" />
+    <ClCompile Include="src\Component\CameraComponent\MainCameraComponent.cpp" />
     <ClCompile Include="src\Component\CameraComponent\OrthoCameraComponent.cpp" />
     <ClCompile Include="src\Component\CameraComponent\PerspectiveCameraComponent.cpp" />
     <ClInclude Include="src\Component\CameraComponent\ShadowCameraComponent.hpp" />
