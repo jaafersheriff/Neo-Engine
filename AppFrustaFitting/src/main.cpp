@@ -76,15 +76,15 @@ int main() {
     Light light(glm::vec3(10.f, 20.f, 0.f), true);
 
     // Renderable
-    for (int i = 0; i < 10; i++) {
-        Renderable sphere(Util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere"), glm::vec3(Util::genRandom(-4.f, 4.f), Util::genRandom(0.5f, 1.f), Util::genRandom(-4.f, 4.f)), glm::vec3(0.5f));
+    for (int i = 0; i < 30; i++) {
+        Renderable sphere(Util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere"), glm::vec3(Util::genRandom(-10.f, 10.f), Util::genRandom(0.5f, 1.f), Util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
         Engine::addComponent<renderable::ShadowCasterRenderable>(sphere.gameObject);
         Engine::addComponent<renderable::PhongShadowRenderable>(sphere.gameObject);
         Engine::addComponent<MaterialComponent>(sphere.gameObject, 0.3f, Util::genRandomVec3(), glm::vec3(1.f), 20.f);
     }
 
     /* Ground plane */
-    Renderable receiver(Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(10.f), glm::vec3(-1.56f, 0, 0));
+    Renderable receiver(Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(50.f), glm::vec3(-1.56f, 0, 0));
     Engine::addComponent<MaterialComponent>(receiver.gameObject, 0.2f, glm::vec3(0.7f), glm::vec3(1.f), 20.f);
     Engine::addComponent<renderable::PhongShadowRenderable>(receiver.gameObject);
 
