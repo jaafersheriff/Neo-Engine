@@ -84,9 +84,9 @@ namespace neo {
             /* Update display, mouse, keyboard */
             Window::update();
 
-            /* Initialize new objects and components */
-            _processInitQueue();
+            /* Destroy and create objects and components */
             _processKillQueue();
+            _processInitQueue();
             Messenger::relayMessages();
 
             /* Update each system */

@@ -120,8 +120,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\FrustaFittingSystem.hpp" />
-    <ClInclude Include="src\MockOrthoComponent.hpp" />
-    <ClInclude Include="src\MockPerspectiveComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />

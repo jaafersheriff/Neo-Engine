@@ -16,8 +16,8 @@ class FrustaFittingSystem : public System {
 public:
 
     struct BoundingBox {
-        glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
-        glm::vec3 max = glm::vec3(-std::numeric_limits<float>::max());
+        glm::vec3 mMin = glm::vec3(std::numeric_limits<float>::max());
+        glm::vec3 mMax = glm::vec3(-std::numeric_limits<float>::max());
         std::vector<glm::vec3> points;
 
         BoundingBox() {}
@@ -35,36 +35,35 @@ public:
         }
 
         void addNewPosition(glm::vec3 other) {
-            if (other.x < min.x) { min.x = other.x; }
-            if (other.y < min.y) { min.y = other.y; }
-            if (other.z < min.z) { min.z = other.z; }
-            if (other.x > max.x) { max.x = other.x; }
-            if (other.y > max.y) { max.y = other.y; }
-            if (other.z > max.z) { max.z = other.z; }
+            if (other.x < mMin.x) { mMin.x = other.x; }
+            if (other.y < mMin.y) { mMin.y = other.y; }
+            if (other.z < mMin.z) { mMin.z = other.z; }
+            if (other.x > mMax.x) { mMax.x = other.x; }
+            if (other.y > mMax.y) { mMax.y = other.y; }
+            if (other.z > mMax.z) { mMax.z = other.z; }
             points.push_back(other);
         }
 
         glm::vec3 center() {
-            return glm::mix(min, max, 0.5f);
+            return glm::mix(mMin, mMax, 0.5f);
         }
 
         float width() {
-            return max.x - min.x;
+            return mMax.x - mMin.x;
         }
 
         float height() {
-            return max.y - min.y;
+            return mMax.y - mMin.y;
         }
 
         float depth() {
-            return max.z - min.z;
+            return mMax.z - mMin.z;
         }
     };
 
-    bool updatePerspective = true;
-    bool updateOrtho = true;
+    bool mUpdatePerspective = true;
 
-    FrustaFittingSystem(float texelSize) :
+    FrustaFittingSystem() :
         System("FrustaFitting System") {
     }
 
@@ -86,7 +85,7 @@ public:
             return;
         }
 
-        if (updatePerspective) {
+        if (mUpdatePerspective) {
             float f = glm::sin(Util::getRunTime());
             float g = glm::cos(Util::getRunTime());
             perspectiveSpat->setLookDir(glm::vec3(f, f / 2, g));
@@ -136,14 +135,6 @@ public:
         const float boxWidth = orthoBox.width() * 0.5f;
         const float boxHeight = orthoBox.height() * 0.5f;
         const float boxDepth = orthoBox.depth() * 0.5f;
-
-
-        // orthoSpat->setPosition(center);
-        // orthoCamera->setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
-        // orthoCamera->setNearFar(-boxDepth, boxDepth);
-
-        glm::vec3 midSceneView = perspectiveSpat->getPosition() + perspectiveSpat->getLookDir() * perspectiveCamera->getNearFar().y / 2.f;
-        float shadowToSceneDistance = glm::distance(lightSpat->getPosition(), midSceneView);
 
         orthoSpat->setPosition(center);
         orthoSpat->setLookDir(lightDir);

@@ -1,8 +1,5 @@
 #include <Engine.hpp>
 
-#include "MockPerspectiveComponent.hpp"
-#include "MockOrthoComponent.hpp"
-
 #include "FrustaFittingSystem.hpp"
 
 #include "Shader/ShadowCasterShader.hpp"
@@ -30,12 +27,12 @@ struct Camera {
 
 struct Light {
     Light(glm::vec3 position, bool attachCube = true) {
+        // Light object
         auto lightObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(lightObject, position, glm::vec3(1.f));
         Engine::addComponent<LightComponent>(lightObject, glm::vec3(1.f), glm::vec3(0.4f, 0.2f, 0.f));
-        // Engine::addComponent<MockOrthoComponent>(lightObject);
 
-        // maybe this should be created per frame by frustafitsystem?
+        // Shadow camera object
         auto cameraObject = &Engine::createGameObject();
         Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
         Engine::addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
@@ -73,7 +70,6 @@ int main() {
     Camera mockCamera(50.f, 0.1f, 5.f, 1.f, glm::vec3(0.f, 2.f, -0.f));
     auto* line = &Engine::addComponent<LineMeshComponent>(mockCamera.gameObject, glm::vec3(0.f, 1.f, 1.f));
     Engine::addComponent<FrustumComponent>(mockCamera.gameObject);
-    Engine::addComponent<MockPerspectiveComponent>(mockCamera.gameObject);
     Engine::addComponent<MainCameraComponent>(mockCamera.gameObject);
 
     // Ortho camera, shadow camera, light
@@ -95,7 +91,7 @@ int main() {
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>(); // Update camera
     Engine::addSystem<FrustumSystem>(); // Calculate original frusta bounds
-    auto& fitSystem = Engine::addSystem<FrustaFittingSystem>(1.f / shadowMapSize); // Fit one frusta into another
+    auto& fitSystem = Engine::addSystem<FrustaFittingSystem>(); // Fit one frusta into another
     Engine::addSystem<FrustumToLineSystem>(); // Create line mesh
 
     /* Init renderer */
@@ -128,8 +124,8 @@ int main() {
             spatial->setPosition(camPos);
         }
         {
-            ImGui::Checkbox("Auto update", &fitSystem.updatePerspective);
-            if (!fitSystem.updatePerspective) {
+            ImGui::Checkbox("Auto update", &fitSystem.mUpdatePerspective);
+            if (!fitSystem.mUpdatePerspective) {
                 glm::vec3 lookDir = spatial->getLookDir();
                 ImGui::SliderFloat3("Look", &lookDir[0], -1.f, 1.f);
                 spatial->setLookDir(lookDir);
