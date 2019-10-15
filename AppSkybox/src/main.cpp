@@ -17,7 +17,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, Window::getAspectRatio());
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -43,15 +43,7 @@ struct Reflection {
 
         Engine::addImGuiFunc("Reflection", [&]() {
             if (auto reflection = Engine::getSingleComponent<ReflectionComponent>()) {
-                glm::vec3 pos = reflection->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
-                if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
-                    reflection->getGameObject().getComponentByType<SpatialComponent>()->setPosition(pos);
-                }
-                float scale = reflection->getGameObject().getComponentByType<SpatialComponent>()->getScale().x;
-                if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
-                    reflection->getGameObject().getComponentByType<SpatialComponent>()->setScale(glm::vec3(scale));
-                }
-                ImGui::SameLine();
+                reflection->getGameObject().getComponentByType<SpatialComponent>()->imGuiEditor();
                 if (ImGui::Button("Add wireframe")) {
                     Engine::addComponent<renderable::WireframeRenderable>(&reflection->getGameObject());
                 }
@@ -75,16 +67,9 @@ struct Refraction {
 
         Engine::addImGuiFunc("Refraction", [&]() {
             if (auto refraction = Engine::getSingleComponent<RefractionComponent>()) {
-                ImGui::SliderFloat("Index", &refraction->ratio, 0.f, 1.f);
-                glm::vec3 pos = refraction->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
-                if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
-                    refraction->getGameObject().getComponentByType<SpatialComponent>()->setPosition(pos);
-                }
-                float scale = refraction->getGameObject().getComponentByType<SpatialComponent>()->getScale().x;
-                if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
-                    refraction->getGameObject().getComponentByType<SpatialComponent>()->setScale(glm::vec3(scale));
-                }
-                ImGui::SameLine();
+                refraction->imGuiEditor();
+                refraction->getGameObject().getComponentByType<SpatialComponent>()->imGuiEditor();
+
                 if (ImGui::Button("Add wireframe")) {
                     Engine::addComponent<renderable::WireframeRenderable>(&refraction->getGameObject());
                 }

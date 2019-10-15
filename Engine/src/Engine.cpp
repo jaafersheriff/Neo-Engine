@@ -8,6 +8,7 @@ extern "C" {
 
 #include "Engine.hpp"
 #include "Renderer/Renderer.hpp"
+#include "Shader/WireframeShader.hpp"
 
 #include "GameObject/GameObject.hpp"
 #include "Messaging/Messenger.hpp"
@@ -380,42 +381,7 @@ namespace neo {
     void Engine::addSelectionEditing() {
         addSystem<MouseRaySystem>();
         addSystem<EditorSystem>();
-        addImGuiFunc("Editor", []() {
-            if (ImGui::Button("Create GameObject")) {
-                Engine::removeComponent<SelectedComponent>(*Engine::getSingleComponent<SelectedComponent>());
-                auto& go = Engine::createGameObject();
-                Engine::addComponent<BoundingBoxComponent>(&go, std::vector<float>{ -1.f, -1.f, -1.f, 1.f, 1.f, 1.f });
-                Engine::addComponent<SpatialComponent>(&go);
-                Engine::addComponent<SelectableComponent>(&go);
-                Engine::addComponent<SelectedComponent>(&go);
-                Engine::addComponent<MeshComponent>(&go, Library::getMesh("sphere"));
-                Engine::addComponent<renderable::PhongRenderable>(&go);
-            }
-            if (auto selected = Engine::getSingleComponent<SelectedComponent>()) {
-                auto allComponents = selected->getGameObject()._getcomps();
-                static std::optional<std::type_index> index;
-                if (ImGui::BeginCombo("", "Edit components")) {
-                    index = std::nullopt;
-                    for (auto comp : allComponents) {
-                        if (ImGui::Selectable(comp.first.name() + 6)) {
-                            index = comp.first;
-                        }
-
-                    }
-                    ImGui::EndCombo();
-                }
-                if (index) {
-                    auto components = allComponents[index.value()];
-                    if (components.size()) {
-                        static int offset = 0;
-                        if (components.size() > 1) {
-                            ImGui::SliderInt("Index", &offset, 0, components.size() - 1);
-                        }
-                        components[offset]->imGuiEditor();
-                    }
-                }
-            }
-        });
+        Renderer::addSceneShader<WireframeShader>();
     }
 
     void Engine::shutDown() {

@@ -15,7 +15,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, Window::getAspectRatio());
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -27,14 +27,8 @@ struct Light {
         Engine::addComponent<LightComponent>(&gameObject, col, att);
 
         Engine::addImGuiFunc("Light", [&]() {
-            auto light = Engine::getSingleComponent<LightComponent>();
-            if (auto spatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
-                glm::vec3 pos = spatial->getPosition();
-                if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
-                    spatial->setPosition(pos);
-                }
-                ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
-                ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
+            if (auto light = Engine::getSingleComponent<LightComponent>()) {
+                light->imGuiEditor();
             }
         });
     }
@@ -98,7 +92,7 @@ int main() {
             }
         },
         // Operate on selected components
-        [](SelectedComponent* selected) {
+        [](SelectedComponent* selected, glm::vec3) {
             if (auto material = selected->getGameObject().getComponentByType<MaterialComponent>()) {
                 material->mDiffuse = glm::vec3(1.f, 0.f, 0.f);
             }
@@ -108,7 +102,7 @@ int main() {
             glm::vec3 scale = selectedComps[0]->getGameObject().getComponentByType<SpatialComponent>()->getScale();
             ImGui::SliderFloat3("Scale", &scale[0], 0.f, 3.f);
             for (auto selected : selectedComps) {
-                selected->getGameObject().getComponentByType<SpatialComponent>()->setScale(scale);
+                selected->getGameObject().getComponentByType<SpatialComponent>()->imGuiEditor();
             }
         }
     );

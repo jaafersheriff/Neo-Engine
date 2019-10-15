@@ -34,6 +34,7 @@ namespace neo {
     }
 
     void OrthoCameraComponent::imGuiEditor() {
+        CameraComponent::imGuiEditor();
         glm::vec2 h = getHorizontalBounds();
         glm::vec2 v = getVerticalBounds();
         bool edited = false;

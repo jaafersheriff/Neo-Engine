@@ -29,7 +29,8 @@ struct Light {
     Light(glm::vec3 position, bool attachCube = true) {
         // Light object
         auto lightObject = &Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(lightObject, position, glm::vec3(1.f));
+        auto& spatial = Engine::addComponent<SpatialComponent>(lightObject, position, glm::vec3(1.f));
+        spatial.setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
         Engine::addComponent<LightComponent>(lightObject, glm::vec3(1.f), glm::vec3(0.4f, 0.2f, 0.f));
 
         // Shadow camera object
@@ -119,32 +120,9 @@ int main() {
     Engine::addImGuiFunc("PerspectiveCamera", [&]() {
         auto spatial = mockCamera.gameObject->getComponentByType<SpatialComponent>();
         auto camera = dynamic_cast<PerspectiveCameraComponent*>(mockCamera.camera);
-        {
-            glm::vec3 camPos = spatial->getPosition();
-            ImGui::SliderFloat3("Position", &camPos[0], -20.f, 20.f);
-            spatial->setPosition(camPos);
-        }
-        {
-            ImGui::Checkbox("Auto update", &perspectiveUpdate.mUpdatePerspective);
-            if (!perspectiveUpdate.mUpdatePerspective) {
-                glm::vec3 lookDir = spatial->getLookDir();
-                ImGui::SliderFloat3("Look", &lookDir[0], -1.f, 1.f);
-                spatial->setLookDir(lookDir);
-            }
-        }
-        {
-            float fov = camera->getFOV();
-            glm::vec2 nearfar = camera->getNearFar();
-            if (ImGui::SliderFloat("FOV", &fov, 15.f, 110.f)) {
-                camera->setFOV(fov);
-            }
-            if (ImGui::SliderFloat("Near", &nearfar[0], 0.f, 3.f)) {
-                camera->setNearFar(nearfar.x, nearfar.y);
-            }
-            if (ImGui::SliderFloat("Far", &nearfar[1], 2.f, 20.f)) {
-                camera->setNearFar(nearfar.x, nearfar.y);
-            }
-        }
+        ImGui::Checkbox("Auto update", &perspectiveUpdate.mUpdatePerspective);
+        spatial->imGuiEditor();
+        camera->imGuiEditor();
     });
 
     /* Run */

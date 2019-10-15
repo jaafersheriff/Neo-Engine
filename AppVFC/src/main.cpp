@@ -16,7 +16,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, Window::getAspectRatio());
     }
 };
 
@@ -27,13 +27,7 @@ struct Light {
         Engine::addComponent<LightComponent>(&gameObject, col, att);
 
         Engine::addImGuiFunc("Light", [&]() {
-            auto light = Engine::getSingleComponent<LightComponent>();
-            glm::vec3 pos = light->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
-            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
-                light->getGameObject().getComponentByType<SpatialComponent>()->setPosition(pos);
-            }
-            ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
-            ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
+            Engine::getSingleComponent<LightComponent>()->imGuiEditor();
         });
     }
 };

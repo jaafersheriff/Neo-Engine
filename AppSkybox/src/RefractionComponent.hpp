@@ -10,8 +10,12 @@ class RefractionComponent : public Component {
 
         RefractionComponent(GameObject *go, float r = 0.5f) :
             Component(go),
-            ratio(r)
+            mRatio(r)
         {}
 
-        float ratio = 0.f;
+        float mRatio = 0.f;
+
+        virtual void imGuiEditor() override {
+            ImGui::SliderFloat("Refraction", &mRatio, 0.f, 1.f);
+        }
 };

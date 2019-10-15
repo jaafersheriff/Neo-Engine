@@ -46,7 +46,7 @@ class RefractionShader : public Shader {
 
                 loadUniform("M", model->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
                 loadUniform("N", model->getGameObject().getComponentByType<SpatialComponent>()->getNormalMatrix());
-                loadUniform("ratio", renderable->ratio);
+                loadUniform("ratio", renderable->mRatio);
 
                 /* DRAW */
                 mesh.draw();

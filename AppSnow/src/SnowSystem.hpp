@@ -16,17 +16,17 @@ class SnowSystem : public System {
 
         virtual void update(const float dt) override {
             for (auto comp : Engine::getComponents<SnowComponent>()) {
-                comp->height = -0.19f * comp->snowSize + 0.17f;
+                comp->mHeight = -0.19f * comp->mSnowSize + 0.17f;
 
-                comp->snowAngle = comp->getGameObject().getComponentByType<SpatialComponent>()->getUpDir();
-                comp->snowAngle.x = -comp->snowAngle.x;
-                comp->snowAngle.z = -comp->snowAngle.z;
+                comp->mSnowAngle = comp->getGameObject().getComponentByType<SpatialComponent>()->getUpDir();
+                comp->mSnowAngle.x = -comp->mSnowAngle.x;
+                comp->mSnowAngle.z = -comp->mSnowAngle.z;
 
                 // TODO - messaging...
                 auto line = comp->getGameObject().getComponentByType<LineMeshComponent>();
                 if (line) {
                     line->removeNode(1);
-                    line->addNode(comp->snowAngle);
+                    line->addNode(comp->mSnowAngle);
                 }
 
             }

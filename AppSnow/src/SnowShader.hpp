@@ -21,12 +21,12 @@ public:
 
         /* Load snow */
         auto snow = Engine::getComponents<SnowComponent>()[0];
-        loadUniform("snowAngle", snow->snowAngle);
-        loadUniform("snowColor", snow->snowColor);
-        loadUniform("snowSize", snow->snowSize);
-        loadUniform("height", snow->height);
-        loadUniform("rimColor", snow->rimColor);
-        loadUniform("rimPower", snow->rimPower);
+        loadUniform("snowAngle", snow->mSnowAngle);
+        loadUniform("snowColor", snow->mSnowColor);
+        loadUniform("snowSize", snow->mSnowSize);
+        loadUniform("height", snow->mHeight);
+        loadUniform("rimColor", snow->mRimColor);
+        loadUniform("rimPower", snow->mRimPower);
 
         /* Load Camera */
         loadUniform("P", camera.getProj());

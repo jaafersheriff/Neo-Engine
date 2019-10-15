@@ -13,6 +13,7 @@ namespace neo {
             CameraComponent(CameraComponent &&) = default;
 
             virtual void init() override;
+            virtual void imGuiEditor() override;
 
             /* Setters */
             void setNearFar(float, float);

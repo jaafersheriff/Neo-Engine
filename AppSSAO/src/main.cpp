@@ -18,7 +18,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, Window::getAspectRatio());
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -158,19 +158,12 @@ int main() {
                 lights.erase(lights.begin() + index);
                 index = glm::max(0, index - 1);
             }
+            l->light->imGuiEditor();
             auto spat = l->gameObject->getComponentByType<SpatialComponent>();
             if (!spat) {
                 return;
             }
-            glm::vec3 pos = spat->getPosition();
-            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -25.f, 25.f)) {
-                spat->setPosition(pos);
-            }
-            float size = spat->getScale().x;
-            if (ImGui::SliderFloat("Scale", &size, 15.f, 100.f)) {
-                spat->setScale(glm::vec3(size));
-            }
-            ImGui::SliderFloat3("Color", glm::value_ptr(l->light->mColor), 0.f, 1.f);
+            spat->imGuiEditor();
         }
     });
 

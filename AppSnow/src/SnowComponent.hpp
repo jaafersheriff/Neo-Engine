@@ -13,19 +13,27 @@ class SnowComponent : public Component{
         
         SnowComponent(GameObject *gameObject) :
             Component(gameObject),
-            snowAngle(0.f, 1.f, 0.f),
-            snowSize(0.36f),
-            snowColor(0.36f, 0.48f, 0.56f),
-            height(0.07f),
-            rimColor(1.f),
-            rimPower(0.25f)
+            mSnowAngle(0.f, 1.f, 0.f),
+            mSnowSize(0.36f),
+            mSnowColor(0.36f, 0.48f, 0.56f),
+            mHeight(0.07f),
+            mRimColor(1.f),
+            mRimPower(0.25f)
         {}
 
-        glm::vec3 snowAngle;
-        float snowSize;
-        glm::vec3 snowColor;
-        float height;
-        glm::vec3 rimColor;
-        float rimPower;
+        virtual void imGuiEditor() override {
+            ImGui::SliderFloat("Snow size", &mSnowSize, 1.f, 0.f);
+            ImGui::SliderFloat3("Snow color", glm::value_ptr(mSnowColor), 0.f, 1.f);
+            ImGui::SliderFloat("Height", &mHeight, 0.f, .25f);
+            ImGui::SliderFloat3("Rim color", glm::value_ptr(mRimColor), 0.f, 1.f);
+            ImGui::SliderFloat("Rim power", &mRimPower, 0.f, 25.f);
+        }
+
+        glm::vec3 mSnowAngle;
+        float mSnowSize;
+        glm::vec3 mSnowColor;
+        float mHeight;
+        glm::vec3 mRimColor;
+        float mRimPower;
 };
 

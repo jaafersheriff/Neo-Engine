@@ -1,8 +1,14 @@
 #pragma once
 
 #include "Systems/System.hpp"
+#include <functional>
+
+#include "glm/glm.hpp"
 
 namespace neo {
+
+    class SelectedComponent;
+    class SelectableComponent;
 
     class SelectingSystem : public System {
 

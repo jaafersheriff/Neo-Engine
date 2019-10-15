@@ -4,8 +4,8 @@
 #include "GameObject/GameObject.hpp"
 #include "Messaging/Messenger.hpp"
 
-
 #include "glm/gtc/matrix_transform.hpp"
+#include "ext/imgui/imgui.h"
 
 namespace neo {
 
@@ -57,6 +57,11 @@ namespace neo {
         assert(spatial);
         mViewMat = glm::lookAt(spatial->getPosition(), spatial->getPosition() + spatial->getLookDir(), spatial->getUpDir());
         mViewMatDirty = false;
+    }
+
+    void CameraComponent::imGuiEditor() {
+        ImGui::SliderFloat("Near", &mNear, 0.1f, 10.f);
+        ImGui::SliderFloat("Far", &mFar, 1.f, 100.f);
     }
 
 }

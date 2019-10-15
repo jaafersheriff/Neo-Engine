@@ -29,7 +29,7 @@ namespace neo {
                     }
                     else if (auto perspectiveCam = dynamic_cast<PerspectiveCameraComponent*>(camera)) {
                         float fov = glm::radians(perspectiveCam->getFOV());
-                        float ar = 1.f;
+                        float ar = perspectiveCam->getAspectRatio();
                         float Hnear = 2 * glm::tan(fov / 2) * nDis;
                         float Wnear = Hnear * ar;
                         float Hfar = 2 * glm::tan(fov / 2) * fDis;

@@ -7,6 +7,7 @@
 #include "Window/Keyboard.hpp"
 
 #include "Util/Util.hpp"
+#include "ext/imgui/imgui.h"
 
 namespace neo {
 
@@ -51,5 +52,10 @@ namespace neo {
         auto spatial = mGameObject->getComponentByType<SpatialComponent>();
         assert(spatial);
         spatial->setUVW(u, v, w);
+    }
+
+    void CameraControllerComponent::imGuiEditor() {
+        ImGui::SliderFloat("Look speed", &mLookSpeed, 0.1f, 10.f);
+        ImGui::SliderFloat("Move speed", &mMoveSpeed, 0.1f, 10.f);
     }
 }

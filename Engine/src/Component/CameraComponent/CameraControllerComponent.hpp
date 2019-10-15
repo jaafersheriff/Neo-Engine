@@ -23,6 +23,7 @@ namespace neo {
  
             CameraControllerComponent(GameObject *, float ls, float ms);
             CameraControllerComponent(CameraControllerComponent && other) = default;
+            virtual void imGuiEditor();
 
             void setOrientation(float p, float t);
 

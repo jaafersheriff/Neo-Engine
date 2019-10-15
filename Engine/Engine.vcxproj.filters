@@ -111,6 +111,7 @@
     <ClCompile Include="src\Systems\SelectingSystems\MouseRaySystem.cpp" />
     <ClCompile Include="src\Component\CameraComponent\MainCameraComponent.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\FrustaFittingSystem.cpp" />
+    <ClCompile Include="src\Systems\SelectingSystems\EditorSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />

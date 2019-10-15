@@ -122,6 +122,7 @@
     <ClCompile Include="src\Systems\CameraSystems\FrustaFittingSystem.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\FrustumSystem.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\FrustumToLineSystem.cpp" />
+    <ClCompile Include="src\Systems\SelectingSystems\EditorSystem.cpp" />
     <ClCompile Include="src\Systems\SelectingSystems\MouseRaySystem.cpp" />
     <ClCompile Include="src\Systems\SelectingSystems\SelectingSystem.cpp" />
     <ClCompile Include="src\Systems\TranslationSystems\RotationSystem.cpp" />

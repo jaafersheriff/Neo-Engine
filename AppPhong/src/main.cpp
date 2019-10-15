@@ -14,7 +14,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        cameraComp = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+        cameraComp = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, Window::getAspectRatio());
         cameraController = &Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -33,12 +33,7 @@ struct Light {
         Engine::addComponent<renderable::WireframeRenderable>(gameObject);
 
         Engine::addImGuiFunc("Light", [&]() {
-            glm::vec3 pos = gameObject->getComponentByType<SpatialComponent>()->getPosition();
-            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
-                gameObject->getComponentByType<SpatialComponent>()->setPosition(pos);
-            }
-            ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
-            ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
+            light->imGuiEditor();
         });
     }
 };
@@ -90,11 +85,9 @@ int main() {
         // Reset operation for unselected components
         [](SelectableComponent* selectable) {},
         // Operate on selected components
-        [](SelectedComponent* selected) {
+        [](SelectedComponent* selected, glm::vec3 mousePos) {
             if (auto spatial = selected->getGameObject().getComponentByType<SpatialComponent>()) {
-                if (auto mouseRay = Engine::getSingleComponent<MouseRayComponent>()) {
-                    spatial->setPosition(mouseRay->position + mouseRay->direction * 5.f);
-                }
+                spatial->setPosition(mousePos);
             }
         }
     );

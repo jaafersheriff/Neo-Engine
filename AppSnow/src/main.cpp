@@ -14,7 +14,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, Window::getAspectRatio());
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -29,12 +29,7 @@ struct Light {
         light = &Engine::addComponent<LightComponent>(gameObject, col, att);
 
         Engine::addImGuiFunc("Light", [&]() {
-            glm::vec3 pos = gameObject->getComponentByType<SpatialComponent>()->getPosition();
-            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -100.f, 100.f)) {
-                gameObject->getComponentByType<SpatialComponent>()->setPosition(pos);
-            }
-            ImGui::SliderFloat3("Color", glm::value_ptr(light->mColor), 0.f, 1.f);
-            ImGui::SliderFloat3("Attenuation", glm::value_ptr(light->mAttenuation), 0.f, 1.f);
+            light->imGuiEditor();
         });
     }
 };
@@ -49,22 +44,7 @@ struct Renderable {
         Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 0.f));
 
         Engine::addImGuiFunc("Mesh", [&]() {
-            glm::vec3 pos = gameObject->getComponentByType<SpatialComponent>()->getPosition();
-            if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -10.f, 10.f)) {
-                gameObject->getComponentByType<SpatialComponent>()->setPosition(pos);
-            }
-            float scale = gameObject->getComponentByType<SpatialComponent>()->getScale().x;
-            if (ImGui::SliderFloat("Scale", &scale, 0.f, 10.f)) {
-                gameObject->getComponentByType<SpatialComponent>()->setScale(glm::vec3(scale));
-            }
-            static glm::vec3 rot(0.f);
-            if (ImGui::SliderFloat3("Rotation", glm::value_ptr(rot), 0.f, 4.f)) {
-                glm::mat4 R;
-                R = glm::rotate(glm::mat4(1.f), rot.x, glm::vec3(1, 0, 0));
-                R *= glm::rotate(glm::mat4(1.f), rot.y, glm::vec3(0, 1, 0));
-                R *= glm::rotate(glm::mat4(1.f), rot.z, glm::vec3(0, 0, 1));
-                gameObject->getComponentByType<SpatialComponent>()->setOrientation(glm::mat3(R));
-            }
+            gameObject->getComponentByType<SpatialComponent>()->imGuiEditor();
         });
     }
 };
@@ -81,19 +61,8 @@ struct Snow {
         line->addNodes({ {glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f) }, {glm::vec3(0.f, 1.f, 0.f), glm::vec3(1.f) } });
         
         Engine::addImGuiFunc("Snow", [&]() {
-            ImGui::SliderFloat("Snow size", &snow->snowSize, 1.f, 0.f);
-            ImGui::SliderFloat3("Snow color", glm::value_ptr(snow->snowColor), 0.f, 1.f);
-            ImGui::SliderFloat("Height", &snow->height, 0.f, .25f);
-            ImGui::SliderFloat3("Rim color", glm::value_ptr(snow->rimColor), 0.f, 1.f);
-            ImGui::SliderFloat("Rim power", &snow->rimPower, 0.f, 25.f);
-            static glm::vec3 rot(0.f);
-            if (ImGui::SliderFloat3("Rotation", glm::value_ptr(rot), -Util::PI(), Util::PI())) {
-                glm::mat4 R;
-                R = glm::rotate(glm::mat4(1.f), rot.x, glm::vec3(1, 0, 0));
-                R *= glm::rotate(glm::mat4(1.f), rot.y, glm::vec3(0, 1, 0));
-                R *= glm::rotate(glm::mat4(1.f), rot.z, glm::vec3(0, 0, 1));
-                gameObject->getComponentByType<SpatialComponent>()->setOrientation(glm::mat3(R));
-            }
+            snow->imGuiEditor();
+            snow->getGameObject().getComponentByType<SpatialComponent>()->imGuiEditor();
         });
     }
 };

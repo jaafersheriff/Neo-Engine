@@ -26,7 +26,6 @@ namespace neo {
                     replaceMesh(mesh.second);
                 }
             }
-            ImGui::EndCombo();
         }
 
     protected:

@@ -146,13 +146,13 @@ namespace neo {
         glm::vec3 moveAmount(0.f);
         glm::vec3 scaleAmount(0.f);
         glm::vec3 lookDir = getLookDir();
-        if (ImGui::DragFloat3("Move", &moveAmount[0], 1.f, -20.f, 20.f)) {
+        if (ImGui::DragFloat3("Move", &moveAmount[0], 0.5f, -20.f, 20.f)) {
             move(moveAmount);
         }
-        if (ImGui::DragFloat3("Scale", &scaleAmount[0], 0.5f, 0.f, 5.f)) {
+        if (ImGui::DragFloat3("Scale", &scaleAmount[0], 0.5f, -5.f, 5.f)) {
             resize(scaleAmount);
         }
-        if (ImGui::DragFloat3("LookDir", &lookDir[0], 0.1f, 0.f, 1.f)) {
+        if (ImGui::DragFloat3("LookDir", &lookDir[0], 0.1f, -1.f, 1.f)) {
             setLookDir(lookDir);
         }
     }

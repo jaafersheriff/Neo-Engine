@@ -42,6 +42,7 @@ namespace neo {
     }
 
     void PerspectiveCameraComponent::imGuiEditor() {
+        CameraComponent::imGuiEditor();
         float fov = getFOV();
         float ar = getAspectRatio();
         if (ImGui::SliderFloat("FOV", &fov, 0.f, 180.f)) {
