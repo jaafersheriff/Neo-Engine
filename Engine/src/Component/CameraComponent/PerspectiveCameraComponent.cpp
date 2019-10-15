@@ -6,6 +6,8 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "ext/imgui/imgui.h"
+
 namespace neo {
 
     PerspectiveCameraComponent::PerspectiveCameraComponent(GameObject *gameObject, float near, float far, float fov, float ar) :
@@ -37,6 +39,17 @@ namespace neo {
     void PerspectiveCameraComponent::_detProj() const {
         mProjMat = glm::perspective(glm::radians(mFOV), mAspectRatio, mNear, mFar);
         mProjMatDirty = false;
+    }
+
+    void PerspectiveCameraComponent::imGuiEditor() {
+        float fov = getFOV();
+        float ar = getAspectRatio();
+        if (ImGui::SliderFloat("FOV", &fov, 0.f, 180.f)) {
+            setFOV(fov);
+        }
+        if (ImGui::SliderFloat("Aspect Ratio", &ar, 0.f, 1.f)) {
+            setAspectRatio(ar);
+        }
     }
 
 }

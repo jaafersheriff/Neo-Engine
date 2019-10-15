@@ -9,6 +9,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "ext/imgui/imgui.h"
 
 namespace neo {
 
@@ -19,6 +20,10 @@ namespace neo {
             Component(go),
             mSpeed(speed)
         {}
+
+        virtual void imGuiEditor() override {
+            ImGui::SliderFloat3("Speed", &mSpeed[0], -5.f, 5.f);
+        }
 
         glm::vec3 mSpeed;
 

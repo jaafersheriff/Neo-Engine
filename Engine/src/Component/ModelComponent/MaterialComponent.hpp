@@ -3,6 +3,7 @@
 #include "Component/Component.hpp"
 
 #include <glm/glm.hpp>
+#include "ext/imgui/imgui.h"
 
 namespace neo {
 
@@ -21,6 +22,13 @@ namespace neo {
                 mSpecular(spec),
                 mShine(shine)
             {}
+
+            virtual void imGuiEditor() override {
+                ImGui::SliderFloat("Ambient", &mAmbient, 0.f, 1.f);
+                ImGui::SliderFloat3("Diffuse", &mDiffuse[0], 0.f, 1.f);
+                ImGui::SliderFloat3("Specular", &mSpecular[0], 0.f, 1.f);
+                ImGui::SliderFloat("Shine", &mShine, 0.f, 50.f);
+            }
 
     };
 }

@@ -12,6 +12,8 @@ namespace neo {
             /* Overridden functions */
             virtual void init() {};
             virtual void kill() {};
+            /* Components can have an editor */
+            virtual void imGuiEditor() {};
 
             /* Remove copy constructors */
             Component(const Component &) = delete;
@@ -22,6 +24,8 @@ namespace neo {
             /* Virtual destructor necessary for polymorphic destruction */
             virtual ~Component() = default;
 
+
+            /* GameObject */
             GameObject & getGameObject() { return *mGameObject; }
             const GameObject & getGameObject() const { return *mGameObject; }
             void removeGameObject() { mGameObject = nullptr; }

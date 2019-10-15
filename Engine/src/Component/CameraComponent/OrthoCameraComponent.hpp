@@ -13,6 +13,8 @@ namespace neo {
             OrthoCameraComponent(GameObject *, float near, float far, float hMin, float hMax, float vMin, float vMax);
             OrthoCameraComponent(OrthoCameraComponent &&) = default;
 
+            virtual void imGuiEditor() override;
+
             /* Setters */
             void setOrthoBounds(const glm::vec2 &, const glm::vec2 &);
 

@@ -47,7 +47,12 @@ namespace neo {
                     CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                     loadUniform("M", spatialComponent->getModelMatrix());
-                    loadUniform("wireColor", renderable->color);
+
+                    glm::vec3 color(1.f);
+                    if (const auto material = renderable->getGameObject().getComponentByType<MaterialComponent>()) {
+                        color = material->mDiffuse;
+                    }
+                    loadUniform("wireColor", color);
 
                     /* Draw outline */
                     mesh.draw();

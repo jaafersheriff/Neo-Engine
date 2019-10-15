@@ -13,6 +13,8 @@ namespace neo {
             PerspectiveCameraComponent(GameObject *, float near, float far, float fov, float ar);
             PerspectiveCameraComponent(PerspectiveCameraComponent &&) = default;
 
+            virtual void imGuiEditor() override;
+
             /* Setters */
             void setFOV(float);
             void setAspectRatio(float);

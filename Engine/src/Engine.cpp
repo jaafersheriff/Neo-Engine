@@ -59,6 +59,11 @@ namespace neo {
         /* Init loader after initializing GL*/
         Loader::init(app_res, true);
 
+        /* Generate basic meshes */
+        Library::getMesh("cube");
+        Library::getMesh("quad");
+        Library::getMesh("sphere");
+
         /* Init Util */
         Util::init();
    }
@@ -406,8 +411,7 @@ namespace neo {
                         if (components.size() > 1) {
                             ImGui::SliderInt("Index", &offset, 0, components.size() - 1);
                         }
-                        // TODO : give all the components an editor (:
-                        // components[offset]->imguiEditor();
+                        components[offset]->imGuiEditor();
                     }
                 }
             }

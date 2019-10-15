@@ -4,6 +4,8 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "ext/imgui/imgui.h"
+
 namespace neo {
 
     SpatialComponent::SpatialComponent(GameObject *go) :
@@ -138,5 +140,20 @@ namespace neo {
             mNormalMatrix = getOrientation() * glm::mat3(glm::scale(glm::mat4(), 1.0f / mScale));
         }
         mNormalMatrixDirty = false;
+    }
+
+    void SpatialComponent::imGuiEditor() {
+        glm::vec3 moveAmount(0.f);
+        glm::vec3 scaleAmount(0.f);
+        glm::vec3 lookDir = getLookDir();
+        if (ImGui::DragFloat3("Move", &moveAmount[0], 1.f, -20.f, 20.f)) {
+            move(moveAmount);
+        }
+        if (ImGui::DragFloat3("Scale", &scaleAmount[0], 0.5f, 0.f, 5.f)) {
+            resize(scaleAmount);
+        }
+        if (ImGui::DragFloat3("LookDir", &lookDir[0], 0.1f, 0.f, 1.f)) {
+            setLookDir(lookDir);
+        }
     }
 }

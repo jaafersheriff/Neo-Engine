@@ -23,6 +23,7 @@ namespace neo {
             void move(const glm::vec3 &);
             void resize(const glm::vec3 &);
             void rotate(const glm::mat3 &);
+            virtual void imGuiEditor() override;
 
             /* Setters */
             void setPosition(const glm::vec3 &);

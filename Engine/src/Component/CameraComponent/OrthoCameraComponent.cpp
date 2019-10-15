@@ -8,6 +8,7 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "ext/imgui/imgui.h"
 namespace neo {
 
     OrthoCameraComponent::OrthoCameraComponent(GameObject *gameObject, float near, float far, float horizMin, float horizMax, float vertMin, float vertMax) 
@@ -30,6 +31,17 @@ namespace neo {
     void OrthoCameraComponent::_detProj() const {
         mProjMat = glm::ortho(mHorizBounds.x, mHorizBounds.y, mVertBounds.x, mVertBounds.y, mNear, mFar);
         mProjMatDirty = false;
+    }
+
+    void OrthoCameraComponent::imGuiEditor() {
+        glm::vec2 h = getHorizontalBounds();
+        glm::vec2 v = getVerticalBounds();
+        bool edited = false;
+        edited = edited || ImGui::SliderFloat("H-Bounds", &h[0], -10.f, 10.f);
+        edited = edited || ImGui::SliderFloat("V-Bounds", &v[0], -10.f, 10.f);
+        if (edited) {
+            setOrthoBounds(h, v);
+        }
     }
 
 }

@@ -72,6 +72,13 @@ namespace neo {
             mDirty = true;
         }
 
+        void editNode(const unsigned i, const glm::vec3 pos, std::optional<glm::vec3> col = std::nullopt) {
+            if (i < mNodes.size()) {
+                mNodes[i].position = pos;
+                mNodes[i].color = col.value_or(mOverrideColor.value_or(glm::vec3(1.f)));
+            }
+        }
+
         void removeNode(const glm::vec3 position) {
             for (unsigned i = 0; i < mNodes.size(); i++) {
                 if (mNodes[i].position == position) {
@@ -91,6 +98,32 @@ namespace neo {
         void clearNodes() {
             mNodes.clear();
             mDirty = true;
+        }
+
+        virtual void imGuiEditor() override {
+            if (mOverrideColor) {
+                ImGui::SliderFloat("Color", &(mOverrideColor.value())[0], 0.f, 1.f);
+            }
+            ImGui::Separator();
+
+            static glm::vec3 addPos(0.f);
+            ImGui::Separator();
+            ImGui::SliderFloat3("Add Node", &addPos[0], -50.f, 50.f);
+            if (ImGui::Button("Add")) {
+                addNode(addPos);
+            }
+            ImGui::Separator();
+
+            static int index = 0;
+            if (mNodes.size()) {
+                ImGui::SliderInt("Index", &index, 0, mNodes.size() - 1);
+                glm::vec3 pos = mNodes[index].position;
+                glm::vec3 col = mNodes[index].color;
+                bool edited = false;
+                edited = edited || ImGui::SliderFloat3("Position", &pos[0], -25.f, 25.f);
+                edited = edited || ImGui::SliderFloat3("Color", &col[0], 0.f, 1.f);
+                editNode(index, pos, col);
+            }
         }
 
     };
