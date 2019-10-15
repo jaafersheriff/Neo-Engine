@@ -12,7 +12,7 @@ namespace neo {
             float maxDist = 100.f,
             std::function<bool(SelectedComponent*)> removeDecider = [](SelectedComponent*) { return true; },
             std::function<void(SelectableComponent*)> resetOperation = [](SelectableComponent*) {},
-            std::function<void(SelectedComponent*)> selectOperation = [](SelectedComponent*) {},
+            std::function<void(SelectedComponent*, glm::vec3)> selectOperation = [](SelectedComponent*, glm::vec3) {},
             std::function<void(std::vector<SelectedComponent*>&)> editorOperation = [](std::vector<SelectedComponent*>&) {}) :
 
             System("Selecting System"),
@@ -34,7 +34,7 @@ namespace neo {
         const float mMaxDist;
         const std::function<bool(SelectedComponent*)> mRemoveDecider;
         const std::function<void(SelectableComponent*)> mResetOperation;
-        const std::function<void(SelectedComponent*)> mSelectOperation;
+        const std::function<void(SelectedComponent*, glm::vec3)> mSelectOperation;
         const std::function<void(std::vector<SelectedComponent*>&)> mEditorOperation;
     };
 

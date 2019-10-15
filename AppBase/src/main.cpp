@@ -13,7 +13,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, Window::getAspectRatio());
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -82,6 +82,8 @@ int main() {
     Renderable cube(Library::getMesh("cube"), glm::vec3(0.f, 0.5f, 0.f));
     Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
     Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+    Engine::addComponent<SelectableComponent>(cube.gameObject);
+    Engine::addComponent<BoundingBoxComponent>(cube.gameObject, Library::getMesh("cube")->mBuffers.vertices);
 
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
@@ -98,6 +100,7 @@ int main() {
 
     /* Attach ImGui panes */
     Engine::addDefaultImGuiFunc();
+    Engine::addSelectionEditing();
 
     /* Run */
     Engine::run();

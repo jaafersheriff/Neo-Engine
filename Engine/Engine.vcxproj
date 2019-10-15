@@ -82,6 +82,7 @@
     <ClInclude Include="src\Systems\CameraSystems\FrustaFittingSystem.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\FrustumSystem.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\FrustumToLineSystem.hpp" />
+    <ClInclude Include="src\Systems\SelectingSystems\EditorSystem.hpp" />
     <ClInclude Include="src\Systems\SelectingSystems\MouseRaySystem.hpp" />
     <ClInclude Include="src\Systems\SelectingSystems\SelectingSystem.hpp" />
     <ClInclude Include="src\Systems\System.hpp" />

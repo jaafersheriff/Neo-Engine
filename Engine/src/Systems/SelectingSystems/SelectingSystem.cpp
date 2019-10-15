@@ -42,11 +42,17 @@ namespace neo {
 
 
                     // Ray march
+                    bool objectFound = false;
                     for (float i = 0.f; i < maxDistance; i += maxDistance / static_cast<float>(mMaxMarches)) {
-                        if (bb->intersect(mouseRay->position + mouseRay->direction * i)) {
+                        glm::vec3 raySample = mouseRay->position + mouseRay->direction * i;
+                        if (bb->intersect(raySample)) {
                             // Add and operate on new selected
-                            mSelectOperation(&Engine::addComponent<SelectedComponent>(&selectable->getGameObject()));
+                            mSelectOperation(&Engine::addComponent<SelectedComponent>(&selectable->getGameObject()), raySample);
+                            objectFound = true;
                         }
+                    }
+                    if (objectFound) {
+                        break;
                     }
                 }
             }

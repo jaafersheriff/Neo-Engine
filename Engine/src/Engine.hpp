@@ -63,6 +63,7 @@ namespace neo {
             static std::unordered_map<std::string, std::function<void()>> imGuiFuncs;
             static void addImGuiFunc(std::string name, std::function<void()> func) { imGuiFuncs.insert({ name, func}); }
             static void addDefaultImGuiFunc();
+            static void addSelectionEditing();
 
         private:
             /* Initialize / kill queues */

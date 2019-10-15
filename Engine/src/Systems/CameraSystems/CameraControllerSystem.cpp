@@ -17,7 +17,7 @@ namespace neo {
     void CameraControllerSystem::_updateLook(const float dt, CameraControllerComponent& comp) {
         glm::vec2 mousePos = Mouse::getPos();
         glm::vec2 mouseSpeed = Mouse::getSpeed();
-        if (Mouse::isDown(GLFW_MOUSE_BUTTON_1) && (mousePos.x || mousePos.y)) {
+        if (Mouse::isDown(GLFW_MOUSE_BUTTON_2) && (mousePos.x || mousePos.y)) {
             float theta = comp.mTheta - mouseSpeed.x * comp.mLookSpeed * dt;
             float phi = comp.mPhi + mouseSpeed.y * comp.mLookSpeed * dt;
             comp.setOrientation(theta, phi);

@@ -75,6 +75,7 @@
     <ClInclude Include="src\Component\SelectingComponent\SelectableComponent.hpp" />
     <ClInclude Include="src\Systems\SelectingSystems\MouseRaySystem.hpp" />
     <ClInclude Include="src\Systems\CameraSystems\FrustaFittingSystem.hpp" />
+    <ClInclude Include="src\Systems\SelectingSystems\EditorSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />

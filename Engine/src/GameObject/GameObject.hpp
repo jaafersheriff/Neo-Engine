@@ -35,6 +35,7 @@ namespace neo {
             template <typename CompT> CompT * getComponentByType() const;
 
             const std::vector<Component *> getAllComponents() const { return mComponents; }
+            std::unordered_map<std::type_index, std::vector<Component *>> _getcomps() { return mComponentsByType ; }
             int getNumReceiverTypes() { return mReceivers.size(); }
             int getNumReceivers() {
                 int count = 0;
