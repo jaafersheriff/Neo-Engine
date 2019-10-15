@@ -18,13 +18,14 @@ namespace neo {
             if (auto selected = Engine::getSingleComponent<SelectedComponent>()) {
                 auto allComponents = selected->getGameObject()._getcomps();
                 static std::optional<std::type_index> index;
-                if (ImGui::BeginCombo("", "Edit components")) {
+                if (ImGui::BeginCombo("", index ? index->name() + 6: "Edit components")) {
                     index = std::nullopt;
                     for (auto comp : allComponents) {
-                        if (ImGui::Selectable(comp.first.name() + 6)) {
-                            index = comp.first;
+                        if (comp.second.size()) {
+                            if (ImGui::Selectable(comp.first.name() + 6)) {
+                                index = comp.first;
+                            }
                         }
-
                     }
                     ImGui::EndCombo();
                 }
@@ -36,6 +37,10 @@ namespace neo {
                             ImGui::SliderInt("Index", &offset, 0, components.size() - 1);
                         }
                         components[offset]->imGuiEditor();
+                        if (ImGui::Button("Remove")) {
+                            selected->getGameObject().removeComponent(*components[offset], *index);
+                            index = std::nullopt;
+                        }
                     }
                 }
                 if (ImGui::BeginCombo("", "Add components")) {
