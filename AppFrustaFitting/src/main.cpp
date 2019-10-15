@@ -42,7 +42,9 @@ struct Light {
         Engine::addComponent<ShadowCameraComponent>(cameraObject);
 
         Engine::addImGuiFunc("Light", []() {
-            auto spatial = Engine::getSingleComponent<LightComponent>()->getGameObject().getComponentByType<SpatialComponent>();
+            auto light = Engine::getSingleComponent<LightComponent>();
+            auto spatial = light->getGameObject().getComponentByType<SpatialComponent>();
+            light->imGuiEditor();
             glm::vec3 lookdir = spatial->getLookDir();
             ImGui::SliderFloat3("lookdir", &lookdir[0], -1.f, 1.f);
             spatial->setLookDir(lookdir);
