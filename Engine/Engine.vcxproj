@@ -32,6 +32,7 @@
     <ClInclude Include="src\Component\ModelComponent\LineMeshComponent.hpp" />
     <ClInclude Include="src\Component\ModelComponent\MaterialComponent.hpp" />
     <ClInclude Include="src\Component\RenderableComponent\AlphaTestRenderable.hpp" />
+    <ClInclude Include="src\Component\RenderableComponent\OutlineRenderable.hpp" />
     <ClInclude Include="src\Component\RenderableComponent\PhongRenderable.hpp" />
     <ClInclude Include="src\Component\ModelComponent\MeshComponent.hpp" />
     <ClInclude Include="src\Component\ModelComponent\TextureComponent.hpp" />
@@ -69,6 +70,7 @@
     <ClInclude Include="src\Shader\AlphaTestShader.hpp" />
     <ClInclude Include="src\Shader\GammaCorrectShader.hpp" />
     <ClInclude Include="src\Shader\LineShader.hpp" />
+    <ClInclude Include="src\Shader\OutlineShader.hpp" />
     <ClInclude Include="src\Shader\PhongShader.hpp" />
     <ClInclude Include="src\Shader\PostProcessShader.hpp" />
     <ClInclude Include="src\Shader\ShadowCasterShader.hpp" />

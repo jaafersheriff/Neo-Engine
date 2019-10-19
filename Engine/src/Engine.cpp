@@ -9,7 +9,7 @@ extern "C" {
 #include "Engine.hpp"
 #include "Renderer/Renderer.hpp"
 #include "Shader/WireframeShader.hpp"
-#include "Shader/LineShader.hpp"
+#include "Shader/OutlineShader.hpp"
 
 #include "GameObject/GameObject.hpp"
 #include "Messaging/Messenger.hpp"
@@ -82,8 +82,7 @@ namespace neo {
         addSystem<MouseRaySystem>();
         addSystem<EditorSystem>();
         Renderer::addSceneShader<WireframeShader>();
-        Renderer::addSceneShader<LineShader>();
-
+        Renderer::addSceneShader<OutlineShader>();
 
         while (!Window::shouldClose()) {
             /* Update Util */

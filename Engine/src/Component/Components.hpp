@@ -20,6 +20,7 @@
 #include "ModelComponent/MeshComponent.hpp"
 
 #include "RenderableComponent/AlphaTestRenderable.hpp"
+#include "RenderableComponent/OutlineRenderable.hpp"
 #include "RenderableComponent/PhongRenderable.hpp"
 #include "RenderableComponent/PhongShadowRenderable.hpp"
 #include "RenderableComponent/ShadowCasterRenderable.hpp"
