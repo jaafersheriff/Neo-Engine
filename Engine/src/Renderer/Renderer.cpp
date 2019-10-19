@@ -116,7 +116,7 @@ namespace neo {
         }
 
         /* Render imgui */
-        if (Engine::imGuiEnabled) {
+        if (Engine::mImGuiEnabled) {
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }

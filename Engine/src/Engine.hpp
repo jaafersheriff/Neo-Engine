@@ -58,12 +58,9 @@ namespace neo {
             template <typename CompT> static CompT* getSingleComponent();
 
             /* ImGui */
-            static bool imGuiEnabled;
-            static void toggleImGui() { imGuiEnabled = !imGuiEnabled; }
-            static std::unordered_map<std::string, std::function<void()>> imGuiFuncs;
-            static void addImGuiFunc(std::string name, std::function<void()> func) { imGuiFuncs.insert({ name, func}); }
-            static void addDefaultImGuiFunc();
-            static void addSelectionEditing();
+            static bool mImGuiEnabled;
+            static void toggleImGui() { mImGuiEnabled = !mImGuiEnabled; }
+            static void addImGuiFunc(std::string name, std::function<void()> func) { mImGuiFuncs.insert({ name, func}); }
 
         private:
             /* Initialize / kill queues */
@@ -72,18 +69,22 @@ namespace neo {
             static void _processInitQueue();
             static void _initGameObjects();
             static void _initComponents();
+            static void _initSystems();
             static std::vector<GameObject *> mGameObjectKillQueue;
             static std::vector<std::pair<std::type_index, Component *>> mComponentKillQueue;
             static void _processKillQueue();
             static void _killGameObjects();
             static void _killComponents();
 
-            static void _initSystems();
-
             /* Active containers */
             static std::vector<std::unique_ptr<GameObject>> mGameObjects;
             static std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> mComponents;
             static std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
+
+            /* ImGui */
+            static std::unordered_map<std::string, std::function<void()>> mImGuiFuncs;
+            static void _runImGui();
+ 
     };
 
     /* Template implementation */

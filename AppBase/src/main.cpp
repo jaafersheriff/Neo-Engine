@@ -74,8 +74,8 @@ int main() {
     Renderer::addSceneShader<AlphaTestShader>();
 
     /* Attach ImGui panes */
-    Engine::addDefaultImGuiFunc();
-    Engine::addSelectionEditing();
+    // Engine::addDefaultImGuiFunc();
+    // Engine::addSelectionEditing();
 
     /* Run */
     Engine::run();

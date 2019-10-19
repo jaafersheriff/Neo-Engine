@@ -54,7 +54,7 @@ namespace neo {
         if (key == GLFW_KEY_GRAVE_ACCENT && mods && action == GLFW_PRESS) {
             Engine::toggleImGui();
         }
-        else if (Engine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+        else if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             Keyboard::reset();
             ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
         }
@@ -64,7 +64,7 @@ namespace neo {
     }
 
     void Window::_mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
-        if (Engine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+        if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
         }
         else {
@@ -73,13 +73,13 @@ namespace neo {
     }
 
     void Window::_scrollCallback(GLFWwindow * window, double dx, double dy) {
-        if (Engine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+        if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
         }
    }
 
     void Window::_characterCallback(GLFWwindow *window, unsigned int c) {
-        if (Engine::imGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
+        if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {
             ImGui_ImplGlfw_CharCallback(window, c);
         }
     }
@@ -188,7 +188,7 @@ namespace neo {
         glfwGetCursorPos(mWindow, &x, &y);
         Mouse::update(x, y);
 
-        if (Engine::imGuiEnabled) {
+        if (Engine::mImGuiEnabled) {
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();

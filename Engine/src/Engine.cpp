@@ -43,8 +43,8 @@ namespace neo {
     std::vector<int> Util::mFPSList;
 
     /* ImGui */
-    bool Engine::imGuiEnabled = true;
-    std::unordered_map<std::string, std::function<void()>> Engine::imGuiFuncs;
+    bool Engine::mImGuiEnabled = true;
+    std::unordered_map<std::string, std::function<void()>> Engine::mImGuiFuncs;
 
     void Engine::init(const std::string &title, const std::string &app_res, const int width, const int height) {
         /* Init base engine */
@@ -67,12 +67,6 @@ namespace neo {
 
         /* Init Util */
         Util::init();
-   }
-
-    void Engine::_initSystems() {
-        for (auto & system : mSystems) {
-            system.second->init();
-        }
     }
 
     void Engine::run() {
@@ -82,6 +76,12 @@ namespace neo {
 
         /* Init systems */
         _initSystems();
+
+        // TODO if config.selecting
+        addSystem<MouseRaySystem>();
+        addSystem<EditorSystem>();
+        Renderer::addSceneShader<WireframeShader>();
+
 
         while (!Window::shouldClose()) {
             /* Update Util */
@@ -104,8 +104,10 @@ namespace neo {
             }
  
             /* Update imgui functions */
-            if (imGuiEnabled) {
-                for (auto & it : imGuiFuncs) {
+            if (mImGuiEnabled) {
+                // TODO if config.default imgui
+                _runImGui();
+                for (auto & it : mImGuiFuncs) {
                     ImGui::Begin(it.first.c_str(), nullptr, ImVec2(0.f, 0.f), 0.5f, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_AlwaysAutoResize);
                     ImGui::SetWindowFontScale(1.3f);
                     it.second();
@@ -160,6 +162,12 @@ namespace neo {
             it->second->back()->init();
         }
         mComponentInitQueue.clear();
+    }
+
+    void Engine::_initSystems() {
+        for (auto & system : mSystems) {
+            system.second->init();
+        }
     }
 
     void Engine::_processKillQueue() {
@@ -235,9 +243,9 @@ namespace neo {
         mComponentKillQueue.clear();
     }
 
-    void Engine::addDefaultImGuiFunc() {
-        addImGuiFunc("Neo", [&]() {
-            if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
+    void Engine::_runImGui() {
+        if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu("Performance")) {
                 // Translate FPS to floats
                 std::vector<float> FPSfloats(Util::mFPSList.begin(), Util::mFPSList.end());
                 ImGui::PlotLines("FPS", FPSfloats.data(), FPSfloats.size(), 0, std::to_string(Util::mFPS).c_str());
@@ -245,8 +253,9 @@ namespace neo {
                 if (ImGui::Button("VSync")) {
                     Window::toggleVSync();
                 }
+                ImGui::EndMenu();
             }
-            if (ImGui::CollapsingHeader("ECS", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::BeginMenu("ECS")) {
                 ImGui::Text("GameObjects:  %d", Engine::getGameObjects().size());
                 int count = 0;
                 for (auto go : Engine::getGameObjects()) {
@@ -257,7 +266,7 @@ namespace neo {
                     for (unsigned i = 0; i < mSystems.size(); i++) {
                         auto & sys = mSystems[i].second;
                         ImGui::PushID(i);
-                        bool treeActive = ImGui::TreeNode(sys->mName.c_str());
+                        bool treeActive = ImGui::TreeNodeEx(sys->mName.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
                         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                             ImGui::SetDragDropPayload("SYSTEM_SWAP", &i, sizeof(unsigned));
                             ImGui::Text("Swap %s", sys->mName.c_str());
@@ -281,9 +290,10 @@ namespace neo {
 
                     ImGui::TreePop();
                 }
+                ImGui::EndMenu();
             }
-            if (ImGui::CollapsingHeader("Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
-                if (Renderer::mDefaultCamera && ImGui::TreeNode("Camera")) {
+            if (ImGui::BeginMenu("Renderer")) {
+                if (Renderer::mDefaultCamera && ImGui::TreeNode("Scene Camera")) {
                     auto spatial = Renderer::mDefaultCamera->getGameObject().getComponentByType<SpatialComponent>();
                     assert(spatial);
                     auto pos = spatial->getPosition();
@@ -297,7 +307,7 @@ namespace neo {
                         for (unsigned i = 0; i < shaders.size(); i++) {
                             auto& shader = shaders[i];
                             ImGui::PushID(i);
-                            bool treeActive = ImGui::TreeNode(shader.second->mName.c_str());
+                            bool treeActive = ImGui::TreeNodeEx(shader.second->mName.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
                             if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                                 ImGui::SetDragDropPayload(swapName.c_str(), &i, sizeof(unsigned));
                                 ImGui::Text("Swap %s", shader.second->mName.c_str());
@@ -325,27 +335,28 @@ namespace neo {
                         }
                     };
 
-                    if (Renderer::mPreProcessShaders.size() && ImGui::TreeNode("Pre process")) {
+                    if (Renderer::mPreProcessShaders.size() && ImGui::TreeNodeEx("Pre process", ImGuiTreeNodeFlags_DefaultOpen)) {
                         shadersFunc(Renderer::mPreProcessShaders, "PRESHADER_SWAP");
                         ImGui::TreePop();
                     }
-                    if (Renderer::mSceneShaders.size() && ImGui::TreeNode("Scene")) {
+                    if (Renderer::mSceneShaders.size() && ImGui::TreeNodeEx("Scene", ImGuiTreeNodeFlags_DefaultOpen)) {
                         shadersFunc(Renderer::mSceneShaders, "SCENESHADER_SWAP");
                         ImGui::TreePop();
                     }
-                    if (Renderer::mPostShaders.size() && ImGui::TreeNode("Post process")) {
+                    if (Renderer::mPostShaders.size() && ImGui::TreeNodeEx("Post process", ImGuiTreeNodeFlags_DefaultOpen)) {
                         shadersFunc(Renderer::mPostShaders, "POSTSHADER_SWAP");
                         ImGui::TreePop();
                     }
                     ImGui::TreePop();
                 }
+                ImGui::EndMenu();
             }
             auto textureFunc = [&](const Texture& texture) {
                 float scale = 150.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
                 ImGui::Image((ImTextureID)texture.mTextureID, ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
             };
-            if (ImGui::CollapsingHeader("Library", ImGuiTreeNodeFlags_DefaultOpen)) {
-                if (Library::mFramebuffers.size() && ImGui::TreeNode("FBOs")) {
+            if (ImGui::BeginMenu("Library")) {
+                if (ImGui::TreeNodeEx("FBOs", ImGuiTreeNodeFlags_DefaultOpen)) {
                     for (auto & fbo : Library::mFramebuffers) {
                         if (ImGui::TreeNode((fbo.first + " (" + std::to_string(fbo.second->mFBOID) + ")").c_str())) {
                             for (auto& t : fbo.second->mTextures) {
@@ -359,13 +370,13 @@ namespace neo {
                     }
                     ImGui::TreePop();
                 }
-                if (Library::mMeshes.size() && ImGui::TreeNode("Meshes")) {
+                if (ImGui::TreeNodeEx("Meshes", ImGuiTreeNodeFlags_DefaultOpen)) {
                     for (auto & m : Library::mMeshes) {
                         ImGui::Text("%s (%d)", m.first.c_str(), m.second->mVertexBufferSize);
                     }
                     ImGui::TreePop();
                 }
-                if (Library::mTextures.size() && ImGui::TreeNode("Textures")) {
+                if (ImGui::TreeNodeEx("Textures", ImGuiTreeNodeFlags_DefaultOpen)) {
                     for (auto& t : Library::mTextures) {
                         if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->mTextureID) + ")" + " [" + std::to_string(t.second->mWidth) + ", " + std::to_string(t.second->mHeight) + "]").c_str())) {
                             textureFunc(*t.second);
@@ -374,14 +385,10 @@ namespace neo {
                     }
                     ImGui::TreePop();
                 }
+                ImGui::EndMenu();
             }
-        });
-    }
-
-    void Engine::addSelectionEditing() {
-        addSystem<MouseRaySystem>();
-        addSystem<EditorSystem>();
-        Renderer::addSceneShader<WireframeShader>();
+            ImGui::EndMainMenuBar();
+        }
     }
 
     void Engine::shutDown() {
