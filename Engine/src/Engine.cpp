@@ -22,7 +22,7 @@ extern "C" {
 namespace neo {
 
     /* Base Engine */
-    std::string Engine::APP_NAME = "Neo Engine";
+    EngineConfig Engine::mConfig;
 
     /* ECS */
     std::vector<std::unique_ptr<GameObject>> Engine::mGameObjects;
@@ -47,19 +47,19 @@ namespace neo {
     bool Engine::mImGuiEnabled = true;
     std::unordered_map<std::string, std::function<void()>> Engine::mImGuiFuncs;
 
-    void Engine::init(const std::string &title, const std::string &app_res, const int width, const int height) {
+    void Engine::init(EngineConfig config) {
         /* Init base engine */
         srand((unsigned int)(time(0)));
-        APP_NAME = title;
+        mConfig = config;
 
         /* Init window*/
-        if (Window::initGLFW(APP_NAME)) {
+        if (Window::initGLFW(mConfig.APP_NAME)) {
             std::cerr << "Failed initializing Window" << std::endl;
         }
-        Window::setSize(glm::ivec2(width, height));
+        Window::setSize(glm::ivec2(mConfig.width, mConfig.height));
 
         /* Init loader after initializing GL*/
-        Loader::init(app_res, true);
+        Loader::init(mConfig.APP_RES, true);
 
         /* Generate basic meshes */
         Library::getMesh("cube");
@@ -78,11 +78,13 @@ namespace neo {
         /* Init systems */
         _initSystems();
 
-        // TODO if config.selecting
-        addSystem<MouseRaySystem>();
-        addSystem<EditorSystem>();
-        Renderer::addSceneShader<WireframeShader>();
-        Renderer::addSceneShader<OutlineShader>();
+        if (mConfig.attachEditor) {
+            addSystem<MouseRaySystem>();
+            addSystem<EditorSystem>();
+            Renderer::addSceneShader<WireframeShader>();
+            Renderer::addSceneShader<OutlineShader>();
+            ImGui::GetStyle().ScaleAllSizes(2.f);
+        }
 
         while (!Window::shouldClose()) {
             /* Update Util */
@@ -106,14 +108,8 @@ namespace neo {
  
             /* Update imgui functions */
             if (mImGuiEnabled) {
-                // TODO if config.default imgui
+                ImGui::GetIO().FontGlobalScale = 2.0f;
                 _runImGui();
-                for (auto & it : mImGuiFuncs) {
-                    ImGui::Begin(it.first.c_str(), nullptr, ImVec2(0.f, 0.f), 0.5f, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_AlwaysAutoResize);
-                    ImGui::SetWindowFontScale(1.3f);
-                    it.second();
-                    ImGui::End();
-                }
                 Messenger::relayMessages();
             }
 
@@ -388,7 +384,7 @@ namespace neo {
                 }
                 ImGui::EndMenu();
             }
-            if (ImGui::BeginMenu("Editor")) {
+            if (mConfig.attachEditor && ImGui::BeginMenu("Editor")) {
                 if (ImGui::Button("Create GameObject")) {
                     Engine::removeComponent<SelectedComponent>(*Engine::getSingleComponent<SelectedComponent>());
                     auto& go = Engine::createGameObject();
@@ -430,6 +426,15 @@ namespace neo {
                     if (ImGui::BeginCombo("", "Add components")) {
                         // TODO..
                         ImGui::EndCombo();
+                    }
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu(mConfig.APP_NAME.c_str())) {
+                for (auto & it : mImGuiFuncs) {
+                    if (ImGui::TreeNodeEx(it.first.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+                        it.second();
+                        ImGui::TreePop();
                     }
                 }
                 ImGui::EndMenu();

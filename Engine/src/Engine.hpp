@@ -23,15 +23,22 @@
 
 namespace neo {
 
+    struct EngineConfig {
+        std::string APP_NAME = "Neo Engine";
+        std::string APP_RES = "";
+        int width = 1920;
+        int height = 1080;
+        bool attachEditor = true;
+    };
+
     class Engine {
 
         /* Base Engine */
         public:
-            static void init(const std::string &, const std::string &, int, const int);
+            static EngineConfig mConfig;
+            static void init(EngineConfig);
             static void run();
             static void shutDown();
-
-            static std::string APP_NAME;        /* Name of application */
 
         /* ECS */
         public:

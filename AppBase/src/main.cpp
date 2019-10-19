@@ -45,7 +45,10 @@ struct Renderable {
 };
 
 int main() {
-    Engine::init("Base", "res/", 1280, 720);
+    EngineConfig config;
+    config.APP_NAME = "Base";
+    config.APP_RES = "res/";
+    Engine::init(config);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
@@ -73,8 +76,6 @@ int main() {
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
 
-    /* Attach ImGui panes */
-    // Engine::addDefaultImGuiFunc();
     // Engine::addSelectionEditing();
 
     /* Run */
