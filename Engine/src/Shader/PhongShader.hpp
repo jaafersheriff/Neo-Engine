@@ -59,8 +59,6 @@ namespace neo {
         {}
 
         virtual void render(const CameraComponent &camera) override {
-            mNumDraws = 0;
-
             bind();
 
             /* Load PV */
@@ -124,18 +122,10 @@ namespace neo {
                 }
 
                 /* DRAW */
-                mNumDraws++;
                 mesh.draw();
             }
 
             unbind();
         }
-
-        virtual void imguiEditor() override {
-            ImGui::Text("Draws: %d", mNumDraws);
-        }
-
-        private:
-            int mNumDraws = 0;
     };
 }

@@ -8,10 +8,11 @@ namespace neo {
             25,
             100.f,
             [](SelectedComponent* selected) { 
-                Engine::removeComponent(*selected->getGameObject().getComponentByType<renderable::OutlineRenderable>());
                 return true; 
             },
-            [](SelectableComponent* selectable) { },
+            [](SelectableComponent* selectable) { 
+                Engine::removeComponent(*selectable->getGameObject().getComponentByType<renderable::OutlineRenderable>());
+            },
             [](SelectedComponent* selected, glm::vec3 mousePos) {
                 // Move selected object to moise pos
                 if (auto spatial = selected->getGameObject().getComponentByType<SpatialComponent>()) {
