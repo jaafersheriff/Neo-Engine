@@ -20,7 +20,7 @@ namespace neo {
                     uniform mat4 P, V, M;
                     out vec3 vCol;
                     void main() {
-                        gl_Position = P * V * vec4(vertPos, 1);
+                        gl_Position = P * V * M * vec4(vertPos, 1);
                         vCol = vertColor;
                     })",
                     R"(
@@ -42,6 +42,21 @@ namespace neo {
                 loadUniform("V", camera.getView());
 
                 for (auto& line : Engine::getComponents<LineMeshComponent>()) {
+                    glm::mat4 M(1.f);
+                    if (line->mUseParentSpatial) {
+                        if (auto spatial = line->getGameObject().getComponentByType<SpatialComponent>()) {
+                            M = spatial->getModelMatrix();
+                        }
+                    }
+                    loadUniform("M", M);
+
+                    if (line->mWriteDepth) {
+                        CHECK_GL(glEnable(GL_DEPTH_TEST));
+                    }
+                    else {
+                        CHECK_GL(glDisable(GL_DEPTH_TEST));
+                    }
+
                     /* Bind mesh */
                     const Mesh & mesh(line->getMesh());
                     CHECK_GL(glBindVertexArray(mesh.mVAOID));

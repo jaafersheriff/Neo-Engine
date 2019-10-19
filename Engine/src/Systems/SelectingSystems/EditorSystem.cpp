@@ -3,51 +3,30 @@
 
 namespace neo {
 
-    EditorSystem::EditorSystem() : SelectingSystem() {
-        Engine::addImGuiFunc("Editor", []() {
-            if (ImGui::Button("Create GameObject")) {
-                Engine::removeComponent<SelectedComponent>(*Engine::getSingleComponent<SelectedComponent>());
-                auto& go = Engine::createGameObject();
-                Engine::addComponent<BoundingBoxComponent>(&go, std::vector<float>{ -1.f, -1.f, -1.f, 1.f, 1.f, 1.f });
-                Engine::addComponent<SpatialComponent>(&go);
-                Engine::addComponent<SelectableComponent>(&go);
-                Engine::addComponent<SelectedComponent>(&go);
-                Engine::addComponent<MeshComponent>(&go, Library::getMesh("sphere"));
-                Engine::addComponent<renderable::WireframeRenderable>(&go);
-            }
-            if (auto selected = Engine::getSingleComponent<SelectedComponent>()) {
-                auto allComponents = selected->getGameObject()._getcomps();
-                static std::optional<std::type_index> index;
-                if (ImGui::BeginCombo("", index ? index->name() + 6: "Edit components")) {
-                    index = std::nullopt;
-                    for (auto comp : allComponents) {
-                        if (comp.second.size()) {
-                            if (ImGui::Selectable(comp.first.name() + 6)) {
-                                index = comp.first;
-                            }
-                        }
-                    }
-                    ImGui::EndCombo();
+    EditorSystem::EditorSystem() 
+        : SelectingSystem(
+            25,
+            100.f,
+            [](SelectedComponent*) { return true; },
+            [](SelectableComponent*) {},
+            [](SelectedComponent* selected, glm::vec3 mousePos) {
+                // Move selected object to moise pos
+                if (auto spatial = selected->getGameObject().getComponentByType<SpatialComponent>()) {
+                    spatial->setPosition(mousePos);
                 }
-                if (index) {
-                    auto components = allComponents[index.value()];
-                    if (components.size()) {
-                        static int offset = 0;
-                        if (components.size() > 1) {
-                            ImGui::SliderInt("Index", &offset, 0, components.size() - 1);
-                        }
-                        components[offset]->imGuiEditor();
-                        if (ImGui::Button("Remove")) {
-                            selected->getGameObject().removeComponent(*components[offset], *index);
-                            index = std::nullopt;
-                        }
-                    }
-                }
-                if (ImGui::BeginCombo("", "Add components")) {
-                    // TODO..
-                    ImGui::EndCombo();
-                }
-            }
-        });
-    }
+                // Add lines
+                auto& xLine = Engine::addComponent<LineMeshComponent>(&selected->getGameObject(), glm::vec3(1, 0, 0));
+                xLine.addNode(glm::vec3(0.f));
+                xLine.addNode(glm::vec3(1.f, 0.f, 0.f));
+                auto& yLine = Engine::addComponent<LineMeshComponent>(&selected->getGameObject(), glm::vec3(0, 1, 0));
+                yLine.addNode(glm::vec3(0.f));
+                yLine.addNode(glm::vec3(0.f, 1.f, 0.f));
+                auto& zLine = Engine::addComponent<LineMeshComponent>(&selected->getGameObject(), glm::vec3(0, 0, 1));
+                zLine.addNode(glm::vec3(0.f));
+                zLine.addNode(glm::vec3(0.f, 0.f, 1.f));
+
+                xLine.mUseParentSpatial = yLine.mUseParentSpatial = zLine.mUseParentSpatial = true;
+                xLine.mWriteDepth = yLine.mWriteDepth = zLine.mWriteDepth = false;
+            }) 
+    { }
 }

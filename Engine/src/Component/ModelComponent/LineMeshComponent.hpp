@@ -20,11 +20,15 @@ namespace neo {
 
         std::optional<glm::vec3> mOverrideColor;
         std::vector<Node> mNodes;
+        bool mWriteDepth;
+        bool mUseParentSpatial;
         mutable bool mDirty;
 
         LineMeshComponent(GameObject *go, std::optional<glm::vec3> overrideColor = std::nullopt) :
             MeshComponent(go, new Mesh),
             mDirty(false),
+            mWriteDepth(true),
+            mUseParentSpatial(false),
             mOverrideColor(overrideColor)
         {}
 
