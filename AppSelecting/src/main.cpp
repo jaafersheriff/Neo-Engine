@@ -49,10 +49,10 @@ struct Renderable {
 };
 
 int main() {
-	EngineConfig config;
-	config.APP_NAME = "FrustaFitting";
-	config.APP_RES = "res/";
-	config.attachEditor = false;
+    EngineConfig config;
+    config.APP_NAME = "FrustaFitting";
+    config.APP_RES = "res/";
+    config.attachEditor = false;
 	Engine::init(config);
 
     /* Game objects */

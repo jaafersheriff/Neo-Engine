@@ -53,9 +53,9 @@ struct Orient {
 };
 
 int main() {
-	EngineConfig config;
-	config.APP_NAME = "Geometry Shaders";
-	config.APP_RES = "res/";
+    EngineConfig config;
+    config.APP_NAME = "Geometry Shaders";
+    config.APP_RES = "res/";
 	Engine::init(config);
 
     /* Game objects */

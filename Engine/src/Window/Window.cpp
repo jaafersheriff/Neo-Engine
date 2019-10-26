@@ -10,15 +10,12 @@
 
 #include <iostream>
 
-#define DEFAULT_WITH 1280
-#define DEFAULT_HEIGHT 720
-
 namespace neo {
 
     GLFWwindow *Window::mWindow = nullptr;
     glm::ivec2 Window::mFrameSize;
     glm::ivec2 Window::mFullscreenSize;
-    glm::ivec2 Window::mWindowSize(DEFAULT_WITH, DEFAULT_HEIGHT);
+    glm::ivec2 Window::mWindowSize(1920, 1080);
     glm::ivec2 Window::mWindowPos(0, 0);
     bool Window::mFullscreen = false;
     bool Window::mVSyncEnabled = true;

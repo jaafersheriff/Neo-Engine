@@ -68,9 +68,9 @@ struct Snow {
 };
 
 int main() {
-	EngineConfig config;
-	config.APP_NAME = "Snow";
-	config.APP_RES = "res/";
+    EngineConfig config;
+    config.APP_NAME = "Snow";
+    config.APP_RES = "res/";
 	Engine::init(config);
 
     /* Game objects */

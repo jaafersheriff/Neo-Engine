@@ -46,9 +46,9 @@ struct Renderable {
 };
 
 int main() {
-	EngineConfig config;
-	config.APP_NAME = "SSAO";
-	config.APP_RES = "res/";
+    EngineConfig config;
+    config.APP_NAME = "SSAO";
+    config.APP_RES = "res/";
 	Engine::init(config);
 
     /* Game objects */

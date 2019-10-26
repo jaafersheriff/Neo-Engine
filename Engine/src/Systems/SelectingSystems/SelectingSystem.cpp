@@ -22,9 +22,9 @@ namespace neo {
             float maxDistance = mMaxDist;
             auto mainCamera = Engine::getSingleComponent<MainCameraComponent>();
             if (mainCamera) {
-				if (auto camera = mainCamera->getGameObject().getComponentByType<CameraComponent>()) {
-					maxDistance = glm::max(maxDistance, camera->getNearFar().y);
-				}
+                if (auto camera = mainCamera->getGameObject().getComponentByType<CameraComponent>()) {
+                    maxDistance = glm::max(maxDistance, camera->getNearFar().y);
+                }
             }
 
             // Select a new object
@@ -33,13 +33,13 @@ namespace neo {
                     // Frustum culling
                     if (const auto& spatial = selectable->getGameObject().getComponentByType<SpatialComponent>()) {
                         if (mainCamera) {
-							if (auto camera = mainCamera->getGameObject().getComponentByType<CameraComponent>()) {
-								if (const auto& frustumPlanes = camera->getGameObject().getComponentByType<FrustumComponent>()) {
-									float radius = glm::max(glm::max(spatial->getScale().x, spatial->getScale().y), spatial->getScale().z) * bb->getRadius();
-									if (!frustumPlanes->isInFrustum(spatial->getPosition(), radius)) {
-										continue;
-									}
-								}
+                            if (auto camera = mainCamera->getGameObject().getComponentByType<CameraComponent>()) {
+                                if (const auto& frustumPlanes = camera->getGameObject().getComponentByType<FrustumComponent>()) {
+                                    float radius = glm::max(glm::max(spatial->getScale().x, spatial->getScale().y), spatial->getScale().z) * bb->getRadius();
+                                    if (!frustumPlanes->isInFrustum(spatial->getPosition(), radius)) {
+                                        continue;
+                                    }
+                                }
                             }
                         }
                     }

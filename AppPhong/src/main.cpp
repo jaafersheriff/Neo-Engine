@@ -52,10 +52,10 @@ struct Renderable {
 };
 
 int main() {
-	EngineConfig config;
-	config.APP_NAME = "Basic Phong";
-	config.APP_RES = "res/";
-	Engine::init(config);
+    EngineConfig config;
+    config.APP_NAME = "Basic Phong";
+    config.APP_RES = "res/";
+    Engine::init(config);
 
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);

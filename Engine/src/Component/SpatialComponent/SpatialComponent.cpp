@@ -59,7 +59,7 @@ namespace neo {
             return;
         }
 
-		mScale *= glm::clamp(factor, glm::vec3(0.f), factor);
+        mScale *= glm::clamp(factor, glm::vec3(0.f), factor);
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
         Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);

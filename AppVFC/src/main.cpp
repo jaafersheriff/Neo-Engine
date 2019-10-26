@@ -63,9 +63,9 @@ void generateObjects(int amount) {
 }
 
 int main() {
-	EngineConfig config;
-	config.APP_NAME = "VFC";
-	config.APP_RES = "res/";
+    EngineConfig config;
+    config.APP_NAME = "VFC";
+    config.APP_RES = "res/";
 	Engine::init(config);
 
     /* Game objects */

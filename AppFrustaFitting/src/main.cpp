@@ -38,7 +38,7 @@ struct Light {
         Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
         Engine::addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
         Engine::addComponent<FrustumComponent>(cameraObject);
-        auto& line = Engine::addComponent<LineMeshComponent>(cameraObject, glm::vec3(1.f, 0.f, 1.f));
+        Engine::addComponent<LineMeshComponent>(cameraObject, glm::vec3(1.f, 0.f, 1.f));
         Engine::addComponent<ShadowCameraComponent>(cameraObject);
 
         Engine::addImGuiFunc("Light", []() {
@@ -63,9 +63,9 @@ struct Renderable {
 };
 
 int main() {
-	EngineConfig config;
-	config.APP_NAME = "FrustaFitting";
-	config.APP_RES = "res/";
+    EngineConfig config;
+    config.APP_NAME = "FrustaFitting";
+    config.APP_RES = "res/";
 	Engine::init(config);
 
     /* Game objects */

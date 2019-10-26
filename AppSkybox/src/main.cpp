@@ -83,9 +83,9 @@ struct Refraction {
 };
 
 int main() {
-	EngineConfig config;
-	config.APP_NAME = "Skybox";
-	config.APP_RES = "res/";
+    EngineConfig config;
+    config.APP_NAME = "Skybox";
+    config.APP_RES = "res/";
 	Engine::init(config);
 
     /* Game objects */
