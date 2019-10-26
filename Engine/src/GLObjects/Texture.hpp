@@ -31,7 +31,7 @@ namespace neo {
             }
 
             void generateMipMaps() {
-                //CHECK_GL(glGenerateTextureMipmap(mTextureID));
+                CHECK_GL(glGenerateTextureMipmap(mTextureID));
             }
 
             virtual void bind() const = 0;

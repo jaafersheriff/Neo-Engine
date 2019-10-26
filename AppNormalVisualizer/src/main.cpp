@@ -56,7 +56,7 @@ int main() {
     EngineConfig config;
     config.APP_NAME = "Geometry Shaders";
     config.APP_RES = "res/";
-	Engine::init(config);
+    Engine::init(config);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);

@@ -53,7 +53,7 @@ int main() {
     config.APP_NAME = "FrustaFitting";
     config.APP_RES = "res/";
     config.attachEditor = false;
-	Engine::init(config);
+    Engine::init(config);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);

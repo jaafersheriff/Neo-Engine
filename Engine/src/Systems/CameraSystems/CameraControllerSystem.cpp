@@ -27,30 +27,30 @@ namespace neo {
 
     void CameraControllerSystem::_updatePosition(const float dt, CameraControllerComponent& comp) {
 
-		int forward(Keyboard::isKeyPressed(comp.mForwardButton));
-		int backward(Keyboard::isKeyPressed(comp.mBackwardButton));
-		int right(Keyboard::isKeyPressed(comp.mRightButton));
-		int left(Keyboard::isKeyPressed(comp.mLeftButton));
-		int up(Keyboard::isKeyPressed(comp.mUpButton));
-		int down(Keyboard::isKeyPressed(comp.mDownButton));
-		int speed(Keyboard::isKeyPressed(GLFW_KEY_LEFT_SHIFT));
+            int forward(Keyboard::isKeyPressed(comp.mForwardButton));
+            int backward(Keyboard::isKeyPressed(comp.mBackwardButton));
+            int right(Keyboard::isKeyPressed(comp.mRightButton));
+            int left(Keyboard::isKeyPressed(comp.mLeftButton));
+            int up(Keyboard::isKeyPressed(comp.mUpButton));
+            int down(Keyboard::isKeyPressed(comp.mDownButton));
+            int speed(Keyboard::isKeyPressed(GLFW_KEY_LEFT_SHIFT));
 
-		glm::vec3 dir(
-		    float(right - left),
-		    float(up - down),
-		    float(backward - forward)
-		);
+            glm::vec3 dir(
+                float(right - left),
+                float(up - down),
+                float(backward - forward)
+            );
 
-		if (dir != glm::vec3()) {
-		    auto spatial = comp.getGameObject().getComponentByType<SpatialComponent>();
-		    assert(spatial);
-		    dir = glm::normalize(dir);
-		    dir = glm::normalize(
-		        spatial->getRightDir() * dir.x +
-		        spatial->getUpDir() * dir.y +
-		        -spatial->getLookDir() * dir.z);
-		    spatial->move(dir * comp.mMoveSpeed * dt * (speed ? mSuperSpeed : 1.f));
-		}
+            if (dir != glm::vec3()) {
+                auto spatial = comp.getGameObject().getComponentByType<SpatialComponent>();
+                assert(spatial);
+                dir = glm::normalize(dir);
+                dir = glm::normalize(
+                    spatial->getRightDir() * dir.x +
+                    spatial->getUpDir() * dir.y +
+                    -spatial->getLookDir() * dir.z);
+                spatial->move(dir * comp.mMoveSpeed * dt * (speed ? mSuperSpeed : 1.f));
+            }
 
     }
 
