@@ -52,7 +52,10 @@ struct Renderable {
 };
 
 int main() {
-    Engine::init("Phong Rendering", "res/", 1280, 720);
+	EngineConfig config;
+	config.APP_NAME = "Basic Phong";
+	config.APP_RES = "res/";
+	Engine::init(config);
 
     /* Game objects */
     Camera camera(45.f, 0.01f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
@@ -74,23 +77,6 @@ int main() {
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
-    Engine::addSystem<MouseRaySystem>();
-    Engine::addSystem<SelectingSystem>(
-        20, 
-        100.f,
-        // Decide to remove selected components
-        [](SelectedComponent* selected) {
-            return true;
-        },
-        // Reset operation for unselected components
-        [](SelectableComponent* selectable) {},
-        // Operate on selected components
-        [](SelectedComponent* selected, glm::vec3 mousePos) {
-            if (auto spatial = selected->getGameObject().getComponentByType<SpatialComponent>()) {
-                spatial->setPosition(mousePos);
-            }
-        }
-    );
 
     /* Init renderer */
     Renderer::init("shaders/", camera.cameraComp);
@@ -98,7 +84,6 @@ int main() {
     Renderer::addSceneShader<WireframeShader>();
 
     /* Attach ImGui panes */
-    Engine::addDefaultImGuiFunc();
 
     /* Run */
     Engine::run();

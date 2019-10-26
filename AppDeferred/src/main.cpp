@@ -45,7 +45,10 @@ struct Renderable {
 };
 
 int main() {
-    Engine::init("Deferred", "res/", 1280, 720);
+	EngineConfig config;
+	config.APP_NAME = "Deferred";
+	config.APP_RES = "res/";
+    Engine::init(config);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
@@ -81,8 +84,6 @@ int main() {
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
-    Engine::addDefaultImGuiFunc();
-
     Engine::addImGuiFunc("Lights", [&]() {
         static int index;
         if (ImGui::CollapsingHeader("Create Lights")) {

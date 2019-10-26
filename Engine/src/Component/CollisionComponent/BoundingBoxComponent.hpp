@@ -5,6 +5,7 @@
 #include "Component/SpatialComponent/SpatialComponent.hpp"
 
 #include <glm/glm.hpp>
+#include "glm/gtc/matrix_transform.hpp"
 
 namespace neo {
 
@@ -33,7 +34,8 @@ namespace neo {
         bool intersect(const glm::vec3 position) const {
             auto spatial = mGameObject->getComponentByType<SpatialComponent>();
             assert(spatial);
-            return glm::length(glm::vec3(glm::inverse(spatial->getModelMatrix()) * glm::vec4(position, 1.f))) <= getRadius();
+			// TODO - this is broke
+			return glm::length(glm::vec3(glm::inverse(glm::scale(glm::mat4(1.f), spatial->getScale()) * glm::translate(glm::mat4(1.f), spatial->getPosition())) * glm::vec4(position, 1.f))) <= getRadius();
         }
     };
 }

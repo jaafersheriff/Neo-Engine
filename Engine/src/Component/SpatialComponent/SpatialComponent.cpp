@@ -54,12 +54,12 @@ namespace neo {
         Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
     }
 
-    void SpatialComponent::resize(const glm::vec3 & factor) {
+    void SpatialComponent::resize(const glm::vec3& factor) {
         if (factor == glm::vec3(1.f)) {
             return;
         }
 
-        mScale *= factor;
+		mScale *= glm::clamp(factor, glm::vec3(0.f), factor);
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
         Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
@@ -144,12 +144,12 @@ namespace neo {
 
     void SpatialComponent::imGuiEditor() {
         glm::vec3 moveAmount(0.f);
-        glm::vec3 scaleAmount(0.f);
+        glm::vec3 scaleAmount(1.f);
         glm::vec3 lookDir = getLookDir();
         if (ImGui::DragFloat3("Move", &moveAmount[0], 0.5f, -20.f, 20.f)) {
             move(moveAmount);
         }
-        if (ImGui::DragFloat3("Scale", &scaleAmount[0], 0.5f, -5.f, 5.f)) {
+        if (ImGui::DragFloat3("Scale", &scaleAmount[0], 0.05f, 0.001f, 2.f)) {
             resize(scaleAmount);
         }
         if (ImGui::DragFloat3("LookDir", &lookDir[0], 0.1f, -1.f, 1.f)) {

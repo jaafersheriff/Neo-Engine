@@ -63,7 +63,10 @@ void generateObjects(int amount) {
 }
 
 int main() {
-    Engine::init("Base", "res/", 1280, 720);
+	EngineConfig config;
+	config.APP_NAME = "VFC";
+	config.APP_RES = "res/";
+	Engine::init(config);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
@@ -94,8 +97,6 @@ int main() {
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
-    Engine::addDefaultImGuiFunc();
-
     Engine::addImGuiFunc("VFC", [&]() {
         static int slider = 10;
         ImGui::SliderInt("Num objects", &slider, 1, 10000);

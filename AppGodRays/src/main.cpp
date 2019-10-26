@@ -65,7 +65,10 @@ struct Renderable {
 };
 
 int main() {
-    Engine::init("God Rays", "res/", 1280, 720);
+	EngineConfig config;
+	config.APP_NAME = "GodRays";
+	config.APP_RES = "res/";
+	Engine::init(config);
 
     /* Game objects */
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
@@ -99,7 +102,6 @@ int main() {
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
-    Engine::addDefaultImGuiFunc();
 
     /* Run */
     Engine::run();

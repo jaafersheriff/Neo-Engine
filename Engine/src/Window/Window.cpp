@@ -153,12 +153,12 @@ namespace neo {
         glfwSetCursorEnterCallback(mWindow, _cursorEnterCallback);
 
         /* Init GLEW */
-        glewExperimental = GL_FALSE;
         GLenum error = glGetError();
         if (error != GL_NO_ERROR) {
             std::cout << "OpenGL Error: " << error << std::endl;
             return 1;
         }
+        glewExperimental = GL_FALSE;
         error = glewInit();
         if (error != GLEW_OK) {
             std::cerr << "Failed to init GLEW" << std::endl;

@@ -24,18 +24,12 @@ namespace neo {
 
             GameObject();
 
-            /* Add/remove components */
-            template<typename CompT> void addComponent(CompT &);
-            void addComponent(Component &, std::type_index);
-            void removeComponent(Component &, std::type_index);
-
             /* Get all components by type */
             template <typename CompT> const std::vector<CompT *> & getComponentsByType() const;
             /* Get First component by type */
             template <typename CompT> CompT * getComponentByType() const;
 
             const std::vector<Component *> getAllComponents() const { return mComponents; }
-            std::unordered_map<std::type_index, std::vector<Component *>> _getcomps() { return mComponentsByType ; }
             int getNumReceiverTypes() { return mReceivers.size(); }
             int getNumReceivers() {
                 int count = 0;
@@ -48,6 +42,12 @@ namespace neo {
             }
 
         private:
+            /* Used by the engine */
+            template<typename CompT> void addComponent(CompT &);
+            void addComponent(Component &, std::type_index);
+            void removeComponent(Component &, std::type_index);
+            std::unordered_map<std::type_index, std::vector<Component *>> getComponentsMap() { return mComponentsByType ; }
+
             /* Containers */
             std::vector<Component *> mComponents;
             std::unordered_map<std::type_index, std::vector<Component *>> mComponentsByType;

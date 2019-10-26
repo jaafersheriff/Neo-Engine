@@ -385,18 +385,8 @@ namespace neo {
                 ImGui::EndMenu();
             }
             if (mConfig.attachEditor && ImGui::BeginMenu("Editor")) {
-                if (ImGui::Button("Create GameObject")) {
-                    Engine::removeComponent<SelectedComponent>(*Engine::getSingleComponent<SelectedComponent>());
-                    auto& go = Engine::createGameObject();
-                    Engine::addComponent<BoundingBoxComponent>(&go, std::vector<float>{ -1.f, -1.f, -1.f, 1.f, 1.f, 1.f });
-                    Engine::addComponent<SpatialComponent>(&go);
-                    Engine::addComponent<SelectableComponent>(&go);
-                    Engine::addComponent<SelectedComponent>(&go);
-                    Engine::addComponent<MeshComponent>(&go, Library::getMesh("sphere"));
-                    Engine::addComponent<renderable::WireframeRenderable>(&go);
-                }
                 if (auto selected = Engine::getSingleComponent<SelectedComponent>()) {
-                    auto allComponents = selected->getGameObject()._getcomps();
+                    auto allComponents = selected->getGameObject().getComponentsMap();
                     static std::optional<std::type_index> index;
                     if (ImGui::BeginCombo("", index ? index->name() + 6 : "Edit components")) {
                         index = std::nullopt;
@@ -414,20 +404,43 @@ namespace neo {
                         if (components.size()) {
                             static int offset = 0;
                             if (components.size() > 1) {
+								ImGui::Indent();
                                 ImGui::SliderInt("Index", &offset, 0, components.size() - 1);
+								ImGui::Unindent();
                             }
+							ImGui::Indent();
                             components[offset]->imGuiEditor();
-                            if (ImGui::Button("Remove")) {
-                                selected->getGameObject().removeComponent(*components[offset], *index);
+							ImGui::Unindent();
+
+							ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0.81f, 0.20f, 0.20f, 0.40f));
+							ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
+							ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
+                            if (ImGui::Button("Remove", ImVec2(ImGui::GetWindowWidth() * 0.9f, 0))) {
+								// TODO...
+								// Engine::removeComponent(static_cast<decltype(*index)>(components[offset]));
                                 index = std::nullopt;
                             }
+							ImGui::PopStyleColor(3);
                         }
                     }
+					ImGui::Separator();
                     if (ImGui::BeginCombo("", "Add components")) {
                         // TODO..
                         ImGui::EndCombo();
                     }
                 }
+				ImGui::Separator();
+                if (ImGui::Button("Create new GameObject")) {
+                    Engine::removeComponent<SelectedComponent>(*Engine::getSingleComponent<SelectedComponent>());
+                    auto& go = Engine::createGameObject();
+                    Engine::addComponent<BoundingBoxComponent>(&go, std::vector<float>{ -1.f, -1.f, -1.f, 1.f, 1.f, 1.f });
+                    Engine::addComponent<SpatialComponent>(&go);
+                    Engine::addComponent<SelectableComponent>(&go);
+                    Engine::addComponent<SelectedComponent>(&go);
+                    Engine::addComponent<MeshComponent>(&go, Library::getMesh("sphere"));
+                    Engine::addComponent<renderable::WireframeRenderable>(&go);
+                }
+ 
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu(mConfig.APP_NAME.c_str())) {

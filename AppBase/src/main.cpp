@@ -57,11 +57,13 @@ int main() {
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
     /* Cube object */
-    Renderable cube(Library::getMesh("cube"), glm::vec3(0.f, 0.5f, 0.f));
-    Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
-    Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
-    Engine::addComponent<SelectableComponent>(cube.gameObject);
-    Engine::addComponent<BoundingBoxComponent>(cube.gameObject, Library::getMesh("cube")->mBuffers.vertices);
+	{
+		Renderable cube(Library::getMesh("cube"), glm::vec3(0.f, 0.5f, 0.f));
+		Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+		Engine::addComponent<SelectableComponent>(cube.gameObject);
+		Engine::addComponent<BoundingBoxComponent>(cube.gameObject, Library::getMesh("cube")->mBuffers.vertices);
+		Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
+	}
 
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
@@ -75,8 +77,6 @@ int main() {
     Renderer::init("shaders/", camera.camera);
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
-
-    // Engine::addSelectionEditing();
 
     /* Run */
     Engine::run();

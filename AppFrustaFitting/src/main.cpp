@@ -38,7 +38,7 @@ struct Light {
         Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
         Engine::addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
         Engine::addComponent<FrustumComponent>(cameraObject);
-        Engine::addComponent<LineMeshComponent>(cameraObject, glm::vec3(1.f, 0.f, 1.f));
+        auto& line = Engine::addComponent<LineMeshComponent>(cameraObject, glm::vec3(1.f, 0.f, 1.f));
         Engine::addComponent<ShadowCameraComponent>(cameraObject);
 
         Engine::addImGuiFunc("Light", []() {
@@ -63,7 +63,10 @@ struct Renderable {
 };
 
 int main() {
-    Engine::init("FrustaFitting", "res/", 1280, 720);
+	EngineConfig config;
+	config.APP_NAME = "FrustaFitting";
+	config.APP_RES = "res/";
+	Engine::init(config);
 
     /* Game objects */
     Camera sceneCamera(45.f, 1.f, 100.f, Window::getAspectRatio(), glm::vec3(0, 0.6f, 5));
@@ -105,7 +108,6 @@ int main() {
     Renderer::addSceneShader<LineShader>();
 
     /* Attach ImGui panes */
-    Engine::addDefaultImGuiFunc();
     Engine::addImGuiFunc("SceneCamera", [&]() {
         if (ImGui::Button("Set scene")) {
             Renderer::setDefaultCamera(sceneCamera.camera);

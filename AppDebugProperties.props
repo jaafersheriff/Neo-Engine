@@ -8,7 +8,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\OpenGL\glew-2.1.0\include;C:\OpenGL\glfw-3.2.1\include;C:\OpenGL\glm-0.9.8.5;$(SolutionDir)\Engine\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\jaafe\Downloads\Neo-Engine\Engine\src;C:\OpenGL\glew-2.1.0\include;C:\OpenGL\glfw-3.2.1\include;C:\OpenGL\glm-0.9.8.5;$(SolutionDir)Engine\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
@@ -25,7 +25,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)\Engine\build\Debug\Engine.lib;C:\OpenGL\glfw-3.2.1\debug\src\Debug\glfw3.lib;C:\OpenGL\glew-2.1.0\lib\Release\Win32\glew32s.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)\Engine\build\Debug\Engine.lib;C:\OpenGL\glfw-3.2.1\lib-vc2015\glfw3.lib;C:\OpenGL\glew-2.1.0\lib\Debug\x64\glew32sd.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />
