@@ -52,11 +52,11 @@ class GBufferShader : public Shader {
                 loadUniform("M", renderable.get<SpatialComponent>()->getModelMatrix());
 
                 /* Bind diffuse map or material */
-                auto matComp = renderable.gameObject.getComponentByType<MaterialComponent>();
+                auto matComp = renderable.mGameObject.getComponentByType<MaterialComponent>();
                 if (matComp) {
                     loadUniform("ambient", matComp->mAmbient);
                 }
-                if (auto diffMap = renderable.gameObject.getComponentByType<DiffuseMapComponent>()) {
+                if (auto diffMap = renderable.mGameObject.getComponentByType<DiffuseMapComponent>()) {
                     diffMap->mTexture->bind();
                     loadUniform("useDiffuseMap", true);
                     loadUniform("diffuseMap", diffMap->mTexture->mTextureID);
@@ -69,7 +69,7 @@ class GBufferShader : public Shader {
                 }
 
                 /* Bind normal map */
-                if (auto normalMap = renderable.gameObject.getComponentByType<NormalMapComponent>()) {
+                if (auto normalMap = renderable.mGameObject.getComponentByType<NormalMapComponent>()) {
                     normalMap->mTexture->bind();
                     loadUniform("useNormalMap", true);
                     loadUniform("normalMap", normalMap->mTexture->mTextureID);

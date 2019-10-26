@@ -47,7 +47,7 @@ namespace neo {
 
                 // VFC
                 if (cameraFrustum) {
-                    if (const auto& boundingBox = renderable.gameObject.getComponentByType<BoundingBoxComponent>()) {
+                    if (const auto& boundingBox = renderable.mGameObject.getComponentByType<BoundingBoxComponent>()) {
                         float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
                         if (!cameraFrustum->isInFrustum(renderableSpatial->getPosition(), radius)) {
                             continue;

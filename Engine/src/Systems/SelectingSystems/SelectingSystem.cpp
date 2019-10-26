@@ -31,7 +31,7 @@ namespace neo {
 
                 // Frustum culling
                 if (auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
-                    if (const auto& frustumPlanes = mainCamera->gameObject.getComponentByType<FrustumComponent>()) {
+                    if (const auto& frustumPlanes = mainCamera->mGameObject.getComponentByType<FrustumComponent>()) {
                         float radius = glm::max(glm::max(selectableSpatial->getScale().x, selectableSpatial->getScale().y), selectableSpatial->getScale().z) * selectableBox->getRadius();
                         if (!frustumPlanes->isInFrustum(selectableSpatial->getPosition(), radius)) {
                             continue;
@@ -46,7 +46,7 @@ namespace neo {
                     glm::vec3 raySample = mouseRay->position + mouseRay->direction * i;
                     if (selectableBox->intersect(raySample)) {
                         // Add and operate on new selected
-                        mSelectOperation(&Engine::addComponent<SelectedComponent>(&selectable.gameObject), raySample);
+                        mSelectOperation(&Engine::addComponent<SelectedComponent>(&selectable.mGameObject), raySample);
                         objectFound = true;
                     }
                 }

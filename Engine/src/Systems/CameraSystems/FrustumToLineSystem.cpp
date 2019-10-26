@@ -8,7 +8,7 @@ namespace neo {
         for (auto camera : Engine::getComponentTuples<CameraComponent, LineMeshComponent, FrustumComponent>()) {
 
             glm::vec3 color(1.f);
-            if (auto material = camera.gameObject.getComponentByType<MaterialComponent>()) {
+            if (auto material = camera.mGameObject.getComponentByType<MaterialComponent>()) {
                 color = material->mDiffuse;
             }
 

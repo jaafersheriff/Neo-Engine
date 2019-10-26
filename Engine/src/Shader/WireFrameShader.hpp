@@ -46,7 +46,7 @@ namespace neo {
                     loadUniform("M", spatialComponent->getModelMatrix());
 
                     glm::vec3 color(1.f);
-                    if (const auto material = renderable.gameObject.getComponentByType<MaterialComponent>()) {
+                    if (const auto material = renderable.mGameObject.getComponentByType<MaterialComponent>()) {
                         color = material->mDiffuse;
                     }
                     loadUniform("wireColor", color);

@@ -15,20 +15,20 @@ namespace neo {
         friend Engine;
 
     public:
-        GameObject& gameObject;
+        GameObject& mGameObject;
 
         ComponentTuple(GameObject& go) :
-            gameObject(go),
-            valid(true)
+            mGameObject(go),
+            mValid(true)
         {}
 
         operator bool() const {
-            return valid;
+            return mValid;
         }
 
         template <typename CompT>
         CompT* get() {
-            return dynamic_cast<CompT*>(components[typeid(CompT)]);
+            return dynamic_cast<CompT*>(mComponentMap[typeid(CompT)]);
         }
 
         template <typename CompT, typename... CompTs> 
@@ -40,16 +40,16 @@ namespace neo {
         }
 
     private:
-        std::unordered_map<std::type_index, Component *> components;
-        bool valid;
+        std::unordered_map<std::type_index, Component *> mComponentMap;
+        bool mValid;
 
         template <typename CompT = void> 
         void _addComponent() {
-            if (auto comp = gameObject.getComponentByType<CompT>()) {
-                components[typeid(CompT)] = comp;
+            if (auto comp = mGameObject.getComponentByType<CompT>()) {
+                mComponentMap[typeid(CompT)] = comp;
             }
             else {
-                valid = false;
+                mValid = false;
             }
 
         }

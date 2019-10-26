@@ -80,7 +80,7 @@ namespace neo {
                 auto renderableSpatial = renderable.get<SpatialComponent>();
 
                 // VFC
-                if (const auto& boundingBox = renderable.gameObject.getComponentByType<BoundingBoxComponent>()) {
+                if (const auto& boundingBox = renderable.mGameObject.getComponentByType<BoundingBoxComponent>()) {
                     if (const auto& frustumPlanes = camera.getGameObject().getComponentByType<FrustumComponent>()) {
                         float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
                         if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
@@ -98,7 +98,7 @@ namespace neo {
                 loadUniform("N", renderableSpatial->getNormalMatrix());
 
                 /* Bind texture */
-                if (auto diffuseMap = renderable.gameObject.getComponentByType<DiffuseMapComponent>()) {
+                if (auto diffuseMap = renderable.mGameObject.getComponentByType<DiffuseMapComponent>()) {
                     auto texture = (const Texture2D *)(diffuseMap->mTexture);
                     texture->bind();
                     loadUniform("diffuseMap", texture->mTextureID);
@@ -109,7 +109,7 @@ namespace neo {
                 }
 
                 /* Bind material */
-                if (auto matComp = renderable.gameObject.getComponentByType<MaterialComponent>()) {
+                if (auto matComp = renderable.mGameObject.getComponentByType<MaterialComponent>()) {
                     loadUniform("ambient", matComp->mAmbient);
                     loadUniform("diffuseColor", matComp->mDiffuse);
                     loadUniform("specularColor", matComp->mSpecular);

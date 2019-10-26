@@ -53,7 +53,7 @@ namespace neo {
                 loadUniform("M", spatial->getModelMatrix());
 
                 /* Bind texture */
-                if (const auto diffuseMap = renderable.gameObject.getComponentByType<DiffuseMapComponent>()) {
+                if (const auto diffuseMap = renderable.mGameObject.getComponentByType<DiffuseMapComponent>()) {
                     auto texture = (const Texture2D *)(diffuseMap->mTexture);
                     texture->bind();
                     loadUniform("diffuseMap", texture->mTextureID);
