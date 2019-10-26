@@ -89,17 +89,15 @@ namespace neo {
                 }
 
                 /* Load light */
-                if (const auto shadowCamera = Engine::getSingleComponent<ShadowCameraComponent>()) {
-                    if (const auto camera = shadowCamera->getGameObject().getComponentByType<CameraComponent>()) {
-                        loadUniform("L", biasMatrix * camera->getProj() * camera->getView());
-                    }
+                if (auto shadowCamera = Engine::getComponentTuple<ShadowCameraComponent, CameraComponent>()) {
+                    auto camera = shadowCamera->get<CameraComponent>();
+                    loadUniform("L", biasMatrix * camera->getProj() * camera->getView());
                 }
-                if (const auto light = Engine::getSingleComponent<LightComponent>()) {
-                    if (const auto lightSpat = light->getGameObject().getComponentByType<SpatialComponent>()) {
-                        loadUniform("lightPos", lightSpat->getPosition());
-                        loadUniform("lightCol", light->mColor);
-                        loadUniform("lightAtt", light->mAttenuation);
-                    }
+
+                if (auto light = Engine::getComponentTuple<LightComponent, SpatialComponent>()) {
+                    loadUniform("lightPos", light->get<SpatialComponent>()->getPosition());
+                    loadUniform("lightCol", light->get<LightComponent>()->mColor);
+                    loadUniform("lightAtt", light->get<LightComponent>()->mAttenuation);
                 }
 
                 /* Bias */
@@ -114,15 +112,12 @@ namespace neo {
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.mTextureID));
                 loadUniform("shadowMap", texture.mTextureID);
 
-                for (auto& renderable : Engine::getComponents<renderable::PhongShadowRenderable>()) {
-                    auto meshComponent = renderable->getGameObject().getComponentByType<MeshComponent>();
-                    auto renderableSpatial = renderable->getGameObject().getComponentByType<SpatialComponent>();
-                    if (!meshComponent || !renderableSpatial) {
-                        continue;
-                    }
+                for (auto renderable : Engine::getComponentTuples<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>()) {
+                    auto meshComponent = renderable.get<MeshComponent>();
+                    auto renderableSpatial = renderable.get<SpatialComponent>();
 
                     // VFC
-                    if (const auto& boundingBox = renderable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
+                    if (const auto& boundingBox = renderable.gameObject.getComponentByType<BoundingBoxComponent>()) {
                         if (const auto& frustumPlanes = camera.getGameObject().getComponentByType<FrustumComponent>()) {
                             float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
                             if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
@@ -141,7 +136,7 @@ namespace neo {
                     loadUniform("N", renderableSpatial->getNormalMatrix());
 
                     /* Bind texture */
-                    auto texComp = renderable->getGameObject().getComponentByType<DiffuseMapComponent>();
+                    auto texComp = renderable.gameObject.getComponentByType<DiffuseMapComponent>();
                     if (texComp) {
                         auto texture = (const Texture2D *)(texComp->mTexture);
                         texture->bind();
@@ -153,7 +148,7 @@ namespace neo {
                     }
 
                     /* Bind material */
-                    if (auto material = renderable->getGameObject().getComponentByType<MaterialComponent>()) {
+                    if (auto material = renderable.gameObject.getComponentByType<MaterialComponent>()) {
                         loadUniform("ambient", material->mAmbient);
                         loadUniform("diffuseColor", material->mDiffuse);
                         loadUniform("specularColor", material->mSpecular);

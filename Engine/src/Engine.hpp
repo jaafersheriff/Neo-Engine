@@ -65,6 +65,7 @@ namespace neo {
             static const std::vector<std::pair<std::type_index, System *>> & getSystems() { return reinterpret_cast<const std::vector<std::pair<std::type_index, System *>> &>(mSystems); }
             template <typename CompT> static const std::vector<CompT *> & getComponents();
             template <typename CompT> static CompT* getSingleComponent();
+            template <typename CompT, typename... CompTs> static std::optional<ComponentTuple> getComponentTuple(GameObject& go);
             template <typename CompT, typename... CompTs> static std::optional<ComponentTuple> getComponentTuple();
             template <typename CompT, typename... CompTs> static std::vector<ComponentTuple> getComponentTuples();
 
@@ -184,10 +185,20 @@ namespace neo {
     }
 
     template <typename CompT, typename... CompTs>
+    std::optional<ComponentTuple> Engine::getComponentTuple() {
+        for (auto comp : getComponents<CompT>()) {
+            if (auto tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject())) {
+                return tuple;
+            }
+        }
+        return {};
+    }
+ 
+    template <typename CompT, typename... CompTs>
     std::vector<ComponentTuple> Engine::getComponentTuples() {
         std::vector<ComponentTuple> tuples;
         for (auto comp : getComponents<CompT>()) {
-            auto tuple = getComponentTuple<CompT, CompTs...>();
+            auto tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject());
             if (tuple && *tuple) {
                 tuples.emplace_back(*tuple);
             }
@@ -197,15 +208,16 @@ namespace neo {
     }
 
     template <typename CompT, typename... CompTs>
-    std::optional<ComponentTuple> Engine::getComponentTuple() {
-        for (auto comp : getComponents<CompT>()) {
-            ComponentTuple tuple(comp->getGameObject());
-            tuple._addComponent<CompT>();
-            tuple.populate<CompTs...>();
-            if (tuple) {
-                return tuple;
-            }
+    std::optional<ComponentTuple> Engine::getComponentTuple(GameObject& go) {
+        ComponentTuple tuple(go);
+        tuple._addComponent<CompT>();
+        tuple.populate<CompTs...>();
+        if (tuple) {
+            return tuple;
         }
+
         return {};
     }
+
+
 }

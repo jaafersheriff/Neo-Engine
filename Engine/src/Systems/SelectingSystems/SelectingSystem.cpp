@@ -20,52 +20,46 @@ namespace neo {
             }
 
             float maxDistance = mMaxDist;
-            auto mainCamera = Engine::getSingleComponent<MainCameraComponent>();
-            if (mainCamera) {
-                if (auto camera = mainCamera->getGameObject().getComponentByType<CameraComponent>()) {
-                    maxDistance = glm::max(maxDistance, camera->getNearFar().y);
-                }
+            if (auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
+                maxDistance = glm::max(maxDistance, mainCamera->get<CameraComponent>()->getNearFar().y);
             }
 
             // Select a new object
-            for (auto selectable : Engine::getComponents<SelectableComponent>()) {
-                if (auto bb = selectable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
-                    // Frustum culling
-                    if (const auto& spatial = selectable->getGameObject().getComponentByType<SpatialComponent>()) {
-                        if (mainCamera) {
-                            if (auto camera = mainCamera->getGameObject().getComponentByType<CameraComponent>()) {
-                                if (const auto& frustumPlanes = camera->getGameObject().getComponentByType<FrustumComponent>()) {
-                                    float radius = glm::max(glm::max(spatial->getScale().x, spatial->getScale().y), spatial->getScale().z) * bb->getRadius();
-                                    if (!frustumPlanes->isInFrustum(spatial->getPosition(), radius)) {
-                                        continue;
-                                    }
-                                }
-                            }
+            for (auto selectable : Engine::getComponentTuples<SelectableComponent, BoundingBoxComponent, SpatialComponent>()) {
+                auto selectableSpatial = selectable.get<SpatialComponent>();
+                auto selectableBox = selectable.get<BoundingBoxComponent>();
+
+                // Frustum culling
+                if (auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
+                    if (const auto& frustumPlanes = mainCamera->gameObject.getComponentByType<FrustumComponent>()) {
+                        float radius = glm::max(glm::max(selectableSpatial->getScale().x, selectableSpatial->getScale().y), selectableSpatial->getScale().z) * selectableBox->getRadius();
+                        if (!frustumPlanes->isInFrustum(selectableSpatial->getPosition(), radius)) {
+                            continue;
                         }
                     }
+                }
 
 
-                    // Ray march
-                    bool objectFound = false;
-                    for (float i = 0.f; i < maxDistance; i += maxDistance / static_cast<float>(mMaxMarches)) {
-                        glm::vec3 raySample = mouseRay->position + mouseRay->direction * i;
-                        if (bb->intersect(raySample)) {
-                            // Add and operate on new selected
-                            mSelectOperation(&Engine::addComponent<SelectedComponent>(&selectable->getGameObject()), raySample);
-                            objectFound = true;
-                        }
+                // Ray march
+                bool objectFound = false;
+                for (float i = 0.f; i < maxDistance; i += maxDistance / static_cast<float>(mMaxMarches)) {
+                    glm::vec3 raySample = mouseRay->position + mouseRay->direction * i;
+                    if (selectableBox->intersect(raySample)) {
+                        // Add and operate on new selected
+                        mSelectOperation(&Engine::addComponent<SelectedComponent>(&selectable.gameObject), raySample);
+                        objectFound = true;
                     }
-                    if (objectFound) {
-                        break;
-                    }
+                }
+                if (objectFound) {
+                    break;
                 }
             }
+        }
 
-            // Operate on unselected objects
-            for (auto selectable : Engine::getComponents<SelectableComponent>()) {
-                if (!selectable->getGameObject().getComponentByType<SelectedComponent>()) {
-                    mResetOperation(selectable);
-                }
+        // Operate on unselected objects
+        for (auto selectable : Engine::getComponents<SelectableComponent>()) {
+            if (!selectable->getGameObject().getComponentByType<SelectedComponent>()) {
+                mResetOperation(selectable);
             }
         }
     }

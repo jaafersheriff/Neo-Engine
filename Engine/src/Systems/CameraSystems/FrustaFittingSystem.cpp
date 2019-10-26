@@ -11,25 +11,23 @@
 namespace neo {
 
     void FrustaFittingSystem::update(const float dt) {
-        const auto shadowCamera = Engine::getSingleComponent<ShadowCameraComponent>();
-        const auto mainCamera = Engine::getSingleComponent<MainCameraComponent>();
-        auto light = Engine::getSingleComponent<LightComponent>();
+        auto shadowCamera = Engine::getComponentTuple<ShadowCameraComponent, CameraComponent, SpatialComponent>();
+        auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
+        auto light = Engine::getComponentTuple<LightComponent, SpatialComponent>();
         if (!shadowCamera || !mainCamera || !light) {
             return;
         }
-        auto orthoCamera = dynamic_cast<OrthoCameraComponent*>(shadowCamera->getGameObject().getComponentByType<CameraComponent>());
-        auto perspectiveCamera = dynamic_cast<PerspectiveCameraComponent*>(mainCamera->getGameObject().getComponentByType<CameraComponent>());
+        auto orthoCamera = dynamic_cast<OrthoCameraComponent*>(shadowCamera->get<CameraComponent>());
+        auto perspectiveCamera = dynamic_cast<PerspectiveCameraComponent*>(mainCamera->get<CameraComponent>());
         if (!orthoCamera || !perspectiveCamera) {
             return;
         }
-        auto orthoSpat = orthoCamera->getGameObject().getComponentByType<SpatialComponent>();
-        auto perspectiveSpat = perspectiveCamera->getGameObject().getComponentByType<SpatialComponent>();
-        if (!orthoSpat || !perspectiveSpat) {
-            return;
-        }
+
 
         /////////////////////// Do the fitting! ///////////////////////////////
-        const auto lightSpat = light->getGameObject().getComponentByType<SpatialComponent>();
+        auto orthoSpat = orthoCamera->getGameObject().getComponentByType<SpatialComponent>();
+        auto perspectiveSpat = perspectiveCamera->getGameObject().getComponentByType<SpatialComponent>();
+        auto lightSpat = light->get<SpatialComponent>();
         if (!lightSpat) {
             return;
         }

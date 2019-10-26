@@ -4,12 +4,9 @@
 namespace neo {
 
     void MouseRaySystem::update(const float dt) {
-        auto mainCamera = Engine::getSingleComponent<MainCameraComponent>();
-        if (!mainCamera) {
-            return;
-        }
-        auto camera = mainCamera->getGameObject().getComponentByType<CameraComponent>();
-        assert(camera);
+        auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+        assert(mainCamera);
+        auto camera = mainCamera->get<CameraComponent>();
 
         auto mouseRayComp = Engine::getSingleComponent<MouseRayComponent>();
         if (Mouse::isDown(GLFW_MOUSE_BUTTON_1)) {

@@ -38,18 +38,18 @@ namespace neo {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (const auto& renderable : Engine::getComponents<renderable::OutlineRenderable>()) {
-                const auto& renderableMesh = renderable->getGameObject().getComponentByType<MeshComponent>();
-                const auto& renderableSpatial = renderable->getGameObject().getComponentByType<SpatialComponent>();
-                if (!renderableMesh || !renderableSpatial) {
-                    continue;
-                }
+            const auto cameraFrustum = camera.getGameObject().getComponentByType<FrustumComponent>();
+
+            for (auto& renderable : Engine::getComponentTuples<renderable::OutlineRenderable, MeshComponent, SpatialComponent>()) {
+                auto renderableOutline = renderable.get<renderable::OutlineRenderable>();
+                auto renderableMesh = renderable.get<MeshComponent>();
+                auto renderableSpatial = renderable.get<SpatialComponent>();
 
                 // VFC
-                if (const auto& boundingBox = renderable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
-                    if (const auto& frustumPlanes = camera.getGameObject().getComponentByType<FrustumComponent>()) {
+                if (cameraFrustum) {
+                    if (const auto& boundingBox = renderable.gameObject.getComponentByType<BoundingBoxComponent>()) {
                         float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
-                        if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
+                        if (!cameraFrustum->isInFrustum(renderableSpatial->getPosition(), radius)) {
                             continue;
                         }
                     }
@@ -60,10 +60,10 @@ namespace neo {
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
-                glm::mat4 M = renderableSpatial->getModelMatrix() * glm::scale(glm::mat4(1.f), glm::vec3(1.f + renderable->mScale));
+                glm::mat4 M = renderableSpatial->getModelMatrix() * glm::scale(glm::mat4(1.f), glm::vec3(1.f + renderableOutline->mScale));
 
                 loadUniform("M", M);
-                loadUniform("outlineColor", renderable->mColor);
+                loadUniform("outlineColor", renderableOutline->mColor);
 
                 /* DRAW */
                 mesh.draw();
