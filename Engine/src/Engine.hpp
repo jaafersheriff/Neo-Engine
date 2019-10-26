@@ -30,6 +30,15 @@ namespace neo {
         int height = 1080;
         bool attachEditor = true;
     };
+            struct ComponentTuple {
+                std::unordered_map<std::type_index, Component *> components;
+
+                template <typename CompT>
+                CompT* get() {
+                    return dynamic_cast<CompT*>(components[typeid(CompT)]);
+                }
+            };
+
 
     class Engine {
 
@@ -63,6 +72,7 @@ namespace neo {
             static const std::vector<std::pair<std::type_index, System *>> & getSystems() { return reinterpret_cast<const std::vector<std::pair<std::type_index, System *>> &>(mSystems); }
             template <typename CompT> static const std::vector<CompT *> & getComponents();
             template <typename CompT> static CompT* getSingleComponent();
+            template <typename... CompTs> static ComponentTuple getComponentTuple();
 
             /* ImGui */
             static bool mImGuiEnabled;
@@ -82,6 +92,10 @@ namespace neo {
             static void _processKillQueue();
             static void _killGameObjects();
             static void _killComponents();
+
+            /* More ECS */
+            template <typename CompT, typename... CompTs> static void _addToTuple(ComponentTuple& tuple, GameObject& go);
+            template <typename CompT = void> static void _addSingleToTuple(ComponentTuple& tuple, GameObject& go);
 
             /* Active containers */
             static std::vector<std::unique_ptr<GameObject>> mGameObjects;
@@ -171,11 +185,38 @@ namespace neo {
     template <typename CompT>
     CompT* Engine::getSingleComponent() {
         auto components = getComponents<CompT>();
-        if (!components.size()) {
-            return nullptr;
-        }
-        assert(components.size() <= 1);
+        assert(components.size() == 1);
 
         return components[0];
+    }
+
+    template <typename... CompTs>
+    ComponentTuple Engine::getComponentTuple() {
+        ComponentTuple tuple;
+        _addToTuple<CompTs...>(tuple, createGameObject());
+        return tuple;
+    }
+
+    template <typename CompT, typename... CompTs>
+    void Engine::_addToTuple(ComponentTuple& tuple, GameObject& go) {
+        _addSingleToTuple<CompT>(tuple, go);
+        if constexpr (sizeof...(CompTs) > 0) {
+            _addToTuple<CompTs...>(tuple, go);
+        }
+    }
+
+    template<typename CompT> 
+    void Engine::_addSingleToTuple(ComponentTuple& tuple, GameObject& go) {
+        if (auto comp = go.getComponentByType<CompT>()) {
+            tuple.components[typeid(CompT)] = comp;
+        }
+        else {
+            tuple.components[typeid(CompT)] = nullptr;
+        }
+    }
+
+    template <>
+    void Engine::_addSingleToTuple(ComponentTuple&, GameObject& go) {
+
     }
 }

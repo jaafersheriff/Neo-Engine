@@ -4,6 +4,7 @@
 namespace neo {
 
     void RotationSystem::update(const float dt) {
+        auto tuple = Engine::getComponentTuple<RotationComponent, SpatialComponent>();
         for (auto comp : Engine::getComponents<RotationComponent>()) {
             if (auto spatial = comp->getGameObject().getComponentByType<SpatialComponent>()) {
                 glm::mat4 R(1.f);
