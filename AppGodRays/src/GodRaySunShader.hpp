@@ -44,6 +44,7 @@ class GodRaySunShader : public Shader {
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 
             bind();
+
             /* Load PV */
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
@@ -53,7 +54,6 @@ class GodRaySunShader : public Shader {
             loadUniform("Vi", Vi);
 
             auto& mesh = *Library::getMesh("plane");
-
             for (auto& renderable : Engine::getComponents<SunComponent>()) {
 
                 /* Bind mesh */

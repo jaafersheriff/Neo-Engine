@@ -27,25 +27,19 @@ class ReflectionShader : public Shader {
             loadUniform("camPos", camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
             /* Load environment map */
-            if (auto skybox = Engine::getSingleComponent<SkyboxComponent>()) {
-                if (auto cubemap = skybox->getGameObject().getComponentByType<CubeMapComponent>()) {
-                    loadUniform("cubeMap", cubemap->mTexture->mTextureID);
-                }
+            if (auto skybox = Engine::getComponentTuple<SkyboxComponent, CubeMapComponent>()) {
+                loadUniform("cubeMap", skybox->get<CubeMapComponent>()->mTexture->mTextureID);
             }
 
-            for (auto& renderable : Engine::getComponents<ReflectionComponent>()) {
-                auto model = renderable->getGameObject().getComponentByType<MeshComponent>();
-                if (!model) {
-                    continue;
-                }
+            for (auto renderable : Engine::getComponentTuples<ReflectionComponent, MeshComponent, SpatialComponent>()) {
 
                 /* Bind mesh */
-                const Mesh & mesh(model->getMesh());
+                const Mesh & mesh(renderable.get<MeshComponent>()->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
-                loadUniform("M", model->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
-                loadUniform("N", model->getGameObject().getComponentByType<SpatialComponent>()->getNormalMatrix());
+                loadUniform("M", renderable.get<SpatialComponent>()->getModelMatrix());
+                loadUniform("N", renderable.get<SpatialComponent>()->getNormalMatrix());
 
                 /* DRAW */
                 mesh.draw();

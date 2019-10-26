@@ -18,16 +18,12 @@ class LookAtCameraSystem : public System {
 
         virtual void update(const float dt) override {
             auto cameraLookPos = Engine::getSingleComponent<LookAtCameraReceiver>();
-            auto shadowCamera = Engine::getSingleComponent<ShadowCameraComponent>();
+            auto shadowCamera = Engine::getComponentTuple<ShadowCameraComponent, CameraComponent>();
             if (!cameraLookPos || !shadowCamera) {
                 return;
             }
 
-            auto camera = shadowCamera->getGameObject().getComponentByType<CameraComponent>();
-            if (!camera) {
-                return;
-            }
-
+            auto camera = shadowCamera->get<CameraComponent>();
             glm::vec3 lookPos = cameraLookPos->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
             cameraLookPos->getGameObject().getComponentByType<SpatialComponent>()->setLookDir(lookPos - camera->getGameObject().getComponentByType<SpatialComponent>()->getPosition());
         }

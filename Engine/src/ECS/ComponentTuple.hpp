@@ -16,8 +16,6 @@ namespace neo {
 
     public:
         GameObject& gameObject;
-        std::unordered_map<std::type_index, Component *> components;
-        bool valid;
 
         ComponentTuple(GameObject& go) :
             gameObject(go),
@@ -42,6 +40,9 @@ namespace neo {
         }
 
     private:
+        std::unordered_map<std::type_index, Component *> components;
+        bool valid;
+
         template <typename CompT = void> 
         void _addComponent() {
             if (auto comp = gameObject.getComponentByType<CompT>()) {

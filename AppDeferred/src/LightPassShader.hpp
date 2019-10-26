@@ -72,23 +72,23 @@ class LightPassShader : public Shader {
             loadUniform("gDepth", gbuffer->mTextures[2]->mTextureID);
 
             /* Render light volumes */
-            for (auto & light : Engine::getComponents<LightComponent>()) {
-                if (const auto spat = light->getGameObject().getComponentByType<SpatialComponent>()) {
-                    loadUniform("M", spat->getModelMatrix());
-                    loadUniform("lightPos", spat->getPosition());
-                    loadUniform("lightRadius", spat->getScale().x);
-                    loadUniform("lightCol", light->mColor);
+            for (auto light : Engine::getComponentTuples<LightComponent, SpatialComponent>()) {
+                auto spatial = light.get<SpatialComponent>();
 
-                    // If camera is inside light 
-                    float dist = glm::distance(spat->getPosition(), camSpatial->getPosition());
-                    if (dist - camera.getNearFar().x < spat->getScale().x) {
-                        CHECK_GL(glCullFace(GL_FRONT));
-                    }
-                    else {
-                        CHECK_GL(glCullFace(GL_BACK));
-                    }
-                    mesh->draw();
+                loadUniform("M", spatial->getModelMatrix());
+                loadUniform("lightPos", spatial->getPosition());
+                loadUniform("lightRadius", spatial->getScale().x);
+                loadUniform("lightCol", light.get<LightComponent>()->mColor);
+
+                // If camera is inside light 
+                float dist = glm::distance(spatial->getPosition(), camSpatial->getPosition());
+                if (dist - camera.getNearFar().x < spatial->getScale().x) {
+                    CHECK_GL(glCullFace(GL_FRONT));
                 }
+                else {
+                    CHECK_GL(glCullFace(GL_BACK));
+                }
+                mesh->draw();
             }
 
             unbind();

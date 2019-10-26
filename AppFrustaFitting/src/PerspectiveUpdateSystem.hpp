@@ -21,19 +21,15 @@ public:
     }
 
     virtual void update(const float dt) override {
-        const auto mainCamera = Engine::getSingleComponent<MainCameraComponent>();
+        auto mainCamera = Engine::getComponentTuple<MainCameraComponent, SpatialComponent>();
         if (!mainCamera) {
-            return;
-        }
-        auto perspectiveSpat = mainCamera->getGameObject().getComponentByType<SpatialComponent>();
-        if (!perspectiveSpat) {
             return;
         }
 
         if (mUpdatePerspective) {
             float f = glm::sin(Util::getRunTime());
             float g = glm::cos(Util::getRunTime());
-            perspectiveSpat->setLookDir(glm::vec3(f, f / 2, g));
+            mainCamera->get<SpatialComponent>()->setLookDir(glm::vec3(f, f / 2, g));
         }
     }
 };

@@ -44,47 +44,45 @@ class GBufferShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (const auto& model : Engine::getComponents<MeshComponent>()) {
-                if (const auto spatial = model->getGameObject().getComponentByType<SpatialComponent>()) {
-                    loadUniform("M", spatial->getModelMatrix());
+            for (auto renderable : Engine::getComponentTuples<MeshComponent, SpatialComponent>()) {
+                loadUniform("M", renderable.get<SpatialComponent>()->getModelMatrix());
 
-                    /* Bind mesh */
-                    const Mesh & mesh(model->getMesh());
-                    CHECK_GL(glBindVertexArray(mesh.mVAOID));
-                    CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
+                /* Bind mesh */
+                const Mesh & mesh(renderable.get<MeshComponent>()->getMesh());
+                CHECK_GL(glBindVertexArray(mesh.mVAOID));
+                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
-                    /* Bind diffuse map or material */
-                    auto matComp = model->getGameObject().getComponentByType<MaterialComponent>();
-                    if (matComp) {
-                        loadUniform("ambient", matComp->mAmbient);
-                    }
-                    if (auto diffMap = model->getGameObject().getComponentByType<DiffuseMapComponent>()) {
-                        diffMap->mTexture->bind();
-                        loadUniform("useDiffuseMap", true);
-                        loadUniform("diffuseMap", diffMap->mTexture->mTextureID);
-                    }
-                    else {
-                        loadUniform("useDiffuseMap", false);
-                        if (matComp) {
-                            loadUniform("diffuseMaterial", matComp->mDiffuse);
-                        }
-                    }
-
-                    /* Bind normal map */
-                    auto normalMap = model->getGameObject().getComponentByType<neo::NormalMapComponent>();
-                    if (normalMap) {
-                        normalMap->mTexture->bind();
-                        loadUniform("useNormalMap", true);
-                        loadUniform("normalMap", normalMap->mTexture->mTextureID);
-                    }
-                    else {
-                        loadUniform("useNormalMap", false);
-                        loadUniform("N", spatial->getNormalMatrix());
-                    }
-
-                    /* DRAW */
-                    mesh.draw();
+                /* Bind diffuse map or material */
+                auto matComp = renderable.gameObject.getComponentByType<MaterialComponent>();
+                if (matComp) {
+                    loadUniform("ambient", matComp->mAmbient);
                 }
+                if (auto diffMap = renderable.gameObject.getComponentByType<DiffuseMapComponent>()) {
+                    diffMap->mTexture->bind();
+                    loadUniform("useDiffuseMap", true);
+                    loadUniform("diffuseMap", diffMap->mTexture->mTextureID);
+                }
+                else {
+                    loadUniform("useDiffuseMap", false);
+                    if (matComp) {
+                        loadUniform("diffuseMaterial", matComp->mDiffuse);
+                    }
+                }
+
+                /* Bind normal map */
+                auto normalMap = renderable.gameObject.getComponentByType<neo::NormalMapComponent>();
+                if (normalMap) {
+                    normalMap->mTexture->bind();
+                    loadUniform("useNormalMap", true);
+                    loadUniform("normalMap", normalMap->mTexture->mTextureID);
+                }
+                else {
+                    loadUniform("useNormalMap", false);
+                    loadUniform("N", renderable.get<SpatialComponent>()->getNormalMatrix());
+                }
+
+                /* DRAW */
+                mesh.draw();
             }
 
             unbind();

@@ -29,15 +29,12 @@ class GodRayOccluderShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (const auto& renderable : Engine::getComponents<SunOccluderComponent>()) {
-                const auto& renderableMesh = renderable->getGameObject().getComponentByType<MeshComponent>();
-                const auto& renderableSpatial = renderable->getGameObject().getComponentByType<SpatialComponent>();
-                if (!renderableMesh || !renderableSpatial) {
-                    continue;
-                }
+            for (auto& renderable : Engine::getComponentTuples<SunOccluderComponent, MeshComponent, SpatialComponent>()) {
+                auto renderableMesh = renderable.get<MeshComponent>();
+                auto renderableSpatial = renderable.get<SpatialComponent>();
 
                 // VFC
-                if (const auto& boundingBox = renderable->getGameObject().getComponentByType<BoundingBoxComponent>()) {
+                if (const auto& boundingBox = renderable.gameObject.getComponentByType<BoundingBoxComponent>()) {
                     if (const auto& frustumPlanes = camera.getGameObject().getComponentByType<FrustumComponent>()) {
                         float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
                         if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
@@ -54,7 +51,7 @@ class GodRayOccluderShader : public Shader {
                 loadUniform("M", renderableSpatial->getModelMatrix());
 
                 /* Bind texture */
-                if (auto diffuseMap = renderable->getGameObject().getComponentByType<DiffuseMapComponent>()) {
+                if (auto diffuseMap = renderable.gameObject.getComponentByType<DiffuseMapComponent>()) {
                     auto texture = (const Texture2D *)(diffuseMap->mTexture);
                     texture->bind();
                     loadUniform("diffuseMap", texture->mTextureID);
