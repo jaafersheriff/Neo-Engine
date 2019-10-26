@@ -45,6 +45,7 @@
     <ClInclude Include="src\Component\TransformationComponent\SinTranslateComponent.hpp" />
     <ClInclude Include="src\Component\SpatialComponent\SpatialComponent.hpp" />
     <ClInclude Include="src\Component\TransformationComponent\RotationComponent.hpp" />
+    <ClInclude Include="src\ECS\ComponentTuple.hpp" />
     <ClInclude Include="src\ext\imgui\imconfig.h" />
     <ClInclude Include="src\ext\imgui\imgui.h" />
     <ClInclude Include="src\ext\imgui\imgui_impl_glfw.h" />

@@ -78,6 +78,7 @@
     <ClInclude Include="src\Systems\SelectingSystems\EditorSystem.hpp" />
     <ClInclude Include="src\Shader\OutlineShader.hpp" />
     <ClInclude Include="src\Component\RenderableComponent\OutlineRenderable.hpp" />
+    <ClInclude Include="src\ECS\ComponentTuple.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
