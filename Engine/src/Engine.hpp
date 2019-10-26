@@ -72,7 +72,7 @@ namespace neo {
             static const std::vector<std::pair<std::type_index, System *>> & getSystems() { return reinterpret_cast<const std::vector<std::pair<std::type_index, System *>> &>(mSystems); }
             template <typename CompT> static const std::vector<CompT *> & getComponents();
             template <typename CompT> static CompT* getSingleComponent();
-            template <typename... CompTs> static ComponentTuple getComponentTuple();
+            template <typename CompT, typename... CompTs> static ComponentTuple getComponentTuple();
 
             /* ImGui */
             static bool mImGuiEnabled;
@@ -185,15 +185,20 @@ namespace neo {
     template <typename CompT>
     CompT* Engine::getSingleComponent() {
         auto components = getComponents<CompT>();
+        if (!components.size()) {
+            return nullptr;
+        }
         assert(components.size() == 1);
 
         return components[0];
     }
 
-    template <typename... CompTs>
+    template <typename CompT, typename... CompTs>
     ComponentTuple Engine::getComponentTuple() {
         ComponentTuple tuple;
-        _addToTuple<CompTs...>(tuple, createGameObject());
+        if (auto comp = getSingleComponent<CompT>()) {
+            _addToTuple<CompTs...>(tuple, comp->getGameObject());
+        }
         return tuple;
     }
 
@@ -213,10 +218,5 @@ namespace neo {
         else {
             tuple.components[typeid(CompT)] = nullptr;
         }
-    }
-
-    template <>
-    void Engine::_addSingleToTuple(ComponentTuple&, GameObject& go) {
-
     }
 }
