@@ -364,6 +364,10 @@ namespace neo {
                         }
                     };
 
+                    if (Renderer::mComputeShaders.size() && ImGui::TreeNodeEx("Compute", ImGuiTreeNodeFlags_DefaultOpen)) {
+                        shadersFunc(Renderer::mComputeShaders, "COMPUTE_SWAP");
+                        ImGui::TreePop();
+                    }
                     if (Renderer::mPreProcessShaders.size() && ImGui::TreeNodeEx("Pre process", ImGuiTreeNodeFlags_DefaultOpen)) {
                         shadersFunc(Renderer::mPreProcessShaders, "PRESHADER_SWAP");
                         ImGui::TreePop();

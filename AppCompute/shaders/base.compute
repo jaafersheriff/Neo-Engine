@@ -9,8 +9,7 @@ uniform float radius;
 // buffer that is Vertex|Color|Vertex|Color|
 struct AttribData
 {
-	vec4 v;
-	vec4 c;
+	vec3 v;
 };
 
 // Declare an input/output buffer that stores data.
@@ -45,8 +44,5 @@ void main()
 	// Calculate the vertex position based on
 	// the previously calculated angle and radius.
 	// This is provided by the application.
-	outBuffer.data[storePos].v = vec4(sin(alpha) * radius, cos(alpha) * radius, 0.0, 1.0);
-
-	// Assign a color for the vertex
-	outBuffer.data[storePos].c = vec4(float(storePos) / float(gSize), 0.0, 1.0, 1.0);
+	outBuffer.data[storePos].v = vec3(sin(alpha) * radius, cos(alpha) * radius, 0.0);
 }

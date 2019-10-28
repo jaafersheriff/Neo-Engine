@@ -136,7 +136,7 @@ namespace neo {
         std::string sourceString(shaderString);
 
         // Prepend #version
-        sourceString.insert(0, "#version 330 core\n");
+        sourceString.insert(0, "#version 430 core\n");
 
         // Break up source by line
         std::string::size_type start = 0;

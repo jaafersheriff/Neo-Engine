@@ -18,18 +18,7 @@ namespace neo {
             Component(go)
         {
             Mesh::MeshBuffers buffers;
-            buffers.vertices.push_back(-0.5f);
-            buffers.vertices.push_back(-0.5f);
-            buffers.vertices.push_back( 0.5f);
-
-            buffers.vertices.push_back( 0.5f);
-            buffers.vertices.push_back(-0.5f);
-            buffers.vertices.push_back( 0.f);
-
-            buffers.vertices.push_back( 0.f);
-            buffers.vertices.push_back( 0.5f);
-            buffers.vertices.push_back( 0.f);
-            for (int i = 0; i < mNumVerts - 9; i++) {
+            for (int i = 0; i < mNumVerts; i++) {
                 buffers.vertices.push_back(0);
             }
 

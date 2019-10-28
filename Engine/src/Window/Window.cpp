@@ -126,9 +126,9 @@ namespace neo {
         /* Request version 3.3 of OpenGL */
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        const char *glsl_version = "#version 330";
+        const char *glsl_version = "#version 430";
         glfwWindowHint(GLFW_AUTO_ICONIFY, false);
 
         /* Create GLFW window */

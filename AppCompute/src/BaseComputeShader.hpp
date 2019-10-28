@@ -17,11 +17,11 @@ public:
     float radius = 0.1f;
     int groupSizeWidth = 64;
 
-    BaseComputeShader(const std::string &vert, const std::string &frag) :
-        Shader("BaseCompute Shader", vert, frag)
+    BaseComputeShader(const std::string &compute) :
+        Shader("BaseCompute Shader", compute)
     {}
 
-    virtual void render(const CameraComponent &camera) override {
+    virtual void render(const CameraComponent &) override {
         bind();
 
         loadUniform("radius", radius);
@@ -46,5 +46,9 @@ public:
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, gIndexBufferBinding, 0);
 
         unbind();
+    }
+
+    virtual void imguiEditor() override {
+        ImGui::SliderFloat("R", &radius, 0.f, 1.f);
     }
 };

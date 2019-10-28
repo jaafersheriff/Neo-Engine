@@ -47,6 +47,7 @@ int main() {
     EngineConfig config;
     config.APP_NAME = "Compute";
     config.APP_RES = "res/";
+    config.attachEditor = false;
     Engine::init(config);
 
     /* Game objects */
@@ -64,6 +65,7 @@ int main() {
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
+    Renderer::addComputeShader<BaseComputeShader>("base.compute");
     Renderer::addSceneShader<MeshVisShader>("meshVis.vert", "meshVis.frag");
 
     /* Run */
