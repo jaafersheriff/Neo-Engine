@@ -53,6 +53,12 @@ int main() {
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
+    // Create mesh
+    {
+        auto& go = Engine::createGameObject();
+        Engine::addComponent<ComputeMeshComponent>(&go);
+    }
+
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
 

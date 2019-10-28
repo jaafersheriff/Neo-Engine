@@ -21,7 +21,7 @@ public:
 
         for (auto& model : Engine::getComponents<ComputeMeshComponent>()) {
             /* Bind mesh */
-            // glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+            // CHECK_GL(glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT));
             CHECK_GL(glBindVertexArray(model->mComputeMesh->mVAOID));
 
             /* DRAW */
