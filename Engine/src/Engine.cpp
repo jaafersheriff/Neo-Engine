@@ -129,6 +129,11 @@ namespace neo {
         mGameObjectKillQueue.push_back(&go);
     }
 
+    void Engine::removeComponent(std::type_index type, Component* component) {
+        assert(mComponents.count(type)); // trying to remove a type of component that was never added
+        mComponentKillQueue.emplace_back(type, component);
+    }
+
     void Engine::_processInitQueue() {
         _initGameObjects();
         _initComponents();
@@ -387,38 +392,37 @@ namespace neo {
             if (mConfig.attachEditor && ImGui::BeginMenu("Editor")) {
                 if (auto selected = Engine::getSingleComponent<SelectedComponent>()) {
                     auto allComponents = selected->getGameObject().getComponentsMap();
-                    static std::optional<std::type_index> index;
-                    if (ImGui::BeginCombo("", index ? index->name() + 6 : "Edit components")) {
-                        index = std::nullopt;
+                    static std::optional<std::type_index> type;
+                    if (ImGui::BeginCombo("", type ? type->name() + 6 : "Edit components")) {
+                        type = std::nullopt;
                         for (auto comp : allComponents) {
                             if (comp.second.size()) {
                                 if (ImGui::Selectable(comp.first.name() + 6)) {
-                                    index = comp.first;
+                                    type = comp.first;
                                 }
                             }
                         }
                         ImGui::EndCombo();
                     }
-                    if (index) {
-                        auto components = allComponents[index.value()];
+                    if (type) {
+                        auto components = allComponents[type.value()];
                         if (components.size()) {
-                            static int offset = 0;
+                            static int index = 0;
                             if (components.size() > 1) {
                                 ImGui::Indent();
-                                ImGui::SliderInt("Index", &offset, 0, components.size() - 1);
+                                ImGui::SliderInt("Index", &index, 0, components.size() - 1);
                                 ImGui::Unindent();
                             }
                             ImGui::Indent();
-                            components[offset]->imGuiEditor();
+                            components[index]->imGuiEditor();
                             ImGui::Unindent();
 
                             ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0.81f, 0.20f, 0.20f, 0.40f));
                             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
                             ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
                             if (ImGui::Button("Remove", ImVec2(ImGui::GetWindowWidth() * 0.9f, 0))) {
-                                // TODO...
-                                // Engine::removeComponent(static_cast<decltype(*index)>(components[offset]));
-                                index = std::nullopt;
+                                Engine::removeComponent(type.value(), components[index]);
+                                type = std::nullopt;
                             }
                             ImGui::PopStyleColor(3);
                         }

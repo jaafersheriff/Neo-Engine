@@ -35,7 +35,9 @@ namespace neo {
         void populate() {
             _addComponent<CompT>();
             if constexpr (sizeof...(CompTs) > 0) {
-                populate<CompTs...>();
+                if (mValid) {
+                    populate<CompTs...>();
+                }
             }
         }
 
