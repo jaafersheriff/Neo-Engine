@@ -441,9 +441,9 @@ namespace neo {
                             components[index]->imGuiEditor();
                             ImGui::Unindent();
 
-                            ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0.81f, 0.20f, 0.20f, 0.40f));
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.81f, 0.20f, 0.20f, 0.40f));
                             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
-                            ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
                             if (ImGui::Button("Remove", ImVec2(ImGui::GetWindowWidth() * 0.9f, 0))) {
                                 Engine::removeComponent(type.value(), components[index]);
                                 type = std::nullopt;
@@ -451,11 +451,14 @@ namespace neo {
                             ImGui::PopStyleColor(3);
                         }
                     }
-                    ImGui::Separator();
-                    if (ImGui::BeginCombo("", "Add components")) {
-                        // TODO..
-                        ImGui::EndCombo();
-                    }
+                    /* Attaching new components here would be nice, but there's problems:
+                        - There's no way have a static list of all components possible (not just ones that have been added to the scene)
+                            - They _could_ all be registered manually, both by the Engine for Engine-specific components and per-app
+                            - They would need some dummy GameObject to be tied to
+                        - Components have a deleted copy construct
+                            - The copy constructor could be made protected, but then every single component would need some clone(GameObject&) function
+                              to create a new unique_ptr of itself. That's too much overhead I think.
+                    */
                 }
                 ImGui::Separator();
                 if (ImGui::Button("Create new GameObject")) {
@@ -482,9 +485,4 @@ namespace neo {
             ImGui::EndMainMenuBar();
         }
     }
-
-    void Engine::_registerEngineComponents() {
-        // TODO
-    }
-
 }
