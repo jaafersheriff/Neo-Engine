@@ -11,6 +11,7 @@ namespace neo {
     std::string Renderer::APP_SHADER_DIR;
     CameraComponent *Renderer::mDefaultCamera(nullptr);
     Framebuffer *Renderer::mDefaultFBO;
+    std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mComputeShaders;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPreProcessShaders;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mSceneShaders;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPostShaders;
@@ -37,6 +38,9 @@ namespace neo {
     }
 
     void Renderer::shutDown() {
+        for (auto& shader : mComputeShaders) {
+            shader.second->cleanUp();
+        }
         for (auto& shader : mPreProcessShaders) {
             shader.second->cleanUp();
         }
@@ -74,8 +78,15 @@ namespace neo {
         resetState();
 
         /* Get active shaders */
+        std::vector<Shader *> activeComputeShaders = _getActiveShaders(mComputeShaders);
         std::vector<Shader *> activePreShaders = _getActiveShaders(mPreProcessShaders);
         std::vector<Shader *> activePostShaders = _getActiveShaders(mPostShaders);
+
+        /* Run compute */
+        for (auto& shader : activeComputeShaders) {
+            resetState();
+            shader->render(*mDefaultCamera);
+        }
 
         /* Render all preprocesses */
         for (auto & shader : activePreShaders) {

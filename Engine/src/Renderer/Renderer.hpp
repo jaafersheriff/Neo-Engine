@@ -35,6 +35,7 @@ namespace neo {
             static void setDefaultFBO(const std::string &);
 
             /* Shaders */
+            template <typename ShaderT, typename... Args> static ShaderT & addComputeShader(Args &&...);
             template <typename ShaderT, typename... Args> static ShaderT & addPreProcessShader(Args &&...);
             template <typename ShaderT, typename... Args> static ShaderT & addSceneShader(Args &&...);
             template <typename ShaderT, typename... Args> static ShaderT & addPostProcessShader(Args &&...);
@@ -45,6 +46,7 @@ namespace neo {
             static Framebuffer* mDefaultFBO;
             static glm::vec3 mClearColor;
 
+            static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mComputeShaders;
             static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPreProcessShaders;
             static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mSceneShaders;
             static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPostShaders;
@@ -55,6 +57,18 @@ namespace neo {
     };
 
     /* Template implementation */
+    template <typename ShaderT, typename... Args>
+    ShaderT & Renderer::addComputeShader(Args &&... args) {
+        std::type_index typeI(typeid(ShaderT));
+        for (auto& shader : mComputeShaders) {
+            if (shader.first == typeI) {
+                return static_cast<ShaderT&>(*shader.second);
+            }
+        }
+        mComputeShaders.emplace_back(typeI, _createShader<ShaderT>(std::forward<Args>(args)...));
+        return static_cast<ShaderT &>(*mComputeShaders.back().second);
+    }
+
     template <typename ShaderT, typename... Args>
     ShaderT & Renderer::addPreProcessShader(Args &&... args) {
         std::type_index typeI(typeid(ShaderT));
