@@ -121,6 +121,22 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+    <None Include="shaders\meshVis.frag" />
+    <None Include="shaders\meshVis.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\base.compute">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </DeploymentContent>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ExcludedFromBuild>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\BaseComputeShader.hpp" />
+    <ClInclude Include="src\ComputeMeshComponent.hpp" />
+    <ClInclude Include="src\MeshVisShader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

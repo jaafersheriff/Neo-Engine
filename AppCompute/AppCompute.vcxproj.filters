@@ -21,5 +21,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+    <None Include="shaders\meshVis.vert" />
+    <None Include="shaders\meshVis.frag" />
+    <None Include="shaders\base.compute" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\BaseComputeShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ComputeMeshComponent.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MeshVisShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
