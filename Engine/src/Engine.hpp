@@ -60,6 +60,9 @@ namespace neo {
             /* Attach a system */
             template <typename SysT, typename... Args> static SysT & addSystem(Args &&...);
 
+            /* Register all components with the engine */
+            template <typename CompT> static void registerComponent(CompT component);
+
             /* Getters */
             static const std::vector<GameObject *> & getGameObjects() { return reinterpret_cast<const std::vector<GameObject *> &>(mGameObjects); }
             template <typename SysT> static SysT & getSystem();
@@ -93,6 +96,8 @@ namespace neo {
             static std::vector<std::unique_ptr<GameObject>> mGameObjects;
             static std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> mComponents;
             static std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
+            static std::map<std::type_index, Component> mAllComponents;
+            static void _registerEngineComponents();
 
             /* ImGui */
             static std::unordered_map<std::string, std::function<void()>> mImGuiFuncs;
@@ -156,6 +161,14 @@ namespace neo {
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
         removeComponent(typeid(CompT), static_cast<Component*>(&component));
+    }
+
+    template <typename CompT> 
+    void Engine::registerComponent(CompT component) {
+        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+
+        mAllComponents[typeid(CompT)] = static_cast<Component>(component);
     }
 
     template <typename CompT>

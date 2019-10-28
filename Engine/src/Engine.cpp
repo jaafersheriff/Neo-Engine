@@ -172,6 +172,30 @@ namespace neo {
         }
     }
 
+    void Engine::shutDown() {
+        // Clean up GameObjects and components
+        for (auto& gameObject : mGameObjects) {
+            removeGameObject(*gameObject);
+        }
+        _processKillQueue();
+
+        // Clean up Renderer
+        Renderer::shutDown();
+
+        // Clean up GL objects
+        for (auto& mesh : Library::mMeshes) {
+            mesh.second->destroy();
+        }
+        for (auto& texture : Library::mTextures) {
+            texture.second->destroy();
+        }
+        for (auto& frameBuffer : Library::mFramebuffers) {
+            frameBuffer.second->destroy();
+        }
+
+        Window::shutDown();
+    }
+
     void Engine::_processKillQueue() {
         /* Remove Components from GameObjects */
         for (auto & comp : mComponentKillQueue) {
@@ -459,8 +483,8 @@ namespace neo {
         }
     }
 
-    void Engine::shutDown() {
-        Window::shutDown();
+    void Engine::_registerEngineComponents() {
+        // TODO
     }
 
 }

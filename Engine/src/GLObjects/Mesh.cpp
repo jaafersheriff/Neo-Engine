@@ -100,4 +100,8 @@ namespace neo {
         /* Error check */
         assert(glGetError() == GL_NO_ERROR);
     }
+
+    void Mesh::destroy() {
+        // TODO
+    }
 }

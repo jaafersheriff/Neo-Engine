@@ -27,6 +27,7 @@ namespace neo {
             static void resetState();
             static void render(float);
             static void renderScene(const CameraComponent &);
+            static void shutDown();
 
             static void setDefaultCamera(CameraComponent *cam) { mDefaultCamera = cam; }
 

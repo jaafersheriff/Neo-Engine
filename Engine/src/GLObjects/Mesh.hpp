@@ -66,5 +66,8 @@ namespace neo {
 
             /* Call the appropriate draw function */
             void draw(unsigned = 0) const;
+
+            /* Remove */
+            void destroy();
     };
 }

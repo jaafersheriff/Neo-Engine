@@ -36,6 +36,18 @@ namespace neo {
         mDefaultFBO->mFBOID = 0;
     }
 
+    void Renderer::shutDown() {
+        for (auto& shader : mPreProcessShaders) {
+            shader.second->cleanUp();
+        }
+        for (auto& shader : mSceneShaders) {
+            shader.second->cleanUp();
+        }
+        for (auto& shader : mPostShaders) {
+            shader.second->cleanUp();
+        }
+    }
+
     void Renderer::resetState() {
         CHECK_GL(glClearColor(0.0f, 0.0f, 0.0f, 1.f));
 
