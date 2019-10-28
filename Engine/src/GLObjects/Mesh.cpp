@@ -7,14 +7,6 @@
 
 namespace neo {
 
-    Mesh::~Mesh() {
-        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mVertexBufferID));
-        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mNormalBufferID));
-        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mUVBufferID));
-        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mElementBufferID));
-        CHECK_GL(glDeleteVertexArrays(1, (GLuint *) &mVAOID));
-    }
-
     void Mesh::draw(unsigned size) const {
         if (mElementBufferSize) {
             // TODO - instanced?
@@ -102,6 +94,11 @@ namespace neo {
     }
 
     void Mesh::destroy() {
-        // TODO
+        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mVertexBufferID));
+        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mNormalBufferID));
+        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mUVBufferID));
+        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mElementBufferID));
+        CHECK_GL(glDeleteVertexArrays(1, (GLuint *) &mVAOID));
+
     }
 }

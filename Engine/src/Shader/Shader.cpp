@@ -297,7 +297,6 @@ namespace neo {
             if (mVertexID) {
                 CHECK_GL(glDetachShader(mPID, mVertexID));
                 CHECK_GL(glDeleteShader(mVertexID));
-
             }
             if (mFragmentID) {
                 CHECK_GL(glDetachShader(mPID, mFragmentID));

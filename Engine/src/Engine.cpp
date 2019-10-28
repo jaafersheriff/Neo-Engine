@@ -57,6 +57,7 @@ namespace neo {
             std::cerr << "Failed initializing Window" << std::endl;
         }
         Window::setSize(glm::ivec2(mConfig.width, mConfig.height));
+        ImGui::GetStyle().ScaleAllSizes(2.f);
 
         /* Init loader after initializing GL*/
         Loader::init(mConfig.APP_RES, true);
@@ -71,20 +72,20 @@ namespace neo {
     }
 
     void Engine::run() {
+        /* Apply config */
+        if (mConfig.attachEditor) {
+            addSystem<MouseRaySystem>();
+            addSystem<EditorSystem>();
+            Renderer::addSceneShader<WireframeShader>();
+            Renderer::addSceneShader<OutlineShader>();
+        }
+
         /* Initialize new objects and components */
         _processInitQueue();
         Messenger::relayMessages();
 
         /* Init systems */
         _initSystems();
-
-        if (mConfig.attachEditor) {
-            addSystem<MouseRaySystem>();
-            addSystem<EditorSystem>();
-            Renderer::addSceneShader<WireframeShader>();
-            Renderer::addSceneShader<OutlineShader>();
-            ImGui::GetStyle().ScaleAllSizes(2.f);
-        }
 
         while (!Window::shouldClose()) {
             /* Update Util */
@@ -117,7 +118,9 @@ namespace neo {
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
             Renderer::render((float)Util::mTimeStep);
-       }
+        }
+
+        shutDown();
     }
 
     GameObject & Engine::createGameObject() {
@@ -282,9 +285,9 @@ namespace neo {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("ECS")) {
-                ImGui::Text("GameObjects:  %d", Engine::getGameObjects().size());
+                ImGui::Text("GameObjects:  %d", getGameObjects().size());
                 int count = 0;
-                for (auto go : Engine::getGameObjects()) {
+                for (auto go : getGameObjects()) {
                     count += go->getAllComponents().size();
                 }
                 ImGui::Text("Components:  %d", count);
@@ -414,7 +417,7 @@ namespace neo {
                 ImGui::EndMenu();
             }
             if (mConfig.attachEditor && ImGui::BeginMenu("Editor")) {
-                if (auto selected = Engine::getSingleComponent<SelectedComponent>()) {
+                if (auto selected = getSingleComponent<SelectedComponent>()) {
                     auto allComponents = selected->getGameObject().getComponentsMap();
                     static std::optional<std::type_index> type;
                     if (ImGui::BeginCombo("", type ? type->name() + 6 : "Edit components")) {
@@ -445,31 +448,38 @@ namespace neo {
                             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
                             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
                             if (ImGui::Button("Remove", ImVec2(ImGui::GetWindowWidth() * 0.9f, 0))) {
-                                Engine::removeComponent(type.value(), components[index]);
-                                type = std::nullopt;
+                                removeComponent(type.value(), components[index]);
+                                if (components.size() == 1) {
+                                    index = 0;
+                                    type = std::nullopt;
+                                }
+                                else if (index == components.size() - 1) {
+                                    index--;
+                                }
                             }
                             ImGui::PopStyleColor(3);
                         }
                     }
                     /* Attaching new components here would be nice, but there's problems:
                         - There's no way have a static list of all components possible (not just ones that have been added to the scene)
-                            - They _could_ all be registered manually, both by the Engine for Engine-specific components and per-app
+                            - They _could_ all be registered manually, both by the Engine for Engine-specific components and ny the Application for app-specific components
                             - They would need some dummy GameObject to be tied to
                         - Components have a deleted copy construct
                             - The copy constructor could be made protected, but then every single component would need some clone(GameObject&) function
-                              to create a new unique_ptr of itself. That's too much overhead I think.
+                              to create a new unique_ptr of itself. That's too much overhead.
+                        If I ever do enough object editing that I feel a need for attaching new components, then it's possible. Just a bit messy.
                     */
                 }
                 ImGui::Separator();
                 if (ImGui::Button("Create new GameObject")) {
-                    Engine::removeComponent<SelectedComponent>(*Engine::getSingleComponent<SelectedComponent>());
-                    auto& go = Engine::createGameObject();
-                    Engine::addComponent<BoundingBoxComponent>(&go, std::vector<float>{ -1.f, -1.f, -1.f, 1.f, 1.f, 1.f });
-                    Engine::addComponent<SpatialComponent>(&go);
-                    Engine::addComponent<SelectableComponent>(&go);
-                    Engine::addComponent<SelectedComponent>(&go);
-                    Engine::addComponent<MeshComponent>(&go, Library::getMesh("sphere"));
-                    Engine::addComponent<renderable::WireframeRenderable>(&go);
+                    removeComponent<SelectedComponent>(*getSingleComponent<SelectedComponent>());
+                    auto& go = createGameObject();
+                    addComponent<BoundingBoxComponent>(&go, std::vector<float>{ -1.f, -1.f, -1.f, 1.f, 1.f, 1.f });
+                    addComponent<SpatialComponent>(&go);
+                    addComponent<SelectableComponent>(&go);
+                    addComponent<SelectedComponent>(&go);
+                    addComponent<MeshComponent>(&go, Library::getMesh("sphere"));
+                    addComponent<renderable::WireframeRenderable>(&go);
                 }
                 ImGui::EndMenu();
             }

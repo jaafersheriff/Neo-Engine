@@ -39,9 +39,6 @@ namespace neo {
                 mBuffers = buffers;
             }
 
-            /* Destructor */
-            ~Mesh();
-
             /* VAO ID */
             unsigned int mVAOID;
 
