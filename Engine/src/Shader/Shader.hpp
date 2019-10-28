@@ -22,6 +22,10 @@ namespace neo {
             Shader(const std::string &, const char *, const char *);
             Shader(const std::string &, const char *, const std::string &);
             Shader(const std::string &, const char *, const char *, const char *);
+            // Compute
+            Shader(const std::string &, const std::string &);
+            Shader(const std::string &, const char *);
+
             Shader(Shader&& rhs) = default;
 
             virtual ~Shader() = default;
@@ -62,15 +66,18 @@ namespace neo {
             GLint mVertexID = 0;
             GLint mFragmentID = 0;
             GLint mGeometryID = 0;
+            GLint mComputeID = 0;
             std::map<std::string, GLint> mAttributes;
             std::map<std::string, GLint> mUniforms;
 
             std::string mVertexFile = "";
             std::string mFragmentFile = "";
             std::string mGeometryFile = "";
+            std::string mComputeFile = "";
             const char* mVertexSource = nullptr;
             const char* mFragmentSource = nullptr;
             const char* mGeometrySource = nullptr;
+            const char* mComputeSource = nullptr;
 
             void _init();
             std::string _getFullPath(const std::string&);

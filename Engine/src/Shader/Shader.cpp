@@ -37,6 +37,18 @@ namespace neo {
         mFragmentFile = fName;
     }
 
+
+    Shader::Shader(const std::string &name, const std::string &cName) : 
+        Shader(name, Util::textFileRead(_getFullPath(cName).c_str())) {
+        mComputeFile = cName;
+    }
+
+    Shader::Shader(const std::string &name, const char *cTex) :
+        mName(name),
+        mComputeSource(cTex) {
+        _init();
+    }
+
     Shader::Shader(const std::string &name, const char *vTex, const char *fTex, const char *gTex) :
         mName(name),
         mVertexSource(vTex),
@@ -48,6 +60,10 @@ namespace neo {
 
     void Shader::reload() {
         cleanUp();
+        if (mComputeFile.size()) {
+            delete mComputeSource;
+            mComputeSource = Util::textFileRead(_getFullPath(mComputeFile).c_str());
+        }
         if (mVertexFile.size()) {
             delete mVertexSource;
             mVertexSource = Util::textFileRead(_getFullPath(mVertexFile).c_str());
@@ -69,6 +85,7 @@ namespace neo {
         std::string processedVertex = _processShader(mVertexSource);
         std::string processedFragment = _processShader(mFragmentSource);
         std::string processedGeometry = _processShader(mGeometrySource);
+        std::string processedCompute = _processShader(mComputeSource);
 
         if (processedVertex.size() && (mVertexID = _compileShader(GL_VERTEX_SHADER, processedVertex.c_str()))) {
             CHECK_GL(glAttachShader(mPID, mVertexID));
@@ -78,6 +95,9 @@ namespace neo {
         }
         if (processedGeometry.size() && (mGeometryID = _compileShader(GL_GEOMETRY_SHADER, processedGeometry.c_str()))) {
             CHECK_GL(glAttachShader(mPID, mGeometryID));
+        }
+        if (processedCompute.size() && (mComputeID = _compileShader(GL_COMPUTE_SHADER, processedCompute.c_str()))) {
+            CHECK_GL(glAttachShader(mPID, mComputeID));
         }
         CHECK_GL(glLinkProgram(mPID));
 
@@ -99,6 +119,9 @@ namespace neo {
         }
         if (mGeometryID) {
             _findAttributesAndUniforms(processedGeometry.c_str());
+        }
+        if (mComputeID) {
+            _findAttributesAndUniforms(processedCompute.c_str());
         }
 
         std::cout << "Successfully compiled and linked " << mName << std::endl;
@@ -179,6 +202,8 @@ namespace neo {
                 case GL_GEOMETRY_SHADER:
                     std::cout << " geometry shader";
                     break;
+                case GL_COMPUTE_SHADER:
+                    std::cout << " compute shader";
                 default:
                     break;
             }
@@ -306,9 +331,13 @@ namespace neo {
                 CHECK_GL(glDeleteShader(mGeometryID));
                 CHECK_GL(glDetachShader(mPID, mGeometryID));
             }
+            if (mComputeID) {
+                CHECK_GL(glDeleteShader(mComputeID));
+                CHECK_GL(glDetachShader(mPID, mComputeID));
+            }
         }
         CHECK_GL(glDeleteProgram(mPID));
-        mPID = mVertexID = mFragmentID = mGeometryID = 0;
+        mPID = mVertexID = mFragmentID = mGeometryID = mComputeID = 0;
     }
 
     void Shader::loadUniform(const std::string &loc, const bool b) const {
