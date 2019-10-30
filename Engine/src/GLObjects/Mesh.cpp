@@ -32,7 +32,7 @@ namespace neo {
         }
     }
 
-    void Mesh::upload(unsigned type) {
+    void Mesh::upload(int type) {
         /* Initialize VAO */
         CHECK_GL(glGenVertexArrays(1, (GLuint *) &mVAOID));
         CHECK_GL(glBindVertexArray(mVAOID));
@@ -75,7 +75,7 @@ namespace neo {
         }
 
         /* Set draw mode */
-        if (type) {
+        if (type > -1) {
             mPrimitiveType = type;
         }
         else if (!mBuffers.indices.empty()) {

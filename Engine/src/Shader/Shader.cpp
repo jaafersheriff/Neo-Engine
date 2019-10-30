@@ -352,6 +352,10 @@ namespace neo {
         CHECK_GL(glUniform1i(getUniform(loc), i));
     }
 
+    void Shader::loadUniform(const std::string &loc, const double d) const {
+        CHECK_GL(glUniform1f(getUniform(loc), static_cast<float>(d)));
+    }
+
     void Shader::loadUniform(const std::string &loc, const float f) const {
         CHECK_GL(glUniform1f(getUniform(loc), f));
     }

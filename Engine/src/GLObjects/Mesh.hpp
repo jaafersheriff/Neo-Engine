@@ -59,7 +59,7 @@ namespace neo {
             unsigned mPrimitiveType;
 
             /* Copy data to GPU */
-            void upload(unsigned = 0);
+            void upload(int = -1);
 
             /* Call the appropriate draw function */
             void draw(unsigned = 0) const;

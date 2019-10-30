@@ -65,8 +65,16 @@ int main() {
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
-    Renderer::addComputeShader<BaseComputeShader>("base.compute");
+    auto& compute = Renderer::addComputeShader<BaseComputeShader>("base.compute");
+    compute.mActive = false;
     Renderer::addSceneShader<MeshVisShader>("meshVis.vert", "meshVis.frag");
+
+    Engine::addImGuiFunc("Mesh", []() {
+        if (auto mesh = Engine::getSingleComponent<ComputeMeshComponent>()) {
+            mesh->imGuiEditor();
+        }
+
+    });
 
     /* Run */
     Engine::run();
