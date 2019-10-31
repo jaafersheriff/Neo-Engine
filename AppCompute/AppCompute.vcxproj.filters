@@ -21,18 +21,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="shaders\meshVis.vert" />
-    <None Include="shaders\meshVis.frag" />
-    <None Include="shaders\base.compute" />
+    <None Include="shaders\metaballs.vert" />
+    <None Include="shaders\metaballs.frag" />
+    <None Include="shaders\metaballs.compute" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\BaseComputeShader.hpp">
+    <ClInclude Include="src\MetaballsShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ComputeMeshComponent.hpp">
+    <ClInclude Include="src\MetaballsComputeShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\MeshVisShader.hpp">
+    <ClInclude Include="src\MetaballsMeshComponent.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

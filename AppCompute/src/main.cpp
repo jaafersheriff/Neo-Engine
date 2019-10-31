@@ -1,8 +1,8 @@
 #include <Engine.hpp>
 
-#include "BaseComputeShader.hpp"
-#include "MeshVisShader.hpp"
-#include "ComputeMeshComponent.hpp"
+#include "MetaballsComputeShader.hpp"
+#include "MetaballsShader.hpp"
+#include "MetaballsMeshComponent.hpp"
 
 #include "Shader/AlphaTestShader.hpp"
 
@@ -59,7 +59,7 @@ int main() {
     // Create mesh
     {
         auto& go = Engine::createGameObject();
-        Engine::addComponent<ComputeMeshComponent>(&go);
+        Engine::addComponent<MetaballsMeshComponent>(&go);
         Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.5f, 0.f));
     }
 
@@ -73,13 +73,13 @@ int main() {
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
-    Renderer::addComputeShader<BaseComputeShader>("base.compute");
-    Renderer::addSceneShader<MeshVisShader>("meshVis.vert", "meshVis.frag");
+    Renderer::addComputeShader<MetaballsComputeShader>("metaballs.compute");
+    Renderer::addSceneShader<MetaballsShader>("metaballs.vert", "metaballs.frag");
     Renderer::addSceneShader<AlphaTestShader>();
 
     Engine::addImGuiFunc("Mesh", []() {
-        if (auto mesh = Engine::getComponentTuple<ComputeMeshComponent, SpatialComponent>()) {
-            mesh->get<ComputeMeshComponent>()->imGuiEditor();
+        if (auto mesh = Engine::getComponentTuple<MetaballsMeshComponent, SpatialComponent>()) {
+            mesh->get<MetaballsMeshComponent>()->imGuiEditor();
             mesh->get<SpatialComponent>()->imGuiEditor();
         }
 
