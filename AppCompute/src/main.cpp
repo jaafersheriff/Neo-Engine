@@ -4,6 +4,8 @@
 #include "MeshVisShader.hpp"
 #include "ComputeMeshComponent.hpp"
 
+#include "Shader/AlphaTestShader.hpp"
+
 using namespace neo;
 
 /* Game object definitions */
@@ -58,20 +60,27 @@ int main() {
     {
         auto& go = Engine::createGameObject();
         Engine::addComponent<ComputeMeshComponent>(&go);
+        Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.5f, 0.f));
     }
+
+    /* Ground plane */
+    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
+    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
+    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, Library::getTexture("grid.png"));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
-    auto& compute = Renderer::addComputeShader<BaseComputeShader>("base.compute");
-    compute.mActive = false;
+    Renderer::addComputeShader<BaseComputeShader>("base.compute");
     Renderer::addSceneShader<MeshVisShader>("meshVis.vert", "meshVis.frag");
+    Renderer::addSceneShader<AlphaTestShader>();
 
     Engine::addImGuiFunc("Mesh", []() {
-        if (auto mesh = Engine::getSingleComponent<ComputeMeshComponent>()) {
-            mesh->imGuiEditor();
+        if (auto mesh = Engine::getComponentTuple<ComputeMeshComponent, SpatialComponent>()) {
+            mesh->get<ComputeMeshComponent>()->imGuiEditor();
+            mesh->get<SpatialComponent>()->imGuiEditor();
         }
 
     });
