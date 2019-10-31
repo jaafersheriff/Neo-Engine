@@ -12,7 +12,7 @@ class MetaballsShader : public Shader {
 
 public:
 
-    bool wireFrame = true;
+    bool mWireframe = true;
 
     MetaballsShader(const std::string &vert, const std::string &frag) :
         Shader("Metaballs Shader", vert, frag)
@@ -25,12 +25,12 @@ public:
         loadUniform("V", camera.getView());
 
         for (auto& model : Engine::getComponentTuples<MetaballsMeshComponent, SpatialComponent>()) {
-            if (wireFrame) {
+            if (mWireframe) {
                 CHECK_GL(glDisable(GL_CULL_FACE));
                 CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
             }
 
-            loadUniform("wf", wireFrame);   
+            loadUniform("wf", mWireframe);   
             loadUniform("M", model.get<SpatialComponent>()->getModelMatrix());
 
             /* Bind mesh */
@@ -44,6 +44,6 @@ public:
     }
 
     virtual void imguiEditor() override {
-        ImGui::Checkbox("Wireframe", &wireFrame);
+        ImGui::Checkbox("Wireframe", &mWireframe);
     }
 };

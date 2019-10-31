@@ -144,6 +144,12 @@ namespace neo {
         static_assert(!std::is_same<ShaderT, Shader>::value, "ShaderT must be a derived Shader type");
         std::type_index typeI(typeid(ShaderT));
 
+        for (auto& shader : mComputeShaders) {
+            if (shader.first == typeI) {
+                return reinterpret_cast<ShaderT &>(*shader.second);
+            }
+        }
+
         for (auto& shader : mPreProcessShaders) {
             if (shader.first == typeI) {
                 return reinterpret_cast<ShaderT &>(*shader.second);

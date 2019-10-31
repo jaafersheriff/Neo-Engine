@@ -1,6 +1,3 @@
-// https://developer.arm.com/docs/100587/latest/compute-shaders/compute-shaders-example
-
-// The uniform parameters that are passed from application for every frame.
 uniform float radius;
 
 // byte alignment is important
@@ -24,8 +21,6 @@ layout(std430, binding = 0) buffer destBuffer
 // This is a one-dimensional problem, so prefer a one-dimensional group layout.
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-// Declare the main program function that is executed once
-// glDispatchCompute is called from the application.
 void main()
 {
 	// Read the current global position for this thread
