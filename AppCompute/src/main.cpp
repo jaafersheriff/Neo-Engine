@@ -5,8 +5,6 @@
 #include "MetaballsComputeShader.hpp"
 #include "MetaballsShader.hpp"
 
-#include "Shader/AlphaTestShader.hpp"
-
 using namespace neo;
 
 /* Game object definitions */
@@ -64,21 +62,15 @@ int main() {
         Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.5f, 0.f));
     }
 
-    /* Ground plane */
-    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
-    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
-    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, Library::getTexture("grid.png"));
-
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
     Engine::addSystem<MetaballsSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.camera);
+    Renderer::init("shaders/", camera.camera, glm::vec3(1.f));
     auto& computeShader = Renderer::addComputeShader<MetaballsComputeShader>("metaballs.compute");
     computeShader.mActive = false;
     Renderer::addSceneShader<MetaballsShader>("metaballs.vert", "metaballs.frag");
-    Renderer::addSceneShader<AlphaTestShader>();
 
     Engine::addImGuiFunc("Mesh", []() {
         if (auto mesh = Engine::getComponentTuple<MetaballsMeshComponent, SpatialComponent>()) {
