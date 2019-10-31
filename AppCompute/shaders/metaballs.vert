@@ -11,5 +11,5 @@ void main() {
       vec4 wv = M * vec4(vertPos.xyz, 1.0);
       gl_Position = P * V * wv;
       fragPos = wv.xyz;
-      fragNor = vertNor;
+      fragNor = N * vertNor;
 }

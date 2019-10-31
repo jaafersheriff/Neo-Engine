@@ -13,9 +13,14 @@ void main() {
         color = vec4(1);
     }
     else {
-        vec3 c = normalize(fragNor);
+        vec3 c = vec3(1,0,1);
+        vec3 N = normalize(fragNor);
+        vec3 lightDir = lightPos - fragPos;
+        vec3 L = normalize(lightDir);
+        float lambert = clamp(dot(L, N), 0.0, 1.0);
         color = vec4(
-            c
-            , 1.0);
+                c * 0.2 + 
+                c * lambert
+                , 1.0);
     }
 }
