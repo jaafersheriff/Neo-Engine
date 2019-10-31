@@ -8,6 +8,9 @@
 
 namespace neo {
 
+    unsigned Renderer::NEO_GL_MAJOR_VERSION = 4;
+    unsigned Renderer::NEO_GL_MINOR_VERSION = 3;
+    std::string Renderer::NEO_GLSL_VERSION = "#version 430";
     std::string Renderer::APP_SHADER_DIR;
     CameraComponent *Renderer::mDefaultCamera(nullptr);
     Framebuffer *Renderer::mDefaultFBO;

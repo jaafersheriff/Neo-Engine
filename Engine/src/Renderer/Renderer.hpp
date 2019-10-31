@@ -22,6 +22,9 @@ namespace neo {
 
         public:
             static std::string APP_SHADER_DIR;
+            static unsigned NEO_GL_MAJOR_VERSION;
+            static unsigned NEO_GL_MINOR_VERSION;
+            static std::string NEO_GLSL_VERSION;
 
             static void init(const std::string &, CameraComponent *, glm::vec3 clearColor = glm::vec3(0.f));
             static void resetState();
