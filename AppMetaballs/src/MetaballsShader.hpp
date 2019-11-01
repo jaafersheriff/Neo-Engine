@@ -23,9 +23,14 @@ public:
 
         loadUniform("P", camera.getProj());
         loadUniform("V", camera.getView());
+        loadUniform("camPos", camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
         if (auto light = Engine::getComponentTuple<LightComponent, SpatialComponent>()) {
             loadUniform("lightPos", light->get<SpatialComponent>()->getPosition());
+        }
+
+        if (auto skybox = Engine::getComponentTuple<renderable::SkyboxComponent, CubeMapComponent>()) {
+            loadUniform("cubeMap", skybox->get<CubeMapComponent>()->mTexture->mTextureID);
         }
 
         for (auto& metaball : Engine::getComponentTuples<MetaballsComponent, MeshComponent, SpatialComponent>()) {
@@ -34,7 +39,7 @@ public:
                 CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
             }
 
-            loadUniform("wf", mWireframe);   
+            loadUniform("wireframe", mWireframe);
             loadUniform("M", metaball.get<SpatialComponent>()->getModelMatrix());
             loadUniform("N", metaball.get<SpatialComponent>()->getNormalMatrix());
 

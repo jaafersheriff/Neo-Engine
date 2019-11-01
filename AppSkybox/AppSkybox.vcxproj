@@ -126,8 +126,6 @@
     <ClInclude Include="src\ReflectionShader.hpp" />
     <ClInclude Include="src\RefractionComponent.hpp" />
     <ClInclude Include="src\RefractionShader.hpp" />
-    <ClInclude Include="src\SkyboxComponent.hpp" />
-    <ClInclude Include="src\SkyboxShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\model.vert" />

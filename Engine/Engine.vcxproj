@@ -37,6 +37,7 @@
     <ClInclude Include="src\Component\ModelComponent\MeshComponent.hpp" />
     <ClInclude Include="src\Component\ModelComponent\TextureComponent.hpp" />
     <ClInclude Include="src\Component\RenderableComponent\ShadowCasterRenderable.hpp" />
+    <ClInclude Include="src\Component\RenderableComponent\SkyboxComponent.hpp" />
     <ClInclude Include="src\Component\RenderableComponent\WireframeRenderable.hpp" />
     <ClInclude Include="src\Component\SelectingComponent\MouseRayComponent.hpp" />
     <ClInclude Include="src\Component\SelectingComponent\SelectableComponent.hpp" />
@@ -76,6 +77,7 @@
     <ClInclude Include="src\Shader\PostProcessShader.hpp" />
     <ClInclude Include="src\Shader\ShadowCasterShader.hpp" />
     <ClInclude Include="src\Shader\PhongShadowShader.hpp" />
+    <ClInclude Include="src\Shader\SkyboxShader.hpp" />
     <ClInclude Include="src\Shader\WireframeShader.hpp" />
     <ClInclude Include="src\GLObjects\Framebuffer.hpp" />
     <ClInclude Include="src\GLObjects\GLHelper.hpp" />

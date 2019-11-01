@@ -4,10 +4,8 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\SkyboxShader.hpp" />
     <ClInclude Include="src\ReflectionShader.hpp" />
     <ClInclude Include="src\RefractionShader.hpp" />
-    <ClInclude Include="src\SkyboxComponent.hpp" />
     <ClInclude Include="src\ReflectionComponent.hpp" />
     <ClInclude Include="src\RefractionComponent.hpp" />
   </ItemGroup>

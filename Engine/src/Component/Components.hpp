@@ -24,6 +24,7 @@
 #include "RenderableComponent/PhongRenderable.hpp"
 #include "RenderableComponent/PhongShadowRenderable.hpp"
 #include "RenderableComponent/ShadowCasterRenderable.hpp"
+#include "RenderableComponent/SkyboxComponent.hpp"
 #include "RenderableComponent/WireframeRenderable.hpp"
 
 #include "SelectingComponent/MouseRayComponent.hpp"

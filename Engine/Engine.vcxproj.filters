@@ -79,6 +79,8 @@
     <ClInclude Include="src\Shader\OutlineShader.hpp" />
     <ClInclude Include="src\Component\RenderableComponent\OutlineRenderable.hpp" />
     <ClInclude Include="src\ECS\ComponentTuple.hpp" />
+    <ClInclude Include="src\Component\RenderableComponent\SkyboxComponent.hpp" />
+    <ClInclude Include="src\Shader\SkyboxShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />

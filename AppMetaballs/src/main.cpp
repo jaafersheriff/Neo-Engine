@@ -4,6 +4,8 @@
 #include "MetaballsSystem.hpp"
 #include "MetaballsShader.hpp"
 
+#include "Shader/SkyboxShader.hpp"
+
 using namespace neo;
 
 /* Game object definitions */
@@ -45,7 +47,7 @@ struct Renderable {
 
 int main() {
     EngineConfig config;
-    config.APP_NAME = "Compute";
+    config.APP_NAME = "Metaballs";
     config.APP_RES = "res/";
     config.attachEditor = false;
     Engine::init(config);
@@ -54,9 +56,14 @@ int main() {
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
-    Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+    /* Skybox */
+    {
+        GameObject* gameObject = &Engine::createGameObject();
+        Engine::addComponent<renderable::SkyboxComponent>(gameObject);
+        Engine::addComponent<CubeMapComponent>(gameObject, Library::getCubemap("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}));
+    }
 
-    // Create mesh
+    /* METBALL */
     {
         auto& go = Engine::createGameObject();
         Engine::addComponent<MetaballsComponent>(&go);
@@ -71,6 +78,7 @@ int main() {
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
     Renderer::addSceneShader<MetaballsShader>("metaballs.vert", "metaballs.frag");
+    Renderer::addSceneShader<SkyboxShader>();
 
     /* Run */
     Engine::run();
