@@ -108,7 +108,6 @@ namespace neo {
             }
             if (major < 2) {
                 printf("This shader example will not work due to the installed Opengl version, which is %d.%d.\n", major, minor);
-                std::cin.get();
                 assert(false);
             }
         }
@@ -119,7 +118,6 @@ namespace neo {
             {
                 const char *const ErrorString = errorString(Error);
                 printf("OpenGL error in file '%s' at line %d calling function '%s': '%s' '%d 0x%X'\n", File, Line, Function, ErrorString, Error, Error);
-                std::cin.get();
                 assert(false);
             }
         }
@@ -129,7 +127,6 @@ namespace neo {
             if (err != GL_FRAMEBUFFER_COMPLETE) {
                 const char *const errString = errorString(err);
                 printf("OpenGL error '%s' '%d 0x%X'\n", errString, err, err);
-                std::cin.get();
                 assert(false);
             }
         }

@@ -44,7 +44,7 @@ namespace neo {
             CHECK_GL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
         }
 
-        virtual const Mesh & getMesh() const override {
+        virtual Mesh & getMesh() const override {
             if (mDirty && mNodes.size()) {
                 std::vector<glm::vec3> positions;
                 std::vector<glm::vec3> colors;

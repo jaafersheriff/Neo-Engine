@@ -17,27 +17,15 @@ namespace neo {
             };
 
             /* Constructor */
-            Mesh() :
-                mVAOID(0),
-                mVertexBufferID(0),
-                mNormalBufferID(0),
-                mUVBufferID(0),
-                mElementBufferID(0),
-                mVertexBufferSize(0),
-                mNormalBufferSize(0),
-                mUVBufferSize(0),
-                mElementBufferSize(0),
-                mPrimitiveType(0)
-            {}
+            Mesh(unsigned primitiveType = 0);
+            Mesh(MeshBuffers& buffers);
 
-            Mesh(MeshBuffers& buffers) 
-                : Mesh() {
-                mVertexBufferSize = buffers.vertices.size();
-                mNormalBufferSize = buffers.normals.size();
-                mUVBufferSize = buffers.texCoords.size();
-                mElementBufferSize = buffers.indices.size();
-                mBuffers = buffers;
-            }
+            /* Remove copy constructors */
+            Mesh(const Mesh &) = delete;
+            Mesh & operator=(const Mesh &) = delete;
+            Mesh(Mesh &&) = default;
+            Mesh & operator=(Mesh &&) = default;
+
 
             /* VAO ID */
             unsigned int mVAOID;
@@ -45,14 +33,14 @@ namespace neo {
             /* VBO IDs */
             unsigned int mVertexBufferID;
             unsigned int mNormalBufferID;
-            unsigned int mUVBufferID;
+            unsigned int mTexBufferID;
             unsigned int mElementBufferID;
 
             /* VBO Info */
             MeshBuffers mBuffers;
             int mVertexBufferSize;
             int mNormalBufferSize;
-            int mUVBufferSize;
+            int mTexBufferSize;
             int mElementBufferSize;
 
             /* Primitive type */
@@ -60,11 +48,15 @@ namespace neo {
 
             /* Copy data to GPU */
             void upload(int = -1);
+            void reupload();
 
             /* Call the appropriate draw function */
             void draw(unsigned = 0) const;
 
             /* Remove */
             void destroy();
+
+    private:
+        void _upload();
     };
 }

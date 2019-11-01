@@ -75,7 +75,7 @@ namespace neo {
         /* Provide VBO info */
         mesh->mVertexBufferSize = int(mesh->mBuffers.vertices.size());
         mesh->mNormalBufferSize = int(mesh->mBuffers.normals.size());
-        mesh->mUVBufferSize = int(mesh->mBuffers.texCoords.size());
+        mesh->mTexBufferSize = int(mesh->mBuffers.texCoords.size());
         mesh->mElementBufferSize = int(mesh->mBuffers.indices.size());
 
         /* Optional resize */

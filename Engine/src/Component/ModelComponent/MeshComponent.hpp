@@ -16,7 +16,7 @@ namespace neo {
             mMesh(m)
         {}
 
-        virtual const Mesh& getMesh() const { return *mMesh; }
+        virtual Mesh& getMesh() const { return *mMesh; }
         void replaceMesh(Mesh* m) { mMesh = m; }
 
         virtual void imGuiEditor() override {
