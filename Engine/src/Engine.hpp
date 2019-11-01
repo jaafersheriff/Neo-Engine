@@ -179,7 +179,7 @@ namespace neo {
         if (!components.size()) {
             return nullptr;
         }
-        assert(components.size() == 1);
+        // assert(components.size() == 1);
 
         return components[0];
     }

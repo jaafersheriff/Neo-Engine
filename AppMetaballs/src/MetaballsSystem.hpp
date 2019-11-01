@@ -3,7 +3,8 @@
 #include "Systems/System.hpp"
 #include "Engine.hpp"
 
-#include "MetaballsComponent.hpp"
+#include "MetaballComponent.hpp"
+#include "MetaballsMeshComponent.hpp"
 
 using namespace neo;
 
@@ -28,6 +29,8 @@ class MetaballsSystem : public System {
             System("Metaballs System") {
 
             mGrid = new Grid[mDims * mDims * mDims];
+
+            update(0.f);
         }
 
         virtual void imguiEditor() override {
@@ -35,8 +38,8 @@ class MetaballsSystem : public System {
         }
 
         virtual void update(const float dt) override {
-            auto metaball = Engine::getComponentTuple<MetaballsComponent, MeshComponent>();
-            if (!metaball) {
+            auto metaballMesh = Engine::getComponentTuple<MetaballsMeshComponent, MeshComponent>();
+            if (!metaballMesh) {
                 return;
             }
 
@@ -48,28 +51,30 @@ class MetaballsSystem : public System {
 			uint32_t numVertices = 0;
 			uint32_t maxVertices = (32<<10);
 
-            auto balls = metaball->get<MetaballsComponent>();
-            if (balls->mPositions.empty()) {
+            auto balls = Engine::getComponentTuples<MetaballComponent, SpatialComponent>();
+            if (balls.empty()) {
                 return;
             }
 
-            auto& mesh = metaball->get<MeshComponent>()->getMesh();
+            auto& mesh = metaballMesh->get<MeshComponent>()->getMesh();
             mesh.mBuffers.vertices.clear();
             mesh.mBuffers.normals.clear();
 
             if (mAutoUpdate) {
-                balls->mDirty = true;
                 auto rTime = Util::getRunTime();
-                for (uint32_t ii = 0; ii < balls->mPositions.size(); ++ii) {
-                    balls->mPositions[ii].x = glm::sin(rTime*(ii*0.21f) + ii * 0.37f) * (mDims * 0.5f - 8.0f);
-                    balls->mPositions[ii].y = glm::sin(rTime*(ii*0.37f) + ii * 0.67f) * (mDims * 0.5f - 8.0f);
-                    balls->mPositions[ii].z = glm::cos(rTime*(ii*0.11f) + ii * 0.13f) * (mDims * 0.5f - 8.0f);
-                    balls->mRadius[ii] = (2.0f + (glm::sin(rTime*(ii*0.13f))*0.5f + 0.5f)*2.0f);
-                }
-            }
+                for (uint32_t ii = 0; ii < balls.size(); ++ii) {
+                    auto spatial = balls[ii].get<SpatialComponent>();
+                    glm::vec3 position = spatial->getPosition();
+                    float radius = spatial->getScale().x;
 
-            if (!balls->mDirty) {
-                return;
+                    position.x = glm::sin(rTime*(ii*0.21f) + ii * 0.37f) * (mDims * 0.5f - 8.0f);
+                    position.y = glm::sin(rTime*(ii*0.37f) + ii * 0.67f) * (mDims * 0.5f - 8.0f);
+                    position.z = glm::cos(rTime*(ii*0.11f) + ii * 0.13f) * (mDims * 0.5f - 8.0f);
+                    radius = (2.0f + (glm::sin(rTime*(ii*0.13f))*0.5f + 0.5f)*2.0f);
+
+                    spatial->setPosition(position);
+                    spatial->setScale(glm::vec3(radius));
+                }
             }
 
 			for (uint32_t zz = 0; zz < mDims; ++zz) {
@@ -81,11 +86,13 @@ class MetaballsSystem : public System {
 
 						float dist = 0.0f;
 						float prod = 1.0f;
-						for (uint32_t ii = 0; ii < balls->mPositions.size(); ++ii) {
-							float dx = balls->mPositions[ii].x - (-mDims*0.5f + float(xx) );
-							float dy = balls->mPositions[ii].y - (-mDims*0.5f + float(yy) );
-							float dz = balls->mPositions[ii].z - (-mDims*0.5f + float(zz) );
-                            float invr = 1.f / balls->mRadius[ii];
+						for (uint32_t ii = 0; ii < balls.size(); ++ii) {
+                            auto spatial = balls[ii].get<SpatialComponent>();
+							float dx = spatial->getPosition().x - (-mDims*0.5f + float(xx) );
+							float dy = spatial->getPosition().y - (-mDims*0.5f + float(yy) );
+							float dz = spatial->getPosition().z - (-mDims*0.5f + float(zz) );
+
+                            float invr = 1.f / spatial->getScale().x;
 							float dot = dx*dx + dy*dy + dz*dz;
 							dot *= invr*invr;
 
@@ -161,7 +168,6 @@ class MetaballsSystem : public System {
             }
 
             mesh.upload();
-            balls->mDirty = false;
         }
 
     private:

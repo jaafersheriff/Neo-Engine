@@ -124,7 +124,8 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\MetaballsComponent.hpp" />
+    <ClInclude Include="src\MetaballComponent.hpp" />
+    <ClInclude Include="src\MetaballsMeshComponent.hpp" />
     <ClInclude Include="src\MetaballsShader.hpp" />
     <ClInclude Include="src\MetaballsSystem.hpp" />
   </ItemGroup>

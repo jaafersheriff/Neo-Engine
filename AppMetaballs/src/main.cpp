@@ -1,6 +1,7 @@
 #include <Engine.hpp>
 
-#include "MetaballsComponent.hpp"
+#include "MetaballComponent.hpp"
+#include "MetaballsMeshComponent.hpp"
 #include "MetaballsSystem.hpp"
 #include "MetaballsShader.hpp"
 
@@ -19,22 +20,6 @@ struct Camera {
     }
 };
 
-struct Light {
-    Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        auto& gameObject = Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(&gameObject, pos);
-        Engine::addComponent<LightComponent>(&gameObject, col, att);
-
-        Engine::addImGuiFunc("Light", [&]() {
-            auto light = Engine::getSingleComponent<LightComponent>();
-            light->imGuiEditor();
-            if (auto spatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
-                spatial->imGuiEditor();
-            }
-        });
-    }
-};
-
 struct Renderable {
     GameObject *gameObject;
 
@@ -45,11 +30,21 @@ struct Renderable {
     }
 };
 
+struct Metaball {
+    Metaball(glm::vec3 position, float radius) {
+        GameObject* gameObject = &Engine::createGameObject();
+        Engine::addComponent<MetaballComponent>(gameObject);
+        Engine::addComponent<MeshComponent>(gameObject, Library::getMesh("sphere"));
+        Engine::addComponent<SpatialComponent>(gameObject, position, glm::vec3(radius));
+        Engine::addComponent<SelectableComponent>(gameObject);
+        Engine::addComponent<BoundingBoxComponent>(gameObject, Library::getMesh("sphere")->mBuffers.vertices);
+    }
+};
+
 int main() {
     EngineConfig config;
     config.APP_NAME = "Metaballs";
     config.APP_RES = "res/";
-    config.attachEditor = false;
     Engine::init(config);
 
     /* Game objects */
@@ -65,10 +60,16 @@ int main() {
 
     /* METBALL */
     {
+        // Balls
+        // TODO : when radius is 10, selecting breaks 
+        Metaball(glm::vec3(-1.f, 0.f, 0.f), 1.f);
+        Metaball(glm::vec3(1.f, 0.f, 0.f), 1.f);
+
+        // Mesh
         auto& go = Engine::createGameObject();
-        Engine::addComponent<MetaballsComponent>(&go);
+        Engine::addComponent<MetaballsMeshComponent>(&go);
         Engine::addComponent<MeshComponent>(&go, new Mesh(GL_TRIANGLES));
-        Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.5f, 0.f));
+        Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.f, 0.f));
     }
 
     /* Systems - order matters! */
@@ -81,8 +82,26 @@ int main() {
     Renderer::addSceneShader<SkyboxShader>();
 
     Engine::addImGuiFunc("Metaballs", []() {
-        if (auto metaball = Engine::getSingleComponent<MetaballsComponent>()) {
-            metaball->imGuiEditor();
+        static int index = 0;
+        auto metaballs = Engine::getComponents<MetaballComponent>();
+
+        if (ImGui::Button("Add")) {
+            Metaball(glm::vec3(0.f), 1.f);
+        }
+
+        if (metaballs.size()) {
+            ImGui::SliderInt("Index", &index, 0, metaballs.size() - 1);
+            glm::vec3 position = metaballs[index]->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
+            ImGui::Text("%0.2f, %0.2f, %0.2f", position.x, position.y, position.z);
+            if (ImGui::Button("Remove")) {
+                Engine::removeGameObject(metaballs[index]->getGameObject());
+                if (metaballs.size() - 1 == 1) {
+                    index = 0;
+                }
+                else if (index == metaballs.size() - 2) {
+                    index--;
+                }
+            }
         }
     });
 

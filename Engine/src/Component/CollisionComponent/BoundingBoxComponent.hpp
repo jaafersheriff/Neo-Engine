@@ -35,7 +35,7 @@ namespace neo {
             auto spatial = mGameObject->getComponentByType<SpatialComponent>();
             assert(spatial);
             // TODO - this is broke
-            return glm::length(glm::vec3(glm::inverse(glm::scale(glm::mat4(1.f), spatial->getScale()) * glm::translate(glm::mat4(1.f), spatial->getPosition())) * glm::vec4(position, 1.f))) <= getRadius();
+            return glm::length(glm::vec3(glm::inverse(spatial->getModelMatrix()) * glm::vec4(position, 1.f))) <= getRadius();
         }
     };
 }

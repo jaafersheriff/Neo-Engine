@@ -30,7 +30,10 @@
     <ClInclude Include="src\MetaballsSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\MetaballsComponent.hpp">
+    <ClInclude Include="src\MetaballComponent.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MetaballsMeshComponent.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

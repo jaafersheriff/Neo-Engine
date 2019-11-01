@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine.hpp"
-#include "MetaballsComponent.hpp"
+#include "MetaballsMeshComponent.hpp"
 
 #include "Shader/Shader.hpp"
 #include "GLObjects/GlHelper.hpp"
@@ -33,7 +33,7 @@ public:
             loadUniform("cubeMap", skybox->get<CubeMapComponent>()->mTexture->mTextureID);
         }
 
-        for (auto& metaball : Engine::getComponentTuples<MetaballsComponent, MeshComponent, SpatialComponent>()) {
+        for (auto& metaball : Engine::getComponentTuples<MetaballsMeshComponent, MeshComponent, SpatialComponent>()) {
             CHECK_GL(glDisable(GL_CULL_FACE));
             if (mWireframe) {
                 CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));

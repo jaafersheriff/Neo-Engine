@@ -5,6 +5,7 @@ namespace neo {
 
     EditorSystem::EditorSystem() 
         : SelectingSystem(
+            "Editor System",
             25,
             100.f,
             [](SelectedComponent* selected) { 
@@ -16,6 +17,9 @@ namespace neo {
             [](SelectedComponent* selected, glm::vec3 mousePos) {
                 if (!selected->getGameObject().getComponentByType<renderable::OutlineRenderable>()) {
                     Engine::addComponent<renderable::OutlineRenderable>(&selected->getGameObject(), glm::vec4(1.f, 0.95f, 0.72f, 0.75f), 0.08f);
+                }
+                if (auto spatial = selected->getGameObject().getComponentByType<SpatialComponent>()) {
+                    spatial->setPosition(mousePos);
                 }
             }) 
     { }

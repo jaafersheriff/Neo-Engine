@@ -49,6 +49,7 @@ namespace neo {
                         // Add and operate on new selected
                         mSelectOperation(&Engine::addComponent<SelectedComponent>(&selectable.mGameObject), raySample);
                         objectFound = true;
+                        break;
                     }
                 }
                 if (objectFound) {
