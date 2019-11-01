@@ -3,7 +3,7 @@
 #include "Systems/System.hpp"
 #include "Engine.hpp"
 
-#include <iostream>
+#include "MetaballsComponent.hpp"
 
 using namespace neo;
 
@@ -19,14 +19,19 @@ class MetaballsSystem : public System {
             float mVal;
             glm::vec3 mNormal;
         };
-        const int mDims = 32;
 
         Grid* mGrid;
+        const int mDims = 32;
+        bool mAutoUpdate = false;
 
         MetaballsSystem() :
             System("Metaballs System") {
 
             mGrid = new Grid[mDims * mDims * mDims];
+        }
+
+        virtual void imguiEditor() override {
+            ImGui::Checkbox("Auto update", &mAutoUpdate);
         }
 
         virtual void update(const float dt) override {
@@ -43,19 +48,29 @@ class MetaballsSystem : public System {
 			uint32_t numVertices = 0;
 			uint32_t maxVertices = (32<<10);
 
+            auto balls = metaball->get<MetaballsComponent>();
+            if (balls->mPositions.empty()) {
+                return;
+            }
+
             auto& mesh = metaball->get<MeshComponent>()->getMesh();
             mesh.mBuffers.vertices.clear();
             mesh.mBuffers.normals.clear();
 
-			const uint32_t numSpheres = 16;
-			float sphere[numSpheres][4];
-            auto rTime = Util::getRunTime();
-			for (uint32_t ii = 0; ii < numSpheres; ++ii) {
-				sphere[ii][0] = glm::sin(rTime*(ii*0.21f)+ii*0.37f) * (mDims * 0.5f - 8.0f);
-				sphere[ii][1] = glm::sin(rTime*(ii*0.37f)+ii*0.67f) * (mDims * 0.5f - 8.0f);
-				sphere[ii][2] = glm::cos(rTime*(ii*0.11f)+ii*0.13f) * (mDims * 0.5f - 8.0f);
-				sphere[ii][3] = 1.0f/(2.0f + (glm::sin(rTime*(ii*0.13f) )*0.5f+0.5f)*2.0f);
-			}
+            if (mAutoUpdate) {
+                balls->mDirty = true;
+                auto rTime = Util::getRunTime();
+                for (uint32_t ii = 0; ii < balls->mPositions.size(); ++ii) {
+                    balls->mPositions[ii].x = glm::sin(rTime*(ii*0.21f) + ii * 0.37f) * (mDims * 0.5f - 8.0f);
+                    balls->mPositions[ii].y = glm::sin(rTime*(ii*0.37f) + ii * 0.67f) * (mDims * 0.5f - 8.0f);
+                    balls->mPositions[ii].z = glm::cos(rTime*(ii*0.11f) + ii * 0.13f) * (mDims * 0.5f - 8.0f);
+                    balls->mRadius[ii] = (2.0f + (glm::sin(rTime*(ii*0.13f))*0.5f + 0.5f)*2.0f);
+                }
+            }
+
+            if (!balls->mDirty) {
+                return;
+            }
 
 			for (uint32_t zz = 0; zz < mDims; ++zz) {
 				for (uint32_t yy = 0; yy < mDims; ++yy) {
@@ -66,12 +81,11 @@ class MetaballsSystem : public System {
 
 						float dist = 0.0f;
 						float prod = 1.0f;
-						for (uint32_t ii = 0; ii < numSpheres; ++ii) {
-							const float* pos = sphere[ii];
-							float dx = pos[0] - (-mDims*0.5f + float(xx) );
-							float dy = pos[1] - (-mDims*0.5f + float(yy) );
-							float dz = pos[2] - (-mDims*0.5f + float(zz) );
-							float invr = pos[3];
+						for (uint32_t ii = 0; ii < balls->mPositions.size(); ++ii) {
+							float dx = balls->mPositions[ii].x - (-mDims*0.5f + float(xx) );
+							float dy = balls->mPositions[ii].y - (-mDims*0.5f + float(yy) );
+							float dz = balls->mPositions[ii].z - (-mDims*0.5f + float(zz) );
+                            float invr = 1.f / balls->mRadius[ii];
 							float dot = dx*dx + dy*dy + dz*dz;
 							dot *= invr*invr;
 
@@ -147,6 +161,7 @@ class MetaballsSystem : public System {
             }
 
             mesh.upload();
+            balls->mDirty = false;
         }
 
     private:

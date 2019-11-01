@@ -80,6 +80,12 @@ int main() {
     Renderer::addSceneShader<MetaballsShader>("metaballs.vert", "metaballs.frag");
     Renderer::addSceneShader<SkyboxShader>();
 
+    Engine::addImGuiFunc("Metaballs", []() {
+        if (auto metaball = Engine::getSingleComponent<MetaballsComponent>()) {
+            metaball->imGuiEditor();
+        }
+    });
+
     /* Run */
     Engine::run();
     return 0;
