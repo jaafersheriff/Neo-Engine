@@ -7,7 +7,5 @@ using namespace neo;
 class MetaballComponent : public Component {
 
 public:
-    MetaballComponent(GameObject* go) :
-        Component(go) {
-    }
+    MetaballComponent(GameObject* go);
 };

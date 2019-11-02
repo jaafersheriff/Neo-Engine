@@ -122,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MetaballComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MetaballComponent.hpp" />

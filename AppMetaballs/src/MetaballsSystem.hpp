@@ -21,14 +21,12 @@ class MetaballsSystem : public System {
             glm::vec3 mNormal;
         };
 
-        Grid* mGrid;
-        const int mDims = 32;
+        int mDims = 32;
         bool mAutoUpdate = false;
+        bool mDirtyBalls = true;
 
         MetaballsSystem() :
             System("Metaballs System") {
-
-            mGrid = new Grid[mDims * mDims * mDims];
 
             update(0.f);
         }
@@ -43,18 +41,18 @@ class MetaballsSystem : public System {
                 return;
             }
 
-            const uint32_t ypitch = mDims;
-		    const uint32_t zpitch = mDims*mDims;
-		    const float invdim = 1.0f/float(mDims-1);
+            auto balls = Engine::getComponentTuples<MetaballComponent, SpatialComponent>();
+            if (balls.empty() || !mDirtyBalls) {
+                return;
+            }
 
 			// Stats.
 			uint32_t numVertices = 0;
 			uint32_t maxVertices = (32<<10);
 
-            auto balls = Engine::getComponentTuples<MetaballComponent, SpatialComponent>();
-            if (balls.empty()) {
-                return;
-            }
+            const uint32_t ypitch = mDims;
+		    const uint32_t zpitch = mDims*mDims;
+		    const float invdim = 1.0f/float(mDims-1);
 
             auto& mesh = metaballMesh->get<MeshComponent>()->getMesh();
             mesh.mBuffers.vertices.clear();
@@ -77,6 +75,7 @@ class MetaballsSystem : public System {
                 }
             }
 
+            Grid* grid = new Grid[mDims * mDims * mDims];
 			for (uint32_t zz = 0; zz < mDims; ++zz) {
 				for (uint32_t yy = 0; yy < mDims; ++yy) {
 					uint32_t offset = (zz*mDims+yy)*mDims;
@@ -101,7 +100,7 @@ class MetaballsSystem : public System {
 							prod *= dot;
 						}
 
-						mGrid[xoffset].mVal = dist / prod - 1.0f;
+						grid[xoffset].mVal = dist / prod - 1.0f;
 					}
 				}
 			}
@@ -113,7 +112,7 @@ class MetaballsSystem : public System {
 					for (uint32_t xx = 1; xx < mDims-1; ++xx) {
 						uint32_t xoffset = offset + xx;
 
-						Grid* grid = mGrid;
+						// Grid* grid = grid;
 						const glm::vec3 normal = {
 							grid[xoffset-1     ].mVal - grid[xoffset+1     ].mVal,
 							grid[xoffset-ypitch].mVal - grid[xoffset+ypitch].mVal,
@@ -149,7 +148,7 @@ class MetaballsSystem : public System {
                             -mDims * 0.5f + float(zz)
                         };
 
-                        const Grid* grid = mGrid;
+                        // const Grid* grid = mGrid;
                         const Grid* val[8] = {
                             &grid[xoffset + zpitch + ypitch],
                             &grid[xoffset + zpitch + ypitch + 1],
@@ -168,6 +167,8 @@ class MetaballsSystem : public System {
             }
 
             mesh.upload();
+            mDirtyBalls = false;
+            delete[] grid;
         }
 
     private:
