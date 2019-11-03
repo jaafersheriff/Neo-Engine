@@ -9,12 +9,12 @@ namespace neo {
 
     class MouseRayComponent : public Component {
     public:
-        glm::vec3 position;
-        glm::vec3 direction;
+        glm::vec3 mPosition;
+        glm::vec3 mDirection;
         MouseRayComponent(GameObject *go) :
             Component(go),
-            position(0.f),
-            direction(0.f)
+            mPosition(0.f),
+            mDirection(0.f)
         {}
     };
 
