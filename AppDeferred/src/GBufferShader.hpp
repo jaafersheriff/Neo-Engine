@@ -44,20 +44,20 @@ class GBufferShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            for (auto renderable : Engine::getComponentTuples<MeshComponent, SpatialComponent>()) {
-                loadUniform("M", renderable.get<SpatialComponent>()->getModelMatrix());
+            for (auto& renderable : Engine::getComponentTuples<MeshComponent, SpatialComponent>()) {
+                loadUniform("M", renderable->get<SpatialComponent>()->getModelMatrix());
 
                 /* Bind mesh */
-                const Mesh & mesh(renderable.get<MeshComponent>()->getMesh());
+                const Mesh & mesh(renderable->get<MeshComponent>()->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
                 CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                 /* Bind diffuse map or material */
-                auto matComp = renderable.mGameObject.getComponentByType<MaterialComponent>();
+                auto matComp = renderable->mGameObject.getComponentByType<MaterialComponent>();
                 if (matComp) {
                     loadUniform("ambient", matComp->mAmbient);
                 }
-                if (auto diffMap = renderable.mGameObject.getComponentByType<DiffuseMapComponent>()) {
+                if (auto diffMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
                     diffMap->mTexture->bind();
                     loadUniform("useDiffuseMap", true);
                     loadUniform("diffuseMap", diffMap->mTexture->mTextureID);
@@ -70,7 +70,7 @@ class GBufferShader : public Shader {
                 }
 
                 /* Bind normal map */
-                auto normalMap = renderable.mGameObject.getComponentByType<neo::NormalMapComponent>();
+                auto normalMap = renderable->mGameObject.getComponentByType<neo::NormalMapComponent>();
                 if (normalMap) {
                     normalMap->mTexture->bind();
                     loadUniform("useNormalMap", true);
@@ -78,7 +78,7 @@ class GBufferShader : public Shader {
                 }
                 else {
                     loadUniform("useNormalMap", false);
-                    loadUniform("N", renderable.get<SpatialComponent>()->getNormalMatrix());
+                    loadUniform("N", renderable->get<SpatialComponent>()->getNormalMatrix());
                 }
 
                 /* DRAW */

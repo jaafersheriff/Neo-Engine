@@ -42,8 +42,8 @@ namespace neo {
             loadUniform("V", camera.getView());
 
             for (auto& renderable : Engine::getComponentTuples<renderable::AlphaTestRenderable, MeshComponent, SpatialComponent>()) {
-                auto meshComp = renderable.get<MeshComponent>();
-                auto spatial = renderable.get<SpatialComponent>();
+                auto meshComp = renderable->get<MeshComponent>();
+                auto spatial = renderable->get<SpatialComponent>();
 
                 /* Bind mesh */
                 const Mesh & mesh(meshComp->getMesh());
@@ -53,7 +53,7 @@ namespace neo {
                 loadUniform("M", spatial->getModelMatrix());
 
                 /* Bind texture */
-                if (const auto diffuseMap = renderable.mGameObject.getComponentByType<DiffuseMapComponent>()) {
+                if (const auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
                     auto texture = (const Texture2D *)(diffuseMap->mTexture);
                     texture->bind();
                     loadUniform("diffuseMap", texture->mTextureID);

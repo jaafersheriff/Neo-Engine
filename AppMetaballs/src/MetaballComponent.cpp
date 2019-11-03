@@ -6,7 +6,7 @@ using namespace neo;
 
 MetaballComponent::MetaballComponent(GameObject* go) :
     Component(go) {
-        Messenger::addReceiver<SpatialChangeMessage>(nullptr, [](const Message& _msg) {
+        Messenger::addReceiver<SpatialChangeMessage>(go, [](const Message& _msg) {
             const SpatialChangeMessage& msg = static_cast<const SpatialChangeMessage &>(_msg);
             Engine::getSystem<MetaballsSystem>().mDirtyBalls = true;
         });

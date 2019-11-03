@@ -5,15 +5,15 @@
 namespace neo {
 
     void FrustumToLineSystem::update(const float dt) {
-        for (auto camera : Engine::getComponentTuples<CameraComponent, LineMeshComponent, FrustumComponent>()) {
+        for (auto&& camera : Engine::getComponentTuples<CameraComponent, LineMeshComponent, FrustumComponent>()) {
 
             glm::vec3 color(1.f);
-            if (auto material = camera.mGameObject.getComponentByType<MaterialComponent>()) {
+            if (auto material = camera->mGameObject.getComponentByType<MaterialComponent>()) {
                 color = material->mDiffuse;
             }
 
-            auto line = camera.get<LineMeshComponent>();
-            auto bounds = camera.get<FrustumComponent>();
+            auto line = camera->get<LineMeshComponent>();
+            auto bounds = camera->get<FrustumComponent>();
 
             line->clearNodes();
 

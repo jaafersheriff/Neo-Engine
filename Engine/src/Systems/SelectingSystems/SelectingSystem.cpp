@@ -26,9 +26,9 @@ namespace neo {
             }
 
             // Select a new object
-            for (auto selectable : Engine::getComponentTuples<SelectableComponent, BoundingBoxComponent, SpatialComponent>()) {
-                auto selectableSpatial = selectable.get<SpatialComponent>();
-                auto selectableBox = selectable.get<BoundingBoxComponent>();
+            for (auto& selectable : Engine::getComponentTuples<SelectableComponent, BoundingBoxComponent, SpatialComponent>()) {
+                auto selectableSpatial = selectable->get<SpatialComponent>();
+                auto selectableBox = selectable->get<BoundingBoxComponent>();
 
                 // Frustum culling
                 if (mainCamera) {
@@ -47,7 +47,7 @@ namespace neo {
                     glm::vec3 raySample = mouseRay->position + mouseRay->direction * i;
                     if (selectableBox->intersect(raySample)) {
                         // Add and operate on new selected
-                        mSelectOperation(&Engine::addComponent<SelectedComponent>(&selectable.mGameObject), raySample);
+                        mSelectOperation(&Engine::addComponent<SelectedComponent>(&selectable->mGameObject), raySample);
                         objectFound = true;
                         break;
                     }

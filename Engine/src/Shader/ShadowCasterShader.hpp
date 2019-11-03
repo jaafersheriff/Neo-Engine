@@ -60,11 +60,11 @@ namespace neo {
                 loadUniform("V", camera->getView());
 
                 for (auto& renderable : Engine::getComponentTuples<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>()) {
-                    auto meshComponent = renderable.get<MeshComponent>();
-                    auto renderableSpatial = renderable.get<SpatialComponent>();
+                    auto meshComponent = renderable->get<MeshComponent>();
+                    auto renderableSpatial = renderable->get<SpatialComponent>();
 
                     // VFC
-                    if (const auto& boundingBox = renderable.mGameObject.getComponentByType<BoundingBoxComponent>()) {
+                    if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
                         if (const auto& frustumPlanes = camera->getGameObject().getComponentByType<FrustumComponent>()) {
                             float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z);
                             if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
@@ -81,7 +81,7 @@ namespace neo {
                     loadUniform("M", renderableSpatial->getModelMatrix());
 
                     /* Bind texture */
-                    auto texComp = renderable.mGameObject.getComponentByType<DiffuseMapComponent>();
+                    auto texComp = renderable->mGameObject.getComponentByType<DiffuseMapComponent>();
                     if (texComp) {
                         auto texture = (const Texture2D *)(texComp->mTexture);
                         texture->bind();

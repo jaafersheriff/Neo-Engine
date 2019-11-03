@@ -3,10 +3,10 @@
 
 namespace neo {
     void FrustumSystem::update(const float dt) {
-        for (auto cameraTuple : Engine::getComponentTuples<CameraComponent, FrustumComponent, SpatialComponent>()) {
-            auto camera = cameraTuple.get<CameraComponent>();
-            auto frustum = cameraTuple.get<FrustumComponent>();
-            auto spatial = cameraTuple.get<SpatialComponent>();
+        for (auto& cameraTuple : Engine::getComponentTuples<CameraComponent, FrustumComponent, SpatialComponent>()) {
+            auto camera = cameraTuple->get<CameraComponent>();
+            auto frustum = cameraTuple->get<FrustumComponent>();
+            auto spatial = cameraTuple->get<SpatialComponent>();
 
             glm::mat4 PV = camera->getProj() * camera->getView();
             float nDis = camera->getNearFar().x;

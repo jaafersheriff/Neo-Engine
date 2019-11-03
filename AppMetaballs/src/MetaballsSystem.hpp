@@ -48,22 +48,10 @@ class MetaballsSystem : public System {
                 return;
             }
 
-			// Stats.
-			uint32_t numVertices = 0;
-			uint32_t maxVertices = (32<<10);
-
-            const uint32_t ypitch = mDims;
-		    const uint32_t zpitch = mDims*mDims;
-		    const float invdim = 1.0f/float(mDims-1);
-
-            auto& mesh = metaballMesh->get<MeshComponent>()->getMesh();
-            mesh.mBuffers.vertices.clear();
-            mesh.mBuffers.normals.clear();
-
             if (mAutoUpdate) {
                 auto rTime = Util::getRunTime();
                 for (uint32_t ii = 0; ii < balls.size(); ++ii) {
-                    auto spatial = balls[ii].get<SpatialComponent>();
+                    auto spatial = balls[ii]->get<SpatialComponent>();
                     glm::vec3 position = spatial->getPosition();
                     float radius = spatial->getScale().x;
 
@@ -81,6 +69,19 @@ class MetaballsSystem : public System {
                 return;
             }
 
+			// Stats.
+			uint32_t numVertices = 0;
+			uint32_t maxVertices = (32<<10);
+
+            const uint32_t ypitch = mDims;
+		    const uint32_t zpitch = mDims*mDims;
+		    const float invdim = 1.0f/float(mDims-1);
+
+
+            auto& mesh = metaballMesh->get<MeshComponent>()->getMesh();
+            mesh.mBuffers.vertices.clear();
+            mesh.mBuffers.normals.clear();
+
             Grid* grid = new Grid[mDims * mDims * mDims];
 			for (uint32_t zz = 0; zz < mDims; ++zz) {
 				for (uint32_t yy = 0; yy < mDims; ++yy) {
@@ -92,7 +93,7 @@ class MetaballsSystem : public System {
 						float dist = 0.0f;
 						float prod = 1.0f;
 						for (uint32_t ii = 0; ii < balls.size(); ++ii) {
-                            auto spatial = balls[ii].get<SpatialComponent>();
+                            auto spatial = balls[ii]->get<SpatialComponent>();
 							float dx = spatial->getPosition().x - (-mDims*0.5f + float(xx) );
 							float dy = spatial->getPosition().y - (-mDims*0.5f + float(yy) );
 							float dz = spatial->getPosition().z - (-mDims*0.5f + float(zz) );

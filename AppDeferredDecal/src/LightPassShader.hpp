@@ -71,9 +71,9 @@ class LightPassShader : public Shader {
             loadUniform("gDepth", gbuffer->mTextures[2]->mTextureID);
 
             /* Render light volumes */
-            for (auto lightTuple : Engine::getComponentTuples<LightComponent, SpatialComponent>()) {
-                auto light = lightTuple.get<LightComponent>();
-                auto spatial = lightTuple.get<SpatialComponent>();
+            for (auto& lightTuple : Engine::getComponentTuples<LightComponent, SpatialComponent>()) {
+                auto light = lightTuple->get<LightComponent>();
+                auto spatial = lightTuple->get<SpatialComponent>();
 
                 loadUniform("M", spatial->getModelMatrix());
                 loadUniform("lightPos", spatial->getPosition());

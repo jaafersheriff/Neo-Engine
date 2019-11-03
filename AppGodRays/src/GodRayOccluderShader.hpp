@@ -30,11 +30,11 @@ class GodRayOccluderShader : public Shader {
             loadUniform("V", camera.getView());
 
             for (auto& renderable : Engine::getComponentTuples<SunOccluderComponent, MeshComponent, SpatialComponent>()) {
-                auto renderableMesh = renderable.get<MeshComponent>();
-                auto renderableSpatial = renderable.get<SpatialComponent>();
+                auto renderableMesh = renderable->get<MeshComponent>();
+                auto renderableSpatial = renderable->get<SpatialComponent>();
 
                 // VFC
-                if (const auto& boundingBox = renderable.mGameObject.getComponentByType<BoundingBoxComponent>()) {
+                if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
                     if (const auto& frustumPlanes = camera.getGameObject().getComponentByType<FrustumComponent>()) {
                         float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
                         if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
@@ -51,7 +51,7 @@ class GodRayOccluderShader : public Shader {
                 loadUniform("M", renderableSpatial->getModelMatrix());
 
                 /* Bind texture */
-                if (auto diffuseMap = renderable.mGameObject.getComponentByType<DiffuseMapComponent>()) {
+                if (auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
                     auto texture = (const Texture2D *)(diffuseMap->mTexture);
                     texture->bind();
                     loadUniform("diffuseMap", texture->mTextureID);

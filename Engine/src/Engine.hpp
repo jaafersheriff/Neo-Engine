@@ -66,9 +66,9 @@ namespace neo {
             static const std::vector<std::pair<std::type_index, System *>> & getSystems() { return reinterpret_cast<const std::vector<std::pair<std::type_index, System *>> &>(mSystems); }
             template <typename CompT> static const std::vector<CompT *> & getComponents();
             template <typename CompT> static CompT* getSingleComponent();
-            template <typename CompT, typename... CompTs> static std::optional<ComponentTuple> getComponentTuple(GameObject& go);
-            template <typename CompT, typename... CompTs> static std::optional<ComponentTuple> getComponentTuple();
-            template <typename CompT, typename... CompTs> static std::vector<ComponentTuple> getComponentTuples();
+            template <typename CompT, typename... CompTs> static std::unique_ptr<ComponentTuple> getComponentTuple(GameObject& go);
+            template <typename CompT, typename... CompTs> static std::unique_ptr<ComponentTuple> getComponentTuple();
+            template <typename CompT, typename... CompTs> static std::vector<std::unique_ptr<ComponentTuple>> getComponentTuples();
 
             /* ImGui */
             static bool mImGuiEnabled;
@@ -179,28 +179,27 @@ namespace neo {
         if (!components.size()) {
             return nullptr;
         }
-        // assert(components.size() == 1);
+        assert(components.size() == 1);
 
         return components[0];
     }
 
     template <typename CompT, typename... CompTs>
-    std::optional<ComponentTuple> Engine::getComponentTuple() {
+    std::unique_ptr<ComponentTuple> Engine::getComponentTuple() {
         for (auto comp : getComponents<CompT>()) {
             if (auto tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject())) {
                 return tuple;
             }
         }
-        return {};
+        return nullptr;
     }
  
     template <typename CompT, typename... CompTs>
-    std::vector<ComponentTuple> Engine::getComponentTuples() {
-        std::vector<ComponentTuple> tuples;
+    std::vector<std::unique_ptr<ComponentTuple>> Engine::getComponentTuples() {
+        std::vector<std::unique_ptr<ComponentTuple>> tuples;
         for (auto comp : getComponents<CompT>()) {
-            auto tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject());
-            if (tuple && *tuple) {
-                tuples.emplace_back(*tuple);
+            if (auto tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject())) {
+                tuples.push_back(std::move(tuple));
             }
         }
 
@@ -208,15 +207,16 @@ namespace neo {
     }
 
     template <typename CompT, typename... CompTs>
-    std::optional<ComponentTuple> Engine::getComponentTuple(GameObject& go) {
-        ComponentTuple tuple(go);
-        tuple._addComponent<CompT>();
-        tuple.populate<CompTs...>();
-        if (tuple) {
+    std::unique_ptr<ComponentTuple> Engine::getComponentTuple(GameObject& go) {
+        std::unique_ptr<ComponentTuple> tuple = std::make_unique<ComponentTuple>(go);
+        tuple->_addComponent<CompT>();
+        tuple->populate<CompTs...>();
+
+        if (*tuple) {
             return tuple;
         }
 
-        return {};
+        return nullptr;
     }
 
 

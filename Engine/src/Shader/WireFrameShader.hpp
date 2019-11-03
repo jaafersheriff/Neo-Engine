@@ -34,9 +34,9 @@ namespace neo {
                 loadUniform("P", camera.getProj());
                 loadUniform("V", camera.getView());
 
-                for (auto renderable : Engine::getComponentTuples<renderable::WireframeRenderable, MeshComponent, SpatialComponent>()) {
-                    const auto meshComponent = renderable.get<MeshComponent>();
-                    const auto spatialComponent = renderable.get<SpatialComponent>();
+                for (auto& renderable : Engine::getComponentTuples<renderable::WireframeRenderable, MeshComponent, SpatialComponent>()) {
+                    const auto meshComponent = renderable->get<MeshComponent>();
+                    const auto spatialComponent = renderable->get<SpatialComponent>();
 
                     /* Bind mesh */
                     const Mesh & mesh(meshComponent->getMesh());
@@ -46,7 +46,7 @@ namespace neo {
                     loadUniform("M", spatialComponent->getModelMatrix());
 
                     glm::vec3 color(1.f);
-                    if (const auto material = renderable.mGameObject.getComponentByType<MaterialComponent>()) {
+                    if (const auto material = renderable->mGameObject.getComponentByType<MaterialComponent>()) {
                         color = material->mDiffuse;
                     }
                     loadUniform("wireColor", color);

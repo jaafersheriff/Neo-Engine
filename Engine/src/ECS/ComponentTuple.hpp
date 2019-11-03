@@ -22,13 +22,19 @@ namespace neo {
             mValid(true)
         {}
 
+        /* Remove copy constructors */
+        ComponentTuple(const ComponentTuple &) = delete;
+        ComponentTuple & operator=(const ComponentTuple &) = delete;
+        ComponentTuple(ComponentTuple &&) = default;
+        ComponentTuple & operator=(ComponentTuple &&) = default;
+
         operator bool() const {
             return mValid;
         }
 
         template <typename CompT>
         CompT* get() {
-            return dynamic_cast<CompT*>(mComponentMap[typeid(CompT)]);
+            return static_cast<CompT*>(mComponentMap[typeid(CompT)]);
         }
 
         template <typename CompT, typename... CompTs> 
