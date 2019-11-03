@@ -7,44 +7,29 @@
 
 namespace neo {
 
-    Mesh::Mesh(unsigned primitiveType) :
+    Mesh::Mesh(int primitiveType) :
         mVAOID(0),
         mVertexBufferID(0),
         mNormalBufferID(0),
         mTexBufferID(0),
         mElementBufferID(0),
-        mVertexBufferSize(0),
-        mNormalBufferSize(0),
-        mTexBufferSize(0),
-        mElementBufferSize(0),
         mPrimitiveType(primitiveType)
     {
         /* Initialize VAO */
         CHECK_GL(glGenVertexArrays(1, (GLuint *)&mVAOID));
     }
 
-    Mesh::Mesh(MeshBuffers& buffers)
-        : Mesh() {
+    Mesh::Mesh(MeshBuffers& buffers, int primitiveType)
+        : Mesh(primitiveType) {
+
         mBuffers = buffers;
-
-        if (!mPrimitiveType) {
-            if (mElementBufferSize) {
-                mPrimitiveType = GL_TRIANGLES;
-            }
-            else {
-                mPrimitiveType = GL_TRIANGLE_STRIP;
-            }
-        }
-
         upload();
     }
 
-
-
     void Mesh::draw(unsigned size) const {
-        if (mElementBufferSize) {
+        if (mElementBufferID) {
             // TODO - instanced?
-            CHECK_GL(glDrawElements(mPrimitiveType, size ? size : mElementBufferSize, GL_UNSIGNED_INT, nullptr));
+            CHECK_GL(glDrawElements(mPrimitiveType, size ? size : mBuffers.indices.size(), GL_UNSIGNED_INT, nullptr));
         }
         else if (size) {
             CHECK_GL(glDrawArrays(mPrimitiveType, 0, size));
@@ -54,31 +39,30 @@ namespace neo {
             switch (mPrimitiveType) {
                 case GL_POINTS:
                 case GL_LINE_STRIP:
-                    vSize = mVertexBufferSize / 3;
+                    vSize = mBuffers.vertices.size() / 3;
                 case GL_LINES:
-                    vSize = mVertexBufferSize / 6;
+                    vSize = mBuffers.vertices.size() / 6;
                 case GL_TRIANGLES:
-                    vSize = mVertexBufferSize / 9;
+                    vSize = mBuffers.vertices.size() / 9;
                 default:
-                    vSize = mVertexBufferSize;
+                    vSize = mBuffers.vertices.size();
             }
             CHECK_GL(glDrawArrays(mPrimitiveType, 0, vSize));
         }
     }
 
-    void Mesh::upload(int type) {
+    void Mesh::upload() {
         _upload();
 
         /* Set draw mode */
-        if (type > -1) {
-            mPrimitiveType = type;
+        if (mPrimitiveType == -1) {
+            if (mElementBufferID) {
+                mPrimitiveType = GL_TRIANGLES;
+            }
+            else {
+                mPrimitiveType = GL_TRIANGLE_STRIP;
+            }
         }
-
-        mVertexBufferSize = mBuffers.vertices.size();
-        mNormalBufferSize = mBuffers.normals.size();
-        mTexBufferSize = mBuffers.texCoords.size();
-        mElementBufferSize = mBuffers.indices.size();
-
     }
 
     void Mesh::_upload() {
@@ -128,7 +112,10 @@ namespace neo {
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementBufferID));
             CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, mBuffers.indices.size() * sizeof(unsigned int), &mBuffers.indices[0], GL_STATIC_DRAW));
         }
-
+        else if (mElementBufferID) {
+            CHECK_GL(glDeleteBuffers(1, (GLuint *)&mElementBufferID));
+            mElementBufferID = 0;
+        }
 
         /* Unbind  */
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));

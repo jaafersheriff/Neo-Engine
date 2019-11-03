@@ -9,15 +9,13 @@ namespace neo {
 
     private:
         static Mesh* _createMesh(const std::vector<float> &vert, const std::vector<float> &norm, const std::vector<float> &tex, const std::vector<unsigned> &ele, unsigned mode = GL_TRIANGLES) {
-            Mesh::MeshBuffers buffers{
+            MeshBuffers buffers{
                 vert,
                 norm,
                 tex,
                 ele
             };
-            Mesh *mesh = new Mesh(buffers);
-            mesh->upload(mode);
-            return mesh;
+            return new Mesh(buffers, mode);
         }
 
         public:

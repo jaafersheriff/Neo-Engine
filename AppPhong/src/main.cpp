@@ -13,7 +13,7 @@ struct Camera {
 
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         gameObject = &Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f), glm::vec3(3.f));
         cameraComp = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, Window::getAspectRatio());
         cameraController = &Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }

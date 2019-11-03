@@ -5,20 +5,20 @@
 #include <vector>
 
 namespace neo {
+    struct MeshBuffers {
+        std::vector<float> vertices;
+        std::vector<float> normals;
+        std::vector<float> texCoords;
+        std::vector<unsigned int> indices;
+    };
 
     class Mesh {
 
         public:
-            struct MeshBuffers {
-                std::vector<float> vertices;
-                std::vector<float> normals;
-                std::vector<float> texCoords;
-                std::vector<unsigned int> indices;
-            };
 
             /* Constructor */
-            Mesh(unsigned primitiveType = 0);
-            Mesh(MeshBuffers& buffers);
+            Mesh(int primitiveType = -1);
+            Mesh(MeshBuffers& buffers, int primitiveType = -1);
 
             /* Remove copy constructors */
             Mesh(const Mesh &) = delete;
@@ -38,16 +38,12 @@ namespace neo {
 
             /* VBO Info */
             MeshBuffers mBuffers;
-            int mVertexBufferSize;
-            int mNormalBufferSize;
-            int mTexBufferSize;
-            int mElementBufferSize;
 
             /* Primitive type */
             unsigned mPrimitiveType;
 
             /* Copy data to GPU */
-            void upload(int = -1);
+            void upload();
             void reupload();
 
             /* Call the appropriate draw function */

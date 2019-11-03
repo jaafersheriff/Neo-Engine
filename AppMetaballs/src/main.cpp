@@ -12,9 +12,10 @@ using namespace neo;
 /* Game object definitions */
 struct Camera {
     CameraComponent *camera;
-    Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
+    Camera(float fov, float near, float far, float ls, float ms, glm::vec3 pos, glm::vec3 lookDir) {
         GameObject *gameObject = &Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        auto& spatial = Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        spatial.setLookDir(lookDir);
         camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, Window::getAspectRatio());
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
@@ -48,7 +49,7 @@ int main() {
     Engine::init(config);
 
     /* Game objects */
-    Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+    Camera camera(45.f, 1.f, 100.f, 0.4f, 7.f, glm::vec3(-2.f, 2.f, 50.f), glm::vec3(0.f, 0.f, -1.f));
     Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
     /* Skybox */
@@ -62,8 +63,8 @@ int main() {
     {
         // Balls
         // TODO : when radius is 10, selecting breaks 
-        Metaball(glm::vec3(-1.f, 0.f, 0.f), 1.f);
-        Metaball(glm::vec3(1.f, 0.f, 0.f), 1.f);
+        Metaball(glm::vec3(-1.4f, 0.f, 0.f), 1.f);
+        Metaball(glm::vec3(1.4f, 0.f, 0.f), 2.5f);
 
         // Mesh
         auto& go = Engine::createGameObject();
@@ -82,13 +83,14 @@ int main() {
     Renderer::addSceneShader<SkyboxShader>();
 
     Engine::addImGuiFunc("Metaballs", []() {
-        static int index = 0;
-        auto metaballs = Engine::getComponents<MetaballComponent>();
-
+        static float scale = 2.f;
+        ImGui::SliderFloat("S", &scale, 1.f, 5.f);
         if (ImGui::Button("Add")) {
-            Metaball(glm::vec3(0.f), 1.f);
+            Metaball(Util::genRandomVec3(-2.f, 2.f), scale);
         }
 
+        static int index = 0;
+        auto metaballs = Engine::getComponents<MetaballComponent>();
         if (metaballs.size()) {
             ImGui::SliderInt("Index", &index, 0, metaballs.size() - 1);
             glm::vec3 position = metaballs[index]->getGameObject().getComponentByType<SpatialComponent>()->getPosition();

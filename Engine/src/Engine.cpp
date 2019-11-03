@@ -76,7 +76,6 @@ namespace neo {
         if (mConfig.attachEditor) {
             addSystem<MouseRaySystem>();
             addSystem<EditorSystem>();
-            Renderer::addSceneShader<WireframeShader>();
             Renderer::addSceneShader<OutlineShader>();
         }
 
@@ -405,7 +404,7 @@ namespace neo {
                 }
                 if (ImGui::TreeNodeEx("Meshes", ImGuiTreeNodeFlags_DefaultOpen)) {
                     for (auto & m : Library::mMeshes) {
-                        ImGui::Text("%s (%d)", m.first.c_str(), m.second->mVertexBufferSize);
+                        ImGui::Text("%s (%d)", m.first.c_str(), m.second->mBuffers.vertices.size());
                     }
                     ImGui::TreePop();
                 }

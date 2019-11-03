@@ -25,7 +25,7 @@ namespace neo {
         mutable bool mDirty;
 
         LineMeshComponent(GameObject *go, std::optional<glm::vec3> overrideColor = std::nullopt) :
-            MeshComponent(go, new Mesh),
+            MeshComponent(go, new Mesh(GL_LINE_STRIP)),
             mDirty(false),
             mWriteDepth(true),
             mUseParentSpatial(false),
@@ -33,7 +33,7 @@ namespace neo {
         {}
 
         virtual void init() override {
-            mMesh->upload(GL_LINE_STRIP);
+            mMesh->upload();
 
             // create color buffer
             CHECK_GL(glBindVertexArray(mMesh->mVAOID));

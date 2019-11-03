@@ -53,38 +53,32 @@ namespace neo {
             exit(1);
         }
 
-        /* Create a new empty mesh */
-        Mesh * mesh = new Mesh;
+        /* Create empty mesh buffers */
+        MeshBuffers buffers = MeshBuffers{};
 
         int vertCount = 0;
         /* For every shape in the loaded file */
         for (unsigned int i = 0; i < shapes.size(); i++) {
             /* Concatenate the shape's vertices, normals, and textures to the mesh */
-            mesh->mBuffers.vertices.insert(mesh->mBuffers.vertices.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
-            mesh->mBuffers.normals.insert(mesh->mBuffers.normals.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
-            mesh->mBuffers.texCoords.insert(mesh->mBuffers.texCoords.end(), shapes[i].mesh.texcoords.begin(), shapes[i].mesh.texcoords.end());
+            buffers.vertices.insert(buffers.vertices.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
+            buffers.normals.insert(buffers.normals.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
+            buffers.texCoords.insert(buffers.texCoords.end(), shapes[i].mesh.texcoords.begin(), shapes[i].mesh.texcoords.end());
 
             /* Concatenate the shape's indices to the new mesh
              * Indices need to be incremented as we concatenate shapes */
             for (unsigned int i : shapes[i].mesh.indices) {
-                mesh->mBuffers.indices.push_back(i + vertCount);
+                buffers.indices.push_back(i + vertCount);
             }
             vertCount += int(shapes[i].mesh.positions.size()) / 3;
         }
 
-        /* Provide VBO info */
-        mesh->mVertexBufferSize = int(mesh->mBuffers.vertices.size());
-        mesh->mNormalBufferSize = int(mesh->mBuffers.normals.size());
-        mesh->mTexBufferSize = int(mesh->mBuffers.texCoords.size());
-        mesh->mElementBufferSize = int(mesh->mBuffers.indices.size());
-
         /* Optional resize */
         if (doResize) {
-            _resize(*mesh);
+            _resize(buffers);
         }
 
-        /* Load mesh to GPU */
-        mesh->upload();
+        /* Create mesh and upload */
+        Mesh* mesh = new Mesh(buffers);
 
         if (mVerbose) {
             std::cout << "Loaded mesh (" << vertCount << " vertices): " << fileName << std::endl;
@@ -154,8 +148,7 @@ namespace neo {
     }
 
     /* Provided function to resize a mesh so all vertex positions are [0, 1.f] */
-    void Loader::_resize(Mesh& mesh) {
-        Mesh::MeshBuffers& buffers = mesh.mBuffers;
+    void Loader::_resize(MeshBuffers& buffers) {
         float minX, minY, minZ;
         float maxX, maxY, maxZ;
         float scaleX, scaleY, scaleZ;

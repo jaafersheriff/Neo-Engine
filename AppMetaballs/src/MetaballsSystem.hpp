@@ -27,7 +27,9 @@ class MetaballsSystem : public System {
 
         MetaballsSystem() :
             System("Metaballs System") {
+        }
 
+        virtual void init() override {
             update(0.f);
         }
 
@@ -42,7 +44,7 @@ class MetaballsSystem : public System {
             }
 
             auto balls = Engine::getComponentTuples<MetaballComponent, SpatialComponent>();
-            if (balls.empty() || !mDirtyBalls) {
+            if (balls.empty()) {
                 return;
             }
 
@@ -73,6 +75,10 @@ class MetaballsSystem : public System {
                     spatial->setPosition(position);
                     spatial->setScale(glm::vec3(radius));
                 }
+            }
+
+            if (!mDirtyBalls) {
+                return;
             }
 
             Grid* grid = new Grid[mDims * mDims * mDims];
@@ -174,7 +180,7 @@ class MetaballsSystem : public System {
     private:
 
         uint32_t triangulate(
-            Mesh::MeshBuffers* buffers
+            MeshBuffers* buffers
             , const float* _rgb
             , const float* _xyz
             , const Grid* _val[8]
