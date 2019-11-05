@@ -72,7 +72,7 @@ namespace neo {
         if (!mVertexBufferID) {
             CHECK_GL(glGenBuffers(1, (GLuint *)&mVertexBufferID));
         }
-        if (mBuffers.vertices.size() && mVertexBufferID) {
+        if (!mBuffers.vertices.empty() && mVertexBufferID) {
             CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferID));
             CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mBuffers.vertices.size() * sizeof(float), &mBuffers.vertices[0], GL_STATIC_DRAW));
             CHECK_GL(glEnableVertexAttribArray(0));

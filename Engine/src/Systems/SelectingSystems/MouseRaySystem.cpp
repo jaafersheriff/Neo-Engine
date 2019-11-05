@@ -29,8 +29,8 @@ namespace neo {
             if (!mouseRayComp) {
                 mouseRayComp = &Engine::addComponent<MouseRayComponent>(&Engine::createGameObject());
             }
-            mouseRayComp->direction = dir;
-            mouseRayComp->position = pos;
+            mouseRayComp->mDirection = dir;
+            mouseRayComp->mPosition = pos;
 
             if (mShowRay) {
                 LineMeshComponent* line = mouseRayComp->getGameObject().getComponentByType<LineMeshComponent>();

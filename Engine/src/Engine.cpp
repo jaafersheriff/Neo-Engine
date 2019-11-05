@@ -421,8 +421,12 @@ namespace neo {
             }
             if (mConfig.attachEditor && ImGui::BeginMenu("Editor")) {
                 if (auto selected = getSingleComponent<SelectedComponent>()) {
+                    if (ImGui::Button("Delete entity")) {
+                        Engine::removeGameObject(selected->getGameObject());
+                    }
                     auto allComponents = selected->getGameObject().getComponentsMap();
                     static std::optional<std::type_index> type;
+                    ImGui::Separator();
                     if (ImGui::BeginCombo("", type ? type->name() + 6 : "Edit components")) {
                         type = std::nullopt;
                         for (auto comp : allComponents) {
@@ -450,7 +454,7 @@ namespace neo {
                             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.81f, 0.20f, 0.20f, 0.40f));
                             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
                             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
-                            if (ImGui::Button("Remove", ImVec2(ImGui::GetWindowWidth() * 0.9f, 0))) {
+                            if (ImGui::Button("Remove Component", ImVec2(ImGui::GetWindowWidth() * 0.9f, 0))) {
                                 removeComponent(type.value(), components[index]);
                                 if (components.size() == 1) {
                                     index = 0;

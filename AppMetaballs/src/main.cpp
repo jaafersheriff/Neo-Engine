@@ -62,7 +62,6 @@ int main() {
     /* METBALL */
     {
         // Balls
-        // TODO : when radius is 10, selecting breaks 
         Metaball(glm::vec3(-1.4f, 0.f, 0.f), 1.f);
         Metaball(glm::vec3(1.4f, 0.f, 0.f), 2.5f);
 
@@ -84,9 +83,9 @@ int main() {
 
     Engine::addImGuiFunc("Metaballs", []() {
         static float scale = 2.f;
-        ImGui::SliderFloat("S", &scale, 1.f, 5.f);
         if (ImGui::Button("Add")) {
-            Metaball(Util::genRandomVec3(-2.f, 2.f), scale);
+            Metaball(Util::genRandomVec3(-2.f, 2.f), Util::genRandom(2.f, 4.f));
+            Engine::getSystem<MetaballsSystem>().mDirtyBalls = true;
         }
 
         static int index = 0;
@@ -97,6 +96,7 @@ int main() {
             ImGui::Text("%0.2f, %0.2f, %0.2f", position.x, position.y, position.z);
             if (ImGui::Button("Remove")) {
                 Engine::removeGameObject(metaballs[index]->getGameObject());
+                Engine::getSystem<MetaballsSystem>().mDirtyBalls = true;
                 if (metaballs.size() - 1 == 1) {
                     index = 0;
                 }

@@ -19,7 +19,7 @@ void main() {
 
 	    vec4 refl = texture(cubeMap, reflect(V, N));
 
-        float index = 1.2;
+        float index = 1.333;
 	    float d = index * dot(V, N);
 	    float k = clamp(d * d + 1.0 - index * index, 0.0, 1.0);
 
