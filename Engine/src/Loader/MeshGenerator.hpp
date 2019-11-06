@@ -37,7 +37,7 @@ namespace neo {
                   0.5f, -0.5f,  0.5f,
                   0.5f,  0.5f,  0.5f,
                  -0.5f,  0.5f,  0.5f };
-                m->addVertexBuffer(VertexType::Position, 0, 3, verts);
+                m->addVertexBuffer(VertexType::Position, 0, 3, &verts);
 
                 std::vector<float> normals =
                 { 0,  0, -1,
@@ -64,7 +64,7 @@ namespace neo {
                   0,  0,  1,
                   0,  0,  1,
                   0,  0,  1 };
-                m->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+                m->addVertexBuffer(VertexType::Normal, 1, 3, &normals);
 
                 std::vector<float> uvs =
                 { 1.f, 0.f,
@@ -96,7 +96,7 @@ namespace neo {
                     1.f, 0.f,
                     1.f, 1.f,
                     0.f, 1.f };
-                m->addVertexBuffer(VertexType::Texture0, 2, 2, uvs);
+                m->addVertexBuffer(VertexType::Texture0, 2, 2, &uvs);
 
                 std::vector<unsigned> indices =
                 { 0,  1,  2,
@@ -124,21 +124,21 @@ namespace neo {
                    0.5f, -0.5f,  0.f,
                   -0.5f,  0.5f,  0.f,
                    0.5f,  0.5f,  0.f };
-                m->addVertexBuffer(VertexType::Position, 0, 3, verts);
+                m->addVertexBuffer(VertexType::Position, 0, 3, &verts);
 
                 std::vector<float> normals =
                 { 0.f, 0.f, 1.f,
                   0.f, 0.f, 1.f,
                   0.f, 0.f, 1.f,
                   0.f, 0.f, 1.f };
-                m->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+                m->addVertexBuffer(VertexType::Normal, 1, 3, &normals);
 
                 std::vector<float> uvs =
                 { 0.f, 0.f,
                   1.f, 0.f,
                   0.f, 1.f,
                   1.f, 1.f };
-                m->addVertexBuffer(VertexType::Texture0, 2, 2, uvs);
+                m->addVertexBuffer(VertexType::Texture0, 2, 2, &uvs);
 
                 std::vector<unsigned> indices =
                 { 0, 1, 2,
@@ -241,9 +241,9 @@ namespace neo {
                 }
 
                 Mesh* m = new Mesh;
-                m->addVertexBuffer(VertexType::Position, 0, 3, verts);
-                m->addVertexBuffer(VertexType::Normal, 1, 3, verts);
-                m->addVertexBuffer(VertexType::Texture0, 2, 2, tex);
+                m->addVertexBuffer(VertexType::Position, 0, 3, &verts);
+                m->addVertexBuffer(VertexType::Normal, 1, 3, &verts);
+                m->addVertexBuffer(VertexType::Texture0, 2, 2, &tex);
                 m->addElementBuffer(ele);
 
                 return m;
@@ -300,9 +300,9 @@ namespace neo {
                 }
 
                 Mesh *m = new Mesh;
-                m->addVertexBuffer(VertexType::Position, 0, 3, vertices);
-                m->addVertexBuffer(VertexType::Normal, 1, 3, normals);
-                m->addVertexBuffer(VertexType::Texture0, 2, 2, textureCoords);
+                m->addVertexBuffer(VertexType::Position, 0, 3, &vertices);
+                m->addVertexBuffer(VertexType::Normal, 1, 3, &normals);
+                m->addVertexBuffer(VertexType::Texture0, 2, 2, &textureCoords);
                 m->addElementBuffer(indices);
 
                 return m;

@@ -43,7 +43,7 @@ struct Renderable {
         Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
         Engine::addComponent<renderable::PhongRenderable>(gameObject);
         Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f), 20.f);
-        Engine::addComponent<BoundingBoxComponent>(gameObject, mesh->mBuffers.vertices);
+        Engine::addComponent<BoundingBoxComponent>(gameObject, mesh);
         Engine::addComponent<SelectableComponent>(gameObject);
     }
 };
@@ -83,6 +83,7 @@ int main() {
     Engine::addSystem<CameraControllerSystem>();
     Engine::addSystem<MouseRaySystem>(true);
     Engine::addSystem<SelectingSystem>(
+        "Selector System",
         20, 
         100.f,
         // Decide to remove selected components
@@ -96,7 +97,7 @@ int main() {
             }
         },
         // Operate on selected components
-        [](SelectedComponent* selected, glm::vec3) {
+        [](SelectedComponent* selected, const MouseRayComponent*, float) {
             if (auto material = selected->getGameObject().getComponentByType<MaterialComponent>()) {
                 material->mDiffuse = glm::vec3(1.f, 0.f, 0.f);
             }

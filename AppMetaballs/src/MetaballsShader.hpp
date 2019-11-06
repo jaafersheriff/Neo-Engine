@@ -43,14 +43,8 @@ public:
             loadUniform("M", metaball->get<SpatialComponent>()->getModelMatrix());
             loadUniform("N", metaball->get<SpatialComponent>()->getNormalMatrix());
 
-            /* Bind mesh */
-            auto& mesh = metaball->get<MeshComponent>()->getMesh();
-            CHECK_GL(glBindVertexArray(mesh.mVAOID));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.mVertexBufferID));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh.mNormalBufferID));
-
             /* DRAW */
-            mesh.draw();
+            metaball->get<MeshComponent>()->getMesh().draw();
         }
 
         unbind();

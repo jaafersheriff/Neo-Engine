@@ -27,7 +27,7 @@ public:
 
             // Bind mesh
             CHECK_GL(glBindVertexArray(mesh->mMesh->mVAOID));
-            CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mesh->mMesh->mVertexBufferID));
+            // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mesh->mMesh->mVertexBufferID));
             // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, mesh->mMesh->mNormalBufferID));
             // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, mesh->mMesh->mTexBufferID));
             // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, mesh->mMesh->mElementBufferID));
@@ -38,7 +38,7 @@ public:
             CHECK_GL(glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT));
 
             // Reset bind
-            CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0));
+            // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0));
             // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0));
             // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, 0));
             // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, 0));

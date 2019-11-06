@@ -53,19 +53,13 @@ class GodRaySunShader : public Shader {
             Vi = glm::transpose(Vi);
             loadUniform("Vi", Vi);
 
-            auto& mesh = *Library::getMesh("plane");
             for (auto& renderable : Engine::getComponents<SunComponent>()) {
 
-                /* Bind mesh */
-                CHECK_GL(glBindVertexArray(mesh.mVAOID));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
-
                 loadUniform("M", renderable->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
-
                 loadUniform("center", renderable->getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
                 /* DRAW */
-                mesh.draw();
+                Library::getMesh("plane")->draw();
             }
 
             unbind();

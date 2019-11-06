@@ -26,18 +26,11 @@ class NormalShader : public Shader {
             loadUniform("V", camera.getView());
 
             for (auto& renderable : Engine::getComponentTuples<MeshComponent, SpatialComponent>()) {
-                /* Bind mesh */
-                const Mesh & mesh(renderable->get<MeshComponent>()->getMesh());
-                CHECK_GL(glBindVertexArray(mesh.mVAOID));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
-
-                glm::mat4 M = renderable->get<SpatialComponent>()->getModelMatrix();
-                loadUniform("M", M);
-                glm::mat4 N = glm::transpose(glm::inverse(camera.getView() * M));
-                loadUniform("N", glm::mat3(N));
+                loadUniform("M", renderable->get<SpatialComponent>()->getModelMatrix());
+                loadUniform("N", renderable->get<SpatialComponent>()->getNormalMatrix());
 
                 /* DRAW */
-                mesh.draw();
+                renderable->get<MeshComponent>()->getMesh().draw();
             }
 
             unbind();

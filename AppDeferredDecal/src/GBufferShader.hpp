@@ -44,11 +44,6 @@ class GBufferShader : public Shader {
             loadUniform("V", camera.getView());
 
             for (auto& renderable : Engine::getComponentTuples<MeshComponent, SpatialComponent>()) {
-                /* Bind mesh */
-                const Mesh& mesh(renderable->get<MeshComponent>()->getMesh());
-                CHECK_GL(glBindVertexArray(mesh.mVAOID));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
-
                 loadUniform("M", renderable->get<SpatialComponent>()->getModelMatrix());
 
                 /* Bind diffuse map or material */
@@ -80,7 +75,7 @@ class GBufferShader : public Shader {
                 }
 
                 /* DRAW */
-                mesh.draw();
+                renderable->get<MeshComponent>()->getMesh().draw();
             }
 
             unbind();

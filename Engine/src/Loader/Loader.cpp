@@ -83,9 +83,9 @@ namespace neo {
         _resize(mesh, vertices, doResize);
 
         /* Upload */
-        mesh->addVertexBuffer(VertexType::Position, 0, 3, vertices);
-        mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
-        mesh->addVertexBuffer(VertexType::Texture0, 2, 2, texCoords);
+        mesh->addVertexBuffer(VertexType::Position, 0, 3, &vertices);
+        mesh->addVertexBuffer(VertexType::Normal, 1, 3, &normals);
+        mesh->addVertexBuffer(VertexType::Texture0, 2, 2, &texCoords);
         if (indices.size()) {
             mesh->addElementBuffer(indices);
         }

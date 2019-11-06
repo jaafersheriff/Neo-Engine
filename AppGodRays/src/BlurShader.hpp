@@ -64,11 +64,7 @@ class BlurShader : public Shader {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            auto mesh = Library::getMesh("quad");
-            CHECK_GL(glBindVertexArray(mesh->mVAOID));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh->mVertexBufferID));
-            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mElementBufferID));
-            mesh->draw();
+            Library::getMesh("quad")->draw();
 
             unbind();
         }

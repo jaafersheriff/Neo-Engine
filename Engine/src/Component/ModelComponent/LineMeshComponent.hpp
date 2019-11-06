@@ -34,9 +34,8 @@ namespace neo {
         }
 
         virtual void init() override {
-            std::vector<float> empty;
-            mMesh->addVertexBuffer(VertexType::Position, 0, 3, empty);
-            mMesh->addVertexBuffer(VertexType::Color0, 1, 3, empty);
+            mMesh->addVertexBuffer(VertexType::Position, 0, 3);
+            mMesh->addVertexBuffer(VertexType::Color0, 1, 3);
         }
 
         virtual Mesh & getMesh() const override {

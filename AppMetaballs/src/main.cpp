@@ -38,7 +38,7 @@ struct Metaball {
         Engine::addComponent<MeshComponent>(gameObject, Library::getMesh("sphere"));
         Engine::addComponent<SpatialComponent>(gameObject, position, glm::vec3(radius));
         Engine::addComponent<SelectableComponent>(gameObject);
-        Engine::addComponent<BoundingBoxComponent>(gameObject, Library::getMesh("sphere")->mBuffers.vertices);
+        Engine::addComponent<BoundingBoxComponent>(gameObject, Library::getMesh("sphere"));
     }
 };
 
@@ -68,7 +68,10 @@ int main() {
         // Mesh
         auto& go = Engine::createGameObject();
         Engine::addComponent<MetaballsMeshComponent>(&go);
-        Engine::addComponent<MeshComponent>(&go, new Mesh(GL_TRIANGLES));
+        Mesh* mesh = new Mesh(GL_TRIANGLES);
+        mesh->addVertexBuffer(VertexType::Position, 0, 3);
+        mesh->addVertexBuffer(VertexType::Normal, 0, 3);
+        Engine::addComponent<MeshComponent>(&go, mesh);
         Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.f, 0.f));
     }
 

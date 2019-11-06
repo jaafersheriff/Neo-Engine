@@ -47,7 +47,7 @@ namespace neo {
             unsigned int mVAOID;
 
             /* VBOs */
-            void addVertexBuffer(VertexType type, unsigned attribArray, unsigned stride, std::vector<float>& buffer);
+            void addVertexBuffer(VertexType type, unsigned attribArray, unsigned stride, std::vector<float>* buffer = nullptr);
             void updateVertexBuffer(VertexType type, std::vector<float>& buffer);
             void removeVertexBuffer(VertexType type);
             std::unordered_map<VertexType, VertexBuffer> mVBOs;

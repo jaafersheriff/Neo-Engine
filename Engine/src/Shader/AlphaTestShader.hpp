@@ -42,9 +42,8 @@ namespace neo {
             loadUniform("V", camera.getView());
 
             for (auto& renderable : Engine::getComponentTuples<renderable::AlphaTestRenderable, MeshComponent, SpatialComponent>()) {
-                auto meshComp = renderable->get<MeshComponent>();
-                auto spatial = renderable->get<SpatialComponent>();
 
+                auto spatial = renderable->get<SpatialComponent>();
                 loadUniform("M", spatial->getModelMatrix());
 
                 /* Bind texture */
@@ -55,8 +54,7 @@ namespace neo {
                 }
 
                 /* DRAW */
-                const Mesh & mesh(meshComp->getMesh());
-                mesh.draw();
+                renderable->get<MeshComponent>()->getMesh().draw();
             }
 
             unbind();

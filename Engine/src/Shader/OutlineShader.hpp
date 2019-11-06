@@ -42,7 +42,6 @@ namespace neo {
 
             for (auto& renderable : Engine::getComponentTuples<renderable::OutlineRenderable, MeshComponent, SpatialComponent>()) {
                 auto renderableOutline = renderable->get<renderable::OutlineRenderable>();
-                auto renderableMesh = renderable->get<MeshComponent>();
                 auto renderableSpatial = renderable->get<SpatialComponent>();
 
                 // VFC
@@ -61,8 +60,7 @@ namespace neo {
                 loadUniform("outlineColor", renderableOutline->mColor);
 
                 /* DRAW */
-                const Mesh & mesh(renderableMesh->getMesh());
-                mesh.draw();
+                renderable->get<MeshComponent>()->getMesh().draw();
             }
 
             unbind();

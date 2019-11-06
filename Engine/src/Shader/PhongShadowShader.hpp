@@ -108,12 +108,10 @@ namespace neo {
 
                 /* Bind shadow map */
                 const Texture & texture(*Library::getFBO("shadowMap")->mTextures[0]);
-                CHECK_GL(glActiveTexture(GL_TEXTURE0 + texture.mTextureID));
-                CHECK_GL(glBindTexture(GL_TEXTURE_2D, texture.mTextureID));
+                texture.bind();
                 loadUniform("shadowMap", texture.mTextureID);
 
                 for (auto& renderable : Engine::getComponentTuples<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>()) {
-                    auto meshComponent = renderable->get<MeshComponent>();
                     auto renderableSpatial = renderable->get<SpatialComponent>();
 
                     // VFC
@@ -126,19 +124,13 @@ namespace neo {
                         }
                     }
 
-
-                    /* Bind mesh */
-                    const Mesh & mesh(meshComponent->getMesh());
-                    CHECK_GL(glBindVertexArray(mesh.mVAOID));
-                    CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
-
                     loadUniform("M", renderableSpatial->getModelMatrix());
                     loadUniform("N", renderableSpatial->getNormalMatrix());
 
                     /* Bind texture */
                     auto texComp = renderable->mGameObject.getComponentByType<DiffuseMapComponent>();
                     if (texComp) {
-                        auto texture = (const Texture2D *)(texComp->mTexture);
+                        auto texture = texComp->mTexture;
                         texture->bind();
                         loadUniform("diffuseMap", texture->mTextureID);
                         loadUniform("useTexture", true);
@@ -156,7 +148,7 @@ namespace neo {
                     }
 
                     /* DRAW */
-                    mesh.draw();
+                    renderable->get<MeshComponent>()->getMesh().draw();
                 }
 
                 unbind();

@@ -58,13 +58,9 @@ namespace neo {
                     }
 
                     /* Bind mesh */
-                    const Mesh & mesh(line->getMesh());
-                    CHECK_GL(glBindVertexArray(mesh.mVAOID));
-
-                    mesh.draw(line->getNodes().size());
+                    line->getMesh().draw();
                 }
 
-                CHECK_GL(glBindVertexArray(0));	
                 unbind();
             }
         };

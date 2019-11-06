@@ -35,13 +35,8 @@ namespace neo {
                 loadUniform("V", camera.getView());
 
                 for (auto& renderable : Engine::getComponentTuples<renderable::WireframeRenderable, MeshComponent, SpatialComponent>()) {
-                    const auto meshComponent = renderable->get<MeshComponent>();
+
                     const auto spatialComponent = renderable->get<SpatialComponent>();
-
-                    /* Bind mesh */
-                    const Mesh & mesh(meshComponent->getMesh());
-                    CHECK_GL(glBindVertexArray(mesh.mVAOID));
-
                     loadUniform("M", spatialComponent->getModelMatrix());
 
                     glm::vec3 color(1.f);
@@ -51,7 +46,7 @@ namespace neo {
                     loadUniform("wireColor", color);
 
                     /* Draw outline */
-                    mesh.draw();
+                    renderable->get<MeshComponent>()->getMesh().draw();
                 }
 
                 unbind();

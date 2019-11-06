@@ -49,11 +49,6 @@ class LightPassShader : public Shader {
             loadUniform("invV", glm::inverse(camera.getView()));
             loadUniform("camPos", camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
-            /* Bind sphere volume */
-            auto mesh = Library::getMesh("ico_2", true);
-            CHECK_GL(glBindVertexArray(mesh->mVAOID));
-            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mElementBufferID));
-
             /* Bind gbuffer */
             auto gbuffer = Library::getFBO("gbuffer");
             gbuffer->mTextures[0]->bind();
@@ -80,7 +75,7 @@ class LightPassShader : public Shader {
                 else {
                     CHECK_GL(glCullFace(GL_BACK));
                 }
-                mesh->draw();
+                Library::getMesh("ico_2", true)->draw();
             }
 
             unbind();

@@ -45,11 +45,6 @@ public:
             loadUniform("M", model->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
             loadUniform("N", model->getGameObject().getComponentByType<SpatialComponent>()->getNormalMatrix());
 
-            /* Bind mesh */
-            const Mesh & mesh(model->getMesh());
-            CHECK_GL(glBindVertexArray(mesh.mVAOID));
-            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
-
             /* Bind material */
             if (auto material = model->getGameObject().getComponentByType<MaterialComponent>()) {
                 loadUniform("ambient", material->mAmbient);
@@ -59,7 +54,7 @@ public:
             }
 
             /* DRAW */
-            mesh.draw();
+            model->getMesh().draw();
         }
 
         unbind();

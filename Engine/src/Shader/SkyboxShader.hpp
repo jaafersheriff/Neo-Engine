@@ -47,15 +47,13 @@ namespace neo {
             loadUniform("P", camera.getProj());
             loadUniform("V", camera.getView());
 
-            const Mesh& mesh = *Library::getMesh("cube");
-            CHECK_GL(glBindVertexArray(mesh.mVAOID));
-            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
-
             /* Bind texture */
-            loadUniform("cubeMap", skybox->get<CubeMapComponent>()->mTexture->mTextureID);
+            auto texture = skybox->get<CubeMapComponent>()->mTexture;
+            texture->bind();
+            loadUniform("cubeMap", texture->mTextureID);
 
             /* Draw */
-            mesh.draw();
+            Library::getMesh("cube")->draw();
 
             unbind();
         }

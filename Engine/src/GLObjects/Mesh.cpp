@@ -50,7 +50,7 @@ namespace neo {
         }
     }
 
-    void Mesh::addVertexBuffer(VertexType type, unsigned attribArray, unsigned stride, std::vector<float>& buffer) {
+    void Mesh::addVertexBuffer(VertexType type, unsigned attribArray, unsigned stride, std::vector<float>* buffer) {
         {
             const auto& vbo = mVBOs.find(type);
             assert(vbo == mVBOs.end());
@@ -60,12 +60,14 @@ namespace neo {
         auto& vertexBuffer = mVBOs[type];
         vertexBuffer.attribArray = attribArray;
         vertexBuffer.stride = stride;
-        vertexBuffer.bufferSize = buffer.size();
+        vertexBuffer.bufferSize = buffer ? buffer->size() : 0;
 
         CHECK_GL(glBindVertexArray(mVAOID));
         CHECK_GL(glGenBuffers(1, (GLuint *)&vertexBuffer.vboID));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
-        CHECK_GL(glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_STATIC_DRAW));
+        if (buffer && buffer->size()) {
+            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, buffer->size() * sizeof(float), buffer->data(), GL_STATIC_DRAW));
+        }
         CHECK_GL(glEnableVertexAttribArray(attribArray));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
         CHECK_GL(glVertexAttribPointer(attribArray, stride, GL_FLOAT, GL_FALSE, 0, (const void *)0));

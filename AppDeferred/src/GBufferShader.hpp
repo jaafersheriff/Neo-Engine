@@ -47,11 +47,6 @@ class GBufferShader : public Shader {
             for (auto& renderable : Engine::getComponentTuples<MeshComponent, SpatialComponent>()) {
                 loadUniform("M", renderable->get<SpatialComponent>()->getModelMatrix());
 
-                /* Bind mesh */
-                const Mesh & mesh(renderable->get<MeshComponent>()->getMesh());
-                CHECK_GL(glBindVertexArray(mesh.mVAOID));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
-
                 /* Bind diffuse map or material */
                 auto matComp = renderable->mGameObject.getComponentByType<MaterialComponent>();
                 if (matComp) {
@@ -82,7 +77,7 @@ class GBufferShader : public Shader {
                 }
 
                 /* DRAW */
-                mesh.draw();
+                renderable->get<MeshComponent>()->getMesh().draw();
             }
 
             unbind();

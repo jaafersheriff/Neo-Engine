@@ -58,7 +58,7 @@ void generateObjects(int amount) {
         Renderable renderable(mesh, position, size);
         Engine::addComponent<renderable::PhongRenderable>(renderable.gameObject);
         Engine::addComponent<MaterialComponent>(renderable.gameObject, 0.2f, glm::normalize(position), glm::vec3(1.f));
-        auto boundingBox = &Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, mesh->mBuffers.vertices);
+        auto boundingBox = &Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, mesh);
     }
 }
 

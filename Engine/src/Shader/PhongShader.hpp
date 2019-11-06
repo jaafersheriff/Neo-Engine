@@ -76,7 +76,6 @@ namespace neo {
             }
 
             for (auto& renderable : Engine::getComponentTuples<renderable::PhongRenderable, MeshComponent, SpatialComponent>()) {
-                auto renderableMesh = renderable->get<MeshComponent>();
                 auto renderableSpatial = renderable->get<SpatialComponent>();
 
                 // VFC
@@ -88,7 +87,6 @@ namespace neo {
                         }
                     }
                 }
-
 
                 loadUniform("M", renderableSpatial->getModelMatrix());
                 loadUniform("N", renderableSpatial->getNormalMatrix());
@@ -113,8 +111,7 @@ namespace neo {
                 }
 
                 /* DRAW */
-                const Mesh & mesh(renderableMesh->getMesh());
-                mesh.draw();
+                renderable->get<MeshComponent>()->getMesh().draw();
             }
 
             unbind();

@@ -77,11 +77,6 @@ class MetaballsSystem : public System {
 		    const uint32_t zpitch = mDims*mDims;
 		    const float invdim = 1.0f/float(mDims-1);
 
-
-            auto& mesh = metaballMesh->get<MeshComponent>()->getMesh();
-            mesh.mBuffers.vertices.clear();
-            mesh.mBuffers.normals.clear();
-
             Grid* grid = new Grid[mDims * mDims * mDims];
 			for (uint32_t zz = 0; zz < mDims; ++zz) {
 				for (uint32_t yy = 0; yy < mDims; ++yy) {
@@ -131,6 +126,8 @@ class MetaballsSystem : public System {
 				}
 			}
 
+            std::vector<float> vertices;
+            std::vector<float> normals;
             for (uint32_t zz = 0; zz < mDims - 1 && numVertices + 12 < maxVertices; ++zz) {
                 float rgb[6];
                 rgb[2] = zz * invdim;
@@ -167,13 +164,15 @@ class MetaballsSystem : public System {
                             &grid[xoffset],
                         };
 
-                        uint32_t num = triangulate(&mesh.mBuffers, rgb, pos, val, 0.5f);
+                        uint32_t num = triangulate(vertices, normals, rgb, pos, val, 0.5f);
                         numVertices += num;
                     }
                 }
             }
 
-            mesh.upload();
+            auto& mesh = metaballMesh->get<MeshComponent>()->getMesh();
+            mesh.updateVertexBuffer(VertexType::Position, vertices);
+            mesh.updateVertexBuffer(VertexType::Normal, normals);
             mDirtyBalls = false;
             delete[] grid;
         }
@@ -181,7 +180,8 @@ class MetaballsSystem : public System {
     private:
 
         uint32_t triangulate(
-            MeshBuffers* buffers
+              std::vector<float>& vertices
+            , std::vector<float>& normals
             , const float* _rgb
             , const float* _xyz
             , const Grid* _val[8]
@@ -233,13 +233,13 @@ class MetaballsSystem : public System {
             {
                 const float* _vertex = verts[uint8_t(indices[ii])];
 
-                buffers->vertices.push_back(_xyz[0] + _vertex[0]);
-                buffers->vertices.push_back(_xyz[1] + _vertex[1]);
-                buffers->vertices.push_back(_xyz[2] + _vertex[2]);
+                vertices.push_back(_xyz[0] + _vertex[0]);
+                vertices.push_back(_xyz[1] + _vertex[1]);
+                vertices.push_back(_xyz[2] + _vertex[2]);
 
-                buffers->normals.push_back(_vertex[3]);
-                buffers->normals.push_back(_vertex[4]);
-                buffers->normals.push_back(_vertex[5]);
+                normals.push_back(_vertex[3]);
+                normals.push_back(_vertex[4]);
+                normals.push_back(_vertex[5]);
                 
                 ++num;
             }
