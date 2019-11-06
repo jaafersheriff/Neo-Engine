@@ -45,9 +45,6 @@ namespace neo {
                 auto meshComp = renderable->get<MeshComponent>();
                 auto spatial = renderable->get<SpatialComponent>();
 
-                /* Bind mesh */
-                const Mesh & mesh(meshComp->getMesh());
-
                 loadUniform("M", spatial->getModelMatrix());
 
                 /* Bind texture */
@@ -58,6 +55,7 @@ namespace neo {
                 }
 
                 /* DRAW */
+                const Mesh & mesh(meshComp->getMesh());
                 mesh.draw();
             }
 

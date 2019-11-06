@@ -16,6 +16,7 @@ namespace neo {
     }
 
     void Mesh::draw(unsigned size) const {
+        CHECK_GL(glBindVertexArray(mVAOID));
         if (mElementVBO) {
             // TODO - instanced?
             CHECK_GL(glDrawElements(mPrimitiveType, size ? size : mElementVBO->bufferSize, GL_UNSIGNED_INT, nullptr));
@@ -68,8 +69,6 @@ namespace neo {
         CHECK_GL(glEnableVertexAttribArray(attribArray));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
         CHECK_GL(glVertexAttribPointer(attribArray, stride, GL_FLOAT, GL_FALSE, 0, (const void *)0));
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-        CHECK_GL(glBindVertexArray(0));
 
         assert(glGetError() == GL_NO_ERROR);
     }
@@ -83,8 +82,7 @@ namespace neo {
         CHECK_GL(glBindVertexArray(mVAOID));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
         CHECK_GL(glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_STATIC_DRAW));
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-        CHECK_GL(glBindVertexArray(0));
+
 
         assert(glGetError() == GL_NO_ERROR);
 
@@ -93,6 +91,7 @@ namespace neo {
     void Mesh::removeVertexBuffer(VertexType type) {
         const auto& vbo = mVBOs.find(type);
         if (vbo != mVBOs.end()) {
+            CHECK_GL(glBindVertexArray(mVAOID));
             CHECK_GL(glDeleteBuffers(1, (GLuint *)&vbo->second.vboID));
             mVBOs.erase(type);
         }
@@ -104,11 +103,10 @@ namespace neo {
         mElementVBO->bufferSize = buffer.size();
 
         CHECK_GL(glBindVertexArray(mVAOID));
+
         CHECK_GL(glGenBuffers(1, (GLuint *)&mElementVBO->vboID));
         CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID));
         CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(unsigned int), &buffer[0], GL_STATIC_DRAW));
-        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-        CHECK_GL(glBindVertexArray(0));
 
         assert(glGetError() == GL_NO_ERROR);
 
@@ -116,6 +114,7 @@ namespace neo {
     }
 
     void Mesh::removeElementBuffer() {
+        CHECK_GL(glBindVertexArray(mVAOID));
         CHECK_GL(glDeleteBuffers(1, (GLuint *)&mElementVBO->vboID));
         mElementVBO = std::nullopt;
 

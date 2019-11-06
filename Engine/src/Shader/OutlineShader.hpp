@@ -55,16 +55,13 @@ namespace neo {
                     }
                 }
 
-                /* Bind mesh */
-                const Mesh & mesh(renderableMesh->getMesh());
-                CHECK_GL(glBindVertexArray(mesh.mVAOID));
-
                 glm::mat4 M = renderableSpatial->getModelMatrix() * glm::scale(glm::mat4(1.f), glm::vec3(1.f + renderableOutline->mScale));
-
                 loadUniform("M", M);
+
                 loadUniform("outlineColor", renderableOutline->mColor);
 
                 /* DRAW */
+                const Mesh & mesh(renderableMesh->getMesh());
                 mesh.draw();
             }
 

@@ -89,8 +89,6 @@ namespace neo {
                     }
                 }
 
-                /* Bind mesh */
-                const Mesh & mesh(renderableMesh->getMesh());
 
                 loadUniform("M", renderableSpatial->getModelMatrix());
                 loadUniform("N", renderableSpatial->getNormalMatrix());
@@ -115,6 +113,7 @@ namespace neo {
                 }
 
                 /* DRAW */
+                const Mesh & mesh(renderableMesh->getMesh());
                 mesh.draw();
             }
 
