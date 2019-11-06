@@ -4,6 +4,8 @@
 #include "GameObject/GameObject.hpp"
 #include "Component/SpatialComponent/SpatialComponent.hpp"
 
+#include "GLObjects/Mesh.hpp"
+
 #include <glm/glm.hpp>
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -13,18 +15,29 @@ namespace neo {
     public:
         glm::vec3 mMin, mMax;
 
-        BoundingBoxComponent(GameObject *go, const std::vector<float>& vertices) :
-            Component(go) {
-            assert(vertices.size() > 0);
-            for (size_t v = 0; v < vertices.size() / 3; v++) {
-                mMin.x = glm::min(mMin.x, vertices[3 * v + 0]);
-                mMin.y = glm::min(mMin.y, vertices[3 * v + 1]);
-                mMin.z = glm::min(mMin.z, vertices[3 * v + 2]);
+        BoundingBoxComponent(GameObject *go) :
+            Component(go),
+            mMin(0.f),
+            mMax(0.f) {
+        }
 
-                mMax.x = glm::max(mMax.x, vertices[3 * v + 0]);
-                mMax.y = glm::max(mMax.y, vertices[3 * v + 1]);
-                mMax.z = glm::max(mMax.z, vertices[3 * v + 2]);
+        BoundingBoxComponent(GameObject *go, std::vector<glm::vec3>& vertices) :
+            Component(go) {
+            mMin = glm::vec3(FLT_MAX);
+            mMax = glm::vec3(FLT_MIN);
+
+            for (auto vert : vertices) {
+                mMin = glm::min(mMin, vert);
+                mMax = glm::max(mMax, vert);
             }
+        }
+
+
+        BoundingBoxComponent(GameObject *go, const Mesh* mesh) :
+            BoundingBoxComponent(go)
+        {
+            mMin = mesh->mMin;
+            mMax = mesh->mMax;
         }
 
         float getRadius() const {
@@ -34,7 +47,7 @@ namespace neo {
         bool intersect(const glm::vec3 position) const {
             auto spatial = mGameObject->getComponentByType<SpatialComponent>();
             assert(spatial);
-            // TODO - this is broke
+            // TODO - this is broke?
             return glm::length(glm::vec3(glm::inverse(spatial->getModelMatrix()) * glm::vec4(position, 1.f))) <= getRadius();
         }
     };

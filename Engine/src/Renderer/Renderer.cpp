@@ -165,8 +165,6 @@ namespace neo {
         shader.bind();
         auto mesh = Library::getMesh("quad");
         CHECK_GL(glBindVertexArray(mesh->mVAOID));
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh->mVertexBufferID));
-        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mElementBufferID));
 
         // Bind input fbo texture
         input->mTextures[0]->bind();

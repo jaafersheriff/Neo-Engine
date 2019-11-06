@@ -3,13 +3,27 @@
 #include "glm/glm.hpp"
 
 #include <vector>
+#include <unordered_map>
+#include <optional>
 
 namespace neo {
-    struct MeshBuffers {
-        std::vector<float> vertices;
-        std::vector<float> normals;
-        std::vector<float> texCoords;
-        std::vector<unsigned int> indices;
+
+    enum class VertexType {
+        Position,
+        Normal,
+        Texture0,
+        Texture1,
+        Texture2,
+        Color0,
+        Color1,
+        Color2
+    };
+
+    struct VertexBuffer {
+        unsigned vboID = 0;
+        unsigned attribArray = 0;
+        unsigned stride = 3;
+        unsigned bufferSize = 0;
     };
 
     class Mesh {
@@ -18,7 +32,6 @@ namespace neo {
 
             /* Constructor */
             Mesh(int primitiveType = -1);
-            Mesh(MeshBuffers& buffers, int primitiveType = -1);
 
             /* Remove copy constructors */
             Mesh(const Mesh &) = delete;
@@ -26,33 +39,30 @@ namespace neo {
             Mesh(Mesh &&) = default;
             Mesh & operator=(Mesh &&) = default;
 
+            /* Min/max */
+            glm::vec3 mMin = glm::vec3(0.f);
+            glm::vec3 mMax = glm::vec3(0.f);
 
             /* VAO ID */
             unsigned int mVAOID;
 
-            /* VBO IDs */
-            unsigned int mVertexBufferID;
-            unsigned int mNormalBufferID;
-            unsigned int mTexBufferID;
-            unsigned int mElementBufferID;
+            /* VBOs */
+            void addVertexBuffer(VertexType type, unsigned attribArray, unsigned stride, std::vector<float>& buffer);
+            void updateVertexBuffer(VertexType type, std::vector<float>& buffer);
+            void removeVertexBuffer(VertexType type);
+            std::unordered_map<VertexType, VertexBuffer> mVBOs;
 
-            /* VBO Info */
-            MeshBuffers mBuffers;
+            void addElementBuffer(std::vector<unsigned>& buffer);
+            void removeElementBuffer();
+            std::optional<VertexBuffer> mElementVBO;
 
             /* Primitive type */
             unsigned mPrimitiveType;
-
-            /* Copy data to GPU */
-            void upload();
-            void reupload();
 
             /* Call the appropriate draw function */
             void draw(unsigned = 0) const;
 
             /* Remove */
             void destroy();
-
-    private:
-        void _upload();
     };
 }

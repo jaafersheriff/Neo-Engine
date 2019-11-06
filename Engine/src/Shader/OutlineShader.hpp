@@ -58,7 +58,6 @@ namespace neo {
                 /* Bind mesh */
                 const Mesh & mesh(renderableMesh->getMesh());
                 CHECK_GL(glBindVertexArray(mesh.mVAOID));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                 glm::mat4 M = renderableSpatial->getModelMatrix() * glm::scale(glm::mat4(1.f), glm::vec3(1.f + renderableOutline->mScale));
 

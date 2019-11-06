@@ -7,130 +7,145 @@ namespace neo {
 
     class MeshGenerator {
 
-    private:
-        static Mesh* _createMesh(const std::vector<float> &vert, const std::vector<float> &norm, const std::vector<float> &tex, const std::vector<unsigned> &ele, unsigned mode = GL_TRIANGLES) {
-            MeshBuffers buffers{
-                vert,
-                norm,
-                tex,
-                ele
-            };
-            return new Mesh(buffers, mode);
-        }
-
         public:
 
             static Mesh* createCube() {
-                return _createMesh(
-                    {-0.5f, -0.5f, -0.5f,
-                      0.5f,  0.5f, -0.5f,
-                      0.5f, -0.5f, -0.5f,
-                     -0.5f,  0.5f, -0.5f,
-                     -0.5f, -0.5f, -0.5f,
-                     -0.5f,  0.5f,  0.5f,
-                     -0.5f,  0.5f, -0.5f,
-                     -0.5f, -0.5f,  0.5f,
-                     -0.5f,  0.5f, -0.5f,
-                      0.5f,  0.5f,  0.5f,
-                      0.5f,  0.5f, -0.5f,
-                     -0.5f,  0.5f,  0.5f,
-                      0.5f, -0.5f, -0.5f,
-                      0.5f,  0.5f, -0.5f,
-                      0.5f,  0.5f,  0.5f,
-                      0.5f, -0.5f,  0.5f,
-                     -0.5f, -0.5f, -0.5f,
-                      0.5f, -0.5f, -0.5f,
-                      0.5f, -0.5f,  0.5f,
-                     -0.5f, -0.5f,  0.5f,
-                     -0.5f, -0.5f,  0.5f,
-                      0.5f, -0.5f,  0.5f,
-                      0.5f,  0.5f,  0.5f,
-                     -0.5f,  0.5f,  0.5f },
-                    { 0,  0, -1,
-                      0,  0, -1,
-                      0,  0, -1,
-                      0,  0, -1,
-                     -1,  0,  0,
-                     -1,  0,  0,
-                     -1,  0,  0,
-                     -1,  0,  0,
-                      0,  1,  0,
-                      0,  1,  0,
-                      0,  1,  0,
-                      0,  1,  0,
-                      1,  0,  0,
-                      1,  0,  0,
-                      1,  0,  0,
-                      1,  0,  0,
-                      0, -1,  0,
-                      0, -1,  0,
-                      0, -1,  0,
-                      0, -1,  0,
-                      0,  0,  1,
-                      0,  0,  1,
-                      0,  0,  1,
-                      0,  0,  1 },
-                    {1.f, 0.f,
-                     0.f, 1.f,
-                     0.f, 0.f,
-                     1.f, 1.f,
+                Mesh* m = new Mesh;
 
-                     0.f, 0.f,
-                     1.f, 1.f,
-                     0.f, 1.f,
-                     1.f, 0.f,
+                std::vector<float> verts =
+                { -0.5f, -0.5f, -0.5f,
+                  0.5f,  0.5f, -0.5f,
+                  0.5f, -0.5f, -0.5f,
+                 -0.5f,  0.5f, -0.5f,
+                 -0.5f, -0.5f, -0.5f,
+                 -0.5f,  0.5f,  0.5f,
+                 -0.5f,  0.5f, -0.5f,
+                 -0.5f, -0.5f,  0.5f,
+                 -0.5f,  0.5f, -0.5f,
+                  0.5f,  0.5f,  0.5f,
+                  0.5f,  0.5f, -0.5f,
+                 -0.5f,  0.5f,  0.5f,
+                  0.5f, -0.5f, -0.5f,
+                  0.5f,  0.5f, -0.5f,
+                  0.5f,  0.5f,  0.5f,
+                  0.5f, -0.5f,  0.5f,
+                 -0.5f, -0.5f, -0.5f,
+                  0.5f, -0.5f, -0.5f,
+                  0.5f, -0.5f,  0.5f,
+                 -0.5f, -0.5f,  0.5f,
+                 -0.5f, -0.5f,  0.5f,
+                  0.5f, -0.5f,  0.5f,
+                  0.5f,  0.5f,  0.5f,
+                 -0.5f,  0.5f,  0.5f };
+                m->addVertexBuffer(VertexType::Position, 0, 3, verts);
 
-                     1.f, 0.f,
-                     0.f, 1.f,
-                     0.f, 0.f,
-                     1.f, 1.f,
+                std::vector<float> normals =
+                { 0,  0, -1,
+                  0,  0, -1,
+                  0,  0, -1,
+                  0,  0, -1,
+                 -1,  0,  0,
+                 -1,  0,  0,
+                 -1,  0,  0,
+                 -1,  0,  0,
+                  0,  1,  0,
+                  0,  1,  0,
+                  0,  1,  0,
+                  0,  1,  0,
+                  1,  0,  0,
+                  1,  0,  0,
+                  1,  0,  0,
+                  1,  0,  0,
+                  0, -1,  0,
+                  0, -1,  0,
+                  0, -1,  0,
+                  0, -1,  0,
+                  0,  0,  1,
+                  0,  0,  1,
+                  0,  0,  1,
+                  0,  0,  1 };
+                m->addVertexBuffer(VertexType::Normal, 1, 3, normals);
 
-                     1.f, 0.f,
-                     1.f, 1.f,
-                     0.f, 1.f,
-                     0.f, 0.f,
+                std::vector<float> uvs =
+                { 1.f, 0.f,
+                    0.f, 1.f,
+                    0.f, 0.f,
+                    1.f, 1.f,
 
-                     1.f, 1.f,
-                     0.f, 1.f,
-                     0.f, 0.f,
-                     1.f, 0.f,
+                    0.f, 0.f,
+                    1.f, 1.f,
+                    0.f, 1.f,
+                    1.f, 0.f,
 
-                     0.f, 0.f,
-                     1.f, 0.f,
-                     1.f, 1.f,
-                     0.f, 1.f},
-                    { 0,  1,  2,
-                      0,  3,  1,
-                      4,  5,  6,
-                      4,  7,  5,
-                      8,  9, 10,
-                      8, 11,  9,
-                     12, 13, 14,
-                     12, 14, 15,
-                     16, 17, 18,
-                     16, 18, 19,
-                     20, 21, 22,
-                     20, 22, 23 } 
-                );
+                    1.f, 0.f,
+                    0.f, 1.f,
+                    0.f, 0.f,
+                    1.f, 1.f,
+
+                    1.f, 0.f,
+                    1.f, 1.f,
+                    0.f, 1.f,
+                    0.f, 0.f,
+
+                    1.f, 1.f,
+                    0.f, 1.f,
+                    0.f, 0.f,
+                    1.f, 0.f,
+
+                    0.f, 0.f,
+                    1.f, 0.f,
+                    1.f, 1.f,
+                    0.f, 1.f };
+                m->addVertexBuffer(VertexType::Texture0, 2, 2, uvs);
+
+                std::vector<unsigned> indices =
+                { 0,  1,  2,
+                  0,  3,  1,
+                  4,  5,  6,
+                  4,  7,  5,
+                  8,  9, 10,
+                  8, 11,  9,
+                 12, 13, 14,
+                 12, 14, 15,
+                 16, 17, 18,
+                 16, 18, 19,
+                 20, 21, 22,
+                 20, 22, 23 };
+                m->addElementBuffer(indices);
+
+                return m;
             }
 
             static Mesh* createQuad() {
-                return _createMesh(
-                    {-0.5f, -0.5f,  0.f,
-                      0.5f, -0.5f,  0.f,
-                     -0.5f,  0.5f,  0.f,
-                      0.5f,  0.5f,  0.f },
-                    {0.f, 0.f, 1.f,
-                     0.f, 0.f, 1.f,
-                     0.f, 0.f, 1.f,
-                     0.f, 0.f, 1.f }, 
-                    {0.f, 0.f, 
-                     1.f, 0.f,
-                     0.f, 1.f,
-                     1.f, 1.f }, 
-                    {0, 1, 2,
-                     1, 3, 2}
-                );
+                Mesh* m = new Mesh;
+
+                std::vector<float> verts =
+                { -0.5f, -0.5f,  0.f,
+                   0.5f, -0.5f,  0.f,
+                  -0.5f,  0.5f,  0.f,
+                   0.5f,  0.5f,  0.f };
+                m->addVertexBuffer(VertexType::Position, 0, 3, verts);
+
+                std::vector<float> normals =
+                { 0.f, 0.f, 1.f,
+                  0.f, 0.f, 1.f,
+                  0.f, 0.f, 1.f,
+                  0.f, 0.f, 1.f };
+                m->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+
+                std::vector<float> uvs =
+                { 0.f, 0.f,
+                  1.f, 0.f,
+                  0.f, 1.f,
+                  1.f, 1.f };
+                m->addVertexBuffer(VertexType::Texture0, 2, 2, uvs);
+
+                std::vector<unsigned> indices =
+                { 0, 1, 2,
+                  1, 3, 2 };
+                m->addElementBuffer(indices);
+
+                return m;
             }
 
             // http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
@@ -225,12 +240,13 @@ namespace neo {
                     tex.push_back(glm::clamp(0.5f + std::asin(verts[i+1]) / Util::PI(), 0.f, 1.f));
                 }
 
-                return _createMesh(
-                    verts,
-                    verts,
-                    tex,
-                    ele
-                );
+                Mesh* m = new Mesh;
+                m->addVertexBuffer(VertexType::Position, 0, 3, verts);
+                m->addVertexBuffer(VertexType::Normal, 1, 3, verts);
+                m->addVertexBuffer(VertexType::Texture0, 2, 2, tex);
+                m->addElementBuffer(ele);
+
+                return m;
             }
 
             // TODOs
@@ -282,12 +298,14 @@ namespace neo {
                         indices[pointer++] = bottomRight;
                     }
                 }
-                return _createMesh(
-                    vertices,
-                    normals,
-                    textureCoords,
-                    indices
-                );
+
+                Mesh *m = new Mesh;
+                m->addVertexBuffer(VertexType::Position, 0, 3, vertices);
+                m->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+                m->addVertexBuffer(VertexType::Texture0, 2, 2, textureCoords);
+                m->addElementBuffer(indices);
+
+                return m;
             }
     };
 

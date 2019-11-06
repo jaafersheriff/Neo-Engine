@@ -54,31 +54,41 @@ namespace neo {
         }
 
         /* Create empty mesh buffers */
-        MeshBuffers buffers = MeshBuffers{};
+        std::vector<float> vertices;
+        std::vector<float> normals;
+        std::vector<float> texCoords;
+        std::vector<unsigned> indices;
 
         int vertCount = 0;
         /* For every shape in the loaded file */
         for (unsigned int i = 0; i < shapes.size(); i++) {
             /* Concatenate the shape's vertices, normals, and textures to the mesh */
-            buffers.vertices.insert(buffers.vertices.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
-            buffers.normals.insert(buffers.normals.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
-            buffers.texCoords.insert(buffers.texCoords.end(), shapes[i].mesh.texcoords.begin(), shapes[i].mesh.texcoords.end());
+            vertices.insert(vertices.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
+            normals.insert(normals.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
+            texCoords.insert(texCoords.end(), shapes[i].mesh.texcoords.begin(), shapes[i].mesh.texcoords.end());
 
             /* Concatenate the shape's indices to the new mesh
              * Indices need to be incremented as we concatenate shapes */
             for (unsigned int i : shapes[i].mesh.indices) {
-                buffers.indices.push_back(i + vertCount);
+                indices.push_back(i + vertCount);
             }
             vertCount += int(shapes[i].mesh.positions.size()) / 3;
         }
 
-        /* Optional resize */
-        if (doResize) {
-            _resize(buffers);
-        }
 
-        /* Create mesh and upload */
-        Mesh* mesh = new Mesh(buffers);
+        /* Create mesh */
+        Mesh* mesh = new Mesh;
+
+        /* Optional resize and find min/max */
+        _resize(mesh, vertices, doResize);
+
+        /* Upload */
+        mesh->addVertexBuffer(VertexType::Position, 0, 3, vertices);
+        mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+        mesh->addVertexBuffer(VertexType::Texture0, 2, 2, texCoords);
+        if (indices.size()) {
+            mesh->addElementBuffer(indices);
+        }
 
         if (mVerbose) {
             std::cout << "Loaded mesh (" << vertCount << " vertices): " << fileName << std::endl;
@@ -148,7 +158,7 @@ namespace neo {
     }
 
     /* Provided function to resize a mesh so all vertex positions are [0, 1.f] */
-    void Loader::_resize(MeshBuffers& buffers) {
+    void Loader::_resize(Mesh* mesh, std::vector<float>& vertices, bool doResize) {
         float minX, minY, minZ;
         float maxX, maxY, maxZ;
         float scaleX, scaleY, scaleZ;
@@ -159,49 +169,54 @@ namespace neo {
         maxX = maxY = maxZ = -1.1754E+38F;
 
         //Go through all vertices to determine min and max of each dimension
-        for (size_t v = 0; v < buffers.vertices.size() / 3; v++) {
-            if (buffers.vertices[3 * v + 0] < minX) minX = buffers.vertices[3 * v + 0];
-            if (buffers.vertices[3 * v + 0] > maxX) maxX = buffers.vertices[3 * v + 0];
+        for (size_t v = 0; v < vertices.size() / 3; v++) {
+            if (vertices[3 * v + 0] < minX) minX = vertices[3 * v + 0];
+            if (vertices[3 * v + 0] > maxX) maxX = vertices[3 * v + 0];
 
-            if (buffers.vertices[3 * v + 1] < minY) minY = buffers.vertices[3 * v + 1];
-            if (buffers.vertices[3 * v + 1] > maxY) maxY = buffers.vertices[3 * v + 1];
+            if (vertices[3 * v + 1] < minY) minY = vertices[3 * v + 1];
+            if (vertices[3 * v + 1] > maxY) maxY = vertices[3 * v + 1];
 
-            if (buffers.vertices[3 * v + 2] < minZ) minZ = buffers.vertices[3 * v + 2];
-            if (buffers.vertices[3 * v + 2] > maxZ) maxZ = buffers.vertices[3 * v + 2];
+            if (vertices[3 * v + 2] < minZ) minZ = vertices[3 * v + 2];
+            if (vertices[3 * v + 2] > maxZ) maxZ = vertices[3 * v + 2];
         }
+
+        mesh->mMin = glm::vec3(minX, minY, minZ);
+        mesh->mMax = glm::vec3(maxX, maxY, maxZ);
 
         //From min and max compute necessary scale and shift for each dimension
-        float maxExtent, xExtent, yExtent, zExtent;
-        xExtent = maxX - minX;
-        yExtent = maxY - minY;
-        zExtent = maxZ - minZ;
-        if (xExtent >= yExtent && xExtent >= zExtent) {
-            maxExtent = xExtent;
-        }
-        if (yExtent >= xExtent && yExtent >= zExtent) {
-            maxExtent = yExtent;
-        }
-        if (zExtent >= xExtent && zExtent >= yExtent) {
-            maxExtent = zExtent;
-        }
-        scaleX = 2.f / maxExtent;
-        shiftX = minX + (xExtent / 2.f);
-        scaleY = 2.f / maxExtent;
-        shiftY = minY + (yExtent / 2.f);
-        scaleZ = 2.f / maxExtent;
-        shiftZ = minZ + (zExtent) / 2.f;
+        if (doResize) {
+            float maxExtent, xExtent, yExtent, zExtent;
+            xExtent = maxX - minX;
+            yExtent = maxY - minY;
+            zExtent = maxZ - minZ;
+            if (xExtent >= yExtent && xExtent >= zExtent) {
+                maxExtent = xExtent;
+            }
+            if (yExtent >= xExtent && yExtent >= zExtent) {
+                maxExtent = yExtent;
+            }
+            if (zExtent >= xExtent && zExtent >= yExtent) {
+                maxExtent = zExtent;
+            }
+            scaleX = 2.f / maxExtent;
+            shiftX = minX + (xExtent / 2.f);
+            scaleY = 2.f / maxExtent;
+            shiftY = minY + (yExtent / 2.f);
+            scaleZ = 2.f / maxExtent;
+            shiftZ = minZ + (zExtent) / 2.f;
 
-        //Go through all verticies shift and scale them
-        for (size_t v = 0; v < buffers.vertices.size() / 3; v++) {
-            buffers.vertices[3 * v + 0] = (buffers.vertices[3 * v + 0] - shiftX) * scaleX;
-            assert(buffers.vertices[3 * v + 0] >= -1.0 - epsilon);
-            assert(buffers.vertices[3 * v + 0] <= 1.0 + epsilon);
-            buffers.vertices[3 * v + 1] = (buffers.vertices[3 * v + 1] - shiftY) * scaleY;
-            assert(buffers.vertices[3 * v + 1] >= -1.0 - epsilon);
-            assert(buffers.vertices[3 * v + 1] <= 1.0 + epsilon);
-            buffers.vertices[3 * v + 2] = (buffers.vertices[3 * v + 2] - shiftZ) * scaleZ;
-            assert(buffers.vertices[3 * v + 2] >= -1.0 - epsilon);
-            assert(buffers.vertices[3 * v + 2] <= 1.0 + epsilon);
+            //Go through all verticies shift and scale them
+            for (size_t v = 0; v < vertices.size() / 3; v++) {
+                vertices[3 * v + 0] = (vertices[3 * v + 0] - shiftX) * scaleX;
+                assert(vertices[3 * v + 0] >= -1.0 - epsilon);
+                assert(vertices[3 * v + 0] <= 1.0 + epsilon);
+                vertices[3 * v + 1] = (vertices[3 * v + 1] - shiftY) * scaleY;
+                assert(vertices[3 * v + 1] >= -1.0 - epsilon);
+                assert(vertices[3 * v + 1] <= 1.0 + epsilon);
+                vertices[3 * v + 2] = (vertices[3 * v + 2] - shiftZ) * scaleZ;
+                assert(vertices[3 * v + 2] >= -1.0 - epsilon);
+                assert(vertices[3 * v + 2] <= 1.0 + epsilon);
+            }
         }
     }
 }

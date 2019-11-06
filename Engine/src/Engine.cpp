@@ -404,7 +404,7 @@ namespace neo {
                 }
                 if (ImGui::TreeNodeEx("Meshes", ImGuiTreeNodeFlags_DefaultOpen)) {
                     for (auto & m : Library::mMeshes) {
-                        ImGui::Text("%s (%d)", m.first.c_str(), m.second->mBuffers.vertices.size());
+                        ImGui::Text("%s (%d)", m.first.c_str(), m.second->mVBOs.size() + (m.second->mElementVBO ? 1 : 0));
                     }
                     ImGui::TreePop();
                 }
@@ -481,7 +481,7 @@ namespace neo {
                 if (ImGui::Button("Create new GameObject")) {
                     removeComponent<SelectedComponent>(*getSingleComponent<SelectedComponent>());
                     auto& go = createGameObject();
-                    addComponent<BoundingBoxComponent>(&go, std::vector<float>{ -1.f, -1.f, -1.f, 1.f, 1.f, 1.f });
+                    // addComponent<BoundingBoxComponent>(&go, std::vector<glm::vec3>{ glm::vec3(-1.f), glm::vec3(1.f) });
                     addComponent<SpatialComponent>(&go);
                     addComponent<SelectableComponent>(&go);
                     addComponent<SelectedComponent>(&go);

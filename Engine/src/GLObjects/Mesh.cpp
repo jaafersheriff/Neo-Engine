@@ -9,47 +9,38 @@ namespace neo {
 
     Mesh::Mesh(int primitiveType) :
         mVAOID(0),
-        mVertexBufferID(0),
-        mNormalBufferID(0),
-        mTexBufferID(0),
-        mElementBufferID(0),
         mPrimitiveType(primitiveType)
     {
         /* Initialize VAO */
         CHECK_GL(glGenVertexArrays(1, (GLuint *)&mVAOID));
     }
 
-    Mesh::Mesh(MeshBuffers& buffers, int primitiveType)
-        : Mesh(primitiveType) {
-
-        mBuffers = buffers;
-        upload();
-    }
-
     void Mesh::draw(unsigned size) const {
-        if (mElementBufferID) {
+        if (mElementVBO) {
             // TODO - instanced?
-            CHECK_GL(glDrawElements(mPrimitiveType, size ? size : mBuffers.indices.size(), GL_UNSIGNED_INT, nullptr));
+            CHECK_GL(glDrawElements(mPrimitiveType, size ? size : mElementVBO->bufferSize, GL_UNSIGNED_INT, nullptr));
         }
         else if (size) {
             CHECK_GL(glDrawArrays(mPrimitiveType, 0, size));
         }
         else {
+            const auto& positions = mVBOs.find(VertexType::Position);
+            assert(positions != mVBOs.end());
             int vSize = 0;
             switch (mPrimitiveType) {
                 case GL_POINTS:
-                    vSize = mBuffers.vertices.size() / 3;
+                    vSize = positions->second.bufferSize / 3;
                 case GL_LINE_STRIP:
-                    vSize = mBuffers.vertices.size() / 3 - 1;
+                    vSize = positions->second.bufferSize / 3 - 1;
                     break;
                 case GL_TRIANGLE_STRIP:
-                    vSize = mBuffers.vertices.size() / 4 - 3;
+                    vSize = positions->second.bufferSize / 4 - 3;
                     break;
                 case GL_LINES:
-                    vSize = mBuffers.vertices.size() / 6;
+                    vSize = positions->second.bufferSize / 6;
                     break;
                 case GL_TRIANGLES:
-                    vSize = mBuffers.vertices.size() / 9;
+                    vSize = positions->second.bufferSize / 9;
                     break;
                 default:
                     break;
@@ -58,98 +49,87 @@ namespace neo {
         }
     }
 
-    void Mesh::upload() {
-        _upload();
-
-        /* Set draw mode */
-        if (mPrimitiveType == -1) {
-            if (mElementBufferID) {
-                mPrimitiveType = GL_TRIANGLES;
-            }
-            else {
-                mPrimitiveType = GL_TRIANGLE_STRIP;
-            }
+    void Mesh::addVertexBuffer(VertexType type, unsigned attribArray, unsigned stride, std::vector<float>& buffer) {
+        {
+            const auto& vbo = mVBOs.find(type);
+            assert(vbo == mVBOs.end());
         }
-    }
 
-    void Mesh::_upload() {
+        mVBOs[type] = {};
+        auto& vertexBuffer = mVBOs[type];
+        vertexBuffer.attribArray = attribArray;
+        vertexBuffer.stride = stride;
+        vertexBuffer.bufferSize = buffer.size();
+
         CHECK_GL(glBindVertexArray(mVAOID));
-
-        /* Copy vertex array */
-        if (!mBuffers.vertices.empty()) {
-            if (!mVertexBufferID) {
-                CHECK_GL(glGenBuffers(1, (GLuint *)&mVertexBufferID));
-            }
-            CHECK_GL(glBindBuffer(GL_SHADER_STORAGE_BUFFER, mVertexBufferID));
-            CHECK_GL(glBufferData(GL_SHADER_STORAGE_BUFFER, mBuffers.vertices.size() * sizeof(float), &mBuffers.vertices[0], GL_STATIC_DRAW));
-            CHECK_GL(glEnableVertexAttribArray(0));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferID));
-            CHECK_GL(glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (const void *)0));
-        }
-        else if (mVertexBufferID) {
-            CHECK_GL(glDeleteBuffers(1, (GLuint *)&mVertexBufferID));
-            mVertexBufferID = 0;
-        }
-
-        /* Copy normal array if it exists */
-        if (!mBuffers.normals.empty()) {
-            if (!mNormalBufferID) {
-                CHECK_GL(glGenBuffers(1, (GLuint *)&mNormalBufferID));
-            }
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mNormalBufferID));
-            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mBuffers.normals.size() * sizeof(float), &mBuffers.normals[0], GL_STATIC_DRAW));
-            CHECK_GL(glEnableVertexAttribArray(1));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mNormalBufferID));
-            CHECK_GL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
-        }
-        else if (mNormalBufferID) {
-            CHECK_GL(glDeleteBuffers(1, (GLuint *)&mNormalBufferID));
-            mNormalBufferID = 0;
-        }
-
-        /* Copy texture array if it exists */
-        if (!mBuffers.texCoords.empty()) {
-            if (!mTexBufferID) {
-                CHECK_GL(glGenBuffers(1, (GLuint *)&mTexBufferID));
-            }
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mTexBufferID));
-            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, mBuffers.texCoords.size() * sizeof(float), &mBuffers.texCoords[0], GL_STATIC_DRAW));
-            CHECK_GL(glEnableVertexAttribArray(2));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mTexBufferID));
-            CHECK_GL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0));
-        }
-        else if (mTexBufferID) {
-            CHECK_GL(glDeleteBuffers(1, (GLuint *)&mTexBufferID));
-            mTexBufferID = 0;
-        }
-
-        /* Copy element array if it exists */
-        if (!mBuffers.indices.empty()) {
-            if (!mElementBufferID) {
-                CHECK_GL(glGenBuffers(1, (GLuint *)&mElementBufferID));
-            }
-            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementBufferID));
-            CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, mBuffers.indices.size() * sizeof(unsigned int), &mBuffers.indices[0], GL_STATIC_DRAW));
-        }
-        else if (mElementBufferID) {
-            CHECK_GL(glDeleteBuffers(1, (GLuint *)&mElementBufferID));
-            mElementBufferID = 0;
-        }
-
-        /* Unbind  */
+        CHECK_GL(glGenBuffers(1, (GLuint *)&vertexBuffer.vboID));
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
+        CHECK_GL(glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_STATIC_DRAW));
+        CHECK_GL(glEnableVertexAttribArray(attribArray));
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
+        CHECK_GL(glVertexAttribPointer(attribArray, stride, GL_FLOAT, GL_FALSE, 0, (const void *)0));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+        CHECK_GL(glBindVertexArray(0));
 
-        /* Error check */
         assert(glGetError() == GL_NO_ERROR);
     }
 
-    void Mesh::destroy() {
-        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mVertexBufferID));
-        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mNormalBufferID));
-        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mTexBufferID));
-        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mElementBufferID));
-        CHECK_GL(glDeleteVertexArrays(1, (GLuint *) &mVAOID));
+    void Mesh::updateVertexBuffer(VertexType type, std::vector<float>& buffer) {
+        const auto& vbo = mVBOs.find(type);
+        assert(vbo != mVBOs.end());
+        auto& vertexBuffer = vbo->second;
+        vertexBuffer.bufferSize = buffer.size();
 
+        CHECK_GL(glBindVertexArray(mVAOID));
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
+        CHECK_GL(glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_STATIC_DRAW));
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        CHECK_GL(glBindVertexArray(0));
+
+        assert(glGetError() == GL_NO_ERROR);
+
+    }
+
+    void Mesh::removeVertexBuffer(VertexType type) {
+        const auto& vbo = mVBOs.find(type);
+        if (vbo != mVBOs.end()) {
+            CHECK_GL(glDeleteBuffers(1, (GLuint *)&vbo->second.vboID));
+            mVBOs.erase(type);
+        }
+    }
+
+    void Mesh::addElementBuffer(std::vector<unsigned>& buffer) {
+        assert(!mElementVBO.has_value());
+        mElementVBO = std::make_optional<VertexBuffer>();
+        mElementVBO->bufferSize = buffer.size();
+
+        CHECK_GL(glBindVertexArray(mVAOID));
+        CHECK_GL(glGenBuffers(1, (GLuint *)&mElementVBO->vboID));
+        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID));
+        CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(unsigned int), &buffer[0], GL_STATIC_DRAW));
+        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+        CHECK_GL(glBindVertexArray(0));
+
+        assert(glGetError() == GL_NO_ERROR);
+
+        mPrimitiveType = GL_TRIANGLES;
+    }
+
+    void Mesh::removeElementBuffer() {
+        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mElementVBO->vboID));
+        mElementVBO = std::nullopt;
+
+        mPrimitiveType = GL_TRIANGLE_STRIP;
+    }
+
+    void Mesh::destroy() {
+        removeVertexBuffer(VertexType::Position);
+        removeVertexBuffer(VertexType::Normal);
+        removeVertexBuffer(VertexType::Texture0);
+        removeVertexBuffer(VertexType::Texture1);
+        removeVertexBuffer(VertexType::Texture2);
+        removeVertexBuffer(VertexType::Color0);
+        removeVertexBuffer(VertexType::Color1);
+        removeVertexBuffer(VertexType::Color2);
     }
 }

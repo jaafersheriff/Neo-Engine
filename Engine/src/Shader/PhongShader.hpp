@@ -91,8 +91,6 @@ namespace neo {
 
                 /* Bind mesh */
                 const Mesh & mesh(renderableMesh->getMesh());
-                CHECK_GL(glBindVertexArray(mesh.mVAOID));
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mElementBufferID));
 
                 loadUniform("M", renderableSpatial->getModelMatrix());
                 loadUniform("N", renderableSpatial->getNormalMatrix());

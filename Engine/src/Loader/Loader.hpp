@@ -12,7 +12,6 @@
 namespace neo {
 
     class Mesh;
-    struct MeshBuffers;
     class Framebuffer;
 
     class Loader {
@@ -29,7 +28,7 @@ namespace neo {
 
         private:
             /* Resize mesh vertex buffers so all the vertices are [-1, 1] */
-            static void _resize(MeshBuffers&);
+            static void _resize(Mesh*, std::vector<float>&, bool);
 
             /* Load a single texture file */
             static uint8_t* _loadSingleTexture(Texture*, const std::string&, bool = true);

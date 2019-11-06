@@ -61,7 +61,7 @@ int main() {
     Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
     Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
     Engine::addComponent<SelectableComponent>(cube.gameObject);
-    Engine::addComponent<BoundingBoxComponent>(cube.gameObject, Library::getMesh("cube")->mBuffers.vertices);
+    Engine::addComponent<BoundingBoxComponent>(cube.gameObject, Library::getMesh("cube"));
 
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));

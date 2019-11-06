@@ -30,33 +30,29 @@ namespace neo {
             mWriteDepth(true),
             mUseParentSpatial(false),
             mOverrideColor(overrideColor)
-        {}
+        {
+        }
 
         virtual void init() override {
-            mMesh->upload();
-
-            // create color buffer
-            CHECK_GL(glBindVertexArray(mMesh->mVAOID));
-            CHECK_GL(glGenBuffers(1, (GLuint *)&mMesh->mNormalBufferID));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mMesh->mNormalBufferID));
-            CHECK_GL(glEnableVertexAttribArray(1));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mMesh->mNormalBufferID));
-            CHECK_GL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0));
+            std::vector<float> empty;
+            mMesh->addVertexBuffer(VertexType::Position, 0, 3, empty);
+            mMesh->addVertexBuffer(VertexType::Color0, 1, 3, empty);
         }
 
         virtual Mesh & getMesh() const override {
             if (mDirty && mNodes.size()) {
-                std::vector<glm::vec3> positions;
-                std::vector<glm::vec3> colors;
+                std::vector<float> positions;
+                std::vector<float> colors;
                 for (Node n : mNodes) {
-                    positions.push_back(n.position);
-                    colors.push_back(n.color);
+                    positions.push_back(n.position.x);
+                    positions.push_back(n.position.y);
+                    positions.push_back(n.position.z);
+                    colors.push_back(n.color.r);
+                    colors.push_back(n.color.g);
+                    colors.push_back(n.color.b);
                 }
-                CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mMesh->mVertexBufferID));
-                CHECK_GL(glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_DYNAMIC_DRAW));
-                CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mMesh->mNormalBufferID));
-                CHECK_GL(glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), colors.data(), GL_DYNAMIC_DRAW));
-                CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+                mMesh->updateVertexBuffer(VertexType::Position, positions);
+                mMesh->updateVertexBuffer(VertexType::Color0, colors);
                 mDirty = false;
             }
 
