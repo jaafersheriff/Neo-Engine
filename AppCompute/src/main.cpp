@@ -1,7 +1,6 @@
 #include <Engine.hpp>
 
 #include "MetaballsMeshComponent.hpp"
-#include "MetaballsSystem.hpp"
 #include "MetaballsComputeShader.hpp"
 #include "MetaballsShader.hpp"
 
@@ -66,26 +65,17 @@ int main() {
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
-    Engine::addSystem<MetaballsSystem>();
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
-    auto& computeShader = Renderer::addComputeShader<MetaballsComputeShader>("metaballs.compute");
-    computeShader.mActive = false;
+    Renderer::addComputeShader<MetaballsComputeShader>("metaballs.compute");
     Renderer::addSceneShader<MetaballsShader>("metaballs.vert", "metaballs.frag");
 
     Engine::addImGuiFunc("Mesh", []() {
         if (auto mesh = Engine::getComponentTuple<MetaballsMeshComponent, SpatialComponent>()) {
             mesh->get<MetaballsMeshComponent>()->imGuiEditor();
             mesh->get<SpatialComponent>()->imGuiEditor();
-
-            static bool useCompute = false;
-            if (ImGui::Checkbox("Use compute", &useCompute)) {
-                Renderer::getShader<MetaballsComputeShader>().mActive = useCompute;
-                Engine::getSystem<MetaballsSystem>().mActive = !useCompute;
-            }
         }
-
     });
 
     /* Run */

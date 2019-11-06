@@ -14,7 +14,6 @@ class MetaballsComputeShader : public Shader {
 
 public:
 
-    float mRadius = 1.0f;
     int groupSizeWidth = 64;
 
     MetaballsComputeShader(const std::string &compute) :
@@ -24,32 +23,31 @@ public:
     virtual void render(const CameraComponent &) override {
         bind();
 
-        loadUniform("radius", mRadius);
-
         if (auto mesh = Engine::getSingleComponent<MetaballsMeshComponent>()) {
 
             // Bind mesh
-            GLuint gIndexBufferBinding = 0;
             CHECK_GL(glBindVertexArray(mesh->mMesh->mVAOID));
-            CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, gIndexBufferBinding, mesh->mMesh->mVertexBufferID));
-            CHECK_GL(glEnableVertexAttribArray(0));
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh->mMesh->mVertexBufferID));
-            CHECK_GL(glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (const void *)0));
+            CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mesh->mMesh->mVertexBufferID));
+            // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, mesh->mMesh->mNormalBufferID));
+            // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, mesh->mMesh->mTexBufferID));
+            // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, mesh->mMesh->mElementBufferID));
 
             // Dispatch 
             // TODO - get max groupsize from GL
-            CHECK_GL(glDispatchCompute(mesh->mMesh->mVertexBufferSize / groupSizeWidth, 1, 1));
+            CHECK_GL(glDispatchCompute(mesh->mNumVerts / groupSizeWidth, 1, 1));
             CHECK_GL(glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT));
 
             // Reset bind
-            CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, gIndexBufferBinding, 0));
+            CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0));
+            // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0));
+            // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, 0));
+            // CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, 0));
         }
 
         unbind();
     }
 
     virtual void imguiEditor() override {
-        ImGui::SliderFloat("R", &mRadius, 0.f, 1.f);
         ImGui::SliderInt("GroupSize", &groupSizeWidth, 1, 128);
     }
 };

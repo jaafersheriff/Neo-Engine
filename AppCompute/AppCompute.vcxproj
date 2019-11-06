@@ -137,7 +137,6 @@
     <ClInclude Include="src\MetaballsComputeShader.hpp" />
     <ClInclude Include="src\MetaballsMeshComponent.hpp" />
     <ClInclude Include="src\MetaballsShader.hpp" />
-    <ClInclude Include="src\MetaballsSystem.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
