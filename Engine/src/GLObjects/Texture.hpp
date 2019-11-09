@@ -20,7 +20,9 @@ namespace neo {
         public:
 
             GLuint mTextureID = 0;
-            int mWidth, mHeight, mComponents;
+            int mWidth = 1;
+            int mHeight = 1;
+            int mComponents = 1;
             TextureFormat mFormat;
 
             /* Upload to GPU */
@@ -36,6 +38,9 @@ namespace neo {
 
             virtual void bind() const = 0;
             virtual void resize(const glm::uvec2) = 0;
+            virtual void resize(const glm::uvec3 size) {
+                resize(glm::uvec3(size.x, size.y, 0));
+            }
 
     };
 
@@ -119,6 +124,46 @@ namespace neo {
             }
     };
 
+    class Texture3D : public Texture {
+
+        public:
+            int mDepth;
+            void bind() const {
+                CHECK_GL(glActiveTexture(GL_TEXTURE0 + mTextureID));
+                CHECK_GL(glBindTexture(GL_TEXTURE_3D, mTextureID));
+            }
+
+            void resize(const glm::uvec2 size) {
+                resize(glm::uvec3(size.x, size.y, 0));
+            }
+
+            virtual void resize(const glm::uvec3 size) override {
+                mWidth = size.x;
+                mHeight = size.y;
+                mDepth = size.z;
+                bind();
+                CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.inputFormat, mWidth, mHeight, mDepth, 0, mFormat.format, GL_UNSIGNED_BYTE, 0));
+            }
+
+            void upload(bool shouldUpload, uint8_t **data) {
+                CHECK_GL(glGenTextures(1, &mTextureID));
+
+                CHECK_GL(glBindTexture(GL_TEXTURE_3D, mTextureID));
+
+                CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 1, mFormat.inputFormat, mWidth, mHeight, mDepth, 0, mFormat.format, GL_UNSIGNED_BYTE, shouldUpload ? *data : 0));
+
+
+                CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, mFormat.filter));
+                CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, mFormat.filter));
+
+                CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, mFormat.mode));
+                CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, mFormat.mode));
+                CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, mFormat.mode));
+
+                CHECK_GL(glBindTexture(GL_TEXTURE_3D, 0));
+                assert(glGetError() == GL_NO_ERROR);
+            }
+    };
 
 
 }

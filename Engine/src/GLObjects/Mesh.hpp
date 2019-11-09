@@ -47,14 +47,17 @@ namespace neo {
             unsigned int mVAOID;
 
             /* VBOs */
-            void addVertexBuffer(VertexType type, unsigned attribArray, unsigned stride, std::vector<float>* buffer = nullptr);
-            void updateVertexBuffer(VertexType type, std::vector<float>& buffer);
+            void addVertexBuffer(VertexType type, unsigned attribArray, unsigned stride, const std::vector<float>& buffer = {});
+            void updateVertexBuffer(VertexType type, const std::vector<float>& buffer);
+            void updateVertexBuffer(VertexType type, unsigned size);
             void removeVertexBuffer(VertexType type);
-            std::unordered_map<VertexType, VertexBuffer> mVBOs;
 
-            void addElementBuffer(std::vector<unsigned>& buffer);
+            void addElementBuffer(const std::vector<unsigned>& buffer = {});
+            void updateElementBuffer(const std::vector<unsigned>& buffer);
+            void updateElementBuffer(unsigned size);
             void removeElementBuffer();
-            std::optional<VertexBuffer> mElementVBO;
+
+            const VertexBuffer& getVBO(VertexType type);
 
             /* Primitive type */
             unsigned mPrimitiveType;
@@ -64,5 +67,12 @@ namespace neo {
 
             /* Remove */
             void destroy();
+
+        private:
+            std::unordered_map<VertexType, VertexBuffer> mVBOs;
+            
+    public://todo - hax
+
+            std::optional<VertexBuffer> mElementVBO;
     };
 }

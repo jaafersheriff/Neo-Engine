@@ -1,8 +1,8 @@
 #include <Engine.hpp>
 
-#include "MetaballsMeshComponent.hpp"
-#include "MetaballsComputeShader.hpp"
-#include "MetaballsShader.hpp"
+#include "ParticleMeshComponent.hpp"
+#include "ParticlesComputeShader.hpp"
+#include "ParticleVisShader.hpp"
 
 using namespace neo;
 
@@ -22,14 +22,6 @@ struct Light {
         auto& gameObject = Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(&gameObject, pos);
         Engine::addComponent<LightComponent>(&gameObject, col, att);
-
-        Engine::addImGuiFunc("Light", [&]() {
-            auto light = Engine::getSingleComponent<LightComponent>();
-            light->imGuiEditor();
-            if (auto spatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
-                spatial->imGuiEditor();
-            }
-        });
     }
 };
 
@@ -59,7 +51,7 @@ int main() {
     // Create mesh
     {
         auto& go = Engine::createGameObject();
-        Engine::addComponent<MetaballsMeshComponent>(&go);
+        Engine::addComponent<ParticleMeshComponent>(&go);
         Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.5f, 0.f));
     }
 
@@ -68,12 +60,12 @@ int main() {
 
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
-    Renderer::addComputeShader<MetaballsComputeShader>("metaballs.compute");
-    Renderer::addSceneShader<MetaballsShader>("metaballs.vert", "metaballs.frag");
+    Renderer::addComputeShader<ParticlesComputeShader>("particles.compute");
+    Renderer::addSceneShader<ParticleVisShader>("particles.vert", "particles.frag");
 
     Engine::addImGuiFunc("Mesh", []() {
-        if (auto mesh = Engine::getComponentTuple<MetaballsMeshComponent, SpatialComponent>()) {
-            mesh->get<MetaballsMeshComponent>()->imGuiEditor();
+        if (auto mesh = Engine::getComponentTuple<ParticleMeshComponent, SpatialComponent>()) {
+            mesh->get<ParticleMeshComponent>()->imGuiEditor();
             mesh->get<SpatialComponent>()->imGuiEditor();
         }
     });

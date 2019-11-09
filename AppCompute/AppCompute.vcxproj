@@ -121,11 +121,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="shaders\metaballs.frag" />
-    <None Include="shaders\metaballs.vert" />
+    <None Include="shaders\particles.frag" />
+    <None Include="shaders\particles.vert" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\metaballs.compute">
+    <None Include="shaders\particles.compute">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </DeploymentContent>
       <FileType>Document</FileType>
@@ -134,9 +134,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\MetaballsComputeShader.hpp" />
-    <ClInclude Include="src\MetaballsMeshComponent.hpp" />
-    <ClInclude Include="src\MetaballsShader.hpp" />
+    <ClInclude Include="src\ParticlesComputeShader.hpp" />
+    <ClInclude Include="src\ParticleMeshComponent.hpp" />
+    <ClInclude Include="src\ParticleVisShader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,0 +1,68 @@
+
+
+
+layout(std140, binding = 0) buffer Pos
+{
+	vec4 pos[];
+};
+
+layout(std140, binding = 1) buffer Vel
+{
+	vec4 vel[];
+};
+
+
+
+uniform float invNoiseSize;
+uniform sampler3D noiseTex3D;
+
+vec3 noise3f(vec3 p) {
+    return texture(noiseTex3D, p * invNoiseSize).xyz;
+}
+
+// fractal sum
+vec3 fBm3f(vec3 p, int octaves, float lacunarity, float gain) {
+    float freq = 1.0, amp = 0.5;
+    vec3 sum = vec3(0.0);
+    for(int i=0; i<octaves; i++) {
+        sum += noise3f(p*freq)*amp;
+        freq *= lacunarity;
+        amp *= gain;
+    }
+    return sum;
+}
+
+vec3 attract(vec3 p, vec3 p2) {
+    const float softeningSquared = 0.01;
+    vec3 v = p2 - p;
+    float r2 = dot(v, v);
+    r2 += softeningSquared;
+    float invDist = 1.0f / sqrt(r2);
+    float invDistCubed = invDist*invDist*invDist;
+    return v * invDistCubed;
+}
+
+layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+void main()
+{
+	// Read the current global position for this thread
+	uint i = gl_GlobalInvocationID.x;
+
+    vec3 p = pos[i].xyz;
+    vec3 v = vel[i].xyz;
+
+    float noiseFreq = 2.f;
+    float noiseStrength = 0.01f;
+    vec4 attractor = vec4(0.0);
+    float damping = 0.9;
+
+    v += fBm3f(p*noiseFreq,4,2.0,0.5)*noiseStrength;
+    v += attract(p, attractor.xyz)*attractor.w;
+
+    p += v;
+    v *= damping;
+
+    pos[i] = vec4(p, 1.0);
+    vel[i] = vec4(v, 0.0);
+
+}
