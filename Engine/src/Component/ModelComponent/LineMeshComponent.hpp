@@ -42,13 +42,15 @@ namespace neo {
             if (mDirty && mNodes.size()) {
                 std::vector<float> positions;
                 std::vector<float> colors;
-                for (Node n : mNodes) {
-                    positions.push_back(n.position.x);
-                    positions.push_back(n.position.y);
-                    positions.push_back(n.position.z);
-                    colors.push_back(n.color.r);
-                    colors.push_back(n.color.g);
-                    colors.push_back(n.color.b);
+                positions.resize(mNodes.size() * 3);
+                colors.resize(mNodes.size() * 3);
+                for (unsigned i = 0; i < mNodes.size(); i++) {
+                    positions[i * 3 + 0] = mNodes[i].position.x;
+                    positions[i * 3 + 1] = mNodes[i].position.y;
+                    positions[i * 3 + 2] = mNodes[i].position.z;
+                    colors[i * 3 + 0] = mNodes[i].color.r;
+                    colors[i * 3 + 1] = mNodes[i].color.g;
+                    colors[i * 3 + 2] = mNodes[i].color.b;
                 }
                 mMesh->updateVertexBuffer(VertexType::Position, positions);
                 mMesh->updateVertexBuffer(VertexType::Color0, colors);

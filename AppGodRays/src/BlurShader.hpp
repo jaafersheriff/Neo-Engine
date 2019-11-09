@@ -25,7 +25,7 @@ class BlurShader : public Shader {
 
             // Format for color buffers
             TextureFormat format = { GL_R16, GL_RED, GL_NEAREST, GL_REPEAT };
-            blur->attachColorTexture(Window::getFrameSize() / 2, 1, format); 
+            blur->attachColorTexture(Window::getFrameSize() / 2, format); 
             blur->initDrawBuffers();
 
             // Handle frame size changing

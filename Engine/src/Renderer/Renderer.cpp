@@ -70,8 +70,6 @@ namespace neo {
         CHECK_GL(glBlendEquation(GL_FUNC_ADD));
         CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-        CHECK_GL(glBindVertexArray(0));
-
         CHECK_GL(glActiveTexture(GL_TEXTURE0));
         CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
     }

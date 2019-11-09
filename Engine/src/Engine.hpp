@@ -216,6 +216,7 @@ namespace neo {
             return tuple;
         }
 
+        tuple.release();
         return nullptr;
     }
 

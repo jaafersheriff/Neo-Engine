@@ -22,7 +22,6 @@ class AOShader : public PostProcessShader {
             Texture *kernelTex = Library::createEmptyTexture("aoKernel");
             kernelTex->mWidth = 32;
             kernelTex->mHeight = 1;
-            kernelTex->mComponents = 3;
             CHECK_GL(glGenTextures(1, &kernelTex->mTextureID));
             kernelTex->bind();
             CHECK_GL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB16F, 64, 0, GL_RGB, GL_FLOAT, nullptr));
@@ -36,9 +35,6 @@ class AOShader : public PostProcessShader {
             // generate 4x4 noise texture
             Texture *noiseTex = Library::createEmptyTexture("aoNoise");
             noiseTex->mFormat = { GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT };
-            noiseTex->mWidth = noiseTex->mHeight = 4;
-            noiseTex->mComponents = 3;
-            noiseTex->upload();
             generateNoise(4);
         }
 
@@ -58,25 +54,23 @@ class AOShader : public PostProcessShader {
                 kernel.push_back(sample);
             };
             Texture *kernelTex = Library::getTexture("aoKernel");
-            kernelTex->mWidth = size;
-            kernelTex->mHeight = 1;
+            kernelTex->resize(glm::uvec2(size, 1));
             kernelTex->bind();
             CHECK_GL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB16F, kernel.size(), 0, GL_RGB, GL_FLOAT, &kernel[0]));
         }
 
         void generateNoise(unsigned dim) {
-            std::vector<glm::vec3> noise;
-            for (unsigned i = 0; i < dim*dim; i++) {
-                noise.push_back(glm::normalize(glm::vec3(
-                    Util::genRandom(0.f, 1.f),
-                    Util::genRandom(0.f, 1.f),
-                    0.f
-                )));
+            std::vector<uint8_t> noise;
+            noise.resize(dim*dim*3);
+            for (unsigned i = 0; i < dim*dim*3; i+=3) {
+                noise[i + 0] = Util::genRandom();
+                noise[i + 1] = Util::genRandom();
+                noise[i + 2] = Util::genRandom();
             }
             Texture *noiseTex = Library::getTexture("aoNoise");
-            noiseTex->mWidth = noiseTex->mHeight = dim;
             noiseTex->bind();
-            CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, dim, dim, 0, GL_RGB, GL_FLOAT, &noise[0]));
+            noiseTex->resize(glm::uvec2(dim));
+            noiseTex->upload(noise.data());
         }
 
         virtual void render(const CameraComponent &camera) override {

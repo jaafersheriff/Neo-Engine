@@ -77,6 +77,8 @@ class GBufferShader : public Shader {
                 }
 
                 /* DRAW */
+                CHECK_GL(glBindVertexArray(renderable->get<MeshComponent>()->getMesh().mVAOID));	
+                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable->get<MeshComponent>()->getMesh().mElementVBO->vboID));
                 renderable->get<MeshComponent>()->getMesh().draw();
             }
 
