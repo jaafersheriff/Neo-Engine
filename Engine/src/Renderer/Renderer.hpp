@@ -108,12 +108,12 @@ namespace neo {
             // Ping & pong 
             auto ping = Library::getFBO("ping");
             ping->generate();
-            ping->attachColorTexture(Window::getFrameSize(), 4, format);
+            ping->attachColorTexture(Window::getFrameSize(), format);
             ping->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT);
 
             auto pong = Library::getFBO("pong");
             pong->generate();
-            pong->attachColorTexture(Window::getFrameSize(), 4, format);
+            pong->attachColorTexture(Window::getFrameSize(), format);
             pong->mTextures.push_back(ping->mTextures[1]);
 
             // Use ping as temporary fbo

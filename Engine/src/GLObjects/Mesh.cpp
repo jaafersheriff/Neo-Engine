@@ -46,7 +46,7 @@ namespace neo {
                 default:
                     break;
             }
-            CHECK_GL(glDrawArrays(mPrimitiveType, 0, positions->second.bufferSize));
+            CHECK_GL(glDrawArrays(mPrimitiveType, 0, vSize));
         }
     }
 
@@ -82,9 +82,9 @@ namespace neo {
         vertexBuffer.bufferSize = buffer.size();
 
         CHECK_GL(glBindVertexArray(mVAOID));
-        CHECK_GL(glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertexBuffer.vboID));
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
         if (buffer.size()) {
-            CHECK_GL(glBufferData(GL_SHADER_STORAGE_BUFFER, buffer.size() * sizeof(float), buffer.data(), GL_STATIC_DRAW));
+            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(), GL_STATIC_DRAW));
         }
 
         assert(glGetError() == GL_NO_ERROR);
@@ -98,8 +98,8 @@ namespace neo {
         vertexBuffer.bufferSize = size;
 
         CHECK_GL(glBindVertexArray(mVAOID));
-        CHECK_GL(glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertexBuffer.vboID));
-        CHECK_GL(glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(float), (const void *)0, GL_STATIC_DRAW));
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
+        CHECK_GL(glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), (const void *)0, GL_STATIC_DRAW));
 
         assert(glGetError() == GL_NO_ERROR);
     }

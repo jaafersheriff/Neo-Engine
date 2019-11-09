@@ -11,5 +11,5 @@ void main() {
     // if (i < 0.01) discard;
 
     // color = vec4(fragCol.rgb, i);
-    color = vec4(1.0);
+    color = vec4(1.0, 1.0, 0.0, 1.0);
 }

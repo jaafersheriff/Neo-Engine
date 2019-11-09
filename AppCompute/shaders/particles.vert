@@ -1,6 +1,5 @@
 
 #extension GL_EXT_shader_io_blocks : enable
-
 layout( std140, binding=0 ) buffer Pos {
     vec4 pos[];
 };
@@ -18,10 +17,10 @@ void main() {
 
     vec2 quadPos = vec2( ((gl_VertexID - 1) & 2) >> 1, (gl_VertexID % 2) >> 1);
 
-    vec4 particleEye = V * M * particlePos;
-    vec4 vertEyePos = particleEye + vec4((quadPos * 2.0 - 1.0) * 1.f, 0.0, 1.0);
+    vec4 particleEye = V * particlePos;
+    vec4 vertEyePos = particleEye + vec4((quadPos * 2.0 - 1.0) * 0.4f, 0.0, 0.0);
 
     fragTex = quadPos;
 
-    gl_Position = P * vertEyePos;
+    gl_Position = P * V * vec4(vertEyePos.xyz, 1.0);
 }

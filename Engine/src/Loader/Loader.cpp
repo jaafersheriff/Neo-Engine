@@ -99,61 +99,62 @@ namespace neo {
 
     Texture2D* Loader::loadTexture(const std::string &fileName, TextureFormat format) {
         /* Create an empty texture if it is not already exist in the library */
-        Texture2D* texture = new Texture2D;
-        texture->mFormat = format;
+        int width, height, components;
+        uint8_t* data = _loadTextureData(width, height, components, fileName);
 
-        uint8_t* data = _loadSingleTexture(texture, fileName);
-
-        texture->upload(true, &data);
+        Texture2D* texture = new Texture2D(format, glm::uvec2(width, height), data);
         texture->generateMipMaps();
 
-        _cleanSingleTexture(data);
+        _cleanTextureData(data);
 
         return texture;
 
     }
 
-    TextureCubeMap* Loader::loadTexture(const std::string &name, const std::vector<std::string> & files) {
-
+    TextureCubeMap* Loader::loadTexture(const std::string &name, const std::vector<std::string>& files) {
         /* Create an empty texture if it is not already exist in the library */
-        TextureCubeMap* texture = new TextureCubeMap;
-        TextureFormat format = { GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE };
-        texture->mFormat = format;
-
         /* Use stbi if name is an existing file */
-        uint8_t* data[6];
+        int width = 1;
+        int height = 1;
+        int components = 1;
+        std::vector<uint8_t*> data;
         for (int i = 0; i < 6; i++) {
-            data[i] = _loadSingleTexture(texture, files[i], false);
+            int _width, _height, _components;
+            data.push_back(_loadTextureData(_width, _height, _components, files[i], false));
+            width = glm::min(width, _width);
+            height = glm::min(height, _height);
+            components = glm::min(components, _components);
         }
 
         /* Upload data to GPU and free from CPU */
-        texture->upload(true, data);
+        TextureFormat format = { GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE };
+        TextureCubeMap* texture = new TextureCubeMap(format, glm::uvec2(width, height), data.data());
 
         /* Clean */
         for (int i = 0; i < 6; i++) {
-            _cleanSingleTexture(data[i]);
+            _cleanTextureData(data[i]);
         }
 
         return texture;
     }
 
-    uint8_t* Loader::_loadSingleTexture(Texture* texture, const std::string& fileName, bool flip) {
+    uint8_t* Loader::_loadTextureData(int& width, int& height, int& components, const std::string& fileName, bool flip) {
         /* Use stbi if name is an existing file */
         FILE *f;
         assert(!fopen_s(&f, (RES_DIR + fileName).c_str(), "rb"), "Error opening texture file");
 
         stbi_set_flip_vertically_on_load(flip);
-        uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &texture->mWidth, &texture->mHeight, &texture->mComponents, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
+        uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &width, &height, &components, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
         assert(data, "Error reading texture file");
 
         if (mVerbose) {
-            std::cout << "Loaded texture " << fileName << " [" << texture->mWidth << ", " << texture->mHeight << "]" << std::endl;
+            std::cout << "Loaded texture " << fileName << " [" << width << ", " << height << "]" << std::endl;
         }
 
         return data;
     }
 
-    void Loader::_cleanSingleTexture(uint8_t* data) {
+    void Loader::_cleanTextureData(uint8_t* data) {
         stbi_image_free(data);
     }
 

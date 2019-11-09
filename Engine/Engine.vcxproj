@@ -61,6 +61,8 @@
     <ClInclude Include="src\ext\stb_image.h" />
     <ClInclude Include="src\ext\tiny_obj_loader.h" />
     <ClInclude Include="src\GameObject\GameObject.hpp" />
+    <ClInclude Include="src\GLObjects\Texture2D.hpp" />
+    <ClInclude Include="src\GLObjects\Texture3D.hpp" />
     <ClInclude Include="src\Loader\Library.hpp" />
     <ClInclude Include="src\Loader\Loader.hpp" />
     <ClInclude Include="src\Loader\MeshGenerator.hpp" />
@@ -115,6 +117,7 @@
     <ClCompile Include="src\ext\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\GameObject\GameObject.cpp" />
+    <ClCompile Include="src\GLObjects\Texture.cpp" />
     <ClCompile Include="src\Loader\Library.cpp" />
     <ClCompile Include="src\Loader\Loader.cpp" />
     <ClCompile Include="src\Messaging\Messenger.cpp" />
@@ -145,6 +148,7 @@
     <None Include="shaders\phong.glsl" />
     <None Include="shaders\postprocess.glsl" />
     <None Include="shaders\shadowreceiver.glsl" />
+    <None Include="src\GLObjects\TextureCubeMap.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

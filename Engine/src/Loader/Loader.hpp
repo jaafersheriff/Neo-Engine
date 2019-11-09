@@ -7,7 +7,8 @@
 #include <string>
 #include <vector>
 
-#include "GLObjects/Texture.hpp"
+#include "GLObjects/Texture2D.hpp"
+#include "GLObjects/TextureCubeMap.hpp"
 
 namespace neo {
 
@@ -31,8 +32,8 @@ namespace neo {
             static void _resize(Mesh*, std::vector<float>&, bool);
 
             /* Load a single texture file */
-            static uint8_t* _loadSingleTexture(Texture*, const std::string&, bool = true);
-            static void _cleanSingleTexture(uint8_t*);
+            static uint8_t* _loadTextureData(int&, int&, int&, const std::string&, bool = true);
+            static void _cleanTextureData(uint8_t*);
 
             /* Private members */
             static std::string RES_DIR;

@@ -36,7 +36,7 @@ public:
             CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->get<ParticleMeshComponent>()->mMesh->mElementVBO->vboID));
 
             /* DRAW */
-            model->get<ParticleMeshComponent>()->mMesh->draw();
+            model->get<ParticleMeshComponent>()->mMesh->draw(model->get<ParticleMeshComponent>()->mNumVerts * 6);
         }
 
         unbind();

@@ -52,17 +52,21 @@ void main()
     vec3 v = vel[i].xyz;
 
     float noiseFreq = 2.f;
-    float noiseStrength = 0.01f;
+    float noiseStrength = 10.f;
     vec4 attractor = vec4(0.0);
     float damping = 0.9;
 
-    v += fBm3f(p*noiseFreq,4,2.0,0.5)*noiseStrength;
-    v += attract(p, attractor.xyz)*attractor.w;
+    // v += fBm3f(p*noiseFreq,4,2.0,0.5)*noiseStrength;
+    // v += attract(p, attractor.xyz)*attractor.w;
+
+    v += vec3(1.2f);
 
     p += v;
     v *= damping;
 
     pos[i] = vec4(p, 1.0);
-    vel[i] = vec4(v, 0.0);
+    // vel[i] = vec4(v, 0.0);
+
+    pos[i] = vec4(i/64, i % 2 == 0 ? 0.2 : 0.0, 0.0, 1.0) * 10;
 
 }

@@ -81,6 +81,8 @@
     <ClInclude Include="src\ECS\ComponentTuple.hpp" />
     <ClInclude Include="src\Component\RenderableComponent\SkyboxComponent.hpp" />
     <ClInclude Include="src\Shader\SkyboxShader.hpp" />
+    <ClInclude Include="src\GLObjects\Texture2D.hpp" />
+    <ClInclude Include="src\GLObjects\Texture3D.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -117,6 +119,7 @@
     <ClCompile Include="src\Component\CameraComponent\MainCameraComponent.cpp" />
     <ClCompile Include="src\Systems\CameraSystems\FrustaFittingSystem.cpp" />
     <ClCompile Include="src\Systems\SelectingSystems\EditorSystem.cpp" />
+    <ClCompile Include="src\GLObjects\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />
@@ -127,5 +130,6 @@
     <None Include="shaders\gammacorrect.glsl" />
     <None Include="shaders\postprocess.glsl" />
     <None Include="shaders\shadowreceiver.glsl" />
+    <None Include="src\GLObjects\TextureCubeMap.hpp" />
   </ItemGroup>
 </Project>

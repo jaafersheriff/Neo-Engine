@@ -39,7 +39,7 @@ namespace neo {
     Texture* Library::createEmptyTexture(const std::string& name) {
         auto it = mTextures.find(name);
         assert(it == mTextures.end(), "Texture already found");
-        Texture* texture = new Texture2D;
+        Texture* texture = new Texture2D({}, glm::uvec2(1), { 0xF });
         _insertTexture(name, texture);
         return texture;
     }

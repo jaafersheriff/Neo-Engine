@@ -404,7 +404,7 @@ namespace neo {
                 }
                 if (ImGui::TreeNodeEx("Meshes", ImGuiTreeNodeFlags_DefaultOpen)) {
                     for (auto & m : Library::mMeshes) {
-                        ImGui::Text("%s (%d)", m.first.c_str());
+                        ImGui::Text("%s", m.first.c_str());
                     }
                     ImGui::TreePop();
                 }

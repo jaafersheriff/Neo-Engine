@@ -52,7 +52,7 @@ int main() {
     {
         auto& go = Engine::createGameObject();
         Engine::addComponent<ParticleMeshComponent>(&go);
-        Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.5f, 0.f));
+        Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.0f, 0.f));
     }
 
     /* Systems - order matters! */
