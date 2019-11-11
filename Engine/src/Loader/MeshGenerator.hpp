@@ -36,6 +36,8 @@ namespace neo {
                   0.5f,  0.5f,  0.5f,
                  -0.5f,  0.5f,  0.5f };
                 mesh->addVertexBuffer(VertexType::Position, 0, 3, verts);
+                mesh->mMin = glm::vec3(-0.5f);
+                mesh->mMax = glm::vec3( 0.5f);
 
                 std::vector<float> normals =
                 { 0,  0, -1,
@@ -119,6 +121,8 @@ namespace neo {
                   -0.5f,  0.5f,  0.f,
                    0.5f,  0.5f,  0.f };
                 mesh->addVertexBuffer(VertexType::Position, 0, 3, verts);
+                mesh->mMin = glm::vec3(-0.5f, -0.5f, -0.1f);
+                mesh->mMax = glm::vec3( 0.5f,  0.5f,  0.1f);
 
                 std::vector<float> normals =
                 { 0.f, 0.f, 1.f,
@@ -158,6 +162,8 @@ namespace neo {
                        -t / length,  0.f / length, -1.f / length,
                        -t / length,  0.f / length,  1.f / length
                 };
+                mesh->mMin = glm::vec3(-t / length);
+                mesh->mMax = glm::vec3( t / length);
 
                 std::vector<unsigned> ele = {
                       0, 11,  5,
@@ -203,6 +209,8 @@ namespace neo {
                         verts.push_back(halfC.x);
                         verts.push_back(halfC.y);
                         verts.push_back(halfC.z);
+                        mesh->mMin = glm::min(mesh->mMin, glm::min(halfA, glm::min(halfB, halfC)));
+                        mesh->mMax = glm::max(mesh->mMax, glm::max(halfA, glm::max(halfB, halfC)));
 
                         // add indices of new faces 
                         int indA = verts.size() / 3 - 3;
@@ -243,28 +251,47 @@ namespace neo {
             //  Move this to its own terrain generator class?
             //  Calculate normals based on verts
             static void generatePlane(Mesh* mesh, float h, int VERTEX_COUNT, int SIZE) {
+                mesh->mMin = glm::vec3(FLT_MAX);
+                mesh->mMax = glm::vec3(FLT_MIN);
+
                 int count = VERTEX_COUNT * VERTEX_COUNT;
+
                 std::vector<std::vector<float>> heights;
+
                 std::vector<float> vertices;
                 vertices.resize(count * 3);
+
                 std::vector<float> normals;
                 normals.resize(count * 3);
+
                 std::vector<float> textureCoords;
                 textureCoords.resize(count * 2);
+
                 std::vector<unsigned> indices;
                 indices.resize(6 * (VERTEX_COUNT - 1) * (VERTEX_COUNT * 1));
+
                 int vertexPointer = 0;
                 for (int i = 0; i < VERTEX_COUNT; i++) {
                     heights.push_back(std::vector<float>());
                     heights[i].resize(VERTEX_COUNT);
+
                     for (int j = 0; j < VERTEX_COUNT; j++) {
-                        vertices[vertexPointer * 3] = (float)j / ((float)VERTEX_COUNT - 1) * SIZE;
                         float height = Util::genRandom(0.f, h); // getHeight(j, i, image);
                         heights[i][j] = height;
-                        vertices[vertexPointer * 3 + 1] = height;
-                        vertices[vertexPointer * 3 + 2] = (float)i / ((float)VERTEX_COUNT - 1) * SIZE;
+
+                        glm::vec3 vert = glm::vec3(
+                            (float)j / ((float)VERTEX_COUNT - 1) * SIZE,
+                            height,
+                            (float)i / ((float)VERTEX_COUNT - 1) * SIZE);
+                        vertices[vertexPointer * 3 + 0] = vert.x;
+                        vertices[vertexPointer * 3 + 1] = vert.y;
+                        vertices[vertexPointer * 3 + 2] = vert.z;
+
+                        mesh->mMin = glm::min(mesh->mMin, vert);
+                        mesh->mMax = glm::max(mesh->mMax, vert);
+
                         glm::vec3 normal = glm::vec3(0.f, 1.f, 0.f); // calculateNormal(j, i, image);
-                        normals[vertexPointer * 3] = normal.x;
+                        normals[vertexPointer * 3 + 0] = normal.x;
                         normals[vertexPointer * 3 + 1] = normal.y;
                         normals[vertexPointer * 3 + 2] = normal.z;
                         textureCoords[vertexPointer * 2] = (float)j / ((float)VERTEX_COUNT - 1);
