@@ -29,7 +29,6 @@ namespace neo {
                 out vec4 color;
                 void main() {
                     color = texture(cubeMap, fragTex);
-                    color = vec4(fragTex, 1.0);
                 }
                 )")
         {}

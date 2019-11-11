@@ -129,23 +129,19 @@ namespace neo {
     }
 
     TextureCubeMap* Loader::loadTexture(const std::string &name, const std::vector<std::string>& files) {
-        /* Create an empty texture if it is not already exist in the library */
-        /* Use stbi if name is an existing file */
-        int width = 1;
-        int height = 1;
-        int components = 1;
+        NEO_ASSERT(files.size() == 6, "Attempting to create cube map without 6 files");
+
         std::vector<uint8_t*> data;
+        std::vector<glm::uvec2> sizes;
         for (int i = 0; i < 6; i++) {
             int _width, _height, _components;
             data.push_back(_loadTextureData(_width, _height, _components, files[i], false));
-            width = glm::min(width, _width);
-            height = glm::min(height, _height);
-            components = glm::min(components, _components);
+            sizes.push_back(glm::uvec2(_width, _height));
         }
 
         /* Upload data to GPU and free from CPU */
         TextureFormat format = { GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE };
-        TextureCubeMap* texture = new TextureCubeMap(format, glm::uvec2(width, height), data.data());
+        TextureCubeMap* texture = new TextureCubeMap(format, sizes, data.data());
 
         /* Clean */
         for (int i = 0; i < 6; i++) {

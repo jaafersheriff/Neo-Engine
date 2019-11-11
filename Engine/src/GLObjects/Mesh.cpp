@@ -58,8 +58,6 @@ namespace neo {
         NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when adding VertexBuffer");
 
         mVBOs[type] = vertexBuffer;
-
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
     }
 
     void Mesh::updateVertexBuffer(VertexType type, const std::vector<float>& buffer) {
@@ -120,9 +118,9 @@ namespace neo {
             CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(unsigned), &buffer[0], GL_STATIC_DRAW));
         }
 
+        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
         NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when updating VertexBuffer");
 
-        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
     }
 
     void Mesh::updateElementBuffer(const std::vector<unsigned>& buffer) {
@@ -135,6 +133,7 @@ namespace neo {
             CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(unsigned), &buffer[0], GL_STATIC_DRAW));
         }
 
+        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
         NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when updating VertexBuffer");
     }
 
@@ -147,6 +146,7 @@ namespace neo {
         CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID));
         CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(unsigned), (const void *)0, GL_STATIC_DRAW));
 
+        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
         NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when updating VertexBuffer");
     }
 
