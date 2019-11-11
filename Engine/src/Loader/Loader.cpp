@@ -32,19 +32,23 @@ namespace neo {
         /* Check with static meshes first */
         if (!std::strcmp(fileName.c_str(), "cube")) {
             MeshGenerator::generateCube(mesh);
+            mesh->mPrimitiveType = GL_TRIANGLES;
             return mesh;
         }
         if (!std::strcmp(fileName.c_str(), "quad") || !std::strcmp(fileName.c_str(), "plane")) {
             MeshGenerator::generateQuad(mesh);
+            mesh->mPrimitiveType = GL_TRIANGLES;
             return mesh;
         }
         if (!std::strcmp(fileName.c_str(), "sphere") || !std::strcmp(fileName.c_str(), "ico_2")) {
             MeshGenerator::generateSphere(mesh, 2);
+            mesh->mPrimitiveType = GL_TRIANGLES;
             return mesh;
         }
         if (!std::strncmp(fileName.c_str(), "ico_", 4)) {
             int recursions = std::stoi(fileName.c_str() + 4);
             MeshGenerator::generateSphere(mesh, recursions);
+            mesh->mPrimitiveType = GL_TRIANGLES;
             return mesh;
         }
 
@@ -89,9 +93,15 @@ namespace neo {
 
         /* Upload */
         mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
-        mesh->addVertexBuffer(VertexType::Position, 0, 3, vertices);
-        mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
-        mesh->addVertexBuffer(VertexType::Texture0, 2, 2, texCoords);
+        if (vertices.size()) {
+            mesh->addVertexBuffer(VertexType::Position, 0, 3, vertices);
+        }
+        if (normals.size()) {
+            mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+        }
+        if (texCoords.size()) {
+            mesh->addVertexBuffer(VertexType::Texture0, 2, 2, texCoords);
+        }
         if (indices.size()) {
             mesh->mPrimitiveType = GL_TRIANGLES;
             mesh->addElementBuffer(indices);

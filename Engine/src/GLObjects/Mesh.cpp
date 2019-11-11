@@ -40,8 +40,7 @@ namespace neo {
             NEO_ASSERT(vbo == mVBOs.end(), "Attempting to add a VertexBuffer that already exists");
         }
 
-        mVBOs[type] = {};
-        auto& vertexBuffer = mVBOs[type];
+        auto vertexBuffer = VertexBuffer{};
         vertexBuffer.attribArray = attribArray;
         vertexBuffer.stride = stride;
         vertexBuffer.bufferSize = buffer.size();
@@ -57,6 +56,10 @@ namespace neo {
         CHECK_GL(glVertexAttribPointer(attribArray, stride, GL_FLOAT, GL_FALSE, 0, (const void *)0));
 
         NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when adding VertexBuffer");
+
+        mVBOs[type] = vertexBuffer;
+
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
     }
 
     void Mesh::updateVertexBuffer(VertexType type, const std::vector<float>& buffer) {
@@ -105,6 +108,7 @@ namespace neo {
 
     void Mesh::addElementBuffer(const std::vector<unsigned>& buffer) {
         NEO_ASSERT(!mElementVBO.has_value(), "Attempting to add 2 ElementBuffers");
+
         mElementVBO = std::make_optional<VertexBuffer>();
         mElementVBO->bufferSize = buffer.size();
 
@@ -118,7 +122,7 @@ namespace neo {
 
         NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when updating VertexBuffer");
 
-        mPrimitiveType = GL_TRIANGLES;
+        CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
     }
 
     void Mesh::updateElementBuffer(const std::vector<unsigned>& buffer) {
