@@ -79,13 +79,13 @@ int main() {
     /* Cube object */
     for (int i = 0; i < 15; i++) {
         Renderable cube(Library::getMesh("PineTree3.obj"), glm::vec3(Util::genRandom(-7.5f, 7.5f), 0.5f, Util::genRandom(-7.5f, 7.5f)), glm::vec3(Util::genRandom(0.7f, 1.3f)), glm::vec3(0.f, Util::genRandom(0.f, 360.f), 0.f));
-        Engine::addComponent<DiffuseMapComponent>(cube.gameObject, Library::getTexture("PineTexture.png"));
+        Engine::addComponent<DiffuseMapComponent>(cube.gameObject, *Library::getTexture("PineTexture.png"));
     }
 
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
     Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
-    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, Library::getTexture("grid.png"));
+    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::getTexture("grid.png"));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();

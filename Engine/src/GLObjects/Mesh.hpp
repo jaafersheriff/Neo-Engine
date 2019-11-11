@@ -57,7 +57,7 @@ namespace neo {
             void updateElementBuffer(unsigned size);
             void removeElementBuffer();
 
-            const VertexBuffer& getVBO(VertexType type);
+            const VertexBuffer& getVBO(VertexType type) const;
 
             /* Primitive type */
             unsigned mPrimitiveType;

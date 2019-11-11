@@ -76,7 +76,7 @@ int main() {
         Engine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
         Engine::addComponent<renderable::AlphaTestRenderable>(gameObject);
         Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f), 20.f);
-        Engine::addComponent<DiffuseMapComponent>(gameObject, Library::getTexture("grid.png"));
+        Engine::addComponent<DiffuseMapComponent>(gameObject, *Library::getTexture("grid.png"));
     }
 
     /* Systems - order matters! */

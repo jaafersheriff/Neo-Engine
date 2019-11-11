@@ -56,7 +56,7 @@ int main() {
     {
         GameObject* gameObject = &Engine::createGameObject();
         Engine::addComponent<renderable::SkyboxComponent>(gameObject);
-        Engine::addComponent<CubeMapComponent>(gameObject, Library::getCubemap("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}));
+        Engine::addComponent<CubeMapComponent>(gameObject, *Library::getCubemap("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}));
     }
 
     /* METBALL */
@@ -68,7 +68,7 @@ int main() {
         // Mesh
         auto& go = Engine::createGameObject();
         Engine::addComponent<MetaballsMeshComponent>(&go);
-        Mesh* mesh = new Mesh(GL_TRIANGLES);
+        Mesh* mesh = Library::createEmptyMesh("Metaballs");
         mesh->addVertexBuffer(VertexType::Position, 0, 3);
         mesh->addVertexBuffer(VertexType::Normal, 0, 3);
         Engine::addComponent<MeshComponent>(&go, mesh);

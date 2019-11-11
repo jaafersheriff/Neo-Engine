@@ -60,7 +60,7 @@ int main() {
 
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
     Renderable r(Library::getMesh("mr_krab.obj"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
-    Engine::addComponent<DiffuseMapComponent>(r.gameObject, Library::getTexture("mr_krab.png"));
+    Engine::addComponent<DiffuseMapComponent>(r.gameObject, *Library::getTexture("mr_krab.png"));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();

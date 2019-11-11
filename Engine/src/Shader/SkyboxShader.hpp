@@ -29,6 +29,7 @@ namespace neo {
                 out vec4 color;
                 void main() {
                     color = texture(cubeMap, fragTex);
+                    color = vec4(fragTex, 1.0);
                 }
                 )")
         {}
@@ -48,9 +49,9 @@ namespace neo {
             loadUniform("V", camera.getView());
 
             /* Bind texture */
-            auto texture = skybox->get<CubeMapComponent>()->mTexture;
-            texture->bind();
-            loadUniform("cubeMap", texture->mTextureID);
+            const auto& texture = skybox->get<CubeMapComponent>()->mTexture;
+            texture.bind();
+            loadUniform("cubeMap", texture.mTextureID);
 
             /* Draw */
             Library::getMesh("cube")->draw();

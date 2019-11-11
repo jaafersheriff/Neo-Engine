@@ -4,6 +4,8 @@
 #include "GameObject/GameObject.hpp"
 #include "Messaging/Messenger.hpp"
 
+#include "Util/Util.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 #include "ext/imgui/imgui.h"
 
@@ -54,7 +56,7 @@ namespace neo {
 
     void CameraComponent::_detView() const {
         auto spatial = mGameObject->getComponentByType<SpatialComponent>();
-        assert(spatial);
+        NEO_ASSERT(spatial, "Camera has no SpatialComponent");
         mViewMat = glm::lookAt(spatial->getPosition(), spatial->getPosition() + spatial->getLookDir(), spatial->getUpDir());
         mViewMatDirty = false;
     }

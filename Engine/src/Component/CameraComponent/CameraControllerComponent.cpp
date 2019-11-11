@@ -50,7 +50,7 @@ namespace neo {
         glm::vec3 u(glm::cross(v, w));
 
         auto spatial = mGameObject->getComponentByType<SpatialComponent>();
-        assert(spatial);
+        NEO_ASSERT(spatial, "CameraController has no SpatialComponent");
         spatial->setUVW(u, v, w);
     }
 

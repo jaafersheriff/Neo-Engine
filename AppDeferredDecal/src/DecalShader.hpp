@@ -57,9 +57,8 @@ class DecalShader : public Shader {
                 loadUniform("invM", glm::inverse(spatial->getModelMatrix()));
 
                 auto diffuseMap = decal->get<DiffuseMapComponent>();
-                auto texture = (const Texture2D *)(diffuseMap->mTexture);
-                texture->bind();
-                loadUniform("decalTexture", texture->mTextureID);
+                diffuseMap->mTexture.bind();
+                loadUniform("decalTexture", diffuseMap->mTexture.mTextureID);
 
                 Library::getMesh("cube")->draw();
             }

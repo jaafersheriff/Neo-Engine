@@ -72,6 +72,9 @@ namespace neo {
 
         CHECK_GL(glActiveTexture(GL_TEXTURE0));
         CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
+
+        CHECK_GL(glBindVertexArray(0));
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
     }
 
     void Renderer::render(float dt) {

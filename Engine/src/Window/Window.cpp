@@ -135,7 +135,7 @@ namespace neo {
         if (!mWindow) {
             glfwTerminate();
             std::cin.get();
-            assert(false, "Failed to create window");
+            NEO_ASSERT(false, "Failed to create window");
         }
         glfwMakeContextCurrent(mWindow);
 

@@ -30,14 +30,14 @@ public:
         }
 
         if (auto skybox = Engine::getComponentTuple<renderable::SkyboxComponent, CubeMapComponent>()) {
-            loadUniform("cubeMap", skybox->get<CubeMapComponent>()->mTexture->mTextureID);
+            loadUniform("cubeMap", skybox->get<CubeMapComponent>()->mTexture.mTextureID);
         }
 
+        CHECK_GL(glDisable(GL_CULL_FACE));
+        if (mWireframe) {
+            CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+        }
         for (auto& metaball : Engine::getComponentTuples<MetaballsMeshComponent, MeshComponent, SpatialComponent>()) {
-            CHECK_GL(glDisable(GL_CULL_FACE));
-            if (mWireframe) {
-                CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-            }
 
             loadUniform("wireframe", mWireframe);
             loadUniform("M", metaball->get<SpatialComponent>()->getModelMatrix());

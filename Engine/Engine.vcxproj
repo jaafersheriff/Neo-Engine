@@ -61,6 +61,7 @@
     <ClInclude Include="src\ext\stb_image.h" />
     <ClInclude Include="src\ext\tiny_obj_loader.h" />
     <ClInclude Include="src\GameObject\GameObject.hpp" />
+    <ClInclude Include="src\GLObjects\Texture1D.hpp" />
     <ClInclude Include="src\GLObjects\Texture2D.hpp" />
     <ClInclude Include="src\GLObjects\Texture3D.hpp" />
     <ClInclude Include="src\Loader\Library.hpp" />

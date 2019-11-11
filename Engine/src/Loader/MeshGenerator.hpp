@@ -9,9 +9,7 @@ namespace neo {
 
         public:
 
-            static Mesh* createCube() {
-                Mesh* m = new Mesh;
-
+            static void generateCube(Mesh* mesh) {
                 std::vector<float> verts =
                 { -0.5f, -0.5f, -0.5f,
                   0.5f,  0.5f, -0.5f,
@@ -37,7 +35,7 @@ namespace neo {
                   0.5f, -0.5f,  0.5f,
                   0.5f,  0.5f,  0.5f,
                  -0.5f,  0.5f,  0.5f };
-                m->addVertexBuffer(VertexType::Position, 0, 3, verts);
+                mesh->addVertexBuffer(VertexType::Position, 0, 3, verts);
 
                 std::vector<float> normals =
                 { 0,  0, -1,
@@ -64,7 +62,7 @@ namespace neo {
                   0,  0,  1,
                   0,  0,  1,
                   0,  0,  1 };
-                m->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+                mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
 
                 std::vector<float> uvs =
                 { 1.f, 0.f,
@@ -96,7 +94,7 @@ namespace neo {
                     1.f, 0.f,
                     1.f, 1.f,
                     0.f, 1.f };
-                m->addVertexBuffer(VertexType::Texture0, 2, 2, uvs);
+                mesh->addVertexBuffer(VertexType::Texture0, 2, 2, uvs);
 
                 std::vector<unsigned> indices =
                 { 0,  1,  2,
@@ -111,45 +109,39 @@ namespace neo {
                  16, 18, 19,
                  20, 21, 22,
                  20, 22, 23 };
-                m->addElementBuffer(indices);
-
-                return m;
+                mesh->addElementBuffer(indices);
             }
 
-            static Mesh* createQuad() {
-                Mesh* m = new Mesh;
-
+            static void generateQuad(Mesh* mesh) {
                 std::vector<float> verts =
                 { -0.5f, -0.5f,  0.f,
                    0.5f, -0.5f,  0.f,
                   -0.5f,  0.5f,  0.f,
                    0.5f,  0.5f,  0.f };
-                m->addVertexBuffer(VertexType::Position, 0, 3, verts);
+                mesh->addVertexBuffer(VertexType::Position, 0, 3, verts);
 
                 std::vector<float> normals =
                 { 0.f, 0.f, 1.f,
                   0.f, 0.f, 1.f,
                   0.f, 0.f, 1.f,
                   0.f, 0.f, 1.f };
-                m->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+                mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
 
                 std::vector<float> uvs =
                 { 0.f, 0.f,
                   1.f, 0.f,
                   0.f, 1.f,
                   1.f, 1.f };
-                m->addVertexBuffer(VertexType::Texture0, 2, 2, uvs);
+                mesh->addVertexBuffer(VertexType::Texture0, 2, 2, uvs);
 
                 std::vector<unsigned> indices =
                 { 0, 1, 2,
                   1, 3, 2 };
-                m->addElementBuffer(indices);
-
-                return m;
+                mesh->addElementBuffer(indices);
             }
 
             // http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
-            static Mesh* createSphere(int recursions) {
+            static void generateSphere(Mesh* mesh, int recursions) {
 	            float t = (float) (1.f + (glm::sqrt(5.0)) / 2.f);
                 float length = glm::length(glm::vec3(1, 0, t));
                 std::vector<float> verts = {
@@ -240,20 +232,17 @@ namespace neo {
                     tex.push_back(glm::clamp(0.5f + std::asin(verts[i+1]) / Util::PI(), 0.f, 1.f));
                 }
 
-                Mesh* m = new Mesh;
-                m->addVertexBuffer(VertexType::Position, 0, 3, verts);
-                m->addVertexBuffer(VertexType::Normal, 1, 3, verts);
-                m->addVertexBuffer(VertexType::Texture0, 2, 2, tex);
-                m->addElementBuffer(ele);
-
-                return m;
+                mesh->addVertexBuffer(VertexType::Position, 0, 3, verts);
+                mesh->addVertexBuffer(VertexType::Normal, 1, 3, verts);
+                mesh->addVertexBuffer(VertexType::Texture0, 2, 2, tex);
+                mesh->addElementBuffer(ele);
             }
 
             // TODOs
             //  Take height map as input
             //  Move this to its own terrain generator class?
             //  Calculate normals based on verts
-            static Mesh* createPlane(float h, int VERTEX_COUNT, int SIZE) {
+            static void generatePlane(Mesh* mesh, float h, int VERTEX_COUNT, int SIZE) {
                 int count = VERTEX_COUNT * VERTEX_COUNT;
                 std::vector<std::vector<float>> heights;
                 std::vector<float> vertices;
@@ -299,13 +288,10 @@ namespace neo {
                     }
                 }
 
-                Mesh *m = new Mesh;
-                m->addVertexBuffer(VertexType::Position, 0, 3, vertices);
-                m->addVertexBuffer(VertexType::Normal, 1, 3, normals);
-                m->addVertexBuffer(VertexType::Texture0, 2, 2, textureCoords);
-                m->addElementBuffer(indices);
-
-                return m;
+                mesh->addVertexBuffer(VertexType::Position, 0, 3, vertices);
+                mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+                mesh->addVertexBuffer(VertexType::Texture0, 2, 2, textureCoords);
+                mesh->addElementBuffer(indices);
             }
     };
 

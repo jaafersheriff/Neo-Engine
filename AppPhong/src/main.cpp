@@ -47,7 +47,7 @@ struct Renderable {
         Engine::addComponent<MeshComponent>(gameObject, mesh);
         Engine::addComponent<renderable::PhongRenderable>(gameObject);
         Engine::addComponent<MaterialComponent>(gameObject);
-        Engine::addComponent<DiffuseMapComponent>(gameObject, tex);
+        Engine::addComponent<DiffuseMapComponent>(gameObject, *tex);
     }
 };
 

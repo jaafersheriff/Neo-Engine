@@ -2,28 +2,27 @@
 
 #include "Texture.hpp"
 
+#include "Util/Util.hpp"
+
 namespace neo {
 
     class TextureCubeMap : public Texture {
     public:
 
         TextureCubeMap(TextureFormat format, glm::uvec2 size, uint8_t** data = nullptr) :
-            Texture(format, size) {
+            Texture(GL_TEXTURE_CUBE_MAP, format, size) {
 
             upload(data);
         }
         
-
-        virtual void bind() const override {
-            CHECK_GL(glActiveTexture(GL_TEXTURE0 + mTextureID));
-            CHECK_GL(glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureID));
-        }
 
         virtual void upload(const uint8_t* data = nullptr) override {
         }
 
 
         void upload(uint8_t** data) {
+            bind();
+
             // F, B, U, D, R, L
             for (int i = 0; i < 6; i++) {
                 if (data && data[i]) {
@@ -31,17 +30,10 @@ namespace neo {
                 }
             }
 
-            CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, mFormat.filter));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, mFormat.filter));
-
-            CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, mFormat.mode));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, mFormat.mode));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, mFormat.mode));
-
             CHECK_GL(glActiveTexture(GL_TEXTURE0));
 
             /* Error check */
-            assert(glGetError() == GL_NO_ERROR);
+            NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when uploading Texture");
         }
 
     protected:

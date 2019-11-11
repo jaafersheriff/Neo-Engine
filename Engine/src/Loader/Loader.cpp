@@ -26,19 +26,26 @@ namespace neo {
     }
 
     Mesh* Loader::loadMesh(const std::string &fileName, bool doResize) {
+        /* Create mesh */
+        Mesh* mesh = new Mesh;
+
         /* Check with static meshes first */
         if (!std::strcmp(fileName.c_str(), "cube")) {
-            return MeshGenerator::createCube();
+            MeshGenerator::generateCube(mesh);
+            return mesh;
         }
         if (!std::strcmp(fileName.c_str(), "quad") || !std::strcmp(fileName.c_str(), "plane")) {
-            return MeshGenerator::createQuad();
+            MeshGenerator::generateQuad(mesh);
+            return mesh;
         }
         if (!std::strcmp(fileName.c_str(), "sphere") || !std::strcmp(fileName.c_str(), "ico_2")) {
-            return MeshGenerator::createSphere(2);
+            MeshGenerator::generateSphere(mesh, 2);
+            return mesh;
         }
         if (!std::strncmp(fileName.c_str(), "ico_", 4)) {
             int recursions = std::stoi(fileName.c_str() + 4);
-            return MeshGenerator::createSphere(recursions);
+            MeshGenerator::generateSphere(mesh, recursions);
+            return mesh;
         }
 
         /* If mesh was not found in map, read it in */
@@ -76,17 +83,17 @@ namespace neo {
         }
 
 
-        /* Create mesh */
-        Mesh* mesh = new Mesh;
 
         /* Optional resize and find min/max */
         _resize(mesh, vertices, doResize);
 
         /* Upload */
+        mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
         mesh->addVertexBuffer(VertexType::Position, 0, 3, vertices);
         mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
         mesh->addVertexBuffer(VertexType::Texture0, 2, 2, texCoords);
         if (indices.size()) {
+            mesh->mPrimitiveType = GL_TRIANGLES;
             mesh->addElementBuffer(indices);
         }
 
@@ -141,11 +148,11 @@ namespace neo {
     uint8_t* Loader::_loadTextureData(int& width, int& height, int& components, const std::string& fileName, bool flip) {
         /* Use stbi if name is an existing file */
         FILE *f;
-        assert(!fopen_s(&f, (RES_DIR + fileName).c_str(), "rb"), "Error opening texture file");
+        NEO_ASSERT(!fopen_s(&f, (RES_DIR + fileName).c_str(), "rb"), "Error opening texture file");
 
         stbi_set_flip_vertically_on_load(flip);
         uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &width, &height, &components, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
-        assert(data, "Error reading texture file");
+        NEO_ASSERT(data, "Error reading texture file");
 
         if (mVerbose) {
             std::cout << "Loaded texture " << fileName << " [" << width << ", " << height << "]" << std::endl;

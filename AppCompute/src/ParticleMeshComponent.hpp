@@ -17,7 +17,7 @@ public:
     ParticleMeshComponent(GameObject* go) :
         Component(go)
     {
-        mMesh = new Mesh(GL_TRIANGLES);
+        mMesh = Library::createEmptyMesh("Particles");
         mMesh->addVertexBuffer(VertexType::Position, 0, 4); // positions
         mMesh->addVertexBuffer(VertexType::Color0, 1, 4); // velocity
         mMesh->addElementBuffer();

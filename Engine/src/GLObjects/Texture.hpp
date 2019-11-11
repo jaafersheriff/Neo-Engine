@@ -22,8 +22,8 @@ namespace neo {
         public:
 
             /* Constructor */
-            Texture(TextureFormat format, glm::uvec2 size);
-            Texture(TextureFormat format, glm::uvec3 size);
+            Texture(GLuint, TextureFormat format, glm::uvec2 size);
+            Texture(GLuint, TextureFormat format, glm::uvec3 size);
 
             /* Delete copy constructors */
             Texture(const Texture &) = delete;
@@ -48,9 +48,11 @@ namespace neo {
             /* Upload to GPU */
             virtual void upload(const uint8_t* data = nullptr) = 0;
 
-            virtual void bind() const = 0;
+            void bind() const;
+            void applyFormat();
 
         protected:
+            const GLuint mTextureType;
             virtual void _resize() = 0;
     };
 

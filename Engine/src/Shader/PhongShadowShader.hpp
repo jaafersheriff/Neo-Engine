@@ -128,11 +128,9 @@ namespace neo {
                     loadUniform("N", renderableSpatial->getNormalMatrix());
 
                     /* Bind texture */
-                    auto texComp = renderable->mGameObject.getComponentByType<DiffuseMapComponent>();
-                    if (texComp) {
-                        auto texture = texComp->mTexture;
-                        texture->bind();
-                        loadUniform("diffuseMap", texture->mTextureID);
+                    if (const auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
+                        diffuseMap->mTexture.bind();
+                        loadUniform("diffuseMap", diffuseMap->mTexture.mTextureID);
                         loadUniform("useTexture", true);
                     }
                     else {

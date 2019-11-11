@@ -53,9 +53,9 @@ class GBufferShader : public Shader {
                     loadUniform("ambient", matComp->mAmbient);
                 }
                 if (auto diffMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                    diffMap->mTexture->bind();
+                    diffMap->mTexture.bind();
+                    loadUniform("diffuseMap", diffMap->mTexture.mTextureID);
                     loadUniform("useDiffuseMap", true);
-                    loadUniform("diffuseMap", diffMap->mTexture->mTextureID);
                 }
                 else {
                     loadUniform("useDiffuseMap", false);
@@ -67,9 +67,9 @@ class GBufferShader : public Shader {
                 /* Bind normal map */
                 auto normalMap = renderable->mGameObject.getComponentByType<neo::NormalMapComponent>();
                 if (normalMap) {
-                    normalMap->mTexture->bind();
+                    normalMap->mTexture.bind();
+                    loadUniform("normalMap", normalMap->mTexture.mTextureID);
                     loadUniform("useNormalMap", true);
-                    loadUniform("normalMap", normalMap->mTexture->mTextureID);
                 }
                 else {
                     loadUniform("useNormalMap", false);
@@ -77,8 +77,6 @@ class GBufferShader : public Shader {
                 }
 
                 /* DRAW */
-                CHECK_GL(glBindVertexArray(renderable->get<MeshComponent>()->getMesh().mVAOID));	
-                CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable->get<MeshComponent>()->getMesh().mElementVBO->vboID));
                 renderable->get<MeshComponent>()->getMesh().draw();
             }
 

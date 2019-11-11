@@ -176,7 +176,7 @@ namespace neo {
             return "../Engine/shaders/" + fileName;
         }
         else {
-            assert(false, fileName + "doesn't exist");
+            NEO_ASSERT(false, std::stringstream(fileName + "doesn't exist"));
         }
     }
 

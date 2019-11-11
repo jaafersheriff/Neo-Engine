@@ -8,6 +8,9 @@
 
 namespace neo {
 
+#define NEO_STR(x) #x
+#define NEO_ASSERT(x, s) if (!(x)) { printf("%s: (%s), function %s, file %s, line %d.\n", s, NEO_STR(x), __func__, __FILE__, __LINE__); abort(); }
+ 
     struct Util {
         
         static void init() {

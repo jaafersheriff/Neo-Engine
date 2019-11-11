@@ -83,6 +83,7 @@
     <ClInclude Include="src\Shader\SkyboxShader.hpp" />
     <ClInclude Include="src\GLObjects\Texture2D.hpp" />
     <ClInclude Include="src\GLObjects\Texture3D.hpp" />
+    <ClInclude Include="src\GLObjects\Texture1D.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />

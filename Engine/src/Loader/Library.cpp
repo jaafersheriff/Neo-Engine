@@ -3,6 +3,9 @@
 #include "Loader.hpp"
 
 #include "GLObjects/Framebuffer.hpp"
+#include "GLObjects/Mesh.hpp"
+
+#include "Util/Util.hpp"
 
 namespace neo {
     /* Library */
@@ -24,6 +27,15 @@ namespace neo {
         return mesh;
     }
 
+    Mesh* Library::createEmptyMesh(const std::string& name) {
+        auto it = mMeshes.find(name);
+        NEO_ASSERT(it == mMeshes.end(), "Mesh already found");
+        Mesh* mesh = new Mesh;
+        _insertMesh(name, mesh);
+        return mesh;
+
+    }
+
     Texture* Library::getTexture(const std::string& fileName, TextureFormat format) {
         auto it = mTextures.find(fileName);
         if (it != mTextures.end()) {
@@ -33,14 +45,6 @@ namespace neo {
         auto texture = Loader::loadTexture(fileName, format);
         _insertTexture(fileName, texture);
 
-        return texture;
-    }
-
-    Texture* Library::createEmptyTexture(const std::string& name) {
-        auto it = mTextures.find(name);
-        assert(it == mTextures.end(), "Texture already found");
-        Texture* texture = new Texture2D({}, glm::uvec2(1), { 0xF });
-        _insertTexture(name, texture);
         return texture;
     }
 

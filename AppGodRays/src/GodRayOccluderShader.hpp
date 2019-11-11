@@ -47,9 +47,8 @@ class GodRayOccluderShader : public Shader {
 
                 /* Bind texture */
                 if (auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                    auto texture = (const Texture2D *)(diffuseMap->mTexture);
-                    texture->bind();
-                    loadUniform("diffuseMap", texture->mTextureID);
+                    diffuseMap->mTexture.bind();
+                    loadUniform("diffuseMap", diffuseMap->mTexture.mTextureID);
                     loadUniform("useTexture", true);
                 }
                 else {

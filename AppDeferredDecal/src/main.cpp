@@ -52,7 +52,7 @@ struct Decal {
         gameObject = &Engine::createGameObject();
         spat = &Engine::addComponent<SpatialComponent>(gameObject, pos, scale);
         Engine::addComponent<DecalRenderable>(gameObject);
-        Engine::addComponent<DiffuseMapComponent>(gameObject, texture);
+        Engine::addComponent<DiffuseMapComponent>(gameObject, *texture);
         Engine::addComponent<RotationComponent>(gameObject, glm::vec3(0, 1, 0));
     }
 };
@@ -81,7 +81,7 @@ int main() {
 
     for (int i = 0; i < 20; i++) {
         Renderable tree(Library::getMesh("PineTree3.obj", true), glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
-        Engine::addComponent<DiffuseMapComponent>(tree.gameObject, Library::getTexture("PineTexture.png"));
+        Engine::addComponent<DiffuseMapComponent>(tree.gameObject, *Library::getTexture("PineTexture.png"));
     }
 
     // Terrain 
