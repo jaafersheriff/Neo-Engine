@@ -32,8 +32,6 @@ public:
 
             /* Bind mesh */
             CHECK_GL(glBindVertexArray(model->get<ParticleMeshComponent>()->mMesh->mVAOID));
-            CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, model->get<ParticleMeshComponent>()->mMesh->getVBO(VertexType::Position).vboID));
-            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->get<ParticleMeshComponent>()->mMesh->mElementVBO->vboID));
 
             /* DRAW */
             model->get<ParticleMeshComponent>()->mMesh->draw(model->get<ParticleMeshComponent>()->mNumVerts * 6);
