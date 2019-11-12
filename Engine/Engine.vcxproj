@@ -58,6 +58,8 @@
     <ClInclude Include="src\ext\imgui\stb_rect_pack.h" />
     <ClInclude Include="src\ext\imgui\stb_textedit.h" />
     <ClInclude Include="src\ext\imgui\stb_truetype.h" />
+    <ClInclude Include="src\ext\microprofile.h" />
+    <ClInclude Include="src\ext\microprofile_html.h" />
     <ClInclude Include="src\ext\stb_image.h" />
     <ClInclude Include="src\ext\tiny_obj_loader.h" />
     <ClInclude Include="src\GameObject\GameObject.hpp" />
@@ -117,6 +119,7 @@
     <ClCompile Include="src\ext\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\ext\microprofile.cpp" />
     <ClCompile Include="src\GameObject\GameObject.cpp" />
     <ClCompile Include="src\GLObjects\Texture.cpp" />
     <ClCompile Include="src\Loader\Library.cpp" />

@@ -6,6 +6,8 @@
 
 #include <vector>
 
+#include "ext/microprofile.h"
+
 namespace neo {
 
 #define NEO_STR(x) #x
@@ -18,6 +20,7 @@ namespace neo {
         }
 
         static void update() {
+            MICROPROFILE_SCOPEI("Util", "Util::update", MP_AUTO);
             /* Update delta time and FPS */
             float runTime = (float)getRunTime();
             mTotalFrames++;

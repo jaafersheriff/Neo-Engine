@@ -2,12 +2,15 @@
 
 #include "GameObject/GameObject.hpp"
 
+#include "ext/microprofile.h"
+
 namespace neo {
 
     std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> Messenger::mMessages;
     std::unordered_map<std::type_index, std::vector<std::function<void (const Message &)>>> Messenger::mReceivers;
 
     void Messenger::relayMessages() {
+        MICROPROFILE_SCOPEI("Messenger", "relayMessages()", MP_AUTO);
         static std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> messageBuffer;
 
         if (mMessages.size()) {

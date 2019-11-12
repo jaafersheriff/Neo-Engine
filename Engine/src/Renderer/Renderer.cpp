@@ -5,6 +5,7 @@
 #include "Window/Window.hpp"
 
 #include "ext/imgui/imgui_impl_opengl3.h"
+#include "ext/microprofile.h"
 
 namespace neo {
 
@@ -56,6 +57,9 @@ namespace neo {
     }
 
     void Renderer::resetState() {
+        MICROPROFILE_ENTERI("Renderer", "Renderer::resetState", MP_AUTO);
+        MICROPROFILE_GPU_ENTERI("RendererGPU", "resetState", MP_AUTO);
+
         CHECK_GL(glClearColor(0.0f, 0.0f, 0.0f, 1.f));
 
         CHECK_GL(glEnable(GL_DEPTH_TEST));
@@ -74,9 +78,14 @@ namespace neo {
         CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
 
         CHECK_GL(glBindVertexArray(0));
+
+        MICROPROFILE_LEAVE();
+        MICROPROFILE_GPU_LEAVE();
     }
 
     void Renderer::render(float dt) {
+        MICROPROFILE_SCOPEI("Renderer", "Renderer::render", MP_AUTO);
+        MICROPROFILE_SCOPEGPUI("Renderer::render", MP_AUTO);
         resetState();
 
         /* Get active shaders */
@@ -85,18 +94,36 @@ namespace neo {
         std::vector<Shader *> activePostShaders = _getActiveShaders(mPostShaders);
 
         /* Run compute */
+        MICROPROFILE_ENTERI("Renderer", "Compute shaders", MP_AUTO);
+        MICROPROFILE_GPU_ENTERI("RendererGPU", "Compute shaders", MP_AUTO);
         for (auto& shader : activeComputeShaders) {
             resetState();
+            MICROPROFILE_ENTERI(shader->mName.c_str(), "render", MP_AUTO);
+            MICROPROFILE_GPU_ENTERI("RendererGPU", "render", MP_AUTO);
             shader->render(*mDefaultCamera);
+            MICROPROFILE_LEAVE();
+            MICROPROFILE_GPU_LEAVE();
         }
+        MICROPROFILE_LEAVE();
+        MICROPROFILE_GPU_LEAVE();
 
         /* Render all preprocesses */
+        MICROPROFILE_ENTERI("Renderer", "PreScene shaders", MP_AUTO);
+        MICROPROFILE_GPU_ENTERI("RendererGPU", "PreScene shaders", MP_AUTO);
         for (auto & shader : activePreShaders) {
             resetState();
+            MICROPROFILE_ENTERI(shader->mName.c_str(), "render", MP_AUTO);
+            MICROPROFILE_GPU_ENTERI("RendererGPU", "render shaders", MP_AUTO);
             shader->render(*mDefaultCamera);
+            MICROPROFILE_LEAVE();
+            MICROPROFILE_GPU_LEAVE();
         }
+        MICROPROFILE_LEAVE();
+        MICROPROFILE_GPU_LEAVE();
 
         /* Reset default FBO state */
+        MICROPROFILE_ENTERI("Renderer", "Set DefaultFBO", MP_AUTO);
+        MICROPROFILE_GPU_ENTERI("RendererGPU", "Set DefaultFBO", MP_AUTO);
         if (activePostShaders.size()) {
             mDefaultFBO->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
@@ -110,12 +137,16 @@ namespace neo {
         glm::ivec2 frameSize = Window::getFrameSize();
         CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+        MICROPROFILE_LEAVE();
+        MICROPROFILE_GPU_LEAVE();
  
         /* Render all scene shaders */
         renderScene(*mDefaultCamera);
 
         /* Post process with ping & pong */
         if (activePostShaders.size()) {
+            MICROPROFILE_ENTERI("Renderer", "PostProcess shaders", MP_AUTO);
+            MICROPROFILE_GPU_ENTERI("RendererGPU", "PostProcess shaders", MP_AUTO);
             /* Render first post process shader into appropriate output buffer */
             Framebuffer *inputFBO = mDefaultFBO;
             Framebuffer *outputFBO = activePostShaders.size() == 1 ? Library::getFBO("0") : Library::getFBO("pong");
@@ -138,18 +169,30 @@ namespace neo {
             if (activePostShaders.size() > 1) {
                 _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("0"));
             }
+            MICROPROFILE_LEAVE();
+            MICROPROFILE_GPU_LEAVE();
         }
 
         /* Render imgui */
         if (Engine::mImGuiEnabled) {
+            MICROPROFILE_ENTERI("Renderer", "Render ImGui", MP_AUTO);
+            MICROPROFILE_GPU_ENTERI("RendererGPU", "Render ImGui", MP_AUTO);
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            MICROPROFILE_LEAVE();
+            MICROPROFILE_GPU_LEAVE();
         }
 
+        MICROPROFILE_ENTERI("Renderer", "SwapBuffers", MP_AUTO);
+        MICROPROFILE_GPU_ENTERI("Renderer", "SwapBuffers", MP_AUTO);
         glfwSwapBuffers(Window::getWindow());
+        MICROPROFILE_LEAVE();
+        MICROPROFILE_GPU_LEAVE();
     }
 
     void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output) {
+        MICROPROFILE_ENTERI("Renderer", "renderPostProcess", MP_AUTO);
+        MICROPROFILE_GPU_ENTERI("RendererGPU", "PostProcess shaders", MP_AUTO);
         // Reset output FBO
         output->bind();
         resetState();
@@ -173,28 +216,42 @@ namespace neo {
 
         // Allow shader to do any prep (eg. bind uniforms) 
         // Also allows shader to override output render target (user responsible for handling)
+        MICROPROFILE_ENTERI("Renderer", "renderPostProcess_render", MP_AUTO);
+        MICROPROFILE_GPU_ENTERI("RendererGPU", "renderPostProcess_render", MP_AUTO);
         shader.render(*mDefaultCamera);
+        MICROPROFILE_LEAVE();
+        MICROPROFILE_GPU_LEAVE();
 
         // Render post process effect
         mesh->draw();
 
         shader.unbind();
+        MICROPROFILE_LEAVE();
+        MICROPROFILE_GPU_LEAVE();
     }
 
     void Renderer::renderScene(const CameraComponent &camera) {
-       for (auto& shader : mSceneShaders) {
+        MICROPROFILE_ENTERI("Renderer", "renderScene", MP_AUTO);
+        MICROPROFILE_GPU_ENTERI("RendererGPU", "renderScene", MP_AUTO);
+
+        for (auto& shader : mSceneShaders) {
             if (shader.second->mActive) {
                 resetState();
+                MICROPROFILE_ENTERI("Renderer", shader.second->mName.c_str(), MP_AUTO);
+                MICROPROFILE_GPU_ENTERI("RendererGPU", shader.second->mName.c_str(), MP_AUTO);
                 shader.second->render(camera);
+                MICROPROFILE_LEAVE();
+                MICROPROFILE_GPU_LEAVE();
             }
         }
+        MICROPROFILE_LEAVE();
+        MICROPROFILE_GPU_LEAVE();
     }
 
     void Renderer::setDefaultFBO(const std::string &name) {
         auto fb = Library::getFBO(name);
-        if (fb) {
-            mDefaultFBO = fb;
-        }
+        NEO_ASSERT(fb, "Attempting to set an invalid FBO");
+        mDefaultFBO = fb;
     }
 
     std::vector<Shader *> Renderer::_getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &shaders) {

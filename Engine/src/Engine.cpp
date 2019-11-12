@@ -16,6 +16,8 @@ extern "C" {
 
 #include "Loader/Loader.hpp"
 
+#include "ext/microprofile.h"
+
 #include <time.h>
 #include <iostream>
 
@@ -48,6 +50,7 @@ namespace neo {
     std::unordered_map<std::string, std::function<void()>> Engine::mImGuiFuncs;
 
     void Engine::init(EngineConfig config) {
+        
         /* Init base engine */
         srand((unsigned int)(time(0)));
         mConfig = config;
@@ -69,9 +72,17 @@ namespace neo {
 
         /* Init Util */
         Util::init();
+#if MICROPROFILE_ENABLED
+	MicroProfileOnThreadCreate("MAIN THREAD");
+	MicroProfileGpuInitGL();
+	MicroProfileSetEnableAllGroups(true);
+	MicroProfileSetForceMetaCounters(1);
+	MicroProfileStartContextSwitchTrace();
+#endif
     }
 
     void Engine::run() {
+       
         /* Apply config */
         if (mConfig.attachEditor) {
             addSystem<MouseRaySystem>();
@@ -86,7 +97,12 @@ namespace neo {
         /* Init systems */
         _initSystems();
 
+        MICROPROFILE_DEFINE(Engine, "Engine", "Engine", MP_AUTO);
+		MICROPROFILE_SCOPE(Engine); 
+
         while (!Window::shouldClose()) {
+            MICROPROFILE_ENTERI("Engine", "Engine::run", MP_AUTO);
+
             /* Update Util */
             Util::update();
 
@@ -99,17 +115,24 @@ namespace neo {
             Messenger::relayMessages();
 
             /* Update each system */
-            for (auto & system : mSystems) {
+            MICROPROFILE_ENTERI("Engine", "System update", MP_AUTO);
+            for (auto& system : mSystems) {
                 if (system.second->mActive) {
+                    // TODO : system names don't show up in profile
+                    MICROPROFILE_ENTERI("System", system.second->mName.c_str(), MP_AUTO);
                     system.second->update((float)Util::mTimeStep);
+                    MICROPROFILE_LEAVE();
                     Messenger::relayMessages();
                 }
             }
- 
+            MICROPROFILE_LEAVE();
+
             /* Update imgui functions */
             if (mImGuiEnabled) {
+                MICROPROFILE_ENTERI("Engine", "_runImGui", MP_AUTO);
                 ImGui::GetIO().FontGlobalScale = 2.0f;
                 _runImGui();
+                MICROPROFILE_LEAVE();
                 Messenger::relayMessages();
             }
 
@@ -117,9 +140,14 @@ namespace neo {
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
             Renderer::render((float)Util::mTimeStep);
+
+            MicroProfileFlip(0);
+            MICROPROFILE_LEAVE();
         }
 
         shutDown();
+        
+	MicroProfileShutdown();
     }
 
     GameObject & Engine::createGameObject() {
@@ -137,6 +165,7 @@ namespace neo {
     }
 
     void Engine::_processInitQueue() {
+        MICROPROFILE_SCOPEI("Engine", "_processKillQueue()", MP_AUTO);
         _initGameObjects();
         _initComponents();
     }
@@ -199,6 +228,7 @@ namespace neo {
     }
 
     void Engine::_processKillQueue() {
+        MICROPROFILE_SCOPEI("Engine", "_processKillQueue()", MP_AUTO);
         /* Remove Components from GameObjects */
         for (auto & comp : mComponentKillQueue) {
             comp.second->getGameObject().removeComponent(*(comp.second), comp.first);
@@ -481,7 +511,7 @@ namespace neo {
                 if (ImGui::Button("Create new GameObject")) {
                     removeComponent<SelectedComponent>(*getSingleComponent<SelectedComponent>());
                     auto& go = createGameObject();
-                    // addComponent<BoundingBoxComponent>(&go, std::vector<glm::vec3>{ glm::vec3(-1.f), glm::vec3(1.f) });
+                    addComponent<BoundingBoxComponent>(&go, Library::getMesh("sphere"));
                     addComponent<SpatialComponent>(&go);
                     addComponent<SelectableComponent>(&go);
                     addComponent<SelectedComponent>(&go);

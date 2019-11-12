@@ -84,6 +84,8 @@
     <ClInclude Include="src\GLObjects\Texture2D.hpp" />
     <ClInclude Include="src\GLObjects\Texture3D.hpp" />
     <ClInclude Include="src\GLObjects\Texture1D.hpp" />
+    <ClInclude Include="src\ext\microprofile.h" />
+    <ClInclude Include="src\ext\microprofile_html.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />
@@ -121,6 +123,7 @@
     <ClCompile Include="src\Systems\CameraSystems\FrustaFittingSystem.cpp" />
     <ClCompile Include="src\Systems\SelectingSystems\EditorSystem.cpp" />
     <ClCompile Include="src\GLObjects\Texture.cpp" />
+    <ClCompile Include="src\ext\microprofile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />

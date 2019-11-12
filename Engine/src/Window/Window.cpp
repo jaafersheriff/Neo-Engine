@@ -175,22 +175,29 @@ namespace neo {
     }
 
     void Window::update() {
+        MICROPROFILE_SCOPEI("Window", "Window::update", MP_AUTO);
         /* Don't update display if window is minimized */
         if (glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED)) {
             return;
         }
 
+        MICROPROFILE_ENTERI("Window", "Mouse::update", MP_AUTO);
         double x, y;
         glfwGetCursorPos(mWindow, &x, &y);
         Mouse::update(x, y);
+        MICROPROFILE_LEAVE();
 
         if (Engine::mImGuiEnabled) {
+            MICROPROFILE_ENTERI("Window", "ImGui::NewFrame", MP_AUTO);
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
+            MICROPROFILE_LEAVE();
         }
 
+        MICROPROFILE_ENTERI("Window", "glfwPollEvents", MP_AUTO);
         glfwPollEvents();
+        MICROPROFILE_LEAVE();
     }
 
     void Window::setWindowTitle(const std::string &name) {
