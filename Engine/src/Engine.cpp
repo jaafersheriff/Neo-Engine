@@ -76,8 +76,8 @@ namespace neo {
 	MicroProfileOnThreadCreate("MAIN THREAD");
 	MicroProfileGpuInitGL();
 	MicroProfileSetEnableAllGroups(true);
-	MicroProfileSetForceMetaCounters(1);
-	MicroProfileStartContextSwitchTrace();
+	// MicroProfileSetForceMetaCounters(1);
+	// MicroProfileStartContextSwitchTrace();
 #endif
     }
 
@@ -101,7 +101,7 @@ namespace neo {
 		MICROPROFILE_SCOPE(Engine); 
 
         while (!Window::shouldClose()) {
-            MICROPROFILE_ENTERI("Engine", "Engine::run", MP_AUTO);
+            MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);
 
             /* Update Util */
             Util::update();
@@ -142,12 +142,10 @@ namespace neo {
             Renderer::render((float)Util::mTimeStep);
 
             MicroProfileFlip(0);
-            MICROPROFILE_LEAVE();
         }
 
         shutDown();
-        
-	MicroProfileShutdown();
+	    MicroProfileShutdown();
     }
 
     GameObject & Engine::createGameObject() {
