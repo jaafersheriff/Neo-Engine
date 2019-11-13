@@ -42,8 +42,6 @@ namespace neo {
             loadUniform("V", camera.getView());
 
             for (auto& renderable : Engine::getComponentTuples<renderable::AlphaTestRenderable, MeshComponent, SpatialComponent>()) {
-                MICROPROFILE_SCOPEI("AlphaTestShader", "draw", MP_AUTO);
-
                 auto spatial = renderable->get<SpatialComponent>();
                 loadUniform("M", spatial->getModelMatrix());
 

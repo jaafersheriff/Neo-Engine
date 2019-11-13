@@ -62,7 +62,6 @@ namespace neo {
                 const auto& cameraFrustum = camera->getGameObject().getComponentByType<FrustumComponent>();
 
                 for (auto& renderable : Engine::getComponentTuples<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>()) {
-                    MICROPROFILE_SCOPEI("ShadowCasterShader", "draw", MP_AUTO);
                     auto renderableSpatial = renderable->get<SpatialComponent>();
 
                     // VFC

@@ -4,9 +4,9 @@
 namespace neo {
 
     void CameraControllerSystem::update(const float dt) {
-        if (auto comp = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
-            _updateLook(dt, comp->get<CameraComponent>());
-            _updatePosition(dt, comp->get<CameraComponent>();
+        if (auto comp = Engine::getSingleComponent<CameraControllerComponent>()) {
+            _updateLook(dt, *comp);
+            _updatePosition(dt, *comp);
         }
     }
 

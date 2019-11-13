@@ -76,8 +76,7 @@ namespace neo {
 	MicroProfileOnThreadCreate("MAIN THREAD");
 	MicroProfileGpuInitGL();
 	MicroProfileSetEnableAllGroups(true);
-	// MicroProfileSetForceMetaCounters(1);
-	// MicroProfileStartContextSwitchTrace();
+	MicroProfileSetForceMetaCounters(1);
 #endif
     }
 
@@ -97,9 +96,6 @@ namespace neo {
         /* Init systems */
         _initSystems();
 
-        MICROPROFILE_DEFINE(Engine, "Engine", "Engine", MP_AUTO);
-		MICROPROFILE_SCOPE(Engine); 
-
         while (!Window::shouldClose()) {
             MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);
 
@@ -118,8 +114,8 @@ namespace neo {
             MICROPROFILE_ENTERI("Engine", "System update", MP_AUTO);
             for (auto& system : mSystems) {
                 if (system.second->mActive) {
-                    // TODO : system names don't show up in profile
-                    MICROPROFILE_ENTERI("System", system.second->mName.c_str(), MP_AUTO);
+                    MICROPROFILE_DEFINE(System, "System", system.second->mName.c_str(), MP_AUTO);
+		            MICROPROFILE_ENTER(System); 
                     system.second->update((float)Util::mTimeStep);
                     MICROPROFILE_LEAVE();
                     Messenger::relayMessages();

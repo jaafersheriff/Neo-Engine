@@ -41,8 +41,6 @@ namespace neo {
             const auto cameraFrustum = camera.getGameObject().getComponentByType<FrustumComponent>();
 
             for (auto& renderable : Engine::getComponentTuples<renderable::OutlineRenderable, MeshComponent, SpatialComponent>()) {
-                MICROPROFILE_SCOPEI("OutlineShader", "draw", MP_AUTO);
-
                 auto renderableOutline = renderable->get<renderable::OutlineRenderable>();
                 auto renderableSpatial = renderable->get<SpatialComponent>();
 
