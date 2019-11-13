@@ -42,6 +42,8 @@ namespace neo {
                 loadUniform("V", camera.getView());
 
                 for (auto& line : Engine::getComponents<LineMeshComponent>()) {
+                    MICROPROFILE_SCOPEI("LineShader", "draw", MP_AUTO);
+
                     glm::mat4 M(1.f);
                     if (line->mUseParentSpatial) {
                         if (auto spatial = line->getGameObject().getComponentByType<SpatialComponent>()) {

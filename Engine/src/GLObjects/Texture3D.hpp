@@ -19,6 +19,9 @@ namespace neo {
         }
 
         virtual void upload(const uint8_t* data = nullptr) override {
+            MICROPROFILE_SCOPEI("Texture3D", "upload", MP_AUTO);
+            MICROPROFILE_SCOPEGPUI("Texture3D::upload", MP_AUTO);
+
             bind();
 
             CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 1, mFormat.inputFormat, mWidth, mHeight, mDepth, 0, mFormat.format, GL_UNSIGNED_BYTE, data));

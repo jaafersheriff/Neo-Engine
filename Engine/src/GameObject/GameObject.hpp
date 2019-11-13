@@ -4,6 +4,8 @@
 #include <functional>
 #include <typeindex>
 
+#include "ext/microprofile.h"
+
 namespace neo {
 
     class Engine;
@@ -65,6 +67,7 @@ namespace neo {
 
     template <typename CompT>
     const std::vector<CompT *> & GameObject::getComponentsByType() const {
+        MICROPROFILE_SCOPEI("GameObject", "getComponentsByType", MP_AUTO);
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
@@ -79,6 +82,7 @@ namespace neo {
 
     template <typename CompT>
     CompT * GameObject::getComponentByType() const {
+        MICROPROFILE_SCOPEI("GameObject", "getComponentByType", MP_AUTO);
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 

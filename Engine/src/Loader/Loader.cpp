@@ -26,6 +26,8 @@ namespace neo {
     }
 
     Mesh* Loader::loadMesh(const std::string &fileName, bool doResize) {
+        MICROPROFILE_SCOPEI("Loader", "loadMesh", MP_AUTO);
+
         /* Create mesh */
         Mesh* mesh = new Mesh;
 
@@ -115,6 +117,7 @@ namespace neo {
     }
 
     Texture2D* Loader::loadTexture(const std::string &fileName, TextureFormat format) {
+        MICROPROFILE_SCOPEI("Loader", "loadTexture", MP_AUTO);
         /* Create an empty texture if it is not already exist in the library */
         int width, height, components;
         uint8_t* data = _loadTextureData(width, height, components, fileName);
@@ -129,6 +132,8 @@ namespace neo {
     }
 
     TextureCubeMap* Loader::loadTexture(const std::string &name, const std::vector<std::string>& files) {
+        MICROPROFILE_SCOPEI("Loader", "loadCubemap", MP_AUTO);
+
         NEO_ASSERT(files.size() == 6, "Attempting to create cube map without 6 files");
 
         std::vector<uint8_t*> data;

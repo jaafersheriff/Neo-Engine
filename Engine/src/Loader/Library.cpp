@@ -14,6 +14,7 @@ namespace neo {
     std::unordered_map<std::string, Framebuffer *> Library::mFramebuffers;
 
     Mesh* Library::getMesh(const std::string& fileName, bool doResize) {
+        MICROPROFILE_SCOPEI("Library", "getMesh", MP_AUTO);
         /* Search map first */
         auto it = mMeshes.find(fileName);
         if (it != mMeshes.end()) {
@@ -37,6 +38,7 @@ namespace neo {
     }
 
     Texture* Library::getTexture(const std::string& fileName, TextureFormat format) {
+        MICROPROFILE_SCOPEI("Library", "getTexture", MP_AUTO);
         auto it = mTextures.find(fileName);
         if (it != mTextures.end()) {
             return it->second;
@@ -49,6 +51,7 @@ namespace neo {
     }
 
     Texture* Library::getCubemap(const std::string& name, const std::vector<std::string> &files) {
+        MICROPROFILE_SCOPEI("Library", "getCubemap", MP_AUTO);
         auto it = mTextures.find(name);
         if (it != mTextures.end()) {
             return it->second;
@@ -61,6 +64,7 @@ namespace neo {
     }
 
     Framebuffer* Library::getFBO(const std::string &name) {
+        MICROPROFILE_SCOPEI("Library", "getFBO", MP_AUTO);
         auto it = mFramebuffers.find(name);
         if (it == mFramebuffers.end()) {
             mFramebuffers.emplace(name, new Framebuffer);

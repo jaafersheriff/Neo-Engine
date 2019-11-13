@@ -40,6 +40,7 @@ namespace neo {
 
         virtual Mesh & getMesh() const override {
             if (mDirty && mNodes.size()) {
+                MICROPROFILE_SCOPEI("LineMeshComponent", "_updateMesh", MP_AUTO);
                 std::vector<float> positions;
                 std::vector<float> colors;
                 positions.resize(mNodes.size() * 3);

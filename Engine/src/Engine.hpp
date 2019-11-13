@@ -22,6 +22,8 @@
 
 #include "GameObject/GameObject.hpp"
 
+#include "ext/microprofile.h"
+
 namespace neo {
     class ComponentTuple;
 
@@ -160,6 +162,7 @@ namespace neo {
 
     template <typename CompT>
     const std::vector<CompT *> & Engine::getComponents() {
+        MICROPROFILE_SCOPEI("Engine", "getComponents", MP_AUTO);
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
@@ -175,6 +178,7 @@ namespace neo {
 
     template <typename CompT>
     CompT* Engine::getSingleComponent() {
+        MICROPROFILE_SCOPEI("Engine", "getSingleComponents", MP_AUTO);
         auto components = getComponents<CompT>();
         if (!components.size()) {
             return nullptr;
@@ -186,6 +190,7 @@ namespace neo {
 
     template <typename CompT, typename... CompTs>
     std::unique_ptr<ComponentTuple> Engine::getComponentTuple() {
+        MICROPROFILE_SCOPEI("Engine", "getComponentTuple", MP_AUTO);
         for (auto comp : getComponents<CompT>()) {
             if (auto tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject())) {
                 return tuple;
@@ -196,6 +201,7 @@ namespace neo {
  
     template <typename CompT, typename... CompTs>
     std::vector<std::unique_ptr<ComponentTuple>> Engine::getComponentTuples() {
+        MICROPROFILE_SCOPEI("Engine", "getComponentTuple", MP_AUTO);
         std::vector<std::unique_ptr<ComponentTuple>> tuples;
         for (auto comp : getComponents<CompT>()) {
             if (auto tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject())) {

@@ -111,14 +111,17 @@ namespace neo {
                 texture.bind();
                 loadUniform("shadowMap", texture.mTextureID);
 
+                const auto& cameraFrustum = camera.getGameObject().getComponentByType<FrustumComponent>();
                 for (auto& renderable : Engine::getComponentTuples<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>()) {
+                    MICROPROFILE_SCOPEI("PhongShaderShader", "draw", MP_AUTO);
                     auto renderableSpatial = renderable->get<SpatialComponent>();
 
                     // VFC
-                    if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                        if (const auto& frustumPlanes = camera.getGameObject().getComponentByType<FrustumComponent>()) {
+                    if (cameraFrustum) {
+                        MICROPROFILE_SCOPEI("PhongShaderShader", "VFC", MP_AUTO);
+                        if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
                             float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
-                            if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
+                            if (!cameraFrustum->isInFrustum(renderableSpatial->getPosition(), radius)) {
                                 continue;
                             }
                         }

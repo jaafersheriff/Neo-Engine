@@ -55,6 +55,7 @@ namespace neo {
     }
 
     void CameraComponent::_detView() const {
+        MICROPROFILE_SCOPEI("CameraComponent", "_detView", MP_AUTO);
         auto spatial = mGameObject->getComponentByType<SpatialComponent>();
         NEO_ASSERT(spatial, "Camera has no SpatialComponent");
         mViewMat = glm::lookAt(spatial->getPosition(), spatial->getPosition() + spatial->getLookDir(), spatial->getUpDir());

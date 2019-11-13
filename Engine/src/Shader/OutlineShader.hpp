@@ -41,11 +41,14 @@ namespace neo {
             const auto cameraFrustum = camera.getGameObject().getComponentByType<FrustumComponent>();
 
             for (auto& renderable : Engine::getComponentTuples<renderable::OutlineRenderable, MeshComponent, SpatialComponent>()) {
+                MICROPROFILE_SCOPEI("OutlineShader", "draw", MP_AUTO);
+
                 auto renderableOutline = renderable->get<renderable::OutlineRenderable>();
                 auto renderableSpatial = renderable->get<SpatialComponent>();
 
                 // VFC
                 if (cameraFrustum) {
+                    MICROPROFILE_SCOPEI("OutlineShader", "VFC", MP_AUTO);
                     if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
                         float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
                         if (!cameraFrustum->isInFrustum(renderableSpatial->getPosition(), radius)) {

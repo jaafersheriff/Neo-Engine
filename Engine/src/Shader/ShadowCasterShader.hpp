@@ -59,14 +59,18 @@ namespace neo {
                 loadUniform("P", camera->getProj());
                 loadUniform("V", camera->getView());
 
+                const auto& cameraFrustum = camera->getGameObject().getComponentByType<FrustumComponent>();
+
                 for (auto& renderable : Engine::getComponentTuples<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>()) {
+                    MICROPROFILE_SCOPEI("ShadowCasterShader", "draw", MP_AUTO);
                     auto renderableSpatial = renderable->get<SpatialComponent>();
 
                     // VFC
-                    if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                        if (const auto& frustumPlanes = camera->getGameObject().getComponentByType<FrustumComponent>()) {
+                    if (cameraFrustum) {
+                        MICROPROFILE_SCOPEI("ShadowCasterShader", "VFC", MP_AUTO);
+                        if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
                             float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z);
-                            if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
+                            if (!cameraFrustum->isInFrustum(renderableSpatial->getPosition(), radius)) {
                                 continue;
                             }
                         }

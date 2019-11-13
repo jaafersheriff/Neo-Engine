@@ -33,6 +33,7 @@ namespace neo {
     }
 
     void CameraControllerComponent::_updateSpatialOrientation() {
+        MICROPROFILE_SCOPEI("CameraControllerComponent", "_updateSpatialOrientation", MP_AUTO);
         if (mTheta > Util::PI()) {
             mTheta = std::fmod(mTheta, Util::PI()) - Util::PI();
         }

@@ -24,6 +24,9 @@ namespace neo {
 
 
         void upload(const std::vector<glm::uvec2>& sizes, uint8_t** data) {
+            MICROPROFILE_SCOPEI("TextureCube", "upload", MP_AUTO);
+            MICROPROFILE_SCOPEGPUI("TextureCube::upload", MP_AUTO);
+
             NEO_ASSERT(data, "Trying to upload a CubeMap with invalid data");
             bind();
 

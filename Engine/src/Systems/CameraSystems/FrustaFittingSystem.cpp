@@ -23,7 +23,6 @@ namespace neo {
             return;
         }
 
-
         /////////////////////// Do the fitting! ///////////////////////////////
         auto orthoSpat = orthoCamera->getGameObject().getComponentByType<SpatialComponent>();
         auto perspectiveSpat = perspectiveCamera->getGameObject().getComponentByType<SpatialComponent>();

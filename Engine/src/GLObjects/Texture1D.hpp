@@ -19,6 +19,9 @@ namespace neo {
         }
 
         virtual void upload(const uint8_t* data = nullptr) override {
+            MICROPROFILE_SCOPEI("Texture1D", "upload", MP_AUTO);
+            MICROPROFILE_SCOPEGPUI("Texture1D::upload", MP_AUTO);
+
             /* Bind texture buffer object to active texture */
             bind();
 
