@@ -106,9 +106,8 @@ namespace neo {
         CHECK_GL(glGetProgramiv(mPID, GL_LINK_STATUS, &linkSuccess));
         if (!linkSuccess) {
             GLHelper::printProgramInfoLog(mPID);
-            std::cout << "Error linking shader " << mName << std::endl;
-            std::cin.get();
-            exit(EXIT_FAILURE);
+            printf("Error linking shader %s\n", mName.c_str());
+            NEO_ASSERT(false, "");
         }
 
         if (mVertexID) {
@@ -176,7 +175,8 @@ namespace neo {
             return "../Engine/shaders/" + fileName;
         }
         else {
-            NEO_ASSERT(false, "Shader file doesn't exist");
+            printf("%s shader file doesn't exist %s\n", fileName.c_str());
+            NEO_ASSERT(false, "");
         }
     }
 
@@ -216,8 +216,7 @@ namespace neo {
                 std::cout << lineNum++ << " " << line << std::endl;
             }
 
-            std::cin.get();
-            exit(EXIT_FAILURE);
+            NEO_ASSERT(false, "");
         }
 
         return shader;

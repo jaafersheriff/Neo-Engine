@@ -103,7 +103,7 @@ namespace neo {
 
         mFrameSize.x = width; mFrameSize.y = height;
 
-        // This message is sent for every frame that the frame is being resized..
+        // This message is sent for every frame that the window is being resized..
         // During a quick click-and-drag resize of the window, this can result 
         // in hundreds of messages 
         Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, mFrameSize);

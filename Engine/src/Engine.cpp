@@ -111,7 +111,7 @@ namespace neo {
             Messenger::relayMessages();
 
             /* Update each system */
-            MICROPROFILE_ENTERI("Engine", "System update", MP_AUTO);
+            MICROPROFILE_ENTERI("System", "System update", MP_AUTO);
             for (auto& system : mSystems) {
                 if (system.second->mActive) {
                     MICROPROFILE_DEFINE(System, "System", system.second->mName.c_str(), MP_AUTO);
