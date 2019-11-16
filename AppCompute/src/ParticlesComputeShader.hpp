@@ -20,20 +20,23 @@ public:
         Shader("ParticlesCompute Shader", compute)
     {
 
+        TextureFormat format;
+        format.filter = GL_LINEAR;
+        format.mode = GL_REPEAT;
+        format.format = GL_RGBA;
+        format.inputFormat = GL_RGBA8_SNORM;
+        noiseTex = Library::createEmptyTexture<Texture3D>("noiseTex", format);
+        noiseTex->resize(glm::uvec3(16));
+        _generateNoiseTexture();
+    }
+
+    void _generateNoiseTexture() {
         uint8_t* data = new uint8_t[16 * 16 * 16 * 4];
         uint8_t* ptr = data;
         for (int i = 0; i < 16 * 16 * 16 * 4; i++) {
             data[i] = rand() & 0xff;
         }
 
-        TextureFormat format;
-        format.filter = GL_LINEAR;
-        format.mode = GL_REPEAT;
-        format.format = GL_RGBA;
-        format.inputFormat = GL_RGBA8;
-
-        noiseTex = Library::createEmptyTexture<Texture3D>("noiseTex", format);
-        noiseTex->resize(glm::uvec3(16));
         noiseTex->upload(data);
 
         delete[] data;
@@ -72,5 +75,8 @@ public:
 
     virtual void imguiEditor() override {
         ImGui::SliderInt("GroupSize", &groupSizeWidth, 1, 128);
+        if (ImGui::Button("Regenerate noise")) {
+            _generateNoiseTexture();
+        }
     }
 };

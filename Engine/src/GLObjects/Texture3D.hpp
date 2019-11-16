@@ -24,7 +24,7 @@ namespace neo {
 
             bind();
 
-            CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.inputFormat, mWidth, mHeight, mDepth, 0, mFormat.format, GL_UNSIGNED_BYTE, data));
+            CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.inputFormat, mWidth, mHeight, mDepth, 0, mFormat.format, GL_BYTE, data));
 
             CHECK_GL(glBindTexture(GL_TEXTURE_3D, 0));
         }

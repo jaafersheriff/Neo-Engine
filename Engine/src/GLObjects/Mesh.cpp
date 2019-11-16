@@ -47,16 +47,16 @@ namespace neo {
 
         CHECK_GL(glBindVertexArray(mVAOID));
         CHECK_GL(glGenBuffers(1, (GLuint *)&vertexBuffer.vboID));
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
+        CHECK_GL(glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertexBuffer.vboID));
 
         if (buffer.size()) {
-            CHECK_GL(glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_STATIC_DRAW));
+            CHECK_GL(glBufferData(GL_SHADER_STORAGE_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_STATIC_DRAW));
         }
         CHECK_GL(glEnableVertexAttribArray(attribArray));
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
+        CHECK_GL(glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertexBuffer.vboID));
         CHECK_GL(glVertexAttribPointer(attribArray, stride, GL_FLOAT, GL_FALSE, 0, (const void *)0));
 
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        CHECK_GL(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
         CHECK_GL(glBindVertexArray(0));
 
         mVBOs[type] = vertexBuffer;

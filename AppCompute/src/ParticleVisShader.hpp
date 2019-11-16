@@ -23,8 +23,8 @@ public:
         loadUniform("V", camera.getView());
 
         for (auto& model : Engine::getComponentTuples<ParticleMeshComponent, SpatialComponent>()) {
-            CHECK_GL(glEnable(GL_BLEND));
-            CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE));
+            // CHECK_GL(glEnable(GL_BLEND));
+            // CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE));
             CHECK_GL(glDisable(GL_DEPTH_TEST));
             CHECK_GL(glDisable(GL_CULL_FACE));
 
