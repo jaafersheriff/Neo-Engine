@@ -20,7 +20,7 @@ public:
         mMesh = Library::createEmptyMesh("Particles");
         mMesh->addVertexBuffer(VertexType::Position, 0, 4); // positions
         mMesh->addVertexBuffer(VertexType::Color0, 1, 4); // velocity
-        mMesh->addElementBuffer();
+        // mMesh->addElementBuffer();
         updateBuffers();
     }
 
@@ -57,6 +57,6 @@ public:
             indices[index++] = element + 2;
             indices[index++] = element + 3;
         }
-        mMesh->updateElementBuffer(indices);
+        // mMesh->updateElementBuffer(indices);
     }
 };

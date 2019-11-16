@@ -46,7 +46,7 @@ namespace neo {
 
         auto it = mTextures.find(name);
         NEO_ASSERT(it == mTextures.end(), "Texture already found");
-        Texture* texture = new T(format, glm::uvec2(1), { 0xF });
+        Texture* texture = new T(format, glm::uvec3(1), { 0xF });
         _insertTexture(name, texture);
         return texture;
     }

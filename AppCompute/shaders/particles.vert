@@ -22,5 +22,6 @@ void main() {
 
     fragTex = quadPos;
 
-    gl_Position = P * V * vec4(vertEyePos.xyz, 1.0);
+    gl_Position = P * vec4(vertEyePos.xyz, 1.0);
+    gl_Position = P * V * vec4(particlePos.xyz, 1.0);
 }

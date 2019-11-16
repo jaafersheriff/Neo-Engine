@@ -14,13 +14,13 @@ class ParticlesComputeShader : public Shader {
 public:
 
     int groupSizeWidth = 64;
-    Texture3D* noiseTex;
+    Texture* noiseTex;
 
     ParticlesComputeShader(const std::string &compute) :
         Shader("ParticlesCompute Shader", compute)
     {
 
-        uint8_t* data = new uint8_t[16 * 16 * 16 * 4 * 2];
+        uint8_t* data = new uint8_t[16 * 16 * 16 * 4];
         uint8_t* ptr = data;
         for (int i = 0; i < 16 * 16 * 16 * 4; i++) {
             data[i] = rand() & 0xff;
@@ -30,9 +30,11 @@ public:
         format.filter = GL_LINEAR;
         format.mode = GL_REPEAT;
         format.format = GL_RGBA;
-        format.inputFormat = GL_RGBA16;
+        format.inputFormat = GL_RGBA8;
 
-        noiseTex = new Texture3D(format, glm::uvec3(16), data);
+        noiseTex = Library::createEmptyTexture<Texture3D>("noiseTex", format);
+        noiseTex->resize(glm::uvec3(16));
+        noiseTex->upload(data);
 
         delete[] data;
     }
