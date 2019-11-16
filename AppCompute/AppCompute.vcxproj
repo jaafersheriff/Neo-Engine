@@ -123,6 +123,7 @@
   <ItemGroup>
     <None Include="README.md" />
     <None Include="shaders\particles.frag" />
+    <None Include="shaders\particles.geom" />
     <None Include="shaders\particles.vert" />
   </ItemGroup>
   <ItemGroup>

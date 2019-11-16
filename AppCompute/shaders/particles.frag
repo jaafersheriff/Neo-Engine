@@ -1,6 +1,6 @@
 
-in vec4 fragCol;
-in vec2 fragTex;
+//in vec4 fragCol;
+//in vec2 fragTex;
 
 out vec4 color;
 

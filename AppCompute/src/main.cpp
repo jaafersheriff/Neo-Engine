@@ -61,7 +61,7 @@ int main() {
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
     Renderer::addComputeShader<ParticlesComputeShader>("particles.compute");
-    Renderer::addSceneShader<ParticleVisShader>("particles.vert", "particles.frag");
+    Renderer::addSceneShader<ParticleVisShader>("particles.vert", "particles.frag", "particles.geom");
 
     Engine::addImGuiFunc("Mesh", []() {
         if (auto mesh = Engine::getComponentTuple<ParticleMeshComponent, SpatialComponent>()) {

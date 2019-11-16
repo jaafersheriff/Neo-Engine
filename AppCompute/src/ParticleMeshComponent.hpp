@@ -18,9 +18,9 @@ public:
         Component(go)
     {
         mMesh = Library::createEmptyMesh("Particles");
+        mMesh->mPrimitiveType = GL_POINTS;
         mMesh->addVertexBuffer(VertexType::Position, 0, 4); // positions
         mMesh->addVertexBuffer(VertexType::Color0, 1, 4); // velocity
-        mMesh->addElementBuffer();
         updateBuffers();
     }
 
@@ -28,35 +28,18 @@ public:
         if (ImGui::DragInt("#Verts", &mNumVerts, 1, 3, 2048)) {
             updateBuffers();
         }
-        if (ImGui::Button("Points")) {
-            mMesh->mPrimitiveType = GL_POINTS;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Triangles")) {
-            mMesh->mPrimitiveType = GL_TRIANGLES;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Triangle Strip")) {
-            mMesh->mPrimitiveType = GL_TRIANGLE_STRIP;
-        }
     }
 
     void updateBuffers() {
-        mMesh->updateVertexBuffer(VertexType::Position, mNumVerts * 4);
-        mMesh->updateVertexBuffer(VertexType::Color0, mNumVerts * 4);
-
-        std::vector<unsigned> indices;
-        indices.resize(mNumVerts * 6);
-        int index = 0;
-        for (size_t i = 0; i < mNumVerts; i++) {
-            uint32_t element = uint32_t(i << 2);
-            indices[index++] = element;
-            indices[index++] = element + 1;
-            indices[index++] = element + 2;
-            indices[index++] = element;
-            indices[index++] = element + 2;
-            indices[index++] = element + 3;
+        std::vector<float> buffer;
+        buffer.resize(mNumVerts * 4);
+        for (int i = 0; i < mNumVerts; i++) {
+            buffer[i * 4 + 0] = Util::genRandom(-1.f, 1.f);
+            buffer[i * 4 + 1] = Util::genRandom(-1.f, 1.f);
+            buffer[i * 4 + 2] = Util::genRandom(-1.f, 1.f);
+            buffer[i * 4 + 3] = 1.f;
         }
-        mMesh->updateElementBuffer(indices);
+        mMesh->updateVertexBuffer(VertexType::Position, buffer);
+        mMesh->updateVertexBuffer(VertexType::Color0, buffer);
     }
 };

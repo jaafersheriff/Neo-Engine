@@ -12,8 +12,8 @@ class ParticleVisShader : public Shader {
 
 public:
 
-    ParticleVisShader(const std::string &vert, const std::string &frag) :
-        Shader("ParticleVis Shader", vert, frag)
+    ParticleVisShader(const std::string &vert, const std::string& frag, const std::string &geom) :
+        Shader("ParticleVis Shader", vert, frag, geom)
     {}
 
     virtual void render(const CameraComponent &camera) override {
@@ -30,14 +30,12 @@ public:
 
             loadUniform("M", model->get<SpatialComponent>()->getModelMatrix());
 
-            /* Bind mesh */
-            CHECK_GL(glBindVertexArray(model->get<ParticleMeshComponent>()->mMesh->mVAOID));
-            CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, model->get<ParticleMeshComponent>()->mMesh->getVBO(VertexType::Position).vboID));
+        CHECK_GL(glBindVertexArray(model->get<ParticleMeshComponent>()->mMesh->mVAOID));
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, model->get<ParticleMeshComponent>()->mMesh->getVBO(VertexType::Position).vboID));
+
 
             /* DRAW */
-            model->get<ParticleMeshComponent>()->mMesh->draw(model->get<ParticleMeshComponent>()->mNumVerts * 6);
-
-            CHECK_GL(glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 0,  0 ));
+            model->get<ParticleMeshComponent>()->mMesh->draw();
         }
 
         unbind();
