@@ -40,8 +40,8 @@ public:
         for (auto& metaball : Engine::getComponentTuples<MetaballsMeshComponent, MeshComponent, SpatialComponent>()) {
 
             loadUniform("wireframe", mWireframe);
-            loadUniform("M", metaball->get<SpatialComponent>()->getModelMatrix());
-            loadUniform("N", metaball->get<SpatialComponent>()->getNormalMatrix());
+            loadUniform("M", glm::mat4(1.f)); // metaball->get<SpatialComponent>()->getModelMatrix());
+            loadUniform("N", glm::mat3(1.f)); // metaball->get<SpatialComponent>()->getNormalMatrix());
 
             /* DRAW */
             metaball->get<MeshComponent>()->getMesh().draw();

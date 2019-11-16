@@ -66,6 +66,7 @@ namespace neo {
             void draw(unsigned = 0) const;
 
             /* Remove */
+            void clear();
             void destroy();
 
         private:

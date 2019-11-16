@@ -70,7 +70,7 @@ int main() {
         Engine::addComponent<MetaballsMeshComponent>(&go);
         Mesh* mesh = Library::createEmptyMesh("Metaballs");
         mesh->addVertexBuffer(VertexType::Position, 0, 3);
-        mesh->addVertexBuffer(VertexType::Normal, 0, 3);
+        mesh->addVertexBuffer(VertexType::Normal, 1, 3);
         Engine::addComponent<MeshComponent>(&go, mesh);
         Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.f, 0.f));
     }

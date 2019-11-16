@@ -10,6 +10,6 @@ out vec3 fragNor;
 void main() {
       vec4 worldPos = M * vec4(vertPos.xyz, 1.0);
       gl_Position = P * V * worldPos;
-      fragPos = worldPos.xyz;
+      fragPos = vertPos.xyz;
       fragNor = N * vertNor;
 }

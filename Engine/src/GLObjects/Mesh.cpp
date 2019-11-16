@@ -48,15 +48,16 @@ namespace neo {
         CHECK_GL(glBindVertexArray(mVAOID));
         CHECK_GL(glGenBuffers(1, (GLuint *)&vertexBuffer.vboID));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
+
         if (buffer.size()) {
             CHECK_GL(glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_STATIC_DRAW));
         }
         CHECK_GL(glEnableVertexAttribArray(attribArray));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
         CHECK_GL(glVertexAttribPointer(attribArray, stride, GL_FLOAT, GL_FALSE, 0, (const void *)0));
-        CHECK_GL(glBindVertexArray(0));
 
-        NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when adding VertexBuffer");
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        CHECK_GL(glBindVertexArray(0));
 
         mVBOs[type] = vertexBuffer;
     }
@@ -71,13 +72,12 @@ namespace neo {
         vertexBuffer.bufferSize = buffer.size();
 
         CHECK_GL(glBindVertexArray(mVAOID));
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
         if (buffer.size()) {
-            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
             CHECK_GL(glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_STATIC_DRAW));
-            CHECK_GL(glBindVertexArray(0));
         }
-
-        NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when updating VertexBuffer");
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        CHECK_GL(glBindVertexArray(0));
     }
 
     void Mesh::updateVertexBuffer(VertexType type, unsigned size) {
@@ -93,19 +93,20 @@ namespace neo {
         CHECK_GL(glBindVertexArray(mVAOID));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
         CHECK_GL(glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), (const void *)0, GL_STATIC_DRAW));
+        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
         CHECK_GL(glBindVertexArray(0));
-
-        NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when updating VertexBuffer");
     }
 
     void Mesh::removeVertexBuffer(VertexType type) {
         const auto& vbo = mVBOs.find(type);
+
         if (vbo != mVBOs.end()) {
             CHECK_GL(glBindVertexArray(mVAOID));
+            CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vbo->second.vboID));
             CHECK_GL(glDeleteBuffers(1, (GLuint *)&vbo->second.vboID));
             CHECK_GL(glBindVertexArray(0));
-            mVBOs.erase(type);
         }
+        mVBOs.erase(type);
     }
 
     const VertexBuffer& Mesh::getVBO(VertexType type) const {
@@ -129,8 +130,6 @@ namespace neo {
         }
         CHECK_GL(glBindVertexArray(0));
 
-        NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when updating VertexBuffer");
-
     }
 
     void Mesh::updateElementBuffer(const std::vector<unsigned>& buffer) {
@@ -146,8 +145,6 @@ namespace neo {
             CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(unsigned), &buffer[0], GL_STATIC_DRAW));
         }
         CHECK_GL(glBindVertexArray(0));
-
-        NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when updating VertexBuffer");
     }
 
     void Mesh::updateElementBuffer(unsigned size) {
@@ -162,20 +159,22 @@ namespace neo {
         CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID));
         CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(unsigned), (const void *)0, GL_STATIC_DRAW));
         CHECK_GL(glBindVertexArray(0));
-
-        NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when updating VertexBuffer");
     }
 
     void Mesh::removeElementBuffer() {
-        CHECK_GL(glBindVertexArray(mVAOID));
-        CHECK_GL(glDeleteBuffers(1, (GLuint *)&mElementVBO->vboID));
-        CHECK_GL(glBindVertexArray(0));
-        mElementVBO = std::nullopt;
+        if (mElementVBO.has_value()) {
+            CHECK_GL(glBindVertexArray(mVAOID));
+            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID));
+            CHECK_GL(glDeleteBuffers(1, (GLuint *)&mElementVBO->vboID));
+            CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+            CHECK_GL(glBindVertexArray(0));
+            mElementVBO = std::nullopt;
+        }
 
         mPrimitiveType = GL_TRIANGLE_STRIP;
     }
 
-    void Mesh::destroy() {
+    void Mesh::clear() {
         removeVertexBuffer(VertexType::Position);
         removeVertexBuffer(VertexType::Normal);
         removeVertexBuffer(VertexType::Texture0);
@@ -185,6 +184,11 @@ namespace neo {
         removeVertexBuffer(VertexType::Color1);
         removeVertexBuffer(VertexType::Color2);
         removeElementBuffer();
-        // TODO - remove VAO
+    }
+
+    void Mesh::destroy() {
+        NEO_ASSERT(mVAOID, "Attempting to clear Mesh an empty mesh?");
+        clear();
+        CHECK_GL(glDeleteVertexArrays(1, (GLuint *)&mVAOID));
     }
 }
