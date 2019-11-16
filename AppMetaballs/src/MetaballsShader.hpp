@@ -25,10 +25,6 @@ public:
         loadUniform("V", camera.getView());
         loadUniform("camPos", camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
-        if (auto light = Engine::getComponentTuple<LightComponent, SpatialComponent>()) {
-            loadUniform("lightPos", light->get<SpatialComponent>()->getPosition());
-        }
-
         if (auto skybox = Engine::getComponentTuple<renderable::SkyboxComponent, CubeMapComponent>()) {
             loadUniform("cubeMap", skybox->get<CubeMapComponent>()->mTexture.mTextureID);
         }
@@ -40,8 +36,8 @@ public:
         for (auto& metaball : Engine::getComponentTuples<MetaballsMeshComponent, MeshComponent, SpatialComponent>()) {
 
             loadUniform("wireframe", mWireframe);
-            loadUniform("M", glm::mat4(1.f)); // metaball->get<SpatialComponent>()->getModelMatrix());
-            loadUniform("N", glm::mat3(1.f)); // metaball->get<SpatialComponent>()->getNormalMatrix());
+            loadUniform("M", metaball->get<SpatialComponent>()->getModelMatrix());
+            loadUniform("N", metaball->get<SpatialComponent>()->getNormalMatrix());
 
             /* DRAW */
             metaball->get<MeshComponent>()->getMesh().draw();

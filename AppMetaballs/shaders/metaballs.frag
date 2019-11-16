@@ -2,7 +2,6 @@ in vec3 fragPos;
 in vec3 fragNor;
 
 uniform bool wireframe;
-uniform vec3 lightPos;
 uniform vec3 camPos;
 
 uniform samplerCube cubeMap;

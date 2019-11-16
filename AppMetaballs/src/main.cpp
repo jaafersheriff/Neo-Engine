@@ -69,6 +69,7 @@ int main() {
         auto& go = Engine::createGameObject();
         Engine::addComponent<MetaballsMeshComponent>(&go);
         Mesh* mesh = Library::createEmptyMesh("Metaballs");
+        mesh->mPrimitiveType = GL_TRIANGLES;
         mesh->addVertexBuffer(VertexType::Position, 0, 3);
         mesh->addVertexBuffer(VertexType::Normal, 1, 3);
         Engine::addComponent<MeshComponent>(&go, mesh);
