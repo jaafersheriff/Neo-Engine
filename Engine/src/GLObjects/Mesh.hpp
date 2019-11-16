@@ -71,9 +71,7 @@ namespace neo {
 
         private:
             std::unordered_map<VertexType, VertexBuffer> mVBOs;
-            
-    public://todo - hax
-
             std::optional<VertexBuffer> mElementVBO;
+            
     };
 }

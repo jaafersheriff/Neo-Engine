@@ -9,15 +9,15 @@
 
 namespace neo {
 
-#define RENDERER_MP_ENTERD(x, y, z)\
-    MICROPROFILE_DEFINE(x, y, z, MP_AUTO);\
-    MICROPROFILE_ENTER(x);\
-    MICROPROFILE_DEFINE_GPU(x, z,  MP_AUTO);\
-    MICROPROFILE_GPU_ENTER(x)
+#define RENDERER_MP_ENTERD(define, group, name)\
+    MICROPROFILE_DEFINE(define, group, name, MP_AUTO);\
+    MICROPROFILE_ENTER(define);\
+    MICROPROFILE_DEFINE_GPU(define, name,  MP_AUTO);\
+    MICROPROFILE_GPU_ENTER(define)
 
-#define RENDERER_MP_ENTER(x)\
-    MICROPROFILE_ENTERI("Renderer", x, MP_AUTO);\
-    MICROPROFILE_GPU_ENTERI("RendererGPU", x, MP_AUTO)
+#define RENDERER_MP_ENTER(name)\
+    MICROPROFILE_ENTERI("Renderer", name, MP_AUTO);\
+    MICROPROFILE_GPU_ENTERI("RendererGPU", name, MP_AUTO)
 
 #define RENDERER_MP_LEAVE()\
     MICROPROFILE_LEAVE();\

@@ -83,7 +83,7 @@ int main() {
     Engine::addSystem<CameraControllerSystem>();
     Engine::addSystem<MouseRaySystem>(true);
     Engine::addSystem<SelectingSystem>(
-        "Selector System",
+        "Selecter System",
         20, 
         100.f,
         // Decide to remove selected components

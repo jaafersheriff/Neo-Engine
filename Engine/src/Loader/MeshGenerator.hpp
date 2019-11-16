@@ -112,6 +112,8 @@ namespace neo {
                  20, 21, 22,
                  20, 22, 23 };
                 mesh->addElementBuffer(indices);
+
+                mesh->mPrimitiveType = GL_TRIANGLES;
             }
 
             static void generateQuad(Mesh* mesh) {
@@ -142,6 +144,8 @@ namespace neo {
                 { 0, 1, 2,
                   1, 3, 2 };
                 mesh->addElementBuffer(indices);
+
+                mesh->mPrimitiveType = GL_TRIANGLES;
             }
 
             // http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
@@ -244,6 +248,8 @@ namespace neo {
                 mesh->addVertexBuffer(VertexType::Normal, 1, 3, verts);
                 mesh->addVertexBuffer(VertexType::Texture0, 2, 2, tex);
                 mesh->addElementBuffer(ele);
+
+                mesh->mPrimitiveType = GL_TRIANGLES;
             }
 
             // TODOs
@@ -319,6 +325,8 @@ namespace neo {
                 mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
                 mesh->addVertexBuffer(VertexType::Texture0, 2, 2, textureCoords);
                 mesh->addElementBuffer(indices);
+
+                mesh->mPrimitiveType = GL_TRIANGLES;
             }
     };
 

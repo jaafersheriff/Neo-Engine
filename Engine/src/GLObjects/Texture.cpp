@@ -35,11 +35,12 @@ namespace neo {
 
         CHECK_GL(glTexParameteri(mTextureType, GL_TEXTURE_WRAP_S, mFormat.mode));
         if (mTextureType != GL_TEXTURE_1D) {
-            CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, mFormat.mode));
-        }
-        if (mTextureType != GL_TEXTURE_2D) {
-            CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, mFormat.mode));
-        }
+            CHECK_GL(glTexParameteri(mTextureType, GL_TEXTURE_WRAP_T, mFormat.mode));
+
+            if (mTextureType != GL_TEXTURE_2D) {
+                CHECK_GL(glTexParameteri(mTextureType, GL_TEXTURE_WRAP_R, mFormat.mode));
+            }
+	}
     }
 
     void Texture::resize(const glm::uvec2 size) {

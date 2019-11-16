@@ -34,23 +34,19 @@ namespace neo {
         /* Check with static meshes first */
         if (!std::strcmp(fileName.c_str(), "cube")) {
             MeshGenerator::generateCube(mesh);
-            mesh->mPrimitiveType = GL_TRIANGLES;
             return mesh;
         }
         if (!std::strcmp(fileName.c_str(), "quad") || !std::strcmp(fileName.c_str(), "plane")) {
             MeshGenerator::generateQuad(mesh);
-            mesh->mPrimitiveType = GL_TRIANGLES;
             return mesh;
         }
         if (!std::strcmp(fileName.c_str(), "sphere") || !std::strcmp(fileName.c_str(), "ico_2")) {
             MeshGenerator::generateSphere(mesh, 2);
-            mesh->mPrimitiveType = GL_TRIANGLES;
             return mesh;
         }
         if (!std::strncmp(fileName.c_str(), "ico_", 4)) {
             int recursions = std::stoi(fileName.c_str() + 4);
             MeshGenerator::generateSphere(mesh, recursions);
-            mesh->mPrimitiveType = GL_TRIANGLES;
             return mesh;
         }
 
