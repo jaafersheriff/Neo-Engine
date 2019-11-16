@@ -22,7 +22,7 @@ namespace neo {
             float maxDistance = mMaxDist;
             auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
             if (mainCamera) {
-                maxDistance = glm::max(maxDistance, mainCamera->get<CameraComponent>()->getNearFar().y);
+                maxDistance = glm::min(maxDistance, mainCamera->get<CameraComponent>()->getNearFar().y);
             }
 
             // Select a new object

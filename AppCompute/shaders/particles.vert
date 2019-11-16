@@ -1,7 +1,7 @@
 
 layout(location = 0) in vec4 vertPos;
 
-uniform mat4 P, V, M;
+uniform mat4 P, V;
 
 void main() {
 

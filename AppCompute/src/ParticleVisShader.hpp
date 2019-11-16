@@ -27,16 +27,14 @@ public:
         loadUniform("spriteSize", mSpriteSize);
         loadUniform("spriteColor", mSpriteColor);
 
-        for (auto& model : Engine::getComponentTuples<ParticleMeshComponent, SpatialComponent>()) {
+        if (auto model = Engine::getSingleComponent<ParticleMeshComponent>()) {
             CHECK_GL(glEnable(GL_BLEND));
             CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE));
             CHECK_GL(glDisable(GL_DEPTH_TEST));
             CHECK_GL(glDisable(GL_CULL_FACE));
 
-            loadUniform("M", model->get<SpatialComponent>()->getModelMatrix());
-
             /* DRAW */
-            model->get<ParticleMeshComponent>()->mMesh->draw();
+            model->mMesh->draw();
         }
 
         unbind();
