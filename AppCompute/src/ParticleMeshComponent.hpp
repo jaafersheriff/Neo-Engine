@@ -12,7 +12,7 @@ class ParticleMeshComponent : public Component {
 
 public:
     Mesh* mMesh;
-    int mNumVerts = 256;
+    int mNumVerts = 2048;
 
     ParticleMeshComponent(GameObject* go) :
         Component(go)
@@ -25,21 +25,32 @@ public:
     }
 
     virtual void imGuiEditor() override {
-        if (ImGui::DragInt("#Verts", &mNumVerts, 1, 3, 2048)) {
+        if (ImGui::DragInt("#Verts", &mNumVerts, 1, 1, 1<<16)) {
+            updateBuffers();
+        }
+        if (ImGui::Button("Reset")) {
             updateBuffers();
         }
     }
 
     void updateBuffers() {
-        std::vector<float> buffer;
-        buffer.resize(mNumVerts * 4);
+        std::vector<float> positions;
+        std::vector<float> velocities;
+        positions.resize(mNumVerts * 4);
+        velocities.resize(mNumVerts * 4);
         for (int i = 0; i < mNumVerts; i++) {
-            buffer[i * 4 + 0] = Util::genRandom(-1.f, 1.f);
-            buffer[i * 4 + 1] = Util::genRandom(-1.f, 1.f);
-            buffer[i * 4 + 2] = Util::genRandom(-1.f, 1.f);
-            buffer[i * 4 + 3] = 1.f;
+            glm::vec3 pos = glm::normalize(Util::genRandomVec3(-1.f, 1.f));
+            positions[i * 4 + 0] = pos.x;
+            positions[i * 4 + 1] = pos.y;
+            positions[i * 4 + 2] = pos.z;
+            positions[i * 4 + 3] = 1.f;
+
+            velocities[i * 4 + 0] = 0.f;
+            velocities[i * 4 + 1] = 0.f;
+            velocities[i * 4 + 2] = 0.f;
+            velocities[i * 4 + 3] = 0.f;
         }
-        mMesh->updateVertexBuffer(VertexType::Position, buffer);
-        mMesh->updateVertexBuffer(VertexType::Color0, buffer);
+        mMesh->updateVertexBuffer(VertexType::Position, positions);
+        mMesh->updateVertexBuffer(VertexType::Color0, velocities);
     }
 };

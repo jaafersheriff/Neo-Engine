@@ -15,6 +15,10 @@ layout(std140, binding = 1) buffer Vel
 
 uniform float invNoiseSize;
 uniform sampler3D noiseTex3D;
+uniform float noiseFreq;
+uniform float noiseStrength;
+uniform float damping;
+uniform vec4 attractor;
 
 vec3 noise3f(vec3 p) {
     return texture(noiseTex3D, p * invNoiseSize).xyz;
@@ -50,11 +54,6 @@ void main()
 
     vec3 p = pos[i].xyz;
     vec3 v = vel[i].xyz;
-
-    float noiseFreq = 10.f;
-    float noiseStrength = 0.1f;
-    vec4 attractor = vec4(vec3(0.2), 0.002);
-    float damping = 0.95;
 
     v += fBm3f(p*noiseFreq,4,2.0,0.5)*noiseStrength;
     v += attract(p, attractor.xyz)*attractor.w;

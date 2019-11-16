@@ -16,6 +16,15 @@ public:
     int groupSizeWidth = 64;
     Texture* noiseTex;
 
+    float noiseFreq = 10.f;
+    float noiseStrength = 0.01f;
+    float damping = 0.95f;
+
+    bool attractorEnabled = false;
+    float attractorSpeed = 0.2f;
+    float attractorStrength = 0.0002f;
+    glm::vec3 baseAttractor = glm::vec3(0.f);
+
     ParticlesComputeShader(const std::string &compute) :
         Shader("ParticlesCompute Shader", compute)
     {
@@ -52,6 +61,21 @@ public:
             noiseTex->bind();
             loadUniform("noiseTex3D", noiseTex->mTextureID);
             loadUniform("invNoiseSize", 1 / 16.f);
+            loadUniform("noiseFreq", noiseFreq);
+            loadUniform("noiseStrength", noiseStrength);
+            loadUniform("damping", damping);
+
+            glm::vec4 attractor(0.f);
+            if (attractorEnabled) {
+                attractor.x = baseAttractor.x + glm::sin(Util::getRunTime()/1000.f * attractorSpeed);
+                attractor.y = baseAttractor.y + glm::sin(Util::getRunTime()/1000.f * attractorSpeed * 1.3f);
+                attractor.z = baseAttractor.z + glm::cos(Util::getRunTime()/1000.f * attractorSpeed);
+                attractor.w = attractorStrength;
+            }
+            else {
+                attractor.w = 0.f;
+            }
+            loadUniform("attractor", attractor);
 
             // Bind mesh
             CHECK_GL(glBindVertexArray(mesh->mMesh->mVAOID));
@@ -75,6 +99,15 @@ public:
 
     virtual void imguiEditor() override {
         ImGui::SliderInt("GroupSize", &groupSizeWidth, 1, 128);
+        ImGui::SliderFloat("Noise Frequency", &noiseFreq, 0.f, 30.f);
+        ImGui::DragFloat("Noise Strength", &noiseStrength, 0.001f, 0.0f, 0.2f);
+        ImGui::DragFloat("Damping", &damping, 0.001f, 0.7f, 0.99f);
+        ImGui::Checkbox("Attractor", &attractorEnabled);
+        if (attractorEnabled) {
+            ImGui::SliderFloat3("Base position", &baseAttractor[0], -10.f, 10.f);
+            ImGui::SliderFloat("Attractor speed", &attractorSpeed, 0.f, 100.f);
+            ImGui::SliderFloat("Attractor strength", &attractorStrength, 0.f, 1.f);
+        }
         if (ImGui::Button("Regenerate noise")) {
             _generateNoiseTexture();
         }

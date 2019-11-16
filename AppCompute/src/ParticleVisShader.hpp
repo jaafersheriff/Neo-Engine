@@ -12,6 +12,9 @@ class ParticleVisShader : public Shader {
 
 public:
 
+    float mSpriteSize = 0.1f;
+    glm::vec3 mSpriteColor = glm::vec3(1.f);
+
     ParticleVisShader(const std::string &vert, const std::string& frag, const std::string &geom) :
         Shader("ParticleVis Shader", vert, frag, geom)
     {}
@@ -21,18 +24,16 @@ public:
 
         loadUniform("P", camera.getProj());
         loadUniform("V", camera.getView());
+        loadUniform("spriteSize", mSpriteSize);
+        loadUniform("spriteColor", mSpriteColor);
 
         for (auto& model : Engine::getComponentTuples<ParticleMeshComponent, SpatialComponent>()) {
-            // CHECK_GL(glEnable(GL_BLEND));
-            // CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE));
+            CHECK_GL(glEnable(GL_BLEND));
+            CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE));
             CHECK_GL(glDisable(GL_DEPTH_TEST));
             CHECK_GL(glDisable(GL_CULL_FACE));
 
             loadUniform("M", model->get<SpatialComponent>()->getModelMatrix());
-
-        CHECK_GL(glBindVertexArray(model->get<ParticleMeshComponent>()->mMesh->mVAOID));
-        CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, model->get<ParticleMeshComponent>()->mMesh->getVBO(VertexType::Position).vboID));
-
 
             /* DRAW */
             model->get<ParticleMeshComponent>()->mMesh->draw();
@@ -42,5 +43,7 @@ public:
     }
 
     virtual void imguiEditor() override {
+        ImGui::SliderFloat("Sprite size", &mSpriteSize, 0.1f, 2.f);
+        ImGui::ColorEdit3("Sprite color", &mSpriteColor[0]);
     }
 };
