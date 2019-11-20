@@ -49,6 +49,7 @@ class MetaballsSystem : public System {
             }
 
             if (mAutoUpdate) {
+                MICROPROFILE_ENTERI("Metaballs System", "updatePositions", MP_AUTO);
                 auto rTime = Util::getRunTime();
                 for (uint32_t ii = 0; ii < balls.size(); ++ii) {
                     auto spatial = balls[ii]->get<SpatialComponent>();
@@ -63,6 +64,7 @@ class MetaballsSystem : public System {
                     spatial->setPosition(position);
                     spatial->setScale(glm::vec3(radius));
                 }
+                MICROPROFILE_LEAVE();
             }
 
             if (!mDirtyBalls) {
@@ -77,6 +79,7 @@ class MetaballsSystem : public System {
 		    const uint32_t zpitch = mDims*mDims;
 		    const float invdim = 1.0f/float(mDims-1);
 
+            MICROPROFILE_ENTERI("Metaballs System", "generateGrid", MP_AUTO);
             Grid* grid = new Grid[mDims * mDims * mDims];
 			for (uint32_t zz = 0; zz < mDims; ++zz) {
 				for (uint32_t yy = 0; yy < mDims; ++yy) {
@@ -115,17 +118,17 @@ class MetaballsSystem : public System {
 						uint32_t xoffset = offset + xx;
 
 						// Grid* grid = grid;
-						const glm::vec3 normal = {
+                        grid[xoffset].mNormal = glm::normalize(glm::vec3(
 							grid[xoffset-1     ].mVal - grid[xoffset+1     ].mVal,
 							grid[xoffset-ypitch].mVal - grid[xoffset+ypitch].mVal,
-							grid[xoffset-zpitch].mVal - grid[xoffset+zpitch].mVal,
-						};
-
-                        grid[xoffset].mNormal = glm::normalize(normal);
+							grid[xoffset-zpitch].mVal - grid[xoffset+zpitch].mVal
+						));
 					}
 				}
 			}
+            MICROPROFILE_LEAVE();
 
+            MICROPROFILE_ENTERI("Metaballs System", "generateMesh", MP_AUTO);
             std::vector<float> vertices;
             std::vector<float> normals;
             for (uint32_t zz = 0; zz < mDims - 1 && numVertices + 12 < maxVertices; ++zz) {
@@ -169,12 +172,15 @@ class MetaballsSystem : public System {
                     }
                 }
             }
+            MICROPROFILE_LEAVE();
 
+            MICROPROFILE_ENTERI("Metaballs System", "updateMesh", MP_AUTO);
             auto& mesh = metaballMesh->get<MeshComponent>()->getMesh();
             mesh.updateVertexBuffer(VertexType::Position, vertices);
             mesh.updateVertexBuffer(VertexType::Normal, normals);
             mDirtyBalls = false;
             delete[] grid;
+            MICROPROFILE_LEAVE();
         }
 
     private:

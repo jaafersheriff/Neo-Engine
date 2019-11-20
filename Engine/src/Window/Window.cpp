@@ -48,7 +48,7 @@ namespace neo {
             }
             return;
         }
-        if (key == GLFW_KEY_GRAVE_ACCENT && mods && action == GLFW_PRESS) {
+        if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS) {
             Engine::toggleImGui();
         }
         else if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())) {

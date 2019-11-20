@@ -1,6 +1,5 @@
 #include <Engine.hpp>
 
-#include "ParticleAttractorComponent.hpp"
 #include "ParticleMeshComponent.hpp"
 #include "ParticlesComputeShader.hpp"
 #include "ParticleVisShader.hpp"
@@ -40,6 +39,7 @@ int main() {
     EngineConfig config;
     config.APP_NAME = "Compute";
     config.APP_RES = "res/";
+    config.attachEditor = false;
     Engine::init(config);
 
     /* Game objects */
@@ -53,18 +53,6 @@ int main() {
         auto& go = Engine::createGameObject();
         Engine::addComponent<ParticleMeshComponent>(&go);
         Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.0f, 0.f));
-    }
-
-    // Create attractor
-    {
-        auto& go = Engine::createGameObject();
-        Engine::addComponent<ParticleAttractorComponent>(&go);
-        Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.0f, 0.f));
-        Engine::addComponent<BoundingBoxComponent>(&go, Library::getMesh("sphere"));
-        Engine::addComponent<SpatialComponent>(&go);
-        Engine::addComponent<SelectableComponent>(&go);
-        Engine::addComponent<MeshComponent>(&go, Library::getMesh("sphere"));
-        Engine::addComponent<renderable::WireframeRenderable>(&go);
     }
 
     /* Systems - order matters! */

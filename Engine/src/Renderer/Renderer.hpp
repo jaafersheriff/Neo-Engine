@@ -25,6 +25,7 @@ namespace neo {
             static unsigned NEO_GL_MAJOR_VERSION;
             static unsigned NEO_GL_MINOR_VERSION;
             static std::string NEO_GLSL_VERSION;
+            static glm::ivec3 NEO_MAX_COMPUTE_GROUP_SIZE;
 
             static void init(const std::string &, CameraComponent *, glm::vec3 clearColor = glm::vec3(0.f));
             static void resetState();

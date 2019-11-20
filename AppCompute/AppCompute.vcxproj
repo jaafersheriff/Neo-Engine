@@ -136,7 +136,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\ParticleAttractorComponent.hpp" />
     <ClInclude Include="src\ParticlesComputeShader.hpp" />
     <ClInclude Include="src\ParticleMeshComponent.hpp" />
     <ClInclude Include="src\ParticleVisShader.hpp" />

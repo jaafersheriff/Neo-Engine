@@ -26,6 +26,8 @@ namespace neo {
     unsigned Renderer::NEO_GL_MAJOR_VERSION = 4;
     unsigned Renderer::NEO_GL_MINOR_VERSION = 3;
     std::string Renderer::NEO_GLSL_VERSION = "#version 430";
+    glm::ivec3 Renderer::NEO_MAX_COMPUTE_GROUP_SIZE = glm::ivec3(1);
+
     std::string Renderer::APP_SHADER_DIR;
     CameraComponent *Renderer::mDefaultCamera(nullptr);
     Framebuffer *Renderer::mDefaultFBO;
@@ -53,6 +55,11 @@ namespace neo {
         /* Init default FBO */
         mDefaultFBO = Library::getFBO("0");
         mDefaultFBO->mFBOID = 0;
+
+        /* Set max work gruop */
+        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &NEO_MAX_COMPUTE_GROUP_SIZE.x));
+        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &NEO_MAX_COMPUTE_GROUP_SIZE.y));
+        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &NEO_MAX_COMPUTE_GROUP_SIZE.z));
     }
 
     void Renderer::shutDown() {

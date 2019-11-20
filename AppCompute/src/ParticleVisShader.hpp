@@ -12,8 +12,8 @@ class ParticleVisShader : public Shader {
 
 public:
 
-    float mSpriteSize = 0.1f;
-    glm::vec3 mSpriteColor = glm::vec3(1.f);
+    float mSpriteSize = 0.2f;
+    glm::vec3 mSpriteColor = glm::vec3(0.67f, 1.f, 0.55f);
 
     ParticleVisShader(const std::string &vert, const std::string& frag, const std::string &geom) :
         Shader("ParticleVis Shader", vert, frag, geom)
@@ -33,10 +33,11 @@ public:
             CHECK_GL(glDisable(GL_DEPTH_TEST));
             CHECK_GL(glDisable(GL_CULL_FACE));
 
+            loadUniform("M", model->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
+
             /* DRAW */
             model->mMesh->draw();
         }
-
         unbind();
     }
 
