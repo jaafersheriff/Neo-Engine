@@ -253,10 +253,7 @@ namespace neo {
             }
 
             // TODOs
-            //  Take height map as input
-            //  Move this to its own terrain generator class?
-            //  Calculate normals based on verts
-            static void generatePlane(Mesh* mesh, float h, int VERTEX_COUNT, int SIZE) {
+            static void generatePlane(Mesh* mesh, float h, int VERTEX_COUNT) {
                 mesh->mMin = glm::vec3(FLT_MAX);
                 mesh->mMax = glm::vec3(FLT_MIN);
 
@@ -282,42 +279,51 @@ namespace neo {
                     heights[i].resize(VERTEX_COUNT);
 
                     for (int j = 0; j < VERTEX_COUNT; j++) {
-                        float height = Util::genRandom(0.f, h); // getHeight(j, i, image);
-                        heights[i][j] = height;
+                        heights[i][j] = Util::genRandom(0.f, h);
 
                         glm::vec3 vert = glm::vec3(
-                            (float)j / ((float)VERTEX_COUNT - 1) * SIZE,
-                            height,
-                            (float)i / ((float)VERTEX_COUNT - 1) * SIZE);
+                            (float)j / ((float)VERTEX_COUNT - 1),
+                            heights[i][j],
+                            (float)i / ((float)VERTEX_COUNT - 1));
+
                         vertices[vertexPointer * 3 + 0] = vert.x;
                         vertices[vertexPointer * 3 + 1] = vert.y;
                         vertices[vertexPointer * 3 + 2] = vert.z;
 
-                        mesh->mMin = glm::min(mesh->mMin, vert);
-                        mesh->mMax = glm::max(mesh->mMax, vert);
-
-                        glm::vec3 normal = glm::vec3(0.f, 1.f, 0.f); // calculateNormal(j, i, image);
-                        normals[vertexPointer * 3 + 0] = normal.x;
-                        normals[vertexPointer * 3 + 1] = normal.y;
-                        normals[vertexPointer * 3 + 2] = normal.z;
                         textureCoords[vertexPointer * 2] = (float)j / ((float)VERTEX_COUNT - 1);
                         textureCoords[vertexPointer * 2 + 1] = (float)i / ((float)VERTEX_COUNT - 1);
+
                         vertexPointer++;
+
+                        mesh->mMin = glm::min(mesh->mMin, vert);
+                        mesh->mMax = glm::max(mesh->mMax, vert);
                     }
                 }
-                int pointer = 0;
-                for (int gz = 0; gz < VERTEX_COUNT - 1; gz++) {
-                    for (int gx = 0; gx < VERTEX_COUNT - 1; gx++) {
-                        int topLeft = (gz*VERTEX_COUNT) + gx;
+
+                int indexPointer = 0;
+                int normalPointer = 0;
+                for (int i = 0; i < VERTEX_COUNT - 1; i++) {
+                    for (int j = 0; j < VERTEX_COUNT - 1; j++) {
+                        float heightL = heights[glm::clamp(i - 1, 0, VERTEX_COUNT)][j    ];
+                        float heightR = heights[glm::clamp(i + 1, 0, VERTEX_COUNT)][j    ];
+                        float heightD = heights[i    ][glm::clamp(j + 1, 0, VERTEX_COUNT)];
+                        float heightU = heights[i    ][glm::clamp(j - 1, 0, VERTEX_COUNT)];
+                        glm::vec3 normal = glm::normalize(glm::vec3(heightL - heightR, 2.f, heightD - heightU));
+                        normals[normalPointer * 3 + 0] = normal.x;
+                        normals[normalPointer * 3 + 1] = normal.y;
+                        normals[normalPointer * 3 + 2] = normal.z;
+                        normalPointer++;
+
+                        int topLeft = (i*VERTEX_COUNT) + j;
                         int topRight = topLeft + 1;
-                        int bottomLeft = ((gz + 1)*VERTEX_COUNT) + gx;
+                        int bottomLeft = ((i + 1)*VERTEX_COUNT) + j;
                         int bottomRight = bottomLeft + 1;
-                        indices[pointer++] = topLeft;
-                        indices[pointer++] = bottomLeft;
-                        indices[pointer++] = topRight;
-                        indices[pointer++] = topRight;
-                        indices[pointer++] = bottomLeft;
-                        indices[pointer++] = bottomRight;
+                        indices[indexPointer++] = topLeft;
+                        indices[indexPointer++] = bottomLeft;
+                        indices[indexPointer++] = topRight;
+                        indices[indexPointer++] = topRight;
+                        indices[indexPointer++] = bottomLeft;
+                        indices[indexPointer++] = bottomRight;
                     }
                 }
 
