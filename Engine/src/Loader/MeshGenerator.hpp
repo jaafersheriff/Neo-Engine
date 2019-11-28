@@ -1,7 +1,7 @@
 
 #include "GLObjects/Mesh.hpp"
 
-#include "Util/Util.hpp"
+#include "ext/PerlinNoise.hpp"
 
 namespace neo {
 
@@ -252,14 +252,19 @@ namespace neo {
                 mesh->mPrimitiveType = GL_TRIANGLES;
             }
 
-            // TODOs
-            static void generatePlane(Mesh* mesh, float h, int VERTEX_COUNT) {
+            static void generatePlane(Mesh* mesh, float h, int VERTEX_COUNT, int numOctaves) {
+                siv::PerlinNoise noise(rand());
+
                 mesh->mMin = glm::vec3(FLT_MAX);
                 mesh->mMax = glm::vec3(FLT_MIN);
 
                 int count = VERTEX_COUNT * VERTEX_COUNT;
 
                 std::vector<std::vector<float>> heights;
+                heights.resize(VERTEX_COUNT);
+                for (int i = 0; i < VERTEX_COUNT; i++) {
+                    heights[i].resize(VERTEX_COUNT);
+                }
 
                 std::vector<float> vertices;
                 vertices.resize(count * 3);
@@ -273,46 +278,47 @@ namespace neo {
                 std::vector<unsigned> indices;
                 indices.resize(6 * (VERTEX_COUNT - 1) * (VERTEX_COUNT * 1));
 
+                for (int i = 0; i < VERTEX_COUNT; i++) {
+                    for (int j = 0; j < VERTEX_COUNT; j++) {
+                        heights[j][i] = h * noise.octaveNoise(j / static_cast<double>(VERTEX_COUNT), i / static_cast<double>(VERTEX_COUNT), numOctaves);
+                    }
+                }
+
                 int vertexPointer = 0;
                 for (int i = 0; i < VERTEX_COUNT; i++) {
-                    heights.push_back(std::vector<float>());
-                    heights[i].resize(VERTEX_COUNT);
-
                     for (int j = 0; j < VERTEX_COUNT; j++) {
-                        heights[i][j] = Util::genRandom(0.f, h);
 
                         glm::vec3 vert = glm::vec3(
                             (float)j / ((float)VERTEX_COUNT - 1),
-                            heights[i][j],
+                            heights[j][i],
                             (float)i / ((float)VERTEX_COUNT - 1));
 
                         vertices[vertexPointer * 3 + 0] = vert.x;
                         vertices[vertexPointer * 3 + 1] = vert.y;
                         vertices[vertexPointer * 3 + 2] = vert.z;
 
+                        float heightL = j == 0                ? 0.f : heights[j - 1][i    ] / h;
+                        float heightR = j == VERTEX_COUNT - 1 ? 0.f : heights[j + 1][i    ] / h;
+                        float heightD = i == VERTEX_COUNT - 1 ? 0.f : heights[j    ][i + 1] / h;
+                        float heightU = i == 0                ? 0.f : heights[j    ][i - 1] / h;
+                        glm::vec3 normal = glm::normalize(glm::vec3(heightL - heightR, 2.f / ((float)VERTEX_COUNT - 1), heightD - heightU));
+                        normals[vertexPointer * 3 + 0] = normal.x;
+                        normals[vertexPointer * 3 + 1] = normal.y;
+                        normals[vertexPointer * 3 + 2] = normal.z;
+
                         textureCoords[vertexPointer * 2] = (float)j / ((float)VERTEX_COUNT - 1);
                         textureCoords[vertexPointer * 2 + 1] = (float)i / ((float)VERTEX_COUNT - 1);
 
-                        vertexPointer++;
 
                         mesh->mMin = glm::min(mesh->mMin, vert);
                         mesh->mMax = glm::max(mesh->mMax, vert);
+                        vertexPointer++;
                     }
                 }
 
                 int indexPointer = 0;
-                int normalPointer = 0;
                 for (int i = 0; i < VERTEX_COUNT - 1; i++) {
                     for (int j = 0; j < VERTEX_COUNT - 1; j++) {
-                        float heightL = heights[glm::clamp(i - 1, 0, VERTEX_COUNT)][j    ];
-                        float heightR = heights[glm::clamp(i + 1, 0, VERTEX_COUNT)][j    ];
-                        float heightD = heights[i    ][glm::clamp(j + 1, 0, VERTEX_COUNT)];
-                        float heightU = heights[i    ][glm::clamp(j - 1, 0, VERTEX_COUNT)];
-                        glm::vec3 normal = glm::normalize(glm::vec3(heightL - heightR, 2.f, heightD - heightU));
-                        normals[normalPointer * 3 + 0] = normal.x;
-                        normals[normalPointer * 3 + 1] = normal.y;
-                        normals[normalPointer * 3 + 2] = normal.z;
-                        normalPointer++;
 
                         int topLeft = (i*VERTEX_COUNT) + j;
                         int topRight = topLeft + 1;

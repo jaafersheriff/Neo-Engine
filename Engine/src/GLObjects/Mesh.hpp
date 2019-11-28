@@ -32,6 +32,7 @@ namespace neo {
 
             /* Constructor */
             Mesh(int primitiveType = -1);
+            ~Mesh();
 
             /* Remove copy constructors */
             Mesh(const Mesh &) = delete;

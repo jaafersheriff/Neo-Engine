@@ -17,6 +17,10 @@ namespace neo {
         CHECK_GL(glGenVertexArrays(1, (GLuint *)&mVAOID));
     }
 
+    Mesh::~Mesh() {
+        destroy();
+    }
+
     // TODO - instanced
     void Mesh::draw(unsigned size) const {
         const auto& positions = getVBO(VertexType::Position);
@@ -187,7 +191,7 @@ namespace neo {
     }
 
     void Mesh::destroy() {
-        NEO_ASSERT(mVAOID, "Attempting to clear Mesh an empty mesh?");
+        NEO_ASSERT(mVAOID, "Attempting to clear Mesh an empty mesh");
         clear();
         CHECK_GL(glDeleteVertexArrays(1, (GLuint *)&mVAOID));
     }
