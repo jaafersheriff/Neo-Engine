@@ -168,7 +168,7 @@ namespace neo {
         }
 
 
-        assert(false);
+        NEO_ASSERT(false, "Attempting to get a Shader that doesn't exist");
     }
 
 }

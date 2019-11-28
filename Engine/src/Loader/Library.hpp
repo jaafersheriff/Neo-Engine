@@ -22,7 +22,7 @@ namespace neo {
             static Texture* getTexture(const std::string&, TextureFormat = TextureFormat{});
 
             template <typename T>
-            static Texture* createEmptyTexture(const std::string&, TextureFormat);
+            static Texture* createEmptyTexture(const std::string&, TextureFormat, glm::uvec3 = glm::uvec3(1));
             static Texture* getCubemap(const std::string&, const std::vector<std::string> &);
             static Framebuffer* getFBO(const std::string&);
 
@@ -40,13 +40,13 @@ namespace neo {
     };
 
     template <typename T>
-    Texture* Library::createEmptyTexture(const std::string& name, TextureFormat format) {
+    Texture* Library::createEmptyTexture(const std::string& name, TextureFormat format, glm::uvec3 size) {
         static_assert(std::is_base_of<Texture, T>::value, "T must be a Texture type");
         static_assert(!std::is_same<T, Texture>::value, "T must be a derived Texture type");
 
         auto it = mTextures.find(name);
         NEO_ASSERT(it == mTextures.end(), "Texture already found");
-        Texture* texture = new T(format, glm::uvec3(1), { 0xF });
+        Texture* texture = new T(format, size, { 0xF });
         _insertTexture(name, texture);
         return texture;
     }

@@ -40,13 +40,8 @@ namespace neo {
             MeshGenerator::generateQuad(mesh);
             return mesh;
         }
-        if (!std::strcmp(fileName.c_str(), "sphere") || !std::strcmp(fileName.c_str(), "ico_2")) {
+        if (!std::strcmp(fileName.c_str(), "sphere")) {
             MeshGenerator::generateSphere(mesh, 2);
-            return mesh;
-        }
-        if (!std::strncmp(fileName.c_str(), "ico_", 4)) {
-            int recursions = std::stoi(fileName.c_str() + 4);
-            MeshGenerator::generateSphere(mesh, recursions);
             return mesh;
         }
 
@@ -56,11 +51,7 @@ namespace neo {
         std::string errString;
         // TODO : use assimp or another optimized asset loader
         bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, (RES_DIR + fileName).c_str());
-        if (!rc) {
-            std::cerr << errString << std::endl;
-            std::cin.get();
-            exit(1);
-        }
+        NEO_ASSERT(!rc, errString);
 
         /* Create empty mesh buffers */
         std::vector<float> vertices;
@@ -83,8 +74,6 @@ namespace neo {
             }
             vertCount += int(shapes[i].mesh.positions.size()) / 3;
         }
-
-
 
         /* Optional resize and find min/max */
         _resize(mesh, vertices, doResize);
