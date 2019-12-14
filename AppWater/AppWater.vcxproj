@@ -118,6 +118,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\WaterMeshComponent.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\combine.frag" />
+    <None Include="shaders\gbuffer.frag" />
+    <None Include="shaders\gbuffer.vert" />
+    <None Include="shaders\lightpass.frag" />
+    <None Include="shaders\lightpass.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\CombineShader.hpp" />
+    <ClInclude Include="src\GBufferShader.hpp" />
+    <ClInclude Include="src\LightPassShader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

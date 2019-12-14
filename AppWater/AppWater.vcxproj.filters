@@ -15,8 +15,29 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\WaterMeshComponent.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\combine.frag" />
+    <None Include="shaders\gbuffer.frag" />
+    <None Include="shaders\gbuffer.vert" />
+    <None Include="shaders\lightpass.frag" />
+    <None Include="shaders\lightpass.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\CombineShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GBufferShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LightPassShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

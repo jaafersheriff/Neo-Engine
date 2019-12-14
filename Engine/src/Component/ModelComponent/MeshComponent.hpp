@@ -8,6 +8,8 @@
 
 namespace neo {
 
+    class Library;
+
     class MeshComponent : public Component {
 
     public:
@@ -20,12 +22,12 @@ namespace neo {
         void replaceMesh(Mesh* m) { mMesh = m; }
 
         virtual void imGuiEditor() override {
-            auto meshes = Library::getAllMeshes();
-            for (auto mesh : meshes) {
-                if (ImGui::Button(mesh.first.c_str())) {
-                    replaceMesh(mesh.second);
-                }
-            }
+            // auto meshes = Library::getAllMeshes();
+            // for (auto mesh : meshes) {
+            //     if (ImGui::Button(mesh.first.c_str())) {
+            //         replaceMesh(mesh.second);
+            //     }
+            // }
         }
 
     protected:

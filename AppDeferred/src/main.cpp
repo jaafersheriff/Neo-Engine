@@ -54,8 +54,11 @@ int main() {
     Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
     Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
+    /* Lights */
     std::vector<Light *> lights;
     lights.push_back(new Light(glm::vec3(25.f, 25.f, 0.f), glm::vec3(1.f), glm::vec3(100.f)));
+
+    /* Renderables */
     Renderable cube(Library::getMesh("cube"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
     Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, Util::genRandomVec3());
     Renderable dragon(Library::getMesh("dragon10k.obj", true), glm::vec3(-4.f, 10.f, -5.f), glm::vec3(10.f));

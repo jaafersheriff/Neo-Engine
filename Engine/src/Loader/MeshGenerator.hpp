@@ -280,7 +280,7 @@ namespace neo {
 
                 for (int i = 0; i < VERTEX_COUNT; i++) {
                     for (int j = 0; j < VERTEX_COUNT; j++) {
-                        heights[j][i] = h * noise.octaveNoise(j / static_cast<double>(VERTEX_COUNT), i / static_cast<double>(VERTEX_COUNT), numOctaves);
+                        heights[j][i] = h == 0.f ? h : h * noise.octaveNoise(j / static_cast<double>(VERTEX_COUNT), i / static_cast<double>(VERTEX_COUNT), numOctaves);
                     }
                 }
 
@@ -297,10 +297,10 @@ namespace neo {
                         vertices[vertexPointer * 3 + 1] = vert.y;
                         vertices[vertexPointer * 3 + 2] = vert.z;
 
-                        float heightL = j == 0                ? 0.f : heights[j - 1][i    ] / h;
-                        float heightR = j == VERTEX_COUNT - 1 ? 0.f : heights[j + 1][i    ] / h;
-                        float heightD = i == VERTEX_COUNT - 1 ? 0.f : heights[j    ][i + 1] / h;
-                        float heightU = i == 0                ? 0.f : heights[j    ][i - 1] / h;
+                        float heightL = j == (h == 0.f || 0               ) ? 0.f : heights[j - 1][i    ] / h;
+                        float heightR = j == (h == 0.f || VERTEX_COUNT - 1) ? 0.f : heights[j + 1][i    ] / h;
+                        float heightD = i == (h == 0.f || VERTEX_COUNT - 1) ? 0.f : heights[j    ][i + 1] / h;
+                        float heightU = i == (h == 0.f || 0               ) ? 0.f : heights[j    ][i - 1] / h;
                         glm::vec3 normal = glm::normalize(glm::vec3(heightL - heightR, 2.f / ((float)VERTEX_COUNT - 1), heightD - heightU));
                         normals[vertexPointer * 3 + 0] = normal.x;
                         normals[vertexPointer * 3 + 1] = normal.y;
