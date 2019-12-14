@@ -50,8 +50,6 @@ namespace neo {
             const std::string mName = 0;
 
             /* Utility functions */
-            void attachType(std::string& file, ShaderType type);
-            void attachType(const char* source, ShaderType type);
             void init();
             void bind();
             void unbind();
@@ -76,10 +74,16 @@ namespace neo {
             GLint getAttribute(const std::string &) const;
             GLint getUniform(const std::string &) const;
 
+        protected: 
+            void _attachType(const std::string& file, ShaderType type);
+            void _attachType(const char* source, ShaderType type);
+
         private:
             /* GLSL shader attributes */
             GLuint mPID = 0;
+
             std::unordered_map<ShaderType, ShaderSource> mSources;
+
             std::map<std::string, GLint> mAttributes;
             std::map<std::string, GLint> mUniforms;
 

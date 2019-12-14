@@ -13,8 +13,13 @@ class NormalShader : public Shader {
         float magnitude = 0.4f;
     
         NormalShader(const std::string &vert, const std::string &frag, const std::string &geom) :
-            Shader("Normal Shader", vert, frag, geom) 
-        {}
+            Shader("Normal Shader")
+        {
+            _attachType(vert, ShaderType::VERTEX);
+            _attachType(frag, ShaderType::FRAGMENT);
+            _attachType(geom, ShaderType::GEOMETRY);
+            init();
+        }
 
         virtual void render(const CameraComponent &camera) override {
             bind();

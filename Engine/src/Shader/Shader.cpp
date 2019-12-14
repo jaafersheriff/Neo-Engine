@@ -13,15 +13,15 @@ namespace neo {
 
     Shader::Shader(const std::string &name, std::string& vertexFile, std::string& fragmentFile) :
         Shader(name) {
-        attachType(vertexFile, ShaderType::VERTEX);
-        attachType(fragmentFile, ShaderType::FRAGMENT);
+        _attachType(vertexFile, ShaderType::VERTEX);
+        _attachType(fragmentFile, ShaderType::FRAGMENT);
         init();
     }
 
     Shader::Shader(const std::string &name, const char* vertexSource, const char* fragmentSource) :
         Shader(name) {
-        attachType(vertexSource, ShaderType::VERTEX);
-        attachType(fragmentSource, ShaderType::FRAGMENT);
+        _attachType(vertexSource, ShaderType::VERTEX);
+        _attachType(fragmentSource, ShaderType::FRAGMENT);
         init();
     }
 
@@ -36,11 +36,11 @@ namespace neo {
         init();
     }
 
-    void Shader::attachType(std::string& file, ShaderType type) {
+    void Shader::_attachType(const std::string& file, ShaderType type) {
         mSources.emplace(type, ShaderSource{ 0, file, Util::textFileRead(_getFullPath(file).c_str()) });
     }
 
-    void Shader::attachType(const char* source, ShaderType type) {
+    void Shader::_attachType(const char* source, ShaderType type) {
         mSources.emplace(type, ShaderSource{ 0, "", source });
     }
 
