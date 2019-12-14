@@ -80,6 +80,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppMetaballs", "AppMetaball
 		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppWater", "AppWater\AppWater.vcxproj", "{4D213502-8CFD-4127-92A8-F6A98AE607B2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2C8EFE39-BFDB-4561-A025-B086D478161C} = {2C8EFE39-BFDB-4561-A025-B086D478161C}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -216,6 +221,14 @@ Global
 		{69DA3187-25A0-44D2-9048-F4A6BD7AA1D6}.Release|x64.Build.0 = Release|x64
 		{69DA3187-25A0-44D2-9048-F4A6BD7AA1D6}.Release|x86.ActiveCfg = Release|Win32
 		{69DA3187-25A0-44D2-9048-F4A6BD7AA1D6}.Release|x86.Build.0 = Release|Win32
+		{4D213502-8CFD-4127-92A8-F6A98AE607B2}.Debug|x64.ActiveCfg = Debug|x64
+		{4D213502-8CFD-4127-92A8-F6A98AE607B2}.Debug|x64.Build.0 = Debug|x64
+		{4D213502-8CFD-4127-92A8-F6A98AE607B2}.Debug|x86.ActiveCfg = Debug|Win32
+		{4D213502-8CFD-4127-92A8-F6A98AE607B2}.Debug|x86.Build.0 = Debug|Win32
+		{4D213502-8CFD-4127-92A8-F6A98AE607B2}.Release|x64.ActiveCfg = Release|x64
+		{4D213502-8CFD-4127-92A8-F6A98AE607B2}.Release|x64.Build.0 = Release|x64
+		{4D213502-8CFD-4127-92A8-F6A98AE607B2}.Release|x86.ActiveCfg = Release|Win32
+		{4D213502-8CFD-4127-92A8-F6A98AE607B2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
