@@ -5,6 +5,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include <unordered_map>
 #include <map>
 #include <string>
 #include <iostream>
@@ -13,21 +14,32 @@ namespace neo {
 
     class CameraComponent;
 
+    enum class ShaderType {
+        VERTEX,
+        FRAGMENT,
+        GEOMETRY,
+        TESSELLATION_CONTROL,
+        TESSELLATION_EVAL,
+        COMPUTE
+    };
+
+            struct ShaderSource {
+                GLint id = 0;
+                std::string file = "";
+                const char* source = nullptr;
+                std::string processedSource;
+            };
+
+
+
     class Shader {
 
         public:
-            Shader(const std::string &);
-            Shader(const std::string &, const std::string &, const std::string &);
-            Shader(const std::string &, const std::string &, const std::string &, const std::string &);
-            Shader(const std::string &, const char *, const char *);
-            Shader(const std::string &, const char *, const std::string &);
-            Shader(const std::string &, const char *, const char *, const char *);
-            // Compute
-            Shader(const std::string &, const std::string &);
-            Shader(const std::string &, const char *);
-
+            Shader(const std::string &name);
+            // Base vertex/fragment
+            Shader(const std::string &name, std::string& vertexFile, std::string& fragmentFile);
+            Shader(const std::string &name, const char* vertexSource, const char* fragmentSource);
             Shader(Shader&& rhs) = default;
-
             virtual ~Shader() = default;
 
             virtual void render(const CameraComponent &) {}
@@ -38,6 +50,9 @@ namespace neo {
             const std::string mName = 0;
 
             /* Utility functions */
+            void attachType(std::string& file, ShaderType type);
+            void attachType(const char* source, ShaderType type);
+            void init();
             void bind();
             void unbind();
             void reload();
@@ -64,24 +79,12 @@ namespace neo {
         private:
             /* GLSL shader attributes */
             GLuint mPID = 0;
-            GLint mVertexID = 0;
-            GLint mFragmentID = 0;
-            GLint mGeometryID = 0;
-            GLint mComputeID = 0;
+            std::unordered_map<ShaderType, ShaderSource> mSources;
             std::map<std::string, GLint> mAttributes;
             std::map<std::string, GLint> mUniforms;
 
-            std::string mVertexFile = "";
-            std::string mFragmentFile = "";
-            std::string mGeometryFile = "";
-            std::string mComputeFile = "";
-            const char* mVertexSource = nullptr;
-            const char* mFragmentSource = nullptr;
-            const char* mGeometrySource = nullptr;
-            const char* mComputeSource = nullptr;
-
-            void _init();
             std::string _getFullPath(const std::string&);
+            GLint _getGLType(ShaderType);
             GLuint _compileShader(GLenum, const char *);
             std::string _processShader(const char *);
             void _findAttributesAndUniforms(const char *);

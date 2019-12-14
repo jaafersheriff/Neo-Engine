@@ -11,94 +11,49 @@ namespace neo {
         mName(name)
     {}
 
-    Shader::Shader(const std::string &name, const std::string &vName, const std::string &fName) :
-        Shader(name, vName, fName, "")
-    {}
-
-    Shader::Shader(const std::string &name, const std::string &vName, const std::string &fName, const std::string &gName) :
-        Shader(
-            name,
-            (vName.size() ? Util::textFileRead(_getFullPath(vName).c_str()) : NULL),
-            (fName.size() ? Util::textFileRead(_getFullPath(fName).c_str()) : NULL),
-            (gName.size() ? Util::textFileRead(_getFullPath(gName).c_str()) : NULL))
-    {
-        mVertexFile = vName;
-        mFragmentFile = fName;
-        mGeometryFile = gName;
+    Shader::Shader(const std::string &name, std::string& vertexFile, std::string& fragmentFile) :
+        Shader(name) {
+        attachType(vertexFile, ShaderType::VERTEX);
+        attachType(fragmentFile, ShaderType::FRAGMENT);
+        init();
     }
 
-    Shader::Shader(const std::string &name, const char *vTex, const char *fTex) :
-        Shader(name, vTex, fTex, NULL)
-    {}
-
-    Shader::Shader(const std::string &name, const char *vTex, const std::string &fName) :
-        Shader(name, vTex, (fName.size() ? Util::textFileRead(_getFullPath(fName).c_str()) : NULL), NULL)
-    {
-        mFragmentFile = fName;
+    Shader::Shader(const std::string &name, const char* vertexSource, const char* fragmentSource) :
+        Shader(name) {
+        attachType(vertexSource, ShaderType::VERTEX);
+        attachType(fragmentSource, ShaderType::FRAGMENT);
+        init();
     }
-
-
-    Shader::Shader(const std::string &name, const std::string &cName) : 
-        Shader(name, Util::textFileRead(_getFullPath(cName).c_str())) {
-        mComputeFile = cName;
-    }
-
-    Shader::Shader(const std::string &name, const char *cTex) :
-        mName(name),
-        mComputeSource(cTex) {
-        _init();
-    }
-
-    Shader::Shader(const std::string &name, const char *vTex, const char *fTex, const char *gTex) :
-        mName(name),
-        mVertexSource(vTex),
-        mFragmentSource(fTex),
-        mGeometrySource(gTex) {
-
-        _init();
-   }
 
     void Shader::reload() {
         cleanUp();
-        if (mComputeFile.size()) {
-            delete mComputeSource;
-            mComputeSource = Util::textFileRead(_getFullPath(mComputeFile).c_str());
+        for (auto& shader : mSources) {
+            if (shader.second.file.size()) {
+                delete shader.second.source;
+                shader.second.source = Util::textFileRead(_getFullPath(shader.second.file).c_str());
+            }
         }
-        if (mVertexFile.size()) {
-            delete mVertexSource;
-            mVertexSource = Util::textFileRead(_getFullPath(mVertexFile).c_str());
-        }
-        if (mFragmentFile.size()) {
-            delete mFragmentSource;
-            mFragmentSource = Util::textFileRead(_getFullPath(mFragmentFile).c_str());
-        }
-         if (mGeometryFile.size()) {
-            delete mGeometrySource;
-            mGeometrySource = Util::textFileRead(_getFullPath(mGeometryFile).c_str());
-        }
-        _init();
+        init();
     }
 
-    void Shader::_init() {
+    void Shader::attachType(std::string& file, ShaderType type) {
+        mSources.emplace(type, ShaderSource{ 0, file, Util::textFileRead(_getFullPath(file).c_str()) });
+    }
+
+    void Shader::attachType(const char* source, ShaderType type) {
+        mSources.emplace(type, ShaderSource{ 0, "", source });
+    }
+
+    void Shader::init() {
         mPID = glCreateProgram();
+        
+        for (auto& shader : mSources) {
+            shader.second.processedSource = _processShader(shader.second.source);
+            if (shader.second.processedSource.size() && (shader.second.id = _compileShader(_getGLType(shader.first), shader.second.processedSource.c_str()))) {
+                CHECK_GL(glAttachShader(mPID, shader.second.id));
+            }
+        }
 
-        std::string processedVertex = _processShader(mVertexSource);
-        std::string processedFragment = _processShader(mFragmentSource);
-        std::string processedGeometry = _processShader(mGeometrySource);
-        std::string processedCompute = _processShader(mComputeSource);
-
-        if (processedVertex.size() && (mVertexID = _compileShader(GL_VERTEX_SHADER, processedVertex.c_str()))) {
-            CHECK_GL(glAttachShader(mPID, mVertexID));
-        }
-        if (processedFragment.size() && (mFragmentID = _compileShader(GL_FRAGMENT_SHADER, processedFragment.c_str()))) {
-            CHECK_GL(glAttachShader(mPID, mFragmentID));
-        }
-        if (processedGeometry.size() && (mGeometryID = _compileShader(GL_GEOMETRY_SHADER, processedGeometry.c_str()))) {
-            CHECK_GL(glAttachShader(mPID, mGeometryID));
-        }
-        if (processedCompute.size() && (mComputeID = _compileShader(GL_COMPUTE_SHADER, processedCompute.c_str()))) {
-            CHECK_GL(glAttachShader(mPID, mComputeID));
-        }
         CHECK_GL(glLinkProgram(mPID));
 
         // See whether link was successful
@@ -110,17 +65,10 @@ namespace neo {
             NEO_ASSERT(false, "");
         }
 
-        if (mVertexID) {
-            _findAttributesAndUniforms(processedVertex.c_str());
-        }
-        if (mFragmentID) {
-            _findAttributesAndUniforms(processedFragment.c_str());
-        }
-        if (mGeometryID) {
-            _findAttributesAndUniforms(processedGeometry.c_str());
-        }
-        if (mComputeID) {
-            _findAttributesAndUniforms(processedCompute.c_str());
+        for (auto& shader : mSources) {
+            if (shader.second.id) {
+                _findAttributesAndUniforms(shader.second.processedSource.c_str());
+            }
         }
 
         std::cout << "Successfully compiled and linked " << mName << std::endl;
@@ -318,25 +266,32 @@ namespace neo {
     void Shader::cleanUp() {
         if (mPID) {
             unbind();
-            if (mVertexID) {
-                CHECK_GL(glDetachShader(mPID, mVertexID));
-                CHECK_GL(glDeleteShader(mVertexID));
-            }
-            if (mFragmentID) {
-                CHECK_GL(glDetachShader(mPID, mFragmentID));
-                CHECK_GL(glDeleteShader(mFragmentID));
-            }
-            if (mGeometryID) {
-                CHECK_GL(glDeleteShader(mGeometryID));
-                CHECK_GL(glDetachShader(mPID, mGeometryID));
-            }
-            if (mComputeID) {
-                CHECK_GL(glDeleteShader(mComputeID));
-                CHECK_GL(glDetachShader(mPID, mComputeID));
+            for (auto& shader : mSources) {
+                CHECK_GL(glDetachShader(mPID, shader.second.id));
+                CHECK_GL(glDeleteShader(shader.second.id));
+                shader.second.id = 0;
             }
         }
         CHECK_GL(glDeleteProgram(mPID));
-        mPID = mVertexID = mFragmentID = mGeometryID = mComputeID = 0;
+        mPID = 0;
+    }
+
+    GLint Shader::_getGLType(ShaderType type) {
+        switch(type) {
+        case(ShaderType::VERTEX):
+            return GL_VERTEX_SHADER;
+        case(ShaderType::FRAGMENT):
+            return GL_FRAGMENT_SHADER;
+        case(ShaderType::GEOMETRY):
+            return GL_GEOMETRY_SHADER;
+        case(ShaderType::COMPUTE):
+            return GL_COMPUTE_SHADER;
+        case(ShaderType::TESSELLATION_CONTROL):
+            return GL_TESS_CONTROL_SHADER;
+        case(ShaderType::TESSELLATION_EVAL):
+            return GL_TESS_EVALUATION_SHADER;
+        }
+        NEO_ASSERT(false, "Invalid ShaderType");
     }
 
     void Shader::loadUniform(const std::string &loc, const bool b) const {
