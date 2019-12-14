@@ -17,7 +17,7 @@ class BlurShader : public Shader {
         float mWeight=0.69f;
         float mContribution = 0.4f;
 
-        BlurShader(const std::string &vert, const std::string &frag) :
+        BlurShader(const std::string &vert, const std::string& frag) :
             Shader("Blur Shader", vert, frag) {
             // Create blur 
             auto blur = Library::getFBO("godrayblur");

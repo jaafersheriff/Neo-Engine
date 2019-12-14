@@ -11,7 +11,7 @@ namespace neo {
         mName(name)
     {}
 
-    Shader::Shader(const std::string &name, std::string& vertexFile, std::string& fragmentFile) :
+    Shader::Shader(const std::string &name, const std::string& vertexFile, const std::string& fragmentFile) :
         Shader(name) {
         _attachType(vertexFile, ShaderType::VERTEX);
         _attachType(fragmentFile, ShaderType::FRAGMENT);

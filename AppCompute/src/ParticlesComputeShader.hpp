@@ -16,8 +16,11 @@ public:
     float timeScale = 100.f;
 
     ParticlesComputeShader(const std::string &compute) :
-        Shader("ParticlesCompute Shader", compute)
-    {}
+        Shader("ParticlesCompute Shader")
+    {
+        _attachType(compute, ShaderType::COMPUTE);
+        init();
+    }
 
     virtual void render(const CameraComponent &) override {
         bind();

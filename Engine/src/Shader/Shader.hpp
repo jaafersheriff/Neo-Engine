@@ -37,7 +37,7 @@ namespace neo {
         public:
             Shader(const std::string &name);
             // Base vertex/fragment
-            Shader(const std::string &name, std::string& vertexFile, std::string& fragmentFile);
+            Shader(const std::string &name, const std::string& vertexFile, const std::string& fragmentFile);
             Shader(const std::string &name, const char* vertexSource, const char* fragmentSource);
             Shader(Shader&& rhs) = default;
             virtual ~Shader() = default;

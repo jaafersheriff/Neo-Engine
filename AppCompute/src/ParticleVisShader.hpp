@@ -16,8 +16,13 @@ public:
     glm::vec3 mSpriteColor = glm::vec3(0.67f, 1.f, 0.55f);
 
     ParticleVisShader(const std::string &vert, const std::string& frag, const std::string &geom) :
-        Shader("ParticleVis Shader", vert, frag, geom)
-    {}
+        Shader("ParticleVis Shader")
+    {
+        _attachType(vert, ShaderType::VERTEX);
+        _attachType(frag, ShaderType::FRAGMENT);
+        _attachType(geom, ShaderType::GEOMETRY);
+        init();
+    }
 
     virtual void render(const CameraComponent &camera) override {
         bind();

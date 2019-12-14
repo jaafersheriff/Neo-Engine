@@ -82,7 +82,7 @@ class LightPassShader : public Shader {
                 else {
                     CHECK_GL(glCullFace(GL_BACK));
                 }
-                Library::getMesh("ico_2", true)->draw();
+                Library::getMesh("sphere", true)->draw();
             }
 
             unbind();
