@@ -28,6 +28,8 @@
     <None Include="shaders\gbuffer.vert" />
     <None Include="shaders\lightpass.frag" />
     <None Include="shaders\lightpass.vert" />
+    <None Include="shaders\water.vert" />
+    <None Include="shaders\water.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CombineShader.hpp">
@@ -37,6 +39,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\LightPassShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WaterShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

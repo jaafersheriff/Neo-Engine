@@ -7,6 +7,7 @@
 #include "Shader/GammaCorrectShader.hpp"
 
 #include "WaterMeshComponent.hpp"
+#include "WaterShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "Util/Util.hpp"
@@ -94,6 +95,7 @@ int main() {
     Renderer::init("shaders/", camera.camera);
     Renderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
     Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag"); 
+    Renderer::addSceneShader<WaterShader>("water.vert", "water.frag");
     Renderer::addPostProcessShader<CombineShader>("combine.frag"); 
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
