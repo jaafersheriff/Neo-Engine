@@ -22,7 +22,22 @@ namespace neo {
             float phi = comp.mPhi + mouseSpeed.y * comp.mLookSpeed * dt;
             comp.setOrientation(theta, phi);
         }
-
+        if (Keyboard::isKeyPressed(comp.mLookLeftButton)) {
+            float theta = comp.mTheta + comp.mLookSpeed * 2.f * dt;
+            comp.setOrientation(theta, comp.mPhi);
+        }
+        if (Keyboard::isKeyPressed(comp.mLookRightButton)) {
+            float theta = comp.mTheta - comp.mLookSpeed * 2.f * dt;
+            comp.setOrientation(theta, comp.mPhi);
+        }
+        if (Keyboard::isKeyPressed(comp.mLookUpButton)) {
+            float phi = comp.mPhi - comp.mLookSpeed * 2.f * dt;
+            comp.setOrientation(comp.mTheta, phi);
+        }
+        if (Keyboard::isKeyPressed(comp.mLookDownButton)) {
+            float phi = comp.mPhi + comp.mLookSpeed * 2.f * dt;
+            comp.setOrientation(comp.mTheta, phi);
+        }
     }
 
     void CameraControllerSystem::_updatePosition(const float dt, CameraControllerComponent& comp) {

@@ -14,6 +14,11 @@ namespace neo {
             float mMoveSpeed;
             float mTheta, mPhi;
 
+            int mLookLeftButton;
+            int mLookRightButton;
+            int mLookDownButton;
+            int mLookUpButton;
+
             int mForwardButton;
             int mBackwardButton;
             int mRightButton;
