@@ -1,7 +1,11 @@
 
-layout (triangles, fractional_odd_spacing, ccw) in;
+layout (triangles, equal_spacing, ccw) in;
+
+const uint numWaves = 2;
 
 uniform mat4 P, V;
+uniform float time;
+uniform float dampeningFactor;
 
 in vec3 evalPos[];
 in vec4 evalTex[];
@@ -17,9 +21,93 @@ vec4 interpolate4D(vec4 v0, vec4 v1, vec4 v2) {
     return vec4(gl_TessCoord.x) * v0 + vec4(gl_TessCoord.y) * v1 + vec4(gl_TessCoord.z) * v2;
 }
 
+struct WaveResult
+{
+    vec3 position;
+    vec3 normal;
+    vec3 binormal;
+    vec3 tangent;
+};
+ 
+struct Wave
+{
+    vec3 direction;
+    float steepness;
+    float waveLength;
+    float amplitude;
+    float speed;
+};
+ 
+WaveResult CalculateWave(Wave wave, vec3 wavePosition, float edgeDampen)
+{
+    WaveResult result;
+ 
+    float frequency = 2.0 / wave.waveLength;
+    float phaseConstant = wave.speed * frequency;
+    float qi = wave.steepness / (wave.amplitude * frequency * numWaves);
+    float rad = frequency * dot(wave.direction.xz, wavePosition.xz) + time * phaseConstant;
+    float sinR = sin(rad);
+    float cosR = cos(rad);
+ 
+    result.position.x = wavePosition.x + qi * wave.amplitude * wave.direction.x * cosR * edgeDampen;
+    result.position.z = wavePosition.z + qi * wave.amplitude * wave.direction.z * cosR * edgeDampen;
+    result.position.y = wave.amplitude * sinR * edgeDampen;
+ 
+    float waFactor = frequency * wave.amplitude;
+    float radN = frequency * dot(wave.direction, result.position) + time * phaseConstant;
+    float sinN = sin(radN);
+    float cosN = cos(radN);
+ 
+    result.binormal.x = 1 - (qi * wave.direction.x * wave.direction.x * waFactor * sinN);
+    result.binormal.z = -1 * (qi * wave.direction.x * wave.direction.z * waFactor * sinN);
+    result.binormal.y = wave.direction.x * waFactor * cosN;
+ 
+    result.tangent.x = -1 * (qi * wave.direction.x * wave.direction.z * waFactor * sinN);
+    result.tangent.z = 1 - (qi * wave.direction.z * wave.direction.z * waFactor * sinN);
+    result.tangent.y = wave.direction.z * waFactor * cosN;
+ 
+    result.normal.x = -1 * (wave.direction.x * waFactor * cosN);
+    result.normal.z = -1 * (wave.direction.z * waFactor * cosN);
+    result.normal.y = 1 - (qi * waFactor * sinN);
+ 
+    result.binormal = normalize(result.binormal);
+    result.tangent = normalize(result.tangent);
+    result.normal = normalize(result.normal);
+ 
+    return result;
+}
+
+
 void main() {
     fragPos = interpolate3D(evalPos[0], evalPos[1], evalPos[2]);
     fragTex = interpolate4D(evalTex[0], evalTex[1], evalTex[2]);
 
+Wave waves[numWaves];
+    waves[0].direction = vec3(0.3, 0, -0.7);
+    waves[0].steepness = 1.79;
+    waves[0].waveLength = 3.75;
+    waves[0].amplitude = 0.85;
+    waves[0].speed = 1.21;
+ 
+    waves[1].direction = vec3(0.5, 0, -0.2);
+    waves[1].steepness = 1.79;
+    waves[1].waveLength = 4.1;
+    waves[1].amplitude = 0.52;
+    waves[1].speed = 1.03;
+ 
+    float dampening = 1.0 - pow(clamp(abs(fragTex.z - 0.5) / 0.5, 0.0, 1.0), dampeningFactor);
+    dampening *= 1.0 - pow(clamp(abs(fragTex.w - 0.5) / 0.5, 0.0, 1.0), dampeningFactor);
+ 
+    WaveResult finalWaveResult;
+    finalWaveResult.position = vec3(0,0,0);
+
+    for(uint waveId = 0; waveId < numWaves; waveId++)
+    {
+        WaveResult waveResult = CalculateWave(waves[waveId], fragPos.xyz, dampening);
+        finalWaveResult.position += waveResult.position;
+    }
+    finalWaveResult.position -= fragPos.xyz * (numWaves - 1);
+    fragPos = finalWaveResult.position;
+    
     gl_Position = P * V * vec4(fragPos, 1.0);
 }

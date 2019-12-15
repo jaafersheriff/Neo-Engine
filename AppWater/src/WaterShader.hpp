@@ -18,6 +18,7 @@ class WaterShader : public Shader {
 
         glm::vec3 tessFactor = glm::vec3(10.f, 7.f, 3.f);
         glm::vec2 tessDistance = glm::vec2(2.f, 5.f);
+        float dampeningFactor = 0.5f;
 
         WaterShader(const std::string &vert, const std::string &frag, const std::string& control, const std::string& eval) :
             Shader("Water Shader") {
@@ -36,6 +37,8 @@ class WaterShader : public Shader {
 
             loadUniform("tessFactor", tessFactor);
             loadUniform("tessDistance", tessDistance);
+            loadUniform("time", Util::getRunTime());
+            loadUniform("dampeningFactor", dampeningFactor);
 
             CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
             CHECK_GL(glPatchParameteri(GL_PATCH_VERTICES, 3));
@@ -51,5 +54,6 @@ class WaterShader : public Shader {
         virtual void imguiEditor() override {
             ImGui::SliderFloat3("TessFactor", &tessFactor[0], 0.1f, 10.f);
             ImGui::SliderFloat2("TessDistance", &tessDistance[0], 0.1f, 30.f);
+            ImGui::SliderFloat("Dampening", &dampeningFactor, 0.1f, 5.f);
         }
 };
