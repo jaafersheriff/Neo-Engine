@@ -1,6 +1,8 @@
 #include "Shader.hpp"
 #include "Util/Util.hpp"
+#include "GLObjects/Texture.hpp"
 #include "GLObjects/GLHelper.hpp"
+
 #include "Renderer/Renderer.hpp"
 
 #include <fstream>
@@ -333,4 +335,10 @@ namespace neo {
     void Shader::loadUniform(const std::string &loc, const glm::mat4 & m) const {
         CHECK_GL(glUniformMatrix4fv(getUniform(loc), 1, GL_FALSE, glm::value_ptr(m)));
     }
+
+    void Shader::loadTexture(const std::string &loc, const Texture & texture) const {
+        texture.bind();
+        loadUniform(loc, texture.mTextureID);
+    }
+
 }

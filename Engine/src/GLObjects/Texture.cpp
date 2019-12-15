@@ -5,6 +5,8 @@
 
 #include "GLObjects/GLHelper.hpp"
 
+#include "Util/Util.hpp"
+
 namespace neo {
 
     Texture::Texture(GLuint textureType, TextureFormat format, glm::uvec2 size) :
@@ -40,7 +42,7 @@ namespace neo {
             if (mTextureType != GL_TEXTURE_2D) {
                 CHECK_GL(glTexParameteri(mTextureType, GL_TEXTURE_WRAP_R, mFormat.mode));
             }
-	}
+	    }
     }
 
     void Texture::resize(const glm::uvec2 size) {
@@ -53,6 +55,26 @@ namespace neo {
         mDepth = size.z;
 
         _resize();
+    }
+
+    void Texture::update(const glm::uvec2 size, const uint8_t* data) {
+        update(glm::uvec3(size, 0), data);
+    }
+
+    void Texture::update(const glm::uvec3 size, const uint8_t* data) {
+        NEO_ASSERT(data != nullptr, "Attempting to update a texture with nothing");
+        resize(size);
+        upload(data);
+    }
+
+    void Texture::update(const glm::uvec2 size, const float* data) {
+        update(glm::uvec3(size, 0), data);
+    }
+
+    void Texture::update(const glm::uvec3 size, const float* data) {
+        NEO_ASSERT(data != nullptr, "Attempting to update a texture with nothing");
+        resize(size);
+        upload(data);
     }
 
     void Texture::destroy() {

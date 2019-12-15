@@ -13,6 +13,7 @@
 namespace neo {
 
     class CameraComponent;
+    class Texture;
 
     enum class ShaderType {
         VERTEX,
@@ -69,6 +70,7 @@ namespace neo {
             void loadUniform(const std::string &, const glm::vec4 &) const;   // vec4
             void loadUniform(const std::string &, const glm::mat3 &) const;   // mat3
             void loadUniform(const std::string &, const glm::mat4 &) const;   // mat4
+            void loadTexture(const std::string &, const Texture &) const;     // texture
 
             /* Get shader location */
             GLint getAttribute(const std::string &) const;

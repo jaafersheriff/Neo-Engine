@@ -35,6 +35,20 @@ namespace neo {
             NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when uploading Texture");
         }
 
+        virtual void upload(const float* data = nullptr) override {
+            MICROPROFILE_SCOPEI("Texture2D", "upload", MP_AUTO);
+            MICROPROFILE_SCOPEGPUI("Texture2D::upload", MP_AUTO);
+
+            /* Bind texture buffer object to active texture */
+            bind();
+
+            /* Load texture data to GPU */
+            CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, mFormat.inputFormat, mWidth, mHeight, 0, mFormat.format, GL_FLOAT, data));
+
+            /* Error check */
+            NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when uploading Texture");
+        }
+
     protected:
         virtual void _resize() override {
             bind();

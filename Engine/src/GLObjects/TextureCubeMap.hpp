@@ -22,6 +22,8 @@ namespace neo {
         virtual void upload(const uint8_t* data = nullptr) override {
         }
 
+        virtual void upload(const float* data = nullptr) override {
+        }
 
         void upload(const std::vector<glm::uvec2>& sizes, uint8_t** data) {
             MICROPROFILE_SCOPEI("TextureCube", "upload", MP_AUTO);
