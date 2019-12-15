@@ -30,6 +30,8 @@
     <None Include="shaders\lightpass.vert" />
     <None Include="shaders\water.vert" />
     <None Include="shaders\water.frag" />
+    <None Include="shaders\water.control" />
+    <None Include="shaders\water.eval" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CombineShader.hpp">

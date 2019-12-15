@@ -68,10 +68,6 @@ int main() {
     Engine::addComponent<MaterialComponent>(dragon.gameObject, 0.2f, Util::genRandomVec3());
     Renderable stairs(Library::getMesh("staircase.obj", true), glm::vec3(5.f, 10.f, 9.f), glm::vec3(10.f));
     Engine::addComponent<MaterialComponent>(stairs.gameObject, 0.2f, Util::genRandomVec3());
-    for (int i = 0; i < 20; i++) {
-        Renderable tree(Library::getMesh("PineTree3.obj", true), glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
-        Engine::addComponent<DiffuseMapComponent>(tree.gameObject, *Library::getTexture("PineTexture.png"));
-    }
 
     /* Water */
     {
@@ -79,13 +75,6 @@ int main() {
         Engine::addComponent<SpatialComponent>(&go);
         Engine::addComponent<WaterMeshComponent>(&go, 50, 50, 5.f, 5.f);
     }
-
-
-    // Terrain 
-    // TODO : used hilly plain -- add perlin to meshgen
-    Renderable terrain(Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
-    terrain.spat->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
-    Engine::addComponent<MaterialComponent>(terrain.gameObject, 0.7f, glm::vec3(0.7f));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
@@ -95,7 +84,7 @@ int main() {
     Renderer::init("shaders/", camera.camera);
     Renderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
     Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag"); 
-    Renderer::addSceneShader<WaterShader>("water.vert", "water.frag");
+    Renderer::addSceneShader<WaterShader>("water.vert", "water.frag", "water.control", "water.eval");
     Renderer::addPostProcessShader<CombineShader>("combine.frag"); 
     Renderer::addPostProcessShader<GammaCorrectShader>();
 

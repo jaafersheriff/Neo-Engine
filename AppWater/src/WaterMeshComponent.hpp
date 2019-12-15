@@ -14,7 +14,7 @@ namespace neo {
         std::vector<float> texCoords;
 
         WaterMeshComponent(GameObject *go, int xTiles, int zTiles, float texTileX, float texTileZ) :
-            MeshComponent(go, new Mesh(GL_TRIANGLES))
+            MeshComponent(go, new Mesh(GL_PATCHES))
         {
             uint32_t vertexCount = xTiles * zTiles * 6;
 

@@ -248,7 +248,7 @@ namespace neo {
     GLint Shader::getAttribute(const std::string &name) const {
         std::map<std::string, GLint>::const_iterator attribute = mAttributes.find(name.c_str());
         if (attribute == mAttributes.end()) {
-            std::cerr << name << " is not an attribute variable" << std::endl;
+            std::cerr << name << " is not an attribute variable - did you remember to call Shader::init()" << std::endl;
             return -1;
         }
         return attribute->second;
@@ -257,7 +257,7 @@ namespace neo {
     GLint Shader::getUniform(const std::string &name) const {
         std::map<std::string, GLint>::const_iterator uniform = mUniforms.find(name.c_str());
         if (uniform == mUniforms.end()) {
-            std::cerr << name << " is not an uniform variable" << std::endl;
+            std::cerr << name << " is not an uniform variable - did you remember to call Shader::init()" << std::endl;
             return -1;
         }
         return uniform->second;

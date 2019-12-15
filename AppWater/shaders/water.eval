@@ -1,0 +1,25 @@
+
+layout (triangles, fractional_odd_spacing, ccw) in;
+
+uniform mat4 P, V;
+
+in vec3 evalPos[];
+in vec4 evalTex[];
+
+out vec3 fragPos;
+out vec4 fragTex;
+
+vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2) {
+    return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
+}
+
+vec4 interpolate4D(vec4 v0, vec4 v1, vec4 v2) {
+    return vec4(gl_TessCoord.x) * v0 + vec4(gl_TessCoord.y) * v1 + vec4(gl_TessCoord.z) * v2;
+}
+
+void main() {
+    fragPos = interpolate3D(evalPos[0], evalPos[1], evalPos[2]);
+    fragTex = interpolate4D(evalTex[0], evalTex[1], evalTex[2]);
+
+    gl_Position = P * V * vec4(fragPos, 1.0);
+}
