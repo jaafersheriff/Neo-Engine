@@ -31,6 +31,8 @@ public:
     glm::vec2 tessDistance = glm::vec2(2.f, 5.f);
     float dampeningFactor = 0.5f;
 
+    glm::vec4 normalMapScrollDir = glm::vec4(1.f, 0.f, 1.f, 0.f);
+    glm::vec2 normalMapScrollSpeed = glm::vec2(1.f, 1.f);
 
     WaterShader(const std::string &vert, const std::string &frag, const std::string& control, const std::string& eval) :
         Shader("Water Shader") {
@@ -70,8 +72,13 @@ public:
         loadTexture("waveData", *waveTextureData);
         loadUniform("numWaves", waveData.size());
 
+        loadTexture("WaterNormalMap1", *Library::getTexture("water1.png", { GL_RGBA, GL_RGBA, GL_LINEAR, GL_REPEAT }));
+        loadTexture("WaterNormalMap2", *Library::getTexture("water2.png", { GL_RGBA, GL_RGBA, GL_LINEAR, GL_REPEAT }));
+        loadUniform("normalMapScrollDir", normalMapScrollDir);
+        loadUniform("normalMapScrollSpeed", normalMapScrollSpeed);
+
         CHECK_GL(glPatchParameteri(GL_PATCH_VERTICES, 3));
-                CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+                // CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
         if (auto renderable = Engine::getComponentTuple<WaterMeshComponent, SpatialComponent>()) {
             loadUniform("M", renderable->get<SpatialComponent>()->getModelMatrix());
             loadUniform("N", renderable->get<SpatialComponent>()->getNormalMatrix());
@@ -92,6 +99,10 @@ public:
             waveData.push_back(WaveData{});
             updateTexture = true;
         }
+        ImGui::SliderFloat2("NormalMap1 scroll dir", &normalMapScrollDir[0], 0.f, 1.f);
+        ImGui::SliderFloat("NormalMap1 scroll speed", &normalMapScrollSpeed[0], 0.f, 1.f);
+        ImGui::SliderFloat2("NormalMap2 scroll dir", &normalMapScrollDir[2], 0.f, 1.f);
+        ImGui::SliderFloat("NormalMap2 scroll speed", &normalMapScrollSpeed[1], 0.f, 1.f);
         if (ImGui::TreeNodeEx("Wave data", ImGuiTreeNodeFlags_DefaultOpen)) {
             for (int i = 0; i < waveData.size(); i++) {
                 ImGui::PushID(i);

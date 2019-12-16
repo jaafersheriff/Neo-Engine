@@ -359,7 +359,7 @@ namespace neo {
                         for (unsigned i = 0; i < shaders.size(); i++) {
                             auto& shader = shaders[i];
                             ImGui::PushID(i);
-                            bool treeActive = ImGui::TreeNodeEx(shader.second->mName.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
+                            bool treeActive = ImGui::TreeNodeEx(shader.second->mName.c_str());
                             if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                                 ImGui::SetDragDropPayload(swapName.c_str(), &i, sizeof(unsigned));
                                 ImGui::Text("Swap %s", shader.second->mName.c_str());
