@@ -34,6 +34,9 @@ public:
     glm::vec4 normalMapScrollDir = glm::vec4(1.f, 0.f, 1.f, 0.f);
     glm::vec2 normalMapScrollSpeed = glm::vec2(1.f, 1.f);
 
+    // glm::vec2 reflectanceFactor = glm::vec2(16.f, 0.2f);
+    float shine = 20.f;
+
     WaterShader(const std::string &vert, const std::string &frag, const std::string& control, const std::string& eval) :
         Shader("Water Shader") {
         _attachType(vert, ShaderType::VERTEX);
@@ -77,6 +80,12 @@ public:
         loadUniform("normalMapScrollDir", normalMapScrollDir);
         loadUniform("normalMapScrollSpeed", normalMapScrollSpeed);
 
+        if (auto light = Engine::getComponentTuple<LightComponent, SpatialComponent>()) {
+            loadUniform("lightPos", light->get<SpatialComponent>()->getPosition());
+        }
+        // loadUniform("reflectanceFactor", reflectanceFactor);
+        loadUniform("shine", shine);
+
         CHECK_GL(glPatchParameteri(GL_PATCH_VERTICES, 3));
                 // CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
         if (auto renderable = Engine::getComponentTuple<WaterMeshComponent, SpatialComponent>()) {
@@ -94,15 +103,20 @@ public:
         ImGui::SliderFloat2("TessDistance", &tessDistance[0], 0.1f, 30.f);
         ImGui::SliderFloat("Dampening", &dampeningFactor, 0.1f, 5.f);
 
+        ImGui::SliderFloat2("NormalMap1 scroll dir", &normalMapScrollDir[0], 0.f, 1.f);
+        ImGui::SliderFloat("NormalMap1 scroll speed", &normalMapScrollSpeed[0], 0.f, 1.f);
+        ImGui::SliderFloat2("NormalMap2 scroll dir", &normalMapScrollDir[2], 0.f, 1.f);
+        ImGui::SliderFloat("NormalMap2 scroll speed", &normalMapScrollSpeed[1], 0.f, 1.f);
+
+        // ImGui::SliderFloat("Reflectance.x", &reflectanceFactor[0], 1.f, 50.f);
+        // ImGui::SliderFloat("Reflectance.y", &reflectanceFactor[1], 0.f, 1.f);
+        ImGui::SliderFloat("shine", &shine, 1.f, 50.f);
+
         bool updateTexture = false;
         if (ImGui::Button("Add wave")) {
             waveData.push_back(WaveData{});
             updateTexture = true;
         }
-        ImGui::SliderFloat2("NormalMap1 scroll dir", &normalMapScrollDir[0], 0.f, 1.f);
-        ImGui::SliderFloat("NormalMap1 scroll speed", &normalMapScrollSpeed[0], 0.f, 1.f);
-        ImGui::SliderFloat2("NormalMap2 scroll dir", &normalMapScrollDir[2], 0.f, 1.f);
-        ImGui::SliderFloat("NormalMap2 scroll speed", &normalMapScrollSpeed[1], 0.f, 1.f);
         if (ImGui::TreeNodeEx("Wave data", ImGuiTreeNodeFlags_DefaultOpen)) {
             for (int i = 0; i < waveData.size(); i++) {
                 ImGui::PushID(i);
