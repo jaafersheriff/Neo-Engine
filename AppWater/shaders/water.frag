@@ -94,5 +94,5 @@ void main() {
     specularNoise *= texture2D(waterNoise, fragTex.xy * 0.5).r;
     float specularFactor = geometryTerm * normalDistribution * fresnelReflectance * specIntensity * nDotL * specularNoise;
 
-    color = vec4(vec3(specularFactor), 1.0);
+    color = vec4(vec3(1.0), 1.0);
 }

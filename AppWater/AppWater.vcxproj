@@ -136,6 +136,7 @@
     <ClInclude Include="src\GBufferShader.hpp" />
     <ClInclude Include="src\LightPassShader.hpp" />
     <ClInclude Include="src\WaterShader.hpp" />
+    <ClInclude Include="src\WaterComponent.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

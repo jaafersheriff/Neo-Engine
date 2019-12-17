@@ -6,6 +6,7 @@
 #include "Shader/WireframeShader.hpp"
 #include "Shader/GammaCorrectShader.hpp"
 
+#include "WaterComponent.hpp"
 #include "WaterMeshComponent.hpp"
 #include "WaterShader.hpp"
 
@@ -74,6 +75,7 @@ int main() {
         auto& go = Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(&go);
         Engine::addComponent<WaterMeshComponent>(&go, 50, 50, 5.f, 5.f);
+        Engine::addComponent<WaterComponent>(&go);
     }
 
     /* Systems - order matters! */
@@ -89,6 +91,13 @@ int main() {
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
+    Engine::addImGuiFunc("Water", [&]() {
+        if (auto water = Engine::getComponentTuple<WaterComponent, WaterMeshComponent, SpatialComponent>()) {
+            water->get<WaterComponent>()->imGuiEditor();
+            water->get<WaterMeshComponent>()->imGuiEditor();
+            water->get<SpatialComponent>()->imGuiEditor();
+        }
+    });
     Engine::addImGuiFunc("Lights", [&]() {
         static int index;
         if (ImGui::CollapsingHeader("Create Lights")) {
