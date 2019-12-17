@@ -13,8 +13,8 @@ namespace neo {
         std::vector<float> vertices;
         std::vector<float> texCoords;
 
-        glm::vec3 tessFactor = glm::vec3(10.f, 7.f, 3.f);
-        glm::vec2 tessDistance = glm::vec2(2.f, 5.f);
+        glm::vec3 mTessFactor = glm::vec3(10.f, 7.f, 1.f);
+        glm::vec2 mTessDistance = glm::vec2(20.f, 35.f);
 
         WaterMeshComponent(GameObject *go, int xTiles, int zTiles, float texTileX, float texTileZ) :
             MeshComponent(go, new Mesh(GL_PATCHES))
@@ -104,8 +104,8 @@ namespace neo {
         }
 
         virtual void imGuiEditor() override {
-            ImGui::SliderFloat3("TessFactor", &tessFactor[0], 0.1f, 10.f);
-            ImGui::SliderFloat2("TessDistance", &tessDistance[0], 0.1f, 30.f);
+            ImGui::SliderFloat3("TessFactor", &mTessFactor[0], 0.1f, 10.f);
+            ImGui::SliderFloat2("TessDistance", &mTessDistance[0], 0.1f, 30.f);
         }
 
     };

@@ -22,19 +22,22 @@ class WaterComponent : public Component{
 
         float mDampening = 0.5f; // per wave?
 
-        glm::vec2 reflectanceFactor = glm::vec2(0.16f, 0.2f);
-        float roughness = 0.5f;
-        float specIntensity = 0.2f;
+        glm::vec2 mReflectanceFactor = glm::vec2(0.16f, 0.2f);
+        float mRoughness = 0.5f;
+        float mSpecIntensity = 0.2f;
+
+        glm::vec3 mBaseColor = glm::vec3(0.14f, 0.25f, 0.87f);
 
         WaterComponent(GameObject *gameObject) :
             Component(gameObject)
         {}
 
         virtual void imGuiEditor() override {
+            ImGui::SliderFloat3("Color", &mBaseColor[0], 0.f, 1.f);
             ImGui::SliderFloat("Dampening", &mDampening, 0.1f, 5.f);
-            ImGui::SliderFloat("Reflectance", &reflectanceFactor[0], 0.f, 1.f);
-            ImGui::SliderFloat("Roughness", &roughness, 0.f, 1.f);
-            ImGui::SliderFloat("Specular", &specIntensity, 0.f, 1.f);
+            ImGui::SliderFloat("Reflectance", &mReflectanceFactor[0], 0.f, 1.f);
+            ImGui::SliderFloat("Roughness", &mRoughness, 0.f, 1.f);
+            ImGui::SliderFloat("Specular", &mSpecIntensity, 0.f, 1.f);
             if (ImGui::Button("Add wave")) {
                 mWaveData.push_back(WaveData{});
                 mDirtyWave = true;

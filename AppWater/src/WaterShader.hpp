@@ -115,17 +115,19 @@ public:
                     rawWaveData[4 * i + 3] = renderable->get<WaterComponent>()->mWaveData[i].waveLength;
                     waveTextureData->update(glm::uvec2(renderable->get<WaterComponent>()->mWaveData.size(), 1), rawWaveData.data());
                 }
+                renderable->get<WaterComponent>()->mDirtyWave = false;
             }
 
-            loadUniform("tessFactor", renderable->get<WaterMeshComponent>()->tessFactor);
-            loadUniform("tessDistance", renderable->get<WaterMeshComponent>()->tessDistance);
+            loadUniform("baseColor", renderable->get<WaterComponent>()->mBaseColor);
+            loadUniform("tessFactor", renderable->get<WaterMeshComponent>()->mTessFactor);
+            loadUniform("tessDistance", renderable->get<WaterMeshComponent>()->mTessDistance);
             loadUniform("dampeningFactor", renderable->get<WaterComponent>()->mDampening);
 
             loadUniform("numWaves", renderable->get<WaterComponent>()->mWaveData.size());
 
-            loadUniform("reflectanceFactor", renderable->get<WaterComponent>()->reflectanceFactor);
-            loadUniform("roughness", renderable->get<WaterComponent>()->roughness);
-            loadUniform("specIntensity", renderable->get<WaterComponent>()->specIntensity);
+            loadUniform("reflectanceFactor", renderable->get<WaterComponent>()->mReflectanceFactor);
+            loadUniform("roughness", renderable->get<WaterComponent>()->mRoughness);
+            loadUniform("specIntensity", renderable->get<WaterComponent>()->mSpecIntensity);
 
             loadUniform("M", renderable->get<SpatialComponent>()->getModelMatrix());
             loadUniform("N", renderable->get<SpatialComponent>()->getNormalMatrix());

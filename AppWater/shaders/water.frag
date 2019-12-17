@@ -22,6 +22,8 @@ uniform float specIntensity;
 
 uniform sampler2D waterNoise;
 
+uniform vec3 baseColor;
+
 out vec4 color;
 
 #define PI 3.14159265359
@@ -94,5 +96,5 @@ void main() {
     specularNoise *= texture2D(waterNoise, fragTex.xy * 0.5).r;
     float specularFactor = geometryTerm * normalDistribution * fresnelReflectance * specIntensity * nDotL * specularNoise;
 
-    color = vec4(vec3(1.0), 1.0);
+    color = vec4(baseColor, 1.0);
 }
