@@ -16,10 +16,46 @@ uniform sampler2D WaterNormalMap1;
 uniform sampler2D WaterNormalMap2;
 
 uniform vec3 lightPos;
-// uniform vec2 reflectanceFactor;
-uniform float shine;
+uniform vec2 reflectanceFactor;
+uniform float roughness;
+uniform float specIntensity;
+
+uniform sampler2D waterNoise;
 
 out vec4 color;
+
+#define PI 3.14159265359
+float CalculateNormalDistributionGGX(float a, float NdotH) {
+    float a2     = a*a;
+    float NdotH2 = NdotH*NdotH;
+	
+    float nom    = a2;
+    float denom  = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom        = PI * denom * denom;
+	
+    return nom / denom;
+}
+
+float CalculateSchlickFresnelReflectance(vec3 H, vec3 V, float F0 ) {
+  float base = 1.0 - dot( V, H );
+  float exponential = pow( base, 5.0 );
+  return exponential + F0 * ( 1.0 - exponential );
+}
+
+float GeometrySchlickGGX(float NdotV, float k) {
+    float nom   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+	
+    return nom / denom;
+}
+  
+
+float CalculateSmithGGXGeometryTerm(float k, float NdotL, float NdotV) { 
+    float ggx1 = GeometrySchlickGGX(NdotV, k);
+    float ggx2 = GeometrySchlickGGX(NdotL, k);
+	
+    return ggx1 * ggx2;
+}
 
 void main() {
     // Calculate normals
@@ -39,26 +75,24 @@ void main() {
     finalNormal = normalize(finalNormal);
 
     // Calculate specular
+    // TODO: this is broken
     vec3 lightDir = lightPos - fragWorldPos.xyz;
     vec3 L = -normalize(lightDir);
     vec3 V = -normalize(fragWorldViewPos.xyz);
     vec3 H = normalize(V + L);
-    /*
     float linearRoughness = roughness * roughness;
     float nDotL = clamp(dot(finalNormal, L), 0.0, 1.0);
     float nDotV = abs(dot(finalNormal, V)) + EPSILON;
     float nDotH = clamp(dot(finalNormal, H), 0.0, 1.0);
     float lDotH = clamp(dot(L, H), 0.0, 1.0);
-    vec3 f0 = reflectanceFactor.x * reflectance.y * reflectance.y;
+    float f0 = reflectanceFactor.x * reflectanceFactor.y * reflectanceFactor.y;
     float normalDistribution = CalculateNormalDistributionGGX(linearRoughness, nDotH);
-    vec3 fresnelReflectance = CalculateSchlickFresnelReflectance(lDotH, f0);
+    float fresnelReflectance = CalculateSchlickFresnelReflectance(H, V, f0);
     float geometryTerm = CalculateSmithGGXGeometryTerm(linearRoughness, nDotL, nDotV);
-    float specularNoise = WaterNoiseMap.Sample(LinearWrapSampler, normalMapCoords1 * 0.5).r;
-    specularNoise *= WaterNoiseMap.Sample(LinearWrapSampler, normalMapCoords2 * 0.5).r;
-    specularNoise *= WaterNoiseMap.Sample(LinearWrapSampler, input.texCoord0.xy * 0.5).r;
-    vec3 specularFactor = (geometryTerm * normalDistribution) * fresnelReflectance * specIntensity * nDotL * specularNoise;
-    */
-    vec3 specularFactor = vec3(1.0) * pow(clamp(dot(H, N), 0.0, 1.0), shine);
+    float specularNoise = texture2D(waterNoise, normalMapCoords1 * 0.5).r;
+    specularNoise *= texture2D(waterNoise, normalMapCoords2 * 0.5).r;
+    specularNoise *= texture2D(waterNoise, fragTex.xy * 0.5).r;
+    float specularFactor = geometryTerm * normalDistribution * fresnelReflectance * specIntensity * nDotL * specularNoise;
 
-    color = vec4(specularFactor, 1.0);
-} 
+    color = vec4(vec3(specularFactor), 1.0);
+}

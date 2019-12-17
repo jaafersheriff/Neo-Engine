@@ -20,6 +20,11 @@ namespace neo {
             upload(data);
         }
 
+        Texture2D(TextureFormat format, glm::uvec2 size,const std::vector<float>& data = {}) :
+            Texture(GL_TEXTURE_2D, format, size)
+        {
+            upload(data.data());
+        }
 
         virtual void upload(const uint8_t* data = nullptr) override {
             MICROPROFILE_SCOPEI("Texture2D", "upload", MP_AUTO);

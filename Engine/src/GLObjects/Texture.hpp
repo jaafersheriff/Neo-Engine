@@ -15,6 +15,7 @@ namespace neo {
         GLenum format = GL_RGBA;
         GLint filter = GL_NEAREST;
         GLenum mode = GL_REPEAT;
+        GLenum type = GL_UNSIGNED_BYTE;
     };
 
     class Texture {

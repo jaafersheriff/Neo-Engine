@@ -34,8 +34,13 @@ public:
     glm::vec4 normalMapScrollDir = glm::vec4(1.f, 0.f, 1.f, 0.f);
     glm::vec2 normalMapScrollSpeed = glm::vec2(1.f, 1.f);
 
-    // glm::vec2 reflectanceFactor = glm::vec2(16.f, 0.2f);
-    float shine = 20.f;
+    glm::vec2 reflectanceFactor = glm::vec2(0.16f, 0.2f);
+    float roughness = 0.5f;
+    float specIntensity = 0.2f;
+
+    Texture* waterNoise;
+
+    bool wireframe = false;
 
     WaterShader(const std::string &vert, const std::string &frag, const std::string& control, const std::string& eval) :
         Shader("Water Shader") {
@@ -50,6 +55,7 @@ public:
         directionFormat.format = GL_RGB;
         directionFormat.filter = GL_LINEAR;
         directionFormat.mode = GL_CLAMP;
+        directionFormat.type = GL_FLOAT;
         waveTextureDirection = Library::createEmptyTexture<Texture2D>("waveDirection", directionFormat);
 
         TextureFormat dataFormat;
@@ -57,7 +63,22 @@ public:
         dataFormat.format = GL_RGBA;
         dataFormat.filter = GL_LINEAR;
         dataFormat.mode = GL_CLAMP;
+        dataFormat.type = GL_FLOAT;
         waveTextureData = Library::createEmptyTexture<Texture2D>("wavedata", dataFormat);
+
+        TextureFormat noiseFormat;
+        noiseFormat.inputFormat = GL_R16F;
+        noiseFormat.format = GL_RED;
+        noiseFormat.filter = GL_LINEAR;
+        noiseFormat.mode = GL_CLAMP;
+        noiseFormat.type = GL_FLOAT;
+        waterNoise = Library::createEmptyTexture<Texture2D>("waterNoise", noiseFormat);
+        std::vector<float> data;
+        data.resize(16 * 16 * 1);
+        for (int i = 0; i < 16 * 16 * 1; i++) {
+            data[i] = Util::genRandom(-1.f, 1.f);
+        }
+        waterNoise->update(glm::uvec2(16, 16), data.data());
     }
 
     virtual void render(const CameraComponent &camera) override {
@@ -83,11 +104,19 @@ public:
         if (auto light = Engine::getComponentTuple<LightComponent, SpatialComponent>()) {
             loadUniform("lightPos", light->get<SpatialComponent>()->getPosition());
         }
-        // loadUniform("reflectanceFactor", reflectanceFactor);
-        loadUniform("shine", shine);
+        loadUniform("reflectanceFactor", reflectanceFactor);
+        loadUniform("roughness", roughness);
+        loadUniform("specIntensity", specIntensity);
+
+        loadTexture("waterNoise", *waterNoise);
 
         CHECK_GL(glPatchParameteri(GL_PATCH_VERTICES, 3));
-                // CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+        if (wireframe) {
+            CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+        }
+        else {
+            CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+        }
         if (auto renderable = Engine::getComponentTuple<WaterMeshComponent, SpatialComponent>()) {
             loadUniform("M", renderable->get<SpatialComponent>()->getModelMatrix());
             loadUniform("N", renderable->get<SpatialComponent>()->getNormalMatrix());
@@ -99,6 +128,7 @@ public:
     }
 
     virtual void imguiEditor() override {
+        ImGui::Checkbox("Wireframe", &wireframe);
         ImGui::SliderFloat3("TessFactor", &tessFactor[0], 0.1f, 10.f);
         ImGui::SliderFloat2("TessDistance", &tessDistance[0], 0.1f, 30.f);
         ImGui::SliderFloat("Dampening", &dampeningFactor, 0.1f, 5.f);
@@ -108,9 +138,9 @@ public:
         ImGui::SliderFloat2("NormalMap2 scroll dir", &normalMapScrollDir[2], 0.f, 1.f);
         ImGui::SliderFloat("NormalMap2 scroll speed", &normalMapScrollSpeed[1], 0.f, 1.f);
 
-        // ImGui::SliderFloat("Reflectance.x", &reflectanceFactor[0], 1.f, 50.f);
-        // ImGui::SliderFloat("Reflectance.y", &reflectanceFactor[1], 0.f, 1.f);
-        ImGui::SliderFloat("shine", &shine, 1.f, 50.f);
+        ImGui::SliderFloat("Reflectance", &reflectanceFactor[0], 0.f, 1.f);
+        ImGui::SliderFloat("Roughness", &roughness, 0.f, 1.f);
+        ImGui::SliderFloat("Specular", &specIntensity, 0.f, 1.f);
 
         bool updateTexture = false;
         if (ImGui::Button("Add wave")) {
