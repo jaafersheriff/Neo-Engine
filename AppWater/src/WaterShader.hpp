@@ -20,10 +20,18 @@ public:
     Texture* waveTextureDirection;
     Texture* waveTextureData;
 
-    glm::vec4 normalMapScrollDir = glm::vec4(1.f, 0.f, 1.f, 0.f);
-    glm::vec2 normalMapScrollSpeed = glm::vec2(1.f, 1.f);
+    glm::vec4 normalMapScrollDir = glm::vec4(0.25f, 0.25f, 0.25f, -0.25f);
+    glm::vec2 normalMapScrollSpeed = glm::vec2(0.2f, 0.3f);
 
     Texture* waterNoise;
+
+    float refractionFactor = 0.2f;
+    float refractionHeightFactor = 1.f;
+    float refractionDistanceFactor = 1.f;
+
+    glm::vec3 reflectionColor = glm::vec3(1.f);
+
+    float depthSofteningDistance = 1.f;
 
     bool wireframe = false;
 
@@ -55,7 +63,7 @@ public:
         noiseFormat.inputFormat = GL_R16F;
         noiseFormat.format = GL_RED;
         noiseFormat.filter = GL_LINEAR;
-        noiseFormat.mode = GL_CLAMP;
+        noiseFormat.mode = GL_REPEAT;
         noiseFormat.type = GL_FLOAT;
         waterNoise = Library::createEmptyTexture<Texture2D>("waterNoise", noiseFormat);
         std::vector<float> data;
@@ -78,6 +86,8 @@ public:
 
         loadUniform("P", camera.getProj());
         loadUniform("V", camera.getView());
+        loadUniform("invP", glm::inverse(camera.getProj()));
+        loadUniform("invV", glm::inverse(camera.getView()));
         loadUniform("camPos", camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
         loadUniform("time", Util::getRunTime());
@@ -96,6 +106,16 @@ public:
         loadUniform("normalMapScrollSpeed", normalMapScrollSpeed);
 
         loadTexture("waterNoise", *waterNoise);
+
+        loadUniform("refractionDistortionFactor", refractionFactor);
+        loadUniform("refractionHeightFactor", refractionHeightFactor);
+        loadUniform("refractionDistanceFactor", refractionDistanceFactor);
+        loadTexture("gDiffuse", *Library::getFBO("gbuffer")->mTextures[2]);
+        loadTexture("gDepth", *Library::getFBO("gbuffer")->mTextures[3]);
+
+        loadUniform("reflectionColor", reflectionColor);
+
+        loadUniform("depthSofteningDistance", depthSofteningDistance);
 
         if (auto renderable = Engine::getComponentTuple<WaterComponent, WaterMeshComponent, SpatialComponent>()) {
             if (renderable->get<WaterComponent>()->mDirtyWave) {
@@ -146,5 +166,13 @@ public:
         ImGui::SliderFloat("NormalMap1 scroll speed", &normalMapScrollSpeed[0], 0.f, 1.f);
         ImGui::SliderFloat2("NormalMap2 scroll dir", &normalMapScrollDir[2], 0.f, 1.f);
         ImGui::SliderFloat("NormalMap2 scroll speed", &normalMapScrollSpeed[1], 0.f, 1.f);
+
+        ImGui::SliderFloat("Refraction Factor", &refractionFactor, 0.f, 1.f);
+        ImGui::SliderFloat("Refraction Height", &refractionHeightFactor, 0.f, 50.f);
+        ImGui::SliderFloat("Refraction Distance", &refractionDistanceFactor, 0.f, 50.f);
+
+        ImGui::SliderFloat3("Reflection Color", &reflectionColor[0], 0.f, 1.f);
+
+        ImGui::SliderFloat("Depth dist", &depthSofteningDistance, 0.f, 50.f);
     }
 };

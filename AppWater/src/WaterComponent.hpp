@@ -14,28 +14,32 @@ class WaterComponent : public Component{
             glm::vec3 direction = glm::vec3(0.3f, 0.f, -0.7f);
             float steepness = 1.8f;
             float waveLength = 4.f;
-            float amplitude = 0.6f;
+            float amplitude = 5.6f;
             float speed = 1.1f;
         };
         std::vector<WaveData> mWaveData;
         bool mDirtyWave = true;
 
-        float mDampening = 0.5f; // per wave?
+        float mDampening = 1.5f; // per wave?
 
-        glm::vec2 mReflectanceFactor = glm::vec2(0.16f, 0.2f);
-        float mRoughness = 0.5f;
-        float mSpecIntensity = 0.2f;
+        glm::vec2 mReflectanceFactor = glm::vec2(0.5f, 0.9f);
+        float mRoughness = 0.3f;
+        float mSpecIntensity = 0.9f;
 
         glm::vec3 mBaseColor = glm::vec3(0.14f, 0.25f, 0.87f);
 
         WaterComponent(GameObject *gameObject) :
             Component(gameObject)
-        {}
+        {
+            WaveData data;
+            data.amplitude = 10.f;
+            mWaveData.push_back(data);
+        }
 
         virtual void imGuiEditor() override {
-            ImGui::SliderFloat3("Color", &mBaseColor[0], 0.f, 1.f);
+            ImGui::SliderFloat3("Base Color", &mBaseColor[0], 0.f, 1.f);
             ImGui::SliderFloat("Dampening", &mDampening, 0.1f, 5.f);
-            ImGui::SliderFloat("Reflectance", &mReflectanceFactor[0], 0.f, 1.f);
+            ImGui::SliderFloat2("Reflectance", &mReflectanceFactor[0], 0.f, 1.f);
             ImGui::SliderFloat("Roughness", &mRoughness, 0.f, 1.f);
             ImGui::SliderFloat("Specular", &mSpecIntensity, 0.f, 1.f);
             if (ImGui::Button("Add wave")) {

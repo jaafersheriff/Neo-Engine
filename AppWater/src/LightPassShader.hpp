@@ -58,12 +58,9 @@ class LightPassShader : public Shader {
 
             /* Bind gbuffer */
             auto gbuffer = Library::getFBO("gbuffer");
-            gbuffer->mTextures[0]->bind();
-            loadUniform("gNormal", gbuffer->mTextures[0]->mTextureID);
-            gbuffer->mTextures[1]->bind();
-            loadUniform("gDiffuse", gbuffer->mTextures[1]->mTextureID);
-            gbuffer->mTextures[2]->bind();
-            loadUniform("gDepth", gbuffer->mTextures[2]->mTextureID);
+            loadTexture("gNormal", *gbuffer->mTextures[1]);
+            loadTexture("gDiffuse", *gbuffer->mTextures[2]);
+            loadTexture("gDepth", *gbuffer->mTextures[3]);
 
             /* Render light volumes */
             for (auto& light : Engine::getComponentTuples<LightComponent, SpatialComponent>()) {

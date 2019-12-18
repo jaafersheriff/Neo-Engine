@@ -11,10 +11,12 @@ uniform sampler2D diffuseMap;
 uniform vec3 diffuseMaterial;
 uniform float ambient;
 
-layout (location = 0) out vec4 gNormal;
-layout (location = 1) out vec4 gDiffuse;
+layout (location = 0) out vec4 gWorld;
+layout (location = 1) out vec4 gNormal;
+layout (location = 2) out vec4 gDiffuse;
 
 void main() {
+    gWorld = vec4(fragPos.xyz, 1.0);
     gNormal = vec4(0.5 + 0.5 * (useNormalMap ? texture(normalMap, fragTex).rgb : normalize(fragNor)), 1.f);
     gDiffuse = vec4(useDiffuseMap ? texture(diffuseMap, fragTex).rgb : diffuseMaterial, 1.f);
 }  
