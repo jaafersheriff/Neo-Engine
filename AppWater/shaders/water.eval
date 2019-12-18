@@ -118,11 +118,11 @@ void main() {
     fragPos = P * fragWorldViewPos;
     fragNormal = normalize(N * finalWaveResult.normal);
     fragWorldNormalAndHeight.xyz = fragNormal;
-    fragNormal = normalize(vec3(V * vec4(fragNormal, 1.0)));
+    // fragNormal = normalize(vec3(V * vec4(fragNormal, 1.0)));
     fragTangent = normalize(N * finalWaveResult.tangent);
-    fragTangent = normalize(vec3(V * vec4(fragTangent, 0.0)));
+    // fragTangent = normalize(vec3(V * vec4(fragTangent, 0.0)));
     fragBinormal = normalize(N * finalWaveResult.binormal);
-    fragBinormal = normalize(vec3(V * vec4(fragBinormal, 0.0)));
+    // fragBinormal = normalize(vec3(V * vec4(fragBinormal, 0.0)));
 
     gl_Position = fragPos;
 }

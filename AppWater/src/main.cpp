@@ -73,7 +73,7 @@ int main() {
     /* Water */
     {
         auto& go = Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(&go);
+        Engine::addComponent<SpatialComponent>(&go, glm::vec3(-20.f, 5.f, -15.f));
         Engine::addComponent<WaterMeshComponent>(&go, 50, 50, 5.f, 5.f);
         Engine::addComponent<WaterComponent>(&go);
     }

@@ -79,7 +79,7 @@ void main() {
     // Calculate specular
     // TODO: this is broken
     vec3 lightDir = lightPos - fragWorldPos.xyz;
-    vec3 L = -normalize(lightDir);
+    vec3 L = normalize(lightDir);
     vec3 V = -normalize(fragWorldViewPos.xyz);
     vec3 H = normalize(V + L);
     float linearRoughness = roughness * roughness;
@@ -96,5 +96,5 @@ void main() {
     specularNoise *= texture2D(waterNoise, fragTex.xy * 0.5).r;
     float specularFactor = geometryTerm * normalDistribution * fresnelReflectance * specIntensity * nDotL * specularNoise;
 
-    color = vec4(baseColor, 1.0);
+    color = vec4(baseColor * clamp(dot(N, L), 0.0, 1.0) + baseColor * 0.1, 1.0);
 }
