@@ -23,15 +23,14 @@ void main()
     float x = p.x;
     float y = p.y;
     float z = p.z;
+
+    float a = -5.5;
+    float b = 3.5;
+    float d = -1;
     
-    float a = 0.9;
-    float b = 5.0;
-    float c = 9.9;
-    float d = 1.0;
-    
-    dx = (-a*x+ y*y - z*z + a *c) * timestep;
-    dy = (x*(y-b*z)+d) * timestep;
-    dz = (-z + x*(b*y +z)) * timestep; 
+    dx = y * timestep;
+    dy = z * timestep;
+    dz = (-a*x -b*y -z + (d* (pow(x, 3)))) * timestep;
     
     p += vec3(dx, dy, dz);
 
