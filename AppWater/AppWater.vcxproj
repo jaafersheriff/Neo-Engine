@@ -124,6 +124,8 @@
     <None Include="shaders\combine.frag" />
     <None Include="shaders\gbuffer.frag" />
     <None Include="shaders\gbuffer.vert" />
+    <None Include="shaders\gbufferskybox.frag" />
+    <None Include="shaders\gbufferskybox.vert" />
     <None Include="shaders\lightpass.frag" />
     <None Include="shaders\lightpass.vert" />
     <None Include="shaders\water.control" />
@@ -134,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="src\CombineShader.hpp" />
     <ClInclude Include="src\GBufferShader.hpp" />
+    <ClInclude Include="src\GBufferSkyboxShader.hpp" />
     <ClInclude Include="src\LightPassShader.hpp" />
     <ClInclude Include="src\WaterShader.hpp" />
     <ClInclude Include="src\WaterComponent.hpp" />

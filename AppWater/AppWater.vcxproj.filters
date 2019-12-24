@@ -32,6 +32,8 @@
     <None Include="shaders\water.frag" />
     <None Include="shaders\water.control" />
     <None Include="shaders\water.eval" />
+    <None Include="shaders\gbufferskybox.vert" />
+    <None Include="shaders\gbufferskybox.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CombineShader.hpp">
@@ -47,6 +49,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\WaterComponent.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GBufferSkyboxShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

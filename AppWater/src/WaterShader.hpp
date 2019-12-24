@@ -32,7 +32,7 @@ public:
     glm::vec3 refractionColor = glm::vec3(0.184f, 0.216f, 0.212f);
     glm::vec3 reflectionColor = glm::vec3(1.f);
 
-    float depthSofteningDistance = 1.f;
+    float depthSofteningDistance = 12.f;
 
     bool wireframe = false;
 

@@ -23,6 +23,7 @@ class CombineShader : public PostProcessShader {
 
             // Bind diffuse output
             auto gBuffer = Library::getFBO("gbuffer");
+            loadTexture("gNormal", *gBuffer->mTextures[1]);
             loadTexture("gDiffuse", *gBuffer->mTextures[2]);
             loadTexture("gDepth", *gBuffer->mTextures[3]);
 

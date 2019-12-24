@@ -1,6 +1,7 @@
 #include <Engine.hpp>
 
 #include "GBufferShader.hpp"
+#include "GBufferSkyboxShader.hpp"
 #include "LightPassShader.hpp"
 #include "CombineShader.hpp"
 #include "Shader/WireframeShader.hpp"
@@ -70,6 +71,15 @@ int main() {
     Renderable stairs(Library::getMesh("staircase.obj", true), glm::vec3(5.f, 10.f, 9.f), glm::vec3(10.f));
     Engine::addComponent<MaterialComponent>(stairs.gameObject, 0.2f, Util::genRandomVec3());
 
+    /* Skybox */
+    {
+        GameObject* gameObject = &Engine::createGameObject();
+        Engine::addComponent<renderable::SkyboxComponent>(gameObject);
+        Engine::addComponent<CubeMapComponent>(gameObject, *Library::getCubemap("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}));
+    }
+
+
+
     /* Water */
     {
         auto& go = Engine::createGameObject();
@@ -85,6 +95,7 @@ int main() {
     /* Init renderer */
     Renderer::init("shaders/", camera.camera);
     Renderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
+    Renderer::addPreProcessShader<GBufferSkyboxShader>("gbufferskybox.vert", "gbufferskybox.frag");
     Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag"); 
     Renderer::addSceneShader<WaterShader>("water.vert", "water.frag", "water.control", "water.eval");
     Renderer::addPostProcessShader<CombineShader>("combine.frag"); 

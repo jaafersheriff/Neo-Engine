@@ -123,10 +123,10 @@ void main() {
 
     vec3 scenePosition = texture(gWorld, hdrCoords).rgb;
     float depthSoftenedAlpha = clamp(distance(scenePosition, fragWorldPos.xyz) / depthSofteningDistance, 0.0, 1.0);
-    color = vec4(specularFactor + vec3(waterColor) + baseColor, depthSoftenedAlpha); return;
 
     vec3 waterSurfacePosition = (distortedPosition.y < fragWorldPos.y) ? distortedPosition : scenePosition;
     waterColor = mix(waterColor, baseColor.rgb, clamp((fragWorldPos.y - waterSurfacePosition.y) / refractionHeightFactor, 0.0, 1.0));
+    color = vec4(specularFactor + vec3(clamp((fragWorldPos.y - waterSurfacePosition.y) / refractionHeightFactor, 0.0, 1.0)), depthSoftenedAlpha); return;
 
     float waveTopReflectionFactor = pow(1.0 - clamp(dot(fragNormal, V), 0.0, 1.0), 3);
     vec3 waterBaseColor = mix(waterColor, baseColor, clamp(clamp(length(fragViewPos.xyz) / refractionDistanceFactor, 0.0, 1.0) + waveTopReflectionFactor, 0.0, 1.0));
