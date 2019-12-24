@@ -25,12 +25,6 @@ namespace neo {
     }
 
     void Window::_keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-        /* Exit */
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-            glfwSetWindowShouldClose(window, true);
-            return;
-        }
-
         /* Toggle mFullscreen (f11 or alt+enter) */
         if ((key == GLFW_KEY_F11 || key == GLFW_KEY_ENTER && mods & GLFW_MOD_ALT) && action == GLFW_PRESS) {
             /* If already full screen */

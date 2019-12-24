@@ -2,20 +2,22 @@
 #define EPSILON 0.00001
 #define PI 3.14159265359
 
+in vec4 fragScreenPos;
 in vec4 fragWorldPos;
 in vec4 fragViewPos;
-in vec4 fragScreenPos;
-in vec3 fragViewNormal;
-in vec3 fragViewTangent;
-in vec3 fragViewBinormal;
+in vec3 fragNormal;
+in vec3 fragTangent;
+in vec3 fragBinormal;
 in vec4 fragTex;
-in vec4 fragNormalAndHeight;
+in float frahHeight;
 
 uniform float time;
 uniform vec4 normalMapScrollDir;
 uniform vec2 normalMapScrollSpeed;
 uniform sampler2D WaterNormalMap1;
 uniform sampler2D WaterNormalMap2;
+
+uniform vec3 camPos;
 
 uniform vec3 lightPos;
 uniform vec2 reflectanceFactor;
@@ -26,11 +28,13 @@ uniform sampler2D waterNoise;
 
 uniform float refractionDistortionFactor;
 uniform sampler2D gDiffuse; // this should be final light pass 
+uniform sampler2D gWorld;
 uniform sampler2D gDepth;
 uniform mat4 invV;
 uniform mat4 invP;
 uniform float refractionHeightFactor;
 uniform float refractionDistanceFactor;
+uniform vec3 refractionColor;
 
 uniform float depthSofteningDistance;
 
@@ -72,25 +76,11 @@ float CalculateSmithGGXGeometryTerm(float k, float NdotL, float NdotV) {
     return ggx1 * ggx2;
 }
 
-vec3 WorldPosFromDepth(vec2 tex, float depth) {
-    float z = depth * 2.0 - 1.0;
-
-    vec4 clipSpacePosition = vec4(tex * 2.0 - 1.0, z, 1.0);
-    vec4 viewSpacePosition = invP * clipSpacePosition;
-
-    // Perspective division
-    viewSpacePosition /= viewSpacePosition.w;
-
-    vec4 worldSpacePosition = invV * viewSpacePosition;
-
-    return worldSpacePosition.xyz;
-}
-
 void main() {
     // Calculate normals
-    vec3 N = normalize(fragViewNormal);
-    vec3 T = normalize(fragViewTangent);
-    vec3 B = normalize(fragViewBinormal);
+    vec3 N = normalize(fragNormal);
+    vec3 T = normalize(fragTangent);
+    vec3 B = normalize(fragBinormal);
     mat3 texSpace = mat3(T, B, N);
  
     vec2 normalMapCoords1 = fragTex.xy + time * normalMapScrollDir.xy * normalMapScrollSpeed.x;
@@ -102,12 +92,10 @@ void main() {
     finalNormal += normalize(texSpace * normalMap2.xyz);
     finalNormal = normalize(finalNormal);
 
-
     // Calculate specular
-    // TODO: this is broken
     vec3 lightDir = lightPos - fragWorldPos.xyz;
     vec3 L = normalize(lightDir);
-    vec3 V = -normalize(fragViewPos.xyz);
+    vec3 V = normalize(camPos - fragWorldPos.xyz);
     vec3 H = normalize(V + L);
     float linearRoughness = roughness * roughness;
     float nDotL = clamp(dot(finalNormal, L), 0.0, 1.0);
@@ -118,27 +106,29 @@ void main() {
     float normalDistribution = CalculateNormalDistributionGGX(linearRoughness, nDotH);
     float fresnelReflectance = CalculateSchlickFresnelReflectance(H, V, f0);
     float geometryTerm = CalculateSmithGGXGeometryTerm(linearRoughness, nDotL, nDotV);
+
+    // TODO : uncomment later
     // float specularNoise = texture(waterNoise, normalMapCoords1 * 0.5).r;
-    // specularNoise *= texture(waterNoise, normalMapCoords2 * 0.5).r; // 0
+    // specularNoise *= texture(waterNoise, normalMapCoords2 * 0.5).r;
     // specularNoise *= texture(waterNoise, fragTex.xy * 0.5).r;
     float specularNoise = 1.f;
+
     float specularFactor = geometryTerm * normalDistribution * fresnelReflectance * specIntensity * nDotL * specularNoise;
     
-    vec2 hdrCoords = ((vec2(fragScreenPos.x, -fragScreenPos.y) / fragScreenPos.w) * 0.5) + 0.5;
+    vec2 hdrCoords = ((vec2(fragScreenPos.x, fragScreenPos.y) / fragScreenPos.w) * 0.5) + 0.5;
     vec2 distortedTexCoord = (hdrCoords + ((finalNormal.xz + finalNormal.xy) * 0.5) * refractionDistortionFactor);
-    float distortedDepth = texture(gDepth, distortedTexCoord).r;
-    vec3 distortedPosition = WorldPosFromDepth(distortedTexCoord, distortedDepth);
+    vec3 distortedPosition = texture(gWorld, distortedTexCoord).rgb;
     vec2 refractionTexCoord = (distortedPosition.y < fragWorldPos.y) ? distortedTexCoord : hdrCoords;
-    vec3 waterColor = texture(gDiffuse, refractionTexCoord).rgb * baseColor;
+    vec3 waterColor = texture(gDiffuse, refractionTexCoord).rgb * refractionColor;
 
-    float sceneDepth = texture(gDepth, hdrCoords).r;
-    vec3 scenePosition = WorldPosFromDepth(hdrCoords, sceneDepth);
+    vec3 scenePosition = texture(gWorld, hdrCoords).rgb;
     float depthSoftenedAlpha = clamp(distance(scenePosition, fragWorldPos.xyz) / depthSofteningDistance, 0.0, 1.0);
+    color = vec4(specularFactor + vec3(waterColor) + baseColor, depthSoftenedAlpha); return;
 
     vec3 waterSurfacePosition = (distortedPosition.y < fragWorldPos.y) ? distortedPosition : scenePosition;
     waterColor = mix(waterColor, baseColor.rgb, clamp((fragWorldPos.y - waterSurfacePosition.y) / refractionHeightFactor, 0.0, 1.0));
 
-    float waveTopReflectionFactor = pow(1.0 - clamp(dot(fragViewNormal, V), 0.0, 1.0), 3);
+    float waveTopReflectionFactor = pow(1.0 - clamp(dot(fragNormal, V), 0.0, 1.0), 3);
     vec3 waterBaseColor = mix(waterColor, baseColor, clamp(clamp(length(fragViewPos.xyz) / refractionDistanceFactor, 0.0, 1.0) + waveTopReflectionFactor, 0.0, 1.0));
 
     vec3 finalWaterColor = waterBaseColor + specularFactor;

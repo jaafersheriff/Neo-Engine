@@ -10,12 +10,16 @@ uniform float diffuseAmount;
 out vec4 color;
 
 void main() {
-    if(texture(gDepth, fragTex).r > texture(inputDepth, fragTex).r) {
-        color = vec4(texture(inputFBO, fragTex).rgb, 1.0);
-        return;
-    }
     vec4 lightOutput = texture(lightOutput, fragTex);
     vec4 diffuse = texture(gDiffuse, fragTex);
-    color.rgb = diffuseAmount * diffuse.rgb + lightOutput.rgb;
+    vec4 waterOutput = texture(inputFBO, fragTex);
+    float waterDepth = texture(inputDepth, fragTex).r;
+    vec3 diff = diffuseAmount * diffuse.rgb + lightOutput.rgb;
+    if (waterDepth < 1.0 && texture(gDepth, fragTex).r > waterDepth) {
+       color.rgb = waterOutput.rgb * waterOutput.a;
+    }
+    else {
+        color.rgb = diff;
+    }
     color.a = 1.f;
 }

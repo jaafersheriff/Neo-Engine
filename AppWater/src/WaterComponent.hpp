@@ -52,7 +52,7 @@ class WaterComponent : public Component{
                     ImGui::Separator();
                     mDirtyWave |= ImGui::SliderFloat3("Direction", &mWaveData[i].direction[0], -1.f, 1.f);
                     mWaveData[i].direction = glm::normalize(mWaveData[i].direction);
-                    mDirtyWave |= ImGui::SliderFloat("Steepness", &mWaveData[i].steepness, 0.01f, 10.f);
+                    mDirtyWave |= ImGui::SliderFloat("Steepness", &mWaveData[i].steepness, -10.f, 1.f);
                     mDirtyWave |= ImGui::SliderFloat("Wavelength", &mWaveData[i].waveLength, 0.01f, 10.f);
                     mDirtyWave |= ImGui::SliderFloat("Speed", &mWaveData[i].speed, 0.f, 1.f);
                     mDirtyWave |= ImGui::SliderFloat("Amplitude", &mWaveData[i].amplitude, 0.f, 10.f);

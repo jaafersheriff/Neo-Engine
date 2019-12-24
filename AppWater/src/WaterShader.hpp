@@ -25,10 +25,11 @@ public:
 
     Texture* waterNoise;
 
-    float refractionFactor = 0.2f;
+    float refractionFactor = 0.02f;
     float refractionHeightFactor = 1.f;
     float refractionDistanceFactor = 1.f;
 
+    glm::vec3 refractionColor = glm::vec3(0.184f, 0.216f, 0.212f);
     glm::vec3 reflectionColor = glm::vec3(1.f);
 
     float depthSofteningDistance = 1.f;
@@ -67,11 +68,12 @@ public:
         noiseFormat.type = GL_FLOAT;
         waterNoise = Library::createEmptyTexture<Texture2D>("waterNoise", noiseFormat);
         std::vector<float> data;
-        data.resize(16 * 16 * 1);
-        for (int i = 0; i < 16 * 16 * 1; i++) {
+        const int noisesize = 256;
+        data.resize(noisesize * noisesize * 1);
+        for (int i = 0; i < noisesize * noisesize * 1; i++) {
             data[i] = Util::genRandom(-1.f, 1.f);
         }
-        waterNoise->update(glm::uvec2(16, 16), data.data());
+        waterNoise->update(glm::uvec2(noisesize, noisesize), data.data());
     }
 
     virtual void render(const CameraComponent &camera) override {
@@ -110,10 +112,13 @@ public:
         loadUniform("refractionDistortionFactor", refractionFactor);
         loadUniform("refractionHeightFactor", refractionHeightFactor);
         loadUniform("refractionDistanceFactor", refractionDistanceFactor);
+
+        loadTexture("gWorld", *Library::getFBO("gbuffer")->mTextures[0]);
         loadTexture("gDiffuse", *Library::getFBO("gbuffer")->mTextures[2]);
         loadTexture("gDepth", *Library::getFBO("gbuffer")->mTextures[3]);
 
         loadUniform("reflectionColor", reflectionColor);
+        loadUniform("refractionColor", refractionColor);
 
         loadUniform("depthSofteningDistance", depthSofteningDistance);
 
@@ -170,6 +175,7 @@ public:
         ImGui::SliderFloat("Refraction Factor", &refractionFactor, 0.f, 1.f);
         ImGui::SliderFloat("Refraction Height", &refractionHeightFactor, 0.f, 50.f);
         ImGui::SliderFloat("Refraction Distance", &refractionDistanceFactor, 0.f, 50.f);
+        ImGui::ColorEdit3("Refraction Color", &reflectionColor[0]);
 
         ImGui::SliderFloat3("Reflection Color", &reflectionColor[0], 0.f, 1.f);
 
