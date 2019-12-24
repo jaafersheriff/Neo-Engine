@@ -25,14 +25,14 @@ public:
 
     Texture* waterNoise;
 
-    float refractionFactor = 0.02f;
-    float refractionHeightFactor = 1.f;
-    float refractionDistanceFactor = 1.f;
+    float refractionFactor = 0.04f;
+    float refractionHeightFactor = 2.5f;
+    float refractionDistanceFactor = 15.0f;
 
-    glm::vec3 refractionColor = glm::vec3(0.184f, 0.216f, 0.212f);
-    glm::vec3 reflectionColor = glm::vec3(1.f);
+    glm::vec3 refractionColor = glm::vec3(0.003f, 0.599f, 0.812f);
+    glm::vec3 surfaceColor = glm::vec3(0.465f, 0.797f, 0.991f);
 
-    float depthSofteningDistance = 12.f;
+    float depthSofteningDistance = 0.5f;
 
     bool wireframe = false;
 
@@ -79,6 +79,7 @@ public:
     virtual void render(const CameraComponent &camera) override {
         bind();
 
+        CHECK_GL(glDisable(GL_BLEND));
         if (wireframe) {
             CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
         }
@@ -117,10 +118,14 @@ public:
         loadTexture("gDiffuse", *Library::getFBO("gbuffer")->mTextures[2]);
         loadTexture("gDepth", *Library::getFBO("gbuffer")->mTextures[3]);
 
-        loadUniform("reflectionColor", reflectionColor);
+        loadUniform("surfaceColor", surfaceColor);
         loadUniform("refractionColor", refractionColor);
 
         loadUniform("depthSofteningDistance", depthSofteningDistance);
+
+        if (auto skybox = Engine::getComponentTuple<renderable::SkyboxComponent, CubeMapComponent>()) {
+            loadTexture("cubeMap", skybox->get<CubeMapComponent>()->mTexture);
+        }
 
         if (auto renderable = Engine::getComponentTuple<WaterComponent, WaterMeshComponent, SpatialComponent>()) {
             if (renderable->get<WaterComponent>()->mDirtyWave) {
@@ -143,7 +148,6 @@ public:
                 renderable->get<WaterComponent>()->mDirtyWave = false;
             }
 
-            loadUniform("baseColor", renderable->get<WaterComponent>()->mBaseColor);
             loadUniform("tessFactor", renderable->get<WaterMeshComponent>()->mTessFactor);
             loadUniform("tessDistance", renderable->get<WaterMeshComponent>()->mTessDistance);
             loadUniform("dampeningFactor", renderable->get<WaterComponent>()->mDampening);
@@ -175,9 +179,9 @@ public:
         ImGui::SliderFloat("Refraction Factor", &refractionFactor, 0.f, 1.f);
         ImGui::SliderFloat("Refraction Height", &refractionHeightFactor, 0.f, 50.f);
         ImGui::SliderFloat("Refraction Distance", &refractionDistanceFactor, 0.f, 50.f);
-        ImGui::ColorEdit3("Refraction Color", &reflectionColor[0]);
+        ImGui::ColorEdit3("Refraction Color", &refractionColor[0]);
 
-        ImGui::SliderFloat3("Reflection Color", &reflectionColor[0], 0.f, 1.f);
+        ImGui::ColorEdit3("Surface Color", &surfaceColor[0]);
 
         ImGui::SliderFloat("Depth dist", &depthSofteningDistance, 0.f, 50.f);
     }

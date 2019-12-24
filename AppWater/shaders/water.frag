@@ -38,9 +38,8 @@ uniform vec3 refractionColor;
 
 uniform float depthSofteningDistance;
 
-uniform vec3 reflectionColor;
-
-uniform vec3 baseColor;
+uniform samplerCube cubeMap;
+uniform vec3 surfaceColor;
 
 out vec4 color;
 
@@ -108,12 +107,12 @@ void main() {
     float geometryTerm = CalculateSmithGGXGeometryTerm(linearRoughness, nDotL, nDotV);
 
     // TODO : uncomment later
-    // float specularNoise = texture(waterNoise, normalMapCoords1 * 0.5).r;
+    float specularNoise = 1.0; //texture(waterNoise, normalMapCoords1 * 0.5).r;
     // specularNoise *= texture(waterNoise, normalMapCoords2 * 0.5).r;
     // specularNoise *= texture(waterNoise, fragTex.xy * 0.5).r;
-    float specularNoise = 1.f;
-
     float specularFactor = geometryTerm * normalDistribution * fresnelReflectance * specIntensity * nDotL * specularNoise;
+
+	vec3 reflectionColor = texture(cubeMap, reflect(V, finalNormal)).rgb * surfaceColor;
     
     vec2 hdrCoords = ((vec2(fragScreenPos.x, fragScreenPos.y) / fragScreenPos.w) * 0.5) + 0.5;
     vec2 distortedTexCoord = (hdrCoords + ((finalNormal.xz + finalNormal.xy) * 0.5) * refractionDistortionFactor);
@@ -122,16 +121,15 @@ void main() {
     vec3 waterColor = texture(gDiffuse, refractionTexCoord).rgb * refractionColor;
 
     vec3 scenePosition = texture(gWorld, hdrCoords).rgb;
-    float depthSoftenedAlpha = clamp(distance(scenePosition, fragWorldPos.xyz) / depthSofteningDistance, 0.0, 1.0);
+    float depthSoftenedAlpha = clamp(abs(distance(scenePosition, fragWorldPos.xyz)) * depthSofteningDistance, 0.0, 1.0);
 
     vec3 waterSurfacePosition = (distortedPosition.y < fragWorldPos.y) ? distortedPosition : scenePosition;
-    waterColor = mix(waterColor, baseColor.rgb, clamp((fragWorldPos.y - waterSurfacePosition.y) / refractionHeightFactor, 0.0, 1.0));
-    color = vec4(specularFactor + vec3(clamp((fragWorldPos.y - waterSurfacePosition.y) / refractionHeightFactor, 0.0, 1.0)), depthSoftenedAlpha); return;
+    waterColor = mix(waterColor, refractionColor, clamp((fragWorldPos.y - waterSurfacePosition.y) / refractionHeightFactor, 0.0, 1.0));
 
     float waveTopReflectionFactor = pow(1.0 - clamp(dot(fragNormal, V), 0.0, 1.0), 3);
-    vec3 waterBaseColor = mix(waterColor, baseColor, clamp(clamp(length(fragViewPos.xyz) / refractionDistanceFactor, 0.0, 1.0) + waveTopReflectionFactor, 0.0, 1.0));
+    waterColor = mix(waterColor, reflectionColor, clamp(clamp(length(fragViewPos.xyz) / refractionDistanceFactor, 0.0, 1.0) + waveTopReflectionFactor, 0.0, 1.0));
 
-    vec3 finalWaterColor = waterBaseColor + specularFactor;
+    vec3 finalWaterColor = waterColor + clamp(specularFactor, 0.0, 1.0);
 
     color = vec4(finalWaterColor, depthSoftenedAlpha);
 }

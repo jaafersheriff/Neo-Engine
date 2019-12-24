@@ -20,13 +20,11 @@ class WaterComponent : public Component{
         std::vector<WaveData> mWaveData;
         bool mDirtyWave = true;
 
-        float mDampening = 1.5f; // per wave?
+        float mDampening = 5.f; // per wave?
 
-        glm::vec2 mReflectanceFactor = glm::vec2(0.5f, 0.9f);
-        float mRoughness = 0.3f;
-        float mSpecIntensity = 0.9f;
-
-        glm::vec3 mBaseColor = glm::vec3(0.14f, 0.25f, 0.87f);
+        glm::vec2 mReflectanceFactor = glm::vec2(0.16f, 0.55f);
+        float mRoughness = 0.08f;
+        float mSpecIntensity = 125.0f;
 
         WaterComponent(GameObject *gameObject) :
             Component(gameObject)
@@ -37,7 +35,6 @@ class WaterComponent : public Component{
         }
 
         virtual void imGuiEditor() override {
-            ImGui::SliderFloat3("Base Color", &mBaseColor[0], 0.f, 1.f);
             ImGui::SliderFloat("Dampening", &mDampening, 0.1f, 5.f);
             ImGui::SliderFloat2("Reflectance", &mReflectanceFactor[0], 0.f, 1.f);
             ImGui::SliderFloat("Roughness", &mRoughness, 0.f, 1.f);

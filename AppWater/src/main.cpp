@@ -66,10 +66,8 @@ int main() {
     /* Renderables */
     Renderable cube(Library::getMesh("cube"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
     Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, Util::genRandomVec3());
-    Renderable dragon(Library::getMesh("dragon10k.obj", true), glm::vec3(-4.f, 10.f, -5.f), glm::vec3(10.f));
+    Renderable dragon(Library::getMesh("dragon10k.obj", true), glm::vec3(4.f, 5.f, 5.f), glm::vec3(10.f));
     Engine::addComponent<MaterialComponent>(dragon.gameObject, 0.2f, Util::genRandomVec3());
-    Renderable stairs(Library::getMesh("staircase.obj", true), glm::vec3(5.f, 10.f, 9.f), glm::vec3(10.f));
-    Engine::addComponent<MaterialComponent>(stairs.gameObject, 0.2f, Util::genRandomVec3());
 
     /* Skybox */
     {
