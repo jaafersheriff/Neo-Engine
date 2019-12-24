@@ -107,9 +107,7 @@ namespace neo {
                 loadUniform("pcfSize", pcfSize);
 
                 /* Bind shadow map */
-                const Texture & texture(*Library::getFBO("shadowMap")->mTextures[0]);
-                texture.bind();
-                loadUniform("shadowMap", texture.mTextureID);
+                loadTexture("shadowMap", *Library::getFBO("shadowMap")->mTextures[0]);
 
                 const auto& cameraFrustum = camera.getGameObject().getComponentByType<FrustumComponent>();
                 for (auto& renderable : Engine::getComponentTuples<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>()) {
@@ -131,8 +129,7 @@ namespace neo {
 
                     /* Bind texture */
                     if (const auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                        diffuseMap->mTexture.bind();
-                        loadUniform("diffuseMap", diffuseMap->mTexture.mTextureID);
+                        loadTexture("diffuseMap", diffuseMap->mTexture);
                         loadUniform("useTexture", true);
                     }
                     else {

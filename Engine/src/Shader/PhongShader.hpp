@@ -96,8 +96,7 @@ namespace neo {
 
                 /* Bind texture */
                 if (auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                    diffuseMap->mTexture.bind();
-                    loadUniform("diffuseMap", diffuseMap->mTexture.mTextureID);
+                    loadTexture("diffuseMap", diffuseMap->mTexture);
                     loadUniform("useTexture", true);
                 }
                 else {

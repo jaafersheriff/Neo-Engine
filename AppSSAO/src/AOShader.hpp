@@ -71,18 +71,12 @@ class AOShader : public PostProcessShader {
 
             // bind gbuffer
             auto gbuffer = Library::getFBO("gbuffer");
-            gbuffer->mTextures[0]->bind();
-            loadUniform("gNormal", gbuffer->mTextures[0]->mTextureID);
-            gbuffer->mTextures[2]->bind();
-            loadUniform("gDepth", gbuffer->mTextures[2]->mTextureID);
+            loadTexture("gNormal", *gbuffer->mTextures[0]);
+            loadTexture("gDepth",  *gbuffer->mTextures[2]);
 
             // bind kernel and noise
-            auto noise = Library::getTexture("aoNoise");
-            noise->bind();
-            loadUniform("noise", noise->mTextureID);
-            auto kernel = Library::getTexture("aoKernel");
-            kernel->bind();
-            loadUniform("kernel", kernel->mTextureID);
+            loadTexture("noise", *Library::getTexture("aoNoise"));
+            loadTexture("kernel", *Library::getTexture("aoKernel"));
 
             loadUniform("P", camera.getProj());
             loadUniform("invP", glm::inverse(camera.getProj()));

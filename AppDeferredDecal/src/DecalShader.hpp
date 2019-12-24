@@ -45,10 +45,8 @@ class DecalShader : public Shader {
 
             /* Bind gbuffer */
             auto gbuffer = Library::getFBO("gbuffer");
-            gbuffer->mTextures[0]->bind();
-            loadUniform("gNormal", gbuffer->mTextures[0]->mTextureID);
-            gbuffer->mTextures[2]->bind();
-            loadUniform("gDepth", gbuffer->mTextures[2]->mTextureID);
+            loadTexture("gNormal", *gbuffer->mTextures[0]);
+            loadTexture("gDepth",  *gbuffer->mTextures[2]);
 
             /* Render decals */
             for (auto& decal : Engine::getComponentTuples<DecalRenderable, SpatialComponent, DiffuseMapComponent>()) {
@@ -57,8 +55,7 @@ class DecalShader : public Shader {
                 loadUniform("invM", glm::inverse(spatial->getModelMatrix()));
 
                 auto diffuseMap = decal->get<DiffuseMapComponent>();
-                diffuseMap->mTexture.bind();
-                loadUniform("decalTexture", diffuseMap->mTexture.mTextureID);
+                loadTexture("decalTexture", diffuseMap->mTexture);
 
                 Library::getMesh("cube")->draw();
             }

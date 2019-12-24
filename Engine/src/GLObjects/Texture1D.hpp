@@ -14,7 +14,7 @@ namespace neo {
             upload(data.size() ? data.data() : nullptr);
         }
 
-        Texture1D(TextureFormat format, glm::uvec2 size, const std::vector<uint8_t>& data = {}) :
+        Texture1D(TextureFormat format, glm::uvec2 size, const std::vector<float>& data = {}) :
             Texture(format, glm::uvec2(size.x, 1)) 
         {
             bind();

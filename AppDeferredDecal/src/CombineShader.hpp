@@ -23,18 +23,15 @@ class CombineShader : public PostProcessShader {
 
             // Bind diffuse output
             auto gBuffer = Library::getFBO("gbuffer");
-            gBuffer->mTextures[1]->bind();
-            loadUniform("gDiffuse", gBuffer->mTextures[1]->mTextureID);
+            loadTexture("gDiffuse", *gBuffer->mTextures[1]);
 
             // Bind light pass output
             auto lightFBO = Library::getFBO("lightpass");
-            lightFBO->mTextures[0]->bind();
-            loadUniform("lightOutput", lightFBO->mTextures[0]->mTextureID);
+            loadTexture("lightOutput", *lightFBO->mTextures[0]);
 
             // Decals
             auto decalFBO = Library::getFBO("decals");
-            decalFBO->mTextures[0]->bind();
-            loadUniform("decals", decalFBO->mTextures[0]->mTextureID);
+            loadTexture("decals", *decalFBO->mTextures[0]);
         }
 
         virtual void imguiEditor() override {

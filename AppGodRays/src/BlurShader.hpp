@@ -45,8 +45,8 @@ class BlurShader : public Shader {
 
             bind();
 
-            Library::getFBO("godray")->mTextures[0]->bind();
-            loadUniform("godray", Library::getFBO("godray")->mTextures[0]->mTextureID);
+            loadTexture("godray", *Library::getFBO("godray")->mTextures[0]);
+
             loadUniform("decay", mDecay);
             loadUniform("density", mDensity);
             loadUniform("weight", mWeight);

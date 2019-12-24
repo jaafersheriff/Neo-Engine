@@ -26,7 +26,7 @@ public:
         loadUniform("camPos", camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
         if (auto skybox = Engine::getComponentTuple<renderable::SkyboxComponent, CubeMapComponent>()) {
-            loadUniform("cubeMap", skybox->get<CubeMapComponent>()->mTexture.mTextureID);
+            loadTexture("cubeMap", skybox->get<CubeMapComponent>()->mTexture);
         }
 
         CHECK_GL(glDisable(GL_CULL_FACE));

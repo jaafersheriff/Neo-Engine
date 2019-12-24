@@ -48,9 +48,7 @@ namespace neo {
             loadUniform("V", camera.getView());
 
             /* Bind texture */
-            const auto& texture = skybox->get<CubeMapComponent>()->mTexture;
-            texture.bind();
-            loadUniform("cubeMap", texture.mTextureID);
+            loadTexture("cubeMap", skybox->get<CubeMapComponent>()->mTexture);
 
             /* Draw */
             Library::getMesh("cube")->draw();

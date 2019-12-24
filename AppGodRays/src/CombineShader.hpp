@@ -19,9 +19,7 @@ class CombineShader : public PostProcessShader {
         {}
 
         virtual void render(const CameraComponent &camera) override {
-            auto godray = Library::getFBO("godrayblur");
-            godray->mTextures[0]->bind();
-            loadUniform("godray", godray->mTextures[0]->mTextureID);
+            loadTexture("godray", *Library::getFBO("godrayblur")->mTextures[0]);
 
             loadUniform("sunColor", Engine::getSingleComponent<SunComponent>()->getGameObject().getComponentByType<LightComponent>()->mColor);
             loadUniform("exposure", exposure);
