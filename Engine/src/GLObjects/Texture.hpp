@@ -23,8 +23,8 @@ namespace neo {
         public:
 
             /* Constructor */
-            Texture(GLuint, TextureFormat format, glm::uvec2 size);
-            Texture(GLuint, TextureFormat format, glm::uvec3 size);
+            Texture(TextureFormat format, glm::uvec2 size);
+            Texture(TextureFormat format, glm::uvec3 size);
 
             /* Delete copy constructors */
             Texture(const Texture &) = delete;
@@ -55,11 +55,11 @@ namespace neo {
             void update(const glm::uvec3 size, const float* data);
 
             void bind() const;
-            void applyFormat();
 
         protected:
-            const GLuint mTextureType;
+            virtual void _applyFormat() = 0;
             virtual void _resize() = 0;
+            virtual void _bind() const = 0;
     };
 
 }

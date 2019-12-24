@@ -221,10 +221,8 @@ namespace neo {
         CHECK_GL(glBindVertexArray(mesh->mVAOID));
 
         // Bind input fbo texture
-        input->mTextures[0]->bind();
-        shader.loadUniform("inputFBO", input->mTextures[0]->mTextureID);
-        input->mTextures[1]->bind();
-        shader.loadUniform("inputDepth", input->mTextures[1]->mTextureID);
+        shader.loadTexture("inputFBO", *input->mTextures[0]); 
+        shader.loadTexture("inputDepth", *input->mTextures[1]); 
 
         RENDERER_MP_LEAVE();
 

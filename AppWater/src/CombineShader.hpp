@@ -28,8 +28,7 @@ class CombineShader : public PostProcessShader {
 
             // Bind light pass output
             auto lightFBO = Library::getFBO("lightpass");
-            lightFBO->mTextures[0]->bind();
-            loadUniform("lightOutput", lightFBO->mTextures[0]->mTextureID);
+            loadTexture("lightOutput", *lightFBO->mTextures[0]);
         }
 
         virtual void imguiEditor() override {

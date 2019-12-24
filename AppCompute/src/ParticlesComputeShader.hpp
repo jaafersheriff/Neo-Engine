@@ -18,7 +18,7 @@ public:
     ParticlesComputeShader(const std::string &compute) :
         Shader("ParticlesCompute Shader")
     {
-        _attachType(compute, ShaderType::COMPUTE);
+        _attachStage(compute, ShaderStage::COMPUTE);
         init();
     }
 

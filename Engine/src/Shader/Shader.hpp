@@ -15,7 +15,7 @@ namespace neo {
     class CameraComponent;
     class Texture;
 
-    enum class ShaderType {
+    enum class ShaderStage {
         VERTEX,
         FRAGMENT,
         GEOMETRY,
@@ -24,14 +24,12 @@ namespace neo {
         COMPUTE
     };
 
-            struct ShaderSource {
-                GLint id = 0;
-                std::string file = "";
-                const char* source = nullptr;
-                std::string processedSource;
-            };
-
-
+    struct ShaderSource {
+        GLint id = 0;
+        std::string file = "";
+        const char* source = nullptr;
+        std::string processedSource;
+    };
 
     class Shader {
 
@@ -56,13 +54,10 @@ namespace neo {
             void unbind();
             void reload();
             void cleanUp();
-            void addAttribute(const std::string &);
-            void addUniform(const std::string &);
 
             /* Parent load functions */
             void loadUniform(const std::string &, const bool) const;          // bool
             void loadUniform(const std::string &, const int) const;           // int
-            void loadUniform(const std::string &, const GLuint) const;        // GLuint
             void loadUniform(const std::string &, const double) const;        // double
             void loadUniform(const std::string &, const float) const;         // float
             void loadUniform(const std::string &, const glm::vec2 &) const;   // vec2
@@ -77,22 +72,26 @@ namespace neo {
             GLint getUniform(const std::string &) const;
 
         protected: 
-            void _attachType(const std::string& file, ShaderType type);
-            void _attachType(const char* source, ShaderType type);
+            void _attachStage(ShaderStage type, const std::string& file);
+            void _attachStage(ShaderStage type, const char* source);
 
         private:
             /* GLSL shader attributes */
             GLuint mPID = 0;
 
-            std::unordered_map<ShaderType, ShaderSource> mSources;
+            std::unordered_map<ShaderStage, ShaderSource> mStages;
 
             std::map<std::string, GLint> mAttributes;
             std::map<std::string, GLint> mUniforms;
 
             std::string _getFullPath(const std::string&);
-            GLint _getGLType(ShaderType);
+
+            GLint _getGLShaderStage(ShaderStage);
+
             GLuint _compileShader(GLenum, const char *);
             std::string _processShader(const char *);
             void _findAttributesAndUniforms(const char *);
+            void _addAttribute(const std::string &);
+            void _addUniform(const std::string &);
     };
 }

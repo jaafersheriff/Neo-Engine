@@ -15,9 +15,9 @@ class NormalShader : public Shader {
         NormalShader(const std::string &vert, const std::string &frag, const std::string &geom) :
             Shader("Normal Shader")
         {
-            _attachType(vert, ShaderType::VERTEX);
-            _attachType(frag, ShaderType::FRAGMENT);
-            _attachType(geom, ShaderType::GEOMETRY);
+            _attachStage(vert, ShaderStage::VERTEX);
+            _attachStage(frag, ShaderStage::FRAGMENT);
+            _attachStage(geom, ShaderStage::GEOMETRY);
             init();
         }
 

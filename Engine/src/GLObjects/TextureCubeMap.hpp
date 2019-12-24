@@ -12,17 +12,32 @@ namespace neo {
     public:
 
         TextureCubeMap(TextureFormat format, const std::vector<glm::uvec2>& sizes, uint8_t** data = nullptr) :
-            Texture(GL_TEXTURE_CUBE_MAP, format, glm::uvec2(1)) {
+            Texture(format, glm::uvec2(1)) {
 
             std::copy_n(sizes.begin(), 6, mSizes.begin());
+            bind();
+            _applyFormat();
             upload(sizes, data);
         }
-        
+
 
         virtual void upload(const uint8_t* data = nullptr) override {
         }
 
         virtual void upload(const float* data = nullptr) override {
+        }
+
+        virtual void _bind() const override {
+            CHECK_GL(glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureID));
+        }
+
+        virtual void _applyFormat() override {
+            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, mFormat.filter));
+            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, mFormat.filter));
+
+            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, mFormat.mode));
+            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, mFormat.mode));
+            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, mFormat.mode));
         }
 
         void upload(const std::vector<glm::uvec2>& sizes, uint8_t** data) {

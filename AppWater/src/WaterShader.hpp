@@ -37,10 +37,10 @@ public:
 
     WaterShader(const std::string &vert, const std::string &frag, const std::string& control, const std::string& eval) :
         Shader("Water Shader") {
-        _attachType(vert, ShaderType::VERTEX);
-        _attachType(frag, ShaderType::FRAGMENT);
-        _attachType(control, ShaderType::TESSELLATION_CONTROL);
-        _attachType(eval, ShaderType::TESSELLATION_EVAL);
+        _attachStage(ShaderStage::VERTEX, vert);
+        _attachStage(ShaderStage::FRAGMENT, frag);
+        _attachStage(ShaderStage::TESSELLATION_CONTROL, control);
+        _attachStage(ShaderStage::TESSELLATION_EVAL, eval);
         init();
 
         TextureFormat directionFormat;
@@ -143,7 +143,7 @@ public:
             loadUniform("tessDistance", renderable->get<WaterMeshComponent>()->mTessDistance);
             loadUniform("dampeningFactor", renderable->get<WaterComponent>()->mDampening);
 
-            loadUniform("numWaves", renderable->get<WaterComponent>()->mWaveData.size());
+            loadUniform("numWaves", static_cast<int>(renderable->get<WaterComponent>()->mWaveData.size()));
 
             loadUniform("reflectanceFactor", renderable->get<WaterComponent>()->mReflectanceFactor);
             loadUniform("roughness", renderable->get<WaterComponent>()->mRoughness);
