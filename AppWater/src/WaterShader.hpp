@@ -34,6 +34,8 @@ public:
 
     float depthSofteningDistance = 0.5f;
 
+    float reflectionPow = 3.f;
+
     bool wireframe = false;
 
     WaterShader(const std::string &vert, const std::string &frag, const std::string& control, const std::string& eval) :
@@ -118,6 +120,8 @@ public:
         loadTexture("gDiffuse", *Library::getFBO("gbuffer")->mTextures[2]);
         loadTexture("gDepth", *Library::getFBO("gbuffer")->mTextures[3]);
 
+        loadUniform("reflectionPow", reflectionPow);
+
         loadUniform("surfaceColor", surfaceColor);
         loadUniform("refractionColor", refractionColor);
 
@@ -182,6 +186,7 @@ public:
         ImGui::ColorEdit3("Refraction Color", &refractionColor[0]);
 
         ImGui::ColorEdit3("Surface Color", &surfaceColor[0]);
+        ImGui::SliderFloat("Reflection Pow", &reflectionPow, 0.f, 100.f);
 
         ImGui::SliderFloat("Depth dist", &depthSofteningDistance, 0.f, 50.f);
     }

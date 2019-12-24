@@ -21,7 +21,7 @@ void main() {
 
     color.rgb = (length(deferredNormal) <= 1.0 ? 1.f : 0.f) * deferredColor.rgb; 
     color.rgb += (length(deferredNormal) == 0.0 ? 0.f : 1.f) * (diffuseAmount * deferredColor.rgb + lightOutput.rgb);
-    if (waterDepth <= 1.0 && waterDepth < deferredDepth) {
+    if (waterDepth < deferredDepth) {
        color.rgb = waterOutput.rgb * waterOutput.a + color.rgb * (1.0 - waterOutput.a);
     }
     color.a = 1.f;

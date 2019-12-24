@@ -9,7 +9,7 @@ in vec3 fragNormal;
 in vec3 fragTangent;
 in vec3 fragBinormal;
 in vec4 fragTex;
-in float frahHeight;
+in float fragHeight;
 
 uniform float time;
 uniform vec4 normalMapScrollDir;
@@ -21,6 +21,7 @@ uniform vec3 camPos;
 
 uniform vec3 lightPos;
 uniform vec2 reflectanceFactor;
+uniform float reflectionPow;
 uniform float roughness;
 uniform float specIntensity;
 
@@ -121,12 +122,12 @@ void main() {
     vec3 waterColor = texture(gDiffuse, refractionTexCoord).rgb * refractionColor;
 
     vec3 scenePosition = texture(gWorld, hdrCoords).rgb;
-    float depthSoftenedAlpha = clamp(abs(distance(scenePosition, fragWorldPos.xyz)) * depthSofteningDistance, 0.0, 1.0);
+    float depthSoftenedAlpha = clamp(abs(distance(scenePosition, fragWorldPos.xyz)) / depthSofteningDistance, 0.0, 1.0);
 
     vec3 waterSurfacePosition = (distortedPosition.y < fragWorldPos.y) ? distortedPosition : scenePosition;
     waterColor = mix(waterColor, refractionColor, clamp((fragWorldPos.y - waterSurfacePosition.y) / refractionHeightFactor, 0.0, 1.0));
 
-    float waveTopReflectionFactor = pow(1.0 - clamp(dot(fragNormal, V), 0.0, 1.0), 3);
+    float waveTopReflectionFactor = pow(1.0 - clamp(dot(fragNormal, V), 0.0, 1.0), reflectionPow);
     waterColor = mix(waterColor, reflectionColor, clamp(clamp(length(fragViewPos.xyz) / refractionDistanceFactor, 0.0, 1.0) + waveTopReflectionFactor, 0.0, 1.0));
 
     vec3 finalWaterColor = waterColor + clamp(specularFactor, 0.0, 1.0);
