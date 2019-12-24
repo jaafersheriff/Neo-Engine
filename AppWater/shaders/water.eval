@@ -42,12 +42,12 @@ WaveResult CalculateWave(uint waveID, vec3 wavePosition, float edgeDampen)
 {
     WaveResult result;
 
-    vec4 wave = texture2D(waveData, vec2(float(waveID) / numWaves, 1));
+    vec4 wave = texture(waveData, vec2(float(waveID) / numWaves, 1));
     float amplitude = wave.r;
     float speed = wave.g;
     float steepness = wave.b;
     float waveLength = wave.a;
-    vec3 direction = texture2D(waveDir, vec2(float(waveID) / numWaves, 1)).rgb;
+    vec3 direction = texture(waveDir, vec2(float(waveID) / numWaves, 1)).rgb;
  
     float frequency = 2.0 / waveLength;
     float phaseConstant = speed * frequency;
@@ -116,9 +116,9 @@ void main() {
     fragViewPos = V * fragWorldPos;
     fragScreenPos = P * fragViewPos;
     fragNormalAndHeight.xyz = normalize(N * finalWaveResult.normal);
-    // fragViewNormal = normalize(vec3(V * vec4(fragNormalAndHeight.xyz, 1.0)));
-    // fragViewTangent = normalize(vec3(V * vec4(normalize(N * finalWaveResult.tangent), 1.0)));
-    // fragViewBinormal = normalize(vec3(V * vec4(normalize(N * finalWaveResult.binormal), 1.0)));
+    fragViewNormal = normalize(vec3(V * vec4(fragNormalAndHeight.xyz, 1.0)));
+    fragViewTangent = normalize(vec3(V * vec4(normalize(N * finalWaveResult.tangent), 1.0)));
+    fragViewBinormal = normalize(vec3(V * vec4(normalize(N * finalWaveResult.binormal), 1.0)));
     fragViewNormal = normalize(fragNormalAndHeight.xyz);
     fragViewTangent = normalize(N * finalWaveResult.tangent);
     fragViewBinormal = normalize(N * finalWaveResult.binormal);

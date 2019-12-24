@@ -62,8 +62,8 @@ namespace neo {
         GLint linkSuccess;
         CHECK_GL(glGetProgramiv(mPID, GL_LINK_STATUS, &linkSuccess));
         if (!linkSuccess) {
-            GLHelper::printProgramInfoLog(mPID);
             printf("Error linking shader %s\n", mName.c_str());
+            GLHelper::printProgramInfoLog(mPID);
             NEO_ASSERT(false, "");
         }
 
@@ -140,7 +140,6 @@ namespace neo {
         GLint compileSuccess;
         CHECK_GL(glGetShaderiv(shader, GL_COMPILE_STATUS, &compileSuccess));
         if (!compileSuccess) {
-            GLHelper::printShaderInfoLog(shader);
             std::cout << "Error compiling " << mName;
             switch (shaderType) {
                 case GL_VERTEX_SHADER:
@@ -166,6 +165,7 @@ namespace neo {
                 std::cout << lineNum++ << " " << line << std::endl;
             }
 
+            GLHelper::printShaderInfoLog(shader);
             NEO_ASSERT(false, "");
         }
 

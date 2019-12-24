@@ -11,7 +11,6 @@ namespace neo {
         Texture2D(TextureFormat format, glm::uvec2 size, const std::vector<uint8_t>& data = {}) :
             Texture(format, size) 
         {
-            bind();
             _applyFormat();
             upload(data.size() ? data.data() : nullptr);
         }
@@ -19,7 +18,6 @@ namespace neo {
         Texture2D(TextureFormat format, glm::uvec2 size, const uint8_t* data = nullptr) :
             Texture(format, size)
         {
-            bind();
             _applyFormat();
             upload(data);
         }
@@ -27,7 +25,6 @@ namespace neo {
         Texture2D(TextureFormat format, glm::uvec2 size,const std::vector<float>& data = {}) :
             Texture(format, size)
         {
-            bind();
             _applyFormat();
             upload(data.data());
         }
@@ -37,6 +34,7 @@ namespace neo {
         }
 
         virtual void _applyFormat() override {
+            bind();
             CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mFormat.filter));
             CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mFormat.filter));
 

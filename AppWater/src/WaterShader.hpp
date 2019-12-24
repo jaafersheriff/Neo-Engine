@@ -47,7 +47,7 @@ public:
         directionFormat.inputFormat = GL_RGB16F;
         directionFormat.format = GL_RGB;
         directionFormat.filter = GL_LINEAR;
-        directionFormat.mode = GL_CLAMP;
+        directionFormat.mode = GL_CLAMP_TO_EDGE;
         directionFormat.type = GL_FLOAT;
         waveTextureDirection = Library::createEmptyTexture<Texture2D>("waveDirection", directionFormat);
 
@@ -55,7 +55,7 @@ public:
         dataFormat.inputFormat = GL_RGBA16F;
         dataFormat.format = GL_RGBA;
         dataFormat.filter = GL_LINEAR;
-        dataFormat.mode = GL_CLAMP;
+        dataFormat.mode = GL_CLAMP_TO_EDGE;
         dataFormat.type = GL_FLOAT;
         waveTextureData = Library::createEmptyTexture<Texture2D>("wavedata", dataFormat);
 

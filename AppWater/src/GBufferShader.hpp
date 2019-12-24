@@ -20,11 +20,11 @@ class GBufferShader : public Shader {
             gbuffer->generate();
 
             // Format for color buffers
-            TextureFormat format = { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP };
+            TextureFormat format = { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE };
             gbuffer->attachColorTexture(Window::getFrameSize(), format); // world
             gbuffer->attachColorTexture(Window::getFrameSize(), format); // normal
             gbuffer->attachColorTexture(Window::getFrameSize(), format); // diffuse
-            gbuffer->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_CLAMP); // depth
+            gbuffer->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_CLAMP_TO_EDGE); // depth
             gbuffer->initDrawBuffers();
 
             // Handle frame size changing

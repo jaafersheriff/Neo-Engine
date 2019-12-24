@@ -10,7 +10,7 @@ uniform float diffuseAmount;
 out vec4 color;
 
 void main() {
-    if(texture2D(gDepth, fragTex).r > texture2D(inputDepth, fragTex).r) {
+    if(texture(gDepth, fragTex).r > texture(inputDepth, fragTex).r) {
         color = vec4(texture(inputFBO, fragTex).rgb, 1.0);
         return;
     }
