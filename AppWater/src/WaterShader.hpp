@@ -35,6 +35,7 @@ public:
     float depthSofteningDistance = 0.5f;
 
     float reflectionPow = 3.f;
+    glm::vec4 ssrSettings = glm::vec4(0.5f, 20.f, 10.f, 20.f);
 
     bool wireframe = false;
 
@@ -119,10 +120,12 @@ public:
         loadUniform("refractionDistanceFactor", refractionDistanceFactor);
 
         loadTexture("gWorld", *Library::getFBO("gbuffer")->mTextures[0]);
+        loadTexture("gNormal", *Library::getFBO("gbuffer")->mTextures[1]);
         loadTexture("gDiffuse", *Library::getFBO("gbuffer")->mTextures[2]);
         loadTexture("gDepth", *Library::getFBO("gbuffer")->mTextures[3]);
 
         loadUniform("reflectionPow", reflectionPow);
+        loadUniform("ssrSettings", ssrSettings);
 
         loadUniform("surfaceColor", surfaceColor);
         loadUniform("refractionColor", refractionColor);
@@ -189,6 +192,7 @@ public:
 
         ImGui::ColorEdit3("Surface Color", &surfaceColor[0]);
         ImGui::SliderFloat("Reflection Pow", &reflectionPow, 0.f, 100.f);
+        ImGui::SliderFloat4("SSR", &ssrSettings[0], 0.f, 100.f);
 
         ImGui::SliderFloat("Depth dist", &depthSofteningDistance, 0.f, 50.f);
     }
