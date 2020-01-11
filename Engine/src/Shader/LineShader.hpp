@@ -32,14 +32,16 @@ namespace neo {
                 )
             {}
 
-            virtual void render(const CameraComponent &camera) override {
+            virtual void render() override {
                 bind();
 
                 CHECK_GL(glEnable(GL_LINE_SMOOTH));
 
                 /* Load PV */
-                loadUniform("P", camera.getProj());
-                loadUniform("V", camera.getView());
+                auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+                NEO_ASSERT(camera, "No main camera exists");
+                loadUniform("P", camera->get<CameraComponent>()->getProj());
+                loadUniform("V", camera->get<CameraComponent>()->getView());
 
                 for (auto& line : Engine::getComponents<LineMeshComponent>()) {
                     glm::mat4 M(1.f);

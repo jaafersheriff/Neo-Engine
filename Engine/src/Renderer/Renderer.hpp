@@ -13,7 +13,6 @@
 namespace neo {
 
     class Engine;
-    class CameraComponent;
     class PostProcessShader;
 
     class Renderer {
@@ -27,13 +26,11 @@ namespace neo {
             static std::string NEO_GLSL_VERSION;
             static glm::ivec3 NEO_MAX_COMPUTE_GROUP_SIZE;
 
-            static void init(const std::string &, CameraComponent *, glm::vec3 clearColor = glm::vec3(0.f));
+            static void init(const std::string &, glm::vec3 clearColor = glm::vec3(0.f));
             static void resetState();
             static void render(float);
-            static void renderScene(const CameraComponent &);
+            static void renderScene();
             static void shutDown();
-
-            static void setDefaultCamera(CameraComponent *cam) { mDefaultCamera = cam; }
 
             /* FBO */
             static void setDefaultFBO(const std::string &);
@@ -46,7 +43,6 @@ namespace neo {
             template <typename ShaderT> static ShaderT& getShader();
 
         private:
-            static CameraComponent* mDefaultCamera;
             static Framebuffer* mDefaultFBO;
             static glm::vec3 mClearColor;
 

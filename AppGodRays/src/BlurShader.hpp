@@ -37,7 +37,7 @@ class BlurShader : public Shader {
 
         }
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render() override {
             auto fbo = Library::getFBO("godrayblur");
             fbo->bind();
             glm::ivec2 frameSize = Window::getFrameSize() / 2;
@@ -53,16 +53,20 @@ class BlurShader : public Shader {
             loadUniform("blurSteps", mBlurSteps);
             loadUniform("contribution", mContribution);
 
+            auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+            NEO_ASSERT(mainCamera, "No MainCamera exists");
+            auto camera = mainCamera->get<CameraComponent>();
+
             // sun position in screen space
             if (const auto& sun = Engine::getSingleComponent<SunComponent>()) {
-                glm::vec4 clipspace = camera.getProj() * camera.getView() * glm::vec4(sun->getGameObject().getComponentByType<SpatialComponent>()->getPosition(), 1.0);
+                glm::vec4 clipspace = camera->getProj() * camera->getView() * glm::vec4(sun->getGameObject().getComponentByType<SpatialComponent>()->getPosition(), 1.0);
                 glm::vec3 ndcspace = glm::vec3(clipspace) / clipspace.w;
                 glm::vec2 sspace = (glm::vec2(ndcspace) + 1.f) / 2.f;
                 loadUniform("sunPos", sspace);
             }
 
-            loadUniform("P", camera.getProj());
-            loadUniform("V", camera.getView());
+            loadUniform("P", camera->getProj());
+            loadUniform("V", camera->getView());
 
             Library::getMesh("quad")->draw();
 

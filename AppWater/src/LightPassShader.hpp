@@ -30,9 +30,9 @@ class LightPassShader : public Shader {
             });
         }
 
-        virtual void render(const CameraComponent &camera) override {
-            const auto camSpatial = camera.getGameObject().getComponentByType<SpatialComponent>();
-            if (!camSpatial) {
+        virtual void render() override {
+            auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
+            if (!mainCamera) {
                 return;
             }
 
@@ -50,11 +50,11 @@ class LightPassShader : public Shader {
             loadUniform("showLights", showLights);
             loadUniform("showRadius", showRadius);
 
-            loadUniform("P", camera.getProj());
-            loadUniform("V", camera.getView());
-            loadUniform("invP", glm::inverse(camera.getProj()));
-            loadUniform("invV", glm::inverse(camera.getView()));
-            loadUniform("camPos", camSpatial->getPosition());
+            loadUniform("P", mainCamera->get<CameraComponent>()->getProj());
+            loadUniform("V", mainCamera->get<CameraComponent>()->getView());
+            loadUniform("invP", glm::inverse(mainCamera->get<CameraComponent>()->getProj()));
+            loadUniform("invV", glm::inverse(mainCamera->get<CameraComponent>()->getView()));
+            loadUniform("camPos", mainCamera->get<SpatialComponent>()->getPosition());
 
             /* Bind gbuffer */
             auto gbuffer = Library::getFBO("gbuffer");
@@ -72,8 +72,8 @@ class LightPassShader : public Shader {
                 loadUniform("lightCol", light->get<LightComponent>()->mColor);
 
                 // If camera is inside light 
-                float dist = glm::distance(spatial->getPosition(), camSpatial->getPosition());
-                if (dist - camera.getNearFar().x < spatial->getScale().x) {
+                float dist = glm::distance(spatial->getPosition(), mainCamera->get<SpatialComponent>()->getPosition());
+                if (dist - mainCamera->get<CameraComponent>()->getNearFar().x < spatial->getScale().x) {
                     CHECK_GL(glCullFace(GL_FRONT));
                 }
                 else {

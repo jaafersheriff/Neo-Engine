@@ -118,7 +118,7 @@ int main() {
     Engine::addSystem<SinTranslateSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.camera);
+    Renderer::init("shaders/");
     Renderer::addPreProcessShader<ShadowCasterShader>(2048);
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<PhongShadowShader>();
@@ -129,7 +129,14 @@ int main() {
         static bool useLightCam = false;
         if (ImGui::Button("Switch Camera")) {
             useLightCam = !useLightCam;
-            Renderer::setDefaultCamera(useLightCam ? light.camera : camera.camera);
+            if (useLightCam) {
+                Engine::removeComponent<MainCameraComponent>(*camera.camera->getGameObject().getComponentByType<MainCameraComponent>());
+                Engine::addComponent<MainCameraComponent>(&light.camera->getGameObject());
+            }
+            else {
+                Engine::removeComponent<MainCameraComponent>(*light.camera->getGameObject().getComponentByType<MainCameraComponent>());
+                Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
+            }
         }
     });
 

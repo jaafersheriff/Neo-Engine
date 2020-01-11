@@ -81,7 +81,7 @@ int main() {
     Engine::addSystem<SinTranslateSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.camera);
+    Renderer::init("shaders/");
     Renderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
     Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag"); 
     Renderer::addPostProcessShader<CombineShader>("combine.frag"); 

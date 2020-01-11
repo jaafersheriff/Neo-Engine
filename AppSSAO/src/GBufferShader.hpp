@@ -33,14 +33,17 @@ class GBufferShader : public Shader {
             });
         }
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render() override {
             auto fbo = Library::getFBO("gbuffer");
             fbo->bind();
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
             bind();
-            loadUniform("P", camera.getProj());
-            loadUniform("V", camera.getView());
+
+            if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
+                loadUniform("P", camera->get<CameraComponent>()->getProj());
+                loadUniform("V", camera->get<CameraComponent>()->getView());
+            }
 
             for (auto& model : Engine::getComponents<MeshComponent>()) {
                 loadUniform("M", model->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());

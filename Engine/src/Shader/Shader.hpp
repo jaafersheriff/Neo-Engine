@@ -12,7 +12,6 @@
 
 namespace neo {
 
-    class CameraComponent;
     class Texture;
 
     enum class ShaderStage {
@@ -41,7 +40,7 @@ namespace neo {
             Shader(Shader&& rhs) = default;
             virtual ~Shader() = default;
 
-            virtual void render(const CameraComponent &) {}
+            virtual void render() {}
             virtual void imguiEditor() {}
             bool mActive = true;
 

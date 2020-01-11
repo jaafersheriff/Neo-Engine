@@ -29,7 +29,6 @@ namespace neo {
     glm::ivec3 Renderer::NEO_MAX_COMPUTE_GROUP_SIZE = glm::ivec3(1);
 
     std::string Renderer::APP_SHADER_DIR;
-    CameraComponent *Renderer::mDefaultCamera(nullptr);
     Framebuffer *Renderer::mDefaultFBO;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mComputeShaders;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPreProcessShaders;
@@ -37,9 +36,8 @@ namespace neo {
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPostShaders;
     glm::vec3 Renderer::mClearColor;
 
-    void Renderer::init(const std::string &dir, CameraComponent *cam, glm::vec3 clearColor) {
+    void Renderer::init(const std::string &dir, glm::vec3 clearColor) {
         APP_SHADER_DIR = dir;
-        setDefaultCamera(cam);
         mClearColor = clearColor;
 
         /* Init default GL state */
@@ -119,7 +117,7 @@ namespace neo {
             for (auto& shader : activeComputeShaders) {
                 resetState();
                 RENDERER_MP_ENTERD(Compute, "Compute shaders", shader->mName.c_str());
-                shader->render(*mDefaultCamera);
+                shader->render();
                 RENDERER_MP_LEAVE();
             }
             RENDERER_MP_LEAVE();
@@ -132,7 +130,7 @@ namespace neo {
             for (auto & shader : activePreShaders) {
                 resetState();
                 RENDERER_MP_ENTERD(Pre, "PreScene shaders", shader->mName.c_str());
-                shader->render(*mDefaultCamera);
+                shader->render();
                 RENDERER_MP_LEAVE();
             }
             RENDERER_MP_LEAVE();
@@ -156,7 +154,7 @@ namespace neo {
         RENDERER_MP_LEAVE();
  
         /* Render all scene shaders */
-        renderScene(*mDefaultCamera);
+        renderScene();
 
         /* Post process with ping & pong */
         if (activePostShaders.size()) {
@@ -229,7 +227,7 @@ namespace neo {
         RENDERER_MP_ENTERD(Post, "PostProcess Shaders", shader.mName.c_str());
         // Allow shader to do any prep (eg. bind uniforms) 
         // Also allows shader to override output render target (user responsible for handling)
-        shader.render(*mDefaultCamera);
+        shader.render();
 
         // Render post process effect
         mesh->draw();
@@ -238,14 +236,14 @@ namespace neo {
         RENDERER_MP_LEAVE();
     }
 
-    void Renderer::renderScene(const CameraComponent &camera) {
+    void Renderer::renderScene() {
         RENDERER_MP_ENTER("renderScene");
 
         for (auto& shader : mSceneShaders) {
             if (shader.second->mActive) {
                 resetState();
                 RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName.c_str());
-                shader.second->render(camera);
+                shader.second->render();
                 RENDERER_MP_LEAVE();
             }
         }

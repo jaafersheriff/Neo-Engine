@@ -22,7 +22,7 @@ public:
         init();
     }
 
-    virtual void render(const CameraComponent &) override {
+    virtual void render() override {
         bind();
 
         if (auto mesh = Engine::getSingleComponent<ParticleMeshComponent>()) {

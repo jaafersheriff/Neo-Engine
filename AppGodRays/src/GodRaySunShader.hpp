@@ -35,7 +35,7 @@ class GodRaySunShader : public Shader {
 
         }
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render() override {
             auto fbo = Library::getFBO("godray");
             fbo->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
@@ -46,12 +46,14 @@ class GodRaySunShader : public Shader {
             bind();
 
             /* Load PV */
-            loadUniform("P", camera.getProj());
-            loadUniform("V", camera.getView());
-            glm::mat4 Vi = camera.getView();
-            Vi[3][0] = Vi[3][1] = Vi[3][2] = 0.f;
-            Vi = glm::transpose(Vi);
-            loadUniform("Vi", Vi);
+            if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
+                loadUniform("P", camera->get<CameraComponent>()->getProj());
+                loadUniform("V", camera->get<CameraComponent>()->getView());
+                glm::mat4 Vi = camera->get<CameraComponent>()->getView();
+                Vi[3][0] = Vi[3][1] = Vi[3][2] = 0.f;
+                Vi = glm::transpose(Vi);
+                loadUniform("Vi", Vi);
+            }
 
             for (auto& renderable : Engine::getComponents<SunComponent>()) {
 

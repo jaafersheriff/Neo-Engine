@@ -21,14 +21,16 @@ class NormalShader : public Shader {
             init();
         }
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render() override {
             bind();
 
             loadUniform("magnitude", magnitude);
 
             /* Load PV */
-            loadUniform("P", camera.getProj());
-            loadUniform("V", camera.getView());
+            auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+            NEO_ASSERT(camera, "No MainCamera exists");
+            loadUniform("P", camera->get<CameraComponent>()->getProj());
+            loadUniform("V", camera->get<CameraComponent>()->getView());
 
             for (auto& renderable : Engine::getComponentTuples<MeshComponent, SpatialComponent>()) {
                 loadUniform("M", renderable->get<SpatialComponent>()->getModelMatrix());

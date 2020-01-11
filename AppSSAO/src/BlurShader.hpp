@@ -15,7 +15,7 @@ class BlurShader : public PostProcessShader {
             PostProcessShader("Blur Shader", frag) 
         {}
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render() override {
             loadUniform("blurAmount", blurAmount);
         }
 

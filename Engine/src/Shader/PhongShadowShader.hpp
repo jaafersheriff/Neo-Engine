@@ -78,15 +78,16 @@ namespace neo {
                 0.0f, 0.0f, 0.5f, 0.0f,
                 0.5f, 0.5f, 0.5f, 1.0f);
 
-            virtual void render(const CameraComponent &camera) override {
+            virtual void render() override {
                 bind();
 
-                /* Load Camera */
-                loadUniform("P", camera.getProj());
-                loadUniform("V", camera.getView());
-                if (const auto cameraSpatial = camera.getGameObject().getComponentByType<SpatialComponent>()) {
-                    loadUniform("camPos", cameraSpatial->getPosition());
-                }
+                /* Load PV */
+                auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
+                NEO_ASSERT(camera, "No main camera exists");
+                loadUniform("P", camera->get<CameraComponent>()->getProj());
+                loadUniform("V", camera->get<CameraComponent>()->getView());
+
+                loadUniform("camPos", camera->get<SpatialComponent>()->getPosition());
 
                 /* Load light */
                 if (auto shadowCamera = Engine::getComponentTuple<ShadowCameraComponent, CameraComponent>()) {
@@ -109,7 +110,7 @@ namespace neo {
                 /* Bind shadow map */
                 loadTexture("shadowMap", *Library::getFBO("shadowMap")->mTextures[0]);
 
-                const auto& cameraFrustum = camera.getGameObject().getComponentByType<FrustumComponent>();
+                const auto& cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
                 for (auto& renderable : Engine::getComponentTuples<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>()) {
                     auto renderableSpatial = renderable->get<SpatialComponent>();
 

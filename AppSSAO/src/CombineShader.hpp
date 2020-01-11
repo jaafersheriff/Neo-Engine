@@ -19,7 +19,7 @@ class CombineShader : public PostProcessShader {
             PostProcessShader ("Combine Shader", frag) 
         {}
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render() override {
             loadUniform("showAO", showAO);
             loadUniform("diffuseAmount", diffuseAmount);
 

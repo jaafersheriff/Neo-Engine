@@ -345,15 +345,6 @@ namespace neo {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Renderer")) {
-                if (Renderer::mDefaultCamera && ImGui::TreeNode("Scene Camera")) {
-                    auto spatial = Renderer::mDefaultCamera->getGameObject().getComponentByType<SpatialComponent>();
-                    assert(spatial);
-                    auto pos = spatial->getPosition();
-                    auto look = spatial->getLookDir();
-                    ImGui::Text("Position: %0.2f, %0.2f, %0.2f", pos.x, pos.y, pos.z);
-                    ImGui::Text("Look Dir: %0.2f, %0.2f, %0.2f", look.x, look.y, look.z);
-                    ImGui::TreePop();
-                }
                 if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
                     auto shadersFunc = [&](std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>>& shaders, const std::string swapName) {
                         for (unsigned i = 0; i < shaders.size(); i++) {

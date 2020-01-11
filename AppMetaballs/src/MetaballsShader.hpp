@@ -18,12 +18,14 @@ public:
         Shader("Metaballs Shader", vert, frag)
     {}
 
-    virtual void render(const CameraComponent &camera) override {
+    virtual void render() override {
         bind();
 
-        loadUniform("P", camera.getProj());
-        loadUniform("V", camera.getView());
-        loadUniform("camPos", camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
+        if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>()) {
+            loadUniform("P", camera->get<CameraComponent>()->getProj());
+            loadUniform("V", camera->get<CameraComponent>()->getView());
+            loadUniform("camPos", camera->get<SpatialComponent>()->getPosition());
+        }
 
         if (auto skybox = Engine::getComponentTuple<renderable::SkyboxComponent, CubeMapComponent>()) {
             loadTexture("cubeMap", skybox->get<CubeMapComponent>()->mTexture);

@@ -92,7 +92,7 @@ int main() {
     Engine::addSystem<RotationSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.camera);
+    Renderer::init("shaders/");
     Renderer::addPreProcessShader<GodRaySunShader>("billboard.vert", "godraysun.frag");
     Renderer::addPreProcessShader<GodRayOccluderShader>("model.vert", "godrayoccluder.frag");
     Renderer::addPreProcessShader<BlurShader>("blur.vert", "blur.frag");

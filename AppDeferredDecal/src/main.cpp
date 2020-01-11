@@ -96,7 +96,7 @@ int main() {
     Engine::addSystem<RotationSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.camera);
+    Renderer::init("shaders/");
     Renderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
     Renderer::addPreProcessShader<DecalShader>("decal.vert", "decal.frag"); 
     Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag"); 

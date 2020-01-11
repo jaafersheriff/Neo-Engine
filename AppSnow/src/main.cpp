@@ -86,7 +86,7 @@ int main() {
     Engine::addSystem<SnowSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.camera, glm::vec3(0.2f, 0.3f, 0.4f));
+    Renderer::init("shaders/", glm::vec3(0.2f, 0.3f, 0.4f));
     auto snowShader = &Renderer::addSceneShader<SnowShader>("snow.vert", "snow.frag");
     Renderer::addSceneShader<LineShader>();
 

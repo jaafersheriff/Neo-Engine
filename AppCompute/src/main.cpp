@@ -59,7 +59,7 @@ int main() {
     Engine::addSystem<CameraControllerSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.camera);
+    Renderer::init("shaders/");
     Renderer::addComputeShader<ParticlesComputeShader>("particles.compute");
     Renderer::addSceneShader<ParticleVisShader>("particles.vert", "particles.frag", "particles.geom");
 

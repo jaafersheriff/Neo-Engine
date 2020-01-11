@@ -90,7 +90,7 @@ int main() {
     Engine::addSystem<FrustumToLineSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.camera);
+    Renderer::init("shaders/");
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<LineShader>();

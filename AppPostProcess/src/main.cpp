@@ -66,7 +66,7 @@ int main() {
     Engine::addSystem<CameraControllerSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.camera);
+    Renderer::init("shaders/");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addPostProcessShader<PostProcessShader>("DepthShader", "depth.frag");
     Renderer::addPostProcessShader<PostProcessShader>("BlueShader", "blue.frag");

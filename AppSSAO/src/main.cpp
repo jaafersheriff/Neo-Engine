@@ -78,7 +78,7 @@ int main() {
     Engine::addSystem<SinTranslateSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.camera);
+    Renderer::init("shaders/");
 
     // TODO - this ordering is super broken
     Renderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");

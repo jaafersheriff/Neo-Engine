@@ -64,7 +64,7 @@ class AOShader : public PostProcessShader {
             noiseTex->upload(noise.data());
         }
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render() override {
 
             loadUniform("radius", radius);
             loadUniform("bias", bias);
@@ -78,8 +78,10 @@ class AOShader : public PostProcessShader {
             loadTexture("noise", *Library::getTexture("aoNoise"));
             loadTexture("kernel", *Library::getTexture("aoKernel"));
 
-            loadUniform("P", camera.getProj());
-            loadUniform("invP", glm::inverse(camera.getProj()));
+            if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
+                loadUniform("P", camera->get<CameraComponent>()->getProj());
+                loadUniform("invP", glm::inverse(camera->get<CameraComponent>()->getProj()));
+            }
         }
 
         virtual void imguiEditor() override {

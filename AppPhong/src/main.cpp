@@ -79,7 +79,7 @@ int main() {
     Engine::addSystem<CameraControllerSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.cameraComp);
+    Renderer::init("shaders/");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<WireframeShader>();
 

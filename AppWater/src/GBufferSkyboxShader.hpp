@@ -18,7 +18,7 @@ class GBufferSkyboxShader : public Shader {
             Shader("GbufferSkybox", vert, frag) 
         { }
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render() override {
             auto fbo = Library::getFBO("gbuffer");
             fbo->bind();
 
@@ -32,8 +32,10 @@ class GBufferSkyboxShader : public Shader {
             bind();
 
             /* Load PV */
-            loadUniform("P", camera.getProj());
-            loadUniform("V", camera.getView());
+            if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
+                loadUniform("P", camera->get<CameraComponent>()->getProj());
+                loadUniform("V", camera->get<CameraComponent>()->getView());
+            }
 
             /* Bind texture */
             loadTexture("cubeMap", skybox->get<CubeMapComponent>()->mTexture);

@@ -18,16 +18,22 @@ class GodRayOccluderShader : public Shader {
             Shader("GodRayOccluder Shader", vert, frag) {
         }
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render() override {
+            auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+            if (!camera) {
+                return;
+            }
+
             auto fbo = Library::getFBO("godray");
             fbo->bind();
             glm::ivec2 frameSize = Window::getFrameSize() / 2;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();
+
             /* Load PV */
-            loadUniform("P", camera.getProj());
-            loadUniform("V", camera.getView());
+            loadUniform("P", camera->get<CameraComponent>()->getProj());
+            loadUniform("V", camera->get<CameraComponent>()->getView());
 
             for (auto& renderable : Engine::getComponentTuples<SunOccluderComponent, MeshComponent, SpatialComponent>()) {
                 auto renderableMesh = renderable->get<MeshComponent>();
@@ -35,7 +41,7 @@ class GodRayOccluderShader : public Shader {
 
                 // VFC
                 if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                    if (const auto& frustumPlanes = camera.getGameObject().getComponentByType<FrustumComponent>()) {
+                    if (const auto& frustumPlanes = camera->mGameObject.getComponentByType<FrustumComponent>()) {
                         float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
                         if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
                             continue;

@@ -78,7 +78,7 @@ public:
         waterNoise->update(glm::uvec2(noisesize, noisesize), data.data());
     }
 
-    virtual void render(const CameraComponent &camera) override {
+    virtual void render() override {
         bind();
 
         CHECK_GL(glDisable(GL_BLEND));
@@ -89,11 +89,13 @@ public:
             CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
         }
 
-        loadUniform("P", camera.getProj());
-        loadUniform("V", camera.getView());
-        loadUniform("invP", glm::inverse(camera.getProj()));
-        loadUniform("invV", glm::inverse(camera.getView()));
-        loadUniform("camPos", camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
+        if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>()) {
+            loadUniform("P", camera->get<CameraComponent>()->getProj());
+            loadUniform("V", camera->get<CameraComponent>()->getView());
+            loadUniform("invP", glm::inverse(camera->get<CameraComponent>()->getProj()));
+            loadUniform("invV", glm::inverse(camera->get<CameraComponent>()->getView()));
+            loadUniform("camPos", camera->get<SpatialComponent>()->getPosition());
+        }
 
         loadUniform("time", Util::getRunTime());
 

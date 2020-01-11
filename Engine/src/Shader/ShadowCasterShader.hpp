@@ -41,7 +41,7 @@ namespace neo {
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
             }
 
-            virtual void render(const CameraComponent &) override {
+            virtual void render() override {
                 auto shadowCamera = Engine::getComponentTuple<ShadowCameraComponent, CameraComponent>();
                 if (!shadowCamera) {
                     return;

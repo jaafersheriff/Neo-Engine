@@ -33,7 +33,7 @@ namespace neo {
                 )")
         {}
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render() override {
             auto skybox = Engine::getComponentTuple<renderable::SkyboxComponent, CubeMapComponent>();
             if (!skybox) {
                 return;
@@ -44,8 +44,10 @@ namespace neo {
             bind();
 
             /* Load PV */
-            loadUniform("P", camera.getProj());
-            loadUniform("V", camera.getView());
+            auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+            NEO_ASSERT(camera, "No main camera exists");
+            loadUniform("P", camera->get<CameraComponent>()->getProj());
+            loadUniform("V", camera->get<CameraComponent>()->getView());
 
             /* Bind texture */
             loadTexture("cubeMap", skybox->get<CubeMapComponent>()->mTexture);

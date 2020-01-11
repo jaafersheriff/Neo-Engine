@@ -16,7 +16,7 @@ public:
         Shader("Snow Shader", vert, frag)
     {}
 
-    virtual void render(const CameraComponent &camera) override {
+    virtual void render() override {
         bind();
 
         /* Load snow */
@@ -29,9 +29,11 @@ public:
         loadUniform("rimPower", snow->mRimPower);
 
         /* Load Camera */
-        loadUniform("P", camera.getProj());
-        loadUniform("V", camera.getView());
-        loadUniform("camPos", camera.getGameObject().getComponentByType<SpatialComponent>()->getPosition());
+        if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>()) {
+            loadUniform("P", camera->get<CameraComponent>()->getProj());
+            loadUniform("V", camera->get<CameraComponent>()->getView());
+            loadUniform("camPos", camera->get<SpatialComponent>()->getPosition());
+        }
 
         /* Load light */
         auto lights = Engine::getComponents<LightComponent>();

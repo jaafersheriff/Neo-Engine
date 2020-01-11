@@ -81,7 +81,7 @@ int main() {
     Engine::addSystem<MetaballsSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/", camera.camera);
+    Renderer::init("shaders/");
     Renderer::addSceneShader<MetaballsShader>("metaballs.vert", "metaballs.frag");
     Renderer::addSceneShader<SkyboxShader>();
 

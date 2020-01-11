@@ -29,7 +29,7 @@ class DecalShader : public Shader {
             });
         }
 
-        virtual void render(const CameraComponent &camera) override {
+        virtual void render() override {
             auto fbo = Library::getFBO("decals");
             fbo->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
@@ -38,10 +38,11 @@ class DecalShader : public Shader {
             CHECK_GL(glDisable(GL_CULL_FACE));
 
             bind();
-
-            loadUniform("P", camera.getProj());
-            loadUniform("invPV", glm::inverse(camera.getProj() * camera.getView()));
-            loadUniform("V", camera.getView());
+            if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
+                loadUniform("P", camera->get<CameraComponent>()->getProj());
+                loadUniform("invPV", glm::inverse(camera->get<CameraComponent>()->getProj() * camera->get<CameraComponent>()->getView()));
+                loadUniform("V", camera->get<CameraComponent>()->getView());
+            }
 
             /* Bind gbuffer */
             auto gbuffer = Library::getFBO("gbuffer");
