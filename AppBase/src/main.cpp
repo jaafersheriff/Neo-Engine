@@ -2,6 +2,7 @@
 
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
+#include "CombineShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -72,9 +73,13 @@ int main() {
     Engine::addSystem<CameraControllerSystem>();
 
     /* Init renderer */
+    Texture* T = Library::createEmptyTexture<Texture2D>("shareddepth", TextureFormat{ GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_NEAREST, GL_REPEAT });
+    T->resize(glm::uvec2(1920, 1080));
+
     Renderer::init("shaders/");
-    Renderer::addSceneShader<PhongShader>();
-    Renderer::addSceneShader<AlphaTestShader>();
+    Renderer::addPreProcessShader<PhongShader>();
+    Renderer::addPreProcessShader<AlphaTestShader>();
+    Renderer::addPostProcessShader<CombineShader>();
 
     /* Run */
     Engine::run();

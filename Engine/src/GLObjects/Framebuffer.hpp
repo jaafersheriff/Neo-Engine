@@ -46,6 +46,12 @@ namespace neo {
                 _attachTexture(GL_DEPTH_ATTACHMENT, *t);
             }
 
+            void attachDepthTexture(Texture *t) {
+                NEO_ASSERT(t->mFormat.inputFormat == GL_DEPTH_COMPONENT, "Invalid depth target format");
+                NEO_ASSERT(t->mFormat.format == GL_DEPTH_COMPONENT, "Invalid depth target format"); // or depth_16, 24, 32
+                _attachTexture(GL_DEPTH_ATTACHMENT, *t);
+            }
+
             void initDrawBuffers() {
                 if (!mColorAttachments) {
                     return;

@@ -32,9 +32,32 @@ namespace neo {
                     alphaDiscard(albedo.a);
                     color = albedo;
                 })")
-        {}
+        {
+            // Create alphart 
+            auto alphart = Library::getFBO("alphart");
+            alphart->generate();
+
+            // Format for color buffers
+            TextureFormat format = { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT };
+            alphart->attachColorTexture(Window::getFrameSize(), format); // diffuse
+            alphart->attachDepthTexture(Library::getTexture("shareddepth"));
+            alphart->initDrawBuffers();
+
+            // Handle frame size changing
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
+                Library::getFBO("alphart")->resize(frameSize);
+            });
+
+        }
 
         virtual void render() override {
+            auto fbo = Library::getFBO("alphart");
+            fbo->bind();
+            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
+            CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
+
             bind();
 
             /* Load PV */
