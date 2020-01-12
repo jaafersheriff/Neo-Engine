@@ -38,6 +38,7 @@ struct Light {
         Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
         Engine::addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
         Engine::addComponent<FrustumComponent>(cameraObject);
+        Engine::addComponent<FrustumFitReceiverComponent>(cameraObject);
         Engine::addComponent<LineMeshComponent>(cameraObject, glm::vec3(1.f, 0.f, 1.f));
         Engine::addComponent<ShadowCameraComponent>(cameraObject);
 
@@ -77,6 +78,7 @@ int main() {
     Camera mockCamera(50.f, 0.1f, 5.f, 1.f, glm::vec3(0.f, 2.f, -0.f));
     auto* line = &Engine::addComponent<LineMeshComponent>(mockCamera.gameObject, glm::vec3(0.f, 1.f, 1.f));
     Engine::addComponent<FrustumComponent>(mockCamera.gameObject);
+    Engine::addComponent<FrustumFitSourceComponent>(mockCamera.gameObject);
 
     // Ortho camera, shadow camera, light
     Light light(glm::vec3(10.f, 20.f, 0.f), true);
@@ -111,15 +113,19 @@ int main() {
     Engine::addImGuiFunc("SceneCamera", [&]() {
         if (ImGui::Button("Set scene")) {
             Engine::removeComponent<MainCameraComponent>(*mockCamera.gameObject->getComponentByType<MainCameraComponent>());
-            Engine::removeComponent(*mockCamera.gameObject->getComponentByType<CameraControllerComponent>());
+            Engine::removeComponent<CameraControllerComponent>(*mockCamera.gameObject->getComponentByType<CameraControllerComponent>());
+            Engine::removeComponent<FrustumFitSourceComponent>(*mockCamera.gameObject->getComponentByType<FrustumFitSourceComponent>());
             Engine::addComponent<MainCameraComponent>(sceneCamera.gameObject);
             Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
+            Engine::addComponent<FrustumFitSourceComponent>(sceneCamera.gameObject);
         }
         if (ImGui::Button("Set perspective")) {
             Engine::removeComponent<MainCameraComponent>(*sceneCamera.gameObject->getComponentByType<MainCameraComponent>());
-            Engine::removeComponent(*sceneCamera.gameObject->getComponentByType<CameraControllerComponent>());
+            Engine::removeComponent<CameraControllerComponent>(*sceneCamera.gameObject->getComponentByType<CameraControllerComponent>());
+            Engine::removeComponent<FrustumFitSourceComponent>(*sceneCamera.gameObject->getComponentByType<FrustumFitSourceComponent>());
             Engine::addComponent<MainCameraComponent>(mockCamera.gameObject);
             Engine::addComponent<CameraControllerComponent>(mockCamera.gameObject, 0.4f, 7.f);
+            Engine::addComponent<FrustumFitSourceComponent>(mockCamera.gameObject);
         }
 
     });

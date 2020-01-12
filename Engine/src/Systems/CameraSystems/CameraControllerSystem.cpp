@@ -17,6 +17,7 @@ namespace neo {
     void CameraControllerSystem::_updateLook(const float dt, CameraControllerComponent& comp) {
         glm::vec2 mousePos = Mouse::getPos();
         glm::vec2 mouseSpeed = Mouse::getSpeed();
+
         if (Mouse::isDown(GLFW_MOUSE_BUTTON_2) && (mousePos.x || mousePos.y)) {
             float theta = comp.mTheta - mouseSpeed.x * comp.mLookSpeed * dt;
             float phi = comp.mPhi + mouseSpeed.y * comp.mLookSpeed * dt;
@@ -48,7 +49,7 @@ namespace neo {
             int left(Keyboard::isKeyPressed(comp.mLeftButton));
             int up(Keyboard::isKeyPressed(comp.mUpButton));
             int down(Keyboard::isKeyPressed(comp.mDownButton));
-            int speed(Keyboard::isKeyPressed(GLFW_KEY_LEFT_SHIFT));
+            bool speed(Keyboard::isKeyPressed(GLFW_KEY_LEFT_SHIFT));
 
             glm::vec3 dir(
                 float(right - left),
@@ -58,7 +59,7 @@ namespace neo {
 
             if (dir != glm::vec3()) {
                 auto spatial = comp.getGameObject().getComponentByType<SpatialComponent>();
-                assert(spatial);
+                NEO_ASSERT(spatial, "Camera doesn't have SpatialComponent");
                 dir = glm::normalize(dir);
                 dir = glm::normalize(
                     spatial->getRightDir() * dir.x +

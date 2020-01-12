@@ -11,14 +11,14 @@
 namespace neo {
 
     void FrustaFittingSystem::update(const float dt) {
-        auto shadowCamera = Engine::getComponentTuple<ShadowCameraComponent, CameraComponent, SpatialComponent>();
-        auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
+        auto sourceCamera = Engine::getComponentTuple<CameraComponent, FrustumFitSourceComponent, SpatialComponent>();
+        auto receiverCamera = Engine::getComponentTuple<CameraComponent, FrustumFitReceiverComponent, SpatialComponent>();
         auto light = Engine::getComponentTuple<LightComponent, SpatialComponent>();
-        if (!shadowCamera || !mainCamera || !light) {
+        if (!receiverCamera || !sourceCamera || !light) {
             return;
         }
-        auto orthoCamera = dynamic_cast<OrthoCameraComponent*>(shadowCamera->get<CameraComponent>());
-        auto perspectiveCamera = dynamic_cast<PerspectiveCameraComponent*>(mainCamera->get<CameraComponent>());
+        auto orthoCamera = dynamic_cast<OrthoCameraComponent*>(receiverCamera->get<CameraComponent>());
+        auto perspectiveCamera = dynamic_cast<PerspectiveCameraComponent*>(sourceCamera->get<CameraComponent>());
         if (!orthoCamera || !perspectiveCamera) {
             return;
         }

@@ -3,6 +3,8 @@
 #include "CameraComponent/CameraControllerComponent.hpp"
 #include "CameraComponent/CameraComponent.hpp"
 #include "CameraComponent/FrustumComponent.hpp"
+#include "CameraComponent/FrustumFitReceiverComponent.hpp"
+#include "CameraComponent/FrustumFitSourceComponent.hpp"
 #include "CameraComponent/MainCameraComponent.hpp"
 #include "CameraComponent/OrthoCameraComponent.hpp"
 #include "CameraComponent/PerspectiveCameraComponent.hpp"

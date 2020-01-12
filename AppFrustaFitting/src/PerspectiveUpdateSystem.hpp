@@ -21,15 +21,15 @@ public:
     }
 
     virtual void update(const float dt) override {
-        auto mainCamera = Engine::getComponentTuple<MainCameraComponent, SpatialComponent>();
-        if (!mainCamera) {
+        auto sourceCamera = Engine::getComponentTuple<FrustumFitSourceComponent, SpatialComponent>();
+        if (!sourceCamera) {
             return;
         }
 
         if (mUpdatePerspective) {
             float f = glm::sin(Util::getRunTime());
             float g = glm::cos(Util::getRunTime());
-            mainCamera->get<SpatialComponent>()->setLookDir(glm::vec3(f, f / 2, g));
+            sourceCamera->get<SpatialComponent>()->setLookDir(glm::vec3(f, f / 2, g));
         }
     }
 };

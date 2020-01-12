@@ -22,6 +22,8 @@
     <ClInclude Include="src\Component\CameraComponent\CameraComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\CameraControllerComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\FrustumComponent.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\FrustumFitReceiverComponent.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\FrustumFitSourceComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\MainCameraComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\OrthoCameraComponent.hpp" />
     <ClInclude Include="src\Component\CameraComponent\PerspectiveCameraComponent.hpp" />

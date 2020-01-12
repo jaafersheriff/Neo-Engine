@@ -57,7 +57,6 @@ namespace neo {
 
             /* Remove the component from the engine and its game object */
             template <typename CompT> static void removeComponent(CompT &);
-            static void removeComponent(std::type_index type, Component*);
 
             /* Attach a system */
             template <typename SysT, typename... Args> static SysT & addSystem(Args &&...);
@@ -87,6 +86,7 @@ namespace neo {
             static void _initSystems();
             static std::vector<GameObject *> mGameObjectKillQueue;
             static std::vector<std::pair<std::type_index, Component *>> mComponentKillQueue;
+            static void _removeComponent(std::type_index type, Component*);
             static void _processKillQueue();
             static void _killGameObjects();
             static void _killComponents();
@@ -157,7 +157,7 @@ namespace neo {
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
-        removeComponent(typeid(CompT), static_cast<Component*>(&component));
+        _removeComponent(typeid(CompT), static_cast<Component*>(&component));
     }
 
     template <typename CompT>

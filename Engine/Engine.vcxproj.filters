@@ -86,6 +86,8 @@
     <ClInclude Include="src\ext\microprofile.h" />
     <ClInclude Include="src\ext\microprofile_html.h" />
     <ClInclude Include="src\ext\PerlinNoise.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\FrustumFitSourceComponent.hpp" />
+    <ClInclude Include="src\Component\CameraComponent\FrustumFitReceiverComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\CameraComponent\CameraComponent.cpp" />

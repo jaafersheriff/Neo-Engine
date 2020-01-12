@@ -153,7 +153,7 @@ namespace neo {
         mGameObjectKillQueue.push_back(&go);
     }
 
-    void Engine::removeComponent(std::type_index type, Component* component) {
+    void Engine::_removeComponent(std::type_index type, Component* component) {
         assert(mComponents.count(type)); // trying to remove a type of component that was never added
         mComponentKillQueue.emplace_back(type, component);
     }
@@ -470,7 +470,7 @@ namespace neo {
                             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
                             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
                             if (ImGui::Button("Remove Component", ImVec2(ImGui::GetWindowWidth() * 0.9f, 0))) {
-                                removeComponent(type.value(), components[index]);
+                                _removeComponent(type.value(), components[index]);
                                 if (components.size() == 1) {
                                     index = 0;
                                     type = std::nullopt;
