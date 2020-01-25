@@ -5,8 +5,6 @@
 #include "GLObjects/Framebuffer.hpp"
 #include "GLObjects/Mesh.hpp"
 
-#include "Util/Util.hpp"
-
 namespace neo {
     /* Library */
     std::unordered_map<std::string, Mesh *> Library::mMeshes;

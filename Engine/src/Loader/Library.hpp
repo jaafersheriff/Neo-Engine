@@ -4,6 +4,8 @@
 
 #include "GLObjects/Texture.hpp"
 
+#include "Util/Util.hpp"
+
 namespace neo {
 
     class Engine;
@@ -35,8 +37,6 @@ namespace neo {
 
             static void _insertMesh(const std::string&, Mesh*);
             static void _insertTexture(const std::string&, Texture*);
-
-
     };
 
     template <typename T>
@@ -46,9 +46,25 @@ namespace neo {
 
         auto it = mTextures.find(name);
         NEO_ASSERT(it == mTextures.end(), "Texture already found");
-        Texture* t;
-        std::vector<uint8_t> data = { 0xF };
-        t = new T(format, size, data.data());
+        void* data;
+        switch(format.type) {
+        case GL_UNSIGNED_BYTE:
+            uint8_t d = 0xFF;
+            data = &d;
+            break;
+        case GL_FLOAT:
+            float d = 255;
+            data = &d;
+            break;
+        case GL_INT:
+            int d = 1.f;
+            data = &d;
+            break;
+        default:
+            NEO_ASSERT(false, "Trying to create an empty texture with an unsupported type");
+            break;
+        }
+        Texture* t = new T(format, size, data);
         _insertTexture(name, t);
         return t;
     }
