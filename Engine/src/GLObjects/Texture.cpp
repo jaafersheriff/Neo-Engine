@@ -39,24 +39,14 @@ namespace neo {
         _resize();
     }
 
-    void Texture::update(const glm::uvec2 size, const uint8_t* data) {
+    void Texture::update(const glm::uvec2 size, const void* data) {
         update(glm::uvec3(size, 0), data);
     }
 
-    void Texture::update(const glm::uvec3 size, const uint8_t* data) {
+    void Texture::update(const glm::uvec3 size, const void* data) {
         NEO_ASSERT(data != nullptr, "Attempting to update a texture with nothing");
         resize(size);
-        upload(data);
-    }
-
-    void Texture::update(const glm::uvec2 size, const float* data) {
-        update(glm::uvec3(size, 0), data);
-    }
-
-    void Texture::update(const glm::uvec3 size, const float* data) {
-        NEO_ASSERT(data != nullptr, "Attempting to update a texture with nothing");
-        resize(size);
-        upload(data);
+        _upload(data);
     }
 
     void Texture::destroy() {

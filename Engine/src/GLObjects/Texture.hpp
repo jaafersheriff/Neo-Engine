@@ -47,12 +47,8 @@ namespace neo {
             void resize(const glm::uvec3 size);
 
             /* Upload to GPU */
-            virtual void upload(const uint8_t* data = nullptr) = 0;
-            virtual void upload(const float* data = nullptr) = 0;
-            void update(const glm::uvec2 size, const uint8_t* data);
-            void update(const glm::uvec3 size, const uint8_t* data);
-            void update(const glm::uvec2 size, const float* data);
-            void update(const glm::uvec3 size, const float* data);
+            void update(const glm::uvec2 size, const void* data);
+            void update(const glm::uvec3 size, const void* data);
 
             void bind() const;
 
@@ -60,6 +56,7 @@ namespace neo {
             virtual void _applyFormat() = 0;
             virtual void _resize() = 0;
             virtual void _bind() const = 0;
+            virtual void _upload(const void* data) = 0;
     };
 
 }

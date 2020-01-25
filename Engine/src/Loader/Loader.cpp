@@ -130,8 +130,8 @@ namespace neo {
         }
 
         /* Upload data to GPU and free from CPU */
-        TextureFormat format = { GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE };
-        TextureCubeMap* texture = new TextureCubeMap(format, sizes, data.data());
+        TextureFormat format = { GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_UNSIGNED_BYTE };
+        TextureCubeMap* texture = new TextureCubeMap(format, sizes, reinterpret_cast<void**>(data.data()));
 
         /* Clean */
         for (int i = 0; i < 6; i++) {

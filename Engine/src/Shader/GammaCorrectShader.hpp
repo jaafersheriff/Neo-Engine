@@ -15,7 +15,7 @@ class GammaCorrectShader : public PostProcessShader {
         float gamma = 2.2f;
 
         GammaCorrectShader() :
-            PostProcessShader("GammaCorrectShader", "gammacorrect.glsl") {
+            PostProcessShader("GammaCorrectShader", std::string("gammacorrect.glsl")) {
         }
 
         virtual void render() override {

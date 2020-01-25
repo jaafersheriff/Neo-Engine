@@ -47,15 +47,8 @@ namespace neo {
         auto it = mTextures.find(name);
         NEO_ASSERT(it == mTextures.end(), "Texture already found");
         Texture* t;
-        if (format.type == GL_FLOAT) {
-            std::vector<float> data = { 0xF };
-            t = new T(format, size, data);
-        }
-        else {
-            std::vector<uint8_t> data = { 0xF };
-            t = new T(format, size, data);
-        }
- 
+        std::vector<uint8_t> data = { 0xF };
+        t = new T(format, size, data.data());
         _insertTexture(name, t);
         return t;
     }

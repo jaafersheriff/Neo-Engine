@@ -11,20 +11,18 @@ namespace neo {
     class TextureCubeMap : public Texture {
     public:
 
-        TextureCubeMap(TextureFormat format, const std::vector<glm::uvec2>& sizes, uint8_t** data = nullptr) :
+        TextureCubeMap(TextureFormat format, const std::vector<glm::uvec2>& sizes, void** data) :
             Texture(format, glm::uvec2(1)) {
 
             std::copy_n(sizes.begin(), 6, mSizes.begin());
             bind();
             _applyFormat();
-            upload(sizes, data);
+            _upload(sizes, data);
         }
 
-
-        virtual void upload(const uint8_t* data = nullptr) override {
-        }
-
-        virtual void upload(const float* data = nullptr) override {
+    protected:
+        virtual void _upload(const void* data) override {
+            NEO_ASSERT(false, "Can't use standard upload for a CubeMap");
         }
 
         virtual void _bind() const override {
@@ -40,7 +38,7 @@ namespace neo {
             CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, mFormat.mode));
         }
 
-        void upload(const std::vector<glm::uvec2>& sizes, uint8_t** data) {
+        void _upload(const std::vector<glm::uvec2>& sizes, void** data) {
             MICROPROFILE_SCOPEI("TextureCube", "upload", MP_AUTO);
             MICROPROFILE_SCOPEGPUI("TextureCube::upload", MP_AUTO);
 
@@ -59,9 +57,6 @@ namespace neo {
             NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when uploading Texture");
         }
 
-    protected:
-        std::array<glm::uvec2, 6> mSizes;
-
         virtual void _resize() override {
             bind();
             for (int i = 0; i < 6; i++) {
@@ -70,6 +65,9 @@ namespace neo {
                 mSizes[i].y = mHeight;
             }
         }
+
+    private:
+        std::array<glm::uvec2, 6> mSizes;
 
     };
 }
