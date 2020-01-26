@@ -56,31 +56,9 @@ namespace neo {
                                 getPhong(fragNor, fragPos.rgb, camPos, lightPos, lightAtt, lightCol, albedo.rgb, specularColor, shine);
                     color.a = albedo.a;
                 })")
-        {
-            // Create phongrt 
-            auto phongrt = Library::getFBO("phongrt");
-            phongrt->generate();
-
-            // Format for color buffers
-            TextureFormat format = { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT };
-            phongrt->attachColorTexture(Window::getFrameSize(), format); // diffuse
-            phongrt->attachDepthTexture(Library::getTexture("shareddepth"));
-            phongrt->initDrawBuffers();
-
-            // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
-                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Library::getFBO("phongrt")->resize(frameSize);
-            });
-        }
+        { }
 
         virtual void render() override {
-            auto fbo = Library::getFBO("phongrt");
-            fbo->bind();
-            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
-            CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-
             bind();
 
             /* Load PV */

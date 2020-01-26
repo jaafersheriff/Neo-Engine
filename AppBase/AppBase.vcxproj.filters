@@ -6,7 +6,4 @@
   <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\CombineShader.hpp" />
-  </ItemGroup>
 </Project>
