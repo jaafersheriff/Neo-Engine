@@ -2,6 +2,7 @@
 
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
+#include "DOFShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -75,6 +76,7 @@ int main() {
     Renderer::init("shaders/");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
+    Renderer::addPostProcessShader<DOFShader>("dof.frag");
 
     /* Run */
     Engine::run();
