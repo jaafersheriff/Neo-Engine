@@ -8,39 +8,39 @@
 
 #include "Loader/Library.hpp"
 #include "GLObjects/Framebuffer.hpp"
+#include "GLObjects/Mesh.hpp"
 
 #include "ext/imgui/imgui.h"
 
 using namespace neo;
 
-class DofDownShader : public Shader {
+class DofBlurShader : public Shader {
 
     public:
 
         std::shared_ptr<int> frameScale;
-        glm::vec2 dofWorld = glm::vec2(0.3f, 0.5f);
 
-        DofDownShader(const std::string& vert, const std::string &frag, std::shared_ptr<int> scale) :
-            Shader("DofDown Shader", vert, frag),
+        DofBlurShader(const std::string& vert, const std::string &frag, std::shared_ptr<int> scale) :
+            Shader("DofBlur Shader", vert, frag),
             frameScale(scale)
         {
             glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
-            auto DofDownFBO = Library::getFBO("dofdown");
-            DofDownFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT });
-            DofDownFBO->attachDepthTexture(frameSize, GL_NEAREST, GL_REPEAT); // depth
-            DofDownFBO->initDrawBuffers();
+            auto DofBlurFBO = Library::getFBO("dofblur");
+            DofBlurFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT });
+            DofBlurFBO->attachDepthTexture(frameSize, GL_NEAREST, GL_REPEAT); // depth
+            DofBlurFBO->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&, frameScale = frameScale](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Library::getFBO("dofdown")->resize(frameSize / glm::uvec2(*frameScale));
+                Library::getFBO("dofblur")->resize(frameSize / glm::uvec2(*frameScale));
             });
  
         }
 
         virtual void render() override {
-            Library::getFBO("dofdown")->bind();
+            Library::getFBO("dofblur")->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
             CHECK_GL(glDisable(GL_DEPTH_TEST));
@@ -51,11 +51,8 @@ class DofDownShader : public Shader {
             bind();
 
             loadUniform("invRenderTargetSize", glm::vec2(1.f) / glm::vec2(frameSize));
-            loadUniform("dofEqWorld", dofWorld);
-            loadUniform("dofRowDelta", glm::vec2(0, frameSize.y / *frameScale));
 
-            loadTexture("inputFBO", *Library::getFBO("default")->mTextures[0]);
-            loadTexture("inputDepth", *Library::getFBO("default")->mTextures[1]);
+            loadTexture("dofDown", *Library::getFBO("dofdown")->mTextures[0]);
 
             auto mesh = Library::getMesh("quad");
             CHECK_GL(glBindVertexArray(mesh->mVAOID));
@@ -63,6 +60,5 @@ class DofDownShader : public Shader {
         }
 
         virtual void imguiEditor() override {
-            ImGui::SliderFloat2("DOF World", &dofWorld[0], 0.f, 100.f);
         }
 };

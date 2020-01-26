@@ -3,6 +3,7 @@
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
 #include "Shader/GammaCorrectShader.hpp"
+#include "DofBlurShader.hpp"
 #include "DofDownShader.hpp"
 #include "PostShader.hpp"
 
@@ -92,11 +93,20 @@ int main() {
     Renderer::init("shaders/");
     Renderer::setDefaultFBO("default");
 
-    Renderer::addPreProcessShader<DofDownShader>("dofdown.vert", "dofdown.frag");
+    std::shared_ptr<int> frameScale = std::make_shared<int>(4);
+    Renderer::addPreProcessShader<DofDownShader>("dofdown.vert", "dofdown.frag", frameScale);
+    Renderer::addPreProcessShader<DofBlurShader>("dofblur.vert", "dofblur.frag", frameScale);
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addPostProcessShader<PostShader>("post.frag");
     Renderer::addPostProcessShader<GammaCorrectShader>();
+
+    Engine::addImGuiFunc("DOF", [&]() {
+        if (ImGui::SliderInt("Scale", frameScale.get(), 1, 16)) {
+            Library::getFBO("dofdown")->resize(Window::getFrameSize() / *frameScale);
+            Library::getFBO("dofblur")->resize(Window::getFrameSize() / *frameScale);
+        }
+    });
 
     /* Run */
     Engine::run();
