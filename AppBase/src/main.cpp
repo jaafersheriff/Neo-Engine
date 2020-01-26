@@ -107,7 +107,6 @@ int main() {
         if (ImGui::SliderInt("Scale", frameScale.get(), 1, 16)) {
             Library::getFBO("dofdown")->resize(Window::getFrameSize() / *frameScale);
             Library::getFBO("dofnearblur")->resize(Window::getFrameSize() / *frameScale);
-            Library::getFBO("dofinterpolate")->resize(Window::getFrameSize() / *frameScale);
         }
     });
 

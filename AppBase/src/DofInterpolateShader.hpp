@@ -26,17 +26,17 @@ class DofInterpolateShader : public Shader {
             Shader("DofInterpolate Shader", vert, frag),
             frameScale(scale)
         {
-            glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
+            glm::uvec2 frameSize = Window::getFrameSize();
             auto DofInterpolateFBO = Library::getFBO("dofinterpolate");
             DofInterpolateFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT });
             DofInterpolateFBO->attachDepthTexture(frameSize, GL_NEAREST, GL_REPEAT); // depth
             DofInterpolateFBO->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&, frameScale = frameScale](const Message &msg) {
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Library::getFBO("dofinterpolate")->resize(frameSize / glm::uvec2(*frameScale));
+                Library::getFBO("dofinterpolate")->resize(frameSize);
             });
  
         }
@@ -47,12 +47,12 @@ class DofInterpolateShader : public Shader {
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
             CHECK_GL(glDisable(GL_DEPTH_TEST));
 
-            glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
+            glm::uvec2 frameSize = Window::getFrameSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();
 
-            loadUniform("invRenderTargetSize", glm::vec2(1.f) / glm::vec2(frameSize));
+            loadUniform("invRenderTargetSize", glm::vec2(1.f) / glm::vec2(frameSize / glm::uvec2(*frameScale)));
             loadUniform("dofLerpScale", glm::vec4( -1 / interpolateBlur.x, -1 / interpolateBlur.y, -1 / interpolateBlur.z, 1 / interpolateBlur.z ));
             loadUniform("dofLerpBias", glm::vec4(1.f, (1.f - interpolateBlur.y) / interpolateBlur.x, 1.f / interpolateBlur.y, (interpolateBlur.y - 1.f) / interpolateBlur.y));
             loadUniform("dofEqFar", dofEqFar);
@@ -69,9 +69,9 @@ class DofInterpolateShader : public Shader {
         }
 
         virtual void imguiEditor() override {
-            if (ImGui::SliderFloat3("Interpolate Blur", &interpolateBlur[0], 0.f, 1.f)) {
+            if (ImGui::SliderFloat3("Interpolate Blur", &interpolateBlur[0], -1.f, 1.f)) {
                 interpolateBlur = glm::normalize(interpolateBlur);
             }
-            ImGui::SliderFloat3("Eq Far", &dofEqFar[0], 0.f, 1.f);
+            ImGui::SliderFloat3("Eq Far", &dofEqFar[0], -10.f, 10.f);
         }
 };

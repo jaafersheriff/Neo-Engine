@@ -15,16 +15,36 @@ class PostShader : public PostProcessShader {
 
     public:
 
+        int showFBO = 2;
+
         PostShader(const std::string& frag) :
             PostProcessShader("Post Shader", frag)
         {}
 
         virtual void render() override {
-            loadTexture("dofDown", *Library::getFBO("dofdown")->mTextures[0]);
-            loadTexture("dofNearBlur", *Library::getFBO("dofnearblur")->mTextures[0]);
-            loadTexture("dofInterpolate", *Library::getFBO("dofinterpolate")->mTextures[0]);
+            switch (showFBO) {
+            case 0:
+                loadTexture("inColor", *Library::getFBO("dofdown")->mTextures[0]);
+                break;
+            case 1:
+                loadTexture("inColor", *Library::getFBO("dofnearblur")->mTextures[0]);
+                break;
+            case 2:
+                loadTexture("inColor", *Library::getFBO("dofinterpolate")->mTextures[0]);
+            default:
+                break;
+            }
         }
 
         virtual void imguiEditor() override {
+            if (ImGui::RadioButton("Show Down", showFBO == 0)) {
+                showFBO = 0;
+            }
+            if (ImGui::RadioButton("Show Blur", showFBO == 1)) {
+                showFBO = 1;
+            }
+            if (ImGui::RadioButton("Show Interpolate", showFBO == 2)) {
+                showFBO = 2;
+            }
         }
 };

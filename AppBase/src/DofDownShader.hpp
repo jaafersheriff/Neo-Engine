@@ -71,7 +71,7 @@ class DofDownShader : public Shader {
         }
 
         virtual void imguiEditor() override {
-            ImGui::SliderFloat2("DOF World", &dofWorld[0], 0.f, 100.f);
-            ImGui::SliderFloat2("DOF Weapon", &dofWeapon[0], 0.f, 100.f);
+            ImGui::SliderFloat2("DOF Weapon", &dofWeapon[0], 0.f, 1.f);
+            ImGui::SliderFloat2("DOF World", &dofWorld[0], 0.f, 1.f);
         }
 };
