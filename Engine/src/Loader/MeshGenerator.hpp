@@ -297,10 +297,10 @@ namespace neo {
                         vertices[vertexPointer * 3 + 1] = vert.y;
                         vertices[vertexPointer * 3 + 2] = vert.z;
 
-                        float heightL = j == (h == 0.f || 0               ) ? 0.f : heights[j - 1][i    ] / h;
-                        float heightR = j == (h == 0.f || VERTEX_COUNT - 1) ? 0.f : heights[j + 1][i    ] / h;
-                        float heightD = i == (h == 0.f || VERTEX_COUNT - 1) ? 0.f : heights[j    ][i + 1] / h;
-                        float heightU = i == (h == 0.f || 0               ) ? 0.f : heights[j    ][i - 1] / h;
+                        float heightL = (h == 0.f || j == 0               ) ? 0.f : heights[j - 1][i    ] / h;
+                        float heightR = (h == 0.f || j == VERTEX_COUNT - 1) ? 0.f : heights[j + 1][i    ] / h;
+                        float heightD = (h == 0.f || i == VERTEX_COUNT - 1) ? 0.f : heights[j    ][i + 1] / h;
+                        float heightU = (h == 0.f || i == 0               ) ? 0.f : heights[j    ][i - 1] / h;
                         glm::vec3 normal = glm::normalize(glm::vec3(heightL - heightR, 2.f / ((float)VERTEX_COUNT - 1), heightD - heightU));
                         normals[vertexPointer * 3 + 0] = normal.x;
                         normals[vertexPointer * 3 + 1] = normal.y;
@@ -308,7 +308,6 @@ namespace neo {
 
                         textureCoords[vertexPointer * 2] = (float)j / ((float)VERTEX_COUNT - 1);
                         textureCoords[vertexPointer * 2 + 1] = (float)i / ((float)VERTEX_COUNT - 1);
-
 
                         mesh->mMin = glm::min(mesh->mMin, vert);
                         mesh->mMax = glm::max(mesh->mMax, vert);

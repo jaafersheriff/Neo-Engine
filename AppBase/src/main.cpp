@@ -3,6 +3,8 @@
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
 #include "Shader/GammaCorrectShader.hpp"
+#include "Loader/MeshGenerator.hpp"
+
 #include "DofNearBlurShader.hpp"
 #include "DofDownShader.hpp"
 #include "DofInterpolateShader.hpp"
@@ -72,9 +74,11 @@ int main() {
     }
 
     /* Ground plane */
-    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
-    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
-    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::getTexture("grid.png"));
+    auto planeMesh = Library::createEmptyMesh("ground");
+    MeshGenerator::generatePlane(planeMesh, 1.f, 128, 8);
+    Renderable plane(planeMesh, glm::vec3(-25.f, 0.f, -25.f), glm::vec3(50.f, 10.f, 50.f));
+    Engine::addComponent<renderable::PhongRenderable>(plane.gameObject);
+    Engine::addComponent<MaterialComponent>(plane.gameObject, 0.2f, glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(1.f));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
