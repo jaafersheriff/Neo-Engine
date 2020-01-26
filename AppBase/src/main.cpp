@@ -5,6 +5,7 @@
 #include "Shader/GammaCorrectShader.hpp"
 #include "DofNearBlurShader.hpp"
 #include "DofDownShader.hpp"
+#include "DofInterpolateShader.hpp"
 #include "PostShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -96,6 +97,7 @@ int main() {
     std::shared_ptr<int> frameScale = std::make_shared<int>(4);
     Renderer::addPreProcessShader<DofDownShader>("dofdown.vert", "dofdown.frag", frameScale);
     Renderer::addPreProcessShader<DofNearBlurShader>("dofnearblur.vert", "dofnearblur.frag", frameScale);
+    Renderer::addPreProcessShader<DofInterpolateShader>("dofinterpolate.vert", "dofinterpolate.frag", frameScale);
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addPostProcessShader<PostShader>("post.frag");
@@ -105,6 +107,7 @@ int main() {
         if (ImGui::SliderInt("Scale", frameScale.get(), 1, 16)) {
             Library::getFBO("dofdown")->resize(Window::getFrameSize() / *frameScale);
             Library::getFBO("dofnearblur")->resize(Window::getFrameSize() / *frameScale);
+            Library::getFBO("dofinterpolate")->resize(Window::getFrameSize() / *frameScale);
         }
     });
 

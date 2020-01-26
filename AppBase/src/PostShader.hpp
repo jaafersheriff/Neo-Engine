@@ -22,6 +22,7 @@ class PostShader : public PostProcessShader {
         virtual void render() override {
             loadTexture("dofDown", *Library::getFBO("dofdown")->mTextures[0]);
             loadTexture("dofNearBlur", *Library::getFBO("dofnearblur")->mTextures[0]);
+            loadTexture("dofInterpolate", *Library::getFBO("dofinterpolate")->mTextures[0]);
         }
 
         virtual void imguiEditor() override {

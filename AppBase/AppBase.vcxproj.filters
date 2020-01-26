@@ -10,10 +10,13 @@
     <None Include="shaders\dofdown.vert" />
     <None Include="shaders\dofnearblur.frag" />
     <None Include="shaders\dofnearblur.vert" />
+    <None Include="shaders\dofinterpolate.vert" />
+    <None Include="shaders\dofinterpolate.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PostShader.hpp" />
     <ClInclude Include="src\DofDownShader.hpp" />
     <ClInclude Include="src\DofNearBlurShader.hpp" />
+    <ClInclude Include="src\DofInterpolateShader.hpp" />
   </ItemGroup>
 </Project>
