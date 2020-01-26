@@ -121,12 +121,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="shaders\dofa.frag" />
-    <None Include="shaders\dofa.vert" />
+    <None Include="shaders\dofdown.frag" />
+    <None Include="shaders\dofdown.vert" />
     <None Include="shaders\post.frag" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\DOFAShader.hpp" />
+    <ClInclude Include="src\DofDownShader.hpp" />
     <ClInclude Include="src\PostShader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

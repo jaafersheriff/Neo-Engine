@@ -9,18 +9,15 @@ in vec2 fragDepthTex2;
 in vec2 fragDepthTex3;
 
 uniform vec2 dofEqWorld; 
-uniform vec2 dofEqWeapon; 
 uniform vec2 dofRowDelta;  // vec2( 0, 0.25 / renderTargetHeight )    
 
 out vec4 outColor;
 
+// DofDown
 void main() {
     mediump vec3 color;
     mediump float maxCoc;
     vec4 depth;
-    mediump vec4 viewCoc;
-    mediump vec4 sceneCoc;
-    mediump vec4 curCoc;
     mediump vec4 coc;
     vec2 rowOfs[4];
     
@@ -39,40 +36,26 @@ void main() {
     color /= 4;
     
     // Process 4 samples at a time to use vector hardware efficiently.    
-    // The CoC will be 1 if the depth is negative, so use "min" to pick    
-    // between "sceneCoc" and "viewCoc".   
     depth[0] = texture( inputDepth, fragDepthTex0.xy + rowOfs[0] ).r;
     depth[1] = texture( inputDepth, fragDepthTex1.xy + rowOfs[0] ).r;
     depth[2] = texture( inputDepth, fragDepthTex2.xy + rowOfs[0] ).r;
     depth[3] = texture( inputDepth, fragDepthTex3.xy + rowOfs[0] ).r;
-    viewCoc = clamp( dofEqWeapon.x * -depth + dofEqWeapon.y, 0.0, 1.0 );
-    sceneCoc = clamp( dofEqWorld.x * depth + dofEqWorld.y, 0.0, 1.0 );
-    curCoc = min( viewCoc, sceneCoc );
-    coc = curCoc;
+    coc = clamp( dofEqWorld.x * depth + dofEqWorld.y, 0.0, 1.0 );
     depth[0] = texture( inputDepth, fragDepthTex0.xy + rowOfs[1] ).r;
     depth[1] = texture( inputDepth, fragDepthTex1.xy + rowOfs[1] ).r;
     depth[2] = texture( inputDepth, fragDepthTex2.xy + rowOfs[1] ).r;
     depth[3] = texture( inputDepth, fragDepthTex3.xy + rowOfs[1] ).r;
-    viewCoc = clamp( dofEqWeapon.x * -depth + dofEqWeapon.y, 0.0, 1.0 );
-    sceneCoc = clamp( dofEqWorld.x * depth + dofEqWorld.y, 0.0, 1.0 );
-    curCoc = min( viewCoc, sceneCoc );
-    coc = max( coc, curCoc );
+    coc = clamp( dofEqWorld.x * depth + dofEqWorld.y, 0.0, 1.0 );
     depth[0] = texture( inputDepth, fragDepthTex0.xy + rowOfs[2] ).r;
     depth[1] = texture( inputDepth, fragDepthTex1.xy + rowOfs[2] ).r;
     depth[2] = texture( inputDepth, fragDepthTex2.xy + rowOfs[2] ).r;
     depth[3] = texture( inputDepth, fragDepthTex3.xy + rowOfs[2] ).r;
-    viewCoc = clamp( dofEqWeapon.x * -depth + dofEqWeapon.y, 0.0, 1.0 );
-    sceneCoc = clamp( dofEqWorld.x * depth + dofEqWorld.y, 0.0, 1.0 );
-    curCoc = min( viewCoc, sceneCoc );
-    coc = max( coc, curCoc );
+    coc = clamp( dofEqWorld.x * depth + dofEqWorld.y, 0.0, 1.0 );
     depth[0] = texture( inputDepth, fragDepthTex0.xy + rowOfs[3] ).r;
     depth[1] = texture( inputDepth, fragDepthTex1.xy + rowOfs[3] ).r;
     depth[2] = texture( inputDepth, fragDepthTex2.xy + rowOfs[3] ).r;
     depth[3] = texture( inputDepth, fragDepthTex3.xy + rowOfs[3] ).r;
-    viewCoc = clamp( dofEqWeapon.x * -depth + dofEqWeapon.y, 0.0, 1.0 );
-    sceneCoc = clamp( dofEqWorld.x * depth + dofEqWorld.y, 0.0, 1.0 );
-    curCoc = min( viewCoc, sceneCoc );
-    coc = max( coc, curCoc );
+    coc = clamp( dofEqWorld.x * depth + dofEqWorld.y, 0.0, 1.0 );
     maxCoc = max( max( coc[0], coc[1] ), max( coc[2], coc[3] ) );
 
     outColor = vec4( color, maxCoc );

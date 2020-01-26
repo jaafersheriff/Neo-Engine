@@ -2,7 +2,7 @@
 
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
-#include "DOFAShader.hpp"
+#include "DofDownShader.hpp"
 #include "PostShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -87,7 +87,7 @@ int main() {
  
     Renderer::init("shaders/");
     Renderer::setDefaultFBO("default");
-    Renderer::addPreProcessShader<DOFAShader>("dofa.vert", "dofa.frag");
+    Renderer::addPreProcessShader<DofDownShader>("dofdown.vert", "dofdown.frag");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addPostProcessShader<PostShader>("post.frag");

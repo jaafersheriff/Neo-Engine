@@ -1,9 +1,9 @@
 #include "postprocess.glsl"
 
-uniform sampler2D DOFA;
+uniform sampler2D dofdown;
 
 out vec4 color;
 
 void main() { 
-    color = texture(DOFA, fragTex); 
+    color = texture(dofdown, fragTex); 
 }

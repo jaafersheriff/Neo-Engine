@@ -20,7 +20,7 @@ class PostShader : public PostProcessShader {
         {}
 
         virtual void render() override {
-            loadTexture("DOFA", *Library::getFBO("DOFA")->mTextures[0]);
+            loadTexture("dofdown", *Library::getFBO("dofdown")->mTextures[0]);
         }
 
         virtual void imguiEditor() override {

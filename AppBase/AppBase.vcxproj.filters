@@ -6,11 +6,11 @@
   <ItemGroup>
     <None Include="README.md" />
     <None Include="shaders\post.frag" />
-    <None Include="shaders\dofa.frag" />
-    <None Include="shaders\dofa.vert" />
+    <None Include="shaders\dofdown.frag" />
+    <None Include="shaders\dofdown.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PostShader.hpp" />
-    <ClInclude Include="src\DOFAShader.hpp" />
+    <ClInclude Include="src\DofDownShader.hpp" />
   </ItemGroup>
 </Project>
