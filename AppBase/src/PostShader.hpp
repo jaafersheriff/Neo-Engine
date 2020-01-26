@@ -6,17 +6,21 @@
 #include "Window/Window.hpp"
 #include "Messaging/Messenger.hpp"
 
+#include "Loader/Library.hpp"
+#include "GLObjects/Framebuffer.hpp"
+
 using namespace neo;
 
-class DOFShader : public PostProcessShader {
+class PostShader : public PostProcessShader {
 
     public:
 
-        DOFShader(const std::string &frag) :
-            PostProcessShader("DOF Shader", frag) 
+        PostShader(const std::string& frag) :
+            PostProcessShader("Post Shader", frag)
         {}
 
         virtual void render() override {
+            loadTexture("DOFA", *Library::getFBO("DOFA")->mTextures[0]);
         }
 
         virtual void imguiEditor() override {

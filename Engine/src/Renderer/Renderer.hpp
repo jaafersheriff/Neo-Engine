@@ -104,17 +104,17 @@ namespace neo {
 
             // Ping & pong 
             auto ping = Library::getFBO("ping");
-            ping->generate();
             ping->attachColorTexture(Window::getFrameSize(), format);
             ping->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT);
 
+            // Set default FBO if it's the back buffer
+            if (mDefaultFBO == Library::getFBO("0")) {
+                mDefaultFBO = ping;
+            }
+
             auto pong = Library::getFBO("pong");
-            pong->generate();
             pong->attachColorTexture(Window::getFrameSize(), format);
             pong->mTextures.push_back(ping->mTextures[1]);
-
-            // Use ping as temporary fbo
-            mDefaultFBO = ping;
 
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));

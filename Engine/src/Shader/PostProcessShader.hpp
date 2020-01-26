@@ -6,6 +6,13 @@ namespace neo {
 
     class PostProcessShader : public Shader {
     public:
+        PostProcessShader(const std::string &name, const std::string& vert, const std::string &frag) :
+            Shader(name) {
+            _attachStage(ShaderStage::VERTEX, vert);
+            _attachStage(ShaderStage::FRAGMENT, frag);
+            init();
+        }
+
         PostProcessShader(const std::string &name, const std::string &frag) :
             Shader(name) {
             _attachStage(ShaderStage::VERTEX, 

@@ -122,9 +122,12 @@
   <ItemGroup>
     <None Include="README.md" />
     <None Include="shaders\dof.frag" />
+    <None Include="shaders\dof.vert" />
+    <None Include="shaders\post.frag" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\DOFShader.hpp" />
+    <ClInclude Include="src\DOFAShader.hpp" />
+    <ClInclude Include="src\PostShader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

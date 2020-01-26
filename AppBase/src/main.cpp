@@ -2,7 +2,8 @@
 
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
-#include "DOFShader.hpp"
+#include "DOFAShader.hpp"
+#include "PostShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -73,10 +74,23 @@ int main() {
     Engine::addSystem<CameraControllerSystem>();
 
     /* Init renderer */
+    auto defaultFBO = Library::getFBO("default");
+    defaultFBO->attachColorTexture(Window::getFrameSize(), { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT });
+    defaultFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
+    defaultFBO->initDrawBuffers();
+    // Handle frame size changing
+    Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+        const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+        glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
+        Library::getFBO("default")->resize(frameSize);
+    });
+ 
     Renderer::init("shaders/");
+    Renderer::setDefaultFBO("default");
+    Renderer::addPreProcessShader<DOFAShader>("dof.vert", "dof.frag");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
-    Renderer::addPostProcessShader<DOFShader>("dof.frag");
+    Renderer::addPostProcessShader<PostShader>("post.frag");
 
     /* Run */
     Engine::run();
