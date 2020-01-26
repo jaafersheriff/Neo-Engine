@@ -62,7 +62,7 @@ int main() {
     /* Scene objects */
     for (int i = 0; i < 20; i++) {
         auto mesh = i % 2 ? Library::getMesh("cube") : Library::getMesh("sphere");
-        Renderable renderable(mesh, Util::genRandomVec3(-7.f, 7.f), glm::vec3(Util::genRandom(0.5f, 1.5f)), Util::genRandomVec3(-Util::PI, Util::PI));
+        Renderable renderable(mesh, glm::vec3(Util::genRandom(-7.f, 7.f), Util::genRandom(1.f, 5.f), Util::genRandom(-7.f, 7.f)), glm::vec3(Util::genRandom(0.5f, 1.5f)), Util::genRandomVec3(-Util::PI, Util::PI));
         Engine::addComponent<renderable::PhongRenderable>(renderable.gameObject);
         Engine::addComponent<MaterialComponent>(renderable.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
         Engine::addComponent<SelectableComponent>(renderable.gameObject);
@@ -91,6 +91,7 @@ int main() {
  
     Renderer::init("shaders/");
     Renderer::setDefaultFBO("default");
+
     Renderer::addPreProcessShader<DofDownShader>("dofdown.vert", "dofdown.frag");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
