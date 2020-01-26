@@ -121,8 +121,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="shaders\dof.frag" />
-    <None Include="shaders\dof.vert" />
+    <None Include="shaders\dofa.frag" />
+    <None Include="shaders\dofa.vert" />
     <None Include="shaders\post.frag" />
   </ItemGroup>
   <ItemGroup>

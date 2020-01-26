@@ -5,9 +5,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="shaders\dof.frag" />
-    <None Include="shaders\dof.vert" />
     <None Include="shaders\post.frag" />
+    <None Include="shaders\dofa.frag" />
+    <None Include="shaders\dofa.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PostShader.hpp" />

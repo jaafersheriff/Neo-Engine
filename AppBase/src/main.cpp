@@ -87,7 +87,7 @@ int main() {
  
     Renderer::init("shaders/");
     Renderer::setDefaultFBO("default");
-    Renderer::addPreProcessShader<DOFAShader>("dof.vert", "dof.frag");
+    Renderer::addPreProcessShader<DOFAShader>("dofa.vert", "dofa.frag");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addPostProcessShader<PostShader>("post.frag");

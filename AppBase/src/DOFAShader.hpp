@@ -18,6 +18,8 @@ class DOFAShader : public Shader {
     public:
 
         glm::uvec2 frameSize = glm::uvec2(1920, 1080);
+        glm::vec2 dofWorld = glm::vec2(0.f);
+        glm::vec2 dofWeapon = glm::vec2(0.f);
 
         DOFAShader(const std::string& vert, const std::string &frag) :
             Shader("DOFA Shader", vert, frag)
@@ -39,6 +41,9 @@ class DOFAShader : public Shader {
             bind();
 
             loadUniform("invRenderTargetSize", glm::vec2(1.f) / glm::vec2(frameSize));
+            loadUniform("dofEqWorld", dofWorld);
+            loadUniform("dofEqWeapon", dofWeapon);
+            loadUniform("dofRowDelta", glm::vec2(0, 0.25f / frameSize.y));
 
             loadTexture("inputFBO", *Library::getFBO("default")->mTextures[0]);
             loadTexture("inputDepth", *Library::getFBO("default")->mTextures[1]);
@@ -56,5 +61,7 @@ class DOFAShader : public Shader {
             if (resizeFrame) {
                 Library::getFBO("DOFA")->resize(frameSize);
             }
+            ImGui::SliderFloat2("DOF World", &dofWorld[0], 0.f, 100.f);
+            ImGui::SliderFloat2("DOF Weapon", &dofWeapon[0], 0.f, 100.f);
         }
 };
