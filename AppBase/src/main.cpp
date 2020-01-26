@@ -2,6 +2,7 @@
 
 #include "Shader/PhongShader.hpp"
 #include "Shader/AlphaTestShader.hpp"
+#include "Shader/GammaCorrectShader.hpp"
 #include "DofDownShader.hpp"
 #include "PostShader.hpp"
 
@@ -58,15 +59,18 @@ int main() {
 
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
-    /* Cube object */
-    Renderable cube(Library::getMesh("cube"), glm::vec3(0.f, 0.5f, 0.f));
-    Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
-    Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
-    Engine::addComponent<SelectableComponent>(cube.gameObject);
-    Engine::addComponent<BoundingBoxComponent>(cube.gameObject, Library::getMesh("cube"));
+    /* Scene objects */
+    for (int i = 0; i < 20; i++) {
+        auto mesh = i % 2 ? Library::getMesh("cube") : Library::getMesh("sphere");
+        Renderable renderable(mesh, Util::genRandomVec3(-7.f, 7.f), glm::vec3(Util::genRandom(0.5f, 1.5f)), Util::genRandomVec3(-Util::PI, Util::PI));
+        Engine::addComponent<renderable::PhongRenderable>(renderable.gameObject);
+        Engine::addComponent<MaterialComponent>(renderable.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+        Engine::addComponent<SelectableComponent>(renderable.gameObject);
+        Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, mesh);
+    }
 
     /* Ground plane */
-    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
+    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
     Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
     Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::getTexture("grid.png"));
 
@@ -91,6 +95,7 @@ int main() {
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addPostProcessShader<PostShader>("post.frag");
+    Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Run */
     Engine::run();

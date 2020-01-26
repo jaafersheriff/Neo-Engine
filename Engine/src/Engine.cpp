@@ -36,7 +36,7 @@ namespace neo {
     std::vector<std::pair<std::type_index, std::unique_ptr<Component>>> Engine::mComponentInitQueue;
     std::vector<std::pair<std::type_index, Component *>> Engine::mComponentKillQueue;
 
-    /* FPS */
+    /* Util */
     int Util::mFPS = 0;
     int Util::mFramesInCount = 0;
     int Util::mTotalFrames = 0;
@@ -44,6 +44,7 @@ namespace neo {
     double Util::mLastFPSTime = 0.0;
     double Util::mLastFrameTime = 0.0;
     std::vector<int> Util::mFPSList;
+    const float Util::PI = glm::pi<float>();
 
     /* ImGui */
     bool Engine::mImGuiEnabled = true;

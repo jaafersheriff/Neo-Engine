@@ -38,7 +38,7 @@ namespace neo {
             }
         }
 
-        static float PI() { return glm::pi<float>(); }
+        static const float PI;
 
         /* Generate a random float [0, 1] */
         static inline float genRandom() {
