@@ -8,12 +8,12 @@
     <None Include="shaders\post.frag" />
     <None Include="shaders\dofdown.frag" />
     <None Include="shaders\dofdown.vert" />
-    <None Include="shaders\dofblur.vert" />
-    <None Include="shaders\dofblur.frag" />
+    <None Include="shaders\dofnearblur.frag" />
+    <None Include="shaders\dofnearblur.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PostShader.hpp" />
     <ClInclude Include="src\DofDownShader.hpp" />
-    <ClInclude Include="src\DofBlurShader.hpp" />
+    <ClInclude Include="src\DofNearBlurShader.hpp" />
   </ItemGroup>
 </Project>

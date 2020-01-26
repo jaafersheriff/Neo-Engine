@@ -14,33 +14,33 @@
 
 using namespace neo;
 
-class DofBlurShader : public Shader {
+class DofNearBlurShader : public Shader {
 
     public:
 
         std::shared_ptr<int> frameScale;
 
-        DofBlurShader(const std::string& vert, const std::string &frag, std::shared_ptr<int> scale) :
-            Shader("DofBlur Shader", vert, frag),
+        DofNearBlurShader(const std::string& vert, const std::string &frag, std::shared_ptr<int> scale) :
+            Shader("DofNearBlur Shader", vert, frag),
             frameScale(scale)
         {
             glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
-            auto DofBlurFBO = Library::getFBO("dofblur");
-            DofBlurFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT });
-            DofBlurFBO->attachDepthTexture(frameSize, GL_NEAREST, GL_REPEAT); // depth
-            DofBlurFBO->initDrawBuffers();
+            auto DofNearBlurFBO = Library::getFBO("dofnearblur");
+            DofNearBlurFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT });
+            DofNearBlurFBO->attachDepthTexture(frameSize, GL_NEAREST, GL_REPEAT); // depth
+            DofNearBlurFBO->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&, frameScale = frameScale](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Library::getFBO("dofblur")->resize(frameSize / glm::uvec2(*frameScale));
+                Library::getFBO("dofnearblur")->resize(frameSize / glm::uvec2(*frameScale));
             });
  
         }
 
         virtual void render() override {
-            Library::getFBO("dofblur")->bind();
+            Library::getFBO("dofnearblur")->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
             CHECK_GL(glDisable(GL_DEPTH_TEST));

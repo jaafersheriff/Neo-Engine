@@ -1,10 +1,10 @@
 #include "postprocess.glsl"
 
 uniform sampler2D dofDown;
-uniform sampler2D dofBlur;
+uniform sampler2D dofNearBlur;
 
 out vec4 color;
 
 void main() { 
-    color = texture(dofBlur, fragTex); 
+    color = texture(dofNearBlur, fragTex); 
 }
