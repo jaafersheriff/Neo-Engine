@@ -37,6 +37,7 @@ vec4 InterpolateDof( mediump vec3 small, mediump vec3 med, mediump vec3 large, m
 
     // Unblurred sample with weight "weights.x" done by alpha blending     
     mediump vec3 color = weights.y * small + weights.z * med + weights.w * large;
+    return vec4(color, 1.0);
     float alpha = dot( weights.yzw, vec3( 16.0 / 17, 1.0, 1.0 ) );
     return vec4( color, alpha );
 } 
@@ -45,23 +46,21 @@ void main() {
     mediump vec3 small = GetSmallBlurSample( fragTex );
     mediump vec4 med = texture( dofBlur, fragTex );
     mediump vec3 large = texture( dofDown, fragTex ).rgb;
-    mediump float depth;
-    mediump float nearCoc;
+    mediump float depth = texture( inputDepth, fragTex ).r * 0.5 + 0.5;
+    mediump float nearCoc = med.a;
     mediump float farCoc;
     mediump float coc;
-    nearCoc = med.a;
-    depth = texture( inputDepth, fragTex ).r;
-    // if ( depth > 1.0e6 )     {         
-    //         coc = nearCoc;
+    if ( depth > 1.0e6 )     {         
+    coc = nearCoc;
     //         // We don't want to blur the sky.     
-    // }     
-    // else {         
+    }     
+    else {         
         // dofEqFar.x and dofEqFar.y specify the linear ramp to convert        
         // to depth for the distant out-of-focus region.        
         // dofEqFar.z is the ratio of the far to the near blur radius.         
         farCoc = clamp( dofEqFar.x * depth + dofEqFar.y, 0.0, 1.0 );
         coc = max( nearCoc, farCoc * dofEqFar.z );
-    // }     
-    
+  }     
+   
     color = InterpolateDof( small, med.rgb, large, coc );
 }

@@ -38,7 +38,7 @@ void main() {
     color += texture( inputFBO, fragColorTex0.xy + rowOfs[2] ).rgb;
     color += texture( inputFBO, fragColorTex1.xy + rowOfs[2] ).rgb;
     color /= 4;
-    
+
     // Process 4 samples at a time to use vector hardware efficiently.    
     // The CoC will be 1 if the depth is negative, so use "min" to pick    
     // between "sceneCoc" and "viewCoc".   
@@ -46,6 +46,7 @@ void main() {
     depth[1] = texture( inputDepth, fragDepthTex1.xy + rowOfs[0] ).r;
     depth[2] = texture( inputDepth, fragDepthTex2.xy + rowOfs[0] ).r;
     depth[3] = texture( inputDepth, fragDepthTex3.xy + rowOfs[0] ).r;
+    depth = depth * 0.5 + 0.5;
     viewCoc = clamp( dofEqWeapon.x * -depth + dofEqWeapon.y, 0.0, 1.0 );
     sceneCoc = clamp( dofEqWorld.x * depth + dofEqWorld.y, 0.0, 1.0 );
     curCoc = min( viewCoc, sceneCoc );
@@ -54,6 +55,7 @@ void main() {
     depth[1] = texture( inputDepth, fragDepthTex1.xy + rowOfs[1] ).r;
     depth[2] = texture( inputDepth, fragDepthTex2.xy + rowOfs[1] ).r;
     depth[3] = texture( inputDepth, fragDepthTex3.xy + rowOfs[1] ).r;
+    depth = depth * 0.5 + 0.5;
     viewCoc = clamp( dofEqWeapon.x * -depth + dofEqWeapon.y, 0.0, 1.0 );
     sceneCoc = clamp( dofEqWorld.x * depth + dofEqWorld.y, 0.0, 1.0 );
     curCoc = min( viewCoc, sceneCoc );
@@ -62,6 +64,7 @@ void main() {
     depth[1] = texture( inputDepth, fragDepthTex1.xy + rowOfs[2] ).r;
     depth[2] = texture( inputDepth, fragDepthTex2.xy + rowOfs[2] ).r;
     depth[3] = texture( inputDepth, fragDepthTex3.xy + rowOfs[2] ).r;
+    depth = depth * 0.5 + 0.5;
     viewCoc = clamp( dofEqWeapon.x * -depth + dofEqWeapon.y, 0.0, 1.0 );
     sceneCoc = clamp( dofEqWorld.x * depth + dofEqWorld.y, 0.0, 1.0 );
     curCoc = min( viewCoc, sceneCoc );
@@ -70,6 +73,7 @@ void main() {
     depth[1] = texture( inputDepth, fragDepthTex1.xy + rowOfs[3] ).r;
     depth[2] = texture( inputDepth, fragDepthTex2.xy + rowOfs[3] ).r;
     depth[3] = texture( inputDepth, fragDepthTex3.xy + rowOfs[3] ).r;
+    depth = depth * 0.5 + 0.5;
     viewCoc = clamp( dofEqWeapon.x * -depth + dofEqWeapon.y, 0.0, 1.0 );
     sceneCoc = clamp( dofEqWorld.x * depth + dofEqWorld.y, 0.0, 1.0 );
     curCoc = min( viewCoc, sceneCoc );

@@ -17,12 +17,9 @@ class GodRaySunShader : public Shader {
             Shader("GodRaySun Shader", vert, frag) {
 
             // Create godray 
-            auto godray = Library::getFBO("godray");
-            godray->generate();
-
-            // Format for color buffers
             // 0 used for base 
             TextureFormat format = { GL_R16, GL_RED, GL_LINEAR, GL_CLAMP_TO_EDGE };
+            auto godray = Library::getFBO("godray");
             godray->attachColorTexture(Window::getFrameSize() / 2, format); 
             godray->initDrawBuffers();
 

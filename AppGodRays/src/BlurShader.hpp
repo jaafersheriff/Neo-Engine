@@ -21,9 +21,6 @@ class BlurShader : public Shader {
             Shader("Blur Shader", vert, frag) {
             // Create blur 
             auto blur = Library::getFBO("godrayblur");
-            blur->generate();
-
-            // Format for color buffers
             TextureFormat format = { GL_R16, GL_RED, GL_NEAREST, GL_REPEAT };
             blur->attachColorTexture(Window::getFrameSize() / 2, format); 
             blur->initDrawBuffers();
