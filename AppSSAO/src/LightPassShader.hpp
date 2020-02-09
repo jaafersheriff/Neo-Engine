@@ -18,7 +18,6 @@ class LightPassShader : public Shader {
             Shader("LightPass Shader", vert, frag) {
             // Create render target
             auto lightFBO = Library::getFBO("lightpass");
-            lightFBO->generate();
             lightFBO->attachColorTexture(Window::getFrameSize(), TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
 
             // Handle frame size changing
@@ -77,7 +76,7 @@ class LightPassShader : public Shader {
                 else {
                     CHECK_GL(glCullFace(GL_BACK));
                 }
-                Library::getMesh("ico_2", true)->draw();
+                Library::getMesh("sphere", true)->draw();
             }
 
             unbind();

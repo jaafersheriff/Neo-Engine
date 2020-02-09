@@ -68,9 +68,9 @@ int main() {
     /* Init renderer */
     Renderer::init("shaders/");
     Renderer::addSceneShader<PhongShader>();
-    Renderer::addPostProcessShader<PostProcessShader>("DepthShader", "depth.frag");
-    Renderer::addPostProcessShader<PostProcessShader>("BlueShader", "blue.frag");
-    Renderer::addPostProcessShader<PostProcessShader>("InvertShader", "invert.frag");
+    Renderer::addPostProcessShader<PostProcessShader>("DepthShader", std::string("depth.frag"));
+    Renderer::addPostProcessShader<PostProcessShader>("BlueShader", std::string("blue.frag"));
+    Renderer::addPostProcessShader<PostProcessShader>("InvertShader", std::string("invert.frag"));
 
     /* Attach ImGui panes */
 

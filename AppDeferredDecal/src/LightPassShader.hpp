@@ -18,7 +18,6 @@ class LightPassShader : public Shader {
             Shader("LightPassShader", vert, frag) {
             // Create render target
             auto lightFBO = Library::getFBO("lightpass");
-            lightFBO->generate();
             lightFBO->attachColorTexture(Window::getFrameSize(), TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
             lightFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
 
@@ -81,7 +80,7 @@ class LightPassShader : public Shader {
                     CHECK_GL(glCullFace(GL_BACK));
                 }
 
-                Library::getMesh("ico_2", true)->draw();
+                Library::getMesh("sphere", true)->draw();
             }
 
             unbind();

@@ -17,7 +17,6 @@ class GBufferShader : public Shader {
 
             // Create gbuffer 
             auto gbuffer = Library::getFBO("gbuffer");
-            gbuffer->generate();
 
             // Format for color buffers
             TextureFormat format = { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT };

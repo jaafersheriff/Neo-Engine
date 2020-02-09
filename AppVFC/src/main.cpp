@@ -80,7 +80,7 @@ int main() {
     generateObjects(10);
 
     /* Ground plane */
-    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(30.f), glm::vec3(-Util::PI() / 2.f, 0.f, 0.f));
+    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(30.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
     Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
     Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::getTexture("grid.png"));
 

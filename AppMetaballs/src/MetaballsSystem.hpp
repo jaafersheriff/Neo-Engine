@@ -22,7 +22,7 @@ class MetaballsSystem : public System {
         };
 
         int mDims = 32;
-        bool mAutoUpdate = false;
+        bool mAutoUpdate = true;
         bool mDirtyBalls = true;
 
         MetaballsSystem() :

@@ -17,7 +17,6 @@ class GBufferShader : public Shader {
 
             // Create gbuffer 
             auto gbuffer = Library::getFBO("gbuffer");
-            gbuffer->generate();
 
             TextureFormat format{ GL_RGB, GL_RGB, GL_NEAREST, GL_CLAMP_TO_EDGE };
             gbuffer->attachColorTexture(Window::getFrameSize(), format); // normal

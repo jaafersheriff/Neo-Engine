@@ -19,7 +19,6 @@ class LightPassShader : public Shader {
             Shader("LightPassShader", vert, frag) {
             // Create render target
             auto lightFBO = Library::getFBO("lightpass");
-            lightFBO->generate();
             lightFBO->attachColorTexture(Window::getFrameSize(), TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
 
             // Handle frame size changing
