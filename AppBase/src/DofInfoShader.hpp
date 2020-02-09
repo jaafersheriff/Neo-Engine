@@ -18,7 +18,7 @@ class DofInfoShader : public Shader {
 
     public:
 
-        glm::vec3 focalPoints = glm::vec3(0.f, 0.5f, 1.f);
+        glm::vec3 focalPoints = glm::vec3(0.5f, 0.8f, 9.f);
 
         DofInfoShader(const std::string& vert, const std::string &frag) :
             Shader("DofInfo Shader", vert, frag) {

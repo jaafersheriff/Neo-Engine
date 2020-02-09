@@ -16,9 +16,9 @@ class PostShader : public PostProcessShader {
 
     public:
 
-        glm::vec2 maxCoc = glm::vec2(5.f, 10.f);
-        float radiusScale = 0.4f;
-        int poissonSize = 8;
+        glm::vec2 maxCoc = glm::vec2(5.2f, 14.9f);
+        float radiusScale = 0.24f;
+        int poissonSize = 32; 
 
         PostShader(const std::string& frag) :
             PostProcessShader("Post Shader", frag)

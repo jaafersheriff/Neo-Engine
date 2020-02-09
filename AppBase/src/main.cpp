@@ -64,9 +64,9 @@ int main() {
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
     /* Scene objects */
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 50; i++) {
         auto mesh = i % 2 ? Library::getMesh("cube") : Library::getMesh("sphere");
-        Renderable renderable(mesh, glm::vec3(Util::genRandom(-7.f, 7.f), Util::genRandom(1.f, 5.f), Util::genRandom(-7.f, 7.f)), glm::vec3(Util::genRandom(0.5f, 1.5f)), Util::genRandomVec3(-Util::PI, Util::PI));
+        Renderable renderable(mesh, glm::vec3(Util::genRandom(-30.f, 30.f), 1.f, Util::genRandom(-30.f, 30.f)), glm::vec3(Util::genRandom(1.5f, 4.5f)), Util::genRandomVec3(-Util::PI, Util::PI));
         Engine::addComponent<renderable::PhongRenderable>(renderable.gameObject);
         Engine::addComponent<MaterialComponent>(renderable.gameObject, 0.2f, Util::genRandomVec3(0.2f, 1.f), glm::vec3(1.f));
         Engine::addComponent<SelectableComponent>(renderable.gameObject);
@@ -74,11 +74,9 @@ int main() {
     }
 
     /* Ground plane */
-    auto planeMesh = Library::createEmptyMesh("ground");
-    MeshGenerator::generatePlane(planeMesh, 0.5f, 512, 6);
-    Renderable plane(planeMesh, glm::vec3(-25.f, 0.f, -25.f), glm::vec3(50.f, 10.f, 50.f));
-    Engine::addComponent<renderable::PhongRenderable>(plane.gameObject);
-    Engine::addComponent<MaterialComponent>(plane.gameObject, 0.2f, glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(1.f));
+    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(100.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
+    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
+    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::getTexture("grid.png"));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
