@@ -26,8 +26,7 @@ class DofDownShader : public Shader {
         {
             glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
             auto DofDownFBO = Library::getFBO("dofdown");
-            DofDownFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT });
-            DofDownFBO->attachDepthTexture(frameSize, GL_NEAREST, GL_REPEAT); // depth
+            DofDownFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
             DofDownFBO->initDrawBuffers();
 
             // Handle frame size changing
@@ -43,7 +42,6 @@ class DofDownShader : public Shader {
             Library::getFBO("dofdown")->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
-            CHECK_GL(glDisable(GL_DEPTH_TEST));
 
             glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));

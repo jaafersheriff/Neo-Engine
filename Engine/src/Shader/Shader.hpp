@@ -60,6 +60,7 @@ namespace neo {
             void loadUniform(const std::string &, const double) const;        // double
             void loadUniform(const std::string &, const float) const;         // float
             void loadUniform(const std::string &, const glm::vec2 &) const;   // vec2
+            void loadUniform(const std::string &, const glm::ivec2 &) const;  // ivec2
             void loadUniform(const std::string &, const glm::vec3 &) const;   // vec3
             void loadUniform(const std::string &, const glm::vec4 &) const;   // vec4
             void loadUniform(const std::string &, const glm::mat3 &) const;   // mat3

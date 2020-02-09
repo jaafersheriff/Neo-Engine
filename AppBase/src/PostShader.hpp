@@ -34,8 +34,9 @@ class PostShader : public PostProcessShader {
             case 1:
                 loadTexture("inColor", *Library::getFBO("dofdown")->mTextures[0]);
                 break;
-            // case 2:
-            //     loadTexture("inColor", *Library::getFBO("dofdown")->mTextures[0]);
+            case 2:
+                loadTexture("inColor", *Library::getFBO("dofblur")->mTextures[0]);
+                break;
             default:
                 break;
             }
@@ -50,9 +51,9 @@ class PostShader : public PostProcessShader {
                 if (ImGui::RadioButton("Show down", showFBO == 1)) {
                     showFBO = 1;
                 }
-                // if (ImGui::RadioButton("Show Interpolate", showFBO == 2)) {
-                //     showFBO = 2;
-                // }
+                if (ImGui::RadioButton("Show down blur", showFBO == 2)) {
+                    showFBO = 2;
+                }
             }
             ImGui::SliderFloat("Opacity", &dofOpacity, 0.f, 5.f);
         }

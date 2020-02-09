@@ -316,6 +316,10 @@ namespace neo {
         CHECK_GL(glUniform2f(getUniform(loc), v.x, v.y));
     }
 
+    void Shader::loadUniform(const std::string &loc, const glm::ivec2 & v) const {
+        CHECK_GL(glUniform2i(getUniform(loc), v.x, v.y));
+    }
+
     void Shader::loadUniform(const std::string &loc, const glm::vec3 & v) const {
         CHECK_GL(glUniform3f(getUniform(loc), v.x, v.y, v.z));
     }
