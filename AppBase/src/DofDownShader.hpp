@@ -19,24 +19,22 @@ class DofDownShader : public Shader {
     public:
 
         std::shared_ptr<int> frameScale;
-        glm::vec3 interpolateBlur = glm::vec3(0.2f, 0.5f, 0.3f);
-        glm::vec3 dofEqFar = glm::vec3(1.f);
 
         DofDownShader(const std::string& vert, const std::string &frag, std::shared_ptr<int> scale) :
             Shader("DofDown Shader", vert, frag),
             frameScale(scale)
         {
-            glm::uvec2 frameSize = Window::getFrameSize();
+            glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
             auto DofDownFBO = Library::getFBO("dofdown");
             DofDownFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT });
             DofDownFBO->attachDepthTexture(frameSize, GL_NEAREST, GL_REPEAT); // depth
             DofDownFBO->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&, frameScale = frameScale](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Library::getFBO("dofdown")->resize(frameSize);
+                Library::getFBO("dofdown")->resize(frameSize / glm::uvec2(*frameScale));
             });
  
         }
@@ -47,18 +45,10 @@ class DofDownShader : public Shader {
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
             CHECK_GL(glDisable(GL_DEPTH_TEST));
 
-            glm::uvec2 frameSize = Window::getFrameSize();
+            glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();
-
-            loadUniform("invRenderTargetSize", glm::vec2(1.f) / glm::vec2(frameSize / glm::uvec2(*frameScale)));
-            loadUniform("dofLerpScale", glm::vec4( -1 / interpolateBlur.x, -1 / interpolateBlur.y, -1 / interpolateBlur.z, 1 / interpolateBlur.z ));
-            loadUniform("dofLerpBias", glm::vec4(1.f, (1.f - interpolateBlur.y) / interpolateBlur.x, 1.f / interpolateBlur.y, (interpolateBlur.y - 1.f) / interpolateBlur.y));
-            loadUniform("dofEqFar", dofEqFar);
-
-            loadTexture("dofDown", *Library::getFBO("dofdown")->mTextures[0]);
-            loadTexture("dofBlur", *Library::getFBO("dofnearblur")->mTextures[0]);
 
             loadTexture("inputFBO", *Library::getFBO("default")->mTextures[0]);
             loadTexture("inputDepth", *Library::getFBO("default")->mTextures[1]);
@@ -69,9 +59,5 @@ class DofDownShader : public Shader {
         }
 
         virtual void imguiEditor() override {
-            if (ImGui::SliderFloat3("Interpolate Blur", &interpolateBlur[0], -1.f, 1.f)) {
-                interpolateBlur = glm::normalize(interpolateBlur);
-            }
-            ImGui::SliderFloat3("Eq Far", &dofEqFar[0], -10.f, 10.f);
         }
 };

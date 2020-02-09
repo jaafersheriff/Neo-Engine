@@ -121,8 +121,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="shaders\dofinterpolate.frag" />
-    <None Include="shaders\dofinterpolate.vert" />
+    <None Include="shaders\dofdown.frag" />
+    <None Include="shaders\dofdown.vert" />
     <None Include="shaders\dofnearblur.frag" />
     <None Include="shaders\dofnearblur.vert" />
     <None Include="shaders\dofblurinfo.frag" />

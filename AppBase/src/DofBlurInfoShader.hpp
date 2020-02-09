@@ -17,23 +17,20 @@ class DofBlurInfoShader : public Shader {
 
     public:
 
-        std::shared_ptr<int> frameScale;
         glm::vec3 focalPoints = glm::vec3(0.f, 0.5f, 1.f);
 
-        DofBlurInfoShader(const std::string& vert, const std::string &frag, std::shared_ptr<int> scale) :
-            Shader("DofBlurInfo Shader", vert, frag),
-            frameScale(scale)
-        {
-            glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
+        DofBlurInfoShader(const std::string& vert, const std::string &frag) :
+            Shader("DofBlurInfo Shader", vert, frag) {
+            glm::uvec2 frameSize = Window::getFrameSize();
             auto DofBlurInfoFBO = Library::getFBO("dofblurinfo");
             DofBlurInfoFBO->attachColorTexture(frameSize, { GL_RG8, GL_RG, GL_NEAREST, GL_CLAMP_TO_EDGE });
             DofBlurInfoFBO->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&, frameScale = frameScale](const Message &msg) {
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Library::getFBO("dofblurinfo")->resize(frameSize / glm::uvec2(*frameScale));
+                Library::getFBO("dofblurinfo")->resize(frameSize);
             });
  
         }
@@ -49,7 +46,7 @@ class DofBlurInfoShader : public Shader {
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 0.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 
-            glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
+            glm::uvec2 frameSize = Window::getFrameSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();

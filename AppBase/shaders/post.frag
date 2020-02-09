@@ -12,6 +12,6 @@ void main() {
     vec4 dofColor = texture(inColor, fragTex);
     color = sceneColor + dofColor * dofOpacity;
     if (showDebug) {
-        color = vec4(vec3(dofColor.y), 1.0);
+        color = dofColor;
     }
 }

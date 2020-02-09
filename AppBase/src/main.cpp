@@ -85,8 +85,8 @@ int main() {
 
     /* Init renderer */
     auto defaultFBO = Library::getFBO("default");
-    defaultFBO->attachColorTexture(Window::getFrameSize(), { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT });
-    defaultFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
+    defaultFBO->attachColorTexture(Window::getFrameSize(), { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
+    defaultFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_CLAMP_TO_EDGE); // depth
     defaultFBO->initDrawBuffers();
     // Handle frame size changing
     Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
@@ -99,9 +99,9 @@ int main() {
     Renderer::setDefaultFBO("default");
 
     std::shared_ptr<int> frameScale = std::make_shared<int>(4);
-    Renderer::addPreProcessShader<DofBlurInfoShader>("dofblurinfo.vert", "dofblurinfo.frag", frameScale);
+    Renderer::addPreProcessShader<DofBlurInfoShader>("dofblurinfo.vert", "dofblurinfo.frag");
+    Renderer::addPreProcessShader<DofDownShader>("dofdown.vert", "dofdown.frag", frameScale);
     // Renderer::addPreProcessShader<DofNearBlurShader>("dofnearblur.vert", "dofnearblur.frag", frameScale);
-    // Renderer::addPreProcessShader<DofDownShader>("dofdown.vert", "dofdown.frag", frameScale);
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addPostProcessShader<PostShader>("post.frag");
@@ -109,8 +109,7 @@ int main() {
 
     Engine::addImGuiFunc("DOF", [&]() {
         if (ImGui::SliderInt("Scale", frameScale.get(), 1, 16)) {
-            Library::getFBO("dofblurinfo")->resize(Window::getFrameSize() / *frameScale);
-            Library::getFBO("dofnearblur")->resize(Window::getFrameSize() / *frameScale);
+            Library::getFBO("dofdown")->resize(Window::getFrameSize() / *frameScale);
         }
     });
 

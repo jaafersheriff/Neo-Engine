@@ -8,10 +8,10 @@
     <None Include="shaders\post.frag" />
     <None Include="shaders\dofnearblur.frag" />
     <None Include="shaders\dofnearblur.vert" />
-    <None Include="shaders\dofinterpolate.vert" />
-    <None Include="shaders\dofinterpolate.frag" />
     <None Include="shaders\dofblurinfo.vert" />
     <None Include="shaders\dofblurinfo.frag" />
+    <None Include="shaders\dofdown.frag" />
+    <None Include="shaders\dofdown.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PostShader.hpp" />

@@ -31,9 +31,9 @@ class PostShader : public PostProcessShader {
             case 0:
                 loadTexture("inColor", *Library::getFBO("dofblurinfo")->mTextures[0]);
                 break;
-            // case 1:
-            //     loadTexture("inColor", *Library::getFBO("dofnearblur")->mTextures[0]);
-            //     break;
+            case 1:
+                loadTexture("inColor", *Library::getFBO("dofdown")->mTextures[0]);
+                break;
             // case 2:
             //     loadTexture("inColor", *Library::getFBO("dofdown")->mTextures[0]);
             default:
@@ -44,12 +44,12 @@ class PostShader : public PostProcessShader {
         virtual void imguiEditor() override {
             ImGui::Checkbox("Debug", &showDebug);
             if (showDebug) {
-                if (ImGui::RadioButton("Show Down", showFBO == 0)) {
+                if (ImGui::RadioButton("Show Blur info", showFBO == 0)) {
                     showFBO = 0;
                 }
-                // if (ImGui::RadioButton("Show Blur", showFBO == 1)) {
-                //     showFBO = 1;
-                // }
+                if (ImGui::RadioButton("Show down", showFBO == 1)) {
+                    showFBO = 1;
+                }
                 // if (ImGui::RadioButton("Show Interpolate", showFBO == 2)) {
                 //     showFBO = 2;
                 // }
