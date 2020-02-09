@@ -15,46 +15,28 @@ class PostShader : public PostProcessShader {
 
     public:
 
-        int showFBO = 2;
-        float dofOpacity = 1.f;
-        bool showDebug = false;
+        glm::vec2 maxCoc = glm::vec2(5.f, 10.f);
+        float radiusScale = 0.4f;
 
         PostShader(const std::string& frag) :
             PostProcessShader("Post Shader", frag)
         {}
 
         virtual void render() override {
-            loadUniform("showDebug", showDebug);
-            loadUniform("dofOpacity", dofOpacity);
-            loadTexture("inputFBO", *Library::getFBO("default")->mTextures[0]);
-            switch (showFBO) {
-            case 0:
-                loadTexture("inColor", *Library::getFBO("dofblurinfo")->mTextures[0]);
-                break;
-            case 1:
-                loadTexture("inColor", *Library::getFBO("dofdown")->mTextures[0]);
-                break;
-            case 2:
-                loadTexture("inColor", *Library::getFBO("dofblur")->mTextures[0]);
-                break;
-            default:
-                break;
-            }
+            const auto& defaultFBO = *Library::getFBO("default")->mTextures[0];
+            loadTexture("inputFBO", defaultFBO);
+            loadUniform("scenePixelSize", 1.f / glm::vec2(defaultFBO.mWidth, defaultFBO.mHeight));
+
+            const auto& dofBlur = *Library::getFBO("dofblur")->mTextures[0];
+            loadTexture("dofblur", dofBlur);
+            loadUniform("dofPixelSize", 1.f / glm::vec2(dofBlur.mWidth, dofBlur.mHeight));
+
+            loadUniform("maxCoc", maxCoc);
+            loadUniform("radiusScale", radiusScale);
         }
 
         virtual void imguiEditor() override {
-            ImGui::Checkbox("Debug", &showDebug);
-            if (showDebug) {
-                if (ImGui::RadioButton("Show Blur info", showFBO == 0)) {
-                    showFBO = 0;
-                }
-                if (ImGui::RadioButton("Show down", showFBO == 1)) {
-                    showFBO = 1;
-                }
-                if (ImGui::RadioButton("Show down blur", showFBO == 2)) {
-                    showFBO = 2;
-                }
-            }
-            ImGui::SliderFloat("Opacity", &dofOpacity, 0.f, 5.f);
+            ImGui::SliderFloat2("max coc", &maxCoc[0], 1.f, 30.f);
+            ImGui::SliderFloat("radius scale", &radiusScale, 0.f, 1.f);
         }
 };
