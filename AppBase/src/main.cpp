@@ -58,7 +58,7 @@ int main() {
     Engine::init(config);
 
     /* Game objects */
-    Camera camera(45.f, 1.f, 30.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+    Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
@@ -68,14 +68,14 @@ int main() {
         auto mesh = i % 2 ? Library::getMesh("cube") : Library::getMesh("sphere");
         Renderable renderable(mesh, glm::vec3(Util::genRandom(-7.f, 7.f), Util::genRandom(1.f, 5.f), Util::genRandom(-7.f, 7.f)), glm::vec3(Util::genRandom(0.5f, 1.5f)), Util::genRandomVec3(-Util::PI, Util::PI));
         Engine::addComponent<renderable::PhongRenderable>(renderable.gameObject);
-        Engine::addComponent<MaterialComponent>(renderable.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+        Engine::addComponent<MaterialComponent>(renderable.gameObject, 0.2f, Util::genRandomVec3(0.2f, 1.f), glm::vec3(1.f));
         Engine::addComponent<SelectableComponent>(renderable.gameObject);
         Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, mesh);
     }
 
     /* Ground plane */
     auto planeMesh = Library::createEmptyMesh("ground");
-    MeshGenerator::generatePlane(planeMesh, 1.f, 128, 8);
+    MeshGenerator::generatePlane(planeMesh, 0.5f, 512, 6);
     Renderable plane(planeMesh, glm::vec3(-25.f, 0.f, -25.f), glm::vec3(50.f, 10.f, 50.f));
     Engine::addComponent<renderable::PhongRenderable>(plane.gameObject);
     Engine::addComponent<MaterialComponent>(plane.gameObject, 0.2f, glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(1.f));

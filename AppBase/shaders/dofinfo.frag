@@ -26,6 +26,5 @@ void main() {
     // scale f to [0, 1]
     f = f * 0.5 + 0.5;
 
-    // TODO - no need to write regular depth
-    outColor = vec4(depth, f, 0.0, 1.0);
+    outColor = vec4(vec3(f), 1.0);
 }

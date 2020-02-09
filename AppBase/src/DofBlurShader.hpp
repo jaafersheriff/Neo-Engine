@@ -19,6 +19,7 @@ class DofBlurShader : public Shader {
     public:
 
         std::shared_ptr<int> frameScale;
+        int blurSize = 1;
 
         DofBlurShader(const std::string& vert, const std::string &frag, std::shared_ptr<int> scale) :
             Shader("DofBlur Shader", vert, frag),
@@ -51,6 +52,7 @@ class DofBlurShader : public Shader {
             auto dofdownFBO = Library::getFBO("dofdown")->mTextures[0];
             loadTexture("dofDown", *dofdownFBO);
             loadUniform("frameSize", glm::ivec2(dofdownFBO->mWidth, dofdownFBO->mHeight));
+            loadUniform("blurSize", blurSize);
 
             auto mesh = Library::getMesh("quad");
             CHECK_GL(glBindVertexArray(mesh->mVAOID));
@@ -58,5 +60,6 @@ class DofBlurShader : public Shader {
         }
 
         virtual void imguiEditor() override {
+            ImGui::SliderInt("Blur size", &blurSize, 0, 8);
         }
 };

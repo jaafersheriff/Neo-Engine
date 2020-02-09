@@ -18,7 +18,7 @@ out vec4 color;
 void main() { 
 
     // convert depth into blur radius in pixels
-    float depthCenter = texture(dofinfo, fragTex).g;
+    float depthCenter = texture(dofinfo, fragTex).r;
     float discRadius = abs(depthCenter * maxCoc.y - maxCoc.x);
     float discRadiusBlur = discRadius * radiusScale; // compute radius on dofblur
 
@@ -30,8 +30,8 @@ void main() {
         vec2 coordScene = fragTex + (scenePixelSize * poisson * discRadius);
 
         // get scene tap
-        vec4 blurTap = vec4(texture(inputFBO, coordBlur).rgb, texture(dofinfo, coordBlur).g);
-        vec4 sceneTap = vec4(texture(inputFBO, coordScene).rgb, texture(dofinfo, coordScene).g);
+        vec4 blurTap = vec4(texture(inputFBO, coordBlur).rgb, texture(dofinfo, coordBlur).r);
+        vec4 sceneTap = vec4(texture(inputFBO, coordScene).rgb, texture(dofinfo, coordScene).r);
 
         // mix low and high-res taps based on blurrines
         vec4 tapBlur = vec4(abs(sceneTap.a * 2.0 - 1.0)); // put bluriness into [0, 1] 

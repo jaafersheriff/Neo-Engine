@@ -24,7 +24,7 @@ class DofInfoShader : public Shader {
             Shader("DofInfo Shader", vert, frag) {
             glm::uvec2 frameSize = Window::getFrameSize();
             auto DofInfoFBO = Library::getFBO("dofinfo");
-            DofInfoFBO->attachColorTexture(frameSize, { GL_RG8, GL_RG, GL_NEAREST, GL_CLAMP_TO_EDGE });
+            DofInfoFBO->attachColorTexture(frameSize, { GL_R8, GL_RED, GL_NEAREST, GL_CLAMP_TO_EDGE });
             DofInfoFBO->initDrawBuffers();
 
             // Handle frame size changing
@@ -54,7 +54,6 @@ class DofInfoShader : public Shader {
 
             loadUniform("focalPoints", focalPoints);
 
-            loadTexture("inputFBO", *Library::getFBO("default")->mTextures[0]);
             loadTexture("inputDepth", *Library::getFBO("default")->mTextures[1]);
 
             auto mesh = Library::getMesh("quad");
@@ -63,6 +62,8 @@ class DofInfoShader : public Shader {
         }
 
         virtual void imguiEditor() override {
-            ImGui::SliderFloat3("Focal points", &focalPoints[0], 0.f, 1.f);
+            ImGui::SliderFloat("Near Point", &focalPoints[0], 0.f, focalPoints.y - 0.001f);
+            ImGui::SliderFloat("Center Point", &focalPoints[1], focalPoints.x + 0.001f, focalPoints.z - 0.001f);
+            ImGui::SliderFloat("Far Point", &focalPoints[2], focalPoints.y + 0.001f, 1.f);
         }
 };
