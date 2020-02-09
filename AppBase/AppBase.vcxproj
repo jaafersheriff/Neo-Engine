@@ -125,14 +125,14 @@
     <None Include="shaders\dofinterpolate.vert" />
     <None Include="shaders\dofnearblur.frag" />
     <None Include="shaders\dofnearblur.vert" />
-    <None Include="shaders\dofdown.frag" />
-    <None Include="shaders\dofdown.vert" />
+    <None Include="shaders\dofblurinfo.frag" />
+    <None Include="shaders\dofblurinfo.vert" />
     <None Include="shaders\post.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DofInterpolateShader.hpp" />
     <ClInclude Include="src\DofNearBlurShader.hpp" />
-    <ClInclude Include="src\DofDownShader.hpp" />
+    <ClInclude Include="src\DofBlurInfoShader.hpp" />
     <ClInclude Include="src\PostShader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

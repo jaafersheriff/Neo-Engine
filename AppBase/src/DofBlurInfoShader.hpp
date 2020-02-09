@@ -13,27 +13,27 @@
 
 using namespace neo;
 
-class DofDownShader : public Shader {
+class DofBlurInfoShader : public Shader {
 
     public:
 
         std::shared_ptr<int> frameScale;
         glm::vec3 focalPoints = glm::vec3(0.f, 0.5f, 1.f);
 
-        DofDownShader(const std::string& vert, const std::string &frag, std::shared_ptr<int> scale) :
-            Shader("DofDown Shader", vert, frag),
+        DofBlurInfoShader(const std::string& vert, const std::string &frag, std::shared_ptr<int> scale) :
+            Shader("DofBlurInfo Shader", vert, frag),
             frameScale(scale)
         {
             glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
-            auto DofDownFBO = Library::getFBO("dofdown");
-            DofDownFBO->attachColorTexture(frameSize, { GL_RG8, GL_RG, GL_NEAREST, GL_CLAMP_TO_EDGE });
-            DofDownFBO->initDrawBuffers();
+            auto DofBlurInfoFBO = Library::getFBO("dofblurinfo");
+            DofBlurInfoFBO->attachColorTexture(frameSize, { GL_RG8, GL_RG, GL_NEAREST, GL_CLAMP_TO_EDGE });
+            DofBlurInfoFBO->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&, frameScale = frameScale](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Library::getFBO("dofdown")->resize(frameSize / glm::uvec2(*frameScale));
+                Library::getFBO("dofblurinfo")->resize(frameSize / glm::uvec2(*frameScale));
             });
  
         }
@@ -45,7 +45,7 @@ class DofDownShader : public Shader {
             This shader would need to output to pong and a custom RT though 
             pong for DofNearBlur
             custom RT for DofInterpolate */
-            Library::getFBO("dofdown")->bind();
+            Library::getFBO("dofblurinfo")->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 0.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 

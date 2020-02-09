@@ -29,7 +29,7 @@ class PostShader : public PostProcessShader {
             loadTexture("inputFBO", *Library::getFBO("default")->mTextures[0]);
             switch (showFBO) {
             case 0:
-                loadTexture("inColor", *Library::getFBO("dofdown")->mTextures[0]);
+                loadTexture("inColor", *Library::getFBO("dofblurinfo")->mTextures[0]);
                 break;
             // case 1:
             //     loadTexture("inColor", *Library::getFBO("dofnearblur")->mTextures[0]);

@@ -6,7 +6,7 @@
 #include "Loader/MeshGenerator.hpp"
 
 #include "DofNearBlurShader.hpp"
-#include "DofDownShader.hpp"
+#include "DofBlurInfoShader.hpp"
 #include "DofInterpolateShader.hpp"
 #include "PostShader.hpp"
 
@@ -99,7 +99,7 @@ int main() {
     Renderer::setDefaultFBO("default");
 
     std::shared_ptr<int> frameScale = std::make_shared<int>(4);
-    Renderer::addPreProcessShader<DofDownShader>("dofdown.vert", "dofdown.frag", frameScale);
+    Renderer::addPreProcessShader<DofBlurInfoShader>("dofblurinfo.vert", "dofblurinfo.frag", frameScale);
     // Renderer::addPreProcessShader<DofNearBlurShader>("dofnearblur.vert", "dofnearblur.frag", frameScale);
     // Renderer::addPreProcessShader<DofInterpolateShader>("dofinterpolate.vert", "dofinterpolate.frag", frameScale);
     Renderer::addSceneShader<PhongShader>();
@@ -109,7 +109,7 @@ int main() {
 
     Engine::addImGuiFunc("DOF", [&]() {
         if (ImGui::SliderInt("Scale", frameScale.get(), 1, 16)) {
-            Library::getFBO("dofdown")->resize(Window::getFrameSize() / *frameScale);
+            Library::getFBO("dofblurinfo")->resize(Window::getFrameSize() / *frameScale);
             Library::getFBO("dofnearblur")->resize(Window::getFrameSize() / *frameScale);
         }
     });
