@@ -7,7 +7,7 @@
 
 #include "DofNearBlurShader.hpp"
 #include "DofBlurInfoShader.hpp"
-#include "DofInterpolateShader.hpp"
+#include "DofDownShader.hpp"
 #include "PostShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -101,7 +101,7 @@ int main() {
     std::shared_ptr<int> frameScale = std::make_shared<int>(4);
     Renderer::addPreProcessShader<DofBlurInfoShader>("dofblurinfo.vert", "dofblurinfo.frag", frameScale);
     // Renderer::addPreProcessShader<DofNearBlurShader>("dofnearblur.vert", "dofnearblur.frag", frameScale);
-    // Renderer::addPreProcessShader<DofInterpolateShader>("dofinterpolate.vert", "dofinterpolate.frag", frameScale);
+    // Renderer::addPreProcessShader<DofDownShader>("dofdown.vert", "dofdown.frag", frameScale);
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addPostProcessShader<PostShader>("post.frag");

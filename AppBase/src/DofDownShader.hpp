@@ -14,7 +14,7 @@
 
 using namespace neo;
 
-class DofInterpolateShader : public Shader {
+class DofDownShader : public Shader {
 
     public:
 
@@ -22,27 +22,27 @@ class DofInterpolateShader : public Shader {
         glm::vec3 interpolateBlur = glm::vec3(0.2f, 0.5f, 0.3f);
         glm::vec3 dofEqFar = glm::vec3(1.f);
 
-        DofInterpolateShader(const std::string& vert, const std::string &frag, std::shared_ptr<int> scale) :
-            Shader("DofInterpolate Shader", vert, frag),
+        DofDownShader(const std::string& vert, const std::string &frag, std::shared_ptr<int> scale) :
+            Shader("DofDown Shader", vert, frag),
             frameScale(scale)
         {
             glm::uvec2 frameSize = Window::getFrameSize();
-            auto DofInterpolateFBO = Library::getFBO("dofinterpolate");
-            DofInterpolateFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT });
-            DofInterpolateFBO->attachDepthTexture(frameSize, GL_NEAREST, GL_REPEAT); // depth
-            DofInterpolateFBO->initDrawBuffers();
+            auto DofDownFBO = Library::getFBO("dofdown");
+            DofDownFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT });
+            DofDownFBO->attachDepthTexture(frameSize, GL_NEAREST, GL_REPEAT); // depth
+            DofDownFBO->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Library::getFBO("dofinterpolate")->resize(frameSize);
+                Library::getFBO("dofdown")->resize(frameSize);
             });
  
         }
 
         virtual void render() override {
-            Library::getFBO("dofinterpolate")->bind();
+            Library::getFBO("dofdown")->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
             CHECK_GL(glDisable(GL_DEPTH_TEST));

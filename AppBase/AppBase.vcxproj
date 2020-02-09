@@ -130,7 +130,7 @@
     <None Include="shaders\post.frag" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\DofInterpolateShader.hpp" />
+    <ClInclude Include="src\DofDownShader.hpp" />
     <ClInclude Include="src\DofNearBlurShader.hpp" />
     <ClInclude Include="src\DofBlurInfoShader.hpp" />
     <ClInclude Include="src\PostShader.hpp" />

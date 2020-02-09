@@ -16,7 +16,7 @@
   <ItemGroup>
     <ClInclude Include="src\PostShader.hpp" />
     <ClInclude Include="src\DofNearBlurShader.hpp" />
-    <ClInclude Include="src\DofInterpolateShader.hpp" />
     <ClInclude Include="src\DofBlurInfoShader.hpp" />
+    <ClInclude Include="src\DofDownShader.hpp" />
   </ItemGroup>
 </Project>

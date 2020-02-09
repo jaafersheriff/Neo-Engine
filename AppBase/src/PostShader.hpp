@@ -35,7 +35,7 @@ class PostShader : public PostProcessShader {
             //     loadTexture("inColor", *Library::getFBO("dofnearblur")->mTextures[0]);
             //     break;
             // case 2:
-            //     loadTexture("inColor", *Library::getFBO("dofinterpolate")->mTextures[0]);
+            //     loadTexture("inColor", *Library::getFBO("dofdown")->mTextures[0]);
             default:
                 break;
             }
