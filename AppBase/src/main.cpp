@@ -1,8 +1,9 @@
 #include <Engine.hpp>
 
-#include "Shader/PhongShader.hpp"
-#include "Shader/AlphaTestShader.hpp"
+#include "Shader/PhongShadowShader.hpp"
+#include "Shader/ShadowCasterShader.hpp"
 #include "Shader/GammaCorrectShader.hpp"
+
 #include "Loader/MeshGenerator.hpp"
 
 #include "DofBlurShader.hpp"
@@ -30,6 +31,8 @@ struct Light {
         auto& gameObject = Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(&gameObject, pos);
         Engine::addComponent<LightComponent>(&gameObject, col, att);
+        Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(&gameObject, -1.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
+        Engine::addComponent<ShadowCameraComponent>(&gameObject);
 
         Engine::addImGuiFunc("Light", [&]() {
             auto light = Engine::getSingleComponent<LightComponent>();
@@ -67,7 +70,8 @@ int main() {
     for (int i = 0; i < 50; i++) {
         auto mesh = i % 2 ? Library::getMesh("cube") : Library::getMesh("sphere");
         Renderable renderable(mesh, glm::vec3(Util::genRandom(-30.f, 30.f), 1.f, Util::genRandom(-30.f, 30.f)), glm::vec3(Util::genRandom(1.5f, 4.5f)), Util::genRandomVec3(-Util::PI, Util::PI));
-        Engine::addComponent<renderable::PhongRenderable>(renderable.gameObject);
+        Engine::addComponent<renderable::PhongShadowRenderable>(renderable.gameObject);
+        Engine::addComponent<renderable::ShadowCasterRenderable>(renderable.gameObject);
         Engine::addComponent<MaterialComponent>(renderable.gameObject, 0.2f, Util::genRandomVec3(0.2f, 1.f), glm::vec3(1.f));
         Engine::addComponent<SelectableComponent>(renderable.gameObject);
         Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, mesh);
@@ -75,8 +79,8 @@ int main() {
 
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(100.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
-    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
-    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::getTexture("grid.png"));
+    Engine::addComponent<renderable::PhongShadowRenderable>(plane.gameObject);
+    Engine::addComponent<MaterialComponent>(plane.gameObject, 0.2f, glm::vec3(0.2f), glm::vec3(1.f));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
@@ -100,8 +104,8 @@ int main() {
     Renderer::addPreProcessShader<DofInfoShader>("dofinfo.vert", "dofinfo.frag");
     Renderer::addPreProcessShader<DofDownShader>("dofdown.vert", "dofdown.frag", frameScale);
     Renderer::addPreProcessShader<DofBlurShader>("dofblur.vert", "dofblur.frag", frameScale);
-    Renderer::addSceneShader<PhongShader>();
-    Renderer::addSceneShader<AlphaTestShader>();
+    Renderer::addPreProcessShader<ShadowCasterShader>(4096);
+    Renderer::addSceneShader<PhongShadowShader>();
     Renderer::addPostProcessShader<PostShader>("post.frag");
     Renderer::addPostProcessShader<GammaCorrectShader>();
 

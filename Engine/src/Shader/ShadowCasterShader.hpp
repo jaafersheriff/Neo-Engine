@@ -32,7 +32,6 @@ namespace neo {
                     ) {
                 /* Init shadow map */
                 Framebuffer *depthFBO = Library::getFBO("shadowMap");
-                depthFBO->generate();
                 depthFBO->attachDepthTexture(glm::ivec2(dimension), GL_LINEAR, GL_CLAMP_TO_BORDER);
                 depthFBO->disableDraw();
                 depthFBO->disableRead();
@@ -44,7 +43,7 @@ namespace neo {
             virtual void render() override {
                 auto shadowCamera = Engine::getComponentTuple<ShadowCameraComponent, CameraComponent>();
                 if (!shadowCamera) {
-                    return;
+                    NEO_ASSERT(shadowCamera, "No shadow camera found");
                 }
                 auto camera = shadowCamera->get<CameraComponent>();
 
