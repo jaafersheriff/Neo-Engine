@@ -76,8 +76,6 @@ int main() {
         Engine::addComponent<CubeMapComponent>(gameObject, *Library::getCubemap("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}));
     }
 
-
-
     /* Water */
     {
         auto& go = Engine::createGameObject();

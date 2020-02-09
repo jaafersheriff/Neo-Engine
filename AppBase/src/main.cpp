@@ -2,6 +2,7 @@
 
 #include "Shader/PhongShadowShader.hpp"
 #include "Shader/ShadowCasterShader.hpp"
+#include "Shader/SkyboxShader.hpp"
 #include "Shader/GammaCorrectShader.hpp"
 
 #include "Loader/MeshGenerator.hpp"
@@ -27,12 +28,13 @@ struct Camera {
 };
 
 struct Light {
+    GameObject* gameObject;
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        auto& gameObject = Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(&gameObject, pos);
-        Engine::addComponent<LightComponent>(&gameObject, col, att);
-        Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(&gameObject, -1.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
-        Engine::addComponent<ShadowCameraComponent>(&gameObject);
+        gameObject = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(gameObject, pos);
+        Engine::addComponent<LightComponent>(gameObject, col, att);
+        Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(gameObject, -1.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
+        Engine::addComponent<ShadowCameraComponent>(gameObject);
 
         Engine::addImGuiFunc("Light", [&]() {
             auto light = Engine::getSingleComponent<LightComponent>();
@@ -64,7 +66,8 @@ int main() {
     Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
-    Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+    Light light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+    light.gameObject->getComponentByType<SpatialComponent>()->setLookDir(glm::normalize(glm::vec3(0.43f, -0.464f, -0.776f)));
 
     /* Scene objects */
     for (int i = 0; i < 50; i++) {
@@ -81,6 +84,13 @@ int main() {
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(100.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
     Engine::addComponent<renderable::PhongShadowRenderable>(plane.gameObject);
     Engine::addComponent<MaterialComponent>(plane.gameObject, 0.2f, glm::vec3(0.2f), glm::vec3(1.f));
+
+    /* Skybox */
+    {
+        GameObject* gameObject = &Engine::createGameObject();
+        Engine::addComponent<renderable::SkyboxComponent>(gameObject);
+        Engine::addComponent<CubeMapComponent>(gameObject, *Library::getCubemap("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}));
+    }
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
@@ -105,7 +115,9 @@ int main() {
     Renderer::addPreProcessShader<DofDownShader>("dofdown.vert", "dofdown.frag", frameScale);
     Renderer::addPreProcessShader<DofBlurShader>("dofblur.vert", "dofblur.frag", frameScale);
     Renderer::addPreProcessShader<ShadowCasterShader>(4096);
-    Renderer::addSceneShader<PhongShadowShader>();
+    auto& phongshadow = Renderer::addSceneShader<PhongShadowShader>();
+    phongshadow.bias = 0.002f;
+    Renderer::addSceneShader<SkyboxShader>();
     Renderer::addPostProcessShader<PostShader>("post.frag");
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
