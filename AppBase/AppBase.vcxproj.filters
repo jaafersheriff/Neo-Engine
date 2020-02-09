@@ -8,15 +8,15 @@
     <None Include="shaders\post.frag" />
     <None Include="shaders\dofdown.frag" />
     <None Include="shaders\dofdown.vert" />
-    <None Include="shaders\dofblur.frag" />
-    <None Include="shaders\dofblur.vert" />
-    <None Include="shaders\dofinfo.frag" />
-    <None Include="shaders\dofinfo.vert" />
+    <None Include="shaders\dofnearblur.frag" />
+    <None Include="shaders\dofnearblur.vert" />
+    <None Include="shaders\dofinterpolate.vert" />
+    <None Include="shaders\dofinterpolate.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PostShader.hpp" />
     <ClInclude Include="src\DofDownShader.hpp" />
-    <ClInclude Include="src\DofBlurShader.hpp" />
-    <ClInclude Include="src\DofInfoShader.hpp" />
+    <ClInclude Include="src\DofNearBlurShader.hpp" />
+    <ClInclude Include="src\DofInterpolateShader.hpp" />
   </ItemGroup>
 </Project>
