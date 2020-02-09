@@ -427,6 +427,7 @@ namespace neo {
                 if (ImGui::TreeNodeEx("Textures", ImGuiTreeNodeFlags_DefaultOpen)) {
                     for (auto& t : Library::mTextures) {
                         if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->mTextureID) + ")" + " [" + std::to_string(t.second->mWidth) + ", " + std::to_string(t.second->mHeight) + "]").c_str())) {
+                            // TODO - only run this on 2D textures
                             textureFunc(*t.second);
                             ImGui::TreePop();
                         }

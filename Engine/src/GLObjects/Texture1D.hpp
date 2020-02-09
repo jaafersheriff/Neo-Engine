@@ -9,8 +9,8 @@ namespace neo {
         Texture1D(TextureFormat format, glm::uvec2 size, const void* data) :
             Texture(format, glm::uvec2(size.x, 1)) 
         {
-            bind();
             _applyFormat();
+            resize(size);
             _upload(data);
         }
 
@@ -20,6 +20,7 @@ namespace neo {
         }
 
         virtual void _applyFormat() override {
+            bind();
             CHECK_GL(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, mFormat.filter));
             CHECK_GL(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, mFormat.filter));
 
