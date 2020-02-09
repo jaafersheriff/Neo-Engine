@@ -6,17 +6,17 @@
   <ItemGroup>
     <None Include="README.md" />
     <None Include="shaders\post.frag" />
-    <None Include="shaders\dofblurinfo.vert" />
-    <None Include="shaders\dofblurinfo.frag" />
     <None Include="shaders\dofdown.frag" />
     <None Include="shaders\dofdown.vert" />
     <None Include="shaders\dofblur.frag" />
     <None Include="shaders\dofblur.vert" />
+    <None Include="shaders\dofinfo.frag" />
+    <None Include="shaders\dofinfo.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PostShader.hpp" />
-    <ClInclude Include="src\DofBlurInfoShader.hpp" />
     <ClInclude Include="src\DofDownShader.hpp" />
     <ClInclude Include="src\DofBlurShader.hpp" />
+    <ClInclude Include="src\DofInfoShader.hpp" />
   </ItemGroup>
 </Project>

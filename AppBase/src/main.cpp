@@ -6,7 +6,7 @@
 #include "Loader/MeshGenerator.hpp"
 
 #include "DofBlurShader.hpp"
-#include "DofBlurInfoShader.hpp"
+#include "DofInfoShader.hpp"
 #include "DofDownShader.hpp"
 #include "PostShader.hpp"
 
@@ -99,7 +99,7 @@ int main() {
     Renderer::setDefaultFBO("default");
 
     std::shared_ptr<int> frameScale = std::make_shared<int>(16);
-    Renderer::addPreProcessShader<DofBlurInfoShader>("dofblurinfo.vert", "dofblurinfo.frag");
+    Renderer::addPreProcessShader<DofInfoShader>("dofinfo.vert", "dofinfo.frag");
     Renderer::addPreProcessShader<DofDownShader>("dofdown.vert", "dofdown.frag", frameScale);
     Renderer::addPreProcessShader<DofBlurShader>("dofblur.vert", "dofblur.frag", frameScale);
     Renderer::addSceneShader<PhongShader>();

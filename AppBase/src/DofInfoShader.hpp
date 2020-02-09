@@ -7,30 +7,31 @@
 #include "Messaging/Messenger.hpp"
 
 #include "Loader/Library.hpp"
+#include "GLObjects/Mesh.hpp"
 #include "GLObjects/Framebuffer.hpp"
 
 #include "ext/imgui/imgui.h"
 
 using namespace neo;
 
-class DofBlurInfoShader : public Shader {
+class DofInfoShader : public Shader {
 
     public:
 
         glm::vec3 focalPoints = glm::vec3(0.f, 0.5f, 1.f);
 
-        DofBlurInfoShader(const std::string& vert, const std::string &frag) :
-            Shader("DofBlurInfo Shader", vert, frag) {
+        DofInfoShader(const std::string& vert, const std::string &frag) :
+            Shader("DofInfo Shader", vert, frag) {
             glm::uvec2 frameSize = Window::getFrameSize();
-            auto DofBlurInfoFBO = Library::getFBO("dofblurinfo");
-            DofBlurInfoFBO->attachColorTexture(frameSize, { GL_RG8, GL_RG, GL_NEAREST, GL_CLAMP_TO_EDGE });
-            DofBlurInfoFBO->initDrawBuffers();
+            auto DofInfoFBO = Library::getFBO("dofinfo");
+            DofInfoFBO->attachColorTexture(frameSize, { GL_RG8, GL_RG, GL_NEAREST, GL_CLAMP_TO_EDGE });
+            DofInfoFBO->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
-                Library::getFBO("dofblurinfo")->resize(frameSize);
+                Library::getFBO("dofinfo")->resize(frameSize);
             });
  
         }
@@ -40,9 +41,9 @@ class DofBlurInfoShader : public Shader {
             This could be done purely as post process 
             Renderer would just need to resize ping/pong everytime?
             This shader would need to output to pong and a custom RT though 
-            pong for DofNearBlur
+            pong for DofNear
             custom RT for DofInterpolate */
-            Library::getFBO("dofblurinfo")->bind();
+            Library::getFBO("dofinfo")->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 0.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 

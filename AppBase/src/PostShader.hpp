@@ -36,11 +36,13 @@ class PostShader : public PostProcessShader {
             loadTexture("dofblur", dofBlur);
             loadUniform("dofPixelSize", 1.f / glm::vec2(dofBlur.mWidth, dofBlur.mHeight));
 
+            loadTexture("dofinfo", *Library::getFBO("dofinfo")->mTextures[0]);
+
             loadUniform("maxCoc", maxCoc);
             loadUniform("radiusScale", radiusScale);
 
             loadUniform("poissonSize", poissonSize);
-            loadTexture("poisson", *Library::getTexture("poisson"));
+            loadTexture("poissonTex", *Library::getTexture("poisson"));
         }
 
         virtual void imguiEditor() override {
