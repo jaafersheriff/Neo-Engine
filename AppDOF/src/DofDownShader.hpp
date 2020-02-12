@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Shader/PostProcessShader.hpp"
-#include "GLObjects/GLHelper.hpp"
+#include "Renderer/Shader/PostProcessShader.hpp"
+#include "Renderer/GLObjects/GLHelper.hpp"
 
 #include "Window/Window.hpp"
 #include "Messaging/Messenger.hpp"
 
 #include "Loader/Library.hpp"
-#include "GLObjects/Framebuffer.hpp"
-#include "GLObjects/Mesh.hpp"
+#include "Renderer/GLObjects/Framebuffer.hpp"
+#include "Renderer/GLObjects/Mesh.hpp"
 
 #include "ext/imgui/imgui.h"
 

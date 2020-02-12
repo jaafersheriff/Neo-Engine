@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component/Component.hpp"
+#include "ECS/Component/Component.hpp"
 
 using namespace neo;
 

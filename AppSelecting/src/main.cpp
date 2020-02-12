@@ -1,9 +1,9 @@
 #include <Engine.hpp>
 
-#include "Shader/PhongShader.hpp"
-#include "Shader/AlphaTestShader.hpp"
-#include "Shader/LineShader.hpp"
-#include "Shader/GammaCorrectShader.hpp"
+#include "Renderer/Shader/PhongShader.hpp"
+#include "Renderer/Shader/AlphaTestShader.hpp"
+#include "Renderer/Shader/LineShader.hpp"
+#include "Renderer/Shader/GammaCorrectShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 

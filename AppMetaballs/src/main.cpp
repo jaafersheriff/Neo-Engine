@@ -5,7 +5,7 @@
 #include "MetaballsSystem.hpp"
 #include "MetaballsShader.hpp"
 
-#include "Shader/SkyboxShader.hpp"
+#include "Renderer/Shader/SkyboxShader.hpp"
 
 using namespace neo;
 

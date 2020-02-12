@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Shader/Shader.hpp"
-#include "GLObjects/GLHelper.hpp"
+#include "Renderer/Shader/Shader.hpp"
+#include "Renderer/GLObjects/GLHelper.hpp"
 
 #include "Engine.hpp"
 

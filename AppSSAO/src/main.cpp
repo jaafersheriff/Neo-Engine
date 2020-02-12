@@ -1,6 +1,6 @@
 #include <Engine.hpp>
 
-#include "Shader/WireframeShader.hpp"
+#include "Renderer/Shader/WireframeShader.hpp"
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
 #include "AOShader.hpp"

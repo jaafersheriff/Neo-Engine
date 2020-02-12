@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Component/Component.hpp"
-#include "GameObject/GameObject.hpp"
+#include "ECS/Component/Component.hpp"
+#include "ECS/GameObject.hpp"
 
 using namespace neo;
 

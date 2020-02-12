@@ -2,8 +2,8 @@
 
 #include "Engine.hpp"
 
-#include "Shader/Shader.hpp"
-#include "GLObjects/GlHelper.hpp"
+#include "Renderer/Shader/Shader.hpp"
+#include "Renderer/GLObjects/GlHelper.hpp"
 
 using namespace neo;
 

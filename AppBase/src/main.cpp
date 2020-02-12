@@ -1,7 +1,7 @@
 #include <Engine.hpp>
 
-#include "Shader/PhongShader.hpp"
-#include "Shader/AlphaTestShader.hpp"
+#include "Renderer/Shader/PhongShader.hpp"
+#include "Renderer/Shader/AlphaTestShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 

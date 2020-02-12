@@ -2,7 +2,7 @@
 
 #include "SnowShader.hpp"
 #include "SnowSystem.hpp"
-#include "Shader/LineShader.hpp"
+#include "Renderer/Shader/LineShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 

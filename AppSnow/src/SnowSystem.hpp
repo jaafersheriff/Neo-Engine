@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Engine.hpp>
-#include "Systems/System.hpp"
+#include "ECS/Systems/System.hpp"
 
 #include "SnowComponent.hpp"
 

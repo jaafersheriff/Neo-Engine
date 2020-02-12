@@ -2,10 +2,10 @@
 
 #include "PerspectiveUpdateSystem.hpp"
 
-#include "Shader/ShadowCasterShader.hpp"
-#include "Shader/PhongShadowShader.hpp"
-#include "Shader/LineShader.hpp"
-#include "Shader/WireFrameShader.hpp"
+#include "Renderer/Shader/ShadowCasterShader.hpp"
+#include "Renderer/Shader/PhongShadowShader.hpp"
+#include "Renderer/Shader/LineShader.hpp"
+#include "Renderer/Shader/WireFrameShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 

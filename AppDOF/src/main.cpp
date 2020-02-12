@@ -1,9 +1,9 @@
 #include <Engine.hpp>
 
-#include "Shader/PhongShadowShader.hpp"
-#include "Shader/ShadowCasterShader.hpp"
-#include "Shader/SkyboxShader.hpp"
-#include "Shader/GammaCorrectShader.hpp"
+#include "Renderer/Shader/PhongShadowShader.hpp"
+#include "Renderer/Shader/ShadowCasterShader.hpp"
+#include "Renderer/Shader/SkyboxShader.hpp"
+#include "Renderer/Shader/GammaCorrectShader.hpp"
 
 #include "Loader/MeshGenerator.hpp"
 

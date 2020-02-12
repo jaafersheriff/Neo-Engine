@@ -1,7 +1,7 @@
 #include <Engine.hpp>
 
-#include "Shader/PhongShader.hpp"
-#include "Shader/WireframeShader.hpp"
+#include "Renderer/Shader/PhongShader.hpp"
+#include "Renderer/Shader/WireframeShader.hpp"
 
 #include "NormalShader.hpp"
 

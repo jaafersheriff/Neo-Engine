@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Systems/System.hpp"
+#include "ECS/Systems/System.hpp"
 #include "Engine.hpp"
 
 #include "LookAtCameraReceiver.hpp"
-#include "Component/CameraComponent/CameraComponent.hpp"
-#include "Component/SpatialComponent/SpatialComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 using namespace neo;
 

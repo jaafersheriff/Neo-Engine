@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Shader/PostProcessShader.hpp"
-#include "GLObjects/GLHelper.hpp"
-#include "GLObjects/Texture1D.hpp"
+#include "Renderer/Shader/PostProcessShader.hpp"
+#include "Renderer/GLObjects/GLHelper.hpp"
+#include "Renderer/GLObjects/Texture1D.hpp"
 
 #include "Window/Window.hpp"
 #include "Messaging/Messenger.hpp"

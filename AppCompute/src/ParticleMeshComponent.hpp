@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Component/Component.hpp"
+#include "ECS/Component/Component.hpp"
 
-#include "GLObjects/Mesh.hpp"
+#include "Renderer/GLObjects/Mesh.hpp"
 
 #include "ext/imgui/imgui.h"
 

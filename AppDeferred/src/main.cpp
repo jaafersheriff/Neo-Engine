@@ -3,8 +3,8 @@
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
 #include "CombineShader.hpp"
-#include "Shader/WireframeShader.hpp"
-#include "Shader/GammaCorrectShader.hpp"
+#include "Renderer/Shader/WireframeShader.hpp"
+#include "Renderer/Shader/GammaCorrectShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "Util/Util.hpp"
