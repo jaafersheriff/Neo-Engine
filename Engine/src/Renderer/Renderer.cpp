@@ -1,5 +1,5 @@
 #include "Renderer.hpp"
-#include "GLObjects/GLHelper.hpp"
+#include "Renderer/GLObjects/GLHelper.hpp"
 
 #include "Engine.hpp"
 #include "Window/Window.hpp"

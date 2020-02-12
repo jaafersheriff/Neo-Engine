@@ -1,5 +1,5 @@
 
-#include "GLObjects/Mesh.hpp"
+#include "Renderer/GLObjects/Mesh.hpp"
 
 #include "ext/PerlinNoise.hpp"
 

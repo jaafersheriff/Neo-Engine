@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GameObject/GameObject.hpp"
-#include "Component/Component.hpp"
+#include "ECS/GameObject.hpp"
+#include "ECS/Component/Component.hpp"
 
 #include <optional>
 #include <unordered_map>

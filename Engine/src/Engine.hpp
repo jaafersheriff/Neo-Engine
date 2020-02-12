@@ -9,8 +9,8 @@
 #include "Util/Util.hpp"
 
 #include "ECS/ComponentTuple.hpp"
-#include "Component/Components.hpp"
-#include "Systems/Systems.hpp"
+#include "ECS/Component/Components.hpp"
+#include "ECS/Systems/Systems.hpp"
 
 #include "ext/imgui/imgui.h"
 
@@ -20,7 +20,7 @@
 #include <functional>
 #include <optional>
 
-#include "GameObject/GameObject.hpp"
+#include "ECS/GameObject.hpp"
 
 #include "ext/microprofile.h"
 

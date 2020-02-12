@@ -8,10 +8,10 @@ extern "C" {
 
 #include "Engine.hpp"
 #include "Renderer/Renderer.hpp"
-#include "Shader/WireframeShader.hpp"
-#include "Shader/OutlineShader.hpp"
+#include "Renderer/Shader/WireframeShader.hpp"
+#include "Renderer/Shader/OutlineShader.hpp"
 
-#include "GameObject/GameObject.hpp"
+#include "ECS/GameObject.hpp"
 #include "Messaging/Messenger.hpp"
 
 #include "Loader/Loader.hpp"

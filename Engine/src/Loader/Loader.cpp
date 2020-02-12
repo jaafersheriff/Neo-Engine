@@ -2,10 +2,10 @@
 
 #include "MeshGenerator.hpp"
 
-#include "GLObjects/Mesh.hpp"
-#include "GLObjects/Texture.hpp"
-#include "GLObjects/GLHelper.hpp"
-#include "GLObjects/Framebuffer.hpp"
+#include "Renderer/GLObjects/Mesh.hpp"
+#include "Renderer/GLObjects/Texture.hpp"
+#include "Renderer/GLObjects/GLHelper.hpp"
+#include "Renderer/GLObjects/Framebuffer.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ext/tiny_obj_loader.h"

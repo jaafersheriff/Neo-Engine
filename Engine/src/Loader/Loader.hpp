@@ -7,8 +7,8 @@
 #include <string>
 #include <vector>
 
-#include "GLObjects/Texture2D.hpp"
-#include "GLObjects/TextureCubeMap.hpp"
+#include "Renderer/GLObjects/Texture2D.hpp"
+#include "Renderer/GLObjects/TextureCubeMap.hpp"
 
 namespace neo {
 

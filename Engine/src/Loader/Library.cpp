@@ -2,8 +2,8 @@
 
 #include "Loader.hpp"
 
-#include "GLObjects/Framebuffer.hpp"
-#include "GLObjects/Mesh.hpp"
+#include "Renderer/GLObjects/Framebuffer.hpp"
+#include "Renderer/GLObjects/Mesh.hpp"
 
 namespace neo {
     /* Library */

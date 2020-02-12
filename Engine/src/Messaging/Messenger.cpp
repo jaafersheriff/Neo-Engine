@@ -1,6 +1,6 @@
 #include "Messenger.hpp"
 
-#include "GameObject/GameObject.hpp"
+#include "ECS/GameObject.hpp"
 
 #include "ext/microprofile.h"
 

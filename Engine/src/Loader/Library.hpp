@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include "GLObjects/Texture.hpp"
+#include "Renderer/GLObjects/Texture.hpp"
 
 #include "Util/Util.hpp"
 
