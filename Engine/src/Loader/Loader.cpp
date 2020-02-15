@@ -2,10 +2,14 @@
 
 #include "MeshGenerator.hpp"
 
+#include "Library.hpp"
+
 #include "Renderer/GLObjects/Mesh.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
+
+#include "ECS/Component/ModelComponent/MaterialComponent.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ext/tiny_obj_loader.h"
@@ -99,6 +103,68 @@ namespace neo {
         }
 
         return mesh;
+    }
+   std::vector<Asset> Loader::loadMultiAsset(const std::string &fileName) {
+        /* If mesh was not found in map, read it in */
+        std::vector<tinyobj::shape_t> shapes;
+        std::vector<tinyobj::material_t> objMaterials;
+
+        std::string errString;
+        // TODO : use assimp or another optimized asset loader
+        bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, (RES_DIR + fileName).c_str(), RES_DIR.c_str());
+        NEO_ASSERT(rc, errString);
+
+        std::vector<Asset> ret;
+
+        for (auto& shape : shapes) {
+            Asset asset;
+
+            asset.mesh = new Mesh;
+
+            /* Upload */
+            asset.mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
+            if (shape.mesh.positions.size()) {
+                asset.mesh->addVertexBuffer(VertexType::Position, 0, 3, shape.mesh.positions);
+            }
+            if (shape.mesh.normals.size()) {
+                asset.mesh->addVertexBuffer(VertexType::Normal, 1, 3, shape.mesh.normals);
+            }
+            if (shape.mesh.texcoords.size()) {
+                asset.mesh->addVertexBuffer(VertexType::Texture0, 2, 2, shape.mesh.texcoords);
+            }
+            if (shape.mesh.indices.size()) {
+                asset.mesh->mPrimitiveType = GL_TRIANGLES;
+                asset.mesh->addElementBuffer(shape.mesh.indices);
+            }
+
+            if (mVerbose) {
+                std::cout << "Loaded mesh (" << shape.mesh.positions.size() << " vertices): " << fileName << ": " << shape.name << std::endl;
+            }
+
+            for (auto materialID : shape.mesh.material_ids) {
+                if (materialID >= 0) {
+                    auto& material = objMaterials[materialID];
+                    asset.material.ambient = glm::vec3(material.ambient[0], material.ambient[1], material.ambient[2]);
+                    asset.material.diffuse = glm::vec3(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
+                    asset.material.specular = glm::vec3(material.specular[0], material.ambient[1], material.ambient[2]);
+                    asset.material.shininess = material.shininess;
+
+                    if (material.ambient_texname.size()) {
+                        asset.ambient_tex = Library::getTexture(material.ambient_texname, TextureFormat{});
+                    }
+                    if (material.diffuse_texname.size()) {
+                        asset.diffuse_tex = Library::getTexture(material.diffuse_texname, TextureFormat{});
+                    }
+                    if (material.specular_texname.size()) {
+                        asset.specular_tex = Library::getTexture(material.specular_texname, TextureFormat{});
+                    }
+                }
+            }
+
+            ret.push_back(asset);
+        }
+
+        return ret;
     }
 
     Texture2D* Loader::loadTexture(const std::string &fileName, TextureFormat format) {

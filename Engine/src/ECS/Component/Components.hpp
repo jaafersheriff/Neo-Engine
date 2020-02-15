@@ -35,3 +35,6 @@
 
 #include "TransformationComponent/RotationComponent.hpp"
 #include "TransformationComponent/SinTranslateComponent.hpp"
+
+#include "ParentComponent.hpp"
+#include "ChildComponent.hpp"

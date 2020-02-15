@@ -10,10 +10,25 @@
 #include "Renderer/GLObjects/Texture2D.hpp"
 #include "Renderer/GLObjects/TextureCubeMap.hpp"
 
+#include "ECS/Component/ModelComponent/MaterialComponent.hpp"
+
 namespace neo {
 
     class Mesh;
     class Framebuffer;
+
+    struct Asset {
+        Mesh* mesh;
+        Material material;
+        Texture* ambient_tex = nullptr;            // map_Ka
+        Texture* diffuse_tex = nullptr;            // map_Kd
+        Texture* specular_tex = nullptr;           // map_Ks
+        // Texture* specular_highlight_tex; // map_Ns
+        // Texture* bump_tex;               // map_bump, bump
+        // Texture* displacement_tex;       // disp
+        // Texture* alpha_texname;              // map_d
+    };
+
 
     class Loader {
 
@@ -22,6 +37,7 @@ namespace neo {
 
             /* Load Mesh pointer from an .obj file */
             static Mesh* loadMesh(const std::string &, bool = false);
+            static std::vector<Asset> loadMultiAsset(const std::string &);
 
             /* Retrieve Texture pointer from an image file */
             static Texture2D* loadTexture(const std::string &, TextureFormat);

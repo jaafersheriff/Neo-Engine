@@ -9,7 +9,7 @@ namespace neo {
 
             glm::vec3 color(1.f);
             if (auto material = camera->mGameObject.getComponentByType<MaterialComponent>()) {
-                color = material->mDiffuse;
+                color = material->material.diffuse;
             }
 
             auto line = camera->get<LineMeshComponent>();

@@ -37,7 +37,7 @@ namespace neo {
                 in vec2 fragTex;
                 uniform sampler2D diffuseMap;
                 uniform bool useTexture;
-                uniform float ambient;
+                uniform vec3 ambient;
                 uniform vec3 diffuseColor;
                 uniform vec3 specularColor;
                 uniform float shine;
@@ -78,6 +78,51 @@ namespace neo {
 
             const auto& cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
 
+            // TODO : This can be cleaned up with a _render(Description {M, N, diffuse, ambient, ... });
+            for (auto& renderable : Engine::getComponentTuples<renderable::PhongRenderable, ParentComponent>()) {
+                auto parent = renderable->get<ParentComponent>();
+                glm::mat4 pM(1.f);
+                glm::mat3 pN(1.f);
+                if (auto spatial = parent->getGameObject().getComponentByType<SpatialComponent>()) {
+                    pM = spatial->getModelMatrix();
+                    pN = spatial->getNormalMatrix();
+                }
+
+                for (auto& child : renderable->get<ParentComponent>()->gos) {
+                    if (auto mesh = child->getComponentByType<MeshComponent>()) {
+                        glm::mat4 M = pM;
+                        glm::mat3 N = pN;
+                        if (auto spatial = child->getComponentByType<SpatialComponent>()) {
+                            M = M * spatial->getModelMatrix();
+                            N = N * spatial->getNormalMatrix();
+                        }
+                        loadUniform("M", M);
+                        loadUniform("N", N);
+
+                        if (auto d = child->getComponentByType<DiffuseMapComponent>()) {
+                            loadTexture("diffuseMap", d->mTexture);
+                            loadUniform("useTexture", true);
+                        }
+                        else {
+                            loadUniform("useTexture", false);
+                        }
+
+                        MaterialComponent* mc = parent->getGameObject().getComponentByType<MaterialComponent>();
+                        if (auto m = child->getComponentByType<MaterialComponent>()) {
+                            mc = m;
+                        }
+                        if (mc) {
+                            loadUniform("ambient", mc->material.ambient);
+                            loadUniform("diffuseColor", mc->material.diffuse);
+                            loadUniform("specularColor", mc->material.specular);
+                            loadUniform("shine", mc->material.shininess);
+                        }
+
+                        mesh->getMesh().draw();
+                    }
+                }
+            }
+
             for (auto& renderable : Engine::getComponentTuples<renderable::PhongRenderable, MeshComponent, SpatialComponent>()) {
                 auto renderableSpatial = renderable->get<SpatialComponent>();
 
@@ -106,17 +151,15 @@ namespace neo {
 
                 /* Bind material */
                 if (auto matComp = renderable->mGameObject.getComponentByType<MaterialComponent>()) {
-                    loadUniform("ambient", matComp->mAmbient);
-                    loadUniform("diffuseColor", matComp->mDiffuse);
-                    loadUniform("specularColor", matComp->mSpecular);
-                    loadUniform("shine", matComp->mShine);
+                    loadUniform("ambient", matComp->material.ambient);
+                    loadUniform("diffuseColor", matComp->material.diffuse);
+                    loadUniform("specularColor", matComp->material.specular);
+                    loadUniform("shine", matComp->material.shininess);
                 }
 
                 /* DRAW */
                 renderable->get<MeshComponent>()->getMesh().draw();
             }
-
-            unbind();
         }
     };
 }
