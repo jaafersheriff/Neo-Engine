@@ -35,6 +35,34 @@ class GodRayOccluderShader : public Shader {
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
 
+            for (auto& renderable : Engine::getComponentTuples<SunOccluderComponent, ParentComponent>()) {
+                auto parent = renderable->get<ParentComponent>();
+                glm::mat4 pM(1.f);
+                if (auto spatial = parent->getGameObject().getComponentByType<SpatialComponent>()) {
+                    pM = spatial->getModelMatrix();
+                }
+
+                for (auto& child : renderable->get<ParentComponent>()->gos) {
+                    if (auto mesh = child->getComponentByType<MeshComponent>()) {
+                        glm::mat4 M(pM);
+                        if (auto spatial = child->getComponentByType<SpatialComponent>()) {
+                            M = spatial->getModelMatrix();
+                        }
+                        loadUniform("M", M);
+
+                        if (auto d = child->getComponentByType<DiffuseMapComponent>()) {
+                            loadTexture("diffuseMap", d->mTexture);
+                            loadUniform("useTexture", true);
+                        }
+                        else {
+                            loadUniform("useTexture", false);
+                        }
+
+                        mesh->getMesh().draw();
+                    }
+                }
+            }
+
             for (auto& renderable : Engine::getComponentTuples<SunOccluderComponent, MeshComponent, SpatialComponent>()) {
                 auto renderableMesh = renderable->get<MeshComponent>();
                 auto renderableSpatial = renderable->get<SpatialComponent>();
