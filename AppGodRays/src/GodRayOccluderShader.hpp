@@ -42,23 +42,15 @@ class GodRayOccluderShader : public Shader {
                     pM = spatial->getModelMatrix();
                 }
 
-                for (auto& child : renderable->get<ParentComponent>()->gos) {
+                for (auto& child : renderable->get<ParentComponent>()->childrenObjects) {
                     if (auto mesh = child->getComponentByType<MeshComponent>()) {
+
                         glm::mat4 M(pM);
                         if (auto spatial = child->getComponentByType<SpatialComponent>()) {
-                            M = spatial->getModelMatrix();
-                        }
-                        loadUniform("M", M);
-
-                        if (auto d = child->getComponentByType<DiffuseMapComponent>()) {
-                            loadTexture("diffuseMap", d->mTexture);
-                            loadUniform("useTexture", true);
-                        }
-                        else {
-                            loadUniform("useTexture", false);
+                            M = spatial->getModelMatrix() * pM;
                         }
 
-                        mesh->getMesh().draw();
+                        _render(M, mesh->getMesh(), child->getComponentByType<DiffuseMapComponent>());
                     }
                 }
             }
@@ -67,31 +59,22 @@ class GodRayOccluderShader : public Shader {
                 auto renderableMesh = renderable->get<MeshComponent>();
                 auto renderableSpatial = renderable->get<SpatialComponent>();
 
-                // VFC
-                if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                    if (const auto& frustumPlanes = camera->mGameObject.getComponentByType<FrustumComponent>()) {
-                        float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
-                        if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
-                            continue;
-                        }
-                    }
-                }
+                _render(renderableSpatial->getModelMatrix(), renderableMesh->getMesh(), renderable->mGameObject.getComponentByType<DiffuseMapComponent>());
+            }
+        }
 
-                loadUniform("M", renderableSpatial->getModelMatrix());
+    private:
 
-                /* Bind texture */
-                if (auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                    loadTexture("diffuseMap", diffuseMap->mTexture);
-                    loadUniform("useTexture", true);
-                }
-                else {
-                    loadUniform("useTexture", false);
-                }
+        void _render(const glm::mat4& M, const Mesh& mesh, const DiffuseMapComponent* diffuseMap = nullptr) {
+            loadUniform("M", M);
 
-                /* DRAW */
-                renderableMesh->getMesh().draw();
+            Texture* texture = Library::getTexture("white");
+            if (diffuseMap) {
+                texture = &diffuseMap->mTexture;
             }
 
-            unbind();
+            loadTexture("diffuseMap", *texture);
+
+            mesh.draw();
         }
 };

@@ -10,12 +10,12 @@ namespace neo {
     class DiffuseMapComponent : public Component {
 
         public:
-            DiffuseMapComponent(GameObject *go, const Texture& tex) :
+            DiffuseMapComponent(GameObject *go, Texture& tex) :
                 Component(go),
                 mTexture(tex)
             {}
 
-            const Texture& mTexture;
+            Texture& mTexture;
     };
 
     class SpecularMapComponent : public Component {

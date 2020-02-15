@@ -89,8 +89,8 @@
     <ClInclude Include="src\Renderer\GLObjects\Texture1D.hpp" />
     <ClInclude Include="src\Renderer\GLObjects\Texture2D.hpp" />
     <ClInclude Include="src\Renderer\GLObjects\Texture3D.hpp" />
-    <ClInclude Include="src\ECS\Component\ParentComponent.hpp" />
-    <ClInclude Include="src\ECS\Component\ChildComponent.hpp" />
+    <ClInclude Include="src\ECS\Component\RelationComponent\ParentComponent.hpp" />
+    <ClInclude Include="src\ECS\Component\RelationComponent\ChildComponent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Loader\Loader.cpp" />

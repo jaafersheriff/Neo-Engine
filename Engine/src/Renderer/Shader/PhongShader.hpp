@@ -88,7 +88,7 @@ namespace neo {
                     pN = spatial->getNormalMatrix();
                 }
 
-                for (auto& child : renderable->get<ParentComponent>()->gos) {
+                for (auto& child : renderable->get<ParentComponent>()->childrenObjects) {
                     if (auto mesh = child->getComponentByType<MeshComponent>()) {
                         glm::mat4 M = pM;
                         glm::mat3 N = pN;

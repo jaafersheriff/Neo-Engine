@@ -91,7 +91,7 @@ int main() {
         for (auto a : asset) {
             GameObject* child = &Engine::createGameObject();
             Engine::addComponent<ChildComponent>(child, parent);
-            parentC.gos.push_back(child);
+            parentC.childrenObjects.push_back(child);
 
             Engine::addComponent<MeshComponent>(child, a.mesh);
             Engine::addComponent<MaterialComponent>(child, a.material.ambient, a.material.diffuse, a.material.specular, a.material.shininess);

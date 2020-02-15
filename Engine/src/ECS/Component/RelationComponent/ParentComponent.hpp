@@ -8,7 +8,7 @@ namespace neo {
 
         class ParentComponent : public Component {
         public:
-            std::vector<GameObject*> gos;
+            std::vector<GameObject*> childrenObjects;
             ParentComponent(GameObject *go) :
                 Component(go)
             {}

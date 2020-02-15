@@ -71,6 +71,14 @@ namespace neo {
         Library::getMesh("quad");
         Library::getMesh("sphere");
 
+        /* Generate basic textures*/
+        uint8_t data = 0x0;
+        auto tex = Library::createEmptyTexture<Texture2D>("black", {});
+        tex->update(glm::uvec2(1), &data);
+        data = 0xFF;
+        tex = Library::createEmptyTexture<Texture2D>("white", {});
+        tex->update(glm::uvec2(1), &data);
+
         /* Init Util */
         Util::init();
 #if MICROPROFILE_ENABLED

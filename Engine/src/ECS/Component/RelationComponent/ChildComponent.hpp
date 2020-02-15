@@ -6,10 +6,10 @@ namespace neo {
 
         class ChildComponent : public Component {
         public:
-            GameObject* parent;
+            GameObject* parentObject;
             ChildComponent(GameObject *go, GameObject* parent) :
                 Component(go),
-                parent(parent)
+                parentObject(parent)
             {}
 
         };
