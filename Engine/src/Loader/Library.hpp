@@ -17,15 +17,19 @@ namespace neo {
         friend Engine;
 
         public:
-            static Mesh* getMesh(const std::string&, bool = false);
             static Mesh* createEmptyMesh(const std::string&);
+            static Mesh* getMesh(const std::string&);
+            static Mesh* loadMesh(const std::string&, bool = false);
             static const std::unordered_map<std::string, Mesh*> getAllMeshes() { return mMeshes; }
-
-            static Texture* getTexture(const std::string&, TextureFormat = TextureFormat{});
 
             template <typename T>
             static Texture* createEmptyTexture(const std::string&, TextureFormat, glm::uvec3 = glm::uvec3(1));
-            static Texture* getCubemap(const std::string&, const std::vector<std::string> &);
+            static Texture* getTexture(const std::string&);
+            static Texture* loadTexture(const std::string&, TextureFormat = TextureFormat{});
+            static Texture* loadCubemap(const std::string&, const std::vector<std::string> &);
+
+
+            static Framebuffer* createFBO(const std::string&);
             static Framebuffer* getFBO(const std::string&);
 
         private:

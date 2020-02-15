@@ -11,18 +11,21 @@ namespace neo {
     std::unordered_map<std::string, Texture *> Library::mTextures;
     std::unordered_map<std::string, Framebuffer *> Library::mFramebuffers;
 
-    Mesh* Library::getMesh(const std::string& fileName, bool doResize) {
-        MICROPROFILE_SCOPEI("Library", "getMesh", MP_AUTO);
+    Mesh* Library::getMesh(const std::string& name) {
         /* Search map first */
-        auto it = mMeshes.find(fileName);
+        auto it = mMeshes.find(name);
         if (it != mMeshes.end()) {
             return it->second;
         }
 
-        /* Create mesh if not found */
-        auto mesh = Loader::loadMesh(fileName, doResize);
-        _insertMesh(fileName, mesh);
+        NEO_ASSERT(false, "Mesh " + name + "not found");
+    }
 
+    Mesh* Library::loadMesh(const std::string& fileName, bool doResize) {
+        MICROPROFILE_SCOPEI("Library", "loadMesh", MP_AUTO);
+
+        Mesh* mesh = Loader::loadMesh(fileName, doResize);
+        _insertMesh(fileName, mesh);
         return mesh;
     }
 
@@ -35,25 +38,25 @@ namespace neo {
 
     }
 
-    Texture* Library::getTexture(const std::string& fileName, TextureFormat format) {
-        MICROPROFILE_SCOPEI("Library", "getTexture", MP_AUTO);
-        auto it = mTextures.find(fileName);
-        if (it != mTextures.end()) {
-            return it->second;
-        }
-
-        auto texture = Loader::loadTexture(fileName, format);
-        _insertTexture(fileName, texture);
-
-        return texture;
-    }
-
-    Texture* Library::getCubemap(const std::string& name, const std::vector<std::string> &files) {
-        MICROPROFILE_SCOPEI("Library", "getCubemap", MP_AUTO);
+    Texture* Library::getTexture(const std::string& name) {
         auto it = mTextures.find(name);
         if (it != mTextures.end()) {
             return it->second;
         }
+
+        NEO_ASSERT(false, "Texture " + name + " not found");
+    }
+
+    Texture* Library::loadTexture(const std::string& fileName, TextureFormat format) {
+        MICROPROFILE_SCOPEI("Library", "loadTexture", MP_AUTO);
+
+        Texture2D* texture = Loader::loadTexture(fileName, format);
+        _insertTexture(fileName, texture);
+        return texture;
+    }
+
+    Texture* Library::loadCubemap(const std::string& name, const std::vector<std::string> &files) {
+        MICROPROFILE_SCOPEI("Library", "loadCubemap", MP_AUTO);
 
         auto texture = Loader::loadTexture(name, files);
         _insertTexture(name, texture);
@@ -61,14 +64,20 @@ namespace neo {
         return texture;
     }
 
+    Framebuffer* Library::createFBO(const std::string& name) {
+        auto fb = new Framebuffer;
+        mFramebuffers.emplace(name, new Framebuffer);
+        return fb;
+    }
+
     Framebuffer* Library::getFBO(const std::string &name) {
         MICROPROFILE_SCOPEI("Library", "getFBO", MP_AUTO);
         auto it = mFramebuffers.find(name);
         if (it == mFramebuffers.end()) {
-            mFramebuffers.emplace(name, new Framebuffer);
-            it = mFramebuffers.find(name);
+            return it->second;
         }
-        return it->second;
+
+        NEO_ASSERT(false, "FBO " + name + " doesn't exist");
     }
 
     void Library::_insertMesh(const std::string& name, Mesh* mesh) {
