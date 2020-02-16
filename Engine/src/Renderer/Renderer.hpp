@@ -102,7 +102,7 @@ namespace neo {
             TextureFormat format{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT };
 
             // Ping & pong 
-            auto ping = Library::getFBO("ping");
+            auto ping = Library::createFBO("ping");
             ping->attachColorTexture(Window::getFrameSize(), format);
             ping->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT);
 
@@ -111,7 +111,7 @@ namespace neo {
                 mDefaultFBO = ping;
             }
 
-            auto pong = Library::getFBO("pong");
+            auto pong = Library::createFBO("pong");
             pong->attachColorTexture(Window::getFrameSize(), format);
             pong->mTextures.push_back(ping->mTextures[1]);
 

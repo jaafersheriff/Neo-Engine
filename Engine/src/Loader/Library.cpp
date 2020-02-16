@@ -24,6 +24,11 @@ namespace neo {
     Mesh* Library::loadMesh(const std::string& fileName, bool doResize) {
         MICROPROFILE_SCOPEI("Library", "loadMesh", MP_AUTO);
 
+        auto it = mMeshes.find(fileName);
+        if (it != mMeshes.end()) {
+            return it->second;
+        }
+
         Mesh* mesh = Loader::loadMesh(fileName, doResize);
         _insertMesh(fileName, mesh);
         return mesh;
@@ -50,6 +55,11 @@ namespace neo {
     Texture* Library::loadTexture(const std::string& fileName, TextureFormat format) {
         MICROPROFILE_SCOPEI("Library", "loadTexture", MP_AUTO);
 
+        auto it = mTextures.find(fileName);
+        if (it != mTextures.end()) {
+            return it->second;
+        }
+
         Texture2D* texture = Loader::loadTexture(fileName, format);
         _insertTexture(fileName, texture);
         return texture;
@@ -66,14 +76,14 @@ namespace neo {
 
     Framebuffer* Library::createFBO(const std::string& name) {
         auto fb = new Framebuffer;
-        mFramebuffers.emplace(name, new Framebuffer);
+        mFramebuffers.emplace(name, fb);
         return fb;
     }
 
     Framebuffer* Library::getFBO(const std::string &name) {
         MICROPROFILE_SCOPEI("Library", "getFBO", MP_AUTO);
         auto it = mFramebuffers.find(name);
-        if (it == mFramebuffers.end()) {
+        if (it != mFramebuffers.end()) {
             return it->second;
         }
 

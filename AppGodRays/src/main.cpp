@@ -61,7 +61,12 @@ struct Renderable {
         Engine::addComponent<MeshComponent>(gameObject, mesh);
         Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
         Engine::addComponent<renderable::PhongRenderable>(gameObject);
-        Engine::addComponent<MaterialComponent>(gameObject, glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+        Material material;
+        material.ambient = glm::vec3(0.2f);
+        material.diffuse = glm::vec3(1.f, 0.f, 1.f);
+        material.specular = glm::vec3(1.f);
+        material.shininess = 25.f;
+        Engine::addComponent<MaterialComponent>(gameObject, material);
         Engine::addComponent<SunOccluderComponent>(gameObject);
     }
 };
@@ -94,7 +99,7 @@ int main() {
             parentC.childrenObjects.push_back(child);
 
             Engine::addComponent<MeshComponent>(child, a.mesh);
-            Engine::addComponent<MaterialComponent>(child, a.material.ambient, a.material.diffuse, a.material.specular, a.material.shininess);
+            Engine::addComponent<MaterialComponent>(child, a.material);
             if (a.diffuse_tex) {
                 Engine::addComponent<DiffuseMapComponent>(child, *a.diffuse_tex);
             }
@@ -109,7 +114,7 @@ int main() {
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
     Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
-    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::getTexture("grid.png"));
+    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::loadTexture("grid.png"));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();

@@ -10,12 +10,11 @@
 #include "Renderer/GLObjects/Texture2D.hpp"
 #include "Renderer/GLObjects/TextureCubeMap.hpp"
 
-#include "ECS/Component/ModelComponent/MaterialComponent.hpp"
+// Remove?
+#include "Renderer/GLObjects/Mesh.hpp"
+#include "Renderer/GLObjects/Material.hpp"
 
 namespace neo {
-
-    class Mesh;
-    class Framebuffer;
 
     struct Asset {
         Mesh* mesh;

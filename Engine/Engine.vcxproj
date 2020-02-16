@@ -51,6 +51,7 @@
     <ClInclude Include="src\ECS\Component\SpatialComponent\SpatialComponent.hpp" />
     <ClInclude Include="src\ECS\Component\TransformationComponent\RotationComponent.hpp" />
     <ClInclude Include="src\ECS\ComponentTuple.hpp" />
+    <ClInclude Include="src\ECS\Systems\RelationSystems\ParentChildSystem.hpp" />
     <ClInclude Include="src\ext\imgui\imconfig.h" />
     <ClInclude Include="src\ext\imgui\imgui.h" />
     <ClInclude Include="src\ext\imgui\imgui_impl_glfw.h" />
@@ -68,6 +69,7 @@
     <ClInclude Include="src\ext\stb_image.h" />
     <ClInclude Include="src\ext\tiny_obj_loader.h" />
     <ClInclude Include="src\ECS\GameObject.hpp" />
+    <ClInclude Include="src\Renderer\GLObjects\Material.hpp" />
     <ClInclude Include="src\Renderer\GLObjects\Texture1D.hpp" />
     <ClInclude Include="src\Renderer\GLObjects\Texture2D.hpp" />
     <ClInclude Include="src\Renderer\GLObjects\Texture3D.hpp" />
@@ -118,6 +120,7 @@
     <ClInclude Include="src\ECS\Component\CameraComponent\ShadowCameraComponent.hpp" />
     <ClCompile Include="src\ECS\Component\RenderableComponent\PhongShadowRenderable.hpp" />
     <ClCompile Include="src\ECS\Component\SpatialComponent\SpatialComponent.cpp" />
+    <ClCompile Include="src\ECS\Systems\RelationSystems\ParentChildSystem.cpp" />
     <ClCompile Include="src\ext\imgui\imgui.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_draw.cpp" />

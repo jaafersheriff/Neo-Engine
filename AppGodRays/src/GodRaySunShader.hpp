@@ -19,7 +19,7 @@ class GodRaySunShader : public Shader {
             // Create godray 
             // 0 used for base 
             TextureFormat format = { GL_R16, GL_RED, GL_LINEAR, GL_CLAMP_TO_EDGE };
-            auto godray = Library::getFBO("godray");
+            auto godray = Library::createFBO("godray");
             godray->attachColorTexture(Window::getFrameSize() / 2, format); 
             godray->initDrawBuffers();
 
@@ -58,7 +58,7 @@ class GodRaySunShader : public Shader {
                 loadUniform("center", renderable->getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
                 /* DRAW */
-                Library::getMesh("plane")->draw();
+                Library::getMesh("quad")->draw();
             }
 
             unbind();

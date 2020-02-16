@@ -112,10 +112,10 @@ namespace neo {
                             mc = m;
                         }
                         if (mc) {
-                            loadUniform("ambient", mc->material.ambient);
-                            loadUniform("diffuseColor", mc->material.diffuse);
-                            loadUniform("specularColor", mc->material.specular);
-                            loadUniform("shine", mc->material.shininess);
+                            loadUniform("ambient", mc->mMaterial.ambient);
+                            loadUniform("diffuseColor", mc->mMaterial.diffuse);
+                            loadUniform("specularColor", mc->mMaterial.specular);
+                            loadUniform("shine", mc->mMaterial.shininess);
                         }
 
                         mesh->getMesh().draw();
@@ -151,10 +151,10 @@ namespace neo {
 
                 /* Bind material */
                 if (auto matComp = renderable->mGameObject.getComponentByType<MaterialComponent>()) {
-                    loadUniform("ambient", matComp->material.ambient);
-                    loadUniform("diffuseColor", matComp->material.diffuse);
-                    loadUniform("specularColor", matComp->material.specular);
-                    loadUniform("shine", matComp->material.shininess);
+                    loadUniform("ambient", matComp->mMaterial.ambient);
+                    loadUniform("diffuseColor", matComp->mMaterial.diffuse);
+                    loadUniform("specularColor", matComp->mMaterial.specular);
+                    loadUniform("shine", matComp->mMaterial.shininess);
                 }
 
                 /* DRAW */

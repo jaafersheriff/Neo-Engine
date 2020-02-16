@@ -63,13 +63,18 @@ namespace neo {
         Window::setSize(glm::ivec2(mConfig.width, mConfig.height));
         ImGui::GetStyle().ScaleAllSizes(2.f);
 
+        /* Init default FBO */
+        auto backBuffer = Library::createFBO("0");
+        backBuffer->mFBOID = 0;
+        Renderer::setDefaultFBO("0");
+
         /* Init loader after initializing GL*/
         Loader::init(mConfig.APP_RES, true);
 
         /* Generate basic meshes */
-        Library::getMesh("cube");
-        Library::getMesh("quad");
-        Library::getMesh("sphere");
+        Library::loadMesh("cube");
+        Library::loadMesh("quad");
+        Library::loadMesh("sphere");
 
         /* Generate basic textures*/
         uint8_t data = 0x0;

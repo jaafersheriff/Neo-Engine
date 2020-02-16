@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 
+#include "Renderer/GLObjects/Mesh.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 
 #include "Util/Util.hpp"
@@ -9,7 +10,6 @@
 namespace neo {
 
     class Engine;
-    class Mesh;
     class Framebuffer;
 
     class Library {

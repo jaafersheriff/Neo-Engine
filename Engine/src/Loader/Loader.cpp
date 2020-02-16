@@ -40,7 +40,7 @@ namespace neo {
             MeshGenerator::generateCube(mesh);
             return mesh;
         }
-        if (!std::strcmp(fileName.c_str(), "quad") || !std::strcmp(fileName.c_str(), "plane")) {
+        if (!std::strcmp(fileName.c_str(), "quad")) {
             MeshGenerator::generateQuad(mesh);
             return mesh;
         }
@@ -150,13 +150,13 @@ namespace neo {
                     asset.material.shininess = material.shininess;
 
                     if (material.ambient_texname.size()) {
-                        asset.ambient_tex = Library::getTexture(material.ambient_texname, TextureFormat{});
+                        asset.ambient_tex = Library::loadTexture(material.ambient_texname, TextureFormat{});
                     }
                     if (material.diffuse_texname.size()) {
-                        asset.diffuse_tex = Library::getTexture(material.diffuse_texname, TextureFormat{});
+                        asset.diffuse_tex = Library::loadTexture(material.diffuse_texname, TextureFormat{});
                     }
                     if (material.specular_texname.size()) {
-                        asset.specular_tex = Library::getTexture(material.specular_texname, TextureFormat{});
+                        asset.specular_tex = Library::loadTexture(material.specular_texname, TextureFormat{});
                     }
                 }
             }

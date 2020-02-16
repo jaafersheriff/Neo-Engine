@@ -50,10 +50,6 @@ namespace neo {
             CHECK_GL(glViewport(0, 0, m.frameSize.x, m.frameSize.y));
         });
 
-        /* Init default FBO */
-        mDefaultFBO = Library::getFBO("0");
-        mDefaultFBO->mFBOID = 0;
-
         /* Set max work gruop */
         CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &NEO_MAX_COMPUTE_GROUP_SIZE.x));
         CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &NEO_MAX_COMPUTE_GROUP_SIZE.y));

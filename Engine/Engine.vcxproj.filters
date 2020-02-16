@@ -91,6 +91,8 @@
     <ClInclude Include="src\Renderer\GLObjects\Texture3D.hpp" />
     <ClInclude Include="src\ECS\Component\RelationComponent\ParentComponent.hpp" />
     <ClInclude Include="src\ECS\Component\RelationComponent\ChildComponent.hpp" />
+    <ClInclude Include="src\Renderer\GLObjects\Material.hpp" />
+    <ClInclude Include="src\ECS\Systems\RelationSystems\ParentChildSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Loader\Loader.cpp" />
@@ -129,6 +131,7 @@
     <ClCompile Include="src\Renderer\GLObjects\GLHelper.cpp" />
     <ClCompile Include="src\Renderer\GLObjects\Mesh.cpp" />
     <ClCompile Include="src\Renderer\GLObjects\Texture.cpp" />
+    <ClCompile Include="src\ECS\Systems\RelationSystems\ParentChildSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\ext\imgui\LICENSE.txt" />

@@ -20,7 +20,7 @@ class BlurShader : public Shader {
         BlurShader(const std::string &vert, const std::string& frag) :
             Shader("Blur Shader", vert, frag) {
             // Create blur 
-            auto blur = Library::getFBO("godrayblur");
+            auto blur = Library::createFBO("godrayblur");
             TextureFormat format = { GL_R16, GL_RED, GL_NEAREST, GL_REPEAT };
             blur->attachColorTexture(Window::getFrameSize() / 2, format); 
             blur->initDrawBuffers();

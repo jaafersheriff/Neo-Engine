@@ -39,7 +39,8 @@ namespace neo {
                 }
             }
 
-            if (!parentExists) {
+            if (!parentExists
+                || !childComponent->parentObject->getComponentByType<ParentComponent>()) {
                 Engine::removeComponent<ChildComponent>(*childComponent);
             }
         }
