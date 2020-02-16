@@ -22,10 +22,10 @@ namespace neo {
         Texture* ambient_tex = nullptr;            // map_Ka
         Texture* diffuse_tex = nullptr;            // map_Kd
         Texture* specular_tex = nullptr;           // map_Ks
+        Texture* displacement_tex = nullptr;       // disp
+        // Texture* alpha_tex = nullptr;              // map_d
+        // Texture* bump_tex = nullptr;               // map_bump, bump
         // Texture* specular_highlight_tex; // map_Ns
-        // Texture* bump_tex;               // map_bump, bump
-        // Texture* displacement_tex;       // disp
-        // Texture* alpha_texname;              // map_d
     };
 
 

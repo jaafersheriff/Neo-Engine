@@ -158,6 +158,9 @@ namespace neo {
                     if (material.specular_texname.size()) {
                         asset.specular_tex = Library::loadTexture(material.specular_texname, TextureFormat{});
                     }
+                    if (material.bump_texname.size()) {
+                        asset.bump_tex = Library::loadTexture(material.bump_texname, TextureFormat{});
+                    }
                 }
             }
 

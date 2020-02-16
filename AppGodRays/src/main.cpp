@@ -1,12 +1,12 @@
 #include <Engine.hpp>
 
-#include "Renderer/Shader/PhongShader.hpp"
 #include "Renderer/Shader/AlphaTestShader.hpp"
 #include "Renderer/Shader/GammaCorrectShader.hpp"
 
 #include "SunComponent.hpp"
 #include "SunOccluderComponent.hpp"
 #include "GodRaySunShader.hpp"
+#include "MyPhongShader.hpp"
 #include "GodRayOccluderShader.hpp"
 #include "BlurShader.hpp"
 #include "CombineShader.hpp"
@@ -106,7 +106,12 @@ int main() {
             if (a.specular_tex) {
                 Engine::addComponent<SpecularMapComponent>(child, *a.specular_tex);
             }
-            // TODO - ambient
+            if (a.ambient_tex) {
+                Engine::addComponent<AmbientMapComponent>(child, *a.ambient_tex);
+            }
+            if (a.displacement_tex) {
+                Engine::addComponent<NormalMapComponent>(child, *a.displacement_tex);
+            }
         }
     }
     Renderable cube(Library::getMesh("cube"), glm::vec3(0.f), glm::vec3(1.f));
@@ -125,7 +130,7 @@ int main() {
     Renderer::addPreProcessShader<GodRaySunShader>("billboard.vert", "godraysun.frag");
     Renderer::addPreProcessShader<GodRayOccluderShader>("model.vert", "godrayoccluder.frag");
     Renderer::addPreProcessShader<BlurShader>("blur.vert", "blur.frag");
-    Renderer::addSceneShader<PhongShader>();
+    Renderer::addSceneShader<MyPhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addPostProcessShader<CombineShader>("combine.frag");
     Renderer::addPostProcessShader<GammaCorrectShader>();
