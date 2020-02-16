@@ -57,19 +57,6 @@ public:
                     description.M = M;
                     description.N = N;
 
-                    if (auto ambientMap = child->getComponentByType<AmbientMapComponent>()) {
-                        description.ambientMap = ambientMap->mTexture;
-                    }
-                    if (auto diffuseMap = child->getComponentByType<DiffuseMapComponent>()) {
-                        description.diffuseMap = diffuseMap->mTexture;
-                    }
-                    if (auto specularMap = child->getComponentByType<SpecularMapComponent>()) {
-                        description.specularMap = specularMap->mTexture;
-                    }
-                    if (auto normalMap = child->getComponentByType<NormalMapComponent>()) {
-                        description.normalMap = normalMap->mTexture;
-                    }
-
                     Material material;
                     MaterialComponent* mc = parent->getGameObject().getComponentByType<MaterialComponent>();
                     if (auto m = child->getComponentByType<MaterialComponent>()) {
@@ -77,6 +64,28 @@ public:
                     }
                     if (mc) {
                         material = mc->mMaterial;
+                    }
+
+                    if (auto ambientMap = child->getComponentByType<AmbientMapComponent>()) {
+                        description.ambientMap = ambientMap->mTexture;
+                        if (glm::length(material.ambient) == 0.f) {
+                            material.ambient = glm::vec3(1.f);
+                        }
+                    }
+                    if (auto diffuseMap = child->getComponentByType<DiffuseMapComponent>()) {
+                        description.diffuseMap = diffuseMap->mTexture;
+                        if (glm::length(material.diffuse) == 0.f) {
+                            material.diffuse = glm::vec3(1.f);
+                        }
+                    }
+                    if (auto specularMap = child->getComponentByType<SpecularMapComponent>()) {
+                        description.specularMap = specularMap->mTexture;
+                        if (glm::length(material.specular) == 0.f) {
+                            material.specular = glm::vec3(1.f);
+                        }
+                    }
+                    if (auto normalMap = child->getComponentByType<NormalMapComponent>()) {
+                        description.normalMap = normalMap->mTexture;
                     }
                     description.material = material;
 
@@ -103,23 +112,33 @@ public:
             description.M = renderableSpatial->getModelMatrix();
             description.N = renderableSpatial->getNormalMatrix();
 
-            if (auto ambientMap = renderable->mGameObject.getComponentByType<AmbientMapComponent>()) {
-                description.ambientMap = ambientMap->mTexture;
-            }
-            if (auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                description.diffuseMap = diffuseMap->mTexture;
-            }
-            if (auto specularMap = renderable->mGameObject.getComponentByType<SpecularMapComponent>()) {
-                description.specularMap = specularMap->mTexture;
-            }
-            if (auto normalMap = renderable->mGameObject.getComponentByType<NormalMapComponent>()) {
-                description.normalMap = normalMap->mTexture;
-            }
-
-            /* Bind material */
             Material material;
             if (auto matComp = renderable->mGameObject.getComponentByType<MaterialComponent>()) {
                 material = matComp->mMaterial;
+            }
+
+            if (auto ambientMap = renderable->mGameObject.getComponentByType<AmbientMapComponent>()) {
+                description.ambientMap = ambientMap->mTexture;
+                if (glm::length(material.ambient) == 0.f) {
+                    material.ambient = glm::vec3(1.f);
+                }
+            }
+            if (auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
+                description.diffuseMap = diffuseMap->mTexture;
+                if (glm::length(material.diffuse) == 0.f) {
+                    material.diffuse = glm::vec3(1.f);
+                }
+
+            }
+            if (auto specularMap = renderable->mGameObject.getComponentByType<SpecularMapComponent>()) {
+                description.specularMap = specularMap->mTexture;
+                if (glm::length(material.specular) == 0.f) {
+                    material.specular = glm::vec3(1.f);
+                }
+
+            }
+            if (auto normalMap = renderable->mGameObject.getComponentByType<NormalMapComponent>()) {
+                description.normalMap = normalMap->mTexture;
             }
 
             _render(description);

@@ -1,6 +1,5 @@
 #include <Engine.hpp>
 
-#include "Renderer/Shader/AlphaTestShader.hpp"
 #include "Renderer/Shader/GammaCorrectShader.hpp"
 
 #include "SunComponent.hpp"
@@ -53,24 +52,6 @@ struct Light {
     }
 };
 
-struct Renderable {
-    GameObject *gameObject;
-
-    Renderable(Mesh *mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
-        gameObject = &Engine::createGameObject();
-        Engine::addComponent<MeshComponent>(gameObject, mesh);
-        Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
-        Engine::addComponent<renderable::PhongRenderable>(gameObject);
-        Material material;
-        material.ambient = glm::vec3(0.2f);
-        material.diffuse = glm::vec3(1.f, 0.f, 1.f);
-        material.specular = glm::vec3(1.f);
-        material.shininess = 25.f;
-        Engine::addComponent<MaterialComponent>(gameObject, material);
-        Engine::addComponent<SunOccluderComponent>(gameObject);
-    }
-};
-
 int main() {
     EngineConfig config;
     config.APP_NAME = "GodRays";
@@ -89,7 +70,7 @@ int main() {
 
         GameObject* parent = &Engine::createGameObject();
         auto& parentC = Engine::addComponent<ParentComponent>(parent);
-        Engine::addComponent<SpatialComponent>(parent, glm::vec3(0.f), glm::vec3(0.1f));
+        Engine::addComponent<SpatialComponent>(parent, glm::vec3(0.f), glm::vec3(0.2f));
         Engine::addComponent<renderable::PhongRenderable>(parent);
         Engine::addComponent<SunOccluderComponent>(parent);
 
@@ -114,12 +95,6 @@ int main() {
             }
         }
     }
-    Renderable cube(Library::getMesh("cube"), glm::vec3(0.f), glm::vec3(1.f));
-
-    /* Ground plane */
-    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
-    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
-    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::loadTexture("grid.png"));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();

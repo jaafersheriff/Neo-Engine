@@ -146,20 +146,24 @@ namespace neo {
                     auto& material = objMaterials[materialID];
                     asset.material.ambient = glm::vec3(material.ambient[0], material.ambient[1], material.ambient[2]);
                     asset.material.diffuse = glm::vec3(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
-                    asset.material.specular = glm::vec3(material.specular[0], material.ambient[1], material.ambient[2]);
+                    asset.material.specular = glm::vec3(material.specular[0], material.specular[1], material.specular[2]);
                     asset.material.shininess = material.shininess;
 
+                    TextureFormat format;
+                    format.inputFormat = GL_RGB8;
+                    format.format = GL_RGB;
+
                     if (material.ambient_texname.size()) {
-                        asset.ambient_tex = Library::loadTexture(material.ambient_texname, TextureFormat{});
+                        asset.ambient_tex = Library::loadTexture(material.ambient_texname, format);
                     }
                     if (material.diffuse_texname.size()) {
-                        asset.diffuse_tex = Library::loadTexture(material.diffuse_texname, TextureFormat{});
+                        asset.diffuse_tex = Library::loadTexture(material.diffuse_texname, format);
                     }
                     if (material.specular_texname.size()) {
-                        asset.specular_tex = Library::loadTexture(material.specular_texname, TextureFormat{});
+                        asset.specular_tex = Library::loadTexture(material.specular_texname, format);
                     }
                     if (material.displacement_texname.size()) {
-                        asset.displacement_tex = Library::loadTexture(material.displacement_texname, TextureFormat{});
+                        asset.displacement_tex = Library::loadTexture(material.displacement_texname, format);
                     }
                 }
             }
@@ -174,7 +178,7 @@ namespace neo {
         MICROPROFILE_SCOPEI("Loader", "loadTexture", MP_AUTO);
         /* Create an empty texture if it is not already exist in the library */
         int width, height, components;
-        uint8_t* data = _loadTextureData(width, height, components, fileName);
+        uint8_t* data = _loadTextureData(width, height, components, fileName, format);
 
         Texture2D* texture = new Texture2D(format, glm::uvec2(width, height), data);
         texture->generateMipMaps();
@@ -194,7 +198,7 @@ namespace neo {
         std::vector<glm::uvec2> sizes;
         for (int i = 0; i < 6; i++) {
             int _width, _height, _components;
-            data.push_back(_loadTextureData(_width, _height, _components, files[i], false));
+            data.push_back(_loadTextureData(_width, _height, _components, files[i], {}, false));
             sizes.push_back(glm::uvec2(_width, _height));
         }
 
@@ -210,13 +214,13 @@ namespace neo {
         return texture;
     }
 
-    uint8_t* Loader::_loadTextureData(int& width, int& height, int& components, const std::string& fileName, bool flip) {
+    uint8_t* Loader::_loadTextureData(int& width, int& height, int& components, const std::string& fileName, TextureFormat format, bool flip) {
         /* Use stbi if name is an existing file */
         FILE *f;
         NEO_ASSERT(!fopen_s(&f, (RES_DIR + fileName).c_str(), "rb"), "Error opening texture file");
 
         stbi_set_flip_vertically_on_load(flip);
-        uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &width, &height, &components, STBI_rgb_alpha);   // TODO - allow ability to specify number of components
+        uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &width, &height, &components, format.format == GL_RGB ? STBI_rgb : STBI_rgb_alpha);
         NEO_ASSERT(data, "Error reading texture file");
 
         if (mVerbose) {

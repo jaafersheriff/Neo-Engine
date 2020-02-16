@@ -735,6 +735,28 @@ void LoadMtl(std::map<std::string, int> &material_map,
       continue;
     }
 
+    // displacement texture
+    if ((0 == strncmp(token, "map_disp", 8)) && isSpace(token[8])) {
+      token += 9;
+      material.displacement_texname = token;
+      continue;
+    }
+
+    // displacement texture
+    if ((0 == strncmp(token, "Disp", 4)) && isSpace(token[4])) {
+      token += 5;
+      material.displacement_texname = token;
+      continue;
+    }
+
+    // displacement texture
+    if ((0 == strncmp(token, "map_Disp", 8)) && isSpace(token[8])) {
+      token += 9;
+      material.displacement_texname = token;
+      continue;
+    }
+
+
     // unknown parameter
     const char *_space = strchr(token, ' ');
     if (!_space) {
