@@ -115,17 +115,29 @@ int main() {
             Engine::removeComponent<MainCameraComponent>(*mockCamera.gameObject->getComponentByType<MainCameraComponent>());
             Engine::removeComponent<CameraControllerComponent>(*mockCamera.gameObject->getComponentByType<CameraControllerComponent>());
             Engine::removeComponent<FrustumFitSourceComponent>(*mockCamera.gameObject->getComponentByType<FrustumFitSourceComponent>());
-            Engine::addComponent<MainCameraComponent>(sceneCamera.gameObject);
-            Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
-            Engine::addComponent<FrustumFitSourceComponent>(sceneCamera.gameObject);
+            if (!sceneCamera.gameObject->getComponentByType<MainCameraComponent>()) {
+                Engine::addComponent<MainCameraComponent>(sceneCamera.gameObject);
+            }
+            if (!sceneCamera.gameObject->getComponentByType<CameraControllerComponent>()) {
+                Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
+            }
+            if (!sceneCamera.gameObject->getComponentByType<FrustumFitSourceComponent>()) {
+                Engine::addComponent<FrustumFitSourceComponent>(sceneCamera.gameObject);
+            }
         }
         if (ImGui::Button("Set perspective")) {
             Engine::removeComponent<MainCameraComponent>(*sceneCamera.gameObject->getComponentByType<MainCameraComponent>());
             Engine::removeComponent<CameraControllerComponent>(*sceneCamera.gameObject->getComponentByType<CameraControllerComponent>());
             Engine::removeComponent<FrustumFitSourceComponent>(*sceneCamera.gameObject->getComponentByType<FrustumFitSourceComponent>());
-            Engine::addComponent<MainCameraComponent>(mockCamera.gameObject);
-            Engine::addComponent<CameraControllerComponent>(mockCamera.gameObject, 0.4f, 7.f);
-            Engine::addComponent<FrustumFitSourceComponent>(mockCamera.gameObject);
+            if (!mockCamera.gameObject->getComponentByType<MainCameraComponent>()) {
+                Engine::addComponent<MainCameraComponent>(mockCamera.gameObject);
+            }
+            if (!mockCamera.gameObject->getComponentByType<CameraControllerComponent>()) {
+                Engine::addComponent<CameraControllerComponent>(mockCamera.gameObject, 0.4f, 7.f);
+            }
+            if (!mockCamera.gameObject->getComponentByType<FrustumFitSourceComponent>()) {
+                Engine::addComponent<FrustumFitSourceComponent>(mockCamera.gameObject);
+            }
         }
 
     });

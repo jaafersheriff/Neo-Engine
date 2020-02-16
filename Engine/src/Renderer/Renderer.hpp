@@ -29,7 +29,6 @@ namespace neo {
             static void init(const std::string &, glm::vec3 clearColor = glm::vec3(0.f));
             static void resetState();
             static void render(float);
-            static void renderScene();
             static void shutDown();
 
             /* FBO */

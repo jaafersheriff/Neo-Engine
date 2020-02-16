@@ -154,7 +154,16 @@ namespace neo {
         RENDERER_MP_LEAVE();
  
         /* Render all scene shaders */
-        renderScene();
+        RENDERER_MP_ENTER("renderScene");
+        for (auto& shader : mSceneShaders) {
+            if (shader.second->mActive) {
+                resetState();
+                RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName.c_str());
+                shader.second->render();
+                RENDERER_MP_LEAVE();
+            }
+        }
+        RENDERER_MP_LEAVE();
 
         /* Post process with ping & pong */
         if (activePostShaders.size()) {
@@ -233,20 +242,6 @@ namespace neo {
         mesh->draw();
 
         shader.unbind();
-        RENDERER_MP_LEAVE();
-    }
-
-    void Renderer::renderScene() {
-        RENDERER_MP_ENTER("renderScene");
-
-        for (auto& shader : mSceneShaders) {
-            if (shader.second->mActive) {
-                resetState();
-                RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName.c_str());
-                shader.second->render();
-                RENDERER_MP_LEAVE();
-            }
-        }
         RENDERER_MP_LEAVE();
     }
 
