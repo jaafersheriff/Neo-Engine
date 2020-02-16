@@ -18,6 +18,9 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MyPhongShader.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\SunComponent.hpp">
@@ -47,5 +50,7 @@
     <None Include="shaders\blur.vert" />
     <None Include="shaders\blur.frag" />
     <None Include="shaders\combine.frag" />
+    <None Include="shaders\myphong.vert" />
+    <None Include="shaders\myphong.frag" />
   </ItemGroup>
 </Project>

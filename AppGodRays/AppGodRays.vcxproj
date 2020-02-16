@@ -120,6 +120,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MyPhongShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\BlurShader.hpp" />
@@ -137,6 +138,8 @@
     <None Include="shaders\godrayoccluder.frag" />
     <None Include="shaders\godraysun.frag" />
     <None Include="shaders\model.vert" />
+    <None Include="shaders\myphong.vert" />
+    <None Include="shaders\myphong.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

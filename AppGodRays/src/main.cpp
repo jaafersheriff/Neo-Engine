@@ -127,13 +127,13 @@ int main() {
 
     /* Init renderer */
     Renderer::init("shaders/");
-    Renderer::addPreProcessShader<GodRaySunShader>("billboard.vert", "godraysun.frag");
-    Renderer::addPreProcessShader<GodRayOccluderShader>("model.vert", "godrayoccluder.frag");
-    Renderer::addPreProcessShader<BlurShader>("blur.vert", "blur.frag");
-    Renderer::addSceneShader<MyPhongShader>();
-    Renderer::addSceneShader<AlphaTestShader>();
-    Renderer::addPostProcessShader<CombineShader>("combine.frag");
-    Renderer::addPostProcessShader<GammaCorrectShader>();
+    // Renderer::addPreProcessShader<GodRaySunShader>("billboard.vert", "godraysun.frag");
+    // Renderer::addPreProcessShader<GodRayOccluderShader>("model.vert", "godrayoccluder.frag");
+    // Renderer::addPreProcessShader<BlurShader>("blur.vert", "blur.frag");
+    Renderer::addSceneShader<MyPhongShader>("myphong.vert", "myphong.frag");
+    // Renderer::addSceneShader<AlphaTestShader>();
+    // Renderer::addPostProcessShader<CombineShader>("combine.frag");
+    // Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
 

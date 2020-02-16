@@ -46,8 +46,7 @@ public:
 
             for (auto& child : renderable->get<ParentComponent>()->childrenObjects) {
                 if (auto mesh = child->getComponentByType<MeshComponent>()) {
-                    RenderDescription description;
-                    description.mesh = &mesh->getMesh();
+                    RenderDescription description(mesh->getMesh());
 
                     glm::mat4 M = pM;
                     glm::mat3 N = pN;
@@ -59,16 +58,16 @@ public:
                     description.N = N;
 
                     if (auto ambientMap = child->getComponentByType<AmbientMapComponent>()) {
-                        description.ambientMap = &ambientMap->mTexture;
+                        description.ambientMap = ambientMap->mTexture;
                     }
                     if (auto diffuseMap = child->getComponentByType<DiffuseMapComponent>()) {
-                        description.diffuseMap = &diffuseMap->mTexture;
+                        description.diffuseMap = diffuseMap->mTexture;
                     }
                     if (auto specularMap = child->getComponentByType<SpecularMapComponent>()) {
-                        description.specularMap = &specularMap->mTexture;
+                        description.specularMap = specularMap->mTexture;
                     }
                     if (auto normalMap = child->getComponentByType<NormalMapComponent>()) {
-                        description.normalMap = &normalMap->mTexture;
+                        description.normalMap = normalMap->mTexture;
                     }
 
                     Material material;
@@ -100,21 +99,21 @@ public:
                 }
             }
 
-            RenderDescription description;
+            RenderDescription description(renderable->get<MeshComponent>()->getMesh());
             description.M = renderableSpatial->getModelMatrix();
             description.N = renderableSpatial->getNormalMatrix();
 
             if (auto ambientMap = renderable->mGameObject.getComponentByType<AmbientMapComponent>()) {
-                description.ambientMap = &ambientMap->mTexture;
+                description.ambientMap = ambientMap->mTexture;
             }
             if (auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                description.diffuseMap = &diffuseMap->mTexture;
+                description.diffuseMap = diffuseMap->mTexture;
             }
             if (auto specularMap = renderable->mGameObject.getComponentByType<SpecularMapComponent>()) {
-                description.specularMap = &specularMap->mTexture;
+                description.specularMap = specularMap->mTexture;
             }
             if (auto normalMap = renderable->mGameObject.getComponentByType<NormalMapComponent>()) {
-                description.normalMap = &normalMap->mTexture;
+                description.normalMap = normalMap->mTexture;
             }
 
             /* Bind material */
@@ -130,14 +129,21 @@ public:
 private:
 
     struct RenderDescription {
+        RenderDescription(const Mesh& mesh) :
+            mesh(mesh),
+            ambientMap(*Library::getTexture("white")),
+            diffuseMap(*Library::getTexture("white")),
+            specularMap(*Library::getTexture("white")),
+            normalMap(*Library::getTexture("black"))
+        {}
+        const Mesh& mesh;
+        Texture& ambientMap;
+        Texture& diffuseMap;
+        Texture& specularMap;
+        Texture& normalMap;
         glm::mat4 M;
         glm::mat3 N;
         Material material;
-        Texture* ambientMap;
-        Texture* diffuseMap;
-        Texture* specularMap;
-        Texture* normalMap;
-        Mesh* mesh;
     };
 
     void _render(RenderDescription& description) {
@@ -147,11 +153,11 @@ private:
         loadUniform("diffuse", description.material.diffuse);
         loadUniform("specular", description.material.specular);
         loadUniform("shine", description.material.shininess);
-        loadTexture("ambientMap", description.ambientMap ? *description.ambientMap : *Library::getTexture("white"));
-        loadTexture("diffuseMap", description.diffuseMap ? *description.diffuseMap : *Library::getTexture("white"));
-        loadTexture("specularMap", description.specularMap ? *description.specularMap : *Library::getTexture("white"));
-        loadTexture("alphaMap", description.normalMap ? *description.normalMap : *Library::getTexture("black"));
+        loadTexture("ambientMap", description.ambientMap);
+        loadTexture("diffuseMap", description.diffuseMap);
+        loadTexture("specularMap", description.specularMap);
+        loadTexture("normalMap", description.normalMap);
 
-        description.mesh->draw();
+        description.mesh.draw();
     }
 };
