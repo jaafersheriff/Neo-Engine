@@ -1,4 +1,7 @@
+#include "ECS/GameObject.hpp"
 #include "SpatialComponent.hpp"
+
+#include "ECS/Component/RelationComponent/ParentComponent.hpp"
 
 #include "Messaging/Messenger.hpp"
 
@@ -126,7 +129,14 @@ namespace neo {
     }
 
     void SpatialComponent::_detModelMatrix() const {
-        mModelMatrix = glm::scale(glm::translate(glm::mat4(), mPosition) * glm::mat4(getOrientation()), mScale);
+        glm::mat4 parentM(1.f);
+        if (auto parent = mGameObject->getComponentByType<ParentComponent>()) {
+            if (auto parentSpat = parent->getGameObject().getComponentByType<SpatialComponent>()) {
+                parentM = parentSpat->getModelMatrix();
+            }
+
+        }
+        mModelMatrix = parentM * glm::scale(glm::translate(glm::mat4(), mPosition) * glm::mat4(getOrientation()), mScale);
         mModelMatrixDirty = false;
 
         Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
@@ -134,9 +144,17 @@ namespace neo {
 
     void SpatialComponent::_detNormalMatrix() const {
         if (mScale.x == mScale.y && mScale.y == mScale.z) {
-            mNormalMatrix = glm::mat3(mModelMatrix);
+            mNormalMatrix = glm::mat3(getModelMatrix());
         }
         else {
+            glm::mat3 parentM(1.f);
+            if (auto parent = mGameObject->getComponentByType<ParentComponent>()) {
+                if (auto parentSpat = parent->getGameObject().getComponentByType<SpatialComponent>()) {
+                    parentM = parentSpat->getNormalMatrix();
+                }
+
+            }
+
             mNormalMatrix = getOrientation() * glm::mat3(glm::scale(glm::mat4(), 1.0f / mScale));
         }
         mNormalMatrixDirty = false;

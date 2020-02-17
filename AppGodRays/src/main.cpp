@@ -71,13 +71,12 @@ int main() {
         GameObject* parent = &Engine::createGameObject();
         auto& parentC = Engine::addComponent<ParentComponent>(parent);
         Engine::addComponent<SpatialComponent>(parent, glm::vec3(0.f), glm::vec3(0.2f));
-        Engine::addComponent<renderable::PhongRenderable>(parent);
-        Engine::addComponent<SunOccluderComponent>(parent);
 
         for (auto a : asset) {
             GameObject* child = &Engine::createGameObject();
             Engine::addComponent<ChildComponent>(child, parent);
-            parentC.childrenObjects.push_back(child);
+            Engine::addComponent<renderable::PhongRenderable>(child);
+            Engine::addComponent<SunOccluderComponent>(child);
 
             Engine::addComponent<MeshComponent>(child, a.mesh);
             Engine::addComponent<MaterialComponent>(child, a.material);
