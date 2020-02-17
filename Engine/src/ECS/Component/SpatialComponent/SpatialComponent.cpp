@@ -2,6 +2,7 @@
 #include "SpatialComponent.hpp"
 
 #include "ECS/Component/RelationComponent/ParentComponent.hpp"
+#include "ECS/Component/RelationComponent/ChildComponent.hpp"
 
 #include "Messaging/Messenger.hpp"
 
@@ -113,6 +114,11 @@ namespace neo {
         mNormalMatrixDirty = true;
         Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
     }
+
+    void SpatialComponent::setDirty() {
+        mModelMatrixDirty = true;
+        mNormalMatrixDirty = true;
+    }
         
     const glm::mat4 & SpatialComponent::getModelMatrix() const {
         if (mModelMatrixDirty) {
@@ -130,16 +136,23 @@ namespace neo {
 
     void SpatialComponent::_detModelMatrix() const {
         glm::mat4 parentM(1.f);
-        if (auto parent = mGameObject->getComponentByType<ParentComponent>()) {
-            if (auto parentSpat = parent->getGameObject().getComponentByType<SpatialComponent>()) {
+        if (auto child = mGameObject->getComponentByType<ChildComponent>()) {
+            if (auto parentSpat = child->parentObject->getComponentByType<SpatialComponent>()) {
                 parentM = parentSpat->getModelMatrix();
             }
 
         }
-        mModelMatrix = parentM * glm::scale(glm::translate(glm::mat4(), mPosition) * glm::mat4(getOrientation()), mScale);
+        mModelMatrix = glm::scale(glm::translate(glm::mat4(), mPosition) * glm::mat4(getOrientation()), mScale) * parentM;
         mModelMatrixDirty = false;
 
         Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
+        if (auto parent = mGameObject->getComponentByType<ParentComponent>()) {
+            for (auto child : parent->childrenObjects) {
+                if (auto childSpat = child->getComponentByType<SpatialComponent>()) {
+                    childSpat->setDirty();
+                }
+            }
+        }
     }
 
     void SpatialComponent::_detNormalMatrix() const {
@@ -148,8 +161,8 @@ namespace neo {
         }
         else {
             glm::mat3 parentM(1.f);
-            if (auto parent = mGameObject->getComponentByType<ParentComponent>()) {
-                if (auto parentSpat = parent->getGameObject().getComponentByType<SpatialComponent>()) {
+            if (auto child = mGameObject->getComponentByType<ChildComponent>()) {
+                if (auto parentSpat = child->parentObject->getComponentByType<SpatialComponent>()) {
                     parentM = parentSpat->getNormalMatrix();
                 }
 
@@ -158,6 +171,13 @@ namespace neo {
             mNormalMatrix = getOrientation() * glm::mat3(glm::scale(glm::mat4(), 1.0f / mScale));
         }
         mNormalMatrixDirty = false;
+        if (auto parent = mGameObject->getComponentByType<ParentComponent>()) {
+            for (auto child : parent->childrenObjects) {
+                if (auto childSpat = child->getComponentByType<SpatialComponent>()) {
+                    childSpat->setDirty();
+                }
+            }
+        }
     }
 
     void SpatialComponent::imGuiEditor() {

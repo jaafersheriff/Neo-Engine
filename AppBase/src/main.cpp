@@ -59,13 +59,23 @@ int main() {
     /* Cube object */
     Renderable cube(Library::getMesh("cube"), glm::vec3(0.f, 0.5f, 0.f));
     Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
-
     Material material;
     material.ambient = glm::vec3(0.2f);
     material.diffuse = glm::vec3(1.f, 0.f, 1.f);
     Engine::addComponent<MaterialComponent>(cube.gameObject, material);
     Engine::addComponent<SelectableComponent>(cube.gameObject);
     Engine::addComponent<BoundingBoxComponent>(cube.gameObject, Library::getMesh("cube"));
+    auto& parent = Engine::addComponent<ParentComponent>(cube.gameObject);
+
+    {
+        Renderable child(Library::getMesh("cube"), glm::vec3(0.f, 1.5f, 1.5f));
+        parent.childrenObjects.push_back(child.gameObject);
+        Engine::addComponent<renderable::PhongRenderable>(child.gameObject);
+        Engine::addComponent<SelectableComponent>(child.gameObject);
+        Engine::addComponent<BoundingBoxComponent>(child.gameObject, Library::getMesh("cube"));
+        Engine::addComponent<ChildComponent>(child.gameObject, cube.gameObject);
+        Engine::addComponent<RotationComponent>(child.gameObject, glm::vec3(0.f, 1.f, 0.f));
+    }
 
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
@@ -74,6 +84,7 @@ int main() {
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
+    Engine::addSystem<RotationSystem>();
 
     /* Init renderer */
     Renderer::init("shaders/");

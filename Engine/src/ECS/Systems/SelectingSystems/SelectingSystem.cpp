@@ -12,18 +12,15 @@ namespace neo {
 
     void SelectingSystem::update(const float dt) {
         if (auto mouseRay = Engine::getSingleComponent<MouseRayComponent>()) {
-            // Decide to remove unselected objects
-            for (auto selected : Engine::getComponents<SelectedComponent>()) {
-                if (mRemoveDecider(selected)) {
-                    Engine::removeComponent<SelectedComponent>(*selected);
-                }
-            }
 
+            SelectableComponent* selectedSelectable = nullptr;
+            float intersectDist = 0.f;
             float maxDistance = mMaxDist;
             auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
             if (mainCamera) {
                 maxDistance = glm::min(maxDistance, mainCamera->get<CameraComponent>()->getNearFar().y);
             }
+
 
             // Select a new object
             for (auto& selectable : Engine::getComponentTuples<SelectableComponent, BoundingBoxComponent, SpatialComponent>()) {
@@ -42,18 +39,35 @@ namespace neo {
 
 
                 // Ray march
-                bool objectFound = false;
                 for (float i = 0.f; i < maxDistance; i += maxDistance / static_cast<float>(mMaxMarches)) {
                     glm::vec3 raySample = mouseRay->mPosition + mouseRay->mDirection * i;
                     if (selectableBox->intersect(raySample)) {
-                        // Add and operate on new selected
-                        mSelectOperation(&Engine::addComponent<SelectedComponent>(&selectable->mGameObject), mouseRay, i);
-                        objectFound = true;
+                        selectedSelectable = selectable->get<SelectableComponent>();
+                        intersectDist = i;
                         break;
                     }
                 }
-                if (objectFound) {
+                if (selectedSelectable) {
                     break;
+                }
+            }
+
+
+            SelectedComponent* selected = nullptr;
+            if (selectedSelectable) {
+                if (auto s = selectedSelectable->getGameObject().getComponentByType<SelectedComponent>()) {
+                    selected = s;
+                }
+                else {
+                    selected = &Engine::addComponent<SelectedComponent>(&selectedSelectable->getGameObject());
+                }
+                mSelectOperation(selected, mouseRay, intersectDist);
+            }
+
+            // Decide to remove unselected objects
+            for (auto eSelected : Engine::getComponents<SelectedComponent>()) {
+                if (!selected || (&eSelected->getGameObject() != &selected->getGameObject()) && mRemoveDecider(eSelected)) {
+                    Engine::removeComponent<SelectedComponent>(*eSelected);
                 }
             }
         }

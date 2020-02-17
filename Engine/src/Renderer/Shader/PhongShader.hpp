@@ -109,8 +109,8 @@ namespace neo {
                 if (auto matComp = renderable->mGameObject.getComponentByType<MaterialComponent>()) {
                     material = matComp->mMaterial;
                 }
-                else if (auto parent = renderable->mGameObject.getComponentByType<ParentComponent>()) {
-                    if (auto matComp = parent->getGameObject().getComponentByType<MaterialComponent>()) {
+                else if (auto child = renderable->mGameObject.getComponentByType<ChildComponent>()) {
+                    if (auto matComp = child->parentObject->getComponentByType<MaterialComponent>()) {
                         material = matComp->mMaterial;
                     }
                 }

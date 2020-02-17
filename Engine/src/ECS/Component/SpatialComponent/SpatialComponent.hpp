@@ -31,6 +31,7 @@ namespace neo {
             void setScale(const float);
             void setOrientation(const glm::mat3 &);
             void setUVW(const glm::vec3 &, const glm::vec3 &, const glm::vec3 &);
+            void setDirty();
 
             /* Getters */
             const glm::vec3 getPosition() const { return mPosition; }

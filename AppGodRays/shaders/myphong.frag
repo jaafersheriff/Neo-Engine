@@ -28,5 +28,5 @@ void main() {
     vec3 n = texture(normalMap, fragTex).rgb; //normalize(fragNor); 
     vec3 phong = getPhong(n, fragPos.rgb, camPos, lightPos, lightAtt, lightCol, dif, spec, shine);
 
-    color = vec4(n, 1.0);
+    color = vec4(dif, 1.0);
 }
