@@ -511,11 +511,11 @@ namespace neo {
                 if (ImGui::Button("Create new GameObject")) {
                     removeComponent<SelectedComponent>(*getSingleComponent<SelectedComponent>());
                     auto& go = createGameObject();
-                    addComponent<BoundingBoxComponent>(&go, Library::getMesh("sphere"));
+                    addComponent<BoundingBoxComponent>(&go, *Library::getMesh("sphere"));
                     addComponent<SpatialComponent>(&go);
                     addComponent<SelectableComponent>(&go);
                     addComponent<SelectedComponent>(&go);
-                    addComponent<MeshComponent>(&go, Library::getMesh("sphere"));
+                    addComponent<MeshComponent>(&go, *Library::getMesh("sphere"));
                     addComponent<renderable::WireframeRenderable>(&go);
                 }
                 ImGui::EndMenu();

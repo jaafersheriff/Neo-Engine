@@ -111,13 +111,14 @@ namespace neo {
                 loadTexture("shadowMap", *Library::getFBO("shadowMap")->mTextures[0]);
 
                 const auto& cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
-                for (auto& renderable : Engine::getComponentTuples<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>()) {
-                    auto renderableSpatial = renderable->get<SpatialComponent>();
+                for (auto& renderableIt : Engine::getComponentTuples<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>()) {
+                    auto renderable = renderableIt->get<renderable::PhongShadowRenderable>();
+                    auto renderableSpatial = renderableIt->get<SpatialComponent>();
 
                     // VFC
                     if (cameraFrustum) {
                         MICROPROFILE_SCOPEI("PhongShaderShader", "VFC", MP_AUTO);
-                        if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
+                        if (const auto& boundingBox = renderableIt->mGameObject.getComponentByType<BoundingBoxComponent>()) {
                             float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
                             if (!cameraFrustum->isInFrustum(renderableSpatial->getPosition(), radius)) {
                                 continue;
@@ -129,24 +130,16 @@ namespace neo {
                     loadUniform("N", renderableSpatial->getNormalMatrix());
 
                     /* Bind texture */
-                    if (const auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                        loadTexture("diffuseMap", diffuseMap->mTexture);
-                        loadUniform("useTexture", true);
-                    }
-                    else {
-                        loadUniform("useTexture", false);
-                    }
+                    loadTexture("diffuseMap", renderable->mDiffuseMap);
 
                     /* Bind material */
-                    if (auto material = renderable->mGameObject.getComponentByType<MaterialComponent>()) {
-                        loadUniform("ambient", material->mAmbient);
-                        loadUniform("diffuseColor", material->mDiffuse);
-                        loadUniform("specularColor", material->mSpecular);
-                        loadUniform("shine", material->mShine);
-                    }
+                    loadUniform("ambient", renderable->mMaterial.mAmbient);
+                    loadUniform("diffuseColor", renderable->mMaterial.mDiffuse);
+                    loadUniform("specularColor", renderable->mMaterial.mSpecular);
+                    loadUniform("shine", renderable->mMaterial.mShininess);
 
                     /* DRAW */
-                    renderable->get<MeshComponent>()->getMesh().draw();
+                    renderableIt->get<MeshComponent>()->mMesh.draw();
                 }
 
                 unbind();

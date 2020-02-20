@@ -4,12 +4,16 @@
 
 namespace neo {
 
+    class Texture;
+
     namespace renderable {
 
         class AlphaTestRenderable : public Component {
         public:
-            AlphaTestRenderable(GameObject *go) :
-                Component(go)
+            const Texture& mDiffuseMap;
+            AlphaTestRenderable(GameObject *go, const Texture& texture) :
+                Component(go),
+                mDiffuseMap(texture)
             {}
 
         };

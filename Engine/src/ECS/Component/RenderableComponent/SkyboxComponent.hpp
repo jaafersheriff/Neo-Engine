@@ -6,8 +6,10 @@ namespace neo {
     namespace renderable {
         class SkyboxComponent : public Component {
         public:
-            SkyboxComponent(GameObject *go) :
-                Component(go)
+            const Texture& mCubeMap;
+            SkyboxComponent(GameObject *go, const Texture& cubeMap) :
+                Component(go),
+                mCubeMap(cubeMap)
             {}
         };
     }

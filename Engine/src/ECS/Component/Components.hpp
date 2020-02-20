@@ -16,14 +16,11 @@
 
 #include "SpatialComponent/SpatialComponent.hpp"
 
-#include "ModelComponent/LineMeshComponent.hpp"
-#include "ModelComponent/MaterialComponent.hpp"
-#include "ModelComponent/TextureComponent.hpp"
-#include "ModelComponent/MeshComponent.hpp"
-
 #include "RelationComponent/ParentComponent.hpp"
 #include "RelationComponent/ChildComponent.hpp"
 
+#include "RenderableComponent/MeshComponent.hpp"
+#include "RenderableComponent/LineMeshComponent.hpp"
 #include "RenderableComponent/AlphaTestRenderable.hpp"
 #include "RenderableComponent/OutlineRenderable.hpp"
 #include "RenderableComponent/PhongRenderable.hpp"

@@ -33,11 +33,11 @@ namespace neo {
         }
 
 
-        BoundingBoxComponent(GameObject *go, const Mesh* mesh) :
+        BoundingBoxComponent(GameObject *go, const Mesh& mesh) :
             BoundingBoxComponent(go)
         {
-            mMin = mesh->mMin;
-            mMax = mesh->mMax;
+            mMin = mesh.mMin;
+            mMax = mesh.mMax;
         }
 
         float getRadius() const {

@@ -1,14 +1,12 @@
 #pragma once
 
-#include "ECS/Component/ModelComponent/MeshComponent.hpp"
-
 #include "Renderer/GLObjects/GLHelper.hpp"
 
 #include <optional>
 
 namespace neo {
 
-    class LineMeshComponent : public MeshComponent {
+    class LineMeshComponent : public Component {
 
     public:
 
@@ -25,7 +23,8 @@ namespace neo {
         mutable bool mDirty;
 
         LineMeshComponent(GameObject *go, std::optional<glm::vec3> overrideColor = std::nullopt) :
-            MeshComponent(go, new Mesh(GL_LINE_STRIP)),
+            Component(go),
+            mMesh(new Mesh(GL_LINE_STRIP)),
             mDirty(false),
             mWriteDepth(true),
             mUseParentSpatial(false),
@@ -38,7 +37,7 @@ namespace neo {
             mMesh->addVertexBuffer(VertexType::Color0, 1, 3);
         }
 
-        virtual Mesh & getMesh() const override {
+        const Mesh& getMesh() const {
             if (mDirty && mNodes.size()) {
                 MICROPROFILE_SCOPEI("LineMeshComponent", "_updateMesh", MP_AUTO);
                 std::vector<float> positions;
@@ -58,8 +57,7 @@ namespace neo {
                 mDirty = false;
             }
 
-            return MeshComponent::getMesh();
-
+            return *mMesh;
         }
 
         const std::vector<Node>& getNodes() const { return mNodes; }
@@ -127,6 +125,9 @@ namespace neo {
                 editNode(index, pos, col);
             }
         }
+
+        private:
+            Mesh* mMesh;
 
     };
 }

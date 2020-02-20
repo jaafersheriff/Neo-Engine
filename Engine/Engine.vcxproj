@@ -32,14 +32,12 @@
     <ClInclude Include="src\ECS\Component\Component.hpp" />
     <ClInclude Include="src\ECS\Component\Components.hpp" />
     <ClInclude Include="src\ECS\Component\LightComponent\LightComponent.hpp" />
-    <ClInclude Include="src\ECS\Component\ModelComponent\LineMeshComponent.hpp" />
-    <ClInclude Include="src\ECS\Component\ModelComponent\MaterialComponent.hpp" />
+    <ClInclude Include="src\ECS\Component\RenderableComponent\LineMeshComponent.hpp" />
     <ClInclude Include="src\ECS\Component\RelationComponent\ParentComponent.hpp" />
     <ClInclude Include="src\ECS\Component\RenderableComponent\AlphaTestRenderable.hpp" />
+    <ClInclude Include="src\ECS\Component\RenderableComponent\MeshComponent.hpp" />
     <ClInclude Include="src\ECS\Component\RenderableComponent\OutlineRenderable.hpp" />
     <ClInclude Include="src\ECS\Component\RenderableComponent\PhongRenderable.hpp" />
-    <ClInclude Include="src\ECS\Component\ModelComponent\MeshComponent.hpp" />
-    <ClInclude Include="src\ECS\Component\ModelComponent\TextureComponent.hpp" />
     <ClInclude Include="src\ECS\Component\RenderableComponent\ShadowCasterRenderable.hpp" />
     <ClInclude Include="src\ECS\Component\RenderableComponent\SkyboxComponent.hpp" />
     <ClInclude Include="src\ECS\Component\RenderableComponent\WireframeRenderable.hpp" />

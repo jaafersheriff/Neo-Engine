@@ -34,7 +34,7 @@ namespace neo {
         {}
 
         virtual void render() override {
-            auto skybox = Engine::getComponentTuple<renderable::SkyboxComponent, CubeMapComponent>();
+            auto skybox = Engine::getSingleComponent<renderable::SkyboxComponent>();
             if (!skybox) {
                 return;
             }
@@ -50,7 +50,7 @@ namespace neo {
             loadUniform("V", camera->get<CameraComponent>()->getView());
 
             /* Bind texture */
-            loadTexture("cubeMap", skybox->get<CubeMapComponent>()->mTexture);
+            loadTexture("cubeMap", skybox->mCubeMap);
 
             /* Draw */
             Library::getMesh("cube")->draw();

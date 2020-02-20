@@ -147,7 +147,7 @@ namespace neo {
 
         Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
         if (auto parent = mGameObject->getComponentByType<ParentComponent>()) {
-            for (auto child : parent->childrenObjects) {
+            for (auto child : parent->mChildrenObjects) {
                 if (auto childSpat = child->getComponentByType<SpatialComponent>()) {
                     childSpat->setDirty();
                 }
@@ -172,7 +172,7 @@ namespace neo {
         }
         mNormalMatrixDirty = false;
         if (auto parent = mGameObject->getComponentByType<ParentComponent>()) {
-            for (auto child : parent->childrenObjects) {
+            for (auto child : parent->mChildrenObjects) {
                 if (auto childSpat = child->getComponentByType<SpatialComponent>()) {
                     childSpat->setDirty();
                 }

@@ -9,8 +9,11 @@ namespace neo {
         class WireframeRenderable: public Component {
 
         public:
-            WireframeRenderable(GameObject *go) :
-                Component(go)
+            glm::vec3 mColor;
+
+            WireframeRenderable(GameObject *go, glm::vec3 color = glm::vec3(1.f)) :
+                Component(go),
+                mColor(color)
             {}
 
         };

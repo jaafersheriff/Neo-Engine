@@ -60,13 +60,14 @@ namespace neo {
 
                 const auto& cameraFrustum = camera->getGameObject().getComponentByType<FrustumComponent>();
 
-                for (auto& renderable : Engine::getComponentTuples<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>()) {
-                    auto renderableSpatial = renderable->get<SpatialComponent>();
+                for (auto& renderableIt : Engine::getComponentTuples<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>()) {
+                    auto renderable = renderableIt->get<renderable::ShadowCasterRenderable>();
+                    auto renderableSpatial = renderableIt->get<SpatialComponent>();
 
                     // VFC
                     if (cameraFrustum) {
                         MICROPROFILE_SCOPEI("ShadowCasterShader", "VFC", MP_AUTO);
-                        if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
+                        if (const auto& boundingBox = renderableIt->mGameObject.getComponentByType<BoundingBoxComponent>()) {
                             float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z);
                             if (!cameraFrustum->isInFrustum(renderableSpatial->getPosition(), radius)) {
                                 continue;
@@ -77,16 +78,10 @@ namespace neo {
                     loadUniform("M", renderableSpatial->getModelMatrix());
 
                     /* Bind texture */
-                    if (auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                        loadTexture("diffuseMap", diffuseMap->mTexture);
-                        loadUniform("useTexture", true);
-                    }
-                    else {
-                        loadUniform("useTexture", false);
-                    }
+                    loadTexture("diffuseMap", renderable->mAlphaMap);
 
                     /* DRAW */
-                    renderable->get<MeshComponent>()->getMesh().draw();
+                    renderableIt->get<MeshComponent>()->mMesh.draw();
                 }
 
 

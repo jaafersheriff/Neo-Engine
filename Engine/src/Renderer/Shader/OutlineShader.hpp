@@ -62,7 +62,7 @@ namespace neo {
                 loadUniform("outlineColor", renderableOutline->mColor);
 
                 /* DRAW */
-                renderable->get<MeshComponent>()->getMesh().draw();
+                renderable->get<MeshComponent>()->mMesh.draw();
             }
 
             unbind();

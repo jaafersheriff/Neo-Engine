@@ -7,33 +7,28 @@ namespace neo {
     void FrustumToLineSystem::update(const float dt) {
         for (auto&& camera : Engine::getComponentTuples<CameraComponent, LineMeshComponent, FrustumComponent>()) {
 
-            glm::vec3 color(1.f);
-            if (auto material = camera->mGameObject.getComponentByType<MaterialComponent>()) {
-                color = material->mMaterial.diffuse;
-            }
-
             auto line = camera->get<LineMeshComponent>();
             auto bounds = camera->get<FrustumComponent>();
 
             line->clearNodes();
 
             // We have to do this ridiculousness because line strip (:
-            line->addNode(bounds->NearLeftBottom, color);
-            line->addNode(bounds->NearLeftTop, color);
-            line->addNode(bounds->NearRightTop, color);
-            line->addNode(bounds->NearRightBottom, color);
-            line->addNode(bounds->NearLeftBottom, color);
-            line->addNode(bounds->FarLeftBottom, color);
-            line->addNode(bounds->FarLeftTop, color);
-            line->addNode(bounds->NearLeftTop, color);
-            line->addNode(bounds->FarLeftTop, color);
-            line->addNode(bounds->FarRightTop, color);
-            line->addNode(bounds->NearRightTop, color);
-            line->addNode(bounds->FarRightTop, color);
-            line->addNode(bounds->FarRightBottom, color);
-            line->addNode(bounds->NearRightBottom, color);
-            line->addNode(bounds->FarRightBottom, color);
-            line->addNode(bounds->FarLeftBottom, color);
+            line->addNode(bounds->NearLeftBottom);
+            line->addNode(bounds->NearLeftTop);
+            line->addNode(bounds->NearRightTop);
+            line->addNode(bounds->NearRightBottom);
+            line->addNode(bounds->NearLeftBottom);
+            line->addNode(bounds->FarLeftBottom);
+            line->addNode(bounds->FarLeftTop);
+            line->addNode(bounds->NearLeftTop);
+            line->addNode(bounds->FarLeftTop);
+            line->addNode(bounds->FarRightTop);
+            line->addNode(bounds->NearRightTop);
+            line->addNode(bounds->FarRightTop);
+            line->addNode(bounds->FarRightBottom);
+            line->addNode(bounds->NearRightBottom);
+            line->addNode(bounds->FarRightBottom);
+            line->addNode(bounds->FarLeftBottom);
         }
     }
 }

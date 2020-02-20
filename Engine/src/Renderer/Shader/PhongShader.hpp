@@ -78,13 +78,14 @@ namespace neo {
 
             const auto& cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
 
-            for (auto& renderable : Engine::getComponentTuples<renderable::PhongRenderable, MeshComponent, SpatialComponent>()) {
-                auto renderableSpatial = renderable->get<SpatialComponent>();
+            for (auto& renderableIt : Engine::getComponentTuples<renderable::PhongRenderable, MeshComponent, SpatialComponent>()) {
+                auto renderable = renderableIt->get<renderable::PhongRenderable>();
+                auto renderableSpatial = renderableIt->get<SpatialComponent>();
 
                 // VFC
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("PhongShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
+                    if (const auto& boundingBox = renderableIt->mGameObject.getComponentByType<BoundingBoxComponent>()) {
                         float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
                         if (!cameraFrustum->isInFrustum(renderableSpatial->getPosition(), radius)) {
                             continue;
@@ -96,32 +97,18 @@ namespace neo {
                 loadUniform("N", renderableSpatial->getNormalMatrix());
 
                 /* Bind texture */
-                if (auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                    loadTexture("diffuseMap", diffuseMap->mTexture);
-                    loadUniform("useTexture", true);
-                }
-                else {
-                    loadUniform("useTexture", false);
-                }
+                loadTexture("diffuseMap", renderable->mDiffuseMap);
 
                 /* Bind material */
-                Material material;
-                if (auto matComp = renderable->mGameObject.getComponentByType<MaterialComponent>()) {
-                    material = matComp->mMaterial;
-                }
-                else if (auto child = renderable->mGameObject.getComponentByType<ChildComponent>()) {
-                    if (auto matComp = child->parentObject->getComponentByType<MaterialComponent>()) {
-                        material = matComp->mMaterial;
-                    }
-                }
+                Material& material = renderable->mMaterial;
 
-                loadUniform("ambient", material.ambient);
-                loadUniform("diffuseColor", material.diffuse);
-                loadUniform("specularColor", material.specular);
-                loadUniform("shine", material.shininess);
+                loadUniform("ambient", material.mAmbient);
+                loadUniform("diffuseColor", material.mDiffuse);
+                loadUniform("specularColor", material.mSpecular);
+                loadUniform("shine", material.mShininess);
 
                 /* DRAW */
-                renderable->get<MeshComponent>()->getMesh().draw();
+                renderableIt->get<MeshComponent>()->mMesh.draw();
             }
         }
     };

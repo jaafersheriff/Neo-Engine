@@ -9,8 +9,6 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
-#include "ECS/Component/ModelComponent/MaterialComponent.hpp"
-
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ext/tiny_obj_loader.h"
 
@@ -144,10 +142,14 @@ namespace neo {
             for (auto materialID : shape.mesh.material_ids) {
                 if (materialID >= 0) {
                     auto& material = objMaterials[materialID];
-                    asset.material.ambient = glm::vec3(material.ambient[0], material.ambient[1], material.ambient[2]);
-                    asset.material.diffuse = glm::vec3(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
-                    asset.material.specular = glm::vec3(material.specular[0], material.specular[1], material.specular[2]);
-                    asset.material.shininess = material.shininess;
+                    asset.material.mAmbient = glm::vec3(material.ambient[0], material.ambient[1], material.ambient[2]);
+                    asset.material.mDiffuse = glm::vec3(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
+                    asset.material.mSpecular = glm::vec3(material.specular[0], material.specular[1], material.specular[2]);
+                    asset.material.mShininess = material.shininess;
+                    asset.material.mTransmittance = glm::vec3(material.transmittance[0], material.transmittance[1], material.transmittance[2]);
+                    asset.material.mEmission = glm::vec3(material.emission[0], material.emission[1], material.emission[2]);
+                    asset.material.mIOR = material.ior;
+                    asset.material.mDissolve = material.dissolve;
 
                     TextureFormat format;
                     format.inputFormat = GL_RGB8;

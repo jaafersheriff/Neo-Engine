@@ -48,12 +48,10 @@ namespace neo {
                 loadUniform("M", spatial->getModelMatrix());
 
                 /* Bind texture */
-                if (const auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                    loadTexture("diffuseMap", diffuseMap->mTexture);
-                }
+                loadTexture("diffuseMap", renderable->get<renderable::AlphaTestRenderable>()->mDiffuseMap);
 
                 /* DRAW */
-                renderable->get<MeshComponent>()->getMesh().draw();
+                renderable->get<MeshComponent>()->mMesh.draw();
             }
 
             unbind();
