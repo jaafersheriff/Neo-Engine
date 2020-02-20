@@ -24,7 +24,7 @@ class GodRayOccluderShader : public Shader {
                 return;
             }
 
-            auto fbo = Library::createFBO("godray");
+            auto fbo = Library::getFBO("godray");
             fbo->bind();
             glm::ivec2 frameSize = Window::getFrameSize() / 2;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
@@ -35,46 +35,35 @@ class GodRayOccluderShader : public Shader {
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
 
-            for (auto& renderable : Engine::getComponentTuples<SunOccluderComponent, ParentComponent>()) {
-                auto parent = renderable->get<ParentComponent>();
-                glm::mat4 pM(1.f);
-                if (auto spatial = parent->getGameObject().getComponentByType<SpatialComponent>()) {
-                    pM = spatial->getModelMatrix();
-                }
-
-                for (auto& child : renderable->get<ParentComponent>()->childrenObjects) {
-                    if (auto mesh = child->getComponentByType<MeshComponent>()) {
-
-                        glm::mat4 M(pM);
-                        if (auto spatial = child->getComponentByType<SpatialComponent>()) {
-                            M = spatial->getModelMatrix() * pM;
-                        }
-
-                        _render(M, mesh->getMesh(), child->getComponentByType<DiffuseMapComponent>());
-                    }
-                }
-            }
-
             for (auto& renderable : Engine::getComponentTuples<SunOccluderComponent, MeshComponent, SpatialComponent>()) {
                 auto renderableMesh = renderable->get<MeshComponent>();
                 auto renderableSpatial = renderable->get<SpatialComponent>();
 
-                _render(renderableSpatial->getModelMatrix(), renderableMesh->getMesh(), renderable->mGameObject.getComponentByType<DiffuseMapComponent>());
+                // VFC
+                if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
+                    if (const auto& frustumPlanes = camera->mGameObject.getComponentByType<FrustumComponent>()) {
+                        float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
+                        if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
+                            continue;
+                        }
+                    }
+                }
+
+                loadUniform("M", renderableSpatial->getModelMatrix());
+
+                /* Bind texture */
+                if (auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
+                    loadTexture("diffuseMap", diffuseMap->mTexture);
+                    loadUniform("useTexture", true);
+                }
+                else {
+                    loadUniform("useTexture", false);
+                }
+
+                /* DRAW */
+                renderableMesh->getMesh().draw();
             }
-        }
 
-    private:
-
-        void _render(const glm::mat4& M, const Mesh& mesh, const DiffuseMapComponent* diffuseMap = nullptr) {
-            loadUniform("M", M);
-
-            Texture* texture = Library::getTexture("white");
-            if (diffuseMap) {
-                texture = &diffuseMap->mTexture;
-            }
-
-            loadTexture("diffuseMap", *texture);
-
-            mesh.draw();
+            unbind();
         }
 };

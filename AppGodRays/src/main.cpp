@@ -1,18 +1,17 @@
 #include <Engine.hpp>
 
+#include "Renderer/Shader/PhongShader.hpp"
+#include "Renderer/Shader/AlphaTestShader.hpp"
 #include "Renderer/Shader/GammaCorrectShader.hpp"
 
 #include "SunComponent.hpp"
 #include "SunOccluderComponent.hpp"
 #include "GodRaySunShader.hpp"
-#include "MyPhongShader.hpp"
 #include "GodRayOccluderShader.hpp"
 #include "BlurShader.hpp"
 #include "CombineShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
-
-#include "Loader/Loader.hpp"
 
 using namespace neo;
 
@@ -52,6 +51,19 @@ struct Light {
     }
 };
 
+struct Renderable {
+    GameObject *gameObject;
+
+    Renderable(Mesh *mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
+        gameObject = &Engine::createGameObject();
+        Engine::addComponent<MeshComponent>(gameObject, mesh);
+        Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
+        Engine::addComponent<renderable::PhongRenderable>(gameObject);
+        Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+        Engine::addComponent<SunOccluderComponent>(gameObject);
+    }
+};
+
 int main() {
     EngineConfig config;
     config.APP_NAME = "GodRays";
@@ -59,41 +71,21 @@ int main() {
     Engine::init(config);
 
     /* Game objects */
-    Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+    Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
     Light(glm::vec3(0.f, 2.f, -20.f), 12.f, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
-    /* Sponza object */
-    {
-        auto asset = Loader::loadMultiAsset("sponza.obj");
-
-        GameObject* parent = &Engine::createGameObject();
-        auto& parentC = Engine::addComponent<ParentComponent>(parent);
-        Engine::addComponent<SpatialComponent>(parent, glm::vec3(0.f), glm::vec3(0.2f));
-
-        for (auto a : asset) {
-            GameObject* child = &Engine::createGameObject();
-            Engine::addComponent<ChildComponent>(child, parent);
-            Engine::addComponent<renderable::PhongRenderable>(child);
-            Engine::addComponent<SunOccluderComponent>(child);
-
-            Engine::addComponent<MeshComponent>(child, a.mesh);
-            Engine::addComponent<MaterialComponent>(child, a.material);
-            if (a.diffuse_tex) {
-                Engine::addComponent<DiffuseMapComponent>(child, *a.diffuse_tex);
-            }
-            if (a.specular_tex) {
-                Engine::addComponent<SpecularMapComponent>(child, *a.specular_tex);
-            }
-            if (a.ambient_tex) {
-                Engine::addComponent<AmbientMapComponent>(child, *a.ambient_tex);
-            }
-            if (a.displacement_tex) {
-                Engine::addComponent<NormalMapComponent>(child, *a.displacement_tex);
-            }
-        }
+    /* Cube object */
+    for (int i = 0; i < 15; i++) {
+        Renderable cube(Library::getMesh("PineTree3.obj"), glm::vec3(Util::genRandom(-7.5f, 7.5f), 0.5f, Util::genRandom(-7.5f, 7.5f)), glm::vec3(Util::genRandom(0.7f, 1.3f)), glm::vec3(0.f, Util::genRandom(0.f, 360.f), 0.f));
+        Engine::addComponent<DiffuseMapComponent>(cube.gameObject, *Library::getTexture("PineTexture.png"));
     }
+
+    /* Ground plane */
+    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
+    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
+    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::getTexture("grid.png"));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
@@ -101,13 +93,13 @@ int main() {
 
     /* Init renderer */
     Renderer::init("shaders/");
-    // Renderer::addPreProcessShader<GodRaySunShader>("billboard.vert", "godraysun.frag");
-    // Renderer::addPreProcessShader<GodRayOccluderShader>("model.vert", "godrayoccluder.frag");
-    // Renderer::addPreProcessShader<BlurShader>("blur.vert", "blur.frag");
-    Renderer::addSceneShader<MyPhongShader>("myphong.vert", "myphong.frag");
-    // Renderer::addSceneShader<AlphaTestShader>();
-    // Renderer::addPostProcessShader<CombineShader>("combine.frag");
-    // Renderer::addPostProcessShader<GammaCorrectShader>();
+    Renderer::addPreProcessShader<GodRaySunShader>("billboard.vert", "godraysun.frag");
+    Renderer::addPreProcessShader<GodRayOccluderShader>("model.vert", "godrayoccluder.frag");
+    Renderer::addPreProcessShader<BlurShader>("blur.vert", "blur.frag");
+    Renderer::addSceneShader<PhongShader>();
+    Renderer::addSceneShader<AlphaTestShader>();
+    Renderer::addPostProcessShader<CombineShader>("combine.frag");
+    Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
 
