@@ -121,6 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CombineShader.hpp" />
+    <ClInclude Include="src\GBufferComponent.hpp" />
     <ClInclude Include="src\GBufferShader.hpp" />
     <ClInclude Include="src\LightPassShader.hpp" />
   </ItemGroup>

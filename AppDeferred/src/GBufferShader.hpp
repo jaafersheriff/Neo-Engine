@@ -4,6 +4,8 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Window/Window.hpp"
 
+#include "GBufferComponent.hpp"
+
 #include "Messaging/Messenger.hpp"
 
 using namespace neo;
@@ -46,35 +48,19 @@ class GBufferShader : public Shader {
                 loadUniform("V", camera->get<CameraComponent>()->getView());
             }
 
-            for (auto& renderable : Engine::getComponentTuples<MeshComponent, SpatialComponent>()) {
-                loadUniform("M", renderable->get<SpatialComponent>()->getModelMatrix());
+            for (auto& renderableIt : Engine::getComponentTuples<GBufferComponent, MeshComponent, SpatialComponent>()) {
+                auto renderable = renderableIt->get<GBufferComponent>();
+                loadUniform("M", renderableIt->get<SpatialComponent>()->getModelMatrix());
 
-                /* Bind diffuse map or material */
-                auto matComp = renderable->mGameObject.getComponentByType<MaterialComponent>();
-                if (matComp) {
-                    loadUniform("ambient", matComp->mAmbient);
-                }
-                if (auto diffMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                    loadUniform("useDiffuseMap", true);
-                    loadTexture("diffuseMap", diffMap->mTexture);
-                }
-                else {
-                    loadUniform("useDiffuseMap", false);
-                    if (matComp) {
-                        loadUniform("diffuseMaterial", matComp->mDiffuse);
-                    }
-                }
+                loadUniform("ambientColor", renderable->mMaterial.mAmbient);
+                loadUniform("diffuseColor", renderable->mMaterial.mDiffuse);
+
+                loadTexture("diffuseMap", renderable->mDiffuseMap);
 
                 /* Bind normal map */
+                loadUniform("N", renderable->get<SpatialComponent>()->getNormalMatrix());
                 auto normalMap = renderable->mGameObject.getComponentByType<neo::NormalMapComponent>();
-                if (normalMap) {
-                    loadTexture("normalMap", normalMap->mTexture);
-                    loadUniform("useNormalMap", true);
-                }
-                else {
-                    loadUniform("useNormalMap", false);
-                    loadUniform("N", renderable->get<SpatialComponent>()->getNormalMatrix());
-                }
+                loadTexture("normalMap", normalMap->mTexture);
 
                 /* DRAW */
                 renderable->get<MeshComponent>()->getMesh().draw();
