@@ -37,7 +37,7 @@ namespace neo {
         std::string errString;
         // TODO : use assimp or another optimized asset loader
         bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, (RES_DIR + fileName).c_str());
-        NEO_ASSERT(rc, errString);
+        NEO_ASSERT(rc, errString.c_str());
 
         /* Create empty mesh buffers */
         std::vector<float> vertices;
