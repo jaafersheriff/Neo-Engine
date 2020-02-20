@@ -1,7 +1,9 @@
 #include <Engine.hpp>
 
-#include "Shader/PhongShader.hpp"
-#include "Shader/AlphaTestShader.hpp"
+#include "Renderer/Shader/PhongShader.hpp"
+#include "Renderer/Shader/AlphaTestShader.hpp"
+
+#include "Renderer/GLObjects/Material.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -34,16 +36,6 @@ struct Light {
     }
 };
 
-struct Renderable {
-    GameObject *gameObject;
-
-    Renderable(Mesh *mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
-        gameObject = &Engine::createGameObject();
-        Engine::addComponent<MeshComponent>(gameObject, mesh);
-        Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
-    }
-};
-
 int main() {
     EngineConfig config;
     config.APP_NAME = "Base";
@@ -57,19 +49,36 @@ int main() {
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
     /* Cube object */
-    Renderable cube(Library::getMesh("cube"), glm::vec3(0.f, 0.5f, 0.f));
-    Engine::addComponent<renderable::PhongRenderable>(cube.gameObject);
-    Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
-    Engine::addComponent<SelectableComponent>(cube.gameObject);
-    Engine::addComponent<BoundingBoxComponent>(cube.gameObject, Library::getMesh("cube"));
+    GameObject* cube = &Engine::createGameObject();
+    Engine::addComponent<SpatialComponent>(cube, glm::vec3(0.f, 0.5f, 0.f));
+    Engine::addComponent<MeshComponent>(cube, *Library::getMesh("cube"));
+    Engine::addComponent<renderable::PhongRenderable>(cube, *Library::getTexture("white"), Material(glm::vec3(0.2f), glm::vec3(1.f,0.f,1.f)));
+    Engine::addComponent<SelectableComponent>(cube);
+    Engine::addComponent<BoundingBoxComponent>(cube, *Library::getMesh("cube"));
+    auto& parent = Engine::addComponent<ParentComponent>(cube);
+    
+    // TODO remve after im done testing relations
+    {
+        GameObject* child = &Engine::createGameObject();
+        Engine::addComponent<SpatialComponent>(child, glm::vec3(0.f, 0.5f, 0.f));
+        Engine::addComponent<RotationComponent>(child, glm::vec3(0.f, 0.5f, 0.f));
+        Engine::addComponent<MeshComponent>(child, *Library::getMesh("child"));
+        Engine::addComponent<renderable::PhongRenderable>(child, *Library::getTexture("white"), Material(glm::vec3(0.2f), glm::vec3(1.f, 1.f, 0.f)));
+        Engine::addComponent<SelectableComponent>(child);
+        Engine::addComponent<BoundingBoxComponent>(child, *Library::getMesh("child"));
+        Engine::addComponent<ChildComponent>(child, cube);
+        parent.mChildrenObjects.push_back(child);
+    }
 
     /* Ground plane */
-    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
-    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
-    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::getTexture("grid.png"));
+    GameObject* plane = &Engine::createGameObject();
+    Engine::addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
+    Engine::addComponent<MeshComponent>(plane, *Library::getMesh("quad"));
+    Engine::addComponent<renderable::AlphaTestRenderable>(plane, *Library::getTexture("grid.png"));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
+    Engine::addSystem<RotationSystem>();
 
     /* Init renderer */
     Renderer::init("shaders/");
