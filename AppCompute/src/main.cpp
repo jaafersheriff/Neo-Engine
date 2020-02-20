@@ -25,16 +25,6 @@ struct Light {
     }
 };
 
-struct Renderable {
-    GameObject *gameObject;
-
-    Renderable(Mesh *mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
-        gameObject = &Engine::createGameObject();
-        Engine::addComponent<MeshComponent>(gameObject, mesh);
-        Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
-    }
-};
-
 int main() {
     EngineConfig config;
     config.APP_NAME = "Compute";
