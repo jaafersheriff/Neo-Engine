@@ -1,7 +1,5 @@
 #include "Loader.hpp"
 
-#include "MeshGenerator.hpp"
-
 #include "Library.hpp"
 
 #include "Renderer/GLObjects/Mesh.hpp"
@@ -32,20 +30,6 @@ namespace neo {
 
         /* Create mesh */
         Mesh* mesh = new Mesh;
-
-        /* Check with static meshes first */
-        if (!std::strcmp(fileName.c_str(), "cube")) {
-            MeshGenerator::generateCube(mesh);
-            return mesh;
-        }
-        if (!std::strcmp(fileName.c_str(), "quad")) {
-            MeshGenerator::generateQuad(mesh);
-            return mesh;
-        }
-        if (!std::strcmp(fileName.c_str(), "sphere")) {
-            MeshGenerator::generateSphere(mesh, 2);
-            return mesh;
-        }
 
         /* If mesh was not found in map, read it in */
         std::vector<tinyobj::shape_t> shapes;
@@ -110,7 +94,7 @@ namespace neo {
         std::string errString;
         // TODO : use assimp or another optimized asset loader
         bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, (RES_DIR + fileName).c_str(), RES_DIR.c_str());
-        NEO_ASSERT(rc, errString);
+        NEO_ASSERT(rc, errString.c_str());
 
         std::vector<Asset> ret;
 
@@ -152,8 +136,8 @@ namespace neo {
                     asset.material.mDissolve = material.dissolve;
 
                     TextureFormat format;
-                    format.inputFormat = GL_RGB8;
-                    format.format = GL_RGB;
+                    format.mSizedFormat = GL_RGB8;
+                    format.mBaseFormat = GL_RGB;
 
                     if (material.ambient_texname.size()) {
                         asset.ambient_tex = Library::loadTexture(material.ambient_texname, format);
@@ -222,7 +206,7 @@ namespace neo {
         NEO_ASSERT(!fopen_s(&f, (RES_DIR + fileName).c_str(), "rb"), "Error opening texture file");
 
         stbi_set_flip_vertically_on_load(flip);
-        uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &width, &height, &components, format.format == GL_RGB ? STBI_rgb : STBI_rgb_alpha);
+        uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &width, &height, &components, format.mBaseFormat == GL_RGB ? STBI_rgb : STBI_rgb_alpha);
         NEO_ASSERT(data, "Error reading texture file");
 
         if (mVerbose) {

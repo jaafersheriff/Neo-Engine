@@ -11,11 +11,11 @@
 namespace neo {
 
     struct TextureFormat {
-        GLint inputFormat = GL_RGBA;
-        GLenum format = GL_RGBA;
-        GLint filter = GL_NEAREST;
-        GLenum mode = GL_REPEAT;
-        GLenum type = GL_UNSIGNED_BYTE;
+        GLint mSizedFormat = GL_RGBA8;
+        GLenum mBaseFormat = GL_RGBA;
+        GLint mFilter = GL_NEAREST;
+        GLenum mMode = GL_REPEAT;
+        GLenum mType = GL_UNSIGNED_BYTE;
     };
 
     class Texture {

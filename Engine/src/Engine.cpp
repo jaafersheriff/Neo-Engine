@@ -15,6 +15,7 @@ extern "C" {
 #include "Messaging/Messenger.hpp"
 
 #include "Loader/Loader.hpp"
+#include "Loader/MeshGenerator.hpp"
 
 #include "ext/microprofile.h"
 
@@ -72,17 +73,23 @@ namespace neo {
         Loader::init(mConfig.APP_RES, true);
 
         /* Generate basic meshes */
-        Library::loadMesh("cube");
-        Library::loadMesh("quad");
-        Library::loadMesh("sphere");
+        Mesh* mesh = new Mesh;
+        MeshGenerator::generateCube(mesh);
+        Library::loadMesh(std::string("cube"), mesh);
+        mesh = new Mesh;
+        MeshGenerator::generateQuad(mesh);
+        Library::loadMesh(std::string("quad"), mesh);
+        mesh = new Mesh;
+        MeshGenerator::generateSphere(mesh, 2);
+        Library::loadMesh(std::string("sphere"), mesh);
 
         /* Generate basic textures*/
-        uint8_t data = 0x0;
+        uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
         auto tex = Library::createEmptyTexture<Texture2D>("black", {});
-        tex->update(glm::uvec2(1), &data);
-        data = 0xFF;
+        tex->update(glm::uvec2(1), data);
+        data[0] = data[1] = data[2] = 0xFF;
         tex = Library::createEmptyTexture<Texture2D>("white", {});
-        tex->update(glm::uvec2(1), &data);
+        tex->update(glm::uvec2(1), data);
 
         /* Init Util */
         Util::init();

@@ -125,8 +125,7 @@ namespace neo {
             return "../Engine/shaders/" + fileName;
         }
         else {
-            printf("%s shader file doesn't exist %s\n", fileName.c_str());
-            NEO_ASSERT(false, "");
+            NEO_ASSERT(false, fileName + " shader file doesn't exist");
         }
     }
 

@@ -36,8 +36,7 @@ namespace neo {
                 in vec3 fragNor;
                 in vec2 fragTex;
                 uniform sampler2D diffuseMap;
-                uniform bool useTexture;
-                uniform vec3 ambient;
+                uniform vec3 ambientColor;
                 uniform vec3 diffuseColor;
                 uniform vec3 specularColor;
                 uniform float shine;
@@ -47,12 +46,10 @@ namespace neo {
                 uniform vec3 lightAtt;
                 out vec4 color;
                 void main() {
-                    vec4 albedo = vec4(diffuseColor, 1.f);
-                    if (useTexture) {
-                        albedo = texture(diffuseMap, fragTex);
-                        alphaDiscard(albedo.a);
-                    }
-                    color.rgb = albedo.rgb * ambient + 
+                    vec4 albedo = texture(diffuseMap, fragTex);
+                    albedo.rgb += diffuseColor;
+                    alphaDiscard(albedo.a);
+                    color.rgb = albedo.rgb * ambientColor + 
                                 getPhong(fragNor, fragPos.rgb, camPos, lightPos, lightAtt, lightCol, albedo.rgb, specularColor, shine);
                     color.a = albedo.a;
                 })")
@@ -102,7 +99,7 @@ namespace neo {
                 /* Bind material */
                 Material& material = renderable->mMaterial;
 
-                loadUniform("ambient", material.mAmbient);
+                loadUniform("ambientColor", material.mAmbient);
                 loadUniform("diffuseColor", material.mDiffuse);
                 loadUniform("specularColor", material.mSpecular);
                 loadUniform("shine", material.mShininess);

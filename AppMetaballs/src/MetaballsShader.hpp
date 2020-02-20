@@ -26,9 +26,12 @@ public:
             loadUniform("V", camera->get<CameraComponent>()->getView());
             loadUniform("camPos", camera->get<SpatialComponent>()->getPosition());
         }
+        else {
+            return;
+        }
 
-        if (auto skybox = Engine::getComponentTuple<renderable::SkyboxComponent, CubeMapComponent>()) {
-            loadTexture("cubeMap", skybox->get<CubeMapComponent>()->mTexture);
+        if (auto skybox = Engine::getSingleComponent<renderable::SkyboxComponent>()) {
+            loadTexture("cubeMap", skybox->mCubeMap);
         }
 
         CHECK_GL(glDisable(GL_CULL_FACE));
@@ -42,7 +45,7 @@ public:
             loadUniform("N", metaball->get<SpatialComponent>()->getNormalMatrix());
 
             /* DRAW */
-            metaball->get<MeshComponent>()->getMesh().draw();
+            metaball->get<MeshComponent>()->mMesh.draw();
         }
 
         unbind();

@@ -20,6 +20,7 @@ namespace neo {
             static Mesh* createEmptyMesh(const std::string&);
             static Mesh* getMesh(const std::string&);
             static Mesh* loadMesh(const std::string&, bool = false);
+            static void loadMesh(const std::string&, Mesh* mesh);
             static const std::unordered_map<std::string, Mesh*> getAllMeshes() { return mMeshes; }
 
             template <typename T>
@@ -51,15 +52,15 @@ namespace neo {
         auto it = mTextures.find(name);
         NEO_ASSERT(it == mTextures.end(), "Texture already found");
         void* data;
-        if (format.type == GL_UNSIGNED_BYTE) {
+        if (format.mType == GL_UNSIGNED_BYTE) {
             uint8_t d = 0xFF;
             data = &d;
         }
-        else if (format.type == GL_FLOAT) {
+        else if (format.mType == GL_FLOAT) {
             float d = 1.f;
             data = &d;
         }
-        else if (format.type == GL_INT) {
+        else if (format.mType == GL_INT) {
             int d = 255;
             data = &d;
         }

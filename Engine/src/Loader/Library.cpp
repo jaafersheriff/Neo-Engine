@@ -34,6 +34,10 @@ namespace neo {
         return mesh;
     }
 
+    void Library::loadMesh(const std::string& name, Mesh* mesh) {
+        _insertMesh(name, mesh);
+    }
+
     Mesh* Library::createEmptyMesh(const std::string& name) {
         auto it = mMeshes.find(name);
         NEO_ASSERT(it == mMeshes.end(), "Mesh already found");

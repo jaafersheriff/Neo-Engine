@@ -20,12 +20,12 @@ namespace neo {
         }
 
         virtual void _applyFormat() override {
-            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, mFormat.filter));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, mFormat.filter));
+            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, mFormat.mFilter));
+            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, mFormat.mFilter));
 
-            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, mFormat.mode));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, mFormat.mode));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, mFormat.mode));
+            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, mFormat.mMode));
+            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, mFormat.mMode));
+            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, mFormat.mMode));
         }
 
         virtual void _upload(const void* data) override {
@@ -34,14 +34,14 @@ namespace neo {
 
             bind();
 
-            CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.inputFormat, mWidth, mHeight, mDepth, 0, mFormat.format, mFormat.type, data));
+            CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mSizedFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, data));
 
             CHECK_GL(glBindTexture(GL_TEXTURE_3D, 0));
         }
 
         virtual void _resize() override {
             bind();
-            CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.inputFormat, mWidth, mHeight, mDepth, 0, mFormat.format, mFormat.type, 0));
+            CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mSizedFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, 0));
         }
 
     };

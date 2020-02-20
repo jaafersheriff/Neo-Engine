@@ -52,7 +52,7 @@ int main() {
     GameObject* cube = &Engine::createGameObject();
     Engine::addComponent<SpatialComponent>(cube, glm::vec3(0.f, 0.5f, 0.f));
     Engine::addComponent<MeshComponent>(cube, *Library::getMesh("cube"));
-    Engine::addComponent<renderable::PhongRenderable>(cube, *Library::getTexture("white"), Material(glm::vec3(0.2f), glm::vec3(1.f,0.f,1.f)));
+    Engine::addComponent<renderable::PhongRenderable>(cube, *Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f,0.f,1.f)));
     Engine::addComponent<SelectableComponent>(cube);
     Engine::addComponent<BoundingBoxComponent>(cube, *Library::getMesh("cube"));
     auto& parent = Engine::addComponent<ParentComponent>(cube);
@@ -62,10 +62,10 @@ int main() {
         GameObject* child = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(child, glm::vec3(0.f, 0.5f, 0.f));
         Engine::addComponent<RotationComponent>(child, glm::vec3(0.f, 0.5f, 0.f));
-        Engine::addComponent<MeshComponent>(child, *Library::getMesh("child"));
-        Engine::addComponent<renderable::PhongRenderable>(child, *Library::getTexture("white"), Material(glm::vec3(0.2f), glm::vec3(1.f, 1.f, 0.f)));
+        Engine::addComponent<MeshComponent>(child, *Library::getMesh("cube"));
+        Engine::addComponent<renderable::PhongRenderable>(child, *Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 1.f, 0.f)));
         Engine::addComponent<SelectableComponent>(child);
-        Engine::addComponent<BoundingBoxComponent>(child, *Library::getMesh("child"));
+        Engine::addComponent<BoundingBoxComponent>(child, *Library::getMesh("cube"));
         Engine::addComponent<ChildComponent>(child, cube);
         parent.mChildrenObjects.push_back(child);
     }
@@ -74,7 +74,7 @@ int main() {
     GameObject* plane = &Engine::createGameObject();
     Engine::addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
     Engine::addComponent<MeshComponent>(plane, *Library::getMesh("quad"));
-    Engine::addComponent<renderable::AlphaTestRenderable>(plane, *Library::getTexture("grid.png"));
+    Engine::addComponent<renderable::AlphaTestRenderable>(plane, *Library::loadTexture("grid.png"));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();

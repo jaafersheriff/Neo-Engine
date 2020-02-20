@@ -37,7 +37,7 @@ class NormalShader : public Shader {
                 loadUniform("N", renderable->get<SpatialComponent>()->getNormalMatrix());
 
                 /* DRAW */
-                renderable->get<MeshComponent>()->getMesh().draw();
+                renderable->get<MeshComponent>()->mMesh.draw();
             }
 
             unbind();
