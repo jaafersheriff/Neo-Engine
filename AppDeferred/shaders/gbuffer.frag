@@ -5,7 +5,7 @@ in vec2 fragTex;
 
 uniform sampler2D diffuseMap;
 uniform vec3 diffuseColor;
-uniform float ambientColor;
+uniform vec3 ambientColor;
 
 layout (location = 0) out vec4 gNormal;
 layout (location = 1) out vec4 gDiffuse;

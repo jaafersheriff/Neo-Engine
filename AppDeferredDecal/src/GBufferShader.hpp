@@ -4,6 +4,8 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Window/Window.hpp"
 
+#include "GBufferComponent.hpp"
+
 #include "Messaging/Messenger.hpp"
 
 using namespace neo;
@@ -16,7 +18,7 @@ class GBufferShader : public Shader {
             Shader("GBufferShader", vert, frag) {
 
             // Create gbuffer 
-            auto gbuffer = Library::getFBO("gbuffer");
+            auto gbuffer = Library::createFBO("gbuffer");
 
             TextureFormat format{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT };
             gbuffer->attachColorTexture(Window::getFrameSize(), format); // color
@@ -45,37 +47,19 @@ class GBufferShader : public Shader {
                 loadUniform("V", camera->get<CameraComponent>()->getView());
             }
 
-            for (auto& renderable : Engine::getComponentTuples<MeshComponent, SpatialComponent>()) {
-                loadUniform("M", renderable->get<SpatialComponent>()->getModelMatrix());
+            for (auto& renderableIt : Engine::getComponentTuples<GBufferComponent, MeshComponent, SpatialComponent>()) {
+                auto renderable = renderableIt->get<GBufferComponent>();
+                loadUniform("M", renderableIt->get<SpatialComponent>()->getModelMatrix());
+                loadUniform("N", renderableIt->get<SpatialComponent>()->getNormalMatrix());
 
                 /* Bind diffuse map or material */
-                auto matComp = renderable->mGameObject.getComponentByType<MaterialComponent>();
-                if (matComp) {
-                    loadUniform("ambient", matComp->mAmbient);
-                }
-                if (auto diffMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                    loadTexture("diffuseMap", diffMap->mTexture);
-                    loadUniform("useDiffuseMap", true);
-                }
-                else {
-                    loadUniform("useDiffuseMap", false);
-                    if (matComp) {
-                        loadUniform("diffuseMaterial", matComp->mDiffuse);
-                    }
-                }
+                loadUniform("ambientColor", renderable->mMaterial.mAmbient);
+                loadUniform("diffuseColor", renderable->mMaterial.mDiffuse);
 
-                /* Bind normal map */
-                if (auto normalMap = renderable->mGameObject.getComponentByType<NormalMapComponent>()) {
-                    loadTexture("normalMap", normalMap->mTexture);
-                    loadUniform("useNormalMap", true);
-                }
-                else {
-                    loadUniform("useNormalMap", false);
-                    loadUniform("N", renderable->get<SpatialComponent>()->getNormalMatrix());
-                }
+                loadTexture("diffuseMap", renderable->mDiffuseMap);
 
                 /* DRAW */
-                renderable->get<MeshComponent>()->getMesh().draw();
+                renderableIt->get<MeshComponent>()->mMesh.draw();
             }
 
             unbind();

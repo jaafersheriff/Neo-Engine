@@ -1,5 +1,7 @@
 #include <Engine.hpp>
 
+#include "GBufferComponent.hpp"
+
 #include "DecalShader.hpp"
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
@@ -35,12 +37,17 @@ struct Light {
 
 struct Renderable {
     GameObject *gameObject;
-    SpatialComponent *spat;
+    SpatialComponent *spatial;
+    GBufferComponent *gbuffer;
 
-    Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale) {
+    Renderable(Mesh *mesh, Texture* texture, glm::vec3 pos, glm::vec3 scale) {
         gameObject = &Engine::createGameObject();
-        spat = &Engine::addComponent<SpatialComponent>(gameObject, pos, scale);
-        Engine::addComponent<MeshComponent>(gameObject, mesh);
+        spatial = &Engine::addComponent<SpatialComponent>(gameObject, pos, scale);
+        Engine::addComponent<MeshComponent>(gameObject, *mesh);
+        Material material;
+        material.mAmbient = glm::vec3(0.2f);
+        material.mDiffuse = Util::genRandomVec3();
+        gbuffer = &Engine::addComponent<GBufferComponent>(gameObject, *texture, material);
     }
 };
 
@@ -51,8 +58,7 @@ struct Decal {
     Decal(Texture* texture, glm::vec3 pos, glm::vec3 scale) {
         gameObject = &Engine::createGameObject();
         spat = &Engine::addComponent<SpatialComponent>(gameObject, pos, scale);
-        Engine::addComponent<DecalRenderable>(gameObject);
-        Engine::addComponent<DiffuseMapComponent>(gameObject, *texture);
+        Engine::addComponent<DecalRenderable>(gameObject, *texture);
         Engine::addComponent<RotationComponent>(gameObject, glm::vec3(0, 1, 0));
     }
 };
@@ -70,26 +76,22 @@ int main() {
     std::vector<Light *> lights;
     lights.push_back(new Light(glm::vec3(25.f, 25.f, 0.f), glm::vec3(1.f), glm::vec3(100.f)));
 
-    Renderable cube(Library::getMesh("cube"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
-    Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, Util::genRandomVec3());
-
-    Renderable dragon(Library::getMesh("dragon10k.obj", true), glm::vec3(-4.f, 10.f, -5.f), glm::vec3(10.f));
-    Engine::addComponent<MaterialComponent>(dragon.gameObject, 0.2f, Util::genRandomVec3());
-
-    Renderable stairs(Library::getMesh("staircase.obj", true), glm::vec3(5.f, 10.f, 9.f), glm::vec3(10.f));
-    Engine::addComponent<MaterialComponent>(stairs.gameObject, 0.2f, Util::genRandomVec3());
+    Renderable cube(Library::getMesh("cube"), Library::getTexture("black"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
+    Renderable dragon(Library::loadMesh("dragon10k.obj", true), Library::getTexture("black"), glm::vec3(-4.f, 10.f, -5.f), glm::vec3(10.f));
+    Renderable stairs(Library::loadMesh("staircase.obj", true), Library::getTexture("black"), glm::vec3(5.f, 10.f, 9.f), glm::vec3(10.f));
 
     for (int i = 0; i < 20; i++) {
-        Renderable tree(Library::getMesh("PineTree3.obj", true), glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
-        Engine::addComponent<DiffuseMapComponent>(tree.gameObject, *Library::getTexture("PineTexture.png"));
+        Renderable tree(Library::loadMesh("PineTree3.obj"), Library::loadTexture("PineTexture.png"), glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
+        tree.gbuffer->mMaterial.mDiffuse = glm::vec3(0.f);
     }
 
     // Terrain 
-    Renderable terrain(Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
-    terrain.spat->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
-    Engine::addComponent<MaterialComponent>(terrain.gameObject, 0.7f, glm::vec3(0.7f));
+    Renderable terrain(Library::getMesh("quad"), Library::getTexture("black"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
+    terrain.spatial->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
+    terrain.gbuffer->mMaterial.mAmbient = glm::vec3(0.7f);
+    terrain.gbuffer->mMaterial.mDiffuse = glm::vec3(0.7f);
 
-    Decal decal(Library::getTexture("texture.png"), glm::vec3(0.f, 0.f, -25.f), glm::vec3(15.f));
+    Decal decal(Library::loadTexture("texture.png"), glm::vec3(0.f, 0.f, -25.f), glm::vec3(15.f));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();

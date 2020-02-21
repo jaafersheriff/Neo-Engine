@@ -78,10 +78,11 @@ void main() {
     vec3 N = normalize(fragNor);
     vec3 H = normalize(L + V);
     float lambert = clamp(dot(L, N), 0.f, 1.f);
-    vec3 diffuseContrib = lightCol * lambert * attFactor;
+    vec3 diffuseContrib = lightCol * lambert;
     float s = pow(clamp(dot(H, N), 0.f, 1.f), 33.f);
-    vec3 specularContrib = lightCol * s * attFactor * 0.33f;
-    color.a = 1.f;
+    vec3 specularContrib = lightCol * s * 0.33f;
     color.rgb = diffuseContrib * 0.2f + diffuseContrib * albedo.rgb + specularContrib;
+    color.rgb *= attFactor;
+    color.a = 1.f;
     gl_FragDepth = depth;
 }
