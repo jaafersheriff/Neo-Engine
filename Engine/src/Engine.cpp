@@ -469,13 +469,13 @@ namespace neo {
                         for (auto comp : allComponents) {
                             if (comp.second.size()) {
                                 if (ImGui::Selectable(comp.first.name() + 6)) {
-                                    type = comp.first;
+                                    type = std::make_optional<std::type_index>(comp.first);
                                 }
                             }
                         }
                         ImGui::EndCombo();
                     }
-                    if (type) {
+                    if (type.has_value()) {
                         auto components = allComponents[type.value()];
                         if (components.size()) {
                             static int index = 0;
@@ -505,13 +505,12 @@ namespace neo {
                         }
                     }
                     /* Attaching new components here would be nice, but there's problems:
-                        - There's no way have a static list of all components possible (not just ones that have been added to the scene)
-                            - They _could_ all be registered manually, both by the Engine for Engine-specific components and ny the Application for app-specific components
+                        - There's no reflection that provides a static list of all components possible (including any application-specific components)
+                            - They _could_ all be registered manually, both by the Engine for Engine-specific components and by the Application for app-specific components
                             - They would need some dummy GameObject to be tied to
                         - Components have a deleted copy construct
                             - The copy constructor could be made protected, but then every single component would need some clone(GameObject&) function
                               to create a new unique_ptr of itself. That's too much overhead.
-                        If I ever do enough object editing that I feel a need for attaching new components, then it's possible. Just a bit messy.
                     */
                 }
                 ImGui::Separator();
