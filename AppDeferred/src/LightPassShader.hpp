@@ -18,7 +18,7 @@ class LightPassShader : public Shader {
         LightPassShader(const std::string &vert, const std::string &frag) :
             Shader("LightPassShader", vert, frag) {
             // Create render target
-            auto lightFBO = Library::getFBO("lightpass");
+            auto lightFBO = Library::createFBO("lightpass");
             lightFBO->attachColorTexture(Window::getFrameSize(), TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
 
             // Handle frame size changing
@@ -70,7 +70,7 @@ class LightPassShader : public Shader {
                 loadUniform("lightRadius", spatial->getScale().x);
                 loadUniform("lightCol", light->get<LightComponent>()->mColor);
 
-                // If mainCamera->get<CameraComponent>()->is inside light 
+                // If mainCamera is inside light 
                 float dist = glm::distance(spatial->getPosition(), mainCamera->get<SpatialComponent>()->getPosition());
                 if (dist - mainCamera->get<CameraComponent>()->getNearFar().x < spatial->getScale().x) {
                     CHECK_GL(glCullFace(GL_FRONT));
@@ -78,7 +78,7 @@ class LightPassShader : public Shader {
                 else {
                     CHECK_GL(glCullFace(GL_BACK));
                 }
-                Library::getMesh("sphere", true)->draw();
+                Library::getMesh("sphere")->draw();
             }
 
             unbind();

@@ -79,5 +79,6 @@ void main() {
     // TODO : these constants should come from gbuffer
     color.rgb = albedo.rgb * 0.2 + 
                 getPhong(fragNor, fragPos.rgb, camPos, lightPos, vec3(0.0), lightCol, albedo.rgb, vec3(1.0), 33.0);
+    color.rgb *= attFactor;
     gl_FragDepth = depth;
 }

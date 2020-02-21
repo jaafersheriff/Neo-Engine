@@ -18,11 +18,11 @@ class GBufferShader : public Shader {
             Shader("GBufferShader", vert, frag) {
 
             // Create gbuffer 
-            auto gbuffer = Library::getFBO("gbuffer");
+            auto gbuffer = Library::createFBO("gbuffer");
 
             // Format for color buffers
             TextureFormat format = { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT };
-            gbuffer->attachColorTexture(Window::getFrameSize(), format); // color
+            gbuffer->attachColorTexture(Window::getFrameSize(), format); // normal
             gbuffer->attachColorTexture(Window::getFrameSize(), format); // diffuse
             gbuffer->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
             gbuffer->initDrawBuffers();
@@ -51,19 +51,15 @@ class GBufferShader : public Shader {
             for (auto& renderableIt : Engine::getComponentTuples<GBufferComponent, MeshComponent, SpatialComponent>()) {
                 auto renderable = renderableIt->get<GBufferComponent>();
                 loadUniform("M", renderableIt->get<SpatialComponent>()->getModelMatrix());
+                loadUniform("N", renderableIt->get<SpatialComponent>()->getNormalMatrix());
 
                 loadUniform("ambientColor", renderable->mMaterial.mAmbient);
                 loadUniform("diffuseColor", renderable->mMaterial.mDiffuse);
 
                 loadTexture("diffuseMap", renderable->mDiffuseMap);
 
-                /* Bind normal map */
-                loadUniform("N", renderable->get<SpatialComponent>()->getNormalMatrix());
-                auto normalMap = renderable->mGameObject.getComponentByType<neo::NormalMapComponent>();
-                loadTexture("normalMap", normalMap->mTexture);
-
                 /* DRAW */
-                renderable->get<MeshComponent>()->getMesh().draw();
+                renderableIt->get<MeshComponent>()->mMesh.draw();
             }
 
             unbind();
