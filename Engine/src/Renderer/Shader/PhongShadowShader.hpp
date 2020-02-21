@@ -41,11 +41,10 @@ namespace neo {
                     in vec3 fragNor;
                     in vec2 fragTex;
                     in vec4 shadowCoord;
-                    uniform float ambient;
+                    uniform vec3 ambientColor;
                     uniform vec3 diffuseColor;
                     uniform vec3 specularColor;
                     uniform float shine;
-                    uniform bool useTexture;
                     uniform sampler2D diffuseMap;
                     uniform vec3 camPos;
                     uniform vec3 lightPos, lightCol, lightAtt;
@@ -54,15 +53,13 @@ namespace neo {
                     uniform int pcfSize;
                     out vec4 color;
                     void main() {
-                        vec4 albedo = vec4(diffuseColor, 1.f);
-                        if (useTexture) {
-                            albedo = texture(diffuseMap, fragTex);
-                            alphaDiscard(albedo.a);
-                        }
+                        vec4 albedo = texture(diffuseMap, fragTex);
+                        alphaDiscard(albedo.a);
+                        albedo.rgb += diffuseColor;
 
                         float visibility = getShadowVisibility(pcfSize, shadowMap, shadowCoord, bias);
                         vec3 phong = getPhong(fragNor, fragPos.rgb, camPos, lightPos, lightAtt, lightCol, albedo.rgb, specularColor, shine);
-                        color.rgb = albedo.rgb * ambient + 
+                        color.rgb = albedo.rgb * ambientColor + 
                                     visibility * phong;
                         color.a = albedo.a;
                     })"),
@@ -133,7 +130,7 @@ namespace neo {
                     loadTexture("diffuseMap", renderable->mDiffuseMap);
 
                     /* Bind material */
-                    loadUniform("ambient", renderable->mMaterial.mAmbient);
+                    loadUniform("ambientColor", renderable->mMaterial.mAmbient);
                     loadUniform("diffuseColor", renderable->mMaterial.mDiffuse);
                     loadUniform("specularColor", renderable->mMaterial.mSpecular);
                     loadUniform("shine", renderable->mMaterial.mShininess);
@@ -146,7 +143,7 @@ namespace neo {
             }
 
             virtual void imguiEditor() override {
-                ImGui::SliderFloat("Bias", &bias, 1e-5, 1e-2);
+                ImGui::SliderFloat("Bias", &bias, 1e-5f, 1e-2f);
                 ImGui::SliderInt("PCF", &pcfSize, 0, 5);
             }
     };

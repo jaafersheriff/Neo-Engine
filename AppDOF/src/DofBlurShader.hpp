@@ -26,7 +26,7 @@ class DofBlurShader : public Shader {
             frameScale(scale)
         {
             glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
-            auto DofBlurFBO = Library::getFBO("dofblur");
+            auto DofBlurFBO = Library::createFBO("dofblur");
             DofBlurFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
             DofBlurFBO->initDrawBuffers();
 

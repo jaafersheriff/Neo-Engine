@@ -52,7 +52,7 @@ struct Renderable {
 
     Renderable(Mesh *mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
         gameObject = &Engine::createGameObject();
-        Engine::addComponent<MeshComponent>(gameObject, mesh);
+        Engine::addComponent<MeshComponent>(gameObject, *mesh);
         Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
     }
 };
@@ -73,30 +73,35 @@ int main() {
     for (int i = 0; i < 50; i++) {
         auto mesh = i % 2 ? Library::getMesh("cube") : Library::getMesh("sphere");
         Renderable renderable(mesh, glm::vec3(Util::genRandom(-30.f, 30.f), 1.f, Util::genRandom(-30.f, 30.f)), glm::vec3(Util::genRandom(1.5f, 4.5f)), Util::genRandomVec3(-Util::PI, Util::PI));
-        Engine::addComponent<renderable::PhongShadowRenderable>(renderable.gameObject);
-        Engine::addComponent<renderable::ShadowCasterRenderable>(renderable.gameObject);
-        Engine::addComponent<MaterialComponent>(renderable.gameObject, 0.2f, Util::genRandomVec3(0.2f, 1.f), glm::vec3(1.f));
+        Material material;
+        material.mAmbient = glm::vec3(0.2f);
+        material.mDiffuse = Util::genRandomVec3(0.2f, 1.f);
+        Engine::addComponent<renderable::PhongShadowRenderable>(renderable.gameObject, *Library::getTexture("black"), material);
+        Engine::addComponent<renderable::ShadowCasterRenderable>(renderable.gameObject, *Library::getTexture("black"));
         Engine::addComponent<SelectableComponent>(renderable.gameObject);
-        Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, mesh);
+        Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, *mesh);
     }
 
     /* Ground plane */
-    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(100.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
-    Engine::addComponent<renderable::PhongShadowRenderable>(plane.gameObject);
-    Engine::addComponent<MaterialComponent>(plane.gameObject, 0.2f, glm::vec3(0.2f), glm::vec3(1.f));
+    {
+        Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(100.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
+        Material material;
+        material.mAmbient = glm::vec3(0.2f);
+        material.mDiffuse = glm::vec3(0.2f);
+        Engine::addComponent<renderable::PhongShadowRenderable>(plane.gameObject, *Library::getTexture("black"), material);
+    }
 
     /* Skybox */
     {
         GameObject* gameObject = &Engine::createGameObject();
-        Engine::addComponent<renderable::SkyboxComponent>(gameObject);
-        Engine::addComponent<CubeMapComponent>(gameObject, *Library::getCubemap("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}));
+        Engine::addComponent<renderable::SkyboxComponent>(gameObject, *Library::loadCubemap("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}));
     }
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
 
     /* Init renderer */
-    auto defaultFBO = Library::getFBO("default");
+    auto defaultFBO = Library::createFBO("default");
     defaultFBO->attachColorTexture(Window::getFrameSize(), { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
     defaultFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_CLAMP_TO_EDGE); // depth
     defaultFBO->initDrawBuffers();

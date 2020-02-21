@@ -55,7 +55,7 @@ class PostShader : public PostProcessShader {
 
         void generatePoisson(int size) {
             std::vector<float> kernel;
-            for (unsigned i = 0; i < poissonSize; i++) {
+            for (int i = 0; i < poissonSize; i++) {
                 glm::vec2 sample(
                     Util::genRandom(-1.f, 1.f),
                     Util::genRandom(-1.f, 1.f)

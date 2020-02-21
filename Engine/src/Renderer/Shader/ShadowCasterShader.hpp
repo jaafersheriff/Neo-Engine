@@ -31,7 +31,7 @@ namespace neo {
                         })"
                     ) {
                 /* Init shadow map */
-                Framebuffer *depthFBO = Library::getFBO("shadowMap");
+                Framebuffer *depthFBO = Library::createFBO("shadowMap");
                 depthFBO->attachDepthTexture(glm::ivec2(dimension), GL_LINEAR, GL_CLAMP_TO_BORDER);
                 depthFBO->disableDraw();
                 depthFBO->disableRead();

@@ -280,7 +280,7 @@ namespace neo {
 
                 for (int i = 0; i < VERTEX_COUNT; i++) {
                     for (int j = 0; j < VERTEX_COUNT; j++) {
-                        heights[j][i] = h == 0.f ? h : h * noise.octaveNoise(j / static_cast<double>(VERTEX_COUNT), i / static_cast<double>(VERTEX_COUNT), numOctaves);
+                        heights[j][i] = h == 0.f ? h : h * static_cast<float>(noise.octaveNoise(j / static_cast<double>(VERTEX_COUNT), i / static_cast<double>(VERTEX_COUNT), numOctaves));
                     }
                 }
 
