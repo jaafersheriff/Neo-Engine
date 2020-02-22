@@ -27,8 +27,8 @@ public:
         }
 
         if (mUpdatePerspective) {
-            float f = glm::sin(Util::getRunTime());
-            float g = glm::cos(Util::getRunTime());
+            float f = static_cast<float>(glm::sin(Util::getRunTime()));
+            float g = static_cast<float>(glm::cos(Util::getRunTime()));
             sourceCamera->get<SpatialComponent>()->setLookDir(glm::vec3(f, f / 2, g));
         }
     }

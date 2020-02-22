@@ -55,10 +55,8 @@ namespace neo {
 
             SelectedComponent* selected = nullptr;
             if (selectedSelectable) {
-                if (auto s = selectedSelectable->getGameObject().getComponentByType<SelectedComponent>()) {
-                    selected = s;
-                }
-                else {
+                selected = selectedSelectable->getGameObject().getComponentByType<SelectedComponent>();
+                if (!selected) {
                     selected = &Engine::addComponent<SelectedComponent>(&selectedSelectable->getGameObject());
                 }
                 mSelectOperation(selected, mouseRay, intersectDist);
@@ -66,7 +64,7 @@ namespace neo {
 
             // Decide to remove unselected objects
             for (auto eSelected : Engine::getComponents<SelectedComponent>()) {
-                if (!selected || (&eSelected->getGameObject() != &selected->getGameObject()) && mRemoveDecider(eSelected)) {
+                if ((&eSelected->getGameObject() != &selected->getGameObject()) && mRemoveDecider(eSelected)) {
                     Engine::removeComponent<SelectedComponent>(*eSelected);
                 }
             }

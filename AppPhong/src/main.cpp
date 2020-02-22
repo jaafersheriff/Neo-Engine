@@ -27,9 +27,9 @@ struct Light {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos);
         light = &Engine::addComponent<LightComponent>(gameObject, col, att);
-        Engine::addComponent<MeshComponent>(gameObject, Library::getMesh("sphere"));
+        Engine::addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere"));
         Engine::addComponent<SelectableComponent>(gameObject);
-        Engine::addComponent<BoundingBoxComponent>(gameObject, Library::getMesh("sphere"));
+        Engine::addComponent<BoundingBoxComponent>(gameObject, *Library::getMesh("sphere"));
         Engine::addComponent<renderable::WireframeRenderable>(gameObject);
 
         Engine::addImGuiFunc("Light", [&]() {
@@ -44,10 +44,13 @@ struct Renderable {
     Renderable(Mesh *mesh, Texture *tex, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, p, glm::vec3(s), o);
-        Engine::addComponent<MeshComponent>(gameObject, mesh);
-        Engine::addComponent<renderable::PhongRenderable>(gameObject);
-        Engine::addComponent<MaterialComponent>(gameObject);
-        Engine::addComponent<DiffuseMapComponent>(gameObject, *tex);
+        Engine::addComponent<MeshComponent>(gameObject, *mesh);
+        Material material;
+        material.mAmbient = glm::vec3(0.1f);
+        material.mDiffuse = glm::vec3(0.f);
+        material.mSpecular = glm::vec3(1.f);
+        material.mShininess = 50.f;
+        Engine::addComponent<renderable::PhongRenderable>(gameObject, *tex, material);
     }
 };
 
@@ -63,12 +66,15 @@ int main() {
 
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
+
+    Library::loadMesh("mr_krab.obj", true);
+    Library::loadTexture("mr_krab.png");
     std::vector<Renderable *> renderables;
     for (int x = -2; x < 3; x++) {
         for (int z = 0; z < 10; z++) {
             renderables.push_back(
                 new Renderable(
-                    Library::getMesh("mr_krab.obj", true), 
+                    Library::getMesh("mr_krab.obj"), 
                     Library::getTexture("mr_krab.png"),
                     glm::vec3(x*2, 0, z*2))
             );

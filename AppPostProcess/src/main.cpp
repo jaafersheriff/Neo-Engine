@@ -20,31 +20,26 @@ struct Camera {
 
 struct Light {
     GameObject *gameObject;
-    LightComponent *light;
 
     Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos);
-        light = &Engine::addComponent<LightComponent>(gameObject, col, att);
-
-        Engine::addImGuiFunc("Light", [&]() {
-            if (!light) {
-                return;
-            }
-            light->imGuiEditor();
-        });
+        Engine::addComponent<LightComponent>(gameObject, col, att);
     }
 };
 
 struct Renderable {
     GameObject *gameObject;
 
-    Renderable(Mesh *mesh, float amb, glm::vec3 diffuse, glm::vec3 spec) {
+    Renderable(Mesh *mesh, Texture* texture, float amb, glm::vec3 diffuse, glm::vec3 spec) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
-        Engine::addComponent<MeshComponent>(gameObject, mesh);
-        Engine::addComponent<renderable::PhongRenderable>(gameObject);
-        Engine::addComponent<MaterialComponent>(gameObject, amb, diffuse, spec);
+        Engine::addComponent<MeshComponent>(gameObject, *mesh);
+        Material material;
+        material.mAmbient = glm::vec3(amb);
+        material.mDiffuse = diffuse;
+        material.mSpecular = spec;
+        Engine::addComponent<renderable::PhongRenderable>(gameObject, *texture, material);
     }
 };
 
@@ -59,8 +54,7 @@ int main() {
     Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable r(Library::getMesh("mr_krab.obj"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
-    Engine::addComponent<DiffuseMapComponent>(r.gameObject, *Library::getTexture("mr_krab.png"));
+    Renderable r(Library::loadMesh("mr_krab.obj"), Library::loadTexture("mr_krab.png"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();

@@ -37,10 +37,9 @@ struct Light {
         gameObject = &Engine::createGameObject();
         camSpatial = &Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(2.f), glm::mat3(glm::rotate(glm::mat4(1.f), 0.6f, glm::vec3(1, 0, 0))));
         light = &Engine::addComponent<LightComponent>(gameObject, col, att);
-        Engine::addComponent<MeshComponent>(gameObject, Library::getMesh("cube"));
-        Engine::addComponent<renderable::PhongRenderable>(gameObject);
-        Engine::addComponent<MaterialComponent>(gameObject, 1.f, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(gameObject, -1.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
+        Engine::addComponent<MeshComponent>(gameObject, *Library::getMesh("cube"));
+        Engine::addComponent<renderable::WireframeRenderable>(gameObject);
+        camera = &Engine::addComponentAs<OrthoCameraComponent, CameraComponent>(gameObject, 0.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
         sin = &Engine::addComponent<SinTranslateComponent>(gameObject, glm::vec3(0.f, 0.f, 20.f), camSpatial->getPosition());
 
         Engine::addComponent<ShadowCameraComponent>(gameObject);
@@ -48,7 +47,7 @@ struct Light {
         // Separate game object for look at
         gameO = &Engine::createGameObject();
         lookAtSpatial = &Engine::addComponent<SpatialComponent>(gameO, glm::vec3(0.f), glm::vec3(1.f));
-        Engine::addComponent<MeshComponent>(gameO, Library::getMesh("cube"));
+        Engine::addComponent<MeshComponent>(gameO, *Library::getMesh("cube"));
         Engine::addComponent<renderable::WireframeRenderable>(gameO);
         Engine::addComponent<LookAtCameraReceiver>(gameO);
 
@@ -80,7 +79,7 @@ struct Renderable {
     Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale, glm::mat4 ori = glm::mat3()) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, scale, ori);
-        Engine::addComponent<MeshComponent>(gameObject, mesh);
+        Engine::addComponent<MeshComponent>(gameObject, *mesh);
     }
 };
 
@@ -102,15 +101,21 @@ int main() {
             Util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere"),
             glm::vec3(Util::genRandom(-45.f, 45.f), Util::genRandom(2.f, 5.f), Util::genRandom(-45.f, 45.f)),
             glm::vec3(Util::genRandom(5.f)));
-        Engine::addComponent<renderable::ShadowCasterRenderable>(r.gameObject);
-        Engine::addComponent<renderable::PhongShadowRenderable>(r.gameObject);
-        Engine::addComponent<MaterialComponent>(r.gameObject, 0.3f, Util::genRandomVec3(), glm::vec3(1.f), 20.f);
+        Engine::addComponent<renderable::ShadowCasterRenderable>(r.gameObject, *Library::getTexture("white"));
+        Material material;
+        material.mAmbient = glm::vec3(0.3f);
+        material.mDiffuse = Util::genRandomVec3();
+        material.mShininess = 20.f;
+        Engine::addComponent<renderable::PhongShadowRenderable>(r.gameObject, *Library::getTexture("black"), material);
     }
 
     // Terrain receiver 
     Renderable receiver(Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(100.f), glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
-    Engine::addComponent<MaterialComponent>(receiver.gameObject, 0.2f, glm::vec3(0.7f), glm::vec3(1.f), 20.f);
-    Engine::addComponent<renderable::PhongShadowRenderable>(receiver.gameObject);
+    Material material;
+    material.mAmbient = glm::vec3(0.2f);
+    material.mDiffuse = glm::vec3(0.7f);
+    material.mShininess = 20.f;
+    Engine::addComponent<renderable::PhongShadowRenderable>(receiver.gameObject, *Library::getTexture("black"), material);
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
