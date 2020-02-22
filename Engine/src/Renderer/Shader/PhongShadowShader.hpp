@@ -67,7 +67,7 @@ namespace neo {
                 pcfSize(pcfSize)
             {}
 
-            float bias;
+            float bias = 0.002f;
             int pcfSize;
             const glm::mat4 biasMatrix = glm::mat4(
                 0.5f, 0.0f, 0.0f, 0.0f,

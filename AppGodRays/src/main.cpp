@@ -56,11 +56,8 @@ struct Renderable {
 
     Renderable(Mesh *mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
         gameObject = &Engine::createGameObject();
-        Engine::addComponent<MeshComponent>(gameObject, mesh);
+        Engine::addComponent<MeshComponent>(gameObject, *mesh);
         Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
-        Engine::addComponent<renderable::PhongRenderable>(gameObject);
-        Engine::addComponent<MaterialComponent>(gameObject, 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
-        Engine::addComponent<SunOccluderComponent>(gameObject);
     }
 };
 
@@ -76,16 +73,21 @@ int main() {
 
     Light(glm::vec3(0.f, 2.f, -20.f), 12.f, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
-    /* Cube object */
+    /* Trees */
+    Library::loadTexture("PineTexture.png");
+    Library::loadMesh("PineTree3.obj");
     for (int i = 0; i < 15; i++) {
         Renderable cube(Library::getMesh("PineTree3.obj"), glm::vec3(Util::genRandom(-7.5f, 7.5f), 0.5f, Util::genRandom(-7.5f, 7.5f)), glm::vec3(Util::genRandom(0.7f, 1.3f)), glm::vec3(0.f, Util::genRandom(0.f, 360.f), 0.f));
-        Engine::addComponent<DiffuseMapComponent>(cube.gameObject, *Library::getTexture("PineTexture.png"));
+        Material material;
+        material.mAmbient = glm::vec3(0.2f);
+        material.mDiffuse = glm::vec3(0.f);
+        Engine::addComponent<renderable::PhongRenderable>(cube.gameObject, *Library::getTexture("PineTexture.png"), material);
+        Engine::addComponent<SunOccluderComponent>(cube.gameObject, *Library::getTexture("PineTexture.png"));
     }
 
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
-    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
-    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::getTexture("grid.png"));
+    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject, *Library::loadTexture("grid.png"));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();

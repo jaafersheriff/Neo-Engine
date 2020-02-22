@@ -36,7 +36,6 @@ class GodRayOccluderShader : public Shader {
             loadUniform("V", camera->get<CameraComponent>()->getView());
 
             for (auto& renderable : Engine::getComponentTuples<SunOccluderComponent, MeshComponent, SpatialComponent>()) {
-                auto renderableMesh = renderable->get<MeshComponent>();
                 auto renderableSpatial = renderable->get<SpatialComponent>();
 
                 // VFC
@@ -52,16 +51,10 @@ class GodRayOccluderShader : public Shader {
                 loadUniform("M", renderableSpatial->getModelMatrix());
 
                 /* Bind texture */
-                if (auto diffuseMap = renderable->mGameObject.getComponentByType<DiffuseMapComponent>()) {
-                    loadTexture("diffuseMap", diffuseMap->mTexture);
-                    loadUniform("useTexture", true);
-                }
-                else {
-                    loadUniform("useTexture", false);
-                }
+                loadTexture("alphaMap", renderable->get<SunOccluderComponent>()->mAlphaMap);
 
                 /* DRAW */
-                renderableMesh->getMesh().draw();
+                renderable->get<MeshComponent>()->mMesh.draw();
             }
 
             unbind();

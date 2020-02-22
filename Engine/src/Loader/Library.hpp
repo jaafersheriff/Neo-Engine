@@ -52,16 +52,12 @@ namespace neo {
         auto it = mTextures.find(name);
         NEO_ASSERT(it == mTextures.end(), "Texture already found");
         void* data;
-        if (format.mType == GL_UNSIGNED_BYTE) {
-            uint8_t d[] = { 0xFF, 0xFF, 0xFF, 0xFF };
-            data = d;
+        if (format.mType == GL_UNSIGNED_BYTE || format.mType == GL_INT) {
+            uint32_t d = 0xFFFFFFFF;
+            data = &d;
         }
         else if (format.mType == GL_FLOAT) {
             float d[] = { 1.f, 1.f, 1.f, 1.f };
-            data = d;
-        }
-        else if (format.mType == GL_INT) {
-            int d[] = { 255, 255, 255, 255 };
             data = d;
         }
         else {

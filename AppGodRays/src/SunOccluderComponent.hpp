@@ -8,7 +8,9 @@ using namespace neo;
 class SunOccluderComponent : public Component {
 
 public:
-    SunOccluderComponent(GameObject *go) :
-        Component(go)
+    const Texture& mAlphaMap;
+    SunOccluderComponent(GameObject *go, const Texture& texture) :
+        Component(go),
+        mAlphaMap(texture)
     {}
 };
