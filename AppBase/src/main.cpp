@@ -55,20 +55,6 @@ int main() {
     Engine::addComponent<renderable::PhongRenderable>(cube, *Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f,0.f,1.f)));
     Engine::addComponent<SelectableComponent>(cube);
     Engine::addComponent<BoundingBoxComponent>(cube, *Library::getMesh("cube"));
-    auto& parent = Engine::addComponent<ParentComponent>(cube);
-    
-    // TODO remve after im done testing relations
-    {
-        GameObject* child = &Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(child, glm::vec3(0.f, 0.5f, 0.f));
-        Engine::addComponent<RotationComponent>(child, glm::vec3(0.f, 0.5f, 0.f));
-        Engine::addComponent<MeshComponent>(child, *Library::getMesh("cube"));
-        Engine::addComponent<renderable::PhongRenderable>(child, *Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 1.f, 0.f)));
-        Engine::addComponent<SelectableComponent>(child);
-        Engine::addComponent<BoundingBoxComponent>(child, *Library::getMesh("cube"));
-        Engine::addComponent<ChildComponent>(child, cube);
-        parent.mChildrenObjects.push_back(child);
-    }
 
     /* Ground plane */
     GameObject* plane = &Engine::createGameObject();

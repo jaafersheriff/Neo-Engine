@@ -9,7 +9,7 @@
 #include "Util/Util.hpp"
 
 #include "ECS/ComponentTuple.hpp"
-#include "ECS/Component/Components.hpp"
+#include "ECS/Components.hpp"
 #include "ECS/Systems/Systems.hpp"
 
 #include "ext/imgui/imgui.h"

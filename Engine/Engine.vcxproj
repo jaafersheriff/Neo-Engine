@@ -27,13 +27,11 @@
     <ClInclude Include="src\ECS\Component\CameraComponent\MainCameraComponent.hpp" />
     <ClInclude Include="src\ECS\Component\CameraComponent\OrthoCameraComponent.hpp" />
     <ClInclude Include="src\ECS\Component\CameraComponent\PerspectiveCameraComponent.hpp" />
-    <ClInclude Include="src\ECS\Component\RelationComponent\ChildComponent.hpp" />
     <ClInclude Include="src\ECS\Component\CollisionComponent\BoundingBoxComponent.hpp" />
     <ClInclude Include="src\ECS\Component\Component.hpp" />
-    <ClInclude Include="src\ECS\Component\Components.hpp" />
+    <ClInclude Include="src\ECS\Components.hpp" />
     <ClInclude Include="src\ECS\Component\LightComponent\LightComponent.hpp" />
     <ClInclude Include="src\ECS\Component\RenderableComponent\LineMeshComponent.hpp" />
-    <ClInclude Include="src\ECS\Component\RelationComponent\ParentComponent.hpp" />
     <ClInclude Include="src\ECS\Component\RenderableComponent\AlphaTestRenderable.hpp" />
     <ClInclude Include="src\ECS\Component\RenderableComponent\MeshComponent.hpp" />
     <ClInclude Include="src\ECS\Component\RenderableComponent\OutlineRenderable.hpp" />
@@ -49,7 +47,6 @@
     <ClInclude Include="src\ECS\Component\SpatialComponent\SpatialComponent.hpp" />
     <ClInclude Include="src\ECS\Component\TransformationComponent\RotationComponent.hpp" />
     <ClInclude Include="src\ECS\ComponentTuple.hpp" />
-    <ClInclude Include="src\ECS\Systems\RelationSystems\ParentChildSystem.hpp" />
     <ClInclude Include="src\ext\imgui\imconfig.h" />
     <ClInclude Include="src\ext\imgui\imgui.h" />
     <ClInclude Include="src\ext\imgui\imgui_impl_glfw.h" />
@@ -118,7 +115,6 @@
     <ClInclude Include="src\ECS\Component\CameraComponent\ShadowCameraComponent.hpp" />
     <ClCompile Include="src\ECS\Component\RenderableComponent\PhongShadowRenderable.hpp" />
     <ClCompile Include="src\ECS\Component\SpatialComponent\SpatialComponent.cpp" />
-    <ClCompile Include="src\ECS\Systems\RelationSystems\ParentChildSystem.cpp" />
     <ClCompile Include="src\ext\imgui\imgui.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_draw.cpp" />

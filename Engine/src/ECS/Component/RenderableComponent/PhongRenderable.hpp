@@ -16,7 +16,7 @@ namespace neo {
             Material mMaterial;
             const Texture& mDiffuseMap;
 
-            PhongRenderable(GameObject *go, const Texture& diffuseMap, Material material) :
+            PhongRenderable(GameObject *go, const Texture& diffuseMap, Material material = Material{}) :
                 Component(go),
                 mDiffuseMap(diffuseMap),
                 mMaterial(material)
