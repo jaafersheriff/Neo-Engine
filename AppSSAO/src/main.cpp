@@ -41,7 +41,7 @@ struct Renderable {
     Renderable(Mesh *mesh, glm::vec3 pos, glm::vec3 scale) {
         gameObject = &Engine::createGameObject();
         spat = &Engine::addComponent<SpatialComponent>(gameObject, pos, scale);
-        Engine::addComponent<MeshComponent>(gameObject, mesh);
+        Engine::addComponent<MeshComponent>(gameObject, *mesh);
     }
 };
 
@@ -57,21 +57,44 @@ int main() {
 
     std::vector<Light *> lights;
     lights.push_back(new Light(glm::vec3(25.f, 25.f, 0.f), glm::vec3(1.f), glm::vec3(100.f)));
-    Renderable cube(Library::getMesh("cube"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
-    Engine::addComponent<MaterialComponent>(cube.gameObject, 0.2f, Util::genRandomVec3());
-    Renderable dragon(Library::getMesh("dragon10k.obj", true), glm::vec3(-4.f, 5.f, -5.f), glm::vec3(10.f));
-    Engine::addComponent<MaterialComponent>(dragon.gameObject, 0.2f, Util::genRandomVec3());
-    Renderable stairs(Library::getMesh("staircase.obj", true), glm::vec3(5.f, 5.f, 9.f), glm::vec3(10.f));
-    Engine::addComponent<MaterialComponent>(stairs.gameObject, 0.2f, Util::genRandomVec3());
+    {
+        Renderable cube(Library::getMesh("cube"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
+        Material material;
+        material.mAmbient = glm::vec3(0.2f);
+        material.mDiffuse = Util::genRandomVec3();
+        Engine::addComponent<GBufferComponent>(cube.gameObject, *Library::getTexture("black"), material);
+    }
+    {
+        Renderable dragon(Library::loadMesh("dragon10k.obj", true), glm::vec3(-4.f, 5.f, -5.f), glm::vec3(10.f));
+        Material material;
+        material.mAmbient = glm::vec3(0.2f);
+        material.mDiffuse = Util::genRandomVec3();
+        Engine::addComponent<GBufferComponent>(dragon.gameObject, *Library::getTexture("black"), material);
+    }
+    {
+        Renderable stairs(Library::loadMesh("staircase.obj", true), glm::vec3(5.f, 5.f, 9.f), glm::vec3(10.f));
+        Material material;
+        material.mAmbient = glm::vec3(0.2f);
+        material.mDiffuse = Util::genRandomVec3();
+        Engine::addComponent<GBufferComponent>(stairs.gameObject, *Library::getTexture("black"), material);
+    }
+    Library::loadMesh("PineTree3.obj", true);
+    Library::loadTexture("PineTexture.png");
     for (int i = 0; i < 20; i++) {
-        Renderable tree(Library::getMesh("PineTree3.obj", true), glm::vec3(50.f - i * 5.f, 5.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
-        Engine::addComponent<DiffuseMapComponent>(tree.gameObject, *Library::getTexture("PineTexture.png"));
+        Renderable tree(Library::getMesh("PineTree3.obj"), glm::vec3(50.f - i * 5.f, 5.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
+        Material material;
+        material.mAmbient = glm::vec3(0.2f);
+        material.mDiffuse = glm::vec3(0.f);
+        Engine::addComponent<GBufferComponent>(tree.gameObject, *Library::getTexture("PineTexture.png"), material);
     }
 
     // Terrain 
     Renderable terrain(Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
     terrain.spat->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
-    Engine::addComponent<MaterialComponent>(terrain.gameObject, 0.7f, glm::vec3(0.7f));
+    Material material;
+    material.mAmbient = glm::vec3(0.7f);
+    material.mDiffuse = glm::vec3(0.7f);
+    Engine::addComponent<GBufferComponent>(terrain.gameObject, *Library::getTexture("black"), material);
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();

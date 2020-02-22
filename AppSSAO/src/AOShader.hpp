@@ -20,9 +20,11 @@ class AOShader : public PostProcessShader {
             PostProcessShader("AO Shader", frag) {
 
             // generate kernel
+            Texture *kernelTex = Library::createEmptyTexture<Texture1D>("aoKernel", { GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT, GL_UNSIGNED_BYTE });
             generateKernel(32);
 
             // generate 4x4 noise texture
+            Texture *noiseTex = Library::createEmptyTexture<Texture2D>("aoNoise", { GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT, GL_UNSIGNED_BYTE });
             generateNoise(4);
         }
 
@@ -43,8 +45,7 @@ class AOShader : public PostProcessShader {
                 kernel.push_back(static_cast<uint8_t>(sample.y));
                 kernel.push_back(static_cast<uint8_t>(sample.z));
             };
-            Texture *kernelTex = Library::createEmptyTexture<Texture1D>("aoKernel", { GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT, GL_UNSIGNED_BYTE });
-            kernelTex->update(glm::uvec2(size, 1), kernel.data());
+            Library::getTexture("aoKernel")->update(glm::uvec2(size, 1), kernel.data());
         }
 
         void generateNoise(unsigned dim) {
@@ -55,8 +56,7 @@ class AOShader : public PostProcessShader {
                 noise[i + 1] = Util::genRandom();
                 noise[i + 2] = Util::genRandom();
             }
-            Texture *noiseTex = Library::createEmptyTexture<Texture2D>("aoNoise", { GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT, GL_UNSIGNED_BYTE });
-            noiseTex->update(glm::uvec2(dim), noise.data());
+            Library::getTexture("aoNoise")->update(glm::uvec2(dim), noise.data());
         }
 
         virtual void render() override {
