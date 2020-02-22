@@ -38,7 +38,7 @@ class MetaballsSystem : public System {
         }
 
         virtual void update(const float dt) override {
-            auto metaballMesh = Engine::getComponentTuple<MetaballsMeshComponent, MeshComponent>();
+            auto metaballMesh = Engine::getSingleComponent<MetaballsMeshComponent>();
             if (!metaballMesh) {
                 return;
             }
@@ -175,9 +175,8 @@ class MetaballsSystem : public System {
             MICROPROFILE_LEAVE();
 
             MICROPROFILE_ENTERI("Metaballs System", "updateMesh", MP_AUTO);
-            auto& mesh = metaballMesh->get<MeshComponent>()->getMesh();
-            mesh.updateVertexBuffer(VertexType::Position, vertices);
-            mesh.updateVertexBuffer(VertexType::Normal, normals);
+            metaballMesh->mMesh->updateVertexBuffer(VertexType::Position, vertices);
+            metaballMesh->mMesh->updateVertexBuffer(VertexType::Normal, normals);
             mDirtyBalls = false;
             delete[] grid;
             MICROPROFILE_LEAVE();

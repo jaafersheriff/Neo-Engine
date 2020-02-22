@@ -110,12 +110,16 @@ namespace neo {
             Renderer::addSceneShader<OutlineShader>();
         }
 
-        /* Initialize new objects and components */
-        _processInitQueue();
-        Messenger::relayMessages();
+        /* Add engine-specific systems */
+        // addSystem<RelationSystem>();
+        // addSystem<FinalTransformSystem>();
 
         /* Init systems */
         _initSystems();
+
+        /* Initialize new objects and components */
+        _processInitQueue();
+        Messenger::relayMessages();
 
         while (!Window::shouldClose()) {
             MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);

@@ -21,24 +21,14 @@ struct Camera {
     }
 };
 
-struct Renderable {
-    GameObject *gameObject;
-
-    Renderable(Mesh *mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
-        gameObject = &Engine::createGameObject();
-        Engine::addComponent<MeshComponent>(gameObject, mesh);
-        Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
-    }
-};
-
 struct Metaball {
     Metaball(glm::vec3 position, float radius) {
         GameObject* gameObject = &Engine::createGameObject();
         Engine::addComponent<MetaballComponent>(gameObject);
-        Engine::addComponent<MeshComponent>(gameObject, Library::getMesh("sphere"));
+        Engine::addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere"));
         Engine::addComponent<SpatialComponent>(gameObject, position, glm::vec3(radius));
         Engine::addComponent<SelectableComponent>(gameObject);
-        Engine::addComponent<BoundingBoxComponent>(gameObject, Library::getMesh("sphere"));
+        Engine::addComponent<BoundingBoxComponent>(gameObject, *Library::getMesh("sphere"));
     }
 };
 
@@ -55,8 +45,7 @@ int main() {
     /* Skybox */
     {
         GameObject* gameObject = &Engine::createGameObject();
-        Engine::addComponent<renderable::SkyboxComponent>(gameObject);
-        Engine::addComponent<CubeMapComponent>(gameObject, *Library::getCubemap("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}));
+        Engine::addComponent<renderable::SkyboxComponent>(gameObject, *Library::loadCubemap("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}));
     }
 
     /* METBALL */
@@ -67,12 +56,10 @@ int main() {
 
         // Mesh
         auto& go = Engine::createGameObject();
-        Engine::addComponent<MetaballsMeshComponent>(&go);
-        Mesh* mesh = Library::createEmptyMesh("Metaballs");
-        mesh->mPrimitiveType = GL_TRIANGLES;
-        mesh->addVertexBuffer(VertexType::Position, 0, 3);
-        mesh->addVertexBuffer(VertexType::Normal, 1, 3);
-        Engine::addComponent<MeshComponent>(&go, mesh);
+        auto& mesh = Engine::addComponent<MetaballsMeshComponent>(&go);
+        mesh.mMesh->mPrimitiveType = GL_TRIANGLES;
+        mesh.mMesh->addVertexBuffer(VertexType::Position, 0, 3);
+        mesh.mMesh->addVertexBuffer(VertexType::Normal, 1, 3);
         Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.f, 0.f));
     }
 

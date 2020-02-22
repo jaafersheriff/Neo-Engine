@@ -38,14 +38,14 @@ public:
         if (mWireframe) {
             CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
         }
-        for (auto& metaball : Engine::getComponentTuples<MetaballsMeshComponent, MeshComponent, SpatialComponent>()) {
+        for (auto& metaball : Engine::getComponentTuples<MetaballsMeshComponent, SpatialComponent>()) {
 
             loadUniform("wireframe", mWireframe);
             loadUniform("M", metaball->get<SpatialComponent>()->getModelMatrix());
             loadUniform("N", metaball->get<SpatialComponent>()->getNormalMatrix());
 
             /* DRAW */
-            metaball->get<MeshComponent>()->mMesh.draw();
+            metaball->get<MetaballsMeshComponent>()->mMesh->draw();
         }
 
         unbind();
