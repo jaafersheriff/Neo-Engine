@@ -23,6 +23,7 @@
     <ProjectGuid>{6EC037EE-4CF7-4C35-B0F7-4D4E6DEA7E1A}</ProjectGuid>
     <RootNamespace>AppFrustaFitting</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <ProjectName>AppShadowFrustaFitting</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -65,7 +65,7 @@ struct Renderable {
 
 int main() {
     EngineConfig config;
-    config.APP_NAME = "FrustaFitting";
+    config.APP_NAME = "ShadowFrustaFitting";
     config.APP_RES = "res/";
     Engine::init(config);
 

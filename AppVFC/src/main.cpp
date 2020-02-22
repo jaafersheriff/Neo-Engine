@@ -37,7 +37,7 @@ struct Renderable {
 
     Renderable(Mesh *mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
         gameObject = &Engine::createGameObject();
-        Engine::addComponent<MeshComponent>(gameObject, mesh);
+        Engine::addComponent<MeshComponent>(gameObject, *mesh);
         Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
     }
 };
@@ -56,9 +56,11 @@ void generateObjects(int amount) {
         const auto mesh = Library::getMesh("sphere");
 
         Renderable renderable(mesh, position, size);
-        Engine::addComponent<renderable::PhongRenderable>(renderable.gameObject);
-        Engine::addComponent<MaterialComponent>(renderable.gameObject, 0.2f, glm::normalize(position), glm::vec3(1.f));
-        auto boundingBox = &Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, mesh);
+        Material material;
+        material.mAmbient = glm::vec3(0.2f);
+        material.mDiffuse = glm::vec3(glm::normalize(position));
+        Engine::addComponent<renderable::PhongRenderable>(renderable.gameObject, *Library::getTexture("black"), material);
+        auto boundingBox = &Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, *mesh);
     }
 }
 
@@ -81,8 +83,7 @@ int main() {
 
     /* Ground plane */
     Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(30.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
-    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject);
-    Engine::addComponent<DiffuseMapComponent>(plane.gameObject, *Library::getTexture("grid.png"));
+    Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject, *Library::loadTexture("grid.png"));
 
     /* Systems - order matters! */
     Engine::addSystem<CameraControllerSystem>();
