@@ -24,7 +24,7 @@ public:
     }
 
     virtual void imGuiEditor() override {
-        if (ImGui::DragInt("#Verts", &mNumParticles, Renderer::NEO_MAX_COMPUTE_GROUP_SIZE.x, Renderer::NEO_MAX_COMPUTE_GROUP_SIZE.x, 1572864)) {
+        if (ImGui::DragInt("#Verts", &mNumParticles, 1.f, Renderer::NEO_MAX_COMPUTE_GROUP_SIZE.x, 1572864)) {
             updateBuffers();
         }
         if (ImGui::Button("Reset")) {
