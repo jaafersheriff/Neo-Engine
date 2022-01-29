@@ -1,8 +1,9 @@
 #pragma once
 
 #include "ECS/Systems/System.hpp"
-#include "Engine.hpp"
+#include "Engine/Engine.hpp"
 
+#include "DirtyBallsComponent.hpp"
 #include "MetaballComponent.hpp"
 #include "MetaballsMeshComponent.hpp"
 
@@ -20,8 +21,10 @@ class MetaballsSystem : public System {
             float mVal;
             glm::vec3 mNormal;
         };
+        struct DirtyBalls : public Message {
+        };
 
-        int mDims = 32;
+        uint32_t mDims = 32;
         bool mAutoUpdate = true;
         bool mDirtyBalls = true;
 
@@ -38,6 +41,7 @@ class MetaballsSystem : public System {
         }
 
         virtual void update(const float dt) override {
+            NEO_UNUSED(dt);
             auto metaballMesh = Engine::getSingleComponent<MetaballsMeshComponent>();
             if (!metaballMesh) {
                 return;
@@ -48,9 +52,17 @@ class MetaballsSystem : public System {
                 return;
             }
 
+            auto dirtyBalls = Engine::getComponents<DirtyBallsComponent>();
+            if (dirtyBalls.size()) {
+                mDirtyBalls = true;
+                for (auto* comp : dirtyBalls)
+                Engine::removeComponent(*comp);
+            }
+
+
             if (mAutoUpdate) {
                 MICROPROFILE_ENTERI("Metaballs System", "updatePositions", MP_AUTO);
-                auto rTime = Util::getRunTime();
+                float rTime = static_cast<float>(Util::getRunTime());
                 for (uint32_t ii = 0; ii < balls.size(); ++ii) {
                     auto spatial = balls[ii]->get<SpatialComponent>();
                     glm::vec3 position = spatial->getPosition();
@@ -75,6 +87,7 @@ class MetaballsSystem : public System {
 			uint32_t numVertices = 0;
 			uint32_t maxVertices = (32<<10);
 
+            const int nDims = -static_cast<int>(mDims);
             const uint32_t ypitch = mDims;
 		    const uint32_t zpitch = mDims*mDims;
 		    const float invdim = 1.0f/float(mDims-1);
@@ -92,9 +105,9 @@ class MetaballsSystem : public System {
 						float prod = 1.0f;
 						for (uint32_t ii = 0; ii < balls.size(); ++ii) {
                             auto spatial = balls[ii]->get<SpatialComponent>();
-							float dx = spatial->getPosition().x - (-mDims*0.5f + float(xx) );
-							float dy = spatial->getPosition().y - (-mDims*0.5f + float(yy) );
-							float dz = spatial->getPosition().z - (-mDims*0.5f + float(zz) );
+							float dx = spatial->getPosition().x - (nDims*0.5f + float(xx) );
+							float dy = spatial->getPosition().y - (nDims*0.5f + float(yy) );
+							float dz = spatial->getPosition().z - (nDims*0.5f + float(zz) );
 
                             float invr = 1.f / spatial->getScale().x;
 							float dot = dx*dx + dy*dy + dz*dz;
@@ -150,9 +163,9 @@ class MetaballsSystem : public System {
 
                         float pos[3] =
                         {
-                            -mDims * 0.5f + float(xx),
-                            -mDims * 0.5f + float(yy),
-                            -mDims * 0.5f + float(zz)
+                            nDims * 0.5f + float(xx),
+                            nDims * 0.5f + float(yy),
+                            nDims * 0.5f + float(zz)
                         };
 
                         // const Grid* grid = mGrid;
@@ -231,6 +244,7 @@ class MetaballsSystem : public System {
             float dr = _rgb[3] - _rgb[0];
             float dg = _rgb[4] - _rgb[1];
             float db = _rgb[5] - _rgb[2];
+            NEO_UNUSED(dr, dg, db);
 
             uint32_t num = 0;
             const int8_t* indices = sIndices[cubeindex];

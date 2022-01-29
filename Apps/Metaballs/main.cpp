@@ -1,5 +1,6 @@
-#include <Engine.hpp>
+#include "Engine/Engine.hpp"
 
+#include "DirtyBallsComponent.hpp"
 #include "MetaballComponent.hpp"
 #include "MetaballsMeshComponent.hpp"
 #include "MetaballsSystem.hpp"
@@ -76,18 +77,24 @@ int main() {
         static float scale = 2.f;
         if (ImGui::Button("Add")) {
             Metaball(Util::genRandomVec3(-2.f, 2.f), Util::genRandom(2.f, 4.f));
-            Engine::getSystem<MetaballsSystem>().mDirtyBalls = true;
+            {
+                GameObject* gameObject = &Engine::createGameObject();
+                Engine::addComponent<DirtyBallsComponent>(gameObject);
+            }
         }
 
         static int index = 0;
         auto metaballs = Engine::getComponents<MetaballComponent>();
         if (metaballs.size()) {
-            ImGui::SliderInt("Index", &index, 0, metaballs.size() - 1);
+            ImGui::SliderInt("Index", &index, 0, static_cast<int>(metaballs.size()) - 1);
             glm::vec3 position = metaballs[index]->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
             ImGui::Text("%0.2f, %0.2f, %0.2f", position.x, position.y, position.z);
             if (ImGui::Button("Remove")) {
                 Engine::removeGameObject(metaballs[index]->getGameObject());
-                Engine::getSystem<MetaballsSystem>().mDirtyBalls = true;
+                {
+                    GameObject* gameObject = &Engine::createGameObject();
+                    Engine::addComponent<DirtyBallsComponent>(gameObject);
+                }
                 if (metaballs.size() - 1 == 1) {
                     index = 0;
                 }

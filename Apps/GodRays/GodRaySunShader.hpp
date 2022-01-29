@@ -3,7 +3,7 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Engine.hpp"
+#include "Engine/Engine.hpp"
 
 #include "SunComponent.hpp"
 
@@ -26,6 +26,7 @@ class GodRaySunShader : public Shader {
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+                NEO_UNUSED(m);
                 glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
                 Library::getFBO("godray")->resize(frameSize / 2);
             });

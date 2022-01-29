@@ -1,4 +1,4 @@
-#include <Engine.hpp>
+#include "Engine/Engine.hpp"
 
 #include "PerspectiveUpdateSystem.hpp"
 
@@ -26,7 +26,7 @@ struct Camera {
 };
 
 struct Light {
-    Light(glm::vec3 position, bool attachCube = true) {
+    Light(glm::vec3 position) {
         // Light object
         auto lightObject = &Engine::createGameObject();
         auto& spatial = Engine::addComponent<SpatialComponent>(lightObject, position, glm::vec3(1.f));
@@ -76,12 +76,12 @@ int main() {
     
     // Perspective camera
     Camera mockCamera(50.f, 0.1f, 5.f, 1.f, glm::vec3(0.f, 2.f, -0.f));
-    auto* line = &Engine::addComponent<LineMeshComponent>(mockCamera.gameObject, glm::vec3(0.f, 1.f, 1.f));
+    &Engine::addComponent<LineMeshComponent>(mockCamera.gameObject, glm::vec3(0.f, 1.f, 1.f));
     Engine::addComponent<FrustumComponent>(mockCamera.gameObject);
     Engine::addComponent<FrustumFitSourceComponent>(mockCamera.gameObject);
 
     // Ortho camera, shadow camera, light
-    Light light(glm::vec3(10.f, 20.f, 0.f), true);
+    Light light(glm::vec3(10.f, 20.f, 0.f));
 
     // Renderable
     for (int i = 0; i < 30; i++) {

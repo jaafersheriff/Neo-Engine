@@ -63,8 +63,6 @@ namespace neo {
 
             /* Getters */
             static const std::vector<GameObject *> & getGameObjects() { return reinterpret_cast<const std::vector<GameObject *> &>(mGameObjects); }
-            template <typename SysT> static SysT & getSystem();
-            static const std::vector<std::pair<std::type_index, System *>> & getSystems() { return reinterpret_cast<const std::vector<std::pair<std::type_index, System *>> &>(mSystems); }
             template <typename CompT> static const std::vector<CompT *> & getComponents();
             template <typename CompT> static CompT* getSingleComponent();
             template <typename CompT, typename... CompTs> static std::unique_ptr<ComponentTuple> getComponentTuple(GameObject& go);
@@ -131,22 +129,6 @@ namespace neo {
 
         mSystems.push_back({ typeI, std::make_unique<SysT>(std::forward<Args>(args)...) });
         return static_cast<SysT &>(*mSystems.back().second);
-    }
-
-    template <typename SysT> 
-    SysT & Engine::getSystem(void) {
-        static_assert(std::is_base_of<System, SysT>::value, "SysT must be a System type");
-        static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived System type");
-
-        std::type_index typeI(typeid(SysT));
-        for (auto & sys : mSystems) {
-            if (sys.first == typeI) {
-                // this is valid because unique_ptr<T> is exactly the same data as T *
-                return reinterpret_cast<SysT &>(*sys.second);
-            }
-        }
-
-        assert(false);
     }
 
     template <typename CompT>

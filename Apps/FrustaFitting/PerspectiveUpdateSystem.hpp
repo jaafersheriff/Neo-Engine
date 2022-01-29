@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ECS/Systems/System.hpp"
-#include "Engine.hpp"
+#include "Engine/Engine.hpp"
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
@@ -21,6 +21,7 @@ public:
     }
 
     virtual void update(const float dt) override {
+        NEO_UNUSED(dt);
         auto sourceCamera = Engine::getComponentTuple<FrustumFitSourceComponent, SpatialComponent>();
         if (!sourceCamera) {
             return;

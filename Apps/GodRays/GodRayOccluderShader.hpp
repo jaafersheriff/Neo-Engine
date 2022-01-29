@@ -3,7 +3,7 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Engine.hpp"
+#include "Engine/Engine.hpp"
 
 #include "SunComponent.hpp"
 #include "SunOccluderComponent.hpp"
