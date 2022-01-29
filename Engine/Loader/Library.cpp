@@ -18,7 +18,7 @@ namespace neo {
             return it->second;
         }
 
-        NEO_ASSERT(false, "Mesh " + name + "not found");
+        NEO_FAIL("Mesh %s not found", name.c_str());
     }
 
     Mesh* Library::loadMesh(const std::string& fileName, bool doResize) {
@@ -53,7 +53,7 @@ namespace neo {
             return it->second;
         }
 
-        NEO_ASSERT(false, "Texture " + name + " not found");
+        NEO_FAIL("Texture %s not found", name.c_str());
     }
 
     Texture* Library::loadTexture(const std::string& fileName, TextureFormat format) {
@@ -91,7 +91,8 @@ namespace neo {
             return it->second;
         }
 
-        NEO_ASSERT(false, "FBO " + name + " doesn't exist");
+        NEO_FAIL("FBO %s doesn't exist", name.c_str());
+        return nullptr;
     }
 
     void Library::_insertMesh(const std::string& name, Mesh* mesh) {

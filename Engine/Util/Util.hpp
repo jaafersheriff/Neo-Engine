@@ -10,9 +10,24 @@
 
 namespace neo {
 
-#define NEO_ASSERT(x, s) if (!(x)) { printf("\n\n%s: (%s) in %s, file %s on line %d.\n", std::string(s).c_str(), #x, __func__, __FILE__, __LINE__); abort(); }
 #define NEO_UNUSED(...) __noop(__VA_ARGS__)
  
+#ifndef NEO_DEBUG_ASSERT
+	#ifdef DEBUG_MODE
+		#define NEO_ASSERT(c, fmt, ...) \
+			if (!(c)) { \
+				char _fullmsg[256]; \
+				sprintf(_fullmsg, fmt, __VA_ARGS__); \
+				printf("\n\n%s: (%s) in %s, file %s on line %d.\n", _fullmsg, #c, __func__, __FILE__, __LINE__); \
+                abort(); \
+			}
+		#define NEO_FAIL(fmt, ...) NEO_ASSERT(false, fmt, __VA_ARGS__)
+	#else
+		#define NEO_ASSERT(c, fmt, ...) NEO_UNUSED(c, fmt); NEO_UNUSED(__VA_ARGS__)
+		#define NEO_FAIL(fmt, ...) NEO_UNUSED(fmt); NEO_UNUSED(__VA_ARGS__) ; abort()
+	#endif // NEO_CONFIG_DEBUG
+#endif // NEO_DEBUG_ASSERT
+
     struct Util {
         
         static void init() {

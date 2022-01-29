@@ -61,7 +61,8 @@ namespace neo {
             data = d;
         }
         else {
-            NEO_ASSERT(false, "Trying to create an empty texture with an unsupported type");
+            NEO_UNUSED(data);
+            NEO_FAIL("Trying to create an empty texture with an unsupported type");
         }
         Texture* t = new T(format, size, data);
         _insertTexture(name, t);

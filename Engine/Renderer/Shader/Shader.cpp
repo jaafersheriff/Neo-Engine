@@ -128,7 +128,7 @@ namespace neo {
             return Renderer::ENGINE_SHADER_DIR + fileName;
         }
         else {
-            NEO_ASSERT(false, fileName + " shader file doesn't exist");
+            NEO_FAIL("%s shader file doesn't exist", fileName.c_str());
         }
     }
 
@@ -295,7 +295,7 @@ namespace neo {
         case(ShaderStage::TESSELLATION_EVAL):
             return GL_TESS_EVALUATION_SHADER;
         }
-        NEO_ASSERT(false, "Invalid ShaderStage");
+        NEO_FAIL("Invalid ShaderStage: %d", type);
     }
 
     void Shader::loadUniform(const std::string &loc, const bool b) const {
