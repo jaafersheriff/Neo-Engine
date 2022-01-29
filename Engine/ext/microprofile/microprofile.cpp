@@ -2,7 +2,6 @@
 #include "microprofile.h"
 #if MICROPROFILE_ENABLED
 
-#define GLEW_STATIC
 #include "GL/glew.h"
 
 

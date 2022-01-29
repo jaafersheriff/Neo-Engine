@@ -17,8 +17,6 @@ extern "C" {
 #include "Loader/Loader.hpp"
 #include "Loader/MeshGenerator.hpp"
 
-#include "ext/microprofile.h"
-
 #include <time.h>
 #include <iostream>
 
@@ -325,9 +323,10 @@ namespace neo {
             if (ImGui::BeginMenu("Performance")) {
                 // Translate FPS to floats
                 std::vector<float> FPSfloats;
-                FPSfloats.reserve(Util::mFPSList.size());
-                for (size_t i = 0; i < Util::mFPSList.size(); i++) {
-                    FPSfloats[i] = static_cast<float>(Util::mFPSList[i]);
+                std::vector<int> FPSInts = Util::mFPSList;
+                FPSfloats.resize(FPSInts.size());
+                for (size_t i = 0; i < FPSInts.size(); i++) {
+                    FPSfloats[i] = static_cast<float>(FPSInts[i]);
                 }
                 ImGui::PlotLines("FPS", FPSfloats.data(), static_cast<int>(FPSfloats.size()), 0, std::to_string(Util::mFPS).c_str());
                 ImGui::Text("dt: %0.3fms", 1000.0 * Util::mTimeStep);

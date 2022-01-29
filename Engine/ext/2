@@ -59,7 +59,6 @@ PRIVATE
 )
 target_link_libraries(microprofile
 PUBLIC
-	wsock32 ws2_32
 PRIVATE
 	libglew_static
 )

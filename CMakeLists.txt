@@ -54,7 +54,6 @@ set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 
 include(cmake/InitApp.cmake)
 include(cmake/InitLib.cmake)
-include(cmake/CaptureFiles.cmake)
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Engine")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Apps")

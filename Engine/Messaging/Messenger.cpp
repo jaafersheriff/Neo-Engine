@@ -2,7 +2,7 @@
 
 #include "ECS/GameObject.hpp"
 
-#include "ext/microprofile.h"
+#include "microprofile.h"
 
 namespace neo {
 

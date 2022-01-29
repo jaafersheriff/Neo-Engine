@@ -3,13 +3,15 @@ function (InitApp TargetID)
 	message(STATUS "Generating App/${TargetID}")
 
 	project(${TargetID})
-	add_library(${TargetID})
+	add_executable(${TargetID})
 
-	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${TargetID})
 	
-	file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.*)
-	file(GLOB_RECURSE HPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/*.*)
-	targetCaptureFiles("${CPP_FILES}" "${HPP_FILES}" "${TargetID}")
+	file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/${TargetID}/*.cpp)
+	file(GLOB_RECURSE HPP_FILES 
+			  ${CMAKE_CURRENT_SOURCE_DIR}/${TargetID}/*.hpp
+			  ${CMAKE_CURRENT_SOURCE_DIR}/${TargetID}/*.h
+	)
 
 	target_sources(${TargetID}
 	PRIVATE
@@ -19,12 +21,19 @@ function (InitApp TargetID)
 
 	target_include_directories(${TargetID}
 	PUBLIC
-		${CMAKE_CURRENT_SOURCE_DIR}/include
+		${CMAKE_CURRENT_SOURCE_DIR}/${TargetID}
 	PRIVATE
-		"include/${TargetID}"
 	)
 
-	set_target_properties(${TargetID} PROPERTIES FOLDER "Neo")
+	target_link_libraries(${TargetID}
+	PUBLIC
+	PRIVATE
+		Neo
+	)
+
+	set_target_properties(${TargetID} PROPERTIES FOLDER "Apps")
+
+	set_property(TARGET ${TargetID} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Apps/${TargetID}")
 
 endfunction()
 

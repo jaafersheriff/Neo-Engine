@@ -21,6 +21,7 @@ namespace neo {
 
         public:
             static std::string APP_SHADER_DIR;
+            static std::string ENGINE_SHADER_DIR;
             static unsigned NEO_GL_MAJOR_VERSION;
             static unsigned NEO_GL_MINOR_VERSION;
             static std::string NEO_GLSL_VERSION;

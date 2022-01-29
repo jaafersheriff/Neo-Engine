@@ -8,4 +8,5 @@ PRIVATE
 	glm
 	libglew_static
 	imgui
+	Util
 )

@@ -8,4 +8,5 @@ PRIVATE
 	glfw
 	imgui
 	libglew_static
+	Util
 )
