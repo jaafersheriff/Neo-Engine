@@ -1,4 +1,4 @@
-#include <Engine.hpp>
+#include "Engine/Engine.hpp"
 
 #include "Renderer/Shader/GammaCorrectShader.hpp"
 #include "Renderer/Shader/PhongShader.hpp"
@@ -58,9 +58,10 @@ void generateObjects(int amount) {
         Renderable renderable(mesh, position, size);
         Material material;
         material.mAmbient = glm::vec3(0.2f);
-        material.mDiffuse = glm::vec3(glm::normalize(position));
+        material.mDiffuse = (glm::normalize(position) + 1.f) / 2.f;
         Engine::addComponent<renderable::PhongRenderable>(renderable.gameObject, *Library::getTexture("black"), material);
         auto boundingBox = &Engine::addComponent<BoundingBoxComponent>(renderable.gameObject, *mesh);
+        NEO_UNUSED(boundingBox);
     }
 }
 

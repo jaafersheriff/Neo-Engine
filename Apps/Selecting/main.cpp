@@ -84,6 +84,7 @@ int main() {
         100.f,
         // Decide to remove selected components
         [](SelectedComponent* selected) {
+            NEO_UNUSED(selected);
             return false;
         },
         // Reset operation for unselected components

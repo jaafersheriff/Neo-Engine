@@ -1,4 +1,4 @@
-#include <Engine.hpp>
+#include "Engine/Engine.hpp"
 
 #include "Renderer/Shader/WireframeShader.hpp"
 #include "GBufferShader.hpp"
@@ -119,9 +119,9 @@ int main() {
                 static float size(15.f);
                 static glm::vec3 color(1.f);
                 static float yOffset(10.f);
-                ImGui::SliderFloat3("Position", glm::value_ptr(pos), -25.f, 25.f);
+                ImGui::SliderFloat3("Position", &pos[0], -25.f, 25.f);
                 ImGui::SliderFloat("Scale", &size, 15.f, 100.f);
-                ImGui::SliderFloat3("Color", glm::value_ptr(color), 0.01f, 1.f);
+                ImGui::SliderFloat3("Color", &color[0], 0.01f, 1.f);
                 ImGui::SliderFloat("Offset", &yOffset, 0.f, 25.f);
                 if (ImGui::Button("Create")) {
                     auto light = new Light(pos, color, glm::vec3(size));
@@ -129,7 +129,7 @@ int main() {
                         Engine::addComponent<SinTranslateComponent>(light->gameObject, glm::vec3(0.f, yOffset, 0.f), pos);
                     }
                     lights.push_back(light);
-                    index = lights.size() - 1;
+                    index = static_cast<int>(lights.size()) - 1;
                 }
                 ImGui::TreePop();
             }
@@ -148,8 +148,8 @@ int main() {
                 static float minSinOffset(0.f);
                 static float maxSinOffset(0.f);
                 ImGui::SliderInt("Num lights", &numLights, 0, 1000);
-                ImGui::SliderFloat3("Min offset", glm::value_ptr(minOffset), -100.f, 100.f);
-                ImGui::SliderFloat3("Max offset", glm::value_ptr(maxOffset), -100.f, 100.f);
+                ImGui::SliderFloat3("Min offset", &minOffset[0], -100.f, 100.f);
+                ImGui::SliderFloat3("Max offset", &maxOffset[0], -100.f, 100.f);
                 ImGui::SliderFloat("Min scale", &minScale, 0.f, maxScale);
                 ImGui::SliderFloat("Max scale", &maxScale, minScale, 100.f);
                 ImGui::SliderFloat("Min sin", &minSinOffset, 0.f, 15.f);
@@ -175,7 +175,7 @@ int main() {
             return;
         }
         if (ImGui::CollapsingHeader("Edit Lights")) {
-            ImGui::SliderInt("Index", &index, 0, lights.size() - 1);
+            ImGui::SliderInt("Index", &index, 0, static_cast<int>(lights.size()) - 1);
             auto l = lights[index];
             if (ImGui::Button("Delete light")) {
                 Engine::removeGameObject(*l->gameObject);

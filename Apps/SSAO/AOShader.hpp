@@ -21,10 +21,12 @@ class AOShader : public PostProcessShader {
 
             // generate kernel
             Texture *kernelTex = Library::createEmptyTexture<Texture1D>("aoKernel", { GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT, GL_UNSIGNED_BYTE });
+            NEO_UNUSED(kernelTex);
             generateKernel(32);
 
             // generate 4x4 noise texture
             Texture *noiseTex = Library::createEmptyTexture<Texture2D>("aoNoise", { GL_RGB16F, GL_RGB, GL_NEAREST, GL_REPEAT, GL_UNSIGNED_BYTE });
+            NEO_UNUSED(noiseTex);
             generateNoise(4);
         }
 
@@ -52,9 +54,9 @@ class AOShader : public PostProcessShader {
             std::vector<uint8_t> noise;
             noise.resize(dim*dim*3);
             for (unsigned i = 0; i < dim*dim*3; i+=3) {
-                noise[i + 0] = Util::genRandom();
-                noise[i + 1] = Util::genRandom();
-                noise[i + 2] = Util::genRandom();
+                noise[i + 0] = static_cast<uint8_t>(Util::genRandom());
+                noise[i + 1] = static_cast<uint8_t>(Util::genRandom());
+                noise[i + 2] = static_cast<uint8_t>(Util::genRandom());
             }
             Library::getTexture("aoNoise")->update(glm::uvec2(dim), noise.data());
         }
