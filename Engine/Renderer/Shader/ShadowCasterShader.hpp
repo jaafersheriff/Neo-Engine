@@ -3,7 +3,7 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
-#include "Engine.hpp"
+#include "Engine/Engine.hpp"
 
 namespace neo {
 

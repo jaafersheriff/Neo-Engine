@@ -33,6 +33,7 @@ class DofBlurShader : public Shader {
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&, frameScale = frameScale](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+                NEO_UNUSED(m);
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
                 Library::getFBO("dofblur")->resize(frameSize / glm::uvec2(*frameScale));
             });

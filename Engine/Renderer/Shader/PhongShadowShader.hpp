@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine.hpp"
+#include "Engine/Engine.hpp"
 
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
@@ -88,8 +88,8 @@ namespace neo {
 
                 /* Load light */
                 if (auto shadowCamera = Engine::getComponentTuple<ShadowCameraComponent, CameraComponent>()) {
-                    auto camera = shadowCamera->get<CameraComponent>();
-                    loadUniform("L", biasMatrix * camera->getProj() * camera->getView());
+                    auto _shadowCamera = shadowCamera->get<CameraComponent>();
+                    loadUniform("L", biasMatrix * _shadowCamera->getProj() * _shadowCamera->getView());
                 }
 
                 if (auto light = Engine::getComponentTuple<LightComponent, SpatialComponent>()) {

@@ -24,6 +24,7 @@ class PostShader : public PostProcessShader {
             PostProcessShader("Post Shader", frag)
         {
             Texture *poissonTex = Library::createEmptyTexture<Texture1D>("poisson", { GL_RG16F, GL_RG, GL_NEAREST, GL_REPEAT, GL_FLOAT });
+            NEO_UNUSED(poissonTex);
             generatePoisson(poissonSize);
         }
 
@@ -54,6 +55,7 @@ class PostShader : public PostProcessShader {
         }
 
         void generatePoisson(int size) {
+            poissonSize = size;
             std::vector<float> kernel;
             for (int i = 0; i < poissonSize; i++) {
                 glm::vec2 sample(
