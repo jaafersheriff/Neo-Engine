@@ -24,10 +24,11 @@
 namespace neo {
 
     bool Loader::mVerbose = false;
-    std::string Loader::RES_DIR = "";
+    std::string Loader::APP_RES_DIR = "";
+    std::string Loader::ENGINE_RES_DIR = "../../Engine/res/";
 
     void Loader::init(const std::string &res, bool v) {
-        RES_DIR = res;
+        APP_RES_DIR = res;
         mVerbose = v;
     }
 
@@ -41,8 +42,13 @@ namespace neo {
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> objMaterials;
         std::string errString;
+        std::string _fileName = APP_RES_DIR + fileName;
+        if (!Util::fileExists(_fileName.c_str())) {
+            _fileName = ENGINE_RES_DIR + fileName;
+        }
+        NEO_ASSERT(Util::fileExists(_fileName.c_str()), "Unable to find file: %s", fileName.c_str());
         // TODO : use assimp or another optimized asset loader
-        bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, (RES_DIR + fileName).c_str());
+        bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, _fileName.c_str());
         NEO_ASSERT(rc, errString.c_str());
 
         /* Create empty mesh buffers */
@@ -97,9 +103,14 @@ namespace neo {
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> objMaterials;
 
-        std::string errString;
+        std::string resDir = APP_RES_DIR;
+        if (!Util::fileExists((resDir + fileName).c_str())) {
+            resDir = ENGINE_RES_DIR;
+            NEO_ASSERT(Util::fileExists((resDir + fileName).c_str()), "Unable to find file: %s", fileName.c_str());
+        }
         // TODO : use assimp or another optimized asset loader
-        bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, (RES_DIR + fileName).c_str(), RES_DIR.c_str());
+        std::string errString;
+        bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, (resDir + fileName).c_str(), resDir.c_str());
         NEO_ASSERT(rc, errString.c_str());
 
         std::vector<Asset> ret;
@@ -211,12 +222,15 @@ namespace neo {
     }
 
     uint8_t* Loader::_loadTextureData(int& width, int& height, int& components, const std::string& fileName, TextureFormat format, bool flip) {
-        /* Use stbi if name is an existing file */
-        FILE *f;
-        NEO_ASSERT(!fopen_s(&f, (RES_DIR + fileName).c_str(), "rb"), "Error opening texture file");
+        std::string _fileName = APP_RES_DIR + fileName;
+        if (!Util::fileExists(_fileName.c_str())) {
+            _fileName = ENGINE_RES_DIR + fileName;
+            NEO_ASSERT(Util::fileExists(_fileName.c_str()), "Unable to find file: %s", fileName.c_str());
+        }
 
+        /* Use stbi if name is an existing file */
         stbi_set_flip_vertically_on_load(flip);
-        uint8_t *data = stbi_load((RES_DIR + fileName).c_str(), &width, &height, &components, format.mBaseFormat == GL_RGB ? STBI_rgb : STBI_rgb_alpha);
+        uint8_t *data = stbi_load((APP_RES_DIR + fileName).c_str(), &width, &height, &components, format.mBaseFormat == GL_RGB ? STBI_rgb : STBI_rgb_alpha);
         NEO_ASSERT(data, "Error reading texture file");
 
         if (mVerbose) {

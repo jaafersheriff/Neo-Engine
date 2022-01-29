@@ -50,7 +50,8 @@ namespace neo {
             static void _cleanTextureData(uint8_t*);
 
             /* Private members */
-            static std::string RES_DIR;
+            static std::string APP_RES_DIR;
+            static std::string ENGINE_RES_DIR;
             static bool mVerbose;
 
 
