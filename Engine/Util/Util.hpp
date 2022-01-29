@@ -11,10 +11,7 @@
 namespace neo {
 
 #define NEO_ASSERT(x, s) if (!(x)) { printf("\n\n%s: (%s) in %s, file %s on line %d.\n", std::string(s).c_str(), #x, __func__, __FILE__, __LINE__); abort(); }
- 
-    
-static inline void _UNUSED(...) {}
-#define NEO_UNUSED(...) neo::_UNUSED(__VA_ARGS__)
+#define NEO_UNUSED(...) __noop(__VA_ARGS__)
  
     struct Util {
         

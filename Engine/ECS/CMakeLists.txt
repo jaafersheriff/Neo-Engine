@@ -6,4 +6,6 @@ PUBLIC
 PRIVATE
 	Engine
 	glm
+	libglew_static
+	glfw
 )

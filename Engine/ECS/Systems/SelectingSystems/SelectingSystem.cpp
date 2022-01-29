@@ -11,6 +11,7 @@ namespace neo {
     }
 
     void SelectingSystem::update(const float dt) {
+        NEO_UNUSED(dt);
         if (auto mouseRay = Engine::getSingleComponent<MouseRayComponent>()) {
 
             SelectableComponent* selectedSelectable = nullptr;

@@ -4,6 +4,7 @@
 namespace neo {
 
     void MouseRaySystem::update(const float dt) {
+        NEO_UNUSED(dt);
         auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
         assert(mainCamera);
         auto camera = mainCamera->get<CameraComponent>();

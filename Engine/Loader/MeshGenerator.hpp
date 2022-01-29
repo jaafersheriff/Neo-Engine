@@ -217,9 +217,9 @@ namespace neo {
                         mesh->mMax = glm::max(mesh->mMax, glm::max(halfA, glm::max(halfB, halfC)));
 
                         // add indices of new faces 
-                        int indA = verts.size() / 3 - 3;
-                        int indB = verts.size() / 3 - 2;
-                        int indC = verts.size() / 3 - 1;
+                        int indA = static_cast<int>(verts.size()) / 3 - 3;
+                        int indB = static_cast<int>(verts.size()) / 3 - 2;
+                        int indC = static_cast<int>(verts.size()) / 3 - 1;
                         ele2.push_back(ele[j + 0]);
                         ele2.push_back(indA);
                         ele2.push_back(indC);

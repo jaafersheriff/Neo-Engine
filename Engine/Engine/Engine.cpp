@@ -324,8 +324,12 @@ namespace neo {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("Performance")) {
                 // Translate FPS to floats
-                std::vector<float> FPSfloats(Util::mFPSList.begin(), Util::mFPSList.end());
-                ImGui::PlotLines("FPS", FPSfloats.data(), FPSfloats.size(), 0, std::to_string(Util::mFPS).c_str());
+                std::vector<float> FPSfloats;
+                FPSfloats.reserve(Util::mFPSList.size());
+                for (size_t i = 0; i < Util::mFPSList.size(); i++) {
+                    FPSfloats[i] = static_cast<float>(Util::mFPSList[i]);
+                }
+                ImGui::PlotLines("FPS", FPSfloats.data(), static_cast<int>(FPSfloats.size()), 0, std::to_string(Util::mFPS).c_str());
                 ImGui::Text("dt: %0.3fms", 1000.0 * Util::mTimeStep);
                 if (ImGui::Button("VSync")) {
                     Window::toggleVSync();
@@ -334,7 +338,7 @@ namespace neo {
             }
             if (ImGui::BeginMenu("ECS")) {
                 ImGui::Text("GameObjects:  %d", getGameObjects().size());
-                int count = 0;
+                size_t count = 0;
                 for (auto go : getGameObjects()) {
                     count += go->getAllComponents().size();
                 }
@@ -425,7 +429,10 @@ namespace neo {
             }
             auto textureFunc = [&](const Texture& texture) {
                 float scale = 150.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
-                ImGui::Image((ImTextureID)texture.mTextureID, ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
+#pragma warning(push)
+#pragma warning(disable: 4312)
+                ImGui::Image(reinterpret_cast<ImTextureID>(texture.mTextureID), ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
+#pragma warning(pop)
             };
             if (ImGui::BeginMenu("Library")) {
                 if (ImGui::TreeNodeEx("FBOs", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -485,7 +492,7 @@ namespace neo {
                             static int index = 0;
                             if (components.size() > 1) {
                                 ImGui::Indent();
-                                ImGui::SliderInt("Index", &index, 0, components.size() - 1);
+                                ImGui::SliderInt("Index", &index, 0, static_cast<int>(components.size()) - 1);
                                 ImGui::Unindent();
                             }
                             ImGui::Indent();

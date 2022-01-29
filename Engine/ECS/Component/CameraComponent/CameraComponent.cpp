@@ -26,6 +26,7 @@ namespace neo {
         mProjMatDirty = true;
 
         Messenger::addReceiver<SpatialChangeMessage>(mGameObject, [&](const Message & msg_) {
+            NEO_UNUSED(msg_);
             mViewMatDirty = true;
         });
     }

@@ -11,6 +11,7 @@
 namespace neo {
 
     void FrustaFittingSystem::update(const float dt) {
+        NEO_UNUSED(dt);
         auto sourceCamera = Engine::getComponentTuple<CameraComponent, FrustumFitSourceComponent, SpatialComponent>();
         auto receiverCamera = Engine::getComponentTuple<CameraComponent, FrustumFitReceiverComponent, SpatialComponent>();
         auto light = Engine::getComponentTuple<LightComponent, SpatialComponent>();
@@ -26,6 +27,7 @@ namespace neo {
         /////////////////////// Do the fitting! ///////////////////////////////
         auto orthoSpat = orthoCamera->getGameObject().getComponentByType<SpatialComponent>();
         auto perspectiveSpat = perspectiveCamera->getGameObject().getComponentByType<SpatialComponent>();
+        NEO_UNUSED(perspectiveSpat);
         auto lightSpat = light->get<SpatialComponent>();
         if (!lightSpat) {
             return;

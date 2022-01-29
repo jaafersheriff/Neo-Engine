@@ -3,6 +3,7 @@
 
 namespace neo {
     void FrustumSystem::update(const float dt) {
+        NEO_UNUSED(dt);
         for (auto& cameraTuple : Engine::getComponentTuples<CameraComponent, FrustumComponent, SpatialComponent>()) {
             auto camera = cameraTuple->get<CameraComponent>();
             auto frustum = cameraTuple->get<FrustumComponent>();
