@@ -40,8 +40,8 @@ namespace neo {
             const glm::mat3 & getNormalMatrix() const;
 
         private:
-            glm::vec3 mPosition;
-            glm::vec3 mScale;
+            glm::vec3 mPosition{ 0.f, 0.f, 0.f };
+            glm::vec3 mScale{ 1.f, 1.f, 1.f };
 
             void _detModelMatrix() const;
             void _detNormalMatrix() const;

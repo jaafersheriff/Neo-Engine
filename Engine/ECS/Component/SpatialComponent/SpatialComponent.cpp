@@ -132,7 +132,7 @@ namespace neo {
     }
 
     void SpatialComponent::_detModelMatrix() const {
-        mModelMatrix = glm::scale(glm::translate(glm::mat4(), mPosition) * glm::mat4(getOrientation()), mScale);
+        mModelMatrix = glm::scale(glm::translate(glm::mat4(1.f), mPosition) * glm::mat4(getOrientation()), mScale);
         mModelMatrixDirty = false;
     }
 

@@ -12,7 +12,7 @@ namespace neo {
                 mU(1.f, 0.f, 0.f),
                 mV(0.f, 1.f, 0.f),
                 mW(0.f, 0.f, 1.f),
-                mOrientation(),
+                mOrientation(1.f),
                 mOrientationDirty(false)
             {}
 
@@ -20,7 +20,7 @@ namespace neo {
                 mU(u),
                 mV(v),
                 mW(w),
-                mOrientation(),
+                mOrientation(1.f),
                 mOrientationDirty(true)
             {}
 
