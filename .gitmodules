@@ -7,3 +7,6 @@
 [submodule "Engine/ext/glm"]
 	path = Engine/ext/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "Engine/ext/glew-cmake"]
+	path = Engine/ext/glew-cmake
+	url = https://github.com/Perlmint/glew-cmake.git

@@ -9,16 +9,16 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Window")
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext")
 
-add_library(Neo INTERFACE)
-target_link_libraries(Neo
-INTERFACE
-	ECS
-	Engine
-	Loader
-	Messaging
-	Renderer
-	Util
-	Window
-	glfw
-	glm
-)
+# add_library(Neo INTERFACE)
+# target_link_libraries(Neo
+# INTERFACE
+# 	ECS
+# 	Engine
+# 	Loader
+# 	Messaging
+# 	Renderer
+# 	Util
+# 	Window
+# 	glfw
+# 	glm
+# )

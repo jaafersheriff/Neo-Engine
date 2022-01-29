@@ -116,7 +116,7 @@ namespace neo {
 
             static int index = 0;
             if (mNodes.size()) {
-                ImGui::SliderInt("Index", &index, 0, mNodes.size() - 1);
+                ImGui::SliderInt("Index", &index, 0, static_cast<int>(mNodes.size() - 1));
                 glm::vec3 pos = mNodes[index].position;
                 glm::vec3 col = mNodes[index].color;
                 bool edited = false;

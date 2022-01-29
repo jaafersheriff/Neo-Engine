@@ -32,9 +32,9 @@ namespace neo {
             template <typename CompT> CompT * getComponentByType() const;
 
             const std::vector<Component *> getAllComponents() const { return mComponents; }
-            int getNumReceiverTypes() { return mReceivers.size(); }
-            int getNumReceivers() {
-                int count = 0;
+            size_t getNumReceiverTypes() { return mReceivers.size(); }
+            size_t getNumReceivers() {
+                size_t count = 0;
                 auto it = mReceivers.begin();
                 while (it != mReceivers.end()) {
                     count += it->second.size();

@@ -13,6 +13,10 @@ namespace neo {
 #define NEO_STR(x) #x
 #define NEO_ASSERT(x, s) if (!(x)) { printf("\n\n%s: (%s) in %s, file %s on line %d.\n", s, NEO_STR(x), __func__, __FILE__, __LINE__); abort(); }
  
+    
+static inline void _UNUSED(...) {}
+#define NEO_UNUSED(...) neo::_UNUSED(__VA_ARGS__)
+ 
     struct Util {
         
         static void init() {
@@ -97,8 +101,6 @@ namespace neo {
 
         static bool fileExists(const char *fn) {
             FILE *fp;
-            char *content = NULL;
-            int count = 0;
             if (fn != NULL) {
                 fp = fopen(fn, "rt");
                 if (fp != NULL) {
