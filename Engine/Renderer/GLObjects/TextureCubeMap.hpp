@@ -17,11 +17,12 @@ namespace neo {
             std::copy_n(sizes.begin(), 6, mSizes.begin());
             bind();
             _applyFormat();
-            _upload(sizes, data);
+            _upload(data);
         }
 
     protected:
         virtual void _upload(const void* data) override {
+            NEO_UNUSED(data);
             NEO_ASSERT(false, "Can't use standard upload for a CubeMap");
         }
 
@@ -38,7 +39,7 @@ namespace neo {
             CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, mFormat.mMode));
         }
 
-        void _upload(const std::vector<glm::uvec2>& sizes, void** data) {
+        void _upload(void** data) {
             MICROPROFILE_SCOPEI("TextureCube", "upload", MP_AUTO);
             MICROPROFILE_SCOPEGPUI("TextureCube::upload", MP_AUTO);
 

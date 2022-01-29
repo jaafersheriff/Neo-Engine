@@ -7,11 +7,17 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
+#pragma warning(push)
+#pragma warning(disable: 4706)
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ext/tiny_obj_loader.h"
+#pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable: 4244)
 #define STB_IMAGE_IMPLEMENTATION
 #include "ext/stb_image.h"
+#pragma warning(pop)
 
 #include <iostream>
 
@@ -43,11 +49,11 @@ namespace neo {
         std::vector<float> vertices;
         std::vector<float> normals;
         std::vector<float> texCoords;
-        std::vector<unsigned> indices;
+        std::vector<uint32_t> indices;
 
         int vertCount = 0;
         /* For every shape in the loaded file */
-        for (unsigned int i = 0; i < shapes.size(); i++) {
+        for (uint32_t i = 0; i < shapes.size(); i++) {
             /* Concatenate the shape's vertices, normals, and textures to the mesh */
             vertices.insert(vertices.end(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
             normals.insert(normals.end(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());
@@ -55,8 +61,8 @@ namespace neo {
 
             /* Concatenate the shape's indices to the new mesh
              * Indices need to be incremented as we concatenate shapes */
-            for (unsigned int i : shapes[i].mesh.indices) {
-                indices.push_back(i + vertCount);
+            for (uint32_t j : shapes[i].mesh.indices) {
+                indices.push_back(j + vertCount);
             }
             vertCount += int(shapes[i].mesh.positions.size()) / 3;
         }
@@ -197,6 +203,10 @@ namespace neo {
             _cleanTextureData(data[i]);
         }
 
+        if (mVerbose) {
+            std::cout << "Loaded cubemap (" << name << ")" << std::endl;
+        }
+
         return texture;
     }
 
@@ -248,10 +258,12 @@ namespace neo {
 
         //From min and max compute necessary scale and shift for each dimension
         if (doResize) {
-            float maxExtent, xExtent, yExtent, zExtent;
+            float xExtent, yExtent, zExtent;
             xExtent = maxX - minX;
             yExtent = maxY - minY;
             zExtent = maxZ - minZ;
+
+            float maxExtent = 0;
             if (xExtent >= yExtent && xExtent >= zExtent) {
                 maxExtent = xExtent;
             }

@@ -1,7 +1,6 @@
 // Acts as both library and loader 
 #pragma once
 
-#define GLEW_STATIC
 #include "GL/glew.h"
 
 #include <string>
