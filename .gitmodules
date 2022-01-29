@@ -1,0 +1,9 @@
+[submodule "Engine/ext/imgui"]
+	path = Engine/ext/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "Engine/ext/glfw"]
+	path = Engine/ext/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "Engine/ext/glm"]
+	path = Engine/ext/glm
+	url = https://github.com/g-truc/glm.git

@@ -1,0 +1,62 @@
+cmake_minimum_required(VERSION 3.17)
+
+set(WIN_SDK_VERSION 10.0.19041.0)
+set(WIN_SDK_MIN_VERSION 10.0.17134.0)
+set(CMAKE_SYSTEM_VERSION ${WIN_SDK_VERSION})
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON) # enables folder structures in IDEs
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+project(Arson CXX C)
+
+# disable warnings on different compilers for our external dependencies (aka, source not written or maintained by us)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+	set(disableWarning /W0)
+	add_compile_options("/WX" "/W4")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4075,4264")
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+	set(disableWarning -w0)
+	add_compile_options("-Werror")
+else()
+	message(FATAL_ERROR	"Unsupported compiler: ${CMAKE_CXX_COMPILER_ID}")
+endif()
+
+set(CMAKE_CXX_FLAGS_PUBLISH "${CMAKE_CXX_FLAGS_RELEASE}")
+set(CMAKE_C_FLAGS_PUBLISH "${CMAKE_C_FLAGS_RELEASE}")
+set(CMAKE_EXE_LINKER_FLAGS_PUBLISH "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
+set(CMAKE_SHARED_LINKER_FLAGS_PUBLISH "${CMAKE_SHARED_LINKER_FLAGS_RELEASE}")
+set(CMAKE_STATIC_LINKER_FLAGS_PUBLISH "${CMAKE_STATIC_LINKER_FLAGS_RELEASE}")
+set(STATIC_LIBRARY_FLAGS_PUBLISH "${STATIC_LIBRARY_FLAGS_RELEASE}")
+if(MSVC)
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+	set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /INCREMENTAL /EDITANDCONTINUE")
+	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /INCREMENTAL /EDITANDCONTINUE")
+endif()
+
+if(MSVC)
+	add_compile_options(
+		/FC
+		/GR-
+		/Zc:rvalueCast
+	)
+endif()
+
+add_compile_definitions(
+	_CRT_SECURE_NO_WARNINGS
+	$<$<CONFIG:Debug>:AR_CONFIG_DEBUG>
+	$<$<CONFIG:Release>:AR_CONFIG_RELEASE>
+)
+
+
+set(CPACK_COMPONENTS_GROUPING IGNORE)
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
+
+include(cmake/InitApp.cmake)
+include(cmake/InitLib.cmake)
+include(cmake/CaptureFiles.cmake)
+
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Engine")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Apps")
