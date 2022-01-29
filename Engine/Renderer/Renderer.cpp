@@ -1,10 +1,10 @@
 #include "Renderer.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Engine.hpp"
+#include "Engine/Engine.hpp"
 #include "Window/Window.hpp"
 
-#include "ext/imgui/imgui_impl_opengl3.h"
+#include "imgui_impl_opengl3.h"
 #include "ext/microprofile.h"
 
 namespace neo {
@@ -97,6 +97,7 @@ namespace neo {
     }
 
     void Renderer::render(float dt) {
+        NEO_UNUSED(dt);
         RENDERER_MP_ENTER("Renderer::render");
 
         resetState();

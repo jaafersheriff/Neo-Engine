@@ -44,7 +44,7 @@ namespace neo {
                 std::vector<float> colors;
                 positions.resize(mNodes.size() * 3);
                 colors.resize(mNodes.size() * 3);
-                for (unsigned i = 0; i < mNodes.size(); i++) {
+                for (uint32_t i = 0; i < mNodes.size(); i++) {
                     positions[i * 3 + 0] = mNodes[i].position.x;
                     positions[i * 3 + 1] = mNodes[i].position.y;
                     positions[i * 3 + 2] = mNodes[i].position.z;
@@ -72,7 +72,7 @@ namespace neo {
             mDirty = true;
         }
 
-        void editNode(const unsigned i, const glm::vec3 pos, std::optional<glm::vec3> col = std::nullopt) {
+        void editNode(const uint32_t i, const glm::vec3 pos, std::optional<glm::vec3> col = std::nullopt) {
             if (i < mNodes.size()) {
                 mNodes[i].position = pos;
                 mNodes[i].color = col.value_or(mOverrideColor.value_or(glm::vec3(1.f)));
@@ -80,7 +80,7 @@ namespace neo {
         }
 
         void removeNode(const glm::vec3 position) {
-            for (unsigned i = 0; i < mNodes.size(); i++) {
+            for (uint32_t i = 0; i < mNodes.size(); i++) {
                 if (mNodes[i].position == position) {
                     removeNode(i);
                     return;

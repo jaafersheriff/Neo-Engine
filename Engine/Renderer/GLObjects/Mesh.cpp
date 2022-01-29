@@ -1,6 +1,5 @@
 #include "Mesh.hpp"
 
-#define GLEW_STATIC
 #include "GL/glew.h"
 
 #include "Renderer/GLObjects/GLHelper.hpp"
@@ -22,7 +21,7 @@ namespace neo {
     }
 
     // TODO - instanced
-    void Mesh::draw(unsigned size) const {
+    void Mesh::draw(uint32_t size) const {
         const auto& positions = getVBO(VertexType::Position);
 
         CHECK_GL(glBindVertexArray(mVAOID));
@@ -38,7 +37,7 @@ namespace neo {
         CHECK_GL(glBindVertexArray(0));
     }
 
-    void Mesh::addVertexBuffer(VertexType type, unsigned attribArray, unsigned stride, const std::vector<float>& buffer) {
+    void Mesh::addVertexBuffer(VertexType type, uint32_t attribArray, uint32_t stride, const std::vector<float>& buffer) {
         {
             const auto& vbo = mVBOs.find(type);
             NEO_ASSERT(vbo == mVBOs.end(), "Attempting to add a VertexBuffer that already exists");
@@ -47,7 +46,7 @@ namespace neo {
         auto vertexBuffer = VertexBuffer{};
         vertexBuffer.attribArray = attribArray;
         vertexBuffer.stride = stride;
-        vertexBuffer.bufferSize = buffer.size();
+        vertexBuffer.bufferSize = static_cast<uint32_t>(buffer.size());
 
         CHECK_GL(glBindVertexArray(mVAOID));
         CHECK_GL(glGenBuffers(1, (GLuint *)&vertexBuffer.vboID));
@@ -73,7 +72,7 @@ namespace neo {
         const auto& vbo = mVBOs.find(type);
         NEO_ASSERT(vbo != mVBOs.end(), "Attempting to update a VertexBuffer that doesn't exist");
         auto& vertexBuffer = vbo->second;
-        vertexBuffer.bufferSize = buffer.size();
+        vertexBuffer.bufferSize = static_cast<uint32_t>(buffer.size());
 
         CHECK_GL(glBindVertexArray(mVAOID));
         CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID));
@@ -84,7 +83,7 @@ namespace neo {
         CHECK_GL(glBindVertexArray(0));
     }
 
-    void Mesh::updateVertexBuffer(VertexType type, unsigned size) {
+    void Mesh::updateVertexBuffer(VertexType type, uint32_t size) {
         MICROPROFILE_SCOPEI("Mesh", "updateVertexBuffer", MP_AUTO);
         MICROPROFILE_SCOPEGPUI("Mesh::updateVBO", MP_AUTO);
 
@@ -119,39 +118,39 @@ namespace neo {
         return vbo->second;
     }
 
-    void Mesh::addElementBuffer(const std::vector<unsigned>& buffer) {
+    void Mesh::addElementBuffer(const std::vector<uint32_t>& buffer) {
         NEO_ASSERT(!mElementVBO.has_value(), "Attempting to add 2 ElementBuffers");
 
         mElementVBO = std::make_optional<VertexBuffer>();
-        mElementVBO->bufferSize = buffer.size();
+        mElementVBO->bufferSize = static_cast<uint32_t>(buffer.size());
 
         CHECK_GL(glBindVertexArray(mVAOID));
 
         CHECK_GL(glGenBuffers(1, (GLuint *)&mElementVBO->vboID));
         CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID));
         if (buffer.size()) {
-            CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(unsigned), &buffer[0], GL_STATIC_DRAW));
+            CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(uint32_t), &buffer[0], GL_STATIC_DRAW));
         }
         CHECK_GL(glBindVertexArray(0));
 
     }
 
-    void Mesh::updateElementBuffer(const std::vector<unsigned>& buffer) {
+    void Mesh::updateElementBuffer(const std::vector<uint32_t>& buffer) {
         MICROPROFILE_SCOPEI("Mesh", "updateElementBuffer", MP_AUTO);
         MICROPROFILE_SCOPEGPUI("Mesh::updateEBO", MP_AUTO);
 
         NEO_ASSERT(mElementVBO.has_value() && buffer.size(), "Attempting to update an ElementBuffer that doesn't exist");
-        mElementVBO->bufferSize = buffer.size();
+        mElementVBO->bufferSize = static_cast<uint32_t>(buffer.size());
 
         CHECK_GL(glBindVertexArray(mVAOID));
         CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID));
         if (buffer.size()) {
-            CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(unsigned), &buffer[0], GL_STATIC_DRAW));
+            CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(uint32_t), &buffer[0], GL_STATIC_DRAW));
         }
         CHECK_GL(glBindVertexArray(0));
     }
 
-    void Mesh::updateElementBuffer(unsigned size) {
+    void Mesh::updateElementBuffer(uint32_t size) {
         MICROPROFILE_SCOPEI("Mesh", "updateElementBuffer", MP_AUTO);
         MICROPROFILE_SCOPEGPUI("Mesh::updateEBO", MP_AUTO);
 
@@ -161,7 +160,7 @@ namespace neo {
 
         CHECK_GL(glBindVertexArray(mVAOID));
         CHECK_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID));
-        CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(unsigned), (const void *)0, GL_STATIC_DRAW));
+        CHECK_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(uint32_t), (const void *)0, GL_STATIC_DRAW));
         CHECK_GL(glBindVertexArray(0));
     }
 

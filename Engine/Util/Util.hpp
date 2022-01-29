@@ -10,8 +10,7 @@
 
 namespace neo {
 
-#define NEO_STR(x) #x
-#define NEO_ASSERT(x, s) if (!(x)) { printf("\n\n%s: (%s) in %s, file %s on line %d.\n", s, NEO_STR(x), __func__, __FILE__, __LINE__); abort(); }
+#define NEO_ASSERT(x, s) if (!(x)) { printf("\n\n%s: (%s) in %s, file %s on line %d.\n", std::string(s).c_str(), #x, __func__, __FILE__, __LINE__); abort(); }
  
     
 static inline void _UNUSED(...) {}

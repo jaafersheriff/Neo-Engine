@@ -2,7 +2,6 @@
 
 #include <GL/glew.h>
 #include "glm/glm.hpp"
-#include "glm/gtc/type_ptr.hpp"
 
 #include <unordered_map>
 #include <map>
@@ -58,12 +57,12 @@ namespace neo {
             void loadUniform(const std::string &, const int) const;           // int
             void loadUniform(const std::string &, const double) const;        // double
             void loadUniform(const std::string &, const float) const;         // float
-            void loadUniform(const std::string &, const glm::vec2 &) const;   // vec2
-            void loadUniform(const std::string &, const glm::ivec2 &) const;  // ivec2
-            void loadUniform(const std::string &, const glm::vec3 &) const;   // vec3
-            void loadUniform(const std::string &, const glm::vec4 &) const;   // vec4
-            void loadUniform(const std::string &, const glm::mat3 &) const;   // mat3
-            void loadUniform(const std::string &, const glm::mat4 &) const;   // mat4
+            void loadUniform(const std::string &, const glm::vec2&) const;   // vec2
+            void loadUniform(const std::string &, const glm::ivec2&) const;  // ivec2
+            void loadUniform(const std::string &, const glm::vec3&) const;   // vec3
+            void loadUniform(const std::string &, const glm::vec4&) const;   // vec4
+            void loadUniform(const std::string &, const glm::mat3&) const;   // mat3
+            void loadUniform(const std::string &, const glm::mat4&) const;   // mat4
             void loadTexture(const std::string &, const Texture &) const;     // texture
 
             /* Get shader location */

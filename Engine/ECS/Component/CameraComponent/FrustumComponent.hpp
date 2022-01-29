@@ -11,22 +11,22 @@ namespace neo {
             {}
 
             // Bounds
-            glm::vec3 NearLeftBottom;
-            glm::vec3 NearLeftTop;
-            glm::vec3 NearRightBottom;
-            glm::vec3 NearRightTop;
-            glm::vec3 FarLeftBottom;
-            glm::vec3 FarLeftTop;
-            glm::vec3 FarRightBottom;
-            glm::vec3 FarRightTop;
+            glm::vec3 NearLeftBottom{ 0.f, 0.f, 0.f };
+            glm::vec3 NearLeftTop{ 0.f, 0.f, 0.f };
+            glm::vec3 NearRightBottom{ 0.f, 0.f, 0.f };
+            glm::vec3 NearRightTop{ 0.f, 0.f, 0.f };
+            glm::vec3 FarLeftBottom{ 0.f, 0.f, 0.f };
+            glm::vec3 FarLeftTop{ 0.f, 0.f, 0.f };
+            glm::vec3 FarRightBottom{ 0.f, 0.f, 0.f };
+            glm::vec3 FarRightTop{ 0.f, 0.f, 0.f };
 
             // Planes
-            glm::vec4 mLeft;
-            glm::vec4 mRight;
-            glm::vec4 mTop;
-            glm::vec4 mBottom;
-            glm::vec4 mNear;
-            glm::vec4 mFar;
+            glm::vec4 mLeft{ 0.f, 0.f, 0.f, 0.f };
+            glm::vec4 mRight{ 0.f, 0.f, 0.f, 0.f };
+            glm::vec4 mTop{ 0.f, 0.f, 0.f, 0.f };
+            glm::vec4 mBottom{ 0.f, 0.f, 0.f, 0.f };
+            glm::vec4 mNear{ 0.f, 0.f, 0.f, 0.f };
+            glm::vec4 mFar{ 0.f, 0.f, 0.f, 0.f };
 
             // Test if an object is inside the frustum
             bool isInFrustum(const glm::vec3 position, const float radius) {

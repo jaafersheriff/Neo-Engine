@@ -1,6 +1,5 @@
 #include "Texture.hpp"
 
-#define GLEW_STATIC
 #include "GL/glew.h"
 
 #include "Renderer/GLObjects/GLHelper.hpp"

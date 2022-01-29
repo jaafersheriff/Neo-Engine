@@ -16,10 +16,6 @@ set_target_properties(update_mappings PROPERTIES FOLDER "ext/GLFW3")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glew-cmake")
 set_target_properties(libglew_shared PROPERTIES FOLDER "ext/glew")
 set_target_properties(libglew_static PROPERTIES FOLDER "ext/glew")
-target_include_directories(libglew_static
-PUBLIC
-	"${CMAKE_CURRENT_SOURCE_DIR}/glew-cmake/include"
-)
 
 ## GLM
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glm")

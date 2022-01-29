@@ -51,8 +51,11 @@ namespace neo {
         
         for (auto &&[stage, source] : mStages) {
             source.processedSource = _processShader(source.source);
-            if (source.processedSource.size() && (source.id = _compileShader(_getGLShaderStage(stage), source.processedSource.c_str()))) {
-                CHECK_GL(glAttachShader(mPID, source.id));
+            if (source.processedSource.size()) {
+                source.id = _compileShader(_getGLShaderStage(stage), source.processedSource.c_str());
+                if (source.id) {
+                    CHECK_GL(glAttachShader(mPID, source.id));
+                }
             }
         }
 
@@ -194,7 +197,7 @@ namespace neo {
                 // Handle lines with multiple variables separated by commas
                 char *lineEnding = line + strlen(line) + 1;
                 int lastDelimiter = -1;
-                int lineEndingLength = strlen(lineEnding);
+                size_t lineEndingLength = strlen(lineEnding);
                 for (int i = 0; i < lineEndingLength; i++) {
                     if (lineEnding[i] == ',') {
                         lineEnding[i] = '\0';
@@ -314,27 +317,27 @@ namespace neo {
     void Shader::loadUniform(const std::string &loc, const glm::vec2 & v) const {
         CHECK_GL(glUniform2f(getUniform(loc), v.x, v.y));
     }
-
+    
     void Shader::loadUniform(const std::string &loc, const glm::ivec2 & v) const {
         CHECK_GL(glUniform2i(getUniform(loc), v.x, v.y));
     }
-
+    
     void Shader::loadUniform(const std::string &loc, const glm::vec3 & v) const {
         CHECK_GL(glUniform3f(getUniform(loc), v.x, v.y, v.z));
     }
-
+    
     void Shader::loadUniform(const std::string &loc, const glm::vec4 & v) const {
         CHECK_GL(glUniform4f(getUniform(loc), v.r, v.g, v.b, v.a));
     }
-
+    
     void Shader::loadUniform(const std::string &loc, const glm::mat3 & m) const {
-        CHECK_GL(glUniformMatrix3fv(getUniform(loc), 1, GL_FALSE, glm::value_ptr(m)));
+        CHECK_GL(glUniformMatrix3fv(getUniform(loc), 1, GL_FALSE, &m[0][0]));
     }
-
-    void Shader::loadUniform(const std::string &loc, const glm::mat4 & m) const {
-        CHECK_GL(glUniformMatrix4fv(getUniform(loc), 1, GL_FALSE, glm::value_ptr(m)));
+    
+    void Shader::loadUniform(const std::string& loc, const glm::mat4& m) const {
+        CHECK_GL(glUniformMatrix4fv(getUniform(loc), 1, GL_FALSE, &m[0][0]));
     }
-
+    
     void Shader::loadTexture(const std::string &loc, const Texture & texture) const {
         texture.bind();
         CHECK_GL(glUniform1i(getUniform(loc), texture.mTextureID));
