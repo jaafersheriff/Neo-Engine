@@ -41,7 +41,7 @@ struct Light {
 struct Renderable {
     GameObject *gameObject;
 
-    Renderable(Mesh *mesh, Texture *tex, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3()) {
+    Renderable(Mesh *mesh, Texture *tex, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3(1.f)) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, p, glm::vec3(s), o);
         Engine::addComponent<MeshComponent>(gameObject, *mesh);
