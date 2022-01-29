@@ -1,4 +1,4 @@
-#include <Engine.hpp>
+#include "Engine/Engine.hpp"
 
 #include "GBufferComponent.hpp"
 
@@ -109,10 +109,10 @@ int main() {
     Engine::addImGuiFunc("Decal", [&]() {
         auto pos = decal.spat->getPosition();
         auto scale = decal.spat->getScale();
-        if (ImGui::SliderFloat3("Position", glm::value_ptr(pos), -25.f, 25.f)) {
+        if (ImGui::SliderFloat3("Position", &pos[0], -25.f, 25.f)) {
             decal.spat->setPosition(pos);
         }
-        if (ImGui::SliderFloat3("Scale", glm::value_ptr(scale), 0.f, 50.f)) {
+        if (ImGui::SliderFloat3("Scale", &scale[0], 0.f, 50.f)) {
             decal.spat->setScale(scale);
         }
     });
@@ -125,21 +125,21 @@ int main() {
             static float size(15.f);
             static glm::vec3 color(1.f);
             static float yOffset(10.f);
-            ImGui::SliderFloat3("Position", glm::value_ptr(pos), -25.f, 25.f);
+            ImGui::SliderFloat3("Position", &pos[0], -25.f, 25.f);
             ImGui::SliderFloat("Scale", &size, 15.f, 100.f);
-            ImGui::SliderFloat3("Color", glm::value_ptr(color), 0.01f, 1.f);
+            ImGui::SliderFloat3("Color", &color[0], 0.01f, 1.f);
             ImGui::SliderFloat("Offset", &yOffset, 0.f, 25.f);
             if (ImGui::Button("Create")) {
                 auto light = new Light(pos, color, glm::vec3(size));
                 lights.push_back(light);
-                index = lights.size() - 1;
+                index = static_cast<int>(lights.size()) - 1;
             }
         }
         if (lights.empty()) {
             return;
         }
         if (ImGui::CollapsingHeader("Edit Lights")) {
-            ImGui::SliderInt("Index", &index, 0, lights.size() - 1);
+            ImGui::SliderInt("Index", &index, 0, static_cast<int>(lights.size()) - 1);
             auto l = lights[index];
             if (ImGui::Button("Delete light")) {
                 Engine::removeGameObject(*l->gameObject);

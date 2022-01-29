@@ -4,7 +4,7 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 
 #include "Loader/Library.hpp"
-#include "Engine.hpp"
+#include "Engine/Engine.hpp"
 
 using namespace neo;
 

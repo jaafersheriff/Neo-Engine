@@ -3,7 +3,7 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Engine.hpp"
+#include "Engine/Engine.hpp"
 
 #include "DecalRenderable.hpp"
 
@@ -23,6 +23,7 @@ class DecalShader : public Shader {
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
+                NEO_UNUSED(m);
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).frameSize;
                 Library::getFBO("decals")->resize(frameSize);
             });
