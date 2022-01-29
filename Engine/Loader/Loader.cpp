@@ -230,7 +230,7 @@ namespace neo {
 
         /* Use stbi if name is an existing file */
         stbi_set_flip_vertically_on_load(flip);
-        uint8_t *data = stbi_load((APP_RES_DIR + fileName).c_str(), &width, &height, &components, format.mBaseFormat == GL_RGB ? STBI_rgb : STBI_rgb_alpha);
+        uint8_t *data = stbi_load(_fileName.c_str(), &width, &height, &components, format.mBaseFormat == GL_RGB ? STBI_rgb : STBI_rgb_alpha);
         NEO_ASSERT(data, "Error reading texture file");
 
         if (mVerbose) {
