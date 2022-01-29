@@ -8,7 +8,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON) # enables folder structures in IDEs
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(Arson CXX C)
+project(Neo CXX C)
 
 # disable warnings on different compilers for our external dependencies (aka, source not written or maintained by us)
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")

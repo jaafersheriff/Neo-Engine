@@ -16,8 +16,10 @@ function (InitLibWithName TargetID)
 
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 	
-	file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.*)
-	file(GLOB_RECURSE HPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/*.*)
+	file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+	file(GLOB_RECURSE HPP_FILES 
+			  ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
+			  ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 	targetCaptureFiles("${CPP_FILES}" "${HPP_FILES}" "${TargetID}")
 
 	target_sources(${TargetID}
@@ -28,7 +30,7 @@ function (InitLibWithName TargetID)
 
 	target_include_directories(${TargetID}
 	PUBLIC
-		${CMAKE_CURRENT_SOURCE_DIR}/include
+		${CMAKE_CURRENT_SOURCE_DIR}
 	PRIVATE
 		"include/${TargetID}"
 	)
