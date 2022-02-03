@@ -48,13 +48,14 @@ int main() {
 
     Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
-    /* Cube object */
-    GameObject* cube = &Engine::createGameObject();
-    Engine::addComponent<SpatialComponent>(cube, glm::vec3(0.f, 0.5f, 0.f));
-    Engine::addComponent<MeshComponent>(cube, *Library::getMesh("cube"));
-    Engine::addComponent<renderable::PhongRenderable>(cube, *Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f,0.f,1.f)));
-    Engine::addComponent<SelectableComponent>(cube);
-    Engine::addComponent<BoundingBoxComponent>(cube, *Library::getMesh("cube"));
+    /* Bunny object */
+    GameObject* bunny = &Engine::createGameObject();
+    Engine::addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
+    Engine::addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
+    Engine::addComponent<MeshComponent>(bunny, *Library::loadMesh("bunny.obj", true));
+    Engine::addComponent<renderable::PhongRenderable>(bunny, *Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f,0.f,1.f)));
+    Engine::addComponent<SelectableComponent>(bunny);
+    Engine::addComponent<BoundingBoxComponent>(bunny, *Library::loadMesh("bunny.obj"));
 
     /* Ground plane */
     GameObject* plane = &Engine::createGameObject();

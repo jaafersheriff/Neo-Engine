@@ -3,9 +3,8 @@ InitLib()
 
 target_link_libraries(ECS
 PUBLIC
+	microprofile
+	Util
+	Window
 PRIVATE
-	Engine
-	glm
-	libglew_static
-	glfw
 )

@@ -17,10 +17,8 @@ INTERFACE
 	Loader
 	Messaging
 	Renderer
-	Util
 	Window
-	glm
-	libglew_static
+	Util
 	glfw
-	microprofile
+	libglew_static
 )
