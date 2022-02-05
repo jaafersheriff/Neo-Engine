@@ -1,14 +1,14 @@
-function(GetTargetName TargetID)
+function(InitLib) 
+	_GetTargetName(TargetID)
+	_InitLibWithName("${TargetID}")
+endfunction()
+
+function(_GetTargetName TargetID)
 	get_filename_component(_TargetID ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 	set("${TargetID}" "${_TargetID}" PARENT_SCOPE)
 endfunction()
 
-function(InitLib) 
-	GetTargetName(TargetID)
-	InitLibWithName("${TargetID}")
-endfunction()
-
-function (InitLibWithName TargetID) 
+function (_InitLibWithName TargetID) 
 	message(STATUS "Generating Neo/${TargetID}")
 
 	project(${TargetID})
@@ -24,7 +24,9 @@ function (InitLibWithName TargetID)
 	file(GLOB_RECURSE HPP_FILES 
 			  ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
 			  ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES 
+		${CPP_FILES} 
+		${HPP_FILES})
 	target_sources(${TargetID}
 	PRIVATE
 		${CPP_FILES}

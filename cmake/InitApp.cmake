@@ -18,6 +18,9 @@ function (InitApp TargetID)
 		${CPP_FILES}
 		${HPP_FILES}
 	)
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES 
+		${CPP_FILES} 
+		${HPP_FILES})
 
 	target_include_directories(${TargetID}
 	PUBLIC
