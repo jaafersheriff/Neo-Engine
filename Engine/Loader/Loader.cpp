@@ -33,6 +33,7 @@ namespace neo {
     }
 
     Mesh* Loader::loadMesh(const std::string &fileName, bool doResize) {
+        MICROPROFILE_TIMELINE_ENTER_STATIC(MP_ALICEBLUE, fileName.c_str());
         MICROPROFILE_SCOPEI("Loader", "loadMesh", MP_AUTO);
 
         /* Create mesh */
@@ -96,6 +97,7 @@ namespace neo {
             std::cout << "Loaded mesh (" << vertCount << " vertices): " << fileName << std::endl;
         }
 
+        MICROPROFILE_TIMELINE_LEAVE_STATIC(fileName.c_str());
         return mesh;
     }
    std::vector<Asset> Loader::loadMultiAsset(const std::string &fileName) {

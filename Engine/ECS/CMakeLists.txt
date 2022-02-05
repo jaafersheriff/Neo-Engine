@@ -3,8 +3,9 @@ InitLib()
 
 target_link_libraries(ECS
 PUBLIC
-	microprofile
 	Util
+	microprofile
 	Window
 PRIVATE
+	libglew_static
 )

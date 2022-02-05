@@ -1,7 +1,6 @@
 #include "OrthoCameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "ECS/GameObject.hpp"
 #include "Messaging/Messenger.hpp"
 
 #include "Window/Window.hpp"
@@ -9,6 +8,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include "ext/imgui/imgui.h"
+
 namespace neo {
 
     OrthoCameraComponent::OrthoCameraComponent(GameObject *gameObject, float near, float far, float horizMin, float horizMax, float vertMin, float vertMax) 

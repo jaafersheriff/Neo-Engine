@@ -20,6 +20,39 @@ set_target_properties(libglew_static PROPERTIES FOLDER "ext/glew")
 ## GLM
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glm")
 
+## microprofile
+set(MICROPROFILE_USE_CONFIG_FILE ON CACHE BOOL "" FORCE)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/microprofile")
+set_target_properties(microprofile PROPERTIES FOLDER "ext")
+target_link_libraries(microprofile
+PRIVATE
+	libglew_static
+)
+target_include_directories(microprofile
+PUBLIC
+	"${CMAKE_CURRENT_SOURCE_DIR}"
+)
+target_sources(microprofile PRIVATE "microprofile.config.h")
+
+# file(GLOB MP_CPP_FILES microprofile/*.cpp)
+# file(GLOB MP_HPP_FILES microprofile/*.h)
+# add_library(microprofile STATIC
+# 	${MP_CPP_FILES}
+# 	${MP_HPP_FILES}
+# )
+# set_target_properties(microprofile PROPERTIES FOLDER "ext")
+# target_include_directories(microprofile
+# PUBLIC
+# 	"${CMAKE_CURRENT_SOURCE_DIR}/microprofile/"
+# PRIVATE
+# )
+# target_link_libraries(microprofile
+# PUBLIC
+# 	wsock32 ws2_32
+# PRIVATE
+# 	libglew_static
+# )
+
 ## imgui
 file(GLOB IMGUI_CPP_FILES imgui/*.cpp)
 file(GLOB IMGUI_HPP_FILES imgui/*.h)
@@ -43,24 +76,3 @@ PUBLIC
 PRIVATE
 	glfw
 )
-
-## microprofile
-file(GLOB MP_CPP_FILES microprofile/*.cpp)
-file(GLOB MP_HPP_FILES microprofile/*.h)
-add_library(microprofile STATIC
-	${MP_CPP_FILES}
-	${MP_HPP_FILES}
-)
-set_target_properties(microprofile PROPERTIES FOLDER "ext")
-target_include_directories(microprofile
-PUBLIC
-	"${CMAKE_CURRENT_SOURCE_DIR}/microprofile/"
-PRIVATE
-)
-target_link_libraries(microprofile
-PUBLIC
-	wsock32 ws2_32
-PRIVATE
-	libglew_static
-)
-

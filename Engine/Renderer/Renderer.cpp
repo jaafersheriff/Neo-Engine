@@ -9,19 +9,19 @@
 
 namespace neo {
 
-#define RENDERER_MP_ENTERD(define, group, name)\
-    MICROPROFILE_DEFINE(define, group, name, MP_AUTO);\
-    MICROPROFILE_ENTER(define);\
-    MICROPROFILE_DEFINE_GPU(define, name,  MP_AUTO);\
-    MICROPROFILE_GPU_ENTER(define)
+#define RENDERER_MP_ENTERD(define, group, name) 
+//     MICROPROFILE_DEFINE(define, group, name, MP_AUTO);\
+//     MICROPROFILE_ENTER(define);\
+//     MICROPROFILE_DEFINE_GPU(define, name,  MP_AUTO);\
+//     MICROPROFILE_GPU_ENTER(define)
 
-#define RENDERER_MP_ENTER(name)\
-    MICROPROFILE_ENTERI("Renderer", name, MP_AUTO);\
-    MICROPROFILE_GPU_ENTERI("RendererGPU", name, MP_AUTO)
+#define RENDERER_MP_ENTER(name)
+//    MICROPROFILE_ENTERI("Renderer", name, MP_AUTO);\
+//    MICROPROFILE_GPU_ENTERI("RendererGPU", name, MP_AUTO)
 
-#define RENDERER_MP_LEAVE()\
-    MICROPROFILE_LEAVE();\
-    MICROPROFILE_GPU_LEAVE()
+#define RENDERER_MP_LEAVE() 
+//    MICROPROFILE_LEAVE();\
+//    MICROPROFILE_GPU_LEAVE()
 
     unsigned Renderer::NEO_GL_MAJOR_VERSION = 4;
     unsigned Renderer::NEO_GL_MINOR_VERSION = 3;
@@ -99,7 +99,8 @@ namespace neo {
 
     void Renderer::render(float dt) {
         NEO_UNUSED(dt);
-        RENDERER_MP_ENTER("Renderer::render");
+	    MICROPROFILE_SCOPEI("MicroProfile", "DRAWSTUFF", 0xffff3456);
+	    MICROPROFILE_SCOPEGPUI("DRAWSTUFF", 0xffff4444);
 
         resetState();
 
