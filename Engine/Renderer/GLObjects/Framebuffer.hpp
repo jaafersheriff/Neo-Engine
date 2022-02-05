@@ -22,6 +22,8 @@ namespace neo {
         }
         
         void bind() {
+            MICROPROFILE_SCOPEI("Framebuffer", "Framebuffer::bind", MP_AUTO);
+            MICROPROFILE_SCOPEGPUI("Framebuffer::bind", MP_AUTO);
             CHECK_GL(glBindFramebuffer(GL_FRAMEBUFFER, mFBOID));
         }
         

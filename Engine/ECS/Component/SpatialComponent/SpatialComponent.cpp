@@ -132,11 +132,13 @@ namespace neo {
     }
 
     void SpatialComponent::_detModelMatrix() const {
+        MICROPROFILE_SCOPEI("SpatialComponent", "SpatialComponent::_detModelMatrix", MP_AUTO);
         mModelMatrix = glm::scale(glm::translate(glm::mat4(1.f), mPosition) * glm::mat4(getOrientation()), mScale);
         mModelMatrixDirty = false;
     }
 
     void SpatialComponent::_detNormalMatrix() const {
+        MICROPROFILE_SCOPEI("SpatialComponent", "SpatialComponent::_detNormalMatrix", MP_AUTO);
         if (mScale.x == mScale.y && mScale.y == mScale.z) {
             mNormalMatrix = glm::mat3(getModelMatrix());
         }

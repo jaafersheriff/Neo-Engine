@@ -1,12 +1,11 @@
 #include "OrthoCameraComponent.hpp"
+
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
-
 #include "Messaging/Messenger.hpp"
-
 #include "Window/Window.hpp"
+#include "Util/Util.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
-
 #include "ext/imgui/imgui.h"
 
 namespace neo {
@@ -29,6 +28,7 @@ namespace neo {
     }
 
     void OrthoCameraComponent::_detProj() const {
+        MICROPROFILE_SCOPEI("OrthoCameraComponent", "OrthoCameraComponent::_detProj", MP_AUTO);
         mProjMat = glm::ortho(mHorizBounds.x, mHorizBounds.y, mVertBounds.x, mVertBounds.y, mNear, mFar);
         mProjMatDirty = false;
     }

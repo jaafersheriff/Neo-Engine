@@ -22,6 +22,8 @@ namespace neo {
 
     // TODO - instanced
     void Mesh::draw(uint32_t size) const {
+        MICROPROFILE_SCOPEI("Mesh", "Mesh::draw", MP_AUTO);
+        MICROPROFILE_SCOPEGPUI("Mesh::draw", MP_AUTO);
         const auto& positions = getVBO(VertexType::Position);
 
         CHECK_GL(glBindVertexArray(mVAOID));
@@ -67,7 +69,7 @@ namespace neo {
 
     void Mesh::updateVertexBuffer(VertexType type, const std::vector<float>& buffer) {
         MICROPROFILE_SCOPEI("Mesh", "updateVertexBuffer", MP_AUTO);
-        MICROPROFILE_SCOPEGPUI("Mesh::updateVBO", MP_AUTO);
+        MICROPROFILE_SCOPEGPUI("Mesh::updateVertexBuffer", MP_AUTO);
 
         const auto& vbo = mVBOs.find(type);
         NEO_ASSERT(vbo != mVBOs.end(), "Attempting to update a VertexBuffer that doesn't exist");

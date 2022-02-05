@@ -61,9 +61,9 @@ namespace neo {
             /* Load PV */
             auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
             NEO_ASSERT(camera, "No main camera exists");
+
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
-
             loadUniform("camPos", camera->get<SpatialComponent>()->getPosition());
 
             /* Load light */

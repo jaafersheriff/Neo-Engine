@@ -226,10 +226,14 @@ namespace neo {
     }
 
     void Shader::bind() {
+        MICROPROFILE_SCOPEI("Shader", "Shader::bind", MP_AUTO);
+        MICROPROFILE_SCOPEGPUI("Shader::bind", MP_AUTO);
         CHECK_GL(glUseProgram(mPID));
     }
 
     void Shader::unbind() {
+        MICROPROFILE_SCOPEI("Shader", "Shader::unbind", MP_AUTO);
+        MICROPROFILE_SCOPEGPUI("Shader::unbind", MP_AUTO);
         CHECK_GL(glUseProgram(0));
     }
 
@@ -299,46 +303,57 @@ namespace neo {
     }
 
     void Shader::loadUniform(const std::string &loc, const bool b) const {
+        MICROPROFILE_SCOPEI("Shader", "Shader::loadUniform", MP_AUTO);
         CHECK_GL(glUniform1i(getUniform(loc), b));
     }
 
     void Shader::loadUniform(const std::string &loc, const int i) const {
+        MICROPROFILE_SCOPEI("Shader", "Shader::loadUniform", MP_AUTO);
         CHECK_GL(glUniform1i(getUniform(loc), i));
     }
 
     void Shader::loadUniform(const std::string &loc, const double d) const {
+        MICROPROFILE_SCOPEI("Shader", "Shader::loadUniform", MP_AUTO);
         CHECK_GL(glUniform1f(getUniform(loc), static_cast<float>(d)));
     }
 
     void Shader::loadUniform(const std::string &loc, const float f) const {
+        MICROPROFILE_SCOPEI("Shader", "Shader::loadUniform", MP_AUTO);
         CHECK_GL(glUniform1f(getUniform(loc), f));
     }
 
     void Shader::loadUniform(const std::string &loc, const glm::vec2 & v) const {
+        MICROPROFILE_SCOPEI("Shader", "Shader::loadUniform", MP_AUTO);
         CHECK_GL(glUniform2f(getUniform(loc), v.x, v.y));
     }
     
     void Shader::loadUniform(const std::string &loc, const glm::ivec2 & v) const {
+        MICROPROFILE_SCOPEI("Shader", "Shader::loadUniform", MP_AUTO);
         CHECK_GL(glUniform2i(getUniform(loc), v.x, v.y));
     }
     
     void Shader::loadUniform(const std::string &loc, const glm::vec3 & v) const {
+        MICROPROFILE_SCOPEI("Shader", "Shader::loadUniform", MP_AUTO);
         CHECK_GL(glUniform3f(getUniform(loc), v.x, v.y, v.z));
     }
     
     void Shader::loadUniform(const std::string &loc, const glm::vec4 & v) const {
+        MICROPROFILE_SCOPEI("Shader", "Shader::loadUniform", MP_AUTO);
         CHECK_GL(glUniform4f(getUniform(loc), v.r, v.g, v.b, v.a));
     }
     
     void Shader::loadUniform(const std::string &loc, const glm::mat3 & m) const {
+        MICROPROFILE_SCOPEI("Shader", "Shader::loadUniform", MP_AUTO);
         CHECK_GL(glUniformMatrix3fv(getUniform(loc), 1, GL_FALSE, &m[0][0]));
     }
     
     void Shader::loadUniform(const std::string& loc, const glm::mat4& m) const {
+        MICROPROFILE_SCOPEI("Shader", "Shader::loadUniform", MP_AUTO);
         CHECK_GL(glUniformMatrix4fv(getUniform(loc), 1, GL_FALSE, &m[0][0]));
     }
     
     void Shader::loadTexture(const std::string &loc, const Texture & texture) const {
+        MICROPROFILE_SCOPEI("Shader", "Shader::loadUniform", MP_AUTO);
         texture.bind();
         CHECK_GL(glUniform1i(getUniform(loc), texture.mTextureID));
     }
