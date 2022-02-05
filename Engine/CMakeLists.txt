@@ -22,3 +22,11 @@ INTERFACE
 	glfw
 	libglew_static
 )
+
+add_custom_target(shaders)
+file(GLOB_RECURSE SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/shaders" FILES ${SHADERS})
+set_property(TARGET shaders APPEND PROPERTY SOURCES ${SHADERS})
+set_target_properties(shaders PROPERTIES FOLDER "Neo/shaders")
+
+
