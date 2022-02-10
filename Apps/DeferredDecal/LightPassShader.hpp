@@ -63,6 +63,7 @@ class LightPassShader : public Shader {
             loadTexture("gDepth",   *gbuffer->mTextures[2]);
 
             /* Render light volumes */
+            // TODO : instanced
             for (auto& lightTuple : Engine::getComponentTuples<LightComponent, SpatialComponent>()) {
                 auto light = lightTuple->get<LightComponent>();
                 auto spatial = lightTuple->get<SpatialComponent>();

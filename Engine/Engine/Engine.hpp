@@ -19,6 +19,7 @@
 #include <typeindex>
 #include <functional>
 #include <optional>
+#include <thread>
 
 #include "ECS/GameObject.hpp"
 
@@ -97,7 +98,6 @@ namespace neo {
             /* ImGui */
             static std::unordered_map<std::string, std::function<void()>> mImGuiFuncs;
             static void _runImGui();
- 
     };
 
     /* Template implementation */

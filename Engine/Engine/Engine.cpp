@@ -8,8 +8,10 @@ extern "C" {
 
 #include "Engine.hpp"
 #include "Renderer/Renderer.hpp"
-#include "Renderer/Shader/WireframeShader.hpp"
+#include "Renderer/Shader/SelectableShader.hpp"
 #include "Renderer/Shader/OutlineShader.hpp"
+#include "Renderer/Shader/WireframeShader.hpp"
+#include "Renderer/Shader/LineShader.hpp"
 
 #include "ECS/GameObject.hpp"
 #include "Messaging/Messenger.hpp"
@@ -35,22 +37,12 @@ namespace neo {
     std::vector<std::pair<std::type_index, std::unique_ptr<Component>>> Engine::mComponentInitQueue;
     std::vector<std::pair<std::type_index, Component *>> Engine::mComponentKillQueue;
 
-    /* Util */
-    int Util::mFPS = 0;
-    int Util::mFramesInCount = 0;
-    int Util::mTotalFrames = 0;
-    double Util::mTimeStep = 0.0;
-    double Util::mLastFPSTime = 0.0;
-    double Util::mLastFrameTime = 0.0;
-    std::vector<int> Util::mFPSList;
-    const float Util::PI = glm::pi<float>();
-
     /* ImGui */
     bool Engine::mImGuiEnabled = true;
     std::unordered_map<std::string, std::function<void()>> Engine::mImGuiFuncs;
 
     void Engine::init(EngineConfig config) {
-        
+
         /* Init base engine */
         srand((unsigned int)(time(0)));
         mConfig = config;
@@ -61,11 +53,6 @@ namespace neo {
         }
         Window::setSize(glm::ivec2(mConfig.width, mConfig.height));
         ImGui::GetStyle().ScaleAllSizes(2.f);
-
-        /* Init default FBO */
-        auto backBuffer = Library::createFBO("0");
-        backBuffer->mFBOID = 0;
-        Renderer::setDefaultFBO("0");
 
         /* Init loader after initializing GL*/
         Loader::init(mConfig.APP_RES, true);
@@ -91,11 +78,12 @@ namespace neo {
 
         /* Init Util */
         Util::init();
+
 #if MICROPROFILE_ENABLED
-	MicroProfileOnThreadCreate("MAIN THREAD");
-	MicroProfileGpuInitGL();
-	MicroProfileSetEnableAllGroups(true);
-	MicroProfileSetForceMetaCounters(1);
+        MicroProfileOnThreadCreate("MAIN THREAD");
+        MicroProfileGpuInitGL();
+        MicroProfileSetEnableAllGroups(true);
+        MicroProfileSetForceMetaCounters(1);
 #endif
     }
 
@@ -103,13 +91,13 @@ namespace neo {
        
         /* Apply config */
         if (mConfig.attachEditor) {
-            addSystem<MouseRaySystem>();
-            addSystem<EditorSystem>();
+            // addSystem<EditorSystem>();
+            Renderer::addPreProcessShader<SelectableShader>();
             Renderer::addSceneShader<OutlineShader>();
+            Renderer::addSceneShader<LineShader>();
         }
 
         /* Add engine-specific systems */
-        // addSystem<RelationSystem>();
         // addSystem<FinalTransformSystem>();
 
         /* Init systems */
@@ -159,7 +147,6 @@ namespace neo {
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
             Renderer::render((float)Util::mTimeStep);
-
             MicroProfileFlip(0);
         }
 
@@ -329,7 +316,7 @@ namespace neo {
                     FPSfloats[i] = static_cast<float>(FPSInts[i]);
                 }
                 ImGui::PlotLines("FPS", FPSfloats.data(), static_cast<int>(FPSfloats.size()), 0, std::to_string(Util::mFPS).c_str());
-                ImGui::Text("dt: %0.3fms", 1000.0 * Util::mTimeStep);
+                ImGui::PlotLines("Frame time", Util::mTimeStepList.data(), static_cast<int>(Util::mTimeStepList.size()), 0, std::to_string(Util::mTimeStep * 1000.f).c_str());
                 if (ImGui::Button("VSync")) {
                     Window::toggleVSync();
                 }
@@ -529,7 +516,7 @@ namespace neo {
                     auto& go = createGameObject();
                     addComponent<BoundingBoxComponent>(&go, *Library::getMesh("sphere"));
                     addComponent<SpatialComponent>(&go);
-                    addComponent<SelectableComponent>(&go);
+                    addComponent<renderable::SelectableComponent>(&go);
                     addComponent<SelectedComponent>(&go);
                     addComponent<MeshComponent>(&go, *Library::getMesh("sphere"));
                     addComponent<renderable::WireframeRenderable>(&go);

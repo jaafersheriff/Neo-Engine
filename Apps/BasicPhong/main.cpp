@@ -28,9 +28,9 @@ struct Light {
         Engine::addComponent<SpatialComponent>(gameObject, pos);
         light = &Engine::addComponent<LightComponent>(gameObject, col, att);
         Engine::addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere"));
-        Engine::addComponent<SelectableComponent>(gameObject);
         Engine::addComponent<BoundingBoxComponent>(gameObject, *Library::getMesh("sphere"));
         Engine::addComponent<renderable::WireframeRenderable>(gameObject);
+        Engine::addComponent<renderable::SelectableComponent>(gameObject);
 
         Engine::addImGuiFunc("Light", [&]() {
             light->imGuiEditor();
@@ -51,6 +51,7 @@ struct Renderable {
         material.mSpecular = glm::vec3(1.f);
         material.mShininess = 50.f;
         Engine::addComponent<renderable::PhongRenderable>(gameObject, *tex, material);
+        Engine::addComponent<renderable::SelectableComponent>(gameObject);
     }
 };
 

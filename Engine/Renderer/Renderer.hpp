@@ -74,6 +74,7 @@ namespace neo {
         std::type_index typeI(typeid(ShaderT));
         for (auto& shader : mPreProcessShaders) {
             if (shader.first == typeI) {
+                NEO_ASSERT("Attempting to add a preprocess shader twice: %s", shader.second->mName.c_str());
                 return static_cast<ShaderT&>(*shader.second);
             }
         }
@@ -86,6 +87,7 @@ namespace neo {
         std::type_index typeI(typeid(ShaderT));
         for (auto& shader : mSceneShaders) {
             if (shader.first == typeI) {
+                NEO_ASSERT("Attempting to add a scene shader twice: %s", shader.second->mName.c_str());
                 return static_cast<ShaderT&>(*shader.second);
             }
         }

@@ -44,13 +44,18 @@ namespace neo {
             mFramesInCount++;
             if (runTime - mLastFPSTime >= 1.0) {
                 mFPS = mFramesInCount;
-                if (mFPSList.size() == 25) {
+                if (mFPSList.size() == 100) {
                     mFPSList.erase(mFPSList.begin());
                 }
                 mFPSList.push_back(mFPS);
                 mFramesInCount = 0;
                 mLastFPSTime = runTime;
             }
+
+            if (mTimeStepList.size() == 1000) {
+                mTimeStepList.erase(mTimeStepList.begin());
+            }
+            mTimeStepList.push_back(static_cast<float>(mTimeStep) * 1000.f);
         }
 
         static const float PI;
@@ -169,6 +174,7 @@ namespace neo {
         public:
             static std::vector<int> mFPSList;
             static int mFPS;                 /* Frames per second */
+            static std::vector<float> mTimeStepList;
             static double mTimeStep;         /* Delta time */
             static int mTotalFrames;         /* Total frames since start up */
         private:

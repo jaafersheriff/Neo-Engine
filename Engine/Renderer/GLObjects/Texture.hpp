@@ -10,7 +10,7 @@
 namespace neo {
 
     struct TextureFormat {
-        GLint mSizedFormat = GL_RGBA8;
+        GLint mInternalFormat = GL_RGBA8;
         GLenum mBaseFormat = GL_RGBA;
         GLint mFilter = GL_NEAREST;
         GLenum mMode = GL_REPEAT;

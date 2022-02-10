@@ -34,14 +34,14 @@ namespace neo {
 
             bind();
 
-            CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mSizedFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, data));
+            CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mInternalFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, data));
 
             CHECK_GL(glBindTexture(GL_TEXTURE_3D, 0));
         }
 
         virtual void _resize() override {
             bind();
-            CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mSizedFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, 0));
+            CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mInternalFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, 0));
         }
 
     };

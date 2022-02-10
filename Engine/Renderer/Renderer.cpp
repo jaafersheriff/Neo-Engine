@@ -10,10 +10,10 @@
 namespace neo {
 
 #define RENDERER_MP_ENTERD(define, group, name) \
-     MICROPROFILE_DEFINE(define, group, name, MP_AUTO);\
-     MICROPROFILE_ENTER(define);\
-     MICROPROFILE_DEFINE_GPU(define, name,  MP_AUTO);\
-     MICROPROFILE_GPU_ENTER(define)
+    MICROPROFILE_DEFINE(define, group, name, MP_AUTO);\
+    MICROPROFILE_ENTER(define);\
+    MICROPROFILE_DEFINE_GPU(define, name,  MP_AUTO);\
+    MICROPROFILE_GPU_ENTER(define)
 
 #define RENDERER_MP_ENTER(name) \
     MICROPROFILE_ENTERI("Renderer", name, MP_AUTO);\
@@ -24,8 +24,8 @@ namespace neo {
     MICROPROFILE_GPU_LEAVE()
 
     unsigned Renderer::NEO_GL_MAJOR_VERSION = 4;
-    unsigned Renderer::NEO_GL_MINOR_VERSION = 3;
-    std::string Renderer::NEO_GLSL_VERSION = "#version 430";
+    unsigned Renderer::NEO_GL_MINOR_VERSION = 4;
+    std::string Renderer::NEO_GLSL_VERSION = "#version 440";
     glm::ivec3 Renderer::NEO_MAX_COMPUTE_GROUP_SIZE = glm::ivec3(1);
 
     std::string Renderer::APP_SHADER_DIR;
@@ -40,6 +40,11 @@ namespace neo {
     void Renderer::init(const std::string &dir, glm::vec3 clearColor) {
         APP_SHADER_DIR = dir;
         mClearColor = clearColor;
+
+        /* Init default FBO */
+        auto backBuffer = Library::createFBO("0");
+        backBuffer->mFBOID = 0;
+        Renderer::setDefaultFBO("0");
 
         /* Init default GL state */
         resetState();

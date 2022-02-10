@@ -38,7 +38,7 @@ namespace neo {
             bind();
 
             /* Load texture data to GPU */
-            CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, mFormat.mSizedFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, mFormat.mType, data));
+            CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, mFormat.mInternalFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, mFormat.mType, data));
 
             /* Error check */
             NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when uploading Texture");
@@ -46,7 +46,7 @@ namespace neo {
 
         virtual void _resize() override {
             bind();
-            CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, mFormat.mSizedFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, mFormat.mType, 0));
+            CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, mFormat.mInternalFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, mFormat.mType, 0));
         }
 
     };

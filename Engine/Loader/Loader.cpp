@@ -155,7 +155,7 @@ namespace neo {
                     asset.material.mDissolve = material.dissolve;
 
                     TextureFormat format;
-                    format.mSizedFormat = GL_RGB8;
+                    format.mInternalFormat = GL_RGB8;
                     format.mBaseFormat = GL_RGB;
 
                     if (material.ambient_texname.size()) {

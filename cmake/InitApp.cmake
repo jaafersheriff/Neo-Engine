@@ -39,9 +39,9 @@ function (InitApp TargetID)
 	set_property(TARGET ${TargetID} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Apps/${TargetID}")
 
 	# Assume res/ and shaders/
-	file(GLOB_RECURSE RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${TargetID}/res/*)
-	source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/${TargetID}" FILES ${RESOURCES})
-	set_property(TARGET ${TargetID} APPEND PROPERTY SOURCES ${RESOURCES})
+	# file(GLOB_RECURSE RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${TargetID}/res/*)
+	# source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/${TargetID}" FILES ${RESOURCES})
+	# set_property(TARGET ${TargetID} APPEND PROPERTY SOURCES ${RESOURCES})
 
 	file(GLOB_RECURSE SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/${TargetID}/shaders/*)
 	source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/${TargetID}" FILES ${SHADERS})
