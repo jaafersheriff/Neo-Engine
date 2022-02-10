@@ -75,6 +75,13 @@ namespace neo {
         WindowFrameSizeMessage(const glm::uvec2 & frameSize) : frameSize(frameSize) {}
     };
 
+    /* An entity was selected */
+    struct ComponentSelectedMessage : public Message {
+        const uint32_t componentID;
+        ComponentSelectedMessage(const uint32_t id) : componentID(id) {}
+    };
+
+
 
 
     // // key input

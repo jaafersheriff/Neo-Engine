@@ -5,7 +5,9 @@
 #include "CameraSystems/FrustumSystem.hpp"
 #include "CameraSystems/FrustumToLineSystem.hpp"
 
-#include "SelectingSystem/MouseRaySystem.hpp"
+#include "SelectingSystems/MouseRaySystem.hpp"
+#include "SelectingSystems/EditorSystem.hpp"
+#include "SelectingSystems/SelectingSystem.hpp"
 
 #include "TranslationSystems/RotationSystem.hpp"
 #include "TranslationSystems/SinTranslateSystem.hpp"

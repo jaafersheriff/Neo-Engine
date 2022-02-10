@@ -2,23 +2,21 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include "Renderer/GLObjects/Material.hpp"
+#include <inttypes.h>
 
 namespace neo {
-    namespace renderable {
 
-        class SelectableComponent : public Component {
-        public:
+    class SelectableComponent : public Component {
+    public:
 
-            SelectableComponent(GameObject* go) :
-                Component(go),
-                mID(sCounter++)
-            {}
+        SelectableComponent(GameObject* go) :
+            Component(go),
+            mID(sCounter++)
+        {}
 
-            uint32_t mID = 0;
+        uint32_t mID = 0;
 
-        private:
-            static uint32_t sCounter;
-        };
-    }
+    private:
+        static uint32_t sCounter;
+    };
 }

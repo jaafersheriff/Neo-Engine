@@ -91,10 +91,9 @@ namespace neo {
        
         /* Apply config */
         if (mConfig.attachEditor) {
-            // addSystem<EditorSystem>();
+            addSystem<EditorSystem>();
             Renderer::addPreProcessShader<SelectableShader>();
             Renderer::addSceneShader<OutlineShader>();
-            Renderer::addSceneShader<LineShader>();
         }
 
         /* Add engine-specific systems */
@@ -516,7 +515,7 @@ namespace neo {
                     auto& go = createGameObject();
                     addComponent<BoundingBoxComponent>(&go, *Library::getMesh("sphere"));
                     addComponent<SpatialComponent>(&go);
-                    addComponent<renderable::SelectableComponent>(&go);
+                    addComponent<SelectableComponent>(&go);
                     addComponent<SelectedComponent>(&go);
                     addComponent<MeshComponent>(&go, *Library::getMesh("sphere"));
                     addComponent<renderable::WireframeRenderable>(&go);
