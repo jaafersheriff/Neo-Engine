@@ -91,6 +91,7 @@ namespace neo {
        
         /* Apply config */
         if (mConfig.attachEditor) {
+            addSystem<MouseRaySystem>();
             addSystem<EditorSystem>();
             Renderer::addPreProcessShader<SelectableShader>();
             Renderer::addSceneShader<OutlineShader>();
@@ -128,9 +129,9 @@ namespace neo {
 		            MICROPROFILE_ENTER(System); 
                     system.second->update((float)Util::mTimeStep);
                     MICROPROFILE_LEAVE();
-                    Messenger::relayMessages();
                 }
             }
+            Messenger::relayMessages();
             MICROPROFILE_LEAVE();
 
             /* Update imgui functions */
@@ -146,6 +147,8 @@ namespace neo {
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
             Renderer::render((float)Util::mTimeStep);
+            Messenger::relayMessages();
+
             MicroProfileFlip(0);
         }
 
@@ -460,11 +463,11 @@ namespace neo {
                     auto allComponents = selected->getGameObject().getComponentsMap();
                     static std::optional<std::type_index> type;
                     ImGui::Separator();
-                    if (ImGui::BeginCombo("", type ? type->name() + 6 : "Edit components")) {
+                    if (ImGui::BeginCombo("Components", type ? type->name() : "Edit components")) {
                         type = std::nullopt;
                         for (auto comp : allComponents) {
                             if (comp.second.size()) {
-                                if (ImGui::Selectable(comp.first.name() + 6)) {
+                                if (ImGui::Selectable(comp.first.name())) {
                                     type = std::make_optional<std::type_index>(comp.first);
                                 }
                             }
