@@ -24,7 +24,7 @@ class DofDownShader : public Shader {
             Shader("DofDown Shader", vert, frag),
             frameScale(scale)
         {
-            glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
+            glm::uvec2 frameSize = WindowSurface::getFrameSize() / *frameScale;
             auto DofDownFBO = Library::createFBO("dofdown");
             DofDownFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
             DofDownFBO->initDrawBuffers();
@@ -44,7 +44,7 @@ class DofDownShader : public Shader {
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 
-            glm::uvec2 frameSize = Window::getFrameSize() / *frameScale;
+            glm::uvec2 frameSize = WindowSurface::getFrameSize() / *frameScale;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();

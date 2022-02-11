@@ -17,7 +17,7 @@ class DecalShader : public Shader {
             Shader("DecalShader", vert, frag) {
             // Create render target
             auto decalFBO = Library::createFBO("decals");
-            decalFBO->attachColorTexture(Window::getFrameSize(), TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
+            decalFBO->attachColorTexture(WindowSurface::getFrameSize(), TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
             decalFBO->initDrawBuffers();
 
             // Handle frame size changing

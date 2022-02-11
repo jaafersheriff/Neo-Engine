@@ -18,8 +18,8 @@ class LightPassShader : public Shader {
             Shader("LightPassShader", vert, frag) {
             // Create render target
             auto lightFBO = Library::createFBO("lightpass");
-            lightFBO->attachColorTexture(Window::getFrameSize(), TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
-            lightFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
+            lightFBO->attachColorTexture(WindowSurface::getFrameSize(), TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
+            lightFBO->attachDepthTexture(WindowSurface::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {

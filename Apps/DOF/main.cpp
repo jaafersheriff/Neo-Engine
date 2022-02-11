@@ -22,7 +22,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, Window::getAspectRatio());
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, WindowSurface::getAspectRatio());
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -102,8 +102,8 @@ int main() {
 
     /* Init renderer */
     auto defaultFBO = Library::createFBO("default");
-    defaultFBO->attachColorTexture(Window::getFrameSize(), { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
-    defaultFBO->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_CLAMP_TO_EDGE); // depth
+    defaultFBO->attachColorTexture(WindowSurface::getFrameSize(), { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
+    defaultFBO->attachDepthTexture(WindowSurface::getFrameSize(), GL_NEAREST, GL_CLAMP_TO_EDGE); // depth
     defaultFBO->initDrawBuffers();
     // Handle frame size changing
     Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
@@ -129,8 +129,8 @@ int main() {
 
     Engine::addImGuiFunc("DOF", [&]() {
         if (ImGui::SliderInt("Scale", frameScale.get(), 1, 16)) {
-            Library::getFBO("dofdown")->resize(Window::getFrameSize() / *frameScale);
-            Library::getFBO("dofblur")->resize(Window::getFrameSize() / *frameScale);
+            Library::getFBO("dofdown")->resize(WindowSurface::getFrameSize() / *frameScale);
+            Library::getFBO("dofblur")->resize(WindowSurface::getFrameSize() / *frameScale);
         }
     });
 

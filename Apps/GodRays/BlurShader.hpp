@@ -22,7 +22,7 @@ class BlurShader : public Shader {
             // Create blur 
             auto blur = Library::createFBO("godrayblur");
             TextureFormat format = { GL_R16, GL_RED, GL_NEAREST, GL_REPEAT };
-            blur->attachColorTexture(Window::getFrameSize() / 2, format); 
+            blur->attachColorTexture(WindowSurface::getFrameSize() / 2, format); 
             blur->initDrawBuffers();
 
             // Handle frame size changing
@@ -38,7 +38,7 @@ class BlurShader : public Shader {
         virtual void render() override {
             auto fbo = Library::getFBO("godrayblur");
             fbo->bind();
-            glm::ivec2 frameSize = Window::getFrameSize() / 2;
+            glm::ivec2 frameSize = WindowSurface::getFrameSize() / 2;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();

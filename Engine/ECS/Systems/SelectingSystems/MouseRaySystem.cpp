@@ -15,7 +15,7 @@ namespace neo {
             glm::vec2 mouseCoords = Mouse::getPos();
 
             // Mouse coords in NDC space
-            mouseCoords = glm::vec2((2.f * mouseCoords.x) / Window::getFrameSize().x - 1.f, 1.f - (2.f * mouseCoords.y) / Window::getFrameSize().y);
+            mouseCoords = glm::vec2((2.f * mouseCoords.x) / WindowSurface::getFrameSize().x - 1.f, 1.f - (2.f * mouseCoords.y) / WindowSurface::getFrameSize().y);
 
             // Mouse coords in clip space to eye space
             glm::vec4 mouseCoordsEye = glm::inverse(camera->getProj()) * glm::vec4(mouseCoords, -1.f, 1.f);

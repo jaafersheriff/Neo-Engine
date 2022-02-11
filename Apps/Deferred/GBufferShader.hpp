@@ -22,9 +22,9 @@ class GBufferShader : public Shader {
 
             // Format for color buffers
             TextureFormat format = { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT };
-            gbuffer->attachColorTexture(Window::getFrameSize(), format); // normal
-            gbuffer->attachColorTexture(Window::getFrameSize(), format); // diffuse
-            gbuffer->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
+            gbuffer->attachColorTexture(WindowSurface::getFrameSize(), format); // normal
+            gbuffer->attachColorTexture(WindowSurface::getFrameSize(), format); // diffuse
+            gbuffer->attachDepthTexture(WindowSurface::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
             gbuffer->initDrawBuffers();
 
             // Handle frame size changing

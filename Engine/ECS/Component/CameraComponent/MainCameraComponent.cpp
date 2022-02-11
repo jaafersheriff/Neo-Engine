@@ -14,7 +14,7 @@ namespace neo {
                 NEO_UNUSED(_msg);
                 auto comp = Engine::getSingleComponent<MainCameraComponent>();
                 if (auto camera = dynamic_cast<PerspectiveCameraComponent*>(comp->getGameObject().getComponentByType<CameraComponent>())) {
-                    camera->setAspectRatio(Window::getAspectRatio());
+                    camera->setAspectRatio(WindowSurface::getAspectRatio());
                 }
             });
     }

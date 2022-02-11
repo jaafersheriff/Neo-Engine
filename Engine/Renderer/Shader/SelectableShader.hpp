@@ -27,7 +27,7 @@ namespace neo {
             ) {
             /* Init shadow map */
             Framebuffer* stencilBuffer = Library::createFBO("selectable");
-            stencilBuffer->attachStencilTexture(Window::getSize(), GL_NEAREST, GL_CLAMP_TO_EDGE);
+            stencilBuffer->attachStencilTexture(WindowSurface::getSize(), GL_NEAREST, GL_CLAMP_TO_EDGE);
             stencilBuffer->disableDraw();
 
             // Handle frame size changing
@@ -64,7 +64,7 @@ namespace neo {
 
             CHECK_GL(glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
             CHECK_GL(glClearStencil(0));
-            CHECK_GL(glViewport(0, 0, Window::getSize().x, Window::getSize().y));
+            CHECK_GL(glViewport(0, 0, WindowSurface::getSize().x, WindowSurface::getSize().y));
 
             CHECK_GL(glEnable(GL_STENCIL_TEST));
             CHECK_GL(glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE));

@@ -28,48 +28,20 @@ namespace neo {
 	#endif // NEO_CONFIG_DEBUG
 #endif // NEO_DEBUG_ASSERT
 
-    struct Util {
-        
-        static void init() {
-            mLastFrameTime = getRunTime();
-        }
+    namespace util {
 
-        static void update() {
-            MICROPROFILE_SCOPEI("Util", "Util::update", MP_AUTO);
-            /* Update delta time and FPS */
-            float runTime = (float)getRunTime();
-            mTotalFrames++;
-            mTimeStep = runTime - mLastFrameTime;
-            mLastFrameTime = runTime;
-            mFramesInCount++;
-            if (runTime - mLastFPSTime >= 1.0) {
-                mFPS = mFramesInCount;
-                if (mFPSList.size() == 100) {
-                    mFPSList.erase(mFPSList.begin());
-                }
-                mFPSList.push_back(mFPS);
-                mFramesInCount = 0;
-                mLastFPSTime = runTime;
-            }
-
-            if (mTimeStepList.size() == 1000) {
-                mTimeStepList.erase(mTimeStepList.begin());
-            }
-            mTimeStepList.push_back(static_cast<float>(mTimeStep) * 1000.f);
-        }
-
-        static const float PI;
+        static const float PI = glm::pi<float>();
 
         /* Generate a random float [0, 1] */
         static inline float genRandom() {
-            return rand() / (float) RAND_MAX;
+            return rand() / (float)RAND_MAX;
         }
-    
+
         /* Generate a scaled random value */
         static inline float genRandom(const float val) {
             return genRandom() * val;
         }
-   
+
         /* Generate a random value in a range [min, max] */
         static inline float genRandom(const float min, const float max) {
             return genRandom() * (max - min) + min;
@@ -79,7 +51,7 @@ namespace neo {
         static inline glm::vec3 genRandomVec3() {
             return glm::vec3(genRandom(), genRandom(), genRandom());
         }
-    
+
         /* Generate random vec3 with values [0, 1] */
         static inline glm::vec3 genRandomVec3(const float min, const float max) {
             return glm::vec3(genRandom(min, max), genRandom(min, max), genRandom(min, max));
@@ -111,12 +83,12 @@ namespace neo {
             );
         }
 
-        static glm::vec3 sphericalToCartesian(const glm::vec3 & v) {
+        static glm::vec3 sphericalToCartesian(const glm::vec3& v) {
             return sphericalToCartesian(v.x, v.y, v.z);
         }
 
-        static bool fileExists(const char *fn) {
-            FILE *fp;
+        static bool fileExists(const char* fn) {
+            FILE* fp;
             if (fn != NULL) {
                 fp = fopen(fn, "rt");
                 if (fp != NULL) {
@@ -127,9 +99,9 @@ namespace neo {
             return false;
         }
 
-        static char *textFileRead(const char *fn) {
-            FILE *fp;
-            char *content = NULL;
+        static char* textFileRead(const char* fn) {
+            FILE* fp;
+            char* content = NULL;
             int count = 0;
             if (fn != NULL) {
                 fp = fopen(fn, "rt");
@@ -138,7 +110,7 @@ namespace neo {
                     count = (int)ftell(fp);
                     rewind(fp);
                     if (count > 0) {
-                        content = (char *)malloc(sizeof(char) * (count + 1));
+                        content = (char*)malloc(sizeof(char) * (count + 1));
                         count = (int)fread(content, sizeof(char), count, fp);
                         content[count] = '\0';
                     }
@@ -151,8 +123,8 @@ namespace neo {
             return content;
         }
 
-        static int textFileWrite(const char *fn, char *s) {
-            FILE *fp;
+        static int textFileWrite(const char* fn, char* s) {
+            FILE* fp;
             int status = 0;
             if (fn != NULL) {
                 fopen_s(&fp, fn, "w");
@@ -165,23 +137,5 @@ namespace neo {
             }
             return(status);
         }
-
-        static double getRunTime() {
-            return glfwGetTime();
-        }
-
-        /* FPS*/
-        public:
-            static std::vector<int> mFPSList;
-            static int mFPS;                 /* Frames per second */
-            static std::vector<float> mTimeStepList;
-            static double mTimeStep;         /* Delta time */
-            static int mTotalFrames;         /* Total frames since start up */
-        private:
-            static double mLastFPSTime;      /* Time at which last FPS was calculated */
-            static int mFramesInCount;       /* Number of frames in current second */
-            static double mLastFrameTime;    /* Time at which last frame was rendered */
-
-
-    };
+    }
 }

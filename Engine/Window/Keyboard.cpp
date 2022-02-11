@@ -4,8 +4,6 @@
 
 namespace neo {
 
-    int Keyboard::mKeyStatus[NUM_KEYS] = { GLFW_RELEASE };
-
     bool Keyboard::isKeyPressed(int key) {
         return mKeyStatus[key] >= GLFW_PRESS;
     }

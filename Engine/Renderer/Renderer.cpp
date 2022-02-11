@@ -37,6 +37,8 @@ namespace neo {
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPostShaders;
     glm::vec3 Renderer::mClearColor;
 
+    WindowSurface Renderer::mWindowSurface;
+
     void Renderer::init(const std::string &dir, glm::vec3 clearColor) {
         APP_SHADER_DIR = dir;
         mClearColor = clearColor;
@@ -50,7 +52,7 @@ namespace neo {
         resetState();
 
         /* Init GL window */
-        CHECK_GL(glViewport(0, 0, Window::getFrameSize().x, Window::getFrameSize().y));
+        CHECK_GL(glViewport(0, 0, mWindowSurface.getFrameSize().x, mWindowSurface.getFrameSize().y));
         Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
             const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
             CHECK_GL(glViewport(0, 0, m.frameSize.x, m.frameSize.y));
@@ -151,7 +153,7 @@ namespace neo {
                 Library::getFBO("0")->bind();
             }
         }
-        glm::ivec2 frameSize = Window::getFrameSize();
+        glm::ivec2 frameSize = mWindowSurface.getFrameSize();
         CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         RENDERER_MP_LEAVE();
@@ -208,7 +210,7 @@ namespace neo {
         RENDERER_MP_LEAVE();
 
         RENDERER_MP_ENTER("glfwSwapBuffers");
-        glfwSwapBuffers(Window::getWindow());
+        glfwSwapBuffers(mWindowSurface.getWindow());
         RENDERER_MP_LEAVE();
     }
 
@@ -222,7 +224,7 @@ namespace neo {
         CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
         // TODO : messaging to resize fbo
-        glm::ivec2 frameSize = Window::getFrameSize();
+        glm::ivec2 frameSize = mWindowSurface.getFrameSize();
         CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
         // Bind quad 

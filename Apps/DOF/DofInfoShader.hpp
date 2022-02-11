@@ -22,7 +22,7 @@ class DofInfoShader : public Shader {
 
         DofInfoShader(const std::string& vert, const std::string &frag) :
             Shader("DofInfo Shader", vert, frag) {
-            glm::uvec2 frameSize = Window::getFrameSize();
+            glm::uvec2 frameSize = WindowSurface::getFrameSize();
             auto DofInfoFBO = Library::createFBO("dofinfo");
             DofInfoFBO->attachColorTexture(frameSize, { GL_R8, GL_RED, GL_NEAREST, GL_CLAMP_TO_EDGE });
             DofInfoFBO->initDrawBuffers();
@@ -48,7 +48,7 @@ class DofInfoShader : public Shader {
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 0.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 
-            glm::uvec2 frameSize = Window::getFrameSize();
+            glm::uvec2 frameSize = WindowSurface::getFrameSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();

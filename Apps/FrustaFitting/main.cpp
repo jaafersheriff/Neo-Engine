@@ -70,7 +70,7 @@ int main() {
     Engine::init(config);
 
     /* Game objects */
-    Camera sceneCamera(45.f, 1.f, 100.f, Window::getAspectRatio(), glm::vec3(0, 0.6f, 5));
+    Camera sceneCamera(45.f, 1.f, 100.f, WindowSurface::getAspectRatio(), glm::vec3(0, 0.6f, 5));
     Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
     Engine::addComponent<MainCameraComponent>(sceneCamera.gameObject);
     

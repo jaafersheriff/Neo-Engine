@@ -17,7 +17,7 @@ struct Camera {
         GameObject *gameObject = &Engine::createGameObject();
         auto& spatial = Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
         spatial.setLookDir(lookDir);
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, Window::getAspectRatio());
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, WindowSurface::getAspectRatio());
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };

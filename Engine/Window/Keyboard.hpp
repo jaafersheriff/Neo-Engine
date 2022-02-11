@@ -8,13 +8,13 @@ namespace neo {
 
         public:
             /* Denotes whether a key is pressed */
-            static bool isKeyPressed(int);
+            bool isKeyPressed(int);
 
-            static void setKeyStatus(int, int);
+            void setKeyStatus(int, int);
 
-            static void reset();
+            void reset();
 
         private:
-            static int mKeyStatus[NUM_KEYS];
+            int mKeyStatus[NUM_KEYS] = { GLFW_RELEASE };
         };
 }

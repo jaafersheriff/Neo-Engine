@@ -2,14 +2,6 @@
 
 namespace neo {
 
-    double Mouse::mX = 0.0;
-    double Mouse::mY = 0.0;
-    int Mouse::mZ = 0;
-    double Mouse::mDX = 0.0;
-    double Mouse::mDY = 0.0;
-    int Mouse::mMouseButtons[GLFW_MOUSE_BUTTON_LAST] = { GLFW_RELEASE };
-    bool Mouse::mIsReset = true;
-
     void Mouse::update(double newX, double newY) {
         if (mIsReset) {
             mX = newX;

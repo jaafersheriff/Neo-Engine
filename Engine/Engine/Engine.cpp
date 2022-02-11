@@ -48,10 +48,10 @@ namespace neo {
         mConfig = config;
 
         /* Init window*/
-        if (Window::initGLFW(mConfig.APP_NAME)) {
+        if (WindowSurface::initGLFW(mConfig.APP_NAME)) {
             std::cerr << "Failed initializing Window" << std::endl;
         }
-        Window::setSize(glm::ivec2(mConfig.width, mConfig.height));
+        WindowSurface::setSize(glm::ivec2(mConfig.width, mConfig.height));
         ImGui::GetStyle().ScaleAllSizes(2.f);
 
         /* Init loader after initializing GL*/
@@ -108,14 +108,14 @@ namespace neo {
         _processInitQueue();
         Messenger::relayMessages();
 
-        while (!Window::shouldClose()) {
+        while (!WindowSurface::shouldClose()) {
             MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);
 
             /* Update Util */
             Util::update();
 
             /* Update display, mouse, keyboard */
-            Window::update();
+            WindowSurface::update();
 
             /* Destroy and create objects and components */
             _processKillQueue();
@@ -231,7 +231,7 @@ namespace neo {
             frameBuffer.second->destroy();
         }
 
-        Window::shutDown();
+        WindowSurface::shutDown();
     }
 
     void Engine::_processKillQueue() {
@@ -321,7 +321,7 @@ namespace neo {
                 ImGui::PlotLines("FPS", FPSfloats.data(), static_cast<int>(FPSfloats.size()), 0, std::to_string(Util::mFPS).c_str());
                 ImGui::PlotLines("Frame time", Util::mTimeStepList.data(), static_cast<int>(Util::mTimeStepList.size()), 0, std::to_string(Util::mTimeStep * 1000.f).c_str());
                 if (ImGui::Button("VSync")) {
-                    Window::toggleVSync();
+                    WindowSurface::toggleVSync();
                 }
                 ImGui::EndMenu();
             }

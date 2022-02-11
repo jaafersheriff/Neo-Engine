@@ -13,6 +13,7 @@
 namespace neo {
 
     class Engine;
+    class WindowSurface;
     class PostProcessShader;
 
     class Renderer {
@@ -45,6 +46,7 @@ namespace neo {
         private:
             static Framebuffer* mDefaultFBO;
             static glm::vec3 mClearColor;
+            static WindowSurface mWindowSurface;
 
             static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mComputeShaders;
             static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPreProcessShaders;
@@ -108,8 +110,8 @@ namespace neo {
 
             // Ping & pong 
             auto ping = Library::createFBO("ping");
-            ping->attachColorTexture(Window::getFrameSize(), format);
-            ping->attachDepthTexture(Window::getFrameSize(), GL_NEAREST, GL_REPEAT);
+            ping->attachColorTexture(WindowSurface::getFrameSize(), format);
+            ping->attachDepthTexture(WindowSurface::getFrameSize(), GL_NEAREST, GL_REPEAT);
 
             // Set default FBO if it's the back buffer
             if (mDefaultFBO == Library::getFBO("0")) {
@@ -117,7 +119,7 @@ namespace neo {
             }
 
             auto pong = Library::createFBO("pong");
-            pong->attachColorTexture(Window::getFrameSize(), format);
+            pong->attachColorTexture(WindowSurface::getFrameSize(), format);
             pong->mTextures.push_back(ping->mTextures[1]);
 
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {

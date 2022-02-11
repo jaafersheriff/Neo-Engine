@@ -10,30 +10,33 @@ namespace neo {
 
         public:
             /* Update */
-            static void update(double, double);
+            void update(double, double);
 
-            static glm::vec2 getPos();
-            static glm::vec2 getSpeed();
-            static int getScrollSpeed();
+            glm::vec2 getPos();
+            glm::vec2 getSpeed();
+            int getScrollSpeed();
 
             /* Denotes if mouse buttons are pressed */
-            static void setButtonStatus(int, int);
-            static void setScroll(double);
-            static bool isDown(int);
-            static void reset();
+            void setButtonStatus(int, int);
+            void setScroll(double);
+            bool isDown(int);
+            void reset();
         private:
-            static int mMouseButtons[GLFW_MOUSE_BUTTON_LAST];
-            static bool mIsReset;
+            int mMouseButtons[GLFW_MOUSE_BUTTON_LAST] = { GLFW_RELEASE };
+            bool mIsReset = true;
 
             /* x-y position and speed */
-            static double mX, mY;
-            static double mDX, mDY;
+            double mX = 0.0;
+            double mY = 0.0;
+            double mDX = 0.0;
+            double mDY = 0.0;
 
             /* Scroll wheel 
             * -1 if scrolling back
             *  0 if not scrolling
             *  1 if scrolling forward
             */
-            static int mZ;
+            int mZ = 0;
+
     };
 }
