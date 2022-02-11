@@ -134,7 +134,7 @@ namespace neo {
                 Engine::addComponent<MouseComponent>(&hardware, mMouse);
                 Engine::addComponent<KeyboardComponent>(&hardware, mKeyboard);
                 Engine::addComponent<WindowDetailsComponent>(&hardware, mWindow.getDetails());
-                Engine::addComponent<FrameStatsComponent>(&hardware, runTime);
+                Engine::addComponent<FrameStatsComponent>(&hardware, runTime, static_cast<float>(counter.mTimeStep));
                 Engine::addComponent<SingleFrameComponent>(&hardware);
             }
 

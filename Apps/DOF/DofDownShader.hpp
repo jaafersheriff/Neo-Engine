@@ -3,7 +3,6 @@
 #include "Renderer/Shader/PostProcessShader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Window/Window.hpp"
 #include "Messaging/Messenger.hpp"
 
 #include "Loader/Library.hpp"
@@ -24,9 +23,8 @@ class DofDownShader : public Shader {
             Shader("DofDown Shader", vert, frag),
             frameScale(scale)
         {
-            glm::uvec2 frameSize = WindowSurface::getFrameSize() / *frameScale;
             auto DofDownFBO = Library::createFBO("dofdown");
-            DofDownFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
+            DofDownFBO->attachColorTexture({ 1, 1 }, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
             DofDownFBO->initDrawBuffers();
 
             // Handle frame size changing
@@ -40,11 +38,12 @@ class DofDownShader : public Shader {
         }
 
         virtual void render() override {
-            Library::getFBO("dofdown")->bind();
+            auto fbo = Library::getFBO("dofdown");
+            fbo->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 
-            glm::uvec2 frameSize = WindowSurface::getFrameSize() / *frameScale;
+            glm::uvec2 frameSize = { fbo->mTextures[0]->mWidth, fbo->mTextures[0]->mHeight };
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();

@@ -36,7 +36,7 @@ public:
         std::vector<float> positions;
         positions.resize(mNumParticles * 4);
         for (int i = 0; i < mNumParticles; i++) {
-            glm::vec3 pos = glm::normalize(Util::genRandomVec3(-1.f, 1.f));
+            glm::vec3 pos = glm::normalize(util::genRandomVec3(-1.f, 1.f));
             positions[i * 4 + 0] = pos.x;
             positions[i * 4 + 1] = pos.y;
             positions[i * 4 + 2] = pos.z;

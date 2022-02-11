@@ -28,7 +28,12 @@ public:
         if (auto mesh = Engine::getSingleComponent<ParticleMeshComponent>()) {
             auto position = mesh->mMesh->getVBO(VertexType::Position);
 
-            loadUniform("timestep", Util::mTimeStep / 1000.f * timeScale);
+            if (auto frameStats = Engine::getSingleComponent<FrameStatsComponent>()) {
+                loadUniform("timestep", frameStats->mDT / 1000.f * timeScale);
+            }
+            else {
+                loadUniform("timestep", 0.f);
+            }
 
             // Bind mesh
             CHECK_GL(glBindVertexArray(mesh->mMesh->mVAOID));

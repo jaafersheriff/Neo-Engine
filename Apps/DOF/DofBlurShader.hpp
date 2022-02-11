@@ -3,7 +3,6 @@
 #include "Renderer/Shader/PostProcessShader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Window/Window.hpp"
 #include "Messaging/Messenger.hpp"
 
 #include "Loader/Library.hpp"
@@ -25,9 +24,8 @@ class DofBlurShader : public Shader {
             Shader("DofBlur Shader", vert, frag),
             frameScale(scale)
         {
-            glm::uvec2 frameSize = WindowSurface::getFrameSize() / *frameScale;
             auto DofBlurFBO = Library::createFBO("dofblur");
-            DofBlurFBO->attachColorTexture(frameSize, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
+            DofBlurFBO->attachColorTexture({ 1, 1 }, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
             DofBlurFBO->initDrawBuffers();
 
             // Handle frame size changing
@@ -45,7 +43,9 @@ class DofBlurShader : public Shader {
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 
-            glm::uvec2 frameSize = WindowSurface::getFrameSize() / *frameScale;
+            auto windowDetails = Engine::getSingleComponent<WindowDetailsComponent>();
+            NEO_ASSERT(windowDetails, "Window details don't exist");
+            glm::ivec2 frameSize = windowDetails->mDetails.getSize() / *frameScale;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();

@@ -2,7 +2,6 @@
 
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
-#include "Window/Window.hpp"
 
 #include "GBufferComponent.hpp"
 
@@ -22,9 +21,9 @@ class GBufferShader : public Shader {
 
             // Format for color buffers
             TextureFormat format = { GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT };
-            gbuffer->attachColorTexture(WindowSurface::getFrameSize(), format); // normal
-            gbuffer->attachColorTexture(WindowSurface::getFrameSize(), format); // diffuse
-            gbuffer->attachDepthTexture(WindowSurface::getFrameSize(), GL_NEAREST, GL_REPEAT); // depth
+            gbuffer->attachColorTexture({ 1, 1 }, format); // normal
+            gbuffer->attachColorTexture({ 1, 1 }, format); // diffuse
+            gbuffer->attachDepthTexture({ 1, 1 }, GL_NEAREST, GL_REPEAT); // depth
             gbuffer->initDrawBuffers();
 
             // Handle frame size changing

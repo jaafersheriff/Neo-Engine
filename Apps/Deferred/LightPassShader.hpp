@@ -19,12 +19,10 @@ class LightPassShader : public Shader {
             Shader("LightPassShader", vert, frag) {
             // Create render target
             auto lightFBO = Library::createFBO("lightpass");
-            lightFBO->attachColorTexture(WindowSurface::getFrameSize(), TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
+            lightFBO->attachColorTexture({ 1, 1 }, TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
-                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                NEO_UNUSED(m);
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
                 Library::getFBO("lightpass")->resize(frameSize);
             });

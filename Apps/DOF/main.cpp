@@ -22,7 +22,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, WindowSurface::getAspectRatio());
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -72,10 +72,10 @@ int main() {
     /* Scene objects */
     for (int i = 0; i < 50; i++) {
         auto mesh = i % 2 ? Library::getMesh("cube") : Library::getMesh("sphere");
-        Renderable renderable(mesh, glm::vec3(Util::genRandom(-30.f, 30.f), 1.f, Util::genRandom(-30.f, 30.f)), glm::vec3(Util::genRandom(1.5f, 4.5f)), Util::genRandomVec3(-Util::PI, Util::PI));
+        Renderable renderable(mesh, glm::vec3(util::genRandom(-30.f, 30.f), 1.f, util::genRandom(-30.f, 30.f)), glm::vec3(util::genRandom(1.5f, 4.5f)), util::genRandomVec3(-util::PI, util::PI));
         Material material;
         material.mAmbient = glm::vec3(0.2f);
-        material.mDiffuse = Util::genRandomVec3(0.2f, 1.f);
+        material.mDiffuse = util::genRandomVec3(0.2f, 1.f);
         Engine::addComponent<renderable::PhongShadowRenderable>(renderable.gameObject, *Library::getTexture("black"), material);
         Engine::addComponent<renderable::ShadowCasterRenderable>(renderable.gameObject, *Library::getTexture("black"));
         Engine::addComponent<SelectableComponent>(renderable.gameObject);
@@ -84,7 +84,7 @@ int main() {
 
     /* Ground plane */
     {
-        Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(100.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
+        Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(100.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
         Material material;
         material.mAmbient = glm::vec3(0.2f);
         material.mDiffuse = glm::vec3(0.2f);
@@ -102,13 +102,11 @@ int main() {
 
     /* Init renderer */
     auto defaultFBO = Library::createFBO("default");
-    defaultFBO->attachColorTexture(WindowSurface::getFrameSize(), { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
-    defaultFBO->attachDepthTexture(WindowSurface::getFrameSize(), GL_NEAREST, GL_CLAMP_TO_EDGE); // depth
+    defaultFBO->attachColorTexture({ 1, 1 }, { GL_RGBA, GL_RGBA, GL_NEAREST, GL_CLAMP_TO_EDGE });
+    defaultFBO->attachDepthTexture({ 1, 1 }, GL_NEAREST, GL_CLAMP_TO_EDGE); // depth
     defaultFBO->initDrawBuffers();
     // Handle frame size changing
     Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
-        const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-        NEO_UNUSED(m);
         glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
         Library::getFBO("default")->resize(frameSize);
     });
@@ -128,9 +126,11 @@ int main() {
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
     Engine::addImGuiFunc("DOF", [&]() {
-        if (ImGui::SliderInt("Scale", frameScale.get(), 1, 16)) {
-            Library::getFBO("dofdown")->resize(WindowSurface::getFrameSize() / *frameScale);
-            Library::getFBO("dofblur")->resize(WindowSurface::getFrameSize() / *frameScale);
+        if (auto windowDetails = Engine::getSingleComponent<WindowDetailsComponent>()) {
+            if (ImGui::SliderInt("Scale", frameScale.get(), 1, 16)) {
+                Library::getFBO("dofdown")->resize(windowDetails->mDetails.getSize() / *frameScale);
+                Library::getFBO("dofblur")->resize(windowDetails->mDetails.getSize() / *frameScale);
+            }
         }
     });
 

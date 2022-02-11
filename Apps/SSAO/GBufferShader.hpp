@@ -2,7 +2,6 @@
 
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
-#include "Window/Window.hpp"
 
 #include "GBufferComponent.hpp"
 
@@ -21,15 +20,13 @@ class GBufferShader : public Shader {
             auto gbuffer = Library::createFBO("gbuffer");
 
             TextureFormat format{ GL_RGB, GL_RGB, GL_NEAREST, GL_CLAMP_TO_EDGE };
-            gbuffer->attachColorTexture(WindowSurface::getFrameSize(), format); // normal
-            gbuffer->attachColorTexture(WindowSurface::getFrameSize(), format); // color
-            gbuffer->attachDepthTexture(WindowSurface::getFrameSize(), GL_NEAREST, GL_CLAMP_TO_EDGE);  // depth
+            gbuffer->attachColorTexture({ 1, 1 }, format); // normal
+            gbuffer->attachColorTexture({ 1, 1 }, format); // color
+            gbuffer->attachDepthTexture({ 1, 1 }, GL_NEAREST, GL_CLAMP_TO_EDGE);  // depth
             gbuffer->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
-                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                NEO_UNUSED(m);
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
                 Library::getFBO("gbuffer")->resize(frameSize);
             });

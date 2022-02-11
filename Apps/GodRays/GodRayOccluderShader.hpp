@@ -26,7 +26,9 @@ class GodRayOccluderShader : public Shader {
 
             auto fbo = Library::getFBO("godray");
             fbo->bind();
-            glm::ivec2 frameSize = WindowSurface::getFrameSize() / 2;
+            auto windowDetails = Engine::getSingleComponent<WindowDetailsComponent>();
+            NEO_ASSERT(windowDetails, "Window details don't exist");
+            glm::ivec2 frameSize = windowDetails->mDetails.getSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();

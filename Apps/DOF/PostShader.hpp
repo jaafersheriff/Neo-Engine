@@ -3,7 +3,6 @@
 #include "Renderer/Shader/PostProcessShader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Window/Window.hpp"
 #include "Messaging/Messenger.hpp"
 
 #include "Loader/Library.hpp"
@@ -59,14 +58,14 @@ class PostShader : public PostProcessShader {
             std::vector<float> kernel;
             for (int i = 0; i < poissonSize; i++) {
                 glm::vec2 sample(
-                    Util::genRandom(-1.f, 1.f),
-                    Util::genRandom(-1.f, 1.f)
+                    util::genRandom(-1.f, 1.f),
+                    util::genRandom(-1.f, 1.f)
                 );
                 sample = glm::normalize(sample);
-                sample *= Util::genRandom(0.f, 1.f);
+                sample *= util::genRandom(0.f, 1.f);
 
                 float scale = (float)i / (float)poissonSize;
-                scale = Util::lerp(0.1f, 1.f, scale * scale);
+                scale = util::lerp(0.1f, 1.f, scale * scale);
                 sample *= scale;
 
                 kernel.push_back(sample.x);

@@ -17,7 +17,7 @@ struct Camera {
         GameObject *gameObject = &Engine::createGameObject();
         auto& spatial = Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
         spatial.setLookDir(lookDir);
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, WindowSurface::getAspectRatio());
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -76,7 +76,7 @@ int main() {
     Engine::addImGuiFunc("Metaballs", []() {
         static float scale = 2.f;
         if (ImGui::Button("Add")) {
-            Metaball(Util::genRandomVec3(-2.f, 2.f), Util::genRandom(2.f, 4.f));
+            Metaball(util::genRandomVec3(-2.f, 2.f), util::genRandom(2.f, 4.f));
             {
                 GameObject* gameObject = &Engine::createGameObject();
                 Engine::addComponent<DirtyBallsComponent>(gameObject);

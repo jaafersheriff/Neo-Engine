@@ -62,7 +62,10 @@ class MetaballsSystem : public System {
 
             if (mAutoUpdate) {
                 MICROPROFILE_ENTERI("Metaballs System", "updatePositions", MP_AUTO);
-                float rTime = static_cast<float>(Util::getRunTime());
+                float rTime = 0.f;
+                if (auto frameStats = Engine::getSingleComponent<FrameStatsComponent>()) {
+                    rTime = frameStats->mRunTime;
+                }
                 for (uint32_t ii = 0; ii < balls.size(); ++ii) {
                     auto spatial = balls[ii]->get<SpatialComponent>();
                     glm::vec3 position = spatial->getPosition();

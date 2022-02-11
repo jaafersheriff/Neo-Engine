@@ -109,8 +109,8 @@ namespace neo {
 
             // Ping & pong 
             auto ping = Library::createFBO("ping");
-            ping->attachColorTexture({}, format);
-            ping->attachDepthTexture({}, GL_NEAREST, GL_REPEAT);
+            ping->attachColorTexture({1, 1}, format);
+            ping->attachDepthTexture({1, 1}, GL_NEAREST, GL_REPEAT);
 
             // Set default FBO if it's the back buffer
             if (mDefaultFBO == Library::getFBO("0")) {
@@ -118,7 +118,7 @@ namespace neo {
             }
 
             auto pong = Library::createFBO("pong");
-            pong->attachColorTexture({}, format);
+            pong->attachColorTexture({1, 1}, format);
             pong->mTextures.push_back(ping->mTextures[1]);
 
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {

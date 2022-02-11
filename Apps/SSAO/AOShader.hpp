@@ -4,7 +4,6 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Texture1D.hpp"
 
-#include "Window/Window.hpp"
 #include "Messaging/Messenger.hpp"
 
 using namespace neo;
@@ -34,14 +33,14 @@ class AOShader : public PostProcessShader {
             std::vector<uint8_t> kernel;
             for (unsigned i = 0; i < size; i++) {
                 glm::vec3 sample(
-                    Util::genRandom(-1.f, 1.f),
-                    Util::genRandom(-1.f, 1.f),
-                    Util::genRandom(0.f, 1.f)
+                    util::genRandom(-1.f, 1.f),
+                    util::genRandom(-1.f, 1.f),
+                    util::genRandom(0.f, 1.f)
                 );
                 sample = glm::normalize(sample);
-                sample *= Util::genRandom(0.f, 1.f);
+                sample *= util::genRandom(0.f, 1.f);
                 float scale = (float)i / (float)size;
-                scale = Util::lerp(0.1f, 1.f, scale * scale);
+                scale = util::lerp(0.1f, 1.f, scale * scale);
                 sample *= scale;
                 kernel.push_back(static_cast<uint8_t>(sample.x));
                 kernel.push_back(static_cast<uint8_t>(sample.y));
@@ -54,9 +53,9 @@ class AOShader : public PostProcessShader {
             std::vector<uint8_t> noise;
             noise.resize(dim*dim*3);
             for (unsigned i = 0; i < dim*dim*3; i+=3) {
-                noise[i + 0] = static_cast<uint8_t>(Util::genRandom());
-                noise[i + 1] = static_cast<uint8_t>(Util::genRandom());
-                noise[i + 2] = static_cast<uint8_t>(Util::genRandom());
+                noise[i + 0] = static_cast<uint8_t>(util::genRandom());
+                noise[i + 1] = static_cast<uint8_t>(util::genRandom());
+                noise[i + 2] = static_cast<uint8_t>(util::genRandom());
             }
             Library::getTexture("aoNoise")->update(glm::uvec2(dim), noise.data());
         }

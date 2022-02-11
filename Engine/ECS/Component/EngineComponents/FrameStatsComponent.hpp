@@ -8,11 +8,13 @@ namespace neo {
     class FrameStatsComponent : public Component {
 
     public:
-        FrameStatsComponent(GameObject *go, float runTime)
+        FrameStatsComponent(GameObject *go, float runTime, float timeStep)
             : Component(go)
             , mRunTime(runTime)
+            , mDT(timeStep)
         {}
 
         const float mRunTime;
+        const float mDT;
     };
 }

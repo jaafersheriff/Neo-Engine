@@ -18,10 +18,10 @@ struct Camera {
     GameObject *gameObject;
     CameraComponent *camera;
 
-    Camera(float fov, float near, float far, float ar, glm::vec3 pos) {
+    Camera(float fov, float near, float far, glm::vec3 pos) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, ar);
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
     }
 };
 
@@ -70,12 +70,12 @@ int main() {
     Engine::init(config);
 
     /* Game objects */
-    Camera sceneCamera(45.f, 1.f, 100.f, WindowSurface::getAspectRatio(), glm::vec3(0, 0.6f, 5));
+    Camera sceneCamera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
     Engine::addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
     Engine::addComponent<MainCameraComponent>(sceneCamera.gameObject);
     
     // Perspective camera
-    Camera mockCamera(50.f, 0.1f, 5.f, 1.f, glm::vec3(0.f, 2.f, -0.f));
+    Camera mockCamera(50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
     &Engine::addComponent<LineMeshComponent>(mockCamera.gameObject, glm::vec3(0.f, 1.f, 1.f));
     Engine::addComponent<FrustumComponent>(mockCamera.gameObject);
     Engine::addComponent<FrustumFitSourceComponent>(mockCamera.gameObject);
@@ -85,10 +85,10 @@ int main() {
 
     // Renderable
     for (int i = 0; i < 30; i++) {
-        Renderable sphere(Util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere"), glm::vec3(Util::genRandom(-10.f, 10.f), Util::genRandom(0.5f, 1.f), Util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
+        Renderable sphere(util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere"), glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
         Material material;
         material.mAmbient = glm::vec3(0.3f);
-        material.mDiffuse = Util::genRandomVec3();
+        material.mDiffuse = util::genRandomVec3();
         Engine::addComponent<renderable::PhongShadowRenderable>(sphere.gameObject, *Library::getTexture("black"), material);
         Engine::addComponent<renderable::ShadowCasterRenderable>(sphere.gameObject, *Library::getTexture("black"));
     }
@@ -111,7 +111,7 @@ int main() {
     Renderer::init("shaders/");
     Renderer::addPreProcessShader<ShadowCasterShader>(shadowMapSize);
     Renderer::addSceneShader<PhongShadowShader>();
-    Renderer::addSceneShader<LineShader>();
+    Renderer::addSceneShader<LineShader>().mActive = true;
 
     /* Attach ImGui panes */
     Engine::addImGuiFunc("SceneCamera", [&]() {

@@ -21,7 +21,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, WindowSurface::getAspectRatio());
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -77,7 +77,7 @@ int main() {
     Library::loadTexture("PineTexture.png");
     Library::loadMesh("PineTree3.obj");
     for (int i = 0; i < 15; i++) {
-        Renderable cube(Library::getMesh("PineTree3.obj"), glm::vec3(Util::genRandom(-7.5f, 7.5f), 0.5f, Util::genRandom(-7.5f, 7.5f)), glm::vec3(Util::genRandom(0.7f, 1.3f)), glm::vec3(0.f, Util::genRandom(0.f, 360.f), 0.f));
+        Renderable cube(Library::getMesh("PineTree3.obj"), glm::vec3(util::genRandom(-7.5f, 7.5f), 0.5f, util::genRandom(-7.5f, 7.5f)), glm::vec3(util::genRandom(0.7f, 1.3f)), glm::vec3(0.f, util::genRandom(0.f, 360.f), 0.f));
         Material material;
         material.mAmbient = glm::vec3(0.2f);
         material.mDiffuse = glm::vec3(0.f);
@@ -86,7 +86,7 @@ int main() {
     }
 
     /* Ground plane */
-    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
+    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
     Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject, *Library::loadTexture("grid.png"));
 
     /* Systems - order matters! */

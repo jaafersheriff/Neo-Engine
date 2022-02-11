@@ -17,7 +17,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, WindowSurface::getAspectRatio());
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -44,7 +44,7 @@ struct Renderable {
         Engine::addComponent<MeshComponent>(gameObject, *mesh);
         Material material;
         material.mAmbient = glm::vec3(0.2f);
-        material.mDiffuse = Util::genRandomVec3();
+        material.mDiffuse = util::genRandomVec3();
         gbuffer = &Engine::addComponent<GBufferComponent>(gameObject, *texture, material);
     }
 };
@@ -70,7 +70,7 @@ int main() {
 
     Texture* pineTexture = Library::loadTexture("PineTexture.png");
     for (int i = 0; i < 20; i++) {
-        Renderable tree(Library::loadMesh("PineTree3.obj", true), pineTexture, glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * Util::genRandom()), glm::vec3(10.f));
+        Renderable tree(Library::loadMesh("PineTree3.obj", true), pineTexture, glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * util::genRandom()), glm::vec3(10.f));
         tree.gbuffer->mMaterial.mDiffuse = glm::vec3(0.f);
     }
 
@@ -138,14 +138,14 @@ int main() {
                 if (ImGui::Button("Create light")) {
                     for (int i = 0; i < numLights; i++) {
                         glm::vec3 position = glm::vec3(
-                            Util::genRandom(minOffset.x, maxOffset.x),
-                            Util::genRandom(minOffset.y, maxOffset.y),
-                            Util::genRandom(minOffset.z, maxOffset.z)
+                            util::genRandom(minOffset.x, maxOffset.x),
+                            util::genRandom(minOffset.y, maxOffset.y),
+                            util::genRandom(minOffset.z, maxOffset.z)
                         );
-                        glm::vec3 color = Util::genRandomVec3();
-                        float size = Util::genRandom(minScale, maxScale);
+                        glm::vec3 color = util::genRandomVec3();
+                        float size = util::genRandom(minScale, maxScale);
                         auto light = new Light(position, color, glm::vec3(size));
-                        glm::vec3 sinMove(0.f, Util::genRandom(minSinOffset, maxSinOffset), 0.f);
+                        glm::vec3 sinMove(0.f, util::genRandom(minSinOffset, maxSinOffset), 0.f);
                         Engine::addComponent<SinTranslateComponent>(light->gameObject, sinMove, position);
                         lights.push_back(light);
                     }

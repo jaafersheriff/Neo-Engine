@@ -16,7 +16,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos) {
         gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, WindowSurface::getAspectRatio());
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
     }
 };
 
@@ -51,8 +51,8 @@ void generateObjects(int amount) {
     }
  
     for (int i = 0; i < amount; i++) {
-        glm::vec3 position(Util::genRandom(-15.f, 15.f), 0.f, Util::genRandom(-15.f, 15.f));
-        glm::vec3 size = glm::vec3(Util::genRandom(0.5f, 2.f), Util::genRandom(0.5f, 2.f), Util::genRandom(0.5f, 2.f));
+        glm::vec3 position(util::genRandom(-15.f, 15.f), 0.f, util::genRandom(-15.f, 15.f));
+		glm::vec3 size = glm::vec3(util::genRandom(0.5f, 2.f), util::genRandom(0.5f, 2.f), util::genRandom(0.5f, 2.f));
         const auto mesh = Library::getMesh("sphere");
 
         Renderable renderable(mesh, position, size);
@@ -83,7 +83,7 @@ int main() {
     generateObjects(10);
 
     /* Ground plane */
-    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(30.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
+    Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(30.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
     Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject, *Library::loadTexture("grid.png"));
 
     /* Systems - order matters! */

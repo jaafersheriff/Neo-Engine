@@ -3,7 +3,6 @@
 #include "Renderer/Shader/PostProcessShader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Window/Window.hpp"
 #include "Messaging/Messenger.hpp"
 
 #include "Loader/Library.hpp"
@@ -22,15 +21,12 @@ class DofInfoShader : public Shader {
 
         DofInfoShader(const std::string& vert, const std::string &frag) :
             Shader("DofInfo Shader", vert, frag) {
-            glm::uvec2 frameSize = WindowSurface::getFrameSize();
             auto DofInfoFBO = Library::createFBO("dofinfo");
-            DofInfoFBO->attachColorTexture(frameSize, { GL_R8, GL_RED, GL_NEAREST, GL_CLAMP_TO_EDGE });
+            DofInfoFBO->attachColorTexture({ 1, 1 }, { GL_R8, GL_RED, GL_NEAREST, GL_CLAMP_TO_EDGE });
             DofInfoFBO->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
-                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                NEO_UNUSED(m);
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
                 Library::getFBO("dofinfo")->resize(frameSize);
             });
@@ -48,7 +44,9 @@ class DofInfoShader : public Shader {
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 0.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 
-            glm::uvec2 frameSize = WindowSurface::getFrameSize();
+            auto windowDetails = Engine::getSingleComponent<WindowDetailsComponent>();
+            NEO_ASSERT(windowDetails, "Window details don't exist");
+            glm::uvec2 frameSize = windowDetails->mDetails.getSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
             bind();

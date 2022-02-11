@@ -20,7 +20,7 @@ class GodRaySunShader : public Shader {
             // 0 used for base 
             TextureFormat format = { GL_R16, GL_RED, GL_LINEAR, GL_CLAMP_TO_EDGE };
             auto godray = Library::createFBO("godray");
-            godray->attachColorTexture(WindowSurface::getFrameSize() / 2, format); 
+            godray->attachColorTexture({ 1, 1 }, format);
             godray->initDrawBuffers();
 
             // Handle frame size changing
@@ -36,9 +36,11 @@ class GodRaySunShader : public Shader {
         virtual void render() override {
             auto fbo = Library::getFBO("godray");
             fbo->bind();
-            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
-            glm::ivec2 frameSize = WindowSurface::getFrameSize() / 2;
+            auto windowDetails = Engine::getSingleComponent<WindowDetailsComponent>();
+            NEO_ASSERT(windowDetails, "Window details don't exist");
+            glm::ivec2 frameSize = windowDetails->mDetails.getSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 
             bind();

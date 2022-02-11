@@ -28,9 +28,11 @@ public:
         }
 
         if (mUpdatePerspective) {
-            float f = static_cast<float>(glm::sin(Util::getRunTime()));
-            float g = static_cast<float>(glm::cos(Util::getRunTime()));
-            sourceCamera->get<SpatialComponent>()->setLookDir(glm::vec3(f, f / 2, g));
+            if (auto frameStats = Engine::getSingleComponent<FrameStatsComponent>()) {
+                float f = static_cast<float>(glm::sin(frameStats->mRunTime));
+                float g = static_cast<float>(glm::cos(frameStats->mRunTime));
+                sourceCamera->get<SpatialComponent>()->setLookDir(glm::vec3(f, f / 2, g));
+            }
         }
     }
 };
