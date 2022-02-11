@@ -7,17 +7,21 @@ extern "C" {
 #endif
 
 #include "Engine.hpp"
+
 #include "Renderer/Renderer.hpp"
 #include "Renderer/Shader/SelectableShader.hpp"
 #include "Renderer/Shader/OutlineShader.hpp"
 #include "Renderer/Shader/WireframeShader.hpp"
 #include "Renderer/Shader/LineShader.hpp"
 
-#include "ECS/GameObject.hpp"
+#include "Hardware/WindowSurface.hpp"
+
 #include "Messaging/Messenger.hpp"
 
 #include "Loader/Loader.hpp"
 #include "Loader/MeshGenerator.hpp"
+
+#include "Util/FrameCounter.hpp"
 
 #include <time.h>
 #include <iostream>
@@ -41,6 +45,10 @@ namespace neo {
     bool Engine::mImGuiEnabled = true;
     std::unordered_map<std::string, std::function<void()>> Engine::mImGuiFuncs;
 
+    /* Hardware */
+    Keyboard Engine::mKeyboard;
+    Mouse Engine::mMouse;
+
     void Engine::init(EngineConfig config) {
 
         /* Init base engine */
@@ -48,11 +56,14 @@ namespace neo {
         mConfig = config;
 
         /* Init window*/
-        if (WindowSurface::initGLFW(mConfig.APP_NAME)) {
+        if (mWindow.init(mConfig.APP_NAME)) {
             std::cerr << "Failed initializing Window" << std::endl;
         }
-        WindowSurface::setSize(glm::ivec2(mConfig.width, mConfig.height));
+        mWindow.setSize(glm::ivec2(mConfig.width, mConfig.height));
         ImGui::GetStyle().ScaleAllSizes(2.f);
+
+        mMouse.init();
+        mKeyboard.init();
 
         /* Init loader after initializing GL*/
         Loader::init(mConfig.APP_RES, true);
@@ -76,9 +87,6 @@ namespace neo {
         tex = Library::createEmptyTexture<Texture2D>("white", {});
         tex->update(glm::uvec2(1), data);
 
-        /* Init Util */
-        Util::init();
-
 #if MICROPROFILE_ENABLED
         MicroProfileOnThreadCreate("MAIN THREAD");
         MicroProfileGpuInitGL();
@@ -101,6 +109,9 @@ namespace neo {
         auto& lineShader = Renderer::addSceneShader<LineShader>();
         lineShader.mActive = false;
 
+        util::FrameCounter counter;
+        counter.init(glfwGetTime());
+
         /* Init systems */
         _initSystems();
 
@@ -108,14 +119,23 @@ namespace neo {
         _processInitQueue();
         Messenger::relayMessages();
 
-        while (!WindowSurface::shouldClose()) {
+        while (!mWindow.shouldClose()) {
             MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);
 
-            /* Update Util */
-            Util::update();
+            /* Update frame counter */
+            float runTime = static_cast<float>(glfwGetTime());
+            counter.update(runTime);
 
             /* Update display, mouse, keyboard */
-            WindowSurface::update();
+            mWindow.update();
+            {
+                auto& hardware = Engine::createGameObject();
+                Engine::addComponent<MouseComponent>(&hardware, mMouse);
+                Engine::addComponent<KeyboardComponent>(&hardware, mKeyboard);
+                Engine::addComponent<WindowDetailsComponent>(&hardware, mWindow.getDetails());
+                Engine::addComponent<FrameStatsComponent>(&hardware, runTime);
+                Engine::addComponent<SingleFrameComponent>(&hardware);
+            }
 
             /* Destroy and create objects and components */
             _processKillQueue();
@@ -128,7 +148,7 @@ namespace neo {
                 if (system.second->mActive) {
                     MICROPROFILE_DEFINE(System, "System", system.second->mName.c_str(), MP_AUTO);
 		            MICROPROFILE_ENTER(System); 
-                    system.second->update((float)Util::mTimeStep);
+                    system.second->update(static_cast<float>(counter.mTimeStep));
                     MICROPROFILE_LEAVE();
                 }
             }
@@ -139,7 +159,7 @@ namespace neo {
             if (mImGuiEnabled) {
                 MICROPROFILE_ENTERI("Engine", "_runImGui", MP_AUTO);
                 ImGui::GetIO().FontGlobalScale = 2.0f;
-                _runImGui();
+                _runImGui(counter);
                 MICROPROFILE_LEAVE();
                 Messenger::relayMessages();
             }
@@ -147,8 +167,12 @@ namespace neo {
             /* Render */
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
-            Renderer::render((float)Util::mTimeStep);
+            Renderer::render(static_cast<float>(counter.mTimeStep), mWindow);
             Messenger::relayMessages();
+
+            for (auto& frameComponent : Engine::getComponents<SingleFrameComponent>()) {
+                Engine::removeGameObject(frameComponent->getGameObject());
+            }
 
             MicroProfileFlip(0);
         }
@@ -231,7 +255,7 @@ namespace neo {
             frameBuffer.second->destroy();
         }
 
-        WindowSurface::shutDown();
+        mWindow.shutDown();
     }
 
     void Engine::_processKillQueue() {
@@ -308,20 +332,20 @@ namespace neo {
         mComponentKillQueue.clear();
     }
 
-    void Engine::_runImGui() {
+    void Engine::_runImGui(const util::FrameCounter& counter) {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("Performance")) {
                 // Translate FPS to floats
                 std::vector<float> FPSfloats;
-                std::vector<int> FPSInts = Util::mFPSList;
+                std::vector<int> FPSInts = counter.mFPSList;
                 FPSfloats.resize(FPSInts.size());
                 for (size_t i = 0; i < FPSInts.size(); i++) {
                     FPSfloats[i] = static_cast<float>(FPSInts[i]);
                 }
-                ImGui::PlotLines("FPS", FPSfloats.data(), static_cast<int>(FPSfloats.size()), 0, std::to_string(Util::mFPS).c_str());
-                ImGui::PlotLines("Frame time", Util::mTimeStepList.data(), static_cast<int>(Util::mTimeStepList.size()), 0, std::to_string(Util::mTimeStep * 1000.f).c_str());
+                ImGui::PlotLines("FPS", FPSfloats.data(), static_cast<int>(FPSfloats.size()), 0, std::to_string(counter.mFPS).c_str());
+                ImGui::PlotLines("Frame time", counter.mTimeStepList.data(), static_cast<int>(counter.mTimeStepList.size()), 0, std::to_string(counter.mTimeStep * 1000.f).c_str());
                 if (ImGui::Button("VSync")) {
-                    WindowSurface::toggleVSync();
+                    mWindow.toggleVSync();
                 }
                 ImGui::EndMenu();
             }
@@ -374,7 +398,7 @@ namespace neo {
 
                                 line->mUseParentSpatial = true;
                                 line->mWriteDepth = true;
-                                line->mOverrideColor = Util::genRandomVec3(0.3f, 1.f);
+                                line->mOverrideColor = util::genRandomVec3(0.3f, 1.f);
 
                                 glm::vec3 NearLeftBottom{ box->mMin };
                                 glm::vec3 NearLeftTop{ box->mMin.x, box->mMax.y, box->mMin.z };

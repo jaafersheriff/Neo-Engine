@@ -6,4 +6,5 @@ PUBLIC
 	Util
 	Window
 PRIVATE
+	libglew_static
 )

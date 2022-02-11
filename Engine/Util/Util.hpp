@@ -83,11 +83,11 @@ namespace neo {
             );
         }
 
-        static glm::vec3 sphericalToCartesian(const glm::vec3& v) {
+        static inline glm::vec3 sphericalToCartesian(const glm::vec3& v) {
             return sphericalToCartesian(v.x, v.y, v.z);
         }
 
-        static bool fileExists(const char* fn) {
+        static inline bool fileExists(const char* fn) {
             FILE* fp;
             if (fn != NULL) {
                 fp = fopen(fn, "rt");
@@ -99,7 +99,7 @@ namespace neo {
             return false;
         }
 
-        static char* textFileRead(const char* fn) {
+        static inline char* textFileRead(const char* fn) {
             FILE* fp;
             char* content = NULL;
             int count = 0;
@@ -123,7 +123,7 @@ namespace neo {
             return content;
         }
 
-        static int textFileWrite(const char* fn, char* s) {
+        static inline int textFileWrite(const char* fn, char* s) {
             FILE* fp;
             int status = 0;
             if (fn != NULL) {

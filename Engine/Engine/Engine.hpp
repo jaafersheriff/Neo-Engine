@@ -1,9 +1,5 @@
 #pragma once
 
-#include "Window/Window.hpp"
-#include "Window/Mouse.hpp"
-#include "Window/Keyboard.hpp"
-
 #include "Renderer/Renderer.hpp"
 #include "Loader/Library.hpp"
 #include "Util/Util.hpp"
@@ -13,6 +9,7 @@
 #include "ECS/Systems/Systems.hpp"
 
 #include "ext/imgui/imgui.h"
+#include "microprofile.h"
 
 #include <vector>
 #include <unordered_map>
@@ -23,10 +20,14 @@
 
 #include "ECS/GameObject.hpp"
 
-#include "microprofile.h"
-
 namespace neo {
+    namespace util {
+        struct FrameCounter;
+    }
     class ComponentTuple;
+    class Window;
+    class Keyboard;
+    class Mouse;
 
     struct EngineConfig {
         std::string APP_NAME = "Neo Engine";
@@ -97,7 +98,12 @@ namespace neo {
 
             /* ImGui */
             static std::unordered_map<std::string, std::function<void()>> mImGuiFuncs;
-            static void _runImGui();
+            static void _runImGui(const util::FrameCounter&);
+
+            /* Hardware */
+            static WindowSurface mWindow;
+            static Keyboard mKeyboard;
+            static Mouse mMouse;
     };
 
     /* Template implementation */

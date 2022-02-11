@@ -15,41 +15,48 @@ namespace neo {
     }
 
     void CameraControllerSystem::_updateLook(const float dt, CameraControllerComponent& comp) {
-        glm::vec2 mousePos = Mouse::getPos();
-        glm::vec2 mouseSpeed = Mouse::getSpeed();
+        if (auto mouse = Engine::getSingleComponent<MouseComponent>()) {
+            glm::vec2 mousePos = mouse->mFrameMouse.getPos();
+            glm::vec2 mouseSpeed = mouse->mFrameMouse.getSpeed();
 
-        if (Mouse::isDown(GLFW_MOUSE_BUTTON_2) && (mousePos.x || mousePos.y)) {
-            float theta = comp.mTheta - mouseSpeed.x * comp.mLookSpeed * dt;
-            float phi = comp.mPhi + mouseSpeed.y * comp.mLookSpeed * dt;
-            comp.setOrientation(theta, phi);
+            if (mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_2) && (mousePos.x || mousePos.y)) {
+                float theta = comp.mTheta - mouseSpeed.x * comp.mLookSpeed * dt;
+                float phi = comp.mPhi + mouseSpeed.y * comp.mLookSpeed * dt;
+                comp.setOrientation(theta, phi);
+            }
         }
-        if (Keyboard::isKeyPressed(comp.mLookLeftButton)) {
-            float theta = comp.mTheta + comp.mLookSpeed * 2.f * dt;
-            comp.setOrientation(theta, comp.mPhi);
-        }
-        if (Keyboard::isKeyPressed(comp.mLookRightButton)) {
-            float theta = comp.mTheta - comp.mLookSpeed * 2.f * dt;
-            comp.setOrientation(theta, comp.mPhi);
-        }
-        if (Keyboard::isKeyPressed(comp.mLookUpButton)) {
-            float phi = comp.mPhi - comp.mLookSpeed * 2.f * dt;
-            comp.setOrientation(comp.mTheta, phi);
-        }
-        if (Keyboard::isKeyPressed(comp.mLookDownButton)) {
-            float phi = comp.mPhi + comp.mLookSpeed * 2.f * dt;
-            comp.setOrientation(comp.mTheta, phi);
+
+
+        if (auto keyboard = Engine::getSingleComponent<KeyboardComponent>()) {
+            if (keyboard->mFrameKeyboard.isKeyPressed(comp.mLookLeftButton)) {
+                float theta = comp.mTheta + comp.mLookSpeed * 2.f * dt;
+                comp.setOrientation(theta, comp.mPhi);
+            }
+            if (keyboard->mFrameKeyboard.isKeyPressed(comp.mLookRightButton)) {
+                float theta = comp.mTheta - comp.mLookSpeed * 2.f * dt;
+                comp.setOrientation(theta, comp.mPhi);
+            }
+            if (keyboard->mFrameKeyboard.isKeyPressed(comp.mLookUpButton)) {
+                float phi = comp.mPhi - comp.mLookSpeed * 2.f * dt;
+                comp.setOrientation(comp.mTheta, phi);
+            }
+            if (keyboard->mFrameKeyboard.isKeyPressed(comp.mLookDownButton)) {
+                float phi = comp.mPhi + comp.mLookSpeed * 2.f * dt;
+                comp.setOrientation(comp.mTheta, phi);
+            }
         }
     }
 
     void CameraControllerSystem::_updatePosition(const float dt, CameraControllerComponent& comp) {
 
-            int forward(Keyboard::isKeyPressed(comp.mForwardButton));
-            int backward(Keyboard::isKeyPressed(comp.mBackwardButton));
-            int right(Keyboard::isKeyPressed(comp.mRightButton));
-            int left(Keyboard::isKeyPressed(comp.mLeftButton));
-            int up(Keyboard::isKeyPressed(comp.mUpButton));
-            int down(Keyboard::isKeyPressed(comp.mDownButton));
-            bool speed(Keyboard::isKeyPressed(GLFW_KEY_LEFT_SHIFT));
+        if (auto keyboard = Engine::getSingleComponent<KeyboardComponent>()) {
+            int forward(keyboard->mFrameKeyboard.isKeyPressed(comp.mForwardButton));
+            int backward(keyboard->mFrameKeyboard.isKeyPressed(comp.mBackwardButton));
+            int right(keyboard->mFrameKeyboard.isKeyPressed(comp.mRightButton));
+            int left(keyboard->mFrameKeyboard.isKeyPressed(comp.mLeftButton));
+            int up(keyboard->mFrameKeyboard.isKeyPressed(comp.mUpButton));
+            int down(keyboard->mFrameKeyboard.isKeyPressed(comp.mDownButton));
+            bool speed(keyboard->mFrameKeyboard.isKeyPressed(GLFW_KEY_LEFT_SHIFT));
 
             glm::vec3 dir(
                 float(right - left),
@@ -67,8 +74,6 @@ namespace neo {
                     -spatial->getLookDir() * dir.z);
                 spatial->move(dir * comp.mMoveSpeed * dt * (speed ? mSuperSpeed : 1.f));
             }
-
+        }
     }
-
-
 }

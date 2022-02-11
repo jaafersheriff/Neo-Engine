@@ -2,7 +2,6 @@
 
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "Messaging/Messenger.hpp"
-#include "Window/Window.hpp"
 #include "Util/Util.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"

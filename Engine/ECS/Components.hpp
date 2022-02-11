@@ -12,9 +12,14 @@
 
 #include "Component/CollisionComponent/BoundingBoxComponent.hpp"
 
-#include "Component/LightComponent/LightComponent.hpp"
+#include "Component/EngineComponents/FrameStatsComponent.hpp"
+#include "Component/EngineComponents/SingleFrameComponent.hpp"
 
-#include "Component/SpatialComponent/SpatialComponent.hpp"
+#include "Component/HardwareComponent/KeyboardComponent.hpp"
+#include "Component/HardwareComponent/MouseComponent.hpp"
+#include "Component/HardwareComponent/WindowDetailsComponent.hpp"
+
+#include "Component/LightComponent/LightComponent.hpp"
 
 #include "Component/RenderableComponent/MeshComponent.hpp"
 #include "Component/RenderableComponent/LineMeshComponent.hpp"
@@ -29,6 +34,8 @@
 #include "Component/SelectingComponent/MouseRayComponent.hpp"
 #include "Component/SelectingComponent/SelectableComponent.hpp"
 #include "Component/SelectingComponent/SelectedComponent.hpp"
+
+#include "Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "Component/TransformationComponent/RotationComponent.hpp"
 #include "Component/TransformationComponent/SinTranslateComponent.hpp"

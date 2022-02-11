@@ -27,14 +27,14 @@ namespace neo {
             ) {
             /* Init shadow map */
             Framebuffer* stencilBuffer = Library::createFBO("selectable");
-            stencilBuffer->attachStencilTexture(WindowSurface::getSize(), GL_NEAREST, GL_CLAMP_TO_EDGE);
+            stencilBuffer->attachStencilTexture({ }, GL_NEAREST, GL_CLAMP_TO_EDGE);
             stencilBuffer->disableDraw();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message& msg) {
                 const WindowFrameSizeMessage& m(static_cast<const WindowFrameSizeMessage&>(msg));
                 NEO_UNUSED(m);
-                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage&>(msg)).frameSize;
+                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage&>(msg)).mFrameSize;
                 Library::getFBO("selectable")->resize(frameSize);
                 });
 
@@ -45,26 +45,28 @@ namespace neo {
 
             auto fbo = Library::getFBO("selectable");
             fbo->bind();
+            NEO_ASSERT(fbo->mTextures.size() > 0, "Selectable render target never initialized");
 
             // Read pixels from last frame before clearing the buffer
-            // TODO : use texture size
-            if (Mouse::isDown(GLFW_MOUSE_BUTTON_1) && mFrameCount >= 5) {
-                MICROPROFILE_SCOPEI("Selectable Shader", "ReadPixels", MP_AUTO);
-                MICROPROFILE_SCOPEGPUI("Selectable Shader - ReadPixels", MP_AUTO);
-                uint8_t buffer[4];
-                CHECK_GL(glReadPixels(static_cast<GLint>(Mouse::getPos().x), static_cast<int>(fbo->mTextures[0]->mHeight - Mouse::getPos().y), 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer));
-                uint8_t id = buffer[0];
-                if (id != mSelectedID) {
-                    mSelectedID = id;
-                    Messenger::sendMessage<ComponentSelectedMessage>(nullptr, mSelectedID);
-                }
+            if (auto mouse = Engine::getSingleComponent<MouseComponent>()) {
+                if (mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1) && mFrameCount >= 5) {
+                    MICROPROFILE_SCOPEI("Selectable Shader", "ReadPixels", MP_AUTO);
+                    MICROPROFILE_SCOPEGPUI("Selectable Shader - ReadPixels", MP_AUTO);
+                    uint8_t buffer[4];
+                    CHECK_GL(glReadPixels(static_cast<GLint>(mouse->mFrameMouse.getPos().x), static_cast<int>(fbo->mTextures[0]->mHeight - mouse->mFrameMouse.getPos().y), 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer));
+                    uint8_t id = buffer[0];
+                    if (id != mSelectedID) {
+                        mSelectedID = id;
+                        Messenger::sendMessage<ComponentSelectedMessage>(nullptr, mSelectedID);
+                    }
 
-                mFrameCount = 0;
+                    mFrameCount = 0;
+                }
             }
 
             CHECK_GL(glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
             CHECK_GL(glClearStencil(0));
-            CHECK_GL(glViewport(0, 0, WindowSurface::getSize().x, WindowSurface::getSize().y));
+            CHECK_GL(glViewport(0, 0, fbo->mTextures[0]->mWidth, fbo->mTextures[0]->mHeight));
 
             CHECK_GL(glEnable(GL_STENCIL_TEST));
             CHECK_GL(glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE));

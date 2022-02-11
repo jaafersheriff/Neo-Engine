@@ -32,14 +32,14 @@ namespace neo {
         for (auto &&[stage, source] : mStages) {
             if (source.file.size()) {
                 delete source.source;
-                source.source = Util::textFileRead(_getFullPath(source.file).c_str());
+                source.source = util::textFileRead(_getFullPath(source.file).c_str());
             }
         }
         init();
     }
 
     void Shader::_attachStage(ShaderStage stage, const std::string& file) {
-        mStages.emplace(stage, ShaderSource{ 0, file, Util::textFileRead(_getFullPath(file).c_str()) });
+        mStages.emplace(stage, ShaderSource{ 0, file, util::textFileRead(_getFullPath(file).c_str()) });
     }
 
     void Shader::_attachStage(ShaderStage stage, const char* source) {
@@ -103,7 +103,7 @@ namespace neo {
                 std::string fileName = _getFullPath(line.substr(nameStart + 10, nameEnd - nameStart - 10));
 
                 // Load file
-                char* sourceInclude = Util::textFileRead(fileName.c_str());
+                char* sourceInclude = util::textFileRead(fileName.c_str());
 
                 // Replace include with source
                 sourceString.erase(start, end - start);
@@ -121,10 +121,10 @@ namespace neo {
     }
 
     std::string Shader::_getFullPath(const std::string& fileName) {
-        if (Util::fileExists((Renderer::APP_SHADER_DIR + fileName).c_str())) {
+        if (util::fileExists((Renderer::APP_SHADER_DIR + fileName).c_str())) {
             return Renderer::APP_SHADER_DIR + fileName;
         }
-        else if (Util::fileExists((Renderer::ENGINE_SHADER_DIR + fileName).c_str())) {
+        else if (util::fileExists((Renderer::ENGINE_SHADER_DIR + fileName).c_str())) {
             return Renderer::ENGINE_SHADER_DIR + fileName;
         }
         else {

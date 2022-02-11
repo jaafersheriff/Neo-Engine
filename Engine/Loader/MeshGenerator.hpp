@@ -1,6 +1,5 @@
 
 #include "Renderer/GLObjects/Mesh.hpp"
-
 #include "ext/PerlinNoise.hpp"
 
 namespace neo {
@@ -240,8 +239,8 @@ namespace neo {
                 // calculate UV coords
                 std::vector<float> tex;
                 for (unsigned i = 0; i < verts.size(); i += 3) {
-                    tex.push_back(glm::clamp(0.5f + std::atan2(verts[i + 2], verts[i]) / (2.f * Util::PI), 0.f, 1.f));
-                    tex.push_back(glm::clamp(0.5f + std::asin(verts[i+1]) / Util::PI, 0.f, 1.f));
+                    tex.push_back(glm::clamp(0.5f + std::atan2(verts[i + 2], verts[i]) / (2.f * util::PI), 0.f, 1.f));
+                    tex.push_back(glm::clamp(0.5f + std::asin(verts[i+1]) / util::PI, 0.f, 1.f));
                 }
 
                 mesh->addVertexBuffer(VertexType::Position, 0, 3, verts);

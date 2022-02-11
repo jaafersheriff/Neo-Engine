@@ -5,7 +5,7 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Loader")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Messaging")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Renderer")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Util")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Window")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Hardware")
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext")
 
@@ -23,7 +23,7 @@ INTERFACE
 	Loader
 	Messaging
 	Renderer
-	Window
+	Hardware
 	Util
 	glfw
 	libglew_static

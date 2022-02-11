@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Message.hpp"
+#include "ECS/GameObject.hpp"
 
 #include <vector>
 #include <unordered_map>
@@ -9,8 +10,6 @@
 #include <functional>
 
 namespace neo {
-
-    class GameObject;
 
     class Messenger {
 

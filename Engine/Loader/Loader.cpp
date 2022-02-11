@@ -44,10 +44,10 @@ namespace neo {
         std::vector<tinyobj::material_t> objMaterials;
         std::string errString;
         std::string _fileName = APP_RES_DIR + fileName;
-        if (!Util::fileExists(_fileName.c_str())) {
+        if (!util::fileExists(_fileName.c_str())) {
             _fileName = ENGINE_RES_DIR + fileName;
         }
-        NEO_ASSERT(Util::fileExists(_fileName.c_str()), "Unable to find file: %s", fileName.c_str());
+        NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file: %s", fileName.c_str());
         // TODO : use assimp or another optimized asset loader
         bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, _fileName.c_str());
         NEO_ASSERT(rc, errString.c_str());
@@ -106,9 +106,9 @@ namespace neo {
         std::vector<tinyobj::material_t> objMaterials;
 
         std::string resDir = APP_RES_DIR;
-        if (!Util::fileExists((resDir + fileName).c_str())) {
+        if (!util::fileExists((resDir + fileName).c_str())) {
             resDir = ENGINE_RES_DIR;
-            NEO_ASSERT(Util::fileExists((resDir + fileName).c_str()), "Unable to find file: %s", fileName.c_str());
+            NEO_ASSERT(util::fileExists((resDir + fileName).c_str()), "Unable to find file: %s", fileName.c_str());
         }
         // TODO : use assimp or another optimized asset loader
         std::string errString;
@@ -225,9 +225,9 @@ namespace neo {
 
     uint8_t* Loader::_loadTextureData(int& width, int& height, int& components, const std::string& fileName, TextureFormat format, bool flip) {
         std::string _fileName = APP_RES_DIR + fileName;
-        if (!Util::fileExists(_fileName.c_str())) {
+        if (!util::fileExists(_fileName.c_str())) {
             _fileName = ENGINE_RES_DIR + fileName;
-            NEO_ASSERT(Util::fileExists(_fileName.c_str()), "Unable to find file: %s", fileName.c_str());
+            NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file: %s", fileName.c_str());
         }
 
         /* Use stbi if name is an existing file */

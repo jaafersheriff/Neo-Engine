@@ -30,7 +30,7 @@ namespace neo {
 
             static void init(const std::string &, glm::vec3 clearColor = glm::vec3(0.f));
             static void resetState();
-            static void render(float);
+            static void render(float, WindowSurface&);
             static void shutDown();
 
             /* FBO */
@@ -46,7 +46,6 @@ namespace neo {
         private:
             static Framebuffer* mDefaultFBO;
             static glm::vec3 mClearColor;
-            static WindowSurface mWindowSurface;
 
             static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mComputeShaders;
             static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPreProcessShaders;
@@ -55,7 +54,7 @@ namespace neo {
             template <typename ShaderT, typename... Args> static std::unique_ptr<ShaderT> _createShader(Args &&...);
             static std::vector<Shader *> _getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &);
 
-            static void _renderPostProcess(Shader &, Framebuffer *, Framebuffer *);
+            static void _renderPostProcess(Shader &, Framebuffer *, Framebuffer *, glm::ivec2);
     };
 
     /* Template implementation */
@@ -110,8 +109,8 @@ namespace neo {
 
             // Ping & pong 
             auto ping = Library::createFBO("ping");
-            ping->attachColorTexture(WindowSurface::getFrameSize(), format);
-            ping->attachDepthTexture(WindowSurface::getFrameSize(), GL_NEAREST, GL_REPEAT);
+            ping->attachColorTexture({}, format);
+            ping->attachDepthTexture({}, GL_NEAREST, GL_REPEAT);
 
             // Set default FBO if it's the back buffer
             if (mDefaultFBO == Library::getFBO("0")) {
@@ -119,13 +118,13 @@ namespace neo {
             }
 
             auto pong = Library::createFBO("pong");
-            pong->attachColorTexture(WindowSurface::getFrameSize(), format);
+            pong->attachColorTexture({}, format);
             pong->mTextures.push_back(ping->mTextures[1]);
 
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                Library::getFBO("ping")->resize(m.frameSize);
-                Library::getFBO("pong")->resize(m.frameSize);
+                Library::getFBO("ping")->resize(m.mFrameSize);
+                Library::getFBO("pong")->resize(m.mFrameSize);
             });
         }
 

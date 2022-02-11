@@ -62,41 +62,15 @@ namespace neo {
 
     /* A spatiality was changed in some way */
     struct SpatialChangeMessage : public Message {
-        const SpatialComponent & spatial;
-        SpatialChangeMessage(const SpatialComponent & spatial) : spatial(spatial) {}
+        const SpatialComponent & mSpatial;
+        SpatialChangeMessage(const SpatialComponent & spatial) : mSpatial(spatial) {}
     };
 
     /* The window was resized */
     struct WindowFrameSizeMessage : public Message {
-        glm::uvec2 frameSize;
-        WindowFrameSizeMessage(const glm::uvec2 & frameSize) : frameSize(frameSize) {}
+        glm::uvec2 mFrameSize;
+        WindowFrameSizeMessage(const glm::uvec2 & frameSize) : mFrameSize(frameSize) {}
     };
-
-    /* An entity was selected */
-    struct ComponentSelectedMessage : public Message {
-        const uint32_t componentID;
-        ComponentSelectedMessage(const uint32_t id) : componentID(id) {}
-    };
-
-    // // key input
-    // struct KeyMessage : public Message {
-    //     int key, action, mods;
-    //     KeyMessage(int key, int action, int mods) : key(key), action(action), mods(mods) {}
-    // };
-
-    // // mouse input
-    // struct MouseMessage : public Message {
-    //     int button, action, mods;
-    //     MouseMessage(int button, int action, int mods) : button(button), action(action), mods(mods) {}
-    // };
-
-    // // scroll input
-    // struct ScrollMessage : public Message {
-    //     float dx, dy;
-    //     ScrollMessage(float dx, float dy) : dx(dx), dy(dy) {}
-    // };
-
-
 
     // // component has put through the init queue and added to the scene
     // struct ComponentAddedMessage : public Message {

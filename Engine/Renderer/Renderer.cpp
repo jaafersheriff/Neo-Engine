@@ -2,7 +2,7 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 
 #include "Engine/Engine.hpp"
-#include "Window/Window.hpp"
+#include "Hardware/WindowSurface.hpp"
 
 #include "imgui_impl_opengl3.h"
 #include "microprofile.h"
@@ -37,8 +37,6 @@ namespace neo {
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPostShaders;
     glm::vec3 Renderer::mClearColor;
 
-    WindowSurface Renderer::mWindowSurface;
-
     void Renderer::init(const std::string &dir, glm::vec3 clearColor) {
         APP_SHADER_DIR = dir;
         mClearColor = clearColor;
@@ -50,13 +48,6 @@ namespace neo {
 
         /* Init default GL state */
         resetState();
-
-        /* Init GL window */
-        CHECK_GL(glViewport(0, 0, mWindowSurface.getFrameSize().x, mWindowSurface.getFrameSize().y));
-        Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
-            const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-            CHECK_GL(glViewport(0, 0, m.frameSize.x, m.frameSize.y));
-        });
 
         /* Set max work gruop */
         CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &NEO_MAX_COMPUTE_GROUP_SIZE.x));
@@ -104,7 +95,7 @@ namespace neo {
         RENDERER_MP_LEAVE();
     }
 
-    void Renderer::render(float dt) {
+    void Renderer::render(float dt, WindowSurface& window) {
         NEO_UNUSED(dt);
         RENDERER_MP_ENTER("Renderer::render");
 
@@ -153,7 +144,7 @@ namespace neo {
                 Library::getFBO("0")->bind();
             }
         }
-        glm::ivec2 frameSize = mWindowSurface.getFrameSize();
+        glm::ivec2 frameSize = window.getDetails().getSize();
         CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         RENDERER_MP_LEAVE();
@@ -178,13 +169,13 @@ namespace neo {
             Framebuffer *inputFBO = mDefaultFBO;
             Framebuffer *outputFBO = activePostShaders.size() == 1 ? Library::getFBO("0") : Library::getFBO("pong");
 
-            _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO);
+            _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().getSize());
 
             /* [2, n-1] shaders use ping & pong */
             inputFBO = Library::getFBO("pong");
             outputFBO = Library::getFBO("ping");
             for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
-                _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO);
+                _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO, window.getDetails().getSize());
 
                 /* Swap ping & pong */
                 Framebuffer *temp = inputFBO;
@@ -194,7 +185,7 @@ namespace neo {
 
             /* nth shader writes out to FBO 0 if it hasn't already been done */
             if (activePostShaders.size() > 1) {
-                _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("0"));
+                _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("0"), window.getDetails().getSize());
             }
             RENDERER_MP_LEAVE();
         }
@@ -210,11 +201,11 @@ namespace neo {
         RENDERER_MP_LEAVE();
 
         RENDERER_MP_ENTER("glfwSwapBuffers");
-        glfwSwapBuffers(mWindowSurface.getWindow());
+        glfwSwapBuffers(window.getWindow());
         RENDERER_MP_LEAVE();
     }
 
-    void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output) {
+    void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize) {
         RENDERER_MP_ENTER("_renderPostProcess");
 
         // Reset output FBO
@@ -224,7 +215,6 @@ namespace neo {
         CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
         // TODO : messaging to resize fbo
-        glm::ivec2 frameSize = mWindowSurface.getFrameSize();
         CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
         // Bind quad 
