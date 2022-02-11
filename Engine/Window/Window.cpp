@@ -67,7 +67,10 @@ namespace neo {
         if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
             ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
         }
-   }
+        else {
+            Mouse::setScroll(dy);
+        }
+    }
 
     void Window::_characterCallback(GLFWwindow *window, unsigned int c) {
         if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
@@ -182,6 +185,7 @@ namespace neo {
         double x, y;
         glfwGetCursorPos(mWindow, &x, &y);
         Mouse::update(x, y);
+        Mouse::setScroll(0);
         MICROPROFILE_LEAVE();
 
         if (Engine::mImGuiEnabled) {

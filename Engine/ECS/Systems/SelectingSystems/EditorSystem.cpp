@@ -24,7 +24,9 @@ namespace neo {
         if (auto selected = Engine::getSingleComponent<SelectedComponent>()) {
             if (auto spatial = selected->getGameObject().getComponentByType<SpatialComponent>()) {
                 if (auto mouseRay = Engine::getSingleComponent<MouseRayComponent>()) {
-                    spatial->setPosition(mouseRay->mPosition + mouseRay->mDirection * glm::distance(mouseRay->mPosition, spatial->getPosition()));
+                    float offset = glm::distance(mouseRay->mPosition, spatial->getPosition());
+                    offset += Mouse::getScrollSpeed();
+                    spatial->setPosition(mouseRay->mPosition + mouseRay->mDirection * offset);
                 }
             }
         }

@@ -4,6 +4,7 @@ namespace neo {
 
     double Mouse::mX = 0.0;
     double Mouse::mY = 0.0;
+    int Mouse::mZ = 0;
     double Mouse::mDX = 0.0;
     double Mouse::mDY = 0.0;
     int Mouse::mMouseButtons[GLFW_MOUSE_BUTTON_LAST] = { GLFW_RELEASE };
@@ -23,16 +24,18 @@ namespace neo {
         /* Set new positions */
         mX = newX;
         mY = newY;
-
-        // TODO : dw = scroll whell
     }
 
     glm::vec2 Mouse::getPos() {
-        return glm::vec2(mX, mY);
+        return { mX, mY };
     }
 
     glm::vec2 Mouse::getSpeed() {
-        return glm::vec2(mDX, mDY);
+        return { mDX, mDY };
+    }
+
+    int Mouse::getScrollSpeed() {
+        return mZ;
     }
 
     bool Mouse::isDown(int button) {
@@ -41,6 +44,10 @@ namespace neo {
 
     void Mouse::setButtonStatus(int button, int action) {
         mMouseButtons[button] = action;
+    }
+
+    void Mouse::setScroll(double newScroll) {
+        mZ = static_cast<int>(newScroll);
     }
 
     void Mouse::reset() {

@@ -14,9 +14,11 @@ namespace neo {
 
             static glm::vec2 getPos();
             static glm::vec2 getSpeed();
+            static int getScrollSpeed();
 
             /* Denotes if mouse buttons are pressed */
             static void setButtonStatus(int, int);
+            static void setScroll(double);
             static bool isDown(int);
             static void reset();
         private:
@@ -27,6 +29,11 @@ namespace neo {
             static double mX, mY;
             static double mDX, mDY;
 
-
+            /* Scroll wheel 
+            * -1 if scrolling back
+            *  0 if not scrolling
+            *  1 if scrolling forward
+            */
+            static int mZ;
     };
 }
