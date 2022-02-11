@@ -10,11 +10,16 @@
 
 namespace neo {
 
-    PerspectiveCameraComponent::PerspectiveCameraComponent(GameObject *gameObject, float near, float far, float fov, float ar) :
+    PerspectiveCameraComponent::PerspectiveCameraComponent(GameObject* gameObject, float near, float far, float fov, float ar) :
         CameraComponent(gameObject) {
         setNearFar(near, far);
         setFOV(fov);
         setAspectRatio(ar);
+
+        Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [this](const Message& msg) {
+            glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage&>(msg)).mFrameSize;
+            setAspectRatio(frameSize.x / static_cast<float>(frameSize.y));
+        });
     }
 
     void PerspectiveCameraComponent::setFOV(float fov) {

@@ -15,7 +15,7 @@ struct Camera {
     Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
         GameObject *gameObject = &Engine::createGameObject();
         Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov, WindowSurface::getAspectRatio());
+        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
         Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
@@ -59,7 +59,7 @@ int main() {
 
     /* Ground plane */
     GameObject* plane = &Engine::createGameObject();
-    Engine::addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-Util::PI / 2.f, 0.f, 0.f));
+    Engine::addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
     Engine::addComponent<MeshComponent>(plane, *Library::getMesh("quad"));
     Engine::addComponent<renderable::AlphaTestRenderable>(plane, *Library::loadTexture("grid.png"));
 

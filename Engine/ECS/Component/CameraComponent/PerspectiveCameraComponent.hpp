@@ -10,7 +10,7 @@ namespace neo {
     class PerspectiveCameraComponent : public CameraComponent {
 
         public:
-            PerspectiveCameraComponent(GameObject *, float near, float far, float fov, float ar);
+            PerspectiveCameraComponent(GameObject *, float near, float far, float fov, float ar = 1.f);
             PerspectiveCameraComponent(PerspectiveCameraComponent &&) = default;
 
             virtual void imGuiEditor() override;

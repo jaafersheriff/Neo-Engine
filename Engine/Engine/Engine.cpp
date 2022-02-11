@@ -46,6 +46,7 @@ namespace neo {
     std::unordered_map<std::string, std::function<void()>> Engine::mImGuiFuncs;
 
     /* Hardware */
+    WindowSurface Engine::mWindow;
     Keyboard Engine::mKeyboard;
     Mouse Engine::mMouse;
 

@@ -27,16 +27,14 @@ namespace neo {
             ) {
             /* Init shadow map */
             Framebuffer* stencilBuffer = Library::createFBO("selectable");
-            stencilBuffer->attachStencilTexture({ }, GL_NEAREST, GL_CLAMP_TO_EDGE);
+            stencilBuffer->attachStencilTexture({1, 1}, GL_NEAREST, GL_CLAMP_TO_EDGE);
             stencilBuffer->disableDraw();
 
             // Handle frame size changing
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message& msg) {
-                const WindowFrameSizeMessage& m(static_cast<const WindowFrameSizeMessage&>(msg));
-                NEO_UNUSED(m);
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage&>(msg)).mFrameSize;
                 Library::getFBO("selectable")->resize(frameSize);
-                });
+            });
 
         }
 

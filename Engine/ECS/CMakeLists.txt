@@ -5,7 +5,7 @@ target_link_libraries(ECS
 PUBLIC
 	Util
 	microprofile
-	Window
+	Hardware
 PRIVATE
 	libglew_static
 )
