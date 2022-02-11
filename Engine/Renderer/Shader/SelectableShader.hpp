@@ -52,7 +52,7 @@ namespace neo {
                 MICROPROFILE_SCOPEI("Selectable Shader", "ReadPixels", MP_AUTO);
                 MICROPROFILE_SCOPEGPUI("Selectable Shader - ReadPixels", MP_AUTO);
                 uint8_t buffer[4];
-                CHECK_GL(glReadPixels(static_cast<GLint>(Mouse::getPos().x), static_cast<int>(Window::getSize().y - Mouse::getPos().y), 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer));
+                CHECK_GL(glReadPixels(static_cast<GLint>(Mouse::getPos().x), static_cast<int>(fbo->mTextures[0]->mHeight - Mouse::getPos().y), 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer));
                 uint8_t id = buffer[0];
                 if (id != mSelectedID) {
                     mSelectedID = id;

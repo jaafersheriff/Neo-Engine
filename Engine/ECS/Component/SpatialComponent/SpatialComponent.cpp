@@ -143,7 +143,7 @@ namespace neo {
             mNormalMatrix = glm::mat3(getModelMatrix());
         }
         else {
-            mNormalMatrix = getOrientation() * glm::mat3(glm::scale(glm::mat4(), 1.0f / mScale));
+            mNormalMatrix = getOrientation() * glm::mat3(glm::scale(glm::mat4(1.f), 1.0f / mScale));
         }
         mNormalMatrixDirty = false;
     }

@@ -4,6 +4,7 @@
 #include "Renderer/Shader/AlphaTestShader.hpp"
 #include "Renderer/Shader/LineShader.hpp"
 #include "Renderer/Shader/GammaCorrectShader.hpp"
+#include "Renderer/Shader/SelectableShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -80,37 +81,27 @@ int main() {
     Engine::addSystem<MouseRaySystem>(true);
     Engine::addSystem<SelectingSystem>(
         "Selecter System",
-        20, 
-        100.f,
-        // Decide to remove selected components
-        [](SelectedComponent* selected) {
-            NEO_UNUSED(selected);
-            return false;
-        },
         // Reset operation for unselected components
-        [](SelectableComponent* selectable) {
-            if (auto renderable = selectable->getGameObject().getComponentByType<renderable::PhongRenderable>()) {
+        [](SelectedComponent* reset) {
+            if (auto renderable = reset->getGameObject().getComponentByType<renderable::PhongRenderable>()) {
                 renderable->mMaterial.mDiffuse = glm::vec3(1.f);
             }
         },
         // Operate on selected components
-        [](SelectedComponent* selected, const MouseRayComponent*, float) {
+        [](SelectableComponent* selected) {
             if (auto renderable = selected->getGameObject().getComponentByType<renderable::PhongRenderable>()) {
                 renderable->mMaterial.mDiffuse = glm::vec3(1.f, 0.f, 0.f);
             }
         },
         // imgui editor
-        [](std::vector<SelectedComponent*> selectedComps) {
-            glm::vec3 scale = selectedComps[0]->getGameObject().getComponentByType<SpatialComponent>()->getScale();
-            ImGui::SliderFloat3("Scale", &scale[0], 0.f, 3.f);
-            for (auto selected : selectedComps) {
-                selected->getGameObject().getComponentByType<SpatialComponent>()->imGuiEditor();
-            }
+        [](SelectedComponent* edit) {
+            edit->getGameObject().getComponentByType<SpatialComponent>()->imGuiEditor();
         }
     );
 
     /* Init renderer */
     Renderer::init("shaders/");
+    Renderer::addPreProcessShader<SelectableShader>();
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
     Renderer::addSceneShader<LineShader>();

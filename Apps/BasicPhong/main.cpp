@@ -51,8 +51,6 @@ struct Renderable {
         material.mSpecular = glm::vec3(1.f);
         material.mShininess = 50.f;
         Engine::addComponent<renderable::PhongRenderable>(gameObject, *tex, material);
-        Engine::addComponent<SelectableComponent>(gameObject);
-        Engine::addComponent<BoundingBoxComponent>(gameObject, *mesh);
     }
 };
 

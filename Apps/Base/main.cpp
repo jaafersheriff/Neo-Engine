@@ -54,7 +54,7 @@ int main() {
     Engine::addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
     Engine::addComponent<MeshComponent>(bunny, *Library::loadMesh("bunny.obj", true));
     Engine::addComponent<renderable::PhongRenderable>(bunny, *Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f,0.f,1.f)));
-    Engine::addComponent<renderable::SelectableComponent>(bunny);
+    Engine::addComponent<SelectableComponent>(bunny);
     Engine::addComponent<BoundingBoxComponent>(bunny, *Library::loadMesh("bunny.obj"));
 
     /* Ground plane */
