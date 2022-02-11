@@ -167,8 +167,7 @@ namespace neo {
             }
         }
 
-
-        NEO_ASSERT(false, "Attempting to get a Shader that doesn't exist");
+        NEO_FAIL("Attempting to get a Shader that doesn't exist");
     }
 
 }
