@@ -98,7 +98,8 @@ namespace neo {
         }
 
         /* Add engine-specific systems */
-        // addSystem<FinalTransformSystem>();
+        auto& lineShader = Renderer::addSceneShader<LineShader>();
+        lineShader.mActive = false;
 
         /* Init systems */
         _initSystems();
@@ -362,6 +363,56 @@ namespace neo {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Renderer")) {
+                static bool _showBB = false;
+                if (ImGui::Checkbox("Show bounding boxes", &_showBB)) {
+                    if (_showBB) {
+                        Renderer::getShader<LineShader>().mActive = true;
+                        for (auto box : Engine::getComponents<BoundingBoxComponent>()) {
+                            auto line = box->getGameObject().getComponentByType<LineMeshComponent>();
+                            if (!line) {
+                                line = &Engine::addComponent<LineMeshComponent>(&box->getGameObject());
+
+                                line->mUseParentSpatial = true;
+                                line->mWriteDepth = true;
+                                line->mOverrideColor = Util::genRandomVec3(0.3f, 1.f);
+
+                                glm::vec3 NearLeftBottom{ box->mMin };
+                                glm::vec3 NearLeftTop{ box->mMin.x, box->mMax.y, box->mMin.z };
+                                glm::vec3 NearRightBottom{ box->mMax.x, box->mMin.y, box->mMin.z };
+                                glm::vec3 NearRightTop{ box->mMax.x, box->mMax.y, box->mMin.z };
+                                glm::vec3 FarLeftBottom{ box->mMin.x, box->mMin.y,  box->mMax.z };
+                                glm::vec3 FarLeftTop{ box->mMin.x, box->mMax.y,     box->mMax.z };
+                                glm::vec3 FarRightBottom{ box->mMax.x, box->mMin.y, box->mMax.z };
+                                glm::vec3 FarRightTop{ box->mMax };
+
+                                line->addNode(NearLeftBottom);
+                                line->addNode(NearLeftTop);
+                                line->addNode(NearRightTop);
+                                line->addNode(NearRightBottom);
+                                line->addNode(NearLeftBottom);
+                                line->addNode(FarLeftBottom);
+                                line->addNode(FarLeftTop);
+                                line->addNode(NearLeftTop);
+                                line->addNode(FarLeftTop);
+                                line->addNode(FarRightTop);
+                                line->addNode(NearRightTop);
+                                line->addNode(FarRightTop);
+                                line->addNode(FarRightBottom);
+                                line->addNode(NearRightBottom);
+                                line->addNode(FarRightBottom);
+                                line->addNode(FarLeftBottom);
+                            }
+                        }
+                    }
+                    else {
+                        for (auto box : Engine::getComponents<BoundingBoxComponent>()) {
+                            auto line = box->getGameObject().getComponentByType<LineMeshComponent>();
+                            if (line) {
+                                Engine::removeComponent(*line);
+                            }
+                        }
+                    }
+                }
                 if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
                     auto shadersFunc = [&](std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>>& shaders, const std::string swapName) {
                         for (unsigned i = 0; i < shaders.size(); i++) {

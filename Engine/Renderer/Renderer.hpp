@@ -75,6 +75,7 @@ namespace neo {
         for (auto& shader : mPreProcessShaders) {
             if (shader.first == typeI) {
                 NEO_ASSERT("Attempting to add a preprocess shader twice: %s", shader.second->mName.c_str());
+                shader.second->mActive = true;
                 return static_cast<ShaderT&>(*shader.second);
             }
         }
@@ -88,6 +89,7 @@ namespace neo {
         for (auto& shader : mSceneShaders) {
             if (shader.first == typeI) {
                 NEO_ASSERT("Attempting to add a scene shader twice: %s", shader.second->mName.c_str());
+                shader.second->mActive = true;
                 return static_cast<ShaderT&>(*shader.second);
             }
         }

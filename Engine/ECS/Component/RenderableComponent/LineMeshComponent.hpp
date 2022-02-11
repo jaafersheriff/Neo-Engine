@@ -15,7 +15,6 @@ namespace neo {
             glm::vec3 color;
         };
 
-
         std::optional<glm::vec3> mOverrideColor;
         std::vector<Node> mNodes;
         bool mWriteDepth;

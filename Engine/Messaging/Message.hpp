@@ -60,9 +60,6 @@ namespace neo {
         virtual ~Message() = default;
     };
 
-
-
-
     /* A spatiality was changed in some way */
     struct SpatialChangeMessage : public Message {
         const SpatialComponent & spatial;
@@ -80,9 +77,6 @@ namespace neo {
         const uint32_t componentID;
         ComponentSelectedMessage(const uint32_t id) : componentID(id) {}
     };
-
-
-
 
     // // key input
     // struct KeyMessage : public Message {
