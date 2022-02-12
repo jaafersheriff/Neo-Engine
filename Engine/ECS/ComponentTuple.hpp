@@ -13,6 +13,7 @@ namespace neo {
     class ComponentTuple {
 
         friend Engine;
+        friend ECS;
 
     public:
         GameObject& mGameObject;
@@ -35,6 +36,11 @@ namespace neo {
         template <typename CompT>
         CompT* get() {
             return static_cast<CompT*>(mComponentMap[typeid(CompT)]);
+        }
+
+        template <typename CompT>
+        const CompT* get() const {
+            return get<CompT>();
         }
 
         template <typename CompT, typename... CompTs> 

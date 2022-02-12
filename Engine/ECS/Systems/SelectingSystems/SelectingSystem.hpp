@@ -30,7 +30,7 @@ namespace neo {
         {}
 
 
-        virtual void init() override;
+        virtual void init(ECS& ecs) override;
         virtual void update(ECS& ecs) override;
         virtual void imguiEditor(ECS& ecs) override;
 

@@ -12,6 +12,7 @@
 namespace neo {
 
     class ECS;
+    class GameObject;
 
     class Messenger {
 
@@ -22,7 +23,7 @@ namespace neo {
 
             /* Adds a receiver for a message type. If gameObject is null, the function will be called for all messages 
             of that type. If gameObject is not null, the function will be called for only messages of that type sent to that object */
-            template <typename MsgT> static void addReceiver(const GameObject * gameObject, ReceiverFunc&);
+            template <typename MsgT> static void addReceiver(const GameObject * gameObject, const ReceiverFunc&);
 
             static void relayMessages(ECS& ecs);
 
@@ -38,7 +39,7 @@ namespace neo {
     }
 
     template <typename MsgT>
-    void Messenger::addReceiver(const GameObject *gameObject, ReceiverFunc& func) {
+    void Messenger::addReceiver(const GameObject *gameObject, const ReceiverFunc& func) {
         static_assert(std::is_base_of<Message, MsgT>::value, "MsgT must be a message type");
 
         auto & receiver =  gameObject ? const_cast<GameObject *>(gameObject)->mReceivers : mReceivers;

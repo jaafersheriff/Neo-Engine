@@ -6,15 +6,15 @@ namespace neo {
     EditorSystem::EditorSystem() 
         : SelectingSystem(
             "Editor System",
-            [](SelectedComponent* reset, ECS& ecs) { 
+            [](ECS& ecs, SelectedComponent* reset) { 
                 ecs.removeComponent(*reset->getGameObject().getComponentByType<renderable::OutlineRenderable>());
             },
-            [](SelectableComponent* selected, ECS& ecs) {
+            [](ECS& ecs, SelectableComponent* selected) {
                 if (!selected->getGameObject().getComponentByType<renderable::OutlineRenderable>()) {
                     ecs.addComponent<renderable::OutlineRenderable>(&selected->getGameObject(), glm::vec4(1.f, 0.95f, 0.72f, 0.75f), 0.08f);
                 }
             },
-            [](SelectedComponent* ) {}
+            [](ECS&, SelectedComponent* ) {}
         )
     { 
     }

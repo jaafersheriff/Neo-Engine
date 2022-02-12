@@ -17,7 +17,7 @@ namespace neo {
     class GameObject {
 
         friend Engine;
-        friend Messenger;
+        friend class Messenger;
 
         public:
             /* Don't copy GameObjects */
@@ -36,10 +36,8 @@ namespace neo {
             size_t getNumReceiverTypes() { return mReceivers.size(); }
             size_t getNumReceivers() {
                 size_t count = 0;
-                auto it = mReceivers.begin();
-                while (it != mReceivers.end()) {
-                    count += it->second.size();
-                    it++;
+                for (auto&& [type, receivers] : mReceivers) {
+                    count += receivers.size();
                 }
                 return count;
             }

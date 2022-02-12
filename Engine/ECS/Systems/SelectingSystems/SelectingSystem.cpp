@@ -6,7 +6,9 @@
 
 namespace neo {
 
-    void SelectingSystem::init() {
+    void SelectingSystem::init(ECS& _ecs) {
+        NEO_UNUSED(_ecs);
+
         Messenger::addReceiver<ComponentSelectedMessage>(nullptr, [&](const neo::Message& msg, ECS& ecs) {
             const ComponentSelectedMessage & m(static_cast<const ComponentSelectedMessage &>(msg));
             if (auto oldSelected = ecs.getSingleComponent<SelectedComponent>()) {
@@ -30,6 +32,7 @@ namespace neo {
     }
 
     void SelectingSystem::update(ECS& ecs) {
+        NEO_UNUSED(ecs);
     }
 
     void SelectingSystem::imguiEditor(ECS& ecs) {

@@ -6,8 +6,8 @@ namespace neo {
     void CameraControllerSystem::update(ECS& ecs) {
         if (CameraControllerComponent* cameraController = ecs.getSingleComponent<CameraControllerComponent>()) {
             if (auto frameStats = ecs.getSingleComponent<FrameStatsComponent>()) {
-                _updateLook(frameStats->mDT, *cameraController);
-                _updatePosition(frameStats->mDT, *cameraController);
+                _updateLook(frameStats->mDT, ecs, *cameraController);
+                _updatePosition(frameStats->mDT, ecs, *cameraController);
             }
         }
     }
