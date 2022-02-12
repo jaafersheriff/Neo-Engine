@@ -24,17 +24,17 @@ public:
         init();
     }
 
-    virtual void render() override {
+    virtual void render(const ECS& ecs) override {
         bind();
 
-        if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
+        if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>()) {
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
         }
         loadUniform("spriteSize", mSpriteSize);
         loadUniform("spriteColor", mSpriteColor);
 
-        if (auto model = Engine::getSingleComponent<ParticleMeshComponent>()) {
+        if (auto model = ecs.getSingleComponent<ParticleMeshComponent>()) {
             CHECK_GL(glEnable(GL_BLEND));
             CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE));
             CHECK_GL(glDisable(GL_DEPTH_TEST));

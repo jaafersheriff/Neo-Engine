@@ -4,17 +4,16 @@
 
 namespace neo {
 
-    void MouseRaySystem::update(const float dt) {
-        NEO_UNUSED(dt);
-        auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+    void MouseRaySystem::update(ECS& ecs) {
+        auto mainCamera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
         NEO_ASSERT(mainCamera, "Main camera doesn't exist");
         auto camera = mainCamera->get<CameraComponent>();
 
-        auto windowDetails = Engine::getSingleComponent<WindowDetailsComponent>();
+        auto windowDetails = ecs.getSingleComponent<WindowDetailsComponent>();
         NEO_ASSERT(windowDetails, "Window details don't exist");
 
-        auto mouseRayComp = Engine::getSingleComponent<MouseRayComponent>();
-        if (auto mouse = Engine::getSingleComponent<MouseComponent>()) {
+        auto mouseRayComp = ecs.getSingleComponent<MouseRayComponent>();
+        if (auto mouse = ecs.getSingleComponent<MouseComponent>()) {
             if (mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
                 // Mouse coords in viewport space
                 glm::vec2 mouseCoords = mouse->mFrameMouse.getPos();
@@ -34,7 +33,7 @@ namespace neo {
 
                 // Create new mouseray if one doesnt exist
                 if (!mouseRayComp) {
-                    mouseRayComp = &Engine::addComponent<MouseRayComponent>(&Engine::createGameObject());
+                    mouseRayComp = &ecs.addComponent<MouseRayComponent>(&ecs.createGameObject());
                 }
                 mouseRayComp->mDirection = dir;
                 mouseRayComp->mPosition = pos;
@@ -42,14 +41,14 @@ namespace neo {
                 if (mShowRay) {
                     LineMeshComponent* line = mouseRayComp->getGameObject().getComponentByType<LineMeshComponent>();
                     if (!line) {
-                        line = &Engine::addComponent<LineMeshComponent>(&mouseRayComp->getGameObject());
+                        line = &ecs.addComponent<LineMeshComponent>(&mouseRayComp->getGameObject());
                     }
                     line->clearNodes();
                     line->addNodes({ {pos, glm::vec3(1.f)}, {pos + dir * camera->getNearFar().y, glm::vec3(1.f)} });
                 }
             }
             else if (mouseRayComp && !mShowRay) {
-                Engine::removeGameObject(mouseRayComp->getGameObject());
+                ecs.removeGameObject(mouseRayComp->getGameObject());
             }
         }
     }

@@ -22,14 +22,15 @@ class LightPassShader : public Shader {
             lightFBO->attachColorTexture({ 1, 1 }, TextureFormat{ GL_RGBA, GL_RGBA, GL_NEAREST, GL_REPEAT }); // color
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
+                NEO_UNUSED(ecs);
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
                 Library::getFBO("lightpass")->resize(frameSize);
             });
         }
 
-        virtual void render() override {
-            auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
+        virtual void render(const ECS& ecs) override {
+            auto mainCamera = ecs.getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
             if (!mainCamera) {
                 return;
             }
@@ -61,7 +62,7 @@ class LightPassShader : public Shader {
             loadTexture("gDepth",   *gbuffer->mTextures[2]);
 
             /* Render light volumes */
-            for (auto& light : Engine::getComponentTuples<LightComponent, SpatialComponent>()) {
+            for (auto& light : ecs.getComponentTuples<LightComponent, SpatialComponent>()) {
                 auto spatial = light->get<SpatialComponent>();
 
                 loadUniform("M", spatial->getModelMatrix());

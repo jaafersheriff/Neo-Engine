@@ -6,12 +6,12 @@ namespace neo {
     EditorSystem::EditorSystem() 
         : SelectingSystem(
             "Editor System",
-            [](SelectedComponent* reset) { 
-                Engine::removeComponent(*reset->getGameObject().getComponentByType<renderable::OutlineRenderable>());
+            [](SelectedComponent* reset, ECS& ecs) { 
+                ecs.removeComponent(*reset->getGameObject().getComponentByType<renderable::OutlineRenderable>());
             },
-            [](SelectableComponent* selected) {
+            [](SelectableComponent* selected, ECS& ecs) {
                 if (!selected->getGameObject().getComponentByType<renderable::OutlineRenderable>()) {
-                    Engine::addComponent<renderable::OutlineRenderable>(&selected->getGameObject(), glm::vec4(1.f, 0.95f, 0.72f, 0.75f), 0.08f);
+                    ecs.addComponent<renderable::OutlineRenderable>(&selected->getGameObject(), glm::vec4(1.f, 0.95f, 0.72f, 0.75f), 0.08f);
                 }
             },
             [](SelectedComponent* ) {}
@@ -19,12 +19,11 @@ namespace neo {
     { 
     }
 
-    void EditorSystem::update(float dt) {
-        NEO_UNUSED(dt);
-        if (auto selected = Engine::getSingleComponent<SelectedComponent>()) {
+    void EditorSystem::update(ECS& ecs) {
+        if (auto selected = ecs.getSingleComponent<SelectedComponent>()) {
             if (auto spatial = selected->getGameObject().getComponentByType<SpatialComponent>()) {
-                if (auto mouseRay = Engine::getSingleComponent<MouseRayComponent>()) {
-                    if (auto mouse = Engine::getSingleComponent<MouseComponent>()) {
+                if (auto mouseRay = ecs.getSingleComponent<MouseRayComponent>()) {
+                    if (auto mouse = ecs.getSingleComponent<MouseComponent>()) {
                         float offset = glm::distance(mouseRay->mPosition, spatial->getPosition());
                         offset += mouse->mFrameMouse.getScrollSpeed();
                         spatial->setPosition(mouseRay->mPosition + mouseRay->mDirection * offset);

@@ -4,13 +4,13 @@
 #include <functional>
 #include <typeindex>
 
-// #include "microprofile.h"
 #include "Util/Util.hpp"
+
+#include "Messaging/Messenger.hpp"
 
 namespace neo {
 
     class Engine;
-    class Messenger;
     class Component;
     struct Message;
 
@@ -54,7 +54,7 @@ namespace neo {
             /* Containers */
             std::vector<Component *> mComponents;
             std::unordered_map<std::type_index, std::vector<Component *>> mComponentsByType;
-            std::unordered_map<std::type_index, std::vector<std::function<void (const Message &)>>> mReceivers;
+            std::unordered_map<std::type_index, std::vector<ReceiverFunc>> mReceivers;
     };
 
     /* Template implementation */

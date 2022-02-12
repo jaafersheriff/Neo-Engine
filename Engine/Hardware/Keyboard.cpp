@@ -7,14 +7,16 @@
 namespace neo {
 
     void Keyboard::init() {
-        Messenger::addReceiver<ResetKeyboardMessage>(nullptr, [this](const neo::Message& msg) {
+        Messenger::addReceiver<ResetKeyboardMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+            NEO_UNUSED(ecs);
             const ResetKeyboardMessage& m(static_cast<const ResetKeyboardMessage&>(msg));
             NEO_UNUSED(m);
 
             reset();
         });
 
-        Messenger::addReceiver<KeyPressedMessage>(nullptr, [this](const neo::Message& msg) {
+        Messenger::addReceiver<KeyPressedMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+            NEO_UNUSED(ecs);
             const KeyPressedMessage& m(static_cast<const KeyPressedMessage&>(msg));
 
             setKeyStatus(m.mKey, m.mAction);

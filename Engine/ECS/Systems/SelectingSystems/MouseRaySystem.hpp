@@ -13,7 +13,7 @@ namespace neo {
         {}
 
 
-        virtual void update(const float dt) override;
+        virtual void update(ECS&) override;
 
     private:
         bool mShowRay;

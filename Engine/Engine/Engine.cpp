@@ -32,14 +32,7 @@ namespace neo {
     EngineConfig Engine::mConfig;
 
     /* ECS */
-    std::vector<std::unique_ptr<GameObject>> Engine::mGameObjects;
-    std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> Engine::mComponents;
-    std::vector<std::pair<std::type_index, std::unique_ptr<System>>> Engine::mSystems;
-
-    std::vector<std::unique_ptr<GameObject>> Engine::mGameObjectInitQueue;
-    std::vector<GameObject *> Engine::mGameObjectKillQueue;
-    std::vector<std::pair<std::type_index, std::unique_ptr<Component>>> Engine::mComponentInitQueue;
-    std::vector<std::pair<std::type_index, Component *>> Engine::mComponentKillQueue;
+    ECS Engine::mECS;
 
     /* ImGui */
     bool Engine::mImGuiEnabled = true;
@@ -100,8 +93,8 @@ namespace neo {
        
         /* Apply config */
         if (mConfig.attachEditor) {
-            addSystem<MouseRaySystem>();
-            addSystem<EditorSystem>();
+            mECS.addSystem<MouseRaySystem>();
+            mECS.addSystem<EditorSystem>();
             Renderer::addPreProcessShader<SelectableShader>();
             Renderer::addSceneShader<OutlineShader>();
         }
@@ -114,11 +107,11 @@ namespace neo {
         counter.init(glfwGetTime());
 
         /* Init systems */
-        _initSystems();
+        mECS._initSystems();
 
         /* Initialize new objects and components */
-        _processInitQueue();
-        Messenger::relayMessages();
+        mECS._processInitQueue();
+        Messenger::relayMessages(mECS);
 
         while (!mWindow.shouldClose()) {
             MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);
@@ -130,31 +123,22 @@ namespace neo {
             /* Update display, mouse, keyboard */
             mWindow.update();
             {
-                auto& hardware = Engine::createGameObject();
-                Engine::addComponent<MouseComponent>(&hardware, mMouse);
-                Engine::addComponent<KeyboardComponent>(&hardware, mKeyboard);
-                Engine::addComponent<WindowDetailsComponent>(&hardware, mWindow.getDetails());
-                Engine::addComponent<FrameStatsComponent>(&hardware, runTime, static_cast<float>(counter.mTimeStep));
-                Engine::addComponent<SingleFrameComponent>(&hardware);
+                auto& hardware = mECS.createGameObject();
+                mECS.addComponent<MouseComponent>(&hardware, mMouse);
+                mECS.addComponent<KeyboardComponent>(&hardware, mKeyboard);
+                mECS.addComponent<WindowDetailsComponent>(&hardware, mWindow.getDetails());
+                mECS.addComponent<FrameStatsComponent>(&hardware, runTime, static_cast<float>(counter.mTimeStep));
+                mECS.addComponent<SingleFrameComponent>(&hardware);
             }
 
             /* Destroy and create objects and components */
-            _processKillQueue();
-            _processInitQueue();
-            Messenger::relayMessages();
+            mECS._processKillQueue();
+            mECS._processInitQueue();
+            Messenger::relayMessages(mECS);
 
             /* Update each system */
-            MICROPROFILE_ENTERI("System", "System update", MP_AUTO);
-            for (auto& system : mSystems) {
-                if (system.second->mActive) {
-                    MICROPROFILE_DEFINE(System, "System", system.second->mName.c_str(), MP_AUTO);
-		            MICROPROFILE_ENTER(System); 
-                    system.second->update(static_cast<float>(counter.mTimeStep));
-                    MICROPROFILE_LEAVE();
-                }
-            }
-            Messenger::relayMessages();
-            MICROPROFILE_LEAVE();
+            mECS._updateSystems();
+            Messenger::relayMessages(mECS);
 
             /* Update imgui functions */
             if (mImGuiEnabled) {
@@ -162,17 +146,17 @@ namespace neo {
                 ImGui::GetIO().FontGlobalScale = 2.0f;
                 _runImGui(counter);
                 MICROPROFILE_LEAVE();
-                Messenger::relayMessages();
+                Messenger::relayMessages(mECS);
             }
 
             /* Render */
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
-            Renderer::render(static_cast<float>(counter.mTimeStep), mWindow);
-            Messenger::relayMessages();
+            Renderer::render(static_cast<float>(counter.mTimeStep), mWindow, mECS);
+            Messenger::relayMessages(mECS);
 
-            for (auto& frameComponent : Engine::getComponents<SingleFrameComponent>()) {
-                Engine::removeGameObject(frameComponent->getGameObject());
+            for (auto& frameComponent : mECS.getComponents<SingleFrameComponent>()) {
+                mECS.removeGameObject(frameComponent->getGameObject());
             }
 
             MicroProfileFlip(0);
@@ -182,68 +166,8 @@ namespace neo {
 	    MicroProfileShutdown();
     }
 
-    GameObject & Engine::createGameObject() {
-        mGameObjectInitQueue.emplace_back(std::make_unique<GameObject>());
-        return *mGameObjectInitQueue.back().get();
-    }
-
-    void Engine::removeGameObject(GameObject &go) {
-        mGameObjectKillQueue.push_back(&go);
-    }
-
-    void Engine::_removeComponent(std::type_index type, Component* component) {
-        assert(mComponents.count(type)); // trying to remove a type of component that was never added
-        mComponentKillQueue.emplace_back(type, component);
-    }
-
-    void Engine::_processInitQueue() {
-        MICROPROFILE_SCOPEI("Engine", "_processKillQueue()", MP_AUTO);
-        _initGameObjects();
-        _initComponents();
-    }
-
-    void Engine::_initGameObjects() {
-        for (auto & object : mGameObjectInitQueue) {
-            mGameObjects.emplace_back(std::move(object));
-        }
-        mGameObjectInitQueue.clear();
-    }
-
-    void Engine::_initComponents() {
-
-        for (int i = 0; i < int(mComponentInitQueue.size()); i++) {
-            auto & type(mComponentInitQueue[i].first);
-            auto & comp(mComponentInitQueue[i].second);
-            /* Add Component to respective GameObjects */
-            comp.get()->getGameObject().addComponent(*comp.get(), type);
-
-            /* Add Component to active engine */
-            auto it(mComponents.find(type));
-            if (it == mComponents.end()) {
-                mComponents.emplace(type, std::make_unique<std::vector<std::unique_ptr<Component>>>());
-                it = mComponents.find(type);
-            }
-            it->second->emplace_back(std::move(comp));
-            it->second->back()->init();
-        }
-        mComponentInitQueue.clear();
-    }
-
-    void Engine::_initSystems() {
-        for (auto & system : mSystems) {
-            system.second->init();
-        }
-    }
-
     void Engine::shutDown() {
-        // Clean up GameObjects and components
-        for (auto& gameObject : mGameObjects) {
-            removeGameObject(*gameObject);
-        }
-        _processKillQueue();
-
-        // Clean up Renderer
-        Renderer::shutDown();
+        mECS.shutDown();
 
         // Clean up GL objects
         for (auto& mesh : Library::mMeshes) {
@@ -256,81 +180,9 @@ namespace neo {
             frameBuffer.second->destroy();
         }
 
+        Renderer::shutDown();
+
         mWindow.shutDown();
-    }
-
-    void Engine::_processKillQueue() {
-        MICROPROFILE_SCOPEI("Engine", "_processKillQueue()", MP_AUTO);
-        /* Remove Components from GameObjects */
-        for (auto & comp : mComponentKillQueue) {
-            comp.second->getGameObject().removeComponent(*(comp.second), comp.first);
-        }
-
-        _killGameObjects();
-        _killComponents();
-    }
-
-    void Engine::_killGameObjects() {
-        for (auto killIt(mGameObjectKillQueue.begin()); killIt != mGameObjectKillQueue.end(); ++killIt) {
-            bool found = false;
-            /* Look in active game objects in reverse order */
-            for (int i = int(mGameObjects.size()) - 1; i >= 0; --i) {
-                GameObject * go(mGameObjects[i].get());
-                if (go == *killIt) {
-                    /* Add game object's components to kill queue */
-                    for (auto compTIt(go->mComponentsByType.begin()); compTIt != go->mComponentsByType.end(); ++compTIt) {
-                        for (auto & comp : compTIt->second) {
-                            comp->removeGameObject();
-                            mComponentKillQueue.emplace_back(compTIt->first, comp);
-                        }
-                    }
-                    mGameObjects.erase(mGameObjects.begin() + i);
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                /* Look in game object initialization queue, in reverse order */
-                for (int i = int(mGameObjectInitQueue.size()) - 1; i >= 0; --i) {
-                    if (mGameObjectInitQueue[i].get() == *killIt) {
-                        mGameObjectInitQueue.erase(mGameObjectInitQueue.begin() + i);
-                        break;
-                    }
-                }
-            }
-        }
-        mGameObjectKillQueue.clear();
-    }
-
-    void Engine::_killComponents() {
-        for (auto & killE : mComponentKillQueue) {
-            std::type_index typeI(killE.first);
-            Component * comp(killE.second);
-            comp->kill();
-            bool found(false);
-            /* Look in active components in reverse order */
-            if (mComponents.count(typeI)) {
-                auto & comps(*mComponents.at(typeI));
-                for (int i = int(comps.size()) - 1; i >= 0; --i) {
-                    if (comps[i].get() == comp) {
-                        auto it(comps.begin() + i);
-                        comps.erase(it);
-                        found = true;
-                        break;
-                    }
-                }
-            }
-            if (!found) {
-                /* Look in component initialization queue in reverse order */
-                for (int i = int(mComponentInitQueue.size()) - 1; i >= 0; --i) {
-                    if (mComponentInitQueue[i].second.get() == comp) {
-                        mComponentInitQueue.erase(mComponentInitQueue.begin() + i);
-                        break;
-                    }
-                }
-            }
-        }
-        mComponentKillQueue.clear();
     }
 
     void Engine::_runImGui(const util::FrameCounter& counter) {
@@ -361,144 +213,11 @@ namespace neo {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("ECS")) {
-                ImGui::Text("GameObjects:  %d", getGameObjects().size());
-                size_t count = 0;
-                for (auto go : getGameObjects()) {
-                    count += go->getAllComponents().size();
-                }
-                ImGui::Text("Components:  %d", count);
-                if (mSystems.size() && ImGui::TreeNodeEx("Systems", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    for (unsigned i = 0; i < mSystems.size(); i++) {
-                        auto & sys = mSystems[i].second;
-                        ImGui::PushID(i);
-                        bool treeActive = ImGui::TreeNodeEx(sys->mName.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
-                        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-                            ImGui::SetDragDropPayload("SYSTEM_SWAP", &i, sizeof(unsigned));
-                            ImGui::Text("Swap %s", sys->mName.c_str());
-                            ImGui::EndDragDropSource();
-                        }
-                        if (ImGui::BeginDragDropTarget()) {
-                            if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload("SYSTEM_SWAP")) {
-                                IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
-                                unsigned payload_n = *(const unsigned *)payLoad->Data;
-                                mSystems[i].swap(mSystems[payload_n]);
-                            }
-                            ImGui::EndDragDropTarget();
-                        }
-                        ImGui::PopID();
-                        if (treeActive) {
-                            ImGui::Checkbox("Active", &sys->mActive);
-                            sys->imguiEditor();
-                            ImGui::TreePop();
-                        }
-                    }
-
-                    ImGui::TreePop();
-                }
+                mECS._imguiEdtor();
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Renderer")) {
-                static bool _showBB = false;
-                if (ImGui::Checkbox("Show bounding boxes", &_showBB)) {
-                    if (_showBB) {
-                        Renderer::getShader<LineShader>().mActive = true;
-                        for (auto box : Engine::getComponents<BoundingBoxComponent>()) {
-                            auto line = box->getGameObject().getComponentByType<LineMeshComponent>();
-                            if (!line) {
-                                line = &Engine::addComponent<LineMeshComponent>(&box->getGameObject());
-
-                                line->mUseParentSpatial = true;
-                                line->mWriteDepth = true;
-                                line->mOverrideColor = util::genRandomVec3(0.3f, 1.f);
-
-                                glm::vec3 NearLeftBottom{ box->mMin };
-                                glm::vec3 NearLeftTop{ box->mMin.x, box->mMax.y, box->mMin.z };
-                                glm::vec3 NearRightBottom{ box->mMax.x, box->mMin.y, box->mMin.z };
-                                glm::vec3 NearRightTop{ box->mMax.x, box->mMax.y, box->mMin.z };
-                                glm::vec3 FarLeftBottom{ box->mMin.x, box->mMin.y,  box->mMax.z };
-                                glm::vec3 FarLeftTop{ box->mMin.x, box->mMax.y,     box->mMax.z };
-                                glm::vec3 FarRightBottom{ box->mMax.x, box->mMin.y, box->mMax.z };
-                                glm::vec3 FarRightTop{ box->mMax };
-
-                                line->addNode(NearLeftBottom);
-                                line->addNode(NearLeftTop);
-                                line->addNode(NearRightTop);
-                                line->addNode(NearRightBottom);
-                                line->addNode(NearLeftBottom);
-                                line->addNode(FarLeftBottom);
-                                line->addNode(FarLeftTop);
-                                line->addNode(NearLeftTop);
-                                line->addNode(FarLeftTop);
-                                line->addNode(FarRightTop);
-                                line->addNode(NearRightTop);
-                                line->addNode(FarRightTop);
-                                line->addNode(FarRightBottom);
-                                line->addNode(NearRightBottom);
-                                line->addNode(FarRightBottom);
-                                line->addNode(FarLeftBottom);
-                            }
-                        }
-                    }
-                    else {
-                        for (auto box : Engine::getComponents<BoundingBoxComponent>()) {
-                            auto line = box->getGameObject().getComponentByType<LineMeshComponent>();
-                            if (line) {
-                                Engine::removeComponent(*line);
-                            }
-                        }
-                    }
-                }
-                if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    auto shadersFunc = [&](std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>>& shaders, const std::string swapName) {
-                        for (unsigned i = 0; i < shaders.size(); i++) {
-                            auto& shader = shaders[i];
-                            ImGui::PushID(i);
-                            bool treeActive = ImGui::TreeNodeEx(shader.second->mName.c_str());
-                            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-                                ImGui::SetDragDropPayload(swapName.c_str(), &i, sizeof(unsigned));
-                                ImGui::Text("Swap %s", shader.second->mName.c_str());
-                                ImGui::EndDragDropSource();
-                            }
-                            if (ImGui::BeginDragDropTarget()) {
-                                if (const ImGuiPayload *payLoad = ImGui::AcceptDragDropPayload(swapName.c_str())) {
-                                    IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
-                                    unsigned payload_n = *(const unsigned *)payLoad->Data;
-                                    shaders[i].swap(shaders[payload_n]);
-                                }
-                                ImGui::EndDragDropTarget();
-                            }
-
-                            if (treeActive) {
-                                ImGui::Checkbox("Active", &shader.second->mActive);
-                                ImGui::SameLine();
-                                if (ImGui::Button("Reload")) {
-                                    shader.second->reload();
-                                }
-                                shader.second->imguiEditor();
-                                ImGui::TreePop();
-                            }
-                            ImGui::PopID();
-                        }
-                    };
-
-                    if (Renderer::mComputeShaders.size() && ImGui::TreeNodeEx("Compute", ImGuiTreeNodeFlags_DefaultOpen)) {
-                        shadersFunc(Renderer::mComputeShaders, "COMPUTE_SWAP");
-                        ImGui::TreePop();
-                    }
-                    if (Renderer::mPreProcessShaders.size() && ImGui::TreeNodeEx("Pre process", ImGuiTreeNodeFlags_DefaultOpen)) {
-                        shadersFunc(Renderer::mPreProcessShaders, "PRESHADER_SWAP");
-                        ImGui::TreePop();
-                    }
-                    if (Renderer::mSceneShaders.size() && ImGui::TreeNodeEx("Scene", ImGuiTreeNodeFlags_DefaultOpen)) {
-                        shadersFunc(Renderer::mSceneShaders, "SCENESHADER_SWAP");
-                        ImGui::TreePop();
-                    }
-                    if (Renderer::mPostShaders.size() && ImGui::TreeNodeEx("Post process", ImGuiTreeNodeFlags_DefaultOpen)) {
-                        shadersFunc(Renderer::mPostShaders, "POSTSHADER_SWAP");
-                        ImGui::TreePop();
-                    }
-                    ImGui::TreePop();
-                }
+                Renderer::_imguiEditor(mECS);
                 ImGui::EndMenu();
             }
             auto textureFunc = [&](const Texture& texture) {
@@ -542,9 +261,9 @@ namespace neo {
                 ImGui::EndMenu();
             }
             if (mConfig.attachEditor && ImGui::BeginMenu("Editor")) {
-                if (auto selected = getSingleComponent<SelectedComponent>()) {
+                if (auto selected = mECS.getSingleComponent<SelectedComponent>()) {
                     if (ImGui::Button("Delete entity")) {
-                        Engine::removeGameObject(selected->getGameObject());
+                        mECS.removeGameObject(selected->getGameObject());
                     }
                     auto allComponents = selected->getGameObject().getComponentsMap();
                     static std::optional<std::type_index> type;
@@ -577,7 +296,7 @@ namespace neo {
                             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
                             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
                             if (ImGui::Button("Remove Component", ImVec2(ImGui::GetWindowWidth() * 0.9f, 0))) {
-                                _removeComponent(type.value(), components[index]);
+                                mECS._removeComponent(type.value(), components[index]);
                                 if (components.size() == 1) {
                                     index = 0;
                                     type = std::nullopt;
@@ -600,14 +319,14 @@ namespace neo {
                 }
                 ImGui::Separator();
                 if (ImGui::Button("Create new GameObject")) {
-                    removeComponent<SelectedComponent>(*getSingleComponent<SelectedComponent>());
-                    auto& go = createGameObject();
-                    addComponent<BoundingBoxComponent>(&go, *Library::getMesh("sphere"));
-                    addComponent<SpatialComponent>(&go);
-                    addComponent<SelectableComponent>(&go);
-                    addComponent<SelectedComponent>(&go);
-                    addComponent<MeshComponent>(&go, *Library::getMesh("sphere"));
-                    addComponent<renderable::WireframeRenderable>(&go);
+                    mECS.removeComponent<SelectedComponent>(*mECS.getSingleComponent<SelectedComponent>());
+                    auto& go = mECS.createGameObject();
+                    mECS.addComponent<BoundingBoxComponent>(&go, *Library::getMesh("sphere"));
+                    mECS.addComponent<SpatialComponent>(&go);
+                    mECS.addComponent<SelectableComponent>(&go);
+                    mECS.addComponent<SelectedComponent>(&go);
+                    mECS.addComponent<MeshComponent>(&go, *Library::getMesh("sphere"));
+                    mECS.addComponent<renderable::WireframeRenderable>(&go);
                 }
                 ImGui::EndMenu();
             }

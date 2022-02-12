@@ -13,6 +13,6 @@ namespace neo {
             System("Frustum System")
         {}
 
-        virtual void update(const float dt) override;
+        virtual void update(ECS& ecs) override;
     };
 }

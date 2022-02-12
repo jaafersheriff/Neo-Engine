@@ -18,7 +18,8 @@ class GammaCorrectShader : public PostProcessShader {
             PostProcessShader("GammaCorrectShader", std::string("gammacorrect.glsl")) {
         }
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
+            NEO_UNUSED(ecs);
             loadUniform("gamma", gamma);
         }
 

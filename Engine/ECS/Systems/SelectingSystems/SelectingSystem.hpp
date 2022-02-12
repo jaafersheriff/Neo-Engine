@@ -14,8 +14,8 @@ namespace neo {
     class SelectingSystem : public System {
 
     public:
-        using SelectableOperation = std::function<void(SelectableComponent*)>;
-        using SelectedOperation = std::function<void(SelectedComponent*)>;
+        using SelectableOperation = std::function<void(ECS&, SelectableComponent*)>;
+        using SelectedOperation = std::function<void(ECS&, SelectedComponent*)>;
 
         SelectingSystem(
             std::string name,
@@ -31,8 +31,8 @@ namespace neo {
 
 
         virtual void init() override;
-        virtual void update(const float dt) override;
-        virtual void imguiEditor() override;
+        virtual void update(ECS& ecs) override;
+        virtual void imguiEditor(ECS& ecs) override;
 
     private:
         const SelectedOperation mResetOperation; // Called when an object is unselected

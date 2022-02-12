@@ -20,15 +20,15 @@ public:
         System("PerspectiveUpdate System") {
     }
 
-    virtual void update(const float dt) override {
+    virtual void update(ECS& ecs) override {
         NEO_UNUSED(dt);
-        auto sourceCamera = Engine::getComponentTuple<FrustumFitSourceComponent, SpatialComponent>();
+        auto sourceCamera = ecs.getComponentTuple<FrustumFitSourceComponent, SpatialComponent>();
         if (!sourceCamera) {
             return;
         }
 
         if (mUpdatePerspective) {
-            if (auto frameStats = Engine::getSingleComponent<FrameStatsComponent>()) {
+            if (auto frameStats = ecs.getSingleComponent<FrameStatsComponent>()) {
                 float f = static_cast<float>(glm::sin(frameStats->mRunTime));
                 float g = static_cast<float>(glm::cos(frameStats->mRunTime));
                 sourceCamera->get<SpatialComponent>()->setLookDir(glm::vec3(f, f / 2, g));

@@ -4,6 +4,8 @@
 
 namespace neo {
 
+    class ECS;
+
     class System {
 
         public:
@@ -11,9 +13,9 @@ namespace neo {
                 mName(name)
             {}
 
-            virtual void init() {};
-            virtual void update(const float) {};
-            virtual void imguiEditor() {};
+            virtual void init(ECS&) {};
+            virtual void update(ECS&) {};
+            virtual void imguiEditor(ECS&) {};
             bool mActive = true;
             const std::string mName = 0;
     };

@@ -10,11 +10,10 @@
 
 namespace neo {
 
-    void FrustaFittingSystem::update(const float dt) {
-        NEO_UNUSED(dt);
-        auto sourceCamera = Engine::getComponentTuple<CameraComponent, FrustumFitSourceComponent, SpatialComponent>();
-        auto receiverCamera = Engine::getComponentTuple<CameraComponent, FrustumFitReceiverComponent, SpatialComponent>();
-        auto light = Engine::getComponentTuple<LightComponent, SpatialComponent>();
+    void FrustaFittingSystem::update(ECS& ecs) {
+        auto sourceCamera = ecs.getComponentTuple<CameraComponent, FrustumFitSourceComponent, SpatialComponent>();
+        auto receiverCamera = ecs.getComponentTuple<CameraComponent, FrustumFitReceiverComponent, SpatialComponent>();
+        auto light = ecs.getComponentTuple<LightComponent, SpatialComponent>();
         if (!receiverCamera || !sourceCamera || !light) {
             return;
         }

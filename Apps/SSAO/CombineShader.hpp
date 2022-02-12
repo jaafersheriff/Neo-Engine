@@ -18,7 +18,8 @@ class CombineShader : public PostProcessShader {
             PostProcessShader ("Combine Shader", frag) 
         {}
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
+            NEO_UNUSED(ecs);
             loadUniform("showAO", showAO);
             loadUniform("diffuseAmount", diffuseAmount);
 

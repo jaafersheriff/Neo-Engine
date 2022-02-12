@@ -1,6 +1,8 @@
 #include "Renderer.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
+#include "Shader/LineShader.hpp"
+
 #include "Engine/Engine.hpp"
 #include "Hardware/WindowSurface.hpp"
 
@@ -95,7 +97,7 @@ namespace neo {
         RENDERER_MP_LEAVE();
     }
 
-    void Renderer::render(float dt, WindowSurface& window) {
+    void Renderer::render(float dt, WindowSurface& window, ECS& ecs) {
         NEO_UNUSED(dt);
         RENDERER_MP_ENTER("Renderer::render");
 
@@ -113,7 +115,7 @@ namespace neo {
             for (auto& shader : activeComputeShaders) {
                 resetState();
                 RENDERER_MP_ENTERD(Compute, "Compute shaders", shader->mName.c_str());
-                shader->render();
+                shader->render(ecs);
                 RENDERER_MP_LEAVE();
             }
             RENDERER_MP_LEAVE();
@@ -126,7 +128,7 @@ namespace neo {
             for (auto & shader : activePreShaders) {
                 resetState();
                 RENDERER_MP_ENTERD(Pre, "PreScene shaders", shader->mName.c_str());
-                shader->render();
+                shader->render(ecs);
                 RENDERER_MP_LEAVE();
             }
             RENDERER_MP_LEAVE();
@@ -155,7 +157,7 @@ namespace neo {
             if (shader.second->mActive) {
                 resetState();
                 RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName.c_str());
-                shader.second->render();
+                shader.second->render(ecs);
                 RENDERER_MP_LEAVE();
             }
         }
@@ -169,13 +171,13 @@ namespace neo {
             Framebuffer *inputFBO = mDefaultFBO;
             Framebuffer *outputFBO = activePostShaders.size() == 1 ? Library::getFBO("0") : Library::getFBO("pong");
 
-            _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().getSize());
+            _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().getSize(), ecs);
 
             /* [2, n-1] shaders use ping & pong */
             inputFBO = Library::getFBO("pong");
             outputFBO = Library::getFBO("ping");
             for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
-                _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO, window.getDetails().getSize());
+                _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO, window.getDetails().getSize(), ecs);
 
                 /* Swap ping & pong */
                 Framebuffer *temp = inputFBO;
@@ -185,7 +187,7 @@ namespace neo {
 
             /* nth shader writes out to FBO 0 if it hasn't already been done */
             if (activePostShaders.size() > 1) {
-                _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("0"), window.getDetails().getSize());
+                _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("0"), window.getDetails().getSize(), ecs);
             }
             RENDERER_MP_LEAVE();
         }
@@ -205,7 +207,7 @@ namespace neo {
         RENDERER_MP_LEAVE();
     }
 
-    void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize) {
+    void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize, ECS& ecs) {
         RENDERER_MP_ENTER("_renderPostProcess");
 
         // Reset output FBO
@@ -231,7 +233,7 @@ namespace neo {
         RENDERER_MP_ENTERD(Post, "PostProcess Shaders", shader.mName.c_str());
         // Allow shader to do any prep (eg. bind uniforms) 
         // Also allows shader to override output render target (user responsible for handling)
-        shader.render();
+        shader.render(ecs);
 
         // Render post process effect
         mesh->draw();
@@ -257,5 +259,110 @@ namespace neo {
         }
 
         return ret;
+    }
+
+    void Renderer::_imguiEditor(ECS& ecs) {
+        static bool _showBB = false;
+        if (ImGui::Checkbox("Show bounding boxes", &_showBB)) {
+            if (_showBB) {
+                getShader<LineShader>().mActive = true;
+                for (auto box : ecs.getComponents<BoundingBoxComponent>()) {
+                    auto line = box->getGameObject().getComponentByType<LineMeshComponent>();
+                    if (!line) {
+                        line = &ecs.addComponent<LineMeshComponent>(&box->getGameObject());
+
+                        line->mUseParentSpatial = true;
+                        line->mWriteDepth = true;
+                        line->mOverrideColor = util::genRandomVec3(0.3f, 1.f);
+
+                        glm::vec3 NearLeftBottom{ box->mMin };
+                        glm::vec3 NearLeftTop{ box->mMin.x, box->mMax.y, box->mMin.z };
+                        glm::vec3 NearRightBottom{ box->mMax.x, box->mMin.y, box->mMin.z };
+                        glm::vec3 NearRightTop{ box->mMax.x, box->mMax.y, box->mMin.z };
+                        glm::vec3 FarLeftBottom{ box->mMin.x, box->mMin.y,  box->mMax.z };
+                        glm::vec3 FarLeftTop{ box->mMin.x, box->mMax.y,     box->mMax.z };
+                        glm::vec3 FarRightBottom{ box->mMax.x, box->mMin.y, box->mMax.z };
+                        glm::vec3 FarRightTop{ box->mMax };
+
+                        line->addNode(NearLeftBottom);
+                        line->addNode(NearLeftTop);
+                        line->addNode(NearRightTop);
+                        line->addNode(NearRightBottom);
+                        line->addNode(NearLeftBottom);
+                        line->addNode(FarLeftBottom);
+                        line->addNode(FarLeftTop);
+                        line->addNode(NearLeftTop);
+                        line->addNode(FarLeftTop);
+                        line->addNode(FarRightTop);
+                        line->addNode(NearRightTop);
+                        line->addNode(FarRightTop);
+                        line->addNode(FarRightBottom);
+                        line->addNode(NearRightBottom);
+                        line->addNode(FarRightBottom);
+                        line->addNode(FarLeftBottom);
+                    }
+                }
+            }
+            else {
+                for (auto box : ecs.getComponents<BoundingBoxComponent>()) {
+                    auto line = box->getGameObject().getComponentByType<LineMeshComponent>();
+                    if (line) {
+                        ecs.removeComponent(*line);
+                    }
+                }
+            }
+        }
+        if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
+            auto shadersFunc = [&](std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>>& shaders, const std::string swapName) {
+                for (unsigned i = 0; i < shaders.size(); i++) {
+                    auto& shader = shaders[i];
+                    ImGui::PushID(i);
+                    bool treeActive = ImGui::TreeNodeEx(shader.second->mName.c_str());
+                    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+                        ImGui::SetDragDropPayload(swapName.c_str(), &i, sizeof(unsigned));
+                        ImGui::Text("Swap %s", shader.second->mName.c_str());
+                        ImGui::EndDragDropSource();
+                    }
+                    if (ImGui::BeginDragDropTarget()) {
+                        if (const ImGuiPayload* payLoad = ImGui::AcceptDragDropPayload(swapName.c_str())) {
+                            IM_ASSERT(payLoad->DataSize == sizeof(unsigned));
+                            unsigned payload_n = *(const unsigned*)payLoad->Data;
+                            shaders[i].swap(shaders[payload_n]);
+                        }
+                        ImGui::EndDragDropTarget();
+                    }
+
+                    if (treeActive) {
+                        ImGui::Checkbox("Active", &shader.second->mActive);
+                        ImGui::SameLine();
+                        if (ImGui::Button("Reload")) {
+                            shader.second->reload();
+                        }
+                        shader.second->imguiEditor();
+                        ImGui::TreePop();
+                    }
+                    ImGui::PopID();
+                }
+            };
+
+            if (Renderer::mComputeShaders.size() && ImGui::TreeNodeEx("Compute", ImGuiTreeNodeFlags_DefaultOpen)) {
+                shadersFunc(Renderer::mComputeShaders, "COMPUTE_SWAP");
+                ImGui::TreePop();
+            }
+            if (Renderer::mPreProcessShaders.size() && ImGui::TreeNodeEx("Pre process", ImGuiTreeNodeFlags_DefaultOpen)) {
+                shadersFunc(Renderer::mPreProcessShaders, "PRESHADER_SWAP");
+                ImGui::TreePop();
+            }
+            if (Renderer::mSceneShaders.size() && ImGui::TreeNodeEx("Scene", ImGuiTreeNodeFlags_DefaultOpen)) {
+                shadersFunc(Renderer::mSceneShaders, "SCENESHADER_SWAP");
+                ImGui::TreePop();
+            }
+            if (Renderer::mPostShaders.size() && ImGui::TreeNodeEx("Post process", ImGuiTreeNodeFlags_DefaultOpen)) {
+                shadersFunc(Renderer::mPostShaders, "POSTSHADER_SWAP");
+                ImGui::TreePop();
+            }
+            ImGui::TreePop();
+        }
+
     }
 }

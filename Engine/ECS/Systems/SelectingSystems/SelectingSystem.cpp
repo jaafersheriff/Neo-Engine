@@ -7,37 +7,36 @@
 namespace neo {
 
     void SelectingSystem::init() {
-        Messenger::addReceiver<ComponentSelectedMessage>(nullptr, [&](const neo::Message& msg) {
+        Messenger::addReceiver<ComponentSelectedMessage>(nullptr, [&](const neo::Message& msg, ECS& ecs) {
             const ComponentSelectedMessage & m(static_cast<const ComponentSelectedMessage &>(msg));
-            if (auto oldSelected = Engine::getSingleComponent<SelectedComponent>()) {
+            if (auto oldSelected = ecs.getSingleComponent<SelectedComponent>()) {
                 {
                     MICROPROFILE_SCOPEI("SelectingSystem", "ResetOperation", MP_AUTO);
-                    mResetOperation(oldSelected);
+                    mResetOperation(ecs, oldSelected);
                 }
-                Engine::removeComponent(*oldSelected);
+                ecs.removeComponent(*oldSelected);
             }
-            for (auto selectable : Engine::getComponents<SelectableComponent>()) {
+            for (auto selectable : ecs.getComponents<SelectableComponent>()) {
                 if (selectable->mID == m.componentID) {
                     {
                         MICROPROFILE_SCOPEI("SelectingSystem", "SelectOperation", MP_AUTO);
-                        mSelectOperation(selectable);
+                        mSelectOperation(ecs, selectable);
                     }
-                    Engine::addComponent<SelectedComponent>(&selectable->getGameObject());
+                    ecs.addComponent<SelectedComponent>(&selectable->getGameObject());
                     break;
                 }
             }
         });
     }
 
-    void SelectingSystem::update(const float dt) {
-        NEO_UNUSED(dt);
+    void SelectingSystem::update(ECS& ecs) {
     }
 
-    void SelectingSystem::imguiEditor() {
-        auto selected = Engine::getSingleComponent<SelectedComponent>();
+    void SelectingSystem::imguiEditor(ECS& ecs) {
+        auto selected = ecs.getSingleComponent<SelectedComponent>();
         if (selected) {
             MICROPROFILE_SCOPEI("SelectingSystem", "EditorOperation", MP_AUTO);
-            mEditorOperation(selected);
+            mEditorOperation(ecs, selected);
         }
     }
 

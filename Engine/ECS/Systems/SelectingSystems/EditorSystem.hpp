@@ -10,7 +10,7 @@ namespace neo {
     public:
         EditorSystem();
 
-        virtual void update(float dt) override;
+        virtual void update(ECS&) override;
     };
 
 }

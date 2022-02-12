@@ -33,8 +33,8 @@ namespace neo {
                 )")
         {}
 
-        virtual void render() override {
-            auto skybox = Engine::getSingleComponent<renderable::SkyboxComponent>();
+        virtual void render(const ECS& ecs) override {
+            auto skybox = ecs.getSingleComponent<renderable::SkyboxComponent>();
             if (!skybox) {
                 return;
             }
@@ -44,7 +44,7 @@ namespace neo {
             bind();
 
             /* Load PV */
-            auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+            auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
             NEO_ASSERT(camera, "No main camera exists");
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());

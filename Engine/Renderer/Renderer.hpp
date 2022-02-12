@@ -13,6 +13,7 @@
 namespace neo {
 
     class Engine;
+    class ECS;
     class WindowSurface;
     class PostProcessShader;
 
@@ -30,7 +31,7 @@ namespace neo {
 
             static void init(const std::string &, glm::vec3 clearColor = glm::vec3(0.f));
             static void resetState();
-            static void render(float, WindowSurface&);
+            static void render(float, WindowSurface&, ECS&);
             static void shutDown();
 
             /* FBO */
@@ -44,6 +45,8 @@ namespace neo {
             template <typename ShaderT> static ShaderT& getShader();
 
         private:
+            static void _imguiEditor(ECS& ecs);
+
             static Framebuffer* mDefaultFBO;
             static glm::vec3 mClearColor;
 
@@ -54,7 +57,7 @@ namespace neo {
             template <typename ShaderT, typename... Args> static std::unique_ptr<ShaderT> _createShader(Args &&...);
             static std::vector<Shader *> _getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &);
 
-            static void _renderPostProcess(Shader &, Framebuffer *, Framebuffer *, glm::ivec2);
+            static void _renderPostProcess(Shader &, Framebuffer *, Framebuffer *, glm::ivec2, ECS&);
     };
 
     /* Template implementation */

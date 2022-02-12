@@ -11,22 +11,24 @@
 
 namespace neo {
 
+    class ECS;
+
     class Messenger {
 
         public:
             /* Sends out a message for any receivers of that message type to pick up
              * If gameObject is not null, first sends the message locally to receivers of only that object. */
-            template <typename MsgT, typename... Args> static void sendMessage(const GameObject * gameObject, Args &&... args);
+            template <typename MsgT, typename... Args> static void sendMessage(const GameObject* gameObject, Args &&... args);
 
             /* Adds a receiver for a message type. If gameObject is null, the function will be called for all messages 
             of that type. If gameObject is not null, the function will be called for only messages of that type sent to that object */
-            template <typename MsgT> static void addReceiver(const GameObject * gameObject, const std::function<void(const Message &)> & func);
+            template <typename MsgT> static void addReceiver(const GameObject * gameObject, ReceiverFunc&);
 
-            static void relayMessages();
+            static void relayMessages(ECS& ecs);
 
         private:
             static std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> mMessages;
-            static std::unordered_map<std::type_index, std::vector<std::function<void(const Message &)>>> mReceivers;
+            static std::unordered_map<std::type_index, std::vector<ReceiverFunc>> mReceivers;
     };
 
     template <typename MsgT, typename... Args>
@@ -36,7 +38,7 @@ namespace neo {
     }
 
     template <typename MsgT>
-    void Messenger::addReceiver(const GameObject *gameObject, const std::function<void(const Message &)> & func) {
+    void Messenger::addReceiver(const GameObject *gameObject, ReceiverFunc& func) {
         static_assert(std::is_base_of<Message, MsgT>::value, "MsgT must be a message type");
 
         auto & receiver =  gameObject ? const_cast<GameObject *>(gameObject)->mReceivers : mReceivers;

@@ -6,23 +6,25 @@
 namespace neo {
 
     void Mouse::init() {
-        Messenger::addReceiver<MouseResetMessage>(nullptr, [this](const neo::Message& msg) {
-			const MouseResetMessage& m(static_cast<const MouseResetMessage&>(msg));
-            NEO_UNUSED(m);
+        Messenger::addReceiver<MouseResetMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+            NEO_UNUSED(msg, ecs);
             reset();
         });
 
-        Messenger::addReceiver<MouseButtonMessage>(nullptr, [this](const neo::Message& msg) {
+        Messenger::addReceiver<MouseButtonMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+            NEO_UNUSED(ecs);
             const MouseButtonMessage& m(static_cast<const MouseButtonMessage&>(msg));
             setButtonStatus(m.mButton, m.mAction);
         });
 
-        Messenger::addReceiver<ScrollWheelMessage>(nullptr, [this](const neo::Message& msg) {
+        Messenger::addReceiver<ScrollWheelMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+            NEO_UNUSED(ecs);
             const ScrollWheelMessage& m(static_cast<const ScrollWheelMessage&>(msg));
             setScroll(m.mSpeed);
         });
 
-        Messenger::addReceiver<MouseMoveMessage>(nullptr, [this](const neo::Message& msg) {
+        Messenger::addReceiver<MouseMoveMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+            NEO_UNUSED(ecs);
             const MouseMoveMessage& m(static_cast<const MouseMoveMessage&>(msg));
             if (mIsReset) {
                 mX = m.mX;

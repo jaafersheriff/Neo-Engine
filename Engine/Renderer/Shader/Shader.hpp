@@ -11,6 +11,7 @@
 namespace neo {
 
     class Texture;
+    class ECS;
 
     enum class ShaderStage {
         VERTEX,
@@ -38,7 +39,7 @@ namespace neo {
             Shader(Shader&& rhs) = default;
             virtual ~Shader() = default;
 
-            virtual void render() {}
+            virtual void render(const ECS&) {}
             virtual void imguiEditor() {}
             bool mActive = true;
 

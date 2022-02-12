@@ -28,20 +28,20 @@ namespace neo {
                 })")
         {}
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
             bind();
 
             CHECK_GL(glCullFace(GL_FRONT));
 
             /* Load PV */
-            auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+            auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
             NEO_ASSERT(camera, "No main camera exists");
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
 
             const auto cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
 
-            for (auto& renderable : Engine::getComponentTuples<renderable::OutlineRenderable, MeshComponent, SpatialComponent>()) {
+            for (auto& renderable : ecs.getComponentTuples<renderable::OutlineRenderable, MeshComponent, SpatialComponent>()) {
                 auto renderableOutline = renderable->get<renderable::OutlineRenderable>();
                 auto renderableSpatial = renderable->get<SpatialComponent>();
 

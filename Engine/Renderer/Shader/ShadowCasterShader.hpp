@@ -40,8 +40,8 @@ namespace neo {
                 CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
             }
 
-            virtual void render() override {
-                auto shadowCamera = Engine::getComponentTuple<ShadowCameraComponent, CameraComponent>();
+            virtual void render(const ECS& ecs) override {
+                auto shadowCamera = ecs.getComponentTuple<ShadowCameraComponent, CameraComponent>();
                 if (!shadowCamera) {
                     NEO_ASSERT(shadowCamera, "No shadow camera found");
                 }
@@ -60,7 +60,7 @@ namespace neo {
 
                 const auto& cameraFrustum = camera->getGameObject().getComponentByType<FrustumComponent>();
 
-                for (auto& renderableIt : Engine::getComponentTuples<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>()) {
+                for (auto& renderableIt : ecs.getComponentTuples<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>()) {
                     auto renderable = renderableIt->get<renderable::ShadowCasterRenderable>();
                     auto renderableSpatial = renderableIt->get<SpatialComponent>();
 

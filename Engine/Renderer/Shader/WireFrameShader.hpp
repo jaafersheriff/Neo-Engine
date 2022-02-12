@@ -25,18 +25,18 @@ namespace neo {
                 )
             {}
 
-            virtual void render() {
+            virtual void render(ECS& ecs) {
                 bind();
                 CHECK_GL(glDisable(GL_CULL_FACE));
                 CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 
                 /* Load PV */
-                auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+                auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
                 NEO_ASSERT(camera, "No main camera exists");
                 loadUniform("P", camera->get<CameraComponent>()->getProj());
                 loadUniform("V", camera->get<CameraComponent>()->getView());
 
-                for (auto& renderableIt : Engine::getComponentTuples<renderable::WireframeRenderable, MeshComponent, SpatialComponent>()) {
+                for (auto& renderableIt : ecs.getComponentTuples<renderable::WireframeRenderable, MeshComponent, SpatialComponent>()) {
                     const auto renderable = renderableIt->get<renderable::WireframeRenderable>();
                     const auto spatialComponent = renderableIt->get<SpatialComponent>();
 

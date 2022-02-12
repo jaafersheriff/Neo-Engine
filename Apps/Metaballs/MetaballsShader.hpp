@@ -18,10 +18,10 @@ public:
         Shader("Metaballs Shader", vert, frag)
     {}
 
-    virtual void render() override {
+    virtual void render(const ECS& ecs) override {
         bind();
 
-        if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>()) {
+        if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>()) {
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
             loadUniform("camPos", camera->get<SpatialComponent>()->getPosition());
@@ -30,7 +30,7 @@ public:
             return;
         }
 
-        if (auto skybox = Engine::getSingleComponent<renderable::SkyboxComponent>()) {
+        if (auto skybox = ecs.getSingleComponent<renderable::SkyboxComponent>()) {
             loadTexture("cubeMap", skybox->mCubeMap);
         }
 
@@ -38,7 +38,7 @@ public:
         if (mWireframe) {
             CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
         }
-        for (auto& metaball : Engine::getComponentTuples<MetaballsMeshComponent, SpatialComponent>()) {
+        for (auto& metaball : ecs.getComponentTuples<MetaballsMeshComponent, SpatialComponent>()) {
 
             loadUniform("wireframe", mWireframe);
             loadUniform("M", metaball->get<SpatialComponent>()->getModelMatrix());

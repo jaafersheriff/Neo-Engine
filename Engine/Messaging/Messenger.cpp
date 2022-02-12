@@ -7,9 +7,9 @@
 namespace neo {
 
     std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> Messenger::mMessages;
-    std::unordered_map<std::type_index, std::vector<std::function<void (const Message &)>>> Messenger::mReceivers;
+    std::unordered_map<std::type_index, std::vector<ReceiverFunc>> Messenger::mReceivers;
 
-    void Messenger::relayMessages() {
+    void Messenger::relayMessages(ECS& ecs) {
         MICROPROFILE_SCOPEI("Messenger", "relayMessages()", MP_AUTO);
         static std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> messageBuffer;
 
@@ -27,7 +27,7 @@ namespace neo {
                     auto objectReceivers(gameObject->mReceivers.find(msgTypeI));
                     if (objectReceivers != gameObject->mReceivers.end()) {
                         for (auto & receiver : objectReceivers->second) {
-                            receiver(*msg);
+                            receiver(*msg, ecs);
                         }
                     }
                 }
@@ -36,7 +36,7 @@ namespace neo {
                 auto localReceivers(mReceivers.find(msgTypeI));
                 if (localReceivers != mReceivers.end()) {
                     for (auto & receiver : localReceivers->second) {
-                        receiver(*msg);
+                        receiver(*msg, ecs);
                     }
                 }
             }

@@ -4,9 +4,8 @@
 
 namespace neo {
 
-    void FrustumToLineSystem::update(const float dt) {
-        NEO_UNUSED(dt);
-        for (auto&& camera : Engine::getComponentTuples<CameraComponent, LineMeshComponent, FrustumComponent>()) {
+    void FrustumToLineSystem::update(ECS& ecs) {
+        for (auto&& camera : ecs.getComponentTuples<CameraComponent, LineMeshComponent, FrustumComponent>()) {
 
             auto line = camera->get<LineMeshComponent>();
             auto bounds = camera->get<FrustumComponent>();

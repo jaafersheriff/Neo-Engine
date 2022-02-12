@@ -26,25 +26,26 @@ class GBufferShader : public Shader {
             gbuffer->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
+                NEO_UNUSED(ecs);
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
                 Library::getFBO("gbuffer")->resize(frameSize);
             });
         }
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
             auto fbo = Library::getFBO("gbuffer");
             fbo->bind();
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
             bind();
 
-            if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
+            if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>()) {
                 loadUniform("P", camera->get<CameraComponent>()->getProj());
                 loadUniform("V", camera->get<CameraComponent>()->getView());
             }
 
-            for (auto& renderableIt : Engine::getComponentTuples<GBufferComponent, MeshComponent, SpatialComponent>()) {
+            for (auto& renderableIt : ecs.getComponentTuples<GBufferComponent, MeshComponent, SpatialComponent>()) {
                 auto renderable = renderableIt->get<GBufferComponent>();
                 auto spatial = renderableIt->get<SpatialComponent>();
 

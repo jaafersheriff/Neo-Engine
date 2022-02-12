@@ -3,19 +3,22 @@
 
 namespace neo {
 
-    void CameraControllerSystem::update(const float dt) {
-        if (auto comp = Engine::getSingleComponent<CameraControllerComponent>()) {
-            _updateLook(dt, *comp);
-            _updatePosition(dt, *comp);
+    void CameraControllerSystem::update(ECS& ecs) {
+        if (CameraControllerComponent* cameraController = ecs.getSingleComponent<CameraControllerComponent>()) {
+            if (auto frameStats = ecs.getSingleComponent<FrameStatsComponent>()) {
+                _updateLook(frameStats->mDT, *cameraController);
+                _updatePosition(frameStats->mDT, *cameraController);
+            }
         }
     }
 
-    void CameraControllerSystem::imguiEditor() {
+    void CameraControllerSystem::imguiEditor(ECS& ecs) {
+        NEO_UNUSED(ecs);
         ImGui::SliderFloat("SuperSpeed", &mSuperSpeed, 1.f, 10.f);
     }
 
-    void CameraControllerSystem::_updateLook(const float dt, CameraControllerComponent& comp) {
-        if (auto mouse = Engine::getSingleComponent<MouseComponent>()) {
+    void CameraControllerSystem::_updateLook(const float dt, ECS& ecs, CameraControllerComponent& comp) {
+        if (auto mouse = ecs.getSingleComponent<MouseComponent>()) {
             glm::vec2 mousePos = mouse->mFrameMouse.getPos();
             glm::vec2 mouseSpeed = mouse->mFrameMouse.getSpeed();
 
@@ -26,8 +29,7 @@ namespace neo {
             }
         }
 
-
-        if (auto keyboard = Engine::getSingleComponent<KeyboardComponent>()) {
+        if (auto keyboard = ecs.getSingleComponent<KeyboardComponent>()) {
             if (keyboard->mFrameKeyboard.isKeyPressed(comp.mLookLeftButton)) {
                 float theta = comp.mTheta + comp.mLookSpeed * 2.f * dt;
                 comp.setOrientation(theta, comp.mPhi);
@@ -47,9 +49,9 @@ namespace neo {
         }
     }
 
-    void CameraControllerSystem::_updatePosition(const float dt, CameraControllerComponent& comp) {
+    void CameraControllerSystem::_updatePosition(const float dt, ECS& ecs, CameraControllerComponent& comp) {
 
-        if (auto keyboard = Engine::getSingleComponent<KeyboardComponent>()) {
+        if (auto keyboard = ecs.getSingleComponent<KeyboardComponent>()) {
             int forward(keyboard->mFrameKeyboard.isKeyPressed(comp.mForwardButton));
             int backward(keyboard->mFrameKeyboard.isKeyPressed(comp.mBackwardButton));
             int right(keyboard->mFrameKeyboard.isKeyPressed(comp.mRightButton));

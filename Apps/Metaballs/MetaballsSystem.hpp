@@ -32,38 +32,38 @@ class MetaballsSystem : public System {
             System("Metaballs System") {
         }
 
-        virtual void init() override {
-            update(0.f);
+        virtual void init(ECS& ecs) override {
+            update(ecs);
         }
 
-        virtual void imguiEditor() override {
+        virtual void imguiEditor(ECS& ecs) override {
+            NEO_UNUSED(ecs);
             ImGui::Checkbox("Auto update", &mAutoUpdate);
         }
 
-        virtual void update(const float dt) override {
-            NEO_UNUSED(dt);
-            auto metaballMesh = Engine::getSingleComponent<MetaballsMeshComponent>();
+        virtual void update(ECS& ecs) override {
+            auto metaballMesh = ecs.getSingleComponent<MetaballsMeshComponent>();
             if (!metaballMesh) {
                 return;
             }
 
-            auto balls = Engine::getComponentTuples<MetaballComponent, SpatialComponent>();
+            auto balls = ecs.getComponentTuples<MetaballComponent, SpatialComponent>();
             if (balls.empty()) {
                 return;
             }
 
-            auto dirtyBalls = Engine::getComponents<DirtyBallsComponent>();
+            auto dirtyBalls = ecs.getComponents<DirtyBallsComponent>();
             if (dirtyBalls.size()) {
                 mDirtyBalls = true;
                 for (auto* comp : dirtyBalls)
-                Engine::removeComponent(*comp);
+                ecs.removeComponent(*comp);
             }
 
 
             if (mAutoUpdate) {
                 MICROPROFILE_ENTERI("Metaballs System", "updatePositions", MP_AUTO);
                 float rTime = 0.f;
-                if (auto frameStats = Engine::getSingleComponent<FrameStatsComponent>()) {
+                if (auto frameStats = ecs.getSingleComponent<FrameStatsComponent>()) {
                     rTime = frameStats->mRunTime;
                 }
                 for (uint32_t ii = 0; ii < balls.size(); ++ii) {

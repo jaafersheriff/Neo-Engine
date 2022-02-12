@@ -128,7 +128,8 @@ namespace neo {
         glfwMakeContextCurrent(mWindow);
 
         /* Set callbacks */
-        Messenger::addReceiver<ToggleFullscreenMessage>(nullptr, [this](const neo::Message& msg) {
+        Messenger::addReceiver<ToggleFullscreenMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+            NEO_UNUSED(ecs);
             const ToggleFullscreenMessage& m(static_cast<const ToggleFullscreenMessage&>(msg));
             /* If already full screen */
             if (m.mAlreadyFullscreen) {
@@ -144,7 +145,8 @@ namespace neo {
                 glfwSetWindowMonitor(mWindow, monitor, 0, 0, video->width, video->height, video->refreshRate);
             }
         });
-        Messenger::addReceiver<WindowSizeMessage>(nullptr, [this](const neo::Message& msg) {
+        Messenger::addReceiver<WindowSizeMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+            NEO_UNUSED(ecs);
             const WindowSizeMessage& m(static_cast<const WindowSizeMessage&>(msg));
             if (mDetails.mFullscreen) {
                 mDetails.mFullscreenSize.x = m.mWidth;
@@ -155,7 +157,8 @@ namespace neo {
                 mDetails.mWindowSize.y = m.mHeight;
             }
         });
-        Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [this](const neo::Message& msg) {
+        Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+            NEO_UNUSED(ecs);
             const WindowFrameSizeMessage& m(static_cast<const WindowFrameSizeMessage&>(msg));
 
             mDetails.mFrameSize.x = m.mFrameSize.x;

@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <typeindex>
+#include <functional>
 // Don't add includes. If possible, forward declard. This file shouldn't contain
 // any functionality, and it will be included all over the place.
 
@@ -50,15 +51,14 @@
 
 namespace neo {
 
-    class GameObject;
     class Component;
     class SpatialComponent;
-    class CameraComponent;
-
+    class ECS;
 
     struct Message {
         virtual ~Message() = default;
     };
+    using ReceiverFunc = const std::function<void(const Message&, ECS&)>;
 
     /* A spatiality was changed in some way */
     struct SpatialChangeMessage : public Message {

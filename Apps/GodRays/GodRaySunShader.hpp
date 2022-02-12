@@ -24,19 +24,18 @@ class GodRaySunShader : public Shader {
             godray->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
-                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                NEO_UNUSED(m);
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
+                NEO_UNUSED(ecs);
                 glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
                 Library::getFBO("godray")->resize(frameSize / 2);
             });
 
         }
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
             auto fbo = Library::getFBO("godray");
             fbo->bind();
-            auto windowDetails = Engine::getSingleComponent<WindowDetailsComponent>();
+            auto windowDetails = ecs.getSingleComponent<WindowDetailsComponent>();
             NEO_ASSERT(windowDetails, "Window details don't exist");
             glm::ivec2 frameSize = windowDetails->mDetails.getSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
@@ -46,7 +45,7 @@ class GodRaySunShader : public Shader {
             bind();
 
             /* Load PV */
-            if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
+            if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>()) {
                 loadUniform("P", camera->get<CameraComponent>()->getProj());
                 loadUniform("V", camera->get<CameraComponent>()->getView());
                 glm::mat4 Vi = camera->get<CameraComponent>()->getView();
@@ -55,7 +54,7 @@ class GodRaySunShader : public Shader {
                 loadUniform("Vi", Vi);
             }
 
-            for (auto& renderable : Engine::getComponents<SunComponent>()) {
+            for (auto& renderable : ecs.getComponents<SunComponent>()) {
 
                 loadUniform("M", renderable->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
                 loadUniform("center", renderable->getGameObject().getComponentByType<SpatialComponent>()->getPosition());

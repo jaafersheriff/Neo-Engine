@@ -11,12 +11,12 @@ namespace neo {
             System("CameraController System")
         {}
 
-        virtual void update(const float dt) override;
-        virtual void imguiEditor() override;
+        virtual void update(ECS& ecs) override;
+        virtual void imguiEditor(ECS& ecs) override;
 
     protected:
-        void _updateLook(const float dt, CameraControllerComponent&);
-        void _updatePosition(const float dt, CameraControllerComponent&);
+        void _updateLook(const float dt, ECS&, CameraControllerComponent&);
+        void _updatePosition(const float dt, ECS&, CameraControllerComponent&);
 
     private:
 

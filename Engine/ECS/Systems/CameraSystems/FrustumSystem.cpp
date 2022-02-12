@@ -2,9 +2,8 @@
 #include "FrustumSystem.hpp"
 
 namespace neo {
-    void FrustumSystem::update(const float dt) {
-        NEO_UNUSED(dt);
-        for (auto& cameraTuple : Engine::getComponentTuples<CameraComponent, FrustumComponent, SpatialComponent>()) {
+    void FrustumSystem::update(ECS& ecs) {
+        for (auto& cameraTuple : ecs.getComponentTuples<CameraComponent, FrustumComponent, SpatialComponent>()) {
             auto camera = cameraTuple->get<CameraComponent>();
             auto frustum = cameraTuple->get<FrustumComponent>();
             auto spatial = cameraTuple->get<SpatialComponent>();

@@ -75,11 +75,11 @@ namespace neo {
                 0.0f, 0.0f, 0.5f, 0.0f,
                 0.5f, 0.5f, 0.5f, 1.0f);
 
-            virtual void render() override {
+            virtual void render(const ECS& ecs) override {
                 bind();
 
                 /* Load PV */
-                auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
+                auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
                 NEO_ASSERT(camera, "No main camera exists");
                 loadUniform("P", camera->get<CameraComponent>()->getProj());
                 loadUniform("V", camera->get<CameraComponent>()->getView());
@@ -87,12 +87,12 @@ namespace neo {
                 loadUniform("camPos", camera->get<SpatialComponent>()->getPosition());
 
                 /* Load light */
-                if (auto shadowCamera = Engine::getComponentTuple<ShadowCameraComponent, CameraComponent>()) {
+                if (auto shadowCamera = ecs.getComponentTuple<ShadowCameraComponent, CameraComponent>()) {
                     auto _shadowCamera = shadowCamera->get<CameraComponent>();
                     loadUniform("L", biasMatrix * _shadowCamera->getProj() * _shadowCamera->getView());
                 }
 
-                if (auto light = Engine::getComponentTuple<LightComponent, SpatialComponent>()) {
+                if (auto light = ecs.getComponentTuple<LightComponent, SpatialComponent>()) {
                     loadUniform("lightPos", light->get<SpatialComponent>()->getPosition());
                     loadUniform("lightCol", light->get<LightComponent>()->mColor);
                     loadUniform("lightAtt", light->get<LightComponent>()->mAttenuation);
@@ -108,7 +108,7 @@ namespace neo {
                 loadTexture("shadowMap", *Library::getFBO("shadowMap")->mTextures[0]);
 
                 const auto& cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
-                for (auto& renderableIt : Engine::getComponentTuples<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>()) {
+                for (auto& renderableIt : ecs.getComponentTuples<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>()) {
                     auto renderable = renderableIt->get<renderable::PhongShadowRenderable>();
                     auto renderableSpatial = renderableIt->get<SpatialComponent>();
 

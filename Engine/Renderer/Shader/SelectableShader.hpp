@@ -31,14 +31,15 @@ namespace neo {
             stencilBuffer->disableDraw();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message& msg) {
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
+                NEO_UNUSED(ecs);
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage&>(msg)).mFrameSize;
                 Library::getFBO("selectable")->resize(frameSize);
             });
 
         }
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
             mFrameCount++;
 
             auto fbo = Library::getFBO("selectable");
@@ -46,7 +47,7 @@ namespace neo {
             NEO_ASSERT(fbo->mTextures.size() > 0, "Selectable render target never initialized");
 
             // Read pixels from last frame before clearing the buffer
-            if (auto mouse = Engine::getSingleComponent<MouseComponent>()) {
+            if (auto mouse = ecs.getSingleComponent<MouseComponent>()) {
                 if (mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1) && mFrameCount >= 5) {
                     MICROPROFILE_SCOPEI("Selectable Shader", "ReadPixels", MP_AUTO);
                     MICROPROFILE_SCOPEGPUI("Selectable Shader - ReadPixels", MP_AUTO);
@@ -71,12 +72,12 @@ namespace neo {
             bind();
 
             /* Load PV */
-            auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+            auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
             NEO_ASSERT(camera, "No main camera exists");
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
 
-            for (auto& renderable : Engine::getComponentTuples<SelectableComponent, MeshComponent, SpatialComponent>()) {
+            for (auto& renderable : ecs.getComponentTuples<SelectableComponent, MeshComponent, SpatialComponent>()) {
                 uint32_t stencilID = renderable->get<SelectableComponent>()->mID;
                 CHECK_GL(glStencilFunc(GL_ALWAYS, static_cast<GLuint>(stencilID), 0));
                 loadUniform("componentID", static_cast<int>(stencilID));

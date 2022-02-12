@@ -22,13 +22,13 @@ public:
         init();
     }
 
-    virtual void render() override {
+    virtual void render(const ECS& ecs) override {
         bind();
 
-        if (auto mesh = Engine::getSingleComponent<ParticleMeshComponent>()) {
+        if (auto mesh = ecs.getSingleComponent<ParticleMeshComponent>()) {
             auto position = mesh->mMesh->getVBO(VertexType::Position);
 
-            if (auto frameStats = Engine::getSingleComponent<FrameStatsComponent>()) {
+            if (auto frameStats = ecs.getSingleComponent<FrameStatsComponent>()) {
                 loadUniform("timestep", frameStats->mDT / 1000.f * timeScale);
             }
             else {

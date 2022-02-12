@@ -21,13 +21,14 @@ class DecalShader : public Shader {
             decalFBO->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
+                NEO_UNUSED(ecs);
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
                 Library::getFBO("decals")->resize(frameSize);
             });
         }
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
             auto fbo = Library::getFBO("decals");
             fbo->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
@@ -36,7 +37,7 @@ class DecalShader : public Shader {
             CHECK_GL(glDisable(GL_CULL_FACE));
 
             bind();
-            if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
+            if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>()) {
                 loadUniform("P", camera->get<CameraComponent>()->getProj());
                 loadUniform("invPV", glm::inverse(camera->get<CameraComponent>()->getProj() * camera->get<CameraComponent>()->getView()));
                 loadUniform("V", camera->get<CameraComponent>()->getView());
@@ -48,7 +49,7 @@ class DecalShader : public Shader {
             loadTexture("gDepth",  *gbuffer->mTextures[2]);
 
             /* Render decals */
-            for (auto& decal : Engine::getComponentTuples<DecalRenderable, SpatialComponent>()) {
+            for (auto& decal : ecs.getComponentTuples<DecalRenderable, SpatialComponent>()) {
                 auto spatial = decal->get<SpatialComponent>();
                 loadUniform("M", spatial->getModelMatrix());
                 loadUniform("invM", glm::inverse(spatial->getModelMatrix()));
