@@ -5,6 +5,10 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
 
+#include "ECS/Component/CameraComponent/FrustumComponent.hpp"
+#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/RenderableComponent/OutlineRenderable.hpp"
+
 namespace neo {
 
     class OutlineShader : public Shader {

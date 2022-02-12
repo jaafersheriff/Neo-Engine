@@ -3,7 +3,7 @@
 #include "ECS/Component/Component.hpp"
 #include "ECS/GameObject.hpp"
 
-#include "Hardware/WindowSurface.hpp"
+#include "Hardware/WindowDetails.hpp"
 
 #include <imgui/imgui.h>
 
@@ -12,7 +12,7 @@ namespace neo {
     class WindowDetailsComponent : public Component {
 
     public:
-        WindowDetailsComponent (GameObject *go, WindowSurface::WindowDetails details)
+        WindowDetailsComponent (GameObject *go, WindowDetails details)
             : Component(go)
             , mDetails(details)
         {}
@@ -25,6 +25,6 @@ namespace neo {
 			ImGui::Text("Window Pos:      [%d, %d]", mDetails.mWindowPos.x, mDetails.mWindowPos.y);
         }
 
-        const WindowSurface::WindowDetails mDetails;
+        const WindowDetails mDetails;
     };
 }

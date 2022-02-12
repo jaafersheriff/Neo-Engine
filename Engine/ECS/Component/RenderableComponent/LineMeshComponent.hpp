@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Renderer/GLObjects/GLHelper.hpp"
-
 #include <optional>
+
+#include "Renderer/GLObjects/Mesh.hpp"
 
 namespace neo {
 

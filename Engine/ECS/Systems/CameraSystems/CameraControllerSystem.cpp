@@ -1,6 +1,11 @@
 #include "Engine/Engine.hpp"
 #include "CameraControllerSystem.hpp"
 
+#include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
+#include "ECS/Component/HardwareComponent/MouseComponent.hpp"
+#include "ECS/Component/HardwareComponent/KeyboardComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
 namespace neo {
 
     void CameraControllerSystem::update(ECS& ecs) {

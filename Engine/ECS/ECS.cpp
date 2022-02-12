@@ -1,5 +1,7 @@
 #include "ECS.hpp"
 
+#include <imgui/imgui.h>
+
 namespace neo {
 
     void ECS::_updateSystems() {
@@ -7,7 +9,7 @@ namespace neo {
         for (auto& system : mSystems) {
             if (system.second->mActive) {
                 MICROPROFILE_SCOPEI(system.second->mName.c_str(), "update", MP_AUTO);
-                system.second->update();
+                system.second->update(*this);
             }
         }
     }
@@ -68,7 +70,7 @@ namespace neo {
 
     void ECS::_initSystems() {
         for (auto& system : mSystems) {
-            system.second->init();
+            system.second->init(*this);
         }
     }
 
@@ -174,7 +176,7 @@ namespace neo {
                 ImGui::PopID();
                 if (treeActive) {
                     ImGui::Checkbox("Active", &sys->mActive);
-                    sys->imguiEditor();
+                    sys->imguiEditor(*this);
                     ImGui::TreePop();
                 }
             }

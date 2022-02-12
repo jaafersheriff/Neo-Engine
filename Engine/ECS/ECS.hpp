@@ -3,8 +3,7 @@
 #include "Util/Util.hpp"
 
 #include "ECS/ComponentTuple.hpp"
-#include "ECS/Components.hpp"
-#include "ECS/Systems/Systems.hpp"
+#include "ECS/Systems/System.hpp"
 
 #include <vector>
 #include <unordered_map>
@@ -19,6 +18,7 @@
 
 namespace neo {
     class ComponentTuple;
+    class System;
 
     class ECS {
         friend Engine;
@@ -50,10 +50,10 @@ namespace neo {
             template <typename CompT> const std::vector<CompT*>& getComponents();
             template <typename CompT> CompT const* getSingleComponent() const;
             template <typename CompT> CompT* getSingleComponent();
-            template <typename CompT, typename... CompTs> const std::unique_ptr<const ComponentTuple> getComponentTuple(GameObject& go) const;
-            template <typename CompT, typename... CompTs> const std::unique_ptr<ComponentTuple> getComponentTuple(GameObject& go);
-            template <typename CompT, typename... CompTs> const std::unique_ptr<const ComponentTuple> getComponentTuple() const;
-            template <typename CompT, typename... CompTs> const std::unique_ptr<ComponentTuple> getComponentTuple();
+            template <typename CompT, typename... CompTs> std::unique_ptr<const ComponentTuple> getComponentTuple(const GameObject& go) const;
+            template <typename CompT, typename... CompTs> std::unique_ptr<ComponentTuple> getComponentTuple(const GameObject& go);
+            template <typename CompT, typename... CompTs> std::unique_ptr<const ComponentTuple> getComponentTuple() const;
+            template <typename CompT, typename... CompTs> std::unique_ptr<ComponentTuple> getComponentTuple();
             template <typename CompT, typename... CompTs> const std::vector<std::unique_ptr<const ComponentTuple>> getComponentTuples() const;
             template <typename CompT, typename... CompTs> const std::vector<std::unique_ptr<ComponentTuple>> getComponentTuples();
 
@@ -157,7 +157,13 @@ namespace neo {
     template <typename CompT>
     CompT const* ECS::getSingleComponent() const {
         MICROPROFILE_SCOPEI("Engine", "getSingleComponents const", MP_AUTO);
-        return getSingleComponent<CompT>();
+        auto components = getComponents<CompT>();
+        if (!components.size()) {
+            return nullptr;
+        }
+        NEO_ASSERT(components.size() == 1, "Attempting to get a single component when there are many");
+
+        return components[0];
     }
 
     template <typename CompT>
@@ -167,16 +173,16 @@ namespace neo {
         if (!components.size()) {
             return nullptr;
         }
-        assert(components.size() == 1);
+        NEO_ASSERT(components.size() == 1, "Attempting to get a single component when there are many");
 
         return components[0];
     }
 
     template <typename CompT, typename... CompTs>
-    const std::unique_ptr<const ComponentTuple> ECS::getComponentTuple() const {
+    std::unique_ptr<const ComponentTuple> ECS::getComponentTuple() const {
         MICROPROFILE_SCOPEI("Engine", "getComponentTuple const", MP_AUTO);
-        for (auto comp : getComponents<CompT>()) {
-            if (const auto tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject())) {
+        for (CompT const* comp : getComponents<CompT>()) {
+            if (auto tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject())) {
                 return tuple;
             }
         }
@@ -184,7 +190,7 @@ namespace neo {
     }
 
     template <typename CompT, typename... CompTs>
-    const std::unique_ptr<ComponentTuple> ECS::getComponentTuple() {
+    std::unique_ptr<ComponentTuple> ECS::getComponentTuple() {
         MICROPROFILE_SCOPEI("Engine", "getComponentTuple", MP_AUTO);
         for (auto comp : getComponents<CompT>()) {
             if (auto tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject())) {
@@ -197,15 +203,9 @@ namespace neo {
     template <typename CompT, typename... CompTs>
     const std::vector<std::unique_ptr<const ComponentTuple>> ECS::getComponentTuples() const {
         MICROPROFILE_SCOPEI("Engine", "getComponentTuples const", MP_AUTO);
-        return getComponentTuples<CompT, CompTs...>();
-    }
-
-    template <typename CompT, typename... CompTs>
-    const std::vector<std::unique_ptr<ComponentTuple>> ECS::getComponentTuples() {
-        MICROPROFILE_SCOPEI("Engine", "getComponentTuples", MP_AUTO);
-        std::vector<std::unique_ptr<ComponentTuple>> tuples;
-        for (auto comp : getComponents<CompT>()) {
-            if (auto tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject())) {
+        std::vector<std::unique_ptr<const ComponentTuple>> tuples;
+        for (CompT const* comp : getComponents<CompT>()) {
+            if (std::unique_ptr<const ComponentTuple> tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject())) {
                 tuples.push_back(std::move(tuple));
             }
         }
@@ -214,7 +214,20 @@ namespace neo {
     }
 
     template <typename CompT, typename... CompTs>
-    const std::unique_ptr<const ComponentTuple> ECS::getComponentTuple(GameObject& go) const {
+    const std::vector<std::unique_ptr<ComponentTuple>> ECS::getComponentTuples() {
+        MICROPROFILE_SCOPEI("Engine", "getComponentTuples", MP_AUTO);
+        std::vector<std::unique_ptr<ComponentTuple>> tuples;
+        for (CompT* comp : getComponents<CompT>()) {
+            if (std::unique_ptr<ComponentTuple> tuple = getComponentTuple<CompT, CompTs...>(comp->getGameObject())) {
+                tuples.push_back(std::move(tuple));
+            }
+        }
+
+        return tuples;
+    }
+
+    template <typename CompT, typename... CompTs>
+    std::unique_ptr<const ComponentTuple> ECS::getComponentTuple(const GameObject& go) const {
         MICROPROFILE_SCOPEI("Engine", "getComponentTuple(GameObject) const", MP_AUTO);
         std::unique_ptr<ComponentTuple> tuple = std::make_unique<ComponentTuple>(go);
         tuple->populate<CompT, CompTs...>();
@@ -228,7 +241,7 @@ namespace neo {
     }
 
     template <typename CompT, typename... CompTs>
-    const std::unique_ptr<ComponentTuple> ECS::getComponentTuple(GameObject& go) {
+    std::unique_ptr<ComponentTuple> ECS::getComponentTuple(const GameObject& go) {
         MICROPROFILE_SCOPEI("Engine", "getComponentTuple(GameObject)", MP_AUTO);
         std::unique_ptr<ComponentTuple> tuple = std::make_unique<ComponentTuple>(go);
         tuple->populate<CompT, CompTs...>();

@@ -2,6 +2,8 @@
 
 #include "ECS/Systems/System.hpp"
 
+#include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
+
 namespace neo {
 
     class CameraControllerSystem : public System {

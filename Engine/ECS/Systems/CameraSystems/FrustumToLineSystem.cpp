@@ -1,11 +1,14 @@
-#include "Engine/Engine.hpp"
-
 #include "FrustumToLineSystem.hpp"
+
+#include "ECS/ECS.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumComponent.hpp"
+#include "ECS/Component/RenderableComponent/LineMeshComponent.hpp"
 
 namespace neo {
 
     void FrustumToLineSystem::update(ECS& ecs) {
-        for (auto&& camera : ecs.getComponentTuples<CameraComponent, LineMeshComponent, FrustumComponent>()) {
+        for (auto& camera : ecs.getComponentTuples<CameraComponent, LineMeshComponent, FrustumComponent>()) {
 
             auto line = camera->get<LineMeshComponent>();
             auto bounds = camera->get<FrustumComponent>();

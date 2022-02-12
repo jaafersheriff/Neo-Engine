@@ -5,11 +5,10 @@
 
 #include "glm/glm.hpp"
 
-namespace neo {
+#include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
+#include "ECS/Component/SelectingComponent/SelectedComponent.hpp"
 
-    class SelectedComponent;
-    class SelectableComponent;
-    class MouseRayComponent;
+namespace neo {
 
     class SelectingSystem : public System {
 

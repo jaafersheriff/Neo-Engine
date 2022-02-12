@@ -1,6 +1,11 @@
 #include "EditorSystem.hpp"
 #include "Engine/Engine.hpp"
 
+#include "ECS/Component/HardwareComponent/MouseComponent.hpp"
+#include "ECS/Component/RenderableComponent/OutlineRenderable.hpp"
+#include "ECS/Component/SelectingComponent/MouseRayComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
 namespace neo {
 
     EditorSystem::EditorSystem() 

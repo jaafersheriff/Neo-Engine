@@ -6,6 +6,8 @@
 #include "Engine/Engine.hpp"
 #include "Hardware/WindowSurface.hpp"
 
+#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+
 #include "imgui_impl_opengl3.h"
 #include "microprofile.h"
 

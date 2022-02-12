@@ -1,6 +1,12 @@
 #include "Engine/Engine.hpp"
 #include "FrustumSystem.hpp"
 
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumComponent.hpp"
+#include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
 namespace neo {
     void FrustumSystem::update(ECS& ecs) {
         for (auto& cameraTuple : ecs.getComponentTuples<CameraComponent, FrustumComponent, SpatialComponent>()) {

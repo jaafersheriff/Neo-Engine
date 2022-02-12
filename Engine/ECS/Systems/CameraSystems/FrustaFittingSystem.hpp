@@ -2,7 +2,6 @@
 
 #include "ECS/Systems/System.hpp"
 
-
 namespace neo {
 
     class FrustaFittingSystem : public System {

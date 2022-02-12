@@ -3,6 +3,14 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/HardwareComponent/MouseComponent.hpp"
+#include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
+#include "ECS/Component/SelectingComponent/SelectedComponent.hpp"
+#include "ECS/Component/RenderableComponent/MeshComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
 #include "Engine/Engine.hpp"
 
 namespace neo {
@@ -77,7 +85,7 @@ namespace neo {
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
 
-            for (auto& renderable : ecs.getComponentTuples<SelectableComponent, MeshComponent, SpatialComponent>()) {
+            for (const auto& renderable : ecs.getComponentTuples<SelectableComponent, MeshComponent, SpatialComponent>()) {
                 uint32_t stencilID = renderable->get<SelectableComponent>()->mID;
                 CHECK_GL(glStencilFunc(GL_ALWAYS, static_cast<GLuint>(stencilID), 0));
                 loadUniform("componentID", static_cast<int>(stencilID));

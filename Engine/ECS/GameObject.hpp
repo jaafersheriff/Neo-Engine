@@ -17,6 +17,7 @@ namespace neo {
     class GameObject {
 
         friend Engine;
+        friend ECS;
         friend class Messenger;
 
         public:

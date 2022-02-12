@@ -1,12 +1,18 @@
-#include "Engine/Engine.hpp"
-
 #include "FrustaFittingSystem.hpp"
 
+#include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
+#include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include <algorithm>
 #include <limits>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace neo {
 

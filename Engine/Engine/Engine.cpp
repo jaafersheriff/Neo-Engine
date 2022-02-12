@@ -14,7 +14,16 @@ extern "C" {
 #include "Renderer/Shader/WireframeShader.hpp"
 #include "Renderer/Shader/LineShader.hpp"
 
+#include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
+#include "ECS/Component/EngineComponents/SingleFrameComponent.hpp"
+#include "ECS/Component/HardwareComponent/KeyboardComponent.hpp"
+#include "ECS/Component/HardwareComponent/WindowDetailsComponent.hpp"
+#include "ECS/Systems/SelectingSystems/MouseRaySystem.hpp"
+#include "ECS/Systems/SelectingSystems/EditorSystem.hpp"
+
 #include "Hardware/WindowSurface.hpp"
+#include "Hardware/Keyboard.hpp"
+#include "Hardware/Mouse.hpp"
 
 #include "Messaging/Messenger.hpp"
 

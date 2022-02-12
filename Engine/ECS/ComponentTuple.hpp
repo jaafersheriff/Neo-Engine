@@ -16,18 +16,12 @@ namespace neo {
         friend ECS;
 
     public:
-        GameObject& mGameObject;
+        const GameObject& mGameObject;
 
-        ComponentTuple(GameObject& go) :
+        ComponentTuple(const GameObject& go) :
             mGameObject(go),
             mValid(true)
         {}
-
-        /* Remove copy constructors */
-        ComponentTuple(const ComponentTuple &) = delete;
-        ComponentTuple & operator=(const ComponentTuple &) = delete;
-        ComponentTuple(ComponentTuple &&) = default;
-        ComponentTuple & operator=(ComponentTuple &&) = default;
 
         operator bool() const {
             return mValid;
@@ -35,12 +29,16 @@ namespace neo {
 
         template <typename CompT>
         CompT* get() {
-            return static_cast<CompT*>(mComponentMap[typeid(CompT)]);
+            const auto& comp = mComponentMap.find(typeid(CompT));
+            NEO_ASSERT(comp != mComponentMap.end(), "Attempting to access an invalid component type");
+            return static_cast<CompT *>(comp->second);
         }
 
         template <typename CompT>
-        const CompT* get() const {
-            return get<CompT>();
+        CompT const* get() const {
+            const auto& comp = mComponentMap.find(typeid(CompT));
+            NEO_ASSERT(comp != mComponentMap.end(), "Attempting to access an invalid component type");
+            return static_cast<CompT const*>(comp->second);
         }
 
         template <typename CompT, typename... CompTs> 

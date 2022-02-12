@@ -1,6 +1,10 @@
 #include "Engine/Engine.hpp"
 #include "SinTranslateSystem.hpp"
 
+#include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+#include "ECS/Component/TransformationComponent/SinTranslateComponent.hpp"
+
 namespace neo {
     void SinTranslateSystem::update(ECS& ecs) {
         for (auto sin : ecs.getComponents<SinTranslateComponent>()) {

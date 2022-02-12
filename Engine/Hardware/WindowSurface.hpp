@@ -1,10 +1,10 @@
-/* Window class
- * Static GLFW wrapper */
 #pragma once
 
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
+
+#include "WindowDetails.hpp"
 
 #include <string>
 
@@ -12,17 +12,6 @@ namespace neo {
 
     class WindowSurface {
     public:
-        struct WindowDetails {
-            glm::ivec2 mFrameSize = {};
-            glm::ivec2 mFullscreenSize = {};
-            glm::ivec2 mWindowSize = { 1920, 1080 };
-            glm::ivec2 mWindowPos = { 0,0 };
-            bool mFullscreen = false;
-            bool mVSyncEnabled = true;
-
-            glm::ivec2 getSize() const { return mFullscreen ? mFullscreenSize : mWindowSize; }
-        };
-
         int init(const std::string&);
         void update();
         void shutDown();

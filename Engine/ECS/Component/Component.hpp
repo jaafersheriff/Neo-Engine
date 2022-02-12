@@ -1,5 +1,7 @@
 #pragma once
 
+#include <imgui/imgui.h>
+
 namespace neo {
 
     class GameObject;
@@ -27,7 +29,7 @@ namespace neo {
 
             /* GameObject */
             GameObject & getGameObject() { return *mGameObject; }
-            const GameObject & getGameObject() const { return *mGameObject; }
+            const GameObject& getGameObject() const { return *mGameObject; }
             void removeGameObject() { mGameObject = nullptr; }
                  
         protected:
