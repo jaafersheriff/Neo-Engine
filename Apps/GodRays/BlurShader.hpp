@@ -26,19 +26,18 @@ class BlurShader : public Shader {
             blur->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
-                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                NEO_UNUSED(m);
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
+                NEO_UNUSED(ecs);
                 glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
                 Library::getFBO("godrayblur")->resize(frameSize / 2);
             });
 
         }
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
             auto fbo = Library::getFBO("godrayblur");
             fbo->bind();
-            auto windowDetails = Engine::getSingleComponent<WindowDetailsComponent>();
+            auto windowDetails = ecs.getSingleComponent<WindowDetailsComponent>();
             NEO_ASSERT(windowDetails, "Window details don't exist");
             glm::ivec2 frameSize = windowDetails->mDetails.getSize() / 2;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
@@ -53,12 +52,12 @@ class BlurShader : public Shader {
             loadUniform("blurSteps", mBlurSteps);
             loadUniform("contribution", mContribution);
 
-            auto mainCamera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+            auto mainCamera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
             NEO_ASSERT(mainCamera, "No MainCamera exists");
             auto camera = mainCamera->get<CameraComponent>();
 
             // sun position in screen space
-            if (const auto& sun = Engine::getSingleComponent<SunComponent>()) {
+            if (const auto& sun = ecs.getSingleComponent<SunComponent>()) {
                 glm::vec4 clipspace = camera->getProj() * camera->getView() * glm::vec4(sun->getGameObject().getComponentByType<SpatialComponent>()->getPosition(), 1.0);
                 glm::vec3 ndcspace = glm::vec3(clipspace) / clipspace.w;
                 glm::vec2 sspace = (glm::vec2(ndcspace) + 1.f) / 2.f;

@@ -124,7 +124,8 @@ namespace neo {
             pong->attachColorTexture({1, 1}, format);
             pong->mTextures.push_back(ping->mTextures[1]);
 
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
+                NEO_UNUSED(ecs);
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
                 Library::getFBO("ping")->resize(m.mFrameSize);
                 Library::getFBO("pong")->resize(m.mFrameSize);

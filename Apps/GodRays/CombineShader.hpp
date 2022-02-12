@@ -17,10 +17,10 @@ class CombineShader : public PostProcessShader {
             PostProcessShader("Combine Shader", frag) 
         {}
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
             loadTexture("godray", *Library::getFBO("godrayblur")->mTextures[0]);
 
-            loadUniform("sunColor", Engine::getSingleComponent<SunComponent>()->getGameObject().getComponentByType<LightComponent>()->mColor);
+            loadUniform("sunColor", ecs.getSingleComponent<SunComponent>()->getGameObject().getComponentByType<LightComponent>()->mColor);
             loadUniform("exposure", exposure);
         }
 

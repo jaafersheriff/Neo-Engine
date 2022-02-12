@@ -43,8 +43,8 @@ struct Light {
         ecs.addComponent<SpatialComponent>(&gameObject, pos);
         ecs.addComponent<LightComponent>(&gameObject, col, att);
 
-        Engine::addImGuiFunc("Light", [&]() {
-            auto light = ecs.getSingleComponent<LightComponent>();
+        Engine::addImGuiFunc("Light", [](ECS& ecs_) {
+            auto light = ecs_.getSingleComponent<LightComponent>();
             light->imGuiEditor();
             if (auto spatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
                 spatial->imGuiEditor();

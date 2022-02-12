@@ -3,10 +3,11 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Engine/Engine.hpp"
-
 #include "SunComponent.hpp"
 #include "SunOccluderComponent.hpp"
+
+#include "ECS/ECS.hpp"
+#include "ECS/Component/HardwareComponent/WindowDetailsComponent.hpp"
 
 using namespace neo;
 
@@ -18,15 +19,15 @@ class GodRayOccluderShader : public Shader {
             Shader("GodRayOccluder Shader", vert, frag) {
         }
 
-        virtual void render() override {
-            auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+        virtual void render(const ECS& ecs) override {
+            auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
             if (!camera) {
                 return;
             }
 
             auto fbo = Library::getFBO("godray");
             fbo->bind();
-            auto windowDetails = Engine::getSingleComponent<WindowDetailsComponent>();
+            auto windowDetails = ecs.getSingleComponent<WindowDetailsComponent>();
             NEO_ASSERT(windowDetails, "Window details don't exist");
             glm::ivec2 frameSize = windowDetails->mDetails.getSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
@@ -37,7 +38,7 @@ class GodRayOccluderShader : public Shader {
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
 
-            for (auto& renderable : Engine::getComponentTuples<SunOccluderComponent, MeshComponent, SpatialComponent>()) {
+            for (auto& renderable : ecs.getComponentTuples<SunOccluderComponent, MeshComponent, SpatialComponent>()) {
                 auto renderableSpatial = renderable->get<SpatialComponent>();
 
                 // VFC

@@ -48,13 +48,14 @@ namespace neo {
             /* ImGui */
             static bool mImGuiEnabled;
             static void toggleImGui() { mImGuiEnabled = !mImGuiEnabled; }
-            static void addImGuiFunc(std::string name, std::function<void()> func) { mImGuiFuncs.insert({ name, func}); }
+            using ImGuiFunc = std::function<void(ECS& ecs)>;
+            static void addImGuiFunc(std::string name, ImGuiFunc func) { mImGuiFuncs.insert({ name, func}); }
 
         private:
             static ECS mECS;
 
             /* ImGui */
-            static std::unordered_map<std::string, std::function<void()>> mImGuiFuncs;
+            static std::unordered_map<std::string, ImGuiFunc> mImGuiFuncs;
             static void _runImGui(const util::FrameCounter&);
 
             /* Hardware */

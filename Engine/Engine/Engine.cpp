@@ -45,7 +45,7 @@ namespace neo {
 
     /* ImGui */
     bool Engine::mImGuiEnabled = true;
-    std::unordered_map<std::string, std::function<void()>> Engine::mImGuiFuncs;
+    std::unordered_map<std::string, Engine::ImGuiFunc> Engine::mImGuiFuncs;
 
     /* Hardware */
     WindowSurface Engine::mWindow;
@@ -344,7 +344,7 @@ namespace neo {
             if (ImGui::BeginMenu(mConfig.APP_NAME.c_str())) {
                 for (auto & it : mImGuiFuncs) {
                     if (ImGui::TreeNodeEx(it.first.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                        it.second();
+                        it.second(mECS);
                         ImGui::TreePop();
                     }
                 }

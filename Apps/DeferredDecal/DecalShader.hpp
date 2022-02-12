@@ -3,9 +3,12 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Engine/Engine.hpp"
-
 #include "DecalRenderable.hpp"
+
+#include "ECS/ECS.hpp"
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 using namespace neo;
 

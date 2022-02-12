@@ -27,7 +27,8 @@ class PostShader : public PostProcessShader {
             generatePoisson(poissonSize);
         }
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
+            NEO_UNUSED(ecs);
             const auto& defaultFBO = *Library::getFBO("default")->mTextures[0];
             loadTexture("inputFBO", defaultFBO);
             loadUniform("scenePixelSize", 1.f / glm::vec2(defaultFBO.mWidth, defaultFBO.mHeight));

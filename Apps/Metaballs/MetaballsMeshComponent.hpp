@@ -2,6 +2,8 @@
 
 #include "ECS/Component/Component.hpp"
 
+#include "Renderer/GLObjects/Mesh.hpp"
+
 using namespace neo;
 
 class MetaballsMeshComponent : public Component {

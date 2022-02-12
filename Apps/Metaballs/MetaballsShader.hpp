@@ -1,10 +1,14 @@
 #pragma once
 
-#include "Engine/Engine.hpp"
 #include "MetaballsMeshComponent.hpp"
 
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
+
+#include "ECS/ECS.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/RenderableComponent/SkyboxComponent.hpp"
 
 using namespace neo;
 

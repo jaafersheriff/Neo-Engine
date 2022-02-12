@@ -4,6 +4,9 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Texture1D.hpp"
 
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
+
 #include "Messaging/Messenger.hpp"
 
 using namespace neo;
@@ -60,7 +63,7 @@ class AOShader : public PostProcessShader {
             Library::getTexture("aoNoise")->update(glm::uvec2(dim), noise.data());
         }
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
 
             loadUniform("radius", radius);
             loadUniform("bias", bias);
@@ -74,7 +77,7 @@ class AOShader : public PostProcessShader {
             loadTexture("noise", *Library::getTexture("aoNoise"));
             loadTexture("kernel", *Library::getTexture("aoKernel"));
 
-            if (auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>()) {
+            if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>()) {
                 loadUniform("P", camera->get<CameraComponent>()->getProj());
                 loadUniform("invP", glm::inverse(camera->get<CameraComponent>()->getProj()));
             }

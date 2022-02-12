@@ -15,7 +15,9 @@ class BlurShader : public PostProcessShader {
             PostProcessShader("Blur Shader", frag) 
         {}
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
+            NEO_UNUSED(ecs);
+
             loadUniform("blurAmount", blurAmount);
         }
 

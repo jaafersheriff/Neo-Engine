@@ -4,7 +4,10 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 
 #include "Loader/Library.hpp"
-#include "Engine/Engine.hpp"
+
+#include "ECS/ECS.hpp"
+#include "ECS/Component/LightComponent/LightComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 using namespace neo;
 

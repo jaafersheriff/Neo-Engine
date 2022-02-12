@@ -26,14 +26,15 @@ class DofInfoShader : public Shader {
             DofInfoFBO->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg) {
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
+                NEO_UNUSED(ecs);
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
                 Library::getFBO("dofinfo")->resize(frameSize);
             });
  
         }
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
             /* TODO 
             This could be done purely as post process 
             Renderer would just need to resize ping/pong everytime?
@@ -44,7 +45,7 @@ class DofInfoShader : public Shader {
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 0.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 
-            auto windowDetails = Engine::getSingleComponent<WindowDetailsComponent>();
+            auto windowDetails = ecs.getSingleComponent<WindowDetailsComponent>();
             NEO_ASSERT(windowDetails, "Window details don't exist");
             glm::uvec2 frameSize = windowDetails->mDetails.getSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));

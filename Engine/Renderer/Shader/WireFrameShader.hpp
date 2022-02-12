@@ -3,6 +3,7 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
+#include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/WireframeRenderable.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
@@ -28,7 +29,7 @@ namespace neo {
                 )
             {}
 
-            virtual void render(ECS& ecs) {
+            virtual void render(const ECS& ecs) override {
                 bind();
                 CHECK_GL(glDisable(GL_CULL_FACE));
                 CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));

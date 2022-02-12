@@ -6,6 +6,13 @@
 #include "Renderer/Shader/WireframeShader.hpp"
 #include "Renderer/Shader/GammaCorrectShader.hpp"
 
+#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
+#include "ECS/Component/TransformationComponent/SinTranslateComponent.hpp"
+
+#include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
+#include "ECS/Systems/TranslationSystems/SinTranslateSystem.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 #include "Util/Util.hpp"
 
@@ -14,11 +21,11 @@ using namespace neo;
 /* Game object definitions */
 struct Camera {
     CameraComponent *camera;
-    Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        GameObject *gameObject = &Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
-        Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
+    Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
+        GameObject *gameObject = &ecs.createGameObject();
+        ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        camera = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+        ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
 
@@ -26,10 +33,10 @@ struct Light {
     GameObject *gameObject;
     LightComponent *light;
 
-    Light(glm::vec3 pos, glm::vec3 col, glm::vec3 scale) {
-        gameObject = &Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(gameObject, pos, scale);
-        light = &Engine::addComponent<LightComponent>(gameObject, col);
+    Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 scale) {
+        gameObject = &ecs.createGameObject();
+        ecs.addComponent<SpatialComponent>(gameObject, pos, scale);
+        light = &ecs.addComponent<LightComponent>(gameObject, col);
     }
 };
 
@@ -38,14 +45,14 @@ struct Renderable {
     SpatialComponent *spatial;
     GBufferComponent *gbuffer;
 
-    Renderable(Mesh *mesh, Texture* texture, glm::vec3 pos, glm::vec3 scale) {
-        gameObject = &Engine::createGameObject();
-        spatial = &Engine::addComponent<SpatialComponent>(gameObject, pos, scale);
-        Engine::addComponent<MeshComponent>(gameObject, *mesh);
+    Renderable(ECS& ecs, Mesh *mesh, Texture* texture, glm::vec3 pos, glm::vec3 scale) {
+        gameObject = &ecs.createGameObject();
+        spatial = &ecs.addComponent<SpatialComponent>(gameObject, pos, scale);
+        ecs.addComponent<MeshComponent>(gameObject, *mesh);
         Material material;
         material.mAmbient = glm::vec3(0.2f);
         material.mDiffuse = util::genRandomVec3();
-        gbuffer = &Engine::addComponent<GBufferComponent>(gameObject, *texture, material);
+        gbuffer = &ecs.addComponent<GBufferComponent>(gameObject, *texture, material);
     }
 };
 
@@ -53,36 +60,36 @@ int main() {
     EngineConfig config;
     config.APP_NAME = "Deferred";
     config.APP_RES = "res/";
-    Engine::init(config);
+    ECS& ecs = Engine::init(config);
 
     /* Game objects */
-    Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
-    Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
+    Camera camera(ecs, 45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
+    ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
     /* Lights */
     std::vector<Light *> lights;
-    lights.push_back(new Light(glm::vec3(25.f, 25.f, 0.f), glm::vec3(1.f), glm::vec3(100.f)));
+    lights.push_back(new Light(ecs, glm::vec3(25.f, 25.f, 0.f), glm::vec3(1.f), glm::vec3(100.f)));
 
     /* Renderables */
-    Renderable cube(Library::getMesh("cube"), Library::getTexture("black"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
-    Renderable dragon(Library::loadMesh("dragon10k.obj", true), Library::getTexture("black"), glm::vec3(-4.f, 10.f, -5.f), glm::vec3(10.f));
-    Renderable stairs(Library::loadMesh("staircase.obj", true), Library::getTexture("black"), glm::vec3(5.f, 10.f, 9.f), glm::vec3(10.f));
+    Renderable cube(ecs, Library::getMesh("cube"), Library::getTexture("black"), glm::vec3(10.f, 0.75f, 0.f), glm::vec3(5.f));
+    Renderable dragon(ecs, Library::loadMesh("dragon10k.obj", true), Library::getTexture("black"), glm::vec3(-4.f, 10.f, -5.f), glm::vec3(10.f));
+    Renderable stairs(ecs, Library::loadMesh("staircase.obj", true), Library::getTexture("black"), glm::vec3(5.f, 10.f, 9.f), glm::vec3(10.f));
 
     Texture* pineTexture = Library::loadTexture("PineTexture.png");
     for (int i = 0; i < 20; i++) {
-        Renderable tree(Library::loadMesh("PineTree3.obj", true), pineTexture, glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * util::genRandom()), glm::vec3(10.f));
+        Renderable tree(ecs, Library::loadMesh("PineTree3.obj", true), pineTexture, glm::vec3(50.f - i * 5.f, 10.f, 25.f + 25.f * util::genRandom()), glm::vec3(10.f));
         tree.gbuffer->mMaterial.mDiffuse = glm::vec3(0.f);
     }
 
     // Terrain 
-    Renderable terrain(Library::getMesh("quad"), Library::getTexture("black"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
+    Renderable terrain(ecs, Library::getMesh("quad"), Library::getTexture("black"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1000.f));
     terrain.spatial->rotate(glm::mat3(glm::rotate(glm::mat4(1.f), -1.56f, glm::vec3(1, 0, 0))));
     terrain.gbuffer->mMaterial.mAmbient = glm::vec3(0.7f);
     terrain.gbuffer->mMaterial.mDiffuse = glm::vec3(0.7f);
 
     /* Systems - order matters! */
-    Engine::addSystem<CameraControllerSystem>();
-    Engine::addSystem<SinTranslateSystem>();
+    ecs.addSystem<CameraControllerSystem>();
+    ecs.addSystem<SinTranslateSystem>();
 
     /* Init renderer */
     Renderer::init("shaders/");
@@ -92,7 +99,7 @@ int main() {
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
-    Engine::addImGuiFunc("Lights", [&]() {
+    Engine::addImGuiFunc("Lights", [&lights](ECS& ecs_) {
         static int index;
         if (ImGui::CollapsingHeader("Create Lights")) {
             if (ImGui::TreeNode("Single")) {
@@ -105,9 +112,9 @@ int main() {
                 ImGui::SliderFloat3("Color", &color[0], 0.01f, 1.f);
                 ImGui::SliderFloat("Offset", &yOffset.y, 0.f, 25.f);
                 if (ImGui::Button("Create")) {
-                    auto light = new Light(pos, color, glm::vec3(size));
+                    auto light = new Light(ecs_, pos, color, glm::vec3(size));
                     if (yOffset.y) {
-                        Engine::addComponent<SinTranslateComponent>(light->gameObject, yOffset, pos);
+                        ecs_.addComponent<SinTranslateComponent>(light->gameObject, yOffset, pos);
                     }
                     lights.push_back(light);
                     index = static_cast<int>(lights.size()) - 1;
@@ -117,7 +124,7 @@ int main() {
             if (ImGui::TreeNode("Random Lights")) {
                 if (ImGui::Button("Clear lights")) {
                     for (auto & l : lights) {
-                        Engine::removeGameObject(*l->gameObject);
+                        ecs_.removeGameObject(*l->gameObject);
                     }
                     lights.clear();
                 }
@@ -144,9 +151,9 @@ int main() {
                         );
                         glm::vec3 color = util::genRandomVec3();
                         float size = util::genRandom(minScale, maxScale);
-                        auto light = new Light(position, color, glm::vec3(size));
+                        auto light = new Light(ecs_, position, color, glm::vec3(size));
                         glm::vec3 sinMove(0.f, util::genRandom(minSinOffset, maxSinOffset), 0.f);
-                        Engine::addComponent<SinTranslateComponent>(light->gameObject, sinMove, position);
+                        ecs_.addComponent<SinTranslateComponent>(light->gameObject, sinMove, position);
                         lights.push_back(light);
                     }
                 }
@@ -160,7 +167,7 @@ int main() {
             ImGui::SliderInt("Index", &index, 0, static_cast<int>(lights.size()) - 1);
             auto l = lights[index];
             if (ImGui::Button("Delete light")) {
-                Engine::removeGameObject(*l->gameObject);
+                ecs.removeGameObject(*l->gameObject);
                 lights.erase(lights.begin() + index);
                 index = glm::max(0, index - 1);
             }

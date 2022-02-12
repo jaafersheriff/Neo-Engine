@@ -5,7 +5,14 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
 
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
+#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/LightComponent/LightComponent.hpp"
+#include "ECS/Component/RenderableComponent/PhongRenderable.hpp"
+#include "ECS/Component/RenderableComponent/MeshComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 namespace neo {
 

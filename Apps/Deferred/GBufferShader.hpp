@@ -7,6 +7,11 @@
 
 #include "Messaging/Messenger.hpp"
 
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/RenderableComponent/MeshComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
 using namespace neo;
 
 class GBufferShader : public Shader {

@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Engine/Engine.hpp"
 #include "ParticleMeshComponent.hpp"
 
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
 #include "Renderer/GLObjects/Texture3D.hpp"
+
+#include "ECS/ECS.hpp"
+#include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 
 using namespace neo;
 

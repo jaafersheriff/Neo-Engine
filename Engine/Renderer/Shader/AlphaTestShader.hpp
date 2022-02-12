@@ -5,6 +5,8 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
 
+#include "ECS/Component/RenderableComponent/AlphaTestRenderable.hpp"
+
 namespace neo {
 
     class AlphaTestShader : public Shader {

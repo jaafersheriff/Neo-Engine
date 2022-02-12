@@ -3,7 +3,8 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Engine/Engine.hpp"
+#include "ECS/ECS.hpp"
+#include "ECS/Component/LightComponent/LightComponent.hpp"
 
 using namespace neo;
 

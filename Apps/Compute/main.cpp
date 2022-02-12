@@ -4,24 +4,32 @@
 #include "ParticlesComputeShader.hpp"
 #include "ParticleVisShader.hpp"
 
+#include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/LightComponent/LightComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
+#include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
+
 using namespace neo;
 
 /* Game object definitions */
 struct Camera {
     CameraComponent *camera;
-    Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        GameObject *gameObject = &Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
-        Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
+    Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
+        GameObject *gameObject = &ecs.createGameObject();
+        ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        camera = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+        ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
 
 struct Light {
-    Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        auto& gameObject = Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(&gameObject, pos);
-        Engine::addComponent<LightComponent>(&gameObject, col, att);
+    Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
+        auto& gameObject = ecs.createGameObject();
+        ecs.addComponent<SpatialComponent>(&gameObject, pos);
+        ecs.addComponent<LightComponent>(&gameObject, col, att);
     }
 };
 
@@ -30,31 +38,31 @@ int main() {
     config.APP_NAME = "Compute";
     config.APP_RES = "res/";
     config.attachEditor = false;
-    Engine::init(config);
+    ECS& ecs = Engine::init(config);
 
     /* Game objects */
-    Camera camera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-    Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
+    Camera camera(ecs, 45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+    ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
-    Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+    Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
     // Create mesh
     {
-        auto& go = Engine::createGameObject();
-        Engine::addComponent<ParticleMeshComponent>(&go);
-        Engine::addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.0f, 0.f));
+        auto& go = ecs.createGameObject();
+        ecs.addComponent<ParticleMeshComponent>(&go);
+        ecs.addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.0f, 0.f));
     }
 
     /* Systems - order matters! */
-    Engine::addSystem<CameraControllerSystem>();
+    ecs.addSystem<CameraControllerSystem>();
 
     /* Init renderer */
     Renderer::init("shaders/");
     Renderer::addComputeShader<ParticlesComputeShader>("particles.compute");
     Renderer::addSceneShader<ParticleVisShader>("particles.vert", "particles.frag", "particles.geom");
 
-    Engine::addImGuiFunc("Mesh", []() {
-        if (auto mesh = Engine::getComponentTuple<ParticleMeshComponent, SpatialComponent>()) {
+    Engine::addImGuiFunc("Mesh", [](ECS& ecs_) {
+        if (auto mesh = ecs_.getComponentTuple<ParticleMeshComponent, SpatialComponent>()) {
             mesh->get<ParticleMeshComponent>()->imGuiEditor();
             mesh->get<SpatialComponent>()->imGuiEditor();
         }

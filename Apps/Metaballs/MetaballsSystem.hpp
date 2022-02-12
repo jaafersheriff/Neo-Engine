@@ -1,11 +1,13 @@
 #pragma once
 
-#include "ECS/Systems/System.hpp"
-#include "Engine/Engine.hpp"
+#include "ECS/ECS.hpp"
 
 #include "DirtyBallsComponent.hpp"
 #include "MetaballComponent.hpp"
 #include "MetaballsMeshComponent.hpp"
+
+#include"ECS/Component/EngineComponents/FrameStatsComponent.hpp"
+#include"ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 using namespace neo;
 

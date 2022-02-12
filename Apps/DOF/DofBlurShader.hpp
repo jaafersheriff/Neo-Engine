@@ -1,13 +1,16 @@
 #pragma once
 
-#include "Renderer/Shader/PostProcessShader.hpp"
-#include "Renderer/GLObjects/GLHelper.hpp"
+#include "ECS/ECS.hpp"
+#include "ECS/Component/HardwareComponent/WindowDetailsComponent.hpp"
 
 #include "Messaging/Messenger.hpp"
 
 #include "Loader/Library.hpp"
+
 #include "Renderer/GLObjects/Framebuffer.hpp"
+#include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Mesh.hpp"
+#include "Renderer/Shader/PostProcessShader.hpp"
 
 #include "ext/imgui/imgui.h"
 
@@ -29,21 +32,20 @@ class DofBlurShader : public Shader {
             DofBlurFBO->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&, frameScale = frameScale](const Message &msg) {
-                const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                NEO_UNUSED(m);
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&, frameScale = frameScale](const Message &msg, ECS& ecs) {
+                NEO_UNUSED(ecs);
                 glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
                 Library::getFBO("dofblur")->resize(frameSize / glm::uvec2(*frameScale));
             });
  
         }
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
             Library::getFBO("dofblur")->bind();
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 
-            auto windowDetails = Engine::getSingleComponent<WindowDetailsComponent>();
+            auto windowDetails = ecs.getSingleComponent<WindowDetailsComponent>();
             NEO_ASSERT(windowDetails, "Window details don't exist");
             glm::ivec2 frameSize = windowDetails->mDetails.getSize() / *frameScale;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));

@@ -3,9 +3,8 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Engine/Engine.hpp"
-
 #include "SunComponent.hpp"
+#include "ECS/Component/HardwareComponent/WindowDetailsComponent.hpp"
 
 using namespace neo;
 

@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Engine/Engine.hpp"
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
+
+#include "ECS/ECS.hpp"
+#include "ECS/Component/RenderableComponent/SkyboxComponent.hpp"
 
 namespace neo {
     class SkyboxShader : public Shader {
