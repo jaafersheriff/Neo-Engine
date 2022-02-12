@@ -1,5 +1,9 @@
-#include "Engine/Engine.hpp"
 #include "RotationSystem.hpp"
+#include "ECS/ECS.hpp"
+
+#include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+#include "ECS/Component/TransformationComponent/RotationComponent.hpp"
 
 namespace neo {
 

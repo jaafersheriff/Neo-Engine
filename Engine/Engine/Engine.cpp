@@ -52,7 +52,7 @@ namespace neo {
     Keyboard Engine::mKeyboard;
     Mouse Engine::mMouse;
 
-    void Engine::init(EngineConfig config) {
+    ECS& Engine::init(EngineConfig config) {
 
         /* Init base engine */
         srand((unsigned int)(time(0)));
@@ -96,6 +96,8 @@ namespace neo {
         MicroProfileSetEnableAllGroups(true);
         MicroProfileSetForceMetaCounters(1);
 #endif
+
+        return mECS;
     }
 
     void Engine::run() {

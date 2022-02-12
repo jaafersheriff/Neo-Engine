@@ -40,7 +40,7 @@ namespace neo {
         /* Base Engine */
         public:
             static EngineConfig mConfig;
-            static void init(EngineConfig);
+            static ECS& init(EngineConfig);
             static void run();
             static void shutDown();
 

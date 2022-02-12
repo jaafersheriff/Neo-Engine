@@ -1,9 +1,11 @@
 #pragma once
 
-#include "Engine/Engine.hpp"
+#include "ECS/ECS.hpp"
 
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
+
+#include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 
 namespace neo {
 
@@ -97,7 +99,7 @@ namespace neo {
                 loadTexture("diffuseMap", renderable->mDiffuseMap);
 
                 /* Bind material */
-                Material& material = renderable->mMaterial;
+                const Material& material = renderable->mMaterial;
 
                 loadUniform("ambientColor", material.mAmbient);
                 loadUniform("diffuseColor", material.mDiffuse);

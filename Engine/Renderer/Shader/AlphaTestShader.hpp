@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Engine.hpp"
+#include "ECS/ECS.hpp"
 
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
@@ -34,16 +34,16 @@ namespace neo {
                 })")
         {}
 
-        virtual void render() override {
+        virtual void render(const ECS& ecs) override {
             bind();
 
             /* Load PV */
-            auto camera = Engine::getComponentTuple<MainCameraComponent, CameraComponent>();
+            auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
             NEO_ASSERT(camera, "No main camera exists");
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
 
-            for (auto& renderable : Engine::getComponentTuples<renderable::AlphaTestRenderable, MeshComponent, SpatialComponent>()) {
+            for (auto& renderable : ecs.getComponentTuples<renderable::AlphaTestRenderable, MeshComponent, SpatialComponent>()) {
                 auto spatial = renderable->get<SpatialComponent>();
                 loadUniform("M", spatial->getModelMatrix());
 
