@@ -6,6 +6,18 @@
 #include "Renderer/Shader/GammaCorrectShader.hpp"
 #include "Renderer/Shader/SelectableShader.hpp"
 
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/LightComponent/LightComponent.hpp"
+#include "ECS/Component/RenderableComponent/MeshComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
+#include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
+#include "ECS/Systems/SelectingSystems/MouseRaySystem.hpp"
+#include "ECS/Systems/SelectingSystems/SelectingSystem.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -13,22 +25,22 @@ using namespace neo;
 /* Game object definitions */
 struct Camera {
     CameraComponent *camera;
-    Camera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        GameObject *gameObject = &Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &Engine::addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
-        Engine::addComponent<CameraControllerComponent>(gameObject, ls, ms);
+    Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
+        GameObject *gameObject = &ecs.createGameObject();
+        ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+        camera = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+        ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
     }
 };
 
 struct Light {
-    Light(glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        auto& gameObject = Engine::createGameObject();
-        Engine::addComponent<SpatialComponent>(&gameObject, pos);
-        Engine::addComponent<LightComponent>(&gameObject, col, att);
+    Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
+        auto& gameObject = ecs.createGameObject();
+        ecs.addComponent<SpatialComponent>(&gameObject, pos);
+        ecs.addComponent<LightComponent>(&gameObject, col, att);
 
-        Engine::addImGuiFunc("Light", [&]() {
-            if (auto light = Engine::getSingleComponent<LightComponent>()) {
+        Engine::addImGuiFunc("Light", [](ECS& ecs_) {
+            if (auto light = ecs_.getSingleComponent<LightComponent>()) {
                 light->imGuiEditor();
             }
         });
@@ -38,10 +50,10 @@ struct Light {
 struct Renderable {
     GameObject *gameObject;
 
-    Renderable(Mesh *mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
-        gameObject = &Engine::createGameObject();
-        Engine::addComponent<MeshComponent>(gameObject, *mesh);
-        Engine::addComponent<SpatialComponent>(gameObject, position, scale, rotation);
+    Renderable(ECS& ecs, Mesh *mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
+        gameObject = &ecs.createGameObject();
+        ecs.addComponent<MeshComponent>(gameObject, *mesh);
+        ecs.addComponent<SpatialComponent>(gameObject, position, scale, rotation);
     }
 };
 
@@ -50,51 +62,54 @@ int main() {
     config.APP_NAME = "FrustaFitting";
     config.APP_RES = "res/";
     config.attachEditor = false;
-    Engine::init(config);
+    ECS& ecs = Engine::init(config);
 
     /* Game objects */
-    Camera camera(45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-    Engine::addComponent<MainCameraComponent>(&camera.camera->getGameObject());
+    Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+    ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
-    Light(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+    Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
     /* Cube object */
     for (int i = 0; i < 30; i++) {
-        Renderable r(Library::getMesh("sphere"), glm::vec3(util::genRandom(-7.5, 7.5), 0.f, util::genRandom(-7.5, 7.5)));
+        Renderable r(ecs, Library::getMesh("sphere"), glm::vec3(util::genRandom(-7.5, 7.5), 0.f, util::genRandom(-7.5, 7.5)));
         Material material;
         material.mAmbient = glm::vec3(0.2f);
         material.mDiffuse = glm::vec3(1.f, 1.f, 1.f);
         material.mShininess = 20.f;
-        Engine::addComponent<renderable::PhongRenderable>(r.gameObject, *Library::getTexture("black"), material);
-        Engine::addComponent<BoundingBoxComponent>(r.gameObject, *Library::getMesh("sphere"));
-        Engine::addComponent<SelectableComponent>(r.gameObject);
+        ecs.addComponent<renderable::PhongRenderable>(r.gameObject, *Library::getTexture("black"), material);
+        ecs.addComponent<BoundingBoxComponent>(r.gameObject, *Library::getMesh("sphere"));
+        ecs.addComponent<SelectableComponent>(r.gameObject);
     }
 
     /* Ground plane */
     {
-        Renderable plane(Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
-        Engine::addComponent<renderable::AlphaTestRenderable>(plane.gameObject, *Library::loadTexture("grid.png"));
+        Renderable plane(ecs, Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
+        ecs.addComponent<renderable::AlphaTestRenderable>(plane.gameObject, *Library::loadTexture("grid.png"));
     }
 
     /* Systems - order matters! */
-    Engine::addSystem<CameraControllerSystem>();
-    Engine::addSystem<MouseRaySystem>(true);
-    Engine::addSystem<SelectingSystem>(
+    ecs.addSystem<CameraControllerSystem>();
+    ecs.addSystem<MouseRaySystem>(true);
+    ecs.addSystem<SelectingSystem>(
         "Selecter System",
         // Reset operation for unselected components
-        [](SelectedComponent* reset) {
+        [](ECS& ecs_, SelectedComponent* reset) {
+            NEO_UNUSED(ecs_);
             if (auto renderable = reset->getGameObject().getComponentByType<renderable::PhongRenderable>()) {
                 renderable->mMaterial.mDiffuse = glm::vec3(1.f);
             }
         },
         // Operate on selected components
-        [](SelectableComponent* selected) {
+        [](ECS& ecs_, SelectableComponent* selected) {
+            NEO_UNUSED(ecs_);
             if (auto renderable = selected->getGameObject().getComponentByType<renderable::PhongRenderable>()) {
                 renderable->mMaterial.mDiffuse = glm::vec3(1.f, 0.f, 0.f);
             }
         },
         // imgui editor
-        [](SelectedComponent* edit) {
+        [](ECS& ecs_, SelectedComponent* edit) {
+            NEO_UNUSED(ecs_);
             edit->getGameObject().getComponentByType<SpatialComponent>()->imGuiEditor();
         }
     );

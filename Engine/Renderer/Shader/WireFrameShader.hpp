@@ -3,6 +3,8 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/WireframeRenderable.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"

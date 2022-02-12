@@ -167,7 +167,7 @@ int main() {
             ImGui::SliderInt("Index", &index, 0, static_cast<int>(lights.size()) - 1);
             auto l = lights[index];
             if (ImGui::Button("Delete light")) {
-                ecs.removeGameObject(*l->gameObject);
+                ecs_.removeGameObject(*l->gameObject);
                 lights.erase(lights.begin() + index);
                 index = glm::max(0, index - 1);
             }

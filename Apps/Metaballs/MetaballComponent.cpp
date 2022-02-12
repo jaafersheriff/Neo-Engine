@@ -1,6 +1,5 @@
 #include "MetaballComponent.hpp"
 #include "MetaballsSystem.hpp"
-#include "Engine/Engine.hpp"
 
 using namespace neo;
 
