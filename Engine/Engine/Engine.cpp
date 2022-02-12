@@ -335,7 +335,7 @@ namespace neo {
 
     void Engine::_runImGui(const util::FrameCounter& counter) {
         if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu("Performance")) {
+            if (ImGui::BeginMenu("Stats")) {
                 // Translate FPS to floats
                 std::vector<float> FPSfloats;
                 std::vector<int> FPSInts = counter.mFPSList;
@@ -347,6 +347,16 @@ namespace neo {
                 ImGui::PlotLines("Frame time", counter.mTimeStepList.data(), static_cast<int>(counter.mTimeStepList.size()), 0, std::to_string(counter.mTimeStep * 1000.f).c_str());
                 if (ImGui::Button("VSync")) {
                     mWindow.toggleVSync();
+                }
+                if (auto stats = Engine::getComponentTuple<MouseComponent, WindowDetailsComponent>()) {
+                    if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
+                        stats->get<WindowDetailsComponent>()->imGuiEditor();
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNodeEx("Mouse", ImGuiTreeNodeFlags_DefaultOpen)) {
+                        stats->get<MouseComponent>()->imGuiEditor();
+                        ImGui::TreePop();
+                    }
                 }
                 ImGui::EndMenu();
             }
