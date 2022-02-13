@@ -10,8 +10,7 @@ namespace neo {
     class Mouse {
 
     public:
-        struct MouseResetMessage : public Message {
-        };
+        struct MouseResetMessage : public Message { };
         struct MouseButtonMessage : public Message {
             const int mButton;
             const int mAction;
@@ -33,6 +32,11 @@ namespace neo {
                 , mY(y)
             {}
         };
+
+        Mouse() = default;
+        ~Mouse() = default;
+        Mouse(const Mouse&) = default;
+        Mouse& operator=(const Mouse&) = default;
 
         void init();
 

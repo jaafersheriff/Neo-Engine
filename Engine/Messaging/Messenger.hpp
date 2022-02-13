@@ -15,8 +15,12 @@ namespace neo {
     class GameObject;
 
     class Messenger {
-
         public:
+            Messenger() = default;
+            ~Messenger() = default;
+            Messenger(const Messenger&) = delete;
+            Messenger& operator=(const Messenger&) = delete;
+
             /* Sends out a message for any receivers of that message type to pick up
              * If gameObject is not null, first sends the message locally to receivers of only that object. */
             template <typename MsgT, typename... Args> static void sendMessage(const GameObject* gameObject, Args &&... args);
@@ -42,8 +46,8 @@ namespace neo {
     void Messenger::addReceiver(const GameObject *gameObject, const ReceiverFunc& func) {
         static_assert(std::is_base_of<Message, MsgT>::value, "MsgT must be a message type");
 
-        auto & receiver =  gameObject ? const_cast<GameObject *>(gameObject)->mReceivers : mReceivers;
-        receiver[std::type_index(typeid(MsgT))].emplace_back(func);
+        auto& receiver = gameObject ? const_cast<GameObject *>(gameObject)->mReceivers : mReceivers;
+		receiver[std::type_index(typeid(MsgT))].emplace_back(func);
 
     }
 

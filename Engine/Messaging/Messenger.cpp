@@ -6,8 +6,8 @@
 
 namespace neo {
 
-    std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> Messenger::mMessages;
-    std::unordered_map<std::type_index, std::vector<ReceiverFunc>> Messenger::mReceivers;
+    std::vector<std::tuple<const GameObject*, std::type_index, std::unique_ptr<Message>>> Messenger::mMessages = {};
+    std::unordered_map<std::type_index, std::vector<ReceiverFunc>> Messenger::mReceivers = {};
 
     void Messenger::relayMessages(ECS& ecs) {
         MICROPROFILE_SCOPEI("Messenger", "relayMessages()", MP_AUTO);

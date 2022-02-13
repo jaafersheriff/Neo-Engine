@@ -9,10 +9,7 @@ namespace neo {
 
     class Keyboard {
     public:
-        struct ResetKeyboardMessage : public Message {
-            ResetKeyboardMessage()
-            {}
-        };
+        struct ResetKeyboardMessage : public Message { };
         struct KeyPressedMessage : public Message {
             const int mKey;
             const int mAction;
@@ -22,10 +19,14 @@ namespace neo {
             {}
         };
 
+        Keyboard() = default;
+        ~Keyboard() = default;
+        Keyboard(const Keyboard&) = default;
+        Keyboard& operator=(const Keyboard&) = default;
+        
         void init();
 
         bool isKeyPressed(int) const;
-
         void setKeyStatus(int, int);
         void reset();
 

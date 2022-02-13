@@ -14,7 +14,7 @@ namespace neo {
         }
     }
 
-    void ECS::shutDown() {
+    void ECS::clean() {
         for (auto& gameObject : mGameObjects) {
             removeGameObject(*gameObject);
         }

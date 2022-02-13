@@ -107,5 +107,19 @@ namespace neo {
         }
     }
 
-
+    void Library::clean() {
+        // Clean up GL objects
+        for (auto& mesh : mMeshes) {
+            mesh.second->destroy();
+        }
+        mMeshes.clear();
+        for (auto& texture : mTextures) {
+            texture.second->destroy();
+        }
+        mTextures.clear();
+        for (auto& frameBuffer : mFramebuffers) {
+            frameBuffer.second->destroy();
+        }
+        mFramebuffers.clear();
+    }
 }

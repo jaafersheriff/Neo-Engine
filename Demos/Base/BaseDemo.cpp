@@ -45,11 +45,10 @@ struct Light {
     }
 };
 
-BaseDemo::BaseDemo() : IDemo() {
-	mConfig.name = "Base Demo";
-}
-
-BaseDemo::~BaseDemo() {
+IDemo::Config BaseDemo::getConfig() const {
+    IDemo::Config config;
+    config.name = "Base Demo";
+    return config;
 }
 
 void BaseDemo::init(ECS& ecs) {
@@ -85,7 +84,6 @@ void BaseDemo::init(ECS& ecs) {
     ecs.addSystem<RotationSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
 }

@@ -41,19 +41,19 @@ namespace neo {
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPostShaders;
     glm::vec3 Renderer::mClearColor;
 
-    void Renderer::init(const std::string &dir, glm::vec3 clearColor) {
-        APP_SHADER_DIR = dir;
-        mClearColor = clearColor;
-
+    Renderer::Renderer() {
         /* Set max work gruop */
         CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &NEO_MAX_COMPUTE_GROUP_SIZE.x));
         CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &NEO_MAX_COMPUTE_GROUP_SIZE.y));
         CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &NEO_MAX_COMPUTE_GROUP_SIZE.z));
-
-        preinit();
     }
 
-    void Renderer::preinit() {
+    void Renderer::setDemoConfig(IDemo::Config config) {
+        APP_SHADER_DIR = config.shaderDir;
+        mClearColor = config.clearColor;
+    }
+
+    void Renderer::init() {
         /* Init default FBO */
         auto backBuffer = Library::createFBO("0");
         backBuffer->mFBOID = 0;
@@ -63,7 +63,7 @@ namespace neo {
         resetState();
     }
 
-    void Renderer::shutDown() {
+    void Renderer::clean() {
         for (auto& shader : mComputeShaders) {
             shader.second->cleanUp();
         }
@@ -80,6 +80,8 @@ namespace neo {
             shader.second->cleanUp();
         }
         mPostShaders.clear();
+
+        resetState();
     }
 
     void Renderer::resetState() {

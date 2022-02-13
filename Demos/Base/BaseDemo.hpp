@@ -6,9 +6,7 @@ using namespace neo;
 
 class BaseDemo : public IDemo {
 public:
-	BaseDemo();
-	~BaseDemo();
-
+	virtual IDemo::Config getConfig() const override;
 	virtual void init(ECS& ecs) override;
 	virtual void update(ECS& ecs) override;
 	virtual void destroy() override;

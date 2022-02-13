@@ -74,12 +74,10 @@ struct Renderable {
     }
 };
 
-BasicPhong::BasicPhong() : IDemo() {
-    // TODO - force this being set on construction somehow
-    mConfig.name = "Basic Phong";
-}
-
-BasicPhong::~BasicPhong() {
+IDemo::Config BasicPhong::getConfig() const {
+    IDemo::Config config;
+    config.name = "Basic Phong";
+    return config;
 }
 
 void BasicPhong::init(ECS& ecs) {
@@ -110,7 +108,6 @@ void BasicPhong::init(ECS& ecs) {
 
     /* Init renderer */
     // TODO - dont call renderer init here
-    Renderer::init("shaders/");
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<WireframeShader>();
 

@@ -9,8 +9,12 @@
 int main() {
     using namespace neo;
 
+    DemoWrangler demos = {
+        sCurrentDemo,
+        sDemos
+    };
     Engine::init();
-    Engine::run(sDemos, sCurrentDemo);
+    Engine::run(demos);
 
 	return EXIT_SUCCESS;
 }

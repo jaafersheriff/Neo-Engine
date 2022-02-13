@@ -17,6 +17,13 @@ namespace neo {
         friend Engine;
 
         public:
+            Library() = default;
+            ~Library() = default;
+            Library(const Library&) = delete;
+            Library& operator=(const Library&) = delete;
+
+            static void clean();
+
             static Mesh* createEmptyMesh(const std::string&);
             static Mesh* getMesh(const std::string&);
             static Mesh* loadMesh(const std::string&, bool = false);
@@ -28,7 +35,6 @@ namespace neo {
             static Texture* getTexture(const std::string&);
             static Texture* loadTexture(const std::string&, TextureFormat = TextureFormat{});
             static Texture* loadCubemap(const std::string&, const std::vector<std::string> &);
-
 
             static Framebuffer* createFBO(const std::string&);
             static Framebuffer* getFBO(const std::string&);

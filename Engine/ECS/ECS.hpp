@@ -24,8 +24,12 @@ namespace neo {
         friend Engine;
 
         public:
-            void init();
-            void shutDown();
+            ECS() = default;
+            ~ECS() = default;
+            ECS(const ECS&) = delete;
+            ECS& operator=(const ECS&) = delete;
+
+            void clean();
 
         /* ECS */
         public:

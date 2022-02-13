@@ -2,6 +2,7 @@
 
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
+#include "DemoInfra/IDemo.hpp"
 
 #include "Messaging/Messenger.hpp"
 
@@ -22,6 +23,13 @@ namespace neo {
         friend Engine;
 
         public:
+            Renderer();
+            ~Renderer() = default;
+            Renderer(const Renderer &) = delete;
+            Renderer & operator=(const Renderer &) = delete;
+            Renderer(Renderer &&) = delete;
+            Renderer & operator=(Renderer &&) = delete;
+
             static std::string APP_SHADER_DIR;
             static std::string ENGINE_SHADER_DIR;
             static unsigned NEO_GL_MAJOR_VERSION;
@@ -29,11 +37,11 @@ namespace neo {
             static std::string NEO_GLSL_VERSION;
             static glm::ivec3 NEO_MAX_COMPUTE_GROUP_SIZE;
 
-            static void init(const std::string &, glm::vec3 clearColor = glm::vec3(0.f));
-            static void preinit();
+            static void setDemoConfig(IDemo::Config);
+            static void init();
             static void resetState();
             static void render(float, WindowSurface&, ECS&);
-            static void shutDown();
+            static void clean();
 
             /* FBO */
             static void setDefaultFBO(const std::string &);

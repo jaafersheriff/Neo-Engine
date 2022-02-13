@@ -31,6 +31,11 @@ namespace neo {
     class Loader {
 
         public:
+            Loader() = default;
+            ~Loader() = default;
+            Loader(const Loader&) = delete;
+            Loader& operator=(const Loader&) = delete;
+
             static void init(const std::string &, bool);
 
             /* Load Mesh pointer from an .obj file */

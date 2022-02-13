@@ -5,6 +5,11 @@
 namespace neo {
     namespace util {
         struct FrameCounter {
+            FrameCounter() = default;
+            ~FrameCounter() = default;
+            FrameCounter(const FrameCounter&) = delete;
+            FrameCounter& operator=(const FrameCounter&) = delete;
+
             void init(double);
             void update(double);
 

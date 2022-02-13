@@ -32,11 +32,17 @@ namespace neo {
 
         /* Base Engine */
         public:
-            static ECS& init();
-            static void run(std::vector<neo::IDemo*>& demos, uint32_t currDemo);
+            Engine() = default;
+            ~Engine() = default;
+            Engine(const Engine &) = delete;
+            Engine & operator=(const Engine &) = delete;
+            Engine(Engine &&) = delete;
+            Engine & operator=(Engine &&) = delete;
+
+            static void init();
+            static void run(DemoWrangler&);
             static void shutDown();
 
-        public:
             /* ImGui */
             static bool mImGuiEnabled;
             static void toggleImGui() { mImGuiEnabled = !mImGuiEnabled; }
@@ -45,10 +51,13 @@ namespace neo {
 
         private:
             static ECS mECS;
+            static void _createPrefabs();
+			static void _swapDemo(DemoWrangler&, bool doDestroy = true);
+            static int mSwapDemoIndex;
 
             /* ImGui */
             static std::unordered_map<std::string, ImGuiFunc> mImGuiFuncs;
-            static void _runImGui(std::vector<neo::IDemo*>& demos, uint32_t currDemo, const util::FrameCounter&);
+            static void _runImGui(DemoWrangler&, const util::FrameCounter&);
 
             /* Hardware */
             static WindowSurface mWindow;

@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-static uint32_t sCurrentDemo = 0;
+static int sCurrentDemo = -1;
 static std::vector<neo::IDemo*> sDemos = {
 	// TODO - maybe there should be some internal demo
 	new BaseDemo(),

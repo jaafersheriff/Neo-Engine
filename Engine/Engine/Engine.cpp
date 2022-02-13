@@ -34,6 +34,7 @@ extern "C" {
 
 #include <time.h>
 #include <iostream>
+#include <microprofile.h>
 
 namespace neo {
 
@@ -49,7 +50,9 @@ namespace neo {
     Keyboard Engine::mKeyboard;
     Mouse Engine::mMouse;
 
-    ECS& Engine::init() {
+    int Engine::mSwapDemoIndex = 0;
+
+    void Engine::init() {
 
         /* Init base engine */
         srand((unsigned int)(time(0)));
@@ -60,9 +63,8 @@ namespace neo {
         }
         mWindow.setSize(glm::ivec2(1920, 1080));
         ImGui::GetStyle().ScaleAllSizes(2.f);
-
-        mMouse.init();
         mKeyboard.init();
+        mMouse.init();
 
         Renderer::init();
 
@@ -72,94 +74,18 @@ namespace neo {
         MicroProfileSetEnableAllGroups(true);
         MicroProfileSetForceMetaCounters(1);
 #endif
-
-        return mECS;
     }
 
-    void Engine::run(std::vector<neo::IDemo*>& demos, uint32_t currDemo) {
+    void Engine::run(DemoWrangler& demos) {
         util::FrameCounter counter;
 
-        auto preInit = [&]() {
-            /* Generate basic meshes */
-            Mesh* mesh = new Mesh;
-            MeshGenerator::generateCube(mesh);
-            Library::loadMesh(std::string("cube"), mesh);
-            mesh = new Mesh;
-            MeshGenerator::generateQuad(mesh);
-            Library::loadMesh(std::string("quad"), mesh);
-            mesh = new Mesh;
-            MeshGenerator::generateSphere(mesh, 2);
-            Library::loadMesh(std::string("sphere"), mesh);
-
-            /* Generate basic textures*/
-            uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
-            auto tex = Library::createEmptyTexture<Texture2D>("black", {});
-            tex->update(glm::uvec2(1), data);
-            data[0] = data[1] = data[2] = 0xFF;
-            tex = Library::createEmptyTexture<Texture2D>("white", {});
-            tex->update(glm::uvec2(1), data);
-        };
-        auto runInit = [&]() {
-            /* Init loader after initializing GL*/
-            Loader::init(mConfig.APP_RES, true);
-
-            /* Apply config */
-            if (mConfig.attachEditor) {
-                mECS.addSystem<MouseRaySystem>();
-                mECS.addSystem<EditorSystem>();
-                Renderer::addPreProcessShader<SelectableShader>();
-                Renderer::addSceneShader<OutlineShader>();
-            }
-
-            /* Add engine-specific systems */
-            auto& lineShader = Renderer::addSceneShader<LineShader>();
-            lineShader.mActive = false;
-
-            counter.init(glfwGetTime());
-
-            /* Init systems */
-            mECS._initSystems();
-
-            /* Initialize new objects and components */
-            mECS._processInitQueue();
-            Messenger::relayMessages(mECS);
-
-        };
-
-        preInit();
-        mSwapDemo = currDemo;
-        demos[currDemo]->init(mECS);
-        runInit();
+        counter.init(glfwGetTime());
+        _swapDemo(demos, false);
         
         while (!mWindow.shouldClose()) {
             MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);
 
-            if (mSwapDemo != currDemo) {
-                demos[currDemo]->destroy();
-                currDemo = mSwapDemo;
-                mECS.shutDown();
-
-                // Clean up GL objects
-                for (auto& mesh : Library::mMeshes) {
-                    mesh.second->destroy();
-                }
-                Library::mMeshes.clear();
-                for (auto& texture : Library::mTextures) {
-                    texture.second->destroy();
-                }
-                Library::mTextures.clear();
-                for (auto& frameBuffer : Library::mFramebuffers) {
-                    frameBuffer.second->destroy();
-                }
-                Library::mFramebuffers.clear();
-
-                Renderer::shutDown();
-
-                Renderer::preinit();
-                preInit();
-                demos[currDemo]->init(mECS);
-                runInit();
-            }
+            _swapDemo(demos);
 
             /* Update frame counter */
             float runTime = static_cast<float>(glfwGetTime());
@@ -176,7 +102,7 @@ namespace neo {
                 mECS.addComponent<SingleFrameComponent>(&hardware);
             }
 
-            demos[currDemo]->update(mECS);
+            demos.CurrentDemo()->update(mECS);
 
             /* Destroy and create objects and components */
             mECS._processKillQueue();
@@ -191,7 +117,7 @@ namespace neo {
             if (mImGuiEnabled) {
                 MICROPROFILE_ENTERI("Engine", "_runImGui", MP_AUTO);
                 ImGui::GetIO().FontGlobalScale = 2.0f;
-                _runImGui(demos, currDemo, counter);
+                _runImGui(demos, counter);
                 MICROPROFILE_LEAVE();
                 Messenger::relayMessages(mECS);
             }
@@ -209,37 +135,91 @@ namespace neo {
             MicroProfileFlip(0);
         }
 
-        demos[currDemo]->destroy();
+        demos.CurrentDemo()->destroy();
         shutDown();
 	    MicroProfileShutdown();
     }
 
+    void Engine::_swapDemo(DemoWrangler& demos, bool doDestroy) {
+        if (mSwapDemoIndex == demos.currentDemoIndex) {
+            return;
+        }
+        MICROPROFILE_SCOPEI("Engine", "_swapDemo", MP_AUTO);
+
+        /* Destry the old state*/
+        if (doDestroy) {
+            demos.CurrentDemo()->destroy();
+            mECS.clean();
+            Library::clean();
+            Renderer::clean();
+        }
+
+        /* Init the new state */
+        demos.SetDemo(mSwapDemoIndex);
+        auto config = demos.GetConfig();
+        mWindow.setWindowTitle(config.name);
+        Renderer::setDemoConfig(config);
+        Renderer::init();
+        Loader::init(config.resDir, true);
+        _createPrefabs();
+        demos.CurrentDemo()->init(mECS);
+
+        /* Apply config */
+        if (config.attachEditor) {
+            mECS.addSystem<MouseRaySystem>();
+            mECS.addSystem<EditorSystem>();
+            Renderer::addPreProcessShader<SelectableShader>();
+            Renderer::addSceneShader<OutlineShader>();
+        }
+
+        /* Add engine-specific systems */
+        auto& lineShader = Renderer::addSceneShader<LineShader>();
+        lineShader.mActive = false;
+
+        /* Init systems */
+        mECS._initSystems();
+
+        /* Initialize new objects and components */
+        mECS._processInitQueue();
+        Messenger::relayMessages(mECS);
+    }
+
+    void Engine::_createPrefabs() {
+        /* Generate basic meshes */
+        Mesh* mesh = new Mesh;
+        prefabs::generateCube(mesh);
+        Library::loadMesh(std::string("cube"), mesh);
+        mesh = new Mesh;
+        prefabs::generateQuad(mesh);
+        Library::loadMesh(std::string("quad"), mesh);
+        mesh = new Mesh;
+        prefabs::generateSphere(mesh, 2);
+        Library::loadMesh(std::string("sphere"), mesh);
+
+        /* Generate basic textures*/
+        uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
+        auto tex = Library::createEmptyTexture<Texture2D>("black", {});
+        tex->update(glm::uvec2(1), data);
+        data[0] = data[1] = data[2] = 0xFF;
+        tex = Library::createEmptyTexture<Texture2D>("white", {});
+        tex->update(glm::uvec2(1), data);
+    }
+
     void Engine::shutDown() {
-        mECS.shutDown();
-
-        // Clean up GL objects
-        for (auto& mesh : Library::mMeshes) {
-            mesh.second->destroy();
-        }
-        for (auto& texture : Library::mTextures) {
-            texture.second->destroy();
-        }
-        for (auto& frameBuffer : Library::mFramebuffers) {
-            frameBuffer.second->destroy();
-        }
-
-        Renderer::shutDown();
+        mECS.clean();
+        Library::clean();
+        Renderer::clean();
 
         mWindow.shutDown();
     }
 
-    void Engine::_runImGui(std::vector<neo::IDemo*>& demos, uint32_t currDemo, const util::FrameCounter& counter) {
+    void Engine::_runImGui(DemoWrangler& demos, const util::FrameCounter& counter) {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("Demos")) {
-                if (ImGui::BeginCombo("Demos", demos[currDemo]->getConfig().name.c_str())) {
-                    for (int i = 0; i < demos.size(); i++) {
-                        if (ImGui::Selectable(demos[i]->getConfig().name.c_str())) {
-                            mSwapDemo = i;
+                if (ImGui::BeginCombo("Demos", demos.CurrentDemo()->getConfig().name.c_str())) {
+                    for (int i = 0; i < demos.demos.size(); i++) {
+                        if (ImGui::Selectable(demos.demos[i]->getConfig().name.c_str())) {
+                            mSwapDemoIndex = i;
                         }
                     }
                     ImGui::EndCombo();
@@ -319,7 +299,7 @@ namespace neo {
                 }
                 ImGui::EndMenu();
             }
-            if (mConfig.attachEditor && ImGui::BeginMenu("Editor")) {
+            if (demos.GetConfig().attachEditor && ImGui::BeginMenu("Editor")) {
                 if (auto selected = mECS.getSingleComponent<SelectedComponent>()) {
                     if (ImGui::Button("Delete entity")) {
                         mECS.removeGameObject(selected->getGameObject());
@@ -389,7 +369,7 @@ namespace neo {
                 }
                 ImGui::EndMenu();
             }
-            if (ImGui::BeginMenu(mConfig.APP_NAME.c_str())) {
+            if (ImGui::BeginMenu(demos.GetConfig().name.c_str())) {
                 for (auto & it : mImGuiFuncs) {
                     if (ImGui::TreeNodeEx(it.first.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
                         it.second(mECS);

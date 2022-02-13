@@ -12,6 +12,11 @@ namespace neo {
 
     class WindowSurface {
     public:
+        WindowSurface() = default;
+        ~WindowSurface() = default;
+        WindowSurface(const WindowSurface&) = delete;
+        WindowSurface& operator=(const WindowSurface&) = delete;
+
         int init(const std::string&);
         void update();
         void shutDown();

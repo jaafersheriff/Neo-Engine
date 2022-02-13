@@ -12,6 +12,10 @@ namespace neo {
             System(const std::string & name) :
                 mName(name)
             {}
+            ~System() = default;
+            System(const System&) = delete;
+            System& operator=(const System&) = delete;
+
 
             virtual void init(ECS&) {};
             virtual void update(ECS&) {};
