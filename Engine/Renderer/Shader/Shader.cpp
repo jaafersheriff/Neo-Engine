@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <vector>
+#include "microprofile.h"
 
 namespace neo {
     Shader::Shader(const std::string &name) :

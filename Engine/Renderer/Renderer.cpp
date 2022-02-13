@@ -33,7 +33,7 @@ namespace neo {
     glm::ivec3 Renderer::NEO_MAX_COMPUTE_GROUP_SIZE = glm::ivec3(1);
 
     std::string Renderer::APP_SHADER_DIR;
-    std::string Renderer::ENGINE_SHADER_DIR = "../../Engine/shaders/";
+    std::string Renderer::ENGINE_SHADER_DIR = "../Engine/shaders/";
     Framebuffer *Renderer::mDefaultFBO;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mComputeShaders;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPreProcessShaders;

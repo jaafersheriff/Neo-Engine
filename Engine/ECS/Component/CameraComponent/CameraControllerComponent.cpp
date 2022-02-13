@@ -4,7 +4,10 @@
 #include "ECS/GameObject.hpp"
 
 #include "Util/Util.hpp"
-#include "ext/imgui/imgui.h"
+
+#include <imgui/imgui.h>
+#include <GLFW/glfw3.h>
+#include "microprofile.h"
 
 namespace neo {
 

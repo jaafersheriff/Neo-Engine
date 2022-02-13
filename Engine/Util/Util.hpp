@@ -1,12 +1,9 @@
 #pragma once
 
-#include "GLFW/glfw3.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/constants.hpp"
-
 #include <vector>
 
-#include "microprofile.h"
+#include "glm/gtc/constants.hpp"
+#include "glm/glm.hpp"
 
 namespace neo {
 

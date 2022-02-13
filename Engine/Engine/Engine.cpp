@@ -100,7 +100,8 @@ namespace neo {
         return mECS;
     }
 
-    void Engine::run() {
+    void Engine::run(std::vector<neo::IDemo*>& demos, uint32_t currDemo) {
+        demos[currDemo]->init(mECS);
        
         /* Apply config */
         if (mConfig.attachEditor) {
@@ -142,6 +143,8 @@ namespace neo {
                 mECS.addComponent<SingleFrameComponent>(&hardware);
             }
 
+            demos[currDemo]->update(mECS);
+
             /* Destroy and create objects and components */
             mECS._processKillQueue();
             mECS._processInitQueue();
@@ -173,6 +176,7 @@ namespace neo {
             MicroProfileFlip(0);
         }
 
+        demos[currDemo]->destroy();
         shutDown();
 	    MicroProfileShutdown();
     }

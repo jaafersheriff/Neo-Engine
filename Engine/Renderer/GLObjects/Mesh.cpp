@@ -1,10 +1,9 @@
 #include "Mesh.hpp"
-
-#include "GL/glew.h"
-
+#include "Util/Util.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Util/Util.hpp"
+#include "GL/glew.h"
+#include "microprofile.h"
 
 namespace neo {
 

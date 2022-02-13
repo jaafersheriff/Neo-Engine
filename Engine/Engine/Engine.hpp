@@ -5,6 +5,7 @@
 #include "Util/Util.hpp"
 
 #include "ECS/ECS.hpp"
+#include "DemoInfra/IDemo.hpp"
 
 #include "ext/imgui/imgui.h"
 #include "microprofile.h"
@@ -41,7 +42,7 @@ namespace neo {
         public:
             static EngineConfig mConfig;
             static ECS& init(EngineConfig);
-            static void run();
+            static void run(std::vector<neo::IDemo*>& demos, uint32_t currDemo);
             static void shutDown();
 
         public:

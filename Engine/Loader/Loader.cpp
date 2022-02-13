@@ -25,7 +25,7 @@ namespace neo {
 
     bool Loader::mVerbose = false;
     std::string Loader::APP_RES_DIR = "";
-    std::string Loader::ENGINE_RES_DIR = "../../Engine/res/";
+    std::string Loader::ENGINE_RES_DIR = "../Engine/res/";
 
     void Loader::init(const std::string &res, bool v) {
         APP_RES_DIR = res;
@@ -47,7 +47,7 @@ namespace neo {
         if (!util::fileExists(_fileName.c_str())) {
             _fileName = ENGINE_RES_DIR + fileName;
         }
-        NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file: %s", fileName.c_str());
+        NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file: %s after checking:\n\t%s\n\t%s\n", fileName.c_str(), APP_RES_DIR.c_str(), ENGINE_RES_DIR.c_str());
         // TODO : use assimp or another optimized asset loader
         bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, _fileName.c_str());
         NEO_ASSERT(rc, errString.c_str());

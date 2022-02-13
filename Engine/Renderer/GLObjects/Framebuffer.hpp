@@ -1,12 +1,11 @@
 #pragma once
 
-#include "GL/glew.h"
-
+#include "Texture2D.hpp"
 #include "GLHelper.hpp"
 
-#include "Texture2D.hpp"
-
 #include <vector>
+#include "GL/glew.h"
+#include "microprofile.h"
 
 namespace neo {
 

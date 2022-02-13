@@ -52,8 +52,7 @@ add_compile_definitions(
 set(CPACK_COMPONENTS_GROUPING IGNORE)
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 
-include(cmake/InitApp.cmake)
 include(cmake/InitLib.cmake)
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Engine")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Apps")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Demos")
