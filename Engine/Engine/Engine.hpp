@@ -54,10 +54,11 @@ namespace neo {
 
         private:
             static ECS mECS;
+            static uint32_t mSwapDemo;
 
             /* ImGui */
             static std::unordered_map<std::string, ImGuiFunc> mImGuiFuncs;
-            static void _runImGui(const util::FrameCounter&);
+            static void _runImGui(std::vector<neo::IDemo*>& demos, uint32_t currDemo, const util::FrameCounter&);
 
             /* Hardware */
             static WindowSurface mWindow;

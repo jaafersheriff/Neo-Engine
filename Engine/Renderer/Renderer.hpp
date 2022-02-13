@@ -30,6 +30,7 @@ namespace neo {
             static glm::ivec3 NEO_MAX_COMPUTE_GROUP_SIZE;
 
             static void init(const std::string &, glm::vec3 clearColor = glm::vec3(0.f));
+            static void preinit();
             static void resetState();
             static void render(float, WindowSurface&, ECS&);
             static void shutDown();

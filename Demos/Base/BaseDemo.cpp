@@ -28,15 +28,6 @@
 using namespace neo;
 
 /* Game object definitions */
-struct Camera {
-    CameraComponent *camera;
-    Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        GameObject *gameObject = &ecs.createGameObject();
-        ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
-        ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
-    }
-};
 
 struct Light {
     Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
@@ -55,17 +46,22 @@ struct Light {
 };
 
 BaseDemo::BaseDemo() : IDemo() {
+	mConfig.name = "Base Demo";
 }
 
 BaseDemo::~BaseDemo() {
 }
 
 void BaseDemo::init(ECS& ecs) {
-	mConfig.name = "Base Demo";
 
-    /* Game objects */
-    Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-    ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
+    /* Camera */
+    {
+        GameObject* gameObject = &ecs.createGameObject();
+        ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(0, 0.6f, 5), glm::vec3(1.f));
+        ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, 1.f, 100.f, 45.f);
+        ecs.addComponent<CameraControllerComponent>(gameObject, 0.4f, 7.f);
+        ecs.addComponent<MainCameraComponent>(gameObject);
+    }
 
     Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 

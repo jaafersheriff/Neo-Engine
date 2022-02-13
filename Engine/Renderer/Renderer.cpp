@@ -45,6 +45,15 @@ namespace neo {
         APP_SHADER_DIR = dir;
         mClearColor = clearColor;
 
+        /* Set max work gruop */
+        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &NEO_MAX_COMPUTE_GROUP_SIZE.x));
+        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &NEO_MAX_COMPUTE_GROUP_SIZE.y));
+        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &NEO_MAX_COMPUTE_GROUP_SIZE.z));
+
+        preinit();
+    }
+
+    void Renderer::preinit() {
         /* Init default FBO */
         auto backBuffer = Library::createFBO("0");
         backBuffer->mFBOID = 0;
@@ -52,26 +61,25 @@ namespace neo {
 
         /* Init default GL state */
         resetState();
-
-        /* Set max work gruop */
-        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &NEO_MAX_COMPUTE_GROUP_SIZE.x));
-        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &NEO_MAX_COMPUTE_GROUP_SIZE.y));
-        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &NEO_MAX_COMPUTE_GROUP_SIZE.z));
     }
 
     void Renderer::shutDown() {
         for (auto& shader : mComputeShaders) {
             shader.second->cleanUp();
         }
+        mComputeShaders.clear();
         for (auto& shader : mPreProcessShaders) {
             shader.second->cleanUp();
         }
+        mPreProcessShaders.clear();
         for (auto& shader : mSceneShaders) {
             shader.second->cleanUp();
         }
+        mSceneShaders.clear();
         for (auto& shader : mPostShaders) {
             shader.second->cleanUp();
         }
+        mPostShaders.clear();
     }
 
     void Renderer::resetState() {

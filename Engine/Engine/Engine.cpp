@@ -42,6 +42,7 @@ namespace neo {
 
     /* ECS */
     ECS Engine::mECS;
+    uint32_t Engine::mSwapDemo = 0;
 
     /* ImGui */
     bool Engine::mImGuiEnabled = true;
@@ -71,25 +72,6 @@ namespace neo {
         /* Init loader after initializing GL*/
         Loader::init(mConfig.APP_RES, true);
 
-        /* Generate basic meshes */
-        Mesh* mesh = new Mesh;
-        MeshGenerator::generateCube(mesh);
-        Library::loadMesh(std::string("cube"), mesh);
-        mesh = new Mesh;
-        MeshGenerator::generateQuad(mesh);
-        Library::loadMesh(std::string("quad"), mesh);
-        mesh = new Mesh;
-        MeshGenerator::generateSphere(mesh, 2);
-        Library::loadMesh(std::string("sphere"), mesh);
-
-        /* Generate basic textures*/
-        uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
-        auto tex = Library::createEmptyTexture<Texture2D>("black", {});
-        tex->update(glm::uvec2(1), data);
-        data[0] = data[1] = data[2] = 0xFF;
-        tex = Library::createEmptyTexture<Texture2D>("white", {});
-        tex->update(glm::uvec2(1), data);
-
 #if MICROPROFILE_ENABLED
         MicroProfileOnThreadCreate("MAIN THREAD");
         MicroProfileGpuInitGL();
@@ -101,32 +83,86 @@ namespace neo {
     }
 
     void Engine::run(std::vector<neo::IDemo*>& demos, uint32_t currDemo) {
-        demos[currDemo]->init(mECS);
-       
-        /* Apply config */
-        if (mConfig.attachEditor) {
-            mECS.addSystem<MouseRaySystem>();
-            mECS.addSystem<EditorSystem>();
-            Renderer::addPreProcessShader<SelectableShader>();
-            Renderer::addSceneShader<OutlineShader>();
-        }
-
-        /* Add engine-specific systems */
-        auto& lineShader = Renderer::addSceneShader<LineShader>();
-        lineShader.mActive = false;
-
         util::FrameCounter counter;
-        counter.init(glfwGetTime());
 
-        /* Init systems */
-        mECS._initSystems();
+        auto preInit = [&]() {
+            /* Generate basic meshes */
+            Mesh* mesh = new Mesh;
+            MeshGenerator::generateCube(mesh);
+            Library::loadMesh(std::string("cube"), mesh);
+            mesh = new Mesh;
+            MeshGenerator::generateQuad(mesh);
+            Library::loadMesh(std::string("quad"), mesh);
+            mesh = new Mesh;
+            MeshGenerator::generateSphere(mesh, 2);
+            Library::loadMesh(std::string("sphere"), mesh);
 
-        /* Initialize new objects and components */
-        mECS._processInitQueue();
-        Messenger::relayMessages(mECS);
+            /* Generate basic textures*/
+            uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
+            auto tex = Library::createEmptyTexture<Texture2D>("black", {});
+            tex->update(glm::uvec2(1), data);
+            data[0] = data[1] = data[2] = 0xFF;
+            tex = Library::createEmptyTexture<Texture2D>("white", {});
+            tex->update(glm::uvec2(1), data);
+        };
+        auto runInit = [&]() {
+            /* Apply config */
+            if (mConfig.attachEditor) {
+                mECS.addSystem<MouseRaySystem>();
+                mECS.addSystem<EditorSystem>();
+                Renderer::addPreProcessShader<SelectableShader>();
+                Renderer::addSceneShader<OutlineShader>();
+            }
 
+            /* Add engine-specific systems */
+            auto& lineShader = Renderer::addSceneShader<LineShader>();
+            lineShader.mActive = false;
+
+            counter.init(glfwGetTime());
+
+            /* Init systems */
+            mECS._initSystems();
+
+            /* Initialize new objects and components */
+            mECS._processInitQueue();
+            Messenger::relayMessages(mECS);
+
+        };
+
+        preInit();
+        mSwapDemo = currDemo;
+        demos[currDemo]->init(mECS);
+        runInit();
+        
         while (!mWindow.shouldClose()) {
             MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);
+
+            if (mSwapDemo != currDemo) {
+                demos[currDemo]->destroy();
+                currDemo = mSwapDemo;
+                mECS.shutDown();
+
+                // Clean up GL objects
+                for (auto& mesh : Library::mMeshes) {
+                    mesh.second->destroy();
+                }
+                Library::mMeshes.clear();
+                for (auto& texture : Library::mTextures) {
+                    texture.second->destroy();
+                }
+                Library::mTextures.clear();
+                for (auto& frameBuffer : Library::mFramebuffers) {
+                    frameBuffer.second->destroy();
+                }
+                Library::mFramebuffers.clear();
+
+                Renderer::shutDown();
+
+                Renderer::preinit();
+                preInit();
+                demos[currDemo]->init(mECS);
+                runInit();
+            }
 
             /* Update frame counter */
             float runTime = static_cast<float>(glfwGetTime());
@@ -158,7 +194,7 @@ namespace neo {
             if (mImGuiEnabled) {
                 MICROPROFILE_ENTERI("Engine", "_runImGui", MP_AUTO);
                 ImGui::GetIO().FontGlobalScale = 2.0f;
-                _runImGui(counter);
+                _runImGui(demos, currDemo, counter);
                 MICROPROFILE_LEAVE();
                 Messenger::relayMessages(mECS);
             }
@@ -200,8 +236,19 @@ namespace neo {
         mWindow.shutDown();
     }
 
-    void Engine::_runImGui(const util::FrameCounter& counter) {
+    void Engine::_runImGui(std::vector<neo::IDemo*>& demos, uint32_t currDemo, const util::FrameCounter& counter) {
         if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu("Demos")) {
+                if (ImGui::BeginCombo("Demos", demos[currDemo]->getConfig().name.c_str())) {
+                    for (int i = 0; i < demos.size(); i++) {
+                        if (ImGui::Selectable(demos[i]->getConfig().name.c_str())) {
+                            mSwapDemo = i;
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+                ImGui::EndMenu();
+            }
             if (ImGui::BeginMenu("Stats")) {
                 // Translate FPS to floats
                 std::vector<float> FPSfloats;
