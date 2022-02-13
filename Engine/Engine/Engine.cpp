@@ -37,12 +37,8 @@ extern "C" {
 
 namespace neo {
 
-    /* Base Engine */
-    EngineConfig Engine::mConfig;
-
     /* ECS */
     ECS Engine::mECS;
-    uint32_t Engine::mSwapDemo = 0;
 
     /* ImGui */
     bool Engine::mImGuiEnabled = true;
@@ -53,24 +49,22 @@ namespace neo {
     Keyboard Engine::mKeyboard;
     Mouse Engine::mMouse;
 
-    ECS& Engine::init(EngineConfig config) {
+    ECS& Engine::init() {
 
         /* Init base engine */
         srand((unsigned int)(time(0)));
-        mConfig = config;
 
         /* Init window*/
-        if (mWindow.init(mConfig.APP_NAME)) {
+        if (mWindow.init("")) {
             std::cerr << "Failed initializing Window" << std::endl;
         }
-        mWindow.setSize(glm::ivec2(mConfig.width, mConfig.height));
+        mWindow.setSize(glm::ivec2(1920, 1080));
         ImGui::GetStyle().ScaleAllSizes(2.f);
 
         mMouse.init();
         mKeyboard.init();
 
-        /* Init loader after initializing GL*/
-        Loader::init(mConfig.APP_RES, true);
+        Renderer::init();
 
 #if MICROPROFILE_ENABLED
         MicroProfileOnThreadCreate("MAIN THREAD");
@@ -106,6 +100,9 @@ namespace neo {
             tex->update(glm::uvec2(1), data);
         };
         auto runInit = [&]() {
+            /* Init loader after initializing GL*/
+            Loader::init(mConfig.APP_RES, true);
+
             /* Apply config */
             if (mConfig.attachEditor) {
                 mECS.addSystem<MouseRaySystem>();

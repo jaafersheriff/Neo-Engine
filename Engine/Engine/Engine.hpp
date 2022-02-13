@@ -28,20 +28,11 @@ namespace neo {
     class Keyboard;
     class Mouse;
 
-    struct EngineConfig {
-        std::string APP_NAME = "Neo Engine";
-        std::string APP_RES = "";
-        int width = 1920;
-        int height = 1080;
-        bool attachEditor = true;
-    };
-
     class Engine {
 
         /* Base Engine */
         public:
-            static EngineConfig mConfig;
-            static ECS& init(EngineConfig);
+            static ECS& init();
             static void run(std::vector<neo::IDemo*>& demos, uint32_t currDemo);
             static void shutDown();
 
@@ -54,7 +45,6 @@ namespace neo {
 
         private:
             static ECS mECS;
-            static uint32_t mSwapDemo;
 
             /* ImGui */
             static std::unordered_map<std::string, ImGuiFunc> mImGuiFuncs;
