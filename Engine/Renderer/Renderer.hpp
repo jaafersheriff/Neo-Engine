@@ -23,7 +23,7 @@ namespace neo {
         friend Engine;
 
         public:
-            Renderer();
+            Renderer() = default;
             ~Renderer() = default;
             Renderer(const Renderer &) = delete;
             Renderer & operator=(const Renderer &) = delete;
