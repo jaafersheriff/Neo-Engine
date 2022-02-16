@@ -39,6 +39,7 @@ namespace {
 IDemo::Config Compute::getConfig() const {
     IDemo::Config config;
     config.name = "Compute";
+    config.clearColor = { 0.f, 0.f, 0.f };
     return config;
 }
 

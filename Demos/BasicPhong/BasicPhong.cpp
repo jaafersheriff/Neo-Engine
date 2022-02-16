@@ -76,6 +76,7 @@ namespace {
 IDemo::Config BasicPhong::getConfig() const {
     IDemo::Config config;
     config.name = "Basic Phong";
+    config.clearColor = { 0.1f, 0.1f, 0.1f };
     return config;
 }
 

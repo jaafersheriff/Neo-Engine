@@ -10,7 +10,7 @@ using namespace neo;
 class NormalShader : public Shader {
 
     public: 
-        float magnitude = 0.4f;
+        float magnitude = 0.08f;
     
         NormalShader(const std::string &vert, const std::string &frag, const std::string &geom) :
             Shader("Normal Shader")

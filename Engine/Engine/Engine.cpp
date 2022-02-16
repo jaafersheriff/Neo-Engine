@@ -145,6 +145,7 @@ namespace neo {
         /* Destry the old state*/
         demos.getCurrentDemo()->destroy();
         mECS.clean();
+        Messenger::clean();
         Library::clean();
         Renderer::clean();
 
@@ -201,6 +202,7 @@ namespace neo {
     }
 
     void Engine::shutDown() {
+        Messenger::clean();
         mECS.clean();
         Library::clean();
         Renderer::clean();

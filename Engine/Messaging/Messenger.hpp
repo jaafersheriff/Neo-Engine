@@ -30,6 +30,7 @@ namespace neo {
             template <typename MsgT> static void addReceiver(const GameObject * gameObject, const ReceiverFunc&);
 
             static void relayMessages(ECS& ecs);
+            static void clean();
 
         private:
             static std::vector<std::tuple<const GameObject *, std::type_index, std::unique_ptr<Message>>> mMessages;

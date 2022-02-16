@@ -136,8 +136,14 @@ namespace neo {
             Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
                 NEO_UNUSED(ecs);
                 const WindowFrameSizeMessage & m(static_cast<const WindowFrameSizeMessage &>(msg));
-                Library::getFBO("ping")->resize(m.mFrameSize);
-                Library::getFBO("pong")->resize(m.mFrameSize);
+                auto ping = Library::getFBO("ping");
+                if (ping) {
+                    ping->resize(m.mFrameSize);
+                }
+                auto pong = Library::getFBO("pong");
+                if (pong) {
+                    pong->resize(m.mFrameSize);
+                }
             });
         }
 
