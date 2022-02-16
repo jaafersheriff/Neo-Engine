@@ -1,6 +1,7 @@
 #include "Base/BaseDemo.hpp"
 #include "BasicPhong/BasicPhong.hpp"
 #include "Compute/Compute.hpp"
+#include "GodRays/GodRays.hpp"
 #include "NormalVisualizer/NormalVisualizer.hpp"
 #include "VFC/VFC.hpp"
 
@@ -12,6 +13,7 @@ static std::vector<neo::IDemo*> sDemos = {
 	new BaseDemo(),
 	new BasicPhong(),
 	new Compute(),
+	new GodRays(),
 	new NormalVisualizer(),
 	new VFC()
 };
