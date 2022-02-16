@@ -36,13 +36,10 @@ struct Camera {
 };
 
 struct Light {
-    GameObject *gameObject;
-    LightComponent *light;
-
     Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        gameObject = &ecs.createGameObject();
+        auto gameObject = &ecs.createGameObject();
         ecs.addComponent<SpatialComponent>(gameObject, pos);
-        light = &ecs.addComponent<LightComponent>(gameObject, col, att);
+        ecs.addComponent<LightComponent>(gameObject, col, att);
         ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere"));
         ecs.addComponent<BoundingBoxComponent>(gameObject, *Library::getMesh("sphere"));
         ecs.addComponent<renderable::WireframeRenderable>(gameObject);

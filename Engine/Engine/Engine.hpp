@@ -52,8 +52,7 @@ namespace neo {
         private:
             static ECS mECS;
             static void _createPrefabs();
-			static void _swapDemo(DemoWrangler&, bool doDestroy = true);
-            static int mSwapDemoIndex;
+			static void _swapDemo(DemoWrangler&);
 
             /* ImGui */
             static std::unordered_map<std::string, ImGuiFunc> mImGuiFuncs;

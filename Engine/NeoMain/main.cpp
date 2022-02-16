@@ -9,10 +9,7 @@
 int main() {
     using namespace neo;
 
-    DemoWrangler demos = {
-        sCurrentDemo,
-        sDemos
-    };
+    DemoWrangler demos(sCurrentDemo, sDemos);
     Engine::init();
     Engine::run(demos);
 

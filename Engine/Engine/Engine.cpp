@@ -50,8 +50,6 @@ namespace neo {
     Keyboard Engine::mKeyboard;
     Mouse Engine::mMouse;
 
-    int Engine::mSwapDemoIndex = 0;
-
     void Engine::init() {
 
         /* Init base engine */
@@ -65,27 +63,28 @@ namespace neo {
         ImGui::GetStyle().ScaleAllSizes(2.f);
         mKeyboard.init();
         mMouse.init();
-
-        Renderer::init();
-
 #if MICROPROFILE_ENABLED
         MicroProfileOnThreadCreate("MAIN THREAD");
         MicroProfileGpuInitGL();
         MicroProfileSetEnableAllGroups(true);
         MicroProfileSetForceMetaCounters(1);
 #endif
+
+        Renderer::init();
     }
 
     void Engine::run(DemoWrangler& demos) {
         util::FrameCounter counter;
 
         counter.init(glfwGetTime());
-        _swapDemo(demos, false);
+        demos.setForceReload();
         
         while (!mWindow.shouldClose()) {
             MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);
 
-            _swapDemo(demos);
+            if (demos.needsReload()) {
+                _swapDemo(demos);
+            }
 
             /* Update frame counter */
             float runTime = static_cast<float>(glfwGetTime());
@@ -102,7 +101,7 @@ namespace neo {
                 mECS.addComponent<SingleFrameComponent>(&hardware);
             }
 
-            demos.CurrentDemo()->update(mECS);
+            demos.getCurrentDemo()->update(mECS);
 
             /* Destroy and create objects and components */
             mECS._processKillQueue();
@@ -135,34 +134,30 @@ namespace neo {
             MicroProfileFlip(0);
         }
 
-        demos.CurrentDemo()->destroy();
+        demos.getCurrentDemo()->destroy();
         shutDown();
 	    MicroProfileShutdown();
     }
 
-    void Engine::_swapDemo(DemoWrangler& demos, bool doDestroy) {
-        if (mSwapDemoIndex == demos.currentDemoIndex) {
-            return;
-        }
+    void Engine::_swapDemo(DemoWrangler& demos) {
         MICROPROFILE_SCOPEI("Engine", "_swapDemo", MP_AUTO);
 
         /* Destry the old state*/
-        if (doDestroy) {
-            demos.CurrentDemo()->destroy();
-            mECS.clean();
-            Library::clean();
-            Renderer::clean();
-        }
+        demos.getCurrentDemo()->destroy();
+        mECS.clean();
+        Library::clean();
+        Renderer::clean();
 
         /* Init the new state */
-        demos.SetDemo(mSwapDemoIndex);
-        auto config = demos.GetConfig();
+        demos.swap();
+        auto config = demos.getConfig();
         mWindow.setWindowTitle(config.name);
         Renderer::setDemoConfig(config);
         Renderer::init();
+        Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, mWindow.getDetails().mFrameSize);
         Loader::init(config.resDir, true);
         _createPrefabs();
-        demos.CurrentDemo()->init(mECS);
+        demos.getCurrentDemo()->init(mECS);
 
         /* Apply config */
         if (config.attachEditor) {
@@ -216,13 +211,16 @@ namespace neo {
     void Engine::_runImGui(DemoWrangler& demos, const util::FrameCounter& counter) {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("Demos")) {
-                if (ImGui::BeginCombo("Demos", demos.CurrentDemo()->getConfig().name.c_str())) {
+                if (ImGui::BeginCombo("Demos", demos.getCurrentDemo()->getConfig().name.c_str())) {
                     for (int i = 0; i < demos.demos.size(); i++) {
                         if (ImGui::Selectable(demos.demos[i]->getConfig().name.c_str())) {
-                            mSwapDemoIndex = i;
+                            demos.reload(i);
                         }
                     }
                     ImGui::EndCombo();
+                }
+                if (ImGui::Button("Force reload")) {
+                    demos.setForceReload();
                 }
                 ImGui::EndMenu();
             }
@@ -299,7 +297,7 @@ namespace neo {
                 }
                 ImGui::EndMenu();
             }
-            if (demos.GetConfig().attachEditor && ImGui::BeginMenu("Editor")) {
+            if (demos.getConfig().attachEditor && ImGui::BeginMenu("Editor")) {
                 if (auto selected = mECS.getSingleComponent<SelectedComponent>()) {
                     if (ImGui::Button("Delete entity")) {
                         mECS.removeGameObject(selected->getGameObject());
@@ -369,7 +367,7 @@ namespace neo {
                 }
                 ImGui::EndMenu();
             }
-            if (ImGui::BeginMenu(demos.GetConfig().name.c_str())) {
+            if (ImGui::BeginMenu(demos.getConfig().name.c_str())) {
                 for (auto & it : mImGuiFuncs) {
                     if (ImGui::TreeNodeEx(it.first.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
                         it.second(mECS);
