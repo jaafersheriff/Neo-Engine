@@ -28,22 +28,23 @@
 using namespace neo;
 
 /* Game object definitions */
+namespace {
+    struct Light {
+        Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
+            auto& gameObject = ecs.createGameObject();
+            ecs.addComponent<SpatialComponent>(&gameObject, pos);
+            ecs.addComponent<LightComponent>(&gameObject, col, att);
 
-struct Light {
-    Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        auto& gameObject = ecs.createGameObject();
-        ecs.addComponent<SpatialComponent>(&gameObject, pos);
-        ecs.addComponent<LightComponent>(&gameObject, col, att);
-
-        Engine::addImGuiFunc("Light", [](ECS& ecs_) {
-            auto light = ecs_.getSingleComponent<LightComponent>();
-            light->imGuiEditor();
-            if (auto spatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
-                spatial->imGuiEditor();
-            }
-        });
-    }
-};
+            Engine::addImGuiFunc("Light", [](ECS& ecs_) {
+                auto light = ecs_.getSingleComponent<LightComponent>();
+                light->imGuiEditor();
+                if (auto spatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
+                    spatial->imGuiEditor();
+                }
+                });
+        }
+    };
+}
 
 IDemo::Config BaseDemo::getConfig() const {
     IDemo::Config config;

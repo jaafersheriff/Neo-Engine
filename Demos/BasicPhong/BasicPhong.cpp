@@ -22,54 +22,56 @@
 using namespace neo;
 
 /* Game object definitions */
-struct Camera {
-    GameObject *gameObject;
-    CameraControllerComponent *cameraController;
-    CameraComponent *cameraComp;
+namespace {
+    struct Camera {
+        GameObject* gameObject;
+        CameraControllerComponent* cameraController;
+        CameraComponent* cameraComp;
 
-    Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        gameObject = &ecs.createGameObject();
-        ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f), glm::vec3(3.f));
-        cameraComp = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
-        cameraController = &ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
-    }
-};
+        Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
+            gameObject = &ecs.createGameObject();
+            ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f), glm::vec3(3.f));
+            cameraComp = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+            cameraController = &ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
+        }
+    };
 
-struct Light {
-    Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        auto gameObject = &ecs.createGameObject();
-        ecs.addComponent<SpatialComponent>(gameObject, pos);
-        ecs.addComponent<LightComponent>(gameObject, col, att);
-        ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere"));
-        ecs.addComponent<BoundingBoxComponent>(gameObject, *Library::getMesh("sphere"));
-        ecs.addComponent<renderable::WireframeRenderable>(gameObject);
-        ecs.addComponent<SelectableComponent>(gameObject);
+    struct Light {
+        Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
+            auto gameObject = &ecs.createGameObject();
+            ecs.addComponent<SpatialComponent>(gameObject, pos);
+            ecs.addComponent<LightComponent>(gameObject, col, att);
+            ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere"));
+            ecs.addComponent<BoundingBoxComponent>(gameObject, *Library::getMesh("sphere"));
+            ecs.addComponent<renderable::WireframeRenderable>(gameObject);
+            ecs.addComponent<SelectableComponent>(gameObject);
 
-        Engine::addImGuiFunc("Light", [](ECS& ecs_) {
-            auto light = ecs_.getSingleComponent<LightComponent>();
-            light->imGuiEditor();
-            if (auto spatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
-                spatial->imGuiEditor();
-            }
-        });
-    }
-};
+            Engine::addImGuiFunc("Light", [](ECS& ecs_) {
+                auto light = ecs_.getSingleComponent<LightComponent>();
+                light->imGuiEditor();
+                if (auto spatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
+                    spatial->imGuiEditor();
+                }
+                });
+        }
+    };
 
-struct Renderable {
-    GameObject *gameObject;
+    struct Renderable {
+        GameObject* gameObject;
 
-    Renderable(ECS& ecs, Mesh *mesh, Texture *tex, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3(1.f)) {
-        gameObject = &ecs.createGameObject();
-        ecs.addComponent<SpatialComponent>(gameObject, p, glm::vec3(s), o);
-        ecs.addComponent<MeshComponent>(gameObject, *mesh);
-        Material material;
-        material.mAmbient = glm::vec3(0.1f);
-        material.mDiffuse = glm::vec3(0.f);
-        material.mSpecular = glm::vec3(1.f);
-        material.mShininess = 50.f;
-        ecs.addComponent<renderable::PhongRenderable>(gameObject, *tex, material);
-    }
-};
+        Renderable(ECS& ecs, Mesh* mesh, Texture* tex, glm::vec3 p, float s = 1.f, glm::mat3 o = glm::mat3(1.f)) {
+            gameObject = &ecs.createGameObject();
+            ecs.addComponent<SpatialComponent>(gameObject, p, glm::vec3(s), o);
+            ecs.addComponent<MeshComponent>(gameObject, *mesh);
+            Material material;
+            material.mAmbient = glm::vec3(0.1f);
+            material.mDiffuse = glm::vec3(0.f);
+            material.mSpecular = glm::vec3(1.f);
+            material.mShininess = 50.f;
+            ecs.addComponent<renderable::PhongRenderable>(gameObject, *tex, material);
+        }
+    };
+}
 
 IDemo::Config BasicPhong::getConfig() const {
     IDemo::Config config;
