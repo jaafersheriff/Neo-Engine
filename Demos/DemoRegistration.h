@@ -4,6 +4,8 @@
 #include "GodRays/GodRays.hpp"
 #include "Metaballs/Metaballs.hpp"
 #include "NormalVisualizer/NormalVisualizer.hpp"
+#include "PostProcess/PostProcess.hpp"
+#include "Selecting/Selecting.hpp"
 #include "VFC/VFC.hpp"
 
 #include <vector>
@@ -17,6 +19,8 @@ static std::vector<neo::IDemo*> sDemos = {
 	new GodRays(),
 	new Metaballs(),
 	new NormalVisualizer(),
+	new PostProcess(),
+	new Selecting(),
 	new VFC()
 };
 

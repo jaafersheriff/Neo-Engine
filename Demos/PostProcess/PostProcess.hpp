@@ -4,7 +4,7 @@
 
 using namespace neo;
 
-class Selecting : public IDemo {
+class PostProcess : public IDemo {
 public:
 	virtual IDemo::Config getConfig() const override;
 	virtual void init(ECS& ecs) override;
