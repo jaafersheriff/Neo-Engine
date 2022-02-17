@@ -1,3 +1,4 @@
+#include "Metaballs.hpp"
 #include "Engine/Engine.hpp"
 
 #include "DirtyBallsComponent.hpp"
@@ -22,33 +23,37 @@
 using namespace neo;
 
 /* Game object definitions */
-struct Camera {
-    CameraComponent *camera;
-    Camera(ECS& ecs, float fov, float near, float far, float ls, float ms, glm::vec3 pos, glm::vec3 lookDir) {
-        GameObject *gameObject = &ecs.createGameObject();
-        auto& spatial = ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        spatial.setLookDir(lookDir);
-        camera = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
-        ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
-    }
-};
+namespace {
+    struct Camera {
+        CameraComponent* camera;
+        Camera(ECS& ecs, float fov, float near, float far, float ls, float ms, glm::vec3 pos, glm::vec3 lookDir) {
+            GameObject* gameObject = &ecs.createGameObject();
+            auto& spatial = ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+            spatial.setLookDir(lookDir);
+            camera = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+            ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
+        }
+    };
 
-struct Metaball {
-    Metaball(ECS& ecs, glm::vec3 position, float radius) {
-        GameObject* gameObject = &ecs.createGameObject();
-        ecs.addComponent<MetaballComponent>(gameObject);
-        ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere"));
-        ecs.addComponent<SpatialComponent>(gameObject, position, glm::vec3(radius));
-        ecs.addComponent<SelectableComponent>(gameObject);
-        ecs.addComponent<BoundingBoxComponent>(gameObject, *Library::getMesh("sphere"));
-    }
-};
+    struct Metaball {
+        Metaball(ECS& ecs, glm::vec3 position, float radius) {
+            GameObject* gameObject = &ecs.createGameObject();
+            ecs.addComponent<MetaballComponent>(gameObject);
+            ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere"));
+            ecs.addComponent<SpatialComponent>(gameObject, position, glm::vec3(radius));
+            ecs.addComponent<SelectableComponent>(gameObject);
+            ecs.addComponent<BoundingBoxComponent>(gameObject, *Library::getMesh("sphere"));
+        }
+    };
+}
 
-int main() {
-    EngineConfig config;
-    config.APP_NAME = "Metaballs";
-    config.APP_RES = "res/";
-    ECS& ecs = Engine::init(config);
+IDemo::Config Metaballs::getConfig() const {
+    IDemo::Config config;
+    config.name = "Metaballs";
+    return config;
+}
+
+void Metaballs::init(ECS& ecs) {
 
     /* Game objects */
     Camera camera(ecs, 45.f, 1.f, 100.f, 0.4f, 7.f, glm::vec3(-2.f, 2.f, 50.f), glm::vec3(0.f, 0.f, -1.f));
@@ -80,8 +85,7 @@ int main() {
     ecs.addSystem<MetaballsSystem>();
 
     /* Init renderer */
-    Renderer::init("shaders/");
-    Renderer::addSceneShader<MetaballsShader>("metaballs.vert", "metaballs.frag");
+    Renderer::addSceneShader<MetaballsShader>("metaballs/metaballs.vert", "metaballs/metaballs.frag");
     Renderer::addSceneShader<SkyboxShader>();
 
     Engine::addImGuiFunc("Metaballs", [](ECS& ecs_) {
@@ -115,8 +119,4 @@ int main() {
             }
         }
     });
-
-    /* Run */
-    Engine::run();
-    return 0;
 }

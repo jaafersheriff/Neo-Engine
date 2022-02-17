@@ -1,3 +1,4 @@
+#include "Selecting/Selecting.hpp"
 #include "Engine/Engine.hpp"
 
 #include "Renderer/Shader/PhongShader.hpp"
@@ -23,46 +24,49 @@
 using namespace neo;
 
 /* Game object definitions */
-struct Camera {
-    CameraComponent *camera;
-    Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-        GameObject *gameObject = &ecs.createGameObject();
-        ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-        camera = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
-        ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
-    }
-};
+namespace {
+    struct Camera {
+        CameraComponent* camera;
+        Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
+            GameObject* gameObject = &ecs.createGameObject();
+            ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
+            camera = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+            ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
+        }
+    };
 
-struct Light {
-    Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-        auto& gameObject = ecs.createGameObject();
-        ecs.addComponent<SpatialComponent>(&gameObject, pos);
-        ecs.addComponent<LightComponent>(&gameObject, col, att);
+    struct Light {
+        Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
+            auto& gameObject = ecs.createGameObject();
+            ecs.addComponent<SpatialComponent>(&gameObject, pos);
+            ecs.addComponent<LightComponent>(&gameObject, col, att);
 
-        Engine::addImGuiFunc("Light", [](ECS& ecs_) {
-            if (auto light = ecs_.getSingleComponent<LightComponent>()) {
-                light->imGuiEditor();
-            }
-        });
-    }
-};
+            Engine::addImGuiFunc("Light", [](ECS& ecs_) {
+                if (auto light = ecs_.getSingleComponent<LightComponent>()) {
+                    light->imGuiEditor();
+                }
+                });
+        }
+    };
 
-struct Renderable {
-    GameObject *gameObject;
+    struct Renderable {
+        GameObject* gameObject;
 
-    Renderable(ECS& ecs, Mesh *mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
-        gameObject = &ecs.createGameObject();
-        ecs.addComponent<MeshComponent>(gameObject, *mesh);
-        ecs.addComponent<SpatialComponent>(gameObject, position, scale, rotation);
-    }
-};
+        Renderable(ECS& ecs, Mesh* mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
+            gameObject = &ecs.createGameObject();
+            ecs.addComponent<MeshComponent>(gameObject, *mesh);
+            ecs.addComponent<SpatialComponent>(gameObject, position, scale, rotation);
+        }
+    };
+}
 
-int main() {
-    EngineConfig config;
-    config.APP_NAME = "FrustaFitting";
-    config.APP_RES = "res/";
-    config.attachEditor = false;
-    ECS& ecs = Engine::init(config);
+IDemo::Config Selecting::getConfig() const {
+    IDemo::Config config;
+    config.name = "Selecting";
+    return config;
+}
+
+void Selecting::init(ECS& ecs) {
 
     /* Game objects */
     Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
@@ -115,7 +119,6 @@ int main() {
     );
 
     /* Init renderer */
-    Renderer::init("shaders/");
     Renderer::addPreProcessShader<SelectableShader>();
     Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<AlphaTestShader>();
@@ -123,8 +126,4 @@ int main() {
     Renderer::addPostProcessShader<GammaCorrectShader>();
 
     /* Attach ImGui panes */
-
-    /* Run */
-    Engine::run();
-    return 0;
 }
