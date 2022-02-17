@@ -59,7 +59,7 @@ namespace {
 
 IDemo::Config PostProcess::getConfig() const {
     IDemo::Config config;
-    config.name = "VFC";
+    config.name = "Post Process";
     return config;
 }
 
@@ -77,9 +77,9 @@ void PostProcess::init(ECS& ecs) {
 
     /* Init renderer */
     Renderer::addSceneShader<PhongShader>();
-    Renderer::addPostProcessShader<PostProcessShader>("DepthShader", std::string("depth.frag"));
-    Renderer::addPostProcessShader<PostProcessShader>("BlueShader", std::string("blue.frag"));
-    Renderer::addPostProcessShader<PostProcessShader>("InvertShader", std::string("invert.frag"));
+    Renderer::addPostProcessShader<PostProcessShader>("DepthShader", std::string("postprocess/depth.frag"));
+    Renderer::addPostProcessShader<PostProcessShader>("BlueShader", std::string("postprocess/blue.frag"));
+    Renderer::addPostProcessShader<PostProcessShader>("InvertShader", std::string("postprocess/invert.frag"));
 
     /* Attach ImGui panes */
 }

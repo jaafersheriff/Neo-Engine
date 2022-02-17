@@ -58,6 +58,7 @@ namespace neo {
 
             static Framebuffer* mDefaultFBO;
             static glm::vec3 mClearColor;
+            static bool mShowBB;
 
             static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mComputeShaders;
             static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPreProcessShaders;

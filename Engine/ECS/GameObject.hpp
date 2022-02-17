@@ -28,7 +28,7 @@ namespace neo {
             GameObject(GameObject &&) = delete;
             GameObject & operator=(const GameObject &) = delete;
 
-            GameObject();
+            GameObject(const std::string& tag);
 
             /* Get all components by type */
             template <typename CompT> const std::vector<CompT *> & getComponentsByType() const;
@@ -51,11 +51,13 @@ namespace neo {
             void addComponent(Component &, std::type_index);
             void removeComponent(Component &, std::type_index);
             std::unordered_map<std::type_index, std::vector<Component *>> getComponentsMap() { return mComponentsByType ; }
+            std::string mTag = "";
 
             /* Containers */
             std::vector<Component *> mComponents;
             std::unordered_map<std::type_index, std::vector<Component *>> mComponentsByType;
             std::unordered_map<std::type_index, std::vector<ReceiverFunc>> mReceivers;
+
     };
 
     /* Template implementation */

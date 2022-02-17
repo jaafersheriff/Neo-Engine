@@ -46,5 +46,6 @@ namespace neo {
 
     void Messenger::clean() {
         mMessages.clear();
+        mReceivers.clear();
     }
 }

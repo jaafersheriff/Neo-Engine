@@ -40,6 +40,7 @@ namespace neo {
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mSceneShaders;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPostShaders;
     glm::vec3 Renderer::mClearColor;
+    bool Renderer::mShowBB = false;
 
     void Renderer::setDemoConfig(IDemo::Config config) {
         APP_SHADER_DIR = config.shaderDir;
@@ -78,6 +79,7 @@ namespace neo {
             shader.second->cleanUp();
         }
         mPostShaders.clear();
+        mShowBB = false;
 
         resetState();
     }
@@ -272,9 +274,8 @@ namespace neo {
     }
 
     void Renderer::_imguiEditor(ECS& ecs) {
-        static bool _showBB = false;
-        if (ImGui::Checkbox("Show bounding boxes", &_showBB)) {
-            if (_showBB) {
+        if (ImGui::Checkbox("Show bounding boxes", &mShowBB)) {
+            if (mShowBB) {
                 getShader<LineShader>().mActive = true;
                 for (auto box : ecs.getComponents<BoundingBoxComponent>()) {
                     auto line = box->getGameObject().getComponentByType<LineMeshComponent>();
@@ -315,8 +316,7 @@ namespace neo {
             }
             else {
                 for (auto box : ecs.getComponents<BoundingBoxComponent>()) {
-                    auto line = box->getGameObject().getComponentByType<LineMeshComponent>();
-                    if (line) {
+                    if (auto line = box->getGameObject().getComponentByType<LineMeshComponent>()) {
                         ecs.removeComponent(*line);
                     }
                 }

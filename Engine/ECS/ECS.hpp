@@ -34,7 +34,7 @@ namespace neo {
         /* ECS */
         public:
             /* Create & destroy GameObjects */
-            GameObject & createGameObject();
+            GameObject & createGameObject(const std::string& tag = "");
             void removeGameObject(GameObject &);
 
             /* Create a Component and attach it to a GameObject */

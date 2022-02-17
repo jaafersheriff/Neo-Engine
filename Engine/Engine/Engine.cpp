@@ -147,14 +147,16 @@ namespace neo {
         mECS.clean();
         Library::clean();
         Renderer::clean();
+        Messenger::clean();
 
         /* Init the new state */
         demos.swap();
         auto config = demos.getConfig();
-        mWindow.setWindowTitle(config.name);
+        mWindow.reset(config.name);
+        mMouse.init();
+        mKeyboard.init();
         Renderer::setDemoConfig(config);
         Renderer::init();
-        Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, mWindow.getDetails().mFrameSize);
         Loader::init(config.resDir, true);
         _createPrefabs();
         demos.getCurrentDemo()->init(mECS);
@@ -165,6 +167,7 @@ namespace neo {
             mECS.addSystem<EditorSystem>();
             Renderer::addPreProcessShader<SelectableShader>();
             Renderer::addSceneShader<OutlineShader>();
+            Renderer::addSceneShader<WireframeShader>();
         }
 
         /* Add engine-specific systems */
@@ -349,10 +352,6 @@ namespace neo {
                     /* Attaching new components here would be nice, but there's problems:
                         - There's no reflection that provides a static list of all components possible (including any application-specific components)
                             - They _could_ all be registered manually, both by the Engine for Engine-specific components and by the Application for app-specific components
-                            - They would need some dummy GameObject to be tied to
-                        - Components have a deleted copy construct
-                            - The copy constructor could be made protected, but then every single component would need some clone(GameObject&) function
-                              to create a new unique_ptr of itself. That's too much overhead.
                     */
                 }
                 ImGui::Separator();

@@ -4,9 +4,10 @@
 
 namespace neo {
 
-    GameObject::GameObject() :
-        mComponents(),
-        mComponentsByType()
+    GameObject::GameObject(const std::string& tag)
+        : mComponents()
+        , mComponentsByType()
+        , mTag(tag)
     {}
 
     void GameObject::addComponent(Component & component, std::type_index typeI) {

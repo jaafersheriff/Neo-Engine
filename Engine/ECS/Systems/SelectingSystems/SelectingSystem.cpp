@@ -9,7 +9,8 @@ namespace neo {
     void SelectingSystem::init(ECS& _ecs) {
         NEO_UNUSED(_ecs);
 
-        Messenger::addReceiver<ComponentSelectedMessage>(nullptr, [&](const neo::Message& msg, ECS& ecs) {
+        // It's only possible to have one SelectedSystem at a time..
+        Messenger::addReceiver<ComponentSelectedMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
             const ComponentSelectedMessage & m(static_cast<const ComponentSelectedMessage &>(msg));
             if (auto oldSelected = ecs.getSingleComponent<SelectedComponent>()) {
                 {
@@ -25,7 +26,6 @@ namespace neo {
                         mSelectOperation(ecs, selectable);
                     }
                     ecs.addComponent<SelectedComponent>(&selectable->getGameObject());
-                    break;
                 }
             }
         });

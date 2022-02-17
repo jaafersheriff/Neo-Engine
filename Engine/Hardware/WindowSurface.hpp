@@ -18,6 +18,7 @@ namespace neo {
         WindowSurface& operator=(const WindowSurface&) = delete;
 
         int init(const std::string&);
+        void reset(const std::string&);
         void update();
         void shutDown();
 
@@ -28,7 +29,6 @@ namespace neo {
         GLFWwindow* getWindow() { return mWindow; }
         void toggleVSync();
         void setSize(const glm::ivec2&);
-        void setWindowTitle(const std::string&);
 
     private:
         GLFWwindow* mWindow = nullptr;

@@ -21,8 +21,8 @@ namespace neo {
         _processKillQueue();
     }
 
-    GameObject& ECS::createGameObject() {
-        mGameObjectInitQueue.emplace_back(std::make_unique<GameObject>());
+    GameObject& ECS::createGameObject(const std::string& tag) {
+        mGameObjectInitQueue.emplace_back(std::make_unique<GameObject>(tag));
         return *mGameObjectInitQueue.back().get();
     }
 
@@ -149,12 +149,23 @@ namespace neo {
     }
 
     void ECS::_imguiEdtor() {
-        ImGui::Text("GameObjects:  %d", getGameObjects().size());
         size_t count = 0;
         for (auto go : getGameObjects()) {
             count += go->getAllComponents().size();
         }
-        ImGui::Text("Components:  %d", count);
+        ImGui::Text("Components: %d", count);
+        std::string label = "GameObjects: " + getGameObjects().size();
+        if (ImGui::TreeNodeEx(label.c_str())) {
+            for (auto& gameObject : getGameObjects()) {
+                if (gameObject->mTag.size() && ImGui::TreeNodeEx(gameObject->mTag.c_str())) {
+                    for (auto& component : gameObject->getAllComponents()) {
+                        component->imGuiEditor();
+                    }
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
         if (mSystems.size() && ImGui::TreeNodeEx("Systems", ImGuiTreeNodeFlags_DefaultOpen)) {
             for (unsigned i = 0; i < mSystems.size(); i++) {
                 auto& sys = mSystems[i].second;

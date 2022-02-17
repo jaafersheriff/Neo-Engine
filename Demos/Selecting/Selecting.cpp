@@ -63,6 +63,7 @@ namespace {
 IDemo::Config Selecting::getConfig() const {
     IDemo::Config config;
     config.name = "Selecting";
+    config.attachEditor = false;
     return config;
 }
 
