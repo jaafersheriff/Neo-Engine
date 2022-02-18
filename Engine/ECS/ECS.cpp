@@ -154,8 +154,9 @@ namespace neo {
             count += go->getAllComponents().size();
         }
         ImGui::Text("Components: %d", count);
-        std::string label = "GameObjects: " + getGameObjects().size();
-        if (ImGui::TreeNodeEx(label.c_str())) {
+        char buf[256];
+        sprintf(buf, "Gameobjects: %d", static_cast<int>(getGameObjects().size()));
+        if (ImGui::TreeNodeEx(buf)) {
             for (auto& gameObject : getGameObjects()) {
                 if (gameObject->mTag.size() && ImGui::TreeNodeEx(gameObject->mTag.c_str())) {
                     for (auto& component : gameObject->getAllComponents()) {

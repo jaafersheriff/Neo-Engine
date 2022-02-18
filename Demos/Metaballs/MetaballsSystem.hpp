@@ -54,13 +54,7 @@ class MetaballsSystem : public System {
                 return;
             }
 
-            auto dirtyBalls = ecs.getComponents<DirtyBallsComponent>();
-            if (dirtyBalls.size()) {
-                mDirtyBalls = true;
-                for (auto* comp : dirtyBalls)
-                ecs.removeComponent(*comp);
-            }
-
+            mDirtyBalls = ecs.getComponents<DirtyBallsComponent>().size() > 0;
 
             if (mAutoUpdate) {
                 MICROPROFILE_ENTERI("Metaballs System", "updatePositions", MP_AUTO);

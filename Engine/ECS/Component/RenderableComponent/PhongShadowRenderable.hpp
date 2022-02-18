@@ -22,6 +22,10 @@ namespace neo {
                 mMaterial(material)
             {}
 
+            virtual void imGuiEditor() override {
+                ImGui::ColorEdit3("Diffuse", &mMaterial.mDiffuse[0]);
+            }
+
         };
     }
 }

@@ -159,7 +159,6 @@ namespace neo {
         Renderer::init();
         Loader::init(config.resDir, true);
         _createPrefabs();
-        demos.getCurrentDemo()->init(mECS);
 
         /* Apply config */
         if (config.attachEditor) {
@@ -173,6 +172,8 @@ namespace neo {
         /* Add engine-specific systems */
         auto& lineShader = Renderer::addSceneShader<LineShader>();
         lineShader.mActive = false;
+
+        demos.getCurrentDemo()->init(mECS);
 
         /* Init systems */
         mECS._initSystems();

@@ -1,3 +1,4 @@
+#pragma once
 
 #include "Renderer/GLObjects/Mesh.hpp"
 #include "ext/PerlinNoise.hpp"
