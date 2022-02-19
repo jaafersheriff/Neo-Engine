@@ -56,14 +56,32 @@ namespace neo {
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("OutlineShader", "VFC", MP_AUTO);
                     if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                        float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
-                        if (!cameraFrustum->isInFrustum(renderableSpatial->getPosition(), radius)) {
+                        if (!cameraFrustum->isInFrustum(renderableSpatial->getModelMatrix() * glm::vec4(boundingBox->getCenter(), 1.f), boundingBox->getRadius())) {
                             continue;
                         }
                     }
                 }
 
-                glm::mat4 M = glm::scale(renderableSpatial->getModelMatrix(), glm::vec3(1.f + renderableOutline->mScale));
+                // Scale from local origin
+                glm::vec3 scaleFactor = renderableSpatial->getScale() * (1.f + renderableOutline->mScale);
+                glm::mat4 S;
+                if (auto bb = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
+                    glm::vec3 worldSpaceCenter = renderableSpatial->getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
+                    glm::vec3 offsetTranslation = renderableSpatial->getPosition() - worldSpaceCenter;
+                    // Set model's true center as the origin
+                    S = glm::translate(glm::mat4(1.f), -offsetTranslation);
+                    // Scale
+                    S *= glm::scale(glm::mat4(1.f), glm::vec3(renderableSpatial->getScale() * (renderableOutline->mScale + 1.f)));
+                    // Translate back
+                    S *= glm::translate(glm::mat4(1.f), offsetTranslation);
+                }
+                else {
+                    S = glm::scale(glm::mat4(1.f), scaleFactor);
+                }
+
+                glm::mat4 T = glm::translate(glm::mat4(1.f), renderableSpatial->getPosition());
+                glm::mat4 R = glm::mat4(renderableSpatial->getOrientation());
+                glm::mat4 M = T * S * R;
                 loadUniform("M", M);
 
                 loadUniform("outlineColor", renderableOutline->mColor);

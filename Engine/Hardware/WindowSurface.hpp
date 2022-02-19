@@ -25,6 +25,7 @@ namespace neo {
         int shouldClose() const;
         WindowDetails getDetails() const { return mDetails; }
         float getAspectRatio() const { return mDetails.mFrameSize.x / (float)mDetails.mFrameSize.y; }
+        int isFocused() const;
 
         GLFWwindow* getWindow() { return mWindow; }
         void toggleVSync();

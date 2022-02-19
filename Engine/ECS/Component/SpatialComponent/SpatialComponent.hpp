@@ -34,8 +34,8 @@ namespace neo {
             void setDirty();
 
             /* Getters */
-            const glm::vec3 getPosition() const { return mPosition; }
-            const glm::vec3 getScale() const { return mScale; }
+            glm::vec3 getPosition() const { return mPosition; }
+            glm::vec3 getScale() const { return mScale; }
             const glm::mat4 & getModelMatrix() const;
             const glm::mat3 & getNormalMatrix() const;
 

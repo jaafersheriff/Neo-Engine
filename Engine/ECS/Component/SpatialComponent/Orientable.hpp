@@ -38,12 +38,14 @@ namespace neo {
                 mOrientationDirty = false;
                 _detUVW();
             }
+
             virtual void setUVW(const glm::vec3 & u, const glm::vec3 & v, const glm::vec3 & w) {
                 this->mU = glm::normalize(u);
                 this->mV = glm::normalize(v);
                 this->mW = glm::normalize(w);
                 mOrientationDirty = true;
             }
+
             void setLookDir(glm::vec3 dir) {
                 glm::vec3 w = -glm::normalize(dir);
                 if (w == -getLookDir()) {

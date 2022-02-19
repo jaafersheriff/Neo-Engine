@@ -219,10 +219,6 @@ namespace neo {
 
     void WindowSurface::update() {
         MICROPROFILE_SCOPEI("Window", "Window::update", MP_AUTO);
-        /* Don't update display if window is minimized */
-        if (glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED)) {
-            return;
-        }
 
         MICROPROFILE_ENTERI("Window", "Mouse::update", MP_AUTO);
         double x, y;
@@ -231,7 +227,7 @@ namespace neo {
         Messenger::sendMessage<Mouse::ScrollWheelMessage>(nullptr, 0);
         MICROPROFILE_LEAVE();
 
-        if (Engine::mImGuiEnabled) {
+        if (Engine::mImGuiEnabled && isFocused()) {
             MICROPROFILE_ENTERI("Window", "ImGui::NewFrame", MP_AUTO);
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -259,6 +255,10 @@ namespace neo {
 
     int WindowSurface::shouldClose() const {
         return glfwWindowShouldClose(mWindow);
+    }
+
+    int WindowSurface::isFocused() const {
+        return glfwGetWindowAttrib(mWindow, GLFW_FOCUSED);
     }
 
     void WindowSurface::shutDown() {

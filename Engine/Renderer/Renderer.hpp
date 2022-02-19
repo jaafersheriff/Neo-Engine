@@ -40,7 +40,7 @@ namespace neo {
             static void setDemoConfig(IDemo::Config);
             static void init();
             static void resetState();
-            static void render(float, WindowSurface&, ECS&);
+            static void render(WindowSurface&, ECS&);
             static void clean();
 
             /* FBO */

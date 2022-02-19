@@ -28,13 +28,22 @@ namespace neo {
     void EditorSystem::update(ECS& ecs) {
         if (auto selected = ecs.getSingleComponent<SelectedComponent>()) {
             if (auto spatial = selected->getGameObject().getComponentByType<SpatialComponent>()) {
-                if (auto bb = selected->getGameObject().getComponentByType<BoundingBoxComponent>()) {
-                    if (auto mouseRay = ecs.getSingleComponent<MouseRayComponent>()) {
-                        if (auto mouse = ecs.getSingleComponent<MouseComponent>()) {
+                if (auto mouseRay = ecs.getSingleComponent<MouseRayComponent>()) {
+                    if (auto mouse = ecs.getSingleComponent<MouseComponent>()) {
+                        glm::vec3 pos;
+                        if (auto bb = selected->getGameObject().getComponentByType<BoundingBoxComponent>()) {
                             glm::vec3 worldSpaceCenter = spatial->getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
                             glm::vec3 offsetTranslation = spatial->getPosition() - worldSpaceCenter;
-                            spatial->setPosition(mouseRay->mPosition + mouseRay->mDirection * glm::distance(worldSpaceCenter, mouseRay->mPosition) + offsetTranslation);
+                            float distance = glm::distance(worldSpaceCenter, mouseRay->mPosition);
+                            distance += mouse->mFrameMouse.getScrollSpeed();
+                            pos = mouseRay->mPosition + mouseRay->mDirection * distance + offsetTranslation;
                         }
+                        else {
+                            float distance = glm::distance(spatial->getPosition(), mouseRay->mPosition);
+                            distance += mouse->mFrameMouse.getScrollSpeed();
+                            pos = mouseRay->mPosition + mouseRay->mDirection * distance;
+                        }
+                        spatial->setPosition(pos);
                     }
                 }
             }

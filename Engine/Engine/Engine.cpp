@@ -113,7 +113,7 @@ namespace neo {
             Messenger::relayMessages(mECS);
 
             /* Update imgui functions */
-            if (mImGuiEnabled) {
+            if (mImGuiEnabled && mWindow.isFocused()) {
                 MICROPROFILE_ENTERI("Engine", "_runImGui", MP_AUTO);
                 ImGui::GetIO().FontGlobalScale = 2.0f;
                 _runImGui(demos, counter);
@@ -124,7 +124,7 @@ namespace neo {
             /* Render */
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
-            Renderer::render(static_cast<float>(counter.mTimeStep), mWindow, mECS);
+            Renderer::render(mWindow, mECS);
             Messenger::relayMessages(mECS);
 
             for (auto& frameComponent : mECS.getComponents<SingleFrameComponent>()) {

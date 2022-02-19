@@ -109,10 +109,12 @@ namespace neo {
         RENDERER_MP_LEAVE();
     }
 
-    void Renderer::render(float dt, WindowSurface& window, ECS& ecs) {
-        NEO_UNUSED(dt);
-        RENDERER_MP_ENTER("Renderer::render");
+    void Renderer::render(WindowSurface& window, ECS& ecs) {
+        if (!window.isFocused()) {
+            return;
+        }
 
+        RENDERER_MP_ENTER("Renderer::render");
         resetState();
 
         /* Get active shaders */

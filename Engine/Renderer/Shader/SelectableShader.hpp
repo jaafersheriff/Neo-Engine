@@ -51,11 +51,6 @@ namespace neo {
 
         virtual void render(const ECS& ecs) override {
             auto mouse = ecs.getSingleComponent<MouseComponent>();
-            if (!mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
-                return;
-            }
-
-
 
             auto fbo = Library::getFBO("selectable");
             fbo->bind();
@@ -103,7 +98,7 @@ namespace neo {
                 renderable->get<MeshComponent>()->mMesh.draw();
                 rendered++;
             }
-            // Read pixels from last frame before clearing the buffer
+
             uint8_t buffer[4];
             {
                 MICROPROFILE_SCOPEI("Selectable Shader", "ReadPixels", MP_AUTO);
