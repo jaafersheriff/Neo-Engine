@@ -62,25 +62,22 @@ namespace neo {
                     }
                 }
 
-                // Scale from local origin
-                glm::vec3 scaleFactor = renderableSpatial->getScale() * (1.f + renderableOutline->mScale);
-                glm::mat4 S;
-                if (auto bb = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                    glm::vec3 worldSpaceCenter = renderableSpatial->getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
-                    glm::vec3 offsetTranslation = renderableSpatial->getPosition() - worldSpaceCenter;
-                    // Set model's true center as the origin
-                    S = glm::translate(glm::mat4(1.f), -offsetTranslation);
-                    // Scale
-                    S *= glm::scale(glm::mat4(1.f), glm::vec3(renderableSpatial->getScale() * (renderableOutline->mScale + 1.f)));
-                    // Translate back
-                    S *= glm::translate(glm::mat4(1.f), offsetTranslation);
-                }
-                else {
-                    S = glm::scale(glm::mat4(1.f), scaleFactor);
-                }
-
+                // Scale from wlocal origin
+                glm::vec3 scaleFactor(1.f + renderableOutline->mScale);
+                glm::mat4 S(1.f);
                 glm::mat4 T = glm::translate(glm::mat4(1.f), renderableSpatial->getPosition());
                 glm::mat4 R = glm::mat4(renderableSpatial->getOrientation());
+                if (auto bb = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
+                    glm::vec3 offsetTranslation = bb->getCenter();
+                    S = glm::mat4(1.f);
+                    S *= glm::translate(glm::mat4(1.f), offsetTranslation);
+                    S *= glm::scale(glm::mat4(1.f), renderableSpatial->getScale() * scaleFactor);
+                    S *= glm::translate(glm::mat4(1.f), -offsetTranslation);
+                }
+                else {
+                }
+                    S = glm::scale(glm::mat4(1.f), scaleFactor);
+
                 glm::mat4 M = T * S * R;
                 loadUniform("M", M);
 

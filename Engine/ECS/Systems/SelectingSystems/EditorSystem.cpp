@@ -25,6 +25,7 @@ namespace neo {
     { 
     }
 
+    // TODO : add hovered capability
     void EditorSystem::update(ECS& ecs) {
         if (auto selected = ecs.getSingleComponent<SelectedComponent>()) {
             if (auto spatial = selected->getGameObject().getComponentByType<SpatialComponent>()) {

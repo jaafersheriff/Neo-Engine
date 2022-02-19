@@ -51,6 +51,10 @@ namespace neo {
 
         virtual void render(const ECS& ecs) override {
             auto mouse = ecs.getSingleComponent<MouseComponent>();
+            // TODO : add hovered capability
+            if (!mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
+                return;
+            }
 
             auto fbo = Library::getFBO("selectable");
             fbo->bind();

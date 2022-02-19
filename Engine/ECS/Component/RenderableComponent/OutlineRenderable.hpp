@@ -18,7 +18,7 @@ namespace neo {
 
             virtual void imGuiEditor() override {
                 ImGui::ColorEdit4("Color", &mColor[0]);
-                ImGui::SliderFloat("Scale", &mScale, 0.01f, 1.f);
+                ImGui::SliderFloat("Scale", &mScale, 0.001f, 10.f);
             }
 
             glm::vec4 mColor;

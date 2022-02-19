@@ -9,6 +9,7 @@
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderableComponent/AlphaTestRenderable.hpp"
+#include "ECS/Component/RenderableComponent/OutlineRenderable.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/PhongRenderable.hpp"
 #include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
@@ -58,16 +59,16 @@ void BaseDemo::init(ECS& ecs) {
     GameObject* bunny = &ecs.createGameObject("Bunny");
     ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
     ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-    ecs.addComponent<MeshComponent>(bunny, *Library::loadMesh("bunny.obj", true));
+    ecs.addComponent<MeshComponent>(bunny, *Library::loadMesh("cube"));
     ecs.addComponent<renderable::PhongRenderable>(bunny, *Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f,0.f,1.f)));
     ecs.addComponent<SelectableComponent>(bunny);
-    ecs.addComponent<BoundingBoxComponent>(bunny, *Library::loadMesh("bunny.obj", true));
+    ecs.addComponent<BoundingBoxComponent>(bunny, *Library::loadMesh("cube"));
 
     {
         GameObject* cube = &ecs.createGameObject("Cube");
-        ecs.addComponent<SpatialComponent>(cube, glm::vec3(0.f, 1.0f, 0.f));
-        ecs.addComponent<RotationComponent>(cube, util::genRandomVec3());
+        ecs.addComponent<SpatialComponent>(cube, glm::vec3(0.f), glm::vec3(1.f));
         ecs.addComponent<renderable::PhongRenderable>(cube, *Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
+        ecs.addComponent<renderable::OutlineRenderable>(cube, glm::vec4(1.f), 1.f);
         ecs.addComponent<SelectableComponent>(cube);
 
         Mesh* mesh = new Mesh;
@@ -914,14 +915,14 @@ void BaseDemo::init(ECS& ecs) {
 
             std::vector<float> verts;
             verts.reserve(verts_.size() * 3);
-            glm::vec3 min = glm::vec3(1000000000000000000);
-            glm::vec3 max = glm::vec3(-1000000000000000000);
+            glm::vec3 min = glm::vec3(1000000000000000000.f);
+            glm::vec3 max = glm::vec3(-1000000000000000000.f);
             for (auto vert : verts_) {
-                verts.push_back(vert.x);
-                verts.push_back(vert.y);
-                verts.push_back(vert.z);
-                min = glm::min(min, vert);
-                max = glm::max(max, vert);
+                verts.push_back(vert.x * 0.02f);
+                verts.push_back(vert.y * 0.02f);
+                verts.push_back(vert.z * 0.02f);
+                min = glm::min(min, vert * 0.02f);
+                max = glm::max(max, vert * 0.02f);
             }
             mesh->addVertexBuffer(VertexType::Position, 0, 3, verts);
             mesh->mMin = min;
