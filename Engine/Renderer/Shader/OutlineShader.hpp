@@ -1,12 +1,15 @@
 #pragma once
 
-#include "Engine.hpp"
+#include "Engine/Engine.hpp"
 
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
 
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/OutlineRenderable.hpp"
 
 namespace neo {
@@ -60,7 +63,7 @@ namespace neo {
                     }
                 }
 
-                glm::mat4 M = renderableSpatial->getModelMatrix() * glm::scale(glm::mat4(1.f), glm::vec3(1.f + renderableOutline->mScale));
+                glm::mat4 M = glm::scale(renderableSpatial->getModelMatrix(), glm::vec3(1.f + renderableOutline->mScale));
                 loadUniform("M", M);
 
                 loadUniform("outlineColor", renderableOutline->mColor);

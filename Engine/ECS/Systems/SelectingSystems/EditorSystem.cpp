@@ -1,6 +1,7 @@
 #include "EditorSystem.hpp"
 #include "Engine/Engine.hpp"
 
+#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/RenderableComponent/OutlineRenderable.hpp"
 #include "ECS/Component/SelectingComponent/MouseRayComponent.hpp"
@@ -27,11 +28,13 @@ namespace neo {
     void EditorSystem::update(ECS& ecs) {
         if (auto selected = ecs.getSingleComponent<SelectedComponent>()) {
             if (auto spatial = selected->getGameObject().getComponentByType<SpatialComponent>()) {
-                if (auto mouseRay = ecs.getSingleComponent<MouseRayComponent>()) {
-                    if (auto mouse = ecs.getSingleComponent<MouseComponent>()) {
-                        float offset = glm::distance(mouseRay->mPosition, spatial->getPosition());
-                        offset += mouse->mFrameMouse.getScrollSpeed();
-                        spatial->setPosition(mouseRay->mPosition + mouseRay->mDirection * offset);
+                if (auto bb = selected->getGameObject().getComponentByType<BoundingBoxComponent>()) {
+                    if (auto mouseRay = ecs.getSingleComponent<MouseRayComponent>()) {
+                        if (auto mouse = ecs.getSingleComponent<MouseComponent>()) {
+                            glm::vec3 worldSpaceCenter = spatial->getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
+                            glm::vec3 offsetTranslation = spatial->getPosition() - worldSpaceCenter;
+                            spatial->setPosition(mouseRay->mPosition + mouseRay->mDirection * glm::distance(worldSpaceCenter, mouseRay->mPosition) + offsetTranslation);
+                        }
                     }
                 }
             }

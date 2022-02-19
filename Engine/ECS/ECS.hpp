@@ -49,7 +49,8 @@ namespace neo {
             template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
 
             /* Getters */
-            const std::vector<const GameObject*>& getGameObjects() const { return reinterpret_cast<const std::vector<const GameObject*> &>(mGameObjects); }
+            const std::vector<GameObject*>& getGameObjects() const { return reinterpret_cast<const std::vector<GameObject*>&>(mGameObjects); }
+            const std::vector<const GameObject*>& cGetGameObjects() const { return reinterpret_cast<const std::vector<const GameObject*> &>(mGameObjects); }
             template <typename CompT> const std::vector<CompT const*>& getComponents() const;
             template <typename CompT> const std::vector<CompT*>& getComponents();
             template <typename CompT> CompT const* getSingleComponent() const;

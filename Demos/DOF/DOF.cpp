@@ -1,7 +1,7 @@
 #include "DOF/DOF.hpp"
 #include "Engine/Engine.hpp"
 
-#include "Renderer/Shader/PhongShadowShader.hpp"
+#include "Renderer/Shader/PhongShader.hpp"
 #include "Renderer/Shader/ShadowCasterShader.hpp"
 #include "Renderer/Shader/SkyboxShader.hpp"
 #include "Renderer/Shader/GammaCorrectShader.hpp"
@@ -64,7 +64,7 @@ namespace {
         GameObject* gameObject;
 
         Renderable(ECS& ecs, Mesh* mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
-            gameObject = &ecs.createGameObject("sponza");
+            gameObject = &ecs.createGameObject();
             ecs.addComponent<MeshComponent>(gameObject, *mesh);
             ecs.addComponent<SpatialComponent>(gameObject, position, scale, rotation);
         }
@@ -83,6 +83,7 @@ void DOF::init(ECS& ecs) {
     /* Game objects */
     Camera camera(ecs, 45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
     ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
+    ecs.addComponent<FrustumComponent>(&camera.camera->getGameObject());
 
     Light light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f), glm::normalize(glm::vec3(0.43f, -0.464f, -0.776f)));
 
@@ -100,15 +101,14 @@ void DOF::init(ECS& ecs) {
     // }
 
     {
-        auto mesh = Library::loadMesh("sponza.obj");
-        Renderable renderable(ecs, mesh, glm::vec3(0.f), glm::vec3(0.2f));
-        Material material;
-        material.mAmbient = glm::vec3(0.2f);
-        material.mDiffuse = util::genRandomVec3(0.2f, 1.f);
-        ecs.addComponent<renderable::PhongShadowRenderable>(renderable.gameObject, *Library::getTexture("black"), material);
-        ecs.addComponent<renderable::ShadowCasterRenderable>(renderable.gameObject, *Library::getTexture("black"));
-        ecs.addComponent<BoundingBoxComponent>(renderable.gameObject, *mesh);
-
+        auto assets = Loader::loadMultiAsset("sponza.obj");
+        for (auto asset : assets) {
+            Renderable renderable(ecs, asset.mesh, glm::vec3(0.f), glm::vec3(0.2f));
+            auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
+            ecs.addComponent<renderable::PhongRenderable>(renderable.gameObject, *diffuseTex, asset.material);
+            ecs.addComponent<SelectableComponent>(renderable.gameObject);
+            ecs.addComponent<BoundingBoxComponent>(renderable.gameObject, *asset.mesh);
+        }
     }
 
     /* Ground plane */
@@ -146,9 +146,7 @@ void DOF::init(ECS& ecs) {
     Renderer::addPreProcessShader<DofInfoShader>("dof/dofinfo.vert", "dof/dofinfo.frag");
     Renderer::addPreProcessShader<DofDownShader>("dof/dofdown.vert", "dof/dofdown.frag", frameScale);
     Renderer::addPreProcessShader<DofBlurShader>("dof/dofblur.vert", "dof/dofblur.frag", frameScale);
-    Renderer::addPreProcessShader<ShadowCasterShader>(4096);
-    auto& phongshadow = Renderer::addSceneShader<PhongShadowShader>();
-    phongshadow.bias = 0.002f;
+    Renderer::addSceneShader<PhongShader>();
     Renderer::addSceneShader<SkyboxShader>();
     Renderer::addPostProcessShader<PostShader>("dof/post.frag");
     Renderer::addPostProcessShader<GammaCorrectShader>();

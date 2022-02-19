@@ -159,8 +159,21 @@ namespace neo {
         if (ImGui::TreeNodeEx(buf)) {
             for (auto& gameObject : getGameObjects()) {
                 if (gameObject->mTag.size() && ImGui::TreeNodeEx(gameObject->mTag.c_str())) {
-                    for (auto& component : gameObject->getAllComponents()) {
-                        component->imGuiEditor();
+                    for (auto&& [type, components] : gameObject->getComponentsMap()) {
+                        for (int i = 0; i < components.size(); i++) {
+                            ImGui::Text(type.name());
+                            components[i]->imGuiEditor();
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.81f, 0.20f, 0.20f, 0.40f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
+                            ImGui::PushID(gameObject + type.hash_code() + i);
+                            if (ImGui::Button("Remove")) {
+                                _removeComponent(type, components[i]);
+                            }
+                            ImGui::PopID();
+                            ImGui::PopStyleColor(3);
+                            ImGui::Separator();
+                        }
                     }
                     ImGui::TreePop();
                 }

@@ -5,6 +5,8 @@
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumComponent.hpp"
+#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
 #include "ECS/Component/SelectingComponent/SelectedComponent.hpp"
@@ -48,28 +50,16 @@ namespace neo {
         }
 
         virtual void render(const ECS& ecs) override {
-            mFrameCount++;
+            auto mouse = ecs.getSingleComponent<MouseComponent>();
+            if (!mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
+                return;
+            }
+
+
 
             auto fbo = Library::getFBO("selectable");
             fbo->bind();
             NEO_ASSERT(fbo->mTextures.size() > 0, "Selectable render target never initialized");
-
-            // Read pixels from last frame before clearing the buffer
-            if (auto mouse = ecs.getSingleComponent<MouseComponent>()) {
-                if (mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1) && mFrameCount >= 5) {
-                    MICROPROFILE_SCOPEI("Selectable Shader", "ReadPixels", MP_AUTO);
-                    MICROPROFILE_SCOPEGPUI("Selectable Shader - ReadPixels", MP_AUTO);
-                    uint8_t buffer[4];
-                    CHECK_GL(glReadPixels(static_cast<GLint>(mouse->mFrameMouse.getPos().x), static_cast<int>(fbo->mTextures[0]->mHeight - mouse->mFrameMouse.getPos().y), 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer));
-                    uint8_t id = buffer[0];
-                    if (id != mSelectedID) {
-                        mSelectedID = id;
-                        Messenger::sendMessage<ComponentSelectedMessage>(nullptr, mSelectedID);
-                    }
-
-                    mFrameCount = 0;
-                }
-            }
 
             CHECK_GL(glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
             CHECK_GL(glClearStencil(0));
@@ -85,21 +75,51 @@ namespace neo {
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
 
+            const auto& cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
+
+            uint8_t rendered = 1;
+            std::unordered_map<uint8_t, uint32_t> map;
             for (const auto& renderable : ecs.getComponentTuples<SelectableComponent, MeshComponent, SpatialComponent>()) {
-                uint32_t stencilID = renderable->get<SelectableComponent>()->mID;
-                CHECK_GL(glStencilFunc(GL_ALWAYS, static_cast<GLuint>(stencilID), 0));
-                loadUniform("componentID", static_cast<int>(stencilID));
-                loadUniform("M", renderable->get<SpatialComponent>()->getModelMatrix());
+                auto renderableSpatial = renderable->get<SpatialComponent>();
+                uint32_t componentID = renderable->get<SelectableComponent>()->mID;
+
+                // VFC
+                if (cameraFrustum) {
+                    MICROPROFILE_SCOPEI("SelectableShader", "VFC", MP_AUTO);
+                    if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
+                        float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
+                        if (!cameraFrustum->isInFrustum(renderableSpatial->getPosition(), radius)) {
+                            continue;
+                        }
+                    }
+                }
+
+                map.insert({ rendered, componentID });
+                CHECK_GL(glStencilFunc(GL_ALWAYS, static_cast<GLuint>(rendered), 0));
+                loadUniform("componentID", static_cast<int>(rendered));
+                loadUniform("M", renderableSpatial->getModelMatrix());
 
                 /* DRAW */
                 renderable->get<MeshComponent>()->mMesh.draw();
+                rendered++;
+            }
+            // Read pixels from last frame before clearing the buffer
+            uint8_t buffer[4];
+            {
+                MICROPROFILE_SCOPEI("Selectable Shader", "ReadPixels", MP_AUTO);
+                MICROPROFILE_SCOPEGPUI("Selectable Shader - ReadPixels", MP_AUTO);
+                CHECK_GL(glReadPixels(static_cast<GLint>(mouse->mFrameMouse.getPos().x), static_cast<int>(fbo->mTextures[0]->mHeight - mouse->mFrameMouse.getPos().y), 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer));
+            }
+            uint8_t id = buffer[0];
+            if (map[id] != mSelectedID) {
+                mSelectedID = map[id];
+                Messenger::sendMessage<ComponentSelectedMessage>(nullptr, mSelectedID);
             }
 
             unbind();
         }
 
         private:
-            uint8_t mSelectedID = 0;
-            uint8_t mFrameCount = 0;
+            uint32_t mSelectedID = 0;
     };
 }

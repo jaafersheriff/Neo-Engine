@@ -44,6 +44,10 @@ namespace neo {
             return glm::distance(mMin, mMax) / 2.f;
         }
 
+        glm::vec3 getCenter() const {
+            return mMin + ((mMax - mMin) / 2.f);
+        }
+
         bool intersect(const glm::vec3 position) const {
             auto spatial = mGameObject->getComponentByType<SpatialComponent>();
             NEO_ASSERT(spatial, "BoundingBox has no SpatialComponent");

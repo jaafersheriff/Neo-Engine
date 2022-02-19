@@ -61,7 +61,7 @@ void BaseDemo::init(ECS& ecs) {
     ecs.addComponent<MeshComponent>(bunny, *Library::loadMesh("bunny.obj", true));
     ecs.addComponent<renderable::PhongRenderable>(bunny, *Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f,0.f,1.f)));
     ecs.addComponent<SelectableComponent>(bunny);
-    ecs.addComponent<BoundingBoxComponent>(bunny, *Library::loadMesh("bunny.obj"));
+    ecs.addComponent<BoundingBoxComponent>(bunny, *Library::loadMesh("bunny.obj", true));
 
     /* Ground plane */
     GameObject* plane = &ecs.createGameObject("Grid");

@@ -122,6 +122,8 @@ namespace neo {
 
             asset.mesh = new Mesh;
 
+            _resize(asset.mesh, shape.mesh.positions, false);
+
             /* Upload */
             asset.mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
             if (shape.mesh.positions.size()) {
@@ -269,9 +271,6 @@ namespace neo {
             if (vertices[3 * v + 2] > maxZ) maxZ = vertices[3 * v + 2];
         }
 
-        mesh->mMin = glm::vec3(minX, minY, minZ);
-        mesh->mMax = glm::vec3(maxX, maxY, maxZ);
-
         //From min and max compute necessary scale and shift for each dimension
         if (doResize) {
             float xExtent, yExtent, zExtent;
@@ -296,18 +295,30 @@ namespace neo {
             scaleZ = 2.f / maxExtent;
             shiftZ = minZ + (zExtent) / 2.f;
 
+
             //Go through all verticies shift and scale them
+            minX = minY = minZ = 1.1754E+38F;
+            maxX = maxY = maxZ = -1.1754E+38F;
             for (size_t v = 0; v < vertices.size() / 3; v++) {
                 vertices[3 * v + 0] = (vertices[3 * v + 0] - shiftX) * scaleX;
+                minX  = std::min(minX, vertices[3 * v + 0]);
+                maxX  = std::max(maxX, vertices[3 * v + 0]);
                 assert(vertices[3 * v + 0] >= -1.0 - epsilon);
                 assert(vertices[3 * v + 0] <= 1.0 + epsilon);
                 vertices[3 * v + 1] = (vertices[3 * v + 1] - shiftY) * scaleY;
+                minY  = std::min(minY, vertices[3 * v + 1]);
+                maxY  = std::max(maxY, vertices[3 * v + 1]);
                 assert(vertices[3 * v + 1] >= -1.0 - epsilon);
                 assert(vertices[3 * v + 1] <= 1.0 + epsilon);
                 vertices[3 * v + 2] = (vertices[3 * v + 2] - shiftZ) * scaleZ;
+                minZ  = std::min(minZ, vertices[3 * v + 2]);
+                maxZ  = std::max(maxZ, vertices[3 * v + 2]);
                 assert(vertices[3 * v + 2] >= -1.0 - epsilon);
                 assert(vertices[3 * v + 2] <= 1.0 + epsilon);
             }
         }
+    
+        mesh->mMin = glm::vec3(minX, minY, minZ);
+        mesh->mMax = glm::vec3(maxX, maxY, maxZ);
     }
 }

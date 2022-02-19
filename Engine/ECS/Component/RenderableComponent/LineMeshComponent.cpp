@@ -85,7 +85,7 @@ namespace neo {
 
     void LineMeshComponent::imGuiEditor() {
         if (mOverrideColor) {
-            ImGui::SliderFloat("Color", &(mOverrideColor.value())[0], 0.f, 1.f);
+            ImGui::SliderFloat3("Color", &(mOverrideColor.value())[0], 0.f, 1.f);
         }
         ImGui::Separator();
 

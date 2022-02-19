@@ -111,12 +111,23 @@ namespace neo {
             return 1;
         }
 
-        /* Request version 3.3 of OpenGL */
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+        glfwWindowHint(GLFW_DEPTH_BITS, 32);
+        glfwWindowHint(GLFW_STENCIL_BITS, 0);
+        glfwWindowHint(GLFW_SAMPLES, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, Renderer::NEO_GL_MAJOR_VERSION);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, Renderer::NEO_GL_MINOR_VERSION);
         glfwWindowHint(GLFW_AUTO_ICONIFY, false);
+        glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
+
+#ifdef DEBUG_MODE
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
+
+        const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        NEO_UNUSED(mode);
 
         /* Create GLFW window */
         mWindow = glfwCreateWindow(mDetails.mWindowSize.x, mDetails.mWindowSize.y, name.c_str(), NULL, NULL);
