@@ -37,8 +37,8 @@ namespace neo {
         glm::vec2 h = getHorizontalBounds();
         glm::vec2 v = getVerticalBounds();
         bool edited = false;
-        edited = edited || ImGui::SliderFloat("H-Bounds", &h[0], -10.f, 10.f);
-        edited = edited || ImGui::SliderFloat("V-Bounds", &v[0], -10.f, 10.f);
+        edited = edited || ImGui::SliderFloat2("H-Bounds", &h[0], -10.f, 10.f);
+        edited = edited || ImGui::SliderFloat2("V-Bounds", &v[0], -10.f, 10.f);
         if (edited) {
             setOrthoBounds(h, v);
         }

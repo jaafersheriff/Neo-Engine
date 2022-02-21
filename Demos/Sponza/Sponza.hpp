@@ -4,8 +4,7 @@
 
 using namespace neo;
 
-// Depth of field
-class DOF : public IDemo {
+class Sponza : public IDemo {
 public:
 	virtual IDemo::Config getConfig() const override;
 	virtual void init(ECS& ecs) override;

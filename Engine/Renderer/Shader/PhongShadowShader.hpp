@@ -70,7 +70,7 @@ namespace neo {
                         float visibility = getShadowVisibility(pcfSize, shadowMap, shadowCoord, bias);
                         vec3 phong = getPhong(fragNor, fragPos.rgb, camPos, lightPos, lightAtt, lightCol, albedo.rgb, specularColor, shine);
                         color.rgb = albedo.rgb * ambientColor + 
-                                    visibility * phong;
+                                    max(visibility, 0.2) * phong;
                         color.a = albedo.a;
                     })"),
                 bias(b),

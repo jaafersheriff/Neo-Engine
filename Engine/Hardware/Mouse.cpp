@@ -69,5 +69,8 @@ namespace neo {
     void Mouse::reset() {
         mIsReset = true;
         mDX = mDY = 0;
+        for (int i = 0; i < GLFW_MOUSE_BUTTON_LAST; i++) {
+            mMouseButtons[i] = { GLFW_RELEASE };
+        }
     }
 }

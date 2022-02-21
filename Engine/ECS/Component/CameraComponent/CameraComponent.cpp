@@ -65,8 +65,12 @@ namespace neo {
     }
 
     void CameraComponent::imGuiEditor() {
-        ImGui::SliderFloat("Near", &mNear, 0.1f, 10.f);
-        ImGui::SliderFloat("Far", &mFar, 1.f, 100.f);
+        if (ImGui::SliderFloat("Near", &mNear, 0.1f, 10.f)) {
+            mProjMatDirty = true;
+        }
+        if (ImGui::SliderFloat("Far", &mFar, 1.f, 100.f)) {
+            mProjMatDirty = true;
+        }
     }
 
 }

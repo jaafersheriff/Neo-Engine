@@ -46,6 +46,7 @@ namespace neo {
         static void _mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
             if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
                 ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+                Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
             }
             else {
                 Messenger::sendMessage<Mouse::MouseButtonMessage>(nullptr, button, action);
@@ -55,6 +56,7 @@ namespace neo {
         static void _scrollCallback(GLFWwindow* window, double dx, double dy) {
             if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
                 ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
+                Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
             }
             else {
                 Messenger::sendMessage<Mouse::ScrollWheelMessage>(nullptr, dy);
@@ -64,6 +66,7 @@ namespace neo {
         static void _characterCallback(GLFWwindow* window, unsigned int c) {
             if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
                 ImGui_ImplGlfw_CharCallback(window, c);
+                Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
             }
         }
 
