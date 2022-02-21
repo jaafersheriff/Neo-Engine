@@ -56,8 +56,8 @@ void Sponza::init(ECS& ecs) {
         auto& spat = ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(20.f));
         spat.setLookDir(glm::normalize(glm::vec3(0.43f, -0.464f, -0.776f)));
         ecs.addComponent<LightComponent>(gameObject, glm::vec3(1.f));
-            ecs.addComponent<renderable::WireframeRenderable>(gameObject);
-        ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("cube"));
+        ecs.addComponent<renderable::WireframeRenderable>(gameObject);
+        ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("cube").mesh);
         auto& line = ecs.addComponent<LineMeshComponent>(gameObject, glm::vec3(1, 0, 0));
         line.mUseParentSpatial = true;
         line.addNode({ 0,0,0 });
@@ -76,13 +76,13 @@ void Sponza::init(ECS& ecs) {
     auto assets = Loader::loadMultiAsset("sponza.obj");
     for (auto asset : assets) {
         auto gameObject = &ecs.createGameObject();
-        ecs.addComponent<MeshComponent>(gameObject, *asset.mesh);
+        ecs.addComponent<MeshComponent>(gameObject, *asset.meshData.mesh);
         ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(0.1f));
         auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
         ecs.addComponent<renderable::PhongShadowRenderable>(gameObject, *diffuseTex, asset.material);
         ecs.addComponent<renderable::ShadowCasterRenderable>(gameObject, *diffuseTex);
         // ecs.addComponent<SelectableComponent>(renderable.gameObject);
-        ecs.addComponent<BoundingBoxComponent>(gameObject, *asset.mesh);
+        ecs.addComponent<BoundingBoxComponent>(gameObject, asset.meshData);
     }
 
     /* Systems - order matters! */

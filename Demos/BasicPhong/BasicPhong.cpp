@@ -41,8 +41,8 @@ namespace {
             auto gameObject = &ecs.createGameObject();
             ecs.addComponent<SpatialComponent>(gameObject, pos);
             ecs.addComponent<LightComponent>(gameObject, col, att);
-            ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere"));
-            ecs.addComponent<BoundingBoxComponent>(gameObject, *Library::getMesh("sphere"));
+            ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere").mesh);
+            ecs.addComponent<BoundingBoxComponent>(gameObject, Library::getMesh("sphere"));
             ecs.addComponent<renderable::WireframeRenderable>(gameObject);
             ecs.addComponent<SelectableComponent>(gameObject);
 
@@ -96,7 +96,7 @@ void BasicPhong::init(ECS& ecs) {
             renderables.push_back(
                 new Renderable(
                     ecs,
-                    Library::getMesh("mr_krab.obj"), 
+                    Library::getMesh("mr_krab.obj").mesh, 
                     Library::getTexture("mr_krab.png"),
                     glm::vec3(x*2, 0, z*2))
             );

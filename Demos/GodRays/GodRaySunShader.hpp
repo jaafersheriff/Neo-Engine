@@ -59,7 +59,7 @@ class GodRaySunShader : public Shader {
                 loadUniform("center", renderable->getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
                 /* DRAW */
-                Library::getMesh("quad")->draw();
+                Library::getMesh("quad").mesh->draw();
             }
 
             unbind();

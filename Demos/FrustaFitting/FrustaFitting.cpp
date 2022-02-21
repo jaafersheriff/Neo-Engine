@@ -107,7 +107,7 @@ void FrustaFitting::init(ECS& ecs) {
 
     // Renderable
     for (int i = 0; i < 30; i++) {
-        Renderable sphere(ecs, util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere"), glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
+        Renderable sphere(ecs, util::genRandomBool() ? Library::getMesh("cube").mesh : Library::getMesh("sphere").mesh, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
         Material material;
         material.mAmbient = glm::vec3(0.3f);
         material.mDiffuse = util::genRandomVec3();
@@ -116,7 +116,7 @@ void FrustaFitting::init(ECS& ecs) {
     }
 
     /* Ground plane */
-    Renderable receiver(ecs, Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(50.f), glm::vec3(-1.56f, 0, 0));
+    Renderable receiver(ecs, Library::getMesh("quad").mesh, glm::vec3(0.f, 0.f, 0.f), glm::vec3(50.f), glm::vec3(-1.56f, 0, 0));
     Material material;
     material.mAmbient = glm::vec3(0.2f);
     material.mDiffuse = glm::vec3(0.7f);

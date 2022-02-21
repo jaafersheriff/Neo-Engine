@@ -7,11 +7,11 @@
 
 namespace neo {
     /* Library */
-    std::unordered_map<std::string, Mesh *> Library::mMeshes;
-    std::unordered_map<std::string, Texture *> Library::mTextures;
-    std::unordered_map<std::string, Framebuffer *> Library::mFramebuffers;
+    std::unordered_map<std::string, MeshData> Library::mMeshes;
+    std::unordered_map<std::string, Texture*> Library::mTextures;
+    std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
 
-    Mesh* Library::getMesh(const std::string& name) {
+    MeshData Library::getMesh(const std::string& name) {
         /* Search map first */
         auto it = mMeshes.find(name);
         if (it != mMeshes.end()) {
@@ -21,7 +21,7 @@ namespace neo {
         NEO_FAIL("Mesh %s not found", name.c_str());
     }
 
-    Mesh* Library::loadMesh(const std::string& fileName, bool doResize) {
+    MeshData Library::loadMesh(const std::string& fileName, bool doResize) {
         MICROPROFILE_SCOPEI("Library", "loadMesh", MP_AUTO);
 
         auto it = mMeshes.find(fileName);
@@ -29,22 +29,13 @@ namespace neo {
             return it->second;
         }
 
-        Mesh* mesh = Loader::loadMesh(fileName, doResize);
+        MeshData mesh = Loader::loadMesh(fileName, doResize);
         _insertMesh(fileName, mesh);
         return mesh;
     }
 
-    void Library::loadMesh(const std::string& name, Mesh* mesh) {
-        _insertMesh(name, mesh);
-    }
-
-    Mesh* Library::createEmptyMesh(const std::string& name) {
-        auto it = mMeshes.find(name);
-        NEO_ASSERT(it == mMeshes.end(), "Mesh already found");
-        Mesh* mesh = new Mesh;
-        _insertMesh(name, mesh);
-        return mesh;
-
+    void Library::insertMesh(const std::string& name, MeshData& data) {
+        _insertMesh(name, data);
     }
 
     Texture* Library::getTexture(const std::string& name) {
@@ -95,9 +86,9 @@ namespace neo {
         return nullptr;
     }
 
-    void Library::_insertMesh(const std::string& name, Mesh* mesh) {
-        if (mesh) {
-            mMeshes.insert({ name, mesh });
+    void Library::_insertMesh(const std::string& name, MeshData data) {
+        if (data.mesh) {
+            mMeshes.insert({ name, data });
         }
     }
 
@@ -109,8 +100,8 @@ namespace neo {
 
     void Library::clean() {
         // Clean up GL objects
-        for (auto& mesh : mMeshes) {
-            mesh.second->destroy();
+        for (auto& meshData : mMeshes) {
+            meshData.second.mesh->destroy();
         }
         mMeshes.clear();
         for (auto& texture : mTextures) {

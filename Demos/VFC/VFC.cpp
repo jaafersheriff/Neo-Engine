@@ -65,14 +65,14 @@ namespace {
         for (int i = 0; i < amount; i++) {
             glm::vec3 position(util::genRandom(-15.f, 15.f), 0.f, util::genRandom(-15.f, 15.f));
             glm::vec3 size = glm::vec3(util::genRandom(0.5f, 2.f), util::genRandom(0.5f, 2.f), util::genRandom(0.5f, 2.f));
-            const auto mesh = Library::getMesh("sphere");
+            const auto meshData = Library::getMesh("sphere");
 
-            Renderable renderable(ecs, mesh, position, size);
+            Renderable renderable(ecs, meshData.mesh, position, size);
             Material material;
             material.mAmbient = glm::vec3(0.2f);
             material.mDiffuse = (glm::normalize(position) + 1.f) / 2.f;
             ecs.addComponent<renderable::PhongRenderable>(renderable.gameObject, *Library::getTexture("black"), material);
-            auto boundingBox = &ecs.addComponent<BoundingBoxComponent>(renderable.gameObject, *mesh);
+            auto boundingBox = &ecs.addComponent<BoundingBoxComponent>(renderable.gameObject, meshData);
             NEO_UNUSED(boundingBox);
         }
     }
@@ -99,7 +99,7 @@ void VFC::init(ECS& ecs) {
     generateObjects(ecs, 10);
 
     /* Ground plane */
-    Renderable plane(ecs, Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(30.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
+    Renderable plane(ecs, Library::getMesh("quad").mesh, glm::vec3(0.f), glm::vec3(30.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
     ecs.addComponent<renderable::AlphaTestRenderable>(plane.gameObject, *Library::loadTexture("grid.png"));
 
     /* Systems - order matters! */

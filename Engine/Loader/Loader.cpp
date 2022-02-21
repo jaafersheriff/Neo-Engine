@@ -32,12 +32,14 @@ namespace neo {
         mVerbose = v;
     }
 
-    Mesh* Loader::loadMesh(const std::string &fileName, bool doResize) {
+    MeshData Loader::loadMesh(const std::string &fileName, bool doResize) {
         MICROPROFILE_TIMELINE_ENTER_STATIC(MP_ALICEBLUE, fileName.c_str());
         MICROPROFILE_SCOPEI("Loader", "loadMesh", MP_AUTO);
 
         /* Create mesh */
+        MeshData meshData;
         Mesh* mesh = new Mesh;
+        meshData.mesh = mesh;
 
         /* If mesh was not found in map, read it in */
         std::vector<tinyobj::shape_t> shapes;
@@ -75,7 +77,7 @@ namespace neo {
         }
 
         /* Optional resize and find min/max */
-        _resize(mesh, vertices, doResize);
+        _findMetaData(meshData, vertices, doResize);
 
         /* Upload */
         mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
@@ -98,7 +100,7 @@ namespace neo {
         }
 
         MICROPROFILE_TIMELINE_LEAVE_STATIC(fileName.c_str());
-        return mesh;
+        return meshData;
     }
    std::vector<Asset> Loader::loadMultiAsset(const std::string &fileName) {
         /* If mesh was not found in map, read it in */
@@ -120,24 +122,25 @@ namespace neo {
         for (auto& shape : shapes) {
             Asset asset;
 
-            asset.mesh = new Mesh;
+            Mesh* mesh = new Mesh;
+            asset.meshData.mesh = mesh;
 
-            _resize(asset.mesh, shape.mesh.positions, false);
+            _findMetaData(asset.meshData, shape.mesh.positions, false);
 
             /* Upload */
-            asset.mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
+            mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
             if (shape.mesh.positions.size()) {
-                asset.mesh->addVertexBuffer(VertexType::Position, 0, 3, shape.mesh.positions);
+                mesh->addVertexBuffer(VertexType::Position, 0, 3, shape.mesh.positions);
             }
             if (shape.mesh.normals.size()) {
-                asset.mesh->addVertexBuffer(VertexType::Normal, 1, 3, shape.mesh.normals);
+                mesh->addVertexBuffer(VertexType::Normal, 1, 3, shape.mesh.normals);
             }
             if (shape.mesh.texcoords.size()) {
-                asset.mesh->addVertexBuffer(VertexType::Texture0, 2, 2, shape.mesh.texcoords);
+                mesh->addVertexBuffer(VertexType::Texture0, 2, 2, shape.mesh.texcoords);
             }
             if (shape.mesh.indices.size()) {
-                asset.mesh->mPrimitiveType = GL_TRIANGLES;
-                asset.mesh->addElementBuffer(shape.mesh.indices);
+                mesh->mPrimitiveType = GL_TRIANGLES;
+                mesh->addElementBuffer(shape.mesh.indices);
             }
 
             if (mVerbose) {
@@ -249,7 +252,7 @@ namespace neo {
     }
 
     /* Provided function to resize a mesh so all vertex positions are [0, 1.f] */
-    void Loader::_resize(Mesh* mesh, std::vector<float>& vertices, bool doResize) {
+    void Loader::_findMetaData(MeshData& meshData, std::vector<float>& vertices, bool doResize) {
         float minX, minY, minZ;
         float maxX, maxY, maxZ;
         float scaleX, scaleY, scaleZ;
@@ -272,53 +275,54 @@ namespace neo {
         }
 
         //From min and max compute necessary scale and shift for each dimension
+        float xExtent, yExtent, zExtent;
+        xExtent = maxX - minX;
+        yExtent = maxY - minY;
+        zExtent = maxZ - minZ;
+
+        float maxExtent = 0;
+        if (xExtent >= yExtent && xExtent >= zExtent) {
+            maxExtent = xExtent;
+        }
+        if (yExtent >= xExtent && yExtent >= zExtent) {
+            maxExtent = yExtent;
+        }
+        if (zExtent >= xExtent && zExtent >= yExtent) {
+            maxExtent = zExtent;
+        }
+        scaleX = 2.f / maxExtent;
+        shiftX = minX + (xExtent / 2.f);
+        scaleY = 2.f / maxExtent;
+        shiftY = minY + (yExtent / 2.f);
+        scaleZ = 2.f / maxExtent;
+        shiftZ = minZ + (zExtent) / 2.f;
+
         if (doResize) {
-            float xExtent, yExtent, zExtent;
-            xExtent = maxX - minX;
-            yExtent = maxY - minY;
-            zExtent = maxZ - minZ;
-
-            float maxExtent = 0;
-            if (xExtent >= yExtent && xExtent >= zExtent) {
-                maxExtent = xExtent;
-            }
-            if (yExtent >= xExtent && yExtent >= zExtent) {
-                maxExtent = yExtent;
-            }
-            if (zExtent >= xExtent && zExtent >= yExtent) {
-                maxExtent = zExtent;
-            }
-            scaleX = 2.f / maxExtent;
-            shiftX = minX + (xExtent / 2.f);
-            scaleY = 2.f / maxExtent;
-            shiftY = minY + (yExtent / 2.f);
-            scaleZ = 2.f / maxExtent;
-            shiftZ = minZ + (zExtent) / 2.f;
-
-
             //Go through all verticies shift and scale them
             minX = minY = minZ = 1.1754E+38F;
             maxX = maxY = maxZ = -1.1754E+38F;
             for (size_t v = 0; v < vertices.size() / 3; v++) {
                 vertices[3 * v + 0] = (vertices[3 * v + 0] - shiftX) * scaleX;
-                minX  = std::min(minX, vertices[3 * v + 0]);
-                maxX  = std::max(maxX, vertices[3 * v + 0]);
+                minX = std::min(minX, vertices[3 * v + 0]);
+                maxX = std::max(maxX, vertices[3 * v + 0]);
                 assert(vertices[3 * v + 0] >= -1.0 - epsilon);
                 assert(vertices[3 * v + 0] <= 1.0 + epsilon);
                 vertices[3 * v + 1] = (vertices[3 * v + 1] - shiftY) * scaleY;
-                minY  = std::min(minY, vertices[3 * v + 1]);
-                maxY  = std::max(maxY, vertices[3 * v + 1]);
+                minY = std::min(minY, vertices[3 * v + 1]);
+                maxY = std::max(maxY, vertices[3 * v + 1]);
                 assert(vertices[3 * v + 1] >= -1.0 - epsilon);
                 assert(vertices[3 * v + 1] <= 1.0 + epsilon);
                 vertices[3 * v + 2] = (vertices[3 * v + 2] - shiftZ) * scaleZ;
-                minZ  = std::min(minZ, vertices[3 * v + 2]);
-                maxZ  = std::max(maxZ, vertices[3 * v + 2]);
+                minZ = std::min(minZ, vertices[3 * v + 2]);
+                maxZ = std::max(maxZ, vertices[3 * v + 2]);
                 assert(vertices[3 * v + 2] >= -1.0 - epsilon);
                 assert(vertices[3 * v + 2] <= 1.0 + epsilon);
             }
         }
-    
-        mesh->mMin = glm::vec3(minX, minY, minZ);
-        mesh->mMax = glm::vec3(maxX, maxY, maxZ);
+
+        meshData.mMin = glm::vec3(minX, minY, minZ);
+        meshData.mMax = glm::vec3(maxX, maxY, maxZ);
+        meshData.mBasePosition = glm::vec3(shiftX, shiftY, shiftZ);
+        meshData.mBaseScale = glm::vec3(scaleX, scaleY, scaleZ);
     }
 }

@@ -39,10 +39,10 @@ namespace {
         Metaball(ECS& ecs, glm::vec3 position, float radius) {
             GameObject* gameObject = &ecs.createGameObject();
             ecs.addComponent<MetaballComponent>(gameObject);
-            ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere"));
+            ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere").mesh);
             ecs.addComponent<SpatialComponent>(gameObject, position, glm::vec3(radius));
             ecs.addComponent<SelectableComponent>(gameObject);
-            ecs.addComponent<BoundingBoxComponent>(gameObject, *Library::getMesh("sphere"));
+            ecs.addComponent<BoundingBoxComponent>(gameObject, Library::getMesh("sphere"));
         }
     };
 }

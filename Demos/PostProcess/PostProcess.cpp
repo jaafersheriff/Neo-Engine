@@ -70,7 +70,7 @@ void PostProcess::init(ECS& ecs) {
     ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
     Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable r(ecs, Library::loadMesh("mr_krab.obj"), Library::loadTexture("mr_krab.png"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+    Renderable r(ecs, Library::loadMesh("mr_krab.obj").mesh, Library::loadTexture("mr_krab.png"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
 
     /* Systems - order matters! */
     ecs.addSystem<CameraControllerSystem>();

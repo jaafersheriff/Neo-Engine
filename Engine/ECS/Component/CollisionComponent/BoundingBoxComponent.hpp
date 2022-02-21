@@ -4,6 +4,8 @@
 #include "ECS/GameObject.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
+#include "Loader/Loader.hpp"
+
 #include "Renderer/GLObjects/Mesh.hpp"
 
 #include <glm/glm.hpp>
@@ -33,7 +35,7 @@ namespace neo {
         }
 
 
-        BoundingBoxComponent(GameObject *go, const Mesh& mesh) :
+        BoundingBoxComponent(GameObject *go, MeshData mesh) :
             BoundingBoxComponent(go)
         {
             mMin = mesh.mMin;

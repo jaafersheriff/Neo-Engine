@@ -17,10 +17,12 @@ public:
     ParticleMeshComponent(GameObject* go) :
         Component(go)
     {
-        mMesh = Library::createEmptyMesh("Particles");
+        MeshData meshData;
+        meshData.mesh = new Mesh;
         mMesh->mPrimitiveType = GL_POINTS;
         mMesh->addVertexBuffer(VertexType::Position, 0, 4); // positions
         updateBuffers();
+        Library::insertMesh("Particles", meshData);
     }
 
     virtual void imGuiEditor() override {

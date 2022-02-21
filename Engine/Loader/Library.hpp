@@ -1,11 +1,13 @@
 #pragma once
 
-#include <unordered_map>
-
 #include "Renderer/GLObjects/Mesh.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 
+#include "Loader.hpp"
+
 #include "Util/Util.hpp"
+
+#include <unordered_map>
 
 namespace neo {
 
@@ -24,11 +26,10 @@ namespace neo {
 
             static void clean();
 
-            static Mesh* createEmptyMesh(const std::string&);
-            static Mesh* getMesh(const std::string&);
-            static Mesh* loadMesh(const std::string&, bool = false);
-            static void loadMesh(const std::string&, Mesh* mesh);
-            static const std::unordered_map<std::string, Mesh*> getAllMeshes() { return mMeshes; }
+            static MeshData getMesh(const std::string&);
+            static MeshData loadMesh(const std::string&, bool = false);
+            static void insertMesh(const std::string&, MeshData& mesh);
+            static const std::unordered_map<std::string, MeshData> getAllMeshes() { return mMeshes; }
 
             template <typename T>
             static Texture* createEmptyTexture(const std::string&, TextureFormat, glm::uvec3 = glm::uvec3(1));
@@ -42,11 +43,11 @@ namespace neo {
         private:
             // TODO 
             // template <typename T> static T* _find(const std::string&);
-            static std::unordered_map<std::string, Mesh*> mMeshes;
+            static std::unordered_map<std::string, MeshData> mMeshes;
             static std::unordered_map<std::string, Texture*> mTextures;
             static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
 
-            static void _insertMesh(const std::string&, Mesh*);
+            static void _insertMesh(const std::string&, MeshData);
             static void _insertTexture(const std::string&, Texture*);
     };
 

@@ -40,10 +40,6 @@ namespace neo {
             Mesh(Mesh &&) = default;
             Mesh & operator=(Mesh &&) = default;
 
-            /* Min/max */
-            glm::vec3 mMin{ 0.f, 0.f, 0.f };
-            glm::vec3 mMax{ 0.f, 0.f, 0.f };
-
             /* VAO ID */
             uint32_t mVAOID;
 

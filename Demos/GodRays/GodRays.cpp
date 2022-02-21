@@ -96,7 +96,7 @@ void GodRays::init(ECS& ecs) {
     Library::loadTexture("PineTexture.png");
     Library::loadMesh("PineTree3.obj");
     for (int i = 0; i < 15; i++) {
-        Renderable cube(ecs, Library::getMesh("PineTree3.obj"), glm::vec3(util::genRandom(-7.5f, 7.5f), 0.5f, util::genRandom(-7.5f, 7.5f)), glm::vec3(util::genRandom(0.7f, 1.3f)), glm::vec3(0.f, util::genRandom(0.f, 360.f), 0.f));
+        Renderable cube(ecs, Library::getMesh("PineTree3.obj").mesh, glm::vec3(util::genRandom(-7.5f, 7.5f), 0.5f, util::genRandom(-7.5f, 7.5f)), glm::vec3(util::genRandom(0.7f, 1.3f)), glm::vec3(0.f, util::genRandom(0.f, 360.f), 0.f));
         Material material;
         material.mAmbient = glm::vec3(0.2f);
         material.mDiffuse = glm::vec3(0.f);
@@ -105,7 +105,7 @@ void GodRays::init(ECS& ecs) {
     }
 
     /* Ground plane */
-    Renderable plane(ecs, Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
+    Renderable plane(ecs, Library::getMesh("quad").mesh, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
     ecs.addComponent<renderable::AlphaTestRenderable>(plane.gameObject, *Library::loadTexture("grid.png"));
 
     /* Systems - order matters! */

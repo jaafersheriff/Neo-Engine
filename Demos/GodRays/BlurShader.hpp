@@ -67,7 +67,7 @@ class BlurShader : public Shader {
             loadUniform("P", camera->getProj());
             loadUniform("V", camera->getView());
 
-            Library::getMesh("quad")->draw();
+            Library::getMesh("quad").mesh->draw();
 
             unbind();
         }

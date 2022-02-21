@@ -77,19 +77,19 @@ void Selecting::init(ECS& ecs) {
 
     /* Cube object */
     for (int i = 0; i < 30; i++) {
-        Renderable r(ecs, Library::getMesh("sphere"), glm::vec3(util::genRandom(-7.5, 7.5), 0.f, util::genRandom(-7.5, 7.5)));
+        Renderable r(ecs, Library::getMesh("sphere").mesh, glm::vec3(util::genRandom(-7.5, 7.5), 0.f, util::genRandom(-7.5, 7.5)));
         Material material;
         material.mAmbient = glm::vec3(0.2f);
         material.mDiffuse = glm::vec3(1.f, 1.f, 1.f);
         material.mShininess = 20.f;
         ecs.addComponent<renderable::PhongRenderable>(r.gameObject, *Library::getTexture("black"), material);
-        ecs.addComponent<BoundingBoxComponent>(r.gameObject, *Library::getMesh("sphere"));
+        ecs.addComponent<BoundingBoxComponent>(r.gameObject, Library::getMesh("sphere"));
         ecs.addComponent<SelectableComponent>(r.gameObject);
     }
 
     /* Ground plane */
     {
-        Renderable plane(ecs, Library::getMesh("quad"), glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
+        Renderable plane(ecs, Library::getMesh("quad").mesh, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
         ecs.addComponent<renderable::AlphaTestRenderable>(plane.gameObject, *Library::loadTexture("grid.png"));
     }
 

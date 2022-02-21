@@ -185,15 +185,21 @@ namespace neo {
 
     void Engine::_createPrefabs() {
         /* Generate basic meshes */
-        Mesh* mesh = new Mesh;
-        prefabs::generateCube(mesh);
-        Library::loadMesh(std::string("cube"), mesh);
-        mesh = new Mesh;
-        prefabs::generateQuad(mesh);
-        Library::loadMesh(std::string("quad"), mesh);
-        mesh = new Mesh;
-        prefabs::generateSphere(mesh, 2);
-        Library::loadMesh(std::string("sphere"), mesh);
+        {
+            MeshData meshData;
+            prefabs::generateCube(meshData);
+            Library::insertMesh(std::string("cube"), meshData);
+        }
+        {
+            MeshData meshData;
+            prefabs::generateQuad(meshData);
+            Library::insertMesh(std::string("quad"), meshData);
+        }
+        {
+            MeshData meshData;
+            prefabs::generateSphere(meshData, 2);
+            Library::insertMesh(std::string("sphere"), meshData);
+        }
 
         /* Generate basic textures*/
         uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
@@ -359,11 +365,12 @@ namespace neo {
                 if (ImGui::Button("Create new GameObject")) {
                     mECS.removeComponent<SelectedComponent>(*mECS.getSingleComponent<SelectedComponent>());
                     auto& go = mECS.createGameObject();
-                    mECS.addComponent<BoundingBoxComponent>(&go, *Library::getMesh("sphere"));
+                    auto sphereMesh = Library::getMesh("sphere");
+                    mECS.addComponent<BoundingBoxComponent>(&go, sphereMesh);
                     mECS.addComponent<SpatialComponent>(&go);
                     mECS.addComponent<SelectableComponent>(&go);
                     mECS.addComponent<SelectedComponent>(&go);
-                    mECS.addComponent<MeshComponent>(&go, *Library::getMesh("sphere"));
+                    mECS.addComponent<MeshComponent>(&go, *sphereMesh.mesh);
                     mECS.addComponent<renderable::WireframeRenderable>(&go);
                 }
                 ImGui::EndMenu();

@@ -67,7 +67,7 @@ void NormalVisualizer::init(ECS& ecs) {
     Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
 
     Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Orient(ecs, Library::loadMesh("bunny.obj"));
+    Orient(ecs, Library::loadMesh("bunny.obj").mesh);
 
     /* Systems - order matters! */
     ecs.addSystem<CameraControllerSystem>();

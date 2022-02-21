@@ -235,8 +235,8 @@ namespace neo {
 
         // Bind quad 
         shader.bind();
-        auto mesh = Library::getMesh("quad");
-        CHECK_GL(glBindVertexArray(mesh->mVAOID));
+        auto meshData = Library::getMesh("quad");
+        CHECK_GL(glBindVertexArray(meshData.mesh->mVAOID));
 
         // Bind input fbo texture
         shader.loadTexture("inputFBO", *input->mTextures[0]); 
@@ -250,7 +250,7 @@ namespace neo {
         shader.render(ecs);
 
         // Render post process effect
-        mesh->draw();
+        meshData.mesh->draw();
 
         shader.unbind();
         RENDERER_MP_LEAVE();
