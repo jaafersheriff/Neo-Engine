@@ -48,7 +48,7 @@ namespace neo {
 
             /* Load Mesh pointer from an .obj file */
             static MeshData loadMesh(const std::string &, bool = false);
-            static std::vector<Asset> loadMultiAsset(const std::string &);
+            static std::vector<Asset> loadMultiAsset(const std::string &, bool TODOdoresize);
 
             /* Retrieve Texture pointer from an image file */
             static Texture2D* loadTexture(const std::string &, TextureFormat);

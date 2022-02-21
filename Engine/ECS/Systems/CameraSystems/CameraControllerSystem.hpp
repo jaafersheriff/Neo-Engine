@@ -16,13 +16,11 @@ namespace neo {
         virtual void update(ECS& ecs) override;
         virtual void imguiEditor(ECS& ecs) override;
 
+        float mSuperSpeed = 2.5f;
     protected:
         void _updateLook(const float dt, ECS&, CameraControllerComponent&);
         void _updatePosition(const float dt, ECS&, CameraControllerComponent&);
 
-    private:
-
-        float mSuperSpeed = 2.5f;
 
     };
 }

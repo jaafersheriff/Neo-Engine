@@ -46,7 +46,7 @@ IDemo::Config Sponza::getConfig() const {
 void Sponza::init(ECS& ecs) {
 
     /* Game objects */
-    Camera camera(ecs, 45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 50.f);
+    Camera camera(ecs, 45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 150.f);
     ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
     ecs.addComponent<FrustumComponent>(&camera.camera->getGameObject());
     ecs.addComponent<FrustumFitSourceComponent>(&camera.camera->getGameObject());
@@ -73,20 +73,35 @@ void Sponza::init(ECS& ecs) {
         ecs.addComponent<FrustumFitReceiverComponent>(shadowCam);
     }
 
-    auto assets = Loader::loadMultiAsset("sponza.obj");
-    for (auto asset : assets) {
+    // auto assets_stock = Loader::loadMultiAsset("sponza.obj", false);
+    auto assets_scaled = Loader::loadMultiAsset("sponza.obj", true);
+    // for(auto& asset : assets_stock) {
+    //     auto gameObject = &ecs.createGameObject();
+    //     ecs.addComponent<MeshComponent>(gameObject, *asset.meshData.mesh);
+    //     ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(0.f, 25.f, 0.f), glm::vec3(1.0f));
+    //     auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
+    //     asset.material.mAmbient = glm::vec3(0.2f);
+    //     ecs.addComponent<renderable::PhongShadowRenderable>(gameObject, *diffuseTex, asset.material);
+    //     ecs.addComponent<renderable::ShadowCasterRenderable>(gameObject, *diffuseTex);
+    //     // ecs.addComponent<SelectableComponent>(renderable.gameObject);
+    //     ecs.addComponent<BoundingBoxComponent>(gameObject, asset.meshData);
+    // }
+    for(auto& asset : assets_scaled) {
         auto gameObject = &ecs.createGameObject();
         ecs.addComponent<MeshComponent>(gameObject, *asset.meshData.mesh);
-        ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(0.1f));
+        ecs.addComponent<SpatialComponent>(gameObject, asset.meshData.mBasePosition, asset.meshData.mBaseScale);
         auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
+        asset.material.mAmbient = glm::vec3(0.2f);
         ecs.addComponent<renderable::PhongShadowRenderable>(gameObject, *diffuseTex, asset.material);
         ecs.addComponent<renderable::ShadowCasterRenderable>(gameObject, *diffuseTex);
-        // ecs.addComponent<SelectableComponent>(renderable.gameObject);
+        ecs.addComponent<SelectableComponent>(gameObject);
         ecs.addComponent<BoundingBoxComponent>(gameObject, asset.meshData);
     }
 
+
     /* Systems - order matters! */
-    ecs.addSystem<CameraControllerSystem>();
+    auto& camSys = ecs.addSystem<CameraControllerSystem>();
+    camSys.mSuperSpeed = 10.f;
     ecs.addSystem<FrustaFittingSystem>();
 
     /* Init renderer */
