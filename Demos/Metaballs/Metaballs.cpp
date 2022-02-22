@@ -23,7 +23,7 @@
 using namespace neo;
 
 /* Game object definitions */
-namespace {
+namespace Metaballs {
     struct Camera {
         CameraComponent* camera;
         Camera(ECS& ecs, float fov, float near, float far, float ls, float ms, glm::vec3 pos, glm::vec3 lookDir) {
@@ -39,84 +39,84 @@ namespace {
         Metaball(ECS& ecs, glm::vec3 position, float radius) {
             GameObject* gameObject = &ecs.createGameObject();
             ecs.addComponent<MetaballComponent>(gameObject);
-            ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere").mesh);
+            ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere").mMesh);
             ecs.addComponent<SpatialComponent>(gameObject, position, glm::vec3(radius));
             ecs.addComponent<SelectableComponent>(gameObject);
             ecs.addComponent<BoundingBoxComponent>(gameObject, Library::getMesh("sphere"));
         }
     };
-}
 
-IDemo::Config Metaballs::getConfig() const {
-    IDemo::Config config;
-    config.name = "Metaballs";
-    return config;
-}
-
-void Metaballs::init(ECS& ecs) {
-
-    /* Game objects */
-    Camera camera(ecs, 45.f, 1.f, 100.f, 0.4f, 7.f, glm::vec3(-2.f, 2.f, 50.f), glm::vec3(0.f, 0.f, -1.f));
-    ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
-
-    /* Skybox */
-    {
-        GameObject* gameObject = &ecs.createGameObject();
-        ecs.addComponent<renderable::SkyboxComponent>(gameObject, *Library::loadCubemap("arctic_skybox", {"arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga"}));
+    IDemo::Config Demo::getConfig() const {
+        IDemo::Config config;
+        config.name = "Metaballs";
+        return config;
     }
 
-    /* METBALL */
-    {
-        // Balls
-        Metaball(ecs, glm::vec3(-1.4f, 0.f, 0.f), 1.f);
-        Metaball(ecs, glm::vec3(1.4f, 0.f, 0.f), 2.5f);
+    void Demo::init(ECS& ecs) {
 
-        // Mesh
-        auto& go = ecs.createGameObject();
-        auto& mesh = ecs.addComponent<MetaballsMeshComponent>(&go);
-        mesh.mMesh->mPrimitiveType = GL_TRIANGLES;
-        mesh.mMesh->addVertexBuffer(VertexType::Position, 0, 3);
-        mesh.mMesh->addVertexBuffer(VertexType::Normal, 1, 3);
-        ecs.addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.f, 0.f));
-    }
+        /* Game objects */
+        Camera camera(ecs, 45.f, 1.f, 100.f, 0.4f, 7.f, glm::vec3(-2.f, 2.f, 50.f), glm::vec3(0.f, 0.f, -1.f));
+        ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
-    /* Systems - order matters! */
-    ecs.addSystem<CameraControllerSystem>();
-    ecs.addSystem<MetaballsSystem>();
-
-    /* Init renderer */
-    Renderer::addSceneShader<MetaballsShader>("metaballs/metaballs.vert", "metaballs/metaballs.frag");
-    Renderer::addSceneShader<SkyboxShader>();
-
-    Engine::addImGuiFunc("Metaballs", [](ECS& ecs_) {
-        static float scale = 2.f;
-        if (ImGui::Button("Add")) {
-            Metaball(ecs_, util::genRandomVec3(-2.f, 2.f), util::genRandom(2.f, 4.f));
-            {
-                GameObject* gameObject = &ecs_.createGameObject();
-                ecs_.addComponent<DirtyBallsComponent>(gameObject);
-            }
+        /* Skybox */
+        {
+            GameObject* gameObject = &ecs.createGameObject();
+            ecs.addComponent<renderable::SkyboxComponent>(gameObject, *Library::loadCubemap("arctic_skybox", { "arctic_ft.tga", "arctic_bk.tga", "arctic_up.tga", "arctic_dn.tga", "arctic_rt.tga", "arctic_lf.tga" }));
         }
 
-        static int index = 0;
-        auto metaballs = ecs_.getComponents<MetaballComponent>();
-        if (metaballs.size()) {
-            ImGui::SliderInt("Index", &index, 0, static_cast<int>(metaballs.size()) - 1);
-            glm::vec3 position = metaballs[index]->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
-            ImGui::Text("%0.2f, %0.2f, %0.2f", position.x, position.y, position.z);
-            if (ImGui::Button("Remove")) {
-                ecs_.removeGameObject(metaballs[index]->getGameObject());
+        /* METBALL */
+        {
+            // Balls
+            Metaball(ecs, glm::vec3(-1.4f, 0.f, 0.f), 1.f);
+            Metaball(ecs, glm::vec3(1.4f, 0.f, 0.f), 2.5f);
+
+            // Mesh
+            auto& go = ecs.createGameObject();
+            auto& mesh = ecs.addComponent<MetaballsMeshComponent>(&go);
+            mesh.mMesh->mPrimitiveType = GL_TRIANGLES;
+            mesh.mMesh->addVertexBuffer(VertexType::Position, 0, 3);
+            mesh.mMesh->addVertexBuffer(VertexType::Normal, 1, 3);
+            ecs.addComponent<SpatialComponent>(&go, glm::vec3(0.f, 0.f, 0.f));
+        }
+
+        /* Systems - order matters! */
+        ecs.addSystem<CameraControllerSystem>();
+        ecs.addSystem<MetaballsSystem>();
+
+        /* Init renderer */
+        Renderer::addSceneShader<MetaballsShader>("metaballs/metaballs.vert", "metaballs/metaballs.frag");
+        Renderer::addSceneShader<SkyboxShader>();
+
+        Engine::addImGuiFunc("Metaballs", [](ECS& ecs_) {
+            static float scale = 2.f;
+            if (ImGui::Button("Add")) {
+                Metaball(ecs_, util::genRandomVec3(-2.f, 2.f), util::genRandom(2.f, 4.f));
                 {
                     GameObject* gameObject = &ecs_.createGameObject();
                     ecs_.addComponent<DirtyBallsComponent>(gameObject);
                 }
-                if (metaballs.size() - 1 == 1) {
-                    index = 0;
-                }
-                else if (index == metaballs.size() - 2) {
-                    index--;
+            }
+
+            static int index = 0;
+            auto metaballs = ecs_.getComponents<MetaballComponent>();
+            if (metaballs.size()) {
+                ImGui::SliderInt("Index", &index, 0, static_cast<int>(metaballs.size()) - 1);
+                glm::vec3 position = metaballs[index]->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
+                ImGui::Text("%0.2f, %0.2f, %0.2f", position.x, position.y, position.z);
+                if (ImGui::Button("Remove")) {
+                    ecs_.removeGameObject(metaballs[index]->getGameObject());
+                    {
+                        GameObject* gameObject = &ecs_.createGameObject();
+                        ecs_.addComponent<DirtyBallsComponent>(gameObject);
+                    }
+                    if (metaballs.size() - 1 == 1) {
+                        index = 0;
+                    }
+                    else if (index == metaballs.size() - 2) {
+                        index--;
+                    }
                 }
             }
-        }
-    });
+            });
+    }
 }

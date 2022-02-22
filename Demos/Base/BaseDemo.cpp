@@ -1,4 +1,4 @@
-#include "BaseDemo.hpp"
+#include "Base/BaseDemo.hpp"
 #include "Engine/Engine.hpp"
 
 #include "ECS/ECS.hpp"
@@ -28,61 +28,61 @@
 using namespace neo;
 
 /* Game object definitions */
-namespace {
-}
 
-IDemo::Config BaseDemo::getConfig() const {
-    IDemo::Config config;
-    config.name = "Base Demo";
-    return config;
-}
+namespace Base {
 
-void BaseDemo::init(ECS& ecs) {
-
-    /* Camera */
-    {
-        GameObject* gameObject = &ecs.createGameObject("Camera");
-        ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(0, 0.6f, 5), glm::vec3(1.f));
-        ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, 1.f, 100.f, 45.f);
-        ecs.addComponent<CameraControllerComponent>(gameObject, 0.4f, 7.f);
-        ecs.addComponent<MainCameraComponent>(gameObject);
+    IDemo::Config Demo::getConfig() const {
+        IDemo::Config config;
+        config.name = "Base Demo";
+        return config;
     }
 
-    {
-        auto& gameObject = ecs.createGameObject("Light");
-        ecs.addComponent<SpatialComponent>(&gameObject, glm::vec3(0.f, 2.f, 20.f));
-        ecs.addComponent<LightComponent>(&gameObject, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+    void Demo::init(ECS& ecs) {
+
+        /* Camera */
+        {
+            GameObject* gameObject = &ecs.createGameObject("Camera");
+            ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(0, 0.6f, 5), glm::vec3(1.f));
+            ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, 1.f, 100.f, 45.f);
+            ecs.addComponent<CameraControllerComponent>(gameObject, 0.4f, 7.f);
+            ecs.addComponent<MainCameraComponent>(gameObject);
+        }
+
+        {
+            auto& gameObject = ecs.createGameObject("Light");
+            ecs.addComponent<SpatialComponent>(&gameObject, glm::vec3(0.f, 2.f, 20.f));
+            ecs.addComponent<LightComponent>(&gameObject, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+        }
+
+        /* Bunny object */
+        GameObject* bunny = &ecs.createGameObject("Bunny");
+        ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
+        ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
+        ecs.addComponent<MeshComponent>(bunny, *Library::loadMesh("bunny.obj", true).mMesh);
+        ecs.addComponent<renderable::PhongRenderable>(bunny, *Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
+        ecs.addComponent<SelectableComponent>(bunny);
+        ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
+
+        /* Ground plane */
+        GameObject* plane = &ecs.createGameObject("Grid");
+        ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
+        ecs.addComponent<MeshComponent>(plane, *Library::getMesh("quad").mMesh);
+        ecs.addComponent<renderable::AlphaTestRenderable>(plane, *Library::loadTexture("grid.png"));
+
+        /* Systems - order matters! */
+        ecs.addSystem<CameraControllerSystem>();
+        ecs.addSystem<RotationSystem>();
+
+        /* Init renderer */
+        Renderer::addSceneShader<PhongShader>();
+        Renderer::addSceneShader<AlphaTestShader>();
     }
 
-    /* Bunny object */
-    GameObject* bunny = &ecs.createGameObject("Bunny");
-    ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-    ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-    ecs.addComponent<MeshComponent>(bunny, *Library::loadMesh("bunny.obj", true).mesh);
-    ecs.addComponent<renderable::PhongRenderable>(bunny, *Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f,0.f,1.f)));
-    ecs.addComponent<SelectableComponent>(bunny);
-    ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
+    void Demo::update(ECS& ecs) {
+        NEO_UNUSED(ecs);
+    }
 
-    /* Ground plane */
-    GameObject* plane = &ecs.createGameObject("Grid");
-    ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
-    ecs.addComponent<MeshComponent>(plane, *Library::getMesh("quad").mesh);
-    ecs.addComponent<renderable::AlphaTestRenderable>(plane, *Library::loadTexture("grid.png"));
+    void Demo::destroy() {
+    }
 
-    /* Systems - order matters! */
-    ecs.addSystem<CameraControllerSystem>();
-    ecs.addSystem<RotationSystem>();
-
-    /* Init renderer */
-    Renderer::addSceneShader<PhongShader>();
-    Renderer::addSceneShader<AlphaTestShader>();
 }
-
-void BaseDemo::update(ECS& ecs) {
-    NEO_UNUSED(ecs);
-}
-
-void BaseDemo::destroy() {
-}
-
-

@@ -11,11 +11,13 @@
 
 using namespace neo;
 
-class GodRayOccluderShader : public Shader {
+namespace GodRays {
+
+    class GodRayOccluderShader : public Shader {
 
     public:
 
-        GodRayOccluderShader(const std::string &vert, const std::string &frag) :
+        GodRayOccluderShader(const std::string& vert, const std::string& frag) :
             Shader("GodRayOccluder Shader", vert, frag) {
         }
 
@@ -62,4 +64,5 @@ class GodRayOccluderShader : public Shader {
 
             unbind();
         }
-};
+    };
+}

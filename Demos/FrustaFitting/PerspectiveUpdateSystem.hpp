@@ -13,27 +13,29 @@
 
 using namespace neo;
 
-class PerspectiveUpdateSystem : public System {
+namespace FrustaFitting {
+    class PerspectiveUpdateSystem : public System {
 
-public:
-    bool mUpdatePerspective = true;
+    public:
+        bool mUpdatePerspective = true;
 
-    PerspectiveUpdateSystem() :
-        System("PerspectiveUpdate System") {
-    }
-
-    virtual void update(ECS& ecs) override {
-        auto sourceCamera = ecs.getComponentTuple<FrustumFitSourceComponent, SpatialComponent>();
-        if (!sourceCamera) {
-            return;
+        PerspectiveUpdateSystem() :
+            System("PerspectiveUpdate System") {
         }
 
-        if (mUpdatePerspective) {
-            if (auto frameStats = ecs.getSingleComponent<FrameStatsComponent>()) {
-                float f = static_cast<float>(glm::sin(frameStats->mRunTime));
-                float g = static_cast<float>(glm::cos(frameStats->mRunTime));
-                sourceCamera->get<SpatialComponent>()->setLookDir(glm::vec3(f, f / 2, g));
+        virtual void update(ECS& ecs) override {
+            auto sourceCamera = ecs.getComponentTuple<FrustumFitSourceComponent, SpatialComponent>();
+            if (!sourceCamera) {
+                return;
+            }
+
+            if (mUpdatePerspective) {
+                if (auto frameStats = ecs.getSingleComponent<FrameStatsComponent>()) {
+                    float f = static_cast<float>(glm::sin(frameStats->mRunTime));
+                    float g = static_cast<float>(glm::cos(frameStats->mRunTime));
+                    sourceCamera->get<SpatialComponent>()->setLookDir(glm::vec3(f, f / 2, g));
+                }
             }
         }
-    }
-};
+    };
+}

@@ -4,8 +4,10 @@
 
 using namespace neo;
 
-class PostProcess : public IDemo {
-public:
-	virtual IDemo::Config getConfig() const override;
-	virtual void init(ECS& ecs) override;
-};
+namespace PostProcess {
+	class Demo : public IDemo {
+	public:
+		virtual IDemo::Config getConfig() const override;
+		virtual void init(ECS& ecs) override;
+	};
+}

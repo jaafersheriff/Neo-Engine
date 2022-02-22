@@ -11,48 +11,50 @@
 
 using namespace neo;
 
-class ParticleVisShader : public Shader {
+namespace Compute {
+    class ParticleVisShader : public Shader {
 
-public:
+    public:
 
-    float mSpriteSize = 0.2f;
-    glm::vec3 mSpriteColor = glm::vec3(0.67f, 1.f, 0.55f);
+        float mSpriteSize = 0.2f;
+        glm::vec3 mSpriteColor = glm::vec3(0.67f, 1.f, 0.55f);
 
-    ParticleVisShader(const std::string &vert, const std::string& frag, const std::string &geom) :
-        Shader("ParticleVis Shader")
-    {
-        _attachStage(ShaderStage::VERTEX, vert);
-        _attachStage(ShaderStage::FRAGMENT, frag);
-        _attachStage(ShaderStage::GEOMETRY, geom);
-        init();
-    }
-
-    virtual void render(const ECS& ecs) override {
-        bind();
-
-        if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>()) {
-            loadUniform("P", camera->get<CameraComponent>()->getProj());
-            loadUniform("V", camera->get<CameraComponent>()->getView());
+        ParticleVisShader(const std::string& vert, const std::string& frag, const std::string& geom) :
+            Shader("ParticleVis Shader")
+        {
+            _attachStage(ShaderStage::VERTEX, vert);
+            _attachStage(ShaderStage::FRAGMENT, frag);
+            _attachStage(ShaderStage::GEOMETRY, geom);
+            init();
         }
-        loadUniform("spriteSize", mSpriteSize);
-        loadUniform("spriteColor", mSpriteColor);
 
-        if (auto model = ecs.getSingleComponent<ParticleMeshComponent>()) {
-            CHECK_GL(glEnable(GL_BLEND));
-            CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE));
-            CHECK_GL(glDisable(GL_DEPTH_TEST));
-            CHECK_GL(glDisable(GL_CULL_FACE));
+        virtual void render(const ECS& ecs) override {
+            bind();
 
-            loadUniform("M", model->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
+            if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>()) {
+                loadUniform("P", camera->get<CameraComponent>()->getProj());
+                loadUniform("V", camera->get<CameraComponent>()->getView());
+            }
+            loadUniform("spriteSize", mSpriteSize);
+            loadUniform("spriteColor", mSpriteColor);
 
-            /* DRAW */
-            model->mMesh->draw();
+            if (auto model = ecs.getSingleComponent<ParticleMeshComponent>()) {
+                CHECK_GL(glEnable(GL_BLEND));
+                CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE));
+                CHECK_GL(glDisable(GL_DEPTH_TEST));
+                CHECK_GL(glDisable(GL_CULL_FACE));
+
+                loadUniform("M", model->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
+
+                /* DRAW */
+                model->mMesh->draw();
+            }
+            unbind();
         }
-        unbind();
-    }
 
-    virtual void imguiEditor() override {
-        ImGui::SliderFloat("Sprite size", &mSpriteSize, 0.1f, 2.f);
-        ImGui::ColorEdit3("Sprite color", &mSpriteColor[0]);
-    }
-};
+        virtual void imguiEditor() override {
+            ImGui::SliderFloat("Sprite size", &mSpriteSize, 0.1f, 2.f);
+            ImGui::ColorEdit3("Sprite color", &mSpriteColor[0]);
+        }
+    };
+}

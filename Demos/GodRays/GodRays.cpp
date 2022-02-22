@@ -29,7 +29,7 @@
 using namespace neo;
 
 /* Game object definitions */
-namespace {
+namespace GodRays {
     struct Camera {
         CameraComponent* camera;
         Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
@@ -75,49 +75,49 @@ namespace {
             ecs.addComponent<SpatialComponent>(gameObject, position, scale, rotation);
         }
     };
-}
 
-IDemo::Config GodRays::getConfig() const {
-    IDemo::Config config;
-    config.name = "GodRays";
-    config.clearColor = { 0.f, 0.f, 0.f };
-    return config;
-}
-
-void GodRays::init(ECS& ecs) {
-
-    /* Game objects */
-    Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-    ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
-
-    Light(ecs, glm::vec3(0.f, 2.f, -20.f), 12.f, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-
-    /* Trees */
-    Library::loadTexture("PineTexture.png");
-    Library::loadMesh("PineTree3.obj");
-    for (int i = 0; i < 15; i++) {
-        Renderable cube(ecs, Library::getMesh("PineTree3.obj").mesh, glm::vec3(util::genRandom(-7.5f, 7.5f), 0.5f, util::genRandom(-7.5f, 7.5f)), glm::vec3(util::genRandom(0.7f, 1.3f)), glm::vec3(0.f, util::genRandom(0.f, 360.f), 0.f));
-        Material material;
-        material.mAmbient = glm::vec3(0.2f);
-        material.mDiffuse = glm::vec3(0.f);
-        ecs.addComponent<renderable::PhongRenderable>(cube.gameObject, *Library::getTexture("PineTexture.png"), material);
-        ecs.addComponent<SunOccluderComponent>(cube.gameObject, *Library::getTexture("PineTexture.png"));
+    IDemo::Config Demo::getConfig() const {
+        IDemo::Config config;
+        config.name = "GodRays";
+        config.clearColor = { 0.f, 0.f, 0.f };
+        return config;
     }
 
-    /* Ground plane */
-    Renderable plane(ecs, Library::getMesh("quad").mesh, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
-    ecs.addComponent<renderable::AlphaTestRenderable>(plane.gameObject, *Library::loadTexture("grid.png"));
+    void Demo::init(ECS& ecs) {
 
-    /* Systems - order matters! */
-    ecs.addSystem<CameraControllerSystem>();
-    ecs.addSystem<RotationSystem>();
+        /* Game objects */
+        Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+        ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
-    /* Init renderer */
-    Renderer::addPreProcessShader<GodRaySunShader>("godrays/billboard.vert", "godrays/godraysun.frag");
-    Renderer::addPreProcessShader<GodRayOccluderShader>("godrays/model.vert", "godrays/godrayoccluder.frag");
-    Renderer::addPreProcessShader<BlurShader>("godrays/blur.vert", "godrays/blur.frag");
-    Renderer::addSceneShader<PhongShader>();
-    Renderer::addSceneShader<AlphaTestShader>();
-    Renderer::addPostProcessShader<CombineShader>("godrays/combine.frag");
-    Renderer::addPostProcessShader<GammaCorrectShader>();
+        Light(ecs, glm::vec3(0.f, 2.f, -20.f), 12.f, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+
+        /* Trees */
+        Library::loadTexture("PineTexture.png");
+        Library::loadMesh("PineTree3.obj");
+        for (int i = 0; i < 15; i++) {
+            Renderable cube(ecs, Library::getMesh("PineTree3.obj").mMesh, glm::vec3(util::genRandom(-7.5f, 7.5f), 0.5f, util::genRandom(-7.5f, 7.5f)), glm::vec3(util::genRandom(0.7f, 1.3f)), glm::vec3(0.f, util::genRandom(0.f, 360.f), 0.f));
+            Material material;
+            material.mAmbient = glm::vec3(0.2f);
+            material.mDiffuse = glm::vec3(0.f);
+            ecs.addComponent<renderable::PhongRenderable>(cube.gameObject, *Library::getTexture("PineTexture.png"), material);
+            ecs.addComponent<SunOccluderComponent>(cube.gameObject, *Library::getTexture("PineTexture.png"));
+        }
+
+        /* Ground plane */
+        Renderable plane(ecs, Library::getMesh("quad").mMesh, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
+        ecs.addComponent<renderable::AlphaTestRenderable>(plane.gameObject, *Library::loadTexture("grid.png"));
+
+        /* Systems - order matters! */
+        ecs.addSystem<CameraControllerSystem>();
+        ecs.addSystem<RotationSystem>();
+
+        /* Init renderer */
+        Renderer::addPreProcessShader<GodRaySunShader>("godrays/billboard.vert", "godrays/godraysun.frag");
+        Renderer::addPreProcessShader<GodRayOccluderShader>("godrays/model.vert", "godrays/godrayoccluder.frag");
+        Renderer::addPreProcessShader<BlurShader>("godrays/blur.vert", "godrays/blur.frag");
+        Renderer::addSceneShader<PhongShader>();
+        Renderer::addSceneShader<AlphaTestShader>();
+        Renderer::addPostProcessShader<CombineShader>("godrays/combine.frag");
+        Renderer::addPostProcessShader<GammaCorrectShader>();
+    }
 }

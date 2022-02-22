@@ -23,7 +23,7 @@
 using namespace neo;
 
 /* Game object definitions */
-namespace {
+namespace NormalVisualizer {
     struct Camera {
         Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
             GameObject* gameObject = &ecs.createGameObject();
@@ -53,27 +53,28 @@ namespace {
             ecs.addComponent<renderable::WireframeRenderable>(gameObject);
         }
     };
-}
 
-IDemo::Config NormalVisualizer::getConfig() const {
-    IDemo::Config config;
-    config.name = "NormalVisualizer";
-    config.clearColor = { 0.2f, 0.3f, 0.4f };
-    return config;
-}
+    IDemo::Config Demo::getConfig() const {
+        IDemo::Config config;
+        config.name = "NormalVisualizer";
+        config.shaderDir = "res/normalvisualizer/";
+        config.clearColor = { 0.2f, 0.3f, 0.4f };
+        return config;
+    }
 
-void NormalVisualizer::init(ECS& ecs) {
-    /* Game objects */
-    Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+    void Demo::init(ECS& ecs) {
+        /* Game objects */
+        Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
 
-    Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Orient(ecs, Library::loadMesh("bunny.obj").mesh);
+        Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+        Orient(ecs, Library::loadMesh("bunny.obj").mMesh);
 
-    /* Systems - order matters! */
-    ecs.addSystem<CameraControllerSystem>();
-    ecs.addSystem<RotationSystem>();
+        /* Systems - order matters! */
+        ecs.addSystem<CameraControllerSystem>();
+        ecs.addSystem<RotationSystem>();
 
-    /* Init renderer */
-    Renderer::addSceneShader<PhongShader>();
-    Renderer::addSceneShader<NormalShader>("normalvisualizer/normal.vert", "normalvisualizer/normal.frag", "normalvisualizer/normal.geom");
+        /* Init renderer */
+        Renderer::addSceneShader<PhongShader>();
+        Renderer::addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
+    }
 }

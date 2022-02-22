@@ -4,8 +4,10 @@
 
 using namespace neo;
 
-class MetaballComponent : public Component {
+namespace Metaballs {
+    class MetaballComponent : public Component {
 
-public:
-    MetaballComponent(GameObject* go);
-};
+    public:
+        MetaballComponent(GameObject* go);
+    };
+}

@@ -370,7 +370,7 @@ namespace neo {
                     mECS.addComponent<SpatialComponent>(&go);
                     mECS.addComponent<SelectableComponent>(&go);
                     mECS.addComponent<SelectedComponent>(&go);
-                    mECS.addComponent<MeshComponent>(&go, *sphereMesh.mesh);
+                    mECS.addComponent<MeshComponent>(&go, *sphereMesh.mMesh);
                     mECS.addComponent<renderable::WireframeRenderable>(&go);
                 }
                 ImGui::EndMenu();

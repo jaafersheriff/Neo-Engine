@@ -7,14 +7,15 @@
 
 using namespace neo;
 
-class CombineShader : public PostProcessShader {
+namespace GodRays {
+    class CombineShader : public PostProcessShader {
 
     public:
 
         float exposure = 0.9f;
 
-        CombineShader(const std::string &frag) :
-            PostProcessShader("Combine Shader", frag) 
+        CombineShader(const std::string& frag) :
+            PostProcessShader("Combine Shader", frag)
         {}
 
         virtual void render(const ECS& ecs) override {
@@ -27,4 +28,5 @@ class CombineShader : public PostProcessShader {
         virtual void imguiEditor() override {
             ImGui::SliderFloat("Exposure", &exposure, 0.01f, 10.f);
         }
-};
+    };
+}

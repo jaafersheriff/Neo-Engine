@@ -87,7 +87,7 @@ namespace neo {
     }
 
     void Library::_insertMesh(const std::string& name, MeshData data) {
-        if (data.mesh) {
+        if (data.mMesh) {
             mMeshes.insert({ name, data });
         }
     }
@@ -101,7 +101,7 @@ namespace neo {
     void Library::clean() {
         // Clean up GL objects
         for (auto& meshData : mMeshes) {
-            meshData.second.mesh->destroy();
+            meshData.second.mMesh->destroy();
         }
         mMeshes.clear();
         for (auto& texture : mTextures) {

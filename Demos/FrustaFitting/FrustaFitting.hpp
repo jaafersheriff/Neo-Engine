@@ -4,8 +4,10 @@
 
 using namespace neo;
 
-class FrustaFitting : public IDemo {
-public:
-	virtual IDemo::Config getConfig() const override;
-	virtual void init(ECS& ecs) override;
-};
+namespace FrustaFitting {
+	class Demo : public IDemo {
+	public:
+		virtual IDemo::Config getConfig() const override;
+		virtual void init(ECS& ecs) override;
+	};
+}

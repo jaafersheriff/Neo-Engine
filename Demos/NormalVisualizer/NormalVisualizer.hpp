@@ -4,8 +4,10 @@
 
 using namespace neo;
 
-class NormalVisualizer : public IDemo {
-public:
-	virtual IDemo::Config getConfig() const override;
-	virtual void init(ECS& ecs) override;
-};
+namespace NormalVisualizer {
+	class Demo : public IDemo {
+	public:
+		virtual IDemo::Config getConfig() const override;
+		virtual void init(ECS& ecs) override;
+	};
+}

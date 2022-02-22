@@ -19,7 +19,7 @@
 using namespace neo;
 
 /* Game object definitions */
-namespace {
+namespace PostProcess {
 
     struct Camera {
         CameraComponent* camera;
@@ -55,31 +55,32 @@ namespace {
             ecs.addComponent<renderable::PhongRenderable>(gameObject, *texture, material);
         }
     };
-}
 
-IDemo::Config PostProcess::getConfig() const {
-    IDemo::Config config;
-    config.name = "Post Process";
-    return config;
-}
+    IDemo::Config Demo::getConfig() const {
+        IDemo::Config config;
+        config.name = "Post Process";
+        config.shaderDir = "shaders/postprocess/";
+        return config;
+    }
 
-void PostProcess::init(ECS& ecs) {
+    void Demo::init(ECS& ecs) {
 
-    /* Game objects */
-    Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-    ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
+        /* Game objects */
+        Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+        ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
 
-    Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-    Renderable r(ecs, Library::loadMesh("mr_krab.obj").mesh, Library::loadTexture("mr_krab.png"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
+        Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+        Renderable r(ecs, Library::loadMesh("mr_krab.obj").mMesh, Library::loadTexture("mr_krab.png"), 0.2f, glm::vec3(1.f, 0.f, 1.f), glm::vec3(1.f));
 
-    /* Systems - order matters! */
-    ecs.addSystem<CameraControllerSystem>();
+        /* Systems - order matters! */
+        ecs.addSystem<CameraControllerSystem>();
 
-    /* Init renderer */
-    Renderer::addSceneShader<PhongShader>();
-    Renderer::addPostProcessShader<PostProcessShader>("DepthShader", std::string("postprocess/depth.frag"));
-    Renderer::addPostProcessShader<PostProcessShader>("BlueShader", std::string("postprocess/blue.frag"));
-    Renderer::addPostProcessShader<PostProcessShader>("InvertShader", std::string("postprocess/invert.frag"));
+        /* Init renderer */
+        Renderer::addSceneShader<PhongShader>();
+        Renderer::addPostProcessShader<PostProcessShader>("DepthShader", std::string("depth.frag"));
+        Renderer::addPostProcessShader<PostProcessShader>("BlueShader", std::string("blue.frag"));
+        Renderer::addPostProcessShader<PostProcessShader>("InvertShader", std::string("invert.frag"));
 
-    /* Attach ImGui panes */
+        /* Attach ImGui panes */
+    }
 }

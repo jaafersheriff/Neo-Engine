@@ -39,7 +39,7 @@ namespace neo {
         /* Create mesh */
         MeshData meshData;
         Mesh* mesh = new Mesh;
-        meshData.mesh = mesh;
+        meshData.mMesh = mesh;
 
         /* If mesh was not found in map, read it in */
         std::vector<tinyobj::shape_t> shapes;
@@ -123,7 +123,7 @@ namespace neo {
             Asset asset;
 
             Mesh* mesh = new Mesh;
-            asset.meshData.mesh = mesh;
+            asset.meshData.mMesh = mesh;
 
             _findMetaData(asset.meshData, shape.mesh.positions, true);
 

@@ -8,11 +8,12 @@
 
 using namespace neo;
 
-class GodRaySunShader : public Shader {
+namespace GodRays {
+    class GodRaySunShader : public Shader {
 
     public:
 
-        GodRaySunShader(const std::string &vert, const std::string &frag) :
+        GodRaySunShader(const std::string& vert, const std::string& frag) :
             Shader("GodRaySun Shader", vert, frag) {
 
             // Create godray 
@@ -23,11 +24,11 @@ class GodRaySunShader : public Shader {
             godray->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
                 NEO_UNUSED(ecs);
-                glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
+                glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage&>(msg)).mFrameSize;
                 Library::getFBO("godray")->resize(frameSize / 2);
-            });
+                });
 
         }
 
@@ -59,9 +60,10 @@ class GodRaySunShader : public Shader {
                 loadUniform("center", renderable->getGameObject().getComponentByType<SpatialComponent>()->getPosition());
 
                 /* DRAW */
-                Library::getMesh("quad").mesh->draw();
+                Library::getMesh("quad").mMesh->draw();
             }
 
             unbind();
         }
-};
+    };
+}

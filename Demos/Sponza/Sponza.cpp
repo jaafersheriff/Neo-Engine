@@ -24,7 +24,7 @@
 using namespace neo;
 
 /* Game object definitions */
-namespace {
+namespace Sponza {
     struct Camera {
         CameraComponent* camera;
         Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
@@ -34,68 +34,67 @@ namespace {
             ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
         }
     };
-}
 
-IDemo::Config Sponza::getConfig() const {
-    IDemo::Config config;
-    config.name = "Sponza";
-    config.attachEditor = true;
-    return config;
-}
 
-void Sponza::init(ECS& ecs) {
-
-    /* Game objects */
-    Camera camera(ecs, 45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 150.f);
-    ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
-    ecs.addComponent<FrustumComponent>(&camera.camera->getGameObject());
-    ecs.addComponent<FrustumFitSourceComponent>(&camera.camera->getGameObject());
-
-    {
-        auto gameObject = &ecs.createGameObject("Light");
-        auto& spat = ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(20.f));
-        spat.setLookDir(glm::normalize(glm::vec3(0.43f, -0.464f, -0.776f)));
-        ecs.addComponent<LightComponent>(gameObject, glm::vec3(1.f));
-        ecs.addComponent<renderable::WireframeRenderable>(gameObject);
-        ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("cube").mesh);
-        auto& line = ecs.addComponent<LineMeshComponent>(gameObject, glm::vec3(1, 0, 0));
-        line.mUseParentSpatial = true;
-        line.addNode({ 0,0,0 });
-        line.addNode({ 0,0,1 });
-    }
-    {
-        auto shadowCam = &ecs.createGameObject("shadowcam");
-        ecs.addComponentAs<OrthoCameraComponent, CameraComponent>(shadowCam, -1.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
-        ecs.addComponent<ShadowCameraComponent>(shadowCam);
-        ecs.addComponent<SelectableComponent>(shadowCam);
-        ecs.addComponent<FrustumComponent>(shadowCam);
-        ecs.addComponent<SpatialComponent>(shadowCam);
-        ecs.addComponent<FrustumFitReceiverComponent>(shadowCam);
+    IDemo::Config Demo::getConfig() const {
+        IDemo::Config config;
+        config.name = "Sponza";
+        config.attachEditor = true;
+        return config;
     }
 
-    auto assets = Loader::loadMultiAsset("sponza.obj");
-    for(auto& asset : assets) {
-        auto gameObject = &ecs.createGameObject();
-        ecs.addComponent<MeshComponent>(gameObject, *asset.meshData.mesh);
-        ecs.addComponent<SpatialComponent>(gameObject, asset.meshData.mBasePosition, asset.meshData.mBaseScale);
-        auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
-        asset.material.mAmbient = glm::vec3(0.2f);
-        ecs.addComponent<renderable::PhongShadowRenderable>(gameObject, *diffuseTex, asset.material);
-        ecs.addComponent<renderable::ShadowCasterRenderable>(gameObject, *diffuseTex);
-        ecs.addComponent<SelectableComponent>(gameObject);
-        ecs.addComponent<BoundingBoxComponent>(gameObject, asset.meshData);
+    void Demo::init(ECS& ecs) {
+
+        /* Game objects */
+        Camera camera(ecs, 45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 150.f);
+        ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
+        ecs.addComponent<FrustumComponent>(&camera.camera->getGameObject());
+        ecs.addComponent<FrustumFitSourceComponent>(&camera.camera->getGameObject());
+
+        {
+            auto gameObject = &ecs.createGameObject("Light");
+            auto& spat = ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(20.f));
+            spat.setLookDir(glm::normalize(glm::vec3(0.43f, -0.464f, -0.776f)));
+            ecs.addComponent<LightComponent>(gameObject, glm::vec3(1.f));
+            ecs.addComponent<renderable::WireframeRenderable>(gameObject);
+            ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("cube").mMesh);
+            auto& line = ecs.addComponent<LineMeshComponent>(gameObject, glm::vec3(1, 0, 0));
+            line.mUseParentSpatial = true;
+            line.addNode({ 0,0,0 });
+            line.addNode({ 0,0,1 });
+        }
+        {
+            auto shadowCam = &ecs.createGameObject("shadowcam");
+            ecs.addComponentAs<OrthoCameraComponent, CameraComponent>(shadowCam, -1.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
+            ecs.addComponent<ShadowCameraComponent>(shadowCam);
+            ecs.addComponent<SelectableComponent>(shadowCam);
+            ecs.addComponent<FrustumComponent>(shadowCam);
+            ecs.addComponent<SpatialComponent>(shadowCam);
+            ecs.addComponent<FrustumFitReceiverComponent>(shadowCam);
+        }
+
+        auto assets = Loader::loadMultiAsset("sponza.obj");
+        for (auto& asset : assets) {
+            auto gameObject = &ecs.createGameObject();
+            ecs.addComponent<MeshComponent>(gameObject, *asset.meshData.mMesh);
+            ecs.addComponent<SpatialComponent>(gameObject, asset.meshData.mBasePosition * 0.1f, asset.meshData.mBaseScale * 0.1f);
+            auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
+            asset.material.mAmbient = glm::vec3(0.2f);
+            ecs.addComponent<renderable::PhongShadowRenderable>(gameObject, *diffuseTex, asset.material);
+            ecs.addComponent<renderable::ShadowCasterRenderable>(gameObject, *diffuseTex);
+            ecs.addComponent<SelectableComponent>(gameObject);
+            ecs.addComponent<BoundingBoxComponent>(gameObject, asset.meshData);
+        }
+
+
+        /* Systems - order matters! */
+        auto& camSys = ecs.addSystem<CameraControllerSystem>();
+        camSys.mSuperSpeed = 10.f;
+        ecs.addSystem<FrustaFittingSystem>();
+
+        /* Init renderer */
+        Renderer::addPreProcessShader<ShadowCasterShader>(4096);
+        auto& _s = Renderer::addSceneShader<PhongShadowShader>();
+        _s.bias = 0.001f;
     }
-
-
-    /* Systems - order matters! */
-    auto& camSys = ecs.addSystem<CameraControllerSystem>();
-    camSys.mSuperSpeed = 10.f;
-    ecs.addSystem<FrustaFittingSystem>();
-
-    /* Init renderer */
-    Renderer::addPreProcessShader<ShadowCasterShader>(4096);
-    auto& _s = Renderer::addSceneShader<PhongShadowShader>();
-    _s.bias = 0.001f;
-
-;
 }

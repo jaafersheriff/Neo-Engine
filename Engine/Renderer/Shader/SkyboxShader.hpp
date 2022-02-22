@@ -55,7 +55,7 @@ namespace neo {
             loadTexture("cubeMap", skybox->mCubeMap);
 
             /* Draw */
-            Library::getMesh("cube").mesh->draw();
+            Library::getMesh("cube").mMesh->draw();
 
             unbind();
         }

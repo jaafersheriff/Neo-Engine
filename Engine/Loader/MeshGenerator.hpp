@@ -8,7 +8,7 @@ namespace neo {
     namespace prefabs {
 
         static void generateCube(MeshData& meshData) {
-            meshData.mesh = new Mesh;
+            meshData.mMesh = new Mesh;
 
             std::vector<float> verts =
             { -0.5f, -0.5f, -0.5f,
@@ -35,7 +35,7 @@ namespace neo {
               0.5f, -0.5f,  0.5f,
               0.5f,  0.5f,  0.5f,
              -0.5f,  0.5f,  0.5f };
-            meshData.mesh->addVertexBuffer(VertexType::Position, 0, 3, verts);
+            meshData.mMesh->addVertexBuffer(VertexType::Position, 0, 3, verts);
             meshData.mMin = glm::vec3(-0.5f);
             meshData.mMax = glm::vec3(0.5f);
 
@@ -64,7 +64,7 @@ namespace neo {
               0,  0,  1,
               0,  0,  1,
               0,  0,  1 };
-            meshData.mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+            meshData.mMesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
 
             std::vector<float> uvs =
             { 1.f, 0.f,
@@ -96,7 +96,7 @@ namespace neo {
                 1.f, 0.f,
                 1.f, 1.f,
                 0.f, 1.f };
-            meshData.mesh->addVertexBuffer(VertexType::Texture0, 2, 2, uvs);
+            meshData.mMesh->addVertexBuffer(VertexType::Texture0, 2, 2, uvs);
 
             std::vector<unsigned> indices =
             { 0,  1,  2,
@@ -111,19 +111,19 @@ namespace neo {
              16, 18, 19,
              20, 21, 22,
              20, 22, 23 };
-            meshData.mesh->addElementBuffer(indices);
+            meshData.mMesh->addElementBuffer(indices);
 
-            meshData.mesh->mPrimitiveType = GL_TRIANGLES;
+            meshData.mMesh->mPrimitiveType = GL_TRIANGLES;
         }
 
         static void generateQuad(MeshData& meshData) {
-            meshData.mesh = new Mesh;
+            meshData.mMesh = new Mesh;
             std::vector<float> verts =
             { -0.5f, -0.5f,  0.f,
                0.5f, -0.5f,  0.f,
               -0.5f,  0.5f,  0.f,
                0.5f,  0.5f,  0.f };
-            meshData.mesh->addVertexBuffer(VertexType::Position, 0, 3, verts);
+            meshData.mMesh->addVertexBuffer(VertexType::Position, 0, 3, verts);
 			meshData.mMin = glm::vec3(-0.5f, -0.5f, -0.1f);
             meshData.mMax = glm::vec3(0.5f, 0.5f, 0.1f);
 
@@ -132,26 +132,26 @@ namespace neo {
               0.f, 0.f, 1.f,
               0.f, 0.f, 1.f,
               0.f, 0.f, 1.f };
-            meshData.mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+            meshData.mMesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
 
             std::vector<float> uvs =
             { 0.f, 0.f,
               1.f, 0.f,
               0.f, 1.f,
               1.f, 1.f };
-            meshData.mesh->addVertexBuffer(VertexType::Texture0, 2, 2, uvs);
+            meshData.mMesh->addVertexBuffer(VertexType::Texture0, 2, 2, uvs);
 
             std::vector<unsigned> indices =
             { 0, 1, 2,
               1, 3, 2 };
-            meshData.mesh->addElementBuffer(indices);
+            meshData.mMesh->addElementBuffer(indices);
 
-            meshData.mesh->mPrimitiveType = GL_TRIANGLES;
+            meshData.mMesh->mPrimitiveType = GL_TRIANGLES;
         }
 
         // http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
         static void generateSphere(MeshData& meshData, int recursions) {
-            meshData.mesh = new Mesh;
+            meshData.mMesh = new Mesh;
 
             float t = (float)(1.f + (glm::sqrt(5.0)) / 2.f);
             float length = glm::length(glm::vec3(1, 0, t));
@@ -247,12 +247,12 @@ namespace neo {
                 tex.push_back(glm::clamp(0.5f + std::asin(verts[i + 1]) / util::PI, 0.f, 1.f));
             }
 
-            meshData.mesh->addVertexBuffer(VertexType::Position, 0, 3, verts);
-            meshData.mesh->addVertexBuffer(VertexType::Normal, 1, 3, verts);
-            meshData.mesh->addVertexBuffer(VertexType::Texture0, 2, 2, tex);
-            meshData.mesh->addElementBuffer(ele);
+            meshData.mMesh->addVertexBuffer(VertexType::Position, 0, 3, verts);
+            meshData.mMesh->addVertexBuffer(VertexType::Normal, 1, 3, verts);
+            meshData.mMesh->addVertexBuffer(VertexType::Texture0, 2, 2, tex);
+            meshData.mMesh->addElementBuffer(ele);
 
-            meshData.mesh->mPrimitiveType = GL_TRIANGLES;
+            meshData.mMesh->mPrimitiveType = GL_TRIANGLES;
         }
 
         void generatePlane(MeshData& meshData, float h, int VERTEX_COUNT, int numOctaves) {
@@ -335,12 +335,12 @@ namespace neo {
                 }
             }
 
-            meshData.mesh->addVertexBuffer(VertexType::Position, 0, 3, vertices);
-            meshData.mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
-            meshData.mesh->addVertexBuffer(VertexType::Texture0, 2, 2, textureCoords);
-            meshData.mesh->addElementBuffer(indices);
+            meshData.mMesh->addVertexBuffer(VertexType::Position, 0, 3, vertices);
+            meshData.mMesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+            meshData.mMesh->addVertexBuffer(VertexType::Texture0, 2, 2, textureCoords);
+            meshData.mMesh->addElementBuffer(indices);
 
-            meshData.mesh->mPrimitiveType = GL_TRIANGLES;
+            meshData.mMesh->mPrimitiveType = GL_TRIANGLES;
         }
     }
 }

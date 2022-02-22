@@ -7,12 +7,13 @@
 
 using namespace neo;
 
-class NormalShader : public Shader {
+namespace NormalVisualizer {
+    class NormalShader : public Shader {
 
-    public: 
+    public:
         float magnitude = 0.08f;
-    
-        NormalShader(const std::string &vert, const std::string &frag, const std::string &geom) :
+
+        NormalShader(const std::string& vert, const std::string& frag, const std::string& geom) :
             Shader("Normal Shader")
         {
             _attachStage(ShaderStage::VERTEX, vert);
@@ -47,4 +48,5 @@ class NormalShader : public Shader {
             ImGui::SliderFloat("Magnitude", &magnitude, 0.f, 1.f);
         }
 
-};
+    };
+}

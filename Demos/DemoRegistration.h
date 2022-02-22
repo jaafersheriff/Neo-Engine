@@ -1,6 +1,7 @@
 #include "Base/BaseDemo.hpp"
 #include "BasicPhong/BasicPhong.hpp"
 #include "Compute/Compute.hpp"
+#include "Deferred/Deferred.hpp"
 #include "FrustaFitting/FrustaFitting.hpp"
 #include "GodRays/GodRays.hpp"
 #include "Metaballs/Metaballs.hpp"
@@ -15,16 +16,17 @@
 
 static int sCurrentDemo = 0;
 static std::vector<neo::IDemo*> sDemos = {
-	new BaseDemo(),
-	new BasicPhong(),
-	new Compute(),
-	new FrustaFitting(),
-	new GodRays(),
-	new Metaballs(),
-	new NormalVisualizer(),
-	new PostProcess(),
-	new Selecting(),
-	new Sponza(),
-	new VFC()
+	new Base::Demo(),
+	new BasicPhong::Demo(),
+	new Compute::Demo(),
+	new Deferred::Demo(),
+	new FrustaFitting::Demo(),
+	new GodRays::Demo(),
+	new Metaballs::Demo(),
+	new NormalVisualizer::Demo(),
+	new PostProcess::Demo(),
+	new Selecting::Demo(),
+	new Sponza::Demo(),
+	new VFC::Demo()
 };
 

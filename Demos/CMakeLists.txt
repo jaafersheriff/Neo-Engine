@@ -29,10 +29,19 @@ PUBLIC
 PRIVATE
 )
 
-
 target_link_libraries(Demos
 PUBLIC
 PRIVATE
 	Neo
 )
+
+set_target_properties(Demos PROPERTIES FOLDER "Demos")
+
+## Shaders
+# add_custom_target(DemoGLSL)
+# file(GLOB_RECURSE SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*)
+# source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/shaders" FILES ${SHADERS})
+# set_property(TARGET DemoGLSL APPEND PROPERTY SOURCES ${SHADERS})
+# set_target_properties(DemoGLSL PROPERTIES FOLDER "Demos")
+
 

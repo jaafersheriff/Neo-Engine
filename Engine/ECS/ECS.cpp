@@ -19,6 +19,7 @@ namespace neo {
             removeGameObject(*gameObject);
         }
         _processKillQueue();
+        mSystems.clear();
     }
 
     GameObject& ECS::createGameObject(const std::string& tag) {

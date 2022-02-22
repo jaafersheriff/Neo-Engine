@@ -7,17 +7,18 @@
 
 using namespace neo;
 
-class BlurShader : public Shader {
+namespace GodRays {
+    class BlurShader : public Shader {
 
     public:
 
         float mBlurSteps = 67.f;
-        float mDecay=0.954f;
-        float mDensity=0.78f;
-        float mWeight=0.69f;
+        float mDecay = 0.954f;
+        float mDensity = 0.78f;
+        float mWeight = 0.69f;
         float mContribution = 0.4f;
 
-        BlurShader(const std::string &vert, const std::string& frag) :
+        BlurShader(const std::string& vert, const std::string& frag) :
             Shader("Blur Shader", vert, frag) {
             // Create blur 
             auto blur = Library::createFBO("godrayblur");
@@ -26,11 +27,11 @@ class BlurShader : public Shader {
             blur->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
+            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
                 NEO_UNUSED(ecs);
-                glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
+                glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage&>(msg)).mFrameSize;
                 Library::getFBO("godrayblur")->resize(frameSize / 2);
-            });
+                });
 
         }
 
@@ -67,7 +68,7 @@ class BlurShader : public Shader {
             loadUniform("P", camera->getProj());
             loadUniform("V", camera->getView());
 
-            Library::getMesh("quad").mesh->draw();
+            Library::getMesh("quad").mMesh->draw();
 
             unbind();
         }
@@ -79,4 +80,5 @@ class BlurShader : public Shader {
             ImGui::SliderFloat("Weight", &mWeight, 0.01f, 1.f);
             ImGui::SliderFloat("Contribution", &mContribution, 0.01f, 1.f);
         }
-};
+    };
+}

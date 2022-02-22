@@ -16,7 +16,7 @@
 namespace neo {
 
    struct MeshData {
-        Mesh* mesh;
+        Mesh* mMesh;
         glm::vec3 mMin{ 0.f, 0.f, 0.f };
         glm::vec3 mMax{ 0.f, 0.f, 0.f };
 

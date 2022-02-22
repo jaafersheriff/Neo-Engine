@@ -5,10 +5,12 @@
 
 using namespace neo;
 
-class SunComponent : public Component {
+namespace GodRays {
+    class SunComponent : public Component {
 
-public:
-    SunComponent(GameObject *go) :
-        Component(go)
-    {}
-};
+    public:
+        SunComponent(GameObject* go) :
+            Component(go)
+        {}
+    };
+}

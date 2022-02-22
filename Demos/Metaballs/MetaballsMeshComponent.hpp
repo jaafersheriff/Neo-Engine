@@ -6,12 +6,14 @@
 
 using namespace neo;
 
-class MetaballsMeshComponent : public Component {
+namespace Metaballs {
+    class MetaballsMeshComponent : public Component {
 
-public:
-    Mesh* mMesh;
-    MetaballsMeshComponent(GameObject* go) :
-        Component(go) {
-        mMesh = new Mesh;
-    }
-};
+    public:
+        Mesh* mMesh;
+        MetaballsMeshComponent(GameObject* go) :
+            Component(go) {
+            mMesh = new Mesh;
+        }
+    };
+}

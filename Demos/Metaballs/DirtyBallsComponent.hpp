@@ -4,9 +4,11 @@
 
 using namespace neo;
 
-class DirtyBallsComponent : public Component {
+namespace Metaballs {
+    class DirtyBallsComponent : public Component {
 
-public:
-    DirtyBallsComponent(GameObject* go) : Component(go) {}
-};
+    public:
+        DirtyBallsComponent(GameObject* go) : Component(go) {}
+    };
 
+}
