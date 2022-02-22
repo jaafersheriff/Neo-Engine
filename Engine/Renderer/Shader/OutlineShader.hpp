@@ -62,23 +62,9 @@ namespace neo {
                     }
                 }
 
-                // Scale from wlocal origin
-                glm::vec3 scaleFactor(1.f + renderableOutline->mScale);
-                glm::mat4 S(1.f);
-                glm::mat4 T = glm::translate(glm::mat4(1.f), renderableSpatial->getPosition());
-                glm::mat4 R = glm::mat4(renderableSpatial->getOrientation());
-                if (auto bb = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                    glm::vec3 offsetTranslation = bb->getCenter();
-                    S = glm::mat4(1.f);
-                    S *= glm::translate(glm::mat4(1.f), offsetTranslation);
-                    S *= glm::scale(glm::mat4(1.f), renderableSpatial->getScale() * scaleFactor);
-                    S *= glm::translate(glm::mat4(1.f), -offsetTranslation);
-                }
-                else {
-                }
-                    S = glm::scale(glm::mat4(1.f), scaleFactor);
-
-                glm::mat4 M = T * S * R;
+                // Match the transforms of spatial component..
+                glm::vec3 scaleFactor = renderableSpatial->getScale() * (1.f + renderableOutline->mScale);
+                glm::mat4 M = glm::scale(glm::translate(glm::mat4(1.f), renderableSpatial->getPosition()) * glm::mat4(renderableSpatial->getOrientation()), scaleFactor);
                 loadUniform("M", M);
 
                 loadUniform("outlineColor", renderableOutline->mColor);

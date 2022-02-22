@@ -96,9 +96,9 @@ namespace neo {
                 map.insert({ rendered, componentID });
                 CHECK_GL(glStencilFunc(GL_ALWAYS, static_cast<GLuint>(rendered), 0));
                 loadUniform("componentID", static_cast<int>(rendered));
-                loadUniform("M", renderableSpatial->getModelMatrix());
 
                 /* DRAW */
+                loadUniform("M", renderableSpatial->getModelMatrix());
                 renderable->get<MeshComponent>()->mMesh.draw();
                 rendered++;
             }

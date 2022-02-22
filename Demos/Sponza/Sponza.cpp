@@ -73,20 +73,8 @@ void Sponza::init(ECS& ecs) {
         ecs.addComponent<FrustumFitReceiverComponent>(shadowCam);
     }
 
-    // auto assets_stock = Loader::loadMultiAsset("sponza.obj", false);
-    auto assets_scaled = Loader::loadMultiAsset("sponza.obj", true);
-    // for(auto& asset : assets_stock) {
-    //     auto gameObject = &ecs.createGameObject();
-    //     ecs.addComponent<MeshComponent>(gameObject, *asset.meshData.mesh);
-    //     ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(0.f, 25.f, 0.f), glm::vec3(1.0f));
-    //     auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
-    //     asset.material.mAmbient = glm::vec3(0.2f);
-    //     ecs.addComponent<renderable::PhongShadowRenderable>(gameObject, *diffuseTex, asset.material);
-    //     ecs.addComponent<renderable::ShadowCasterRenderable>(gameObject, *diffuseTex);
-    //     // ecs.addComponent<SelectableComponent>(renderable.gameObject);
-    //     ecs.addComponent<BoundingBoxComponent>(gameObject, asset.meshData);
-    // }
-    for(auto& asset : assets_scaled) {
+    auto assets = Loader::loadMultiAsset("sponza.obj");
+    for(auto& asset : assets) {
         auto gameObject = &ecs.createGameObject();
         ecs.addComponent<MeshComponent>(gameObject, *asset.meshData.mesh);
         ecs.addComponent<SpatialComponent>(gameObject, asset.meshData.mBasePosition, asset.meshData.mBaseScale);

@@ -133,11 +133,7 @@ namespace neo {
 
     void SpatialComponent::_detModelMatrix() const {
         MICROPROFILE_SCOPEI("SpatialComponent", "SpatialComponent::_detModelMatrix", MP_AUTO);
-        // TODO - apply orientation in model's local space, true to its object origin?
         mModelMatrix = glm::scale(glm::translate(glm::mat4(1.f), mPosition) * glm::mat4(getOrientation()), mScale);
-        // mModelMatrix = glm::scale(glm::mat4(1.f), mScale);
-        // mModelMatrix *= glm::mat4(getOrientation());
-        // mModelMatrix *= glm::translate(glm::mat4(1.f), mPosition);
         mModelMatrixDirty = false;
     }
 

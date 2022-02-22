@@ -102,7 +102,7 @@ namespace neo {
         MICROPROFILE_TIMELINE_LEAVE_STATIC(fileName.c_str());
         return meshData;
     }
-   std::vector<Asset> Loader::loadMultiAsset(const std::string &fileName ,bool b) {
+   std::vector<Asset> Loader::loadMultiAsset(const std::string &fileName) {
         /* If mesh was not found in map, read it in */
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> objMaterials;
@@ -125,7 +125,7 @@ namespace neo {
             Mesh* mesh = new Mesh;
             asset.meshData.mesh = mesh;
 
-            _findMetaData(asset.meshData, shape.mesh.positions, b);
+            _findMetaData(asset.meshData, shape.mesh.positions, true);
 
             /* Upload */
             mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
