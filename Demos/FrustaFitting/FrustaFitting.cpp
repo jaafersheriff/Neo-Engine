@@ -4,9 +4,10 @@
 #include "PerspectiveUpdateSystem.hpp"
 
 #include "Renderer/Shader/ShadowCasterShader.hpp"
-#include "Renderer/Shader/PhongShadowShader.hpp"
 #include "Renderer/Shader/LineShader.hpp"
 #include "Renderer/Shader/WireFrameShader.hpp"
+#include "Renderer/Shader/PhongShadowShader.hpp"
+#include "WireShader.hpp"
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
@@ -35,12 +36,11 @@ static constexpr int shadowMapSize = 2048;
 namespace FrustaFitting {
     struct Camera {
         GameObject* gameObject;
-        CameraComponent* camera;
 
-        Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos) {
-            gameObject = &ecs.createGameObject();
+        Camera(std::string name, ECS & ecs, float fov, float near, float far, glm::vec3 pos) {
+            gameObject = &ecs.createGameObject(name);
             ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-            camera = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+            &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
         }
     };
 
@@ -53,7 +53,7 @@ namespace FrustaFitting {
             ecs.addComponent<LightComponent>(lightObject, glm::vec3(1.f), glm::vec3(0.4f, 0.2f, 0.f));
 
             // Shadow camera object
-            auto cameraObject = &ecs.createGameObject();
+            auto cameraObject = &ecs.createGameObject("Light camera");
             ecs.addComponentAs<OrthoCameraComponent, CameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
             ecs.addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
             ecs.addComponent<FrustumComponent>(cameraObject);
@@ -92,12 +92,12 @@ namespace FrustaFitting {
     void Demo::init(ECS& ecs) {
 
         /* Game objects */
-        Camera sceneCamera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
+        Camera sceneCamera("main camera", ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
         ecs.addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
         ecs.addComponent<MainCameraComponent>(sceneCamera.gameObject);
 
         // Perspective camera
-        Camera mockCamera(ecs, 50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
+        Camera mockCamera("mockCamera", ecs, 50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
         &ecs.addComponent<LineMeshComponent>(mockCamera.gameObject, glm::vec3(0.f, 1.f, 1.f));
         ecs.addComponent<FrustumComponent>(mockCamera.gameObject);
         ecs.addComponent<FrustumFitSourceComponent>(mockCamera.gameObject);
@@ -107,12 +107,15 @@ namespace FrustaFitting {
 
         // Renderable
         for (int i = 0; i < 30; i++) {
-            Renderable sphere(ecs, util::genRandomBool() ? Library::getMesh("cube").mMesh : Library::getMesh("sphere").mMesh, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
+            auto mesh = util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere");
+            Renderable sphere(ecs, mesh.mMesh, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
             Material material;
             material.mAmbient = glm::vec3(0.3f);
             material.mDiffuse = util::genRandomVec3();
+            ecs.addComponent<BoundingBoxComponent>(sphere.gameObject, mesh);
             ecs.addComponent<renderable::PhongShadowRenderable>(sphere.gameObject, *Library::getTexture("black"), material);
             ecs.addComponent<renderable::ShadowCasterRenderable>(sphere.gameObject, *Library::getTexture("black"));
+            ecs.addComponent<SelectableComponent>(sphere.gameObject);
         }
 
         /* Ground plane */
@@ -120,6 +123,7 @@ namespace FrustaFitting {
         Material material;
         material.mAmbient = glm::vec3(0.2f);
         material.mDiffuse = glm::vec3(0.7f);
+        ecs.addComponent<BoundingBoxComponent>(receiver.gameObject, Library::getMesh("quad"));
         ecs.addComponent<renderable::PhongShadowRenderable>(receiver.gameObject, *Library::getTexture("black"), material);
 
         /* Systems - order matters! */
@@ -132,6 +136,7 @@ namespace FrustaFitting {
         /* Init renderer */
         Renderer::addPreProcessShader<ShadowCasterShader>(shadowMapSize);
         Renderer::addSceneShader<PhongShadowShader>();
+        Renderer::addSceneShader<WireShader>();
         Renderer::addSceneShader<LineShader>().mActive = true;
 
         /* Attach ImGui panes */
@@ -168,9 +173,9 @@ namespace FrustaFitting {
             });
 
         Engine::addImGuiFunc("PerspectiveCamera", [&](ECS& ecs_) {
-            NEO_UNUSED(ecs_);
-            auto spatial = mockCamera.gameObject->getComponentByType<SpatialComponent>();
-            auto camera = dynamic_cast<PerspectiveCameraComponent*>(mockCamera.camera);
+            auto mockCamera = ecs_.getComponentTuple<SpatialComponent, FrustumFitSourceComponent>();
+            auto spatial = mockCamera->get<SpatialComponent>();
+            auto camera = dynamic_cast<PerspectiveCameraComponent*>(mockCamera->get<SpatialComponent>()->getGameObject().getComponentByType<CameraComponent>());
             ImGui::Checkbox("Auto update", &perspectiveUpdate.mUpdatePerspective);
             spatial->imGuiEditor();
             camera->imGuiEditor();

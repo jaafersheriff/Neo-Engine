@@ -41,6 +41,7 @@ namespace neo {
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPostShaders;
     glm::vec3 Renderer::mClearColor;
     bool Renderer::mShowBB = false;
+    Renderer::FrameStats Renderer::mStats;
 
     void Renderer::setDemoConfig(IDemo::Config config) {
         APP_SHADER_DIR = config.shaderDir;
@@ -110,111 +111,115 @@ namespace neo {
     }
 
     void Renderer::render(WindowSurface& window, ECS& ecs) {
-        if (!window.isFocused()) {
-            return;
-        }
+        if (!window.isMinimized()) {
+            mStats = {};
 
-        RENDERER_MP_ENTER("Renderer::render");
-        resetState();
+            RENDERER_MP_ENTER("Renderer::render");
+            resetState();
 
-        /* Get active shaders */
-        std::vector<Shader *> activeComputeShaders = _getActiveShaders(mComputeShaders);
-        std::vector<Shader *> activePreShaders = _getActiveShaders(mPreProcessShaders);
-        std::vector<Shader *> activePostShaders = _getActiveShaders(mPostShaders);
+            /* Get active shaders */
+            std::vector<Shader*> activeComputeShaders = _getActiveShaders(mComputeShaders);
+            std::vector<Shader*> activePreShaders = _getActiveShaders(mPreProcessShaders);
+            std::vector<Shader*> activePostShaders = _getActiveShaders(mPostShaders);
 
-        /* Run compute */
-        if (activeComputeShaders.size()) {
-            RENDERER_MP_ENTER("Compute shaders");
+            /* Run compute */
+            if (activeComputeShaders.size()) {
+                RENDERER_MP_ENTER("Compute shaders");
 
-            for (auto& shader : activeComputeShaders) {
-                resetState();
-                RENDERER_MP_ENTERD(Compute, "Compute shaders", shader->mName.c_str());
-                shader->render(ecs);
+                for (auto& shader : activeComputeShaders) {
+                    resetState();
+                    RENDERER_MP_ENTERD(Compute, "Compute shaders", shader->mName.c_str());
+                    mStats.mNumShaders++;
+                    shader->render(ecs);
+                    RENDERER_MP_LEAVE();
+                }
                 RENDERER_MP_LEAVE();
             }
-            RENDERER_MP_LEAVE();
-        }
 
-        /* Render all preprocesses */
-        if (activePreShaders.size()) {
-            RENDERER_MP_ENTER("PreScene shaders");
-
-            for (auto & shader : activePreShaders) {
-                resetState();
-                RENDERER_MP_ENTERD(Pre, "PreScene shaders", shader->mName.c_str());
-                shader->render(ecs);
-                RENDERER_MP_LEAVE();
-            }
-            RENDERER_MP_LEAVE();
-        }
-
-        /* Reset default FBO state */
-        RENDERER_MP_ENTER("Reset DefaultFBO");
-        if (activePostShaders.size()) {
-            mDefaultFBO->bind();
-            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
-        }
-        else {
-            CHECK_GL(glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f));
+            /* Render all preprocesses */
             if (activePreShaders.size()) {
-                Library::getFBO("0")->bind();
-            }
-        }
-        glm::ivec2 frameSize = window.getDetails().getSize();
-        CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
-        CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-        RENDERER_MP_LEAVE();
- 
-        /* Render all scene shaders */
-        RENDERER_MP_ENTER("renderScene");
-        for (auto& shader : mSceneShaders) {
-            if (shader.second->mActive) {
-                resetState();
-                RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName.c_str());
-                shader.second->render(ecs);
+                RENDERER_MP_ENTER("PreScene shaders");
+
+                for (auto& shader : activePreShaders) {
+                    resetState();
+                    RENDERER_MP_ENTERD(Pre, "PreScene shaders", shader->mName.c_str());
+                    mStats.mNumShaders++;
+                    shader->render(ecs);
+                    RENDERER_MP_LEAVE();
+                }
                 RENDERER_MP_LEAVE();
             }
-        }
-        RENDERER_MP_LEAVE();
 
-        /* Post process with ping & pong */
-        if (activePostShaders.size()) {
-            RENDERER_MP_ENTER("PostProcess shaders");
-
-            /* Render first post process shader into appropriate output buffer */
-            Framebuffer *inputFBO = mDefaultFBO;
-            Framebuffer *outputFBO = activePostShaders.size() == 1 ? Library::getFBO("0") : Library::getFBO("pong");
-
-            _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().getSize(), ecs);
-
-            /* [2, n-1] shaders use ping & pong */
-            inputFBO = Library::getFBO("pong");
-            outputFBO = Library::getFBO("ping");
-            for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
-                _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO, window.getDetails().getSize(), ecs);
-
-                /* Swap ping & pong */
-                Framebuffer *temp = inputFBO;
-                inputFBO = outputFBO;
-                outputFBO = temp;
+            /* Reset default FBO state */
+            RENDERER_MP_ENTER("Reset DefaultFBO");
+            if (activePostShaders.size()) {
+                mDefaultFBO->bind();
+                CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             }
+            else {
+                CHECK_GL(glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f));
+                if (activePreShaders.size()) {
+                    Library::getFBO("0")->bind();
+                }
+            }
+            glm::ivec2 frameSize = window.getDetails().getSize();
+            CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+            CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+            RENDERER_MP_LEAVE();
 
-            /* nth shader writes out to FBO 0 if it hasn't already been done */
-            if (activePostShaders.size() > 1) {
-                _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("0"), window.getDetails().getSize(), ecs);
+            /* Render all scene shaders */
+            RENDERER_MP_ENTER("renderScene");
+            for (auto& shader : mSceneShaders) {
+                if (shader.second->mActive) {
+                    resetState();
+                    RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName.c_str());
+                    mStats.mNumShaders++;
+                    shader.second->render(ecs);
+                    RENDERER_MP_LEAVE();
+                }
             }
             RENDERER_MP_LEAVE();
-        }
 
-        /* Render imgui */
-        if (Engine::mImGuiEnabled) {
-            RENDERER_MP_ENTER("ImGui::render");
-            ImGui::Render();
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            /* Post process with ping & pong */
+            if (activePostShaders.size()) {
+                RENDERER_MP_ENTER("PostProcess shaders");
+
+                /* Render first post process shader into appropriate output buffer */
+                Framebuffer* inputFBO = mDefaultFBO;
+                Framebuffer* outputFBO = activePostShaders.size() == 1 ? Library::getFBO("0") : Library::getFBO("pong");
+
+                _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().getSize(), ecs);
+
+                /* [2, n-1] shaders use ping & pong */
+                inputFBO = Library::getFBO("pong");
+                outputFBO = Library::getFBO("ping");
+                for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
+                    _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO, window.getDetails().getSize(), ecs);
+
+                    /* Swap ping & pong */
+                    Framebuffer* temp = inputFBO;
+                    inputFBO = outputFBO;
+                    outputFBO = temp;
+                }
+
+                /* nth shader writes out to FBO 0 if it hasn't already been done */
+                if (activePostShaders.size() > 1) {
+                    mStats.mNumShaders++;
+                    _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("0"), window.getDetails().getSize(), ecs);
+                }
+                RENDERER_MP_LEAVE();
+            }
+
+            /* Render imgui */
+            if (Engine::mImGuiEnabled) {
+                RENDERER_MP_ENTER("ImGui::render");
+                ImGui::Render();
+                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+                RENDERER_MP_LEAVE();
+            }
+
             RENDERER_MP_LEAVE();
         }
-
-        RENDERER_MP_LEAVE();
 
         RENDERER_MP_ENTER("glfwSwapBuffers");
         glfwSwapBuffers(window.getWindow());
@@ -276,6 +281,11 @@ namespace neo {
     }
 
     void Renderer::_imguiEditor(ECS& ecs) {
+        if (ImGui::TreeNodeEx("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::Text("Num Draws: %d", mStats.mNumDraws);
+            ImGui::Text("Num Shaders: %d", mStats.mNumShaders);
+            ImGui::TreePop();
+        }
         if (ImGui::Checkbox("Show bounding boxes", &mShowBB)) {
             if (mShowBB) {
                 getShader<LineShader>().mActive = true;

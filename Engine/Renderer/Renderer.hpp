@@ -22,6 +22,11 @@ namespace neo {
 
         friend Engine;
 
+        struct FrameStats {
+            uint32_t mNumDraws = 0;
+            uint32_t mNumShaders = 0;
+        };
+
         public:
             Renderer() = default;
             ~Renderer() = default;
@@ -36,6 +41,7 @@ namespace neo {
             static unsigned NEO_GL_MINOR_VERSION;
             static std::string NEO_GLSL_VERSION;
             static glm::ivec3 NEO_MAX_COMPUTE_GROUP_SIZE;
+            static FrameStats mStats;
 
             static void setDemoConfig(IDemo::Config);
             static void init();

@@ -40,14 +40,16 @@ namespace GodRays {
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
 
+            const auto cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
+
             for (auto& renderable : ecs.getComponentTuples<SunOccluderComponent, MeshComponent, SpatialComponent>()) {
                 auto renderableSpatial = renderable->get<SpatialComponent>();
 
-                // VFC
-                if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                    if (const auto& frustumPlanes = camera->mGameObject.getComponentByType<FrustumComponent>()) {
-                        float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
-                        if (!frustumPlanes->isInFrustum(renderableSpatial->getPosition(), radius)) {
+				// VFC
+                if (cameraFrustum) {
+                    MICROPROFILE_SCOPEI("PhongShader", "VFC", MP_AUTO);
+                    if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
+                        if (!cameraFrustum->isInFrustum(*renderableSpatial, *boundingBox)) {
                             continue;
                         }
                     }

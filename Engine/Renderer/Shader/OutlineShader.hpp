@@ -56,7 +56,7 @@ namespace neo {
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("OutlineShader", "VFC", MP_AUTO);
                     if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                        if (!cameraFrustum->isInFrustum(renderableSpatial->getModelMatrix() * glm::vec4(boundingBox->getCenter(), 1.f), boundingBox->getRadius())) {
+                        if (!cameraFrustum->isInFrustum(*renderableSpatial, *boundingBox)) {
                             continue;
                         }
                     }

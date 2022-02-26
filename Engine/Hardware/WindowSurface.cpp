@@ -230,7 +230,7 @@ namespace neo {
         Messenger::sendMessage<Mouse::ScrollWheelMessage>(nullptr, 0);
         MICROPROFILE_LEAVE();
 
-        if (Engine::mImGuiEnabled && isFocused()) {
+        if (Engine::mImGuiEnabled && !isMinimized()) {
             MICROPROFILE_ENTERI("Window", "ImGui::NewFrame", MP_AUTO);
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -260,8 +260,8 @@ namespace neo {
         return glfwWindowShouldClose(mWindow);
     }
 
-    int WindowSurface::isFocused() const {
-        return glfwGetWindowAttrib(mWindow, GLFW_FOCUSED);
+    int WindowSurface::isMinimized() const {
+        return glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED);
     }
 
     void WindowSurface::shutDown() {

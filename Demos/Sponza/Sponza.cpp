@@ -17,6 +17,7 @@
 #include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
+#include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -90,6 +91,7 @@ namespace Sponza {
         /* Systems - order matters! */
         auto& camSys = ecs.addSystem<CameraControllerSystem>();
         camSys.mSuperSpeed = 10.f;
+        ecs.addSystem<FrustumSystem>();
         ecs.addSystem<FrustaFittingSystem>();
 
         /* Init renderer */

@@ -2,6 +2,8 @@
 #include "Util/Util.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
+#include "Renderer/Renderer.hpp"
+
 #include "GL/glew.h"
 #include "microprofile.h"
 
@@ -21,8 +23,8 @@ namespace neo {
 
     // TODO - instanced
     void Mesh::draw(uint32_t size) const {
-        // MICROPROFILE_SCOPEI("Mesh", "Mesh::draw", MP_AUTO);
-        // MICROPROFILE_SCOPEGPUI("Mesh::draw", MP_AUTO);
+        Renderer::mStats.mNumDraws++;
+
         const auto& positions = getVBO(VertexType::Position);
 
         CHECK_GL(glBindVertexArray(mVAOID));

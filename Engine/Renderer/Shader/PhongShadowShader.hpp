@@ -126,8 +126,7 @@ namespace neo {
                     if (cameraFrustum) {
                         MICROPROFILE_SCOPEI("PhongShaderShader", "VFC", MP_AUTO);
                         if (const auto& boundingBox = renderableIt->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                            float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
-                            if (!cameraFrustum->isInFrustum(renderableSpatial->getPosition(), radius)) {
+                            if (!cameraFrustum->isInFrustum(*renderableSpatial, *boundingBox)) {
                                 continue;
                             }
                         }

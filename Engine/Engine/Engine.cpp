@@ -92,6 +92,7 @@ namespace neo {
 
             /* Update display, mouse, keyboard */
             mWindow.update();
+            // TODO : if minimized, sleep
             {
                 auto& hardware = mECS.createGameObject();
                 mECS.addComponent<MouseComponent>(&hardware, mMouse);
@@ -109,11 +110,13 @@ namespace neo {
             Messenger::relayMessages(mECS);
 
             /* Update each system */
-            mECS._updateSystems();
-            Messenger::relayMessages(mECS);
+            if (!mWindow.isMinimized()) {
+                mECS._updateSystems();
+                Messenger::relayMessages(mECS);
+            }
 
             /* Update imgui functions */
-            if (mImGuiEnabled && mWindow.isFocused()) {
+            if (mImGuiEnabled && !mWindow.isMinimized()) {
                 MICROPROFILE_ENTERI("Engine", "_runImGui", MP_AUTO);
                 ImGui::GetIO().FontGlobalScale = 2.0f;
                 _runImGui(demos, counter);

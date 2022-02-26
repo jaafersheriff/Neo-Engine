@@ -82,16 +82,16 @@ namespace neo {
                 auto renderableSpatial = renderable->get<SpatialComponent>();
                 uint32_t componentID = renderable->get<SelectableComponent>()->mID;
 
-                // VFC
+    			// VFC
                 if (cameraFrustum) {
-                    MICROPROFILE_SCOPEI("SelectableShader", "VFC", MP_AUTO);
+                    MICROPROFILE_SCOPEI("PhongShader", "VFC", MP_AUTO);
                     if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                        float radius = glm::max(glm::max(renderableSpatial->getScale().x, renderableSpatial->getScale().y), renderableSpatial->getScale().z) * boundingBox->getRadius();
-                        if (!cameraFrustum->isInFrustum(renderableSpatial->getPosition(), radius)) {
+                        if (!cameraFrustum->isInFrustum(*renderableSpatial, *boundingBox)) {
                             continue;
                         }
                     }
                 }
+
 
                 map.insert({ rendered, componentID });
                 CHECK_GL(glStencilFunc(GL_ALWAYS, static_cast<GLuint>(rendered), 0));
