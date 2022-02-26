@@ -22,6 +22,7 @@
 #include "ECS/Component/TransformationComponent/SinTranslateComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
+#include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 #include "ECS/Systems/TranslationSystems/SinTranslateSystem.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -130,6 +131,7 @@ namespace Deferred {
 
         /* Systems - order matters! */
         ecs.addSystem<CameraControllerSystem>();
+        ecs.addSystem<RotationSystem>();
         ecs.addSystem<SinTranslateSystem>();
 
         // TODO - this ordering is super broken

@@ -250,10 +250,7 @@ namespace neo {
                 ImGui::PlotLines("Frame time", counter.mTimeStepList.data(), static_cast<int>(counter.mTimeStepList.size()), 0, std::to_string(counter.mTimeStep * 1000.f).c_str());
                 ImGui::Text("Num Draws: %d", Renderer::mStats.mNumDraws);
                 ImGui::Text("Num Shaders: %d", Renderer::mStats.mNumShaders);
-                if (ImGui::Button("VSync")) {
-                    mWindow.toggleVSync();
-                }
-                if (auto stats = Engine::getComponentTuple<MouseComponent, WindowDetailsComponent>()) {
+                if (auto stats = mECS.getComponentTuple<MouseComponent, WindowDetailsComponent>()) {
                     if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
                         stats->get<WindowDetailsComponent>()->imGuiEditor();
                         ImGui::TreePop();
@@ -270,6 +267,9 @@ namespace neo {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Renderer")) {
+                if (ImGui::Button("VSync")) {
+                    mWindow.toggleVSync();
+                }
                 Renderer::_imguiEditor(mECS);
                 ImGui::EndMenu();
             }

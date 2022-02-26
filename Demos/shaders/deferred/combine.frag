@@ -18,6 +18,7 @@ void main() {
 
     outcolor.rgb = 
 	 	diffuseAmount * diffuse.rgb
+		+ diffuseAmount * decal.rgb
 		+ lightOutput.rgb * decal.rgb
 		+ (lightOutput.rgb * (showAO ? aoOutput.r : 1.f));
     outcolor.a = 1.f;
