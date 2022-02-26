@@ -281,11 +281,6 @@ namespace neo {
     }
 
     void Renderer::_imguiEditor(ECS& ecs) {
-        if (ImGui::TreeNodeEx("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
-            ImGui::Text("Num Draws: %d", mStats.mNumDraws);
-            ImGui::Text("Num Shaders: %d", mStats.mNumShaders);
-            ImGui::TreePop();
-        }
         if (ImGui::Checkbox("Show bounding boxes", &mShowBB)) {
             if (mShowBB) {
                 getShader<LineShader>().mActive = true;

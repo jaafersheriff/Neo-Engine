@@ -248,6 +248,8 @@ namespace neo {
                 }
                 ImGui::PlotLines("FPS", FPSfloats.data(), static_cast<int>(FPSfloats.size()), 0, std::to_string(counter.mFPS).c_str());
                 ImGui::PlotLines("Frame time", counter.mTimeStepList.data(), static_cast<int>(counter.mTimeStepList.size()), 0, std::to_string(counter.mTimeStep * 1000.f).c_str());
+                ImGui::Text("Num Draws: %d", Renderer::mStats.mNumDraws);
+                ImGui::Text("Num Shaders: %d", Renderer::mStats.mNumShaders);
                 if (ImGui::Button("VSync")) {
                     mWindow.toggleVSync();
                 }
