@@ -32,26 +32,4 @@ namespace neo {
 
 	private:
 	};
-
-	class DemoWrangler {
-	public:
-		DemoWrangler(int& idx, std::vector<IDemo*>& d)
-			: currentDemoIndex(idx)
-			, demos(d)
-		{}
-
-		int& currentDemoIndex;
-		std::vector<IDemo*>& demos;
-
-		IDemo::Config getConfig() { return demos[currentDemoIndex]->getConfig(); }
-		IDemo* getCurrentDemo() { return demos[currentDemoIndex]; }
-
-		void swap() { currentDemoIndex = nextDemoIndex; forceReload = false; }
-		void reload(int newDemo) { nextDemoIndex = newDemo; }
-		void setForceReload() { forceReload = true; }
-		bool needsReload() { return forceReload || nextDemoIndex != currentDemoIndex; };
-	private:
-		int nextDemoIndex = 0;
-		bool forceReload = false;
-	};
 }

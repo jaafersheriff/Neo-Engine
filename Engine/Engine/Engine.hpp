@@ -5,7 +5,7 @@
 #include "Util/Util.hpp"
 
 #include "ECS/ECS.hpp"
-#include "DemoInfra/IDemo.hpp"
+#include "DemoInfra/DemoWrangler.h"
 
 #include "ext/imgui/imgui.h"
 #include "microprofile.h"

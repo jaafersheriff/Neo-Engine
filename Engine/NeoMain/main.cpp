@@ -1,5 +1,5 @@
 #include "Engine/Engine.hpp"
-#include "DemoInfra/IDemo.hpp"
+#include "DemoInfra/DemoWrangler.h"
 #include "DemoRegistration.h"
 
 #include <cstdlib>
@@ -7,11 +7,9 @@
 #include <memory>
 
 int main() {
-    using namespace neo;
-
-    DemoWrangler demos(sCurrentDemo, sDemos);
-    Engine::init();
-    Engine::run(demos);
+    neo::DemoWrangler demos(sCurrentDemo, sDemos);
+    neo::Engine::init();
+    neo::Engine::run(demos);
 
 	return EXIT_SUCCESS;
 }

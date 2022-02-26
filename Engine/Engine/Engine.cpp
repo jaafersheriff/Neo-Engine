@@ -226,8 +226,8 @@ namespace neo {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("Demos")) {
                 if (ImGui::BeginCombo("Demos", demos.getCurrentDemo()->getConfig().name.c_str())) {
-                    for (int i = 0; i < demos.demos.size(); i++) {
-                        if (ImGui::Selectable(demos.demos[i]->getConfig().name.c_str())) {
+                    for (int i = 0; i < demos.getDemos().size(); i++) {
+                        if (ImGui::Selectable(demos.getDemos()[i]->getConfig().name.c_str())) {
                             demos.reload(i);
                         }
                     }
