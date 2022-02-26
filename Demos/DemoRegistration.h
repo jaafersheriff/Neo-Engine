@@ -9,7 +9,6 @@
 #include "PostProcess/PostProcess.hpp"
 #include "Selecting/Selecting.hpp"
 #include "Sponza/Sponza.hpp"
-#include "VFC/VFC.hpp"
 
 #include <vector>
 #include <memory>
@@ -27,6 +26,5 @@ static std::vector<neo::IDemo*> sDemos = {
 	new PostProcess::Demo(),
 	new Selecting::Demo(),
 	new Sponza::Demo(),
-	new VFC::Demo()
 };
 

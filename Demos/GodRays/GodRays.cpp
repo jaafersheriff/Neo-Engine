@@ -47,22 +47,6 @@ namespace GodRays {
             ecs.addComponent<LightComponent>(&gameObject, col, att);
             ecs.addComponent<SunComponent>(&gameObject);
             ecs.addComponent<SelectableComponent>(&gameObject);
-
-            Engine::addImGuiFunc("Light", [](ECS& ecs_) {
-                auto light = ecs_.getSingleComponent<LightComponent>();
-                if (auto spatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
-                    glm::vec3 pos = spatial->getPosition();
-                    if (ImGui::SliderFloat3("Position", &pos[0], -100.f, 100.f)) {
-                        spatial->setPosition(pos);
-                    }
-                    float scale = spatial->getScale().x;
-                    if (ImGui::SliderFloat("Scale", &scale, 0.f, 100.f)) {
-                        spatial->setScale(glm::vec3(scale));
-                    }
-                    ImGui::SliderFloat3("Color", &light->mColor[0], 0.f, 1.f);
-                    ImGui::SliderFloat3("Attenuation", &light->mAttenuation[0], 0.f, 1.f);
-                }
-                });
         }
     };
 
@@ -119,5 +103,21 @@ namespace GodRays {
         Renderer::addSceneShader<AlphaTestShader>();
         Renderer::addPostProcessShader<CombineShader>("godrays/combine.frag");
         Renderer::addPostProcessShader<GammaCorrectShader>();
+    }
+
+    void Demo::imGuiEditor(ECS& ecs) {
+        auto light = ecs.getSingleComponent<LightComponent>();
+        if (auto spatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
+            glm::vec3 pos = spatial->getPosition();
+            if (ImGui::SliderFloat3("Position", &pos[0], -100.f, 100.f)) {
+                spatial->setPosition(pos);
+            }
+            float scale = spatial->getScale().x;
+            if (ImGui::SliderFloat("Scale", &scale, 0.f, 100.f)) {
+                spatial->setScale(glm::vec3(scale));
+            }
+            ImGui::SliderFloat3("Color", &light->mColor[0], 0.f, 1.f);
+            ImGui::SliderFloat3("Attenuation", &light->mAttenuation[0], 0.f, 1.f);
+        }
     }
 }

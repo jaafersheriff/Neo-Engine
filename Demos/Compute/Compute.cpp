@@ -63,12 +63,12 @@ namespace Compute {
         /* Init renderer */
         Renderer::addComputeShader<ParticlesComputeShader>("compute/particles.compute");
         Renderer::addSceneShader<ParticleVisShader>("compute/particles.vert", "compute/particles.frag", "compute/particles.geom");
+    }
 
-        Engine::addImGuiFunc("Mesh", [](ECS& ecs_) {
-            if (auto mesh = ecs_.getComponentTuple<ParticleMeshComponent, SpatialComponent>()) {
-                mesh->get<ParticleMeshComponent>()->imGuiEditor();
-                mesh->get<SpatialComponent>()->imGuiEditor();
-            }
-            });
+    void Demo::imGuiEditor(ECS& ecs) {
+        if (auto mesh = ecs.getComponentTuple<ParticleMeshComponent, SpatialComponent>()) {
+            mesh->get<ParticleMeshComponent>()->imGuiEditor();
+            mesh->get<SpatialComponent>()->imGuiEditor();
+        }
     }
 }

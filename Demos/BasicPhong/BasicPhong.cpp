@@ -29,7 +29,7 @@ namespace BasicPhong {
         CameraComponent* cameraComp;
 
         Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-            gameObject = &ecs.createGameObject();
+            gameObject = &ecs.createGameObject("Camera");
             ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f), glm::vec3(3.f));
             cameraComp = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
             cameraController = &ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
@@ -38,21 +38,13 @@ namespace BasicPhong {
 
     struct Light {
         Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-            auto gameObject = &ecs.createGameObject();
+            auto gameObject = &ecs.createGameObject("Light");
             ecs.addComponent<SpatialComponent>(gameObject, pos);
             ecs.addComponent<LightComponent>(gameObject, col, att);
             ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("sphere").mMesh);
             ecs.addComponent<BoundingBoxComponent>(gameObject, Library::getMesh("sphere"));
             ecs.addComponent<renderable::WireframeRenderable>(gameObject);
             ecs.addComponent<SelectableComponent>(gameObject);
-
-            Engine::addImGuiFunc("Light", [](ECS& ecs_) {
-                auto light = ecs_.getSingleComponent<LightComponent>();
-                light->imGuiEditor();
-                if (auto spatial = light->getGameObject().getComponentByType<SpatialComponent>()) {
-                    spatial->imGuiEditor();
-                }
-                });
         }
     };
 

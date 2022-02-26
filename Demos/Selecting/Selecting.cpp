@@ -39,15 +39,9 @@ namespace Selecting {
 
         struct Light {
             Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-                auto& gameObject = ecs.createGameObject();
+                auto& gameObject = ecs.createGameObject("Light");
                 ecs.addComponent<SpatialComponent>(&gameObject, pos);
                 ecs.addComponent<LightComponent>(&gameObject, col, att);
-
-                Engine::addImGuiFunc("Light", [](ECS& ecs_) {
-                    if (auto light = ecs_.getSingleComponent<LightComponent>()) {
-                        light->imGuiEditor();
-                    }
-                    });
             }
         };
 

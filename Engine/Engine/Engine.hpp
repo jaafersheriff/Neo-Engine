@@ -46,8 +46,6 @@ namespace neo {
             /* ImGui */
             static bool mImGuiEnabled;
             static void toggleImGui() { mImGuiEnabled = !mImGuiEnabled; }
-            using ImGuiFunc = std::function<void(ECS& ecs)>;
-            static void addImGuiFunc(std::string name, ImGuiFunc func) { mImGuiFuncs.insert({ name, func}); }
 
         private:
             static ECS mECS;
@@ -55,7 +53,6 @@ namespace neo {
 			static void _swapDemo(DemoWrangler&);
 
             /* ImGui */
-            static std::unordered_map<std::string, ImGuiFunc> mImGuiFuncs;
             static void _runImGui(DemoWrangler&, const util::FrameCounter&);
 
             /* Hardware */

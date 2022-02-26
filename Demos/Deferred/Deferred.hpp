@@ -9,5 +9,6 @@ namespace Deferred {
 	public:
 		virtual IDemo::Config getConfig() const override;
 		virtual void init(ECS& ecs) override;
+		virtual void imGuiEditor(ECS& ecs) override;
 	};
 }

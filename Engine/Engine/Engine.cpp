@@ -43,7 +43,6 @@ namespace neo {
 
     /* ImGui */
     bool Engine::mImGuiEnabled = true;
-    std::unordered_map<std::string, Engine::ImGuiFunc> Engine::mImGuiFuncs;
 
     /* Hardware */
     WindowSurface Engine::mWindow;
@@ -381,12 +380,7 @@ namespace neo {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu(demos.getConfig().name.c_str())) {
-                for (auto & it : mImGuiFuncs) {
-                    if (ImGui::TreeNodeEx(it.first.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                        it.second(mECS);
-                        ImGui::TreePop();
-                    }
-                }
+                demos.getCurrentDemo()->imGuiEditor(mECS);
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();

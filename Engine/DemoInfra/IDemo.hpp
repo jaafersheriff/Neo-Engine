@@ -28,6 +28,9 @@ namespace neo {
 		virtual void update(ECS& ecs) {
 			NEO_UNUSED(ecs);
 		};
+		virtual void imGuiEditor(ECS& ecs) {
+			NEO_UNUSED(ecs);
+		}
 		virtual void destroy() {}
 
 	private:

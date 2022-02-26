@@ -86,37 +86,37 @@ namespace Metaballs {
         /* Init renderer */
         Renderer::addSceneShader<MetaballsShader>("metaballs/metaballs.vert", "metaballs/metaballs.frag");
         Renderer::addSceneShader<SkyboxShader>();
+    }
 
-        Engine::addImGuiFunc("Metaballs", [](ECS& ecs_) {
-            static float scale = 2.f;
-            if (ImGui::Button("Add")) {
-                Metaball(ecs_, util::genRandomVec3(-2.f, 2.f), util::genRandom(2.f, 4.f));
+    void Demo::imGuiEditor(ECS& ecs) {
+
+        static float scale = 2.f;
+        if (ImGui::Button("Add")) {
+            Metaball(ecs, util::genRandomVec3(-2.f, 2.f), util::genRandom(2.f, 4.f));
+            {
+                GameObject* gameObject = &ecs.createGameObject();
+                ecs.addComponent<DirtyBallsComponent>(gameObject);
+            }
+        }
+
+        static int index = 0;
+        auto metaballs = ecs.getComponents<MetaballComponent>();
+        if (metaballs.size()) {
+            ImGui::SliderInt("Index", &index, 0, static_cast<int>(metaballs.size()) - 1);
+            metaballs[index]->getGameObject().getComponentByType<SpatialComponent>()->imGuiEditor();
+            if (ImGui::Button("Remove")) {
+                ecs.removeGameObject(metaballs[index]->getGameObject());
                 {
-                    GameObject* gameObject = &ecs_.createGameObject();
-                    ecs_.addComponent<DirtyBallsComponent>(gameObject);
+                    GameObject* gameObject = &ecs.createGameObject();
+                    ecs.addComponent<DirtyBallsComponent>(gameObject);
+                }
+                if (metaballs.size() - 1 == 1) {
+                    index = 0;
+                }
+                else if (index == metaballs.size() - 2) {
+                    index--;
                 }
             }
-
-            static int index = 0;
-            auto metaballs = ecs_.getComponents<MetaballComponent>();
-            if (metaballs.size()) {
-                ImGui::SliderInt("Index", &index, 0, static_cast<int>(metaballs.size()) - 1);
-                glm::vec3 position = metaballs[index]->getGameObject().getComponentByType<SpatialComponent>()->getPosition();
-                ImGui::Text("%0.2f, %0.2f, %0.2f", position.x, position.y, position.z);
-                if (ImGui::Button("Remove")) {
-                    ecs_.removeGameObject(metaballs[index]->getGameObject());
-                    {
-                        GameObject* gameObject = &ecs_.createGameObject();
-                        ecs_.addComponent<DirtyBallsComponent>(gameObject);
-                    }
-                    if (metaballs.size() - 1 == 1) {
-                        index = 0;
-                    }
-                    else if (index == metaballs.size() - 2) {
-                        index--;
-                    }
-                }
-            }
-            });
+        }
     }
 }

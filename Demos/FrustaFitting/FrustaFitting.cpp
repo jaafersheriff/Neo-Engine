@@ -1,6 +1,7 @@
 #include "FrustaFitting/FrustaFitting.hpp"
 #include "Engine/Engine.hpp"
 
+#include "MockCameraComponent.hpp"
 #include "PerspectiveUpdateSystem.hpp"
 
 #include "Renderer/Shader/ShadowCasterShader.hpp"
@@ -60,15 +61,6 @@ namespace FrustaFitting {
             ecs.addComponent<FrustumFitReceiverComponent>(cameraObject);
             ecs.addComponent<LineMeshComponent>(cameraObject, glm::vec3(1.f, 0.f, 1.f));
             ecs.addComponent<ShadowCameraComponent>(cameraObject);
-
-            Engine::addImGuiFunc("Light", [](ECS& ecs_) {
-                auto light = ecs_.getSingleComponent<LightComponent>();
-                auto spatial = light->getGameObject().getComponentByType<SpatialComponent>();
-                light->imGuiEditor();
-                glm::vec3 lookdir = spatial->getLookDir();
-                ImGui::SliderFloat3("lookdir", &lookdir[0], -1.f, 1.f);
-                spatial->setLookDir(lookdir);
-                });
         }
     };
 
@@ -98,6 +90,7 @@ namespace FrustaFitting {
 
         // Perspective camera
         Camera mockCamera("mockCamera", ecs, 50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
+        &ecs.addComponent<MockCameraComponent>(mockCamera.gameObject);
         &ecs.addComponent<LineMeshComponent>(mockCamera.gameObject, glm::vec3(0.f, 1.f, 1.f));
         ecs.addComponent<FrustumComponent>(mockCamera.gameObject);
         ecs.addComponent<FrustumFitSourceComponent>(mockCamera.gameObject);
@@ -131,55 +124,12 @@ namespace FrustaFitting {
         ecs.addSystem<FrustumSystem>(); // Calculate original frusta bounds
         ecs.addSystem<FrustaFittingSystem>(); // Fit one frusta into another
         ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
-        auto& perspectiveUpdate = ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
+        ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
 
         /* Init renderer */
         Renderer::addPreProcessShader<ShadowCasterShader>(shadowMapSize);
         Renderer::addSceneShader<PhongShadowShader>();
         Renderer::addSceneShader<WireShader>();
         Renderer::addSceneShader<LineShader>().mActive = true;
-
-        /* Attach ImGui panes */
-        Engine::addImGuiFunc("SceneCamera", [&](ECS& ecs_) {
-            if (ImGui::Button("Set scene")) {
-                ecs_.removeComponent<MainCameraComponent>(*mockCamera.gameObject->getComponentByType<MainCameraComponent>());
-                ecs_.removeComponent<CameraControllerComponent>(*mockCamera.gameObject->getComponentByType<CameraControllerComponent>());
-                ecs_.removeComponent<FrustumFitSourceComponent>(*mockCamera.gameObject->getComponentByType<FrustumFitSourceComponent>());
-                if (!sceneCamera.gameObject->getComponentByType<MainCameraComponent>()) {
-                    ecs_.addComponent<MainCameraComponent>(sceneCamera.gameObject);
-                }
-                if (!sceneCamera.gameObject->getComponentByType<CameraControllerComponent>()) {
-                    ecs_.addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
-                }
-                if (!sceneCamera.gameObject->getComponentByType<FrustumFitSourceComponent>()) {
-                    ecs_.addComponent<FrustumFitSourceComponent>(sceneCamera.gameObject);
-                }
-            }
-            if (ImGui::Button("Set perspective")) {
-                ecs_.removeComponent<MainCameraComponent>(*sceneCamera.gameObject->getComponentByType<MainCameraComponent>());
-                ecs_.removeComponent<CameraControllerComponent>(*sceneCamera.gameObject->getComponentByType<CameraControllerComponent>());
-                ecs_.removeComponent<FrustumFitSourceComponent>(*sceneCamera.gameObject->getComponentByType<FrustumFitSourceComponent>());
-                if (!mockCamera.gameObject->getComponentByType<MainCameraComponent>()) {
-                    ecs_.addComponent<MainCameraComponent>(mockCamera.gameObject);
-                }
-                if (!mockCamera.gameObject->getComponentByType<CameraControllerComponent>()) {
-                    ecs_.addComponent<CameraControllerComponent>(mockCamera.gameObject, 0.4f, 7.f);
-                }
-                if (!mockCamera.gameObject->getComponentByType<FrustumFitSourceComponent>()) {
-                    ecs_.addComponent<FrustumFitSourceComponent>(mockCamera.gameObject);
-                }
-            }
-
-            });
-
-        Engine::addImGuiFunc("PerspectiveCamera", [&](ECS& ecs_) {
-            auto mockCamera = ecs_.getComponentTuple<SpatialComponent, FrustumFitSourceComponent>();
-            auto spatial = mockCamera->get<SpatialComponent>();
-            auto camera = dynamic_cast<PerspectiveCameraComponent*>(mockCamera->get<SpatialComponent>()->getGameObject().getComponentByType<CameraComponent>());
-            ImGui::Checkbox("Auto update", &perspectiveUpdate.mUpdatePerspective);
-            spatial->imGuiEditor();
-            camera->imGuiEditor();
-            });
-        ;
     }
 }

@@ -143,9 +143,13 @@ namespace Deferred {
         Renderer::addPostProcessShader<CombineShader>("combine.frag");    // combine light pass and ssao 
         Renderer::addPostProcessShader<GammaCorrectShader>();
 
+    }
+
+    void Demo::imGuiEditor(ECS& ecs) {
+
         /* Attach ImGui panes */
-        Engine::addImGuiFunc("Decal", [&](ECS& ecs_) {
-            auto decal = ecs_.getComponentTuple<DecalRenderable, SpatialComponent>();
+        if(ImGui::TreeNodeEx("Decal")) {
+            auto decal = ecs.getComponentTuple<DecalRenderable, SpatialComponent>();
             auto spat = decal->get<SpatialComponent>();
             auto pos = spat->getPosition();
             auto scale = spat->getScale();
@@ -155,8 +159,9 @@ namespace Deferred {
             if (ImGui::SliderFloat3("Scale", &scale[0], 0.f, 50.f)) {
                 spat->setScale(scale);
             }
-            });
-        Engine::addImGuiFunc("Lights", [](ECS& ecs_) {
+        }
+
+        if (ImGui::TreeNodeEx("Lights")) {
             static int index;
             if (ImGui::CollapsingHeader("Create Lights")) {
                 if (ImGui::TreeNode("Single")) {
@@ -169,17 +174,17 @@ namespace Deferred {
                     ImGui::SliderFloat3("Color", &color[0], 0.01f, 1.f);
                     ImGui::SliderFloat("Offset", &yOffset, 0.f, 25.f);
                     if (ImGui::Button("Create")) {
-                        auto light = Light(ecs_, pos, color, glm::vec3(size));
+                        auto light = Light(ecs, pos, color, glm::vec3(size));
                         if (yOffset) {
-                            ecs_.addComponent<SinTranslateComponent>(light.gameObject, glm::vec3(0.f, yOffset, 0.f), pos);
+                            ecs.addComponent<SinTranslateComponent>(light.gameObject, glm::vec3(0.f, yOffset, 0.f), pos);
                         }
                     }
                     ImGui::TreePop();
                 }
                 if (ImGui::TreeNode("Random Lights")) {
                     if (ImGui::Button("Clear lights")) {
-                        for (auto& l : ecs_.getComponents<LightComponent>()) {
-                            ecs_.removeGameObject(l->getGameObject());
+                        for (auto& l : ecs.getComponents<LightComponent>()) {
+                            ecs.removeGameObject(l->getGameObject());
                         }
                     }
                     static int numLights = 10;
@@ -205,14 +210,14 @@ namespace Deferred {
                             );
                             glm::vec3 color = util::genRandomVec3();
                             float size = util::genRandom(minScale, maxScale);
-                            auto light = Light(ecs_, position, color, glm::vec3(size));
-                            ecs_.addComponent<SinTranslateComponent>(light.gameObject, glm::vec3(0.f, util::genRandom(minSinOffset, maxSinOffset), 0.f), position);
+                            auto light = Light(ecs, position, color, glm::vec3(size));
+                            ecs.addComponent<SinTranslateComponent>(light.gameObject, glm::vec3(0.f, util::genRandom(minSinOffset, maxSinOffset), 0.f), position);
                         }
                     }
                     ImGui::TreePop();
                 }
             }
-            auto lights = ecs_.getComponents<LightComponent>();
+            auto lights = ecs.getComponents<LightComponent>();
             if (lights.empty()) {
                 return;
             }
@@ -220,7 +225,7 @@ namespace Deferred {
                 ImGui::SliderInt("Index", &index, 0, static_cast<int>(lights.size()) - 1);
                 auto l = lights[index];
                 if (ImGui::Button("Delete light")) {
-                    ecs_.removeGameObject(l->getGameObject());
+                    ecs.removeGameObject(l->getGameObject());
                     lights.erase(lights.begin() + index);
                     index = glm::max(0, index - 1);
                 }
@@ -231,6 +236,6 @@ namespace Deferred {
                 }
                 spat->imGuiEditor();
             }
-            });
+        }
     }
 }
