@@ -88,7 +88,7 @@ namespace neo {
                 auto renderable = renderableIt->get<renderable::PhongRenderable>();
                 auto renderableSpatial = renderableIt->get<SpatialComponent>();
 
-				// VFC
+                // VFC
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("PhongShader", "VFC", MP_AUTO);
                     if (const auto& boundingBox = renderableIt->mGameObject.getComponentByType<BoundingBoxComponent>()) {

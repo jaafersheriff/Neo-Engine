@@ -39,7 +39,7 @@ namespace neo {
     }
 
     void Texture::update(const glm::uvec2 size, const void* data) {
-		update(glm::uvec3(size, 0), data);
+        update(glm::uvec3(size, 0), data);
     }
 
     void Texture::update(const glm::uvec3 size, const void* data) {
