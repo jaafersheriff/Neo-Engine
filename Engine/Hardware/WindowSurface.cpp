@@ -82,18 +82,17 @@ namespace neo {
             }
             });
         glfwSetMouseButtonCallback(mWindow, [](GLFWwindow* window, int button, int action, int mods) {
-            if (ImGuiManager::isEnabled() && !ImGuiManager::isViewportHovered()) {
+            bool doImGui = false;
+            doImGui |= ImGuiManager::isEnabled() && !ImGuiManager::isViewportHovered();
+            doImGui |= ImGuiManager::isEnabled() && ImGuiManager::isViewportHovered() && !ImGuiManager::isViewportFocused() && action == GLFW_PRESS;
+            if (doImGui) {
                 ImGuiManager::updateMouse(window, button, action, mods);
                 Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
-            }
-            else if (ImGuiManager::isEnabled() && ImGuiManager::isViewportHovered() && !ImGuiManager::isViewportFocused() && action == GLFW_PRESS) {
-                ImGuiManager::updateMouse(window, button, action, mods);
             }
             else {
                 Messenger::sendMessage<Mouse::MouseButtonMessage>(nullptr, button, action);
             }
             });
-
         glfwSetScrollCallback(mWindow, [](GLFWwindow* window, double dx, double dy) {
             if (ImGuiManager::isEnabled() && !ImGuiManager::isViewportHovered()) {
                 ImGuiManager::updateScroll(window, dx, dy);
