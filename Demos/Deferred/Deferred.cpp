@@ -159,6 +159,8 @@ namespace Deferred {
             if (ImGui::SliderFloat3("Scale", &scale[0], 0.f, 50.f)) {
                 spat->setScale(scale);
             }
+
+            ImGui::TreePop();
         }
 
         if (ImGui::TreeNodeEx("Lights")) {
@@ -236,6 +238,8 @@ namespace Deferred {
                 }
                 spat->imGuiEditor();
             }
+
+            ImGui::TreePop();
         }
     }
 }

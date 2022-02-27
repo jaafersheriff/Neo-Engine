@@ -9,9 +9,10 @@
 
 namespace neo {
 
-    Mesh::Mesh(int primitiveType) :
-        mVAOID(0),
-        mPrimitiveType(primitiveType < 0 ? GL_TRIANGLE_STRIP : primitiveType)
+    Mesh::Mesh(int primitiveType)
+        : mVAOID(0)
+        , mPrimitiveType(primitiveType < 0 ? GL_TRIANGLE_STRIP : primitiveType)
+        , mVBOs({})
     {
         /* Initialize VAO */
         CHECK_GL(glGenVertexArrays(1, (GLuint *)&mVAOID));

@@ -57,7 +57,7 @@ namespace NormalVisualizer {
     IDemo::Config Demo::getConfig() const {
         IDemo::Config config;
         config.name = "NormalVisualizer";
-        config.shaderDir = "res/normalvisualizer/";
+        config.shaderDir = "shaders/normalvisualizer/";
         config.clearColor = { 0.2f, 0.3f, 0.4f };
         return config;
     }
