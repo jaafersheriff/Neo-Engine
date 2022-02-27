@@ -58,7 +58,7 @@ namespace neo {
             template <typename ShaderT, typename... Args> static ShaderT & addPostProcessShader(Args &&...);
             template <typename ShaderT> static ShaderT& getShader();
 
-            static void imGuiEditor(ECS& ecs);
+            static void imGuiEditor(WindowSurface& window, ECS& ecs);
         private:
             static Framebuffer* mBackBuffer;
 			static Framebuffer* mDefaultFBO;

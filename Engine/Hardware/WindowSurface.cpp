@@ -86,7 +86,7 @@ namespace neo {
                 ImGuiManager::updateMouse(window, button, action, mods);
                 Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
             }
-            else if (ImGuiManager::isEnabled() && ImGuiManager::isViewportHovered() && !ImGuiManager::isViewportFocused() && action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_1) {
+            else if (ImGuiManager::isEnabled() && ImGuiManager::isViewportHovered() && !ImGuiManager::isViewportFocused() && action == GLFW_PRESS) {
                 ImGuiManager::updateMouse(window, button, action, mods);
             }
             else {
@@ -95,7 +95,7 @@ namespace neo {
             });
 
         glfwSetScrollCallback(mWindow, [](GLFWwindow* window, double dx, double dy) {
-            if (ImGuiManager::isEnabled() && !ImGuiManager::isViewportFocused()) {
+            if (ImGuiManager::isEnabled() && !ImGuiManager::isViewportHovered()) {
                 ImGuiManager::updateScroll(window, dx, dy);
                 Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
             }

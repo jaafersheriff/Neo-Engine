@@ -15,12 +15,6 @@ namespace neo {
         setNearFar(near, far);
         setFOV(fov);
         setAspectRatio(ar);
-
-        Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [this](const Message& msg, ECS& ecs) {
-            NEO_UNUSED(ecs);
-            glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage&>(msg)).mFrameSize;
-            setAspectRatio(frameSize.x / static_cast<float>(frameSize.y));
-        });
     }
 
     void PerspectiveCameraComponent::setFOV(float fov) {

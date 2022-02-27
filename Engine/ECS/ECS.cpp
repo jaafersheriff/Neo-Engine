@@ -149,7 +149,8 @@ namespace neo {
         mComponentKillQueue.clear();
     }
 
-    void ECS::_imguiEdtor() {
+    void ECS::imguiEdtor() {
+        ImGui::Begin("ECS");
         size_t count = 0;
         for (auto go : getGameObjects()) {
             count += go->getAllComponents().size();
@@ -157,7 +158,7 @@ namespace neo {
         ImGui::Text("Components: %d", count);
         char buf[256];
         sprintf(buf, "Gameobjects: %d", static_cast<int>(getGameObjects().size()));
-        if (ImGui::TreeNodeEx(buf)) {
+        if (ImGui::TreeNodeEx(buf, ImGuiTreeNodeFlags_DefaultOpen)) {
             for (auto& gameObject : getGameObjects()) {
                 if (gameObject->mTag.size() && ImGui::TreeNodeEx(gameObject->mTag.c_str())) {
                     for (auto&& [type, components] : gameObject->getComponentsMap()) {
@@ -209,5 +210,6 @@ namespace neo {
 
             ImGui::TreePop();
         }
+        ImGui::End();
     }
 }

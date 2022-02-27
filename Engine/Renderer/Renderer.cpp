@@ -290,7 +290,7 @@ namespace neo {
         return ret;
     }
 
-    void Renderer::imGuiEditor(ECS& ecs) {
+    void Renderer::imGuiEditor(WindowSurface& window, ECS& ecs) {
 
         ImGui::Begin("Viewport");
         ImGuiManager::setViewportFocus(ImGui::IsWindowFocused(), ImGui::IsWindowHovered());
@@ -308,6 +308,10 @@ namespace neo {
         ImGui::End();
 
         ImGui::Begin("Renderer");
+        if (ImGui::Button("VSync")) {
+            window.toggleVSync();
+        }
+
         if (ImGui::Checkbox("Show bounding boxes", &mShowBB)) {
             if (mShowBB) {
                 getShader<LineShader>().mActive = true;

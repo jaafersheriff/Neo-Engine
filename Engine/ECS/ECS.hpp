@@ -62,6 +62,7 @@ namespace neo {
             template <typename CompT, typename... CompTs> const std::vector<std::unique_ptr<const ComponentTuple>> getComponentTuples() const;
             template <typename CompT, typename... CompTs> const std::vector<std::unique_ptr<ComponentTuple>> getComponentTuples();
 
+            void imguiEdtor();
         private:
             /* Initialize / kill queues */
             std::vector<std::unique_ptr<GameObject>> mGameObjectInitQueue;
@@ -82,8 +83,6 @@ namespace neo {
             mutable std::unordered_map<std::type_index, std::unique_ptr<std::vector<std::unique_ptr<Component>>>> mComponents;
             std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
             void _updateSystems();
-
-            void _imguiEdtor();
     };
 
     /* Template implementation */

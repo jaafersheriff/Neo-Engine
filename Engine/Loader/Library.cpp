@@ -5,6 +5,8 @@
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/Mesh.hpp"
 
+#include "imgui/imgui.h"
+
 namespace neo {
     /* Library */
     std::unordered_map<std::string, MeshData> Library::mMeshes;
@@ -112,5 +114,49 @@ namespace neo {
             frameBuffer.second->destroy();
         }
         mFramebuffers.clear();
+    }
+
+    void Library::imGuiEditor() {
+auto textureFunc = [&](const Texture& texture) {
+        float scale = 150.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
+#pragma warning(push)
+#pragma warning(disable: 4312)
+                ImGui::Image(reinterpret_cast<ImTextureID>(texture.mTextureID), ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
+#pragma warning(pop)
+            };
+
+        ImGui::Begin("Library");
+        if (ImGui::TreeNodeEx("FBOs", ImGuiTreeNodeFlags_DefaultOpen)) {
+            for (auto& fbo : Library::mFramebuffers) {
+                if (ImGui::TreeNode((fbo.first + " (" + std::to_string(fbo.second->mFBOID) + ")").c_str())) {
+                    for (auto& t : fbo.second->mTextures) {
+                        if (ImGui::TreeNode((std::to_string(t->mTextureID) + " [" + std::to_string(t->mWidth) + ", " + std::to_string(t->mHeight) + "]").c_str())) {
+                            textureFunc(*t);
+                            ImGui::TreePop();
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNodeEx("Meshes", ImGuiTreeNodeFlags_DefaultOpen)) {
+            for (auto& m : Library::mMeshes) {
+                ImGui::Text("%s", m.first.c_str());
+            }
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNodeEx("Textures", ImGuiTreeNodeFlags_DefaultOpen)) {
+            for (auto& t : Library::mTextures) {
+                if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->mTextureID) + ")" + " [" + std::to_string(t.second->mWidth) + ", " + std::to_string(t.second->mHeight) + "]").c_str())) {
+                    // TODO - only run this on 2D textures
+                    textureFunc(*t.second);
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
+        ImGui::End();
+
     }
 }

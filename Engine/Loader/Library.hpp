@@ -40,6 +40,8 @@ namespace neo {
             static Framebuffer* createFBO(const std::string&);
             static Framebuffer* getFBO(const std::string&);
 
+            static void imGuiEditor();
+
         private:
             // TODO 
             // template <typename T> static T* _find(const std::string&);
