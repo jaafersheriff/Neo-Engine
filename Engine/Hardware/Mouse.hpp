@@ -21,7 +21,7 @@ namespace neo {
         };
         struct ScrollWheelMessage : public Message {
             const double mSpeed;
-			ScrollWheelMessage(double speed)
+            ScrollWheelMessage(double speed)
                 : mSpeed(speed)
             {}
         };

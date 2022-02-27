@@ -12,6 +12,8 @@
 namespace neo {
 
     bool ImGuiManager::mIsEnabled = true;
+    bool ImGuiManager::mIsViewportFocused = false;
+    bool ImGuiManager::mIsViewportHovered = false;
 
     void ImGuiManager::init(GLFWwindow* window) {
         /* Init ImGui */
@@ -31,6 +33,22 @@ namespace neo {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         MICROPROFILE_LEAVE();
+    }
+
+    void ImGuiManager::updateMouse(GLFWwindow* window, int button, int action, int mods) {
+        ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+    }
+
+    void ImGuiManager::updateKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
+        ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+    }
+
+    void ImGuiManager::updateScroll(GLFWwindow* window, double dx, double dy) {
+        ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
+    }
+
+    void ImGuiManager::updateCharacter(GLFWwindow* window, unsigned int c) {
+        ImGui_ImplGlfw_CharCallback(window, c);
     }
 
     void ImGuiManager::begin() {

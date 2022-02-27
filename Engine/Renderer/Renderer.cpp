@@ -293,16 +293,18 @@ namespace neo {
     void Renderer::imGuiEditor(ECS& ecs) {
 
         ImGui::Begin("Viewport");
-        ImVec2 size;
-        size.x = ImGui::GetWindowWidth();
-        size.y = ImGui::GetWindowHeight();
-        if (size.x != mDefaultFBO->mTextures[0]->mWidth || size.y != mDefaultFBO->mTextures[0]->mHeight) {
-            Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, glm::uvec2(size.x, size.y));
-        }
+        ImGuiManager::setViewportFocus(ImGui::IsWindowFocused(), ImGui::IsWindowHovered());
+
+		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+        if (viewportPanelSize.x != 0 && viewportPanelSize.y != 0) {
+            if (viewportPanelSize.x != mDefaultFBO->mTextures[0]->mWidth || viewportPanelSize.y != mDefaultFBO->mTextures[0]->mHeight) {
+                Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, glm::uvec2(viewportPanelSize.x, viewportPanelSize.y));
+            }
 #pragma warning(push)
 #pragma warning(disable: 4312)
-        ImGui::Image(reinterpret_cast<ImTextureID>(mDefaultFBO->mTextures[0]->mTextureID), size, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::Image(reinterpret_cast<ImTextureID>(mDefaultFBO->mTextures[0]->mTextureID), viewportPanelSize, ImVec2(0, 1), ImVec2(1, 0));
 #pragma warning(pop)
+        }
         ImGui::End();
 
         ImGui::Begin("Renderer");
