@@ -18,6 +18,7 @@ namespace neo {
     class ECS;
     class WindowSurface;
     class PostProcessShader;
+    class BlitShader;
 
     class Renderer {
 
@@ -60,8 +61,9 @@ namespace neo {
             static void imGuiEditor(ECS& ecs);
         private:
             static Framebuffer* mBackBuffer;
-            static Framebuffer* mDefaultFBO;
+			static Framebuffer* mDefaultFBO;
             static glm::vec3 mClearColor;
+            static BlitShader* mBlitShader;
             static bool mShowBB;
 
             static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mComputeShaders;

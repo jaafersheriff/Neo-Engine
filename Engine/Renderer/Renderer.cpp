@@ -1,6 +1,7 @@
 #include "Renderer.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
+#include "Shader/BlitShader.hpp"
 #include "Shader/LineShader.hpp"
 
 #include "Engine/Engine.hpp"
@@ -37,6 +38,7 @@ namespace neo {
     std::string Renderer::ENGINE_SHADER_DIR = "../Engine/shaders/";
     Framebuffer* Renderer::mBackBuffer;
     Framebuffer* Renderer::mDefaultFBO;
+    BlitShader* Renderer::mBlitShader = nullptr;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mComputeShaders;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPreProcessShaders;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mSceneShaders;
@@ -202,15 +204,36 @@ namespace neo {
             }
 
             /* Render imgui */
-            RENDERER_MP_ENTER("ImGui::render");
             if (ImGuiManager::isEnabled()) {
+                RENDERER_MP_ENTER("ImGui::render");
                 mBackBuffer->bind();
                 ImGuiManager::render();
+                RENDERER_MP_LEAVE();
             }
             else {
-                // TODO : blit directly to backbuffer
+                RENDERER_MP_ENTER("Final Blit");
+                if (!mBlitShader) {
+                    mBlitShader = new BlitShader;
+                }
+                mBackBuffer->bind();
+                resetState();
+                CHECK_GL(glDisable(GL_DEPTH_TEST));
+                CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
+                CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
+                CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+
+                mBlitShader->bind();
+                auto meshData = Library::getMesh("quad");
+                CHECK_GL(glBindVertexArray(meshData.mMesh->mVAOID));
+
+                // Bind input fbo texture
+                mBlitShader->loadTexture("inputTexture", *mDefaultFBO->mTextures[0]);
+
+                // Render 
+                meshData.mMesh->draw();
+                mBlitShader->unbind();
+                RENDERER_MP_LEAVE();
             }
-            RENDERER_MP_LEAVE();
 
             RENDERER_MP_LEAVE();
         }
@@ -229,7 +252,6 @@ namespace neo {
         CHECK_GL(glDisable(GL_DEPTH_TEST));
         CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
         CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
-        // TODO : messaging to resize fbo
         CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
 
         // Bind quad 
@@ -269,6 +291,21 @@ namespace neo {
     }
 
     void Renderer::imGuiEditor(ECS& ecs) {
+
+        ImGui::Begin("Viewport");
+        ImVec2 size;
+        size.x = ImGui::GetWindowWidth();
+        size.y = ImGui::GetWindowHeight();
+        if (size.x != mDefaultFBO->mTextures[0]->mWidth || size.y != mDefaultFBO->mTextures[0]->mHeight) {
+            Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, glm::uvec2(size.x, size.y));
+        }
+#pragma warning(push)
+#pragma warning(disable: 4312)
+        ImGui::Image(reinterpret_cast<ImTextureID>(mDefaultFBO->mTextures[0]->mTextureID), size, ImVec2(0, 1), ImVec2(1, 0));
+#pragma warning(pop)
+        ImGui::End();
+
+        ImGui::Begin("Renderer");
         if (ImGui::Checkbox("Show bounding boxes", &mShowBB)) {
             if (mShowBB) {
                 getShader<LineShader>().mActive = true;
@@ -368,6 +405,8 @@ namespace neo {
             }
             ImGui::TreePop();
         }
+
+        ImGui::End();
 
     }
 

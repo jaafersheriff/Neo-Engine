@@ -1,5 +1,6 @@
 #include "ImGuiManager.hpp"
 
+#include "Engine/Engine.hpp"
 #include "Renderer/Renderer.hpp"
 
 #include "imgui_impl_glfw.h"
@@ -25,18 +26,14 @@ namespace neo {
     }
 
     void ImGuiManager::update() {
-        if (mIsEnabled) {
-            MICROPROFILE_ENTERI("Window", "ImGui::NewFrame", MP_AUTO);
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-            MICROPROFILE_LEAVE();
-        }
+        MICROPROFILE_ENTERI("ImGuiManager", "update", MP_AUTO);
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        MICROPROFILE_LEAVE();
     }
 
-    void ImGuiManager::run() {
-        MICROPROFILE_ENTERI("Engine", "_runImGui", MP_AUTO);
-
+    void ImGuiManager::begin() {
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
         // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
         // because it would be confusing to have two docking targets within each others.
@@ -67,22 +64,10 @@ namespace neo {
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
         ImGui::GetIO().FontGlobalScale = 2.0f;
 
-        ImGui::Begin("Viewport");
-        ImVec2 size;
-        size.x = ImGui::GetWindowWidth();
-        size.y = ImGui::GetWindowHeight();
-        if (size.x != Renderer::mDefaultFBO->mTextures[0]->mWidth || size.y != Renderer::mDefaultFBO->mTextures[0]->mHeight) {
-            Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, glm::uvec2(size.x, size.y));
-        }
-#pragma warning(push)
-#pragma warning(disable: 4312)
-        ImGui::Image(reinterpret_cast<ImTextureID>(Renderer::mDefaultFBO->mTextures[0]->mTextureID), size, ImVec2(0, 1), ImVec2(1, 0));
-#pragma warning(pop)
-        ImGui::End();
-        // TODO
+    }
 
+    void ImGuiManager::end() {
         ImGui::End();
-        MICROPROFILE_LEAVE();
     }
 
     void ImGuiManager::render() {

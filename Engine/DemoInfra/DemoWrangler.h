@@ -14,9 +14,9 @@ namespace neo {
 		const std::vector<IDemo*>& getDemos() { return mDemos; }
 
 		void swap();
-		void reload(int newDemo);
 		void setForceReload();
 		bool needsReload();
+		void imGuiEditor();
 	private:
 		int& mCurrentDemoIndex;
 		std::vector<IDemo*>& mDemos;

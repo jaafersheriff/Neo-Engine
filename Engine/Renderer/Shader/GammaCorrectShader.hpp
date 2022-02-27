@@ -6,9 +6,9 @@
 #include "Loader/Library.hpp"
 #include "Engine/Engine.hpp"
 
-using namespace neo;
+namespace neo {
 
-class GammaCorrectShader : public PostProcessShader {
+    class GammaCorrectShader : public PostProcessShader {
 
     public:
 
@@ -26,4 +26,5 @@ class GammaCorrectShader : public PostProcessShader {
         virtual void imguiEditor() override {
             ImGui::SliderFloat("Gamma", &gamma, 0.f, 5.f);
         }
-};
+    };
+}

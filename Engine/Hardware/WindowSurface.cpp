@@ -13,9 +13,8 @@ namespace neo {
     namespace {
 
         static void _errorCallback(int error, const char* desc) {
-            std::cerr << "Error " << error << ": " << desc << std::endl;
+            std::cerr << "GLFW Error " << error << ": " << desc << std::endl;
         }
-
 
         struct ToggleFullscreenMessage : public Message {
             bool mAlreadyFullscreen = false;
@@ -23,27 +22,8 @@ namespace neo {
                 mAlreadyFullscreen(alreadyFullscreen)
             {}
         };
-        static void _keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-            /* Toggle mFullscreen (f11 or alt+enter) */
-            if ((key == GLFW_KEY_F11 || key == GLFW_KEY_ENTER && mods & GLFW_MOD_ALT) && action == GLFW_PRESS) {
-                Messenger::sendMessage<ToggleFullscreenMessage>(nullptr, glfwGetWindowMonitor(window) != nullptr);
-                return;
-            }
-            if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS) {
-                ImGuiManager::toggleImGui();
-            }
-            NEO_UNUSED(window, key, scancode, action, mods);
-            // else if (::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
-            //     ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
-            //     Messenger::sendMessage<Keyboard::ResetKeyboardMessage>(nullptr);
-            // }
-            // else {
-            //     Messenger::sendMessage<Keyboard::KeyPressedMessage>(nullptr, key, action);
-            // }
-        }
 
         static void _mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-            NEO_UNUSED(window, button, action, mods);
             // if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
             //     ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
             //     Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
@@ -135,8 +115,29 @@ namespace neo {
             NEO_ASSERT(false, "Failed to create window");
         }
         glfwMakeContextCurrent(mWindow);
+		glfwSetWindowUserPointer(mWindow, &mDetails);
 
-        glfwSetKeyCallback(mWindow, _keyCallback);
+        glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+            /* Toggle mFullscreen (f11 or alt+enter) */
+            if ((key == GLFW_KEY_F11 || key == GLFW_KEY_ENTER && mods & GLFW_MOD_ALT) && action == GLFW_PRESS) {
+                Messenger::sendMessage<ToggleFullscreenMessage>(nullptr, glfwGetWindowMonitor(window) != nullptr);
+                return;
+            }
+            if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS) {
+                ImGuiManager::toggleImGui();
+			    WindowDetails& details = *(WindowDetails*)glfwGetWindowUserPointer(window);
+                Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, details.mWindowSize);
+            }
+            NEO_UNUSED(window, key, scancode, action, mods);
+            // else if (::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
+            //     ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+            //     Messenger::sendMessage<Keyboard::ResetKeyboardMessage>(nullptr);
+            // }
+            // else {
+            //     Messenger::sendMessage<Keyboard::KeyPressedMessage>(nullptr, key, action);
+            // }
+
+        }); 
         glfwSetMouseButtonCallback(mWindow, _mouseButtonCallback);
         glfwSetScrollCallback(mWindow, _scrollCallback);
         glfwSetCharCallback(mWindow, _characterCallback);

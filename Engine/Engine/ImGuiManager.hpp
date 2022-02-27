@@ -10,7 +10,8 @@ namespace neo {
 
 		static void init(GLFWwindow* window);
 		static void update();
-		static void run();
+		static void begin();
+		static void end();
 		static void render();
 		static void destroy();
 
