@@ -90,6 +90,7 @@ namespace neo {
 
             /* Update display, mouse, keyboard */
             mWindow.update();
+            ImGuiManager::update();
             // TODO : if minimized, sleep
             {
                 auto& hardware = mECS.createGameObject();
@@ -113,7 +114,7 @@ namespace neo {
                 Messenger::relayMessages(mECS);
 
                 /* Update imgui functions */
-                ImGuiManager::update();
+                ImGuiManager::run();
                 Messenger::relayMessages(mECS);
             }
 
@@ -263,7 +264,7 @@ namespace neo {
                 if (ImGui::Button("VSync")) {
                     mWindow.toggleVSync();
                 }
-                Renderer::_imguiEditor(mECS);
+                Renderer::imGuiEditor(mECS);
                 ImGui::EndMenu();
             }
             auto textureFunc = [&](const Texture& texture) {

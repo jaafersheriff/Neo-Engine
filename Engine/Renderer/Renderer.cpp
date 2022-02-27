@@ -35,7 +35,8 @@ namespace neo {
 
     std::string Renderer::APP_SHADER_DIR;
     std::string Renderer::ENGINE_SHADER_DIR = "../Engine/shaders/";
-    Framebuffer *Renderer::mDefaultFBO;
+    Framebuffer* Renderer::mBackBuffer;
+    Framebuffer* Renderer::mDefaultFBO;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mComputeShaders;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPreProcessShaders;
     std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mSceneShaders;
@@ -51,9 +52,20 @@ namespace neo {
 
     void Renderer::init() {
         /* Init default FBO */
-        auto backBuffer = Library::createFBO("0");
-        backBuffer->mFBOID = 0;
-        Renderer::setDefaultFBO("0");
+        mBackBuffer = Library::createFBO("0");
+        mBackBuffer->mFBOID = 0;
+
+        mDefaultFBO = Library::createFBO("backbuffer");
+        TextureFormat format = { GL_RGB, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE };
+        mDefaultFBO->attachColorTexture({ 1, 1 }, format);
+        mDefaultFBO->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_EDGE);
+        mDefaultFBO->initDrawBuffers();
+        mDefaultFBO->bind();
+        Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [](const Message& msg, ECS& ecs) {
+            NEO_UNUSED(ecs);
+            auto m = static_cast<const WindowFrameSizeMessage&>(msg);
+            mDefaultFBO->resize(m.mFrameSize);
+        });
 
         /* Set max work gruop */
         CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &NEO_MAX_COMPUTE_GROUP_SIZE.x));
@@ -138,7 +150,7 @@ namespace neo {
             else {
                 CHECK_GL(glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f));
                 if (activePreShaders.size()) {
-                    Library::getFBO("0")->bind();
+                    Library::getFBO("backbuffer")->bind();
                 }
             }
             glm::ivec2 frameSize = window.getDetails().getSize();
@@ -165,7 +177,7 @@ namespace neo {
 
                 /* Render first post process shader into appropriate output buffer */
                 Framebuffer* inputFBO = mDefaultFBO;
-                Framebuffer* outputFBO = activePostShaders.size() == 1 ? Library::getFBO("0") : Library::getFBO("pong");
+                Framebuffer* outputFBO = activePostShaders.size() == 1 ? Library::getFBO("backbuffer") : Library::getFBO("pong");
 
                 _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().getSize(), ecs);
 
@@ -184,14 +196,20 @@ namespace neo {
                 /* nth shader writes out to FBO 0 if it hasn't already been done */
                 if (activePostShaders.size() > 1) {
                     mStats.mNumShaders++;
-                    _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("0"), window.getDetails().getSize(), ecs);
+                    _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("backbuffer"), window.getDetails().getSize(), ecs);
                 }
                 RENDERER_MP_LEAVE();
             }
 
             /* Render imgui */
             RENDERER_MP_ENTER("ImGui::render");
-            ImGuiManager::render();
+            if (ImGuiManager::isEnabled()) {
+                mBackBuffer->bind();
+                ImGuiManager::render();
+            }
+            else {
+                // TODO : blit directly to backbuffer
+            }
             RENDERER_MP_LEAVE();
 
             RENDERER_MP_LEAVE();
@@ -237,12 +255,6 @@ namespace neo {
         RENDERER_MP_LEAVE();
     }
 
-    void Renderer::setDefaultFBO(const std::string &name) {
-        auto fb = Library::getFBO(name);
-        NEO_ASSERT(fb, "Attempting to set an invalid FBO");
-        mDefaultFBO = fb;
-    }
-
     std::vector<Shader *> Renderer::_getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &shaders) {
         MICROPROFILE_SCOPEI("Renderer", "_getActiveShaders", MP_AUTO);
 
@@ -256,7 +268,7 @@ namespace neo {
         return ret;
     }
 
-    void Renderer::_imguiEditor(ECS& ecs) {
+    void Renderer::imGuiEditor(ECS& ecs) {
         if (ImGui::Checkbox("Show bounding boxes", &mShowBB)) {
             if (mShowBB) {
                 getShader<LineShader>().mActive = true;

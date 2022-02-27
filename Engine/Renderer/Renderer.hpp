@@ -14,13 +14,14 @@
 namespace neo {
 
     class Engine;
+    class ImGuiManager;
     class ECS;
     class WindowSurface;
     class PostProcessShader;
 
     class Renderer {
 
-        friend Engine;
+        friend ImGuiManager;
 
         struct FrameStats {
             uint32_t mNumDraws = 0;
@@ -49,9 +50,6 @@ namespace neo {
             static void render(WindowSurface&, ECS&);
             static void clean();
 
-            /* FBO */
-            static void setDefaultFBO(const std::string &);
-
             /* Shaders */
             template <typename ShaderT, typename... Args> static ShaderT & addComputeShader(Args &&...);
             template <typename ShaderT, typename... Args> static ShaderT & addPreProcessShader(Args &&...);
@@ -59,9 +57,9 @@ namespace neo {
             template <typename ShaderT, typename... Args> static ShaderT & addPostProcessShader(Args &&...);
             template <typename ShaderT> static ShaderT& getShader();
 
+            static void imGuiEditor(ECS& ecs);
         private:
-            static void _imguiEditor(ECS& ecs);
-
+            static Framebuffer* mBackBuffer;
             static Framebuffer* mDefaultFBO;
             static glm::vec3 mClearColor;
             static bool mShowBB;

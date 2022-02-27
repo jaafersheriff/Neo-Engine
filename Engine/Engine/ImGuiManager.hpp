@@ -15,6 +15,7 @@ namespace neo {
 		static void destroy();
 
         static void toggleImGui() { mIsEnabled = !mIsEnabled; }
+		static bool isEnabled() { return mIsEnabled; }
 	private:
 		static bool mIsEnabled;
 	};
