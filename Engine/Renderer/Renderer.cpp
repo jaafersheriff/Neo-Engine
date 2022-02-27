@@ -4,6 +4,7 @@
 #include "Shader/LineShader.hpp"
 
 #include "Engine/Engine.hpp"
+#include "Engine/ImGuiManager.hpp"
 #include "Hardware/WindowSurface.hpp"
 
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
@@ -60,28 +61,6 @@ namespace neo {
         CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &NEO_MAX_COMPUTE_GROUP_SIZE.z));
 
         /* Init default GL state */
-        resetState();
-    }
-
-    void Renderer::clean() {
-        for (auto& shader : mComputeShaders) {
-            shader.second->cleanUp();
-        }
-        mComputeShaders.clear();
-        for (auto& shader : mPreProcessShaders) {
-            shader.second->cleanUp();
-        }
-        mPreProcessShaders.clear();
-        for (auto& shader : mSceneShaders) {
-            shader.second->cleanUp();
-        }
-        mSceneShaders.clear();
-        for (auto& shader : mPostShaders) {
-            shader.second->cleanUp();
-        }
-        mPostShaders.clear();
-        mShowBB = false;
-
         resetState();
     }
 
@@ -211,12 +190,9 @@ namespace neo {
             }
 
             /* Render imgui */
-            if (Engine::mImGuiEnabled) {
-                RENDERER_MP_ENTER("ImGui::render");
-                ImGui::Render();
-                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-                RENDERER_MP_LEAVE();
-            }
+            RENDERER_MP_ENTER("ImGui::render");
+            ImGuiManager::render();
+            RENDERER_MP_LEAVE();
 
             RENDERER_MP_LEAVE();
         }
@@ -382,4 +358,28 @@ namespace neo {
         }
 
     }
+
+    void Renderer::clean() {
+        for (auto& shader : mComputeShaders) {
+            shader.second->cleanUp();
+        }
+        mComputeShaders.clear();
+        for (auto& shader : mPreProcessShaders) {
+            shader.second->cleanUp();
+        }
+        mPreProcessShaders.clear();
+        for (auto& shader : mSceneShaders) {
+            shader.second->cleanUp();
+        }
+        mSceneShaders.clear();
+        for (auto& shader : mPostShaders) {
+            shader.second->cleanUp();
+        }
+        mPostShaders.clear();
+        mShowBB = false;
+
+        resetState();
+    }
+
+
 }

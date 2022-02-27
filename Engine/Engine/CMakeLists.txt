@@ -7,4 +7,5 @@ PUBLIC
 	Hardware
 PRIVATE
 	libglew_static
+	imgui
 )

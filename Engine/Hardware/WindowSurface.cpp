@@ -2,11 +2,9 @@
 #include "Mouse.hpp"
 #include "Keyboard.hpp"
 
-#include "Engine/Engine.hpp"
+#include "Renderer/Renderer.hpp"
+#include "Engine/ImGuiManager.hpp"
 #include "Messaging/Messenger.hpp"
-
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 
 #include <iostream>
 
@@ -32,58 +30,55 @@ namespace neo {
                 return;
             }
             if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS) {
-                Engine::toggleImGui();
+                ImGuiManager::toggleImGui();
             }
-            else if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
-                ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
-                Messenger::sendMessage<Keyboard::ResetKeyboardMessage>(nullptr);
-            }
-            else {
-                Messenger::sendMessage<Keyboard::KeyPressedMessage>(nullptr, key, action);
-            }
+            NEO_UNUSED(window, key, scancode, action, mods);
+            // else if (::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
+            //     ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+            //     Messenger::sendMessage<Keyboard::ResetKeyboardMessage>(nullptr);
+            // }
+            // else {
+            //     Messenger::sendMessage<Keyboard::KeyPressedMessage>(nullptr, key, action);
+            // }
         }
 
         static void _mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-            if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
-                ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-                Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
-            }
-            else {
-                Messenger::sendMessage<Mouse::MouseButtonMessage>(nullptr, button, action);
-            }
+            NEO_UNUSED(window, button, action, mods);
+            // if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
+            //     ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+            //     Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
+            // }
+            // else {
+            //     Messenger::sendMessage<Mouse::MouseButtonMessage>(nullptr, button, action);
+            // }
         }
 
         static void _scrollCallback(GLFWwindow* window, double dx, double dy) {
-            if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
-                ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
-                Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
-            }
-            else {
-                Messenger::sendMessage<Mouse::ScrollWheelMessage>(nullptr, dy);
-            }
+            NEO_UNUSED(window, dx, dy);
+            // if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
+            //     ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
+            //     Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
+            // }
+            // else {
+            //     Messenger::sendMessage<Mouse::ScrollWheelMessage>(nullptr, dy);
+            // }
         }
 
         static void _characterCallback(GLFWwindow* window, unsigned int c) {
-            if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
-                ImGui_ImplGlfw_CharCallback(window, c);
-                Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
-            }
+            NEO_UNUSED(window, c);
+            // if (Engine::mImGuiEnabled && (ImGui::IsWindowFocused() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))) {
+            //     ImGui_ImplGlfw_CharCallback(window, c);
+            //     Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
+            // }
         }
 
-        struct WindowSizeMessage : public Message {
-            const int mWidth, mHeight;
-            WindowSizeMessage(int w, int h)
-                : mWidth(w)
-                , mHeight(h)
-            {}
-        };
         static void _windowSizeCallback(GLFWwindow* window, int width, int height) {
             NEO_UNUSED(window);
             if (width == 0 || height == 0) {
                 return;
             }
 
-            Messenger::sendMessage<WindowSizeMessage>(nullptr, width, height);
+            Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, glm::uvec2(width, height));
         }
 
         static void _framebufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -166,12 +161,6 @@ namespace neo {
 
         reset(name);
 
-        /* Init ImGui */
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGui_ImplGlfw_InitForOpenGL(mWindow, false);
-        ImGui_ImplOpenGL3_Init(Renderer::NEO_GLSL_VERSION.c_str());
-
         return 0;
     }
 
@@ -196,18 +185,6 @@ namespace neo {
                 glfwSetWindowMonitor(mWindow, monitor, 0, 0, video->width, video->height, video->refreshRate);
             }
             });
-        Messenger::addReceiver<WindowSizeMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
-            NEO_UNUSED(ecs);
-            const WindowSizeMessage& m(static_cast<const WindowSizeMessage&>(msg));
-            if (mDetails.mFullscreen) {
-                mDetails.mFullscreenSize.x = m.mWidth;
-                mDetails.mFullscreenSize.y = m.mHeight;
-            }
-            else {
-                mDetails.mWindowSize.x = m.mWidth;
-                mDetails.mWindowSize.y = m.mHeight;
-            }
-            });
         Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
             NEO_UNUSED(ecs);
             const WindowFrameSizeMessage& m(static_cast<const WindowFrameSizeMessage&>(msg));
@@ -229,14 +206,6 @@ namespace neo {
         Messenger::sendMessage<Mouse::MouseMoveMessage>(nullptr, x, y);
         Messenger::sendMessage<Mouse::ScrollWheelMessage>(nullptr, 0);
         MICROPROFILE_LEAVE();
-
-        if (Engine::mImGuiEnabled && !isMinimized()) {
-            MICROPROFILE_ENTERI("Window", "ImGui::NewFrame", MP_AUTO);
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-            MICROPROFILE_LEAVE();
-        }
 
         MICROPROFILE_ENTERI("Window", "glfwPollEvents", MP_AUTO);
         glfwPollEvents();
@@ -265,11 +234,6 @@ namespace neo {
     }
 
     void WindowSurface::shutDown() {
-        /* Clean up ImGui */
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
-
         /* Clean up GLFW */
         glfwDestroyWindow(mWindow);
         glfwTerminate();

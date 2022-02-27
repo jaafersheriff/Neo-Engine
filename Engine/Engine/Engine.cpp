@@ -21,6 +21,8 @@ extern "C" {
 #include "ECS/Systems/SelectingSystems/MouseRaySystem.hpp"
 #include "ECS/Systems/SelectingSystems/EditorSystem.hpp"
 
+#include "ImGuiManager.hpp"
+
 #include "Hardware/WindowSurface.hpp"
 #include "Hardware/Keyboard.hpp"
 #include "Hardware/Mouse.hpp"
@@ -41,9 +43,6 @@ namespace neo {
     /* ECS */
     ECS Engine::mECS;
 
-    /* ImGui */
-    bool Engine::mImGuiEnabled = true;
-
     /* Hardware */
     WindowSurface Engine::mWindow;
     Keyboard Engine::mKeyboard;
@@ -59,7 +58,7 @@ namespace neo {
             std::cerr << "Failed initializing Window" << std::endl;
         }
         mWindow.setSize(glm::ivec2(1920, 1080));
-        ImGui::GetStyle().ScaleAllSizes(2.f);
+        ImGuiManager::init(mWindow.getWindow());
         mKeyboard.init();
         mMouse.init();
 #if MICROPROFILE_ENABLED
@@ -108,18 +107,13 @@ namespace neo {
             mECS._processInitQueue();
             Messenger::relayMessages(mECS);
 
-            /* Update each system */
             if (!mWindow.isMinimized()) {
+                /* Update each system */
                 mECS._updateSystems();
                 Messenger::relayMessages(mECS);
-            }
 
-            /* Update imgui functions */
-            if (mImGuiEnabled && !mWindow.isMinimized()) {
-                MICROPROFILE_ENTERI("Engine", "_runImGui", MP_AUTO);
-                ImGui::GetIO().FontGlobalScale = 2.0f;
-                _runImGui(demos, counter);
-                MICROPROFILE_LEAVE();
+                /* Update imgui functions */
+                ImGuiManager::update();
                 Messenger::relayMessages(mECS);
             }
 
@@ -217,11 +211,11 @@ namespace neo {
         mECS.clean();
         Library::clean();
         Renderer::clean();
-
+        ImGuiManager::destroy();
         mWindow.shutDown();
     }
 
-    void Engine::_runImGui(DemoWrangler& demos, const util::FrameCounter& counter) {
+    void Engine::imGuiEditor(DemoWrangler& demos, const util::FrameCounter& counter) {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("Demos")) {
                 if (ImGui::BeginCombo("Demos", demos.getCurrentDemo()->getConfig().name.c_str())) {

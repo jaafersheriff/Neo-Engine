@@ -7,7 +7,6 @@
 #include "ECS/ECS.hpp"
 #include "DemoInfra/DemoWrangler.h"
 
-#include "ext/imgui/imgui.h"
 #include "microprofile.h"
 
 #include <vector>
@@ -44,16 +43,11 @@ namespace neo {
             static void shutDown();
 
             /* ImGui */
-            static bool mImGuiEnabled;
-            static void toggleImGui() { mImGuiEnabled = !mImGuiEnabled; }
-
+            static void imGuiEditor(DemoWrangler&, const util::FrameCounter&);
         private:
             static ECS mECS;
             static void _createPrefabs();
 			static void _swapDemo(DemoWrangler&);
-
-            /* ImGui */
-            static void _runImGui(DemoWrangler&, const util::FrameCounter&);
 
             /* Hardware */
             static WindowSurface mWindow;
