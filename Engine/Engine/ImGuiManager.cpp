@@ -161,6 +161,10 @@ namespace neo {
         }
     }
 
+    void ImGuiManager::reset() {
+        mViewport = {};
+    }
+
     bool ImGuiManager::isViewportFocused() {
         NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
 

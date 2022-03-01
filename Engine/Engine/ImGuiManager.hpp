@@ -20,6 +20,7 @@ namespace neo {
         static void begin();
         static void end();
         static void render();
+        static void reset();
         static void destroy();
 
         static void updateMouse(GLFWwindow* window, int button, int action, int mods);

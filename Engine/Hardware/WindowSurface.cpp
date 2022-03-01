@@ -190,11 +190,11 @@ namespace neo {
             mDetails.mSize.y = m.mSize.y;
         });
 
-        int x, y;
-        glfwGetFramebufferSize(mWindow, &x, &y);
-        mDetails.mSize.x = x;
-        mDetails.mSize.y = y;
-        if (mDetails.mFullscreen) {
+        if (!ImGuiManager::isEnabled()) {
+            int x, y;
+            glfwGetFramebufferSize(mWindow, &x, &y);
+            mDetails.mSize.x = x;
+            mDetails.mSize.y = y;
             Messenger::sendMessage<FrameSizeMessage>(nullptr, mDetails.mSize);
         }
     }

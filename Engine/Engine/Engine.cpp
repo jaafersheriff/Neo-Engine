@@ -57,7 +57,6 @@ namespace neo {
         if (mWindow.init("")) {
             std::cerr << "Failed initializing Window" << std::endl;
         }
-        mWindow.setSize(glm::ivec2(1920, 1080));
         ImGuiManager::init(mWindow.getWindow());
         mKeyboard.init();
         mMouse.init();
@@ -174,6 +173,7 @@ namespace neo {
         demos.swap();
         auto config = demos.getConfig();
         mWindow.reset(config.name);
+        ImGuiManager::reset();
         mMouse.init();
         mKeyboard.init();
         Renderer::setDemoConfig(config);
