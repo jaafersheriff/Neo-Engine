@@ -95,6 +95,7 @@ namespace neo {
             Messenger::relayMessages(mECS);
 
             {
+                MICROPROFILE_SCOPEI("Engine", "FrameStats Entity", MP_AUTO);
                 auto& hardware = mECS.createGameObject();
                 mECS.addComponent<MouseComponent>(&hardware, mMouse);
                 mECS.addComponent<KeyboardComponent>(&hardware, mKeyboard);
@@ -108,7 +109,10 @@ namespace neo {
                 mECS.addComponent<SingleFrameComponent>(&hardware);
             }
 
-            demos.getCurrentDemo()->update(mECS);
+            {
+                MICROPROFILE_SCOPEI("Engine", "Demo::update", MP_AUTO);
+                demos.getCurrentDemo()->update(mECS);
+            }
 
             /* Destroy and create objects and components */
             mECS._processKillQueue();
@@ -122,7 +126,7 @@ namespace neo {
 
                 /* Update imgui functions */
                 if (ImGuiManager::isEnabled()) {
-                    MICROPROFILE_SCOPEI("ImGui", "run", MP_AUTO);
+                    MICROPROFILE_SCOPEI("ImGui", "ImGui", MP_AUTO);
                     ImGuiManager::begin();
 
                     demos.imGuiEditor();

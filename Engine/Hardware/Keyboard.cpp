@@ -24,16 +24,18 @@ namespace neo {
     }
 
     bool Keyboard::isKeyPressed(int key) const {
-        return mKeyStatus[key] >= GLFW_PRESS;
+        NEO_ASSERT(key < NUM_KEYS, "Invalid key");
+        return mKeyStatus[key];
     }
 
     void Keyboard::setKeyStatus(int key, int action) {
-        mKeyStatus[key] = action;
+        NEO_ASSERT(key < NUM_KEYS, "Invalid key");
+        mKeyStatus[key] = action >= GLFW_PRESS;
     }
 
     void Keyboard::reset() {
         for (int key(0); key < NUM_KEYS; ++key) {
-            mKeyStatus[key] = GLFW_RELEASE;
+            mKeyStatus[key] = false;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace neo {
         }
 
         void FrameCounter::update(double _runTime) {
-            MICROPROFILE_SCOPEI("Util", "Util::update", MP_AUTO);
+            MICROPROFILE_SCOPEI("FrameCounter", "FrameCounter::update", MP_AUTO);
             /* Update delta time and FPS */
             float runTime = static_cast<float>(_runTime);
             mTotalFrames++;

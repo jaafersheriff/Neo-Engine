@@ -1,6 +1,6 @@
 #pragma once
 
-#define NUM_KEYS 1024
+#define NUM_KEYS GLFW_KEY_LAST
 
 #include "GLFW/glfw3.h"
 #include "Messaging/Message.hpp"
@@ -31,6 +31,6 @@ namespace neo {
         void reset();
 
     private:
-        int mKeyStatus[NUM_KEYS] = { GLFW_RELEASE };
+        bool mKeyStatus[NUM_KEYS] = { GLFW_RELEASE };
     };
 }

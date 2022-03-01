@@ -30,7 +30,7 @@ namespace neo {
     void ImGuiManager::update() {
         NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
 
-        MICROPROFILE_ENTERI("ImGuiManager", "update", MP_AUTO);
+        MICROPROFILE_SCOPEI("ImGuiManager", "ImGuiManager::update", MP_AUTO);
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -43,11 +43,12 @@ namespace neo {
                 Messenger::sendMessage<Mouse::MouseMoveMessage>(nullptr, static_cast<double>(mx), static_cast<double>(my));
             }
         }
-        MICROPROFILE_LEAVE();
     }
 
     void ImGuiManager::updateViewport() {
         NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
+        MICROPROFILE_SCOPEI("ImGuiManager", "ImGuiManager::updateViewport", MP_AUTO);
 
         mViewport.mIsFocused = ImGui::IsWindowFocused();
         mViewport.mIsHovered = ImGui::IsWindowHovered();
@@ -92,6 +93,8 @@ namespace neo {
 
     void ImGuiManager::begin() {
         NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
+        MICROPROFILE_SCOPEI("ImGuiManager", "ImGuiManager::begin", MP_AUTO);
 
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
         // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
