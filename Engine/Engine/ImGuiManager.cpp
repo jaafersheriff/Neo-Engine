@@ -13,10 +13,7 @@
 namespace neo {
 
     bool ImGuiManager::mIsEnabled = true;
-    bool ImGuiManager::mIsViewportFocused = false;
-    bool ImGuiManager::mIsViewportHovered = false;
-    glm::vec2 ImGuiManager::mViewportOffset = {};
-    glm::vec2 ImGuiManager::mViewportSize = {};
+    ImGuiManager::Viewport ImGuiManager::mViewport;
 
     void ImGuiManager::init(GLFWwindow* window) {
         /* Init ImGui */
@@ -31,16 +28,18 @@ namespace neo {
     }
 
     void ImGuiManager::update() {
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
         MICROPROFILE_ENTERI("ImGuiManager", "update", MP_AUTO);
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        if (isEnabled() && isViewportHovered()) {
+        if (isViewportHovered()) {
             auto [mx, my] = ImGui::GetMousePos();
-            mx -= mViewportOffset.x;
-            my -= mViewportOffset.y;
-            my = mViewportSize.y - my;
-            if (mx >= 0 && mx <= mViewportSize.x && my >= 0 && my <= mViewportSize.y) {
+            mx -= mViewport.mOffset.x;
+            my -= mViewport.mOffset.y;
+            my = mViewport.mSize.y - my;
+            if (mx >= 0 && mx <= mViewport.mSize.x && my >= 0 && my <= mViewport.mSize.y) {
                 Messenger::sendMessage<Mouse::MouseMoveMessage>(nullptr, static_cast<double>(mx), static_cast<double>(my));
             }
         }
@@ -48,33 +47,52 @@ namespace neo {
     }
 
     void ImGuiManager::updateViewport() {
-        mIsViewportFocused = ImGui::IsWindowFocused();
-        mIsViewportHovered = ImGui::IsWindowHovered();
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
+        mViewport.mIsFocused = ImGui::IsWindowFocused();
+        mViewport.mIsHovered = ImGui::IsWindowHovered();
 
         auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
 		auto viewportOffset = ImGui::GetWindowPos();
-        mViewportOffset = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
-        mViewportSize = { viewportMaxRegion.x - viewportMinRegion.x, viewportMaxRegion.y - viewportMinRegion.y };
+        glm::ivec2 offset = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+        glm::ivec2 size = { viewportMaxRegion.x - viewportMinRegion.x, viewportMaxRegion.y - viewportMinRegion.y };
+        if (size.x != 0 && size.y != 0) {
+            if (glm::uvec2(size) != mViewport.mSize || glm::uvec2(offset) != mViewport.mOffset) {
+                mViewport.mOffset = glm::uvec2(offset);
+                mViewport.mSize = glm::uvec2(size);
+                Messenger::sendMessage<FrameSizeMessage>(nullptr, mViewport.mSize);
+            }
+        }
     }
 
     void ImGuiManager::updateMouse(GLFWwindow* window, int button, int action, int mods) {
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
         ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
     }
 
     void ImGuiManager::updateKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
         ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
     }
 
     void ImGuiManager::updateScroll(GLFWwindow* window, double dx, double dy) {
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
         ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
     }
 
     void ImGuiManager::updateCharacter(GLFWwindow* window, unsigned int c) {
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
         ImGui_ImplGlfw_CharCallback(window, c);
     }
 
     void ImGuiManager::begin() {
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
         // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
         // because it would be confusing to have two docking targets within each others.
@@ -108,10 +126,14 @@ namespace neo {
     }
 
     void ImGuiManager::end() {
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
         ImGui::End();
     }
 
     void ImGuiManager::render() {
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
         {
             MICROPROFILE_SCOPEI("ImGuiManager", "ImGui::render", MP_AUTO);
             MICROPROFILE_SCOPEGPUI("ImGui::render", MP_AUTO);
@@ -137,6 +159,30 @@ namespace neo {
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             }
         }
+    }
+
+    bool ImGuiManager::isViewportFocused() {
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
+        return mViewport.mIsFocused;
+    }
+
+    bool ImGuiManager::isViewportHovered() {
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
+        return mViewport.mIsHovered;
+    }
+
+    glm::uvec2 ImGuiManager::getViewportSize() {
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
+        return mViewport.mSize;
+    }
+
+    glm::uvec2 ImGuiManager::getViewportOffset() {
+        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+
+        return mViewport.mOffset;
     }
 
     void ImGuiManager::destroy() {

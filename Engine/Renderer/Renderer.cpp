@@ -63,10 +63,10 @@ namespace neo {
         mDefaultFBO->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_EDGE);
         mDefaultFBO->initDrawBuffers();
         mDefaultFBO->bind();
-        Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [](const Message& msg, ECS& ecs) {
+        Messenger::addReceiver<FrameSizeMessage>(nullptr, [](const Message& msg, ECS& ecs) {
             NEO_UNUSED(ecs);
-            auto m = static_cast<const WindowFrameSizeMessage&>(msg);
-            mDefaultFBO->resize(m.mFrameSize);
+            auto m = static_cast<const FrameSizeMessage&>(msg);
+            mDefaultFBO->resize(m.mSize);
         });
 
         /* Set max work gruop */
@@ -147,7 +147,7 @@ namespace neo {
             RENDERER_MP_ENTER("Reset DefaultFBO");
             mDefaultFBO->bind();
             CHECK_GL(glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f));
-            glm::ivec2 frameSize = window.getDetails().getSize();
+            glm::ivec2 frameSize = window.getDetails().mSize;
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
             RENDERER_MP_LEAVE();
@@ -173,13 +173,13 @@ namespace neo {
                 Framebuffer* inputFBO = mDefaultFBO;
                 Framebuffer* outputFBO = activePostShaders.size() == 1 ? mDefaultFBO : Library::getFBO("pong");
 
-                _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().getSize(), ecs);
+                _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().mSize, ecs);
 
                 /* [2, n-1] shaders use ping & pong */
                 inputFBO = Library::getFBO("pong");
                 outputFBO = Library::getFBO("ping");
                 for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
-                    _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO, window.getDetails().getSize(), ecs);
+                    _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO, window.getDetails().mSize, ecs);
 
                     /* Swap ping & pong */
                     Framebuffer* temp = inputFBO;
@@ -190,7 +190,7 @@ namespace neo {
                 /* nth shader writes out to FBO 0 if it hasn't already been done */
                 if (activePostShaders.size() > 1) {
                     mStats.mNumShaders++;
-                    _renderPostProcess(*activePostShaders.back(), inputFBO, mDefaultFBO, window.getDetails().getSize(), ecs);
+                    _renderPostProcess(*activePostShaders.back(), inputFBO, mDefaultFBO, window.getDetails().mSize, ecs);
                 }
                 RENDERER_MP_LEAVE();
             }
@@ -289,9 +289,6 @@ namespace neo {
 
         glm::vec2 viewportSize = ImGuiManager::getViewportSize();
         if (viewportSize.x != 0 && viewportSize.y != 0) {
-            if (viewportSize.x != mDefaultFBO->mTextures[0]->mWidth || viewportSize.y != mDefaultFBO->mTextures[0]->mHeight) {
-                Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, glm::uvec2(viewportSize.x, viewportSize.y));
-            }
 #pragma warning(push)
 #pragma warning(disable: 4312)
             ImGui::Image(reinterpret_cast<ImTextureID>(mDefaultFBO->mTextures[0]->mTextureID), { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));

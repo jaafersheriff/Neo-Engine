@@ -37,7 +37,7 @@ namespace neo {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-        glfwWindowHint(GLFW_DEPTH_BITS, 32);
+        glfwWindowHint(GLFW_DEPTH_BITS, 0);
         glfwWindowHint(GLFW_STENCIL_BITS, 0);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, Renderer::NEO_GL_MAJOR_VERSION);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, Renderer::NEO_GL_MINOR_VERSION);
@@ -52,7 +52,7 @@ namespace neo {
         NEO_UNUSED(mode);
 
         /* Create GLFW window */
-        mWindow = glfwCreateWindow(mDetails.mWindowSize.x, mDetails.mWindowSize.y, name.c_str(), NULL, NULL);
+        mWindow = glfwCreateWindow(mDetails.mSize.x, mDetails.mSize.y, name.c_str(), NULL, NULL);
         if (!mWindow) {
             glfwTerminate();
             std::cin.get();
@@ -70,7 +70,11 @@ namespace neo {
             if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS) {
                 ImGuiManager::toggleImGui();
                 WindowDetails& details = *(WindowDetails*)glfwGetWindowUserPointer(window);
-                Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, details.mWindowSize);
+                int x, y;
+                glfwGetFramebufferSize(window, &x, &y);
+                details.mSize.x = x;
+                details.mSize.y = y;
+                Messenger::sendMessage<FrameSizeMessage>(nullptr, details.mSize);
             }
             if (ImGuiManager::isEnabled() && !ImGuiManager::isViewportFocused()) {
                 ImGuiManager::updateKeyboard(window, key, scancode, action, mods);
@@ -113,7 +117,7 @@ namespace neo {
                 return;
             }
 
-            Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, glm::uvec2(width, height));
+            Messenger::sendMessage<FrameSizeMessage>(nullptr, glm::uvec2(width, height));
             });
 
         glfwSetFramebufferSizeCallback(mWindow, [](GLFWwindow* window, int width, int height) {
@@ -125,7 +129,7 @@ namespace neo {
             // This message is sent for every frame that the window is being resized..
             // During a quick click-and-drag resize of the window, this can result 
             // in hundreds of messages 
-            Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, glm::uvec2(width, height));
+            Messenger::sendMessage<FrameSizeMessage>(nullptr, glm::uvec2(width, height));
             });
 
         glfwSetCursorEnterCallback(mWindow, [](GLFWwindow* window, int entered) {
@@ -163,30 +167,45 @@ namespace neo {
             /* If already full screen */
             if (m.mAlreadyFullscreen) {
                 mDetails.mFullscreen = false;
-                glfwSetWindowMonitor(mWindow, nullptr, mDetails.mWindowPos.x, mDetails.mWindowPos.y, mDetails.mWindowSize.x, mDetails.mWindowSize.y, GLFW_DONT_CARE);
+                mDetails.mSize = { 1920, 1080 };
+                glfwSetWindowMonitor(mWindow, nullptr, mDetails.mPos.x, mDetails.mPos.y, mDetails.mSize.x, mDetails.mSize.y, mDetails.mVSyncEnabled);
             }
             /* If windowed */
             else {
-                glfwGetWindowPos(mWindow, &mDetails.mWindowPos.x, &mDetails.mWindowPos.y);
+                int x, y;
+                glfwGetWindowPos(mWindow, &x, &y);
+                mDetails.mPos.x = x;
+                mDetails.mPos.y = y;
                 mDetails.mFullscreen = true;
                 GLFWmonitor* monitor(glfwGetPrimaryMonitor());
                 const GLFWvidmode* video(glfwGetVideoMode(monitor));
                 glfwSetWindowMonitor(mWindow, monitor, 0, 0, video->width, video->height, video->refreshRate);
             }
-            });
-        Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+        });
+        Messenger::addReceiver<FrameSizeMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
             NEO_UNUSED(ecs);
-            const WindowFrameSizeMessage& m(static_cast<const WindowFrameSizeMessage&>(msg));
+            const FrameSizeMessage& m(static_cast<const FrameSizeMessage&>(msg));
 
-            mDetails.mFrameSize.x = m.mFrameSize.x;
-            mDetails.mFrameSize.y = m.mFrameSize.y;
-            });
+            mDetails.mSize.x = m.mSize.x;
+            mDetails.mSize.y = m.mSize.y;
+        });
 
-        glfwGetFramebufferSize(mWindow, &mDetails.mFrameSize.x, &mDetails.mFrameSize.y);
-        Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, mDetails.mFrameSize);
+        int x, y;
+        glfwGetFramebufferSize(mWindow, &x, &y);
+        mDetails.mSize.x = x;
+        mDetails.mSize.y = y;
+        if (mDetails.mFullscreen) {
+            Messenger::sendMessage<FrameSizeMessage>(nullptr, mDetails.mSize);
+        }
     }
 
     void WindowSurface::updateHardware() {
+        if (!ImGuiManager::isEnabled()) {
+            double x, y;
+            glfwGetCursorPos(mWindow, &x, &y);
+            y = mDetails.mSize.y - y;
+            Messenger::sendMessage<Mouse::MouseMoveMessage>(nullptr, x, y);
+        }
         Messenger::sendMessage<Mouse::ScrollWheelMessage>(nullptr, 0.0);
         MICROPROFILE_ENTERI("Window", "glfwPollEvents", MP_AUTO);
         glfwPollEvents();
@@ -195,9 +214,9 @@ namespace neo {
 
     void WindowSurface::setSize(const glm::ivec2& size) {
         if (!mDetails.mFullscreen) {
-            mDetails.mWindowSize.x = size.x;
-            mDetails.mWindowSize.y = size.y;
-            glfwSetWindowSize(mWindow, mDetails.mWindowSize.x, mDetails.mWindowSize.y);
+            mDetails.mSize.x = size.x;
+            mDetails.mSize.y = size.y;
+            glfwSetWindowSize(mWindow, mDetails.mSize.x, mDetails.mSize.y);
         }
     }
 

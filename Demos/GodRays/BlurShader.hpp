@@ -27,9 +27,9 @@ namespace GodRays {
             blur->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
+            Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
                 NEO_UNUSED(ecs);
-                glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage&>(msg)).mFrameSize;
+                glm::ivec2 frameSize = (static_cast<const FrameSizeMessage&>(msg)).mSize;
                 Library::getFBO("godrayblur")->resize(frameSize / 2);
                 });
 
@@ -38,10 +38,8 @@ namespace GodRays {
         virtual void render(const ECS& ecs) override {
             auto fbo = Library::getFBO("godrayblur");
             fbo->bind();
-            auto windowDetails = ecs.getSingleComponent<WindowDetailsComponent>();
-            NEO_ASSERT(windowDetails, "Window details don't exist");
-            glm::ivec2 frameSize = windowDetails->mDetails.getSize() / 2;
-            CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+            auto viewport = ecs.getSingleComponent<ViewportDetailsComponent>();
+            CHECK_GL(glViewport(0, 0, viewport->mSize.x, viewport->mSize.y));
 
             bind();
 

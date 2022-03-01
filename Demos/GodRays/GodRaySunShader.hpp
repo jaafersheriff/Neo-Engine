@@ -4,7 +4,7 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 
 #include "SunComponent.hpp"
-#include "ECS/Component/HardwareComponent/WindowDetailsComponent.hpp"
+#include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 
 using namespace neo;
 
@@ -24,9 +24,9 @@ namespace GodRays {
             godray->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
+            Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
                 NEO_UNUSED(ecs);
-                glm::ivec2 frameSize = (static_cast<const WindowFrameSizeMessage&>(msg)).mFrameSize;
+                glm::ivec2 frameSize = (static_cast<const FrameSizeMessage&>(msg)).mSize;
                 Library::getFBO("godray")->resize(frameSize / 2);
                 });
 
@@ -35,10 +35,8 @@ namespace GodRays {
         virtual void render(const ECS& ecs) override {
             auto fbo = Library::getFBO("godray");
             fbo->bind();
-            auto windowDetails = ecs.getSingleComponent<WindowDetailsComponent>();
-            NEO_ASSERT(windowDetails, "Window details don't exist");
-            glm::ivec2 frameSize = windowDetails->mDetails.getSize();
-            CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+            auto viewport = ecs.getSingleComponent<ViewportDetailsComponent>();
+            CHECK_GL(glViewport(0, 0, viewport->mSize.x, viewport->mSize.y));
             CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
 

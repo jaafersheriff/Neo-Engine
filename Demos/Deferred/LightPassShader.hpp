@@ -27,9 +27,9 @@ class LightPassShader : public Shader {
             lightFBO->attachDepthTexture({ 1, 1 }, GL_NEAREST, GL_REPEAT); // depth
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
+            Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
                 NEO_UNUSED(ecs);
-                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
+                glm::uvec2 frameSize = (static_cast<const FrameSizeMessage &>(msg)).mSize;
                 Library::getFBO("lightpass")->resize(frameSize);
             });
         }

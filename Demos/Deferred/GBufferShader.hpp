@@ -26,9 +26,9 @@ class GBufferShader : public Shader {
             gbuffer->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
+            Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
                 NEO_UNUSED(ecs);
-                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage &>(msg)).mFrameSize;
+                glm::uvec2 frameSize = (static_cast<const FrameSizeMessage &>(msg)).mSize;
                 Library::getFBO("gbuffer")->resize(frameSize);
             });
         }

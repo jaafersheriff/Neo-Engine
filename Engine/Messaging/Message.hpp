@@ -67,9 +67,9 @@ namespace neo {
     };
 
     /* The window was resized */
-    struct WindowFrameSizeMessage : public Message {
-        glm::uvec2 mFrameSize;
-        WindowFrameSizeMessage(const glm::uvec2 & frameSize) : mFrameSize(frameSize) {}
+    struct FrameSizeMessage : public Message {
+        glm::uvec2 mSize;
+        FrameSizeMessage(const glm::uvec2 & frameSize) : mSize(frameSize) {}
     };
 
     // // component has put through the init queue and added to the scene

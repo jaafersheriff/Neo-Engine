@@ -8,6 +8,12 @@ struct GLFWwindow;
 namespace neo {
     class ImGuiManager {
     public:
+        struct Viewport {
+            bool mIsFocused = false;
+            bool mIsHovered = false;
+            glm::uvec2 mOffset = { 0,0 };
+            glm::uvec2 mSize = { 0,0 };
+        };
 
         static void init(GLFWwindow* window);
         static void update();
@@ -25,14 +31,12 @@ namespace neo {
         static bool isEnabled() { return mIsEnabled; }
 
         static void updateViewport();
-        static bool isViewportFocused() { return mIsViewportFocused; }
-        static bool isViewportHovered() { return mIsViewportHovered; }
-        static glm::vec2 getViewportSize() { return mViewportSize; }
+        static bool isViewportFocused();
+        static bool isViewportHovered();
+        static glm::uvec2 getViewportOffset();
+        static glm::uvec2 getViewportSize();
     private:
         static bool mIsEnabled;
-        static bool mIsViewportFocused;
-        static bool mIsViewportHovered;
-        static glm::vec2 mViewportOffset;
-        static glm::vec2 mViewportSize;
+        static Viewport mViewport;
     };
 }

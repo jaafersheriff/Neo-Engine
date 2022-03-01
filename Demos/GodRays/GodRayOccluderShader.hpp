@@ -7,7 +7,7 @@
 #include "SunOccluderComponent.hpp"
 
 #include "ECS/ECS.hpp"
-#include "ECS/Component/HardwareComponent/WindowDetailsComponent.hpp"
+#include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 
 using namespace neo;
 
@@ -29,10 +29,8 @@ namespace GodRays {
 
             auto fbo = Library::getFBO("godray");
             fbo->bind();
-            auto windowDetails = ecs.getSingleComponent<WindowDetailsComponent>();
-            NEO_ASSERT(windowDetails, "Window details don't exist");
-            glm::ivec2 frameSize = windowDetails->mDetails.getSize();
-            CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+            auto viewport = ecs.getSingleComponent<ViewportDetailsComponent>();
+            CHECK_GL(glViewport(0, 0, viewport->mSize.x, viewport->mSize.y));
 
             bind();
 

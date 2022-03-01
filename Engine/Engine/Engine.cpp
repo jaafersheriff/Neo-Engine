@@ -17,7 +17,7 @@ extern "C" {
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/EngineComponents/SingleFrameComponent.hpp"
 #include "ECS/Component/HardwareComponent/KeyboardComponent.hpp"
-#include "ECS/Component/HardwareComponent/WindowDetailsComponent.hpp"
+#include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Systems/SelectingSystems/MouseRaySystem.hpp"
 #include "ECS/Systems/SelectingSystems/EditorSystem.hpp"
 
@@ -99,7 +99,12 @@ namespace neo {
                 auto& hardware = mECS.createGameObject();
                 mECS.addComponent<MouseComponent>(&hardware, mMouse);
                 mECS.addComponent<KeyboardComponent>(&hardware, mKeyboard);
-                mECS.addComponent<WindowDetailsComponent>(&hardware, mWindow.getDetails());
+                if (ImGuiManager::isEnabled()) {
+                    mECS.addComponent<ViewportDetailsComponent>(&hardware, ImGuiManager::getViewportSize(), mWindow.getDetails().mPos + ImGuiManager::getViewportOffset());
+                }
+                else {
+                    mECS.addComponent<ViewportDetailsComponent>(&hardware, mWindow.getDetails().mSize, mWindow.getDetails().mPos);
+                }
                 mECS.addComponent<FrameStatsComponent>(&hardware, runTime, static_cast<float>(counter.mTimeStep));
                 mECS.addComponent<SingleFrameComponent>(&hardware);
             }
@@ -249,9 +254,9 @@ namespace neo {
             ImGui::PlotLines("Frame time", counter.mTimeStepList.data(), static_cast<int>(counter.mTimeStepList.size()), 0, std::to_string(counter.mTimeStep * 1000.f).c_str());
             ImGui::Text("Num Draws: %d", Renderer::mStats.mNumDraws);
             ImGui::Text("Num Shaders: %d", Renderer::mStats.mNumShaders);
-            if (auto stats = mECS.getComponentTuple<MouseComponent, WindowDetailsComponent>()) {
+            if (auto stats = mECS.getComponentTuple<MouseComponent, ViewportDetailsComponent>()) {
                 if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    stats->get<WindowDetailsComponent>()->imGuiEditor();
+                    stats->get<ViewportDetailsComponent>()->imGuiEditor();
                     ImGui::TreePop();
                 }
                 if (ImGui::TreeNodeEx("Mouse", ImGuiTreeNodeFlags_DefaultOpen)) {

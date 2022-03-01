@@ -23,8 +23,8 @@ namespace neo {
         void shutDown();
 
         int shouldClose() const;
-        WindowDetails getDetails() const { return mDetails; }
-        float getAspectRatio() const { return mDetails.mFrameSize.x / (float)mDetails.mFrameSize.y; }
+        const WindowDetails& getDetails() const { return mDetails; }
+        float getAspectRatio() const { return mDetails.mSize.x / (float)mDetails.mSize.y; }
         int isMinimized() const;
 
         GLFWwindow* getWindow() { return mWindow; }

@@ -4,7 +4,7 @@
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
-#include "ECS/Component/HardwareComponent/WindowDetailsComponent.hpp"
+#include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/RenderableComponent/LineMeshComponent.hpp"
 #include "ECS/Component/SelectingComponent/MouseRayComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
@@ -16,8 +16,8 @@ namespace neo {
         NEO_ASSERT(mainCamera, "Main camera doesn't exist");
         auto camera = mainCamera->get<CameraComponent>();
 
-        auto windowDetails = ecs.getSingleComponent<WindowDetailsComponent>();
-        NEO_ASSERT(windowDetails, "Window details don't exist");
+        auto viewport = ecs.getSingleComponent<ViewportDetailsComponent>();
+        NEO_ASSERT(viewport, "Window details don't exist");
 
         auto mouseRayComp = ecs.getSingleComponent<MouseRayComponent>();
         if (auto mouse = ecs.getSingleComponent<MouseComponent>()) {
@@ -26,7 +26,7 @@ namespace neo {
                 glm::vec2 mouseCoords = mouse->mFrameMouse.getPos();
 
                 // Mouse coords in NDC space
-                auto framesize = windowDetails->mDetails.mFrameSize;
+                auto framesize = viewport->mSize;
                 mouseCoords = glm::vec2((2.f * mouseCoords.x) / framesize.x - 1.f, (2.f * mouseCoords.y) / framesize.y - 1.f);
 
                 // Mouse coords in clip space to eye space

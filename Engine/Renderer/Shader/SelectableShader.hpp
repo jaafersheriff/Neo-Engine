@@ -41,9 +41,9 @@ namespace neo {
             stencilBuffer->disableDraw();
 
             // Handle frame size changing
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
+            Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
                 NEO_UNUSED(ecs);
-                glm::uvec2 frameSize = (static_cast<const WindowFrameSizeMessage&>(msg)).mFrameSize;
+                glm::uvec2 frameSize = (static_cast<const FrameSizeMessage&>(msg)).mSize;
                 Library::getFBO("selectable")->resize(frameSize);
             });
 
@@ -107,10 +107,8 @@ namespace neo {
             {
                 MICROPROFILE_SCOPEI("Selectable Shader", "ReadPixels", MP_AUTO);
                 MICROPROFILE_SCOPEGPUI("Selectable Shader - ReadPixels", MP_AUTO);
-                // TODO _ broken becaues mouse position is absolute rather than relative
-                glm::vec2 mousePos = mouse->mFrameMouse.getPos();
-                glm::ivec2 iMousePos(mousePos);
-                CHECK_GL(glReadPixels(iMousePos.x, iMousePos.y, 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer));
+                glm::ivec2 mousePos = glm::ivec2(mouse->mFrameMouse.getPos());
+                CHECK_GL(glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer));
             }
             uint8_t id = buffer[0];
             if (map[id] != mSelectedID) {

@@ -10,8 +10,8 @@ namespace neo {
 
     MainCameraComponent::MainCameraComponent(GameObject *gameObject) :
         Component(gameObject) {
-            Messenger::addReceiver<WindowFrameSizeMessage>(nullptr, [](const Message& m, ECS& ecs) {
-                const WindowFrameSizeMessage& msg = static_cast<const WindowFrameSizeMessage&>(m);
+            Messenger::addReceiver<FrameSizeMessage>(nullptr, [](const Message& m, ECS& ecs) {
+                const FrameSizeMessage& msg = static_cast<const FrameSizeMessage&>(m);
                 auto comp = ecs.getSingleComponent<MainCameraComponent>();
                 if (auto camera = dynamic_cast<PerspectiveCameraComponent*>(comp->getGameObject().getComponentByType<CameraComponent>())) {
                     // camera->setAspectRatio(msg.mFrameSize.x / static_cast<float>(msg.mFrameSize.y));
