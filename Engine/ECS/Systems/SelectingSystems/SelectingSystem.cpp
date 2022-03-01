@@ -20,7 +20,7 @@ namespace neo {
                 ecs.removeComponent(*oldSelected);
             }
             for (auto selectable : ecs.getComponents<SelectableComponent>()) {
-                if (selectable->mID == m.componentID) {
+                if (selectable->mID == m.mComponentID) {
                     {
                         MICROPROFILE_SCOPEI("SelectingSystem", "SelectOperation", MP_AUTO);
                         mSelectOperation(ecs, selectable);

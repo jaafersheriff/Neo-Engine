@@ -186,17 +186,8 @@ namespace neo {
         Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, mDetails.mFrameSize);
     }
 
-    void WindowSurface::update() {
-        MICROPROFILE_SCOPEI("Window", "Window::update", MP_AUTO);
-
-        MICROPROFILE_ENTERI("Window", "Mouse::update", MP_AUTO);
-        if (!ImGuiManager::isEnabled()) {
-            double x, y;
-            glfwGetCursorPos(mWindow, &x, &y);
-            Messenger::sendMessage<Mouse::MouseMoveMessage>(nullptr, x, y);
-        }
-        MICROPROFILE_LEAVE();
-
+    void WindowSurface::updateHardware() {
+        Messenger::sendMessage<Mouse::ScrollWheelMessage>(nullptr, 0.0);
         MICROPROFILE_ENTERI("Window", "glfwPollEvents", MP_AUTO);
         glfwPollEvents();
         MICROPROFILE_LEAVE();

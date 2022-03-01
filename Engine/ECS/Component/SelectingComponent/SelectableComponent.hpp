@@ -10,8 +10,10 @@ namespace neo {
 
     /* An entity was selected */
     struct ComponentSelectedMessage : public Message {
-        const uint32_t componentID;
-        ComponentSelectedMessage(const uint32_t id) : componentID(id) {}
+        const uint32_t mComponentID;
+        ComponentSelectedMessage(const uint32_t id)
+            : mComponentID(id)
+        {}
     };
 
     class SelectableComponent : public Component {

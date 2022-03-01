@@ -50,8 +50,8 @@ namespace neo {
         return { mDX, mDY };
     }
 
-    int Mouse::getScrollSpeed() const {
-        return mZ;
+    float Mouse::getScrollSpeed() const {
+        return static_cast<float>(mDZ);
     }
 
     bool Mouse::isDown(int button) const {
@@ -63,13 +63,13 @@ namespace neo {
     }
 
     void Mouse::setScroll(double newScroll) {
-        mZ = static_cast<int>(newScroll);
+        mDZ = static_cast<int>(newScroll);
     }
 
     void Mouse::reset() {
         mIsReset = true;
         mDX = mDY = 0;
-        mZ = 0;
+        mDZ = 0;
         for (int i = 0; i < GLFW_MOUSE_BUTTON_LAST; i++) {
             mMouseButtons[i] = { GLFW_RELEASE };
         }

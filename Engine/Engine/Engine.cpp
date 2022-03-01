@@ -89,10 +89,12 @@ namespace neo {
             counter.update(runTime);
 
             /* Update display, mouse, keyboard */
-            mWindow.update();
+            mWindow.updateHardware();
             if (ImGuiManager::isEnabled()) {
                 ImGuiManager::update();
             }
+            Messenger::relayMessages(mECS);
+
             {
                 auto& hardware = mECS.createGameObject();
                 mECS.addComponent<MouseComponent>(&hardware, mMouse);
