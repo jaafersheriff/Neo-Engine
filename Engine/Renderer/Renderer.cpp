@@ -145,16 +145,8 @@ namespace neo {
 
             /* Reset default FBO state */
             RENDERER_MP_ENTER("Reset DefaultFBO");
-            if (activePostShaders.size()) {
-                mDefaultFBO->bind();
-                CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
-            }
-            else {
-                CHECK_GL(glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f));
-                if (activePreShaders.size()) {
-                    Library::getFBO("backbuffer")->bind();
-                }
-            }
+            mDefaultFBO->bind();
+            CHECK_GL(glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f));
             glm::ivec2 frameSize = window.getDetails().getSize();
             CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
             CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
@@ -179,7 +171,7 @@ namespace neo {
 
                 /* Render first post process shader into appropriate output buffer */
                 Framebuffer* inputFBO = mDefaultFBO;
-                Framebuffer* outputFBO = activePostShaders.size() == 1 ? Library::getFBO("backbuffer") : Library::getFBO("pong");
+                Framebuffer* outputFBO = activePostShaders.size() == 1 ? mDefaultFBO : Library::getFBO("pong");
 
                 _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().getSize(), ecs);
 
@@ -198,14 +190,14 @@ namespace neo {
                 /* nth shader writes out to FBO 0 if it hasn't already been done */
                 if (activePostShaders.size() > 1) {
                     mStats.mNumShaders++;
-                    _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("backbuffer"), window.getDetails().getSize(), ecs);
+                    _renderPostProcess(*activePostShaders.back(), inputFBO, mDefaultFBO, window.getDetails().getSize(), ecs);
                 }
                 RENDERER_MP_LEAVE();
             }
 
             /* Render imgui */
             if (ImGuiManager::isEnabled()) {
-                RENDERER_MP_ENTER("ImGui::render");
+                RENDERER_MP_ENTER("ImGuiManager::render");
                 mBackBuffer->bind();
                 ImGuiManager::render();
                 RENDERER_MP_LEAVE();
@@ -293,16 +285,16 @@ namespace neo {
     void Renderer::imGuiEditor(WindowSurface& window, ECS& ecs) {
 
         ImGui::Begin("Viewport");
-        ImGuiManager::setViewportFocus(ImGui::IsWindowFocused(), ImGui::IsWindowHovered());
+        ImGuiManager::updateViewport();
 
-		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-        if (viewportPanelSize.x != 0 && viewportPanelSize.y != 0) {
-            if (viewportPanelSize.x != mDefaultFBO->mTextures[0]->mWidth || viewportPanelSize.y != mDefaultFBO->mTextures[0]->mHeight) {
-                Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, glm::uvec2(viewportPanelSize.x, viewportPanelSize.y));
+        glm::vec2 viewportSize = ImGuiManager::getViewportSize();
+        if (viewportSize.x != 0 && viewportSize.y != 0) {
+            if (viewportSize.x != mDefaultFBO->mTextures[0]->mWidth || viewportSize.y != mDefaultFBO->mTextures[0]->mHeight) {
+                Messenger::sendMessage<WindowFrameSizeMessage>(nullptr, glm::uvec2(viewportSize.x, viewportSize.y));
             }
 #pragma warning(push)
 #pragma warning(disable: 4312)
-            ImGui::Image(reinterpret_cast<ImTextureID>(mDefaultFBO->mTextures[0]->mTextureID), viewportPanelSize, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::Image(reinterpret_cast<ImTextureID>(mDefaultFBO->mTextures[0]->mTextureID), { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
 #pragma warning(pop)
         }
         ImGui::End();

@@ -227,14 +227,10 @@ namespace neo {
     }
 
     void Shader::bind() {
-        MICROPROFILE_SCOPEI("Shader", "Shader::bind", MP_AUTO);
-        MICROPROFILE_SCOPEGPUI("Shader::bind", MP_AUTO);
         CHECK_GL(glUseProgram(mPID));
     }
 
     void Shader::unbind() {
-        MICROPROFILE_SCOPEI("Shader", "Shader::unbind", MP_AUTO);
-        MICROPROFILE_SCOPEGPUI("Shader::unbind", MP_AUTO);
         CHECK_GL(glUseProgram(0));
     }
 

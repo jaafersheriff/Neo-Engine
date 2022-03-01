@@ -190,10 +190,11 @@ namespace neo {
         MICROPROFILE_SCOPEI("Window", "Window::update", MP_AUTO);
 
         MICROPROFILE_ENTERI("Window", "Mouse::update", MP_AUTO);
-        double x, y;
-        glfwGetCursorPos(mWindow, &x, &y);
-        Messenger::sendMessage<Mouse::MouseMoveMessage>(nullptr, x, y);
-        Messenger::sendMessage<Mouse::ScrollWheelMessage>(nullptr, 0);
+        if (!ImGuiManager::isEnabled()) {
+            double x, y;
+            glfwGetCursorPos(mWindow, &x, &y);
+            Messenger::sendMessage<Mouse::MouseMoveMessage>(nullptr, x, y);
+        }
         MICROPROFILE_LEAVE();
 
         MICROPROFILE_ENTERI("Window", "glfwPollEvents", MP_AUTO);

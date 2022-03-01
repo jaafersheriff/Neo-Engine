@@ -27,9 +27,9 @@ namespace neo {
             glm::vec2 mousePos = mouse->mFrameMouse.getPos();
             glm::vec2 mouseSpeed = mouse->mFrameMouse.getSpeed();
 
-            if (mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_2) && (mousePos.x || mousePos.y)) {
+            if (mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_2)) {
                 float theta = comp.mTheta - mouseSpeed.x * comp.mLookSpeed * dt;
-                float phi = comp.mPhi + mouseSpeed.y * comp.mLookSpeed * dt;
+                float phi = comp.mPhi - mouseSpeed.y * comp.mLookSpeed * dt;
                 comp.setOrientation(theta, phi);
             }
         }

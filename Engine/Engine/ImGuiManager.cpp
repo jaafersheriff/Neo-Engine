@@ -2,6 +2,7 @@
 
 #include "Engine/Engine.hpp"
 #include "Renderer/Renderer.hpp"
+#include "Hardware/Mouse.hpp"
 
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -14,6 +15,8 @@ namespace neo {
     bool ImGuiManager::mIsEnabled = true;
     bool ImGuiManager::mIsViewportFocused = false;
     bool ImGuiManager::mIsViewportHovered = false;
+    glm::vec2 ImGuiManager::mViewportOffset = {};
+    glm::vec2 ImGuiManager::mViewportSize = {};
 
     void ImGuiManager::init(GLFWwindow* window) {
         /* Init ImGui */
@@ -24,7 +27,7 @@ namespace neo {
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         ImGui_ImplGlfw_InitForOpenGL(window, false);
         ImGui_ImplOpenGL3_Init(Renderer::NEO_GLSL_VERSION.c_str());
-        ImGui::GetStyle().ScaleAllSizes(2.f);
+        // ImGui::GetStyle().ScaleAllSizes(2.f);
     }
 
     void ImGuiManager::update() {
@@ -32,7 +35,27 @@ namespace neo {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        if (isEnabled() && isViewportHovered()) {
+            auto [mx, my] = ImGui::GetMousePos();
+            mx -= mViewportOffset.x;
+            my -= mViewportOffset.y;
+            my = mViewportSize.y - my;
+            if (mx >= 0 && mx <= mViewportSize.x && my >= 0 && my <= mViewportSize.y) {
+                Messenger::sendMessage<Mouse::MouseMoveMessage>(nullptr, static_cast<double>(mx), static_cast<double>(my));
+            }
+        }
         MICROPROFILE_LEAVE();
+    }
+
+    void ImGuiManager::updateViewport() {
+        mIsViewportFocused = ImGui::IsWindowFocused();
+        mIsViewportHovered = ImGui::IsWindowHovered();
+
+        auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
+		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+		auto viewportOffset = ImGui::GetWindowPos();
+        mViewportOffset = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+        mViewportSize = { viewportMaxRegion.x - viewportMinRegion.x, viewportMaxRegion.y - viewportMinRegion.y };
     }
 
     void ImGuiManager::updateMouse(GLFWwindow* window, int button, int action, int mods) {
@@ -55,13 +78,13 @@ namespace neo {
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
         // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
         // because it would be confusing to have two docking targets within each others.
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
         ImGuiViewport* viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(viewport->Size);
         ImGui::SetNextWindowViewport(viewport->ID);
         window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_HorizontalScrollbar;
 
         // When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background 
         // and handle the pass-thru hole, so we ask Begin() to not render a background.
@@ -89,15 +112,31 @@ namespace neo {
     }
 
     void ImGuiManager::render() {
-        ImGui::Render();
+        {
+            MICROPROFILE_SCOPEI("ImGuiManager", "ImGui::render", MP_AUTO);
+            MICROPROFILE_SCOPEGPUI("ImGui::render", MP_AUTO);
+            ImGui::Render();
+        }
         ImGuiIO& io = ImGui::GetIO();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            GLFWwindow* backup_current_context = glfwGetCurrentContext();
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
+            {
+                MICROPROFILE_SCOPEI("ImGuiManager", "ImGui::UpdatePlatformWindows", MP_AUTO);
+                MICROPROFILE_SCOPEGPUI("ImGui::UpdatePlatformWindows", MP_AUTO);
+                ImGui::UpdatePlatformWindows();
+            }
+            {
+
+                MICROPROFILE_SCOPEI("ImGuiManager", "ImGui::RenderPlatformWindowsDefault", MP_AUTO);
+                MICROPROFILE_SCOPEGPUI("ImGui::RenderPlatformWindowsDefault", MP_AUTO);
+                ImGui::RenderPlatformWindowsDefault();
+            }
+            {
+
+                MICROPROFILE_SCOPEI("ImGuiManager", "ImGui_ImplOpenGL3_RenderDrawData", MP_AUTO);
+                MICROPROFILE_SCOPEGPUI("ImGui_ImplOpenGL3_RenderDrawData", MP_AUTO);
+                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            }
         }
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
     void ImGuiManager::destroy() {

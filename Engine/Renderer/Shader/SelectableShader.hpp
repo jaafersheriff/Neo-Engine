@@ -108,7 +108,9 @@ namespace neo {
                 MICROPROFILE_SCOPEI("Selectable Shader", "ReadPixels", MP_AUTO);
                 MICROPROFILE_SCOPEGPUI("Selectable Shader - ReadPixels", MP_AUTO);
                 // TODO _ broken becaues mouse position is absolute rather than relative
-                CHECK_GL(glReadPixels(static_cast<GLint>(mouse->mFrameMouse.getPos().x), static_cast<int>(fbo->mTextures[0]->mHeight - mouse->mFrameMouse.getPos().y), 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer));
+                glm::vec2 mousePos = mouse->mFrameMouse.getPos();
+                glm::ivec2 iMousePos(mousePos);
+                CHECK_GL(glReadPixels(iMousePos.x, iMousePos.y, 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer));
             }
             uint8_t id = buffer[0];
             if (map[id] != mSelectedID) {

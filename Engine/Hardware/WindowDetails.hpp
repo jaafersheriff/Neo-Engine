@@ -11,6 +11,6 @@ namespace neo {
         bool mFullscreen = false;
         bool mVSyncEnabled = true;
 
-        glm::ivec2 getSize() const { return mFullscreen ? mFullscreenSize : mWindowSize; }
+        glm::ivec2 getSize() const { return mFullscreen ? mFullscreenSize : mFrameSize; }
     };
 }
