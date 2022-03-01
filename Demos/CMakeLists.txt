@@ -38,6 +38,13 @@ PRIVATE
 set_target_properties(Demos PROPERTIES FOLDER "Demos")
 
 ## Shaders
+add_custom_target(Demo_GLSL)
+file(GLOB_RECURSE DEMO_SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/shaders" FILES ${DEMO_SHADERS})
+set_property(TARGET Demo_GLSL APPEND PROPERTY SOURCES ${DEMO_SHADERS})
+set_target_properties(Demo_GLSL PROPERTIES FOLDER "Demos")
+
+
 # add_custom_target(DemoGLSL)
 # file(GLOB_RECURSE SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*)
 # source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/shaders" FILES ${SHADERS})

@@ -9,13 +9,13 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glfw")
 target_include_directories(glfw AFTER 
 PRIVATE 
 )
-set_target_properties(glfw PROPERTIES FOLDER "ext/GLFW3")
-set_target_properties(update_mappings PROPERTIES FOLDER "ext/GLFW3")
+set_target_properties(glfw PROPERTIES FOLDER "Neo/ext/GLFW3")
+set_target_properties(update_mappings PROPERTIES FOLDER "Neo/ext/GLFW3")
 
 ## GLEW
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glew-cmake")
-set_target_properties(libglew_shared PROPERTIES FOLDER "ext/glew")
-set_target_properties(libglew_static PROPERTIES FOLDER "ext/glew")
+set_target_properties(libglew_shared PROPERTIES FOLDER "Neo/ext/glew")
+set_target_properties(libglew_static PROPERTIES FOLDER "Neo/ext/glew")
 
 ## GLM
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glm")
@@ -23,7 +23,7 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glm")
 ## microprofile
 set(MICROPROFILE_USE_CONFIG_FILE ON CACHE BOOL "" FORCE)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/microprofile")
-set_target_properties(microprofile PROPERTIES FOLDER "ext")
+set_target_properties(microprofile PROPERTIES FOLDER "Neo/ext")
 target_link_libraries(microprofile
 PRIVATE
 	libglew_static
@@ -45,7 +45,7 @@ add_library(imgui STATIC
  	imgui/backends/imgui_impl_glfw.h
  	imgui/backends/imgui_impl_opengl3.h
 )
-set_target_properties(imgui PROPERTIES FOLDER "ext")
+set_target_properties(imgui PROPERTIES FOLDER "Neo/ext")
 target_include_directories(imgui 
 PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/"
