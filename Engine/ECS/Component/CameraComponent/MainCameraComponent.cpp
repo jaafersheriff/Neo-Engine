@@ -14,7 +14,8 @@ namespace neo {
                 const WindowFrameSizeMessage& msg = static_cast<const WindowFrameSizeMessage&>(m);
                 auto comp = ecs.getSingleComponent<MainCameraComponent>();
                 if (auto camera = dynamic_cast<PerspectiveCameraComponent*>(comp->getGameObject().getComponentByType<CameraComponent>())) {
-                    camera->setAspectRatio(msg.mFrameSize.x / static_cast<float>(msg.mFrameSize.y));
+                    // camera->setAspectRatio(msg.mFrameSize.x / static_cast<float>(msg.mFrameSize.y));
+                    camera->setAspectRatio(1.17f); NEO_UNUSED(msg);
                 }
             });
     }
