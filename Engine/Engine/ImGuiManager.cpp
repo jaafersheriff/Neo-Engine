@@ -161,6 +161,11 @@ namespace neo {
         }
     }
 
+    void ImGuiManager::toggleImGui() {
+        mIsEnabled = !mIsEnabled;
+        reset();
+    }
+
     void ImGuiManager::reset() {
         mViewport = {};
     }

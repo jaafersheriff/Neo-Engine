@@ -28,7 +28,7 @@ namespace neo {
         static void updateCharacter(GLFWwindow* window, unsigned int c);
         static void updateScroll(GLFWwindow* window, double dx, double dy);
 
-        static void toggleImGui() { mIsEnabled = !mIsEnabled; }
+        static void toggleImGui();
         static bool isEnabled() { return mIsEnabled; }
 
         static void updateViewport();

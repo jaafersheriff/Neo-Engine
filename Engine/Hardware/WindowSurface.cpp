@@ -69,12 +69,14 @@ namespace neo {
             }
             if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS) {
                 ImGuiManager::toggleImGui();
-                WindowDetails& details = *(WindowDetails*)glfwGetWindowUserPointer(window);
-                int x, y;
-                glfwGetFramebufferSize(window, &x, &y);
-                details.mSize.x = x;
-                details.mSize.y = y;
-                Messenger::sendMessage<FrameSizeMessage>(nullptr, details.mSize);
+                if (!ImGuiManager::isEnabled()) {
+                    WindowDetails& details = *(WindowDetails*)glfwGetWindowUserPointer(window);
+                    int x, y;
+                    glfwGetFramebufferSize(window, &x, &y);
+                    details.mSize.x = x;
+                    details.mSize.y = y;
+                    Messenger::sendMessage<FrameSizeMessage>(nullptr, details.mSize);
+                }
             }
             if (ImGuiManager::isEnabled() && !ImGuiManager::isViewportFocused()) {
                 ImGuiManager::updateKeyboard(window, key, scancode, action, mods);
