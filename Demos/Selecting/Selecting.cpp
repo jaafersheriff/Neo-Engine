@@ -4,7 +4,6 @@
 #include "Renderer/Shader/PhongShader.hpp"
 #include "Renderer/Shader/AlphaTestShader.hpp"
 #include "Renderer/Shader/LineShader.hpp"
-#include "Renderer/Shader/GammaCorrectShader.hpp"
 #include "Renderer/Shader/SelectableShader.hpp"
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
@@ -120,8 +119,6 @@ namespace Selecting {
         Renderer::addSceneShader<PhongShader>();
         Renderer::addSceneShader<AlphaTestShader>();
         Renderer::addSceneShader<LineShader>();
-        Renderer::addPostProcessShader<GammaCorrectShader>();
 
-        /* Attach ImGui panes */
     }
 }

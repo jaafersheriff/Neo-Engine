@@ -5,6 +5,8 @@
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/Mesh.hpp"
 
+#include "Engine/ImGuiManager.hpp"
+
 #include "imgui/imgui.h"
 
 namespace neo {
@@ -117,8 +119,8 @@ namespace neo {
     }
 
     void Library::imGuiEditor() {
-auto textureFunc = [&](const Texture& texture) {
-        float scale = 150.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
+        auto textureFunc = [&](const Texture& texture) {
+            float scale = 150.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
 #pragma warning(push)
 #pragma warning(disable: 4312)
                 ImGui::Image(reinterpret_cast<ImTextureID>(texture.mTextureID), ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
@@ -128,14 +130,12 @@ auto textureFunc = [&](const Texture& texture) {
         ImGui::Begin("Library");
         if (ImGui::TreeNodeEx("FBOs", ImGuiTreeNodeFlags_DefaultOpen)) {
             for (auto& fbo : Library::mFramebuffers) {
-                if (ImGui::TreeNode((fbo.first + " (" + std::to_string(fbo.second->mFBOID) + ")").c_str())) {
-                    for (auto& t : fbo.second->mTextures) {
-                        if (ImGui::TreeNode((std::to_string(t->mTextureID) + " [" + std::to_string(t->mWidth) + ", " + std::to_string(t->mHeight) + "]").c_str())) {
-                            textureFunc(*t);
-                            ImGui::TreePop();
-                        }
-                    }
-                    ImGui::TreePop();
+                ImGui::Text((fbo.first + " (" + std::to_string(fbo.second->mFBOID) + ")").c_str());
+                for (auto& t : fbo.second->mTextures) {
+                    ImGui::SameLine();
+                    ImGui::Text((std::to_string(t->mTextureID) + " [" + std::to_string(t->mWidth) + ", " + std::to_string(t->mHeight) + "]").c_str());
+                    ImGui::SameLine();
+                    textureFunc(*t);
                 }
             }
             ImGui::TreePop();

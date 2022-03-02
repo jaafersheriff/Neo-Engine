@@ -171,7 +171,7 @@ namespace neo {
 
                 /* Render first post process shader into appropriate output buffer */
                 Framebuffer* inputFBO = mDefaultFBO;
-                Framebuffer* outputFBO = activePostShaders.size() == 1 ? mDefaultFBO : Library::getFBO("pong");
+                Framebuffer* outputFBO = Library::getFBO("pong");
 
                 _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().mSize, ecs);
 
@@ -189,7 +189,6 @@ namespace neo {
 
                 /* nth shader writes out to FBO 0 if it hasn't already been done */
                 if (activePostShaders.size() > 1) {
-                    mStats.mNumShaders++;
                     _renderPostProcess(*activePostShaders.back(), inputFBO, mDefaultFBO, window.getDetails().mSize, ecs);
                 }
                 RENDERER_MP_LEAVE();
@@ -237,6 +236,7 @@ namespace neo {
 
     void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize, ECS& ecs) {
         RENDERER_MP_ENTER("_renderPostProcess");
+        mStats.mNumShaders++;
 
         // Reset output FBO
         output->bind();
@@ -354,7 +354,11 @@ namespace neo {
                 for (unsigned i = 0; i < shaders.size(); i++) {
                     auto& shader = shaders[i];
                     ImGui::PushID(i);
+
+                    ImGui::Checkbox("", &shader.second->mActive);
+                    ImGui::SameLine();
                     bool treeActive = ImGui::TreeNodeEx(shader.second->mName.c_str());
+
                     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                         ImGui::SetDragDropPayload(swapName.c_str(), &i, sizeof(unsigned));
                         ImGui::Text("Swap %s", shader.second->mName.c_str());
@@ -370,7 +374,7 @@ namespace neo {
                     }
 
                     if (treeActive) {
-                        ImGui::Checkbox("Active", &shader.second->mActive);
+                        ImGui::Spacing();
                         ImGui::SameLine();
                         if (ImGui::Button("Reload")) {
                             shader.second->reload();

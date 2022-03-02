@@ -3,7 +3,6 @@
 
 #include "Renderer/GLObjects/Material.hpp"
 #include "Renderer/Shader/WireframeShader.hpp"
-#include "Renderer/Shader/GammaCorrectShader.hpp"
 #include "DecalShader.hpp"
 #include "GBufferShader.hpp"
 #include "LightPassShader.hpp"
@@ -141,7 +140,6 @@ namespace Deferred {
         Renderer::addPostProcessShader<AOShader>("ao.frag");    // first post process - generate ssao map 
         Renderer::addPostProcessShader<BlurShader>("blur.frag"); // blur ssao map
         Renderer::addPostProcessShader<CombineShader>("combine.frag");    // combine light pass and ssao 
-        Renderer::addPostProcessShader<GammaCorrectShader>();
 
     }
 

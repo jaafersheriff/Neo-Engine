@@ -3,7 +3,6 @@
 
 #include "Renderer/Shader/PhongShader.hpp"
 #include "Renderer/Shader/AlphaTestShader.hpp"
-#include "Renderer/Shader/GammaCorrectShader.hpp"
 
 #include "SunComponent.hpp"
 #include "SunOccluderComponent.hpp"
@@ -102,7 +101,6 @@ namespace GodRays {
         Renderer::addSceneShader<PhongShader>();
         Renderer::addSceneShader<AlphaTestShader>();
         Renderer::addPostProcessShader<CombineShader>("godrays/combine.frag");
-        Renderer::addPostProcessShader<GammaCorrectShader>();
     }
 
     void Demo::imGuiEditor(ECS& ecs) {
