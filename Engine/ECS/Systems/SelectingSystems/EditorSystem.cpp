@@ -17,7 +17,7 @@ namespace neo {
             },
             [](ECS& ecs, SelectableComponent* selected) {
                 if (!selected->getGameObject().getComponentByType<renderable::OutlineRenderable>()) {
-                    ecs.addComponent<renderable::OutlineRenderable>(&selected->getGameObject(), glm::vec4(1.f, 0.95f, 0.72f, 0.75f), 0.08f);
+                    ecs.addComponent<renderable::OutlineRenderable>(&selected->getGameObject(), glm::vec4(1.f, 0.95f, 0.72f, 1.f), 3.f);
                 }
             },
             [](ECS&, SelectedComponent* ) {}

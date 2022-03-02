@@ -10,15 +10,15 @@ namespace neo {
 
         class OutlineRenderable : public Component {
         public:
-            OutlineRenderable(GameObject *go, glm::vec4 color = glm::vec4(1.f, 0.f, 0.f, 0.4f), float scale = 0.2f) :
-                Component(go),
-                mColor(color),
-                mScale(scale)
+            OutlineRenderable(GameObject* go, glm::vec4 color = glm::vec4(1.f, 0.f, 0.f, 1.f), float scale = 3.f)
+                : Component(go)
+                , mColor(color)
+                , mScale(scale)
             {}
 
             virtual void imGuiEditor() override {
                 ImGui::ColorEdit4("Color", &mColor[0]);
-                ImGui::SliderFloat("Scale", &mScale, 0.001f, 10.f);
+                ImGui::SliderFloat("Scale", &mScale, 0.5f, 10.f);
             }
 
             glm::vec4 mColor;

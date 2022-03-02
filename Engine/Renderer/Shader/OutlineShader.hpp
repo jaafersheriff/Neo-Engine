@@ -9,6 +9,7 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/OutlineRenderable.hpp"
 
@@ -18,14 +19,23 @@ namespace neo {
 
     public:
 
+        float mWidth = 2.f;
+
         OutlineShader() :
             Shader("Outline Shader",
                 R"(
                 layout(location = 0) in vec3 vertPos;
+                layout(location = 1) in vec3 vertNor;
                 uniform mat4 P, V, M;
-                out vec2 fragTex;
+                uniform mat3 N;
+                uniform float width;
+                uniform vec2 screenSize;
                 void main() {
-                    gl_Position = P * V * M * vec4(vertPos, 1.0);
+                    vec4 clipPos = P * V * M * vec4(vertPos, 1.0);
+                    vec3 clipNor = mat3(P * V) * N * vertNor;
+                    vec2 offset = normalize(clipNor.xy) / screenSize * width * clipPos.w * 2;
+                    clipPos += vec4(offset, 0.0, 0.0);
+                    gl_Position = clipPos;
                 })",
                 R"(
                 uniform vec4 outlineColor;
@@ -45,6 +55,8 @@ namespace neo {
             NEO_ASSERT(camera, "No main camera exists");
             loadUniform("P", camera->get<CameraComponent>()->getProj());
             loadUniform("V", camera->get<CameraComponent>()->getView());
+            auto viewport = ecs.getSingleComponent<ViewportDetailsComponent>();
+            loadUniform("screenSize", glm::vec2(viewport->mSize));
 
             const auto cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
 
@@ -63,10 +75,10 @@ namespace neo {
                 }
 
                 // Match the transforms of spatial component..
-                glm::vec3 scaleFactor = renderableSpatial->getScale() * (1.f + renderableOutline->mScale);
-                glm::mat4 M = glm::scale(glm::translate(glm::mat4(1.f), renderableSpatial->getPosition()) * glm::mat4(renderableSpatial->getOrientation()), scaleFactor);
-                loadUniform("M", M);
+                loadUniform("M", renderableSpatial->getModelMatrix());
+                loadUniform("N", renderableSpatial->getNormalMatrix());
 
+                loadUniform("width", renderableOutline->mScale);
                 loadUniform("outlineColor", renderableOutline->mColor);
 
                 /* DRAW */

@@ -152,7 +152,7 @@ namespace neo {
     }
 
     void ECS::imguiEdtor() {
-        ImGui::Begin("ECS");
+        ImGui::Begin("ECS", nullptr, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove);
         size_t count = 0;
         for (auto go : getGameObjects()) {
             count += go->getAllComponents().size();

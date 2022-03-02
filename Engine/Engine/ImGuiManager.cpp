@@ -144,6 +144,13 @@ namespace neo {
         }
         ImGuiIO& io = ImGui::GetIO();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            auto draw = ImGui::GetDrawData();
+            if (draw) {
+                printf("ds %0.2f %0.2f\n", draw->DisplaySize.x, draw->DisplaySize.y);
+                printf("dp %0.2f %0.2f\n", draw->DisplayPos.x, draw->DisplayPos.y);
+            }
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            
             {
                 MICROPROFILE_SCOPEI("ImGuiManager", "ImGui::UpdatePlatformWindows", MP_AUTO);
                 MICROPROFILE_SCOPEGPUI("ImGui::UpdatePlatformWindows", MP_AUTO);
@@ -161,6 +168,8 @@ namespace neo {
                 MICROPROFILE_SCOPEGPUI("ImGui_ImplOpenGL3_RenderDrawData", MP_AUTO);
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             }
+            
+            glfwMakeContextCurrent(backup_current_context);
         }
     }
 
