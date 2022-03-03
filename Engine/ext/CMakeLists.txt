@@ -57,3 +57,19 @@ PUBLIC
 PRIVATE
 	glfw
 )
+
+## implot
+file(GLOB IMPLOT_CPP_FILES imgui/*.cpp)
+file(GLOB IMPLOT_HPP_FILES imgui/*.h)
+add_library(implot STATIC
+	${IMGUI_CPP_FILES}
+	${IMGUI_HPP_FILES}
+)
+set_target_properties(implot PROPERTIES FOLDER "Neo/ext")
+target_include_directories(implot 
+PUBLIC
+	"${CMAKE_CURRENT_SOURCE_DIR}/implot/"
+PRIVATE
+)
+
+

@@ -13,3 +13,6 @@
 [submodule "Engine/ext/microprofile"]
 	path = Engine/ext/microprofile
 	url = https://github.com/jonasmr/microprofile.git
+[submodule "Engine/ext/implot"]
+	path = Engine/ext/implot
+	url = https://github.com/epezent/implot
