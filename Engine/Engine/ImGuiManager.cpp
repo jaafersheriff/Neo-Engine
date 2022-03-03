@@ -4,11 +4,11 @@
 #include "Renderer/Renderer.hpp"
 #include "Hardware/Mouse.hpp"
 
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-#include "microprofile.h"
-
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#include <implot/implot.h>
+#include <microprofile.h>
 
 namespace neo {
 
@@ -19,12 +19,12 @@ namespace neo {
         /* Init ImGui */
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+        ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         ImGui_ImplGlfw_InitForOpenGL(window, false);
         ImGui_ImplOpenGL3_Init(Renderer::NEO_GLSL_VERSION.c_str());
-        // ImGui::GetStyle().ScaleAllSizes(2.f);
     }
 
     void ImGuiManager::update() {
@@ -209,6 +209,7 @@ namespace neo {
     void ImGuiManager::destroy() {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
+        ImPlot::DestroyContext();
         ImGui::DestroyContext();
     }
 }

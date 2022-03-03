@@ -1,6 +1,11 @@
+
 #include "FrameCounter.hpp"
 
-#include "microprofile.h"
+#include <imgui/imgui.h>
+#include <implot/implot.h>
+#include <microprofile.h>
+
+#include <string>
 
 namespace neo {
     namespace util {
@@ -32,6 +37,26 @@ namespace neo {
             }
             mTimeStepList.push_back(static_cast<float>(mTimeStep) * 1000.f);
 
+        }
+
+        void FrameCounter::imGuiEditor() const {
+            // Translate FPS to floats
+            std::vector<float> FPSfloats;
+            std::vector<int> FPSInts = mFPSList;
+            FPSfloats.resize(FPSInts.size());
+            for (size_t i = 0; i < FPSInts.size(); i++) {
+                FPSfloats[i] = static_cast<float>(FPSInts[i]);
+            }
+            if (ImPlot::BeginPlot("FPS")) {
+                ImPlot::PlotLine("_", FPSfloats.data(), static_cast<int>(FPSfloats.size()));
+                ImPlot::EndPlot();
+            }
+            if (ImPlot::BeginPlot("Frametime")) {
+                ImPlot::PlotLine("__", mTimeStepList.data(), static_cast<int>(mTimeStepList.size()));
+                ImPlot::EndPlot();
+            }
+            // ImGui::PlotLines("FPS", FPSfloats.data(), static_cast<int>(FPSfloats.size()), 0, std::to_string(mFPS).c_str());
+            // ImGui::PlotLines("Frame time", mTimeStepList.data(), static_cast<int>(mTimeStepList.size()), 0, std::to_string(mTimeStep * 1000.f).c_str());
         }
     }
 }

@@ -7,4 +7,5 @@ PUBLIC
 	microprofile
 	glm
 PRIVATE
+	imgui
 )

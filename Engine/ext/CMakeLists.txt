@@ -35,8 +35,14 @@ PUBLIC
 target_sources(microprofile PRIVATE "microprofile.config.h")
 
 ## imgui
-file(GLOB IMGUI_CPP_FILES imgui/*.cpp)
-file(GLOB IMGUI_HPP_FILES imgui/*.h)
+file(GLOB IMGUI_CPP_FILES 
+	imgui/*.cpp
+	implot/*.cpp
+)
+file(GLOB IMGUI_HPP_FILES 
+	imgui/*.h
+	implot/*.h
+)
 add_library(imgui STATIC
 	${IMGUI_CPP_FILES}
  	imgui/backends/imgui_impl_glfw.cpp 
@@ -50,6 +56,7 @@ target_include_directories(imgui
 PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/"
  	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/"
+ 	"${CMAKE_CURRENT_SOURCE_DIR}/implot"
 PRIVATE
 )
 target_link_libraries(imgui
@@ -57,19 +64,4 @@ PUBLIC
 PRIVATE
 	glfw
 )
-
-## implot
-file(GLOB IMPLOT_CPP_FILES imgui/*.cpp)
-file(GLOB IMPLOT_HPP_FILES imgui/*.h)
-add_library(implot STATIC
-	${IMGUI_CPP_FILES}
-	${IMGUI_HPP_FILES}
-)
-set_target_properties(implot PROPERTIES FOLDER "Neo/ext")
-target_include_directories(implot 
-PUBLIC
-	"${CMAKE_CURRENT_SOURCE_DIR}/implot/"
-PRIVATE
-)
-
 

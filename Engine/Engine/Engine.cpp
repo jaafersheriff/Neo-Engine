@@ -247,15 +247,7 @@ namespace neo {
     void Engine::imGuiEditor(DemoWrangler& demos, const util::FrameCounter& counter) {
         {
             ImGui::Begin("Stats");
-            // Translate FPS to floats
-            std::vector<float> FPSfloats;
-            std::vector<int> FPSInts = counter.mFPSList;
-            FPSfloats.resize(FPSInts.size());
-            for (size_t i = 0; i < FPSInts.size(); i++) {
-                FPSfloats[i] = static_cast<float>(FPSInts[i]);
-            }
-            ImGui::PlotLines("FPS", FPSfloats.data(), static_cast<int>(FPSfloats.size()), 0, std::to_string(counter.mFPS).c_str());
-            ImGui::PlotLines("Frame time", counter.mTimeStepList.data(), static_cast<int>(counter.mTimeStepList.size()), 0, std::to_string(counter.mTimeStep * 1000.f).c_str());
+            counter.imGuiEditor();
             ImGui::Text("Num Draws: %d", Renderer::mStats.mNumDraws);
             ImGui::Text("Num Shaders: %d", Renderer::mStats.mNumShaders);
             if (auto stats = mECS.getComponentTuple<MouseComponent, ViewportDetailsComponent>()) {

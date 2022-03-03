@@ -12,6 +12,7 @@ namespace neo {
 
             void init(double);
             void update(double);
+            void imGuiEditor() const;
 
         public:
             std::vector<int> mFPSList;
