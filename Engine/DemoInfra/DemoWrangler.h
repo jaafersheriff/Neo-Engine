@@ -5,6 +5,8 @@
 
 namespace neo {
 
+	class ECS;
+
 	class DemoWrangler {
 	public:
 		DemoWrangler(int& idx, std::vector<IDemo*>& demos);
@@ -16,7 +18,7 @@ namespace neo {
 		void swap();
 		void setForceReload();
 		bool needsReload();
-		void imGuiEditor();
+		void imGuiEditor(ECS& ecs);
 	private:
 		int& mCurrentDemoIndex;
 		std::vector<IDemo*>& mDemos;

@@ -126,12 +126,7 @@ namespace neo {
                     MICROPROFILE_SCOPEI("ImGui", "ImGui", MP_AUTO);
                     ImGuiManager::begin();
 
-                    demos.imGuiEditor();
-                    {
-                        ImGui::Begin(demos.getConfig().name.c_str());
-                        demos.getCurrentDemo()->imGuiEditor(mECS);
-                        ImGui::End();
-                    }
+                    demos.imGuiEditor(mECS);
                     mECS.imguiEdtor();
                     Renderer::imGuiEditor(mWindow, mECS);
                     Library::imGuiEditor();

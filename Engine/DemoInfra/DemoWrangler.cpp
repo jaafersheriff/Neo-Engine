@@ -30,7 +30,7 @@ namespace neo {
         return mForceReload || mNextDemoIndex != mCurrentDemoIndex; 
     };
     
-    void DemoWrangler::imGuiEditor() {
+    void DemoWrangler::imGuiEditor(ECS& ecs) {
         ImGui::Begin("Demos");
         if (ImGui::BeginCombo("Demos", getCurrentDemo()->getConfig().name.c_str())) {
             for (int i = 0; i < getDemos().size(); i++) {
@@ -43,6 +43,7 @@ namespace neo {
         if (ImGui::Button("Force reload")) {
             setForceReload();
         }
+        getCurrentDemo()->imGuiEditor(ecs);
         ImGui::End();
 
     }

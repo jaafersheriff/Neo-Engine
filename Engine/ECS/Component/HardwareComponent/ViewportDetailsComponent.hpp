@@ -19,8 +19,8 @@ namespace neo {
         {}
 
         virtual void imGuiEditor() override {
-            ImGui::Text("Viewport Size:     [%d, %d]", mSize.x, mSize.y);
-			ImGui::Text("Viewport Pos:      [%d, %d]", mPos.x, mPos.y);
+            ImGui::Text("Viewport Size: [%d, %d]", mSize.x, mSize.y);
+			ImGui::Text("Viewport Pos:  [%d, %d]", mPos.x, mPos.y);
         }
 
         const glm::uvec2 mSize;

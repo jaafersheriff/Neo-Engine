@@ -26,6 +26,19 @@ namespace neo {
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         ImGui_ImplGlfw_InitForOpenGL(window, false);
         ImGui_ImplOpenGL3_Init(Renderer::NEO_GLSL_VERSION.c_str());
+
+        ImGuiStyle* style = &ImGui::GetStyle();
+        style->ChildRounding = 4.0f;
+        style->FrameBorderSize = 1.0f;
+        style->FrameRounding = 2.0f;
+        style->GrabMinSize = 7.0f;
+        style->PopupRounding = 2.0f;
+        style->ScrollbarRounding = 12.0f;
+        style->ScrollbarSize = 13.0f;
+        style->TabBorderSize = 1.0f;
+        style->TabRounding = 0.0f;
+        style->WindowRounding = 4.0f;
+ 
     }
 
     void ImGuiManager::update() {

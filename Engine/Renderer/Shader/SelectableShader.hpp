@@ -101,6 +101,9 @@ namespace neo {
                 loadUniform("M", renderableSpatial->getModelMatrix());
                 renderable->get<MeshComponent>()->mMesh.draw();
                 rendered++;
+                if (rendered > 256) {
+                    break;
+                }
             }
 
             uint8_t buffer[4];
