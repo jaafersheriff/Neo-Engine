@@ -14,6 +14,7 @@ namespace neo {
 
     bool ImGuiManager::mIsEnabled = true;
     ImGuiManager::Viewport ImGuiManager::mViewport;
+    NeoConsole ImGuiManager::mConsole;
 
     void ImGuiManager::init(GLFWwindow* window) {
         /* Init ImGui */

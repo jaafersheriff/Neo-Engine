@@ -33,6 +33,7 @@ extern "C" {
 #include "Loader/MeshGenerator.hpp"
 
 #include "Util/FrameCounter.hpp"
+#include "Util/Log.hpp"
 
 #include <time.h>
 #include <iostream>
@@ -54,9 +55,7 @@ namespace neo {
         srand((unsigned int)(time(0)));
 
         /* Init window*/
-        if (mWindow.init("")) {
-            std::cerr << "Failed initializing Window" << std::endl;
-        }
+        NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
         ImGuiManager::init(mWindow.getWindow());
         mKeyboard.init();
         mMouse.init();
@@ -181,7 +180,7 @@ namespace neo {
         mKeyboard.init();
         Renderer::setDemoConfig(config);
         Renderer::init();
-        Loader::init(config.resDir, true);
+        Loader::init(config.resDir);
         _createPrefabs();
 
         /* Apply config */
@@ -244,6 +243,7 @@ namespace neo {
     }
 
     void Engine::imGuiEditor(DemoWrangler& demos, const util::FrameCounter& counter) {
+        ImGuiManager::mConsole.Draw();
         {
             ImGui::Begin("Stats");
             counter.imGuiEditor();

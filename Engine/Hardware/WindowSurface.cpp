@@ -6,6 +6,7 @@
 #include "Engine/ImGuiManager.hpp"
 #include "Messaging/Messenger.hpp"
 
+#include "Util/Log.hpp"
 #include <iostream>
 
 namespace neo {
@@ -13,7 +14,7 @@ namespace neo {
     namespace {
 
         static void _errorCallback(int error, const char* desc) {
-            std::cerr << "GLFW Error " << error << ": " << desc << std::endl;
+            NEO_LOG_S(neo::util::LogSeverity::Error, "GLFW Error %d: %s", error, desc);
         }
 
         struct ToggleFullscreenMessage : public Message {
@@ -29,10 +30,7 @@ namespace neo {
         glfwSetErrorCallback(_errorCallback);
 
         /* Init GLFW */
-        if (!glfwInit()) {
-            std::cerr << "Error initializing GLFW" << std::endl;
-            return 1;
-        }
+        NEO_ASSERT(glfwInit(), "Error initializing GLFW");
 
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -55,8 +53,7 @@ namespace neo {
         mWindow = glfwCreateWindow(mDetails.mSize.x, mDetails.mSize.y, name.c_str(), NULL, NULL);
         if (!mWindow) {
             glfwTerminate();
-            std::cin.get();
-            NEO_ASSERT(false, "Failed to create window");
+            NEO_FAIL("Failed to create window");
         }
         glfwMakeContextCurrent(mWindow);
         glfwSetWindowUserPointer(mWindow, &mDetails);
@@ -140,18 +137,11 @@ namespace neo {
         });
 
         /* Init GLEW */
-        GLenum error = glGetError();
-        if (error != GL_NO_ERROR) {
-            std::cout << "OpenGL Error: " << error << std::endl;
-            return 1;
-        }
+        CHECK_GL(glGetError());
         glewExperimental = GL_FALSE;
-        error = glewInit();
-        if (error != GLEW_OK) {
-            std::cerr << "Failed to init GLEW" << std::endl;
-            return 1;
-        }
+        NEO_ASSERT(glewInit()== GLEW_OK, "Failed to init GLEW");
         glGetError();
+
         glfwSwapInterval(mDetails.mVSyncEnabled);
 
         reset(name);

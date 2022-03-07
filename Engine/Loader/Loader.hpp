@@ -44,7 +44,7 @@ namespace neo {
             Loader(const Loader&) = delete;
             Loader& operator=(const Loader&) = delete;
 
-            static void init(const std::string &, bool);
+            static void init(const std::string &);
 
             /* Load Mesh pointer from an .obj file */
             static MeshData loadMesh(const std::string &, bool = false);
@@ -65,8 +65,5 @@ namespace neo {
             /* Private members */
             static std::string APP_RES_DIR;
             static std::string ENGINE_RES_DIR;
-            static bool mVerbose;
-
-
     };
 }

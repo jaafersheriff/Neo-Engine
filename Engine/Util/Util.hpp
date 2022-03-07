@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Util/Log.hpp"
+
 #include <vector>
 
 #include "glm/gtc/constants.hpp"
@@ -13,9 +15,9 @@ namespace neo {
 	#ifdef DEBUG_MODE
 		#define NEO_ASSERT(c, fmt, ...) \
 			if (!(c)) { \
-				char _fullmsg[256]; \
-				sprintf(_fullmsg, fmt, __VA_ARGS__); \
-				printf("\n\n%s: (%s) in %s, file %s on line %d.\n", _fullmsg, #c, __func__, __FILE__, __LINE__); \
+                char buf[1024]; \
+                sprintf(buf, fmt, __VA_ARGS__); \
+				NEO_LOG_S(neo::util::LogSeverity::Error, "%s: (%s) in %s, file %s on line %d.\n", buf, #c, __func__, __FILE__, __LINE__); \
                 abort(); \
 			}
 		#define NEO_FAIL(fmt, ...) NEO_ASSERT(false, fmt, __VA_ARGS__)

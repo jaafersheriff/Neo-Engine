@@ -42,10 +42,7 @@ namespace neo {
     }
 
     void Mesh::addVertexBuffer(VertexType type, uint32_t attribArray, uint32_t stride, const std::vector<float>& buffer) {
-        {
-            const auto& vbo = mVBOs.find(type);
-            NEO_ASSERT(vbo == mVBOs.end(), "Attempting to add a VertexBuffer that already exists");
-        }
+        NEO_ASSERT(mVBOs.find(type) == mVBOs.end(), "Attempting to add a VertexBuffer that already exists");
 
         auto vertexBuffer = VertexBuffer{};
         vertexBuffer.attribArray = attribArray;

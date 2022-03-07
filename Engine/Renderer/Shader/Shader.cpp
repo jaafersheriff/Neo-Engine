@@ -1,9 +1,10 @@
 #include "Renderer/Shader/Shader.hpp"
-#include "Util/Util.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
 #include "Renderer/Renderer.hpp"
+#include "Util/Util.hpp"
+#include "Util/Log.hpp"
 
 #include <fstream>
 #include <vector>
@@ -66,9 +67,8 @@ namespace neo {
         GLint linkSuccess;
         CHECK_GL(glGetProgramiv(mPID, GL_LINK_STATUS, &linkSuccess));
         if (!linkSuccess) {
-            printf("Error linking shader %s\n", mName.c_str());
             GLHelper::printProgramInfoLog(mPID);
-            NEO_ASSERT(false, "");
+            NEO_FAIL("Error linking shader %s", mName.c_str());
         }
 
         for (auto &&[type, source] : mStages) {
@@ -77,7 +77,7 @@ namespace neo {
             }
         }
 
-        std::cout << "Successfully compiled and linked " << mName << std::endl;
+        NEO_LOG("Successfully compiled and linked %s", mName.c_str());
     }
 
     // Handle #includes
@@ -143,33 +143,35 @@ namespace neo {
         GLint compileSuccess;
         CHECK_GL(glGetShaderiv(shader, GL_COMPILE_STATUS, &compileSuccess));
         if (!compileSuccess) {
-            std::cout << "Error compiling " << mName;
+            std::stringstream stream;
+            stream << "Error compiling " << mName;
             switch (shaderType) {
                 case GL_VERTEX_SHADER:
-                    std::cout << " vertex shader";
+                    stream << " vertex shader";
                     break;
                 case GL_FRAGMENT_SHADER:
-                    std::cout << " fragment shader";
+                    stream << " fragment shader";
                     break;
                 case GL_GEOMETRY_SHADER:
-                    std::cout << " geometry shader";
+                    stream << " geometry shader";
                     break;
                 case GL_COMPUTE_SHADER:
-                    std::cout << " compute shader";
+                    stream << " compute shader";
                 default:
                     break;
             }
-            std::cout << std::endl;
+            stream << std::endl;
 
             std::stringstream ss(shaderString);
             std::string line;
             int lineNum = 1;
             while (shaderString && std::getline(ss, line, '\n')) {
-                std::cout << lineNum++ << " " << line << std::endl;
+                stream << lineNum++ << " " << line << std::endl;
             }
+            NEO_LOG(stream.str().c_str());
 
             GLHelper::printShaderInfoLog(shader);
-            NEO_ASSERT(false, "");
+            NEO_FAIL("Err");
         }
 
         return shader;
@@ -237,7 +239,7 @@ namespace neo {
     void Shader::_addAttribute(const std::string &name) {
         GLint r = glGetAttribLocation(mPID, name.c_str());
         if (r < 0) {
-            std::cerr << this->mName << " WARN: " << name << " cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it\n" << std::endl;
+            NEO_LOG_S(util::LogSeverity::Warning, "%s WARN: %s cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", this->mName.c_str(), name.c_str());
         }
         mAttributes[name] = r;
     }
@@ -245,7 +247,7 @@ namespace neo {
     void Shader::_addUniform(const std::string &name) {
         GLint r = glGetUniformLocation(mPID, name.c_str());
         if (r < 0) {
-            std::cerr << this->mName << " WARN: " << name << " cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it\n" << std::endl;
+            NEO_LOG_S(util::LogSeverity::Warning, "%s WARN: %s cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", this->mName.c_str(), name.c_str());
         }
         mUniforms[name] = r;
     }
@@ -253,7 +255,7 @@ namespace neo {
     GLint Shader::getAttribute(const std::string &name) const {
         std::map<std::string, GLint>::const_iterator attribute = mAttributes.find(name.c_str());
         if (attribute == mAttributes.end()) {
-            std::cerr << name << " is not an attribute variable - did you remember to call Shader::init()" << std::endl;
+            NEO_LOG_S(util::LogSeverity::Warning, "%s is not an attribute variable - did you remember to call Shader::init()", name.c_str());
             return -1;
         }
         return attribute->second;
@@ -262,7 +264,7 @@ namespace neo {
     GLint Shader::getUniform(const std::string &name) const {
         std::map<std::string, GLint>::const_iterator uniform = mUniforms.find(name.c_str());
         if (uniform == mUniforms.end()) {
-            std::cerr << name << " is not an uniform variable - did you remember to call Shader::init()" << std::endl;
+            NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable - did you remember to call Shader::init()", name.c_str());
             return -1;
         }
         return uniform->second;

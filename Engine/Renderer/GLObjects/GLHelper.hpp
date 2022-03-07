@@ -9,8 +9,6 @@
 #include "GL/glew.h"
 
 #include <sstream>
-#include <iostream>
-#include <cassert>
 #include <stdio.h>
 
 namespace neo {
@@ -31,7 +29,6 @@ namespace neo {
             void checkFrameBuffer();
             void printProgramInfoLog(GLuint program);
             void printShaderInfoLog(GLuint shader);
-            void checkVersion();
         }
 
     #ifdef DEBUG_MODE

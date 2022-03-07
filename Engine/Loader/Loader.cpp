@@ -7,6 +7,8 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
+#include "Util/Log.hpp"
+
 #pragma warning(push)
 #pragma warning(disable: 4706)
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -19,21 +21,16 @@
 #include "ext/stb_image.h"
 #pragma warning(pop)
 
-#include <iostream>
-
 namespace neo {
 
-    bool Loader::mVerbose = false;
     std::string Loader::APP_RES_DIR = "";
     std::string Loader::ENGINE_RES_DIR = "../Engine/res/";
 
-    void Loader::init(const std::string &res, bool v) {
+    void Loader::init(const std::string &res) {
         APP_RES_DIR = res;
-        mVerbose = v;
     }
 
     MeshData Loader::loadMesh(const std::string &fileName, bool doResize) {
-        MICROPROFILE_TIMELINE_ENTER_STATIC(MP_ALICEBLUE, fileName.c_str());
         MICROPROFILE_SCOPEI("Loader", "loadMesh", MP_AUTO);
 
         /* Create mesh */
@@ -95,11 +92,7 @@ namespace neo {
             mesh->addElementBuffer(indices);
         }
 
-        if (mVerbose) {
-            std::cout << "Loaded mesh (" << vertCount << " vertices): " << fileName << std::endl;
-        }
-
-        MICROPROFILE_TIMELINE_LEAVE_STATIC(fileName.c_str());
+        NEO_LOG("Loaded mesh (%d vertices): %s", vertCount, fileName.c_str());
         return meshData;
     }
    std::vector<Asset> Loader::loadMultiAsset(const std::string &fileName) {
@@ -143,9 +136,7 @@ namespace neo {
                 mesh->addElementBuffer(shape.mesh.indices);
             }
 
-            if (mVerbose) {
-                std::cout << "Loaded mesh (" << shape.mesh.positions.size() << " vertices): " << fileName << ": " << shape.name << std::endl;
-            }
+            NEO_LOG("Loaded mesh (%d vertices): %s of %s", shape.mesh.positions.size(), fileName.c_str(), shape.name.c_str());
 
             for (auto materialID : shape.mesh.material_ids) {
                 if (materialID >= 0) {
@@ -221,9 +212,7 @@ namespace neo {
             _cleanTextureData(data[i]);
         }
 
-        if (mVerbose) {
-            std::cout << "Loaded cubemap (" << name << ")" << std::endl;
-        }
+        NEO_LOG("Loaded cubemap (%s)", name.c_str());
 
         return texture;
     }
@@ -240,9 +229,7 @@ namespace neo {
         uint8_t *data = stbi_load(_fileName.c_str(), &width, &height, &components, format.mBaseFormat == GL_RGB ? STBI_rgb : STBI_rgb_alpha);
         NEO_ASSERT(data, "Error reading texture file");
 
-        if (mVerbose) {
-            std::cout << "Loaded texture " << fileName << " [" << width << ", " << height << "]" << std::endl;
-        }
+        NEO_LOG("Loaded texture %s [%d, %d]", fileName.c_str(), width, height);
 
         return data;
     }
