@@ -22,6 +22,7 @@ namespace neo {
         private:
             double mLastFPSTime = 0.0;      /* Time at which last FPS was calculated */
             int mFramesInCount = 0;         /* Number of frames in current second */
+            double mLastFrameTime = 0.0;    /* Time at which last frame was rendered */
         };
     }
 }

@@ -75,7 +75,7 @@ namespace neo {
         util::FrameCounter counter;
         demos.setForceReload();
         
-        while (!mWindow.shouldClose()) {
+        while (!mWindow.shouldClose() && !mKeyboard.isKeyPressed(GLFW_KEY_ESCAPE)) {
             MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);
 
             if (demos.needsReload()) {

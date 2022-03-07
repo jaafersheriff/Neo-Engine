@@ -15,6 +15,8 @@ namespace neo {
             /* Update delta time and FPS */
             float runTime = static_cast<float>(_runTime);
             mTotalFrames++;
+            mTimeStep = runTime - mLastFrameTime;
+            mLastFrameTime = runTime;
             mFramesInCount++;
             if (runTime - mLastFPSTime >= 1.0) {
                 mFPS = mFramesInCount;
