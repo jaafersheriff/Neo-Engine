@@ -144,11 +144,6 @@ namespace neo {
         }
         ImGuiIO& io = ImGui::GetIO();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            auto draw = ImGui::GetDrawData();
-            if (draw) {
-                printf("ds %0.2f %0.2f\n", draw->DisplaySize.x, draw->DisplaySize.y);
-                printf("dp %0.2f %0.2f\n", draw->DisplayPos.x, draw->DisplayPos.y);
-            }
             GLFWwindow* backup_current_context = glfwGetCurrentContext();
             
             {

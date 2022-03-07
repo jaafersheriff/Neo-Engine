@@ -71,9 +71,8 @@ namespace neo {
     }
 
     void Engine::run(DemoWrangler& demos) {
-        util::FrameCounter counter;
 
-        counter.init(glfwGetTime());
+        util::FrameCounter counter;
         demos.setForceReload();
         
         while (!mWindow.shouldClose()) {
