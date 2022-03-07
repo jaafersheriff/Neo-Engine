@@ -92,7 +92,7 @@ namespace neo {
             mesh->addElementBuffer(indices);
         }
 
-        NEO_LOG("Loaded mesh (%d vertices): %s", vertCount, fileName.c_str());
+        NEO_LOG_I("Loaded mesh (%d vertices): %s", vertCount, fileName.c_str());
         return meshData;
     }
    std::vector<Asset> Loader::loadMultiAsset(const std::string &fileName) {
@@ -136,7 +136,7 @@ namespace neo {
                 mesh->addElementBuffer(shape.mesh.indices);
             }
 
-            NEO_LOG("Loaded mesh (%d vertices): %s of %s", shape.mesh.positions.size(), shape.name.c_str(), fileName.c_str());
+            NEO_LOG_I("Loaded mesh (%d vertices): %s of %s", shape.mesh.positions.size(), shape.name.c_str(), fileName.c_str());
 
             for (auto materialID : shape.mesh.material_ids) {
                 if (materialID >= 0) {
@@ -212,7 +212,7 @@ namespace neo {
             _cleanTextureData(data[i]);
         }
 
-        NEO_LOG("Loaded cubemap (%s)", name.c_str());
+        NEO_LOG_I("Loaded cubemap (%s)", name.c_str());
 
         return texture;
     }
@@ -229,7 +229,7 @@ namespace neo {
         uint8_t *data = stbi_load(_fileName.c_str(), &width, &height, &components, format.mBaseFormat == GL_RGB ? STBI_rgb : STBI_rgb_alpha);
         NEO_ASSERT(data, "Error reading texture file");
 
-        NEO_LOG("Loaded texture %s [%d, %d]", fileName.c_str(), width, height);
+        NEO_LOG_I("Loaded texture %s [%d, %d]", fileName.c_str(), width, height);
 
         return data;
     }

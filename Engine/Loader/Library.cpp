@@ -33,6 +33,7 @@ namespace neo {
             return it->second;
         }
 
+        NEO_LOG("First request for %s, loading...", fileName.c_str());
         MeshData mesh = Loader::loadMesh(fileName, doResize);
         _insertMesh(fileName, mesh);
         return mesh;
@@ -59,6 +60,7 @@ namespace neo {
             return it->second;
         }
 
+        NEO_LOG("First request for %s, loading...", fileName.c_str());
         Texture2D* texture = Loader::loadTexture(fileName, format);
         _insertTexture(fileName, texture);
         return texture;
@@ -76,6 +78,7 @@ namespace neo {
     Framebuffer* Library::createFBO(const std::string& name) {
         auto fb = new Framebuffer;
         mFramebuffers.emplace(name, fb);
+        NEO_LOG("Creating FBO %s", name.c_str());
         return fb;
     }
 
@@ -103,6 +106,7 @@ namespace neo {
     }
 
     void Library::clean() {
+        NEO_LOG("Cleaning library...");
         // Clean up GL objects
         for (auto& meshData : mMeshes) {
             meshData.second.mMesh->destroy();

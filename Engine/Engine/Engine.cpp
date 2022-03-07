@@ -60,6 +60,7 @@ namespace neo {
         mKeyboard.init();
         mMouse.init();
 #if MICROPROFILE_ENABLED
+        NEO_LOG_I("Microprofile enabled");
         MicroProfileOnThreadCreate("MAIN THREAD");
         MicroProfileGpuInitGL();
         MicroProfileSetEnableAllGroups(true);
@@ -87,9 +88,7 @@ namespace neo {
 
             /* Update display, mouse, keyboard */
             mWindow.updateHardware();
-            if (ImGuiManager::isEnabled()) {
-                ImGuiManager::update();
-            }
+            ImGuiManager::update();
             Messenger::relayMessages(mECS);
 
             {
@@ -149,6 +148,7 @@ namespace neo {
             Renderer::render(mWindow, mECS);
             Messenger::relayMessages(mECS);
 
+            // TODO - this should be its own system
             for (auto& frameComponent : mECS.getComponents<SingleFrameComponent>()) {
                 mECS.removeGameObject(frameComponent->getGameObject());
             }
@@ -185,6 +185,7 @@ namespace neo {
 
         /* Apply config */
         if (config.attachEditor) {
+            NEO_LOG("Attaching editor");
             mECS.addSystem<MouseRaySystem>();
             mECS.addSystem<EditorSystem>();
             Renderer::addPreProcessShader<SelectableShader>();
@@ -234,6 +235,7 @@ namespace neo {
     }
 
     void Engine::shutDown() {
+        NEO_LOG_I("Shutting down...");
         Messenger::clean();
         mECS.clean();
         Library::clean();

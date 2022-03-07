@@ -44,6 +44,9 @@ namespace neo {
                 }
                 return count;
             }
+            const char* getName() {
+                return mTag.c_str();
+            }
 
         private:
             /* Used by the engine */

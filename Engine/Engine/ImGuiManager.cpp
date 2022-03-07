@@ -29,7 +29,9 @@ namespace neo {
     }
 
     void ImGuiManager::update() {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        if (!mIsEnabled) {
+            return;
+        }
 
         MICROPROFILE_SCOPEI("ImGuiManager", "ImGuiManager::update", MP_AUTO);
         ImGui_ImplOpenGL3_NewFrame();
@@ -47,7 +49,7 @@ namespace neo {
     }
 
     void ImGuiManager::updateViewport() {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
         MICROPROFILE_SCOPEI("ImGuiManager", "ImGuiManager::updateViewport", MP_AUTO);
 
@@ -69,31 +71,31 @@ namespace neo {
     }
 
     void ImGuiManager::updateMouse(GLFWwindow* window, int button, int action, int mods) {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
         ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
     }
 
     void ImGuiManager::updateKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
         ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
     }
 
     void ImGuiManager::updateScroll(GLFWwindow* window, double dx, double dy) {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
         ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
     }
 
     void ImGuiManager::updateCharacter(GLFWwindow* window, unsigned int c) {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
         ImGui_ImplGlfw_CharCallback(window, c);
     }
 
     void ImGuiManager::begin() {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
         MICROPROFILE_SCOPEI("ImGuiManager", "ImGuiManager::begin", MP_AUTO);
 
@@ -130,13 +132,15 @@ namespace neo {
     }
 
     void ImGuiManager::end() {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
         ImGui::End();
     }
 
     void ImGuiManager::render() {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        if (!mIsEnabled) {
+            return;
+        }
 
         {
             MICROPROFILE_SCOPEI("ImGuiManager", "ImGui::render", MP_AUTO);
@@ -170,6 +174,7 @@ namespace neo {
     }
 
     void ImGuiManager::toggleImGui() {
+        NEO_LOG_I("Toggle imgui");
         mIsEnabled = !mIsEnabled;
         reset();
     }
@@ -179,25 +184,25 @@ namespace neo {
     }
 
     bool ImGuiManager::isViewportFocused() {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
         return mViewport.mIsFocused;
     }
 
     bool ImGuiManager::isViewportHovered() {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
         return mViewport.mIsHovered;
     }
 
     glm::uvec2 ImGuiManager::getViewportSize() {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
         return mViewport.mSize;
     }
 
     glm::uvec2 ImGuiManager::getViewportOffset() {
-        NEO_ASSERT(mIsEnabled, "Don't call imgui stuff if it isn't enabled");
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
         return mViewport.mOffset;
     }

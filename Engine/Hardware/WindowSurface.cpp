@@ -14,7 +14,7 @@ namespace neo {
     namespace {
 
         static void _errorCallback(int error, const char* desc) {
-            NEO_LOG_S(neo::util::LogSeverity::Error, "GLFW Error %d: %s", error, desc);
+            NEO_LOG_E("GLFW Error %d: %s", error, desc);
         }
 
         struct ToggleFullscreenMessage : public Message {

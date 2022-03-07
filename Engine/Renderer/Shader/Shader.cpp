@@ -77,7 +77,7 @@ namespace neo {
             }
         }
 
-        NEO_LOG("Compiled %s", mName.c_str());
+        NEO_LOG_I("Compiled %s", mName.c_str());
     }
 
     // Handle #includes
@@ -157,21 +157,20 @@ namespace neo {
                     break;
                 case GL_COMPUTE_SHADER:
                     stream << " compute shader";
+                    break;
                 default:
                     break;
             }
             stream << std::endl;
 
-            std::stringstream ss(shaderString);
-            std::string line;
-            int lineNum = 1;
-            while (shaderString && std::getline(ss, line, '\n')) {
-                stream << lineNum++ << " " << line << std::endl;
-            }
-            NEO_LOG(stream.str().c_str());
-
+            // std::stringstream ss(shaderString);
+            // std::string line;
+            // int lineNum = 1;
+            // while (shaderString && std::getline(ss, line, '\n')) {
+            //     stream << lineNum++ << " " << line << std::endl;
+            // }
             GLHelper::printShaderInfoLog(shader);
-            NEO_FAIL("Err");
+            NEO_LOG_E(stream.str().c_str());
         }
 
         return shader;

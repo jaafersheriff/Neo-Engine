@@ -112,6 +112,7 @@ namespace neo {
             }
             uint8_t id = buffer[0];
             if (map[id] != mSelectedID) {
+
                 mSelectedID = map[id];
                 Messenger::sendMessage<ComponentSelectedMessage>(nullptr, mSelectedID);
             }

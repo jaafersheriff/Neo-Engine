@@ -39,6 +39,7 @@ namespace neo {
 				char buf[1024];
 				sprintf(buf, "%0.4f [%s]: %s", glfwGetTime(), sLogSeverityString.at(severity), inbuf);
 
+				fprintf(stderr, buf);
 				ImGuiManager::mConsole.AddLog(buf);
 			}
 		}

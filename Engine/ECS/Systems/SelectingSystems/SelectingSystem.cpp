@@ -23,6 +23,7 @@ namespace neo {
                 if (selectable->mID == m.mComponentID) {
                     {
                         MICROPROFILE_SCOPEI("SelectingSystem", "SelectOperation", MP_AUTO);
+                        NEO_LOG("New entity selected: %d %s", selectable->mID, selectable->getGameObject().getName());
                         mSelectOperation(ecs, selectable);
                     }
                     ecs.addComponent<SelectedComponent>(&selectable->getGameObject());
