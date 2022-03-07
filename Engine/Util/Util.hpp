@@ -22,7 +22,7 @@ namespace neo {
 			}
 		#define NEO_FAIL(fmt, ...) NEO_ASSERT(false, fmt, __VA_ARGS__)
 	#else
-		#define NEO_ASSERT(c, fmt, ...) NEO_UNUSED(c, fmt); NEO_UNUSED(__VA_ARGS__)
+		#define NEO_ASSERT(c, fmt, ...) do {((void)(c));} while(0); NEO_UNUSED(fmt); NEO_UNUSED(__VA_ARGS__)
 		#define NEO_FAIL(fmt, ...) NEO_UNUSED(fmt); NEO_UNUSED(__VA_ARGS__) ; abort()
 	#endif // NEO_CONFIG_DEBUG
 #endif // NEO_DEBUG_ASSERT
