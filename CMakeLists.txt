@@ -49,6 +49,20 @@ add_compile_definitions(
 	$<$<CONFIG:Debug>:DEBUG_MODE>
 )
 
+#--------------------------------------------------------------------
+# Hide the console window in visual studio projects
+#--------------------------------------------------------------------
+if(MSVC)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+endif()
+
+#--------------------------------------------------------------------
+# Hide the console window in visual studio projects - Release
+#--------------------------------------------------------------------
+if(MSVC)
+	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+endif()
+
 set(CPACK_COMPONENTS_GROUPING IGNORE)
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 

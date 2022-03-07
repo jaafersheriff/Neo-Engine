@@ -22,7 +22,7 @@ namespace neo {
     public:
 
         SelectableShader() :
-            Shader("Selectable",
+            Shader("Selectable Shader",
                 R"(
                         layout (location = 0) in vec3 vertPos;
                         uniform mat4 P, V, M;

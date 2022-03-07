@@ -136,7 +136,7 @@ namespace neo {
                 mesh->addElementBuffer(shape.mesh.indices);
             }
 
-            NEO_LOG("Loaded mesh (%d vertices): %s of %s", shape.mesh.positions.size(), fileName.c_str(), shape.name.c_str());
+            NEO_LOG("Loaded mesh (%d vertices): %s of %s", shape.mesh.positions.size(), shape.name.c_str(), fileName.c_str());
 
             for (auto materialID : shape.mesh.material_ids) {
                 if (materialID >= 0) {

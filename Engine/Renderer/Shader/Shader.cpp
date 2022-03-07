@@ -77,7 +77,7 @@ namespace neo {
             }
         }
 
-        NEO_LOG("Successfully compiled and linked %s", mName.c_str());
+        NEO_LOG("Compiled %s", mName.c_str());
     }
 
     // Handle #includes
