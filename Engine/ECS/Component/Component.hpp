@@ -1,14 +1,12 @@
 #pragma once
 
-#include <string.h>
+#include <string>
 
 namespace neo {
 
-	class Component {
-
-		public:
-			/* Components can have an editor */
-			virtual void imGuiEditor() {};
-			virtual std::string getName() = 0;
+	struct Component {
+		/* Components can have an editor */
+		virtual void imGuiEditor() {};
+		virtual std::string getName() = 0;
 	};
 }

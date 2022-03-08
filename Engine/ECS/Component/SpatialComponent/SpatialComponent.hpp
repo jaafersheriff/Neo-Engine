@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ECS/ECS.hpp"
 #include "ECS/Component/Component.hpp"
 #include "Orientable.hpp"
 
@@ -11,19 +12,19 @@ namespace neo {
 
         public:
 
-            SpatialComponent(GameObject *);
-            SpatialComponent(GameObject *, const glm::vec3 &);
-            SpatialComponent(GameObject *, const glm::vec3 &, const glm::vec3 &);
-            SpatialComponent(GameObject *, const glm::vec3 &, const glm::vec3 &, const glm::vec3 &);
-            SpatialComponent(GameObject *, const glm::vec3 &, const glm::vec3 &, const glm::mat3 &);
+            SpatialComponent(ECS::Entity entity);
+            SpatialComponent(ECS::Entity entity, const glm::vec3 &);
+            SpatialComponent(ECS::Entity entity, const glm::vec3 &, const glm::vec3 &);
+            SpatialComponent(ECS::Entity entity, const glm::vec3 &, const glm::vec3 &, const glm::vec3 &);
+            SpatialComponent(ECS::Entity entity, const glm::vec3 &, const glm::vec3 &, const glm::mat3 &);
 
-            SpatialComponent(SpatialComponent && other) = default;
+            virtual std::string getName() override { return "SpatialComponent"; }
+            virtual void imGuiEditor() override;
 
             /* Update */
             void move(const glm::vec3 &);
             void resize(const glm::vec3 &);
             void rotate(const glm::mat3 &);
-            virtual void imGuiEditor() override;
 
             /* Setters */
             void setPosition(const glm::vec3 &);
@@ -40,6 +41,7 @@ namespace neo {
             const glm::mat3 & getNormalMatrix() const;
 
         private:
+            ECS::Entity mEntity;
             glm::vec3 mPosition{ 0.f, 0.f, 0.f };
             glm::vec3 mScale{ 1.f, 1.f, 1.f };
 

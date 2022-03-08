@@ -16,13 +16,10 @@
 #include <optional>
 #include <thread>
 
-#include "ECS/GameObject.hpp"
-
 namespace neo {
     namespace util {
         struct FrameCounter;
     }
-    class ComponentTuple;
     class Window;
     class Keyboard;
     class Mouse;

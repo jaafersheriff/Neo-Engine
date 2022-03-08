@@ -62,12 +62,15 @@ namespace neo {
 				// Entity access
 				template<typename CompT, typename... Args> CompT& addComponent(Entity e, Args... args);
 				template<typename CompT> void removeComponent(Entity e);
+
+                template<typename CompT> bool has(Entity e);
 				template<typename CompT> CompT& getComponent(Entity e);
 				template<typename CompT> const CompT& getComponent(Entity e) const;
 				template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple(const Entity e);
 				template<typename... CompTs> const ComponentTuple<CompTs...>& cGetComponentTuple(const Entity e) const;
 
 				// All access
+                template<typename CompT> CompT& getComponent();
 				template<typename... CompTs> View<CompTs...> getView();
 				template<typename... CompTs> const View<CompTs...> getView() const;
 				template<typename... CompTs> auto getSingleView();
@@ -75,9 +78,9 @@ namespace neo {
 				template<typename... CompTs> std::vector<ComponentTuple<CompTs...>> getComponentTuples();
 				template<typename... CompTs> std::vector<const ComponentTuple<CompTs...>> getComponentTuples() const;
 
+				Registry mRegistry;
         private:
             /* Active containers */
-				Registry mRegistry;
 				std::vector<Entity> mEntityKillQueue;
 				using ComponentModFunc = std::function<void(Registry&)>;
 				std::vector<ComponentModFunc> mAddComponentFuncs;
@@ -86,6 +89,18 @@ namespace neo {
             std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
             void _updateSystems();
     };
+
+    template<typename CompT>
+    CompT& ECS::getComponent() {
+        auto view = mRegistry.view<FrameStatsComponent>();
+        NEO_ASSERT(view.size() == 1, "wtf");
+        return mRegistry.get<FrameStatsComponent>(view.front());
+    }
+
+    template<typename CompT>
+    bool ECS::has(ECS::Entity e) {
+        return mRegistry.has<FrameStatsComponent>(e);
+    }
 
     /* Template implementation */
     // template <typename CompT, typename... Args>
@@ -275,7 +290,7 @@ namespace neo {
 		if (auto comp = mRegistry.try_get<CompT>(e)) {
 			return *comp;
 		}
-		throw std::runtime_error("Use getTuple dummy");
+        NEO_FAIL("Err");
 	}
 
 	template<typename CompT>
@@ -283,7 +298,7 @@ namespace neo {
 		if (auto comp = mRegistry.try_get<CompT>(e)) {
 			return *comp;
 		}
-		throw std::runtime_error("Use getTuple dummy");
+        NEO_FAIL("Err");
 	}
 
 	template<typename CompT, typename... Args>
@@ -298,7 +313,7 @@ namespace neo {
 
 		mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
 			if (registry.try_get<CompT>(e)) {
-				throw std::runtime_error("Attempting to overwrite a component");
+                NEO_FAIL("Err");
 			}
 
 			registry.emplace<CompT>(e, *component);

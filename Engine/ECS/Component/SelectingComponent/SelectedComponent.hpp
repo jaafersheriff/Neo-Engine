@@ -5,8 +5,9 @@
 namespace neo {
 
     struct SelectedComponent : public Component {
-        SelectedComponent(GameObject* go)
-            : Component(go)
-        {}
+
+        virtual std::string getName() override {
+            return "SelectedComponent";
+        }
     };
 }

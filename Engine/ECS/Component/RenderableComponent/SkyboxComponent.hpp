@@ -4,13 +4,16 @@
 
 namespace neo {
     namespace renderable {
-        class SkyboxComponent : public Component {
-        public:
+        struct SkyboxComponent : public Component {
             const Texture& mCubeMap;
-            SkyboxComponent(GameObject *go, const Texture& cubeMap) :
-                Component(go),
+
+            SkyboxComponent(const Texture& cubeMap) :
                 mCubeMap(cubeMap)
             {}
+
+            virtual std::string getName() override {
+                return "SkyboxComponent";
+            }
         };
     }
 }
