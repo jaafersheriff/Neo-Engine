@@ -1,66 +1,12 @@
 #pragma once
 
 #include <entt/entt.hpp>
-#include <entt/entity/group.hpp>
-#include <entt/entity/utility.hpp>
 
 namespace neo {
 
-	template<typename... CompTs>
-	struct ComponentTuple {
-		std::tuple<CompTs*...> mTuple = {};
-		mutable bool mValid = true;
-
-		template<typename ...CompTs>
-		ComponentTuple(std::tuple<CompTs*...>& inTuple)
-			: mTuple(inTuple)
-		{
-			_validate<CompTs...>();
-		}
-		ComponentTuple(const ComponentTuple& other) = delete;
-		ComponentTuple(ComponentTuple&& other) = delete;
-
-		~ComponentTuple() = default;
-
-		operator bool() {
-			return mValid;
-		}
-
-
-		template<typename CompT>
-		CompT& get() {
-			return *std::get<CompT*>(mTuple);
-		}
-
-		template<typename CompT>
-		const CompT& get() const {
-			return *std::get<CompT*>(mTuple);
-		}
-
-
-		auto raw() {
-			return mTuple;
-		}
-
-	private:
-		template<typename T, typename ...S>
-		auto _validate() const {
-			if (std::get<T*>(mTuple) == nullptr) {
-				mValid = false;
-			}
-			else {
-				if constexpr (sizeof...(S) > 0) {
-					_validate<S...>();
-				}
-			}
-
-		}
-	};
-
-
 	class ECS {
 	public:
-		using Entity = entt::entity;
+v		using Entity = entt::entity;
 		using Registry = entt::registry;
 
 		template<typename... CompTs>
@@ -91,8 +37,8 @@ namespace neo {
 		template<typename... CompTs> std::vector<ComponentTuple<CompTs...>> getComponentTuples();
 		template<typename... CompTs> std::vector<const ComponentTuple<CompTs...>> getComponentTuples() const;
 
-		mutable Registry mRegistry;
 	private:
+		Registry mRegistry;
 
 		std::vector<Entity> mEntityKillQueue;
 

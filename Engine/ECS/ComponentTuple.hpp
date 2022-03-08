@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ECS/GameObject.hpp"
 #include "ECS/Component/Component.hpp"
 
 #include <optional>
@@ -8,62 +7,53 @@
 
 namespace neo {
 
-    class Engine;
+	template<typename... CompTs>
+	struct ComponentTuple {
+		std::tuple<CompTs*...> mTuple = {};
+		mutable bool mValid = true;
 
-    class ComponentTuple {
+		template<typename ...CompTs>
+		ComponentTuple(std::tuple<CompTs*...>& inTuple)
+			: mTuple(inTuple)
+		{
+			_validate<CompTs...>();
+		}
+		ComponentTuple(const ComponentTuple& other) = delete;
+		ComponentTuple(ComponentTuple&& other) = delete;
 
-        friend Engine;
-        friend ECS;
+		~ComponentTuple() = default;
 
-    public:
-        const GameObject& mGameObject;
+		operator bool() {
+			return mValid;
+		}
 
-        ComponentTuple(const GameObject& go) :
-            mGameObject(go),
-            mValid(true)
-        {}
 
-        operator bool() const {
-            return mValid;
-        }
+		template<typename CompT>
+		CompT& get() {
+			return *std::get<CompT*>(mTuple);
+		}
 
-        template <typename CompT>
-        CompT* get() {
-            const auto& comp = mComponentMap.find(typeid(CompT));
-            NEO_ASSERT(comp != mComponentMap.end(), "Attempting to access an invalid component type");
-            return static_cast<CompT *>(comp->second);
-        }
+		template<typename CompT>
+		const CompT& get() const {
+			return *std::get<CompT*>(mTuple);
+		}
 
-        template <typename CompT>
-        CompT const* get() const {
-            const auto& comp = mComponentMap.find(typeid(CompT));
-            NEO_ASSERT(comp != mComponentMap.end(), "Attempting to access an invalid component type");
-            return static_cast<CompT const*>(comp->second);
-        }
 
-        template <typename CompT, typename... CompTs> 
-        void populate() {
-            _addComponent<CompT>();
-            if constexpr (sizeof...(CompTs) > 0) {
-                if (mValid) {
-                    populate<CompTs...>();
-                }
-            }
-        }
+		auto raw() {
+			return mTuple;
+		}
 
-    private:
-        std::unordered_map<std::type_index, Component *> mComponentMap;
-        bool mValid;
-
-        template <typename CompT = void> 
-        void _addComponent() {
-            if (auto comp = mGameObject.getComponentByType<CompT>()) {
-                mComponentMap[typeid(CompT)] = comp;
-            }
-            else {
-                mValid = false;
-            }
-
-        }
-    };
+	private:
+		template<typename T, typename ...S>
+		auto _validate() const {
+			if (std::get<T*>(mTuple) == nullptr) {
+				mValid = false;
+			}
+			else {
+				if constexpr (sizeof...(S) > 0) {
+					_validate<S...>();
+				}
+			}
+		}
+	};
 }
