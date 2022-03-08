@@ -8,6 +8,7 @@ namespace neo {
     std::unordered_map<std::type_index, std::vector<ReceiverFunc>> Messenger::mReceivers = {};
 
     void Messenger::relayMessages(ECS& ecs) {
+        NEO_UNUSED(ecs);
         MICROPROFILE_SCOPEI("Messenger", "relayMessages()", MP_AUTO);
         static std::vector<std::tuple<const ECS::Entity *, std::type_index, std::unique_ptr<Message>>> messageBuffer;
 

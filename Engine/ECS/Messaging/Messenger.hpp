@@ -46,8 +46,11 @@ namespace neo {
     void Messenger::addReceiver(const ECS::Entity *gameObject, const ReceiverFunc& func) {
         static_assert(std::is_base_of<Message, MsgT>::value, "MsgT must be a message type");
 
-        auto& receiver = gameObject ? const_cast<ECS::Entity *>(gameObject)->mReceivers : mReceivers;
-		receiver[std::type_index(typeid(MsgT))].emplace_back(func);
+        if (!gameObject) {
+            mReceivers[std::type_index(typeid(MsgT))].emplace_back(func);
+        }
+        // auto& receiver = gameObject ? const_cast<ECS::Entity *>(gameObject)->mReceivers : mReceivers;
+		// receiver[std::type_index(typeid(MsgT))].emplace_back(func);
 
     }
 
