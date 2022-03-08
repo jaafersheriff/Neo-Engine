@@ -2,6 +2,7 @@
 
 #include "Util/Util.hpp"
 
+#include "ECS/ComponentTuple.hpp"
 #include "ECS/Systems/System.hpp"
 
 #include <vector>
@@ -16,6 +17,7 @@
 
 namespace neo {
     class System;
+    class Engine;
 
     class ECS {
         friend Engine;

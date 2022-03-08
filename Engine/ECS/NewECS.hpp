@@ -6,7 +6,7 @@ namespace neo {
 
 	class ECS {
 	public:
-v		using Entity = entt::entity;
+		using Entity = entt::entity;
 		using Registry = entt::registry;
 
 		template<typename... CompTs>
