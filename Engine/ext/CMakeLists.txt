@@ -65,3 +65,8 @@ PRIVATE
 	glfw
 )
 
+
+## entt
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/entt")
+set_target_properties(EnTT PROPERTIES FOLDER "Neo/ext/entt")
+set_target_properties(aob PROPERTIES FOLDER "Neo/ext/entt")
