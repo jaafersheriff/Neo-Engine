@@ -22,84 +22,69 @@ namespace neo {
     class ECS {
         friend Engine;
 
-        public:
-            ECS() = default;
-            ~ECS() = default;
-            ECS(const ECS&) = delete;
-            ECS& operator=(const ECS&) = delete;
+    public:
+        ECS() = default;
+        ~ECS() = default;
+        ECS(const ECS&) = delete;
+        ECS& operator=(const ECS&) = delete;
 
-				void flush();
-         	void clean();
-            void imguiEdtor();
+        void flush();
+        void clean();
+        void imguiEdtor();
 
-        		/* ECS */
-				using Entity = entt::entity;
-				using Registry = entt::registry;
+        /* ECS */
+        using Entity = entt::entity;
+        using Registry = entt::registry;
+        template<typename... CompTs>
+        using View = entt::basic_view<Entity, entt::get_t<CompTs...>, entt::exclude_t<>>;
 
-				template<typename... CompTs>
-				using View = entt::basic_view<Entity, entt::get_t<CompTs...>, entt::exclude_t<>>;
+        Entity createEntity();
+        void removeEntity(Entity e);
 
-            /* Attach a system */
-            template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
+        // Entity access
+        template<typename CompT, typename... Args> CompT& addComponent(Entity e, Args... args);
+        template<typename CompT> void removeComponent(Entity e);
 
-            /* Old Getters */
-            // const std::vector<GameObject*>& getGameObjects() const { return reinterpret_cast<const std::vector<GameObject*>&>(mGameObjects); }
-            // const std::vector<const GameObject*>& cGetGameObjects() const { return reinterpret_cast<const std::vector<const GameObject*> &>(mGameObjects); }
-            // template <typename CompT> const std::vector<CompT const*>& getComponents() const;
-            // template <typename CompT> const std::vector<CompT*>& getComponents();
-            // template <typename CompT> CompT const* getSingleComponent() const;
-            // template <typename CompT> CompT* getSingleComponent();
-            // template <typename CompT, typename... CompTs> std::unique_ptr<const ComponentTuple> getComponentTuple(const GameObject& go) const;
-            // template <typename CompT, typename... CompTs> std::unique_ptr<ComponentTuple> getComponentTuple(const GameObject& go);
-            // template <typename CompT, typename... CompTs> std::unique_ptr<const ComponentTuple> getComponentTuple() const;
-            // template <typename CompT, typename... CompTs> std::unique_ptr<ComponentTuple> getComponentTuple();
-            // template <typename CompT, typename... CompTs> const std::vector<std::unique_ptr<const ComponentTuple>> getComponentTuples() const;
-            // template <typename CompT, typename... CompTs> const std::vector<std::unique_ptr<ComponentTuple>> getComponentTuples();
+        template<typename CompT> bool has(Entity e);
+        template<typename CompT> CompT& getComponent(Entity e);
+        template<typename CompT> const CompT& getComponent(Entity e) const;
+        template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple(Entity e);
+        template<typename... CompTs> const ComponentTuple<CompTs...>& cGetComponentTuple(const Entity e) const;
 
-				Entity createEntity();
-				void removeEntity(Entity e);
+        // All access
+        template<typename CompT> CompT& getComponent();
+        template<typename... CompTs> View<CompTs...> getView();
+        template<typename... CompTs> const View<CompTs...> getView() const;
+        template<typename... CompTs> auto getSingleView();
+        template<typename... CompTs> const auto getSingleView() const;
+        template<typename... CompTs> std::vector<ComponentTuple<CompTs...>> getComponentTuples();
+        template<typename... CompTs> std::vector<const ComponentTuple<CompTs...>> getComponentTuples() const;
 
-				// Entity access
-				template<typename CompT, typename... Args> CompT& addComponent(Entity e, Args... args);
-				template<typename CompT> void removeComponent(Entity e);
+        /* Attach a system */
+        template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
 
-                template<typename CompT> bool has(Entity e);
-				template<typename CompT> CompT& getComponent(Entity e);
-				template<typename CompT> const CompT& getComponent(Entity e) const;
-				template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple(const Entity e);
-				template<typename... CompTs> const ComponentTuple<CompTs...>& cGetComponentTuple(const Entity e) const;
+    private:
+        Registry mRegistry;
+        /* Active containers */
+        std::vector<Entity> mEntityKillQueue;
+        using ComponentModFunc = std::function<void(Registry&)>;
+        std::vector<ComponentModFunc> mAddComponentFuncs;
+        std::vector<ComponentModFunc> mRemoveComponentFuncs;
 
-				// All access
-                template<typename CompT> CompT& getComponent();
-				template<typename... CompTs> View<CompTs...> getView();
-				template<typename... CompTs> const View<CompTs...> getView() const;
-				template<typename... CompTs> auto getSingleView();
-				template<typename... CompTs> const auto getSingleView() const;
-				template<typename... CompTs> std::vector<ComponentTuple<CompTs...>> getComponentTuples();
-				template<typename... CompTs> std::vector<const ComponentTuple<CompTs...>> getComponentTuples() const;
-
-				Registry mRegistry;
-        private:
-            /* Active containers */
-				std::vector<Entity> mEntityKillQueue;
-				using ComponentModFunc = std::function<void(Registry&)>;
-				std::vector<ComponentModFunc> mAddComponentFuncs;
-				std::vector<ComponentModFunc> mRemoveComponentFuncs;
-
-            std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
-            void _updateSystems();
+        std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
+        void _updateSystems();
     };
 
     template<typename CompT>
     CompT& ECS::getComponent() {
-        auto view = mRegistry.view<FrameStatsComponent>();
+        auto view = mRegistry.view<CompT>();
         NEO_ASSERT(view.size() == 1, "wtf");
-        return mRegistry.get<FrameStatsComponent>(view.front());
+        return mRegistry.get<CompT>(view.front());
     }
 
     template<typename CompT>
     bool ECS::has(ECS::Entity e) {
-        return mRegistry.has<FrameStatsComponent>(e);
+        return mRegistry.has<CompT>(e);
     }
 
     /* Template implementation */
@@ -276,8 +261,8 @@ namespace neo {
     // }
 
 	template<typename... CompTs>
-	ComponentTuple<CompTs...> ECS::getComponentTuple(const Entity e) {
-		return ComponentTuple<CompTs...>(std::move(mRegistry.try_get<CompTs...>(e)));
+	ComponentTuple<CompTs...> ECS::getComponentTuple(Entity e) {
+		return ComponentTuple<CompTs...>(mRegistry.try_get<CompTs...>(e));
 	}
 
 	template<typename... CompTs>
@@ -353,8 +338,8 @@ namespace neo {
 
 	template<typename... CompTs>
 	std::vector<ComponentTuple<CompTs...>> ECS::getComponentTuples() {
-		std::vector<ECS::ComponentTuple<CompTs...>> ret;
-		mRegistry.each([this, &ret](auto entity) {
+		std::vector<ComponentTuple<CompTs...>> ret;
+		mRegistry.each([this, &ret](ECS::Entity entity) {
 			ret.push_back(getComponentTuple<CompTs...>(entity));
 			});
 		return ret;
@@ -362,8 +347,8 @@ namespace neo {
 
 	template<typename... CompTs>
 	std::vector<const ComponentTuple<CompTs...>> ECS::getComponentTuples() const {
-		std::vector<ECS::ComponentTuple<CompTs...>> ret;
-		mRegistry.each([this, &ret](auto entity) {
+		std::vector<ComponentTuple<CompTs...>> ret;
+		mRegistry.each([this, &ret](ECS::Entity entity) {
 			ret.push_back(cGetComponentTuple<CompTs...>(entity));
 			});
 		return ret;
