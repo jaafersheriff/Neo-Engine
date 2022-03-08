@@ -8,4 +8,5 @@ PRIVATE
 	Util
 	imgui
 	glfw
+	EnTT::EnTT
 )
