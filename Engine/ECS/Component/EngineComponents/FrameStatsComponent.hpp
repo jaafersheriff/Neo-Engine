@@ -1,20 +1,23 @@
 #pragma once
 
 #include "ECS/Component/Component.hpp"
-#include "ECS/GameObject.hpp"
+
+#include <imgui/imgui.h>
 
 namespace neo {
 
-    class FrameStatsComponent : public Component {
+    struct FrameStatsComponent : public Component {
+        float mRunTime;
+        float mDT;
 
-    public:
-        FrameStatsComponent(GameObject *go, float runTime, float timeStep)
-            : Component(go)
-            , mRunTime(runTime)
-            , mDT(timeStep)
-        {}
+        virtual std::string getName() override {
+            return "FrameStatsComponent";
+        }
 
-        const float mRunTime;
-        const float mDT;
+        virtual void imGuiEditor() override {
+            ImGui::TextWrapped("Run Time:   %0.3f", mRunTime);
+            ImGui::TextWrapped("Frame Time: %0.3f", mDT);
+
+        }
     };
 }

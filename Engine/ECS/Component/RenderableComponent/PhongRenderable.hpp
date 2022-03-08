@@ -9,18 +9,19 @@ namespace neo {
 
     namespace renderable {
 
-        class PhongRenderable : public Component {
-
-        public:
+        struct PhongRenderable : public Component {
             // These will be replaced by renderer handles eventually
             Material mMaterial;
             const Texture& mDiffuseMap;
 
-            PhongRenderable(GameObject *go, const Texture& diffuseMap, Material material = Material{}) :
-                Component(go),
+            PhongRenderable(const Texture& diffuseMap, Material material = Material{}) :
                 mDiffuseMap(diffuseMap),
                 mMaterial(material)
             {}
+
+            virtual std::string getName() override {
+                return "PhongRenderable";
+            }
 
         };
     }

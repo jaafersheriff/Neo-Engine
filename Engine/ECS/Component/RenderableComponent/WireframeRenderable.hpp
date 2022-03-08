@@ -1,21 +1,22 @@
 #pragma once
 
 #include "ECS/Component/Component.hpp"
+#include <imgui/imgui.h>
 
 namespace neo {
 
     namespace renderable {
 
-        class WireframeRenderable: public Component {
+        struct WireframeRenderable : public Component {
+            glm::vec3 mColor = glm::vec3(1.f);
 
-        public:
-            glm::vec3 mColor;
+            virtual std::string getName() override {
+                return "WireframeRenderable";
+            }
 
-            WireframeRenderable(GameObject *go, glm::vec3 color = glm::vec3(1.f)) :
-                Component(go),
-                mColor(color)
-            {}
-
+		    virtual void imGuiEditor() override {
+                ImGui::ColorEdit3("Color", &mColor[0]);
+            };
         };
     }
 }

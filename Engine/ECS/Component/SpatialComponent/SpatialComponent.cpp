@@ -1,4 +1,3 @@
-#include "ECS/GameObject.hpp"
 #include "SpatialComponent.hpp"
 
 #include "ECS/Messaging/Messenger.hpp"
@@ -9,9 +8,9 @@
 
 namespace neo {
 
-    SpatialComponent::SpatialComponent(GameObject *go) :
-        Component(go),
+    SpatialComponent::SpatialComponent(ECS::Entity e) :
         Orientable(),
+        mEntity(e),
         mPosition(0.f),
         mScale(1.f),
         mModelMatrix(),
@@ -20,18 +19,18 @@ namespace neo {
         mNormalMatrixDirty(true)
     {}
 
-    SpatialComponent::SpatialComponent(GameObject *go, const glm::vec3 & p) :
-        SpatialComponent(go) {
+    SpatialComponent::SpatialComponent(ECS::Entity e, const glm::vec3 & p) :
+        SpatialComponent(e) {
         mPosition = p;
     }
 
-    SpatialComponent::SpatialComponent(GameObject *go, const glm::vec3 & p, const glm::vec3 & s) :
-        SpatialComponent(go, p) {
+    SpatialComponent::SpatialComponent(ECS::Entity e, const glm::vec3 & p, const glm::vec3 & s) :
+        SpatialComponent(e, p) {
         mScale = s;
     }
 
-    SpatialComponent::SpatialComponent(GameObject *go, const glm::vec3 & p, const glm::vec3 & s, const glm::vec3 & r) :
-        SpatialComponent(go, p) {
+    SpatialComponent::SpatialComponent(ECS::Entity e, const glm::vec3 & p, const glm::vec3 & s, const glm::vec3 & r) :
+        SpatialComponent(e, p) {
         mScale = s;
         glm::mat4 rotation(1.f);
         rotation = glm::rotate(rotation, r.x, glm::vec3(1, 0, 0));
@@ -40,8 +39,8 @@ namespace neo {
         setOrientation(glm::mat3(rotation));
     }
 
-    SpatialComponent::SpatialComponent(GameObject *go, const glm::vec3 & p, const glm::vec3 & s, const glm::mat3 & o) :
-        SpatialComponent(go, p, s) {
+    SpatialComponent::SpatialComponent(ECS::Entity e, const glm::vec3 & p, const glm::vec3 & s, const glm::mat3 & o) :
+        SpatialComponent(e, p, s) {
         setOrientation(o);
     }
 
@@ -52,7 +51,7 @@ namespace neo {
 
         mPosition += delta;
         mModelMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
+        Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
     void SpatialComponent::resize(const glm::vec3& factor) {
@@ -63,14 +62,14 @@ namespace neo {
         mScale *= glm::clamp(factor, glm::vec3(0.f), factor);
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
+        Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
     void SpatialComponent::rotate(const glm::mat3 & mat) {
         Orientable::rotate(mat);
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
+        Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
     void SpatialComponent::setPosition(const glm::vec3 & loc) {
@@ -80,7 +79,7 @@ namespace neo {
 
         mPosition = loc;
         mModelMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
+        Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
     void SpatialComponent::setScale(const glm::vec3 & scale) {
@@ -91,7 +90,7 @@ namespace neo {
         this->mScale = scale;
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
+        Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
     void SpatialComponent::setScale(const float scale) {
@@ -102,14 +101,14 @@ namespace neo {
         Orientable::setOrientation(orient);
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
+        Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
     void SpatialComponent::setUVW(const glm::vec3 & u, const glm::vec3 & v, const glm::vec3 & w) {
         Orientable::setUVW(u, v, w);
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
-        Messenger::sendMessage<SpatialChangeMessage>(mGameObject, *this);
+        Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
     void SpatialComponent::setDirty() {

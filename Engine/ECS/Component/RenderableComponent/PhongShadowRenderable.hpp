@@ -10,17 +10,18 @@ namespace neo {
 
     namespace renderable {
 
-        class PhongShadowRenderable : public Component {
-        public:
-
+        struct PhongShadowRenderable : public Component {
             const Texture& mDiffuseMap;
             Material mMaterial;
 
-            PhongShadowRenderable(GameObject *go, const Texture& texture, Material material) :
-                Component(go),
+            PhongShadowRenderable(const Texture& texture, Material material) :
                 mDiffuseMap(texture),
                 mMaterial(material)
             {}
+
+            virtual std::string getName() override {
+                return "PhongShadowRenderable";
+            }
 
             virtual void imGuiEditor() override {
                 ImGui::ColorEdit3("Diffuse", &mMaterial.mDiffuse[0]);

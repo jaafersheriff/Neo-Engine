@@ -3,8 +3,6 @@
 #include "ECS/Component/Component.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "ECS/GameObject.hpp"
-
 #include "Util/Util.hpp"
 
 #include <glm/glm.hpp>
@@ -13,20 +11,16 @@
 
 namespace neo {
 
-    class RotationComponent : public Component {
+    struct RotationComponent : public Component {
+        glm::vec3 mSpeed;
 
-    public:
-        RotationComponent(GameObject *go, glm::vec3 speed) :
-            Component(go),
-            mSpeed(speed)
-        {}
+        virtual std::string getName() override {
+            return "RotationComponent";
+        }
 
         virtual void imGuiEditor() override {
             ImGui::SliderFloat3("Speed", &mSpeed[0], -5.f, 5.f);
         }
 
-        glm::vec3 mSpeed;
-
     };
-
 }
