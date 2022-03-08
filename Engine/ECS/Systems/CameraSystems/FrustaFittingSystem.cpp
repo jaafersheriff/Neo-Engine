@@ -45,11 +45,11 @@ namespace neo {
         const auto& worldToLight = glm::lookAt(lightDir, glm::vec3(0.f), up);
         const auto& lightToWorld = glm::inverse(worldToLight);
 
-        const float aspect = sceneProj[1][1] / sceneProj[0][0];
-        const float fov = 2.f * glm::atan(1.f / sceneProj[1][1]);
-        const float zNear = sceneProj[3][2] / (sceneProj[2][2] - 1.f);
-        const float zFar = sceneProj[3][2] / (sceneProj[2][2] + 1.f);
-        const float zRange = zFar - zNear;
+        // const float aspect = sceneProj[1][1] / sceneProj[0][0];
+        // const float fov = 2.f * glm::atan(1.f / sceneProj[1][1]);
+        // const float zNear = sceneProj[3][2] / (sceneProj[2][2] - 1.f);
+        // const float zFar = sceneProj[3][2] / (sceneProj[2][2] + 1.f);
+        // const float zRange = zFar - zNear;
         const float depthMin = -1.f; // GL things
 
         struct BoundingBox {
