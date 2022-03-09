@@ -4,20 +4,18 @@
 
 #include <GL/glew.h>
 #include <microprofile.h>
+#include <imgui/imgui.h>
 
 namespace neo {
 
-    LineMeshComponent::LineMeshComponent(GameObject* go, std::optional<glm::vec3> overrideColor) :
-        Component(go),
+    LineMeshComponent::LineMeshComponent(std::optional<glm::vec3> overrideColor) :
         mMesh(new Mesh(GL_LINE_STRIP)),
         mDirty(false),
         mWriteDepth(true),
         mUseParentSpatial(false),
         mOverrideColor(overrideColor)
     {
-    }
 
-    void LineMeshComponent::init() {
         mMesh->addVertexBuffer(VertexType::Position, 0, 3);
         mMesh->addVertexBuffer(VertexType::Color0, 1, 3);
     }

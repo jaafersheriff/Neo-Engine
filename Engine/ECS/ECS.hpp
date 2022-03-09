@@ -53,9 +53,11 @@ namespace neo {
 
         // All access
         template<typename CompT> CompT* getComponent();
+        template<typename CompT> CompT *const getComponent() const;
         template<typename... CompTs> View<CompTs...> getView();
         template<typename... CompTs> const View<CompTs...> getView() const;
-        template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple(); // TODO - const
+        template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple();
+        template<typename... CompTs> const ComponentTuple<CompTs...> cGetComponentTuple() const;
         template<typename... CompTs> std::vector<ComponentTuple<CompTs...>> getComponentTuples();
         template<typename... CompTs> std::vector<const ComponentTuple<CompTs...>> getComponentTuples() const;
 
@@ -85,6 +87,11 @@ namespace neo {
             return mRegistry.try_get<CompT>(view.front());
         }
         return nullptr;
+    }
+
+    template<typename CompT>
+    CompT *const ECS::getComponent() const {
+        return getComponent<CompT>();
     }
 
     template<typename CompT>
@@ -192,4 +199,11 @@ namespace neo {
         NEO_ASSERT(tuples.size() == 1, "");
         return tuples[0];
 	}
+
+    template<typename... CompTs> 
+    const ComponentTuple<CompTs...> ECS::cGetComponentTuple() const {
+        auto tuples = getComponentsTuples<CompTs...>();
+        NEO_ASSERT(tuples.size() == 1, "");
+        return tuples[0];
+    }
 }

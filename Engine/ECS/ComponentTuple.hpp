@@ -39,9 +39,12 @@ namespace neo {
 			return *std::get<CompT*>(mTuple);
 		}
 
-
 		auto raw() {
 			return mTuple;
+		}
+
+		auto raw() const {
+			return _getRaw<CompTs...>();
 		}
 
 	private:
@@ -55,6 +58,15 @@ namespace neo {
 					_validate<S...>();
 				}
 			}
+		}
+
+		template<typename T, typename... S>
+		auto _getRaw() const {
+			std::tuple<T *const> end = std::make_tuple<T *const>(std::get<T*>(mTuple));
+			if constexpr (sizeof...(S) > 0) {
+				return std::make_tuple<T* const, S* const...>(end, _getRaw<S...>());
+			}
+			return end;
 		}
 	};
 }
