@@ -2,15 +2,12 @@
 #include "SelectingSystem.hpp"
 
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
-#include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
-#include "ECS/Component/SelectingComponent/SelectedComponent.hpp"
 
 namespace neo {
 
     void SelectingSystem::init(ECS& _ecs) {
         NEO_UNUSED(_ecs);
 
-        // It's only possible to have one SelectedSystem at a time..
         Messenger::addReceiver<ComponentSelectedMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
             const ComponentSelectedMessage & m(static_cast<const ComponentSelectedMessage &>(msg));
             auto oldSelectedEntity = ecs.getView<SelectedComponent>();
@@ -42,8 +39,7 @@ namespace neo {
     }
 
     void SelectingSystem::imguiEditor(ECS& ecs) {
-        auto selected = ecs.getSingleComponent<SelectedComponent>();
-        if (selected) {
+        if (auto selected = ecs.getComponent<SelectedComponent>()) {
             MICROPROFILE_SCOPEI("SelectingSystem", "EditorOperation", MP_AUTO);
             mEditorOperation(ecs, selected);
         }

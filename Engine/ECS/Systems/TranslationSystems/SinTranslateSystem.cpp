@@ -7,14 +7,15 @@
 namespace neo {
     void SinTranslateSystem::update(ECS& ecs) {
 
-        auto frameStats = ecs.getComponent<FrameStatsComponent>();
+        if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
 
-        for (auto& tuple : ecs.getComponentTuples<SinTranslateComponent, SpatialComponent>()) {
-            auto&& [sin, spatial] = tuple.raw();
-            double time = frameStats.mRunTime;
-            glm::vec3 oldPos = spatial->getPosition();
-            oldPos = sin->mBasePosition + (float)glm::cos(time) * sin->mOffset;
-            spatial->setPosition(oldPos);
+            for (auto& tuple : ecs.getComponentTuples<SinTranslateComponent, SpatialComponent>()) {
+                auto&& [sin, spatial] = tuple.raw();
+                double time = frameStats->mRunTime;
+                glm::vec3 oldPos = spatial->getPosition();
+                oldPos = sin->mBasePosition + (float)glm::cos(time) * sin->mOffset;
+                spatial->setPosition(oldPos);
+            }
         }
     }
 

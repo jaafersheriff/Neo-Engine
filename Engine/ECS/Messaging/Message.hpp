@@ -51,7 +51,7 @@
 
 namespace neo {
 
-    class Component;
+    struct Component;
     class SpatialComponent;
     class ECS;
 
