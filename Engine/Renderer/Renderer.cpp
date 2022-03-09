@@ -16,16 +16,19 @@
 namespace neo {
 
 #define RENDERER_MP_ENTERD(define, group, name) \
-    MICROPROFILE_DEFINE(define, group, name, MP_AUTO);\
+    if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, static_cast<GLsizei>(name.size()), name.c_str()); \
+    MICROPROFILE_DEFINE(define, group, name.c_str(), MP_AUTO);\
     MICROPROFILE_ENTER(define);\
-    MICROPROFILE_DEFINE_GPU(define, name,  MP_AUTO);\
+    MICROPROFILE_DEFINE_GPU(define, name.c_str(),  MP_AUTO);\
     MICROPROFILE_GPU_ENTER(define)
 
 #define RENDERER_MP_ENTER(name) \
+    if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name); \
     MICROPROFILE_ENTERI("Renderer", name, MP_AUTO);\
     MICROPROFILE_GPU_ENTERI("RendererGPU", name, MP_AUTO)
 
 #define RENDERER_MP_LEAVE() \
+    if (glIsEnabled(GL_DEBUG_OUTPUT)) glPopDebugGroup(); \
     MICROPROFILE_LEAVE();\
     MICROPROFILE_GPU_LEAVE()
 
@@ -177,7 +180,7 @@ namespace neo {
 
                 for (auto& shader : activeComputeShaders) {
                     resetState();
-                    RENDERER_MP_ENTERD(Compute, "Compute shaders", shader->mName.c_str());
+                    RENDERER_MP_ENTERD(Compute, "Compute shaders", shader->mName);
                     mStats.mNumShaders++;
                     shader->render(ecs);
                     RENDERER_MP_LEAVE();
@@ -191,7 +194,7 @@ namespace neo {
 
                 for (auto& shader : activePreShaders) {
                     resetState();
-                    RENDERER_MP_ENTERD(Pre, "PreScene shaders", shader->mName.c_str());
+                    RENDERER_MP_ENTERD(Pre, "PreScene shaders", shader->mName);
                     mStats.mNumShaders++;
                     shader->render(ecs);
                     RENDERER_MP_LEAVE();
@@ -213,7 +216,7 @@ namespace neo {
             for (auto& shader : mSceneShaders) {
                 if (shader.second->mActive) {
                     resetState();
-                    RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName.c_str());
+                    RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName);
                     mStats.mNumShaders++;
                     shader.second->render(ecs);
                     RENDERER_MP_LEAVE();
@@ -313,7 +316,7 @@ namespace neo {
 
         RENDERER_MP_LEAVE();
 
-        RENDERER_MP_ENTERD(Post, "PostProcess Shaders", shader.mName.c_str());
+        RENDERER_MP_ENTERD(Post, "PostProcess Shaders", shader.mName);
         // Allow shader to do any prep (eg. bind uniforms) 
         // Also allows shader to override output render target (user responsible for handling)
         shader.render(ecs);
