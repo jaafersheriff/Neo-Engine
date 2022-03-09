@@ -1,19 +1,15 @@
 #pragma once
 
 #include "ECS/Component/Component.hpp"
-#include "ECS/GameObject.hpp"
 #include "Hardware/Mouse.hpp"
 
 #include <imgui/imgui.h>
 
 namespace neo {
 
-    class MouseComponent : public Component {
-
-    public:
-        MouseComponent (GameObject *go, Mouse& engineMouse)
-            : Component(go)
-            , mFrameMouse(engineMouse)
+    struct MouseComponent : public Component {
+        MouseComponent(Mouse& engineMouse)
+            : mFrameMouse(engineMouse)
         {}
 
         virtual void imGuiEditor() override {

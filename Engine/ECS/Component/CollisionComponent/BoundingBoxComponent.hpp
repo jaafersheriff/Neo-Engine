@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ECS/Component/Component.hpp"
-#include "ECS/GameObject.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "Loader/Loader.hpp"
@@ -17,14 +16,12 @@ namespace neo {
     public:
         glm::vec3 mMin, mMax;
 
-        BoundingBoxComponent(GameObject *go) :
-            Component(go),
+        BoundingBoxComponent() :
             mMin(0.f),
             mMax(0.f) {
         }
 
-        BoundingBoxComponent(GameObject *go, std::vector<glm::vec3>& vertices) :
-            Component(go) {
+        BoundingBoxComponent(std::vector<glm::vec3>& vertices) {
             mMin = glm::vec3(FLT_MAX);
             mMax = glm::vec3(FLT_MIN);
 
@@ -35,9 +32,7 @@ namespace neo {
         }
 
 
-        BoundingBoxComponent(GameObject *go, MeshData mesh) :
-            BoundingBoxComponent(go)
-        {
+        BoundingBoxComponent(MeshData mesh) {
             mMin = mesh.mMin;
             mMax = mesh.mMax;
         }
@@ -50,11 +45,8 @@ namespace neo {
             return mMin + ((mMax - mMin) / 2.f);
         }
 
-        bool intersect(const glm::vec3 position) const {
-            auto spatial = mGameObject->getComponentByType<SpatialComponent>();
-            NEO_ASSERT(spatial, "BoundingBox has no SpatialComponent");
-            // TODO - this is broke?
-            return glm::length(glm::vec3(glm::inverse(spatial->getModelMatrix()) * glm::vec4(position, 1.f))) < getRadius();
+        bool intersect(const glm::mat4& modelMatrix, glm::vec3 position) const {
+            return glm::length(glm::vec3(glm::inverse(modelMatrix) * glm::vec4(position, 1.f))) < getRadius();
         }
     };
 }

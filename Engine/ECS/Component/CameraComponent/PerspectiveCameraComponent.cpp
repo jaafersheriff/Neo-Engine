@@ -10,8 +10,8 @@
 
 namespace neo {
 
-    PerspectiveCameraComponent::PerspectiveCameraComponent(GameObject* gameObject, float near, float far, float fov, float ar) :
-        CameraComponent(gameObject) {
+    PerspectiveCameraComponent::PerspectiveCameraComponent(float near, float far, float fov, float ar) :
+        CameraComponent() {
         setNearFar(near, far);
         setFOV(fov);
         setAspectRatio(ar);
