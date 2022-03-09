@@ -52,7 +52,7 @@
 namespace neo {
 
     struct Component;
-    class SpatialComponent;
+    struct SpatialComponent;
     class ECS;
 
     struct Message {

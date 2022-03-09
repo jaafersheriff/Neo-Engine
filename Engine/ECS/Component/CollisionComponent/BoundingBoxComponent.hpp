@@ -12,8 +12,9 @@
 
 namespace neo {
 
-    class BoundingBoxComponent : public Component {
-    public:
+    struct BoundingBoxComponent : public Component {
+        virtual std::string getName() override { return "BoundingBoxComponent"; } 
+
         glm::vec3 mMin, mMax;
 
         BoundingBoxComponent() :
@@ -30,7 +31,6 @@ namespace neo {
                 mMax = glm::max(mMax, vert);
             }
         }
-
 
         BoundingBoxComponent(MeshData mesh) {
             mMin = mesh.mMin;

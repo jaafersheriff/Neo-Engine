@@ -15,7 +15,7 @@ namespace neo {
 		mutable bool mValid = true;
 
 		template<typename ...CompTs>
-		ComponentTuple(entt::entity e, std::tuple<CompTs*...>& inTuple)
+		ComponentTuple(entt::entity e, std::tuple<CompTs*...> inTuple)
 			: mEntity(e)
 			, mTuple(inTuple)
 		{

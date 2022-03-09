@@ -8,15 +8,17 @@
 
 namespace neo {
 
-    SpatialComponent::SpatialComponent(ECS::Entity e) :
-        Orientable(),
-        mEntity(e),
-        mPosition(0.f),
-        mScale(1.f),
-        mModelMatrix(),
-        mNormalMatrix(),
-        mModelMatrixDirty(true),
-        mNormalMatrixDirty(true)
+    SpatialComponent::SpatialComponent(ECS::Entity e)
+        : Orientable()
+        , mEntity(e)
+        , mPosition(0.f)
+        , mScale(1.f)
+        , mModelMatrix(1.f)
+        , mNormalMatrix(1.f)
+        , mViewMat(1.f)
+        , mModelMatrixDirty(true)
+        , mNormalMatrixDirty(true)
+        , mViewMatDirty(true)
     {}
 
     SpatialComponent::SpatialComponent(ECS::Entity e, const glm::vec3 & p) :
@@ -130,6 +132,13 @@ namespace neo {
         return mNormalMatrix;
     }
 
+    const glm::mat4 & SpatialComponent::getView() const {
+        if (mViewMatDirty) {
+            _detView();
+        }
+        return mViewMat;
+    }
+
     void SpatialComponent::_detModelMatrix() const {
         MICROPROFILE_SCOPEI("SpatialComponent", "SpatialComponent::_detModelMatrix", MP_AUTO);
         mModelMatrix = glm::scale(glm::translate(glm::mat4(1.f), mPosition) * glm::mat4(getOrientation()), mScale);
@@ -145,6 +154,12 @@ namespace neo {
             mNormalMatrix = getOrientation() * glm::mat3(glm::scale(glm::mat4(1.f), 1.0f / mScale));
         }
         mNormalMatrixDirty = false;
+    }
+
+    void SpatialComponent::_detView() const {
+        MICROPROFILE_SCOPEI("SpatialComponent", "_detView", MP_AUTO);
+        mViewMat = glm::lookAt(getPosition(), getPosition() + getLookDir(), getUpDir());
+        mViewMatDirty = false;
     }
 
     void SpatialComponent::imGuiEditor() {

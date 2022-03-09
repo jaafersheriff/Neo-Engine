@@ -15,16 +15,9 @@ namespace neo {
     CameraComponent::CameraComponent()
         : mNear()
         , mFar()
-        , mViewMat()
         , mProjMat()
-        , mViewMatDirty(true)
         , mProjMatDirty(true)
     {
-        // TODO - busted
-        Messenger::addReceiver<SpatialChangeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
-            NEO_UNUSED(msg, ecs);
-            mViewMatDirty = true;
-            });
     }
 
     void CameraComponent::setNearFar(float near, float far) {
@@ -37,26 +30,11 @@ namespace neo {
         mProjMatDirty = true;
     }
 
-    const glm::mat4 & CameraComponent::getView() const {
-        if (mViewMatDirty) {
-            _detView();
-        }
-        return mViewMat;
-    }
-
     const glm::mat4 & CameraComponent::getProj() const {
         if (mProjMatDirty) {
             _detProj();
         }
         return mProjMat;
-    }
-
-    void CameraComponent::_detView() const {
-        MICROPROFILE_SCOPEI("CameraComponent", "_detView", MP_AUTO);
-        auto spatial = mGameObject->getComponentByType<SpatialComponent>();
-        NEO_ASSERT(spatial, "Camera has no SpatialComponent");
-        mViewMat = glm::lookAt(spatial->getPosition(), spatial->getPosition() + spatial->getLookDir(), spatial->getUpDir());
-        mViewMatDirty = false;
     }
 
     void CameraComponent::imGuiEditor() {
