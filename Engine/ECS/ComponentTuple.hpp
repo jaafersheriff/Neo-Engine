@@ -4,17 +4,20 @@
 
 #include <optional>
 #include <unordered_map>
+#include <entt/entt.hpp>
 
 namespace neo {
 
 	template<typename... CompTs>
 	struct ComponentTuple {
+		entt::entity mEntity;
 		std::tuple<CompTs*...> mTuple = {};
 		mutable bool mValid = true;
 
 		template<typename ...CompTs>
-		ComponentTuple(std::tuple<CompTs*...>& inTuple)
-			: mTuple(inTuple)
+		ComponentTuple(entt::entity e, std::tuple<CompTs*...>& inTuple)
+			: mEntity(e)
+			, mTuple(inTuple)
 		{
 			_validate<CompTs...>();
 		}

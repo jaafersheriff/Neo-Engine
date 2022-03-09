@@ -17,7 +17,7 @@ namespace neo {
         {}
     };
 
-    class SelectableComponent : public Component {
+    struct SelectableComponent : public Component {
     public:
         SelectableComponent() :
             mID(sSelectableCounter++)

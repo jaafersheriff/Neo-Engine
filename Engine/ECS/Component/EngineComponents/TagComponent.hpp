@@ -13,6 +13,6 @@ namespace neo {
             return "Tag Component";
         }
 
-        const std::string mTag;
+        std::string mTag;
     };
 }
