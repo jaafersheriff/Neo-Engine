@@ -9,10 +9,11 @@
 namespace neo {
 
     void CameraControllerSystem::update(ECS& ecs) {
-        if (CameraControllerComponent* cameraController = ecs.getSingleComponent<CameraControllerComponent>()) {
-            if (auto frameStats = ecs.getSingleComponent<FrameStatsComponent>()) {
-                _updateLook(frameStats->mDT, ecs, *cameraController);
-                _updatePosition(frameStats->mDT, ecs, *cameraController);
+        if (auto& cameraController = ecs.getComponentTuple<CameraControllerComponent, SpatialComponent>()) {
+            if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
+                auto& [controller, spatial] = cameraController.get();
+                _updateLook(frameStats->mDT, ecs, controller, spatial);
+                _updatePosition(frameStats->mDT, ecs, controller, spatial);
             }
         }
     }
@@ -22,41 +23,57 @@ namespace neo {
         ImGui::SliderFloat("SuperSpeed", &mSuperSpeed, 1.f, 10.f);
     }
 
-    void CameraControllerSystem::_updateLook(const float dt, ECS& ecs, CameraControllerComponent& comp) {
-        if (auto mouse = ecs.getSingleComponent<MouseComponent>()) {
+    void CameraControllerSystem::_updateLook(const float dt, ECS& ecs, CameraControllerComponent& controller, SpatialComponent& spatial) {
+        float theta = 0.f;
+        float phi = util::PI * 0.5f;
+
+        if (auto mouse = ecs.getComponent<MouseComponent>()) {
             glm::vec2 mousePos = mouse->mFrameMouse.getPos();
             glm::vec2 mouseSpeed = mouse->mFrameMouse.getSpeed();
 
             if (mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_2)) {
-                float theta = comp.mTheta - mouseSpeed.x * comp.mLookSpeed * dt;
-                float phi = comp.mPhi - mouseSpeed.y * comp.mLookSpeed * dt;
-                comp.setOrientation(theta, phi);
+                theta -= mouseSpeed.x * controller.mLookSpeed * dt;
+                phi -= mouseSpeed.y * controller.mLookSpeed * dt;
             }
         }
 
-        if (auto keyboard = ecs.getSingleComponent<KeyboardComponent>()) {
-            if (keyboard->mFrameKeyboard.isKeyPressed(comp.mLookLeftButton)) {
-                float theta = comp.mTheta + comp.mLookSpeed * 2.f * dt;
-                comp.setOrientation(theta, comp.mPhi);
+        if (auto keyboard = ecs.getComponent<KeyboardComponent>()) {
+            if (keyboard->mFrameKeyboard.isKeyPressed(controller.mLookLeftButton)) {
+                theta += controller.mLookSpeed * 2.f * dt;
             }
-            if (keyboard->mFrameKeyboard.isKeyPressed(comp.mLookRightButton)) {
-                float theta = comp.mTheta - comp.mLookSpeed * 2.f * dt;
-                comp.setOrientation(theta, comp.mPhi);
+            if (keyboard->mFrameKeyboard.isKeyPressed(controller.mLookRightButton)) {
+                theta -= controller.mLookSpeed * 2.f * dt;
             }
-            if (keyboard->mFrameKeyboard.isKeyPressed(comp.mLookUpButton)) {
-                float phi = comp.mPhi - comp.mLookSpeed * 2.f * dt;
-                comp.setOrientation(comp.mTheta, phi);
+            if (keyboard->mFrameKeyboard.isKeyPressed(controller.mLookUpButton)) {
+                phi -= controller.mLookSpeed * 2.f * dt;
             }
-            if (keyboard->mFrameKeyboard.isKeyPressed(comp.mLookDownButton)) {
-                float phi = comp.mPhi + comp.mLookSpeed * 2.f * dt;
-                comp.setOrientation(comp.mTheta, phi);
+            if (keyboard->mFrameKeyboard.isKeyPressed(controller.mLookDownButton)) {
+                phi += controller.mLookSpeed * 2.f * dt;
             }
         }
+
+        if (theta > util::PI) {
+            theta = std::fmod(theta, util::PI) - util::PI;
+        }
+        else if (theta < -util::PI) {
+            theta = util::PI - std::fmod(-theta, util::PI);
+        }
+
+        /* phi [0.f, pi] */
+        phi = glm::max(glm::min(phi, util::PI), 0.f);
+
+        glm::vec3 w(-util::sphericalToCartesian(1.0f, theta, phi));
+        w = glm::vec3(-w.y, w.z, -w.x); // one of the many reasons I like z to be up
+        glm::vec3 v(util::sphericalToCartesian(1.0f, theta, phi - util::PI * 0.5f));
+        v = glm::vec3(-v.y, v.z, -v.x);
+        glm::vec3 u(glm::cross(v, w));
+
+        spatial.setUVW(u, v, w);
     }
 
-    void CameraControllerSystem::_updatePosition(const float dt, ECS& ecs, CameraControllerComponent& comp) {
+    void CameraControllerSystem::_updatePosition(const float dt, ECS& ecs, CameraControllerComponent& comp, SpatialComponent& spatial) {
 
-        if (auto keyboard = ecs.getSingleComponent<KeyboardComponent>()) {
+        if (auto keyboard = ecs.getComponent<KeyboardComponent>()) {
             int forward(keyboard->mFrameKeyboard.isKeyPressed(comp.mForwardButton));
             int backward(keyboard->mFrameKeyboard.isKeyPressed(comp.mBackwardButton));
             int right(keyboard->mFrameKeyboard.isKeyPressed(comp.mRightButton));
@@ -72,14 +89,12 @@ namespace neo {
             );
 
             if (dir != glm::vec3()) {
-                auto spatial = comp.getGameObject().getComponentByType<SpatialComponent>();
-                NEO_ASSERT(spatial, "Camera doesn't have SpatialComponent");
                 dir = glm::normalize(dir);
                 dir = glm::normalize(
-                    spatial->getRightDir() * dir.x +
-                    spatial->getUpDir() * dir.y +
-                    -spatial->getLookDir() * dir.z);
-                spatial->move(dir * comp.mMoveSpeed * dt * (speed ? mSuperSpeed : 1.f));
+                        spatial.getRightDir() * dir.x +
+                        spatial.getUpDir()    * dir.y +
+                    -spatial.getLookDir()     * dir.z);
+                spatial.move(dir * comp.mMoveSpeed * dt * (speed ? mSuperSpeed : 1.f));
             }
         }
     }
