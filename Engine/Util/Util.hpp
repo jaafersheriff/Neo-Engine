@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Util/Log.hpp"
+#include "Util/Log/Log.hpp"
 
 #include <vector>
 
@@ -19,13 +19,16 @@ namespace neo {
                 sprintf(buf, fmt, __VA_ARGS__); \
 				NEO_LOG_S(neo::util::LogSeverity::Error, "%s: (%s) in %s, file %s on line %d.\n", buf, #c, __func__, __FILE__, __LINE__); \
                 abort(); \
-			}
+			} 
 		#define NEO_FAIL(fmt, ...) NEO_ASSERT(false, fmt, __VA_ARGS__)
 	#else
-		#define NEO_ASSERT(c, fmt, ...) do {((void)(c));} while(0); NEO_UNUSED(fmt); NEO_UNUSED(__VA_ARGS__)
+		#define NEO_ASSERT(c, fmt, ...) (void)(c); NEO_UNUSED(fmt); NEO_UNUSED(__VA_ARGS__)
+		#define NEO_ASSERT(c) NEO_ASSERT(c, "")
 		#define NEO_FAIL(fmt, ...) NEO_UNUSED(fmt); NEO_UNUSED(__VA_ARGS__) ; abort()
 	#endif // NEO_CONFIG_DEBUG
 #endif // NEO_DEBUG_ASSERT
+
+#define NEO_ARRAYSIZE(_ARR)          ((int)(sizeof(_ARR) / sizeof(*(_ARR))))     // Size of a static C-style array. Don't use on pointers!
 
     namespace util {
 

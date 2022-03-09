@@ -7,7 +7,7 @@
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 
-#include "Messaging/Messenger.hpp"
+#include "ECS/Messaging/Messenger.hpp"
 
 using namespace neo;
 

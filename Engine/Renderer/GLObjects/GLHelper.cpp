@@ -1,7 +1,7 @@
 #include "GLHelper.hpp"
 
 #include "Util/Util.hpp"
-#include "Util/Log.hpp"
+#include "Util/Log/Log.hpp"
 
 namespace neo {
 

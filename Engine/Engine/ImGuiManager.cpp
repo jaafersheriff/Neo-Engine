@@ -4,6 +4,8 @@
 #include "Renderer/Renderer.hpp"
 #include "Hardware/Mouse.hpp"
 
+#include "Util/Util.hpp"
+
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -14,7 +16,7 @@ namespace neo {
 
     bool ImGuiManager::mIsEnabled = true;
     ImGuiManager::Viewport ImGuiManager::mViewport;
-    NeoConsole ImGuiManager::mConsole;
+    ImGuiConsole ImGuiManager::mConsole;
 
     void ImGuiManager::init(GLFWwindow* window) {
         /* Init ImGui */
@@ -25,7 +27,7 @@ namespace neo {
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         ImGui_ImplGlfw_InitForOpenGL(window, false);
-        ImGui_ImplOpenGL3_Init(Renderer::NEO_GLSL_VERSION.c_str());
+        ImGui_ImplOpenGL3_Init(Renderer::mDetails.mGLSLVersion.c_str());
 
         ImGuiStyle* style = &ImGui::GetStyle();
         style->ChildRounding = 4.0f;
@@ -193,6 +195,7 @@ namespace neo {
     }
 
     void ImGuiManager::reset() {
+        mConsole.clearLog();
         mViewport = {};
     }
 
@@ -225,5 +228,13 @@ namespace neo {
         ImGui_ImplGlfw_Shutdown();
         ImPlot::DestroyContext();
         ImGui::DestroyContext();
+    }
+
+    void ImGuiManager::log(const char* log, util::LogSeverity severity) {
+        mConsole.addLog(log, severity);
+    }
+
+    void ImGuiManager::imGuiEditor() {
+        mConsole.imGuiEditor();
     }
 }

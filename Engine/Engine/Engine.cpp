@@ -27,13 +27,13 @@ extern "C" {
 #include "Hardware/Keyboard.hpp"
 #include "Hardware/Mouse.hpp"
 
-#include "Messaging/Messenger.hpp"
+#include "ECS/Messaging/Messenger.hpp"
 
 #include "Loader/Loader.hpp"
 #include "Loader/MeshGenerator.hpp"
 
 #include "Util/FrameCounter.hpp"
-#include "Util/Log.hpp"
+#include "Util/Log/Log.hpp"
 
 #include <time.h>
 #include <iostream>
@@ -130,6 +130,7 @@ namespace neo {
                     mECS.imguiEdtor();
                     Renderer::imGuiEditor(mWindow, mECS);
                     Library::imGuiEditor();
+                    ImGuiManager::imGuiEditor();
                     imGuiEditor(demos, counter);
 
                     ImGuiManager::end();
@@ -167,10 +168,10 @@ namespace neo {
         Messenger::clean();
 
         /* Init the new state */
+        ImGuiManager::reset();
         demos.swap();
         auto config = demos.getConfig();
         mWindow.reset(config.name);
-        ImGuiManager::reset();
         mMouse.init();
         mKeyboard.init();
         Renderer::setDemoConfig(config);
@@ -240,12 +241,11 @@ namespace neo {
     }
 
     void Engine::imGuiEditor(DemoWrangler& demos, const util::FrameCounter& counter) {
-        ImGuiManager::mConsole.Draw();
         {
             ImGui::Begin("Stats");
             counter.imGuiEditor();
-            ImGui::Text("Num Draws: %d", Renderer::mStats.mNumDraws);
-            ImGui::Text("Num Shaders: %d", Renderer::mStats.mNumShaders);
+            ImGui::TextWrapped("Num Draws: %d", Renderer::mStats.mNumDraws);
+            ImGui::TextWrapped("Num Shaders: %d", Renderer::mStats.mNumShaders);
             if (auto stats = mECS.getComponentTuple<MouseComponent, ViewportDetailsComponent>()) {
                 if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
                     stats->get<ViewportDetailsComponent>()->imGuiEditor();

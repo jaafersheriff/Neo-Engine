@@ -134,10 +134,10 @@ namespace neo {
         ImGui::Begin("Library");
         if (ImGui::TreeNodeEx("FBOs", ImGuiTreeNodeFlags_DefaultOpen)) {
             for (auto& fbo : Library::mFramebuffers) {
-                ImGui::Text((fbo.first + " (" + std::to_string(fbo.second->mFBOID) + ")").c_str());
+                ImGui::TextWrapped((fbo.first + " (" + std::to_string(fbo.second->mFBOID) + ")").c_str());
                 for (auto& t : fbo.second->mTextures) {
                     ImGui::SameLine();
-                    ImGui::Text((std::to_string(t->mTextureID) + " [" + std::to_string(t->mWidth) + ", " + std::to_string(t->mHeight) + "]").c_str());
+                    ImGui::TextWrapped((std::to_string(t->mTextureID) + " [" + std::to_string(t->mWidth) + ", " + std::to_string(t->mHeight) + "]").c_str());
                     ImGui::SameLine();
                     textureFunc(*t);
                 }
@@ -146,7 +146,7 @@ namespace neo {
         }
         if (ImGui::TreeNodeEx("Meshes", ImGuiTreeNodeFlags_DefaultOpen)) {
             for (auto& m : Library::mMeshes) {
-                ImGui::Text("%s", m.first.c_str());
+                ImGui::TextWrapped("%s", m.first.c_str());
             }
             ImGui::TreePop();
         }

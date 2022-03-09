@@ -4,7 +4,7 @@
 
 #include "Renderer/Renderer.hpp"
 #include "Util/Util.hpp"
-#include "Util/Log.hpp"
+#include "Util/Log/Log.hpp"
 
 #include <fstream>
 #include <vector>
@@ -89,7 +89,7 @@ namespace neo {
         std::string sourceString(shaderString);
 
         // Prepend #version
-        sourceString.insert(0, (Renderer::NEO_GLSL_VERSION + "\n").c_str());
+        sourceString.insert(0, (Renderer::mDetails.mGLSLVersion+ "\n").c_str());
 
         // Break up source by line
         std::string::size_type start = 0;

@@ -5,7 +5,7 @@
 
 #include "GBufferComponent.hpp"
 
-#include "Messaging/Messenger.hpp"
+#include "ECS/Messaging/Messenger.hpp"
 
 using namespace neo;
 

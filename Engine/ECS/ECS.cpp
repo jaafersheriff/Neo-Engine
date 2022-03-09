@@ -17,7 +17,7 @@ namespace neo {
     }
 
     void ECS::clean() {
-        NEO_LOG_I("Cleaning ECS...");
+        NEO_LOG("Cleaning ECS...");
         for (auto& gameObject : mGameObjects) {
             removeGameObject(*gameObject);
         }
@@ -158,7 +158,7 @@ namespace neo {
         for (auto go : getGameObjects()) {
             count += go->getAllComponents().size();
         }
-        ImGui::Text("Components: %d", count);
+        ImGui::TextWrapped("Components: %d", count);
         char buf[256];
         sprintf(buf, "Gameobjects: %d", static_cast<int>(getGameObjects().size()));
         if (ImGui::TreeNodeEx(buf, ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -167,7 +167,7 @@ namespace neo {
                     if (ImGui::TreeNodeEx(gameObject->mTag.c_str())) {
                         for (auto&& [type, components] : gameObject->getComponentsMap()) {
                             for (int i = 0; i < components.size(); i++) {
-                                ImGui::Text(type.name());
+                                ImGui::TextWrapped(type.name());
                                 components[i]->imGuiEditor();
                                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.81f, 0.20f, 0.20f, 0.40f));
                                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
@@ -194,7 +194,7 @@ namespace neo {
                 bool treeActive = ImGui::TreeNodeEx(sys->mName.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                     ImGui::SetDragDropPayload("SYSTEM_SWAP", &i, sizeof(unsigned));
-                    ImGui::Text("Swap %s", sys->mName.c_str());
+                    ImGui::TextWrapped("Swap %s", sys->mName.c_str());
                     ImGui::EndDragDropSource();
                 }
                 if (ImGui::BeginDragDropTarget()) {

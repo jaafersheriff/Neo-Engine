@@ -3,7 +3,7 @@
 #include "Renderer/Shader/PostProcessShader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "Messaging/Messenger.hpp"
+#include "ECS/Messaging/Messenger.hpp"
 
 using namespace neo;
 

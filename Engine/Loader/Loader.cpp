@@ -7,7 +7,7 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
-#include "Util/Log.hpp"
+#include "Util/Log/Log.hpp"
 
 #pragma warning(push)
 #pragma warning(disable: 4706)

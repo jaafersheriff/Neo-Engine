@@ -4,7 +4,7 @@
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "DemoInfra/IDemo.hpp"
 
-#include "Messaging/Messenger.hpp"
+#include "ECS/Messaging/Messenger.hpp"
 
 #include <unordered_map>
 #include <typeindex>
@@ -29,6 +29,16 @@ namespace neo {
             uint32_t mNumShaders = 0;
         };
 
+        struct RendererDetails {
+            uint32_t mGLMajorVersion = 0;
+            uint32_t mGLMinorVersion = 0;
+            std::string mGLSLVersion = "";
+            glm::ivec3 mMaxComputeWorkGroupSize = { 0,0,0 };
+            std::string mVendor = "";
+            std::string mRenderer = "";
+            std::string mShadingLanguage = "";
+        };
+
         public:
             Renderer() = default;
             ~Renderer() = default;
@@ -39,11 +49,8 @@ namespace neo {
 
             static std::string APP_SHADER_DIR;
             static std::string ENGINE_SHADER_DIR;
-            static unsigned NEO_GL_MAJOR_VERSION;
-            static unsigned NEO_GL_MINOR_VERSION;
-            static std::string NEO_GLSL_VERSION;
-            static glm::ivec3 NEO_MAX_COMPUTE_GROUP_SIZE;
             static FrameStats mStats;
+            static RendererDetails mDetails;
 
             static void setDemoConfig(IDemo::Config);
             static void init();

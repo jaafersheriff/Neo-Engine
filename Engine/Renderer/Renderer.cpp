@@ -29,10 +29,7 @@ namespace neo {
     MICROPROFILE_LEAVE();\
     MICROPROFILE_GPU_LEAVE()
 
-    unsigned Renderer::NEO_GL_MAJOR_VERSION = 4;
-    unsigned Renderer::NEO_GL_MINOR_VERSION = 4;
-    std::string Renderer::NEO_GLSL_VERSION = "#version 440";
-    glm::ivec3 Renderer::NEO_MAX_COMPUTE_GROUP_SIZE = glm::ivec3(1);
+    Renderer::RendererDetails Renderer::mDetails = { 4, 4, "#version 440" };
 
     std::string Renderer::APP_SHADER_DIR;
     std::string Renderer::ENGINE_SHADER_DIR = "../Engine/shaders/";
@@ -70,9 +67,16 @@ namespace neo {
         });
 
         /* Set max work gruop */
-        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &NEO_MAX_COMPUTE_GROUP_SIZE.x));
-        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &NEO_MAX_COMPUTE_GROUP_SIZE.y));
-        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &NEO_MAX_COMPUTE_GROUP_SIZE.z));
+        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x));
+        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y));
+        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z));
+        char buf[256];
+        memcpy(buf, glGetString(GL_VENDOR), 256);
+        mDetails.mVendor = buf;
+        memcpy(buf, glGetString(GL_RENDERER), 256);
+        mDetails.mRenderer = buf;
+        memcpy(buf, glGetString(GL_SHADING_LANGUAGE_VERSION), 256);
+        mDetails.mShadingLanguage = buf;
 
         /* Init default GL state */
         resetState();
@@ -297,6 +301,12 @@ namespace neo {
         ImGui::End();
 
         ImGui::Begin("Renderer");
+        ImGui::TextWrapped("OpenGL Version: %d.%d", mDetails.mGLMajorVersion, mDetails.mGLMinorVersion);
+        ImGui::TextWrapped("Max Shading Language:  %s", mDetails.mShadingLanguage.c_str());
+        ImGui::TextWrapped("Used Shading Language: %s", mDetails.mGLSLVersion.c_str());
+        ImGui::TextWrapped("Vendor: %s", mDetails.mVendor.c_str());
+        ImGui::TextWrapped("Renderer: %s", mDetails.mRenderer.c_str());
+        ImGui::TextWrapped("Max Compute Work Group Size: [%d, %d, %d]", mDetails.mMaxComputeWorkGroupSize.x, mDetails.mMaxComputeWorkGroupSize.y, mDetails.mMaxComputeWorkGroupSize.z);
         if (ImGui::Button("VSync")) {
             window.toggleVSync();
         }
@@ -361,7 +371,7 @@ namespace neo {
 
                     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                         ImGui::SetDragDropPayload(swapName.c_str(), &i, sizeof(unsigned));
-                        ImGui::Text("Swap %s", shader.second->mName.c_str());
+                        ImGui::TextWrapped("Swap %s", shader.second->mName.c_str());
                         ImGui::EndDragDropSource();
                     }
                     if (ImGui::BeginDragDropTarget()) {

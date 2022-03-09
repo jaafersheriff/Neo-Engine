@@ -3,7 +3,6 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/DemoInfra")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ECS")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Engine")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Loader")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Messaging")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/NeoMain")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Renderer")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Util")
@@ -23,7 +22,6 @@ INTERFACE
 	ECS
 	Engine
 	Loader
-	Messaging
 	Renderer
 	Hardware
 	DemoInfra

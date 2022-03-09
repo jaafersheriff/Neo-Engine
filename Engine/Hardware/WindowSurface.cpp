@@ -4,9 +4,9 @@
 
 #include "Renderer/Renderer.hpp"
 #include "Engine/ImGuiManager.hpp"
-#include "Messaging/Messenger.hpp"
+#include "ECS/Messaging/Messenger.hpp"
 
-#include "Util/Log.hpp"
+#include "Util/Log/Log.hpp"
 #include <iostream>
 
 namespace neo {
@@ -37,8 +37,8 @@ namespace neo {
         glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
         glfwWindowHint(GLFW_DEPTH_BITS, 0);
         glfwWindowHint(GLFW_STENCIL_BITS, 0);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, Renderer::NEO_GL_MAJOR_VERSION);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, Renderer::NEO_GL_MINOR_VERSION);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, Renderer::mDetails.mGLMajorVersion);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, Renderer::mDetails.mGLMinorVersion);
         glfwWindowHint(GLFW_AUTO_ICONIFY, false);
         glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 

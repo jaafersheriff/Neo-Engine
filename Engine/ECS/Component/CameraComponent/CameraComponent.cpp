@@ -2,7 +2,7 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "ECS/GameObject.hpp"
-#include "Messaging/Messenger.hpp"
+#include "ECS/Messaging/Messenger.hpp"
 
 #include "Util/Util.hpp"
 

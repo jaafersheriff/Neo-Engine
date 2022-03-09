@@ -43,7 +43,7 @@ namespace Compute {
                 CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, position.vboID));
 
                 // Dispatch 
-                CHECK_GL(glDispatchCompute(mesh->mNumParticles / Renderer::NEO_MAX_COMPUTE_GROUP_SIZE.x, 1, 1));
+                CHECK_GL(glDispatchCompute(mesh->mNumParticles / Renderer::mDetails.mMaxComputeWorkGroupSize.x, 1, 1));
                 CHECK_GL(glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT));
 
 

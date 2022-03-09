@@ -1,7 +1,7 @@
 #include "ECS/GameObject.hpp"
 #include "SpatialComponent.hpp"
 
-#include "Messaging/Messenger.hpp"
+#include "ECS/Messaging/Messenger.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include <imgui/imgui.h>
