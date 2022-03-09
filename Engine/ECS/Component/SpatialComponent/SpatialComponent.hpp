@@ -8,9 +8,7 @@
 
 namespace neo {
 
-    class SpatialComponent : public Component, public Orientable {
-
-        public:
+    struct SpatialComponent : public Component, public Orientable {
 
             SpatialComponent(ECS::Entity entity);
             SpatialComponent(ECS::Entity entity, const glm::vec3 &);
@@ -37,8 +35,9 @@ namespace neo {
             /* Getters */
             glm::vec3 getPosition() const { return mPosition; }
             glm::vec3 getScale() const { return mScale; }
-            const glm::mat4 & getModelMatrix() const;
-            const glm::mat3 & getNormalMatrix() const;
+            const glm::mat4& getModelMatrix() const;
+            const glm::mat3& getNormalMatrix() const;
+            const glm::mat4& getView() const;
 
         private:
             ECS::Entity mEntity;
@@ -47,10 +46,13 @@ namespace neo {
 
             void _detModelMatrix() const;
             void _detNormalMatrix() const;
+            void _detView() const;
             mutable glm::mat4 mModelMatrix;
             mutable glm::mat3 mNormalMatrix;
+            mutable glm::mat4 mViewMat;
             mutable bool mModelMatrixDirty;
             mutable bool mNormalMatrixDirty;
+            mutable bool mViewMatDirty;
     };
 
 };

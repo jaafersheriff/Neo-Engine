@@ -10,10 +10,7 @@ namespace neo {
 
     class Mesh;
 
-    class LineMeshComponent : public Component {
-
-    public:
-
+    struct LineMeshComponent : public Component {
         struct Node {
             glm::vec3 position;
             glm::vec3 color;
@@ -29,6 +26,7 @@ namespace neo {
 
         const Mesh& getMesh() const;
         const std::vector<Node>& getNodes() const { return mNodes; }
+        virtual std::string getName() override { return "LineMeshComponent"; }
 
         void addNode(const glm::vec3 pos, glm::vec3 col = glm::vec3(1.f));
         void addNodes(const std::vector<Node>& oNodes);
@@ -40,6 +38,5 @@ namespace neo {
         virtual void imGuiEditor() override;
     private:
         Mesh* mMesh;
-
     };
 }

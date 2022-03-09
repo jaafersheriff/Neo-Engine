@@ -61,27 +61,27 @@ namespace neo {
             const auto cameraFrustum = ecs.getComponent<FrustumComponent>(camera.mEntity);
 
             for (auto& tuple : ecs.getComponentTuples<renderable::OutlineRenderable, MeshComponent, SpatialComponent>()) {
-                auto&& [renderable, mesh, spatial] = tuple.raw();
+                const auto& [renderable, mesh, spatial] = tuple.get();
 
                 // VFC
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("OutlineShader", "VFC", MP_AUTO);
                     if (const auto& boundingBox = ecs.getComponent<BoundingBoxComponent>(tuple.mEntity)) {
-                        if (!cameraFrustum->isInFrustum(*spatial, *boundingBox)) {
+                        if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
                             continue;
                         }
                     }
                 }
 
                 // Match the transforms of spatial component..
-                loadUniform("M", spatial->getModelMatrix());
-                loadUniform("N", spatial->getNormalMatrix());
+                loadUniform("M", spatial.getModelMatrix());
+                loadUniform("N", spatial.getNormalMatrix());
 
-                loadUniform("width", renderable->mScale);
-                loadUniform("outlineColor", renderable->mColor);
+                loadUniform("width", renderable.mScale);
+                loadUniform("outlineColor", renderable.mColor);
 
                 /* DRAW */
-                mesh->mMesh.draw();
+                mesh.mMesh.draw();
             }
 
             unbind();

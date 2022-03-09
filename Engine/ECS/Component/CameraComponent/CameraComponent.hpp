@@ -6,34 +6,25 @@
 
 namespace neo {
 
-    class CameraComponent : public Component {
+    struct CameraComponent : public Component {
+        virtual std::string getName() override { return "CameraComponent"; }
+        virtual void imGuiEditor() override;
 
-        public:
-            CameraComponent(GameObject *gameObject);
-            CameraComponent(CameraComponent &&) = default;
+        /* Setters */
+        void setNearFar(float, float);
 
-            virtual void init() override;
-            virtual void imGuiEditor() override;
+        /* Getters */
+        const glm::vec2 getNearFar() const { return glm::vec2(mNear, mFar); }
+        const glm::mat4& getProj() const;
 
-            /* Setters */
-            void setNearFar(float, float);
+    protected:
+        float mNear, mFar;
 
-            /* Getters */
-            const glm::vec2 getNearFar() const { return glm::vec2(mNear, mFar); }
-            const glm::mat4 & getView() const;
-            const glm::mat4 & getProj() const;
+        virtual void _detProj() const {}
 
-        protected:
-            float mNear, mFar;
-
-            void _detView() const;
-            virtual void _detProj() const = 0;
-
-            /* Should never be used directly -- call getters */
-            mutable glm::mat4 mViewMat;
-            mutable glm::mat4 mProjMat;
-            mutable bool mViewMatDirty;
-            mutable bool mProjMatDirty;
+        /* Should never be used directly -- call getters */
+        mutable glm::mat4 mProjMat;
+        mutable bool mProjMatDirty;
 
     };
 

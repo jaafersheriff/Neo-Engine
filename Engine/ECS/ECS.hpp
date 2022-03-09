@@ -35,8 +35,6 @@ namespace neo {
         /* ECS */
         using Entity = entt::entity;
         using Registry = entt::registry;
-        template<typename... CompTs>
-        using View = entt::basic_view<Entity, entt::get_t<CompTs...>, entt::exclude_t<>>;
 
         Entity createEntity();
         void removeEntity(Entity e);
@@ -49,13 +47,13 @@ namespace neo {
         template<typename CompT> CompT* getComponent(Entity e);
         template<typename CompT> const CompT* getComponent(Entity e) const;
         template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple(Entity e);
-        template<typename... CompTs> const ComponentTuple<CompTs...>& cGetComponentTuple(const Entity e) const;
+        template<typename... CompTs> const ComponentTuple<CompTs...> cGetComponentTuple(const Entity e) const;
 
         // All access
         template<typename CompT> CompT* getComponent();
         template<typename CompT> CompT *const getComponent() const;
-        template<typename... CompTs> View<CompTs...> getView();
-        template<typename... CompTs> const View<CompTs...> getView() const;
+        template<typename... CompTs> auto getView();
+        template<typename... CompTs> const auto getView() const;
         template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple();
         template<typename... CompTs> const ComponentTuple<CompTs...> cGetComponentTuple() const;
         template<typename... CompTs> std::vector<ComponentTuple<CompTs...>> getComponentTuples();
@@ -121,7 +119,7 @@ namespace neo {
 	}
 
 	template<typename... CompTs>
-	const ComponentTuple<CompTs...>& ECS::cGetComponentTuple(const Entity e) const {
+	const ComponentTuple<CompTs...> ECS::cGetComponentTuple(const Entity e) const {
 		return ComponentTuple<CompTs...>(e, std::move(const_cast<Registry&>(mRegistry).try_get<CompTs...>(e)));
 	}
 
@@ -166,12 +164,12 @@ namespace neo {
 	}
 
 	template<typename... CompTs>
-	ECS::View<CompTs...> ECS::getView() {
+	auto ECS::getView() {
 		return mRegistry.view<CompTs...>();
 	}
 
 	template<typename... CompTs>
-	const ECS::View<CompTs...> ECS::getView() const {
+	const auto ECS::getView() const {
 		return mRegistry.view<CompTs...>();
 	}
 
@@ -188,21 +186,21 @@ namespace neo {
 	const std::vector<ComponentTuple<CompTs...>> ECS::getComponentTuples() const {
 		std::vector<ComponentTuple<CompTs...>> ret;
 		mRegistry.each([this, &ret](ECS::Entity entity) {
-			ret.emplace_back(cGetComponentTuple<CompTs...>(entity));
+			ret.emplace_back(ComponentTuple<CompTs...>(entity, std::move(const_cast<Registry&>(mRegistry).try_get<CompTs...>(entity))));
 			});
 		return ret;
 	}
 
 	template<typename... CompTs>
 	ComponentTuple<CompTs...> ECS::getComponentTuple() {
-        auto tuples = getComponentsTuples<CompTs...>();
+        auto tuples = getComponentTuples<CompTs...>();
         NEO_ASSERT(tuples.size() == 1, "");
         return tuples[0];
 	}
 
     template<typename... CompTs> 
     const ComponentTuple<CompTs...> ECS::cGetComponentTuple() const {
-        auto tuples = getComponentsTuples<CompTs...>();
+        auto tuples = getComponentTuples<CompTs...>();
         NEO_ASSERT(tuples.size() == 1, "");
         return tuples[0];
     }
