@@ -71,6 +71,7 @@ namespace neo {
         std::vector<ComponentModFunc> mRemoveComponentFuncs;
 
         std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
+        void _initSystems();
         void _updateSystems();
     };
 

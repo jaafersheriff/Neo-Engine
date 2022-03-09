@@ -67,7 +67,7 @@ namespace neo {
 		}
 		ImGui::Text("Components: %d", count);
 		char buf[256];
-		sprintf(buf, "Gameobjects: %d", static_cast<int>(getGameObjects().size()));
+		sprintf(buf, "Gameobjects: %d", mRegistry.size());
 		if (ImGui::TreeNodeEx(buf, ImGuiTreeNodeFlags_DefaultOpen)) {
 			for (auto& gameObject : getGameObjects()) {
 				if (gameObject->mTag.size()) {
