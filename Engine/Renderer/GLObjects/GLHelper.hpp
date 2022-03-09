@@ -7,6 +7,8 @@
 #pragma once
 
 #include "GL/glew.h"
+#include "Util/Util.hpp"
+#include "Util/Log/Log.hpp"
 
 #include <sstream>
 #include <stdio.h>

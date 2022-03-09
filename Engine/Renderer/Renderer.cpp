@@ -44,12 +44,64 @@ namespace neo {
     bool Renderer::mShowBB = false;
     Renderer::FrameStats Renderer::mStats;
 
+    void OpenGLMessageCallback(
+        unsigned source,
+        unsigned type,
+        unsigned id,
+        unsigned severity,
+        int length,
+        const char* message,
+        const void* userParam) {
+        NEO_UNUSED(id, length, userParam);
+
+        static std::unordered_map<GLenum, const char*> sSourceString = {
+            {GL_DEBUG_SOURCE_API, "API"},
+            {GL_DEBUG_SOURCE_WINDOW_SYSTEM, "Window"},
+            {GL_DEBUG_SOURCE_SHADER_COMPILER, "Shader Compiler"},
+            {GL_DEBUG_SOURCE_THIRD_PARTY, "3rd Party"},
+            {GL_DEBUG_SOURCE_APPLICATION, "Application"},
+            {GL_DEBUG_SOURCE_OTHER, "Other"},
+        };
+
+        static std::unordered_map<GLenum, const char*> sTypeString{
+            {GL_DEBUG_TYPE_ERROR, "Error"},
+            {GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "Deprecated Behavior"},
+            {GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, "Undefined Behavior"},
+            {GL_DEBUG_TYPE_PORTABILITY, "Portability"},
+            {GL_DEBUG_TYPE_PERFORMANCE, "Performance"},
+            {GL_DEBUG_TYPE_MARKER, "Marker"},
+            {GL_DEBUG_TYPE_PUSH_GROUP, "Push Group"},
+            {GL_DEBUG_TYPE_POP_GROUP, "Pop Group"},
+            {GL_DEBUG_TYPE_OTHER, "Other"},
+        };
+
+        char glBuf[512];
+        sprintf(glBuf, "[GL %s] [%s]: %s", sSourceString.at(source), sTypeString.at(type), message);
+
+        switch (severity) {
+            case GL_DEBUG_SEVERITY_HIGH:         NEO_LOG_E(glBuf); return;
+            case GL_DEBUG_SEVERITY_MEDIUM:       NEO_LOG_W(glBuf); return;
+            case GL_DEBUG_SEVERITY_LOW:          NEO_LOG_W(glBuf); return;
+            case GL_DEBUG_SEVERITY_NOTIFICATION: NEO_LOG_I(glBuf); return;
+        }
+
+        NEO_FAIL("Unknown severity level!");
+    }
+
     void Renderer::setDemoConfig(IDemo::Config config) {
         APP_SHADER_DIR = config.shaderDir;
         mClearColor = config.clearColor;
     }
 
     void Renderer::init() {
+	#ifdef DEBUG_MODE
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(OpenGLMessageCallback, nullptr);
+		
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
+	#endif
+
         /* Init default FBO */
         mBackBuffer = Library::createFBO("0");
         mBackBuffer->mFBOID = 0;
@@ -66,7 +118,7 @@ namespace neo {
             mDefaultFBO->resize(m.mSize);
         });
 
-        /* Set max work gruop */
+        /* Set max work group */
         CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x));
         CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y));
         CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z));

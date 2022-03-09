@@ -195,7 +195,6 @@ namespace neo {
     }
 
     void ImGuiManager::reset() {
-        mConsole.clearLog();
         mViewport = {};
     }
 
