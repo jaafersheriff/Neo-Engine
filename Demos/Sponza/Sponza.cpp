@@ -47,16 +47,16 @@ namespace Sponza {
     void Demo::init(ECS& ecs) {
 
         /* Game objects */
-        Camera camera(ecs, 45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 150.f);
+        Camera camera(ecs, 45.f, 1.f, 300.f, glm::vec3(0, 0.6f, 5), 0.4f, 150.f);
         ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
         ecs.addComponent<FrustumComponent>(&camera.camera->getGameObject());
         ecs.addComponent<FrustumFitSourceComponent>(&camera.camera->getGameObject());
 
         {
             auto gameObject = &ecs.createGameObject("Light");
-            auto& spat = ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(20.f));
-            spat.setLookDir(glm::normalize(glm::vec3(0.43f, -0.464f, -0.776f)));
-            ecs.addComponent<LightComponent>(gameObject, glm::vec3(1.f));
+            auto& spat = ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(75.f, 200.f, 20.f));
+            spat.setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
+            ecs.addComponent<LightComponent>(gameObject, glm::vec3(1.f), glm::vec3(0.6f, 0.005f, 0.f));
             ecs.addComponent<renderable::WireframeRenderable>(gameObject);
             ecs.addComponent<MeshComponent>(gameObject, *Library::getMesh("cube").mMesh);
             auto& line = ecs.addComponent<LineMeshComponent>(gameObject, glm::vec3(1, 0, 0));
@@ -71,7 +71,7 @@ namespace Sponza {
             ecs.addComponent<SelectableComponent>(shadowCam);
             ecs.addComponent<FrustumComponent>(shadowCam);
             ecs.addComponent<SpatialComponent>(shadowCam);
-            ecs.addComponent<FrustumFitReceiverComponent>(shadowCam);
+            ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
         }
 
         auto assets = Loader::loadMultiAsset("sponza.obj");

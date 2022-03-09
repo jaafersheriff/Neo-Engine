@@ -119,9 +119,10 @@ namespace neo {
         }
 
         glm::vec3 center = lightToWorld * glm::vec4(orthoBox.center(), 1.f); // orthos center back in light space
-        const float boxWidth = orthoBox.width() * 0.5f;
-        const float boxHeight = orthoBox.height() * 0.5f;
-        const float boxDepth = orthoBox.depth() * 0.5f;
+        float bias = receiverCamera->get<FrustumFitReceiverComponent>()->mBias;
+        const float boxWidth = orthoBox.width() * 0.5f * (1.f + bias);
+        const float boxHeight = orthoBox.height() * 0.5f * (1.f + bias);
+        const float boxDepth = orthoBox.depth() * 0.5f * (1.f + bias);
 
         orthoSpat->setPosition(center);
         orthoSpat->setLookDir(lightDir);
