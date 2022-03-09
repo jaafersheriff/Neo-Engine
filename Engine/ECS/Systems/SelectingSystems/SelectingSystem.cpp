@@ -1,6 +1,7 @@
 #include "Engine/Engine.hpp"
 #include "SelectingSystem.hpp"
 
+#include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
 #include "ECS/Component/SelectingComponent/SelectedComponent.hpp"
 
@@ -12,21 +13,25 @@ namespace neo {
         // It's only possible to have one SelectedSystem at a time..
         Messenger::addReceiver<ComponentSelectedMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
             const ComponentSelectedMessage & m(static_cast<const ComponentSelectedMessage &>(msg));
-            if (auto oldSelected = ecs.getSingleComponent<SelectedComponent>()) {
+            auto oldSelectedEntity = ecs.getView<SelectedComponent>();
+            NEO_ASSERT(oldSelectedEntity.size() <= 1, "");
+            if (oldSelectedEntity.size() == 1) {
                 {
                     MICROPROFILE_SCOPEI("SelectingSystem", "ResetOperation", MP_AUTO);
-                    mResetOperation(ecs, oldSelected);
+                    mResetOperation(ecs, ecs.getComponent<SelectedComponent>(oldSelectedEntity.front()));
                 }
-                ecs.removeComponent(*oldSelected);
+                ecs.removeComponent<SelectedComponent>(oldSelectedEntity.front());
             }
-            for (auto selectable : ecs.getComponents<SelectableComponent>()) {
+            for (auto selectableEntity : ecs.getView<SelectableComponent>()) {
+                auto selectable = ecs.getComponent<SelectableComponent>(selectableEntity);
                 if (selectable->mID == m.mComponentID) {
                     {
                         MICROPROFILE_SCOPEI("SelectingSystem", "SelectOperation", MP_AUTO);
-                        NEO_LOG("New entity selected: %d %s", selectable->mID, selectable->getGameObject().getName());
+                        std::string name = ecs.has<TagComponent>(selectableEntity) ? ecs.getComponent<TagComponent>(selectableEntity)->getName() : "";
+                        NEO_LOG("New entity selected: %d %s", selectable->mID, name.c_str());
                         mSelectOperation(ecs, selectable);
                     }
-                    ecs.addComponent<SelectedComponent>(&selectable->getGameObject());
+                    ecs.addComponent<SelectedComponent>(selectableEntity);
                 }
             }
         });

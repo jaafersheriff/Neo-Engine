@@ -1,12 +1,12 @@
 #pragma once
 
 #include "ECS/Systems/System.hpp"
-#include <functional>
-
-#include "glm/glm.hpp"
 
 #include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
 #include "ECS/Component/SelectingComponent/SelectedComponent.hpp"
+
+#include <functional>
+#include <glm/glm.hpp>
 
 namespace neo {
 
