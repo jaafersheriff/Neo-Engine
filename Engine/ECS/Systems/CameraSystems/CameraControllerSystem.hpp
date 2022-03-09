@@ -5,7 +5,6 @@
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 
 namespace neo {
-
     class CameraControllerSystem : public System {
 
     public:
@@ -18,9 +17,7 @@ namespace neo {
 
         float mSuperSpeed = 2.5f;
     protected:
-        void _updateLook(const float dt, ECS&, CameraControllerComponent&);
-        void _updatePosition(const float dt, ECS&, CameraControllerComponent&);
-
-
+        void _updateLook(const float dt, ECS&, CameraControllerComponent& controller, SpatialComponent& spatial);
+        void _updatePosition(const float dt, ECS&, CameraControllerComponent& controller, SpatialComponent& spatial);
     };
 }

@@ -5,35 +5,28 @@
 
 namespace neo {
 
-    class CameraComponent;
+    struct CameraControllerComponent : public Component {
+        float mLookSpeed;
+        float mMoveSpeed;
 
-    class CameraControllerComponent : public Component {
+        int mLookLeftButton;
+        int mLookRightButton;
+        int mLookDownButton;
+        int mLookUpButton;
 
-        public: 
-            float mLookSpeed;
-            float mMoveSpeed;
-            float mTheta, mPhi;
+        int mForwardButton;
+        int mBackwardButton;
+        int mRightButton;
+        int mLeftButton;
+        int mUpButton;
+        int mDownButton;
 
-            int mLookLeftButton;
-            int mLookRightButton;
-            int mLookDownButton;
-            int mLookUpButton;
+        CameraControllerComponent(float ls, float ms);
+        virtual std::string getName() { return "CameraControllerComponent"; };
+        virtual void imGuiEditor();
 
-            int mForwardButton;
-            int mBackwardButton;
-            int mRightButton;
-            int mLeftButton;
-            int mUpButton;
-            int mDownButton;
- 
-            CameraControllerComponent(GameObject *, float ls, float ms);
-            CameraControllerComponent(CameraControllerComponent && other) = default;
-            virtual void imGuiEditor();
+    private:
+        void _updateSpatialOrientation();
 
-            void setOrientation(float p, float t);
-
-        private:
-            void _updateSpatialOrientation();
-
-   };
+    };
 }
