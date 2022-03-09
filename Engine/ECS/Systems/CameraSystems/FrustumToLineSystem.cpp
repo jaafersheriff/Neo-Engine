@@ -9,29 +9,27 @@ namespace neo {
 
     void FrustumToLineSystem::update(ECS& ecs) {
         for (auto& camera : ecs.getComponentTuples<CameraComponent, LineMeshComponent, FrustumComponent>()) {
+            auto&& [_, line, frustum] = camera.raw();
 
-            auto& line = camera.get<LineMeshComponent>();
-            auto& bounds = camera.get<FrustumComponent>();
-
-            line.clearNodes();
+            line->clearNodes();
 
             // We have to do this ridiculousness because line strip (:
-            line.addNode(bounds.NearLeftBottom);
-            line.addNode(bounds.NearLeftTop);
-            line.addNode(bounds.NearRightTop);
-            line.addNode(bounds.NearRightBottom);
-            line.addNode(bounds.NearLeftBottom);
-            line.addNode(bounds.FarLeftBottom);
-            line.addNode(bounds.FarLeftTop);
-            line.addNode(bounds.NearLeftTop);
-            line.addNode(bounds.FarLeftTop);
-            line.addNode(bounds.FarRightTop);
-            line.addNode(bounds.NearRightTop);
-            line.addNode(bounds.FarRightTop);
-            line.addNode(bounds.FarRightBottom);
-            line.addNode(bounds.NearRightBottom);
-            line.addNode(bounds.FarRightBottom);
-            line.addNode(bounds.FarLeftBottom);
+            line->addNode(frustum->NearLeftBottom);
+            line->addNode(frustum->NearLeftTop);
+            line->addNode(frustum->NearRightTop);
+            line->addNode(frustum->NearRightBottom);
+            line->addNode(frustum->NearLeftBottom);
+            line->addNode(frustum->FarLeftBottom);
+            line->addNode(frustum->FarLeftTop);
+            line->addNode(frustum->NearLeftTop);
+            line->addNode(frustum->FarLeftTop);
+            line->addNode(frustum->FarRightTop);
+            line->addNode(frustum->NearRightTop);
+            line->addNode(frustum->FarRightTop);
+            line->addNode(frustum->FarRightBottom);
+            line->addNode(frustum->NearRightBottom);
+            line->addNode(frustum->FarRightBottom);
+            line->addNode(frustum->FarLeftBottom);
         }
     }
 }

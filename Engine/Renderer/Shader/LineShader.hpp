@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Engine/Engine.hpp"
-
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
+#include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/RenderableComponent/LineMeshComponent.hpp"
@@ -41,21 +40,21 @@ namespace neo {
                 glEnable(GL_LINE_SMOOTH);
 
                 /* Load PV */
-                auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
+                auto camera = ecs.cGetComponentTuple<MainCameraComponent, CameraComponent>();
                 NEO_ASSERT(camera, "No main camera exists");
-                loadUniform("P", camera->get<CameraComponent>()->getProj());
-                loadUniform("V", camera->get<CameraComponent>()->getView());
+                loadUniform("P", camera.get<CameraComponent>().getProj());
+                loadUniform("V", camera.get<CameraComponent>().getView());
 
-                for (auto& line : ecs.getComponents<LineMeshComponent>()) {
+                ecs.getView<LineMeshComponent>().each([this, &ecs](ECS::Entity entity, LineMeshComponent& line) {
                     glm::mat4 M(1.f);
-                    if (line->mUseParentSpatial) {
-                        if (auto spatial = line->getGameObject().getComponentByType<SpatialComponent>()) {
+                    if (line.mUseParentSpatial) {
+                        if (auto spatial = ecs.getComponent<SpatialComponent>(entity)) {
                             M = spatial->getModelMatrix();
                         }
                     }
                     loadUniform("M", M);
 
-                    if (line->mWriteDepth) {
+                    if (line.mWriteDepth) {
                         glEnable(GL_DEPTH_TEST);
                     }
                     else {
@@ -63,8 +62,8 @@ namespace neo {
                     }
 
                     /* Bind mesh */
-                    line->getMesh().draw();
-                }
+                    line.getMesh().draw();
+                    });
 
                 unbind();
             }

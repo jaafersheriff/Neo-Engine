@@ -51,38 +51,37 @@ namespace neo {
             glCullFace(GL_FRONT);
 
             /* Load PV */
-            auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
+            auto camera = ecs.cGetComponentTuple<MainCameraComponent, CameraComponent>();
             NEO_ASSERT(camera, "No main camera exists");
-            loadUniform("P", camera->get<CameraComponent>()->getProj());
-            loadUniform("V", camera->get<CameraComponent>()->getView());
-            auto viewport = ecs.getSingleComponent<ViewportDetailsComponent>();
+            loadUniform("P", camera.get<CameraComponent>().getProj());
+            loadUniform("V", camera.get<CameraComponent>().getView());
+            auto viewport = ecs.getComponent<ViewportDetailsComponent>();
             loadUniform("screenSize", glm::vec2(viewport->mSize));
 
-            const auto cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
+            const auto cameraFrustum = ecs.getComponent<FrustumComponent>(camera.mEntity);
 
-            for (auto& renderable : ecs.getComponentTuples<renderable::OutlineRenderable, MeshComponent, SpatialComponent>()) {
-                auto renderableOutline = renderable->get<renderable::OutlineRenderable>();
-                auto renderableSpatial = renderable->get<SpatialComponent>();
+            for (auto& tuple : ecs.getComponentTuples<renderable::OutlineRenderable, MeshComponent, SpatialComponent>()) {
+                auto&& [renderable, mesh, spatial] = tuple.raw();
 
                 // VFC
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("OutlineShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                        if (!cameraFrustum->isInFrustum(*renderableSpatial, *boundingBox)) {
+                    if (const auto& boundingBox = ecs.getComponent<BoundingBoxComponent>(tuple.mEntity)) {
+                        if (!cameraFrustum->isInFrustum(*spatial, *boundingBox)) {
                             continue;
                         }
                     }
                 }
 
                 // Match the transforms of spatial component..
-                loadUniform("M", renderableSpatial->getModelMatrix());
-                loadUniform("N", renderableSpatial->getNormalMatrix());
+                loadUniform("M", spatial->getModelMatrix());
+                loadUniform("N", spatial->getNormalMatrix());
 
-                loadUniform("width", renderableOutline->mScale);
-                loadUniform("outlineColor", renderableOutline->mColor);
+                loadUniform("width", renderable->mScale);
+                loadUniform("outlineColor", renderable->mColor);
 
                 /* DRAW */
-                renderable->get<MeshComponent>()->mMesh.draw();
+                mesh->mMesh.draw();
             }
 
             unbind();

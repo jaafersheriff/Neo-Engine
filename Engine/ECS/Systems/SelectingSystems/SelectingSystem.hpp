@@ -13,8 +13,8 @@ namespace neo {
     class SelectingSystem : public System {
 
     public:
-        using SelectableOperation = std::function<void(ECS&, SelectableComponent*)>;
-        using SelectedOperation = std::function<void(ECS&, SelectedComponent*)>;
+        using SelectableOperation = std::function<void(ECS&, ECS::Entity entity, SelectableComponent*)>;
+        using SelectedOperation = std::function<void(ECS&, ECS::Entity entity, SelectedComponent*)>;
 
         SelectingSystem(
             std::string name,

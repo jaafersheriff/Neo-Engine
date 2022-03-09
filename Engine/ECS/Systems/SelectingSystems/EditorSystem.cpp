@@ -12,40 +12,41 @@ namespace neo {
     EditorSystem::EditorSystem() 
         : SelectingSystem(
             "Editor System",
-            [](ECS& ecs, SelectedComponent* reset) { 
-                ecs.removeComponent(*reset->getGameObject().getComponentByType<renderable::OutlineRenderable>());
+            [](ECS& ecs, ECS::Entity entity, SelectedComponent* reset) { 
+                ecs.removeComponent<renderable::OutlineRenderable>(entity);
             },
-            [](ECS& ecs, SelectableComponent* selected) {
-                if (!selected->getGameObject().getComponentByType<renderable::OutlineRenderable>()) {
-                    ecs.addComponent<renderable::OutlineRenderable>(&selected->getGameObject(), glm::vec4(1.f, 0.95f, 0.72f, 1.f), 3.f);
+            [](ECS& ecs, ECS::Entity entity, SelectableComponent* selected) {
+                if (!ecs.has<renderable::OutlineRenderable>(entity)) {
+                    ecs.addComponent<renderable::OutlineRenderable>(entity, glm::vec4(1.f, 0.95f, 0.72f, 1.f), 3.f);
                 }
             },
-            [](ECS&, SelectedComponent* ) {}
+            [](ECS& ecs, ECS::Entity entity, SelectedComponent* selected) {
+                NEO_UNUSED(ecs, entity, selected);
+            }
         )
     { 
     }
 
     // TODO : add hovered capability
     void EditorSystem::update(ECS& ecs) {
-        if (auto selected = ecs.getSingleComponent<SelectedComponent>()) {
-            if (auto spatial = selected->getGameObject().getComponentByType<SpatialComponent>()) {
-                if (auto mouseRay = ecs.getSingleComponent<MouseRayComponent>()) {
-                    if (auto mouse = ecs.getSingleComponent<MouseComponent>()) {
-                        glm::vec3 pos;
-                        if (auto bb = selected->getGameObject().getComponentByType<BoundingBoxComponent>()) {
-                            glm::vec3 worldSpaceCenter = spatial->getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
-                            glm::vec3 offsetTranslation = spatial->getPosition() - worldSpaceCenter;
-                            float distance = glm::distance(worldSpaceCenter, mouseRay->mPosition);
-                            distance += mouse->mFrameMouse.getScrollSpeed();
-                            pos = mouseRay->mPosition + mouseRay->mDirection * distance + offsetTranslation;
-                        }
-                        else {
-                            float distance = glm::distance(spatial->getPosition(), mouseRay->mPosition);
-                            distance += mouse->mFrameMouse.getScrollSpeed();
-                            pos = mouseRay->mPosition + mouseRay->mDirection * distance;
-                        }
-                        spatial->setPosition(pos);
+        if (auto tuple = ecs.getComponentTuple<SelectableComponent, SpatialComponent>()) {
+            if (auto mouseRay = ecs.getComponent<MouseRayComponent>()) {
+                if (auto mouse = ecs.getComponent<MouseComponent>()) {
+                    auto&& [selectable, spatial] = tuple.raw();
+                    glm::vec3 pos;
+                    if (auto bb = ecs.getComponent<BoundingBoxComponent>(tuple.mEntity)) {
+                        glm::vec3 worldSpaceCenter = spatial->getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
+                        glm::vec3 offsetTranslation = spatial->getPosition() - worldSpaceCenter;
+                        float distance = glm::distance(worldSpaceCenter, mouseRay->mPosition);
+                        distance += mouse->mFrameMouse.getScrollSpeed();
+                        pos = mouseRay->mPosition + mouseRay->mDirection * distance + offsetTranslation;
                     }
+                    else {
+                        float distance = glm::distance(spatial->getPosition(), mouseRay->mPosition);
+                        distance += mouse->mFrameMouse.getScrollSpeed();
+                        pos = mouseRay->mPosition + mouseRay->mDirection * distance;
+                    }
+                    spatial->setPosition(pos);
                 }
             }
         }

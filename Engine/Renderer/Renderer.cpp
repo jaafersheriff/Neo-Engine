@@ -369,10 +369,11 @@ namespace neo {
         if (ImGui::Checkbox("Show bounding boxes", &mShowBB)) {
             if (mShowBB) {
                 getShader<LineShader>().mActive = true;
-                for (auto box : ecs.getComponents<BoundingBoxComponent>()) {
-                    auto line = box->getGameObject().getComponentByType<LineMeshComponent>();
+                for (auto boxEntity : ecs.getView<BoundingBoxComponent>()) {
+                    auto box = ecs.getComponent<BoundingBoxComponent>(boxEntity);
+                    auto line = ecs.getComponent<LineMeshComponent>(boxEntity);
                     if (!line) {
-                        line = &ecs.addComponent<LineMeshComponent>(&box->getGameObject());
+                        line = ecs.addComponent<LineMeshComponent>(boxEntity);
 
                         line->mUseParentSpatial = true;
                         line->mWriteDepth = true;
@@ -407,10 +408,8 @@ namespace neo {
                 }
             }
             else {
-                for (auto box : ecs.getComponents<BoundingBoxComponent>()) {
-                    if (auto line = box->getGameObject().getComponentByType<LineMeshComponent>()) {
-                        ecs.removeComponent(*line);
-                    }
+                for (auto tuple : ecs.getComponentTuples<BoundingBoxComponent, LineMeshComponent>()) {
+                    ecs.removeComponent<LineMeshComponent>(tuple.mEntity);
                 }
             }
         }

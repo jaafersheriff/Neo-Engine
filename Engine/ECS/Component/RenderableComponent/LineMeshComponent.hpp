@@ -25,9 +25,7 @@ namespace neo {
         bool mUseParentSpatial;
         mutable bool mDirty;
 
-        LineMeshComponent(GameObject* go, std::optional<glm::vec3> overrideColor = std::nullopt);
-
-        virtual void init() override;
+        LineMeshComponent(std::optional<glm::vec3> overrideColor = std::nullopt);
 
         const Mesh& getMesh() const;
         const std::vector<Node>& getNodes() const { return mNodes; }

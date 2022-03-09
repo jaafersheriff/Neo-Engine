@@ -8,4 +8,5 @@ PUBLIC
 PRIVATE
 	imgui
 	glm
+	EnTT::EnTT
 )
