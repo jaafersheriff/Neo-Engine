@@ -50,7 +50,8 @@ namespace neo {
         }
 
         virtual void render(const ECS& ecs) override {
-            auto mouse = ecs.getSingleComponent<MouseComponent>();
+            auto mouse = ecs.getComponent<MouseComponent>();
+            NEO_ASSERT(mouse, "wtf");
             // TODO : add hovered capability
             if (!mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
                 return;
@@ -69,24 +70,24 @@ namespace neo {
             bind();
 
             /* Load PV */
-            auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
+            auto camera = ecs.cGetComponentTuple<MainCameraComponent, CameraComponent>();
             NEO_ASSERT(camera, "No main camera exists");
-            loadUniform("P", camera->get<CameraComponent>()->getProj());
-            loadUniform("V", camera->get<CameraComponent>()->getView());
+            loadUniform("P", camera.get<CameraComponent>().getProj());
+            loadUniform("V", camera.get<CameraComponent>().getView());
 
-            const auto& cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
+            const auto cameraFrustum = ecs.getComponent<FrustumComponent>(camera.mEntity);
 
             uint8_t rendered = 1;
             std::unordered_map<uint8_t, uint32_t> map;
-            for (const auto& renderable : ecs.getComponentTuples<SelectableComponent, MeshComponent, SpatialComponent>()) {
-                auto renderableSpatial = renderable->get<SpatialComponent>();
-                uint32_t componentID = renderable->get<SelectableComponent>()->mID;
+            for (const auto& tuple : ecs.getComponentTuples<SelectableComponent, MeshComponent, SpatialComponent>()) {
+                const auto& [selectable, mesh, spatial] = tuple.get();
+                uint32_t componentID = selectable.mID;
 
                 // VFC
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("PhongShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = renderable->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                        if (!cameraFrustum->isInFrustum(*renderableSpatial, *boundingBox)) {
+                    if (const auto& boundingBox = ecs.getComponent<BoundingBoxComponent>(tuple.mEntity)) {
+                        if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
                             continue;
                         }
                     }
@@ -98,8 +99,8 @@ namespace neo {
                 loadUniform("componentID", static_cast<int>(rendered));
 
                 /* DRAW */
-                loadUniform("M", renderableSpatial->getModelMatrix());
-                renderable->get<MeshComponent>()->mMesh.draw();
+                loadUniform("M", spatial.getModelMatrix());
+                mesh.mMesh.draw();
                 rendered++;
                 if (rendered > 256) {
                     break;

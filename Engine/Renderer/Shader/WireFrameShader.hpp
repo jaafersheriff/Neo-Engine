@@ -37,21 +37,17 @@ namespace neo {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
                 /* Load PV */
-                auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
+                auto camera = ecs.cGetComponentTuple<MainCameraComponent, CameraComponent>();
                 NEO_ASSERT(camera, "No main camera exists");
-                loadUniform("P", camera->get<CameraComponent>()->getProj());
-                loadUniform("V", camera->get<CameraComponent>()->getView());
+                loadUniform("P", camera.get<CameraComponent>().getProj());
+                loadUniform("V", camera.get<CameraComponent>().getView());
 
-                for (auto& renderableIt : ecs.getComponentTuples<renderable::WireframeRenderable, MeshComponent, SpatialComponent>()) {
-                    const auto renderable = renderableIt->get<renderable::WireframeRenderable>();
-                    const auto spatialComponent = renderableIt->get<SpatialComponent>();
+                for (auto& tuple : ecs.getComponentTuples<renderable::WireframeRenderable, MeshComponent, SpatialComponent>()) {
+                    auto& [renderable, mesh, spatial] = tuple.get();
 
-                    loadUniform("M", spatialComponent->getModelMatrix());
-
+                    loadUniform("M", spatial->getModelMatrix());
                     loadUniform("wireColor", renderable->mColor);
-
-                    /* Draw outline */
-                    renderableIt->get<MeshComponent>()->mMesh.draw();
+                    mesh->mMesh.draw();
                 }
 
                 unbind();

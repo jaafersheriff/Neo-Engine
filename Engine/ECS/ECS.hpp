@@ -59,7 +59,7 @@ namespace neo {
         template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple();
         template<typename... CompTs> const ComponentTuple<CompTs...> cGetComponentTuple() const;
         template<typename... CompTs> std::vector<ComponentTuple<CompTs...>> getComponentTuples();
-        template<typename... CompTs> std::vector<const ComponentTuple<CompTs...>> getComponentTuples() const;
+        template<typename... CompTs> const std::vector<ComponentTuple<CompTs...>> getComponentTuples() const;
 
         /* Attach a system */
         template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
@@ -80,7 +80,7 @@ namespace neo {
     template<typename CompT>
     CompT* ECS::getComponent() {
         auto view = mRegistry.view<CompT>();
-        if (view.size() != 1) {
+        if (view.size() > 1) {
             NEO_LOG_W("Trying to get a single %s when multiple exist", mRegistry.get<CompT>(view.front())->getName().c_str());
         }
         if (view.size()) {
@@ -110,7 +110,7 @@ namespace neo {
             }
         }
 
-        mSystems.push_back({ typeI, std::make_unique<SysT>(std::forward<Args>(args)...) });
+        mSystems.emplace_back({ typeI, std::make_unique<SysT>(std::forward<Args>(args)...) });
         return static_cast<SysT &>(*mSystems.back().second);
     }
 
@@ -179,16 +179,16 @@ namespace neo {
 	std::vector<ComponentTuple<CompTs...>> ECS::getComponentTuples() {
 		std::vector<ComponentTuple<CompTs...>> ret;
 		mRegistry.each([this, &ret](ECS::Entity entity) {
-			ret.push_back(getComponentTuple<CompTs...>(entity));
+			ret.emplace_back(getComponentTuple<CompTs...>(entity));
 			});
 		return ret;
 	}
 
 	template<typename... CompTs>
-	std::vector<const ComponentTuple<CompTs...>> ECS::getComponentTuples() const {
+	const std::vector<ComponentTuple<CompTs...>> ECS::getComponentTuples() const {
 		std::vector<ComponentTuple<CompTs...>> ret;
 		mRegistry.each([this, &ret](ECS::Entity entity) {
-			ret.push_back(cGetComponentTuple<CompTs...>(entity));
+			ret.emplace_back(cGetComponentTuple<CompTs...>(entity));
 			});
 		return ret;
 	}

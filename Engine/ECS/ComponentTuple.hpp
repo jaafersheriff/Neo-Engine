@@ -28,7 +28,6 @@ namespace neo {
 			return mValid;
 		}
 
-
 		template<typename CompT>
 		CompT& get() {
 			return *std::get<CompT*>(mTuple);
@@ -39,12 +38,12 @@ namespace neo {
 			return *std::get<CompT*>(mTuple);
 		}
 
-		auto raw() {
-			return mTuple;
+		auto get() {
+			return _getRaw(std::make_index_sequence<sizeof...(CompTs)>{});
 		}
 
-		auto raw() const {
-			return _getRaw<CompTs...>();
+		std::tuple<const CompTs&...> get() const {
+			return _getRaw(std::make_index_sequence<sizeof...(CompTs)>{});
 		}
 
 	private:
@@ -60,13 +59,16 @@ namespace neo {
 			}
 		}
 
-		template<typename T, typename... S>
-		auto _getRaw() const {
-			std::tuple<T *const> end = std::make_tuple<T *const>(std::get<T*>(mTuple));
-			if constexpr (sizeof...(S) > 0) {
-				return std::make_tuple<T* const, S* const...>(end, _getRaw<S...>());
-			}
-			return end;
+		template<size_t... I>
+		auto _getRaw(std::index_sequence<I...>) { 
+			return std::tie(*std::get<I>(mTuple)...);
 		}
+
+		template<size_t... I>
+		auto _getRaw(std::index_sequence<I...>) const { 
+			return std::tie(*std::get<I>(mTuple)...);
+		}
+
+
 	};
 }
