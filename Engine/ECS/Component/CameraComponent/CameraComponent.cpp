@@ -12,24 +12,19 @@
 
 namespace neo {
 
-    CameraComponent::CameraComponent(GameObject *gameObject) :
-        Component(gameObject),
-        mNear(),
-        mFar(),
-        mViewMat(),
-        mProjMat(),
-        mViewMatDirty(true),
-        mProjMatDirty(true)
-    {}
-
-    void CameraComponent::init() {
-        mViewMatDirty = true;
-        mProjMatDirty = true;
-
-        Messenger::addReceiver<SpatialChangeMessage>(mGameObject, [&](const Message& msg, ECS& ecs) {
+    CameraComponent::CameraComponent()
+        : mNear()
+        , mFar()
+        , mViewMat()
+        , mProjMat()
+        , mViewMatDirty(true)
+        , mProjMatDirty(true)
+    {
+        // TODO - busted
+        Messenger::addReceiver<SpatialChangeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
             NEO_UNUSED(msg, ecs);
             mViewMatDirty = true;
-        });
+            });
     }
 
     void CameraComponent::setNearFar(float near, float far) {

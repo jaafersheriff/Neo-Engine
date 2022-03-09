@@ -1,16 +1,17 @@
 #pragma once
 
 #include "ECS/Component/Component.hpp"
-#include "ECS/GameObject.hpp"
 
 namespace neo {
 
-    class TagComponent : public Component {
-
-    public:
-        TagComponent(GameObject *go, std::string name)
-            , mTag(name)
+    struct TagComponent : public Component {
+        TagComponent(std::string name)
+            : mTag(name)
         {}
+
+        virtual std::string getName() override {
+            return "Tag Component";
+        }
 
         const std::string mTag;
     };
