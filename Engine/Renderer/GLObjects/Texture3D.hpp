@@ -16,16 +16,16 @@ namespace neo {
         
     protected:
         virtual void _bind() const override {
-            CHECK_GL(glBindTexture(GL_TEXTURE_3D, mTextureID));
+            glBindTexture(GL_TEXTURE_3D, mTextureID);
         }
 
         virtual void _applyFormat() override {
-            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, mFormat.mFilter));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, mFormat.mFilter));
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, mFormat.mFilter);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, mFormat.mFilter);
 
-            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, mFormat.mMode));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, mFormat.mMode));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, mFormat.mMode));
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, mFormat.mMode);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, mFormat.mMode);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, mFormat.mMode);
         }
 
         virtual void _upload(const void* data) override {
@@ -34,14 +34,14 @@ namespace neo {
 
             bind();
 
-            CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mInternalFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, data));
+            glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mInternalFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, data);
 
-            CHECK_GL(glBindTexture(GL_TEXTURE_3D, 0));
+            glBindTexture(GL_TEXTURE_3D, 0);
         }
 
         virtual void _resize() override {
             bind();
-            CHECK_GL(glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mInternalFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, 0));
+            glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mInternalFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, 0);
         }
 
     };

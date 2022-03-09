@@ -137,10 +137,8 @@ namespace neo {
         });
 
         /* Init GLEW */
-        CHECK_GL(glGetError());
         glewExperimental = GL_FALSE;
         NEO_ASSERT(glewInit()== GLEW_OK, "Failed to init GLEW");
-        glGetError();
 
         glfwSwapInterval(mDetails.mVSyncEnabled);
 

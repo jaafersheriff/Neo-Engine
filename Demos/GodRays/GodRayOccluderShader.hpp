@@ -30,7 +30,7 @@ namespace GodRays {
             auto fbo = Library::getFBO("godray");
             fbo->bind();
             auto viewport = ecs.getSingleComponent<ViewportDetailsComponent>();
-            CHECK_GL(glViewport(0, 0, viewport->mSize.x, viewport->mSize.y));
+            glViewport(0, 0, viewport->mSize.x, viewport->mSize.y);
 
             bind();
 

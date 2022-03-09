@@ -89,14 +89,14 @@ namespace neo {
             checkError(GET_FILE_LINE);
         }
 
-        void printOpenGLErrors(char const * const Function, char const * const File, int const Line) {
-            GLenum Error = glGetError();
-            if (Error != GL_NO_ERROR)
-            {
-                const char *const ErrorString = errorString(Error);
-                NEO_FAIL("OpenGL error in file '%s' at line %d calling function '%s': '%s' '%d 0x%X'\n", File, Line, Function, ErrorString, Error, Error);
-            }
-        }
+        // void printOpenGLErrors(char const * const Function, char const * const File, int const Line) {
+        //     GLenum Error = glGetError();
+        //     if (Error != GL_NO_ERROR)
+        //     {
+        //         const char *const ErrorString = errorString(Error);
+        //         NEO_FAIL("OpenGL error in file '%s' at line %d calling function '%s': '%s' '%d 0x%X'\n", File, Line, Function, ErrorString, Error, Error);
+        //     }
+        // }
 
         void checkFrameBuffer() {
             GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);

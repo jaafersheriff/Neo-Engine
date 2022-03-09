@@ -119,9 +119,9 @@ namespace neo {
         });
 
         /* Set max work group */
-        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x));
-        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y));
-        CHECK_GL(glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z));
+        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
+        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
+        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z);
         char buf[256];
         memcpy(buf, glGetString(GL_VENDOR), 256);
         mDetails.mVendor = buf;
@@ -137,24 +137,24 @@ namespace neo {
     void Renderer::resetState() {
         RENDERER_MP_ENTER("resetState");
 
-        CHECK_GL(glClearColor(0.0f, 0.0f, 0.0f, 1.f));
+        glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 
-        CHECK_GL(glEnable(GL_DEPTH_TEST));
-        CHECK_GL(glDepthFunc(GL_LESS));
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
 
-        CHECK_GL(glEnable(GL_CULL_FACE));
-        CHECK_GL(glCullFace(GL_BACK));
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
 
-        CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        CHECK_GL(glEnable(GL_BLEND));
-        CHECK_GL(glBlendEquation(GL_FUNC_ADD));
-        CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        glEnable(GL_BLEND);
+        glBlendEquation(GL_FUNC_ADD);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        CHECK_GL(glActiveTexture(GL_TEXTURE0));
-        CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
 
-        CHECK_GL(glBindVertexArray(0));
+        glBindVertexArray(0);
 
         RENDERER_MP_LEAVE();
     }
@@ -202,10 +202,10 @@ namespace neo {
             /* Reset default FBO state */
             RENDERER_MP_ENTER("Reset DefaultFBO");
             mDefaultFBO->bind();
-            CHECK_GL(glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f));
+            glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f);
             glm::ivec2 frameSize = window.getDetails().mSize;
-            CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
-            CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+            glViewport(0, 0, frameSize.x, frameSize.y);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             RENDERER_MP_LEAVE();
 
             /* Render all scene shaders */
@@ -264,14 +264,14 @@ namespace neo {
                 }
                 mBackBuffer->bind();
                 resetState();
-                CHECK_GL(glDisable(GL_DEPTH_TEST));
-                CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
-                CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
-                CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+                glDisable(GL_DEPTH_TEST);
+                glClearColor(0.f, 0.f, 0.f, 1.f);
+                glClear(GL_COLOR_BUFFER_BIT);
+                glViewport(0, 0, frameSize.x, frameSize.y);
 
                 mBlitShader->bind();
                 auto meshData = Library::getMesh("quad");
-                CHECK_GL(glBindVertexArray(meshData.mMesh->mVAOID));
+                glBindVertexArray(meshData.mMesh->mVAOID);
 
                 // Bind input fbo texture
                 mBlitShader->loadTexture("inputTexture", *mDefaultFBO->mTextures[0]);
@@ -297,15 +297,15 @@ namespace neo {
         // Reset output FBO
         output->bind();
         resetState();
-        CHECK_GL(glDisable(GL_DEPTH_TEST));
-        CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
-        CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
-        CHECK_GL(glViewport(0, 0, frameSize.x, frameSize.y));
+        glDisable(GL_DEPTH_TEST);
+        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glViewport(0, 0, frameSize.x, frameSize.y);
 
         // Bind quad 
         shader.bind();
         auto meshData = Library::getMesh("quad");
-        CHECK_GL(glBindVertexArray(meshData.mMesh->mVAOID));
+        glBindVertexArray(meshData.mMesh->mVAOID);
 
         // Bind input fbo texture
         shader.loadTexture("inputFBO", *input->mTextures[0]); 

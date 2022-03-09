@@ -48,7 +48,7 @@ namespace neo {
         virtual void render(const ECS& ecs) override {
             bind();
 
-            CHECK_GL(glCullFace(GL_FRONT));
+            glCullFace(GL_FRONT);
 
             /* Load PV */
             auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();

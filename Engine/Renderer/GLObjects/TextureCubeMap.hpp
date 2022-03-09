@@ -27,16 +27,16 @@ namespace neo {
         }
 
         virtual void _bind() const override {
-            CHECK_GL(glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureID));
+            glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureID);
         }
 
         virtual void _applyFormat() override {
-            CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, mFormat.mFilter));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, mFormat.mFilter));
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, mFormat.mFilter);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, mFormat.mFilter);
 
-            CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, mFormat.mMode));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, mFormat.mMode));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, mFormat.mMode));
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, mFormat.mMode);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, mFormat.mMode);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, mFormat.mMode);
         }
 
         void _upload(void** data) {
@@ -49,10 +49,10 @@ namespace neo {
             // F, B, U, D, R, L
             for (int i = 0; i < 6; i++) {
                 NEO_ASSERT(data[i], "Trying to upload a CubeMap with invalid data");
-                CHECK_GL(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mFormat.mInternalFormat, mSizes[i].x, mSizes[i].y, 0, mFormat.mBaseFormat, GL_UNSIGNED_BYTE, data[i]));
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mFormat.mInternalFormat, mSizes[i].x, mSizes[i].y, 0, mFormat.mBaseFormat, GL_UNSIGNED_BYTE, data[i]);
             }
 
-            CHECK_GL(glActiveTexture(GL_TEXTURE0));
+            glActiveTexture(GL_TEXTURE0);
 
             /* Error check */
             NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when uploading Texture");
@@ -61,7 +61,7 @@ namespace neo {
         virtual void _resize() override {
             bind();
             for (int i = 0; i < 6; i++) {
-                CHECK_GL(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mFormat.mInternalFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, GL_UNSIGNED_BYTE, 0));
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mFormat.mInternalFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, GL_UNSIGNED_BYTE, 0);
                 mSizes[i].x = mWidth;
                 mSizes[i].y = mHeight;
             }

@@ -19,16 +19,16 @@ namespace neo {
 
     protected:
         virtual void _bind() const override {
-            CHECK_GL(glBindTexture(GL_TEXTURE_2D, mTextureID));
+            glBindTexture(GL_TEXTURE_2D, mTextureID);
         }
 
         virtual void _applyFormat() override {
             bind();
-            CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mFormat.mFilter));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mFormat.mFilter));
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mFormat.mFilter);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mFormat.mFilter);
 
-            CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mFormat.mMode));
-            CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mFormat.mMode));
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mFormat.mMode);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mFormat.mMode);
         }
 
         virtual void _upload(const void* data) override {
@@ -39,7 +39,7 @@ namespace neo {
             bind();
 
             /* Load texture data to GPU */
-            CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, mFormat.mInternalFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, mFormat.mType, data));
+            glTexImage2D(GL_TEXTURE_2D, 0, mFormat.mInternalFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, mFormat.mType, data);
 
             /* Error check */
             NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when uploading Texture");
@@ -47,7 +47,7 @@ namespace neo {
 
         virtual void _resize() override {
             bind();
-            CHECK_GL(glTexImage2D(GL_TEXTURE_2D, 0, mFormat.mInternalFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, mFormat.mType, 0));
+            glTexImage2D(GL_TEXTURE_2D, 0, mFormat.mInternalFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, mFormat.mType, 0);
         }
 
     };

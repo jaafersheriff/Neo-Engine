@@ -43,9 +43,9 @@ namespace neo {
                 depthFBO->attachDepthTexture(glm::ivec2(dimension), GL_LINEAR, GL_CLAMP_TO_BORDER);
                 depthFBO->disableDraw();
                 depthFBO->disableRead();
-                CHECK_GL(glBindTexture(GL_TEXTURE_2D, depthFBO->mTextures[0]->mTextureID));
-                CHECK_GL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data()));
-                CHECK_GL(glBindTexture(GL_TEXTURE_2D, 0));
+                glBindTexture(GL_TEXTURE_2D, depthFBO->mTextures[0]->mTextureID);
+                glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data());
+                glBindTexture(GL_TEXTURE_2D, 0);
             }
 
             virtual void render(const ECS& ecs) override {
@@ -59,8 +59,8 @@ namespace neo {
                 auto & depthTexture = fbo->mTextures[0];
 
                 fbo->bind();
-                CHECK_GL(glClear(GL_DEPTH_BUFFER_BIT));
-                CHECK_GL(glViewport(0, 0, depthTexture->mWidth, depthTexture->mHeight));
+                glClear(GL_DEPTH_BUFFER_BIT);
+                glViewport(0, 0, depthTexture->mWidth, depthTexture->mHeight);
 
                 bind();
                 loadUniform("P", camera->getProj());

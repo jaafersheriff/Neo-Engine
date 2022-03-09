@@ -39,10 +39,10 @@ namespace Compute {
             loadUniform("spriteColor", mSpriteColor);
 
             if (auto model = ecs.getSingleComponent<ParticleMeshComponent>()) {
-                CHECK_GL(glEnable(GL_BLEND));
-                CHECK_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE));
-                CHECK_GL(glDisable(GL_DEPTH_TEST));
-                CHECK_GL(glDisable(GL_CULL_FACE));
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+                glDisable(GL_DEPTH_TEST);
+                glDisable(GL_CULL_FACE);
 
                 loadUniform("M", model->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
 

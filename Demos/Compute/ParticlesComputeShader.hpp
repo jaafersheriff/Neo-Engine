@@ -39,16 +39,16 @@ namespace Compute {
                 }
 
                 // Bind mesh
-                CHECK_GL(glBindVertexArray(mesh->mMesh->mVAOID));
-                CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, position.vboID));
+                glBindVertexArray(mesh->mMesh->mVAOID);
+                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, position.vboID);
 
                 // Dispatch 
-                CHECK_GL(glDispatchCompute(mesh->mNumParticles / Renderer::mDetails.mMaxComputeWorkGroupSize.x, 1, 1));
-                CHECK_GL(glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT));
+                glDispatchCompute(mesh->mNumParticles / Renderer::mDetails.mMaxComputeWorkGroupSize.x, 1, 1);
+                glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 
                 // Reset bind
-                CHECK_GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, 0));
+                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, 0);
             }
 
             unbind();

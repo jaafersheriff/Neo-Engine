@@ -60,12 +60,12 @@ namespace neo {
             fbo->bind();
             NEO_ASSERT(fbo->mTextures.size() > 0, "Selectable render target never initialized");
 
-            CHECK_GL(glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
-            CHECK_GL(glClearStencil(0));
-            CHECK_GL(glViewport(0, 0, fbo->mTextures[0]->mWidth, fbo->mTextures[0]->mHeight));
+            glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+            glClearStencil(0);
+            glViewport(0, 0, fbo->mTextures[0]->mWidth, fbo->mTextures[0]->mHeight);
 
-            CHECK_GL(glEnable(GL_STENCIL_TEST));
-            CHECK_GL(glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE));
+            glEnable(GL_STENCIL_TEST);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
             bind();
 
             /* Load PV */
@@ -94,7 +94,7 @@ namespace neo {
 
 
                 map.insert({ rendered, componentID });
-                CHECK_GL(glStencilFunc(GL_ALWAYS, static_cast<GLuint>(rendered), 0));
+                glStencilFunc(GL_ALWAYS, static_cast<GLuint>(rendered), 0);
                 loadUniform("componentID", static_cast<int>(rendered));
 
                 /* DRAW */
@@ -111,7 +111,7 @@ namespace neo {
                 MICROPROFILE_SCOPEI("Selectable Shader", "ReadPixels", MP_AUTO);
                 MICROPROFILE_SCOPEGPUI("Selectable Shader - ReadPixels", MP_AUTO);
                 glm::ivec2 mousePos = glm::ivec2(mouse->mFrameMouse.getPos());
-                CHECK_GL(glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer));
+                glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer);
             }
             uint8_t id = buffer[0];
             if (map[id] != mSelectedID) {

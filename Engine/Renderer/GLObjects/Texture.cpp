@@ -18,11 +18,11 @@ namespace neo {
         mHeight(size.y),
         mDepth(size.z) {
 
-        CHECK_GL(glGenTextures(1, &mTextureID));
+        glGenTextures(1, &mTextureID);
     }
 
     void Texture::bind() const {
-        CHECK_GL(glActiveTexture(GL_TEXTURE0 + mTextureID));
+        glActiveTexture(GL_TEXTURE0 + mTextureID);
         _bind();
     }
 
@@ -49,10 +49,10 @@ namespace neo {
     }
 
     void Texture::destroy() {
-        CHECK_GL(glDeleteTextures(1, &mTextureID));
+        glDeleteTextures(1, &mTextureID);
     }
 
     void Texture::generateMipMaps() {
-        CHECK_GL(glGenerateTextureMipmap(mTextureID));
+        glGenerateTextureMipmap(mTextureID);
     }
 }

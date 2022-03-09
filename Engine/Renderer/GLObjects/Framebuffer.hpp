@@ -17,23 +17,23 @@ namespace neo {
         std::vector<Texture *> mTextures;
 
         Framebuffer() {
-            CHECK_GL(glGenFramebuffers(1, &mFBOID));
+            glGenFramebuffers(1, &mFBOID);
         }
         
         void bind() {
             MICROPROFILE_SCOPEI("Framebuffer", "Framebuffer::bind", MP_AUTO);
             MICROPROFILE_SCOPEGPUI("Framebuffer::bind", MP_AUTO);
-            CHECK_GL(glBindFramebuffer(GL_FRAMEBUFFER, mFBOID));
+            glBindFramebuffer(GL_FRAMEBUFFER, mFBOID);
         }
         
         void disableDraw() {
             bind();
-            CHECK_GL(glDrawBuffer(GL_NONE));
+            glDrawBuffer(GL_NONE);
         }
         
         void disableRead() {
             bind();
-            CHECK_GL(glReadBuffer(GL_NONE));
+            glReadBuffer(GL_NONE);
         }
         
         void attachColorTexture(glm::uvec2 size, TextureFormat format) {
@@ -68,12 +68,12 @@ namespace neo {
             for (int i = 0; i < mColorAttachments; i++) {
                 attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
             }
-            CHECK_GL(glDrawBuffers(mColorAttachments, attachments.data()));
+            glDrawBuffers(mColorAttachments, attachments.data());
         }
         
         void resize(const glm::uvec2 size) {
             bind();
-            CHECK_GL(glViewport(0, 0, size.x, size.y));
+            glViewport(0, 0, size.x, size.y);
             for (auto& texture : mTextures) {
                 texture->resize(size);
             }
@@ -83,14 +83,14 @@ namespace neo {
             for (auto texture : mTextures) {
                 texture->destroy();
             }
-            CHECK_GL(glDeleteFramebuffers(1, &mFBOID));
+            glDeleteFramebuffers(1, &mFBOID);
         }
 
         private:
             void _attachTexture(GLuint component, Texture &texture) {
                 mTextures.emplace_back(&texture);
                 bind();
-                CHECK_GL(glFramebufferTexture2D(GL_FRAMEBUFFER, component, GL_TEXTURE_2D, texture.mTextureID, 0));
+                glFramebufferTexture2D(GL_FRAMEBUFFER, component, GL_TEXTURE_2D, texture.mTextureID, 0);
                 CHECK_GL_FRAMEBUFFER();
            }
     };

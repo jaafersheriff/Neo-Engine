@@ -42,14 +42,14 @@ class LightPassShader : public Shader {
 
             auto fbo = Library::getFBO("lightpass");
             fbo->bind();
-            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
-            CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+            glClearColor(0.f, 0.f, 0.f, 1.f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             bind();
 
-            CHECK_GL(glBlendFunc(GL_ONE, GL_ONE));
-            CHECK_GL(glDisable(GL_DEPTH_TEST));
-            CHECK_GL(glEnable(GL_CULL_FACE));
+            glBlendFunc(GL_ONE, GL_ONE);
+            glDisable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);
 
             loadUniform("showLights", showLights);
             loadUniform("showRadius", showRadius);
@@ -80,10 +80,10 @@ class LightPassShader : public Shader {
                 // If camera is inside light 
                 float dist = glm::distance(spatial->getPosition(), mainCamera->get<SpatialComponent>()->getPosition());
                 if (dist - mainCamera->get<CameraComponent>()->getNearFar().x < spatial->getScale().x) {
-                    CHECK_GL(glCullFace(GL_FRONT));
+                    glCullFace(GL_FRONT);
                 }
                 else {
-                    CHECK_GL(glCullFace(GL_BACK));
+                    glCullFace(GL_BACK);
                 }
 
                 Library::getMesh("sphere").mMesh->draw();

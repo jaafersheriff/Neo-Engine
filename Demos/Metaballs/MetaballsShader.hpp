@@ -39,9 +39,9 @@ namespace Metaballs {
                 loadTexture("cubeMap", skybox->mCubeMap);
             }
 
-            CHECK_GL(glDisable(GL_CULL_FACE));
+            glDisable(GL_CULL_FACE);
             if (mWireframe) {
-                CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             }
             for (auto& metaball : ecs.getComponentTuples<MetaballsMeshComponent, SpatialComponent>()) {
 

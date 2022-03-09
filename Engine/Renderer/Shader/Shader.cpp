@@ -56,16 +56,16 @@ namespace neo {
             if (source.processedSource.size()) {
                 source.id = _compileShader(_getGLShaderStage(stage), source.processedSource.c_str());
                 if (source.id) {
-                    CHECK_GL(glAttachShader(mPID, source.id));
+                    glAttachShader(mPID, source.id);
                 }
             }
         }
 
-        CHECK_GL(glLinkProgram(mPID));
+        glLinkProgram(mPID);
 
         // See whether link was successful
         GLint linkSuccess;
-        CHECK_GL(glGetProgramiv(mPID, GL_LINK_STATUS, &linkSuccess));
+        glGetProgramiv(mPID, GL_LINK_STATUS, &linkSuccess);
         if (!linkSuccess) {
             GLHelper::printProgramInfoLog(mPID);
             NEO_FAIL("Error linking shader %s", mName.c_str());
@@ -136,12 +136,12 @@ namespace neo {
     GLuint Shader::_compileShader(GLenum shaderType, const char *shaderString) {
         // Create the shader, assign source code, and compile it
         GLuint shader = glCreateShader(shaderType);
-        CHECK_GL(glShaderSource(shader, 1, &shaderString, NULL));
-        CHECK_GL(glCompileShader(shader));
+        glShaderSource(shader, 1, &shaderString, NULL);
+        glCompileShader(shader);
 
         // See whether compile was successful
         GLint compileSuccess;
-        CHECK_GL(glGetShaderiv(shader, GL_COMPILE_STATUS, &compileSuccess));
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &compileSuccess);
         if (!compileSuccess) {
             std::stringstream stream;
             stream << "Error compiling " << mName;
@@ -228,11 +228,11 @@ namespace neo {
     }
 
     void Shader::bind() {
-        CHECK_GL(glUseProgram(mPID));
+        glUseProgram(mPID);
     }
 
     void Shader::unbind() {
-        CHECK_GL(glUseProgram(0));
+        glUseProgram(0);
     }
 
     void Shader::_addAttribute(const std::string &name) {
@@ -273,12 +273,12 @@ namespace neo {
         if (mPID) {
             unbind();
             for (auto &&[type, source] : mStages) {
-                CHECK_GL(glDetachShader(mPID, source.id));
-                CHECK_GL(glDeleteShader(source.id));
+                glDetachShader(mPID, source.id);
+                glDeleteShader(source.id);
                 source.id = 0;
             }
         }
-        CHECK_GL(glDeleteProgram(mPID));
+        glDeleteProgram(mPID);
         mPID = 0;
     }
 
@@ -301,48 +301,48 @@ namespace neo {
     }
 
     void Shader::loadUniform(const std::string &loc, const bool b) const {
-        CHECK_GL(glUniform1i(getUniform(loc), b));
+        glUniform1i(getUniform(loc), b);
     }
 
     void Shader::loadUniform(const std::string &loc, const int i) const {
-        CHECK_GL(glUniform1i(getUniform(loc), i));
+        glUniform1i(getUniform(loc), i);
     }
 
     void Shader::loadUniform(const std::string &loc, const double d) const {
-        CHECK_GL(glUniform1f(getUniform(loc), static_cast<float>(d)));
+        glUniform1f(getUniform(loc), static_cast<float>(d));
     }
 
     void Shader::loadUniform(const std::string &loc, const float f) const {
-        CHECK_GL(glUniform1f(getUniform(loc), f));
+        glUniform1f(getUniform(loc), f);
     }
 
     void Shader::loadUniform(const std::string &loc, const glm::vec2 & v) const {
-        CHECK_GL(glUniform2f(getUniform(loc), v.x, v.y));
+        glUniform2f(getUniform(loc), v.x, v.y);
     }
     
     void Shader::loadUniform(const std::string &loc, const glm::ivec2 & v) const {
-        CHECK_GL(glUniform2i(getUniform(loc), v.x, v.y));
+        glUniform2i(getUniform(loc), v.x, v.y);
     }
     
     void Shader::loadUniform(const std::string &loc, const glm::vec3 & v) const {
-        CHECK_GL(glUniform3f(getUniform(loc), v.x, v.y, v.z));
+        glUniform3f(getUniform(loc), v.x, v.y, v.z);
     }
     
     void Shader::loadUniform(const std::string &loc, const glm::vec4 & v) const {
-        CHECK_GL(glUniform4f(getUniform(loc), v.r, v.g, v.b, v.a));
+        glUniform4f(getUniform(loc), v.r, v.g, v.b, v.a);
     }
     
     void Shader::loadUniform(const std::string &loc, const glm::mat3 & m) const {
-        CHECK_GL(glUniformMatrix3fv(getUniform(loc), 1, GL_FALSE, &m[0][0]));
+        glUniformMatrix3fv(getUniform(loc), 1, GL_FALSE, &m[0][0]);
     }
     
     void Shader::loadUniform(const std::string& loc, const glm::mat4& m) const {
-        CHECK_GL(glUniformMatrix4fv(getUniform(loc), 1, GL_FALSE, &m[0][0]));
+        glUniformMatrix4fv(getUniform(loc), 1, GL_FALSE, &m[0][0]);
     }
     
     void Shader::loadTexture(const std::string &loc, const Texture & texture) const {
         texture.bind();
-        CHECK_GL(glUniform1i(getUniform(loc), texture.mTextureID));
+        glUniform1i(getUniform(loc), texture.mTextureID);
     }
 
 }

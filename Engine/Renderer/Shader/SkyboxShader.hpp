@@ -41,8 +41,8 @@ namespace neo {
                 return;
             }
 
-            CHECK_GL(glDisable(GL_CULL_FACE));
-            CHECK_GL(glDepthFunc(GL_LEQUAL));
+            glDisable(GL_CULL_FACE);
+            glDepthFunc(GL_LEQUAL);
             bind();
 
             /* Load PV */

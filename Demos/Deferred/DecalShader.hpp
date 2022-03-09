@@ -37,10 +37,10 @@ namespace Deferred {
         virtual void render(const ECS& ecs) override {
             auto fbo = Library::getFBO("decals");
             fbo->bind();
-            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
-            CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
+            glClearColor(0.f, 0.f, 0.f, 1.f);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-            CHECK_GL(glDisable(GL_CULL_FACE));
+            glDisable(GL_CULL_FACE);
 
             bind();
             if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>()) {

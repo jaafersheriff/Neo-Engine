@@ -36,9 +36,9 @@ namespace GodRays {
             auto fbo = Library::getFBO("godray");
             fbo->bind();
             auto viewport = ecs.getSingleComponent<ViewportDetailsComponent>();
-            CHECK_GL(glViewport(0, 0, viewport->mSize.x, viewport->mSize.y));
-            CHECK_GL(glClearColor(0.f, 0.f, 0.f, 1.f));
-            CHECK_GL(glClear(GL_COLOR_BUFFER_BIT));
+            glViewport(0, 0, viewport->mSize.x, viewport->mSize.y);
+            glClearColor(0.f, 0.f, 0.f, 1.f);
+            glClear(GL_COLOR_BUFFER_BIT);
 
             bind();
 

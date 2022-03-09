@@ -38,7 +38,7 @@ namespace neo {
             virtual void render(const ECS& ecs) override {
                 bind();
 
-                CHECK_GL(glEnable(GL_LINE_SMOOTH));
+                glEnable(GL_LINE_SMOOTH);
 
                 /* Load PV */
                 auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
@@ -56,10 +56,10 @@ namespace neo {
                     loadUniform("M", M);
 
                     if (line->mWriteDepth) {
-                        CHECK_GL(glEnable(GL_DEPTH_TEST));
+                        glEnable(GL_DEPTH_TEST);
                     }
                     else {
-                        CHECK_GL(glDisable(GL_DEPTH_TEST));
+                        glDisable(GL_DEPTH_TEST);
                     }
 
                     /* Bind mesh */

@@ -33,8 +33,8 @@ namespace neo {
 
             virtual void render(const ECS& ecs) override {
                 bind();
-                CHECK_GL(glDisable(GL_CULL_FACE));
-                CHECK_GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+                glDisable(GL_CULL_FACE);
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
                 /* Load PV */
                 auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();

@@ -36,7 +36,7 @@ class GBufferShader : public Shader {
         virtual void render(const ECS& ecs) override {
             auto fbo = Library::getFBO("gbuffer");
             fbo->bind();
-            CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             bind();
 
