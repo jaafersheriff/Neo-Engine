@@ -17,30 +17,28 @@
 namespace neo {
 
     void FrustaFittingSystem::update(ECS& ecs) {
-        auto sourceCamera = ecs.getComponentTuple<CameraComponent, FrustumFitSourceComponent, SpatialComponent>();
-        auto receiverCamera = ecs.getComponentTuple<CameraComponent, FrustumFitReceiverComponent, SpatialComponent>();
+        auto sourceCamera = ecs.getComponentTuple<FrustumFitSourceComponent, SpatialComponent>();
+        auto receiverCamera = ecs.getComponentTuple<FrustumFitReceiverComponent, SpatialComponent>();
         auto light = ecs.getComponentTuple<LightComponent, SpatialComponent>();
         if (!receiverCamera || !sourceCamera || !light) {
             return;
         }
-        auto orthoCamera = dynamic_cast<OrthoCameraComponent*>(receiverCamera->get<CameraComponent>());
-        auto perspectiveCamera = dynamic_cast<PerspectiveCameraComponent*>(sourceCamera->get<CameraComponent>());
+        OrthoCameraComponent* orthoCamera = ecs.getComponent<OrthoCameraComponent>(receiverCamera.mEntity);
+        PerspectiveCameraComponent* perspectiveCamera = ecs.getComponent<PerspectiveCameraComponent>(sourceCamera.mEntity);
         if (!orthoCamera || !perspectiveCamera) {
             return;
         }
 
         /////////////////////// Do the fitting! ///////////////////////////////
-        auto orthoSpat = orthoCamera->getGameObject().getComponentByType<SpatialComponent>();
-        auto perspectiveSpat = perspectiveCamera->getGameObject().getComponentByType<SpatialComponent>();
+        auto& orthoSpat = receiverCamera.get<SpatialComponent>();
+        auto& perspectiveSpat = sourceCamera.get<SpatialComponent>();
         NEO_UNUSED(perspectiveSpat);
-        auto lightSpat = light->get<SpatialComponent>();
-        if (!lightSpat) {
-            return;
-        }
-        const glm::vec3 lightDir = lightSpat->getLookDir();
-        const glm::vec3 up = lightSpat->getUpDir();
+        auto& lightSpat = light.get<SpatialComponent>();
 
-        const auto& sceneView = perspectiveCamera->getView();
+        const glm::vec3 lightDir = lightSpat.getLookDir();
+        const glm::vec3 up = lightSpat.getUpDir();
+
+        const auto& sceneView = perspectiveSpat.getView();
         const auto& sceneProj = perspectiveCamera->getProj();
         const auto& worldToLight = glm::lookAt(lightDir, glm::vec3(0.f), up);
         const auto& lightToWorld = glm::inverse(worldToLight);
@@ -119,13 +117,13 @@ namespace neo {
         }
 
         glm::vec3 center = lightToWorld * glm::vec4(orthoBox.center(), 1.f); // orthos center back in light space
-        float bias = receiverCamera->get<FrustumFitReceiverComponent>()->mBias;
+        float bias = receiverCamera.get<FrustumFitReceiverComponent>().mBias;
         const float boxWidth = orthoBox.width() * 0.5f * (1.f + bias);
         const float boxHeight = orthoBox.height() * 0.5f * (1.f + bias);
         const float boxDepth = orthoBox.depth() * 0.5f * (1.f + bias);
 
-        orthoSpat->setPosition(center);
-        orthoSpat->setLookDir(lightDir);
+        orthoSpat.setPosition(center);
+        orthoSpat.setLookDir(lightDir);
         orthoCamera->setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
         orthoCamera->setNearFar(-boxDepth, boxDepth);
 
