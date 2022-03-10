@@ -53,6 +53,7 @@ namespace neo {
 
 	void ECS::clean() {
 		NEO_LOG_I("Cleaning ECS...");
+		flush();
 		mRegistry.each([this](auto entity) {
 			removeEntity(entity);
 		});
