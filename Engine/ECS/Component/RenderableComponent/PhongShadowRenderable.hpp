@@ -11,15 +11,15 @@ namespace neo {
     namespace renderable {
 
         struct PhongShadowRenderable : public Component {
-            const Texture& mDiffuseMap;
+            Texture* mDiffuseMap;
             Material mMaterial;
 
-            PhongShadowRenderable(const Texture& texture, Material material) :
+            PhongShadowRenderable(Texture* texture, Material material) :
                 mDiffuseMap(texture),
                 mMaterial(material)
             {}
 
-            virtual std::string getName() override {
+            virtual std::string getName() const override {
                 return "PhongShadowRenderable";
             }
 
