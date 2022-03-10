@@ -1,6 +1,8 @@
 #include "EditorSystem.hpp"
 #include "Engine/Engine.hpp"
 
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/RenderableComponent/OutlineRenderable.hpp"
@@ -9,47 +11,55 @@
 
 namespace neo {
 
-    EditorSystem::EditorSystem() 
-        : SelectingSystem(
-            "Editor System",
-            [](ECS& ecs, ECS::Entity entity, SelectedComponent* reset) { 
-                NEO_UNUSED(reset);
-                ecs.removeComponent<renderable::OutlineRenderable>(entity);
-            },
-            [](ECS& ecs, ECS::Entity entity, SelectableComponent* selected) {
-                NEO_UNUSED(selected);
-                if (!ecs.has<renderable::OutlineRenderable>(entity)) {
-                    ecs.addComponent<renderable::OutlineRenderable>(entity, glm::vec4(1.f, 0.95f, 0.72f, 1.f), 3.f);
-                }
-            },
-            [](ECS& ecs, ECS::Entity entity, SelectedComponent* selected) {
-                NEO_UNUSED(ecs, entity, selected);
-            }
-        )
-    { 
-    }
+	EditorSystem::EditorSystem()
+		: SelectingSystem(
+			"Editor System",
+			[](ECS& ecs, ECS::Entity entity, SelectedComponent* reset) {
+				NEO_UNUSED(reset);
+				ecs.removeComponent<renderable::OutlineRenderable>(entity);
+			},
+			[](ECS& ecs, ECS::Entity entity, SelectableComponent* selected) {
+				NEO_UNUSED(selected);
+				if (!ecs.has<renderable::OutlineRenderable>(entity)) {
+					ecs.addComponent<renderable::OutlineRenderable>(entity, glm::vec4(1.f, 0.95f, 0.72f, 1.f), 3.f);
+				}
+			},
+				[](ECS& ecs, ECS::Entity entity, SelectedComponent* selected) {
+				NEO_UNUSED(ecs, entity, selected);
+			}
+				)
+	{}
 
-    // TODO : add hovered capability
-    void EditorSystem::update(ECS& ecs) {
-        for (auto&& [entity, selectable, spatial] : ecs.getView<SelectableComponent, SpatialComponent>().each()) {
-            if (auto mouseRay = ecs.getComponent<MouseRayComponent>()) {
-                if (auto mouse = ecs.getComponent<MouseComponent>()) {
-                    glm::vec3 pos;
-                    if (auto bb = ecs.getComponent<BoundingBoxComponent>(entity)) {
-                        glm::vec3 worldSpaceCenter = spatial.getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
-                        glm::vec3 offsetTranslation = spatial.getPosition() - worldSpaceCenter;
-                        float distance = glm::distance(worldSpaceCenter, mouseRay->mPosition);
-                        distance += mouse->mFrameMouse.getScrollSpeed();
-                        pos = mouseRay->mPosition + mouseRay->mDirection * distance + offsetTranslation;
-                    }
-                    else {
-                        float distance = glm::distance(spatial.getPosition(), mouseRay->mPosition);
-                        distance += mouse->mFrameMouse.getScrollSpeed();
-                        pos = mouseRay->mPosition + mouseRay->mDirection * distance;
-                    }
-                    spatial.setPosition(pos);
-                }
-            }
-        }
-    }
+	// TODO : add hovered capability
+	void EditorSystem::update(ECS& ecs) {
+
+		auto cView = ecs.getView<MainCameraComponent, SpatialComponent>();
+		const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(cView.front());
+		if (auto mouseRay = ecs.getComponent<MouseRayComponent>()) {
+			if (auto mouse = ecs.getComponent<MouseComponent>()) {
+				for (auto&& [entity, selectable, spatial] : ecs.getView<SelectableComponent, SpatialComponent>().each()) {
+					glm::vec3 pos;
+					if (auto bb = ecs.getComponent<BoundingBoxComponent>(entity)) {
+						if (cameraFrustum) {
+							if (!cameraFrustum->isInFrustum(spatial, *bb)) {
+								continue;
+							}
+						}
+
+						glm::vec3 worldSpaceCenter = spatial.getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
+						glm::vec3 offsetTranslation = spatial.getPosition() - worldSpaceCenter;
+						float distance = glm::distance(worldSpaceCenter, mouseRay->mPosition);
+						distance += mouse->mFrameMouse.getScrollSpeed();
+						pos = mouseRay->mPosition + mouseRay->mDirection * distance + offsetTranslation;
+					}
+					else {
+						float distance = glm::distance(spatial.getPosition(), mouseRay->mPosition);
+						distance += mouse->mFrameMouse.getScrollSpeed();
+						pos = mouseRay->mPosition + mouseRay->mDirection * distance;
+					}
+					spatial.setPosition(pos);
+				}
+			}
+		}
+	}
 }

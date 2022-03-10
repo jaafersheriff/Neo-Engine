@@ -133,11 +133,26 @@ namespace neo {
                     MICROPROFILE_SCOPEI("ImGui", "ImGui", MP_AUTO);
                     ImGuiManager::begin();
 
-                    demos.imGuiEditor(mECS);
-                    mECS.imguiEdtor();
-                    Renderer::imGuiEditor(mWindow, mECS);
-                    Library::imGuiEditor();
-                    ImGuiManager::imGuiEditor();
+                    {
+                        MICROPROFILE_SCOPEI("ImGui", "demos.imGuiEditor", MP_AUTO);
+                        demos.imGuiEditor(mECS);
+                    }
+                    {
+                        MICROPROFILE_SCOPEI("ImGui", "mECS.imguiEdtor", MP_AUTO);
+                        mECS.imguiEdtor();
+                    }
+                    {
+                        MICROPROFILE_SCOPEI("ImGui", "Renderer::imGuiEditor", MP_AUTO);
+                        Renderer::imGuiEditor(mWindow, mECS);
+                    }
+                    {
+                        MICROPROFILE_SCOPEI("ImGui", "Library::imGuiEditor", MP_AUTO);
+                        Library::imGuiEditor();
+                    }
+                    {
+                        MICROPROFILE_SCOPEI("ImGui", "ImGuiManager::imGuiEditor", MP_AUTO);
+                        ImGuiManager::imGuiEditor();
+                    }
                     imGuiEditor(demos, counter);
 
                     ImGuiManager::end();
