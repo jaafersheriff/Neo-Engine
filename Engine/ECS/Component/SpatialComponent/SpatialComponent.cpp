@@ -52,6 +52,7 @@ namespace neo {
 
         mPosition += delta;
         mModelMatrixDirty = true;
+        mViewMatDirty = true;
         // Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
@@ -63,6 +64,7 @@ namespace neo {
         mScale *= glm::clamp(factor, glm::vec3(0.f), factor);
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
+        mViewMatDirty = true;
         // Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
@@ -70,6 +72,7 @@ namespace neo {
         Orientable::rotate(mat);
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
+        mViewMatDirty = true;
         // Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
@@ -80,6 +83,7 @@ namespace neo {
 
         mPosition = loc;
         mModelMatrixDirty = true;
+        mViewMatDirty = true;
         // Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
@@ -91,6 +95,7 @@ namespace neo {
         this->mScale = scale;
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
+        mViewMatDirty = true;
         // Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
@@ -102,6 +107,7 @@ namespace neo {
         Orientable::setOrientation(orient);
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
+        mViewMatDirty = true;
         // Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
@@ -109,6 +115,7 @@ namespace neo {
         Orientable::setUVW(u, v, w);
         mModelMatrixDirty = true;
         mNormalMatrixDirty = true;
+        mViewMatDirty = true;
         // Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
     }
 
