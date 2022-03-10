@@ -37,9 +37,9 @@ namespace neo {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
                 /* Load PV */
-                auto camera = ecs.cGetComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
+                auto camera = ecs.cGetComponentTuple<MainCameraComponent, SpatialComponent>();
                 NEO_ASSERT(camera, "No main camera exists");
-                loadUniform("P", camera.get<CameraComponent>().getProj());
+                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.mEntity));
                 loadUniform("V", camera.get<SpatialComponent>().getView());
 
                 for (auto& tuple : ecs.getComponentTuples<renderable::WireframeRenderable, MeshComponent, SpatialComponent>()) {

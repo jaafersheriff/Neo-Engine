@@ -68,44 +68,43 @@ namespace neo {
             bind();
 
             /* Load PV */
-            auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
+            const auto& camera = ecs.cGetComponentTuple<MainCameraComponent, SpatialComponent>();
             NEO_ASSERT(camera, "No main camera exists");
 
-            loadUniform("P", camera->get<CameraComponent>()->getProj());
-            loadUniform("V", camera->get<CameraComponent>()->getView());
-            loadUniform("camPos", camera->get<SpatialComponent>()->getPosition());
+            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.mEntity));
+            loadUniform("V", camera.get<SpatialComponent>().getView());
+            loadUniform("camPos", camera.get<SpatialComponent>().getPosition());
 
             /* Load light */
-            if (auto light = ecs.getComponentTuple<LightComponent, SpatialComponent>()) {
-                loadUniform("lightPos", light->get<SpatialComponent>()->getPosition());
-                loadUniform("lightCol", light->get<LightComponent>()->mColor);
-                loadUniform("lightAtt", light->get<LightComponent>()->mAttenuation);
+            if (auto light = ecs.cGetComponentTuple<LightComponent, SpatialComponent>()) {
+                loadUniform("lightPos", light.get<SpatialComponent>().getPosition());
+                loadUniform("lightCol", light.get<LightComponent>().mColor);
+                loadUniform("lightAtt", light.get<LightComponent>().mAttenuation);
             }
 
-            const auto& cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
+            const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(camera.mEntity);
 
-            for (auto& renderableIt : ecs.getComponentTuples<renderable::PhongRenderable, MeshComponent, SpatialComponent>()) {
-                auto renderable = renderableIt->get<renderable::PhongRenderable>();
-                auto renderableSpatial = renderableIt->get<SpatialComponent>();
+            for (const auto& tuple : ecs.getComponentTuples<renderable::PhongRenderable, MeshComponent, SpatialComponent>()) {
+                auto&& [renderable, mesh, spatial] = tuple.get();
 
                 // VFC
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("PhongShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = renderableIt->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                        if (!cameraFrustum->isInFrustum(*renderableSpatial, *boundingBox)) {
+                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(tuple.mEntity)) {
+                        if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
                             continue;
                         }
                     }
                 }
 
-                loadUniform("M", renderableSpatial->getModelMatrix());
-                loadUniform("N", renderableSpatial->getNormalMatrix());
+                loadUniform("M", spatial.getModelMatrix());
+                loadUniform("N", spatial.getNormalMatrix());
 
                 /* Bind texture */
-                loadTexture("diffuseMap", renderable->mDiffuseMap);
+                loadTexture("diffuseMap", *renderable.mDiffuseMap);
 
                 /* Bind material */
-                const Material& material = renderable->mMaterial;
+                const Material& material = renderable.mMaterial;
 
                 loadUniform("ambientColor", material.mAmbient);
                 loadUniform("diffuseColor", material.mDiffuse);
@@ -113,7 +112,7 @@ namespace neo {
                 loadUniform("shine", material.mShininess);
 
                 /* DRAW */
-                renderableIt->get<MeshComponent>()->mMesh.draw();
+                mesh.mMesh->draw();
             }
         }
     };

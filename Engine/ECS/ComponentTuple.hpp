@@ -24,7 +24,7 @@ namespace neo {
 
 		~ComponentTuple() = default;
 
-		operator bool() {
+		operator bool() const {
 			return mValid;
 		}
 

@@ -12,6 +12,9 @@
 namespace neo {
 
     struct RotationComponent : public Component {
+        RotationComponent(glm::vec3 s)
+            : mSpeed(s)
+        {}
         glm::vec3 mSpeed;
 
         virtual std::string getName() const override {

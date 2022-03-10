@@ -9,8 +9,8 @@ namespace neo {
     namespace renderable {
 
         struct AlphaTestRenderable : public Component {
-            Texture& mDiffuseMap;
-            AlphaTestRenderable(Texture& texture) :
+            Texture* mDiffuseMap;
+            AlphaTestRenderable(Texture* texture) :
                 mDiffuseMap(texture)
             {}
 
