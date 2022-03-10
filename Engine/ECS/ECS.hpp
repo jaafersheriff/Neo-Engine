@@ -45,7 +45,9 @@ namespace neo {
 
         template<typename CompT> bool has(Entity e);
         template<typename CompT> CompT* getComponent(Entity e);
-        template<typename CompT> const CompT* cGetComponent(Entity e) const;
+        template<typename CompT> CompT *const cGetComponent(Entity e) const;
+        template<typename SuperT, typename CompT> SuperT* getComponentAs(Entity e);
+        template<typename SuperT, typename CompT> const SuperT* cGetComponentAs(Entity e) const;
         template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple(Entity e);
         template<typename... CompTs> const ComponentTuple<CompTs...> cGetComponentTuple(const Entity e) const;
 
@@ -136,8 +138,8 @@ namespace neo {
 	}
 
 	template<typename CompT>
-	const CompT* ECS::cGetComponent(Entity e) const {
-        return mRegistry.try_get<CompT>(e);
+	CompT *const ECS::cGetComponent(Entity e) const {
+        return const_cast<CompT *const>(mRegistry.try_get<CompT>(e));
 	}
 
 	template<typename CompT, typename... Args>
@@ -210,5 +212,16 @@ namespace neo {
         auto tuples = getComponentTuples<CompTs...>();
         NEO_ASSERT(tuples.size() == 1, "");
         return tuples[0];
+    }
+
+    template<typename SuperT, typename CompT> SuperT* ECS::getComponentAs(Entity e) {
+        CompT* comp = getComponent<CompT>(e);
+        NEO_ASSERT(comp, "A");
+        return dynamic_cast<SuperT*>(comp);
+    }
+    template<typename SuperT, typename CompT> const SuperT* ECS::cGetComponentAs(Entity e) const {
+        CompT *const comp = cGetComponent<CompT>(e);
+        NEO_ASSERT(comp, "B");
+        return dynamic_cast<SuperT *const>(comp);
     }
 }

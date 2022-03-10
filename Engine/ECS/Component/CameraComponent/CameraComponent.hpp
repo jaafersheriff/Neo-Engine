@@ -21,7 +21,7 @@ namespace neo {
     protected:
         float mNear, mFar;
 
-        virtual void _detProj() const {}
+        virtual void _detProj() const = 0;
 
         /* Should never be used directly -- call getters */
         mutable glm::mat4 mProjMat;

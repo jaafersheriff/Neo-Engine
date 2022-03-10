@@ -12,14 +12,14 @@ namespace neo {
         struct PhongRenderable : public Component {
             // These will be replaced by renderer handles eventually
             Material mMaterial;
-            const Texture& mDiffuseMap;
+            Texture* mDiffuseMap;
 
-            PhongRenderable(const Texture& diffuseMap, Material material = Material{}) :
+            PhongRenderable(Texture* diffuseMap, Material material = Material{}) :
                 mDiffuseMap(diffuseMap),
                 mMaterial(material)
             {}
 
-            virtual std::string getName() override {
+            virtual std::string getName() const override {
                 return "PhongRenderable";
             }
 

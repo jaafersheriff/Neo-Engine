@@ -12,9 +12,9 @@
 namespace neo {
 
     void MouseRaySystem::update(ECS& ecs) {
-        auto mainCamera = ecs.getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
+        auto mainCamera = ecs.getComponentTuple<MainCameraComponent, SpatialComponent>();
         NEO_ASSERT(mainCamera, "Main camera doesn't exist");
-        auto& camera = mainCamera.get<CameraComponent>();
+        auto camera = ecs.getComponentAs<CameraComponent, PerspectiveCameraComponent>(mainCamera.mEntity);
 
         auto viewport = ecs.getComponent<ViewportDetailsComponent>();
         NEO_ASSERT(viewport, "Window details don't exist");
@@ -33,7 +33,7 @@ namespace neo {
                 mouseCoords = glm::vec2((2.f * mouseCoords.x) / framesize.x - 1.f, (2.f * mouseCoords.y) / framesize.y - 1.f);
 
                 // Mouse coords in clip space to eye space
-                glm::vec4 mouseCoordsEye = glm::inverse(camera.getProj()) * glm::vec4(mouseCoords, -1.f, 1.f);
+                glm::vec4 mouseCoordsEye = glm::inverse(camera->getProj()) * glm::vec4(mouseCoords, -1.f, 1.f);
                 mouseCoordsEye.z = -1.f;
                 mouseCoordsEye.w = 0.f;
 
@@ -55,7 +55,7 @@ namespace neo {
                         line = ecs.addComponent<LineMeshComponent>(mouseRay);
                     }
                     line->clearNodes();
-                    line->addNodes({ {pos, glm::vec3(1.f)}, {pos + dir * camera.getNearFar().y, glm::vec3(1.f)} });
+                    line->addNodes({ {pos, glm::vec3(1.f)}, {pos + dir * camera->getNearFar().y, glm::vec3(1.f)} });
                 }
             }
             else if (mouseRayComp && !mShowRay) {
