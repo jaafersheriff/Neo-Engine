@@ -82,10 +82,10 @@ namespace neo {
             const auto cameraFrustum = ecs.cGetComponent<FrustumComponent>(camera.mEntity);
 
             uint8_t rendered = 1;
-            std::unordered_map<uint8_t, uint32_t> map;
+            std::unordered_map<uint8_t, ECS::Entity> map;
             for (const auto& tuple : ecs.getComponentTuples<SelectableComponent, MeshComponent, SpatialComponent>()) {
                 const auto& [selectable, mesh, spatial] = tuple.get();
-                uint32_t componentID = selectable.mID;
+                ECS::Entity componentID = tuple.mEntity;
 
                 // VFC
                 if (cameraFrustum) {
@@ -125,6 +125,6 @@ namespace neo {
         }
 
         private:
-            uint32_t mSelectedID = 0;
+            ECS::Entity mSelectedID;
     };
 }

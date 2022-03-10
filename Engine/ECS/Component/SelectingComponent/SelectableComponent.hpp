@@ -7,7 +7,6 @@
 #include <inttypes.h>
 
 namespace neo {
-    static uint32_t sSelectableCounter;
 
     /* An entity was selected */
     // struct ComponentSelectedMessage : public Message {
@@ -19,11 +18,8 @@ namespace neo {
 
     struct SelectableComponent : public Component {
     public:
-        SelectableComponent() :
-            mID(sSelectableCounter++)
+        SelectableComponent()
         {}
-
-        uint32_t mID = 0;
 
         virtual std::string getName() const override {
             return "SelectableComponent";
