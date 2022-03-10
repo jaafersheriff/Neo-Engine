@@ -26,7 +26,7 @@ namespace neo {
 
         const Mesh& getMesh() const;
         const std::vector<Node>& getNodes() const { return mNodes; }
-        virtual std::string getName() override { return "LineMeshComponent"; }
+        virtual std::string getName() const override { return "LineMeshComponent"; }
 
         void addNode(const glm::vec3 pos, glm::vec3 col = glm::vec3(1.f));
         void addNodes(const std::vector<Node>& oNodes);

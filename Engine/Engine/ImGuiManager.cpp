@@ -58,7 +58,7 @@ namespace neo {
             my -= mViewport.mOffset.y;
             my = mViewport.mSize.y - my;
             if (mx >= 0 && mx <= mViewport.mSize.x && my >= 0 && my <= mViewport.mSize.y) {
-                Messenger::sendMessage<Mouse::MouseMoveMessage>(nullptr, static_cast<double>(mx), static_cast<double>(my));
+                // Messenger::sendMessage<Mouse::MouseMoveMessage>(nullptr, static_cast<double>(mx), static_cast<double>(my));
             }
         }
     }
@@ -80,7 +80,7 @@ namespace neo {
             if (glm::uvec2(size) != mViewport.mSize || glm::uvec2(offset) != mViewport.mOffset) {
                 mViewport.mOffset = glm::uvec2(offset);
                 mViewport.mSize = glm::uvec2(size);
-                Messenger::sendMessage<FrameSizeMessage>(nullptr, mViewport.mSize);
+                // Messenger::sendMessage<FrameSizeMessage>(nullptr, mViewport.mSize);
             }
         }
     }

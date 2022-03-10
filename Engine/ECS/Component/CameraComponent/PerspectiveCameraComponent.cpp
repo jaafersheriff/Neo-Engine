@@ -1,9 +1,6 @@
 #include "PerspectiveCameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "ECS/GameObject.hpp"
-#include "ECS/Messaging/Messenger.hpp"
-
 #include "glm/gtc/matrix_transform.hpp"
 #include <imgui/imgui.h>
 #include "microprofile.h"

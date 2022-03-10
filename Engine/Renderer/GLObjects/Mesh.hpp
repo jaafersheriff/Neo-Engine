@@ -34,12 +34,6 @@ namespace neo {
             Mesh(int primitiveType = -1);
             ~Mesh();
 
-            /* Remove copy constructors */
-            Mesh(const Mesh &) = delete;
-            Mesh & operator=(const Mesh &) = delete;
-            Mesh(Mesh &&) = default;
-            Mesh & operator=(Mesh &&) = default;
-
             /* VAO ID */
             uint32_t mVAOID;
 

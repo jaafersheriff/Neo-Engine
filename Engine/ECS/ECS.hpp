@@ -40,7 +40,7 @@ namespace neo {
         void removeEntity(Entity e);
 
         // Entity access
-        template<typename CompT, typename... Args> CompT* addComponent(Entity e, Args... args);
+        template<typename CompT, typename... Args> CompT* addComponent(Entity e, Args &&... args);
         template<typename CompT> void removeComponent(Entity e);
 
         template<typename CompT> bool has(Entity e);
@@ -79,7 +79,7 @@ namespace neo {
     CompT* ECS::getComponent() {
         auto view = mRegistry.view<CompT>();
         if (view.size() > 1) {
-            NEO_LOG_W("Trying to get a single %s when multiple exist", mRegistry.get<CompT>(view.front())->getName().c_str());
+            NEO_LOG_W("Trying to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->getName().c_str());
         }
         if (view.size()) {
             return mRegistry.try_get<CompT>(view.front());
@@ -89,7 +89,14 @@ namespace neo {
 
     template<typename CompT>
     CompT *const ECS::getComponent() const {
-        return getComponent<CompT>();
+        auto view = mRegistry.view<CompT>();
+        if (view.size() > 1) {
+            NEO_LOG_W("Trying to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->getName().c_str());
+        }
+        if (view.size()) {
+            return const_cast<CompT *const>(mRegistry.try_get<CompT>(view.front()));
+        }
+        return nullptr;
     }
 
     template<typename CompT>
@@ -108,7 +115,7 @@ namespace neo {
             }
         }
 
-        mSystems.emplace_back({ typeI, std::make_unique<SysT>(std::forward<Args>(args)...) });
+        mSystems.push_back({ typeI, std::make_unique<SysT>(std::forward<Args>(args)...) });
         return static_cast<SysT &>(*mSystems.back().second);
     }
 
@@ -134,14 +141,14 @@ namespace neo {
 	}
 
 	template<typename CompT, typename... Args>
-	CompT* ECS::addComponent(Entity e, Args... args) {
+	CompT* ECS::addComponent(Entity e, Args &&... args) {
 		CompT* component;
-		if constexpr (sizeof...(Args) > 0) {
-			component = new CompT(std::forward<Args...>(args...));
-		}
-		else {
-			component = new CompT();
-		}
+        if constexpr (sizeof...(Args) > 0) {
+            component = new CompT(std::forward<Args>(args)...);
+        }
+        else {
+            component = new CompT();
+        }
 
 		mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
 			if (registry.try_get<CompT>(e)) {

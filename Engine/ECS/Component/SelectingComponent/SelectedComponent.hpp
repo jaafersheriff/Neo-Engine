@@ -6,7 +6,7 @@ namespace neo {
 
     struct SelectedComponent : public Component {
 
-        virtual std::string getName() override {
+        virtual std::string getName() const override {
             return "SelectedComponent";
         }
     };

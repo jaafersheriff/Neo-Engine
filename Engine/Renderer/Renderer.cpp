@@ -115,11 +115,12 @@ namespace neo {
         mDefaultFBO->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_EDGE);
         mDefaultFBO->initDrawBuffers();
         mDefaultFBO->bind();
-        Messenger::addReceiver<FrameSizeMessage>(nullptr, [](const Message& msg, ECS& ecs) {
-            NEO_UNUSED(ecs);
-            auto m = static_cast<const FrameSizeMessage&>(msg);
-            mDefaultFBO->resize(m.mSize);
-        });
+        
+        // Messenger::addReceiver<FrameSizeMessage>(nullptr, [](const Message& msg, ECS& ecs) {
+        //     NEO_UNUSED(ecs);
+        //     auto m = static_cast<const FrameSizeMessage&>(msg);
+        //     mDefaultFBO->resize(m.mSize);
+        // });
 
         /* Set max work group */
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);

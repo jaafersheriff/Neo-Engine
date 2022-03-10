@@ -41,16 +41,16 @@ namespace neo {
             stencilBuffer->disableDraw();
 
             // Handle frame size changing
-            Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
-                NEO_UNUSED(ecs);
-                glm::uvec2 frameSize = (static_cast<const FrameSizeMessage&>(msg)).mSize;
-                Library::getFBO("selectable")->resize(frameSize);
-            });
+            // Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
+            //     NEO_UNUSED(ecs);
+            //     glm::uvec2 frameSize = (static_cast<const FrameSizeMessage&>(msg)).mSize;
+            //     Library::getFBO("selectable")->resize(frameSize);
+            // });
 
         }
 
         virtual void render(const ECS& ecs) override {
-            auto mouse = ecs.getComponent<MouseComponent>();
+            const auto& mouse = ecs.getComponent<MouseComponent>();
             NEO_ASSERT(mouse, "wtf");
             // TODO : add hovered capability
             if (!mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
@@ -70,10 +70,10 @@ namespace neo {
             bind();
 
             /* Load PV */
-            auto camera = ecs.cGetComponentTuple<MainCameraComponent, CameraComponent>();
+            auto camera = ecs.cGetComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
             NEO_ASSERT(camera, "No main camera exists");
             loadUniform("P", camera.get<CameraComponent>().getProj());
-            loadUniform("V", camera.get<CameraComponent>().getView());
+            loadUniform("V", camera.get<SpatialComponent>().getView());
 
             const auto cameraFrustum = ecs.getComponent<FrustumComponent>(camera.mEntity);
 
@@ -100,7 +100,7 @@ namespace neo {
 
                 /* DRAW */
                 loadUniform("M", spatial.getModelMatrix());
-                mesh.mMesh.draw();
+                mesh.mMesh->draw();
                 rendered++;
                 if (rendered > 256) {
                     break;
@@ -118,7 +118,7 @@ namespace neo {
             if (map[id] != mSelectedID) {
 
                 mSelectedID = map[id];
-                Messenger::sendMessage<ComponentSelectedMessage>(nullptr, mSelectedID);
+                // Messenger::sendMessage<ComponentSelectedMessage>(nullptr, mSelectedID);
             }
 
             unbind();

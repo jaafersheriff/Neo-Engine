@@ -3,21 +3,21 @@
 #define NUM_KEYS GLFW_KEY_LAST
 
 #include "GLFW/glfw3.h"
-#include "ECS/Messaging/Message.hpp"
+// #include "ECS/Messaging/Message.hpp"
 
 namespace neo {
 
     class Keyboard {
     public:
-        struct ResetKeyboardMessage : public Message { };
-        struct KeyPressedMessage : public Message {
-            const int mKey;
-            const int mAction;
-            KeyPressedMessage(int key, int action)
-                : mKey(key)
-                , mAction(action)
-            {}
-        };
+        // struct ResetKeyboardMessage : public Message { };
+        // struct KeyPressedMessage : public Message {
+        //     const int mKey;
+        //     const int mAction;
+        //     KeyPressedMessage(int key, int action)
+        //         : mKey(key)
+        //         , mAction(action)
+        //     {}
+        // };
 
         Keyboard() = default;
         ~Keyboard() = default;

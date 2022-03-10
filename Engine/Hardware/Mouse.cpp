@@ -1,45 +1,45 @@
 #include "Mouse.hpp"
 
-#include "ECS/Messaging/Messenger.hpp"
+// #include "ECS/Messaging/Messenger.hpp"
 #include "Util/Util.hpp"
 
 namespace neo {
 
     void Mouse::init() {
-        Messenger::addReceiver<MouseResetMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
-            NEO_UNUSED(msg, ecs);
-            reset();
-        });
+        // Messenger::addReceiver<MouseResetMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+        //     NEO_UNUSED(msg, ecs);
+        //     reset();
+        // });
 
-        Messenger::addReceiver<MouseButtonMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
-            NEO_UNUSED(ecs);
-            const MouseButtonMessage& m(static_cast<const MouseButtonMessage&>(msg));
-            setButtonStatus(m.mButton, m.mAction);
-        });
+        // Messenger::addReceiver<MouseButtonMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+        //     NEO_UNUSED(ecs);
+        //     const MouseButtonMessage& m(static_cast<const MouseButtonMessage&>(msg));
+        //     setButtonStatus(m.mButton, m.mAction);
+        // });
 
-        Messenger::addReceiver<ScrollWheelMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
-            NEO_UNUSED(ecs);
-            const ScrollWheelMessage& m(static_cast<const ScrollWheelMessage&>(msg));
-            setScroll(m.mSpeed);
-        });
+        // Messenger::addReceiver<ScrollWheelMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+        //     NEO_UNUSED(ecs);
+        //     const ScrollWheelMessage& m(static_cast<const ScrollWheelMessage&>(msg));
+        //     setScroll(m.mSpeed);
+        // });
 
-        Messenger::addReceiver<MouseMoveMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
-            NEO_UNUSED(ecs);
-            const MouseMoveMessage& m(static_cast<const MouseMoveMessage&>(msg));
-            if (mIsReset) {
-                mX = m.mX;
-                mY = m.mY;
-                mIsReset = false;
-            }
+        // Messenger::addReceiver<MouseMoveMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
+        //     NEO_UNUSED(ecs);
+        //     const MouseMoveMessage& m(static_cast<const MouseMoveMessage&>(msg));
+        //     if (mIsReset) {
+        //         mX = m.mX;
+        //         mY = m.mY;
+        //         mIsReset = false;
+        //     }
 
-            /* Calculate x-y speed */
-            mDX = m.mX - mX;
-            mDY = m.mY - mY;
+        //     /* Calculate x-y speed */
+        //     mDX = m.mX - mX;
+        //     mDY = m.mY - mY;
 
-            /* Set new positions */
-            mX = m.mX;
-            mY = m.mY;
-        });
+        //     /* Set new positions */
+        //     mX = m.mX;
+        //     mY = m.mY;
+        // });
     }
 
     glm::vec2 Mouse::getPos() const {

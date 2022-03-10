@@ -8,6 +8,10 @@
 namespace neo {
 
     struct FrustumComponent : public Component {
+        virtual std::string getName() const override {
+            return "FrustumComponent";
+        }
+
         // Bounds
         glm::vec3 NearLeftBottom{ 0.f, 0.f, 0.f };
         glm::vec3 NearLeftTop{ 0.f, 0.f, 0.f };

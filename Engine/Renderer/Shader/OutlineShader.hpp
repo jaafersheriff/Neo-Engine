@@ -51,11 +51,11 @@ namespace neo {
             glCullFace(GL_FRONT);
 
             /* Load PV */
-            auto camera = ecs.cGetComponentTuple<MainCameraComponent, CameraComponent>();
+            auto camera = ecs.cGetComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
             NEO_ASSERT(camera, "No main camera exists");
             loadUniform("P", camera.get<CameraComponent>().getProj());
-            loadUniform("V", camera.get<CameraComponent>().getView());
-            auto viewport = ecs.getComponent<ViewportDetailsComponent>();
+            loadUniform("V", camera.get<SpatialComponent>().getView());
+            const auto& viewport = ecs.getComponent<ViewportDetailsComponent>();
             loadUniform("screenSize", glm::vec2(viewport->mSize));
 
             const auto cameraFrustum = ecs.getComponent<FrustumComponent>(camera.mEntity);
@@ -81,7 +81,7 @@ namespace neo {
                 loadUniform("outlineColor", renderable.mColor);
 
                 /* DRAW */
-                mesh.mMesh.draw();
+                mesh.mMesh->draw();
             }
 
             unbind();
