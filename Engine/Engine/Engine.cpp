@@ -269,7 +269,7 @@ namespace neo {
         if (demos.getConfig().attachEditor) {
             ImGui::Begin("Editor");
             auto selectedView = mECS.getView<SelectedComponent>();
-            NEO_ASSERT(selectedView.size() == 1, "");
+            NEO_ASSERT(selectedView.size() <= 1, "");
             if (selectedView.size()) {
                 if (ImGui::Button("Delete entity")) {
                     mECS.removeEntity(selectedView.front());
