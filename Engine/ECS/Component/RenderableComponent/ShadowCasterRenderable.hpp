@@ -9,13 +9,13 @@ namespace neo {
     namespace renderable {
 
         struct ShadowCasterRenderable : public Component {
-            const Texture& mAlphaMap;
+            Texture* mAlphaMap;
 
-            ShadowCasterRenderable(const Texture& texture) :
+            ShadowCasterRenderable(Texture* texture) :
                 mAlphaMap(texture)
             {}
 
-            virtual std::string getName() override {
+            virtual std::string getName() const override {
                 return "ShadowCasterRenderable";
             }
 

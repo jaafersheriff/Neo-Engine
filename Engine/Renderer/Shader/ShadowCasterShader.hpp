@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Loader/Library.hpp"
+
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
@@ -7,6 +9,7 @@
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
+#include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
@@ -49,11 +52,10 @@ namespace neo {
             }
 
             virtual void render(const ECS& ecs) override {
-                auto shadowCamera = ecs.getComponentTuple<ShadowCameraComponent, CameraComponent>();
+                auto shadowCamera = ecs.cGetComponentTuple<ShadowCameraComponent, SpatialComponent>();
                 if (!shadowCamera) {
                     NEO_ASSERT(shadowCamera, "No shadow camera found");
                 }
-                auto camera = shadowCamera->get<CameraComponent>();
 
                 auto fbo = Library::getFBO("shadowMap");
                 auto & depthTexture = fbo->mTextures[0];
@@ -63,20 +65,19 @@ namespace neo {
                 glViewport(0, 0, depthTexture->mWidth, depthTexture->mHeight);
 
                 bind();
-                loadUniform("P", camera->getProj());
-                loadUniform("V", camera->getView());
+                loadUniform("P", ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCamera.mEntity)->getProj());
+                loadUniform("V", shadowCamera.get<SpatialComponent>().getView());
 
-                for (auto& renderableIt : ecs.getComponentTuples<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>()) {
-                    auto renderable = renderableIt->get<renderable::ShadowCasterRenderable>();
-                    auto renderableSpatial = renderableIt->get<SpatialComponent>();
+                for (auto& tuple : ecs.getComponentTuples<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>()) {
+                    auto&& [renderable, mesh, spatial] = tuple.get();
 
-                    loadUniform("M", renderableSpatial->getModelMatrix());
+                    loadUniform("M", spatial.getModelMatrix());
 
                     /* Bind texture */
-                    loadTexture("diffuseMap", renderable->mAlphaMap);
+                    loadTexture("diffuseMap", *renderable.mAlphaMap);
 
                     /* DRAW */
-                    renderableIt->get<MeshComponent>()->mMesh.draw();
+                    mesh.mMesh->draw();
                 }
 
 

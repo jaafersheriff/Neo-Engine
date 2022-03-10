@@ -2,11 +2,15 @@
 
 #include "ECS/ECS.hpp"
 
+#include "Loader/Library.hpp"
+
 #include "Renderer/Shader/Shader.hpp"
+#include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
+#include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
@@ -89,23 +93,22 @@ namespace neo {
                 bind();
 
                 /* Load PV */
-                auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
+                const auto& camera = ecs.cGetComponentTuple<MainCameraComponent, SpatialComponent>();
                 NEO_ASSERT(camera, "No main camera exists");
-                loadUniform("P", camera->get<CameraComponent>()->getProj());
-                loadUniform("V", camera->get<CameraComponent>()->getView());
-
-                loadUniform("camPos", camera->get<SpatialComponent>()->getPosition());
+                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.mEntity));
+                loadUniform("V", camera.get<SpatialComponent>().getView());
+                loadUniform("camPos", camera.get<SpatialComponent>().getPosition());
 
                 /* Load light */
-                if (auto shadowCamera = ecs.getComponentTuple<ShadowCameraComponent, CameraComponent>()) {
-                    auto _shadowCamera = shadowCamera->get<CameraComponent>();
-                    loadUniform("L", biasMatrix * _shadowCamera->getProj() * _shadowCamera->getView());
+                if (const auto& shadowCamera = ecs.cGetComponentTuple<ShadowCameraComponent, SpatialComponent>()) {
+                    auto _shadowCamera = ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCamera.mEntity);
+                    loadUniform("L", biasMatrix * _shadowCamera->getProj() * shadowCamera.get<SpatialComponent>().getView());
                 }
 
-                if (auto light = ecs.getComponentTuple<LightComponent, SpatialComponent>()) {
-                    loadUniform("lightPos", light->get<SpatialComponent>()->getPosition());
-                    loadUniform("lightCol", light->get<LightComponent>()->mColor);
-                    loadUniform("lightAtt", light->get<LightComponent>()->mAttenuation);
+                if (auto light = ecs.cGetComponentTuple<LightComponent, SpatialComponent>()) {
+                    loadUniform("lightPos", light.get<SpatialComponent>().getPosition());
+                    loadUniform("lightCol", light.get<LightComponent>().mColor);
+                    loadUniform("lightAtt", light.get<LightComponent>().mAttenuation);
                 }
 
                 /* Bias */
@@ -117,35 +120,34 @@ namespace neo {
                 /* Bind shadow map */
                 loadTexture("shadowMap", *Library::getFBO("shadowMap")->mTextures[0]);
 
-                const auto& cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
-                for (auto& renderableIt : ecs.getComponentTuples<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>()) {
-                    auto renderable = renderableIt->get<renderable::PhongShadowRenderable>();
-                    auto renderableSpatial = renderableIt->get<SpatialComponent>();
+                const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(camera.mEntity);
+                for (const auto& tuple : ecs.getComponentTuples<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>()) {
+                    auto&& [renderable, mesh, spatial] = tuple.get();
 
                     // VFC
                     if (cameraFrustum) {
                         MICROPROFILE_SCOPEI("PhongShaderShader", "VFC", MP_AUTO);
-                        if (const auto& boundingBox = renderableIt->mGameObject.getComponentByType<BoundingBoxComponent>()) {
-                            if (!cameraFrustum->isInFrustum(*renderableSpatial, *boundingBox)) {
+                        if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(tuple.mEntity)) {
+                            if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
                                 continue;
                             }
                         }
                     }
 
-                    loadUniform("M", renderableSpatial->getModelMatrix());
-                    loadUniform("N", renderableSpatial->getNormalMatrix());
+                    loadUniform("M", spatial.getModelMatrix());
+                    loadUniform("N", spatial.getNormalMatrix());
 
                     /* Bind texture */
-                    loadTexture("diffuseMap", renderable->mDiffuseMap);
+                    loadTexture("diffuseMap", *renderable.mDiffuseMap);
 
                     /* Bind material */
-                    loadUniform("ambientColor", renderable->mMaterial.mAmbient);
-                    loadUniform("diffuseColor", renderable->mMaterial.mDiffuse);
-                    loadUniform("specularColor", renderable->mMaterial.mSpecular);
-                    loadUniform("shine", renderable->mMaterial.mShininess);
+                    loadUniform("ambientColor", renderable.mMaterial.mAmbient);
+                    loadUniform("diffuseColor", renderable.mMaterial.mDiffuse);
+                    loadUniform("specularColor", renderable.mMaterial.mSpecular);
+                    loadUniform("shine", renderable.mMaterial.mShininess);
 
                     /* DRAW */
-                    renderableIt->get<MeshComponent>()->mMesh.draw();
+                    mesh.mMesh->draw();
                 }
 
                 unbind();
