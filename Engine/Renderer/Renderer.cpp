@@ -126,7 +126,7 @@ namespace neo {
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z);
-        char buf[256];
+        char buf[512];
         memcpy(buf, glGetString(GL_VENDOR), 256);
         mDetails.mVendor = buf;
         memcpy(buf, glGetString(GL_RENDERER), 256);
