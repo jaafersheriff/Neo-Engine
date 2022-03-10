@@ -45,13 +45,13 @@ namespace neo {
 
         template<typename CompT> bool has(Entity e);
         template<typename CompT> CompT* getComponent(Entity e);
-        template<typename CompT> const CompT* getComponent(Entity e) const;
+        template<typename CompT> const CompT* cGetComponent(Entity e) const;
         template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple(Entity e);
         template<typename... CompTs> const ComponentTuple<CompTs...> cGetComponentTuple(const Entity e) const;
 
         // All access
         template<typename CompT> CompT* getComponent();
-        template<typename CompT> CompT *const getComponent() const;
+        template<typename CompT> CompT *const cGetComponent() const;
         template<typename... CompTs> auto getView();
         template<typename... CompTs> const auto getView() const;
         template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple();
@@ -88,7 +88,7 @@ namespace neo {
     }
 
     template<typename CompT>
-    CompT *const ECS::getComponent() const {
+    CompT *const ECS::cGetComponent() const {
         auto view = mRegistry.view<CompT>();
         if (view.size() > 1) {
             NEO_LOG_W("Trying to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->getName().c_str());
@@ -136,7 +136,7 @@ namespace neo {
 	}
 
 	template<typename CompT>
-	const CompT* ECS::getComponent(Entity e) const {
+	const CompT* ECS::cGetComponent(Entity e) const {
         return mRegistry.try_get<CompT>(e);
 	}
 

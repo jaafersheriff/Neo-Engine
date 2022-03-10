@@ -57,7 +57,7 @@ namespace neo {
         }
 
         virtual void render(const ECS& ecs) override {
-            const auto& mouse = ecs.getComponent<MouseComponent>();
+            const auto& mouse = ecs.cGetComponent<MouseComponent>();
             NEO_ASSERT(mouse, "wtf");
             // TODO : add hovered capability
             if (!mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
@@ -79,7 +79,7 @@ namespace neo {
             loadUniform("P", camera.get<CameraComponent>().getProj());
             loadUniform("V", camera.get<SpatialComponent>().getView());
 
-            const auto cameraFrustum = ecs.getComponent<FrustumComponent>(camera.mEntity);
+            const auto cameraFrustum = ecs.cGetComponent<FrustumComponent>(camera.mEntity);
 
             uint8_t rendered = 1;
             std::unordered_map<uint8_t, uint32_t> map;
@@ -90,7 +90,7 @@ namespace neo {
                 // VFC
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("PhongShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = ecs.getComponent<BoundingBoxComponent>(tuple.mEntity)) {
+                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(tuple.mEntity)) {
                         if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
                             continue;
                         }

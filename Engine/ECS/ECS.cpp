@@ -1,5 +1,7 @@
 #include "ECS.hpp"
 
+#include "Component/EngineComponents/TagComponent.hpp"
+
 #include <imgui/imgui.h>
 
 namespace neo {
@@ -51,8 +53,8 @@ namespace neo {
 
 	void ECS::clean() {
 		NEO_LOG_I("Cleaning ECS...");
-		mRegistry.each([](auto entity) {
-			removeEntity(entity;
+		mRegistry.each([this](auto entity) {
+			removeEntity(entity);
 		});
 		flush();
 		mRegistry.clear();
@@ -62,36 +64,36 @@ namespace neo {
 	void ECS::imguiEdtor() {
 		ImGui::Begin("ECS", nullptr, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove);
 		size_t count = 0;
-		for (auto go : getGameObjects()) {
-			count += go->getAllComponents().size();
-		}
+		// for (auto go : getGameObjects()) {
+		// 	count += go->getAllComponents().size();
+		// }
 		ImGui::Text("Components: %d", count);
 		char buf[256];
-		sprintf(buf, "Gameobjects: %d", mRegistry.size());
+		sprintf(buf, "Gameobjects: %d", static_cast<int>(mRegistry.size()));
 		if (ImGui::TreeNodeEx(buf, ImGuiTreeNodeFlags_DefaultOpen)) {
-			for (auto& gameObject : getGameObjects()) {
-				if (gameObject->mTag.size()) {
-					if (ImGui::TreeNodeEx(gameObject->mTag.c_str())) {
-						for (auto&& [type, components] : gameObject->getComponentsMap()) {
-							for (int i = 0; i < components.size(); i++) {
-								ImGui::Text(type.name());
-								components[i]->imGuiEditor();
-								ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.81f, 0.20f, 0.20f, 0.40f));
-								ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
-								ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
-								ImGui::PushID(gameObject + type.hash_code() + i);
-								if (ImGui::Button("Remove")) {
-									_removeComponent(type, components[i]);
-								}
-								ImGui::PopID();
-								ImGui::PopStyleColor(3);
-								ImGui::Separator();
-							}
-						}
+			mRegistry.each([this](Entity entity) {
+				if (TagComponent* tag = getComponent<TagComponent>(entity)) {
+					if (ImGui::TreeNodeEx(tag->mTag.c_str())) {
+						// for (auto&& [type, components] : gameObject->getComponentsMap()) {
+						// 	for (int i = 0; i < components.size(); i++) {
+						// 		ImGui::Text(type.name());
+						// 		components[i]->imGuiEditor();
+						// 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.81f, 0.20f, 0.20f, 0.40f));
+						// 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
+						// 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
+						// 		ImGui::PushID(gameObject + type.hash_code() + i);
+						// 		if (ImGui::Button("Remove")) {
+						// 			_removeComponent(type, components[i]);
+						// 		}
+						// 		ImGui::PopID();
+						// 		ImGui::PopStyleColor(3);
+						// 		ImGui::Separator();
+						// 	}
+						// }
 						ImGui::TreePop();
 					}
 				}
-			}
+				});
 			ImGui::TreePop();
 		}
 		if (mSystems.size() && ImGui::TreeNodeEx("Systems", ImGuiTreeNodeFlags_DefaultOpen)) {

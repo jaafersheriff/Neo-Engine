@@ -22,11 +22,8 @@ namespace neo {
         int mDownButton;
 
         CameraControllerComponent(float ls, float ms);
-        virtual std::string getName() { return "CameraControllerComponent"; };
+        virtual std::string getName() const override { return "CameraControllerComponent"; };
         virtual void imGuiEditor();
-
-    private:
-        void _updateSpatialOrientation();
 
     };
 }

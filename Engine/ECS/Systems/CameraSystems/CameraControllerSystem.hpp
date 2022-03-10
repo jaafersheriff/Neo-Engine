@@ -5,6 +5,9 @@
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 
 namespace neo {
+
+    struct SpatialComponent;
+
     class CameraControllerSystem : public System {
 
     public:
