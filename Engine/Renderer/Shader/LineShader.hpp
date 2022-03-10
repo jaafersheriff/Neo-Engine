@@ -47,7 +47,7 @@ namespace neo {
                 ecs.getView<LineMeshComponent>().each([this, &ecs](ECS::Entity entity, const LineMeshComponent& line) {
                     glm::mat4 M(1.f);
                     if (line.mUseParentSpatial) {
-                        if (auto spatial = ecs.getComponent<SpatialComponent>(entity)) {
+                        if (auto spatial = ecs.cGetComponent<SpatialComponent>(entity)) {
                             M = spatial->getModelMatrix();
                         }
                     }

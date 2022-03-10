@@ -19,7 +19,9 @@ namespace neo {
         auto viewport = ecs.getComponent<ViewportDetailsComponent>();
         NEO_ASSERT(viewport, "Window details don't exist");
 
-        ECS::Entity mouseRay;
+        auto mouseRayView = ecs.getView<MouseComponent>();
+        NEO_ASSERT(mouseRayView.size() == 1, "Can't be having more than one mouse");
+        auto mouseRay = mouseRayView.front();
         auto mouseRayComp = ecs.getComponent<MouseRayComponent>();
         if (auto mouse = ecs.getComponent<MouseComponent>()) {
             if (mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
@@ -36,7 +38,7 @@ namespace neo {
                 mouseCoordsEye.w = 0.f;
 
                 // Eye space to world space
-                glm::vec3 dir = glm::normalize(glm::vec3(glm::inverse(camera.getView()) * mouseCoordsEye));
+                glm::vec3 dir = glm::normalize(glm::vec3(glm::inverse(mainCamera.get<SpatialComponent>().getView()) * mouseCoordsEye));
                 glm::vec3 pos = mainCamera.get<SpatialComponent>().getPosition();
 
                 // Create new mouseray if one doesnt exist

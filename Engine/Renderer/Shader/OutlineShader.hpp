@@ -55,10 +55,10 @@ namespace neo {
             NEO_ASSERT(camera, "No main camera exists");
             loadUniform("P", camera.get<CameraComponent>().getProj());
             loadUniform("V", camera.get<SpatialComponent>().getView());
-            const auto& viewport = ecs.getComponent<ViewportDetailsComponent>();
+            const auto& viewport = ecs.cGetComponent<ViewportDetailsComponent>();
             loadUniform("screenSize", glm::vec2(viewport->mSize));
 
-            const auto cameraFrustum = ecs.getComponent<FrustumComponent>(camera.mEntity);
+            const auto cameraFrustum = ecs.cGetComponent<FrustumComponent>(camera.mEntity);
 
             for (auto& tuple : ecs.getComponentTuples<renderable::OutlineRenderable, MeshComponent, SpatialComponent>()) {
                 const auto& [renderable, mesh, spatial] = tuple.get();
@@ -66,7 +66,7 @@ namespace neo {
                 // VFC
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("OutlineShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = ecs.getComponent<BoundingBoxComponent>(tuple.mEntity)) {
+                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(tuple.mEntity)) {
                         if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
                             continue;
                         }

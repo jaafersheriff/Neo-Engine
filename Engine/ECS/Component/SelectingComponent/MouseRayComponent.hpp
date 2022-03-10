@@ -10,7 +10,7 @@ namespace neo {
         glm::vec3 mPosition;
         glm::vec3 mDirection;
 
-        virtual std::string getName() override {
+        virtual std::string getName() const override {
             return "MouseRayComponent";
         }
     };

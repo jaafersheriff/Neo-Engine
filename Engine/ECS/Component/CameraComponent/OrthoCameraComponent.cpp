@@ -1,7 +1,7 @@
 #include "OrthoCameraComponent.hpp"
 
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
-#include "ECS/Messaging/Messenger.hpp"
+// #include "ECS/Messaging/Messenger.hpp"
 #include "Util/Util.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -9,8 +9,8 @@
 
 namespace neo {
 
-    OrthoCameraComponent::OrthoCameraComponent(GameObject *gameObject, float near, float far, float horizMin, float horizMax, float vertMin, float vertMax) 
-        : CameraComponent(gameObject) {
+    OrthoCameraComponent::OrthoCameraComponent(float near, float far, float horizMin, float horizMax, float vertMin, float vertMax) 
+        : CameraComponent() {
         setNearFar(near, far);
         setOrthoBounds(glm::vec2(horizMin, horizMax), glm::vec2(vertMin, vertMax));
     }
@@ -23,7 +23,6 @@ namespace neo {
         mHorizBounds = h;
         mVertBounds = v;
         mProjMatDirty = true;
-        mViewMatDirty = true;
     }
 
     void OrthoCameraComponent::_detProj() const {

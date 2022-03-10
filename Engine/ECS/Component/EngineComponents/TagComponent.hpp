@@ -9,7 +9,7 @@ namespace neo {
             : mTag(name)
         {}
 
-        virtual std::string getName() override {
+        virtual std::string getName() const override {
             return "Tag Component";
         }
 

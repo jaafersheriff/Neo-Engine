@@ -2,6 +2,7 @@
 
 #include "ECS/Systems/System.hpp"
 
+#include "ECS/ECS.hpp"
 #include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
 #include "ECS/Component/SelectingComponent/SelectedComponent.hpp"
 
