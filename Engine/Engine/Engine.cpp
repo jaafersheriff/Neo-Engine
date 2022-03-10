@@ -51,11 +51,19 @@ namespace neo {
 
     void Engine::init() {
 
-        /* Init base engine */
         srand((unsigned int)(time(0)));
 
-        /* Init window*/
-        NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
+        {
+            NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
+            GLFWimage icons[1];
+            int components;
+            uint8_t* data = Loader::_loadTextureData(icons[0].width, icons[0].height, components, "icon.png", {}, false);
+            if (data) {
+                icons[0].pixels = data;
+                glfwSetWindowIcon(mWindow.getWindow(), 1, icons);
+            }
+            Loader::_cleanTextureData(data);
+        }
         ImGuiManager::init(mWindow.getWindow());
         mKeyboard.init();
         mMouse.init();

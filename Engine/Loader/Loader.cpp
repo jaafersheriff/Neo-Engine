@@ -221,7 +221,7 @@ namespace neo {
         std::string _fileName = APP_RES_DIR + fileName;
         if (!util::fileExists(_fileName.c_str())) {
             _fileName = ENGINE_RES_DIR + fileName;
-            NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file: %s", fileName.c_str());
+            NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file %s", fileName.c_str());
         }
 
         /* Use stbi if name is an existing file */

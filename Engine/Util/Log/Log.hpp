@@ -3,8 +3,6 @@
 #include <map>
 #include <glm/glm.hpp>
 
-#define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
-
 #ifndef NEO_LOG_S
 	#define NEO_LOG_S(severity, fmt, ...) neo::util::_log(severity, fmt, __VA_ARGS__)
 	#define NEO_LOG(fmt, ...) NEO_LOG_S(neo::util::LogSeverity::Verbose, fmt, __VA_ARGS__)
@@ -36,10 +34,10 @@ namespace neo {
         };
 
         const static std::map<LogSeverity, std::pair<char, glm::vec3>> sLogSeverityData {
-            { LogSeverity::Verbose, {'v', glm::vec3(1.0f, 1.0f, 1.0f)}},
-            { LogSeverity::Info, {'i', glm::vec3(0.2f, 0.5f, 1.0f)}},
-            { LogSeverity::Warning, {'w', glm::vec3(1.0f, 1.0f, 0.0f)}},
-            { LogSeverity::Error, {'e', glm::vec3(1.0f, 0.4f, 0.4f)}},
+            { LogSeverity::Verbose, {'V', glm::vec3(1.0f, 1.0f, 1.0f)}},
+            { LogSeverity::Info,    {'I', glm::vec3(0.2f, 0.5f, 1.0f)}},
+            { LogSeverity::Warning, {'W', glm::vec3(1.0f, 1.0f, 0.0f)}},
+            { LogSeverity::Error,   {'E', glm::vec3(1.0f, 0.4f, 0.4f)}},
         };
 
         void _log(LogSeverity severity, const char* format, ...);

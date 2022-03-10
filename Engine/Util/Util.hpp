@@ -9,20 +9,25 @@
 
 namespace neo {
 
+#define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+
 #define NEO_UNUSED(...) __noop(__VA_ARGS__)
  
 #ifndef NEO_DEBUG_ASSERT
 	#ifdef DEBUG_MODE
 		#define NEO_ASSERT(c, fmt, ...) \
 			if (!(c)) { \
-                char buf[1024]; \
-                sprintf(buf, fmt, __VA_ARGS__); \
-				NEO_LOG_S(neo::util::LogSeverity::Error, "%s: (%s) in %s, file %s on line %d.\n", buf, #c, __func__, __FILE__, __LINE__); \
+				NEO_LOG_E("ASSERT(%s) in %s, file %s on line %d", #c, __func__, __FILENAME__, __LINE__); \
+				NEO_LOG_E(fmt, __VA_ARGS__); \
                 abort(); \
 			} 
 		#define NEO_FAIL(fmt, ...) NEO_ASSERT(false, fmt, __VA_ARGS__)
 	#else
-		#define NEO_ASSERT(c, fmt, ...) (void)(c); NEO_UNUSED(fmt); NEO_UNUSED(__VA_ARGS__)
+		#define NEO_ASSERT(c, fmt, ...) \
+			if (!(c)) { \
+				NEO_LOG_E("ASSERT(%s) in %s, file %s on line %d", #c, __func__, __FILENAME__, __LINE__); \
+				NEO_LOG_E(fmt, __VA_ARGS__); \
+			} 
 		#define NEO_FAIL(fmt, ...) NEO_UNUSED(fmt); NEO_UNUSED(__VA_ARGS__) ; abort()
 	#endif // NEO_CONFIG_DEBUG
 #endif // NEO_DEBUG_ASSERT

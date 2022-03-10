@@ -15,6 +15,8 @@
 
 namespace neo {
 
+    class Engine;
+
    struct MeshData {
         Mesh* mMesh;
         glm::vec3 mMin{ 0.f, 0.f, 0.f };
@@ -37,6 +39,7 @@ namespace neo {
     };
 
     class Loader {
+        friend Engine;
 
         public:
             Loader() = default;
