@@ -40,7 +40,6 @@ namespace neo {
             const glm::mat4& getView() const;
 
         private:
-            ECS::Entity mEntity;
             glm::vec3 mPosition{ 0.f, 0.f, 0.f };
             glm::vec3 mScale{ 1.f, 1.f, 1.f };
 
