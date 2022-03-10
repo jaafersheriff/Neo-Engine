@@ -40,9 +40,10 @@ namespace neo {
                 glEnable(GL_LINE_SMOOTH);
 
                 /* Load PV */
-                const auto& camera = ecs.cGetComponentTuple<MainCameraComponent, SpatialComponent>();
-                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.mEntity));
-                loadUniform("V", camera.get<SpatialComponent>().getView());
+                auto cView = ecs.getView<MainCameraComponent, SpatialComponent>();
+                NEO_ASSERT(cView.size_hint() <= 1, "");
+                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cView.front()));
+                loadUniform("V", ecs.cGetComponent<SpatialComponent>()->getView());
 
                 ecs.getView<LineMeshComponent>().each([this, &ecs](ECS::Entity entity, const LineMeshComponent& line) {
                     glm::mat4 M(1.f);

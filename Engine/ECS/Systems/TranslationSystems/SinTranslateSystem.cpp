@@ -9,8 +9,7 @@ namespace neo {
 
         if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
 
-            for (auto& tuple : ecs.getComponentTuples<SinTranslateComponent, SpatialComponent>()) {
-                auto&& [sin, spatial] = tuple.get();
+            for (auto&& [entity, sin, spatial] : ecs.getView<SinTranslateComponent, SpatialComponent>().each()) {
                 double time = frameStats->mRunTime;
                 glm::vec3 oldPos = spatial.getPosition();
                 oldPos = sin.mBasePosition + (float)glm::cos(time) * sin.mOffset;

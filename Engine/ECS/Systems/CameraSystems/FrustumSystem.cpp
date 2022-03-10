@@ -9,8 +9,7 @@
 
 namespace neo {
     void FrustumSystem::update(ECS& ecs) {
-        for (auto& cameraTuple : ecs.getComponentTuples<FrustumComponent, SpatialComponent>()) {
-            auto&& [frustum, spatial] = cameraTuple.get();
+        for (auto&& [entity, frustum, spatial] : ecs.getView<FrustumComponent, SpatialComponent>().each()) {
 
             glm::vec3 P = spatial.getPosition();
             glm::vec3 v = glm::normalize(spatial.getLookDir());
@@ -19,7 +18,7 @@ namespace neo {
 
             // Update frustum bounds for camera type
             glm::mat4 PV(1.f);
-            if (auto orthoCam = ecs.getComponent<OrthoCameraComponent>(cameraTuple.mEntity)) {
+            if (auto orthoCam = ecs.getComponent<OrthoCameraComponent>(entity)) {
                 PV = orthoCam->getProj() * spatial.getView();
                 float nDis = orthoCam->getNearFar().x;
                 float fDis = orthoCam->getNearFar().y;
@@ -35,7 +34,7 @@ namespace neo {
                 frustum.FarLeftBottom = Cfar + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().x);
                 frustum.FarRightBottom = Cfar + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().y);
             }
-            else if (auto perspectiveCam = ecs.getComponent<PerspectiveCameraComponent>(cameraTuple.mEntity)) {
+            else if (auto perspectiveCam = ecs.getComponent<PerspectiveCameraComponent>(entity)) {
                 PV = perspectiveCam->getProj() * spatial.getView();
                 float nDis = perspectiveCam->getNearFar().x;
                 float fDis = perspectiveCam->getNearFar().y;

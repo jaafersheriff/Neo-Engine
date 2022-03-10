@@ -8,8 +8,7 @@
 namespace neo {
 
     void FrustumToLineSystem::update(ECS& ecs) {
-        for (auto& camera : ecs.getComponentTuples<LineMeshComponent, FrustumComponent>()) {
-            auto&& [line, frustum] = camera.get();
+        for (auto&& [entity, line, frustum] : ecs.getView<LineMeshComponent, FrustumComponent>().each()) {
 
             line.clearNodes();
 

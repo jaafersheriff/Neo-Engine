@@ -34,6 +34,7 @@ namespace neo {
 	}
 
 	void ECS::flush() {
+        MICROPROFILE_SCOPEI("ECS", "flush", MP_AUTO);
 		for (auto&& job : mAddComponentFuncs) {
 			job(mRegistry);
 		}

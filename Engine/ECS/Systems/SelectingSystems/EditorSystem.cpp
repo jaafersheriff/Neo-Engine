@@ -31,12 +31,11 @@ namespace neo {
 
     // TODO : add hovered capability
     void EditorSystem::update(ECS& ecs) {
-        if (auto tuple = ecs.getComponentTuple<SelectableComponent, SpatialComponent>()) {
+        for (auto&& [entity, selectable, spatial] : ecs.getView<SelectableComponent, SpatialComponent>().each()) {
             if (auto mouseRay = ecs.getComponent<MouseRayComponent>()) {
                 if (auto mouse = ecs.getComponent<MouseComponent>()) {
-                    auto&& [selectable, spatial] = tuple.get();
                     glm::vec3 pos;
-                    if (auto bb = ecs.getComponent<BoundingBoxComponent>(tuple.mEntity)) {
+                    if (auto bb = ecs.getComponent<BoundingBoxComponent>(entity)) {
                         glm::vec3 worldSpaceCenter = spatial.getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
                         glm::vec3 offsetTranslation = spatial.getPosition() - worldSpaceCenter;
                         float distance = glm::distance(worldSpaceCenter, mouseRay->mPosition);

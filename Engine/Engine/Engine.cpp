@@ -253,13 +253,13 @@ namespace neo {
             counter.imGuiEditor();
             ImGui::TextWrapped("Num Draws: %d", Renderer::mStats.mNumDraws);
             ImGui::TextWrapped("Num Shaders: %d", Renderer::mStats.mNumShaders);
-            if (auto stats = mECS.getComponentTuple<MouseComponent, ViewportDetailsComponent>()) {
+            for (auto&& [entity, mouse, viewport] : mECS.getView<MouseComponent, ViewportDetailsComponent>().each()) {
                 if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    stats.get<ViewportDetailsComponent>().imGuiEditor();
+                    viewport.imGuiEditor();
                     ImGui::TreePop();
                 }
                 if (ImGui::TreeNodeEx("Mouse", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    stats.get<MouseComponent>().imGuiEditor();
+                    mouse.imGuiEditor();
                     ImGui::TreePop();
                 }
             }
