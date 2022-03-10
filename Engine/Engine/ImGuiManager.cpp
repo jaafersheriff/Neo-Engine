@@ -230,7 +230,8 @@ namespace neo {
     }
 
     void ImGuiManager::log(const char* log, util::LogSeverity severity) {
-        mConsole.addLog(log, severity);
+        NEO_UNUSED(log, severity);
+        // mConsole.addLog(log, severity);
     }
 
     void ImGuiManager::imGuiEditor() {

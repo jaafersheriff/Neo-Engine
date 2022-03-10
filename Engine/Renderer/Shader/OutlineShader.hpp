@@ -51,22 +51,23 @@ namespace neo {
             glCullFace(GL_FRONT);
 
             /* Load PV */
-            auto camera = ecs.cGetComponentTuple<MainCameraComponent, SpatialComponent>();
-            NEO_ASSERT(camera, "No main camera exists");
-            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.mEntity));
-            loadUniform("V", camera.get<SpatialComponent>().getView());
+            auto cView = ecs.getView<MainCameraComponent, SpatialComponent>();
+            NEO_ASSERT(cView.size_hint() <= 1, "");
+            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cView.front()));
+            loadUniform("V", ecs.cGetComponent<SpatialComponent>()->getView());
+
+
             const auto& viewport = ecs.cGetComponent<ViewportDetailsComponent>();
             loadUniform("screenSize", glm::vec2(viewport->mSize));
 
-            const auto cameraFrustum = ecs.cGetComponent<FrustumComponent>(camera.mEntity);
+            const auto cameraFrustum = ecs.cGetComponent<FrustumComponent>(cView.front());
 
-            for (auto& tuple : ecs.getComponentTuples<renderable::OutlineRenderable, MeshComponent, SpatialComponent>()) {
-                const auto& [renderable, mesh, spatial] = tuple.get();
+            for (auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::OutlineRenderable, MeshComponent, SpatialComponent>().each()) {
 
                 // VFC
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("OutlineShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(tuple.mEntity)) {
+                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
                         if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
                             continue;
                         }

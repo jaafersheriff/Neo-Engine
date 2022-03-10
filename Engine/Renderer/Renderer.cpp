@@ -409,8 +409,8 @@ namespace neo {
                 }
             }
             else {
-                for (auto tuple : ecs.getComponentTuples<BoundingBoxComponent, LineMeshComponent>()) {
-                    ecs.removeComponent<LineMeshComponent>(tuple.mEntity);
+                for (auto tuple : ecs.getView<BoundingBoxComponent, LineMeshComponent>()) {
+                    ecs.removeComponent<LineMeshComponent>(tuple);
                 }
             }
         }

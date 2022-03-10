@@ -70,23 +70,23 @@ namespace neo {
             bind();
 
             /* Load PV */
-            auto camera = ecs.cGetComponentTuple<MainCameraComponent, SpatialComponent>();
-            NEO_ASSERT(camera, "No main camera exists");
-            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.mEntity));
-            loadUniform("V", camera.get<SpatialComponent>().getView());
+            auto cView = ecs.getView<MainCameraComponent, SpatialComponent>();
+            NEO_ASSERT(cView.size_hint() <= 1, "");
+            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cView.front()));
+            loadUniform("V", ecs.cGetComponent<SpatialComponent>()->getView());
 
-            const auto cameraFrustum = ecs.cGetComponent<FrustumComponent>(camera.mEntity);
+
+            const auto cameraFrustum = ecs.cGetComponent<FrustumComponent>(cView.front());
 
             uint8_t rendered = 1;
             std::unordered_map<uint8_t, ECS::Entity> map;
-            for (const auto& tuple : ecs.getComponentTuples<SelectableComponent, MeshComponent, SpatialComponent>()) {
-                const auto& [selectable, mesh, spatial] = tuple.get();
-                ECS::Entity componentID = tuple.mEntity;
+            for (const auto&& [entity, selectable, mesh, spatial] : ecs.getView<SelectableComponent, MeshComponent, SpatialComponent>().each()) {
+                ECS::Entity componentID = entity;
 
                 // VFC
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("PhongShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(tuple.mEntity)) {
+                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
                         if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
                             continue;
                         }

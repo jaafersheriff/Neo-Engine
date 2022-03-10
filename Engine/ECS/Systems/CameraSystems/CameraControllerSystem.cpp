@@ -9,9 +9,8 @@
 namespace neo {
 
     void CameraControllerSystem::update(ECS& ecs) {
-        if (auto cameraController = ecs.getComponentTuple<CameraControllerComponent, SpatialComponent>()) {
+        for (auto&& [entity, controller, spatial] : ecs.getView<CameraControllerComponent, SpatialComponent>().each()) {
             if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
-                auto&& [controller, spatial] = cameraController.get();
                 _updateLook(frameStats->mDT, ecs, controller, spatial);
                 _updatePosition(frameStats->mDT, ecs, controller, spatial);
             }
