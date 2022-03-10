@@ -58,7 +58,6 @@ namespace neo {
 		mRegistry.each([this](auto entity) {
 			removeEntity(entity);
 		});
-		flush();
 		mRegistry.clear();
 		mSystems.clear();
 	}

@@ -23,7 +23,7 @@ namespace neo {
         public:
 
             ShadowCasterShader(const int dimension) :
-                Shader("Shadow Caster",
+                Shader("Shadow Caster Shader",
                     R"(
                         layout (location = 0) in vec3 vertPos;
                         layout (location = 2) in vec2 vertTex;
