@@ -9,8 +9,8 @@ namespace neo {
 
     struct PerspectiveCameraComponent : public CameraComponent {
         PerspectiveCameraComponent(float near, float far, float fov, float ar = 1.5f);
-        PerspectiveCameraComponent(PerspectiveCameraComponent&&) = default;
 
+        virtual std::string getName() const override { return "PerspectiveCameraComponent"; }
         virtual void imGuiEditor() override;
 
         /* Setters */

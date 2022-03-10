@@ -7,12 +7,10 @@
 
 namespace neo {
 
-    class OrthoCameraComponent : public CameraComponent {
+    struct OrthoCameraComponent : public CameraComponent {
+            OrthoCameraComponent(float near, float far, float hMin, float hMax, float vMin, float vMax);
 
-        public:
-            OrthoCameraComponent(GameObject *, float near, float far, float hMin, float hMax, float vMin, float vMax);
-            OrthoCameraComponent(OrthoCameraComponent &&) = default;
-
+            virtual std::string getName() const override { return "OrthoCameraComponent"; }
             virtual void imGuiEditor() override;
 
             /* Setters */

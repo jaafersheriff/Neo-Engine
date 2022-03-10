@@ -4,8 +4,6 @@
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "DemoInfra/IDemo.hpp"
 
-#include "ECS/Messaging/Messenger.hpp"
-
 #include <unordered_map>
 #include <typeindex>
 #include <vector>

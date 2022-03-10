@@ -8,7 +8,7 @@ namespace neo {
 
     struct CameraComponent : public Component {
         CameraComponent();
-        virtual std::string getName() override { return "CameraComponent"; }
+        virtual std::string getName() const override { return "CameraComponent"; }
         virtual void imGuiEditor() override;
 
         /* Setters */

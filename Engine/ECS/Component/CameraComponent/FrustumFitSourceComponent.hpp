@@ -4,10 +4,11 @@
 
 namespace neo {
 
-    class FrustumFitSourceComponent : public Component {
-    public:
-        FrustumFitSourceComponent(GameObject *go) :
-            Component(go)
+    struct FrustumFitSourceComponent : public Component {
+        FrustumFitSourceComponent()
         {}
+
+        virtual std::string getName() const override { return "FrustumFitSourceComponent"; }
+
     };
 }

@@ -7,10 +7,12 @@
 namespace neo {
 
     struct FrameStatsComponent : public Component {
-        float mRunTime;
-        float mDT;
+        FrameStatsComponent(float rt, float dt)
+            : mRunTime(rt)
+            , mDT(dt)
+        {}
 
-        virtual std::string getName() override {
+        virtual std::string getName() const override {
             return "FrameStatsComponent";
         }
 
@@ -19,5 +21,8 @@ namespace neo {
             ImGui::TextWrapped("Frame Time: %0.3f", mDT);
 
         }
+
+        float mRunTime;
+        float mDT;
     };
 }

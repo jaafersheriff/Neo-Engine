@@ -10,13 +10,13 @@ namespace neo {
 
     struct SpatialComponent : public Component, public Orientable {
 
-            SpatialComponent(ECS::Entity entity);
-            SpatialComponent(ECS::Entity entity, const glm::vec3 &);
-            SpatialComponent(ECS::Entity entity, const glm::vec3 &, const glm::vec3 &);
-            SpatialComponent(ECS::Entity entity, const glm::vec3 &, const glm::vec3 &, const glm::vec3 &);
-            SpatialComponent(ECS::Entity entity, const glm::vec3 &, const glm::vec3 &, const glm::mat3 &);
+            SpatialComponent();
+            SpatialComponent(const glm::vec3 &);
+            SpatialComponent(const glm::vec3 &, const glm::vec3 &);
+            SpatialComponent(const glm::vec3 &, const glm::vec3 &, const glm::vec3 &);
+            SpatialComponent(const glm::vec3 &, const glm::vec3 &, const glm::mat3 &);
 
-            virtual std::string getName() override { return "SpatialComponent"; }
+            virtual std::string getName() const override { return "SpatialComponent"; }
             virtual void imGuiEditor() override;
 
             /* Update */

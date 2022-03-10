@@ -8,13 +8,15 @@ namespace neo {
 
     namespace renderable {
 
-        class OutlineRenderable : public Component {
-        public:
-            OutlineRenderable(GameObject* go, glm::vec4 color = glm::vec4(1.f, 0.f, 0.f, 1.f), float scale = 3.f)
-                : Component(go)
-                , mColor(color)
+        struct OutlineRenderable : public Component {
+            OutlineRenderable(glm::vec4 color = glm::vec4(1.f, 0.f, 0.f, 1.f), float scale = 3.f)
+                : mColor(color)
                 , mScale(scale)
             {}
+
+            virtual std::string getName() const override {
+                return "OutlineRenderable";
+            }
 
             virtual void imGuiEditor() override {
                 ImGui::ColorEdit4("Color", &mColor[0]);

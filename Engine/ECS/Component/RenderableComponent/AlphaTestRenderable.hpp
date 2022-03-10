@@ -8,13 +8,13 @@ namespace neo {
 
     namespace renderable {
 
-        class AlphaTestRenderable : public Component {
-        public:
-            const Texture& mDiffuseMap;
-            AlphaTestRenderable(GameObject *go, const Texture& texture) :
-                Component(go),
+        struct AlphaTestRenderable : public Component {
+            Texture& mDiffuseMap;
+            AlphaTestRenderable(Texture& texture) :
                 mDiffuseMap(texture)
             {}
+
+            virtual std::string getName() const override { return "AlphaTestRenderable"; }
 
         };
     }

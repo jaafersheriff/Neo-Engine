@@ -5,13 +5,14 @@
 namespace neo {
     class Mesh;
 
-    class MeshComponent : public Component {
-    public:
-        const Mesh& mMesh;
-        MeshComponent(GameObject *go, const Mesh& mesh) :
-            Component(go),
-            mMesh(mesh)
+    struct MeshComponent : public Component {
+        Mesh* mMesh;
+        MeshComponent(Mesh* mesh)
+            : mMesh(mesh)
         {}
 
+        virtual std::string getName() const override {
+            return "MeshComponent";
+        }
     };
 }

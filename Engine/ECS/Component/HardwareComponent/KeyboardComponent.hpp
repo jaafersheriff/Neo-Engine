@@ -8,14 +8,14 @@
 namespace neo {
 
     struct KeyboardComponent : public Component {
-        KeyboardComponent(Keyboard& engineKeyboard)
+        KeyboardComponent(Keyboard engineKeyboard)
             : mFrameKeyboard(engineKeyboard)
         {}
 
-        virtual std::string getName() override {
+        virtual std::string getName() const override {
             return "KeyboardComponent";
         }
 
-        const Keyboard mFrameKeyboard;
+        Keyboard mFrameKeyboard;
     };
 }

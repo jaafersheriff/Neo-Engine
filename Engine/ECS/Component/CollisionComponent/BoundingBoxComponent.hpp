@@ -13,7 +13,7 @@
 namespace neo {
 
     struct BoundingBoxComponent : public Component {
-        virtual std::string getName() override { return "BoundingBoxComponent"; } 
+        virtual std::string getName() const override { return "BoundingBoxComponent"; } 
 
         glm::vec3 mMin, mMax;
 

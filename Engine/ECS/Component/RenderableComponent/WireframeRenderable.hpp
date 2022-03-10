@@ -10,7 +10,7 @@ namespace neo {
         struct WireframeRenderable : public Component {
             glm::vec3 mColor = glm::vec3(1.f);
 
-            virtual std::string getName() override {
+            virtual std::string getName() const override {
                 return "WireframeRenderable";
             }
 

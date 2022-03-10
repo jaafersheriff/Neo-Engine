@@ -4,10 +4,10 @@
 
 namespace neo
 {
-    class ShadowCameraComponent : public Component {
-    public:
-        ShadowCameraComponent(GameObject *go) :
-            Component(go)
+    struct ShadowCameraComponent : public Component {
+        ShadowCameraComponent()
         {}
+
+        virtual std::string getName() const override { return "ShadowCameraComponent"; }
     };
 }
