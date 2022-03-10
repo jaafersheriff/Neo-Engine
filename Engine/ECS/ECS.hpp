@@ -186,7 +186,9 @@ namespace neo {
 	std::vector<ComponentTuple<CompTs...>> ECS::getComponentTuples() {
 		std::vector<ComponentTuple<CompTs...>> ret;
 		mRegistry.each([this, &ret](ECS::Entity entity) {
-			ret.emplace_back(getComponentTuple<CompTs...>(entity));
+            if (auto tuple = getComponentTuple<CompTs...>(entity)) {
+                ret.push_back(tuple);
+            }
 			});
 		return ret;
 	}
@@ -195,7 +197,9 @@ namespace neo {
 	const std::vector<ComponentTuple<CompTs...>> ECS::getComponentTuples() const {
 		std::vector<ComponentTuple<CompTs...>> ret;
 		mRegistry.each([this, &ret](ECS::Entity entity) {
-			ret.emplace_back(ComponentTuple<CompTs...>(entity, std::move(const_cast<Registry&>(mRegistry).try_get<CompTs...>(entity))));
+            if (auto tuple = ComponentTuple<CompTs...>(entity, std::move(const_cast<Registry&>(mRegistry).try_get<CompTs...>(entity)))) {
+                ret.push_back(tuple);
+            }
 			});
 		return ret;
 	}
@@ -203,7 +207,7 @@ namespace neo {
 	template<typename... CompTs>
 	ComponentTuple<CompTs...> ECS::getComponentTuple() {
         auto tuples = getComponentTuples<CompTs...>();
-        NEO_ASSERT(tuples.size() == 1, "");
+        NEO_ASSERT(tuples.size() <= 1, "B");
         return tuples[0];
 	}
 
