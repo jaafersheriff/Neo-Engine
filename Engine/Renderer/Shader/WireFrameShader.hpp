@@ -39,8 +39,8 @@ namespace neo {
                 /* Load PV */
             auto cView = ecs.getView<MainCameraComponent, SpatialComponent>();
             NEO_ASSERT(cView.size_hint() <= 1, "");
-            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cView.front()));
-            loadUniform("V", ecs.cGetComponent<SpatialComponent>()->getView());
+            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cView.front())->getProj());
+            loadUniform("V", cView.get<const SpatialComponent>(cView.front()).getView());
 
                 for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::WireframeRenderable, MeshComponent, SpatialComponent>().each()) {
                     loadUniform("M", spatial.getModelMatrix());
