@@ -7,6 +7,7 @@
 // #include "ECS/Messaging/Messenger.hpp"
 
 #include "Util/Log/Log.hpp"
+#include "Util/ServiceLocator.hpp"
 #include <iostream>
 
 namespace neo {
@@ -65,8 +66,8 @@ namespace neo {
                 return;
             }
             if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS) {
-                ImGuiManager::toggleImGui();
-                if (!ImGuiManager::isEnabled()) {
+                ServiceLocator<ImGuiManager>::ref().toggleImGui();
+                if (!ServiceLocator<ImGuiManager>::ref().isEnabled()) {
                     WindowDetails& details = *(WindowDetails*)glfwGetWindowUserPointer(window);
                     int x, y;
                     glfwGetFramebufferSize(window, &x, &y);
@@ -75,8 +76,8 @@ namespace neo {
                     // Messenger::sendMessage<FrameSizeMessage>(nullptr, details.mSize);
                 }
             }
-            if (ImGuiManager::isEnabled() && !ImGuiManager::isViewportFocused()) {
-                ImGuiManager::updateKeyboard(window, key, scancode, action, mods);
+            if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused()) {
+                ServiceLocator<ImGuiManager>::ref().updateKeyboard(window, key, scancode, action, mods);
                 // Messenger::sendMessage<Keyboard::ResetKeyboardMessage>(nullptr);
             }
             else {
@@ -85,10 +86,10 @@ namespace neo {
             });
         glfwSetMouseButtonCallback(mWindow, [](GLFWwindow* window, int button, int action, int mods) {
             bool doImGui = false;
-            doImGui |= ImGuiManager::isEnabled() && !ImGuiManager::isViewportHovered();
-            doImGui |= ImGuiManager::isEnabled() && ImGuiManager::isViewportHovered() && !ImGuiManager::isViewportFocused() && action == GLFW_PRESS;
+            doImGui |= ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportHovered();
+            doImGui |= ServiceLocator<ImGuiManager>::ref().isEnabled() && ServiceLocator<ImGuiManager>::ref().isViewportHovered() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused() && action == GLFW_PRESS;
             if (doImGui) {
-                ImGuiManager::updateMouse(window, button, action, mods);
+                ServiceLocator<ImGuiManager>::ref().updateMouse(window, button, action, mods);
                 // Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
             }
             else {
@@ -96,8 +97,8 @@ namespace neo {
             }
             });
         glfwSetScrollCallback(mWindow, [](GLFWwindow* window, double dx, double dy) {
-            if (ImGuiManager::isEnabled() && !ImGuiManager::isViewportHovered()) {
-                ImGuiManager::updateScroll(window, dx, dy);
+            if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportHovered()) {
+                ServiceLocator<ImGuiManager>::ref().updateScroll(window, dx, dy);
                 // Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
             }
             else {
@@ -106,8 +107,8 @@ namespace neo {
             });
 
         glfwSetCharCallback(mWindow, [](GLFWwindow* window, unsigned int c) {
-            if (ImGuiManager::isEnabled() && !ImGuiManager::isViewportFocused()) {
-                ImGuiManager::updateCharacter(window, c);
+            if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused()) {
+                ServiceLocator<ImGuiManager>::ref().updateCharacter(window, c);
             }
             });
         glfwSetWindowSizeCallback(mWindow, [](GLFWwindow* window, int width, int height) {
@@ -177,7 +178,7 @@ namespace neo {
         //     mDetails.mSize.y = m.mSize.y;
         // });
 
-        // if (!ImGuiManager::isEnabled()) {
+        // if (!ServiceLocator<ImGuiManager>::ref().isEnabled()) {
         //     int x, y;
         //     glfwGetFramebufferSize(mWindow, &x, &y);
         //     mDetails.mSize.x = x;
@@ -187,7 +188,7 @@ namespace neo {
     }
 
     void WindowSurface::updateHardware() {
-        if (!ImGuiManager::isEnabled()) {
+        if (!ServiceLocator<ImGuiManager>::ref().isEnabled()) {
             double x, y;
             glfwGetCursorPos(mWindow, &x, &y);
             y = mDetails.mSize.y - y;

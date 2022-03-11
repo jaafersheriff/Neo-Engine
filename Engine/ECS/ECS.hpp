@@ -2,7 +2,6 @@
 
 #include "Util/Util.hpp"
 
-#include "ECS/ComponentTuple.hpp"
 #include "ECS/Systems/System.hpp"
 
 #include <vector>
@@ -13,6 +12,10 @@
 #include <thread>
 
 #include <microprofile.h>
+
+#ifndef ENTT_ASSERT
+#define ENTT_ASSERT(condition, ...) NEO_ASSERT(condition, __VA_ARGS__)
+#endif
 #include <entt/entt.hpp>
 
 namespace neo {
@@ -48,18 +51,12 @@ namespace neo {
 		template<typename CompT> CompT *const cGetComponent(Entity e) const;
 		template<typename SuperT, typename CompT> SuperT* getComponentAs(Entity e);
 		template<typename SuperT, typename CompT> const SuperT* cGetComponentAs(Entity e) const;
-		template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple(Entity e);
-		template<typename... CompTs> const ComponentTuple<CompTs...> cGetComponentTuple(const Entity e) const;
 
 		// All access
 		template<typename CompT> CompT* getComponent();
 		template<typename CompT> CompT *const cGetComponent() const;
 		template<typename... CompTs> auto getView();
 		template<typename... CompTs> const auto getView() const;
-		// template<typename... CompTs> ComponentTuple<CompTs...> getComponentTuple();
-		// template<typename... CompTs> const ComponentTuple<CompTs...> cGetComponentTuple() const;
-		// template<typename... CompTs> std::vector<ComponentTuple<CompTs...>> getComponentTuples();
-		// template<typename... CompTs> const std::vector<ComponentTuple<CompTs...>> getComponentTuples() const;
 
 		/* Attach a system */
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
@@ -122,19 +119,6 @@ namespace neo {
 
 		mSystems.push_back({ typeI, std::make_unique<SysT>(std::forward<Args>(args)...) });
 		return static_cast<SysT &>(*mSystems.back().second);
-	}
-
-	template<typename... CompTs>
-	ComponentTuple<CompTs...> ECS::getComponentTuple(Entity e) {
-		MICROPROFILE_SCOPEI("ECS", "getComponentTuple", MP_AUTO);
-		auto t = mRegistry.try_get<CompTs...>(e);
-		return ComponentTuple<CompTs...>(e, t);
-	}
-
-	template<typename... CompTs>
-	const ComponentTuple<CompTs...> ECS::cGetComponentTuple(const Entity e) const {
-		MICROPROFILE_SCOPEI("ECS", "cGetComponentTuple", MP_AUTO);
-		return ComponentTuple<CompTs...>(e, std::move(const_cast<Registry&>(mRegistry).try_get<CompTs...>(e)));
 	}
 
 	template<typename CompT>

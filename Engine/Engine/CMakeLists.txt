@@ -8,5 +8,5 @@ PUBLIC
 PRIVATE
 	libglew_static
 	imgui
-	EnTT::EnTT
+	entt
 )

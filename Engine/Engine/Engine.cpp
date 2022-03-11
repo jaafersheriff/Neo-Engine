@@ -34,6 +34,7 @@ extern "C" {
 
 #include "Util/FrameCounter.hpp"
 #include "Util/Log/Log.hpp"
+#include "Util/ServiceLocator.hpp"
 
 #include <time.h>
 #include <iostream>
@@ -64,7 +65,9 @@ namespace neo {
             }
             Loader::_cleanTextureData(data);
         }
-        ImGuiManager::init(mWindow.getWindow());
+        ServiceLocator<ImGuiManager>::set();
+        ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
+
         mKeyboard.init();
         mMouse.init();
 #if MICROPROFILE_ENABLED
@@ -96,7 +99,7 @@ namespace neo {
 
             /* Update display, mouse, keyboard */
             mWindow.updateHardware();
-            ImGuiManager::update();
+            ServiceLocator<ImGuiManager>::ref().update();
             // Messenger::relayMessages(mECS);
 
             {
@@ -104,8 +107,8 @@ namespace neo {
                 auto hardware = mECS.createEntity();
                 mECS.addComponent<MouseComponent>(hardware, mMouse);
                 mECS.addComponent<KeyboardComponent>(hardware, mKeyboard);
-                if (ImGuiManager::isEnabled()) {
-                    mECS.addComponent<ViewportDetailsComponent>(hardware, ImGuiManager::getViewportSize(), mWindow.getDetails().mPos + ImGuiManager::getViewportOffset());
+                if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+                    mECS.addComponent<ViewportDetailsComponent>(hardware, ServiceLocator<ImGuiManager>::ref().getViewportSize(), mWindow.getDetails().mPos + ServiceLocator<ImGuiManager>::ref().getViewportOffset());
                 }
                 else {
                     mECS.addComponent<ViewportDetailsComponent>(hardware, mWindow.getDetails().mSize, mWindow.getDetails().mPos);
@@ -129,9 +132,9 @@ namespace neo {
                 // Messenger::relayMessages(mECS);
 
                 /* Update imgui functions */
-                if (ImGuiManager::isEnabled()) {
+                if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
                     MICROPROFILE_SCOPEI("ImGui", "ImGui", MP_AUTO);
-                    ImGuiManager::begin();
+                    ServiceLocator<ImGuiManager>::ref().begin();
 
                     {
                         MICROPROFILE_SCOPEI("ImGui", "demos.imGuiEditor", MP_AUTO);
@@ -150,12 +153,12 @@ namespace neo {
                         Library::imGuiEditor();
                     }
                     {
-                        MICROPROFILE_SCOPEI("ImGui", "ImGuiManager::imGuiEditor", MP_AUTO);
-                        ImGuiManager::imGuiEditor();
+                        MICROPROFILE_SCOPEI("ImGui", "ServiceLocator<ImGuiManager>::ref().imGuiEditor", MP_AUTO);
+                        ServiceLocator<ImGuiManager>::ref().imGuiEditor();
                     }
                     imGuiEditor(demos, counter);
 
-                    ImGuiManager::end();
+                    ServiceLocator<ImGuiManager>::ref().end();
                 }
                 // Messenger::relayMessages(mECS);
             }
@@ -190,7 +193,7 @@ namespace neo {
         // Messenger::clean();
 
         /* Init the new state */
-        ImGuiManager::reset();
+        ServiceLocator<ImGuiManager>::ref().reset();
         demos.swap();
         auto config = demos.getConfig();
         mWindow.reset(config.name);
@@ -258,7 +261,7 @@ namespace neo {
         mECS.clean();
         Library::clean();
         Renderer::clean();
-        ImGuiManager::destroy();
+        ServiceLocator<ImGuiManager>::ref().destroy();
         mWindow.shutDown();
     }
 

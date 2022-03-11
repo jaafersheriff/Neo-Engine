@@ -6,7 +6,7 @@ PUBLIC
 	Util
 	microprofile
 	Hardware
-	EnTT::EnTT
+	entt
 PRIVATE
 	libglew_static
 )

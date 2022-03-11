@@ -67,6 +67,19 @@ PRIVATE
 
 
 ## entt
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/entt")
-set_target_properties(EnTT PROPERTIES FOLDER "Neo/ext/entt")
-set_target_properties(aob PROPERTIES FOLDER "Neo/ext/entt")
+file(GLOB_RECURSE ENTT_HPP_FILES 
+	entt/src/*.h
+	entt/src/*.hpp
+)
+file(GLOB_RECURSE ENTT_CPP_FILES 
+	entt.cpp
+)
+add_library(entt STATIC ${ENTT_CPP_FILES} ${ENTT_HPP_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/entt/src FILES 
+	${ENTT_HPP_FILES})
+set_target_properties(entt PROPERTIES FOLDER "Neo/ext")
+target_include_directories(entt
+PUBLIC
+	"${CMAKE_CURRENT_SOURCE_DIR}/entt/src"
+PRIVATE
+)

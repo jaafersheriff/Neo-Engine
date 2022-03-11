@@ -10,6 +10,8 @@
 
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 
+#include "Util/ServiceLocator.hpp"
+
 #include "imgui_impl_opengl3.h"
 #include "microprofile.h"
 
@@ -255,10 +257,10 @@ namespace neo {
             }
 
             /* Render imgui */
-            if (ImGuiManager::isEnabled()) {
-                RENDERER_MP_ENTER("ImGuiManager::render");
+            if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+                RENDERER_MP_ENTER("ServiceLocator<ImGuiManager>::ref().render");
                 mBackBuffer->bind();
-                ImGuiManager::render();
+                ServiceLocator<ImGuiManager>::ref().render();
                 RENDERER_MP_LEAVE();
             }
             else {
@@ -345,9 +347,9 @@ namespace neo {
     void Renderer::imGuiEditor(WindowSurface& window, ECS& ecs) {
 
         ImGui::Begin("Viewport");
-        ImGuiManager::updateViewport();
+        ServiceLocator<ImGuiManager>::ref().updateViewport();
 
-        glm::vec2 viewportSize = ImGuiManager::getViewportSize();
+        glm::vec2 viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
         if (viewportSize.x != 0 && viewportSize.y != 0) {
 #pragma warning(push)
 #pragma warning(disable: 4312)
