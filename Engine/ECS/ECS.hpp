@@ -46,7 +46,7 @@ namespace neo {
 		template<typename CompT, typename... Args> CompT* addComponent(Entity e, Args &&... args);
 		template<typename CompT> void removeComponent(Entity e);
 
-		template<typename CompT> bool has(Entity e);
+		template<typename CompT> bool has(Entity e) const;
 		template<typename CompT> CompT* getComponent(Entity e);
 		template<typename CompT> CompT *const cGetComponent(Entity e) const;
 		template<typename SuperT, typename CompT> SuperT* getComponentAs(Entity e);
@@ -55,14 +55,17 @@ namespace neo {
 		// All access
 		template<typename CompT> CompT* getComponent();
 		template<typename CompT> CompT *const cGetComponent() const;
+		template<typename... CompTs> bool has() const;
 		template<typename... CompTs> auto getView();
 		template<typename... CompTs> const auto getView() const;
+		template<typename... CompTs> std::optional<std::tuple<Entity, CompTs&...>> getSingleView();
+		// template<typename... CompTs> const auto getSingleView() const;
 
 		/* Attach a system */
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
 
-	private:
 		Registry mRegistry;
+	private:
 		/* Active containers */
 		std::vector<Entity> mEntityKillQueue;
 		using ComponentModFunc = std::function<void(Registry&)>;
@@ -101,7 +104,7 @@ namespace neo {
 	}
 
 	template<typename CompT>
-	bool ECS::has(ECS::Entity e) {
+	bool ECS::has(ECS::Entity e) const {
 		MICROPROFILE_SCOPEI("ECS", "has", MP_AUTO);
 		return mRegistry.try_get<CompT>(e) != nullptr;
 	}
@@ -174,6 +177,8 @@ namespace neo {
 	template<typename... CompTs>
 	const auto ECS::getView() const {
 		MICROPROFILE_SCOPEI("ECS", "getView", MP_AUTO);
+		// TODO -- maybe force const inputs rather than attaching it
+		// TODO -- otherwise view.get<> breaks
 		return mRegistry.view<const CompTs...>();
 	}
 
@@ -188,5 +193,30 @@ namespace neo {
 		CompT *const comp = cGetComponent<CompT>(e);
 		NEO_ASSERT(comp, "B");
 		return dynamic_cast<SuperT *const>(comp);
+	}
+
+	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, CompTs&...>> ECS::getSingleView() {
+		MICROPROFILE_SCOPEI("ECS", "getSingleView", MP_AUTO);
+		auto view = mRegistry.view<CompTs...>();
+		NEO_ASSERT(view.size_hint() <= 1, "");
+		if (view.size_hint() == 1) {
+			return { *view.each().begin() };
+		}
+		return std::nullopt;
+	}
+
+	// template<typename... CompTs> const auto ECS::getSingleView() const {
+	// 	MICROPROFILE_SCOPEI("ECS", "getSingleView", MP_AUTO);
+	// 	auto view = mRegistry.view<const CompTs...>();
+	// 	NEO_ASSERT(view.size_hint() <= 1, "");
+	// 	if (view.size_hint() == 1) {
+	// 		return view.each().begin();
+	// 	}
+	// 	return nullptr;
+	// }
+
+	template<typename... CompTs> bool ECS::has() const {
+		MICROPROFILE_SCOPEI("ECS", "has", MP_AUTO);
+		return mRegistry.view<CompTs...>().size_hint() != 0;
 	}
 }

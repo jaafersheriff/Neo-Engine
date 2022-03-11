@@ -23,47 +23,44 @@ namespace neo {
     }
 
     void CameraControllerSystem::_updateLook(const float dt, ECS& ecs, CameraControllerComponent& controller, SpatialComponent& spatial) {
-        float theta = 0.f;
-        float phi = util::PI * 0.5f;
-
         if (auto mouse = ecs.getComponent<MouseComponent>()) {
             glm::vec2 mousePos = mouse->mFrameMouse.getPos();
             glm::vec2 mouseSpeed = mouse->mFrameMouse.getSpeed();
 
             if (mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_2)) {
-                theta -= mouseSpeed.x * controller.mLookSpeed * dt;
-                phi -= mouseSpeed.y * controller.mLookSpeed * dt;
+                controller.mTheta -= mouseSpeed.x * controller.mLookSpeed * dt;
+                controller.mPhi -= mouseSpeed.y * controller.mLookSpeed * dt;
             }
         }
 
         if (auto keyboard = ecs.getComponent<KeyboardComponent>()) {
             if (keyboard->mFrameKeyboard.isKeyPressed(controller.mLookLeftButton)) {
-                theta += controller.mLookSpeed * 2.f * dt;
+                controller.mTheta += controller.mLookSpeed * 2.f * dt;
             }
             if (keyboard->mFrameKeyboard.isKeyPressed(controller.mLookRightButton)) {
-                theta -= controller.mLookSpeed * 2.f * dt;
+                controller.mTheta -= controller.mLookSpeed * 2.f * dt;
             }
             if (keyboard->mFrameKeyboard.isKeyPressed(controller.mLookUpButton)) {
-                phi -= controller.mLookSpeed * 2.f * dt;
+                controller.mPhi -= controller.mLookSpeed * 2.f * dt;
             }
             if (keyboard->mFrameKeyboard.isKeyPressed(controller.mLookDownButton)) {
-                phi += controller.mLookSpeed * 2.f * dt;
+                controller.mPhi += controller.mLookSpeed * 2.f * dt;
             }
         }
 
-        if (theta > util::PI) {
-            theta = std::fmod(theta, util::PI) - util::PI;
+        if (controller.mTheta > util::PI) {
+            controller.mTheta = std::fmod(controller.mTheta, util::PI) - util::PI;
         }
-        else if (theta < -util::PI) {
-            theta = util::PI - std::fmod(-theta, util::PI);
+        else if (controller.mTheta < -util::PI) {
+            controller.mTheta = util::PI - std::fmod(-controller.mTheta, util::PI);
         }
 
-        /* phi [0.f, pi] */
-        phi = glm::max(glm::min(phi, util::PI), 0.f);
+        /* controller.mPhi [0.f, pi] */
+        controller.mPhi = glm::max(glm::min(controller.mPhi, util::PI), 0.f);
 
-        glm::vec3 w(-util::sphericalToCartesian(1.0f, theta, phi));
+        glm::vec3 w(-util::sphericalToCartesian(1.0f, controller.mTheta, controller.mPhi));
         w = glm::vec3(-w.y, w.z, -w.x); // one of the many reasons I like z to be up
-        glm::vec3 v(util::sphericalToCartesian(1.0f, theta, phi - util::PI * 0.5f));
+        glm::vec3 v(util::sphericalToCartesian(1.0f, controller.mTheta, controller.mPhi - util::PI * 0.5f));
         v = glm::vec3(-v.y, v.z, -v.x);
         glm::vec3 u(glm::cross(v, w));
 
