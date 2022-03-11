@@ -52,6 +52,8 @@ namespace neo {
             }
 
             virtual void render(const ECS& ecs) override {
+				MICROPROFILE_DEFINE(Systems_, "ShadowCasterShader", "Preload", MP_AUTO);
+				MICROPROFILE_ENTER(Systems_);
                 auto shadowCamera = ecs.getView<ShadowCameraComponent, SpatialComponent>();
                 if (!shadowCamera) {
                     NEO_ASSERT(shadowCamera, "No shadow camera found");
@@ -66,8 +68,12 @@ namespace neo {
 
                 bind();
                 loadUniform("P", ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCamera.front())->getProj());
-                loadUniform("V", ecs.cGetComponent<SpatialComponent>(shadowCamera.front())->getView());
+                loadUniform("V", shadowCamera.get<const SpatialComponent>(shadowCamera.front()).getView());
 
+				MICROPROFILE_LEAVE();
+
+				MICROPROFILE_DEFINE(Systems__, "ShadowCasterShader", "draw", MP_AUTO);
+				MICROPROFILE_ENTER(Systems__);
                 for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>().each()) {
 
                     loadUniform("M", spatial.getModelMatrix());
@@ -78,6 +84,7 @@ namespace neo {
                     /* DRAW */
                     mesh.mMesh->draw();
                 }
+				MICROPROFILE_LEAVE();
 
 
                 unbind();

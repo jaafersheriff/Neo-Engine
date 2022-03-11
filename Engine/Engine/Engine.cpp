@@ -147,7 +147,7 @@ namespace neo {
                         mECS.imguiEdtor();
                     }
                     {
-                        MICROPROFILE_SCOPEI("ImGui", "ServiceLocator<Renderer>::ref().imGuiEditor", MP_AUTO);
+                        MICROPROFILE_SCOPEI("ImGui", "Renderer.imGuiEditor", MP_AUTO);
                         ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
                     }
                     {
@@ -155,7 +155,7 @@ namespace neo {
                         Library::imGuiEditor();
                     }
                     {
-                        MICROPROFILE_SCOPEI("ImGui", "ServiceLocator<ImGuiManager>::ref().imGuiEditor", MP_AUTO);
+                        MICROPROFILE_SCOPEI("ImGui", "ImGuiManager.imGuiEditor", MP_AUTO);
                         ServiceLocator<ImGuiManager>::ref().imGuiEditor();
                     }
                     imGuiEditor(demos, counter);
