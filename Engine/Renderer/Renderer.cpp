@@ -124,11 +124,11 @@ namespace neo {
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z);
         char buf[512];
-        memcpy(buf, glGetString(GL_VENDOR), 256);
+        memcpy(buf, glGetString(GL_VENDOR), 512);
         mDetails.mVendor = buf;
-        memcpy(buf, glGetString(GL_RENDERER), 256);
+        memcpy(buf, glGetString(GL_RENDERER), 512);
         mDetails.mRenderer = buf;
-        memcpy(buf, glGetString(GL_SHADING_LANGUAGE_VERSION), 256);
+        memcpy(buf, glGetString(GL_SHADING_LANGUAGE_VERSION), 512);
         mDetails.mShadingLanguage = buf;
 
         /* Init default GL state */

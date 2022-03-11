@@ -56,9 +56,10 @@ namespace neo {
 		NEO_LOG_I("Cleaning ECS...");
 		flush();
 		mRegistry.each([this](auto entity) {
-			removeEntity(entity);
+			mRegistry.destroy(entity);
 		});
 		mRegistry.clear();
+		NEO_ASSERT(mRegistry.alive() == 0, "What");
 		mSystems.clear();
 	}
 
