@@ -177,46 +177,6 @@ namespace neo {
 		return mRegistry.view<const CompTs...>();
 	}
 
-	// template<typename... CompTs>
-	// std::vector<ComponentTuple<CompTs...>> ECS::getComponentTuples() {
-	//	 MICROPROFILE_SCOPEI("ECS", "getComponentTuples", MP_AUTO);
-	// 	std::vector<ComponentTuple<CompTs...>> ret;
-	// 	mRegistry.each([this, &ret](ECS::Entity entity) {
-	//		 if (auto tuple = getComponentTuple<CompTs...>(entity)) {
-	//			 ret.push_back(tuple);
-	//		 }
-	// 		});
-	// 	return ret;
-	// }
-
-	// template<typename... CompTs>
-	// const std::vector<ComponentTuple<CompTs...>> ECS::getComponentTuples() const {
-	//	 MICROPROFILE_SCOPEI("ECS", "getComponentTuples", MP_AUTO);
-	// 	std::vector<ComponentTuple<CompTs...>> ret;
-	// 	mRegistry.each([this, &ret](ECS::Entity entity) {
-	//		 if (auto tuple = ComponentTuple<CompTs...>(entity, std::move(const_cast<Registry&>(mRegistry).try_get<CompTs...>(entity)))) {
-	//			 ret.push_back(tuple);
-	//		 }
-	// 		});
-	// 	return ret;
-	// }
-
-	// template<typename... CompTs>
-	// ComponentTuple<CompTs...> ECS::getComponentTuple() {
-	//	 MICROPROFILE_SCOPEI("ECS", "getComponentTuple", MP_AUTO);
-	//	 auto tuples = getComponentTuples<CompTs...>();
-	//	 NEO_ASSERT(tuples.size() <= 1, "B");
-	//	 return tuples[0];
-	// }
-
-	// template<typename... CompTs> 
-	// const ComponentTuple<CompTs...> ECS::cGetComponentTuple() const {
-	//	 MICROPROFILE_SCOPEI("ECS", "cGetComponentTuple", MP_AUTO);
-	//	 auto tuples = getComponentTuples<CompTs...>();
-	//	 NEO_ASSERT(tuples.size() == 1, "");
-	//	 return tuples[0];
-	// }
-
 	template<typename SuperT, typename CompT> SuperT* ECS::getComponentAs(Entity e) {
 		MICROPROFILE_SCOPEI("ECS", "getComponentAs", MP_AUTO);
 		CompT* comp = getComponent<CompT>(e);
