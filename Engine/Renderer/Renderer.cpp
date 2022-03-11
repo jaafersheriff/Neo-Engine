@@ -253,7 +253,7 @@ namespace neo {
 
             /* Render imgui */
             if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                RENDERER_MP_ENTER("ServiceLocator<ImGuiManager>::ref().render");
+                RENDERER_MP_ENTER("ImGuiManager.render");
                 mBackBuffer->bind();
                 ServiceLocator<ImGuiManager>::ref().render();
                 RENDERER_MP_LEAVE();
