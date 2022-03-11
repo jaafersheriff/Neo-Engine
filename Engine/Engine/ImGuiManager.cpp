@@ -14,10 +14,6 @@
 
 namespace neo {
 
-    bool ImGuiManager::mIsEnabled = true;
-    ImGuiManager::Viewport ImGuiManager::mViewport;
-    ImGuiConsole ImGuiManager::mConsole;
-
     void ImGuiManager::init(GLFWwindow* window) {
         /* Init ImGui */
         IMGUI_CHECKVERSION();
@@ -231,7 +227,7 @@ namespace neo {
 
     void ImGuiManager::log(const char* log, util::LogSeverity severity) {
         NEO_UNUSED(log, severity);
-        // mConsole.addLog(log, severity);
+		mConsole.addLog(log, severity);
     }
 
     void ImGuiManager::imGuiEditor() {

@@ -1,8 +1,9 @@
 #include "Log.hpp"
 
-#include "Util/Util.hpp"
-
 #include "Engine/ImGuiManager.hpp"
+
+#include "Util/ServiceLocator.hpp"
+#include "Util/Util.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -35,7 +36,9 @@ namespace neo {
 #ifdef DEBUG_MODE
 				fprintf(stderr, buf);
 #endif
-				ImGuiManager::log(buf, severity);
+				if (!ServiceLocator<ImGuiManager>::empty()) {
+					ServiceLocator<ImGuiManager>::ref().log(buf, severity);
+				}
 			}
 		}
 	}
