@@ -27,7 +27,7 @@ extern "C" {
 #include "Hardware/Keyboard.hpp"
 #include "Hardware/Mouse.hpp"
 
-// #include "ECS/Messaging/Messenger.hpp"
+#include "ECS/Messaging/Messenger.hpp"
 
 #include "Loader/Loader.hpp"
 #include "Loader/MeshGenerator.hpp"
@@ -102,7 +102,7 @@ namespace neo {
             /* Update display, mouse, keyboard */
             mWindow.updateHardware();
             ServiceLocator<ImGuiManager>::ref().update();
-            // Messenger::relayMessages(mECS);
+            Messenger::relayMessages(mECS);
 
             {
                 MICROPROFILE_SCOPEI("Engine", "FrameStats Entity", MP_AUTO);
@@ -126,12 +126,12 @@ namespace neo {
 
             /* Destroy and create objects and components */
             mECS.flush();
-            // Messenger::relayMessages(mECS);
+            Messenger::relayMessages(mECS);
 
             if (!mWindow.isMinimized()) {
                 /* Update each system */
                 mECS._updateSystems();
-                // Messenger::relayMessages(mECS);
+                Messenger::relayMessages(mECS);
 
                 /* Update imgui functions */
                 if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
@@ -162,14 +162,14 @@ namespace neo {
 
                     ServiceLocator<ImGuiManager>::ref().end();
                 }
-                // Messenger::relayMessages(mECS);
+                Messenger::relayMessages(mECS);
             }
 
             /* Render */
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
             ServiceLocator<Renderer>::ref().render(mWindow, mECS);
-            // Messenger::relayMessages(mECS);
+            Messenger::relayMessages(mECS);
 
             // TODO - this should be its own system
             mECS.getView<SingleFrameComponent>().each([](ECS::Entity entity, SingleFrameComponent&) {
@@ -192,7 +192,7 @@ namespace neo {
         mECS.clean();
         Library::clean();
         ServiceLocator<Renderer>::ref().clean();
-        // Messenger::clean();
+        Messenger::clean();
 
         /* Init the new state */
         ServiceLocator<ImGuiManager>::ref().reset();
@@ -227,7 +227,7 @@ namespace neo {
 
         /* Initialize new objects and components */
         mECS.flush();
-        // Messenger::relayMessages(mECS);
+        Messenger::relayMessages(mECS);
     }
 
     void Engine::_createPrefabs() {
@@ -259,7 +259,7 @@ namespace neo {
 
     void Engine::shutDown() {
         NEO_LOG_I("Shutting down...");
-        // Messenger::clean();
+        Messenger::clean();
         mECS.clean();
         Library::clean();
         ServiceLocator<Renderer>::ref().clean();

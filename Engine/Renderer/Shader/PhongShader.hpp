@@ -71,7 +71,7 @@ namespace neo {
             const auto& camera = ecs.getView<MainCameraComponent, SpatialComponent>();
             NEO_ASSERT(camera.size_hint() == 1, "No main camera exists");
 
-            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.front()));
+            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.front())->getProj());
             loadUniform("V", camera.get<const SpatialComponent>(camera.front()).getView());
             loadUniform("camPos", camera.get<const SpatialComponent>(camera.front()).getPosition());
 
