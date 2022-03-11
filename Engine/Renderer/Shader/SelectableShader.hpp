@@ -56,11 +56,15 @@ namespace neo {
 
         }
 
+        // TODO : add hovered capability
         virtual void render(const ECS& ecs) override {
-            const auto& mouse = ecs.cGetComponent<MouseComponent>();
-            NEO_ASSERT(mouse, "wtf");
-            // TODO : add hovered capability
-            if (!mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
+            const auto& mouseOpt = ecs.cGetComponent<MouseComponent>();
+            NEO_ASSERT(mouseOpt, "wtf");
+            if (!mouseOpt) {
+                return;
+            }
+            auto&& [_, mouse] = *mouseOpt;
+            if (!mouse.mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
                 return;
             }
 
@@ -74,13 +78,14 @@ namespace neo {
             bind();
 
             /* Load PV */
-            auto cView = ecs.getView<MainCameraComponent, SpatialComponent>();
-            NEO_ASSERT(cView.size_hint() <= 1, "");
-            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cView.front()));
-            loadUniform("V", ecs.cGetComponent<SpatialComponent>()->getView());
+            auto cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+            if (cameraView) {
+                auto&& [cameraEntity, __, cameraSpatial] = *cameraView;
+                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                loadUniform("V", cameraSpatial.getView());
+            }
 
-
-            const auto cameraFrustum = ecs.cGetComponent<FrustumComponent>(cView.front());
+            const auto cameraFrustum = ecs.cGetComponent<FrustumComponent>(std::get<0>(*cameraView));
 
             uint8_t rendered = 1;
             std::unordered_map<uint8_t, ECS::Entity> map;
@@ -113,8 +118,8 @@ namespace neo {
             {
                 MICROPROFILE_SCOPEI("Selectable Shader", "ReadPixels", MP_AUTO);
                 MICROPROFILE_SCOPEGPUI("Selectable Shader - ReadPixels", MP_AUTO);
-                glm::ivec2 mousePos = glm::ivec2(mouse->mFrameMouse.getPos());
-                glReadnPixels(mousePos.x, mousePos.y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, 4, &buffer);
+                glm::ivec2 mousePos = glm::ivec2(mouse.mFrameMouse.getPos());
+                glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer);
             }
 
                 mSelectedID = map[id];

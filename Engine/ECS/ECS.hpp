@@ -54,12 +54,12 @@ namespace neo {
 
 		// All access
 		template<typename CompT> std::optional<std::tuple<Entity, CompT&>> getComponent();
-		template<typename CompT> CompT *const cGetComponent() const;
+		template<typename CompT> std::optional<std::tuple<ECS::Entity, const CompT&>> cGetComponent() const;
 		template<typename... CompTs> bool has() const;
 		template<typename... CompTs> auto getView();
 		template<typename... CompTs> const auto getView() const;
 		template<typename... CompTs> std::optional<std::tuple<Entity, CompTs&...>> getSingleView();
-		// template<typename... CompTs> const auto getSingleView() const;
+		template<typename... CompTs> std::optional<std::tuple<Entity, const CompTs&...>> getSingleView() const;
 
 		/* Attach a system */
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
@@ -89,16 +89,16 @@ namespace neo {
 	}
 
 	template<typename CompT>
-	CompT *const ECS::cGetComponent() const {
+	std::optional<std::tuple<ECS::Entity, const CompT&>> ECS::cGetComponent() const {
 		MICROPROFILE_SCOPEI("ECS", "cGetComponent", MP_AUTO);
 		auto view = mRegistry.view<CompT>();
 		if (view.size() > 1) {
 			NEO_LOG_W("Trying to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->getName().c_str());
 		}
 		if (view.size()) {
-			return const_cast<CompT *const>(view.get<CompT>(view.front()));
+			return { *view.each().begin() };
 		}
-		return nullptr;
+		return std::nullopt;
 	}
 
 	template<typename CompT>
@@ -203,15 +203,17 @@ namespace neo {
 		return std::nullopt;
 	}
 
-	// template<typename... CompTs> const auto ECS::getSingleView() const {
-	// 	MICROPROFILE_SCOPEI("ECS", "getSingleView", MP_AUTO);
-	// 	auto view = mRegistry.view<const CompTs...>();
-	// 	NEO_ASSERT(view.size_hint() <= 1, "");
-	// 	if (view.size_hint() == 1) {
-	// 		return view.each().begin();
-	// 	}
-	// 	return nullptr;
-	// }
+	// TODO -- maybe force const inputs rather than attaching it
+	// TODO -- otherwise view.get<> breaks
+	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, const CompTs&...>> ECS::getSingleView() const {
+		MICROPROFILE_SCOPEI("ECS", "getSingleView", MP_AUTO);
+		auto view = mRegistry.view<const CompTs...>();
+		NEO_ASSERT(view.size_hint() <= 1, "");
+		if (view.size_hint() == 1) {
+			return { *view.each().begin() };
+		}
+		return std::nullopt;
+	}
 
 	template<typename... CompTs> bool ECS::has() const {
 		MICROPROFILE_SCOPEI("ECS", "has", MP_AUTO);
