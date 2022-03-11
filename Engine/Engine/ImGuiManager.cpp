@@ -5,6 +5,7 @@
 #include "Hardware/Mouse.hpp"
 
 #include "Util/Util.hpp"
+#include "Util/ServiceLocator.hpp"
 
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
@@ -23,7 +24,7 @@ namespace neo {
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         ImGui_ImplGlfw_InitForOpenGL(window, false);
-        ImGui_ImplOpenGL3_Init(Renderer::mDetails.mGLSLVersion.c_str());
+        ImGui_ImplOpenGL3_Init(ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str());
 
         ImGuiStyle* style = &ImGui::GetStyle();
         style->ChildRounding = 4.0f;

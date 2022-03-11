@@ -34,21 +34,6 @@ namespace neo {
     MICROPROFILE_LEAVE();\
     MICROPROFILE_GPU_LEAVE()
 
-    Renderer::RendererDetails Renderer::mDetails = { 4, 4, "#version 440" };
-
-    std::string Renderer::APP_SHADER_DIR;
-    std::string Renderer::ENGINE_SHADER_DIR = "../Engine/shaders/";
-    Framebuffer* Renderer::mBackBuffer;
-    Framebuffer* Renderer::mDefaultFBO;
-    BlitShader* Renderer::mBlitShader = nullptr;
-    std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mComputeShaders;
-    std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPreProcessShaders;
-    std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mSceneShaders;
-    std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> Renderer::mPostShaders;
-    glm::vec3 Renderer::mClearColor;
-    bool Renderer::mShowBB = false;
-    Renderer::FrameStats Renderer::mStats;
-
     void OpenGLMessageCallback(
         unsigned source,
         unsigned type,
@@ -91,6 +76,14 @@ namespace neo {
         }
 
         NEO_FAIL("Unknown severity level!");
+    }
+
+    Renderer::Renderer(int GLMajor, intGLMinor) {
+        mDetails.mGLMajorVersion = GLMajor;
+        mDetails.mGLMinorVersion = GLMinor;
+        std::stringstream glsl;
+        glsl << "#version " << GLMajor << GLMinor << "0";
+        mDetails.mGLSLVersion = glsl.str();
     }
 
     void Renderer::setDemoConfig(IDemo::Config config) {

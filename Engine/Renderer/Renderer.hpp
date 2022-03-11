@@ -28,8 +28,8 @@ namespace neo {
         };
 
         struct RendererDetails {
-            uint32_t mGLMajorVersion = 0;
-            uint32_t mGLMinorVersion = 0;
+            int mGLMajorVersion = 0;
+            int mGLMinorVersion = 0;
             std::string mGLSLVersion = "";
             glm::ivec3 mMaxComputeWorkGroupSize = { 0,0,0 };
             std::string mVendor = "";
@@ -38,47 +38,47 @@ namespace neo {
         };
 
         public:
-            Renderer() = default;
+            Renderer(int GLMajor, int GLMinor);
             ~Renderer() = default;
             Renderer(const Renderer &) = delete;
             Renderer & operator=(const Renderer &) = delete;
             Renderer(Renderer &&) = delete;
             Renderer & operator=(Renderer &&) = delete;
 
-            static std::string APP_SHADER_DIR;
-            static std::string ENGINE_SHADER_DIR;
-            static FrameStats mStats;
-            static RendererDetails mDetails;
+            std::string APP_SHADER_DIR = "";
+            std::string ENGINE_SHADER_DIR = "../Engine/shaders/";
+            FrameStats mStats = {};
+            RendererDetails mDetails = {};
 
-            static void setDemoConfig(IDemo::Config);
-            static void init();
-            static void resetState();
-            static void render(WindowSurface&, ECS&);
-            static void clean();
+            void setDemoConfig(IDemo::Config);
+            void init();
+            void resetState();
+            void render(WindowSurface&, ECS&);
+            void clean();
 
             /* Shaders */
-            template <typename ShaderT, typename... Args> static ShaderT & addComputeShader(Args &&...);
-            template <typename ShaderT, typename... Args> static ShaderT & addPreProcessShader(Args &&...);
-            template <typename ShaderT, typename... Args> static ShaderT & addSceneShader(Args &&...);
-            template <typename ShaderT, typename... Args> static ShaderT & addPostProcessShader(Args &&...);
-            template <typename ShaderT> static ShaderT& getShader();
+            template <typename ShaderT, typename... Args> ShaderT & addComputeShader(Args &&...);
+            template <typename ShaderT, typename... Args> ShaderT & addPreProcessShader(Args &&...);
+            template <typename ShaderT, typename... Args> ShaderT & addSceneShader(Args &&...);
+            template <typename ShaderT, typename... Args> ShaderT & addPostProcessShader(Args &&...);
+            template <typename ShaderT> ShaderT& getShader();
 
-            static void imGuiEditor(WindowSurface& window, ECS& ecs);
+            void imGuiEditor(WindowSurface& window, ECS& ecs);
         private:
-            static Framebuffer* mBackBuffer;
-			static Framebuffer* mDefaultFBO;
-            static glm::vec3 mClearColor;
-            static BlitShader* mBlitShader;
-            static bool mShowBB;
+            Framebuffer* mBackBuffer;
+			Framebuffer* mDefaultFBO;
+            glm::vec3 mClearColor;
+            BlitShader* mBlitShader = nullptr;
+            bool mShowBB = false;
 
-            static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mComputeShaders;
-            static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPreProcessShaders;
-            static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mSceneShaders;
-            static std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPostShaders;
-            template <typename ShaderT, typename... Args> static std::unique_ptr<ShaderT> _createShader(Args &&...);
-            static std::vector<Shader *> _getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &);
+            std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mComputeShaders;
+            std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPreProcessShaders;
+            std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mSceneShaders;
+            std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPostShaders;
+            template <typename ShaderT, typename... Args> std::unique_ptr<ShaderT> _createShader(Args &&...);
+            std::vector<Shader *> _getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &);
 
-            static void _renderPostProcess(Shader &, Framebuffer *, Framebuffer *, glm::ivec2, ECS&);
+            void _renderPostProcess(Shader &, Framebuffer *, Framebuffer *, glm::ivec2, ECS&);
     };
 
     /* Template implementation */

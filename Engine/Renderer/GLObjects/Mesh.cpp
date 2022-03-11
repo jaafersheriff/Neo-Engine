@@ -1,8 +1,10 @@
 #include "Mesh.hpp"
-#include "Util/Util.hpp"
-#include "Renderer/GLObjects/GLHelper.hpp"
 
+#include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/Renderer.hpp"
+
+#include "Util/Util.hpp"
+#include "Util/ServiceLocator.hpp"
 
 #include "GL/glew.h"
 #include "microprofile.h"
@@ -24,7 +26,7 @@ namespace neo {
 
     // TODO - instanced
     void Mesh::draw(uint32_t size) const {
-        Renderer::mStats.mNumDraws++;
+        ServiceLocator<Renderer>::ref().mStats.mNumDraws++;
 
         const auto& positions = getVBO(VertexType::Position);
 

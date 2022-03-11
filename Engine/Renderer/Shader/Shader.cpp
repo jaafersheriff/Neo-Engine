@@ -5,6 +5,7 @@
 #include "Renderer/Renderer.hpp"
 #include "Util/Util.hpp"
 #include "Util/Log/Log.hpp"
+#include "Util/ServiceLocator.hpp"
 
 #include <fstream>
 #include <vector>
@@ -89,7 +90,7 @@ namespace neo {
         std::string sourceString(shaderString);
 
         // Prepend #version
-        sourceString.insert(0, (Renderer::mDetails.mGLSLVersion+ "\n").c_str());
+        sourceString.insert(0, (ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion + "\n").c_str());
 
         // Break up source by line
         std::string::size_type start = 0;
@@ -122,11 +123,11 @@ namespace neo {
     }
 
     std::string Shader::_getFullPath(const std::string& fileName) {
-        if (util::fileExists((Renderer::APP_SHADER_DIR + fileName).c_str())) {
-            return Renderer::APP_SHADER_DIR + fileName;
+        if (util::fileExists((ServiceLocator<Renderer>::ref().APP_SHADER_DIR + fileName).c_str())) {
+            return ServiceLocator<Renderer>::ref().APP_SHADER_DIR + fileName;
         }
-        else if (util::fileExists((Renderer::ENGINE_SHADER_DIR + fileName).c_str())) {
-            return Renderer::ENGINE_SHADER_DIR + fileName;
+        else if (util::fileExists((ServiceLocator<Renderer>::ref().ENGINE_SHADER_DIR + fileName).c_str())) {
+            return ServiceLocator<Renderer>::ref().ENGINE_SHADER_DIR + fileName;
         }
         else {
             NEO_FAIL("%s shader file doesn't exist", fileName.c_str());
