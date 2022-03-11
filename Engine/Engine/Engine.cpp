@@ -54,6 +54,8 @@ namespace neo {
 
         srand((unsigned int)(time(0)));
 
+        ServiceLocator<Renderer>::set(4, 4);
+
         {
             NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
             GLFWimage icons[1];
@@ -78,7 +80,7 @@ namespace neo {
         MicroProfileSetForceMetaCounters(1);
 #endif
 
-        Renderer::init();
+        ServiceLocator<Renderer>::ref().init();
     }
 
     void Engine::run(DemoWrangler& demos) {
@@ -145,8 +147,8 @@ namespace neo {
                         mECS.imguiEdtor();
                     }
                     {
-                        MICROPROFILE_SCOPEI("ImGui", "Renderer::imGuiEditor", MP_AUTO);
-                        Renderer::imGuiEditor(mWindow, mECS);
+                        MICROPROFILE_SCOPEI("ImGui", "ServiceLocator<Renderer>::ref().imGuiEditor", MP_AUTO);
+                        ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
                     }
                     {
                         MICROPROFILE_SCOPEI("ImGui", "Library::imGuiEditor", MP_AUTO);
@@ -166,7 +168,7 @@ namespace neo {
             /* Render */
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
-            Renderer::render(mWindow, mECS);
+            ServiceLocator<Renderer>::ref().render(mWindow, mECS);
             // Messenger::relayMessages(mECS);
 
             // TODO - this should be its own system
@@ -189,7 +191,7 @@ namespace neo {
         demos.getCurrentDemo()->destroy();
         mECS.clean();
         Library::clean();
-        Renderer::clean();
+        ServiceLocator<Renderer>::ref().clean();
         // Messenger::clean();
 
         /* Init the new state */
@@ -199,8 +201,8 @@ namespace neo {
         mWindow.reset(config.name);
         mMouse.init();
         mKeyboard.init();
-        Renderer::setDemoConfig(config);
-        Renderer::init();
+        ServiceLocator<Renderer>::ref().setDemoConfig(config);
+        ServiceLocator<Renderer>::ref().init();
         Loader::init(config.resDir);
         _createPrefabs();
 
@@ -209,13 +211,13 @@ namespace neo {
             NEO_LOG("Attaching editor");
             mECS.addSystem<MouseRaySystem>();
             mECS.addSystem<EditorSystem>();
-            Renderer::addPreProcessShader<SelectableShader>();
-            Renderer::addSceneShader<OutlineShader>();
-            Renderer::addSceneShader<WireframeShader>();
+            ServiceLocator<Renderer>::ref().addPreProcessShader<SelectableShader>();
+            ServiceLocator<Renderer>::ref().addSceneShader<OutlineShader>();
+            ServiceLocator<Renderer>::ref().addSceneShader<WireframeShader>();
         }
 
         /* Add engine-specific systems */
-        auto& lineShader = Renderer::addSceneShader<LineShader>();
+        auto& lineShader = ServiceLocator<Renderer>::ref().addSceneShader<LineShader>();
         lineShader.mActive = false;
 
         demos.getCurrentDemo()->init(mECS);
@@ -260,7 +262,7 @@ namespace neo {
         // Messenger::clean();
         mECS.clean();
         Library::clean();
-        Renderer::clean();
+        ServiceLocator<Renderer>::ref().clean();
         ServiceLocator<ImGuiManager>::ref().destroy();
         mWindow.shutDown();
     }
@@ -269,8 +271,8 @@ namespace neo {
         {
             ImGui::Begin("Stats");
             counter.imGuiEditor();
-            ImGui::TextWrapped("Num Draws: %d", Renderer::mStats.mNumDraws);
-            ImGui::TextWrapped("Num Shaders: %d", Renderer::mStats.mNumShaders);
+            ImGui::TextWrapped("Num Draws: %d", ServiceLocator<Renderer>::ref().mStats.mNumDraws);
+            ImGui::TextWrapped("Num Shaders: %d", ServiceLocator<Renderer>::ref().mStats.mNumShaders);
             for (auto&& [entity, mouse, viewport] : mECS.getView<MouseComponent, ViewportDetailsComponent>().each()) {
                 if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
                     viewport.imGuiEditor();
