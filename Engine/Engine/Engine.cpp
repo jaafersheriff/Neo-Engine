@@ -220,7 +220,7 @@ namespace neo {
         auto& lineShader = ServiceLocator<Renderer>::ref().addSceneShader<LineShader>();
         lineShader.mActive = false;
 
-        demos.getCurrentDemo()->init(mECS);
+        demos.getCurrentDemo()->init(mECS, ServiceLocator<Renderer>::ref());
 
         /* Init systems */
         mECS._initSystems();

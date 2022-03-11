@@ -6,6 +6,7 @@
 namespace neo {
 
 	class ECS;
+	class Renderer;
 
 	class IDemo {
 	public:
@@ -24,7 +25,7 @@ namespace neo {
 		IDemo& operator=(const IDemo&) = delete;
 
 		virtual Config getConfig() const = 0;
-		virtual void init(ECS& ecs) = 0;
+		virtual void init(ECS& ecs, Renderer& renderer) = 0;
 		virtual void update(ECS& ecs) {
 			NEO_UNUSED(ecs);
 		};

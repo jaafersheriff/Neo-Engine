@@ -3,35 +3,35 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-// #include "ECS/Messaging/Message.hpp"
+#include "ECS/Messaging/Message.hpp"
 
 namespace neo {
 
     class Mouse {
 
     public:
-        // struct MouseResetMessage : public Message { };
-        // struct MouseButtonMessage : public Message {
-        //     const int mButton;
-        //     const int mAction;
-		// 	MouseButtonMessage(int button, int action)
-        //         : mButton(button)
-        //         , mAction(action)
-        //     {}
-        // };
-        // struct ScrollWheelMessage : public Message {
-        //     const double mSpeed;
-        //     ScrollWheelMessage(double speed)
-        //         : mSpeed(speed)
-        //     {}
-        // };
-        // struct MouseMoveMessage : public Message {
-        //     const double mX, mY;
-        //     MouseMoveMessage(double x, double y)
-        //         : mX(x)
-        //         , mY(y)
-        //     {}
-        // };
+        struct MouseResetMessage : public Message { };
+        struct MouseButtonMessage : public Message {
+            const int mButton;
+            const int mAction;
+			MouseButtonMessage(int button, int action)
+                : mButton(button)
+                , mAction(action)
+            {}
+        };
+        struct ScrollWheelMessage : public Message {
+            const double mSpeed;
+            ScrollWheelMessage(double speed)
+                : mSpeed(speed)
+            {}
+        };
+        struct MouseMoveMessage : public Message {
+            const double mX, mY;
+            MouseMoveMessage(double x, double y)
+                : mX(x)
+                , mY(y)
+            {}
+        };
 
         void init();
 

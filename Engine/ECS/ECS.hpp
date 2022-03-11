@@ -174,7 +174,7 @@ namespace neo {
 	template<typename... CompTs>
 	const auto ECS::getView() const {
 		MICROPROFILE_SCOPEI("ECS", "getView", MP_AUTO);
-		return mRegistry.view<CompTs...>();
+		return mRegistry.view<const CompTs...>();
 	}
 
 	// template<typename... CompTs>
