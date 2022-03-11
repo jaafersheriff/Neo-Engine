@@ -4,7 +4,7 @@
 
 #include "Renderer/Renderer.hpp"
 #include "Engine/ImGuiManager.hpp"
-// #include "ECS/Messaging/Messenger.hpp"
+#include "ECS/Messaging/Messenger.hpp"
 
 #include "Util/Log/Log.hpp"
 #include "Util/ServiceLocator.hpp"
@@ -73,15 +73,15 @@ namespace neo {
                     glfwGetFramebufferSize(window, &x, &y);
                     details.mSize.x = x;
                     details.mSize.y = y;
-                    // Messenger::sendMessage<FrameSizeMessage>(nullptr, details.mSize);
+                    Messenger::sendMessage<FrameSizeMessage>(details.mSize);
                 }
             }
             if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused()) {
                 ServiceLocator<ImGuiManager>::ref().updateKeyboard(window, key, scancode, action, mods);
-                // Messenger::sendMessage<Keyboard::ResetKeyboardMessage>(nullptr);
+                Messenger::sendMessage<Keyboard::ResetKeyboardMessage>();
             }
             else {
-                // Messenger::sendMessage<Keyboard::KeyPressedMessage>(nullptr, key, action);
+                Messenger::sendMessage<Keyboard::KeyPressedMessage>(key, action);
             }
             });
         glfwSetMouseButtonCallback(mWindow, [](GLFWwindow* window, int button, int action, int mods) {
@@ -90,19 +90,19 @@ namespace neo {
             doImGui |= ServiceLocator<ImGuiManager>::ref().isEnabled() && ServiceLocator<ImGuiManager>::ref().isViewportHovered() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused() && action == GLFW_PRESS;
             if (doImGui) {
                 ServiceLocator<ImGuiManager>::ref().updateMouse(window, button, action, mods);
-                // Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
+                Messenger::sendMessage<Mouse::MouseResetMessage>();
             }
             else {
-                // Messenger::sendMessage<Mouse::MouseButtonMessage>(nullptr, button, action);
+                Messenger::sendMessage<Mouse::MouseButtonMessage>(button, action);
             }
             });
         glfwSetScrollCallback(mWindow, [](GLFWwindow* window, double dx, double dy) {
             if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportHovered()) {
                 ServiceLocator<ImGuiManager>::ref().updateScroll(window, dx, dy);
-                // Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
+                Messenger::sendMessage<Mouse::MouseResetMessage>();
             }
             else {
-                // Messenger::sendMessage<Mouse::ScrollWheelMessage>(nullptr, dy);
+                Messenger::sendMessage<Mouse::ScrollWheelMessage>(dy);
             }
             });
 
@@ -111,13 +111,14 @@ namespace neo {
                 ServiceLocator<ImGuiManager>::ref().updateCharacter(window, c);
             }
             });
+
         glfwSetWindowSizeCallback(mWindow, [](GLFWwindow* window, int width, int height) {
             NEO_UNUSED(window);
             if (width == 0 || height == 0) {
                 return;
             }
 
-            // Messenger::sendMessage<FrameSizeMessage>(nullptr, glm::uvec2(width, height));
+            Messenger::sendMessage<FrameSizeMessage>(glm::uvec2(width, height));
             });
 
         glfwSetFramebufferSizeCallback(mWindow, [](GLFWwindow* window, int width, int height) {
@@ -126,12 +127,12 @@ namespace neo {
                 return;
             }
 
-            // Messenger::sendMessage<FrameSizeMessage>(nullptr, glm::uvec2(width, height));
+            Messenger::sendMessage<FrameSizeMessage>(glm::uvec2(width, height));
             });
 
         glfwSetCursorEnterCallback(mWindow, [](GLFWwindow* window, int entered) {
             NEO_UNUSED(window, entered);
-            // Messenger::sendMessage<Mouse::MouseResetMessage>(nullptr);
+            Messenger::sendMessage<Mouse::MouseResetMessage>();
         });
 
         /* Init GLEW */

@@ -40,14 +40,12 @@ namespace neo {
             bind();
 
             /* Load PV */
-            auto camera = ecs.cGetComponentTuple<MainCameraComponent, SpatialComponent>();
-            NEO_ASSERT(camera, "No main camera exists");
-            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.mEntity)->getProj());
-            loadUniform("V", camera.get<SpatialComponent>().getView());
+            const auto& camera = ecs.getView<MainCameraComponent, SpatialComponent>();
+            NEO_ASSERT(camera.size_hint() == 1, "No main camera exists");
+            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.front())->getProj());
+            loadUniform("V", camera.get<const SpatialComponent>(camera.front()).getView());
 
-            for (auto& tuple : ecs.getComponentTuples<renderable::AlphaTestRenderable, MeshComponent, SpatialComponent>()) {
-                auto&& [renderable, mesh, spatial] = tuple.get();
-
+            for (auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::AlphaTestRenderable, MeshComponent, SpatialComponent>().each()) {
                 loadUniform("M", spatial.getModelMatrix());
 
                 /* Bind texture */

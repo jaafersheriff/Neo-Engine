@@ -1,6 +1,8 @@
 #include "Renderer.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
+#include "ECS/Messaging/Messenger.hpp"
+
 #include "Shader/BlitShader.hpp"
 #include "Shader/LineShader.hpp"
 
@@ -78,7 +80,7 @@ namespace neo {
         NEO_FAIL("Unknown severity level!");
     }
 
-    Renderer::Renderer(int GLMajor, intGLMinor) {
+    Renderer::Renderer(int GLMajor, int GLMinor) {
         mDetails.mGLMajorVersion = GLMajor;
         mDetails.mGLMinorVersion = GLMinor;
         std::stringstream glsl;
@@ -111,11 +113,11 @@ namespace neo {
         mDefaultFBO->initDrawBuffers();
         mDefaultFBO->bind();
         
-        // Messenger::addReceiver<FrameSizeMessage>(nullptr, [](const Message& msg, ECS& ecs) {
-        //     NEO_UNUSED(ecs);
-        //     auto m = static_cast<const FrameSizeMessage&>(msg);
-        //     mDefaultFBO->resize(m.mSize);
-        // });
+        Messenger::addReceiver<FrameSizeMessage>([&](const Message& msg, ECS& ecs) {
+            NEO_UNUSED(ecs);
+            auto m = static_cast<const FrameSizeMessage&>(msg);
+            mDefaultFBO->resize(m.mSize);
+        });
 
         /* Set max work group */
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);

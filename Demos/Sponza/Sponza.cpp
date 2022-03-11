@@ -46,7 +46,7 @@ namespace Sponza {
         return config;
     }
 
-    void Demo::init(ECS& ecs) {
+    void Demo::init(ECS& ecs, Renderer& renderer) {
 
         /* Game objects */
         Camera camera(ecs, 45.f, 1.f, 300.f, glm::vec3(0, 0.6f, 5), 0.4f, 150.f);
@@ -99,8 +99,8 @@ namespace Sponza {
         ecs.addSystem<FrustaFittingSystem>();
 
         /* Init renderer */
-        Renderer::addPreProcessShader<ShadowCasterShader>(4096);
-        auto& _s = Renderer::addSceneShader<PhongShadowShader>();
+        renderer.addPreProcessShader<ShadowCasterShader>(4096);
+        auto& _s = renderer.addSceneShader<PhongShadowShader>();
         _s.bias = 0.001f;
     }
 }

@@ -68,29 +68,28 @@ namespace neo {
             bind();
 
             /* Load PV */
-            const auto& camera = ecs.cGetComponentTuple<MainCameraComponent, SpatialComponent>();
-            NEO_ASSERT(camera, "No main camera exists");
+            const auto& camera = ecs.getView<MainCameraComponent, SpatialComponent>();
+            NEO_ASSERT(camera.size_hint() == 1, "No main camera exists");
 
-            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.mEntity));
-            loadUniform("V", camera.get<SpatialComponent>().getView());
-            loadUniform("camPos", camera.get<SpatialComponent>().getPosition());
+            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.front()));
+            loadUniform("V", camera.get<const SpatialComponent>(camera.front()).getView());
+            loadUniform("camPos", camera.get<const SpatialComponent>(camera.front()).getPosition());
 
             /* Load light */
-            if (auto light = ecs.cGetComponentTuple<LightComponent, SpatialComponent>()) {
-                loadUniform("lightPos", light.get<SpatialComponent>().getPosition());
-                loadUniform("lightCol", light.get<LightComponent>().mColor);
-                loadUniform("lightAtt", light.get<LightComponent>().mAttenuation);
-            }
+            const auto& light = ecs.getView<LightComponent, SpatialComponent>();
+            NEO_ASSERT(light.size_hint() == 1, "");
+            loadUniform("lightPos", light.get<const SpatialComponent>(light.front()).getPosition());
+            loadUniform("lightCol", light.get<const LightComponent>(light.front()).mColor);
+            loadUniform("lightAtt", light.get<const LightComponent>(light.front()).mAttenuation);
 
-            const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(camera.mEntity);
+            const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(camera.front());
 
-            for (const auto& tuple : ecs.getComponentTuples<renderable::PhongRenderable, MeshComponent, SpatialComponent>()) {
-                auto&& [renderable, mesh, spatial] = tuple.get();
+            for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::PhongRenderable, MeshComponent, SpatialComponent>().each()) {
 
                 // VFC
                 if (cameraFrustum) {
                     MICROPROFILE_SCOPEI("PhongShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(tuple.mEntity)) {
+                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
                         if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
                             continue;
                         }
