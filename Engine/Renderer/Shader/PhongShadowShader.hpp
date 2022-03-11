@@ -93,11 +93,13 @@ namespace neo {
                 bind();
 
                 /* Load PV */
-            auto cView = ecs.getView<MainCameraComponent, SpatialComponent>();
-            NEO_ASSERT(cView.size_hint() <= 1, "");
-            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cView.front())->getProj());
-            loadUniform("V", cView.get<const SpatialComponent>(cView.front()).getView());
-            loadUniform("camPos", cView.get<const SpatialComponent>(cView.front()).getPosition());
+                auto cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+                if (cameraView) {
+                    auto&& [cameraEntity, _, spatial] = *cameraView;
+                    loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                    loadUniform("V", spatial.getView());
+                    loadUniform("camPos", spatial.getPosition());
+                }
 
                 /* Load light */
                 for (const auto&& [shadowCameraEntity, shadowCamera, spatial] : ecs.getView<ShadowCameraComponent, SpatialComponent>().each()) {
@@ -120,7 +122,7 @@ namespace neo {
                 /* Bind shadow map */
                 loadTexture("shadowMap", *Library::getFBO("shadowMap")->mTextures[0]);
 
-                const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(cView.front());
+                const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(std::get<0>(*cameraView));
                 for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>().each()) {
 
                     // VFC

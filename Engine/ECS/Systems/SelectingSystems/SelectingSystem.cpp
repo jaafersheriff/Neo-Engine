@@ -39,13 +39,10 @@ namespace neo {
     }
 
     void SelectingSystem::imguiEditor(ECS& ecs) {
-        auto selectedView = ecs.getView<SelectedComponent>();
-        NEO_ASSERT(selectedView.size() <= 1, "How is there more than one selected component");
-        if (selectedView.size()) {
-            if (auto selected = ecs.getComponent<SelectedComponent>(selectedView.front())) {
-                MICROPROFILE_SCOPEI("SelectingSystem", "EditorOperation", MP_AUTO);
-                mEditorOperation(ecs, selectedView.front(), selected);
-            }
+        if (auto selectedView = ecs.getComponent<SelectedComponent>()) {
+            auto&& [selectedEntity, selected] = *selectedView;
+            MICROPROFILE_SCOPEI("SelectingSystem", "EditorOperation", MP_AUTO);
+            mEditorOperation(ecs, selectedEntity, selected);
         }
     }
 

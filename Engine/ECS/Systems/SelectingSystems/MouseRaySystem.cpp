@@ -19,10 +19,7 @@ namespace neo {
         auto viewport = ecs.getComponent<ViewportDetailsComponent>();
         NEO_ASSERT(viewport, "Window details don't exist");
 
-        auto mouseRayView = ecs.getView<MouseComponent>();
-        NEO_ASSERT(mouseRayView.size() == 1, "Can't be having more than one mouse");
-        auto mouseRay = mouseRayView.front();
-        auto mouseRayComp = ecs.getComponent<MouseRayComponent>();
+        auto mouseRayView = ecs.getComponent<MouseRayComponent>();
         if (auto mouseOpt = ecs.getComponent<MouseComponent>()) {
             auto&& [_, mouse] = *mouseOpt;
             if (mouse.mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
@@ -43,24 +40,35 @@ namespace neo {
                 glm::vec3 pos = ecs.getComponent<SpatialComponent>(mainCamera.front())->getPosition();
 
                 // Create new mouseray if one doesnt exist
-                if (!mouseRayComp) {
-                    mouseRay = ecs.createEntity();
-                    mouseRayComp = ecs.addComponent<MouseRayComponent>(mouseRay);
+                ECS::Entity mouseRayEntity;
+                MouseRayComponent* mouseRay;
+                if (mouseRayView) {
+                    mouseRayEntity = std::get<0>(*mouseRayView);
+                    mouseRay = &std::get<1>(*mouseRayView);
                 }
-                mouseRayComp->mDirection = dir;
-                mouseRayComp->mPosition = pos;
+                else {
+                    mouseRayEntity = ecs.createEntity();
+                    mouseRay = ecs.addComponent<MouseRayComponent>(mouseRayEntity);
+                }
+                mouseRay->mDirection = dir;
+                mouseRay->mPosition = pos;
 
                 if (mShowRay) {
-                    LineMeshComponent* line = ecs.getComponent<LineMeshComponent>(mouseRay);
+                    LineMeshComponent* line = ecs.getComponent<LineMeshComponent>(mouseRayEntity);
                     if (!line) {
-                        line = ecs.addComponent<LineMeshComponent>(mouseRay);
+                        line = ecs.addComponent<LineMeshComponent>(mouseRayEntity);
                     }
                     line->clearNodes();
                     line->addNodes({ {pos, glm::vec3(1.f)}, {pos + dir * camera->getNearFar().y, glm::vec3(1.f)} });
                 }
             }
-            else if (mouseRayComp && !mShowRay) {
-                ecs.removeEntity(mouseRay);
+            else if (mouseRayView) {
+                if (!mShowRay) {
+                    ecs.removeEntity(std::get<0>(*mouseRayView));
+                }
+                else {
+                    ecs.removeComponent<MouseRayComponent>(std::get<0>(*mouseRayView));
+                }
             }
         }
     }

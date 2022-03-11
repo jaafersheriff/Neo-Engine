@@ -68,22 +68,23 @@ namespace neo {
             bind();
 
             /* Load PV */
-            const auto& camera = ecs.getView<MainCameraComponent, SpatialComponent>();
-            NEO_ASSERT(camera.size_hint() == 1, "No main camera exists");
-
-            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(camera.front())->getProj());
-            loadUniform("V", camera.get<const SpatialComponent>(camera.front()).getView());
-            loadUniform("camPos", camera.get<const SpatialComponent>(camera.front()).getPosition());
+            const auto& camera = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+            if (camera) {
+                auto&& [cameraEntity, _, cameraSpatial] = *camera;
+                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                loadUniform("V", cameraSpatial.getView());
+                loadUniform("camPos", cameraSpatial.getPosition());
+            }
 
             /* Load light */
-            const auto& light = ecs.getView<LightComponent, SpatialComponent>();
-            NEO_ASSERT(light.size_hint() == 1, "");
-            loadUniform("lightPos", light.get<const SpatialComponent>(light.front()).getPosition());
-            loadUniform("lightCol", light.get<const LightComponent>(light.front()).mColor);
-            loadUniform("lightAtt", light.get<const LightComponent>(light.front()).mAttenuation);
+            if (const auto& lightTuple = ecs.getSingleView<LightComponent, SpatialComponent>()) {
+                auto&& [_, light, spatial] = *lightTuple;
+                loadUniform("lightCol", light.mColor);
+                loadUniform("lightAtt", light.mAttenuation);
+                loadUniform("lightPos", spatial.getPosition());
+            }
 
-            const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(camera.front());
-
+            const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(std::get<0>(*camera));
             for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::PhongRenderable, MeshComponent, SpatialComponent>().each()) {
 
                 // VFC

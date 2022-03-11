@@ -14,17 +14,17 @@ namespace neo {
 	EditorSystem::EditorSystem()
 		: SelectingSystem(
 			"Editor System",
-			[](ECS& ecs, ECS::Entity entity, SelectedComponent* reset) {
+			[](ECS& ecs, ECS::Entity entity, SelectedComponent& reset) {
 				NEO_UNUSED(reset);
 				ecs.removeComponent<renderable::OutlineRenderable>(entity);
 			},
-			[](ECS& ecs, ECS::Entity entity, SelectableComponent* selected) {
+			[](ECS& ecs, ECS::Entity entity, SelectableComponent& selected) {
 				NEO_UNUSED(selected);
 				if (!ecs.has<renderable::OutlineRenderable>(entity)) {
 					ecs.addComponent<renderable::OutlineRenderable>(entity, glm::vec4(1.f, 0.95f, 0.72f, 1.f), 3.f);
 				}
 			},
-				[](ECS& ecs, ECS::Entity entity, SelectedComponent* selected) {
+				[](ECS& ecs, ECS::Entity entity, SelectedComponent& selected) {
 				NEO_UNUSED(ecs, entity, selected);
 			}
 				)

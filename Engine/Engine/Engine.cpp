@@ -288,11 +288,10 @@ namespace neo {
 
         if (demos.getConfig().attachEditor) {
             ImGui::Begin("Editor");
-            auto selectedView = mECS.getView<SelectedComponent>();
-            NEO_ASSERT(selectedView.size() <= 1, "");
-            if (selectedView.size()) {
+            if (auto selectedView = mECS.getComponent<SelectedComponent>()) {
+                auto&& [selectedEntity, _] = *selectedView;
                 if (ImGui::Button("Delete entity")) {
-                    mECS.removeEntity(selectedView.front());
+                    mECS.removeEntity(selectedEntity);
                 }
                 NEO_FAIL("This won't work");
                 // auto allComponents = selected->getGameObject().getComponentsMap();
