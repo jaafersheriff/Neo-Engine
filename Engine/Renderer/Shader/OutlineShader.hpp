@@ -51,16 +51,17 @@ namespace neo {
             glCullFace(GL_FRONT);
 
             /* Load PV */
-            auto cView = ecs.getView<MainCameraComponent, SpatialComponent>();
-            NEO_ASSERT(cView.size_hint() <= 1, "");
-            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cView.front())->getProj());
-            loadUniform("V", cView.get<const SpatialComponent>(cView.front()).getView());
+            auto cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+            if (cameraView) {
+                auto&& [cameraEntity, __, cameraSpatial] = *cameraView;
+                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                loadUniform("V", cameraSpatial.getView());
+            }
 
             const auto& viewport = ecs.cGetComponent<ViewportDetailsComponent>();
-            loadUniform("screenSize", glm::vec2(viewport->mSize));
+            loadUniform("screenSize", glm::vec2(std::get<1>(*viewport).mSize));
 
-            const auto cameraFrustum = ecs.cGetComponent<FrustumComponent>(cView.front());
-
+            const auto cameraFrustum = ecs.cGetComponent<FrustumComponent>(std::get<0>(*cameraView));
             for (auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::OutlineRenderable, MeshComponent, SpatialComponent>().each()) {
 
                 // VFC

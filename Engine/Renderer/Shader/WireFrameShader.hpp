@@ -37,10 +37,11 @@ namespace neo {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
                 /* Load PV */
-            auto cView = ecs.getView<MainCameraComponent, SpatialComponent>();
-            NEO_ASSERT(cView.size_hint() <= 1, "");
-            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cView.front())->getProj());
-            loadUniform("V", cView.get<const SpatialComponent>(cView.front()).getView());
+                if (auto cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>()) {
+                    auto&& [cameraEntity, _, cameraSpatial] = *cameraView;
+                    loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                    loadUniform("V", cameraSpatial.getView());
+                }
 
                 for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::WireframeRenderable, MeshComponent, SpatialComponent>().each()) {
                     loadUniform("M", spatial.getModelMatrix());
