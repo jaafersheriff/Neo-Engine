@@ -32,32 +32,31 @@ namespace neo {
 
 	// TODO : add hovered capability
 	void EditorSystem::update(ECS& ecs) {
-
-		auto cView = ecs.getView<MainCameraComponent, SpatialComponent>();
-		const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(cView.front());
-		if (auto mouseRay = ecs.getComponent<MouseRayComponent>()) {
-			if (auto mouse = ecs.getComponent<MouseComponent>()) {
-				for (auto&& [entity, selectable, spatial] : ecs.getView<SelectableComponent, SpatialComponent>().each()) {
-					glm::vec3 pos;
-					if (auto bb = ecs.getComponent<BoundingBoxComponent>(entity)) {
-						if (cameraFrustum) {
-							if (!cameraFrustum->isInFrustum(spatial, *bb)) {
-								continue;
+		if (auto camera = ecs.getSingleView<MainCameraComponent, FrustumComponent>()) {
+			auto&& [_, __, cameraFrustum] = *camera;
+			if (auto mouseRayOpt = ecs.getComponent<MouseRayComponent>()) {
+				auto&& [___, mouseRay] = *mouseRayOpt;
+				if (auto mouseOpt = ecs.getComponent<MouseComponent>()) { 
+					auto&& [____, mouse] = *mouseOpt;
+					if (auto selectable = ecs.getSingleView<SelectableComponent, SpatialComponent>()) {
+						auto&& [selectableEntity, un4, selectableSpatial] = *selectable;
+						glm::vec3 pos;
+						if (auto bb = ecs.getComponent<BoundingBoxComponent>(selectableEntity)) {
+							if (cameraFrustum.isInFrustum(selectableSpatial, *bb)) {
+								glm::vec3 worldSpaceCenter = selectableSpatial.getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
+								glm::vec3 offsetTranslation = selectableSpatial.getPosition() - worldSpaceCenter;
+								float distance = glm::distance(worldSpaceCenter, mouseRay.mPosition);
+								distance += mouse.mFrameMouse.getScrollSpeed();
+								pos = mouseRay.mPosition + mouseRay.mDirection * distance + offsetTranslation;
 							}
 						}
-
-						glm::vec3 worldSpaceCenter = spatial.getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
-						glm::vec3 offsetTranslation = spatial.getPosition() - worldSpaceCenter;
-						float distance = glm::distance(worldSpaceCenter, mouseRay->mPosition);
-						distance += mouse->mFrameMouse.getScrollSpeed();
-						pos = mouseRay->mPosition + mouseRay->mDirection * distance + offsetTranslation;
+						else {
+							float distance = glm::distance(selectableSpatial.getPosition(), mouseRay.mPosition);
+							distance += mouse.mFrameMouse.getScrollSpeed();
+							pos = mouseRay.mPosition + mouseRay.mDirection * distance;
+						}
+						selectableSpatial.setPosition(pos);
 					}
-					else {
-						float distance = glm::distance(spatial.getPosition(), mouseRay->mPosition);
-						distance += mouse->mFrameMouse.getScrollSpeed();
-						pos = mouseRay->mPosition + mouseRay->mDirection * distance;
-					}
-					spatial.setPosition(pos);
 				}
 			}
 		}

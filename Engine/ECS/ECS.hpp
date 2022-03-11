@@ -53,7 +53,7 @@ namespace neo {
 		template<typename SuperT, typename CompT> const SuperT* cGetComponentAs(Entity e) const;
 
 		// All access
-		template<typename CompT> CompT* getComponent();
+		template<typename CompT> std::optional<std::tuple<Entity, CompT&>> getComponent();
 		template<typename CompT> CompT *const cGetComponent() const;
 		template<typename... CompTs> bool has() const;
 		template<typename... CompTs> auto getView();
@@ -78,16 +78,14 @@ namespace neo {
 	};
 
 	template<typename CompT>
-	CompT* ECS::getComponent() {
+	std::optional<std::tuple<ECS::Entity, CompT&>> ECS::getComponent() {
 		MICROPROFILE_SCOPEI("ECS", "getComponent", MP_AUTO);
 		auto view = mRegistry.view<CompT>();
-		if (view.size() > 1) {
-			NEO_LOG_W("Trying to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->getName().c_str());
+		NEO_ASSERT(view.size() <= 1, "");
+		if (view.size() == 1) {
+			return { *view.each().begin() };
 		}
-		if (view.size()) {
-			return mRegistry.try_get<CompT>(view.front());
-		}
-		return nullptr;
+		return std::nullopt;
 	}
 
 	template<typename CompT>
@@ -98,7 +96,7 @@ namespace neo {
 			NEO_LOG_W("Trying to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->getName().c_str());
 		}
 		if (view.size()) {
-			return const_cast<CompT *const>(mRegistry.try_get<CompT>(view.front()));
+			return const_cast<CompT *const>(view.get<CompT>(view.front()));
 		}
 		return nullptr;
 	}
