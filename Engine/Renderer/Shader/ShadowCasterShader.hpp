@@ -52,10 +52,11 @@ namespace neo {
             }
 
             virtual void render(const ECS& ecs) override {
-                auto shadowCamera = ecs.getView<ShadowCameraComponent, SpatialComponent>();
-                if (!shadowCamera) {
-                    NEO_ASSERT(shadowCamera, "No shadow camera found");
+                auto shadowCameraView = ecs.getSingleView<ShadowCameraComponent, SpatialComponent>();
+                if (!shadowCameraView) {
+                    NEO_ASSERT(shadowCameraView, "No shadow camera found");
                 }
+                auto&& [shadowCameraEntity, shadowCamera, shadowCameraSpatial] = *shadowCameraView;
 
                 auto fbo = Library::getFBO("shadowMap");
                 auto & depthTexture = fbo->mTextures[0];
@@ -65,8 +66,8 @@ namespace neo {
                 glViewport(0, 0, depthTexture->mWidth, depthTexture->mHeight);
 
                 bind();
-                loadUniform("P", ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCamera.front())->getProj());
-                loadUniform("V", shadowCamera.get<const SpatialComponent>(shadowCamera.front()).getView());
+                loadUniform("P", ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCameraEntity)->getProj());
+                loadUniform("V", shadowCameraSpatial.getView());
 
                 for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>().each()) {
 
