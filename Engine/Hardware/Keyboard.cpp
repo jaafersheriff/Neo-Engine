@@ -1,26 +1,26 @@
 #include "Keyboard.hpp"
 
 #include "GLFW/glfw3.h"
-// #include "ECS/Messaging/Messenger.hpp"
+#include "ECS/Messaging/Messenger.hpp"
 #include "Util/Util.hpp"
 
 namespace neo {
 
     void Keyboard::init() {
-        // Messenger::addReceiver<ResetKeyboardMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
-        //     NEO_UNUSED(ecs);
-        //     const ResetKeyboardMessage& m(static_cast<const ResetKeyboardMessage&>(msg));
-        //     NEO_UNUSED(m);
+        Messenger::addReceiver<ResetKeyboardMessage>([this](const neo::Message& msg, ECS& ecs) {
+            NEO_UNUSED(ecs);
+            const ResetKeyboardMessage& m(static_cast<const ResetKeyboardMessage&>(msg));
+            NEO_UNUSED(m);
 
-        //     reset();
-        // });
+            reset();
+        });
 
-        // Messenger::addReceiver<KeyPressedMessage>(nullptr, [this](const neo::Message& msg, ECS& ecs) {
-        //     NEO_UNUSED(ecs);
-        //     const KeyPressedMessage& m(static_cast<const KeyPressedMessage&>(msg));
+        Messenger::addReceiver<KeyPressedMessage>([this](const neo::Message& msg, ECS& ecs) {
+            NEO_UNUSED(ecs);
+            const KeyPressedMessage& m(static_cast<const KeyPressedMessage&>(msg));
 
-        //     setKeyStatus(m.mKey, m.mAction);
-        // });
+            setKeyStatus(m.mKey, m.mAction);
+        });
     }
 
     bool Keyboard::isKeyPressed(int key) const {
