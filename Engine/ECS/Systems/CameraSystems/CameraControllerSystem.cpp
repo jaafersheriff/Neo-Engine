@@ -10,9 +10,10 @@ namespace neo {
 
     void CameraControllerSystem::update(ECS& ecs) {
         for (auto&& [entity, controller, spatial] : ecs.getView<CameraControllerComponent, SpatialComponent>().each()) {
-            if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
-                _updateLook(frameStats->mDT, ecs, controller, spatial);
-                _updatePosition(frameStats->mDT, ecs, controller, spatial);
+            if (auto frameStatsOpt = ecs.getComponent<FrameStatsComponent>()) {
+                auto&& [_, frameStats] = *frameStatsOpt;
+                _updateLook(frameStats.mDT, ecs, controller, spatial);
+                _updatePosition(frameStats.mDT, ecs, controller, spatial);
             }
         }
     }
@@ -23,27 +24,29 @@ namespace neo {
     }
 
     void CameraControllerSystem::_updateLook(const float dt, ECS& ecs, CameraControllerComponent& controller, SpatialComponent& spatial) {
-        if (auto mouse = ecs.getComponent<MouseComponent>()) {
-            glm::vec2 mousePos = mouse->mFrameMouse.getPos();
-            glm::vec2 mouseSpeed = mouse->mFrameMouse.getSpeed();
+        if (auto mouseOpt = ecs.getComponent<MouseComponent>()) {
+            auto&& [_, mouse] = *mouseOpt;
+            glm::vec2 mousePos = mouse.mFrameMouse.getPos();
+            glm::vec2 mouseSpeed = mouse.mFrameMouse.getSpeed();
 
-            if (mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_2)) {
+            if (mouse.mFrameMouse.isDown(GLFW_MOUSE_BUTTON_2)) {
                 controller.mTheta -= mouseSpeed.x * controller.mLookSpeed * dt;
                 controller.mPhi -= mouseSpeed.y * controller.mLookSpeed * dt;
             }
         }
 
-        if (auto keyboard = ecs.getComponent<KeyboardComponent>()) {
-            if (keyboard->mFrameKeyboard.isKeyPressed(controller.mLookLeftButton)) {
+        if (auto keyboardOpt = ecs.getComponent<KeyboardComponent>()) {
+            auto&& [_, keyboard] = *keyboardOpt;
+            if (keyboard.mFrameKeyboard.isKeyPressed(controller.mLookLeftButton)) {
                 controller.mTheta += controller.mLookSpeed * 2.f * dt;
             }
-            if (keyboard->mFrameKeyboard.isKeyPressed(controller.mLookRightButton)) {
+            if (keyboard.mFrameKeyboard.isKeyPressed(controller.mLookRightButton)) {
                 controller.mTheta -= controller.mLookSpeed * 2.f * dt;
             }
-            if (keyboard->mFrameKeyboard.isKeyPressed(controller.mLookUpButton)) {
+            if (keyboard.mFrameKeyboard.isKeyPressed(controller.mLookUpButton)) {
                 controller.mPhi -= controller.mLookSpeed * 2.f * dt;
             }
-            if (keyboard->mFrameKeyboard.isKeyPressed(controller.mLookDownButton)) {
+            if (keyboard.mFrameKeyboard.isKeyPressed(controller.mLookDownButton)) {
                 controller.mPhi += controller.mLookSpeed * 2.f * dt;
             }
         }
@@ -69,14 +72,15 @@ namespace neo {
 
     void CameraControllerSystem::_updatePosition(const float dt, ECS& ecs, CameraControllerComponent& comp, SpatialComponent& spatial) {
 
-        if (auto keyboard = ecs.getComponent<KeyboardComponent>()) {
-            int forward(keyboard->mFrameKeyboard.isKeyPressed(comp.mForwardButton));
-            int backward(keyboard->mFrameKeyboard.isKeyPressed(comp.mBackwardButton));
-            int right(keyboard->mFrameKeyboard.isKeyPressed(comp.mRightButton));
-            int left(keyboard->mFrameKeyboard.isKeyPressed(comp.mLeftButton));
-            int up(keyboard->mFrameKeyboard.isKeyPressed(comp.mUpButton));
-            int down(keyboard->mFrameKeyboard.isKeyPressed(comp.mDownButton));
-            bool speed(keyboard->mFrameKeyboard.isKeyPressed(GLFW_KEY_LEFT_SHIFT));
+        if (auto keyboardOpt = ecs.getComponent<KeyboardComponent>()) {
+            auto&& [_, keyboard] = *keyboardOpt;
+            int forward(keyboard.mFrameKeyboard.isKeyPressed(comp.mForwardButton));
+            int backward(keyboard.mFrameKeyboard.isKeyPressed(comp.mBackwardButton));
+            int right(keyboard.mFrameKeyboard.isKeyPressed(comp.mRightButton));
+            int left(keyboard.mFrameKeyboard.isKeyPressed(comp.mLeftButton));
+            int up(keyboard.mFrameKeyboard.isKeyPressed(comp.mUpButton));
+            int down(keyboard.mFrameKeyboard.isKeyPressed(comp.mDownButton));
+            bool speed(keyboard.mFrameKeyboard.isKeyPressed(GLFW_KEY_LEFT_SHIFT));
 
             glm::vec3 dir(
                 float(right - left),

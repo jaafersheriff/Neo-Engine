@@ -23,13 +23,14 @@ namespace neo {
         NEO_ASSERT(mouseRayView.size() == 1, "Can't be having more than one mouse");
         auto mouseRay = mouseRayView.front();
         auto mouseRayComp = ecs.getComponent<MouseRayComponent>();
-        if (auto mouse = ecs.getComponent<MouseComponent>()) {
-            if (mouse->mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
+        if (auto mouseOpt = ecs.getComponent<MouseComponent>()) {
+            auto&& [_, mouse] = *mouseOpt;
+            if (mouse.mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
                 // Mouse coords in viewport space
-                glm::vec2 mouseCoords = mouse->mFrameMouse.getPos();
+                glm::vec2 mouseCoords = mouse.mFrameMouse.getPos();
 
                 // Mouse coords in NDC space
-                auto framesize = viewport->mSize;
+                auto framesize = std::get<1>(*viewport).mSize;
                 mouseCoords = glm::vec2((2.f * mouseCoords.x) / framesize.x - 1.f, (2.f * mouseCoords.y) / framesize.y - 1.f);
 
                 // Mouse coords in clip space to eye space

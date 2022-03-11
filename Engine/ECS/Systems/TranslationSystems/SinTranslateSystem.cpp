@@ -7,10 +7,11 @@
 namespace neo {
     void SinTranslateSystem::update(ECS& ecs) {
 
-        if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
+        if (auto frameStatsOpt = ecs.getComponent<FrameStatsComponent>()) {
+            auto&& [_, frameStats] = *frameStatsOpt;
 
             for (auto&& [entity, sin, spatial] : ecs.getView<SinTranslateComponent, SpatialComponent>().each()) {
-                double time = frameStats->mRunTime;
+                double time = frameStats.mRunTime;
                 glm::vec3 oldPos = spatial.getPosition();
                 oldPos = sin.mBasePosition + (float)glm::cos(time) * sin.mOffset;
                 spatial.setPosition(oldPos);
