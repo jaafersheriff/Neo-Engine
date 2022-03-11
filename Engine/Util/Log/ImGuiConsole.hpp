@@ -24,6 +24,8 @@ namespace neo {
         ImGuiTextFilter mFilter;
         bool mAutoScrollEnabled;
         bool mScrollToBottom;
+        int mMaxLogSize = 100;
+        bool mInfiniteLog = false;
     };
 
 }

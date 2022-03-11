@@ -35,6 +35,9 @@ namespace neo {
         void* buf = malloc(len); 
         memcpy(buf, (const void*)log, len);
         mLogs.push_back({ severity, static_cast<char*>(buf) });
+        while (!mInfiniteLog && mLogs.size() > mMaxLogSize) {
+            mLogs.erase(mLogs.begin());
+        }
     }
 
     void ImGuiConsole::imGuiEditor() {
@@ -54,6 +57,13 @@ namespace neo {
         ImGui::SameLine();
         ImGui::Checkbox("Auto-scroll", &mAutoScrollEnabled);
 
+        ImGui::SameLine();
+        ImGui::Checkbox("Infinite Scroll", &mInfiniteLog);
+        if (!mInfiniteLog) {
+            ImGui::InputInt("Max size", &mMaxLogSize, 1, 10, ImGuiInputTextFlags_CharsDecimal);
+            mMaxLogSize = std::min(1000, std::max(mMaxLogSize, 1));
+        }
+
         ImGui::Separator();
 
         // Reserve enough left-over height for 1 separator + 1 input text
@@ -69,6 +79,7 @@ namespace neo {
         if (copy_to_clipboard) {
             ImGui::LogToClipboard();
         }
+
         for (int i = 0; i < mLogs.size(); i++) {
             auto&& [severity, log] = mLogs[i];
             if (!mFilter.PassFilter(log)) {
