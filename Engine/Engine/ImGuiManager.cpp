@@ -96,6 +96,7 @@ namespace neo {
             my -= mViewport.mOffset.y;
             my = mViewport.mSize.y - my;
             if (mx >= 0 && mx <= mViewport.mSize.x && my >= 0 && my <= mViewport.mSize.y) {
+                NEO_LOG_I("ImGui Mouse moved %0.2f %0.2f", mx, my);
                 Messenger::sendMessage<Mouse::MouseMoveMessage>(static_cast<double>(mx), static_cast<double>(my));
             }
         }

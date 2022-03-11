@@ -195,9 +195,9 @@ namespace neo {
             double x, y;
             glfwGetCursorPos(mWindow, &x, &y);
             y = mDetails.mSize.y - y;
-            // Messenger::sendMessage<Mouse::MouseMoveMessage>(nullptr, x, y);
+            Messenger::sendMessage<Mouse::MouseMoveMessage>(x, y);
         }
-        // Messenger::sendMessage<Mouse::ScrollWheelMessage>(nullptr, 0.0);
+        Messenger::sendMessage<Mouse::ScrollWheelMessage>(0.0);
         MICROPROFILE_ENTERI("Window", "glfwPollEvents", MP_AUTO);
         glfwPollEvents();
         MICROPROFILE_LEAVE();
