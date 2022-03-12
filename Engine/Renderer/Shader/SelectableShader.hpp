@@ -3,6 +3,8 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
+#include "ECS/Messaging/Messenger.hpp"
+
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
@@ -41,12 +43,11 @@ namespace neo {
             stencilBuffer->disableDraw();
 
             // Handle frame size changing
-            // Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
-            //     NEO_UNUSED(ecs);
-            //     glm::uvec2 frameSize = (static_cast<const FrameSizeMessage&>(msg)).mSize;
-            //     Library::getFBO("selectable")->resize(frameSize);
-            // });
+            Messenger::addReceiver<FrameSizeMessage, &SelectableShader::_onFrameSizeChanged>(this);
+        }
 
+        ~SelectableShader() {
+            Messenger::removeReceiver<FrameSizeMessage>(this);
         }
 
         // TODO : add hovered capability
@@ -131,5 +132,9 @@ namespace neo {
 
         private:
             ECS::Entity mSelectedID;
+
+            void _onFrameSizeChanged(const FrameSizeMessage& msg) {
+                Library::getFBO("selectable")->resize(msg.mSize);
+            }
     };
 }

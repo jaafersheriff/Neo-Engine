@@ -71,10 +71,10 @@ namespace neo {
             }
             if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused()) {
                 ServiceLocator<ImGuiManager>::ref().updateKeyboard(window, key, scancode, action, mods);
-                // Messenger::sendMessage<Keyboard::ResetKeyboardMessage>();
+                Messenger::sendMessage<Keyboard::ResetKeyboardMessage>();
             }
             else {
-                // Messenger::sendMessage<Keyboard::KeyPressedMessage>(key, action);
+                Messenger::sendMessage<Keyboard::KeyPressedMessage>(key, action);
             }
             });
         glfwSetMouseButtonCallback(mWindow, [](GLFWwindow* window, int button, int action, int mods) {

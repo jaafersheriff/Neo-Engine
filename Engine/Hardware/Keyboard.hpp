@@ -11,8 +11,8 @@ namespace neo {
     public:
         struct ResetKeyboardMessage : public Message { };
         struct KeyPressedMessage : public Message {
-            const int mKey;
-            const int mAction;
+            int mKey;
+            int mAction;
             KeyPressedMessage(int key, int action)
                 : mKey(key)
                 , mAction(action)
@@ -24,13 +24,15 @@ namespace neo {
         Keyboard(const Keyboard&) = default;
         Keyboard& operator=(const Keyboard&) = default;
         
+        // TODO - maybe move this to ctors
         void init();
 
         bool isKeyPressed(int) const;
-        void setKeyStatus(int, int);
-        void reset();
 
     private:
         bool mKeyStatus[NUM_KEYS] = { GLFW_RELEASE };
+
+        void _onReset(const ResetKeyboardMessage& msg);
+        void _onKeyPressed(const KeyPressedMessage& msg);
     };
 }

@@ -58,10 +58,10 @@ namespace neo {
         */
         double mDZ = 0;
 
-        void _onMouseReset(const MouseResetMessage& msg);
-        void _onMouseButton(const MouseButtonMessage& msg);
+        void _onReset(const MouseResetMessage& msg);
+        void _onButton(const MouseButtonMessage& msg);
+        void _onMove(const MouseMoveMessage& msg);
         void _onScrollWheel(const ScrollWheelMessage& msg);
-        void _onMouseMove(const MouseMoveMessage& msg);
 
     };
 }

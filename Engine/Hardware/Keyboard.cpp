@@ -7,20 +7,8 @@
 namespace neo {
 
     void Keyboard::init() {
-        // Messenger::addReceiver<ResetKeyboardMessage>([this](const neo::Message& msg, ECS& ecs) {
-        //     NEO_UNUSED(ecs);
-        //     const ResetKeyboardMessage& m(static_cast<const ResetKeyboardMessage&>(msg));
-        //     NEO_UNUSED(m);
-
-        //     reset();
-        // });
-
-        // Messenger::addReceiver<KeyPressedMessage>([this](const neo::Message& msg, ECS& ecs) {
-        //     NEO_UNUSED(ecs);
-        //     const KeyPressedMessage& m(static_cast<const KeyPressedMessage&>(msg));
-
-        //     setKeyStatus(m.mKey, m.mAction);
-        // });
+        Messenger::addReceiver<ResetKeyboardMessage, &Keyboard::_onReset>(this);
+        Messenger::addReceiver<KeyPressedMessage, &Keyboard::_onKeyPressed>(this);
     }
 
     bool Keyboard::isKeyPressed(int key) const {
@@ -28,12 +16,13 @@ namespace neo {
         return mKeyStatus[key];
     }
 
-    void Keyboard::setKeyStatus(int key, int action) {
-        NEO_ASSERT(key < NUM_KEYS, "Invalid key");
-        mKeyStatus[key] = action >= GLFW_PRESS;
+    void Keyboard::_onKeyPressed(const KeyPressedMessage& msg) {
+        NEO_ASSERT(msg.mKey < NUM_KEYS, "Invalid key");
+        mKeyStatus[msg.mKey] = msg.mAction >= GLFW_PRESS;
     }
 
-    void Keyboard::reset() {
+    void Keyboard::_onReset(const ResetKeyboardMessage& msg) {
+        NEO_UNUSED(msg);
         for (int key(0); key < NUM_KEYS; ++key) {
             mKeyStatus[key] = false;
         }
