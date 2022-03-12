@@ -12,16 +12,15 @@
 namespace neo {
 
     void MouseRaySystem::update(ECS& ecs) {
-        auto mainCamera = ecs.getView<MainCameraComponent, SpatialComponent>();
-        NEO_ASSERT(mainCamera.size_hint() == 1, "Main camera doesn't exist");
-        auto camera = ecs.getComponentAs<CameraComponent, PerspectiveCameraComponent>(mainCamera.front());
+        auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+        auto camera = ecs.getComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity);
 
         auto viewport = ecs.getComponent<ViewportDetailsComponent>();
         NEO_ASSERT(viewport, "Window details don't exist");
 
         auto mouseRayView = ecs.getComponent<MouseRayComponent>();
         if (auto mouseOpt = ecs.getComponent<MouseComponent>()) {
-            auto&& [_, mouse] = *mouseOpt;
+            auto&& [__, mouse] = *mouseOpt;
             if (mouse.mFrameMouse.isDown(GLFW_MOUSE_BUTTON_1)) {
                 // Mouse coords in viewport space
                 glm::vec2 mouseCoords = mouse.mFrameMouse.getPos();
@@ -36,11 +35,11 @@ namespace neo {
                 mouseCoordsEye.w = 0.f;
 
                 // Eye space to world space
-                glm::vec3 dir = glm::normalize(glm::vec3(glm::inverse(ecs.getComponent<SpatialComponent>(mainCamera.front())->getView()) * mouseCoordsEye));
-                glm::vec3 pos = ecs.getComponent<SpatialComponent>(mainCamera.front())->getPosition();
+                glm::vec3 dir = glm::normalize(glm::vec3(glm::inverse(ecs.getComponent<SpatialComponent>(cameraEntity)->getView()) * mouseCoordsEye));
+                glm::vec3 pos = cameraSpatial.getPosition();
 
                 // Create new mouseray if one doesnt exist
-                ECS::Entity mouseRayEntity;
+                ECS::Entity mouseRayEntity = entt::null;
                 MouseRayComponent* mouseRay;
                 if (mouseRayView) {
                     mouseRayEntity = std::get<0>(*mouseRayView);
