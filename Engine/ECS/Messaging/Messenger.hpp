@@ -7,11 +7,11 @@
 #include <typeindex>
 #include <memory>
 #include <functional>
+#include <entt/signal/dispatcher.hpp>
 
 namespace neo {
 
     class ECS;
-    class GameObject;
 
     class Messenger {
         public:
@@ -20,33 +20,36 @@ namespace neo {
             Messenger(const Messenger&) = delete;
             Messenger& operator=(const Messenger&) = delete;
 
-            /* Sends out a message for any receivers of that message type to pick up
-             * If gameObject is not null, first sends the message locally to receivers of only that object. */
             template <typename MsgT, typename... Args> static void sendMessage(Args &&... args);
-
-            /* Adds a receiver for a message type. If gameObject is null, the function will be called for all messages 
-            of that type. If gameObject is not null, the function will be called for only messages of that type sent to that object */
-            template <typename MsgT> static void addReceiver(const ReceiverFunc&);
+            template<typename MsgT, auto Func, typename Caller> static void addReceiver(Caller &&caller);
+            template<typename MsgT, auto Func, typename Caller> static void removeReceiver(Caller &&caller);
+            template<typename MsgT, typename Caller> static void removeReceiver(Caller &&caller);
 
             static void relayMessages(ECS& ecs);
             static void clean();
 
         private:
-            static std::vector<std::tuple<std::type_index, std::unique_ptr<Message>>> mMessages;
-            static std::unordered_map<std::type_index, std::vector<ReceiverFunc>> mReceivers;
+            static entt::dispatcher mDispatcher;
     };
 
     template <typename MsgT, typename... Args>
     void Messenger::sendMessage(Args &&... args) {
-        static_assert(std::is_base_of<Message, MsgT>::value, "MsgT must be a message type");
-        mMessages.emplace_back(typeid(MsgT), std::make_unique<MsgT>(std::forward<Args>(args)...));
+        mDispatcher.enqueue<MsgT>(std::forward<Args>(args)...);
     }
 
-    template <typename MsgT>
-    void Messenger::addReceiver(const ReceiverFunc& func) {
-        static_assert(std::is_base_of<Message, MsgT>::value, "MsgT must be a message type");
-		mReceivers[std::type_index(typeid(MsgT))].emplace_back(func);
+    template<typename MsgT, auto Func, typename Caller> 
+    void Messenger::addReceiver(Caller &&caller) {
+        mDispatcher.sink<MsgT>().connect<Func>(caller);
 
     }
+    
+    template<typename MsgT, auto Func, typename Caller> 
+    void Messenger::removeReceiver(Caller&& caller) {
+        mDispatcher.sink<MsgT>().disconnect<Func>(caller);
+    }
 
+    template<typename MsgT, typename Caller> 
+    void Messenger::removeReceiver(Caller&& caller) {
+        mDispatcher.sink<MsgT>().disconnect(caller);
+    }
 }
