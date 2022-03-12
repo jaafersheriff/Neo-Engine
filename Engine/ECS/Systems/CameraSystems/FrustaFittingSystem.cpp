@@ -18,29 +18,29 @@ namespace neo {
 
     void FrustaFittingSystem::update(ECS& ecs) {
 
-        auto sourceCamera = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent, PerspectiveCameraComponent>();
-        auto receiverCamera = ecs.getSingleView<FrustumFitReceiverComponent, SpatialComponent, OrthoCameraComponent>();
+        auto sourceCameraTuple = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent, PerspectiveCameraComponent>();
+        auto receiverCameraTuple = ecs.getSingleView<FrustumFitReceiverComponent, SpatialComponent, OrthoCameraComponent>();
         auto lightTuple = ecs.getSingleView<LightComponent, SpatialComponent>();
-        if (!receiverCamera || !sourceCamera || !lightTuple) {
+        if (!receiverCameraTuple || !sourceCameraTuple || !lightTuple) {
             return;
         }
-        auto&& [sourceCameraEntity, _, sourceSpatial, perspectiveCamera] = *sourceCamera;
-        auto&& [receiverCameraEntity, receiverFrustum, receiverSpatial, orthoCamera] = *receiverCamera;
+        auto&& [sourceCameraEntity, _, sourceSpatial, sourceCamera] = *sourceCameraTuple;
+        auto&& [receiverCameraEntity, receiverFrustum, receiverSpatial, receiverCamera] = *receiverCameraTuple;
         auto&& [lightEntity, light, lightSpatial] = *lightTuple;
 
         /////////////////////// Do the fitting! ///////////////////////////////
         const glm::vec3 lightDir = lightSpatial.getLookDir();
         const glm::vec3 up = lightSpatial.getUpDir();
 
-        const auto& sceneView = receiverSpatial.getView();
-        const auto& sceneProj = perspectiveCamera.getProj();
+        const auto& sourceView = sourceSpatial.getView();
+        const auto& sourceProj = sourceCamera.getProj();
         const auto& worldToLight = glm::lookAt(lightDir, glm::vec3(0.f), up);
         const auto& lightToWorld = glm::inverse(worldToLight);
 
-        // const float aspect = sceneProj[1][1] / sceneProj[0][0];
-        // const float fov = 2.f * glm::atan(1.f / sceneProj[1][1]);
-        // const float zNear = sceneProj[3][2] / (sceneProj[2][2] - 1.f);
-        // const float zFar = sceneProj[3][2] / (sceneProj[2][2] + 1.f);
+        // const float aspect = sourceProj[1][1] / sourceProj[0][0];
+        // const float fov = 2.f * glm::atan(1.f / sourceProj[1][1]);
+        // const float zNear = sourceProj[3][2] / (sourceProj[2][2] - 1.f);
+        // const float zFar = sourceProj[3][2] / (sourceProj[2][2] + 1.f);
         // const float zRange = zFar - zNear;
         const float depthMin = -1.f; // GL things
 
@@ -90,7 +90,7 @@ namespace neo {
             }
         };
 
-        const std::vector<glm::vec4> corners = { // screen space ortho box 
+        const std::vector<glm::vec4> corners = { // screen space receiver box 
             { -1.f,  1.f, depthMin, 1.f }, // corners of near plane
             {  1.f,  1.f, depthMin, 1.f },
             { -1.f, -1.f, depthMin, 1.f },
@@ -101,25 +101,25 @@ namespace neo {
             {  1.f, -1.f,      1.f, 1.f }
         };
 
-        glm::mat4 shadowToWorld = glm::inverse(sceneProj * sceneView); // scene view pos
-        BoundingBox orthoBox;
+        glm::mat4 shadowToWorld = glm::inverse(sourceProj * sourceView); // source view pos
+        BoundingBox receiverBox;
         for (const auto& corner : corners) {
-            glm::vec4 worldPos = shadowToWorld * corner; // transform corners of screen space unit ortho box into scene PV space
+            glm::vec4 worldPos = shadowToWorld * corner; // transform corners of screen space unit receiver box into source PV space
             worldPos = worldPos / worldPos.w;
             worldPos = worldToLight * worldPos; // rotate corners with light's world rotation
-            orthoBox.addNewPosition(worldPos);
+            receiverBox.addNewPosition(worldPos);
         }
 
-        glm::vec3 center = lightToWorld * glm::vec4(orthoBox.center(), 1.f); // orthos center back in light space
+        glm::vec3 center = lightToWorld * glm::vec4(receiverBox.center(), 1.f); // receivers center back in light space
         float bias = receiverFrustum.mBias;
-        const float boxWidth = orthoBox.width() * 0.5f * (1.f + bias);
-        const float boxHeight = orthoBox.height() * 0.5f * (1.f + bias);
-        const float boxDepth = orthoBox.depth() * 0.5f * (1.f + bias);
+        const float boxWidth = receiverBox.width() * 0.5f * (1.f + bias);
+        const float boxHeight = receiverBox.height() * 0.5f * (1.f + bias);
+        const float boxDepth = receiverBox.depth() * 0.5f * (1.f + bias);
 
         receiverSpatial.setPosition(center);
         receiverSpatial.setLookDir(lightDir);
-        orthoCamera.setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
-        orthoCamera.setNearFar(-boxDepth, boxDepth);
+        receiverCamera.setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
+        receiverCamera.setNearFar(-boxDepth, boxDepth);
 
     }
 }
