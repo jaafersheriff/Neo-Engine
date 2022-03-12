@@ -72,7 +72,7 @@ namespace neo {
             BlitShader* mBlitShader = nullptr;
             bool mShowBB = false;
 
-            void onFrameSizeChanged(const FrameSizeMessage& msg);
+            void _onFrameSizeChanged(const FrameSizeMessage& msg);
 
             std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mComputeShaders;
             std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPreProcessShaders;

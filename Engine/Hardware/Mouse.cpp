@@ -6,40 +6,10 @@
 namespace neo {
 
     void Mouse::init() {
-        // Messenger::addReceiver<MouseResetMessage>([this](const neo::Message& msg, ECS& ecs) {
-        //     NEO_UNUSED(msg, ecs);
-        //     reset();
-        // });
-
-        // Messenger::addReceiver<MouseButtonMessage>([this](const neo::Message& msg, ECS& ecs) {
-        //     NEO_UNUSED(ecs);
-        //     const MouseButtonMessage& m(static_cast<const MouseButtonMessage&>(msg));
-        //     setButtonStatus(m.mButton, m.mAction);
-        // });
-
-        // Messenger::addReceiver<ScrollWheelMessage>([this](const neo::Message& msg, ECS& ecs) {
-        //     NEO_UNUSED(ecs);
-        //     const ScrollWheelMessage& m(static_cast<const ScrollWheelMessage&>(msg));
-        //     setScroll(m.mSpeed);
-        // });
-
-        // Messenger::addReceiver<MouseMoveMessage>([this](const neo::Message& msg, ECS& ecs) {
-        //     NEO_UNUSED(ecs);
-        //     const MouseMoveMessage& m(static_cast<const MouseMoveMessage&>(msg));
-        //     if (mIsReset) {
-        //         mX = m.mX;
-        //         mY = m.mY;
-        //         mIsReset = false;
-        //     }
-
-        //     /* Calculate x-y speed */
-        //     mDX = m.mX - mX;
-        //     mDY = m.mY - mY;
-
-        //     /* Set new positions */
-        //     mX = m.mX;
-        //     mY = m.mY;
-        // });
+        Messenger::addReceiver<MouseResetMessage, &Mouse::_onMouseReset>(this);
+        Messenger::addReceiver<MouseButtonMessage, &Mouse::_onMouseButton>(this);
+        Messenger::addReceiver<ScrollWheelMessage, &Mouse::_onScrollWheel>(this);
+        Messenger::addReceiver<MouseMoveMessage, &Mouse::_onMouseMove>(this);
     }
 
     glm::vec2 Mouse::getPos() const {
@@ -58,15 +28,8 @@ namespace neo {
         return mMouseButtons[button] >= GLFW_PRESS;
     }
 
-    void Mouse::setButtonStatus(int button, int action) {
-        mMouseButtons[button] = action;
-    }
-
-    void Mouse::setScroll(double newScroll) {
-        mDZ = static_cast<int>(newScroll);
-    }
-
-    void Mouse::reset() {
+    void Mouse::_onMouseReset(const MouseResetMessage& msg) {
+        NEO_UNUSED(msg);
         mIsReset = true;
         mDX = mDY = 0;
         mDZ = 0;
@@ -74,4 +37,29 @@ namespace neo {
             mMouseButtons[i] = { GLFW_RELEASE };
         }
     }
+
+    void Mouse::_onMouseButton(const MouseButtonMessage& msg) {
+        mMouseButtons[msg.mButton] = msg.mAction;
+    }
+
+    void Mouse::_onScrollWheel(const ScrollWheelMessage& msg) {
+        mDZ = static_cast<int>(msg.mSpeed);
+    }
+
+    void Mouse::_onMouseMove(const MouseMoveMessage& msg) {
+        if (mIsReset) {
+            mX = msg.mX;
+            mY = msg.mY;
+            mIsReset = false;
+        }
+
+        /* Calculate x-y speed */
+        mDX = msg.mX - mX;
+        mDY = msg.mY - mY;
+
+        /* Set new positions */
+        mX = msg.mX;
+        mY = msg.mY;
+    }
+
 }
