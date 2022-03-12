@@ -89,7 +89,7 @@ namespace neo {
         mDetails.mGLSLVersion = glsl.str();
 
         
-        Messenger::addReceiver<FrameSizeMessage, &Renderer::onFrameSizeChanged>(this);
+        Messenger::addReceiver<FrameSizeMessage, &Renderer::_onFrameSizeChanged>(this);
     }
 
     Renderer::~Renderer() {
@@ -137,7 +137,7 @@ namespace neo {
         resetState();
     }
 
-    void Renderer::onFrameSizeChanged(const FrameSizeMessage& msg) {
+    void Renderer::_onFrameSizeChanged(const FrameSizeMessage& msg) {
         mDefaultFBO->resize(msg.mSize);
     }
 

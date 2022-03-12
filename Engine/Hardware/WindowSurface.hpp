@@ -40,11 +40,11 @@ namespace neo {
         void toggleVSync();
         void setSize(const glm::ivec2&);
 
-        void onFrameSizeChanged(const FrameSizeMessage& msg);
-        void onToggleFullscreen(const ToggleFullscreenMessage& msg);
-
     private:
         GLFWwindow* mWindow = nullptr;
         WindowDetails mDetails;
+
+        void _onFrameSizeChanged(const FrameSizeMessage& msg);
+        void _onToggleFullscreen(const ToggleFullscreenMessage& msg);
     };
 }
