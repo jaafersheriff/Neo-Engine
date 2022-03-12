@@ -1,6 +1,7 @@
 #include "Renderer.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
+#include "ECS/Messaging/Message.hpp"
 #include "ECS/Messaging/Messenger.hpp"
 
 #include "Shader/BlitShader.hpp"
@@ -86,6 +87,13 @@ namespace neo {
         std::stringstream glsl;
         glsl << "#version " << GLMajor << GLMinor << "0";
         mDetails.mGLSLVersion = glsl.str();
+
+        
+        Messenger::addReceiver<FrameSizeMessage, &Renderer::onFrameSizeChanged>(this);
+    }
+
+    Renderer::~Renderer() {
+        Messenger::removeReceiver<FrameSizeMessage>(this);
     }
 
     void Renderer::setDemoConfig(IDemo::Config config) {
@@ -113,12 +121,6 @@ namespace neo {
         mDefaultFBO->initDrawBuffers();
         mDefaultFBO->bind();
         
-        Messenger::addReceiver<FrameSizeMessage>([&](const Message& msg, ECS& ecs) {
-            NEO_UNUSED(ecs);
-            auto m = static_cast<const FrameSizeMessage&>(msg);
-            mDefaultFBO->resize(m.mSize);
-        });
-
         /* Set max work group */
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
@@ -133,6 +135,10 @@ namespace neo {
 
         /* Init default GL state */
         resetState();
+    }
+
+    void Renderer::onFrameSizeChanged(const FrameSizeMessage& msg) {
+        mDefaultFBO->resize(msg.mSize);
     }
 
     void Renderer::resetState() {

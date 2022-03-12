@@ -17,6 +17,7 @@ namespace neo {
     class WindowSurface;
     class PostProcessShader;
     class BlitShader;
+    struct FrameSizeMessage;
 
     class Renderer {
 
@@ -39,7 +40,7 @@ namespace neo {
 
         public:
             Renderer(int GLMajor, int GLMinor);
-            ~Renderer() = default;
+            ~Renderer();
             Renderer(const Renderer &) = delete;
             Renderer & operator=(const Renderer &) = delete;
             Renderer(Renderer &&) = delete;
@@ -70,6 +71,8 @@ namespace neo {
             glm::vec3 mClearColor;
             BlitShader* mBlitShader = nullptr;
             bool mShowBB = false;
+
+            void onFrameSizeChanged(const FrameSizeMessage& msg);
 
             std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mComputeShaders;
             std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> mPreProcessShaders;

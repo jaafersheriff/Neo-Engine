@@ -18,13 +18,6 @@ namespace neo {
             NEO_LOG_E("GLFW Error %d: %s", error, desc);
         }
 
-        struct ToggleFullscreenMessage : public Message {
-            bool mAlreadyFullscreen = false;
-            ToggleFullscreenMessage(bool alreadyFullscreen) :
-                mAlreadyFullscreen(alreadyFullscreen)
-            {}
-        };
-
     }
     int WindowSurface::init(const std::string& name) {
         /* Set error callback */
@@ -78,10 +71,10 @@ namespace neo {
             }
             if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused()) {
                 ServiceLocator<ImGuiManager>::ref().updateKeyboard(window, key, scancode, action, mods);
-                Messenger::sendMessage<Keyboard::ResetKeyboardMessage>();
+                // Messenger::sendMessage<Keyboard::ResetKeyboardMessage>();
             }
             else {
-                Messenger::sendMessage<Keyboard::KeyPressedMessage>(key, action);
+                // Messenger::sendMessage<Keyboard::KeyPressedMessage>(key, action);
             }
             });
         glfwSetMouseButtonCallback(mWindow, [](GLFWwindow* window, int button, int action, int mods) {
@@ -90,19 +83,19 @@ namespace neo {
             doImGui |= ServiceLocator<ImGuiManager>::ref().isEnabled() && ServiceLocator<ImGuiManager>::ref().isViewportHovered() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused() && action == GLFW_PRESS;
             if (doImGui) {
                 ServiceLocator<ImGuiManager>::ref().updateMouse(window, button, action, mods);
-                Messenger::sendMessage<Mouse::MouseResetMessage>();
+                // Messenger::sendMessage<Mouse::MouseResetMessage>();
             }
             else {
-                Messenger::sendMessage<Mouse::MouseButtonMessage>(button, action);
+                // Messenger::sendMessage<Mouse::MouseButtonMessage>(button, action);
             }
             });
         glfwSetScrollCallback(mWindow, [](GLFWwindow* window, double dx, double dy) {
             if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportHovered()) {
                 ServiceLocator<ImGuiManager>::ref().updateScroll(window, dx, dy);
-                Messenger::sendMessage<Mouse::MouseResetMessage>();
+                // Messenger::sendMessage<Mouse::MouseResetMessage>();
             }
             else {
-                Messenger::sendMessage<Mouse::ScrollWheelMessage>(dy);
+                // Messenger::sendMessage<Mouse::ScrollWheelMessage>(dy);
             }
             });
 
@@ -132,7 +125,7 @@ namespace neo {
 
         glfwSetCursorEnterCallback(mWindow, [](GLFWwindow* window, int entered) {
             NEO_UNUSED(window, entered);
-            Messenger::sendMessage<Mouse::MouseResetMessage>();
+            // Messenger::sendMessage<Mouse::MouseResetMessage>();
         });
 
         /* Init GLEW */
@@ -146,38 +139,40 @@ namespace neo {
         return 0;
     }
 
+    void WindowSurface::onFrameSizeChanged(const FrameSizeMessage& msg) {
+        const FrameSizeMessage& m(static_cast<const FrameSizeMessage&>(msg));
+
+        mDetails.mSize.x = m.mSize.x;
+        mDetails.mSize.y = m.mSize.y;
+    }
+
+    void WindowSurface::onToggleFullscreen(const ToggleFullscreenMessage& msg) {
+        const ToggleFullscreenMessage& m(static_cast<const ToggleFullscreenMessage&>(msg));
+        /* If already full screen */
+        if (m.mAlreadyFullscreen) {
+            mDetails.mFullscreen = false;
+            mDetails.mSize = { 1920, 1080 };
+            glfwSetWindowMonitor(mWindow, nullptr, mDetails.mPos.x, mDetails.mPos.y, mDetails.mSize.x, mDetails.mSize.y, mDetails.mVSyncEnabled);
+        }
+        /* If windowed */
+        else {
+            int x, y;
+            glfwGetWindowPos(mWindow, &x, &y);
+            mDetails.mPos.x = x;
+            mDetails.mPos.y = y;
+            mDetails.mFullscreen = true;
+            GLFWmonitor* monitor(glfwGetPrimaryMonitor());
+            const GLFWvidmode* video(glfwGetVideoMode(monitor));
+            glfwSetWindowMonitor(mWindow, monitor, 0, 0, video->width, video->height, video->refreshRate);
+        }
+    }
+
     void WindowSurface::reset(const std::string& name) {
         glfwSetWindowTitle(mWindow, name.c_str());
 
         /* Set callbacks */
-        Messenger::addReceiver<ToggleFullscreenMessage>([this](const neo::Message& msg, ECS& ecs) {
-            NEO_UNUSED(ecs);
-            const ToggleFullscreenMessage& m(static_cast<const ToggleFullscreenMessage&>(msg));
-            /* If already full screen */
-            if (m.mAlreadyFullscreen) {
-                mDetails.mFullscreen = false;
-                mDetails.mSize = { 1920, 1080 };
-                glfwSetWindowMonitor(mWindow, nullptr, mDetails.mPos.x, mDetails.mPos.y, mDetails.mSize.x, mDetails.mSize.y, mDetails.mVSyncEnabled);
-            }
-            /* If windowed */
-            else {
-                int x, y;
-                glfwGetWindowPos(mWindow, &x, &y);
-                mDetails.mPos.x = x;
-                mDetails.mPos.y = y;
-                mDetails.mFullscreen = true;
-                GLFWmonitor* monitor(glfwGetPrimaryMonitor());
-                const GLFWvidmode* video(glfwGetVideoMode(monitor));
-                glfwSetWindowMonitor(mWindow, monitor, 0, 0, video->width, video->height, video->refreshRate);
-            }
-        });
-        Messenger::addReceiver<FrameSizeMessage>([this](const neo::Message& msg, ECS& ecs) {
-            NEO_UNUSED(ecs);
-            const FrameSizeMessage& m(static_cast<const FrameSizeMessage&>(msg));
-
-            mDetails.mSize.x = m.mSize.x;
-            mDetails.mSize.y = m.mSize.y;
-        });
+        Messenger::addReceiver<ToggleFullscreenMessage, &WindowSurface::onToggleFullscreen>(this);
+        Messenger::addReceiver<FrameSizeMessage, &WindowSurface::onFrameSizeChanged>(this);
 
         if (!ServiceLocator<ImGuiManager>::empty()) {
             if (!ServiceLocator<ImGuiManager>::ref().isEnabled()) {
@@ -195,9 +190,9 @@ namespace neo {
             double x, y;
             glfwGetCursorPos(mWindow, &x, &y);
             y = mDetails.mSize.y - y;
-            Messenger::sendMessage<Mouse::MouseMoveMessage>(x, y);
+            // Messenger::sendMessage<Mouse::MouseMoveMessage>(x, y);
         }
-        Messenger::sendMessage<Mouse::ScrollWheelMessage>(0.0);
+        // Messenger::sendMessage<Mouse::ScrollWheelMessage>(0.0);
         MICROPROFILE_ENTERI("Window", "glfwPollEvents", MP_AUTO);
         glfwPollEvents();
         MICROPROFILE_LEAVE();

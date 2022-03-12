@@ -59,7 +59,6 @@ namespace neo {
     struct Message {
         virtual ~Message() = default;
     };
-    using ReceiverFunc = std::function<void(const Message&, ECS&)>;
 
     /* A spatiality was changed in some way */
     struct SpatialChangeMessage : public Message {

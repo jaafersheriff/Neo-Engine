@@ -5,12 +5,21 @@
 #include "glm/glm.hpp"
 
 #include "WindowDetails.hpp"
+#include "ECS/Messaging/Message.hpp"
 
 #include <string>
 
 namespace neo {
 
     class WindowSurface {
+
+        struct ToggleFullscreenMessage : public Message {
+            bool mAlreadyFullscreen = false;
+            ToggleFullscreenMessage(bool alreadyFullscreen) :
+                mAlreadyFullscreen(alreadyFullscreen)
+            {}
+        };
+
     public:
         WindowSurface() = default;
         ~WindowSurface() = default;
@@ -30,6 +39,9 @@ namespace neo {
         GLFWwindow* getWindow() { return mWindow; }
         void toggleVSync();
         void setSize(const glm::ivec2&);
+
+        void onFrameSizeChanged(const FrameSizeMessage& msg);
+        void onToggleFullscreen(const ToggleFullscreenMessage& msg);
 
     private:
         GLFWwindow* mWindow = nullptr;
