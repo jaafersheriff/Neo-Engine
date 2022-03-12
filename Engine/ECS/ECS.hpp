@@ -197,7 +197,7 @@ namespace neo {
 		// TODO - assert that theres more than one compt
 		MICROPROFILE_SCOPEI("ECS", "getSingleView", MP_AUTO);
 		auto view = mRegistry.view<CompTs...>();
-		NEO_ASSERT(view.size_hint() <= 1, "");
+		NEO_ASSERT(view.size_hint() <= 1, "Found %d entities when one was requested", view.size_hint());
 		if (view.size_hint() == 1) {
 			return { *view.each().begin() };
 		}
@@ -209,7 +209,7 @@ namespace neo {
 	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, const CompTs&...>> ECS::getSingleView() const {
 		MICROPROFILE_SCOPEI("ECS", "getSingleView", MP_AUTO);
 		auto view = mRegistry.view<const CompTs...>();
-		NEO_ASSERT(view.size_hint() <= 1, "");
+		NEO_ASSERT(view.size_hint() <= 1, "Found %d entities when one was requested", view.size_hint());
 		if (view.size_hint() == 1) {
 			return { *view.each().begin() };
 		}

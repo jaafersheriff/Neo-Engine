@@ -70,8 +70,6 @@ namespace neo {
         ServiceLocator<ImGuiManager>::set();
         ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
 
-        mKeyboard.init();
-        mMouse.init();
 #if MICROPROFILE_ENABLED
         NEO_LOG_I("Microprofile enabled");
         MicroProfileOnThreadCreate("MAIN THREAD");

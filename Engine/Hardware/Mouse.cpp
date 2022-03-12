@@ -6,10 +6,10 @@
 namespace neo {
 
     void Mouse::init() {
-        Messenger::addReceiver<MouseResetMessage, &Mouse::_onMouseReset>(this);
-        Messenger::addReceiver<MouseButtonMessage, &Mouse::_onMouseButton>(this);
+        Messenger::addReceiver<MouseResetMessage, &Mouse::_onReset>(this);
+        Messenger::addReceiver<MouseButtonMessage, &Mouse::_onButton>(this);
         Messenger::addReceiver<ScrollWheelMessage, &Mouse::_onScrollWheel>(this);
-        Messenger::addReceiver<MouseMoveMessage, &Mouse::_onMouseMove>(this);
+        Messenger::addReceiver<MouseMoveMessage, &Mouse::_onMove>(this);
     }
 
     glm::vec2 Mouse::getPos() const {
@@ -28,7 +28,7 @@ namespace neo {
         return mMouseButtons[button] >= GLFW_PRESS;
     }
 
-    void Mouse::_onMouseReset(const MouseResetMessage& msg) {
+    void Mouse::_onReset(const MouseResetMessage& msg) {
         NEO_UNUSED(msg);
         mIsReset = true;
         mDX = mDY = 0;
@@ -38,7 +38,7 @@ namespace neo {
         }
     }
 
-    void Mouse::_onMouseButton(const MouseButtonMessage& msg) {
+    void Mouse::_onButton(const MouseButtonMessage& msg) {
         mMouseButtons[msg.mButton] = msg.mAction;
     }
 
@@ -46,7 +46,7 @@ namespace neo {
         mDZ = static_cast<int>(msg.mSpeed);
     }
 
-    void Mouse::_onMouseMove(const MouseMoveMessage& msg) {
+    void Mouse::_onMove(const MouseMoveMessage& msg) {
         if (mIsReset) {
             mX = msg.mX;
             mY = msg.mY;
