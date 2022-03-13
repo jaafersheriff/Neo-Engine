@@ -38,24 +38,24 @@ namespace neo {
 				auto&& [___, mouseRay] = *mouseRayOpt;
 				if (auto mouseOpt = ecs.getComponent<MouseComponent>()) { 
 					auto&& [____, mouse] = *mouseOpt;
-					if (auto selectable = ecs.getSingleView<SelectableComponent, SpatialComponent>()) {
-						auto&& [selectableEntity, un4, selectableSpatial] = *selectable;
+					if (auto selected = ecs.getSingleView<SelectedComponent, SpatialComponent>()) {
+						auto&& [selectedEntity, un4, selectedSpatial] = *selected;
 						glm::vec3 pos;
-						if (auto bb = ecs.getComponent<BoundingBoxComponent>(selectableEntity)) {
-							if (cameraFrustum.isInFrustum(selectableSpatial, *bb)) {
-								glm::vec3 worldSpaceCenter = selectableSpatial.getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
-								glm::vec3 offsetTranslation = selectableSpatial.getPosition() - worldSpaceCenter;
+						if (auto bb = ecs.getComponent<BoundingBoxComponent>(selectedEntity)) {
+							if (cameraFrustum.isInFrustum(selectedSpatial, *bb)) {
+								glm::vec3 worldSpaceCenter = selectedSpatial.getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
+								glm::vec3 offsetTranslation = selectedSpatial.getPosition() - worldSpaceCenter;
 								float distance = glm::distance(worldSpaceCenter, mouseRay.mPosition);
 								distance += mouse.mFrameMouse.getScrollSpeed();
 								pos = mouseRay.mPosition + mouseRay.mDirection * distance + offsetTranslation;
 							}
 						}
 						else {
-							float distance = glm::distance(selectableSpatial.getPosition(), mouseRay.mPosition);
+							float distance = glm::distance(selectedSpatial.getPosition(), mouseRay.mPosition);
 							distance += mouse.mFrameMouse.getScrollSpeed();
 							pos = mouseRay.mPosition + mouseRay.mDirection * distance;
 						}
-						selectableSpatial.setPosition(pos);
+						selectedSpatial.setPosition(pos);
 					}
 				}
 			}
