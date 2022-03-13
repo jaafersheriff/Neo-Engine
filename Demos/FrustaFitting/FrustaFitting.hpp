@@ -8,6 +8,6 @@ namespace FrustaFitting {
 	class Demo : public IDemo {
 	public:
 		virtual IDemo::Config getConfig() const override;
-		virtual void init(ECS& ecs) override;
+		virtual void init(ECS& ecs, Renderer& renderer) override;
 	};
 }

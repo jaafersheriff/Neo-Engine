@@ -7,10 +7,9 @@ using namespace neo;
 namespace Deferred {
     class DecalRenderable : public Component {
     public:
-        const Texture& mDiffuseMap;
+        Texture* mDiffuseMap;
 
-        DecalRenderable(GameObject* go, const Texture& diffuseMap) :
-            Component(go),
+        DecalRenderable(Texture* diffuseMap) :
             mDiffuseMap(diffuseMap)
         {}
 

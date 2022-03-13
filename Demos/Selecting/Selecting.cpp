@@ -10,6 +10,7 @@
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
@@ -24,36 +25,35 @@ using namespace neo;
 
 namespace Selecting {
 
-    /* Game object definitions */
-    namespace {
-        struct Camera {
-            CameraComponent* camera;
-            Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-                GameObject* gameObject = &ecs.createGameObject();
-                ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-                camera = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
-                ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
-            }
-        };
+    struct Camera {
+        ECS::Entity mEntity;
+        Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
+            mEntity = ecs.createEntity();
+            ecs.addComponent<TagComponent>(mEntity, "Camera");
+            ecs.addComponent<SpatialComponent>(mEntity, pos, glm::vec3(1.f));
+            ecs.addComponent<PerspectiveCameraComponent>(mEntity, near, far, fov);
+            ecs.addComponent<CameraControllerComponent>(mEntity, ls, ms);
+        }
+    };
 
         struct Light {
             Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-                auto& gameObject = ecs.createGameObject("Light");
-                ecs.addComponent<SpatialComponent>(&gameObject, pos);
-                ecs.addComponent<LightComponent>(&gameObject, col, att);
+                auto entity = ecs.createEntity();
+                ecs.addComponent<TagComponent>(entity, "Light");
+                ecs.addComponent<SpatialComponent>(entity, pos);
+                ecs.addComponent<LightComponent>(entity, col, att);
             }
         };
 
         struct Renderable {
-            GameObject* gameObject;
+            ECS::Entity mEntity;
 
             Renderable(ECS& ecs, Mesh* mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
-                gameObject = &ecs.createGameObject();
-                ecs.addComponent<MeshComponent>(gameObject, *mesh);
-                ecs.addComponent<SpatialComponent>(gameObject, position, scale, rotation);
+                mEntity = ecs.createEntity();
+                ecs.addComponent<MeshComponent>(mEntity, *mesh);
+                ecs.addComponent<SpatialComponent>(mEntity, position, scale, rotation);
             }
         };
-    }
 
     IDemo::Config Demo::getConfig() const {
         IDemo::Config config;
@@ -66,7 +66,7 @@ namespace Selecting {
 
         /* Game objects */
         Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-        ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
+        ecs.addComponent<MainCameraComponent>(camera.mEntity);
 
         Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
 
@@ -77,15 +77,15 @@ namespace Selecting {
             material.mAmbient = glm::vec3(0.2f);
             material.mDiffuse = glm::vec3(1.f, 1.f, 1.f);
             material.mShininess = 20.f;
-            ecs.addComponent<renderable::PhongRenderable>(r.gameObject, *Library::getTexture("black"), material);
-            ecs.addComponent<BoundingBoxComponent>(r.gameObject, Library::getMesh("sphere"));
-            ecs.addComponent<SelectableComponent>(r.gameObject);
+            ecs.addComponent<renderable::PhongRenderable>(r.mEntity, *Library::getTexture("black"), material);
+            ecs.addComponent<BoundingBoxComponent>(r.mEntity, Library::getMesh("sphere"));
+            ecs.addComponent<SelectableComponent>(r.mEntity);
         }
 
         /* Ground plane */
         {
             Renderable plane(ecs, Library::getMesh("quad").mMesh, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
-            ecs.addComponent<renderable::AlphaTestRenderable>(plane.gameObject, *Library::loadTexture("grid.png"));
+            ecs.addComponent<renderable::AlphaTestRenderable>(plane.mEntity, *Library::loadTexture("grid.png"));
         }
 
         /* Systems - order matters! */

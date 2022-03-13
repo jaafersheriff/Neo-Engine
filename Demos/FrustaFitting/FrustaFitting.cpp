@@ -17,6 +17,7 @@
 #include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
@@ -35,27 +36,30 @@ static constexpr int shadowMapSize = 2048;
 
 /* Game object definitions */
 namespace FrustaFitting {
-    struct Camera {
-        GameObject* gameObject;
 
-        Camera(std::string name, ECS & ecs, float fov, float near, float far, glm::vec3 pos) {
-            gameObject = &ecs.createGameObject(name);
-            ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-            &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
+    struct Camera {
+        ECS::Entity mEntity;
+        Camera(std::string name, ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
+            mEntity = ecs.createEntity();
+            ecs.addComponent<TagComponent>(mEntity, name);
+            ecs.addComponent<SpatialComponent>(mEntity, pos, glm::vec3(1.f));
+            ecs.addComponent<PerspectiveCameraComponent>(mEntity, near, far, fov);
         }
     };
 
     struct Light {
         Light(ECS& ecs, glm::vec3 position) {
             // Light object
-            auto lightObject = &ecs.createGameObject("Light");
-            auto& spatial = ecs.addComponent<SpatialComponent>(lightObject, position, glm::vec3(1.f));
-            spatial.setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
-            ecs.addComponent<LightComponent>(lightObject, glm::vec3(1.f), glm::vec3(0.4f, 0.2f, 0.f));
+            auto lightEntity = ecs.createEntity();
+            ecs.addComponent<TagComponent>(lightEntity, "Light");
+            auto spatial = ecs.addComponent<SpatialComponent>(lightEntity, position, glm::vec3(1.f));
+            spatial->setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
+            ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f), glm::vec3(0.4f, 0.2f, 0.f));
 
             // Shadow camera object
-            auto cameraObject = &ecs.createGameObject("Light camera");
-            ecs.addComponentAs<OrthoCameraComponent, CameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
+            auto cameraObject = ecs.createEntity();
+            ecs.addComponent<TagComponent>(lightEntity, "Light camera");
+            ecs.addComponent<OrthoCameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
             ecs.addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
             ecs.addComponent<FrustumComponent>(cameraObject);
             ecs.addComponent<FrustumFitReceiverComponent>(cameraObject);
@@ -65,12 +69,12 @@ namespace FrustaFitting {
     };
 
     struct Renderable {
-        GameObject* gameObject;
+        ECS::Entity mEntity;
 
         Renderable(ECS& ecs, Mesh* mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
-            gameObject = &ecs.createGameObject();
-            ecs.addComponent<MeshComponent>(gameObject, *mesh);
-            ecs.addComponent<SpatialComponent>(gameObject, position, scale, rotation);
+            mEntity = ecs.createEntity();
+            ecs.addComponent<MeshComponent>(mEntity, *mesh);
+            ecs.addComponent<SpatialComponent>(mEntity, position, scale, rotation);
         }
     };
 
@@ -81,19 +85,19 @@ namespace FrustaFitting {
         return config;
     }
 
-    void Demo::init(ECS& ecs) {
+    void Demo::init(ECS& ecs, Renderer& renderer) {
 
         /* Game objects */
         Camera sceneCamera("main camera", ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
-        ecs.addComponent<CameraControllerComponent>(sceneCamera.gameObject, 0.4f, 7.f);
-        ecs.addComponent<MainCameraComponent>(sceneCamera.gameObject);
+        ecs.addComponent<CameraControllerComponent>(sceneCamera.mEntity, 0.4f, 7.f);
+        ecs.addComponent<MainCameraComponent>(sceneCamera.mEntity);
 
         // Perspective camera
         Camera mockCamera("mockCamera", ecs, 50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
-        &ecs.addComponent<MockCameraComponent>(mockCamera.gameObject);
-        &ecs.addComponent<LineMeshComponent>(mockCamera.gameObject, glm::vec3(0.f, 1.f, 1.f));
-        ecs.addComponent<FrustumComponent>(mockCamera.gameObject);
-        ecs.addComponent<FrustumFitSourceComponent>(mockCamera.gameObject);
+        ecs.addComponent<MockCameraComponent>(mockCamera.mEntity);
+        ecs.addComponent<LineMeshComponent>(mockCamera.mEntity, glm::vec3(0.f, 1.f, 1.f));
+        ecs.addComponent<FrustumComponent>(mockCamera.mEntity);
+        ecs.addComponent<FrustumFitSourceComponent>(mockCamera.mEntity);
 
         // Ortho camera, shadow camera, light
         Light light(ecs, glm::vec3(10.f, 20.f, 0.f));
@@ -105,10 +109,10 @@ namespace FrustaFitting {
             Material material;
             material.mAmbient = glm::vec3(0.3f);
             material.mDiffuse = util::genRandomVec3();
-            ecs.addComponent<BoundingBoxComponent>(sphere.gameObject, mesh);
-            ecs.addComponent<renderable::PhongShadowRenderable>(sphere.gameObject, *Library::getTexture("black"), material);
-            ecs.addComponent<renderable::ShadowCasterRenderable>(sphere.gameObject, *Library::getTexture("black"));
-            ecs.addComponent<SelectableComponent>(sphere.gameObject);
+            ecs.addComponent<BoundingBoxComponent>(sphere.mEntity, mesh);
+            ecs.addComponent<renderable::PhongShadowRenderable>(sphere.mEntity, *Library::getTexture("black"), material);
+            ecs.addComponent<renderable::ShadowCasterRenderable>(sphere.mEntity, *Library::getTexture("black"));
+            ecs.addComponent<SelectableComponent>(sphere.mEntity);
         }
 
         /* Ground plane */
@@ -116,8 +120,8 @@ namespace FrustaFitting {
         Material material;
         material.mAmbient = glm::vec3(0.2f);
         material.mDiffuse = glm::vec3(0.7f);
-        ecs.addComponent<BoundingBoxComponent>(receiver.gameObject, Library::getMesh("quad"));
-        ecs.addComponent<renderable::PhongShadowRenderable>(receiver.gameObject, *Library::getTexture("black"), material);
+        ecs.addComponent<BoundingBoxComponent>(receiver.mEntity, Library::getMesh("quad"));
+        ecs.addComponent<renderable::PhongShadowRenderable>(receiver.mEntity, *Library::getTexture("black"), material);
 
         /* Systems - order matters! */
         ecs.addSystem<CameraControllerSystem>(); // Update camera
@@ -127,9 +131,9 @@ namespace FrustaFitting {
         ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
 
         /* Init renderer */
-        Renderer::addPreProcessShader<ShadowCasterShader>(shadowMapSize);
-        Renderer::addSceneShader<PhongShadowShader>();
-        Renderer::addSceneShader<WireShader>();
-        Renderer::addSceneShader<LineShader>().mActive = true;
+        renderer.addPreProcessShader<ShadowCasterShader>(shadowMapSize);
+        renderer.addSceneShader<PhongShadowShader>();
+        renderer.addSceneShader<WireShader>();
+        renderer.addSceneShader<LineShader>().mActive = true;
     }
 }

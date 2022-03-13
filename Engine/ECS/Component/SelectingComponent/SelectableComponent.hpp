@@ -2,19 +2,19 @@
 
 #include "ECS/Component/Component.hpp"
 
-// #include "ECS/Messaging/Message.hpp"
+#include "ECS/Messaging/Message.hpp"
 
 #include <inttypes.h>
 
 namespace neo {
 
     /* An entity was selected */
-    // struct ComponentSelectedMessage : public Message {
-    //     const uint32_t mComponentID;
-    //     ComponentSelectedMessage(const uint32_t id)
-    //         : mComponentID(id)
-    //     {}
-    // };
+    struct EntitySelectedMessage : public Message {
+        const ECS::Entity mEntity;
+        EntitySelectedMessage(const uint32_t id)
+            : mEntity(static_cast<ECS::Entity>(id))
+        {}
+    };
 
     struct SelectableComponent : public Component {
     public:

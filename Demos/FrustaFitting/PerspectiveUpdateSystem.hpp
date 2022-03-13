@@ -24,16 +24,14 @@ namespace FrustaFitting {
         }
 
         virtual void update(ECS& ecs) override {
-            auto sourceCamera = ecs.getComponentTuple<FrustumFitSourceComponent, SpatialComponent>();
-            if (!sourceCamera) {
-                return;
-            }
-
-            if (mUpdatePerspective) {
-                if (auto frameStats = ecs.getSingleComponent<FrameStatsComponent>()) {
-                    float f = static_cast<float>(glm::sin(frameStats->mRunTime));
-                    float g = static_cast<float>(glm::cos(frameStats->mRunTime));
-                    sourceCamera->get<SpatialComponent>()->setLookDir(glm::vec3(f, f / 2, g));
+            if (auto sourceCamera = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent>()) {
+                if (mUpdatePerspective) {
+                    if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
+                        auto&& [_, __, sourceSpatial] = *sourceCamera;
+                        float f = static_cast<float>(glm::sin(std::get<1>(*frameStats).mRunTime));
+                        float g = static_cast<float>(glm::cos(std::get<1>(*frameStats).mRunTime));
+                        sourceSpatial.setLookDir(glm::vec3(f, f / 2, g));
+                    }
                 }
             }
         }
