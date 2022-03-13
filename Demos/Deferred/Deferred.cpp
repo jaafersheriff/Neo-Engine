@@ -17,8 +17,8 @@
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
-#include "ECS/Component/TransformationComponent/RotationComponent.hpp"
-#include "ECS/Component/TransformationComponent/SinTranslateComponent.hpp"
+#include "ECS/Component/SpatialComponent/RotationComponent.hpp"
+#include "ECS/Component/SpatialComponent/SinTranslateComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
@@ -33,44 +33,40 @@ using namespace neo;
 namespace Deferred {
 
     struct Camera {
-        CameraComponent* camera;
+        ECS::Entity mEntity;
         Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-            GameObject* gameObject = &ecs.createGameObject();
-            ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-            camera = &ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
-            ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
+            mEntity = ecs.createEntity();
+            ecs.addComponent<SpatialComponent>(mEntity, pos, glm::vec3(1.f));
+            ecs.addComponent<PerspectiveCameraComponent>(mEntity, near, far, fov);
+            ecs.addComponent<CameraControllerComponent>(mEntity, ls, ms);
         }
     };
 
     struct Light {
-        GameObject* gameObject;
-
+        ECS::Entity mEntity;
         Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 scale) {
-            gameObject = &ecs.createGameObject();
-            ecs.addComponent<SpatialComponent>(gameObject, pos, scale);
-            ecs.addComponent<LightComponent>(gameObject, col);
+            mEntity = ecs.createEntity();
+            ecs.addComponent<SpatialComponent>(mEntity, pos, scale);
+            ecs.addComponent<LightComponent>(mEntity, col);
         }
     };
 
     struct Renderable {
-        GameObject* gameObject;
-
+        ECS::Entity mEntity;
         Renderable(ECS& ecs, Mesh* mesh, glm::vec3 pos, glm::vec3 scale, glm::mat3 rot = glm::mat3(1.f)) {
-            gameObject = &ecs.createGameObject();
-            auto& spat = ecs.addComponent<SpatialComponent>(gameObject, pos, scale);
-            spat.setOrientation(rot);
-            ecs.addComponent<MeshComponent>(gameObject, *mesh);
+            mEntity = ecs.createEntity();
+            auto spat = ecs.addComponent<SpatialComponent>(mEntity, pos, scale);
+            spat->setOrientation(rot);
+            ecs.addComponent<MeshComponent>(mEntity, *mesh);
         }
     };
 
     struct Decal {
-        GameObject* gameObject;
-
         Decal(ECS& ecs, Texture* texture, glm::vec3 pos, glm::vec3 scale) {
-            gameObject = &ecs.createGameObject();
-            ecs.addComponent<SpatialComponent>(gameObject, pos, scale);
-            ecs.addComponent<DecalRenderable>(gameObject, *texture);
-            ecs.addComponent<RotationComponent>(gameObject, glm::vec3(0, 1, 0));
+            auto entity = ecs.createEntity();
+            ecs.addComponent<SpatialComponent>(entity, pos, scale);
+            ecs.addComponent<DecalRenderable>(entity, *texture);
+            ecs.addComponent<RotationComponent>(entity, glm::vec3(0, 1, 0));
         }
     };
 
@@ -81,11 +77,11 @@ namespace Deferred {
         return config;
     }
 
-    void Demo::init(ECS& ecs) {
+    void Demo::init(ECS& ecs, Renderer& renderer) {
 
         /* Game objects */
         Camera camera(ecs, 45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 20.f);
-        ecs.addComponent<MainCameraComponent>(&camera.camera->getGameObject());
+        ecs.addComponent<MainCameraComponent>(camera.mEntity);
 
         Light(ecs, glm::vec3(25.f, 25.f, 0.f), glm::vec3(1.f), glm::vec3(100.f));
         {
@@ -93,21 +89,21 @@ namespace Deferred {
             Material material;
             material.mAmbient = glm::vec3(0.2f);
             material.mDiffuse = util::genRandomVec3();
-            ecs.addComponent<GBufferComponent>(cube.gameObject, *Library::getTexture("black"), material);
+            ecs.addComponent<GBufferComponent>(cube.mEntity, *Library::getTexture("black"), material);
         }
         {
             Renderable dragon(ecs, Library::loadMesh("dragon10k.obj", true).mMesh, glm::vec3(-4.f, 5.f, -5.f), glm::vec3(10.f));
             Material material;
             material.mAmbient = glm::vec3(0.2f);
             material.mDiffuse = util::genRandomVec3();
-            ecs.addComponent<GBufferComponent>(dragon.gameObject, *Library::getTexture("black"), material);
+            ecs.addComponent<GBufferComponent>(dragon.mEntity, *Library::getTexture("black"), material);
         }
         {
             Renderable stairs(ecs, Library::loadMesh("staircase.obj", true).mMesh, glm::vec3(5.f, 5.f, 9.f), glm::vec3(10.f));
             Material material;
             material.mAmbient = glm::vec3(0.2f);
             material.mDiffuse = util::genRandomVec3();
-            ecs.addComponent<GBufferComponent>(stairs.gameObject, *Library::getTexture("black"), material);
+            ecs.addComponent<GBufferComponent>(stairs.mEntity, *Library::getTexture("black"), material);
         }
         Library::loadMesh("PineTree3.obj", true);
         Library::loadTexture("PineTexture.png");
@@ -116,7 +112,7 @@ namespace Deferred {
             Material material;
             material.mAmbient = glm::vec3(0.2f);
             material.mDiffuse = glm::vec3(0.f);
-            ecs.addComponent<GBufferComponent>(tree.gameObject, *Library::getTexture("PineTexture.png"), material);
+            ecs.addComponent<GBufferComponent>(tree.mEntity, *Library::getTexture("PineTexture.png"), material);
         }
 
         // Terrain 
@@ -124,7 +120,7 @@ namespace Deferred {
         Material material;
         material.mAmbient = glm::vec3(0.7f);
         material.mDiffuse = glm::vec3(0.7f);
-        ecs.addComponent<GBufferComponent>(terrain.gameObject, *Library::getTexture("black"), material);
+        ecs.addComponent<GBufferComponent>(terrain.mEntity, *Library::getTexture("black"), material);
 
         Decal decal(ecs, Library::loadTexture("decal.png"), glm::vec3(5.f, 0.f, 0.f), glm::vec3(15.f, 30.f, 15.f));
 
@@ -134,12 +130,12 @@ namespace Deferred {
         ecs.addSystem<SinTranslateSystem>();
 
         // TODO - this ordering is super broken
-        Renderer::addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
-        Renderer::addPreProcessShader<DecalShader>("decal.vert", "decal.frag");
-        Renderer::addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag");  // run light pass after generating gbuffer
-        Renderer::addPostProcessShader<AOShader>("ao.frag");    // first post process - generate ssao map 
-        Renderer::addPostProcessShader<BlurShader>("blur.frag"); // blur ssao map
-        Renderer::addPostProcessShader<CombineShader>("combine.frag");    // combine light pass and ssao 
+        renderer.addPreProcessShader<GBufferShader>("gbuffer.vert", "gbuffer.frag");
+        renderer.addPreProcessShader<DecalShader>("decal.vert", "decal.frag");
+        renderer.addPreProcessShader<LightPassShader>("lightpass.vert", "lightpass.frag");  // run light pass after generating gbuffer
+        renderer.addPostProcessShader<AOShader>("ao.frag");    // first post process - generate ssao map 
+        renderer.addPostProcessShader<BlurShader>("blur.frag"); // blur ssao map
+        renderer.addPostProcessShader<CombineShader>("combine.frag");    // combine light pass and ssao 
 
     }
 
@@ -147,15 +143,9 @@ namespace Deferred {
 
         /* Attach ImGui panes */
         if(ImGui::TreeNodeEx("Decal")) {
-            auto decal = ecs.getComponentTuple<DecalRenderable, SpatialComponent>();
-            auto spat = decal->get<SpatialComponent>();
-            auto pos = spat->getPosition();
-            auto scale = spat->getScale();
-            if (ImGui::SliderFloat3("Position", &pos[0], -25.f, 25.f)) {
-                spat->setPosition(pos);
-            }
-            if (ImGui::SliderFloat3("Scale", &scale[0], 0.f, 50.f)) {
-                spat->setScale(scale);
+            if (auto decal = ecs.getSingleView<DecalRenderable, SpatialComponent>()) {
+                auto&& [_, __, decalSpatial] = *decal;
+                decalSpatial.imGuiEditor();
             }
 
             ImGui::TreePop();
@@ -176,15 +166,15 @@ namespace Deferred {
                     if (ImGui::Button("Create")) {
                         auto light = Light(ecs, pos, color, glm::vec3(size));
                         if (yOffset) {
-                            ecs.addComponent<SinTranslateComponent>(light.gameObject, glm::vec3(0.f, yOffset, 0.f), pos);
+                            ecs.addComponent<SinTranslateComponent>(light.mEntity, glm::vec3(0.f, yOffset, 0.f), pos);
                         }
                     }
                     ImGui::TreePop();
                 }
                 if (ImGui::TreeNode("Random Lights")) {
                     if (ImGui::Button("Clear lights")) {
-                        for (auto& l : ecs.getComponents<LightComponent>()) {
-                            ecs.removeGameObject(l->getGameObject());
+                        for (auto& l : ecs.getView<LightComponent>()) {
+                            ecs.removeEntity(l);
                         }
                     }
                     static int numLights = 10;
@@ -211,30 +201,24 @@ namespace Deferred {
                             glm::vec3 color = util::genRandomVec3();
                             float size = util::genRandom(minScale, maxScale);
                             auto light = Light(ecs, position, color, glm::vec3(size));
-                            ecs.addComponent<SinTranslateComponent>(light.gameObject, glm::vec3(0.f, util::genRandom(minSinOffset, maxSinOffset), 0.f), position);
+                            ecs.addComponent<SinTranslateComponent>(light.mEntity, glm::vec3(0.f, util::genRandom(minSinOffset, maxSinOffset), 0.f), position);
                         }
                     }
                     ImGui::TreePop();
                 }
             }
-            auto lights = ecs.getComponents<LightComponent>();
-            if (lights.empty()) {
-                return;
-            }
-            if (ImGui::CollapsingHeader("Edit Lights")) {
-                ImGui::SliderInt("Index", &index, 0, static_cast<int>(lights.size()) - 1);
-                auto l = lights[index];
-                if (ImGui::Button("Delete light")) {
-                    ecs.removeGameObject(l->getGameObject());
-                    lights.erase(lights.begin() + index);
-                    index = glm::max(0, index - 1);
+            if (auto lights = ecs.getView<LightComponent, SpatialComponent>()) {
+                if (ImGui::CollapsingHeader("Edit Lights")) {
+                    ImGui::SliderInt("Index", &index, 0, static_cast<int>(lights.size_hint()) - 1);
+                    auto l = lights.storage<LightComponent>().at(index);
+                    if (ImGui::Button("Delete light")) {
+                        ecs.removeEntity(l);
+                        ImGui::TreePop();
+                        return;
+                    }
+                    lights.get<LightComponent>(l).imGuiEditor();
+                    lights.get<SpatialComponent>(l).imGuiEditor();
                 }
-                l->imGuiEditor();
-                auto spat = l->getGameObject().getComponentByType<SpatialComponent>();
-                if (!spat) {
-                    return;
-                }
-                spat->imGuiEditor();
             }
 
             ImGui::TreePop();

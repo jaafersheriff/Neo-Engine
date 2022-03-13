@@ -5,11 +5,13 @@
 using namespace neo;
 
 namespace FrustaFitting {
-    class MockCameraComponent : public Component {
-    public:
-        MockCameraComponent(GameObject* go) :
-            Component(go)
+    struct MockCameraComponent : public Component {
+        MockCameraComponent()
         {}
+
+        virtual std::string getName() const override {
+            return "MockCameraComponent";
+        }
 
     };
 }

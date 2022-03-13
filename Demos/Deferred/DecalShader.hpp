@@ -8,6 +8,7 @@
 #include "DecalRenderable.hpp"
 
 #include "ECS/ECS.hpp"
+#include "ECS//Messaging/Messenger.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
@@ -27,11 +28,7 @@ namespace Deferred {
             decalFBO->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
-                NEO_UNUSED(ecs);
-                glm::uvec2 frameSize = (static_cast<const FrameSizeMessage&>(msg)).mSize;
-                Library::getFBO("decals")->resize(frameSize);
-                });
+            Messenger::addReceiver<FrameSizeMessage, &DecalShader::_onFrameSizeChanged>(this);
         }
 
         virtual void render(const ECS& ecs) override {
@@ -43,10 +40,11 @@ namespace Deferred {
             glDisable(GL_CULL_FACE);
 
             bind();
-            if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>()) {
-                loadUniform("P", camera->get<CameraComponent>()->getProj());
-                loadUniform("invPV", glm::inverse(camera->get<CameraComponent>()->getProj() * camera->get<CameraComponent>()->getView()));
-                loadUniform("V", camera->get<CameraComponent>()->getView());
+            if (auto camera = ecs.getSingleView<MainCameraComponent, SpatialComponent>()) {
+                auto&& [cameraEntity, _, cameraSpatial] = *camera;
+                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                loadUniform("invP", glm::inverse(ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj()));
+                loadUniform("V", cameraSpatial.getView());
             }
 
             /* Bind gbuffer */
@@ -55,17 +53,22 @@ namespace Deferred {
             loadTexture("gDepth", *gbuffer->mTextures[2]);
 
             /* Render decals */
-            for (auto& decal : ecs.getComponentTuples<DecalRenderable, SpatialComponent>()) {
-                auto spatial = decal->get<SpatialComponent>();
-                loadUniform("M", spatial->getModelMatrix());
-                loadUniform("invM", glm::inverse(spatial->getModelMatrix()));
+            ecs.getView<DecalRenderable, SpatialComponent>().each([this](ECS::Entity entity, const DecalRenderable& decal, const SpatialComponent& spatial) {
+                NEO_UNUSED(entity);
+                loadUniform("M", spatial.getModelMatrix());
+                loadUniform("invM", glm::inverse(spatial.getModelMatrix()));
 
-                loadTexture("decalTexture", decal->get<DecalRenderable>()->mDiffuseMap);
-
+                loadTexture("decalTexture", *decal.mDiffuseMap);
                 Library::getMesh("cube").mMesh->draw();
-            }
+
+            });
 
             unbind();
+        }
+
+    private:
+        void _onFrameSizeChanged(const FrameSizeMessage& msg) {
+                Library::getFBO("decals")->resize(msg.mSize);
         }
     };
 }

@@ -257,10 +257,11 @@ namespace neo {
 
     void Engine::shutDown() {
         NEO_LOG_I("Shutting down...");
-        Messenger::clean();
         mECS.clean();
+        Messenger::clean();
         Library::clean();
         ServiceLocator<Renderer>::ref().clean();
+        ServiceLocator<Renderer>::reset();
         ServiceLocator<ImGuiManager>::ref().destroy();
         mWindow.shutDown();
     }

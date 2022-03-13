@@ -79,9 +79,10 @@ namespace Deferred {
             loadTexture("noise", *Library::getTexture("aoNoise"));
             loadTexture("kernel", *Library::getTexture("aoKernel"));
 
-            if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>()) {
-                loadUniform("P", camera->get<CameraComponent>()->getProj());
-                loadUniform("invP", glm::inverse(camera->get<CameraComponent>()->getProj()));
+            if (auto camera = ecs.getSingleView<MainCameraComponent, SpatialComponent>()) {
+                auto&& [cameraEntity, _, cameraSpatial] = *camera;
+                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                loadUniform("invP", glm::inverse(ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj()));
             }
         }
 
