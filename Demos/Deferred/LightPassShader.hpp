@@ -12,14 +12,15 @@
 
 using namespace neo;
 
-class LightPassShader : public Shader {
+namespace Deferred {
+    class LightPassShader : public Shader {
 
     public:
 
         bool showLights = false;
         float showRadius = 0.1f;
 
-        LightPassShader(const std::string &vert, const std::string &frag) :
+        LightPassShader(const std::string& vert, const std::string& frag) :
             Shader("LightPassShader", vert, frag) {
             // Create render target
             auto lightFBO = Library::createFBO("lightpass");
@@ -27,15 +28,11 @@ class LightPassShader : public Shader {
             lightFBO->attachDepthTexture({ 1, 1 }, GL_NEAREST, GL_REPEAT); // depth
 
             // Handle frame size changing
-            Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
-                NEO_UNUSED(ecs);
-                glm::uvec2 frameSize = (static_cast<const FrameSizeMessage &>(msg)).mSize;
-                Library::getFBO("lightpass")->resize(frameSize);
-            });
+            Messenger::addReceiver<FrameSizeMessage, &LightPassShader::_onFrameSizeChanged>(this);
         }
 
         virtual void render(const ECS& ecs) override {
-            auto mainCamera = ecs.getComponentTuple<MainCameraComponent, CameraComponent, SpatialComponent>();
+            auto mainCamera = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
             if (!mainCamera) {
                 return;
             }
@@ -54,31 +51,29 @@ class LightPassShader : public Shader {
             loadUniform("showLights", showLights);
             loadUniform("showRadius", showRadius);
 
-            loadUniform("P", mainCamera->get<CameraComponent>()->getProj());
+            auto&& [cameraEntity, _, camera, cameraSpatial] = *mainCamera;
+            loadUniform("P", camera.getProj());
             loadUniform("V", mainCamera->get<CameraComponent>()->getView());
-            loadUniform("invP", glm::inverse(mainCamera->get<CameraComponent>()->getProj()));
-            loadUniform("invV", glm::inverse(mainCamera->get<CameraComponent>()->getView()));
-            loadUniform("camPos", mainCamera->get<SpatialComponent>()->getPosition());
+            loadUniform("invP", camera.getProj());
+            loadUniform("invV", cameraSpatial.getView());
+            loadUniform("camPos", cameraSpatial.getPosition());
 
             /* Bind gbuffer */
             auto gbuffer = Library::getFBO("gbuffer");
-            loadTexture("gNormal",  *gbuffer->mTextures[0]);
+            loadTexture("gNormal", *gbuffer->mTextures[0]);
             loadTexture("gDiffuse", *gbuffer->mTextures[1]);
-            loadTexture("gDepth",   *gbuffer->mTextures[2]);
+            loadTexture("gDepth", *gbuffer->mTextures[2]);
 
             /* Render light volumes */
             // TODO : instanced
-            for (auto& lightTuple : ecs.getComponentTuples<LightComponent, SpatialComponent>()) {
-                auto light = lightTuple->get<LightComponent>();
-                auto spatial = lightTuple->get<SpatialComponent>();
-
-                loadUniform("M", spatial->getModelMatrix());
-                loadUniform("lightPos", spatial->getPosition());
-                loadUniform("lightRadius", spatial->getScale().x);
-                loadUniform("lightCol", light->mColor);
+            ecs.getView<LightComponent, SpatialComponent>().each([&](auto entity, auto light, auto spatial) {
+                loadUniform("M", spatial.getModelMatrix());
+                loadUniform("lightPos", spatial.getPosition());
+                loadUniform("lightRadius", spatial.getScale().x);
+                loadUniform("lightCol", light.mColor);
 
                 // If camera is inside light 
-                float dist = glm::distance(spatial->getPosition(), mainCamera->get<SpatialComponent>()->getPosition());
+                float dist = glm::distance(spatial.getPosition(), cameraSpatial.getPosition());
                 if (dist - mainCamera->get<CameraComponent>()->getNearFar().x < spatial->getScale().x) {
                     glCullFace(GL_FRONT);
                 }
@@ -87,7 +82,7 @@ class LightPassShader : public Shader {
                 }
 
                 Library::getMesh("sphere").mMesh->draw();
-            }
+                });
 
             unbind();
         }
@@ -99,4 +94,9 @@ class LightPassShader : public Shader {
             }
         }
 
-};
+        void LightPassShader::_onFrameSizeChanged(const FrameSizeMessage& msg) {
+            Library::getFBO("lightpass")->resize(msg.mSize);
+        }
+
+    };
+}

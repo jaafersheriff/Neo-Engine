@@ -14,14 +14,13 @@ namespace neo {
     class SelectingSystem : public System {
 
     public:
-        using SelectableOperation = std::function<void(ECS&, ECS::Entity entity, SelectableComponent&)>;
-        using SelectedOperation = std::function<void(ECS&, ECS::Entity entity, SelectedComponent&)>;
+        using EntityOperation = std::function<void(ECS&, ECS::Entity entity)>;
 
         SelectingSystem(
             std::string name,
-            SelectedOperation reset,
-            SelectableOperation select,
-            SelectedOperation edit) :
+            EntityOperation reset,
+            EntityOperation select,
+            EntityOperation edit) :
 
             System(name),
             mResetOperation(reset),
@@ -35,9 +34,9 @@ namespace neo {
         virtual void imguiEditor(ECS& ecs) override;
 
     private:
-        const SelectedOperation mResetOperation; // Called when an object is unselected
-        const SelectableOperation mSelectOperation; // Called when an object is freshly selected
-        const SelectedOperation mEditorOperation; // imgui
+        const EntityOperation mResetOperation; // Called when an object is unselected
+        const EntityOperation mSelectOperation; // Called when an object is freshly selected
+        const EntityOperation mEditorOperation; // imgui
     };
 
 }

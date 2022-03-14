@@ -5,10 +5,8 @@
 using namespace neo;
 
 namespace Metaballs {
-    class DirtyBallsComponent : public Component {
-
-    public:
-        DirtyBallsComponent(GameObject* go) : Component(go) {}
+    struct DirtyBallsComponent : public Component {
+        DirtyBallsComponent() {}
     };
 
 }
