@@ -44,11 +44,3 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/shaders" FILES ${DEMO_SHADERS})
 set_property(TARGET Demo_GLSL APPEND PROPERTY SOURCES ${DEMO_SHADERS})
 set_target_properties(Demo_GLSL PROPERTIES FOLDER "Demos")
 
-
-# add_custom_target(DemoGLSL)
-# file(GLOB_RECURSE SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*)
-# source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/shaders" FILES ${SHADERS})
-# set_property(TARGET DemoGLSL APPEND PROPERTY SOURCES ${SHADERS})
-# set_target_properties(DemoGLSL PROPERTIES FOLDER "Demos")
-
-

@@ -9,11 +9,12 @@
 
 using namespace neo;
 
-class GBufferShader : public Shader {
+namespace Deferred {
+    class GBufferShader : public Shader {
 
     public:
 
-        GBufferShader(const std::string &vert, const std::string &frag) :
+        GBufferShader(const std::string& vert, const std::string& frag) :
             Shader("GBuffer Shader", vert, frag) {
 
             // Create gbuffer 
@@ -26,11 +27,7 @@ class GBufferShader : public Shader {
             gbuffer->initDrawBuffers();
 
             // Handle frame size changing
-            Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
-                NEO_UNUSED(ecs);
-                glm::uvec2 frameSize = (static_cast<const FrameSizeMessage &>(msg)).mSize;
-                Library::getFBO("gbuffer")->resize(frameSize);
-            });
+            Messenger::addReceiver<FrameSizeMessage, &GBufferShader::_onFrameSizeChanged>(this);
         }
 
         virtual void render(const ECS& ecs) override {
@@ -40,27 +37,30 @@ class GBufferShader : public Shader {
 
             bind();
 
-            if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>()) {
-                loadUniform("P", camera->get<CameraComponent>()->getProj());
-                loadUniform("V", camera->get<CameraComponent>()->getView());
+            if (auto cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>()) {
+                auto&& [cameraEntity, _, camera, spatial] = *cameraTuple;
+                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                loadUniform("V", spatial.getView());
             }
 
-            for (auto& renderableIt : ecs.getComponentTuples<GBufferComponent, MeshComponent, SpatialComponent>()) {
-                auto renderable = renderableIt->get<GBufferComponent>();
-                auto spatial = renderableIt->get<SpatialComponent>();
-
-                loadUniform("M", spatial->getModelMatrix());
-                loadUniform("N", spatial->getNormalMatrix());
+            ecs.getView<GBufferComponent, MeshComponent, SpatialComponent>().each([this](auto entity, auto gbufferComponent, auto mesh, auto spatial) {
+                loadUniform("M", spatial.getModelMatrix());
+                loadUniform("N", spatial.getNormalMatrix());
 
                 /* Bind diffuse map or material */
-                loadUniform("ambientColor", renderable->mMaterial.mAmbient);
-                loadUniform("diffuseColor", renderable->mMaterial.mDiffuse);
-                loadTexture("diffuseMap", renderable->mDiffuseMap);
+                loadUniform("ambientColor", gbufferComponent.mMaterial.mAmbient);
+                loadUniform("diffuseColor", gbufferComponent.mMaterial.mDiffuse);
+                loadTexture("diffuseMap", *gbufferComponent.mDiffuseMap);
 
                 /* DRAW */
-                renderableIt->get<MeshComponent>()->mMesh.draw();
-            }
+                mesh.mMesh.draw();
+                });
 
             unbind();
-    }
-};
+        }
+
+        void GBufferShader::_onFrameSizeChanged(const FrameSizeMessage& msg) {
+            Library::getFBO("gbuffer")->resize(msg.mSize);
+        }
+    };
+}

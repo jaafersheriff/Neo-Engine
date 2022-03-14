@@ -6,15 +6,15 @@
 
 using namespace neo;
 
-class GBufferComponent: public Component {
-public:
-    Material mMaterial;
-    const Texture& mDiffuseMap;
+namespace Deferred {
+    struct GBufferComponent : public Component {
+        Material mMaterial;
+        Texture* mDiffuseMap;
 
-    GBufferComponent(GameObject *go, const Texture& diffuseMap, Material material) :
-        Component(go),
-        mDiffuseMap(diffuseMap),
-        mMaterial(material)
-    {}
+        GBufferComponent(Texture* diffuseMap, Material material)
+            : mDiffuseMap(diffuseMap)
+            , mMaterial(material)
+        {}
 
-};
+    };
+}
