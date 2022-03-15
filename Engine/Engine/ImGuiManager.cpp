@@ -5,6 +5,7 @@
 #include "Hardware/Mouse.hpp"
 
 #include "Util/Util.hpp"
+#include "Util/Log/Log.hpp"
 
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
@@ -30,6 +31,7 @@ namespace neo {
         ImGui_ImplOpenGL3_Init(Renderer::mDetails.mGLSLVersion.c_str());
 
         ImGuiStyle* style = &ImGui::GetStyle();
+
         style->ChildRounding = 4.0f;
         style->FrameBorderSize = 1.0f;
         style->FrameRounding = 2.0f;
@@ -235,5 +237,54 @@ namespace neo {
 
     void ImGuiManager::imGuiEditor() {
         mConsole.imGuiEditor();
+        {
+            if (ImGui::Button("Reset style")) {
+                ImGuiStyle* style = &ImGui::GetStyle();
+                ImVec4* colors = style->Colors;
+
+#define HEXTOIM(x) x >= 0x1000000 ? ImVec4( ((x >> 24) & 0xFF) /255.f, ((x >> 16) & 0xFF)/255.f, ((x >> 8) & 0xFF)/255.f, ((x) & 0xFF)/255.f): ImVec4( ((x >> 16) & 0xFF) /255.f, ((x >> 8) & 0xFF)/255.f, ((x) & 0xFF)/255.f, 1.f) 
+                // TODO - implot colors
+                {
+                    auto texCol = util::sLogSeverityData.at(util::LogSeverity::Info).second;
+                    colors[ImGuiCol_Text] = ImVec4(texCol.x, texCol.y, texCol.z, 1.f);
+                }
+                {
+                    auto texCol = util::sLogSeverityData.at(util::LogSeverity::Verbose).second;
+                    colors[ImGuiCol_TextDisabled] = ImVec4(texCol.x, texCol.y, texCol.z, 1.f);
+                }
+                colors[ImGuiCol_WindowBg] = HEXTOIM(0x171c19);
+                //        colors[ImGuiCol_ChildBg] = ImVec4(0.280f, 0.280f, 0.280f, 0.000f);
+                //        colors[ImGuiCol_PopupBg] = ImVec4(0.313f, 0.313f, 0.313f, 1.000f);
+                //        colors[ImGuiCol_Border] = ImVec4(0.266f, 0.266f, 0.266f, 1.000f);
+                //        colors[ImGuiCol_BorderShadow] = ImVec4(0.000f, 0.000f, 0.000f, 0.000f);
+                //        colors[ImGuiCol_FrameBg] = ImVec4(0.160f, 0.160f, 0.160f, 1.000f);
+                //        colors[ImGuiCol_FrameBgHovered] = ImVec4(0.200f, 0.200f, 0.200f, 1.000f);
+                //        colors[ImGuiCol_FrameBgActive] = ImVec4(0.280f, 0.280f, 0.280f, 1.000f);
+                //        colors[ImGuiCol_TitleBg] = ImVec4(0.148f, 0.148f, 0.148f, 1.000f);
+                //        colors[ImGuiCol_TitleBgActive] = ImVec4(0.148f, 0.148f, 0.148f, 1.000f);
+                //        colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.148f, 0.148f, 0.148f, 1.000f);
+                //        colors[ImGuiCol_MenuBarBg] = ImVec4(0.195f, 0.195f, 0.195f, 1.000f);
+                //        colors[ImGuiCol_ScrollbarBg] = ImVec4(0.160f, 0.160f, 0.160f, 1.000f);
+                //        colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.277f, 0.277f, 0.277f, 1.000f);
+                //        colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.300f, 0.300f, 0.300f, 1.000f);
+                //        colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
+                //        colors[ImGuiCol_CheckMark] = ImVec4(1.000f, 1.000f, 1.000f, 1.000f);
+                //        colors[ImGuiCol_SliderGrab] = ImVec4(0.391f, 0.391f, 0.391f, 1.000f);
+                //        colors[ImGuiCol_SliderGrabActive] = ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
+                //        colors[ImGuiCol_Button] = ImVec4(1.000f, 1.000f, 1.000f, 0.000f);
+                //        colors[ImGuiCol_ButtonHovered] = ImVec4(1.000f, 1.000f, 1.000f, 0.156f);
+                //        colors[ImGuiCol_ButtonActive] = ImVec4(1.000f, 1.000f, 1.000f, 0.391f);
+                //        colors[ImGuiCol_Header] = ImVec4(0.313f, 0.313f, 0.313f, 1.000f);
+                //        colors[ImGuiCol_HeaderHovered] = ImVec4(0.469f, 0.469f, 0.469f, 1.000f);
+                //        colors[ImGuiCol_HeaderActive] = ImVec4(0.469f, 0.469f, 0.469f, 1.000f);
+                //        colors[ImGuiCol_Separator] = colors[ImGuiCol_Border];
+                //        colors[ImGuiCol_SeparatorHovered] = ImVec4(0.391f, 0.391f, 0.391f, 1.000f);
+                //        colors[ImGuiCol_SeparatorActive] = ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
+                colors[ImGuiCol_TabHovered] = HEXTOIM(0x393D3A);
+                colors[ImGuiCol_TabActive] = HEXTOIM(0x4A6B52);
+                colors[ImGuiCol_TabUnfocused] = HEXTOIM(0x1F2622);
+                colors[ImGuiCol_TabUnfocusedActive] = HEXTOIM(0x19201C);
+            }
+        }
     }
 }
