@@ -1,6 +1,6 @@
 #include "Engine/Engine.hpp"
 #include "DemoInfra/DemoWrangler.h"
-#include "DemoRegistration.h"
+#include "DemoRegistration.hpp"
 
 #include <cstdlib>
 #include <vector>

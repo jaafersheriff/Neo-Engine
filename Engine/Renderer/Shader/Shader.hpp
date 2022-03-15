@@ -54,21 +54,21 @@ namespace neo {
             void cleanUp();
 
             /* Parent load functions */
-            void loadUniform(const std::string &, const bool) const;          // bool
-            void loadUniform(const std::string &, const int) const;           // int
-            void loadUniform(const std::string &, const double) const;        // double
-            void loadUniform(const std::string &, const float) const;         // float
-            void loadUniform(const std::string &, const glm::vec2&) const;   // vec2
-            void loadUniform(const std::string &, const glm::ivec2&) const;  // ivec2
-            void loadUniform(const std::string &, const glm::vec3&) const;   // vec3
-            void loadUniform(const std::string &, const glm::vec4&) const;   // vec4
-            void loadUniform(const std::string &, const glm::mat3&) const;   // mat3
-            void loadUniform(const std::string &, const glm::mat4&) const;   // mat4
-            void loadTexture(const std::string &, const Texture &) const;     // texture
+            void loadUniform(const char *, const bool) const;          // bool
+            void loadUniform(const char *, const int) const;           // int
+            void loadUniform(const char *, const double) const;        // double
+            void loadUniform(const char *, const float) const;         // float
+            void loadUniform(const char *, const glm::vec2&) const;   // vec2
+            void loadUniform(const char *, const glm::ivec2&) const;  // ivec2
+            void loadUniform(const char *, const glm::vec3&) const;   // vec3
+            void loadUniform(const char *, const glm::vec4&) const;   // vec4
+            void loadUniform(const char *, const glm::mat3&) const;   // mat3
+            void loadUniform(const char *, const glm::mat4&) const;   // mat4
+            void loadTexture(const char *, const Texture &) const;     // texture
 
             /* Get shader location */
-            GLint getAttribute(const std::string &) const;
-            GLint getUniform(const std::string &) const;
+            GLint getAttribute(const char *) const;
+            GLint getUniform(const char *) const;
 
         protected: 
             void _attachStage(ShaderStage type, const std::string& file);

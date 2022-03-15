@@ -252,19 +252,19 @@ namespace neo {
         mUniforms[name] = r;
     }
 
-    GLint Shader::getAttribute(const std::string &name) const {
-        std::map<std::string, GLint>::const_iterator attribute = mAttributes.find(name.c_str());
+    GLint Shader::getAttribute(const char *name) const {
+        const auto attribute = mAttributes.find(name);
         if (attribute == mAttributes.end()) {
-            NEO_LOG_S(util::LogSeverity::Warning, "%s is not an attribute variable - did you remember to call Shader::init()", name.c_str());
+            NEO_LOG_S(util::LogSeverity::Warning, "%s is not an attribute variable - did you remember to call Shader::init()", name);
             return -1;
         }
         return attribute->second;
     }
 
-    GLint Shader::getUniform(const std::string &name) const {
-        std::map<std::string, GLint>::const_iterator uniform = mUniforms.find(name.c_str());
+    GLint Shader::getUniform(const char *name) const {
+        const auto uniform = mUniforms.find(name);
         if (uniform == mUniforms.end()) {
-            NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable - did you remember to call Shader::init()", name.c_str());
+            NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable - did you remember to call Shader::init()", name);
             return -1;
         }
         return uniform->second;
@@ -301,47 +301,47 @@ namespace neo {
         NEO_FAIL("Invalid ShaderStage: %d", type);
     }
 
-    void Shader::loadUniform(const std::string &loc, const bool b) const {
+    void Shader::loadUniform(const char* loc, const bool b) const {
         glUniform1i(getUniform(loc), b);
     }
 
-    void Shader::loadUniform(const std::string &loc, const int i) const {
+    void Shader::loadUniform(const char* loc, const int i) const {
         glUniform1i(getUniform(loc), i);
     }
 
-    void Shader::loadUniform(const std::string &loc, const double d) const {
+    void Shader::loadUniform(const char* loc, const double d) const {
         glUniform1f(getUniform(loc), static_cast<float>(d));
     }
 
-    void Shader::loadUniform(const std::string &loc, const float f) const {
+    void Shader::loadUniform(const char* loc, const float f) const {
         glUniform1f(getUniform(loc), f);
     }
 
-    void Shader::loadUniform(const std::string &loc, const glm::vec2 & v) const {
+    void Shader::loadUniform(const char* loc, const glm::vec2 & v) const {
         glUniform2f(getUniform(loc), v.x, v.y);
     }
     
-    void Shader::loadUniform(const std::string &loc, const glm::ivec2 & v) const {
+    void Shader::loadUniform(const char* loc, const glm::ivec2 & v) const {
         glUniform2i(getUniform(loc), v.x, v.y);
     }
     
-    void Shader::loadUniform(const std::string &loc, const glm::vec3 & v) const {
+    void Shader::loadUniform(const char* loc, const glm::vec3 & v) const {
         glUniform3f(getUniform(loc), v.x, v.y, v.z);
     }
     
-    void Shader::loadUniform(const std::string &loc, const glm::vec4 & v) const {
+    void Shader::loadUniform(const char* loc, const glm::vec4 & v) const {
         glUniform4f(getUniform(loc), v.r, v.g, v.b, v.a);
     }
     
-    void Shader::loadUniform(const std::string &loc, const glm::mat3 & m) const {
+    void Shader::loadUniform(const char* loc, const glm::mat3 & m) const {
         glUniformMatrix3fv(getUniform(loc), 1, GL_FALSE, &m[0][0]);
     }
     
-    void Shader::loadUniform(const std::string& loc, const glm::mat4& m) const {
+    void Shader::loadUniform(const char* loc, const glm::mat4& m) const {
         glUniformMatrix4fv(getUniform(loc), 1, GL_FALSE, &m[0][0]);
     }
     
-    void Shader::loadTexture(const std::string &loc, const Texture & texture) const {
+    void Shader::loadTexture(const char* loc, const Texture & texture) const {
         texture.bind();
         glUniform1i(getUniform(loc), texture.mTextureID);
     }
