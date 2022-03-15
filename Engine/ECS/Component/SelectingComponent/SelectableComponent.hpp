@@ -10,7 +10,7 @@ namespace neo {
 
     /* An entity was selected */
     struct EntitySelectedMessage : public Message {
-        const ECS::Entity mEntity;
+        ECS::Entity mEntity;
         EntitySelectedMessage(const uint32_t id)
             : mEntity(static_cast<ECS::Entity>(id))
         {}
