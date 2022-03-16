@@ -82,6 +82,16 @@ namespace neo {
 
                 unbind();
             }
+
+            virtual void imguiEditor() override {
+                auto fbo = Library::getFBO("shadowMap");
+                auto& depthTexture = fbo->mTextures[0];
+                int size = depthTexture->mWidth;
+                if (ImGui::SliderInt("Shadow map size", &size, 1, 4096)) {
+                    fbo->resize(glm::uvec2(size, size));
+                }
+
+            }
         };
 
 }

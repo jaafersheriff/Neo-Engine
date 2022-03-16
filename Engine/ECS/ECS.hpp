@@ -64,8 +64,8 @@ namespace neo {
 		/* Attach a system */
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
 
-		Registry mRegistry;
 	private:
+		Registry mRegistry;
 		/* Active containers */
 		std::vector<Entity> mEntityKillQueue;
 		using ComponentModFunc = std::function<void(Registry&)>;
