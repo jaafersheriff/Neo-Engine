@@ -31,8 +31,5 @@ namespace neo {
 
     private:
         bool mKeyStatus[NUM_KEYS] = { GLFW_RELEASE };
-
-        void _onReset(const ResetKeyboardMessage& msg);
-        void _onKeyPressed(const KeyPressedMessage& msg);
     };
 }

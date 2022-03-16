@@ -88,12 +88,6 @@ namespace neo {
         glsl << "#version " << GLMajor << GLMinor << "0";
         mDetails.mGLSLVersion = glsl.str();
 
-        
-        Messenger::addReceiver<FrameSizeMessage, &Renderer::_onFrameSizeChanged>(this);
-    }
-
-    Renderer::~Renderer() {
-        Messenger::removeReceiver<FrameSizeMessage>(this);
     }
 
     void Renderer::setDemoConfig(IDemo::Config config) {
@@ -120,6 +114,10 @@ namespace neo {
         mDefaultFBO->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_EDGE);
         mDefaultFBO->initDrawBuffers();
         mDefaultFBO->bind();
+        Messenger::addReceiver<FrameSizeMessage>([this](const Message& message) {
+            const FrameSizeMessage& msg(static_cast<const FrameSizeMessage&>(message));
+            mDefaultFBO->resize(msg.mSize);
+            });
         
         /* Set max work group */
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
@@ -135,10 +133,6 @@ namespace neo {
 
         /* Init default GL state */
         resetState();
-    }
-
-    void Renderer::_onFrameSizeChanged(const FrameSizeMessage& msg) {
-        mDefaultFBO->resize(msg.mSize);
     }
 
     void Renderer::resetState() {

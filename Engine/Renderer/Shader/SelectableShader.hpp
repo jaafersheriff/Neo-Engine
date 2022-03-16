@@ -43,11 +43,10 @@ namespace neo {
             stencilBuffer->disableDraw();
 
             // Handle frame size changing
-            Messenger::addReceiver<FrameSizeMessage, &SelectableShader::_onFrameSizeChanged>(this);
-        }
-
-        ~SelectableShader() {
-            Messenger::removeReceiver<FrameSizeMessage>(this);
+            Messenger::addReceiver<FrameSizeMessage>([this](const Message& message) {
+                const FrameSizeMessage& msg(static_cast<const FrameSizeMessage&>(message));
+                Library::getFBO("selectable")->resize(msg.mSize);
+                });
         }
 
         // TODO : add hovered capability
@@ -132,9 +131,5 @@ namespace neo {
 
         private:
             ECS::Entity mSelectedID;
-
-            void _onFrameSizeChanged(const FrameSizeMessage& msg) {
-                Library::getFBO("selectable")->resize(msg.mSize);
-            }
     };
 }

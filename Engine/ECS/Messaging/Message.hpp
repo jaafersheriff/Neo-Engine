@@ -1,6 +1,7 @@
 /* Message struct used to communicate data between components */
 #pragma once
 
+#include "ECS/ECS.hpp"
 #include "glm/glm.hpp"
 
 #include <memory>
@@ -51,14 +52,14 @@
 
 namespace neo {
 
-    class ECS;
-    // TODO - just make this a system with single frame components
     struct Component;
     struct SpatialComponent;
 
     struct Message {
         virtual ~Message() = default;
     };
+    using ReceiverFunc = std::function<void(const Message&)>;
+    using EntityReceiverFunc = std::function<void(const Message&, ECS&, ECS::Entity)>;
 
     /* A spatiality was changed in some way */
     struct SpatialChangeMessage : public Message {

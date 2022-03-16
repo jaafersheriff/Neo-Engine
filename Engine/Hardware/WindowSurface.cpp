@@ -139,40 +139,36 @@ namespace neo {
         return 0;
     }
 
-    void WindowSurface::_onFrameSizeChanged(const FrameSizeMessage& msg) {
-        const FrameSizeMessage& m(static_cast<const FrameSizeMessage&>(msg));
-
-        mDetails.mSize.x = m.mSize.x;
-        mDetails.mSize.y = m.mSize.y;
-    }
-
-    void WindowSurface::_onToggleFullscreen(const ToggleFullscreenMessage& msg) {
-        const ToggleFullscreenMessage& m(static_cast<const ToggleFullscreenMessage&>(msg));
-        /* If already full screen */
-        if (m.mAlreadyFullscreen) {
-            mDetails.mFullscreen = false;
-            mDetails.mSize = { 1920, 1080 };
-            glfwSetWindowMonitor(mWindow, nullptr, mDetails.mPos.x, mDetails.mPos.y, mDetails.mSize.x, mDetails.mSize.y, mDetails.mVSyncEnabled);
-        }
-        /* If windowed */
-        else {
-            int x, y;
-            glfwGetWindowPos(mWindow, &x, &y);
-            mDetails.mPos.x = x;
-            mDetails.mPos.y = y;
-            mDetails.mFullscreen = true;
-            GLFWmonitor* monitor(glfwGetPrimaryMonitor());
-            const GLFWvidmode* video(glfwGetVideoMode(monitor));
-            glfwSetWindowMonitor(mWindow, monitor, 0, 0, video->width, video->height, video->refreshRate);
-        }
-    }
-
     void WindowSurface::reset(const std::string& name) {
         glfwSetWindowTitle(mWindow, name.c_str());
 
         /* Set callbacks */
-        Messenger::addReceiver<ToggleFullscreenMessage, &WindowSurface::_onToggleFullscreen>(this);
-        Messenger::addReceiver<FrameSizeMessage, &WindowSurface::_onFrameSizeChanged>(this);
+        Messenger::addReceiver<ToggleFullscreenMessage>([this](const Message& message) {
+            const ToggleFullscreenMessage& msg(static_cast<const ToggleFullscreenMessage&>(message));
+            /* If already full screen */
+            if (msg.mAlreadyFullscreen) {
+                mDetails.mFullscreen = false;
+                mDetails.mSize = { 1920, 1080 };
+                glfwSetWindowMonitor(mWindow, nullptr, mDetails.mPos.x, mDetails.mPos.y, mDetails.mSize.x, mDetails.mSize.y, mDetails.mVSyncEnabled);
+            }
+            /* If windowed */
+            else {
+                int x, y;
+                glfwGetWindowPos(mWindow, &x, &y);
+                mDetails.mPos.x = x;
+                mDetails.mPos.y = y;
+                mDetails.mFullscreen = true;
+                GLFWmonitor* monitor(glfwGetPrimaryMonitor());
+                const GLFWvidmode* video(glfwGetVideoMode(monitor));
+                glfwSetWindowMonitor(mWindow, monitor, 0, 0, video->width, video->height, video->refreshRate);
+            }
+        });
+
+        Messenger::addReceiver<FrameSizeMessage>([this](const Message& message) {
+            const FrameSizeMessage& msg(static_cast<const FrameSizeMessage&>(message));
+            mDetails.mSize.x = msg.mSize.x;
+            mDetails.mSize.y = msg.mSize.y;
+        });
 
         if (!ServiceLocator<ImGuiManager>::empty()) {
             if (!ServiceLocator<ImGuiManager>::ref().isEnabled()) {
