@@ -6,7 +6,7 @@ PUBLIC
 	glfw
 	microprofile
 	glm
+	entt
 PRIVATE
 	imgui
-	entt
 )

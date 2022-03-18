@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
+#include "Util/Util.hpp"
 #include "glm/glm.hpp"
 
 #include <unordered_map>
@@ -54,21 +55,21 @@ namespace neo {
             void cleanUp();
 
             /* Parent load functions */
-            void loadUniform(const char *, const bool) const;          // bool
-            void loadUniform(const char *, const int) const;           // int
-            void loadUniform(const char *, const double) const;        // double
-            void loadUniform(const char *, const float) const;         // float
-            void loadUniform(const char *, const glm::vec2&) const;   // vec2
-            void loadUniform(const char *, const glm::ivec2&) const;  // ivec2
-            void loadUniform(const char *, const glm::vec3&) const;   // vec3
-            void loadUniform(const char *, const glm::vec4&) const;   // vec4
-            void loadUniform(const char *, const glm::mat3&) const;   // mat3
-            void loadUniform(const char *, const glm::mat4&) const;   // mat4
-            void loadTexture(const char *, const Texture &) const;     // texture
+            void loadUniform(HashedString, const bool) const;          // bool
+            void loadUniform(HashedString, const int) const;           // int
+            void loadUniform(HashedString, const double) const;        // double
+            void loadUniform(HashedString, const float) const;         // float
+            void loadUniform(HashedString, const glm::vec2&) const;   // vec2
+            void loadUniform(HashedString, const glm::ivec2&) const;  // ivec2
+            void loadUniform(HashedString, const glm::vec3&) const;   // vec3
+            void loadUniform(HashedString, const glm::vec4&) const;   // vec4
+            void loadUniform(HashedString, const glm::mat3&) const;   // mat3
+            void loadUniform(HashedString, const glm::mat4&) const;   // mat4
+            void loadTexture(HashedString, const Texture &) const;     // texture
 
             /* Get shader location */
-            GLint getAttribute(const char *) const;
-            GLint getUniform(const char *) const;
+            GLint getAttribute(const char*) const;
+            GLint getUniform(const char*) const;
 
         protected: 
             void _attachStage(ShaderStage type, const std::string& file);
@@ -80,8 +81,8 @@ namespace neo {
 
             std::unordered_map<ShaderStage, ShaderSource> mStages;
 
-            std::map<std::string, GLint> mAttributes;
-            std::map<std::string, GLint> mUniforms;
+            std::map<HashedString, GLint> mAttributes;
+            std::map<HashedString, GLint> mUniforms;
 
             std::string _getFullPath(const std::string&);
 
@@ -90,7 +91,7 @@ namespace neo {
             GLuint _compileShader(GLenum, const char *);
             std::string _processShader(const char *);
             void _findAttributesAndUniforms(const char *);
-            void _addAttribute(const std::string &);
-            void _addUniform(const std::string &);
+            void _addAttribute(HashedString);
+            void _addUniform(HashedString);
     };
 }
