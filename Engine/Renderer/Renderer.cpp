@@ -333,8 +333,6 @@ namespace neo {
     }
 
     std::vector<Shader *> Renderer::_getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &shaders) {
-        MICROPROFILE_SCOPEI("Renderer", "_getActiveShaders", MP_AUTO);
-
         std::vector<Shader *> ret;
         for (auto& shader : shaders) {
             if (shader.second->mActive) {

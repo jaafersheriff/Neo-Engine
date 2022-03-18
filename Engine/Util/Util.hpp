@@ -7,6 +7,8 @@
 #include "glm/gtc/constants.hpp"
 #include "glm/glm.hpp"
 
+#include "entt/core/hashed_string.hpp"
+
 namespace neo {
 
 #define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
@@ -33,6 +35,8 @@ namespace neo {
 #endif // NEO_DEBUG_ASSERT
 
 #define NEO_ARRAYSIZE(_ARR)          ((int)(sizeof(_ARR) / sizeof(*(_ARR))))     // Size of a static C-style array. Don't use on pointers!
+
+    using HashedString = entt::hashed_string;
 
     namespace util {
 

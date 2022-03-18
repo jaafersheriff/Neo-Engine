@@ -3,7 +3,6 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 
 #include "Renderer/Renderer.hpp"
-#include "Util/Util.hpp"
 #include "Util/Log/Log.hpp"
 #include "Util/ServiceLocator.hpp"
 
@@ -204,14 +203,14 @@ namespace neo {
                 for (int i = 0; i < lineEndingLength; i++) {
                     if (lineEnding[i] == ',') {
                         lineEnding[i] = '\0';
-                        _addUniform(lineEnding + (lastDelimiter + 1));
+                        _addUniform(HashedString(lineEnding + (lastDelimiter + 1)));
                         lastDelimiter = i;
                     }
                     else if (lineEnding[i] == ' ' || lineEnding[i] == '\t') {
                         lastDelimiter = i;
                     }
                 }
-                _addUniform(lineEnding + (lastDelimiter + 1));
+                _addUniform(HashedString(lineEnding + (lastDelimiter + 1)));
             }
             else if (!strcmp(token, "layout")) {
                 char *lastToken = nullptr;
@@ -219,7 +218,7 @@ namespace neo {
                     lastToken = token;
                 }
                 if (lastToken) {
-                    _addAttribute(lastToken);
+                    _addAttribute(HashedString(lastToken));
                 }
             }
             else {
@@ -236,24 +235,24 @@ namespace neo {
         glUseProgram(0);
     }
 
-    void Shader::_addAttribute(const std::string &name) {
-        GLint r = glGetAttribLocation(mPID, name.c_str());
+    void Shader::_addAttribute(HashedString name) {
+        GLint r = glGetAttribLocation(mPID, name.data());
         if (r < 0) {
-            NEO_LOG_S(util::LogSeverity::Warning, "%s WARN: %s cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", this->mName.c_str(), name.c_str());
+            NEO_LOG_S(util::LogSeverity::Warning, "%s WARN: %s cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", this->mName.c_str(), name.data());
         }
         mAttributes[name] = r;
     }
 
-    void Shader::_addUniform(const std::string &name) {
-        GLint r = glGetUniformLocation(mPID, name.c_str());
+    void Shader::_addUniform(HashedString name) {
+        GLint r = glGetUniformLocation(mPID, name.data());
         if (r < 0) {
-            NEO_LOG_S(util::LogSeverity::Warning, "%s WARN: %s cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", this->mName.c_str(), name.c_str());
+            NEO_LOG_S(util::LogSeverity::Warning, "%s WARN: %s cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", this->mName.c_str(), name.data());
         }
         mUniforms[name] = r;
     }
 
     GLint Shader::getAttribute(const char *name) const {
-        const auto attribute = mAttributes.find(name);
+        const auto attribute = mAttributes.find(HashedString(name));
         if (attribute == mAttributes.end()) {
             NEO_LOG_S(util::LogSeverity::Warning, "%s is not an attribute variable - did you remember to call Shader::init()", name);
             return -1;
@@ -262,7 +261,7 @@ namespace neo {
     }
 
     GLint Shader::getUniform(const char *name) const {
-        const auto uniform = mUniforms.find(name);
+        const auto uniform = mUniforms.find(HashedString(name));
         if (uniform == mUniforms.end()) {
             NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable - did you remember to call Shader::init()", name);
             return -1;
@@ -301,51 +300,51 @@ namespace neo {
         NEO_FAIL("Invalid ShaderStage: %d", type);
     }
 
-    void Shader::loadUniform(const char* loc, const bool b) const {
+    void Shader::loadUniform(HashedString loc, const bool b) const {
         glUniform1i(getUniform(loc), b);
     }
 
-    void Shader::loadUniform(const char* loc, const int i) const {
+    void Shader::loadUniform(HashedString loc, const int i) const {
         glUniform1i(getUniform(loc), i);
     }
 
-    void Shader::loadUniform(const char* loc, const uint32_t ui) const {
+    void Shader::loadUniform(HashedString loc, const uint32_t ui) const {
         glUniform1ui(getUniform(loc), ui);
     }
 
-    void Shader::loadUniform(const char* loc, const double d) const {
+    void Shader::loadUniform(HashedString loc, const double d) const {
         glUniform1f(getUniform(loc), static_cast<float>(d));
     }
 
-    void Shader::loadUniform(const char* loc, const float f) const {
+    void Shader::loadUniform(HashedString loc, const float f) const {
         glUniform1f(getUniform(loc), f);
     }
 
-    void Shader::loadUniform(const char* loc, const glm::vec2 & v) const {
+    void Shader::loadUniform(HashedString loc, const glm::vec2 & v) const {
         glUniform2f(getUniform(loc), v.x, v.y);
     }
     
-    void Shader::loadUniform(const char* loc, const glm::ivec2 & v) const {
+    void Shader::loadUniform(HashedString loc, const glm::ivec2 & v) const {
         glUniform2i(getUniform(loc), v.x, v.y);
     }
     
-    void Shader::loadUniform(const char* loc, const glm::vec3 & v) const {
+    void Shader::loadUniform(HashedString loc, const glm::vec3 & v) const {
         glUniform3f(getUniform(loc), v.x, v.y, v.z);
     }
     
-    void Shader::loadUniform(const char* loc, const glm::vec4 & v) const {
+    void Shader::loadUniform(HashedString loc, const glm::vec4 & v) const {
         glUniform4f(getUniform(loc), v.r, v.g, v.b, v.a);
     }
     
-    void Shader::loadUniform(const char* loc, const glm::mat3 & m) const {
+    void Shader::loadUniform(HashedString loc, const glm::mat3 & m) const {
         glUniformMatrix3fv(getUniform(loc), 1, GL_FALSE, &m[0][0]);
     }
     
-    void Shader::loadUniform(const char* loc, const glm::mat4& m) const {
+    void Shader::loadUniform(HashedString loc, const glm::mat4& m) const {
         glUniformMatrix4fv(getUniform(loc), 1, GL_FALSE, &m[0][0]);
     }
     
-    void Shader::loadTexture(const char* loc, const Texture & texture) const {
+    void Shader::loadTexture(HashedString loc, const Texture & texture) const {
         texture.bind();
         glUniform1i(getUniform(loc), texture.mTextureID);
     }
