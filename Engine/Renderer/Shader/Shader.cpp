@@ -261,6 +261,7 @@ namespace neo {
     }
 
     GLint Shader::getUniform(const char *name) const {
+        ServiceLocator<Renderer>::ref().mStats.mNumUniforms++;
         const auto uniform = mUniforms.find(HashedString(name));
         if (uniform == mUniforms.end()) {
             NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable - did you remember to call Shader::init()", name);
@@ -341,6 +342,7 @@ namespace neo {
     }
     
     void Shader::loadTexture(HashedString loc, const Texture & texture) const {
+        ServiceLocator<Renderer>::ref().mStats.mNumSamplers++;
         texture.bind();
         glUniform1i(getUniform(loc), texture.mTextureID);
     }
