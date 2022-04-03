@@ -270,9 +270,14 @@ namespace neo {
         {
             ImGui::Begin("Stats");
             counter.imGuiEditor();
-            ImGui::TextWrapped("Num Draws: %d", ServiceLocator<Renderer>::ref().mStats.mNumDraws);
-            ImGui::TextWrapped("Num Shaders: %d", ServiceLocator<Renderer>::ref().mStats.mNumShaders);
-            for (auto&& [entity, mouse, viewport] : mECS.getView<MouseComponent, ViewportDetailsComponent>().each()) {
+            const auto& rendererStats = ServiceLocator<Renderer>::ref().mStats;
+            ImGui::TextWrapped("Num Draws: %d", rendererStats.mNumDraws);
+            ImGui::TextWrapped("Num Shaders: %d", rendererStats.mNumShaders);
+            ImGui::TextWrapped("Num Triangles: %d", rendererStats.mNumTriangles);
+            ImGui::TextWrapped("Num Uniforms: %d", rendererStats.mNumUniforms);
+            ImGui::TextWrapped("Num Samplers: %d", rendererStats.mNumSamplers);
+            if (auto hardwareDetails = mECS.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
+                auto&& [entity, mouse, viewport] = hardwareDetails.value();
                 if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
                     viewport.imGuiEditor();
                     ImGui::TreePop();
@@ -350,14 +355,14 @@ namespace neo {
                         mECS.removeComponent<SelectedComponent>(entity);
                     });
                 }
-                auto go = mECS.createEntity();
+                auto entity = mECS.createEntity();
                 auto sphereMesh = Library::getMesh("sphere");
-                mECS.addComponent<BoundingBoxComponent>(go, sphereMesh);
-                mECS.addComponent<SpatialComponent>(go);
-                mECS.addComponent<SelectableComponent>(go);
-                mECS.addComponent<SelectedComponent>(go);
-                mECS.addComponent<MeshComponent>(go, sphereMesh.mMesh);
-                mECS.addComponent<renderable::WireframeRenderable>(go);
+                mECS.addComponent<BoundingBoxComponent>(entity, sphereMesh);
+                mECS.addComponent<SpatialComponent>(entity);
+                mECS.addComponent<SelectableComponent>(entity);
+                mECS.addComponent<SelectedComponent>(entity);
+                mECS.addComponent<MeshComponent>(entity, sphereMesh.mMesh);
+                mECS.addComponent<renderable::WireframeRenderable>(entity);
             }
             ImGui::End();
         }

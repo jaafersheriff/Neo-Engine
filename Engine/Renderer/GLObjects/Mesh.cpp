@@ -32,12 +32,16 @@ namespace neo {
 
         glBindVertexArray(mVAOID);
         if (mElementVBO) {
-            glDrawElements(mPrimitiveType, size ? size : mElementVBO->bufferSize, GL_UNSIGNED_INT, nullptr);
+            uint32_t usedSize = size ? size : mElementVBO->bufferSize;
+            ServiceLocator<Renderer>::ref().mStats.mNumTriangles += usedSize / 3;
+            glDrawElements(mPrimitiveType, usedSize, GL_UNSIGNED_INT, nullptr);
         }
         else if (size) {
+            ServiceLocator<Renderer>::ref().mStats.mNumTriangles += size / 3;
             glDrawArrays(mPrimitiveType, 0, size);
         }
         else {
+            ServiceLocator<Renderer>::ref().mStats.mNumTriangles += positions.bufferSize / positions.stride / 3;
             glDrawArrays(mPrimitiveType, 0, positions.bufferSize / positions.stride);
         }
         glBindVertexArray(0);
