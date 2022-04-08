@@ -96,12 +96,16 @@ namespace neo {
     void Library::_insertMesh(const std::string& name, MeshData data) {
         if (data.mMesh) {
             mMeshes.insert({ name, data });
+            glBindVertexArray(data.mMesh->mVAOID);
+            glObjectLabel(GL_VERTEX_ARRAY, data.mMesh->mVAOID, static_cast<GLsizei>(name.length()), name.c_str());
         }
     }
 
     void Library::_insertTexture(const std::string& name, Texture* texture) {
         if (texture) {
             mTextures.insert({ name, texture });
+            texture->bind();
+            glObjectLabel(GL_TEXTURE, texture->mTextureID, static_cast<GLsizei>(name.length()), name.c_str());
         }
     }
 
