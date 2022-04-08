@@ -61,6 +61,7 @@ namespace neo {
         auto it = mTextures.find(name);
         NEO_ASSERT(it == mTextures.end(), "Texture already found");
         void* data;
+        // WTF lol how does this work
         if (format.mType == GL_UNSIGNED_BYTE || format.mType == GL_INT) {
             uint32_t d = 0xFFFFFFFF;
             data = &d;
@@ -77,8 +78,6 @@ namespace neo {
         _insertTexture(name, t);
         return t;
     }
-
-
 }
 
 

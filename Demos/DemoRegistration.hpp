@@ -2,6 +2,7 @@
 // #include "BasicPhong/BasicPhong.hpp"
 // #include "Compute/Compute.hpp"
 // #include "Deferred/Deferred.hpp"
+#include "Froxels/Froxels.hpp"
 // #include "FrustaFitting/FrustaFitting.hpp"
 // #include "GodRays/GodRays.hpp"
 // #include "Metaballs/Metaballs.hpp"
@@ -19,6 +20,7 @@ static std::vector<neo::IDemo*> sDemos = {
 // 	new BasicPhong::Demo(),
 // 	new Compute::Demo(),
 // 	new Deferred::Demo(),
+	new Froxels::Demo(),
 // 	new FrustaFitting::Demo(),
 // 	new GodRays::Demo(),
 // 	new Metaballs::Demo(),

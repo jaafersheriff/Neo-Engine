@@ -7,9 +7,13 @@ add_library(Demos)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/Sponza.cpp)
+file(GLOB_RECURSE CPP_FILES 
+		  ${CMAKE_CURRENT_SOURCE_DIR}/Sponza/Sponza.cpp
+		  ${CMAKE_CURRENT_SOURCE_DIR}/Froxels/Froxels.cpp
+)
 file(GLOB_RECURSE HPP_FILES 
-		  ${CMAKE_CURRENT_SOURCE_DIR}/Sponza.h
+		  ${CMAKE_CURRENT_SOURCE_DIR}/Sponza/Sponza.hpp
+		  ${CMAKE_CURRENT_SOURCE_DIR}/Froxels/Froxels.hpp
 		  ${CMAKE_CURRENT_SOURCE_DIR}/DemoRegistration.hpp
 )
 
