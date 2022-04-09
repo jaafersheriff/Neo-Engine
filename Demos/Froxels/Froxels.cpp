@@ -1,5 +1,6 @@
 #include "Froxels/Froxels.hpp"
 #include "VolumeComponent.hpp"
+#include "MockCameraComponent.hpp"
 
 #include "VolumeDebugShader.hpp"
 
@@ -16,16 +17,20 @@
 #include "ECS/Component/RenderableComponent/AlphaTestRenderable.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/PhongRenderable.hpp"
+#include "ECS/Component/RenderableComponent/LineMeshComponent.hpp"
 #include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
+#include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
+#include "ECS/Systems/CameraSystems/FrustumToLineSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
 #include "Renderer/Shader/PhongShader.hpp"
 #include "Renderer/Shader/AlphaTestShader.hpp"
 #include "Renderer/Shader/WireFrameShader.hpp"
+#include "Renderer/Shader/LineShader.hpp"
 
 #include "Renderer/GLObjects/Material.hpp"
 #include "Renderer/GLObjects/Texture3D.hpp"
@@ -34,7 +39,6 @@
 
 using namespace neo;
 
-/* Game object definitions */
 namespace Froxels {
 
     IDemo::Config Demo::getConfig() const {
@@ -65,15 +69,30 @@ namespace Froxels {
 
         // Voxel stuffs
         {
-            auto entity = ecs.createEntity();
-            TextureFormat format;
-            format.mInternalFormat = GL_RGBA8;
-            format.mBaseFormat = GL_RGBA;
-            format.mFilter = GL_LINEAR;
-            format.mMode = GL_CLAMP_TO_EDGE;
-            format.mType = GL_UNSIGNED_BYTE;
-            ecs.addComponent<VolumeComponent>(entity, Library::createEmptyTexture<Texture3D>("Volume", format, { 8, 8, 8 }));
-            ecs.addComponent<TagComponent>(entity, "Volume");
+            {
+                auto entity = ecs.createEntity();
+                TextureFormat format;
+                format.mInternalFormat = GL_RGBA8;
+                format.mBaseFormat = GL_RGBA;
+                format.mFilter = GL_LINEAR;
+                format.mMode = GL_CLAMP_TO_EDGE;
+                format.mType = GL_UNSIGNED_BYTE;
+                ecs.addComponent<VolumeComponent>(entity, Library::createEmptyTexture<Texture3D>("Volume", format, { 8, 8, 8 }));
+                ecs.addComponent<TagComponent>(entity, "Volume");
+            }
+
+            {
+                auto entity = ecs.createEntity();
+                ecs.addComponent<TagComponent>(entity, "Mock camera");
+                auto spat = ecs.addComponent<SpatialComponent>(entity, glm::vec3(7.f, 4.f, 2.f), glm::vec3(1.f));
+                spat->setLookDir(glm::vec3(-1.f, 0.f, 0.f));
+                ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 10.f, 45.f);
+                ecs.addComponent<MockCameraComponent>(entity);
+                ecs.addComponent<LineMeshComponent>(entity, glm::vec3(0.f, 1.f, 1.f));
+                ecs.addComponent<FrustumComponent>(entity);
+            }
+
+
         }
 
         /* Ground plane */
@@ -86,11 +105,14 @@ namespace Froxels {
         /* Systems - order matters! */
         ecs.addSystem<CameraControllerSystem>();
         ecs.addSystem<RotationSystem>();
+        ecs.addSystem<FrustumSystem>();
+        ecs.addSystem<FrustumToLineSystem>();
 
         /* Init renderer */
         renderer.addSceneShader<PhongShader>();
         renderer.addSceneShader<AlphaTestShader>();
         renderer.addSceneShader<WireframeShader>();
+        renderer.addSceneShader<LineShader>();
         renderer.addSceneShader<VolumeDebugShader>("voxel.vert", "voxel.frag");
     }
 
@@ -129,6 +151,12 @@ namespace Froxels {
                 }
                 vol.mTexture->update({vol.mTexture->mWidth, vol.mTexture->mHeight, vol.mTexture->mDepth}, data.data());
             }
+        }
+
+        if (auto mockCamera = ecs.getSingleView<MockCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
+            auto&& [_, __, camera, spatial] = *mockCamera;
+            camera.imGuiEditor();
+            spatial.imGuiEditor();
         }
     }
 
