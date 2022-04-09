@@ -22,7 +22,7 @@ namespace neo {
     struct VertexBuffer {
         uint32_t vboID = 0;
         uint32_t attribArray = 0;
-        uint32_t stride = 3;
+        uint32_t size = 3;
         uint32_t bufferSize = 0;
     };
 
@@ -38,7 +38,8 @@ namespace neo {
             uint32_t mVAOID;
 
             /* VBOs */
-            void addVertexBuffer(VertexType type, uint32_t attribArray, uint32_t stride, const std::vector<float>& buffer = {});
+            void addVertexBuffer(VertexType type, uint32_t attribArray, uint32_t size, const std::vector<float>& buffer = {});
+            void updateVertexBuffer(VertexType type, void* buffer, size_t size);
             void updateVertexBuffer(VertexType type, const std::vector<float>& buffer);
             void updateVertexBuffer(VertexType type, uint32_t size);
             void removeVertexBuffer(VertexType type);
@@ -54,7 +55,7 @@ namespace neo {
             uint32_t mPrimitiveType;
 
             /* Call the appropriate draw function */
-            void draw(uint32_t = 0) const;
+            void draw(uint32_t instanceCount = 1, uint32_t count = 0) const;
 
             /* Remove */
             void clear();
