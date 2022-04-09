@@ -2,7 +2,7 @@
 
 #include "Loader/Library.hpp"
 #include "Renderer/Renderer.hpp"
-#include "Renderer/Shader/Shader.hpp"
+#include "Renderer/GLObjects/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
