@@ -54,27 +54,59 @@ namespace neo {
     };
 
     template <typename T>
+    std::vector<T> getData(GLenum format, glm::uvec3 size) {
+        std::vector<T> data;
+        size_t finalSize = size.x * size.y * size.z;
+        switch (format) {
+        case GL_RED:
+            size *= 1;
+            break;
+        case GL_RG:
+            size *= 2;
+            break;
+        case GL_RGB:
+            size *= 3;
+            break;
+        case GL_RGBA:
+            size *= 4;
+            break;
+        default:
+            NEO_FAIL("This format isn't supported, yet");
+            break;
+        }
+        data.resize(finalSize);
+        return data;
+    }
+
+    template <typename T>
     Texture* Library::createEmptyTexture(const std::string& name, TextureFormat format, glm::uvec3 size) {
         static_assert(std::is_base_of<Texture, T>::value, "T must be a Texture type");
         static_assert(!std::is_same<T, Texture>::value, "T must be a derived Texture type");
 
         auto it = mTextures.find(name);
         NEO_ASSERT(it == mTextures.end(), "Texture already found");
-        void* data;
-        // WTF lol how does this work
-        if (format.mType == GL_UNSIGNED_BYTE || format.mType == GL_INT) {
-            uint32_t d = 0xFFFFFFFF;
-            data = &d;
+        Texture* t;
+
+        switch (format.mType) {
+        case GL_BYTE:
+            t = new T(format, size, getData<int8_t>(format.mBaseFormat, size).data());
+            break;
+        case GL_UNSIGNED_BYTE:
+            t = new T(format, size, getData<uint8_t>(format.mBaseFormat, size).data());
+            break;
+        case GL_INT:
+            t = new T(format, size, getData<int32_t>(format.mBaseFormat, size).data());
+            break;
+        case GL_UNSIGNED_INT:
+            t = new T(format, size, getData<uint32_t>(format.mBaseFormat, size).data());
+            break;
+        case GL_FLOAT:
+            t = new T(format, size, getData<float>(format.mBaseFormat, size).data());
+            break;
+        default:
+            NEO_FAIL("This type isn't supported, yet");
+            break;
         }
-        else if (format.mType == GL_FLOAT) {
-            float d[] = { 1.f, 1.f, 1.f, 1.f };
-            data = d;
-        }
-        else {
-            NEO_UNUSED(data);
-            NEO_FAIL("Trying to create an empty texture with an unsupported type");
-        }
-        Texture* t = new T(format, size, data);
         _insertTexture(name, t);
         return t;
     }
