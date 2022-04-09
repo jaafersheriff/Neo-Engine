@@ -54,7 +54,7 @@ namespace Froxels {
                 size_t numVoxels = volume.mTexture->mWidth * volume.mTexture->mHeight * volume.mTexture->mDepth;
 
                 /* Pull volume data out of GPU */
-                std::vector<uint32_t> voxelData;
+                std::vector<glm::vec4> voxelData;
                 voxelData.resize(numVoxels);
                 volume.mTexture->bind();
                 {
@@ -68,17 +68,17 @@ namespace Froxels {
                 std::vector<glm::vec4> voxelColors;
                 voxelColors.reserve(numVoxels);
 
-                int _c = 0; // im so lazy
+                size_t _c = numVoxels - 1; // im so lazy
                 RENDERER_MP_ENTER("Create instance data");
                 for (size_t x = 0; x < volume.mTexture->mWidth; x++) {
                     for (size_t y = 0; y < volume.mTexture->mHeight; y++) {
                         for (size_t z = 0; z < volume.mTexture->mDepth; z++) {
-                            uint32_t data = voxelData[_c++];
+                            uint32_t data = voxelData[_c--];
                             glm::vec4 color;
-                            color.x = static_cast<float>((data & 0xFF000000) >> 24) / 255.f;
-                            color.y = static_cast<float>((data & 0x00FF0000) >> 16) / 255.f;
-                            color.z = static_cast<float>((data & 0x0000FF00) >>  8) / 255.f;
-                            color.a = static_cast<float>((data & 0x000000FF) >>  0) / 255.f;
+                            color.a = static_cast<float>((data & 0xFF000000) >> 24) / 255.f;
+                            color.z = static_cast<float>((data & 0x00FF0000) >> 16) / 255.f;
+                            color.y = static_cast<float>((data & 0x0000FF00) >>  8) / 255.f;
+                            color.x = static_cast<float>((data & 0x000000FF) >>  0) / 255.f;
                             if (color.a <= 0.2f) {
                                 continue;
                             }
@@ -98,7 +98,7 @@ namespace Froxels {
                 RENDERER_MP_LEAVE();
 
                 RENDERER_MP_ENTER("Draw instance");
-                instancedMesh.mMesh->draw(_c);
+                instancedMesh.mMesh->draw(static_cast<uint32_t>(voxelPositions.size()));
                 RENDERER_MP_LEAVE();
             }
             unbind();

@@ -52,7 +52,9 @@ namespace neo {
             int mGLMajorVersion = 0;
             int mGLMinorVersion = 0;
             std::string mGLSLVersion = "";
+            glm::ivec3 mMaxComputeWorkGroupCount = { 0,0,0 };
             glm::ivec3 mMaxComputeWorkGroupSize = { 0,0,0 };
+            int mMaxComputeWorkInvocations = 0;
             std::string mVendor = "";
             std::string mRenderer = "";
             std::string mShadingLanguage = "";

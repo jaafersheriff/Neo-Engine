@@ -238,7 +238,7 @@ namespace neo {
     void Shader::_addAttribute(HashedString name) {
         GLint r = glGetAttribLocation(mPID, name.data());
         if (r < 0) {
-            NEO_LOG_S(util::LogSeverity::Warning, "%s WARN: %s cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", this->mName.c_str(), name.data());
+            NEO_LOG_S(util::LogSeverity::Warning, "%s: %s cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", this->mName.c_str(), name.data());
         }
         mAttributes[name] = r;
     }
@@ -246,7 +246,7 @@ namespace neo {
     void Shader::_addUniform(HashedString name) {
         GLint r = glGetUniformLocation(mPID, name.data());
         if (r < 0) {
-            NEO_LOG_S(util::LogSeverity::Warning, "%s WARN: %s cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", this->mName.c_str(), name.data());
+            NEO_LOG_S(util::LogSeverity::Warning, "%s: %s cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", this->mName.c_str(), name.data());
         }
         mUniforms[name] = r;
     }
