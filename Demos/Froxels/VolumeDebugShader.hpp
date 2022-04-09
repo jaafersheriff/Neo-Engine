@@ -54,38 +54,41 @@ namespace Froxels {
                 size_t numVoxels = volume.mTexture->mWidth * volume.mTexture->mHeight * volume.mTexture->mDepth;
 
                 /* Pull volume data out of GPU */
-                std::vector<glm::vec4> voxelData;
-                voxelData.resize(numVoxels);
+                std::vector<float> voxelData;
+                voxelData.resize(numVoxels * 4);
                 volume.mTexture->bind();
                 {
                     RENDERER_MP_ENTER("Read volume");
-                    glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_UNSIGNED_BYTE, voxelData.data());
+                    glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_FLOAT, voxelData.data());
                     RENDERER_MP_LEAVE();
                 }
 
-                std::vector<glm::vec3> voxelPositions;
-                voxelPositions.reserve(numVoxels);
-                std::vector<glm::vec4> voxelColors;
-                voxelColors.reserve(numVoxels);
+                std::vector<float> voxelPositions;
+                voxelPositions.reserve(numVoxels * 3);
+                std::vector<float> voxelColors;
+                voxelColors.reserve(numVoxels * 4);
 
-                size_t _c = numVoxels - 1; // im so lazy
+                size_t _c = 0; // im so lazy
                 RENDERER_MP_ENTER("Create instance data");
                 for (size_t x = 0; x < volume.mTexture->mWidth; x++) {
                     for (size_t y = 0; y < volume.mTexture->mHeight; y++) {
                         for (size_t z = 0; z < volume.mTexture->mDepth; z++) {
-                            uint32_t data = voxelData[_c--];
-                            glm::vec4 color;
-                            color.a = static_cast<float>((data & 0xFF000000) >> 24) / 255.f;
-                            color.z = static_cast<float>((data & 0x00FF0000) >> 16) / 255.f;
-                            color.y = static_cast<float>((data & 0x0000FF00) >>  8) / 255.f;
-                            color.x = static_cast<float>((data & 0x000000FF) >>  0) / 255.f;
-                            if (color.a <= 0.2f) {
+                            float a = voxelData[_c * 4 + 0];
+                            float b = voxelData[_c * 4 + 1];
+                            float g = voxelData[_c * 4 + 2];
+                            float r = voxelData[_c * 4 + 3];
+                            _c++;
+                            if (a <= 0.05f) {
                                 continue;
                             }
-                            voxelColors.push_back(color);
+                            voxelColors.push_back(r);
+                            voxelColors.push_back(g);
+                            voxelColors.push_back(b);
+                            voxelColors.push_back(a);
 
-                            glm::vec3 position = { x, y, z };
-                            voxelPositions.push_back(position);
+                            voxelPositions.push_back(static_cast<float>(x));
+                            voxelPositions.push_back(static_cast<float>(y));
+                            voxelPositions.push_back(static_cast<float>(z));
                         }
                     }
                 }

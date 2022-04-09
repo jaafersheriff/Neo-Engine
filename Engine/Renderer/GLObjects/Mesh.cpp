@@ -81,7 +81,7 @@ namespace neo {
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID);
         if (size) {
             // TODO _ this is bad
-            glBufferData(GL_ARRAY_BUFFER, size * vertexBuffer.size * sizeof(float), buffer, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), buffer, GL_STATIC_DRAW);
         }
     }
 

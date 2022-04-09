@@ -85,7 +85,7 @@ namespace Froxels {
             {
                 auto entity = ecs.createEntity();
                 TextureFormat format;
-                format.mInternalFormat = GL_RGBA8;
+                format.mInternalFormat = GL_RGBA32F;
                 format.mBaseFormat = GL_RGBA;
                 format.mFilter = GL_LINEAR;
                 format.mMode = GL_CLAMP_TO_EDGE;
@@ -156,11 +156,10 @@ namespace Froxels {
                 vol.mTexture->resize({ width, height, depth });
             }
             if (upload) {
-                std::vector<uint32_t> data;
-                data.resize(vol.mTexture->mWidth * vol.mTexture->mHeight * vol.mTexture->mDepth);
+                std::vector<float> data;
+                data.resize(vol.mTexture->mWidth * vol.mTexture->mHeight * vol.mTexture->mDepth * 4);
                 for (int i = 0; i < data.size(); i++) {
-                    float r = util::genRandom();
-                    data[i] = *reinterpret_cast<uint32_t*>(&r);
+                    data[i] = util::genRandom();
                 }
                 vol.mTexture->update({vol.mTexture->mWidth, vol.mTexture->mHeight, vol.mTexture->mDepth}, data.data());
             }

@@ -38,7 +38,7 @@ namespace Froxels {
                 loadTexture("inputDepth", *lastFrameBackbuffer->mTextures[1]);
 
                 auto volume = Library::getTexture("Volume");
-                glBindImageTexture(0, volume->mTextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+                glBindImageTexture(0, volume->mTextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
                 glDispatchCompute(volume->mWidth, volume->mHeight, volume->mDepth);
                 glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
