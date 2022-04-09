@@ -73,10 +73,10 @@ namespace Froxels {
                             }
 
                             glm::vec4 color;
-                            color.x = static_cast<float>(data & 0xFF000000);
-                            color.y = static_cast<float>(data & 0x00FF0000);
-                            color.z = static_cast<float>(data & 0x0000FF00);
-                            color.a = static_cast<float>(data & 0x000000FF);
+                            color.x = static_cast<float>((data & 0xFF000000) >> 24) / 255.f;
+                            color.y = static_cast<float>((data & 0x00FF0000) >> 16) / 255.f;
+                            color.z = static_cast<float>((data & 0x0000FF00) >>  8) / 255.f;
+                            color.a = static_cast<float>((data & 0x000000FF) >>  0) / 255.f;
                             voxelColors.push_back(color);
 
                             glm::vec3 position = { x, y, z };
