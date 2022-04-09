@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Loader/Library.hpp"
+#include "Renderer/Renderer.hpp"
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
@@ -32,7 +33,7 @@ namespace Froxels {
             glVertexAttribDivisor(3, 1); 
             mesh.mMesh->addVertexBuffer(VertexType::Texture2, 4, 4, {}); // voxel data -- color
             glVertexAttribDivisor(4, 1); 
-            Library::insertMesh("instanced sphere", mesh);
+            Library::insertMesh("instanced cube", mesh);
         }
 
         virtual void render(const ECS& ecs) override {
@@ -56,7 +57,11 @@ namespace Froxels {
                 std::vector<uint32_t> voxelData;
                 voxelData.resize(numVoxels);
                 volume.mTexture->bind();
-                glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_UNSIGNED_BYTE, voxelData.data());
+                {
+                    RENDERER_MP_ENTER("Read volume");
+                    glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_UNSIGNED_BYTE, voxelData.data());
+                    RENDERER_MP_LEAVE();
+                }
 
                 std::vector<glm::vec3> voxelPositions;
                 voxelPositions.reserve(numVoxels);
@@ -64,19 +69,19 @@ namespace Froxels {
                 voxelColors.reserve(numVoxels);
 
                 int _c = 0; // im so lazy
+                RENDERER_MP_ENTER("Create instance data");
                 for (size_t x = 0; x < volume.mTexture->mWidth; x++) {
                     for (size_t y = 0; y < volume.mTexture->mHeight; y++) {
                         for (size_t z = 0; z < volume.mTexture->mDepth; z++) {
                             uint32_t data = voxelData[_c++];
-                            if (data == 0) {
-                                continue;
-                            }
-
                             glm::vec4 color;
                             color.x = static_cast<float>((data & 0xFF000000) >> 24) / 255.f;
                             color.y = static_cast<float>((data & 0x00FF0000) >> 16) / 255.f;
                             color.z = static_cast<float>((data & 0x0000FF00) >>  8) / 255.f;
                             color.a = static_cast<float>((data & 0x000000FF) >>  0) / 255.f;
+                            if (color.a <= 0.2f) {
+                                continue;
+                            }
                             voxelColors.push_back(color);
 
                             glm::vec3 position = { x, y, z };
@@ -84,12 +89,17 @@ namespace Froxels {
                         }
                     }
                 }
+                RENDERER_MP_LEAVE();
 
+                RENDERER_MP_ENTER("Upload instance data");
                 auto instancedMesh = Library::getMesh("instanced sphere");
                 instancedMesh.mMesh->updateVertexBuffer(VertexType::Texture1, voxelPositions.data(), voxelPositions.size());
                 instancedMesh.mMesh->updateVertexBuffer(VertexType::Texture2, voxelColors.data(), voxelColors.size());
+                RENDERER_MP_LEAVE();
 
+                RENDERER_MP_ENTER("Draw instance");
                 instancedMesh.mMesh->draw(_c);
+                RENDERER_MP_LEAVE();
             }
             unbind();
         }

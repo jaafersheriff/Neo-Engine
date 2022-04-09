@@ -20,23 +20,6 @@
 
 namespace neo {
 
-#define RENDERER_MP_ENTERD(define, group, name) \
-    if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, static_cast<GLsizei>(name.size()), name.c_str()); \
-    MICROPROFILE_DEFINE(define, group, name.c_str(), MP_AUTO);\
-    MICROPROFILE_ENTER(define);\
-    MICROPROFILE_DEFINE_GPU(define, name.c_str(),  MP_AUTO);\
-    MICROPROFILE_GPU_ENTER(define)
-
-#define RENDERER_MP_ENTER(name) \
-    if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name); \
-    MICROPROFILE_ENTERI("Renderer", name, MP_AUTO);\
-    MICROPROFILE_GPU_ENTERI("RendererGPU", name, MP_AUTO)
-
-#define RENDERER_MP_LEAVE() \
-    if (glIsEnabled(GL_DEBUG_OUTPUT)) glPopDebugGroup(); \
-    MICROPROFILE_LEAVE();\
-    MICROPROFILE_GPU_LEAVE()
-
     void OpenGLMessageCallback(
         unsigned source,
         unsigned type,

@@ -94,22 +94,38 @@ namespace Froxels {
         renderer.addSceneShader<VolumeDebugShader>("voxel.vert", "voxel.frag");
     }
 
-    void Demo::update(ECS& ecs) {
-        NEO_UNUSED(ecs);
+    void Demo::destroy() {
     }
 
-    void Demo::destroy() {
+    void Demo::update(ECS& ecs) {
+        NEO_UNUSED(ecs);
     }
 
     void Demo::imGuiEditor(ECS& ecs) {
         if (auto volume = ecs.getSingleView<VolumeComponent, TagComponent>()) {
             auto&& [_, vol, spat] = *volume;
-            if (ImGui::Button("Randomize Volume")) {
+            bool resize = false;
+            bool upload = false;
+            int width = vol.mTexture->mWidth;
+            int height = vol.mTexture->mHeight;
+            int depth = vol.mTexture->mDepth;
+            resize |= ImGui::SliderInt("Width", &width, 1, 64);
+            resize |= ImGui::SliderInt("Height", &height, 1, 64);
+            resize |= ImGui::SliderInt("Depth", &depth, 1, 64);
+
+            upload |= resize;
+            upload |= ImGui::Button("Randomize Volume");
+
+            if (resize) {
+                vol.mTexture->resize({ width, height, depth });
+            }
+            if (upload) {
                 std::vector<uint32_t> data;
                 data.resize(vol.mTexture->mWidth * vol.mTexture->mHeight * vol.mTexture->mDepth);
                 for (int i = 0; i < data.size(); i++) {
                     float r = util::genRandom();
                     data[i] = *reinterpret_cast<uint32_t*>(&r);
+                    // data[i] = data[i] | 0x000000FF;
                 }
                 vol.mTexture->update({vol.mTexture->mWidth, vol.mTexture->mHeight, vol.mTexture->mDepth}, data.data());
             }
