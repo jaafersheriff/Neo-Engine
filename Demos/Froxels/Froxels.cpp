@@ -89,7 +89,7 @@ namespace Froxels {
                 format.mBaseFormat = GL_RGBA;
                 format.mFilter = GL_LINEAR;
                 format.mMode = GL_CLAMP_TO_EDGE;
-                format.mType = GL_UNSIGNED_BYTE;
+                format.mType = GL_FLOAT;
                 ecs.addComponent<VolumeComponent>(entity, Library::createEmptyTexture<Texture3D>("Volume", format, { 8, 8, 8 }));
                 ecs.addComponent<TagComponent>(entity, "Volume");
             }
@@ -122,7 +122,8 @@ namespace Froxels {
         ecs.addSystem<FrustumToLineSystem>();
 
         /* Init renderer */
-        renderer.addComputeShader<VolumeWriteShader>("volumewrite.compute");
+        auto& compute = renderer.addComputeShader<VolumeWriteShader>("volumewrite.compute");
+        compute.mActive = false;
         renderer.addSceneShader<PhongShader>();
         renderer.addSceneShader<AlphaTestShader>();
         renderer.addSceneShader<WireframeShader>();
@@ -145,9 +146,9 @@ namespace Froxels {
             int width = vol.mTexture->mWidth;
             int height = vol.mTexture->mHeight;
             int depth = vol.mTexture->mDepth;
-            resize |= ImGui::SliderInt("Width", &width, 1, 64);
-            resize |= ImGui::SliderInt("Height", &height, 1, 64);
-            resize |= ImGui::SliderInt("Depth", &depth, 1, 64);
+            resize |= ImGui::SliderInt("Width", &width, 1, 256);
+            resize |= ImGui::SliderInt("Height", &height, 1, 256);
+            resize |= ImGui::SliderInt("Depth", &depth, 1, 256);
 
             upload |= resize;
             upload |= ImGui::Button("Randomize Volume");
@@ -156,10 +157,15 @@ namespace Froxels {
                 vol.mTexture->resize({ width, height, depth });
             }
             if (upload) {
-                std::vector<float> data;
-                data.resize(vol.mTexture->mWidth * vol.mTexture->mHeight * vol.mTexture->mDepth * 4);
-                for (int i = 0; i < data.size(); i++) {
-                    data[i] = util::genRandom();
+                std::vector<glm::vec4> data;
+                data.resize(vol.mTexture->mWidth * vol.mTexture->mHeight * vol.mTexture->mDepth);
+                int i = 0;
+                for (size_t x = 1; x <= width; x++) {
+                    for (size_t y = 1; y <= height; y++) {
+                        for (size_t z = 1; z <= depth; z++) {
+                            data[i++] = glm::vec4(static_cast<float>(x) / width, static_cast<float>(y) / height, static_cast<float>(z) / depth, 1.0f);
+                        }
+                    }
                 }
                 vol.mTexture->update({vol.mTexture->mWidth, vol.mTexture->mHeight, vol.mTexture->mDepth}, data.data());
             }
