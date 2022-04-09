@@ -131,7 +131,6 @@ namespace neo {
     }
 
     void Renderer::resetState() {
-        RENDERER_MP_ENTER("resetState");
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 
@@ -151,8 +150,6 @@ namespace neo {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glBindVertexArray(0);
-
-        RENDERER_MP_LEAVE();
     }
 
     void Renderer::render(WindowSurface& window) {
@@ -172,9 +169,9 @@ namespace neo {
                 RENDERER_MP_ENTER("Compute shaders");
 
                 for (auto& shader : activeComputeShaders) {
-                    resetState();
-                    RENDERER_MP_ENTERD(Compute, "Compute shaders", shader->mName);
                     mStats.mNumShaders++;
+                    RENDERER_MP_ENTERD(Compute, "Compute shaders", shader->mName);
+                    resetState();
                     shader->render(ecs);
                     RENDERER_MP_LEAVE();
                 }
@@ -186,9 +183,9 @@ namespace neo {
                 RENDERER_MP_ENTER("PreScene shaders");
 
                 for (auto& shader : activePreShaders) {
-                    resetState();
-                    RENDERER_MP_ENTERD(Pre, "PreScene shaders", shader->mName);
                     mStats.mNumShaders++;
+                    RENDERER_MP_ENTERD(Pre, "PreScene shaders", shader->mName);
+                    resetState();
                     shader->render(ecs);
                     RENDERER_MP_LEAVE();
                 }
@@ -208,9 +205,9 @@ namespace neo {
             RENDERER_MP_ENTER("renderScene");
             for (auto& shader : mSceneShaders) {
                 if (shader.second->mActive) {
-                    resetState();
-                    RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName);
                     mStats.mNumShaders++;
+                    RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName);
+                    resetState();
                     shader.second->render(ecs);
                     RENDERER_MP_LEAVE();
                 }
@@ -258,6 +255,7 @@ namespace neo {
                 if (!mBlitShader) {
                     mBlitShader = new BlitShader;
                 }
+                mStats.mNumShaders++;
                 mBackBuffer->bind();
                 resetState();
                 glDisable(GL_DEPTH_TEST);

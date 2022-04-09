@@ -1,4 +1,8 @@
 #include "Froxels/Froxels.hpp"
+#include "VolumeComponent.hpp"
+
+#include "VolumeDebugShader.hpp"
+
 #include "Engine/Engine.hpp"
 
 #include "ECS/ECS.hpp"
@@ -31,22 +35,12 @@
 using namespace neo;
 
 /* Game object definitions */
-
 namespace Froxels {
-
-    class Volume {
-    public:
-        Volume(Texture* tex)
-            : mTexture(tex)
-        {
-        }
-    private:
-        Texture* mTexture;
-    };
 
     IDemo::Config Demo::getConfig() const {
         IDemo::Config config;
         config.name = "Froxels Demo";
+        config.shaderDir = "shaders/froxels/";
         return config;
     }
 
@@ -71,22 +65,15 @@ namespace Froxels {
 
         // Voxel stuffs
         {
-            for (int i = 0; i < 25; i++) {
-                auto entity = ecs.createEntity();
-                ecs.addComponent<SpatialComponent>(entity, glm::vec3(util::genRandom(-7.f, 7.f), util::genRandom(0.f, 5.f), util::genRandom(-7.f, 7.f)), glm::vec3(util::genRandom(1.f, 2.f)));
-                ecs.addComponent<MeshComponent>(entity, Library::getMesh("sphere").mMesh);
-                ecs.addComponent<renderable::WireframeRenderable>(entity, util::genRandomVec3(0.3f, 1.f));
-            }
-
             auto entity = ecs.createEntity();
             TextureFormat format;
             format.mInternalFormat = GL_RGBA8;
             format.mBaseFormat = GL_RGBA;
-            format.mFilter = GL_NEAREST;
-            format.mMode = GL_REPEAT;
+            format.mFilter = GL_LINEAR;
+            format.mMode = GL_CLAMP_TO_EDGE;
             format.mType = GL_UNSIGNED_BYTE;
-            ecs.addComponent<Volume>(entity, Library::createEmptyTexture<Texture3D>("Volume", format, { 8, 8, 8 }));
-            ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
+            ecs.addComponent<VolumeComponent>(entity, Library::createEmptyTexture<Texture3D>("Volume", format, { 8, 8, 8 }));
+            ecs.addComponent<TagComponent>(entity, "Volume");
         }
 
         /* Ground plane */
@@ -104,6 +91,7 @@ namespace Froxels {
         renderer.addSceneShader<PhongShader>();
         renderer.addSceneShader<AlphaTestShader>();
         renderer.addSceneShader<WireframeShader>();
+        renderer.addSceneShader<VolumeDebugShader>("voxel.vert", "voxel.frag");
     }
 
     void Demo::update(ECS& ecs) {
@@ -114,8 +102,17 @@ namespace Froxels {
     }
 
     void Demo::imGuiEditor(ECS& ecs) {
-        if (auto volume = ecs.getSingleView<Volume, SpatialComponent>()) {
+        if (auto volume = ecs.getSingleView<VolumeComponent, TagComponent>()) {
             auto&& [_, vol, spat] = *volume;
+            if (ImGui::Button("Randomize Volume")) {
+                std::vector<uint32_t> data;
+                data.resize(vol.mTexture->mWidth * vol.mTexture->mHeight * vol.mTexture->mDepth);
+                for (int i = 0; i < data.size(); i++) {
+                    float r = util::genRandom();
+                    data[i] = *reinterpret_cast<uint32_t*>(&r);
+                }
+                vol.mTexture->update({vol.mTexture->mWidth, vol.mTexture->mHeight, vol.mTexture->mDepth}, data.data());
+            }
         }
     }
 
