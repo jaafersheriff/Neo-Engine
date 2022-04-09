@@ -2,7 +2,7 @@
 
 #include "Renderer/Renderer.hpp"
 #include "Util/ServiceLocator.hpp"
-#include "Renderer/Shader/Shader.hpp"
+#include "Renderer/GLObjects/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 

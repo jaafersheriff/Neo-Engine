@@ -2,7 +2,7 @@
 
 #include "ECS/ECS.hpp"
 
-#include "Renderer/Shader/Shader.hpp"
+#include "Renderer/GLObjects/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/Shader/Shader.hpp"
+#include "Renderer/GLObjects/Shader.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
 #include "ECS/Messaging/Messenger.hpp"
