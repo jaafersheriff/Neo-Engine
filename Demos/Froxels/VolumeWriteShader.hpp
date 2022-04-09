@@ -42,7 +42,7 @@ namespace Froxels {
                 auto volume = Library::getTexture("Volume");
                 glBindImageTexture(0, volume->mTextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
-                glDispatchCompute(1024, 1024, 1);
+                glDispatchCompute(1920, 1080, 1);
                 glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             }
 

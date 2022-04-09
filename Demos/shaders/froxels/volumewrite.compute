@@ -9,7 +9,11 @@ uniform sampler2D inputColor;
 uniform sampler2D inputDepth;
 
 ivec3 texToVolume(vec2 texCoords, float depth, ivec3 volumeBounds) {
-	return ivec3(texCoords * volumeBounds.xy, (1.0 - depth) * volumeBounds.z);
+	return ivec3(texCoords * volumeBounds.xy, depth * volumeBounds.z);
+}
+
+float linearizeDepth(float d,float zNear,float zFar) {
+    return zNear * zFar / (zFar + d * (zNear - zFar));
 }
 
 void main() {
@@ -22,11 +26,11 @@ void main() {
 	vec2 texCoords = vec2(pixel_coords.xy) / vec2(backbufferSize);
 
 	vec4 color = vec4(texture(inputColor, texCoords).rgb, 1.0);
-	float depth = texture(inputDepth, texCoords).x;
+	float depth = linearizeDepth(texture(inputDepth, texCoords).x, near, far);
 
 	// output to a specific pixel in the image
 	ivec3 volCoords = texToVolume(texCoords, depth, dims);
-	if (depth == 1.0) {
+	if (depth >= 0.8) {
 		color.a = 0.0;
 	}
 	imageStore(volume, volCoords, color);
