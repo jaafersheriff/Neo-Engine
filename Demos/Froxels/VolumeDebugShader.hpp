@@ -92,7 +92,7 @@ namespace Froxels {
                 RENDERER_MP_LEAVE();
 
                 RENDERER_MP_ENTER("Upload instance data");
-                auto instancedMesh = Library::getMesh("instanced sphere");
+                auto instancedMesh = Library::getMesh("instanced cube");
                 instancedMesh.mMesh->updateVertexBuffer(VertexType::Texture1, voxelPositions.data(), voxelPositions.size());
                 instancedMesh.mMesh->updateVertexBuffer(VertexType::Texture2, voxelColors.data(), voxelColors.size());
                 RENDERER_MP_LEAVE();

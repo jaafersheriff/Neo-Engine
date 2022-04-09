@@ -8,15 +8,12 @@
 using namespace neo;
 
 namespace Froxels {
-    struct VolumeComponent : public Component {
-        VolumeComponent(Texture* tex)
-            : mTexture(tex)
+    struct MockCameraComponent : public Component {
+        MockCameraComponent()
         {}
-        virtual std::string getName() const override { return "VolumeComponent"; }
+        virtual std::string getName() const override { return "MockCameraComponent"; }
         virtual void imGuiEditor() override {
 
         }
-
-        Texture* mTexture;
     };
 }

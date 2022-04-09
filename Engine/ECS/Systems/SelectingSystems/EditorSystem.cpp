@@ -30,33 +30,34 @@ namespace neo {
 
 	// TODO : add hovered capability
 	void EditorSystem::update(ECS& ecs) {
-		if (auto camera = ecs.getSingleView<MainCameraComponent, FrustumComponent>()) {
-			auto&& [_, __, cameraFrustum] = *camera;
-			if (auto mouseRayOpt = ecs.getComponent<MouseRayComponent>()) {
-				auto&& [___, mouseRay] = *mouseRayOpt;
-				if (auto mouseOpt = ecs.getComponent<MouseComponent>()) { 
-					auto&& [____, mouse] = *mouseOpt;
-					if (auto selected = ecs.getSingleView<SelectedComponent, SpatialComponent>()) {
-						auto&& [selectedEntity, un4, selectedSpatial] = *selected;
-						glm::vec3 pos;
-						if (auto bb = ecs.getComponent<BoundingBoxComponent>(selectedEntity)) {
-							if (cameraFrustum.isInFrustum(selectedSpatial, *bb)) {
-								glm::vec3 worldSpaceCenter = selectedSpatial.getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
-								glm::vec3 offsetTranslation = selectedSpatial.getPosition() - worldSpaceCenter;
-								float distance = glm::distance(worldSpaceCenter, mouseRay.mPosition);
-								distance += mouse.mFrameMouse.getScrollSpeed();
-								pos = mouseRay.mPosition + mouseRay.mDirection * distance + offsetTranslation;
-							}
-						}
-						else {
-							float distance = glm::distance(selectedSpatial.getPosition(), mouseRay.mPosition);
-							distance += mouse.mFrameMouse.getScrollSpeed();
-							pos = mouseRay.mPosition + mouseRay.mDirection * distance;
-						}
-						selectedSpatial.setPosition(pos);
-					}
-				}
-			}
-		}
+		NEO_UNUSED(ecs);
+		// if (auto camera = ecs.getSingleView<MainCameraComponent, FrustumComponent>()) {
+		// 	auto&& [_, __, cameraFrustum] = *camera;
+		// 	if (auto mouseRayOpt = ecs.getComponent<MouseRayComponent>()) {
+		// 		auto&& [___, mouseRay] = *mouseRayOpt;
+		// 		if (auto mouseOpt = ecs.getComponent<MouseComponent>()) { 
+		// 			auto&& [____, mouse] = *mouseOpt;
+		// 			if (auto selected = ecs.getSingleView<SelectedComponent, SpatialComponent>()) {
+		// 				auto&& [selectedEntity, un4, selectedSpatial] = *selected;
+		// 				glm::vec3 pos;
+		// 				if (auto bb = ecs.getComponent<BoundingBoxComponent>(selectedEntity)) {
+		// 					if (cameraFrustum.isInFrustum(selectedSpatial, *bb)) {
+		// 						glm::vec3 worldSpaceCenter = selectedSpatial.getModelMatrix() * glm::vec4(bb->getCenter(), 1.f);
+		// 						glm::vec3 offsetTranslation = selectedSpatial.getPosition() - worldSpaceCenter;
+		// 						float distance = glm::distance(worldSpaceCenter, mouseRay.mPosition);
+		// 						distance += mouse.mFrameMouse.getScrollSpeed();
+		// 						pos = mouseRay.mPosition + mouseRay.mDirection * distance + offsetTranslation;
+		// 					}
+		// 				}
+		// 				else {
+		// 					float distance = glm::distance(selectedSpatial.getPosition(), mouseRay.mPosition);
+		// 					distance += mouse.mFrameMouse.getScrollSpeed();
+		// 					pos = mouseRay.mPosition + mouseRay.mDirection * distance;
+		// 				}
+		// 				selectedSpatial.setPosition(pos);
+		// 			}
+		// 		}
+		// 	}
+		// }
 	}
 }
