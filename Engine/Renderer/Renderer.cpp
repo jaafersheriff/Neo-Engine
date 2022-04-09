@@ -102,10 +102,13 @@ namespace neo {
             mDefaultFBO->resize(msg.mSize);
             });
         
-        /* Set max work group */
+        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &mDetails.mMaxComputeWorkGroupCount.x);
+        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &mDetails.mMaxComputeWorkGroupCount.y);
+        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &mDetails.mMaxComputeWorkGroupCount.z);
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z);
+        glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &mDetails.mMaxComputeWorkInvocations);
         mDetails.mVendor = std::string(reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
         mDetails.mRenderer = std::string(reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
         mDetails.mShadingLanguage = std::string(reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
@@ -334,7 +337,9 @@ namespace neo {
         ImGui::TextWrapped("Used Shading Language: %s", mDetails.mGLSLVersion.c_str());
         ImGui::TextWrapped("Vendor: %s", mDetails.mVendor.c_str());
         ImGui::TextWrapped("Renderer: %s", mDetails.mRenderer.c_str());
+        ImGui::TextWrapped("Max Compute Work Group Count: [%d, %d, %d]", mDetails.mMaxComputeWorkGroupCount.x, mDetails.mMaxComputeWorkGroupCount.y, mDetails.mMaxComputeWorkGroupCount.z);
         ImGui::TextWrapped("Max Compute Work Group Size: [%d, %d, %d]", mDetails.mMaxComputeWorkGroupSize.x, mDetails.mMaxComputeWorkGroupSize.y, mDetails.mMaxComputeWorkGroupSize.z);
+        ImGui::TextWrapped("Max Compute Work Group Invocations: %d", mDetails.mMaxComputeWorkInvocations);
         if (ImGui::Button("VSync")) {
             window.toggleVSync();
         }

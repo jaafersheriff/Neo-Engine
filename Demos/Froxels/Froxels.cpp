@@ -1,8 +1,9 @@
 #include "Froxels/Froxels.hpp"
 #include "VolumeComponent.hpp"
-#include "MockCameraComponent.hpp"
+#include "VolumeWriteCameraComponent.hpp"
 
 #include "VolumeDebugShader.hpp"
+#include "VolumeWriteShader.hpp"
 
 #include "Engine/Engine.hpp"
 
@@ -67,6 +68,18 @@ namespace Froxels {
             ecs.addComponent<LightComponent>(entity, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
         }
 
+        {
+            /* Bunny object */
+            auto bunny = ecs.createEntity();
+            ecs.addComponent<TagComponent>(bunny, "Bunny");
+            ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
+            ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
+            ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
+            ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
+            ecs.addComponent<SelectableComponent>(bunny);
+            ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
+        }
+
         // Voxel stuffs
         {
             {
@@ -87,7 +100,7 @@ namespace Froxels {
                 auto spat = ecs.addComponent<SpatialComponent>(entity, glm::vec3(7.f, 4.f, 2.f), glm::vec3(1.f));
                 spat->setLookDir(glm::vec3(-1.f, 0.f, 0.f));
                 ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 10.f, 45.f);
-                ecs.addComponent<MockCameraComponent>(entity);
+                ecs.addComponent<VolumeWriteCameraComponent>(entity);
                 ecs.addComponent<LineMeshComponent>(entity, glm::vec3(0.f, 1.f, 1.f));
                 ecs.addComponent<FrustumComponent>(entity);
             }
@@ -109,6 +122,7 @@ namespace Froxels {
         ecs.addSystem<FrustumToLineSystem>();
 
         /* Init renderer */
+        renderer.addComputeShader<VolumeWriteShader>("volumewrite.compute");
         renderer.addSceneShader<PhongShader>();
         renderer.addSceneShader<AlphaTestShader>();
         renderer.addSceneShader<WireframeShader>();
@@ -147,13 +161,12 @@ namespace Froxels {
                 for (int i = 0; i < data.size(); i++) {
                     float r = util::genRandom();
                     data[i] = *reinterpret_cast<uint32_t*>(&r);
-                    // data[i] = data[i] | 0x000000FF;
                 }
                 vol.mTexture->update({vol.mTexture->mWidth, vol.mTexture->mHeight, vol.mTexture->mDepth}, data.data());
             }
         }
 
-        if (auto mockCamera = ecs.getSingleView<MockCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
+        if (auto mockCamera = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
             auto&& [_, __, camera, spatial] = *mockCamera;
             camera.imGuiEditor();
             spatial.imGuiEditor();
