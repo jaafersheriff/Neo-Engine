@@ -90,7 +90,6 @@ namespace neo {
         }
 
         NEO_FAIL("FBO %s doesn't exist", name.c_str());
-        return nullptr;
     }
 
     void Library::_insertMesh(const std::string& name, MeshData data) {
