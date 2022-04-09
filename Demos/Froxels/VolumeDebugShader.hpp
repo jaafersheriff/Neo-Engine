@@ -73,13 +73,13 @@ namespace Froxels {
                 for (size_t x = 0; x < volume.mTexture->mWidth; x++) {
                     for (size_t y = 0; y < volume.mTexture->mHeight; y++) {
                         for (size_t z = 0; z < volume.mTexture->mDepth; z++) {
-                            float a = voxelData[_c * 4 + 0];
-                            float b = voxelData[_c * 4 + 1];
-                            float g = voxelData[_c * 4 + 2];
-                            float r = voxelData[_c * 4 + 3];
+                            float r = voxelData[_c * 4 + 0];
+                            float g = voxelData[_c * 4 + 1];
+                            float b = voxelData[_c * 4 + 2];
+                            float a = voxelData[_c * 4 + 3];
                             _c++;
                             if (a <= 0.05f) {
-                                continue;
+                                // continue;
                             }
                             voxelColors.push_back(r);
                             voxelColors.push_back(g);
