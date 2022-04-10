@@ -68,29 +68,24 @@ namespace Froxels {
                 std::vector<float> voxelColors;
                 voxelColors.reserve(numVoxels * 4);
 
-                size_t _c = 0; // im so lazy
                 RENDERER_MP_ENTER("Create instance data");
-                for (size_t x = 0; x < volume.mTexture->mWidth; x++) {
-                    for (size_t y = 0; y < volume.mTexture->mHeight; y++) {
-                        for (size_t z = 0; z < volume.mTexture->mDepth; z++) {
-                            float r = voxelData[_c * 4 + 0];
-                            float g = voxelData[_c * 4 + 1];
-                            float b = voxelData[_c * 4 + 2];
-                            float a = voxelData[_c * 4 + 3];
-                            _c++;
-                            if (a <= 0.05f) {
-                                // continue;
-                            }
-                            voxelColors.push_back(r);
-                            voxelColors.push_back(g);
-                            voxelColors.push_back(b);
-                            voxelColors.push_back(a);
-
-                            voxelPositions.push_back(static_cast<float>(x));
-                            voxelPositions.push_back(static_cast<float>(y));
-                            voxelPositions.push_back(static_cast<float>(z));
-                        }
+                for (int i = 0; i < numVoxels; i++) {
+                    float r = voxelData[i * 4 + 0];
+                    float g = voxelData[i * 4 + 1];
+                    float b = voxelData[i * 4 + 2];
+                    float a = voxelData[i * 4 + 3];
+                    if (a <= 0.05f) {
+                        continue;
                     }
+                    voxelColors.push_back(r);
+                    voxelColors.push_back(g);
+                    voxelColors.push_back(b);
+                    voxelColors.push_back(a);
+
+                    glm::ivec3 position = volume.getVoxelIndex(i);
+                    voxelPositions.push_back(static_cast<float>(position.x));
+                    voxelPositions.push_back(static_cast<float>(position.y));
+                    voxelPositions.push_back(static_cast<float>(position.z));
                 }
                 RENDERER_MP_LEAVE();
 
