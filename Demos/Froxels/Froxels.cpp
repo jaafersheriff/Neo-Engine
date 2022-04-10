@@ -168,8 +168,13 @@ namespace Froxels {
             resize |= ImGui::SliderInt("Depth", &depth, 1, 256);
 
             upload |= resize;
-            upload |= ImGui::Button("Randomize Volume");
+            upload |= ImGui::Button("Reload Volume");
 
+            static int mode = 0;
+            ImGui::RadioButton("Clear", &mode, 0);
+            ImGui::RadioButton("Positions", &mode, 1);
+            ImGui::RadioButton("Randomize", &mode, 2);
+            ImGui::RadioButton("Randomize w/ alpha", &mode, 3);
             if (resize) {
                 vol.mTexture->resize({ width, height, depth });
             }
@@ -180,7 +185,19 @@ namespace Froxels {
                 for (size_t x = 1; x <= width; x++) {
                     for (size_t y = 1; y <= height; y++) {
                         for (size_t z = 1; z <= depth; z++) {
-                            data[i++] = glm::vec4(static_cast<float>(x) / width, static_cast<float>(y) / height, static_cast<float>(z) / depth, 1.0f);
+                            if (mode == 0) {
+                                data[i] = glm::vec4(0);
+                            }
+                            else if (mode == 1) {
+                                data[i] = glm::vec4(static_cast<float>(x) / width, static_cast<float>(y) / height, static_cast<float>(z) / depth, 1.0f);
+                            }
+                            else if (mode == 2) {
+                                data[i] = glm::vec4(util::genRandomVec3(), util::genRandom());
+                            }
+                            else if (mode == 2) {
+                                data[i] = glm::vec4(util::genRandomVec3(), 1.0);
+                            }
+                            i++;
                         }
                     }
                 }

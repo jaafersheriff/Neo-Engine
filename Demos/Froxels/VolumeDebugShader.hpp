@@ -79,7 +79,7 @@ namespace Froxels {
                             float a = voxelData[_c * 4 + 3];
                             _c++;
                             if (a <= 0.05f) {
-                                continue;
+                                // continue;
                             }
                             voxelColors.push_back(r);
                             voxelColors.push_back(g);

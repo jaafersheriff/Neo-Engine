@@ -35,7 +35,7 @@ namespace Froxels {
                 loadUniform("near", camera.getNearFar().x);
                 loadUniform("far", camera.getNearFar().y);
 
-                auto lastFrameBackbuffer = Library::getFBO("backbuffer");
+                auto lastFrameBackbuffer = Library::getFBO("downscalebackbuffer");
                 loadTexture("inputColor", *lastFrameBackbuffer->mTextures[0]);
                 loadTexture("inputDepth", *lastFrameBackbuffer->mTextures[1]);
 
@@ -44,7 +44,7 @@ namespace Froxels {
 
                 {
                     RENDERER_MP_ENTER("Dispatch");
-                    glDispatchCompute(1920, 1080, 1);
+                    glDispatchCompute(lastFrameBackbuffer->mTextures[0]->mWidth, lastFrameBackbuffer->mTextures[0]->mHeight, 1);
                     RENDERER_MP_LEAVE();
                 }
 
