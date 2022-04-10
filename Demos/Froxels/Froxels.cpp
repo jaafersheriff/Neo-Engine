@@ -12,6 +12,9 @@
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
@@ -25,6 +28,7 @@
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
+#include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumToLineSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
@@ -92,6 +96,11 @@ namespace Froxels {
                 format.mType = GL_FLOAT;
                 ecs.addComponent<VolumeComponent>(entity, Library::createEmptyTexture<Texture3D>("Volume", format, { 8, 8, 8 }));
                 ecs.addComponent<TagComponent>(entity, "Volume");
+                ecs.addComponent<OrthoCameraComponent>(entity, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
+                ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
+                ecs.addComponent<FrustumComponent>(entity);
+                ecs.addComponent<FrustumFitReceiverComponent>(entity);
+                ecs.addComponent<LineMeshComponent>(entity);
             }
 
             {
@@ -103,6 +112,7 @@ namespace Froxels {
                 ecs.addComponent<VolumeWriteCameraComponent>(entity);
                 ecs.addComponent<LineMeshComponent>(entity, glm::vec3(0.f, 1.f, 1.f));
                 ecs.addComponent<FrustumComponent>(entity);
+                ecs.addComponent<FrustumFitSourceComponent>(entity);
             }
 
 
@@ -119,6 +129,7 @@ namespace Froxels {
         ecs.addSystem<CameraControllerSystem>();
         ecs.addSystem<RotationSystem>();
         ecs.addSystem<FrustumSystem>();
+        ecs.addSystem<FrustaFittingSystem>();
         ecs.addSystem<FrustumToLineSystem>();
 
         /* Init renderer */
