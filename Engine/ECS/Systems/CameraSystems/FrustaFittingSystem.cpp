@@ -118,8 +118,8 @@ namespace neo {
 
         receiverSpatial.setPosition(center);
         receiverSpatial.setLookDir(lightDir);
+        receiverSpatial.setScale(glm::vec3(boxWidth * 2, boxHeight * 2, boxDepth * 2));
         receiverCamera.setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
         receiverCamera.setNearFar(-boxDepth, boxDepth);
-
     }
 }

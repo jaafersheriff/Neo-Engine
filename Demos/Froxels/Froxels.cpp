@@ -4,6 +4,7 @@
 
 #include "VolumeDebugShader.hpp"
 #include "VolumeWriteShader.hpp"
+#include "VolumeDebugRayShader.hpp"
 
 #include "Engine/Engine.hpp"
 
@@ -139,7 +140,10 @@ namespace Froxels {
         renderer.addSceneShader<AlphaTestShader>();
         renderer.addSceneShader<WireframeShader>();
         renderer.addSceneShader<LineShader>();
-        renderer.addSceneShader<VolumeDebugShader>("voxel.vert", "voxel.frag");
+        auto& debug = renderer.addSceneShader<VolumeDebugShader>("voxel.vert", "voxel.frag");
+        debug.mActive = false;
+        auto& debugRay = renderer.addSceneShader<VolumeDebugRayShader>("voxelray.vert", "voxelray.frag");
+        debugRay.mActive = false;
     }
 
     void Demo::destroy() {
