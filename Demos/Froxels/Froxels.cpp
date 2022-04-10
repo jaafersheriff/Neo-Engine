@@ -4,7 +4,6 @@
 
 #include "VolumeDebugShader.hpp"
 #include "VolumeWriteShader.hpp"
-#include "VolumeDebugRayShader.hpp"
 #include "PhongShader.hpp"
 
 #include "Engine/Engine.hpp"
@@ -144,8 +143,6 @@ namespace Froxels {
         renderer.addSceneShader<LineShader>();
         auto& debug = renderer.addSceneShader<VolumeDebugShader>("voxel.vert", "voxel.frag");
         debug.mActive = false;
-        auto& debugRay = renderer.addSceneShader<VolumeDebugRayShader>("voxelray.vert", "voxelray.frag");
-        debugRay.mActive = false;
     }
 
     void Demo::destroy() {
@@ -158,51 +155,7 @@ namespace Froxels {
     void Demo::imGuiEditor(ECS& ecs) {
         if (auto volume = ecs.getSingleView<VolumeComponent, TagComponent>()) {
             auto&& [_, vol, spat] = *volume;
-            bool resize = false;
-            bool upload = false;
-            int width = vol.mTexture->mWidth;
-            int height = vol.mTexture->mHeight;
-            int depth = vol.mTexture->mDepth;
-            resize |= ImGui::SliderInt("Width", &width, 1, 256);
-            resize |= ImGui::SliderInt("Height", &height, 1, 256);
-            resize |= ImGui::SliderInt("Depth", &depth, 1, 256);
-
-            upload |= resize;
-            upload |= ImGui::Button("Reload Volume");
-
-            static int mode = 0;
-            ImGui::RadioButton("Clear", &mode, 0);
-            ImGui::RadioButton("Positions", &mode, 1);
-            ImGui::RadioButton("Randomize", &mode, 2);
-            ImGui::RadioButton("Randomize w/ alpha", &mode, 3);
-            if (resize) {
-                vol.mTexture->resize({ width, height, depth });
-            }
-            if (upload) {
-                std::vector<glm::vec4> data;
-                data.resize(vol.mTexture->mWidth * vol.mTexture->mHeight * vol.mTexture->mDepth);
-                int i = 0;
-                for (size_t x = 1; x <= width; x++) {
-                    for (size_t y = 1; y <= height; y++) {
-                        for (size_t z = 1; z <= depth; z++) {
-                            if (mode == 0) {
-                                data[i] = glm::vec4(0);
-                            }
-                            else if (mode == 1) {
-                                data[i] = glm::vec4(static_cast<float>(x) / width, static_cast<float>(y) / height, static_cast<float>(z) / depth, 1.0f);
-                            }
-                            else if (mode == 2) {
-                                data[i] = glm::vec4(util::genRandomVec3(), util::genRandom());
-                            }
-                            else if (mode == 2) {
-                                data[i] = glm::vec4(util::genRandomVec3(), 1.0);
-                            }
-                            i++;
-                        }
-                    }
-                }
-                vol.mTexture->update({vol.mTexture->mWidth, vol.mTexture->mHeight, vol.mTexture->mDepth}, data.data());
-            }
+            vol.imGuiEditor();
         }
 
         if (auto mockCamera = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {

@@ -1,5 +1,5 @@
 
-layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 1, local_size_y = 1) in;
 layout(rgba32f, binding = 0) uniform writeonly image3D volume;
 
 uniform float near;
@@ -10,7 +10,8 @@ uniform sampler2D inputDepth;
 
 // depth, y, x
 ivec3 texToVolume(vec2 texCoords, float depth, ivec3 volumeBounds) {
-	return ivec3(depth * volumeBounds.z, texCoords * volumeBounds.yx);
+	ivec3 s = ivec3(texCoords * volumeBounds.xy, depth * volumeBounds.z);
+	return s.xyz;
 }
 
 float linearizeDepth(float d,float zNear,float zFar) {
@@ -33,9 +34,9 @@ void main() {
 	float depth = linearizeDepth(depthSample, near, far);
 
 	// output to a specific pixel in the image
-	ivec3 volCoords = texToVolume(texCoords, 1.0 - depthSample, dims);
-	if (depthSample > 0.9) {
-		// color.a = 0.0;
+	ivec3 volCoords = texToVolume(texCoords, depth, dims);
+	if (depthSample > 0.95) {
+		color.a = 0.0;
 	}
-	imageStore(volume, volCoords, color);
+	imageStore(volume, volCoords.xyz, color);
 }
