@@ -13,6 +13,8 @@
 
 #include "Loader/Library.hpp"
 
+#include <imgui/imgui.h>
+
 using namespace neo;
 
 namespace Froxels {
@@ -27,6 +29,9 @@ namespace Froxels {
         virtual void render(const ECS& ecs) override {
             bind();
 
+            loadUniform("StepSize", stepSize);
+            loadUniform("Iterations", iterations);
+
             // Main camera PV, to draw the box
             if (auto cameraOpt = ecs.getSingleView<MainCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
                 auto&& [_, __, camera, spatial] = *cameraOpt;
@@ -38,7 +43,10 @@ namespace Froxels {
             if (auto cameraOpt = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
                 auto&& [_, __, camera, spatial] = *cameraOpt;
                 loadUniform("mockP", camera.getProj());
+                loadUniform("near", camera.getNearFar().x);
+                loadUniform("far", camera.getNearFar().y);
                 loadUniform("mockV", spatial.getView());
+                loadUniform("camPos", spatial.getPosition());
             }
 
             if (auto volumeOpt = ecs.getSingleView<VolumeComponent, SpatialComponent>()) {
@@ -48,10 +56,23 @@ namespace Froxels {
                 loadTexture("volume", *volume.mTexture);
 
                 /* DRAW */
+
+                glFrontFace(GL_CCW);
+                Library::getMesh("cube").mMesh->draw();
+
+                glFrontFace(GL_CW);
                 Library::getMesh("cube").mMesh->draw();
             }
 
             unbind();
         }
+
+        void imguiEditor() {
+            ImGui::SliderFloat("Step size", &stepSize, 0.001f, 10.f);
+            ImGui::SliderInt("Iterations", &iterations, 0, 16);
+        }
+
+        float stepSize = 0.01f;
+        int iterations = 1;
     };
 }
