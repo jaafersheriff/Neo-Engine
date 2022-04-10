@@ -5,6 +5,7 @@
 #include "VolumeDebugShader.hpp"
 #include "VolumeWriteShader.hpp"
 #include "VolumeDebugRayShader.hpp"
+#include "PhongShader.hpp"
 
 #include "Engine/Engine.hpp"
 
@@ -136,7 +137,8 @@ namespace Froxels {
         /* Init renderer */
         auto& compute = renderer.addComputeShader<VolumeWriteShader>("volumewrite.compute");
         compute.mActive = false;
-        renderer.addSceneShader<PhongShader>();
+        renderer.addPreProcessShader<Froxels::PhongShader>();
+        renderer.addSceneShader<neo::PhongShader>();
         renderer.addSceneShader<AlphaTestShader>();
         renderer.addSceneShader<WireframeShader>();
         renderer.addSceneShader<LineShader>();
