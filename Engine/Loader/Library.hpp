@@ -101,7 +101,8 @@ namespace neo {
             t = new T(format, size, getData<uint32_t>(format.mBaseFormat, size).data());
             break;
         case GL_FLOAT:
-            t = new T(format, size, getData<float>(format.mBaseFormat, size).data());
+            // t = new T(format, size, getData<float>(format.mBaseFormat, size).data());
+            t = new T(format, size, nullptr);
             break;
         default:
             NEO_FAIL("This type isn't supported, yet");

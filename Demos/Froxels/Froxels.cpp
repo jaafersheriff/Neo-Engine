@@ -64,6 +64,7 @@ namespace Froxels {
             ecs.addComponent<PerspectiveCameraComponent>(entity, 1.f, 100.f, 45.f);
             ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 7.f);
             ecs.addComponent<MainCameraComponent>(entity);
+            // ecs.addComponent<VolumeWriteCameraComponent>(entity);
         }
 
         {
@@ -83,6 +84,18 @@ namespace Froxels {
             ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
             ecs.addComponent<SelectableComponent>(bunny);
             ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
+
+            // auto assets = Loader::loadMultiAsset("sponza.obj");
+            // for (auto& asset : assets) {
+            //     auto entity = ecs.createEntity();
+            //     ecs.addComponent<MeshComponent>(entity, asset.meshData.mMesh);
+            //     ecs.addComponent<SpatialComponent>(entity, asset.meshData.mBasePosition * 0.1f, asset.meshData.mBaseScale * 0.1f);
+            //     auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
+            //     asset.material.mAmbient = glm::vec3(0.2f);
+            //     ecs.addComponent<renderable::PhongRenderable>(entity, diffuseTex, asset.material);
+            //     ecs.addComponent<SelectableComponent>(entity);
+            //     ecs.addComponent<BoundingBoxComponent>(entity, asset.meshData);
+            // }
         }
 
         // Voxel stuffs

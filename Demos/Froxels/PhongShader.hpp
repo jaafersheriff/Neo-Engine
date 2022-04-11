@@ -44,7 +44,7 @@ namespace Froxels {
                     fragPos = M * vec4(vertPos, 1.0);
                     fragNor = N * vertNor;
                     fragTex = vertTex;
-                    gl_Position = P * V * fragPos;
+                    gl_Position = V * fragPos;
                 })",
                 R"(
                 #include "phong.glsl"
@@ -62,6 +62,9 @@ namespace Froxels {
                 uniform vec3 lightPos;
                 uniform vec3 lightCol;
                 uniform vec3 lightAtt;
+
+                #include "writevoxel.glsl"
+
                 out vec4 color;
                 void main() {
                     vec4 albedo = texture(diffuseMap, fragTex);
@@ -70,6 +73,7 @@ namespace Froxels {
                     color.rgb = albedo.rgb * ambientColor + 
                                 getPhong(fragNor, fragPos.rgb, camPos, lightPos, lightAtt, lightCol, albedo.rgb, specularColor, shine);
                     color.a = albedo.a;
+                    writevoxel(color);
                 })")
         {
             TextureFormat format = { GL_RGBA8, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE };
@@ -100,6 +104,8 @@ namespace Froxels {
             if (camera) {
                 auto&& [cameraEntity, _, cameraSpatial] = *camera;
                 loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                loadUniform("camNear", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getNearFar().x);
+                loadUniform("camFar", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getNearFar().y);
                 loadUniform("V", cameraSpatial.getView());
                 loadUniform("camPos", cameraSpatial.getPosition());
             }
@@ -110,6 +116,14 @@ namespace Froxels {
                 loadUniform("lightCol", light.mColor);
                 loadUniform("lightAtt", light.mAttenuation);
                 loadUniform("lightPos", spatial.getPosition());
+            }
+
+            {
+                auto volume = Library::getTexture("Volume");
+                glClearTexImage(volume->mTextureID, 0, GL_RGBA, GL_FLOAT, 0);
+                glBindImageTexture(0, volume->mTextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+                loadUniform("bufferSize", glm::vec2(fbo->mTextures[0]->mWidth, fbo->mTextures[0]->mHeight));
             }
 
             for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::PhongRenderable, MeshComponent, SpatialComponent>().each()) {
@@ -128,7 +142,11 @@ namespace Froxels {
                 loadUniform("shine", material.mShininess);
 
                 /* DRAW */
+                glFrontFace(GL_CW);
                 mesh.mMesh->draw();
+                glFrontFace(GL_CCW);
+                mesh.mMesh->draw();
+
             }
         }
     };
