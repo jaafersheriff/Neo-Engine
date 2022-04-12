@@ -41,6 +41,7 @@ endif()
 add_compile_definitions(
 	_CRT_SECURE_NO_WARNINGS
 	$<$<CONFIG:Debug>:DEBUG_MODE>
+	$<$<CONFIG:RelWithDebInfo>:DEBUG_MODE>
 )
 
 #--------------------------------------------------------------------
@@ -48,6 +49,7 @@ add_compile_definitions(
 #--------------------------------------------------------------------
 if(MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+	set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 endif()
 
 set(CPACK_COMPONENTS_GROUPING IGNORE)

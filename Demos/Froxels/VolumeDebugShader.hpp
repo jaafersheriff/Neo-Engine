@@ -10,6 +10,7 @@
 #include "ECS//Messaging/Messenger.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
@@ -39,7 +40,6 @@ namespace Froxels {
         virtual void render(const ECS& ecs) override {
             bind();
 
-            loadUniform("voxelSize", 1.f);
             auto cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
             if (cameraView) {
                 auto&& [cameraEntity, __, cameraSpatial] = *cameraView;
@@ -48,18 +48,30 @@ namespace Froxels {
             }
 
 
-            if (auto&& volumeOpt = ecs.getSingleView<TagComponent, VolumeComponent>()) {
-                auto&& [_, __, volume] = *volumeOpt;
+            if (auto&& volumeOpt = ecs.getSingleView<TagComponent, VolumeComponent, OrthoCameraComponent, SpatialComponent>()) {
+                auto&& [_, __, volume, ortho, cameraSpat] = *volumeOpt;
 
                 size_t numVoxels = volume.mTexture->mWidth * volume.mTexture->mHeight * volume.mTexture->mDepth;
+                auto dimension = 0x1 << volume.mSize;
+                glm::vec2 xBounds = ortho.getHorizontalBounds();
+                glm::vec2 yBounds = ortho.getVerticalBounds();
+                glm::vec2 zBounds = ortho.getNearFar();
+                glm::vec3 range = glm::vec3(
+                    xBounds.y - xBounds.x,
+                    yBounds.y - yBounds.x,
+                    zBounds.y - zBounds.x);
+                glm::vec3 voxelSize = range / static_cast<float>(dimension);
+                loadUniform("voxelSize", voxelSize);
 
                 /* Pull volume data out of GPU */
-                std::vector<float> voxelData;
-                voxelData.resize(numVoxels * 4);
+                float* voxelData = new float[numVoxels * 4];
                 volume.mTexture->bind();
                 {
                     RENDERER_MP_ENTER("Read volume");
-                    glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_FLOAT, voxelData.data());
+                    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+                    // pretty sure the amd issue is here?
+                    glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_FLOAT, voxelData);
+                    glMemoryBarrier(GL_ALL_BARRIER_BITS);
                     RENDERER_MP_LEAVE();
                 }
 
@@ -82,11 +94,17 @@ namespace Froxels {
                     voxelColors.push_back(b);
                     voxelColors.push_back(a);
 
-                    glm::ivec3 position = volume.getVoxelIndex(i);
-                    voxelPositions.push_back(static_cast<float>(position.x));
-                    voxelPositions.push_back(static_cast<float>(position.y));
-                    voxelPositions.push_back(static_cast<float>(position.z));
+                    glm::ivec3 index = volume.getVoxelIndex(i);
+
+                    // TODO - this needs to be pushed back by 1/2 voxel size
+                    float x = float(index.x) * range.x / dimension + xBounds.x + voxelSize.x / 2.f;
+                    float y = float(index.y) * range.y / dimension + yBounds.x + voxelSize.y / 2.f;
+                    float z = float(index.z) * range.z / dimension + zBounds.x + voxelSize.z / 2.f;
+                    voxelPositions.push_back(cameraSpat.getPosition().x + x);
+                    voxelPositions.push_back(cameraSpat.getPosition().y + y);
+                    voxelPositions.push_back(cameraSpat.getPosition().z + z);
                 }
+                delete[] voxelData;
                 RENDERER_MP_LEAVE();
 
                 RENDERER_MP_ENTER("Upload instance data");

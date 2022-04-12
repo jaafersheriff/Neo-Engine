@@ -121,7 +121,7 @@ namespace Froxels {
                 auto entity = ecs.createEntity();
                 ecs.addComponent<TagComponent>(entity, "Mock camera");
                 auto spat = ecs.addComponent<SpatialComponent>(entity, glm::vec3(7.f, 4.f, 2.f), glm::vec3(1.f));
-                spat->setLookDir(glm::vec3(-1.f, 0.f, 0.f));
+                spat->setOrientation(glm::mat3(glm::lookAt(spat->getPosition(), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0))));
                 ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 10.f, 45.f);
                 ecs.addComponent<VolumeWriteCameraComponent>(entity);
                 ecs.addComponent<LineMeshComponent>(entity, glm::vec3(0.f, 1.f, 1.f));
