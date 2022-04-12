@@ -79,7 +79,7 @@ namespace Froxels {
             TextureFormat format = { GL_RGBA8, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE };
             auto fbo = Library::createFBO("downscalebackbuffer");
             fbo->attachColorTexture({ 1, 1 }, format);
-            fbo->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_BORDER);
+            fbo->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_EDGE);
             fbo->initDrawBuffers();
 
             // Handle frame size changing
@@ -100,12 +100,11 @@ namespace Froxels {
             bind();
 
             /* Load PV */
-            const auto& camera = ecs.getSingleView<VolumeWriteCameraComponent, SpatialComponent>();
-            if (camera) {
-                auto&& [cameraEntity, _, cameraSpatial] = *camera;
-                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
-                loadUniform("camNear", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getNearFar().x);
-                loadUniform("camFar", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getNearFar().y);
+            if (const auto& cameraOpt = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
+                auto&& [_, __, camera, cameraSpatial] = *cameraOpt;
+                loadUniform("P", camera.getProj());
+                loadUniform("camNear", camera.getNearFar().x);
+                loadUniform("camFar", camera.getNearFar().y);
                 loadUniform("V", cameraSpatial.getView());
                 loadUniform("camPos", cameraSpatial.getPosition());
             }
@@ -121,7 +120,7 @@ namespace Froxels {
             {
                 auto volume = Library::getTexture("Volume");
                 glClearTexImage(volume->mTextureID, 0, GL_RGBA, GL_FLOAT, 0);
-                glBindImageTexture(0, volume->mTextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+                glBindImageTexture(0, volume->mTextureID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
                 loadUniform("bufferSize", glm::vec2(fbo->mTextures[0]->mWidth, fbo->mTextures[0]->mHeight));
             }
