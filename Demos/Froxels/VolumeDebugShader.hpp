@@ -100,9 +100,12 @@ namespace Froxels {
                     float x = float(index.x) * range.x / dimension + xBounds.x + voxelSize.x / 2.f;
                     float y = float(index.y) * range.y / dimension + yBounds.x + voxelSize.y / 2.f;
                     float z = float(index.z) * range.z / dimension + zBounds.x + voxelSize.z / 2.f;
-                    voxelPositions.push_back(cameraSpat.getPosition().x + x);
-                    voxelPositions.push_back(cameraSpat.getPosition().y + y);
-                    voxelPositions.push_back(cameraSpat.getPosition().z + z);
+                    glm::vec3 pos = cameraSpat.getPosition() + glm::vec3(x, y, z);
+                    pos -= static_cast<float>(dimension);
+                    pos *= -1;
+                    voxelPositions.push_back(x);
+                    voxelPositions.push_back(y);
+                    voxelPositions.push_back(z);
                 }
                 delete[] voxelData;
                 RENDERER_MP_LEAVE();

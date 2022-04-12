@@ -41,7 +41,7 @@ namespace Froxels {
 
                 auto volume = Library::getTexture("Volume");
                 glClearTexImage(volume->mTextureID, 0, GL_RGBA, GL_FLOAT, 0);
-                glBindImageTexture(0, volume->mTextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+                glBindImageTexture(0, volume->mTextureID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
                 {
                     RENDERER_MP_ENTER("Dispatch");
