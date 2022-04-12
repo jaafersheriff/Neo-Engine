@@ -3,6 +3,10 @@
 #include "ECS/Component/Component.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 
+#include "Util/Log/Log.hpp"
+#include "Util/Util.hpp"
+
+#include <algorithm>
 #include <glm/glm.hpp>
 #include <imgui/imgui.h>
 
@@ -13,6 +17,7 @@ namespace Froxels {
         VolumeComponent(Texture* tex)
             : mTexture(tex)
         {}
+
         glm::ivec3 getVoxelIndex(size_t index) const {
             int line = 0x1 << mSize;
             int slice = (0x1 << mSize) * line;
@@ -20,6 +25,17 @@ namespace Froxels {
             int y = (static_cast<int>(index) - z * slice) / line;
             int x = (static_cast<int>(index) - z * slice - y * line);
             return glm::ivec3(x, y, z);
+        }
+
+        size_t reverseVoxelIndex(glm::ivec3 index) const {
+            int dim = 0x1 << mSize;
+            int line = dim;
+            int slice = dim * line;
+            size_t r = static_cast<size_t>(index.x + index.y * line + index.z * slice);
+            if (r < 0 || r > dim*dim*dim*4) {
+                NEO_LOG_W("Found an index out of %d bounds: %d", dim*dim*dim*4, r);
+            }
+            return std::clamp(r, static_cast<size_t>(0), static_cast<size_t>(dim*dim*dim*4));
         }
 
         virtual std::string getName() const override { return "VolumeComponent"; }

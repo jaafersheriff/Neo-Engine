@@ -81,34 +81,81 @@ namespace Froxels {
                 voxelColors.reserve(numVoxels * 4);
 
                 RENDERER_MP_ENTER("Create instance data");
-                for (int i = 0; i < numVoxels; i++) {
-                    float r = voxelData[i * 4 + 0];
-                    float g = voxelData[i * 4 + 1];
-                    float b = voxelData[i * 4 + 2];
-                    float a = voxelData[i * 4 + 3];
-                    if (a <= 0.05f) {
-                        continue;
+
+                if (doTrace) {
+                    glm::vec3 base = glm::ivec3(dimension / 2, dimension / 2, 0);
+                    for (int x = -resolution / 2; x <= resolution / 2; x++) {
+                        for (int y = -resolution / 2; y <= resolution / 2; y++) {
+                            glm::vec3 dir;
+                            dir.x = x / (static_cast<float>(resolution + 1) / 2);
+                            dir.y = y / (static_cast<float>(resolution + 1) / 2);
+                            glm::vec3 start = base;
+                            start.x += dir.x;
+                            start.y += dir.y;
+                            dir.z = dimension / maxSteps * stepSize;
+                            int step = 0;
+                            glm::vec3 end = start;
+                            while (step < maxSteps && end.x < dimension && end.y < dimension && end.z < dimension) {
+                                step++;
+                                size_t index = static_cast<int>(volume.reverseVoxelIndex(end));
+                                float r = voxelData[index * 4 + 0];
+                                float g = voxelData[index * 4 + 1];
+                                float b = voxelData[index * 4 + 2];
+                                float a = voxelData[index * 4 + 3];
+
+                                end += dir;
+                                if (a > 0.05f) {
+                                    voxelColors.push_back(r);
+                                    voxelColors.push_back(g);
+                                    voxelColors.push_back(b);
+                                    voxelColors.push_back(a);
+
+                                    // float _x = float(end.x) * range.x / dimension + xBounds.x + voxelSize.x / 2.f;
+                                    // float _y = float(end.y) * range.y / dimension + yBounds.x + voxelSize.y / 2.f;
+                                    // float _z = float(end.z) * range.z / dimension + zBounds.x + voxelSize.z / 2.f;
+                                    // glm::vec3 pos = cameraSpat.getPosition() + glm::vec3(_x, _y, _z);
+                                    // pos -= static_cast<float>(dimension);
+                                    // pos *= -1;
+                                    glm::vec3 pos = end;
+                                    voxelPositions.push_back(pos.x);
+                                    voxelPositions.push_back(pos.y);
+                                    voxelPositions.push_back(pos.z);
+                                }
+                            }
+                        }
                     }
-                    voxelColors.push_back(r);
-                    voxelColors.push_back(g);
-                    voxelColors.push_back(b);
-                    voxelColors.push_back(a);
-
-                    glm::ivec3 index = volume.getVoxelIndex(i);
-
-                    // TODO - this needs to be pushed back by 1/2 voxel size
-                    float x = float(index.x) * range.x / dimension + xBounds.x + voxelSize.x / 2.f;
-                    float y = float(index.y) * range.y / dimension + yBounds.x + voxelSize.y / 2.f;
-                    float z = float(index.z) * range.z / dimension + zBounds.x + voxelSize.z / 2.f;
-                    glm::vec3 pos = cameraSpat.getPosition() + glm::vec3(x, y, z);
-                    pos -= static_cast<float>(dimension);
-                    pos *= -1;
-                    voxelPositions.push_back(x);
-                    voxelPositions.push_back(y);
-                    voxelPositions.push_back(z);
                 }
-                delete[] voxelData;
+                else {
+                    for (int i = 0; i < numVoxels; i++) {
+                        float r = voxelData[i * 4 + 0];
+                        float g = voxelData[i * 4 + 1];
+                        float b = voxelData[i * 4 + 2];
+                        float a = voxelData[i * 4 + 3];
+                        if (a <= 0.05f) {
+                            continue;
+                        }
+                        voxelColors.push_back(r);
+                        voxelColors.push_back(g);
+                        voxelColors.push_back(b);
+                        voxelColors.push_back(a);
+
+                        // TODO : I could raycast through the volume data to find which cubes to generate
+                        glm::ivec3 index = volume.getVoxelIndex(i);
+
+                        // TODO - this needs to be pushed back by 1/2 voxel size
+                        float x = float(index.x) * range.x / dimension + xBounds.x + voxelSize.x / 2.f;
+                        float y = float(index.y) * range.y / dimension + yBounds.x + voxelSize.y / 2.f;
+                        float z = float(index.z) * range.z / dimension + zBounds.x + voxelSize.z / 2.f;
+                        glm::vec3 pos = cameraSpat.getPosition() + glm::vec3(x, y, z);
+                        pos -= static_cast<float>(dimension);
+                        pos *= -1;
+                        voxelPositions.push_back(x);
+                        voxelPositions.push_back(y);
+                        voxelPositions.push_back(z);
+                    }
+                }
                 RENDERER_MP_LEAVE();
+                delete[] voxelData;
 
                 RENDERER_MP_ENTER("Upload instance data");
                 auto instancedMesh = Library::getMesh("instanced cube");
@@ -123,6 +170,15 @@ namespace Froxels {
             unbind();
         }
 
-    private:
+        bool doTrace = false;
+        int resolution = 1;
+        float stepSize = 0.1f;
+        int maxSteps = 16;
+        virtual void imguiEditor() override { 
+            ImGui::Checkbox("trace", &doTrace);
+            ImGui::SliderInt("resolution", &resolution, 1, 256);
+            ImGui::SliderFloat("stepSize", &stepSize, 0.0001f, 10.f);
+            ImGui::SliderInt("max steps", &maxSteps, 1, 64);
+        }
     };
 }
