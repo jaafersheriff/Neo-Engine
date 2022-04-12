@@ -68,10 +68,10 @@ namespace neo {
         std::stringstream glsl;
         glsl << "#version " << GLMajor << GLMinor << "0";
         mDetails.mGLSLVersion = glsl.str();
-
     }
 
     void Renderer::setDemoConfig(IDemo::Config config) {
+        resetState();
         APP_SHADER_DIR = config.shaderDir;
         mClearColor = config.clearColor;
     }

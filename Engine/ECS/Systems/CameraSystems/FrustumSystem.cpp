@@ -25,14 +25,16 @@ namespace neo {
                 glm::vec3 Cnear = P + v * nDis;
                 glm::vec3 Cfar = P + v * fDis;
 
-                frustum.NearLeftTop = Cnear + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().x);
-                frustum.NearRightTop = Cnear + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().y);
-                frustum.NearLeftBottom = Cnear + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().x);
-                frustum.NearRightBottom = Cnear + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().y);
-                frustum.FarLeftTop = Cfar + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().x);
-                frustum.FarRightTop = Cfar + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().y);
-                frustum.FarLeftBottom = Cfar + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().x);
-                frustum.FarRightBottom = Cfar + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().y);
+                glm::vec2 horizontalBounds = orthoCam->getHorizontalBounds();
+                glm::vec2 verticalBounds = orthoCam->getVerticalBounds();
+                frustum.NearLeftTop = Cnear + (up * verticalBounds.y) + (w * horizontalBounds.x);
+                frustum.NearRightTop = Cnear + (up * verticalBounds.y) + (w * horizontalBounds.y);
+                frustum.NearLeftBottom = Cnear + (up * verticalBounds.x) + (w * horizontalBounds.x);
+                frustum.NearRightBottom = Cnear + (up * verticalBounds.x) + (w * horizontalBounds.y);
+                frustum.FarLeftTop = Cfar + (up * verticalBounds.y) + (w * horizontalBounds.x);
+                frustum.FarRightTop = Cfar + (up * verticalBounds.y) + (w * horizontalBounds.y);
+                frustum.FarLeftBottom = Cfar + (up * verticalBounds.x) + (w * horizontalBounds.x);
+                frustum.FarRightBottom = Cfar + (up * verticalBounds.x) + (w * horizontalBounds.y);
             }
             else if (auto perspectiveCam = ecs.getComponent<PerspectiveCameraComponent>(entity)) {
                 PV = perspectiveCam->getProj() * spatial.getView();

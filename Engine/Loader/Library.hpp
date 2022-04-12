@@ -53,30 +53,6 @@ namespace neo {
             static void _insertTexture(const std::string&, Texture*);
     };
 
-    template <typename T>
-    std::vector<T> getData(GLenum format, glm::uvec3 size) {
-        std::vector<T> data;
-        size_t finalSize = size.x * size.y * size.z;
-        switch (format) {
-        case GL_RED:
-            size *= 1;
-            break;
-        case GL_RG:
-            size *= 2;
-            break;
-        case GL_RGB:
-            size *= 3;
-            break;
-        case GL_RGBA:
-            size *= 4;
-            break;
-        default:
-            NEO_FAIL("This format isn't supported, yet");
-            break;
-        }
-        data.resize(finalSize);
-        return data;
-    }
 
     template <typename T>
     Texture* Library::createEmptyTexture(const std::string& name, TextureFormat format, glm::uvec3 size) {
@@ -85,29 +61,7 @@ namespace neo {
 
         auto it = mTextures.find(name);
         NEO_ASSERT(it == mTextures.end(), "Texture already found");
-        Texture* t;
-
-        switch (format.mType) {
-        case GL_BYTE:
-            t = new T(format, size, getData<int8_t>(format.mBaseFormat, size).data());
-            break;
-        case GL_UNSIGNED_BYTE:
-            t = new T(format, size, getData<uint8_t>(format.mBaseFormat, size).data());
-            break;
-        case GL_INT:
-            t = new T(format, size, getData<int32_t>(format.mBaseFormat, size).data());
-            break;
-        case GL_UNSIGNED_INT:
-            t = new T(format, size, getData<uint32_t>(format.mBaseFormat, size).data());
-            break;
-        case GL_FLOAT:
-            // t = new T(format, size, getData<float>(format.mBaseFormat, size).data());
-            t = new T(format, size, nullptr);
-            break;
-        default:
-            NEO_FAIL("This type isn't supported, yet");
-            break;
-        }
+        Texture* t = new T(format, size, nullptr);
         _insertTexture(name, t);
         return t;
     }

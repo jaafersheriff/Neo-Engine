@@ -35,8 +35,6 @@ namespace neo {
             bind();
 
             glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mInternalFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, data);
-
-            glBindTexture(GL_TEXTURE_3D, 0);
         }
 
         virtual void _resize() override {

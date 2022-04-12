@@ -44,7 +44,7 @@ namespace Froxels {
                     fragPos = M * vec4(vertPos, 1.0);
                     fragNor = N * vertNor;
                     fragTex = vertTex;
-                    gl_Position = V * fragPos;
+                    gl_Position = P * V * fragPos;
                 })",
                 R"(
                 #include "phong.glsl"
@@ -144,8 +144,10 @@ namespace Froxels {
                 /* DRAW */
                 glFrontFace(GL_CW);
                 mesh.mMesh->draw();
+                glMemoryBarrier(GL_ALL_BARRIER_BITS);
                 glFrontFace(GL_CCW);
                 mesh.mMesh->draw();
+                glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
             }
         }
