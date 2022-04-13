@@ -76,7 +76,7 @@ namespace Froxels {
                     writevoxel(color);
                 })")
         {
-            TextureFormat format = { GL_RGBA8, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE };
+            TextureFormat format = { GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE };
             auto fbo = Library::createFBO("downscalebackbuffer");
             fbo->attachColorTexture({ 1, 1 }, format);
             fbo->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_EDGE);

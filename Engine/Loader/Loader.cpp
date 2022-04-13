@@ -107,6 +107,7 @@ namespace neo {
         }
         // TODO : use assimp or another optimized asset loader
         std::string errString;
+        // TODO - this breaks down with nested assets
         bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, (resDir + fileName).c_str(), resDir.c_str());
         NEO_ASSERT(rc, errString.c_str());
 
@@ -114,6 +115,8 @@ namespace neo {
 
         for (auto& shape : shapes) {
             Asset asset;
+
+            asset.name = shape.name;
 
             Mesh* mesh = new Mesh;
             asset.meshData.mMesh = mesh;
