@@ -72,18 +72,20 @@ namespace Froxels {
             ecs.addComponent<TagComponent>(entity, "Light");
             ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 2.f, 20.f));
             ecs.addComponent<LightComponent>(entity, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+            ecs.addComponent<MeshComponent>(entity, Library::getMesh("sphere").mMesh);
+            ecs.addComponent<renderable::WireframeRenderable>(entity);
         }
 
         {
             /* Bunny object */
-            auto bunny = ecs.createEntity();
-            ecs.addComponent<TagComponent>(bunny, "Bunny");
-            ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-            ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-            ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
-            ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
-            ecs.addComponent<SelectableComponent>(bunny);
-            ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
+            // auto bunny = ecs.createEntity();
+            // ecs.addComponent<TagComponent>(bunny, "Bunny");
+            // ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
+            // ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
+            // ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
+            // ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
+            // ecs.addComponent<SelectableComponent>(bunny);
+            // ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
 
             // auto assets = Loader::loadMultiAsset("sponza.obj");
             // for (auto& asset : assets) {
@@ -96,6 +98,21 @@ namespace Froxels {
             //     ecs.addComponent<SelectableComponent>(entity);
             //     ecs.addComponent<BoundingBoxComponent>(entity, asset.meshData);
             // }
+
+            auto assets = Loader::loadMultiAsset("CornellBox-Original.obj");
+            for (auto& asset : assets) {
+                auto entity = ecs.createEntity();
+                ecs.addComponent<MeshComponent>(entity, asset.meshData.mMesh);
+                ecs.addComponent<SpatialComponent>(entity, asset.meshData.mBasePosition, asset.meshData.mBaseScale);
+                auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
+                ecs.addComponent<renderable::PhongRenderable>(entity, diffuseTex, asset.material);
+                ecs.addComponent<SelectableComponent>(entity);
+                ecs.addComponent<BoundingBoxComponent>(entity, asset.meshData);
+                if (asset.name == "shortBox" || asset.name == "tallBox") {
+                    ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 1.0f, 0.f));
+                }
+            }
+
         }
 
         // Voxel stuffs
@@ -121,7 +138,7 @@ namespace Froxels {
                 auto entity = ecs.createEntity();
                 ecs.addComponent<TagComponent>(entity, "Mock camera");
                 auto spat = ecs.addComponent<SpatialComponent>(entity, glm::vec3(7.f, 4.f, 2.f), glm::vec3(1.f));
-                spat->setOrientation(glm::mat3(glm::lookAt(spat->getPosition(), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0))));
+                spat->setLookDir(glm::vec3(0, 0, -1));
                 ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 10.f, 45.f);
                 ecs.addComponent<VolumeWriteCameraComponent>(entity);
                 ecs.addComponent<LineMeshComponent>(entity, glm::vec3(0.f, 1.f, 1.f));
@@ -166,15 +183,36 @@ namespace Froxels {
     }
 
     void Demo::imGuiEditor(ECS& ecs) {
-        if (auto volume = ecs.getSingleView<VolumeComponent, TagComponent>()) {
-            auto&& [_, vol, spat] = *volume;
-            vol.imGuiEditor();
+        if (ImGui::TreeNode("Volume")) {
+            if (auto volume = ecs.getSingleView<VolumeComponent, TagComponent>()) {
+                auto&& [_, vol, spat] = *volume;
+                ImGui::PushID(static_cast<int>(_));
+                vol.imGuiEditor();
+                ImGui::PopID();
+            }
+            ImGui::TreePop();
         }
 
-        if (auto mockCamera = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
-            auto&& [_, __, camera, spatial] = *mockCamera;
-            camera.imGuiEditor();
-            spatial.imGuiEditor();
+        if (ImGui::TreeNode("Volume Camera")) {
+            if (auto mockCamera = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
+                auto&& [_, __, camera, spatial] = *mockCamera;
+                ImGui::PushID(static_cast<int>(_));
+                camera.imGuiEditor();
+                spatial.imGuiEditor();
+                ImGui::PopID();
+            }
+            ImGui::TreePop();
+        }
+
+        if (ImGui::TreeNode("Light")) {
+            if (auto lightOpt = ecs.getSingleView<LightComponent, SpatialComponent>()) {
+                auto&& [_, light, spat] = *lightOpt;
+                ImGui::PushID(static_cast<int>(_));
+                light.imGuiEditor();
+                spat.imGuiEditor();
+                ImGui::PopID();
+            }
+            ImGui::TreePop();
         }
     }
 

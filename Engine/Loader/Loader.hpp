@@ -27,6 +27,7 @@ namespace neo {
     };
 
     struct Asset {
+        std::string name;
         MeshData meshData;
         Material material;
         Texture* ambient_tex = nullptr;            // map_Ka

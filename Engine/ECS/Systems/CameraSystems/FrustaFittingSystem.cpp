@@ -20,6 +20,7 @@ namespace neo {
 
         auto sourceCameraTuple = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent, PerspectiveCameraComponent>();
         auto receiverCameraTuple = ecs.getSingleView<FrustumFitReceiverComponent, SpatialComponent, OrthoCameraComponent>();
+        // TODO - light contribution should be a separate system? This system should just be for the raw fitting?
         auto lightTuple = ecs.getSingleView<LightComponent, SpatialComponent>();
         if (!receiverCameraTuple || !sourceCameraTuple || !lightTuple) {
             return;
