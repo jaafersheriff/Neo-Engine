@@ -79,7 +79,7 @@ namespace Froxels {
                 mTexture->update(glm::uvec3(0x1<<mSize), data.data());
             }
         }
-        int mSize = 3;
+        int mSize = 4;
         Texture* mTexture;
     };
 }
