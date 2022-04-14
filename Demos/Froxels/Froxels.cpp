@@ -3,6 +3,7 @@
 #include "VolumeWriteCameraComponent.hpp"
 
 #include "VolumeDebugShader.hpp"
+#include "VolumeDebugGShader.hpp"
 #include "VolumeWriteShader.hpp"
 #include "PhongShader.hpp"
 
@@ -65,6 +66,8 @@ namespace Froxels {
             ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 7.f);
             ecs.addComponent<MainCameraComponent>(entity);
             // ecs.addComponent<VolumeWriteCameraComponent>(entity);
+            // ecs.addComponent<FrustumComponent>(entity);
+            // ecs.addComponent<FrustumFitSourceComponent>(entity);
         }
 
         {
@@ -78,14 +81,14 @@ namespace Froxels {
 
         {
             /* Bunny object */
-            // auto bunny = ecs.createEntity();
-            // ecs.addComponent<TagComponent>(bunny, "Bunny");
-            // ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-            // ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-            // ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
-            // ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
-            // ecs.addComponent<SelectableComponent>(bunny);
-            // ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
+            auto bunny = ecs.createEntity();
+            ecs.addComponent<TagComponent>(bunny, "Bunny");
+            ecs.addComponent<SpatialComponent>(bunny, glm::vec3(3.f, 1.0f, 0.f));
+            ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
+            ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
+            ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
+            ecs.addComponent<SelectableComponent>(bunny);
+            ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
 
             // auto assets = Loader::loadMultiAsset("sponza.obj");
             // for (auto& asset : assets) {
@@ -125,7 +128,7 @@ namespace Froxels {
                 format.mFilter = GL_LINEAR;
                 format.mMode = GL_CLAMP_TO_EDGE;
                 format.mType = GL_FLOAT;
-                ecs.addComponent<VolumeComponent>(entity, Library::createEmptyTexture<Texture3D>("Volume", format, { 8, 8, 8 }));
+                ecs.addComponent<VolumeComponent>(entity, Library::createEmptyTexture<Texture3D>("Volume", format, { 16, 16, 16 }));
                 ecs.addComponent<TagComponent>(entity, "Volume");
                 ecs.addComponent<OrthoCameraComponent>(entity, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
                 ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
@@ -138,10 +141,10 @@ namespace Froxels {
                 auto entity = ecs.createEntity();
                 ecs.addComponent<TagComponent>(entity, "Mock camera");
                 auto spat = ecs.addComponent<SpatialComponent>(entity, glm::vec3(7.f, 4.f, 2.f), glm::vec3(1.f));
-                spat->setLookDir(glm::vec3(0, 0, -1));
+                spat->setOrientation(glm::mat3(glm::lookAt(spat->getPosition(), glm::vec3(0), glm::vec3(0, 1, 0))));
                 ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 10.f, 45.f);
-                ecs.addComponent<VolumeWriteCameraComponent>(entity);
                 ecs.addComponent<LineMeshComponent>(entity, glm::vec3(0.f, 1.f, 1.f));
+                ecs.addComponent<VolumeWriteCameraComponent>(entity);
                 ecs.addComponent<FrustumComponent>(entity);
                 ecs.addComponent<FrustumFitSourceComponent>(entity);
             }
@@ -173,6 +176,7 @@ namespace Froxels {
         renderer.addSceneShader<LineShader>();
         auto& debug = renderer.addSceneShader<VolumeDebugShader>("voxel.vert", "voxel.frag");
         debug.mActive = false;
+        renderer.addSceneShader<VolumeDebugGShader>("voxelG.vert", "voxelG.geom", "voxelG.frag");
     }
 
     void Demo::destroy() {
@@ -200,6 +204,22 @@ namespace Froxels {
                 camera.imGuiEditor();
                 spatial.imGuiEditor();
                 ImGui::PopID();
+            }
+
+            if (ImGui::Button("Swap")) {
+                for (auto&& [cameraEntity, _, __] : ecs.getView<PerspectiveCameraComponent, SpatialComponent>().each()) {
+                    if (ecs.has<VolumeWriteCameraComponent>(cameraEntity)) {
+                        ecs.removeComponent<VolumeWriteCameraComponent>(cameraEntity);
+                        ecs.removeComponent<FrustumComponent>(cameraEntity);
+                        ecs.removeComponent<FrustumFitSourceComponent>(cameraEntity);
+                    }
+                    else {
+                        ecs.addComponent<VolumeWriteCameraComponent>(cameraEntity);
+                        ecs.addComponent<FrustumComponent>(cameraEntity);
+                        ecs.addComponent<FrustumFitSourceComponent>(cameraEntity);
+                    }
+                }
+
             }
             ImGui::TreePop();
         }

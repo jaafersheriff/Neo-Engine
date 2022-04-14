@@ -48,6 +48,7 @@ namespace Froxels {
             }
 
 
+
             if (auto&& volumeOpt = ecs.getSingleView<TagComponent, VolumeComponent, OrthoCameraComponent, SpatialComponent>()) {
                 auto&& [_, __, volume, ortho, cameraSpat] = *volumeOpt;
 
@@ -106,23 +107,19 @@ namespace Froxels {
 
                                 end += dir;
                                 if (a <= 0.05f) {
-                                    // continue;
+                                    continue;
                                 }
                                 voxelColors.push_back(r);
                                 voxelColors.push_back(g);
                                 voxelColors.push_back(b);
                                 voxelColors.push_back(a);
 
-                                // float _x = float(end.x) * range.x / dimension + xBounds.x + voxelSize.x / 2.f;
-                                // float _y = float(end.y) * range.y / dimension + yBounds.x + voxelSize.y / 2.f;
-                                // float _z = float(end.z) * range.z / dimension + zBounds.x + voxelSize.z / 2.f;
-                                // glm::vec3 pos = cameraSpat.getPosition() + glm::vec3(_x, _y, _z);
-                                // pos -= static_cast<float>(dimension);
-                                // pos *= -1;
-                                glm::vec3 pos = end;
-                                voxelPositions.push_back(pos.x);
-                                voxelPositions.push_back(pos.y);
-                                voxelPositions.push_back(pos.z);
+                                float _x = float(end.x) * range.x / dimension + xBounds.x + voxelSize.x / 2.f;
+                                float _y = float(end.y) * range.y / dimension + yBounds.x + voxelSize.y / 2.f;
+                                float _z = float(end.z) * range.z / dimension + zBounds.x + voxelSize.z / 2.f;
+                                voxelPositions.push_back(_x);
+                                voxelPositions.push_back(_y);
+                                voxelPositions.push_back(_z);
                             }
                         }
                     }
@@ -134,33 +131,25 @@ namespace Froxels {
                         float b = voxelData[i * 4 + 2];
                         float a = voxelData[i * 4 + 3];
                         if (a <= 0.05f) {
-                            continue;
+                            a = 0.25f;
                         }
                         voxelColors.push_back(r);
                         voxelColors.push_back(g);
                         voxelColors.push_back(b);
                         voxelColors.push_back(a);
 
-                        // TODO : I could raycast through the volume data to find which cubes to generate
-                        glm::ivec3 index = volume.getVoxelIndex(i, lod);
+                        glm::vec3 index = volume.getVoxelIndex(i, lod);
+                        // Map [0-dim] to [-dim/2, dim/2]
+                        index -= static_cast<float>(dimension) / 2.f;
+
+                        float x = float(index.x) * range.x / dimension + xBounds.x;
+                        float y = float(index.y) * range.y / dimension + yBounds.x;
+                        float z = float(index.z) * range.z / dimension + zBounds.x;
+                        glm::vec3 posIndex = { x, y, z };
+                        glm::vec3 pos = cameraSpat.getPosition() + cameraSpat.getLookDir() * range.z / 2.f;
+                        pos += glm::vec3(posIndex.x, posIndex.y, posIndex.z);
 
                         // TODO - this needs to be pushed back by 1/2 voxel size
-                        float x = float(index.x) * range.x / dimension + xBounds.x + voxelSize.x / 2.f;
-                        float y = float(index.y) * range.y / dimension + yBounds.x + voxelSize.y / 2.f;
-                        float z = float(index.z) * range.z / dimension + zBounds.x + voxelSize.z / 2.f;
-                        glm::vec3 posIndex = { x, y, z };
-                        if (doIndexFlip) {
-                            posIndex -= static_cast<float>(dimension);
-                            posIndex *= -1;
-                        }
-                        glm::vec3 pos = cameraSpat.getPosition() + cameraSpat.getLookDir() * range.z / 2.f;
-                        if (doIndexSwizzle) {
-                            pos += glm::vec3(posIndex.x, posIndex.y, -posIndex.z);
-                        }
-                        else {
-                            pos += glm::vec3(posIndex.x, posIndex.y, posIndex.z);
-                        }
-                        // pos = glm::vec3(ortho.getProj() * cameraSpat.getView() * glm::vec4(pos.x, pos.y, pos.z, 1.0));
                         voxelPositions.push_back(pos.x);
                         voxelPositions.push_back(pos.y);
                         voxelPositions.push_back(pos.z);
@@ -190,8 +179,6 @@ namespace Froxels {
         int lod = 0;
         int volsize = 1;
 
-        bool doIndexFlip = false;
-        bool doIndexSwizzle = false;
         virtual void imguiEditor() override { 
             ImGui::Checkbox("trace", &doTrace);
             if (doTrace) {
@@ -200,8 +187,6 @@ namespace Froxels {
                 ImGui::SliderInt("max steps", &maxSteps, 1, 64);
             }
             else {
-                ImGui::Checkbox("Index flip", &doIndexFlip);
-                ImGui::Checkbox("Index swiz", &doIndexSwizzle);
             }
             ImGui::SliderInt("LOD", &lod, 0, volsize);
         }
