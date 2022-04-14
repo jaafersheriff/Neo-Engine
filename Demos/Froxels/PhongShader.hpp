@@ -87,7 +87,6 @@ namespace Froxels {
                 glm::ivec2 frameSize = (static_cast<const FrameSizeMessage&>(msg)).mSize;
                 Library::getFBO("downscalebackbuffer")->resize(frameSize / 2);
                 });
-
         }
 
         virtual void render(const ECS& ecs) override {
@@ -117,8 +116,8 @@ namespace Froxels {
                 loadUniform("lightPos", spatial.getPosition());
             }
 
+            auto volume = Library::getTexture("Volume");
             {
-                auto volume = Library::getTexture("Volume");
                 glClearTexImage(volume->mTextureID, 0, GL_RGBA, GL_FLOAT, 0);
                 glBindImageTexture(0, volume->mTextureID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
@@ -147,8 +146,10 @@ namespace Froxels {
                 glFrontFace(GL_CCW);
                 mesh.mMesh->draw();
                 glMemoryBarrier(GL_ALL_BARRIER_BITS);
-
             }
+
+            // TODO - generate mips manually in compute
+            volume->generateMipMaps();
         }
     };
 }

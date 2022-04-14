@@ -17,9 +17,9 @@ void writevoxel(vec4 color) {
 	xy /= bufferSize;
 	float depth = gl_FragCoord.z;
 
-	float ldepth = linearizeDepth(gl_FragCoord.z, camNear, camFar);
+	float ldepth = linearizeDepth(gl_FragCoord.z, camNear, camFar) / camFar;
 
-	ivec3 volCoords = ivec3(xy * dims.xy, depth * dims.z);
+	ivec3 volCoords = ivec3(xy * dims.xy, ldepth * dims.z);
 	volCoords = clamp(volCoords, ivec3(0), dims);
 
 	imageStore(volume, volCoords, color);

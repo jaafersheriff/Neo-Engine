@@ -53,6 +53,7 @@ namespace neo {
     }
 
     void Texture::generateMipMaps() {
+        bind();
         glGenerateTextureMipmap(mTextureID);
     }
 }

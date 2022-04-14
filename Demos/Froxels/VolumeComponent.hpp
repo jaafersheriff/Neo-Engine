@@ -18,24 +18,24 @@ namespace Froxels {
             : mTexture(tex)
         {}
 
-        glm::ivec3 getVoxelIndex(size_t index) const {
-            int line = 0x1 << mSize;
-            int slice = (0x1 << mSize) * line;
+        glm::ivec3 getVoxelIndex(size_t index, size_t lod) const {
+            int line = 0x1 << (mSize-lod);
+            int slice = (0x1 << (mSize-lod)) * line;
             int z =  static_cast<int>(index) / slice;
             int y = (static_cast<int>(index) - z * slice) / line;
             int x = (static_cast<int>(index) - z * slice - y * line);
             return glm::ivec3(x, y, z);
         }
 
-        size_t reverseVoxelIndex(glm::ivec3 index) const {
-            int dim = 0x1 << mSize;
+        size_t reverseVoxelIndex(glm::ivec3 index, size_t lod) const {
+            int dim = 0x1 << (mSize-lod);
             int line = dim;
             int slice = dim * line;
             size_t r = static_cast<size_t>(index.x + index.y * line + index.z * slice);
             if (r < 0 || r > dim*dim*dim*4) {
                 NEO_LOG_W("Found an index out of %d bounds: %d", dim*dim*dim*4, r);
             }
-            return std::clamp(r, static_cast<size_t>(0), static_cast<size_t>(dim*dim*dim*4));
+            return std::clamp(r, static_cast<size_t>(0), static_cast<size_t>(dim*dim*dim*4 -1));
         }
 
         virtual std::string getName() const override { return "VolumeComponent"; }
@@ -66,7 +66,7 @@ namespace Froxels {
                         data[i] = glm::vec4(0);
                     }
                     else if (mode == 1) {
-                        glm::vec3 pos = glm::vec3(getVoxelIndex(i)) / glm::vec3(static_cast<float>(0x1<<mSize));
+                        glm::vec3 pos = glm::vec3(getVoxelIndex(i, 0)) / glm::vec3(static_cast<float>(0x1<<mSize));
                         data[i] = glm::vec4(pos.x, pos.y, pos.z, 1.0);
                     }
                     else if (mode == 2) {
