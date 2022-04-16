@@ -99,11 +99,13 @@ namespace Froxels {
             bind();
 
             /* Load PV */
-            if (const auto& cameraOpt = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
-                auto&& [_, __, camera, cameraSpatial] = *cameraOpt;
-                loadUniform("P", camera.getProj());
-                loadUniform("camNear", camera.getNearFar().x);
-                loadUniform("camFar", camera.getNearFar().y);
+            if (const auto& cameraOpt = ecs.getSingleView<VolumeWriteCameraComponent, SpatialComponent>()) {
+                auto&& [entity, __, cameraSpatial] = *cameraOpt;
+                if (auto camera = ecs.getOneOfAs<CameraComponent, PerspectiveCameraComponent, OrthoCameraComponent>(entity)) {
+                    loadUniform("P", camera->getProj());
+                    loadUniform("camNear", camera->getNearFar().x);
+                    loadUniform("camFar", camera->getNearFar().y);
+                }
                 loadUniform("V", cameraSpatial.getView());
                 loadUniform("camPos", cameraSpatial.getPosition());
             }

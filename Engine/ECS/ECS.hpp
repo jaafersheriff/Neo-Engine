@@ -208,7 +208,6 @@ namespace neo {
 		}
 	}
 
-
 	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, CompTs&...>> ECS::getSingleView() {
 		// TODO - assert that theres more than one compt
 		MICROPROFILE_SCOPEI("ECS", "getSingleView", MP_AUTO);

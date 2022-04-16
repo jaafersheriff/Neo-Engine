@@ -5,11 +5,16 @@ uniform mat4 mainP, mainV;
 uniform mat4 persP, persV;
 uniform mat4 orthoP, orthoV;
 
+uniform vec3 persCamPos;
+uniform vec3 persLookDir;
+uniform float persCamNear;
+uniform float persCamFar;
+
 uniform vec3 dims;
 uniform vec3 voxelSize;
 
-in vec4 pos[];
-in vec4 col[];
+in vec4 gPos[];
+in vec4 gCol[];
 
 out vec3 fragColor;
 
@@ -21,23 +26,29 @@ vec3 vertexID_create_cube(in uint vertexID)
 }
 
 void main() {
-    if(col[0].a > 0.5) {
-        fragColor = col[0].rgb;
+if (gCol[0].a > 0.05) {
+        fragColor = gCol[0].rgb;
 
-            // Sizzle is a half fix -- there's another multiplication needed
             // Ortho camera is dicated by light's lookdir lmao
 		for (uint i = 0; i < 14; i++) {
-            vec3 endpos = pos[0].xyz; // [0, dims]
-            // endpos -= dims; endpos.z *= -1;
-            endpos = endpos.xyz / dims * 2 - 1; // [0, dims] / dims = [0, 1] * 2 - 1 = [-1, 1]
-            endpos *= dims; // [-dims, dims]
-            endpos += (vertexID_create_cube(i) - vec3(0, 1, 0)) * 2; // [-dims + cubeVertPos, dims + cubeVertPos]
-            endpos *= dims * voxelSize / dims; // TODO
-            gl_Position = persP * persV * vec4(endpos.xyz, 1.0);
-            // gl_Position = orthoP * orthoV * vec4(endpos.xyz, 1.0);
+            vec3 pos = gPos[0].xyz; // [0, dims]
+            pos = pos.xyz / dims * 2.0 - 1.0; // [0, dims] / dims = [0, 1] * 2 - 1 = [-1, 1]
+            pos *= dims; // [-dims, dims]
+
+            // TODO - I think voxelsize is busted
+            pos += (vertexID_create_cube(i) * 2.0 - 1.0) ;// * voxelSize * 2.0;
+            pos *= voxelSize;
+
+            // offset
+            vec3 look = normalize(persLookDir);
+            pos += persCamPos;
+            pos += look * persCamNear;
+            pos += look * (persCamFar - persCamNear) / 2.0;
+
+            gl_Position = mainP * mainV * vec4(pos.xyz, 1.0);
             EmitVertex();
         }
 
         EndPrimitive();
-    }
+}
 }  
