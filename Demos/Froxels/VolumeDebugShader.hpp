@@ -40,14 +40,13 @@ namespace Froxels {
         virtual void render(const ECS& ecs) override {
             bind();
 
-            auto cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-            if (cameraView) {
-                auto&& [cameraEntity, __, cameraSpatial] = *cameraView;
-                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
-                loadUniform("V", cameraSpatial.getView());
-            }
-
-
+                /* Load PV */
+                auto cameraView = ecs.getSingleView<MainCameraComponent, PerspectiveCameraComponent, SpatialComponent>();
+                if (cameraView) {
+                    auto&& [cameraEntity, _, camera, cameraSpatial] = *cameraView;
+                    loadUniform("P", camera.getProj());
+                    loadUniform("V", cameraSpatial.getView());
+                }
 
             if (auto&& volumeOpt = ecs.getSingleView<TagComponent, VolumeComponent, OrthoCameraComponent, SpatialComponent>()) {
                 auto&& [_, __, volume, ortho, cameraSpat] = *volumeOpt;

@@ -90,31 +90,31 @@ namespace Froxels {
             ecs.addComponent<SelectableComponent>(bunny);
             ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
 
-            // auto assets = Loader::loadMultiAsset("sponza.obj");
-            // for (auto& asset : assets) {
-            //     auto entity = ecs.createEntity();
-            //     ecs.addComponent<MeshComponent>(entity, asset.meshData.mMesh);
-            //     ecs.addComponent<SpatialComponent>(entity, asset.meshData.mBasePosition * 0.1f, asset.meshData.mBaseScale * 0.1f);
-            //     auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
-            //     asset.material.mAmbient = glm::vec3(0.2f);
-            //     ecs.addComponent<renderable::PhongRenderable>(entity, diffuseTex, asset.material);
-            //     ecs.addComponent<SelectableComponent>(entity);
-            //     ecs.addComponent<BoundingBoxComponent>(entity, asset.meshData);
-            // }
-
-            auto assets = Loader::loadMultiAsset("CornellBox-Original.obj");
+            auto assets = Loader::loadMultiAsset("sponza.obj");
             for (auto& asset : assets) {
                 auto entity = ecs.createEntity();
                 ecs.addComponent<MeshComponent>(entity, asset.meshData.mMesh);
-                ecs.addComponent<SpatialComponent>(entity, asset.meshData.mBasePosition, asset.meshData.mBaseScale);
+                ecs.addComponent<SpatialComponent>(entity, asset.meshData.mBasePosition * 0.08f, asset.meshData.mBaseScale * 0.08f);
                 auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
+                asset.material.mAmbient = glm::vec3(0.2f);
                 ecs.addComponent<renderable::PhongRenderable>(entity, diffuseTex, asset.material);
                 ecs.addComponent<SelectableComponent>(entity);
                 ecs.addComponent<BoundingBoxComponent>(entity, asset.meshData);
-                if (asset.name == "shortBox" || asset.name == "tallBox") {
-                    ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 1.0f, 0.f));
-                }
             }
+
+            // auto assets = Loader::loadMultiAsset("CornellBox-Original.obj");
+            // for (auto& asset : assets) {
+            //     auto entity = ecs.createEntity();
+            //     ecs.addComponent<MeshComponent>(entity, asset.meshData.mMesh);
+            //     ecs.addComponent<SpatialComponent>(entity, asset.meshData.mBasePosition, asset.meshData.mBaseScale);
+            //     auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
+            //     ecs.addComponent<renderable::PhongRenderable>(entity, diffuseTex, asset.material);
+            //     ecs.addComponent<SelectableComponent>(entity);
+            //     ecs.addComponent<BoundingBoxComponent>(entity, asset.meshData);
+            //     if (asset.name == "shortBox" || asset.name == "tallBox") {
+            //         ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 1.0f, 0.f));
+            //     }
+            // }
 
         }
 
@@ -198,10 +198,15 @@ namespace Froxels {
         }
 
         if (ImGui::TreeNode("Volume Camera")) {
-            if (auto mockCamera = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
-                auto&& [_, __, camera, spatial] = *mockCamera;
-                ImGui::PushID(static_cast<int>(_));
-                camera.imGuiEditor();
+            if (auto mockCamera = ecs.getSingleView<VolumeWriteCameraComponent, SpatialComponent>()) {
+                auto&& [entity, __, spatial] = *mockCamera;
+                ImGui::PushID(static_cast<int>(entity));
+                if (auto perspective = ecs.getComponent<PerspectiveCameraComponent>(entity)) {
+                    perspective->imGuiEditor();
+                }
+                if (auto ortho = ecs.getComponent<OrthoCameraComponent>(entity)) {
+                    ortho->imGuiEditor();
+                }
                 spatial.imGuiEditor();
                 ImGui::PopID();
             }
@@ -219,7 +224,20 @@ namespace Froxels {
                         ecs.addComponent<FrustumFitSourceComponent>(cameraEntity);
                     }
                 }
+            }
 
+            if (ImGui::Button("Projection")) {
+                if (auto mainCamera = ecs.getSingleView<MainCameraComponent, SpatialComponent>()) {
+                    auto&& [entity, _, __] = *mainCamera;
+                    if (ecs.has<PerspectiveCameraComponent>(entity)) {
+                        ecs.removeComponent<PerspectiveCameraComponent>(entity);
+                        ecs.addComponent<OrthoCameraComponent>(entity, 0.1f, 100.f, -15.f, 15.f, -15.f, 15.f);
+                    }
+                    else if (ecs.has<OrthoCameraComponent>(entity)) {
+                        ecs.removeComponent<OrthoCameraComponent>(entity);
+                        ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 100.f, 45.f, 1.5f);
+                    }
+                }
             }
             ImGui::TreePop();
         }

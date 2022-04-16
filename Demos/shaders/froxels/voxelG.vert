@@ -21,8 +21,7 @@ uvec3 unflatten3D(uint idx, uvec3 dim)
 }
 
 void main() {
-	uvec3 dims = uvec3(textureSize(volume, 0));
 	// uvec3 coord = unflatten3D(gl_VertexID, dims);
     pos = vec4(vertPos, 1.0);
-    col = texture(volume, vertPos / vec3(dims), 0);
+    col = texelFetch(volume, ivec3(vertPos), 0);
 }
