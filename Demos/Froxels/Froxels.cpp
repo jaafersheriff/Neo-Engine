@@ -63,7 +63,7 @@ namespace Froxels {
             ecs.addComponent<TagComponent>(entity, "Camera");
             ecs.addComponent<SpatialComponent>(entity, glm::vec3(0, 0.6f, 5), glm::vec3(1.f));
             ecs.addComponent<PerspectiveCameraComponent>(entity, 1.f, 100.f, 45.f);
-            ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 7.f);
+            ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 20.f);
             ecs.addComponent<MainCameraComponent>(entity);
             // ecs.addComponent<VolumeWriteCameraComponent>(entity);
             // ecs.addComponent<FrustumComponent>(entity);
@@ -81,14 +81,14 @@ namespace Froxels {
 
         {
             /* Bunny object */
-            auto bunny = ecs.createEntity();
-            ecs.addComponent<TagComponent>(bunny, "Bunny");
-            ecs.addComponent<SpatialComponent>(bunny, glm::vec3(3.f, 1.0f, 0.f));
-            ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-            ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
-            ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
-            ecs.addComponent<SelectableComponent>(bunny);
-            ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
+            // auto bunny = ecs.createEntity();
+            // ecs.addComponent<TagComponent>(bunny, "Bunny");
+            // ecs.addComponent<SpatialComponent>(bunny, glm::vec3(3.f, 1.0f, 0.f));
+            // ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
+            // ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
+            // ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
+            // ecs.addComponent<SelectableComponent>(bunny);
+            // ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
 
             auto assets = Loader::loadMultiAsset("sponza.obj");
             for (auto& asset : assets) {
@@ -153,11 +153,11 @@ namespace Froxels {
         }
 
         /* Ground plane */
-        auto plane = ecs.createEntity();
-        ecs.addComponent<TagComponent>(plane, "Grid");
-        ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
-        ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad").mMesh);
-        ecs.addComponent<renderable::AlphaTestRenderable>(plane, Library::loadTexture("grid.png"));
+        // auto plane = ecs.createEntity();
+        // ecs.addComponent<TagComponent>(plane, "Grid");
+        // ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
+        // ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad").mMesh);
+        // ecs.addComponent<renderable::AlphaTestRenderable>(plane, Library::loadTexture("grid.png"));
 
         /* Systems - order matters! */
         ecs.addSystem<CameraControllerSystem>();

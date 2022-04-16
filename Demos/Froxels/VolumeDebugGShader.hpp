@@ -44,12 +44,16 @@ namespace Froxels {
             if (auto volumeCamera = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
                 auto&& [_, __, camera, cameraSpatial] = *volumeCamera;
                 loadUniform("persP", camera.getProj());
-                loadUniform("persCamNear", camera.getNearFar().x);
-                loadUniform("persCamFar", camera.getNearFar().y);
+                loadUniform("camNear", camera.getNearFar().x);
+                loadUniform("camFar", camera.getNearFar().y);
+                loadUniform("fov", glm::radians(camera.getFOV()));
+                loadUniform("ar", camera.getAspectRatio());
 
                 loadUniform("persV", cameraSpatial.getView());
-                loadUniform("persCamPos", cameraSpatial.getPosition());
-                loadUniform("persLookDir", cameraSpatial.getLookDir());
+                loadUniform("camPos", cameraSpatial.getPosition());
+                loadUniform("lookDir", glm::normalize(cameraSpatial.getLookDir()));
+                loadUniform("upDir", glm::normalize(cameraSpatial.getUpDir()));
+                loadUniform("rightDir", glm::normalize(cameraSpatial.getRightDir()));
             }
 
             if (auto&& volumeOpt = ecs.getSingleView<TagComponent, VolumeComponent, OrthoCameraComponent, SpatialComponent>()) {
