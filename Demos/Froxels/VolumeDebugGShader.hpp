@@ -33,30 +33,30 @@ namespace Froxels {
         virtual void render(const ECS& ecs) override {
             bind();
 
-                /* Load PV */
-                auto cameraView = ecs.getSingleView<MainCameraComponent, PerspectiveCameraComponent, SpatialComponent>();
-                if (cameraView) {
-                    auto&& [cameraEntity, _, camera, cameraSpatial] = *cameraView;
-                    loadUniform("mainP", camera.getProj());
-                    loadUniform("mainV", cameraSpatial.getView());
-                }
+            /* Load PV */
+            if (auto main = ecs.getSingleView<MainCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
+                auto&& [_, __, camera, cameraSpatial] = *main;
+                loadUniform("mainP", camera.getProj());
+                loadUniform("mainV", cameraSpatial.getView());
+            }
+
 
             if (auto volumeCamera = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
                 auto&& [_, __, camera, cameraSpatial] = *volumeCamera;
                 loadUniform("persP", camera.getProj());
+                loadUniform("persCamNear", camera.getNearFar().x);
+                loadUniform("persCamFar", camera.getNearFar().y);
+
                 loadUniform("persV", cameraSpatial.getView());
+                loadUniform("persCamPos", cameraSpatial.getPosition());
+                loadUniform("persLookDir", cameraSpatial.getLookDir());
             }
-
-            if (auto orthoCamera = ecs.getSingleView<OrthoCameraComponent, SpatialComponent>()) {
-                auto&& [_, camera, cameraSpatial] = *orthoCamera;
-                loadUniform("orthoP", camera.getProj());
-                loadUniform("orthoV", cameraSpatial.getView());
-            }
-
-
 
             if (auto&& volumeOpt = ecs.getSingleView<TagComponent, VolumeComponent, OrthoCameraComponent, SpatialComponent>()) {
                 auto&& [_, __, volume, ortho, cameraSpat] = *volumeOpt;
+
+                loadUniform("orthoP", ortho.getProj());
+                loadUniform("orthoV", cameraSpat.getView());
 
                 volsize = volume.mSize;
                 auto dimension = 0x1 << (volsize - lod);
