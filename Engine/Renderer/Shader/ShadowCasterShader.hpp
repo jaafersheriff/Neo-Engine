@@ -66,7 +66,9 @@ namespace neo {
                 glViewport(0, 0, depthTexture->mWidth, depthTexture->mHeight);
 
                 bind();
-                loadUniform("P", ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCameraEntity)->getProj());
+                if (auto camera = ecs.getOneOfAs<CameraComponent, OrthoCameraComponent>(shadowCameraEntity)) {
+                    loadUniform("P", camera->getProj());
+                }
                 loadUniform("V", shadowCameraSpatial.getView());
 
                 for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>().each()) {

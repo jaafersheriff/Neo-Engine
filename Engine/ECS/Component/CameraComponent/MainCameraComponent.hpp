@@ -3,6 +3,7 @@
 #include "ECS/Component/Component.hpp"
 
 #include "PerspectiveCameraComponent.hpp"
+#include "OrthoCameraComponent.hpp"
 
 namespace neo {
 

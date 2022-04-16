@@ -77,7 +77,9 @@ namespace neo {
             auto cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
             if (cameraView) {
                 auto&& [cameraEntity, __, cameraSpatial] = *cameraView;
-                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                if (auto camera = ecs.getOneOfAs<CameraComponent, PerspectiveCameraComponent, OrthoCameraComponent>(cameraEntity)) {
+                    loadUniform("P", camera->getProj());
+                }
                 loadUniform("V", cameraSpatial.getView());
             }
 

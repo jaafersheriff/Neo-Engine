@@ -96,14 +96,16 @@ namespace neo {
                 auto cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
                 if (cameraView) {
                     auto&& [cameraEntity, _, spatial] = *cameraView;
-                    loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                    if (auto camera = ecs.getOneOfAs<CameraComponent, PerspectiveCameraComponent, OrthoCameraComponent>(cameraEntity)) {
+                        loadUniform("P", camera->getProj());
+                    }
                     loadUniform("V", spatial.getView());
                     loadUniform("camPos", spatial.getPosition());
                 }
 
                 /* Load light */
                 for (const auto&& [shadowCameraEntity, shadowCamera, spatial] : ecs.getView<ShadowCameraComponent, SpatialComponent>().each()) {
-                    auto _shadowCamera = ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCameraEntity);
+                    auto _shadowCamera = ecs.getOneOfAs<CameraComponent, OrthoCameraComponent>(shadowCameraEntity);
                     loadUniform("L", biasMatrix * _shadowCamera->getProj() * spatial.getView());
                 }
 

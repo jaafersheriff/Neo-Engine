@@ -49,8 +49,8 @@ namespace neo {
 		template<typename CompT> bool has(Entity e) const;
 		template<typename CompT> CompT* getComponent(Entity e);
 		template<typename CompT> CompT *const cGetComponent(Entity e) const;
-		template<typename SuperT, typename CompT> SuperT* getComponentAs(Entity e);
-		template<typename SuperT, typename CompT> const SuperT* cGetComponentAs(Entity e) const;
+		template<typename SuperT, typename CompT, typename... CompTs> SuperT* getOneOfAs(Entity e);
+		template<typename SuperT, typename CompT, typename... CompTs> const SuperT* getOneOfAs(Entity e) const;
 
 		/* All access */
 		template<typename... CompTs> bool has() const;
@@ -180,18 +180,32 @@ namespace neo {
 		return mRegistry.view<const CompTs...>();
 	}
 
-	template<typename SuperT, typename CompT> SuperT* ECS::getComponentAs(Entity e) {
-		MICROPROFILE_SCOPEI("ECS", "getComponentAs", MP_AUTO);
-		CompT* comp = getComponent<CompT>(e);
-		NEO_ASSERT(comp, "A");
-		return dynamic_cast<SuperT*>(comp);
+	template<typename SuperT, typename CompT, typename... CompTs> SuperT* ECS::getOneOfAs(Entity e) {
+		static_assert(std::is_base_of<SuperT, CompT>::value, "TODO");
+		if (auto comp = mRegistry.try_get<CompT>(e)) {
+			return dynamic_cast<SuperT*>(comp);
+		}
+		if constexpr (sizeof...(CompTs) > 0) {
+			return getOneOfAs<SuperT, CompTs...>(e);
+		}
+		// assert?
+		return nullptr;
 	}
-	template<typename SuperT, typename CompT> const SuperT* ECS::cGetComponentAs(Entity e) const {
-		MICROPROFILE_SCOPEI("ECS", "cGetComponentAs", MP_AUTO);
-		CompT *const comp = cGetComponent<CompT>(e);
-		NEO_ASSERT(comp, "B");
-		return dynamic_cast<SuperT *const>(comp);
+
+	template<typename SuperT, typename CompT, typename... CompTs> const SuperT * ECS::getOneOfAs(Entity e) const {
+		static_assert(std::is_base_of<SuperT, CompT>::value, "TODO");
+		if (auto comp = mRegistry.try_get<CompT>(e)) {
+			return dynamic_cast<const SuperT *>(comp);
+		}
+		if constexpr (sizeof...(CompTs) > 0) {
+			return getOneOfAs<SuperT, CompTs...>(e);
+		}
+		else {
+			// assert?
+			return nullptr;
+		}
 	}
+
 
 	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, CompTs&...>> ECS::getSingleView() {
 		// TODO - assert that theres more than one compt

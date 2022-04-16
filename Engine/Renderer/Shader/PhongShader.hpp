@@ -68,10 +68,12 @@ namespace neo {
             bind();
 
             /* Load PV */
-            const auto& camera = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-            if (camera) {
-                auto&& [cameraEntity, _, cameraSpatial] = *camera;
-                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+            const auto& cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+            if (cameraView) {
+                auto&& [cameraEntity, _, cameraSpatial] = *cameraView;
+                if (auto camera = ecs.getOneOfAs<CameraComponent, PerspectiveCameraComponent, OrthoCameraComponent>(cameraEntity)) {
+                    loadUniform("P", camera->getProj());
+                }
                 loadUniform("V", cameraSpatial.getView());
                 loadUniform("camPos", cameraSpatial.getPosition());
             }
@@ -84,7 +86,7 @@ namespace neo {
                 loadUniform("lightPos", spatial.getPosition());
             }
 
-            const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(std::get<0>(*camera));
+            const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(std::get<0>(*cameraView));
             for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::PhongRenderable, MeshComponent, SpatialComponent>().each()) {
 
                 // VFC

@@ -33,12 +33,27 @@ namespace Froxels {
         virtual void render(const ECS& ecs) override {
             bind();
 
-            auto cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-            if (cameraView) {
-                auto&& [cameraEntity, __, cameraSpatial] = *cameraView;
-                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
-                loadUniform("V", cameraSpatial.getView());
+                /* Load PV */
+                auto cameraView = ecs.getSingleView<MainCameraComponent, PerspectiveCameraComponent, SpatialComponent>();
+                if (cameraView) {
+                    auto&& [cameraEntity, _, camera, cameraSpatial] = *cameraView;
+                    loadUniform("mainP", camera.getProj());
+                    loadUniform("mainV", cameraSpatial.getView());
+                }
+
+            if (auto volumeCamera = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
+                auto&& [_, __, camera, cameraSpatial] = *volumeCamera;
+                loadUniform("persP", camera.getProj());
+                loadUniform("persV", cameraSpatial.getView());
             }
+
+            if (auto orthoCamera = ecs.getSingleView<OrthoCameraComponent, SpatialComponent>()) {
+                auto&& [_, camera, cameraSpatial] = *orthoCamera;
+                loadUniform("orthoP", camera.getProj());
+                loadUniform("orthoV", cameraSpatial.getView());
+            }
+
+
 
             if (auto&& volumeOpt = ecs.getSingleView<TagComponent, VolumeComponent, OrthoCameraComponent, SpatialComponent>()) {
                 auto&& [_, __, volume, ortho, cameraSpat] = *volumeOpt;
@@ -54,8 +69,9 @@ namespace Froxels {
                     yBounds.y - yBounds.x,
                     zBounds.y - zBounds.x);
                 glm::vec3 voxelSize = range / static_cast<float>(dimension);
-                // loadUniform("voxelSize", voxelSize);
+                loadUniform("voxelSize", voxelSize / 2.f);
                 loadUniform("lod", lod);
+                loadUniform("dims", glm::vec3(static_cast<float>(dimension)));
                 loadTexture("volume", *volume.mTexture);
 
                 std::vector<float> voxelPositions;
