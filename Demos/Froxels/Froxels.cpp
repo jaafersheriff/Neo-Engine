@@ -201,46 +201,43 @@ namespace Froxels {
             if (auto mockCamera = ecs.getSingleView<VolumeWriteCameraComponent, SpatialComponent>()) {
                 auto&& [entity, __, spatial] = *mockCamera;
                 ImGui::PushID(static_cast<int>(entity));
-                if (auto perspective = ecs.getComponent<PerspectiveCameraComponent>(entity)) {
-                    perspective->imGuiEditor();
-                }
-                if (auto ortho = ecs.getComponent<OrthoCameraComponent>(entity)) {
-                    ortho->imGuiEditor();
+                if (auto camera = ecs.getOneOfAs<CameraComponent, PerspectiveCameraComponent, OrthoCameraComponent>(entity)) {
+                    camera->imGuiEditor();
                 }
                 spatial.imGuiEditor();
                 ImGui::PopID();
             }
-
-            if (ImGui::Button("Swap")) {
-                for (auto&& [cameraEntity, _, __] : ecs.getView<PerspectiveCameraComponent, SpatialComponent>().each()) {
-                    if (ecs.has<VolumeWriteCameraComponent>(cameraEntity)) {
-                        ecs.removeComponent<VolumeWriteCameraComponent>(cameraEntity);
-                        ecs.removeComponent<FrustumComponent>(cameraEntity);
-                        ecs.removeComponent<FrustumFitSourceComponent>(cameraEntity);
-                    }
-                    else {
-                        ecs.addComponent<VolumeWriteCameraComponent>(cameraEntity);
-                        ecs.addComponent<FrustumComponent>(cameraEntity);
-                        ecs.addComponent<FrustumFitSourceComponent>(cameraEntity);
-                    }
-                }
-            }
-
-            if (ImGui::Button("Projection")) {
-                if (auto mainCamera = ecs.getSingleView<MainCameraComponent, SpatialComponent>()) {
-                    auto&& [entity, _, __] = *mainCamera;
-                    if (ecs.has<PerspectiveCameraComponent>(entity)) {
-                        ecs.removeComponent<PerspectiveCameraComponent>(entity);
-                        ecs.addComponent<OrthoCameraComponent>(entity, 0.1f, 100.f, -15.f, 15.f, -15.f, 15.f);
-                    }
-                    else if (ecs.has<OrthoCameraComponent>(entity)) {
-                        ecs.removeComponent<OrthoCameraComponent>(entity);
-                        ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 100.f, 45.f, 1.5f);
-                    }
-                }
-            }
-            ImGui::TreePop();
         }
+
+        if (ImGui::Button("Swap")) {
+            for (auto&& [cameraEntity, _, __] : ecs.getView<PerspectiveCameraComponent, SpatialComponent>().each()) {
+                if (ecs.has<VolumeWriteCameraComponent>(cameraEntity)) {
+                    ecs.removeComponent<VolumeWriteCameraComponent>(cameraEntity);
+                    ecs.removeComponent<FrustumComponent>(cameraEntity);
+                    ecs.removeComponent<FrustumFitSourceComponent>(cameraEntity);
+                }
+                else {
+                    ecs.addComponent<VolumeWriteCameraComponent>(cameraEntity);
+                    ecs.addComponent<FrustumComponent>(cameraEntity);
+                    ecs.addComponent<FrustumFitSourceComponent>(cameraEntity);
+                }
+            }
+        }
+
+        if (ImGui::Button("Projection")) {
+            if (auto mainCamera = ecs.getSingleView<MainCameraComponent, SpatialComponent>()) {
+                auto&& [entity, _, __] = *mainCamera;
+                if (ecs.has<PerspectiveCameraComponent>(entity)) {
+                    ecs.removeComponent<PerspectiveCameraComponent>(entity);
+                    ecs.addComponent<OrthoCameraComponent>(entity, 0.1f, 100.f, -15.f, 15.f, -15.f, 15.f);
+                }
+                else if (ecs.has<OrthoCameraComponent>(entity)) {
+                    ecs.removeComponent<OrthoCameraComponent>(entity);
+                    ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 100.f, 45.f, 1.5f);
+                }
+            }
+        }
+        ImGui::TreePop();
 
         if (ImGui::TreeNode("Light")) {
             if (auto lightOpt = ecs.getSingleView<LightComponent, SpatialComponent>()) {
