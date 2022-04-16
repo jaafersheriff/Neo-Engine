@@ -188,8 +188,10 @@ namespace neo {
 		if constexpr (sizeof...(CompTs) > 0) {
 			return getOneOfAs<SuperT, CompTs...>(e);
 		}
-		// assert?
-		return nullptr;
+		else {
+			// assert?
+			return nullptr;
+		}
 	}
 
 	template<typename SuperT, typename CompT, typename... CompTs> const SuperT * ECS::getOneOfAs(Entity e) const {
@@ -212,8 +214,10 @@ namespace neo {
 		MICROPROFILE_SCOPEI("ECS", "getSingleView", MP_AUTO);
 		auto view = mRegistry.view<CompTs...>();
 		NEO_ASSERT(view.size_hint() <= 1, "Found %d entities when one was requested", view.size_hint());
-		if (view.size_hint() == 1) {
-			return { *view.each().begin() };
+		for (auto entity : view) {
+			if (view.contains(entity)) {
+				return std::tuple_cat(std::make_tuple(entity), view.get<CompTs...>(entity));
+			}
 		}
 		return std::nullopt;
 	}
@@ -223,9 +227,11 @@ namespace neo {
 	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, const CompTs&...>> ECS::getSingleView() const {
 		MICROPROFILE_SCOPEI("ECS", "getSingleView", MP_AUTO);
 		auto view = mRegistry.view<const CompTs...>();
-		NEO_ASSERT(view.size_hint() <= 1, "Found %d entities when one was requested", view.size_hint());
-		if (view.size_hint() == 1) {
-			return { *view.each().begin() };
+		// NEO_ASSERT(view.size_hint() <= 1, "Found %d entities when one was requested", view.size_hint());
+		for (auto entity : view) {
+			if (view.contains(entity)) {
+				return std::tuple_cat(std::make_tuple(entity), view.get<const CompTs...>(entity));
+			}
 		}
 		return std::nullopt;
 	}
