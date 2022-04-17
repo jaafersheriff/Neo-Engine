@@ -53,7 +53,8 @@ namespace Froxels {
             bind();
 
             /* Load PV */
-            if (const auto& cameraOpt = ecs.getSingleView<VolumeWriteCameraComponent, SpatialComponent>()) {
+            const auto& cameraOpt = ecs.getSingleView<VolumeWriteCameraComponent, SpatialComponent>();
+            if (cameraOpt) {
                 auto&& [entity, __, cameraSpatial] = *cameraOpt;
                 if (auto camera = ecs.getOneOfAs<CameraComponent, PerspectiveCameraComponent, OrthoCameraComponent>(entity)) {
                     loadUniform("P", camera->getProj());
@@ -63,6 +64,7 @@ namespace Froxels {
                 loadUniform("V", cameraSpatial.getView());
                 loadUniform("camPos", cameraSpatial.getPosition());
             }
+            const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(std::get<0>(*cameraOpt));
 
             /* Load light */
             if (const auto& lightTuple = ecs.getSingleView<LightComponent, SpatialComponent>()) {
@@ -82,6 +84,16 @@ namespace Froxels {
             }
 
             for (const auto&& [entity, _, renderable, mesh, spatial] : ecs.getView<VolumeWriteComponent, renderable::PhongRenderable, MeshComponent, SpatialComponent>().each()) {
+                // VFC
+                if (cameraFrustum) {
+                    MICROPROFILE_SCOPEI("PhongShader", "VFC", MP_AUTO);
+                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
+                        if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
+                            continue;
+                        }
+                    }
+                }
+
                 loadUniform("M", spatial.getModelMatrix());
                 loadUniform("N", spatial.getNormalMatrix());
 
