@@ -1,11 +1,10 @@
 #include "Froxels/Froxels.hpp"
+
 #include "VolumeComponent.hpp"
 #include "VolumeWriteCameraComponent.hpp"
-
+#include "VolumeWriteComponent.hpp"
 #include "VolumeDebugShader.hpp"
-#include "VolumeDebugGShader.hpp"
 #include "VolumeWriteShader.hpp"
-#include "PhongShader.hpp"
 
 #include "Engine/Engine.hpp"
 
@@ -62,12 +61,10 @@ namespace Froxels {
             auto entity = ecs.createEntity();
             ecs.addComponent<TagComponent>(entity, "Camera");
             ecs.addComponent<SpatialComponent>(entity, glm::vec3(0, 0.6f, 5), glm::vec3(1.f));
-            ecs.addComponent<PerspectiveCameraComponent>(entity, 1.f, 100.f, 45.f);
+            ecs.addComponent<PerspectiveCameraComponent>(entity, 1.f, 200.f, 45.f);
             ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 20.f);
             ecs.addComponent<MainCameraComponent>(entity);
-            // ecs.addComponent<VolumeWriteCameraComponent>(entity);
-            // ecs.addComponent<FrustumComponent>(entity);
-            // ecs.addComponent<FrustumFitSourceComponent>(entity);
+            ecs.addComponent<VolumeWriteCameraComponent>(entity);
         }
 
         {
@@ -98,6 +95,7 @@ namespace Froxels {
                 auto diffuseTex = asset.diffuse_tex ? asset.diffuse_tex : Library::getTexture("black");
                 asset.material.mAmbient = glm::vec3(0.2f);
                 ecs.addComponent<renderable::PhongRenderable>(entity, diffuseTex, asset.material);
+                ecs.addComponent<VolumeWriteComponent>(entity);
                 ecs.addComponent<SelectableComponent>(entity);
                 ecs.addComponent<BoundingBoxComponent>(entity, asset.meshData);
             }
@@ -128,13 +126,8 @@ namespace Froxels {
                 format.mFilter = GL_LINEAR;
                 format.mMode = GL_CLAMP_TO_EDGE;
                 format.mType = GL_FLOAT;
-                ecs.addComponent<VolumeComponent>(entity, Library::createEmptyTexture<Texture3D>("Volume", format, { 16, 16, 16 }));
+                ecs.addComponent<VolumeComponent>(entity, Library::createEmptyTexture<Texture3D>("Volume", format, { 64, 64, 64 }));
                 ecs.addComponent<TagComponent>(entity, "Volume");
-                ecs.addComponent<OrthoCameraComponent>(entity, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
-                ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
-                ecs.addComponent<FrustumComponent>(entity);
-                ecs.addComponent<FrustumFitReceiverComponent>(entity);
-                ecs.addComponent<LineMeshComponent>(entity);
             }
 
             {
@@ -144,20 +137,13 @@ namespace Froxels {
                 spat->setOrientation(glm::mat3(glm::lookAt(spat->getPosition(), glm::vec3(0), glm::vec3(0, 1, 0))));
                 ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 10.f, 45.f);
                 ecs.addComponent<LineMeshComponent>(entity, glm::vec3(0.f, 1.f, 1.f));
-                ecs.addComponent<VolumeWriteCameraComponent>(entity);
-                ecs.addComponent<FrustumComponent>(entity);
-                ecs.addComponent<FrustumFitSourceComponent>(entity);
+                // ecs.addComponent<VolumeWriteCameraComponent>(entity);
+                // ecs.addComponent<FrustumComponent>(entity);
+                // ecs.addComponent<FrustumFitSourceComponent>(entity);
             }
 
 
         }
-
-        /* Ground plane */
-        // auto plane = ecs.createEntity();
-        // ecs.addComponent<TagComponent>(plane, "Grid");
-        // ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
-        // ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad").mMesh);
-        // ecs.addComponent<renderable::AlphaTestRenderable>(plane, Library::loadTexture("grid.png"));
 
         /* Systems - order matters! */
         ecs.addSystem<CameraControllerSystem>();
@@ -167,16 +153,14 @@ namespace Froxels {
         ecs.addSystem<FrustumToLineSystem>();
 
         /* Init renderer */
-        auto& compute = renderer.addComputeShader<VolumeWriteShader>("volumewrite.compute");
-        compute.mActive = false;
-        renderer.addPreProcessShader<Froxels::PhongShader>();
-        renderer.addSceneShader<neo::PhongShader>();
+        renderer.addPreProcessShader<Froxels::VolumeWriteShader>("volumewrite.vert", "volumewrite.frag");
+        auto& phong = renderer.addSceneShader<neo::PhongShader>();
+        phong.mActive = true;
         renderer.addSceneShader<AlphaTestShader>();
         renderer.addSceneShader<WireframeShader>();
         renderer.addSceneShader<LineShader>();
-        auto& debug = renderer.addSceneShader<VolumeDebugShader>("voxel.vert", "voxel.frag");
+        auto& debug = renderer.addSceneShader<VolumeDebugGShader>("voxeldebug.vert", "voxeldebug.geom", "voxeldebug.frag");
         debug.mActive = false;
-        renderer.addSceneShader<VolumeDebugGShader>("voxelG.vert", "voxelG.geom", "voxelG.frag");
     }
 
     void Demo::destroy() {

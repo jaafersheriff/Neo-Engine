@@ -122,6 +122,7 @@ namespace neo {
             asset.meshData.mMesh = mesh;
 
             _findMetaData(asset.meshData, shape.mesh.positions, true);
+            Library::insertMesh(asset.name, asset.meshData);
 
             /* Upload */
             mesh->mPrimitiveType = GL_TRIANGLE_STRIP;

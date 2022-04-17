@@ -1,65 +1,112 @@
 #pragma once
 
-#include "Renderer/Renderer.hpp"
-#include "Util/ServiceLocator.hpp"
+#include "ECS/ECS.hpp"
+
 #include "Renderer/GLObjects/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
-#include "VolumeWriteCameraComponent.hpp"
-#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumComponent.hpp"
+#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/LightComponent/LightComponent.hpp"
+#include "ECS/Component/RenderableComponent/PhongRenderable.hpp"
+#include "ECS/Component/RenderableComponent/MeshComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "Loader/Library.hpp"
+#include "ECS/Messaging/Messenger.hpp"
+#include "ECS/Messaging/Message.hpp"
 
-#include "ECS/ECS.hpp"
+#include "VolumeWriteCameraComponent.hpp"
 
 using namespace neo;
 
 namespace Froxels {
+
     class VolumeWriteShader : public Shader {
 
     public:
 
-        VolumeWriteShader(const std::string& compute) :
-            Shader("VolumeWrite Shader")
+        VolumeWriteShader(const std::string& vert, const std::string& frag) :
+            Shader("VolumeWrite Shader", vert, frag) 
         {
-            _attachStage(ShaderStage::COMPUTE, compute);
-            init();
+            TextureFormat format = { GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE };
+            auto fbo = Library::createFBO("downscalebackbuffer");
+            fbo->attachColorTexture({ 1, 1 }, format);
+            fbo->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_EDGE);
+            fbo->initDrawBuffers();
+
+            Messenger::addReceiver<FrameSizeMessage>([&](const Message& msg) {
+                glm::ivec2 frameSize = (static_cast<const FrameSizeMessage&>(msg)).mSize;
+                });
         }
 
         virtual void render(const ECS& ecs) override {
+            auto fbo = Library::getFBO("downscalebackbuffer");
+            fbo->bind();
+            glViewport(0, 0, fbo->mTextures[0]->mWidth, fbo->mTextures[0]->mHeight);
+            glClearColor(0.f, 0.f, 0.f, 1.f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             bind();
 
-            if (auto volumeWriteCamera = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent>()) {
-                auto&& [_, __, camera] = *volumeWriteCamera;
-                loadUniform("near", camera.getNearFar().x);
-                loadUniform("far", camera.getNearFar().y);
-
-                auto lastFrameBackbuffer = Library::getFBO("downscalebackbuffer");
-                loadTexture("inputColor", *lastFrameBackbuffer->mTextures[0]);
-                loadTexture("inputDepth", *lastFrameBackbuffer->mTextures[1]);
-
-                auto volume = Library::getTexture("Volume");
-                glClearTexImage(volume->mTextureID, 0, GL_RGBA, GL_FLOAT, 0);
-                glBindImageTexture(0, volume->mTextureID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-
-                {
-                    RENDERER_MP_ENTER("Dispatch");
-                    glDispatchCompute(lastFrameBackbuffer->mTextures[0]->mWidth, lastFrameBackbuffer->mTextures[0]->mHeight, 1);
-                    RENDERER_MP_LEAVE();
+            /* Load PV */
+            if (const auto& cameraOpt = ecs.getSingleView<VolumeWriteCameraComponent, SpatialComponent>()) {
+                auto&& [entity, __, cameraSpatial] = *cameraOpt;
+                if (auto camera = ecs.getOneOfAs<CameraComponent, PerspectiveCameraComponent, OrthoCameraComponent>(entity)) {
+                    loadUniform("P", camera->getProj());
+                    loadUniform("camNear", camera->getNearFar().x);
+                    loadUniform("camFar", camera->getNearFar().y);
                 }
-
-                {
-                    RENDERER_MP_ENTER("Barrier");
-                    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-                    RENDERER_MP_LEAVE();
-                }
+                loadUniform("V", cameraSpatial.getView());
+                loadUniform("camPos", cameraSpatial.getPosition());
             }
 
-            unbind();
-        }
+            /* Load light */
+            if (const auto& lightTuple = ecs.getSingleView<LightComponent, SpatialComponent>()) {
+                auto&& [_, light, spatial] = *lightTuple;
+                loadUniform("lightCol", light.mColor);
+                loadUniform("lightAtt", light.mAttenuation);
+                loadUniform("lightPos", spatial.getPosition());
+            }
 
-        virtual void imguiEditor() override {
+            auto volume = Library::getTexture("Volume");
+            {
+                glClearTexImage(volume->mTextureID, 0, GL_RGBA, GL_FLOAT, 0);
+                glBindImageTexture(0, volume->mTextureID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+                Library::getFBO("downscalebackbuffer")->resize(glm::uvec2(volume->mWidth, volume->mHeight));
+
+                loadUniform("bufferSize", glm::vec2(fbo->mTextures[0]->mWidth, fbo->mTextures[0]->mHeight));
+            }
+
+            for (const auto&& [entity, _, renderable, mesh, spatial] : ecs.getView<VolumeWriteComponent, renderable::PhongRenderable, MeshComponent, SpatialComponent>().each()) {
+                loadUniform("M", spatial.getModelMatrix());
+                loadUniform("N", spatial.getNormalMatrix());
+
+                /* Bind texture */
+                loadTexture("diffuseMap", *renderable.mDiffuseMap);
+
+                /* Bind material */
+                const Material& material = renderable.mMaterial;
+
+                loadUniform("ambientColor", material.mAmbient);
+                loadUniform("diffuseColor", material.mDiffuse);
+                loadUniform("specularColor", material.mSpecular);
+                loadUniform("shine", material.mShininess);
+
+                /* DRAW */
+                glFrontFace(GL_CW);
+                mesh.mMesh->draw();
+                glMemoryBarrier(GL_ALL_BARRIER_BITS);
+                glFrontFace(GL_CCW);
+                mesh.mMesh->draw();
+                glMemoryBarrier(GL_ALL_BARRIER_BITS);
+            }
+
+            // TODO - generate mips manually in compute
+            volume->generateMipMaps();
         }
     };
 }
