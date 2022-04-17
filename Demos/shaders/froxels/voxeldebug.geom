@@ -88,7 +88,7 @@ if (gCol[0].a > 0.05) {
             scale.y = distance(_nearBottomLeft, _nearTopLeft) / dims.y;
             scale.z = distance(_farLeftBottom, _nearBottomLeft) / dims.z;
             vec3 endPos = _nearBottomLeft;
-            endPos += rightDir * index.x * scale.x + rightDir * scale.x;
+            endPos += rightDir * index.x * scale.x;
             endPos += upDir * index.y * scale.y;
             // dont do thisendPos += lookDir * index.z * scale.z;
             vec3 cubeVert = (vertexID_create_cube(i)) * scale; // TODO - voxelsize

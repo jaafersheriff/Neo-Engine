@@ -146,6 +146,7 @@ namespace neo {
 		}
 
 		mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
+			MICROPROFILE_SCOPEI("ECS", "lambda addComponent", MP_AUTO);
 			if (registry.try_get<CompT>(e)) {
 				NEO_FAIL("Err");
 			}
@@ -162,6 +163,7 @@ namespace neo {
 	void ECS::removeComponent(Entity e) {
 		MICROPROFILE_SCOPEI("ECS", "removeComponent", MP_AUTO);
 		mRemoveComponentFuncs.push_back([e](Registry& registry) mutable {
+			MICROPROFILE_SCOPEI("ECS", "lambda removeComponent", MP_AUTO);
 			registry.remove<CompT>(e);
 			});
 	}
@@ -181,6 +183,7 @@ namespace neo {
 	}
 
 	template<typename SuperT, typename CompT, typename... CompTs> SuperT* ECS::getOneOfAs(Entity e) {
+		MICROPROFILE_SCOPEI("ECS", "getOneOfAs", MP_AUTO);
 		static_assert(std::is_base_of<SuperT, CompT>::value, "TODO");
 		if (auto comp = mRegistry.try_get<CompT>(e)) {
 			return dynamic_cast<SuperT*>(comp);
@@ -195,6 +198,7 @@ namespace neo {
 	}
 
 	template<typename SuperT, typename CompT, typename... CompTs> const SuperT * ECS::getOneOfAs(Entity e) const {
+		MICROPROFILE_SCOPEI("ECS", "getOneOfAs", MP_AUTO);
 		static_assert(std::is_base_of<SuperT, CompT>::value, "TODO");
 		if (auto comp = mRegistry.try_get<CompT>(e)) {
 			return dynamic_cast<const SuperT *>(comp);
