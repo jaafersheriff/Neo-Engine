@@ -156,9 +156,9 @@ namespace Froxels {
 
         /* Init renderer */
         renderer.addPreProcessShader<Froxels::VolumeWriteShader>("volumewrite.vert", "volumewrite.frag");
-        auto& debug1 = renderer.addPreProcessShader<Froxels::VolumeDebugTraceShader>("debugtrace.vert", "debugtrace.frag");
-        debug1.mActive = false;
         renderer.addSceneShader<neo::PhongShader>();
+        auto& debug1 = renderer.addSceneShader<Froxels::VolumeDebugTraceShader>("debugtrace.vert", "debugtrace.frag");
+        debug1.mActive = false;
         renderer.addSceneShader<AlphaTestShader>();
         renderer.addSceneShader<WireframeShader>();
         renderer.addSceneShader<LineShader>();
