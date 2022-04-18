@@ -42,16 +42,23 @@ namespace Froxels {
 
             if (auto volumeCamera = ecs.getSingleView<VolumeWriteCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
                 auto&& [_, __, camera, cameraSpatial] = *volumeCamera;
-                loadUniform("P", camera.getProj());
                 loadUniform("near", camera.getNearFar().x);
                 loadUniform("far", camera.getNearFar().y);
                 loadUniform("fov", glm::radians(camera.getFOV()));
                 loadUniform("ar", camera.getAspectRatio());
 
-                loadUniform("V", cameraSpatial.getView());
                 loadUniform("lookDir", glm::normalize(cameraSpatial.getLookDir()));
                 loadUniform("upDir", glm::normalize(cameraSpatial.getUpDir()));
                 loadUniform("rightDir", glm::normalize(cameraSpatial.getRightDir()));
+            }
+
+            if (auto&& volumeOpt = ecs.getSingleView<TagComponent, VolumeComponent>()) {
+                auto&& [_, __, volume] = *volumeOpt;
+
+                auto dimension = 0x1 << (volume.mSize);
+                loadUniform("lod", 0);
+                loadUniform("dims", glm::vec3(static_cast<float>(dimension)));
+                loadTexture("volume", *volume.mTexture);
             }
 
             auto quad = Library::getMesh("quad");
@@ -61,7 +68,6 @@ namespace Froxels {
                 glViewport(0, 0, debugTrace->mTextures[0]->mWidth, debugTrace->mTextures[0]->mHeight);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-                loadUniform("bufferSize", glm::vec2(debugTrace->mTextures[0]->mWidth, debugTrace->mTextures[0]->mHeight));
                 quad.mMesh->draw();
             }
 
