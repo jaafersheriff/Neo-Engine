@@ -5,7 +5,6 @@
 #include "VolumeWriteComponent.hpp"
 #include "VolumeDebugShader.hpp"
 #include "VolumeWriteShader.hpp"
-#include "VolumeDebugTraceShader.hpp"
 
 #include "Engine/Engine.hpp"
 #include "Util/ServiceLocator.hpp"
@@ -157,8 +156,6 @@ namespace Froxels {
         /* Init renderer */
         renderer.addPreProcessShader<Froxels::VolumeWriteShader>("volumewrite.vert", "volumewrite.frag");
         renderer.addSceneShader<neo::PhongShader>();
-        auto& debug1 = renderer.addSceneShader<Froxels::VolumeDebugTraceShader>("debugtrace.vert", "debugtrace.frag");
-        debug1.mActive = false;
         renderer.addSceneShader<AlphaTestShader>();
         renderer.addSceneShader<WireframeShader>();
         renderer.addSceneShader<LineShader>();
@@ -183,12 +180,10 @@ namespace Froxels {
                 if (ImGui::Checkbox("Debug", &debug) && !ServiceLocator<Renderer>::empty()) {
                     auto& renderer = ServiceLocator<Renderer>::ref();
                     if (debug) {
-                        renderer.getShader<VolumeDebugTraceShader>().mActive = true;
                         renderer.getShader<VolumeDebugGShader>().mActive = true;
                         renderer.getShader<PhongShader>().mActive = false;
                     }
                     else {
-                        renderer.getShader<VolumeDebugTraceShader>().mActive = false;
                         renderer.getShader<VolumeDebugGShader>().mActive = false;
                         renderer.getShader<PhongShader>().mActive = true;
                     }
