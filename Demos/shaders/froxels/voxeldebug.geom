@@ -40,35 +40,9 @@ void main() {
 if (gCol[0].a > 0.05) {
         fragColor = gCol[0].rgb;
 
-            // Ortho camera is dicated by light's lookdir lmao
 		for (uint i = 0; i < 14; i++) {
-            // vec3 pos = gPos[0].xyz; // [0, dims]
-            // pos = pos.xyz / dims * 2.0 - 1.0; // [0, dims] / dims = [0, 1] * 2 - 1 = [-1, 1]
-            // pos *= dims; // [-dims, dims]
-
-            // // TODO - I think voxelsize is busted
-            // pos += (vertexID_create_cube(i) * 2.0 - 1.0) ;// * voxelSize * 2.0;
-            // pos *= voxelSize;
-
-            // // offset
-            // vec3 look = normalize(persLookDir);
-            // pos += persCamPos;
-            // pos += look * persCamNear;
-            // pos += look * (persCamFar - persCamNear) / 2.0;
-
-            // gl_Position = mainP * mainV * vec4(pos.xyz, 1.0);
-            // EmitVertex();
 
             vec3 index = gPos[0].xyz;
-            // vec3 cNear = camPos + lookDir * camNear;
-            // vec3 cFar = camPos + lookDir * camFar;
-            // vec3 cCenter = camPos + lookDir * camNear + lookDir * (camFar - camNear) / 2.0;
-            // float hNear = 2 * tan(fov / 2) * camNear;
-            // float hFar = 2 * tan(fov / 2) * camFar;
-            // float wNear = hNear * ar;
-            // float wFar = hFar * ar;
-            // vec3 nearBottomLeft = cNear - (upDir * (hNear / 2)) - (rightDir * (wNear / 2));
-            // vec3 farRightTop = cFar + (upDir * (hFar / 2)) + (rightDir * (wFar / 2));
 
             float _camNear = camNear + (camFar - camNear) * (index.z) / dims.z;
             float _camFar = _camNear + (camFar - camNear) * (index.z + 1) / dims.z;
@@ -84,16 +58,15 @@ if (gCol[0].a > 0.05) {
             vec3 _farLeftBottom = _cFar - (upDir * (_hFar / 2)) - (rightDir * (_wFar / 2));
             vec3 _farRightTop = _cFar + (upDir * (_hFar / 2)) + (rightDir * (_wFar / 2));
             vec3 scale = vec3(0.1);
+            // TODO generate cube verts manually, scale manually using all frustum bounds
             scale.x = distance(_nearBottomLeft, _nearRightBottom) / dims.x;
             scale.y = distance(_nearBottomLeft, _nearTopLeft) / dims.y;
             scale.z = distance(_farLeftBottom, _nearBottomLeft) / dims.z;
             vec3 endPos = _nearBottomLeft;
             endPos += rightDir * index.x * scale.x;
             endPos += upDir * index.y * scale.y;
-            // dont do thisendPos += lookDir * index.z * scale.z;
-            vec3 cubeVert = (vertexID_create_cube(i)) * scale; // TODO - voxelsize
+            vec3 cubeVert = (vertexID_create_cube(i)) * scale;
 
-        // fragColor = gPos[0].rgb / dims;
             gl_Position = mainP * mainV * vec4(endPos + cubeVert, 1.0);
             EmitVertex();
         }
