@@ -20,21 +20,6 @@ namespace Froxels {
         VolumeDebugTraceShader(const std::string& vert, const std::string& frag) :
             Shader("VolumeDebugTrace Shader", vert, frag)
         {
-
-            TextureFormat format = { GL_RGB8, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE };
-            {
-                auto fbo = Library::createFBO("debugTrace");
-                fbo->attachColorTexture({ 1, 1 }, format);
-                fbo->initDrawBuffers();
-            }
-
-            Messenger::addReceiver<FrameSizeMessage>([&](const Message& msg) {
-                glm::ivec2 frameSize = (static_cast<const FrameSizeMessage&>(msg)).mSize;
-                if (auto front = Library::getFBO("debugTrace")) {
-                    front->resize(frameSize);
-                }
-            });
-
         }
 
         virtual void render(const ECS& ecs) override {
@@ -62,14 +47,7 @@ namespace Froxels {
             }
 
             auto quad = Library::getMesh("quad");
-            auto debugTrace = Library::getFBO("debugTrace");
-            if (debugTrace) {
-                debugTrace->bind();
-                glViewport(0, 0, debugTrace->mTextures[0]->mWidth, debugTrace->mTextures[0]->mHeight);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-                quad.mMesh->draw();
-            }
+            quad.mMesh->draw();
 
             unbind();
         }
