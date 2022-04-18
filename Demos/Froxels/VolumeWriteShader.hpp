@@ -37,10 +37,6 @@ namespace Froxels {
             fbo->attachColorTexture({ 1, 1 }, format);
             fbo->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_EDGE);
             fbo->initDrawBuffers();
-
-            Messenger::addReceiver<FrameSizeMessage>([&](const Message& msg) {
-                glm::ivec2 frameSize = (static_cast<const FrameSizeMessage&>(msg)).mSize;
-                });
         }
 
         virtual void render(const ECS& ecs) override {

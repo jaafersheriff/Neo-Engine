@@ -5,8 +5,10 @@
 #include "VolumeWriteComponent.hpp"
 #include "VolumeDebugShader.hpp"
 #include "VolumeWriteShader.hpp"
+#include "VolumeDebugTraceShader.hpp"
 
 #include "Engine/Engine.hpp"
+#include "Util/ServiceLocator.hpp"
 
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
@@ -154,13 +156,14 @@ namespace Froxels {
 
         /* Init renderer */
         renderer.addPreProcessShader<Froxels::VolumeWriteShader>("volumewrite.vert", "volumewrite.frag");
-        auto& phong = renderer.addSceneShader<neo::PhongShader>();
-        phong.mActive = true;
+        auto& debug1 = renderer.addPreProcessShader<Froxels::VolumeDebugTraceShader>("debugtrace.vert", "debugtrace.frag");
+        debug1.mActive = false;
+        renderer.addSceneShader<neo::PhongShader>();
         renderer.addSceneShader<AlphaTestShader>();
         renderer.addSceneShader<WireframeShader>();
         renderer.addSceneShader<LineShader>();
-        auto& debug = renderer.addSceneShader<VolumeDebugGShader>("voxeldebug.vert", "voxeldebug.geom", "voxeldebug.frag");
-        debug.mActive = false;
+        auto& debug2 = renderer.addSceneShader<VolumeDebugGShader>("voxeldebug.vert", "voxeldebug.geom", "voxeldebug.frag");
+        debug2.mActive = false;
     }
 
     void Demo::destroy() {
@@ -176,6 +179,20 @@ namespace Froxels {
                 auto&& [_, vol, spat] = *volume;
                 ImGui::PushID(static_cast<int>(_));
                 vol.imGuiEditor();
+                static bool debug = false;
+                if (ImGui::Checkbox("Debug", &debug) && !ServiceLocator<Renderer>::empty()) {
+                    auto& renderer = ServiceLocator<Renderer>::ref();
+                    if (debug) {
+                        renderer.getShader<VolumeDebugTraceShader>().mActive = true;
+                        renderer.getShader<VolumeDebugGShader>().mActive = true;
+                        renderer.getShader<PhongShader>().mActive = false;
+                    }
+                    else {
+                        renderer.getShader<VolumeDebugTraceShader>().mActive = false;
+                        renderer.getShader<VolumeDebugGShader>().mActive = false;
+                        renderer.getShader<PhongShader>().mActive = true;
+                    }
+                }
                 ImGui::PopID();
             }
             ImGui::TreePop();
