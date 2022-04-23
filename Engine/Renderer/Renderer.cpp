@@ -1,9 +1,6 @@
 #include "Renderer.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "ECS/Messaging/Message.hpp"
-#include "ECS/Messaging/Messenger.hpp"
-
 #include "Shader/BlitShader.hpp"
 #include "Shader/LineShader.hpp"
 
@@ -14,6 +11,7 @@
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 
 #include "Util/ServiceLocator.hpp"
+#include "Util/Math.hpp"
 
 #include "imgui_impl_opengl3.h"
 #include "microprofile.h"
@@ -114,10 +112,11 @@ namespace neo {
         mDefaultFBO->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_EDGE);
         mDefaultFBO->initDrawBuffers();
         mDefaultFBO->bind();
-        Messenger::addReceiver<FrameSizeMessage>([this](const Message& message) {
-            const FrameSizeMessage& msg(static_cast<const FrameSizeMessage&>(message));
-            mDefaultFBO->resize(msg.mSize);
-            });
+
+        // Messenger::addReceiver<FrameSizeMessage>([this](const Message& message) {
+        //     const FrameSizeMessage& msg(static_cast<const FrameSizeMessage&>(message));
+        //     mDefaultFBO->resize(msg.mSize);
+        //     });
         
         /* Set max work group */
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
@@ -160,7 +159,7 @@ namespace neo {
         RENDERER_MP_LEAVE();
     }
 
-    void Renderer::render(WindowSurface& window, ECS& ecs) {
+    void Renderer::render(WindowSurface& window) {
         if (!window.isMinimized()) {
             mStats = {};
 
@@ -291,7 +290,7 @@ namespace neo {
         RENDERER_MP_LEAVE();
     }
 
-    void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize, ECS& ecs) {
+    void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize) {
         RENDERER_MP_ENTER("_renderPostProcess");
         mStats.mNumShaders++;
 
@@ -337,7 +336,7 @@ namespace neo {
         return ret;
     }
 
-    void Renderer::imGuiEditor(WindowSurface& window, ECS& ecs) {
+    void Renderer::imGuiEditor(WindowSurface& window) {
 
         ImGui::Begin("Viewport");
         ServiceLocator<ImGuiManager>::ref().updateViewport();
@@ -373,7 +372,7 @@ namespace neo {
 
                         line->mUseParentSpatial = true;
                         line->mWriteDepth = true;
-                        line->mOverrideColor = util::genRandomVec3(0.3f, 1.f);
+                        line->mOverrideColor = math::genRandomVec3(0.3f, 1.f);
 
                         glm::vec3 NearLeftBottom{ box->mMin };
                         glm::vec3 NearLeftTop{ box->mMin.x, box->mMax.y, box->mMin.z };

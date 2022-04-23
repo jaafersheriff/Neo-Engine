@@ -1,7 +1,7 @@
 #include "CameraControllerComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "Util/Util.hpp"
+#include "Util/Math.hpp"
 
 #include <imgui/imgui.h>
 #include <GLFW/glfw3.h>
@@ -23,7 +23,7 @@ namespace neo {
         , mUpButton(GLFW_KEY_SPACE)
         , mDownButton(GLFW_KEY_LEFT_CONTROL) 
         , mTheta(0.f) 
-        , mPhi(util::PI * 0.5f)
+        , mPhi(math::PI * 0.5f)
     { }
 
     void CameraControllerComponent::imGuiEditor() {

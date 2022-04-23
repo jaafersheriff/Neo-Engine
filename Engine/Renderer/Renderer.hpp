@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/Shader/Shader.hpp"
+#include "Renderer/GLObjects/Shader.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "DemoInfra/IDemo.hpp"
 
@@ -13,7 +13,6 @@ namespace neo {
 
     class Engine;
     class ImGuiManager;
-    class ECS;
     class WindowSurface;
     class PostProcessShader;
     class BlitShader;
@@ -57,7 +56,7 @@ namespace neo {
             void setDemoConfig(IDemo::Config);
             void init();
             void resetState();
-            void render(WindowSurface&, ECS&);
+            void render(WindowSurface&);
             void clean();
 
             /* Shaders */
@@ -67,7 +66,7 @@ namespace neo {
             template <typename ShaderT, typename... Args> ShaderT & addPostProcessShader(Args &&...);
             template <typename ShaderT> ShaderT& getShader();
 
-            void imGuiEditor(WindowSurface& window, ECS& ecs);
+            void imGuiEditor(WindowSurface& window);
         private:
             Framebuffer* mBackBuffer;
 			Framebuffer* mDefaultFBO;
@@ -82,7 +81,7 @@ namespace neo {
             template <typename ShaderT, typename... Args> std::unique_ptr<ShaderT> _createShader(Args &&...);
             std::vector<Shader *> _getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &);
 
-            void _renderPostProcess(Shader &, Framebuffer *, Framebuffer *, glm::ivec2, ECS&);
+            void _renderPostProcess(Shader &, Framebuffer *, Framebuffer *, glm::ivec2);
     };
 
     /* Template implementation */
@@ -149,8 +148,7 @@ namespace neo {
             pong->attachColorTexture({1, 1}, format);
             pong->mTextures.push_back(ping->mTextures[1]);
 
-            Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
-                NEO_UNUSED(ecs);
+            Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message &msg) {
                 const FrameSizeMessage & m(static_cast<const FrameSizeMessage &>(msg));
                 auto ping = Library::getFBO("ping");
                 if (ping) {

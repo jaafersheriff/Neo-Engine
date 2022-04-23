@@ -39,23 +39,23 @@ namespace neo {
 		using Entity = entt::entity;
 		using Registry = entt::registry;
 
-		Entity createEntity();
-		void removeEntity(Entity e);
+		/* Const because these jobs are executed at the beginning of the name frame on flush() */
+		Entity createEntity() const;
+		void removeEntity(Entity e) const;
+		template<typename CompT, typename... Args> CompT* addComponent(Entity e, Args &&... args) const;
+		template<typename CompT> void removeComponent(Entity e) const;
 
-		// Entity access
-		template<typename CompT, typename... Args> CompT* addComponent(Entity e, Args &&... args);
-		template<typename CompT> void removeComponent(Entity e);
-
+		/* Entity access */
 		template<typename CompT> bool has(Entity e) const;
 		template<typename CompT> CompT* getComponent(Entity e);
 		template<typename CompT> CompT *const cGetComponent(Entity e) const;
 		template<typename SuperT, typename CompT> SuperT* getComponentAs(Entity e);
 		template<typename SuperT, typename CompT> const SuperT* cGetComponentAs(Entity e) const;
 
-		// All access
+		/* All access */
+		template<typename... CompTs> bool has() const;
 		template<typename CompT> std::optional<std::tuple<Entity, CompT&>> getComponent();
 		template<typename CompT> std::optional<std::tuple<ECS::Entity, const CompT&>> cGetComponent() const;
-		template<typename... CompTs> bool has() const;
 		template<typename... CompTs> auto getView();
 		template<typename... CompTs> const auto getView() const;
 		template<typename... CompTs> std::optional<std::tuple<Entity, CompTs&...>> getSingleView();
@@ -65,9 +65,9 @@ namespace neo {
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
 
 	private:
-		Registry mRegistry;
+		mutable Registry mRegistry;
 		/* Active containers */
-		std::vector<Entity> mEntityKillQueue;
+		mutable std::vector<Entity> mEntityKillQueue;
 		using ComponentModFunc = std::function<void(Registry&)>;
 		std::vector<ComponentModFunc> mAddComponentFuncs;
 		std::vector<ComponentModFunc> mRemoveComponentFuncs;
@@ -135,7 +135,7 @@ namespace neo {
 	}
 
 	template<typename CompT, typename... Args>
-	CompT* ECS::addComponent(Entity e, Args &&... args) {
+	CompT* ECS::addComponent(Entity e, Args &&... args) const {
 		MICROPROFILE_SCOPEI("ECS", "addComponent", MP_AUTO);
 		CompT* component;
 		if constexpr (sizeof...(Args) > 0) {
@@ -159,7 +159,7 @@ namespace neo {
 	}
 
 	template<typename CompT>
-	void ECS::removeComponent(Entity e) {
+	void ECS::removeComponent(Entity e) const {
 		MICROPROFILE_SCOPEI("ECS", "removeComponent", MP_AUTO);
 		mRemoveComponentFuncs.push_back([e](Registry& registry) mutable {
 			registry.remove<CompT>(e);

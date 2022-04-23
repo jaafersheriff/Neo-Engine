@@ -25,11 +25,12 @@ namespace neo {
 		}
 	}
 
-	ECS::Entity ECS::createEntity() {
+	ECS::Entity ECS::createEntity() const {
+		// TODO - maybe all the create/add should be done via an async builder type
 		return mRegistry.create();
 	}
 
-	void ECS::removeEntity(Entity e) {
+	void ECS::removeEntity(Entity e) const {
 		mEntityKillQueue.push_back(e);
 	}
 
@@ -53,6 +54,7 @@ namespace neo {
 
 
 	void ECS::clean() {
+		// TODO - lock
 		NEO_LOG_I("Cleaning ECS...");
 		flush();
 		mRegistry.each([this](auto entity) {
