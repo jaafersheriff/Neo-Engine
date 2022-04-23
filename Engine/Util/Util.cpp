@@ -4,7 +4,7 @@
 namespace neo {
 	namespace util {
 
-		static inline bool fileExists(const char* fn) {
+		inline bool fileExists(const char* fn) {
 			FILE* fp;
 			if (fn != NULL) {
 				fp = fopen(fn, "rt");
@@ -16,7 +16,7 @@ namespace neo {
 			return false;
 		}
 
-		static inline char* textFileRead(const char* fn) {
+		inline char* textFileRead(const char* fn) {
 			FILE* fp;
 			char* content = NULL;
 			int count = 0;
@@ -40,7 +40,7 @@ namespace neo {
 			return content;
 		}
 
-		static inline int textFileWrite(const char* fn, char* s) {
+		inline int textFileWrite(const char* fn, char* s) {
 			FILE* fp;
 			int status = 0;
 			if (fn != NULL) {

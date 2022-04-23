@@ -6,6 +6,10 @@
 
 namespace neo {
 
+	ECS::~ECS() {
+		clean();
+	}
+
 	void ECS::_initSystems() {
 		for (auto& system : mSystems) {
 			system.second->init(*this);

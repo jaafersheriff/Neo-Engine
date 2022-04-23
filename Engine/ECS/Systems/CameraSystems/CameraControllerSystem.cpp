@@ -6,6 +6,8 @@
 #include "ECS/Component/HardwareComponent/KeyboardComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
+#include "Util/Math.hpp"
+
 namespace neo {
 
     void CameraControllerSystem::update(ECS& ecs) {
@@ -51,19 +53,19 @@ namespace neo {
             }
         }
 
-        if (controller.mTheta > util::PI) {
-            controller.mTheta = std::fmod(controller.mTheta, util::PI) - util::PI;
+        if (controller.mTheta > math::PI) {
+            controller.mTheta = std::fmod(controller.mTheta, math::PI) - math::PI;
         }
-        else if (controller.mTheta < -util::PI) {
-            controller.mTheta = util::PI - std::fmod(-controller.mTheta, util::PI);
+        else if (controller.mTheta < -math::PI) {
+            controller.mTheta = math::PI - std::fmod(-controller.mTheta, math::PI);
         }
 
         /* controller.mPhi [0.f, pi] */
-        controller.mPhi = glm::max(glm::min(controller.mPhi, util::PI), 0.f);
+        controller.mPhi = glm::max(glm::min(controller.mPhi, math::PI), 0.f);
 
-        glm::vec3 w(-util::sphericalToCartesian(1.0f, controller.mTheta, controller.mPhi));
+        glm::vec3 w(-math::sphericalToCartesian(1.0f, controller.mTheta, controller.mPhi));
         w = glm::vec3(-w.y, w.z, -w.x); // one of the many reasons I like z to be up
-        glm::vec3 v(util::sphericalToCartesian(1.0f, controller.mTheta, controller.mPhi - util::PI * 0.5f));
+        glm::vec3 v(math::sphericalToCartesian(1.0f, controller.mTheta, controller.mPhi - math::PI * 0.5f));
         v = glm::vec3(-v.y, v.z, -v.x);
         glm::vec3 u(glm::cross(v, w));
 

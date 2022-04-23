@@ -16,8 +16,8 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "Loader/Library.hpp"
-#include "ECS/Messaging/Messenger.hpp"
-#include "ECS/Messaging/Message.hpp"
+// #include "ECS/Messaging/Messenger.hpp"
+// #include "ECS/Messaging/Message.hpp"
 
 #include "VolumeWriteCameraComponent.hpp"
 

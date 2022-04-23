@@ -42,7 +42,6 @@ namespace neo {
             /* ImGui */
             static void imGuiEditor(DemoWrangler&, const util::FrameCounter&);
         private:
-            static ECS mECS;
             static void _createPrefabs();
 			static void _swapDemo(DemoWrangler&);
 

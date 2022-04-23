@@ -4,7 +4,7 @@
 
 #include "Renderer/Renderer.hpp"
 #include "Engine/ImGuiManager.hpp"
-#include "ECS/Messaging/Messenger.hpp"
+// #include "ECS/Messaging/Messenger.hpp"
 
 #include "Util/Log/Log.hpp"
 #include "Util/ServiceLocator.hpp"
@@ -55,7 +55,7 @@ namespace neo {
         glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
             /* Toggle mFullscreen (f11 or alt+enter) */
             if ((key == GLFW_KEY_F11 || key == GLFW_KEY_ENTER && mods & GLFW_MOD_ALT) && action == GLFW_PRESS) {
-                Messenger::sendMessage<ToggleFullscreenMessage>(glfwGetWindowMonitor(window) != nullptr);
+                // Messenger::sendMessage<ToggleFullscreenMessage>(glfwGetWindowMonitor(window) != nullptr);
                 return;
             }
             if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS) {
@@ -66,15 +66,15 @@ namespace neo {
                     glfwGetFramebufferSize(window, &x, &y);
                     details.mSize.x = x;
                     details.mSize.y = y;
-                    Messenger::sendMessage<FrameSizeMessage>(details.mSize);
+                    // Messenger::sendMessage<FrameSizeMessage>(details.mSize);
                 }
             }
             if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused()) {
                 ServiceLocator<ImGuiManager>::ref().updateKeyboard(window, key, scancode, action, mods);
-                Messenger::sendMessage<Keyboard::ResetKeyboardMessage>();
+                // Messenger::sendMessage<Keyboard::ResetKeyboardMessage>();
             }
             else {
-                Messenger::sendMessage<Keyboard::KeyPressedMessage>(key, action);
+                // Messenger::sendMessage<Keyboard::KeyPressedMessage>(key, action);
             }
             });
         glfwSetMouseButtonCallback(mWindow, [](GLFWwindow* window, int button, int action, int mods) {
@@ -83,19 +83,19 @@ namespace neo {
             doImGui |= ServiceLocator<ImGuiManager>::ref().isEnabled() && ServiceLocator<ImGuiManager>::ref().isViewportHovered() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused() && action == GLFW_PRESS;
             if (doImGui) {
                 ServiceLocator<ImGuiManager>::ref().updateMouse(window, button, action, mods);
-                Messenger::sendMessage<Mouse::MouseResetMessage>();
+                // Messenger::sendMessage<Mouse::MouseResetMessage>();
             }
             else {
-                Messenger::sendMessage<Mouse::MouseButtonMessage>(button, action);
+                // Messenger::sendMessage<Mouse::MouseButtonMessage>(button, action);
             }
             });
         glfwSetScrollCallback(mWindow, [](GLFWwindow* window, double dx, double dy) {
             if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportHovered()) {
                 ServiceLocator<ImGuiManager>::ref().updateScroll(window, dx, dy);
-                Messenger::sendMessage<Mouse::MouseResetMessage>();
+                // Messenger::sendMessage<Mouse::MouseResetMessage>();
             }
             else {
-                Messenger::sendMessage<Mouse::ScrollWheelMessage>(dy);
+                // Messenger::sendMessage<Mouse::ScrollWheelMessage>(dy);
             }
             });
 
@@ -111,7 +111,7 @@ namespace neo {
                 return;
             }
 
-            Messenger::sendMessage<FrameSizeMessage>(glm::uvec2(width, height));
+            // Messenger::sendMessage<FrameSizeMessage>(glm::uvec2(width, height));
             });
 
         glfwSetFramebufferSizeCallback(mWindow, [](GLFWwindow* window, int width, int height) {
@@ -120,12 +120,12 @@ namespace neo {
                 return;
             }
 
-            Messenger::sendMessage<FrameSizeMessage>(glm::uvec2(width, height));
+            // Messenger::sendMessage<FrameSizeMessage>(glm::uvec2(width, height));
             });
 
         glfwSetCursorEnterCallback(mWindow, [](GLFWwindow* window, int entered) {
             NEO_UNUSED(window, entered);
-            Messenger::sendMessage<Mouse::MouseResetMessage>();
+            // Messenger::sendMessage<Mouse::MouseResetMessage>();
         });
 
         /* Init GLEW */
@@ -143,32 +143,32 @@ namespace neo {
         glfwSetWindowTitle(mWindow, name.c_str());
 
         /* Set callbacks */
-        Messenger::addReceiver<ToggleFullscreenMessage>([this](const Message& message) {
-            const ToggleFullscreenMessage& msg(static_cast<const ToggleFullscreenMessage&>(message));
-            /* If already full screen */
-            if (msg.mAlreadyFullscreen) {
-                mDetails.mFullscreen = false;
-                mDetails.mSize = { 1920, 1080 };
-                glfwSetWindowMonitor(mWindow, nullptr, mDetails.mPos.x, mDetails.mPos.y, mDetails.mSize.x, mDetails.mSize.y, mDetails.mVSyncEnabled);
-            }
-            /* If windowed */
-            else {
-                int x, y;
-                glfwGetWindowPos(mWindow, &x, &y);
-                mDetails.mPos.x = x;
-                mDetails.mPos.y = y;
-                mDetails.mFullscreen = true;
-                GLFWmonitor* monitor(glfwGetPrimaryMonitor());
-                const GLFWvidmode* video(glfwGetVideoMode(monitor));
-                glfwSetWindowMonitor(mWindow, monitor, 0, 0, video->width, video->height, video->refreshRate);
-            }
-        });
+        // Messenger::addReceiver<ToggleFullscreenMessage>([this](const Message& message) {
+        //     const ToggleFullscreenMessage& msg(static_cast<const ToggleFullscreenMessage&>(message));
+        //     /* If already full screen */
+        //     if (msg.mAlreadyFullscreen) {
+        //         mDetails.mFullscreen = false;
+        //         mDetails.mSize = { 1920, 1080 };
+        //         glfwSetWindowMonitor(mWindow, nullptr, mDetails.mPos.x, mDetails.mPos.y, mDetails.mSize.x, mDetails.mSize.y, mDetails.mVSyncEnabled);
+        //     }
+        //     /* If windowed */
+        //     else {
+        //         int x, y;
+        //         glfwGetWindowPos(mWindow, &x, &y);
+        //         mDetails.mPos.x = x;
+        //         mDetails.mPos.y = y;
+        //         mDetails.mFullscreen = true;
+        //         GLFWmonitor* monitor(glfwGetPrimaryMonitor());
+        //         const GLFWvidmode* video(glfwGetVideoMode(monitor));
+        //         glfwSetWindowMonitor(mWindow, monitor, 0, 0, video->width, video->height, video->refreshRate);
+        //     }
+        // });
 
-        Messenger::addReceiver<FrameSizeMessage>([this](const Message& message) {
-            const FrameSizeMessage& msg(static_cast<const FrameSizeMessage&>(message));
-            mDetails.mSize.x = msg.mSize.x;
-            mDetails.mSize.y = msg.mSize.y;
-        });
+        // Messenger::addReceiver<FrameSizeMessage>([this](const Message& message) {
+        //     const FrameSizeMessage& msg(static_cast<const FrameSizeMessage&>(message));
+        //     mDetails.mSize.x = msg.mSize.x;
+        //     mDetails.mSize.y = msg.mSize.y;
+        // });
 
         if (!ServiceLocator<ImGuiManager>::empty()) {
             if (!ServiceLocator<ImGuiManager>::ref().isEnabled()) {
@@ -176,7 +176,7 @@ namespace neo {
                 glfwGetFramebufferSize(mWindow, &x, &y);
                 mDetails.mSize.x = x;
                 mDetails.mSize.y = y;
-                Messenger::sendMessage<FrameSizeMessage>(mDetails.mSize);
+                // Messenger::sendMessage<FrameSizeMessage>(mDetails.mSize);
             }
         }
     }
@@ -186,9 +186,9 @@ namespace neo {
             double x, y;
             glfwGetCursorPos(mWindow, &x, &y);
             y = mDetails.mSize.y - y;
-            Messenger::sendMessage<Mouse::MouseMoveMessage>(x, y);
+            // Messenger::sendMessage<Mouse::MouseMoveMessage>(x, y);
         }
-        Messenger::sendMessage<Mouse::ScrollWheelMessage>(0.0);
+        // Messenger::sendMessage<Mouse::ScrollWheelMessage>(0.0);
         MICROPROFILE_ENTERI("Window", "glfwPollEvents", MP_AUTO);
         glfwPollEvents();
         MICROPROFILE_LEAVE();

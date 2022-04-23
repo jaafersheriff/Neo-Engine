@@ -3,35 +3,35 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include "ECS/Messaging/Message.hpp"
+// #include "ECS/Messaging/Message.hpp"
 
 namespace neo {
 
     class Mouse {
 
     public:
-        struct MouseResetMessage : public Message { };
-        struct MouseButtonMessage : public Message {
-            int mButton;
-            int mAction;
-			MouseButtonMessage(int button, int action)
-                : mButton(button)
-                , mAction(action)
-            {}
-        };
-        struct ScrollWheelMessage : public Message {
-            double mSpeed;
-            ScrollWheelMessage(double speed)
-                : mSpeed(speed)
-            {}
-        };
-        struct MouseMoveMessage : public Message {
-            double mX, mY;
-            MouseMoveMessage(double x, double y)
-                : mX(x)
-                , mY(y)
-            {}
-        };
+        // struct MouseResetMessage : public Message { };
+        // struct MouseButtonMessage : public Message {
+        //     int mButton;
+        //     int mAction;
+		// 	MouseButtonMessage(int button, int action)
+        //         : mButton(button)
+        //         , mAction(action)
+        //     {}
+        // };
+        // struct ScrollWheelMessage : public Message {
+        //     double mSpeed;
+        //     ScrollWheelMessage(double speed)
+        //         : mSpeed(speed)
+        //     {}
+        // };
+        // struct MouseMoveMessage : public Message {
+        //     double mX, mY;
+        //     MouseMoveMessage(double x, double y)
+        //         : mX(x)
+        //         , mY(y)
+        //     {}
+        // };
 
         // TODO - maybe move this to ctors
         void init();
@@ -57,11 +57,6 @@ namespace neo {
         *  1 if scrolling forward
         */
         double mDZ = 0;
-
-        void _onReset(const MouseResetMessage& msg);
-        void _onButton(const MouseButtonMessage& msg);
-        void _onMove(const MouseMoveMessage& msg);
-        void _onScrollWheel(const ScrollWheelMessage& msg);
 
     };
 }

@@ -34,11 +34,11 @@ namespace neo {
 
 	namespace util {
 
-		static inline bool fileExists(const char* fn);
+		inline bool fileExists(const char* fn);
 
-		static inline char* textFileRead(const char* fn);
+		inline char* textFileRead(const char* fn);
 
-		static inline int textFileWrite(const char* fn, char* s);
+		inline int textFileWrite(const char* fn, char* s);
 
 	}
 }

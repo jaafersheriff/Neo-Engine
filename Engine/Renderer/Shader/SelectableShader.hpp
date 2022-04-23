@@ -3,7 +3,7 @@
 #include "Renderer/GLObjects/Shader.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
-#include "ECS/Messaging/Messenger.hpp"
+/// #include "ECS/Messaging/Messenger.hpp"
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
@@ -43,10 +43,10 @@ namespace neo {
             stencilBuffer->disableDraw();
 
             // Handle frame size changing
-            Messenger::addReceiver<FrameSizeMessage>([this](const Message& message) {
-                const FrameSizeMessage& msg(static_cast<const FrameSizeMessage&>(message));
-                Library::getFBO("selectable")->resize(msg.mSize);
-                });
+            // Messenger::addReceiver<FrameSizeMessage>([this](const Message& message) {
+            //     const FrameSizeMessage& msg(static_cast<const FrameSizeMessage&>(message));
+            //     Library::getFBO("selectable")->resize(msg.mSize);
+            //     });
         }
 
         // TODO : add hovered capability

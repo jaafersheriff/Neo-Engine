@@ -30,6 +30,7 @@
 namespace neo {
 
     class Engine;
+    class ECS;
     class ImGuiManager;
     class WindowSurface;
     class PostProcessShader;
@@ -76,7 +77,7 @@ namespace neo {
             void setDemoConfig(IDemo::Config);
             void init();
             void resetState();
-            void render(WindowSurface&);
+            void render(WindowSurface& window, const ECS& ecs);
             void clean();
 
             /* Shaders */
@@ -101,7 +102,7 @@ namespace neo {
             template <typename ShaderT, typename... Args> std::unique_ptr<ShaderT> _createShader(Args &&...);
             std::vector<Shader *> _getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &);
 
-            void _renderPostProcess(Shader &, Framebuffer *, Framebuffer *, glm::ivec2);
+            void _renderPostProcess(Shader &, Framebuffer *, Framebuffer *, glm::ivec2, const ECS& ecs);
     };
 
     /* Template implementation */

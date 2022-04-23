@@ -5,31 +5,31 @@ namespace neo {
 
 	namespace math {
 
-		static inline float genRandom() {
+		inline float genRandom() {
 			return rand() / (float)RAND_MAX;
 		}
 
-		static inline float genRandom(const float val) {
+		inline float genRandom(const float val) {
 			return genRandom() * val;
 		}
 
-		static inline float genRandom(const float min, const float max) {
+		inline float genRandom(const float min, const float max) {
 			return genRandom() * (max - min) + min;
 		}
 
-		static inline glm::vec3 genRandomVec3() {
+		inline glm::vec3 genRandomVec3() {
 			return glm::vec3(genRandom(), genRandom(), genRandom());
 		}
 
-		static inline glm::vec3 genRandomVec3(const float min, const float max) {
+		inline glm::vec3 genRandomVec3(const float min, const float max) {
 			return glm::vec3(genRandom(min, max), genRandom(min, max), genRandom(min, max));
 		}
 
-		static inline bool genRandomBool() {
+		inline bool genRandomBool() {
 			return genRandom() < 0.5f;
 		}
 
-		static inline float lerp(float a, float b, float t) {
+		inline float lerp(float a, float b, float t) {
 			return a + t * (b - a);
 		}
 
@@ -37,7 +37,7 @@ namespace neo {
 		// theta is CCW angle on xy plane
 		// phi is angle from +z axis
 		// all angles are in radians
-		static glm::vec3 sphericalToCartesian(float rad, float theta, float phi) {
+		glm::vec3 sphericalToCartesian(float rad, float theta, float phi) {
 			float sinTheta = std::sin(theta);
 			float cosTheta = std::cos(theta);
 			float sinPhi = std::sin(phi);
@@ -50,7 +50,7 @@ namespace neo {
 			);
 		}
 
-		static inline glm::vec3 sphericalToCartesian(const glm::vec3& v) {
+		inline glm::vec3 sphericalToCartesian(const glm::vec3& v) {
 			return sphericalToCartesian(v.x, v.y, v.z);
 		}
 

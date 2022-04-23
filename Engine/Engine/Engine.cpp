@@ -27,7 +27,7 @@ extern "C" {
 #include "Hardware/Keyboard.hpp"
 #include "Hardware/Mouse.hpp"
 
-#include "ECS/Messaging/Messenger.hpp"
+// #include "ECS/Messaging/Messenger.hpp"
 
 #include "Loader/Loader.hpp"
 #include "Loader/MeshGenerator.hpp"
@@ -42,9 +42,6 @@ extern "C" {
 
 namespace neo {
 
-    /* ECS */
-    ECS Engine::mECS;
-
     /* Hardware */
     WindowSurface Engine::mWindow;
     Keyboard Engine::mKeyboard;
@@ -54,6 +51,7 @@ namespace neo {
 
         srand((unsigned int)(time(0)));
 
+        ServiceLocator<ECS>::set();
         ServiceLocator<Renderer>::set(4, 4);
 
         {
@@ -100,36 +98,37 @@ namespace neo {
             /* Update display, mouse, keyboard */
             mWindow.updateHardware();
             ServiceLocator<ImGuiManager>::ref().update();
-            Messenger::relayMessages(mECS);
+            // Messenger::relayMessages(ecs);
 
+            auto& ecs = ServiceLocator<ECS>::ref();
             {
                 MICROPROFILE_SCOPEI("Engine", "FrameStats Entity", MP_AUTO);
-                auto hardware = mECS.createEntity();
-                mECS.addComponent<MouseComponent>(hardware, mMouse);
-                mECS.addComponent<KeyboardComponent>(hardware, mKeyboard);
+                auto hardware = ecs.createEntity();
+                ecs.addComponent<MouseComponent>(hardware, mMouse);
+                ecs.addComponent<KeyboardComponent>(hardware, mKeyboard);
                 if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                    mECS.addComponent<ViewportDetailsComponent>(hardware, ServiceLocator<ImGuiManager>::ref().getViewportSize(), mWindow.getDetails().mPos + ServiceLocator<ImGuiManager>::ref().getViewportOffset());
+                    ecs.addComponent<ViewportDetailsComponent>(hardware, ServiceLocator<ImGuiManager>::ref().getViewportSize(), mWindow.getDetails().mPos + ServiceLocator<ImGuiManager>::ref().getViewportOffset());
                 }
                 else {
-                    mECS.addComponent<ViewportDetailsComponent>(hardware, mWindow.getDetails().mSize, mWindow.getDetails().mPos);
+                    ecs.addComponent<ViewportDetailsComponent>(hardware, mWindow.getDetails().mSize, mWindow.getDetails().mPos);
                 }
-                mECS.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(counter.mTimeStep));
-                mECS.addComponent<SingleFrameComponent>(hardware);
+                ecs.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(counter.mTimeStep));
+                ecs.addComponent<SingleFrameComponent>(hardware);
             }
 
             {
                 MICROPROFILE_SCOPEI("Engine", "Demo::update", MP_AUTO);
-                demos.getCurrentDemo()->update(mECS);
+                demos.getCurrentDemo()->update(ecs);
             }
 
             /* Destroy and create objects and components */
-            mECS.flush();
-            Messenger::relayMessages(mECS);
+            ecs.flush();
+            // Messenger::relayMessages(ecs);
 
             if (!mWindow.isMinimized()) {
                 /* Update each system */
-                mECS._updateSystems();
-                Messenger::relayMessages(mECS);
+                ecs._updateSystems();
+                // Messenger::relayMessages(ecs);
 
                 /* Update imgui functions */
                 if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
@@ -138,15 +137,15 @@ namespace neo {
 
                     {
                         MICROPROFILE_SCOPEI("ImGui", "demos.imGuiEditor", MP_AUTO);
-                        demos.imGuiEditor(mECS);
+                        demos.imGuiEditor(ecs);
                     }
                     {
-                        MICROPROFILE_SCOPEI("ImGui", "mECS.imguiEdtor", MP_AUTO);
-                        mECS.imguiEdtor();
+                        MICROPROFILE_SCOPEI("ImGui", "ecs.imguiEdtor", MP_AUTO);
+                        ecs.imguiEdtor();
                     }
                     {
                         MICROPROFILE_SCOPEI("ImGui", "Renderer.imGuiEditor", MP_AUTO);
-                        ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
+                        ServiceLocator<Renderer>::ref().imGuiEditor(mWindow);
                     }
                     {
                         MICROPROFILE_SCOPEI("ImGui", "Library::imGuiEditor", MP_AUTO);
@@ -160,18 +159,18 @@ namespace neo {
 
                     ServiceLocator<ImGuiManager>::ref().end();
                 }
-                Messenger::relayMessages(mECS);
+                // Messenger::relayMessages(ecs);
             }
 
             /* Render */
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
-            ServiceLocator<Renderer>::ref().render(mWindow, mECS);
-            Messenger::relayMessages(mECS);
+            ServiceLocator<Renderer>::ref().render(mWindow, ecs);
+            // Messenger::relayMessages(ecs);
 
             // TODO - this should be its own system
-            mECS.getView<SingleFrameComponent>().each([](ECS::Entity entity, SingleFrameComponent&) {
-                mECS.removeEntity(entity);
+            ecs.getView<SingleFrameComponent>().each([&](ECS::Entity entity, SingleFrameComponent&) {
+                ecs.removeEntity(entity);
             });
 
             MicroProfileFlip(0);
@@ -187,10 +186,10 @@ namespace neo {
 
         /* Destry the old state*/
         demos.getCurrentDemo()->destroy();
-        mECS.clean();
+        ServiceLocator<ECS>::reset();
         Library::clean();
         ServiceLocator<Renderer>::ref().clean();
-        Messenger::clean();
+        // Messenger::clean();
 
         /* Init the new state */
         ServiceLocator<ImGuiManager>::ref().reset();
@@ -205,10 +204,11 @@ namespace neo {
         _createPrefabs();
 
         /* Apply config */
+        auto& ecs = ServiceLocator<ECS>::ref();
         if (config.attachEditor) {
             NEO_LOG("Attaching editor");
-            mECS.addSystem<MouseRaySystem>();
-            mECS.addSystem<EditorSystem>();
+            ecs.addSystem<MouseRaySystem>();
+            ecs.addSystem<EditorSystem>();
             ServiceLocator<Renderer>::ref().addPreProcessShader<SelectableShader>();
             ServiceLocator<Renderer>::ref().addSceneShader<OutlineShader>();
             ServiceLocator<Renderer>::ref().addSceneShader<WireframeShader>();
@@ -218,14 +218,14 @@ namespace neo {
         auto& lineShader = ServiceLocator<Renderer>::ref().addSceneShader<LineShader>();
         lineShader.mActive = false;
 
-        demos.getCurrentDemo()->init(mECS, ServiceLocator<Renderer>::ref());
+        demos.getCurrentDemo()->init(ecs, ServiceLocator<Renderer>::ref());
 
         /* Init systems */
-        mECS._initSystems();
+        ecs._initSystems();
 
         /* Initialize new objects and components */
-        mECS.flush();
-        Messenger::relayMessages(mECS);
+        ecs.flush();
+        // Messenger::relayMessages(ecs);
     }
 
     void Engine::_createPrefabs() {
@@ -257,8 +257,8 @@ namespace neo {
 
     void Engine::shutDown() {
         NEO_LOG_I("Shutting down...");
-        mECS.clean();
-        Messenger::clean();
+        ServiceLocator<ECS>::reset();
+        // Messenger::clean();
         Library::clean();
         ServiceLocator<Renderer>::ref().clean();
         ServiceLocator<Renderer>::reset();
@@ -267,6 +267,7 @@ namespace neo {
     }
 
     void Engine::imGuiEditor(DemoWrangler& demos, const util::FrameCounter& counter) {
+        auto& ecs = ServiceLocator<ECS>::ref();
         {
             ImGui::Begin("Stats");
             counter.imGuiEditor();
@@ -276,7 +277,7 @@ namespace neo {
             ImGui::TextWrapped("Num Triangles: %d", rendererStats.mNumTriangles);
             ImGui::TextWrapped("Num Uniforms: %d", rendererStats.mNumUniforms);
             ImGui::TextWrapped("Num Samplers: %d", rendererStats.mNumSamplers);
-            if (auto hardwareDetails = mECS.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
+            if (auto hardwareDetails = ecs.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
                 auto&& [entity, mouse, viewport] = hardwareDetails.value();
                 if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
                     viewport.imGuiEditor();
@@ -292,10 +293,10 @@ namespace neo {
 
         if (demos.getConfig().attachEditor) {
             ImGui::Begin("Editor");
-            if (auto selectedView = mECS.getComponent<SelectedComponent>()) {
+            if (auto selectedView = ecs.getComponent<SelectedComponent>()) {
                 auto&& [selectedEntity, _] = *selectedView;
                 if (ImGui::Button("Delete entity")) {
-                    mECS.removeEntity(selectedEntity);
+                    ecs.removeEntity(selectedEntity);
                 }
                 NEO_FAIL("This won't work");
                 // auto allComponents = selected->getGameObject().getComponentsMap();
@@ -329,7 +330,7 @@ namespace neo {
                 //         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
                 //         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
                 //         if (ImGui::Button("Remove Component", ImVec2(ImGui::GetWindowWidth() * 0.9f, 0))) {
-                //             mECS._removeComponent(type.value(), components[index]);
+                //             ecs._removeComponent(type.value(), components[index]);
                 //             if (components.size() == 1) {
                 //                 index = 0;
                 //                 type = std::nullopt;
@@ -349,20 +350,20 @@ namespace neo {
             ImGui::Separator();
             if (ImGui::Button("Create new GameObject")) {
                 {
-                    auto view = mECS.getView<SelectedComponent>();
+                    auto view = ecs.getView<SelectedComponent>();
                     NEO_ASSERT(view.size() <= 1, "How are there two items selected at the same time");
-                    view.each([](ECS::Entity entity, SelectedComponent&) {
-                        mECS.removeComponent<SelectedComponent>(entity);
+                    view.each([&](ECS::Entity entity, SelectedComponent&) {
+                        ecs.removeComponent<SelectedComponent>(entity);
                     });
                 }
-                auto entity = mECS.createEntity();
+                auto entity = ecs.createEntity();
                 auto sphereMesh = Library::getMesh("sphere");
-                mECS.addComponent<BoundingBoxComponent>(entity, sphereMesh);
-                mECS.addComponent<SpatialComponent>(entity);
-                mECS.addComponent<SelectableComponent>(entity);
-                mECS.addComponent<SelectedComponent>(entity);
-                mECS.addComponent<MeshComponent>(entity, sphereMesh.mMesh);
-                mECS.addComponent<renderable::WireframeRenderable>(entity);
+                ecs.addComponent<BoundingBoxComponent>(entity, sphereMesh);
+                ecs.addComponent<SpatialComponent>(entity);
+                ecs.addComponent<SelectableComponent>(entity);
+                ecs.addComponent<SelectedComponent>(entity);
+                ecs.addComponent<MeshComponent>(entity, sphereMesh.mMesh);
+                ecs.addComponent<renderable::WireframeRenderable>(entity);
             }
             ImGui::End();
         }

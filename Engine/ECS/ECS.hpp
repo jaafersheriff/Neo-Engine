@@ -27,7 +27,7 @@ namespace neo {
 
 	public:
 		ECS() = default;
-		~ECS() = default;
+		~ECS();
 		ECS(const ECS&) = delete;
 		ECS& operator=(const ECS&) = delete;
 
@@ -69,8 +69,8 @@ namespace neo {
 		/* Active containers */
 		mutable std::vector<Entity> mEntityKillQueue;
 		using ComponentModFunc = std::function<void(Registry&)>;
-		std::vector<ComponentModFunc> mAddComponentFuncs;
-		std::vector<ComponentModFunc> mRemoveComponentFuncs;
+		mutable std::vector<ComponentModFunc> mAddComponentFuncs;
+		mutable std::vector<ComponentModFunc> mRemoveComponentFuncs;
 
 		std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
 		void _initSystems();

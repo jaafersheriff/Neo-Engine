@@ -3,8 +3,7 @@
 #include "ECS/Component/Component.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 
-#include "Util/Log/Log.hpp"
-#include "Util/Util.hpp"
+#include "Util/Math.hpp"
 
 #include <algorithm>
 #include <glm/glm.hpp>
@@ -70,10 +69,10 @@ namespace Froxels {
                         data[i] = glm::vec4(pos.x, pos.y, pos.z, 1.0);
                     }
                     else if (mode == 2) {
-                        data[i] = glm::vec4(util::genRandomVec3(), util::genRandom());
+                        data[i] = glm::vec4(math::genRandomVec3(), math::genRandom());
                     }
                     else if (mode == 2) {
-                        data[i] = glm::vec4(util::genRandomVec3(), 1.0);
+                        data[i] = glm::vec4(math::genRandomVec3(), 1.0);
                     }
                 }
                 mTexture->update(glm::uvec3(0x1<<mSize), data.data());

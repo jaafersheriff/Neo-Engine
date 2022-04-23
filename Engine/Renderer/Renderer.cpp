@@ -140,7 +140,7 @@ namespace neo {
         glBindVertexArray(0);
     }
 
-    void Renderer::render(WindowSurface& window) {
+    void Renderer::render(WindowSurface& window, const ECS& ecs) {
         if (!window.isMinimized()) {
             mStats = {};
 
@@ -272,7 +272,7 @@ namespace neo {
         RENDERER_MP_LEAVE();
     }
 
-    void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize) {
+    void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize, const ECS& ecs) {
         RENDERER_MP_ENTER("_renderPostProcess");
         mStats.mNumShaders++;
 
@@ -319,6 +319,9 @@ namespace neo {
     }
 
     void Renderer::imGuiEditor(WindowSurface& window) {
+        NEO_ASSERT(!ServiceLocator<ECS>::empty(), "Can't call this imgui function before ECS is set");
+
+        auto& ecs = ServiceLocator<ECS>::ref();
 
         ImGui::Begin("Viewport");
         ServiceLocator<ImGuiManager>::ref().updateViewport();

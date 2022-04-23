@@ -5,7 +5,7 @@
 #include "glm/glm.hpp"
 
 #include "WindowDetails.hpp"
-#include "ECS/Messaging/Message.hpp"
+// #include "ECS/Messaging/Message.hpp"
 
 #include <string>
 
@@ -13,12 +13,12 @@ namespace neo {
 
     class WindowSurface {
 
-        struct ToggleFullscreenMessage : public Message {
-            bool mAlreadyFullscreen = false;
-            ToggleFullscreenMessage(bool alreadyFullscreen) :
-                mAlreadyFullscreen(alreadyFullscreen)
-            {}
-        };
+        // struct ToggleFullscreenMessage : public Message {
+        //     bool mAlreadyFullscreen = false;
+        //     ToggleFullscreenMessage(bool alreadyFullscreen) :
+        //         mAlreadyFullscreen(alreadyFullscreen)
+        //     {}
+        // };
 
     public:
         WindowSurface() = default;
@@ -43,8 +43,5 @@ namespace neo {
     private:
         GLFWwindow* mWindow = nullptr;
         WindowDetails mDetails;
-
-        void _onFrameSizeChanged(const FrameSizeMessage& msg);
-        void _onToggleFullscreen(const ToggleFullscreenMessage& msg);
     };
 }
