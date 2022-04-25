@@ -77,6 +77,7 @@ namespace neo {
     }
 
     void Renderer::init() {
+
 	#ifdef DEBUG_MODE
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

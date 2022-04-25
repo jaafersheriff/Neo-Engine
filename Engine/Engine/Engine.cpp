@@ -53,18 +53,7 @@ namespace neo {
 
         ServiceLocator<ECS>::set();
         ServiceLocator<Renderer>::set(4, 4);
-
-        {
-            NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
-            GLFWimage icons[1];
-            int components;
-            uint8_t* data = Loader::_loadTextureData(icons[0].width, icons[0].height, components, "icon.png", {}, false);
-            if (data) {
-                icons[0].pixels = data;
-                glfwSetWindowIcon(mWindow.getWindow(), 1, icons);
-            }
-            Loader::_cleanTextureData(data);
-        }
+        NEO_ASSERT(mWindow.init() == 0, "Failed initializing Window");
         ServiceLocator<ImGuiManager>::set();
         ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
 
@@ -80,6 +69,17 @@ namespace neo {
     }
 
     void Engine::run(DemoWrangler& demos) {
+
+        {
+            GLFWimage icons[1];
+            int components;
+            uint8_t* data = Loader::_loadTextureData(icons[0].width, icons[0].height, components, "icon.png", {}, false);
+            if (data) {
+                icons[0].pixels = data;
+                glfwSetWindowIcon(mWindow.getWindow(), 1, icons);
+            }
+            Loader::_cleanTextureData(data);
+        }
 
         util::FrameCounter counter;
         demos.setForceReload();

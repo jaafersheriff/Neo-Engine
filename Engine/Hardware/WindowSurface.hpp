@@ -26,8 +26,8 @@ namespace neo {
         WindowSurface(const WindowSurface&) = delete;
         WindowSurface& operator=(const WindowSurface&) = delete;
 
-        int init(const std::string&);
-        void reset(const std::string&);
+        int init();
+        void reset();
         void updateHardware();
         void shutDown();
 

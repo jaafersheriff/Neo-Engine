@@ -19,7 +19,7 @@ namespace neo {
         }
 
     }
-    int WindowSurface::init(const std::string& name) {
+    int WindowSurface::init() {
         /* Set error callback */
         glfwSetErrorCallback(_errorCallback);
 
@@ -44,7 +44,7 @@ namespace neo {
         NEO_UNUSED(mode);
 
         /* Create GLFW window */
-        mWindow = glfwCreateWindow(mDetails.mSize.x, mDetails.mSize.y, name.c_str(), NULL, NULL);
+        mWindow = glfwCreateWindow(mDetails.mSize.x, mDetails.mSize.y, "", NULL, NULL);
         if (!mWindow) {
             glfwTerminate();
             NEO_FAIL("Failed to create window");
@@ -134,14 +134,10 @@ namespace neo {
 
         glfwSwapInterval(mDetails.mVSyncEnabled);
 
-        reset(name);
-
         return 0;
     }
 
-    void WindowSurface::reset(const std::string& name) {
-        glfwSetWindowTitle(mWindow, name.c_str());
-
+    void WindowSurface::reset() {
         /* Set callbacks */
         // Messenger::addReceiver<ToggleFullscreenMessage>([this](const Message& message) {
         //     const ToggleFullscreenMessage& msg(static_cast<const ToggleFullscreenMessage&>(message));
@@ -170,15 +166,15 @@ namespace neo {
         //     mDetails.mSize.y = msg.mSize.y;
         // });
 
-        if (!ServiceLocator<ImGuiManager>::empty()) {
-            if (!ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                int x, y;
-                glfwGetFramebufferSize(mWindow, &x, &y);
-                mDetails.mSize.x = x;
-                mDetails.mSize.y = y;
-                // Messenger::sendMessage<FrameSizeMessage>(mDetails.mSize);
-            }
-        }
+        // if (!ServiceLocator<ImGuiManager>::empty()) {
+        //     if (!ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+        //         int x, y;
+        //         glfwGetFramebufferSize(mWindow, &x, &y);
+        //         mDetails.mSize.x = x;
+        //         mDetails.mSize.y = y;
+        //         // Messenger::sendMessage<FrameSizeMessage>(mDetails.mSize);
+        //     }
+        // }
     }
 
     void WindowSurface::updateHardware() {
