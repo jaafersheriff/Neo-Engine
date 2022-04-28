@@ -183,6 +183,9 @@ namespace neo {
 			NEO_UNUSED(r);
 			removeComponent<CompT>(e);
 		};
+		info.widget = [this](entt::registry& r, Entity e) {
+			r.get<CompT>(e).imGuiEditor();
+		};
 		mEditor.registerComponent<CompT>(info);
 
 		mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
