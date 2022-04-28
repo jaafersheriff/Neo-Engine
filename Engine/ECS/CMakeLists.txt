@@ -8,6 +8,7 @@ PUBLIC
 	microprofile
 	Hardware
 	entt
+	imgui
 PRIVATE
 	libglew_static
 )

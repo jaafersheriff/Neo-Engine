@@ -42,6 +42,7 @@ file(GLOB IMGUI_CPP_FILES
 file(GLOB IMGUI_HPP_FILES 
 	imgui/*.h
 	implot/*.h
+	imgui_entt_entity_editor/*.hpp
 )
 add_library(imgui STATIC
 	${IMGUI_CPP_FILES}
@@ -63,6 +64,7 @@ target_link_libraries(imgui
 PUBLIC
 PRIVATE
 	glfw
+	entt
 )
 
 

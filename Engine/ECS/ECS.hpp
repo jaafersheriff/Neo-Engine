@@ -6,6 +6,7 @@
 #define ENTT_ASSERT(condition, ...) NEO_ASSERT(condition, __VA_ARGS__)
 #endif
 #include <entt/entt.hpp>
+#include <imgui_entt_entity_editor/imgui_entt_entity_editor.hpp>
 
 namespace neo {
 	class System;
@@ -55,7 +56,9 @@ namespace neo {
 		template <typename SysT> bool isSystemEnabled() const;
 
 	private:
-		Registry mRegistry;
+		mutable Registry mRegistry;
+		mutable MM::EntityEditor<Entity> mEditor;
+
 		/* Active containers */
 		std::vector<Entity> mEntityKillQueue;
 		using ComponentModFunc = std::function<void(Registry&)>;
@@ -161,12 +164,18 @@ namespace neo {
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 		// MICROPROFILE_SCOPEI("ECS", "addComponent", MP_AUTO);
 		CompT* component;
+
 		if constexpr (sizeof...(Args) > 0) {
 			component = new CompT(std::forward<Args>(args)...);
 		}
 		else {
 			component = new CompT();
 		}
+
+		mEditor.registerComponent<CompT>(component->getName(), [](entt::registry& r, Entity e) {
+			auto c = r.get<CompT>(e);
+			c.imGuiEditor();
+		});
 
 		mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
 			if (registry.try_get<CompT>(e)) {

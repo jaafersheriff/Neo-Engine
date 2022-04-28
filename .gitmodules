@@ -19,3 +19,6 @@
 [submodule "Engine/ext/entt"]
 	path = Engine/ext/entt
 	url = https://github.com/skypjack/entt.git
+[submodule "Engine/ext/imgui_entt_entity_editor"]
+	path = Engine/ext/imgui_entt_entity_editor
+	url = https://github.com/Green-Sky/imgui_entt_entity_editor.git
