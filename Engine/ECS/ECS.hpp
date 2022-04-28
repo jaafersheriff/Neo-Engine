@@ -163,8 +163,8 @@ namespace neo {
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 		// MICROPROFILE_SCOPEI("ECS", "addComponent", MP_AUTO);
-		CompT* component;
 
+		CompT* component;
 		if constexpr (sizeof...(Args) > 0) {
 			component = new CompT(std::forward<Args>(args)...);
 		}
@@ -172,10 +172,18 @@ namespace neo {
 			component = new CompT();
 		}
 
-		mEditor.registerComponent<CompT>(component->getName(), [](entt::registry& r, Entity e) {
-			auto c = r.get<CompT>(e);
-			c.imGuiEditor();
-		});
+		MM::EntityEditor<Entity>::ComponentInfo info;
+		info.name = component->getName();
+		info.create = [this](entt::registry& r, Entity e) {
+			NEO_UNUSED(r, e);
+			// TODO - broken because of default constructor
+			// addComponent<CompT>(e);
+		};
+		info.destroy = [this](entt::registry& r, Entity e) {
+			NEO_UNUSED(r);
+			removeComponent<CompT>(e);
+		};
+		mEditor.registerComponent<CompT>(info);
 
 		mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
 			if (registry.try_get<CompT>(e)) {

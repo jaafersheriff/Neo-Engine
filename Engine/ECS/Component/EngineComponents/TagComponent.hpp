@@ -5,14 +5,15 @@
 namespace neo {
 
     struct TagComponent : public Component {
-        TagComponent(std::string name)
-            : mTag(name)
+        TagComponent() = default;
+        TagComponent(std::string tag) :
+            mTag(tag)
         {}
+
+        std::string mTag;
 
         virtual std::string getName() const override {
             return "Tag Component";
         }
-
-        std::string mTag;
     };
 }

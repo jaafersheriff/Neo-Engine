@@ -3,6 +3,8 @@
 
 #include "Component/EngineComponents/TagComponent.hpp"
 
+#include <imgui_entt_entity_editor/imgui_entt_entity_editor.hpp>
+
 namespace neo {
 
 	void ECS::_initSystems() {
@@ -10,7 +12,6 @@ namespace neo {
 			system.second->init(*this);
 		}
 	}
-
 
 	void ECS::_updateSystems() {
 		MICROPROFILE_SCOPEI("ECS", "_updateSystems", MP_AUTO);
@@ -25,6 +26,7 @@ namespace neo {
 	}
 
 	ECS::Entity ECS::createEntity() {
+		// TODO - this might break while threading
 		return mRegistry.create();
 	}
 
