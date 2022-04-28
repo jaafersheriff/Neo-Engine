@@ -74,9 +74,10 @@ namespace neo {
 		char buf[256];
 		sprintf(buf, "Entities: %d", static_cast<int>(mRegistry.size()));
 		if (ImGui::TreeNodeEx(buf, ImGuiTreeNodeFlags_DefaultOpen)) {
-			getView<TagComponent>().each([](Entity entity, TagComponent& tag) {
+			getView<TagComponent>().each([this](Entity entity, TagComponent& tag) {
 				NEO_UNUSED(entity);
 				if (ImGui::TreeNodeEx(tag.mTag.c_str())) {
+					mEditor.renderEditor(mRegistry, entity);
 					// for (auto&& [type, components] : gameObject->getComponentsMap()) {
 					// 	for (int i = 0; i < components.size(); i++) {
 					// 		ImGui::Text(type.name());
