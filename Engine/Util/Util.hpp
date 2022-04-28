@@ -20,15 +20,14 @@ namespace neo {
 				NEO_LOG_E(fmt, __VA_ARGS__); \
                 abort(); \
 			} 
-		#define NEO_FAIL(fmt, ...) NEO_ASSERT(false, fmt, __VA_ARGS__)
 	#else
 		#define NEO_ASSERT(c, fmt, ...) \
 			if (!(c)) { \
 				NEO_LOG_E("ASSERT(%s) in %s, file %s on line %d", #c, __func__, __FILENAME__, __LINE__); \
 				NEO_LOG_E(fmt, __VA_ARGS__); \
 			} 
-		#define NEO_FAIL(fmt, ...) NEO_UNUSED(fmt); NEO_UNUSED(__VA_ARGS__) ; abort()
 	#endif // NEO_CONFIG_DEBUG
+	#define NEO_FAIL(fmt, ...) NEO_ASSERT(false, fmt, __VA_ARGS__)
 #endif // NEO_DEBUG_ASSERT
 
 #define NEO_ARRAYSIZE(_ARR)          ((int)(sizeof(_ARR) / sizeof(*(_ARR))))     // Size of a static C-style array. Don't use on pointers!

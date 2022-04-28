@@ -6,6 +6,8 @@
 #define ENTT_ASSERT(condition, ...) NEO_ASSERT(condition, __VA_ARGS__)
 #endif
 #include <entt/entt.hpp>
+
+#define MM_IEEE_ASSERT(x) NEO_UNUSED(x)
 #include <imgui_entt_entity_editor/imgui_entt_entity_editor.hpp>
 
 namespace neo {

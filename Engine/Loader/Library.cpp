@@ -22,6 +22,7 @@ namespace neo {
         }
 
         NEO_FAIL("Mesh %s not found", name.c_str());
+        return {};
     }
 
     MeshData Library::loadMesh(const std::string& fileName, bool doResize) {
@@ -49,6 +50,7 @@ namespace neo {
         }
 
         NEO_FAIL("Texture %s not found", name.c_str());
+        return nullptr;
     }
 
     Texture* Library::loadTexture(const std::string& fileName, TextureFormat format) {

@@ -206,6 +206,7 @@ namespace neo {
         }
 
         NEO_FAIL("Attempting to get a Shader that doesn't exist");
+        return reinterpret_cast<ShaderT &>(*mComputeShaders[0].second);
     }
 
 }

@@ -122,9 +122,9 @@ namespace neo {
         else if (util::fileExists((ServiceLocator<Renderer>::ref().ENGINE_SHADER_DIR + fileName).c_str())) {
             return ServiceLocator<Renderer>::ref().ENGINE_SHADER_DIR + fileName;
         }
-        else {
-            NEO_FAIL("%s shader file doesn't exist", fileName.c_str());
-        }
+
+        NEO_FAIL("%s shader file doesn't exist", fileName.c_str());
+        return "";
     }
 
     GLuint Shader::_compileShader(GLenum shaderType, const char *shaderString) {
@@ -292,7 +292,9 @@ namespace neo {
         case(ShaderStage::TESSELLATION_EVAL):
             return GL_TESS_EVALUATION_SHADER;
         }
+
         NEO_FAIL("Invalid ShaderStage: %d", type);
+        return 0;
     }
 
     void Shader::loadUniform(HashedString loc, const bool b) const {
