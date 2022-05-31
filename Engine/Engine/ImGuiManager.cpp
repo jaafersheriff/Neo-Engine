@@ -39,9 +39,9 @@ namespace neo {
         auto disabledTexColglm = util::sLogSeverityData.at(util::LogSeverity::Verbose).second;
         auto disabledTexColimv = ImVec4(disabledTexColglm.x, disabledTexColglm.y, disabledTexColglm.z, 1.f);
         colors[ImGuiCol_TextDisabled] = disabledTexColimv;
-        colors[ImGuiCol_WindowBg] = HEXTOIM(0x171c19);
+        colors[ImGuiCol_WindowBg] = HEXTOIM(0x070808);
         colors[ImGuiCol_Border] = HEXTOIM(0x434343);
-        colors[ImGuiCol_FrameBg] = HEXTOIM(0x1F2522);
+        colors[ImGuiCol_FrameBg] = HEXTOIM(0x101B15);
         colors[ImGuiCol_FrameBgHovered] = HEXTOIM(0x393D3A);
         colors[ImGuiCol_FrameBgActive] = HEXTOIM(0x454f47);
         colors[ImGuiCol_TitleBg] = HEXTOIM(0x151917);
@@ -182,7 +182,6 @@ namespace neo {
         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
         // ImGui::GetIO().FontGlobalScale = 2.0f;
-
     }
 
     void ImGuiManager::end() {
