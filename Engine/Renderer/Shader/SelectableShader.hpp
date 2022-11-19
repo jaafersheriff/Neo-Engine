@@ -29,16 +29,23 @@ namespace neo {
                         out vec2 fragTex;
                         void main() { gl_Position = P * V * M * vec4(vertPos, 1); })",
                 R"(
-                        uniform int componentID;
-                        out int color;
+                        uniform uint componentID;
+                        out uint color;
                         void main() {
                             color = componentID;
                         })"
             ) {
             /* Init shadow map */
-            Framebuffer* stencilBuffer = Library::createFBO("selectable");
-            stencilBuffer->attachStencilTexture({1, 1}, GL_NEAREST, GL_CLAMP_TO_EDGE);
-            stencilBuffer->disableDraw();
+            Framebuffer* fbo = Library::createFBO("selectable");
+            fbo->attachColorTexture({ 1, 1 }, {
+                GL_R32UI,
+                GL_RED_INTEGER,
+                GL_NEAREST,
+                GL_CLAMP_TO_EDGE,
+                GL_UNSIGNED_INT
+                });
+            fbo->attachDepthTexture({ 1, 1 }, GL_NEAREST, GL_CLAMP_TO_EDGE);
+            fbo->initDrawBuffers();
 
             // Handle frame size changing
             Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message& msg, ECS& ecs) {
@@ -60,12 +67,9 @@ namespace neo {
             fbo->bind();
             NEO_ASSERT(fbo->mTextures.size() > 0, "Selectable render target never initialized");
 
-            glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-            glClearStencil(0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glViewport(0, 0, fbo->mTextures[0]->mWidth, fbo->mTextures[0]->mHeight);
 
-            glEnable(GL_STENCIL_TEST);
-            glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
             bind();
 
             /* Load PV */
@@ -76,8 +80,6 @@ namespace neo {
 
             const auto& cameraFrustum = camera->mGameObject.getComponentByType<FrustumComponent>();
 
-            uint8_t rendered = 1;
-            std::unordered_map<uint8_t, uint32_t> map;
             for (const auto& renderable : ecs.getComponentTuples<SelectableComponent, MeshComponent, SpatialComponent>()) {
                 auto renderableSpatial = renderable->get<SpatialComponent>();
                 uint32_t componentID = renderable->get<SelectableComponent>()->mID;
@@ -93,30 +95,23 @@ namespace neo {
                 }
 
 
-                map.insert({ rendered, componentID });
-                glStencilFunc(GL_ALWAYS, static_cast<GLuint>(rendered), 0);
-                loadUniform("componentID", static_cast<int>(rendered));
+                loadUniform("componentID", componentID);
 
                 /* DRAW */
                 loadUniform("M", renderableSpatial->getModelMatrix());
                 renderable->get<MeshComponent>()->mMesh.draw();
-                rendered++;
-                if (rendered > 256) {
-                    break;
-                }
             }
 
-            uint8_t buffer[4];
+            uint32_t buffer;
             {
                 MICROPROFILE_SCOPEI("Selectable Shader", "ReadPixels", MP_AUTO);
                 MICROPROFILE_SCOPEGPUI("Selectable Shader - ReadPixels", MP_AUTO);
                 glm::ivec2 mousePos = glm::ivec2(mouse->mFrameMouse.getPos());
-                glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, buffer);
+                glReadnPixels(mousePos.x, mousePos.y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, 4, &buffer);
             }
-            uint8_t id = buffer[0];
-            if (map[id] != mSelectedID) {
 
-                mSelectedID = map[id];
+            if (buffer != mSelectedID) {
+                mSelectedID = buffer;
                 Messenger::sendMessage<ComponentSelectedMessage>(nullptr, mSelectedID);
             }
 
