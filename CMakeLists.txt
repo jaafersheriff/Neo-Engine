@@ -55,5 +55,7 @@ set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 
 include(cmake/InitLib.cmake)
 
+add_definitions(-DEM)
+
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Engine")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Demos")
