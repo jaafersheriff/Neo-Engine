@@ -27,7 +27,7 @@ extern "C" {
 #include "Hardware/Keyboard.hpp"
 #include "Hardware/Mouse.hpp"
 
-#include "ECS/Messaging/Messenger.hpp"
+#include "Messaging/Messenger.hpp"
 
 #include "Loader/Loader.hpp"
 #include "Loader/MeshGenerator.hpp"

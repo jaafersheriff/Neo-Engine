@@ -1,6 +1,6 @@
 #include "ImGuiManager.hpp"
 
-#include "ECS/Messaging/Messenger.hpp"
+#include "Messaging/Messenger.hpp"
 
 #include "Engine/Engine.hpp"
 #include "Renderer/Renderer.hpp"

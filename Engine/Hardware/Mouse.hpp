@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include "ECS/Messaging/Message.hpp"
+#include "Messaging/Message.hpp"
 
 namespace neo {
 

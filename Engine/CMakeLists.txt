@@ -23,6 +23,7 @@ INTERFACE
 	ECS
 	Engine
 	Loader
+	Messaging
 	Renderer
 	Hardware
 	DemoInfra

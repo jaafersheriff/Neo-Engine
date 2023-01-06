@@ -4,7 +4,7 @@
 
 #include "Renderer/Renderer.hpp"
 #include "Engine/ImGuiManager.hpp"
-#include "ECS/Messaging/Messenger.hpp"
+#include "Messaging/Messenger.hpp"
 
 #include "Util/Log/Log.hpp"
 #include "Util/ServiceLocator.hpp"

@@ -2,7 +2,7 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include "ECS/Messaging/Message.hpp"
+#include "Messaging/Message.hpp"
 
 #include <inttypes.h>
 

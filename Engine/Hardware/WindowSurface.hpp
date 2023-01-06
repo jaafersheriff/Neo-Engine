@@ -5,7 +5,7 @@
 #include "glm/glm.hpp"
 
 #include "WindowDetails.hpp"
-#include "ECS/Messaging/Message.hpp"
+#include "Messaging/Message.hpp"
 
 #include <string>
 

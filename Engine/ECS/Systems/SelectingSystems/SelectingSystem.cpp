@@ -1,7 +1,7 @@
 #include "Engine/Engine.hpp"
 #include "SelectingSystem.hpp"
 
-#include "ECS/Messaging/Messenger.hpp"
+#include "Messaging/Messenger.hpp"
 
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"

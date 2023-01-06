@@ -1,6 +1,6 @@
 #include "Mouse.hpp"
 
-#include "ECS/Messaging/Messenger.hpp"
+#include "Messaging/Messenger.hpp"
 #include "Util/Util.hpp"
 
 namespace neo {

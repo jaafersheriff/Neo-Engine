@@ -1,8 +1,8 @@
 #include "Renderer.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "ECS/Messaging/Message.hpp"
-#include "ECS/Messaging/Messenger.hpp"
+#include "Messaging/Message.hpp"
+#include "Messaging/Messenger.hpp"
 
 #include "Shader/BlitShader.hpp"
 #include "Shader/LineShader.hpp"

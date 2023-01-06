@@ -6,6 +6,7 @@ PUBLIC
 	libglew_static
 PRIVATE
 	Util
+	Messaging
 	imgui
 	glfw
 	entt

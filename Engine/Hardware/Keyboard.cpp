@@ -1,7 +1,7 @@
 #include "Keyboard.hpp"
 
 #include "GLFW/glfw3.h"
-#include "ECS/Messaging/Messenger.hpp"
+#include "Messaging/Messenger.hpp"
 #include "Util/Util.hpp"
 
 namespace neo {
