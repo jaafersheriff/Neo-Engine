@@ -6,9 +6,16 @@
 namespace neo {
 
     void Mouse::init() {
+        Messenger::removeReceiver<MouseResetMessage>(this);
         Messenger::addReceiver<MouseResetMessage, &Mouse::_onReset>(this);
+
+        Messenger::removeReceiver<MouseButtonMessage>(this);
         Messenger::addReceiver<MouseButtonMessage, &Mouse::_onButton>(this);
+
+        Messenger::removeReceiver<ScrollWheelMessage>(this);
         Messenger::addReceiver<ScrollWheelMessage, &Mouse::_onScrollWheel>(this);
+
+        Messenger::removeReceiver<MouseMoveMessage>(this);
         Messenger::addReceiver<MouseMoveMessage, &Mouse::_onMove>(this);
     }
 

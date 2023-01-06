@@ -33,6 +33,10 @@ namespace neo {
         Messenger::addReceiver<EntitySelectedMessage, &_onEntitySelected>(ecs);
     }
 
+    SelectingSystem::~SelectingSystem() {
+        Messenger::removeReceiver<EntitySelectedMessage>(this);
+    }
+
     void SelectingSystem::update(ECS& ecs) {
         NEO_UNUSED(ecs);
     }

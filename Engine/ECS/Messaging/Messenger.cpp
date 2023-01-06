@@ -16,5 +16,6 @@ namespace neo {
 
     void Messenger::clean() {
         mDispatcher.clear();
+        mDispatcher = entt::dispatcher();
     }
 }

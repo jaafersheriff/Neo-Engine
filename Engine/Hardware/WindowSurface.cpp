@@ -5,7 +5,6 @@
 #include "Renderer/Renderer.hpp"
 #include "Engine/ImGuiManager.hpp"
 #include "ECS/Messaging/Messenger.hpp"
-#include "Messaging/EMessenger.hpp"
 
 #include "Util/Log/Log.hpp"
 #include "Util/ServiceLocator.hpp"
@@ -56,11 +55,7 @@ namespace neo {
         glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
             /* Toggle mFullscreen (f11 or alt+enter) */
             if ((key == GLFW_KEY_F11 || key == GLFW_KEY_ENTER && mods & GLFW_MOD_ALT) && action == GLFW_PRESS) {
-#ifdef EM
-                EMessenger::sendMessage<ToggleFullscreenMessage>(glfwGetWindowMonitor(window) != nullptr);
-#else
                 Messenger::sendMessage<ToggleFullscreenMessage>(glfwGetWindowMonitor(window) != nullptr);
-#endif
                 return;
             }
             if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS) {
@@ -176,6 +171,8 @@ namespace neo {
         glfwSetWindowTitle(mWindow, name.c_str());
 
         /* Set callbacks */
+        Messenger::removeReceiver<ToggleFullscreenMessage>(this);
+        Messenger::removeReceiver<FrameSizeMessage>(this);
         Messenger::addReceiver<ToggleFullscreenMessage, &WindowSurface::_onToggleFullscreen>(this);
         Messenger::addReceiver<FrameSizeMessage, &WindowSurface::_onFrameSizeChanged>(this);
 

@@ -87,13 +87,9 @@ namespace neo {
         std::stringstream glsl;
         glsl << "#version " << GLMajor << GLMinor << "0";
         mDetails.mGLSLVersion = glsl.str();
-
-        
-        Messenger::addReceiver<FrameSizeMessage, &Renderer::_onFrameSizeChanged>(this);
     }
 
     Renderer::~Renderer() {
-        Messenger::removeReceiver<FrameSizeMessage>(this);
     }
 
     void Renderer::setDemoConfig(IDemo::Config config) {
@@ -135,6 +131,9 @@ namespace neo {
 
         /* Init default GL state */
         resetState();
+
+        Messenger::removeReceiver<FrameSizeMessage>(this);
+        Messenger::addReceiver<FrameSizeMessage, &Renderer::_onFrameSizeChanged>(this);
     }
 
     void Renderer::_onFrameSizeChanged(const FrameSizeMessage& msg) {

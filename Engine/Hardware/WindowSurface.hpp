@@ -5,11 +5,7 @@
 #include "glm/glm.hpp"
 
 #include "WindowDetails.hpp"
-#ifdef EM
-#include "Messaging/EMessage.hpp"
-#else 
 #include "ECS/Messaging/Message.hpp"
-#endif
 
 #include <string>
 
@@ -17,11 +13,7 @@ namespace neo {
 
     class WindowSurface {
 
-#ifdef EM
-        struct ToggleFullscreenMessage : public EMessage {
-#else
         struct ToggleFullscreenMessage : public Message {
-#endif
             bool mAlreadyFullscreen = false;
             ToggleFullscreenMessage(bool alreadyFullscreen) :
                 mAlreadyFullscreen(alreadyFullscreen)

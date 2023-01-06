@@ -7,7 +7,10 @@
 namespace neo {
 
     void Keyboard::init() {
+        Messenger::removeReceiver<ResetKeyboardMessage>(this);
         Messenger::addReceiver<ResetKeyboardMessage, &Keyboard::_onReset>(this);
+
+        Messenger::removeReceiver<KeyPressedMessage>(this);
         Messenger::addReceiver<KeyPressedMessage, &Keyboard::_onKeyPressed>(this);
     }
 

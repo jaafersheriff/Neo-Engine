@@ -28,6 +28,8 @@ namespace neo {
             mEditorOperation(edit)
         {}
 
+        ~SelectingSystem();
+
 
         virtual void init(ECS& ecs) override;
         virtual void update(ECS& ecs) override;
