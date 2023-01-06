@@ -15,7 +15,6 @@
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/RenderableComponent/LineMeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/WireframeRenderable.hpp"
-#include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
@@ -42,7 +41,6 @@ namespace Sponza {
     IDemo::Config Demo::getConfig() const {
         IDemo::Config config;
         config.name = "Sponza";
-        config.attachEditor = true;
         return config;
     }
 
@@ -72,7 +70,6 @@ namespace Sponza {
             ecs.addComponent<TagComponent>(shadowCam, "Shadow Camera");
             ecs.addComponent<OrthoCameraComponent>(shadowCam, -1.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
             ecs.addComponent<ShadowCameraComponent>(shadowCam);
-            ecs.addComponent<SelectableComponent>(shadowCam);
             ecs.addComponent<FrustumComponent>(shadowCam);
             ecs.addComponent<SpatialComponent>(shadowCam);
             ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
@@ -87,7 +84,6 @@ namespace Sponza {
             asset.material.mAmbient = glm::vec3(0.2f);
             ecs.addComponent<renderable::PhongShadowRenderable>(entity, diffuseTex, asset.material);
             ecs.addComponent<renderable::ShadowCasterRenderable>(entity, diffuseTex);
-            ecs.addComponent<SelectableComponent>(entity);
             ecs.addComponent<BoundingBoxComponent>(entity, asset.meshData);
         }
 

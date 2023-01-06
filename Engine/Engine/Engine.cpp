@@ -9,17 +9,16 @@ extern "C" {
 #include "Engine.hpp"
 
 #include "Renderer/Renderer.hpp"
-#include "Renderer/Shader/SelectableShader.hpp"
 #include "Renderer/Shader/OutlineShader.hpp"
 #include "Renderer/Shader/WireframeShader.hpp"
 #include "Renderer/Shader/LineShader.hpp"
 
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/EngineComponents/SingleFrameComponent.hpp"
+#include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/KeyboardComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Systems/SelectingSystems/MouseRaySystem.hpp"
-#include "ECS/Systems/SelectingSystems/EditorSystem.hpp"
 
 #include "ImGuiManager.hpp"
 
@@ -156,7 +155,7 @@ namespace neo {
                         MICROPROFILE_SCOPEI("ImGui", "ImGuiManager.imGuiEditor", MP_AUTO);
                         ServiceLocator<ImGuiManager>::ref().imGuiEditor();
                     }
-                    imGuiEditor(demos, counter);
+                    imGuiEditor(counter);
 
                     ServiceLocator<ImGuiManager>::ref().end();
                 }
@@ -203,16 +202,6 @@ namespace neo {
         ServiceLocator<Renderer>::ref().init();
         Loader::init(config.resDir);
         _createPrefabs();
-
-        /* Apply config */
-        if (config.attachEditor) {
-            NEO_LOG("Attaching editor");
-            mECS.addSystem<MouseRaySystem>();
-            mECS.addSystem<EditorSystem>();
-            ServiceLocator<Renderer>::ref().addPreProcessShader<SelectableShader>();
-            ServiceLocator<Renderer>::ref().addSceneShader<OutlineShader>();
-            ServiceLocator<Renderer>::ref().addSceneShader<WireframeShader>();
-        }
 
         /* Add engine-specific systems */
         auto& lineShader = ServiceLocator<Renderer>::ref().addSceneShader<LineShader>();
@@ -266,7 +255,7 @@ namespace neo {
         mWindow.shutDown();
     }
 
-    void Engine::imGuiEditor(DemoWrangler& demos, const util::FrameCounter& counter) {
+    void Engine::imGuiEditor(const util::FrameCounter& counter) {
         {
             ImGui::Begin("Stats");
             counter.imGuiEditor();
@@ -286,83 +275,6 @@ namespace neo {
                     mouse.imGuiEditor();
                     ImGui::TreePop();
                 }
-            }
-            ImGui::End();
-        }
-
-        if (demos.getConfig().attachEditor) {
-            ImGui::Begin("Editor");
-            if (auto selectedView = mECS.getComponent<SelectedComponent>()) {
-                auto&& [selectedEntity, _] = *selectedView;
-                if (ImGui::Button("Delete entity")) {
-                    mECS.removeEntity(selectedEntity);
-                }
-                NEO_FAIL("This won't work");
-                // auto allComponents = selected->getGameObject().getComponentsMap();
-                // static std::optional<std::type_index> type;
-                // ImGui::Separator();
-                // if (ImGui::BeginCombo("Components", type ? type->name() : "Edit components")) {
-                //     type = std::nullopt;
-                //     for (auto comp : allComponents) {
-                //         if (comp.second.size()) {
-                //             if (ImGui::Selectable(comp.first.name())) {
-                //                 type = std::make_optional<std::type_index>(comp.first);
-                //             }
-                //         }
-                //     }
-                //     ImGui::EndCombo();
-                // }
-                // if (type.has_value()) {
-                //     auto components = allComponents[type.value()];
-                //     if (components.size()) {
-                //         static int index = 0;
-                //         if (components.size() > 1) {
-                //             ImGui::Indent();
-                //             ImGui::SliderInt("Index", &index, 0, static_cast<int>(components.size()) - 1);
-                //             ImGui::Unindent();
-                //         }
-                //         ImGui::Indent();
-                //         components[index]->imGuiEditor();
-                //         ImGui::Unindent();
-
-                //         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.81f, 0.20f, 0.20f, 0.40f));
-                //         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.81f, 0.20f, 0.20f, 1.00f));
-                //         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.81f, 0.15f, 0.05f, 1.00f));
-                //         if (ImGui::Button("Remove Component", ImVec2(ImGui::GetWindowWidth() * 0.9f, 0))) {
-                //             mECS._removeComponent(type.value(), components[index]);
-                //             if (components.size() == 1) {
-                //                 index = 0;
-                //                 type = std::nullopt;
-                //             }
-                //             else if (index == components.size() - 1) {
-                //                 index--;
-                //             }
-                //         }
-                //         ImGui::PopStyleColor(3);
-                //     }
-                // }
-                /* Attaching new components here would be nice, but there's problems:
-                    - There's no reflection that provides a static list of all components possible (including any application-specific components)
-                        - They _could_ all be registered manually, both by the Engine for Engine-specific components and by the Application for app-specific components
-                */
-            }
-            ImGui::Separator();
-            if (ImGui::Button("Create new GameObject")) {
-                {
-                    auto view = mECS.getView<SelectedComponent>();
-                    NEO_ASSERT(view.size() <= 1, "How are there two items selected at the same time");
-                    view.each([](ECS::Entity entity, SelectedComponent&) {
-                        mECS.removeComponent<SelectedComponent>(entity);
-                    });
-                }
-                auto entity = mECS.createEntity();
-                auto sphereMesh = Library::getMesh("sphere");
-                mECS.addComponent<BoundingBoxComponent>(entity, sphereMesh);
-                mECS.addComponent<SpatialComponent>(entity);
-                mECS.addComponent<SelectableComponent>(entity);
-                mECS.addComponent<SelectedComponent>(entity);
-                mECS.addComponent<MeshComponent>(entity, sphereMesh.mMesh);
-                mECS.addComponent<renderable::WireframeRenderable>(entity);
             }
             ImGui::End();
         }

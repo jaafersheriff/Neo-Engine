@@ -15,7 +15,6 @@ namespace neo {
 			std::string resDir = "res/";
 			std::string shaderDir = "shaders/";
 			glm::vec3 clearColor = { 0.2f, 0.3f, 0.4f };
-			bool attachEditor = true;
 		};
 
 		/* Construction flow goes through init/destroy */
