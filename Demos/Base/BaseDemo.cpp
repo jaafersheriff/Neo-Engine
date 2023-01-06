@@ -12,7 +12,6 @@
 #include "ECS/Component/RenderableComponent/AlphaTestRenderable.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/PhongRenderable.hpp"
-#include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
@@ -64,7 +63,6 @@ namespace Base {
         ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
         ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
         ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
-        ecs.addComponent<SelectableComponent>(bunny);
         ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
 
         /* Ground plane */

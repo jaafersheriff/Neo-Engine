@@ -1,4 +1,4 @@
-// #include "Base/BaseDemo.hpp"
+#include "Base/BaseDemo.hpp"
 // #include "BasicPhong/BasicPhong.hpp"
 // #include "Compute/Compute.hpp"
 // #include "Deferred/Deferred.hpp"
@@ -15,7 +15,7 @@
 
 static int sCurrentDemo = 0;
 static std::vector<neo::IDemo*> sDemos = {
-// 	new Base::Demo(),
+	new Base::Demo(),
 // 	new BasicPhong::Demo(),
 // 	new Compute::Demo(),
 // 	new Deferred::Demo(),
