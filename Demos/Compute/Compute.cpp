@@ -5,6 +5,7 @@
 #include "ParticlesComputeShader.hpp"
 #include "ParticleVisShader.hpp"
 
+#include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
@@ -53,6 +54,7 @@ namespace Compute {
         // Create mesh
         {
             auto entity = ecs.createEntity();
+            ecs.addComponent<TagComponent>(entity, "Particles");
             ecs.addComponent<ParticleMeshComponent>(entity);
             ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 0.0f, 0.f));
         }
@@ -66,10 +68,6 @@ namespace Compute {
     }
 
     void Demo::imGuiEditor(ECS& ecs) {
-        if (auto particles = ecs.getSingleView<ParticleMeshComponent, SpatialComponent>()) {
-            auto&& [_, mesh, spatial] = *particles;
-            mesh.imGuiEditor();
-            spatial.imGuiEditor();
-        }
+        NEO_UNUSED(ecs);
     }
 }
