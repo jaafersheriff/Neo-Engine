@@ -4,7 +4,7 @@
 #include <map>
 
 #ifndef NEO_LOG_S
-	#define NEO_LOG_S(severity, fmt, ...) neo::util::_log(severity, fmt, __VA_ARGS__)
+	#define NEO_LOG_S(severity, fmt, ...) neo::util::_log(severity, __FUNCSIG__, fmt, __VA_ARGS__)
 	#define NEO_LOG(fmt, ...) NEO_LOG_S(neo::util::LogSeverity::Verbose, fmt, __VA_ARGS__)
 	#define NEO_LOG_V(fmt, ...) NEO_LOG_S(neo::util::LogSeverity::Verbose, fmt, __VA_ARGS__)
 	#define NEO_LOG_I(fmt, ...) NEO_LOG_S(neo::util::LogSeverity::Info, fmt, __VA_ARGS__)
@@ -40,6 +40,6 @@ namespace neo {
             { LogSeverity::Error,   {'E', glm::vec3(1.0f, 0.2f, 0.2f)}},
         };
 
-        void _log(LogSeverity severity, const char* format, ...);
+        void _log(LogSeverity severity, const char* sig, const char* format, ...);
     }
 }

@@ -12,7 +12,7 @@
 namespace neo {
 	namespace util {
 
-		void _log(LogSeverity severity, const char* format, ...) {
+		void _log(LogSeverity severity, const char* sig, const char* format, ...) {
 			static_assert(std::is_same<neo::util::LogSeverity, decltype(severity)>::value, "Invalid log severity");
 			bool doTheLog = false;
 			doTheLog |= severity == neo::util::LogSeverity::Verbose && neo::util::sLogVerbose;
@@ -28,7 +28,8 @@ namespace neo {
 				inbuf[NEO_ARRAYSIZE(inbuf) - 1] = 0;
 				va_end(args);
 				char buf[1024];
-				sprintf(buf, "%0.4f [%c]: %s\n", glfwGetTime(), sLogSeverityData.at(severity).first, inbuf);
+				std::string err = severity == neo::util::LogSeverity::Error ? " (" + std::string(sig) + ")" : "";
+				sprintf(buf, "%0.4f [%c]%s: %s\n", glfwGetTime(), sLogSeverityData.at(severity).first, err.c_str(), inbuf);
 
 #ifdef DEBUG_MODE
 				fprintf(stderr, buf);
