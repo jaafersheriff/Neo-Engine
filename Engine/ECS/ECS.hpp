@@ -80,9 +80,14 @@ namespace neo {
 	template<typename CompT>
 	std::optional<std::tuple<ECS::Entity, CompT&>> ECS::getComponent() {
 		MICROPROFILE_SCOPEI("ECS", "getComponent", MP_AUTO);
+        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+	
 		auto view = mRegistry.view<CompT>();
-		NEO_ASSERT(view.size() <= 1, "");
-		if (view.size() == 1) {
+		if (view.size() > 1) {
+			NEO_LOG_E("Attempting to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->getName().c_str());
+		}
+		if (view.size()) {
 			return { *view.each().begin() };
 		}
 		return std::nullopt;
@@ -91,9 +96,12 @@ namespace neo {
 	template<typename CompT>
 	std::optional<std::tuple<ECS::Entity, const CompT&>> ECS::cGetComponent() const {
 		MICROPROFILE_SCOPEI("ECS", "cGetComponent", MP_AUTO);
+        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+	
 		auto view = mRegistry.view<CompT>();
 		if (view.size() > 1) {
-			NEO_LOG_W("Trying to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->getName().c_str());
+			NEO_LOG_E("Attempting to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->getName().c_str());
 		}
 		if (view.size()) {
 			return { *view.each().begin() };
@@ -104,6 +112,9 @@ namespace neo {
 	template<typename CompT>
 	bool ECS::has(ECS::Entity e) const {
 		MICROPROFILE_SCOPEI("ECS", "has", MP_AUTO);
+        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+
 		return mRegistry.try_get<CompT>(e) != nullptr;
 	}
 
@@ -114,6 +125,7 @@ namespace neo {
 		std::type_index typeI(typeid(SysT));
 		for (auto & sys : mSystems) {
 			if (sys.first == typeI) {
+				NEO_LOG_E("Attempting to add a duplicate system %s", sys.second->mName.c_str());
 				return static_cast<SysT &>(*sys.second);
 			}
 		}
@@ -125,17 +137,25 @@ namespace neo {
 	template<typename CompT>
 	CompT* ECS::getComponent(Entity e) {
 		MICROPROFILE_SCOPEI("ECS", "getComponent", MP_AUTO);
+        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+
 		return mRegistry.try_get<CompT>(e);
 	}
 
 	template<typename CompT>
 	CompT *const ECS::cGetComponent(Entity e) const {
 		MICROPROFILE_SCOPEI("ECS", "cGetComponent", MP_AUTO);
+		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+
 		return const_cast<CompT *const>(mRegistry.try_get<CompT>(e));
 	}
 
 	template<typename CompT, typename... Args>
 	CompT* ECS::addComponent(Entity e, Args &&... args) {
+        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 		MICROPROFILE_SCOPEI("ECS", "addComponent", MP_AUTO);
 		CompT* component;
 		if constexpr (sizeof...(Args) > 0) {
@@ -147,7 +167,7 @@ namespace neo {
 
 		mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
 			if (registry.try_get<CompT>(e)) {
-				NEO_FAIL("Err");
+				NEO_FAIL("Attempting to add a second %s to entity %d when one already exists", component->getName().c_str(), e);
 			}
 
 			registry.emplace<CompT>(e, *component);
@@ -160,6 +180,8 @@ namespace neo {
 
 	template<typename CompT>
 	void ECS::removeComponent(Entity e) {
+        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 		MICROPROFILE_SCOPEI("ECS", "removeComponent", MP_AUTO);
 		mRemoveComponentFuncs.push_back([e](Registry& registry) mutable {
 			registry.remove<CompT>(e);
@@ -182,23 +204,30 @@ namespace neo {
 
 	template<typename SuperT, typename CompT> SuperT* ECS::getComponentAs(Entity e) {
 		MICROPROFILE_SCOPEI("ECS", "getComponentAs", MP_AUTO);
+		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+        static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
+        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+
 		CompT* comp = getComponent<CompT>(e);
-		NEO_ASSERT(comp, "A");
+		NEO_ASSERT(comp, "Component doesn't exist!");
 		return dynamic_cast<SuperT*>(comp);
 	}
 	template<typename SuperT, typename CompT> const SuperT* ECS::cGetComponentAs(Entity e) const {
 		MICROPROFILE_SCOPEI("ECS", "cGetComponentAs", MP_AUTO);
+        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+        static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
+        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+
 		CompT *const comp = cGetComponent<CompT>(e);
-		NEO_ASSERT(comp, "B");
+		NEO_ASSERT(comp, "Component doesn't exist!");
 		return dynamic_cast<SuperT *const>(comp);
 	}
 
 	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, CompTs&...>> ECS::getSingleView() {
-		// TODO - assert that theres more than one compt
 		MICROPROFILE_SCOPEI("ECS", "getSingleView", MP_AUTO);
 		auto view = mRegistry.view<CompTs...>();
 		NEO_ASSERT(view.size_hint() <= 1, "Found %d entities when one was requested", view.size_hint());
-		if (view.size_hint() == 1) {
+		if (view.size_hint()) {
 			return { *view.each().begin() };
 		}
 		return std::nullopt;
