@@ -28,22 +28,24 @@ namespace Compute {
         virtual void render(const ECS& ecs) override {
             bind();
 
-            if (auto mesh = ecs.getSingleComponent<ParticleMeshComponent>()) {
-                auto position = mesh->mMesh->getVBO(VertexType::Position);
+            if (auto meshView = ecs.cGetComponent<ParticleMeshComponent>()) {
+                auto&& [_, mesh] = *meshView;
+                auto position = mesh.mMesh->getVBO(VertexType::Position);
 
-                if (auto frameStats = ecs.getSingleComponent<FrameStatsComponent>()) {
-                    loadUniform("timestep", frameStats->mDT / 1000.f * timeScale);
+                if (auto frameStatsView = ecs.cGetComponent<FrameStatsComponent>()) {
+                    auto&& [__, frameStats] = *frameStatsView;
+                    loadUniform("timestep", frameStats.mDT / 1000.f * timeScale);
                 }
                 else {
                     loadUniform("timestep", 0.f);
                 }
 
                 // Bind mesh
-                glBindVertexArray(mesh->mMesh->mVAOID);
+                glBindVertexArray(mesh.mMesh->mVAOID);
                 glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, position.vboID);
 
                 // Dispatch 
-                glDispatchCompute(mesh->mNumParticles / Renderer::mDetails.mMaxComputeWorkGroupSize.x, 1, 1);
+                glDispatchCompute(mesh.mNumParticles / ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.x, 1, 1);
                 glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 

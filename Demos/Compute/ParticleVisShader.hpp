@@ -31,23 +31,25 @@ namespace Compute {
         virtual void render(const ECS& ecs) override {
             bind();
 
-            if (auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>()) {
-                loadUniform("P", camera->get<CameraComponent>()->getProj());
-                loadUniform("V", camera->get<CameraComponent>()->getView());
+            if (auto cameraView = ecs.getSingleView<MainCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
+                auto&& [_, __, camera, camSpatial] = *cameraView;
+                loadUniform("P", camera.getProj());
+                loadUniform("V", camSpatial.getView());
             }
             loadUniform("spriteSize", mSpriteSize);
             loadUniform("spriteColor", mSpriteColor);
 
-            if (auto model = ecs.getSingleComponent<ParticleMeshComponent>()) {
+            if (auto meshView = ecs.getSingleView<ParticleMeshComponent, SpatialComponent>()) {
+                auto&& [_, mesh, spatial] = *meshView;
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE);
                 glDisable(GL_DEPTH_TEST);
                 glDisable(GL_CULL_FACE);
 
-                loadUniform("M", model->getGameObject().getComponentByType<SpatialComponent>()->getModelMatrix());
+                loadUniform("M", spatial.getModelMatrix());
 
                 /* DRAW */
-                model->mMesh->draw();
+                mesh.mMesh->draw();
             }
             unbind();
         }

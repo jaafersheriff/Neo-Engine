@@ -4,6 +4,8 @@
 
 #include "Renderer/GLObjects/Mesh.hpp"
 
+#include "Util/ServiceLocator.hpp"
+
 #include "ext/imgui/imgui.h"
 
 using namespace neo;
@@ -15,11 +17,9 @@ namespace Compute {
         Mesh* mMesh;
         int mNumParticles = 98304;
 
-        ParticleMeshComponent(GameObject* go) :
-            Component(go)
-        {
+        ParticleMeshComponent() {
             MeshData meshData;
-            meshData.mMesh = new Mesh;
+            mMesh = meshData.mMesh = new Mesh;
             mMesh->mPrimitiveType = GL_POINTS;
             mMesh->addVertexBuffer(VertexType::Position, 0, 4); // positions
             updateBuffers();
@@ -27,7 +27,7 @@ namespace Compute {
         }
 
         virtual void imGuiEditor() override {
-            if (ImGui::DragInt("#Verts", &mNumParticles, 1.f, Renderer::mDetails.mMaxComputeWorkGroupSize.x, 1572864)) {
+            if (ImGui::DragInt("#Verts", &mNumParticles, 1.f, ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.x, 1572864)) {
                 updateBuffers();
             }
             if (ImGui::Button("Reset")) {
@@ -46,6 +46,10 @@ namespace Compute {
                 positions[i * 4 + 3] = 1.f;
             }
             mMesh->updateVertexBuffer(VertexType::Position, positions);
+        }
+
+        virtual std::string getName() const override {
+            return "ParticleMeshComponent";
         }
     };
 }
