@@ -9,10 +9,11 @@ namespace neo {
         glm::vec3 mOffset;
         glm::vec3 mBasePosition;
 
-        SinTranslateComponent(glm::vec3 o, glm::vec3 b) :
-            mOffset(o)
-            , mBasePosition(b)
-        {}
+        SinTranslateComponent(glm::vec3 offset, glm::vec3 base) 
+            : mOffset(offset),
+            mBasePosition(base)
+        {
+        }
 
         virtual std::string getName() const override {
             return "SinTranslateComponent";

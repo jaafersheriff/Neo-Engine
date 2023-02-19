@@ -90,7 +90,7 @@ namespace neo {
             return it->second;
         }
 
-        NEO_FAIL("FBO %s doesn't exist", name.c_str());
+        NEO_LOG_E("FBO %s doesn't exist", name.c_str());
         return nullptr;
     }
 

@@ -137,6 +137,14 @@ namespace neo {
 
     void Renderer::_onFrameSizeChanged(const FrameSizeMessage& msg) {
         mDefaultFBO->resize(msg.mSize);
+        auto ping = Library::getFBO("ping");
+        if (ping) {
+            ping->resize(msg.mSize);
+        }
+        auto pong = Library::getFBO("pong");
+        if (pong) {
+            pong->resize(msg.mSize);
+        }
     }
 
     void Renderer::resetState() {

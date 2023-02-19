@@ -3,6 +3,9 @@
 #include "ECS/Component/Component.hpp"
 
 #include "Renderer/GLObjects/Mesh.hpp"
+#include "Renderer/Renderer.hpp"
+
+#include "Loader/Library.hpp"
 
 #include "Util/ServiceLocator.hpp"
 
