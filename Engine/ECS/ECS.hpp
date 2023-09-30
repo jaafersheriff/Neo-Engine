@@ -167,13 +167,15 @@ namespace neo {
 
 		mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
 			if (registry.try_get<CompT>(e)) {
-				NEO_FAIL("Attempting to add a second %s to entity %d when one already exists", component->getName().c_str(), e);
+				NEO_LOG_E("Attempting to add a second %s to entity %d when one already exists", component->getName().c_str(), e);
+			}
+			else {
+				registry.emplace<CompT>(e, *component);
 			}
 
-			registry.emplace<CompT>(e, *component);
 			delete component;
 			component = nullptr;
-			});
+		});
 
 		return component;
 	}

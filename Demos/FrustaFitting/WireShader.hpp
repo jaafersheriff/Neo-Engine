@@ -75,7 +75,7 @@ namespace FrustaFitting {
                 }
 
 
-                glm::mat4 M = glm::scale(glm::translate(glm::mat4(1.f), position) * glm::mat4(spatial.getOrientation()), glm::vec3(scale));
+                glm::mat4 M = glm::scale(glm::translate(glm::mat4(1.f), position) * glm::mat4(spatial.getOrientation()), glm::vec3(_scale));
                 loadUniform("M", M);
                 loadUniform("wireColor", color);
 
