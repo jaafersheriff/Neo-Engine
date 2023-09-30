@@ -46,41 +46,42 @@ namespace FrustaFitting {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
             /* Load PV */
-            auto mainCamera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
-            NEO_ASSERT(mainCamera, "No main camera exists");
-            loadUniform("P", mainCamera->get<CameraComponent>()->getProj());
-            loadUniform("V", mainCamera->get<CameraComponent>()->getView());
+            auto cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+            if (cameraView) {
+                auto&& [cameraEntity, _, spatial] = *cameraView;
+                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                loadUniform("V", spatial.getView());
+            }
 
-            auto mockCamera = ecs.getComponentTuple<FrustumComponent, FrustumFitSourceComponent, CameraComponent>();
-            const auto& cameraFrustum = mockCamera->mGameObject.getComponentByType<FrustumComponent>();
+            auto mockCamera = ecs.getSingleView<FrustumComponent, FrustumFitSourceComponent>();
 
-            for (auto& renderableIt : ecs.getComponentTuples<MeshComponent, SpatialComponent>()) {
-                const auto spatialComponent = renderableIt->get<SpatialComponent>();
+            ecs.getView<MeshComponent, SpatialComponent>().each([&](const ECS::Entity e, const MeshComponent& mesh, const SpatialComponent& spatial) {
                 glm::vec3 color(1.f);
 
-                glm::vec3 position = spatialComponent->getPosition();
-                glm::vec3 _scale = spatialComponent->getOrientation() * spatialComponent->getScale();
+                glm::vec3 position = spatial.getPosition();
+                glm::vec3 _scale = spatial.getOrientation() * spatial.getScale();
                 float scale = std::max(_scale.x, std::max(_scale.y, _scale.z));
 				// VFC
-                if (cameraFrustum) {
+                if (mockCamera) {
+                    auto&& [_, cameraFrustum, __] = *mockCamera;
                     MICROPROFILE_SCOPEI("WireShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = renderableIt->mGameObject.getComponentByType<BoundingBoxComponent>()) {
+                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(e)) {
                         position += boundingBox->getCenter();
                         scale *= boundingBox->getRadius();
-                        if (!cameraFrustum->isInFrustum(position, scale)) {
-                            continue;
+                        if (!cameraFrustum.isInFrustum(position, scale)) {
+                            return;
                         }
                     }
                 }
 
 
-                glm::mat4 M = glm::scale(glm::translate(glm::mat4(1.f), position) * glm::mat4(spatialComponent->getOrientation()), glm::vec3(scale));
+                glm::mat4 M = glm::scale(glm::translate(glm::mat4(1.f), position) * glm::mat4(spatial.getOrientation()), glm::vec3(scale));
                 loadUniform("M", M);
                 loadUniform("wireColor", color);
 
                 /* Draw outline */
-                Library::getMesh("sphere").mMesh->draw();
-            }
+                mesh.mMesh->draw();
+            });
 
             unbind();
         }

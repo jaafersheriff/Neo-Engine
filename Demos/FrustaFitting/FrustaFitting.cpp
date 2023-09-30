@@ -20,7 +20,6 @@
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
-#include "ECS/Component/SelectingComponent/SelectableComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
@@ -39,7 +38,7 @@ namespace FrustaFitting {
 
     struct Camera {
         ECS::Entity mEntity;
-        Camera(std::string name, ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
+        Camera(std::string name, ECS& ecs, float fov, float near, float far, glm::vec3 pos) {
             mEntity = ecs.createEntity();
             ecs.addComponent<TagComponent>(mEntity, name);
             ecs.addComponent<SpatialComponent>(mEntity, pos, glm::vec3(1.f));
@@ -73,7 +72,7 @@ namespace FrustaFitting {
 
         Renderable(ECS& ecs, Mesh* mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
             mEntity = ecs.createEntity();
-            ecs.addComponent<MeshComponent>(mEntity, *mesh);
+            ecs.addComponent<MeshComponent>(mEntity, mesh);
             ecs.addComponent<SpatialComponent>(mEntity, position, scale, rotation);
         }
     };
@@ -110,9 +109,8 @@ namespace FrustaFitting {
             material.mAmbient = glm::vec3(0.3f);
             material.mDiffuse = util::genRandomVec3();
             ecs.addComponent<BoundingBoxComponent>(sphere.mEntity, mesh);
-            ecs.addComponent<renderable::PhongShadowRenderable>(sphere.mEntity, *Library::getTexture("black"), material);
-            ecs.addComponent<renderable::ShadowCasterRenderable>(sphere.mEntity, *Library::getTexture("black"));
-            ecs.addComponent<SelectableComponent>(sphere.mEntity);
+            ecs.addComponent<renderable::PhongShadowRenderable>(sphere.mEntity, Library::getTexture("black"), material);
+            ecs.addComponent<renderable::ShadowCasterRenderable>(sphere.mEntity, Library::getTexture("black"));
         }
 
         /* Ground plane */
@@ -121,7 +119,7 @@ namespace FrustaFitting {
         material.mAmbient = glm::vec3(0.2f);
         material.mDiffuse = glm::vec3(0.7f);
         ecs.addComponent<BoundingBoxComponent>(receiver.mEntity, Library::getMesh("quad"));
-        ecs.addComponent<renderable::PhongShadowRenderable>(receiver.mEntity, *Library::getTexture("black"), material);
+        ecs.addComponent<renderable::PhongShadowRenderable>(receiver.mEntity, Library::getTexture("black"), material);
 
         /* Systems - order matters! */
         ecs.addSystem<CameraControllerSystem>(); // Update camera

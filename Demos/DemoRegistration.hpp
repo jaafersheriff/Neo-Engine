@@ -1,7 +1,7 @@
 #include "Base/BaseDemo.hpp"
 #include "Compute/Compute.hpp"
+#include "FrustaFitting/FrustaFitting.hpp"
 // #include "Deferred/Deferred.hpp"
-// #include "FrustaFitting/FrustaFitting.hpp"
 // #include "GodRays/GodRays.hpp"
 // #include "Metaballs/Metaballs.hpp"
 // #include "NormalVisualizer/NormalVisualizer.hpp"
@@ -15,9 +15,9 @@
 static int sCurrentDemo = 0;
 static std::vector<neo::IDemo*> sDemos = {
 	new Base::Demo(),
+ 	new FrustaFitting::Demo(),
  	new Compute::Demo(),
 // 	new Deferred::Demo(),
-// 	new FrustaFitting::Demo(),
 // 	new GodRays::Demo(),
 // 	new Metaballs::Demo(),
 // 	new NormalVisualizer::Demo(),
