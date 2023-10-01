@@ -12,5 +12,9 @@ namespace neo {
         {}
 
         virtual void update(ECS& ecs) override;
+        virtual void imguiEditor(ECS&) override;
+
+    private:
+        int mCulledCount = -1;
     };
 }

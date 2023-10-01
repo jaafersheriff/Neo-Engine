@@ -9,7 +9,7 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
-#include "ECS/Component/CollisionComponent/ObjectInMainView.hpp"
+#include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderableComponent/PhongRenderable.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
@@ -72,16 +72,15 @@ namespace neo {
 
             /* Load PV */
             const auto& camera = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-            if (camera) {
-                auto&& [cameraEntity, _, cameraSpatial] = *camera;
-                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
-                loadUniform("V", cameraSpatial.getView());
-                loadUniform("camPos", cameraSpatial.getPosition());
-            }
+            NEO_ASSERT(camera, "No main camera :(");
+            auto&& [cameraEntity, _, cameraSpatial] = *camera;
+            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+            loadUniform("V", cameraSpatial.getView());
+            loadUniform("camPos", cameraSpatial.getPosition());
 
             /* Load light */
             if (const auto& lightTuple = ecs.getSingleView<LightComponent, SpatialComponent>()) {
-                auto&& [_, light, spatial] = *lightTuple;
+                auto&& [__, light, spatial] = *lightTuple;
                 loadUniform("lightCol", light.mColor);
                 loadUniform("lightAtt", light.mAttenuation);
                 loadUniform("lightPos", spatial.getPosition());
@@ -90,8 +89,10 @@ namespace neo {
             for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::PhongRenderable, MeshComponent, SpatialComponent>().each()) {
 
                 // VFC
-                if (ecs.isSystemEnabled<FrustumCullingSystem>() && ecs.cGetComponent<BoundingBoxComponent>(entity) && !ecs.cGetComponent<ObjectInMainViewComponent>(entity)) {
-                    continue;
+                if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+                    if (!culled->isInView(ecs, entity, cameraEntity)) {
+                        continue;
+                    }
                 }
 
                 loadUniform("M", spatial.getModelMatrix());

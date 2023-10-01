@@ -104,7 +104,7 @@ namespace FrustaFitting {
         Light light(ecs, glm::vec3(10.f, 20.f, 0.f));
 
         // Renderable
-        for (int i = 0; i < 30000; i++) {
+        for (int i = 0; i < 30; i++) {
             auto mesh = util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere");
             Renderable sphere(ecs, mesh.mMesh, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
             Material material;

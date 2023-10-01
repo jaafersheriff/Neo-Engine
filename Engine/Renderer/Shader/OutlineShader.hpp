@@ -9,7 +9,7 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
-#include "ECS/Component/CollisionComponent/ObjectInMainView.hpp"
+#include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/OutlineRenderable.hpp"
@@ -55,11 +55,10 @@ namespace neo {
 
             /* Load PV */
             auto cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-            if (cameraView) {
-                auto&& [cameraEntity, __, cameraSpatial] = *cameraView;
-                loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
-                loadUniform("V", cameraSpatial.getView());
-            }
+            NEO_ASSERT(cameraView, "No main camera :(");
+            auto&& [cameraEntity, __, cameraSpatial] = *cameraView;
+            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+            loadUniform("V", cameraSpatial.getView());
 
             const auto& viewport = ecs.cGetComponent<ViewportDetailsComponent>();
             loadUniform("screenSize", glm::vec2(std::get<1>(*viewport).mSize));
@@ -67,8 +66,10 @@ namespace neo {
             for (auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::OutlineRenderable, MeshComponent, SpatialComponent>().each()) {
 
                 // VFC
-                if (ecs.isSystemEnabled<FrustumCullingSystem>() && ecs.cGetComponent<BoundingBoxComponent>(entity) && !ecs.cGetComponent<ObjectInMainViewComponent>(entity)) {
-                    continue;
+                if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+                    if (!culled->isInView(ecs, entity, cameraEntity)) {
+                        continue;
+                    }
                 }
 
                 // Match the transforms of spatial component..

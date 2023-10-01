@@ -71,7 +71,7 @@ namespace neo {
 		// }
 		ImGui::Text("Components: %d", count);
 		char buf[256];
-		sprintf(buf, "Gameobjects: %d", static_cast<int>(mRegistry.size()));
+		sprintf(buf, "Entities: %d", static_cast<int>(mRegistry.size()));
 		if (ImGui::TreeNodeEx(buf, ImGuiTreeNodeFlags_DefaultOpen)) {
 			getView<TagComponent>().each([](Entity entity, TagComponent& tag) {
 				NEO_UNUSED(entity);

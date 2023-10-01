@@ -55,16 +55,16 @@ namespace FrustaFitting {
 
             auto mockCamera = ecs.getSingleView<FrustumComponent, FrustumFitSourceComponent>();
 
-            ecs.getView<MeshComponent, SpatialComponent>().each([&](const ECS::Entity e, const MeshComponent& mesh, const SpatialComponent& spatial) {
+            for(auto&& [e, mesh, spatial] : ecs.getView<MeshComponent, SpatialComponent>().each()) {
                 glm::vec3 color(1.f);
 
 				// VFC
                 if (mockCamera) {
-                    auto&& [__, cameraFrustum, ___] = *mockCamera;
+                    auto&& [mockCameraEntity, cameraFrustum, ___] = *mockCamera;
                     MICROPROFILE_SCOPEI("WireShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(e)) {
-                        if (!cameraFrustum.isInFrustum(spatial, *boundingBox)) {
-                            return;
+                    if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(e)) {
+                        if (!culled->isInView(ecs, e, mockCameraEntity)) {
+                            continue;
                         }
                     }
                 }
@@ -75,7 +75,7 @@ namespace FrustaFitting {
 
                 /* Draw outline */
                 mesh.mMesh->draw();
-            });
+            }
 
             unbind();
         }
