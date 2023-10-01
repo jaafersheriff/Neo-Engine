@@ -58,25 +58,19 @@ namespace FrustaFitting {
             ecs.getView<MeshComponent, SpatialComponent>().each([&](const ECS::Entity e, const MeshComponent& mesh, const SpatialComponent& spatial) {
                 glm::vec3 color(1.f);
 
-                glm::vec3 position = spatial.getPosition();
-                glm::vec3 _scale = spatial.getOrientation() * spatial.getScale();
-                float scale = std::max(_scale.x, std::max(_scale.y, _scale.z));
 				// VFC
                 if (mockCamera) {
-                    auto&& [_, cameraFrustum, __] = *mockCamera;
+                    auto&& [__, cameraFrustum, ___] = *mockCamera;
                     MICROPROFILE_SCOPEI("WireShader", "VFC", MP_AUTO);
                     if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(e)) {
-                        position += boundingBox->getCenter();
-                        scale *= boundingBox->getRadius();
-                        if (!cameraFrustum.isInFrustum(position, scale)) {
+                        if (!cameraFrustum.isInFrustum(spatial, *boundingBox)) {
                             return;
                         }
                     }
                 }
 
 
-                glm::mat4 M = glm::scale(glm::translate(glm::mat4(1.f), position) * glm::mat4(spatial.getOrientation()), glm::vec3(_scale));
-                loadUniform("M", M);
+                loadUniform("M", spatial.getModelMatrix());
                 loadUniform("wireColor", color);
 
                 /* Draw outline */
