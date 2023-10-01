@@ -9,9 +9,12 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/CollisionComponent/ObjectInMainView.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/OutlineRenderable.hpp"
+
+#include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 
 namespace neo {
 
@@ -61,17 +64,11 @@ namespace neo {
             const auto& viewport = ecs.cGetComponent<ViewportDetailsComponent>();
             loadUniform("screenSize", glm::vec2(std::get<1>(*viewport).mSize));
 
-            const auto cameraFrustum = ecs.cGetComponent<FrustumComponent>(std::get<0>(*cameraView));
             for (auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::OutlineRenderable, MeshComponent, SpatialComponent>().each()) {
 
                 // VFC
-                if (cameraFrustum) {
-                    MICROPROFILE_SCOPEI("OutlineShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
-                        if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
-                            continue;
-                        }
-                    }
+                if (ecs.isSystemEnabled<FrustumCullingSystem>() && ecs.cGetComponent<BoundingBoxComponent>(entity) && !ecs.cGetComponent<ObjectInMainViewComponent>(entity)) {
+                    continue;
                 }
 
                 // Match the transforms of spatial component..

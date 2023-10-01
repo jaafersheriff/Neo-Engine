@@ -17,21 +17,17 @@ namespace FrustaFitting {
     class PerspectiveUpdateSystem : public System {
 
     public:
-        bool mUpdatePerspective = true;
-
         PerspectiveUpdateSystem() :
             System("PerspectiveUpdate System") {
         }
 
         virtual void update(ECS& ecs) override {
             if (auto sourceCamera = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent>()) {
-                if (mUpdatePerspective) {
-                    if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
-                        auto&& [_, __, sourceSpatial] = *sourceCamera;
-                        float f = static_cast<float>(glm::sin(std::get<1>(*frameStats).mRunTime));
-                        float g = static_cast<float>(glm::cos(std::get<1>(*frameStats).mRunTime));
-                        sourceSpatial.setLookDir(glm::vec3(f, f / 2, g));
-                    }
+                if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
+                    auto&& [_, __, sourceSpatial] = *sourceCamera;
+                    float f = static_cast<float>(glm::sin(std::get<1>(*frameStats).mRunTime));
+                    float g = static_cast<float>(glm::cos(std::get<1>(*frameStats).mRunTime));
+                    sourceSpatial.setLookDir(glm::vec3(f, f / 2, g));
                 }
             }
         }

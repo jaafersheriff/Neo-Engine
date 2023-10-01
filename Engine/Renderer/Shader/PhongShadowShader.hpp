@@ -14,10 +14,13 @@
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/CollisionComponent/ObjectInMainView.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/PhongShadowRenderable.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
+#include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -122,17 +125,11 @@ namespace neo {
                 /* Bind shadow map */
                 loadTexture("shadowMap", *Library::getFBO("shadowMap")->mTextures[0]);
 
-                const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(std::get<0>(*cameraView));
                 for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::PhongShadowRenderable, MeshComponent, SpatialComponent>().each()) {
 
                     // VFC
-                    if (cameraFrustum) {
-                        MICROPROFILE_SCOPEI("PhongShaderShader", "VFC", MP_AUTO);
-                        if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
-                            if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
-                                continue;
-                            }
-                        }
+                    if (ecs.isSystemEnabled<FrustumCullingSystem>() && ecs.cGetComponent<BoundingBoxComponent>(entity) && !ecs.cGetComponent<ObjectInMainViewComponent>(entity)) {
+                        continue;
                     }
 
                     loadUniform("M", spatial.getModelMatrix());

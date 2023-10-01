@@ -25,6 +25,7 @@
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
+#include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumToLineSystem.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -90,6 +91,7 @@ namespace FrustaFitting {
         Camera sceneCamera("main camera", ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
         ecs.addComponent<CameraControllerComponent>(sceneCamera.mEntity, 0.4f, 7.f);
         ecs.addComponent<MainCameraComponent>(sceneCamera.mEntity);
+        ecs.addComponent<FrustumComponent>(sceneCamera.mEntity);
 
         // Perspective camera
         Camera mockCamera("mockCamera", ecs, 50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
@@ -102,7 +104,7 @@ namespace FrustaFitting {
         Light light(ecs, glm::vec3(10.f, 20.f, 0.f));
 
         // Renderable
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 30000; i++) {
             auto mesh = util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere");
             Renderable sphere(ecs, mesh.mMesh, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
             Material material;
@@ -126,6 +128,7 @@ namespace FrustaFitting {
         ecs.addSystem<FrustumSystem>(); // Calculate original frusta bounds
         ecs.addSystem<FrustaFittingSystem>(); // Fit one frusta into another
         ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
+        ecs.addSystem<FrustumCullingSystem>();
         ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
 
         /* Init renderer */

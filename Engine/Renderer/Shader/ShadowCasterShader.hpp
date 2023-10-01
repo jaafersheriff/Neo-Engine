@@ -69,7 +69,18 @@ namespace neo {
                 loadUniform("P", ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCameraEntity)->getProj());
                 loadUniform("V", shadowCameraSpatial.getView());
 
+                const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(shadowCameraEntity);
                 for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>().each()) {
+
+                    // VFC
+                    if (cameraFrustum) {
+                        MICROPROFILE_SCOPEI("ShadowCasterShader", "VFC", MP_AUTO);
+                        if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
+                            if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
+                                continue;
+                            }
+                        }
+                    }
 
                     loadUniform("M", spatial.getModelMatrix());
 

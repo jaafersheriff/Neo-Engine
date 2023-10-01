@@ -9,10 +9,13 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/CollisionComponent/ObjectInMainView.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderableComponent/PhongRenderable.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
+#include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 
 namespace neo {
 
@@ -84,17 +87,11 @@ namespace neo {
                 loadUniform("lightPos", spatial.getPosition());
             }
 
-            const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(std::get<0>(*camera));
             for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::PhongRenderable, MeshComponent, SpatialComponent>().each()) {
 
                 // VFC
-                if (cameraFrustum) {
-                    MICROPROFILE_SCOPEI("PhongShader", "VFC", MP_AUTO);
-                    if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
-                        if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
-                            continue;
-                        }
-                    }
+                if (ecs.isSystemEnabled<FrustumCullingSystem>() && ecs.cGetComponent<BoundingBoxComponent>(entity) && !ecs.cGetComponent<ObjectInMainViewComponent>(entity)) {
+                    continue;
                 }
 
                 loadUniform("M", spatial.getModelMatrix());

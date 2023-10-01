@@ -63,6 +63,7 @@ namespace neo {
 
 		/* Attach a system */
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
+		template <typename SysT> bool isSystemEnabled() const;
 
 	private:
 		Registry mRegistry;
@@ -132,6 +133,19 @@ namespace neo {
 
 		mSystems.push_back({ typeI, std::make_unique<SysT>(std::forward<Args>(args)...) });
 		return static_cast<SysT &>(*mSystems.back().second);
+	}
+
+	template <typename SysT> 
+	bool ECS::isSystemEnabled() const {
+		static_assert(std::is_base_of<System, SysT>::value, "SysT must be a System type");
+		static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived System type");
+		std::type_index typeI(typeid(SysT));
+		for (auto & sys : mSystems) {
+			if (sys.first == typeI && sys.second->mActive) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	template<typename CompT>

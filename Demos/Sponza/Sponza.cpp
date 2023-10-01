@@ -18,6 +18,7 @@
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
+#include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -93,6 +94,7 @@ namespace Sponza {
         camSys.mSuperSpeed = 10.f;
         ecs.addSystem<FrustumSystem>();
         ecs.addSystem<FrustaFittingSystem>();
+        ecs.addSystem<FrustumCullingSystem>();
 
         /* Init renderer */
         renderer.addPreProcessShader<ShadowCasterShader>(4096);
