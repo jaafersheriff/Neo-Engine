@@ -47,7 +47,6 @@ namespace neo {
         struct BoundingBox {
             glm::vec3 mMin = glm::vec3(std::numeric_limits<float>::max());
             glm::vec3 mMax = glm::vec3(-std::numeric_limits<float>::max());
-            std::vector<glm::vec3> points;
 
             BoundingBox() {}
 
@@ -70,7 +69,6 @@ namespace neo {
                 if (other.x > mMax.x) { mMax.x = other.x; }
                 if (other.y > mMax.y) { mMax.y = other.y; }
                 if (other.z > mMax.z) { mMax.z = other.z; }
-                points.push_back(other);
             }
 
             glm::vec3 center() {

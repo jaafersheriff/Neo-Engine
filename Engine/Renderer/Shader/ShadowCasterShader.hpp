@@ -73,12 +73,21 @@ namespace neo {
                 for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>().each()) {
 
                     // VFC
-                    if (ecs.has<FrustumComponent>(shadowCameraEntity)) {
-                        if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-                            if (!culled->isInView(ecs, entity, shadowCameraEntity)) {
+                    // if (ecs.has<FrustumComponent>(shadowCameraEntity)) {
+                    //     if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+                    //         if (!culled->isInView(ecs, entity, shadowCameraEntity)) {
+                    //             continue;
+                    //         }
+                    //     }
+                    // }
+                    if (const auto& fr = ecs.cGetComponent<FrustumComponent>(shadowCameraEntity)) {
+                        if (const auto& bb = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
+                            if (!fr->isInFrustum(spatial, *bb)) {
                                 continue;
                             }
+
                         }
+
                     }
 
                     loadUniform("M", spatial.getModelMatrix());

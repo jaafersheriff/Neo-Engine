@@ -32,6 +32,7 @@ namespace neo {
 
         // Test if an object is inside the frustum
         bool isInFrustum(const SpatialComponent& spatial, const BoundingBoxComponent& box) const {
+            MICROPROFILE_SCOPEI("FrustumComponent", "isInFrustum", MP_AUTO);
             glm::mat4 M = spatial.getModelMatrix();
             glm::vec3 min = M * glm::vec4(box.mMin, 1.f);
             glm::vec3 max = M * glm::vec4(box.mMax, 1.f);
@@ -54,8 +55,8 @@ namespace neo {
 
         // https://iquilezles.org/articles/frustumcorrect/
         inline bool _boxInsideOfPlane(glm::vec4 plane, glm::vec3 min, glm::vec3 max) const {
-            return !(
-                   glm::dot(plane, glm::vec4(min.x, min.y, min.z, 1.f)) < 0.f
+            return !
+                (  glm::dot(plane, glm::vec4(min.x, min.y, min.z, 1.f)) < 0.f
                 && glm::dot(plane, glm::vec4(max.x, min.y, min.z, 1.f)) < 0.f
                 && glm::dot(plane, glm::vec4(min.x, max.y, min.z, 1.f)) < 0.f
                 && glm::dot(plane, glm::vec4(max.x, max.y, min.z, 1.f)) < 0.f

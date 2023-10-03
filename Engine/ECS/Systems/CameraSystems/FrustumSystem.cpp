@@ -33,6 +33,12 @@ namespace neo {
                 frustum.FarRightTop = Cfar + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().y);
                 frustum.FarLeftBottom = Cfar + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().x);
                 frustum.FarRightBottom = Cfar + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().y);
+
+                frustum.mNear.x = PV[0][3] + PV[0][2];
+                frustum.mNear.y = PV[1][3] + PV[1][2];
+                frustum.mNear.z = PV[2][3] + PV[2][2];
+                frustum.mNear.w = PV[3][3] + PV[3][2];
+                // frustum.mNear /= glm::length(glm::vec3(frustum.mNear));
             }
             else if (auto perspectiveCam = ecs.getComponent<PerspectiveCameraComponent>(entity)) {
                 PV = perspectiveCam->getProj() * spatial.getView();
@@ -55,6 +61,12 @@ namespace neo {
                 frustum.FarRightTop = Cfar + (up * (Hfar / 2)) + (w * (Wfar / 2));
                 frustum.FarLeftBottom = Cfar - (up * (Hfar / 2)) - (w * (Wfar / 2));
                 frustum.FarRightBottom = Cfar - (up * (Hfar / 2)) + (w * (Wfar / 2));
+
+                frustum.mNear.x = PV[0][2];
+                frustum.mNear.y = PV[1][2];
+                frustum.mNear.z = PV[2][2];
+                frustum.mNear.w = PV[3][2];
+                // frustum.mNear /= glm::length(glm::vec3(frustum.mNear));
             }
 
             // Update frustum planes
@@ -62,37 +74,31 @@ namespace neo {
             frustum.mLeft.y = PV[1][3] + PV[1][0];
             frustum.mLeft.z = PV[2][3] + PV[2][0];
             frustum.mLeft.w = PV[3][3] + PV[3][0];
-            frustum.mLeft /= glm::length(glm::vec3(frustum.mLeft));
+            // frustum.mLeft /= glm::length(glm::vec3(frustum.mLeft));
 
             frustum.mRight.x = PV[0][3] - PV[0][0];
             frustum.mRight.y = PV[1][3] - PV[1][0];
             frustum.mRight.z = PV[2][3] - PV[2][0];
             frustum.mRight.w = PV[3][3] - PV[3][0];
-            frustum.mRight /= glm::length(glm::vec3(frustum.mRight));
+            // frustum.mRight /= glm::length(glm::vec3(frustum.mRight));
 
             frustum.mBottom.x = PV[0][3] + PV[0][1];
             frustum.mBottom.y = PV[1][3] + PV[1][1];
             frustum.mBottom.z = PV[2][3] + PV[2][1];
             frustum.mBottom.w = PV[3][3] + PV[3][1];
-            frustum.mBottom /= glm::length(glm::vec3(frustum.mBottom));
+            // frustum.mBottom /= glm::length(glm::vec3(frustum.mBottom));
 
             frustum.mTop.x = PV[0][3] - PV[0][1];
             frustum.mTop.y = PV[1][3] - PV[1][1];
             frustum.mTop.z = PV[2][3] - PV[2][1];
             frustum.mTop.w = PV[3][3] - PV[3][1];
-            frustum.mTop /= glm::length(glm::vec3(frustum.mTop));
+            // frustum.mTop /= glm::length(glm::vec3(frustum.mTop));
 
             frustum.mFar.x = PV[0][3] - PV[0][2];
             frustum.mFar.y = PV[1][3] - PV[1][2];
             frustum.mFar.z = PV[2][3] - PV[2][2];
             frustum.mFar.w = PV[3][3] - PV[3][2];
-            frustum.mFar /= glm::length(glm::vec3(frustum.mFar));
-
-            frustum.mNear.x = PV[0][2];
-            frustum.mNear.y = PV[1][2];
-            frustum.mNear.z = PV[2][2];
-            frustum.mNear.w = PV[3][2];
-            frustum.mNear /= glm::length(glm::vec3(frustum.mNear));
+            // frustum.mFar /= glm::length(glm::vec3(frustum.mFar));
         }
     }
 }
