@@ -37,11 +37,13 @@ namespace neo {
 	void ECS::flush() {
         MICROPROFILE_SCOPEI("ECS", "flush", MP_AUTO);
 		for (auto&& job : mAddComponentFuncs) {
+			mComponentCount++;
 			job(mRegistry);
 		}
 		mAddComponentFuncs.clear();
 
 		for (auto&& job : mRemoveComponentFuncs) {
+			mComponentCount--;
 			job(mRegistry);
 		}
 		mRemoveComponentFuncs.clear();
@@ -60,17 +62,14 @@ namespace neo {
 			mRegistry.destroy(entity);
 		});
 		mRegistry.clear();
+		mComponentCount = 0;
 		NEO_ASSERT(mRegistry.alive() == 0, "What");
 		mSystems.clear();
 	}
 
 	void ECS::imguiEdtor() {
 		ImGui::Begin("ECS", nullptr, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove);
-		size_t count = 0;
-		// for (auto go : getGameObjects()) {
-		// 	count += go->getAllComponents().size();
-		// }
-		ImGui::Text("Components: %d", count);
+		ImGui::Text("Components: %d", mComponentCount);
 		char buf[256];
 		sprintf(buf, "Entities: %d", static_cast<int>(mRegistry.size()));
 		if (ImGui::TreeNodeEx(buf, ImGuiTreeNodeFlags_DefaultOpen)) {

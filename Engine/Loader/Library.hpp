@@ -56,17 +56,16 @@ namespace neo {
 
         auto it = mTextures.find(name);
         NEO_ASSERT(it == mTextures.end(), "Texture already found");
-        void* data;
+        float fd[] = { 1.f, 1.f, 1.f, 1.f };
+        uint32_t id = 0xFFFFFFFF;
+        void* data = nullptr;
         if (format.mType == GL_UNSIGNED_BYTE || format.mType == GL_INT) {
-            uint32_t d = 0xFFFFFFFF;
-            data = &d;
+            data = &id;
         }
         else if (format.mType == GL_FLOAT) {
-            float d[] = { 1.f, 1.f, 1.f, 1.f };
-            data = d;
+            data = fd;
         }
         else {
-            NEO_UNUSED(data);
             NEO_FAIL("Trying to create an empty texture with an unsupported type");
         }
         Texture* t = new T(format, size, data);

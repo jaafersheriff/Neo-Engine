@@ -278,35 +278,5 @@ namespace neo {
             }
             ImGui::End();
         }
-
-        // if (demos.getConfig().attachEditor) {
-        //     ImGui::Begin("Editor");
-        //     if (auto selectedView = mECS.getComponent<SelectedComponent>()) {
-        //         auto&& [selectedEntity, _] = *selectedView;
-        //         if (ImGui::Button("Delete entity")) {
-        //             mECS.removeEntity(selectedEntity);
-        //         }
-        //         mECS.mEditor.renderEditor(mECS.mRegistry, selectedEntity);
-        //     }
-        //     ImGui::Separator();
-        //     if (ImGui::Button("Create new GameObject")) {
-        //         {
-        //             auto view = mECS.getView<SelectedComponent>();
-        //             NEO_ASSERT(view.size() <= 1, "How are there two items selected at the same time");
-        //             view.each([](ECS::Entity entity, SelectedComponent&) {
-        //                 mECS.removeComponent<SelectedComponent>(entity);
-        //             });
-        //         }
-        //         auto entity = mECS.createEntity();
-        //         auto sphereMesh = Library::getMesh("sphere");
-        //         mECS.addComponent<BoundingBoxComponent>(entity, sphereMesh);
-        //         mECS.addComponent<SpatialComponent>(entity);
-        //         mECS.addComponent<SelectableComponent>(entity);
-        //         mECS.addComponent<SelectedComponent>(entity);
-        //         mECS.addComponent<MeshComponent>(entity, sphereMesh.mMesh);
-        //         mECS.addComponent<renderable::WireframeRenderable>(entity);
-        //     }
-        //     ImGui::End();
-        // }
     }
 }
