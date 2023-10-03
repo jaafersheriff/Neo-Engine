@@ -32,7 +32,6 @@ namespace neo {
 
         // Test if an object is inside the frustum
         bool isInFrustum(const SpatialComponent& spatial, const BoundingBoxComponent& box) const {
-            MICROPROFILE_SCOPEI("FrustumComponent", "isInFrustum", MP_AUTO);
             glm::mat4 M = spatial.getModelMatrix();
             glm::vec3 min = M * glm::vec4(box.mMin, 1.f);
             glm::vec3 max = M * glm::vec4(box.mMax, 1.f);
