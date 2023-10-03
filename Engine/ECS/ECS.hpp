@@ -80,7 +80,7 @@ namespace neo {
 
 	template<typename CompT>
 	std::optional<std::tuple<ECS::Entity, CompT&>> ECS::getComponent() {
-		MICROPROFILE_SCOPEI("ECS", "getComponent", MP_AUTO);
+		// MICROPROFILE_SCOPEI("ECS", "getComponent", MP_AUTO);
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 	
@@ -95,8 +95,8 @@ namespace neo {
 	}
 
 	template<typename CompT>
-	std::optional<std::tuple<ECS::Entity, const CompT&>> ECS::cGetComponent() const {
-		MICROPROFILE_SCOPEI("ECS", "cGetComponent", MP_AUTO);
+	std::optional<std::tuple<ECS::Entity, const CompT&>> ECS::cGetComponent() const{
+		// MICROPROFILE_SCOPEI("ECS", "cGetComponent", MP_AUTO);
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 	
@@ -112,7 +112,7 @@ namespace neo {
 
 	template<typename CompT>
 	bool ECS::has(ECS::Entity e) const {
-		MICROPROFILE_SCOPEI("ECS", "has", MP_AUTO);
+		// MICROPROFILE_SCOPEI("ECS", "has", MP_AUTO);
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
@@ -150,7 +150,7 @@ namespace neo {
 
 	template<typename CompT>
 	CompT* ECS::getComponent(Entity e) {
-		MICROPROFILE_SCOPEI("ECS", "getComponent", MP_AUTO);
+		// MICROPROFILE_SCOPEI("ECS", "getComponent", MP_AUTO);
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
@@ -159,7 +159,7 @@ namespace neo {
 
 	template<typename CompT>
 	CompT *const ECS::cGetComponent(Entity e) const {
-		MICROPROFILE_SCOPEI("ECS", "cGetComponent", MP_AUTO);
+		// MICROPROFILE_SCOPEI("ECS", "cGetComponent", MP_AUTO);
 		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
@@ -170,7 +170,7 @@ namespace neo {
 	CompT* ECS::addComponent(Entity e, Args &&... args) {
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
-		MICROPROFILE_SCOPEI("ECS", "addComponent", MP_AUTO);
+		// MICROPROFILE_SCOPEI("ECS", "addComponent", MP_AUTO);
 		CompT* component;
 		if constexpr (sizeof...(Args) > 0) {
 			component = new CompT(std::forward<Args>(args)...);
@@ -198,7 +198,7 @@ namespace neo {
 	void ECS::removeComponent(Entity e) {
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
-		MICROPROFILE_SCOPEI("ECS", "removeComponent", MP_AUTO);
+		// MICROPROFILE_SCOPEI("ECS", "removeComponent", MP_AUTO);
 		mRemoveComponentFuncs.push_back([e](Registry& registry) mutable {
 			registry.remove<CompT>(e);
 			});
@@ -219,7 +219,7 @@ namespace neo {
 	}
 
 	template<typename SuperT, typename CompT> SuperT* ECS::getComponentAs(Entity e) {
-		MICROPROFILE_SCOPEI("ECS", "getComponentAs", MP_AUTO);
+		// MICROPROFILE_SCOPEI("ECS", "getComponentAs", MP_AUTO);
 		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
@@ -229,7 +229,7 @@ namespace neo {
 		return dynamic_cast<SuperT*>(comp);
 	}
 	template<typename SuperT, typename CompT> const SuperT* ECS::cGetComponentAs(Entity e) const {
-		MICROPROFILE_SCOPEI("ECS", "cGetComponentAs", MP_AUTO);
+		// MICROPROFILE_SCOPEI("ECS", "cGetComponentAs", MP_AUTO);
         static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
         static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
         static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
@@ -262,7 +262,7 @@ namespace neo {
 	}
 
 	template<typename... CompTs> bool ECS::has() const {
-		MICROPROFILE_SCOPEI("ECS", "has", MP_AUTO);
+		// MICROPROFILE_SCOPEI("ECS", "has", MP_AUTO);
 		return mRegistry.view<CompTs...>().size_hint() != 0;
 	}
 }

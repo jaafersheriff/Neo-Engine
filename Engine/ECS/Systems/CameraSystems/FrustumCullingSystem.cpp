@@ -16,9 +16,12 @@ namespace neo {
     void FrustumCullingSystem::update(ECS& ecs) {
         NEO_ASSERT(ecs.isSystemEnabled<FrustumSystem>(), "This system can only be used with the FrustumSystem!");
         mCulledCount = 0;
+
+        auto cameras = ecs.getView<FrustumComponent>();
+
         for (auto&& [entity, spatial, bb] : ecs.getView<SpatialComponent, BoundingBoxComponent>().each()) {
             CameraCulledComponent culled;
-            for(auto&& [cameraEntity, frustum] : ecs.getView<FrustumComponent>().each()) {
+            for(auto&& [cameraEntity, frustum] : cameras.each()) {
                 if ((ecs.has<PerspectiveCameraComponent>(cameraEntity) || ecs.has<OrthoCameraComponent>(cameraEntity)) && frustum.isInFrustum(spatial, bb)) {
                     culled.mCameraViews.insert(cameraEntity);
                 }

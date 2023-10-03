@@ -12,6 +12,7 @@
 #include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/ShadowCasterRenderable.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
@@ -69,14 +70,12 @@ namespace neo {
                 loadUniform("P", ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCameraEntity)->getProj());
                 loadUniform("V", shadowCameraSpatial.getView());
 
-                const auto& cameraFrustum = ecs.cGetComponent<FrustumComponent>(shadowCameraEntity);
                 for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::ShadowCasterRenderable, MeshComponent, SpatialComponent>().each()) {
 
                     // VFC
-                    if (cameraFrustum) {
-                        MICROPROFILE_SCOPEI("ShadowCasterShader", "VFC", MP_AUTO);
-                        if (const auto& boundingBox = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
-                            if (!cameraFrustum->isInFrustum(spatial, *boundingBox)) {
+                    if (ecs.has<FrustumComponent>(shadowCameraEntity)) {
+                        if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+                            if (!culled->isInView(ecs, entity, shadowCameraEntity)) {
                                 continue;
                             }
                         }

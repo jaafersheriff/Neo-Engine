@@ -61,7 +61,6 @@ namespace FrustaFitting {
 				// VFC
                 if (mockCamera) {
                     auto&& [mockCameraEntity, cameraFrustum, ___] = *mockCamera;
-                    MICROPROFILE_SCOPEI("WireShader", "VFC", MP_AUTO);
                     if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(e)) {
                         if (!culled->isInView(ecs, e, mockCameraEntity)) {
                             continue;
