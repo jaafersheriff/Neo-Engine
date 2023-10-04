@@ -2,8 +2,15 @@
 
 #include "Engine/Engine.hpp"
 
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/RenderableComponent/MeshComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
+
+#include <imgui/imgui.h>
 
 using namespace neo;
 
@@ -28,17 +35,18 @@ namespace NormalVisualizer {
             loadUniform("magnitude", magnitude);
 
             /* Load PV */
-            auto camera = ecs.getComponentTuple<MainCameraComponent, CameraComponent>();
-            NEO_ASSERT(camera, "No MainCamera exists");
-            loadUniform("P", camera->get<CameraComponent>()->getProj());
-            loadUniform("V", camera->get<CameraComponent>()->getView());
+            const auto& camera = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+            NEO_ASSERT(camera, "No main camera :(");
+            auto&& [cameraEntity, _, cameraSpatial] = *camera;
+            loadUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+            loadUniform("V", cameraSpatial.getView());
 
-            for (auto& renderable : ecs.getComponentTuples<MeshComponent, SpatialComponent>()) {
-                loadUniform("M", renderable->get<SpatialComponent>()->getModelMatrix());
-                loadUniform("N", renderable->get<SpatialComponent>()->getNormalMatrix());
+            for (const auto&& [__, mesh, spatial] : ecs.getView<MeshComponent, SpatialComponent>().each()) {
+                loadUniform("M", spatial.getModelMatrix());
+                loadUniform("N", spatial.getNormalMatrix());
 
                 /* DRAW */
-                renderable->get<MeshComponent>()->mMesh.draw();
+                mesh.mMesh->draw();
             }
 
             unbind();

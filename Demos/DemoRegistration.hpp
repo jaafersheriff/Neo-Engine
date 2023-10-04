@@ -4,7 +4,7 @@
 #include "Cornell/Cornell.hpp"
 // #include "Deferred/Deferred.hpp"
 // #include "Metaballs/Metaballs.hpp"
-// #include "NormalVisualizer/NormalVisualizer.hpp"
+#include "NormalVisualizer/NormalVisualizer.hpp"
 // #include "PostProcess/PostProcess.hpp"
 // #include "Selecting/Selecting.hpp"
 #include "Sponza/Sponza.hpp"
@@ -20,8 +20,8 @@ static std::vector<neo::IDemo*> sDemos = {
  	new FrustaFitting::Demo(),
  	new Compute::Demo(),
 // 	new Deferred::Demo(),
-// 	new Metaballs::Demo(),
-// 	new NormalVisualizer::Demo(),
+// new Metaballs::Demo(),
+new NormalVisualizer::Demo(),
 // 	new PostProcess::Demo(),
 // 	new Selecting::Demo(),
 };

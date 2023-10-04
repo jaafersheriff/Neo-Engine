@@ -200,6 +200,13 @@ namespace neo {
             MICROPROFILE_SCOPEGPUI("ImGui::render", MP_AUTO);
             ImGui::Render();
         }
+        {
+
+            MICROPROFILE_SCOPEI("ImGuiManager", "ImGui_ImplOpenGL3_RenderDrawData", MP_AUTO);
+            MICROPROFILE_SCOPEGPUI("ImGui_ImplOpenGL3_RenderDrawData", MP_AUTO);
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        }
+
         ImGuiIO& io = ImGui::GetIO();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             GLFWwindow* backup_current_context = glfwGetCurrentContext();
@@ -214,12 +221,6 @@ namespace neo {
                 MICROPROFILE_SCOPEI("ImGuiManager", "ImGui::RenderPlatformWindowsDefault", MP_AUTO);
                 MICROPROFILE_SCOPEGPUI("ImGui::RenderPlatformWindowsDefault", MP_AUTO);
                 ImGui::RenderPlatformWindowsDefault();
-            }
-            {
-
-                MICROPROFILE_SCOPEI("ImGuiManager", "ImGui_ImplOpenGL3_RenderDrawData", MP_AUTO);
-                MICROPROFILE_SCOPEGPUI("ImGui_ImplOpenGL3_RenderDrawData", MP_AUTO);
-                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             }
             
             glfwMakeContextCurrent(backup_current_context);

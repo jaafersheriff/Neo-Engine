@@ -12,6 +12,8 @@ file(GLOB_RECURSE CPP_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/Cornell/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Compute/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Sponza/*.cpp
+#	${CMAKE_CURRENT_SOURCE_DIR}/Metaballs/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/NormalVisualizer/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/FrustaFitting/*.cpp
 )
 file(GLOB_RECURSE HPP_FILES 
@@ -19,7 +21,9 @@ file(GLOB_RECURSE HPP_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/Cornell/*.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Compute/*.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Sponza/*.hpp
+#	${CMAKE_CURRENT_SOURCE_DIR}/Metaballs/*.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/FrustaFitting/*.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/NormalVisualizer/*.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/DemoRegistration.hpp
 )
 

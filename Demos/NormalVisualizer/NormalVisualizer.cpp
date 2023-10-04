@@ -13,7 +13,7 @@
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
-#include "ECS/Component/TransformationComponent/RotationComponent.hpp"
+#include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
@@ -26,31 +26,31 @@ using namespace neo;
 namespace NormalVisualizer {
     struct Camera {
         Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-            GameObject* gameObject = &ecs.createGameObject();
-            ecs.addComponent<SpatialComponent>(gameObject, pos, glm::vec3(1.f));
-            ecs.addComponentAs<PerspectiveCameraComponent, CameraComponent>(gameObject, near, far, fov);
-            ecs.addComponent<CameraControllerComponent>(gameObject, ls, ms);
-            ecs.addComponent<MainCameraComponent>(gameObject);
+            auto entity = ecs.createEntity();
+            ecs.addComponent<SpatialComponent>(entity, pos, glm::vec3(1.f));
+            ecs.addComponent<PerspectiveCameraComponent>(entity, near, far, fov);
+            ecs.addComponent<CameraControllerComponent>(entity, ls, ms);
+            ecs.addComponent<MainCameraComponent>(entity);
         }
     };
 
     struct Light {
 
         Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
-            auto gameObject = &ecs.createGameObject();
-            ecs.addComponent<SpatialComponent>(gameObject, pos);
-            ecs.addComponent<LightComponent>(gameObject, col, att);
+            auto entity = ecs.createEntity();
+            ecs.addComponent<SpatialComponent>(entity, pos);
+            ecs.addComponent<LightComponent>(entity, col, att);
         }
     };
 
     struct Orient {
         Orient(ECS& ecs, Mesh* mesh) {
-            auto gameObject = &ecs.createGameObject();
-            ecs.addComponent<SpatialComponent>(gameObject, glm::vec3(0.f), glm::vec3(1.f));
-            ecs.addComponent<RotationComponent>(gameObject, glm::vec3(0.f, 0.6f, 0.f));
-            ecs.addComponent<MeshComponent>(gameObject, *mesh);
-            ecs.addComponent<renderable::PhongRenderable>(gameObject, *Library::getTexture("black"));
-            ecs.addComponent<renderable::WireframeRenderable>(gameObject);
+            auto entity = ecs.createEntity();
+            ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
+            ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.6f, 0.f));
+            ecs.addComponent<MeshComponent>(entity, mesh);
+            ecs.addComponent<renderable::PhongRenderable>(entity, Library::getTexture("black"));
+            ecs.addComponent<renderable::WireframeRenderable>(entity);
         }
     };
 
@@ -62,7 +62,7 @@ namespace NormalVisualizer {
         return config;
     }
 
-    void Demo::init(ECS& ecs) {
+    void Demo::init(ECS& ecs, Renderer& renderer) {
         /* Game objects */
         Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
 
@@ -74,7 +74,7 @@ namespace NormalVisualizer {
         ecs.addSystem<RotationSystem>();
 
         /* Init renderer */
-        Renderer::addSceneShader<PhongShader>();
-        Renderer::addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
+        renderer.addSceneShader<PhongShader>();
+        renderer.addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
     }
 }
