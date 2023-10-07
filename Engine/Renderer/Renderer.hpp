@@ -4,6 +4,10 @@
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "DemoInfra/IDemo.hpp"
 
+#include <typeindex>
+#include <memory>
+#include <tuple>
+
 namespace neo {
 
     class Engine;

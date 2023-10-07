@@ -17,6 +17,8 @@
 #include "ECS/Component/RenderableComponent/ShadowCasterRenderable.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
+#include <imgui/imgui.h>
+
 namespace neo {
 
     class ShadowCasterShader : public Shader {

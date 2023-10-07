@@ -2,6 +2,8 @@
 
 #include "ECS/Component/Component.hpp"
 
+#include <imgui/imgui.h>
+
 namespace neo {
 
     namespace renderable {

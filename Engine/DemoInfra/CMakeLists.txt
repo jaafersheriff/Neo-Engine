@@ -5,6 +5,6 @@ target_link_libraries(DemoInfra
 PUBLIC
 	glm
 PRIVATE
-   imgui
+	imgui
 	entt
 )

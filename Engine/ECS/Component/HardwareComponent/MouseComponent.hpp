@@ -3,6 +3,8 @@
 #include "ECS/Component/Component.hpp"
 #include "Hardware/Mouse.hpp"
 
+#include <imgui/imgui.h>
+
 namespace neo {
 
     struct MouseComponent : public Component {

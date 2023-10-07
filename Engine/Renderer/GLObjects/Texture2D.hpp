@@ -2,6 +2,8 @@
 
 #include "Texture.hpp"
 
+#include <microprofile/microprofile.h>
+
 namespace neo {
 
     class Texture2D : public Texture {

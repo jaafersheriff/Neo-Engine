@@ -2,6 +2,11 @@
 
 #include "ECS/Systems/System.hpp"
 
+#ifndef ENTT_ASSERT
+#define ENTT_ASSERT(condition, ...) NEO_ASSERT(condition, __VA_ARGS__)
+#endif
+#include <entt/entt.hpp>
+
 namespace neo {
 	class System;
 	class Engine;

@@ -3,7 +3,11 @@
 #include "Texture2D.hpp"
 #include "GLHelper.hpp"
 
+#include "Util/Util.hpp"
+
 #include <GL/glew.h>
+
+#include <microprofile/microprofile.h>
 
 namespace neo {
 

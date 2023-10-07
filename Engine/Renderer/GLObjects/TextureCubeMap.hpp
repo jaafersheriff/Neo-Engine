@@ -4,6 +4,8 @@
 
 #include <array>
 
+#include <microprofile/microprofile.h>
+
 namespace neo {
 
     class TextureCubeMap : public Texture {
