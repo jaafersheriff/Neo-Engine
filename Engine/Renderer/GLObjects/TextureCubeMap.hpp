@@ -2,6 +2,8 @@
 
 #include "Texture.hpp"
 
+#include <array>
+
 namespace neo {
 
     class TextureCubeMap : public Texture {

@@ -5,10 +5,6 @@
 
 #include "Loader.hpp"
 
-#include "Util/Util.hpp"
-
-#include <unordered_map>
-
 namespace neo {
 
     class Engine;

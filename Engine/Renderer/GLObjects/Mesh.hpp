@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 namespace neo {
 
     enum class VertexType {

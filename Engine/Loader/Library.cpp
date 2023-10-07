@@ -1,3 +1,4 @@
+#include "Loader/pch.hpp"
 #include "Library.hpp"
 
 #include "Loader.hpp"
@@ -6,8 +7,6 @@
 #include "Renderer/GLObjects/Mesh.hpp"
 
 #include "Engine/ImGuiManager.hpp"
-
-#include "imgui/imgui.h"
 
 namespace neo {
     /* Library */

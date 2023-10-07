@@ -3,9 +3,6 @@
 
 #include "GL/glew.h"
 
-#include <string>
-#include <vector>
-
 #include "Renderer/GLObjects/Texture2D.hpp"
 #include "Renderer/GLObjects/TextureCubeMap.hpp"
 

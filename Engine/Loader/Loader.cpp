@@ -1,3 +1,4 @@
+#include "Loader/pch.hpp"
 #include "Loader.hpp"
 
 #include "Library.hpp"
@@ -6,8 +7,6 @@
 #include "Renderer/GLObjects/Texture.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
-
-#include "Util/Log/Log.hpp"
 
 #pragma warning(push)
 #pragma warning(disable: 4706)
