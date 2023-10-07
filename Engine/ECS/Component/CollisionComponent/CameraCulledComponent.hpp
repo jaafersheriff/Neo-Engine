@@ -6,8 +6,6 @@
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 
-#include <vector>
-
 namespace neo {
 
     struct CameraCulledComponent : public Component {

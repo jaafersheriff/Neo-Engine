@@ -3,12 +3,6 @@
 #include "ECS/Component/Component.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "Util/Util.hpp"
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include "ext/imgui/imgui.h"
-
 namespace neo {
 
     struct RotationComponent : public Component {

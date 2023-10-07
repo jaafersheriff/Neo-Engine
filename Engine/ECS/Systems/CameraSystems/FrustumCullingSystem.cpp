@@ -1,3 +1,4 @@
+#include "ECS/pch.hpp"
 #include "FrustumCullingSystem.hpp"
 
 #include "ECS/ECS.hpp"
@@ -8,8 +9,6 @@
 #include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
-
-#include <imgui/imgui.h>
 
 namespace neo {
 

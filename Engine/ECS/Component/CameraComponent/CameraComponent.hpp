@@ -2,8 +2,6 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include <glm/glm.hpp>
-
 namespace neo {
 
     struct CameraComponent : public Component {

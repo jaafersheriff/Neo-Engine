@@ -1,11 +1,8 @@
+#include "ECS/pch.hpp"
 #include "CameraControllerComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "Util/Util.hpp"
-
-#include <imgui/imgui.h>
-#include <GLFW/glfw3.h>
-#include "microprofile.h"
+#include "GLFW/glfw3.h"
 
 namespace neo {
 

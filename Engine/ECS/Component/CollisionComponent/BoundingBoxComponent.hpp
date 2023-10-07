@@ -7,9 +7,6 @@
 
 #include "Renderer/GLObjects/Mesh.hpp"
 
-#include <glm/glm.hpp>
-#include "glm/gtc/matrix_transform.hpp"
-
 namespace neo {
 
     struct BoundingBoxComponent : public Component {

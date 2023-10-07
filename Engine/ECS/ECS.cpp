@@ -1,8 +1,7 @@
+#include "ECS/pch.hpp"
 #include "ECS.hpp"
 
 #include "Component/EngineComponents/TagComponent.hpp"
-
-#include <imgui/imgui.h>
 
 namespace neo {
 

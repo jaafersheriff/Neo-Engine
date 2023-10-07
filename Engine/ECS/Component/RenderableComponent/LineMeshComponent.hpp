@@ -2,10 +2,6 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include <optional>
-#include <vector>
-#include <glm/glm.hpp>
-
 namespace neo {
 
     class Mesh;

@@ -2,9 +2,6 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include <glm/glm.hpp>
-#include "ext/imgui/imgui.h"
-
 namespace neo {
 
     struct LightComponent : public Component {

@@ -1,3 +1,4 @@
+#include "ECS/pch.hpp"
 #include "FrustaFittingSystem.hpp"
 
 #include "ECS/ECS.hpp"
@@ -9,10 +10,6 @@
 #include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
-
-#include <algorithm>
-#include <limits>
-#include <glm/gtc/matrix_transform.hpp>
 
 namespace neo {
 

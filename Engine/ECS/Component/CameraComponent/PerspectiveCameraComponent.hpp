@@ -3,8 +3,6 @@
 #include "ECS/Component/Component.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 
-#include <glm/glm.hpp>
-
 namespace neo {
 
     struct PerspectiveCameraComponent : public CameraComponent {

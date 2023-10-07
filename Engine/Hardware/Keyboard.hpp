@@ -1,8 +1,9 @@
 #pragma once
 
-#define NUM_KEYS GLFW_KEY_LAST
-
 #include "Messaging/Message.hpp"
+
+#include <GLFW/glfw3.h>
+#define NUM_KEYS GLFW_KEY_LAST
 
 namespace neo {
 

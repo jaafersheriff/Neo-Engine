@@ -1,10 +1,9 @@
+#include "ECS/pch.hpp"
 #include "ECS/Component/RenderableComponent/LineMeshComponent.hpp"
 
 #include "Renderer/GLObjects/Mesh.hpp"
 
 #include <GL/glew.h>
-#include <microprofile.h>
-#include <imgui/imgui.h>
 
 namespace neo {
 

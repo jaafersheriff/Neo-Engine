@@ -2,6 +2,8 @@
 
 #include "Messaging/Message.hpp"
 
+#include <GLFW/glfw3.h>
+
 namespace neo {
 
     class Mouse {

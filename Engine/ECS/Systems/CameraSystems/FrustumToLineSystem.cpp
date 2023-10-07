@@ -1,3 +1,4 @@
+#include "ECS/pch.hpp"
 #include "FrustumToLineSystem.hpp"
 
 #include "ECS/ECS.hpp"

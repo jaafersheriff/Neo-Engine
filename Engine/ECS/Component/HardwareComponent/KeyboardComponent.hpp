@@ -3,8 +3,6 @@
 #include "ECS/Component/Component.hpp"
 #include "Hardware/Keyboard.hpp"
 
-#include <imgui/imgui.h>
-
 namespace neo {
 
     struct KeyboardComponent : public Component {

@@ -1,3 +1,4 @@
+#include "ECS/pch.hpp"
 #include "Engine/Engine.hpp"
 #include "CameraControllerSystem.hpp"
 
@@ -5,6 +6,8 @@
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/KeyboardComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
+#include <GLFW/glfw3.h>
 
 namespace neo {
 

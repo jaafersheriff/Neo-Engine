@@ -3,12 +3,6 @@
 #include "ECS/Component/Component.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-
-#include "Util/Util.hpp"
-
-#include <glm/glm.hpp>
-#include "ext/imgui/imgui.h"
-
 namespace neo {
 
     struct SinTranslateComponent : public Component {

@@ -4,8 +4,6 @@
 
 #include "Hardware/WindowDetails.hpp"
 
-#include <imgui/imgui.h>
-
 namespace neo {
 
     struct ViewportDetailsComponent : public Component {

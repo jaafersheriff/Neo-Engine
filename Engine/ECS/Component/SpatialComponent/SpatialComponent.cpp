@@ -1,10 +1,7 @@
+#include "ECS/pch.hpp"
 #include "SpatialComponent.hpp"
 
 // #include "ECS/Messaging/Messenger.hpp"
-
-#include "glm/gtc/matrix_transform.hpp"
-#include <imgui/imgui.h>
-#include "microprofile.h"
 
 namespace neo {
 

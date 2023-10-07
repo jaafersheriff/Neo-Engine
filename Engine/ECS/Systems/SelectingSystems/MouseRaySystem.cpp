@@ -1,3 +1,4 @@
+#include "ECS/pch.hpp"
 #include "MouseRaySystem.hpp"
 
 #include "ECS/ECS.hpp"
@@ -8,6 +9,8 @@
 #include "ECS/Component/RenderableComponent/LineMeshComponent.hpp"
 #include "ECS/Component/SelectingComponent/MouseRayComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
+#include "GLFW/glfw3.h"
 
 namespace neo {
 
