@@ -1,8 +1,5 @@
 #pragma once
 
-#include <map>
-#include <glm/glm.hpp>
-
 #ifndef NEO_LOG_S
 	#define NEO_LOG_S(severity, fmt, ...) neo::util::_log(severity, fmt, __VA_ARGS__)
 	#define NEO_LOG(fmt, ...) NEO_LOG_S(neo::util::LogSeverity::Verbose, fmt, __VA_ARGS__)

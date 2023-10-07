@@ -56,6 +56,7 @@ set(CPACK_COMPONENTS_GROUPING IGNORE)
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 
 include(cmake/InitLib.cmake)
+include(cmake/pch.cmake)
 
 add_definitions(-DEM)
 

@@ -1,14 +1,11 @@
+#include "Util/pch.hpp"
+
 #include "Log.hpp"
 
 #include "Engine/ImGuiManager.hpp"
 
 #include "Util/ServiceLocator.hpp"
 #include "Util/Util.hpp"
-
-#include <iostream>
-#include <sstream>
-#include <map>
-#include <imgui/imgui.h>
 
 #include <GLFW/glfw3.h>
 

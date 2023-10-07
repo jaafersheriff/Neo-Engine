@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 namespace neo {
     namespace util {
         struct FrameCounter {

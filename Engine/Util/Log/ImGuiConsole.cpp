@@ -1,8 +1,7 @@
+#include "Util/pch.hpp"
 #include "ImGuiConsole.hpp"
 
 #include "Util/Util.hpp"
-
-#include <ctype.h>
 
 namespace neo {
 

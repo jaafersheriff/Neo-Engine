@@ -1,4 +1,3 @@
-
 #include <entt/locator/locator.hpp>
 
 namespace neo {

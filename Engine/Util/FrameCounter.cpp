@@ -1,11 +1,7 @@
-
+#include "Util/pch.hpp"
 #include "FrameCounter.hpp"
 
-#include <imgui/imgui.h>
 #include <implot/implot.h>
-#include <microprofile.h>
-
-#include <string>
 
 namespace neo {
     namespace util {
