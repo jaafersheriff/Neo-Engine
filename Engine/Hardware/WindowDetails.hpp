@@ -1,7 +1,5 @@
 #pragma once
 
-#include "glm/glm.hpp"
-
 namespace neo {
     struct WindowDetails {
         glm::uvec2 mSize = {1920, 1080};

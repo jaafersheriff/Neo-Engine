@@ -1,8 +1,5 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-
 #include "Messaging/Message.hpp"
 
 namespace neo {

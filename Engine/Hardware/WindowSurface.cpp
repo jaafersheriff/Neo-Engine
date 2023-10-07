@@ -1,3 +1,4 @@
+#include "Hardware/pch.hpp"
 #include "WindowSurface.hpp"
 #include "Mouse.hpp"
 #include "Keyboard.hpp"
@@ -5,10 +6,6 @@
 #include "Renderer/Renderer.hpp"
 #include "Engine/ImGuiManager.hpp"
 #include "Messaging/Messenger.hpp"
-
-#include "Util/Log/Log.hpp"
-#include "Util/ServiceLocator.hpp"
-#include <iostream>
 
 namespace neo {
 

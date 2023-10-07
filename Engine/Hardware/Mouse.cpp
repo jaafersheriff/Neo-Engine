@@ -1,7 +1,7 @@
+#include "Hardware/pch.hpp"
 #include "Mouse.hpp"
 
 #include "Messaging/Messenger.hpp"
-#include "Util/Util.hpp"
 
 namespace neo {
 

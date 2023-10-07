@@ -3,7 +3,7 @@
 #include "Texture2D.hpp"
 #include "GLHelper.hpp"
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 namespace neo {
 

@@ -2,7 +2,6 @@
 
 #define NUM_KEYS GLFW_KEY_LAST
 
-#include "GLFW/glfw3.h"
 #include "Messaging/Message.hpp"
 
 namespace neo {
