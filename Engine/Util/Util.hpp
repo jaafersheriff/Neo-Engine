@@ -2,6 +2,10 @@
 
 #include "Util/Log/Log.hpp"
 
+#include <glm/gtc/constants.hpp>
+
+#include <entt/core/hashed_string.hpp>
+
 namespace neo {
 
 #define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)

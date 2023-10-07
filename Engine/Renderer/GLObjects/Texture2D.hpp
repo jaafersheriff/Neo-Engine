@@ -1,9 +1,6 @@
 #pragma once
 
 #include "Texture.hpp"
-#include "Util/Util.hpp"
-
-#include "microprofile.h"
 
 namespace neo {
 

@@ -4,11 +4,6 @@
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "DemoInfra/IDemo.hpp"
 
-#include <unordered_map>
-#include <typeindex>
-#include <vector>
-#include <memory>
-
 namespace neo {
 
     class Engine;

@@ -3,12 +3,6 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 
 #include "Renderer/Renderer.hpp"
-#include "Util/Log/Log.hpp"
-#include "Util/ServiceLocator.hpp"
-
-#include <fstream>
-#include <vector>
-#include "microprofile.h"
 
 namespace neo {
     Shader::Shader(const std::string &name) :

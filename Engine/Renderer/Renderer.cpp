@@ -1,3 +1,4 @@
+#include "Renderer/pch.hpp"
 #include "Renderer.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
@@ -13,10 +14,7 @@
 
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 
-#include "Util/ServiceLocator.hpp"
-
 #include "imgui_impl_opengl3.h"
-#include "microprofile.h"
 
 namespace neo {
 

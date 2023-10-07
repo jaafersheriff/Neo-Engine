@@ -1,13 +1,10 @@
+#include "Renderer/pch.hpp"
 #include "Mesh.hpp"
 
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/Renderer.hpp"
 
-#include "Util/Util.hpp"
-#include "Util/ServiceLocator.hpp"
-
 #include "GL/glew.h"
-#include "microprofile.h"
 
 namespace neo {
 

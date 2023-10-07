@@ -1,7 +1,5 @@
+#include "Renderer/pch.hpp"
 #include "GLHelper.hpp"
-
-#include "Util/Util.hpp"
-#include "Util/Log/Log.hpp"
 
 namespace neo {
 

@@ -2,6 +2,8 @@
 
 #include "Util/Log/Log.hpp"
 
+#include <imgui/imgui.h>
+
 namespace neo {
 
     class ImGuiConsole {

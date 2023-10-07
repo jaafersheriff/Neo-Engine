@@ -1,12 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
-#include "Util/Util.hpp"
-#include "glm/glm.hpp"
 
-#include <unordered_map>
-#include <map>
-#include <string>
 
 namespace neo {
 

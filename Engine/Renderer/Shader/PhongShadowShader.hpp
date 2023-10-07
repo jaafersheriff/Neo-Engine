@@ -22,8 +22,6 @@
 
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 
-#include "glm/gtc/matrix_transform.hpp"
-
 namespace neo {
 
     class PhongShadowShader : public Shader {

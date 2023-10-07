@@ -4,9 +4,6 @@
 
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include <glm/glm.hpp>
-#include <vector>
-
 namespace neo {
 
     struct TextureFormat {

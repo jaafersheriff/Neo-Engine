@@ -1,11 +1,5 @@
 #pragma once
 
-#include "glm/glm.hpp"
-
-#include <vector>
-#include <unordered_map>
-#include <optional>
-
 namespace neo {
 
     enum class VertexType {
