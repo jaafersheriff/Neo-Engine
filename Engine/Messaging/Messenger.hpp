@@ -40,7 +40,6 @@ namespace neo {
     template<typename MsgT, auto Func, typename Caller> 
     void Messenger::addReceiver(Caller &&caller) {
         mDispatcher.sink<MsgT>().connect<Func>(caller);
-
     }
     
     template<typename MsgT, auto Func, typename Caller> 

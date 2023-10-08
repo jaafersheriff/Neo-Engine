@@ -150,7 +150,8 @@ namespace neo {
             pong->attachColorTexture({1, 1}, format);
             pong->mTextures.push_back(ping->mTextures[1]);
 
-            Messenger::addReceiver<FrameSizeMessage>(nullptr, [&](const Message &msg, ECS& ecs) {
+            Messenger::addReceiver<FrameSizeMessage, &Renderer::_onFrameSizeChanged>(this);
+            Messenger::addReceiver<FrameSizeMessage>(this, [&](const Message &msg, ECS& ecs) {
                 NEO_UNUSED(ecs);
                 const FrameSizeMessage & m(static_cast<const FrameSizeMessage &>(msg));
                 auto ping = Library::getFBO("ping");

@@ -53,7 +53,7 @@ namespace Deferred {
 
             auto&& [cameraEntity, _, camera, cameraSpatial] = *mainCamera;
             loadUniform("P", camera.getProj());
-            loadUniform("V", mainCamera->get<CameraComponent>()->getView());
+            loadUniform("V", cameraSpatial.getView());
             loadUniform("invP", camera.getProj());
             loadUniform("invV", cameraSpatial.getView());
             loadUniform("camPos", cameraSpatial.getPosition());
