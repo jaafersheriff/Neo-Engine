@@ -18,7 +18,6 @@ extern "C" {
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/KeyboardComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
-#include "ECS/Systems/SelectingSystems/MouseRaySystem.hpp"
 
 #include "ImGuiManager.hpp"
 
@@ -69,7 +68,7 @@ namespace neo {
         ServiceLocator<ImGuiManager>::set();
         ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
 
-#if MICROPROFILE_ENABLED
+#if 0
         NEO_LOG_I("Microprofile enabled");
         MicroProfileOnThreadCreate("MAIN THREAD");
         MicroProfileGpuInitGL();

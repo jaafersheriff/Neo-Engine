@@ -20,6 +20,7 @@
 
 #include "Renderer/Shader/PhongShader.hpp"
 #include "Renderer/Shader/AlphaTestShader.hpp"
+#include "Renderer/Shader/FXAAShader.hpp"
 
 #include "Renderer/GLObjects/Material.hpp"
 
@@ -79,6 +80,7 @@ namespace Base {
         /* Init renderer */
         renderer.addSceneShader<PhongShader>();
         renderer.addSceneShader<AlphaTestShader>();
+        // renderer.addPostProcessShader<FXAAShader>();
     }
 
     void Demo::update(ECS& ecs) {

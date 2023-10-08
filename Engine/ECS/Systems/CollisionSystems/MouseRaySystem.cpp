@@ -4,10 +4,10 @@
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CollisionComponent/MouseRayComponent.hpp"
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/RenderableComponent/LineMeshComponent.hpp"
-#include "ECS/Component/SelectingComponent/MouseRayComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "GLFW/glfw3.h"

@@ -63,7 +63,7 @@ namespace neo {
 	}
 
 	void ECS::imguiEdtor() {
-		ImGui::Begin("ECS", nullptr, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove);
+		ImGui::Begin("ECS");
 		char buf[64];
 		sprintf(buf, "Entities: %d", static_cast<int>(mRegistry.alive()));
 		if (ImGui::TreeNodeEx(buf, ImGuiTreeNodeFlags_DefaultOpen)) {
