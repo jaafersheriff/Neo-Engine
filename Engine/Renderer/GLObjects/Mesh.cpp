@@ -41,7 +41,6 @@ namespace neo {
             ServiceLocator<Renderer>::ref().mStats.mNumTriangles += positions.bufferSize / positions.stride / 3;
             glDrawArrays(mPrimitiveType, 0, positions.bufferSize / positions.stride);
         }
-        glBindVertexArray(0);
     }
 
     void Mesh::addVertexBuffer(VertexType type, uint32_t attribArray, uint32_t stride, const std::vector<float>& buffer) {

@@ -254,9 +254,9 @@ namespace neo {
         return attribute->second;
     }
 
-    GLint Shader::getUniform(HashedString& name) const {
+    GLint Shader::getUniform(const char* name) const {
         ServiceLocator<Renderer>::ref().mStats.mNumUniforms++;
-        const auto uniform = mUniforms.find(name);
+        const auto uniform = mUniforms.find(HashedString(name));
         if (uniform == mUniforms.end()) {
             NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable - did you remember to call Shader::init()", name);
             return -1;
@@ -297,51 +297,51 @@ namespace neo {
         return 0;
     }
 
-    void Shader::loadUniform(HashedString loc, const bool b) const {
+    void Shader::loadUniform(const char* loc, const bool b) const {
         glUniform1i(getUniform(loc), b);
     }
 
-    void Shader::loadUniform(HashedString loc, const int i) const {
+    void Shader::loadUniform(const char* loc, const int i) const {
         glUniform1i(getUniform(loc), i);
     }
 
-    void Shader::loadUniform(HashedString loc, const uint32_t ui) const {
+    void Shader::loadUniform(const char* loc, const uint32_t ui) const {
         glUniform1ui(getUniform(loc), ui);
     }
 
-    void Shader::loadUniform(HashedString loc, const double d) const {
+    void Shader::loadUniform(const char* loc, const double d) const {
         glUniform1f(getUniform(loc), static_cast<float>(d));
     }
 
-    void Shader::loadUniform(HashedString loc, const float f) const {
+    void Shader::loadUniform(const char* loc, const float f) const {
         glUniform1f(getUniform(loc), f);
     }
 
-    void Shader::loadUniform(HashedString loc, const glm::vec2 & v) const {
+    void Shader::loadUniform(const char* loc, const glm::vec2 & v) const {
         glUniform2f(getUniform(loc), v.x, v.y);
     }
     
-    void Shader::loadUniform(HashedString loc, const glm::ivec2 & v) const {
+    void Shader::loadUniform(const char* loc, const glm::ivec2 & v) const {
         glUniform2i(getUniform(loc), v.x, v.y);
     }
     
-    void Shader::loadUniform(HashedString loc, const glm::vec3 & v) const {
+    void Shader::loadUniform(const char* loc, const glm::vec3 & v) const {
         glUniform3f(getUniform(loc), v.x, v.y, v.z);
     }
     
-    void Shader::loadUniform(HashedString loc, const glm::vec4 & v) const {
+    void Shader::loadUniform(const char* loc, const glm::vec4 & v) const {
         glUniform4f(getUniform(loc), v.r, v.g, v.b, v.a);
     }
     
-    void Shader::loadUniform(HashedString loc, const glm::mat3 & m) const {
+    void Shader::loadUniform(const char* loc, const glm::mat3 & m) const {
         glUniformMatrix3fv(getUniform(loc), 1, GL_FALSE, &m[0][0]);
     }
     
-    void Shader::loadUniform(HashedString loc, const glm::mat4& m) const {
+    void Shader::loadUniform(const char* loc, const glm::mat4& m) const {
         glUniformMatrix4fv(getUniform(loc), 1, GL_FALSE, &m[0][0]);
     }
     
-    void Shader::loadTexture(HashedString loc, const Texture & texture) const {
+    void Shader::loadTexture(const char* loc, const Texture & texture) const {
         ServiceLocator<Renderer>::ref().mStats.mNumSamplers++;
         texture.bind();
         glUniform1i(getUniform(loc), texture.mTextureID);
