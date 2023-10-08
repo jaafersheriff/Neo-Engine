@@ -1,5 +1,6 @@
-#include "NormalVisualizer.hpp"
 #include "Engine/Engine.hpp"
+
+#include "NormalVisualizer.hpp"
 
 #include "Renderer/Shader/PhongShader.hpp"
 #include "Renderer/Shader/WireframeShader.hpp"
