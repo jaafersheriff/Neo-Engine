@@ -9,6 +9,8 @@
 #include "ECS/Component/RenderableComponent/WireframeRenderable.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace neo {
 
     class WireframeShader : public Shader {
@@ -43,10 +45,12 @@ namespace neo {
                     loadUniform("V", cameraSpatial.getView());
                 }
 
-                for (const auto&& [entity, renderable, mesh, spatial] : ecs.getView<renderable::WireframeRenderable, MeshComponent, SpatialComponent>().each()) {
-                    loadUniform("M", spatial.getModelMatrix());
+                for (const auto&& [entity, renderable, bb, spatial] : ecs.getView<renderable::WireframeRenderable, BoundingBoxComponent, SpatialComponent>().each()) {
+                    glm::mat4 M = glm::scale(glm::mat4(1.f), (bb.mMax - bb.mMin) / 2.f);
+                    glm::translate(M, spatial.getPosition());
+                    loadUniform("M", M);
                     loadUniform("wireColor", renderable.mColor);
-                    mesh.mMesh->draw();
+                    Library::getMesh("cube").mMesh->draw();
                 }
 
                 unbind();

@@ -37,20 +37,16 @@ namespace neo {
 	void ECS::flush() {
         MICROPROFILE_SCOPEI("ECS", "flush", MP_AUTO);
 		for (auto&& job : mAddComponentFuncs) {
-			mComponentCount++;
 			job(mRegistry);
 		}
 		mAddComponentFuncs.clear();
 
 		for (auto&& job : mRemoveComponentFuncs) {
-			mComponentCount--;
 			job(mRegistry);
 		}
 		mRemoveComponentFuncs.clear();
 
-		for (Entity e : mEntityKillQueue) {
-			mRegistry.destroy(e);
-		}
+		mRegistry.destroy(mEntityKillQueue.cbegin(), mEntityKillQueue.cend());
 		mEntityKillQueue.clear();
 	}
 
@@ -62,16 +58,14 @@ namespace neo {
 			mRegistry.destroy(entity);
 		});
 		mRegistry.clear();
-		mComponentCount = 0;
 		NEO_ASSERT(mRegistry.alive() == 0, "What");
 		mSystems.clear();
 	}
 
 	void ECS::imguiEdtor() {
 		ImGui::Begin("ECS", nullptr, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove);
-		ImGui::Text("Components: %d", mComponentCount);
-		char buf[256];
-		sprintf(buf, "Entities: %d", static_cast<int>(mRegistry.size()));
+		char buf[64];
+		sprintf(buf, "Entities: %d", static_cast<int>(mRegistry.alive()));
 		if (ImGui::TreeNodeEx(buf, ImGuiTreeNodeFlags_DefaultOpen)) {
 			getView<TagComponent>().each([this](Entity entity, TagComponent& tag) {
 				NEO_UNUSED(entity);

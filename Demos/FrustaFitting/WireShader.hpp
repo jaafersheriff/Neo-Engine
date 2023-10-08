@@ -55,7 +55,7 @@ namespace FrustaFitting {
 
             auto mockCamera = ecs.getSingleView<FrustumComponent, FrustumFitSourceComponent>();
 
-            for(auto&& [e, mesh, spatial] : ecs.getView<MeshComponent, SpatialComponent>().each()) {
+            for(auto&& [e, bb, spatial] : ecs.getView<BoundingBoxComponent, SpatialComponent>().each()) {
                 glm::vec3 color(1.f);
 
 				// VFC
@@ -68,12 +68,13 @@ namespace FrustaFitting {
                     }
                 }
 
-
+                // glm::vec3 scale = spatial.getScale() * (bb.mMax - bb.mMin) / 2.f;
+                // glm::mat4 M = glm::translate(glm::scale(glm::mat4(1.f), scale) * glm::mat4(spatial.getOrientation()), spatial.getPosition());
                 loadUniform("M", spatial.getModelMatrix());
                 loadUniform("wireColor", color);
 
                 /* Draw outline */
-                mesh.mMesh->draw();
+                Library::getMesh("cube").mMesh->draw();
             }
 
             unbind();

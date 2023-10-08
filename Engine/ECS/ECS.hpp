@@ -59,7 +59,6 @@ namespace neo {
 
 	private:
 		mutable Registry mRegistry;
-		int mComponentCount = 0;
 		mutable MM::EntityEditor<Entity> mEditor;
 
 		/* Active containers */
