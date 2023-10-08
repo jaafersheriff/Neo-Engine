@@ -37,6 +37,7 @@ namespace neo {
     namespace util {
 
         static const float PI = glm::pi<float>();
+        static const float EP = static_cast<float>(1e-4);
 
         /* Generate a random float [0, 1] */
         static inline float genRandom() {

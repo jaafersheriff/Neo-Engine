@@ -80,7 +80,7 @@ namespace Base {
         /* Init renderer */
         renderer.addSceneShader<PhongShader>();
         renderer.addSceneShader<AlphaTestShader>();
-        // renderer.addPostProcessShader<FXAAShader>();
+        renderer.addPostProcessShader<FXAAShader>();
     }
 
     void Demo::update(ECS& ecs) {

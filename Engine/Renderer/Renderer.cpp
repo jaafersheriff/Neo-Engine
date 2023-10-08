@@ -257,9 +257,7 @@ namespace neo {
                 }
 
                 /* nth shader writes out to FBO 0 if it hasn't already been done */
-                if (activePostShaders.size() > 1) {
-                    _renderPostProcess(*activePostShaders.back(), inputFBO, mDefaultFBO, window.getDetails().mSize, ecs);
-                }
+                _renderPostProcess(*activePostShaders.back(), inputFBO, mDefaultFBO, window.getDetails().mSize, ecs);
                 RENDERER_MP_LEAVE();
             }
 

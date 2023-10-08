@@ -1,9 +1,6 @@
 #include "Sponza/Sponza.hpp"
 #include "Engine/Engine.hpp"
 
-#include "Renderer/Shader/PhongShadowShader.hpp"
-#include "Renderer/Shader/ShadowCasterShader.hpp"
-
 #include "Loader/Loader.hpp"
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
@@ -20,6 +17,10 @@
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
+
+#include "Renderer/Shader/PhongShadowShader.hpp"
+#include "Renderer/Shader/ShadowCasterShader.hpp"
+#include "Renderer/Shader/FXAAShader.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -100,5 +101,6 @@ namespace Sponza {
         renderer.addPreProcessShader<ShadowCasterShader>(4096);
         auto& _s = renderer.addSceneShader<PhongShadowShader>();
         _s.bias = 0.001f;
+        renderer.addPostProcessShader<FXAAShader>();
     }
 }
