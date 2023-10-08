@@ -254,9 +254,9 @@ namespace neo {
         return attribute->second;
     }
 
-    GLint Shader::getUniform(const char *name) const {
+    GLint Shader::getUniform(HashedString& name) const {
         ServiceLocator<Renderer>::ref().mStats.mNumUniforms++;
-        const auto uniform = mUniforms.find(HashedString(name));
+        const auto uniform = mUniforms.find(name);
         if (uniform == mUniforms.end()) {
             NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable - did you remember to call Shader::init()", name);
             return -1;

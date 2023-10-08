@@ -69,7 +69,7 @@ namespace neo {
 
             /* Get shader location */
             GLint getAttribute(const char*) const;
-            GLint getUniform(const char*) const;
+            GLint getUniform(HashedString&) const;
 
         protected: 
             void _attachStage(ShaderStage type, const std::string& file);
@@ -82,7 +82,7 @@ namespace neo {
             std::unordered_map<ShaderStage, ShaderSource> mStages;
 
             std::map<HashedString, GLint> mAttributes;
-            std::map<HashedString, GLint> mUniforms;
+            std::map<uint32_t, GLint> mUniforms;
 
             std::string _getFullPath(const std::string&);
 
