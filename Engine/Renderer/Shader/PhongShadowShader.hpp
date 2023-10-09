@@ -62,7 +62,7 @@ namespace neo {
                     uniform float shine;
                     uniform sampler2D diffuseMap;
                     uniform vec3 camPos;
-                    uniform vec3 lightPos, lightCol, lightAtt;
+                    uniform vec3 lightDir, lightCol, lightAtt;
                     uniform sampler2D shadowMap;
                     uniform float bias;
                     uniform int pcfSize;
@@ -73,7 +73,7 @@ namespace neo {
                         albedo.rgb += diffuseColor;
 
                         float visibility = getShadowVisibility(pcfSize, shadowMap, shadowCoord, bias);
-                        vec3 phong = getPhong(fragNor, fragPos.rgb, camPos, lightPos, lightAtt, lightCol, albedo.rgb, specularColor, shine);
+                        vec3 phong = getPhong(fragNor, fragPos.rgb, camPos, lightDir, lightAtt, lightCol, albedo.rgb, specularColor, shine);
                         color.rgb = albedo.rgb * ambientColor + 
                                     max(visibility, 0.2) * phong;
                         color.a = albedo.a;
@@ -108,7 +108,7 @@ namespace neo {
                 }
 
                 for (const auto&& [entity, light, spatial] : ecs.getView<LightComponent, SpatialComponent>().each()) {
-                    loadUniform("lightPos", spatial.getPosition());
+                    loadUniform("lightDir", -spatial.getLookDir());
                     loadUniform("lightCol", light.mColor);
                     loadUniform("lightAtt", light.mAttenuation);
                 }

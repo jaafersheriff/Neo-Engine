@@ -17,7 +17,6 @@ namespace neo {
         FXAAShader() :
             PostProcessShader("FXAAShader", R"(
                 #include "postprocess.glsl"
-                uniform sampler2D inputTexture;
                 uniform vec2 frameSize;
                 out vec4 color;
                 void main() {

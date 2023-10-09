@@ -1,8 +1,7 @@
 
-vec3 getPhong(vec3 normal, vec3 worldPos, vec3 camPos, vec3 lightPos, vec3 lightAttenuation, vec3 lightCol, vec3 baseColor, vec3 specularColor, float shine) {
+vec3 getPhong(vec3 normal, vec3 worldPos, vec3 camPos, vec3 lightDir , vec3 lightAttenuation, vec3 lightCol, vec3 baseColor, vec3 specularColor, float shine) {
     vec3 N = normalize(normal);
     vec3 V = normalize(camPos - worldPos.xyz);
-    vec3 lightDir = lightPos - worldPos.xyz;
     float lightDistance = length(lightDir);
     vec3 L = normalize(lightDir);
     vec3 H = normalize(L + V);

@@ -62,7 +62,7 @@ namespace neo {
                     albedo.rgb += diffuseColor;
                     alphaDiscard(albedo.a);
                     color.rgb = albedo.rgb * ambientColor + 
-                                getPhong(fragNor, fragPos.rgb, camPos, lightPos, lightAtt, lightCol, albedo.rgb, specularColor, shine);
+                                getPhong(fragNor, fragPos.rgb, camPos, lightPos - fragPos.xyz, lightAtt, lightCol, albedo.rgb, specularColor, shine);
                     color.a = albedo.a;
                 })")
         { }

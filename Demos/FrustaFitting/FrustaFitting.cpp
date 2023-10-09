@@ -116,7 +116,7 @@ namespace FrustaFitting {
         }
 
         /* Ground plane */
-        Renderable receiver(ecs, Library::getMesh("quad").mMesh, glm::vec3(0.f, 0.f, 0.f), glm::vec3(50.f), glm::vec3(-1.56f, 0, 0));
+        Renderable receiver(ecs, Library::getMesh("quad").mMesh, glm::vec3(0.f, 0.f, 0.f), glm::vec3(50.f, 1.f, 50.f), glm::vec3(-1.56f, 0, 0));
         Material material;
         material.mAmbient = glm::vec3(0.2f);
         material.mDiffuse = glm::vec3(0.7f);
@@ -133,7 +133,8 @@ namespace FrustaFitting {
 
         /* Init renderer */
         renderer.addPreProcessShader<ShadowCasterShader>(shadowMapSize);
-        renderer.addSceneShader<PhongShadowShader>();
+        auto& _s = renderer.addSceneShader<PhongShadowShader>();
+        _s.bias = 0.001f;
         renderer.addSceneShader<WireShader>();
         renderer.addSceneShader<LineShader>().mActive = true;
     }

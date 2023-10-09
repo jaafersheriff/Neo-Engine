@@ -59,7 +59,7 @@ namespace Sponza {
             ecs.addComponent<TagComponent>(lightEntity, "Light");
             auto spat = ecs.addComponent<SpatialComponent>(lightEntity, glm::vec3(75.f, 200.f, 20.f));
             spat->setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
-            ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f), glm::vec3(0.6f, 0.005f, 0.f));
+            ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f), glm::vec3(0.9f, 0.7f, 0.f));
             ecs.addComponent<renderable::WireframeRenderable>(lightEntity);
             ecs.addComponent<MeshComponent>(lightEntity, Library::getMesh("cube").mMesh);
             auto line = ecs.addComponent<LineMeshComponent>(lightEntity, glm::vec3(1, 0, 0));

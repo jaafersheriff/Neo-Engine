@@ -150,8 +150,8 @@ namespace neo {
                     asset.material.mDissolve = material.dissolve;
 
                     TextureFormat format;
-                    format.mInternalFormat = GL_RGB8;
-                    format.mBaseFormat = GL_RGB;
+                    format.mInternalFormat = GL_RGBA8;
+                    format.mBaseFormat = GL_RGBA;
 
                     if (material.ambient_texname.size()) {
                         asset.ambient_tex = Library::loadTexture(material.ambient_texname, format);
