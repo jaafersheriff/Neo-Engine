@@ -37,6 +37,7 @@ target_sources(microprofile PRIVATE "microprofile.config.h")
 ## tracy
 option(TRACY_ENABLE "" ON)
 option(TRACY_NO_BROADCAST "" ON)
+option(TRACY_NO_ROOT_WINDOW "" ON)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tracy")
 target_compile_options(TracyClient PRIVATE "/WX-" "/W0")
 set_target_properties(TracyClient PROPERTIES FOLDER "Neo/ext")
@@ -48,24 +49,6 @@ target_include_directories(capstone
 PUBLIC
  	"${CMAKE_CURRENT_SOURCE_DIR}/capstone/include/capstone"
 )
-
-# nfd
-# file(GLOB NFD_CPP_FILES
-# 	tracy/nfd/nfd_win.cpp
-# )
-# file(GLOB TRACY_SERVER_HPP_FILES 
-# 	tracy/nfd/nfd.h
-# )
-# add_library(NFD STATIC
-# 	${NFD_CPP_FILES}
-# 	${NFD_HPP_FILES}
-# )
-# target_include_directories(NFD
-# PUBLIC
-#  	"${CMAKE_CURRENT_SOURCE_DIR}/tracy/nfd"
-# )
-# target_compile_options(NFD PRIVATE "/WX-" "/W0")
-# set_target_properties(NFD PROPERTIES FOLDER "Neo/ext")
 
 ## tracy server
 file(GLOB TRACY_SERVER_CPP_FILES 
@@ -96,6 +79,11 @@ PUBLIC
  	"${CMAKE_CURRENT_SOURCE_DIR}/tracy/server"
 )
 target_compile_options(TracyServer PRIVATE "/WX-" "/W0")
+target_compile_definitions(TracyServer PRIVATE
+	TRACY_ENABLE
+	TRACY_NO_BROADCAST
+	TRACY_NO_ROOT_WINDOW
+)
 set_target_properties(TracyServer PROPERTIES FOLDER "Neo/ext")
 target_link_libraries(TracyServer
 PRIVATE
