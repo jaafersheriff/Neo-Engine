@@ -35,6 +35,7 @@ namespace neo {
             else {
                 ecs.addComponent<CameraCulledComponent>(entity, cameraViews);
             }
+            cameraViews.clear();
         }
     }
 
