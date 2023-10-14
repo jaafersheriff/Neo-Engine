@@ -20,20 +20,6 @@ set_target_properties(libglew_static PROPERTIES FOLDER "Neo/ext/glew")
 ## GLM
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glm")
 
-## microprofile
-set(MICROPROFILE_USE_CONFIG_FILE ON CACHE BOOL "" FORCE)
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/microprofile")
-set_target_properties(microprofile PROPERTIES FOLDER "Neo/ext")
-target_link_libraries(microprofile
-PRIVATE
-	libglew_static
-)
-target_include_directories(microprofile
-PUBLIC
-	"${CMAKE_CURRENT_SOURCE_DIR}"
-)
-target_sources(microprofile PRIVATE "microprofile.config.h")
-
 ## tracy
 option(TRACY_ENABLE "" ON)
 option(TRACY_NO_BROADCAST "" ON)

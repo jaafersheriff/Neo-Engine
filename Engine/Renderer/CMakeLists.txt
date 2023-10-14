@@ -9,6 +9,7 @@ PRIVATE
 	imgui
 	glm
 	entt
+	TracyClient
 )
 
 add_precompiled_header(Renderer

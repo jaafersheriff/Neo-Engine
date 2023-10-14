@@ -5,12 +5,12 @@ target_link_libraries(ECS
 PUBLIC
 	Util
 	Messaging
-	microprofile
 	Hardware
 	entt
 	imgui
 PRIVATE
 	libglew_static
+	TracyClient
 )
 
 add_precompiled_header(ECS 
