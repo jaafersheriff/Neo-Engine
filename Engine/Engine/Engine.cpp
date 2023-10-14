@@ -38,6 +38,7 @@ extern "C" {
 #include <iostream>
 
 #include <tracy/Tracy.hpp>
+#include <tracy/TracyOpenGL.hpp>
 
 namespace neo {
 
@@ -104,8 +105,9 @@ namespace neo {
             TracyAppInfo(buf, bytes);
             bytes = sprintf(buf, "Max Compute Work Group Size: [%d, %d, %d]", details.mMaxComputeWorkGroupSize.x, details.mMaxComputeWorkGroupSize.y, details.mMaxComputeWorkGroupSize.z);
             TracyAppInfo(buf, bytes);
-
         }
+        TracyGpuContext;
+
     }
 
     void Engine::run(DemoWrangler& demos) {

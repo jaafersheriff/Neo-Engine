@@ -19,28 +19,9 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui_impl_opengl3.h>
+#include <tracy/TracyOpenGL.hpp>
 
 namespace neo {
-
-#define RENDERER_MP_ENTERD(define, group, name)
-#define RENDERER_MP_ENTER(name) 
-#define RENDERER_MP_LEAVE() 
-// #define RENDERER_MP_ENTERD(define, group, name) \
-//     if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, static_cast<GLsizei>(name.size()), name.c_str()); \
-//     MICROPROFILE_DEFINE(define, group, name.c_str(), MP_AUTO);\
-//     MICROPROFILE_ENTER(define);\
-//     MICROPROFILE_DEFINE_GPU(define, name.c_str(),  MP_AUTO);\
-//     MICROPROFILE_GPU_ENTER(define)
-// 
-// #define RENDERER_MP_ENTER(name) \
-//     if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name); \
-//     MICROPROFILE_ENTERI("Renderer", name, MP_AUTO);\
-//     MICROPROFILE_GPU_ENTERI("RendererGPU", name, MP_AUTO)
-// 
-// #define RENDERER_MP_LEAVE() \
-//     if (glIsEnabled(GL_DEBUG_OUTPUT)) glPopDebugGroup(); \
-//     MICROPROFILE_LEAVE();\
-//     MICROPROFILE_GPU_LEAVE()
 
     void OpenGLMessageCallback(
         unsigned source,
@@ -142,7 +123,8 @@ namespace neo {
     }
 
     void Renderer::resetState() {
-        RENDERER_MP_ENTER("resetState");
+        ZoneScoped;
+        TracyGpuZone("resetState");
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 
@@ -162,15 +144,14 @@ namespace neo {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glBindVertexArray(0);
-
-        RENDERER_MP_LEAVE();
     }
 
     void Renderer::render(WindowSurface& window, ECS& ecs) {
         if (!window.isMinimized()) {
             mStats = {};
 
-            RENDERER_MP_ENTER("Renderer::render");
+            ZoneScoped;
+            TracyGpuZone("Renderer::render");
             resetState();
 
             /* Get active shaders */
