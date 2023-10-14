@@ -11,18 +11,18 @@ namespace neo {
     struct CameraCulledComponent : public Component {
         virtual std::string getName() const override { return "CameraCulledComponent"; } 
 
-        CameraCulledComponent(std::set<ECS::Entity> set) :
+        CameraCulledComponent(std::vector<ECS::Entity> set) :
             mCameraViews(set)
         {}
 
         bool isInView(const ECS& ecs, ECS::Entity thisID, ECS::Entity cameraID) const {
             if (ecs.isSystemEnabled<FrustumSystem>() && ecs.isSystemEnabled<FrustumCullingSystem>() && ecs.has<BoundingBoxComponent>(thisID)) {
-                return mCameraViews.find(cameraID) != mCameraViews.end();
+                return std::find(mCameraViews.begin(), mCameraViews.end(), cameraID) != mCameraViews.end();
             }
 
             return true;
         }
 
-        std::set<ECS::Entity> mCameraViews;
+        std::vector<ECS::Entity> mCameraViews;
     };
 }
