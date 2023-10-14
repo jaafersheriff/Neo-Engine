@@ -98,7 +98,7 @@ namespace neo {
         MicroProfileSetForceMetaCounters(1);
 #endif
         auto& io = ImGui::GetIO();
-        view = std::make_unique<tracy::View>( RunOnMainThread, "hey", 0, io.FontDefault, io.FontDefault, io.FontDefault, SetWindowTitleCallback, SetupScaleCallback, AttentionCallback);
+        view = std::make_unique<tracy::View>( RunOnMainThread, "192.168.0.13", 8086, io.FontDefault, io.FontDefault, io.FontDefault, SetWindowTitleCallback, SetupScaleCallback, AttentionCallback);
 
         ServiceLocator<Renderer>::ref().init();
     }
@@ -197,6 +197,7 @@ namespace neo {
                 mECS.removeEntity(entity);
             });
 
+            FrameMark;
             MicroProfileFlip(0);
         }
 
