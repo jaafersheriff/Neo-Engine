@@ -17,6 +17,8 @@
 
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 
+#include <tracy/TracyOpenGL.hpp>
+
 namespace neo {
 
     class PhongShader : public Shader {
@@ -68,6 +70,8 @@ namespace neo {
         { }
 
         virtual void render(const ECS& ecs) override {
+            ZoneScoped;
+            TracyGpuZone("PhongShader");
             bind();
 
             /* Load PV */

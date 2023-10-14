@@ -9,6 +9,8 @@
 #include "ECS/ECS.hpp"
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 
+#include <tracy/TracyOpenGL.hpp>
+
 using namespace neo;
 
 namespace Compute {
@@ -26,6 +28,8 @@ namespace Compute {
         }
 
         virtual void render(const ECS& ecs) override {
+            ZoneScoped;
+            TracyGpuZone("ParticlesComputeShader");
             bind();
 
             if (auto meshView = ecs.cGetComponent<ParticleMeshComponent>()) {

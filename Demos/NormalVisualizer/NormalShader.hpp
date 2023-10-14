@@ -11,6 +11,7 @@
 #include "Renderer/GLObjects/GlHelper.hpp"
 
 #include <imgui.h>
+#include <tracy/TracyOpenGL.hpp>
 
 using namespace neo;
 
@@ -30,6 +31,8 @@ namespace NormalVisualizer {
         }
 
         virtual void render(const ECS& ecs) override {
+            ZoneScoped;
+            TracyGpuZone("NormalShader");
             bind();
 
             loadUniform("magnitude", magnitude);

@@ -16,6 +16,7 @@
 
 #include "Util/Util.hpp"
 
+#include <tracy/TracyOpenGL.hpp>
 
 using namespace neo;
 
@@ -41,6 +42,8 @@ namespace FrustaFitting {
         {}
 
         virtual void render(const ECS& ecs) override {
+            ZoneScoped;
+            TracyGpuZone("WireShader");
             bind();
             glDisable(GL_CULL_FACE);
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

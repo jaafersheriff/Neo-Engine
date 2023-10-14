@@ -72,8 +72,10 @@ namespace neo {
         {}
 
          void render(const ECS& ecs) override {
-             glm::vec2 size = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>()).mSize;
-             loadUniform("frameSize", size);
+            ZoneScoped;
+            TracyGpuZone("FXAAShader");
+            glm::vec2 size = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>()).mSize;
+            loadUniform("frameSize", size);
          }
          void imguiEditor() override {
          }

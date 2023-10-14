@@ -39,6 +39,7 @@ namespace Compute {
         }
 
         void updateBuffers() {
+            ZoneScoped;
             std::vector<float> positions;
             positions.resize(mNumParticles * 4);
             for (int i = 0; i < mNumParticles; i++) {

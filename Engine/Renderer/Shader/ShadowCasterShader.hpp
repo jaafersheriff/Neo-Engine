@@ -18,6 +18,7 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include <imgui.h>
+#include <tracy/TracyOpenGL.hpp>
 
 namespace neo {
 
@@ -55,6 +56,10 @@ namespace neo {
             }
 
             virtual void render(const ECS& ecs) override {
+                ZoneScoped;
+                TracyGpuZone("ShadowCasterShader");
+                bind();
+
                 auto shadowCameraView = ecs.getSingleView<ShadowCameraComponent, SpatialComponent>();
                 if (!shadowCameraView) {
                     NEO_ASSERT(shadowCameraView, "No shadow camera found");
@@ -68,7 +73,6 @@ namespace neo {
                 glClear(GL_DEPTH_BUFFER_BIT);
                 glViewport(0, 0, depthTexture->mWidth, depthTexture->mHeight);
 
-                bind();
                 loadUniform("P", ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCameraEntity)->getProj());
                 loadUniform("V", shadowCameraSpatial.getView());
 

@@ -16,6 +16,8 @@
 
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 
+#include <tracy/TracyOpenGL.hpp>
+
 namespace neo {
 
     class OutlineShader : public Shader {
@@ -49,6 +51,8 @@ namespace neo {
         {}
 
         virtual void render(const ECS& ecs) override {
+            ZoneScoped;
+            TracyGpuZone("OutlineShader");
             bind();
 
             glCullFace(GL_FRONT);

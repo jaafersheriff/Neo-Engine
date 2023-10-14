@@ -9,6 +9,8 @@
 #include "ECS/Component/RenderableComponent/LineMeshComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
+#include <tracy/TracyOpenGL.hpp>
+
 namespace neo {
 
     class LineShader : public Shader {
@@ -35,6 +37,8 @@ namespace neo {
             {}
 
             virtual void render(const ECS& ecs) override {
+                ZoneScoped;
+                TracyGpuZone("NormalShader");
                 bind();
 
                 glEnable(GL_LINE_SMOOTH);
