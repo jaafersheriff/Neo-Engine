@@ -147,133 +147,122 @@ namespace neo {
     }
 
     void Renderer::render(WindowSurface& window, ECS& ecs) {
-        if (!window.isMinimized()) {
-            mStats = {};
+        mStats = {};
 
-            ZoneScoped;
-            TracyGpuZone("Renderer::render");
-            resetState();
+        ZoneScoped;
+        TracyGpuZone("Renderer::render");
+        resetState();
 
-            /* Get active shaders */
-            std::vector<Shader*> activeComputeShaders = _getActiveShaders(mComputeShaders);
-            std::vector<Shader*> activePreShaders = _getActiveShaders(mPreProcessShaders);
-            std::vector<Shader*> activePostShaders = _getActiveShaders(mPostShaders);
+        /* Get active shaders */
+        std::vector<Shader*> activeComputeShaders = _getActiveShaders(mComputeShaders);
+        std::vector<Shader*> activePreShaders = _getActiveShaders(mPreProcessShaders);
+        std::vector<Shader*> activePostShaders = _getActiveShaders(mPostShaders);
 
-            /* Run compute */
-            if (activeComputeShaders.size()) {
-                RENDERER_MP_ENTER("Compute shaders");
-
-                for (auto& shader : activeComputeShaders) {
-                    resetState();
-                    RENDERER_MP_ENTERD(Compute, "Compute shaders", shader->mName);
-                    mStats.mNumShaders++;
-                    shader->render(ecs);
-                    RENDERER_MP_LEAVE();
-                }
-                RENDERER_MP_LEAVE();
+        /* Run compute */
+        if (activeComputeShaders.size()) {
+            ZoneScopedN("Compute shaders");
+            TracyGpuZone("Compute shaders");
+            for (auto& shader : activeComputeShaders) {
+                resetState();
+                mStats.mNumShaders++;
+                shader->render(ecs);
             }
+        }
 
-            /* Render all preprocesses */
-            if (activePreShaders.size()) {
-                RENDERER_MP_ENTER("PreScene shaders");
+        /* Render all preprocesses */
+        if (activePreShaders.size()) {
+            ZoneScopedN("PreScene shaders");
+            TracyGpuZone("PreScene shaders");
 
-                for (auto& shader : activePreShaders) {
-                    resetState();
-                    RENDERER_MP_ENTERD(Pre, "PreScene shaders", shader->mName);
-                    mStats.mNumShaders++;
-                    shader->render(ecs);
-                    RENDERER_MP_LEAVE();
-                }
-                RENDERER_MP_LEAVE();
+            for (auto& shader : activePreShaders) {
+                resetState();
+                mStats.mNumShaders++;
+                shader->render(ecs);
             }
+        }
 
-            /* Reset default FBO state */
-            RENDERER_MP_ENTER("Reset DefaultFBO");
+        /* Reset default FBO state */
+        glm::ivec2 frameSize = window.getDetails().mSize;
+        {
+            ZoneScopedN("Reset DefaultFBO");
+            TracyGpuZone("Reset DefaultFBO");
             mDefaultFBO->bind();
             glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f);
-            glm::ivec2 frameSize = window.getDetails().mSize;
             glViewport(0, 0, frameSize.x, frameSize.y);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            RENDERER_MP_LEAVE();
+        }
 
-            /* Render all scene shaders */
-            RENDERER_MP_ENTER("renderScene");
+        /* Render all scene shaders */
+        {
+            ZoneScopedN("renderScene");
+            TracyGpuZone("renderScene");
             for (auto& shader : mSceneShaders) {
                 if (shader.second->mActive) {
                     resetState();
-                    RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName);
                     mStats.mNumShaders++;
                     shader.second->render(ecs);
-                    RENDERER_MP_LEAVE();
                 }
             }
-            RENDERER_MP_LEAVE();
-
-            /* Post process with ping & pong */
-            if (activePostShaders.size()) {
-                RENDERER_MP_ENTER("PostProcess shaders");
-
-                /* Render first post process shader into appropriate output buffer */
-                Framebuffer* inputFBO = mDefaultFBO;
-                Framebuffer* outputFBO = Library::getFBO("pong");
-
-                _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().mSize, ecs);
-
-                /* [2, n-1] shaders use ping & pong */
-                inputFBO = Library::getFBO("pong");
-                outputFBO = Library::getFBO("ping");
-                for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
-                    _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO, window.getDetails().mSize, ecs);
-
-                    /* Swap ping & pong */
-                    Framebuffer* temp = inputFBO;
-                    inputFBO = outputFBO;
-                    outputFBO = temp;
-                }
-
-                /* nth shader writes out to FBO 0 if it hasn't already been done */
-                _renderPostProcess(*activePostShaders.back(), inputFBO, mDefaultFBO, window.getDetails().mSize, ecs);
-                RENDERER_MP_LEAVE();
-            }
-
-            /* Render imgui */
-            if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                RENDERER_MP_ENTER("ImGuiManager.render");
-                mBackBuffer->bind();
-                ServiceLocator<ImGuiManager>::ref().render();
-                RENDERER_MP_LEAVE();
-            }
-            else {
-                RENDERER_MP_ENTER("Final Blit");
-                if (!mBlitShader) {
-                    mBlitShader = new BlitShader;
-                }
-                mBackBuffer->bind();
-                resetState();
-                glDisable(GL_DEPTH_TEST);
-                glClearColor(0.f, 0.f, 0.f, 1.f);
-                glClear(GL_COLOR_BUFFER_BIT);
-                glViewport(0, 0, frameSize.x, frameSize.y);
-
-                mBlitShader->bind();
-                auto meshData = Library::getMesh("quad");
-                glBindVertexArray(meshData.mMesh->mVAOID);
-
-                // Bind input fbo texture
-                mBlitShader->loadTexture("inputTexture", *mDefaultFBO->mTextures[0]);
-
-                // Render 
-                meshData.mMesh->draw();
-                mBlitShader->unbind();
-                RENDERER_MP_LEAVE();
-            }
-
-            RENDERER_MP_LEAVE();
         }
 
-        RENDERER_MP_ENTER("glfwSwapBuffers");
-        glfwSwapBuffers(window.getWindow());
-        RENDERER_MP_LEAVE();
+        /* Post process with ping & pong */
+        if (activePostShaders.size()) {
+            ZoneScopedN("PostProcess shaders");
+            TracyGpuZone("PostProcess shaders");
+
+            /* Render first post process shader into appropriate output buffer */
+            Framebuffer* inputFBO = mDefaultFBO;
+            Framebuffer* outputFBO = Library::getFBO("pong");
+
+            _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().mSize, ecs);
+
+            /* [2, n-1] shaders use ping & pong */
+            inputFBO = Library::getFBO("pong");
+            outputFBO = Library::getFBO("ping");
+            for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
+                _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO, window.getDetails().mSize, ecs);
+
+                /* Swap ping & pong */
+                Framebuffer* temp = inputFBO;
+                inputFBO = outputFBO;
+                outputFBO = temp;
+            }
+
+            /* nth shader writes out to FBO 0 if it hasn't already been done */
+            _renderPostProcess(*activePostShaders.back(), inputFBO, mDefaultFBO, window.getDetails().mSize, ecs);
+        }
+
+        /* Render imgui */
+        if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+            ZoneScopedN("ImGuiManager.render");
+            TracyGpuZone("ImGuiManager.render");
+            mBackBuffer->bind();
+            ServiceLocator<ImGuiManager>::ref().render();
+        }
+        else {
+            ZoneScopedN("Final Blit");
+            TracyGpuZone("Final Blit");
+            if (!mBlitShader) {
+                mBlitShader = new BlitShader;
+            }
+            mBackBuffer->bind();
+            resetState();
+            glDisable(GL_DEPTH_TEST);
+            glClearColor(0.f, 0.f, 0.f, 1.f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glViewport(0, 0, frameSize.x, frameSize.y);
+
+            mBlitShader->bind();
+            auto meshData = Library::getMesh("quad");
+            glBindVertexArray(meshData.mMesh->mVAOID);
+
+            // Bind input fbo texture
+            mBlitShader->loadTexture("inputTexture", *mDefaultFBO->mTextures[0]);
+
+            // Render 
+            meshData.mMesh->draw();
+            mBlitShader->unbind();
+        }
     }
 
     void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize, ECS& ecs) {
@@ -306,7 +295,6 @@ namespace neo {
         meshData.mMesh->draw();
 
         shader.unbind();
-        // RENDERER_MP_LEAVE();
     }
 
     std::vector<Shader *> Renderer::_getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &shaders) {

@@ -198,7 +198,9 @@ namespace neo {
             /* Render */
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
-            ServiceLocator<Renderer>::ref().render(mWindow, mECS);
+            if (!mWindow.isMinimized()) {
+                ServiceLocator<Renderer>::ref().render(mWindow, mECS);
+            }
             Messenger::relayMessages(mECS);
 
             // TODO - this should be its own system
@@ -206,7 +208,13 @@ namespace neo {
                 mECS.removeEntity(entity);
             });
 
+            {
+                ZoneScopedN("glfwSwapBuffers");
+                TracyGpuZone("glfwSwapBuffers");
+                glfwSwapBuffers(mWindow.getWindow());
+            }
             FrameMark;
+            TracyGpuCollect;
         }
 
         demos.getCurrentDemo()->destroy();
