@@ -49,13 +49,43 @@ PUBLIC
  	"${CMAKE_CURRENT_SOURCE_DIR}/capstone/include/capstone"
 )
 
+# nfd
+# file(GLOB NFD_CPP_FILES
+# 	tracy/nfd/nfd_win.cpp
+# )
+# file(GLOB TRACY_SERVER_HPP_FILES 
+# 	tracy/nfd/nfd.h
+# )
+# add_library(NFD STATIC
+# 	${NFD_CPP_FILES}
+# 	${NFD_HPP_FILES}
+# )
+# target_include_directories(NFD
+# PUBLIC
+#  	"${CMAKE_CURRENT_SOURCE_DIR}/tracy/nfd"
+# )
+# target_compile_options(NFD PRIVATE "/WX-" "/W0")
+# set_target_properties(NFD PROPERTIES FOLDER "Neo/ext")
 
 ## tracy server
 file(GLOB TRACY_SERVER_CPP_FILES 
 	tracy/server/*.cpp
+	tracy/public/common/*.cpp
+	tracy/nfd/nfd_win.cpp
+	tracy/zstd/common/*.c
+	tracy/zstd/compress/*.c
+	tracy/zstd/decompress/*.c
+	tracy/zstd/dictBuilder/*.c
 )
 file(GLOB TRACY_SERVER_HPP_FILES 
 	tracy/server/*.hpp
+	tracy/public/common/*.hpp
+	tracy/nfd/nfd.h
+	tracy/zstd/*.h
+	tracy/zstd/common/*.h
+	tracy/zstd/compress/*.h
+	tracy/zstd/decompress/*.h
+	tracy/zstd/dictBuilder/*.h
 )
 add_library(TracyServer STATIC
 	${TRACY_SERVER_CPP_FILES}
