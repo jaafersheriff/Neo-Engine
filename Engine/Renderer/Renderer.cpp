@@ -323,12 +323,6 @@ namespace neo {
         ImGui::End();
 
         ImGui::Begin("Renderer");
-        // ImGui::TextWrapped("OpenGL Version: %d.%d", mDetails.mGLMajorVersion, mDetails.mGLMinorVersion);
-        // ImGui::TextWrapped("Max Shading Language:  %s", mDetails.mShadingLanguage.c_str());
-        // ImGui::TextWrapped("Used Shading Language: %s", mDetails.mGLSLVersion.c_str());
-        // ImGui::TextWrapped("Vendor: %s", mDetails.mVendor.c_str());
-        // ImGui::TextWrapped("Renderer: %s", mDetails.mRenderer.c_str());
-        // ImGui::TextWrapped("Max Compute Work Group Size: [%d, %d, %d]", mDetails.mMaxComputeWorkGroupSize.x, mDetails.mMaxComputeWorkGroupSize.y, mDetails.mMaxComputeWorkGroupSize.z);
         if (ImGui::TreeNodeEx("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
             ImGui::TextWrapped("Num Draws: %d", mStats.mNumDraws);
             ImGui::TextWrapped("Num Shaders: %d", mStats.mNumShaders);
@@ -346,6 +340,7 @@ namespace neo {
                     ImGui::TreePop();
                 }
             }
+            ImGui::TreePop();
         }
 
         if (ImGui::Button("VSync")) {
