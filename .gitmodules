@@ -18,4 +18,7 @@
 	url = https://github.com/Green-Sky/imgui_entt_entity_editor.git
 [submodule "Engine/ext/tracy"]
 	path = Engine/ext/tracy
-	url = https://github.com/wolfpld/tracy
+	url = https://github.com/wolfpld/tracy.git
+[submodule "Engine/ext/capstone"]
+	path = Engine/ext/capstone
+	url = https://github.com/capstone-engine/capstone.git
