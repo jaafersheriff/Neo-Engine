@@ -11,8 +11,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 #include <entt/core/hashed_string.hpp>
 
-#include <microprofile.h>
+#include <tracy/Tracy.hpp>

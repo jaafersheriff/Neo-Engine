@@ -2,6 +2,9 @@
 #include "Renderer.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
+#include "ECS/Component/HardwareComponent/MouseComponent.hpp"
+#include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
+
 #include "Messaging/Message.hpp"
 #include "Messaging/Messenger.hpp"
 
@@ -15,26 +18,29 @@
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 
 #include <GLFW/glfw3.h>
-#include <imgui/backends/imgui_impl_opengl3.h>
+#include <imgui_impl_opengl3.h>
 
 namespace neo {
 
-#define RENDERER_MP_ENTERD(define, group, name) \
-    if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, static_cast<GLsizei>(name.size()), name.c_str()); \
-    MICROPROFILE_DEFINE(define, group, name.c_str(), MP_AUTO);\
-    MICROPROFILE_ENTER(define);\
-    MICROPROFILE_DEFINE_GPU(define, name.c_str(),  MP_AUTO);\
-    MICROPROFILE_GPU_ENTER(define)
-
-#define RENDERER_MP_ENTER(name) \
-    if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name); \
-    MICROPROFILE_ENTERI("Renderer", name, MP_AUTO);\
-    MICROPROFILE_GPU_ENTERI("RendererGPU", name, MP_AUTO)
-
-#define RENDERER_MP_LEAVE() \
-    if (glIsEnabled(GL_DEBUG_OUTPUT)) glPopDebugGroup(); \
-    MICROPROFILE_LEAVE();\
-    MICROPROFILE_GPU_LEAVE()
+#define RENDERER_MP_ENTERD(define, group, name)
+#define RENDERER_MP_ENTER(name) 
+#define RENDERER_MP_LEAVE() 
+// #define RENDERER_MP_ENTERD(define, group, name) \
+//     if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, static_cast<GLsizei>(name.size()), name.c_str()); \
+//     MICROPROFILE_DEFINE(define, group, name.c_str(), MP_AUTO);\
+//     MICROPROFILE_ENTER(define);\
+//     MICROPROFILE_DEFINE_GPU(define, name.c_str(),  MP_AUTO);\
+//     MICROPROFILE_GPU_ENTER(define)
+// 
+// #define RENDERER_MP_ENTER(name) \
+//     if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name); \
+//     MICROPROFILE_ENTERI("Renderer", name, MP_AUTO);\
+//     MICROPROFILE_GPU_ENTERI("RendererGPU", name, MP_AUTO)
+// 
+// #define RENDERER_MP_LEAVE() \
+//     if (glIsEnabled(GL_DEBUG_OUTPUT)) glPopDebugGroup(); \
+//     MICROPROFILE_LEAVE();\
+//     MICROPROFILE_GPU_LEAVE()
 
     void OpenGLMessageCallback(
         unsigned source,
@@ -302,7 +308,7 @@ namespace neo {
     }
 
     void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize, ECS& ecs) {
-        RENDERER_MP_ENTER("_renderPostProcess");
+        ZoneScoped;
         mStats.mNumShaders++;
 
         // Reset output FBO
@@ -322,9 +328,7 @@ namespace neo {
         shader.loadTexture("inputFBO", *input->mTextures[0]); 
         shader.loadTexture("inputDepth", *input->mTextures[1]); 
 
-        RENDERER_MP_LEAVE();
 
-        RENDERER_MP_ENTERD(Post, "PostProcess Shaders", shader.mName);
         // Allow shader to do any prep (eg. bind uniforms) 
         // Also allows shader to override output render target (user responsible for handling)
         shader.render(ecs);
@@ -333,7 +337,7 @@ namespace neo {
         meshData.mMesh->draw();
 
         shader.unbind();
-        RENDERER_MP_LEAVE();
+        // RENDERER_MP_LEAVE();
     }
 
     std::vector<Shader *> Renderer::_getActiveShaders(std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>> &shaders) {
@@ -368,6 +372,25 @@ namespace neo {
         ImGui::TextWrapped("Vendor: %s", mDetails.mVendor.c_str());
         ImGui::TextWrapped("Renderer: %s", mDetails.mRenderer.c_str());
         ImGui::TextWrapped("Max Compute Work Group Size: [%d, %d, %d]", mDetails.mMaxComputeWorkGroupSize.x, mDetails.mMaxComputeWorkGroupSize.y, mDetails.mMaxComputeWorkGroupSize.z);
+        if (ImGui::TreeNodeEx("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::TextWrapped("Num Draws: %d", mStats.mNumDraws);
+            ImGui::TextWrapped("Num Shaders: %d", mStats.mNumShaders);
+            ImGui::TextWrapped("Num Triangles: %d", mStats.mNumTriangles);
+            ImGui::TextWrapped("Num Uniforms: %d", mStats.mNumUniforms);
+            ImGui::TextWrapped("Num Samplers: %d", mStats.mNumSamplers);
+            if (auto hardwareDetails = ecs.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
+                auto&& [entity, mouse, viewport] = hardwareDetails.value();
+                if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
+                    viewport.imGuiEditor();
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNodeEx("Mouse", ImGuiTreeNodeFlags_DefaultOpen)) {
+                    mouse.imGuiEditor();
+                    ImGui::TreePop();
+                }
+            }
+        }
+
         if (ImGui::Button("VSync")) {
             window.toggleVSync();
         }

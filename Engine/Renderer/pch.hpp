@@ -19,4 +19,4 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <microprofile/microprofile.h>
+#include <tracy/Tracy.hpp>

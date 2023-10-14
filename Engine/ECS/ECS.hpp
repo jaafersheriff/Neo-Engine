@@ -7,8 +7,9 @@
 #endif
 #include <entt/entt.hpp>
 
+
 #define MM_IEEE_ASSERT(x) NEO_UNUSED(x)
-#include <imgui_entt_entity_editor/imgui_entt_entity_editor.hpp>
+#include <imgui_entt_entity_editor.hpp>
 
 namespace neo {
 	class System;
@@ -217,13 +218,13 @@ namespace neo {
 
 	template<typename... CompTs>
 	auto ECS::getView() {
-		MICROPROFILE_SCOPEI("ECS", "getView", MP_AUTO);
+		ZoneScoped;
 		return mRegistry.view<CompTs...>();
 	}
 
 	template<typename... CompTs>
 	const auto ECS::getView() const {
-		MICROPROFILE_SCOPEI("ECS", "getView", MP_AUTO);
+		ZoneScoped;
 		// TODO -- maybe force const inputs rather than attaching it
 		// TODO -- otherwise view.get<> breaks
 		return mRegistry.view<const CompTs...>();
@@ -251,7 +252,7 @@ namespace neo {
 	}
 
 	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, CompTs&...>> ECS::getSingleView() {
-		MICROPROFILE_SCOPEI("ECS", "getSingleView", MP_AUTO);
+		ZoneScopedN("getSingleView");
 		auto view = mRegistry.view<CompTs...>();
 		if (view.size_hint() > 1) {
 			NEO_LOG_E("Found %d entities when one was requested in %s", view.size_hint(), __FUNCSIG__);
@@ -265,7 +266,7 @@ namespace neo {
 	// TODO -- maybe force const inputs rather than attaching it
 	// TODO -- otherwise view.get<> breaks
 	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, const CompTs&...>> ECS::getSingleView() const {
-		MICROPROFILE_SCOPEI("ECS", "getSingleView", MP_AUTO);
+		ZoneScopedN("getSingleView");
 		auto view = mRegistry.view<const CompTs...>();
 		if (view.size_hint() > 1) {
 			NEO_LOG_E("Found %d entities when one was requested in %s", view.size_hint(), __FUNCSIG__);
@@ -281,3 +282,4 @@ namespace neo {
 		return mRegistry.view<CompTs...>().size_hint() != 0;
 	}
 }
+

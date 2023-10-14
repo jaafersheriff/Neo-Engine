@@ -2,7 +2,7 @@
 
 #include "Texture.hpp"
 
-#include <microprofile/microprofile.h>
+#include <tracy/Tracy.hpp>
 
 namespace neo {
 
@@ -31,8 +31,8 @@ namespace neo {
         }
 
         virtual void _upload(const void* data) override {
-            MICROPROFILE_SCOPEI("Texture2D", "upload", MP_AUTO);
-            MICROPROFILE_SCOPEGPUI("Texture2D::upload", MP_AUTO);
+            ZoneScoped;
+            // MICROPROFILE_SCOPEGPUI("Texture2D::upload", MP_AUTO);
 
             /* Bind texture buffer object to active texture */
             bind();

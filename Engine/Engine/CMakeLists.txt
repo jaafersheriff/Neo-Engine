@@ -11,5 +11,4 @@ PRIVATE
 	imgui
 	entt
 	TracyClient
-	TracyServer
 )

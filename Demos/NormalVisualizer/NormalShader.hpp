@@ -10,7 +10,7 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 using namespace neo;
 

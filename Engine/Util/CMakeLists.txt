@@ -7,8 +7,9 @@ PUBLIC
 	glm
 	entt
 	imgui
-PRIVATE
 	TracyClient
+PRIVATE
+	TracyServer
 )
 
 add_precompiled_header(Util 

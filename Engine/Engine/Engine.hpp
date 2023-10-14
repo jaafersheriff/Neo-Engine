@@ -7,8 +7,6 @@
 #include "ECS/ECS.hpp"
 #include "DemoInfra/DemoWrangler.h"
 
-#include "microprofile.h"
-
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
@@ -39,8 +37,6 @@ namespace neo {
             static void run(DemoWrangler&);
             static void shutDown();
 
-            /* ImGui */
-            static void imGuiEditor(const util::FrameCounter&);
         private:
             static ECS mECS;
             static void _createPrefabs();

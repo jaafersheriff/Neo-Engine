@@ -16,6 +16,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 
-#include <microprofile/microprofile.h>
+#include <tracy/Tracy.hpp>

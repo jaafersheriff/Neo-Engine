@@ -4,7 +4,7 @@
 
 #include "Hardware/WindowDetails.hpp"
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 namespace neo {
 

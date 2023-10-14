@@ -1,18 +1,24 @@
 #pragma once
 
+
+namespace tracy {
+    class View;
+}
+
 namespace neo {
     namespace util {
-        struct FrameCounter {
-            FrameCounter() = default;
-            ~FrameCounter() = default;
-            FrameCounter(const FrameCounter&) = delete;
-            FrameCounter& operator=(const FrameCounter&) = delete;
+        struct Profiler {
+            Profiler();
+            ~Profiler();
+            Profiler(const Profiler&) = delete;
+            Profiler& operator=(const Profiler&) = delete;
 
             void update(double);
             void imGuiEditor() const;
 
         public:
-            std::vector<int> mFPSList;
+            std::unique_ptr<tracy::View> view;
+            // std::vector<int> mFPSList;
             int mFPS = 0;                    /* Frames per second */
             double mTimeStep = 0.0;         /* Delta time */
             int mTotalFrames = 0;           /* Total frames since start up */

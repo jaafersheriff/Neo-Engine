@@ -30,16 +30,14 @@ extern "C" {
 #include "Loader/Loader.hpp"
 #include "Loader/MeshGenerator.hpp"
 
-#include "Util/FrameCounter.hpp"
+#include "Util/Profiler.hpp"
 #include "Util/Log/Log.hpp"
 #include "Util/ServiceLocator.hpp"
 
 #include <time.h>
 #include <iostream>
-#include <microprofile.h>
 
 #include <tracy/Tracy.hpp>
-#include <tracy/server/TracyView.hpp>
 
 namespace neo {
 
@@ -50,25 +48,6 @@ namespace neo {
     WindowSurface Engine::mWindow;
     Keyboard Engine::mKeyboard;
     Mouse Engine::mMouse;
-
-    static std::unique_ptr<tracy::View> view;
-    void RunOnMainThread( std::function<void()> cb, bool forceDelay = false )
-    {
-        NEO_UNUSED(cb, forceDelay);
-    }
-    static void SetWindowTitleCallback( const char* title )
-    {
-        NEO_UNUSED(title);
-    }
-    
-    static void AttentionCallback()
-    {
-    }
-    static void SetupScaleCallback( float scale, ImFont*& cb_fixedWidth, ImFont*& cb_bigFont, ImFont*& cb_smallFont )
-    {
-        NEO_UNUSED(scale, cb_fixedWidth, cb_bigFont, cb_smallFont);
-    }
-
 
     void Engine::init() {
 
@@ -97,19 +76,16 @@ namespace neo {
         MicroProfileSetEnableAllGroups(true);
         MicroProfileSetForceMetaCounters(1);
 #endif
-        auto& io = ImGui::GetIO();
-        view = std::make_unique<tracy::View>( RunOnMainThread, "192.168.0.13", 8086, io.FontDefault, io.FontDefault, io.FontDefault, SetWindowTitleCallback, SetupScaleCallback, AttentionCallback);
 
         ServiceLocator<Renderer>::ref().init();
     }
 
     void Engine::run(DemoWrangler& demos) {
 
-        util::FrameCounter counter;
+        util::Profiler profiler;
         demos.setForceReload();
         
         while (!mWindow.shouldClose() && !mKeyboard.isKeyPressed(GLFW_KEY_ESCAPE)) {
-            MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);
             ZoneScoped;
 
             if (demos.needsReload()) {
@@ -118,7 +94,7 @@ namespace neo {
 
             /* Update frame counter */
             float runTime = static_cast<float>(glfwGetTime());
-            counter.update(runTime);
+            profiler.update(runTime);
 
             /* Update display, mouse, keyboard */
             mWindow.updateHardware();
@@ -126,7 +102,7 @@ namespace neo {
             Messenger::relayMessages(mECS);
 
             {
-                MICROPROFILE_SCOPEI("Engine", "FrameStats Entity", MP_AUTO);
+                ZoneScopedN("FrameStats Entity");
                 auto hardware = mECS.createEntity();
                 mECS.addComponent<MouseComponent>(hardware, mMouse);
                 mECS.addComponent<KeyboardComponent>(hardware, mKeyboard);
@@ -136,12 +112,12 @@ namespace neo {
                 else {
                     mECS.addComponent<ViewportDetailsComponent>(hardware, mWindow.getDetails().mSize, mWindow.getDetails().mPos);
                 }
-                mECS.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(counter.mTimeStep));
+                mECS.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(profiler.mTimeStep));
                 mECS.addComponent<SingleFrameComponent>(hardware);
             }
 
             {
-                MICROPROFILE_SCOPEI("Engine", "Demo::update", MP_AUTO);
+                ZoneScopedN("Demo::update");
                 demos.getCurrentDemo()->update(mECS);
             }
 
@@ -156,30 +132,33 @@ namespace neo {
 
                 /* Update imgui functions */
                 if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                    MICROPROFILE_SCOPEI("ImGui", "ImGui", MP_AUTO);
+                    ZoneScopedN("ImGui Calls");
                     ServiceLocator<ImGuiManager>::ref().begin();
 
                     {
-                        MICROPROFILE_SCOPEI("ImGui", "demos.imGuiEditor", MP_AUTO);
+                        ZoneScopedN("demos.imGuiEditor");
                         demos.imGuiEditor(mECS);
                     }
                     {
-                        MICROPROFILE_SCOPEI("ImGui", "mECS.imguiEdtor", MP_AUTO);
+                        ZoneScopedN("mECS.imguiEdtor");
                         mECS.imguiEdtor();
                     }
                     {
-                        MICROPROFILE_SCOPEI("ImGui", "Renderer.imGuiEditor", MP_AUTO);
+                        ZoneScopedN("Renderer.imGuiEditor");
                         ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
                     }
                     {
-                        MICROPROFILE_SCOPEI("ImGui", "Library::imGuiEditor", MP_AUTO);
+                        ZoneScopedN("Library::imGuiEditor");
                         Library::imGuiEditor();
                     }
                     {
-                        MICROPROFILE_SCOPEI("ImGui", "ImGuiManager.imGuiEditor", MP_AUTO);
+                        ZoneScopedN("ImGuiManager.imGuiEditor");
                         ServiceLocator<ImGuiManager>::ref().imGuiEditor();
                     }
-                    imGuiEditor(counter);
+                    {
+                        ZoneScopedN("ImGuiManager.imGuiEditor");
+                        profiler.imGuiEditor();
+                    }
 
                     ServiceLocator<ImGuiManager>::ref().end();
                 }
@@ -198,16 +177,14 @@ namespace neo {
             });
 
             FrameMark;
-            MicroProfileFlip(0);
         }
 
         demos.getCurrentDemo()->destroy();
         shutDown();
-	    MicroProfileShutdown();
     }
 
     void Engine::_swapDemo(DemoWrangler& demos) {
-        MICROPROFILE_SCOPEI("Engine", "_swapDemo", MP_AUTO);
+        ZoneScopedN("_swapDemo");
 
         /* Destry the old state*/
         demos.getCurrentDemo()->destroy();
@@ -278,32 +255,5 @@ namespace neo {
         ServiceLocator<Renderer>::reset();
         ServiceLocator<ImGuiManager>::ref().destroy();
         mWindow.shutDown();
-    }
-
-    void Engine::imGuiEditor(const util::FrameCounter& counter) {
-        {
-            ImGui::Begin("Stats");
-            counter.imGuiEditor();
-            const auto& rendererStats = ServiceLocator<Renderer>::ref().mStats;
-            ImGui::TextWrapped("Num Draws: %d", rendererStats.mNumDraws);
-            ImGui::TextWrapped("Num Shaders: %d", rendererStats.mNumShaders);
-            ImGui::TextWrapped("Num Triangles: %d", rendererStats.mNumTriangles);
-            ImGui::TextWrapped("Num Uniforms: %d", rendererStats.mNumUniforms);
-            ImGui::TextWrapped("Num Samplers: %d", rendererStats.mNumSamplers);
-            if (auto hardwareDetails = mECS.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
-                auto&& [entity, mouse, viewport] = hardwareDetails.value();
-                if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    viewport.imGuiEditor();
-                    ImGui::TreePop();
-                }
-                if (ImGui::TreeNodeEx("Mouse", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    mouse.imGuiEditor();
-                    ImGui::TreePop();
-                }
-            }
-            ImGui::End();
-
-            view->Draw();
-        }
     }
 }

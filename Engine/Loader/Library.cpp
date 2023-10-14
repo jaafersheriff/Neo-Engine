@@ -26,7 +26,7 @@ namespace neo {
     }
 
     MeshData Library::loadMesh(const std::string& fileName, bool doResize) {
-        MICROPROFILE_SCOPEI("Library", "loadMesh", MP_AUTO);
+        ZoneScoped;
 
         auto it = mMeshes.find(fileName);
         if (it != mMeshes.end()) {
@@ -54,7 +54,7 @@ namespace neo {
     }
 
     Texture* Library::loadTexture(const std::string& fileName, TextureFormat format) {
-        MICROPROFILE_SCOPEI("Library", "loadTexture", MP_AUTO);
+        ZoneScoped;
 
         auto it = mTextures.find(fileName);
         if (it != mTextures.end()) {
@@ -68,7 +68,7 @@ namespace neo {
     }
 
     Texture* Library::loadCubemap(const std::string& name, const std::vector<std::string> &files) {
-        MICROPROFILE_SCOPEI("Library", "loadCubemap", MP_AUTO);
+        ZoneScoped;
 
         auto texture = Loader::loadTexture(name, files);
         _insertTexture(name, texture);
@@ -84,7 +84,7 @@ namespace neo {
     }
 
     Framebuffer* Library::getFBO(const std::string &name) {
-        MICROPROFILE_SCOPEI("Library", "getFBO", MP_AUTO);
+        ZoneScoped;
         auto it = mFramebuffers.find(name);
         if (it != mFramebuffers.end()) {
             return it->second;

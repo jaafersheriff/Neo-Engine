@@ -21,7 +21,7 @@ namespace neo {
 
     const Mesh& LineMeshComponent::getMesh() const {
         if (mDirty && mNodes.size()) {
-            MICROPROFILE_SCOPEI("LineMeshComponent", "_updateMesh", MP_AUTO);
+            ZoneScoped;
             std::vector<float> positions;
             std::vector<float> colors;
             positions.resize(mNodes.size() * 3);

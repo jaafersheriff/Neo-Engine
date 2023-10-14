@@ -3,8 +3,6 @@
 
 #include "Component/EngineComponents/TagComponent.hpp"
 
-#include <imgui_entt_entity_editor/imgui_entt_entity_editor.hpp>
-
 namespace neo {
 
 	void ECS::_initSystems() {
@@ -14,13 +12,14 @@ namespace neo {
 	}
 
 	void ECS::_updateSystems() {
-		MICROPROFILE_SCOPEI("ECS", "_updateSystems", MP_AUTO);
+		ZoneScoped;
 		for (auto& system : mSystems) {
 			if (system.second->mActive) {
-				MICROPROFILE_DEFINE(Systems, "ECS", system.second->mName.c_str(), MP_AUTO);
-				MICROPROFILE_ENTER(Systems);
+				ZoneScoped;
+				// MICROPROFILE_DEFINE(Systems, "ECS", system.second->mName.c_str(), MP_AUTO);
+				// MICROPROFILE_ENTER(Systems);
 				system.second->update(*this);
-				MICROPROFILE_LEAVE();
+				// MICROPROFILE_LEAVE();
 			}
 		}
 	}
@@ -35,7 +34,7 @@ namespace neo {
 	}
 
 	void ECS::flush() {
-        MICROPROFILE_SCOPEI("ECS", "flush", MP_AUTO);
+        ZoneScoped;
 		for (auto&& job : mAddComponentFuncs) {
 			job(mRegistry);
 		}

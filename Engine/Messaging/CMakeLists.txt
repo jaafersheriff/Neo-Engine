@@ -6,4 +6,5 @@ PUBLIC
 PRIVATE
 	Util
 	entt
+	TracyClient
 )

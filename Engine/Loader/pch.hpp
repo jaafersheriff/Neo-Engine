@@ -8,6 +8,6 @@
 #include <vector>
 #include <unordered_map>
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 
-#include <microprofile/microprofile.h>
+#include <tracy/Tracy.hpp>

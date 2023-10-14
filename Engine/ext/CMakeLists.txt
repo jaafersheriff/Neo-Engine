@@ -101,7 +101,7 @@ PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/"
  	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/"
  	"${CMAKE_CURRENT_SOURCE_DIR}/implot"
-PRIVATE
+ 	"${CMAKE_CURRENT_SOURCE_DIR}/imgui_entt_entity_editor"
 )
 target_link_libraries(imgui
 PUBLIC

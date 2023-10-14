@@ -3,7 +3,7 @@
 #include "ECS/Component/Component.hpp"
 #include "Hardware/Mouse.hpp"
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 namespace neo {
 

@@ -3,7 +3,7 @@
 #include "Util/Log/ImGuiConsole.hpp"
 #include "Util/Log/Log.hpp"
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 #include <glm/glm.hpp>
 #include <vector>
 
