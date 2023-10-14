@@ -36,7 +36,6 @@ extern "C" {
 
 #include <time.h>
 #include <iostream>
-#include <microprofile.h>
 
 #include <tracy/Tracy.hpp>
 #include <tracy/server/TracyView.hpp>

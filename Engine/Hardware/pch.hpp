@@ -12,4 +12,4 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <microprofile/microprofile.h>
+#include <tracy/Tracy.hpp>

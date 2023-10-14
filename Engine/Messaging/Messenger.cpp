@@ -2,14 +2,14 @@
 
 #include "Util/Util.hpp"
 
-#include <microprofile.h>
+#include <tracy/Tracy.hpp>
 
 namespace neo {
 
     entt::dispatcher Messenger::mDispatcher;
 
     void Messenger::relayMessages(ECS& ecs) {
-        MICROPROFILE_SCOPEI("Messenger", "relayMessages()", MP_AUTO);
+        ZoneScoped;
         NEO_UNUSED(ecs);
         mDispatcher.update();
     }

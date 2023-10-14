@@ -10,12 +10,6 @@
 [submodule "Engine/ext/glew-cmake"]
 	path = Engine/ext/glew-cmake
 	url = https://github.com/Perlmint/glew-cmake.git
-[submodule "Engine/ext/microprofile"]
-	path = Engine/ext/microprofile
-	url = https://github.com/jonasmr/microprofile.git
-[submodule "Engine/ext/implot"]
-	path = Engine/ext/implot
-	url = https://github.com/epezent/implot
 [submodule "Engine/ext/entt"]
 	path = Engine/ext/entt
 	url = https://github.com/skypjack/entt.git
@@ -25,6 +19,3 @@
 [submodule "Engine/ext/tracy"]
 	path = Engine/ext/tracy
 	url = https://github.com/wolfpld/tracy
-[submodule "Engine/ext/capstone"]
-	path = Engine/ext/capstone
-	url = https://github.com/capstone-engine/capstone.git

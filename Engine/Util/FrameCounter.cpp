@@ -7,7 +7,7 @@ namespace neo {
     namespace util {
 
         void FrameCounter::update(double _runTime) {
-            MICROPROFILE_SCOPEI("FrameCounter", "FrameCounter::update", MP_AUTO);
+            ZoneScoped;
             /* Update delta time and FPS */
             float runTime = static_cast<float>(_runTime);
             mTotalFrames++;

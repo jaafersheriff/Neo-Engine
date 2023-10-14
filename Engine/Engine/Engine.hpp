@@ -7,8 +7,6 @@
 #include "ECS/ECS.hpp"
 #include "DemoInfra/DemoWrangler.h"
 
-#include "microprofile.h"
-
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
