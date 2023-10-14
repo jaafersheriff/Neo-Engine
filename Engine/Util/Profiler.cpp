@@ -53,6 +53,7 @@ namespace neo {
                 //     mFPSList.erase(mFPSList.begin());
                 // }
                 // mFPSList.push_back(mFPS);
+                TracyPlot("FPS", static_cast<int64_t>(mFPS));
                 mMaxFPS = std::max(mMaxFPS, mFPS);
                 mFramesInCount = 0;
                 mLastFPSTime = runTime;

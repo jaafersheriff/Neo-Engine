@@ -44,6 +44,7 @@ add_compile_definitions(
 	_CRT_SECURE_NO_WARNINGS
 	$<$<CONFIG:Debug>:DEBUG_MODE>
 	NOMINMAX
+	WIN32_LEAN_AND_MEAN
 )
 
 #--------------------------------------------------------------------

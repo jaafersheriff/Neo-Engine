@@ -22,6 +22,7 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glm")
 
 ## tracy
 option(TRACY_ENABLE "" ON)
+option(TRACY_ON_DEMAND "" ON)
 option(TRACY_NO_BROADCAST "" ON)
 option(TRACY_NO_ROOT_WINDOW "" ON)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tracy")

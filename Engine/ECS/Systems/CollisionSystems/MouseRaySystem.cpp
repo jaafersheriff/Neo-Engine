@@ -15,6 +15,7 @@
 namespace neo {
 
     void MouseRaySystem::update(ECS& ecs) {
+        ZoneScoped;
         auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
         auto camera = ecs.getComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity);
 

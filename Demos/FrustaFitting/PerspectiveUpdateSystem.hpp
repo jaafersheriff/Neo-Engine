@@ -22,6 +22,7 @@ namespace FrustaFitting {
         }
 
         virtual void update(ECS& ecs) override {
+            ZoneScoped;
             if (auto sourceCamera = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent>()) {
                 if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
                     auto&& [_, __, sourceSpatial] = *sourceCamera;

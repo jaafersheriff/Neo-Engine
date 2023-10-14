@@ -9,6 +9,7 @@
 namespace neo {
 
     void FrustumToLineSystem::update(ECS& ecs) {
+        ZoneScoped;
         for (auto&& [entity, line, frustum] : ecs.getView<LineMeshComponent, FrustumComponent>().each()) {
 
             line.clearNodes();

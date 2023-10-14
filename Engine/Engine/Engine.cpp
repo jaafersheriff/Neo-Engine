@@ -78,6 +78,34 @@ namespace neo {
 #endif
 
         ServiceLocator<Renderer>::ref().init();
+        {
+            auto& details = ServiceLocator<Renderer>::ref().mDetails;
+            /* Set max work group */
+            glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &details.mMaxComputeWorkGroupSize.x);
+            glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &details.mMaxComputeWorkGroupSize.y);
+            glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &details.mMaxComputeWorkGroupSize.z);
+            char buf[512];
+            sprintf(buf, "%s", glGetString(GL_VENDOR));
+            details.mVendor = buf;
+            sprintf(buf, "%s", glGetString(GL_RENDERER));
+            details.mRenderer = buf;
+            sprintf(buf, "%s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+            details.mShadingLanguage = buf;
+
+            int bytes = sprintf(buf, "OpenGL Version: %d.%d", details.mGLMajorVersion, details.mGLMinorVersion);;
+            TracyAppInfo(buf, bytes);
+            bytes = sprintf(buf, "Max Shading Language:  %s", details.mShadingLanguage.c_str());
+            TracyAppInfo(buf, bytes);
+            bytes = sprintf(buf, "Used Shading Language: %s", details.mGLSLVersion.c_str());
+            TracyAppInfo(buf, bytes);
+            bytes = sprintf(buf, "Vendor: %s", details.mVendor.c_str());
+            TracyAppInfo(buf, bytes);
+            bytes = sprintf(buf, "Renderer: %s", details.mRenderer.c_str());
+            TracyAppInfo(buf, bytes);
+            bytes = sprintf(buf, "Max Compute Work Group Size: [%d, %d, %d]", details.mMaxComputeWorkGroupSize.x, details.mMaxComputeWorkGroupSize.y, details.mMaxComputeWorkGroupSize.z);
+            TracyAppInfo(buf, bytes);
+
+        }
     }
 
     void Engine::run(DemoWrangler& demos) {

@@ -121,18 +121,6 @@ namespace neo {
         mDefaultFBO->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_EDGE);
         mDefaultFBO->initDrawBuffers();
         mDefaultFBO->bind();
-        
-        /* Set max work group */
-        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
-        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
-        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z);
-        char buf[512];
-        memcpy(buf, glGetString(GL_VENDOR), 512);
-        mDetails.mVendor = buf;
-        memcpy(buf, glGetString(GL_RENDERER), 512);
-        mDetails.mRenderer = buf;
-        memcpy(buf, glGetString(GL_SHADING_LANGUAGE_VERSION), 512);
-        mDetails.mShadingLanguage = buf;
 
         /* Init default GL state */
         resetState();
@@ -366,12 +354,12 @@ namespace neo {
         ImGui::End();
 
         ImGui::Begin("Renderer");
-        ImGui::TextWrapped("OpenGL Version: %d.%d", mDetails.mGLMajorVersion, mDetails.mGLMinorVersion);
-        ImGui::TextWrapped("Max Shading Language:  %s", mDetails.mShadingLanguage.c_str());
-        ImGui::TextWrapped("Used Shading Language: %s", mDetails.mGLSLVersion.c_str());
-        ImGui::TextWrapped("Vendor: %s", mDetails.mVendor.c_str());
-        ImGui::TextWrapped("Renderer: %s", mDetails.mRenderer.c_str());
-        ImGui::TextWrapped("Max Compute Work Group Size: [%d, %d, %d]", mDetails.mMaxComputeWorkGroupSize.x, mDetails.mMaxComputeWorkGroupSize.y, mDetails.mMaxComputeWorkGroupSize.z);
+        // ImGui::TextWrapped("OpenGL Version: %d.%d", mDetails.mGLMajorVersion, mDetails.mGLMinorVersion);
+        // ImGui::TextWrapped("Max Shading Language:  %s", mDetails.mShadingLanguage.c_str());
+        // ImGui::TextWrapped("Used Shading Language: %s", mDetails.mGLSLVersion.c_str());
+        // ImGui::TextWrapped("Vendor: %s", mDetails.mVendor.c_str());
+        // ImGui::TextWrapped("Renderer: %s", mDetails.mRenderer.c_str());
+        // ImGui::TextWrapped("Max Compute Work Group Size: [%d, %d, %d]", mDetails.mMaxComputeWorkGroupSize.x, mDetails.mMaxComputeWorkGroupSize.y, mDetails.mMaxComputeWorkGroupSize.z);
         if (ImGui::TreeNodeEx("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
             ImGui::TextWrapped("Num Draws: %d", mStats.mNumDraws);
             ImGui::TextWrapped("Num Shaders: %d", mStats.mNumShaders);

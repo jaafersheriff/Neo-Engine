@@ -15,11 +15,7 @@ namespace neo {
 		ZoneScoped;
 		for (auto& system : mSystems) {
 			if (system.second->mActive) {
-				ZoneScoped;
-				// MICROPROFILE_DEFINE(Systems, "ECS", system.second->mName.c_str(), MP_AUTO);
-				// MICROPROFILE_ENTER(Systems);
 				system.second->update(*this);
-				// MICROPROFILE_LEAVE();
 			}
 		}
 	}

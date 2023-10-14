@@ -9,6 +9,7 @@
 namespace neo {
 
     void RotationSystem::update(ECS& ecs) {
+        ZoneScoped;
 
         if (auto frameStatsOpt = ecs.getComponent<FrameStatsComponent>()) {
             auto&& [_, frameStats] = *frameStatsOpt;
