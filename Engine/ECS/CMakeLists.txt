@@ -8,9 +8,9 @@ PUBLIC
 	Hardware
 	entt
 	imgui
+	TracyClient
 PRIVATE
 	libglew_static
-	TracyClient
 )
 
 add_precompiled_header(ECS 

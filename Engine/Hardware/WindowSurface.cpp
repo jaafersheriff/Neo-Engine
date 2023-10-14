@@ -192,9 +192,8 @@ namespace neo {
             Messenger::sendMessage<Mouse::MouseMoveMessage>(x, y);
         }
         Messenger::sendMessage<Mouse::ScrollWheelMessage>(0.0);
-        MICROPROFILE_ENTERI("Window", "glfwPollEvents", MP_AUTO);
+        ZoneScoped;
         glfwPollEvents();
-        MICROPROFILE_LEAVE();
     }
 
     void WindowSurface::setSize(const glm::ivec2& size) {

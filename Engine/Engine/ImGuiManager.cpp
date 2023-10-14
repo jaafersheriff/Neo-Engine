@@ -13,8 +13,6 @@
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <implot/implot.h>
-#include <microprofile.h>
 
 namespace neo {
 
@@ -22,7 +20,6 @@ namespace neo {
         /* Init ImGui */
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
@@ -67,7 +64,6 @@ namespace neo {
         colors[ImGuiCol_ResizeGripActive] = texColimv;
         colors[ImGuiCol_SeparatorHovered] = disabledTexColimv;
         colors[ImGuiCol_SeparatorActive] = texColimv;
-        ImPlot::GetStyle().Colors[ImPlotCol_Line] = texColimv;
 
         style->ChildRounding = 4.0f;
         style->FrameBorderSize = 1.0f;
@@ -86,8 +82,8 @@ namespace neo {
         if (!mIsEnabled) {
             return;
         }
+        ZoneScoped;
 
-        MICROPROFILE_SCOPEI("ImGuiManager", "ImGuiManager::update", MP_AUTO);
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -104,8 +100,7 @@ namespace neo {
 
     void ImGuiManager::updateViewport() {
         NEO_ASSERT(mIsEnabled, "ImGui is disabled");
-
-        MICROPROFILE_SCOPEI("ImGuiManager", "ImGuiManager::updateViewport", MP_AUTO);
+        ZoneScoped;
 
         mViewport.mIsFocused = ImGui::IsWindowFocused();
         mViewport.mIsHovered = ImGui::IsWindowHovered();
@@ -150,8 +145,7 @@ namespace neo {
 
     void ImGuiManager::begin() {
         NEO_ASSERT(mIsEnabled, "ImGui is disabled");
-
-        MICROPROFILE_SCOPEI("ImGuiManager", "ImGuiManager::begin", MP_AUTO);
+        ZoneScoped;
 
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
         // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
@@ -196,14 +190,14 @@ namespace neo {
         }
 
         {
-            MICROPROFILE_SCOPEI("ImGuiManager", "ImGui::render", MP_AUTO);
-            MICROPROFILE_SCOPEGPUI("ImGui::render", MP_AUTO);
+            ZoneScopedN("ImGui::render");
+            // MICROPROFILE_SCOPEGPUI("ImGui::render", MP_AUTO);
             ImGui::Render();
         }
         {
 
-            MICROPROFILE_SCOPEI("ImGuiManager", "ImGui_ImplOpenGL3_RenderDrawData", MP_AUTO);
-            MICROPROFILE_SCOPEGPUI("ImGui_ImplOpenGL3_RenderDrawData", MP_AUTO);
+            ZoneScopedN("ImGui_ImplOpenGL3_RenderDrawData");
+            // MICROPROFILE_SCOPEGPUI("ImGui_ImplOpenGL3_RenderDrawData", MP_AUTO);
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
 
@@ -212,14 +206,14 @@ namespace neo {
             GLFWwindow* backup_current_context = glfwGetCurrentContext();
             
             {
-                MICROPROFILE_SCOPEI("ImGuiManager", "ImGui::UpdatePlatformWindows", MP_AUTO);
-                MICROPROFILE_SCOPEGPUI("ImGui::UpdatePlatformWindows", MP_AUTO);
+                ZoneScopedN("ImGui::UpdatePlatformWindows");
+                // MICROPROFILE_SCOPEGPUI("ImGui::UpdatePlatformWindows", MP_AUTO);
                 ImGui::UpdatePlatformWindows();
             }
             {
 
-                MICROPROFILE_SCOPEI("ImGuiManager", "ImGui::RenderPlatformWindowsDefault", MP_AUTO);
-                MICROPROFILE_SCOPEGPUI("ImGui::RenderPlatformWindowsDefault", MP_AUTO);
+                ZoneScopedN("ImGui::RenderPlatformWindowsDefault");
+                // MICROPROFILE_SCOPEGPUI("ImGui::RenderPlatformWindowsDefault", MP_AUTO);
                 ImGui::RenderPlatformWindowsDefault();
             }
             
@@ -264,7 +258,6 @@ namespace neo {
     void ImGuiManager::destroy() {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
-        ImPlot::DestroyContext();
         ImGui::DestroyContext();
     }
 

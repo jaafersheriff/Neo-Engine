@@ -31,6 +31,7 @@ INTERFACE
 	glfw
 	glm
 	libglew_static
+	TracyClient
 )
 
 
