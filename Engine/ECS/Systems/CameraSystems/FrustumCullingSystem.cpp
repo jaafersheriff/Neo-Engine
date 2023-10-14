@@ -19,21 +19,21 @@ namespace neo {
 
         auto cameras = ecs.getView<FrustumComponent>();
 
+        std::set<ECS::Entity> cameraViews;
         for (auto&& [entity, spatial, bb] : ecs.getView<SpatialComponent, BoundingBoxComponent>().each()) {
-            CameraCulledComponent culled;
             for(auto&& [cameraEntity, frustum] : cameras.each()) {
                 if ((ecs.has<PerspectiveCameraComponent>(cameraEntity) || ecs.has<OrthoCameraComponent>(cameraEntity)) && frustum.isInFrustum(spatial, bb)) {
-                    culled.mCameraViews.insert(cameraEntity);
+                    cameraViews.insert(cameraEntity);
                 }
                 else {
                     mCulledCount++;
                 }
             }
             if (auto* existingComp = ecs.getComponent<CameraCulledComponent>(entity)) {
-                existingComp->mCameraViews = culled.mCameraViews;
+                existingComp->mCameraViews.swap(cameraViews);
             }
             else {
-                ecs.addComponent<CameraCulledComponent>(entity, std::move(culled));
+                ecs.addComponent<CameraCulledComponent>(entity, cameraViews);
             }
         }
     }
