@@ -41,6 +41,15 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tracy")
 target_compile_options(TracyClient PRIVATE "/WX-" "/W0")
 set_target_properties(TracyClient PROPERTIES FOLDER "Neo/ext")
 
+## Capstone
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/capstone")
+set_target_properties(capstone PROPERTIES FOLDER "Neo/ext")
+target_include_directories(capstone
+PUBLIC
+ 	"${CMAKE_CURRENT_SOURCE_DIR}/capstone/include/capstone"
+)
+
+
 ## tracy server
 file(GLOB TRACY_SERVER_CPP_FILES 
 	tracy/server/*.cpp
@@ -61,6 +70,7 @@ set_target_properties(TracyServer PROPERTIES FOLDER "Neo/ext")
 target_link_libraries(TracyServer
 PRIVATE
 	imgui
+	capstone
 )
 
 ## imgui
