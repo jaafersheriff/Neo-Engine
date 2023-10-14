@@ -15,4 +15,4 @@
 
 #include <entt/core/hashed_string.hpp>
 
-#include <tracy/Tracy.hpp>
+#include <microprofile.h>

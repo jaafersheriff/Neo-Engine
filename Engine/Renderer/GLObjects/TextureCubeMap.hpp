@@ -4,7 +4,7 @@
 
 #include <array>
 
-#include <tracy/Tracy.hpp>
+#include <microprofile/microprofile.h>
 
 namespace neo {
 
@@ -40,8 +40,8 @@ namespace neo {
         }
 
         void _upload(void** data) {
-            ZoneScoped;
-            // MICROPROFILE_SCOPEGPUI("TextureCube::upload", MP_AUTO);
+            MICROPROFILE_SCOPEI("TextureCube", "upload", MP_AUTO);
+            MICROPROFILE_SCOPEGPUI("TextureCube::upload", MP_AUTO);
 
             NEO_ASSERT(data, "Trying to upload a CubeMap with invalid data");
             bind();

@@ -31,7 +31,7 @@ namespace neo {
 
 
     void PerspectiveCameraComponent::_detProj() const {
-        ZoneScoped;
+        MICROPROFILE_SCOPEI("PerspectiveCameraComponent", "PerspectiveCameraComponent::_detProj", MP_AUTO);
         mProjMat = glm::perspective(glm::radians(mFOV), mAspectRatio, mNear, mFar);
         mProjMatDirty = false;
     }

@@ -1,11 +1,13 @@
 #include "Util/pch.hpp"
 #include "FrameCounter.hpp"
 
+#include <implot/implot.h>
+
 namespace neo {
     namespace util {
 
         void FrameCounter::update(double _runTime) {
-            ZoneScoped;
+            MICROPROFILE_SCOPEI("FrameCounter", "FrameCounter::update", MP_AUTO);
             /* Update delta time and FPS */
             float runTime = static_cast<float>(_runTime);
             mTotalFrames++;
@@ -25,13 +27,13 @@ namespace neo {
         }
 
         void FrameCounter::imGuiEditor() const {
-            // if (ImPlot::BeginPlot(std::string("FPS (" + std::to_string(mFPS) + ")").c_str())) {
-            //     ImPlot::SetupAxis(ImAxis_X1, "Time (s)", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoInitialFit  );
-            //     ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoInitialFit | ImPlotAxisFlags_NoLabel );
-            //     ImPlot::SetupAxisLimits(ImAxis_Y1, 0, mMaxFPS + 10, ImPlotCond_Always);
-            //     ImPlot::PlotLine("", mFPSList.data(), static_cast<int>(mFPSList.size()));
-            //     ImPlot::EndPlot();
-            // }
+            if (ImPlot::BeginPlot(std::string("FPS (" + std::to_string(mFPS) + ")").c_str())) {
+                ImPlot::SetupAxis(ImAxis_X1, "Time (s)", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoInitialFit  );
+                ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoInitialFit | ImPlotAxisFlags_NoLabel );
+                ImPlot::SetupAxisLimits(ImAxis_Y1, 0, mMaxFPS + 10, ImPlotCond_Always);
+                ImPlot::PlotLine("", mFPSList.data(), static_cast<int>(mFPSList.size()));
+                ImPlot::EndPlot();
+            }
         }
     }
 }

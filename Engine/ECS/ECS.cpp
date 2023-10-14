@@ -14,11 +14,13 @@ namespace neo {
 	}
 
 	void ECS::_updateSystems() {
-		ZoneScoped;
+		MICROPROFILE_SCOPEI("ECS", "_updateSystems", MP_AUTO);
 		for (auto& system : mSystems) {
 			if (system.second->mActive) {
-				ZoneScoped;
+				MICROPROFILE_DEFINE(Systems, "ECS", system.second->mName.c_str(), MP_AUTO);
+				MICROPROFILE_ENTER(Systems);
 				system.second->update(*this);
+				MICROPROFILE_LEAVE();
 			}
 		}
 	}
@@ -33,7 +35,7 @@ namespace neo {
 	}
 
 	void ECS::flush() {
-		ZoneScoped;
+        MICROPROFILE_SCOPEI("ECS", "flush", MP_AUTO);
 		for (auto&& job : mAddComponentFuncs) {
 			job(mRegistry);
 		}

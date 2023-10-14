@@ -19,25 +19,22 @@
 
 namespace neo {
 
-#define RENDERER_MP_ENTERD(define, group, name) 
-#define RENDERER_MP_ENTER(name)
-#define RENDERER_MP_LEAVE()
-// #define RENDERER_MP_ENTERD(define, group, name) \
-//     if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, static_cast<GLsizei>(name.size()), name.c_str()); \
-//     MICROPROFILE_DEFINE(define, group, name.c_str(), MP_AUTO);\
-//     MICROPROFILE_ENTER(define);\
-//     MICROPROFILE_DEFINE_GPU(define, name.c_str(),  MP_AUTO);\
-//     MICROPROFILE_GPU_ENTER(define)
-// 
-// #define RENDERER_MP_ENTER(name) \
-//     if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name); \
-//     MICROPROFILE_ENTERI("Renderer", name, MP_AUTO);\
-//     MICROPROFILE_GPU_ENTERI("RendererGPU", name, MP_AUTO)
-// 
-// #define RENDERER_MP_LEAVE() \
-//     if (glIsEnabled(GL_DEBUG_OUTPUT)) glPopDebugGroup(); \
-//     MICROPROFILE_LEAVE();\
-//     MICROPROFILE_GPU_LEAVE()
+#define RENDERER_MP_ENTERD(define, group, name) \
+    if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, static_cast<GLsizei>(name.size()), name.c_str()); \
+    MICROPROFILE_DEFINE(define, group, name.c_str(), MP_AUTO);\
+    MICROPROFILE_ENTER(define);\
+    MICROPROFILE_DEFINE_GPU(define, name.c_str(),  MP_AUTO);\
+    MICROPROFILE_GPU_ENTER(define)
+
+#define RENDERER_MP_ENTER(name) \
+    if (glIsEnabled(GL_DEBUG_OUTPUT)) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name); \
+    MICROPROFILE_ENTERI("Renderer", name, MP_AUTO);\
+    MICROPROFILE_GPU_ENTERI("RendererGPU", name, MP_AUTO)
+
+#define RENDERER_MP_LEAVE() \
+    if (glIsEnabled(GL_DEBUG_OUTPUT)) glPopDebugGroup(); \
+    MICROPROFILE_LEAVE();\
+    MICROPROFILE_GPU_LEAVE()
 
     void OpenGLMessageCallback(
         unsigned source,
@@ -151,7 +148,6 @@ namespace neo {
     }
 
     void Renderer::resetState() {
-        ZoneScoped;
         RENDERER_MP_ENTER("resetState");
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.f);
@@ -180,7 +176,6 @@ namespace neo {
         if (!window.isMinimized()) {
             mStats = {};
 
-            ZoneScoped;
             RENDERER_MP_ENTER("Renderer::render");
             resetState();
 
@@ -191,12 +186,10 @@ namespace neo {
 
             /* Run compute */
             if (activeComputeShaders.size()) {
-                ZoneScoped;
                 RENDERER_MP_ENTER("Compute shaders");
 
                 for (auto& shader : activeComputeShaders) {
                     resetState();
-                    ZoneScoped;
                     RENDERER_MP_ENTERD(Compute, "Compute shaders", shader->mName);
                     mStats.mNumShaders++;
                     shader->render(ecs);
@@ -207,12 +200,10 @@ namespace neo {
 
             /* Render all preprocesses */
             if (activePreShaders.size()) {
-                ZoneScoped;
                 RENDERER_MP_ENTER("PreScene shaders");
 
                 for (auto& shader : activePreShaders) {
                     resetState();
-                    ZoneScoped;
                     RENDERER_MP_ENTERD(Pre, "PreScene shaders", shader->mName);
                     mStats.mNumShaders++;
                     shader->render(ecs);
@@ -222,37 +213,29 @@ namespace neo {
             }
 
             /* Reset default FBO state */
-            const glm::ivec2 frameSize = window.getDetails().mSize;
-            {
-                ZoneScopedN("Reset DefaultFBO");
-                RENDERER_MP_ENTER("Reset DefaultFBO");
-                mDefaultFBO->bind();
-                glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f);
-                glViewport(0, 0, frameSize.x, frameSize.y);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                RENDERER_MP_LEAVE();
-            }
+            RENDERER_MP_ENTER("Reset DefaultFBO");
+            mDefaultFBO->bind();
+            glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f);
+            glm::ivec2 frameSize = window.getDetails().mSize;
+            glViewport(0, 0, frameSize.x, frameSize.y);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            RENDERER_MP_LEAVE();
 
             /* Render all scene shaders */
-            {
-                ZoneScopedN("renderScene");
-                RENDERER_MP_ENTER("renderScene");
-                for (auto& shader : mSceneShaders) {
-                    if (shader.second->mActive) {
-                        resetState();
-                        ZoneScoped;
-                        RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName);
-                        mStats.mNumShaders++;
-                        shader.second->render(ecs);
-                        RENDERER_MP_LEAVE();
-                    }
+            RENDERER_MP_ENTER("renderScene");
+            for (auto& shader : mSceneShaders) {
+                if (shader.second->mActive) {
+                    resetState();
+                    RENDERER_MP_ENTERD(Scene, "Scene Shaders", shader.second->mName);
+                    mStats.mNumShaders++;
+                    shader.second->render(ecs);
+                    RENDERER_MP_LEAVE();
                 }
-                RENDERER_MP_LEAVE();
             }
+            RENDERER_MP_LEAVE();
 
             /* Post process with ping & pong */
             if (activePostShaders.size()) {
-                ZoneScoped;
                 RENDERER_MP_ENTER("PostProcess shaders");
 
                 /* Render first post process shader into appropriate output buffer */
@@ -280,14 +263,12 @@ namespace neo {
 
             /* Render imgui */
             if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                ZoneScoped;
                 RENDERER_MP_ENTER("ImGuiManager.render");
                 mBackBuffer->bind();
                 ServiceLocator<ImGuiManager>::ref().render();
                 RENDERER_MP_LEAVE();
             }
             else {
-                ZoneScoped;
                 RENDERER_MP_ENTER("Final Blit");
                 if (!mBlitShader) {
                     mBlitShader = new BlitShader;
@@ -315,14 +296,12 @@ namespace neo {
             RENDERER_MP_LEAVE();
         }
 
-        ZoneScoped;
         RENDERER_MP_ENTER("glfwSwapBuffers");
         glfwSwapBuffers(window.getWindow());
         RENDERER_MP_LEAVE();
     }
 
     void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize, ECS& ecs) {
-        ZoneScoped;
         RENDERER_MP_ENTER("_renderPostProcess");
         mStats.mNumShaders++;
 
@@ -345,7 +324,6 @@ namespace neo {
 
         RENDERER_MP_LEAVE();
 
-        ZoneText(shader.mName.c_str(), shader.mName.length());
         RENDERER_MP_ENTERD(Post, "PostProcess Shaders", shader.mName);
         // Allow shader to do any prep (eg. bind uniforms) 
         // Also allows shader to override output render target (user responsible for handling)

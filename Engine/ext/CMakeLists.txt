@@ -80,9 +80,11 @@ PRIVATE
 ## imgui
 file(GLOB IMGUI_CPP_FILES 
 	imgui/*.cpp
+	implot/*.cpp
 )
 file(GLOB IMGUI_HPP_FILES 
 	imgui/*.h
+	implot/*.h
 	imgui_entt_entity_editor/*.hpp
 )
 add_library(imgui STATIC
@@ -96,9 +98,9 @@ add_library(imgui STATIC
 set_target_properties(imgui PROPERTIES FOLDER "Neo/ext")
 target_include_directories(imgui 
 PUBLIC
-	"${CMAKE_CURRENT_SOURCE_DIR}/"
 	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/"
  	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/"
+ 	"${CMAKE_CURRENT_SOURCE_DIR}/implot"
 PRIVATE
 )
 target_link_libraries(imgui

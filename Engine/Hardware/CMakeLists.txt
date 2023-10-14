@@ -10,7 +10,6 @@ PRIVATE
 	imgui
 	glfw
 	entt
-	TracyClient
 )
 
 add_precompiled_header(Hardware 

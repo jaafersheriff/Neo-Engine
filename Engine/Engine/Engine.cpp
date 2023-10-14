@@ -36,6 +36,7 @@ extern "C" {
 
 #include <time.h>
 #include <iostream>
+#include <microprofile.h>
 
 #include <tracy/Tracy.hpp>
 #include <tracy/server/TracyView.hpp>
@@ -108,6 +109,7 @@ namespace neo {
         demos.setForceReload();
         
         while (!mWindow.shouldClose() && !mKeyboard.isKeyPressed(GLFW_KEY_ESCAPE)) {
+            MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);
             ZoneScoped;
 
             if (demos.needsReload()) {
@@ -124,7 +126,7 @@ namespace neo {
             Messenger::relayMessages(mECS);
 
             {
-                ZoneScoped;
+                MICROPROFILE_SCOPEI("Engine", "FrameStats Entity", MP_AUTO);
                 auto hardware = mECS.createEntity();
                 mECS.addComponent<MouseComponent>(hardware, mMouse);
                 mECS.addComponent<KeyboardComponent>(hardware, mKeyboard);
@@ -139,7 +141,7 @@ namespace neo {
             }
 
             {
-                ZoneScoped;
+                MICROPROFILE_SCOPEI("Engine", "Demo::update", MP_AUTO);
                 demos.getCurrentDemo()->update(mECS);
             }
 
@@ -154,27 +156,27 @@ namespace neo {
 
                 /* Update imgui functions */
                 if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                    ZoneScoped;
+                    MICROPROFILE_SCOPEI("ImGui", "ImGui", MP_AUTO);
                     ServiceLocator<ImGuiManager>::ref().begin();
 
                     {
-                        ZoneScoped;
+                        MICROPROFILE_SCOPEI("ImGui", "demos.imGuiEditor", MP_AUTO);
                         demos.imGuiEditor(mECS);
                     }
                     {
-                        ZoneScoped;
+                        MICROPROFILE_SCOPEI("ImGui", "mECS.imguiEdtor", MP_AUTO);
                         mECS.imguiEdtor();
                     }
                     {
-                        ZoneScoped;
+                        MICROPROFILE_SCOPEI("ImGui", "Renderer.imGuiEditor", MP_AUTO);
                         ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
                     }
                     {
-                        ZoneScoped;
+                        MICROPROFILE_SCOPEI("ImGui", "Library::imGuiEditor", MP_AUTO);
                         Library::imGuiEditor();
                     }
                     {
-                        ZoneScoped;
+                        MICROPROFILE_SCOPEI("ImGui", "ImGuiManager.imGuiEditor", MP_AUTO);
                         ServiceLocator<ImGuiManager>::ref().imGuiEditor();
                     }
                     imGuiEditor(counter);
@@ -196,14 +198,16 @@ namespace neo {
             });
 
             FrameMark;
+            MicroProfileFlip(0);
         }
 
         demos.getCurrentDemo()->destroy();
         shutDown();
+	    MicroProfileShutdown();
     }
 
     void Engine::_swapDemo(DemoWrangler& demos) {
-        ZoneScoped;
+        MICROPROFILE_SCOPEI("Engine", "_swapDemo", MP_AUTO);
 
         /* Destry the old state*/
         demos.getCurrentDemo()->destroy();

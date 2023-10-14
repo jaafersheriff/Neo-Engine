@@ -29,8 +29,8 @@ namespace neo {
         }
 
         virtual void _upload(const void* data) override {
-            ZoneScoped;
-            // MICROPROFILE_SCOPEGPUI("Texture3D::upload", MP_AUTO);
+            MICROPROFILE_SCOPEI("Texture3D", "upload", MP_AUTO);
+            MICROPROFILE_SCOPEGPUI("Texture3D::upload", MP_AUTO);
 
             bind();
 

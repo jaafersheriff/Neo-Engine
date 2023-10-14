@@ -6,7 +6,6 @@ PUBLIC
 PRIVATE
 	Util
 	libglew_static
-	TracyClient
 )
 
 add_precompiled_header(Loader

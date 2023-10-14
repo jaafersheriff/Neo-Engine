@@ -7,7 +7,7 @@
 
 #include <GL/glew.h>
 
-#include <tracy/Tracy.hpp>
+#include <microprofile/microprofile.h>
 
 namespace neo {
 
@@ -23,7 +23,8 @@ namespace neo {
         }
         
         void bind() {
-            ZoneScoped;
+            MICROPROFILE_SCOPEI("Framebuffer", "Framebuffer::bind", MP_AUTO);
+            MICROPROFILE_SCOPEGPUI("Framebuffer::bind", MP_AUTO);
             glBindFramebuffer(GL_FRAMEBUFFER, mFBOID);
         }
         

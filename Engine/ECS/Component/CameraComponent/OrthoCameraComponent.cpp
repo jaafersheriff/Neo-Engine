@@ -23,7 +23,7 @@ namespace neo {
     }
 
     void OrthoCameraComponent::_detProj() const {
-		ZoneScoped;
+        MICROPROFILE_SCOPEI("OrthoCameraComponent", "OrthoCameraComponent::_detProj", MP_AUTO);
         mProjMat = glm::ortho(mHorizBounds.x, mHorizBounds.y, mVertBounds.x, mVertBounds.y, mNear, mFar);
         mProjMatDirty = false;
     }
