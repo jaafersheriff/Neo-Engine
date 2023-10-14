@@ -6,6 +6,8 @@ PUBLIC
 	Util
 	Messaging
 	Hardware
+	TracyClient
+	TracyServer
 PRIVATE
 	libglew_static
 	imgui

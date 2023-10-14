@@ -34,6 +34,35 @@ PUBLIC
 )
 target_sources(microprofile PRIVATE "microprofile.config.h")
 
+## tracy
+option(TRACY_ENABLE "" ON)
+option(TRACY_NO_BROADCAST "" ON)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tracy")
+target_compile_options(TracyClient PRIVATE "/WX-" "/W0")
+set_target_properties(TracyClient PROPERTIES FOLDER "Neo/ext")
+
+## tracy server
+file(GLOB TRACY_SERVER_CPP_FILES 
+	tracy/server/*.cpp
+)
+file(GLOB TRACY_SERVER_HPP_FILES 
+	tracy/server/*.hpp
+)
+add_library(TracyServer STATIC
+	${TRACY_SERVER_CPP_FILES}
+	${TRACY_SERVER_HPP_FILES}
+)
+target_include_directories(TracyServer
+PUBLIC
+ 	"${CMAKE_CURRENT_SOURCE_DIR}/tracy/server"
+)
+target_compile_options(TracyServer PRIVATE "/WX-" "/W0")
+set_target_properties(TracyServer PROPERTIES FOLDER "Neo/ext")
+target_link_libraries(TracyServer
+PRIVATE
+	imgui
+)
+
 ## imgui
 file(GLOB IMGUI_CPP_FILES 
 	imgui/*.cpp
@@ -66,7 +95,6 @@ PRIVATE
 	glfw
 	entt
 )
-
 
 ## entt
 file(GLOB_RECURSE ENTT_HPP_FILES 

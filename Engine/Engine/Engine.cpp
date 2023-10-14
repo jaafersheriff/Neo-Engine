@@ -38,6 +38,9 @@ extern "C" {
 #include <iostream>
 #include <microprofile.h>
 
+#include <tracy/Tracy.hpp>
+#include <tracy/server/TracyView.hpp>
+
 namespace neo {
 
     /* ECS */
@@ -47,6 +50,25 @@ namespace neo {
     WindowSurface Engine::mWindow;
     Keyboard Engine::mKeyboard;
     Mouse Engine::mMouse;
+
+    static std::unique_ptr<tracy::View> view;
+    void RunOnMainThread( std::function<void()> cb, bool forceDelay = false )
+    {
+        NEO_UNUSED(cb, forceDelay);
+    }
+    static void SetWindowTitleCallback( const char* title )
+    {
+        NEO_UNUSED(title);
+    }
+    
+    static void AttentionCallback()
+    {
+    }
+    static void SetupScaleCallback( float scale, ImFont*& cb_fixedWidth, ImFont*& cb_bigFont, ImFont*& cb_smallFont )
+    {
+        NEO_UNUSED(scale, cb_fixedWidth, cb_bigFont, cb_smallFont);
+    }
+
 
     void Engine::init() {
 
@@ -75,6 +97,8 @@ namespace neo {
         MicroProfileSetEnableAllGroups(true);
         MicroProfileSetForceMetaCounters(1);
 #endif
+        auto& io = ImGui::GetIO();
+        view = std::make_unique<tracy::View>( RunOnMainThread, "hey", 0, io.FontDefault, io.FontDefault, io.FontDefault, SetWindowTitleCallback, SetupScaleCallback, AttentionCallback);
 
         ServiceLocator<Renderer>::ref().init();
     }
@@ -86,6 +110,7 @@ namespace neo {
         
         while (!mWindow.shouldClose() && !mKeyboard.isKeyPressed(GLFW_KEY_ESCAPE)) {
             MICROPROFILE_SCOPEI("Engine", "Engine::run", MP_AUTO);
+            ZoneScoped;
 
             if (demos.needsReload()) {
                 _swapDemo(demos);
@@ -276,6 +301,8 @@ namespace neo {
                 }
             }
             ImGui::End();
+
+            view->Draw();
         }
     }
 }
