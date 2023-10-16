@@ -1,5 +1,6 @@
 #pragma once
 
+#include <TracyEvent.hpp>
 
 namespace tracy {
     class View;
@@ -7,18 +8,19 @@ namespace tracy {
 
 namespace neo {
     namespace util {
-        struct Profiler {
+        class Profiler {
+        public:
             Profiler();
             ~Profiler();
             Profiler(const Profiler&) = delete;
             Profiler& operator=(const Profiler&) = delete;
 
             void update(double);
-            void imGuiEditor() const;
+            void imGuiEditor();
 
-        public:
             std::unique_ptr<tracy::View> view;
             // std::vector<int> mFPSList;
+            tracy::PlotData mFPSList;
             int mFPS = 0;                    /* Frames per second */
             double mTimeStep = 0.0;         /* Delta time */
             int mTotalFrames = 0;           /* Total frames since start up */

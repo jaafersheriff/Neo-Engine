@@ -13,8 +13,9 @@
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-// #include <implot/implot.h>
+
 #include <tracy/Tracy.hpp>
+#include <tracy/TracyOpenGL.hpp>
 
 namespace neo {
 
@@ -195,13 +196,13 @@ namespace neo {
 
         {
             ZoneScopedN("ImGui::render");
-            // MICROPROFILE_SCOPEGPUI("ImGui::render", MP_AUTO);
+            TracyGpuZone("ImGui::render");
             ImGui::Render();
         }
         {
 
             ZoneScopedN("ImGui_ImplOpenGL3_RenderDrawData");
-            // MICROPROFILE_SCOPEGPUI("ImGui_ImplOpenGL3_RenderDrawData", MP_AUTO);
+            TracyGpuZone("ImGui_ImplOpenGL3_RenderDrawData");
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
 
@@ -211,13 +212,13 @@ namespace neo {
             
             {
                 ZoneScopedN("ImGui::UpdatePlatformWindows");
-                // MICROPROFILE_SCOPEGPUI("ImGui::UpdatePlatformWindows", MP_AUTO);
+                TracyGpuZone("ImGui::UpdatePlatformWindows");
                 ImGui::UpdatePlatformWindows();
             }
             {
 
                 ZoneScopedN("ImGui::RenderPlatformWindowsDefault");
-                // MICROPROFILE_SCOPEGPUI("ImGui::RenderPlatformWindowsDefault", MP_AUTO);
+                TracyGpuZone("ImGui::RenderPlatformWindowsDefault");
                 ImGui::RenderPlatformWindowsDefault();
             }
             
@@ -262,7 +263,6 @@ namespace neo {
     void ImGuiManager::destroy() {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
-        // ImPlot::DestroyContext();
         ImGui::DestroyContext();
     }
 

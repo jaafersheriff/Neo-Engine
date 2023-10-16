@@ -186,7 +186,7 @@ namespace neo {
                         ServiceLocator<ImGuiManager>::ref().imGuiEditor();
                     }
                     {
-                        ZoneScopedN("ImGuiManager.imGuiEditor");
+                        ZoneScopedN("Profiler.imGuiEditor");
                         profiler.imGuiEditor();
                     }
 

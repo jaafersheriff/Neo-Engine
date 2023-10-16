@@ -6,8 +6,6 @@
 
 #include <TracyView.hpp>
 
-// #include <implot/implot.h>
-
 
 void* operator new(std::size_t count) {
     auto ptr = malloc(count);
@@ -44,6 +42,12 @@ namespace neo {
         Profiler::Profiler() {
             auto& io = ImGui::GetIO();
             view = std::make_unique<tracy::View>( RunOnMainThread, "192.168.0.13", 8086, io.FontDefault, io.FontDefault, io.FontDefault, SetWindowTitleCallback, SetupScaleCallback, AttentionCallback);
+
+            // TracyPlotConfig("FPS", tracy::PlotFormatType::Number, false, false, 0);
+            TracyPlotConfig("dt", tracy::PlotFormatType::Number, false, false, 0);
+
+
+            mFPSList.name = HashedString("FPS");
         }
 
         Profiler::~Profiler() {
@@ -56,6 +60,7 @@ namespace neo {
             float runTime = static_cast<float>(_runTime);
             mTotalFrames++;
             mTimeStep = runTime - mLastFrameTime;
+            TracyPlot("dt", static_cast<float>(mTimeStep));
             mLastFrameTime = runTime;
             mFramesInCount++;
             if (runTime - mLastFPSTime >= 1.0) {
@@ -64,15 +69,18 @@ namespace neo {
                 //     mFPSList.erase(mFPSList.begin());
                 // }
                 // mFPSList.push_back(mFPS);
-                TracyPlot("FPS", static_cast<int64_t>(mFPS));
+                // TracyPlot("FPS", static_cast<int64_t>(mFPS));
                 mMaxFPS = std::max(mMaxFPS, mFPS);
                 mFramesInCount = 0;
                 mLastFPSTime = runTime;
             }
         }
 
-        void Profiler::imGuiEditor() const {
+        void Profiler::imGuiEditor() {
             view->Draw();
+            int t = 0;
+            view->DrawPlot(mFPSList, 180.0, t, ImVec2(10, 10), false, 10, 200);
+            
 //             if (ImPlot::BeginPlot(std::string("FPS (" + std::to_string(mFPS) + ")").c_str())) {
 //                 ImPlot::SetupAxis(ImAxis_X1, "Time (s)", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoInitialFit  );
 //                 ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoInitialFit | ImPlotAxisFlags_NoLabel );
