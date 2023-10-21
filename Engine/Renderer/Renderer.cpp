@@ -205,7 +205,7 @@ namespace neo {
 
             /* Render first post process shader into appropriate output buffer */
             Framebuffer* inputFBO = mDefaultFBO;
-            Framebuffer* outputFBO = activePostShaders.size() == 1 ? Library::getFBO("0") : Library::getFBO("pong");
+            Framebuffer* outputFBO = activePostShaders.size() == 1 ? mBackBuffer : Library::getFBO("pong");
 
             _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().mSize, ecs);
 
@@ -223,7 +223,7 @@ namespace neo {
 
             /* nth shader writes out to FBO 0 if it hasn't already been done */
             if (activePostShaders.size() > 1) {
-                _renderPostProcess(*activePostShaders.back(), inputFBO, mDefaultFBO, window.getDetails().mSize, ecs);
+                _renderPostProcess(*activePostShaders.back(), inputFBO, mBackBuffer, window.getDetails().mSize, ecs);
             }
         }
 
@@ -233,29 +233,29 @@ namespace neo {
             mBackBuffer->bind();
             ServiceLocator<ImGuiManager>::ref().render();
         }
-        else if (activePostShaders.size() > 1) {
-            TRACY_GPUN("Final Blit");
-            if (!mBlitShader) {
-                mBlitShader = new BlitShader;
-            }
-            mBackBuffer->bind();
-            resetState();
-            glDisable(GL_DEPTH_TEST);
-            glClearColor(0.f, 0.f, 0.f, 1.f);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glViewport(0, 0, frameSize.x, frameSize.y);
+        // else if (activePostShaders.size() > 1) {
+        //     TRACY_GPUN("Final Blit");
+        //     if (!mBlitShader) {
+        //         mBlitShader = new BlitShader;
+        //     }
+        //     mBackBuffer->bind();
+        //     resetState();
+        //     glDisable(GL_DEPTH_TEST);
+        //     glClearColor(0.f, 0.f, 0.f, 1.f);
+        //     glClear(GL_COLOR_BUFFER_BIT);
+        //     glViewport(0, 0, frameSize.x, frameSize.y);
 
-            mBlitShader->bind();
-            auto meshData = Library::getMesh("quad");
-            glBindVertexArray(meshData.mMesh->mVAOID);
+        //     mBlitShader->bind();
+        //     auto meshData = Library::getMesh("quad");
+        //     glBindVertexArray(meshData.mMesh->mVAOID);
 
-            // Bind input fbo texture
-            mBlitShader->loadTexture("inputTexture", *mDefaultFBO->mTextures[0]);
+        //     // Bind input fbo texture
+        //     mBlitShader->loadTexture("inputTexture", *mDefaultFBO->mTextures[0]);
 
-            // Render 
-            meshData.mMesh->draw();
-            mBlitShader->unbind();
-        }
+        //     // Render 
+        //     meshData.mMesh->draw();
+        //     mBlitShader->unbind();
+        // }
     }
 
     void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize, ECS& ecs) {

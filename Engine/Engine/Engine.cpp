@@ -112,7 +112,7 @@ namespace neo {
 
     void Engine::run(DemoWrangler& demos) {
 
-        util::Profiler profiler(mWindow.getDetails().mRefreshRate);
+        util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale);
         demos.setForceReload();
         
         while (!mWindow.shouldClose() && !mKeyboard.isKeyPressed(GLFW_KEY_ESCAPE)) {

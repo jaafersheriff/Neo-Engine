@@ -37,23 +37,50 @@ if (MSVC)
 	target_compile_options(TracyClient PRIVATE "/WX-" "/W0")
 	set_target_properties(TracyClient PROPERTIES FOLDER "Neo/ext")
 
-	## Capstone
-	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/capstone")
-	target_compile_options(capstone PRIVATE "/WX-" "/W0")
-	set_target_properties(capstone PROPERTIES FOLDER "Neo/ext")
-	target_include_directories(capstone
-	PUBLIC
- 		"${CMAKE_CURRENT_SOURCE_DIR}/capstone/include/capstone"
-	)
-
 	## tracy server - can be disabled
 	if (NOT NO_LOCAL_TRACY)
 		option(TRACY_NO_BROADCAST "" ON)
 		option(TRACY_NO_ROOT_WINDOW "" ON)
+
+		## Capstone
+		add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/capstone")
+		target_compile_options(capstone PRIVATE "/WX-" "/W0")
+		set_target_properties(capstone PROPERTIES FOLDER "Neo/ext")
+		target_include_directories(capstone
+		PUBLIC
+ 			"${CMAKE_CURRENT_SOURCE_DIR}/capstone/include/capstone"
+		)
+
+		file(GLOB TRACY_SERVER_FONTS_CPP_FILES
+			tracy/profiler/src/Fonts.cpp
+		)
+		file(GLOB TRACY_SERVER_FONTS_HPP_FILES
+			tracy/profiler/src/Fonts.Hpp
+		)
+		add_library(TracyServerFonts STATIC
+			${TRACY_SERVER_FONTS_CPP_FILES}
+			${TRACY_SERVER_FONTS_HPP_FILES}
+		)
+		target_include_directories(TracyServerFonts
+		PUBLIC
+		 	"${CMAKE_CURRENT_SOURCE_DIR}/tracy/profiler/src"
+		)
+		target_compile_options(TracyServerFonts PUBLIC "/WX-" "/W0")
+		target_compile_definitions(TracyServerFonts PRIVATE
+			TRACY_ENABLE
+			TRACY_NO_BROADCAST
+			TRACY_NO_ROOT_WINDOW
+		)
+		set_target_properties(TracyServerFonts PROPERTIES FOLDER "Neo/ext")
+		target_link_libraries(TracyServerFonts
+		PRIVATE
+			imgui
+			capstone
+		)
+
 		file(GLOB TRACY_SERVER_CPP_FILES 
 			tracy/server/*.cpp
 			tracy/public/common/*.cpp
-			tracy/profiler/src/Fonts.cpp
 			tracy/nfd/nfd_win.cpp
 			tracy/zstd/common/*.c
 			tracy/zstd/compress/*.c
@@ -63,7 +90,6 @@ if (MSVC)
 		file(GLOB TRACY_SERVER_HPP_FILES 
 			tracy/server/*.hpp
 			tracy/public/common/*.hpp
-			tracy/profiler/src/Fonts.hpp
 			tracy/nfd/nfd.h
 			tracy/zstd/*.h
 			tracy/zstd/common/*.h
@@ -87,13 +113,16 @@ if (MSVC)
 		)
 		set_target_properties(TracyServer PROPERTIES FOLDER "Neo/ext")
 		target_link_libraries(TracyServer
+		PUBLIC
+			TracyServerFonts
 		PRIVATE
 			imgui
 			capstone
 		)
 
-	unset(MESSAGE_QUIET)
+
 	endif()
+	unset(MESSAGE_QUIET)
 endif()
 
 ## imgui

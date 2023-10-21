@@ -17,7 +17,7 @@ namespace neo {
     namespace util {
         class Profiler {
         public:
-            Profiler(int refreshRate);
+            Profiler(int refreshRate, float scale);
             ~Profiler();
             Profiler(const Profiler&) = delete;
             Profiler& operator=(const Profiler&) = delete;

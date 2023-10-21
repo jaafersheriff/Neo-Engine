@@ -6,6 +6,7 @@
 
 #ifndef NO_LOCAL_TRACY
 #include <TracyView.hpp>
+#include <Fonts.hpp>
 #endif
 
 
@@ -23,19 +24,11 @@ void operator delete(void* ptr) noexcept {
 namespace {
     void RunOnMainThread( std::function<void()> cb, bool forceDelay = false )
     {
-        NEO_UNUSED(cb, forceDelay);
-    }
-    static void SetWindowTitleCallback( const char* title )
-    {
-        NEO_UNUSED(title);
+        cb();
     }
     
-    static void AttentionCallback()
-    {
-    }
-    static void SetupScaleCallback( float scale, ImFont*& cb_fixedWidth, ImFont*& cb_bigFont, ImFont*& cb_smallFont )
-    {
-        NEO_UNUSED(scale, cb_fixedWidth, cb_bigFont, cb_smallFont);
+    static void AttentionCallback() {
+        NEO_LOG_E("Tracy requires attention");
     }
 }
 #endif
@@ -43,12 +36,13 @@ namespace {
 namespace neo {
     namespace util {
 
-        Profiler::Profiler(int refreshRate) {
+        Profiler::Profiler(int refreshRate, float scale) {
 #ifdef NO_LOCAL_TRACY
             NEO_UNUSED(refreshRate);
 #else
+            LoadFonts(scale, s_fixedWidth, s_smallFont, s_bigFont);
             auto& io = ImGui::GetIO();
-            mTracyServer = std::make_unique<tracy::View>( RunOnMainThread, "192.168.0.13", 8086, io.FontDefault, io.FontDefault, io.FontDefault, SetWindowTitleCallback, SetupScaleCallback, AttentionCallback);
+            mTracyServer = std::make_unique<tracy::View>( RunOnMainThread, "192.168.0.13", 8086, s_fixedWidth, s_smallFont, s_bigFont, nullptr, nullptr, AttentionCallback);
             mTracyServer->GetViewData().frameTarget = refreshRate;
             mTracyServer->GetViewData().drawFrameTargets = true;
             mTracyServer->GetViewData().drawCpuUsageGraph = false;
