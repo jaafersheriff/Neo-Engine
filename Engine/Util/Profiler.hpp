@@ -1,6 +1,6 @@
 #pragma once
 
-#define TRACY_ZONEN(x) ZoneScopedNC(x, (HashedString(x) & 0x9e9e9e) >> 1 )
+#define TRACY_ZONEN(x) ZoneScopedNC(x, (HashedString(x) & 0xfefefe) >> 1 )
 #define TRACY_ZONE() TRACY_ZONEN(TracyFunction)
 #define TRACY_GPUN(x) TRACY_ZONEN(x); TracyGpuZoneC(x, (HashedString(x) & 0xfefefe) >> 1 )
 #define TRACY_GPU() TRACY_GPUN(TracyFunction)

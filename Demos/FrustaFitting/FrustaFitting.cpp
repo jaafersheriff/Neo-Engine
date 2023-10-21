@@ -54,7 +54,7 @@ namespace FrustaFitting {
             ecs.addComponent<TagComponent>(lightEntity, "Light");
             auto spatial = ecs.addComponent<SpatialComponent>(lightEntity, position, glm::vec3(1.f));
             spatial->setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
-            ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f), glm::vec3(0.4f, 0.2f, 0.f));
+            ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f), glm::vec3(1.f));
 
             // Shadow camera object
             auto cameraObject = ecs.createEntity();
@@ -116,12 +116,13 @@ namespace FrustaFitting {
         }
 
         /* Ground plane */
-        Renderable receiver(ecs, Library::getMesh("quad").mMesh, glm::vec3(0.f, 0.f, 0.f), glm::vec3(50.f, 1.f, 50.f), glm::vec3(-1.56f, 0, 0));
+        Renderable receiver(ecs, Library::getMesh("quad").mMesh, glm::vec3(0.f, 0.f, 0.f), glm::vec3(50.f, 50.f, 1.f), glm::vec3(-1.56f, 0, 0));
         Material material;
         material.mAmbient = glm::vec3(0.2f);
         material.mDiffuse = glm::vec3(0.7f);
         ecs.addComponent<BoundingBoxComponent>(receiver.mEntity, Library::getMesh("quad"));
         ecs.addComponent<renderable::PhongShadowRenderable>(receiver.mEntity, Library::getTexture("black"), material);
+        ecs.addComponent<TagComponent>(receiver.mEntity, "Ground");
 
         /* Systems - order matters! */
         ecs.addSystem<CameraControllerSystem>(); // Update camera

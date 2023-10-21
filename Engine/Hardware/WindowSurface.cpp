@@ -44,7 +44,6 @@ namespace neo {
         mDetails.mRefreshRate = mode->refreshRate;
 
         /* Create GLFW window */
-        mTitle = name;
         mWindow = glfwCreateWindow(mDetails.mSize.x, mDetails.mSize.y, name.c_str(), NULL, NULL);
         if (!mWindow) {
             glfwTerminate();
@@ -169,7 +168,6 @@ namespace neo {
     }
 
     void WindowSurface::reset(const std::string& name) {
-        mTitle = name;
         glfwSetWindowTitle(mWindow, name.c_str());
 
         /* Set callbacks */
