@@ -43,6 +43,12 @@ namespace neo {
         NEO_ASSERT(mode, "glfwGetVideoMode failed");
         mDetails.mRefreshRate = mode->refreshRate;
 
+        {
+            float x, y;
+            glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &x, &y);
+            mDetails.mDPIScale = x;
+        }
+
         /* Create GLFW window */
         mWindow = glfwCreateWindow(mDetails.mSize.x, mDetails.mSize.y, name.c_str(), NULL, NULL);
         if (!mWindow) {

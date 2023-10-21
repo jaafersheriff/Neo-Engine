@@ -7,5 +7,6 @@ namespace neo {
         bool mFullscreen = false;
         bool mVSyncEnabled = true;
         int mRefreshRate = 60;
+        float mDPIScale = 1.f;
     };
 }

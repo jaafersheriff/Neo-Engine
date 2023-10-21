@@ -68,7 +68,7 @@ namespace neo {
             Loader::_cleanTextureData(data);
         }
         ServiceLocator<ImGuiManager>::set();
-        ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
+        ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow(), mWindow.getDetails().mDPIScale);
 
 #if MICROPROFILE_ENABLED
         NEO_LOG_I("Microprofile enabled");

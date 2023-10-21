@@ -4,7 +4,9 @@
 
 #include "Profiler.hpp"
 
+#ifndef NO_LOCAL_TRACY
 #include <TracyView.hpp>
+#endif
 
 
 void* operator new(std::size_t count) {
@@ -17,6 +19,7 @@ void operator delete(void* ptr) noexcept {
     free(ptr);
 }
 
+#ifndef NO_LOCAL_TRACY
 namespace {
     void RunOnMainThread( std::function<void()> cb, bool forceDelay = false )
     {
@@ -35,23 +38,29 @@ namespace {
         NEO_UNUSED(scale, cb_fixedWidth, cb_bigFont, cb_smallFont);
     }
 }
+#endif
 
 namespace neo {
     namespace util {
 
         Profiler::Profiler(int refreshRate) {
+#ifdef NO_LOCAL_TRACY
+            NEO_UNUSED(refreshRate);
+#else
             auto& io = ImGui::GetIO();
-            mTracyServer = std::make_unique<tracy::View>( RunOnMainThread, "192.168.0.16", 8086, io.FontDefault, io.FontDefault, io.FontDefault, SetWindowTitleCallback, SetupScaleCallback, AttentionCallback);
-
-            TracyPlotConfig("dt", tracy::PlotFormatType::Number, false, false, 0);
-
+            mTracyServer = std::make_unique<tracy::View>( RunOnMainThread, "192.168.0.13", 8086, io.FontDefault, io.FontDefault, io.FontDefault, SetWindowTitleCallback, SetupScaleCallback, AttentionCallback);
             mTracyServer->GetViewData().frameTarget = refreshRate;
             mTracyServer->GetViewData().drawFrameTargets = true;
             mTracyServer->GetViewData().drawCpuUsageGraph = false;
+#endif
+
+            TracyPlotConfig("dt", tracy::PlotFormatType::Number, false, false, 0);
         }
 
         Profiler::~Profiler() {
+#ifndef NO_LOCAL_TRACY
             mTracyServer.reset();
+#endif
         }
 
         void Profiler::update(double _runTime) {
@@ -65,7 +74,9 @@ namespace neo {
         }
 
         void Profiler::imGuiEditor() const {
+#ifndef NO_LOCAL_TRACY
             mTracyServer->Draw();
+#endif
         }
     }
 }

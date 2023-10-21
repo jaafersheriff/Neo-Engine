@@ -7,9 +7,11 @@
 
 #include <memory>
 
+#ifndef NO_LOCAL_TRACY
 namespace tracy {
     class View;
 }
+#endif
 
 namespace neo {
     namespace util {
@@ -26,8 +28,10 @@ namespace neo {
             double mTimeStep = 0.0;         /* Delta time */
             int mTotalFrames = 0;           /* Total frames since start up */
         private:
-            std::unique_ptr<tracy::View> mTracyServer;
             double mLastFrameTime = 0.0;    /* Time at which last frame was rendered */
+#ifndef NO_LOCAL_TRACY
+            std::unique_ptr<tracy::View> mTracyServer;
+#endif
         };
     }
 }

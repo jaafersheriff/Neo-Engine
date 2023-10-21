@@ -4,6 +4,7 @@
 
 #include "Engine/Engine.hpp"
 #include "Renderer/Renderer.hpp"
+#include "Hardware/WindowSurface.hpp"
 #include "Hardware/Mouse.hpp"
 
 #include "Util/Util.hpp"
@@ -20,18 +21,19 @@
 
 namespace neo {
 
-    void ImGuiManager::init(GLFWwindow* window) {
+    void ImGuiManager::init(GLFWwindow* window, float scale) {
         /* Init ImGui */
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-        io.FontGlobalScale *= 1.7f;
+        io.FontGlobalScale = 1.f * scale;
         ImGui_ImplGlfw_InitForOpenGL(window, false);
         ImGui_ImplOpenGL3_Init(ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str());
 
         ImGuiStyle* style = &ImGui::GetStyle();
+        style->ScaleAllSizes(scale);
         ImVec4* colors = style->Colors;
 #define HEXTOIM(x) x >= 0x1000000 ? ImVec4( ((x >> 24) & 0xFF) /255.f, ((x >> 16) & 0xFF)/255.f, ((x >> 8) & 0xFF)/255.f, ((x) & 0xFF)/255.f): ImVec4( ((x >> 16) & 0xFF) /255.f, ((x >> 8) & 0xFF)/255.f, ((x) & 0xFF)/255.f, 1.f) 
         auto texColglm = util::sLogSeverityData.at(util::LogSeverity::Info).second;
