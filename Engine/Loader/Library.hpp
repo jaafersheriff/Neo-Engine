@@ -2,6 +2,7 @@
 
 #include "Renderer/GLObjects/Mesh.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
+#include "Renderer/GLObjects/NewShader.hpp"
 
 #include "Loader.hpp"
 
@@ -39,6 +40,10 @@ namespace neo {
             static Framebuffer* createFBO(const std::string&);
             static Framebuffer* getFBO(const std::string&);
 
+            using ShaderDefines = std::vector<std::string>;
+            static NewShader* createShader(const std::string& name, const ShaderDefines& defines = {});
+            static NewShader* getShader(const std::string& name, const ShaderDefines& defines = {});
+
             static void imGuiEditor();
 
         private:
@@ -47,6 +52,8 @@ namespace neo {
             static std::unordered_map<std::string, MeshData> mMeshes;
             static std::unordered_map<std::string, Texture*> mTextures;
             static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
+            using ShaderKey = std::pair<std::string, ShaderDefines>;
+            static std::unordered_map<ShaderKey, NewShader*> mShaders;
 
             static void _insertMesh(const std::string&, MeshData);
             static void _insertTexture(const std::string&, Texture*);

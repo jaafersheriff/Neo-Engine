@@ -28,7 +28,7 @@ namespace neo {
 		virtual void update(ECS& ecs) {
 			NEO_UNUSED(ecs);
 		};
-		virtual void render(ECS& ecs) = 0;
+		virtual void render(const ECS& ecs) = 0;
 		virtual void imGuiEditor(ECS& ecs) {
 			NEO_UNUSED(ecs);
 		}

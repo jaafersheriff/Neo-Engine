@@ -12,6 +12,7 @@
 #include "ECS/Component/RenderableComponent/AlphaTestRenderable.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/PhongRenderable.hpp"
+#include "ECS/Component/RenderableComponent/ShaderComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
@@ -63,8 +64,9 @@ namespace Base {
         ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
         ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
         ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
-        // ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
         ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
+        ecs.addComponent<ShaderComponent>(bunny, Library::getShader("PhongShader", {}));
+        // ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
 
         /* Ground plane */
         auto plane = ecs.createEntity();
@@ -91,8 +93,38 @@ namespace Base {
         NEO_UNUSED(ecs);
     }
 
-    void Demo::render(ECS& ecs) {
-        NEO_UNUSED(ecs);
+    void Demo::render(const ECS& ecs) {
+        const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+        const auto&& [__, light, spatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
+
+        for (const auto&& [entity, shader, mesh, spatial] : ecs.getView<ShaderComponent, MeshComponent, SpatialComponent>().each()) {
+        
+            // VFC
+            // if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+            //     if (!culled->isInView(ecs, entity, cameraEntity)) {
+            //         continue;
+            //     }
+            // }
+ 
+            shader.bind();
+            shader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+            shader.bindUniform("V", cameraSpatial.getView());
+            shader.bindUniform("camPos", cameraSpatial.getPosition());
+            shader.bindUniform("lightCol", light.mColor);
+            shader.bindUniform("lightAtt", light.mAttenuation);
+            shader.bindUniform("lightPos", spatial.getPosition());
+            shader.bindUniform("M", spatial.getModelMatrix());
+            shader.bindUniform("N", spatial.getNormalMatrix());
+            // loadTexture("diffuseMap", *renderable.mDiffuseMap);
+            // const Material& material = renderable.mMaterial;
+            // loadUniform("ambientColor", material.mAmbient);
+            // loadUniform("diffuseColor", material.mDiffuse);
+            // loadUniform("specularColor", material.mSpecular);
+            // loadUniform("shine", material.mShininess);
+        
+            /* DRAW */
+            mesh.mMesh->draw();
+        }
     }
 
     void Demo::destroy() {

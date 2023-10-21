@@ -11,7 +11,7 @@ namespace Base {
 		virtual IDemo::Config getConfig() const override;
 		virtual void init(ECS& ecs) override;
 		virtual void update(ECS& ecs) override;
-		virtual void render(ECS& ecs) override;
+		virtual void render(const ECS& ecs) override;
 		virtual void destroy() override;
 		virtual void imGuiEditor(ECS& ecs) override;
 
