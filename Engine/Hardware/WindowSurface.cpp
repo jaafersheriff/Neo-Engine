@@ -40,9 +40,11 @@ namespace neo {
 #endif
 
         const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        NEO_UNUSED(mode);
+        NEO_ASSERT(mode, "glfwGetVideoMode failed");
+        mDetails.mRefreshRate = mode->refreshRate;
 
         /* Create GLFW window */
+        mTitle = name;
         mWindow = glfwCreateWindow(mDetails.mSize.x, mDetails.mSize.y, name.c_str(), NULL, NULL);
         if (!mWindow) {
             glfwTerminate();
@@ -167,6 +169,7 @@ namespace neo {
     }
 
     void WindowSurface::reset(const std::string& name) {
+        mTitle = name;
         glfwSetWindowTitle(mWindow, name.c_str());
 
         /* Set callbacks */
@@ -187,6 +190,7 @@ namespace neo {
     }
 
     void WindowSurface::updateHardware() {
+        TRACY_ZONE();
         if (!ServiceLocator<ImGuiManager>::ref().isEnabled()) {
             double x, y;
             glfwGetCursorPos(mWindow, &x, &y);
@@ -194,8 +198,10 @@ namespace neo {
             Messenger::sendMessage<Mouse::MouseMoveMessage>(x, y);
         }
         Messenger::sendMessage<Mouse::ScrollWheelMessage>(0.0);
-        TRACY_ZONEN("glfwPollEvents");
-        glfwPollEvents();
+        {
+            TRACY_ZONEN("glfwPollEvents");
+            glfwPollEvents();
+        }
     }
 
     void WindowSurface::setSize(const glm::ivec2& size) {

@@ -1,8 +1,8 @@
 #pragma once
 
-#define TRACY_ZONEN(x) ZoneScopedNC(x, HashedString(x));
+#define TRACY_ZONEN(x) ZoneScopedNC(x, (HashedString(x) & 0x9e9e9e) >> 1 )
 #define TRACY_ZONE() TRACY_ZONEN(TracyFunction)
-#define TRACY_GPUN(x) TRACY_ZONEN(x); TracyGpuZoneC(x, HashedString(x))
+#define TRACY_GPUN(x) TRACY_ZONEN(x); TracyGpuZoneC(x, (HashedString(x) & 0xfefefe) >> 1 )
 #define TRACY_GPU() TRACY_GPUN(TracyFunction)
 
 #include <memory>
@@ -15,7 +15,7 @@ namespace neo {
     namespace util {
         class Profiler {
         public:
-            Profiler();
+            Profiler(int refreshRate);
             ~Profiler();
             Profiler(const Profiler&) = delete;
             Profiler& operator=(const Profiler&) = delete;
@@ -23,15 +23,10 @@ namespace neo {
             void update(double);
             void imGuiEditor() const;
 
-            std::unique_ptr<tracy::View> view;
-            // std::vector<int> mFPSList;
-            int mFPS = 0;                    /* Frames per second */
             double mTimeStep = 0.0;         /* Delta time */
             int mTotalFrames = 0;           /* Total frames since start up */
-            int mMaxFPS = 0;           
         private:
-            double mLastFPSTime = 0.0;      /* Time at which last FPS was calculated */
-            int mFramesInCount = 0;         /* Number of frames in current second */
+            std::unique_ptr<tracy::View> mTracyServer;
             double mLastFrameTime = 0.0;    /* Time at which last frame was rendered */
         };
     }

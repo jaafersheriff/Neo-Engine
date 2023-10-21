@@ -6,5 +6,6 @@ namespace neo {
         glm::uvec2 mPos = { 0,0 };
         bool mFullscreen = false;
         bool mVSyncEnabled = true;
+        int mRefreshRate = 60;
     };
 }
