@@ -10,10 +10,10 @@
 
 static int sCurrentDemo = 0;
 static std::vector<neo::IDemo*> sDemos = {
+ 	new FrustaFitting::Demo(),
 	new Base::Demo(),
 	new Cornell::Demo(),
 	new Sponza::Demo(),
- 	new FrustaFitting::Demo(),
  	new Compute::Demo(),
 	new NormalVisualizer::Demo(),
 };

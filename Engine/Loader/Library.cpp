@@ -8,6 +8,8 @@
 
 #include "Engine/ImGuiManager.hpp"
 
+#include "Util/Profiler.hpp"
+
 namespace neo {
     /* Library */
     std::unordered_map<std::string, MeshData> Library::mMeshes;
@@ -26,7 +28,7 @@ namespace neo {
     }
 
     MeshData Library::loadMesh(const std::string& fileName, bool doResize) {
-        ZoneScoped;
+        TRACY_ZONE();
 
         auto it = mMeshes.find(fileName);
         if (it != mMeshes.end()) {
@@ -54,7 +56,7 @@ namespace neo {
     }
 
     Texture* Library::loadTexture(const std::string& fileName, TextureFormat format) {
-        ZoneScoped;
+        TRACY_ZONE();
 
         auto it = mTextures.find(fileName);
         if (it != mTextures.end()) {
@@ -68,7 +70,7 @@ namespace neo {
     }
 
     Texture* Library::loadCubemap(const std::string& name, const std::vector<std::string> &files) {
-        ZoneScoped;
+        TRACY_ZONE();
 
         auto texture = Loader::loadTexture(name, files);
         _insertTexture(name, texture);
@@ -84,7 +86,7 @@ namespace neo {
     }
 
     Framebuffer* Library::getFBO(const std::string &name) {
-        ZoneScoped;
+        TRACY_ZONE();
         auto it = mFramebuffers.find(name);
         if (it != mFramebuffers.end()) {
             return it->second;

@@ -12,7 +12,7 @@ namespace neo {
 	}
 
 	void ECS::_updateSystems() {
-		ZoneScoped;
+		TRACY_ZONEN("Update Systems");
 		for (auto& system : mSystems) {
 			if (system.second->mActive) {
 				system.second->update(*this);
@@ -30,7 +30,7 @@ namespace neo {
 	}
 
 	void ECS::flush() {
-        ZoneScoped;
+		TRACY_ZONE();
 		for (auto&& job : mAddComponentFuncs) {
 			job(mRegistry);
 		}

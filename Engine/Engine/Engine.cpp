@@ -116,7 +116,7 @@ namespace neo {
         demos.setForceReload();
         
         while (!mWindow.shouldClose() && !mKeyboard.isKeyPressed(GLFW_KEY_ESCAPE)) {
-            ZoneScoped;
+            TRACY_ZONEN("Engine::run");
 
             if (demos.needsReload()) {
                 _swapDemo(demos);
@@ -132,7 +132,7 @@ namespace neo {
             Messenger::relayMessages(mECS);
 
             {
-                ZoneScopedN("FrameStats Entity");
+                TRACY_ZONEN("FrameStats Entity");
                 auto hardware = mECS.createEntity();
                 mECS.addComponent<MouseComponent>(hardware, mMouse);
                 mECS.addComponent<KeyboardComponent>(hardware, mKeyboard);
@@ -147,7 +147,7 @@ namespace neo {
             }
 
             {
-                ZoneScopedN("Demo::update");
+                TRACY_ZONEN("Demo::update");
                 demos.getCurrentDemo()->update(mECS);
             }
 
@@ -162,31 +162,31 @@ namespace neo {
 
                 /* Update imgui functions */
                 if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                    ZoneScopedN("ImGui Calls");
+                    TRACY_ZONEN("ImGui");
                     ServiceLocator<ImGuiManager>::ref().begin();
 
                     {
-                        ZoneScopedN("demos.imGuiEditor");
+                        TRACY_ZONEN("Demos Imgui");
                         demos.imGuiEditor(mECS);
                     }
                     {
-                        ZoneScopedN("mECS.imguiEdtor");
+                        TRACY_ZONEN("ECS Imgui");
                         mECS.imguiEdtor();
                     }
                     {
-                        ZoneScopedN("Renderer.imGuiEditor");
+                        TRACY_ZONEN("Renderer Imgui");
                         ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
                     }
                     {
-                        ZoneScopedN("Library::imGuiEditor");
+                        TRACY_ZONEN("Library ImGui");
                         Library::imGuiEditor();
                     }
                     {
-                        ZoneScopedN("ImGuiManager.imGuiEditor");
+                        TRACY_ZONEN("ImGuiManager ImGui");
                         ServiceLocator<ImGuiManager>::ref().imGuiEditor();
                     }
                     {
-                        ZoneScopedN("Profiler.imGuiEditor");
+                        TRACY_ZONEN("Profiler Imgui");
                         profiler.imGuiEditor();
                     }
 
@@ -209,8 +209,7 @@ namespace neo {
             });
 
             {
-                ZoneScopedN("glfwSwapBuffers");
-                TracyGpuZone("glfwSwapBuffers");
+                TRACY_GPUN("glfwSwapBuffers");
                 glfwSwapBuffers(mWindow.getWindow());
             }
             FrameMark;
@@ -222,7 +221,7 @@ namespace neo {
     }
 
     void Engine::_swapDemo(DemoWrangler& demos) {
-        ZoneScopedN("_swapDemo");
+        TRACY_ZONE();
 
         /* Destry the old state*/
         demos.getCurrentDemo()->destroy();

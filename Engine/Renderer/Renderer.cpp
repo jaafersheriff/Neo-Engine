@@ -123,8 +123,7 @@ namespace neo {
     }
 
     void Renderer::resetState() {
-        ZoneScoped;
-        TracyGpuZone("resetState");
+        TRACY_GPU();
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 
@@ -149,8 +148,7 @@ namespace neo {
     void Renderer::render(WindowSurface& window, ECS& ecs) {
         mStats = {};
 
-        ZoneScoped;
-        TracyGpuZone("Renderer::render");
+        TRACY_GPU();
         resetState();
 
         /* Get active shaders */
@@ -160,8 +158,7 @@ namespace neo {
 
         /* Run compute */
         if (activeComputeShaders.size()) {
-            ZoneScopedN("Compute shaders");
-            TracyGpuZone("Compute shaders");
+            TRACY_GPUN("Compute shaders");
             for (auto& shader : activeComputeShaders) {
                 resetState();
                 mStats.mNumShaders++;
@@ -171,8 +168,7 @@ namespace neo {
 
         /* Render all preprocesses */
         if (activePreShaders.size()) {
-            ZoneScopedN("PreScene shaders");
-            TracyGpuZone("PreScene shaders");
+            TRACY_GPUN("PreScene shaders");
 
             for (auto& shader : activePreShaders) {
                 resetState();
@@ -184,8 +180,7 @@ namespace neo {
         /* Reset default FBO state */
         glm::ivec2 frameSize = window.getDetails().mSize;
         {
-            ZoneScopedN("Reset DefaultFBO");
-            TracyGpuZone("Reset DefaultFBO");
+            TRACY_GPUN("Reset DefaultFBO");
             mDefaultFBO->bind();
             glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 1.f);
             glViewport(0, 0, frameSize.x, frameSize.y);
@@ -194,8 +189,7 @@ namespace neo {
 
         /* Render all scene shaders */
         {
-            ZoneScopedN("renderScene");
-            TracyGpuZone("renderScene");
+            TRACY_GPUN("renderScene");
             for (auto& shader : mSceneShaders) {
                 if (shader.second->mActive) {
                     resetState();
@@ -207,8 +201,7 @@ namespace neo {
 
         /* Post process with ping & pong */
         if (activePostShaders.size()) {
-            ZoneScopedN("PostProcess shaders");
-            TracyGpuZone("PostProcess shaders");
+            TRACY_GPUN("PostProcess shaders");
 
             /* Render first post process shader into appropriate output buffer */
             Framebuffer* inputFBO = mDefaultFBO;
@@ -236,14 +229,12 @@ namespace neo {
 
         /* Render imgui */
         if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-            ZoneScopedN("ImGuiManager.render");
-            TracyGpuZone("ImGuiManager.render");
+            TRACY_GPUN("ImGuiManager.render");
             mBackBuffer->bind();
             ServiceLocator<ImGuiManager>::ref().render();
         }
         else if (activePostShaders.size() > 1) {
-            ZoneScopedN("Final Blit");
-            TracyGpuZone("Final Blit");
+            TRACY_GPUN("Final Blit");
             if (!mBlitShader) {
                 mBlitShader = new BlitShader;
             }
@@ -268,7 +259,7 @@ namespace neo {
     }
 
     void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize, ECS& ecs) {
-        ZoneScoped;
+        TRACY_GPU();
         mStats.mNumShaders++;
 
         // Reset output FBO

@@ -10,7 +10,7 @@
 
 namespace neo {
     void FrustumSystem::update(ECS& ecs) {
-        ZoneScoped;
+        TRACY_ZONEN("FrustumSystem");
         for (auto&& [entity, frustum, spatial] : ecs.getView<FrustumComponent, SpatialComponent>().each()) {
 
             glm::vec3 P = spatial.getPosition();

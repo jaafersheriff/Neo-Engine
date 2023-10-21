@@ -2,7 +2,9 @@
 
 #include "Texture.hpp"
 
-#include <tracy/Tracy.hpp>
+#include "Util/Profiler.hpp"
+
+#include <tracy/TracyOpenGL.hpp>
 
 namespace neo {
 
@@ -31,8 +33,7 @@ namespace neo {
         }
 
         virtual void _upload(const void* data) override {
-            ZoneScoped;
-            // MICROPROFILE_SCOPEGPUI("Texture2D::upload", MP_AUTO);
+            TRACY_GPU();
 
             /* Bind texture buffer object to active texture */
             bind();

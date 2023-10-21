@@ -7,6 +7,7 @@
 #include "Hardware/Mouse.hpp"
 
 #include "Util/Util.hpp"
+#include "Util/Profiler.hpp"
 #include "Util/Log/Log.hpp"
 #include "Util/ServiceLocator.hpp"
 
@@ -23,7 +24,6 @@ namespace neo {
         /* Init ImGui */
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        // ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
@@ -68,7 +68,6 @@ namespace neo {
         colors[ImGuiCol_ResizeGripActive] = texColimv;
         colors[ImGuiCol_SeparatorHovered] = disabledTexColimv;
         colors[ImGuiCol_SeparatorActive] = texColimv;
-        // ImPlot::GetStyle().Colors[ImPlotCol_Line] = texColimv;
 
         style->ChildRounding = 4.0f;
         style->FrameBorderSize = 1.0f;
@@ -87,7 +86,7 @@ namespace neo {
         if (!mIsEnabled) {
             return;
         }
-        ZoneScoped;
+        TRACY_ZONE();
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -105,7 +104,7 @@ namespace neo {
 
     void ImGuiManager::updateViewport() {
         NEO_ASSERT(mIsEnabled, "ImGui is disabled");
-        ZoneScoped;
+        TRACY_ZONE();
 
         mViewport.mIsFocused = ImGui::IsWindowFocused();
         mViewport.mIsHovered = ImGui::IsWindowHovered();
@@ -150,7 +149,7 @@ namespace neo {
 
     void ImGuiManager::begin() {
         NEO_ASSERT(mIsEnabled, "ImGui is disabled");
-        ZoneScoped;
+        TRACY_ZONEN("ImGuiManager::begin");
 
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
         // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
@@ -185,6 +184,7 @@ namespace neo {
 
     void ImGuiManager::end() {
         NEO_ASSERT(mIsEnabled, "ImGui is disabled");
+        TRACY_ZONEN("ImGuiManager::end");
 
         ImGui::End();
     }
@@ -195,14 +195,12 @@ namespace neo {
         }
 
         {
-            ZoneScopedN("ImGui::render");
-            TracyGpuZone("ImGui::render");
+            TRACY_GPUN("ImGui::render");
             ImGui::Render();
         }
         {
 
-            ZoneScopedN("ImGui_ImplOpenGL3_RenderDrawData");
-            TracyGpuZone("ImGui_ImplOpenGL3_RenderDrawData");
+            TRACY_GPUN("ImGui_ImplOpenGL3_RenderDrawData");
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
 
@@ -211,14 +209,12 @@ namespace neo {
             GLFWwindow* backup_current_context = glfwGetCurrentContext();
             
             {
-                ZoneScopedN("ImGui::UpdatePlatformWindows");
-                TracyGpuZone("ImGui::UpdatePlatformWindows");
+                TRACY_GPUN("ImGui::UpdatePlatformWindows");
                 ImGui::UpdatePlatformWindows();
             }
             {
 
-                ZoneScopedN("ImGui::RenderPlatformWindowsDefault");
-                TracyGpuZone("ImGui::RenderPlatformWindowsDefault");
+                TRACY_GPUN("ImGui::RenderPlatformWindowsDefault");
                 ImGui::RenderPlatformWindowsDefault();
             }
             

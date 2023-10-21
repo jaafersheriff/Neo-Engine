@@ -7,9 +7,11 @@
 
 #include "Loader/Library.hpp"
 
+#include "Util/Profiler.hpp"
 #include "Util/ServiceLocator.hpp"
 
-#include "ext/imgui/imgui.h"
+#include <imgui.h>
+#include <tracy/TracyOpenGL.hpp>
 
 using namespace neo;
 
@@ -39,7 +41,7 @@ namespace Compute {
         }
 
         void updateBuffers() {
-            ZoneScoped;
+            TRACY_GPUN("ParticleMeshComponent::updateBuffers");
             std::vector<float> positions;
             positions.resize(mNumParticles * 4);
             for (int i = 0; i < mNumParticles; i++) {

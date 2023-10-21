@@ -4,10 +4,10 @@
 #include "GLHelper.hpp"
 
 #include "Util/Util.hpp"
+#include "Util/Profiler.hpp"
 
 #include <GL/glew.h>
-
-#include <tracy/Tracy.hpp>
+#include <tracy/TracyOpenGL.hpp>
 
 namespace neo {
 
@@ -23,8 +23,7 @@ namespace neo {
         }
         
         void bind() {
-            ZoneScoped;
-            // MICROPROFILE_SCOPEGPUI("Framebuffer::bind", MP_AUTO);
+            TRACY_GPU();
             glBindFramebuffer(GL_FRAMEBUFFER, mFBOID);
         }
         

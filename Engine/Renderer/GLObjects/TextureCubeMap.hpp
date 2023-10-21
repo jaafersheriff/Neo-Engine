@@ -4,8 +4,6 @@
 
 #include <array>
 
-#include <tracy/Tracy.hpp>
-
 namespace neo {
 
     class TextureCubeMap : public Texture {
@@ -40,8 +38,7 @@ namespace neo {
         }
 
         void _upload(void** data) {
-            ZoneScoped;
-            //MICROPROFILE_SCOPEGPUI("TextureCube::upload", MP_AUTO);
+            TRACY_GPU();
 
             NEO_ASSERT(data, "Trying to upload a CubeMap with invalid data");
             bind();

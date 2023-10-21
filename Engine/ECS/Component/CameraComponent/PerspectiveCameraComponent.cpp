@@ -1,5 +1,7 @@
 #include "ECS/pch.hpp"
+
 #include "PerspectiveCameraComponent.hpp"
+
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 namespace neo {
@@ -31,7 +33,7 @@ namespace neo {
 
 
     void PerspectiveCameraComponent::_detProj() const {
-        ZoneScoped;
+        TRACY_ZONE();
         mProjMat = glm::perspective(glm::radians(mFOV), mAspectRatio, mNear, mFar);
         mProjMatDirty = false;
     }

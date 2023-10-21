@@ -25,11 +25,11 @@ namespace neo {
                     float FXAA_REDUCE_MUL = 1.0/8.0;
                     float FXAA_REDUCE_MIN = 1.0/128.0;
 
-                    vec3 rgbNW=texture2D(inputFBO,fragTex+(vec2(-1.0,-1.0)/frameSize)).xyz;
-                    vec3 rgbNE=texture2D(inputFBO,fragTex+(vec2( 1.0,-1.0)/frameSize)).xyz;
-                    vec3 rgbSW=texture2D(inputFBO,fragTex+(vec2(-1.0, 1.0)/frameSize)).xyz;
-                    vec3 rgbSE=texture2D(inputFBO,fragTex+(vec2( 1.0, 1.0)/frameSize)).xyz;
-                    vec3 rgbM= texture2D(inputFBO,fragTex).xyz;
+                    vec3 rgbNW=texture(inputFBO,fragTex+(vec2(-1.0,-1.0)/frameSize)).xyz;
+                    vec3 rgbNE=texture(inputFBO,fragTex+(vec2( 1.0,-1.0)/frameSize)).xyz;
+                    vec3 rgbSW=texture(inputFBO,fragTex+(vec2(-1.0, 1.0)/frameSize)).xyz;
+                    vec3 rgbSE=texture(inputFBO,fragTex+(vec2( 1.0, 1.0)/frameSize)).xyz;
+                    vec3 rgbM= texture(inputFBO,fragTex).xyz;
 
                     vec3 luma=vec3(0.299, 0.587, 0.114);
                     float lumaNW = dot(rgbNW, luma);
@@ -56,11 +56,11 @@ namespace neo {
                           dir * rcpDirMin)) / frameSize;
 
                     vec3 rgbA = (1.0/2.0) * (
-                        texture2D(inputFBO, fragTex.xy + dir * (1.0/3.0 - 0.5)).xyz +
-                        texture2D(inputFBO, fragTex.xy + dir * (2.0/3.0 - 0.5)).xyz);
+                        texture(inputFBO, fragTex.xy + dir * (1.0/3.0 - 0.5)).xyz +
+                        texture(inputFBO, fragTex.xy + dir * (2.0/3.0 - 0.5)).xyz);
                     vec3 rgbB = rgbA * (1.0/2.0) + (1.0/4.0) * (
-                        texture2D(inputFBO, fragTex.xy + dir * (0.0/3.0 - 0.5)).xyz +
-                        texture2D(inputFBO, fragTex.xy + dir * (3.0/3.0 - 0.5)).xyz);
+                        texture(inputFBO, fragTex.xy + dir * (0.0/3.0 - 0.5)).xyz +
+                        texture(inputFBO, fragTex.xy + dir * (3.0/3.0 - 0.5)).xyz);
                     float lumaB = dot(rgbB, luma);
 
                     if((lumaB < lumaMin) || (lumaB > lumaMax)){
@@ -72,8 +72,7 @@ namespace neo {
         {}
 
          void render(const ECS& ecs) override {
-            ZoneScoped;
-            TracyGpuZone("FXAAShader");
+            TRACY_GPUN("FXAAShader");
             glm::vec2 size = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>()).mSize;
             loadUniform("frameSize", size);
          }

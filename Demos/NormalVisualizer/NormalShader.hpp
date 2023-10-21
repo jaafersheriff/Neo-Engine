@@ -10,6 +10,8 @@
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/GlHelper.hpp"
 
+#include "Util/Profiler.hpp"
+
 #include <imgui.h>
 #include <tracy/TracyOpenGL.hpp>
 
@@ -31,8 +33,7 @@ namespace NormalVisualizer {
         }
 
         virtual void render(const ECS& ecs) override {
-            ZoneScoped;
-            TracyGpuZone("NormalShader");
+            TRACY_GPUN("NormalShader");
             bind();
 
             loadUniform("magnitude", magnitude);

@@ -1,5 +1,12 @@
 #pragma once
 
+#define TRACY_ZONEN(x) ZoneScopedNC(x, HashedString(x));
+#define TRACY_ZONE() TRACY_ZONEN(TracyFunction)
+#define TRACY_GPUN(x) TRACY_ZONEN(x); TracyGpuZoneC(x, HashedString(x))
+#define TRACY_GPU() TRACY_GPUN(TracyFunction)
+
+#include <memory>
+
 namespace tracy {
     class View;
 }

@@ -7,6 +7,8 @@
 #include "Engine/ImGuiManager.hpp"
 #include "Messaging/Messenger.hpp"
 
+#include "Util/Profiler.hpp"
+
 namespace neo {
 
     namespace {
@@ -192,7 +194,7 @@ namespace neo {
             Messenger::sendMessage<Mouse::MouseMoveMessage>(x, y);
         }
         Messenger::sendMessage<Mouse::ScrollWheelMessage>(0.0);
-        ZoneScopedN("glfwPollEvents");
+        TRACY_ZONEN("glfwPollEvents");
         glfwPollEvents();
     }
 

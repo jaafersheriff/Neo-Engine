@@ -37,8 +37,7 @@ namespace neo {
         {}
 
         virtual void render(const ECS& ecs) override {
-            ZoneScoped;
-            TracyGpuZone("AlphaTestShader");
+            TRACY_GPUN("AlphaTestShader");
             bind();
 
             /* Load PV */

@@ -43,8 +43,7 @@ namespace FrustaFitting {
         {}
 
         virtual void render(const ECS& ecs) override {
-            ZoneScoped;
-            TracyGpuZone("WireShader");
+            TRACY_GPUN("WireShader");
             bind();
             glDisable(GL_CULL_FACE);
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

@@ -51,8 +51,7 @@ namespace neo {
         {}
 
         virtual void render(const ECS& ecs) override {
-            ZoneScoped;
-            TracyGpuZone("OutlineShader");
+            TRACY_GPUN("OutlineShader");
             bind();
 
             glCullFace(GL_FRONT);

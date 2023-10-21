@@ -12,7 +12,7 @@
 namespace neo {
 
     void CameraControllerSystem::update(ECS& ecs) {
-        ZoneScoped;
+        TRACY_ZONE();
         for (auto&& [entity, controller, spatial] : ecs.getView<CameraControllerComponent, SpatialComponent>().each()) {
             if (auto frameStatsOpt = ecs.getComponent<FrameStatsComponent>()) {
                 auto&& [_, frameStats] = *frameStatsOpt;
@@ -28,7 +28,7 @@ namespace neo {
     }
 
     void CameraControllerSystem::_updateLook(const float dt, ECS& ecs, CameraControllerComponent& controller, SpatialComponent& spatial) {
-        ZoneScoped;
+        TRACY_ZONE();
         if (auto mouseOpt = ecs.getComponent<MouseComponent>()) {
             auto&& [_, mouse] = *mouseOpt;
             glm::vec2 mousePos = mouse.mFrameMouse.getPos();
@@ -76,7 +76,7 @@ namespace neo {
     }
 
     void CameraControllerSystem::_updatePosition(const float dt, ECS& ecs, CameraControllerComponent& comp, SpatialComponent& spatial) {
-        ZoneScoped;
+        TRACY_ZONE();
 
         if (auto keyboardOpt = ecs.getComponent<KeyboardComponent>()) {
             auto&& [_, keyboard] = *keyboardOpt;

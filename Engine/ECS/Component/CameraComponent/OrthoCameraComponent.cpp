@@ -23,7 +23,7 @@ namespace neo {
     }
 
     void OrthoCameraComponent::_detProj() const {
-        ZoneScoped;
+        TRACY_ZONE();
         mProjMat = glm::ortho(mHorizBounds.x, mHorizBounds.y, mVertBounds.x, mVertBounds.y, mNear, mFar);
         mProjMatDirty = false;
     }

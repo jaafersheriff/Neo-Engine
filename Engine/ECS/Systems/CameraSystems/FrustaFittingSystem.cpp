@@ -14,7 +14,7 @@
 namespace neo {
 
     void FrustaFittingSystem::update(ECS& ecs) {
-        ZoneScoped;
+        TRACY_ZONE();
 
         auto sourceCameraTuple = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent, PerspectiveCameraComponent>();
         auto receiverCameraTuple = ecs.getSingleView<FrustumFitReceiverComponent, SpatialComponent, OrthoCameraComponent>();

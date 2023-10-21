@@ -70,8 +70,7 @@ namespace neo {
         { }
 
         virtual void render(const ECS& ecs) override {
-            ZoneScoped;
-            TracyGpuZone("PhongShader");
+            TRACY_GPUN("PhongShader");
             bind();
 
             /* Load PV */

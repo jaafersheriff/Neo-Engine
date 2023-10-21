@@ -8,6 +8,8 @@
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
+#include "Util/Profiler.hpp"
+
 #include <algorithm>
 #include <limits>
 
@@ -22,7 +24,7 @@ namespace FrustaFitting {
         }
 
         virtual void update(ECS& ecs) override {
-            ZoneScoped;
+            TRACY_ZONEN("PerspectiveUpdateSystem");
             if (auto sourceCamera = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent>()) {
                 if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
                     auto&& [_, __, sourceSpatial] = *sourceCamera;

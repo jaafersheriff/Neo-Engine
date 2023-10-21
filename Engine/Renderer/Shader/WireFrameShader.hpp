@@ -34,8 +34,7 @@ namespace neo {
             {}
 
             virtual void render(const ECS& ecs) override {
-                ZoneScoped;
-                TracyGpuZone("WireframeShader");
+                TRACY_GPUN("WireframeShader");
                 bind();
                 glDisable(GL_CULL_FACE);
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

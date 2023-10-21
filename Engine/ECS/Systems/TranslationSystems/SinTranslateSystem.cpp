@@ -6,7 +6,7 @@
 
 namespace neo {
     void SinTranslateSystem::update(ECS& ecs) {
-        ZoneScoped;
+        TRACY_ZONEN("SinTranslateSystem");
 
         if (auto frameStatsOpt = ecs.getComponent<FrameStatsComponent>()) {
             auto&& [_, frameStats] = *frameStatsOpt;

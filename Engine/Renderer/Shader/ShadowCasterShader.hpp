@@ -56,8 +56,7 @@ namespace neo {
             }
 
             virtual void render(const ECS& ecs) override {
-                ZoneScoped;
-                TracyGpuZone("ShadowCasterShader");
+                TRACY_GPUN("ShadowCasterShader");
                 bind();
 
                 auto shadowCameraView = ecs.getSingleView<ShadowCameraComponent, SpatialComponent>();

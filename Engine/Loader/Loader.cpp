@@ -8,6 +8,8 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
+#include "Util/Profiler.hpp"
+
 #pragma warning(push)
 #pragma warning(disable: 4706)
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -30,7 +32,7 @@ namespace neo {
     }
 
     MeshData Loader::loadMesh(const std::string &fileName, bool doResize) {
-        ZoneScoped;
+        TRACY_ZONE();
 
         /* Create mesh */
         MeshData meshData;
@@ -175,7 +177,7 @@ namespace neo {
     }
 
     Texture2D* Loader::loadTexture(const std::string &fileName, TextureFormat format) {
-        ZoneScoped;
+        TRACY_ZONE();
         /* Create an empty texture if it is not already exist in the library */
         int width, height, components;
         uint8_t* data = _loadTextureData(width, height, components, fileName, format);
@@ -190,7 +192,7 @@ namespace neo {
     }
 
     TextureCubeMap* Loader::loadTexture(const std::string &name, const std::vector<std::string>& files) {
-        ZoneScoped;
+        TRACY_ZONE();
 
         NEO_ASSERT(files.size() == 6, "Attempting to create cube map without 6 files");
 

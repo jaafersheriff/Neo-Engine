@@ -37,8 +37,7 @@ namespace neo {
             {}
 
             virtual void render(const ECS& ecs) override {
-                ZoneScoped;
-                TracyGpuZone("NormalShader");
+                TRACY_GPUN("LineShader");
                 bind();
 
                 glEnable(GL_LINE_SMOOTH);

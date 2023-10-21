@@ -29,8 +29,7 @@ namespace Compute {
         }
 
         virtual void render(const ECS& ecs) override {
-            ZoneScoped;
-            TracyGpuZone("ParticleVisShader");
+            TRACY_GPUN("ParticleVisShader");
             bind();
 
             if (auto cameraView = ecs.getSingleView<MainCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {

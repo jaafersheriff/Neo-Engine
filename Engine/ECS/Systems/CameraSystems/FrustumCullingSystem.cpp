@@ -13,7 +13,7 @@
 namespace neo {
 
     void FrustumCullingSystem::update(ECS& ecs) {
-        ZoneScoped;
+        TRACY_ZONEN("FrustumCullingSystem");
         NEO_ASSERT(ecs.isSystemEnabled<FrustumSystem>(), "This system can only be used with the FrustumSystem!");
         mCulledCount = 0;
 

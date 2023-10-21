@@ -2,6 +2,7 @@
 
 
 #include "Util/Util.hpp"
+#include "Util/Profiler.hpp"
 
 #include <vector>
 #include <unordered_map>

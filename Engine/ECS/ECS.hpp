@@ -2,6 +2,8 @@
 
 #include "ECS/Systems/System.hpp"
 
+#include "Util/Profiler.hpp"
+
 #ifndef ENTT_ASSERT
 #define ENTT_ASSERT(condition, ...) NEO_ASSERT(condition, __VA_ARGS__)
 #endif
@@ -218,13 +220,13 @@ namespace neo {
 
 	template<typename... CompTs>
 	auto ECS::getView() {
-		ZoneScoped;
+		TRACY_ZONE();
 		return mRegistry.view<CompTs...>();
 	}
 
 	template<typename... CompTs>
 	const auto ECS::getView() const {
-		ZoneScoped;
+		TRACY_ZONE();
 		// TODO -- maybe force const inputs rather than attaching it
 		// TODO -- otherwise view.get<> breaks
 		return mRegistry.view<const CompTs...>();
@@ -252,7 +254,7 @@ namespace neo {
 	}
 
 	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, CompTs&...>> ECS::getSingleView() {
-		ZoneScopedN("getSingleView");
+		TRACY_ZONE();
 		auto view = mRegistry.view<CompTs...>();
 		if (view.size_hint() > 1) {
 			NEO_LOG_E("Found %d entities when one was requested in %s", view.size_hint(), __FUNCSIG__);
@@ -266,7 +268,7 @@ namespace neo {
 	// TODO -- maybe force const inputs rather than attaching it
 	// TODO -- otherwise view.get<> breaks
 	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, const CompTs&...>> ECS::getSingleView() const {
-		ZoneScopedN("getSingleView");
+		TRACY_ZONE();
 		auto view = mRegistry.view<const CompTs...>();
 		if (view.size_hint() > 1) {
 			NEO_LOG_E("Found %d entities when one was requested in %s", view.size_hint(), __FUNCSIG__);

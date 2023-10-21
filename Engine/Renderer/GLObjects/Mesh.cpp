@@ -4,6 +4,8 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/Renderer.hpp"
 
+#include "Util/Profiler.hpp"
+
 #include "GL/glew.h"
 
 namespace neo {
@@ -69,8 +71,7 @@ namespace neo {
     }
 
     void Mesh::updateVertexBuffer(VertexType type, const std::vector<float>& buffer) {
-        ZoneScoped;
-        // MICROPROFILE_SCOPEGPUI("Mesh::updateVertexBuffer", MP_AUTO);
+        TRACY_GPU();
 
         const auto& vbo = mVBOs.find(type);
         NEO_ASSERT(vbo != mVBOs.end(), "Attempting to update a VertexBuffer that doesn't exist");
@@ -87,8 +88,7 @@ namespace neo {
     }
 
     void Mesh::updateVertexBuffer(VertexType type, uint32_t size) {
-        ZoneScoped;
-        // MICROPROFILE_SCOPEGPUI("Mesh::updateVBO", MP_AUTO);
+        TRACY_GPU();
 
         NEO_ASSERT(size > 0, "Attempting to update a VertexBuffer with no data");
         const auto& vbo = mVBOs.find(type);
@@ -139,8 +139,7 @@ namespace neo {
     }
 
     void Mesh::updateElementBuffer(const std::vector<uint32_t>& buffer) {
-        ZoneScoped;
-        // MICROPROFILE_SCOPEGPUI("Mesh::updateEBO", MP_AUTO);
+        TRACY_GPU();
 
         NEO_ASSERT(mElementVBO.has_value() && buffer.size(), "Attempting to update an ElementBuffer that doesn't exist");
         mElementVBO->bufferSize = static_cast<uint32_t>(buffer.size());
@@ -154,8 +153,7 @@ namespace neo {
     }
 
     void Mesh::updateElementBuffer(uint32_t size) {
-        ZoneScoped;
-        // MICROPROFILE_SCOPEGPUI("Mesh::updateEBO", MP_AUTO);
+        TRACY_GPU();
 
         NEO_ASSERT(mElementVBO.has_value(), "Attempting to update an ElementBuffer that doesn't exist");
         NEO_ASSERT(size, "Attempting to update an ElementBuffer with no data");
