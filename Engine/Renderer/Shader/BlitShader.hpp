@@ -14,11 +14,10 @@ namespace neo {
 
         BlitShader() :
             PostProcessShader("BlitShader", R"(
-                in vec2 fragTex;
-                uniform sampler2D inputTexture;
+                #include "postprocess.glsl"
                 out vec4 color;
                 void main() {
-                color = texture(inputTexture, fragTex);
+                color = texture(inputFBO, fragTex);
                 })")
         {}
     };

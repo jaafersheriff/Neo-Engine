@@ -91,6 +91,9 @@ namespace neo {
 		
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
 	#endif
+        if (!mBlitShader) {
+            mBlitShader = new BlitShader;
+        }
 
         /* Init default FBO */
         mBackBuffer = Library::createFBO("0");
@@ -111,7 +114,7 @@ namespace neo {
     }
 
     void Renderer::_onFrameSizeChanged(const FrameSizeMessage& msg) {
-        mDefaultFBO->resize(msg.mSize);
+        Library::getFBO("backbuffer")->resize(msg.mSize);
         auto ping = Library::getFBO("ping");
         if (ping) {
             ping->resize(msg.mSize);
@@ -205,7 +208,7 @@ namespace neo {
 
             /* Render first post process shader into appropriate output buffer */
             Framebuffer* inputFBO = mDefaultFBO;
-            Framebuffer* outputFBO = activePostShaders.size() == 1 ? mBackBuffer : Library::getFBO("pong");
+            Framebuffer* outputFBO = activePostShaders.size() == 1 ? Library::getFBO("backbuffer") : Library::getFBO("pong");
 
             _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().mSize, ecs);
 
@@ -223,8 +226,11 @@ namespace neo {
 
             /* nth shader writes out to FBO 0 if it hasn't already been done */
             if (activePostShaders.size() > 1) {
-                _renderPostProcess(*activePostShaders.back(), inputFBO, mBackBuffer, window.getDetails().mSize, ecs);
+                _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("backbuffer"), window.getDetails().mSize, ecs);
             }
+        }
+        else if (mDefaultFBO != Library::getFBO("backbuffer")) {
+            _renderPostProcess(*mBlitShader, mDefaultFBO, Library::getFBO("backbuffer"), window.getDetails().mSize, ecs);
         }
 
         /* Render imgui */
@@ -233,29 +239,10 @@ namespace neo {
             mBackBuffer->bind();
             ServiceLocator<ImGuiManager>::ref().render();
         }
-        // else if (activePostShaders.size() > 1) {
-        //     TRACY_GPUN("Final Blit");
-        //     if (!mBlitShader) {
-        //         mBlitShader = new BlitShader;
-        //     }
-        //     mBackBuffer->bind();
-        //     resetState();
-        //     glDisable(GL_DEPTH_TEST);
-        //     glClearColor(0.f, 0.f, 0.f, 1.f);
-        //     glClear(GL_COLOR_BUFFER_BIT);
-        //     glViewport(0, 0, frameSize.x, frameSize.y);
-
-        //     mBlitShader->bind();
-        //     auto meshData = Library::getMesh("quad");
-        //     glBindVertexArray(meshData.mMesh->mVAOID);
-
-        //     // Bind input fbo texture
-        //     mBlitShader->loadTexture("inputTexture", *mDefaultFBO->mTextures[0]);
-
-        //     // Render 
-        //     meshData.mMesh->draw();
-        //     mBlitShader->unbind();
-        // }
+        else {
+            TRACY_GPUN("Final Blit");
+            _renderPostProcess(*mBlitShader, Library::getFBO("backbuffer"), mBackBuffer, window.getDetails().mSize, ecs);
+        }
     }
 
     void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize, ECS& ecs) {
@@ -278,7 +265,6 @@ namespace neo {
         // Bind input fbo texture
         shader.loadTexture("inputFBO", *input->mTextures[0]); 
         shader.loadTexture("inputDepth", *input->mTextures[1]); 
-
 
         // Allow shader to do any prep (eg. bind uniforms) 
         // Also allows shader to override output render target (user responsible for handling)
@@ -305,12 +291,11 @@ namespace neo {
 
         ImGui::Begin("Viewport");
         ServiceLocator<ImGuiManager>::ref().updateViewport();
-
         glm::vec2 viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
         if (viewportSize.x != 0 && viewportSize.y != 0) {
 #pragma warning(push)
 #pragma warning(disable: 4312)
-            ImGui::Image(reinterpret_cast<ImTextureID>(mDefaultFBO->mTextures[0]->mTextureID), { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::Image(reinterpret_cast<ImTextureID>(Library::getFBO("backbuffer")->mTextures[0]->mTextureID), { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
 #pragma warning(pop)
         }
         ImGui::End();

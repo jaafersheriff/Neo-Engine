@@ -142,9 +142,7 @@ namespace neo {
             ping->attachDepthTexture({1, 1}, GL_NEAREST, GL_REPEAT);
 
             // Set default FBO if it's the back buffer
-            if (mDefaultFBO == Library::getFBO("0")) {
-                mDefaultFBO = ping;
-            }
+            mDefaultFBO = ping;
 
             auto pong = Library::createFBO("pong");
             pong->attachColorTexture({1, 1}, format);
