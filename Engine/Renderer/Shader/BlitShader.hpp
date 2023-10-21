@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 
 #include "Renderer/Shader/PostProcessShader.hpp"
@@ -22,3 +23,4 @@ namespace neo {
         {}
     };
 }
+#endif

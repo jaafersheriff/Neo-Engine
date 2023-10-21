@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 
 #include "Renderer/Shader/Shader.hpp"
@@ -61,3 +62,4 @@ namespace neo {
         }
     };
 }
+#endif

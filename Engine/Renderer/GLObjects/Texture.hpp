@@ -1,8 +1,9 @@
 #pragma once
 
-#include "GL/glew.h"
-
 #include "Renderer/GLObjects/GLHelper.hpp"
+
+#include <GL/glew.h>
+#include <glm/glm.hpp>
 
 namespace neo {
 

@@ -5,6 +5,9 @@
 
 #include "Loader.hpp"
 
+#include <unordered_map>
+#include <string>
+
 namespace neo {
 
     class Engine;

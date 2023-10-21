@@ -24,10 +24,11 @@ namespace neo {
 		IDemo& operator=(const IDemo&) = delete;
 
 		virtual Config getConfig() const = 0;
-		virtual void init(ECS& ecs, Renderer& renderer) = 0;
+		virtual void init(ECS& ecs) = 0;
 		virtual void update(ECS& ecs) {
 			NEO_UNUSED(ecs);
 		};
+		virtual void render(ECS& ecs) = 0;
 		virtual void imGuiEditor(ECS& ecs) {
 			NEO_UNUSED(ecs);
 		}

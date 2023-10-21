@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
@@ -80,3 +81,4 @@ namespace neo {
          }
     };
 }
+#endif

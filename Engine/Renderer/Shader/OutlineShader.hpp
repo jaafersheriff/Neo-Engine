@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 
 #include "Engine/Engine.hpp"
@@ -90,3 +91,4 @@ namespace neo {
         }
     };
 }
+#endif

@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 
 #include "Util/Util.hpp"
@@ -95,3 +96,4 @@ namespace neo {
             void _addUniform(HashedString);
     };
 }
+#endif

@@ -3,7 +3,7 @@
 #include "Texture.hpp"
 
 #include "Util/Profiler.hpp"
-
+#include "Util/Util.hpp"
 #include <tracy/TracyOpenGL.hpp>
 
 namespace neo {

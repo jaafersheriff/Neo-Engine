@@ -38,7 +38,7 @@ namespace Base {
         return config;
     }
 
-    void Demo::init(ECS& ecs, Renderer& renderer) {
+    void Demo::init(ECS& ecs) {
 
         /* Camera */
         {
@@ -63,7 +63,7 @@ namespace Base {
         ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
         ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
         ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
-        ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
+        // ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
         ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
 
         /* Ground plane */
@@ -71,16 +71,16 @@ namespace Base {
         ecs.addComponent<TagComponent>(plane, "Grid");
         ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
         ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad").mMesh);
-        ecs.addComponent<renderable::AlphaTestRenderable>(plane, Library::loadTexture("grid.png"));
+        // ecs.addComponent<renderable::AlphaTestRenderable>(plane, Library::loadTexture("grid.png"));
 
         /* Systems - order matters! */
         ecs.addSystem<CameraControllerSystem>();
         ecs.addSystem<RotationSystem>();
 
         /* Init renderer */
-        renderer.addSceneShader<PhongShader>();
-        renderer.addSceneShader<AlphaTestShader>();
-        renderer.addPostProcessShader<FXAAShader>();
+        // renderer.addSceneShader<PhongShader>();
+        // renderer.addSceneShader<AlphaTestShader>();
+        // renderer.addPostProcessShader<FXAAShader>();
     }
 
     void Demo::imGuiEditor(ECS& ecs) {
@@ -88,6 +88,10 @@ namespace Base {
     }
 
     void Demo::update(ECS& ecs) {
+        NEO_UNUSED(ecs);
+    }
+
+    void Demo::render(ECS& ecs) {
         NEO_UNUSED(ecs);
     }
 

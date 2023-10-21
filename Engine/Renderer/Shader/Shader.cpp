@@ -1,3 +1,4 @@
+#if 0
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
@@ -348,3 +349,4 @@ namespace neo {
     }
 
 }
+#endif

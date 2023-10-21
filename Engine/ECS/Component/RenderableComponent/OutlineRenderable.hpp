@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 
 #include "ECS/Component/Component.hpp"
@@ -28,3 +29,4 @@ namespace neo {
         };
     }
 }
+#endif

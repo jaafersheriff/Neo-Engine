@@ -84,8 +84,8 @@ namespace Cornell {
         ecs.addSystem<CameraControllerSystem>();
 
         /* Init renderer */
-        renderer.addSceneShader<PhongShader>();
-        renderer.addPostProcessShader<FXAAShader>();
+        // renderer.addSceneShader<PhongShader>();
+        // renderer.addPostProcessShader<FXAAShader>();
     }
 
     void Demo::update(ECS& ecs) {

@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 
 #include "Loader/Library.hpp"
@@ -108,3 +109,4 @@ namespace neo {
         };
 
 }
+#endif

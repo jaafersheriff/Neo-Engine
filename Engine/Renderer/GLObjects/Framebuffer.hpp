@@ -8,6 +8,7 @@
 
 #include <GL/glew.h>
 #include <tracy/TracyOpenGL.hpp>
+#include <vector>
 
 namespace neo {
 
