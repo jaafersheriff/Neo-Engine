@@ -41,7 +41,7 @@ namespace neo {
 
         Profiler::Profiler() {
             auto& io = ImGui::GetIO();
-            view = std::make_unique<tracy::View>( RunOnMainThread, "192.168.0.13", 8086, io.FontDefault, io.FontDefault, io.FontDefault, SetWindowTitleCallback, SetupScaleCallback, AttentionCallback);
+            view = std::make_unique<tracy::View>( RunOnMainThread, "192.168.0.16", 8086, io.FontDefault, io.FontDefault, io.FontDefault, SetWindowTitleCallback, SetupScaleCallback, AttentionCallback);
 
             // TracyPlotConfig("FPS", tracy::PlotFormatType::Number, false, false, 0);
             TracyPlotConfig("dt", tracy::PlotFormatType::Number, false, false, 0);

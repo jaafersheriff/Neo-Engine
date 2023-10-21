@@ -13,24 +13,15 @@ project(Neo CXX C)
 # disable warnings on different compilers for our external dependencies (aka, source not written or maintained by us)
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	set(disableWarning /W0)
-	add_compile_options("/WX-" "/W0")
+	add_compile_options("/WX" "/W4")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4075,4264,4201")
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-	set(disableWarning -w0)
-	add_compile_options("-Werror")
 else()
 	message(FATAL_ERROR	"Unsupported compiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
 if(MSVC)
-	# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
-	# set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /ZI")
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
-	# set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /INCREMENTAL /EDITANDCONTINUE")
-	# set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /INCREMENTAL /EDITANDCONTINUE")
-	# set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /INCREMENTAL /EDITANDCONTINUE")
-	# set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /INCREMENTAL /EDITANDCONTINUE")
 endif()
 
 if(MSVC)
@@ -38,13 +29,16 @@ if(MSVC)
 		/FC
 		/Zc:rvalueCast
 	)
+	add_compile_definitions(
+		_CRT_SECURE_NO_WARNINGS
+		NOMINMAX
+		WIN32_LEAN_AND_MEAN
+)
+
 endif()
 
 add_compile_definitions(
-	_CRT_SECURE_NO_WARNINGS
 	$<$<CONFIG:Debug>:DEBUG_MODE>
-	NOMINMAX
-	WIN32_LEAN_AND_MEAN
 )
 
 #--------------------------------------------------------------------
@@ -59,8 +53,6 @@ set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 
 include(cmake/InitLib.cmake)
 include(cmake/pch.cmake)
-
-add_definitions(-DEM)
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Engine")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Demos")

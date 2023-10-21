@@ -79,11 +79,11 @@ namespace FrustaFitting {
                 if (mainView || shadowView) {
                     glm::vec3 color(0.f);
                     if (mainView && shadowView) {
-                        glm::vec3 color(0.7f);
+                        color = glm::vec3(0.7f);
 
                     }
                     else if (mainView) {
-                        glm::vec3 color(1.0f);
+                        color = glm::vec3(1.0f);
                     }
                     loadUniform("wireColor", color);
                     loadUniform("M", sp.getModelMatrix());
