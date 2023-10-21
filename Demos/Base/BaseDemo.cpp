@@ -95,9 +95,9 @@ namespace Base {
 
     void Demo::render(const ECS& ecs) {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-        const auto&& [__, light, spatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
+        const auto&& [__, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
-        for (const auto&& [entity, shader, mesh, spatial] : ecs.getView<ShaderComponent, MeshComponent, SpatialComponent>().each()) {
+        for (const auto&& [entity, shader, mesh, drawSpatial] : ecs.getView<ShaderComponent, MeshComponent, SpatialComponent>().each()) {
         
             // VFC
             // if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
@@ -112,9 +112,9 @@ namespace Base {
             shader.bindUniform("camPos", cameraSpatial.getPosition());
             shader.bindUniform("lightCol", light.mColor);
             shader.bindUniform("lightAtt", light.mAttenuation);
-            shader.bindUniform("lightPos", spatial.getPosition());
-            shader.bindUniform("M", spatial.getModelMatrix());
-            shader.bindUniform("N", spatial.getNormalMatrix());
+            shader.bindUniform("lightPos", lightSpatial.getPosition());
+            shader.bindUniform("M", drawSpatial.getModelMatrix());
+            shader.bindUniform("N", drawSpatial.getNormalMatrix());
             // loadTexture("diffuseMap", *renderable.mDiffuseMap);
             // const Material& material = renderable.mMaterial;
             // loadUniform("ambientColor", material.mAmbient);
