@@ -8,6 +8,7 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
@@ -56,29 +57,38 @@ namespace FrustaFitting {
                 loadUniform("V", spatial.getView());
             }
 
-            auto mockCamera = ecs.getSingleView<FrustumComponent, FrustumFitSourceComponent>();
+            auto mockSourceCamera = ecs.getSingleView<FrustumComponent, FrustumFitSourceComponent>(); // main mock camera 
+            auto mockReceiverCamera = ecs.getSingleView<FrustumComponent, FrustumFitReceiverComponent>(); // shadow camera
+            NEO_ASSERT(mockSourceCamera && mockReceiverCamera, "Dont use this without proper cameras set up");
+
+            auto&& [mockSourceCameraEntity, _, __] = *mockSourceCamera;
+            auto&& [mockReceiverCameraEntity, ___, ____] = *mockReceiverCamera;
 
             for(auto&& [e, bb, spatial] : ecs.getView<BoundingBoxComponent, SpatialComponent>().each()) {
-                glm::vec3 color(1.f);
-
-				// VFC
-                if (mockCamera) {
-                    auto&& [mockCameraEntity, cameraFrustum, ___] = *mockCamera;
-                    if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(e)) {
-                        if (!culled->isInView(ecs, e, mockCameraEntity)) {
-                            continue;
-                        }
-                    }
-                }
-
                 SpatialComponent sp = spatial;
                 sp.setScale(spatial.getScale() * (bb.mMax - bb.mMin));
-                loadUniform("M", sp.getModelMatrix());
 
-                loadUniform("wireColor", color);
+                bool mainView = false;
+                bool shadowView = false;
+                if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(e)) {
+                    mainView = culled->isInView(ecs, e, mockSourceCameraEntity);
+                    shadowView = culled->isInView(ecs, e, mockReceiverCameraEntity);
+                }
 
-                /* Draw outline */
-                Library::getMesh("cube").mMesh->draw();
+
+                if (mainView || shadowView) {
+                    glm::vec3 color(0.f);
+                    if (mainView && shadowView) {
+                        glm::vec3 color(0.7f);
+
+                    }
+                    else if (mainView) {
+                        glm::vec3 color(1.0f);
+                    }
+                    loadUniform("wireColor", color);
+                    loadUniform("M", sp.getModelMatrix());
+                    Library::getMesh("cube").mMesh->draw();
+                }
             }
 
             unbind();

@@ -7,6 +7,7 @@ namespace neo {
     class Mesh;
 
     struct LineMeshComponent : public Component {
+        // TODO - replace array of structs with struct of arrays hmmm
         struct Node {
             glm::vec3 position;
             glm::vec3 color;

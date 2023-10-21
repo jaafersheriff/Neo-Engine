@@ -45,9 +45,6 @@ namespace neo {
 
             // TracyPlotConfig("FPS", tracy::PlotFormatType::Number, false, false, 0);
             TracyPlotConfig("dt", tracy::PlotFormatType::Number, false, false, 0);
-
-
-            mFPSList.name = HashedString("FPS");
         }
 
         Profiler::~Profiler() {
@@ -76,10 +73,8 @@ namespace neo {
             }
         }
 
-        void Profiler::imGuiEditor() {
+        void Profiler::imGuiEditor() const {
             view->Draw();
-            int t = 0;
-            view->DrawPlot(mFPSList, 180.0, t, ImVec2(10, 10), false, 10, 200);
             
 //             if (ImPlot::BeginPlot(std::string("FPS (" + std::to_string(mFPS) + ")").c_str())) {
 //                 ImPlot::SetupAxis(ImAxis_X1, "Time (s)", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoInitialFit  );

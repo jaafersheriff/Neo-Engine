@@ -212,7 +212,7 @@ namespace neo {
 
             /* Render first post process shader into appropriate output buffer */
             Framebuffer* inputFBO = mDefaultFBO;
-            Framebuffer* outputFBO = Library::getFBO("pong");
+            Framebuffer* outputFBO = activePostShaders.size() == 1 ? Library::getFBO("0") : Library::getFBO("pong");
 
             _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().mSize, ecs);
 
@@ -229,7 +229,9 @@ namespace neo {
             }
 
             /* nth shader writes out to FBO 0 if it hasn't already been done */
-            _renderPostProcess(*activePostShaders.back(), inputFBO, mDefaultFBO, window.getDetails().mSize, ecs);
+            if (activePostShaders.size() > 1) {
+                _renderPostProcess(*activePostShaders.back(), inputFBO, mDefaultFBO, window.getDetails().mSize, ecs);
+            }
         }
 
         /* Render imgui */
@@ -239,7 +241,7 @@ namespace neo {
             mBackBuffer->bind();
             ServiceLocator<ImGuiManager>::ref().render();
         }
-        else {
+        else if (activePostShaders.size() > 1) {
             ZoneScopedN("Final Blit");
             TracyGpuZone("Final Blit");
             if (!mBlitShader) {
