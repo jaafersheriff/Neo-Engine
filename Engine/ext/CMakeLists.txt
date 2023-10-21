@@ -53,6 +53,7 @@ if (MSVC)
 		file(GLOB TRACY_SERVER_CPP_FILES 
 			tracy/server/*.cpp
 			tracy/public/common/*.cpp
+			tracy/profiler/src/Fonts.cpp
 			tracy/nfd/nfd_win.cpp
 			tracy/zstd/common/*.c
 			tracy/zstd/compress/*.c
@@ -62,6 +63,7 @@ if (MSVC)
 		file(GLOB TRACY_SERVER_HPP_FILES 
 			tracy/server/*.hpp
 			tracy/public/common/*.hpp
+			tracy/profiler/src/Fonts.hpp
 			tracy/nfd/nfd.h
 			tracy/zstd/*.h
 			tracy/zstd/common/*.h
