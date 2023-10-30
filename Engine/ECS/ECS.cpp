@@ -45,7 +45,6 @@ namespace neo {
 		mEntityKillQueue.clear();
 	}
 
-
 	void ECS::clean() {
 		NEO_LOG_I("Cleaning ECS...");
 		flush();

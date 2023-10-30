@@ -229,7 +229,7 @@ namespace neo {
 		TRACY_ZONE();
 		// TODO -- maybe force const inputs rather than attaching it
 		// TODO -- otherwise view.get<> breaks
-		return mRegistry.view<const CompTs...>();
+		return mRegistry.view<CompTs...>();
 	}
 
 	template<typename SuperT, typename CompT> SuperT* ECS::getComponentAs(Entity e) {
@@ -253,7 +253,8 @@ namespace neo {
 		return dynamic_cast<SuperT *const>(comp);
 	}
 
-	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, CompTs&...>> ECS::getSingleView() {
+	template<typename... CompTs>
+	std::optional<std::tuple<ECS::Entity, CompTs&...>> ECS::getSingleView() {
 		TRACY_ZONE();
 		auto view = mRegistry.view<CompTs...>();
 		if (view.size_hint() > 1) {
@@ -267,7 +268,8 @@ namespace neo {
 
 	// TODO -- maybe force const inputs rather than attaching it
 	// TODO -- otherwise view.get<> breaks
-	template<typename... CompTs> std::optional<std::tuple<ECS::Entity, const CompTs&...>> ECS::getSingleView() const {
+	template<typename... CompTs>
+	std::optional<std::tuple<ECS::Entity, const CompTs&...>> ECS::getSingleView() const {
 		TRACY_ZONE();
 		auto view = mRegistry.view<const CompTs...>();
 		if (view.size_hint() > 1) {
@@ -279,7 +281,8 @@ namespace neo {
 		return std::nullopt;
 	}
 
-	template<typename... CompTs> bool ECS::has() const {
+	template<typename... CompTs> 
+	bool ECS::has() const {
 		// MICROPROFILE_SCOPEI("ECS", "has", MP_AUTO);
 		return mRegistry.view<CompTs...>().size_hint() != 0;
 	}

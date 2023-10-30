@@ -3,6 +3,8 @@
 
 #include "GL/glew.h"
 
+#include "ECS/Component/RenderableComponent/MaterialComponent.hpp"
+
 #include "Renderer/GLObjects/Texture2D.hpp"
 #include "Renderer/GLObjects/TextureCubeMap.hpp"
 
@@ -25,7 +27,7 @@ namespace neo {
 
     struct Asset {
         MeshData meshData;
-        Material material;
+        MaterialComponent material;
         Texture* ambient_tex = nullptr;            // map_Ka
         Texture* diffuse_tex = nullptr;            // map_Kd
         Texture* specular_tex = nullptr;           // map_Ks
@@ -45,6 +47,8 @@ namespace neo {
             Loader& operator=(const Loader&) = delete;
 
             static void init(const std::string &);
+
+            static const char* loadFileString(const std::string&);
 
             /* Load Mesh pointer from an .obj file */
             static MeshData loadMesh(const std::string &, bool = false);

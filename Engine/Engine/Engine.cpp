@@ -192,6 +192,7 @@ namespace neo {
             // TODO - should this go after processkillqueue?
 				if (!mWindow.isMinimized()) {
 					ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), mECS);
+            	ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo());
 				}
             Messenger::relayMessages(mECS);
 

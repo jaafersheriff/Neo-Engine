@@ -96,6 +96,26 @@ namespace neo {
         return nullptr;
     }
 
+    NewShader* Library::createShaderSource(const std::string& name, const NewShader::ConstructionArgs& args) {
+        auto it = mShaders.find(name);
+        if (it != mShaders.end()) {
+            NEO_LOG_E("Attempting to overrwite existing shader %s", name.c_str());
+            return it->second;
+        }
+
+        NEO_LOG("Creating Shader %s", name.c_str());
+        NewShader* source = new NewShader(args);
+        mShaders.emplace(name, source);
+        return source;
+    }
+
+    NewShader* Library::getShaderSource(const std::string& name) {
+        auto it = mShaders.find(name);
+        NEO_ASSERT(it != mShaders.end(), "Shader %s doesn't exist!", name.c_str());
+
+        return it->second;
+    }
+
     void Library::_insertMesh(const std::string& name, MeshData data) {
         if (data.mMesh) {
             mMeshes.insert({ name, data });

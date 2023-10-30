@@ -9,12 +9,15 @@
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
+#include "ECS/Component/NewRenderingComponents/AlphaTestComponent.hpp"
+#include "ECS/Component/NewRenderingComponents/OpaqueComponent.hpp"
 #include "ECS/Component/RenderableComponent/AlphaTestRenderable.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/PhongRenderable.hpp"
-#include "ECS/Component/RenderableComponent/ShaderComponent.hpp"
+#include "ECS/Component/RenderableComponent/MaterialComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
+#include "ECS/Component/NewRenderingComponents/PhongShaderComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
@@ -22,6 +25,8 @@
 #include "Renderer/Shader/PhongShader.hpp"
 #include "Renderer/Shader/AlphaTestShader.hpp"
 #include "Renderer/Shader/FXAAShader.hpp"
+
+#include "Renderer/RenderingSystems/PhongRenderer.hpp"
 
 #include "Renderer/GLObjects/Material.hpp"
 
@@ -65,7 +70,9 @@ namespace Base {
         ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
         ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
         ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
-        ecs.addComponent<ShaderComponent>(bunny, Library::getShader("PhongShader", {}));
+        ecs.addComponent<PhongShaderComponent>(bunny);
+        ecs.addComponent<OpaqueComponent>(bunny);
+        ecs.addComponent<MaterialComponent>(bunny);
         // ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
 
         /* Ground plane */
@@ -73,6 +80,9 @@ namespace Base {
         ecs.addComponent<TagComponent>(plane, "Grid");
         ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
         ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad").mMesh);
+        ecs.addComponent<PhongShaderComponent>(plane);
+        ecs.addComponent<MaterialComponent>(plane);
+        ecs.addComponent<AlphaTestComponent>(plane);
         // ecs.addComponent<renderable::AlphaTestRenderable>(plane, Library::loadTexture("grid.png"));
 
         /* Systems - order matters! */
@@ -97,34 +107,9 @@ namespace Base {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
         const auto&& [__, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
-        for (const auto&& [entity, shader, mesh, drawSpatial] : ecs.getView<ShaderComponent, MeshComponent, SpatialComponent>().each()) {
-        
-            // VFC
-            // if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-            //     if (!culled->isInView(ecs, entity, cameraEntity)) {
-            //         continue;
-            //     }
-            // }
- 
-            shader.bind();
-            shader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
-            shader.bindUniform("V", cameraSpatial.getView());
-            shader.bindUniform("camPos", cameraSpatial.getPosition());
-            shader.bindUniform("lightCol", light.mColor);
-            shader.bindUniform("lightAtt", light.mAttenuation);
-            shader.bindUniform("lightPos", lightSpatial.getPosition());
-            shader.bindUniform("M", drawSpatial.getModelMatrix());
-            shader.bindUniform("N", drawSpatial.getNormalMatrix());
-            // loadTexture("diffuseMap", *renderable.mDiffuseMap);
-            // const Material& material = renderable.mMaterial;
-            // loadUniform("ambientColor", material.mAmbient);
-            // loadUniform("diffuseColor", material.mDiffuse);
-            // loadUniform("specularColor", material.mSpecular);
-            // loadUniform("shine", material.mShininess);
-        
-            /* DRAW */
-            mesh.mMesh->draw();
-        }
+        drawPhong<OpaqueComponent>(ecs, cameraEntity, light, lightSpatial);
+        // glEnable(GL_BLEND);
+        // drawPhong<AlphaTestComponent>(ecs, cameraEntity, light, lightSpatial);
     }
 
     void Demo::destroy() {

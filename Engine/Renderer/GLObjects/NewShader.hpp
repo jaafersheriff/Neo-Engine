@@ -1,31 +1,31 @@
 #pragma once
 
-// This should just be 
-// Name
-// Shader file path
-// Shader source
-// map<ShaderDefines, PID>
-
-#include <variant>
+#include "ResolvedShaderInstance.hpp"
 
 namespace neo {
+
 	class NewShader {
     public:
-        using UniformVariant =
-            std::variant<
-            bool,
-            int,
-            uint32_t,
-            double,
-            float,
-            glm::vec2,
-            glm::ivec2,
-            glm::vec3,
-            glm::vec4,
-            glm::mat3,
-            glm::mat4
-            >;
+        enum class ShaderStage {
+            VERTEX,
+            FRAGMENT,
+            GEOMETRY,
+            TESSELLATION_CONTROL,
+            TESSELLATION_EVAL,
+            COMPUTE
+        };
+        using ConstructionArgs = std::unordered_map<ShaderStage, const char*>;
 
+        NewShader(const ConstructionArgs& args);
+        ~NewShader();
+		NewShader(const NewShader &) = delete;
+        NewShader & operator=(const NewShader &) = delete;
+        NewShader(NewShader &&) = delete;
+        NewShader & operator=(NewShader &&) = delete;
 
+        ResolvedShaderInstance getResolvedInstance(const ResolvedShaderInstance::ShaderDefines& defines);
+    private:
+        ConstructionArgs mConstructionArgs;
+        std::unordered_map<ResolvedShaderInstance::ShaderDefines, ResolvedShaderInstance> mResolvedShaders;
 	};
 }
