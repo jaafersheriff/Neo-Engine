@@ -60,13 +60,14 @@ namespace neo {
 
         glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
             /* Toggle mFullscreen (f11 or alt+enter) */
+            auto& imguiManager = ServiceLocator<ImGuiManager>::ref();
             if ((key == GLFW_KEY_F11 || key == GLFW_KEY_ENTER && mods & GLFW_MOD_ALT) && action == GLFW_PRESS) {
                 Messenger::sendMessage<ToggleFullscreenMessage>(glfwGetWindowMonitor(window) != nullptr);
                 return;
             }
             if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS) {
-                ServiceLocator<ImGuiManager>::ref().toggleImGui();
-                if (!ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+                imguiManager.toggleImGui();
+                if (!imguiManager.isEnabled()) {
                     WindowDetails& details = *(WindowDetails*)glfwGetWindowUserPointer(window);
                     int x, y;
                     glfwGetFramebufferSize(window, &x, &y);
@@ -75,36 +76,45 @@ namespace neo {
                     Messenger::sendMessage<FrameSizeMessage>(details.mSize);
                 }
             }
-            if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused()) {
+            if (imguiManager.isEnabled()) {
                 ServiceLocator<ImGuiManager>::ref().updateKeyboard(window, key, scancode, action, mods);
-                Messenger::sendMessage<Keyboard::ResetKeyboardMessage>();
             }
-            else {
+            if (!imguiManager.isEnabled() || imguiManager.isViewportFocused()) {
                 Messenger::sendMessage<Keyboard::KeyPressedMessage>(key, action);
             }
-            });
+            else {
+                Messenger::sendMessage<Keyboard::ResetKeyboardMessage>();
+            }
+        });
+
         glfwSetMouseButtonCallback(mWindow, [](GLFWwindow* window, int button, int action, int mods) {
-            bool doImGui = false;
-            doImGui |= ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportHovered();
-            doImGui |= ServiceLocator<ImGuiManager>::ref().isEnabled() && ServiceLocator<ImGuiManager>::ref().isViewportHovered() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused() && action == GLFW_PRESS;
-            if (doImGui) {
-                ServiceLocator<ImGuiManager>::ref().updateMouse(window, button, action, mods);
-                Messenger::sendMessage<Mouse::MouseResetMessage>();
+            auto& imguiManager = ServiceLocator<ImGuiManager>::ref();
+            if (imguiManager.isEnabled()) {
+                imguiManager.updateMouse(window, button, action, mods);
             }
-            else {
+            if (!imguiManager.isEnabled() || imguiManager.isViewportHovered()) {
                 Messenger::sendMessage<Mouse::MouseButtonMessage>(button, action);
-            }
-            });
-        glfwSetScrollCallback(mWindow, [](GLFWwindow* window, double dx, double dy) {
-            if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportHovered()) {
-                ServiceLocator<ImGuiManager>::ref().updateScroll(window, dx, dy);
-                Messenger::sendMessage<Mouse::MouseResetMessage>();
+                if (action == GLFW_PRESS) {
+                    ImGui::SetWindowFocus("Viewport");
+                }
             }
             else {
+                Messenger::sendMessage<Mouse::MouseResetMessage>();
+            }
+        });
+
+        glfwSetScrollCallback(mWindow, [](GLFWwindow* window, double dx, double dy) {
+            auto& imguiManager = ServiceLocator<ImGuiManager>::ref();
+            if (imguiManager.isEnabled()) {
+                imguiManager.updateScroll(window, dx, dy);
+            }
+            if (!imguiManager.isEnabled() || imguiManager.isViewportHovered()) {
                 Messenger::sendMessage<Mouse::ScrollWheelMessage>(dy);
             }
+            else {
+                Messenger::sendMessage<Mouse::MouseResetMessage>();
+            }
             });
-
         glfwSetCharCallback(mWindow, [](GLFWwindow* window, unsigned int c) {
             if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused()) {
                 ServiceLocator<ImGuiManager>::ref().updateCharacter(window, c);
