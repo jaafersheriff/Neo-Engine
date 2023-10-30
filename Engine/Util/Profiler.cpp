@@ -6,6 +6,7 @@
 
 #ifndef NO_LOCAL_TRACY
 #include <TracyView.hpp>
+#include <TracyMouse.hpp>
 #include <Fonts.hpp>
 #endif
 
@@ -64,6 +65,8 @@ namespace neo {
             mTimeStep = runTime - mLastFrameTime;
             TracyPlot("dt", static_cast<float>(mTimeStep));
             mLastFrameTime = runTime;
+
+            tracy::MouseFrame();
         }
 
         void Profiler::imGuiEditor() const {

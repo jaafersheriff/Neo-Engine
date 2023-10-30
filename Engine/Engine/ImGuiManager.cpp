@@ -71,16 +71,26 @@ namespace neo {
         colors[ImGuiCol_SeparatorHovered] = disabledTexColimv;
         colors[ImGuiCol_SeparatorActive] = texColimv;
 
-        style->ChildRounding = 4.0f;
-        style->FrameBorderSize = 1.0f;
-        style->FrameRounding = 2.0f;
-        style->GrabMinSize = 7.0f;
-        style->PopupRounding = 2.0f;
-        style->ScrollbarRounding = 12.0f;
+        style->FrameRounding = 0.0f;
+        style->WindowBorderSize = 0.f;
+        style->FrameBorderSize = 0.f;
+        style->ChildBorderSize = 0.f;
+        style->WindowPadding = { 8.f, 16.f };
+        style->ItemSpacing = { 14.f, 5.f };
+        style->GrabMinSize = 10.f;
+
+        style->ChildRounding = 0.0f;
+        style->PopupRounding = 1.0f;
+        style->ScrollbarRounding = 0.0f;
         style->ScrollbarSize = 13.0f;
-        style->TabBorderSize = 1.0f;
+        style->TabBorderSize = 0.0f;
         style->TabRounding = 0.0f;
-        style->WindowRounding = 4.0f;
+        style->WindowRounding = 0.0f;
+        style->GrabRounding = 0.f;
+        style->WindowMenuButtonPosition = ImGuiDir_None;
+        style->ColorButtonPosition = ImGuiDir_Left;
+        style->AntiAliasedFill = false;
+        style->AntiAliasedFill = false;
 
     }
 
