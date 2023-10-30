@@ -41,8 +41,7 @@ namespace neo {
             NEO_UNUSED(refreshRate);
 #else
             LoadFonts(scale, s_fixedWidth, s_smallFont, s_bigFont);
-            auto& io = ImGui::GetIO();
-            mTracyServer = std::make_unique<tracy::View>( RunOnMainThread, "192.168.0.13", 8086, s_fixedWidth, s_smallFont, s_bigFont, nullptr, nullptr, AttentionCallback);
+            mTracyServer = std::make_unique<tracy::View>( RunOnMainThread, "127.0.0.1", 8086, s_fixedWidth, s_smallFont, s_bigFont, nullptr, nullptr, AttentionCallback);
             mTracyServer->GetViewData().frameTarget = refreshRate;
             mTracyServer->GetViewData().drawFrameTargets = true;
             mTracyServer->GetViewData().drawCpuUsageGraph = false;
