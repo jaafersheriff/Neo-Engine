@@ -14,7 +14,7 @@ namespace neo {
     struct ShaderComponent : public Component {
         ShaderComponent(NewShader* shader);
 
-        ResolvedShaderInstance getResolvedInstance(const ResolvedShaderInstance::ShaderDefines& defines) const;
+        ResolvedShaderInstance getResolvedInstance(const NewShader::ShaderDefines& defines) const;
 
         virtual std::string getName() const = 0;
 

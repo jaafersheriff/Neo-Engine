@@ -1,12 +1,17 @@
 #pragma once
 
-#include "ResolvedShaderInstance.hpp"
+#include "Renderer/GLObjects/GLHelper.hpp"
+
+#include <set>
+#include <unordered_map>
 
 namespace neo {
+    class ResolvedShaderInstance;
 
 	class NewShader {
     public:
         using ConstructionArgs = std::unordered_map<ShaderStage, const char*>;
+        using ShaderDefines = std::set<std::string>;
 
         NewShader(const char* name, const ConstructionArgs& args);
         ~NewShader();
@@ -15,10 +20,10 @@ namespace neo {
         NewShader(NewShader &&) = delete;
         NewShader & operator=(NewShader &&) = delete;
 
-        ResolvedShaderInstance getResolvedInstance(const ResolvedShaderInstance::ShaderDefines& defines);
+        ResolvedShaderInstance getResolvedInstance(const ShaderDefines& defines);
     private:
         std::string mName;
         ConstructionArgs mConstructionArgs;
-        std::unordered_map<ResolvedShaderInstance::ShaderDefines, ResolvedShaderInstance> mResolvedShaders;
+        std::unordered_map<ShaderDefines, ResolvedShaderInstance> mResolvedShaders;
 	};
 }

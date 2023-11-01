@@ -191,8 +191,7 @@ namespace neo {
             // TODO - only run this at 60FPS in its own thread
             // TODO - should this go after processkillqueue?
 				if (!mWindow.isMinimized()) {
-					ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), mECS);
-            	ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo());
+            	ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), mECS);
 				}
             Messenger::relayMessages(mECS);
 

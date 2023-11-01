@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Renderer/GLObjects/NewShader.hpp"
+
 #include <glm/glm.hpp>
 #include <gl/glew.h>
 
@@ -15,9 +17,8 @@ namespace neo {
     class ResolvedShaderInstance {
         friend NewShader;
     public:
-        using ShaderDefines = std::set<std::string>;
 
-        ResolvedShaderInstance(const NewShader::ConstructionArgs& args, const ShaderDefines& defines);
+        ResolvedShaderInstance(const NewShader::ConstructionArgs& args, const NewShader::ShaderDefines& defines);
         ~ResolvedShaderInstance();
 
         void bind() const;
@@ -47,6 +48,6 @@ namespace neo {
         std::unordered_map<uint32_t, GLint> mUniforms;
 
         GLuint _compileShader(GLenum shaderType, const char* shaderString);
-        GLint _getUniform(const char* name) cosnt;
+        GLint _getUniform(const char* name) const;
     };
 }

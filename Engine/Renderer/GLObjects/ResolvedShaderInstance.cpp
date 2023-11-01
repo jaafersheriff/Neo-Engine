@@ -9,7 +9,7 @@
 namespace neo {
     namespace {
 
-        std::string _processShader(const char* shaderString) {
+        static std::string _processShader(const char* shaderString) {
             if (!shaderString) {
                 return "";
             }
@@ -52,8 +52,7 @@ namespace neo {
             return sourceString;
         }
 
-
-        void _findUniforms(const char *shaderString, std::vector<std::string>& uniforms) {
+        static void _findUniforms(const char *shaderString, std::vector<std::string>& uniforms) {
             char fileText[1<<16];
             strcpy(fileText, shaderString);
             std::vector<char *> lines;
@@ -106,7 +105,7 @@ namespace neo {
         }
     }
 
-    ResolvedShaderInstance::ResolvedShaderInstance(const NewShader::ConstructionArgs& args, const ShaderDefines& defines) {
+    ResolvedShaderInstance::ResolvedShaderInstance(const NewShader::ConstructionArgs& args, const NewShader::ShaderDefines& defines) {
         mPid = glCreateProgram();
 
         for (auto&& [stage, source] : args) {

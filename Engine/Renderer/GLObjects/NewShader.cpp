@@ -2,8 +2,9 @@
 
 #include "NewShader.hpp"
 
+#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+
 #include "Loader/Library.hpp"
-#include "GLHelper.hpp"
 
 namespace neo {
 	NewShader::NewShader(const char* name, const ConstructionArgs& args) 
@@ -16,7 +17,7 @@ namespace neo {
 		mResolvedShaders.clear();
 	}
 
-	ResolvedShaderInstance NewShader::getResolvedInstance(const ResolvedShaderInstance::ShaderDefines& defines) {
+	ResolvedShaderInstance NewShader::getResolvedInstance(const ShaderDefines& defines) {
 		auto it = mResolvedShaders.find(defines);
 		if (it != mResolvedShaders.end()) {
 			return it->second;

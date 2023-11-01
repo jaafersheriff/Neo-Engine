@@ -11,7 +11,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const LightComponent& light, const SpatialComponent& lightSpatial, const ResolvedShaderInstance::ShaderDefines& inDefines = {}) {
+    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const LightComponent& light, const SpatialComponent& lightSpatial, const NewShader::ShaderDefines& inDefines = {}) {
         const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 
         // bool containsAlphaTest = contains(AlphaTestComponent, CompTs...);

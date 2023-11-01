@@ -104,7 +104,7 @@ namespace neo {
         }
 
         NEO_LOG("Creating Shader %s", name.c_str());
-        NewShader* source = new NewShader(name, args);
+        NewShader* source = new NewShader(name.c_str(), args);
         mShaders.emplace(name, source);
         return source;
     }
