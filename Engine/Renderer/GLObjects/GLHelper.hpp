@@ -11,6 +11,15 @@
 
 namespace neo {
 
+        enum class ShaderStage {
+            VERTEX,
+            FRAGMENT,
+            GEOMETRY,
+            TESSELLATION_CONTROL,
+            TESSELLATION_EVAL,
+            COMPUTE
+        };
+
         /* For printing out the current file and line number */
         template <typename T>
         std::string NumberToString(T x)
@@ -23,6 +32,7 @@ namespace neo {
 
         namespace GLHelper {
 
+            GLint getGLShaderStage(ShaderStage type);
             void checkFrameBuffer();
             void printProgramInfoLog(GLuint program);
             void printShaderInfoLog(GLuint shader);

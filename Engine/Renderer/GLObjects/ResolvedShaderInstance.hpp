@@ -16,6 +16,13 @@ namespace neo {
         friend NewShader;
     public:
         using ShaderDefines = std::set<std::string>;
+
+        ResolvedShaderInstance(const NewShader::ConstructionArgs& args, const ShaderDefines& defines);
+        ~ResolvedShaderInstance();
+
+        void bind() const;
+        void unbind() const;
+
         using UniformVariant =
             std::variant<
             bool,
@@ -30,13 +37,16 @@ namespace neo {
             glm::mat3,
             glm::mat4
             >;
-
-        void bind() const;
-        void unbind() const;
         void bindUniform(const char* name, const UniformVariant& uniform) const;
         void bindTexture(const char* name, const Texture& texture) const;
 
     private:
+        bool mValid = false;
         GLuint mPid = 0;
+        std::unordered_map<ShaderStage, GLuint> mShaderIDs;
+        std::unordered_map<uint32_t, GLint> mUniforms;
+
+        GLuint _compileShader(GLenum shaderType, const char* shaderString);
+        GLint _getUniform(const char* name) cosnt;
     };
 }

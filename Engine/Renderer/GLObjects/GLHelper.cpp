@@ -42,6 +42,24 @@ namespace neo {
             }
         }
 
+        GLint getGLShaderStage(ShaderStage type) {
+            switch(type) {
+            case(ShaderStage::VERTEX):
+                return GL_VERTEX_SHADER;
+            case(ShaderStage::FRAGMENT):
+                return GL_FRAGMENT_SHADER;
+            case(ShaderStage::GEOMETRY):
+                return GL_GEOMETRY_SHADER;
+            case(ShaderStage::COMPUTE):
+                return GL_COMPUTE_SHADER;
+            case(ShaderStage::TESSELLATION_CONTROL):
+                return GL_TESS_CONTROL_SHADER;
+            case(ShaderStage::TESSELLATION_EVAL):
+                return GL_TESS_EVALUATION_SHADER;
+            }
+            NEO_FAIL("Invalid ShaderStage: %d", type);
+            return 0;
+        }
         void checkError(const char *str) {
             GLenum glErr = glGetError();
             if (glErr != GL_NO_ERROR) {
