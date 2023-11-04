@@ -15,9 +15,17 @@ uniform vec3 lightCol;
 uniform vec3 lightAtt;
 out vec4 color;
 void main() {
-    vec4 albedo = texture(diffuseMap, fragTex);
+    vec4 albedo = vec4(0,0,0,1);
+#ifdef DIFFUSE_MAP
+    albedo = texture(diffuseMap, fragTex);
+#else
     albedo.rgb += diffuseColor;
+#endif
+
+#ifdef ALPHA_TEST
     alphaDiscard(albedo.a);
+#endif
+
     color.rgb = albedo.rgb * ambientColor + 
                 getPhong(fragNor, fragPos.rgb, camPos, lightPos - fragPos.xyz, lightAtt, lightCol, albedo.rgb, specularColor, shine);
     color.a = albedo.a;

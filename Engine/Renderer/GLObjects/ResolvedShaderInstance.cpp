@@ -48,8 +48,23 @@ namespace neo {
 
             // Handle #defines
             {
-                // TODO
-                NEO_UNUSED(defines);
+                std::string::size_type start = 0;
+                std::string::size_type end = 0;
+                while ((end = sourceString.find("\n", start)) != std::string::npos) {
+                    std::string line = sourceString.substr(start, end - start);
+
+                    std::string::size_type defineStart = line.find("#ifdef ");
+                    if (defineStart != std::string::npos && end != std::string::npos && defineStart != end) {
+                        std::string define = line.substr(defineStart + 7, end - start - 7);
+                        if (defines.find(define) != defines.end()) {
+                            NEO_LOG_E("Found define %s", define.c_str());
+                        }
+                        else {
+                            NEO_LOG_E("Shader has %s but wasn't found in input defines", define.c_str());
+                        }
+                    }
+                    start = end + 1;
+                }
             }
 
             return sourceString;

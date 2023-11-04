@@ -430,7 +430,7 @@ namespace neo {
         //         }
         //     }
         // }
-        if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
+        // if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
 //             auto shadersFunc = [&](std::vector<std::pair<std::type_index, std::unique_ptr<Shader>>>& shaders, const std::string swapName) {
 //                 for (unsigned i = 0; i < shaders.size(); i++) {
 //                     auto& shader = shaders[i];
@@ -483,8 +483,8 @@ namespace neo {
             //     shadersFunc(Renderer::mPostShaders, "POSTSHADER_SWAP");
             //     ImGui::TreePop();
             // }
-            ImGui::TreePop();
-        }
+            // ImGui::TreePop();
+        // }
 
         ImGui::End();
 
