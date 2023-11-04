@@ -2,6 +2,8 @@
 
 #include "ECS/ECS.hpp"
 
+#include "ECS/Component/NewRenderingComponents/PhongShaderComponent.hpp"
+
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/RenderableComponent/MaterialComponent.hpp"
 #include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
@@ -13,19 +15,23 @@ namespace neo {
 
 	template<typename... CompTs>
     void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const LightComponent& light, const SpatialComponent& lightSpatial, const NewShader::ShaderDefines& inDefines = {}) {
+        MICROPROFILE_SCOPEI("PhongRenderer", "drawPhong", MP_AUTO);
         const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 
         bool containsAlphaTest = false;
-        if constexpr((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
-            containsAlphaTest = true;
-            ecs.sort<AlphaTestComponent>([&cameraSpatial, &ecs](ECS::Entity entityLeft, ECS::Entity entityRight) {
-                auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
-                auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
-                if (leftSpatial && rightSpatial) {
-                    return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) < glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
-                }
-                return false;
-            });
+        {
+            // MICROPROFILE_SCOPEI("PhongRenderer", "Sort alpha test", MP_AUTO);
+            // if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
+            //     containsAlphaTest = true;
+            //     ecs.sort<AlphaTestComponent>([&cameraSpatial, &ecs](ECS::Entity entityLeft, ECS::Entity entityRight) {
+            //         auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
+            //         auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
+            //         if (leftSpatial && rightSpatial) {
+            //             return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) < glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
+            //         }
+            //         return false;
+            //         });
+            // }
         }
 
         const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
@@ -38,13 +44,16 @@ namespace neo {
             }
  
             NewShader::ShaderDefines phongDefines = inDefines;
-            if (containsAlphaTest) {
-                phongDefines.emplace("ALPHA_TEST");
-            }
-
             const auto& material = view.get<const MaterialComponent>(entity);
-            if (material.mDiffuseMap) {
-                phongDefines.emplace("DIFFUSE_MAP");
+            {
+                MICROPROFILE_SCOPEI("PhongRenderer", "Collect defines", MP_AUTO);
+                if (containsAlphaTest) {
+                    phongDefines.emplace("ALPHA_TEST");
+                }
+
+                if (material.mDiffuseMap) {
+                    phongDefines.emplace("DIFFUSE_MAP");
+                }
             }
             auto resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(phongDefines);
             resolvedShader.bind();

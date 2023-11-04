@@ -28,6 +28,7 @@ namespace neo {
 	}
 
 	const ResolvedShaderInstance& NewShader::getResolvedInstance(const ShaderDefines& defines) {
+        MICROPROFILE_SCOPEI("ResolvedShaderInstance", "getResolvedInstance", MP_AUTO);
 		HashedShaderDefines hash = _getDefinesHash(defines);
 		auto it = mResolvedShaders.find(hash);
 		if (it == mResolvedShaders.end()) {
@@ -50,11 +51,12 @@ namespace neo {
 				NEO_LOG_E("Failed to resolve instance of %s with %s", mName.c_str(), ss.str().c_str());
 			}
 		}
+
+
 		if (it->second.mValid) {
 			return it->second;
 		}
 
-		// TODO - return dummy shader..
 		return Library::getDummyShader();
 	}
 
