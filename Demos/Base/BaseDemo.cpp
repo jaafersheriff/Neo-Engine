@@ -109,8 +109,8 @@ namespace Base {
         const auto&& [__, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
         drawPhong<OpaqueComponent>(ecs, cameraEntity, light, lightSpatial);
-        // glEnable(GL_BLEND);
-        // drawPhong<AlphaTestComponent>(ecs, cameraEntity, light, lightSpatial);
+        glEnable(GL_BLEND);
+        drawPhong<AlphaTestComponent>(ecs, cameraEntity, light, lightSpatial);
     }
 
     void Demo::destroy() {

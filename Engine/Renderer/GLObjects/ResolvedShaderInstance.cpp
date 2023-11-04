@@ -93,7 +93,7 @@ namespace neo {
                                 // Erase endif
                                 sourceString.erase(macroEnd, 6);
                                 // Erase ifdef
-                                sourceString.erase(macroStart, end);
+                                sourceString.erase(macroStart, end - macroStart);
                             }
                             end = start;
                         }

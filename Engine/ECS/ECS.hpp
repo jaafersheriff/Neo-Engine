@@ -56,9 +56,12 @@ namespace neo {
 		template<typename... CompTs> std::optional<std::tuple<Entity, CompTs&...>> getSingleView();
 		template<typename... CompTs> std::optional<std::tuple<Entity, const CompTs&...>> getSingleView() const;
 
+		template<typename Comp> void sort(std::function<bool(Entity left, Entity right)> compare) const;
+
 		/* Attach a system */
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
 		template <typename SysT> bool isSystemEnabled() const;
+
 
 	private:
 		mutable Registry mRegistry;
@@ -285,6 +288,13 @@ namespace neo {
 	bool ECS::has() const {
 		// MICROPROFILE_SCOPEI("ECS", "has", MP_AUTO);
 		return mRegistry.view<CompTs...>().size_hint() != 0;
+	}
+
+
+	template<typename CompT> 
+	void ECS::sort(std::function<bool(Entity left, Entity right)> compare) const {
+		MICROPROFILE_SCOPEI("ECS", "sort", MP_AUTO);
+		mRegistry.sort<CompT>(compare);
 	}
 }
 
