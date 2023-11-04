@@ -123,7 +123,6 @@ namespace neo {
     NewShader* Library::createShaderSource(const std::string& name, const NewShader::ConstructionArgs& args) {
         auto it = mShaders.find(name);
         if (it != mShaders.end()) {
-            NEO_LOG_E("Attempting to overrwite existing shader %s", name.c_str());
             return it->second;
         }
 
@@ -168,7 +167,7 @@ namespace neo {
         }
         mFramebuffers.clear();
         for (auto& shader : mShaders) {
-            shader.second->~NewShader();
+            shader.second->destroy();
         }
         mShaders.clear();
     }

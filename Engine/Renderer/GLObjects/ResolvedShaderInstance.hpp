@@ -18,8 +18,11 @@ namespace neo {
         friend NewShader;
     public:
 
-        ResolvedShaderInstance(const NewShader::ConstructionArgs& args, const NewShader::ShaderDefines& defines);
-        ~ResolvedShaderInstance();
+        ResolvedShaderInstance() = default;
+        ~ResolvedShaderInstance() = default;
+
+        bool init(const NewShader::ConstructionArgs& args, const NewShader::ShaderDefines& defines);
+        void destroy();
 
         void bind() const;
         void unbind() const;

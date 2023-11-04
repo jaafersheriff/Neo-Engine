@@ -14,7 +14,16 @@ namespace neo {
 	}
 
 	NewShader::~NewShader() {
-		// TODO - delete the construction args file strings
+		for (auto& source : mConstructionArgs) {
+			delete source.second;
+		}
+		mConstructionArgs.clear();
+	}
+
+	void NewShader::destroy() {
+		for (auto& instance : mResolvedShaders) {
+			instance.second.destroy();
+		}
 		mResolvedShaders.clear();
 	}
 
@@ -22,17 +31,28 @@ namespace neo {
 		HashedShaderDefines hash = _getDefinesHash(defines);
 		auto it = mResolvedShaders.find(hash);
 		if (it == mResolvedShaders.end()) {
-			mResolvedShaders.emplace(std::make_pair(hash, ResolvedShaderInstance(
-				mConstructionArgs,
-				defines
-			)));
+			mResolvedShaders.emplace(hash, ResolvedShaderInstance());
 			it = mResolvedShaders.find(hash);
+			it->second.init(mConstructionArgs, defines);
+
+			std::stringstream ss;
+#ifdef DEBUG_MODE
+			ss << "{";
+			for (auto& s : defines) {
+				ss << s.c_str() << ", ";
+			}
+			ss << "}";
+#endif
+			if (it->second.mValid) {
+				NEO_LOG_V("Resolving a new shader for %s with %s", mName.c_str(), ss.str().c_str());
+			}
+			else {
+				NEO_LOG_E("Failed to resolve instance of %s with %s", mName.c_str(), ss.str().c_str());
+			}
 		}
 		if (it->second.mValid) {
 			return it->second;
 		}
-
-		NEO_LOG_E("Failed to find or compile %s", mName.c_str());
 
 		// TODO - return dummy shader..
 		return Library::getDummyShader();

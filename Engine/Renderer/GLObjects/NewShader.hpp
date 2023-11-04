@@ -22,6 +22,7 @@ namespace neo {
         NewShader & operator=(NewShader &&) = delete;
 
         const ResolvedShaderInstance& getResolvedInstance(const ShaderDefines& defines);
+        void destroy();
     private:
         std::string mName;
         ConstructionArgs mConstructionArgs;

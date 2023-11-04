@@ -108,12 +108,14 @@ namespace neo {
         }
     }
 
-    ResolvedShaderInstance::ResolvedShaderInstance(const NewShader::ConstructionArgs& args, const NewShader::ShaderDefines& defines) {
+    bool ResolvedShaderInstance::init(const NewShader::ConstructionArgs& args, const NewShader::ShaderDefines& defines) {
+        NEO_ASSERT(!mValid && mPid == 0, "TODO");
+        mValid = false;
         mPid = glCreateProgram();
 
         for (auto&& [stage, source] : args) {
             if (!source) {
-                return;
+                return mValid;
             }
             std::string processedSource = _processShader(source, defines);
             if (processedSource.size()) {
@@ -143,6 +145,7 @@ namespace neo {
         }
 
         mValid = true;
+        return mValid;
     }
 
     GLuint ResolvedShaderInstance::_compileShader(GLenum shaderType, const char *shaderString) {
@@ -161,15 +164,15 @@ namespace neo {
         return shader;
     }
 
-    ResolvedShaderInstance::~ResolvedShaderInstance() {
+    void ResolvedShaderInstance::destroy() {
         if (mPid) {
             unbind();
             for (auto&& [stage, id] : mShaderIDs) {
                 glDetachShader(mPid, id);
                 glDeleteShader(id);
             }
+            glDeleteProgram(mPid);
         }
-        glDeleteProgram(mPid);
         mPid = 0;
     }
 
@@ -185,7 +188,7 @@ namespace neo {
         ServiceLocator<Renderer>::ref().mStats.mNumUniforms++;
         const auto uniform = mUniforms.find(HashedString(name));
         if (uniform == mUniforms.end()) {
-            NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable", name);
+            // NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable", name);
             return -1;
         }
         return uniform->second;
