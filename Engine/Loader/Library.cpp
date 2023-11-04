@@ -16,7 +16,29 @@ namespace neo {
     std::unordered_map<std::string, Texture*> Library::mTextures;
     std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
     std::unordered_map<std::string, NewShader*> Library::mShaders;
-    ResolvedShaderInstance* Library::mDummyShader;
+    NewShader* Library::mDummyShader;
+
+    void Library::init() {
+        mDummyShader = new NewShader("Dummy", {
+            {ShaderStage::VERTEX, 
+                R"(
+                    void main() {
+                        gl_Position = vec4(0,0,0,0);
+                    }
+                )"},
+            {ShaderStage::FRAGMENT,
+                R"(
+                    out vec4 color;
+                    void main() {
+                        color = vec4(0,0,0,0);
+                    }
+                )"}
+        });
+    }
+
+    const ResolvedShaderInstance& Library::getDummyShader() {
+        return mDummyShader->getResolvedInstance({});
+    }
 
     MeshData Library::getMesh(const std::string& name) {
         /* Search map first */
@@ -145,6 +167,10 @@ namespace neo {
             frameBuffer.second->destroy();
         }
         mFramebuffers.clear();
+        for (auto& shader : mShaders) {
+            shader.second->~NewShader();
+        }
+        mShaders.clear();
     }
 
     void Library::imGuiEditor() {

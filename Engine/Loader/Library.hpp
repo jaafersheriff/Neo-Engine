@@ -25,7 +25,7 @@ namespace neo {
             Library(const Library&) = delete;
             Library& operator=(const Library&) = delete;
 
-            static void setShaderDir(const char*);
+            static void init();
             static void clean();
 
             static MeshData getMesh(const std::string&);
@@ -55,7 +55,7 @@ namespace neo {
             static std::unordered_map<std::string, Texture*> mTextures;
             static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
             static std::unordered_map<std::string, NewShader*> mShaders;
-            static ResolvedShaderInstance* mDummyShader;
+            static NewShader* mDummyShader;
 
             static void _insertMesh(const std::string&, MeshData);
             static void _insertTexture(const std::string&, Texture*);

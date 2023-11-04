@@ -90,9 +90,9 @@ namespace neo {
 		
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
 	#endif
-        if (!mBlitShader) {
-            mBlitShader = new BlitShader;
-        }
+        // if (!mBlitShader) {
+        //     mBlitShader = new BlitShader;
+        // }
 
         /* Init default FBO */
         mBackBuffer = Library::createFBO("0");
@@ -259,50 +259,47 @@ namespace neo {
                 // RENDERER_MP_LEAVE();
             }
 
-            RENDERER_MP_LEAVE();
-        }
-
         /* Post process with ping & pong */
-        if (activePostShaders.size()) {
-            TRACY_GPUN("PostProcess shaders");
+        // if (activePostShaders.size()) {
+        //     TRACY_GPUN("PostProcess shaders");
 
-            /* Render first post process shader into appropriate output buffer */
-            Framebuffer* inputFBO = mDefaultFBO;
-            Framebuffer* outputFBO = activePostShaders.size() == 1 ? Library::getFBO("backbuffer") : Library::getFBO("pong");
+        //     /* Render first post process shader into appropriate output buffer */
+        //     Framebuffer* inputFBO = mDefaultFBO;
+        //     Framebuffer* outputFBO = activePostShaders.size() == 1 ? Library::getFBO("backbuffer") : Library::getFBO("pong");
 
-            _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().mSize, ecs);
+        //     _renderPostProcess(*activePostShaders[0], inputFBO, outputFBO, window.getDetails().mSize, ecs);
 
-            /* [2, n-1] shaders use ping & pong */
-            inputFBO = Library::getFBO("pong");
-            outputFBO = Library::getFBO("ping");
-            for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
-                _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO, window.getDetails().mSize, ecs);
+        //     /* [2, n-1] shaders use ping & pong */
+        //     inputFBO = Library::getFBO("pong");
+        //     outputFBO = Library::getFBO("ping");
+        //     for (unsigned i = 1; i < activePostShaders.size() - 1; i++) {
+        //         _renderPostProcess(*activePostShaders[i], inputFBO, outputFBO, window.getDetails().mSize, ecs);
 
-                /* Swap ping & pong */
-                Framebuffer* temp = inputFBO;
-                inputFBO = outputFBO;
-                outputFBO = temp;
-            }
+        //         /* Swap ping & pong */
+        //         Framebuffer* temp = inputFBO;
+        //         inputFBO = outputFBO;
+        //         outputFBO = temp;
+        //     }
 
-            /* nth shader writes out to FBO 0 if it hasn't already been done */
-            if (activePostShaders.size() > 1) {
-                _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("backbuffer"), window.getDetails().mSize, ecs);
-            }
-        }
-        else if (mDefaultFBO != Library::getFBO("backbuffer")) {
-            _renderPostProcess(*mBlitShader, mDefaultFBO, Library::getFBO("backbuffer"), window.getDetails().mSize, ecs);
-        }
+        //     /* nth shader writes out to FBO 0 if it hasn't already been done */
+        //     if (activePostShaders.size() > 1) {
+        //         _renderPostProcess(*activePostShaders.back(), inputFBO, Library::getFBO("backbuffer"), window.getDetails().mSize, ecs);
+        //     }
+        // }
+        // else if (mDefaultFBO != Library::getFBO("backbuffer")) {
+        //     _renderPostProcess(*mBlitShader, mDefaultFBO, Library::getFBO("backbuffer"), window.getDetails().mSize, ecs);
+        // }
 
-        /* Render imgui */
-        if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-            TRACY_GPUN("ImGuiManager.render");
-            mBackBuffer->bind();
-            ServiceLocator<ImGuiManager>::ref().render();
-        }
-        else {
-            TRACY_GPUN("Final Blit");
-            _renderPostProcess(*mBlitShader, Library::getFBO("backbuffer"), mBackBuffer, window.getDetails().mSize, ecs);
-        }
+        // /* Render imgui */
+        // if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+        //     TRACY_GPUN("ImGuiManager.render");
+        //     mBackBuffer->bind();
+        //     ServiceLocator<ImGuiManager>::ref().render();
+        // }
+        // else {
+        //     TRACY_GPUN("Final Blit");
+        //     _renderPostProcess(*mBlitShader, Library::getFBO("backbuffer"), mBackBuffer, window.getDetails().mSize, ecs);
+        // }
     }
 
     // void Renderer::_renderPostProcess(Shader &shader, Framebuffer *input, Framebuffer *output, glm::ivec2 frameSize, ECS& ecs) {

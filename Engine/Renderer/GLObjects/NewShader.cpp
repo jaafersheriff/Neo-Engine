@@ -37,4 +37,12 @@ namespace neo {
 		// TODO - return dummy shader..
 		return Library::getDummyShader();
 	}
+
+	NewShader::HashedShaderDefines NewShader::_getDefinesHash(const NewShader::ShaderDefines& defines) {
+		HashedShaderDefines seed = static_cast<HashedShaderDefines>(defines.size());
+		for (auto& i : defines) {
+			seed ^= HashedString(i.c_str()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		}
+		return seed;
+	}
 }

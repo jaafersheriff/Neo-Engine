@@ -70,6 +70,8 @@ namespace neo {
         ServiceLocator<ImGuiManager>::set();
         ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
 
+        Library::init();
+
         ServiceLocator<Renderer>::ref().init();
         {
             auto& details = ServiceLocator<Renderer>::ref().mDetails;
