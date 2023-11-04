@@ -113,6 +113,7 @@ namespace neo {
         mValid = false;
         mPid = glCreateProgram();
 
+        std::vector<std::string> uniforms;
         for (auto&& [stage, source] : args) {
             if (!source) {
                 return mValid;
@@ -123,15 +124,7 @@ namespace neo {
                 if (mShaderIDs[stage]) {
                     glAttachShader(mPid, mShaderIDs[stage]);
 
-                    std::vector<std::string> uniforms;
                     _findUniforms(processedSource.c_str(), uniforms);
-                    for (auto& uniform : uniforms) {
-                        GLint r = glGetUniformLocation(mPid, uniform.c_str());
-                        if (r < 0) {
-                            NEO_LOG_S(util::LogSeverity::Warning, "WARN: %s uniform cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", uniform.c_str());
-                        }
-                        mUniforms[HashedString(uniform.c_str())] = r;
-                    }
                 }
             }
         }
@@ -145,6 +138,14 @@ namespace neo {
         }
 
         mValid = true;
+       for (auto& uniform : uniforms) {
+           GLint r = glGetUniformLocation(mPid, uniform.c_str());
+           if (r < 0) {
+               NEO_LOG_S(util::LogSeverity::Warning, "WARN: %s uniform cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", uniform.c_str());
+           }
+           mUniforms[HashedString(uniform.c_str())] = r;
+       }
+
         return mValid;
     }
 
