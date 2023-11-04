@@ -56,11 +56,46 @@ namespace neo {
                     std::string::size_type defineStart = line.find("#ifdef ");
                     if (defineStart != std::string::npos && end != std::string::npos && defineStart != end) {
                         std::string define = line.substr(defineStart + 7, end - start - 7);
-                        if (defines.find(define) != defines.end()) {
-                            NEO_LOG_E("Found define %s", define.c_str());
+
+                        std::string::size_type macroStart = start;
+                        std::string::size_type macroElse = sourceString.find("#else", end);
+                        std::string::size_type macroEnd = sourceString.find("#endif", end);
+                        std::string::size_type nestedIfDef = sourceString.find("#ifdef", end);
+                        NEO_ASSERT(macroEnd != std::string::npos, "Found an #ifdef %s without a matching #endif", define.c_str());
+                        if (nestedIfDef != std::string::npos) {
+                            NEO_ASSERT(nestedIfDef > macroEnd, "Can't have nested ifdefs");
+                        }
+
+                        if (defines.find(define) == defines.end()) {
+                            if (macroElse != std::string::npos && macroElse < macroEnd) {
+                                // remove endif
+                                sourceString.erase(macroEnd, 6);
+                                // remove else
+                                sourceString.erase(macroElse, 5);
+                                // remove ifdef block to else
+                                sourceString.erase(macroStart, macroElse - macroStart);
+                            }
+                            else {
+                                sourceString.erase(macroStart, macroEnd - macroStart + 6);
+                            }
+                            end = start;
                         }
                         else {
-                            NEO_LOG_E("Shader has %s but wasn't found in input defines", define.c_str());
+                            if (macroElse != std::string::npos && macroElse < macroEnd) {
+                                // remove endif
+                                sourceString.erase(macroEnd, 6);
+                                // remove else block to endif
+                                sourceString.erase(macroElse, macroEnd - macroElse);
+                                // remove ifdef
+                                sourceString.erase(macroStart, end - macroStart);
+                            }
+                            else {
+                                // Erase endif
+                                sourceString.erase(macroEnd, 6);
+                                // Erase ifdef
+                                sourceString.erase(macroStart, end);
+                            }
+                            end = start;
                         }
                     }
                     start = end + 1;

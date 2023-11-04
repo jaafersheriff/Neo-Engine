@@ -4,9 +4,14 @@
 in vec4 fragPos;
 in vec3 fragNor;
 in vec2 fragTex;
+
+#ifdef DIFFUSE_MAP
 uniform sampler2D diffuseMap;
-uniform vec3 ambientColor;
+#else
 uniform vec3 diffuseColor;
+#endif
+
+uniform vec3 ambientColor;
 uniform vec3 specularColor;
 uniform float shine;
 uniform vec3 camPos;
@@ -19,7 +24,7 @@ void main() {
 #ifdef DIFFUSE_MAP
     albedo = texture(diffuseMap, fragTex);
 #else
-    albedo.rgb += diffuseColor;
+    albedo.rgb = diffuseColor;
 #endif
 
 #ifdef ALPHA_TEST

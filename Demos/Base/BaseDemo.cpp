@@ -60,7 +60,7 @@ namespace Base {
             auto entity = ecs.createEntity();
             ecs.addComponent<TagComponent>(entity, "Light");
             ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 2.f, 20.f));
-            ecs.addComponent<LightComponent>(entity, glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+            ecs.addComponent<LightComponent>(entity, glm::vec3(1.f), glm::vec3(0.1, 0.05, 0.003f));
         }
 
         /* Bunny object */
@@ -72,8 +72,9 @@ namespace Base {
         ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
         ecs.addComponent<PhongShaderComponent>(bunny);
         ecs.addComponent<OpaqueComponent>(bunny);
-        ecs.addComponent<MaterialComponent>(bunny);
-        // ecs.addComponent<renderable::PhongRenderable>(bunny, Library::getTexture("black"), Material(glm::vec3(0.2f), glm::vec3(1.f, 0.f, 1.f)));
+        auto material = ecs.addComponent<MaterialComponent>(bunny);
+        material->mAmbient = glm::vec3(0.2f);
+        material->mDiffuse = glm::vec3(1.f, 0.f, 1.f);
 
         /* Ground plane */
         auto plane = ecs.createEntity();

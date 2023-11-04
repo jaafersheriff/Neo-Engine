@@ -32,9 +32,9 @@ namespace neo {
             }
  
             NewShader::ShaderDefines phongDefines = inDefines;
-            // if (containsAlphaTest) {
-            //     phongDefines.emplace("ALPHA_TEST");
-            // }
+            if (containsAlphaTest) {
+                phongDefines.emplace("ALPHA_TEST");
+            }
 
             const auto& material = view.get<const MaterialComponent>(entity);
             if (material.mDiffuseMap) {
