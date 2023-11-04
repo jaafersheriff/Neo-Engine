@@ -231,7 +231,7 @@ namespace neo {
         mKeyboard.init();
         ServiceLocator<Renderer>::ref().setDemoConfig(config);
         ServiceLocator<Renderer>::ref().init();
-        Loader::init(config.resDir);
+        Loader::init(config.resDir, config.shaderDir);
         _createPrefabs();
 
         /* Add engine-specific systems */

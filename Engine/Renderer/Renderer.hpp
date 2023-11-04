@@ -49,8 +49,6 @@ namespace neo {
             Renderer(Renderer &&) = delete;
             Renderer & operator=(Renderer &&) = delete;
 
-            std::string APP_SHADER_DIR = "";
-            std::string ENGINE_SHADER_DIR = "../Engine/shaders/";
             FrameStats mStats = {};
             RendererDetails mDetails = {};
 

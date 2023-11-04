@@ -8,8 +8,8 @@ namespace neo {
 	struct PhongShaderComponent : public ShaderComponent {
 		PhongShaderComponent() : ShaderComponent({
 			Library::createShaderSource("PhongShader", {
-				{ ShaderStage::VERTEX, Library::loadShaderFile("phong.vert")},
-				{ ShaderStage::FRAGMENT, Library::loadShaderFile("phong.frag") }
+				{ ShaderStage::VERTEX, Loader::loadFileString("phong.vert")},
+				{ ShaderStage::FRAGMENT, Loader::loadFileString("phong.frag") }
 			})
 		})
 		{}

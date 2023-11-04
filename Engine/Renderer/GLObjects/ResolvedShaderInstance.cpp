@@ -31,7 +31,7 @@ namespace neo {
                     std::string::size_type nameStart = line.find("#include \"");
                     std::string::size_type nameEnd = line.find("\"", nameStart + 10);
                     if (nameStart != std::string::npos && nameEnd != std::string::npos && nameStart != nameEnd) {
-                        const char* sourceInclude = Library::loadShaderFile(line.substr(nameStart + 10, nameEnd - nameStart - 10).c_str());
+                        const char* sourceInclude = Loader::loadFileString(line.substr(nameStart + 10, nameEnd - nameStart - 10).c_str());
 
                         // Replace include with source
                         sourceString.erase(start, end - start);
@@ -112,6 +112,9 @@ namespace neo {
         mPid = glCreateProgram();
 
         for (auto&& [stage, source] : args) {
+            if (!source) {
+                return;
+            }
             std::string processedSource = _processShader(source, defines);
             if (processedSource.size()) {
                 mShaderIDs[stage] = _compileShader(GLHelper::getGLShaderStage(stage), processedSource.c_str());

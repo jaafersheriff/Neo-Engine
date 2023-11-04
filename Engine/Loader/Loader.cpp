@@ -25,10 +25,39 @@
 namespace neo {
 
     std::string Loader::APP_RES_DIR = "";
+    std::string Loader::APP_SHADER_DIR = "";
     std::string Loader::ENGINE_RES_DIR = "../Engine/res/";
+    std::string Loader::ENGINE_SHADER_DIR = "../Engine/shaders/";
 
-    void Loader::init(const std::string &res) {
+    void Loader::init(const std::string &res, const std::string& shaderDir) {
         APP_RES_DIR = res;
+        APP_SHADER_DIR = shaderDir;
+    }
+
+    const char* Loader::loadFileString(const std::string& fileName) {
+        auto load = [](const char* fullPath, const char** ret) {
+            if (util::fileExists(fullPath)) {
+                // Each of these util::textFileReads does a malloc..
+                *ret = util::textFileRead(fullPath);
+                return true;
+            }
+            return false;
+        };
+
+        const char* ret;
+        if (load((APP_RES_DIR + fileName).c_str(), &ret)) {
+            return ret;
+        }
+        if (load((APP_SHADER_DIR + fileName).c_str(), &ret)) {
+            return ret;
+        }
+        if (load((ENGINE_RES_DIR + fileName).c_str(), &ret)) {
+            return ret;
+        }
+        if (load((ENGINE_SHADER_DIR + fileName).c_str(), &ret)) {
+            return ret;
+        }
+        return nullptr;
     }
 
     MeshData Loader::loadMesh(const std::string &fileName, bool doResize) {

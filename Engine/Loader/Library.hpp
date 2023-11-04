@@ -25,6 +25,7 @@ namespace neo {
             Library(const Library&) = delete;
             Library& operator=(const Library&) = delete;
 
+            static void setShaderDir(const char*);
             static void clean();
 
             static MeshData getMesh(const std::string&);
@@ -41,7 +42,6 @@ namespace neo {
             static Framebuffer* createFBO(const std::string&);
             static Framebuffer* getFBO(const std::string&);
 
-            static const char* loadShaderFile(const char* fileName);
 			static NewShader* createShaderSource(const std::string& name, const NewShader::ConstructionArgs& args);
             static NewShader* getShaderSource(const char* name);
             static const ResolvedShaderInstance& getDummyShader();

@@ -46,7 +46,7 @@ namespace neo {
             Loader(const Loader&) = delete;
             Loader& operator=(const Loader&) = delete;
 
-            static void init(const std::string &);
+            static void init(const std::string &resDir, const std::string &shaderDir);
 
             static const char* loadFileString(const std::string&);
 
@@ -68,6 +68,8 @@ namespace neo {
 
             /* Private members */
             static std::string APP_RES_DIR;
+            static std::string APP_SHADER_DIR;
             static std::string ENGINE_RES_DIR;
+            static std::string ENGINE_SHADER_DIR;
     };
 }

@@ -79,7 +79,6 @@ namespace neo {
     }
 
     void Renderer::setDemoConfig(IDemo::Config config) {
-        APP_SHADER_DIR = config.shaderDir;
         mClearColor = config.clearColor;
     }
 
