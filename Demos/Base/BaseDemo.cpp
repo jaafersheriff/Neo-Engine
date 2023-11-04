@@ -64,27 +64,31 @@ namespace Base {
         }
 
         /* Bunny object */
-        auto bunny = ecs.createEntity();
-        ecs.addComponent<TagComponent>(bunny, "Bunny");
-        ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-        ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-        ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
-        ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
-        ecs.addComponent<PhongShaderComponent>(bunny);
-        ecs.addComponent<OpaqueComponent>(bunny);
-        auto material = ecs.addComponent<MaterialComponent>(bunny);
-        material->mAmbient = glm::vec3(0.2f);
-        material->mDiffuse = glm::vec3(1.f, 0.f, 1.f);
+        {
+            auto bunny = ecs.createEntity();
+            ecs.addComponent<TagComponent>(bunny, "Bunny");
+            ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
+            ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
+            ecs.addComponent<MeshComponent>(bunny, Library::loadMesh("bunny.obj", true).mMesh);
+            ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh("bunny.obj"));
+            ecs.addComponent<PhongShaderComponent>(bunny);
+            ecs.addComponent<OpaqueComponent>(bunny);
+            auto material = ecs.addComponent<MaterialComponent>(bunny);
+            material->mAmbient = glm::vec3(0.2f);
+            material->mDiffuse = glm::vec3(1.f, 0.f, 1.f);
+        }
 
         /* Ground plane */
-        auto plane = ecs.createEntity();
-        ecs.addComponent<TagComponent>(plane, "Grid");
-        ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
-        ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad").mMesh);
-        ecs.addComponent<PhongShaderComponent>(plane);
-        ecs.addComponent<MaterialComponent>(plane);
-        ecs.addComponent<AlphaTestComponent>(plane);
-        // ecs.addComponent<renderable::AlphaTestRenderable>(plane, Library::loadTexture("grid.png"));
+        {
+            auto plane = ecs.createEntity();
+            ecs.addComponent<TagComponent>(plane, "Grid");
+            ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
+            ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad").mMesh);
+            ecs.addComponent<PhongShaderComponent>(plane);
+            ecs.addComponent<AlphaTestComponent>(plane);
+            auto material = ecs.addComponent<MaterialComponent>(plane);
+            material->mDiffuseMap = Library::loadTexture("grid.png");
+        }
 
         /* Systems - order matters! */
         ecs.addSystem<CameraControllerSystem>();

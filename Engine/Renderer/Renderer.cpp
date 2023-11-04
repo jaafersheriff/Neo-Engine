@@ -226,7 +226,11 @@ namespace neo {
             //     _renderPostProcess(*activePostShaders.back(), inputFBO, mDefaultFBO, window.getDetails().mSize, ecs);
             //     RENDERER_MP_LEAVE();
             // }
-            demo->render(ecs);
+            {
+                RENDERER_MP_ENTER("Draw Demo");
+                demo->render(ecs);
+                RENDERER_MP_LEAVE();
+            }
 
             /* Render imgui */
             if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {

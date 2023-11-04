@@ -173,8 +173,11 @@ namespace neo {
                 mShaderIDs[stage] = _compileShader(GLHelper::getGLShaderStage(stage), processedSource.c_str());
                 if (mShaderIDs[stage]) {
                     glAttachShader(mPid, mShaderIDs[stage]);
-
                     _findUniforms(processedSource.c_str(), uniforms);
+                }
+                else {
+                    mValid = false;
+                    return mValid;
                 }
             }
         }
@@ -185,9 +188,12 @@ namespace neo {
         glGetProgramiv(mPid, GL_LINK_STATUS, &linkSuccess);
         if (!linkSuccess) {
             GLHelper::printProgramInfoLog(mPid);
+            destroy();
+            mValid = false;
+            return mValid;
         }
 
-        mValid = true;
+       mValid = true;
        for (auto& uniform : uniforms) {
            GLint r = glGetUniformLocation(mPid, uniform.c_str());
            if (r < 0) {
@@ -210,6 +216,8 @@ namespace neo {
         glGetShaderiv(shader, GL_COMPILE_STATUS, &compileSuccess);
         if (!compileSuccess) {
             GLHelper::printShaderInfoLog(shader);
+            glDeleteShader(shader);
+            return 0;
         }
 
         return shader;

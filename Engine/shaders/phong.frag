@@ -32,6 +32,6 @@ void main() {
 #endif
 
     color.rgb = albedo.rgb * ambientColor + 
-                getPhong(fragNor, fragPos.rgb, camPos, lightPos - fragPos.xyz, lightAtt, lightCol, albedo.rgb, specularColor, shine);
-    color.a = albedo.a;
+                getPhong(fragNor, fragPos.rgb, camPos, normalize(lightPos - fragPos.xyz), lightAtt, lightCol, albedo.rgb, specularColor, shine);
+    color.a = 1.0;
 }

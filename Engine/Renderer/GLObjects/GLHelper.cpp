@@ -63,7 +63,7 @@ namespace neo {
         void checkError(const char *str) {
             GLenum glErr = glGetError();
             if (glErr != GL_NO_ERROR) {
-                NEO_FAIL("GL_ERROR at %s : %s.\n", str, errorString(glErr));
+                NEO_LOG_E("GL_ERROR at %s : %s.\n", str, errorString(glErr));
             }
         }
 
