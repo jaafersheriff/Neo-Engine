@@ -7,6 +7,7 @@
 #include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
 
 #include "Renderer/GLObjects/NewShader.hpp"
+#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
 namespace neo {
 
@@ -30,7 +31,7 @@ namespace neo {
                 }
             }
  
-            ResolvedShaderInstance::ShaderDefines phongDefines = inDefines;
+            NewShader::ShaderDefines phongDefines = inDefines;
             // if (containsAlphaTest) {
             //     phongDefines.emplace("ALPHA_TEST");
             // }

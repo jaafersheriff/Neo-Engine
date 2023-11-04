@@ -12,6 +12,7 @@ namespace neo {
     public:
         using ConstructionArgs = std::unordered_map<ShaderStage, const char*>;
         using ShaderDefines = std::set<std::string>;
+        using HashedShaderDefines = HashedString::value_type;
 
         NewShader(const char* name, const ConstructionArgs& args);
         ~NewShader();
@@ -20,10 +21,12 @@ namespace neo {
         NewShader(NewShader &&) = delete;
         NewShader & operator=(NewShader &&) = delete;
 
-        ResolvedShaderInstance getResolvedInstance(const ShaderDefines& defines);
+        const ResolvedShaderInstance& getResolvedInstance(const ShaderDefines& defines);
     private:
         std::string mName;
         ConstructionArgs mConstructionArgs;
-        std::unordered_map<ShaderDefines, ResolvedShaderInstance> mResolvedShaders;
+        std::unordered_map<HashedShaderDefines, ResolvedShaderInstance> mResolvedShaders;
+
+        HashedShaderDefines _getDefinesHash(const ShaderDefines& defines);
 	};
 }

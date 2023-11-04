@@ -2,6 +2,8 @@
 
 #include "ShaderComponent.hpp"
 
+#include "Loader/Library.hpp"
+
 namespace neo {
 	struct PhongShaderComponent : public ShaderComponent {
 		PhongShaderComponent() : ShaderComponent({

@@ -14,28 +14,27 @@ namespace neo {
 	}
 
 	NewShader::~NewShader() {
+		// TODO - delete the construction args file strings
 		mResolvedShaders.clear();
 	}
 
-	ResolvedShaderInstance NewShader::getResolvedInstance(const ShaderDefines& defines) {
-		auto it = mResolvedShaders.find(defines);
-		if (it != mResolvedShaders.end()) {
-			return it->second;
-		}
-		else {
-			auto newInstance = ResolvedShaderInstance(
+	const ResolvedShaderInstance& NewShader::getResolvedInstance(const ShaderDefines& defines) {
+		HashedShaderDefines hash = _getDefinesHash(defines);
+		auto it = mResolvedShaders.find(hash);
+		if (it == mResolvedShaders.end()) {
+			mResolvedShaders.emplace(std::make_pair(hash, ResolvedShaderInstance(
 				mConstructionArgs,
 				defines
-			);
-			if (newInstance.mValid) {
-				mResolvedShaders.emplace(newInstance);
-				return newInstance;
-			}
+			)));
+			it = mResolvedShaders.find(hash);
+		}
+		if (it->second.mValid) {
+			return it->second;
 		}
 
 		NEO_LOG_E("Failed to find or compile %s", mName.c_str());
 
 		// TODO - return dummy shader..
-		return Renderer::getDummyShader();
+		return Library::getDummyShader();
 	}
 }

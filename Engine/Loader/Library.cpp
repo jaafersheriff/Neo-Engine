@@ -15,6 +15,8 @@ namespace neo {
     std::unordered_map<std::string, MeshData> Library::mMeshes;
     std::unordered_map<std::string, Texture*> Library::mTextures;
     std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
+    std::unordered_map<std::string, NewShader*> Library::mShaders;
+    ResolvedShaderInstance* Library::mDummyShader;
 
     MeshData Library::getMesh(const std::string& name) {
         /* Search map first */
@@ -109,9 +111,9 @@ namespace neo {
         return source;
     }
 
-    NewShader* Library::getShaderSource(const std::string& name) {
+    NewShader* Library::getShaderSource(const char* name) {
         auto it = mShaders.find(name);
-        NEO_ASSERT(it != mShaders.end(), "Shader %s doesn't exist!", name.c_str());
+        NEO_ASSERT(it != mShaders.end(), "Shader %s doesn't exist!", name);
 
         return it->second;
     }

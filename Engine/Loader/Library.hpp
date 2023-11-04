@@ -41,8 +41,10 @@ namespace neo {
             static Framebuffer* createFBO(const std::string&);
             static Framebuffer* getFBO(const std::string&);
 
+            static const char* loadShaderFile(const char* fileName);
 			static NewShader* createShaderSource(const std::string& name, const NewShader::ConstructionArgs& args);
-            static NewShader* getShaderSource(const std::string& name);
+            static NewShader* getShaderSource(const char* name);
+            static const ResolvedShaderInstance& getDummyShader();
 
             static void imGuiEditor();
 
@@ -53,6 +55,7 @@ namespace neo {
             static std::unordered_map<std::string, Texture*> mTextures;
             static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
             static std::unordered_map<std::string, NewShader*> mShaders;
+            static ResolvedShaderInstance* mDummyShader;
 
             static void _insertMesh(const std::string&, MeshData);
             static void _insertTexture(const std::string&, Texture*);
