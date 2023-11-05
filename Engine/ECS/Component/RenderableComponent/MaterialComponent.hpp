@@ -2,6 +2,8 @@
 
 #include "ECS/Component/Component.hpp"
 
+#include <imgui/imgui.h>
+
 namespace neo {
     class Texture; 
 	struct MaterialComponent : public Component {
@@ -11,6 +13,8 @@ namespace neo {
         glm::vec3 mDiffuse;
 
         glm::vec3 mSpecular;
+
+        // Unused..for now
         float mShininess;
         glm::vec3 mTransmittance;
         glm::vec3 mEmission;
@@ -20,5 +24,11 @@ namespace neo {
         virtual std::string getName() const override {
             return "MaterialComponent";
         }
+
+		virtual void imGuiEditor() override {
+            ImGui::ColorEdit3("Ambient", &mAmbient[0]);
+            ImGui::ColorEdit3("Diffuse", &mDiffuse[0]);
+            ImGui::ColorEdit3("Specular", &mSpecular[0]);
+        };
 	};
 }

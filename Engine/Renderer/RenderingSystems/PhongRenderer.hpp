@@ -19,19 +19,16 @@ namespace neo {
         const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 
         bool containsAlphaTest = false;
-        {
-            // MICROPROFILE_SCOPEI("PhongRenderer", "Sort alpha test", MP_AUTO);
-            // if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
-            //     containsAlphaTest = true;
-            //     ecs.sort<AlphaTestComponent>([&cameraSpatial, &ecs](ECS::Entity entityLeft, ECS::Entity entityRight) {
-            //         auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
-            //         auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
-            //         if (leftSpatial && rightSpatial) {
-            //             return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) < glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
-            //         }
-            //         return false;
-            //         });
-            // }
+        if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
+            containsAlphaTest = true;
+        //     ecs.sort<AlphaTestComponent>([&cameraSpatial, &ecs](ECS::Entity entityLeft, ECS::Entity entityRight) {
+        //         auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
+        //         auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
+        //         if (leftSpatial && rightSpatial) {
+        //             return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) < glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
+        //         }
+        //         return false;
+        //         });
         }
 
         const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();

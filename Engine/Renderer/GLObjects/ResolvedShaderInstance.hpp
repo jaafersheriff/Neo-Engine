@@ -21,7 +21,7 @@ namespace neo {
         ResolvedShaderInstance() = default;
         ~ResolvedShaderInstance() = default;
 
-        bool init(const NewShader::ConstructionArgs& args, const NewShader::ShaderDefines& defines);
+        bool init(const NewShader::ShaderSources& args, const NewShader::ShaderDefines& defines);
         void destroy();
 
         void bind() const;

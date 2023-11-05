@@ -87,6 +87,7 @@ namespace Base {
             ecs.addComponent<PhongShaderComponent>(plane);
             ecs.addComponent<AlphaTestComponent>(plane);
             auto material = ecs.addComponent<MaterialComponent>(plane);
+            material->mAmbient = glm::vec3(1.f);
             material->mDiffuseMap = Library::loadTexture("grid.png");
         }
 

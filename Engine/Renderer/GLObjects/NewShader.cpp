@@ -2,22 +2,31 @@
 
 #include "NewShader.hpp"
 
+#include "Renderer/Renderer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
 #include "Loader/Library.hpp"
 
+#include <imgui.h>
+
 namespace neo {
 	NewShader::NewShader(const char* name, const ConstructionArgs& args) 
-		: mConstructionArgs(args) 
-		, mName(name)
+		: mName(name)
+		, mConstructionArgs(args) 
 	{
+		for (auto& arg : args) {
+			mShaderSources.emplace(arg.first, Loader::loadFileString(arg.second));
+		}
 	}
 
+	NewShader::NewShader(const char* name, const ShaderSources& sources)
+		: mName(name)
+		, mShaderSources(sources) {
+	}
+
+
 	NewShader::~NewShader() {
-		for (auto& source : mConstructionArgs) {
-			delete source.second;
-		}
-		mConstructionArgs.clear();
+		destroy();
 	}
 
 	void NewShader::destroy() {
@@ -25,6 +34,11 @@ namespace neo {
 			instance.second.destroy();
 		}
 		mResolvedShaders.clear();
+
+		for (auto& source : mShaderSources) {
+			delete source.second;
+		}
+		mShaderSources.clear();
 	}
 
 	const ResolvedShaderInstance& NewShader::getResolvedInstance(const ShaderDefines& defines) {
@@ -34,13 +48,17 @@ namespace neo {
 		if (it == mResolvedShaders.end()) {
 			mResolvedShaders.emplace(hash, ResolvedShaderInstance());
 			it = mResolvedShaders.find(hash);
-			it->second.init(mConstructionArgs, defines);
+			it->second.init(mShaderSources, defines);
 
 			std::stringstream ss;
 #ifdef DEBUG_MODE
 			ss << "{";
-			for (auto& s : defines) {
-				ss << s.c_str() << ", ";
+			for (auto d = defines.begin(); d != defines.end(); d++) {
+				ss << d->c_str();
+				if (d != std::prev(defines.end())) {
+					ss << ", ";
+				}
+
 			}
 			ss << "}";
 #endif
@@ -66,5 +84,15 @@ namespace neo {
 			seed ^= HashedString(i.c_str()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 		}
 		return seed;
+	}
+
+	void NewShader::imguiEditor() {
+		ImGui::Text("Variants: %d", mResolvedShaders.size());
+		if (mConstructionArgs && ImGui::Button("Reload")) {
+			destroy();
+			for (auto& arg : *mConstructionArgs) {
+				mShaderSources.emplace(arg.first, Loader::loadFileString(arg.second));
+			}
+		};
 	}
 }

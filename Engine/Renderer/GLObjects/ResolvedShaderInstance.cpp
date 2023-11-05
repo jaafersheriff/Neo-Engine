@@ -158,7 +158,7 @@ namespace neo {
         }
     }
 
-    bool ResolvedShaderInstance::init(const NewShader::ConstructionArgs& args, const NewShader::ShaderDefines& defines) {
+    bool ResolvedShaderInstance::init(const NewShader::ShaderSources& args, const NewShader::ShaderDefines& defines) {
         NEO_ASSERT(!mValid && mPid == 0, "TODO");
         mValid = false;
         mPid = glCreateProgram();

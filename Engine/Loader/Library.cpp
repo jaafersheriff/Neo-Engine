@@ -19,7 +19,7 @@ namespace neo {
     NewShader* Library::mDummyShader;
 
     void Library::init() {
-        mDummyShader = new NewShader("Dummy", {
+        mDummyShader = new NewShader("Dummy", NewShader::ShaderSources{
             {ShaderStage::VERTEX, 
                 R"(
                     void main() {
@@ -190,6 +190,15 @@ namespace neo {
                     ImGui::TextWrapped((std::to_string(t->mTextureID) + " [" + std::to_string(t->mWidth) + ", " + std::to_string(t->mHeight) + "]").c_str());
                     ImGui::SameLine();
                     textureFunc(*t);
+                }
+            }
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
+            for (auto& shader : Library::mShaders) {
+                if (ImGui::TreeNode(shader.first.c_str())) {
+                    shader.second->imguiEditor();
+                    ImGui::TreePop();
                 }
             }
             ImGui::TreePop();
