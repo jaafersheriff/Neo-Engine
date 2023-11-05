@@ -7,6 +7,7 @@ namespace neo {
 
 	class ECS;
 	class Renderer;
+	class Framebuffer;
 
 	class IDemo {
 	public:
@@ -28,7 +29,7 @@ namespace neo {
 		virtual void update(ECS& ecs) {
 			NEO_UNUSED(ecs);
 		};
-		virtual void render(const ECS& ecs) = 0;
+		virtual void render(const ECS& ecs, Framebuffer& backbuffer) = 0;
 		virtual void imGuiEditor(ECS& ecs) {
 			NEO_UNUSED(ecs);
 		}

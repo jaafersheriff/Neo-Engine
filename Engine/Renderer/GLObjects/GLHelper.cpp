@@ -4,6 +4,62 @@
 namespace neo {
 
     namespace GLHelper {
+        namespace {
+
+            /* For printing out the current file and line number */
+            template <typename T>
+            std::string NumberToString(T x)
+            {
+                std::ostringstream ss;
+                ss << x;
+                return ss.str();
+            }
+
+        }
+
+        void OpenGLMessageCallback(
+            unsigned source,
+            unsigned type,
+            unsigned id,
+            unsigned severity,
+            int length,
+            const char* message,
+            const void* userParam) {
+            NEO_UNUSED(id, length, userParam);
+
+            static std::unordered_map<GLenum, const char*> sSourceString = {
+                {GL_DEBUG_SOURCE_API, "API"},
+                {GL_DEBUG_SOURCE_WINDOW_SYSTEM, "Window"},
+                {GL_DEBUG_SOURCE_SHADER_COMPILER, "Shader Compiler"},
+                {GL_DEBUG_SOURCE_THIRD_PARTY, "3rd Party"},
+                {GL_DEBUG_SOURCE_APPLICATION, "Application"},
+                {GL_DEBUG_SOURCE_OTHER, "Other"},
+            };
+
+            static std::unordered_map<GLenum, const char*> sTypeString{
+                {GL_DEBUG_TYPE_ERROR, "Error"},
+                {GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "Deprecated Behavior"},
+                {GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, "Undefined Behavior"},
+                {GL_DEBUG_TYPE_PORTABILITY, "Portability"},
+                {GL_DEBUG_TYPE_PERFORMANCE, "Performance"},
+                {GL_DEBUG_TYPE_MARKER, "Marker"},
+                {GL_DEBUG_TYPE_PUSH_GROUP, "Push Group"},
+                {GL_DEBUG_TYPE_POP_GROUP, "Pop Group"},
+                {GL_DEBUG_TYPE_OTHER, "Other"},
+            };
+
+            char glBuf[512];
+            sprintf(glBuf, "[GL %s] [%s]: %s", sSourceString.at(source), sTypeString.at(type), message);
+
+            switch (severity) {
+                case GL_DEBUG_SEVERITY_HIGH:         NEO_LOG_E(glBuf); return;
+                case GL_DEBUG_SEVERITY_MEDIUM:       NEO_LOG_W(glBuf); return;
+                case GL_DEBUG_SEVERITY_LOW:          NEO_LOG_W(glBuf); return;
+                case GL_DEBUG_SEVERITY_NOTIFICATION: NEO_LOG_I(glBuf); return;
+            }
+
+            NEO_FAIL("Unknown severity level!");
+        }
 
         const char * errorString(GLenum err) {
             switch (err) {
@@ -60,6 +116,7 @@ namespace neo {
             NEO_FAIL("Invalid ShaderStage: %d", type);
             return 0;
         }
+
         void checkError(const char *str) {
             GLenum glErr = glGetError();
             if (glErr != GL_NO_ERROR) {
@@ -72,6 +129,7 @@ namespace neo {
             GLint charsWritten = 0;
             GLchar *infoLog;
 
+            #define GET_FILE_LINE (std::string(__FILE__) + ":" + NumberToString(__LINE__)).c_str()
             checkError(GET_FILE_LINE);
             glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infologLength);
             checkError(GET_FILE_LINE);

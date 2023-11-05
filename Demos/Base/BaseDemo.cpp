@@ -8,6 +8,7 @@
 #include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
+#include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/NewRenderingComponents/AlphaTestComponent.hpp"
 #include "ECS/Component/NewRenderingComponents/OpaqueComponent.hpp"
@@ -95,10 +96,11 @@ namespace Base {
         ecs.addSystem<CameraControllerSystem>();
         ecs.addSystem<RotationSystem>();
 
-        /* Init renderer */
-        // renderer.addSceneShader<PhongShader>();
-        // renderer.addSceneShader<AlphaTestShader>();
-        // renderer.addPostProcessShader<FXAAShader>();
+        // TODO - this should have a better interface that can maintained in render()
+        auto colorBuffer = Library::createFBO("colorBuffer");
+        colorBuffer->attachColorTexture(glm::uvec2(1, 1), TextureFormat{});
+        colorBuffer->attachDepthTexture(glm::uvec2(1, 1), GL_LINEAR, GL_CLAMP);
+        colorBuffer->initDrawBuffers();
     }
 
     void Demo::imGuiEditor(ECS& ecs) {
@@ -109,13 +111,24 @@ namespace Base {
         NEO_UNUSED(ecs);
     }
 
-    void Demo::render(const ECS& ecs) {
+    void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
         const auto&& [__, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
+        auto colorBuffer = Library::getFBO("colorBuffer");
+        auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
+        colorBuffer->resize(viewport.mSize);
+        colorBuffer->bind();
+        glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+        glm::vec3 clearColor = getConfig().clearColor;
+        glClearColor(clearColor.r, clearColor.g, clearColor.b, 1.0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         drawPhong<OpaqueComponent>(ecs, cameraEntity, light, lightSpatial);
-        glEnable(GL_BLEND);
         drawPhong<AlphaTestComponent>(ecs, cameraEntity, light, lightSpatial);
+
+        backbuffer.bind();
+        // drawFXAA();
     }
 
     void Demo::destroy() {

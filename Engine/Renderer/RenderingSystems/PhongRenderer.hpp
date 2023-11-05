@@ -21,6 +21,8 @@ namespace neo {
         bool containsAlphaTest = false;
         if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
             containsAlphaTest = true;
+            glEnable(GL_BLEND);
+            // Transparency sorting..for later
         //     ecs.sort<AlphaTestComponent>([&cameraSpatial, &ecs](ECS::Entity entityLeft, ECS::Entity entityRight) {
         //         auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
         //         auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
@@ -42,15 +44,13 @@ namespace neo {
  
             NewShader::ShaderDefines phongDefines = inDefines;
             const auto& material = view.get<const MaterialComponent>(entity);
-            {
-                MICROPROFILE_SCOPEI("PhongRenderer", "Collect defines", MP_AUTO);
-                if (containsAlphaTest) {
-                    phongDefines.emplace("ALPHA_TEST");
-                }
+            if (containsAlphaTest) {
+                NEO_ASSERT(!ecs.has<OpaqueComponent>(entity), "Entity has opaque and alpha test component?");
+                phongDefines.emplace("ALPHA_TEST");
+            }
 
-                if (material.mDiffuseMap) {
-                    phongDefines.emplace("DIFFUSE_MAP");
-                }
+            if (material.mDiffuseMap) {
+                phongDefines.emplace("DIFFUSE_MAP");
             }
             auto resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(phongDefines);
             resolvedShader.bind();
@@ -76,6 +76,10 @@ namespace neo {
             resolvedShader.bindUniform("shine", material.mShininess);
         
             view.get<const MeshComponent>(entity).mMesh->draw();
+        }
+
+        if (containsAlphaTest) {
+            glDisable(GL_BLEND);
         }
 
 	}

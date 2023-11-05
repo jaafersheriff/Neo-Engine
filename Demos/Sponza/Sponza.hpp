@@ -9,6 +9,6 @@ namespace Sponza {
 	public:
 		virtual IDemo::Config getConfig() const override;
 		virtual void init(ECS& ecs) override;
-		virtual void render(const ECS& ecs) override;
+		virtual void render(const ECS& ecs, Framebuffer& backbuffer) override;
 	};
 }

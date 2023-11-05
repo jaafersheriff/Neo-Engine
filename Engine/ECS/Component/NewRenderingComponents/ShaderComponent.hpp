@@ -16,7 +16,6 @@ namespace neo {
         ShaderComponent(NewShader* shader) : mShaderSource(shader) {}
 
         const ResolvedShaderInstance& getResolvedInstance(const NewShader::ShaderDefines& defines) const {
-            MICROPROFILE_SCOPEI(getName().c_str(), "getResolvedInstance", MP_AUTO);
             return mShaderSource->getResolvedInstance(defines);
         }
 

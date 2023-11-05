@@ -115,7 +115,7 @@ namespace Sponza {
         // renderer.addPostProcessShader<FXAAShader>();
     }
 
-    void Demo::render(const ECS& ecs) {
+    void Demo::render(const ECS& ecs, Framebuffer&) {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
         const auto&& [__, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
 

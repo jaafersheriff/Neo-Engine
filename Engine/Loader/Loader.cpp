@@ -45,6 +45,7 @@ namespace neo {
         };
 
         const char* ret;
+        // TODO - this should be extended to other load funcs..
         if (load((APP_RES_DIR + fileName).c_str(), &ret)) {
             return ret;
         }
@@ -125,7 +126,8 @@ namespace neo {
         NEO_LOG_I("Loaded mesh (%d vertices): %s", vertCount, fileName.c_str());
         return meshData;
     }
-   std::vector<Asset> Loader::loadMultiAsset(const std::string &fileName) {
+
+    std::vector<Asset> Loader::loadMultiAsset(const std::string &fileName) {
         /* If mesh was not found in map, read it in */
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> objMaterials;
