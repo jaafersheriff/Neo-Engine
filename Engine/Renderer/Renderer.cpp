@@ -1,6 +1,8 @@
 #include "Renderer/pch.hpp"
 #include "Renderer.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
+#include "Renderer/GLObjects/NewShader.hpp"
+#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
@@ -239,28 +241,49 @@ namespace neo {
                 ServiceLocator<ImGuiManager>::ref().render();
             }
             else {
-                // RENDERER_MP_ENTER("Final Blit");
-                // if (!mBlitShader) {
-                //     mBlitShader = new BlitShader;
-                // }
-                // mBackBuffer->bind();
-                // resetState();
-                // glDisable(GL_DEPTH_TEST);
-                // glClearColor(0.f, 0.f, 0.f, 1.f);
-                // glClear(GL_COLOR_BUFFER_BIT);
-                // glViewport(0, 0, frameSize.x, frameSize.y);
+                RENDERER_MP_ENTER("Final Blit");
+                if (!mBlitShader) {
+                    mBlitShader = new NewShader("Final Blit", NewShader::ShaderSources{
+                        { ShaderStage::VERTEX,
+                        R"(
+                            layout (location = 0) in vec3 vertPos;
+                            layout (location = 2) in vec2 vertTex;
+                            out vec2 fragTex;
+                            void main() { 
+                                gl_Position = vec4(2 * vertPos, 1); 
+                                fragTex = vertTex; 
+                            } 
+                        )"},
+                        { ShaderStage::FRAGMENT,
+                        R"(
+                            in vec2 fragTex;
+                            uniform sampler2D inputTexture;
+                            out vec4 color;
+                            void main() {
+                                color = texture(inputTexture, fragTex);
+                            }
+                        )"}
+                    });
+                }
+                mBackBuffer->bind();
+                resetState();
+                glDisable(GL_DEPTH_TEST);
+                glClearColor(0.f, 0.f, 0.f, 1.f);
+                glClear(GL_COLOR_BUFFER_BIT);
+                glViewport(0, 0, frameSize.x, frameSize.y);
 
-                // mBlitShader->bind();
-                // auto meshData = Library::getMesh("quad");
-                // glBindVertexArray(meshData.mMesh->mVAOID);
+                auto resolvedBlit = mBlitShader->getResolvedInstance({});
+                resolvedBlit.bind();
 
-                // // Bind input fbo texture
-                // mBlitShader->loadTexture("inputTexture", *mDefaultFBO->mTextures[0]);
+                auto meshData = Library::getMesh("quad");
+                glBindVertexArray(meshData.mMesh->mVAOID);
 
-                // // Render 
-                // meshData.mMesh->draw();
-                // mBlitShader->unbind();
-                // RENDERER_MP_LEAVE();
+                // Bind input fbo texture
+                resolvedBlit.bindTexture("inputTexture", *mDefaultFBO->mTextures[0]);
+
+                // Render 
+                meshData.mMesh->draw();
+                RENDERER_MP_LEAVE();
             }
 
         /* Post process with ping & pong */
