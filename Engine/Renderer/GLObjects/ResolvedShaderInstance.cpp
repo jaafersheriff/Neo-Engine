@@ -166,6 +166,7 @@ namespace neo {
         std::vector<std::string> uniforms;
         for (auto&& [stage, source] : args) {
             if (!source) {
+                NEO_LOG_E("Trying to compile an empty shader source");
                 return mValid;
             }
             std::string processedSource = _processShader(source, defines);

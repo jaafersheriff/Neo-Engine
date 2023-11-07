@@ -257,6 +257,10 @@ namespace neo {
     glm::uvec2 ImGuiManager::getViewportSize() {
         NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
+        // Viewport isn't ready on the first frame..
+        if (mViewport.mSize == glm::uvec2(0, 0)) {
+            return glm::uvec2(1, 1);
+        }
         return mViewport.mSize;
     }
 

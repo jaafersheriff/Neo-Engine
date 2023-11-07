@@ -58,6 +58,7 @@ namespace neo {
         if (load((ENGINE_SHADER_DIR + fileName).c_str(), &ret)) {
             return ret;
         }
+        NEO_LOG_E("Unable to find string file %s", fileName.c_str());
         return nullptr;
     }
 

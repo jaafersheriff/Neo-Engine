@@ -70,7 +70,6 @@ namespace neo {
 			}
 		}
 
-
 		if (it->second.mValid) {
 			return it->second;
 		}

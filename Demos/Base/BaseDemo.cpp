@@ -28,6 +28,7 @@
 #include "Renderer/Shader/FXAAShader.hpp"
 
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
+#include "Renderer/RenderingSystems/FXAARenderer.hpp"
 
 #include "Renderer/GLObjects/Material.hpp"
 
@@ -98,7 +99,12 @@ namespace Base {
 
         // TODO - this should have a better interface that can maintained in render()
         auto colorBuffer = Library::createFBO("colorBuffer");
-        colorBuffer->attachColorTexture(glm::uvec2(1, 1), TextureFormat{});
+        colorBuffer->attachColorTexture(glm::uvec2(1, 1), TextureFormat{
+            GL_RGB8,
+            GL_RGB,
+            GL_LINEAR,
+            GL_CLAMP
+            });
         colorBuffer->attachDepthTexture(glm::uvec2(1, 1), GL_LINEAR, GL_CLAMP);
         colorBuffer->initDrawBuffers();
     }
@@ -118,17 +124,15 @@ namespace Base {
         auto colorBuffer = Library::getFBO("colorBuffer");
         auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
         colorBuffer->resize(viewport.mSize);
-        colorBuffer->bind();
-        glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+
         glm::vec3 clearColor = getConfig().clearColor;
-        glClearColor(clearColor.r, clearColor.g, clearColor.b, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        colorBuffer->clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         drawPhong<OpaqueComponent>(ecs, cameraEntity, light, lightSpatial);
         drawPhong<AlphaTestComponent>(ecs, cameraEntity, light, lightSpatial);
 
-        backbuffer.bind();
-        // drawFXAA();
+        backbuffer.clear(glm::vec4(0.f), GL_COLOR_BUFFER_BIT);
+        drawFXAA(backbuffer, *colorBuffer->mTextures[0]);
     }
 
     void Demo::destroy() {

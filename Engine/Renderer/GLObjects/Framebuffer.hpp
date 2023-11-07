@@ -61,9 +61,7 @@ namespace neo {
         }
         
         void initDrawBuffers() {
-            if (!mColorAttachments) {
-                return;
-            }
+            NEO_ASSERT(mColorAttachments, "Attempting to init FBO without any color attachments");
         
             bind();
             std::vector<GLenum> attachments;
@@ -74,11 +72,24 @@ namespace neo {
         }
         
         void resize(const glm::uvec2 size) {
-            bind();
-            glViewport(0, 0, size.x, size.y);
-            for (auto& texture : mTextures) {
-                texture->resize(size);
+            NEO_ASSERT(size.x != 0 || size.y != 0, "Can't have a 0-dimension framebuffer..");
+            NEO_ASSERT(mTextures.size(), "Attempting to resize framebuffer with no textures");
+            if (size.x != mTextures[0]->mWidth || size.y != mTextures[0]->mHeight) {
+                bind();
+                glViewport(0, 0, size.x, size.y);
+                for (auto& texture : mTextures) {
+                    texture->resize(size);
+                }
             }
+        }
+
+        void clear(glm::vec4 clearColor, GLbitfield clearFlags) {
+            NEO_ASSERT(mTextures.size(), "Attempting to clear framebuffer with no textures");
+
+            bind();
+            glViewport(0, 0, mTextures[0]->mWidth, mTextures[0]->mHeight);
+            glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+            glClear(clearFlags);
         }
         
         void destroy() {
