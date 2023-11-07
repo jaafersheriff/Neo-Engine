@@ -112,7 +112,6 @@ namespace Sponza {
         ecs.addSystem<FrustumCullingSystem>();
 
         /* Init renderer */
-        // renderer.addPreProcessShader<ShadowCasterShader>(4096);
         // auto& _s = renderer.addSceneShader<PhongShadowShader>();
         // _s.bias = 0.001f;
         // renderer.addPostProcessShader<FXAAShader>();
@@ -131,6 +130,7 @@ namespace Sponza {
         drawShadows<AlphaTestComponent>(*shadowMap, ecs);
 
         backbuffer.bind();
+        backbuffer.clear(glm::vec4(getConfig().clearColor, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight);
         drawPhong<OpaqueComponent>(ecs, cameraEntity, light, lightSpatial);
         drawPhong<AlphaTestComponent>(ecs, cameraEntity, light, lightSpatial);

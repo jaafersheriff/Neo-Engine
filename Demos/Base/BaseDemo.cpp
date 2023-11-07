@@ -108,30 +108,26 @@ namespace Base {
         const auto&& [__, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
         auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-        // auto sceneTarget = Library::createTransientFBO(viewport.mSize, {
-        //     TextureFormat{
-        //         GL_RGB8,
-        //         GL_RGB,
-        //     },
-        //     TextureFormat{
-        //         GL_R16,
-        //         GL_DEPTH_COMPONENT,
-        //     }
-        // });
+        auto sceneTarget = Library::createTransientFBO(viewport.mSize, {
+            TextureFormat{
+                GL_RGB8,
+                GL_RGB,
+            },
+            TextureFormat{
+                GL_R16,
+                GL_DEPTH_COMPONENT,
+            }
+        });
 
         glm::vec3 clearColor = getConfig().clearColor;
 
-        // sceneTarget->bind();
-        // sceneTarget->clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        backbuffer.bind();
-        backbuffer.clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        sceneTarget->bind();
+        sceneTarget->clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
         drawPhong<OpaqueComponent>(ecs, cameraEntity, light, lightSpatial);
         drawPhong<AlphaTestComponent>(ecs, cameraEntity, light, lightSpatial);
 
-        // backbuffer.clear(glm::vec4(0.f), GL_COLOR_BUFFER_BIT);
-        // drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
+        drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
     }
 
     void Demo::destroy() {

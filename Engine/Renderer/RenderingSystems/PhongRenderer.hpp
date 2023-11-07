@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ECS/ECS.hpp"
+#include "Util/Profiler.hpp"
 
 #include "ECS/Component/NewRenderingComponents/PhongShaderComponent.hpp"
 #include "ECS/Component/NewRenderingComponents/OpaqueComponent.hpp"
@@ -16,7 +17,7 @@ namespace neo {
 
 	template<typename... CompTs>
     void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const LightComponent& light, const SpatialComponent& lightSpatial, const NewShader::ShaderDefines& inDefines = {}) {
-        GPU_MP_ENTER("drawPhong");
+        TRACY_GPUN("drawPhong");
         const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 
         bool containsAlphaTest = false;
@@ -84,7 +85,5 @@ namespace neo {
         if (containsAlphaTest) {
             glDisable(GL_BLEND);
         }
-
-        GPU_MP_LEAVE();
 	}
 }

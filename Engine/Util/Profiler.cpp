@@ -33,7 +33,7 @@ namespace {
     }
     
     static void AttentionCallback() {
-        NEO_LOG_E("Tracy requires attention");
+        NEO_LOG_I("Tracy requires attention");
     }
 }
 #endif

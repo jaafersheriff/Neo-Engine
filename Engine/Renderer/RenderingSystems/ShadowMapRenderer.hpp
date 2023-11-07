@@ -10,7 +10,7 @@ namespace neo {
 
 	template<typename... CompTs>
     void drawShadows(Framebuffer& depthMap, const ECS& ecs) {
-        GPU_MP_ENTER("drawShadows");
+        TRACY_GPUN("drawShadows");
 
         depthMap.bind();
         depthMap.disableDraw();
@@ -58,12 +58,12 @@ namespace neo {
             resolvedShader.bindUniform("V", shadowCameraSpatial.getView());
             resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
             view.get<const MeshComponent>(entity).mMesh->draw();
+
+            resolvedShader.unbind();
         }
 
         if (containsAlphaTest) {
             glDisable(GL_BLEND);
         }
-
-        GPU_MP_LEAVE();
 	}
 }

@@ -3,7 +3,7 @@ in vec2 fragTex;
 
 #ifdef ALPHA_TEST
 #include "alphaDiscard.glsl"
-uniform sampler2D alphaMap;
+layout (binding = 0) uniform sampler2D alphaMap;
 #endif
 
 

@@ -44,7 +44,7 @@ namespace neo {
 	}
 
 	const ResolvedShaderInstance& NewShader::getResolvedInstance(const ShaderDefines& defines) {
-        MICROPROFILE_SCOPEI("ResolvedShaderInstance", "getResolvedInstance", MP_AUTO);
+		TRACY_ZONE();
 		HashedShaderDefines hash = _getDefinesHash(defines);
 		auto it = mResolvedShaders.find(hash);
 		if (it == mResolvedShaders.end()) {

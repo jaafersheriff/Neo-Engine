@@ -10,7 +10,7 @@ namespace neo {
 
 	template<typename... CompTs>
     void drawFXAA(Framebuffer& outputFBO, Texture& inputTexture) {
-        MICROPROFILE_SCOPEI("FXAARenderer", "drawFXAA", MP_AUTO);
+        TRACY_GPUN("drawFXAA");
 
         // Where are these const chars in memory..are they being created and passed on each call?
         auto fxaaShader = Library::createShaderSource("FXAAShader", NewShader::ShaderSources {
@@ -19,7 +19,7 @@ namespace neo {
             { ShaderStage::FRAGMENT, R"(
                 in vec2 fragTex;
                 uniform vec2 frameSize;
-                uniform sampler2D inputTexture;
+                layout(binding = 0) uniform sampler2D inputTexture;
 
                 out vec4 color;
                 void main() {
@@ -76,6 +76,7 @@ namespace neo {
         });
 
         outputFBO.bind();
+        glViewport(0, 0, outputFBO.mTextures[0]->mWidth, outputFBO.mTextures[0]->mHeight);
 
         auto resolvedShader = fxaaShader->getResolvedInstance({});
         resolvedShader.bind();
@@ -85,5 +86,7 @@ namespace neo {
         glDisable(GL_DEPTH_TEST);
         Library::getMesh("quad").mMesh->draw();
         glEnable(GL_DEPTH_TEST);
+
+        resolvedShader.unbind();
     }
 }

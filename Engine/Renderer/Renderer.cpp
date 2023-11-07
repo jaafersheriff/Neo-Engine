@@ -47,6 +47,7 @@ namespace neo {
 		
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
 		glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_FALSE);
+		// glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
 	#endif
 
         /* Init default FBO */
@@ -75,7 +76,7 @@ namespace neo {
             { ShaderStage::FRAGMENT,
             R"(
                 in vec2 fragTex;
-                uniform sampler2D inputTexture;
+                layout (binding = 0) uniform sampler2D inputTexture;
                 out vec4 color;
                 void main() {
                     color = texture(inputTexture, fragTex);
@@ -134,50 +135,48 @@ namespace neo {
         mStats = {};
 
         TRACY_GPU();
-			resetState();
-            mDefaultFBO->bind();
+        resetState();
+        mDefaultFBO->bind();
 
-            {
-                GPU_MP_ENTER("Draw Demo");
-                demo->render(ecs, *mDefaultFBO);
-                GPU_MP_LEAVE();
-            }
-
-            /* Render imgui */
-            if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                TRACY_GPUN("ImGuiManager.render");
-                mBackBuffer->bind();
-                ServiceLocator<ImGuiManager>::ref().render();
-            }
-            else {
-                TRACY_GPUN("Final Blit");
-                mBackBuffer->bind();
-                resetState();
-                glDisable(GL_DEPTH_TEST);
-                glClearColor(0.f, 0.f, 0.f, 1.f);
-                glClear(GL_COLOR_BUFFER_BIT);
-                auto frameSize = window.getDetails().mSize;
-                glViewport(0, 0, frameSize.x, frameSize.y);
-
-                auto resolvedBlit = mBlitShader->getResolvedInstance({});
-                resolvedBlit.bind();
-
-                auto meshData = Library::getMesh("quad");
-                glBindVertexArray(meshData.mMesh->mVAOID);
-
-                // Bind input fbo texture
-                resolvedBlit.bindTexture("inputTexture", *mDefaultFBO->mTextures[0]);
-
-                // Render 
-                meshData.mMesh->draw();
-                resolvedBlit.unbind();
-            }
+        {
+            TRACY_GPUN("Draw Demo");
+            demo->render(ecs, *mDefaultFBO);
         }
 
-			{
-        		TRACY_GPUN("glfwSwapBuffers");
-        		glfwSwapBuffers(window.getWindow());
-			}
+        /* Render imgui */
+        if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+            TRACY_GPUN("ImGuiManager.render");
+            mBackBuffer->bind();
+            ServiceLocator<ImGuiManager>::ref().render();
+        }
+        else {
+            TRACY_GPUN("Final Blit");
+            mBackBuffer->bind();
+            resetState();
+            glDisable(GL_DEPTH_TEST);
+            glClearColor(0.f, 0.f, 0.f, 1.f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            auto frameSize = window.getDetails().mSize;
+            glViewport(0, 0, frameSize.x, frameSize.y);
+
+            auto resolvedBlit = mBlitShader->getResolvedInstance({});
+            resolvedBlit.bind();
+
+            auto meshData = Library::getMesh("quad");
+            glBindVertexArray(meshData.mMesh->mVAOID);
+
+            // Bind input fbo texture
+            resolvedBlit.bindTexture("inputTexture", *mDefaultFBO->mTextures[0]);
+
+            // Render 
+            meshData.mMesh->draw();
+            resolvedBlit.unbind();
+        }
+
+        {
+            TRACY_GPUN("glfwSwapBuffers");
+            glfwSwapBuffers(window.getWindow());
+        }
     }
 
     void Renderer::imGuiEditor(WindowSurface& window, ECS& ecs) {
