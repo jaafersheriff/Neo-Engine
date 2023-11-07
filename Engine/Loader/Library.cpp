@@ -150,12 +150,15 @@ namespace neo {
                 fb->attachColorTexture(size, format);
             }
         }
-        fb->initDrawBuffers();
-        mTransientFramebuffers.emplace(hash, std::make_pair<uint8_t, Framebuffer*>(static_cast<uint8_t>(1), std::move(fb)));
+        if (fb->mColorAttachments) {
+            fb->initDrawBuffers();
+        }
+        mTransientFramebuffers.emplace(hash, std::make_pair<uint8_t, Framebuffer*>(static_cast<uint8_t>(2), std::move(fb)));
         return fb;
     }
 
     uint32_t Library::_getTransientFBOHash(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+        NEO_UNUSED(formats);
         uint32_t seed = size.x + size.y;
 		for (auto& i : formats) {
 			seed ^= i.mBaseFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -189,6 +192,19 @@ namespace neo {
         mShaders.emplace(name, source);
         return source;
     }
+
+    NewShader* Library::createShaderSource(const std::string& name, const NewShader::ShaderSources& sources) {
+        auto it = mShaders.find(name);
+        if (it != mShaders.end()) {
+            return it->second;
+        }
+
+        NEO_LOG("Creating Shader %s", name.c_str());
+        NewShader* source = new NewShader(name.c_str(), sources);
+        mShaders.emplace(name, source);
+        return source;
+    }
+
 
     NewShader* Library::getShaderSource(const char* name) {
         auto it = mShaders.find(name);
@@ -252,7 +268,7 @@ namespace neo {
             }
             if (ImGui::TreeNodeEx("Transients", ImGuiTreeNodeFlags_DefaultOpen)) {
                 for (auto& [hash, fboPair] : Library::mTransientFramebuffers) {
-                    ImGui::TextWrapped("%d [%d] (%d)", static_cast<int>(hash), static_cast<int>(fboPair.first), fboPair.second->mFBOID);
+                    ImGui::TextWrapped("[%d] (%d)", static_cast<int>(fboPair.first), fboPair.second->mFBOID);
                     for (auto& t : fboPair.second->mTextures) {
                         ImGui::SameLine();
                         ImGui::TextWrapped("%d [%d, %d]", t->mTextureID, t->mWidth, t->mHeight);

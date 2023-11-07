@@ -3,6 +3,7 @@
 #include "ECS/ECS.hpp"
 
 #include "ECS/Component/NewRenderingComponents/PhongShaderComponent.hpp"
+#include "ECS/Component/NewRenderingComponents/OpaqueComponent.hpp"
 
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/RenderableComponent/MaterialComponent.hpp"
@@ -15,7 +16,7 @@ namespace neo {
 
 	template<typename... CompTs>
     void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const LightComponent& light, const SpatialComponent& lightSpatial, const NewShader::ShaderDefines& inDefines = {}) {
-        MICROPROFILE_SCOPEI("PhongRenderer", "drawPhong", MP_AUTO);
+        GPU_MP_ENTER("drawPhong");
         const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 
         bool containsAlphaTest = false;
@@ -76,11 +77,14 @@ namespace neo {
             resolvedShader.bindUniform("shine", material.mShininess);
         
             view.get<const MeshComponent>(entity).mMesh->draw();
+
+            resolvedShader.unbind();
         }
 
         if (containsAlphaTest) {
             glDisable(GL_BLEND);
         }
 
+        GPU_MP_LEAVE();
 	}
 }

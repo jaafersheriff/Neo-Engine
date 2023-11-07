@@ -188,16 +188,20 @@ namespace neo {
                     format.mBaseFormat = GL_RGBA;
 
                     if (material.ambient_texname.size()) {
-                        asset.ambient_tex = Library::loadTexture(material.ambient_texname, format);
+                        // asset.material.mAmbient = Library::loadTexture(material.ambient_texname, format);
                     }
                     if (material.diffuse_texname.size()) {
-                        asset.diffuse_tex = Library::loadTexture(material.diffuse_texname, format);
+                        asset.material.mDiffuseMap = Library::loadTexture(material.diffuse_texname, format);
+                        asset.material.mAlphaMap = asset.material.mDiffuseMap;
                     }
                     if (material.specular_texname.size()) {
-                        asset.specular_tex = Library::loadTexture(material.specular_texname, format);
+                        asset.material.mSpecularMap = Library::loadTexture(material.specular_texname, format);
                     }
                     if (material.displacement_texname.size()) {
-                        asset.displacement_tex = Library::loadTexture(material.displacement_texname, format);
+                        asset.material.mNormalMap = Library::loadTexture(material.displacement_texname, format);
+                    }
+                    if (material.alpha_texname.size()) {
+                        asset.material.mAlphaMap = Library::loadTexture(material.alpha_texname, format);
                     }
                 }
             }
@@ -215,7 +219,6 @@ namespace neo {
         uint8_t* data = _loadTextureData(width, height, components, fileName, format);
 
         Texture2D* texture = new Texture2D(format, glm::uvec2(width, height), data);
-        texture->generateMipMaps();
 
         _cleanTextureData(data);
 

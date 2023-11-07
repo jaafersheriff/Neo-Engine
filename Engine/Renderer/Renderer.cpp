@@ -45,15 +45,17 @@ namespace neo {
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback(GLHelper::OpenGLMessageCallback, nullptr);
 		
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+		glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_FALSE);
 	#endif
 
         /* Init default FBO */
+        glActiveTexture(GL_TEXTURE0);
         mBackBuffer = Library::createFBO("0");
         mBackBuffer->mFBOID = 0;
 
         mDefaultFBO = Library::createFBO("backbuffer");
-        TextureFormat format = { GL_RGB, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE };
+        TextureFormat format = { GL_RGB16, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE };
         mDefaultFBO->attachColorTexture({ 1, 1 }, format);
         mDefaultFBO->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_EDGE);
         mDefaultFBO->initDrawBuffers();
@@ -168,6 +170,7 @@ namespace neo {
 
                 // Render 
                 meshData.mMesh->draw();
+                resolvedBlit.unbind();
             }
         }
 

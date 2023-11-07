@@ -87,7 +87,6 @@ namespace neo {
             NEO_ASSERT(mTextures.size(), "Attempting to clear framebuffer with no textures");
 
             bind();
-            glViewport(0, 0, mTextures[0]->mWidth, mTextures[0]->mHeight);
             glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
             glClear(clearFlags);
         }

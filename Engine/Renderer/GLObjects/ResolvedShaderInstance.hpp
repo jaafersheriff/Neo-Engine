@@ -47,6 +47,7 @@ namespace neo {
     private:
         bool mValid = false;
         GLuint mPid = 0;
+        mutable GLuint mActiveTextures = 0;
         std::unordered_map<ShaderStage, GLuint> mShaderIDs;
         std::unordered_map<uint32_t, GLint> mUniforms;
 

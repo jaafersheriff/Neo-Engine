@@ -45,6 +45,7 @@ namespace neo {
             static Framebuffer* getFBO(const std::string&);
 
 			static NewShader* createShaderSource(const std::string& name, const NewShader::ConstructionArgs& args);
+			static NewShader* createShaderSource(const std::string& name, const NewShader::ShaderSources& args);
             static NewShader* getShaderSource(const char* name);
             static const ResolvedShaderInstance& getDummyShader();
 

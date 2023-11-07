@@ -35,8 +35,10 @@ namespace neo {
 		}
 		mResolvedShaders.clear();
 
-		for (auto& source : mShaderSources) {
-			delete source.second;
+		if (mConstructionArgs) {
+			for (auto& source : mShaderSources) {
+				delete source.second;
+			}
 		}
 		mShaderSources.clear();
 	}
@@ -71,6 +73,7 @@ namespace neo {
 		}
 
 		if (it->second.mValid) {
+			it->second.mActiveTextures = 0;
 			return it->second;
 		}
 

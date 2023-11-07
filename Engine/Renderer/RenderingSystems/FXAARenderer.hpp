@@ -12,7 +12,9 @@ namespace neo {
     void drawFXAA(Framebuffer& outputFBO, Texture& inputTexture) {
         MICROPROFILE_SCOPEI("FXAARenderer", "drawFXAA", MP_AUTO);
 
-        static NewShader fxaaShader("FXAAShader", NewShader::ShaderSources {
+        // Where are these const chars in memory..are they being created and passed on each call?
+        auto fxaaShader = Library::createShaderSource("FXAAShader", NewShader::ShaderSources {
+            // TODO - this is a memory leak
             { ShaderStage::VERTEX, Loader::loadFileString("quad.vert")},
             { ShaderStage::FRAGMENT, R"(
                 in vec2 fragTex;
@@ -75,7 +77,7 @@ namespace neo {
 
         outputFBO.bind();
 
-        auto resolvedShader = fxaaShader.getResolvedInstance({});
+        auto resolvedShader = fxaaShader->getResolvedInstance({});
         resolvedShader.bind();
         resolvedShader.bindUniform("frameSize", glm::vec2(inputTexture.mWidth, inputTexture.mHeight));
         resolvedShader.bindTexture("inputTexture", inputTexture);

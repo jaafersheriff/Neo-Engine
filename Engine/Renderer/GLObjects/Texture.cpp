@@ -21,7 +21,6 @@ namespace neo {
     }
 
     void Texture::bind() const {
-        glActiveTexture(GL_TEXTURE0 + mTextureID);
         _bind();
     }
 

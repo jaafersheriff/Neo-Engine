@@ -9,10 +9,15 @@ namespace neo {
 	struct MaterialComponent : public Component {
         glm::vec3 mAmbient;
 
-        Texture* mDiffuseMap;
+        Texture* mDiffuseMap = nullptr;
         glm::vec3 mDiffuse;
 
+        Texture* mSpecularMap = nullptr;
         glm::vec3 mSpecular;
+
+        Texture* mNormalMap = nullptr;
+
+        Texture* mAlphaMap = nullptr;
 
         // Unused..for now
         float mShininess;
