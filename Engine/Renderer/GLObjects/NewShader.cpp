@@ -73,7 +73,6 @@ namespace neo {
 		}
 
 		if (it->second.mValid) {
-			it->second.mActiveTextures = 0;
 			return it->second;
 		}
 

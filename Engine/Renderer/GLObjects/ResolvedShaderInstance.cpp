@@ -276,7 +276,12 @@ namespace neo {
 
     void ResolvedShaderInstance::bindTexture(const char* name, const Texture& texture) const {
         ServiceLocator<Renderer>::ref().mStats.mNumSamplers++;
-        glActiveTexture(GL_TEXTURE0 + mActiveTextures++);
+        GLint bindingLoc = 0;
+        auto binding = mBindings.find(HashedString(name));
+        if (binding != mBindings.end()) {
+            bindingLoc = binding->second;
+        }
+        glActiveTexture(GL_TEXTURE0 + bindingLoc);
         texture.bind();
         glUniform1i(_getUniform(name), texture.mTextureID);
 

@@ -6,7 +6,7 @@ in vec3 fragNor;
 in vec2 fragTex;
 
 #ifdef DIFFUSE_MAP
-layout(binding = 0) uniform sampler2D diffuseMap;
+layout(binding = 1) uniform sampler2D diffuseMap;
 #else
 uniform vec3 diffuseColor;
 #endif
