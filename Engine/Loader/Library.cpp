@@ -15,6 +15,7 @@ namespace neo {
     std::unordered_map<std::string, MeshData> Library::mMeshes;
     std::unordered_map<std::string, Texture*> Library::mTextures;
     std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
+    std::unordered_map<uint32_t, std::pair<std::uint8_t, Framebuffer*>> Library::mTransientFramebuffers;
     std::unordered_map<std::string, NewShader*> Library::mShaders;
     NewShader* Library::mDummyShader;
 
@@ -38,6 +39,22 @@ namespace neo {
 
     const ResolvedShaderInstance& Library::getDummyShader() {
         return mDummyShader->getResolvedInstance({});
+    }
+
+    void Library::tick() {
+        for (auto it = mTransientFramebuffers.begin(); it != mTransientFramebuffers.end();) {
+            auto& usageCount = it->second.first;
+            auto fbo = it->second.second;
+            if (usageCount == 0) {
+                fbo->destroy();
+                delete fbo;
+                it = mTransientFramebuffers.erase(it);
+            }
+            else {
+                usageCount--;
+                it++;
+            }
+        }
     }
 
     MeshData Library::getMesh(const std::string& name) {
@@ -107,6 +124,47 @@ namespace neo {
         mFramebuffers.emplace(name, fb);
         NEO_LOG("Creating FBO %s", name.c_str());
         return fb;
+    }
+
+    Framebuffer* Library::createTransientFBO(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+        uint32_t hash = _getTransientFBOHash(size, formats);
+        auto it = mTransientFramebuffers.find(hash);
+        if (it != mTransientFramebuffers.end()) {
+            auto& fboPair = it->second;
+            // Only keep transients for 5 frames
+            if (fboPair.first < 5) {
+                fboPair.first++;
+            }
+            return fboPair.second;
+        }
+
+        auto fb = new Framebuffer;
+        for (auto& format : formats) {
+            if (format.mBaseFormat == GL_DEPTH_COMPONENT) {
+                fb->attachDepthTexture(size, format.mFilter, format.mMode);
+            }
+            else if (format.mBaseFormat == GL_DEPTH_STENCIL) {
+                fb->attachStencilTexture(size, format.mFilter, format.mMode);
+            }
+            else {
+                fb->attachColorTexture(size, format);
+            }
+        }
+        fb->initDrawBuffers();
+        mTransientFramebuffers.emplace(hash, std::make_pair<uint8_t, Framebuffer*>(static_cast<uint8_t>(1), std::move(fb)));
+        return fb;
+    }
+
+    uint32_t Library::_getTransientFBOHash(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+        uint32_t seed = size.x + size.y;
+		for (auto& i : formats) {
+			seed ^= i.mBaseFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= i.mInternalFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= i.mFilter + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= i.mMode + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= i.mType + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		}
+		return seed;
     }
 
     Framebuffer* Library::getFBO(const std::string &name) {
@@ -184,13 +242,25 @@ namespace neo {
         ImGui::Begin("Library");
         if (ImGui::TreeNodeEx("FBOs", ImGuiTreeNodeFlags_DefaultOpen)) {
             for (auto& fbo : Library::mFramebuffers) {
-                ImGui::TextWrapped((fbo.first + " (" + std::to_string(fbo.second->mFBOID) + ")").c_str());
+                ImGui::TextWrapped("%s (%d)", fbo.first.c_str(), fbo.second->mFBOID);
                 for (auto& t : fbo.second->mTextures) {
                     ImGui::SameLine();
-                    ImGui::TextWrapped((std::to_string(t->mTextureID) + " [" + std::to_string(t->mWidth) + ", " + std::to_string(t->mHeight) + "]").c_str());
+                    ImGui::TextWrapped("%d [%d, %d]", t->mTextureID, t->mWidth, t->mHeight);
                     ImGui::SameLine();
                     textureFunc(*t);
                 }
+            }
+            if (ImGui::TreeNodeEx("Transients", ImGuiTreeNodeFlags_DefaultOpen)) {
+                for (auto& [hash, fboPair] : Library::mTransientFramebuffers) {
+                    ImGui::TextWrapped("%d [%d] (%d)", static_cast<int>(hash), static_cast<int>(fboPair.first), fboPair.second->mFBOID);
+                    for (auto& t : fboPair.second->mTextures) {
+                        ImGui::SameLine();
+                        ImGui::TextWrapped("%d [%d, %d]", t->mTextureID, t->mWidth, t->mHeight);
+                        ImGui::SameLine();
+                        textureFunc(*t);
+                    }
+                }
+                ImGui::TreePop();
             }
             ImGui::TreePop();
         }

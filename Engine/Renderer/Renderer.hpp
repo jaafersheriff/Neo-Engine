@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Renderer/Shader/Shader.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "DemoInfra/IDemo.hpp"
 

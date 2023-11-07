@@ -10,7 +10,6 @@
 #include "Messaging/Message.hpp"
 #include "Messaging/Messenger.hpp"
 
-#include "Shader/BlitShader.hpp"
 #include "Shader/LineShader.hpp"
 
 #include "Engine/Engine.hpp"
@@ -134,6 +133,7 @@ namespace neo {
 
         TRACY_GPU();
 			resetState();
+            mDefaultFBO->bind();
 
             {
                 GPU_MP_ENTER("Draw Demo");

@@ -23,10 +23,6 @@
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
-#include "Renderer/Shader/PhongShader.hpp"
-#include "Renderer/Shader/AlphaTestShader.hpp"
-#include "Renderer/Shader/FXAAShader.hpp"
-
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 
@@ -97,16 +93,6 @@ namespace Base {
         ecs.addSystem<CameraControllerSystem>();
         ecs.addSystem<RotationSystem>();
 
-        // TODO - this should have a better interface that can maintained in render()
-        auto colorBuffer = Library::createFBO("colorBuffer");
-        colorBuffer->attachColorTexture(glm::uvec2(1, 1), TextureFormat{
-            GL_RGB8,
-            GL_RGB,
-            GL_LINEAR,
-            GL_CLAMP
-            });
-        colorBuffer->attachDepthTexture(glm::uvec2(1, 1), GL_LINEAR, GL_CLAMP);
-        colorBuffer->initDrawBuffers();
     }
 
     void Demo::imGuiEditor(ECS& ecs) {
@@ -121,9 +107,21 @@ namespace Base {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
         const auto&& [__, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
-        auto colorBuffer = Library::getFBO("colorBuffer");
         auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-        colorBuffer->resize(viewport.mSize);
+        auto colorBuffer = Library::createTransientFBO(viewport.mSize, {
+            TextureFormat{
+                GL_RGB8,
+                GL_RGB,
+                GL_LINEAR,
+                GL_CLAMP_TO_EDGE,
+            },
+            TextureFormat{
+                GL_R16,
+                GL_DEPTH_COMPONENT,
+                GL_LINEAR,
+                GL_CLAMP_TO_EDGE,
+            }
+        });
 
         glm::vec3 clearColor = getConfig().clearColor;
         colorBuffer->clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

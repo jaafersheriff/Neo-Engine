@@ -26,6 +26,7 @@ namespace neo {
             Library& operator=(const Library&) = delete;
 
             static void init();
+            static void tick();
             static void clean();
 
             static MeshData getMesh(const std::string&);
@@ -40,6 +41,7 @@ namespace neo {
             static Texture* loadCubemap(const std::string&, const std::vector<std::string> &);
 
             static Framebuffer* createFBO(const std::string&);
+            static Framebuffer* createTransientFBO(glm::uvec2 size, const std::vector<TextureFormat>& formats);
             static Framebuffer* getFBO(const std::string&);
 
 			static NewShader* createShaderSource(const std::string& name, const NewShader::ConstructionArgs& args);
@@ -54,11 +56,13 @@ namespace neo {
             static std::unordered_map<std::string, MeshData> mMeshes;
             static std::unordered_map<std::string, Texture*> mTextures;
             static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
+            static std::unordered_map<uint32_t, std::pair<std::uint8_t, Framebuffer*>> mTransientFramebuffers;
             static std::unordered_map<std::string, NewShader*> mShaders;
             static NewShader* mDummyShader;
 
             static void _insertMesh(const std::string&, MeshData);
             static void _insertTexture(const std::string&, Texture*);
+            static uint32_t _getTransientFBOHash(glm::uvec2 size, const std::vector<TextureFormat>& formats);
     };
 
     template <typename T>

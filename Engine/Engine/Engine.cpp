@@ -202,6 +202,9 @@ namespace neo {
                 mECS.removeEntity(entity);
             });
 
+            // Flush resources
+            Library::tick();
+
             {
                 TRACY_GPUN("glfwSwapBuffers");
                 glfwSwapBuffers(mWindow.getWindow());
