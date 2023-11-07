@@ -105,55 +105,40 @@ namespace neo {
             return sourceString;
         }
 
-        static void _findUniforms(const char *shaderString, std::vector<std::string>& uniforms) {
-            char fileText[1<<16];
-            strcpy(fileText, shaderString);
-            std::vector<char *> lines;
+        static void _findUniforms(const char *shaderString, std::vector<std::string>& uniforms, std::map<std::string, GLint>& bindings) {
+            std::string fileText(shaderString);
+            std::string::size_type start = 0;
+            std::string::size_type end = 0;
+            while ((end = fileText.find("\n", start)) != std::string::npos) {
+                std::string line = fileText.substr(start, end - start);
 
-            // Read the first line
-            char * token = strtok(fileText, ";\n");
-            lines.push_back(token);
-            // Read all subsequent lines
-            while ((token = strtok(NULL, ";\n")) != NULL) {
-                lines.push_back(token);
-            }
+                std::string::size_type uniformStart = line.find("uniform");
+                std::string::size_type bindingLoc = line.find("binding =");
+                if (uniformStart != std::string::npos) {
+                    std::string::size_type uniformTypeStart = line.find_first_not_of(' ', uniformStart + 7);
+                    std::string::size_type uniformTypeEnd = line.find_first_of(' ', uniformTypeStart);
+                    std::string::size_type uniformNameStart = line.find_first_not_of(' ', uniformTypeEnd);
+                    std::string::size_type uniformNameEnd = line.find(";", uniformNameStart);
+                    NEO_ASSERT(
+                        uniformTypeStart != std::string::npos
+                        && uniformTypeEnd != std::string::npos
+                        && uniformNameStart != std::string::npos
+                        && uniformNameEnd != std::string::npos, "Failed to parse uniform at line %s", line.c_str());
+                    std::string uniform = line.substr(uniformNameStart, uniformNameEnd - uniformNameStart);
+                    NEO_ASSERT(uniform.find(" ", uniformNameStart) == std::string::npos && uniform.find(",", uniformNameStart), "Can't have nested uniform definitions");
+                    uniforms.push_back(uniform);
 
-            // Look for keywords per line
-            for (char *line : lines) {
-                token = strtok(line, " (\n");
-                if (token == NULL) {
-                    continue;
-                }
-                if (!strcmp(token, "uniform")) {
-                    // Handle lines with multiple variables separated by commas
-                    char *lineEnding = line + strlen(line) + 1;
-                    int lastDelimiter = -1;
-                    size_t lineEndingLength = strlen(lineEnding);
-                    for (int i = 0; i < lineEndingLength; i++) {
-                        if (lineEnding[i] == ',') {
-                            lineEnding[i] = '\0';
-                            uniforms.push_back(lineEnding + (lastDelimiter + 1));
-                            lastDelimiter = i;
-                        }
-                        else if (lineEnding[i] == ' ' || lineEnding[i] == '\t') {
-                            lastDelimiter = i;
-                        }
+                    if (bindingLoc != std::string::npos) {
+                        std::string::size_type bindingValueStart = line.find_first_not_of(' ', bindingLoc + 9);
+                        std::string::size_type bindingValueEnd = line.find(")", bindingValueStart);
+                        NEO_ASSERT(
+                            bindingValueStart != std::string::npos
+                            && bindingValueEnd != std::string::npos, "Filaed to parse binding at %s", line.c_str());
+                       bindings.emplace(uniform, std::stoi(line.substr(bindingValueStart, bindingValueEnd - bindingValueStart)));
                     }
-                    uniforms.push_back(lineEnding + (lastDelimiter + 1));
                 }
-                // Attributes, if you want
-                // else if (!strcmp(token, "layout")) {
-                //     char *lastToken = nullptr;
-                //     while ((token = strtok(NULL, " ")) != NULL) {
-                //         lastToken = token;
-                //     }
-                //     if (lastToken) {
-                //         _addAttribute(HashedString(lastToken));
-                //     }
-                // }
-                else {
-                    continue;
-                }
+
+                start = end + 1;
             }
         }
     }
@@ -164,6 +149,7 @@ namespace neo {
         mPid = glCreateProgram();
 
         std::vector<std::string> uniforms;
+        std::map<std::string, GLint> bindings;
         for (auto&& [stage, source] : args) {
             if (!source) {
                 NEO_LOG_E("Trying to compile an empty shader source");
@@ -174,7 +160,7 @@ namespace neo {
                 mShaderIDs[stage] = _compileShader(GLHelper::getGLShaderStage(stage), processedSource.c_str());
                 if (mShaderIDs[stage]) {
                     glAttachShader(mPid, mShaderIDs[stage]);
-                    _findUniforms(processedSource.c_str(), uniforms);
+                    _findUniforms(processedSource.c_str(), uniforms, bindings);
                 }
                 else {
                     mValid = false;
@@ -200,7 +186,10 @@ namespace neo {
            if (r < 0) {
                NEO_LOG_S(util::LogSeverity::Warning, "WARN: %s uniform cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it", uniform.c_str());
            }
-           mUniforms[HashedString(uniform.c_str())] = r;
+           mUniforms[HashedString(uniform.c_str()).value()] = r;
+       }
+       for (auto& binding : bindings) {
+           mBindings[HashedString(binding.first.c_str()).value()] = binding.second;
        }
 
         return mValid;

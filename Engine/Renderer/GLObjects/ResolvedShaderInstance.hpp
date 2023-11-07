@@ -49,7 +49,8 @@ namespace neo {
         GLuint mPid = 0;
         mutable GLuint mActiveTextures = 0;
         std::unordered_map<ShaderStage, GLuint> mShaderIDs;
-        std::unordered_map<uint32_t, GLint> mUniforms;
+        std::unordered_map<HashedString::hash_type, GLint> mUniforms;
+        std::unordered_map<HashedString::hash_type, GLint> mBindings;
 
         GLuint _compileShader(GLenum shaderType, const char* shaderString);
         GLint _getUniform(const char* name) const;
