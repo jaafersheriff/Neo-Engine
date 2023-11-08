@@ -183,7 +183,7 @@ namespace neo {
                     }
                     {
                         TRACY_ZONEN("Profiler Imgui");
-                        profiler.imGuiEditor(mWindow.getDetails().mSize, mWindow.getDetails().mPos, ImGui::GetID("Viewport"));
+                        profiler.imGuiEditor();
                     }
                     {
                         TRACY_ZONEN("Renderer Imgui");

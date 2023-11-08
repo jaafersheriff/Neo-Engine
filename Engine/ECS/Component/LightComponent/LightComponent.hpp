@@ -17,7 +17,7 @@ namespace neo {
 
         virtual std::string getName() const override { return "LightComponent"; }
         virtual void imGuiEditor() {
-            ImGui::SliderFloat3("Color", &mColor[0], 0.f, 1.f);
+            ImGui::ColorEdit3("Color", &mColor[0]);
             ImGui::SliderFloat("Attenuation.x", &mAttenuation[0], 0.f, 1.f);
             ImGui::SliderFloat("Attenuation.y", &mAttenuation[1], 0.f, 0.1f);
             ImGui::SliderFloat("Attenuation.z", &mAttenuation[2], 0.f, 0.01f);

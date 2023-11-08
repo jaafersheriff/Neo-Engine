@@ -69,9 +69,9 @@ namespace neo {
             tracy::MouseFrame();
         }
 
-        void Profiler::imGuiEditor(glm::uvec2 viewportSize, glm::uvec2 viewportPos, ImGuiID viewportID) const {
+        void Profiler::imGuiEditor() const {
 #ifndef NO_LOCAL_TRACY
-            // Profiler is baked into the viewport dock sapce
+            // Profiler is baked into the viewport dock space
             mTracyServer->Draw();
 #endif
         }

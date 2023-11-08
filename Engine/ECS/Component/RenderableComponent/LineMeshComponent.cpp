@@ -82,7 +82,7 @@ namespace neo {
 
     void LineMeshComponent::imGuiEditor() {
         if (mOverrideColor) {
-            ImGui::SliderFloat3("Color", &(mOverrideColor.value())[0], 0.f, 1.f);
+            ImGui::ColorPicker3("Color", &(mOverrideColor.value())[0]);
         }
         ImGui::Separator();
 
@@ -101,7 +101,7 @@ namespace neo {
             glm::vec3 col = mNodes[index].color;
             bool edited = false;
             edited = edited || ImGui::SliderFloat3("Position", &pos[0], -25.f, 25.f);
-            edited = edited || ImGui::SliderFloat3("Color", &col[0], 0.f, 1.f);
+            edited = edited || ImGui::ColorEdit3("Color", &col[0]);
             editNode(index, pos, col);
         }
     }

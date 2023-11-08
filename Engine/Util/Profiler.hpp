@@ -24,7 +24,7 @@ namespace neo {
             Profiler& operator=(const Profiler&) = delete;
 
             void update(double);
-            void imGuiEditor(glm::uvec2 viewportSize, glm::uvec2 viewportPos, ImGuiID viewportID) const;
+            void imGuiEditor() const;
 
             double mTimeStep = 0.0;         /* Delta time */
             int mTotalFrames = 0;           /* Total frames since start up */
