@@ -1,0 +1,213 @@
+diff --git a/server/TracyView.cpp b/server/TracyView.cpp
+index 6b373985..af389a77 100644
+--- a/server/TracyView.cpp
++++ b/server/TracyView.cpp
+@@ -663,6 +663,7 @@ bool View::DrawImpl()
+         keepOpenPtr = &keepOpen;
+     }
+ 
++    ImGuiViewport* viewport = ImGui::GetMainViewport();
+ #ifndef TRACY_NO_ROOT_WINDOW
+     if( !m_titleSet && m_stcb )
+     {
+@@ -670,7 +671,6 @@ bool View::DrawImpl()
+         m_stcb( m_worker.GetCaptureName().c_str() );
+     }
+ 
+-    ImGuiViewport* viewport = ImGui::GetMainViewport();
+     {
+         auto& style = ImGui::GetStyle();
+         const auto wrPrev = style.WindowRounding;
+@@ -694,96 +694,11 @@ bool View::DrawImpl()
+ #else
+     char tmp[2048];
+     sprintf( tmp, "%s###Profiler", m_worker.GetCaptureName().c_str() );
+-    ImGui::SetNextWindowSize( ImVec2( 1550, 800 ), ImGuiCond_FirstUseEver );
++    float w = ImGui::GetContentRegionAvail().x;
++    ImGui::SetNextWindowSize( ImVec2( std::min(w, 1550.f), 800 ), ImGuiCond_FirstUseEver );
+     ImGui::Begin( tmp, keepOpenPtr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus );
+ #endif
+ 
+-    if( !m_staticView )
+-    {
+-        if( ImGui::Button( ICON_FA_WIFI ) || m_forceConnectionPopup )
+-        {
+-            if( m_forceConnectionPopup )
+-            {
+-                m_forceConnectionPopup.Decay( false );
+-                ImGui::SetNextWindowPos( viewport->Pos + ImGui::GetCursorPos() );
+-            }
+-            ImGui::OpenPopup( "TracyConnectionPopup" );
+-        }
+-        ImGui::SameLine();
+-        if( ImGui::BeginPopup( "TracyConnectionPopup" ) )
+-        {
+-            const bool wasDisconnectIssued = m_disconnectIssued;
+-            const bool discardData = !DrawConnection();
+-            const bool disconnectIssuedJustNow = m_disconnectIssued != wasDisconnectIssued;
+-            if( discardData ) keepOpen = false;
+-            if( disconnectIssuedJustNow || discardData ) ImGui::CloseCurrentPopup();
+-            ImGui::EndPopup();
+-        }
+-    }
+-    std::lock_guard<std::mutex> lock( m_worker.GetDataLock() );
+-    m_worker.DoPostponedWork();
+-    if( !m_worker.IsDataStatic() )
+-    {
+-        if( m_worker.IsConnected() )
+-        {
+-            if( ImGui::Button( m_viewMode == ViewMode::Paused ? MainWindowButtons[0] : MainWindowButtons[1], ImVec2( bw, 0 ) ) )
+-            {
+-                if( m_viewMode != ViewMode::Paused )
+-                {
+-                    m_viewMode = ViewMode::Paused;
+-                    m_viewModeHeuristicTry = false;
+-                }
+-                else
+-                {
+-                    ImGui::OpenPopup( "viewMode" );
+-                }
+-            }
+-        }
+-        else
+-        {
+-            Attention( m_attnDisconnected );
+-            ImGui::BeginDisabled();
+-            ImGui::ButtonEx( MainWindowButtons[2], ImVec2( bw, 0 ) );
+-            ImGui::EndDisabled();
+-        }
+-        if( ImGui::BeginPopup( "viewMode" ) )
+-        {
+-            if( ImGui::Selectable( ICON_FA_MAGNIFYING_GLASS_PLUS " Newest three frames" ) )
+-            {
+-                m_viewMode = ViewMode::LastFrames;
+-            }
+-            if( ImGui::Selectable( ICON_FA_RULER_HORIZONTAL " Use current zoom level" ) )
+-            {
+-                m_viewMode = ViewMode::LastRange;
+-            }
+-            ImGui::EndPopup();
+-        }
+-        else if( m_viewModeHeuristicTry )
+-        {
+-            const auto lastTime = m_worker.GetLastTime();
+-            if( lastTime > 5*1000*1000*1000ll )
+-            {
+-                if( m_viewMode == ViewMode::LastFrames && m_worker.GetFrameCount( *m_worker.GetFramesBase() ) <= 2 )
+-                {
+-                    m_viewMode = ViewMode::LastRange;
+-                    ZoomToRange( lastTime - 5*1000*1000*1000ll, lastTime, false );
+-                }
+-                else
+-                {
+-                    m_viewModeHeuristicTry = false;
+-                }
+-            }
+-        }
+-    }
+-    else
+-    {
+-        ImGui::PushStyleColor( ImGuiCol_Button, (ImVec4)ImColor::HSV( 0.f, 0.6f, 0.6f) );
+-        ImGui::PushStyleColor( ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV( 0.f, 0.7f, 0.7f) );
+-        ImGui::PushStyleColor( ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV( 0.f, 0.8f, 0.8f) );
+-        if( ImGui::Button( ICON_FA_POWER_OFF ) ) keepOpen = false;
+-        ImGui::PopStyleColor( 3 );
+-    }
+-    ImGui::SameLine();
+     ToggleButton( ICON_FA_GEAR " Options", m_showOptions );
+     ImGui::SameLine();
+     ToggleButton( ICON_FA_TAGS " Messages", m_showMessages );
+@@ -895,6 +810,93 @@ bool View::DrawImpl()
+             ImGui::EndPopup();
+         }
+     }
++    ImGui::SameLine();
++    if( !m_worker.IsDataStatic() )
++    {
++        if( m_worker.IsConnected() )
++        {
++            if( ImGui::Button( m_viewMode == ViewMode::Paused ? MainWindowButtons[0] : MainWindowButtons[1], ImVec2( bw, 0 ) ) )
++            {
++                if( m_viewMode != ViewMode::Paused )
++                {
++                    m_viewMode = ViewMode::Paused;
++                    m_viewModeHeuristicTry = false;
++                }
++                else
++                {
++                    ImGui::OpenPopup( "viewMode" );
++                }
++            }
++        }
++        else
++        {
++            Attention( m_attnDisconnected );
++            ImGui::BeginDisabled();
++            ImGui::ButtonEx( MainWindowButtons[2], ImVec2( bw, 0 ) );
++            ImGui::EndDisabled();
++        }
++        if( ImGui::BeginPopup( "viewMode" ) )
++        {
++            if( ImGui::Selectable( ICON_FA_MAGNIFYING_GLASS_PLUS " Newest three frames" ) )
++            {
++                m_viewMode = ViewMode::LastFrames;
++            }
++            if( ImGui::Selectable( ICON_FA_RULER_HORIZONTAL " Use current zoom level" ) )
++            {
++                m_viewMode = ViewMode::LastRange;
++            }
++            ImGui::EndPopup();
++        }
++        else if( m_viewModeHeuristicTry )
++        {
++            const auto lastTime = m_worker.GetLastTime();
++            if( lastTime > 5*1000*1000*1000ll )
++            {
++                if( m_viewMode == ViewMode::LastFrames && m_worker.GetFrameCount( *m_worker.GetFramesBase() ) <= 2 )
++                {
++                    m_viewMode = ViewMode::LastRange;
++                    ZoomToRange( lastTime - 5*1000*1000*1000ll, lastTime, false );
++                }
++                else
++                {
++                    m_viewModeHeuristicTry = false;
++                }
++            }
++        }
++    }
++    else
++    {
++        ImGui::PushStyleColor( ImGuiCol_Button, (ImVec4)ImColor::HSV( 0.f, 0.6f, 0.6f) );
++        ImGui::PushStyleColor( ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV( 0.f, 0.7f, 0.7f) );
++        ImGui::PushStyleColor( ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV( 0.f, 0.8f, 0.8f) );
++        if( ImGui::Button( ICON_FA_POWER_OFF ) ) keepOpen = false;
++        ImGui::PopStyleColor( 3 );
++    }
++
++    if( !m_staticView )
++    {
++        if( ImGui::Button( ICON_FA_WIFI ) || m_forceConnectionPopup )
++        {
++            if( m_forceConnectionPopup )
++            {
++                m_forceConnectionPopup.Decay( false );
++                ImGui::SetNextWindowPos( viewport->Pos + ImGui::GetCursorPos() );
++            }
++            ImGui::OpenPopup( "TracyConnectionPopup" );
++        }
++        ImGui::SameLine();
++        if( ImGui::BeginPopup( "TracyConnectionPopup" ) )
++        {
++            const bool wasDisconnectIssued = m_disconnectIssued;
++            const bool discardData = !DrawConnection();
++            const bool disconnectIssuedJustNow = m_disconnectIssued != wasDisconnectIssued;
++            if( discardData ) keepOpen = false;
++            if( disconnectIssuedJustNow || discardData ) ImGui::CloseCurrentPopup();
++            ImGui::EndPopup();
++        }
++    }
++    std::lock_guard<std::mutex> lock( m_worker.GetDataLock() );
++    m_worker.DoPostponedWork();
+ 
+     {
+         ImGui::SameLine();
