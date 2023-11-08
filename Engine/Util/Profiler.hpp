@@ -6,6 +6,7 @@
 #define TRACY_GPU() TRACY_GPUN(TracyFunction)
 
 #include <memory>
+#include <imgui.h>
 
 #ifndef NO_LOCAL_TRACY
 namespace tracy {
@@ -23,7 +24,7 @@ namespace neo {
             Profiler& operator=(const Profiler&) = delete;
 
             void update(double);
-            void imGuiEditor() const;
+            void imGuiEditor(glm::uvec2 viewportSize, glm::uvec2 viewportPos, ImGuiID viewportID) const;
 
             double mTimeStep = 0.0;         /* Delta time */
             int mTotalFrames = 0;           /* Total frames since start up */

@@ -174,10 +174,6 @@ namespace neo {
                         mECS.imguiEdtor();
                     }
                     {
-                        TRACY_ZONEN("Renderer Imgui");
-                        ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
-                    }
-                    {
                         TRACY_ZONEN("Library ImGui");
                         Library::imGuiEditor();
                     }
@@ -187,7 +183,11 @@ namespace neo {
                     }
                     {
                         TRACY_ZONEN("Profiler Imgui");
-                        profiler.imGuiEditor();
+                        profiler.imGuiEditor(mWindow.getDetails().mSize, mWindow.getDetails().mPos, ImGui::GetID("Viewport"));
+                    }
+                    {
+                        TRACY_ZONEN("Renderer Imgui");
+                        ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
                     }
 
                     ServiceLocator<ImGuiManager>::ref().end();

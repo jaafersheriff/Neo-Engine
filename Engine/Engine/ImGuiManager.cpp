@@ -27,7 +27,7 @@ namespace neo {
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.FontGlobalScale = 1.f * scale / 2.f;
         ImGui_ImplGlfw_InitForOpenGL(window, false);
         ImGui_ImplOpenGL3_Init(ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str());
@@ -118,6 +118,7 @@ namespace neo {
         NEO_ASSERT(mIsEnabled, "ImGui is disabled");
         TRACY_ZONE();
 
+        // TODO -- this can all grab the necessary details directly using the Viewport's ImGuiID 
         mViewport.mIsFocused = ImGui::IsWindowFocused();
         mViewport.mIsHovered = ImGui::IsWindowHovered();
 
