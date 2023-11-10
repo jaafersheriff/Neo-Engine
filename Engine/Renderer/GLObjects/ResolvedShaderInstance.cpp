@@ -263,7 +263,7 @@ namespace neo {
             else if constexpr (std::is_same_v<T, glm::ivec2>)
                 glUniform2i(_getUniform(name), arg.x, arg.y);
             else if constexpr (std::is_same_v<T, glm::vec3>)
-				glUniform3f(_getUniform(name), arg.x, arg.y, arg.z);
+                glUniform3f(_getUniform(name), arg.x, arg.y, arg.z);
             else if constexpr (std::is_same_v<T, glm::vec4>)
                 glUniform4f(_getUniform(name), arg.x, arg.y, arg.z, arg.w);
             else if constexpr (std::is_same_v<T, glm::mat3>)
@@ -278,12 +278,12 @@ namespace neo {
     void ResolvedShaderInstance::bindTexture(const char* name, const Texture& texture) const {
         ServiceLocator<Renderer>::ref().mStats.mNumSamplers++;
         auto binding = mBindings.find(HashedString(name));
-        GLint uniformLoc = 0;
+        GLint bindingLoc = 0;
         if (binding != mBindings.end()) {
-            uniformLoc = binding->second;
+            bindingLoc = binding->second;
         }
-        glActiveTexture(GL_TEXTURE0 + uniformLoc);
+        glActiveTexture(GL_TEXTURE0 + bindingLoc);
         texture.bind();
-        glUniform1i(_getUniform(name), uniformLoc);
+        glUniform1i(_getUniform(name), bindingLoc);
     }
 }

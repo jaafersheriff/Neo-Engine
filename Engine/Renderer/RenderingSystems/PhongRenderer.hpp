@@ -23,8 +23,8 @@ namespace neo {
         bool containsAlphaTest = false;
         if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
             containsAlphaTest = true;
-            glEnable(GL_BLEND);
             // Transparency sorting..for later
+        //     glEnable(GL_BLEND);
         //     ecs.sort<AlphaTestComponent>([&cameraSpatial, &ecs](ECS::Entity entityLeft, ECS::Entity entityRight) {
         //         auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
         //         auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
@@ -54,6 +54,11 @@ namespace neo {
             if (material.mDiffuseMap) {
                 phongDefines.emplace("DIFFUSE_MAP");
             }
+            if (material.mNormalMap) {
+                phongDefines.emplace("NORMAL_MAP");
+
+            }
+
             auto resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(phongDefines);
             resolvedShader.bind();
 
@@ -62,6 +67,10 @@ namespace neo {
             }
             else {
                 resolvedShader.bindUniform("diffuseColor", material.mDiffuse);
+            }
+
+            if (material.mNormalMap) {
+                resolvedShader.bindTexture("normalMap", *material.mNormalMap);
             }
 
             resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
@@ -83,7 +92,7 @@ namespace neo {
         }
 
         if (containsAlphaTest) {
-            glDisable(GL_BLEND);
+            //glDisable(GL_BLEND);
         }
 	}
 }

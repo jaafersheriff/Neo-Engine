@@ -65,7 +65,7 @@ namespace neo {
 			ss << "}";
 #endif
 			if (it->second.mValid) {
-				NEO_LOG_V("Resolving a new shader for %s with %s", mName.c_str(), ss.str().c_str());
+				NEO_LOG_I("Resolving a new shader for %s with %s", mName.c_str(), ss.str().c_str());
 			}
 			else {
 				NEO_LOG_E("Failed to resolve instance of %s with %s", mName.c_str(), ss.str().c_str());

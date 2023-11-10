@@ -11,6 +11,10 @@ layout(binding = 0) uniform sampler2D diffuseMap;
 uniform vec3 diffuseColor;
 #endif
 
+#ifdef NORMAL_MAP
+layout(binding = 1) uniform sampler2D normalMap;
+#endif
+
 uniform vec3 ambientColor;
 uniform vec3 specularColor;
 uniform float shine;
@@ -31,7 +35,9 @@ void main() {
     alphaDiscard(albedo.a);
 #endif
 
+    vec3 nor = fragNor;
+
     color.rgb = albedo.rgb * ambientColor + 
-                getPhong(fragNor, fragPos.rgb, camPos, lightPos - fragPos.xyz, lightAtt, lightCol, albedo.rgb, specularColor, shine);
+                getPhong(nor, fragPos.rgb, camPos, lightPos - fragPos.xyz, lightAtt, lightCol, albedo.rgb, specularColor, shine);
     color.a = 1.0;
 }
