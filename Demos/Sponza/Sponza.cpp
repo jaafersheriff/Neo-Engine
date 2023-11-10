@@ -122,9 +122,10 @@ namespace Sponza {
         const auto&& [__, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
         auto shadowMap = Library::createTransientFBO(glm::uvec2(4096, 4096), { TextureFormat{
-            GL_R16,
+            GL_DEPTH_COMPONENT,
             GL_DEPTH_COMPONENT,
         } });
+        shadowMap->bind();
         shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), GL_DEPTH_BUFFER_BIT);
         drawShadows<OpaqueComponent>(*shadowMap, ecs);
         drawShadows<AlphaTestComponent>(*shadowMap, ecs);

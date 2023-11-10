@@ -181,6 +181,7 @@ namespace neo {
         }
 
        mValid = true;
+       // This might break if different shader stages use the same uniform..?
        for (auto& uniform : uniforms) {
            GLint r = glGetUniformLocation(mPid, uniform.c_str());
            if (r < 0) {
@@ -276,14 +277,13 @@ namespace neo {
 
     void ResolvedShaderInstance::bindTexture(const char* name, const Texture& texture) const {
         ServiceLocator<Renderer>::ref().mStats.mNumSamplers++;
-        GLenum bindingLoc = GL_TEXTURE0;
         auto binding = mBindings.find(HashedString(name));
+        GLint uniformLoc = 0;
         if (binding != mBindings.end()) {
-            bindingLoc += binding->second;
+            uniformLoc = binding->second;
         }
-        glActiveTexture(bindingLoc);
+        glActiveTexture(GL_TEXTURE0 + uniformLoc);
         texture.bind();
-        glUniform1i(_getUniform(name), texture.mTextureID);
-
+        glUniform1i(_getUniform(name), uniformLoc);
     }
 }
