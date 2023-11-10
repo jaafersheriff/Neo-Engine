@@ -16,8 +16,9 @@
 
 namespace neo {
 
+    using LightView = std::tuple<ECS::Entity, LightComponent, SpatialComponent>;
+
 	template<typename... CompTs>
-    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const LightComponent& light, const SpatialComponent& lightSpatial, Texture* shadowMap = nullptr, const NewShader::ShaderDefines& inDefines = {}) {
         TRACY_GPU();
         const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 
@@ -91,8 +92,9 @@ namespace neo {
                 resolvedShader.bindUniform("lightAtt", light.mAttenuation);
                 resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
                 if (shadowsEnabled) {
-                    loadUniform("lightDir", -lightSpatial.getLookDir());
-                    loadUniform("L", L);
+                    resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
+                    resolvedShader.bindUniform("L", L);
+                    resolvedShader.bindTexture("shadowMap", *shadowMap);
                 }
             }
 
@@ -112,4 +114,10 @@ namespace neo {
             //glDisable(GL_BLEND);
         }
 	}
+
+    template<>
+    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const LightView& light, Texture* shadowMap, const NewShader::ShaderDefines& inDefines) {
+        drawPhong<OpaqueComponent>(ecs, cameraEntity, light, shadowMap, inDefines);
+        drawPhong<AlphaTestComponent>(ecs, cameraEntity, light, shadowMap, inDefines);
+    }
 }

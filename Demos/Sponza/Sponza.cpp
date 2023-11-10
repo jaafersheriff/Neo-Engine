@@ -118,8 +118,8 @@ namespace Sponza {
     }
 
     void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
-        const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-        const auto&& [__, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
+        const auto&& [cameraEntity, _, _] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+        auto& lightView = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
         auto shadowMap = Library::createTransientFBO(glm::uvec2(4096, 4096), { TextureFormat{
             GL_DEPTH_COMPONENT,
@@ -133,8 +133,7 @@ namespace Sponza {
         backbuffer.bind();
         backbuffer.clear(glm::vec4(getConfig().clearColor, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight);
-        drawPhong<OpaqueComponent>(ecs, cameraEntity, light, lightSpatial);
-        drawPhong<AlphaTestComponent>(ecs, cameraEntity, light, lightSpatial);
+        drawPhong(ecs, cameraEntity, lightView);
 
     }
 }
