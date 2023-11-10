@@ -54,7 +54,7 @@ namespace neo {
 
 			std::stringstream ss;
 #ifdef DEBUG_MODE
-			ss << "{";
+			ss << "with {";
 			for (auto d = defines.begin(); d != defines.end(); d++) {
 				ss << d->c_str();
 				if (d != std::prev(defines.end())) {
@@ -65,10 +65,10 @@ namespace neo {
 			ss << "}";
 #endif
 			if (it->second.mValid) {
-				NEO_LOG_I("Resolving a new shader for %s with %s", mName.c_str(), ss.str().c_str());
+				NEO_LOG_I("Resolving a new shader for %s %s", mName.c_str(), ss.str().c_str());
 			}
 			else {
-				NEO_LOG_E("Failed to resolve instance of %s with %s", mName.c_str(), ss.str().c_str());
+				NEO_LOG_E("Failed to resolve instance of %s %s", mName.c_str(), ss.str().c_str());
 			}
 		}
 

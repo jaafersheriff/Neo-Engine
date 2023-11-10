@@ -4,6 +4,7 @@
 
 #include <set>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace neo {
     class ResolvedShaderInstance;
@@ -12,7 +13,7 @@ namespace neo {
     public:
         using ConstructionArgs = std::unordered_map<ShaderStage, std::string>;
         using ShaderSources = std::unordered_map<ShaderStage, const char*>;
-        using ShaderDefines = std::set<std::string>;
+        using ShaderDefines = std::unordered_set<std::string>;
         using HashedShaderDefines = HashedString::value_type;
 
         NewShader(const char* name, const ConstructionArgs& args);
