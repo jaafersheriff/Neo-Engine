@@ -125,7 +125,7 @@ namespace neo {
                         && uniformNameStart != std::string::npos
                         && uniformNameEnd != std::string::npos, "Failed to parse uniform at line %s", line.c_str());
                     std::string uniform = line.substr(uniformNameStart, uniformNameEnd - uniformNameStart);
-                    NEO_ASSERT(uniform.find(" ", uniformNameStart) == std::string::npos && uniform.find(",", uniformNameStart), "Can't have nested uniform definitions");
+                    NEO_ASSERT(uniform.find(" ") == std::string::npos && uniform.find(",") == std::string::npos, "Can't have nested uniform definitions");
                     uniforms.push_back(uniform);
 
                     if (bindingLoc != std::string::npos) {
