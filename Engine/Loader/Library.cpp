@@ -15,7 +15,7 @@ namespace neo {
     std::unordered_map<std::string, MeshData> Library::mMeshes;
     std::unordered_map<std::string, Texture*> Library::mTextures;
     std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
-    std::unordered_map<uint32_t, std::pair<std::uint8_t, Framebuffer*>> Library::mTransientFramebuffers;
+    std::unordered_map<uint32_t, std::vector<Library::TransientValue>> Library::mTransientFramebuffers;
     std::unordered_map<std::string, NewShader*> Library::mShaders;
     NewShader* Library::mDummyShader;
 
@@ -42,16 +42,26 @@ namespace neo {
     }
 
     void Library::tick() {
+        TRACY_ZONE();
         for (auto it = mTransientFramebuffers.begin(); it != mTransientFramebuffers.end();) {
-            auto& usageCount = it->second.first;
-            auto fbo = it->second.second;
-            if (usageCount == 0) {
-                fbo->destroy();
-                delete fbo;
+            auto& tvList = it->second;
+            for (auto tvIt = tvList.begin(); tvIt != tvList.end();) {
+                if (tvIt->mFrameCount == 0) {
+                    tvIt->mFBO->destroy();
+                    delete tvIt->mFBO;
+                    tvIt = tvList.erase(tvIt);
+                }
+                else {
+                    tvIt->mUsedThisFrame = false;
+                    tvIt->mFrameCount--;
+                    tvIt++;
+                }
+            }
+
+            if (tvList.empty()) {
                 it = mTransientFramebuffers.erase(it);
             }
-            else {
-                usageCount--;
+            if (it != mTransientFramebuffers.end()) {
                 it++;
             }
         }
@@ -127,34 +137,55 @@ namespace neo {
     }
 
     Framebuffer* Library::createTransientFBO(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+        TRACY_ZONE();
+        TransientValue& tv = _findTransientResource(size, formats);
+        tv.mUsedThisFrame = true;
+        if (!tv.mFBO) {
+            tv.mFBO = new Framebuffer;
+            for (auto& format : formats) {
+                if (format.mBaseFormat == GL_DEPTH_COMPONENT) {
+                    tv.mFBO->attachDepthTexture(size, format.mFilter, format.mMode);
+                }
+                else if (format.mBaseFormat == GL_DEPTH_STENCIL) {
+                    tv.mFBO->attachStencilTexture(size, format.mFilter, format.mMode);
+                }
+                else {
+                    tv.mFBO->attachColorTexture(size, format);
+                }
+            }
+            if (tv.mFBO->mColorAttachments) {
+                tv.mFBO->initDrawBuffers();
+            }
+        }
+        // Unused resources get removed after 2 frames
+        tv.mFrameCount = 2;
+
+        return tv.mFBO;
+    }
+
+    Library::TransientValue& Library::_findTransientResource(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+        TRACY_ZONE();
         uint32_t hash = _getTransientFBOHash(size, formats);
         auto it = mTransientFramebuffers.find(hash);
-        if (it != mTransientFramebuffers.end()) {
-            auto& fboPair = it->second;
-            // Only keep transients for 5 frames
-            if (fboPair.first < 5) {
-                fboPair.first++;
-            }
-            return fboPair.second;
-        }
 
-        auto fb = new Framebuffer;
-        for (auto& format : formats) {
-            if (format.mBaseFormat == GL_DEPTH_COMPONENT) {
-                fb->attachDepthTexture(size, format.mFilter, format.mMode);
-            }
-            else if (format.mBaseFormat == GL_DEPTH_STENCIL) {
-                fb->attachStencilTexture(size, format.mFilter, format.mMode);
-            }
-            else {
-                fb->attachColorTexture(size, format);
-            }
+        // First time seeing this description
+        if (it == mTransientFramebuffers.end()) {
+            mTransientFramebuffers[hash] = {};
+            mTransientFramebuffers[hash].emplace_back(TransientValue{});
+            return mTransientFramebuffers[hash].back();
         }
-        if (fb->mColorAttachments) {
-            fb->initDrawBuffers();
+        else {
+            // There's already a list here, search it
+            for (auto& existingTransient : it->second) {
+                // An unused resource exists
+                if (!existingTransient.mUsedThisFrame) {
+                    return existingTransient;
+                }
+            }
+            // No unused resources :( Make a new one
+            it->second.emplace_back(TransientValue{});
+            return it->second.back();
         }
-        mTransientFramebuffers.emplace(hash, std::make_pair<uint8_t, Framebuffer*>(static_cast<uint8_t>(2), std::move(fb)));
-        return fb;
     }
 
     uint32_t Library::_getTransientFBOHash(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
@@ -267,13 +298,15 @@ namespace neo {
                 }
             }
             if (ImGui::TreeNodeEx("Transients", ImGuiTreeNodeFlags_DefaultOpen)) {
-                for (auto& [hash, fboPair] : Library::mTransientFramebuffers) {
-                    ImGui::TextWrapped("[%d] (%d)", static_cast<int>(fboPair.first), fboPair.second->mFBOID);
-                    for (auto& t : fboPair.second->mTextures) {
-                        ImGui::SameLine();
-                        ImGui::TextWrapped("%d [%d, %d]", t->mTextureID, t->mWidth, t->mHeight);
-                        ImGui::SameLine();
-                        textureFunc(*t);
+                for (auto& [hash, tvList] : Library::mTransientFramebuffers) {
+                    for (auto& tv : tvList) {
+                        ImGui::TextWrapped("[%d] (%d)", static_cast<int>(tv.mFrameCount), tv.mFBO->mFBOID);
+                        for (auto& t : tv.mFBO->mTextures) {
+                            ImGui::SameLine();
+                            ImGui::TextWrapped("%d [%d, %d]", t->mTextureID, t->mWidth, t->mHeight);
+                            ImGui::SameLine();
+                            textureFunc(*t);
+                        }
                     }
                 }
                 ImGui::TreePop();

@@ -52,18 +52,22 @@ namespace neo {
             static void imGuiEditor();
 
         private:
-            // TODO 
-            // template <typename T> static T* _find(const std::string&);
             static std::unordered_map<std::string, MeshData> mMeshes;
             static std::unordered_map<std::string, Texture*> mTextures;
             static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
-            static std::unordered_map<uint32_t, std::pair<std::uint8_t, Framebuffer*>> mTransientFramebuffers;
+            struct TransientValue {
+                Framebuffer* mFBO = nullptr;
+                uint8_t mFrameCount = 0;
+                bool mUsedThisFrame = false;
+            };
+            static std::unordered_map<uint32_t, std::vector<TransientValue>> mTransientFramebuffers;
             static std::unordered_map<std::string, NewShader*> mShaders;
             static NewShader* mDummyShader;
 
             static void _insertMesh(const std::string&, MeshData);
             static void _insertTexture(const std::string&, Texture*);
             static uint32_t _getTransientFBOHash(glm::uvec2 size, const std::vector<TextureFormat>& formats);
+            static TransientValue& _findTransientResource(glm::uvec2 size, const std::vector<TextureFormat>& formats);
     };
 
     template <typename T>
