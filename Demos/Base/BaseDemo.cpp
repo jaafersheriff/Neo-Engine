@@ -105,7 +105,7 @@ namespace Base {
 
     void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-        const auto&& [__, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
+        const auto light = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
         auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
         auto sceneTarget = Library::createTransientFBO(viewport.mSize, {
@@ -124,8 +124,8 @@ namespace Base {
         sceneTarget->bind();
         sceneTarget->clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-        drawPhong<OpaqueComponent>(ecs, cameraEntity, light, lightSpatial);
-        drawPhong<AlphaTestComponent>(ecs, cameraEntity, light, lightSpatial);
+        drawPhong<OpaqueComponent>(ecs, cameraEntity, light);
+        drawPhong<AlphaTestComponent>(ecs, cameraEntity, light);
 
         drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
     }

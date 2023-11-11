@@ -6,6 +6,8 @@
 #include "ECS/Component/NewRenderingComponents/PhongShaderComponent.hpp"
 #include "ECS/Component/NewRenderingComponents/OpaqueComponent.hpp"
 
+#include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/RenderableComponent/MaterialComponent.hpp"
 #include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
@@ -16,10 +18,12 @@
 
 namespace neo {
 
-    using LightView = std::tuple<ECS::Entity, LightComponent, SpatialComponent>;
+    using LightView = std::tuple<ECS::Entity, const LightComponent&, const SpatialComponent&>;
 
 	template<typename... CompTs>
+    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const LightView& lightView, const Texture* shadowMap = nullptr, const NewShader::ShaderDefines& inDefines = {}) {
         TRACY_GPU();
+        const auto& [lightEntity, light, lightSpatial] = lightView;
         const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 
         NewShader::ShaderDefines parentDefines = inDefines;
@@ -40,11 +44,17 @@ namespace neo {
         }
 
         glm::mat4 L;
-        auto lightCamera = ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(lightEntity);
-        bool shadowsEnabled = shadowMap && lightCamera;
+        const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
+        const bool shadowsEnabled = shadowMap && shadowCamera.has_value();
         if (shadowsEnabled) {
             parentDefines.emplace("ENABLE_SHADOWS");
-            L = lightCamera->getProj() * lightSpatial.getView();
+            const auto& [_, __, shadowOrtho, shadowCameraSpatial] = *shadowCamera;
+            static glm::mat4 biasMatrix(
+                0.5f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.5f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.5f, 0.0f,
+                0.5f, 0.5f, 0.5f, 1.0f);
+            L = biasMatrix * shadowOrtho.getProj() * shadowCameraSpatial.getView();
         }
 
         const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
@@ -63,13 +73,13 @@ namespace neo {
             NewShader::ShaderDefines drawDefines = parentDefines;
             const auto& material = view.get<const MaterialComponent>(entity);
             if (material.mDiffuseMap) {
-                phongDefines.emplace("DIFFUSE_MAP");
+                drawDefines.emplace("DIFFUSE_MAP");
             }
             if (material.mNormalMap) {
-                phongDefines.emplace("NORMAL_MAP");
+                drawDefines.emplace("NORMAL_MAP");
             }
 
-            auto resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(phongDefines);
+            auto resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(drawDefines);
             resolvedShader.bind();
 
             if (material.mDiffuseMap) {
@@ -90,11 +100,13 @@ namespace neo {
                 resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
                 resolvedShader.bindUniform("lightCol", light.mColor);
                 resolvedShader.bindUniform("lightAtt", light.mAttenuation);
-                resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
                 if (shadowsEnabled) {
                     resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
                     resolvedShader.bindUniform("L", L);
                     resolvedShader.bindTexture("shadowMap", *shadowMap);
+                }
+                else {
+                    resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
                 }
             }
 
