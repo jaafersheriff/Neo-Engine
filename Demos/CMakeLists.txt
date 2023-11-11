@@ -14,6 +14,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/Sponza/*.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/Compute/*.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/Cornell/*.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/NormalVisualizer/*.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/DrawStress/*.cpp
 )
 file(GLOB_RECURSE HPP_FILES 
 	${CMAKE_CURRENT_SOURCE_DIR}/DemoRegistration.hpp
@@ -23,6 +24,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/Sponza/*.hpp
 ${CMAKE_CURRENT_SOURCE_DIR}/Compute/*.hpp
 ${CMAKE_CURRENT_SOURCE_DIR}/Cornell/*.hpp
 ${CMAKE_CURRENT_SOURCE_DIR}/NormalVisualizer/*.hpp
+${CMAKE_CURRENT_SOURCE_DIR}/DrawStress/*.hpp
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES 
