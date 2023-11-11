@@ -6,6 +6,7 @@
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
@@ -41,19 +42,6 @@ namespace NormalVisualizer {
         }
     };
 
-    struct Orient {
-        Orient(ECS& ecs, Mesh* mesh) {
-            auto entity = ecs.createEntity();
-            ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
-            ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.6f, 0.f));
-            ecs.addComponent<MeshComponent>(entity, mesh);
-            auto material = ecs.addComponent<MaterialComponent>(entity);
-            material->mDiffuseMap = Library::getTexture("black");
-            ecs.addComponent<PhongShaderComponent>(entity);
-            ecs.addComponent<OpaqueComponent>(entity);
-        }
-    };
-
     IDemo::Config Demo::getConfig() const {
         IDemo::Config config;
         config.name = "NormalVisualizer";
@@ -67,7 +55,17 @@ namespace NormalVisualizer {
         Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
 
         Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
-        Orient(ecs, Library::loadMesh("bunny.obj").mMesh);
+
+        {
+            auto entity = ecs.createEntity();
+            ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
+            ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.6f, 0.f));
+            ecs.addComponent<MeshComponent>(entity, Library::loadMesh("bunny.obj").mMesh);
+            ecs.addComponent<MaterialComponent>(entity);
+            ecs.addComponent<PhongShaderComponent>(entity);
+            ecs.addComponent<OpaqueComponent>(entity);
+            ecs.addComponent<TagComponent>(entity, "bunny");
+        }
 
         /* Systems - order matters! */
         ecs.addSystem<CameraControllerSystem>();
