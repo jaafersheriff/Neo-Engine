@@ -21,6 +21,7 @@ namespace Compute {
     public:
         Mesh* mMesh;
         int mNumParticles = 98304;
+        float timeScale = 100.f;
 
         ParticleMeshComponent() {
             MeshData meshData;
@@ -38,6 +39,7 @@ namespace Compute {
             if (ImGui::Button("Reset")) {
                 updateBuffers();
             }
+            ImGui::SliderFloat("Time scale", &timeScale, 0.f, 1000.f);
         }
 
         void updateBuffers() {

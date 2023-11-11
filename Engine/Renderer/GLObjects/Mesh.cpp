@@ -81,7 +81,7 @@ namespace neo {
         glBindVertexArray(mVAOID);
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID);
         if (buffer.size()) {
-            glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_DYNAMIC_DRAW);
         }
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
@@ -98,7 +98,7 @@ namespace neo {
 
         glBindVertexArray(mVAOID);
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID);
-        glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), (const void *)0, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), (const void *)0, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
@@ -147,7 +147,7 @@ namespace neo {
         glBindVertexArray(mVAOID);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID);
         if (buffer.size()) {
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(uint32_t), &buffer[0], GL_STATIC_DRAW);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(uint32_t), &buffer[0], GL_DYNAMIC_DRAW);
         }
         glBindVertexArray(0);
     }
@@ -161,7 +161,7 @@ namespace neo {
 
         glBindVertexArray(mVAOID);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(uint32_t), (const void *)0, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(uint32_t), (const void *)0, GL_DYNAMIC_DRAW);
         glBindVertexArray(0);
     }
 

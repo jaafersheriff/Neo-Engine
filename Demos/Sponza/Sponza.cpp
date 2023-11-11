@@ -28,8 +28,6 @@
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 
-#include "Renderer/Shader/PhongShadowShader.hpp"
-
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -110,11 +108,6 @@ namespace Sponza {
         ecs.addSystem<FrustumSystem>();
         ecs.addSystem<FrustaFittingSystem>();
         ecs.addSystem<FrustumCullingSystem>();
-
-        /* Init renderer */
-        // auto& _s = renderer.addSceneShader<PhongShadowShader>();
-        // _s.bias = 0.001f;
-        // renderer.addPostProcessShader<FXAAShader>();
     }
 
     void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {

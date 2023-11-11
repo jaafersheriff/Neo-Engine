@@ -62,7 +62,6 @@ namespace Compute {
         }
 
         virtual void imguiEditor() override {
-            ImGui::SliderFloat("Time scale", &timeScale, 0.f, 1000.f);
         }
     };
 }

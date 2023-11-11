@@ -16,8 +16,6 @@ namespace Compute {
 
     public:
 
-        float mSpriteSize = 0.2f;
-        glm::vec3 mSpriteColor = glm::vec3(0.67f, 1.f, 0.55f);
 
         ParticleVisShader(const std::string& vert, const std::string& frag, const std::string& geom) :
             Shader("ParticleVis Shader")
@@ -56,8 +54,6 @@ namespace Compute {
         }
 
         virtual void imguiEditor() override {
-            ImGui::SliderFloat("Sprite size", &mSpriteSize, 0.1f, 2.f);
-            ImGui::ColorEdit3("Sprite color", &mSpriteColor[0]);
         }
     };
 }
