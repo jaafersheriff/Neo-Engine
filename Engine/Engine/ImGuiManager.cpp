@@ -100,10 +100,21 @@ namespace neo {
         NEO_ASSERT(mIsEnabled, "ImGui is disabled");
         TRACY_ZONE();
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        {
+            TRACY_ZONEN("ImGui_ImplOpenGL3_NewFrame");
+            ImGui_ImplOpenGL3_NewFrame();
+        }
+        {
+            TRACY_ZONEN("ImGui_ImplGlfw_NewFrame");
+            ImGui_ImplGlfw_NewFrame();
+        }
+        {
+            TRACY_ZONEN("ImGui::NewFrame");
+            ImGui::NewFrame();
+        }
+
         if (isViewportHovered()) {
+            TRACY_ZONEN("MouseMoveMessage");
             auto [mx, my] = ImGui::GetMousePos();
             mx -= mViewport.mOffset.x;
             my -= mViewport.mOffset.y;

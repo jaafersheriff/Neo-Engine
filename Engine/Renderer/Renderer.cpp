@@ -132,15 +132,45 @@ namespace neo {
     }
 
     void Renderer::render(WindowSurface& window, IDemo* demo, ECS& ecs) {
-        mStats = {};
-
         TRACY_GPU();
+
+        mStats = {};
         resetState();
         mDefaultFBO->bind();
 
         {
             TRACY_GPUN("Draw Demo");
             demo->render(ecs, *mDefaultFBO);
+        }
+        
+        /* Render imgui */
+        if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+            TRACY_GPUN("ImGuiManager.render");
+            mBackBuffer->bind();
+            ServiceLocator<ImGuiManager>::ref().render();
+        }
+        else {
+            TRACY_GPUN("Final Blit");
+            mBackBuffer->bind();
+            resetState();
+            glDisable(GL_DEPTH_TEST);
+            glClearColor(0.f, 0.f, 0.f, 1.f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            auto frameSize = window.getDetails().mSize;
+            glViewport(0, 0, frameSize.x, frameSize.y);
+        
+            auto resolvedBlit = mBlitShader->getResolvedInstance({});
+            resolvedBlit.bind();
+        
+            auto meshData = Library::getMesh("quad");
+            glBindVertexArray(meshData.mMesh->mVAOID);
+        
+            // Bind input fbo texture
+            resolvedBlit.bindTexture("inputTexture", *mDefaultFBO->mTextures[0]);
+        
+            // Render 
+            meshData.mMesh->draw();
+            resolvedBlit.unbind();
         }
 
         /* Render imgui */

@@ -123,13 +123,7 @@ namespace neo {
         }
 
         if (containsAlphaTest) {
-            //glDisable(GL_BLEND);
+            // glDisable(GL_BLEND);
         }
 	}
-
-    template<>
-    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const LightView& light, Texture* shadowMap, const NewShader::ShaderDefines& inDefines) {
-        drawPhong<OpaqueComponent>(ecs, cameraEntity, light, shadowMap, inDefines);
-        drawPhong<AlphaTestComponent>(ecs, cameraEntity, light, shadowMap, inDefines);
-    }
 }

@@ -19,11 +19,11 @@ namespace neo {
 		}
 	}
 
+	// Don't put this in a hot loop
 	NewShader::NewShader(const char* name, const ShaderSources& sources)
 		: mName(name)
 		, mShaderSources(sources) {
 	}
-
 
 	NewShader::~NewShader() {
 		destroy();

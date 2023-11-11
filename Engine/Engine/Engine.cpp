@@ -159,7 +159,6 @@ namespace neo {
             if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
                 TRACY_ZONEN("ImGui");
                 ServiceLocator<ImGuiManager>::ref().begin();
-
                 {
                     TRACY_ZONEN("Demos Imgui");
                     demos.imGuiEditor(mECS);

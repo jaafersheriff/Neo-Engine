@@ -65,11 +65,13 @@ namespace Compute {
     }
 
     void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
+        TRACY_GPUN("Compute::render")
         backbuffer.bind();
         backbuffer.clear(glm::vec4(getConfig().clearColor, 1.0), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Update the mesh
         if (auto meshView = ecs.cGetComponent<ParticleMeshComponent>()) {
+            TRACY_GPUN("Update Particles");
             auto&& [_, mesh] = *meshView;
             auto& particlesCompute = Library::createShaderSource("ParticlesCompute", NewShader::ConstructionArgs{
                 { ShaderStage::COMPUTE, "compute/particles.compute" }
@@ -100,6 +102,7 @@ namespace Compute {
 
         // Draw the mesh
         {
+            TRACY_GPUN("Draw Particles");
             auto& particlesVis = Library::createShaderSource("ParticleVis", NewShader::ConstructionArgs{
                 { ShaderStage::VERTEX,   "compute/particles.vert" },
                 { ShaderStage::GEOMETRY, "compute/particles.geom" },

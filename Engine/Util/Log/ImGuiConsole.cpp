@@ -2,6 +2,7 @@
 #include "ImGuiConsole.hpp"
 
 #include "Util/Util.hpp"
+#include "Util/Profiler.hpp"
 
 namespace neo {
 
@@ -40,6 +41,7 @@ namespace neo {
     }
 
     void ImGuiConsole::imGuiEditor() {
+        TRACY_ZONE();
         if (!ImGui::Begin("Console"))
         {
             ImGui::End();

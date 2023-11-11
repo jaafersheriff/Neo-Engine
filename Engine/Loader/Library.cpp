@@ -225,6 +225,7 @@ namespace neo {
     }
 
     NewShader* Library::createShaderSource(const std::string& name, const NewShader::ShaderSources& sources) {
+        TRACY_ZONE();
         auto it = mShaders.find(name);
         if (it != mShaders.end()) {
             return it->second;
