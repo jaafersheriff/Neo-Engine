@@ -2,11 +2,6 @@
 
 #include "NormalVisualizer.hpp"
 
-#include "Renderer/Shader/PhongShader.hpp"
-#include "Renderer/Shader/WireframeShader.hpp"
-
-#include "NormalShader.hpp"
-
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
@@ -18,6 +13,8 @@
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
+
+#include "Renderer/RenderingSystems/PhongRenderer.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -50,8 +47,10 @@ namespace NormalVisualizer {
             ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
             ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.6f, 0.f));
             ecs.addComponent<MeshComponent>(entity, mesh);
-            ecs.addComponent<renderable::PhongRenderable>(entity, Library::getTexture("black"));
-            ecs.addComponent<renderable::WireframeRenderable>(entity);
+            auto material = ecs.addComponent<MaterialComponent>(entity);
+            material->mDiffuseMap = Library::getTexture("black");
+            ecs.addComponent<PhongShaderComponent>(entity);
+            ecs.addComponent<OpaqueComponent>(entity);
         }
     };
 
@@ -63,7 +62,7 @@ namespace NormalVisualizer {
         return config;
     }
 
-    void Demo::init(ECS& ecs, Renderer& renderer) {
+    void Demo::init(ECS& ecs) {
         /* Game objects */
         Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
 
@@ -73,9 +72,42 @@ namespace NormalVisualizer {
         /* Systems - order matters! */
         ecs.addSystem<CameraControllerSystem>();
         ecs.addSystem<RotationSystem>();
+    }
 
-        /* Init renderer */
-        renderer.addSceneShader<PhongShader>();
-        renderer.addSceneShader<NormalShader>("normal.vert", "normal.frag", "normal.geom");
+    void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
+        const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+        const auto light = *ecs.getSingleView<LightComponent, SpatialComponent>();
+
+        backbuffer.bind();
+        backbuffer.clear(glm::vec4(getConfig().clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        drawPhong<OpaqueComponent>(ecs, cameraEntity, light);
+
+
+        auto normalShader = Library::createShaderSource("NormalVisualizer", NewShader::ConstructionArgs{
+            {ShaderStage::VERTEX, "normal.vert"},
+            {ShaderStage::GEOMETRY, "normal.geom"},
+            {ShaderStage::FRAGMENT, "normal.frag"}
+        })->getResolvedInstance({});
+        normalShader.bind();
+
+        normalShader.bindUniform("magnitude", mMagnitude);
+
+        /* Load PV */
+        normalShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+        normalShader.bindUniform("V", cameraSpatial.getView());
+
+        for (const auto&& [__, mesh, spatial] : ecs.getView<MeshComponent, SpatialComponent>().each()) {
+            normalShader.bindUniform("M", spatial.getModelMatrix());
+            normalShader.bindUniform("N", spatial.getNormalMatrix());
+
+            /* DRAW */
+            mesh.mMesh->draw();
+        }
+    }
+
+    void Demo::imGuiEditor(ECS& ecs) {
+        NEO_UNUSED(ecs);
+        ImGui::SliderFloat("Magnitude", &mMagnitude, 0.f, 1.f);
     }
 }

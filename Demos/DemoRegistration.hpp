@@ -1,9 +1,9 @@
 #include "Base/BaseDemo.hpp"
 #include "Sponza/Sponza.hpp"
 #include "Compute/Compute.hpp"
+#include "Cornell/Cornell.hpp"
 // #include "FrustaFitting/FrustaFitting.hpp"
-// #include "Cornell/Cornell.hpp"
-// #include "NormalVisualizer/NormalVisualizer.hpp"
+#include "NormalVisualizer/NormalVisualizer.hpp"
 
 #include <vector>
 #include <memory>
@@ -13,8 +13,8 @@ static std::vector<neo::IDemo*> sDemos = {
 	new Base::Demo(),
 	new Sponza::Demo(),
  	new Compute::Demo(),
-	// new Cornell::Demo(),
+	new Cornell::Demo(),
  	// new FrustaFitting::Demo(),
-	// new NormalVisualizer::Demo(),
+	new NormalVisualizer::Demo(),
 };
 

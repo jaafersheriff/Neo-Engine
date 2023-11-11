@@ -5,6 +5,7 @@
 
 #include "ECS/Component/NewRenderingComponents/PhongShaderComponent.hpp"
 #include "ECS/Component/NewRenderingComponents/OpaqueComponent.hpp"
+#include "ECS/Component/NewRenderingComponents/AlphaTestComponent.hpp"
 
 #include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
@@ -57,6 +58,7 @@ namespace neo {
             L = biasMatrix * shadowOrtho.getProj() * shadowCameraSpatial.getView();
         }
 
+        const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
         const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
         for (auto entity : view) {
             // VFC
@@ -95,7 +97,7 @@ namespace neo {
 
             // UBO candidates
             {
-                resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                resolvedShader.bindUniform("P", P);
                 resolvedShader.bindUniform("V", cameraSpatial->getView());
                 resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
                 resolvedShader.bindUniform("lightCol", light.mColor);

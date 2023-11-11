@@ -8,6 +8,11 @@ namespace NormalVisualizer {
 	class Demo : public IDemo {
 	public:
 		virtual IDemo::Config getConfig() const override;
-		virtual void init(ECS& ecs, Renderer& renderer) override;
+		virtual void init(ECS& ecs) override;
+		virtual void render(const ECS& ecs, Framebuffer& backbuffer) override;
+		virtual void imGuiEditor(ECS& ecs) override;
+
+	private:
+        float mMagnitude = 0.08f;
 	};
 }

@@ -12,13 +12,14 @@
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderableComponent/PhongRenderable.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+#include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
+
+#include "ECS/Component/NewRenderingComponents/PhongShaderComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 
-#include "Renderer/Shader/PhongShader.hpp"
-#include "Renderer/Shader/FXAAShader.hpp"
-
-#include "Renderer/GLObjects/Material.hpp"
+#include "Renderer/RenderingSystems/PhongRenderer.hpp"
+#include "Renderer/RenderingSystems/FXAARenderer.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -33,24 +34,24 @@ namespace Cornell {
             ecs.addComponent<TagComponent>(entity, name);
             ecs.addComponent<MeshComponent>(entity, mesh);
             ecs.addComponent<SpatialComponent>(entity, position, scale, rotation);
-
-            Material material;
-            material.mAmbient = glm::vec3(0.2f);
-            material.mDiffuse = color;
-            material.mSpecular = glm::vec3(1.f);
-            material.mShininess = 1.f;
-            ecs.addComponent<renderable::PhongRenderable>(entity, Library::getTexture("white"), material);
+            auto material = ecs.addComponent<MaterialComponent>(entity);
+            material->mAmbient = glm::vec3(0.2f);
+            material->mDiffuse = color;
+            material->mSpecular = glm::vec3(1.f);
+            material->mShininess = 1.f;
+            ecs.addComponent<PhongShaderComponent>(entity);
+            ecs.addComponent<OpaqueComponent>(entity);
         }
     }
 
     IDemo::Config Demo::getConfig() const {
         IDemo::Config config;
-        config.name = "Cornell Demo";
+        config.name = "Cornell";
         config.clearColor = glm::vec3(0.f);
         return config;
     }
 
-    void Demo::init(ECS& ecs, Renderer& renderer) {
+    void Demo::init(ECS& ecs) {
 
         /* Camera */
         {
@@ -68,7 +69,11 @@ namespace Cornell {
             ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f - util::EP * 4, 0.5f), glm::vec3(0.25f), glm::vec3(glm::radians(90.f), 0.f, 0.f));
             ecs.addComponent<LightComponent>(entity, glm::vec3(1.f), glm::vec3(3.0, 1.0, 5.0f));
             ecs.addComponent<MeshComponent>(entity, Library::getMesh("quad").mMesh);
-            ecs.addComponent<renderable::PhongRenderable>(entity, Library::getTexture("white"), Material{});
+            auto material = ecs.addComponent<MaterialComponent>(entity);
+            material->mAmbient = glm::vec3(1.f);
+            material->mDiffuse = glm::vec3(1.f);
+            ecs.addComponent<PhongShaderComponent>(entity);
+            ecs.addComponent<OpaqueComponent>(entity);
         }
 
         /* Bunny object */
@@ -82,10 +87,33 @@ namespace Cornell {
 
         /* Systems - order matters! */
         ecs.addSystem<CameraControllerSystem>();
+    }
 
-        /* Init renderer */
-        // renderer.addSceneShader<PhongShader>();
-        // renderer.addPostProcessShader<FXAAShader>();
+    void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
+        const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+        const auto light = *ecs.getSingleView<LightComponent, SpatialComponent>();
+
+        auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
+        auto sceneTarget = Library::createTransientFBO(viewport.mSize, {
+            TextureFormat{
+                GL_RGB8,
+                GL_RGB,
+            },
+            TextureFormat{
+                GL_R16,
+                GL_DEPTH_COMPONENT,
+            }
+        });
+
+        glm::vec3 clearColor = getConfig().clearColor;
+
+        sceneTarget->bind();
+        sceneTarget->clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+        drawPhong<OpaqueComponent>(ecs, cameraEntity, light);
+
+        drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
+
     }
 
     void Demo::update(ECS& ecs) {

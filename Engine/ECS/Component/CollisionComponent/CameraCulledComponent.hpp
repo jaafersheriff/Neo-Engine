@@ -3,6 +3,8 @@
 #include "ECS/ECS.hpp"
 #include "ECS/Component/Component.hpp"
 
+#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 
