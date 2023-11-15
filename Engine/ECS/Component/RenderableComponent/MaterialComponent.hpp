@@ -19,8 +19,9 @@ namespace neo {
 
         Texture* mAlphaMap = nullptr;
 
-        // Unused..for now
         float mShininess;
+
+        // Unused..for now
         glm::vec3 mTransmittance;
         glm::vec3 mEmission;
         float mIOR;      // index of refraction
@@ -34,6 +35,7 @@ namespace neo {
             ImGui::ColorEdit3("Ambient", &mAmbient[0]);
             ImGui::ColorEdit3("Diffuse", &mDiffuse[0]);
             ImGui::ColorEdit3("Specular", &mSpecular[0]);
+            ImGui::SliderFloat("Shine", &mShininess, 0.f, 50.f);
         };
 	};
 }

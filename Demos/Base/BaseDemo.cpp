@@ -71,6 +71,8 @@ namespace Base {
             auto material = ecs.addComponent<MaterialComponent>(bunny);
             material->mAmbient = glm::vec3(0.2f);
             material->mDiffuse = glm::vec3(1.f, 0.f, 1.f);
+            material->mSpecular = glm::vec3(1.f);
+            material->mShininess = 20.f;
         }
 
         /* Ground plane */

@@ -8,6 +8,9 @@
 
 #include "Loader/Library.hpp"
 
+#include <glslang/Include/glslang_c_interface.h>
+#include <glslang/Public/resource_limits_c.h>
+
 namespace neo {
     namespace {
 
@@ -16,9 +19,6 @@ namespace neo {
                 return "";
             }
             std::string sourceString(shaderString);
-
-            // Prepend #version
-            sourceString.insert(0, (ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion + "\n").c_str());
 
             // Handle #includes 
             {
@@ -48,63 +48,43 @@ namespace neo {
                 }
             }
 
-            // Handle #defines
-            {
-                std::string::size_type start = 0;
-                std::string::size_type end = 0;
-                while ((end = sourceString.find("\n", start)) != std::string::npos) {
-                    std::string line = sourceString.substr(start, end - start);
-
-                    std::string::size_type defineStart = line.find("#ifdef ");
-                    if (defineStart != std::string::npos && end != std::string::npos && defineStart != end) {
-                        std::string define = line.substr(defineStart + 7, end - start - 7);
-
-                        std::string::size_type macroStart = start;
-                        std::string::size_type macroElse = sourceString.find("#else", end);
-                        std::string::size_type macroEnd = sourceString.find("#endif", end);
-                        std::string::size_type nestedIfDef = sourceString.find("#ifdef", end);
-                        NEO_ASSERT(macroEnd != std::string::npos, "Found an #ifdef %s without a matching #endif", define.c_str());
-                        if (nestedIfDef != std::string::npos) {
-                            NEO_ASSERT(nestedIfDef > macroEnd, "Can't have nested ifdefs");
-                        }
-
-                        if (defines.find(define) == defines.end()) {
-                            if (macroElse != std::string::npos && macroElse < macroEnd) {
-                                // remove endif
-                                sourceString.erase(macroEnd, 6);
-                                // remove else
-                                sourceString.erase(macroElse, 5);
-                                // remove ifdef block to else
-                                sourceString.erase(macroStart, macroElse - macroStart);
-                            }
-                            else {
-                                sourceString.erase(macroStart, macroEnd - macroStart + 6);
-                            }
-                            end = start;
-                        }
-                        else {
-                            if (macroElse != std::string::npos && macroElse < macroEnd) {
-                                // remove endif
-                                sourceString.erase(macroEnd, 6);
-                                // remove else block to endif
-                                sourceString.erase(macroElse, macroEnd - macroElse);
-                                // remove ifdef
-                                sourceString.erase(macroStart, end - macroStart);
-                            }
-                            else {
-                                // Erase endif
-                                sourceString.erase(macroEnd, 6);
-                                // Erase ifdef
-                                sourceString.erase(macroStart, end - macroStart);
-                            }
-                            end = start;
-                        }
-                    }
-                    start = end + 1;
-                }
+            // #version, #defines
+            std::stringstream preambleBuilder;
+            preambleBuilder << ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion << "\n";
+            for (auto& define : defines) {
+                preambleBuilder << "#define " << define << "\n";
             }
+            sourceString.insert(0, preambleBuilder.str());
 
-            return sourceString;
+            // Use glslang just for the preprocessor..for now
+            // Maybe spirv and validators and stuff can happen later
+            NEO_ASSERT(glslang_initialize_process(), "Failed to initialize glslang");
+
+            glslang_input_t input;
+            input.language = GLSLANG_SOURCE_GLSL;
+            input.stage = GLSLANG_STAGE_VERTEX;
+            input.client = GLSLANG_CLIENT_OPENGL;
+            input.client_version = GLSLANG_TARGET_OPENGL_450;
+            input.target_language = GLSLANG_TARGET_NONE;
+            // input.target_language_version;
+            input.code = sourceString.c_str();
+            input.default_version = 430;
+            input.default_profile = GLSLANG_NO_PROFILE;
+            input.force_default_version_and_profile = false;
+            input.forward_compatible = false;
+            input.messages = GLSLANG_MSG_ONLY_PREPROCESSOR_BIT;
+            input.resource = glslang_default_resource();
+            
+            glslang_shader_t* shader = glslang_shader_create(&input);
+            NEO_ASSERT(shader, "glslang_shader_create failed");
+            
+            glslang_shader_preprocess(shader, &input);
+            
+            std::string ret = glslang_shader_get_preprocessed_code(shader);
+
+            glslang_finalize_process();
+
+            return ret;
         }
 
         static void _findUniforms(const char *shaderString, std::vector<std::string>& uniforms, std::map<std::string, GLint>& bindings) {
@@ -135,7 +115,7 @@ namespace neo {
                         std::string::size_type bindingValueEnd = line.find(")", bindingValueStart);
                         NEO_ASSERT(
                             bindingValueStart != std::string::npos
-                            && bindingValueEnd != std::string::npos, "Filaed to parse binding at %s", line.c_str());
+                            && bindingValueEnd != std::string::npos, "Failed to parse binding at %s", line.c_str());
                        bindings.emplace(uniform, std::stoi(line.substr(bindingValueStart, bindingValueEnd - bindingValueStart)));
                     }
                 }
@@ -230,6 +210,7 @@ namespace neo {
 
     void ResolvedShaderInstance::bind() const {
         glUseProgram(mPid);
+        glActiveTexture(GL_TEXTURE0);
     }
 
     void ResolvedShaderInstance::unbind() const {
@@ -279,8 +260,9 @@ namespace neo {
 
     void ResolvedShaderInstance::bindTexture(const char* name, const Texture& texture) const {
         ServiceLocator<Renderer>::ref().mStats.mNumSamplers++;
-        auto binding = mBindings.find(HashedString(name));
+
         GLint bindingLoc = 0;
+        auto binding = mBindings.find(HashedString(name));
         if (binding != mBindings.end()) {
             bindingLoc = binding->second;
         }

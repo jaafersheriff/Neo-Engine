@@ -21,9 +21,9 @@ layout(binding = 2) uniform sampler2D shadowMap;
 #endif
 
 uniform vec3 lightCol;
-#ifdef DIRECTIONAL_LIGHT || ENABLE_SHADOWS
+#if defined(DIRECTIONAL_LIGHT) || defined(ENABLE_SHADOWS)
 uniform vec3 lightDir;
-#elif POINT_LIGHT
+#elif defined(POINT_LIGHT)
 uniform vec3 lightPos;
 uniform vec3 lightAtt;
 #endif
@@ -55,12 +55,12 @@ void main() {
 float attFactor = 1;
 #ifdef DIRECTIONAL_LIGHT
     vec3 L = normalize(lightDir);
-#elif POINT_LIGHT
+#elif defined(POINT_LIGHT)
     vec3 lightDir = lightPos - fragPos.xyz;
     vec3 L = normalize(lightDir);
     float lightDistance = length(lightDir);
-    if (length(lightAttenuation) > 0) {
-        attFactor = lightAttenuation.x + lightAttenuation.y*lightDistance + lightAttenuation.z*lightDistance*lightDistance;
+    if (length(lightAtt) > 0) {
+        attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
     }
 #else
     vec3 L = vec3(0, 0, 0);
@@ -81,6 +81,6 @@ float attFactor = 1;
     color.rgb *= visibility;
 #endif
 
-
     color.a = 1.0;
 }
+
