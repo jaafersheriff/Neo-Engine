@@ -1,4 +1,3 @@
-#include "phongLighting.glsl"
 #include "alphaDiscard.glsl"
 #include "shadowreceiver.glsl"
 
@@ -18,18 +17,22 @@ layout(binding = 1) uniform sampler2D normalMap;
 
 #ifdef ENABLE_SHADOWS
 in vec4 shadowCoord;
-uniform vec3 lightDir;
 layout(binding = 2) uniform sampler2D shadowMap;
-#else
+#endif
+
+uniform vec3 lightCol;
+#ifdef DIRECTIONAL_LIGHT || ENABLE_SHADOWS
+uniform vec3 lightDir;
+#elif POINT_LIGHT
 uniform vec3 lightPos;
+uniform vec3 lightAtt;
 #endif
 
 uniform vec3 ambientColor;
 uniform vec3 specularColor;
 uniform float shine;
+
 uniform vec3 camPos;
-uniform vec3 lightCol;
-uniform vec3 lightAtt;
 
 out vec4 color;
 
@@ -46,20 +49,38 @@ void main() {
 #endif
 
     // TODO - normal mapping
-    vec3 nor = fragNor;
+    vec3 N = normalize(fragNor);
+    vec3 V = normalize(camPos - fragPos.xyz);
 
-    float visibility = 1.0;
-#ifdef ENABLE_SHADOWS
-    visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.002), 0.2);
-#endif
-
-#ifdef ENABLE_SHADOWS
-#else
+float attFactor = 1;
+#ifdef DIRECTIONAL_LIGHT
+    vec3 L = normalize(lightDir);
+#elif POINT_LIGHT
     vec3 lightDir = lightPos - fragPos.xyz;
+    vec3 L = normalize(lightDir);
+    float lightDistance = length(lightDir);
+    if (length(lightAttenuation) > 0) {
+        attFactor = lightAttenuation.x + lightAttenuation.y*lightDistance + lightAttenuation.z*lightDistance*lightDistance;
+    }
+#else
+    vec3 L = vec3(0, 0, 0);
 #endif
 
-    color.rgb = albedo.rgb * ambientColor +
-        getPhong(nor, fragPos.rgb, camPos, lightDir, lightAtt, lightCol, albedo.rgb, specularColor, shine)
-        * visibility;
+    vec3 H = normalize(L + V);
+    float lambert = clamp(dot(L, N), 0.0, 1.0);
+    vec3 diffuseContrib  = lightCol * lambert / attFactor;
+    vec3 specularContrib = lightCol * pow(clamp(dot(H, N), 0.0, 1.0), shine) / attFactor;
+
+    color.rgb =
+        albedo.rgb * ambientColor
+        + albedo.rgb * diffuseContrib
+        + specularColor * specularContrib;
+
+#ifdef ENABLE_SHADOWS
+    float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.002), 0.2);
+    color.rgb *= visibility;
+#endif
+
+
     color.a = 1.0;
 }

@@ -34,9 +34,11 @@ namespace neo {
                         const char* sourceInclude = Loader::loadFileString(line.substr(nameStart + 10, nameEnd - nameStart - 10).c_str());
 
                         // Replace include with source
-                        sourceString.erase(start, end - start);
-                        sourceString.insert(start, sourceInclude);
-                        delete sourceInclude;
+                        if (sourceInclude) {
+                            sourceString.erase(start, end - start);
+                            sourceString.insert(start, sourceInclude);
+                            delete sourceInclude;
+                        }
 
                         // Reset processing incase there are internal #includes
                         start = end = 0;

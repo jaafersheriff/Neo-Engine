@@ -94,6 +94,6 @@ namespace neo {
 			for (auto& arg : *mConstructionArgs) {
 				mShaderSources.emplace(arg.first, Loader::loadFileString(arg.second));
 			}
-		};
+		}
 	}
 }

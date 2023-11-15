@@ -10,11 +10,7 @@
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
-#include "ECS/Component/NewRenderingComponents/AlphaTestComponent.hpp"
-#include "ECS/Component/NewRenderingComponents/OpaqueComponent.hpp"
-#include "ECS/Component/RenderableComponent/AlphaTestRenderable.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
-#include "ECS/Component/RenderableComponent/PhongRenderable.hpp"
 #include "ECS/Component/RenderableComponent/MaterialComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
@@ -59,6 +55,7 @@ namespace Base {
             ecs.addComponent<TagComponent>(entity, "Light");
             ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 2.f, 20.f));
             ecs.addComponent<LightComponent>(entity, glm::vec3(1.f), glm::vec3(0.1, 0.05, 0.003f));
+            ecs.addComponent<PointLightComponent>(entity);
         }
 
         /* Bunny object */
@@ -105,7 +102,6 @@ namespace Base {
 
     void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-        const auto light = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
         auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
         auto sceneTarget = Library::createTransientFBO(viewport.mSize, {
@@ -124,8 +120,8 @@ namespace Base {
         sceneTarget->bind();
         sceneTarget->clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-        drawPhong<OpaqueComponent>(ecs, cameraEntity, light);
-        drawPhong<AlphaTestComponent>(ecs, cameraEntity, light);
+        drawPhong<OpaqueComponent>(ecs, cameraEntity);
+        drawPhong<AlphaTestComponent>(ecs, cameraEntity);
 
         drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
     }

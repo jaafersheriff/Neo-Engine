@@ -14,18 +14,20 @@
 #include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
 #include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
 
+#include "ECS/Component/LightComponent/LightComponent.hpp"
+#include "ECS/Component/LightComponent/DirectionalLightComponent.hpp"
+#include "ECS/Component/LightComponent/PointLightComponent.hpp"
+
 #include "Renderer/GLObjects/NewShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
 namespace neo {
 
-    using LightView = std::tuple<ECS::Entity, const LightComponent&, const SpatialComponent&>;
-
 	template<typename... CompTs>
-    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const LightView& lightView, const Texture* shadowMap = nullptr, const NewShader::ShaderDefines& inDefines = {}) {
+    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const NewShader::ShaderDefines& inDefines = {}) {
         TRACY_GPU();
-        const auto& [lightEntity, light, lightSpatial] = lightView;
         const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
+        auto&& [lightEntity, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
         NewShader::ShaderDefines parentDefines = inDefines;
         bool containsAlphaTest = false;
@@ -57,6 +59,18 @@ namespace neo {
                 0.5f, 0.5f, 0.5f, 1.0f);
             L = biasMatrix * shadowOrtho.getProj() * shadowCameraSpatial.getView();
         }
+        bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
+        bool pointLight = ecs.has<PointLightComponent>(lightEntity);
+        if (directionalLight) {
+            parentDefines.emplace("DIRECTIONAL_LIGHT");
+        }
+        else if (pointLight) {
+            parentDefines.emplace("POINT_LIGHT");
+        }
+        else {
+            NEO_FAIL("Phong light needs a directional or point light component");
+        }
+
 
         const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
         const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
@@ -101,14 +115,16 @@ namespace neo {
                 resolvedShader.bindUniform("V", cameraSpatial->getView());
                 resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
                 resolvedShader.bindUniform("lightCol", light.mColor);
-                resolvedShader.bindUniform("lightAtt", light.mAttenuation);
-                if (shadowsEnabled) {
+                if (directionalLight || shadowsEnabled) {
                     resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
+                }
+                if (pointLight) {
+                    resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
+                    resolvedShader.bindUniform("lightAtt", light.mAttenuation);
+                }
+                if (shadowsEnabled) {
                     resolvedShader.bindUniform("L", L);
                     resolvedShader.bindTexture("shadowMap", *shadowMap);
-                }
-                else {
-                    resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
                 }
             }
 
