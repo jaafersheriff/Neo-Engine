@@ -52,8 +52,12 @@ namespace neo {
                     tvIt = tvList.erase(tvIt);
                 }
                 else {
-                    tvIt->mUsedThisFrame = false;
-                    tvIt->mFrameCount--;
+                    if (tvIt->mUsedThisFrame) {
+                        tvIt->mUsedThisFrame = false;
+                    }
+                    else {
+                        tvIt->mFrameCount--;
+                    }
                     tvIt++;
                 }
             }
@@ -156,9 +160,12 @@ namespace neo {
             if (tv.mFBO->mColorAttachments) {
                 tv.mFBO->initDrawBuffers();
             }
+            tv.mFrameCount = 1;
         }
-        // Unused resources get removed after 2 frames
-        tv.mFrameCount = 2;
+
+        if (tv.mFrameCount < 5) {
+            tv.mFrameCount++;
+        }
 
         return tv.mFBO;
     }

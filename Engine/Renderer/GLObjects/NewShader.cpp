@@ -53,7 +53,6 @@ namespace neo {
 			it->second.init(mShaderSources, defines);
 
 			std::stringstream ss;
-#ifdef DEBUG_MODE
 			ss << "with {";
 			for (auto d = defines.begin(); d != defines.end(); d++) {
 				ss << d->c_str();
@@ -63,7 +62,6 @@ namespace neo {
 
 			}
 			ss << "}";
-#endif
 			if (it->second.mValid) {
 				NEO_LOG_I("Resolving a new shader for %s %s", mName.c_str(), ss.str().c_str());
 			}
