@@ -67,14 +67,14 @@ namespace Cornell {
             auto entity = ecs.createEntity();
             ecs.addComponent<TagComponent>(entity, "Light");
             ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f - util::EP * 4, 0.5f), glm::vec3(0.25f), glm::vec3(glm::radians(90.f), 0.f, 0.f));
-            ecs.addComponent<LightComponent>(entity, glm::vec3(1.f), glm::vec3(3.0, 1.0, 5.0f));
+            ecs.addComponent<LightComponent>(entity, glm::vec3(1.f));
             ecs.addComponent<MeshComponent>(entity, Library::getMesh("quad").mMesh);
             auto material = ecs.addComponent<MaterialComponent>(entity);
             material->mAmbient = glm::vec3(1.f);
             material->mDiffuse = glm::vec3(1.f);
             ecs.addComponent<PhongShaderComponent>(entity);
             ecs.addComponent<OpaqueComponent>(entity);
-            ecs.addComponent<PointLightComponent>(entity);
+            ecs.addComponent<PointLightComponent>(entity, glm::vec3(3.0, 1.0, 5.0f));
         }
 
         /* Bunny object */

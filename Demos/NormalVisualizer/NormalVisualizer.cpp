@@ -35,10 +35,10 @@ namespace NormalVisualizer {
 
     struct Light {
 
-        Light(ECS& ecs, glm::vec3 pos, glm::vec3 col, glm::vec3 att) {
+        Light(ECS& ecs, glm::vec3 pos, glm::vec3 col) {
             auto entity = ecs.createEntity();
             ecs.addComponent<SpatialComponent>(entity, pos);
-            ecs.addComponent<LightComponent>(entity, col, att);
+            ecs.addComponent<LightComponent>(entity, col);
             ecs.addComponent<DirectionalLightComponent>(entity);
         }
     };
@@ -55,7 +55,7 @@ namespace NormalVisualizer {
         /* Game objects */
         Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
 
-        Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f), glm::vec3(0.6, 0.2, 0.f));
+        Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f));
 
         {
             auto entity = ecs.createEntity();

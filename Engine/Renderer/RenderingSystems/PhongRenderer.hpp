@@ -61,16 +61,17 @@ namespace neo {
         }
         bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
         bool pointLight = ecs.has<PointLightComponent>(lightEntity);
+        glm::vec3 attenuation(0.f);
         if (directionalLight) {
             parentDefines.emplace("DIRECTIONAL_LIGHT");
         }
         else if (pointLight) {
+            attenuation = ecs.cGetComponent<PointLightComponent>(lightEntity)->mAttenuation;
             parentDefines.emplace("POINT_LIGHT");
         }
         else {
             NEO_FAIL("Phong light needs a directional or point light component");
         }
-
 
         const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
         const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
@@ -120,7 +121,7 @@ namespace neo {
                 }
                 if (pointLight) {
                     resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
-                    resolvedShader.bindUniform("lightAtt", light.mAttenuation);
+                    resolvedShader.bindUniform("lightAtt", attenuation);
                 }
                 if (shadowsEnabled) {
                     resolvedShader.bindUniform("L", L);

@@ -65,7 +65,7 @@ namespace Sponza {
             ecs.addComponent<TagComponent>(lightEntity, "Light");
             auto spat = ecs.addComponent<SpatialComponent>(lightEntity, glm::vec3(75.f, 200.f, 20.f));
             spat->setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
-            ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f), glm::vec3(0.9f, 0.7f, 0.f));
+            ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f));
             ecs.addComponent<DirectionalLightComponent>(lightEntity);
             ecs.addComponent<WireframeShaderComponent>(lightEntity);
             ecs.addComponent<MeshComponent>(lightEntity, Library::getMesh("cube").mMesh);
@@ -92,7 +92,7 @@ namespace Sponza {
             ecs.addComponent<ShadowCasterShaderComponent>(entity);
             ecs.addComponent<BoundingBoxComponent>(entity, asset.meshData);
             ecs.addComponent<PhongShaderComponent>(entity);
-            asset.material.mAmbient = glm::vec3(0.2f);
+            asset.material.mAmbient = glm::vec3(0.3f);
             auto material = ecs.addComponent<MaterialComponent>(entity, asset.material);
             if (material->mAlphaMap) {
                 ecs.addComponent<AlphaTestComponent>(entity);
