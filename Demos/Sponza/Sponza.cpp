@@ -66,6 +66,7 @@ namespace Sponza {
             auto spat = ecs.addComponent<SpatialComponent>(lightEntity, glm::vec3(75.f, 200.f, 20.f));
             spat->setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
             ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f), glm::vec3(0.9f, 0.7f, 0.f));
+            ecs.addComponent<DirectionalLightComponent>(lightEntity);
             ecs.addComponent<WireframeShaderComponent>(lightEntity);
             ecs.addComponent<MeshComponent>(lightEntity, Library::getMesh("cube").mMesh);
             auto line = ecs.addComponent<LineMeshComponent>(lightEntity, glm::vec3(1, 0, 0));
@@ -112,7 +113,6 @@ namespace Sponza {
 
     void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
         const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-        const auto lightView = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
         auto shadowMap = Library::createTransientFBO(glm::uvec2(4096, 4096), { TextureFormat{
             GL_DEPTH_COMPONENT,
@@ -126,8 +126,8 @@ namespace Sponza {
         backbuffer.bind();
         backbuffer.clear(glm::vec4(getConfig().clearColor, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight);
-        drawPhong<OpaqueComponent>(ecs, cameraEntity, lightView, shadowMap->mTextures[0]);
-        drawPhong<AlphaTestComponent>(ecs, cameraEntity, lightView, shadowMap->mTextures[0]);
+        drawPhong<OpaqueComponent>(ecs, cameraEntity, shadowMap->mTextures[0]);
+        drawPhong<AlphaTestComponent>(ecs, cameraEntity, shadowMap->mTextures[0]);
 
     }
 }

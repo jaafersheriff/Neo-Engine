@@ -184,8 +184,8 @@ namespace neo {
 		info.name = component->getName();
 		info.create = [this](entt::registry& r, Entity e) {
 			NEO_UNUSED(r, e);
-			// TODO - broken because of default constructor
 			// addComponent<CompT>(e);
+			NEO_LOG_W("Component creation unsupported");
 		};
 		info.destroy = [this](entt::registry& r, Entity e) {
 			NEO_UNUSED(r);

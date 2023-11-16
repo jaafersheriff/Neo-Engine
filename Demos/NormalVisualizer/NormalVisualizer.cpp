@@ -39,6 +39,7 @@ namespace NormalVisualizer {
             auto entity = ecs.createEntity();
             ecs.addComponent<SpatialComponent>(entity, pos);
             ecs.addComponent<LightComponent>(entity, col, att);
+            ecs.addComponent<DirectionalLightComponent>(entity);
         }
     };
 
@@ -74,33 +75,33 @@ namespace NormalVisualizer {
 
     void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-        const auto light = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
         backbuffer.bind();
         backbuffer.clear(glm::vec4(getConfig().clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        drawPhong<OpaqueComponent>(ecs, cameraEntity, light);
+        drawPhong<OpaqueComponent>(ecs, cameraEntity);
 
+        {
+            static auto normalShader = Library::createShaderSource("NormalVisualizer", NewShader::ConstructionArgs{
+                {ShaderStage::VERTEX, "normal.vert"},
+                {ShaderStage::GEOMETRY, "normal.geom"},
+                {ShaderStage::FRAGMENT, "normal.frag"}
+                })->getResolvedInstance({});
+                normalShader.bind();
 
-        auto normalShader = Library::createShaderSource("NormalVisualizer", NewShader::ConstructionArgs{
-            {ShaderStage::VERTEX, "normal.vert"},
-            {ShaderStage::GEOMETRY, "normal.geom"},
-            {ShaderStage::FRAGMENT, "normal.frag"}
-        })->getResolvedInstance({});
-        normalShader.bind();
+                normalShader.bindUniform("magnitude", mMagnitude);
 
-        normalShader.bindUniform("magnitude", mMagnitude);
+                /* Load PV */
+                normalShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+                normalShader.bindUniform("V", cameraSpatial.getView());
 
-        /* Load PV */
-        normalShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
-        normalShader.bindUniform("V", cameraSpatial.getView());
+                for (const auto&& [__, mesh, spatial] : ecs.getView<MeshComponent, SpatialComponent>().each()) {
+                    normalShader.bindUniform("M", spatial.getModelMatrix());
+                    normalShader.bindUniform("N", spatial.getNormalMatrix());
 
-        for (const auto&& [__, mesh, spatial] : ecs.getView<MeshComponent, SpatialComponent>().each()) {
-            normalShader.bindUniform("M", spatial.getModelMatrix());
-            normalShader.bindUniform("N", spatial.getNormalMatrix());
-
-            /* DRAW */
-            mesh.mMesh->draw();
+                    /* DRAW */
+                    mesh.mMesh->draw();
+                }
         }
     }
 

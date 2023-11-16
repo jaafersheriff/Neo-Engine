@@ -61,6 +61,7 @@ namespace DrawStress {
             ecs.addComponent<TagComponent>(entity, "Light");
             ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 2.f, 20.f));
             ecs.addComponent<LightComponent>(entity, glm::vec3(1.f), glm::vec3(0.1, 0.05, 0.003f));
+            ecs.addComponent<PointLightComponent>(entity);
         }
 
         /* Bunny object */
@@ -88,28 +89,14 @@ namespace DrawStress {
 
     void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-        const auto light = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
         auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-        auto sceneTarget = Library::createTransientFBO(viewport.mSize, {
-            TextureFormat{
-                GL_RGB8,
-                GL_RGB,
-            },
-            TextureFormat{
-                GL_R16,
-                GL_DEPTH_COMPONENT,
-            }
-        });
-
         glm::vec3 clearColor = getConfig().clearColor;
 
-        sceneTarget->bind();
-        sceneTarget->clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        backbuffer.bind();
+        backbuffer.clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-        drawPhong<OpaqueComponent>(ecs, cameraEntity, light);
-
-        drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
+        drawPhong<OpaqueComponent>(ecs, cameraEntity);
     }
 
     void Demo::destroy() {

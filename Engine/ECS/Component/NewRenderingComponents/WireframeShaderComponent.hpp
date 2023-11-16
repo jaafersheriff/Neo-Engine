@@ -5,6 +5,7 @@
 #include "Loader/Library.hpp"
 
 namespace neo {
+	// TODO - there's no wireframe rendering system
 	struct WireframeShaderComponent : public ShaderComponent {
         glm::vec3 mColor = glm::vec3(1.f);
 		WireframeShaderComponent() : ShaderComponent({
