@@ -82,7 +82,7 @@ namespace NormalVisualizer {
         drawPhong<OpaqueComponent>(ecs, cameraEntity);
 
         {
-            static auto normalShader = Library::createShaderSource("NormalVisualizer", NewShader::ConstructionArgs{
+            static auto normalShader = Library::createShaderSource("NormalVisualizer", SourceShader::ConstructionArgs{
                 {ShaderStage::VERTEX, "normal.vert"},
                 {ShaderStage::GEOMETRY, "normal.geom"},
                 {ShaderStage::FRAGMENT, "normal.frag"}

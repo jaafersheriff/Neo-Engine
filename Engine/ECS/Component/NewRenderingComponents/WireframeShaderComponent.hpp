@@ -9,7 +9,8 @@ namespace neo {
 	struct WireframeShaderComponent : public ShaderComponent {
         glm::vec3 mColor = glm::vec3(1.f);
 		WireframeShaderComponent() : ShaderComponent({
-			Library::createShaderSource("WireframeShader", NewShader::ShaderSources{
+			Library::createShaderSource("WireframeShader", SourceShader::ShaderCode{
+				// TODO - memory leak
 				{ ShaderStage::VERTEX, Loader::loadFileString("model.vert")},
 				{ ShaderStage::FRAGMENT, R"(
 					uniform vec3 wireColor;

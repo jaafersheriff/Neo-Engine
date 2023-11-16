@@ -2,7 +2,7 @@
 
 #include "ECS/ECS.hpp"
 
-#include "Renderer/GLObjects/NewShader.hpp"
+#include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
@@ -39,7 +39,7 @@ namespace neo {
                 }
             }
 
-            NewShader::ShaderDefines shaderDefines = {};
+            SourceShader::ShaderDefines shaderDefines = {};
             auto material = ecs.cGetComponent<const MaterialComponent>(entity);
             Texture* alphaMap = nullptr;
             if (containsAlphaTest && material && material->mAlphaMap) {

@@ -5,16 +5,13 @@
 
 #include "ECS/Component/RenderableComponent/MaterialComponent.hpp"
 
-#include "Renderer/GLObjects/Texture2D.hpp"
-#include "Renderer/GLObjects/TextureCubeMap.hpp"
-
-// Remove?
-#include "Renderer/GLObjects/Mesh.hpp"
-#include "Renderer/GLObjects/Material.hpp"
-
 namespace neo {
 
     class Engine;
+    class Mesh;
+    class Texture2D;
+    class TextureCubeMap;
+    struct TextureFormat;
 
    struct MeshData {
         Mesh* mMesh;

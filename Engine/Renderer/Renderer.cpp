@@ -1,7 +1,7 @@
 #include "Renderer/pch.hpp"
 #include "Renderer.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
-#include "Renderer/GLObjects/NewShader.hpp"
+#include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
@@ -9,8 +9,6 @@
 
 #include "Messaging/Message.hpp"
 #include "Messaging/Messenger.hpp"
-
-#include "Shader/LineShader.hpp"
 
 #include "Engine/Engine.hpp"
 #include "Engine/ImGuiManager.hpp"
@@ -62,7 +60,7 @@ namespace neo {
         mDefaultFBO->initDrawBuffers();
         mDefaultFBO->bind();
 
-        mBlitShader = new NewShader("Final Blit", NewShader::ShaderSources{
+        mBlitShader = new SourceShader("Final Blit", SourceShader::ShaderCode{
             { ShaderStage::VERTEX,
             R"(
                 layout (location = 0) in vec3 vertPos;

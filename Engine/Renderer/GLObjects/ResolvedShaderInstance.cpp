@@ -3,7 +3,7 @@
 #include "ResolvedShaderInstance.hpp"
 
 #include "Renderer/Renderer.hpp"
-#include "Renderer/GLObjects/NewShader.hpp"
+#include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 
 #include "Loader/Library.hpp"
@@ -14,7 +14,7 @@
 namespace neo {
     namespace {
 
-        static std::string _processShader(const char* shaderString, const NewShader::ShaderDefines& defines) {
+        static std::string _processShader(const char* shaderString, const SourceShader::ShaderDefines& defines) {
             if (!shaderString) {
                 return "";
             }
@@ -125,14 +125,14 @@ namespace neo {
         }
     }
 
-    bool ResolvedShaderInstance::init(const NewShader::ShaderSources& args, const NewShader::ShaderDefines& defines) {
+    bool ResolvedShaderInstance::init(const SourceShader::ShaderCode& shaderCode, const SourceShader::ShaderDefines& defines) {
         NEO_ASSERT(!mValid && mPid == 0, "TODO");
         mValid = false;
         mPid = glCreateProgram();
 
         std::vector<std::string> uniforms;
         std::map<std::string, GLint> bindings;
-        for (auto&& [stage, source] : args) {
+        for (auto&& [stage, source] : shaderCode) {
             if (!source) {
                 NEO_LOG_E("Trying to compile an empty shader source");
                 return mValid;

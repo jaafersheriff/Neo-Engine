@@ -13,9 +13,7 @@
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/NewRenderingComponents/AlphaTestComponent.hpp"
 #include "ECS/Component/NewRenderingComponents/OpaqueComponent.hpp"
-#include "ECS/Component/RenderableComponent/AlphaTestRenderable.hpp"
 #include "ECS/Component/RenderableComponent/MeshComponent.hpp"
-#include "ECS/Component/RenderableComponent/PhongRenderable.hpp"
 #include "ECS/Component/RenderableComponent/MaterialComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
@@ -26,8 +24,6 @@
 
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
-
-#include "Renderer/GLObjects/Material.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 

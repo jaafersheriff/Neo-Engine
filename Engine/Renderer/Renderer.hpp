@@ -14,7 +14,7 @@ namespace neo {
     class ECS;
     class WindowSurface;
     class PostProcessShader;
-    class NewShader;
+    class SourceShader;
     struct FrameSizeMessage;
 
     class Renderer {
@@ -61,7 +61,7 @@ namespace neo {
         private:
             Framebuffer* mBackBuffer;
 			Framebuffer* mDefaultFBO;
-            NewShader* mBlitShader = nullptr;
+            SourceShader* mBlitShader = nullptr;
 
             void _onFrameSizeChanged(const FrameSizeMessage& msg);
     };

@@ -1,6 +1,6 @@
 #include "Renderer/pch.hpp"
 
-#include "NewShader.hpp"
+#include "SourceShader.hpp"
 
 #include "Renderer/Renderer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
@@ -10,7 +10,7 @@
 #include <imgui.h>
 
 namespace neo {
-	NewShader::NewShader(const char* name, const ConstructionArgs& args) 
+	SourceShader::SourceShader(const char* name, const ConstructionArgs& args) 
 		: mName(name)
 		, mConstructionArgs(args) 
 	{
@@ -20,16 +20,16 @@ namespace neo {
 	}
 
 	// Don't put this in a hot loop
-	NewShader::NewShader(const char* name, const ShaderSources& sources)
+	SourceShader::SourceShader(const char* name, const ShaderCode& sources)
 		: mName(name)
 		, mShaderSources(sources) {
 	}
 
-	NewShader::~NewShader() {
+	SourceShader::~SourceShader() {
 		destroy();
 	}
 
-	void NewShader::destroy() {
+	void SourceShader::destroy() {
 		for (auto& instance : mResolvedShaders) {
 			instance.second.destroy();
 		}
@@ -43,7 +43,7 @@ namespace neo {
 		mShaderSources.clear();
 	}
 
-	const ResolvedShaderInstance& NewShader::getResolvedInstance(const ShaderDefines& defines) {
+	const ResolvedShaderInstance& SourceShader::getResolvedInstance(const ShaderDefines& defines) {
 		TRACY_ZONE();
 		HashedShaderDefines hash = _getDefinesHash(defines);
 		auto it = mResolvedShaders.find(hash);
@@ -77,7 +77,7 @@ namespace neo {
 		return Library::getDummyShader();
 	}
 
-	NewShader::HashedShaderDefines NewShader::_getDefinesHash(const NewShader::ShaderDefines& defines) {
+	SourceShader::HashedShaderDefines SourceShader::_getDefinesHash(const SourceShader::ShaderDefines& defines) {
 		HashedShaderDefines seed = static_cast<HashedShaderDefines>(defines.size());
 		for (auto& i : defines) {
 			seed ^= HashedString(i.c_str()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -85,7 +85,7 @@ namespace neo {
 		return seed;
 	}
 
-	void NewShader::imguiEditor() {
+	void SourceShader::imguiEditor() {
 		ImGui::Text("Variants: %d", mResolvedShaders.size());
 		if (mConstructionArgs && ImGui::Button("Reload")) {
 			destroy();

@@ -9,20 +9,20 @@
 namespace neo {
     class ResolvedShaderInstance;
 
-	class NewShader {
+	class SourceShader {
     public:
         using ConstructionArgs = std::unordered_map<ShaderStage, std::string>;
-        using ShaderSources = std::unordered_map<ShaderStage, const char*>;
+        using ShaderCode = std::unordered_map<ShaderStage, const char*>;
         using ShaderDefines = std::unordered_set<std::string>;
         using HashedShaderDefines = HashedString::value_type;
 
-        NewShader(const char* name, const ConstructionArgs& args);
-        NewShader(const char* name, const ShaderSources& args);
-        ~NewShader();
-		NewShader(const NewShader &) = delete;
-        NewShader & operator=(const NewShader &) = delete;
-        NewShader(NewShader &&) = delete;
-        NewShader & operator=(NewShader &&) = delete;
+        SourceShader(const char* name, const ConstructionArgs& args);
+        SourceShader(const char* name, const ShaderCode& args);
+        ~SourceShader();
+		SourceShader(const SourceShader &) = delete;
+        SourceShader & operator=(const SourceShader &) = delete;
+        SourceShader(SourceShader &&) = delete;
+        SourceShader & operator=(SourceShader &&) = delete;
 
         const ResolvedShaderInstance& getResolvedInstance(const ShaderDefines& defines);
         void imguiEditor();
@@ -30,7 +30,7 @@ namespace neo {
     private:
         std::string mName;
         std::optional<ConstructionArgs> mConstructionArgs;
-        ShaderSources mShaderSources;
+        ShaderCode mShaderSources;
         std::unordered_map<HashedShaderDefines, ResolvedShaderInstance> mResolvedShaders;
 
         HashedShaderDefines _getDefinesHash(const ShaderDefines& defines);

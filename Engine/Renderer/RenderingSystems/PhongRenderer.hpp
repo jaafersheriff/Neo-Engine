@@ -18,18 +18,18 @@
 #include "ECS/Component/LightComponent/DirectionalLightComponent.hpp"
 #include "ECS/Component/LightComponent/PointLightComponent.hpp"
 
-#include "Renderer/GLObjects/NewShader.hpp"
+#include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
 namespace neo {
 
 	template<typename... CompTs>
-    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const NewShader::ShaderDefines& inDefines = {}) {
+    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const SourceShader::ShaderDefines& inDefines = {}) {
         TRACY_GPU();
         const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
         auto&& [lightEntity, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
-        NewShader::ShaderDefines parentDefines = inDefines;
+        SourceShader::ShaderDefines parentDefines = inDefines;
         bool containsAlphaTest = false;
         if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
             containsAlphaTest = true;
@@ -87,7 +87,7 @@ namespace neo {
                 NEO_ASSERT(!ecs.has<OpaqueComponent>(entity), "Entity has opaque and alpha test component?");
             }
 
-            NewShader::ShaderDefines drawDefines = parentDefines;
+            SourceShader::ShaderDefines drawDefines = parentDefines;
             const auto& material = view.get<const MaterialComponent>(entity);
             if (material.mDiffuseMap) {
                 drawDefines.emplace("DIFFUSE_MAP");

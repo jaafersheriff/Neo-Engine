@@ -2,7 +2,7 @@
 
 #include "Renderer/GLObjects/Mesh.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
-#include "Renderer/GLObjects/NewShader.hpp"
+#include "Renderer/GLObjects/SourceShader.hpp"
 
 #include "Loader.hpp"
 
@@ -13,7 +13,7 @@ namespace neo {
 
     class Engine;
     class Framebuffer;
-    class NewShader;
+    class SourceShader;
 
     class Library {
 
@@ -44,9 +44,9 @@ namespace neo {
             static Framebuffer* createTransientFBO(glm::uvec2 size, const std::vector<TextureFormat>& formats);
             static Framebuffer* getFBO(const std::string&);
 
-			static NewShader* createShaderSource(const std::string& name, const NewShader::ConstructionArgs& args);
-			static NewShader* createShaderSource(const std::string& name, const NewShader::ShaderSources& args);
-            static NewShader* getShaderSource(const char* name);
+			static SourceShader* createShaderSource(const std::string& name, const SourceShader::ConstructionArgs& args);
+			static SourceShader* createShaderSource(const std::string& name, const SourceShader::ShaderCode& shaderCode);
+            static SourceShader* getShaderSource(const char* name);
             static const ResolvedShaderInstance& getDummyShader();
 
             static void imGuiEditor();
@@ -61,8 +61,8 @@ namespace neo {
                 bool mUsedThisFrame = false;
             };
             static std::unordered_map<uint32_t, std::vector<TransientValue>> mTransientFramebuffers;
-            static std::unordered_map<std::string, NewShader*> mShaders;
-            static NewShader* mDummyShader;
+            static std::unordered_map<std::string, SourceShader*> mShaders;
+            static SourceShader* mDummyShader;
 
             static void _insertMesh(const std::string&, MeshData);
             static void _insertTexture(const std::string&, Texture*);

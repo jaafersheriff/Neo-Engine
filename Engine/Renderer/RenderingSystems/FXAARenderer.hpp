@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/GLObjects/NewShader.hpp"
+#include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
 #include "Loader/Library.hpp"
@@ -13,12 +13,11 @@ namespace neo {
         TRACY_GPUN("drawFXAA");
 
         // Where are these const chars in memory..are they being created and passed on each call?
-        auto fxaaShader = Library::createShaderSource("FXAAShader", NewShader::ConstructionArgs{
+        static auto fxaaShader = Library::createShaderSource("FXAAShader", SourceShader::ConstructionArgs{
             { ShaderStage::VERTEX, "quad.vert"},
             { ShaderStage::FRAGMENT, "fxaa.frag" }
-            });
+        });
 
-        outputFBO.bind();
         glViewport(0, 0, outputFBO.mTextures[0]->mWidth, outputFBO.mTextures[0]->mHeight);
 
         auto resolvedShader = fxaaShader->getResolvedInstance({});

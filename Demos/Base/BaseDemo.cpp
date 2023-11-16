@@ -22,8 +22,6 @@
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 
-#include "Renderer/GLObjects/Material.hpp"
-
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -112,7 +110,7 @@ namespace Base {
                 GL_RGB,
             },
             TextureFormat{
-                GL_R16,
+                GL_DEPTH_COMPONENT,
                 GL_DEPTH_COMPONENT,
             }
         });
@@ -125,6 +123,8 @@ namespace Base {
         drawPhong<OpaqueComponent>(ecs, cameraEntity);
         drawPhong<AlphaTestComponent>(ecs, cameraEntity);
 
+        backbuffer.bind();
+        backbuffer.clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT);
         drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
     }
 

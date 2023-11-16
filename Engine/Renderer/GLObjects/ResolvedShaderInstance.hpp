@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/GLObjects/NewShader.hpp"
+#include "Renderer/GLObjects/SourceShader.hpp"
 
 #include <glm/glm.hpp>
 #include <gl/glew.h>
@@ -11,17 +11,17 @@
 
 namespace neo {
     class Texture;
-    class NewShader;
+    class SourceShader;
 
 
     class ResolvedShaderInstance {
-        friend NewShader;
+        friend SourceShader;
     public:
 
         ResolvedShaderInstance() = default;
         ~ResolvedShaderInstance() = default;
 
-        bool init(const NewShader::ShaderSources& args, const NewShader::ShaderDefines& defines);
+        bool init(const SourceShader::ShaderCode& args, const SourceShader::ShaderDefines& defines);
         void destroy();
 
         void bind() const;

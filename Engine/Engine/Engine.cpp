@@ -9,9 +9,6 @@ extern "C" {
 #include "Engine.hpp"
 
 #include "Renderer/Renderer.hpp"
-#include "Renderer/Shader/OutlineShader.hpp"
-#include "Renderer/Shader/WireframeShader.hpp"
-#include "Renderer/Shader/LineShader.hpp"
 
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/EngineComponents/SingleFrameComponent.hpp"
@@ -237,10 +234,6 @@ namespace neo {
         ServiceLocator<Renderer>::ref().init();
         Loader::init(config.resDir, config.shaderDir);
         _createPrefabs();
-
-        /* Add engine-specific systems */
-        // auto& lineShader = ServiceLocator<Renderer>::ref().addSceneShader<LineShader>();
-        // lineShader.mActive = false;
 
         demos.getCurrentDemo()->init(mECS);
 

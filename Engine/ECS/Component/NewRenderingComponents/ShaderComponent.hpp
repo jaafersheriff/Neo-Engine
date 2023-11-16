@@ -3,7 +3,7 @@
 #include "ECS/Component/Component.hpp"
 
 #include "Renderer/GLObjects/Texture.hpp"
-#include "Renderer/GLObjects/NewShader.hpp"
+#include "Renderer/GLObjects/SourceShader.hpp"
 
 #include <glm/glm.hpp>
 
@@ -13,15 +13,15 @@ namespace neo {
 
     struct ShaderComponent : public Component {
     public:
-        ShaderComponent(NewShader* shader) : mShaderSource(shader) {}
+        ShaderComponent(SourceShader* shader) : mSourceShader(shader) {}
 
-        const ResolvedShaderInstance& getResolvedInstance(const NewShader::ShaderDefines& defines) const {
-            return mShaderSource->getResolvedInstance(defines);
+        const ResolvedShaderInstance& getResolvedInstance(const SourceShader::ShaderDefines& defines) const {
+            return mSourceShader->getResolvedInstance(defines);
         }
 
         virtual std::string getName() const = 0;
 
     protected:
-        NewShader* mShaderSource;
+        SourceShader* mSourceShader;
     };
 }
