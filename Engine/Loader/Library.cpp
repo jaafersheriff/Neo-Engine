@@ -219,7 +219,7 @@ namespace neo {
         return nullptr;
     }
 
-    SourceShader* Library::createShaderSource(const std::string& name, const SourceShader::ConstructionArgs& args) {
+    SourceShader* Library::createSourceShader(const std::string& name, const SourceShader::ConstructionArgs& args) {
         auto it = mShaders.find(name);
         if (it != mShaders.end()) {
             return it->second;
@@ -231,7 +231,7 @@ namespace neo {
         return source;
     }
 
-    SourceShader* Library::createShaderSource(const std::string& name, const SourceShader::ShaderCode& shaderCode) {
+    SourceShader* Library::createSourceShader(const std::string& name, const SourceShader::ShaderCode& shaderCode) {
         TRACY_ZONE();
         auto it = mShaders.find(name);
         if (it != mShaders.end()) {
@@ -245,7 +245,7 @@ namespace neo {
     }
 
 
-    SourceShader* Library::getShaderSource(const char* name) {
+    SourceShader* Library::getSourceShader(const char* name) {
         auto it = mShaders.find(name);
         NEO_ASSERT(it != mShaders.end(), "Shader %s doesn't exist!", name);
 

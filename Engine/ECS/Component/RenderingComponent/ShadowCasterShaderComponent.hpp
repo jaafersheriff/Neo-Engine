@@ -8,7 +8,7 @@ namespace neo {
 
     struct ShadowCasterShaderComponent : public ShaderComponent {
 		ShadowCasterShaderComponent() : ShaderComponent({
-			Library::createShaderSource("ShadowCasterShader", SourceShader::ConstructionArgs{
+			Library::createSourceShader("ShadowCasterShader", SourceShader::ConstructionArgs{
 				{ ShaderStage::VERTEX, "model.vert"},
 				{ ShaderStage::FRAGMENT, "depth.frag" }
 			})

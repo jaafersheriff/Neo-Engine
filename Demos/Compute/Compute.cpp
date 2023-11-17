@@ -63,7 +63,7 @@ namespace Compute {
         if (auto meshView = ecs.cGetComponent<ParticleMeshComponent>()) {
             TRACY_GPUN("Update Particles");
             auto&& [_, mesh] = *meshView;
-            auto& particlesCompute = Library::createShaderSource("ParticlesCompute", SourceShader::ConstructionArgs{
+            auto& particlesCompute = Library::createSourceShader("ParticlesCompute", SourceShader::ConstructionArgs{
                 { ShaderStage::COMPUTE, "compute/particles.compute" }
             })->getResolvedInstance({});
 
@@ -93,7 +93,7 @@ namespace Compute {
         // Draw the mesh
         {
             TRACY_GPUN("Draw Particles");
-            auto& particlesVis = Library::createShaderSource("ParticleVis", SourceShader::ConstructionArgs{
+            auto& particlesVis = Library::createSourceShader("ParticleVis", SourceShader::ConstructionArgs{
                 { ShaderStage::VERTEX,   "compute/particles.vert" },
                 { ShaderStage::GEOMETRY, "compute/particles.geom" },
                 { ShaderStage::FRAGMENT, "compute/particles.frag" },

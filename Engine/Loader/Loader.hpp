@@ -3,7 +3,7 @@
 
 #include "GL/glew.h"
 
-#include "ECS/Component/RenderableComponent/MaterialComponent.hpp"
+#include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 
 namespace neo {
 

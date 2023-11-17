@@ -44,9 +44,9 @@ namespace neo {
             static Framebuffer* createTransientFBO(glm::uvec2 size, const std::vector<TextureFormat>& formats);
             static Framebuffer* getFBO(const std::string&);
 
-			static SourceShader* createShaderSource(const std::string& name, const SourceShader::ConstructionArgs& args);
-			static SourceShader* createShaderSource(const std::string& name, const SourceShader::ShaderCode& shaderCode);
-            static SourceShader* getShaderSource(const char* name);
+			static SourceShader* createSourceShader(const std::string& name, const SourceShader::ConstructionArgs& args);
+			static SourceShader* createSourceShader(const std::string& name, const SourceShader::ShaderCode& shaderCode);
+            static SourceShader* getSourceShader(const char* name);
             static const ResolvedShaderInstance& getDummyShader();
 
             static void imGuiEditor();

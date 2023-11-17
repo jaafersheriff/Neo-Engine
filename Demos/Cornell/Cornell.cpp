@@ -9,11 +9,11 @@
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
-#include "ECS/Component/RenderableComponent/MeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 
-#include "ECS/Component/NewRenderingComponents/PhongShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/PhongShaderComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 
@@ -111,8 +111,8 @@ namespace Cornell {
         glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
         drawPhong<OpaqueComponent>(ecs, cameraEntity);
 
+        backbuffer.clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
-
     }
 
     void Demo::update(ECS& ecs) {

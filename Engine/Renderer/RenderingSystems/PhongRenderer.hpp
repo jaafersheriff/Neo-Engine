@@ -3,14 +3,14 @@
 #include "ECS/ECS.hpp"
 #include "Util/Profiler.hpp"
 
-#include "ECS/Component/NewRenderingComponents/PhongShaderComponent.hpp"
-#include "ECS/Component/NewRenderingComponents/OpaqueComponent.hpp"
-#include "ECS/Component/NewRenderingComponents/AlphaTestComponent.hpp"
+#include "ECS/Component/RenderingComponent/PhongShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
+#include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
 
 #include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
-#include "ECS/Component/RenderableComponent/MaterialComponent.hpp"
+#include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 #include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
 #include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
 

@@ -11,19 +11,18 @@
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
-#include "ECS/Component/NewRenderingComponents/AlphaTestComponent.hpp"
-#include "ECS/Component/NewRenderingComponents/OpaqueComponent.hpp"
-#include "ECS/Component/RenderableComponent/MeshComponent.hpp"
-#include "ECS/Component/RenderableComponent/MaterialComponent.hpp"
+#include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
+#include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
+#include "ECS/Component/RenderingComponent/MeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
-#include "ECS/Component/NewRenderingComponents/PhongShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/PhongShaderComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
-#include "Renderer/RenderingSystems/FXAARenderer.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 

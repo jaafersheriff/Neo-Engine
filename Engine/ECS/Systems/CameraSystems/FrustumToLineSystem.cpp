@@ -4,7 +4,7 @@
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
-#include "ECS/Component/RenderableComponent/LineMeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
 namespace neo {
 

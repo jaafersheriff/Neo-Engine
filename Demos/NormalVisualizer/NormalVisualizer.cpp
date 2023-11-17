@@ -8,13 +8,14 @@
 #include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
-#include "ECS/Component/RenderableComponent/MeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
+#include "Renderer/RenderingSystems/WireframeRenderer.hpp"
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -64,6 +65,7 @@ namespace NormalVisualizer {
             ecs.addComponent<MeshComponent>(entity, Library::loadMesh("bunny.obj").mMesh);
             ecs.addComponent<MaterialComponent>(entity);
             ecs.addComponent<PhongShaderComponent>(entity);
+            ecs.addComponent<WireframeShaderComponent>(entity);
             ecs.addComponent<OpaqueComponent>(entity);
             ecs.addComponent<TagComponent>(entity, "bunny");
         }
@@ -80,9 +82,10 @@ namespace NormalVisualizer {
         backbuffer.clear(glm::vec4(getConfig().clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         drawPhong<OpaqueComponent>(ecs, cameraEntity);
+        drawWireframe(ecs, cameraEntity);
 
         {
-            static auto normalShader = Library::createShaderSource("NormalVisualizer", SourceShader::ConstructionArgs{
+            static auto normalShader = Library::createSourceShader("NormalVisualizer", SourceShader::ConstructionArgs{
                 {ShaderStage::VERTEX, "normal.vert"},
                 {ShaderStage::GEOMETRY, "normal.geom"},
                 {ShaderStage::FRAGMENT, "normal.frag"}

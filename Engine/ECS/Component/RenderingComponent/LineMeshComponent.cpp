@@ -1,5 +1,5 @@
 #include "ECS/pch.hpp"
-#include "ECS/Component/RenderableComponent/LineMeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
 #include "Renderer/GLObjects/Mesh.hpp"
 

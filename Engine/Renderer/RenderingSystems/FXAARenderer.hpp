@@ -13,7 +13,7 @@ namespace neo {
         TRACY_GPUN("drawFXAA");
 
         // Where are these const chars in memory..are they being created and passed on each call?
-        static auto fxaaShader = Library::createShaderSource("FXAAShader", SourceShader::ConstructionArgs{
+        auto fxaaShader = Library::createSourceShader("FXAAShader", SourceShader::ConstructionArgs{
             { ShaderStage::VERTEX, "quad.vert"},
             { ShaderStage::FRAGMENT, "fxaa.frag" }
         });
