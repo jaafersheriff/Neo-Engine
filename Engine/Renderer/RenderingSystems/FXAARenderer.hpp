@@ -25,8 +25,11 @@ namespace neo {
         resolvedShader.bindUniform("frameSize", glm::vec2(inputTexture.mWidth, inputTexture.mHeight));
         resolvedShader.bindTexture("inputTexture", inputTexture);
 
+        bool oldDepthState = glIsEnabled(GL_DEPTH_TEST);
         glDisable(GL_DEPTH_TEST);
         Library::getMesh("quad").mMesh->draw();
-        glEnable(GL_DEPTH_TEST);
+        if (oldDepthState) {
+            glEnable(GL_DEPTH_TEST);
+        }
     }
 }

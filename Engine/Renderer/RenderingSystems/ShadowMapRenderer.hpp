@@ -20,8 +20,8 @@ namespace neo {
 
         bool containsAlphaTest = false;
         if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
+				// TODO - set GL state?
             containsAlphaTest = true;
-            glEnable(GL_BLEND);
         }
 
         auto shadowCameraView = ecs.getSingleView<ShadowCameraComponent, SpatialComponent>();
@@ -63,7 +63,7 @@ namespace neo {
         }
 
         if (containsAlphaTest) {
-            glDisable(GL_BLEND);
+            // glDisable(GL_BLEND);
         }
 	}
 }
