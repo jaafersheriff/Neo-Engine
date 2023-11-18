@@ -10,7 +10,6 @@
 #include <Fonts.hpp>
 #endif
 
-
 void* operator new(std::size_t count) {
     auto ptr = malloc(count);
     TracyAlloc(ptr, count);
@@ -22,8 +21,10 @@ void operator delete(void* ptr) noexcept {
 }
 
 #ifndef NO_LOCAL_TRACY
+void* zigzagTex;
 namespace {
-    void RunOnMainThread( std::function<void()> cb, bool forceDelay = false )
+    
+    void RunOnMainThread( const std::function<void()>& cb, bool forceDelay = false )
     {
         cb();
     }
@@ -42,7 +43,12 @@ namespace neo {
             NEO_UNUSED(refreshRate);
 #else
             LoadFonts(scale, s_fixedWidth, s_smallFont, s_bigFont);
-            mTracyServer = std::make_unique<tracy::View>( RunOnMainThread, "127.0.0.1", 8086, s_fixedWidth, s_smallFont, s_bigFont, nullptr, nullptr, AttentionCallback);
+            zigzagTex = (void*)(intptr_t)0;
+
+            tracy::Config config;
+            config.threadedRendering = true;
+            config.targetFps = refreshRate;
+            mTracyServer = std::make_unique<tracy::View>( RunOnMainThread, "127.0.0.1", 8086, s_fixedWidth, s_smallFont, s_bigFont, nullptr, nullptr, AttentionCallback, config);
             mTracyServer->GetViewData().frameTarget = refreshRate;
             mTracyServer->GetViewData().drawFrameTargets = true;
             mTracyServer->GetViewData().drawCpuUsageGraph = false;

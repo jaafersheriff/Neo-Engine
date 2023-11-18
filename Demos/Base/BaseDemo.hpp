@@ -12,5 +12,7 @@ namespace Base {
 		virtual void init(ECS& ecs, Renderer& renderer) override;
 		virtual void update(ECS& ecs) override;
 		virtual void destroy() override;
+		virtual void imGuiEditor(ECS& ecs) override;
+
 	};
 }

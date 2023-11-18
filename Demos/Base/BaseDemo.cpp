@@ -83,6 +83,10 @@ namespace Base {
         renderer.addPostProcessShader<FXAAShader>();
     }
 
+    void Demo::imGuiEditor(ECS& ecs) {
+        NEO_UNUSED(ecs);
+    }
+
     void Demo::update(ECS& ecs) {
         NEO_UNUSED(ecs);
     }
