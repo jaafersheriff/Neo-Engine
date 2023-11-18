@@ -128,7 +128,9 @@ namespace neo {
 
             /* Update display, mouse, keyboard */
             mWindow.updateHardware();
-            ServiceLocator<ImGuiManager>::ref().update();
+            if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+                ServiceLocator<ImGuiManager>::ref().update();
+            }
             Messenger::relayMessages(mECS);
 
             {
@@ -155,43 +157,41 @@ namespace neo {
             mECS.flush();
             Messenger::relayMessages(mECS);
 
-            if (!mWindow.isMinimized()) {
-                /* Update each system */
-                mECS._updateSystems();
-                Messenger::relayMessages(mECS);
+            /* Update each system */
+            mECS._updateSystems();
+            Messenger::relayMessages(mECS);
 
-                /* Update imgui functions */
-                if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                    TRACY_ZONEN("ImGui");
-                    ServiceLocator<ImGuiManager>::ref().begin();
+            /* Update imgui functions */
+            if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+                TRACY_ZONEN("ImGui");
+                ServiceLocator<ImGuiManager>::ref().begin();
 
-                    {
-                        TRACY_ZONEN("Demos Imgui");
-                        demos.imGuiEditor(mECS);
-                    }
-                    {
-                        TRACY_ZONEN("ECS Imgui");
-                        mECS.imguiEdtor();
-                    }
-                    {
-                        TRACY_ZONEN("Library ImGui");
-                        Library::imGuiEditor();
-                    }
-                    {
-                        TRACY_ZONEN("ImGuiManager ImGui");
-                        ServiceLocator<ImGuiManager>::ref().imGuiEditor();
-                    }
-                    {
-                        TRACY_ZONEN("Profiler Imgui");
-                        profiler.imGuiEditor();
-                    }
-                    {
-                        TRACY_ZONEN("Renderer Imgui");
-                        ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
-                    }
-
-                    ServiceLocator<ImGuiManager>::ref().end();
+                {
+                    TRACY_ZONEN("Demos Imgui");
+                    demos.imGuiEditor(mECS);
                 }
+                {
+                    TRACY_ZONEN("ECS Imgui");
+                    mECS.imguiEdtor();
+                }
+                {
+                    TRACY_ZONEN("Library ImGui");
+                    Library::imGuiEditor();
+                }
+                {
+                    TRACY_ZONEN("ImGuiManager ImGui");
+                    ServiceLocator<ImGuiManager>::ref().imGuiEditor();
+                }
+                {
+                    TRACY_ZONEN("Profiler Imgui");
+                    profiler.imGuiEditor();
+                }
+                {
+                    TRACY_ZONEN("Renderer Imgui");
+                    ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
+                }
+
+                ServiceLocator<ImGuiManager>::ref().end();
                 Messenger::relayMessages(mECS);
             }
 

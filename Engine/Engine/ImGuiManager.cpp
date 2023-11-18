@@ -95,9 +95,7 @@ namespace neo {
     }
 
     void ImGuiManager::update() {
-        if (!mIsEnabled) {
-            return;
-        }
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
         TRACY_ZONE();
 
         ImGui_ImplOpenGL3_NewFrame();
@@ -202,9 +200,7 @@ namespace neo {
     }
 
     void ImGuiManager::render() {
-        if (!mIsEnabled) {
-            return;
-        }
+        NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
         {
             TRACY_GPUN("ImGui::render");
