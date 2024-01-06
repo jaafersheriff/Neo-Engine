@@ -32,7 +32,7 @@ namespace neo {
             resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
             resolvedShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
             resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
-            resolvedShader.bindUniform("wireColor", view.get<const WireframeShaderComponent>(entity).mColor);
+            resolvedShader.bindUniform("color", view.get<const WireframeShaderComponent>(entity).mColor);
 
             view.get<const MeshComponent>(entity).mMesh->draw();
         }

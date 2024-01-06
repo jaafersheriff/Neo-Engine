@@ -46,6 +46,9 @@ namespace neo {
             static WindowSurface mWindow;
             static Keyboard mKeyboard;
             static Mouse mMouse;
+
+            /* Debug */
+            bool mShowBoundingBoxes = false;
     };
 
 }

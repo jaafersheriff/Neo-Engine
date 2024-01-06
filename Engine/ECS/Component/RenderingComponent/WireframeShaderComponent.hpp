@@ -14,7 +14,7 @@ namespace neo {
 			: ShaderComponent({
 				Library::createSourceShader("WireframeShader", SourceShader::ConstructionArgs{
 					{ ShaderStage::VERTEX, "model.vert"},
-					{ ShaderStage::FRAGMENT, "wireframe.frag" }
+					{ ShaderStage::FRAGMENT, "color.frag" }
 				})
 			})
 			, mColor(color)

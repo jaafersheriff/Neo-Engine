@@ -3,9 +3,13 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "Renderer/RenderingSystems/LineRenderer.hpp"
 
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
+#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 
 #include "Messaging/Message.hpp"
 #include "Messaging/Messenger.hpp"
@@ -13,8 +17,6 @@
 #include "Engine/Engine.hpp"
 #include "Engine/ImGuiManager.hpp"
 #include "Hardware/WindowSurface.hpp"
-
-#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 
 #include <GLFW/glfw3.h>
 #include <imgui_impl_opengl3.h>
@@ -146,6 +148,12 @@ namespace neo {
             demo->render(ecs, *mDefaultFBO);
             resetState();
         }
+
+        if (mShowBoundingBoxes) {
+            TRACY_GPUN("Debug Draws");
+            mDefaultFBO->bind();
+            drawLines(ecs, std::get<0>(*ecs.getComponent<MainCameraComponent>()));
+        }
         
         /* Render imgui */
         if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
@@ -214,6 +222,54 @@ namespace neo {
 
         if (ImGui::Button("VSync")) {
             window.toggleVSync();
+        }
+
+        if (ImGui::Button("Show BoundingBoxes")) {
+            mShowBoundingBoxes = !mShowBoundingBoxes;
+            if (mShowBoundingBoxes) {
+                for (auto boxEntity : ecs.getView<BoundingBoxComponent>()) {
+                    auto box = ecs.getComponent<BoundingBoxComponent>(boxEntity);
+                    auto line = ecs.getComponent<LineMeshComponent>(boxEntity);
+                    if (!line) {
+                        line = ecs.addComponent<LineMeshComponent>(boxEntity);
+
+                        line->mUseParentSpatial = true;
+                        line->mWriteDepth = true;
+                        line->mOverrideColor = util::genRandomVec3(0.3f, 1.f);
+
+                        glm::vec3 NearLeftBottom{ box->mMin };
+                        glm::vec3 NearLeftTop{ box->mMin.x, box->mMax.y, box->mMin.z };
+                        glm::vec3 NearRightBottom{ box->mMax.x, box->mMin.y, box->mMin.z };
+                        glm::vec3 NearRightTop{ box->mMax.x, box->mMax.y, box->mMin.z };
+                        glm::vec3 FarLeftBottom{ box->mMin.x, box->mMin.y,  box->mMax.z };
+                        glm::vec3 FarLeftTop{ box->mMin.x, box->mMax.y,     box->mMax.z };
+                        glm::vec3 FarRightBottom{ box->mMax.x, box->mMin.y, box->mMax.z };
+                        glm::vec3 FarRightTop{ box->mMax };
+
+                        line->addNode(NearLeftBottom);
+                        line->addNode(NearLeftTop);
+                        line->addNode(NearRightTop);
+                        line->addNode(NearRightBottom);
+                        line->addNode(NearLeftBottom);
+                        line->addNode(FarLeftBottom);
+                        line->addNode(FarLeftTop);
+                        line->addNode(NearLeftTop);
+                        line->addNode(FarLeftTop);
+                        line->addNode(FarRightTop);
+                        line->addNode(NearRightTop);
+                        line->addNode(FarRightTop);
+                        line->addNode(FarRightBottom);
+                        line->addNode(NearRightBottom);
+                        line->addNode(FarRightBottom);
+                        line->addNode(FarLeftBottom);
+                    }
+                }
+            }
+            else {
+                for (auto tuple : ecs.getView<BoundingBoxComponent, LineMeshComponent>()) {
+                    ecs.removeComponent<LineMeshComponent>(tuple);
+                }
+            }
         }
 
         ImGui::End();

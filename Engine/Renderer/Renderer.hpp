@@ -61,6 +61,8 @@ namespace neo {
 			Framebuffer* mDefaultFBO;
             SourceShader* mBlitShader = nullptr;
 
+            bool mShowBoundingBoxes = false;
+
             void _onFrameSizeChanged(const FrameSizeMessage& msg);
     };
 
