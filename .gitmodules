@@ -19,3 +19,6 @@
 [submodule "Engine/ext/capstone"]
 	path = Engine/ext/capstone
 	url = https://github.com/capstone-engine/capstone.git
+[submodule "Engine/ext/tracy"]
+	path = Engine/ext/tracy
+	url = https://github.com/jaafersheriff/tracy
