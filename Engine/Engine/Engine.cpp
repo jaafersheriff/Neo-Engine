@@ -183,12 +183,12 @@ namespace neo {
                     ServiceLocator<ImGuiManager>::ref().imGuiEditor();
                 }
                 {
-                    TRACY_ZONEN("Profiler Imgui");
-                    profiler.imGuiEditor();
-                }
-                {
                     TRACY_ZONEN("Renderer Imgui");
                     ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
+                }
+                {
+                    TRACY_ZONEN("Profiler Imgui");
+                    profiler.imGuiEditor();
                 }
 
                 ServiceLocator<ImGuiManager>::ref().end();
