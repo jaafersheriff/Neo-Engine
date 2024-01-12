@@ -70,14 +70,6 @@ namespace neo {
         ServiceLocator<ImGuiManager>::set();
         ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow(), mWindow.getDetails().mDPIScale);
 
-#if MICROPROFILE_ENABLED
-        NEO_LOG_I("Microprofile enabled");
-        MicroProfileOnThreadCreate("MAIN THREAD");
-        MicroProfileGpuInitGL();
-        MicroProfileSetEnableAllGroups(true);
-        MicroProfileSetForceMetaCounters(1);
-#endif
-
         ServiceLocator<Renderer>::ref().init();
         {
             auto& details = ServiceLocator<Renderer>::ref().mDetails;

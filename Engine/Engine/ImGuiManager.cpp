@@ -21,14 +21,14 @@
 
 namespace neo {
 
-    void ImGuiManager::init(GLFWwindow* window, float scale) {
+    void ImGuiManager::init(GLFWwindow* window, [[maybe_unused]] float scale) {
         /* Init ImGui */
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-        io.FontGlobalScale = scale;
+        io.FontGlobalScale = 1.f;
         ImGui_ImplGlfw_InitForOpenGL(window, false);
         ImGui_ImplOpenGL3_Init(ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str());
 
