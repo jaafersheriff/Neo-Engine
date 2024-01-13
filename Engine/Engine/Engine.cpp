@@ -68,7 +68,7 @@ namespace neo {
             Loader::_cleanTextureData(data);
         }
         ServiceLocator<ImGuiManager>::set();
-        ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow(), mWindow.getDetails().mDPIScale);
+        ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
 
         ServiceLocator<Renderer>::ref().init();
         {

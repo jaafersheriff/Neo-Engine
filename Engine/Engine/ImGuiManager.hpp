@@ -25,7 +25,7 @@ namespace neo {
         ImGuiManager(const ImGuiManager&) = delete;
         ImGuiManager & operator=(const ImGuiManager&) = delete;
 
-        void init(GLFWwindow* window, float scale);
+        void init(GLFWwindow* window);
         void update();
         void render();
         void reset();

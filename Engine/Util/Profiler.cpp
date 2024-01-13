@@ -77,8 +77,14 @@ namespace neo {
 
         void Profiler::imGuiEditor() const {
 #ifndef NO_LOCAL_TRACY
+            NEO_ASSERT(mTracyServer, "Tracy server doesn't exist..?");
+
             // Profiler is baked into the viewport dock space
-            mTracyServer->Draw();
+            if (mTracyServer->Draw()) {
+                mTracyServer->doGPUDrift();
+            }
+
+            // Also have another simple graph for when the tracy profiler is collapsed
 #endif
         }
     }
