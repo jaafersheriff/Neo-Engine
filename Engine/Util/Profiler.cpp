@@ -80,9 +80,7 @@ namespace neo {
             NEO_ASSERT(mTracyServer, "Tracy server doesn't exist..?");
 
             // Profiler is baked into the viewport dock space
-            if (mTracyServer->Draw()) {
-                mTracyServer->doGPUDrift();
-            }
+            mTracyServer->Draw();
 
             // Also have another simple graph for when the tracy profiler is collapsed
 #endif
