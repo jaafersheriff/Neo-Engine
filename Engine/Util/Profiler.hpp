@@ -6,7 +6,7 @@
 #define TRACY_GPU() TRACY_GPUN(TracyFunction)
 
 #include <memory>
-#include <imgui.h>
+#include <vector>
 
 #ifndef NO_LOCAL_TRACY
 namespace tracy {
@@ -31,6 +31,10 @@ namespace neo {
             double mLastFrameTime = 0.0;    /* Time at which last frame was rendered */
 #ifndef NO_LOCAL_TRACY
             std::unique_ptr<tracy::View> mTracyServer;
+            mutable std::vector<float> mCPUFrametime;
+            mutable float mCPUFrametimeMax;
+            mutable std::vector<float> mGPUFrametime;
+            mutable float mGPUFrametimeMax;
 #endif
         };
     }

@@ -4,10 +4,13 @@
 
 #include "Profiler.hpp"
 
+#include <imgui.h>
+
 #ifndef NO_LOCAL_TRACY
 #include <TracyView.hpp>
 #include <TracyMouse.hpp>
 #include <Fonts.hpp>
+#include <implot.h>
 #endif
 
 void* operator new(std::size_t count) {
@@ -41,6 +44,7 @@ namespace neo {
         Profiler::Profiler(int refreshRate, float scale) {
 #ifdef NO_LOCAL_TRACY
             NEO_UNUSED(refreshRate);
+
 #else
             LoadFonts(scale, s_fixedWidth, s_smallFont, s_bigFont);
             zigzagTex = (void*)(intptr_t)0;
@@ -52,6 +56,11 @@ namespace neo {
             mTracyServer->GetViewData().frameTarget = refreshRate;
             mTracyServer->GetViewData().drawFrameTargets = true;
             mTracyServer->GetViewData().drawCpuUsageGraph = false;
+
+            mCPUFrametime.reserve(1000);
+            mCPUFrametimeMax = 0.f;
+            mGPUFrametime.reserve(1000);
+            mGPUFrametimeMax = 0.f;
 #endif
         }
 
@@ -79,11 +88,35 @@ namespace neo {
             mTracyServer->Draw();
 
             // Also have another simple graph for when the tracy profiler is collapsed
-            ImGui::Begin("Basic Profiler");
-            ImGui::Text("FPS: %0.3f", mTracyServer->GetFPS());
-            ImGui::Text("dt: %0.3f", mTracyServer->GetFrametime());
-            ImGui::Text("gdt: %0.3f", mTracyServer->GetGPUFrametime());
+            {
+                float latestCPUTime = mTracyServer->GetFrametime();
+                mCPUFrametimeMax = std::max(mCPUFrametimeMax, latestCPUTime);
+                if (mCPUFrametime.size() > 1000) {
+                    mCPUFrametime.erase(mCPUFrametime.begin());
+                }
+                mCPUFrametime.emplace_back(latestCPUTime);
+            }
+            {
+                float latestGPUTime = mTracyServer->GetGPUFrametime();
+                mGPUFrametimeMax = std::max(mGPUFrametimeMax, latestGPUTime);
+                if (mGPUFrametime.size() > 1000) {
+                    mGPUFrametime.erase(mGPUFrametime.begin());
+                }
+                mGPUFrametime.emplace_back(latestGPUTime);
+            }
+
+            ImGui::Begin("BasicProfiler");
+            if (ImPlot::BeginPlot(std::string("FPS (" + std::to_string(mTracyServer->GetFPS()) + ")").c_str())) {
+                ImPlot::SetupAxis(ImAxis_X1, "Time (s)", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoInitialFit  );
+                ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoInitialFit | ImPlotAxisFlags_NoLabel );
+                // ImPlot::SetupAxisLimits(ImAxis_Y1, 0, std::max(mCPUFrametimeMax, mGPUFrametimeMax) + 3.f, ImPlotCond_Always);
+                ImPlot::PlotLine("CPU", mCPUFrametime.data(), static_cast<int>(mCPUFrametime.size()));
+                ImPlot::PlotLine("GPU", mGPUFrametime.data(), static_cast<int>(mGPUFrametime.size()));
+                ImPlot::EndPlot();
+            }
             ImGui::End();
+            // ImGui::Text("dt: %0.3f", mTracyServer->GetFrametime());
+            // ImGui::Text("gdt: %0.3f", mTracyServer->GetGPUFrametime());
 #endif
         }
     }

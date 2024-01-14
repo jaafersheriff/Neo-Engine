@@ -15,6 +15,7 @@
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <implot.h>
 
 #include <tracy/Tracy.hpp>
 #include <tracy/TracyOpenGL.hpp>
@@ -25,6 +26,7 @@ namespace neo {
         /* Init ImGui */
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+        ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.FontGlobalScale = 1.f;
@@ -69,6 +71,7 @@ namespace neo {
         colors[ImGuiCol_ResizeGripActive] = texColimv;
         colors[ImGuiCol_SeparatorHovered] = disabledTexColimv;
         colors[ImGuiCol_SeparatorActive] = texColimv;
+        ImPlot::GetStyle().Colors[ImPlotCol_Line] = texColimv;
 
         style->FrameRounding = 0.0f;
         style->WindowBorderSize = 0.f;
@@ -266,6 +269,7 @@ namespace neo {
     void ImGuiManager::destroy() {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
+        ImPlot::DestroyContext();
         ImGui::DestroyContext();
     }
 
