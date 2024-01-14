@@ -53,8 +53,6 @@ namespace neo {
             mTracyServer->GetViewData().drawFrameTargets = true;
             mTracyServer->GetViewData().drawCpuUsageGraph = false;
 #endif
-
-            TracyPlotConfig("dt", tracy::PlotFormatType::Number, false, false, 0);
         }
 
         Profiler::~Profiler() {
@@ -67,9 +65,7 @@ namespace neo {
             TRACY_ZONE();
             /* Update delta time and FPS */
             float runTime = static_cast<float>(_runTime);
-            mTotalFrames++;
             mTimeStep = runTime - mLastFrameTime;
-            TracyPlot("dt", static_cast<float>(mTimeStep));
             mLastFrameTime = runTime;
 
             tracy::MouseFrame();
@@ -83,6 +79,11 @@ namespace neo {
             mTracyServer->Draw();
 
             // Also have another simple graph for when the tracy profiler is collapsed
+            ImGui::Begin("Basic Profiler");
+            ImGui::Text("FPS: %0.3f", mTracyServer->GetFPS());
+            ImGui::Text("dt: %0.3f", mTracyServer->GetFrametime());
+            ImGui::Text("gdt: %0.3f", mTracyServer->GetGPUFrametime());
+            ImGui::End();
 #endif
         }
     }

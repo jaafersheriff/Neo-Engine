@@ -27,7 +27,6 @@ namespace neo {
             void imGuiEditor() const;
 
             double mTimeStep = 0.0;         /* Delta time */
-            int mTotalFrames = 0;           /* Total frames since start up */
         private:
             double mLastFrameTime = 0.0;    /* Time at which last frame was rendered */
 #ifndef NO_LOCAL_TRACY
