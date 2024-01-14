@@ -38,6 +38,8 @@ namespace {
 }
 #endif
 
+#define MAX_SAMPLES 250
+
 namespace neo {
     namespace util {
 
@@ -57,10 +59,13 @@ namespace neo {
             mTracyServer->GetViewData().drawFrameTargets = true;
             mTracyServer->GetViewData().drawCpuUsageGraph = false;
 
-            mCPUFrametime.reserve(1000);
+            mCPUFrametime.reserve(MAX_SAMPLES);
             mCPUFrametimeMax = 0.f;
-            mGPUFrametime.reserve(1000);
+            mCPUFrametimeOffset = 0;
+            mGPUFrametime.reserve(MAX_SAMPLES);
             mGPUFrametimeMax = 0.f;
+
+            mRefreshRate = 1000.f / refreshRate;
 #endif
         }
 
@@ -81,7 +86,9 @@ namespace neo {
         }
 
         void Profiler::imGuiEditor() const {
-#ifndef NO_LOCAL_TRACY
+#ifdef NO_LOCAL_TRACY
+            return;
+#endif
             NEO_ASSERT(mTracyServer, "Tracy server doesn't exist..?");
 
             // Profiler is baked into the viewport dock space
@@ -91,33 +98,36 @@ namespace neo {
             {
                 float latestCPUTime = mTracyServer->GetFrametime();
                 mCPUFrametimeMax = std::max(mCPUFrametimeMax, latestCPUTime);
-                if (mCPUFrametime.size() > 1000) {
-                    mCPUFrametime.erase(mCPUFrametime.begin());
+                if (mCPUFrametime.size() < MAX_SAMPLES) {
+                    mCPUFrametime.emplace_back(latestCPUTime);
                 }
-                mCPUFrametime.emplace_back(latestCPUTime);
+                else {
+                    mCPUFrametime[mCPUFrametimeOffset] = latestCPUTime;
+                    mCPUFrametimeOffset = (mCPUFrametimeOffset + 1) % MAX_SAMPLES;
+                }
             }
             {
                 float latestGPUTime = mTracyServer->GetGPUFrametime();
                 mGPUFrametimeMax = std::max(mGPUFrametimeMax, latestGPUTime);
-                if (mGPUFrametime.size() > 1000) {
+                if (mGPUFrametime.size() > MAX_SAMPLES) {
                     mGPUFrametime.erase(mGPUFrametime.begin());
                 }
                 mGPUFrametime.emplace_back(latestGPUTime);
             }
 
             ImGui::Begin("BasicProfiler");
-            if (ImPlot::BeginPlot(std::string("FPS (" + std::to_string(mTracyServer->GetFPS()) + ")").c_str())) {
-                ImPlot::SetupAxis(ImAxis_X1, "Time (s)", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoInitialFit  );
-                ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoInitialFit | ImPlotAxisFlags_NoLabel );
-                // ImPlot::SetupAxisLimits(ImAxis_Y1, 0, std::max(mCPUFrametimeMax, mGPUFrametimeMax) + 3.f, ImPlotCond_Always);
+
+            if (ImPlot::BeginPlot(std::string("FPS (" + std::to_string(static_cast<int>(mTracyServer->GetFPS())) + ")").c_str())) {
+                ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoLabel);
+                ImPlot::SetupAxis(ImAxis_Y1, "ms", ImPlotAxisFlags_NoInitialFit);
+                ImPlot::SetupAxisLimits(ImAxis_X1, 0, MAX_SAMPLES, ImPlotCond_Always);
+                ImPlot::SetupAxisLimits(ImAxis_Y1, 0, mRefreshRate * 2.f, ImPlotCond_Always);
+                ImPlot::SetNextLineStyle(ImVec4(0.5f, 1.0f, 0.0f, 1.0f));
                 ImPlot::PlotLine("CPU", mCPUFrametime.data(), static_cast<int>(mCPUFrametime.size()));
-                ImPlot::PlotLine("GPU", mGPUFrametime.data(), static_cast<int>(mGPUFrametime.size()));
+                // ImPlot::PlotLine("GPU", mGPUFrametime.data(), static_cast<int>(mGPUFrametime.size()));
                 ImPlot::EndPlot();
             }
-            ImGui::End();
-            // ImGui::Text("dt: %0.3f", mTracyServer->GetFrametime());
-            // ImGui::Text("gdt: %0.3f", mTracyServer->GetGPUFrametime());
-#endif
+
         }
     }
 }
