@@ -71,7 +71,7 @@ namespace neo {
         colors[ImGuiCol_ResizeGripActive] = texColimv;
         colors[ImGuiCol_SeparatorHovered] = disabledTexColimv;
         colors[ImGuiCol_SeparatorActive] = texColimv;
-        ImPlot::GetStyle().Colors[ImPlotCol_Line] = texColimv;
+        // ImPlot::GetStyle().Colors[ImPlotCol_Line] = texColimv;
 
         style->FrameRounding = 0.0f;
         style->WindowBorderSize = 0.f;

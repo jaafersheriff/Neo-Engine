@@ -32,11 +32,12 @@ namespace neo {
 #ifndef NO_LOCAL_TRACY
             float mRefreshRate; // Milliseconds
             std::unique_ptr<tracy::View> mTracyServer;
+
             mutable std::vector<float> mCPUFrametime;
-            mutable float mCPUFrametimeMax;
             mutable int mCPUFrametimeOffset;
+
             mutable std::vector<float> mGPUFrametime;
-            mutable float mGPUFrametimeMax;
+            mutable int mGPUFrametimeOffset;
 #endif
         };
     }
