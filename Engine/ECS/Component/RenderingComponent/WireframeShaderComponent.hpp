@@ -4,7 +4,7 @@
 
 #include "Loader/Library.hpp"
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 namespace neo {
 	struct WireframeShaderComponent : public ShaderComponent {

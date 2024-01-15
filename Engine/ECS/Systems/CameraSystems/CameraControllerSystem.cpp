@@ -29,6 +29,7 @@ namespace neo {
 
     void CameraControllerSystem::_updateLook(const float dt, ECS& ecs, CameraControllerComponent& controller, SpatialComponent& spatial) {
         TRACY_ZONE();
+        bool delta = false;
         if (auto mouseOpt = ecs.getComponent<MouseComponent>()) {
             auto&& [_, mouse] = *mouseOpt;
             glm::vec2 mousePos = mouse.mFrameMouse.getPos();
@@ -37,6 +38,7 @@ namespace neo {
             if (mouse.mFrameMouse.isDown(GLFW_MOUSE_BUTTON_2)) {
                 controller.mTheta -= mouseSpeed.x * controller.mLookSpeed * dt;
                 controller.mPhi -= mouseSpeed.y * controller.mLookSpeed * dt;
+                delta = true;
             }
         }
 
@@ -44,16 +46,23 @@ namespace neo {
             auto&& [_, keyboard] = *keyboardOpt;
             if (keyboard.mFrameKeyboard.isKeyPressed(controller.mLookLeftButton)) {
                 controller.mTheta += controller.mLookSpeed * 2.f * dt;
+                delta = true;
             }
             if (keyboard.mFrameKeyboard.isKeyPressed(controller.mLookRightButton)) {
                 controller.mTheta -= controller.mLookSpeed * 2.f * dt;
+                delta = true;
             }
             if (keyboard.mFrameKeyboard.isKeyPressed(controller.mLookUpButton)) {
                 controller.mPhi -= controller.mLookSpeed * 2.f * dt;
+                delta = true;
             }
             if (keyboard.mFrameKeyboard.isKeyPressed(controller.mLookDownButton)) {
                 controller.mPhi += controller.mLookSpeed * 2.f * dt;
+                delta = true;
             }
+        }
+        if (!delta) {
+            return;
         }
 
         if (controller.mTheta > util::PI) {

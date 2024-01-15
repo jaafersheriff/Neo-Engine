@@ -23,7 +23,7 @@
 
 namespace neo {
 
-	template<typename... CompTs>
+    template<typename... CompTs>
     void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const SourceShader::ShaderDefines& inDefines = {}) {
         TRACY_GPU();
         const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
@@ -96,7 +96,7 @@ namespace neo {
                 drawDefines.emplace("NORMAL_MAP");
             }
 
-            auto resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(drawDefines);
+            auto& resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(drawDefines);
             resolvedShader.bind();
 
             if (material.mDiffuseMap) {
@@ -144,5 +144,5 @@ namespace neo {
         if (containsAlphaTest) {
             // glDisable(GL_BLEND);
         }
-	}
+    }
 }

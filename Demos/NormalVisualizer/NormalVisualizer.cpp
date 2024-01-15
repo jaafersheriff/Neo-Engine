@@ -85,7 +85,7 @@ namespace NormalVisualizer {
         drawWireframe(ecs, cameraEntity);
 
         {
-            static auto normalShader = Library::createSourceShader("NormalVisualizer", SourceShader::ConstructionArgs{
+            static auto& normalShader = Library::createSourceShader("NormalVisualizer", SourceShader::ConstructionArgs{
                 {ShaderStage::VERTEX, "normal.vert"},
                 {ShaderStage::GEOMETRY, "normal.geom"},
                 {ShaderStage::FRAGMENT, "normal.frag"}

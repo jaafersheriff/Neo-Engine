@@ -38,8 +38,6 @@ namespace neo {
         }
 
         void _upload(void** data) {
-            TRACY_GPU();
-
             NEO_ASSERT(data, "Trying to upload a CubeMap with invalid data");
             bind();
 

@@ -157,7 +157,7 @@ namespace neo {
             auto frameSize = window.getDetails().mSize;
             glViewport(0, 0, frameSize.x, frameSize.y);
         
-            auto resolvedBlit = mBlitShader->getResolvedInstance({});
+            auto& resolvedBlit = mBlitShader->getResolvedInstance({});
             resolvedBlit.bind();
         
             auto meshData = Library::getMesh("quad");

@@ -11,7 +11,7 @@ namespace neo {
 
 	template<typename... CompTs>
     void drawWireframe(const ECS& ecs, ECS::Entity cameraEntity, const SourceShader::ShaderDefines& inDefines = {}) {
-        GPU_MP_ENTER("drawWireframe");
+        TRACY_GPU();
 
         // TODO - stash the old state?
         glDisable(GL_CULL_FACE);
@@ -40,7 +40,5 @@ namespace neo {
         // TODO - stash the old state
         glEnable(GL_CULL_FACE);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-        GPU_MP_LEAVE();
 	}
 }
