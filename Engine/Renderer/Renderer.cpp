@@ -156,7 +156,6 @@ namespace neo {
         }
         else {
             TRACY_GPUN("Final Blit");
-            resetState();
             glDisable(GL_DEPTH_TEST);
             {
                 TRACY_GPUN("Clear backbuffer");
