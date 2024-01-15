@@ -18,11 +18,15 @@ namespace neo {
         mCulledCount = 0;
 
         auto cameras = ecs.getView<FrustumComponent>();
-        CameraCulledComponent culled;
 
         std::vector<ECS::Entity> cameraViews;
+        cameraViews.reserve(cameras.size());
         for (auto&& [entity, spatial, bb] : ecs.getView<SpatialComponent, BoundingBoxComponent>().each()) {
-            culled.mCameraViews.clear();
+            // cameraViews.clear();
+            for (auto camera = cameraViews.begin(); camera < cameraViews.end(); camera++) {
+                *camera = static_cast<ECS::Entity>(std::numeric_limits<uint32_t>::max());
+            }
+
             for(auto&& [cameraEntity, frustum] : cameras.each()) {
                 if ((ecs.has<PerspectiveCameraComponent>(cameraEntity) || ecs.has<OrthoCameraComponent>(cameraEntity)) && frustum.isInFrustum(spatial, bb)) {
                     cameraViews.push_back(cameraEntity);
@@ -32,10 +36,10 @@ namespace neo {
                 }
             }
             if (auto* existingComp = ecs.getComponent<CameraCulledComponent>(entity)) {
-                existingComp->mCameraViews.swap(culled.mCameraViews);
+                existingComp->mCameraViews.swap(cameraViews);
             }
             else {
-                ecs.addComponent<CameraCulledComponent>(entity, culled);
+                ecs.addComponent<CameraCulledComponent>(entity, cameraViews);
             }
         }
     }

@@ -201,10 +201,6 @@ namespace neo {
             // Flush resources
             Library::tick();
 
-            {
-                TRACY_GPUN("glfwSwapBuffers");
-                glfwSwapBuffers(mWindow.getWindow());
-            }
             FrameMark;
             TracyGpuCollect;
         }
