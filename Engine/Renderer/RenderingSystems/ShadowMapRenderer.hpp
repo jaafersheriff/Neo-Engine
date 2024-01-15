@@ -41,7 +41,7 @@ namespace neo {
 
             SourceShader::ShaderDefines shaderDefines = {};
             auto material = ecs.cGetComponent<const MaterialComponent>(entity);
-            Texture* alphaMap = nullptr;
+            NewTexture* alphaMap = nullptr;
             if (containsAlphaTest && material && material->mAlphaMap) {
                 alphaMap = material->mAlphaMap;
                 shaderDefines.emplace("ALPHA_TEST");

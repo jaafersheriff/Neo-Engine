@@ -9,7 +9,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-    void drawFXAA(Framebuffer& outputFBO, Texture& inputTexture) {
+    void drawFXAA(Framebuffer& outputFBO, NewTexture& inputTexture) {
         TRACY_GPUN("drawFXAA");
 
         // Where are these const chars in memory..are they being created and passed on each call?

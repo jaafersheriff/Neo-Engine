@@ -54,7 +54,7 @@ namespace neo {
         mBackBuffer->mFBOID = 0;
 
         mDefaultFBO = Library::createFBO("backbuffer");
-        TextureFormat format = { GL_RGB16, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE };
+        NewTextureFormat format = { TextureTarget::Texture2D, GL_RGB16, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE };
         mDefaultFBO->attachColorTexture({ 1, 1 }, format);
         mDefaultFBO->attachDepthTexture({ 1, 1 }, GL_LINEAR, GL_CLAMP_TO_EDGE);
         mDefaultFBO->initDrawBuffers();
@@ -103,7 +103,12 @@ namespace neo {
     }
 
     void Renderer::_onFrameSizeChanged(const FrameSizeMessage& msg) {
-        mDefaultFBO->resize(msg.mSize);
+        mDefaultFBO->destroy();
+        NewTextureFormat format = { TextureTarget::Texture2D, GL_RGB16, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE };
+        mDefaultFBO->attachColorTexture({ msg.mSize.x, msg.mSize.y }, format);
+        mDefaultFBO->attachDepthTexture({ msg.mSize.x, msg.mSize.y }, GL_LINEAR, GL_CLAMP_TO_EDGE);
+        mDefaultFBO->initDrawBuffers();
+        mDefaultFBO->bind();
     }
 
     void Renderer::resetState() {

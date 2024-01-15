@@ -10,9 +10,8 @@
 #include <string>
 
 namespace neo {
-    class Texture;
+    class NewTexture;
     class SourceShader;
-
 
     class ResolvedShaderInstance {
         friend SourceShader;
@@ -42,7 +41,7 @@ namespace neo {
             glm::mat4
             >;
         void bindUniform(const char* name, const UniformVariant& uniform) const;
-        void bindTexture(const char* name, const Texture& texture) const;
+        void bindTexture(const char* name, const NewTexture& texture) const;
 
     private:
         bool mValid = false;

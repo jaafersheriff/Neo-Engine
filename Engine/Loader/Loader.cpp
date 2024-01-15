@@ -184,7 +184,8 @@ namespace neo {
                     asset.material.mIOR = material.ior;
                     asset.material.mDissolve = material.dissolve;
 
-                    TextureFormat format;
+                    NewTextureFormat format;
+                    format.mTarget = TextureTarget::Texture2D;
                     format.mInternalFormat = GL_RGBA8;
                     format.mBaseFormat = GL_RGBA;
 
@@ -213,13 +214,13 @@ namespace neo {
         return ret;
     }
 
-    Texture2D* Loader::loadTexture(const std::string &fileName, TextureFormat format) {
+    NewTexture* Loader::loadTexture(const std::string &fileName, NewTextureFormat format) {
         TRACY_ZONE();
         /* Create an empty texture if it is not already exist in the library */
         int width, height, components;
         uint8_t* data = _loadTextureData(width, height, components, fileName, format);
 
-        Texture2D* texture = new Texture2D(format, glm::uvec2(width, height), data);
+        NewTexture* texture = new NewTexture(format, glm::uvec2(width, height), data);
 
         _cleanTextureData(data);
 
@@ -227,22 +228,23 @@ namespace neo {
 
     }
 
-    TextureCubeMap* Loader::loadTexture(const std::string &name, const std::vector<std::string>& files) {
+    NewTexture* Loader::loadTexture(const std::string &name, const std::vector<std::string>& files) {
         TRACY_ZONE();
 
         NEO_ASSERT(files.size() == 6, "Attempting to create cube map without 6 files");
 
         std::vector<uint8_t*> data;
-        std::vector<glm::uvec2> sizes;
+        glm::u16vec2 size(UINT16_MAX, UINT16_MAX);
         for (int i = 0; i < 6; i++) {
             int _width, _height, _components;
             data.push_back(_loadTextureData(_width, _height, _components, files[i], {}, false));
-            sizes.push_back(glm::uvec2(_width, _height));
+            size.x = std::min(size.x, static_cast<uint16_t>(_width));
+            size.y = std::min(size.y, static_cast<uint16_t>(_height));
         }
 
         /* Upload data to GPU and free from CPU */
-        TextureFormat format = { GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_UNSIGNED_BYTE };
-        TextureCubeMap* texture = new TextureCubeMap(format, sizes, reinterpret_cast<void**>(data.data()));
+        NewTextureFormat format = { TextureTarget::TextureCube, GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_UNSIGNED_BYTE };
+        NewTexture* texture = new NewTexture(format, size, reinterpret_cast<void**>(data.data()));
 
         /* Clean */
         for (int i = 0; i < 6; i++) {
@@ -254,7 +256,7 @@ namespace neo {
         return texture;
     }
 
-    uint8_t* Loader::_loadTextureData(int& width, int& height, int& components, const std::string& fileName, TextureFormat format, bool flip) {
+    uint8_t* Loader::_loadTextureData(int& width, int& height, int& components, const std::string& fileName, NewTextureFormat format, bool flip) {
         std::string _fileName = APP_RES_DIR + fileName;
         if (!util::fileExists(_fileName.c_str())) {
             _fileName = ENGINE_RES_DIR + fileName;

@@ -114,7 +114,8 @@ namespace Sponza {
     void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
         const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
-        auto shadowMap = Library::createTransientFBO(glm::uvec2(4096, 4096), { TextureFormat{
+        auto shadowMap = Library::createTransientFBO(glm::uvec2(4096, 4096), { NewTextureFormat{
+            TextureTarget::Texture2D,
             GL_DEPTH_COMPONENT,
             GL_DEPTH_COMPONENT,
         } });

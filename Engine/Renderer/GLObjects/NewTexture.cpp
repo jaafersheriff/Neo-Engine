@@ -63,10 +63,29 @@ namespace neo {
 			break;
 		}
 
-		// Upload
-		if (data == nullptr) {
+		// Lock in storage
+		switch (mFormat.mTarget) {
+		case TextureTarget::Texture1D:
+			glTexStorage1D(GL_TEXTURE_1D, 0, mFormat.mInternalFormat, mWidth);
+			break;
+		case TextureTarget::Texture2D:
+			glTexStorage2D(GL_TEXTURE_2D, 0, mFormat.mInternalFormat, mWidth, mHeight);
+			break;
+		case TextureTarget::Texture3D:
+			glTexStorage3D(GL_TEXTURE_3D, 0, mFormat.mInternalFormat, mWidth, mHeight, mDepth);
+			break;
+		case TextureTarget::TextureCube:
+			for (int i = 0; i < 6; i++) {
+				glTexStorage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mFormat.mInternalFormat, mWidth, mHeight);
+			}
+			break;
+		default:
+			NEO_FAIL("Invalid texture class");
+			break;
 		}
-		else {
+
+		// Upload
+		if (data != nullptr) {
 			switch (mFormat.mTarget) {
 			case TextureTarget::Texture1D:
 				glTexImage1D(GL_TEXTURE_1D, 0, mFormat.mInternalFormat, mWidth, 0, mFormat.mBaseFormat, mFormat.mType, data);
@@ -77,7 +96,7 @@ namespace neo {
 			case TextureTarget::Texture3D:
 				glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mInternalFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, data);
 				break;
-			case TextureTarget::TextureCube:
+			case TextureTarget::TextureCube: {
 				// Danger!
 				const void** _data = reinterpret_cast<const void**>(const_cast<void*>(data));
 				// F, B, U, D, R, L
@@ -86,6 +105,7 @@ namespace neo {
 					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mFormat.mInternalFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, mFormat.mType, _data[i]);
 				}
 				break;
+			}
 			default:
 				NEO_FAIL("Invalid texture class");
 				break;

@@ -33,12 +33,11 @@ namespace neo {
 		void genMips();
 		void destroy();
 
-	private:
 		GLuint mTextureID = 0;
+		const NewTextureFormat mFormat; // TODO - can this be const?
+
 		uint16_t mWidth = 1;
 		uint16_t mHeight = 1;
 		uint16_t mDepth = 0;
-		const NewTextureFormat mFormat; // TODO - can this be const?
-
 	};
 }
