@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 
 #include "Texture.hpp"
@@ -67,3 +68,4 @@ namespace neo {
 
     };
 }
+#endif

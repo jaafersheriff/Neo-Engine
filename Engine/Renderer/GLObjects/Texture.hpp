@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 
 #include "Renderer/GLObjects/GLHelper.hpp"
@@ -57,3 +58,4 @@ namespace neo {
     };
 
 }
+#endif

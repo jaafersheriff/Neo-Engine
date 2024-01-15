@@ -1,3 +1,4 @@
+#if 0
 #include "Renderer/pch.hpp"
 #include "Texture.hpp"
 
@@ -54,3 +55,4 @@ namespace neo {
         glGenerateTextureMipmap(mTextureID);
     }
 }
+#endif
