@@ -194,7 +194,6 @@ namespace neo {
         ImGui::Begin("Renderer");
         if (ImGui::TreeNodeEx("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
             ImGui::TextWrapped("Num Draws: %d", mStats.mNumDraws);
-            ImGui::TextWrapped("Num Shaders: %d", mStats.mNumShaders);
             ImGui::TextWrapped("Num Triangles: %d", mStats.mNumTriangles);
             ImGui::TextWrapped("Num Uniforms: %d", mStats.mNumUniforms);
             ImGui::TextWrapped("Num Samplers: %d", mStats.mNumSamplers);

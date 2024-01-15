@@ -24,7 +24,6 @@ namespace neo {
         // This should be moved to its own file/service locator..?
         struct FrameStats {
             uint32_t mNumDraws = 0;
-            uint32_t mNumShaders = 0;
             uint32_t mNumTriangles = 0;
             uint32_t mNumUniforms = 0;
             uint32_t mNumSamplers = 0;
