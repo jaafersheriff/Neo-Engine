@@ -50,8 +50,6 @@ namespace neo {
 
         /* Init default FBO */
         glActiveTexture(GL_TEXTURE0);
-        mBackBuffer = Library::createFBO("0");
-        mBackBuffer->mFBOID = 0;
 
         mDefaultFBO = Library::createFBO("backbuffer");
         TextureFormat format = { TextureTarget::Texture2D, GL_RGB16, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE };
@@ -106,8 +104,7 @@ namespace neo {
         mDefaultFBO->destroy();
         // Placement new to regenerate the FBO handle
         new (mDefaultFBO) Framebuffer();
-        TextureFormat format = { TextureTarget::Texture2D, GL_RGB16, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE };
-        mDefaultFBO->attachColorTexture({ msg.mSize.x, msg.mSize.y }, format);
+        mDefaultFBO->attachColorTexture({ msg.mSize.x, msg.mSize.y }, { TextureTarget::Texture2D, GL_RGB16, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE });
         mDefaultFBO->attachDepthTexture({ msg.mSize.x, msg.mSize.y }, GL_DEPTH_COMPONENT16, GL_LINEAR, GL_CLAMP_TO_EDGE);
         mDefaultFBO->initDrawBuffers();
         mDefaultFBO->bind();
@@ -134,6 +131,7 @@ namespace neo {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glBindVertexArray(0);
+        glUseProgram(0);
     }
 
     void Renderer::render(WindowSurface& window, IDemo* demo, ECS& ecs) {
@@ -146,35 +144,37 @@ namespace neo {
         {
             TRACY_GPUN("Draw Demo");
             demo->render(ecs, *mDefaultFBO);
+            resetState();
         }
         
         /* Render imgui */
         if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
             TRACY_GPUN("ImGuiManager.render");
-            mBackBuffer->bind();
+            // Bind backbuffer
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
             ServiceLocator<ImGuiManager>::ref().render();
         }
         else {
             TRACY_GPUN("Final Blit");
-            mBackBuffer->bind();
             resetState();
             glDisable(GL_DEPTH_TEST);
-            glClearColor(0.f, 0.f, 0.f, 1.f);
-            glClear(GL_COLOR_BUFFER_BIT);
-            auto frameSize = window.getDetails().mSize;
-            glViewport(0, 0, frameSize.x, frameSize.y);
+            {
+                TRACY_GPUN("Clear backbuffer");
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                auto frameSize = window.getDetails().mSize;
+                glViewport(0, 0, frameSize.x, frameSize.y);
+                glClearColor(0.f, 0.f, 0.f, 1.f);
+                glClear(GL_COLOR_BUFFER_BIT);
+            }
         
             auto& resolvedBlit = mBlitShader->getResolvedInstance({});
             resolvedBlit.bind();
-        
-            auto meshData = Library::getMesh("quad");
-            glBindVertexArray(meshData.mMesh->mVAOID);
         
             // Bind input fbo texture
             resolvedBlit.bindTexture("inputTexture", *mDefaultFBO->mTextures[0]);
         
             // Render 
-            meshData.mMesh->draw();
+            Library::getMesh("quad").mMesh->draw();
             resolvedBlit.unbind();
         }
     }

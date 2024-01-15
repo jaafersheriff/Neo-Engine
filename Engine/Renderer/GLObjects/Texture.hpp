@@ -18,8 +18,8 @@ namespace neo {
 		TextureTarget mTarget = TextureTarget::Texture2D;
         GLint mInternalFormat = GL_RGBA8;
         GLenum mBaseFormat = GL_RGBA;
-        GLint mFilter = GL_NEAREST; // TODO - this should be split between min/mag/mip
-        GLenum mMode = GL_REPEAT; // TODO - this should be split between STR
+        GLint mFilter = GL_LINEAR; // TODO - this should be split between min/mag/mip
+        GLenum mMode = GL_CLAMP_TO_EDGE; // TODO - this should be split between STR
         GLenum mType = GL_UNSIGNED_BYTE;
 	};
 

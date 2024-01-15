@@ -18,6 +18,7 @@ namespace neo {
             { ShaderStage::FRAGMENT, "fxaa.frag" }
         });
 
+        outputFBO.bind();
         glViewport(0, 0, outputFBO.mTextures[0]->mWidth, outputFBO.mTextures[0]->mHeight);
 
         auto& resolvedShader = fxaaShader->getResolvedInstance({});

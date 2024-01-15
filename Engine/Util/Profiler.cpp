@@ -91,42 +91,50 @@ namespace neo {
             NEO_ASSERT(mTracyServer, "Tracy server doesn't exist..?");
 
             // Profiler is baked into the viewport dock space
-            mTracyServer->Draw();
+            {
+                TRACY_ZONEN("Draw Tracy");
+                mTracyServer->Draw();
+            }
 
             // Also have another simple graph for when the tracy profiler is collapsed
-            float latestCPUTime = mTracyServer->GetFrametime();
-            if (mCPUFrametime.size() < MAX_SAMPLES) {
-                mCPUFrametime.emplace_back(latestCPUTime);
-            }
-            else {
-                mCPUFrametime[mCPUFrametimeOffset] = latestCPUTime;
-                mCPUFrametimeOffset = (mCPUFrametimeOffset + 1) % MAX_SAMPLES;
-            }
+            {
+                TRACY_ZONEN("Update frametime");
+                float latestCPUTime = mTracyServer->GetFrametime();
+                if (mCPUFrametime.size() < MAX_SAMPLES) {
+                    mCPUFrametime.emplace_back(latestCPUTime);
+                }
+                else {
+                    mCPUFrametime[mCPUFrametimeOffset] = latestCPUTime;
+                    mCPUFrametimeOffset = (mCPUFrametimeOffset + 1) % MAX_SAMPLES;
+                }
 
-            float latestGPUTime = mTracyServer->GetGPUFrametime();
-            if (mGPUFrametime.size() < MAX_SAMPLES) {
-                mGPUFrametime.emplace_back(latestGPUTime);
+                float latestGPUTime = mTracyServer->GetGPUFrametime();
+                if (mGPUFrametime.size() < MAX_SAMPLES) {
+                    mGPUFrametime.emplace_back(latestGPUTime);
+                }
+                else {
+                    mGPUFrametime[mGPUFrametimeOffset] = latestGPUTime;
+                    mGPUFrametimeOffset = (mGPUFrametimeOffset + 1) % MAX_SAMPLES;
+                }
             }
-            else {
-                mGPUFrametime[mGPUFrametimeOffset] = latestGPUTime;
-                mGPUFrametimeOffset = (mGPUFrametimeOffset + 1) % MAX_SAMPLES;
+            {
+                TRACY_ZONEN("Draw BasicProfiler");
+                ImGui::Begin("BasicProfiler");
+                if (ImPlot::BeginPlot(std::string("FPS (" + std::to_string(static_cast<int>(mTracyServer->GetFPS())) + ")").c_str())) {
+                    ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoLabel);
+                    ImPlot::SetupAxis(ImAxis_Y1, "ms", ImPlotAxisFlags_NoInitialFit);
+                    ImPlot::SetupAxisLimits(ImAxis_X1, 0, MAX_SAMPLES, ImPlotCond_Always);
+                    ImPlot::SetupAxisLimits(ImAxis_Y1, 0, mRefreshRate * 2.f, ImPlotCond_Always);
+
+                    ImPlot::SetNextLineStyle(ImVec4(0.5f, 1.0f, 0.0f, 1.0f));
+                    ImPlot::PlotLine("CPU", mCPUFrametime.data(), static_cast<int>(mCPUFrametime.size()), 1.0, 0.0, 0, mCPUFrametimeOffset);
+
+                    ImPlot::SetNextLineStyle(ImVec4(0.7, 0.0f, 0.7f, 1.0f));
+                    ImPlot::PlotLine("GPU", mGPUFrametime.data(), static_cast<int>(mGPUFrametime.size()), 1.0, 0.0, 0, mCPUFrametimeOffset);
+                    ImPlot::EndPlot();
+                }
+                ImGui::End();
             }
-
-            ImGui::Begin("BasicProfiler");
-            if (ImPlot::BeginPlot(std::string("FPS (" + std::to_string(static_cast<int>(mTracyServer->GetFPS())) + ")").c_str())) {
-                ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoLabel);
-                ImPlot::SetupAxis(ImAxis_Y1, "ms", ImPlotAxisFlags_NoInitialFit);
-                ImPlot::SetupAxisLimits(ImAxis_X1, 0, MAX_SAMPLES, ImPlotCond_Always);
-                ImPlot::SetupAxisLimits(ImAxis_Y1, 0, mRefreshRate * 2.f, ImPlotCond_Always);
-
-                ImPlot::SetNextLineStyle(ImVec4(0.5f, 1.0f, 0.0f, 1.0f));
-                ImPlot::PlotLine("CPU", mCPUFrametime.data(), static_cast<int>(mCPUFrametime.size()), 1.0, 0.0, 0, mCPUFrametimeOffset);
-
-                ImPlot::SetNextLineStyle(ImVec4(0.7, 0.0f, 0.7f, 1.0f));
-                ImPlot::PlotLine("GPU", mGPUFrametime.data(), static_cast<int>(mGPUFrametime.size()), 1.0, 0.0, 0, mCPUFrametimeOffset);
-                ImPlot::EndPlot();
-            }
-            ImGui::End();
 
         }
     }

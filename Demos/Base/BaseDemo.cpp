@@ -107,7 +107,7 @@ namespace Base {
         auto sceneTarget = Library::createTransientFBO(viewport.mSize, {
             TextureFormat{
                 TextureTarget::Texture2D,
-                GL_RGB8,
+                GL_RGB16,
                 GL_RGB,
             },
             TextureFormat{

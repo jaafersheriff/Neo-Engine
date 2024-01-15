@@ -72,6 +72,7 @@ namespace neo {
                 attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
             }
             glDrawBuffers(mColorAttachments, attachments.data());
+            CHECK_GL_FRAMEBUFFER();
         }
        
         void clear(glm::vec4 clearColor, GLbitfield clearFlags) {
@@ -85,8 +86,12 @@ namespace neo {
         void destroy() {
             for (auto texture : mTextures) {
                 texture->destroy();
+                delete texture;
             }
+            mTextures.clear();
             glDeleteFramebuffers(1, &mFBOID);
+            mColorAttachments = 0;
+            mFBOID = 0;
         }
 
         private:

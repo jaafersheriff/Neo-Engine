@@ -58,7 +58,6 @@ namespace neo {
 
             void imGuiEditor(WindowSurface& window, ECS& ecs);
         private:
-            Framebuffer* mBackBuffer;
 			Framebuffer* mDefaultFBO;
             SourceShader* mBlitShader = nullptr;
 

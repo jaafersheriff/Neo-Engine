@@ -210,7 +210,6 @@ namespace neo {
 
     void ResolvedShaderInstance::bind() const {
         glUseProgram(mPid);
-        glActiveTexture(GL_TEXTURE0);
     }
 
     void ResolvedShaderInstance::unbind() const {
