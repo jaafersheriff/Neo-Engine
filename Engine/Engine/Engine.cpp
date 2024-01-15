@@ -202,8 +202,8 @@ namespace neo {
             Library::tick();
 
             mWindow.flip();
-            FrameMark;
             TracyGpuCollect;
+            FrameMark;
         }
 
         demos.getCurrentDemo()->destroy();
