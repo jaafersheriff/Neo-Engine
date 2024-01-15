@@ -106,7 +106,7 @@ namespace neo {
         util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale);
         demos.setForceReload();
         
-        while (!mWindow.shouldClose() && !mKeyboard.isKeyPressed(GLFW_KEY_ESCAPE)) {
+        while (!mWindow.shouldClose()) {
             TRACY_ZONEN("Engine::run");
 
             if (demos.needsReload()) {
@@ -201,6 +201,7 @@ namespace neo {
             // Flush resources
             Library::tick();
 
+            mWindow.flip();
             FrameMark;
             TracyGpuCollect;
         }

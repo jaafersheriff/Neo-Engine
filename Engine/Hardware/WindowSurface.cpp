@@ -239,6 +239,11 @@ namespace neo {
         return glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED);
     }
 
+    void WindowSurface::flip() {
+        TRACY_ZONE();
+        glfwSwapBuffers(mWindow);
+    }
+
     void WindowSurface::shutDown() {
         /* Clean up GLFW */
         glfwDestroyWindow(mWindow);

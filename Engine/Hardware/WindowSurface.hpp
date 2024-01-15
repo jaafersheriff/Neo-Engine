@@ -23,6 +23,7 @@ namespace neo {
         int init(const std::string&);
         void reset(const std::string&);
         void updateHardware();
+        void flip();
         void shutDown();
 
         int shouldClose() const;

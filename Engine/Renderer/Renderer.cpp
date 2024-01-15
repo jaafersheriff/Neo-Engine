@@ -170,11 +170,6 @@ namespace neo {
             meshData.mMesh->draw();
             resolvedBlit.unbind();
         }
-
-        {
-            TRACY_GPUN("glfwSwapBuffers");
-            glfwSwapBuffers(window.getWindow());
-        }
     }
 
     void Renderer::imGuiEditor(WindowSurface& window, ECS& ecs) {
@@ -197,18 +192,18 @@ namespace neo {
             ImGui::TextWrapped("Num Triangles: %d", mStats.mNumTriangles);
             ImGui::TextWrapped("Num Uniforms: %d", mStats.mNumUniforms);
             ImGui::TextWrapped("Num Samplers: %d", mStats.mNumSamplers);
-            if (auto hardwareDetails = ecs.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
-                auto&& [entity, mouse, viewport] = hardwareDetails.value();
-                if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    viewport.imGuiEditor();
-                    ImGui::TreePop();
-                }
-                if (ImGui::TreeNodeEx("Mouse", ImGuiTreeNodeFlags_DefaultOpen)) {
-                    mouse.imGuiEditor();
-                    ImGui::TreePop();
-                }
-            }
             ImGui::TreePop();
+        }
+        if (auto hardwareDetails = ecs.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
+            auto&& [entity, mouse, viewport] = hardwareDetails.value();
+            if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
+                viewport.imGuiEditor();
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNodeEx("Mouse", ImGuiTreeNodeFlags_DefaultOpen)) {
+                mouse.imGuiEditor();
+                ImGui::TreePop();
+            }
         }
 
         if (ImGui::Button("VSync")) {

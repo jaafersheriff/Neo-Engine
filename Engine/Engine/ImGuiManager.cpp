@@ -225,22 +225,24 @@ namespace neo {
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
 
-        ImGuiIO& io = ImGui::GetIO();
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            GLFWwindow* backup_current_context = glfwGetCurrentContext();
-            
-            {
-                TRACY_GPUN("ImGui::UpdatePlatformWindows");
-                ImGui::UpdatePlatformWindows();
-            }
-            {
+        // Only needed with multiple viewports, which I don't do
+        // ImGuiIO& io = ImGui::GetIO();
+        // if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        //     
+        //     GLFWwindow* backup_current_context = glfwGetCurrentContext();
+        //     {
+        //         TRACY_GPUN("ImGui::UpdatePlatformWindows");
+        //         ImGui::UpdatePlatformWindows();
+        //     }
+        //     {
 
-                TRACY_GPUN("ImGui::RenderPlatformWindowsDefault");
-                ImGui::RenderPlatformWindowsDefault();
-            }
-            
-            glfwMakeContextCurrent(backup_current_context);
-        }
+        //         TRACY_GPUN("ImGui::RenderPlatformWindowsDefault");
+        //         ImGui::RenderPlatformWindowsDefault();
+        //     }
+        // 
+        //      glfwMakeContextCurrent(backup_current_context);
+        //     
+        // }
     }
 
     void ImGuiManager::toggleImGui() {
