@@ -116,7 +116,7 @@ namespace Sponza {
 
         auto shadowMap = Library::createTransientFBO(glm::uvec2(4096, 4096), { TextureFormat{
             TextureTarget::Texture2D,
-            GL_DEPTH_COMPONENT,
+            GL_DEPTH_COMPONENT16,
             GL_DEPTH_COMPONENT,
         } });
         shadowMap->bind();

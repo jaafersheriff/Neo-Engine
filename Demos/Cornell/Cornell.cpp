@@ -101,7 +101,7 @@ namespace Cornell {
             },
             TextureFormat{
                 TextureTarget::Texture2D,
-                GL_R16,
+                GL_DEPTH_COMPONENT16,
                 GL_DEPTH_COMPONENT,
             }
         });
