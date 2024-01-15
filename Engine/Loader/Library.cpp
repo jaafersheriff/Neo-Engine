@@ -162,7 +162,7 @@ namespace neo {
             tv.mFBO = new Framebuffer;
             for (auto& format : formats) {
                 if (format.mBaseFormat == GL_DEPTH_COMPONENT) {
-                    tv.mFBO->attachDepthTexture(size, format.mFilter, format.mMode);
+                    tv.mFBO->attachDepthTexture(size, format.mInternalFormat, format.mFilter, format.mMode);
                 }
                 else if (format.mBaseFormat == GL_DEPTH_STENCIL) {
                     tv.mFBO->attachStencilTexture(size, format.mFilter, format.mMode);

@@ -112,7 +112,7 @@ namespace Base {
             },
             TextureFormat{
                 TextureTarget::Texture2D,
-                GL_DEPTH_COMPONENT,
+                GL_DEPTH_COMPONENT16,
                 GL_DEPTH_COMPONENT,
             }
         });

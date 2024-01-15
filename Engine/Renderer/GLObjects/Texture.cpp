@@ -66,17 +66,17 @@ namespace neo {
 		// Lock in storage
 		switch (mFormat.mTarget) {
 		case TextureTarget::Texture1D:
-			glTexStorage1D(GL_TEXTURE_1D, 0, mFormat.mInternalFormat, mWidth);
+			glTexStorage1D(GL_TEXTURE_1D, 1, mFormat.mInternalFormat, mWidth);
 			break;
 		case TextureTarget::Texture2D:
-			glTexStorage2D(GL_TEXTURE_2D, 0, mFormat.mInternalFormat, mWidth, mHeight);
+			glTexStorage2D(GL_TEXTURE_2D, 1, mFormat.mInternalFormat, mWidth, mHeight);
 			break;
 		case TextureTarget::Texture3D:
-			glTexStorage3D(GL_TEXTURE_3D, 0, mFormat.mInternalFormat, mWidth, mHeight, mDepth);
+			glTexStorage3D(GL_TEXTURE_3D, 1, mFormat.mInternalFormat, mWidth, mHeight, mDepth);
 			break;
 		case TextureTarget::TextureCube:
 			for (int i = 0; i < 6; i++) {
-				glTexStorage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mFormat.mInternalFormat, mWidth, mHeight);
+				glTexStorage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 1, mFormat.mInternalFormat, mWidth, mHeight);
 			}
 			break;
 		default:
@@ -88,13 +88,13 @@ namespace neo {
 		if (data != nullptr) {
 			switch (mFormat.mTarget) {
 			case TextureTarget::Texture1D:
-				glTexImage1D(GL_TEXTURE_1D, 0, mFormat.mInternalFormat, mWidth, 0, mFormat.mBaseFormat, mFormat.mType, data);
+				glTexSubImage1D(GL_TEXTURE_1D, 0, 0, mWidth, mFormat.mBaseFormat, mFormat.mType, data);
 				break;
 			case TextureTarget::Texture2D:
-	            glTexImage2D(GL_TEXTURE_2D, 0, mFormat.mInternalFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, mFormat.mType, data);
+				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mWidth, mHeight, mFormat.mBaseFormat, mFormat.mType, data);
 				break;
 			case TextureTarget::Texture3D:
-				glTexImage3D(GL_TEXTURE_3D, 0, mFormat.mInternalFormat, mWidth, mHeight, mDepth, 0, mFormat.mBaseFormat, mFormat.mType, data);
+				glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, mWidth, mHeight, mDepth, mFormat.mBaseFormat, mFormat.mType, data);
 				break;
 			case TextureTarget::TextureCube: {
 				// Danger!
@@ -102,7 +102,7 @@ namespace neo {
 				// F, B, U, D, R, L
 				for (int i = 0; i < 6; i++) {
 					NEO_ASSERT(_data[i], "Trying to upload a CubeMap with invalid data");
-					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mFormat.mInternalFormat, mWidth, mHeight, 0, mFormat.mBaseFormat, mFormat.mType, _data[i]);
+					glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, mWidth, mHeight, mFormat.mBaseFormat, mFormat.mType, _data[i]);
 				}
 				break;
 			}

@@ -44,8 +44,9 @@ namespace neo {
             _attachTexture(GL_COLOR_ATTACHMENT0 + mColorAttachments++, *t);
         }
         
-        void attachDepthTexture(glm::ivec2 size, GLint filter, GLenum mode) {
-            Texture *t = new Texture(TextureFormat{ TextureTarget::Texture2D, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, filter, mode }, size, nullptr);
+        void attachDepthTexture(glm::ivec2 size, GLint format, GLint filter, GLenum mode) {
+            NEO_ASSERT(format == GL_DEPTH_COMPONENT32F || format == GL_DEPTH_COMPONENT24 || format == GL_DEPTH_COMPONENT16, "Incompatible depth format");
+            Texture *t = new Texture(TextureFormat{ TextureTarget::Texture2D, format, GL_DEPTH_COMPONENT, filter, mode }, size, nullptr);
             _attachTexture(GL_DEPTH_ATTACHMENT, *t);
         }
         
