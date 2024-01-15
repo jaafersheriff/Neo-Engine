@@ -14,7 +14,7 @@ namespace neo {
 		TextureCube
 	};
 
-	struct NewTextureFormat {
+	struct TextureFormat {
 		TextureTarget mTarget = TextureTarget::Texture2D;
         GLint mInternalFormat = GL_RGBA8;
         GLenum mBaseFormat = GL_RGBA;
@@ -23,18 +23,18 @@ namespace neo {
         GLenum mType = GL_UNSIGNED_BYTE;
 	};
 
-	class NewTexture {
+	class Texture {
 	public:
-		NewTexture(NewTextureFormat format, uint16_t dimension, const void* data = nullptr);
-		NewTexture(NewTextureFormat format, glm::u16vec2 dimension, const void* data = nullptr);
-		NewTexture(NewTextureFormat format, glm::u16vec3 dimension, const void* data = nullptr);
+		Texture(TextureFormat format, uint16_t dimension, const void* data = nullptr);
+		Texture(TextureFormat format, glm::u16vec2 dimension, const void* data = nullptr);
+		Texture(TextureFormat format, glm::u16vec3 dimension, const void* data = nullptr);
 
 		void bind() const;
 		void genMips();
 		void destroy();
 
 		GLuint mTextureID = 0;
-		const NewTextureFormat mFormat; // TODO - can this be const?
+		const TextureFormat mFormat; // TODO - can this be const?
 
 		uint16_t mWidth = 1;
 		uint16_t mHeight = 1;

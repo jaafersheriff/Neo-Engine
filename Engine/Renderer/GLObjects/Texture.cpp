@@ -1,5 +1,5 @@
 #include "Renderer/pch.hpp"
-#include "NewTexture.hpp"
+#include "Texture.hpp"
 
 namespace neo {
 	namespace {
@@ -20,13 +20,13 @@ namespace neo {
 		}
 	}
 
-	NewTexture::NewTexture(NewTextureFormat format, uint16_t dimension, const void* data) : 
-		NewTexture(format, glm::u16vec3(dimension, dimension, 0), data) {}
+	Texture::Texture(TextureFormat format, uint16_t dimension, const void* data) : 
+		Texture(format, glm::u16vec3(dimension, dimension, 0), data) {}
 
-	NewTexture::NewTexture(NewTextureFormat format, glm::u16vec2 dimension, const void* data) :
-		NewTexture(format, glm::u16vec3(dimension.x, dimension.y, 0), data) {}
+	Texture::Texture(TextureFormat format, glm::u16vec2 dimension, const void* data) :
+		Texture(format, glm::u16vec3(dimension.x, dimension.y, 0), data) {}
 
-	NewTexture::NewTexture(NewTextureFormat format, glm::u16vec3 dimension, const void* data) :
+	Texture::Texture(TextureFormat format, glm::u16vec3 dimension, const void* data) :
 		mFormat(format) {
 		switch (mFormat.mTarget) {
 		case TextureTarget::Texture3D:
@@ -116,16 +116,20 @@ namespace neo {
         NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when creating Texture");
 	}
 
-	void NewTexture::bind() const {
+	void Texture::bind() const {
 		glBindTexture(_getGLTarget(mFormat.mTarget), mTextureID);
 	}
 
-	void NewTexture::genMips() {
+	void Texture::genMips() {
 		glGenerateTextureMipmap(mTextureID);
 	}
 
-	void NewTexture::destroy() {
-        glDeleteTextures(1, &mTextureID);
+	void Texture::destroy() {
+		glDeleteTextures(1, &mTextureID);
+		mTextureID = 0;
+		mWidth = 1;
+		mHeight = 1;
+		mDepth = 0;
 	}
 
 }

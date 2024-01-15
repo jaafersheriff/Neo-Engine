@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Renderer/GLObjects/Mesh.hpp"
-#include "Renderer/GLObjects/NewTexture.hpp"
+#include "Renderer/GLObjects/Texture.hpp"
 #include "Renderer/GLObjects/SourceShader.hpp"
 
 #include "Loader.hpp"
@@ -34,13 +34,13 @@ namespace neo {
             static void insertMesh(const std::string&, MeshData& mesh);
             static const std::unordered_map<std::string, MeshData> getAllMeshes() { return mMeshes; }
 
-            static NewTexture* getTexture(const std::string&);
-            static NewTexture* loadTexture(const std::string&, NewTextureFormat = {});
-            static NewTexture* createTexture(const std::string&, NewTextureFormat, glm::u16vec3 dimension, const void* data = nullptr);
-            static NewTexture* loadCubemap(const std::string&, const std::vector<std::string> &);
+            static Texture* getTexture(const std::string&);
+            static Texture* loadTexture(const std::string&, TextureFormat = {});
+            static Texture* createTexture(const std::string&, TextureFormat, glm::u16vec3 dimension, const void* data = nullptr);
+            static Texture* loadCubemap(const std::string&, const std::vector<std::string> &);
 
             static Framebuffer* createFBO(const std::string&);
-            static Framebuffer* createTransientFBO(glm::uvec2 size, const std::vector<NewTextureFormat>& formats);
+            static Framebuffer* createTransientFBO(glm::uvec2 size, const std::vector<TextureFormat>& formats);
             static Framebuffer* getFBO(const std::string&);
 
 			static SourceShader* createSourceShader(const std::string& name, const SourceShader::ConstructionArgs& args);
@@ -52,7 +52,7 @@ namespace neo {
 
         private:
             static std::unordered_map<std::string, MeshData> mMeshes;
-            static std::unordered_map<std::string, NewTexture*> mTextures;
+            static std::unordered_map<std::string, Texture*> mTextures;
             static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
             struct TransientValue {
                 Framebuffer* mFBO = nullptr;
@@ -64,9 +64,9 @@ namespace neo {
             static SourceShader* mDummyShader;
 
             static void _insertMesh(const std::string&, MeshData);
-            static void _insertTexture(const std::string&, NewTexture*);
-            static uint32_t _getTransientFBOHash(glm::uvec2 size, const std::vector<NewTextureFormat>& formats);
-            static TransientValue& _findTransientResource(glm::uvec2 size, const std::vector<NewTextureFormat>& formats);
+            static void _insertTexture(const std::string&, Texture*);
+            static uint32_t _getTransientFBOHash(glm::uvec2 size, const std::vector<TextureFormat>& formats);
+            static TransientValue& _findTransientResource(glm::uvec2 size, const std::vector<TextureFormat>& formats);
     };
 
 }

@@ -5,19 +5,19 @@
 #include <imgui.h>
 
 namespace neo {
-    class NewTexture; 
+    class Texture; 
 	struct MaterialComponent : public Component {
         glm::vec3 mAmbient;
 
-        NewTexture* mDiffuseMap = nullptr;
+        Texture* mDiffuseMap = nullptr;
         glm::vec3 mDiffuse;
 
-        NewTexture* mSpecularMap = nullptr;
+        Texture* mSpecularMap = nullptr;
         glm::vec3 mSpecular;
 
-        NewTexture* mNormalMap = nullptr;
+        Texture* mNormalMap = nullptr;
 
-        NewTexture* mAlphaMap = nullptr;
+        Texture* mAlphaMap = nullptr;
 
         float mShininess;
 

@@ -258,7 +258,7 @@ namespace neo {
         }, uniform);
     }
 
-    void ResolvedShaderInstance::bindTexture(const char* name, const NewTexture& texture) const {
+    void ResolvedShaderInstance::bindTexture(const char* name, const Texture& texture) const {
         ServiceLocator<Renderer>::ref().mStats.mNumSamplers++;
 
         GLint bindingLoc = 0;

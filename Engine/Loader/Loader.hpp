@@ -9,8 +9,8 @@ namespace neo {
 
     class Engine;
     class Mesh;
-    class NewTexture;
-    struct NewTextureFormat;
+    class Texture;
+    struct TextureFormat;
 
    struct MeshData {
         Mesh* mMesh;
@@ -47,15 +47,15 @@ namespace neo {
             static std::vector<Asset> loadMultiAsset(const std::string &);
 
             /* Retrieve Texture pointer from an image file */
-            static NewTexture* loadTexture(const std::string &, NewTextureFormat);
-            static NewTexture* loadTexture(const std::string &, const std::vector<std::string> &);
+            static Texture* loadTexture(const std::string &, TextureFormat);
+            static Texture* loadTexture(const std::string &, const std::vector<std::string> &);
 
         private:
             /* Optionally resize mesh vertex buffers so all the vertices are [-1, 1] */
             static void _findMetaData(MeshData& meshData, std::vector<float>& verts, bool doResize);
 
             /* Load a single texture file */
-            static uint8_t* _loadTextureData(int&, int&, int&, const std::string&, NewTextureFormat, bool = true);
+            static uint8_t* _loadTextureData(int&, int&, int&, const std::string&, TextureFormat, bool = true);
             static void _cleanTextureData(uint8_t*);
 
             /* Private members */

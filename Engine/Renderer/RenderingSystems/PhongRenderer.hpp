@@ -24,7 +24,7 @@
 namespace neo {
 
     template<typename... CompTs>
-    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const NewTexture* shadowMap = nullptr, const SourceShader::ShaderDefines& inDefines = {}) {
+    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const SourceShader::ShaderDefines& inDefines = {}) {
         TRACY_GPU();
         const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
         auto&& [lightEntity, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();

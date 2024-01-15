@@ -13,7 +13,7 @@
 namespace neo {
     /* Library */
     std::unordered_map<std::string, MeshData> Library::mMeshes;
-    std::unordered_map<std::string, NewTexture*> Library::mTextures;
+    std::unordered_map<std::string, Texture*> Library::mTextures;
     std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
     std::unordered_map<uint32_t, std::vector<Library::TransientValue>> Library::mTransientFramebuffers;
     std::unordered_map<std::string, SourceShader*> Library::mShaders;
@@ -100,7 +100,7 @@ namespace neo {
         _insertMesh(name, data);
     }
 
-    NewTexture* Library::getTexture(const std::string& name) {
+    Texture* Library::getTexture(const std::string& name) {
         auto it = mTextures.find(name);
         if (it != mTextures.end()) {
             return it->second;
@@ -110,7 +110,7 @@ namespace neo {
         return nullptr;
     }
 
-    NewTexture* Library::loadTexture(const std::string& fileName, NewTextureFormat format) {
+    Texture* Library::loadTexture(const std::string& fileName, TextureFormat format) {
         TRACY_ZONE();
 
         auto it = mTextures.find(fileName);
@@ -119,12 +119,12 @@ namespace neo {
         }
 
         NEO_LOG("First request for %s, loading...", fileName.c_str());
-        NewTexture* texture = Loader::loadTexture(fileName, format);
+        Texture* texture = Loader::loadTexture(fileName, format);
         _insertTexture(fileName, texture);
         return texture;
     }
 
-    NewTexture* Library::createTexture(const std::string& fileName, NewTextureFormat format, glm::u16vec3 dimension, const void* data) {
+    Texture* Library::createTexture(const std::string& fileName, TextureFormat format, glm::u16vec3 dimension, const void* data) {
         TRACY_ZONE();
 
         auto it = mTextures.find(fileName);
@@ -133,15 +133,15 @@ namespace neo {
         }
 
         NEO_LOG("First request for %s, loading...", fileName.c_str());
-        NewTexture* texture = new NewTexture(format, dimension, data);
+        Texture* texture = new Texture(format, dimension, data);
         _insertTexture(fileName, texture);
         return texture;
     }
 
-    NewTexture* Library::loadCubemap(const std::string& name, const std::vector<std::string> &files) {
+    Texture* Library::loadCubemap(const std::string& name, const std::vector<std::string> &files) {
         TRACY_ZONE();
 
-        NewTexture* texture = Loader::loadTexture(name, files);
+        Texture* texture = Loader::loadTexture(name, files);
         _insertTexture(name, texture);
 
         return texture;
@@ -154,7 +154,7 @@ namespace neo {
         return fb;
     }
 
-    Framebuffer* Library::createTransientFBO(glm::uvec2 size, const std::vector<NewTextureFormat>& formats) {
+    Framebuffer* Library::createTransientFBO(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
         TRACY_ZONE();
         TransientValue& tv = _findTransientResource(size, formats);
         tv.mUsedThisFrame = true;
@@ -184,7 +184,7 @@ namespace neo {
         return tv.mFBO;
     }
 
-    Library::TransientValue& Library::_findTransientResource(glm::uvec2 size, const std::vector<NewTextureFormat>& formats) {
+    Library::TransientValue& Library::_findTransientResource(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
         TRACY_ZONE();
         uint32_t hash = _getTransientFBOHash(size, formats);
         auto it = mTransientFramebuffers.find(hash);
@@ -209,7 +209,7 @@ namespace neo {
         }
     }
 
-    uint32_t Library::_getTransientFBOHash(glm::uvec2 size, const std::vector<NewTextureFormat>& formats) {
+    uint32_t Library::_getTransientFBOHash(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
         NEO_UNUSED(formats);
         uint32_t seed = size.x + size.y;
 		for (auto& i : formats) {
@@ -272,7 +272,7 @@ namespace neo {
         }
     }
 
-    void Library::_insertTexture(const std::string& name, NewTexture* texture) {
+    void Library::_insertTexture(const std::string& name, Texture* texture) {
         if (texture) {
             mTextures.insert({ name, texture });
         }
@@ -300,7 +300,7 @@ namespace neo {
     }
 
     void Library::imGuiEditor() {
-        auto textureFunc = [&](const NewTexture& texture) {
+        auto textureFunc = [&](const Texture& texture) {
             float scale = 150.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
 #pragma warning(push)
 #pragma warning(disable: 4312)

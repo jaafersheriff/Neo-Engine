@@ -105,12 +105,12 @@ namespace Base {
 
         auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
         auto sceneTarget = Library::createTransientFBO(viewport.mSize, {
-            NewTextureFormat{
+            TextureFormat{
                 TextureTarget::Texture2D,
                 GL_RGB8,
                 GL_RGB,
             },
-            NewTextureFormat{
+            TextureFormat{
                 TextureTarget::Texture2D,
                 GL_DEPTH_COMPONENT,
                 GL_DEPTH_COMPONENT,

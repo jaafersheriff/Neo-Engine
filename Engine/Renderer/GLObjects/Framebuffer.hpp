@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NewTexture.hpp"
+#include "Texture.hpp"
 #include "GLHelper.hpp"
 
 #include "Util/Util.hpp"
@@ -17,7 +17,7 @@ namespace neo {
     public: 
         GLuint mFBOID;
         int mColorAttachments = 0;
-        std::vector<NewTexture *> mTextures;
+        std::vector<Texture *> mTextures;
 
         Framebuffer() {
             glGenFramebuffers(1, &mFBOID);
@@ -38,18 +38,18 @@ namespace neo {
             glReadBuffer(GL_NONE);
         }
         
-        void attachColorTexture(glm::uvec2 size, NewTextureFormat format) {
+        void attachColorTexture(glm::uvec2 size, TextureFormat format) {
             NEO_ASSERT(format.mTarget == TextureTarget::Texture2D, "Framebuffers need 2D textures");
-            NewTexture *t = new NewTexture(format, size, nullptr);
+            Texture *t = new Texture(format, size, nullptr);
             _attachTexture(GL_COLOR_ATTACHMENT0 + mColorAttachments++, *t);
         }
         
         void attachDepthTexture(glm::ivec2 size, GLint filter, GLenum mode) {
-            NewTexture *t = new NewTexture(NewTextureFormat{ TextureTarget::Texture2D, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, filter, mode }, size, nullptr);
+            Texture *t = new Texture(TextureFormat{ TextureTarget::Texture2D, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, filter, mode }, size, nullptr);
             _attachTexture(GL_DEPTH_ATTACHMENT, *t);
         }
         
-        void attachDepthTexture(NewTexture *t) {
+        void attachDepthTexture(Texture *t) {
             NEO_ASSERT(t->mFormat.mTarget == TextureTarget::Texture2D, "Framebuffers need 2D textures");
             NEO_ASSERT(t->mFormat.mInternalFormat == GL_DEPTH_COMPONENT, "Invalid depth target format");
             NEO_ASSERT(t->mFormat.mBaseFormat == GL_DEPTH_COMPONENT, "Invalid depth target format"); // or depth_16, 24, 32
@@ -58,7 +58,7 @@ namespace neo {
 
 
         void attachStencilTexture(glm::uvec2 size, GLint filter, GLenum mode) {
-            NewTexture* t = new NewTexture({ TextureTarget::Texture2D, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, filter, mode, GL_UNSIGNED_INT_24_8 }, size, nullptr);
+            Texture* t = new Texture({ TextureTarget::Texture2D, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, filter, mode, GL_UNSIGNED_INT_24_8 }, size, nullptr);
             _attachTexture(GL_DEPTH_STENCIL_ATTACHMENT, *t);
         }
         
@@ -89,7 +89,7 @@ namespace neo {
         }
 
         private:
-            void _attachTexture(GLuint component, NewTexture &texture) {
+            void _attachTexture(GLuint component, Texture &texture) {
                 mTextures.emplace_back(&texture);
                 bind();
                 glFramebufferTexture(GL_FRAMEBUFFER, component, texture.mTextureID, 0);
