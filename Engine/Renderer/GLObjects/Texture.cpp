@@ -47,7 +47,6 @@ namespace neo {
 
 		// Apply format
 		GLenum target = _getGLTarget(format.mTarget);
-		glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
         glTexParameteri(target, GL_TEXTURE_MAG_FILTER, mFormat.mFilter);
         glTexParameteri(target, GL_TEXTURE_MIN_FILTER, mFormat.mFilter);
 		switch (mFormat.mTarget) {

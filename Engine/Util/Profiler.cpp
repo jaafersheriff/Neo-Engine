@@ -24,7 +24,6 @@ void operator delete(void* ptr) noexcept {
 }
 
 #ifndef NO_LOCAL_TRACY
-void* zigzagTex;
 namespace {
     
     void RunOnMainThread( const std::function<void()>& cb, bool forceDelay = false )
@@ -49,7 +48,6 @@ namespace neo {
 
 #else
             LoadFonts(scale, s_fixedWidth, s_smallFont, s_bigFont);
-            zigzagTex = (void*)(intptr_t)0;
 
             tracy::Config config;
             config.threadedRendering = true;
