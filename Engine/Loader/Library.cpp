@@ -72,7 +72,7 @@ namespace neo {
     }
 
     MeshData Library::getMesh(const std::string& name) {
-        /* Search map first */
+        TRACY_ZONE();
         auto it = mMeshes.find(name);
         if (it != mMeshes.end()) {
             return it->second;
@@ -101,6 +101,7 @@ namespace neo {
     }
 
     Texture* Library::getTexture(const std::string& name) {
+        TRACY_ZONE();
         auto it = mTextures.find(name);
         if (it != mTextures.end()) {
             return it->second;
