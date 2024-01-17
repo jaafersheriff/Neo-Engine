@@ -187,7 +187,7 @@ namespace neo {
         if (viewportSize.x != 0 && viewportSize.y != 0) {
 #pragma warning(push)
 #pragma warning(disable: 4312)
-            ImGui::Image(reinterpret_cast<ImTextureID>(Library::getFBO("backbuffer")->mTextures[0]->mTextureID), { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::Image(reinterpret_cast<ImTextureID>(mDefaultFBO->mTextures[0]->mTextureID), { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
 #pragma warning(pop)
         }
         ImGui::End();

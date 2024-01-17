@@ -39,9 +39,10 @@ namespace neo {
             static Texture* createTexture(const std::string&, TextureFormat, glm::u16vec3 dimension, const void* data = nullptr);
             static Texture* loadCubemap(const std::string&, const std::vector<std::string> &);
 
+            // This is only being used for the offscreen backbuffer now..
+            // CreateTempFramebuffer should be extended to accept owned textures..
             static Framebuffer* createFramebuffer(const std::string&);
             static Framebuffer* createTempFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats);
-            static Framebuffer* getFBO(const std::string&);
 
 			static SourceShader* createSourceShader(const std::string& name, const SourceShader::ConstructionArgs& args);
 			static SourceShader* createSourceShader(const std::string& name, const SourceShader::ShaderCode& shaderCode);

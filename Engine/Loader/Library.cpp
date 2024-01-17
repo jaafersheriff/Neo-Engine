@@ -211,6 +211,7 @@ namespace neo {
 
     // This is faster than specialized std::hash
     Library::HashedTempFramebuffer Library::_getTempFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+        TRACY_ZONE();
         NEO_UNUSED(formats);
         HashedTempFramebuffer seed = size.x + size.y;
 		for (auto& i : formats) {
@@ -221,17 +222,6 @@ namespace neo {
 			seed ^= i.mType + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 		}
 		return seed;
-    }
-
-    Framebuffer* Library::getFBO(const std::string &name) {
-        TRACY_ZONE();
-        auto it = mFramebuffers.find(name);
-        if (it != mFramebuffers.end()) {
-            return it->second;
-        }
-
-        NEO_LOG_W("FBO %s doesn't exist", name.c_str());
-        return nullptr;
     }
 
     SourceShader* Library::createSourceShader(const std::string& name, const SourceShader::ConstructionArgs& args) {
@@ -261,6 +251,7 @@ namespace neo {
 
 
     SourceShader* Library::getSourceShader(const char* name) {
+        TRACY_ZONE();
         auto it = mShaders.find(name);
         NEO_ASSERT(it != mShaders.end(), "Shader %s doesn't exist!", name);
 
