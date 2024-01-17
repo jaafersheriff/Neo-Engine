@@ -132,7 +132,9 @@ namespace neo {
             return it->second;
         }
 
-        NEO_LOG("First request for %s, loading...", fileName.c_str());
+        if (data != nullptr) {
+            NEO_LOG("Uploading %s", fileName.c_str());
+        }
         Texture* texture = new Texture(format, dimension, data);
         _insertTexture(fileName, texture);
         return texture;

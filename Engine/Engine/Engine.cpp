@@ -262,9 +262,9 @@ namespace neo {
 
         /* Generate basic textures*/
         uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
-        auto tex = Library::createTexture("black", {}, glm::u16vec3(1), data);
+        Library::createTexture("black", {}, glm::u16vec3(1), data);
         data[0] = data[1] = data[2] = 0xFF;
-        tex = Library::createTexture("white", {}, glm::u16vec3(1), data);
+        Library::createTexture("white", {}, glm::u16vec3(1), data);
     }
 
     void Engine::shutDown() {

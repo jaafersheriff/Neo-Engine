@@ -192,16 +192,20 @@ namespace neo {
                     }
                     if (material.diffuse_texname.size()) {
                         asset.material.mDiffuseMap = Library::loadTexture(material.diffuse_texname, format);
+                        asset.material.mDiffuseMap->genMips();
                         asset.material.mAlphaMap = asset.material.mDiffuseMap;
                     }
                     if (material.specular_texname.size()) {
                         asset.material.mSpecularMap = Library::loadTexture(material.specular_texname, format);
+                        asset.material.mSpecularMap->genMips();
                     }
                     if (material.displacement_texname.size()) {
                         asset.material.mNormalMap = Library::loadTexture(material.displacement_texname, format);
+                        asset.material.mNormalMap->genMips();
                     }
                     if (material.alpha_texname.size()) {
                         asset.material.mAlphaMap = Library::loadTexture(material.alpha_texname, format);
+                        asset.material.mAlphaMap->genMips();
                     }
                 }
             }
