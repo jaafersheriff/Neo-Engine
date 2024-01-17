@@ -14,7 +14,7 @@ namespace neo {
         using ConstructionArgs = std::unordered_map<ShaderStage, std::string>;
         using ShaderCode = std::unordered_map<ShaderStage, const char*>;
         using ShaderDefines = std::unordered_set<std::string>;
-        using HashedShaderDefines = HashedString::value_type;
+        using HashedShaderDefines = uint32_t;
 
         SourceShader(const char* name, const ConstructionArgs& args);
         SourceShader(const char* name, const ShaderCode& args);

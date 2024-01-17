@@ -15,7 +15,7 @@ namespace neo {
     std::unordered_map<std::string, MeshData> Library::mMeshes;
     std::unordered_map<std::string, Texture*> Library::mTextures;
     std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
-    std::unordered_map<uint32_t, std::vector<Library::TempFramebuffer>> Library::mTemporaryFramebuffers;
+    std::unordered_map<neo::Library::HashedTempFramebuffer, std::vector<Library::TempFramebuffer>> Library::mTemporaryFramebuffers;
     std::unordered_map<std::string, SourceShader*> Library::mShaders;
     SourceShader* Library::mDummyShader;
 
@@ -188,7 +188,7 @@ namespace neo {
 
     Library::TempFramebuffer& Library::_findTempFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
         TRACY_ZONE();
-        uint32_t hash = _getTempFramebufferHash(size, formats);
+        HashedTempFramebuffer hash = _getTempFramebufferHash(size, formats);
         auto it = mTemporaryFramebuffers.find(hash);
 
         // First time seeing this description
@@ -211,9 +211,10 @@ namespace neo {
         }
     }
 
-    uint32_t Library::_getTempFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+    // This is faster than specialized std::hash
+    Library::HashedTempFramebuffer Library::_getTempFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
         NEO_UNUSED(formats);
-        uint32_t seed = size.x + size.y;
+        HashedTempFramebuffer seed = size.x + size.y;
 		for (auto& i : formats) {
 			seed ^= i.mBaseFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= i.mInternalFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);

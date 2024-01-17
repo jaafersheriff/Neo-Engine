@@ -59,13 +59,14 @@ namespace neo {
                 uint8_t mFrameCount = 0;
                 bool mUsedThisFrame = false;
             };
-            static std::unordered_map<uint32_t, std::vector<TempFramebuffer>> mTemporaryFramebuffers;
+            using HashedTempFramebuffer = uint32_t;
+            static std::unordered_map<HashedTempFramebuffer, std::vector<TempFramebuffer>> mTemporaryFramebuffers;
             static std::unordered_map<std::string, SourceShader*> mShaders;
             static SourceShader* mDummyShader;
 
             static void _insertMesh(const std::string&, MeshData);
             static void _insertTexture(const std::string&, Texture*);
-            static uint32_t _getTempFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats);
+            static HashedTempFramebuffer _getTempFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats);
             static TempFramebuffer& _findTempFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats);
     };
 
