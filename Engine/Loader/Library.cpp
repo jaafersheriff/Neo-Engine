@@ -194,8 +194,7 @@ namespace neo {
         // First time seeing this description
         if (it == mTemporaryFramebuffers.end()) {
             mTemporaryFramebuffers[hash] = {};
-            mTemporaryFramebuffers[hash].emplace_back(TempFramebuffer{});
-            return mTemporaryFramebuffers[hash].back();
+            return mTemporaryFramebuffers[hash].emplace_back(TempFramebuffer{});
         }
         else {
             // There's already a list here, search it
@@ -206,8 +205,7 @@ namespace neo {
                 }
             }
             // No unused resources :( Make a new one
-            it->second.emplace_back(TempFramebuffer{});
-            return it->second.back();
+            return it->second.emplace_back(TempFramebuffer{});
         }
     }
 
