@@ -93,7 +93,7 @@ namespace Cornell {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
         auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-        auto sceneTarget = Library::createTransientFBO(viewport.mSize, {
+        auto sceneTarget = Library::createTempFramebuffer(viewport.mSize, {
             TextureFormat{
                 TextureTarget::Texture2D,
                 GL_RGB8,

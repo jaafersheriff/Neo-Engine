@@ -39,8 +39,8 @@ namespace neo {
             static Texture* createTexture(const std::string&, TextureFormat, glm::u16vec3 dimension, const void* data = nullptr);
             static Texture* loadCubemap(const std::string&, const std::vector<std::string> &);
 
-            static Framebuffer* createFBO(const std::string&);
-            static Framebuffer* createTransientFBO(glm::uvec2 size, const std::vector<TextureFormat>& formats);
+            static Framebuffer* createFramebuffer(const std::string&);
+            static Framebuffer* createTempFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats);
             static Framebuffer* getFBO(const std::string&);
 
 			static SourceShader* createSourceShader(const std::string& name, const SourceShader::ConstructionArgs& args);
@@ -54,19 +54,19 @@ namespace neo {
             static std::unordered_map<std::string, MeshData> mMeshes;
             static std::unordered_map<std::string, Texture*> mTextures;
             static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
-            struct TransientValue {
-                Framebuffer* mFBO = nullptr;
+            struct TempFramebuffer {
+                Framebuffer* mFramebuffer = nullptr;
                 uint8_t mFrameCount = 0;
                 bool mUsedThisFrame = false;
             };
-            static std::unordered_map<uint32_t, std::vector<TransientValue>> mTransientFramebuffers;
+            static std::unordered_map<uint32_t, std::vector<TempFramebuffer>> mTemporaryFramebuffers;
             static std::unordered_map<std::string, SourceShader*> mShaders;
             static SourceShader* mDummyShader;
 
             static void _insertMesh(const std::string&, MeshData);
             static void _insertTexture(const std::string&, Texture*);
-            static uint32_t _getTransientFBOHash(glm::uvec2 size, const std::vector<TextureFormat>& formats);
-            static TransientValue& _findTransientResource(glm::uvec2 size, const std::vector<TextureFormat>& formats);
+            static uint32_t _getTempFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats);
+            static TempFramebuffer& _findTempFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats);
     };
 
 }

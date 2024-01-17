@@ -51,7 +51,7 @@ namespace neo {
         /* Init default FBO */
         glActiveTexture(GL_TEXTURE0);
 
-        mDefaultFBO = Library::createFBO("backbuffer");
+        mDefaultFBO = Library::createFramebuffer("backbuffer");
         TextureFormat format = { TextureTarget::Texture2D, GL_RGB16, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE };
         mDefaultFBO->attachColorTexture({ 1, 1 }, format);
         mDefaultFBO->attachDepthTexture({ 1, 1 }, GL_DEPTH_COMPONENT16, GL_LINEAR, GL_CLAMP_TO_EDGE);

@@ -15,7 +15,7 @@ namespace neo {
     std::unordered_map<std::string, MeshData> Library::mMeshes;
     std::unordered_map<std::string, Texture*> Library::mTextures;
     std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
-    std::unordered_map<uint32_t, std::vector<Library::TransientValue>> Library::mTransientFramebuffers;
+    std::unordered_map<uint32_t, std::vector<Library::TempFramebuffer>> Library::mTemporaryFramebuffers;
     std::unordered_map<std::string, SourceShader*> Library::mShaders;
     SourceShader* Library::mDummyShader;
 
@@ -43,12 +43,12 @@ namespace neo {
 
     void Library::tick() {
         TRACY_ZONE();
-        for (auto it = mTransientFramebuffers.begin(); it != mTransientFramebuffers.end();) {
+        for (auto it = mTemporaryFramebuffers.begin(); it != mTemporaryFramebuffers.end();) {
             auto& tvList = it->second;
             for (auto tvIt = tvList.begin(); tvIt != tvList.end();) {
                 if (tvIt->mFrameCount == 0) {
-                    tvIt->mFBO->destroy();
-                    delete tvIt->mFBO;
+                    tvIt->mFramebuffer->destroy();
+                    delete tvIt->mFramebuffer;
                     tvIt = tvList.erase(tvIt);
                 }
                 else {
@@ -63,9 +63,9 @@ namespace neo {
             }
 
             if (tvList.empty()) {
-                it = mTransientFramebuffers.erase(it);
+                it = mTemporaryFramebuffers.erase(it);
             }
-            if (it != mTransientFramebuffers.end()) {
+            if (it != mTemporaryFramebuffers.end()) {
                 it++;
             }
         }
@@ -149,32 +149,32 @@ namespace neo {
         return texture;
     }
 
-    Framebuffer* Library::createFBO(const std::string& name) {
+    Framebuffer* Library::createFramebuffer(const std::string& name) {
         auto fb = new Framebuffer;
         mFramebuffers.emplace(name, fb);
         NEO_LOG("Creating FBO %s", name.c_str());
         return fb;
     }
 
-    Framebuffer* Library::createTransientFBO(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+    Framebuffer* Library::createTempFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
         TRACY_ZONE();
-        TransientValue& tv = _findTransientResource(size, formats);
+        TempFramebuffer& tv = _findTempFramebuffer(size, formats);
         tv.mUsedThisFrame = true;
-        if (!tv.mFBO) {
-            tv.mFBO = new Framebuffer;
+        if (!tv.mFramebuffer) {
+            tv.mFramebuffer = new Framebuffer;
             for (auto& format : formats) {
                 if (format.mBaseFormat == GL_DEPTH_COMPONENT) {
-                    tv.mFBO->attachDepthTexture(size, format.mInternalFormat, format.mFilter, format.mMode);
+                    tv.mFramebuffer->attachDepthTexture(size, format.mInternalFormat, format.mFilter, format.mMode);
                 }
                 else if (format.mBaseFormat == GL_DEPTH_STENCIL) {
-                    tv.mFBO->attachStencilTexture(size, format.mFilter, format.mMode);
+                    tv.mFramebuffer->attachStencilTexture(size, format.mFilter, format.mMode);
                 }
                 else {
-                    tv.mFBO->attachColorTexture(size, format);
+                    tv.mFramebuffer->attachColorTexture(size, format);
                 }
             }
-            if (tv.mFBO->mColorAttachments) {
-                tv.mFBO->initDrawBuffers();
+            if (tv.mFramebuffer->mColorAttachments) {
+                tv.mFramebuffer->initDrawBuffers();
             }
             tv.mFrameCount = 1;
         }
@@ -183,19 +183,19 @@ namespace neo {
             tv.mFrameCount++;
         }
 
-        return tv.mFBO;
+        return tv.mFramebuffer;
     }
 
-    Library::TransientValue& Library::_findTransientResource(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+    Library::TempFramebuffer& Library::_findTempFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
         TRACY_ZONE();
-        uint32_t hash = _getTransientFBOHash(size, formats);
-        auto it = mTransientFramebuffers.find(hash);
+        uint32_t hash = _getTempFramebufferHash(size, formats);
+        auto it = mTemporaryFramebuffers.find(hash);
 
         // First time seeing this description
-        if (it == mTransientFramebuffers.end()) {
-            mTransientFramebuffers[hash] = {};
-            mTransientFramebuffers[hash].emplace_back(TransientValue{});
-            return mTransientFramebuffers[hash].back();
+        if (it == mTemporaryFramebuffers.end()) {
+            mTemporaryFramebuffers[hash] = {};
+            mTemporaryFramebuffers[hash].emplace_back(TempFramebuffer{});
+            return mTemporaryFramebuffers[hash].back();
         }
         else {
             // There's already a list here, search it
@@ -206,12 +206,12 @@ namespace neo {
                 }
             }
             // No unused resources :( Make a new one
-            it->second.emplace_back(TransientValue{});
+            it->second.emplace_back(TempFramebuffer{});
             return it->second.back();
         }
     }
 
-    uint32_t Library::_getTransientFBOHash(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+    uint32_t Library::_getTempFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
         NEO_UNUSED(formats);
         uint32_t seed = size.x + size.y;
 		for (auto& i : formats) {
@@ -322,10 +322,10 @@ namespace neo {
                 }
             }
             if (ImGui::TreeNodeEx("Transients", ImGuiTreeNodeFlags_DefaultOpen)) {
-                for (auto& [hash, tvList] : Library::mTransientFramebuffers) {
+                for (auto& [hash, tvList] : Library::mTemporaryFramebuffers) {
                     for (auto& tv : tvList) {
-                        ImGui::TextWrapped("[%d] (%d)", static_cast<int>(tv.mFrameCount), tv.mFBO->mFBOID);
-                        for (auto& t : tv.mFBO->mTextures) {
+                        ImGui::TextWrapped("[%d] (%d)", static_cast<int>(tv.mFrameCount), tv.mFramebuffer->mFBOID);
+                        for (auto& t : tv.mFramebuffer->mTextures) {
                             ImGui::SameLine();
                             ImGui::TextWrapped("%d [%d, %d]", t->mTextureID, t->mWidth, t->mHeight);
                             ImGui::SameLine();
