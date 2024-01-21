@@ -55,9 +55,9 @@ namespace neo {
 			ss << "with { ";
 			const ShaderDefines* _defines = &defines;
 			while (_defines) {
-				for (auto d = defines.mDefines.begin(); d != defines.mDefines.end(); d++) {
-					if (d->second) {
-						ss << d->first.mVal.data();
+                for (auto& define : _defines->mDefines) {
+					if (define.second) {
+						ss << define.first.mVal.data() << ", ";
 					}
 				}
 
