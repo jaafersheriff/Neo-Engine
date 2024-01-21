@@ -14,7 +14,7 @@
 namespace neo {
     namespace {
 
-        static std::string _processShader(const char* shaderString, const SourceShader::ShaderDefines& defines) {
+        static std::string _processShader(const char* shaderString, const ShaderDefines& defines) {
             if (!shaderString) {
                 return "";
             }
@@ -51,8 +51,15 @@ namespace neo {
             // #version, #defines
             std::stringstream preambleBuilder;
             preambleBuilder << ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion << "\n";
-            for (auto& define : defines) {
-                preambleBuilder << "#define " << define << "\n";
+            const ShaderDefines* _defines = &defines;
+            while (_defines) {
+                for (auto& define : _defines->mDefines) {
+                    if (define.second) {
+                        preambleBuilder << "#define " << define.first.mVal.data() << "\n";
+                    }
+
+                }
+                _defines = _defines->mParent;
             }
             sourceString.insert(0, preambleBuilder.str());
 
@@ -125,7 +132,7 @@ namespace neo {
         }
     }
 
-    bool ResolvedShaderInstance::init(const SourceShader::ShaderCode& shaderCode, const SourceShader::ShaderDefines& defines) {
+    bool ResolvedShaderInstance::init(const SourceShader::ShaderCode& shaderCode, const ShaderDefines& defines) {
         NEO_ASSERT(!mValid && mPid == 0, "TODO");
         mValid = false;
         mPid = glCreateProgram();

@@ -24,16 +24,15 @@
 namespace neo {
 
     template<typename... CompTs>
-    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const SourceShader::ShaderDefines& inDefines = {}) {
+    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const ShaderDefines& inDefines = {}) {
         TRACY_GPU();
-        const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
-        auto&& [lightEntity, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
 
-        SourceShader::ShaderDefines parentDefines = inDefines;
+        ShaderDefines passDefines(inDefines);
         bool containsAlphaTest = false;
+        MakeDefine(ALPHA_TEST);
         if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
             containsAlphaTest = true;
-            parentDefines.emplace("ALPHA_TEST");
+            passDefines.set(ALPHA_TEST);
             // Transparency sorting..for later
         //     glEnable(GL_BLEND);
         //     ecs.sort<AlphaTestComponent>([&cameraSpatial, &ecs](ECS::Entity entityLeft, ECS::Entity entityRight) {
@@ -46,11 +45,16 @@ namespace neo {
         //         });
         }
 
+        const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+        const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
+        auto&& [lightEntity, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
+
         glm::mat4 L;
         const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
         const bool shadowsEnabled = shadowMap && shadowCamera.has_value();
+        MakeDefine(ENABLE_SHADOWS);
         if (shadowsEnabled) {
-            parentDefines.emplace("ENABLE_SHADOWS");
+            passDefines.set(ENABLE_SHADOWS);
             const auto& [_, __, shadowOrtho, shadowCameraSpatial] = *shadowCamera;
             static glm::mat4 biasMatrix(
                 0.5f, 0.0f, 0.0f, 0.0f,
@@ -62,18 +66,20 @@ namespace neo {
         bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
         bool pointLight = ecs.has<PointLightComponent>(lightEntity);
         glm::vec3 attenuation(0.f);
+        MakeDefine(DIRECTIONAL_LIGHT);
+        MakeDefine(POINT_LIGHT);
         if (directionalLight) {
-            parentDefines.emplace("DIRECTIONAL_LIGHT");
+            passDefines.set(DIRECTIONAL_LIGHT);
         }
         else if (pointLight) {
             attenuation = ecs.cGetComponent<PointLightComponent>(lightEntity)->mAttenuation;
-            parentDefines.emplace("POINT_LIGHT");
+            passDefines.set(POINT_LIGHT);
         }
         else {
             NEO_FAIL("Phong light needs a directional or point light component");
         }
 
-        const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+        ShaderDefines drawDefines(passDefines);
         const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
         for (auto entity : view) {
             // VFC
@@ -87,13 +93,16 @@ namespace neo {
                 NEO_ASSERT(!ecs.has<OpaqueComponent>(entity), "Entity has opaque and alpha test component?");
             }
 
-            SourceShader::ShaderDefines drawDefines = parentDefines;
+            drawDefines.reset();
+
             const auto& material = view.get<const MaterialComponent>(entity);
+            MakeDefine(DIFFUSE_MAP);
+            MakeDefine(NORMAL_MAP);
             if (material.mDiffuseMap) {
-                drawDefines.emplace("DIFFUSE_MAP");
+                drawDefines.set(DIFFUSE_MAP);
             }
             if (material.mNormalMap) {
-                drawDefines.emplace("NORMAL_MAP");
+                drawDefines.set(NORMAL_MAP);
             }
 
             auto& resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(drawDefines);
@@ -137,8 +146,6 @@ namespace neo {
             resolvedShader.bindUniform("shine", material.mShininess);
 
             view.get<const MeshComponent>(entity).mMesh->draw();
-
-            resolvedShader.unbind();
         }
 
         if (containsAlphaTest) {

@@ -44,7 +44,6 @@ namespace neo {
 	}
 
 	const ResolvedShaderInstance& SourceShader::getResolvedInstance(const ShaderDefines& defines) {
-		TRACY_ZONE();
 		HashedShaderDefines hash = _getDefinesHash(defines);
 		auto it = mResolvedShaders.find(hash);
 		if (it == mResolvedShaders.end()) {
@@ -54,12 +53,15 @@ namespace neo {
 
 			std::stringstream ss;
 			ss << "with { ";
-			for (auto d = defines.begin(); d != defines.end(); d++) {
-				ss << d->c_str();
-				if (d != std::prev(defines.end())) {
-					ss << ", ";
+			const ShaderDefines* _defines = &defines;
+			while (_defines) {
+				for (auto d = defines.mDefines.begin(); d != defines.mDefines.end(); d++) {
+					if (d->second) {
+						ss << d->first.mVal.data();
+					}
 				}
 
+				_defines = _defines->mParent;
 			}
 			ss << " }";
 			if (it->second.mValid) {
@@ -78,10 +80,12 @@ namespace neo {
 	}
 
     // This is faster than specialized std::hash
-	SourceShader::HashedShaderDefines SourceShader::_getDefinesHash(const SourceShader::ShaderDefines& defines) {
-		HashedShaderDefines seed = static_cast<HashedShaderDefines>(defines.size());
-		for (auto& i : defines) {
-			seed ^= HashedString(i.c_str()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	SourceShader::HashedShaderDefines SourceShader::_getDefinesHash(const ShaderDefines& defines) {
+		HashedShaderDefines seed = static_cast<HashedShaderDefines>(defines.mDefines.size());
+		for (auto& i : defines.mDefines) {
+			if (i.second) {
+				seed ^= i.first.mVal.value() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			}
 		}
 		return seed;
 	}

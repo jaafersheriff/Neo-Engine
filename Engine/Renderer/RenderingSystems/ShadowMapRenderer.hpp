@@ -18,10 +18,14 @@ namespace neo {
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data());
         glViewport(0, 0, depthMap.mTextures[0]->mWidth, depthMap.mTextures[0]->mHeight);
 
+        ShaderDefines passDefines = {};
+        MakeDefine(ALPHA_TEST);
+
         bool containsAlphaTest = false;
         if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
-				// TODO - set GL state?
+			// TODO - set GL state?
             containsAlphaTest = true;
+            passDefines.set(ALPHA_TEST);
         }
 
         auto shadowCameraView = ecs.getSingleView<ShadowCameraComponent, SpatialComponent>();
@@ -39,15 +43,13 @@ namespace neo {
                 }
             }
 
-            SourceShader::ShaderDefines shaderDefines = {};
             auto material = ecs.cGetComponent<const MaterialComponent>(entity);
             Texture* alphaMap = nullptr;
             if (containsAlphaTest && material && material->mAlphaMap) {
                 alphaMap = material->mAlphaMap;
-                shaderDefines.emplace("ALPHA_TEST");
             }
 
-            auto resolvedShader = view.get<const ShadowCasterShaderComponent>(entity).getResolvedInstance(shaderDefines);
+            auto& resolvedShader = view.get<const ShadowCasterShaderComponent>(entity).getResolvedInstance(passDefines);
             resolvedShader.bind();
 
             if (alphaMap) {
@@ -58,8 +60,6 @@ namespace neo {
             resolvedShader.bindUniform("V", shadowCameraSpatial.getView());
             resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
             view.get<const MeshComponent>(entity).mMesh->draw();
-
-            resolvedShader.unbind();
         }
 
         if (containsAlphaTest) {

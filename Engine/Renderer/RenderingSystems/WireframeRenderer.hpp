@@ -10,7 +10,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-    void drawWireframe(const ECS& ecs, ECS::Entity cameraEntity, const SourceShader::ShaderDefines& inDefines = {}) {
+    void drawWireframe(const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
         TRACY_GPU();
 
         // TODO - stash the old state?

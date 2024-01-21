@@ -15,7 +15,7 @@ namespace neo {
     public:
         ShaderComponent(SourceShader* shader) : mSourceShader(shader) {}
 
-        const ResolvedShaderInstance& getResolvedInstance(const SourceShader::ShaderDefines& defines) const {
+        const ResolvedShaderInstance& getResolvedInstance(const ShaderDefines& defines) const {
             return mSourceShader->getResolvedInstance(defines);
         }
 
