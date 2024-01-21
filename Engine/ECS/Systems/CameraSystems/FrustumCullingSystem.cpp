@@ -17,24 +17,25 @@ namespace neo {
         NEO_ASSERT(ecs.isSystemEnabled<FrustumSystem>(), "This system can only be used with the FrustumSystem!");
         mCulledCount = 0;
 
-        auto cameras = ecs.getView<FrustumComponent>();
+        const auto& cameras = ecs.getView<FrustumComponent>();
 
         std::vector<ECS::Entity> cameraViews;
-        cameraViews.reserve(cameras.size());
+        cameraViews.resize(cameras.size());
         for (auto&& [entity, spatial, bb] : ecs.getView<SpatialComponent, BoundingBoxComponent>().each()) {
-            // cameraViews.clear();
             for (auto camera = cameraViews.begin(); camera < cameraViews.end(); camera++) {
                 *camera = static_cast<ECS::Entity>(std::numeric_limits<uint32_t>::max());
             }
 
-            for(auto&& [cameraEntity, frustum] : cameras.each()) {
+            int i = 0;
+            for (auto&& [cameraEntity, frustum] : cameras.each()) {
                 if ((ecs.has<PerspectiveCameraComponent>(cameraEntity) || ecs.has<OrthoCameraComponent>(cameraEntity)) && frustum.isInFrustum(spatial, bb)) {
-                    cameraViews.push_back(cameraEntity);
+                    cameraViews[i++] = cameraEntity;
                 }
                 else {
                     mCulledCount++;
                 }
             }
+
             if (auto* existingComp = ecs.getComponent<CameraCulledComponent>(entity)) {
                 existingComp->mCameraViews.swap(cameraViews);
             }
