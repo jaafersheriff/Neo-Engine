@@ -104,7 +104,7 @@ namespace Base {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
         auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-        auto sceneTarget = Library::createTempFramebuffer(viewport.mSize, {
+        auto sceneTarget = Library::getPooledFramebuffer(viewport.mSize, {
             TextureFormat{
                 TextureTarget::Texture2D,
                 GL_RGB16,
@@ -119,13 +119,11 @@ namespace Base {
 
         glm::vec3 clearColor = getConfig().clearColor;
 
-        sceneTarget->bind();
         sceneTarget->clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
         drawPhong<OpaqueComponent>(ecs, cameraEntity);
         drawPhong<AlphaTestComponent>(ecs, cameraEntity);
 
-        backbuffer.bind();
         backbuffer.clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT);
         drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
     }

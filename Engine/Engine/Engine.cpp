@@ -109,97 +109,109 @@ namespace neo {
         while (!mWindow.shouldClose()) {
             TRACY_ZONEN("Engine::run");
 
-            if (demos.needsReload()) {
-                _swapDemo(demos);
-            }
-
-            /* Update frame counter */
-            float runTime = static_cast<float>(glfwGetTime());
-            profiler.update(runTime);
-
-            /* Update display, mouse, keyboard */
-            mWindow.updateHardware();
-            if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                ServiceLocator<ImGuiManager>::ref().update();
-            }
-            Messenger::relayMessages(mECS);
-
             {
-                TRACY_ZONEN("FrameStats Entity");
-                auto hardware = mECS.createEntity();
-                mECS.addComponent<MouseComponent>(hardware, mMouse);
-                mECS.addComponent<KeyboardComponent>(hardware, mKeyboard);
-                if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                    mECS.addComponent<ViewportDetailsComponent>(hardware, ServiceLocator<ImGuiManager>::ref().getViewportSize(), mWindow.getDetails().mPos + ServiceLocator<ImGuiManager>::ref().getViewportOffset());
+                TRACY_ZONEN("Frame");
+                {
+                    TRACY_ZONEN("Frame Update");
+                    if (demos.needsReload()) {
+                        _swapDemo(demos);
+                    }
+
+                    /* Update frame counter */
+                    float runTime = static_cast<float>(glfwGetTime());
+                    profiler.update(runTime);
+
+                    /* Update display, mouse, keyboard */
+                    mWindow.updateHardware();
+                    if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+                        ServiceLocator<ImGuiManager>::ref().update();
+                    }
+                    Messenger::relayMessages(mECS);
+
+                    {
+                        TRACY_ZONEN("FrameStats Entity");
+                        auto hardware = mECS.createEntity();
+                        mECS.addComponent<MouseComponent>(hardware, mMouse);
+                        mECS.addComponent<KeyboardComponent>(hardware, mKeyboard);
+                        if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+                            mECS.addComponent<ViewportDetailsComponent>(hardware, ServiceLocator<ImGuiManager>::ref().getViewportSize(), mWindow.getDetails().mPos + ServiceLocator<ImGuiManager>::ref().getViewportOffset());
+                        }
+                        else {
+                            mECS.addComponent<ViewportDetailsComponent>(hardware, mWindow.getDetails().mSize, mWindow.getDetails().mPos);
+                        }
+                        mECS.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(profiler.mTimeStep));
+                        mECS.addComponent<SingleFrameComponent>(hardware);
+                    }
+
+                    {
+                        TRACY_ZONEN("Demo::update");
+                        demos.getCurrentDemo()->update(mECS);
+                    }
+
+                    /* Destroy and create objects and components */
+                    mECS.flush();
+                    Messenger::relayMessages(mECS);
+
+                    /* Update each system */
+                    mECS._updateSystems();
+                    Messenger::relayMessages(mECS);
+
+                    /* Update imgui functions */
+                    if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+                        TRACY_ZONEN("ImGui");
+                        ServiceLocator<ImGuiManager>::ref().begin();
+                        {
+                            TRACY_ZONEN("Demos Imgui");
+                            demos.imGuiEditor(mECS);
+                        }
+                        {
+                            TRACY_ZONEN("ECS Imgui");
+                            mECS.imguiEdtor();
+                        }
+                        {
+                            TRACY_ZONEN("Library ImGui");
+                            Library::imGuiEditor();
+                        }
+                        {
+                            TRACY_ZONEN("ImGuiManager ImGui");
+                            ServiceLocator<ImGuiManager>::ref().imGuiEditor();
+                        }
+                        {
+                            TRACY_ZONEN("Renderer Imgui");
+                            ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
+                        }
+                        {
+                            TRACY_ZONEN("Profiler Imgui");
+                            profiler.imGuiEditor();
+                        }
+
+                        ServiceLocator<ImGuiManager>::ref().end();
+                        Messenger::relayMessages(mECS);
+                    }
                 }
-                else {
-                    mECS.addComponent<ViewportDetailsComponent>(hardware, mWindow.getDetails().mSize, mWindow.getDetails().mPos);
+
+                /* Render */
+                // TODO - only run this at 60FPS in its own thread
+                // TODO - should this go after processkillqueue?
+                {
+                    TRACY_ZONEN("Frame Render");
+                    if (!mWindow.isMinimized()) {
+                        ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), mECS);
+                    }
+                    Messenger::relayMessages(mECS);
                 }
-                mECS.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(profiler.mTimeStep));
-                mECS.addComponent<SingleFrameComponent>(hardware);
+
+                // TODO - this should be its own system
+                {
+                    TRACY_ZONEN("Frame Cleanup");
+                    mECS.getView<SingleFrameComponent>().each([](ECS::Entity entity, SingleFrameComponent&) {
+                        mECS.removeEntity(entity);
+                        });
+
+                    // Flush resources
+                    Library::tick();
+                }
             }
-
-            {
-                TRACY_ZONEN("Demo::update");
-                demos.getCurrentDemo()->update(mECS);
-            }
-
-            /* Destroy and create objects and components */
-            mECS.flush();
-            Messenger::relayMessages(mECS);
-
-            /* Update each system */
-            mECS._updateSystems();
-            Messenger::relayMessages(mECS);
-
-            /* Update imgui functions */
-            if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-                TRACY_ZONEN("ImGui");
-                ServiceLocator<ImGuiManager>::ref().begin();
-                {
-                    TRACY_ZONEN("Demos Imgui");
-                    demos.imGuiEditor(mECS);
-                }
-                {
-                    TRACY_ZONEN("ECS Imgui");
-                    mECS.imguiEdtor();
-                }
-                {
-                    TRACY_ZONEN("Library ImGui");
-                    Library::imGuiEditor();
-                }
-                {
-                    TRACY_ZONEN("ImGuiManager ImGui");
-                    ServiceLocator<ImGuiManager>::ref().imGuiEditor();
-                }
-                {
-                    TRACY_ZONEN("Renderer Imgui");
-                    ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
-                }
-                {
-                    TRACY_ZONEN("Profiler Imgui");
-                    profiler.imGuiEditor();
-                }
-
-                ServiceLocator<ImGuiManager>::ref().end();
-                Messenger::relayMessages(mECS);
-            }
-
-            /* Render */
-            // TODO - only run this at 60FPS in its own thread
-            // TODO - should this go after processkillqueue?
-            if (!mWindow.isMinimized()) {
-            	ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), mECS);
-            }
-            Messenger::relayMessages(mECS);
-
-            // TODO - this should be its own system
-            mECS.getView<SingleFrameComponent>().each([](ECS::Entity entity, SingleFrameComponent&) {
-                mECS.removeEntity(entity);
-            });
-
-            // Flush resources
-            Library::tick();
 
             mWindow.flip();
             TracyGpuCollect;

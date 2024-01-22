@@ -159,32 +159,32 @@ namespace neo {
 
     Framebuffer* Library::getPooledFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
         TRACY_ZONE();
-        PooledFramebuffer& framebuffer = _findPooledFramebuffer(size, formats);
-        framebuffer.mUsedThisFrame = true;
-        if (!framebuffer.mFramebuffer) {
-            framebuffer.mFramebuffer = new Framebuffer;
+        PooledFramebuffer& pfb = _findPooledFramebuffer(size, formats);
+        pfb.mUsedThisFrame = true;
+        if (!pfb.mFramebuffer) {
+            pfb.mFramebuffer = new Framebuffer;
             for (auto& format : formats) {
                 if (format.mBaseFormat == GL_DEPTH_COMPONENT) {
-                    framebuffer.mFramebuffer->attachDepthTexture(size, format.mInternalFormat, format.mFilter, format.mMode);
+                    pfb.mFramebuffer->attachDepthTexture(size, format.mInternalFormat, format.mFilter, format.mMode);
                 }
                 else if (format.mBaseFormat == GL_DEPTH_STENCIL) {
-                    framebuffer.mFramebuffer->attachStencilTexture(size, format.mFilter, format.mMode);
+                    pfb.mFramebuffer->attachStencilTexture(size, format.mFilter, format.mMode);
                 }
                 else {
-                    framebuffer.mFramebuffer->attachColorTexture(size, format);
+                    pfb.mFramebuffer->attachColorTexture(size, format);
                 }
             }
-            if (framebuffer.mFramebuffer->mColorAttachments) {
-                framebuffer.mFramebuffer->initDrawBuffers();
+            if (pfb.mFramebuffer->mColorAttachments) {
+                pfb.mFramebuffer->initDrawBuffers();
             }
-            framebuffer.mFrameCount = 1;
+            pfb.mFrameCount = 1;
         }
 
-        if (framebuffer.mFrameCount < 5) {
-            framebuffer.mFrameCount++;
+        if (pfb.mFrameCount < 5) {
+            pfb.mFrameCount++;
         }
 
-        return framebuffer.mFramebuffer;
+        return pfb.mFramebuffer;
     }
 
     Library::PooledFramebuffer& Library::_findPooledFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats) {

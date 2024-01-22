@@ -121,7 +121,7 @@ namespace Sponza {
 
     void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
         auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-        auto sceneTarget = Library::createTempFramebuffer(viewport.mSize, {
+        auto sceneTarget = Library::getPooledFramebuffer(viewport.mSize, {
             TextureFormat{
                 TextureTarget::Texture2D,
                 GL_RGB16,
@@ -134,7 +134,7 @@ namespace Sponza {
             }
         });
 
-        auto shadowMap = Library::createTempFramebuffer(glm::uvec2(4096, 4096), { TextureFormat{
+        auto shadowMap = Library::getPooledFramebuffer(glm::uvec2(4096, 4096), { TextureFormat{
             TextureTarget::Texture2D,
             GL_DEPTH_COMPONENT16,
             GL_DEPTH_COMPONENT,
@@ -167,7 +167,7 @@ namespace Sponza {
     }
 
     void Demo::_deferredShading([[maybe_unused]] const ECS& ecs,[[maybe_unused]]  Framebuffer& sceneTarget, glm::uvec2 targetSize) {
-        auto gbuffer = Library::createTempFramebuffer(targetSize, {
+        auto gbuffer = Library::getPooledFramebuffer(targetSize, {
             // Albedo
             TextureFormat{
                 TextureTarget::Texture2D,
