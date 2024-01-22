@@ -26,7 +26,8 @@ namespace neo {
         ShaderDefines(const ShaderDefines& parent) 
             : mParent(&parent) {
         }
-
+        ShaderDefines& operator=(const ShaderDefines&) = delete;
+        ShaderDefines& operator=(ShaderDefines&&) = delete;
 
         void set(const ShaderDefine& define) {
             mDefines[define] = true;
