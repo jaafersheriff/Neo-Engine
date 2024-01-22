@@ -199,10 +199,10 @@ namespace neo {
         }
         else {
             // There's already a list here, search it
-            for (auto& existingTransient : it->second) {
+            for (auto& existingTemporary : it->second) {
                 // An unused resource exists
-                if (!existingTransient.mUsedThisFrame) {
-                    return existingTransient;
+                if (!existingTemporary.mUsedThisFrame) {
+                    return existingTemporary;
                 }
             }
             // No unused resources :( Make a new one
@@ -302,29 +302,37 @@ namespace neo {
             };
 
         ImGui::Begin("Library");
-        if (ImGui::TreeNodeEx("FBOs", ImGuiTreeNodeFlags_DefaultOpen)) {
-            for (auto& fbo : Library::mFramebuffers) {
-                ImGui::TextWrapped("%s (%d)", fbo.first.c_str(), fbo.second->mFBOID);
-                for (auto& t : fbo.second->mTextures) {
+
+        if (ImGui::TreeNodeEx("Framebuffers", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::BeginTable("##Framebuffers", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Reorderable | ImGuiTableFlags_ScrollX)) {
+                ImGui::TableSetupColumn("Name/Size");
+                ImGui::TableSetupColumn("Attachments");
+                ImGui::TableHeadersRow();
+                for (auto& fbo : Library::mFramebuffers) {
+                    ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(0);
+                    ImGui::Text("%s", fbo.first.c_str());
                     ImGui::SameLine();
-                    ImGui::TextWrapped("%d [%d, %d]", t->mTextureID, t->mWidth, t->mHeight);
-                    ImGui::SameLine();
-                    textureFunc(*t);
+                    ImGui::Text("[%d, %d]", fbo.second->mTextures[0]->mWidth, fbo.second->mTextures[0]->mHeight);
+                    ImGui::TableSetColumnIndex(1);
+                    for (auto& t : fbo.second->mTextures) {
+                        textureFunc(*t);
+                        ImGui::SameLine();
+                    }
                 }
-            }
-            if (ImGui::TreeNodeEx("Transients", ImGuiTreeNodeFlags_DefaultOpen)) {
                 for (auto& [hash, tvList] : Library::mTemporaryFramebuffers) {
                     for (auto& tv : tvList) {
-                        ImGui::TextWrapped("[%d] (%d)", static_cast<int>(tv.mFrameCount), tv.mFramebuffer->mFBOID);
+                        ImGui::TableNextRow();
+                        ImGui::TableSetColumnIndex(0);
+                        ImGui::Text("[%d, %d]", tv.mFramebuffer->mTextures[0]->mWidth, tv.mFramebuffer->mTextures[0]->mHeight);
+                        ImGui::TableSetColumnIndex(1);
                         for (auto& t : tv.mFramebuffer->mTextures) {
-                            ImGui::SameLine();
-                            ImGui::TextWrapped("%d [%d, %d]", t->mTextureID, t->mWidth, t->mHeight);
-                            ImGui::SameLine();
                             textureFunc(*t);
+                            ImGui::SameLine();
                         }
                     }
                 }
-                ImGui::TreePop();
+                ImGui::EndTable();
             }
             ImGui::TreePop();
         }

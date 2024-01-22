@@ -14,6 +14,7 @@
 #include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
+#include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
@@ -27,6 +28,7 @@
 
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
+#include "Renderer/RenderingSystems/FXAARenderer.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -111,8 +113,26 @@ namespace Sponza {
         ecs.addSystem<FrustumCullingSystem>();
     }
 
+    void Demo::imGuiEditor(ECS& ecs) {
+        NEO_UNUSED(ecs);
+ 
+        ImGui::Checkbox("Deferred Shading", &mDeferredShading);
+    }
+
     void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
-        const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+        auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
+        auto sceneTarget = Library::createTempFramebuffer(viewport.mSize, {
+            TextureFormat{
+                TextureTarget::Texture2D,
+                GL_RGB16,
+                GL_RGB,
+            },
+            TextureFormat{
+                TextureTarget::Texture2D,
+                GL_DEPTH_COMPONENT16,
+                GL_DEPTH_COMPONENT,
+            }
+        });
 
         auto shadowMap = Library::createTempFramebuffer(glm::uvec2(4096, 4096), { TextureFormat{
             TextureTarget::Texture2D,
@@ -124,11 +144,51 @@ namespace Sponza {
         drawShadows<OpaqueComponent>(*shadowMap, ecs);
         drawShadows<AlphaTestComponent>(*shadowMap, ecs);
 
-        backbuffer.bind();
-        backbuffer.clear(glm::vec4(getConfig().clearColor, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight);
-        drawPhong<OpaqueComponent>(ecs, cameraEntity, shadowMap->mTextures[0]);
-        drawPhong<AlphaTestComponent>(ecs, cameraEntity, shadowMap->mTextures[0]);
+        if (mDeferredShading) {
+            _deferredShading(ecs, *sceneTarget, viewport.mSize);
+        }
+        else {
+            _forwardShading(ecs, *sceneTarget, shadowMap->mTextures[0]);
+        }
 
+        backbuffer.bind();
+        backbuffer.clear(glm::vec4(getConfig().clearColor, 1.f), GL_COLOR_BUFFER_BIT);
+        drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
+    }
+
+    void Demo::_forwardShading(const ECS& ecs, Framebuffer& sceneTarget, Texture* shadowMap) {
+        const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+
+        sceneTarget.bind();
+        sceneTarget.clear(glm::vec4(getConfig().clearColor, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
+        drawPhong<OpaqueComponent>(ecs, cameraEntity, shadowMap);
+        drawPhong<AlphaTestComponent>(ecs, cameraEntity, shadowMap);
+    }
+
+    void Demo::_deferredShading([[maybe_unused]] const ECS& ecs,[[maybe_unused]]  Framebuffer& sceneTarget, glm::uvec2 targetSize) {
+        auto gbuffer = Library::createTempFramebuffer(targetSize, {
+            // Albedo
+            TextureFormat{
+                TextureTarget::Texture2D,
+                GL_RGB16,
+                GL_RGB,
+            },
+            // Normals
+            TextureFormat{
+                TextureTarget::Texture2D,
+                GL_RGB16,
+                GL_RGB,
+            },
+            // Depth
+            TextureFormat{
+                TextureTarget::Texture2D,
+                GL_DEPTH_COMPONENT16,
+                GL_DEPTH_COMPONENT,
+            }
+        });
+
+        gbuffer->bind();
+        gbuffer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 }
