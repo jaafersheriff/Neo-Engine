@@ -294,7 +294,7 @@ namespace neo {
 
     void Library::imGuiEditor() {
         auto textureFunc = [&](const Texture& texture) {
-            float scale = 150.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
+            float scale = 200.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
 #pragma warning(push)
 #pragma warning(disable: 4312)
                 ImGui::Image(reinterpret_cast<ImTextureID>(texture.mTextureID), ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
@@ -312,7 +312,6 @@ namespace neo {
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
                     ImGui::Text("%s", fbo.first.c_str());
-                    ImGui::SameLine();
                     ImGui::Text("[%d, %d]", fbo.second->mTextures[0]->mWidth, fbo.second->mTextures[0]->mHeight);
                     ImGui::TableSetColumnIndex(1);
                     for (auto& t : fbo.second->mTextures) {
@@ -353,8 +352,8 @@ namespace neo {
         }
         if (ImGui::TreeNodeEx("Textures", ImGuiTreeNodeFlags_DefaultOpen)) {
             for (auto& t : Library::mTextures) {
-                if (ImGui::TreeNode((t.first + " (" + std::to_string(t.second->mTextureID) + ")" + " [" + std::to_string(t.second->mWidth) + ", " + std::to_string(t.second->mHeight) + "]").c_str())) {
-                    // TODO - only run this on 2D textures
+                if (ImGui::TreeNode(t.first.c_str())) {
+                    ImGui::Text("[%d, %d]", t.second->mWidth, t.second->mHeight);
                     textureFunc(*t.second);
                     ImGui::TreePop();
                 }
