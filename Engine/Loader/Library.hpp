@@ -40,9 +40,9 @@ namespace neo {
             static Texture* loadCubemap(const std::string&, const std::vector<std::string> &);
 
             // This is only being used for the offscreen backbuffer now..
-            // CreateTempFramebuffer should be extended to accept owned textures..
+            // getPooledFramebuffer should be extended to accept owned textures..
             static Framebuffer* createFramebuffer(const std::string&);
-            static Framebuffer* createTempFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats);
+            static Framebuffer* getPooledFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats);
 
 			static SourceShader* createSourceShader(const std::string& name, const SourceShader::ConstructionArgs& args);
 			static SourceShader* createSourceShader(const std::string& name, const SourceShader::ShaderCode& shaderCode);
@@ -55,20 +55,20 @@ namespace neo {
             static std::unordered_map<std::string, MeshData> mMeshes;
             static std::unordered_map<std::string, Texture*> mTextures;
             static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
-            struct TempFramebuffer {
+            struct PooledFramebuffer {
                 Framebuffer* mFramebuffer = nullptr;
                 uint8_t mFrameCount = 0;
                 bool mUsedThisFrame = false;
             };
-            using HashedTempFramebuffer = uint32_t;
-            static std::unordered_map<HashedTempFramebuffer, std::vector<TempFramebuffer>> mTemporaryFramebuffers;
+            using PooledFramebufferHash = uint32_t;
+            static std::unordered_map<PooledFramebufferHash, std::vector<PooledFramebuffer>> mPooledFramebuffers;
             static std::unordered_map<std::string, SourceShader*> mShaders;
             static SourceShader* mDummyShader;
 
             static void _insertMesh(const std::string&, MeshData);
             static void _insertTexture(const std::string&, Texture*);
-            static HashedTempFramebuffer _getTempFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats);
-            static TempFramebuffer& _findTempFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats);
+            static PooledFramebufferHash _getPooledFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats);
+            static PooledFramebuffer& _findPooledFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats);
     };
 
 }

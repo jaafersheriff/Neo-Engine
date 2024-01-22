@@ -15,7 +15,7 @@ namespace neo {
     std::unordered_map<std::string, MeshData> Library::mMeshes;
     std::unordered_map<std::string, Texture*> Library::mTextures;
     std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
-    std::unordered_map<neo::Library::HashedTempFramebuffer, std::vector<Library::TempFramebuffer>> Library::mTemporaryFramebuffers;
+    std::unordered_map<neo::Library::PooledFramebufferHash, std::vector<Library::PooledFramebuffer>> Library::mPooledFramebuffers;
     std::unordered_map<std::string, SourceShader*> Library::mShaders;
     SourceShader* Library::mDummyShader;
 
@@ -43,7 +43,7 @@ namespace neo {
 
     void Library::tick() {
         TRACY_ZONE();
-        for (auto it = mTemporaryFramebuffers.begin(); it != mTemporaryFramebuffers.end();) {
+        for (auto it = mPooledFramebuffers.begin(); it != mPooledFramebuffers.end();) {
             auto& tvList = it->second;
             for (auto tvIt = tvList.begin(); tvIt != tvList.end();) {
                 if (tvIt->mFrameCount == 0) {
@@ -63,9 +63,9 @@ namespace neo {
             }
 
             if (tvList.empty()) {
-                it = mTemporaryFramebuffers.erase(it);
+                it = mPooledFramebuffers.erase(it);
             }
-            if (it != mTemporaryFramebuffers.end()) {
+            if (it != mPooledFramebuffers.end()) {
                 it++;
             }
         }
@@ -157,64 +157,64 @@ namespace neo {
         return fb;
     }
 
-    Framebuffer* Library::createTempFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+    Framebuffer* Library::getPooledFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
         TRACY_ZONE();
-        TempFramebuffer& tv = _findTempFramebuffer(size, formats);
-        tv.mUsedThisFrame = true;
-        if (!tv.mFramebuffer) {
-            tv.mFramebuffer = new Framebuffer;
+        PooledFramebuffer& framebuffer = _findPooledFramebuffer(size, formats);
+        framebuffer.mUsedThisFrame = true;
+        if (!framebuffer.mFramebuffer) {
+            framebuffer.mFramebuffer = new Framebuffer;
             for (auto& format : formats) {
                 if (format.mBaseFormat == GL_DEPTH_COMPONENT) {
-                    tv.mFramebuffer->attachDepthTexture(size, format.mInternalFormat, format.mFilter, format.mMode);
+                    framebuffer.mFramebuffer->attachDepthTexture(size, format.mInternalFormat, format.mFilter, format.mMode);
                 }
                 else if (format.mBaseFormat == GL_DEPTH_STENCIL) {
-                    tv.mFramebuffer->attachStencilTexture(size, format.mFilter, format.mMode);
+                    framebuffer.mFramebuffer->attachStencilTexture(size, format.mFilter, format.mMode);
                 }
                 else {
-                    tv.mFramebuffer->attachColorTexture(size, format);
+                    framebuffer.mFramebuffer->attachColorTexture(size, format);
                 }
             }
-            if (tv.mFramebuffer->mColorAttachments) {
-                tv.mFramebuffer->initDrawBuffers();
+            if (framebuffer.mFramebuffer->mColorAttachments) {
+                framebuffer.mFramebuffer->initDrawBuffers();
             }
-            tv.mFrameCount = 1;
+            framebuffer.mFrameCount = 1;
         }
 
-        if (tv.mFrameCount < 5) {
-            tv.mFrameCount++;
+        if (framebuffer.mFrameCount < 5) {
+            framebuffer.mFrameCount++;
         }
 
-        return tv.mFramebuffer;
+        return framebuffer.mFramebuffer;
     }
 
-    Library::TempFramebuffer& Library::_findTempFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+    Library::PooledFramebuffer& Library::_findPooledFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
         TRACY_ZONE();
-        HashedTempFramebuffer hash = _getTempFramebufferHash(size, formats);
-        auto it = mTemporaryFramebuffers.find(hash);
+        PooledFramebufferHash hash = _getPooledFramebufferHash(size, formats);
+        auto it = mPooledFramebuffers.find(hash);
 
         // First time seeing this description
-        if (it == mTemporaryFramebuffers.end()) {
-            mTemporaryFramebuffers[hash] = {};
-            return mTemporaryFramebuffers[hash].emplace_back(TempFramebuffer{});
+        if (it == mPooledFramebuffers.end()) {
+            mPooledFramebuffers[hash] = {};
+            return mPooledFramebuffers[hash].emplace_back(PooledFramebuffer{});
         }
         else {
             // There's already a list here, search it
-            for (auto& existingTemporary : it->second) {
+            for (auto& existingFramebuffer : it->second) {
                 // An unused resource exists
-                if (!existingTemporary.mUsedThisFrame) {
-                    return existingTemporary;
+                if (!existingFramebuffer.mUsedThisFrame) {
+                    return existingFramebuffer;
                 }
             }
             // No unused resources :( Make a new one
-            return it->second.emplace_back(TempFramebuffer{});
+            return it->second.emplace_back(PooledFramebuffer{});
         }
     }
 
     // This is faster than specialized std::hash
-    Library::HashedTempFramebuffer Library::_getTempFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+    Library::PooledFramebufferHash Library::_getPooledFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
         TRACY_ZONE();
         NEO_UNUSED(formats);
-        HashedTempFramebuffer seed = size.x + size.y;
+        PooledFramebufferHash seed = size.x + size.y;
 		for (auto& i : formats) {
 			seed ^= i.mBaseFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= i.mInternalFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -319,7 +319,7 @@ namespace neo {
                         ImGui::SameLine();
                     }
                 }
-                for (auto& [hash, tvList] : Library::mTemporaryFramebuffers) {
+                for (auto& [hash, tvList] : Library::mPooledFramebuffers) {
                     for (auto& tv : tvList) {
                         ImGui::TableNextRow();
                         ImGui::TableSetColumnIndex(0);
