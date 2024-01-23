@@ -93,7 +93,7 @@ namespace Cornell {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
         auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-        auto sceneTarget = Library::getPooledFramebuffer(viewport.mSize, {
+        auto sceneTarget = Library::getPooledFramebuffer({ viewport.mSize, {
             TextureFormat{
                 TextureTarget::Texture2D,
                 GL_RGB8,
@@ -104,7 +104,7 @@ namespace Cornell {
                 GL_DEPTH_COMPONENT16,
                 GL_DEPTH_COMPONENT,
             }
-        });
+        } }, "Scene target");
 
         glm::vec3 clearColor = getConfig().clearColor;
 

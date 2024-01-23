@@ -15,7 +15,7 @@ namespace neo {
     std::unordered_map<std::string, MeshData> Library::mMeshes;
     std::unordered_map<std::string, Texture*> Library::mTextures;
     std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
-    std::unordered_map<neo::Library::PooledFramebufferHash, std::vector<Library::PooledFramebuffer>> Library::mPooledFramebuffers;
+    std::unordered_map<neo::PooledFramebufferDetails, std::vector<Library::PooledFramebuffer>> Library::mPooledFramebuffers;
     std::unordered_map<std::string, SourceShader*> Library::mShaders;
     SourceShader* Library::mDummyShader;
 
@@ -157,21 +157,22 @@ namespace neo {
         return fb;
     }
 
-    Framebuffer* Library::getPooledFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+    Framebuffer* Library::getPooledFramebuffer(const PooledFramebufferDetails& details, std::optional<std::string> name) {
         TRACY_ZONE();
-        PooledFramebuffer& pfb = _findPooledFramebuffer(size, formats);
+        PooledFramebuffer& pfb = _findPooledFramebuffer(details);
         pfb.mUsedThisFrame = true;
+        pfb.mName = name;
         if (!pfb.mFramebuffer) {
             pfb.mFramebuffer = new Framebuffer;
-            for (auto& format : formats) {
+            for (auto& format : details.mFormats) {
                 if (format.mBaseFormat == GL_DEPTH_COMPONENT) {
-                    pfb.mFramebuffer->attachDepthTexture(size, format.mInternalFormat, format.mFilter, format.mMode);
+                    pfb.mFramebuffer->attachDepthTexture(details.mSize, format.mInternalFormat, format.mFilter, format.mMode);
                 }
                 else if (format.mBaseFormat == GL_DEPTH_STENCIL) {
-                    pfb.mFramebuffer->attachStencilTexture(size, format.mFilter, format.mMode);
+                    pfb.mFramebuffer->attachStencilTexture(details.mSize, format.mFilter, format.mMode);
                 }
                 else {
-                    pfb.mFramebuffer->attachColorTexture(size, format);
+                    pfb.mFramebuffer->attachColorTexture(details.mSize, format);
                 }
             }
             if (pfb.mFramebuffer->mColorAttachments) {
@@ -187,15 +188,14 @@ namespace neo {
         return pfb.mFramebuffer;
     }
 
-    Library::PooledFramebuffer& Library::_findPooledFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
+    Library::PooledFramebuffer& Library::_findPooledFramebuffer(const PooledFramebufferDetails& details) {
         TRACY_ZONE();
-        PooledFramebufferHash hash = _getPooledFramebufferHash(size, formats);
-        auto it = mPooledFramebuffers.find(hash);
+        auto it = mPooledFramebuffers.find(details);
 
         // First time seeing this description
         if (it == mPooledFramebuffers.end()) {
-            mPooledFramebuffers[hash] = {};
-            return mPooledFramebuffers[hash].emplace_back(PooledFramebuffer{});
+            mPooledFramebuffers[details] = {};
+            return mPooledFramebuffers[details].emplace_back(PooledFramebuffer{});
         }
         else {
             // There's already a list here, search it
@@ -208,21 +208,6 @@ namespace neo {
             // No unused resources :( Make a new one
             return it->second.emplace_back(PooledFramebuffer{});
         }
-    }
-
-    // This is faster than specialized std::hash
-    Library::PooledFramebufferHash Library::_getPooledFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats) {
-        TRACY_ZONE();
-        NEO_UNUSED(formats);
-        PooledFramebufferHash seed = size.x + size.y;
-		for (auto& i : formats) {
-			seed ^= i.mBaseFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-			seed ^= i.mInternalFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-			seed ^= i.mFilter + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-			seed ^= i.mMode + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-			seed ^= i.mType + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-		}
-		return seed;
     }
 
     SourceShader* Library::createSourceShader(const std::string& name, const SourceShader::ConstructionArgs& args) {
@@ -323,6 +308,9 @@ namespace neo {
                     for (auto& tv : tvList) {
                         ImGui::TableNextRow();
                         ImGui::TableSetColumnIndex(0);
+                        if (tv.mName) {
+                            ImGui::Text("*%s", tv.mName.value().c_str());
+                        }
                         ImGui::Text("[%d, %d]", tv.mFramebuffer->mTextures[0]->mWidth, tv.mFramebuffer->mTextures[0]->mHeight);
                         ImGui::TableSetColumnIndex(1);
                         for (auto& t : tv.mFramebuffer->mTextures) {

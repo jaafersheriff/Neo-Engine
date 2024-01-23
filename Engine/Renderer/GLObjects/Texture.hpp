@@ -21,6 +21,16 @@ namespace neo {
         GLint mFilter = GL_LINEAR; // TODO - this should be split between min/mag/mip
         GLenum mMode = GL_REPEAT; // TODO - this should be split between STR
         GLenum mType = GL_UNSIGNED_BYTE;
+
+		bool operator==(const TextureFormat& other) const noexcept {
+			return mTarget == other.mTarget
+				&& mInternalFormat == other.mInternalFormat
+				&& mBaseFormat == other.mBaseFormat
+				&& mFilter == other.mFilter
+				&& mMode == other.mMode
+				&& mType == other.mType
+			;
+		}
 	};
 
 	class Texture {

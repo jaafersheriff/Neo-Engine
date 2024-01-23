@@ -15,6 +15,16 @@ namespace neo {
     class Framebuffer;
     class SourceShader;
 
+    struct PooledFramebufferDetails {
+        glm::uvec2 mSize;
+        std::vector<TextureFormat> mFormats;
+
+        bool operator==(const PooledFramebufferDetails& other) const {
+            // Kinda faulty, but meh
+            return other.mSize == mSize && other.mFormats == mFormats;
+        }
+    };
+
     class Library {
 
         friend Engine;
@@ -42,7 +52,7 @@ namespace neo {
             // This is only being used for the offscreen backbuffer now..
             // getPooledFramebuffer should be extended to accept owned textures..
             static Framebuffer* createFramebuffer(const std::string&);
-            static Framebuffer* getPooledFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats);
+            static Framebuffer* getPooledFramebuffer(const PooledFramebufferDetails& details, std::optional<std::string> name = std::nullopt);
 
 			static SourceShader* createSourceShader(const std::string& name, const SourceShader::ConstructionArgs& args);
 			static SourceShader* createSourceShader(const std::string& name, const SourceShader::ShaderCode& shaderCode);
@@ -59,19 +69,32 @@ namespace neo {
                 Framebuffer* mFramebuffer = nullptr;
                 uint8_t mFrameCount = 0;
                 bool mUsedThisFrame = false;
+                std::optional<std::string> mName = std::nullopt;
             };
-            using PooledFramebufferHash = uint32_t;
-            static std::unordered_map<PooledFramebufferHash, std::vector<PooledFramebuffer>> mPooledFramebuffers;
+            static std::unordered_map<PooledFramebufferDetails, std::vector<PooledFramebuffer>> mPooledFramebuffers;
             static std::unordered_map<std::string, SourceShader*> mShaders;
             static SourceShader* mDummyShader;
 
             static void _insertMesh(const std::string&, MeshData);
             static void _insertTexture(const std::string&, Texture*);
-            static PooledFramebufferHash _getPooledFramebufferHash(glm::uvec2 size, const std::vector<TextureFormat>& formats);
-            static PooledFramebuffer& _findPooledFramebuffer(glm::uvec2 size, const std::vector<TextureFormat>& formats);
+            static PooledFramebuffer& _findPooledFramebuffer(const PooledFramebufferDetails& details);
     };
-
 }
 
+namespace std {
+    template<> struct hash<neo::PooledFramebufferDetails> {
+        size_t operator()(const neo::PooledFramebufferDetails& details) const noexcept {
+            size_t seed = details.mSize.x + details.mSize.y;
+            for (auto& i : details.mFormats) {
+                seed ^= i.mBaseFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+                seed ^= i.mInternalFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+                seed ^= i.mFilter + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+                seed ^= i.mMode + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+                seed ^= i.mType + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            }
+            return seed;
+        }
+    };
+}
 
 

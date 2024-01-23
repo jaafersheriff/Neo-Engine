@@ -104,7 +104,7 @@ namespace Base {
         const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
         auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-        auto sceneTarget = Library::getPooledFramebuffer(viewport.mSize, {
+        auto sceneTarget = Library::getPooledFramebuffer(PooledFramebufferDetails{ viewport.mSize, {
             TextureFormat{
                 TextureTarget::Texture2D,
                 GL_RGB16,
@@ -115,7 +115,7 @@ namespace Base {
                 GL_DEPTH_COMPONENT16,
                 GL_DEPTH_COMPONENT,
             }
-        });
+        } }, "Scene target");
 
         glm::vec3 clearColor = getConfig().clearColor;
 
