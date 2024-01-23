@@ -40,7 +40,7 @@ namespace neo {
             }
         }
 
-        const ShaderDefines* mParent = nullptr;
+        const ShaderDefines* const mParent = nullptr;
         std::map<ShaderDefine, bool> mDefines;
     };
 
