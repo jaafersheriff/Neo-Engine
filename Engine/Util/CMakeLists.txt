@@ -10,6 +10,7 @@ PUBLIC
 	libglew_static 
 PRIVATE
 	glfw
+	implots
 )
 
 if (NO_LOCAL_TRACY) 

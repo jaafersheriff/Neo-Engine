@@ -148,11 +148,9 @@ set_target_properties(SPIRV PROPERTIES FOLDER "Neo/ext/glslang")
 ## imgui
 file(GLOB IMGUI_CPP_FILES 
 	imgui/*.cpp
-	implot/*.cpp
 )
 file(GLOB IMGUI_HPP_FILES 
 	imgui/*.h
-	implot/*.h
 	imgui_entt_entity_editor/*.hpp
 )
 add_library(imgui STATIC
@@ -168,7 +166,6 @@ target_include_directories(imgui
 PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/"
  	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/"
- 	"${CMAKE_CURRENT_SOURCE_DIR}/implot"
  	"${CMAKE_CURRENT_SOURCE_DIR}/imgui_entt_entity_editor"
 )
 target_link_libraries(imgui
@@ -176,6 +173,33 @@ PUBLIC
 PRIVATE
 	glfw
 	entt
+)
+target_compile_definitions(imgui 
+PRIVATE
+	IMGUI_DISABLE_OBSOLETE_FUNCTIONS
+)
+
+## implots
+file(GLOB IMPLOTS_CPP_FILES 
+	implot/*.cpp
+)
+file(GLOB IMPLOTS_HPP_FILES 
+	implot/*.h
+)
+add_library(implots STATIC
+	${IMPLOTS_CPP_FILES}
+	${IMPLOTS_HPP_FILES}
+)
+set_target_properties(implots PROPERTIES FOLDER "Neo/ext")
+target_include_directories(implots
+PUBLIC
+	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/"
+ 	"${CMAKE_CURRENT_SOURCE_DIR}/implot"
+)
+target_link_libraries(implots
+PUBLIC
+PRIVATE
+	glfw
 )
 
 ## entt

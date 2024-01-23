@@ -11,11 +11,11 @@ void main() {
     float FXAA_REDUCE_MUL = 1.0/8.0;
     float FXAA_REDUCE_MIN = 1.0/128.0;
 
-    vec3 rgbNW=texture2D(inputTexture,fragTex+(vec2(-1.0,-1.0)/frameSize)).xyz;
-    vec3 rgbNE=texture2D(inputTexture,fragTex+(vec2( 1.0,-1.0)/frameSize)).xyz;
-    vec3 rgbSW=texture2D(inputTexture,fragTex+(vec2(-1.0, 1.0)/frameSize)).xyz;
-    vec3 rgbSE=texture2D(inputTexture,fragTex+(vec2( 1.0, 1.0)/frameSize)).xyz;
-    vec3 rgbM= texture2D(inputTexture,fragTex).xyz;
+    vec3 rgbNW=texture(inputTexture,fragTex+(vec2(-1.0,-1.0)/frameSize)).xyz;
+    vec3 rgbNE=texture(inputTexture,fragTex+(vec2( 1.0,-1.0)/frameSize)).xyz;
+    vec3 rgbSW=texture(inputTexture,fragTex+(vec2(-1.0, 1.0)/frameSize)).xyz;
+    vec3 rgbSE=texture(inputTexture,fragTex+(vec2( 1.0, 1.0)/frameSize)).xyz;
+    vec3 rgbM= texture(inputTexture,fragTex).xyz;
 
     vec3 luma=vec3(0.299, 0.587, 0.114);
     float lumaNW = dot(rgbNW, luma);
@@ -42,11 +42,11 @@ void main() {
           dir * rcpDirMin)) / frameSize;
 
     vec3 rgbA = (1.0/2.0) * (
-        texture2D(inputTexture, fragTex.xy + dir * (1.0/3.0 - 0.5)).xyz +
-        texture2D(inputTexture, fragTex.xy + dir * (2.0/3.0 - 0.5)).xyz);
+        texture(inputTexture, fragTex.xy + dir * (1.0/3.0 - 0.5)).xyz +
+        texture(inputTexture, fragTex.xy + dir * (2.0/3.0 - 0.5)).xyz);
     vec3 rgbB = rgbA * (1.0/2.0) + (1.0/4.0) * (
-        texture2D(inputTexture, fragTex.xy + dir * (0.0/3.0 - 0.5)).xyz +
-        texture2D(inputTexture, fragTex.xy + dir * (3.0/3.0 - 0.5)).xyz);
+        texture(inputTexture, fragTex.xy + dir * (0.0/3.0 - 0.5)).xyz +
+        texture(inputTexture, fragTex.xy + dir * (3.0/3.0 - 0.5)).xyz);
     float lumaB = dot(rgbB, luma);
 
     if((lumaB < lumaMin) || (lumaB > lumaMax)){

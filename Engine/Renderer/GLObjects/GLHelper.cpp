@@ -57,7 +57,7 @@ namespace neo {
                 case GL_DEBUG_SEVERITY_LOW:          NEO_LOG_W(glBuf); return;
                 case GL_DEBUG_SEVERITY_NOTIFICATION: NEO_LOG_I(glBuf); return;
             }
-
+            NEO_LOG_E(glBuf);
             NEO_FAIL("Unknown severity level!");
         }
 
