@@ -5,6 +5,7 @@ target_link_libraries(Renderer
 PUBLIC
 PRIVATE
 	Util
+	glfw
 	libglew_static
 	imgui
 	glm

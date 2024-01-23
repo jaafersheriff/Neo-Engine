@@ -11,6 +11,7 @@ PRIVATE
 	libglew_static
 	TracyClient
 	imgui
+	glfw
 )
 
 add_precompiled_header(ECS 

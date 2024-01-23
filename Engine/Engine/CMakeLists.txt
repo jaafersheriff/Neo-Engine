@@ -7,6 +7,7 @@ PRIVATE
 	Util
 	Messaging
 	Hardware
+	glfw
 	libglew_static
 	imgui
 	entt

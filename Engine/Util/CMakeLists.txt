@@ -3,12 +3,13 @@ InitLib()
 
 target_link_libraries(Util
 PUBLIC
-	glfw
 	glm
 	entt
 	imgui
 	TracyClient
-	libglew_static
+	libglew_static 
+PRIVATE
+	glfw
 )
 
 if (NO_LOCAL_TRACY) 

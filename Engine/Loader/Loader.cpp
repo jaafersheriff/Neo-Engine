@@ -193,7 +193,7 @@ namespace neo {
                     if (material.diffuse_texname.size()) {
                         asset.material.mDiffuseMap = Library::loadTexture(material.diffuse_texname, format);
                         asset.material.mDiffuseMap->genMips();
-                        asset.material.mAlphaMap = asset.material.mDiffuseMap;
+                        // asset.material.mAlphaMap = asset.material.mDiffuseMap;
                     }
                     if (material.specular_texname.size()) {
                         asset.material.mSpecularMap = Library::loadTexture(material.specular_texname, format);

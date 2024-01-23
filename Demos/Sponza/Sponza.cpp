@@ -1,6 +1,9 @@
 #include "Sponza/Sponza.hpp"
-#include "Engine/Engine.hpp"
 
+#include "GBufferComponent.hpp"
+#include "GBufferRenderer.hpp"
+
+#include "Engine/Engine.hpp"
 #include "Loader/Loader.hpp"
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
@@ -94,6 +97,7 @@ namespace Sponza {
             ecs.addComponent<ShadowCasterShaderComponent>(entity);
             ecs.addComponent<BoundingBoxComponent>(entity, asset.meshData);
             ecs.addComponent<PhongShaderComponent>(entity);
+            ecs.addComponent<GBufferShaderComponent>(entity);
             asset.material.mAmbient = glm::vec3(0.3f);
             auto material = ecs.addComponent<MaterialComponent>(entity, asset.material);
             if (material->mAlphaMap) {
@@ -168,29 +172,13 @@ namespace Sponza {
         drawPhong<AlphaTestComponent>(ecs, cameraEntity, shadowMap);
     }
 
-    void Demo::_deferredShading([[maybe_unused]] const ECS& ecs,[[maybe_unused]]  Framebuffer& sceneTarget, glm::uvec2 targetSize) {
-        auto gbuffer = Library::getPooledFramebuffer({ targetSize, {
-            // Albedo
-            TextureFormat{
-                TextureTarget::Texture2D,
-                GL_RGB16,
-                GL_RGB,
-            },
-            // Normals
-            TextureFormat{
-                TextureTarget::Texture2D,
-                GL_RGB16,
-                GL_RGB,
-            },
-            // Depth
-            TextureFormat{
-                TextureTarget::Texture2D,
-                GL_DEPTH_COMPONENT16,
-                GL_DEPTH_COMPONENT,
-            }
-        } }, "Gbuffer");
-
-        gbuffer->bind();
-        gbuffer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    void Demo::_deferredShading([[maybe_unused]] const ECS& ecs, [[maybe_unused]] Framebuffer& sceneTarget, glm::uvec2 targetSize) {
+        const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+        auto& gbuffer = createGBuffer(targetSize);
+        gbuffer.bind();
+        gbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, targetSize.x, targetSize.y);
+        drawGBuffer<OpaqueComponent>(ecs, cameraEntity, {});
+        drawGBuffer<AlphaTestComponent>(ecs, cameraEntity, {});
     }
 }
