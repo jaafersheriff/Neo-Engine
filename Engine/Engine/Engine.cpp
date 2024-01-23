@@ -54,6 +54,10 @@ namespace neo {
         ServiceLocator<Renderer>::set(4, 4);
 
         {
+            /* Init GLEW */
+            glewExperimental = GL_FALSE;
+            NEO_ASSERT(glewInit()== GLEW_OK, "Failed to init GLEW");
+
             NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
             GLFWimage icons[1];
             int components;

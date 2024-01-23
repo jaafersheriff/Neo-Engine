@@ -2,9 +2,8 @@
 InitLib()
 
 target_link_libraries(DemoInfra
-PUBLIC
-	glm
 PRIVATE
+	glm
 	imgui
 	entt
 )

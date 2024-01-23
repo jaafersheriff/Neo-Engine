@@ -17,6 +17,7 @@
 
 #include "Renderer/RenderingSystems/WireframeRenderer.hpp"
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
+#include "Renderer/GLObjects/Framebuffer.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 

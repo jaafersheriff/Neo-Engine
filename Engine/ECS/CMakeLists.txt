@@ -5,12 +5,12 @@ target_link_libraries(ECS
 PUBLIC
 	Util
 	Messaging
-	Hardware
 	entt
-	imgui
 PRIVATE
+	Hardware
 	libglew_static
 	TracyClient
+	imgui
 )
 
 add_precompiled_header(ECS 

@@ -2,6 +2,7 @@
 #include "Renderer.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/SourceShader.hpp"
+#include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
 

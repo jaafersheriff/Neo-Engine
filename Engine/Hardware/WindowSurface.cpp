@@ -144,10 +144,6 @@ namespace neo {
             Messenger::sendMessage<Mouse::MouseResetMessage>();
         });
 
-        /* Init GLEW */
-        glewExperimental = GL_FALSE;
-        NEO_ASSERT(glewInit()== GLEW_OK, "Failed to init GLEW");
-
         glfwSwapInterval(mDetails.mVSyncEnabled);
 
         reset(name);

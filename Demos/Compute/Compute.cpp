@@ -12,6 +12,7 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "Renderer/GLObjects/Framebuffer.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 

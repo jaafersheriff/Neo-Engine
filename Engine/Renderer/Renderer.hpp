@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Renderer/GLObjects/Framebuffer.hpp"
 #include "DemoInfra/IDemo.hpp"
 
 #include <typeindex>
@@ -14,6 +13,7 @@ namespace neo {
     class ECS;
     class WindowSurface;
     class PostProcessShader;
+    class Framebuffer;
     class SourceShader;
     struct FrameSizeMessage;
 
