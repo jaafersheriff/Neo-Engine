@@ -1,5 +1,8 @@
 #pragma once
 
+#include <tracy/Tracy.hpp>
+#include <GL/glew.h>
+#include <tracy/TracyOpenGL.hpp>
 #define TRACY_ZONEN(x) ZoneScopedNC(x, (HashedString(x) & 0xfefefe) >> 1 )
 #define TRACY_ZONE() TRACY_ZONEN(TracyFunction)
 #define TRACY_GPUN(x) TRACY_ZONEN(x); TracyGpuZoneC(x, (HashedString(x) & 0xfefefe) >> 1 )

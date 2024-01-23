@@ -3,9 +3,9 @@ InitLib()
 
 target_link_libraries(Renderer
 PUBLIC
-	libglew_static
-	Util
 PRIVATE
+	Util
+	libglew_static
 	imgui
 	glm
 	entt

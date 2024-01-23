@@ -4,8 +4,6 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/Renderer.hpp"
 
-#include "Util/Profiler.hpp"
-
 #include "GL/glew.h"
 
 namespace neo {

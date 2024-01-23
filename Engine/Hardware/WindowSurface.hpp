@@ -3,6 +3,8 @@
 #include "WindowDetails.hpp"
 #include "Messaging/Message.hpp"
 
+struct GLFWwindow;
+
 namespace neo {
 
     class WindowSurface {

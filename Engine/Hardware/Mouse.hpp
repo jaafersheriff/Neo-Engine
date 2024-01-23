@@ -2,8 +2,6 @@
 
 #include "Messaging/Message.hpp"
 
-#include <GLFW/glfw3.h>
-
 namespace neo {
 
     class Mouse {
@@ -41,7 +39,7 @@ namespace neo {
         bool isDown(int) const;
 
     private:
-        int mMouseButtons[GLFW_MOUSE_BUTTON_LAST] = { GLFW_RELEASE };
+        int mMouseButtons[/*GLFW_MOUSE_BUTTON_LAST*/ 8] = { /*GLFW_RELEASE*/ 0};
         bool mIsReset = true;
 
         /* x-y position and speed */

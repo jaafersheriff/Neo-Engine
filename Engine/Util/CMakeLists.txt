@@ -8,6 +8,7 @@ PUBLIC
 	entt
 	imgui
 	TracyClient
+	libglew_static
 )
 
 if (NO_LOCAL_TRACY) 

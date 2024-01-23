@@ -1,4 +1,5 @@
 #include "Hardware/pch.hpp"
+
 #include "WindowSurface.hpp"
 #include "Mouse.hpp"
 #include "Keyboard.hpp"
@@ -8,6 +9,7 @@
 #include "Messaging/Messenger.hpp"
 
 #include "Util/Profiler.hpp"
+#include <GLFW/glfw3.h>
 
 namespace neo {
 

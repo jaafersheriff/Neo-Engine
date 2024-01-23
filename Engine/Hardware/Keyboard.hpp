@@ -2,8 +2,7 @@
 
 #include "Messaging/Message.hpp"
 
-#include <GLFW/glfw3.h>
-#define NUM_KEYS GLFW_KEY_LAST
+#define NUM_KEYS /*GLFW_KEY_LAST*/ 348
 
 namespace neo {
 
@@ -30,7 +29,7 @@ namespace neo {
         bool isKeyPressed(int) const;
 
     private:
-        bool mKeyStatus[NUM_KEYS] = { GLFW_RELEASE };
+        bool mKeyStatus[NUM_KEYS] = {/*GLFW_RELEASE*/ 0};
 
         void _onReset(const ResetKeyboardMessage& msg);
         void _onKeyPressed(const KeyPressedMessage& msg);

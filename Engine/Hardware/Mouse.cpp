@@ -1,6 +1,8 @@
 #include "Hardware/pch.hpp"
 #include "Mouse.hpp"
 
+#include <GLFW/glfw3.h>
+
 #include "Messaging/Messenger.hpp"
 
 namespace neo {
