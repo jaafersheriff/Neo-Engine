@@ -64,8 +64,10 @@ namespace neo {
         std::string mName;
         std::optional<ConstructionArgs> mConstructionArgs;
         ShaderCode mShaderSources;
+        
+        // Can't store ShaderDefines in the map because of const char* and mParent*
+        // Also this is faster than specialized std::hash
         std::unordered_map<HashedShaderDefines, ResolvedShaderInstance> mResolvedShaders;
-
         HashedShaderDefines _getDefinesHash(const ShaderDefines& defines);
 	};
 }

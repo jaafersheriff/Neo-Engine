@@ -79,14 +79,19 @@ namespace neo {
 		return Library::getDummyShader();
 	}
 
-    // This is faster than specialized std::hash
 	SourceShader::HashedShaderDefines SourceShader::_getDefinesHash(const ShaderDefines& defines) {
 		HashedShaderDefines seed = static_cast<HashedShaderDefines>(defines.mDefines.size());
-		for (auto& i : defines.mDefines) {
-			if (i.second) {
-				seed ^= i.first.mVal.value() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		const ShaderDefines* _defines = &defines;
+		while (_defines) {
+			for (auto& define : _defines->mDefines) {
+				if (define.second) {
+					seed ^= define.first.mVal.value() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+				}
 			}
+
+			_defines = _defines->mParent;
 		}
+
 		return seed;
 	}
 
