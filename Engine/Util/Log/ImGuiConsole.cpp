@@ -42,7 +42,7 @@ namespace neo {
 
     void ImGuiConsole::imGuiEditor() {
         TRACY_ZONE();
-        if (!ImGui::Begin("Console"))
+        if (!ImGui::Begin("Console", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::End();
             return;
@@ -68,7 +68,7 @@ namespace neo {
         ImGui::Separator();
 
         // Reserve enough left-over height for 1 separator + 1 input text
-        ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_AlwaysAutoResize);
         if (ImGui::BeginPopupContextWindow()) {
             if (ImGui::Selectable("Clear")) {
                 clearLog();

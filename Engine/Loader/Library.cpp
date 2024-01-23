@@ -279,7 +279,7 @@ namespace neo {
 
     void Library::imGuiEditor() {
         auto textureFunc = [&](const Texture& texture) {
-            float scale = 200.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
+            float scale = 175.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
 #pragma warning(push)
 #pragma warning(disable: 4312)
                 ImGui::Image(reinterpret_cast<ImTextureID>(texture.mTextureID), ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
@@ -289,7 +289,7 @@ namespace neo {
         ImGui::Begin("Library");
 
         if (ImGui::TreeNodeEx("Framebuffers", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if (ImGui::BeginTable("##Framebuffers", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Reorderable | ImGuiTableFlags_ScrollX)) {
+            if (ImGui::BeginTable("##Framebuffers", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_ScrollX | ImGuiTableFlags_SizingFixedFit)) {
                 ImGui::TableSetupColumn("Name/Size");
                 ImGui::TableSetupColumn("Attachments");
                 ImGui::TableHeadersRow();
