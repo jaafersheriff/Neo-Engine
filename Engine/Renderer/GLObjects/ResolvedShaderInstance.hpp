@@ -17,7 +17,7 @@ namespace neo {
         friend SourceShader;
     public:
 
-        ResolvedShaderInstance() = default;
+        ResolvedShaderInstance(std::string variant) : mVariant(variant) {}
         ~ResolvedShaderInstance() = default;
 
         bool init(const SourceShader::ShaderCode& args, const ShaderDefines& defines);
@@ -49,6 +49,7 @@ namespace neo {
         std::unordered_map<ShaderStage, GLuint> mShaderIDs;
         std::unordered_map<HashedString::hash_type, GLint> mUniforms;
         std::unordered_map<HashedString::hash_type, GLint> mBindings;
+        std::string mVariant;
 
         GLuint _compileShader(GLenum shaderType, const char* shaderString);
         GLint _getUniform(const char* name) const;

@@ -15,6 +15,7 @@ namespace neo {
     namespace {
 
         static std::string _processShader(const char* shaderString, const ShaderDefines& defines) {
+            TRACY_ZONE();
             if (!shaderString) {
                 return "";
             }
@@ -22,6 +23,7 @@ namespace neo {
 
             // Handle #includes 
             {
+                TRACY_ZONEN("Handle includes");
                 std::string::size_type start = 0;
                 std::string::size_type end = 0;
                 while ((end = sourceString.find("\n", start)) != std::string::npos) {
@@ -54,51 +56,58 @@ namespace neo {
 
             // #version, #defines
             std::stringstream preambleBuilder;
-            preambleBuilder << ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion << "\n";
-            const ShaderDefines* _defines = &defines;
-            while (_defines) {
-                for (auto& define : _defines->mDefines) {
-                    if (define.second) {
-                        preambleBuilder << "#define " << define.first.mVal.data() << "\n";
-                    }
+            {
+                TRACY_ZONEN("Construct preamble");
+                preambleBuilder << ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion << "\n";
+                const ShaderDefines* _defines = &defines;
+                while (_defines) {
+                    for (auto& define : _defines->mDefines) {
+                        if (define.second) {
+                            preambleBuilder << "#define " << define.first.mVal.data() << "\n";
+                        }
 
+                    }
+                    _defines = _defines->mParent;
                 }
-                _defines = _defines->mParent;
+                sourceString.insert(0, preambleBuilder.str());
             }
-            sourceString.insert(0, preambleBuilder.str());
 
             // Use glslang just for the preprocessor..for now
             // Maybe spirv and validators and stuff can happen later
-            NEO_ASSERT(glslang_initialize_process(), "Failed to initialize glslang");
+            {
+                TRACY_ZONEN("glslang");
+                NEO_ASSERT(glslang_initialize_process(), "Failed to initialize glslang");
 
-            glslang_input_t input;
-            input.language = GLSLANG_SOURCE_GLSL;
-            input.stage = GLSLANG_STAGE_VERTEX;
-            input.client = GLSLANG_CLIENT_OPENGL;
-            input.client_version = GLSLANG_TARGET_OPENGL_450;
-            input.target_language = GLSLANG_TARGET_NONE;
-            // input.target_language_version;
-            input.code = sourceString.c_str();
-            input.default_version = 430;
-            input.default_profile = GLSLANG_NO_PROFILE;
-            input.force_default_version_and_profile = false;
-            input.forward_compatible = false;
-            input.messages = GLSLANG_MSG_ONLY_PREPROCESSOR_BIT;
-            input.resource = glslang_default_resource();
-            
-            glslang_shader_t* shader = glslang_shader_create(&input);
-            NEO_ASSERT(shader, "glslang_shader_create failed");
-            
-            glslang_shader_preprocess(shader, &input);
-            
-            std::string ret = glslang_shader_get_preprocessed_code(shader);
+                glslang_input_t input;
+                input.language = GLSLANG_SOURCE_GLSL;
+                input.stage = GLSLANG_STAGE_VERTEX;
+                input.client = GLSLANG_CLIENT_OPENGL;
+                input.client_version = GLSLANG_TARGET_OPENGL_450;
+                input.target_language = GLSLANG_TARGET_NONE;
+                // input.target_language_version;
+                input.code = sourceString.c_str();
+                input.default_version = 430;
+                input.default_profile = GLSLANG_NO_PROFILE;
+                input.force_default_version_and_profile = false;
+                input.forward_compatible = false;
+                input.messages = GLSLANG_MSG_ONLY_PREPROCESSOR_BIT;
+                input.resource = glslang_default_resource();
 
-            glslang_finalize_process();
+                glslang_shader_t* shader = glslang_shader_create(&input);
+                NEO_ASSERT(shader, "glslang_shader_create failed");
 
-            return ret;
+                glslang_shader_preprocess(shader, &input);
+
+                std::string ret = glslang_shader_get_preprocessed_code(shader);
+
+                glslang_finalize_process();
+
+                return ret;
+            }
         }
 
         static void _findUniforms(const char *shaderString, std::vector<std::string>& uniforms, std::map<std::string, GLint>& bindings) {
+            TRACY_ZONE();
             std::string fileText(shaderString);
             std::string::size_type start = 0;
             std::string::size_type end = 0;
@@ -137,7 +146,8 @@ namespace neo {
     }
 
     bool ResolvedShaderInstance::init(const SourceShader::ShaderCode& shaderCode, const ShaderDefines& defines) {
-        NEO_ASSERT(!mValid && mPid == 0, "TODO");
+        NEO_ASSERT(!mValid && mPid == 0, "Trying to initialize an existing shader variant object?");
+        TRACY_ZONE();
         mValid = false;
         mPid = glCreateProgram();
 
@@ -190,6 +200,7 @@ namespace neo {
     }
 
     GLuint ResolvedShaderInstance::_compileShader(GLenum shaderType, const char *shaderString) {
+        TRACY_ZONE();
         // Create the shader, assign source code, and compile it
         GLuint shader = glCreateShader(shaderType);
         glShaderSource(shader, 1, &shaderString, NULL);

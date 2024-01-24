@@ -52,6 +52,7 @@ namespace neo {
             auto& resolvedShader = view.get<const ShadowCasterShaderComponent>(entity).getResolvedInstance(passDefines);
             resolvedShader.bind();
 
+            // TODO - handle the case where there's no alpha map a bit better
             if (alphaMap) {
                 resolvedShader.bindTexture("alphaMap", *alphaMap);
             }

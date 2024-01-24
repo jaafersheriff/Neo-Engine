@@ -2,6 +2,7 @@
 
 #include "Renderer/GLObjects/GLHelper.hpp"
 
+#include <sstream>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
@@ -11,6 +12,8 @@ namespace neo {
     class ResolvedShaderInstance;
 
 #define MakeDefine(x) static ShaderDefine x(#x)
+
+    // TODO - move all this to proper headers ;(
     struct ShaderDefine {
         ShaderDefine(const char* c) :
             mVal(c)
@@ -38,6 +41,19 @@ namespace neo {
             for (auto& define : mDefines) {
                 define.second = false;
             }
+        }
+
+        operator std::string() const { 
+            std::stringstream ss;
+            if (mParent) {
+                ss << std::string(*mParent);
+            }
+            for (auto& define : mDefines) {
+                if (define.second) {
+                    ss << "\t" << define.first.mVal.data() << "\n";
+                }
+            }
+            return ss.str();
         }
 
         const ShaderDefines* const mParent = nullptr;

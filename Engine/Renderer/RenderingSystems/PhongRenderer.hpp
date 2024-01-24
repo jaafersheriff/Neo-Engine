@@ -96,8 +96,12 @@ namespace neo {
             drawDefines.reset();
 
             const auto& material = view.get<const MaterialComponent>(entity);
+            MakeDefine(ALPHA_MAP);
             MakeDefine(DIFFUSE_MAP);
             MakeDefine(NORMAL_MAP);
+            if (containsAlphaTest && material.mAlphaMap) {
+                drawDefines.set(ALPHA_MAP);
+            }
             if (material.mDiffuseMap) {
                 drawDefines.set(DIFFUSE_MAP);
             }
@@ -107,6 +111,11 @@ namespace neo {
 
             auto& resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(drawDefines);
             resolvedShader.bind();
+
+
+            if (containsAlphaTest && material.mAlphaMap) {
+                resolvedShader.bindTexture("alphaMap", *material.mAlphaMap);
+            }
 
             if (material.mDiffuseMap) {
                 resolvedShader.bindTexture("diffuseMap", *material.mDiffuseMap);

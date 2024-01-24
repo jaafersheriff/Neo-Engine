@@ -47,7 +47,7 @@ namespace neo {
 		HashedShaderDefines hash = _getDefinesHash(defines);
 		auto it = mResolvedShaders.find(hash);
 		if (it == mResolvedShaders.end()) {
-			mResolvedShaders.emplace(hash, ResolvedShaderInstance());
+			mResolvedShaders.emplace(hash, ResolvedShaderInstance(defines));
 			it = mResolvedShaders.find(hash);
 			it->second.init(mShaderSources, defines);
 
@@ -65,7 +65,7 @@ namespace neo {
 			}
 			ss << " }";
 			if (it->second.mValid) {
-				NEO_LOG_I("Resolving a new shader for %s %s", mName.c_str(), ss.str().c_str());
+				NEO_LOG_I("Resolving a new variant for %s %s", mName.c_str(), ss.str().c_str());
 			}
 			else {
 				NEO_LOG_E("Failed to resolve instance of %s %s", mName.c_str(), ss.str().c_str());
@@ -96,12 +96,29 @@ namespace neo {
 	}
 
 	void SourceShader::imguiEditor() {
-		ImGui::Text("Variants: %d", mResolvedShaders.size());
-		if (mConstructionArgs && ImGui::Button("Reload")) {
+		if (mConstructionArgs && ImGui::Button("Reload all")) {
 			destroy();
 			for (auto& arg : *mConstructionArgs) {
 				mShaderSources.emplace(arg.first, Loader::loadFileString(arg.second));
 			}
+		}
+
+		if (mResolvedShaders.size()) {
+			if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(mResolvedShaders.size()))) {
+				for (const auto& variant : mResolvedShaders) {
+					// if (mConstructionArgs && ImGui::Button("Reload")) {
+					// Just destroy the variant and evict from the map, easy
+					// }
+					// else {
+						ImGui::Text("%s", variant.second.mVariant.size() ? variant.second.mVariant.c_str() : "No defines");
+						ImGui::Separator();
+					// }
+				}
+				ImGui::TreePop();
+			}
+		}
+		else {
+			ImGui::Text("Variants (0)");
 		}
 	}
 }
