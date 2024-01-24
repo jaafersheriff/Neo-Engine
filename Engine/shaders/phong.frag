@@ -5,19 +5,23 @@ in vec4 fragPos;
 in vec3 fragNor;
 in vec2 fragTex;
 
+#if defined(ALPHA_TEST) && defined(ALPHA_MAP)
+layout(binding = 0) uniform sampler2D alphaMap;
+#endif
+
 #ifdef DIFFUSE_MAP
-layout(binding = 0) uniform sampler2D diffuseMap;
+layout(binding = 1) uniform sampler2D diffuseMap;
 #else
 uniform vec3 diffuseColor;
 #endif
 
 #ifdef NORMAL_MAP
-layout(binding = 1) uniform sampler2D normalMap;
+layout(binding = 2) uniform sampler2D normalMap;
 #endif
 
 #ifdef ENABLE_SHADOWS
 in vec4 shadowCoord;
-layout(binding = 2) uniform sampler2D shadowMap;
+layout(binding = 3) uniform sampler2D shadowMap;
 #endif
 
 uniform vec3 lightCol;
@@ -45,7 +49,11 @@ void main() {
 #endif
 
 #ifdef ALPHA_TEST
+    #ifdef ALPHA_MAP
+    alphaDiscard(texture(alphaMap, fragTex).r);
+    #else
     alphaDiscard(albedo.a);
+    #endif
 #endif
 
     // TODO - normal mapping

@@ -182,6 +182,6 @@ namespace Sponza {
         drawGBuffer<OpaqueComponent>(ecs, cameraEntity, {});
         drawGBuffer<AlphaTestComponent>(ecs, cameraEntity, {});
 
-        blit(sceneTarget, *gbuffer.mTextures[2], targetSize);
+        blit(sceneTarget, *gbuffer.mTextures[0], targetSize);
     }
 }
