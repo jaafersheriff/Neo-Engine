@@ -1,6 +1,5 @@
 #include "alphaDiscard.glsl"
 #include "shadowreceiver.glsl"
-#include "phong.glsl"
 
 in vec4 fragPos;
 in vec3 fragNor;

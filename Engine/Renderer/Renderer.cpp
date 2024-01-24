@@ -1,10 +1,13 @@
 #include "Renderer/pch.hpp"
+
 #include "Renderer.hpp"
+
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
+#include "Renderer/RenderingSystems/Blitter.hpp"
 
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
@@ -61,29 +64,6 @@ namespace neo {
         mDefaultFBO->initDrawBuffers();
         mDefaultFBO->bind();
 
-        mBlitShader = new SourceShader("Final Blit", SourceShader::ShaderCode{
-            { ShaderStage::VERTEX,
-            R"(
-                layout (location = 0) in vec3 vertPos;
-                layout (location = 2) in vec2 vertTex;
-                out vec2 fragTex;
-                void main() { 
-                    gl_Position = vec4(2 * vertPos, 1); 
-                    fragTex = vertTex; 
-                } 
-            )"},
-            { ShaderStage::FRAGMENT,
-            R"(
-                in vec2 fragTex;
-                layout (binding = 0) uniform sampler2D inputTexture;
-                out vec4 color;
-                void main() {
-                    color = texture(inputTexture, fragTex);
-                }
-            )"}
-        });
-
-        
         /* Set max work group */
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
@@ -105,8 +85,7 @@ namespace neo {
 
     void Renderer::_onFrameSizeChanged(const FrameSizeMessage& msg) {
         mDefaultFBO->destroy();
-        // Placement new to regenerate the FBO handle
-        new (mDefaultFBO) Framebuffer();
+        mDefaultFBO->init();
         mDefaultFBO->attachColorTexture({ msg.mSize.x, msg.mSize.y }, { TextureTarget::Texture2D, GL_RGB16, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE });
         mDefaultFBO->attachDepthTexture({ msg.mSize.x, msg.mSize.y }, GL_DEPTH_COMPONENT16, GL_LINEAR, GL_CLAMP_TO_EDGE);
         mDefaultFBO->initDrawBuffers();
@@ -165,25 +144,8 @@ namespace neo {
         }
         else {
             TRACY_GPUN("Final Blit");
-            glDisable(GL_DEPTH_TEST);
-            {
-                TRACY_GPUN("Clear backbuffer");
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                auto frameSize = window.getDetails().mSize;
-                glViewport(0, 0, frameSize.x, frameSize.y);
-                glClearColor(0.f, 0.f, 0.f, 1.f);
-                glClear(GL_COLOR_BUFFER_BIT);
-            }
-        
-            auto& resolvedBlit = mBlitShader->getResolvedInstance({});
-            resolvedBlit.bind();
-        
-            // Bind input fbo texture
-            resolvedBlit.bindTexture("inputTexture", *mDefaultFBO->mTextures[0]);
-        
-            // Render 
-            Library::getMesh("quad").mMesh->draw();
-            resolvedBlit.unbind();
+            Framebuffer fb; // empty framebuffer is just the backbuffer -- just don't do anything with it ever
+            blit(fb, *mDefaultFBO->mTextures[0], window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
         }
     }
 

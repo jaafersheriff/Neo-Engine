@@ -19,7 +19,7 @@ namespace neo {
         int mColorAttachments = 0;
         std::vector<Texture *> mTextures;
 
-        Framebuffer() {
+        void init() {
             glGenFramebuffers(1, &mFBOID);
         }
         

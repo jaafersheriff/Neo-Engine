@@ -10,7 +10,7 @@ namespace neo {
 
 	template<typename... CompTs>
     void drawFXAA(Framebuffer& outputFBO, Texture& inputTexture) {
-        TRACY_GPUN("drawFXAA");
+        TRACY_GPU();
 
         // Where are these const chars in memory..are they being created and passed on each call?
         auto* fxaaShader = Library::createSourceShader("FXAAShader", SourceShader::ConstructionArgs{

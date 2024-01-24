@@ -59,7 +59,6 @@ namespace neo {
             void imGuiEditor(WindowSurface& window, ECS& ecs);
         private:
 			Framebuffer* mDefaultFBO;
-            SourceShader* mBlitShader = nullptr;
 
             bool mShowBoundingBoxes = false;
 

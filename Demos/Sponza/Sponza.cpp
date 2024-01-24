@@ -29,6 +29,7 @@
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 
+#include "Renderer/RenderingSystems/Blitter.hpp"
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
@@ -181,6 +182,6 @@ namespace Sponza {
         drawGBuffer<OpaqueComponent>(ecs, cameraEntity, {});
         drawGBuffer<AlphaTestComponent>(ecs, cameraEntity, {});
 
-
+        blit(sceneTarget, *gbuffer.mTextures[2], targetSize);
     }
 }

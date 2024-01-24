@@ -152,6 +152,7 @@ namespace neo {
 
     Framebuffer* Library::createFramebuffer(const std::string& name) {
         auto fb = new Framebuffer;
+        fb->init();
         mFramebuffers.emplace(name, fb);
         NEO_LOG("Creating FBO %s", name.c_str());
         return fb;
@@ -164,6 +165,7 @@ namespace neo {
         pfb.mName = name;
         if (!pfb.mFramebuffer) {
             pfb.mFramebuffer = new Framebuffer;
+            pfb.mFramebuffer->init();
             for (auto& format : details.mFormats) {
                 if (format.mBaseFormat == GL_DEPTH_COMPONENT) {
                     pfb.mFramebuffer->attachDepthTexture(details.mSize, format.mInternalFormat, format.mFilter, format.mMode);
