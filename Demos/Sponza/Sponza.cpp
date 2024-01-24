@@ -180,5 +180,7 @@ namespace Sponza {
         glViewport(0, 0, targetSize.x, targetSize.y);
         drawGBuffer<OpaqueComponent>(ecs, cameraEntity, {});
         drawGBuffer<AlphaTestComponent>(ecs, cameraEntity, {});
+
+
     }
 }

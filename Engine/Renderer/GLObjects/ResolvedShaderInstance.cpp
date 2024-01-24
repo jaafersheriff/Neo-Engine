@@ -31,13 +31,17 @@ namespace neo {
                     std::string::size_type nameStart = line.find("#include \"");
                     std::string::size_type nameEnd = line.find("\"", nameStart + 10);
                     if (nameStart != std::string::npos && nameEnd != std::string::npos && nameStart != nameEnd) {
-                        const char* sourceInclude = Loader::loadFileString(line.substr(nameStart + 10, nameEnd - nameStart - 10).c_str());
+                        std::string includedFile = line.substr(nameStart + 10, nameEnd - nameStart - 10);
+                        const char* includedFileSrc = Loader::loadFileString(includedFile.c_str());
 
-                        // Replace include with source
-                        if (sourceInclude) {
-                            sourceString.erase(start, end - start);
-                            sourceString.insert(start, sourceInclude);
-                            delete sourceInclude;
+                        sourceString.erase(start, end - start);
+                        if (includedFileSrc) {
+                            // Replace include with source
+                            sourceString.insert(start, includedFileSrc);
+                            delete includedFileSrc;
+                        }
+                        else {
+                            NEO_LOG_E("Found #include %s but it's empty? Skipping", includedFile.c_str());
                         }
 
                         // Reset processing incase there are internal #includes

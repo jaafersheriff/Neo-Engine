@@ -29,6 +29,13 @@ Framebuffer& createGBuffer(glm::uvec2 targetSize) {
             GL_RGB16,
             GL_RGB,
         },
+        // World 
+        // TODO - could do everything in view space to get rid of this
+        TextureFormat{
+            TextureTarget::Texture2D,
+            GL_RGB16,
+            GL_RGB,
+        },
         // Normals
         TextureFormat{
             TextureTarget::Texture2D,

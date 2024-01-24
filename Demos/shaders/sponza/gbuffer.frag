@@ -15,7 +15,8 @@ layout(binding = 1) uniform sampler2D normalMap;
 #endif
 
 layout (location = 0) out vec4 gDiffuse;
-layout (location = 1) out vec4 gNormal;
+layout (location = 1) out vec4 gWorld;
+layout (location = 2) out vec4 gNormal;
 
 void main() {
     vec4 albedo = vec4(0,0,0,1);
@@ -30,5 +31,6 @@ void main() {
 #endif
 
     gDiffuse = vec4(albedo.rgb, 1.f);
+    gWorld = vec4(fragPos.rgb, 1.f);
     gNormal = vec4(normalize(fragNor), 1.f);
 }  
