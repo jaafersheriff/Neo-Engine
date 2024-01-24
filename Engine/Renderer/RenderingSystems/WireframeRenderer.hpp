@@ -13,7 +13,6 @@ namespace neo {
     void drawWireframe(const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
         TRACY_GPU();
 
-        // TODO - stash the old state?
         glDisable(GL_CULL_FACE);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -37,7 +36,6 @@ namespace neo {
             view.get<const MeshComponent>(entity).mMesh->draw();
         }
 
-        // TODO - stash the old state
         glEnable(GL_CULL_FACE);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}

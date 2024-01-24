@@ -23,7 +23,6 @@ namespace neo {
         Keyboard(const Keyboard&) = default;
         Keyboard& operator=(const Keyboard&) = default;
         
-        // TODO - maybe move this to ctors
         void init();
 
         bool isKeyPressed(int) const;

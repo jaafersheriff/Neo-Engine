@@ -30,7 +30,6 @@ namespace neo {
             {}
         };
 
-        // TODO - maybe move this to ctors
         void init();
 
         glm::vec2 getPos() const;

@@ -44,7 +44,7 @@ namespace neo {
 		void destroy();
 
 		GLuint mTextureID = 0;
-		const TextureFormat mFormat; // TODO - can this be const?
+		const TextureFormat mFormat;
 
 		uint16_t mWidth = 1;
 		uint16_t mHeight = 1;
