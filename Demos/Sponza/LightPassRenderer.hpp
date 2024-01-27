@@ -3,6 +3,7 @@
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/LightComponent/MainLightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "Loader/Library.hpp"
@@ -16,8 +17,8 @@ namespace Sponza {
         TRACY_GPU();
 
         auto* lightResolveShader = Library::createSourceShader("LightResolveShader", SourceShader::ConstructionArgs{
-            { ShaderStage::VERTEX, "sponza/lightpass.vert"},
-            { ShaderStage::FRAGMENT, "sponza/lightpass.frag" }
+            { ShaderStage::VERTEX, "sponza/pointlightresolve.vert"},
+            { ShaderStage::FRAGMENT, "sponza/pointlightresolve.frag" }
         });
 
         glEnable(GL_BLEND);
@@ -74,8 +75,53 @@ namespace Sponza {
         // TODO - reset state
     }
 
-    void drawDirectionalLights(const ECS& ecs) {
-        NEO_UNUSED(ecs);
-        NEO_FAIL("TODO");
+    void drawDirectionalLights(const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, Texture* shadowMap = nullptr) {
+        ShaderDefines defines;
+
+        glm::mat4 L;
+        const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
+        const bool shadowsEnabled = shadowMap && shadowCamera.has_value();
+        MakeDefine(ENABLE_SHADOWS);
+        if (shadowsEnabled) {
+            defines.set(ENABLE_SHADOWS);
+            const auto& [_, __, shadowOrtho, shadowCameraSpatial] = *shadowCamera;
+            static glm::mat4 biasMatrix(
+                0.5f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.5f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.5f, 0.0f,
+                0.5f, 0.5f, 0.5f, 1.0f);
+            L = biasMatrix * shadowOrtho.getProj() * shadowCameraSpatial.getView();
+        }
+
+        auto* lightResolveShader = Library::createSourceShader("DirectionalLightResolveShader", SourceShader::ConstructionArgs{
+            { ShaderStage::VERTEX, "quad.vert"},
+            { ShaderStage::FRAGMENT, "sponza/directionallightresolve.frag" }
+        });
+        auto& resolvedShader = lightResolveShader->getResolvedInstance(defines);
+        resolvedShader.bind();
+
+        if (shadowsEnabled) {
+            resolvedShader.bindUniform("L", L);
+            resolvedShader.bindTexture("shadowMap", *shadowMap);
+        }
+
+        auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
+        resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
+        resolvedShader.bindUniform("lightCol", light.mColor);
+
+        const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
+        resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
+
+        /* Bind gbuffer */
+        resolvedShader.bindTexture("gAlbedo", *gbuffer.mTextures[0]);
+        resolvedShader.bindTexture("gSpecular", *gbuffer.mTextures[1]);
+        resolvedShader.bindTexture("gWorld", *gbuffer.mTextures[2]);
+        resolvedShader.bindTexture("gNormal", *gbuffer.mTextures[3]);
+
+        glDisable(GL_DEPTH_TEST);
+
+        Library::getMesh("quad").mMesh->draw();
+
+        // TODO - reset GL state
     }
 }

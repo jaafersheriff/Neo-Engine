@@ -219,5 +219,6 @@ namespace Sponza {
         sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
         drawPointLights(ecs, gbuffer, cameraEntity, targetSize, mLightDebugRadius);
+        drawDirectionalLights(ecs, cameraEntity, gbuffer);
     }
 }
