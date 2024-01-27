@@ -56,6 +56,11 @@ namespace Sponza {
         };
 
         void _createPointLights(ECS& ecs, const int count) {
+            ecs.getView<PointLightComponent>().each([&ecs](auto entity, auto comp) {
+                NEO_UNUSED(comp);
+                ecs.removeEntity(entity);
+            });
+
             for (int i = 0; i < count; i++) {
                 glm::vec3 position(
                     util::genRandom(-150.f, 200.f),
@@ -129,7 +134,6 @@ namespace Sponza {
             }
         }
 
-
         /* Systems - order matters! */
         auto& camSys = ecs.addSystem<CameraControllerSystem>();
         camSys.mSuperSpeed = 10.f;
@@ -147,7 +151,9 @@ namespace Sponza {
         }
         if (mDeferredShading) {
             ImGui::SliderFloat("Debug Radius", &mLightDebugRadius, 0.f, 10.f);
-            ImGui::SliderInt("# Point Lights", &mPointLightCount, 0, 100);
+            if (ImGui::SliderInt("# Point Lights", &mPointLightCount, 0, 100)) {
+                _createPointLights(ecs, mPointLightCount);
+            }
         }
     }
 

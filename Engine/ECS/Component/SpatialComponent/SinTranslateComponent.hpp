@@ -11,7 +11,7 @@ namespace neo {
 
         SinTranslateComponent(glm::vec3 offset, glm::vec3 base) 
             : mOffset(offset),
-            mBasePosition(base)
+            mBasePosition(base + offset * util::genRandom())
         {
         }
 

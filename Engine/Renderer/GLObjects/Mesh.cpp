@@ -23,21 +23,17 @@ namespace neo {
 
     // TODO - instanced
     void Mesh::draw(uint32_t size) const {
-        TRACY_ZONE();
 
         ServiceLocator<Renderer>::ref().mStats.mNumDraws++;
 
         const auto& positions = getVBO(VertexType::Position);
 
         {
-            TRACY_ZONEN("Bind");
             glBindVertexArray(mVAOID);
         }
 
         {
-            TRACY_ZONEN("Cond");
         if (mElementVBO) {
-            TRACY_ZONEN("Draw");
             uint32_t usedSize = size ? size : mElementVBO->bufferSize;
             ServiceLocator<Renderer>::ref().mStats.mNumTriangles += usedSize / 3;
             glDrawElements(mPrimitiveType, usedSize, GL_UNSIGNED_INT, nullptr);
@@ -47,7 +43,6 @@ namespace neo {
             glDrawArrays(mPrimitiveType, 0, size);
         }
         else {
-            TRACY_ZONEN("Draw");
             ServiceLocator<Renderer>::ref().mStats.mNumTriangles += positions.bufferSize / positions.stride / 3;
             glDrawArrays(mPrimitiveType, 0, positions.bufferSize / positions.stride);
         }
