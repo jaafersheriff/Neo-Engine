@@ -41,6 +41,7 @@ namespace NormalVisualizer {
             auto entity = ecs.createEntity();
             ecs.addComponent<SpatialComponent>(entity, pos);
             ecs.addComponent<LightComponent>(entity, col);
+            ecs.addComponent<MainLightComponent>(entity);
             ecs.addComponent<DirectionalLightComponent>(entity);
         }
     };

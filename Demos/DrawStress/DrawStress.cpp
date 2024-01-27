@@ -56,6 +56,7 @@ namespace DrawStress {
             auto entity = ecs.createEntity();
             ecs.addComponent<TagComponent>(entity, "Light");
             ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 2.f, 20.f));
+            ecs.addComponent<MainLightComponent>(entity);
             ecs.addComponent<LightComponent>(entity, glm::vec3(1.f));
             ecs.addComponent<PointLightComponent>(entity, glm::vec3(0.4, 0.01, 0.007));
         }
