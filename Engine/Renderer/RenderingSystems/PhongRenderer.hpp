@@ -99,6 +99,7 @@ namespace neo {
             const auto& material = view.get<const MaterialComponent>(entity);
             MakeDefine(ALPHA_MAP);
             MakeDefine(DIFFUSE_MAP);
+            MakeDefine(SPECULAR_MAP);
             MakeDefine(NORMAL_MAP);
             if (containsAlphaTest && material.mAlphaMap) {
                 drawDefines.set(ALPHA_MAP);
@@ -124,6 +125,13 @@ namespace neo {
             else {
                 resolvedShader.bindUniform("diffuseColor", material.mDiffuse);
             }
+            if (material.mSpecularMap) {
+                resolvedShader.bindTexture("specularMap", *material.mSpecularMap);
+            }
+            else {
+                resolvedShader.bindUniform("specularColor", material.mSpecular);
+            }
+            resolvedShader.bindUniform("shine", material.mShininess);
 
             if (material.mNormalMap) {
                 resolvedShader.bindTexture("normalMap", *material.mNormalMap);
@@ -152,8 +160,6 @@ namespace neo {
             resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
             resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
             resolvedShader.bindUniform("ambientColor", material.mAmbient);
-            resolvedShader.bindUniform("specularColor", material.mSpecular);
-            resolvedShader.bindUniform("shine", material.mShininess);
 
             view.get<const MeshComponent>(entity).mMesh->draw();
         }

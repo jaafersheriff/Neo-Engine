@@ -31,6 +31,12 @@ namespace Sponza {
                 GL_RGB16F,
                 GL_RGB,
             },
+            // Specular/Shine
+            TextureFormat{
+                TextureTarget::Texture2D,
+                GL_RGBA16F,
+                GL_RGBA,
+            },
             // World 
             // TODO - could do everything in view space to get rid of this
             TextureFormat{
@@ -97,12 +103,16 @@ namespace Sponza {
             const auto& material = view.get<const MaterialComponent>(entity);
             MakeDefine(ALPHA_MAP);
             MakeDefine(DIFFUSE_MAP);
+            MakeDefine(SPECULAR_MAP);
             MakeDefine(NORMAL_MAP);
             if (containsAlphaTest && material.mAlphaMap) {
                 drawDefines.set(ALPHA_MAP);
             }
             if (material.mDiffuseMap) {
                 drawDefines.set(DIFFUSE_MAP);
+            }
+            if (material.mSpecularMap) {
+                drawDefines.set(SPECULAR_MAP);
             }
             if (material.mNormalMap) {
                 drawDefines.set(NORMAL_MAP);
@@ -121,6 +131,14 @@ namespace Sponza {
             else {
                 resolvedShader.bindUniform("diffuseColor", material.mDiffuse);
             }
+            if (material.mSpecularMap) {
+                resolvedShader.bindTexture("specularMap", *material.mSpecularMap);
+            }
+            else {
+                resolvedShader.bindUniform("specularColor", material.mSpecular);
+            }
+            resolvedShader.bindUniform("shine", material.mShininess);
+
 
             if (material.mNormalMap) {
                 resolvedShader.bindTexture("normalMap", *material.mNormalMap);

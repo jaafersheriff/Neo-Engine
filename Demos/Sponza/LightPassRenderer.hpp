@@ -44,8 +44,9 @@ namespace Sponza {
 
         /* Bind gbuffer */
         resolvedShader.bindTexture("gAlbedo", *gbuffer.mTextures[0]);
-        resolvedShader.bindTexture("gWorld", *gbuffer.mTextures[1]);
-        resolvedShader.bindTexture("gNormal", *gbuffer.mTextures[2]);
+        resolvedShader.bindTexture("gSpecular", *gbuffer.mTextures[1]);
+        resolvedShader.bindTexture("gWorld", *gbuffer.mTextures[2]);
+        resolvedShader.bindTexture("gNormal", *gbuffer.mTextures[3]);
 
         /* Render light volumes */
         // TODO : instanced

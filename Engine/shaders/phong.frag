@@ -16,13 +16,20 @@ layout(binding = 1) uniform sampler2D diffuseMap;
 uniform vec3 diffuseColor;
 #endif
 
+#ifdef SPECULAR_MAP
+layout(binding = 2) uniform sampler2D specularMap;
+#else
+uniform vec3 specularColor;
+#endif
+uniform float shine;
+
 #ifdef NORMAL_MAP
-layout(binding = 2) uniform sampler2D normalMap;
+layout(binding = 3) uniform sampler2D normalMap;
 #endif
 
 #ifdef ENABLE_SHADOWS
 in vec4 shadowCoord;
-layout(binding = 3) uniform sampler2D shadowMap;
+layout(binding = 4) uniform sampler2D shadowMap;
 #endif
 
 uniform vec3 lightCol;
@@ -34,8 +41,6 @@ uniform vec3 lightAtt;
 #endif
 
 uniform vec3 ambientColor;
-uniform vec3 specularColor;
-uniform float shine;
 
 uniform vec3 camPos;
 
@@ -47,6 +52,13 @@ void main() {
     albedo = texture(diffuseMap, fragTex);
 #else
     albedo.rgb = diffuseColor;
+#endif
+
+    vec3 specular = vec3(0.0);
+#ifdef SPECULAR_MAP
+    specular = texture(specularMap, fragTex);
+#else
+    specular = specularColor;
 #endif
 
 #ifdef ALPHA_TEST
@@ -75,7 +87,7 @@ float attFactor = 1;
     vec3 L = vec3(0, 0, 0);
 #endif
 
-    color.rgb = getPhong(V, N, L, ambientColor, albedo.rgb, specularColor.rgb, shine, lightCol, attFactor);
+    color.rgb = getPhong(V, N, L, ambientColor, albedo.rgb, specular, shine, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
     float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.002), 0.2);

@@ -1,8 +1,9 @@
 #include "phong.glsl"
 
 layout(binding = 0) uniform sampler2D gAlbedo;
-layout(binding = 1) uniform sampler2D gWorld;
-layout(binding = 2) uniform sampler2D gNormal;
+layout(binding = 1) uniform sampler2D gSpecular;
+layout(binding = 2) uniform sampler2D gWorld;
+layout(binding = 3) uniform sampler2D gNormal;
 
 uniform vec2 resolution;
 
@@ -62,12 +63,13 @@ void main() {
     /* Retrieve remaining data from gbuffer */
     vec3 fragNor = texture(gNormal, fragTex).rgb * 2.f - vec3(1.f);
     vec3 albedo = texture(gAlbedo, fragTex).rgb;
+    vec4 specularShine = texture(gSpecular, fragTex);
  
     vec3 L = normalize(lightDir);
     vec3 V = normalize(camPos - fragPos);
     vec3 N = normalize(fragNor);
 
-    color.rgb = getPhong(V, N, L, albedo * 0.2, albedo, vec3(1), 300.f, lightCol, 1.0);
+    color.rgb = getPhong(V, N, L, albedo * 0.2, albedo, specularShine.rgb, specularShine.a, lightCol, 1.0);
     color.rgb *= attFactor;
     color.a = 1.0;
 }
