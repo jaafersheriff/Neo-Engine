@@ -1,5 +1,6 @@
 #include "alphaDiscard.glsl"
 #include "shadowreceiver.glsl"
+#include "phong.glsl"
 
 in vec4 fragPos;
 in vec3 fragNor;
@@ -74,15 +75,7 @@ float attFactor = 1;
     vec3 L = vec3(0, 0, 0);
 #endif
 
-    vec3 H = normalize(L + V);
-    float lambert = clamp(dot(L, N), 0.0, 1.0);
-    vec3 diffuseContrib  = lightCol * lambert / attFactor;
-    vec3 specularContrib = lightCol * pow(clamp(dot(H, N), 0.0, 1.0), shine) / attFactor;
-
-    color.rgb =
-        albedo.rgb * ambientColor
-        + albedo.rgb * diffuseContrib
-        + specularColor * specularContrib;
+    color.rgb = getPhong(V, N, L, ambientColor, albedo.rgb, specularColor.rgb, shine, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
     float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.002), 0.2);
