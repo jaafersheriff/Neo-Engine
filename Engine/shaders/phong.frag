@@ -54,7 +54,7 @@ void main() {
     albedo.rgb = diffuseColor;
 #endif
 
-    vec3 specular = vec3(0.0);
+    vec3 specular = vec3(1.0);
 #ifdef SPECULAR_MAP
     specular = texture(specularMap, fragTex);
 #else
@@ -90,7 +90,7 @@ float attFactor = 1;
     color.rgb = getPhong(V, N, L, ambientColor, albedo.rgb, specular, shine, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
-    float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.002), 0.2);
+    float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.002), 0.1);
     color.rgb *= visibility;
 #endif
 

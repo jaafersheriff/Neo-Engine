@@ -69,7 +69,7 @@ void main() {
     vec3 V = normalize(camPos - fragPos);
     vec3 N = normalize(fragNor);
 
-    color.rgb = getPhong(V, N, L, albedo * 0.2, albedo, specularShine.rgb, specularShine.a, lightCol, 1.0);
-    color.rgb *= attFactor;
+    color.rgb = getPhong(V, N, L, albedo * 0.2, albedo, specularShine.rgb, specularShine.a, lightCol, attFactor);
+    color.rgb *= attFactor * attFactor;
     color.a = 1.0;
 }

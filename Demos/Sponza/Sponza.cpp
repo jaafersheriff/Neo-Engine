@@ -185,7 +185,7 @@ namespace Sponza {
         drawShadows<AlphaTestComponent>(*shadowMap, ecs);
 
         if (mDeferredShading) {
-            _deferredShading(ecs, *sceneTarget, viewport.mSize);
+            _deferredShading(ecs, *sceneTarget, viewport.mSize, shadowMap->mTextures[0]);
         }
         else {
             _forwardShading(ecs, *sceneTarget, shadowMap->mTextures[0]);
@@ -206,7 +206,7 @@ namespace Sponza {
         drawPhong<AlphaTestComponent>(ecs, cameraEntity, shadowMap);
     }
 
-    void Demo::_deferredShading(const ECS& ecs, Framebuffer& sceneTarget, glm::uvec2 targetSize) {
+    void Demo::_deferredShading(const ECS& ecs, Framebuffer& sceneTarget, glm::uvec2 targetSize, Texture* shadowMap) {
         const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
         auto& gbuffer = createGBuffer(targetSize);
         gbuffer.bind();
@@ -219,6 +219,6 @@ namespace Sponza {
         sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
         drawPointLights(ecs, gbuffer, cameraEntity, targetSize, mLightDebugRadius);
-        drawDirectionalLights(ecs, cameraEntity, gbuffer);
+        drawDirectionalLights(ecs, cameraEntity, gbuffer, shadowMap);
     }
 }

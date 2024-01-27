@@ -16,7 +16,7 @@ namespace Sponza {
     void drawPointLights(const ECS& ecs, Framebuffer& gbuffer, ECS::Entity cameraEntity, const glm::uvec2 resolution, const float debugRadius) {
         TRACY_GPU();
 
-        auto* lightResolveShader = Library::createSourceShader("LightResolveShader", SourceShader::ConstructionArgs{
+        auto* lightResolveShader = Library::createSourceShader("PointLightResolveShader", SourceShader::ConstructionArgs{
             { ShaderStage::VERTEX, "sponza/pointlightresolve.vert"},
             { ShaderStage::FRAGMENT, "sponza/pointlightresolve.frag" }
         });
@@ -101,7 +101,7 @@ namespace Sponza {
         resolvedShader.bind();
 
         if (shadowsEnabled) {
-            resolvedShader.bindUniform("L", L);
+            resolvedShader.bindUniform("lightTransform", L);
             resolvedShader.bindTexture("shadowMap", *shadowMap);
         }
 
