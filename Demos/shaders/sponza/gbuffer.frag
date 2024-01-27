@@ -40,5 +40,5 @@ void main() {
 
     gDiffuse = vec4(albedo.rgb, 1.f);
     gWorld = vec4(fragPos.rgb, 1.f);
-    gNormal = vec4(normalize(fragNor), 1.f);
+    gNormal = vec4(normalize(fragNor) * 0.5 + 0.5, 1.f);
 }  

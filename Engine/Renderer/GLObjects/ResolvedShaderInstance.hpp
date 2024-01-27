@@ -35,6 +35,7 @@ namespace neo {
             float,
             glm::vec2,
             glm::ivec2,
+            glm::uvec2,
             glm::vec3,
             glm::vec4,
             glm::mat3,

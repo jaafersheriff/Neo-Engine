@@ -8,6 +8,7 @@
 #include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
 #include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/LightComponent/DirectionalLightComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
@@ -18,13 +19,13 @@ namespace neo {
 
         auto sourceCameraTuple = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent, PerspectiveCameraComponent>();
         auto receiverCameraTuple = ecs.getSingleView<FrustumFitReceiverComponent, SpatialComponent, OrthoCameraComponent>();
-        auto lightTuple = ecs.getSingleView<LightComponent, SpatialComponent>();
+        auto lightTuple = ecs.getSingleView<DirectionalLightComponent, LightComponent, SpatialComponent>();
         if (!receiverCameraTuple || !sourceCameraTuple || !lightTuple) {
             return;
         }
         auto&& [sourceCameraEntity, _, sourceSpatial, sourceCamera] = *sourceCameraTuple;
         auto&& [receiverCameraEntity, receiverFrustum, receiverSpatial, receiverCamera] = *receiverCameraTuple;
-        auto&& [lightEntity, light, lightSpatial] = *lightTuple;
+        auto&& [lightEntity, __, light, lightSpatial] = *lightTuple;
 
         /////////////////////// Do the fitting! ///////////////////////////////
         const glm::vec3 lightDir = lightSpatial.getLookDir();

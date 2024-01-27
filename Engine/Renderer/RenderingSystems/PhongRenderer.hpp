@@ -14,6 +14,7 @@
 #include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
 #include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
 
+#include "ECS/Component/LightComponent/MainLightComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/LightComponent/DirectionalLightComponent.hpp"
 #include "ECS/Component/LightComponent/PointLightComponent.hpp"
@@ -47,7 +48,7 @@ namespace neo {
 
         const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
         const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
-        auto&& [lightEntity, light, lightSpatial] = *ecs.getSingleView<LightComponent, SpatialComponent>();
+        auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
 
         glm::mat4 L;
         const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();

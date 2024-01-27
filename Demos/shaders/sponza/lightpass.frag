@@ -1,17 +1,17 @@
+#include "phong.glsl"
 
-uniform sampler2D gNormal;
-uniform sampler2D gDiffuse;
-uniform sampler2D gDepth;
+layout(binding = 0) uniform sampler2D gAlbedo;
+layout(binding = 1) uniform sampler2D gWorld;
+layout(binding = 2) uniform sampler2D gNormal;
 
-uniform mat4 invP, invV;
+uniform vec2 resolution;
 
 uniform vec3 camPos;
 uniform vec3 lightPos;
 uniform vec3 lightCol;
 uniform float lightRadius;
 
-uniform bool showLights;
-uniform float showRadius;
+uniform float debugRadius;
 
 out vec4 color;
 
@@ -35,29 +35,20 @@ float raySphereIntersect(vec3 r0, vec3 rd, vec3 s0, float sr)
 	return (-b - sqrt((b*b) - 4.0*a*c))/(2.0*a);
 }
 
-vec3 reconstructWorldPos(vec3 coords) {
-	vec3 ndc = coords * 2.0 - vec3(1.0);
-	vec4 view = invP * vec4(ndc, 1.0);
-	view.xyz /= view.w;
-	vec4 world = invV * vec4(view.xyz, 1.0);
-	return world.xyz;
-}
-
 void main() {
     /* Generate tex coords [0, 1] */
-    vec2 fragTex = gl_FragCoord.xy / vec2(textureSize(gDepth, 0));
+    vec2 fragTex = gl_FragCoord.xy / resolution;
     
     /* Calculate fragment's world position */
-    float depth = texture(gDepth, fragTex).r;
-    vec3 fragPos = reconstructWorldPos(vec3(fragTex, depth));
+    vec3 fragPos = texture(gWorld, fragTex).rgb;
 
-    if (showLights) {
-        float rayDist = raySphereIntersect(camPos, normalize(fragPos - camPos), lightPos, lightRadius * showRadius);
-        if (rayDist > 0.0 && rayDist < length(fragPos - camPos)) {
-            color = vec4(lightCol, 1.f);
-            return;
-        }
+#ifdef SHOW_LIGHTS
+    float rayDist = raySphereIntersect(camPos, normalize(fragPos - camPos), lightPos, debugRadius);
+    if (rayDist > 0.0 && rayDist < length(fragPos - camPos)) {
+        color = vec4(lightCol, 1.f);
+        return;
     }
+#endif
 
     /* Calculate attenuation 
      * Early discard if fragment is outside of light volume */
@@ -70,16 +61,13 @@ void main() {
 
     /* Retrieve remaining data from gbuffer */
     vec3 fragNor = texture(gNormal, fragTex).rgb * 2.f - vec3(1.f);
-    vec3 albedo = texture(gDiffuse, fragTex).rgb;
+    vec3 albedo = texture(gAlbedo, fragTex).rgb;
  
     vec3 L = normalize(lightDir);
     vec3 V = normalize(camPos - fragPos);
     vec3 N = normalize(fragNor);
-    vec3 H = normalize(L + V);
-    float lambert = clamp(dot(L, N), 0.f, 1.f);
-    vec3 diffuseContrib = lightCol * lambert * attFactor;
-    float s = pow(clamp(dot(H, N), 0.f, 1.f), 33.f);
-    vec3 specularContrib = lightCol * s * attFactor * 0.33f;
-    color.a = 1.f;
-    color.rgb = diffuseContrib * albedo + specularContrib;
+
+    color.rgb = getPhong(V, N, L, albedo * 0.2, albedo, vec3(1), 33.f, lightCol, 1.0);
+    color.rgb *= attFactor;
+    color.a = 1.0;
 }

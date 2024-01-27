@@ -127,7 +127,7 @@ namespace neo {
                         && uniformNameStart != std::string::npos
                         && uniformNameEnd != std::string::npos, "Failed to parse uniform at line %s", line.c_str());
                     std::string uniform = line.substr(uniformNameStart, uniformNameEnd - uniformNameStart);
-                    NEO_ASSERT(uniform.find(" ") == std::string::npos && uniform.find(",") == std::string::npos, "Can't have nested uniform definitions");
+                    NEO_ASSERT(uniform.find(" ") == std::string::npos && uniform.find(",") == std::string::npos, "Can't have nested uniform definitions at %s", line.c_str());
                     uniforms.push_back(uniform);
 
                     if (bindingLoc != std::string::npos) {
@@ -265,6 +265,8 @@ namespace neo {
             else if constexpr (std::is_same_v<T, glm::vec2>)
                 glUniform2f(_getUniform(name), arg.x, arg.y);
             else if constexpr (std::is_same_v<T, glm::ivec2>)
+                glUniform2i(_getUniform(name), arg.x, arg.y);
+            else if constexpr (std::is_same_v<T, glm::uvec2>)
                 glUniform2i(_getUniform(name), arg.x, arg.y);
             else if constexpr (std::is_same_v<T, glm::vec3>)
                 glUniform3f(_getUniform(name), arg.x, arg.y, arg.z);

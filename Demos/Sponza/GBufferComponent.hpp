@@ -6,16 +6,19 @@
 
 using namespace neo;
 
-struct GBufferShaderComponent : public ShaderComponent {
-    GBufferShaderComponent() : ShaderComponent({
-        Library::createSourceShader("GBufferShader", SourceShader::ConstructionArgs{
-            { ShaderStage::VERTEX, "sponza/gbuffer.vert"},
-            { ShaderStage::FRAGMENT, "sponza/gbuffer.frag" }
-        })
-        })
-    {}
+namespace Sponza {
 
-    virtual std::string getName() const override {
-        return "GBufferShaderComponent";
-    }
-};
+	struct GBufferShaderComponent : public ShaderComponent {
+	    GBufferShaderComponent() : ShaderComponent({
+	        Library::createSourceShader("GBufferShader", SourceShader::ConstructionArgs{
+	            { ShaderStage::VERTEX, "sponza/gbuffer.vert"},
+	            { ShaderStage::FRAGMENT, "sponza/gbuffer.frag" }
+	        })
+	        })
+	    {}
+	
+	    virtual std::string getName() const override {
+	        return "GBufferShaderComponent";
+	    }
+	};
+}
