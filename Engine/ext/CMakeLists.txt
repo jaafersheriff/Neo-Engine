@@ -219,3 +219,9 @@ PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/entt/src"
 PRIVATE
 )
+
+## tinygltf
+set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tinygltf")
+set_target_properties(tinygltf PROPERTIES FOLDER "Neo/ext")
+
