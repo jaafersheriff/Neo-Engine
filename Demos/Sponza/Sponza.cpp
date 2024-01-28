@@ -157,6 +157,12 @@ namespace Sponza {
             if (ImGui::SliderInt("# Point Lights", &mPointLightCount, 0, 100)) {
                 _createPointLights(ecs, mPointLightCount);
             }
+
+            ImGui::Checkbox("AO", &mDrawAO);
+            if (mDrawAO) {
+                ImGui::SliderFloat("AO Radius", &mAORadius, 0.f, 1.f);
+                ImGui::SliderFloat("AO Bias", &mAOBias, 0.f, 1.f);
+            }
         }
     }
 
@@ -224,7 +230,7 @@ namespace Sponza {
         sceneTarget.bind();
         sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
-        drawAO(ecs, cameraEntity, gbuffer, 0.4f, 0.8f);
+        drawAO(ecs, cameraEntity, gbuffer, mAORadius, mAOBias);
 
         NEO_UNUSED(shadowMap);
         // sceneTarget.bind();

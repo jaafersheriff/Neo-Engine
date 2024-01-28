@@ -24,5 +24,8 @@ namespace Sponza {
 		bool mDeferredShading = false;
 		int mPointLightCount = 20;
 		float mLightDebugRadius = 0.f;
+		bool mDrawAO = false;
+		float mAORadius = 0.4f;
+		float mAOBias = 0.7f;
 	};
 }

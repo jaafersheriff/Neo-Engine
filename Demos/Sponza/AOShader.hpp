@@ -83,23 +83,4 @@ namespace Sponza {
         Library::getMesh("quad").mMesh->draw();
     }
 
-#if 0
-
-        virtual void render(const ECS& ecs) override {
-        }
-
-        virtual void imguiEditor() override {
-            int size = Library::getTexture("aoKernel")->mWidth;
-            if (ImGui::SliderInt("Kernel", &size, 1, 128)) {
-                generateKernel(size);
-            }
-            size = Library::getTexture("aoNoise")->mWidth;
-            if (ImGui::SliderInt("Noise", &size, 1, 32)) {
-                generateNoise(size);
-            }
-            ImGui::SliderFloat("Radius", &radius, 0.f, 1.f);
-            ImGui::SliderFloat("Bias", &bias, 0.f, 1.f);
-        }
-    };
-#endif
 }
