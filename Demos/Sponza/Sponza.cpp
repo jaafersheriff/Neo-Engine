@@ -145,6 +145,8 @@ namespace Sponza {
     }
 
     void Demo::imGuiEditor(ECS& ecs) {
+        ImGui::Checkbox("Shadows", &mDrawShadows);
+
         if (ImGui::Checkbox("Deferred Shading", &mDeferredShading)) {
             if (mDeferredShading) {
                 _createPointLights(ecs, mPointLightCount);
@@ -180,16 +182,18 @@ namespace Sponza {
                 GL_DEPTH_COMPONENT
             } 
         } }, "Shadow map");
-        shadowMap->bind();
-        shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), GL_DEPTH_BUFFER_BIT);
-        drawShadows<OpaqueComponent>(*shadowMap, ecs);
-        drawShadows<AlphaTestComponent>(*shadowMap, ecs);
+        if (mDrawShadows) {
+            shadowMap->bind();
+            shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), GL_DEPTH_BUFFER_BIT);
+            drawShadows<OpaqueComponent>(*shadowMap, ecs);
+            drawShadows<AlphaTestComponent>(*shadowMap, ecs);
+        }
 
         if (mDeferredShading) {
-            _deferredShading(ecs, *sceneTarget, viewport.mSize, shadowMap->mTextures[0]);
+            _deferredShading(ecs, *sceneTarget, viewport.mSize, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
         }
         else {
-            _forwardShading(ecs, *sceneTarget, shadowMap->mTextures[0]);
+            _forwardShading(ecs, *sceneTarget, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
         }
 
         backbuffer.bind();

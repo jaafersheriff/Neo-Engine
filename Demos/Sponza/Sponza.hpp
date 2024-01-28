@@ -19,6 +19,8 @@ namespace Sponza {
 	private:
 		void _forwardShading(const ECS& ecs, Framebuffer& sceneTarget, Texture* shadowMap);
 		void _deferredShading(const ECS& ecs, Framebuffer& sceneTarget, glm::uvec2 targetSize, Texture* shadowMap);
+		bool mDrawShadows = true;
+
 		bool mDeferredShading = false;
 		int mPointLightCount = 20;
 		float mLightDebugRadius = 0.f;
