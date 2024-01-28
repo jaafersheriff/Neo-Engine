@@ -3,7 +3,7 @@ in vec2 fragTex;
 
 layout(binding = 0) uniform sampler2D gNormal;
 layout(binding = 1) uniform sampler2D gDepth;
-layout(binding = 2) uniform sampler2D kernel;
+layout(binding = 2) uniform sampler1D kernel;
 layout(binding = 3) uniform sampler2D noise;
 
 uniform float radius;
@@ -36,7 +36,7 @@ void main() {
     float occlusion = 0.f;
     int kernelSize = textureSize(kernel, 0).x;
     for (int i = 0; i < kernelSize; i++) {
-        vec3 kSample = TBN * texelFetch(kernel, ivec2(i, 0), 0).rgb;
+        vec3 kSample = TBN * texelFetch(kernel, i, 0).rgb;
         kSample = fragPos + kSample * radius;
 
         vec4 offset = vec4(kSample, 1.f);
