@@ -116,6 +116,7 @@ namespace Sponza {
             ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
         }
 
+#if 0
         auto assets = Loader::loadMultiAsset("sponza.obj");
         for (auto& asset : assets) {
             auto entity = ecs.createEntity();
@@ -133,6 +134,7 @@ namespace Sponza {
                 ecs.addComponent<OpaqueComponent>(entity);
             }
         }
+#endif
 
         /* Systems - order matters! */
         auto& camSys = ecs.addSystem<CameraControllerSystem>();

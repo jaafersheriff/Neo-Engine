@@ -90,10 +90,14 @@ namespace neo {
             return it->second;
         }
 
+#if 0
         NEO_LOG("First request for %s, loading...", fileName.c_str());
         MeshData mesh = Loader::loadMesh(fileName, doResize);
         _insertMesh(fileName, mesh);
         return mesh;
+#endif
+        NEO_UNUSED(doResize);
+        return {};
     }
 
     void Library::insertMesh(const std::string& name, MeshData& data) {

@@ -59,6 +59,7 @@ namespace Base {
         }
 
         /* Bunny object */
+        Loader::loadGltf("Suzanne/Suzanne.gltf");
         {
             auto bunny = ecs.createEntity();
             ecs.addComponent<TagComponent>(bunny, "Bunny");

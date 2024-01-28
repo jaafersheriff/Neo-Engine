@@ -21,14 +21,6 @@ namespace neo {
         glm::vec3 mBaseScale{ 1.f, 1.f, 1.f };
     };
 
-    struct Asset {
-        MeshData meshData;
-        MaterialComponent material;
-        // Texture* ambient_tex = nullptr;            // map_Ka
-        // Texture* bump_tex = nullptr;               // map_bump, bump
-        // Texture* specular_highlight_tex; // map_Ns
-    };
-
     class Loader {
         friend Engine;
 
@@ -42,9 +34,12 @@ namespace neo {
 
             static const char* loadFileString(const std::string&);
 
-            /* Load Mesh pointer from an .obj file */
+# if 0
             static MeshData loadMesh(const std::string &, bool = false);
             static std::vector<Asset> loadMultiAsset(const std::string &);
+#else
+            static void loadGltf(const std::string& fileName);
+#endif
 
             /* Retrieve Texture pointer from an image file */
             static Texture* loadTexture(const std::string &, TextureFormat);

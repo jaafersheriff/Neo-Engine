@@ -9,17 +9,36 @@
 
 #include "Util/Profiler.hpp"
 
-#pragma warning(push)
-#pragma warning(disable: 4706)
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "ext/tiny_obj_loader.h"
-#pragma warning(pop)
 
+#if 0
 #pragma warning(push)
 #pragma warning(disable: 4244)
 #define STB_IMAGE_IMPLEMENTATION
 #include "ext/stb_image.h"
 #pragma warning(pop)
+#endif
+
+#if 0
+#pragma warning(push)
+#pragma warning(disable: 4706)
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "ext/tiny_obj_loader.h"
+#pragma warning(pop)
+#else
+#define TINYGLTF_IMPLEMENTATION
+//#define TINYGLTF_NO_INCLUDE_STB_IMAGE 
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define TINYGLTF_USE_CPP14 
+#ifndef DEBUG_MODE
+    #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
+#endif
+#pragma warning(push)
+#pragma warning(disable: 4018)
+#pragma warning(disable: 4267)
+#include <ext/tinygltf/tiny_gltf.h>
+#pragma warning(pop)
+#endif
 
 namespace neo {
 
@@ -61,6 +80,7 @@ namespace neo {
         return nullptr;
     }
 
+#if 0
     MeshData Loader::loadMesh(const std::string &fileName, bool doResize) {
         TRACY_ZONE();
 
@@ -215,6 +235,41 @@ namespace neo {
 
         return ret;
     }
+#else
+    void Loader::loadGltf(const std::string& fileName) {
+        tinygltf::Model model;
+        tinygltf::TinyGLTF loader;
+        std::string err;
+        std::string warn;
+        bool ret;
+
+        // TODO - this should be extended to other load funcs..
+        std::string path = fileName;
+        if (util::fileExists((APP_RES_DIR + fileName).c_str())) {
+            path = APP_RES_DIR + fileName;
+        }
+        else if (util::fileExists((ENGINE_RES_DIR + fileName).c_str())) {
+            path = ENGINE_RES_DIR + fileName;
+        }
+
+        if (fileName.substr(fileName.length() - 3, 3) == "glb") {
+            ret = loader.LoadBinaryFromFile(&model, &err, &warn, path); // for binary glTF(.glb)
+        }
+        else {
+            ret = loader.LoadASCIIFromFile(&model, &err, &warn, path);
+        }
+
+        if (!warn.empty()) {
+            NEO_LOG_W("tinygltf: %s", warn.c_str());
+        }
+
+        if (!err.empty()) {
+            NEO_LOG_E("tinygltf: %s", warn.c_str());
+        }
+
+        NEO_ASSERT(ret, "Failed to parse model %s", fileName.c_str());
+    }
+#endif
 
     Texture* Loader::loadTexture(const std::string &fileName, TextureFormat format) {
         TRACY_ZONE();
@@ -227,7 +282,6 @@ namespace neo {
         _cleanTextureData(data);
 
         return texture;
-
     }
 
     Texture* Loader::loadTexture(const std::string &name, const std::vector<std::string>& files) {
