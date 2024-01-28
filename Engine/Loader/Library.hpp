@@ -44,6 +44,7 @@ namespace neo {
             static void insertMesh(const std::string&, MeshData& mesh);
             static const std::unordered_map<std::string, MeshData> getAllMeshes() { return mMeshes; }
 
+            static bool hasTexture(const std::string&); // will go away when proper resource manager happens ;( 
             static Texture* getTexture(const std::string&);
             static Texture* loadTexture(const std::string&, TextureFormat = {});
             static Texture* createTexture(const std::string&, TextureFormat, glm::u16vec3 dimension, const void* data = nullptr);

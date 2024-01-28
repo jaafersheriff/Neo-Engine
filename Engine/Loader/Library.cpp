@@ -111,6 +111,10 @@ namespace neo {
         return nullptr;
     }
 
+    bool Library::hasTexture(const std::string& fileName) {
+        return mTextures.find(fileName) != mTextures.end();
+    }
+
     Texture* Library::loadTexture(const std::string& fileName, TextureFormat format) {
         TRACY_ZONE();
 

@@ -1,14 +1,10 @@
 
 in vec2 fragTex;
 
-uniform sampler2D inputFBO;
-uniform sampler2D inputDepth;
-
-uniform sampler2D gNormal;
-uniform sampler2D gDepth;
-
-uniform sampler2D kernel;
-uniform sampler2D noise;
+layout(binding = 0) uniform sampler2D gNormal;
+layout(binding = 1) uniform sampler2D gDepth;
+layout(binding = 2) uniform sampler2D kernel;
+layout(binding = 3) uniform sampler2D noise;
 
 uniform float radius;
 uniform float bias;

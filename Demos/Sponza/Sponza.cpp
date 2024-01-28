@@ -3,6 +3,7 @@
 #include "GBufferComponent.hpp"
 #include "GBufferRenderer.hpp"
 #include "LightPassRenderer.hpp"
+#include "AOShader.hpp"
 
 #include "Engine/Engine.hpp"
 #include "Loader/Loader.hpp"
@@ -215,10 +216,17 @@ namespace Sponza {
         drawGBuffer<OpaqueComponent>(ecs, cameraEntity, {});
         drawGBuffer<AlphaTestComponent>(ecs, cameraEntity, {});
 
+        // TODO - replace with proper ao fbo
         sceneTarget.bind();
         sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
-        drawPointLights(ecs, gbuffer, cameraEntity, targetSize, mLightDebugRadius);
-        drawDirectionalLights(ecs, cameraEntity, gbuffer, shadowMap);
+        drawAO(ecs, cameraEntity, gbuffer, 0.4f, 0.8f);
+
+        NEO_UNUSED(shadowMap);
+        // sceneTarget.bind();
+        // sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
+        // drawPointLights(ecs, gbuffer, cameraEntity, targetSize, mLightDebugRadius);
+        // drawDirectionalLights(ecs, cameraEntity, gbuffer, shadowMap);
     }
 }
