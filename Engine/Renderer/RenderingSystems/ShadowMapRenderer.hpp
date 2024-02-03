@@ -14,9 +14,12 @@ namespace neo {
 
         depthMap.bind();
         depthMap.disableDraw();
-        glBindTexture(GL_TEXTURE_2D, depthMap.mTextures[0]->mTextureID);
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data());
+        depthMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, depthMap.mTextures[0]->mWidth, depthMap.mTextures[0]->mHeight);
+        {
+            glBindTexture(GL_TEXTURE_2D, depthMap.mTextures[0]->mTextureID);
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data());
+        }
 
         ShaderDefines passDefines = {};
         MakeDefine(ALPHA_TEST);

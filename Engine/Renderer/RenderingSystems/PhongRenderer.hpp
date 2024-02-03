@@ -25,7 +25,7 @@
 namespace neo {
 
     template<typename... CompTs>
-    void drawPhong(const ECS& ecs, ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const ShaderDefines& inDefines = {}) {
+    void drawPhong(const ECS& ecs, const ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const ShaderDefines& inDefines = {}) {
         TRACY_GPU();
 
         ShaderDefines passDefines(inDefines);
