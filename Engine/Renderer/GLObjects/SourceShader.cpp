@@ -52,18 +52,19 @@ namespace neo {
 			it->second.init(mShaderSources, defines);
 
 			std::stringstream ss;
-			ss << "with { ";
-			const ShaderDefines* _defines = &defines;
-			while (_defines) {
-                for (auto& define : _defines->mDefines) {
-					if (define.second) {
-						ss << define.first.mVal.data() << ", ";
+			if (defines.mDefines.size() || defines.mParent != nullptr) {
+				ss << "with\n";
+				const ShaderDefines* _defines = &defines;
+				while (_defines) {
+					for (auto& define : _defines->mDefines) {
+						if (define.second) {
+							ss << "\t" << define.first.mVal.data() << "\n";
+						}
 					}
-				}
 
-				_defines = _defines->mParent;
+					_defines = _defines->mParent;
+				}
 			}
-			ss << " }";
 			if (it->second.mValid) {
 				NEO_LOG_I("Resolving a new variant for %s %s", mName.c_str(), ss.str().c_str());
 			}
@@ -105,6 +106,7 @@ namespace neo {
 
 		if (mResolvedShaders.size()) {
 			if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(mResolvedShaders.size()))) {
+				ImGui::Separator();
 				for (const auto& variant : mResolvedShaders) {
 					// if (mConstructionArgs && ImGui::Button("Reload")) {
 					// Just destroy the variant and evict from the map, easy
