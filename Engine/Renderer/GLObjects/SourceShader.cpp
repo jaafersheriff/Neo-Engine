@@ -65,6 +65,8 @@ namespace neo {
 					_defines = _defines->mParent;
 				}
 			}
+			// Remove the last newline hehe
+			ss.seekp(-1, ss.cur); ss << '\0';
 			if (it->second.mValid) {
 				NEO_LOG_I("Resolving a new variant for %s %s", mName.c_str(), ss.str().c_str());
 			}

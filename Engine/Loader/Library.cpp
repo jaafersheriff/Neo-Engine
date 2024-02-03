@@ -294,8 +294,8 @@ namespace neo {
         ImGui::Begin("Library");
 
         if (ImGui::TreeNodeEx("Framebuffers", ImGuiTreeNodeFlags_DefaultOpen)) {
-            if (ImGui::BeginTable("##Framebuffers", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_ScrollX | ImGuiTableFlags_SizingFixedFit)) {
-                ImGui::TableSetupColumn("Name/Size");
+            if (ImGui::BeginTable("##Framebuffers", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_PreciseWidths | ImGuiTableFlags_SizingStretchSame)) {
+                ImGui::TableSetupColumn("Name/Size", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending);
                 ImGui::TableSetupColumn("Attachments");
                 ImGui::TableHeadersRow();
                 for (auto& fbo : Library::mFramebuffers) {
@@ -304,12 +304,14 @@ namespace neo {
                     ImGui::Text("%s", fbo.first.c_str());
                     ImGui::Text("[%d, %d]", fbo.second->mTextures[0]->mWidth, fbo.second->mTextures[0]->mHeight);
                     ImGui::TableSetColumnIndex(1);
-                    for (auto& t : fbo.second->mTextures) {
-                        textureFunc(*t);
-                        ImGui::SameLine();
+                    for (auto t = fbo.second->mTextures.begin(); t < fbo.second->mTextures.end(); t++) {
+                        textureFunc(**t);
+                        if (t != std::prev(fbo.second->mTextures.end())) {
+                            ImGui::SameLine();
+                        }
                     }
                 }
-                for (auto& [hash, tvList] : Library::mPooledFramebuffers) {
+                for (auto& [details, tvList] : Library::mPooledFramebuffers) {
                     for (auto& tv : tvList) {
                         ImGui::TableNextRow();
                         ImGui::TableSetColumnIndex(0);
@@ -318,9 +320,11 @@ namespace neo {
                         }
                         ImGui::Text("[%d, %d]", tv.mFramebuffer->mTextures[0]->mWidth, tv.mFramebuffer->mTextures[0]->mHeight);
                         ImGui::TableSetColumnIndex(1);
-                        for (auto& t : tv.mFramebuffer->mTextures) {
-                            textureFunc(*t);
-                            ImGui::SameLine();
+                        for (auto t = tv.mFramebuffer->mTextures.begin(); t < tv.mFramebuffer->mTextures.end(); t++) {
+                            textureFunc(**t);
+                            if (t != std::prev(tv.mFramebuffer->mTextures.end())) {
+                                ImGui::SameLine();
+                            }
                         }
                     }
                 }
