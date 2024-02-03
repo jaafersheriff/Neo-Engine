@@ -1,25 +1,14 @@
 
-#include "postprocess.glsl"
+in vec2 fragTex;
 
-uniform sampler2D lightOutput;
-uniform sampler2D gDiffuse;
-uniform sampler2D decals;
-
-uniform bool showAO;
-uniform float diffuseAmount;
+layout(binding = 0) uniform sampler2D lightOutput;
+layout(binding = 1) uniform sampler2D aoOutput;
 
 out vec4 outcolor;
 
 void main() {
-    vec4 lightOutput = texture(lightOutput, fragTex);
-    vec4 aoOutput = texture(inputFBO, fragTex);
-    vec4 diffuse = texture(gDiffuse, fragTex);
-    vec4 decal = texture(decals, fragTex);
+	vec3 lightResolve = texture(lightOutput, fragTex).rgb;
+	lightResolve *= texture(aoOutput, fragTex).r;
 
-    outcolor.rgb = 
-	 	diffuseAmount * diffuse.rgb
-		+ diffuseAmount * decal.rgb
-		+ lightOutput.rgb * decal.rgb
-		+ (lightOutput.rgb * (showAO ? aoOutput.r : 1.f));
-    outcolor.a = 1.f;
+	outcolor = vec4(lightResolve, 1.0);
 }

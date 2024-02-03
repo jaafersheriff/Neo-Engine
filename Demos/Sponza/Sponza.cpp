@@ -226,7 +226,7 @@ namespace Sponza {
         drawGBuffer<OpaqueComponent>(ecs, cameraEntity, {});
         drawGBuffer<AlphaTestComponent>(ecs, cameraEntity, {});
 
-        drawAO(ecs, cameraEntity, gbuffer, targetSize, mAORadius, mAOBias);
+        auto& ao = drawAO(ecs, cameraEntity, gbuffer, targetSize, mDrawAO ? mAORadius : 0.f, mDrawAO ? mAOBias : 0.f);
 
         auto lightResolve = Library::getPooledFramebuffer({ targetSize, {
             TextureFormat{
@@ -241,8 +241,22 @@ namespace Sponza {
         drawPointLights(ecs, gbuffer, cameraEntity, targetSize, mLightDebugRadius);
         drawDirectionalLights(ecs, cameraEntity, gbuffer, shadowMap);
 
+        // I'm lazy so I'm just going to do the final combine here
         sceneTarget.bind();
         sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
+        {
+            auto* combineShader = Library::createSourceShader("FinalCombine", SourceShader::ConstructionArgs{
+                { ShaderStage::VERTEX, "quad.vert"},
+                { ShaderStage::FRAGMENT, "sponza/combine.frag" }
+                });
+            auto& resolvedShader = combineShader->getResolvedInstance({});
+            resolvedShader.bind();
+
+            resolvedShader.bindTexture("lightOutput", *lightResolve->mTextures[0]);
+            resolvedShader.bindTexture("aoOutput", *ao.mTextures[0]);
+
+            Library::getMesh("quad").mMesh->draw();
+        }
     }
 }
