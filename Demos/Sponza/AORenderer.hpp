@@ -52,6 +52,7 @@ namespace Sponza {
     }
 
      Framebuffer& drawAO(const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
+        TRACY_GPU();
         if (!Library::hasTexture("aoKernel")) {
             _generateKernel(8);
         }
@@ -76,6 +77,7 @@ namespace Sponza {
         glViewport(0, 0, targetSize.x / 2u, targetSize.y / 2u);
 
         {
+            TRACY_GPUN("Base AO");
             auto* aoShader = Library::createSourceShader("AOShader", SourceShader::ConstructionArgs{
                 { ShaderStage::VERTEX, "quad.vert"},
                 { ShaderStage::FRAGMENT, "sponza/ao.frag" }
@@ -94,13 +96,15 @@ namespace Sponza {
             resolvedShader.bindTexture("noise", *Library::getTexture("aoNoise"));
             resolvedShader.bindTexture("kernel", *Library::getTexture("aoKernel"));
 
-            resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
-            resolvedShader.bindUniform("invP", glm::inverse(ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj()));
+            const auto P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+            resolvedShader.bindUniform("P", P);
+            resolvedShader.bindUniform("invP", glm::inverse(P));
 
             Library::getMesh("quad").mMesh->draw();
         }
 
         {
+            TRACY_GPUN("AO Blur");
             // Do base AO at full res?
             auto blurredAO = Library::getPooledFramebuffer({ targetSize, {
                 TextureFormat{

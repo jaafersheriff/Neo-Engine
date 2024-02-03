@@ -3,7 +3,7 @@
 #include "GBufferComponent.hpp"
 #include "GBufferRenderer.hpp"
 #include "LightPassRenderer.hpp"
-#include "AOShader.hpp"
+#include "AORenderer.hpp"
 
 #include "Engine/Engine.hpp"
 #include "Loader/Loader.hpp"
@@ -208,6 +208,7 @@ namespace Sponza {
     }
 
     void Demo::_forwardShading(const ECS& ecs, Framebuffer& sceneTarget, Texture* shadowMap) {
+        TRACY_GPU();
         const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
         sceneTarget.bind();
@@ -218,6 +219,7 @@ namespace Sponza {
     }
 
     void Demo::_deferredShading(const ECS& ecs, Framebuffer& sceneTarget, glm::uvec2 targetSize, Texture* shadowMap) {
+        TRACY_GPU();
         const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
         auto& gbuffer = createGBuffer(targetSize);
         gbuffer.bind();
@@ -242,10 +244,11 @@ namespace Sponza {
         drawDirectionalLights(ecs, cameraEntity, gbuffer, shadowMap);
 
         // I'm lazy so I'm just going to do the final combine here
-        sceneTarget.bind();
-        sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
         {
+            TRACY_GPUN("Final Combine");
+            sceneTarget.bind();
+            sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
             auto* combineShader = Library::createSourceShader("FinalCombine", SourceShader::ConstructionArgs{
                 { ShaderStage::VERTEX, "quad.vert"},
                 { ShaderStage::FRAGMENT, "sponza/combine.frag" }

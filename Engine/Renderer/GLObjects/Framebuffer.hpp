@@ -24,7 +24,7 @@ namespace neo {
         }
         
         void bind() {
-            TRACY_GPU();
+            TRACY_ZONE();
             glBindFramebuffer(GL_FRAMEBUFFER, mFBOID);
         }
         
