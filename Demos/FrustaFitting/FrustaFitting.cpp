@@ -150,6 +150,7 @@ namespace FrustaFitting {
                 GL_DEPTH_COMPONENT
             }
         } }, "Shadow map");
+        shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), GL_DEPTH_BUFFER_BIT);
         drawShadows(*shadowMap, ecs);
 
         backbuffer.bind();

@@ -189,6 +189,7 @@ namespace Sponza {
             } 
         } }, "Shadow map");
         if (mDrawShadows) {
+            shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), GL_DEPTH_BUFFER_BIT);
             drawShadows<OpaqueComponent>(*shadowMap, ecs);
             drawShadows<AlphaTestComponent>(*shadowMap, ecs);
         }
@@ -203,13 +204,13 @@ namespace Sponza {
         backbuffer.bind();
         backbuffer.clear(glm::vec4(0,0,0, 1.f), GL_COLOR_BUFFER_BIT);
         drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
-       // Don't forget the depth. Because reasons.
-       glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
-           0, 0, viewport.mSize.x, viewport.mSize.y,
-           0, 0, viewport.mSize.x, viewport.mSize.y,
-           GL_DEPTH_BUFFER_BIT,
-           GL_NEAREST
-       );
+        // Don't forget the depth. Because reasons.
+        glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
+            0, 0, viewport.mSize.x, viewport.mSize.y,
+            0, 0, viewport.mSize.x, viewport.mSize.y,
+            GL_DEPTH_BUFFER_BIT,
+            GL_NEAREST
+        );
     }
 
     void Demo::_forwardShading(const ECS& ecs, Framebuffer& sceneTarget, Texture* shadowMap) {

@@ -34,7 +34,9 @@ namespace Sponza {
         auto& resolvedShader = lightResolveShader->getResolvedInstance(defines);
         resolvedShader.bind();
 
-        resolvedShader.bindUniform("debugRadius", debugRadius);
+        if (debugRadius > 0.f) {
+            resolvedShader.bindUniform("debugRadius", debugRadius);
+        }
         resolvedShader.bindUniform("resolution", glm::vec2(resolution));
 
         const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();

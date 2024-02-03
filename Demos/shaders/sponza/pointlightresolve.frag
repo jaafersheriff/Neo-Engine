@@ -12,7 +12,9 @@ uniform vec3 lightPos;
 uniform vec3 lightCol;
 uniform float lightRadius;
 
+#ifdef SHOW_LIGHTS
 uniform float debugRadius;
+#endif
 
 out vec4 color;
 
