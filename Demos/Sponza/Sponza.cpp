@@ -228,7 +228,7 @@ namespace Sponza {
         drawGBuffer<OpaqueComponent>(ecs, cameraEntity, {});
         drawGBuffer<AlphaTestComponent>(ecs, cameraEntity, {});
 
-        auto& ao = drawAO(ecs, cameraEntity, gbuffer, targetSize, mDrawAO ? mAORadius : 0.f, mDrawAO ? mAOBias : 0.f);
+        auto ao = mDrawAO ? drawAO(ecs, cameraEntity, gbuffer, targetSize, mAORadius, mAOBias) : nullptr;
 
         auto lightResolve = Library::getPooledFramebuffer({ targetSize, {
             TextureFormat{
@@ -253,11 +253,18 @@ namespace Sponza {
                 { ShaderStage::VERTEX, "quad.vert"},
                 { ShaderStage::FRAGMENT, "sponza/combine.frag" }
                 });
-            auto& resolvedShader = combineShader->getResolvedInstance({});
+            ShaderDefines defines;
+            MakeDefine(DRAW_AO);
+            if (mDrawAO) {
+                defines.set(DRAW_AO);
+            }
+            auto& resolvedShader = combineShader->getResolvedInstance(defines);
             resolvedShader.bind();
 
             resolvedShader.bindTexture("lightOutput", *lightResolve->mTextures[0]);
-            resolvedShader.bindTexture("aoOutput", *ao.mTextures[0]);
+            if (mDrawAO) {
+                resolvedShader.bindTexture("aoOutput", *ao->mTextures[0]);
+            }
 
             Library::getMesh("quad").mMesh->draw();
         }

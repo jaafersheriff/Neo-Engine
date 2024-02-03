@@ -51,7 +51,7 @@ namespace Sponza {
         }
     }
 
-     Framebuffer& drawAO(const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
+     Framebuffer* drawAO(const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
         TRACY_GPU();
         if (!Library::hasTexture("aoKernel")) {
             _generateKernel(8);
@@ -131,7 +131,7 @@ namespace Sponza {
             resolvedShader.bindUniform("blurAmount", 2);
 
             Library::getMesh("quad").mMesh->draw();
-            return *blurredAO;
+            return blurredAO;
         }
     }
 
