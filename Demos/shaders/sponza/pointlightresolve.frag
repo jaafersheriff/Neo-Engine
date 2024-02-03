@@ -40,8 +40,8 @@ void main() {
     /* Generate tex coords [0, 1] */
     vec2 fragTex = gl_FragCoord.xy / resolution;
     
-    /* Calculate fragment's world position */
     vec3 fragPos = texture(gWorld, fragTex).rgb;
+    vec3 fragNor = normalize(texture(gNormal, fragTex).rgb * 2.f - vec3(1.f));
 
 #ifdef SHOW_LIGHTS
     float rayDist = raySphereIntersect(camPos, normalize(fragPos - camPos), lightPos, debugRadius);
@@ -61,13 +61,12 @@ void main() {
     }
 
     /* Retrieve remaining data from gbuffer */
-    vec3 fragNor = texture(gNormal, fragTex).rgb * 2.f - vec3(1.f);
     vec3 albedo = texture(gAlbedo, fragTex).rgb;
     vec4 specularShine = texture(gSpecular, fragTex);
  
     vec3 L = normalize(lightDir);
     vec3 V = normalize(camPos - fragPos);
-    vec3 N = normalize(fragNor);
+    vec3 N = fragNor;
 
     color.rgb = getPhong(V, N, L, albedo * 0.2, albedo, specularShine.rgb, specularShine.a, lightCol, attFactor);
     color.rgb *= attFactor * attFactor;

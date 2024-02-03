@@ -51,7 +51,7 @@ namespace Sponza {
         }
     }
 
-    void drawAO(const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, float radius, float bias) {
+     Framebuffer& drawAO(const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
         if (!Library::hasTexture("aoKernel")) {
             _generateKernel(8);
         }
@@ -59,28 +59,76 @@ namespace Sponza {
             _generateNoise(4);
         }
 
-        auto* aoShader = Library::createSourceShader("AOShader", SourceShader::ConstructionArgs{
-            { ShaderStage::VERTEX, "quad.vert"},
-            { ShaderStage::FRAGMENT, "sponza/ao.frag" }
-			});
-        auto& resolvedShader = aoShader->getResolvedInstance({});
-        resolvedShader.bind();
+        // Make a one-off framebuffer for the base AO
+        // Do base AO at half res
+        auto baseAOTarget = Library::getPooledFramebuffer({ glm::max(glm::uvec2(1,1), targetSize / 2u), {
+            TextureFormat{
+                TextureTarget::Texture2D,
+                GL_R16F,
+                GL_RED,
+                GL_LINEAR,
+                GL_REPEAT,
+                GL_FLOAT
+            },
+        } }, "AO base");
+        baseAOTarget->bind();
+        baseAOTarget->clear(glm::vec4(0.f), GL_COLOR_BUFFER_BIT);
+        glViewport(0, 0, targetSize.x / 2u, targetSize.y / 2u);
 
-        resolvedShader.bindUniform("radius", radius);
-        resolvedShader.bindUniform("bias", bias);
+        {
+            auto* aoShader = Library::createSourceShader("AOShader", SourceShader::ConstructionArgs{
+                { ShaderStage::VERTEX, "quad.vert"},
+                { ShaderStage::FRAGMENT, "sponza/ao.frag" }
+                });
+            auto& resolvedShader = aoShader->getResolvedInstance({});
+            resolvedShader.bind();
 
-        // bind gbuffer
-        resolvedShader.bindTexture("gNormal", *gbuffer.mTextures[3]);
-        resolvedShader.bindTexture("gDepth", *gbuffer.mTextures[4]);
+            resolvedShader.bindUniform("radius", radius);
+            resolvedShader.bindUniform("bias", bias);
 
-        // bind kernel and noise
-        resolvedShader.bindTexture("noise", *Library::getTexture("aoNoise"));
-        resolvedShader.bindTexture("kernel", *Library::getTexture("aoKernel"));
+            // bind gbuffer
+            resolvedShader.bindTexture("gNormal", *gbuffer.mTextures[3]);
+            resolvedShader.bindTexture("gDepth", *gbuffer.mTextures[4]);
 
-        resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
-        resolvedShader.bindUniform("invP", glm::inverse(ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj()));
+            // bind kernel and noise
+            resolvedShader.bindTexture("noise", *Library::getTexture("aoNoise"));
+            resolvedShader.bindTexture("kernel", *Library::getTexture("aoKernel"));
 
-        Library::getMesh("quad").mMesh->draw();
+            resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+            resolvedShader.bindUniform("invP", glm::inverse(ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj()));
+
+            Library::getMesh("quad").mMesh->draw();
+        }
+
+        {
+            // Do base AO at full res?
+            auto blurredAO = Library::getPooledFramebuffer({ targetSize, {
+                TextureFormat{
+                    TextureTarget::Texture2D,
+                    GL_R16F,
+                    GL_RED,
+                    GL_LINEAR,
+                    GL_REPEAT,
+                    GL_FLOAT
+                },
+            } }, "AO blurred");
+            blurredAO->bind();
+            blurredAO->clear(glm::vec4(0.f), GL_COLOR_BUFFER_BIT);
+            glViewport(0, 0, targetSize.x, targetSize.y);
+
+            auto* blurShader = Library::createSourceShader("BlurShader", SourceShader::ConstructionArgs{
+                { ShaderStage::VERTEX, "quad.vert"},
+                { ShaderStage::FRAGMENT, "sponza/blur.frag" }
+                });
+            auto& resolvedShader = blurShader->getResolvedInstance({});
+            resolvedShader.bind();
+
+            resolvedShader.bindTexture("inputAO", *baseAOTarget->mTextures[0]);
+            resolvedShader.bindUniform("blurAmount", 2);
+
+            Library::getMesh("quad").mMesh->draw();
+            return *blurredAO;
+        }
     }
 
 }

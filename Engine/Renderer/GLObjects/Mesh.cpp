@@ -120,7 +120,6 @@ namespace neo {
     }
 
     const VertexBuffer& Mesh::getVBO(VertexType type) const {
-        TRACY_ZONE();
         auto vbo = mVBOs.find(type);
         NEO_ASSERT(vbo != mVBOs.end(), "Attempting to retrieve a VertexBuffer that doesn't exist");
         return vbo->second;

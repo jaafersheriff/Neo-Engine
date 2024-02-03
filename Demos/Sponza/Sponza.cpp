@@ -226,17 +226,23 @@ namespace Sponza {
         drawGBuffer<OpaqueComponent>(ecs, cameraEntity, {});
         drawGBuffer<AlphaTestComponent>(ecs, cameraEntity, {});
 
-        // TODO - replace with proper ao fbo
+        drawAO(ecs, cameraEntity, gbuffer, targetSize, mAORadius, mAOBias);
+
+        auto lightResolve = Library::getPooledFramebuffer({ targetSize, {
+            TextureFormat{
+                TextureTarget::Texture2D,
+                GL_RGB16F,
+                GL_RGB,
+            }
+        } }, "LightResolve");
+        lightResolve->bind();
+        lightResolve->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), GL_COLOR_BUFFER_BIT);
+        glViewport(0, 0, targetSize.x, targetSize.y);
+        drawPointLights(ecs, gbuffer, cameraEntity, targetSize, mLightDebugRadius);
+        drawDirectionalLights(ecs, cameraEntity, gbuffer, shadowMap);
+
         sceneTarget.bind();
         sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
-        drawAO(ecs, cameraEntity, gbuffer, mAORadius, mAOBias);
-
-        NEO_UNUSED(shadowMap);
-        // sceneTarget.bind();
-        // sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        // glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
-        // drawPointLights(ecs, gbuffer, cameraEntity, targetSize, mLightDebugRadius);
-        // drawDirectionalLights(ecs, cameraEntity, gbuffer, shadowMap);
     }
 }

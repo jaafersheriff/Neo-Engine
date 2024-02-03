@@ -76,6 +76,8 @@ namespace Sponza {
     }
 
     void drawDirectionalLights(const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, Texture* shadowMap = nullptr) {
+        TRACY_GPU();
+
         ShaderDefines defines;
 
         glm::mat4 L;

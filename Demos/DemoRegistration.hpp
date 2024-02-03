@@ -11,8 +11,8 @@
 
 static int sCurrentDemo = 0;
 static std::vector<neo::IDemo*> sDemos = {
-	new Base::Demo(),
 	new Sponza::Demo(),
+	new Base::Demo(),
  	new Compute::Demo(),
 	new Cornell::Demo(),
 	new DrawStress::Demo(),
