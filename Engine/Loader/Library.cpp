@@ -72,7 +72,6 @@ namespace neo {
     }
 
     MeshData Library::getMesh(const std::string& name) {
-        TRACY_ZONE();
         auto it = mMeshes.find(name);
         if (it != mMeshes.end()) {
             return it->second;

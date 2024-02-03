@@ -29,7 +29,10 @@ namespace neo {
         ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        io.FontGlobalScale = 1.f;
+        // Tracy does its own font scaling. Because of course it does.
+#ifndef NO_LOCAL_TRACY
+        io.FontGlobalScale = 2.f;
+#endif
         ImGui_ImplGlfw_InitForOpenGL(window, false);
         ImGui_ImplOpenGL3_Init(ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str());
 

@@ -44,7 +44,7 @@ namespace neo {
 
         Profiler::Profiler(int refreshRate, float scale) {
 #ifdef NO_LOCAL_TRACY
-            NEO_UNUSED(refreshRate);
+            NEO_UNUSED(refreshRate, scale);
 
 #else
             LoadFonts(scale, s_fixedWidth, s_smallFont, s_bigFont);
@@ -79,13 +79,15 @@ namespace neo {
             mTimeStep = runTime - mLastFrameTime;
             mLastFrameTime = runTime;
 
+#ifndef NO_LOCAL_TRACY
             tracy::MouseFrame();
+#endif
         }
 
         void Profiler::imGuiEditor() const {
 #ifdef NO_LOCAL_TRACY
             return;
-#endif
+#else
             NEO_ASSERT(mTracyServer, "Tracy server doesn't exist..?");
 
             // Profiler is baked into the viewport dock space
@@ -133,6 +135,7 @@ namespace neo {
                 }
                 ImGui::End();
             }
+#endif // NO_LOCAL_TRACY
 
         }
     }
