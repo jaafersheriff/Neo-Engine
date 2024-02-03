@@ -205,6 +205,13 @@ namespace Sponza {
         backbuffer.bind();
         backbuffer.clear(glm::vec4(0,0,0, 1.f), GL_COLOR_BUFFER_BIT);
         drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
+       // Don't forget the depth. Because reasons.
+       glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
+           0, 0, viewport.mSize.x, viewport.mSize.y,
+           0, 0, viewport.mSize.x, viewport.mSize.y,
+           GL_DEPTH_BUFFER_BIT,
+           GL_NEAREST
+       );
     }
 
     void Demo::_forwardShading(const ECS& ecs, Framebuffer& sceneTarget, Texture* shadowMap) {
@@ -267,6 +274,14 @@ namespace Sponza {
             }
 
             Library::getMesh("quad").mMesh->draw();
+
+            // Don't forget the depth. Because reasons.
+            glBlitNamedFramebuffer(gbuffer.mFBOID, sceneTarget.mFBOID,
+                0, 0, targetSize.x, targetSize.y,
+                0, 0, targetSize.x, targetSize.y,
+                GL_DEPTH_BUFFER_BIT,
+                GL_NEAREST
+            );
         }
     }
 }
