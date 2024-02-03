@@ -27,12 +27,15 @@ namespace FrustaFitting {
             TRACY_ZONEN("PerspectiveUpdateSystem");
             if (auto sourceCamera = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent>()) {
                 if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
+                    mOffset += std::get<1>(*frameStats).mDT;
                     auto&& [_, __, sourceSpatial] = *sourceCamera;
-                    float f = static_cast<float>(glm::sin(std::get<1>(*frameStats).mRunTime));
-                    float g = static_cast<float>(glm::cos(std::get<1>(*frameStats).mRunTime));
+                    float f = static_cast<float>(glm::sin(mOffset));
+                    float g = static_cast<float>(glm::cos(mOffset));
                     sourceSpatial.setLookDir(glm::vec3(f, f / 2, g));
                 }
             }
         }
+    private: 
+        float mOffset = 0.f;
     };
 }

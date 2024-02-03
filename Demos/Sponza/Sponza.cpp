@@ -189,8 +189,6 @@ namespace Sponza {
             } 
         } }, "Shadow map");
         if (mDrawShadows) {
-            shadowMap->bind();
-            shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), GL_DEPTH_BUFFER_BIT);
             drawShadows<OpaqueComponent>(*shadowMap, ecs);
             drawShadows<AlphaTestComponent>(*shadowMap, ecs);
         }

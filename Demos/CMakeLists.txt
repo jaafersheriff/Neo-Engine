@@ -8,22 +8,11 @@ add_library(Demos)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE CPP_FILES 
-# 	${CMAKE_CURRENT_SOURCE_DIR}/*/*.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/Base/*.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/Sponza/*.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/Compute/*.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/Cornell/*.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/DrawStress/*.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/NormalVisualizer/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/*/*.cpp
 )
 file(GLOB_RECURSE HPP_FILES 
 	${CMAKE_CURRENT_SOURCE_DIR}/DemoRegistration.hpp
-#	${CMAKE_CURRENT_SOURCE_DIR}/*/*.hpp
-${CMAKE_CURRENT_SOURCE_DIR}/Base/*.hpp
-${CMAKE_CURRENT_SOURCE_DIR}/Sponza/*.hpp
-${CMAKE_CURRENT_SOURCE_DIR}/Compute/*.hpp
-${CMAKE_CURRENT_SOURCE_DIR}/DrawStress/*.hpp
-${CMAKE_CURRENT_SOURCE_DIR}/NormalVisualizer/*.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/*/*.hpp
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES 

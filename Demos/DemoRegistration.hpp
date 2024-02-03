@@ -3,7 +3,7 @@
 #include "Compute/Compute.hpp"
 #include "Cornell/Cornell.hpp"
 #include "DrawStress/DrawStress.hpp"
-// #include "FrustaFitting/FrustaFitting.hpp"
+#include "FrustaFitting/FrustaFitting.hpp"
 #include "NormalVisualizer/NormalVisualizer.hpp"
 
 #include <vector>
@@ -16,7 +16,7 @@ static std::vector<neo::IDemo*> sDemos = {
  	new Compute::Demo(),
 	new Cornell::Demo(),
 	new DrawStress::Demo(),
- 	// new FrustaFitting::Demo(),
+ 	new FrustaFitting::Demo(),
 	new NormalVisualizer::Demo(),
 };
 

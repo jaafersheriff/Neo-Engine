@@ -4,22 +4,22 @@
 #include "MockCameraComponent.hpp"
 #include "PerspectiveUpdateSystem.hpp"
 
-#include "Renderer/Shader/ShadowCasterShader.hpp"
-#include "Renderer/Shader/LineShader.hpp"
-#include "Renderer/Shader/WireFrameShader.hpp"
-#include "Renderer/Shader/PhongShadowShader.hpp"
-#include "WireShader.hpp"
-
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
+#include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
-#include "ECS/Component/RenderableComponent/MeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/MeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/PhongShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/ShadowCasterShaderComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
@@ -28,11 +28,14 @@
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumToLineSystem.hpp"
 
+#include "Renderer/GLObjects/Framebuffer.hpp"
+#include "Renderer/RenderingSystems/PhongRenderer.hpp"
+#include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
+#include "Renderer/RenderingSystems/LineRenderer.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
-
-static constexpr int shadowMapSize = 2048;
 
 /* Game object definitions */
 namespace FrustaFitting {
@@ -54,11 +57,13 @@ namespace FrustaFitting {
             ecs.addComponent<TagComponent>(lightEntity, "Light");
             auto spatial = ecs.addComponent<SpatialComponent>(lightEntity, position, glm::vec3(1.f));
             spatial->setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
-            ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f), glm::vec3(1.f));
+            ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f));
+            ecs.addComponent<DirectionalLightComponent>(lightEntity);
+            ecs.addComponent<MainLightComponent>(lightEntity);
 
             // Shadow camera object
             auto cameraObject = ecs.createEntity();
-            ecs.addComponent<TagComponent>(lightEntity, "Light camera");
+            ecs.addComponent<TagComponent>(cameraObject, "Light camera");
             ecs.addComponent<OrthoCameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
             ecs.addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
             ecs.addComponent<FrustumComponent>(cameraObject);
@@ -78,14 +83,13 @@ namespace FrustaFitting {
         }
     };
 
-
     IDemo::Config Demo::getConfig() const {
         IDemo::Config config;
         config.name = "FrustaFitting";
         return config;
     }
 
-    void Demo::init(ECS& ecs, Renderer& renderer) {
+    void Demo::init(ECS& ecs) {
 
         /* Game objects */
         Camera sceneCamera("main camera", ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
@@ -107,21 +111,23 @@ namespace FrustaFitting {
         for (int i = 0; i < 50; i++) {
             auto mesh = util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere");
             Renderable sphere(ecs, mesh.mMesh, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
-            Material material;
+            ecs.addComponent<BoundingBoxComponent>(sphere.mEntity, mesh);
+            MaterialComponent material;
             material.mAmbient = glm::vec3(0.3f);
             material.mDiffuse = util::genRandomVec3();
-            ecs.addComponent<BoundingBoxComponent>(sphere.mEntity, mesh);
-            ecs.addComponent<renderable::PhongShadowRenderable>(sphere.mEntity, Library::getTexture("black"), material);
-            ecs.addComponent<renderable::ShadowCasterRenderable>(sphere.mEntity, Library::getTexture("black"));
+            ecs.addComponent<MaterialComponent>(sphere.mEntity, material);
+            ecs.addComponent<PhongShaderComponent>(sphere.mEntity);
+            ecs.addComponent<ShadowCasterShaderComponent>(sphere.mEntity);
         }
 
         /* Ground plane */
         Renderable receiver(ecs, Library::getMesh("quad").mMesh, glm::vec3(0.f, 0.f, 0.f), glm::vec3(50.f, 50.f, 1.f), glm::vec3(-1.56f, 0, 0));
-        Material material;
+        ecs.addComponent<BoundingBoxComponent>(receiver.mEntity, Library::getMesh("quad"));
+        MaterialComponent material;
         material.mAmbient = glm::vec3(0.2f);
         material.mDiffuse = glm::vec3(0.7f);
-        ecs.addComponent<BoundingBoxComponent>(receiver.mEntity, Library::getMesh("quad"));
-        ecs.addComponent<renderable::PhongShadowRenderable>(receiver.mEntity, Library::getTexture("black"), material);
+        ecs.addComponent<MaterialComponent>(receiver.mEntity, material);
+        ecs.addComponent<PhongShaderComponent>(receiver.mEntity);
         ecs.addComponent<TagComponent>(receiver.mEntity, "Ground");
 
         /* Systems - order matters! */
@@ -131,12 +137,25 @@ namespace FrustaFitting {
         ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
         ecs.addSystem<FrustumCullingSystem>();
         ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
+    }
 
-        /* Init renderer */
-        renderer.addPreProcessShader<ShadowCasterShader>(shadowMapSize);
-        auto& _s = renderer.addSceneShader<PhongShadowShader>();
-        _s.bias = 0.001f;
-        renderer.addSceneShader<WireShader>();
-        renderer.addSceneShader<LineShader>().mActive = true;
+    void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
+        const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
+        const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+
+        auto shadowMap = Library::getPooledFramebuffer({ glm::uvec2(2048, 2048), {
+            TextureFormat{
+                TextureTarget::Texture2D,
+                GL_DEPTH_COMPONENT16,
+                GL_DEPTH_COMPONENT
+            }
+        } }, "Shadow map");
+        drawShadows(*shadowMap, ecs);
+
+        backbuffer.bind();
+        backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+        drawPhong(ecs, cameraEntity, shadowMap->mTextures[0]);
+        drawLines(ecs, cameraEntity);
     }
 }
