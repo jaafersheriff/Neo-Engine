@@ -1,5 +1,5 @@
 #include "Engine/Engine.hpp"
-#include "DemoInfra/DemoWrangler.h"
+#include "DemoInfra/DemoWrangler.hpp"
 #include "DemoRegistration.hpp"
 
 #include <cstdlib>
