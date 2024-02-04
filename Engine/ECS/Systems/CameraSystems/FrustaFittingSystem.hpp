@@ -4,14 +4,14 @@
 
 namespace neo {
 
-    class FrustaFittingSystem : public System {
+	class FrustaFittingSystem : public System {
 
-    public:
+	public:
 
-        FrustaFittingSystem() :
-            System("FrustaFitting System") {
-        }
+		FrustaFittingSystem() :
+			System("FrustaFitting System") {
+		}
 
-        virtual void update(ECS& ecs) override;
-    };
+		virtual void update(ECS& ecs) override;
+	};
 }

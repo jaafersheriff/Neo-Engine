@@ -81,8 +81,8 @@ namespace neo {
 
 	template<typename CompT>
 	std::optional<std::tuple<ECS::Entity, CompT&>> ECS::getComponent() {
-        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
-        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 	
 		auto view = mRegistry.view<CompT>();
 		if (view.size() > 1) {
@@ -96,8 +96,8 @@ namespace neo {
 
 	template<typename CompT>
 	std::optional<std::tuple<ECS::Entity, const CompT&>> ECS::cGetComponent() const{
-        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
-        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 	
 		auto view = mRegistry.view<CompT>();
 		if (view.size() > 1) {
@@ -111,8 +111,8 @@ namespace neo {
 
 	template<typename CompT>
 	bool ECS::has(ECS::Entity e) const {
-        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
-        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
 		return mRegistry.try_get<CompT>(e) != nullptr;
 	}
@@ -148,8 +148,8 @@ namespace neo {
 
 	template<typename CompT>
 	CompT* ECS::getComponent(Entity e) {
-        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
-        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
 		return mRegistry.try_get<CompT>(e);
 	}
@@ -157,15 +157,15 @@ namespace neo {
 	template<typename CompT>
 	CompT *const ECS::cGetComponent(Entity e) const {
 		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
-        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
 		return const_cast<CompT *const>(mRegistry.try_get<CompT>(e));
 	}
 
 	template<typename CompT, typename... Args>
 	CompT* ECS::addComponent(Entity e, Args &&... args) {
-        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
-        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
 		CompT* component;
 		if constexpr (sizeof...(Args) > 0) {
@@ -208,8 +208,8 @@ namespace neo {
 
 	template<typename CompT>
 	void ECS::removeComponent(Entity e) {
-        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
-        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 		mRemoveComponentFuncs.push_back([e](Registry& registry) mutable {
 			registry.remove<CompT>(e);
 			});
@@ -231,17 +231,17 @@ namespace neo {
 
 	template<typename SuperT, typename CompT> SuperT* ECS::getComponentAs(Entity e) {
 		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
-        static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
-        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+		static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
+		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
 		CompT* comp = getComponent<CompT>(e);
 		NEO_ASSERT(comp, "Component doesn't exist!");
 		return dynamic_cast<SuperT*>(comp);
 	}
 	template<typename SuperT, typename CompT> const SuperT* ECS::cGetComponentAs(Entity e) const {
-        static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
-        static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
-        static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
+		static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
+		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
 		CompT *const comp = cGetComponent<CompT>(e);
 		NEO_ASSERT(comp, "Component doesn't exist!");

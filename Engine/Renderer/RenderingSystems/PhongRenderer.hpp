@@ -24,148 +24,148 @@
 
 namespace neo {
 
-    template<typename... CompTs>
-    void drawPhong(const ECS& ecs, const ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const ShaderDefines& inDefines = {}) {
-        TRACY_GPU();
+	template<typename... CompTs>
+	void drawPhong(const ECS& ecs, const ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const ShaderDefines& inDefines = {}) {
+		TRACY_GPU();
 
-        ShaderDefines passDefines(inDefines);
-        bool containsAlphaTest = false;
-        MakeDefine(ALPHA_TEST);
-        if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
-            containsAlphaTest = true;
-            passDefines.set(ALPHA_TEST);
-            // Transparency sorting..for later
-        //     glEnable(GL_BLEND);
-        //     ecs.sort<AlphaTestComponent>([&cameraSpatial, &ecs](ECS::Entity entityLeft, ECS::Entity entityRight) {
-        //         auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
-        //         auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
-        //         if (leftSpatial && rightSpatial) {
-        //             return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) < glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
-        //         }
-        //         return false;
-        //         });
-        }
+		ShaderDefines passDefines(inDefines);
+		bool containsAlphaTest = false;
+		MakeDefine(ALPHA_TEST);
+		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
+			containsAlphaTest = true;
+			passDefines.set(ALPHA_TEST);
+			// Transparency sorting..for later
+		//	 glEnable(GL_BLEND);
+		//	 ecs.sort<AlphaTestComponent>([&cameraSpatial, &ecs](ECS::Entity entityLeft, ECS::Entity entityRight) {
+		//		 auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
+		//		 auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
+		//		 if (leftSpatial && rightSpatial) {
+		//			 return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) < glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
+		//		 }
+		//		 return false;
+		//		 });
+		}
 
-        const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
-        const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
-        auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
+		const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
+		auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
 
-        glm::mat4 L;
-        const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
-        const bool shadowsEnabled = shadowMap && shadowCamera.has_value();
-        MakeDefine(ENABLE_SHADOWS);
-        if (shadowsEnabled) {
-            passDefines.set(ENABLE_SHADOWS);
-            const auto& [_, __, shadowOrtho, shadowCameraSpatial] = *shadowCamera;
-            static glm::mat4 biasMatrix(
-                0.5f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.5f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.5f, 0.0f,
-                0.5f, 0.5f, 0.5f, 1.0f);
-            L = biasMatrix * shadowOrtho.getProj() * shadowCameraSpatial.getView();
-        }
-        bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
-        bool pointLight = ecs.has<PointLightComponent>(lightEntity);
-        glm::vec3 attenuation(0.f);
-        MakeDefine(DIRECTIONAL_LIGHT);
-        MakeDefine(POINT_LIGHT);
-        if (directionalLight) {
-            passDefines.set(DIRECTIONAL_LIGHT);
-        }
-        else if (pointLight) {
-            attenuation = ecs.cGetComponent<PointLightComponent>(lightEntity)->mAttenuation;
-            passDefines.set(POINT_LIGHT);
-        }
-        else {
-            NEO_FAIL("Phong light needs a directional or point light component");
-        }
+		glm::mat4 L;
+		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
+		const bool shadowsEnabled = shadowMap && shadowCamera.has_value();
+		MakeDefine(ENABLE_SHADOWS);
+		if (shadowsEnabled) {
+			passDefines.set(ENABLE_SHADOWS);
+			const auto& [_, __, shadowOrtho, shadowCameraSpatial] = *shadowCamera;
+			static glm::mat4 biasMatrix(
+				0.5f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.5f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.5f, 0.0f,
+				0.5f, 0.5f, 0.5f, 1.0f);
+			L = biasMatrix * shadowOrtho.getProj() * shadowCameraSpatial.getView();
+		}
+		bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
+		bool pointLight = ecs.has<PointLightComponent>(lightEntity);
+		glm::vec3 attenuation(0.f);
+		MakeDefine(DIRECTIONAL_LIGHT);
+		MakeDefine(POINT_LIGHT);
+		if (directionalLight) {
+			passDefines.set(DIRECTIONAL_LIGHT);
+		}
+		else if (pointLight) {
+			attenuation = ecs.cGetComponent<PointLightComponent>(lightEntity)->mAttenuation;
+			passDefines.set(POINT_LIGHT);
+		}
+		else {
+			NEO_FAIL("Phong light needs a directional or point light component");
+		}
 
-        ShaderDefines drawDefines(passDefines);
-        const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
-        for (auto entity : view) {
-            // VFC
-            if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-                if (!culled->isInView(ecs, entity, cameraEntity)) {
-                    continue;
-                }
-            }
+		ShaderDefines drawDefines(passDefines);
+		const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
+		for (auto entity : view) {
+			// VFC
+			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+				if (!culled->isInView(ecs, entity, cameraEntity)) {
+					continue;
+				}
+			}
 
-            if (containsAlphaTest) {
-                NEO_ASSERT(!ecs.has<OpaqueComponent>(entity), "Entity has opaque and alpha test component?");
-            }
+			if (containsAlphaTest) {
+				NEO_ASSERT(!ecs.has<OpaqueComponent>(entity), "Entity has opaque and alpha test component?");
+			}
 
-            drawDefines.reset();
+			drawDefines.reset();
 
-            const auto& material = view.get<const MaterialComponent>(entity);
-            MakeDefine(ALPHA_MAP);
-            MakeDefine(DIFFUSE_MAP);
-            MakeDefine(SPECULAR_MAP);
-            MakeDefine(NORMAL_MAP);
-            if (containsAlphaTest && material.mAlphaMap) {
-                drawDefines.set(ALPHA_MAP);
-            }
-            if (material.mDiffuseMap) {
-                drawDefines.set(DIFFUSE_MAP);
-            }
-            if (material.mNormalMap) {
-                drawDefines.set(NORMAL_MAP);
-            }
+			const auto& material = view.get<const MaterialComponent>(entity);
+			MakeDefine(ALPHA_MAP);
+			MakeDefine(DIFFUSE_MAP);
+			MakeDefine(SPECULAR_MAP);
+			MakeDefine(NORMAL_MAP);
+			if (containsAlphaTest && material.mAlphaMap) {
+				drawDefines.set(ALPHA_MAP);
+			}
+			if (material.mDiffuseMap) {
+				drawDefines.set(DIFFUSE_MAP);
+			}
+			if (material.mNormalMap) {
+				drawDefines.set(NORMAL_MAP);
+			}
 
-            auto& resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(drawDefines);
-            resolvedShader.bind();
+			auto& resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(drawDefines);
+			resolvedShader.bind();
 
 
-            if (containsAlphaTest && material.mAlphaMap) {
-                resolvedShader.bindTexture("alphaMap", *material.mAlphaMap);
-            }
+			if (containsAlphaTest && material.mAlphaMap) {
+				resolvedShader.bindTexture("alphaMap", *material.mAlphaMap);
+			}
 
-            if (material.mDiffuseMap) {
-                resolvedShader.bindTexture("diffuseMap", *material.mDiffuseMap);
-            }
-            else {
-                resolvedShader.bindUniform("diffuseColor", material.mDiffuse);
-            }
-            if (material.mSpecularMap) {
-                resolvedShader.bindTexture("specularMap", *material.mSpecularMap);
-            }
-            else {
-                resolvedShader.bindUniform("specularColor", material.mSpecular);
-            }
-            resolvedShader.bindUniform("shine", material.mShininess);
+			if (material.mDiffuseMap) {
+				resolvedShader.bindTexture("diffuseMap", *material.mDiffuseMap);
+			}
+			else {
+				resolvedShader.bindUniform("diffuseColor", material.mDiffuse);
+			}
+			if (material.mSpecularMap) {
+				resolvedShader.bindTexture("specularMap", *material.mSpecularMap);
+			}
+			else {
+				resolvedShader.bindUniform("specularColor", material.mSpecular);
+			}
+			resolvedShader.bindUniform("shine", material.mShininess);
 
-            if (material.mNormalMap) {
-                resolvedShader.bindTexture("normalMap", *material.mNormalMap);
-            }
+			if (material.mNormalMap) {
+				resolvedShader.bindTexture("normalMap", *material.mNormalMap);
+			}
 
-            // UBO candidates
-            {
-                resolvedShader.bindUniform("P", P);
-                resolvedShader.bindUniform("V", cameraSpatial->getView());
-                resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
-                resolvedShader.bindUniform("lightCol", light.mColor);
-                if (directionalLight || shadowsEnabled) {
-                    resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
-                }
-                if (pointLight) {
-                    resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
-                    resolvedShader.bindUniform("lightAtt", attenuation);
-                }
-                if (shadowsEnabled) {
-                    resolvedShader.bindUniform("L", L);
-                    resolvedShader.bindTexture("shadowMap", *shadowMap);
-                }
-            }
+			// UBO candidates
+			{
+				resolvedShader.bindUniform("P", P);
+				resolvedShader.bindUniform("V", cameraSpatial->getView());
+				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
+				resolvedShader.bindUniform("lightCol", light.mColor);
+				if (directionalLight || shadowsEnabled) {
+					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
+				}
+				if (pointLight) {
+					resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
+					resolvedShader.bindUniform("lightAtt", attenuation);
+				}
+				if (shadowsEnabled) {
+					resolvedShader.bindUniform("L", L);
+					resolvedShader.bindTexture("shadowMap", *shadowMap);
+				}
+			}
 
-            const auto& drawSpatial = view.get<const SpatialComponent>(entity);
-            resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
-            resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
-            resolvedShader.bindUniform("ambientColor", material.mAmbient);
+			const auto& drawSpatial = view.get<const SpatialComponent>(entity);
+			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
+			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
+			resolvedShader.bindUniform("ambientColor", material.mAmbient);
 
-            view.get<const MeshComponent>(entity).mMesh->draw();
-        }
+			view.get<const MeshComponent>(entity).mMesh->draw();
+		}
 
-        if (containsAlphaTest) {
-            // glDisable(GL_BLEND);
-        }
-    }
+		if (containsAlphaTest) {
+			// glDisable(GL_BLEND);
+		}
+	}
 }

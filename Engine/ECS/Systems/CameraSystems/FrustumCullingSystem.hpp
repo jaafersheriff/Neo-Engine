@@ -4,17 +4,17 @@
 
 namespace neo {
 
-    class FrustumCullingSystem : public System {
+	class FrustumCullingSystem : public System {
 
-    public:
-        FrustumCullingSystem() :
-            System("FrustumCulling System")
-        {}
+	public:
+		FrustumCullingSystem() :
+			System("FrustumCulling System")
+		{}
 
-        virtual void update(ECS& ecs) override;
-        virtual void imguiEditor(ECS&) override;
+		virtual void update(ECS& ecs) override;
+		virtual void imguiEditor(ECS&) override;
 
-    private:
-        int mCulledCount = -1;
-    };
+	private:
+		int mCulledCount = -1;
+	};
 }

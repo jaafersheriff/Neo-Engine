@@ -9,7 +9,7 @@ uniform mat4 Vi;
 out vec2 fragTex;
 
 void main() {
-    vec4 worldPos = M * Vi * vec4(vertPos, 1.0);
-    gl_Position = P * V * worldPos;
-    fragTex = (vertPos.xy + 1) / 2.f;
+	vec4 worldPos = M * Vi * vec4(vertPos, 1.0);
+	gl_Position = P * V * worldPos;
+	fragTex = (vertPos.xy + 1) / 2.f;
 }

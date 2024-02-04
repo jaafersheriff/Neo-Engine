@@ -4,11 +4,11 @@
 
 namespace neo {
 
-    struct FrustumFitSourceComponent : public Component {
-        FrustumFitSourceComponent()
-        {}
+	struct FrustumFitSourceComponent : public Component {
+		FrustumFitSourceComponent()
+		{}
 
-        virtual std::string getName() const override { return "FrustumFitSourceComponent"; }
+		virtual std::string getName() const override { return "FrustumFitSourceComponent"; }
 
-    };
+	};
 }

@@ -5,13 +5,13 @@
 using namespace neo;
 
 namespace FrustaFitting {
-    struct MockCameraComponent : public Component {
-        MockCameraComponent()
-        {}
+	struct MockCameraComponent : public Component {
+		MockCameraComponent()
+		{}
 
-        virtual std::string getName() const override {
-            return "MockCameraComponent";
-        }
+		virtual std::string getName() const override {
+			return "MockCameraComponent";
+		}
 
-    };
+	};
 }

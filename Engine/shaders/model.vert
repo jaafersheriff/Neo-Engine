@@ -10,8 +10,8 @@ out vec4 fragPos;
 out vec3 fragNor;
 out vec2 fragTex;
 void main() {
-    fragPos = M * vec4(vertPos, 1.0);
-    fragNor = vertNor;
-    fragTex = vertTex;
-    gl_Position = P * V * fragPos;
+	fragPos = M * vec4(vertPos, 1.0);
+	fragNor = vertNor;
+	fragTex = vertTex;
+	gl_Position = P * V * fragPos;
 }

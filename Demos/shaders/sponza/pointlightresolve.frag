@@ -39,38 +39,38 @@ float raySphereIntersect(vec3 r0, vec3 rd, vec3 s0, float sr)
 }
 
 void main() {
-    /* Generate tex coords [0, 1] */
-    vec2 fragTex = gl_FragCoord.xy / resolution;
-    
-    vec3 fragPos = texture(gWorld, fragTex).rgb;
-    vec3 fragNor = normalize(texture(gNormal, fragTex).rgb * 2.f - vec3(1.f));
+	/* Generate tex coords [0, 1] */
+	vec2 fragTex = gl_FragCoord.xy / resolution;
+	
+	vec3 fragPos = texture(gWorld, fragTex).rgb;
+	vec3 fragNor = normalize(texture(gNormal, fragTex).rgb * 2.f - vec3(1.f));
 
 #ifdef SHOW_LIGHTS
-    float rayDist = raySphereIntersect(camPos, normalize(fragPos - camPos), lightPos, debugRadius);
-    if (rayDist > 0.0 && rayDist < length(fragPos - camPos)) {
-        color = vec4(lightCol, 1.f);
-        return;
-    }
+	float rayDist = raySphereIntersect(camPos, normalize(fragPos - camPos), lightPos, debugRadius);
+	if (rayDist > 0.0 && rayDist < length(fragPos - camPos)) {
+		color = vec4(lightCol, 1.f);
+		return;
+	}
 #endif
 
-    /* Calculate attenuation 
-     * Early discard if fragment is outside of light volume */
-    vec3 lightDir = lightPos - fragPos;
-    float lightDist = length(lightDir);
-    float attFactor = 1.f - clamp((lightDist / lightRadius) * (lightDist / lightRadius), 0.f, 1.f);
-    if (attFactor == 0.f) {
-        discard;
-    }
+	/* Calculate attenuation 
+	 * Early discard if fragment is outside of light volume */
+	vec3 lightDir = lightPos - fragPos;
+	float lightDist = length(lightDir);
+	float attFactor = 1.f - clamp((lightDist / lightRadius) * (lightDist / lightRadius), 0.f, 1.f);
+	if (attFactor == 0.f) {
+		discard;
+	}
 
-    /* Retrieve remaining data from gbuffer */
-    vec3 albedo = texture(gAlbedo, fragTex).rgb;
-    vec4 specularShine = texture(gSpecular, fragTex);
+	/* Retrieve remaining data from gbuffer */
+	vec3 albedo = texture(gAlbedo, fragTex).rgb;
+	vec4 specularShine = texture(gSpecular, fragTex);
  
-    vec3 L = normalize(lightDir);
-    vec3 V = normalize(camPos - fragPos);
-    vec3 N = fragNor;
+	vec3 L = normalize(lightDir);
+	vec3 V = normalize(camPos - fragPos);
+	vec3 N = fragNor;
 
-    color.rgb = getPhong(V, N, L, albedo * 0.2, albedo, specularShine.rgb, specularShine.a, lightCol, attFactor);
-    color.rgb *= attFactor * attFactor;
-    color.a = 1.0;
+	color.rgb = getPhong(V, N, L, albedo * 0.2, albedo, specularShine.rgb, specularShine.a, lightCol, attFactor);
+	color.rgb *= attFactor * attFactor;
+	color.a = 1.0;
 }

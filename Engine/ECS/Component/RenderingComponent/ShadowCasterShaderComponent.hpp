@@ -6,7 +6,7 @@
 
 namespace neo {
 
-    struct ShadowCasterShaderComponent : public ShaderComponent {
+	struct ShadowCasterShaderComponent : public ShaderComponent {
 		ShadowCasterShaderComponent() : ShaderComponent({
 			Library::createSourceShader("ShadowCasterShader", SourceShader::ConstructionArgs{
 				{ ShaderStage::VERTEX, "model.vert"},
@@ -15,9 +15,9 @@ namespace neo {
 		})
 		{}
 
-        virtual std::string getName() const override {
-            return "ShadowCasterShaderComponent";
-        }
+		virtual std::string getName() const override {
+			return "ShadowCasterShaderComponent";
+		}
 
-    };
+	};
 }

@@ -7,25 +7,25 @@
 using namespace neo;
 
 namespace Deferred {
-    class BlurShader : public PostProcessShader {
+	class BlurShader : public PostProcessShader {
 
-    public:
+	public:
 
-        int blurAmount = 2;
+		int blurAmount = 2;
 
-        BlurShader(const std::string& frag) :
-            PostProcessShader("Blur Shader", frag)
-        {}
+		BlurShader(const std::string& frag) :
+			PostProcessShader("Blur Shader", frag)
+		{}
 
-        virtual void render(const ECS& ecs) override {
-            NEO_UNUSED(ecs);
+		virtual void render(const ECS& ecs) override {
+			NEO_UNUSED(ecs);
 
-            loadUniform("blurAmount", blurAmount);
-        }
+			loadUniform("blurAmount", blurAmount);
+		}
 
-        virtual void imguiEditor() override {
-            ImGui::SliderInt("Blur", &blurAmount, 0, 10);
-        }
-    };
+		virtual void imguiEditor() override {
+			ImGui::SliderInt("Blur", &blurAmount, 0, 10);
+		}
+	};
 }
 #endif

@@ -6,21 +6,21 @@
 
 namespace neo {
 
-    struct SpatialComponent;
+	struct SpatialComponent;
 
-    class CameraControllerSystem : public System {
+	class CameraControllerSystem : public System {
 
-    public:
-        CameraControllerSystem() :
-            System("CameraController System")
-        {}
+	public:
+		CameraControllerSystem() :
+			System("CameraController System")
+		{}
 
-        virtual void update(ECS& ecs) override;
-        virtual void imguiEditor(ECS& ecs) override;
+		virtual void update(ECS& ecs) override;
+		virtual void imguiEditor(ECS& ecs) override;
 
-        float mSuperSpeed = 2.5f;
-    protected:
-        void _updateLook(const float dt, ECS&, CameraControllerComponent& controller, SpatialComponent& spatial);
-        void _updatePosition(const float dt, ECS&, CameraControllerComponent& controller, SpatialComponent& spatial);
-    };
+		float mSuperSpeed = 2.5f;
+	protected:
+		void _updateLook(const float dt, ECS&, CameraControllerComponent& controller, SpatialComponent& spatial);
+		void _updatePosition(const float dt, ECS&, CameraControllerComponent& controller, SpatialComponent& spatial);
+	};
 }

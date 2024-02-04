@@ -7,11 +7,11 @@
 
 namespace neo {
 
-    struct DirectionalLightComponent : public Component {
-        DirectionalLightComponent() {}
-        
-        virtual std::string getName() const override {
-            return "DirectionalLightComponent";
-        }
-    };
+	struct DirectionalLightComponent : public Component {
+		DirectionalLightComponent() {}
+		
+		virtual std::string getName() const override {
+			return "DirectionalLightComponent";
+		}
+	};
 }

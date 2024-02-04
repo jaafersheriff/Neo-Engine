@@ -11,17 +11,17 @@
 
 namespace neo {
 
-    struct ShaderComponent : public Component {
-    public:
-        ShaderComponent(SourceShader* shader) : mSourceShader(shader) {}
+	struct ShaderComponent : public Component {
+	public:
+		ShaderComponent(SourceShader* shader) : mSourceShader(shader) {}
 
-        const ResolvedShaderInstance& getResolvedInstance(const ShaderDefines& defines) const {
-            return mSourceShader->getResolvedInstance(defines);
-        }
+		const ResolvedShaderInstance& getResolvedInstance(const ShaderDefines& defines) const {
+			return mSourceShader->getResolvedInstance(defines);
+		}
 
-        virtual std::string getName() const = 0;
+		virtual std::string getName() const = 0;
 
-    protected:
-        SourceShader* mSourceShader;
-    };
+	protected:
+		SourceShader* mSourceShader;
+	};
 }

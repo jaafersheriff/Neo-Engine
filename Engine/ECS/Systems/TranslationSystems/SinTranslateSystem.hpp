@@ -4,14 +4,14 @@
 
 namespace neo {
 
-    class SinTranslateSystem : public System {
+	class SinTranslateSystem : public System {
 
-    public:
-        SinTranslateSystem() :
-            System("SinTranslate System")
-        {}
+	public:
+		SinTranslateSystem() :
+			System("SinTranslate System")
+		{}
 
-        virtual void update(ECS& ecs) override;
+		virtual void update(ECS& ecs) override;
 
-    };
+	};
 }

@@ -31,31 +31,31 @@ layout (location = 2) out vec4 gWorld;
 layout (location = 3) out vec4 gNormal;
 
 void main() {
-    vec4 albedo = vec4(0,0,0,1);
+	vec4 albedo = vec4(0,0,0,1);
 #ifdef DIFFUSE_MAP
-    albedo = texture(diffuseMap, fragTex);
+	albedo = texture(diffuseMap, fragTex);
 #else
-    albedo.rgb = diffuseColor;
+	albedo.rgb = diffuseColor;
 #endif
 
-    vec3 specular= vec3(0.0);
+	vec3 specular= vec3(0.0);
 #ifdef SPECULAR_MAP
-    specular = texture(specularMap, fragTex).rgb;
+	specular = texture(specularMap, fragTex).rgb;
 #else
-    specular = specularColor;
+	specular = specularColor;
 #endif
 
 
 #ifdef ALPHA_TEST
-    #ifdef ALPHA_MAP
-    alphaDiscard(texture(alphaMap, fragTex).r);
-    #else
-    alphaDiscard(albedo.a);
-    #endif
+	#ifdef ALPHA_MAP
+	alphaDiscard(texture(alphaMap, fragTex).r);
+	#else
+	alphaDiscard(albedo.a);
+	#endif
 #endif
 
-    gDiffuse = vec4(albedo.rgb, 1.f);
-    gSpecular = vec4(specular, shine);
-    gWorld = vec4(fragPos.rgb, 1.f);
-    gNormal = vec4(normalize(fragNor), 1.f);
+	gDiffuse = vec4(albedo.rgb, 1.f);
+	gSpecular = vec4(specular, shine);
+	gWorld = vec4(fragPos.rgb, 1.f);
+	gNormal = vec4(normalize(fragNor), 1.f);
 }  

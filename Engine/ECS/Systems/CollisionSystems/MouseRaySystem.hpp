@@ -4,18 +4,18 @@
 
 namespace neo {
 
-    class MouseRaySystem : public System {
+	class MouseRaySystem : public System {
 
-    public:
-        MouseRaySystem(bool show = false) :
-            System("MouseRay System"),
-            mShowRay(show)
-        {}
+	public:
+		MouseRaySystem(bool show = false) :
+			System("MouseRay System"),
+			mShowRay(show)
+		{}
 
 
-        virtual void update(ECS&) override;
+		virtual void update(ECS&) override;
 
-    private:
-        bool mShowRay;
-    };
+	private:
+		bool mShowRay;
+	};
 }

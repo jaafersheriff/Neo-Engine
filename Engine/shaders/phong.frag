@@ -47,53 +47,53 @@ uniform vec3 camPos;
 out vec4 color;
 
 void main() {
-    vec4 albedo = vec4(0,0,0,1);
+	vec4 albedo = vec4(0,0,0,1);
 #ifdef DIFFUSE_MAP
-    albedo = texture(diffuseMap, fragTex);
+	albedo = texture(diffuseMap, fragTex);
 #else
-    albedo.rgb = diffuseColor;
+	albedo.rgb = diffuseColor;
 #endif
 
-    vec3 specular = vec3(1.0);
+	vec3 specular = vec3(1.0);
 #ifdef SPECULAR_MAP
-    specular = texture(specularMap, fragTex);
+	specular = texture(specularMap, fragTex);
 #else
-    specular = specularColor;
+	specular = specularColor;
 #endif
 
 #ifdef ALPHA_TEST
-    #ifdef ALPHA_MAP
-    alphaDiscard(texture(alphaMap, fragTex).r);
-    #else
-    alphaDiscard(albedo.a);
-    #endif
+	#ifdef ALPHA_MAP
+	alphaDiscard(texture(alphaMap, fragTex).r);
+	#else
+	alphaDiscard(albedo.a);
+	#endif
 #endif
 
-    // TODO - normal mapping
-    vec3 N = normalize(fragNor);
-    vec3 V = normalize(camPos - fragPos.xyz);
+	// TODO - normal mapping
+	vec3 N = normalize(fragNor);
+	vec3 V = normalize(camPos - fragPos.xyz);
 
 float attFactor = 1;
 #ifdef DIRECTIONAL_LIGHT
-    vec3 L = normalize(lightDir);
+	vec3 L = normalize(lightDir);
 #elif defined(POINT_LIGHT)
-    vec3 lightDir = lightPos - fragPos.xyz;
-    vec3 L = normalize(lightDir);
-    float lightDistance = length(lightDir);
-    if (length(lightAtt) > 0) {
-        attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
-    }
+	vec3 lightDir = lightPos - fragPos.xyz;
+	vec3 L = normalize(lightDir);
+	float lightDistance = length(lightDir);
+	if (length(lightAtt) > 0) {
+		attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
+	}
 #else
-    vec3 L = vec3(0, 0, 0);
+	vec3 L = vec3(0, 0, 0);
 #endif
 
-    color.rgb = getPhong(V, N, L, ambientColor, albedo.rgb, specular, shine, lightCol, attFactor);
+	color.rgb = getPhong(V, N, L, ambientColor, albedo.rgb, specular, shine, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
-    float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.1);
-    color.rgb *= visibility;
+	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.1);
+	color.rgb *= visibility;
 #endif
 
-    color.a = 1.0;
+	color.a = 1.0;
 }
 

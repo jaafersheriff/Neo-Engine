@@ -13,35 +13,35 @@
 
 #ifndef NO_LOCAL_TRACY
 namespace tracy {
-    class View;
+	class View;
 }
 #endif
 
 namespace neo {
-    namespace util {
-        class Profiler {
-        public:
-            Profiler(int refreshRate, float scale);
-            ~Profiler();
-            Profiler(const Profiler&) = delete;
-            Profiler& operator=(const Profiler&) = delete;
+	namespace util {
+		class Profiler {
+		public:
+			Profiler(int refreshRate, float scale);
+			~Profiler();
+			Profiler(const Profiler&) = delete;
+			Profiler& operator=(const Profiler&) = delete;
 
-            void update(double);
-            void imGuiEditor() const;
+			void update(double);
+			void imGuiEditor() const;
 
-            double mTimeStep = 0.0;         /* Delta time */
-        private:
-            double mLastFrameTime = 0.0;    /* Time at which last frame was rendered */
+			double mTimeStep = 0.0;		 /* Delta time */
+		private:
+			double mLastFrameTime = 0.0;	/* Time at which last frame was rendered */
 #ifndef NO_LOCAL_TRACY
-            float mRefreshRate; // Milliseconds
-            std::unique_ptr<tracy::View> mTracyServer;
+			float mRefreshRate; // Milliseconds
+			std::unique_ptr<tracy::View> mTracyServer;
 
-            mutable std::vector<float> mCPUFrametime;
-            mutable int mCPUFrametimeOffset;
+			mutable std::vector<float> mCPUFrametime;
+			mutable int mCPUFrametimeOffset;
 
-            mutable std::vector<float> mGPUFrametime;
-            mutable int mGPUFrametimeOffset;
+			mutable std::vector<float> mGPUFrametime;
+			mutable int mGPUFrametimeOffset;
 #endif
-        };
-    }
+		};
+	}
 }

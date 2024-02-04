@@ -16,48 +16,48 @@
 using namespace neo;
 
 namespace Compute {
-    class ParticleMeshComponent : public Component {
+	class ParticleMeshComponent : public Component {
 
-    public:
-        Mesh* mMesh;
-        int mNumParticles = 98304;
-        float timeScale = 100.f;
+	public:
+		Mesh* mMesh;
+		int mNumParticles = 98304;
+		float timeScale = 100.f;
 
-        ParticleMeshComponent() {
-            MeshData meshData;
-            mMesh = meshData.mMesh = new Mesh;
-            mMesh->mPrimitiveType = GL_POINTS;
-            mMesh->addVertexBuffer(VertexType::Position, 0, 4); // positions
-            updateBuffers();
-            Library::insertMesh("Particles", meshData);
-        }
+		ParticleMeshComponent() {
+			MeshData meshData;
+			mMesh = meshData.mMesh = new Mesh;
+			mMesh->mPrimitiveType = GL_POINTS;
+			mMesh->addVertexBuffer(VertexType::Position, 0, 4); // positions
+			updateBuffers();
+			Library::insertMesh("Particles", meshData);
+		}
 
-        virtual void imGuiEditor() override {
-            if (ImGui::DragInt("#Verts", &mNumParticles, 1.f, ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.x, 1572864)) {
-                updateBuffers();
-            }
-            if (ImGui::Button("Reset")) {
-                updateBuffers();
-            }
-            ImGui::SliderFloat("Time scale", &timeScale, 0.f, 1000.f);
-        }
+		virtual void imGuiEditor() override {
+			if (ImGui::DragInt("#Verts", &mNumParticles, 1.f, ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.x, 1572864)) {
+				updateBuffers();
+			}
+			if (ImGui::Button("Reset")) {
+				updateBuffers();
+			}
+			ImGui::SliderFloat("Time scale", &timeScale, 0.f, 1000.f);
+		}
 
-        void updateBuffers() {
-            TRACY_GPUN("ParticleMeshComponent::updateBuffers");
-            std::vector<float> positions;
-            positions.resize(mNumParticles * 4);
-            for (int i = 0; i < mNumParticles; i++) {
-                glm::vec3 pos = glm::normalize(util::genRandomVec3(-1.f, 1.f));
-                positions[i * 4 + 0] = pos.x;
-                positions[i * 4 + 1] = pos.y;
-                positions[i * 4 + 2] = pos.z;
-                positions[i * 4 + 3] = 1.f;
-            }
-            mMesh->updateVertexBuffer(VertexType::Position, positions);
-        }
+		void updateBuffers() {
+			TRACY_GPUN("ParticleMeshComponent::updateBuffers");
+			std::vector<float> positions;
+			positions.resize(mNumParticles * 4);
+			for (int i = 0; i < mNumParticles; i++) {
+				glm::vec3 pos = glm::normalize(util::genRandomVec3(-1.f, 1.f));
+				positions[i * 4 + 0] = pos.x;
+				positions[i * 4 + 1] = pos.y;
+				positions[i * 4 + 2] = pos.z;
+				positions[i * 4 + 3] = 1.f;
+			}
+			mMesh->updateVertexBuffer(VertexType::Position, positions);
+		}
 
-        virtual std::string getName() const override {
-            return "ParticleMeshComponent";
-        }
-    };
+		virtual std::string getName() const override {
+			return "ParticleMeshComponent";
+		}
+	};
 }

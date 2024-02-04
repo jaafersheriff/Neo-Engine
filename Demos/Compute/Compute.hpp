@@ -12,7 +12,7 @@ namespace Compute {
 		virtual void render(const ECS& ecs, Framebuffer& backbuffer) override;
 		virtual void imGuiEditor(ECS& ecs) override;
 	private:
-        float mSpriteSize = 0.2f;
-        glm::vec3 mSpriteColor = glm::vec3(0.67f, 1.f, 0.55f);
+		float mSpriteSize = 0.2f;
+		glm::vec3 mSpriteColor = glm::vec3(0.67f, 1.f, 0.55f);
 	};
 }

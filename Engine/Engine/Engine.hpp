@@ -5,7 +5,7 @@
 #include "Util/Util.hpp"
 
 #include "ECS/ECS.hpp"
-#include "DemoInfra/DemoWrangler.h"
+#include "DemoInfra/DemoWrangler.hpp"
 
 #include <vector>
 #include <unordered_map>
@@ -15,40 +15,40 @@
 #include <thread>
 
 namespace neo {
-    namespace util {
-        struct FrameCounter;
-    }
-    class Window;
-    class Keyboard;
-    class Mouse;
+	namespace util {
+		struct FrameCounter;
+	}
+	class Window;
+	class Keyboard;
+	class Mouse;
 
-    class Engine {
+	class Engine {
 
-        /* Base Engine */
-        public:
-            Engine() = default;
-            ~Engine() = default;
-            Engine(const Engine &) = delete;
-            Engine & operator=(const Engine &) = delete;
-            Engine(Engine &&) = delete;
-            Engine & operator=(Engine &&) = delete;
+		/* Base Engine */
+		public:
+			Engine() = default;
+			~Engine() = default;
+			Engine(const Engine &) = delete;
+			Engine & operator=(const Engine &) = delete;
+			Engine(Engine &&) = delete;
+			Engine & operator=(Engine &&) = delete;
 
-            static void init();
-            static void run(DemoWrangler&);
-            static void shutDown();
+			static void init();
+			static void run(DemoWrangler&);
+			static void shutDown();
 
-        private:
-            static ECS mECS;
-            static void _createPrefabs();
+		private:
+			static ECS mECS;
+			static void _createPrefabs();
 			static void _swapDemo(DemoWrangler&);
 
-            /* Hardware */
-            static WindowSurface mWindow;
-            static Keyboard mKeyboard;
-            static Mouse mMouse;
+			/* Hardware */
+			static WindowSurface mWindow;
+			static Keyboard mKeyboard;
+			static Mouse mMouse;
 
-            /* Debug */
-            bool mShowBoundingBoxes = false;
-    };
+			/* Debug */
+			bool mShowBoundingBoxes = false;
+	};
 
 }

@@ -22,26 +22,26 @@ uniform vec3 lightDir;
 out vec4 color;
 
 void main() {
-    vec4 albedo = texture(gAlbedo, fragTex);
-    vec4 specular = texture(gSpecular, fragTex);
-    vec3 worldPos = texture(gWorld, fragTex).rgb;
-    vec3 norm = texture(gNormal, fragTex).rgb;
+	vec4 albedo = texture(gAlbedo, fragTex);
+	vec4 specular = texture(gSpecular, fragTex);
+	vec3 worldPos = texture(gWorld, fragTex).rgb;
+	vec3 norm = texture(gNormal, fragTex).rgb;
 
-    // TODO - normal mapping
-    vec3 N = normalize(norm.xyz);
-    vec3 V = normalize(camPos - worldPos.xyz);
+	// TODO - normal mapping
+	vec3 N = normalize(norm.xyz);
+	vec3 V = normalize(camPos - worldPos.xyz);
 
-    float attFactor = 1;
-    vec3 L = normalize(lightDir);
+	float attFactor = 1;
+	vec3 L = normalize(lightDir);
 
-    color.rgb = getPhong(V, N, L, albedo.rgb * 0.2, albedo.rgb, specular.rgb, specular.a, lightCol, attFactor);
+	color.rgb = getPhong(V, N, L, albedo.rgb * 0.2, albedo.rgb, specular.rgb, specular.a, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
-    vec4 shadowCoord = lightTransform * vec4(worldPos, 1.0);
-    float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.002), 0.2);
-    color.rgb *= visibility;
+	vec4 shadowCoord = lightTransform * vec4(worldPos, 1.0);
+	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.002), 0.2);
+	color.rgb *= visibility;
 #endif
 
-    color.a = 1.0;
+	color.a = 1.0;
 }
 

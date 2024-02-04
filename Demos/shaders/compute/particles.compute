@@ -15,24 +15,24 @@ void main()
 	// Read the current global position for this thread
 	uint i = gl_GlobalInvocationID.x;
 
-    vec3 p = pos[i].xyz;
+	vec3 p = pos[i].xyz;
 
-    float dx = 0;
-    float dy = 0;
-    float dz = 0;
-    float x = p.x;
-    float y = p.y;
-    float z = p.z;
+	float dx = 0;
+	float dy = 0;
+	float dz = 0;
+	float x = p.x;
+	float y = p.y;
+	float z = p.z;
 
-    float a = -5.5;
-    float b = 3.5;
-    float d = -1;
-    
-    dx = y * timestep;
-    dy = z * timestep;
-    dz = (-a*x -b*y -z + (d* (pow(x, 3)))) * timestep;
-    
-    p += vec3(dx, dy, dz);
+	float a = -5.5;
+	float b = 3.5;
+	float d = -1;
+	
+	dx = y * timestep;
+	dy = z * timestep;
+	dz = (-a*x -b*y -z + (d* (pow(x, 3)))) * timestep;
+	
+	p += vec3(dx, dy, dz);
 
-    pos[i] = vec4(p, 1.0);
+	pos[i] = vec4(p, 1.0);
 }

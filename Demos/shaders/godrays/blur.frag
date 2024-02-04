@@ -17,17 +17,17 @@ out vec4 outcolor;
 
 void main() {
    
-    vec2 texCoords = fragTex;
-    vec2 deltaTexCoords = density * (texCoords - sunPos) / blurSteps;
-    float totalDecay = 1.0;
-    vec4 sum = texture(godray, texCoords) * contribution;
-    for(int i = 0; i < blurSteps; i++) {
-        texCoords -= deltaTexCoords;
-        vec4 currentSample = texture(godray, clamp(texCoords, 0.0, 1.0));
-        sum += currentSample * contribution * totalDecay * weight;
-        totalDecay *= decay;
-    }
-    outcolor = sum;
+	vec2 texCoords = fragTex;
+	vec2 deltaTexCoords = density * (texCoords - sunPos) / blurSteps;
+	float totalDecay = 1.0;
+	vec4 sum = texture(godray, texCoords) * contribution;
+	for(int i = 0; i < blurSteps; i++) {
+		texCoords -= deltaTexCoords;
+		vec4 currentSample = texture(godray, clamp(texCoords, 0.0, 1.0));
+		sum += currentSample * contribution * totalDecay * weight;
+		totalDecay *= decay;
+	}
+	outcolor = sum;
 
 }
 

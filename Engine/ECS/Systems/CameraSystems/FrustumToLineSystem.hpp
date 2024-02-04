@@ -4,13 +4,13 @@
 
 namespace neo {
 
-    class FrustumToLineSystem : public System {
+	class FrustumToLineSystem : public System {
 
-        public:
-            FrustumToLineSystem() :
-                System("FrustumToLine System")
-            {}
+		public:
+			FrustumToLineSystem() :
+				System("FrustumToLine System")
+			{}
 
-            virtual void update(ECS& ecs) override;
-    };
+			virtual void update(ECS& ecs) override;
+	};
 }

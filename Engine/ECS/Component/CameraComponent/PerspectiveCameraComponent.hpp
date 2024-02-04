@@ -5,26 +5,26 @@
 
 namespace neo {
 
-    struct PerspectiveCameraComponent : public CameraComponent {
-        PerspectiveCameraComponent(float near, float far, float fov, float ar = 1.5f);
+	struct PerspectiveCameraComponent : public CameraComponent {
+		PerspectiveCameraComponent(float near, float far, float fov, float ar = 1.5f);
 
-        virtual std::string getName() const override { return "PerspectiveCameraComponent"; }
-        virtual void imGuiEditor() override;
+		virtual std::string getName() const override { return "PerspectiveCameraComponent"; }
+		virtual void imGuiEditor() override;
 
-        /* Setters */
-        void setFOV(float);
-        void setAspectRatio(float);
+		/* Setters */
+		void setFOV(float);
+		void setAspectRatio(float);
 
-        /* Getters */
-        const float getFOV() const { return mFOV; }
-        const float getAspectRatio() const { return mAspectRatio; }
+		/* Getters */
+		const float getFOV() const { return mFOV; }
+		const float getAspectRatio() const { return mAspectRatio; }
 
-    private:
-        float mFOV;
-        float mAspectRatio;
+	private:
+		float mFOV;
+		float mAspectRatio;
 
-        virtual void _detProj() const override;
+		virtual void _detProj() const override;
 
-    };
+	};
 
 }

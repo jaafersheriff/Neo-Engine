@@ -4,14 +4,14 @@
 
 namespace neo {
 
-    class RotationSystem : public System {
+	class RotationSystem : public System {
 
-    public:
-        RotationSystem() :
-            System("Rotation System")
-        {}
+	public:
+		RotationSystem() :
+			System("Rotation System")
+		{}
 
-        virtual void update(ECS& ecs) override;
+		virtual void update(ECS& ecs) override;
 
-    };
+	};
 }

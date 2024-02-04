@@ -7,9 +7,9 @@
 #include <memory>
 
 int main() {
-    neo::DemoWrangler demos(sCurrentDemo, sDemos);
-    neo::Engine::init();
-    neo::Engine::run(demos);
+	neo::DemoWrangler demos(sCurrentDemo, sDemos);
+	neo::Engine::init();
+	neo::Engine::run(demos);
 
 	return EXIT_SUCCESS;
 }

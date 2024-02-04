@@ -10,33 +10,33 @@
 namespace neo {
 
 	template<typename... CompTs>
-    void drawWireframe(const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
-        TRACY_GPU();
+	void drawWireframe(const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
+		TRACY_GPU();
 
-        glDisable(GL_CULL_FACE);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDisable(GL_CULL_FACE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        const auto& view = ecs.getView<const WireframeShaderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
-        for (auto entity : view) {
-            // VFC
-            if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-                if (!culled->isInView(ecs, entity, cameraEntity)) {
-                    continue;
-                }
-            }
+		const auto& view = ecs.getView<const WireframeShaderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
+		for (auto entity : view) {
+			// VFC
+			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+				if (!culled->isInView(ecs, entity, cameraEntity)) {
+					continue;
+				}
+			}
 
-            auto resolvedShader = view.get<const WireframeShaderComponent>(entity).getResolvedInstance(inDefines);
-            resolvedShader.bind();
+			auto resolvedShader = view.get<const WireframeShaderComponent>(entity).getResolvedInstance(inDefines);
+			resolvedShader.bind();
 
-            resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
-            resolvedShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
-            resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
-            resolvedShader.bindUniform("color", view.get<const WireframeShaderComponent>(entity).mColor);
+			resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+			resolvedShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
+			resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
+			resolvedShader.bindUniform("color", view.get<const WireframeShaderComponent>(entity).mColor);
 
-            view.get<const MeshComponent>(entity).mMesh->draw();
-        }
+			view.get<const MeshComponent>(entity).mMesh->draw();
+		}
 
-        glEnable(GL_CULL_FACE);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_CULL_FACE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 }

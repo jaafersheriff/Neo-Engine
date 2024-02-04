@@ -47,16 +47,16 @@ namespace neo {
 
 		// Apply format
 		GLenum target = _getGLTarget(format.mTarget);
-        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, mFormat.mFilter);
-        glTexParameteri(target, GL_TEXTURE_MIN_FILTER, mFormat.mFilter);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, mFormat.mFilter);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, mFormat.mFilter);
 		switch (mFormat.mTarget) {
 		case TextureTarget::Texture3D:
-            glTexParameteri(target, GL_TEXTURE_WRAP_R, mFormat.mMode);
+			glTexParameteri(target, GL_TEXTURE_WRAP_R, mFormat.mMode);
 		case TextureTarget::TextureCube:
 		case TextureTarget::Texture2D:
-            glTexParameteri(target, GL_TEXTURE_WRAP_T, mFormat.mMode);
+			glTexParameteri(target, GL_TEXTURE_WRAP_T, mFormat.mMode);
 		case TextureTarget::Texture1D:
-            glTexParameteri(target, GL_TEXTURE_WRAP_S, mFormat.mMode);
+			glTexParameteri(target, GL_TEXTURE_WRAP_S, mFormat.mMode);
 			break;
 		default:
 			NEO_FAIL("Invalid texture class");
@@ -113,7 +113,7 @@ namespace neo {
 
 		}
 
-        NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when creating Texture");
+		NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when creating Texture");
 	}
 
 	void Texture::bind() const {

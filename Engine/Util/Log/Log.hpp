@@ -15,31 +15,31 @@
 
 // TODO - should these be under some private namespace?
 namespace neo {
-    namespace util {
+	namespace util {
 
 #ifdef DEBUG_MODE
-        static bool sLogVerbose = true;
+		static bool sLogVerbose = true;
 #else
-        static bool sLogVerbose = false;
+		static bool sLogVerbose = false;
 #endif 
-        static bool sLogInfo = true;
-        static bool sLogWarning = true;
-        static bool sLogError = true;
+		static bool sLogInfo = true;
+		static bool sLogWarning = true;
+		static bool sLogError = true;
 
-        enum class LogSeverity {
-            Verbose,
-            Info,
-            Warning,
-            Error
-        };
+		enum class LogSeverity {
+			Verbose,
+			Info,
+			Warning,
+			Error
+		};
 
-        const static std::map<LogSeverity, std::pair<char, glm::vec3>> sLogSeverityData {
-            { LogSeverity::Verbose, {'V', glm::vec3(0.26f, 0.4f, 0.32f)}},
-            { LogSeverity::Info,    {'I', glm::vec3(0.09f, 0.67f, 0.39f)}},
-            { LogSeverity::Warning, {'W', glm::vec3(1.0f, 1.0f, 0.0f)}},
-            { LogSeverity::Error,   {'E', glm::vec3(1.0f, 0.2f, 0.2f)}},
-        };
+		const static std::map<LogSeverity, std::pair<char, glm::vec3>> sLogSeverityData {
+			{ LogSeverity::Verbose, {'V', glm::vec3(0.26f, 0.4f, 0.32f)}},
+			{ LogSeverity::Info,	{'I', glm::vec3(0.09f, 0.67f, 0.39f)}},
+			{ LogSeverity::Warning, {'W', glm::vec3(1.0f, 1.0f, 0.0f)}},
+			{ LogSeverity::Error,   {'E', glm::vec3(1.0f, 0.2f, 0.2f)}},
+		};
 
-        void _log(LogSeverity severity, const char* sig, const char* format, ...);
-    }
+		void _log(LogSeverity severity, const char* sig, const char* format, ...);
+	}
 }

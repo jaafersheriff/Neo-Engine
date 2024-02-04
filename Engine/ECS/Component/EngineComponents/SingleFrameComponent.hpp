@@ -4,10 +4,10 @@
 
 namespace neo {
 
-    struct SingleFrameComponent : public Component {
-        SingleFrameComponent() {}
-        virtual std::string getName() const override {
-            return "SingleFrameComponent";
-        }
-    };
+	struct SingleFrameComponent : public Component {
+		SingleFrameComponent() {}
+		virtual std::string getName() const override {
+			return "SingleFrameComponent";
+		}
+	};
 }

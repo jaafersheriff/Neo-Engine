@@ -17,12 +17,12 @@ out vec4 shadowCoord;
 #endif
 
 void main() {
-    fragPos = M * vec4(vertPos, 1.0);
-    fragNor = N * vertNor;
-    fragTex = vertTex;
-    gl_Position = P * V * fragPos;
+	fragPos = M * vec4(vertPos, 1.0);
+	fragNor = N * vertNor;
+	fragTex = vertTex;
+	gl_Position = P * V * fragPos;
 
 #ifdef ENABLE_SHADOWS
-    shadowCoord = L * fragPos;
+	shadowCoord = L * fragPos;
 #endif
 }
