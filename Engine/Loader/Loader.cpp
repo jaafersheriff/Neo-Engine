@@ -519,8 +519,8 @@ namespace neo {
 				);
 			}
 
-			// TODO : attributes
-			// // TODO: Indices
+			// TODO: Indices
+			NEO_ASSERT(gltfMesh.indices < 0, "TODO: indices");
 			// {
 			// 	auto& indicesAccessor = model.accessors[gltfMesh.indices];
 			// 	NEO_ASSERT(!indicesAccessor.sparse.isSparse, "TODO : sparse?");

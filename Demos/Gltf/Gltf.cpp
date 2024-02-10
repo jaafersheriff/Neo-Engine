@@ -49,7 +49,7 @@ namespace Gltf {
 		}
 
 
-		Loader::GltfScene scene = Loader::loadGltfScene("TriangleWithoutIndices/TriangleWithoutIndices.gltf");
+		Loader::GltfScene scene = Loader::loadGltfScene("Triangle/Triangle.gltf");
 		for (auto& node : scene.mNodes) {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.0f, 0.f));
