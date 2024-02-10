@@ -15,7 +15,7 @@ namespace neo {
 	class Framebuffer {
 	
 	public: 
-		GLuint mFBOID;
+		GLuint mFBOID = 0;
 		int mColorAttachments = 0;
 		std::vector<Texture *> mTextures;
 
