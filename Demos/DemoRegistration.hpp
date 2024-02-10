@@ -1,3 +1,4 @@
+#include "PBR/PBR.hpp"
 #include "Base/BaseDemo.hpp"
 #include "Sponza/Sponza.hpp"
 #include "Compute/Compute.hpp"
@@ -11,6 +12,7 @@
 
 static int sCurrentDemo = 0;
 static std::vector<neo::IDemo*> sDemos = {
+	new PBR::Demo(),
 	new Base::Demo(),
 	new Sponza::Demo(),
  	new Compute::Demo(),

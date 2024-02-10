@@ -100,21 +100,25 @@ namespace neo {
 			{
 				TRACY_ZONEN("Update frametime");
 				float latestCPUTime = mTracyServer->GetFrametime();
-				if (mCPUFrametime.size() < MAX_SAMPLES) {
-					mCPUFrametime.emplace_back(latestCPUTime);
-				}
-				else {
-					mCPUFrametime[mCPUFrametimeOffset] = latestCPUTime;
-					mCPUFrametimeOffset = (mCPUFrametimeOffset + 1) % MAX_SAMPLES;
+				if (latestCPUTime >= 0.f) {
+					if (mCPUFrametime.size() < MAX_SAMPLES) {
+						mCPUFrametime.emplace_back(latestCPUTime);
+					}
+					else {
+						mCPUFrametime[mCPUFrametimeOffset] = latestCPUTime;
+						mCPUFrametimeOffset = (mCPUFrametimeOffset + 1) % MAX_SAMPLES;
+					}
 				}
 
 				float latestGPUTime = mTracyServer->GetGPUFrametime();
-				if (mGPUFrametime.size() < MAX_SAMPLES) {
-					mGPUFrametime.emplace_back(latestGPUTime);
-				}
-				else {
-					mGPUFrametime[mGPUFrametimeOffset] = latestGPUTime;
-					mGPUFrametimeOffset = (mGPUFrametimeOffset + 1) % MAX_SAMPLES;
+				if (latestGPUTime >= 0.f) {
+					if (mGPUFrametime.size() < MAX_SAMPLES) {
+						mGPUFrametime.emplace_back(latestGPUTime);
+					}
+					else {
+						mGPUFrametime[mGPUFrametimeOffset] = latestGPUTime;
+						mGPUFrametimeOffset = (mGPUFrametimeOffset + 1) % MAX_SAMPLES;
+					}
 				}
 			}
 			{
