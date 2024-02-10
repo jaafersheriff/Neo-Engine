@@ -34,6 +34,8 @@
 #include <tiny_gltf.h>
 #pragma warning(pop)
 
+#pragma optimize("", off)
+
 namespace neo {
 
 	std::string Loader::APP_RES_DIR = "";
@@ -123,13 +125,13 @@ namespace neo {
 		/* Upload */
 		mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
 		if (vertices.size()) {
-			mesh->addVertexBuffer(VertexType::Position, 0, 3, vertices);
+			mesh->addVertexBuffer_DEPRECATED(VertexType::Position, 0, 3, vertices);
 		}
 		if (normals.size()) {
-			mesh->addVertexBuffer(VertexType::Normal, 1, 3, normals);
+			mesh->addVertexBuffer_DEPRECATED(VertexType::Normal, 1, 3, normals);
 		}
 		if (texCoords.size()) {
-			mesh->addVertexBuffer(VertexType::Texture0, 2, 2, texCoords);
+			mesh->addVertexBuffer_DEPRECATED(VertexType::Texture0, 2, 2, texCoords);
 		}
 		if (indices.size()) {
 			mesh->mPrimitiveType = GL_TRIANGLES;
@@ -168,13 +170,13 @@ namespace neo {
 			/* Upload */
 			mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
 			if (shape.mesh.positions.size()) {
-				mesh->addVertexBuffer(VertexType::Position, 0, 3, shape.mesh.positions);
+				mesh->addVertexBuffer_DEPRECATED(VertexType::Position, 0, 3, shape.mesh.positions);
 			}
 			if (shape.mesh.normals.size()) {
-				mesh->addVertexBuffer(VertexType::Normal, 1, 3, shape.mesh.normals);
+				mesh->addVertexBuffer_DEPRECATED(VertexType::Normal, 1, 3, shape.mesh.normals);
 			}
 			if (shape.mesh.texcoords.size()) {
-				mesh->addVertexBuffer(VertexType::Texture0, 2, 2, shape.mesh.texcoords);
+				mesh->addVertexBuffer_DEPRECATED(VertexType::Texture0, 2, 2, shape.mesh.texcoords);
 			}
 			if (shape.mesh.indices.size()) {
 				mesh->mPrimitiveType = GL_TRIANGLES;
@@ -399,8 +401,6 @@ namespace neo {
 			return {};
 		}
 
-		NEO_LOG_I("Successfully parsed %s", _fileName.c_str());
-
 		// Translate tinygltf::Model to Loader::GltfScene
 		NEO_LOG_V("Translating %s to neo", _fileName.c_str());
 		if (model.lights.size()) {
@@ -414,82 +414,137 @@ namespace neo {
 		}
 
 		GltfScene outScene;
-		for (auto& node : model.scenes[model.defaultScene].nodes) {
-			if (node.camera || node.light || !node.mesh) {
+		for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
+			const auto& node = model.nodes[nodeID];
+			if (!node.camera || !node.light || node.mesh) {
 				continue;
 			}
 
 			auto outNode = outScene.mNodes.emplace({});
 
 			// Spatial
-			if (node.matrix.size() == 16) {
-				NEO_FAIL("TODO: handle full transformation matrix");
+			NEO_ASSERT(node.matrix.empty(), "TODO: handle full transformation matrix");
+			NEO_ASSERT(node.translation.empty() && node.scale.empty() && node.rotation.empty(), "TODO: Handle spatial");
+
+			// Mesh
+			if (model.meshes[node.mesh].primitives.size() > 1) {
+				NEO_LOG_W("Mesh has >1 mesh? Using the first...");
 			}
-			if (node.translation.size() == 3) {
-				outNode.mSpatial.setPosition(node.translation[0], node.translation[1], node.translation[2]);
+			auto& gltfMesh = model.meshes[node.mesh].primitives[0];
+
+			outNode->mMesh.mMesh = new Mesh;
+			switch (gltfMesh.mode) {
+			case TINYGLTF_MODE_POINTS:
+				outNode->mMesh.mMesh->mPrimitiveType = GL_POINTS;
+				break;
+			case TINYGLTF_MODE_LINE:
+				outNode->mMesh.mMesh->mPrimitiveType = GL_LINES;
+				break;
+			case TINYGLTF_MODE_LINE_LOOP:
+				outNode->mMesh.mMesh->mPrimitiveType = GL_LINE_LOOP;
+				break;
+			case TINYGLTF_MODE_LINE_STRIP:
+				outNode->mMesh.mMesh->mPrimitiveType = GL_LINE_STRIP;
+				break;
+			case TINYGLTF_MODE_TRIANGLES:
+				outNode->mMesh.mMesh->mPrimitiveType = GL_TRIANGLES;
+				break;
+			case TINYGLTF_MODE_TRIANGLE_STRIP:
+				outNode->mMesh.mMesh->mPrimitiveType = GL_TRIANGLE_STRIP;
+				break;
+			case TINYGLTF_MODE_TRIANGLE_FAN:
+				outNode->mMesh.mMesh->mPrimitiveType = GL_TRIANGLE_FAN;
+				break;
 			}
-			if (node.scale.size() == 3) {
-				outNode.mSpatial.setScale(node.translation[0], node.translation[1], node.translation[2]);
+
+			for (const auto& attribute : gltfMesh.attributes) {
+				const auto& accessor = model.accessors[attribute.second];
+
+				VertexType vertexType = VertexType::Position;
+				if (attribute.first == "POSITION") {
+					if (accessor.maxValues.size() == 3) {
+						outNode->mMesh.mMax = glm::vec3(accessor.maxValues[0], accessor.maxValues[1], accessor.maxValues[2]);
+					}
+					if (accessor.minValues.size() == 3) {
+						outNode->mMesh.mMin = glm::vec3(accessor.minValues[0], accessor.minValues[1], accessor.minValues[2]);
+					}
+				}
+				else {
+					NEO_FAIL("TODO: non position attributes");
+				}
+
+				NEO_ASSERT(!accessor.sparse.isSparse, "TODO: sparse");
+
+				const auto& bufferView = model.bufferViews[accessor.bufferView];
+				const auto& buffer = model.buffers[bufferView.buffer];
+
+				const uint32_t stride = accessor.ByteStride(bufferView);
+				const uint8_t* bufferData = static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset;
+				GLenum format = GL_FLOAT;
+				switch (accessor.componentType) {
+				case TINYGLTF_COMPONENT_TYPE_BYTE:
+					format = GL_BYTE;
+					break;
+				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+					format = GL_UNSIGNED_BYTE;
+					break;
+				case TINYGLTF_COMPONENT_TYPE_SHORT:
+					format = GL_SHORT;
+					break;
+				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+					format = GL_UNSIGNED_SHORT;
+					break;
+				case TINYGLTF_COMPONENT_TYPE_INT:
+					format = GL_INT;
+					break;
+				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+					format = GL_UNSIGNED_INT;
+					break;
+				case TINYGLTF_COMPONENT_TYPE_FLOAT:
+					format = GL_FLOAT;
+					break;
+				case TINYGLTF_COMPONENT_TYPE_DOUBLE:
+					format = GL_DOUBLE;
+					break;
+				}
+				outNode->mMesh.mMesh->addVertexBuffer(
+					vertexType, 
+					tinygltf::GetNumComponentsInType(accessor.type), 
+					stride, 
+					format, 
+					accessor.normalized, 
+					static_cast<uint32_t>(accessor.byteOffset), 
+					static_cast<uint32_t>(bufferView.byteLength), 
+					bufferData
+				);
 			}
-			if (node.rotation.size() == 4) {
-				NEO_FAIL("TODO: quat to rotation matrix");
-			}
+
+			// TODO : attributes
+			// // TODO: Indices
+			// {
+			// 	auto& indicesAccessor = model.accessors[gltfMesh.indices];
+			// 	NEO_ASSERT(!indicesAccessor.sparse.isSparse, "TODO : sparse?");
+			// 	auto& indicesBufferView = model.bufferViews[indicesAccessor.bufferView];
+			// 	NEO_ASSERT(indicesBufferView.target == TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER, "Not a index buffer?");
+			// 	uint64_t offset = indicesAccessor.byteOffoset + indicesBufferView.byteOffset;
+
+			// 	auto& indicesBuffer = model.buffers[indicesBufferView.buffer];
+			// }
+
+			// TODO: Textures/Images/Samplers
+
+			// TODO: Materials
+			// if (gltfMesh.material > 0) {
+			// 	auto& material = model.materials[gltfMesh.material];
+			// }
 
 			if (!node.children.empty()) {
 				NEO_FAIL("TODO: recurse children");
 				NEO_FAIL("TODO: dont forget transofmration hierarchy");
 			}
-
-			auto& gltfMesh = model.meshes[node.mesh].primtives[0];
-			// Mesh
-			if (gltfMesh.primitives.size() > 1) {
-				NEO_LOG_W("Mesh has >1 mesh? Using the first...");
-			}
-			Mesh* mesh = new Mesh;
-			// TODO : mode
-			switch (gltfMesh.mode) {
-			case TINYGLTF_MODE_POINTS:
-				mesh->mPrimitiveType = GL_POINTS;
-				break;
-			case TINYGLTF_MODE_LINE:
-				mesh->mPrimitiveType = GL_LINES;
-				break;
-			case TINYGLTF_MODE_LINE_LOOP:
-				mesh->mPrimitiveType = GL_LINE_LOOP;
-				break;
-			case TINYGLTF_MODE_LINE_STRIP:
-				mesh->mPrimitiveType = GL_LINE_STRIP;
-				break;
-			case TINYGLTF_MODE_TRIANGLES:
-				mesh->mPrimitiveType = GL_TRIANGLES;
-				break;
-			case TINYGLTF_MODE_TRIANGLE_STRIP:
-				mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
-				break;
-			case TINYGLTF_MODE_TRIANGLE_FAN:
-				mesh->mPrimitiveType = GL_TRIANGLE_FAN;
-				break;
-			}
-			// Indices
-			{
-				auto& indicesAccessor = model.accessors[gltfMesh.indices];
-				NEO_ASSERT(!indicesAccessor.sparse.isSparse, "TODO : sparse?");
-				auto& indicesBufferView = model.bufferViews[indicesAccessor.bufferView];
-				NEO_ASSERT(indicesBufferView.target == TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER, "Not a index buffer?");
-				uint64_t offset = indicesAccessor.byteOffoset + indicesBufferView.byteOffset;
-
-				auto& indicesBuffer = model.buffers[indicesBufferView.buffer];
-			}
-			// TODO : attributes
-
-			// Textures/Images/Samplers
-
-			// Materials
-			if (gltfMesh.material > 0) {
-				auto& material = model.materials[gltfMesh.material];
-			}
 		}
 
-		return {};
+		NEO_LOG_I("Successfully parsed %s", fileName.c_str());
+		return outScene;
 	}
 }

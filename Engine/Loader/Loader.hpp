@@ -3,7 +3,6 @@
 
 #include "GL/glew.h"
 
-#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 
 namespace neo {
@@ -36,12 +35,12 @@ namespace neo {
 		public:
 			struct GltfScene {
 				struct Node {
-					MeshComponent mMesh;
-					SpatialComponent mSpatial;
+					MeshData mMesh;
 				};
 
 				std::vector<Node> mNodes;
 			};
+
 			Loader() = default;
 			~Loader() = default;
 			Loader(const Loader&) = delete;

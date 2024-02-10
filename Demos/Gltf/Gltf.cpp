@@ -49,8 +49,20 @@ namespace Gltf {
 		}
 
 
-		Loader::GltfScene scene = Loader::loadGltfScene("SimpleTexture/SimpleTexture.gltf");
-		// TODO - translate scene to ecs
+		Loader::GltfScene scene = Loader::loadGltfScene("TriangleWithoutIndices/TriangleWithoutIndices.gltf");
+		for (auto& node : scene.mNodes) {
+			auto entity = ecs.createEntity();
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.0f, 0.f));
+			ecs.addComponent<MeshComponent>(entity, node.mMesh.mMesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh);
+			ecs.addComponent<PhongShaderComponent>(entity);
+			ecs.addComponent<OpaqueComponent>(entity);
+			auto material = ecs.addComponent<MaterialComponent>(entity);
+			material->mAmbient = glm::vec3(0.2f);
+			material->mDiffuse = glm::vec3(1.f, 0.f, 1.f);
+			material->mSpecular = glm::vec3(1.f);
+			material->mShininess = 20.f;
+		}
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();

@@ -15,8 +15,8 @@ namespace neo {
 		mOverrideColor(overrideColor)
 	{
 
-		mMesh->addVertexBuffer(VertexType::Position, 0, 3);
-		mMesh->addVertexBuffer(VertexType::Color0, 1, 3);
+		mMesh->addVertexBuffer_DEPRECATED(VertexType::Position, 0, 3);
+		mMesh->addVertexBuffer_DEPRECATED(VertexType::Color0, 1, 3);
 	}
 
 	const Mesh& LineMeshComponent::getMesh() const {

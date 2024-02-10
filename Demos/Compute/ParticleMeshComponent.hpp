@@ -27,7 +27,7 @@ namespace Compute {
 			MeshData meshData;
 			mMesh = meshData.mMesh = new Mesh;
 			mMesh->mPrimitiveType = GL_POINTS;
-			mMesh->addVertexBuffer(VertexType::Position, 0, 4); // positions
+			mMesh->addVertexBuffer_DEPRECATED(VertexType::Position, 0, 4); // positions
 			updateBuffers();
 			Library::insertMesh("Particles", meshData);
 		}

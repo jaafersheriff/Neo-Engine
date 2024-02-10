@@ -5,15 +5,16 @@
 
 namespace neo {
 
-	enum class VertexType {
-		Position,
+	enum class VertexType : uint8_t {
+		Position = 0,
 		Normal,
 		Texture0,
 		Texture1,
 		Texture2,
 		Color0,
 		Color1,
-		Color2
+		Color2,
+		COUNT
 	};
 
 	struct VertexBuffer {
@@ -35,7 +36,8 @@ namespace neo {
 			uint32_t mVAOID;
 
 			/* VBOs */
-			void addVertexBuffer(VertexType type, uint32_t attribArray, uint32_t stride, const std::vector<float>& buffer = {});
+			void addVertexBuffer_DEPRECATED(VertexType type, uint32_t attribArray, uint32_t stride, const std::vector<float>& buffer = {});
+			void addVertexBuffer(VertexType type, uint32_t components, uint32_t stide, uint32_t format, bool normalized, uint32_t offset, uint32_t byteSize, const uint8_t* data = nullptr);
 			void updateVertexBuffer(VertexType type, const std::vector<float>& buffer);
 			void updateVertexBuffer(VertexType type, uint32_t size);
 			void removeVertexBuffer(VertexType type);
