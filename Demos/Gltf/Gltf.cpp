@@ -49,10 +49,11 @@ namespace Gltf {
 		}
 
 
-		Loader::GltfScene scene = Loader::loadGltfScene("Triangle/Triangle.gltf");
+		Loader::GltfScene scene = Loader::loadGltfScene("SimpleMeshes/SimpleMeshes.gltf");
 		for (auto& node : scene.mNodes) {
 			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.0f, 0.f));
+			auto spatial = ecs.addComponent<SpatialComponent>(entity);
+			spatial->setPosition(node.mTranslation);
 			ecs.addComponent<MeshComponent>(entity, node.mMesh.mMesh);
 			ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh);
 			ecs.addComponent<PhongShaderComponent>(entity);

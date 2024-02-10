@@ -445,16 +445,21 @@ namespace neo {
 			}
 
 			GltfScene::Node outNode;
+			NEO_ASSERT(node.name.empty(), "TODO: handle tags");
 
 			// Spatial
 			NEO_ASSERT(node.matrix.empty(), "TODO: handle full transformation matrix");
-			NEO_ASSERT(node.translation.empty() && node.scale.empty() && node.rotation.empty(), "TODO: Handle spatial");
+			NEO_ASSERT(node.scale.empty() && node.rotation.empty(), "TODO: Handle spatial");
+			if (node.translation.size() == 3) {
+				outNode.mTranslation = glm::vec3(node.translation[0], node.translation[1], node.translation[2]);
+			}
 
 			// Mesh
 			if (model.meshes[node.mesh].primitives.size() > 1) {
 				NEO_LOG_W("Mesh has >1 mesh? Using the first...");
 			}
 			auto& gltfMesh = model.meshes[node.mesh].primitives[0];
+			NEO_ASSERT(model.meshes[node.mesh].name.empty(), "TODO: upload mesh to library");
 
 			outNode.mMesh.mMesh = new Mesh;
 			switch (gltfMesh.mode) {
@@ -511,8 +516,11 @@ namespace neo {
 						outNode.mMesh.mMin = glm::vec3(accessor.minValues[0], accessor.minValues[1], accessor.minValues[2]);
 					}
 				}
+				else if (attribute.first == "NORMAL") {
+					vertexType = VertexType::Normal;
+				}
 				else {
-					NEO_FAIL("TODO: non position attributes");
+					NEO_FAIL("TODO: unsupported attribute: %s", attribute.first.c_str());
 				}
 
 				NEO_ASSERT(!accessor.sparse.isSparse, "TODO: sparse");

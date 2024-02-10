@@ -36,6 +36,7 @@ namespace neo {
 			struct GltfScene {
 				struct Node {
 					MeshData mMesh;
+					glm::vec3 mTranslation = glm::vec3(0.f);
 				};
 
 				std::vector<Node> mNodes;
