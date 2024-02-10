@@ -28,3 +28,6 @@
 [submodule "Engine/ext/glslang"]
 	path = Engine/ext/glslang
 	url = https://github.com/KhronosGroup/glslang.git
+[submodule "Engine/ext/tinyobjloader"]
+	path = Engine/ext/tinyobjloader
+	url = https://github.com/tinyobjloader/tinyobjloader.git

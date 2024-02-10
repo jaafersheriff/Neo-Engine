@@ -150,6 +150,7 @@ namespace PBR {
 	}
 
 	void Demo::imGuiEditor(ECS& ecs) {
+		NEO_UNUSED(ecs);
 		ImGui::Checkbox("Shadows", &mDrawShadows);
 	}
 

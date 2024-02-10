@@ -219,3 +219,24 @@ PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/entt/src"
 PRIVATE
 )
+
+## tinyobjloader - switch this with gltf soon pls ;(
+file(GLOB_RECURSE TINYOBJ_HPP_FILES 
+	tinyobjloader/*.h
+)
+file(GLOB_RECURSE TINYOBJ_CPP_FILES 
+	tinyobjloader/*.cc
+)
+add_library(tinyobjloader STATIC ${ENTT_CPP_FILES} ${ENTT_HPP_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/tinyobjloader/ FILES 
+	${TINYOBJ_HPP_FILES}
+	${TINYOBJ_CPP_FILES}
+)
+set_target_properties(tinyobjloader PROPERTIES FOLDER "Neo/ext")
+target_include_directories(tinyobjloader
+PUBLIC
+	"${CMAKE_CURRENT_SOURCE_DIR}/tinyobjloader"
+PRIVATE
+)
+
+

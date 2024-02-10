@@ -6,6 +6,7 @@ PUBLIC
 PRIVATE
 	Util
 	libglew_static
+	tinyobjloader
 )
 
 add_precompiled_header(Loader

@@ -12,7 +12,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4706)
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "ext/tiny_obj_loader.h"
+#include <tiny_obj_loader.h>
 #pragma warning(pop)
 
 #pragma warning(push)
@@ -70,25 +70,22 @@ namespace neo {
 		meshData.mMesh = mesh;
 
 		/* If mesh was not found in map, read it in */
+		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
-		std::vector<tinyobj::material_t> objMaterials;
-		std::string errString;
+		std::vector<tinyobj::material_t> materials;
+		std::string warn, err;
 		std::string _fileName = APP_RES_DIR + fileName;
 		if (!util::fileExists(_fileName.c_str())) {
 			_fileName = ENGINE_RES_DIR + fileName;
 		}
 		NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file: %s after checking:\n\t%s\n\t%s\n", fileName.c_str(), APP_RES_DIR.c_str(), ENGINE_RES_DIR.c_str());
 		// TODO : use assimp or another optimized asset loader
-		bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, _fileName.c_str());
-		NEO_ASSERT(rc, errString.c_str());
+		bool rc = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, _fileName.c_str());
+		NEO_ASSERT(rc, err.c_str());
 
-		/* Create empty mesh buffers */
-		std::vector<float> vertices;
-		std::vector<float> normals;
-		std::vector<float> texCoords;
-		std::vector<uint32_t> indices;
+		NEO_ASSERT(shapes.size() > 0, "%s has no meshes?", fileName.c_str());
+		NEO_ASSERT(shapes.size() < 2, "%s has more than one mesh -- use loadMultiAsset() instead pls", fileName.c_str());
 
-		int vertCount = 0;
 		/* For every shape in the loaded file */
 		for (uint32_t i = 0; i < shapes.size(); i++) {
 			/* Concatenate the shape's vertices, normals, and textures to the mesh */
