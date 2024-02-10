@@ -144,7 +144,7 @@ namespace neo {
 		}
 
 		/* Optional resize and find min/max */
-		_findMetaData(meshData, vertices, doResize);
+		_findMetaData_DEPRECATED(meshData, vertices, doResize);
 
 		/* Upload */
 		mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
@@ -189,7 +189,7 @@ namespace neo {
 			Mesh* mesh = new Mesh;
 			asset.meshData.mMesh = mesh;
 
-			_findMetaData(asset.meshData, shape.mesh.positions, true);
+			_findMetaData_DEPRECATED(asset.meshData, shape.mesh.positions, true);
 
 			/* Upload */
 			mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
@@ -216,10 +216,6 @@ namespace neo {
 					asset.material.mDiffuse = glm::vec3(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
 					asset.material.mSpecular = glm::vec3(material.specular[0], material.specular[1], material.specular[2]);
 					asset.material.mShininess = material.shininess;
-					asset.material.mTransmittance = glm::vec3(material.transmittance[0], material.transmittance[1], material.transmittance[2]);
-					asset.material.mEmission = glm::vec3(material.emission[0], material.emission[1], material.emission[2]);
-					asset.material.mIOR = material.ior;
-					asset.material.mDissolve = material.dissolve;
 
 					TextureFormat format;
 					format.mTarget = TextureTarget::Texture2D;
@@ -319,7 +315,7 @@ namespace neo {
 	}
 
 	/* Provided function to resize a mesh so all vertex positions are [0, 1.f] */
-	void Loader::_findMetaData(MeshData& meshData, std::vector<float>& vertices, bool doResize) {
+	void Loader::_findMetaData_DEPRECATED(MeshData& meshData, std::vector<float>& vertices, bool doResize) {
 		float minX, minY, minZ;
 		float maxX, maxY, maxZ;
 		float scaleX, scaleY, scaleZ;
@@ -430,7 +426,7 @@ namespace neo {
 		if (model.lights.size()) {
 			NEO_LOG_W("%s contains lights - ignoring", fileName.c_str());
 		}
-		if (model.lights.size()) {
+		if (model.cameras.size()) {
 			NEO_LOG_W("%s contains cameras - ignoring", fileName.c_str());
 		}
 		if (model.defaultScene < 0 || model.scenes.size() > 1) {
@@ -440,11 +436,11 @@ namespace neo {
 		GltfScene outScene;
 		for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
 			const auto& node = model.nodes[nodeID];
-			if (!node.camera || !node.light || node.mesh) {
+			if (node.camera != -1 || node.light != -1 || node.mesh == -1) {
 				continue;
 			}
 
-			GltfScene::Node outNode;
+			GltfScene::MeshNode outNode;
 			NEO_ASSERT(node.name.empty(), "TODO: handle tags");
 
 			// Spatial
@@ -459,7 +455,6 @@ namespace neo {
 				NEO_LOG_W("Mesh has >1 mesh? Using the first...");
 			}
 			auto& gltfMesh = model.meshes[node.mesh].primitives[0];
-			NEO_ASSERT(model.meshes[node.mesh].name.empty(), "TODO: upload mesh to library");
 
 			outNode.mMesh.mMesh = new Mesh;
 			switch (gltfMesh.mode) {
@@ -543,6 +538,9 @@ namespace neo {
 					bufferData
 				);
 			}
+			if (!model.meshes[node.mesh].name.empty()) {
+				Library::insertMesh(model.meshes[node.mesh].name, outNode.mMesh);
+			}
 
 			// TODO: Textures/Images/Samplers
 
@@ -551,7 +549,7 @@ namespace neo {
 			// 	auto& material = model.materials[gltfMesh.material];
 			// }
 
-			outScene.mNodes.push_back(outNode);
+			outScene.mMeshNodes.push_back(outNode);
 
 			if (!node.children.empty()) {
 				NEO_FAIL("TODO: recurse children");

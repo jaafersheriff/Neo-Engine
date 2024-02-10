@@ -69,7 +69,7 @@ namespace DrawStress {
 			ecs.addComponent<BoundingBoxComponent>(cube, Library::loadMesh_DEPRECATED("cube"));
 			ecs.addComponent<PhongShaderComponent>(cube);
 			ecs.addComponent<OpaqueComponent>(cube);
-			auto material = ecs.addComponent<MaterialComponent>(cube);
+			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(cube);
 			material->mAmbient = glm::vec3(0.2f);
 			material->mDiffuse = util::genRandomVec3();
 		}

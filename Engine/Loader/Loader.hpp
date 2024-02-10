@@ -23,10 +23,7 @@ namespace neo {
 
 	struct Asset_DEPRECATED {
 		MeshData meshData;
-		MaterialComponent material;
-		// Texture* ambient_tex = nullptr;			// map_Ka
-		// Texture* bump_tex = nullptr;			   // map_bump, bump
-		// Texture* specular_highlight_tex; // map_Ns
+		MaterialComponent_DEPRECATED material;
 	};
 
 	class Loader {
@@ -34,12 +31,12 @@ namespace neo {
 
 		public:
 			struct GltfScene {
-				struct Node {
+				struct MeshNode {
 					MeshData mMesh;
 					glm::vec3 mTranslation = glm::vec3(0.f);
 				};
 
-				std::vector<Node> mNodes;
+				std::vector<MeshNode> mMeshNodes;
 			};
 
 			Loader() = default;
@@ -63,7 +60,7 @@ namespace neo {
 
 		private:
 			/* Optionally resize mesh vertex buffers so all the vertices are [-1, 1] */
-			static void _findMetaData(MeshData& meshData, std::vector<float>& verts, bool doResize);
+			static void _findMetaData_DEPRECATED(MeshData& meshData, std::vector<float>& verts, bool doResize);
 
 			/* Load a single texture file */
 			static uint8_t* _loadTextureData(int&, int&, int&, const std::string&, TextureFormat, bool = true);

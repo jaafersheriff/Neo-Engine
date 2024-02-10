@@ -82,7 +82,7 @@ namespace neo {
 		}
 
 		ShaderDefines drawDefines(passDefines);
-		const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
+		const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent_DEPRECATED, const SpatialComponent, const CompTs...>();
 		for (auto entity : view) {
 			// VFC
 			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
@@ -97,7 +97,7 @@ namespace neo {
 
 			drawDefines.reset();
 
-			const auto& material = view.get<const MaterialComponent>(entity);
+			const auto& material = view.get<const MaterialComponent_DEPRECATED>(entity);
 			MakeDefine(ALPHA_MAP);
 			MakeDefine(DIFFUSE_MAP);
 			MakeDefine(SPECULAR_MAP);

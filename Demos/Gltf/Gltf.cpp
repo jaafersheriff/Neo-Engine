@@ -49,8 +49,8 @@ namespace Gltf {
 		}
 
 
-		Loader::GltfScene scene = Loader::loadGltfScene("SimpleMeshes/SimpleMeshes.gltf");
-		for (auto& node : scene.mNodes) {
+		Loader::GltfScene scene = Loader::loadGltfScene("MeshPrimitiveModes/MeshPrimitiveModes.gltf");
+		for (auto& node : scene.mMeshNodes) {
 			auto entity = ecs.createEntity();
 			auto spatial = ecs.addComponent<SpatialComponent>(entity);
 			spatial->setPosition(node.mTranslation);
@@ -58,9 +58,9 @@ namespace Gltf {
 			ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh);
 			ecs.addComponent<PhongShaderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
-			auto material = ecs.addComponent<MaterialComponent>(entity);
+			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(entity);
 			material->mAmbient = glm::vec3(0.2f);
-			material->mDiffuse = glm::vec3(1.f, 0.f, 1.f);
+			material->mDiffuse = glm::vec3(1.f, 1.f, 1.f);
 			material->mSpecular = glm::vec3(1.f);
 			material->mShininess = 20.f;
 		}

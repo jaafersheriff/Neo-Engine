@@ -126,7 +126,7 @@ namespace Sponza {
 			ecs.addComponent<BoundingBoxComponent>(entity, asset.meshData);
 			ecs.addComponent<PhongShaderComponent>(entity);
 			ecs.addComponent<GBufferShaderComponent>(entity);
-			auto material = ecs.addComponent<MaterialComponent>(entity, asset.material);
+			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(entity, asset.material);
 			if (material->mAlphaMap) {
 				ecs.addComponent<AlphaTestComponent>(entity);
 			}

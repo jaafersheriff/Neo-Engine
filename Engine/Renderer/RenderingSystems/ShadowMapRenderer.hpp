@@ -45,7 +45,7 @@ namespace neo {
 				}
 			}
 
-			auto material = ecs.cGetComponent<const MaterialComponent>(entity);
+			auto material = ecs.cGetComponent<const MaterialComponent_DEPRECATED>(entity);
 			Texture* alphaMap = nullptr;
 			if (containsAlphaTest && material && material->mAlphaMap) {
 				alphaMap = material->mAlphaMap;
