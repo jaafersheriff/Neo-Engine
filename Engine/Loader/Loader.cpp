@@ -399,7 +399,97 @@ namespace neo {
 			return {};
 		}
 
+		NEO_LOG_I("Successfully parsed %s", _fileName.c_str());
+
 		// Translate tinygltf::Model to Loader::GltfScene
+		NEO_LOG_V("Translating %s to neo", _fileName.c_str());
+		if (model.lights.size()) {
+			NEO_LOG_W("%s contains lights - ignoring", fileName.c_str());
+		}
+		if (model.lights.size()) {
+			NEO_LOG_W("%s contains cameras - ignoring", fileName.c_str());
+		}
+		if (model.defaultScene < 0 || model.scenes.size() > 1) {
+			NEO_LOG_W("%s has weird scene layout. Just using the default or first one", fileName.c_str());
+		}
+
+		GltfScene outScene;
+		for (auto& node : model.scenes[model.defaultScene].nodes) {
+			if (node.camera || node.light || !node.mesh) {
+				continue;
+			}
+
+			auto outNode = outScene.mNodes.emplace({});
+
+			// Spatial
+			if (node.matrix.size() == 16) {
+				NEO_FAIL("TODO: handle full transformation matrix");
+			}
+			if (node.translation.size() == 3) {
+				outNode.mSpatial.setPosition(node.translation[0], node.translation[1], node.translation[2]);
+			}
+			if (node.scale.size() == 3) {
+				outNode.mSpatial.setScale(node.translation[0], node.translation[1], node.translation[2]);
+			}
+			if (node.rotation.size() == 4) {
+				NEO_FAIL("TODO: quat to rotation matrix");
+			}
+
+			if (!node.children.empty()) {
+				NEO_FAIL("TODO: recurse children");
+				NEO_FAIL("TODO: dont forget transofmration hierarchy");
+			}
+
+			auto& gltfMesh = model.meshes[node.mesh].primtives[0];
+			// Mesh
+			if (gltfMesh.primitives.size() > 1) {
+				NEO_LOG_W("Mesh has >1 mesh? Using the first...");
+			}
+			Mesh* mesh = new Mesh;
+			// TODO : mode
+			switch (gltfMesh.mode) {
+			case TINYGLTF_MODE_POINTS:
+				mesh->mPrimitiveType = GL_POINTS;
+				break;
+			case TINYGLTF_MODE_LINE:
+				mesh->mPrimitiveType = GL_LINES;
+				break;
+			case TINYGLTF_MODE_LINE_LOOP:
+				mesh->mPrimitiveType = GL_LINE_LOOP;
+				break;
+			case TINYGLTF_MODE_LINE_STRIP:
+				mesh->mPrimitiveType = GL_LINE_STRIP;
+				break;
+			case TINYGLTF_MODE_TRIANGLES:
+				mesh->mPrimitiveType = GL_TRIANGLES;
+				break;
+			case TINYGLTF_MODE_TRIANGLE_STRIP:
+				mesh->mPrimitiveType = GL_TRIANGLE_STRIP;
+				break;
+			case TINYGLTF_MODE_TRIANGLE_FAN:
+				mesh->mPrimitiveType = GL_TRIANGLE_FAN;
+				break;
+			}
+			// Indices
+			{
+				auto& indicesAccessor = model.accessors[gltfMesh.indices];
+				NEO_ASSERT(!indicesAccessor.sparse.isSparse, "TODO : sparse?");
+				auto& indicesBufferView = model.bufferViews[indicesAccessor.bufferView];
+				NEO_ASSERT(indicesBufferView.target == TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER, "Not a index buffer?");
+				uint64_t offset = indicesAccessor.byteOffoset + indicesBufferView.byteOffset;
+
+				auto& indicesBuffer = model.buffers[indicesBufferView.buffer];
+			}
+			// TODO : attributes
+
+			// Textures/Images/Samplers
+
+			// Materials
+			if (gltfMesh.material > 0) {
+				auto& material = model.materials[gltfMesh.material];
+			}
+		}
+
 		return {};
 	}
 }
