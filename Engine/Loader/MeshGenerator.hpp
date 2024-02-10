@@ -111,7 +111,7 @@ namespace neo {
 			 16, 18, 19,
 			 20, 21, 22,
 			 20, 22, 23 };
-			meshData.mMesh->addElementBuffer(indices);
+			meshData.mMesh->addElementBuffer_DEPRECATED(indices);
 
 			meshData.mMesh->mPrimitiveType = GL_TRIANGLES;
 		}
@@ -144,7 +144,7 @@ namespace neo {
 			std::vector<unsigned> indices =
 			{ 0, 1, 2,
 			  1, 3, 2 };
-			meshData.mMesh->addElementBuffer(indices);
+			meshData.mMesh->addElementBuffer_DEPRECATED(indices);
 
 			meshData.mMesh->mPrimitiveType = GL_TRIANGLES;
 		}
@@ -250,7 +250,7 @@ namespace neo {
 			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Position, 0, 3, verts);
 			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Normal, 1, 3, verts);
 			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Texture0, 2, 2, tex);
-			meshData.mMesh->addElementBuffer(ele);
+			meshData.mMesh->addElementBuffer_DEPRECATED(ele);
 
 			meshData.mMesh->mPrimitiveType = GL_TRIANGLES;
 		}
@@ -338,7 +338,7 @@ namespace neo {
 			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Position, 0, 3, vertices);
 			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Normal, 1, 3, normals);
 			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Texture0, 2, 2, textureCoords);
-			meshData.mMesh->addElementBuffer(indices);
+			meshData.mMesh->addElementBuffer_DEPRECATED(indices);
 
 			meshData.mMesh->mPrimitiveType = GL_TRIANGLES;
 		}

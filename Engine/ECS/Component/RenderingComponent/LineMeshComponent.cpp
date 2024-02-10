@@ -34,8 +34,8 @@ namespace neo {
 				colors[i * 3 + 1] = mNodes[i].color.g;
 				colors[i * 3 + 2] = mNodes[i].color.b;
 			}
-			mMesh->updateVertexBuffer(VertexType::Position, positions);
-			mMesh->updateVertexBuffer(VertexType::Color0, colors);
+			mMesh->updateVertexBuffer_DEPRECATED(VertexType::Position, positions);
+			mMesh->updateVertexBuffer_DEPRECATED(VertexType::Color0, colors);
 			mDirty = false;
 		}
 

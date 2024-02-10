@@ -53,7 +53,7 @@ namespace Compute {
 				positions[i * 4 + 2] = pos.z;
 				positions[i * 4 + 3] = 1.f;
 			}
-			mMesh->updateVertexBuffer(VertexType::Position, positions);
+			mMesh->updateVertexBuffer_DEPRECATED(VertexType::Position, positions);
 		}
 
 		virtual std::string getName() const override {

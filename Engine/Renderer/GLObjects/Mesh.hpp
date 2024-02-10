@@ -21,7 +21,8 @@ namespace neo {
 		uint32_t vboID = 0;
 		uint32_t attribArray = 0;
 		uint32_t stride = 3;
-		uint32_t bufferSize = 0;
+		uint32_t elementCount = 0;
+		uint32_t format = 0;
 	};
 
 	class Mesh {
@@ -37,14 +38,15 @@ namespace neo {
 
 			/* VBOs */
 			void addVertexBuffer_DEPRECATED(VertexType type, uint32_t attribArray, uint32_t stride, const std::vector<float>& buffer = {});
-			void addVertexBuffer(VertexType type, uint32_t components, uint32_t stide, uint32_t format, bool normalized, uint32_t offset, uint32_t byteSize, const uint8_t* data = nullptr);
-			void updateVertexBuffer(VertexType type, const std::vector<float>& buffer);
-			void updateVertexBuffer(VertexType type, uint32_t size);
+			void addVertexBuffer(VertexType type, uint32_t components, uint32_t stride, uint32_t format, bool normalized, uint32_t count, uint32_t offset, uint32_t byteSize, const uint8_t* data = nullptr);
+			void updateVertexBuffer_DEPRECATED(VertexType type, const std::vector<float>& buffer);
+			void updateVertexBuffer_DEPRECATED(VertexType type, uint32_t size);
 			void removeVertexBuffer(VertexType type);
 
-			void addElementBuffer(const std::vector<uint32_t>& buffer = {});
-			void updateElementBuffer(const std::vector<uint32_t>& buffer);
-			void updateElementBuffer(uint32_t size);
+			void addElementBuffer_DEPRECATED(const std::vector<uint32_t>& buffer = {});
+			void addElementBuffer(uint32_t count, uint32_t format, uint32_t byteSize, const uint8_t* data = nullptr);
+			void updateElementBuffer_DEPRECATED(const std::vector<uint32_t>& buffer);
+			void updateElementBuffer_DEPRECATED(uint32_t size);
 			void removeElementBuffer();
 
 			const VertexBuffer& getVBO(VertexType type) const;
