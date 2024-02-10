@@ -21,7 +21,7 @@ namespace neo {
 		glm::vec3 mBaseScale{ 1.f, 1.f, 1.f };
 	};
 
-	struct Asset {
+	struct Asset_DEPRECATED {
 		MeshData meshData;
 		MaterialComponent material;
 		// Texture* ambient_tex = nullptr;			// map_Ka
@@ -33,6 +33,8 @@ namespace neo {
 		friend Engine;
 
 		public:
+			struct GltfScene {
+			};
 			Loader() = default;
 			~Loader() = default;
 			Loader(const Loader&) = delete;
@@ -42,9 +44,11 @@ namespace neo {
 
 			static const char* loadFileString(const std::string&);
 
+			static GltfScene loadGltfScene(const std::string& fileName);
+
 			/* Load Mesh pointer from an .obj file */
-			static MeshData loadMesh(const std::string &, bool = false);
-			static std::vector<Asset> loadMultiAsset(const std::string &);
+			static MeshData loadMesh_DEPRECATED(const std::string &, bool = false);
+			static std::vector<Asset_DEPRECATED> loadMultiAsset_DEPRECATED(const std::string &);
 
 			/* Retrieve Texture pointer from an image file */
 			static Texture* loadTexture(const std::string &, TextureFormat);

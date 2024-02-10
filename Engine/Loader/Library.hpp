@@ -40,7 +40,7 @@ namespace neo {
 			static void clean();
 
 			static MeshData getMesh(const std::string&);
-			static MeshData loadMesh(const std::string&, bool = false);
+			static MeshData loadMesh_DEPRECATED(const std::string&, bool = false);
 			static void insertMesh(const std::string&, MeshData& mesh);
 			static const std::unordered_map<std::string, MeshData> getAllMeshes() { return mMeshes; }
 

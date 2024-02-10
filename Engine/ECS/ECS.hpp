@@ -2,6 +2,8 @@
 
 #include "ECS/Systems/System.hpp"
 
+#include "Loader/Loader.hpp"
+
 #include "Util/Profiler.hpp"
 
 #ifndef ENTT_ASSERT

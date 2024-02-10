@@ -6,6 +6,7 @@ PUBLIC
 PRIVATE
 	Util
 	libglew_static
+	tinygltf
 )
 
 add_precompiled_header(Loader

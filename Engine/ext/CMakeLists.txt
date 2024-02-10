@@ -219,3 +219,25 @@ PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/entt/src"
 PRIVATE
 )
+
+## tiny gltf
+file(GLOB_RECURSE TINYGLTF_HPP_FILES 
+	tinygltf/tiny_gltf.h
+)
+file(GLOB_RECURSE TINYGLTF_CPP_FILES 
+	tiny_gltf.cpp
+)
+add_library(tinygltf STATIC ${TINYGLTF_CPP_FILES} ${TINYGLTF_HPP_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/tinygltf FILES 
+		  ${TINYGLTF_HPP_FILES})
+set_target_properties(tinygltf PROPERTIES FOLDER "Neo/ext")
+target_include_directories(tinygltf
+PUBLIC
+	"${CMAKE_CURRENT_SOURCE_DIR}/tinygltf/"
+PRIVATE
+)
+
+
+set_target_properties(tinygltf PROPERTIES FOLDER "Neo/ext/tinygltf")
+target_compile_options(tinygltf PRIVATE "/WX-" "/W0")
+

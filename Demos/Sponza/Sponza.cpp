@@ -117,7 +117,7 @@ namespace Sponza {
 			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
 		}
 
-		auto assets = Loader::loadMultiAsset("sponza.obj");
+		auto assets = Loader::loadMultiAsset_DEPRECATED("sponza.obj");
 		for (auto& asset : assets) {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<MeshComponent>(entity, asset.meshData.mMesh);

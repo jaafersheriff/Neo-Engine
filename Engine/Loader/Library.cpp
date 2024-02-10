@@ -81,7 +81,7 @@ namespace neo {
 		return {};
 	}
 
-	MeshData Library::loadMesh(const std::string& fileName, bool doResize) {
+	MeshData Library::loadMesh_DEPRECATED(const std::string& fileName, bool doResize) {
 		TRACY_ZONE();
 
 		auto it = mMeshes.find(fileName);
@@ -90,7 +90,7 @@ namespace neo {
 		}
 
 		NEO_LOG("First request for %s, loading...", fileName.c_str());
-		MeshData mesh = Loader::loadMesh(fileName, doResize);
+		MeshData mesh = Loader::loadMesh_DEPRECATED(fileName, doResize);
 		_insertMesh(fileName, mesh);
 		return mesh;
 	}

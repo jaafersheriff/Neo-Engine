@@ -9,6 +9,7 @@
 
 #include "Util/Profiler.hpp"
 
+// DEPRECATED :O
 #pragma warning(push)
 #pragma warning(disable: 4706)
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -19,6 +20,18 @@
 #pragma warning(disable: 4244)
 #define STB_IMAGE_IMPLEMENTATION
 #include "ext/stb_image.h"
+#pragma warning(pop)
+
+#pragma warning(push)
+#pragma warning(disable: 4018)
+#pragma warning(disable: 4100)
+#pragma warning(disable: 4267)
+#define TINYGLTF_NO_EXTERNAL_IMAGE 
+#define TINYGLTF_USE_CPP14 
+#define TINYGLTF_NO_STB_IMAGE 
+#define TINYGLTF_NO_STB_IMAGE_WRITE 
+#define TINYGLTF_IMPLEMENTATION
+#include <tiny_gltf.h>
 #pragma warning(pop)
 
 namespace neo {
@@ -61,7 +74,7 @@ namespace neo {
 		return nullptr;
 	}
 
-	MeshData Loader::loadMesh(const std::string &fileName, bool doResize) {
+	MeshData Loader::loadMesh_DEPRECATED(const std::string &fileName, bool doResize) {
 		TRACY_ZONE();
 
 		/* Create mesh */
@@ -127,7 +140,7 @@ namespace neo {
 		return meshData;
 	}
 
-	std::vector<Asset> Loader::loadMultiAsset(const std::string &fileName) {
+	std::vector<Asset_DEPRECATED> Loader::loadMultiAsset_DEPRECATED(const std::string &fileName) {
 		/* If mesh was not found in map, read it in */
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> objMaterials;
@@ -142,10 +155,10 @@ namespace neo {
 		bool rc = tinyobj::LoadObj(shapes, objMaterials, errString, (resDir + fileName).c_str(), resDir.c_str());
 		NEO_ASSERT(rc, errString.c_str());
 
-		std::vector<Asset> ret;
+		std::vector<Asset_DEPRECATED> ret;
 
 		for (auto& shape : shapes) {
-			Asset asset;
+			Asset_DEPRECATED asset;
 
 			Mesh* mesh = new Mesh;
 			asset.meshData.mMesh = mesh;
@@ -351,5 +364,42 @@ namespace neo {
 		meshData.mMax = glm::vec3(maxX, maxY, maxZ);
 		meshData.mBasePosition = glm::vec3(shiftX, shiftY, shiftZ);
 		meshData.mBaseScale = glm::vec3(maxExtent) / 2.f;
+	}
+
+	Loader::GltfScene Loader::loadGltfScene(const std::string& fileName) {
+		std::string _fileName = APP_RES_DIR + fileName;
+		if (!util::fileExists(_fileName.c_str())) {
+			_fileName = ENGINE_RES_DIR + fileName;
+		}
+		NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file: %s after checking:\n\t%s\n\t%s\n", fileName.c_str(), APP_RES_DIR.c_str(), ENGINE_RES_DIR.c_str());
+
+		tinygltf::Model model;
+		tinygltf::TinyGLTF loader;
+		std::string err;
+		std::string warn;
+
+		bool ret = false;
+		if (fileName.substr(fileName.length() - 3, 3) == "glb") {
+			ret = loader.LoadBinaryFromFile(&model, &err, &warn, _fileName.c_str());
+		}
+		else {
+			ret = loader.LoadASCIIFromFile(&model, &err, &warn, _fileName.c_str());
+		}
+
+		if (!warn.empty()) {
+			NEO_LOG_W("Warn: %s\n", warn.c_str());
+		}
+
+		if (!err.empty()) {
+			NEO_LOG_E("Err: %s\n", err.c_str());
+		}
+
+		NEO_ASSERT(ret, "tinygltf failed to parse %s", _fileName.c_str());
+		if (!ret) {
+			return {};
+		}
+
+		// Translate tinygltf::Model to Loader::GltfScene
+		return {};
 	}
 }

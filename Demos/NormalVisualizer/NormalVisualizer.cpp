@@ -64,7 +64,7 @@ namespace NormalVisualizer {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.6f, 0.f));
-			ecs.addComponent<MeshComponent>(entity, Library::loadMesh("bunny.obj").mMesh);
+			ecs.addComponent<MeshComponent>(entity, Library::loadMesh_DEPRECATED("bunny.obj").mMesh);
 			ecs.addComponent<MaterialComponent>(entity);
 			ecs.addComponent<PhongShaderComponent>(entity);
 			ecs.addComponent<WireframeShaderComponent>(entity);
