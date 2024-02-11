@@ -49,20 +49,22 @@ namespace Gltf {
 		}
 
 
-		Loader::GltfScene scene = Loader::loadGltfScene("MeshPrimitiveModes/MeshPrimitiveModes.gltf");
+		Loader::GltfScene scene = Loader::loadGltfScene("SimpleMaterial.gltf");
 		for (auto& node : scene.mMeshNodes) {
 			auto entity = ecs.createEntity();
-			auto spatial = ecs.addComponent<SpatialComponent>(entity);
-			spatial->setPosition(node.mTranslation);
+			if (!node.mName.empty()) {
+				ecs.addComponent<TagComponent>(entity, node.mName);
+			}
+			ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
 			ecs.addComponent<MeshComponent>(entity, node.mMesh.mMesh);
 			ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh);
 			ecs.addComponent<PhongShaderComponent>(entity);
-			ecs.addComponent<OpaqueComponent>(entity);
-			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(entity);
-			material->mAmbient = glm::vec3(0.2f);
-			material->mDiffuse = glm::vec3(1.f, 1.f, 1.f);
-			material->mSpecular = glm::vec3(1.f);
-			material->mShininess = 20.f;
+			if (node.mAlphaMode == Loader::GltfScene::MeshNode::AlphaMode::Opaque) {
+				ecs.addComponent<OpaqueComponent>(entity);
+			}
+			else if (node.mAlphaMode == Loader::GltfScene::MeshNode::AlphaMode::AlphaTest) {
+				ecs.addComponent<AlphaTestComponent>(entity);
+			}
 		}
 
 		/* Systems - order matters! */
@@ -104,13 +106,13 @@ namespace Gltf {
 
 		backbuffer.clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT);
 		drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
-	   // Don't forget the depth. Because reasons.
-	   glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
-		   0, 0, viewport.mSize.x, viewport.mSize.y,
-		   0, 0, viewport.mSize.x, viewport.mSize.y,
-		   GL_DEPTH_BUFFER_BIT,
-		   GL_NEAREST
-	   );
+		// Don't forget the depth. Because reasons.
+		glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
+			0, 0, viewport.mSize.x, viewport.mSize.y,
+			0, 0, viewport.mSize.x, viewport.mSize.y,
+			GL_DEPTH_BUFFER_BIT,
+			GL_NEAREST
+		);
 
 	}
 

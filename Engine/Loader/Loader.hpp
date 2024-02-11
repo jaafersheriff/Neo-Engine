@@ -3,7 +3,10 @@
 
 #include "GL/glew.h"
 
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
+
+#include <optional>
 
 namespace neo {
 
@@ -32,8 +35,19 @@ namespace neo {
 		public:
 			struct GltfScene {
 				struct MeshNode {
-					MeshData mMesh;
-					glm::vec3 mTranslation = glm::vec3(0.f);
+					enum class AlphaMode {
+						Opaque,
+						AlphaTest,
+						Transparent
+					};
+
+					std::string mName = "";
+					MeshData mMesh = {};
+
+					SpatialComponent mSpatial = {};
+
+					AlphaMode mAlphaMode = AlphaMode::Opaque;
+					MaterialComponent mMaterial = {};
 				};
 
 				std::vector<MeshNode> mMeshNodes;

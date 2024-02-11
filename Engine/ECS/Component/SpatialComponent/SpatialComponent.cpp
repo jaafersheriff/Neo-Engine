@@ -108,6 +108,15 @@ namespace neo {
 		// Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
 	}
 
+	void SpatialComponent::setModelMatrix(const glm::mat4& mat) {
+		Orientable::setOrientation(glm::mat3(mat));
+		setPosition(glm::vec3(mat[0][3], mat[1][3], mat[2][3]));
+		mModelMatrixDirty = true;
+		mNormalMatrixDirty = true;
+		mViewMatDirty = true;
+		// Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
+	}
+
 	void SpatialComponent::setUVW(const glm::vec3 & u, const glm::vec3 & v, const glm::vec3 & w) {
 		Orientable::setUVW(u, v, w);
 		mModelMatrixDirty = true;

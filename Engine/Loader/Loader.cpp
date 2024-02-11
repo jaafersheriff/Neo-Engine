@@ -441,13 +441,25 @@ namespace neo {
 			}
 
 			GltfScene::MeshNode outNode;
-			NEO_ASSERT(node.name.empty(), "TODO: handle tags");
+			outNode.mName = node.name;
 
 			// Spatial
-			NEO_ASSERT(node.matrix.empty(), "TODO: handle full transformation matrix");
-			NEO_ASSERT(node.scale.empty() && node.rotation.empty(), "TODO: Handle spatial");
-			if (node.translation.size() == 3) {
-				outNode.mTranslation = glm::vec3(node.translation[0], node.translation[1], node.translation[2]);
+			if (node.matrix.size() == 16) {
+				outNode.mSpatial.setModelMatrix(glm::mat4x4(
+					node.matrix[0],  node.matrix[1],  node.matrix[2],  node.matrix[3],
+					node.matrix[4],  node.matrix[5],  node.matrix[6],  node.matrix[7],
+					node.matrix[8],  node.matrix[9],  node.matrix[10], node.matrix[11],
+					node.matrix[12], node.matrix[13], node.matrix[14], node.matrix[15]
+				));
+			}
+			else {
+				if (node.translation.size() == 3) {
+					outNode.mSpatial.setPosition(glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
+				}
+				if (node.scale.size() == 3) {
+					outNode.mSpatial.setScale(glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
+				}
+				NEO_ASSERT(node.rotation.empty(), "TODO: Handle quats");
 			}
 
 			// Mesh
@@ -542,12 +554,49 @@ namespace neo {
 				Library::insertMesh(model.meshes[node.mesh].name, outNode.mMesh);
 			}
 
-			// TODO: Textures/Images/Samplers
-
 			// TODO: Materials
-			// if (gltfMesh.material > 0) {
-			// 	auto& material = model.materials[gltfMesh.material];
-			// }
+			if (gltfMesh.material > -1) {
+				auto& material = model.materials[gltfMesh.material];
+
+				if (!material.lods.empty()) {
+					NEO_LOG_W("Material has LODs -- unsupported");
+
+				}
+
+				if (material.alphaMode == "OPAQUE") {
+					outNode.mAlphaMode = GltfScene::MeshNode::AlphaMode::Opaque;
+				}
+				else if (material.alphaMode == "MASK") {
+					outNode.mAlphaMode = GltfScene::MeshNode::AlphaMode::AlphaTest;
+				}
+				else if (material.alphaMode == "BLEND") {
+					outNode.mAlphaMode = GltfScene::MeshNode::AlphaMode::Transparent;
+					NEO_FAIL("Transparency is unsupported");
+				}
+
+				NEO_ASSERT(material.normalTexture.index == -1, "Normal maps unsupported");
+				NEO_ASSERT(material.occlusionTexture.index == -1, "Occlusion maps unsupported");
+
+				if (material.emissiveFactor.size() == 3) {
+					outNode.mMaterial.mEmissive = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
+				}
+				NEO_ASSERT(material.emissiveTexture.index == -1, "Emissive maps unsupported");
+
+				outNode.mMaterial.mMetallic = static_cast<float>(material.pbrMetallicRoughness.metallicFactor);
+				outNode.mMaterial.mRoughness = static_cast<float>(material.pbrMetallicRoughness.roughnessFactor);
+				if (material.pbrMetallicRoughness.baseColorFactor.size() == 4) {
+					outNode.mMaterial.mAlbedoColor = glm::vec4(
+						material.pbrMetallicRoughness.baseColorFactor[0],
+						material.pbrMetallicRoughness.baseColorFactor[1],
+						material.pbrMetallicRoughness.baseColorFactor[2],
+						material.pbrMetallicRoughness.baseColorFactor[3]
+					);
+				}
+				NEO_ASSERT(material.pbrMetallicRoughness.baseColorTexture.index == -1, "Albedo maps unsupported");
+				NEO_ASSERT(material.pbrMetallicRoughness.metallicRoughnessTexture.index == -1, "Metal/roughness maps unsupported");
+			}
+
+			// TODO: Textures/Images/Samplers
 
 			outScene.mMeshNodes.push_back(outNode);
 

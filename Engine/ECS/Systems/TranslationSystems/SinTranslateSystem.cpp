@@ -1,5 +1,7 @@
 #include "SinTranslateSystem.hpp"
 
+#include "ECS/ECS.hpp"
+
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/SinTranslateComponent.hpp"

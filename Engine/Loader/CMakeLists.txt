@@ -7,6 +7,7 @@ PRIVATE
 	Util
 	libglew_static
 	tinygltf
+	ECS
 )
 
 add_precompiled_header(Loader

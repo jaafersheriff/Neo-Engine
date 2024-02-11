@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ECS/ECS.hpp"
 #include "ECS/Component/Component.hpp"
 #include "Orientable.hpp"
 
@@ -29,6 +28,7 @@ namespace neo {
 			void setScale(const glm::vec3 &);
 			void setScale(const float);
 			void setOrientation(const glm::mat3 &);
+			void setModelMatrix(const glm::mat4 &);
 			void setUVW(const glm::vec3 &, const glm::vec3 &, const glm::vec3 &);
 			void setDirty();
 
