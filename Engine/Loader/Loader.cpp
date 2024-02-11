@@ -536,6 +536,9 @@ namespace neo {
 				else if (attribute.first == "NORMAL") {
 					vertexType = VertexType::Normal;
 				}
+				else if (attribute.first == "TEXCOORD_0") {
+					vertexType = VertexType::Texture0;
+				}
 				else {
 					NEO_FAIL("TODO: unsupported attribute: %s", attribute.first.c_str());
 				}
@@ -570,7 +573,6 @@ namespace neo {
 
 				if (!material.lods.empty()) {
 					NEO_LOG_W("Material has LODs -- unsupported");
-
 				}
 
 				if (material.alphaMode == "OPAQUE") {
@@ -602,7 +604,15 @@ namespace neo {
 						material.pbrMetallicRoughness.baseColorFactor[3]
 					);
 				}
-				NEO_ASSERT(material.pbrMetallicRoughness.baseColorTexture.index == -1, "Albedo maps unsupported");
+				if (material.pbrMetallicRoughness.baseColorTexture.index > -1) {
+					if (material.pbrMetallicRoughness.baseColorTexture.texCoord > 0) {
+						NEO_LOG_W("Texture wants to use a different texcoord? This probably won't work");
+					}
+					const auto& texture = model.textures[material.pbrMetallicRoughness.baseColorTexture.index];
+					const auto& image = model.images[texture.source];
+					const auto& sampler = model.samplers[texture.sampler];
+
+				}
 				NEO_ASSERT(material.pbrMetallicRoughness.metallicRoughnessTexture.index == -1, "Metal/roughness maps unsupported");
 			}
 

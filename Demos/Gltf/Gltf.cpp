@@ -131,7 +131,7 @@ namespace Gltf {
 		}
 
 
-		Loader::GltfScene scene = Loader::loadGltfScene("OrientationTest.glb");
+		Loader::GltfScene scene = Loader::loadGltfScene("SimpleTexture/SimpleTexture.gltf");
 		for (auto& node : scene.mMeshNodes) {
 			auto entity = ecs.createEntity();
 			if (!node.mName.empty()) {

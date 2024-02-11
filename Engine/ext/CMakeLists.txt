@@ -236,8 +236,6 @@ PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/tinygltf/"
 PRIVATE
 )
-
-
 set_target_properties(tinygltf PROPERTIES FOLDER "Neo/ext/tinygltf")
 target_compile_options(tinygltf PRIVATE "/WX-" "/W0")
 
