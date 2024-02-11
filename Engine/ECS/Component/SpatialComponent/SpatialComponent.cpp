@@ -110,7 +110,7 @@ namespace neo {
 
 	void SpatialComponent::setModelMatrix(const glm::mat4& mat) {
 		Orientable::setOrientation(glm::mat3(mat));
-		setPosition(glm::vec3(mat[0][3], mat[1][3], mat[2][3]));
+		setPosition(glm::vec3(mat[3][0], mat[3][1], mat[3][2]));
 		mModelMatrixDirty = true;
 		mNormalMatrixDirty = true;
 		mViewMatDirty = true;

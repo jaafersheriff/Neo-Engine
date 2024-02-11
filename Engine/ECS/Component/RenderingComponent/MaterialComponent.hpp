@@ -14,7 +14,7 @@ namespace neo {
 		glm::vec3 mSpecular = glm::vec3(0.f);
 		Texture* mNormalMap = nullptr;
 		Texture* mAlphaMap = nullptr;
-		float mShininess = 0.f;
+		float mShininess = 1.f;
 
 		virtual std::string getName() const override {
 			return "MaterialComponent_DEPRECATED";

@@ -9,6 +9,13 @@
 
 #include "Util/Profiler.hpp"
 
+#pragma warning(push)
+#pragma warning(disable: 4201)
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#pragma warning(pop)
+
 // DEPRECATED :O
 #pragma warning(push)
 #pragma warning(disable: 4706)
@@ -436,6 +443,11 @@ namespace neo {
 		GltfScene outScene;
 		for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
 			const auto& node = model.nodes[nodeID];
+			if (!node.children.empty()) {
+				NEO_FAIL("TODO: recurse children");
+				NEO_FAIL("TODO: dont forget transofmration hierarchy");
+			}
+
 			if (node.camera != -1 || node.light != -1 || node.mesh == -1) {
 				continue;
 			}
@@ -445,12 +457,7 @@ namespace neo {
 
 			// Spatial
 			if (node.matrix.size() == 16) {
-				outNode.mSpatial.setModelMatrix(glm::mat4x4(
-					node.matrix[0],  node.matrix[1],  node.matrix[2],  node.matrix[3],
-					node.matrix[4],  node.matrix[5],  node.matrix[6],  node.matrix[7],
-					node.matrix[8],  node.matrix[9],  node.matrix[10], node.matrix[11],
-					node.matrix[12], node.matrix[13], node.matrix[14], node.matrix[15]
-				));
+				outNode.mSpatial.setModelMatrix(glm::make_mat4x4(node.matrix.data()));
 			}
 			else {
 				if (node.translation.size() == 3) {
@@ -459,7 +466,10 @@ namespace neo {
 				if (node.scale.size() == 3) {
 					outNode.mSpatial.setScale(glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
 				}
-				NEO_ASSERT(node.rotation.empty(), "TODO: Handle quats");
+				if (node.rotation.size() == 4) {
+					glm::quat q = glm::make_quat(node.rotation.data());
+					outNode.mSpatial.setOrientation(glm::mat3_cast(q));
+				}
 			}
 
 			// Mesh
@@ -600,10 +610,6 @@ namespace neo {
 
 			outScene.mMeshNodes.push_back(outNode);
 
-			if (!node.children.empty()) {
-				NEO_FAIL("TODO: recurse children");
-				NEO_FAIL("TODO: dont forget transofmration hierarchy");
-			}
 		}
 
 		NEO_LOG_I("Successfully parsed %s", fileName.c_str());
