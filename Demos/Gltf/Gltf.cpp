@@ -74,11 +74,18 @@ namespace Gltf {
 
 			drawDefines.reset();
 			const auto& material = view.get<const MaterialComponent>(entity);
+			MakeDefine(ALBEDO_MAP);
+			if (material.mAlbedoMap) {
+				drawDefines.set(ALBEDO_MAP);
+			}
 
 			auto& resolvedShader = shader->getResolvedInstance(drawDefines);
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
+			if (material.mAlbedoMap) {
+				resolvedShader.bindTexture("albedoMap", *material.mAlbedoMap);
+			}
 
 			// UBO candidates
 			{

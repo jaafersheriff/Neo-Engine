@@ -40,11 +40,12 @@ namespace neo {
 			static void clean();
 
 			static MeshData getMesh(const std::string&);
+			static void insertMesh(const std::string&, MeshData&);
 			static MeshData loadMesh_DEPRECATED(const std::string&, bool = false);
-			static void insertMesh(const std::string&, MeshData& mesh);
 			static const std::unordered_map<std::string, MeshData> getAllMeshes() { return mMeshes; }
 
 			static bool hasTexture(const std::string&); // will go away when proper resource manager happens ;( 
+			static void insertTexture(const std::string&, Texture*);
 			static Texture* getTexture(const std::string&);
 			static Texture* loadTexture(const std::string&, TextureFormat = {});
 			static Texture* createTexture(const std::string&, TextureFormat, glm::u16vec3 dimension, const void* data = nullptr);
@@ -76,8 +77,6 @@ namespace neo {
 			static std::unordered_map<std::string, SourceShader*> mShaders;
 			static SourceShader* mDummyShader;
 
-			static void _insertMesh(const std::string&, MeshData);
-			static void _insertTexture(const std::string&, Texture*);
 			static PooledFramebuffer& _findPooledFramebuffer(const PooledFramebufferDetails& details);
 	};
 }

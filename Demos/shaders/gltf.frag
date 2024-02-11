@@ -6,6 +6,9 @@ in vec3 fragNor;
 in vec2 fragTex;
 
 uniform vec4 albedo;
+#ifdef ALBEDO_MAP
+layout(binding = 0) uniform sampler2D albedoMap;
+#endif
 
 uniform vec3 lightCol;
 #if defined(DIRECTIONAL_LIGHT) || defined(ENABLE_SHADOWS)
@@ -38,7 +41,12 @@ float attFactor = 1;
 	vec3 L = vec3(0, 0, 0);
 #endif
 
-	color.rgb = getPhong(V, N, L, albedo.rgb * 0.2, albedo.rgb, vec3(1.0), 13.0, lightCol, attFactor);
+	vec3 finalAlbedo = albedo.rgb;
+#ifdef ALBEDO_MAP
+	finalAlbedo = texture(albedoMap, fragTex).rgb * albedo.rgb;
+#endif
+
+	color.rgb = getPhong(V, N, L, finalAlbedo.rgb * 0.2, finalAlbedo.rgb, vec3(1.0), 13.0, lightCol, attFactor);
 
 	color.a = 1.0;
 }

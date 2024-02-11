@@ -221,11 +221,17 @@ PRIVATE
 )
 
 ## tiny gltf
+set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
+set(TINYGLTF_INSTALL OFF CACHE BOOL "" FORCE)
+set(TINYGLTF_HEADER_ONLY OFF CACHE BOOL "" FORCE)
 file(GLOB_RECURSE TINYGLTF_HPP_FILES 
+	tinygltf/json.hpp
+	tinygltf/stb_image.h
+	tinygltf/stb_image_write.h
 	tinygltf/tiny_gltf.h
 )
 file(GLOB_RECURSE TINYGLTF_CPP_FILES 
-	tiny_gltf.cpp
+	tiny_gltf.cc
 )
 add_library(tinygltf STATIC ${TINYGLTF_CPP_FILES} ${TINYGLTF_HPP_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/tinygltf FILES 
@@ -236,6 +242,5 @@ PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/tinygltf/"
 PRIVATE
 )
-set_target_properties(tinygltf PROPERTIES FOLDER "Neo/ext/tinygltf")
+set_target_properties(tinygltf PROPERTIES FOLDER "Neo/ext/")
 target_compile_options(tinygltf PRIVATE "/WX-" "/W0")
-

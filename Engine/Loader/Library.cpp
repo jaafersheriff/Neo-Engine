@@ -91,12 +91,8 @@ namespace neo {
 
 		NEO_LOG("First request for %s, loading...", fileName.c_str());
 		MeshData mesh = Loader::loadMesh_DEPRECATED(fileName, doResize);
-		_insertMesh(fileName, mesh);
+		insertMesh(fileName, mesh);
 		return mesh;
-	}
-
-	void Library::insertMesh(const std::string& name, MeshData& data) {
-		_insertMesh(name, data);
 	}
 
 	Texture* Library::getTexture(const std::string& name) {
@@ -124,7 +120,7 @@ namespace neo {
 
 		NEO_LOG("First request for %s, loading...", fileName.c_str());
 		Texture* texture = Loader::loadTexture(fileName, format);
-		_insertTexture(fileName, texture);
+		insertTexture(fileName, texture);
 		return texture;
 	}
 
@@ -140,7 +136,7 @@ namespace neo {
 			NEO_LOG("Uploading %s", fileName.c_str());
 		}
 		Texture* texture = new Texture(format, dimension, data);
-		_insertTexture(fileName, texture);
+		insertTexture(fileName, texture);
 		return texture;
 	}
 
@@ -148,7 +144,7 @@ namespace neo {
 		TRACY_ZONE();
 
 		Texture* texture = Loader::loadTexture(name, files);
-		_insertTexture(name, texture);
+		insertTexture(name, texture);
 
 		return texture;
 	}
@@ -249,13 +245,13 @@ namespace neo {
 		return it->second;
 	}
 
-	void Library::_insertMesh(const std::string& name, MeshData data) {
+	void Library::insertMesh(const std::string& name, MeshData& data) {
 		if (data.mMesh) {
 			mMeshes.insert({ name, data });
 		}
 	}
 
-	void Library::_insertTexture(const std::string& name, Texture* texture) {
+	void Library::insertTexture(const std::string& name, Texture* texture) {
 		if (texture) {
 			mTextures.insert({ name, texture });
 		}

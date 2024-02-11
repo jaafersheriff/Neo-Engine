@@ -24,21 +24,12 @@
 #pragma warning(pop)
 
 #pragma warning(push)
-#pragma warning(disable: 4244)
-#define STB_IMAGE_IMPLEMENTATION
-#include "ext/stb_image.h"
-#pragma warning(pop)
-
-#pragma warning(push)
 #pragma warning(disable: 4018)
 #pragma warning(disable: 4100)
 #pragma warning(disable: 4267)
-#define TINYGLTF_NO_EXTERNAL_IMAGE 
 #define TINYGLTF_USE_CPP14 
-#define TINYGLTF_NO_STB_IMAGE 
-#define TINYGLTF_NO_STB_IMAGE_WRITE 
-#define TINYGLTF_IMPLEMENTATION
 #include <tiny_gltf.h>
+#include <stb_image.h>
 #pragma warning(pop)
 
 #pragma optimize("", off)
@@ -612,11 +603,128 @@ namespace neo {
 					const auto& image = model.images[texture.source];
 					const auto& sampler = model.samplers[texture.sampler];
 
+					TextureFormat format;
+					// Chatgpt to the rescue
+					switch (image.component) {
+						case  1: format.mBaseFormat = GL_RED; break;
+						case  2: format.mBaseFormat = GL_RG; break;
+						case  3: format.mBaseFormat = GL_RGB; break;
+						case  4: format.mBaseFormat = GL_RGBA; break;
+						default: NEO_FAIL("Invalid number of components: %d", image.component);
+					}
+					switch (image.bits) {
+						case  8:  format.mType = GL_UNSIGNED_BYTE; break;
+						case  16: format.mType = GL_UNSIGNED_SHORT; break;
+						case  32: format.mType = GL_FLOAT; break;
+						default: NEO_FAIL("Unsupported bit depth %d", image.bits);
+					}
+					switch (image.pixel_type) {
+					case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+						if (format.mBaseFormat == GL_RGBA) {
+							format.mInternalFormat = GL_RGBA8;
+						}
+						else if (format.mBaseFormat == GL_RGB) {
+							format.mInternalFormat = GL_RGB8;
+						}
+						else if (format.mBaseFormat == GL_RG) {
+							format.mInternalFormat = GL_RG8;
+						}
+						else if (format.mBaseFormat == GL_RED) {
+							format.mInternalFormat = GL_R8;
+						}
+						break;
+					case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+						if (format.mBaseFormat == GL_RGBA) {
+							format.mInternalFormat = GL_RGBA16UI;
+						}
+						else if (format.mBaseFormat == GL_RGB) {
+							format.mInternalFormat = GL_RGB16UI;
+						}
+						else if (format.mBaseFormat == GL_RG) {
+							format.mInternalFormat = GL_RG16UI;
+						}
+						else if (format.mBaseFormat == GL_RED) {
+							format.mInternalFormat = GL_R16UI;
+						}
+						break;
+					case TINYGLTF_COMPONENT_TYPE_FLOAT:
+						if (format.mBaseFormat == GL_RGBA) {
+							format.mInternalFormat = GL_RGBA32F;
+						}
+						else if (format.mBaseFormat == GL_RGB) {
+							format.mInternalFormat = GL_RGB32F;
+						}
+						else if (format.mBaseFormat == GL_RG) {
+							format.mInternalFormat = GL_RG32F;
+						}
+						else if (format.mBaseFormat == GL_RED) {
+							format.mInternalFormat = GL_R32F;
+						}
+						break;
+
+					default:
+						NEO_FAIL("Unsupported pixel type %d", image.pixel_type);
+					}
+					if (sampler.minFilter > -1) {
+						if (sampler.minFilter != sampler.magFilter) {
+							NEO_LOG_W("Different min/mag filters -- this isn't supported. Defaulting to min filter");
+						}
+						switch (sampler.magFilter) {
+						case TINYGLTF_TEXTURE_FILTER_NEAREST:
+							format.mFilter = GL_NEAREST;
+							break;
+						case TINYGLTF_TEXTURE_FILTER_LINEAR:
+							format.mFilter = GL_LINEAR;
+							break;
+						case TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST:
+							format.mFilter = GL_NEAREST_MIPMAP_NEAREST;
+							break;
+						case TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST:
+							format.mFilter = GL_LINEAR_MIPMAP_NEAREST;
+							break;
+						case TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR:
+							format.mFilter = GL_NEAREST_MIPMAP_LINEAR;
+							break;
+						case TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR:
+							format.mFilter = GL_LINEAR_MIPMAP_LINEAR;
+							break;
+						default:
+							NEO_FAIL("Heh?");
+							break;
+						}
+					}
+					if (sampler.wrapS > -1) {
+						if (sampler.wrapS != sampler.wrapT) {
+							NEO_LOG_W("Different s/t wraps -- this isn't supported. Defaulting to s wrap");
+						}
+						switch (sampler.wrapS) {
+						case TINYGLTF_TEXTURE_WRAP_REPEAT:
+							format.mMode = GL_REPEAT;
+							break;
+						case TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE:
+							format.mMode = GL_CLAMP_TO_EDGE;
+							break;
+						case TINYGLTF_TEXTURE_WRAP_MIRRORED_REPEAT:
+							format.mMode = GL_MIRRORED_REPEAT;
+							break;
+						default:
+							NEO_FAIL("Heh?");
+							break;
+						}
+					}
+
+					// TODO - do this library check earlier
+					if (Library::hasTexture(image.uri)) {
+						NEO_LOG_W("Double loading texture %s", image.uri.c_str());
+					}
+					else {
+						Texture* neo_texture = new Texture(format, glm::uvec2(image.width, image.height), image.image.data());
+						outNode.mMaterial.mAlbedoMap = neo_texture;
+						Library::insertTexture(image.uri, neo_texture);
+					}
 				}
 				NEO_ASSERT(material.pbrMetallicRoughness.metallicRoughnessTexture.index == -1, "Metal/roughness maps unsupported");
 			}
-
-			// TODO: Textures/Images/Samplers
 
 			outScene.mMeshNodes.push_back(outNode);
 
