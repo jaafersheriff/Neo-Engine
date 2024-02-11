@@ -1,12 +1,11 @@
-// Acts as both library and loader 
 #pragma once
 
 #include "GL/glew.h"
 
-#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
-#include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
-
 #include <optional>
+
+// DEPRECATED
+#include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 
 namespace neo {
 
@@ -14,6 +13,9 @@ namespace neo {
 	class Mesh;
 	class Texture;
 	struct TextureFormat;
+	namespace GLTFImporter {
+		struct Scene;
+	}
 
    struct MeshData {
 		Mesh* mMesh;
@@ -33,25 +35,6 @@ namespace neo {
 		friend Engine;
 
 		public:
-			struct GltfScene {
-				struct MeshNode {
-					enum class AlphaMode {
-						Opaque,
-						AlphaTest,
-						Transparent
-					};
-
-					std::string mName = "";
-					MeshData mMesh = {};
-
-					SpatialComponent mSpatial = {};
-
-					AlphaMode mAlphaMode = AlphaMode::Opaque;
-					MaterialComponent mMaterial = {};
-				};
-
-				std::vector<MeshNode> mMeshNodes;
-			};
 
 			Loader() = default;
 			~Loader() = default;
@@ -62,7 +45,7 @@ namespace neo {
 
 			static const char* loadFileString(const std::string&);
 
-			static GltfScene loadGltfScene(const std::string& fileName);
+			static GLTFImporter::Scene loadGltfScene(const std::string& fileName);
 
 			/* Load Mesh pointer from an .obj file */
 			static MeshData loadMesh_DEPRECATED(const std::string &, bool = false);

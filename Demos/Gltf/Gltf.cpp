@@ -14,6 +14,8 @@
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
+#include "Loader/GLTFImporter.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -138,7 +140,7 @@ namespace Gltf {
 		}
 
 
-		Loader::GltfScene scene = Loader::loadGltfScene("SimpleTexture/SimpleTexture.gltf");
+		GLTFImporter::Scene scene = Loader::loadGltfScene("Box.gltf");
 		for (auto& node : scene.mMeshNodes) {
 			auto entity = ecs.createEntity();
 			if (!node.mName.empty()) {
@@ -147,10 +149,10 @@ namespace Gltf {
 			ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
 			ecs.addComponent<MeshComponent>(entity, node.mMesh.mMesh);
 			ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh);
-			if (node.mAlphaMode == Loader::GltfScene::MeshNode::AlphaMode::Opaque) {
+			if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 				ecs.addComponent<OpaqueComponent>(entity);
 			}
-			else if (node.mAlphaMode == Loader::GltfScene::MeshNode::AlphaMode::AlphaTest) {
+			else if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::AlphaTest) {
 				ecs.addComponent<AlphaTestComponent>(entity);
 			}
 			ecs.addComponent<MaterialComponent>(entity, node.mMaterial);

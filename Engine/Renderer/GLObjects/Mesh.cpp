@@ -231,11 +231,6 @@ namespace neo {
 		removeVertexBuffer(VertexType::Position);
 		removeVertexBuffer(VertexType::Normal);
 		removeVertexBuffer(VertexType::Texture0);
-		removeVertexBuffer(VertexType::Texture1);
-		removeVertexBuffer(VertexType::Texture2);
-		removeVertexBuffer(VertexType::Color0);
-		removeVertexBuffer(VertexType::Color1);
-		removeVertexBuffer(VertexType::Color2);
 		removeElementBuffer();
 	}
 

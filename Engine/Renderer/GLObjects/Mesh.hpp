@@ -9,11 +9,6 @@ namespace neo {
 		Position = 0,
 		Normal,
 		Texture0,
-		Texture1,
-		Texture2,
-		Color0,
-		Color1,
-		Color2,
 		COUNT
 	};
 
