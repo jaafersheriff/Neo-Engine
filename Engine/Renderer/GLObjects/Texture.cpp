@@ -20,13 +20,13 @@ namespace neo {
 		}
 	}
 
-	Texture::Texture(TextureFormat format, uint16_t dimension, const void* data) : 
+	Texture::Texture(TextureFormat_DEPRECATED format, uint16_t dimension, const void* data) : 
 		Texture(format, glm::u16vec3(dimension, dimension, 0), data) {}
 
-	Texture::Texture(TextureFormat format, glm::u16vec2 dimension, const void* data) :
+	Texture::Texture(TextureFormat_DEPRECATED format, glm::u16vec2 dimension, const void* data) :
 		Texture(format, glm::u16vec3(dimension.x, dimension.y, 0), data) {}
 
-	Texture::Texture(TextureFormat format, glm::u16vec3 dimension, const void* data) :
+	Texture::Texture(TextureFormat_DEPRECATED format, glm::u16vec3 dimension, const void* data) :
 		mFormat(format) {
 		switch (mFormat.mTarget) {
 		case TextureTarget::Texture3D:

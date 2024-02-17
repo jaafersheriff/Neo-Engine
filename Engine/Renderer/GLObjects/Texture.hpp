@@ -14,7 +14,7 @@ namespace neo {
 		TextureCube
 	};
 
-	struct TextureFormat {
+	struct TextureFormat_DEPRECATED {
 		TextureTarget mTarget = TextureTarget::Texture2D;
 		GLint mInternalFormat = GL_RGBA8;
 		GLenum mBaseFormat = GL_RGBA;
@@ -22,7 +22,7 @@ namespace neo {
 		GLenum mMode = GL_REPEAT; // TODO - this should be split between STR
 		GLenum mType = GL_UNSIGNED_BYTE;
 
-		bool operator==(const TextureFormat& other) const noexcept {
+		bool operator==(const TextureFormat_DEPRECATED& other) const noexcept {
 			return mTarget == other.mTarget
 				&& mInternalFormat == other.mInternalFormat
 				&& mBaseFormat == other.mBaseFormat
@@ -35,16 +35,16 @@ namespace neo {
 
 	class Texture {
 	public:
-		Texture(TextureFormat format, uint16_t dimension, const void* data = nullptr);
-		Texture(TextureFormat format, glm::u16vec2 dimension, const void* data = nullptr);
-		Texture(TextureFormat format, glm::u16vec3 dimension, const void* data = nullptr);
+		Texture(TextureFormat_DEPRECATED format, uint16_t dimension, const void* data = nullptr);
+		Texture(TextureFormat_DEPRECATED format, glm::u16vec2 dimension, const void* data = nullptr);
+		Texture(TextureFormat_DEPRECATED format, glm::u16vec3 dimension, const void* data = nullptr);
 
 		void bind() const;
 		void genMips();
 		void destroy();
 
 		GLuint mTextureID = 0;
-		const TextureFormat mFormat;
+		const TextureFormat_DEPRECATED mFormat;
 
 		uint16_t mWidth = 1;
 		uint16_t mHeight = 1;

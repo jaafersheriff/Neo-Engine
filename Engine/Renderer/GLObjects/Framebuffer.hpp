@@ -38,7 +38,7 @@ namespace neo {
 			glReadBuffer(GL_NONE);
 		}
 		
-		void attachColorTexture(glm::uvec2 size, TextureFormat format) {
+		void attachColorTexture(glm::uvec2 size, TextureFormat_DEPRECATED format) {
 			NEO_ASSERT(format.mTarget == TextureTarget::Texture2D, "Framebuffers need 2D textures");
 			Texture *t = new Texture(format, size, nullptr);
 			_attachTexture(GL_COLOR_ATTACHMENT0 + mColorAttachments++, *t);
@@ -46,7 +46,7 @@ namespace neo {
 		
 		void attachDepthTexture(glm::ivec2 size, GLint format, GLint filter, GLenum mode) {
 			NEO_ASSERT(format == GL_DEPTH_COMPONENT32F || format == GL_DEPTH_COMPONENT24 || format == GL_DEPTH_COMPONENT16, "Incompatible depth format");
-			Texture *t = new Texture(TextureFormat{ TextureTarget::Texture2D, format, GL_DEPTH_COMPONENT, filter, mode }, size, nullptr);
+			Texture *t = new Texture(TextureFormat_DEPRECATED{ TextureTarget::Texture2D, format, GL_DEPTH_COMPONENT, filter, mode }, size, nullptr);
 			_attachTexture(GL_DEPTH_ATTACHMENT, *t);
 		}
 		

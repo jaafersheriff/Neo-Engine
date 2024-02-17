@@ -26,32 +26,32 @@ namespace Sponza {
 	Framebuffer& createGBuffer(glm::uvec2 targetSize) {
 		return *Library::getPooledFramebuffer({ targetSize, {
 			// Albedo
-			TextureFormat{
+			TextureFormat_DEPRECATED{
 				TextureTarget::Texture2D,
 				GL_RGB16F,
 				GL_RGB,
 			},
 			// Specular/Shine
-			TextureFormat{
+			TextureFormat_DEPRECATED{
 				TextureTarget::Texture2D,
 				GL_RGBA16F,
 				GL_RGBA,
 			},
 			// World 
 			// TODO - could do everything in view space to get rid of this
-			TextureFormat{
+			TextureFormat_DEPRECATED{
 				TextureTarget::Texture2D,
 				GL_RGB16F,
 				GL_RGB,
 			},
 			// Normals
-			TextureFormat{
+			TextureFormat_DEPRECATED{
 				TextureTarget::Texture2D,
 				GL_RGB16F,
 				GL_RGB,
 			},
 			// Depth
-			TextureFormat{
+			TextureFormat_DEPRECATED{
 				TextureTarget::Texture2D,
 				GL_DEPTH_COMPONENT16,
 				GL_DEPTH_COMPONENT,

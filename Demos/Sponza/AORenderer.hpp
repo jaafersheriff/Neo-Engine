@@ -63,7 +63,7 @@ namespace Sponza {
 		// Make a one-off framebuffer for the base AO
 		// Do base AO at half res
 		auto baseAOTarget = Library::getPooledFramebuffer({ glm::max(glm::uvec2(1,1), targetSize / 2u), {
-			TextureFormat{
+			TextureFormat_DEPRECATED{
 				TextureTarget::Texture2D,
 				GL_R16F,
 				GL_RED,
@@ -107,7 +107,7 @@ namespace Sponza {
 			TRACY_GPUN("AO Blur");
 			// Do base AO at full res?
 			auto blurredAO = Library::getPooledFramebuffer({ targetSize, {
-				TextureFormat{
+				TextureFormat_DEPRECATED{
 					TextureTarget::Texture2D,
 					GL_R16F,
 					GL_RED,

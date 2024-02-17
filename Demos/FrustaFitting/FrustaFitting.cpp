@@ -144,7 +144,7 @@ namespace FrustaFitting {
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto shadowMap = Library::getPooledFramebuffer({ glm::uvec2(2048, 2048), {
-			TextureFormat{
+			TextureFormat_DEPRECATED{
 				TextureTarget::Texture2D,
 				GL_DEPTH_COMPONENT16,
 				GL_DEPTH_COMPONENT

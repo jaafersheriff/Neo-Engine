@@ -112,12 +112,12 @@ namespace Base {
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		auto sceneTarget = Library::getPooledFramebuffer(PooledFramebufferDetails{ viewport.mSize, {
-			TextureFormat{
+			TextureFormat_DEPRECATED{
 				TextureTarget::Texture2D,
 				GL_RGB16,
 				GL_RGB,
 			},
-			TextureFormat{
+			TextureFormat_DEPRECATED{
 				TextureTarget::Texture2D,
 				GL_DEPTH_COMPONENT16,
 				GL_DEPTH_COMPONENT,

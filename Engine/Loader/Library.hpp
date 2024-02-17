@@ -17,7 +17,7 @@ namespace neo {
 
 	struct PooledFramebufferDetails {
 		glm::uvec2 mSize;
-		std::vector<TextureFormat> mFormats;
+		std::vector<TextureFormat_DEPRECATED> mFormats;
 
 		bool operator==(const PooledFramebufferDetails& other) const {
 			// Kinda faulty, but meh
@@ -46,8 +46,8 @@ namespace neo {
 			static bool hasTexture(const std::string&); // will go away when proper resource manager happens ;( 
 			static void insertTexture(const std::string&, Texture*);
 			static Texture* getTexture(const std::string&);
-			static Texture* loadTexture(const std::string&, TextureFormat = {});
-			static Texture* createTexture(const std::string&, TextureFormat, glm::u16vec3 dimension, const void* data = nullptr);
+			static Texture* loadTexture(const std::string&, TextureFormat_DEPRECATED = {});
+			static Texture* createTexture(const std::string&, TextureFormat_DEPRECATED, glm::u16vec3 dimension, const void* data = nullptr);
 			static Texture* loadCubemap(const std::string&, const std::vector<std::string> &);
 
 			// This is only being used for the offscreen backbuffer now..

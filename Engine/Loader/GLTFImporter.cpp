@@ -222,7 +222,7 @@ namespace {
 			return Library::getTexture(image.uri);
 		}
 
-		TextureFormat format;
+		TextureFormat_DEPRECATED format;
 		format.mBaseFormat = _getGLBaseFormat(image.component);
 		format.mType = _getGLType(image.bits);
 		format.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, format.mBaseFormat);
@@ -442,16 +442,16 @@ namespace neo {
 			bool ret = false;
 			ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
 
-			NEO_ASSERT(ret, "tinygltf failed to parse %s", path.c_str());
-			if (!ret) {
-				return {};
-			}
 			if (!warn.empty()) {
 				NEO_LOG_W("tingltf Warning: %s", warn.c_str());
 			}
-
 			if (!err.empty()) {
 				NEO_LOG_E("tinygltf Error: %s", err.c_str());
+			}
+
+			NEO_ASSERT(ret, "tinygltf failed to parse %s", path.c_str());
+			if (!ret) {
+				return {};
 			}
 
 			// Translate tinygltf::Model to Loader::GltfScene

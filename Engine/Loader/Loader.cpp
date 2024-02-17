@@ -55,7 +55,7 @@ namespace neo {
 		return nullptr;
 	}
 
-	Texture* Loader::loadTexture(const std::string &fileName, TextureFormat format) {
+	Texture* Loader::loadTexture(const std::string &fileName, TextureFormat_DEPRECATED format) {
 		TRACY_ZONE();
 		/* Create an empty texture if it is not already exist in the library */
 		int width, height, components;
@@ -84,7 +84,7 @@ namespace neo {
 		}
 
 		/* Upload data to GPU and free from CPU */
-		TextureFormat format = { TextureTarget::TextureCube, GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_UNSIGNED_BYTE };
+		TextureFormat_DEPRECATED format = { TextureTarget::TextureCube, GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_UNSIGNED_BYTE };
 		Texture* texture = new Texture(format, size, reinterpret_cast<void**>(data.data()));
 
 		/* Clean */
@@ -97,7 +97,7 @@ namespace neo {
 		return texture;
 	}
 
-	uint8_t* Loader::_loadTextureData(int& width, int& height, int& components, const std::string& fileName, TextureFormat format, bool flip) {
+	uint8_t* Loader::_loadTextureData(int& width, int& height, int& components, const std::string& fileName, TextureFormat_DEPRECATED format, bool flip) {
 		std::string _fileName = APP_RES_DIR + fileName;
 		if (!util::fileExists(_fileName.c_str())) {
 			_fileName = ENGINE_RES_DIR + fileName;
