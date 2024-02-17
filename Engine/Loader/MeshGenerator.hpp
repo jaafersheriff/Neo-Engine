@@ -35,7 +35,7 @@ namespace neo {
 			  0.5f, -0.5f,  0.5f,
 			  0.5f,  0.5f,  0.5f,
 			 -0.5f,  0.5f,  0.5f };
-			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Position, 0, 3, verts);
+			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
 			meshData.mMin = glm::vec3(-0.5f);
 			meshData.mMax = glm::vec3(0.5f);
 
@@ -64,7 +64,7 @@ namespace neo {
 			  0,  0,  1,
 			  0,  0,  1,
 			  0,  0,  1 };
-			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Normal, 1, 3, normals);
+			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
 
 			std::vector<float> uvs =
 			{ 1.f, 0.f,
@@ -96,7 +96,7 @@ namespace neo {
 				1.f, 0.f,
 				1.f, 1.f,
 				0.f, 1.f };
-			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Texture0, 2, 2, uvs);
+			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, uvs);
 
 			std::vector<unsigned> indices =
 			{ 0,  1,  2,
@@ -113,7 +113,7 @@ namespace neo {
 			 20, 22, 23 };
 			meshData.mMesh->addElementBuffer_DEPRECATED(indices);
 
-			meshData.mMesh->mPrimitiveType = GL_TRIANGLES;
+			meshData.mMesh->mPrimitiveType = types::mesh::Primitive::Triangles;
 		}
 
 		static void generateQuad(MeshData& meshData) {
@@ -123,7 +123,7 @@ namespace neo {
 			   0.5f, -0.5f,  0.f,
 			  -0.5f,  0.5f,  0.f,
 			   0.5f,  0.5f,  0.f };
-			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Position, 0, 3, verts);
+			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
 			meshData.mMin = glm::vec3(-0.5f, -0.5f, -0.1f);
 			meshData.mMax = glm::vec3(0.5f, 0.5f, 0.1f);
 
@@ -132,21 +132,21 @@ namespace neo {
 			  0.f, 0.f, 1.f,
 			  0.f, 0.f, 1.f,
 			  0.f, 0.f, 1.f };
-			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Normal, 1, 3, normals);
+			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
 
 			std::vector<float> uvs =
 			{ 0.f, 0.f,
 			  1.f, 0.f,
 			  0.f, 1.f,
 			  1.f, 1.f };
-			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Texture0, 2, 2, uvs);
+			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, uvs);
 
 			std::vector<unsigned> indices =
 			{ 0, 1, 2,
 			  1, 3, 2 };
 			meshData.mMesh->addElementBuffer_DEPRECATED(indices);
 
-			meshData.mMesh->mPrimitiveType = GL_TRIANGLES;
+			meshData.mMesh->mPrimitiveType = types::mesh::Primitive::Triangles;
 		}
 
 		// http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
@@ -247,12 +247,12 @@ namespace neo {
 				tex.push_back(glm::clamp(0.5f + std::asin(verts[i + 1]) / util::PI, 0.f, 1.f));
 			}
 
-			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Position, 0, 3, verts);
-			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Normal, 1, 3, verts);
-			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Texture0, 2, 2, tex);
+			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
+			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, verts);
+			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, tex);
 			meshData.mMesh->addElementBuffer_DEPRECATED(ele);
 
-			meshData.mMesh->mPrimitiveType = GL_TRIANGLES;
+			meshData.mMesh->mPrimitiveType = types::mesh::Primitive::Triangles;
 		}
 
 		void generatePlane(MeshData& meshData, float h, int VERTEX_COUNT, int numOctaves) {
@@ -335,12 +335,12 @@ namespace neo {
 				}
 			}
 
-			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Position, 0, 3, vertices);
-			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Normal, 1, 3, normals);
-			meshData.mMesh->addVertexBuffer_DEPRECATED(VertexType::Texture0, 2, 2, textureCoords);
+			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, vertices);
+			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
+			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, textureCoords);
 			meshData.mMesh->addElementBuffer_DEPRECATED(indices);
 
-			meshData.mMesh->mPrimitiveType = GL_TRIANGLES;
+			meshData.mMesh->mPrimitiveType = types::mesh::Primitive::Triangles;
 		}
 	}
 }

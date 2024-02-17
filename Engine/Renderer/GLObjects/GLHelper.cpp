@@ -1,6 +1,8 @@
 #include "Renderer/pch.hpp"
 #include "GLHelper.hpp"
 
+#include <GL/glew.h>
+
 namespace neo {
 
 	namespace GLHelper {

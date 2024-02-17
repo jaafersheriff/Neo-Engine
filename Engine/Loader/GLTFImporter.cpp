@@ -22,7 +22,7 @@
 #pragma warning(pop)
 
 namespace {
-	inline GLenum _translateTinyGltfPrimitiveType(int mode) {
+	inline neo::types::mesh::Primitive _translateTinyGltfPrimitiveType(int mode) {
 		switch (mode) {
 		case TINYGLTF_MODE_POINTS:
 			return GL_POINTS;
@@ -51,7 +51,7 @@ namespace {
 		}
 	}
 
-	inline GLenum _translateTinyGltfComponentType(int tinyGltfComponentType) {
+	inline neo::types::ByteFormats _translateTinyGltfComponentType(int tinyGltfComponentType) {
 		switch (tinyGltfComponentType) {
 		case TINYGLTF_COMPONENT_TYPE_BYTE:
 			return GL_BYTE;
@@ -75,7 +75,7 @@ namespace {
 		}
 	}
 
-	inline GLenum _translateTinyGltfPixelType(int pixel_type, GLenum baseFormat) {
+	inline neo::types::texture::InternalFormats _translateTinyGltfPixelType(int pixel_type, GLenum baseFormat) {
 		switch (pixel_type) {
 		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
 			if (baseFormat == GL_RGBA) {
@@ -126,7 +126,7 @@ namespace {
 		return GL_RGBA8;
 	}
 
-	inline GLenum _getGLBaseFormat(int components) {
+	inline neo::types::texture::BaseFormats _getGLBaseFormat(int components) {
 		switch (components) {
 		case  1:
 			return GL_RED;
@@ -142,7 +142,7 @@ namespace {
 		}
 	}
 
-	inline GLenum _getGLType(int bits) {
+	inline neo::types::ByteFormats _getGLType(int bits) {
 		switch (bits) {
 		case  8:
 			return GL_UNSIGNED_BYTE;
@@ -156,7 +156,7 @@ namespace {
 		}
 	}
 
-	inline GLenum _translateTinyGltfFilter(int filter) {
+	inline neo::types::texture::Filters _translateTinyGltfFilter(int filter) {
 		switch (filter) {
 		case TINYGLTF_TEXTURE_FILTER_NEAREST:
 			return GL_NEAREST;
@@ -183,7 +183,7 @@ namespace {
 		}
 	}
 
-	inline GLenum _translateTinyGltfWrap(int wrap) {
+	inline neo::types::texture::Wraps _translateTinyGltfWrap(int wrap) {
 		switch (wrap) {
 		case TINYGLTF_TEXTURE_WRAP_REPEAT:
 			return GL_REPEAT;

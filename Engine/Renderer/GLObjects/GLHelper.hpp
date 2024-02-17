@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include <GL/glew.h>
 #include <string>
 
 namespace neo {
@@ -31,10 +30,10 @@ namespace neo {
 			const char* message,
 			const void* userParam
 		);
-		GLint getGLShaderStage(ShaderStage type);
+		int32_t getGLShaderStage(ShaderStage type);
 		void checkFrameBuffer();
-		void printProgramInfoLog(GLuint program);
-		void printShaderInfoLog(GLuint shader);
+		void printProgramInfoLog(uint32_t program);
+		void printShaderInfoLog(uint32_t shader);
 	}
 
 #ifdef DEBUG_MODE

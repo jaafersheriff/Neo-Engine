@@ -1,33 +1,57 @@
 #pragma once
 
-#include "Renderer/GLObjects/GLHelper.hpp"
+#include "Renderer/Types.hpp"
 
-#include <GL/glew.h>
 #include <glm/glm.hpp>
 
 namespace neo {
 
-	enum class TextureTarget {
-		Texture1D,
-		Texture2D,
-		Texture3D,
-		TextureCube
+	struct TextureFilter {
+		types::texture::Filters mMin = types::texture::Filters::Linear;
+		types::texture::Filters mMag = types::texture::Filters::Linear;
+		//types::texture::Filters mMip = types::texture::Filters::Linear;
+
+		bool operator==(const TextureFilter& other) const noexcept {
+			return mMin == other.mMin
+				&& mMag == other.mMag;
+				//&& mMip == other.mMip;
+		}
 	};
 
-	struct TextureFormat_DEPRECATED {
-		TextureTarget mTarget = TextureTarget::Texture2D;
-		GLint mInternalFormat = GL_RGBA8;
-		GLenum mBaseFormat = GL_RGBA;
-		GLint mFilter = GL_LINEAR; // TODO - this should be split between min/mag/mip
-		GLenum mMode = GL_REPEAT; // TODO - this should be split between STR
-		GLenum mType = GL_UNSIGNED_BYTE;
+	struct TextureWrap {
+		types::texture::Wraps mS = types::texture::Wraps::Clamp;
+		types::texture::Wraps mT = types::texture::Wraps::Clamp;
+		types::texture::Wraps mR = types::texture::Wraps::Clamp;
 
-		bool operator==(const TextureFormat_DEPRECATED& other) const noexcept {
+		bool operator==(const TextureWrap& other) const noexcept {
+			return mS == other.mS
+				&& mT == other.mR
+				&& mR == other.mT;
+		}
+	};
+
+	struct TextureFormat {
+		types::texture::Target mTarget = types::texture::Target::Texture2D;
+		types::texture::InternalFormats mInternalFormat = types::texture::InternalFormats::RGBA8;
+		types::texture::BaseFormats mBaseFormat = types::texture::BaseFormats::RGBA;
+		TextureFilter mFilter = {
+			types::texture::Filters::Linear,
+			types::texture::Filters::Linear
+			//types::texture::Filters::Linear
+		};
+		TextureWrap mWrap = {
+			types::texture::Wraps::Clamp,
+			types::texture::Wraps::Clamp,
+			types::texture::Wraps::Clamp
+		};
+		types::ByteFormats mType = types::ByteFormats::UnsignedByte;
+
+		bool operator==(const TextureFormat& other) const noexcept {
 			return mTarget == other.mTarget
 				&& mInternalFormat == other.mInternalFormat
 				&& mBaseFormat == other.mBaseFormat
 				&& mFilter == other.mFilter
-				&& mMode == other.mMode
+				&& mWrap == other.mWrap
 				&& mType == other.mType
 			;
 		}
@@ -35,16 +59,16 @@ namespace neo {
 
 	class Texture {
 	public:
-		Texture(TextureFormat_DEPRECATED format, uint16_t dimension, const void* data = nullptr);
-		Texture(TextureFormat_DEPRECATED format, glm::u16vec2 dimension, const void* data = nullptr);
-		Texture(TextureFormat_DEPRECATED format, glm::u16vec3 dimension, const void* data = nullptr);
+		Texture(TextureFormat format, uint16_t dimension, const void* data = nullptr);
+		Texture(TextureFormat format, glm::u16vec2 dimension, const void* data = nullptr);
+		Texture(TextureFormat format, glm::u16vec3 dimension, const void* data = nullptr);
 
 		void bind() const;
 		void genMips();
 		void destroy();
 
-		GLuint mTextureID = 0;
-		const TextureFormat_DEPRECATED mFormat;
+		uint32_t mTextureID = 0;
+		const TextureFormat mFormat;
 
 		uint16_t mWidth = 1;
 		uint16_t mHeight = 1;

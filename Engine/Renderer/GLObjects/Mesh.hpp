@@ -3,14 +3,9 @@
 #include <optional>
 #include <unordered_map>
 
-namespace neo {
+#include "Renderer/Types.hpp"
 
-	enum class VertexType : uint8_t {
-		Position = 0,
-		Normal,
-		Texture0,
-		COUNT
-	};
+namespace neo {
 
 	struct VertexBuffer {
 		uint32_t vboID = 0;
@@ -47,7 +42,7 @@ namespace neo {
 			const VertexBuffer& getVBO(VertexType type) const;
 
 			/* Primitive type */
-			uint32_t mPrimitiveType;
+			types::mesh::Primitive mPrimitiveType;
 
 			/* Call the appropriate draw function */
 			void draw(uint32_t = 0) const;

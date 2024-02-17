@@ -17,7 +17,7 @@ namespace neo {
 
 	struct PooledFramebufferDetails {
 		glm::uvec2 mSize;
-		std::vector<TextureFormat_DEPRECATED> mFormats;
+		std::vector<TextureFormat> mFormats;
 
 		bool operator==(const PooledFramebufferDetails& other) const {
 			// Kinda faulty, but meh
@@ -46,8 +46,8 @@ namespace neo {
 			static bool hasTexture(const std::string&); // will go away when proper resource manager happens ;( 
 			static void insertTexture(const std::string&, Texture*);
 			static Texture* getTexture(const std::string&);
-			static Texture* loadTexture(const std::string&, TextureFormat_DEPRECATED = {});
-			static Texture* createTexture(const std::string&, TextureFormat_DEPRECATED, glm::u16vec3 dimension, const void* data = nullptr);
+			static Texture* loadTexture(const std::string&, TextureFormat= {});
+			static Texture* createTexture(const std::string&, TextureFormat, glm::u16vec3 dimension, const void* data = nullptr);
 			static Texture* loadCubemap(const std::string&, const std::vector<std::string> &);
 
 			// This is only being used for the offscreen backbuffer now..
@@ -85,11 +85,10 @@ namespace std {
 		size_t operator()(const neo::PooledFramebufferDetails& details) const noexcept {
 			size_t seed = details.mSize.x + details.mSize.y;
 			for (auto& i : details.mFormats) {
-				seed ^= i.mBaseFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-				seed ^= i.mInternalFormat + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-				seed ^= i.mFilter + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-				seed ^= i.mMode + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-				seed ^= i.mType + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+				seed ^= static_cast<uint32_t>(i.mBaseFormat) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+				seed ^= static_cast<uint32_t>(i.mInternalFormat) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+				seed ^= static_cast<uint32_t>(i.mType) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+				// This ignores wraps and filters hehe
 			}
 			return seed;
 		}
