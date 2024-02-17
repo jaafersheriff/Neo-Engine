@@ -85,6 +85,7 @@ namespace Gltf {
 			MakeDefine(ALBEDO_MAP);
 			MakeDefine(NORMAL_MAP);
 			MakeDefine(METAL_ROUGHNESS_MAP);
+			MakeDefine(OCCLUSION_MAP);
 			if (material.mAlbedoMap) {
 				drawDefines.set(ALBEDO_MAP);
 			}
@@ -164,7 +165,7 @@ namespace Gltf {
 			ecs.addComponent<DirectionalLightComponent>(entity);
 		}
 
-		GLTFImporter::Scene scene = Loader::loadGltfScene("MetalRoughSpheres/MetalRoughSpheres.gltf");
+		GLTFImporter::Scene scene = Loader::loadGltfScene("DamagedHelmet/DamagedHelmet.gltf");
 		for (auto& node : scene.mMeshNodes) {
 			auto entity = ecs.createEntity();
 			if (!node.mName.empty()) {

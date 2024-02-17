@@ -378,12 +378,18 @@ namespace {
 				if (material.normalTexture.scale != 1.0) {
 					NEO_LOG_W("Normal map has a weird scale");
 				}
-				NEO_ASSERT(material.occlusionTexture.index == -1, "Occlusion maps unsupported");
+				outNode.mMaterial.mOcclusionMap = _loadTexture(model, material.occlusionTexture.index, material.occlusionTexture.texCoord);
+				if (outNode.mMaterial.mOcclusionMap) {
+					NEO_LOG_W("Occlusion map loaded, but it's gunna be unused");
+				}
+				if (material.occlusionTexture.strength != 1.0) {
+					NEO_LOG_W("Occlusion map has a weird strength");
+				}
 
 				if (material.emissiveFactor.size() == 3) {
 					outNode.mMaterial.mEmissive = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
 				}
-				NEO_ASSERT(material.emissiveTexture.index == -1, "Emissive maps unsupported");
+				outNode.mMaterial.mOcclusionMap = _loadTexture(model, material.emissiveTexture.index, material.emissiveTexture.texCoord);
 
 				outNode.mMaterial.mMetallic = static_cast<float>(material.pbrMetallicRoughness.metallicFactor);
 				outNode.mMaterial.mRoughness = static_cast<float>(material.pbrMetallicRoughness.roughnessFactor);

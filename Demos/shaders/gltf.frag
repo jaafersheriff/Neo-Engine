@@ -17,7 +17,7 @@ layout(binding = 1) uniform sampler2D normalMap;
 uniform float metalness;
 uniform float roughness;
 #ifdef METAL_ROUGHNESS_MAP
-layout(binding = 2) uniform sampler2D metalRoughnessMap;
+layout(binding = 3) uniform sampler2D metalRoughnessMap;
 #endif
 
 uniform vec3 lightCol;
@@ -33,26 +33,22 @@ uniform vec3 camPos;
 out vec4 color;
 
 void main() {
-	vec3 finalAlbedo = albedo.rgb;
+	vec3 fAlbedo = albedo.rgb;
 #ifdef ALBEDO_MAP
 	vec4 albedoSample = texture(albedoMap, fragTex);
-	finalAlbedo = albedoSample.rgb * albedo.rgb;
+	fAlbedo *= albedoSample.rgb;
 
-#ifdef ALPHA_TEST
-	alphaDiscard(albedoSample.a);
 #endif
-#endif
-
 
 #ifdef DEBUG_METAL_ROUGHNESS
 	float fMetalness = metalness;
 	float fRoughness = roughness;
 #ifdef METAL_ROUGHNESS_MAP
-	vec2 metalRoughness = texture(metalRoughnessMap, fragTex).rg;
-	fMetalness *= metalRoughness.r;
+	vec3 metalRoughness = texture(metalRoughnessMap, fragTex).rgb;
+	fMetalness *= metalRoughness.b;
 	fRoughness *= metalRoughness.g;
 #endif
-	color = vec4(metalness, roughness, 0.0, 1.0);
+	color = vec4(0.0, fRoughness, fMetalness, 1.0);
 	return;
 #endif
 	// TODO - normal mapping
@@ -76,7 +72,7 @@ float attFactor = 1;
 	vec3 L = vec3(0, 0, 0);
 #endif
 
-	color.rgb = getPhong(V, N, L, finalAlbedo.rgb * 0.2, finalAlbedo.rgb, vec3(1.0), 13.0, lightCol, attFactor);
+	color.rgb = getPhong(V, N, L, fAlbedo.rgb * 0.2, fAlbedo.rgb, vec3(1.0), 13.0, lightCol, attFactor);
 	color.a = 1.0;
 }
 
