@@ -387,9 +387,9 @@ namespace {
 				}
 
 				if (material.emissiveFactor.size() == 3) {
-					outNode.mMaterial.mEmissive = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
+					outNode.mMaterial.mEmissiveFactor = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
 				}
-				outNode.mMaterial.mOcclusionMap = _loadTexture(model, material.emissiveTexture.index, material.emissiveTexture.texCoord);
+				outNode.mMaterial.mEmissiveMap = _loadTexture(model, material.emissiveTexture.index, material.emissiveTexture.texCoord);
 
 				outNode.mMaterial.mMetallic = static_cast<float>(material.pbrMetallicRoughness.metallicFactor);
 				outNode.mMaterial.mRoughness = static_cast<float>(material.pbrMetallicRoughness.roughnessFactor);

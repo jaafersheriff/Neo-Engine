@@ -5,6 +5,12 @@
 using namespace neo;
 
 namespace Gltf {
+	enum class DebugMode : uint8_t {
+		Off,
+		MetalRoughness,
+		Emissives,
+		COUNT
+	};
 
 	class Demo : public IDemo {
 	public:
@@ -16,6 +22,7 @@ namespace Gltf {
 		virtual void imGuiEditor(ECS& ecs) override;
 
 	private:
-		bool mDrawMetalRoughness = false;
+		bool mDoOcclusionMap = true;
+		DebugMode mDebugMode = DebugMode::Off;
 	};
 }

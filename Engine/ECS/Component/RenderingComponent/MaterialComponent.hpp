@@ -36,7 +36,7 @@ namespace neo {
 		float mRoughness = 0.7f;
 		Texture* mMetallicRoughnessMap = nullptr;
 
-		glm::vec3 mEmissive = glm::vec3(0.f);
+		glm::vec3 mEmissiveFactor = glm::vec3(0.f);
 		Texture* mEmissiveMap = nullptr;
 
 		Texture* mNormalMap = nullptr;

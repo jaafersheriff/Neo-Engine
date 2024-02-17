@@ -24,14 +24,23 @@ using namespace neo;
 
 namespace Gltf {
 	template<typename... CompTs>
-	void _drawGltf(const ECS& ecs, ECS::Entity cameraEntity, bool drawMetalRoughness) {
+	void _drawGltf(const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, bool doOcclusionMap) {
 		TRACY_GPU();
 
 		ShaderDefines passDefines({});
 
 		MakeDefine(DEBUG_METAL_ROUGHNESS);
-		if (drawMetalRoughness) {
-			passDefines.set(DEBUG_METAL_ROUGHNESS);
+		MakeDefine(DEBUG_EMISSIVE);
+		switch(debugMode) {
+			case DebugMode::MetalRoughness:
+				passDefines.set(DEBUG_METAL_ROUGHNESS);
+				break;
+			case DebugMode::Emissives:
+				passDefines.set(DEBUG_EMISSIVE);
+				break;
+			case DebugMode::Off:
+			default:
+				break;
 		}
 
 		bool containsAlphaTest = false;
@@ -86,6 +95,7 @@ namespace Gltf {
 			MakeDefine(NORMAL_MAP);
 			MakeDefine(METAL_ROUGHNESS_MAP);
 			MakeDefine(OCCLUSION_MAP);
+			MakeDefine(EMISSIVE);
 			if (material.mAlbedoMap) {
 				drawDefines.set(ALBEDO_MAP);
 			}
@@ -94,6 +104,12 @@ namespace Gltf {
 			}
 			if (material.mMetallicRoughnessMap) {
 				drawDefines.set(METAL_ROUGHNESS_MAP);
+			}
+			if (doOcclusionMap && material.mOcclusionMap) {
+				drawDefines.set(OCCLUSION_MAP);
+			}
+			if (material.mEmissiveMap) {
+				drawDefines.set(EMISSIVE);
 			}
 
 			auto& resolvedShader = shader->getResolvedInstance(drawDefines);
@@ -112,6 +128,15 @@ namespace Gltf {
 			resolvedShader.bindUniform("roughness", material.mRoughness);
 			if (material.mMetallicRoughnessMap) {
 				resolvedShader.bindTexture("metalRoughnessMap", *material.mMetallicRoughnessMap);
+			}
+
+			if (doOcclusionMap && material.mOcclusionMap) {
+				resolvedShader.bindTexture("occlusionMap", *material.mOcclusionMap);
+			}
+
+			if (material.mEmissiveMap) {
+				resolvedShader.bindTexture("emissiveMap", *material.mEmissiveMap);
+				resolvedShader.bindUniform("emissiveFactor", material.mEmissiveFactor);
 			}
 
 			// UBO candidates
@@ -189,7 +214,20 @@ namespace Gltf {
 
 	void Demo::imGuiEditor(ECS& ecs) {
 		NEO_UNUSED(ecs);
-		ImGui::Checkbox("Draw metal roughness", &mDrawMetalRoughness);
+		ImGui::Checkbox("Do occlusion map", &mDoOcclusionMap);
+		static std::unordered_map<DebugMode, const char*> sDebugModeStrings = {
+			{DebugMode::Off, "Off"},
+			{DebugMode::MetalRoughness, "MetalRoughness"},
+			{DebugMode::Emissives, "Emissive"},
+		};
+		if (ImGui::BeginCombo("Debug Mode", sDebugModeStrings[mDebugMode])) {
+			for (int i = 0; i < static_cast<int>(DebugMode::COUNT); i++) {
+				if (ImGui::Selectable(sDebugModeStrings[static_cast<DebugMode>(i)], mDebugMode == static_cast<DebugMode>(i))) {
+					mDebugMode = static_cast<DebugMode>(i);
+				}
+			}
+			ImGui::EndCombo();
+		}
 	}
 
 	void Demo::update(ECS& ecs) {
@@ -217,8 +255,8 @@ namespace Gltf {
 
 		sceneTarget->clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		_drawGltf<OpaqueComponent>(ecs, cameraEntity, mDrawMetalRoughness);
-		_drawGltf<AlphaTestComponent>(ecs, cameraEntity, mDrawMetalRoughness);
+		_drawGltf<OpaqueComponent>(ecs, cameraEntity, mDebugMode, mDoOcclusionMap);
+		_drawGltf<AlphaTestComponent>(ecs, cameraEntity, mDebugMode, mDoOcclusionMap);
 
 		backbuffer.clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT);
 		drawFXAA(backbuffer, *sceneTarget->mTextures[0]);

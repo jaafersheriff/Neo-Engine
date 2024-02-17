@@ -17,7 +17,16 @@ layout(binding = 1) uniform sampler2D normalMap;
 uniform float metalness;
 uniform float roughness;
 #ifdef METAL_ROUGHNESS_MAP
-layout(binding = 3) uniform sampler2D metalRoughnessMap;
+layout(binding = 2) uniform sampler2D metalRoughnessMap;
+#endif
+
+#ifdef OCCLUSION_MAP
+layout(binding = 3) uniform sampler2D occlusionMap; // Shouldn't be used for indirect lights
+#endif
+
+#ifdef EMISSIVE
+layout(binding = 4) uniform sampler2D emissiveMap;
+uniform vec3 emissiveFactor;
 #endif
 
 uniform vec3 lightCol;
@@ -51,6 +60,17 @@ void main() {
 	color = vec4(0.0, fRoughness, fMetalness, 1.0);
 	return;
 #endif
+
+
+#ifdef DEBUG_EMISSIVE
+#ifdef EMISSIVE
+	color = 1vec4(emissiveFactor * texture(emissiveMap, fragTex).rgb, 1.0);
+#else
+	color = vec4(0, 0, 0, 1);
+#endif
+	return;
+#endif
+
 	// TODO - normal mapping
 	vec3 N = normalize(fragNor);
 #ifdef NORMAL_MAP
@@ -73,6 +93,9 @@ float attFactor = 1;
 #endif
 
 	color.rgb = getPhong(V, N, L, fAlbedo.rgb * 0.2, fAlbedo.rgb, vec3(1.0), 13.0, lightCol, attFactor);
+#ifdef OCCLUSION_MAP
+	color.rgb *= texture(occlusionMap, fragTex).rgb;
+#endif
 	color.a = 1.0;
 }
 
