@@ -24,10 +24,16 @@ using namespace neo;
 
 namespace Gltf {
 	template<typename... CompTs>
-	void _drawGltf(const ECS& ecs, ECS::Entity cameraEntity) {
+	void _drawGltf(const ECS& ecs, ECS::Entity cameraEntity, bool drawMetalRoughness) {
 		TRACY_GPU();
 
 		ShaderDefines passDefines({});
+
+		MakeDefine(DEBUG_METAL_ROUGHNESS);
+		if (drawMetalRoughness) {
+			passDefines.set(DEBUG_METAL_ROUGHNESS);
+		}
+
 		bool containsAlphaTest = false;
 		MakeDefine(ALPHA_TEST);
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
@@ -77,8 +83,16 @@ namespace Gltf {
 			drawDefines.reset();
 			const auto& material = view.get<const MaterialComponent>(entity);
 			MakeDefine(ALBEDO_MAP);
+			MakeDefine(NORMAL_MAP);
+			MakeDefine(METAL_ROUGHNESS_MAP);
 			if (material.mAlbedoMap) {
 				drawDefines.set(ALBEDO_MAP);
+			}
+			if (material.mNormalMap) {
+				drawDefines.set(NORMAL_MAP);
+			}
+			if (material.mMetallicRoughnessMap) {
+				//drawDefines.set(METAL_ROUGHNESS_MAP);
 			}
 
 			auto& resolvedShader = shader->getResolvedInstance(drawDefines);
@@ -87,6 +101,16 @@ namespace Gltf {
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
 			if (material.mAlbedoMap) {
 				resolvedShader.bindTexture("albedoMap", *material.mAlbedoMap);
+			}
+
+			if (material.mNormalMap) {
+				resolvedShader.bindTexture("normalMap", *material.mNormalMap);
+			}
+
+			resolvedShader.bindUniform("metalness", material.mMetallic);
+			resolvedShader.bindUniform("roughness", material.mRoughness);
+			if (material.mMetallicRoughnessMap) {
+				//resolvedShader.bindTexture("metalRoughnessmap", *material.mMetallicRoughnessMap);
 			}
 
 			// UBO candidates
@@ -124,23 +148,23 @@ namespace Gltf {
 		{
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Camera");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0, 0.6f, 5), glm::vec3(1.f));
-			ecs.addComponent<PerspectiveCameraComponent>(entity, 1.f, 100.f, 45.f);
-			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 7.f);
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.05f, 0.03f, 0.0f), glm::vec3(1.f));
+			ecs.addComponent<PerspectiveCameraComponent>(entity, 0.01f, 10.f, 45.f);
+			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 0.1f);
 			ecs.addComponent<MainCameraComponent>(entity);
 		}
 
 		{
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Light");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 2.f, 20.f));
+			auto spat = ecs.addComponent<SpatialComponent>(entity, glm::vec3(75.f, 200.f, 20.f));
+			spat->setLookDir(glm::normalize(glm::vec3(-0.6f, -0.65f, -0.49f)));
 			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f));
 			ecs.addComponent<MainLightComponent>(entity);
-			ecs.addComponent<PointLightComponent>(entity, glm::vec3(0.1, 0.05, 0.003f));
+			ecs.addComponent<DirectionalLightComponent>(entity);
 		}
 
-
-		GLTFImporter::Scene scene = Loader::loadGltfScene("TextureSettingsTest/TextureSettingsTest.gltf");
+		GLTFImporter::Scene scene = Loader::loadGltfScene("Sponza/Sponza.gltf");
 		for (auto& node : scene.mMeshNodes) {
 			auto entity = ecs.createEntity();
 			if (!node.mName.empty()) {
@@ -165,6 +189,7 @@ namespace Gltf {
 
 	void Demo::imGuiEditor(ECS& ecs) {
 		NEO_UNUSED(ecs);
+		ImGui::Checkbox("Draw metal roughness", &mDrawMetalRoughness);
 	}
 
 	void Demo::update(ECS& ecs) {
@@ -192,8 +217,8 @@ namespace Gltf {
 
 		sceneTarget->clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		_drawGltf<OpaqueComponent>(ecs, cameraEntity);
-		_drawGltf<AlphaTestComponent>(ecs, cameraEntity);
+		_drawGltf<OpaqueComponent>(ecs, cameraEntity, mDrawMetalRoughness);
+		_drawGltf<AlphaTestComponent>(ecs, cameraEntity, mDrawMetalRoughness);
 
 		backbuffer.clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT);
 		drawFXAA(backbuffer, *sceneTarget->mTextures[0]);

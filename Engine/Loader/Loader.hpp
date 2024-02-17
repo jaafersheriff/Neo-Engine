@@ -45,7 +45,7 @@ namespace neo {
 
 			static const char* loadFileString(const std::string&);
 
-			static GLTFImporter::Scene loadGltfScene(const std::string& fileName);
+			static GLTFImporter::Scene loadGltfScene(const std::string& fileName, glm::mat4 baseTransform = glm::mat4(1.f));
 
 			/* Load Mesh pointer from an .obj file */
 			static MeshData loadMesh_DEPRECATED(const std::string &, bool = false);

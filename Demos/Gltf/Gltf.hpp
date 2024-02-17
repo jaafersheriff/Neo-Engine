@@ -15,5 +15,7 @@ namespace Gltf {
 		virtual void destroy() override;
 		virtual void imGuiEditor(ECS& ecs) override;
 
+	private:
+		bool mDrawMetalRoughness = false;
 	};
 }

@@ -353,13 +353,13 @@ namespace neo {
 		meshData.mBaseScale = glm::vec3(maxExtent) / 2.f;
 	}
 
-	GLTFImporter::Scene Loader::loadGltfScene(const std::string& fileName) {
+	GLTFImporter::Scene Loader::loadGltfScene(const std::string& fileName, glm::mat4 baseTransform) {
 		std::string _fileName = APP_RES_DIR + fileName;
 		if (!util::fileExists(_fileName.c_str())) {
 			_fileName = ENGINE_RES_DIR + fileName;
 		}
 		NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file: %s after checking:\n\t%s\n\t%s\n", fileName.c_str(), APP_RES_DIR.c_str(), ENGINE_RES_DIR.c_str());
 
-		return GLTFImporter::loadScene(_fileName);
+		return GLTFImporter::loadScene(_fileName, baseTransform);
 	}
 }

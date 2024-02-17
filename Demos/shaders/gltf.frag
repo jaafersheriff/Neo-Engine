@@ -10,6 +10,16 @@ uniform vec4 albedo;
 layout(binding = 0) uniform sampler2D albedoMap;
 #endif
 
+#ifdef NORMAL_MAP
+layout(binding = 1) uniform sampler2D normalMap;
+#endif
+
+uniform float metalness;
+uniform float roughness;
+#ifdef METAL_ROUGHNESS_MAP
+layout(binding = 2) uniform sampler2D metalRoughnessMap;
+#endif
+
 uniform vec3 lightCol;
 #if defined(DIRECTIONAL_LIGHT) || defined(ENABLE_SHADOWS)
 uniform vec3 lightDir;
@@ -23,8 +33,33 @@ uniform vec3 camPos;
 out vec4 color;
 
 void main() {
+	vec3 finalAlbedo = albedo.rgb;
+#ifdef ALBEDO_MAP
+	vec4 albedoSample = texture(albedoMap, fragTex);
+	finalAlbedo = albedoSample.rgb * albedo.rgb;
+
+#ifdef ALPHA_TEST
+	alphaDiscard(albedoSample.a);
+#endif
+#endif
+
+
+#ifdef DEBUG_METAL_ROUGHNESS
+	float fMetalness = metalness;
+	float fRoughness = roughness;
+#ifdef METAL_ROUGHNESS_MAP
+	vec2 metalRoughness = texture(metalRoughnessMap, fragTex).rg;
+	fMetalness *= metalRoughness.r;
+	fRoughness *= metalRoughness.g;
+#endif
+	color = vec4(metalness, roughness, 0.0, 1.0);
+	return;
+#endif
 	// TODO - normal mapping
 	vec3 N = normalize(fragNor);
+#ifdef NORMAL_MAP
+// 	N = normalize(texture(normalMap, fragTex).rgb);
+#endif
 	vec3 V = normalize(camPos - fragPos.xyz);
 
 float attFactor = 1;
@@ -41,13 +76,7 @@ float attFactor = 1;
 	vec3 L = vec3(0, 0, 0);
 #endif
 
-	vec3 finalAlbedo = albedo.rgb;
-#ifdef ALBEDO_MAP
-	finalAlbedo = texture(albedoMap, fragTex).rgb * albedo.rgb;
-#endif
-
 	color.rgb = getPhong(V, N, L, finalAlbedo.rgb * 0.2, finalAlbedo.rgb, vec3(1.0), 13.0, lightCol, attFactor);
-
 	color.a = 1.0;
 }
 

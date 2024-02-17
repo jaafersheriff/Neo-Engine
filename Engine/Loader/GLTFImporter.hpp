@@ -32,6 +32,6 @@ namespace neo {
 		};
 
 
-		Scene loadScene(const std::string& fileName);
+		Scene loadScene(const std::string& fileName, glm::mat4 baseTransform);
 	}
 }

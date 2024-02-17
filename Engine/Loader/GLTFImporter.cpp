@@ -189,15 +189,58 @@ namespace {
 			return GL_REPEAT;
 			break;
 		case TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE:
-			return GL_CLAMP;
+			return GL_CLAMP_TO_EDGE;
 			break;
 		case TINYGLTF_TEXTURE_WRAP_MIRRORED_REPEAT:
-			return GL_MIRROR;
+			return GL_MIRRORED_REPEAT;
 			break;
 		default:
 			NEO_FAIL("Heh?");
 			break;
 		}
+	}
+
+	neo::Texture* _loadTexture(const tinygltf::Model& model, int index, int texCoord) {
+		if (index == -1) {
+			return nullptr;
+		}
+		if (texCoord > 0) {
+			NEO_LOG_W("Texture wants to use a different texcoord? This probably won't work");
+		}
+
+		const auto& texture = model.textures[index];
+		const auto& image = model.images[texture.source];
+
+		if (!image.uri.empty() && neo::Library::hasTexture(image.uri)) {
+			NEO_LOG_W("Found a texture that's already been loading: %s", image.uri.c_str());
+			return neo::Library::getTexture(image.uri);
+		}
+
+		neo::TextureFormat format;
+		format.mBaseFormat = _getGLBaseFormat(image.component);
+		format.mType = _getGLType(image.bits);
+		format.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, format.mBaseFormat);
+		if (texture.sampler > -1) {
+			const auto& sampler = model.samplers[texture.sampler];
+			if (sampler.minFilter > -1) {
+				if (sampler.minFilter != sampler.magFilter) {
+					NEO_LOG_W("Different min/mag filters -- this isn't supported. Defaulting to min filter");
+				}
+				format.mFilter = _translateTinyGltfFilter(sampler.magFilter);
+			}
+			if (sampler.wrapS > -1) {
+				if (sampler.wrapS != sampler.wrapT) {
+					NEO_LOG_W("Different s/t wraps -- this isn't supported. Defaulting to s wrap");
+				}
+				format.mMode = _translateTinyGltfWrap(sampler.wrapS);
+			}
+		}
+
+		neo::Texture* neo_texture = new neo::Texture(format, glm::uvec2(image.width, image.height), image.image.data());
+		if (!image.uri.empty()) {
+			neo::Library::insertTexture(image.uri, neo_texture);
+		}
+		return neo_texture;
 	}
 
 	void _processNode(const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene) {
@@ -278,8 +321,13 @@ namespace {
 				else if (attribute.first == "TEXCOORD_0") {
 					vertexType = VertexType::Texture0;
 				}
+				else if (attribute.first == "TANGENT") {
+					NEO_LOG_W("TODO: Tangents aren't supported, skipping");
+					continue;
+				}
 				else {
 					NEO_FAIL("TODO: unsupported attribute: %s", attribute.first.c_str());
+					continue;
 				}
 
 				NEO_ASSERT(!accessor.sparse.isSparse, "TODO: sparse");
@@ -290,6 +338,8 @@ namespace {
 				const uint32_t stride = accessor.ByteStride(bufferView);
 				const uint8_t* bufferData = static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset;
 				GLenum format = _translateTinyGltfComponentType(accessor.componentType);
+
+				// TODO : this is duplicating vertex data. Would be better to split glBufferData from glVertexAttribPointer
 				outNode.mMesh.mMesh->addVertexBuffer(
 					vertexType,
 					tinygltf::GetNumComponentsInType(accessor.type),
@@ -324,7 +374,10 @@ namespace {
 					NEO_FAIL("Transparency is unsupported");
 				}
 
-				NEO_ASSERT(material.normalTexture.index == -1, "Normal maps unsupported");
+				outNode.mMaterial.mNormalMap = _loadTexture(model, material.normalTexture.index, material.normalTexture.texCoord);
+				if (material.normalTexture.scale != 1.0) {
+					NEO_LOG_W("Normal map has a weird scale");
+				}
 				NEO_ASSERT(material.occlusionTexture.index == -1, "Occlusion maps unsupported");
 
 				if (material.emissiveFactor.size() == 3) {
@@ -342,44 +395,8 @@ namespace {
 						material.pbrMetallicRoughness.baseColorFactor[3]
 					);
 				}
-				if (material.pbrMetallicRoughness.baseColorTexture.index > -1) {
-					if (material.pbrMetallicRoughness.baseColorTexture.texCoord > 0) {
-						NEO_LOG_W("Texture wants to use a different texcoord? This probably won't work");
-					}
-					const auto& texture = model.textures[material.pbrMetallicRoughness.baseColorTexture.index];
-					const auto& image = model.images[texture.source];
-
-					if (Library::hasTexture(image.uri)) {
-						NEO_LOG_W("Found a texture that's already been loading: %s", image.uri.c_str());
-						outNode.mMaterial.mAlbedoMap = Library::getTexture(image.uri);
-					}
-					else {
-						TextureFormat format;
-						format.mBaseFormat = _getGLBaseFormat(image.component);
-						format.mType = _getGLType(image.bits);
-						format.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, format.mBaseFormat);
-						if (texture.sampler > -1) {
-							const auto& sampler = model.samplers[texture.sampler];
-							if (sampler.minFilter > -1) {
-								if (sampler.minFilter != sampler.magFilter) {
-									NEO_LOG_W("Different min/mag filters -- this isn't supported. Defaulting to min filter");
-								}
-								format.mFilter = _translateTinyGltfFilter(sampler.magFilter);
-							}
-							if (sampler.wrapS > -1) {
-								if (sampler.wrapS != sampler.wrapT) {
-									NEO_LOG_W("Different s/t wraps -- this isn't supported. Defaulting to s wrap");
-								}
-								format.mMode = _translateTinyGltfWrap(sampler.wrapS);
-							}
-						}
-
-						Texture* neo_texture = new Texture(format, glm::uvec2(image.width, image.height), image.image.data());
-						outNode.mMaterial.mAlbedoMap = neo_texture;
-						Library::insertTexture(image.uri, neo_texture);
-					}
-				}
-				NEO_ASSERT(material.pbrMetallicRoughness.metallicRoughnessTexture.index == -1, "Metal/roughness maps unsupported");
+				outNode.mMaterial.mAlbedoMap = _loadTexture(model, material.pbrMetallicRoughness.baseColorTexture.index, material.pbrMetallicRoughness.baseColorTexture.texCoord);
+				outNode.mMaterial.mMetallicRoughnessMap = _loadTexture(model, material.pbrMetallicRoughness.metallicRoughnessTexture.index, material.pbrMetallicRoughness.metallicRoughnessTexture.texCoord);
 
 			}
 
@@ -392,7 +409,7 @@ namespace {
 namespace neo {
 	namespace GLTFImporter {
 
-		Scene loadScene(const std::string& path) {
+		Scene loadScene(const std::string& path, glm::mat4 baseTransform) {
 
 			tinygltf::Model model;
 			tinygltf::TinyGLTF loader;
@@ -431,7 +448,7 @@ namespace neo {
 			Scene outScene;
 			for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
 				const auto& node = model.nodes[nodeID];
-				_processNode(model, node, glm::mat4(1.f), outScene);
+				_processNode(model, node, baseTransform, outScene);
 			}
 
 			NEO_LOG_I("Successfully parsed %s", path.c_str());

@@ -32,8 +32,8 @@ namespace neo {
 		glm::vec4 mAlbedoColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
 		Texture* mAlbedoMap = nullptr;
 
-		float mMetallic = 1.f;
-		float mRoughness = 1.f;
+		float mMetallic = 0.f;
+		float mRoughness = 0.7f;
 		Texture* mMetallicRoughnessMap = nullptr;
 
 		glm::vec3 mEmissive = glm::vec3(0.f);
