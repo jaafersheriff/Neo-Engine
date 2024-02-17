@@ -3,7 +3,14 @@
 namespace neo {
 	namespace types {
 		enum class ByteFormats : uint8_t {
-			UnsignedByte
+			UnsignedByte,
+			Byte,
+			Short,
+			UnsignedShort,
+			Int,
+			UnsignedInt,
+			Double,
+			Float
 		};
 
 		namespace mesh {
@@ -11,7 +18,7 @@ namespace neo {
 				Points,
 				Line,
 				LineLoop,
-				LineStrp,
+				LineStrip,
 				Triangles,
 				TriangleStrip,
 				TriangleFan,

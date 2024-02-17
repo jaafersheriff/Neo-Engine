@@ -25,53 +25,53 @@ namespace {
 	inline neo::types::mesh::Primitive _translateTinyGltfPrimitiveType(int mode) {
 		switch (mode) {
 		case TINYGLTF_MODE_POINTS:
-			return GL_POINTS;
+			return neo::types::mesh::Primitive::Points;
 			break;
 		case TINYGLTF_MODE_LINE:
-			return GL_LINES;
+			return neo::types::mesh::Primitive::Line;
 			break;
 		case TINYGLTF_MODE_LINE_LOOP:
-			return GL_LINE_LOOP;
+			return neo::types::mesh::Primitive::LineLoop;
 			break;
 		case TINYGLTF_MODE_LINE_STRIP:
-			return GL_LINE_STRIP;
+			return neo::types::mesh::Primitive::LineStrip;
 			break;
 		case TINYGLTF_MODE_TRIANGLES:
-			return GL_TRIANGLES;
+			return neo::types::mesh::Primitive::Triangles;
 			break;
 		case TINYGLTF_MODE_TRIANGLE_STRIP:
-			return GL_TRIANGLE_STRIP;
+			return neo::types::mesh::Primitive::TriangleStrip;
 			break;
 		case TINYGLTF_MODE_TRIANGLE_FAN:
-			return GL_TRIANGLE_FAN;
+			return neo::types::mesh::Primitive::TriangleFan;
 			break;
 		default:
 			NEO_FAIL("Invalid primitive type: %d", mode);
-			return GL_TRIANGLE_STRIP;
+			return neo::types::mesh::Primitive::TriangleStrip;
 		}
 	}
 
 	inline neo::types::ByteFormats _translateTinyGltfComponentType(int tinyGltfComponentType) {
 		switch (tinyGltfComponentType) {
 		case TINYGLTF_COMPONENT_TYPE_BYTE:
-			return GL_BYTE;
+			return neo::types::ByteFormats::Byte;
 		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
-			return GL_UNSIGNED_BYTE;
+			return neo::types::ByteFormats::UnsignedByte;
 		case TINYGLTF_COMPONENT_TYPE_SHORT:
-			return GL_SHORT;
+			return neo::types::ByteFormats::Short;
 		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
-			return GL_UNSIGNED_SHORT;
+			return neo::types::ByteFormats::UnsignedShort;
 		case TINYGLTF_COMPONENT_TYPE_INT:
-			return GL_INT;
+			return neo::types::ByteFormats::Int;
 		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
-			return GL_UNSIGNED_INT;
+			return neo::types::ByteFormats::UnsignedInt;
 		case TINYGLTF_COMPONENT_TYPE_DOUBLE:
-			return GL_DOUBLE;
+			return neo::types::ByteFormats::Double;
 		case TINYGLTF_COMPONENT_TYPE_FLOAT:
-			return GL_FLOAT;
+			return neo::types::ByteFormats::Float;
 		default:
 			NEO_FAIL("Invalid component type: %d", tinyGltfComponentType);
-			return GL_FLOAT;
+			return neo::types::ByteFormats::Float;
 		}
 	}
 

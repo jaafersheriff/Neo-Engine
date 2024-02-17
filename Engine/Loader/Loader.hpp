@@ -9,7 +9,7 @@ namespace neo {
 	class Engine;
 	class Mesh;
 	class Texture;
-	struct TextureFormat_DEPRECATED;
+	struct TextureFormat;
 	namespace GLTFImporter {
 		struct Scene;
 	}
@@ -40,12 +40,12 @@ namespace neo {
 			static GLTFImporter::Scene loadGltfScene(const std::string& fileName, glm::mat4 baseTransform = glm::mat4(1.f));
 
 			/* Retrieve Texture pointer from an image file */
-			static Texture* loadTexture(const std::string &, TextureFormat_DEPRECATED);
+			static Texture* loadTexture(const std::string &, TextureFormat format);
 			static Texture* loadTexture(const std::string &, const std::vector<std::string> &);
 
 		private:
 			/* Load a single texture file */
-			static uint8_t* _loadTextureData(int&, int&, int&, const std::string&, TextureFormat_DEPRECATED, bool = true);
+			static uint8_t* _loadTextureData(int&, int&, int&, const std::string&, TextureFormat format, bool = true);
 			static void _cleanTextureData(uint8_t*);
 
 			/* Private members */
