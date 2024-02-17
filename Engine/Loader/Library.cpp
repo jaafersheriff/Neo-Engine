@@ -81,20 +81,6 @@ namespace neo {
 		return {};
 	}
 
-	MeshData Library::loadMesh_DEPRECATED(const std::string& fileName, bool doResize) {
-		TRACY_ZONE();
-
-		auto it = mMeshes.find(fileName);
-		if (it != mMeshes.end()) {
-			return it->second;
-		}
-
-		NEO_LOG("First request for %s, loading...", fileName.c_str());
-		MeshData mesh = Loader::loadMesh_DEPRECATED(fileName, doResize);
-		insertMesh(fileName, mesh);
-		return mesh;
-	}
-
 	Texture* Library::getTexture(const std::string& name) {
 		TRACY_ZONE();
 		auto it = mTextures.find(name);

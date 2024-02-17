@@ -4,9 +4,6 @@
 
 #include <optional>
 
-// DEPRECATED
-#include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
-
 namespace neo {
 
 	class Engine;
@@ -26,11 +23,6 @@ namespace neo {
 		glm::vec3 mBaseScale{ 1.f, 1.f, 1.f };
 	};
 
-	struct Asset_DEPRECATED {
-		MeshData meshData;
-		MaterialComponent_DEPRECATED material;
-	};
-
 	class Loader {
 		friend Engine;
 
@@ -47,18 +39,11 @@ namespace neo {
 
 			static GLTFImporter::Scene loadGltfScene(const std::string& fileName, glm::mat4 baseTransform = glm::mat4(1.f));
 
-			/* Load Mesh pointer from an .obj file */
-			static MeshData loadMesh_DEPRECATED(const std::string &, bool = false);
-			static std::vector<Asset_DEPRECATED> loadMultiAsset_DEPRECATED(const std::string &);
-
 			/* Retrieve Texture pointer from an image file */
 			static Texture* loadTexture(const std::string &, TextureFormat);
 			static Texture* loadTexture(const std::string &, const std::vector<std::string> &);
 
 		private:
-			/* Optionally resize mesh vertex buffers so all the vertices are [-1, 1] */
-			static void _findMetaData_DEPRECATED(MeshData& meshData, std::vector<float>& verts, bool doResize);
-
 			/* Load a single texture file */
 			static uint8_t* _loadTextureData(int&, int&, int&, const std::string&, TextureFormat, bool = true);
 			static void _cleanTextureData(uint8_t*);

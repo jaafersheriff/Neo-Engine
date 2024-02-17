@@ -19,6 +19,8 @@
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
+#include "Loader/GLTFImporter.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -61,10 +63,13 @@ namespace NormalVisualizer {
 		Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f));
 
 		{
+			GLTFImporter::Scene gltfScene = Loader::loadGltfScene("bunny.gltf");
+			const auto& bunnyNode = gltfScene.mMeshNodes[0];
+
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.6f, 0.f));
-			ecs.addComponent<MeshComponent>(entity, Library::loadMesh_DEPRECATED("bunny.obj").mMesh);
+			ecs.addComponent<MeshComponent>(entity, bunnyNode.mMesh.mMesh);
 			ecs.addComponent<MaterialComponent_DEPRECATED>(entity);
 			ecs.addComponent<PhongShaderComponent>(entity);
 			ecs.addComponent<WireframeShaderComponent>(entity);

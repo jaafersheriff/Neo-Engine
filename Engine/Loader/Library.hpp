@@ -41,7 +41,6 @@ namespace neo {
 
 			static MeshData getMesh(const std::string&);
 			static void insertMesh(const std::string&, MeshData&);
-			static MeshData loadMesh_DEPRECATED(const std::string&, bool = false);
 			static const std::unordered_map<std::string, MeshData> getAllMeshes() { return mMeshes; }
 
 			static bool hasTexture(const std::string&); // will go away when proper resource manager happens ;( 

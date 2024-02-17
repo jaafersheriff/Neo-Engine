@@ -23,6 +23,8 @@
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
+#include "Loader/GLTFImporter.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -60,12 +62,15 @@ namespace Base {
 
 		/* Bunny object */
 		{
+			GLTFImporter::Scene gltfScene = Loader::loadGltfScene("bunny.gltf");
+			const auto& bunnyNode = gltfScene.mMeshNodes[0];
+
 			auto bunny = ecs.createEntity();
 			ecs.addComponent<TagComponent>(bunny, "Bunny");
 			ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
 			ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-			ecs.addComponent<MeshComponent>(bunny, Library::loadMesh_DEPRECATED("bunny.obj", true).mMesh);
-			ecs.addComponent<BoundingBoxComponent>(bunny, Library::loadMesh_DEPRECATED("bunny.obj"));
+			ecs.addComponent<MeshComponent>(bunny, bunnyNode.mMesh.mMesh);
+			ecs.addComponent<BoundingBoxComponent>(bunny, bunnyNode.mMesh);
 			ecs.addComponent<PhongShaderComponent>(bunny);
 			ecs.addComponent<OpaqueComponent>(bunny);
 			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(bunny);

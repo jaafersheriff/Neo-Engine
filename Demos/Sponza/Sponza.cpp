@@ -37,6 +37,8 @@
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 
+#include "Loader/GLTFImporter.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -117,22 +119,22 @@ namespace Sponza {
 			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
 		}
 
-		auto assets = Loader::loadMultiAsset_DEPRECATED("sponza.obj");
-		for (auto& asset : assets) {
+		GLTFImporter::Scene scene = Loader::loadGltfScene("Sponza/Sponza.gltf");
+		for (auto& node : scene.mMeshNodes) {
 			auto entity = ecs.createEntity();
-			ecs.addComponent<MeshComponent>(entity, asset.meshData.mMesh);
-			ecs.addComponent<SpatialComponent>(entity, asset.meshData.mBasePosition * 0.1f, asset.meshData.mBaseScale * 0.1f);
-			ecs.addComponent<ShadowCasterShaderComponent>(entity);
-			ecs.addComponent<BoundingBoxComponent>(entity, asset.meshData);
-			ecs.addComponent<PhongShaderComponent>(entity);
-			ecs.addComponent<GBufferShaderComponent>(entity);
-			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(entity, asset.material);
-			if (material->mAlphaMap) {
-				ecs.addComponent<AlphaTestComponent>(entity);
+			if (!node.mName.empty()) {
+				ecs.addComponent<TagComponent>(entity, node.mName);
 			}
-			else {
+			ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
+			ecs.addComponent<MeshComponent>(entity, node.mMesh.mMesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh);
+			if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 				ecs.addComponent<OpaqueComponent>(entity);
 			}
+			else if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::AlphaTest) {
+				ecs.addComponent<AlphaTestComponent>(entity);
+			}
+			ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
 		}
 
 		/* Systems - order matters! */

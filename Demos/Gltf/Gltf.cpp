@@ -185,7 +185,6 @@ namespace Gltf {
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
-
 	}
 
 	void Demo::imGuiEditor(ECS& ecs) {
