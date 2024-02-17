@@ -24,7 +24,7 @@ namespace Compute {
 		float timeScale = 100.f;
 
 		ParticleMeshComponent() {
-			MeshData meshData;
+			MeshData_DEPRECATED meshData;
 			mMesh = meshData.mMesh = new Mesh;
 			mMesh->mPrimitiveType = GL_POINTS;
 			mMesh->addVertexBuffer_DEPRECATED(VertexType::Position, 0, 4); // positions

@@ -222,22 +222,22 @@ namespace {
 			return Library::getTexture(image.uri);
 		}
 
-		TextureFormat_DEPRECATED format;
+		TextureFormat format;
 		format.mBaseFormat = _getGLBaseFormat(image.component);
 		format.mType = _getGLType(image.bits);
 		format.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, format.mBaseFormat);
 		if (texture.sampler > -1) {
 			const auto& sampler = model.samplers[texture.sampler];
 			if (sampler.minFilter > -1) {
-				if (sampler.minFilter != sampler.magFilter) {
-					NEO_LOG_E("Different min/mag filters -- this isn't supported. Defaulting to min filter");
-				}
+				format.mFilter = _translateTinyGltfFilter(sampler.minFilter);
+			}
+			if (sampler.magFilter > -1) {
 				format.mFilter = _translateTinyGltfFilter(sampler.magFilter);
 			}
 			if (sampler.wrapS > -1) {
-				if (sampler.wrapS != sampler.wrapT) {
-					NEO_LOG_E("Different s/t wraps -- this isn't supported. Defaulting to s wrap");
-				}
+				format.mMode = _translateTinyGltfWrap(sampler.wrapS);
+			}
+			if (sampler.wrapT > -1) {
 				format.mMode = _translateTinyGltfWrap(sampler.wrapS);
 			}
 		}
@@ -324,7 +324,7 @@ namespace {
 				const auto& accessor = model.accessors[attribute.second];
 				NEO_ASSERT(!accessor.sparse.isSparse, "Sparse accessor unsupported");
 
-				VertexType vertexType = VertexType::Position;
+				types::mesh::VertexType vertexType = types::mesh::VertexType::Position;
 				if (attribute.first == "POSITION") {
 					if (accessor.maxValues.size() == 3) {
 						outNode.mMesh.mMax = glm::vec3(accessor.maxValues[0], accessor.maxValues[1], accessor.maxValues[2]);
@@ -334,10 +334,10 @@ namespace {
 					}
 				}
 				else if (attribute.first == "NORMAL") {
-					vertexType = VertexType::Normal;
+					vertexType = types::mesh::VertexType::Normal;
 				}
 				else if (attribute.first == "TEXCOORD_0") {
-					vertexType = VertexType::Texture0;
+					vertexType = types::mesh::VertexType::Texture0;
 				}
 				else if (attribute.first == "TANGENT") {
 					NEO_LOG_E("TODO: Tangents aren't supported, skipping");

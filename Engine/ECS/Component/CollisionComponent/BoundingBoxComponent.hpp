@@ -29,7 +29,7 @@ namespace neo {
 			}
 		}
 
-		BoundingBoxComponent(MeshData mesh) {
+		BoundingBoxComponent(MeshData_DEPRECATED mesh) {
 			mMin = mesh.mMin;
 			mMax = mesh.mMax;
 		}

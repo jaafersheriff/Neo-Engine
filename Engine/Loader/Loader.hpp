@@ -14,7 +14,7 @@ namespace neo {
 		struct Scene;
 	}
 
-   struct MeshData {
+   struct MeshData_DEPRECATED {
 		Mesh* mMesh;
 		glm::vec3 mMin{ 0.f, 0.f, 0.f };
 		glm::vec3 mMax{ 0.f, 0.f, 0.f };

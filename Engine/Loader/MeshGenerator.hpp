@@ -7,7 +7,7 @@ namespace neo {
 
 	namespace prefabs {
 
-		static void generateCube(MeshData& meshData) {
+		static void generateCube(MeshData_DEPRECATED& meshData) {
 			meshData.mMesh = new Mesh;
 
 			std::vector<float> verts =
@@ -116,7 +116,7 @@ namespace neo {
 			meshData.mMesh->mPrimitiveType = types::mesh::Primitive::Triangles;
 		}
 
-		static void generateQuad(MeshData& meshData) {
+		static void generateQuad(MeshData_DEPRECATED& meshData) {
 			meshData.mMesh = new Mesh;
 			std::vector<float> verts =
 			{ -0.5f, -0.5f,  0.f,
@@ -150,7 +150,7 @@ namespace neo {
 		}
 
 		// http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
-		static void generateSphere(MeshData& meshData, int recursions) {
+		static void generateSphere(MeshData_DEPRECATED& meshData, int recursions) {
 			meshData.mMesh = new Mesh;
 
 			float t = (float)(1.f + (glm::sqrt(5.0)) / 2.f);
@@ -255,7 +255,7 @@ namespace neo {
 			meshData.mMesh->mPrimitiveType = types::mesh::Primitive::Triangles;
 		}
 
-		void generatePlane(MeshData& meshData, float h, int VERTEX_COUNT, int numOctaves) {
+		void generatePlane(MeshData_DEPRECATED& meshData, float h, int VERTEX_COUNT, int numOctaves) {
 			siv::PerlinNoise noise(rand());
 
 			meshData.mMin = glm::vec3(FLT_MAX);

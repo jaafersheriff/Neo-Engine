@@ -39,9 +39,9 @@ namespace neo {
 			static void tick();
 			static void clean();
 
-			static MeshData getMesh(const std::string&);
-			static void insertMesh(const std::string&, MeshData&);
-			static const std::unordered_map<std::string, MeshData> getAllMeshes() { return mMeshes; }
+			static MeshData_DEPRECATED getMesh(const std::string&);
+			static void insertMesh(const std::string&, MeshData_DEPRECATED&);
+			static const std::unordered_map<std::string, MeshData_DEPRECATED> getAllMeshes() { return mMeshes; }
 
 			static bool hasTexture(const std::string&); // will go away when proper resource manager happens ;( 
 			static void insertTexture(const std::string&, Texture*);
@@ -63,7 +63,7 @@ namespace neo {
 			static void imGuiEditor();
 
 		private:
-			static std::unordered_map<std::string, MeshData> mMeshes;
+			static std::unordered_map<std::string, MeshData_DEPRECATED> mMeshes;
 			static std::unordered_map<std::string, Texture*> mTextures;
 			static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
 			struct PooledFramebuffer {

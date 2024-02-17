@@ -12,7 +12,7 @@
 
 namespace neo {
 	/* Library */
-	std::unordered_map<std::string, MeshData> Library::mMeshes;
+	std::unordered_map<std::string, MeshData_DEPRECATED> Library::mMeshes;
 	std::unordered_map<std::string, Texture*> Library::mTextures;
 	std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
 	std::unordered_map<neo::PooledFramebufferDetails, std::vector<Library::PooledFramebuffer>> Library::mPooledFramebuffers;
@@ -71,7 +71,7 @@ namespace neo {
 		}
 	}
 
-	MeshData Library::getMesh(const std::string& name) {
+	MeshData_DEPRECATED Library::getMesh(const std::string& name) {
 		auto it = mMeshes.find(name);
 		if (it != mMeshes.end()) {
 			return it->second;
@@ -231,7 +231,7 @@ namespace neo {
 		return it->second;
 	}
 
-	void Library::insertMesh(const std::string& name, MeshData& data) {
+	void Library::insertMesh(const std::string& name, MeshData_DEPRECATED& data) {
 		if (data.mMesh) {
 			mMeshes.insert({ name, data });
 		}

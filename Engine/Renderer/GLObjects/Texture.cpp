@@ -16,7 +16,7 @@ namespace neo {
 			case types::texture::Target::TextureCube:
 				return GL_TEXTURE_CUBE_MAP;
 			default:
-				NEO_FAIL("Invalid texture class");
+				NEO_FAIL("Invalid texture type");
 				return 0;
 			}
 		}
@@ -27,6 +27,23 @@ namespace neo {
 				return GL_LINEAR;
 			case types::texture::Filters::Nearest:
 				return GL_NEAREST;
+			default:
+				NEO_FAIL("Invalid texture filter");
+				return 0;
+			}
+		}
+
+		GLenum _getGLWrap(types::texture::Wraps wrap) {
+			switch (wrap) {
+			case types::texture::Wraps::Clamp:
+				return GL_CLAMP;
+			case types::texture::Wraps::Mirrored:
+				return GL_MIRRORED_REPEAT;
+			case types::texture::Wraps::Repeat:
+				return GL_REPEAT;
+			default:
+				NEO_FAIL("Invalid texture wrap");
+				return 0;
 			}
 		}
 	}
@@ -62,12 +79,12 @@ namespace neo {
 		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, _getGLFilter(mFormat.mFilter.mMag));
 		switch (mFormat.mTarget) {
 		case types::texture::Target::Texture3D:
-			glTexParameteri(target, GL_TEXTURE_WRAP_R, mFormat.mMode);
+			glTexParameteri(target, GL_TEXTURE_WRAP_R, _getGLWrap(mFormat.mWrap.mR));
 		case types::texture::Target::TextureCube:
 		case types::texture::Target::Texture2D:
-			glTexParameteri(target, GL_TEXTURE_WRAP_T, mFormat.mMode);
+			glTexParameteri(target, GL_TEXTURE_WRAP_T, _getGLWrap(mFormat.mWrap.mT));
 		case types::texture::Target::Texture1D:
-			glTexParameteri(target, GL_TEXTURE_WRAP_S, mFormat.mMode);
+			glTexParameteri(target, GL_TEXTURE_WRAP_S, _getGLWrap(mFormat.mWrap.mS));
 			break;
 		default:
 			NEO_FAIL("Invalid texture class");

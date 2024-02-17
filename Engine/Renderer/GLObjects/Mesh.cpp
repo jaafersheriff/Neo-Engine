@@ -7,10 +7,33 @@
 #include "GL/glew.h"
 
 namespace neo {
+	namespace {
+		GLenum _translatePrimitive(types::mesh::Primitive primitive) {
+			switch (primitive) {
+			case types::mesh::Primitive::Points:
+				return GL_POINT;
+			case types::mesh::Primitive::Line:
+				return GL_LINE;
+			case types::mesh::Primitive::LineLoop:
+				return GL_LINE_LOOP;
+			case types::mesh::Primitive::LineStrip:
+				return GL_LINE_STRIP;
+			case types::mesh::Primitive::Triangles:
+				return GL_TRIANGLES;
+			case types::mesh::Primitive::TriangleStrip:
+				return GL_TRIANGLE_STRIP;
+			case types::mesh::Primitive::TriangleFan:
+				return GL_TRIANGLE_FAN;
+			default:
+				NEO_FAIL("Unknown primitive type");
+				return GL_TRIANGLE_FAN;
+			}
+		}
+	}
 
-	Mesh::Mesh(int primitiveType)
+	Mesh::Mesh(types::mesh::Primitive primitive)
 		: mVAOID(0)
-		, mPrimitiveType(primitiveType < 0 ? GL_TRIANGLE_STRIP : primitiveType)
+		, mPrimitiveType(primitive)
 		, mVBOs({})
 	{
 		/* Initialize VAO */
@@ -32,20 +55,20 @@ namespace neo {
 		if (mElementVBO) {
 			uint32_t usedSize = size ? size : mElementVBO->elementCount;
 			ServiceLocator<Renderer>::ref().mStats.mNumTriangles += usedSize / 3;
-			glDrawElements(mPrimitiveType, usedSize, mElementVBO->format, nullptr);
+			glDrawElements(_translatePrimitive(mPrimitiveType), usedSize, mElementVBO->format, nullptr);
 		}
 		else if (size) {
 			ServiceLocator<Renderer>::ref().mStats.mNumTriangles += size / 3;
-			glDrawArrays(mPrimitiveType, 0, size);
+			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, size);
 		}
 		else {
-			const auto& positions = getVBO(VertexType::Position);
+			const auto& positions = getVBO(types::mesh::VertexType::Position);
 			ServiceLocator<Renderer>::ref().mStats.mNumTriangles += positions.elementCount / positions.stride / 3;
-			glDrawArrays(mPrimitiveType, 0, positions.elementCount);
+			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, positions.elementCount);
 		}
 	}
 
-	void Mesh::addVertexBuffer_DEPRECATED(VertexType type, uint32_t attribArray, uint32_t stride, const std::vector<float>& buffer) {
+	void Mesh::addVertexBuffer_DEPRECATED(types::mesh::VertexType type, uint32_t attribArray, uint32_t stride, const std::vector<float>& buffer) {
 		NEO_ASSERT(mVBOs.find(type) == mVBOs.end(), "Attempting to add a VertexBuffer that already exists");
 
 		auto vertexBuffer = VertexBuffer{};
@@ -71,7 +94,7 @@ namespace neo {
 		mVBOs[type] = vertexBuffer;
 	}
 
-	void Mesh::addVertexBuffer(VertexType type, uint32_t components, uint32_t stride, uint32_t format, bool normalized, uint32_t count, uint32_t offset, uint32_t byteSize, const uint8_t* buffer) {
+	void Mesh::addVertexBuffer(types::mesh::VertexType type, uint32_t components, uint32_t stride, uint32_t format, bool normalized, uint32_t count, uint32_t offset, uint32_t byteSize, const uint8_t* buffer) {
 		NEO_ASSERT(mVBOs.find(type) == mVBOs.end(), "Attempting to add a VertexBuffer that already exists");
 
 		auto vertexBuffer = VertexBuffer{};
@@ -101,7 +124,7 @@ namespace neo {
 		mVBOs[type] = vertexBuffer;
 	}
 
-	void Mesh::updateVertexBuffer_DEPRECATED(VertexType type, const std::vector<float>& buffer) {
+	void Mesh::updateVertexBuffer_DEPRECATED(types::mesh::VertexType type, const std::vector<float>& buffer) {
 		TRACY_GPU();
 
 		const auto& vbo = mVBOs.find(type);
@@ -118,7 +141,7 @@ namespace neo {
 		glBindVertexArray(0);
 	}
 
-	void Mesh::updateVertexBuffer_DEPRECATED(VertexType type, uint32_t size) {
+	void Mesh::updateVertexBuffer_DEPRECATED(types::mesh::VertexType type, uint32_t size) {
 		TRACY_GPU();
 
 		NEO_ASSERT(size > 0, "Attempting to update a VertexBuffer with no data");
@@ -134,7 +157,7 @@ namespace neo {
 		glBindVertexArray(0);
 	}
 
-	void Mesh::removeVertexBuffer(VertexType type) {
+	void Mesh::removeVertexBuffer(types::mesh::VertexType type) {
 		const auto& vbo = mVBOs.find(type);
 
 		if (vbo != mVBOs.end()) {
@@ -146,7 +169,7 @@ namespace neo {
 		mVBOs.erase(type);
 	}
 
-	const VertexBuffer& Mesh::getVBO(VertexType type) const {
+	const VertexBuffer& Mesh::getVBO(types::mesh::VertexType type) const {
 		auto vbo = mVBOs.find(type);
 		NEO_ASSERT(vbo != mVBOs.end(), "Attempting to retrieve a VertexBuffer that doesn't exist");
 		return vbo->second;
@@ -224,13 +247,15 @@ namespace neo {
 			mElementVBO = std::nullopt;
 		}
 
-		mPrimitiveType = GL_TRIANGLE_STRIP;
+		if (mPrimitiveType == types::mesh::Primitive::Triangles) {
+			mPrimitiveType = types::mesh::Primitive::TriangleStrip;
+		}
 	}
 
 	void Mesh::clear() {
-		removeVertexBuffer(VertexType::Position);
-		removeVertexBuffer(VertexType::Normal);
-		removeVertexBuffer(VertexType::Texture0);
+		removeVertexBuffer(types::mesh::VertexType::Position);
+		removeVertexBuffer(types::mesh::VertexType::Normal);
+		removeVertexBuffer(types::mesh::VertexType::Texture0);
 		removeElementBuffer();
 	}
 
