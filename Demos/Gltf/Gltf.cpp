@@ -92,7 +92,7 @@ namespace Gltf {
 				drawDefines.set(NORMAL_MAP);
 			}
 			if (material.mMetallicRoughnessMap) {
-				//drawDefines.set(METAL_ROUGHNESS_MAP);
+				drawDefines.set(METAL_ROUGHNESS_MAP);
 			}
 
 			auto& resolvedShader = shader->getResolvedInstance(drawDefines);
@@ -110,7 +110,7 @@ namespace Gltf {
 			resolvedShader.bindUniform("metalness", material.mMetallic);
 			resolvedShader.bindUniform("roughness", material.mRoughness);
 			if (material.mMetallicRoughnessMap) {
-				//resolvedShader.bindTexture("metalRoughnessmap", *material.mMetallicRoughnessMap);
+				resolvedShader.bindTexture("metalRoughnessMap", *material.mMetallicRoughnessMap);
 			}
 
 			// UBO candidates
@@ -164,7 +164,7 @@ namespace Gltf {
 			ecs.addComponent<DirectionalLightComponent>(entity);
 		}
 
-		GLTFImporter::Scene scene = Loader::loadGltfScene("Sponza/Sponza.gltf");
+		GLTFImporter::Scene scene = Loader::loadGltfScene("MetalRoughSpheres/MetalRoughSpheres.gltf");
 		for (auto& node : scene.mMeshNodes) {
 			auto entity = ecs.createEntity();
 			if (!node.mName.empty()) {
