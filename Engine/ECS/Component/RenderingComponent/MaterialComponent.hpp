@@ -47,6 +47,12 @@ namespace neo {
 		}
 
 		virtual void imGuiEditor() override {
+			ImGui::ColorEdit3("Albedo", &mAlbedoColor[0]);
+			ImGui::SliderFloat("Metallness", &mMetallic, 0.f, 1.f); // This should be a bool?
+			ImGui::SliderFloat("Roughness", &mRoughness, 0.f, 1.f);
+			if (mEmissiveMap) {
+				ImGui::ColorEdit3("Emissive Factor", &mEmissiveFactor[0]);
+			}
 		};
 	};
 

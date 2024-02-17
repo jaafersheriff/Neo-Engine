@@ -135,6 +135,10 @@ namespace Sponza {
 				ecs.addComponent<AlphaTestComponent>(entity);
 			}
 			ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
+
+			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+			ecs.addComponent<GBufferShaderComponent>(entity);
+			ecs.addComponent<PhongShaderComponent>(entity);
 		}
 
 		/* Systems - order matters! */

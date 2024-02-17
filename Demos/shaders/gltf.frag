@@ -64,7 +64,7 @@ void main() {
 
 #ifdef DEBUG_EMISSIVE
 #ifdef EMISSIVE
-	color = 1vec4(emissiveFactor * texture(emissiveMap, fragTex).rgb, 1.0);
+	color = vec4(emissiveFactor * texture(emissiveMap, fragTex).rgb, 1.0);
 #else
 	color = vec4(0, 0, 0, 1);
 #endif
@@ -94,7 +94,7 @@ float attFactor = 1;
 
 	color.rgb = getPhong(V, N, L, fAlbedo.rgb * 0.2, fAlbedo.rgb, vec3(1.0), 13.0, lightCol, attFactor);
 #ifdef OCCLUSION_MAP
-	color.rgb *= texture(occlusionMap, fragTex).rgb;
+	color.rgb *= texture(occlusionMap, fragTex).r;
 #endif
 	color.a = 1.0;
 }

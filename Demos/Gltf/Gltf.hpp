@@ -22,7 +22,6 @@ namespace Gltf {
 		virtual void imGuiEditor(ECS& ecs) override;
 
 	private:
-		bool mDoOcclusionMap = true;
 		DebugMode mDebugMode = DebugMode::Off;
 	};
 }

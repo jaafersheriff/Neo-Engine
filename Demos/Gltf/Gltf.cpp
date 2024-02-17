@@ -24,7 +24,7 @@ using namespace neo;
 
 namespace Gltf {
 	template<typename... CompTs>
-	void _drawGltf(const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, bool doOcclusionMap) {
+	void _drawGltf(const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode) {
 		TRACY_GPU();
 
 		ShaderDefines passDefines({});
@@ -105,7 +105,7 @@ namespace Gltf {
 			if (material.mMetallicRoughnessMap) {
 				drawDefines.set(METAL_ROUGHNESS_MAP);
 			}
-			if (doOcclusionMap && material.mOcclusionMap) {
+			if (material.mOcclusionMap) {
 				drawDefines.set(OCCLUSION_MAP);
 			}
 			if (material.mEmissiveMap) {
@@ -130,7 +130,7 @@ namespace Gltf {
 				resolvedShader.bindTexture("metalRoughnessMap", *material.mMetallicRoughnessMap);
 			}
 
-			if (doOcclusionMap && material.mOcclusionMap) {
+			if (material.mOcclusionMap) {
 				resolvedShader.bindTexture("occlusionMap", *material.mOcclusionMap);
 			}
 
@@ -214,7 +214,7 @@ namespace Gltf {
 
 	void Demo::imGuiEditor(ECS& ecs) {
 		NEO_UNUSED(ecs);
-		ImGui::Checkbox("Do occlusion map", &mDoOcclusionMap);
+
 		static std::unordered_map<DebugMode, const char*> sDebugModeStrings = {
 			{DebugMode::Off, "Off"},
 			{DebugMode::MetalRoughness, "MetalRoughness"},
@@ -255,8 +255,8 @@ namespace Gltf {
 
 		sceneTarget->clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		_drawGltf<OpaqueComponent>(ecs, cameraEntity, mDebugMode, mDoOcclusionMap);
-		_drawGltf<AlphaTestComponent>(ecs, cameraEntity, mDebugMode, mDoOcclusionMap);
+		_drawGltf<OpaqueComponent>(ecs, cameraEntity, mDebugMode);
+		_drawGltf<AlphaTestComponent>(ecs, cameraEntity, mDebugMode);
 
 		backbuffer.clear(glm::vec4(clearColor, 1.f), GL_COLOR_BUFFER_BIT);
 		drawFXAA(backbuffer, *sceneTarget->mTextures[0]);

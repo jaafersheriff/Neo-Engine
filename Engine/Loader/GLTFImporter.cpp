@@ -201,6 +201,8 @@ namespace {
 	}
 
 	neo::Texture* _loadTexture(const tinygltf::Model& model, int index, int texCoord) {
+		using namespace neo; 
+
 		if (index == -1) {
 			return nullptr;
 		}
@@ -211,12 +213,16 @@ namespace {
 		const auto& texture = model.textures[index];
 		const auto& image = model.images[texture.source];
 
-		if (!image.uri.empty() && neo::Library::hasTexture(image.uri)) {
-			NEO_LOG_W("Found a texture that's already been loading: %s", image.uri.c_str());
-			return neo::Library::getTexture(image.uri);
+		if (!texture.name.empty()) {
+			NEO_LOG_V("Processing texture %s", texture.name.c_str());
 		}
 
-		neo::TextureFormat format;
+		if (!image.uri.empty() && Library::hasTexture(image.uri)) {
+			NEO_LOG_V("Texture %s is already loaded -- skipping", image.uri.c_str());
+			return Library::getTexture(image.uri);
+		}
+
+		TextureFormat format;
 		format.mBaseFormat = _getGLBaseFormat(image.component);
 		format.mType = _getGLType(image.bits);
 		format.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, format.mBaseFormat);
@@ -224,21 +230,21 @@ namespace {
 			const auto& sampler = model.samplers[texture.sampler];
 			if (sampler.minFilter > -1) {
 				if (sampler.minFilter != sampler.magFilter) {
-					NEO_LOG_W("Different min/mag filters -- this isn't supported. Defaulting to min filter");
+					NEO_LOG_E("Different min/mag filters -- this isn't supported. Defaulting to min filter");
 				}
 				format.mFilter = _translateTinyGltfFilter(sampler.magFilter);
 			}
 			if (sampler.wrapS > -1) {
 				if (sampler.wrapS != sampler.wrapT) {
-					NEO_LOG_W("Different s/t wraps -- this isn't supported. Defaulting to s wrap");
+					NEO_LOG_E("Different s/t wraps -- this isn't supported. Defaulting to s wrap");
 				}
 				format.mMode = _translateTinyGltfWrap(sampler.wrapS);
 			}
 		}
 
-		neo::Texture* neo_texture = new neo::Texture(format, glm::uvec2(image.width, image.height), image.image.data());
+		Texture* neo_texture = new Texture(format, glm::uvec2(image.width, image.height), image.image.data());
 		if (!image.uri.empty()) {
-			neo::Library::insertTexture(image.uri, neo_texture);
+			Library::insertTexture(image.uri, neo_texture);
 		}
 		return neo_texture;
 	}
@@ -277,9 +283,18 @@ namespace {
 			return;
 		}
 
-		for (auto& gltfMesh : model.meshes[node.mesh].primitives) {
+		if (!node.name.empty()) {
+			NEO_LOG_V("Processing node %s", node.name.c_str());
+		}
+
+		if (!model.meshes[node.mesh].name.empty()) {
+			NEO_LOG_V("Processing mesh %s", model.meshes[node.mesh].name.c_str());
+		}
+		for (int i = 0; i < model.meshes[node.mesh].primitives.size(); i++) {
+			const auto& gltfMesh = model.meshes[node.mesh].primitives[i];
+
 			GLTFImporter::Node outNode;
-			//outNode.mName = node.name;
+			outNode.mName = node.name + std::to_string(i);
 			outNode.mSpatial = nodeSpatial;
 
 			outNode.mMesh.mMesh = new Mesh;
@@ -289,22 +304,25 @@ namespace {
 			if (gltfMesh.indices > -1)
 			{
 				auto& accessor = model.accessors[gltfMesh.indices];
-				NEO_ASSERT(!accessor.sparse.isSparse, "TODO : sparse?");
+				NEO_ASSERT(!accessor.sparse.isSparse, "Sparse accessor unsupported");
+
 				auto& bufferView = model.bufferViews[accessor.bufferView];
-				NEO_ASSERT(bufferView.target == TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER, "Not a index buffer?");
+				NEO_ASSERT(bufferView.target == TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER, "Indices bufferview isn't an index buffer?");
+
 				const auto& buffer = model.buffers[bufferView.buffer];
 
-				const uint8_t* bufferData = static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset + accessor.byteOffset;
 				outNode.mMesh.mMesh->addElementBuffer(
 					static_cast<uint32_t>(accessor.count),
 					static_cast<uint32_t>(_translateTinyGltfComponentType(accessor.componentType)),
 					static_cast<uint32_t>(bufferView.byteLength),
-					bufferData
+					// TODO - this offset math might be bad
+					static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset + accessor.byteOffset
 				);
 			}
 
 			for (const auto& attribute : gltfMesh.attributes) {
 				const auto& accessor = model.accessors[attribute.second];
+				NEO_ASSERT(!accessor.sparse.isSparse, "Sparse accessor unsupported");
 
 				VertexType vertexType = VertexType::Position;
 				if (attribute.first == "POSITION") {
@@ -322,7 +340,7 @@ namespace {
 					vertexType = VertexType::Texture0;
 				}
 				else if (attribute.first == "TANGENT") {
-					NEO_LOG_W("TODO: Tangents aren't supported, skipping");
+					NEO_LOG_E("TODO: Tangents aren't supported, skipping");
 					continue;
 				}
 				else {
@@ -330,37 +348,37 @@ namespace {
 					continue;
 				}
 
-				NEO_ASSERT(!accessor.sparse.isSparse, "TODO: sparse");
-
 				const auto& bufferView = model.bufferViews[accessor.bufferView];
 				const auto& buffer = model.buffers[bufferView.buffer];
-
-				const uint32_t stride = accessor.ByteStride(bufferView);
-				const uint8_t* bufferData = static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset;
-				GLenum format = _translateTinyGltfComponentType(accessor.componentType);
 
 				// TODO : this is duplicating vertex data. Would be better to split glBufferData from glVertexAttribPointer
 				outNode.mMesh.mMesh->addVertexBuffer(
 					vertexType,
 					tinygltf::GetNumComponentsInType(accessor.type),
-					stride,
-					format,
+					accessor.ByteStride(bufferView),
+					_translateTinyGltfComponentType(accessor.componentType),
 					accessor.normalized,
 					static_cast<uint32_t>(accessor.count),
 					static_cast<uint32_t>(accessor.byteOffset),
 					static_cast<uint32_t>(bufferView.byteLength),
-					bufferData
+					static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset
 				);
 			}
 			if (!model.meshes[node.mesh].name.empty()) {
-				Library::insertMesh(model.meshes[node.mesh].name, outNode.mMesh);
+				Library::insertMesh(model.meshes[node.mesh].name + std::to_string(i), outNode.mMesh);
 			}
 
 			if (gltfMesh.material > -1) {
 				auto& material = model.materials[gltfMesh.material];
 
 				if (!material.lods.empty()) {
-					NEO_LOG_W("Material has LODs -- unsupported");
+					NEO_LOG_W("Material %s has LODs -- unsupported", material.name.c_str());
+				}
+				if (material.doubleSided) {
+					NEO_LOG_W("Material %s is double sided -- unsupported", material.name.c_str());
+				}
+				if (material.alphaCutoff != 0.5) {
+					NEO_LOG_W("Material %s has nonstandard alpha cutoff: %0.2f -- unsupported", material.name.c_str(), material.alphaCutoff);
 				}
 
 				if (material.alphaMode == "OPAQUE") {
@@ -371,19 +389,17 @@ namespace {
 				}
 				else if (material.alphaMode == "BLEND") {
 					outNode.mAlphaMode = GLTFImporter::Node::AlphaMode::Transparent;
-					NEO_FAIL("Transparency is unsupported");
+					NEO_LOG_W("Material %s is transparent -- unsupported", material.name.c_str());
 				}
 
 				outNode.mMaterial.mNormalMap = _loadTexture(model, material.normalTexture.index, material.normalTexture.texCoord);
 				if (material.normalTexture.scale != 1.0) {
-					NEO_LOG_W("Normal map has a weird scale");
+					NEO_LOG_W("Material %s normal map has non-uniform scale -- unsupported", material.name.c_str());
 				}
+
 				outNode.mMaterial.mOcclusionMap = _loadTexture(model, material.occlusionTexture.index, material.occlusionTexture.texCoord);
-				if (outNode.mMaterial.mOcclusionMap) {
-					NEO_LOG_W("Occlusion map loaded, but it's gunna be unused");
-				}
 				if (material.occlusionTexture.strength != 1.0) {
-					NEO_LOG_W("Occlusion map has a weird strength");
+					NEO_LOG_W("Material %s occlusion map has a non-uniform strength -- unsupported", material.name.c_str());
 				}
 
 				if (material.emissiveFactor.size() == 3) {
@@ -416,6 +432,7 @@ namespace neo {
 	namespace GLTFImporter {
 
 		Scene loadScene(const std::string& path, glm::mat4 baseTransform) {
+			NEO_ASSERT(path.length() > 4 && path.substr(path.length() - 4, 4) == "gltf", "Unsupported file type");
 
 			tinygltf::Model model;
 			tinygltf::TinyGLTF loader;
@@ -423,20 +440,18 @@ namespace neo {
 			std::string warn;
 
 			bool ret = false;
-			NEO_ASSERT(path.substr(path.length() - 4, 4) == "gltf", "Unsupported file type");
 			ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
-
-			if (!warn.empty()) {
-				NEO_LOG_W("Warn: %s\n", warn.c_str());
-			}
-
-			if (!err.empty()) {
-				NEO_LOG_E("Err: %s\n", err.c_str());
-			}
 
 			NEO_ASSERT(ret, "tinygltf failed to parse %s", path.c_str());
 			if (!ret) {
 				return {};
+			}
+			if (!warn.empty()) {
+				NEO_LOG_W("tingltf Warning: %s", warn.c_str());
+			}
+
+			if (!err.empty()) {
+				NEO_LOG_E("tinygltf Error: %s", err.c_str());
 			}
 
 			// Translate tinygltf::Model to Loader::GltfScene
@@ -448,7 +463,7 @@ namespace neo {
 				NEO_LOG_W("%s contains cameras - ignoring", path.c_str());
 			}
 			if (model.defaultScene < 0 || model.scenes.size() > 1) {
-				NEO_LOG_W("%s has weird scene layout. Just using the default or first one", path.c_str());
+				NEO_LOG_W("%s has multiple scenes. Just using the default", path.c_str());
 			}
 
 			Scene outScene;
