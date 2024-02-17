@@ -140,7 +140,7 @@ namespace Gltf {
 		}
 
 
-		GLTFImporter::Scene scene = Loader::loadGltfScene("Box.gltf");
+		GLTFImporter::Scene scene = Loader::loadGltfScene("TextureSettingsTest/TextureSettingsTest.gltf");
 		for (auto& node : scene.mMeshNodes) {
 			auto entity = ecs.createEntity();
 			if (!node.mName.empty()) {

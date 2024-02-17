@@ -68,7 +68,9 @@ namespace {
 		case TINYGLTF_COMPONENT_TYPE_DOUBLE:
 			return GL_DOUBLE;
 		case TINYGLTF_COMPONENT_TYPE_FLOAT:
+			return GL_FLOAT;
 		default:
+			NEO_FAIL("Invalid component type: %d", tinyGltfComponentType);
 			return GL_FLOAT;
 		}
 	}
@@ -187,10 +189,10 @@ namespace {
 			return GL_REPEAT;
 			break;
 		case TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE:
-			return GL_CLAMP_TO_EDGE;
+			return GL_CLAMP;
 			break;
 		case TINYGLTF_TEXTURE_WRAP_MIRRORED_REPEAT:
-			return GL_MIRRORED_REPEAT;
+			return GL_MIRROR;
 			break;
 		default:
 			NEO_FAIL("Heh?");
@@ -204,29 +206,27 @@ namespace {
 			return;
 		}
 
-		GLTFImporter::Node outNode;
-		outNode.mName = node.name;
-
 		// Spatial
+		SpatialComponent nodeSpatial;
 		if (node.matrix.size() == 16) {
-			outNode.mSpatial.setModelMatrix(glm::mat4(glm::make_mat4(node.matrix.data())) * parentXform);
+			nodeSpatial.setModelMatrix(glm::mat4(glm::make_mat4(node.matrix.data())) * parentXform);
 		}
 		else {
 			if (node.translation.size() == 3) {
-				outNode.mSpatial.setPosition(glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
+				nodeSpatial.setPosition(glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
 			}
 			if (node.scale.size() == 3) {
-				outNode.mSpatial.setScale(glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
+				nodeSpatial.setScale(glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
 			}
 			if (node.rotation.size() == 4) {
 				glm::quat q = glm::make_quat(node.rotation.data());
-				outNode.mSpatial.setOrientation(glm::mat3_cast(q));
+				nodeSpatial.setOrientation(glm::mat3_cast(q));
 			}
-			outNode.mSpatial.setModelMatrix(outNode.mSpatial.getModelMatrix() * parentXform);
+			nodeSpatial.setModelMatrix(nodeSpatial.getModelMatrix() * parentXform);
 		}
 
 		for (auto& child : node.children) {
-			_processNode(model, model.nodes[child], outNode.mSpatial.getModelMatrix(), outScene);
+			_processNode(model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);
 		}
 
 		// Mesh
@@ -234,155 +234,158 @@ namespace {
 			return;
 		}
 
-		if (model.meshes[node.mesh].primitives.size() > 1) {
-			NEO_LOG_W("Mesh has >1 mesh? Using the first...");
-		}
-		auto& gltfMesh = model.meshes[node.mesh].primitives[0];
+		for (auto& gltfMesh : model.meshes[node.mesh].primitives) {
+			GLTFImporter::Node outNode;
+			//outNode.mName = node.name;
+			outNode.mSpatial = nodeSpatial;
 
-		outNode.mMesh.mMesh = new Mesh;
-		outNode.mMesh.mMesh->mPrimitiveType = _translateTinyGltfPrimitiveType(gltfMesh.mode);
+			outNode.mMesh.mMesh = new Mesh;
+			outNode.mMesh.mMesh->mPrimitiveType = _translateTinyGltfPrimitiveType(gltfMesh.mode);
 
-		// Indices
-		if (gltfMesh.indices > -1)
-		{
-			auto& accessor = model.accessors[gltfMesh.indices];
-			NEO_ASSERT(!accessor.sparse.isSparse, "TODO : sparse?");
-			auto& bufferView = model.bufferViews[accessor.bufferView];
-			NEO_ASSERT(bufferView.target == TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER, "Not a index buffer?");
-			const auto& buffer = model.buffers[bufferView.buffer];
+			// Indices
+			if (gltfMesh.indices > -1)
+			{
+				auto& accessor = model.accessors[gltfMesh.indices];
+				NEO_ASSERT(!accessor.sparse.isSparse, "TODO : sparse?");
+				auto& bufferView = model.bufferViews[accessor.bufferView];
+				NEO_ASSERT(bufferView.target == TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER, "Not a index buffer?");
+				const auto& buffer = model.buffers[bufferView.buffer];
 
-			const uint8_t* bufferData = static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset + accessor.byteOffset;
-			outNode.mMesh.mMesh->addElementBuffer(
-				static_cast<uint32_t>(accessor.count),
-				static_cast<uint32_t>(_translateTinyGltfComponentType(accessor.componentType)),
-				static_cast<uint32_t>(bufferView.byteLength),
-				bufferData
-			);
-		}
-
-		for (const auto& attribute : gltfMesh.attributes) {
-			const auto& accessor = model.accessors[attribute.second];
-
-			VertexType vertexType = VertexType::Position;
-			if (attribute.first == "POSITION") {
-				if (accessor.maxValues.size() == 3) {
-					outNode.mMesh.mMax = glm::vec3(accessor.maxValues[0], accessor.maxValues[1], accessor.maxValues[2]);
-				}
-				if (accessor.minValues.size() == 3) {
-					outNode.mMesh.mMin = glm::vec3(accessor.minValues[0], accessor.minValues[1], accessor.minValues[2]);
-				}
-			}
-			else if (attribute.first == "NORMAL") {
-				vertexType = VertexType::Normal;
-			}
-			else if (attribute.first == "TEXCOORD_0") {
-				vertexType = VertexType::Texture0;
-			}
-			else {
-				NEO_FAIL("TODO: unsupported attribute: %s", attribute.first.c_str());
-			}
-
-			NEO_ASSERT(!accessor.sparse.isSparse, "TODO: sparse");
-
-			const auto& bufferView = model.bufferViews[accessor.bufferView];
-			const auto& buffer = model.buffers[bufferView.buffer];
-
-			const uint32_t stride = accessor.ByteStride(bufferView);
-			const uint8_t* bufferData = static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset;
-			GLenum format = _translateTinyGltfComponentType(accessor.componentType);
-			outNode.mMesh.mMesh->addVertexBuffer(
-				vertexType,
-				tinygltf::GetNumComponentsInType(accessor.type),
-				stride,
-				format,
-				accessor.normalized,
-				static_cast<uint32_t>(accessor.count),
-				static_cast<uint32_t>(accessor.byteOffset),
-				static_cast<uint32_t>(bufferView.byteLength),
-				bufferData
-			);
-		}
-		if (!model.meshes[node.mesh].name.empty()) {
-			Library::insertMesh(model.meshes[node.mesh].name, outNode.mMesh);
-		}
-
-		if (gltfMesh.material > -1) {
-			auto& material = model.materials[gltfMesh.material];
-
-			if (!material.lods.empty()) {
-				NEO_LOG_W("Material has LODs -- unsupported");
-			}
-
-			if (material.alphaMode == "OPAQUE") {
-				outNode.mAlphaMode = GLTFImporter::Node::AlphaMode::Opaque;
-			}
-			else if (material.alphaMode == "MASK") {
-				outNode.mAlphaMode = GLTFImporter::Node::AlphaMode::AlphaTest;
-			}
-			else if (material.alphaMode == "BLEND") {
-				outNode.mAlphaMode = GLTFImporter::Node::AlphaMode::Transparent;
-				NEO_FAIL("Transparency is unsupported");
-			}
-
-			NEO_ASSERT(material.normalTexture.index == -1, "Normal maps unsupported");
-			NEO_ASSERT(material.occlusionTexture.index == -1, "Occlusion maps unsupported");
-
-			if (material.emissiveFactor.size() == 3) {
-				outNode.mMaterial.mEmissive = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
-			}
-			NEO_ASSERT(material.emissiveTexture.index == -1, "Emissive maps unsupported");
-
-			outNode.mMaterial.mMetallic = static_cast<float>(material.pbrMetallicRoughness.metallicFactor);
-			outNode.mMaterial.mRoughness = static_cast<float>(material.pbrMetallicRoughness.roughnessFactor);
-			if (material.pbrMetallicRoughness.baseColorFactor.size() == 4) {
-				outNode.mMaterial.mAlbedoColor = glm::vec4(
-					material.pbrMetallicRoughness.baseColorFactor[0],
-					material.pbrMetallicRoughness.baseColorFactor[1],
-					material.pbrMetallicRoughness.baseColorFactor[2],
-					material.pbrMetallicRoughness.baseColorFactor[3]
+				const uint8_t* bufferData = static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset + accessor.byteOffset;
+				outNode.mMesh.mMesh->addElementBuffer(
+					static_cast<uint32_t>(accessor.count),
+					static_cast<uint32_t>(_translateTinyGltfComponentType(accessor.componentType)),
+					static_cast<uint32_t>(bufferView.byteLength),
+					bufferData
 				);
 			}
-			if (material.pbrMetallicRoughness.baseColorTexture.index > -1) {
-				if (material.pbrMetallicRoughness.baseColorTexture.texCoord > 0) {
-					NEO_LOG_W("Texture wants to use a different texcoord? This probably won't work");
-				}
-				const auto& texture = model.textures[material.pbrMetallicRoughness.baseColorTexture.index];
-				const auto& image = model.images[texture.source];
 
-				if (Library::hasTexture(image.uri)) {
-					NEO_LOG_W("Found a texture that's already been loading: %s", image.uri.c_str());
-					outNode.mMaterial.mAlbedoMap = Library::getTexture(image.uri);
+			for (const auto& attribute : gltfMesh.attributes) {
+				const auto& accessor = model.accessors[attribute.second];
+
+				VertexType vertexType = VertexType::Position;
+				if (attribute.first == "POSITION") {
+					if (accessor.maxValues.size() == 3) {
+						outNode.mMesh.mMax = glm::vec3(accessor.maxValues[0], accessor.maxValues[1], accessor.maxValues[2]);
+					}
+					if (accessor.minValues.size() == 3) {
+						outNode.mMesh.mMin = glm::vec3(accessor.minValues[0], accessor.minValues[1], accessor.minValues[2]);
+					}
+				}
+				else if (attribute.first == "NORMAL") {
+					vertexType = VertexType::Normal;
+				}
+				else if (attribute.first == "TEXCOORD_0") {
+					vertexType = VertexType::Texture0;
 				}
 				else {
-					TextureFormat format;
-					format.mBaseFormat = _getGLBaseFormat(image.component);
-					format.mType = _getGLType(image.bits);
-					format.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, format.mBaseFormat);
-					if (texture.sampler > -1) {
-						const auto& sampler = model.samplers[texture.sampler];
-						if (sampler.minFilter > -1) {
-							if (sampler.minFilter != sampler.magFilter) {
-								NEO_LOG_W("Different min/mag filters -- this isn't supported. Defaulting to min filter");
-							}
-							format.mFilter = _translateTinyGltfFilter(sampler.magFilter);
-						}
-						if (sampler.wrapS > -1) {
-							if (sampler.wrapS != sampler.wrapT) {
-								NEO_LOG_W("Different s/t wraps -- this isn't supported. Defaulting to s wrap");
-							}
-							format.mMode = _translateTinyGltfWrap(sampler.wrapS);
-						}
-					}
-
-					Texture* neo_texture = new Texture(format, glm::uvec2(image.width, image.height), image.image.data());
-					outNode.mMaterial.mAlbedoMap = neo_texture;
-					Library::insertTexture(image.uri, neo_texture);
+					NEO_FAIL("TODO: unsupported attribute: %s", attribute.first.c_str());
 				}
+
+				NEO_ASSERT(!accessor.sparse.isSparse, "TODO: sparse");
+
+				const auto& bufferView = model.bufferViews[accessor.bufferView];
+				const auto& buffer = model.buffers[bufferView.buffer];
+
+				const uint32_t stride = accessor.ByteStride(bufferView);
+				const uint8_t* bufferData = static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset;
+				GLenum format = _translateTinyGltfComponentType(accessor.componentType);
+				outNode.mMesh.mMesh->addVertexBuffer(
+					vertexType,
+					tinygltf::GetNumComponentsInType(accessor.type),
+					stride,
+					format,
+					accessor.normalized,
+					static_cast<uint32_t>(accessor.count),
+					static_cast<uint32_t>(accessor.byteOffset),
+					static_cast<uint32_t>(bufferView.byteLength),
+					bufferData
+				);
 			}
-			NEO_ASSERT(material.pbrMetallicRoughness.metallicRoughnessTexture.index == -1, "Metal/roughness maps unsupported");
+			if (!model.meshes[node.mesh].name.empty()) {
+				Library::insertMesh(model.meshes[node.mesh].name, outNode.mMesh);
+			}
+
+			if (gltfMesh.material > -1) {
+				auto& material = model.materials[gltfMesh.material];
+
+				if (!material.lods.empty()) {
+					NEO_LOG_W("Material has LODs -- unsupported");
+				}
+
+				if (material.alphaMode == "OPAQUE") {
+					outNode.mAlphaMode = GLTFImporter::Node::AlphaMode::Opaque;
+				}
+				else if (material.alphaMode == "MASK") {
+					outNode.mAlphaMode = GLTFImporter::Node::AlphaMode::AlphaTest;
+				}
+				else if (material.alphaMode == "BLEND") {
+					outNode.mAlphaMode = GLTFImporter::Node::AlphaMode::Transparent;
+					NEO_FAIL("Transparency is unsupported");
+				}
+
+				NEO_ASSERT(material.normalTexture.index == -1, "Normal maps unsupported");
+				NEO_ASSERT(material.occlusionTexture.index == -1, "Occlusion maps unsupported");
+
+				if (material.emissiveFactor.size() == 3) {
+					outNode.mMaterial.mEmissive = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
+				}
+				NEO_ASSERT(material.emissiveTexture.index == -1, "Emissive maps unsupported");
+
+				outNode.mMaterial.mMetallic = static_cast<float>(material.pbrMetallicRoughness.metallicFactor);
+				outNode.mMaterial.mRoughness = static_cast<float>(material.pbrMetallicRoughness.roughnessFactor);
+				if (material.pbrMetallicRoughness.baseColorFactor.size() == 4) {
+					outNode.mMaterial.mAlbedoColor = glm::vec4(
+						material.pbrMetallicRoughness.baseColorFactor[0],
+						material.pbrMetallicRoughness.baseColorFactor[1],
+						material.pbrMetallicRoughness.baseColorFactor[2],
+						material.pbrMetallicRoughness.baseColorFactor[3]
+					);
+				}
+				if (material.pbrMetallicRoughness.baseColorTexture.index > -1) {
+					if (material.pbrMetallicRoughness.baseColorTexture.texCoord > 0) {
+						NEO_LOG_W("Texture wants to use a different texcoord? This probably won't work");
+					}
+					const auto& texture = model.textures[material.pbrMetallicRoughness.baseColorTexture.index];
+					const auto& image = model.images[texture.source];
+
+					if (Library::hasTexture(image.uri)) {
+						NEO_LOG_W("Found a texture that's already been loading: %s", image.uri.c_str());
+						outNode.mMaterial.mAlbedoMap = Library::getTexture(image.uri);
+					}
+					else {
+						TextureFormat format;
+						format.mBaseFormat = _getGLBaseFormat(image.component);
+						format.mType = _getGLType(image.bits);
+						format.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, format.mBaseFormat);
+						if (texture.sampler > -1) {
+							const auto& sampler = model.samplers[texture.sampler];
+							if (sampler.minFilter > -1) {
+								if (sampler.minFilter != sampler.magFilter) {
+									NEO_LOG_W("Different min/mag filters -- this isn't supported. Defaulting to min filter");
+								}
+								format.mFilter = _translateTinyGltfFilter(sampler.magFilter);
+							}
+							if (sampler.wrapS > -1) {
+								if (sampler.wrapS != sampler.wrapT) {
+									NEO_LOG_W("Different s/t wraps -- this isn't supported. Defaulting to s wrap");
+								}
+								format.mMode = _translateTinyGltfWrap(sampler.wrapS);
+							}
+						}
+
+						Texture* neo_texture = new Texture(format, glm::uvec2(image.width, image.height), image.image.data());
+						outNode.mMaterial.mAlbedoMap = neo_texture;
+						Library::insertTexture(image.uri, neo_texture);
+					}
+				}
+				NEO_ASSERT(material.pbrMetallicRoughness.metallicRoughnessTexture.index == -1, "Metal/roughness maps unsupported");
+
+			}
+
+			outScene.mMeshNodes.push_back(outNode);
 		}
 
-		outScene.mMeshNodes.push_back(outNode);
 	}
 }
 
