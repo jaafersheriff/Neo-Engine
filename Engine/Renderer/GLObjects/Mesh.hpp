@@ -28,7 +28,7 @@ namespace neo {
 
 			/* VBOs */
 			void addVertexBuffer_DEPRECATED(types::mesh::VertexType type, uint32_t attribArray, uint32_t stride, const std::vector<float>& buffer = {});
-			void addVertexBuffer(types::mesh::VertexType type, uint32_t components, uint32_t stride, uint32_t format, bool normalized, uint32_t count, uint32_t offset, uint32_t byteSize, const uint8_t* data = nullptr);
+			void addVertexBuffer(types::mesh::VertexType type, uint32_t components, uint32_t stride, types::ByteFormats format, bool normalized, uint32_t count, uint32_t offset, uint32_t byteSize, const uint8_t* data = nullptr);
 			void updateVertexBuffer_DEPRECATED(types::mesh::VertexType type, const std::vector<float>& buffer);
 			void updateVertexBuffer_DEPRECATED(types::mesh::VertexType type, uint32_t size);
 			void removeVertexBuffer(types::mesh::VertexType type);

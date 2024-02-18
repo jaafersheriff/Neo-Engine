@@ -8,7 +8,7 @@
 namespace neo {
 
 	LineMeshComponent::LineMeshComponent(std::optional<glm::vec3> overrideColor) :
-		mMesh(new Mesh(GL_LINE_STRIP)),
+		mMesh(new Mesh(types::mesh::Primitive::LineStrip)),
 		mDirty(false),
 		mWriteDepth(true),
 		mUseParentSpatial(false),
