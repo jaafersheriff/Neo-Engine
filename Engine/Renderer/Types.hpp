@@ -58,10 +58,16 @@ namespace neo {
 			};
 
 			enum class InternalFormats : uint8_t {
+				// Wtf byte type are these?
 				R8,
 				RG8,
 				RGB8,
 				RGBA8,
+				R16,
+				RG16,
+				RGB16,
+				RGBA16,
+
 				R16UI,
 				RG16UI,
 				RGB16UI,

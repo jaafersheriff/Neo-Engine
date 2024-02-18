@@ -175,24 +175,24 @@ namespace Sponza {
 	void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		auto sceneTarget = Library::getPooledFramebuffer({ viewport.mSize, {
-			TextureFormat_DEPRECATED{
-				TextureTarget::Texture2D,
-				GL_RGB16,
-				GL_RGB,
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGB16,
+				types::texture::BaseFormats::RGB
 			},
-			TextureFormat_DEPRECATED{
-				TextureTarget::Texture2D,
-				GL_DEPTH_COMPONENT16,
-				GL_DEPTH_COMPONENT,
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::Depth16,
+				types::texture::BaseFormats::Depth
 			}
 		} }, "Scene target");
 
 		auto shadowMap = Library::getPooledFramebuffer({ glm::uvec2(4096, 4096), { 
-			TextureFormat_DEPRECATED{
-				TextureTarget::Texture2D,
-				GL_DEPTH_COMPONENT16,
-				GL_DEPTH_COMPONENT
-			} 
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::Depth16,
+				types::texture::BaseFormats::Depth
+			}
 		} }, "Shadow map");
 		if (mDrawShadows) {
 			shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), GL_DEPTH_BUFFER_BIT);
@@ -243,10 +243,10 @@ namespace Sponza {
 		auto ao = mDrawAO ? drawAO(ecs, cameraEntity, gbuffer, targetSize, mAORadius, mAOBias) : nullptr;
 
 		auto lightResolve = Library::getPooledFramebuffer({ targetSize, {
-			TextureFormat_DEPRECATED{
-				TextureTarget::Texture2D,
-				GL_RGB16F,
-				GL_RGB,
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGB16,
+				types::texture::BaseFormats::RGB
 			}
 		} }, "LightResolve");
 		lightResolve->bind();

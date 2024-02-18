@@ -26,8 +26,8 @@ namespace Compute {
 		ParticleMeshComponent() {
 			MeshData_DEPRECATED meshData;
 			mMesh = meshData.mMesh = new Mesh;
-			mMesh->mPrimitiveType = GL_POINTS;
-			mMesh->addVertexBuffer_DEPRECATED(VertexType::Position, 0, 4); // positions
+			mMesh->mPrimitiveType = types::mesh::Primitive::Points;
+			mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 4); // positions
 			updateBuffers();
 			Library::insertMesh("Particles", meshData);
 		}
@@ -53,7 +53,7 @@ namespace Compute {
 				positions[i * 4 + 2] = pos.z;
 				positions[i * 4 + 3] = 1.f;
 			}
-			mMesh->updateVertexBuffer_DEPRECATED(VertexType::Position, positions);
+			mMesh->updateVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, positions);
 		}
 
 		virtual std::string getName() const override {

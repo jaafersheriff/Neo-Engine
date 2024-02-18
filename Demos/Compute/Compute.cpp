@@ -79,7 +79,7 @@ namespace Compute {
 			}
 
 			// Bind mesh
-			auto& position = mesh.mMesh->getVBO(VertexType::Position);
+			auto& position = mesh.mMesh->getVBO(types::mesh::VertexType::Position);
 			glBindVertexArray(mesh.mMesh->mVAOID);
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, position.vboID);
 

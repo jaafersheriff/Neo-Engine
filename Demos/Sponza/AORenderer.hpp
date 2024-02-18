@@ -36,7 +36,20 @@ namespace Sponza {
 				kernel.push_back(sample.y);
 				kernel.push_back(sample.z);
 			};
-			Library::createTexture("aoKernel", { TextureTarget::Texture1D, GL_RGB32F, GL_RGB, GL_NEAREST, GL_REPEAT, GL_UNSIGNED_BYTE }, glm::uvec3(size, 0, 0), reinterpret_cast<uint32_t*>(kernel.data()));
+			Library::createTexture("aoKernel", { 
+				types::texture::Target::Texture1D, 
+				types::texture::InternalFormats::RGB32F,
+				types::texture::BaseFormats::RGB,
+				{
+					types::texture::Filters::Nearest,
+					types::texture::Filters::Nearest,
+				},
+				{
+					types::texture::Wraps::Repeat,
+					types::texture::Wraps::Repeat,
+				},
+				types::ByteFormats::UnsignedByte }, 
+			glm::uvec3(size, 0, 0), reinterpret_cast<uint32_t*>(kernel.data()));
 		}
 
 		void _generateNoise(uint32_t dim) {
@@ -47,7 +60,20 @@ namespace Sponza {
 				noise[i + 1] = util::genRandom();
 				noise[i + 2] = util::genRandom();
 			}
-			Library::createTexture("aoNoise", { TextureTarget::Texture2D, GL_RGB32F, GL_RGB, GL_NEAREST, GL_REPEAT, GL_UNSIGNED_BYTE }, glm::uvec3(dim, dim, 0), reinterpret_cast<uint32_t*>(noise.data()));
+			Library::createTexture("aoNoise", { 
+				types::texture::Target::Texture2D, 
+				types::texture::InternalFormats::RGB32F,
+				types::texture::BaseFormats::RGB,
+				{
+					types::texture::Filters::Nearest,
+					types::texture::Filters::Nearest,
+				},
+				{
+					types::texture::Wraps::Repeat,
+					types::texture::Wraps::Repeat,
+				},
+				types::ByteFormats::UnsignedByte }, 
+			glm::uvec3(dim, dim, 0), reinterpret_cast<uint32_t*>(noise.data()));
 		}
 	}
 
@@ -63,13 +89,19 @@ namespace Sponza {
 		// Make a one-off framebuffer for the base AO
 		// Do base AO at half res
 		auto baseAOTarget = Library::getPooledFramebuffer({ glm::max(glm::uvec2(1,1), targetSize / 2u), {
-			TextureFormat_DEPRECATED{
-				TextureTarget::Texture2D,
-				GL_R16F,
-				GL_RED,
-				GL_LINEAR,
-				GL_REPEAT,
-				GL_FLOAT
+			TextureFormat {
+				types::texture::Target::Texture2D, 
+				types::texture::InternalFormats::R16F,
+				types::texture::BaseFormats::Red,
+				{
+					types::texture::Filters::Linear,
+					types::texture::Filters::Linear,
+				},
+				{
+					types::texture::Wraps::Repeat,
+					types::texture::Wraps::Repeat,
+				},
+				types::ByteFormats::Float 
 			},
 		} }, "AO base");
 		baseAOTarget->bind();
@@ -107,13 +139,19 @@ namespace Sponza {
 			TRACY_GPUN("AO Blur");
 			// Do base AO at full res?
 			auto blurredAO = Library::getPooledFramebuffer({ targetSize, {
-				TextureFormat_DEPRECATED{
-					TextureTarget::Texture2D,
-					GL_R16F,
-					GL_RED,
-					GL_LINEAR,
-					GL_REPEAT,
-					GL_FLOAT
+				TextureFormat {
+					types::texture::Target::Texture2D, 
+					types::texture::InternalFormats::R16F,
+					types::texture::BaseFormats::Red,
+					{
+						types::texture::Filters::Linear,
+						types::texture::Filters::Linear,
+					},
+					{
+						types::texture::Wraps::Repeat,
+						types::texture::Wraps::Repeat,
+					},
+					types::ByteFormats::Float 
 				},
 			} }, "AO blurred");
 			blurredAO->bind();

@@ -78,7 +78,6 @@ namespace Cornell {
 			ecs.addComponent<PointLightComponent>(entity, glm::vec3(3.0, 1.0, 5.0f));
 		}
 
-		/* Bunny object */
 		insertObject(ecs, "backwall",  Library::getMesh("quad").mMesh, glm::vec3(0.f, 0.5f, 0.f), glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f));
 		insertObject(ecs, "leftwall",  Library::getMesh("quad").mMesh, glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(1.f), glm::vec3(0.f, glm::radians(90.f), 0.f), glm::vec3(1.f, 0.f, 0.f));
 		insertObject(ecs, "rightwall", Library::getMesh("quad").mMesh, glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.f), glm::vec3(0.f, glm::radians(-90.f), 0.f), glm::vec3(0.f, 1.f, 0.f));
@@ -98,7 +97,7 @@ namespace Cornell {
 		auto sceneTarget = Library::getPooledFramebuffer({ viewport.mSize, {
 			TextureFormat {
 				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGBA8,
+				types::texture::InternalFormats::RGB8,
 				types::texture::BaseFormats::RGB
 			},
 			TextureFormat {
