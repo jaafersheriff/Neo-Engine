@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "Renderer/Types.hpp"
+
 #include <string>
 
 namespace neo {
@@ -31,6 +33,7 @@ namespace neo {
 			const void* userParam
 		);
 		int32_t getGLShaderStage(ShaderStage type);
+		uint32_t getGLByteFormat(types::ByteFormats format);
 		void checkFrameBuffer();
 		void printProgramInfoLog(uint32_t program);
 		void printShaderInfoLog(uint32_t shader);

@@ -100,8 +100,8 @@ namespace neo {
 			}
 		}
 
-		GLint getGLShaderStage(ShaderStage type) {
-			switch(type) {
+		int32_t getGLShaderStage(ShaderStage type) {
+			switch (type) {
 			case(ShaderStage::VERTEX):
 				return GL_VERTEX_SHADER;
 			case(ShaderStage::FRAGMENT):
@@ -114,9 +114,36 @@ namespace neo {
 				return GL_TESS_CONTROL_SHADER;
 			case(ShaderStage::TESSELLATION_EVAL):
 				return GL_TESS_EVALUATION_SHADER;
+			default:
+				NEO_FAIL("Invalid ShaderStage: %d", type);
+				return 0;
 			}
-			NEO_FAIL("Invalid ShaderStage: %d", type);
-			return 0;
+		}
+
+		uint32_t getGLByteFormat(types::ByteFormats format) {
+			switch (format) {
+			case types::ByteFormats::UnsignedByte:
+				return GL_UNSIGNED_BYTE;
+			case types::ByteFormats::Byte:
+				return GL_BYTE;
+			case types::ByteFormats::Short:
+				return GL_SHORT;
+			case types::ByteFormats::UnsignedShort:
+				return GL_UNSIGNED_SHORT;
+			case types::ByteFormats::Int:
+				return GL_INT;
+			case types::ByteFormats::UnsignedInt:
+				return GL_UNSIGNED_INT;
+			case types::ByteFormats::UnsignedInt24_8:
+				return GL_UNSIGNED_INT_24_8;
+			case types::ByteFormats::Double:
+				return GL_DOUBLE;
+			case types::ByteFormats::Float:
+				return GL_FLOAT;
+			default:
+				NEO_FAIL("Invalid byte format");
+				return GL_FLOAT;
+			}
 		}
 
 		void checkError(const char *str) {
