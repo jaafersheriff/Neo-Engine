@@ -20,7 +20,7 @@ layout (location = 2) out vec4 gNormal;
 void main() {
 	vec4 fAlbedo = albedo;
 #ifdef ALBEDO_MAP
-	fAlbedo *= texture(diffuseMap, fragTex);
+	fAlbedo *= texture(albedoMap, fragTex);
 #endif
 
 
@@ -28,7 +28,7 @@ void main() {
 	alphaDiscard(fAlbedo.a);
 #endif
 
-	gDiffuse = vec4(albedo.rgb, 1.f);
+	gDiffuse = vec4(fAlbedo.rgb, 1.f);
 	gWorld = vec4(fragPos.rgb, 1.f);
 	gNormal = vec4(normalize(fragNor), 1.f);
 }  

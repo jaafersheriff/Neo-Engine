@@ -166,7 +166,6 @@ namespace neo {
 					_findUniforms(processedSource.c_str(), uniforms, bindings);
 				}
 				else {
-					NEO_LOG_E("Invalid shader:\n%s", processedSource.c_str());
 					mValid = false;
 					return mValid;
 				}

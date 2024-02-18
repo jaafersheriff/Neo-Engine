@@ -68,7 +68,7 @@ void main() {
 	vec3 V = normalize(camPos - fragPos);
 	vec3 N = fragNor;
 
-	color.rgb = getPhong(V, N, L, albedo * 0.2, albedo, vec3(1.0), 33.0, lightCol, attFactor);
+	color.rgb = lambertianDiffuse(L, N, albedo.rgb, lightCol, attFactor);
 	color.rgb *= attFactor * attFactor;
 	color.a = 1.0;
 }
