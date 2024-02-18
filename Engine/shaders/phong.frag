@@ -63,7 +63,7 @@ float attFactor = 1;
 	color.rgb = lambertianDiffuse(L, N, fAlbedo.rgb, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
-	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.1);
+	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.2);
 	color.rgb *= visibility;
 #endif
 

@@ -445,6 +445,7 @@ namespace neo {
 			std::string warn;
 
 			bool ret = false;
+			stbi_set_flip_vertically_on_load(false);
 			ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
 
 			if (!warn.empty()) {

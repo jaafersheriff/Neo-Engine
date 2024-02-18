@@ -66,15 +66,15 @@ namespace Sponza {
 
 			for (int i = 0; i < count; i++) {
 				glm::vec3 position(
-					util::genRandom(-150.f, 200.f),
-					util::genRandom(0.f, 85.f),
-					util::genRandom(-100.f, 100.f)
+					util::genRandom(-15.f, 15.f),
+					util::genRandom(0.f, 10.f),
+					util::genRandom(-7.5f, 7.5f)
 				);
-				glm::vec3 scale(util::genRandom(10.f, 40.f));
+				glm::vec3 scale(util::genRandom(1.f, 5.f));
 				const auto entity = ecs.createEntity();
 				ecs.addComponent<LightComponent>(entity, util::genRandomVec3(0.3f, 1.f));
 				ecs.addComponent<PointLightComponent>(entity);
-				ecs.addComponent<SinTranslateComponent>(entity, glm::vec3(0.f, util::genRandom(0.f, 45.f), 0.f), position);
+				ecs.addComponent<SinTranslateComponent>(entity, glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position);
 				ecs.addComponent<SpatialComponent>(entity, position, scale);
 			}
 		}
@@ -89,7 +89,7 @@ namespace Sponza {
 	void Demo::init(ECS& ecs) {
 
 		/* Game objects */
-		Camera camera(ecs, 45.f, 1.f, 300.f, glm::vec3(0, 0.6f, 5), 0.4f, 150.f);
+		Camera camera(ecs, 45.f, 0.1f, 35.f, glm::vec3(0, 0.6f, 5), 0.4f, 15.f);
 		ecs.addComponent<MainCameraComponent>(camera.mEntity);
 		ecs.addComponent<FrustumComponent>(camera.mEntity);
 		ecs.addComponent<FrustumFitSourceComponent>(camera.mEntity);
@@ -119,7 +119,7 @@ namespace Sponza {
 			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
 		}
 
-		GLTFImporter::Scene scene = Loader::loadGltfScene("Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(100.f)));
+		GLTFImporter::Scene scene = Loader::loadGltfScene("Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
 		for (auto& node : scene.mMeshNodes) {
 			auto entity = ecs.createEntity();
 			if (!node.mName.empty()) {
@@ -143,7 +143,7 @@ namespace Sponza {
 
 		/* Systems - order matters! */
 		auto& camSys = ecs.addSystem<CameraControllerSystem>();
-		camSys.mSuperSpeed = 10.f;
+		camSys.mSuperSpeed = 3.f;
 		ecs.addSystem<SinTranslateSystem>();
 		ecs.addSystem<FrustumSystem>();
 		ecs.addSystem<FrustaFittingSystem>();

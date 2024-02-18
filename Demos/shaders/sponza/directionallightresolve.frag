@@ -32,7 +32,7 @@ void main() {
 	float attFactor = 1;
 	vec3 L = normalize(lightDir);
 
-	color.rgb = albedo.rgb + lambertianDiffuse(L, N, albedo.rgb, lightCol, attFactor);
+	color.rgb = lambertianDiffuse(L, N, albedo.rgb, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
 	vec4 shadowCoord = lightTransform * vec4(worldPos, 1.0);

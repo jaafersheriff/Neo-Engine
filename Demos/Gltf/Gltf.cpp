@@ -208,6 +208,26 @@ namespace Gltf {
 			ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
 		}
 
+		{
+			GLTFImporter::Scene _scene = Loader::loadGltfScene("Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
+			for (auto& node : _scene.mMeshNodes) {
+				auto entity = ecs.createEntity();
+				if (!node.mName.empty()) {
+					ecs.addComponent<TagComponent>(entity, node.mName);
+				}
+				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
+				ecs.addComponent<MeshComponent>(entity, node.mMesh);
+				ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh->mMin, node.mMesh->mMax);
+				if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
+					ecs.addComponent<OpaqueComponent>(entity);
+				}
+				else if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::AlphaTest) {
+					ecs.addComponent<AlphaTestComponent>(entity);
+				}
+				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
+			}
+		}
+
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
 	}

@@ -42,11 +42,13 @@ uniform vec3 camPos;
 out vec4 color;
 
 void main() {
-	vec3 fAlbedo = albedo.rgb;
+	vec4 fAlbedo = albedo;
 #ifdef ALBEDO_MAP
-	vec4 albedoSample = texture(albedoMap, fragTex);
-	fAlbedo *= albedoSample.rgb;
+	fAlbedo *= texture(albedoMap, fragTex);
+#endif
 
+#ifdef ALPHA_TEST
+	alphaDiscard(fAlbedo.a);
 #endif
 
 #ifdef DEBUG_METAL_ROUGHNESS
@@ -92,7 +94,7 @@ float attFactor = 1;
 	vec3 L = vec3(0, 0, 0);
 #endif
 
-	color.rgb = getPhong(V, N, L, fAlbedo.rgb * 0.2, fAlbedo.rgb, vec3(1.0), 13.0, lightCol, attFactor);
+	color.rgb = lambertianDiffuse(L, N, fAlbedo.rgb, lightCol, attFactor);
 #ifdef OCCLUSION_MAP
 	color.rgb *= texture(occlusionMap, fragTex).r;
 #endif

@@ -23,7 +23,6 @@ void main() {
 	fAlbedo *= texture(albedoMap, fragTex);
 #endif
 
-
 #ifdef ALPHA_TEST
 	alphaDiscard(fAlbedo.a);
 #endif
