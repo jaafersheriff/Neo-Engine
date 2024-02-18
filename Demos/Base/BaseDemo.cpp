@@ -73,11 +73,8 @@ namespace Base {
 			ecs.addComponent<BoundingBoxComponent>(bunny, bunnyNode.mMesh->mMin, bunnyNode.mMesh->mMax);
 			ecs.addComponent<PhongShaderComponent>(bunny);
 			ecs.addComponent<OpaqueComponent>(bunny);
-			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(bunny);
-			material->mAmbient = glm::vec3(0.2f);
-			material->mDiffuse = glm::vec3(1.f, 0.f, 1.f);
-			material->mSpecular = glm::vec3(1.f);
-			material->mShininess = 20.f;
+			auto material = ecs.addComponent<MaterialComponent>(bunny);
+			material->mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
 		}
 
 		/* Ground plane */
@@ -88,9 +85,9 @@ namespace Base {
 			ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad"));
 			ecs.addComponent<PhongShaderComponent>(plane);
 			ecs.addComponent<AlphaTestComponent>(plane);
-			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(plane);
-			material->mAmbient = glm::vec3(1.f);
-			material->mDiffuseMap = Library::loadTexture("grid.png");
+			auto material = ecs.addComponent<MaterialComponent>(plane);
+			material->mAlbedoColor = glm::vec4(1.f);
+			material->mAlbedoMap = Library::loadTexture("grid.png");
 		}
 
 		/* Systems - order matters! */

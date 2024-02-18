@@ -6,22 +6,10 @@ in vec4 fragPos;
 in vec3 fragNor;
 in vec2 fragTex;
 
-#if defined(ALPHA_TEST) && defined(ALPHA_MAP)
-layout(binding = 0) uniform sampler2D alphaMap;
+uniform vec4 albedo;
+#ifdef ALBEDO_MAP
+layout(binding = 0) uniform sampler2D albedoMap;
 #endif
-
-#ifdef DIFFUSE_MAP
-layout(binding = 1) uniform sampler2D diffuseMap;
-#else
-uniform vec3 diffuseColor;
-#endif
-
-#ifdef SPECULAR_MAP
-layout(binding = 2) uniform sampler2D specularMap;
-#else
-uniform vec3 specularColor;
-#endif
-uniform float shine;
 
 #ifdef NORMAL_MAP
 layout(binding = 3) uniform sampler2D normalMap;
@@ -40,33 +28,18 @@ uniform vec3 lightPos;
 uniform vec3 lightAtt;
 #endif
 
-uniform vec3 ambientColor;
-
 uniform vec3 camPos;
 
 out vec4 color;
 
 void main() {
-	vec4 albedo = vec4(0,0,0,1);
-#ifdef DIFFUSE_MAP
-	albedo = texture(diffuseMap, fragTex);
-#else
-	albedo.rgb = diffuseColor;
-#endif
-
-	vec3 specular = vec3(1.0);
-#ifdef SPECULAR_MAP
-	specular = texture(specularMap, fragTex);
-#else
-	specular = specularColor;
+	vec4 fAlbedo = albedo;
+#ifdef ALBEDO_MAP
+	fAlbedo *= texture(albedoMap, fragTex);
 #endif
 
 #ifdef ALPHA_TEST
-	#ifdef ALPHA_MAP
-	alphaDiscard(texture(alphaMap, fragTex).r);
-	#else
-	alphaDiscard(albedo.a);
-	#endif
+	alphaDiscard(fAlbedo.a);
 #endif
 
 	// TODO - normal mapping
@@ -87,7 +60,7 @@ float attFactor = 1;
 	vec3 L = vec3(0, 0, 0);
 #endif
 
-	color.rgb = getPhong(V, N, L, ambientColor, albedo.rgb, specular, shine, lightCol, attFactor);
+	color.rgb = lambertianDiffuse(L, N, fAlbedo.rgb, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
 	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.1);

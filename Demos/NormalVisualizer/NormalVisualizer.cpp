@@ -70,7 +70,7 @@ namespace NormalVisualizer {
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.6f, 0.f));
 			ecs.addComponent<MeshComponent>(entity, bunnyNode.mMesh);
-			ecs.addComponent<MaterialComponent_DEPRECATED>(entity);
+			ecs.addComponent<MaterialComponent>(entity);
 			ecs.addComponent<PhongShaderComponent>(entity);
 			ecs.addComponent<WireframeShaderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);

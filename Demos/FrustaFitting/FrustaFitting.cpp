@@ -112,10 +112,8 @@ namespace FrustaFitting {
 			auto mesh = util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere");
 			Renderable sphere(ecs, mesh, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
 			ecs.addComponent<BoundingBoxComponent>(sphere.mEntity, mesh->mMin, mesh->mMax);
-			MaterialComponent_DEPRECATED material;
-			material.mAmbient = glm::vec3(0.3f);
-			material.mDiffuse = util::genRandomVec3();
-			ecs.addComponent<MaterialComponent_DEPRECATED>(sphere.mEntity, material);
+			auto material = ecs.addComponent<MaterialComponent>(sphere.mEntity);
+			material->mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
 			ecs.addComponent<PhongShaderComponent>(sphere.mEntity);
 			ecs.addComponent<ShadowCasterShaderComponent>(sphere.mEntity);
 		}
@@ -123,10 +121,8 @@ namespace FrustaFitting {
 		/* Ground plane */
 		Renderable receiver(ecs, Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(50.f, 50.f, 1.f), glm::vec3(-1.56f, 0, 0));
 		ecs.addComponent<BoundingBoxComponent>(receiver.mEntity, Library::getMesh("quad")->mMin, Library::getMesh("quad")->mMin);
-		MaterialComponent_DEPRECATED material;
-		material.mAmbient = glm::vec3(0.2f);
-		material.mDiffuse = glm::vec3(0.7f);
-		ecs.addComponent<MaterialComponent_DEPRECATED>(receiver.mEntity, material);
+		auto material = ecs.addComponent<MaterialComponent>(receiver.mEntity);
+		material->mAlbedoColor = glm::vec4(glm::vec3(0.7f), 1.f);
 		ecs.addComponent<PhongShaderComponent>(receiver.mEntity);
 		ecs.addComponent<TagComponent>(receiver.mEntity, "Ground");
 

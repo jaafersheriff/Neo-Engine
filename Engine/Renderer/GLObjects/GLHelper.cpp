@@ -165,10 +165,9 @@ namespace neo {
 
 			if (infologLength > 0) {
 				infoLog = (GLchar *)malloc(infologLength + 1);
-				NEO_ASSERT(infoLog != NULL, "Could not allocate InfoLog buffer");
 				glGetShaderInfoLog(shader, infologLength, &charsWritten, infoLog);
 				infoLog[charsWritten + 1] = '\0';
-				NEO_LOG_E("Shader InfoLog:\n%s\n\n", infoLog);
+				NEO_LOG_E("Shader InfoLog:\n%s", infoLog);
 				free(infoLog);
 			}
 			checkError(GET_FILE_LINE);

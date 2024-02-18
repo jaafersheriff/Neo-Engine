@@ -10,7 +10,6 @@ layout(binding = 4) uniform sampler2D shadowMap;
 #endif
 
 layout(binding = 0) uniform sampler2D gAlbedo;
-layout(binding = 1) uniform sampler2D gSpecular;
 layout(binding = 2) uniform sampler2D gWorld;
 layout(binding = 3) uniform sampler2D gNormal;
 
@@ -23,7 +22,6 @@ out vec4 color;
 
 void main() {
 	vec4 albedo = texture(gAlbedo, fragTex);
-	vec4 specular = texture(gSpecular, fragTex);
 	vec3 worldPos = texture(gWorld, fragTex).rgb;
 	vec3 norm = texture(gNormal, fragTex).rgb;
 
@@ -34,7 +32,7 @@ void main() {
 	float attFactor = 1;
 	vec3 L = normalize(lightDir);
 
-	color.rgb = getPhong(V, N, L, albedo.rgb * 0.2, albedo.rgb, specular.rgb, specular.a, lightCol, attFactor);
+	color.rgb = getPhong(V, N, L, albedo.rgb * 0.2, albedo.rgb, vec3(1), 33.f, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
 	vec4 shadowCoord = lightTransform * vec4(worldPos, 1.0);

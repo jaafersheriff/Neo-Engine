@@ -45,10 +45,10 @@ namespace neo {
 				}
 			}
 
-			auto material = ecs.cGetComponent<const MaterialComponent_DEPRECATED>(entity);
+			auto material = ecs.cGetComponent<const MaterialComponent>(entity);
 			Texture* alphaMap = nullptr;
-			if (containsAlphaTest && material && material->mAlphaMap) {
-				alphaMap = material->mAlphaMap;
+			if (containsAlphaTest && material && material->mAlbedoMap) {
+				alphaMap = material->mAlbedoMap;
 			}
 
 			auto& resolvedShader = view.get<const ShadowCasterShaderComponent>(entity).getResolvedInstance(passDefines);

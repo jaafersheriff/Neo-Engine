@@ -82,7 +82,7 @@ namespace neo {
 		}
 
 		ShaderDefines drawDefines(passDefines);
-		const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent_DEPRECATED, const SpatialComponent, const CompTs...>();
+		const auto& view = ecs.getView<const PhongShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
 		for (auto entity : view) {
 			// VFC
 			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
@@ -97,16 +97,12 @@ namespace neo {
 
 			drawDefines.reset();
 
-			const auto& material = view.get<const MaterialComponent_DEPRECATED>(entity);
-			MakeDefine(ALPHA_MAP);
-			MakeDefine(DIFFUSE_MAP);
-			MakeDefine(SPECULAR_MAP);
+			const auto& material = view.get<const MaterialComponent>(entity);
+			MakeDefine(ALBEDO_MAP);
 			MakeDefine(NORMAL_MAP);
-			if (containsAlphaTest && material.mAlphaMap) {
-				drawDefines.set(ALPHA_MAP);
-			}
-			if (material.mDiffuseMap) {
-				drawDefines.set(DIFFUSE_MAP);
+
+			if (material.mAlbedoMap) {
+				drawDefines.set(ALBEDO_MAP);
 			}
 			if (material.mNormalMap) {
 				drawDefines.set(NORMAL_MAP);
@@ -115,24 +111,10 @@ namespace neo {
 			auto& resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(drawDefines);
 			resolvedShader.bind();
 
-
-			if (containsAlphaTest && material.mAlphaMap) {
-				resolvedShader.bindTexture("alphaMap", *material.mAlphaMap);
+			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
+			if (material.mAlbedoMap) {
+				resolvedShader.bindTexture("albedoMap", *material.mAlbedoMap);
 			}
-
-			if (material.mDiffuseMap) {
-				resolvedShader.bindTexture("diffuseMap", *material.mDiffuseMap);
-			}
-			else {
-				resolvedShader.bindUniform("diffuseColor", material.mDiffuse);
-			}
-			if (material.mSpecularMap) {
-				resolvedShader.bindTexture("specularMap", *material.mSpecularMap);
-			}
-			else {
-				resolvedShader.bindUniform("specularColor", material.mSpecular);
-			}
-			resolvedShader.bindUniform("shine", material.mShininess);
 
 			if (material.mNormalMap) {
 				resolvedShader.bindTexture("normalMap", *material.mNormalMap);
@@ -160,7 +142,6 @@ namespace neo {
 			const auto& drawSpatial = view.get<const SpatialComponent>(entity);
 			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
-			resolvedShader.bindUniform("ambientColor", material.mAmbient);
 
 			view.get<const MeshComponent>(entity).mMesh->draw();
 		}

@@ -34,11 +34,8 @@ namespace Cornell {
 			ecs.addComponent<TagComponent>(entity, name);
 			ecs.addComponent<MeshComponent>(entity, mesh);
 			ecs.addComponent<SpatialComponent>(entity, position, scale, rotation);
-			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(entity);
-			material->mAmbient = glm::vec3(0.2f);
-			material->mDiffuse = color;
-			material->mSpecular = glm::vec3(1.f);
-			material->mShininess = 1.f;
+			auto material = ecs.addComponent<MaterialComponent>(entity);
+			material->mAlbedoColor = glm::vec4(color.x, color.y, color.z, 1.f);
 			ecs.addComponent<PhongShaderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
 		}
@@ -70,9 +67,8 @@ namespace Cornell {
 			ecs.addComponent<MainLightComponent>(entity);
 			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f));
 			ecs.addComponent<MeshComponent>(entity, Library::getMesh("quad"));
-			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(entity);
-			material->mAmbient = glm::vec3(1.f);
-			material->mDiffuse = glm::vec3(1.f);
+			auto material = ecs.addComponent<MaterialComponent>(entity);
+			material->mAlbedoColor = glm::vec4(1.f);
 			ecs.addComponent<PhongShaderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
 			ecs.addComponent<PointLightComponent>(entity, glm::vec3(3.0, 1.0, 5.0f));

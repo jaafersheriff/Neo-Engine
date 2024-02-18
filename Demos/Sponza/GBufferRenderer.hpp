@@ -31,12 +31,6 @@ namespace Sponza {
 				types::texture::InternalFormats::RGB16F,
 				types::texture::BaseFormats::RGB
 			},
-			// Specular/Shine
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGBA16F,
-				types::texture::BaseFormats::RGBA
-			},
 			// World 
 			// TODO - could do everything in view space to get rid of this
 			TextureFormat {
@@ -85,7 +79,7 @@ namespace Sponza {
 		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 
 		ShaderDefines drawDefines(passDefines);
-		const auto& view = ecs.getView<const GBufferShaderComponent, const MeshComponent, const MaterialComponent_DEPRECATED, const SpatialComponent, const CompTs...>();
+		const auto& view = ecs.getView<const GBufferShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
 		for (auto entity : view) {
 			// VFC
 			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
@@ -100,19 +94,11 @@ namespace Sponza {
 
 			drawDefines.reset();
 
-			const auto& material = view.get<const MaterialComponent_DEPRECATED>(entity);
-			MakeDefine(ALPHA_MAP);
-			MakeDefine(DIFFUSE_MAP);
-			MakeDefine(SPECULAR_MAP);
+			const auto& material = view.get<const MaterialComponent>(entity);
+			MakeDefine(ALBEDO_MAP);
 			MakeDefine(NORMAL_MAP);
-			if (containsAlphaTest && material.mAlphaMap) {
-				drawDefines.set(ALPHA_MAP);
-			}
-			if (material.mDiffuseMap) {
-				drawDefines.set(DIFFUSE_MAP);
-			}
-			if (material.mSpecularMap) {
-				drawDefines.set(SPECULAR_MAP);
+			if (material.mAlbedoMap) {
+				drawDefines.set(ALBEDO_MAP);
 			}
 			if (material.mNormalMap) {
 				drawDefines.set(NORMAL_MAP);
@@ -121,24 +107,10 @@ namespace Sponza {
 			auto& resolvedShader = view.get<const GBufferShaderComponent>(entity).getResolvedInstance(drawDefines);
 			resolvedShader.bind();
 
-			if (containsAlphaTest && material.mAlphaMap) {
-				resolvedShader.bindTexture("alphaMap", *material.mAlphaMap);
+			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
+			if (material.mAlbedoMap) {
+				resolvedShader.bindTexture("albedoMap", *material.mAlbedoMap);
 			}
-
-			if (material.mDiffuseMap) {
-				resolvedShader.bindTexture("diffuseMap", *material.mDiffuseMap);
-			}
-			else {
-				resolvedShader.bindUniform("diffuseColor", material.mDiffuse);
-			}
-			if (material.mSpecularMap) {
-				resolvedShader.bindTexture("specularMap", *material.mSpecularMap);
-			}
-			else {
-				resolvedShader.bindUniform("specularColor", material.mSpecular);
-			}
-			resolvedShader.bindUniform("shine", material.mShininess);
-
 
 			if (material.mNormalMap) {
 				resolvedShader.bindTexture("normalMap", *material.mNormalMap);

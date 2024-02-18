@@ -69,9 +69,8 @@ namespace DrawStress {
 			ecs.addComponent<BoundingBoxComponent>(cube, Library::getMesh("cube")->mMin, Library::getMesh("cube")->mMax);
 			ecs.addComponent<PhongShaderComponent>(cube);
 			ecs.addComponent<OpaqueComponent>(cube);
-			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(cube);
-			material->mAmbient = glm::vec3(0.2f);
-			material->mDiffuse = util::genRandomVec3();
+			auto material = ecs.addComponent<MaterialComponent>(cube);
+			material->mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
 		}
 
 		/* Systems - order matters! */
