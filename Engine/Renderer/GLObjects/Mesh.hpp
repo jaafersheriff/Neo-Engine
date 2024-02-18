@@ -10,7 +10,8 @@ namespace neo {
 	struct VertexBuffer {
 		uint32_t vboID = 0;
 		uint32_t attribArray = 0;
-		uint32_t stride = 3;
+		uint32_t components = 3;
+		uint32_t stride = 0;
 		uint32_t elementCount = 0;
 		uint32_t format = 0;
 	};
@@ -25,10 +26,8 @@ namespace neo {
 			uint32_t mVAOID;
 
 			/* VBOs */
-			void addVertexBuffer_DEPRECATED(types::mesh::VertexType type, uint32_t attribArray, uint32_t stride, const std::vector<float>& buffer = {});
 			void addVertexBuffer(types::mesh::VertexType type, uint32_t components, uint32_t stride, types::ByteFormats format, bool normalized, uint32_t count, uint32_t offset, uint32_t byteSize, const uint8_t* data = nullptr);
-			void updateVertexBuffer_DEPRECATED(types::mesh::VertexType type, const std::vector<float>& buffer);
-			void updateVertexBuffer_DEPRECATED(types::mesh::VertexType type, uint32_t size);
+			void updateVertexBuffer(types::mesh::VertexType type, uint32_t count, uint32_t byteSize, uint8_t* data);
 			void removeVertexBuffer(types::mesh::VertexType type);
 
 			void addElementBuffer(uint32_t count, types::ByteFormats format, uint32_t byteSize, const uint8_t* data = nullptr);

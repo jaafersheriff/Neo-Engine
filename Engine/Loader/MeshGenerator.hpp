@@ -35,7 +35,17 @@ namespace neo {
 			  0.5f, -0.5f,  0.5f,
 			  0.5f,  0.5f,  0.5f,
 			 -0.5f,  0.5f,  0.5f };
-			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
+			mesh->addVertexBuffer(
+				types::mesh::VertexType::Position, 
+				3, 
+				0, 
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(verts.size()),
+				0,
+				static_cast<uint32_t>(verts.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(verts.data())
+			);
 			mesh->mMin = glm::vec3(-0.5f);
 			mesh->mMax = glm::vec3(0.5f);
 
@@ -64,7 +74,17 @@ namespace neo {
 			  0,  0,  1,
 			  0,  0,  1,
 			  0,  0,  1 };
-			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
+			mesh->addVertexBuffer(
+				types::mesh::VertexType::Normal, 
+				3, 
+				0, 
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(normals.size()),
+				0,
+				static_cast<uint32_t>(normals.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(normals.data())
+			);
 
 			std::vector<float> uvs =
 			{ 1.f, 0.f,
@@ -96,7 +116,17 @@ namespace neo {
 				1.f, 0.f,
 				1.f, 1.f,
 				0.f, 1.f };
-			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, uvs);
+			mesh->addVertexBuffer(
+				types::mesh::VertexType::Texture0, 
+				2, 
+				0, 
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(uvs.size()),
+				0,
+				static_cast<uint32_t>(uvs.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(uvs.data())
+			);
 
 			std::vector<uint32_t> indices =
 			{ 0,  1,  2,
@@ -130,7 +160,17 @@ namespace neo {
 			   0.5f, -0.5f,  0.f,
 			  -0.5f,  0.5f,  0.f,
 			   0.5f,  0.5f,  0.f };
-			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
+			mesh->addVertexBuffer(
+				types::mesh::VertexType::Position, 
+				3, 
+				0, 
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(verts.size()),
+				0,
+				static_cast<uint32_t>(verts.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(verts.data())
+			);
 			mesh->mMin = glm::vec3(-0.5f, -0.5f, -0.1f);
 			mesh->mMax = glm::vec3(0.5f, 0.5f, 0.1f);
 
@@ -139,14 +179,34 @@ namespace neo {
 			  0.f, 0.f, 1.f,
 			  0.f, 0.f, 1.f,
 			  0.f, 0.f, 1.f };
-			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
+			mesh->addVertexBuffer(
+				types::mesh::VertexType::Normal, 
+				3, 
+				0, 
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(normals.size()),
+				0,
+				static_cast<uint32_t>(normals.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(normals.data())
+			);
 
 			std::vector<float> uvs =
 			{ 0.f, 0.f,
 			  1.f, 0.f,
 			  0.f, 1.f,
 			  1.f, 1.f };
-			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, uvs);
+			mesh->addVertexBuffer(
+				types::mesh::VertexType::Texture0, 
+				2, 
+				0, 
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(uvs.size()),
+				0,
+				static_cast<uint32_t>(uvs.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(uvs.data())
+			);
 
 			std::vector<uint32_t> indices =
 			{ 0, 1, 2,
@@ -261,9 +321,40 @@ namespace neo {
 				tex.push_back(glm::clamp(0.5f + std::asin(verts[i + 1]) / util::PI, 0.f, 1.f));
 			}
 
-			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
-			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, verts);
-			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, tex);
+			mesh->addVertexBuffer(
+				types::mesh::VertexType::Position, 
+				3, 
+				0, 
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(verts.size()),
+				0,
+				static_cast<uint32_t>(verts.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(verts.data())
+			);
+			mesh->addVertexBuffer(
+				types::mesh::VertexType::Normal, 
+				3, 
+				0, 
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(verts.size()),
+				0,
+				static_cast<uint32_t>(verts.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(verts.data())
+			);
+
+			mesh->addVertexBuffer(
+				types::mesh::VertexType::Texture0, 
+				2, 
+				0, 
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(tex.size()),
+				0,
+				static_cast<uint32_t>(tex.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(tex.data())
+			);
 			mesh->addElementBuffer(
 				static_cast<uint32_t>(ele.size()),
 				types::ByteFormats::UnsignedInt,
@@ -357,9 +448,40 @@ namespace neo {
 				}
 			}
 
-			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, vertices);
-			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
-			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, textureCoords);
+			mesh->addVertexBuffer(
+				types::mesh::VertexType::Position, 
+				3, 
+				0, 
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(vertices.size()),
+				0,
+				static_cast<uint32_t>(vertices.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(vertices.data())
+			);
+			mesh->addVertexBuffer(
+				types::mesh::VertexType::Normal, 
+				3, 
+				0, 
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(normals.size()),
+				0,
+				static_cast<uint32_t>(normals.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(normals.data())
+			);
+
+			mesh->addVertexBuffer(
+				types::mesh::VertexType::Texture0, 
+				2, 
+				0, 
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(textureCoords.size()),
+				0,
+				static_cast<uint32_t>(textureCoords.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(textureCoords.data())
+			);
 			mesh->addElementBuffer(
 				static_cast<uint32_t>(indices.size()),
 				types::ByteFormats::UnsignedInt,

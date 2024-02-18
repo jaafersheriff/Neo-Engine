@@ -26,7 +26,18 @@ namespace Compute {
 		ParticleMeshComponent() {
 			mMesh = new Mesh;
 			mMesh->mPrimitiveType = types::mesh::Primitive::Points;
-			mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 4); // positions
+			mMesh->addVertexBuffer(
+				types::mesh::VertexType::Position,
+				4,
+				0,
+				types::ByteFormats::Float,
+				false,
+				0,
+				0,
+				0,
+				nullptr
+			);
+
 			updateBuffers();
 			Library::insertMesh("Particles", mMesh);
 		}
@@ -50,9 +61,14 @@ namespace Compute {
 				positions[i * 4 + 0] = pos.x;
 				positions[i * 4 + 1] = pos.y;
 				positions[i * 4 + 2] = pos.z;
-				positions[i * 4 + 3] = 1.f;
+				positions[i * 4 + 3] = 1.f; // TODO - this is useless and costs perf. Get rid of it
 			}
-			mMesh->updateVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, positions);
+			mMesh->updateVertexBuffer(
+				types::mesh::VertexType::Position, 
+				static_cast<uint32_t>(positions.size()),
+				static_cast<uint32_t>(positions.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(positions.data())
+			);
 		}
 
 		virtual std::string getName() const override {

@@ -15,8 +15,28 @@ namespace neo {
 		mOverrideColor(overrideColor)
 	{
 
-		mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3);
-		mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3);
+		mMesh->addVertexBuffer(
+			types::mesh::VertexType::Position, 
+			3,
+			0,
+			types::ByteFormats::Float,
+			false,
+			0,
+			0,
+			3 * sizeof(float),
+			nullptr
+		);
+		mMesh->addVertexBuffer(
+			types::mesh::VertexType::Normal, 
+			3,
+			0,
+			types::ByteFormats::Float,
+			false,
+			0,
+			0,
+			3 * sizeof(float),
+			nullptr
+		);
 	}
 
 	const Mesh& LineMeshComponent::getMesh() const {
@@ -34,8 +54,18 @@ namespace neo {
 				colors[i * 3 + 1] = mNodes[i].color.g;
 				colors[i * 3 + 2] = mNodes[i].color.b;
 			}
-			mMesh->updateVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, positions);
-			mMesh->updateVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, colors);
+			mMesh->updateVertexBuffer(
+				types::mesh::VertexType::Position, 
+				static_cast<uint32_t>(positions.size()),
+				static_cast<uint32_t>(positions.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(positions.data())
+			);
+			mMesh->updateVertexBuffer(
+				types::mesh::VertexType::Normal, 
+				static_cast<uint32_t>(colors.size()),
+				static_cast<uint32_t>(colors.size() * sizeof(float)),
+				reinterpret_cast<uint8_t*>(colors.data())
+			);
 			mDirty = false;
 		}
 

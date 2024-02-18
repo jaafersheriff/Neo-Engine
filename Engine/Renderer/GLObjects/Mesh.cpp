@@ -63,35 +63,9 @@ namespace neo {
 		}
 		else {
 			const auto& positions = getVBO(types::mesh::VertexType::Position);
-			ServiceLocator<Renderer>::ref().mStats.mNumTriangles += positions.elementCount / positions.stride / 3;
+			ServiceLocator<Renderer>::ref().mStats.mNumTriangles += positions.elementCount / positions.components; // This is wrong, need to also divide by primitive size
 			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, positions.elementCount);
 		}
-	}
-
-	void Mesh::addVertexBuffer_DEPRECATED(types::mesh::VertexType type, uint32_t attribArray, uint32_t stride, const std::vector<float>& buffer) {
-		NEO_ASSERT(mVBOs.find(type) == mVBOs.end(), "Attempting to add a VertexBuffer that already exists");
-
-		auto vertexBuffer = VertexBuffer{};
-		vertexBuffer.attribArray = attribArray;
-		vertexBuffer.stride = stride;
-		vertexBuffer.elementCount = static_cast<uint32_t>(buffer.size());
-		vertexBuffer.format = GL_FLOAT;
-
-		glBindVertexArray(mVAOID);
-		glGenBuffers(1, (GLuint *)&vertexBuffer.vboID);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID);
-
-		if (buffer.size()) {
-			glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_STATIC_DRAW);
-		}
-		glEnableVertexAttribArray(attribArray);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID);
-		glVertexAttribPointer(attribArray, stride, GL_FLOAT, GL_FALSE, 0, (const void *)0);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
-		mVBOs[type] = vertexBuffer;
 	}
 
 	void Mesh::addVertexBuffer(types::mesh::VertexType type, uint32_t components, uint32_t stride, types::ByteFormats format, bool normalized, uint32_t count, uint32_t offset, uint32_t byteSize, const uint8_t* buffer) {
@@ -100,6 +74,7 @@ namespace neo {
 		auto vertexBuffer = VertexBuffer{};
 		vertexBuffer.attribArray = static_cast<uint32_t>(type);
 		vertexBuffer.stride = stride;
+		vertexBuffer.components = components;
 		vertexBuffer.elementCount = count;
 		vertexBuffer.format = GLHelper::getGLByteFormat(format);
 
@@ -115,7 +90,7 @@ namespace neo {
 
 #pragma warning(push)
 #pragma warning(disable: 4312)
-		glVertexAttribPointer(vertexBuffer.attribArray, components, GLHelper::getGLByteFormat(format), normalized ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<uint8_t*>(NULL + offset));
+		glVertexAttribPointer(vertexBuffer.attribArray, components, vertexBuffer.format, normalized ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<uint8_t*>(NULL + offset));
 #pragma warning(pop)
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -124,35 +99,19 @@ namespace neo {
 		mVBOs[type] = vertexBuffer;
 	}
 
-	void Mesh::updateVertexBuffer_DEPRECATED(types::mesh::VertexType type, const std::vector<float>& buffer) {
+	void Mesh::updateVertexBuffer(types::mesh::VertexType type, uint32_t count, uint32_t byteSize, uint8_t* data) {
 		TRACY_GPU();
 
 		const auto& vbo = mVBOs.find(type);
 		NEO_ASSERT(vbo != mVBOs.end(), "Attempting to update a VertexBuffer that doesn't exist");
 		auto& vertexBuffer = vbo->second;
-		vertexBuffer.elementCount = static_cast<uint32_t>(buffer.size());
+		vertexBuffer.elementCount = count;
 
 		glBindVertexArray(mVAOID);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID);
-		if (buffer.size()) {
-			glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_DYNAMIC_DRAW);
+		if (byteSize) {
+			glBufferData(GL_ARRAY_BUFFER, byteSize, data, GL_DYNAMIC_DRAW);
 		}
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
-
-	void Mesh::updateVertexBuffer_DEPRECATED(types::mesh::VertexType type, uint32_t size) {
-		TRACY_GPU();
-
-		NEO_ASSERT(size > 0, "Attempting to update a VertexBuffer with no data");
-		const auto& vbo = mVBOs.find(type);
-		NEO_ASSERT(vbo != mVBOs.end(), "Attempting to update a VertexBuffer that doesn't exist");
-		auto& vertexBuffer = vbo->second;
-		vertexBuffer.elementCount = size;
-
-		glBindVertexArray(mVAOID);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID);
-		glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), (const void *)0, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 	}
@@ -179,8 +138,9 @@ namespace neo {
 		NEO_ASSERT(!mElementVBO.has_value(), "Attempting to add 2 ElementBuffers");
 
 		mElementVBO = std::make_optional<VertexBuffer>();
-		mElementVBO->stride = 1;
 		mElementVBO->elementCount = count;
+		mElementVBO->stride = 0;
+		mElementVBO->components = 1;
 		mElementVBO->format = GLHelper::getGLByteFormat(format);
 
 		glBindVertexArray(mVAOID);
