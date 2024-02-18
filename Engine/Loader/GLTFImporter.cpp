@@ -245,6 +245,9 @@ namespace {
 		}
 
 		Texture* neo_texture = new Texture(format, glm::uvec2(image.width, image.height), image.image.data());
+		if (neo_texture->mFormat.mFilter.usesMipFilter()) {
+			neo_texture->genMips();
+		}
 		if (!image.uri.empty()) {
 			Library::insertTexture(image.uri, neo_texture);
 		}
@@ -315,7 +318,7 @@ namespace {
 
 				outNode.mMesh.mMesh->addElementBuffer(
 					static_cast<uint32_t>(accessor.count),
-					static_cast<uint32_t>(_translateTinyGltfComponentType(accessor.componentType)),
+					_translateTinyGltfComponentType(accessor.componentType),
 					static_cast<uint32_t>(bufferView.byteLength),
 					// TODO - this offset math might be bad
 					static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset + accessor.byteOffset

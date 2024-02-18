@@ -29,6 +29,14 @@ namespace neo {
 				return GL_LINEAR;
 			case types::texture::Filters::Nearest:
 				return GL_NEAREST;
+			case types::texture::Filters::NearestMipmapNearest:
+				return GL_NEAREST_MIPMAP_NEAREST;
+			case types::texture::Filters::LinearMipmapNearest:
+				return GL_LINEAR_MIPMAP_NEAREST;
+			case types::texture::Filters::NearestMipmapLinear:
+				return GL_NEAREST_MIPMAP_LINEAR;
+			case types::texture::Filters::LinearMipmapLinear:
+				return GL_LINEAR_MIPMAP_LINEAR;
 			default:
 				NEO_FAIL("Invalid texture filter");
 				return 0;

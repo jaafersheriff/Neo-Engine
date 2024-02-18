@@ -34,7 +34,7 @@ namespace neo {
 			void removeVertexBuffer(types::mesh::VertexType type);
 
 			void addElementBuffer_DEPRECATED(const std::vector<uint32_t>& buffer = {});
-			void addElementBuffer(uint32_t count, uint32_t format, uint32_t byteSize, const uint8_t* data = nullptr);
+			void addElementBuffer(uint32_t count, types::ByteFormats format, uint32_t byteSize, const uint8_t* data = nullptr);
 			void updateElementBuffer_DEPRECATED(const std::vector<uint32_t>& buffer);
 			void updateElementBuffer_DEPRECATED(uint32_t size);
 			void removeElementBuffer();

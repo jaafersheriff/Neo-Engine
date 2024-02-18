@@ -11,7 +11,7 @@ namespace neo {
 		GLenum _translatePrimitive(types::mesh::Primitive primitive) {
 			switch (primitive) {
 			case types::mesh::Primitive::Points:
-				return GL_POINT;
+				return GL_POINTS;
 			case types::mesh::Primitive::Line:
 				return GL_LINE;
 			case types::mesh::Primitive::LineLoop:
@@ -192,13 +192,13 @@ namespace neo {
 		glBindVertexArray(0);
 	}
 
-	void Mesh::addElementBuffer(uint32_t count, uint32_t format, uint32_t byteSize, const uint8_t* data) {
+	void Mesh::addElementBuffer(uint32_t count, types::ByteFormats format, uint32_t byteSize, const uint8_t* data) {
 		NEO_ASSERT(!mElementVBO.has_value(), "Attempting to add 2 ElementBuffers");
 
 		mElementVBO = std::make_optional<VertexBuffer>();
 		mElementVBO->stride = 1;
 		mElementVBO->elementCount = count;
-		mElementVBO->format = format;
+		mElementVBO->format = GLHelper::getGLByteFormat(format);
 
 		glBindVertexArray(mVAOID);
 

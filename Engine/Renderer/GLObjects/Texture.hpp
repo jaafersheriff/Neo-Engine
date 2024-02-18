@@ -16,6 +16,18 @@ namespace neo {
 				&& mMag == other.mMag;
 				//&& mMip == other.mMip;
 		}
+
+		bool usesMipFilter() const {
+			return mMin == types::texture::Filters::LinearMipmapLinear
+				|| mMin == types::texture::Filters::LinearMipmapNearest
+				|| mMin == types::texture::Filters::NearestMipmapLinear
+				|| mMin == types::texture::Filters::NearestMipmapNearest
+				|| mMag == types::texture::Filters::LinearMipmapLinear
+				|| mMag == types::texture::Filters::LinearMipmapNearest
+				|| mMag == types::texture::Filters::NearestMipmapLinear
+				|| mMag == types::texture::Filters::NearestMipmapNearest
+			;
+		}
 	};
 
 	struct TextureWrap {
