@@ -58,9 +58,30 @@ namespace neo {
 		glActiveTexture(GL_TEXTURE0);
 
 		mDefaultFBO = Library::createFramebuffer("backbuffer");
-		TextureFormat_DEPRECATED format = { TextureTarget::Texture2D, GL_RGB16, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE };
-		mDefaultFBO->attachColorTexture({ 1, 1 }, format);
-		mDefaultFBO->attachDepthTexture({ 1, 1 }, GL_DEPTH_COMPONENT16, GL_LINEAR, GL_CLAMP_TO_EDGE);
+		mDefaultFBO->attachColorTexture({ 1, 1 }, { 
+			types::texture::Target::Texture2D, 
+			types::texture::InternalFormats::RGB16F,
+			types::texture::BaseFormats::RGB,
+			{
+				types::texture::Filters::Linear,
+				types::texture::Filters::Linear
+			},
+			{
+				types::texture::Wraps::Clamp,
+				types::texture::Wraps::Clamp
+			}
+		});
+		mDefaultFBO->attachDepthTexture({ 1, 1 }, 
+			types::texture::InternalFormats::Depth16,
+			{
+				types::texture::Filters::Linear,
+				types::texture::Filters::Linear
+			},
+			{
+				types::texture::Wraps::Clamp,
+				types::texture::Wraps::Clamp
+			}
+		);
 		mDefaultFBO->initDrawBuffers();
 		mDefaultFBO->bind();
 
@@ -84,10 +105,12 @@ namespace neo {
 	}
 
 	void Renderer::_onFrameSizeChanged(const FrameSizeMessage& msg) {
+		TextureFormat colorFormat = mDefaultFBO->mTextures[0]->mFormat;
+		TextureFormat depthFormat = mDefaultFBO->mTextures[1]->mFormat;
 		mDefaultFBO->destroy();
 		mDefaultFBO->init();
-		mDefaultFBO->attachColorTexture({ msg.mSize.x, msg.mSize.y }, { TextureTarget::Texture2D, GL_RGB16, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE });
-		mDefaultFBO->attachDepthTexture({ msg.mSize.x, msg.mSize.y }, GL_DEPTH_COMPONENT16, GL_LINEAR, GL_CLAMP_TO_EDGE);
+		mDefaultFBO->attachColorTexture({ msg.mSize.x, msg.mSize.y }, colorFormat);
+		mDefaultFBO->attachDepthTexture({ msg.mSize.x, msg.mSize.y }, depthFormat.mInternalFormat, depthFormat.mFilter, depthFormat.mWrap);
 		mDefaultFBO->initDrawBuffers();
 		mDefaultFBO->bind();
 	}
