@@ -175,23 +175,6 @@ namespace neo {
 		return vbo->second;
 	}
 
-	void Mesh::addElementBuffer_DEPRECATED(const std::vector<uint32_t>& buffer) {
-		NEO_ASSERT(!mElementVBO.has_value(), "Attempting to add 2 ElementBuffers");
-
-		mElementVBO = std::make_optional<VertexBuffer>();
-		mElementVBO->elementCount = static_cast<uint32_t>(buffer.size());
-		mElementVBO->format = GL_UNSIGNED_INT;
-
-		glBindVertexArray(mVAOID);
-
-		glGenBuffers(1, (GLuint *)&mElementVBO->vboID);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID);
-		if (buffer.size()) {
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(uint32_t), &buffer[0], GL_STATIC_DRAW);
-		}
-		glBindVertexArray(0);
-	}
-
 	void Mesh::addElementBuffer(uint32_t count, types::ByteFormats format, uint32_t byteSize, const uint8_t* data) {
 		NEO_ASSERT(!mElementVBO.has_value(), "Attempting to add 2 ElementBuffers");
 
@@ -207,33 +190,6 @@ namespace neo {
 		if (byteSize) {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteSize, data, GL_STATIC_DRAW);
 		}
-		glBindVertexArray(0);
-	}
-
-	void Mesh::updateElementBuffer_DEPRECATED(const std::vector<uint32_t>& buffer) {
-		TRACY_GPU();
-
-		NEO_ASSERT(mElementVBO.has_value() && buffer.size(), "Attempting to update an ElementBuffer that doesn't exist");
-		mElementVBO->elementCount = static_cast<uint32_t>(buffer.size());
-
-		glBindVertexArray(mVAOID);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID);
-		if (buffer.size()) {
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer.size() * sizeof(uint32_t), &buffer[0], GL_DYNAMIC_DRAW);
-		}
-		glBindVertexArray(0);
-	}
-
-	void Mesh::updateElementBuffer_DEPRECATED(uint32_t size) {
-		TRACY_GPU();
-
-		NEO_ASSERT(mElementVBO.has_value(), "Attempting to update an ElementBuffer that doesn't exist");
-		NEO_ASSERT(size, "Attempting to update an ElementBuffer with no data");
-		mElementVBO->elementCount = size;
-
-		glBindVertexArray(mVAOID);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(uint32_t), (const void *)0, GL_DYNAMIC_DRAW);
 		glBindVertexArray(0);
 	}
 

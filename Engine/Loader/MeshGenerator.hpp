@@ -98,7 +98,7 @@ namespace neo {
 				0.f, 1.f };
 			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, uvs);
 
-			std::vector<unsigned> indices =
+			std::vector<uint32_t> indices =
 			{ 0,  1,  2,
 			  0,  3,  1,
 			  4,  5,  6,
@@ -111,7 +111,12 @@ namespace neo {
 			 16, 18, 19,
 			 20, 21, 22,
 			 20, 22, 23 };
-			mesh->addElementBuffer_DEPRECATED(indices);
+			mesh->addElementBuffer(
+				static_cast<uint32_t>(indices.size()),
+				types::ByteFormats::UnsignedInt,
+				static_cast<uint32_t>(indices.size() * sizeof(uint32_t)),
+				reinterpret_cast<uint8_t*>(indices.data())
+			);
 
 			mesh->mPrimitiveType = types::mesh::Primitive::Triangles;
 
@@ -143,10 +148,15 @@ namespace neo {
 			  1.f, 1.f };
 			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, uvs);
 
-			std::vector<unsigned> indices =
+			std::vector<uint32_t> indices =
 			{ 0, 1, 2,
 			  1, 3, 2 };
-			mesh->addElementBuffer_DEPRECATED(indices);
+			mesh->addElementBuffer(
+				static_cast<uint32_t>(indices.size()),
+				types::ByteFormats::UnsignedInt,
+				static_cast<uint32_t>(indices.size() * sizeof(uint32_t)),
+				reinterpret_cast<uint8_t*>(indices.data())
+			);
 
 			mesh->mPrimitiveType = types::mesh::Primitive::Triangles;
 
@@ -200,7 +210,7 @@ namespace neo {
 			};
 
 			for (int i = 1; i <= recursions; i++) {
-				std::vector<unsigned> ele2;
+				std::vector<uint32_t> ele2;
 				for (unsigned j = 0; j <= ele.size() - 3; j += 3) {
 					// find 3 verts of old face
 					glm::vec3 v1(verts[3 * ele[j + 0] + 0], verts[3 * ele[j + 0] + 1], verts[3 * ele[j + 0] + 2]);
@@ -224,9 +234,9 @@ namespace neo {
 					mesh->mMax = glm::max(mesh->mMax, glm::max(halfA, glm::max(halfB, halfC)));
 
 					// add indices of new faces 
-					int indA = static_cast<int>(verts.size()) / 3 - 3;
-					int indB = static_cast<int>(verts.size()) / 3 - 2;
-					int indC = static_cast<int>(verts.size()) / 3 - 1;
+					uint32_t indA = static_cast<uint32_t>(verts.size()) / 3 - 3;
+					uint32_t indB = static_cast<uint32_t>(verts.size()) / 3 - 2;
+					uint32_t indC = static_cast<uint32_t>(verts.size()) / 3 - 1;
 					ele2.push_back(ele[j + 0]);
 					ele2.push_back(indA);
 					ele2.push_back(indC);
@@ -254,7 +264,12 @@ namespace neo {
 			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
 			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, verts);
 			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, tex);
-			mesh->addElementBuffer_DEPRECATED(ele);
+			mesh->addElementBuffer(
+				static_cast<uint32_t>(ele.size()),
+				types::ByteFormats::UnsignedInt,
+				static_cast<uint32_t>(ele.size() * sizeof(uint32_t)),
+				reinterpret_cast<uint8_t*>(ele.data())
+			);
 
 			mesh->mPrimitiveType = types::mesh::Primitive::Triangles;
 
@@ -285,7 +300,7 @@ namespace neo {
 			std::vector<float> textureCoords;
 			textureCoords.resize(count * 2);
 
-			std::vector<unsigned> indices;
+			std::vector<uint32_t> indices;
 			indices.resize(6 * (VERTEX_COUNT - 1) * (VERTEX_COUNT * 1));
 
 			for (int i = 0; i < VERTEX_COUNT; i++) {
@@ -329,10 +344,10 @@ namespace neo {
 			for (int i = 0; i < VERTEX_COUNT - 1; i++) {
 				for (int j = 0; j < VERTEX_COUNT - 1; j++) {
 
-					int topLeft = (i * VERTEX_COUNT) + j;
-					int topRight = topLeft + 1;
-					int bottomLeft = ((i + 1) * VERTEX_COUNT) + j;
-					int bottomRight = bottomLeft + 1;
+					uint32_t topLeft = (i * VERTEX_COUNT) + j;
+					uint32_t topRight = topLeft + 1;
+					uint32_t bottomLeft = ((i + 1) * VERTEX_COUNT) + j;
+					uint32_t bottomRight = bottomLeft + 1;
 					indices[indexPointer++] = topLeft;
 					indices[indexPointer++] = bottomLeft;
 					indices[indexPointer++] = topRight;
@@ -345,7 +360,13 @@ namespace neo {
 			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, vertices);
 			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
 			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, textureCoords);
-			mesh->addElementBuffer_DEPRECATED(indices);
+			mesh->addElementBuffer(
+				static_cast<uint32_t>(indices.size()),
+				types::ByteFormats::UnsignedInt,
+				static_cast<uint32_t>(indices.size() * sizeof(uint32_t)),
+				reinterpret_cast<uint8_t*>(indices.data())
+			);
+
 
 			mesh->mPrimitiveType = types::mesh::Primitive::Triangles;
 
