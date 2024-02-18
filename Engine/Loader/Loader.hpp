@@ -14,15 +14,6 @@ namespace neo {
 		struct Scene;
 	}
 
-   struct MeshData_DEPRECATED {
-		Mesh* mMesh;
-		glm::vec3 mMin{ 0.f, 0.f, 0.f };
-		glm::vec3 mMax{ 0.f, 0.f, 0.f };
-
-		glm::vec3 mBasePosition{ 0.f, 0.f, 0.f };
-		glm::vec3 mBaseScale{ 1.f, 1.f, 1.f };
-	};
-
 	class Loader {
 		friend Engine;
 

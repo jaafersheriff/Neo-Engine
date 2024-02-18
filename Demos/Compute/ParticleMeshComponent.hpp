@@ -24,12 +24,11 @@ namespace Compute {
 		float timeScale = 100.f;
 
 		ParticleMeshComponent() {
-			MeshData_DEPRECATED meshData;
-			mMesh = meshData.mMesh = new Mesh;
+			mMesh = new Mesh;
 			mMesh->mPrimitiveType = types::mesh::Primitive::Points;
 			mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 4); // positions
 			updateBuffers();
-			Library::insertMesh("Particles", meshData);
+			Library::insertMesh("Particles", mMesh);
 		}
 
 		virtual void imGuiEditor() override {

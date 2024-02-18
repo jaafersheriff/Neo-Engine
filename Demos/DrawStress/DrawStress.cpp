@@ -65,8 +65,8 @@ namespace DrawStress {
 		for(int i = 0; i < 10000; i++) {
 			auto cube = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(cube, glm::vec3(util::genRandom(-50.f, 50.f), util::genRandom(-10.f, 10.f), util::genRandom(-50.f, 50.f)), glm::vec3(util::genRandom(0.5f, 1.5f)), util::genRandomVec3(-util::PI, util::PI));
-			ecs.addComponent<MeshComponent>(cube, Library::getMesh("cube").mMesh);
-			ecs.addComponent<BoundingBoxComponent>(cube, Library::getMesh("cube"));
+			ecs.addComponent<MeshComponent>(cube, Library::getMesh("cube"));
+			ecs.addComponent<BoundingBoxComponent>(cube, Library::getMesh("cube")->mMin, Library::getMesh("cube")->mMax);
 			ecs.addComponent<PhongShaderComponent>(cube);
 			ecs.addComponent<OpaqueComponent>(cube);
 			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(cube);

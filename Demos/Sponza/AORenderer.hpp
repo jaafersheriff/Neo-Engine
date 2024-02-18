@@ -132,7 +132,7 @@ namespace Sponza {
 			resolvedShader.bindUniform("P", P);
 			resolvedShader.bindUniform("invP", glm::inverse(P));
 
-			Library::getMesh("quad").mMesh->draw();
+			Library::getMesh("quad")->draw();
 		}
 
 		{
@@ -168,7 +168,7 @@ namespace Sponza {
 			resolvedShader.bindTexture("inputAO", *baseAOTarget->mTextures[0]);
 			resolvedShader.bindUniform("blurAmount", 2);
 
-			Library::getMesh("quad").mMesh->draw();
+			Library::getMesh("quad")->draw();
 			return blurredAO;
 		}
 	}

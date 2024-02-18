@@ -18,8 +18,6 @@ namespace neo {
 	class Mesh {
 
 		public:
-
-			/* Constructor */
 			Mesh(types::mesh::Primitive primitive = types::mesh::Primitive::TriangleStrip);
 			~Mesh();
 
@@ -41,13 +39,13 @@ namespace neo {
 
 			const VertexBuffer& getVBO(types::mesh::VertexType type) const;
 
-			/* Primitive type */
 			types::mesh::Primitive mPrimitiveType = types::mesh::Primitive::TriangleStrip;
 
-			/* Call the appropriate draw function */
+			glm::vec3 mMin = glm::vec3(0.f);
+			glm::vec3 mMax = glm::vec3(0.f);
+
 			void draw(uint32_t = 0) const;
 
-			/* Remove */
 			void clear();
 			void destroy();
 

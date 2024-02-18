@@ -51,7 +51,7 @@ namespace neo {
 		resolvedBlit.bindTexture("inputTexture", inputTexture);
 		
 		// Render 
-		Library::getMesh("quad").mMesh->draw();
+		Library::getMesh("quad")->draw();
 
 		glEnable(GL_DEPTH_TEST);
 	}

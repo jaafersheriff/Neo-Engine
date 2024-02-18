@@ -5,8 +5,6 @@
 
 #include "Loader/Loader.hpp"
 
-#include "Renderer/GLObjects/Mesh.hpp"
-
 namespace neo {
 
 	struct BoundingBoxComponent : public Component {
@@ -29,9 +27,9 @@ namespace neo {
 			}
 		}
 
-		BoundingBoxComponent(MeshData_DEPRECATED mesh) {
-			mMin = mesh.mMin;
-			mMax = mesh.mMax;
+		BoundingBoxComponent(glm::vec3 min, glm::vec3 max) {
+			mMin = min;
+			mMax = max;
 		}
 
 		float getRadius() const {

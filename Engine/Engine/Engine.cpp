@@ -262,21 +262,9 @@ namespace neo {
 
 	void Engine::_createPrefabs() {
 		/* Generate basic meshes */
-		{
-			MeshData_DEPRECATED meshData;
-			prefabs::generateCube(meshData);
-			Library::insertMesh(std::string("cube"), meshData);
-		}
-		{
-			MeshData_DEPRECATED meshData;
-			prefabs::generateQuad(meshData);
-			Library::insertMesh(std::string("quad"), meshData);
-		}
-		{
-			MeshData_DEPRECATED meshData;
-			prefabs::generateSphere(meshData, 2);
-			Library::insertMesh(std::string("sphere"), meshData);
-		}
+		Library::insertMesh(std::string("cube"), prefabs::generateCube());
+		Library::insertMesh(std::string("quad"), prefabs::generateQuad());
+		Library::insertMesh(std::string("sphere"), prefabs::generateSphere(2));
 
 		/* Generate basic textures*/
 		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };

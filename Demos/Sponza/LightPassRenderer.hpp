@@ -71,7 +71,7 @@ namespace Sponza {
 				glCullFace(GL_BACK);
 			}
 
-			Library::getMesh("sphere").mMesh->draw();
+			Library::getMesh("sphere")->draw();
 		}
 
 		// TODO - reset state
@@ -124,7 +124,7 @@ namespace Sponza {
 
 		glDisable(GL_DEPTH_TEST);
 
-		Library::getMesh("quad").mMesh->draw();
+		Library::getMesh("quad")->draw();
 
 		// TODO - reset GL state
 	}

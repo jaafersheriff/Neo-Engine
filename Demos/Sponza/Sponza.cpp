@@ -103,7 +103,7 @@ namespace Sponza {
 			ecs.addComponent<MainLightComponent>(lightEntity);
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
 			ecs.addComponent<WireframeShaderComponent>(lightEntity);
-			ecs.addComponent<MeshComponent>(lightEntity, Library::getMesh("cube").mMesh);
+			ecs.addComponent<MeshComponent>(lightEntity, Library::getMesh("cube"));
 			auto line = ecs.addComponent<LineMeshComponent>(lightEntity, glm::vec3(1, 0, 0));
 			line->mUseParentSpatial = true;
 			line->addNode({ 0,0,0 });
@@ -126,8 +126,8 @@ namespace Sponza {
 				ecs.addComponent<TagComponent>(entity, node.mName);
 			}
 			ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
-			ecs.addComponent<MeshComponent>(entity, node.mMesh.mMesh);
-			ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh);
+			ecs.addComponent<MeshComponent>(entity, node.mMesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh->mMin, node.mMesh->mMax);
 			if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 				ecs.addComponent<OpaqueComponent>(entity);
 			}
@@ -278,7 +278,7 @@ namespace Sponza {
 				resolvedShader.bindTexture("aoOutput", *ao->mTextures[0]);
 			}
 
-			Library::getMesh("quad").mMesh->draw();
+			Library::getMesh("quad")->draw();
 
 			// Don't forget the depth. Because reasons.
 			glBlitNamedFramebuffer(gbuffer.mFBOID, sceneTarget.mFBOID,

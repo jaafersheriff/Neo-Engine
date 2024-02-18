@@ -302,8 +302,8 @@ namespace {
 			outNode.mName = node.name + std::to_string(i);
 			outNode.mSpatial = nodeSpatial;
 
-			outNode.mMesh.mMesh = new Mesh;
-			outNode.mMesh.mMesh->mPrimitiveType = _translateTinyGltfPrimitiveType(gltfMesh.mode);
+			outNode.mMesh = new Mesh;
+			outNode.mMesh->mPrimitiveType = _translateTinyGltfPrimitiveType(gltfMesh.mode);
 
 			// Indices
 			if (gltfMesh.indices > -1)
@@ -316,7 +316,7 @@ namespace {
 
 				const auto& buffer = model.buffers[bufferView.buffer];
 
-				outNode.mMesh.mMesh->addElementBuffer(
+				outNode.mMesh->addElementBuffer(
 					static_cast<uint32_t>(accessor.count),
 					_translateTinyGltfComponentType(accessor.componentType),
 					static_cast<uint32_t>(bufferView.byteLength),
@@ -332,10 +332,10 @@ namespace {
 				types::mesh::VertexType vertexType = types::mesh::VertexType::Position;
 				if (attribute.first == "POSITION") {
 					if (accessor.maxValues.size() == 3) {
-						outNode.mMesh.mMax = glm::vec3(accessor.maxValues[0], accessor.maxValues[1], accessor.maxValues[2]);
+						outNode.mMesh->mMax = glm::vec3(accessor.maxValues[0], accessor.maxValues[1], accessor.maxValues[2]);
 					}
 					if (accessor.minValues.size() == 3) {
-						outNode.mMesh.mMin = glm::vec3(accessor.minValues[0], accessor.minValues[1], accessor.minValues[2]);
+						outNode.mMesh->mMin = glm::vec3(accessor.minValues[0], accessor.minValues[1], accessor.minValues[2]);
 					}
 				}
 				else if (attribute.first == "NORMAL") {
@@ -357,7 +357,7 @@ namespace {
 				const auto& buffer = model.buffers[bufferView.buffer];
 
 				// TODO : this is duplicating vertex data. Would be better to split glBufferData from glVertexAttribPointer
-				outNode.mMesh.mMesh->addVertexBuffer(
+				outNode.mMesh->addVertexBuffer(
 					vertexType,
 					tinygltf::GetNumComponentsInType(accessor.type),
 					accessor.ByteStride(bufferView),

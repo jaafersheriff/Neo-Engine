@@ -197,8 +197,8 @@ namespace Gltf {
 				ecs.addComponent<TagComponent>(entity, node.mName);
 			}
 			ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
-			ecs.addComponent<MeshComponent>(entity, node.mMesh.mMesh);
-			ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh);
+			ecs.addComponent<MeshComponent>(entity, node.mMesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh->mMin, node.mMesh->mMax);
 			if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 				ecs.addComponent<OpaqueComponent>(entity);
 			}

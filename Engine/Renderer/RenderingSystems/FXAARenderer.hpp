@@ -28,7 +28,7 @@ namespace neo {
 
 		bool oldDepthState = glIsEnabled(GL_DEPTH_TEST);
 		glDisable(GL_DEPTH_TEST);
-		Library::getMesh("quad").mMesh->draw();
+		Library::getMesh("quad")->draw();
 		if (oldDepthState) {
 			glEnable(GL_DEPTH_TEST);
 		}

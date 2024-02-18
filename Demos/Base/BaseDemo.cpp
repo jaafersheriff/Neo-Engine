@@ -69,8 +69,8 @@ namespace Base {
 			ecs.addComponent<TagComponent>(bunny, "Bunny");
 			ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
 			ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-			ecs.addComponent<MeshComponent>(bunny, bunnyNode.mMesh.mMesh);
-			ecs.addComponent<BoundingBoxComponent>(bunny, bunnyNode.mMesh);
+			ecs.addComponent<MeshComponent>(bunny, bunnyNode.mMesh);
+			ecs.addComponent<BoundingBoxComponent>(bunny, bunnyNode.mMesh->mMin, bunnyNode.mMesh->mMax);
 			ecs.addComponent<PhongShaderComponent>(bunny);
 			ecs.addComponent<OpaqueComponent>(bunny);
 			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(bunny);
@@ -85,7 +85,7 @@ namespace Base {
 			auto plane = ecs.createEntity();
 			ecs.addComponent<TagComponent>(plane, "Grid");
 			ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
-			ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad").mMesh);
+			ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad"));
 			ecs.addComponent<PhongShaderComponent>(plane);
 			ecs.addComponent<AlphaTestComponent>(plane);
 			auto material = ecs.addComponent<MaterialComponent_DEPRECATED>(plane);

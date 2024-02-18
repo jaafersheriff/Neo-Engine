@@ -7,8 +7,8 @@ namespace neo {
 
 	namespace prefabs {
 
-		static void generateCube(MeshData_DEPRECATED& meshData) {
-			meshData.mMesh = new Mesh;
+		static Mesh* generateCube() {
+			Mesh* mesh = new Mesh;
 
 			std::vector<float> verts =
 			{ -0.5f, -0.5f, -0.5f,
@@ -35,9 +35,9 @@ namespace neo {
 			  0.5f, -0.5f,  0.5f,
 			  0.5f,  0.5f,  0.5f,
 			 -0.5f,  0.5f,  0.5f };
-			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
-			meshData.mMin = glm::vec3(-0.5f);
-			meshData.mMax = glm::vec3(0.5f);
+			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
+			mesh->mMin = glm::vec3(-0.5f);
+			mesh->mMax = glm::vec3(0.5f);
 
 			std::vector<float> normals =
 			{ 0,  0, -1,
@@ -64,7 +64,7 @@ namespace neo {
 			  0,  0,  1,
 			  0,  0,  1,
 			  0,  0,  1 };
-			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
+			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
 
 			std::vector<float> uvs =
 			{ 1.f, 0.f,
@@ -96,7 +96,7 @@ namespace neo {
 				1.f, 0.f,
 				1.f, 1.f,
 				0.f, 1.f };
-			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, uvs);
+			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, uvs);
 
 			std::vector<unsigned> indices =
 			{ 0,  1,  2,
@@ -111,47 +111,51 @@ namespace neo {
 			 16, 18, 19,
 			 20, 21, 22,
 			 20, 22, 23 };
-			meshData.mMesh->addElementBuffer_DEPRECATED(indices);
+			mesh->addElementBuffer_DEPRECATED(indices);
 
-			meshData.mMesh->mPrimitiveType = types::mesh::Primitive::Triangles;
+			mesh->mPrimitiveType = types::mesh::Primitive::Triangles;
+
+			return mesh;
 		}
 
-		static void generateQuad(MeshData_DEPRECATED& meshData) {
-			meshData.mMesh = new Mesh;
+		static Mesh* generateQuad() {
+			Mesh* mesh = new Mesh;
 			std::vector<float> verts =
 			{ -0.5f, -0.5f,  0.f,
 			   0.5f, -0.5f,  0.f,
 			  -0.5f,  0.5f,  0.f,
 			   0.5f,  0.5f,  0.f };
-			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
-			meshData.mMin = glm::vec3(-0.5f, -0.5f, -0.1f);
-			meshData.mMax = glm::vec3(0.5f, 0.5f, 0.1f);
+			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
+			mesh->mMin = glm::vec3(-0.5f, -0.5f, -0.1f);
+			mesh->mMax = glm::vec3(0.5f, 0.5f, 0.1f);
 
 			std::vector<float> normals =
 			{ 0.f, 0.f, 1.f,
 			  0.f, 0.f, 1.f,
 			  0.f, 0.f, 1.f,
 			  0.f, 0.f, 1.f };
-			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
+			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
 
 			std::vector<float> uvs =
 			{ 0.f, 0.f,
 			  1.f, 0.f,
 			  0.f, 1.f,
 			  1.f, 1.f };
-			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, uvs);
+			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, uvs);
 
 			std::vector<unsigned> indices =
 			{ 0, 1, 2,
 			  1, 3, 2 };
-			meshData.mMesh->addElementBuffer_DEPRECATED(indices);
+			mesh->addElementBuffer_DEPRECATED(indices);
 
-			meshData.mMesh->mPrimitiveType = types::mesh::Primitive::Triangles;
+			mesh->mPrimitiveType = types::mesh::Primitive::Triangles;
+
+			return mesh;
 		}
 
 		// http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
-		static void generateSphere(MeshData_DEPRECATED& meshData, int recursions) {
-			meshData.mMesh = new Mesh;
+		static Mesh* generateSphere(int recursions) {
+			Mesh* mesh = new Mesh;
 
 			float t = (float)(1.f + (glm::sqrt(5.0)) / 2.f);
 			float length = glm::length(glm::vec3(1, 0, t));
@@ -169,8 +173,8 @@ namespace neo {
 				   -t / length,  0.f / length, -1.f / length,
 				   -t / length,  0.f / length,  1.f / length
 			};
-			meshData.mMin = glm::vec3(-t / length);
-			meshData.mMax = glm::vec3(t / length);
+			mesh->mMin = glm::vec3(-t / length);
+			mesh->mMax = glm::vec3(t / length);
 
 			std::vector<unsigned> ele = {
 				  0, 11,  5,
@@ -216,8 +220,8 @@ namespace neo {
 					verts.push_back(halfC.x);
 					verts.push_back(halfC.y);
 					verts.push_back(halfC.z);
-					meshData.mMin = glm::min(meshData.mMin, glm::min(halfA, glm::min(halfB, halfC)));
-					meshData.mMax = glm::max(meshData.mMax, glm::max(halfA, glm::max(halfB, halfC)));
+					mesh->mMin = glm::min(mesh->mMin, glm::min(halfA, glm::min(halfB, halfC)));
+					mesh->mMax = glm::max(mesh->mMax, glm::max(halfA, glm::max(halfB, halfC)));
 
 					// add indices of new faces 
 					int indA = static_cast<int>(verts.size()) / 3 - 3;
@@ -247,19 +251,22 @@ namespace neo {
 				tex.push_back(glm::clamp(0.5f + std::asin(verts[i + 1]) / util::PI, 0.f, 1.f));
 			}
 
-			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
-			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, verts);
-			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, tex);
-			meshData.mMesh->addElementBuffer_DEPRECATED(ele);
+			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, verts);
+			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, verts);
+			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, tex);
+			mesh->addElementBuffer_DEPRECATED(ele);
 
-			meshData.mMesh->mPrimitiveType = types::mesh::Primitive::Triangles;
+			mesh->mPrimitiveType = types::mesh::Primitive::Triangles;
+
+			return mesh;
 		}
 
-		void generatePlane(MeshData_DEPRECATED& meshData, float h, int VERTEX_COUNT, int numOctaves) {
+		Mesh* generatePlane(float h, int VERTEX_COUNT, int numOctaves) {
 			siv::PerlinNoise noise(rand());
 
-			meshData.mMin = glm::vec3(FLT_MAX);
-			meshData.mMax = glm::vec3(FLT_MIN);
+			Mesh* mesh = new Mesh;
+			mesh->mMin = glm::vec3(FLT_MAX);
+			mesh->mMax = glm::vec3(FLT_MIN);
 
 			int count = VERTEX_COUNT * VERTEX_COUNT;
 
@@ -312,8 +319,8 @@ namespace neo {
 					textureCoords[vertexPointer * 2] = (float)j / ((float)VERTEX_COUNT - 1);
 					textureCoords[vertexPointer * 2 + 1] = (float)i / ((float)VERTEX_COUNT - 1);
 
-					meshData.mMin = glm::min(meshData.mMin, vert);
-					meshData.mMax = glm::max(meshData.mMax, vert);
+					mesh->mMin = glm::min(mesh->mMin, vert);
+					mesh->mMax = glm::max(mesh->mMax, vert);
 					vertexPointer++;
 				}
 			}
@@ -335,12 +342,14 @@ namespace neo {
 				}
 			}
 
-			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, vertices);
-			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
-			meshData.mMesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, textureCoords);
-			meshData.mMesh->addElementBuffer_DEPRECATED(indices);
+			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Position, 0, 3, vertices);
+			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Normal, 1, 3, normals);
+			mesh->addVertexBuffer_DEPRECATED(types::mesh::VertexType::Texture0, 2, 2, textureCoords);
+			mesh->addElementBuffer_DEPRECATED(indices);
 
-			meshData.mMesh->mPrimitiveType = types::mesh::Primitive::Triangles;
+			mesh->mPrimitiveType = types::mesh::Primitive::Triangles;
+
+			return mesh;
 		}
 	}
 }

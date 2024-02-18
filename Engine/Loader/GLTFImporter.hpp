@@ -19,7 +19,8 @@ namespace neo {
 			};
 
 			std::string mName = "";
-			MeshData_DEPRECATED mMesh;
+
+			Mesh* mMesh;
 
 			SpatialComponent mSpatial = {};
 
