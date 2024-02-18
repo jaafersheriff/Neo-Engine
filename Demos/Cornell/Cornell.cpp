@@ -96,15 +96,15 @@ namespace Cornell {
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		auto sceneTarget = Library::getPooledFramebuffer({ viewport.mSize, {
-			TextureFormat_DEPRECATED{
-				TextureTarget::Texture2D,
-				GL_RGB8,
-				GL_RGB,
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGBA8,
+				types::texture::BaseFormats::RGB
 			},
-			TextureFormat_DEPRECATED{
-				TextureTarget::Texture2D,
-				GL_DEPTH_COMPONENT16,
-				GL_DEPTH_COMPONENT,
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::Depth16,
+				types::texture::BaseFormats::Depth
 			}
 		} }, "Scene target");
 

@@ -26,13 +26,11 @@ namespace neo {
 		void disableRead();
 
 		void attachColorTexture(glm::uvec2 size, TextureFormat format);
-		void attachDepthTexture(glm::ivec2 size, GLint format, GLint filter, GLenum mode);
+		void attachDepthTexture(glm::ivec2 size, types::texture::InternalFormats format, TextureFilter filter, TextureWrap wrap);
 		void attachDepthTexture(Texture* t);
-		void attachStencilTexture(glm::uvec2 size, GLint filter, GLenum mode);
+		void attachStencilTexture(glm::uvec2 size, TextureFilter filter, TextureWrap wrap);
 		void initDrawBuffers();
 		void clear(glm::vec4 clearColor, GLbitfield clearFlags);
 		void destroy();
-	private:
-		void _attachTexture(GLuint component, Texture& texture);
 	};
 }

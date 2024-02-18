@@ -75,110 +75,111 @@ namespace {
 		}
 	}
 
-	inline neo::types::texture::InternalFormats _translateTinyGltfPixelType(int pixel_type, GLenum baseFormat) {
+	inline neo::types::texture::InternalFormats _translateTinyGltfPixelType(int pixel_type, neo::types::texture::BaseFormats baseFormat) {
 		switch (pixel_type) {
 		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
-			if (baseFormat == GL_RGBA) {
-				return GL_RGBA8;
+			if (baseFormat == neo::types::texture::BaseFormats::RGBA) {
+				return neo::types::texture::InternalFormats::RGBA8;
 			}
-			else if (baseFormat == GL_RGB) {
-				return GL_RGB8;
+			else if (baseFormat == neo::types::texture::BaseFormats::RGB) {
+				return neo::types::texture::InternalFormats::RGB8;
 			}
-			else if (baseFormat == GL_RG) {
-				return GL_RG8;
+			else if (baseFormat == neo::types::texture::BaseFormats::RG) {
+				return neo::types::texture::InternalFormats::RG8;
 			}
-			else if (baseFormat == GL_RED) {
-				return GL_R8;
+			else if (baseFormat == neo::types::texture::BaseFormats::Red) {
+				return neo::types::texture::InternalFormats::R8;
 			}
 			break;
 		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
-			if (baseFormat == GL_RGBA) {
-				return GL_RGBA16UI;
+			if (baseFormat == neo::types::texture::BaseFormats::RGBA) {
+				return neo::types::texture::InternalFormats::RGBA16UI;
 			}
-			else if (baseFormat == GL_RGB) {
-				return GL_RGB16UI;
+			else if (baseFormat == neo::types::texture::BaseFormats::RGB) {
+				return neo::types::texture::InternalFormats::RGB16UI;
 			}
-			else if (baseFormat == GL_RG) {
-				return GL_RG16UI;
+			else if (baseFormat == neo::types::texture::BaseFormats::RG) {
+				return neo::types::texture::InternalFormats::RG16UI;
 			}
-			else if (baseFormat == GL_RED) {
-				return GL_R16UI;
+			else if (baseFormat == neo::types::texture::BaseFormats::Red) {
+				return neo::types::texture::InternalFormats::R16UI;
 			}
 			break;
 		case TINYGLTF_COMPONENT_TYPE_FLOAT:
-			if (baseFormat == GL_RGBA) {
-				return GL_RGBA32F;
+			if (baseFormat == neo::types::texture::BaseFormats::RGBA) {
+				return neo::types::texture::InternalFormats::RGBA32F;
 			}
-			else if (baseFormat == GL_RGB) {
-				return GL_RGB32F;
+			else if (baseFormat == neo::types::texture::BaseFormats::RGB) {
+				return neo::types::texture::InternalFormats::RGB32F;
 			}
-			else if (baseFormat == GL_RG) {
-				return GL_RG32F;
+			else if (baseFormat == neo::types::texture::BaseFormats::RG) {
+				return neo::types::texture::InternalFormats::RG32F;
 			}
-			else if (baseFormat == GL_RED) {
-				return GL_R32F;
+			else if (baseFormat == neo::types::texture::BaseFormats::Red) {
+				return neo::types::texture::InternalFormats::R32F;
 			}
 			break;
 		default:
 			NEO_FAIL("Unsupported pixel type %d", pixel_type);
 		}
+
 		NEO_FAIL("Invalid combo of internal/base format");
-		return GL_RGBA8;
+		return neo::types::texture::InternalFormats::RGBA8;
 	}
 
 	inline neo::types::texture::BaseFormats _getGLBaseFormat(int components) {
 		switch (components) {
 		case  1:
-			return GL_RED;
+			return neo::types::texture::BaseFormats::Red;
 		case  2:
-			return GL_RG;
+			return neo::types::texture::BaseFormats::RG;
 		case  3:
-			return GL_RGB;
+			return neo::types::texture::BaseFormats::RGB;
 		case  4:
-			return GL_RGBA;
+			return neo::types::texture::BaseFormats::RGBA;
 		default:
 			NEO_FAIL("Invalid number of components: %d", components);
-			return GL_RGB;
+			return neo::types::texture::BaseFormats::RGB;
 		}
 	}
 
 	inline neo::types::ByteFormats _getGLType(int bits) {
 		switch (bits) {
 		case  8:
-			return GL_UNSIGNED_BYTE;
+			return neo::types::ByteFormats::UnsignedByte;
 		case  16:
-			return GL_UNSIGNED_SHORT;
+			return neo::types::ByteFormats::UnsignedShort;
 		case  32:
-			return GL_FLOAT;
+			return neo::types::ByteFormats::Float;
 		default:
 			NEO_FAIL("Unsupported bit depth %d", bits);
-			return GL_UNSIGNED_BYTE;
+			return neo::types::ByteFormats::UnsignedByte;
 		}
 	}
 
 	inline neo::types::texture::Filters _translateTinyGltfFilter(int filter) {
 		switch (filter) {
 		case TINYGLTF_TEXTURE_FILTER_NEAREST:
-			return GL_NEAREST;
+			return neo::types::texture::Filters::Nearest;
 			break;
 		case TINYGLTF_TEXTURE_FILTER_LINEAR:
-			return GL_LINEAR;
+			return neo::types::texture::Filters::Linear;
 			break;
 		case TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST:
-			return GL_NEAREST_MIPMAP_NEAREST;
+			return neo::types::texture::Filters::NearestMipmapNearest;
 			break;
 		case TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST:
-			return GL_LINEAR_MIPMAP_NEAREST;
+			return neo::types::texture::Filters::LinearMipmapNearest;
 			break;
 		case TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR:
-			return GL_NEAREST_MIPMAP_LINEAR;
+			return neo::types::texture::Filters::NearestMipmapLinear;
 			break;
 		case TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR:
-			return GL_LINEAR_MIPMAP_LINEAR;
+			return neo::types::texture::Filters::LinearMipmapLinear;
 			break;
 		default:
-			NEO_FAIL("Heh?");
-			return GL_LINEAR;
+			NEO_FAIL("Unsupported texture filter");
+			return neo::types::texture::Filters::Linear;
 			break;
 		}
 	}
@@ -186,16 +187,17 @@ namespace {
 	inline neo::types::texture::Wraps _translateTinyGltfWrap(int wrap) {
 		switch (wrap) {
 		case TINYGLTF_TEXTURE_WRAP_REPEAT:
-			return GL_REPEAT;
+			return neo::types::texture::Wraps::Repeat;
 			break;
 		case TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE:
-			return GL_CLAMP_TO_EDGE;
+			return neo::types::texture::Wraps::Clamp;
 			break;
 		case TINYGLTF_TEXTURE_WRAP_MIRRORED_REPEAT:
-			return GL_MIRRORED_REPEAT;
+			return neo::types::texture::Wraps::Mirrored;
 			break;
 		default:
-			NEO_FAIL("Heh?");
+			NEO_FAIL("Unsupported texture wrap");
+			return neo::types::texture::Wraps::Clamp;
 			break;
 		}
 	}
@@ -229,16 +231,16 @@ namespace {
 		if (texture.sampler > -1) {
 			const auto& sampler = model.samplers[texture.sampler];
 			if (sampler.minFilter > -1) {
-				format.mFilter = _translateTinyGltfFilter(sampler.minFilter);
+				format.mFilter.mMin = _translateTinyGltfFilter(sampler.minFilter);
 			}
 			if (sampler.magFilter > -1) {
-				format.mFilter = _translateTinyGltfFilter(sampler.magFilter);
+				format.mFilter.mMag = _translateTinyGltfFilter(sampler.magFilter);
 			}
 			if (sampler.wrapS > -1) {
-				format.mMode = _translateTinyGltfWrap(sampler.wrapS);
+				format.mWrap.mS = _translateTinyGltfWrap(sampler.wrapS);
 			}
 			if (sampler.wrapT > -1) {
-				format.mMode = _translateTinyGltfWrap(sampler.wrapS);
+				format.mWrap.mT = format.mWrap.mT = _translateTinyGltfWrap(sampler.wrapS);
 			}
 		}
 

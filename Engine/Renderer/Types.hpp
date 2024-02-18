@@ -9,6 +9,7 @@ namespace neo {
 			UnsignedShort,
 			Int,
 			UnsignedInt,
+			UnsignedInt24_8,
 			Double,
 			Float
 		};
@@ -43,7 +44,11 @@ namespace neo {
 
 			enum class Filters : uint8_t {
 				Linear,
-				Nearest
+				Nearest,
+				NearestMipmapNearest,
+				LinearMipmapNearest,
+				NearestMipmapLinear,
+				LinearMipmapLinear
 			};
 
 			enum class Wraps : uint8_t {
@@ -53,11 +58,35 @@ namespace neo {
 			};
 
 			enum class InternalFormats : uint8_t {
-				RGBA8
+				R8,
+				RG8,
+				RGB8,
+				RGBA8,
+				R16UI,
+				RG16UI,
+				RGB16UI,
+				RGBA16UI,
+				R16F,
+				RG16F,
+				RGB16F,
+				RGBA16F,
+				R32F,
+				RG32F,
+				RGB32F,
+				RGBA32F,
+				Depth16,
+				Depth24,
+				Depth32,
+				Depth24Stencil8
 			};
 
 			enum class BaseFormats : uint8_t {
-				RGBA
+				Red,
+				RG,
+				RGB,
+				RGBA,
+				Depth,
+				DepthStencil
 			};
 		}
 	}

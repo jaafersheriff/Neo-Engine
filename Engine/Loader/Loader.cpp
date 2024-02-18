@@ -84,8 +84,11 @@ namespace neo {
 		}
 
 		/* Upload data to GPU and free from CPU */
-		TextureFormat format = { 
-			types::texture::Target::TextureCube, GL_RGBA, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_UNSIGNED_BYTE };
+		TextureFormat format = {
+			types::texture::Target::TextureCube,
+			types::texture::InternalFormats::RGBA8,
+			types::texture::BaseFormats::RGBA
+		};
 		Texture* texture = new Texture(format, size, reinterpret_cast<void**>(data.data()));
 
 		/* Clean */
@@ -107,7 +110,7 @@ namespace neo {
 
 		/* Use stbi if name is an existing file */
 		stbi_set_flip_vertically_on_load(flip);
-		uint8_t *data = stbi_load(_fileName.c_str(), &width, &height, &components, format.mBaseFormat == GL_RGB ? STBI_rgb : STBI_rgb_alpha);
+		uint8_t *data = stbi_load(_fileName.c_str(), &width, &height, &components, format.mBaseFormat == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
 		NEO_ASSERT(data, "Error reading texture file");
 
 		NEO_LOG_I("Loaded texture %s [%d, %d]", fileName.c_str(), width, height);

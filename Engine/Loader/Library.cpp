@@ -96,7 +96,7 @@ namespace neo {
 		return mTextures.find(fileName) != mTextures.end();
 	}
 
-	Texture* Library::loadTexture(const std::string& fileName, TextureFormat_DEPRECATED format) {
+	Texture* Library::loadTexture(const std::string& fileName, TextureFormat format) {
 		TRACY_ZONE();
 
 		auto it = mTextures.find(fileName);
@@ -110,7 +110,7 @@ namespace neo {
 		return texture;
 	}
 
-	Texture* Library::createTexture(const std::string& fileName, TextureFormat_DEPRECATED format, glm::u16vec3 dimension, const void* data) {
+	Texture* Library::createTexture(const std::string& fileName, TextureFormat format, glm::u16vec3 dimension, const void* data) {
 		TRACY_ZONE();
 
 		auto it = mTextures.find(fileName);
@@ -152,11 +152,11 @@ namespace neo {
 			pfb.mFramebuffer = new Framebuffer;
 			pfb.mFramebuffer->init();
 			for (auto& format : details.mFormats) {
-				if (format.mBaseFormat == GL_DEPTH_COMPONENT) {
-					pfb.mFramebuffer->attachDepthTexture(details.mSize, format.mInternalFormat, format.mFilter, format.mMode);
+				if (format.mBaseFormat == types::texture::BaseFormats::Depth) {
+					pfb.mFramebuffer->attachDepthTexture(details.mSize, format.mInternalFormat, format.mFilter, format.mWrap);
 				}
-				else if (format.mBaseFormat == GL_DEPTH_STENCIL) {
-					pfb.mFramebuffer->attachStencilTexture(details.mSize, format.mFilter, format.mMode);
+				else if (format.mBaseFormat == types::texture::BaseFormats::DepthStencil) {
+					pfb.mFramebuffer->attachStencilTexture(details.mSize, format.mFilter, format.mWrap);
 				}
 				else {
 					pfb.mFramebuffer->attachColorTexture(details.mSize, format);

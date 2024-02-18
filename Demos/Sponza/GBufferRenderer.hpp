@@ -26,35 +26,35 @@ namespace Sponza {
 	Framebuffer& createGBuffer(glm::uvec2 targetSize) {
 		return *Library::getPooledFramebuffer({ targetSize, {
 			// Albedo
-			TextureFormat_DEPRECATED{
-				TextureTarget::Texture2D,
-				GL_RGB16F,
-				GL_RGB,
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGB16F,
+				types::texture::BaseFormats::RGB
 			},
 			// Specular/Shine
-			TextureFormat_DEPRECATED{
-				TextureTarget::Texture2D,
-				GL_RGBA16F,
-				GL_RGBA,
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGBA16F,
+				types::texture::BaseFormats::RGBA
 			},
 			// World 
 			// TODO - could do everything in view space to get rid of this
-			TextureFormat_DEPRECATED{
-				TextureTarget::Texture2D,
-				GL_RGB16F,
-				GL_RGB,
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGB16F,
+				types::texture::BaseFormats::RGB
 			},
 			// Normals
-			TextureFormat_DEPRECATED{
-				TextureTarget::Texture2D,
-				GL_RGB16F,
-				GL_RGB,
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGB16F,
+				types::texture::BaseFormats::RGB
 			},
 			// Depth
-			TextureFormat_DEPRECATED{
-				TextureTarget::Texture2D,
-				GL_DEPTH_COMPONENT16,
-				GL_DEPTH_COMPONENT,
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::Depth16,
+				types::texture::BaseFormats::Depth
 			}
 		} }, "Gbuffer");
 	}

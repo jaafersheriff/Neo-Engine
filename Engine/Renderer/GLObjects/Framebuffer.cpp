@@ -1,6 +1,15 @@
 #include "Framebuffer.hpp"
 
 namespace neo {
+	namespace {
+		void _attachTexture(Framebuffer& fb, GLenum component, Texture& texture) {
+			fb.mTextures.emplace_back(&texture);
+			fb.bind();
+			glFramebufferTexture(GL_FRAMEBUFFER, component, texture.mTextureID, 0);
+			CHECK_GL_FRAMEBUFFER();
+		}
+	}
+
 	void Framebuffer::init() {
 		glGenFramebuffers(1, &mFBOID);
 	}
@@ -20,28 +29,42 @@ namespace neo {
 	}
 
 	void Framebuffer::attachColorTexture(glm::uvec2 size, TextureFormat format) {
-		NEO_ASSERT(format.mTarget == TextureTarget::Texture2D, "Framebuffers need 2D textures");
+		NEO_ASSERT(format.mTarget == types::texture::Target::Texture2D, "Framebuffers need 2D textures");
 		Texture* t = new Texture(format, size, nullptr);
-		_attachTexture(GL_COLOR_ATTACHMENT0 + mColorAttachments++, *t);
+		_attachTexture(*this, GL_COLOR_ATTACHMENT0 + mColorAttachments++, *t);
 	}
 
-	void Framebuffer::attachDepthTexture(glm::ivec2 size, GLint format, GLint filter, GLenum mode) {
-		NEO_ASSERT(format == GL_DEPTH_COMPONENT32F || format == GL_DEPTH_COMPONENT24 || format == GL_DEPTH_COMPONENT16, "Incompatible depth format");
-		Texture* t = new Texture(TextureFormat{ TextureTarget::Texture2D, format, GL_DEPTH_COMPONENT, filter, mode }, size, nullptr);
-		_attachTexture(GL_DEPTH_ATTACHMENT, *t);
+	void Framebuffer::attachDepthTexture(glm::ivec2 size, types::texture::InternalFormats format, TextureFilter filter, TextureWrap wrap) {
+		Texture* t = new Texture(TextureFormat{
+			types::texture::Target::Texture2D,
+			format,
+			types::texture::BaseFormats::Depth,
+			filter, 
+			wrap }, 
+		size, nullptr);
+		_attachTexture(*this, GL_DEPTH_ATTACHMENT, *t);
 	}
 
 	void Framebuffer::attachDepthTexture(Texture* t) {
-		NEO_ASSERT(t->mFormat.mTarget == TextureTarget::Texture2D, "Framebuffers need 2D textures");
-		NEO_ASSERT(t->mFormat.mInternalFormat == GL_DEPTH_COMPONENT, "Invalid depth target format");
-		NEO_ASSERT(t->mFormat.mBaseFormat == GL_DEPTH_COMPONENT, "Invalid depth target format"); // or depth_16, 24, 32
-		_attachTexture(GL_DEPTH_ATTACHMENT, *t);
+		NEO_ASSERT(t->mFormat.mTarget == types::texture::Target::Texture2D, "Framebuffers need 2D textures");
+		NEO_ASSERT(t->mFormat.mInternalFormat == types::texture::InternalFormats::Depth16 
+			|| t->mFormat.mInternalFormat == types::texture::InternalFormats::Depth24 
+			|| t->mFormat.mInternalFormat == types::texture::InternalFormats::Depth32 
+			, "Invalid depth target format");
+		NEO_ASSERT(t->mFormat.mBaseFormat == types::texture::BaseFormats::Depth, "Invalid depth target format");
+		_attachTexture(*this, GL_DEPTH_ATTACHMENT, *t);
 	}
 
-
-	void Framebuffer::attachStencilTexture(glm::uvec2 size, GLint filter, GLenum mode) {
-		Texture* t = new Texture({ TextureTarget::Texture2D, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, filter, mode, GL_UNSIGNED_INT_24_8 }, size, nullptr);
-		_attachTexture(GL_DEPTH_STENCIL_ATTACHMENT, *t);
+	void Framebuffer::attachStencilTexture(glm::uvec2 size, TextureFilter filter, TextureWrap wrap) {
+		Texture* t = new Texture({ 
+			types::texture::Target::Texture2D, 
+			types::texture::InternalFormats::Depth24Stencil8, 
+			types::texture::BaseFormats::DepthStencil,
+			filter, 
+			wrap, 
+			types::ByteFormats::UnsignedInt24_8 }, 
+		size, nullptr);
+		_attachTexture(*this, GL_DEPTH_STENCIL_ATTACHMENT, *t);
 	}
 
 	void Framebuffer::initDrawBuffers() {
@@ -74,10 +97,4 @@ namespace neo {
 		mFBOID = 0;
 	}
 
-	void Framebuffer::_attachTexture(GLuint component, Texture& texture) {
-		mTextures.emplace_back(&texture);
-		bind();
-		glFramebufferTexture(GL_FRAMEBUFFER, component, texture.mTextureID, 0);
-		CHECK_GL_FRAMEBUFFER();
-	}
 }
