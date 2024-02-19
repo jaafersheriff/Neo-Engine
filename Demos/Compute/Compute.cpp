@@ -58,7 +58,7 @@ namespace Compute {
 	void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
 		TRACY_GPUN("Compute::render")
 		backbuffer.bind();
-		backbuffer.clear(glm::vec4(getConfig().clearColor, 1.0), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		backbuffer.clear(glm::vec4(getConfig().clearColor, 1.0), ClearFlagBits::Color | ClearFlagBits::Depth);
 
 		// Update the mesh
 		if (auto meshView = ecs.cGetComponent<ParticleMeshComponent>()) {

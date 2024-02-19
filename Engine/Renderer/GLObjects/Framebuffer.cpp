@@ -2,6 +2,22 @@
 
 namespace neo {
 	namespace {
+		GLbitfield _getGLClearFlags(ClearFlags flagBits) {
+
+			GLbitfield flags = 0;
+			if (flagBits.mClearFlagBits & static_cast<uint8_t>(ClearFlagBits::Color)) {
+				flags |= GL_COLOR_BUFFER_BIT;
+			}
+			if (flagBits.mClearFlagBits & static_cast<uint8_t>(ClearFlagBits::Depth)) {
+				flags |= GL_DEPTH_BUFFER_BIT;
+			}
+			if (flagBits.mClearFlagBits & static_cast<uint8_t>(ClearFlagBits::Stencil)) {
+				flags |= GL_STENCIL_BUFFER_BIT;
+			}
+
+			return flags;
+		}
+
 		void _attachTexture(Framebuffer& fb, GLenum component, Texture& texture) {
 			fb.mTextures.emplace_back(&texture);
 			fb.bind();
@@ -79,11 +95,11 @@ namespace neo {
 		CHECK_GL_FRAMEBUFFER();
 	}
 
-	void Framebuffer::clear(glm::vec4 clearColor, GLbitfield clearFlags) {
+	void Framebuffer::clear(glm::vec4 clearColor, ClearFlags clearFlags) {
 		NEO_ASSERT(mTextures.size(), "Attempting to clear framebuffer with no textures");
 		bind();
 		glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-		glClear(clearFlags);
+		glClear(_getGLClearFlags(clearFlags));
 	}
 
 	void Framebuffer::destroy() {

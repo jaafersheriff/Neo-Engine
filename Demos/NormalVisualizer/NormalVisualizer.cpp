@@ -86,7 +86,7 @@ namespace NormalVisualizer {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		backbuffer.bind();
-		backbuffer.clear(glm::vec4(getConfig().clearColor, 1.f), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		backbuffer.clear(glm::vec4(getConfig().clearColor, 1.f), ClearFlagBits::Color | ClearFlagBits::Depth);
 
 		drawPhong<OpaqueComponent>(ecs, cameraEntity);
 		drawWireframe(ecs, cameraEntity);

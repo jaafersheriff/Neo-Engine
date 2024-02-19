@@ -54,13 +54,12 @@ namespace neo {
 			sprintf(glBuf, "[GL %s] [%s]: %s", sSourceString.at(source), sTypeString.at(type), message);
 
 			switch (severity) {
-				case GL_DEBUG_SEVERITY_HIGH:		 NEO_LOG_E(glBuf); return;
+				case GL_DEBUG_SEVERITY_HIGH:		 NEO_FAIL(glBuf); return;
 				case GL_DEBUG_SEVERITY_MEDIUM:	   NEO_LOG_W(glBuf); return;
 				case GL_DEBUG_SEVERITY_LOW:		  NEO_LOG_W(glBuf); return;
 				case GL_DEBUG_SEVERITY_NOTIFICATION: NEO_LOG_I(glBuf); return;
 			}
-			NEO_LOG_E(glBuf);
-			NEO_FAIL("Unknown severity level!");
+			NEO_FAIL("%s\nUnknown severity level!", glBuf);
 		}
 
 		const char * errorString(GLenum err) {
