@@ -125,13 +125,13 @@ namespace Base {
 
 		glm::vec3 clearColor = getConfig().clearColor;
 
-		sceneTarget->clear(glm::vec4(clearColor, 1.f), ClearFlagBits::Color);
-		sceneTarget->clear(glm::vec4(clearColor, 1.f), ClearFlagBits::Color | ClearFlagBits::Depth);
+		sceneTarget->clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color);
+		sceneTarget->clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		drawPhong<OpaqueComponent>(ecs, cameraEntity);
 		drawPhong<AlphaTestComponent>(ecs, cameraEntity);
 
-		backbuffer.clear(glm::vec4(clearColor, 1.f), ClearFlagBits::Color);
+		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color);
 		drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
 	   // Don't forget the depth. Because reasons.
 	   glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,

@@ -172,11 +172,11 @@ namespace FrustaFitting {
 				types::texture::BaseFormats::Depth
 			}
 		} }, "Shadow map");
-		shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), ClearFlagBits::Depth);
+		shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Depth);
 		drawShadows(*shadowMap, ecs);
 
 		backbuffer.bind();
-		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), ClearFlagBits::Color | ClearFlagBits::Depth);
+		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		drawPhong(ecs, cameraEntity, shadowMap->mTextures[0]);
 		drawLines(ecs, cameraEntity);

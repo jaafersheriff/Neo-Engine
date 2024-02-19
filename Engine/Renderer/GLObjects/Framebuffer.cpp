@@ -2,16 +2,16 @@
 
 namespace neo {
 	namespace {
-		GLbitfield _getGLClearFlags(ClearFlags flagBits) {
+		GLbitfield _getGLClearFlags(types::framebuffer::ClearFlags flagBits) {
 
 			GLbitfield flags = 0;
-			if (flagBits.mClearFlagBits & static_cast<uint8_t>(ClearFlagBits::Color)) {
+			if (flagBits.mClearFlagBits & static_cast<uint8_t>(types::framebuffer::ClearFlagBits::Color)) {
 				flags |= GL_COLOR_BUFFER_BIT;
 			}
-			if (flagBits.mClearFlagBits & static_cast<uint8_t>(ClearFlagBits::Depth)) {
+			if (flagBits.mClearFlagBits & static_cast<uint8_t>(types::framebuffer::ClearFlagBits::Depth)) {
 				flags |= GL_DEPTH_BUFFER_BIT;
 			}
-			if (flagBits.mClearFlagBits & static_cast<uint8_t>(ClearFlagBits::Stencil)) {
+			if (flagBits.mClearFlagBits & static_cast<uint8_t>(types::framebuffer::ClearFlagBits::Stencil)) {
 				flags |= GL_STENCIL_BUFFER_BIT;
 			}
 
@@ -95,7 +95,7 @@ namespace neo {
 		CHECK_GL_FRAMEBUFFER();
 	}
 
-	void Framebuffer::clear(glm::vec4 clearColor, ClearFlags clearFlags) {
+	void Framebuffer::clear(glm::vec4 clearColor, types::framebuffer::ClearFlags clearFlags) {
 		NEO_ASSERT(mTextures.size(), "Attempting to clear framebuffer with no textures");
 		bind();
 		glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);

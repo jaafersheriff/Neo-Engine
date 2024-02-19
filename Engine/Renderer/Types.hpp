@@ -14,6 +14,29 @@ namespace neo {
 			Float
 		};
 
+		namespace framebuffer {
+			enum class ClearFlagBits : uint8_t {
+				Color = 1 << 0,
+				Depth = 1 << 1,
+				Stencil = 1 << 2,
+			};
+			inline ClearFlagBits operator|(ClearFlagBits a, ClearFlagBits b) {
+				return static_cast<ClearFlagBits>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+			}
+			struct ClearFlags {
+				uint8_t mClearFlagBits = 0;
+				ClearFlags(uint8_t bits) {
+					mClearFlagBits = bits;
+				}
+				ClearFlags(ClearFlagBits bits) {
+					mClearFlagBits = static_cast<uint8_t>(bits);
+				}
+				inline ClearFlags operator|(ClearFlagBits b) {
+					return ClearFlags(static_cast<uint8_t>(b));
+				}
+			};
+		}
+
 		namespace mesh {
 			enum class Primitive : uint8_t {
 				Points,

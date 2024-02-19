@@ -105,7 +105,7 @@ namespace Sponza {
 			},
 		} }, "AO base");
 		baseAOTarget->bind();
-		baseAOTarget->clear(glm::vec4(0.f), ClearFlagBits::Color);
+		baseAOTarget->clear(glm::vec4(0.f), types::framebuffer::ClearFlagBits::Color);
 		glViewport(0, 0, targetSize.x / 2u, targetSize.y / 2u);
 
 		{
@@ -155,7 +155,7 @@ namespace Sponza {
 				},
 			} }, "AO blurred");
 			blurredAO->bind();
-			blurredAO->clear(glm::vec4(0.f), ClearFlagBits::Color);
+			blurredAO->clear(glm::vec4(0.f), types::framebuffer::ClearFlagBits::Color);
 			glViewport(0, 0, targetSize.x, targetSize.y);
 
 			auto* blurShader = Library::createSourceShader("BlurShader", SourceShader::ConstructionArgs{

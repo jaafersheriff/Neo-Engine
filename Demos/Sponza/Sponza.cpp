@@ -195,7 +195,7 @@ namespace Sponza {
 			}
 		} }, "Shadow map");
 		if (mDrawShadows) {
-			shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), ClearFlagBits::Depth);
+			shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Depth);
 			drawShadows<OpaqueComponent>(*shadowMap, ecs);
 			drawShadows<AlphaTestComponent>(*shadowMap, ecs);
 		}
@@ -208,7 +208,7 @@ namespace Sponza {
 		}
 
 		backbuffer.bind();
-		backbuffer.clear(glm::vec4(0,0,0, 1.f), ClearFlagBits::Color);
+		backbuffer.clear(glm::vec4(0,0,0, 1.f), types::framebuffer::ClearFlagBits::Color);
 		drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
 		// Don't forget the depth. Because reasons.
 		glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
@@ -224,7 +224,7 @@ namespace Sponza {
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		sceneTarget.bind();
-		sceneTarget.clear(glm::vec4(getConfig().clearColor, 0.f), ClearFlagBits::Color | ClearFlagBits::Depth);
+		sceneTarget.clear(glm::vec4(getConfig().clearColor, 0.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
 		drawPhong<OpaqueComponent>(ecs, cameraEntity, shadowMap);
 		drawPhong<AlphaTestComponent>(ecs, cameraEntity, shadowMap);
@@ -235,7 +235,7 @@ namespace Sponza {
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		auto& gbuffer = createGBuffer(targetSize);
 		gbuffer.bind();
-		gbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), ClearFlagBits::Color | ClearFlagBits::Depth);
+		gbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, targetSize.x, targetSize.y);
 		drawGBuffer<OpaqueComponent>(ecs, cameraEntity, {});
 		drawGBuffer<AlphaTestComponent>(ecs, cameraEntity, {});
@@ -250,7 +250,7 @@ namespace Sponza {
 			}
 		} }, "LightResolve");
 		lightResolve->bind();
-		lightResolve->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), ClearFlagBits::Color);
+		lightResolve->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color);
 		glViewport(0, 0, targetSize.x, targetSize.y);
 		drawPointLights(ecs, gbuffer, cameraEntity, targetSize, mLightDebugRadius);
 		drawDirectionalLights(ecs, cameraEntity, gbuffer, shadowMap);
@@ -259,7 +259,7 @@ namespace Sponza {
 		{
 			TRACY_GPUN("Final Combine");
 			sceneTarget.bind();
-			sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), ClearFlagBits::Color | ClearFlagBits::Depth);
+			sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 			glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
 			auto* combineShader = Library::createSourceShader("FinalCombine", SourceShader::ConstructionArgs{
 				{ ShaderStage::VERTEX, "quad.vert"},
