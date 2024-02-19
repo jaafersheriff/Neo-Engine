@@ -63,8 +63,8 @@ namespace neo {
 		}
 		else {
 			const auto& positions = getVBO(types::mesh::VertexType::Position);
-			ServiceLocator<Renderer>::ref().mStats.mNumTriangles += positions.elementCount / positions.components; // This is wrong, need to also divide by primitive size
-			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, positions.elementCount);
+			ServiceLocator<Renderer>::ref().mStats.mNumTriangles += positions.elementCount / positions.components;
+			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, positions.elementCount / positions.components);
 		}
 	}
 
