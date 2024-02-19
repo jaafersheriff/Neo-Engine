@@ -20,6 +20,7 @@
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/PhongShaderComponent.hpp"
 #include "ECS/Component/RenderingComponent/ShadowCasterShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/WireframeShaderComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
@@ -32,6 +33,7 @@
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
+#include "Renderer/RenderingSystems/WireframeRenderer.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -39,49 +41,56 @@ using namespace neo;
 
 /* Game object definitions */
 namespace FrustaFitting {
+	namespace {
+		struct SeenByMock : public Component {
+			virtual std::string getName() const override {
+				return "SeenByMock";
+			}
+		};
 
-	struct Camera {
-		ECS::Entity mEntity;
-		Camera(std::string name, ECS& ecs, float fov, float near, float far, glm::vec3 pos) {
-			mEntity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(mEntity, name);
-			ecs.addComponent<SpatialComponent>(mEntity, pos, glm::vec3(1.f));
-			ecs.addComponent<PerspectiveCameraComponent>(mEntity, near, far, fov);
-		}
-	};
+		struct Camera {
+			ECS::Entity mEntity;
+			Camera(std::string name, ECS& ecs, float fov, float near, float far, glm::vec3 pos) {
+				mEntity = ecs.createEntity();
+				ecs.addComponent<TagComponent>(mEntity, name);
+				ecs.addComponent<SpatialComponent>(mEntity, pos, glm::vec3(1.f));
+				ecs.addComponent<PerspectiveCameraComponent>(mEntity, near, far, fov);
+			}
+		};
 
-	struct Light {
-		Light(ECS& ecs, glm::vec3 position) {
-			// Light object
-			auto lightEntity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(lightEntity, "Light");
-			auto spatial = ecs.addComponent<SpatialComponent>(lightEntity, position, glm::vec3(1.f));
-			spatial->setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
-			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f));
-			ecs.addComponent<DirectionalLightComponent>(lightEntity);
-			ecs.addComponent<MainLightComponent>(lightEntity);
+		struct Light {
+			Light(ECS& ecs, glm::vec3 position) {
+				// Light object
+				auto lightEntity = ecs.createEntity();
+				ecs.addComponent<TagComponent>(lightEntity, "Light");
+				auto spatial = ecs.addComponent<SpatialComponent>(lightEntity, position, glm::vec3(1.f));
+				spatial->setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
+				ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f));
+				ecs.addComponent<DirectionalLightComponent>(lightEntity);
+				ecs.addComponent<MainLightComponent>(lightEntity);
 
-			// Shadow camera object
-			auto cameraObject = ecs.createEntity();
-			ecs.addComponent<TagComponent>(cameraObject, "Light camera");
-			ecs.addComponent<OrthoCameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
-			ecs.addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
-			ecs.addComponent<FrustumComponent>(cameraObject);
-			ecs.addComponent<FrustumFitReceiverComponent>(cameraObject);
-			ecs.addComponent<LineMeshComponent>(cameraObject, glm::vec3(1.f, 0.f, 1.f));
-			ecs.addComponent<ShadowCameraComponent>(cameraObject);
-		}
-	};
+				// Shadow camera object
+				auto cameraObject = ecs.createEntity();
+				ecs.addComponent<TagComponent>(cameraObject, "Light camera");
+				ecs.addComponent<OrthoCameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
+				ecs.addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
+				ecs.addComponent<FrustumComponent>(cameraObject);
+				ecs.addComponent<FrustumFitReceiverComponent>(cameraObject);
+				ecs.addComponent<LineMeshComponent>(cameraObject, glm::vec3(1.f, 0.f, 1.f));
+				ecs.addComponent<ShadowCameraComponent>(cameraObject);
+			}
+		};
 
-	struct Renderable {
-		ECS::Entity mEntity;
+		struct Renderable {
+			ECS::Entity mEntity;
 
-		Renderable(ECS& ecs, Mesh* mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
-			mEntity = ecs.createEntity();
-			ecs.addComponent<MeshComponent>(mEntity, mesh);
-			ecs.addComponent<SpatialComponent>(mEntity, position, scale, rotation);
-		}
-	};
+			Renderable(ECS& ecs, Mesh* mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
+				mEntity = ecs.createEntity();
+				ecs.addComponent<MeshComponent>(mEntity, mesh);
+				ecs.addComponent<SpatialComponent>(mEntity, position, scale, rotation);
+			}
+		};
+	}
 
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
@@ -116,6 +125,7 @@ namespace FrustaFitting {
 			material->mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
 			ecs.addComponent<PhongShaderComponent>(sphere.mEntity);
 			ecs.addComponent<ShadowCasterShaderComponent>(sphere.mEntity);
+			ecs.addComponent<WireframeShaderComponent>(sphere.mEntity);
 		}
 
 		/* Ground plane */
@@ -133,6 +143,22 @@ namespace FrustaFitting {
 		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
 		ecs.addSystem<FrustumCullingSystem>();
 		ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
+	}
+
+	void Demo::update(ECS& ecs) {
+		const auto&& [mockCameraEntity, _, __] = *ecs.getSingleView<MockCameraComponent, SpatialComponent>();
+		const auto& view = ecs.getView<const WireframeShaderComponent, CameraCulledComponent>();
+		for (auto entity : view) {
+			auto& culled = view.get<CameraCulledComponent>(entity);
+			if (culled.isInView(ecs, entity, mockCameraEntity)) {
+				if (!ecs.has<SeenByMock>(entity)) {
+					ecs.addComponent<SeenByMock>(entity);
+				}
+			}
+			else if (ecs.has<SeenByMock>(entity)) {
+				ecs.removeComponent<SeenByMock>(entity);
+			}
+		}
 	}
 
 	void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
@@ -154,5 +180,8 @@ namespace FrustaFitting {
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		drawPhong(ecs, cameraEntity, shadowMap->mTextures[0]);
 		drawLines(ecs, cameraEntity);
+
+		// Draw wireframe for anything being seen by the mock camera
+		drawWireframe<SeenByMock>(ecs, cameraEntity);
 	}
 }

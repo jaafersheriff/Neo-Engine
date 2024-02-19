@@ -9,6 +9,7 @@ namespace FrustaFitting {
 	public:
 		virtual IDemo::Config getConfig() const override;
 		virtual void init(ECS& ecs) override;
+		virtual void update(ECS& ecs) override;
 		virtual void render(const ECS& ecs, Framebuffer& backbuffer) override;
 	};
 }

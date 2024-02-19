@@ -262,8 +262,9 @@ namespace {
 
 		// Spatial
 		SpatialComponent nodeSpatial;
+		glm::mat4 localTransform(1.f);
 		if (node.matrix.size() == 16) {
-			nodeSpatial.setModelMatrix(glm::mat4(glm::make_mat4(node.matrix.data())) * parentXform);
+			localTransform = glm::mat4(glm::make_mat4(node.matrix.data()));
 		}
 		else {
 			if (node.translation.size() == 3) {
@@ -276,8 +277,9 @@ namespace {
 				glm::quat q = glm::make_quat(node.rotation.data());
 				nodeSpatial.setOrientation(glm::mat3_cast(q));
 			}
-			nodeSpatial.setModelMatrix(nodeSpatial.getModelMatrix() * parentXform);
+			localTransform = nodeSpatial.getModelMatrix();
 		}
+		nodeSpatial.setModelMatrix(localTransform * parentXform);
 
 		for (auto& child : node.children) {
 			_processNode(model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);

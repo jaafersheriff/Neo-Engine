@@ -26,8 +26,10 @@ namespace neo {
 
 	// Test if an object is inside the frustum
 	bool FrustumComponent::isInFrustum(const SpatialComponent& spatial, const BoundingBoxComponent& box) const {
-		glm::vec3 min = box.mMin * spatial.getScale() + spatial.getPosition();
-		glm::vec3 max = box.mMax * spatial.getScale() + spatial.getPosition();
+		//glm::vec3 min = box.mMin * spatial.getScale() + spatial.getPosition();
+		//glm::vec3 max = box.mMax * spatial.getScale() + spatial.getPosition();
+		glm::vec3 min = spatial.getModelMatrix() * glm::vec4(box.mMin, 1.f);
+		glm::vec3 max = spatial.getModelMatrix() * glm::vec4(box.mMax, 1.f);
 
 		return true
 			&& _boxInsideOfPlane(mLeft, min, max)

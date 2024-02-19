@@ -39,6 +39,7 @@ endif()
 
 add_compile_definitions(
 	$<$<CONFIG:Debug>:DEBUG_MODE>
+	$<$<CONFIG:RelWithDebInfo>:DEBUG_MODE>
 )
 
 #--------------------------------------------------------------------

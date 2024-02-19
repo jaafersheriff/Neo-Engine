@@ -64,18 +64,15 @@ namespace Base {
 
 		/* Bunny object */
 		{
-			//GLTFImporter::Scene gltfScene = Loader::loadGltfScene("bunny.gltf");
-			//const auto& bunnyNode = gltfScene.mMeshNodes[0];
+			GLTFImporter::Scene gltfScene = Loader::loadGltfScene("bunny.gltf");
+			const auto& bunnyNode = gltfScene.mMeshNodes[0];
 
 			auto bunny = ecs.createEntity();
 			ecs.addComponent<TagComponent>(bunny, "Bunny");
 			ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 0.0f, 0.f), glm::vec3(1.5f));
 			ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-			//ecs.addComponent<MeshComponent>(bunny, bunnyNode.mMesh);
-			//ecs.addComponent<BoundingBoxComponent>(bunny, bunnyNode.mMesh->mMin, bunnyNode.mMesh->mMax);
-			auto lineMesh = ecs.addComponent<LineMeshComponent>(bunny, glm::vec3(1.f));
-			lineMesh->addNode({ -1.f, 1.f, 0.f });
-			lineMesh->addNode({ 1.f, 1.f, 0.f });
+			ecs.addComponent<MeshComponent>(bunny, bunnyNode.mMesh);
+			ecs.addComponent<BoundingBoxComponent>(bunny, bunnyNode.mMesh->mMin, bunnyNode.mMesh->mMax);
 			ecs.addComponent<PhongShaderComponent>(bunny);
 			ecs.addComponent<OpaqueComponent>(bunny);
 			auto material = ecs.addComponent<MaterialComponent>(bunny);

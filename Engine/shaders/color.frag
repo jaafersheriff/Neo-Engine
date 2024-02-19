@@ -1,6 +1,6 @@
-uniform vec3 wireColor;
-out vec4 color;
+uniform vec3 color;
+out vec4 outColor;
 void main() {
-	color = vec4(wireColor, 1.0);
+	outColor = vec4(color, 1.0);
 }
 

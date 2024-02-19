@@ -18,7 +18,7 @@ namespace neo {
 			if (!(c)) { \
 				NEO_LOG_E("ASSERT(%s) in %s, file %s on line %d", #c, __func__, __FILENAME__, __LINE__); \
 				NEO_LOG_E(fmt, __VA_ARGS__); \
-				abort(); \
+				__debugbreak(); \
 			} 
 	#else
 		#define NEO_ASSERT(c, fmt, ...) \
