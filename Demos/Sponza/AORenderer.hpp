@@ -38,7 +38,7 @@ namespace Sponza {
 			};
 			Library::createTexture("aoKernel", { 
 				types::texture::Target::Texture1D, 
-				types::texture::InternalFormats::RGB32F,
+				types::texture::InternalFormats::RGB32_F,
 				types::texture::BaseFormats::RGB,
 				{
 					types::texture::Filters::Nearest,
@@ -62,7 +62,7 @@ namespace Sponza {
 			}
 			Library::createTexture("aoNoise", { 
 				types::texture::Target::Texture2D, 
-				types::texture::InternalFormats::RGB32F,
+				types::texture::InternalFormats::RGB32_F,
 				types::texture::BaseFormats::RGB,
 				{
 					types::texture::Filters::Nearest,
@@ -91,8 +91,8 @@ namespace Sponza {
 		auto baseAOTarget = Library::getPooledFramebuffer({ glm::max(glm::uvec2(1,1), targetSize / 2u), {
 			TextureFormat {
 				types::texture::Target::Texture2D, 
-				types::texture::InternalFormats::R16F,
-				types::texture::BaseFormats::Red,
+				types::texture::InternalFormats::R16_F,
+				types::texture::BaseFormats::R,
 				{
 					types::texture::Filters::Linear,
 					types::texture::Filters::Linear,
@@ -141,8 +141,8 @@ namespace Sponza {
 			auto blurredAO = Library::getPooledFramebuffer({ targetSize, {
 				TextureFormat {
 					types::texture::Target::Texture2D, 
-					types::texture::InternalFormats::R16F,
-					types::texture::BaseFormats::Red,
+					types::texture::InternalFormats::R16_F,
+					types::texture::BaseFormats::R,
 					{
 						types::texture::Filters::Linear,
 						types::texture::Filters::Linear,

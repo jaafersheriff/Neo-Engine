@@ -261,12 +261,12 @@ namespace Gltf {
 		auto sceneTarget = Library::getPooledFramebuffer(PooledFramebufferDetails{ viewport.mSize, {
 			TextureFormat {
 				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB16,
+				types::texture::InternalFormats::RGB16_UNORM,
 				types::texture::BaseFormats::RGB
 			},
 			TextureFormat {
 				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::Depth16,
+				types::texture::InternalFormats::D16,
 				types::texture::BaseFormats::Depth
 			}
 		} }, "Scene target");

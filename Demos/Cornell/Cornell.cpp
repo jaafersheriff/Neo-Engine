@@ -93,12 +93,12 @@ namespace Cornell {
 		auto sceneTarget = Library::getPooledFramebuffer({ viewport.mSize, {
 			TextureFormat {
 				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB8,
+				types::texture::InternalFormats::RGB8_UNORM,
 				types::texture::BaseFormats::RGB
 			},
 			TextureFormat {
 				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::Depth16,
+				types::texture::InternalFormats::D16,
 				types::texture::BaseFormats::Depth
 			}
 		} }, "Scene target");

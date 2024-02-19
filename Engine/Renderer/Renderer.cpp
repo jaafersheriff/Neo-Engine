@@ -60,7 +60,7 @@ namespace neo {
 		mDefaultFBO = Library::createFramebuffer("backbuffer");
 		mDefaultFBO->attachColorTexture({ 1, 1 }, { 
 			types::texture::Target::Texture2D, 
-			types::texture::InternalFormats::RGB16F,
+			types::texture::InternalFormats::RGB16_F,
 			types::texture::BaseFormats::RGB,
 			{
 				types::texture::Filters::Linear,
@@ -72,7 +72,7 @@ namespace neo {
 			}
 		});
 		mDefaultFBO->attachDepthTexture({ 1, 1 }, 
-			types::texture::InternalFormats::Depth16,
+			types::texture::InternalFormats::D16,
 			{
 				types::texture::Filters::Linear,
 				types::texture::Filters::Linear

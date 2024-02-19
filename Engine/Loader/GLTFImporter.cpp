@@ -79,44 +79,44 @@ namespace {
 		switch (pixel_type) {
 		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
 			if (baseFormat == neo::types::texture::BaseFormats::RGBA) {
-				return neo::types::texture::InternalFormats::RGBA8;
+				return neo::types::texture::InternalFormats::RGBA8_UNORM;
 			}
 			else if (baseFormat == neo::types::texture::BaseFormats::RGB) {
-				return neo::types::texture::InternalFormats::RGB8;
+				return neo::types::texture::InternalFormats::RGB8_UNORM;
 			}
 			else if (baseFormat == neo::types::texture::BaseFormats::RG) {
-				return neo::types::texture::InternalFormats::RG8;
+				return neo::types::texture::InternalFormats::RG8_UNORM;
 			}
-			else if (baseFormat == neo::types::texture::BaseFormats::Red) {
-				return neo::types::texture::InternalFormats::R8;
+			else if (baseFormat == neo::types::texture::BaseFormats::R) {
+				return neo::types::texture::InternalFormats::R8_UNORM;
 			}
 			break;
 		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
 			if (baseFormat == neo::types::texture::BaseFormats::RGBA) {
-				return neo::types::texture::InternalFormats::RGBA16UI;
+				return neo::types::texture::InternalFormats::RGBA16_UI;
 			}
 			else if (baseFormat == neo::types::texture::BaseFormats::RGB) {
-				return neo::types::texture::InternalFormats::RGB16UI;
+				return neo::types::texture::InternalFormats::RGB16_UI;
 			}
 			else if (baseFormat == neo::types::texture::BaseFormats::RG) {
-				return neo::types::texture::InternalFormats::RG16UI;
+				return neo::types::texture::InternalFormats::RG16_UI;
 			}
-			else if (baseFormat == neo::types::texture::BaseFormats::Red) {
-				return neo::types::texture::InternalFormats::R16UI;
+			else if (baseFormat == neo::types::texture::BaseFormats::R) {
+				return neo::types::texture::InternalFormats::R16_UI;
 			}
 			break;
 		case TINYGLTF_COMPONENT_TYPE_FLOAT:
 			if (baseFormat == neo::types::texture::BaseFormats::RGBA) {
-				return neo::types::texture::InternalFormats::RGBA32F;
+				return neo::types::texture::InternalFormats::RGBA32_F;
 			}
 			else if (baseFormat == neo::types::texture::BaseFormats::RGB) {
-				return neo::types::texture::InternalFormats::RGB32F;
+				return neo::types::texture::InternalFormats::RGB32_F;
 			}
 			else if (baseFormat == neo::types::texture::BaseFormats::RG) {
-				return neo::types::texture::InternalFormats::RG32F;
+				return neo::types::texture::InternalFormats::RG32_F;
 			}
-			else if (baseFormat == neo::types::texture::BaseFormats::Red) {
-				return neo::types::texture::InternalFormats::R32F;
+			else if (baseFormat == neo::types::texture::BaseFormats::R) {
+				return neo::types::texture::InternalFormats::R32_F;
 			}
 			break;
 		default:
@@ -124,13 +124,13 @@ namespace {
 		}
 
 		NEO_FAIL("Invalid combo of internal/base format");
-		return neo::types::texture::InternalFormats::RGBA8;
+		return neo::types::texture::InternalFormats::RGBA8_UNORM;
 	}
 
 	inline neo::types::texture::BaseFormats _getGLBaseFormat(int components) {
 		switch (components) {
 		case  1:
-			return neo::types::texture::BaseFormats::Red;
+			return neo::types::texture::BaseFormats::R;
 		case  2:
 			return neo::types::texture::BaseFormats::RG;
 		case  3:

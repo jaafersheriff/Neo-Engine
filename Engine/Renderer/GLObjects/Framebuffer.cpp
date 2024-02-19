@@ -47,9 +47,9 @@ namespace neo {
 
 	void Framebuffer::attachDepthTexture(Texture* t) {
 		NEO_ASSERT(t->mFormat.mTarget == types::texture::Target::Texture2D, "Framebuffers need 2D textures");
-		NEO_ASSERT(t->mFormat.mInternalFormat == types::texture::InternalFormats::Depth16 
-			|| t->mFormat.mInternalFormat == types::texture::InternalFormats::Depth24 
-			|| t->mFormat.mInternalFormat == types::texture::InternalFormats::Depth32 
+		NEO_ASSERT(t->mFormat.mInternalFormat == types::texture::InternalFormats::D16 
+			|| t->mFormat.mInternalFormat == types::texture::InternalFormats::D24 
+			|| t->mFormat.mInternalFormat == types::texture::InternalFormats::D32 
 			, "Invalid depth target format");
 		NEO_ASSERT(t->mFormat.mBaseFormat == types::texture::BaseFormats::Depth, "Invalid depth target format");
 		_attachTexture(*this, GL_DEPTH_ATTACHMENT, *t);
@@ -58,7 +58,7 @@ namespace neo {
 	void Framebuffer::attachStencilTexture(glm::uvec2 size, TextureFilter filter, TextureWrap wrap) {
 		Texture* t = new Texture({ 
 			types::texture::Target::Texture2D, 
-			types::texture::InternalFormats::Depth24Stencil8, 
+			types::texture::InternalFormats::D24S8, 
 			types::texture::BaseFormats::DepthStencil,
 			filter, 
 			wrap, 

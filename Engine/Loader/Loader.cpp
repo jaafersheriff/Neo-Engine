@@ -86,7 +86,7 @@ namespace neo {
 		/* Upload data to GPU and free from CPU */
 		TextureFormat format = {
 			types::texture::Target::TextureCube,
-			types::texture::InternalFormats::RGBA8,
+			types::texture::InternalFormats::RGBA8_UNORM,
 			types::texture::BaseFormats::RGBA
 		};
 		Texture* texture = new Texture(format, size, reinterpret_cast<void**>(data.data()));

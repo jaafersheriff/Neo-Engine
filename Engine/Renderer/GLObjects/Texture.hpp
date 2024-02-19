@@ -44,7 +44,7 @@ namespace neo {
 
 	struct TextureFormat {
 		types::texture::Target mTarget = types::texture::Target::Texture2D;
-		types::texture::InternalFormats mInternalFormat = types::texture::InternalFormats::RGBA8;
+		types::texture::InternalFormats mInternalFormat = types::texture::InternalFormats::RGBA8_UNORM;
 		types::texture::BaseFormats mBaseFormat = types::texture::BaseFormats::RGBA;
 		TextureFilter mFilter = {
 			types::texture::Filters::Linear,

@@ -168,7 +168,7 @@ namespace FrustaFitting {
 		auto shadowMap = Library::getPooledFramebuffer({ glm::uvec2(2048, 2048), {
 			TextureFormat {
 				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::Depth16,
+				types::texture::InternalFormats::D16,
 				types::texture::BaseFormats::Depth
 			}
 		} }, "Shadow map");
