@@ -102,12 +102,6 @@ namespace Sponza {
 			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f));
 			ecs.addComponent<MainLightComponent>(lightEntity);
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
-			ecs.addComponent<WireframeShaderComponent>(lightEntity);
-			ecs.addComponent<MeshComponent>(lightEntity, Library::getMesh("cube"));
-			auto line = ecs.addComponent<LineMeshComponent>(lightEntity, glm::vec3(1, 0, 0));
-			line->mUseParentSpatial = true;
-			line->addNode({ 0,0,0 });
-			line->addNode({ 0,0,1 });
 		}
 		{
 			auto shadowCam = ecs.createEntity();

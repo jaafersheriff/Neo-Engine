@@ -12,7 +12,6 @@ namespace neo {
 	void drawShadows(Framebuffer& depthMap, const ECS& ecs) {
 		TRACY_GPU();
 
-		depthMap.bind();
 		depthMap.disableDraw();
 		glViewport(0, 0, depthMap.mTextures[0]->mWidth, depthMap.mTextures[0]->mHeight);
 		{

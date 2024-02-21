@@ -22,6 +22,7 @@ namespace Gltf {
 		virtual void imGuiEditor(ECS& ecs) override;
 
 	private:
+		bool mDrawShadows = true;
 		DebugMode mDebugMode = DebugMode::Off;
 	};
 }

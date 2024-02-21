@@ -4,15 +4,21 @@
 #include "ECS/ECS.hpp"
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
+#include "ECS/Component/RenderingComponent/ShadowCasterShaderComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
+#include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
+#include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
@@ -26,7 +32,7 @@ using namespace neo;
 
 namespace Gltf {
 	template<typename... CompTs>
-	void _drawGltf(const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode) {
+	void _drawGltf(const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, Texture* shadowMap) {
 		TRACY_GPU();
 
 		ShaderDefines passDefines({});
@@ -56,6 +62,21 @@ namespace Gltf {
 		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 		auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
 
+		glm::mat4 L;
+		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
+		const bool shadowsEnabled = shadowMap && shadowCamera.has_value();
+		MakeDefine(ENABLE_SHADOWS);
+		if (shadowsEnabled) {
+			passDefines.set(ENABLE_SHADOWS);
+			const auto& [_, __, shadowOrtho, shadowCameraSpatial] = *shadowCamera;
+			static glm::mat4 biasMatrix(
+				0.5f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.5f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.5f, 0.0f,
+				0.5f, 0.5f, 0.5f, 1.0f);
+			L = biasMatrix * shadowOrtho.getProj() * shadowCameraSpatial.getView();
+		}
+
 		bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
 		bool pointLight = ecs.has<PointLightComponent>(lightEntity);
 		glm::vec3 attenuation(0.f);
@@ -73,8 +94,8 @@ namespace Gltf {
 		}
 
 		SourceShader* shader = Library::createSourceShader("GltfShader", SourceShader::ConstructionArgs{
-				{ ShaderStage::VERTEX, "model.vert"},
-				{ ShaderStage::FRAGMENT, "gltf.frag" }
+				{ ShaderStage::VERTEX, "gltf/gltf.vert"},
+				{ ShaderStage::FRAGMENT, "gltf/gltf.frag" }
 		});
 
 		ShaderDefines drawDefines(passDefines);
@@ -147,12 +168,16 @@ namespace Gltf {
 				resolvedShader.bindUniform("V", cameraSpatial->getView());
 				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 				resolvedShader.bindUniform("lightCol", light.mColor);
-				if (directionalLight) {
+				if (directionalLight || shadowsEnabled) {
 					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
 				}
 				if (pointLight) {
 					resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
 					resolvedShader.bindUniform("lightAtt", attenuation);
+				}
+				if (shadowsEnabled) {
+					resolvedShader.bindUniform("L", L);
+					resolvedShader.bindTexture("shadowMap", *shadowMap);
 				}
 			}
 
@@ -180,16 +205,27 @@ namespace Gltf {
 			ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 35.f, 45.f);
 			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 15.f);
 			ecs.addComponent<MainCameraComponent>(entity);
+			ecs.addComponent<FrustumComponent>(entity);
+			ecs.addComponent<FrustumFitSourceComponent>(entity);
 		}
 
 		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(entity, "Light");
-			auto spat = ecs.addComponent<SpatialComponent>(entity, glm::vec3(75.f, 200.f, 20.f));
-			spat->setLookDir(glm::normalize(glm::vec3(-0.6f, -0.65f, -0.49f)));
-			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f));
-			ecs.addComponent<MainLightComponent>(entity);
-			ecs.addComponent<DirectionalLightComponent>(entity);
+			auto lightEntity = ecs.createEntity();
+			ecs.addComponent<TagComponent>(lightEntity, "Light");
+			auto spat = ecs.addComponent<SpatialComponent>(lightEntity, glm::vec3(75.f, 200.f, 20.f));
+			spat->setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
+			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f));
+			ecs.addComponent<MainLightComponent>(lightEntity);
+			ecs.addComponent<DirectionalLightComponent>(lightEntity);
+		}
+		{
+			auto shadowCam = ecs.createEntity();
+			ecs.addComponent<TagComponent>(shadowCam, "Shadow Camera");
+			ecs.addComponent<OrthoCameraComponent>(shadowCam, -1.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
+			ecs.addComponent<ShadowCameraComponent>(shadowCam);
+			ecs.addComponent<FrustumComponent>(shadowCam);
+			ecs.addComponent<SpatialComponent>(shadowCam);
+			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
 		}
 
 		{
@@ -209,6 +245,7 @@ namespace Gltf {
 			}
 			ecs.addComponent<MaterialComponent>(entity, helmet.mMaterial);
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 1.0f, 0.f));
+			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 		}
 
 		{
@@ -228,16 +265,21 @@ namespace Gltf {
 					ecs.addComponent<AlphaTestComponent>(entity);
 				}
 				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
+				ecs.addComponent<ShadowCasterShaderComponent>(entity);
 			}
 		}
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
 		ecs.addSystem<RotationSystem>();
+		ecs.addSystem<FrustumSystem>();
+		ecs.addSystem<FrustaFittingSystem>();
+		ecs.addSystem<FrustumCullingSystem>();
 	}
 
 	void Demo::imGuiEditor(ECS& ecs) {
 		NEO_UNUSED(ecs);
+		ImGui::Checkbox("Shadows", &mDrawShadows);
 
 		static std::unordered_map<DebugMode, const char*> sDebugModeStrings = {
 			{DebugMode::Off, "Off"},
@@ -275,12 +317,27 @@ namespace Gltf {
 			}
 		} }, "Scene target");
 
+		auto shadowMap = Library::getPooledFramebuffer({ glm::uvec2(4096, 4096), { 
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::D16,
+				types::texture::BaseFormats::Depth
+			}
+		} }, "Shadow map");
+		if (mDrawShadows) {
+			shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Depth);
+			drawShadows<OpaqueComponent>(*shadowMap, ecs);
+			drawShadows<AlphaTestComponent>(*shadowMap, ecs);
+		}
+
+
 		glm::vec3 clearColor = getConfig().clearColor;
 
+		sceneTarget->bind();
 		sceneTarget->clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		_drawGltf<OpaqueComponent>(ecs, cameraEntity, mDebugMode);
-		_drawGltf<AlphaTestComponent>(ecs, cameraEntity, mDebugMode);
+		_drawGltf<OpaqueComponent>(ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
+		_drawGltf<AlphaTestComponent>(ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color);

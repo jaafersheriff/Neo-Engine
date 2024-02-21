@@ -1,4 +1,5 @@
 #include "alphaDiscard.glsl"
+#include "shadowreceiver.glsl"
 #include "phong.glsl"
 
 in vec4 fragPos;
@@ -27,6 +28,11 @@ layout(binding = 3) uniform sampler2D occlusionMap; // Shouldn't be used for ind
 #ifdef EMISSIVE
 layout(binding = 4) uniform sampler2D emissiveMap;
 uniform vec3 emissiveFactor;
+#endif
+
+#ifdef ENABLE_SHADOWS
+in vec4 shadowCoord;
+layout(binding = 5) uniform sampler2D shadowMap;
 #endif
 
 uniform vec3 lightCol;
@@ -94,10 +100,17 @@ float attFactor = 1;
 	vec3 L = vec3(0, 0, 0);
 #endif
 
-	color.rgb = 0.1 * fAlbedo.rgb + lambertianDiffuse(L, N, fAlbedo.rgb, lightCol, attFactor);
+	color.rgb = 0.3 * fAlbedo.rgb + lambertianDiffuse(L, N, fAlbedo.rgb, lightCol, attFactor);
 #ifdef OCCLUSION_MAP
 	color.rgb *= texture(occlusionMap, fragTex).r;
 #endif
+
+#ifdef ENABLE_SHADOWS
+	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.2);
+	color.rgb *= visibility;
+#endif
+
+
 	color.a = 1.0;
 }
 
