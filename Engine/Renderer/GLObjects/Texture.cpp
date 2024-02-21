@@ -46,7 +46,7 @@ namespace neo {
 		GLenum _getGLWrap(types::texture::Wraps wrap) {
 			switch (wrap) {
 			case types::texture::Wraps::Clamp:
-				return GL_CLAMP;
+				return GL_CLAMP_TO_EDGE;
 			case types::texture::Wraps::Mirrored:
 				return GL_MIRRORED_REPEAT;
 			case types::texture::Wraps::Repeat:

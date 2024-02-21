@@ -209,7 +209,7 @@ namespace Sponza {
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(0,0,0, 1.f), types::framebuffer::ClearFlagBits::Color);
-		drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
+		drawFXAA(glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0]);
 		// Don't forget the depth. Because reasons.
 		glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
 			0, 0, viewport.mSize.x, viewport.mSize.y,

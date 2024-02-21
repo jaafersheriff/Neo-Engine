@@ -172,6 +172,7 @@ namespace neo {
 			pfb.mFrameCount++;
 		}
 
+		pfb.mFramebuffer->bind();
 		return pfb.mFramebuffer;
 	}
 

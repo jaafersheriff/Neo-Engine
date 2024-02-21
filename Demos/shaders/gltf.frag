@@ -94,7 +94,7 @@ float attFactor = 1;
 	vec3 L = vec3(0, 0, 0);
 #endif
 
-	color.rgb = lambertianDiffuse(L, N, fAlbedo.rgb, lightCol, attFactor);
+	color.rgb = 0.1 * fAlbedo.rgb + lambertianDiffuse(L, N, fAlbedo.rgb, lightCol, attFactor);
 #ifdef OCCLUSION_MAP
 	color.rgb *= texture(occlusionMap, fragTex).r;
 #endif

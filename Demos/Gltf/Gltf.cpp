@@ -6,8 +6,10 @@
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
+#include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
+#include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
@@ -175,8 +177,8 @@ namespace Gltf {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Camera");
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.05f, 0.03f, 0.0f), glm::vec3(1.f));
-			ecs.addComponent<PerspectiveCameraComponent>(entity, 0.01f, 10.f, 45.f);
-			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 0.1f);
+			ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 35.f, 45.f);
+			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 15.f);
 			ecs.addComponent<MainCameraComponent>(entity);
 		}
 
@@ -190,22 +192,23 @@ namespace Gltf {
 			ecs.addComponent<DirectionalLightComponent>(entity);
 		}
 
-		GLTFImporter::Scene scene = Loader::loadGltfScene("DamagedHelmet/DamagedHelmet.gltf");
-		for (auto& node : scene.mMeshNodes) {
+		{
+			GLTFImporter::Node helmet = Loader::loadGltfScene("DamagedHelmet/DamagedHelmet.gltf", glm::translate(glm::mat4(1.f), glm::vec3(0.f, 2.5f, -0.5f))).mMeshNodes[0];
 			auto entity = ecs.createEntity();
-			if (!node.mName.empty()) {
-				ecs.addComponent<TagComponent>(entity, node.mName);
+			if (!helmet.mName.empty()) {
+				ecs.addComponent<TagComponent>(entity, helmet.mName);
 			}
-			ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
-			ecs.addComponent<MeshComponent>(entity, node.mMesh);
-			ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh->mMin, node.mMesh->mMax);
-			if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
+			ecs.addComponent<SpatialComponent>(entity, helmet.mSpatial);
+			ecs.addComponent<MeshComponent>(entity, helmet.mMesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, helmet.mMesh->mMin, helmet.mMesh->mMax);
+			if (helmet.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 				ecs.addComponent<OpaqueComponent>(entity);
 			}
-			else if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::AlphaTest) {
+			else if (helmet.mAlphaMode == GLTFImporter::Node::AlphaMode::AlphaTest) {
 				ecs.addComponent<AlphaTestComponent>(entity);
 			}
-			ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
+			ecs.addComponent<MaterialComponent>(entity, helmet.mMaterial);
+			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 1.0f, 0.f));
 		}
 
 		{
@@ -230,6 +233,7 @@ namespace Gltf {
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
+		ecs.addSystem<RotationSystem>();
 	}
 
 	void Demo::imGuiEditor(ECS& ecs) {
@@ -278,8 +282,9 @@ namespace Gltf {
 		_drawGltf<OpaqueComponent>(ecs, cameraEntity, mDebugMode);
 		_drawGltf<AlphaTestComponent>(ecs, cameraEntity, mDebugMode);
 
+		backbuffer.bind();
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color);
-		drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
+		drawFXAA(glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0]);
 		// Don't forget the depth. Because reasons.
 		glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
 			0, 0, viewport.mSize.x, viewport.mSize.y,

@@ -105,13 +105,13 @@ namespace Cornell {
 
 		glm::vec3 clearColor = getConfig().clearColor;
 
-		sceneTarget->bind();
 		sceneTarget->clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		drawPhong<OpaqueComponent>(ecs, cameraEntity);
 
+		backbuffer.bind();
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
-		drawFXAA(backbuffer, *sceneTarget->mTextures[0]);
+		drawFXAA(glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0]);
 	}
 
 	void Demo::update(ECS& ecs) {

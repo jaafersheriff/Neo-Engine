@@ -279,7 +279,7 @@ namespace {
 			}
 			localTransform = nodeSpatial.getModelMatrix();
 		}
-		nodeSpatial.setModelMatrix(localTransform * parentXform);
+		nodeSpatial.setModelMatrix(parentXform * localTransform);
 
 		for (auto& child : node.children) {
 			_processNode(model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);
