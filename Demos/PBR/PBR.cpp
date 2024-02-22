@@ -30,7 +30,7 @@ using namespace neo;
 
 namespace PBR {
 	template<typename... CompTs>
-	void _drawGltf(const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, Texture* shadowMap) {
+	void _drawPBR(const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, Texture* shadowMap) {
 		TRACY_GPU();
 
 		ShaderDefines passDefines({});
@@ -165,6 +165,7 @@ namespace PBR {
 				resolvedShader.bindUniform("P", P);
 				resolvedShader.bindUniform("V", cameraSpatial->getView());
 				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
+				resolvedShader.bindUniform("camDir", cameraSpatial->getLookDir());
 				resolvedShader.bindUniform("lightCol", light.mColor);
 				if (directionalLight || shadowsEnabled) {
 					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
@@ -305,7 +306,7 @@ namespace PBR {
 		auto sceneTarget = Library::getPooledFramebuffer(PooledFramebufferDetails{ viewport.mSize, {
 			TextureFormat {
 				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB16_UNORM,
+				types::texture::InternalFormats::RGB16_F,
 				types::texture::BaseFormats::RGB
 			},
 			TextureFormat {
@@ -334,8 +335,8 @@ namespace PBR {
 		sceneTarget->bind();
 		sceneTarget->clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		_drawGltf<OpaqueComponent>(ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
-		_drawGltf<AlphaTestComponent>(ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
+		_drawPBR<OpaqueComponent>(ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
+		_drawPBR<AlphaTestComponent>(ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color);

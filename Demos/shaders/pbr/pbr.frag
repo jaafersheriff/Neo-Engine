@@ -1,6 +1,6 @@
 #include "alphaDiscard.glsl"
 #include "shadowreceiver.glsl"
-#include "phong.glsl"
+#include "pbr/pbr.glsl"
 
 in vec4 fragPos;
 in vec3 fragNor;
@@ -44,6 +44,7 @@ uniform vec3 lightAtt;
 #endif
 
 uniform vec3 camPos;
+uniform vec3 camDir;
 
 out vec4 color;
 
@@ -57,7 +58,6 @@ void main() {
 	alphaDiscard(fAlbedo.a);
 #endif
 
-#ifdef DEBUG_METAL_ROUGHNESS
 	float fMetalness = metalness;
 	float fRoughness = roughness;
 #ifdef METAL_ROUGHNESS_MAP
@@ -65,6 +65,8 @@ void main() {
 	fMetalness *= metalRoughness.b;
 	fRoughness *= metalRoughness.g;
 #endif
+
+#ifdef DEBUG_METAL_ROUGHNESS
 	color = vec4(0.0, fRoughness, fMetalness, 1.0);
 	return;
 #endif
@@ -100,14 +102,22 @@ float attFactor = 1;
 	vec3 Ldir = vec3(0, 0, 0);
 #endif
 
-	color.rgb = 0.3 * fAlbedo.rgb + lambertianDiffuse(Ldir, N, fAlbedo.rgb, lightCol, attFactor);
+	PBRData pbrData;
+	pbrData.albedo = fAlbedo.rgb;
+	pbrData.N = N;
+	pbrData.V = V;
+	pbrData.L = Ldir;
+	pbrData.linearRoughness = fRoughness;
+	pbrData.metalness = fMetalness;
+	color.rgb = doPBR(pbrData);
+
 #ifdef OCCLUSION_MAP
 	color.rgb *= texture(occlusionMap, fragTex).r;
 #endif
 
 #ifdef ENABLE_SHADOWS
 	vec4 shadowCoord = L * fragPos;
-	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.2);
+	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.1);
 	color.rgb *= visibility;
 #endif
 	color.a = 1.0;
