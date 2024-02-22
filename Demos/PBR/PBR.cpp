@@ -1,4 +1,4 @@
-#include "Gltf/Gltf.hpp"
+#include "PBR/PBR.hpp"
 #include "Engine/Engine.hpp"
 
 #include "ECS/ECS.hpp"
@@ -28,9 +28,7 @@
 
 using namespace neo;
 
-/* Game object definitions */
-
-namespace Gltf {
+namespace PBR {
 	template<typename... CompTs>
 	void _drawGltf(const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, Texture* shadowMap) {
 		TRACY_GPU();
@@ -93,9 +91,9 @@ namespace Gltf {
 			NEO_FAIL("Phong light needs a directional or point light component");
 		}
 
-		SourceShader* shader = Library::createSourceShader("GltfShader", SourceShader::ConstructionArgs{
+		SourceShader* shader = Library::createSourceShader("PBR Shader", SourceShader::ConstructionArgs{
 				{ ShaderStage::VERTEX, "model.vert"},
-				{ ShaderStage::FRAGMENT, "gltf/gltf.frag" }
+				{ ShaderStage::FRAGMENT, "pbr/pbr.frag" }
 		});
 
 		ShaderDefines drawDefines(passDefines);
@@ -191,7 +189,7 @@ namespace Gltf {
 
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
-		config.name = "Gltf Demo";
+		config.name = "PBR Demo";
 		return config;
 	}
 

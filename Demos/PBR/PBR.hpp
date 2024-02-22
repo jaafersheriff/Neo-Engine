@@ -4,7 +4,7 @@
 
 using namespace neo;
 
-namespace Gltf {
+namespace PBR {
 	enum class DebugMode : uint8_t {
 		Off,
 		MetalRoughness,
