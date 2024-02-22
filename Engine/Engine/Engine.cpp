@@ -10,6 +10,7 @@ extern "C" {
 
 #include "Renderer/Renderer.hpp"
 
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/EngineComponents/SingleFrameComponent.hpp"
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
@@ -123,31 +124,8 @@ namespace neo {
 						_swapDemo(demos);
 					}
 
-					/* Update frame counter */
-					float runTime = static_cast<float>(glfwGetTime());
-					profiler.update(runTime);
-
-					/* Update display, mouse, keyboard */
-					mWindow.updateHardware();
-					if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-						ServiceLocator<ImGuiManager>::ref().update();
-					}
+					_startFrame(profiler);
 					Messenger::relayMessages(mECS);
-
-					{
-						TRACY_ZONEN("FrameStats Entity");
-						auto hardware = mECS.createEntity();
-						mECS.addComponent<MouseComponent>(hardware, mMouse);
-						mECS.addComponent<KeyboardComponent>(hardware, mKeyboard);
-						if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-							mECS.addComponent<ViewportDetailsComponent>(hardware, ServiceLocator<ImGuiManager>::ref().getViewportSize(), mWindow.getDetails().mPos + ServiceLocator<ImGuiManager>::ref().getViewportOffset());
-						}
-						else {
-							mECS.addComponent<ViewportDetailsComponent>(hardware, mWindow.getDetails().mSize, mWindow.getDetails().mPos);
-						}
-						mECS.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(profiler.mTimeStep));
-						mECS.addComponent<SingleFrameComponent>(hardware);
-					}
 
 					{
 						TRACY_ZONEN("Demo::update");
@@ -166,30 +144,16 @@ namespace neo {
 					if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
 						TRACY_ZONEN("ImGui");
 						ServiceLocator<ImGuiManager>::ref().begin();
+
 						{
-							TRACY_ZONEN("Demos Imgui");
+							TRACY_ZONEN("Demo Imgui");
 							demos.imGuiEditor(mECS);
 						}
-						{
-							TRACY_ZONEN("ECS Imgui");
-							mECS.imguiEdtor();
-						}
-						{
-							TRACY_ZONEN("Library ImGui");
-							Library::imGuiEditor();
-						}
-						{
-							TRACY_ZONEN("ImGuiManager ImGui");
-							ServiceLocator<ImGuiManager>::ref().imGuiEditor();
-						}
-						{
-							TRACY_ZONEN("Renderer Imgui");
-							ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
-						}
-						{
-							TRACY_ZONEN("Profiler Imgui");
-							profiler.imGuiEditor();
-						}
+						mECS.imguiEdtor();
+						Library::imGuiEditor();
+						ServiceLocator<ImGuiManager>::ref().imGuiEditor();
+						ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
+						profiler.imGuiEditor();
 
 						ServiceLocator<ImGuiManager>::ref().end();
 						Messenger::relayMessages(mECS);
@@ -207,16 +171,8 @@ namespace neo {
 					Messenger::relayMessages(mECS);
 				}
 
-				// TODO - this should be its own system
-				{
-					TRACY_ZONEN("Frame Cleanup");
-					mECS.getView<SingleFrameComponent>().each([](ECS::Entity entity, SingleFrameComponent&) {
-						mECS.removeEntity(entity);
-						});
-
-					// Flush resources
-					Library::tick();
-				}
+				_endFrame();
+				Messenger::relayMessages(mECS);
 			}
 
 			mWindow.flip();
@@ -282,5 +238,57 @@ namespace neo {
 		ServiceLocator<Renderer>::reset();
 		ServiceLocator<ImGuiManager>::ref().destroy();
 		mWindow.shutDown();
+	}
+
+	void Engine::_startFrame(util::Profiler& profiler) {
+		TRACY_ZONE();
+
+		/* Update frame counter */
+		float runTime = static_cast<float>(glfwGetTime());
+		profiler.update(runTime);
+
+		/* Update display, mouse, keyboard */
+		mWindow.updateHardware();
+		if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+			ServiceLocator<ImGuiManager>::ref().update();
+		}
+
+		glm::uvec2 viewportSize;
+		glm::uvec2 viewportPosition;
+			if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+				viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
+				viewportPosition = mWindow.getDetails().mPos + ServiceLocator<ImGuiManager>::ref().getViewportOffset();
+			}
+			else {
+				viewportSize = mWindow.getDetails().mSize;
+				viewportPosition = mWindow.getDetails().mPos;
+			}
+		{
+			TRACY_ZONEN("FrameStats Entity");
+			auto hardware = mECS.createEntity();
+			mECS.addComponent<MouseComponent>(hardware, mMouse);
+			mECS.addComponent<KeyboardComponent>(hardware, mKeyboard);
+			mECS.addComponent<ViewportDetailsComponent>(hardware, viewportSize, viewportPosition);
+			mECS.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(profiler.mTimeStep));
+			mECS.addComponent<SingleFrameComponent>(hardware);
+		}
+
+		{
+			TRACY_ZONEN("Aspect Ratio");
+			for (auto& entity : mECS.getView<MainCameraComponent>()) {
+				mECS.getComponent<PerspectiveCameraComponent>(entity)->setAspectRatio(viewportSize.x / static_cast<float>(viewportSize.y));
+			}
+		}
+	}
+
+	void Engine::_endFrame() {
+		TRACY_ZONE();
+
+		for(auto& entity : mECS.getView<SingleFrameComponent>()) {
+			mECS.removeEntity(entity);
+		}
+
+		// Flush resources
+		Library::tick();
 	}
 }

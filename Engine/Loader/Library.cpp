@@ -266,6 +266,7 @@ namespace neo {
 	}
 
 	void Library::imGuiEditor() {
+		TRACY_ZONE();
 		auto textureFunc = [&](const Texture& texture) {
 			float scale = 175.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
 #pragma warning(push)

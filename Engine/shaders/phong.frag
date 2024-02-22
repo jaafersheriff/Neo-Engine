@@ -12,12 +12,12 @@ layout(binding = 0) uniform sampler2D albedoMap;
 #endif
 
 #ifdef NORMAL_MAP
-layout(binding = 3) uniform sampler2D normalMap;
+layout(binding = 1) uniform sampler2D normalMap;
 #endif
 
 #ifdef ENABLE_SHADOWS
-in vec4 shadowCoord;
-layout(binding = 4) uniform sampler2D shadowMap;
+uniform mat4 L;
+layout(binding = 2) uniform sampler2D shadowMap;
 #endif
 
 uniform vec3 lightCol;
@@ -48,21 +48,22 @@ void main() {
 
 float attFactor = 1;
 #ifdef DIRECTIONAL_LIGHT
-	vec3 L = normalize(lightDir);
+	vec3 Ldir = normalize(lightDir);
 #elif defined(POINT_LIGHT)
 	vec3 lightDir = lightPos - fragPos.xyz;
-	vec3 L = normalize(lightDir);
 	float lightDistance = length(lightDir);
+	vec3 Ldir = lightDir / lightDistance;
 	if (length(lightAtt) > 0) {
 		attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
 	}
 #else
-	vec3 L = vec3(0, 0, 0);
+	vec3 Ldir = vec3(0, 0, 0);
 #endif
 
-	color.rgb = lambertianDiffuse(L, N, fAlbedo.rgb, lightCol, attFactor);
+	color.rgb = lambertianDiffuse(Ldir, N, fAlbedo.rgb, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
+	vec4 shadowCoord = L * fragPos;
 	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.2);
 	color.rgb *= visibility;
 #endif

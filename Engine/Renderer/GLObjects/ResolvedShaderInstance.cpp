@@ -222,8 +222,10 @@ namespace neo {
 		if (mPid) {
 			unbind();
 			for (auto&& [stage, id] : mShaderIDs) {
-				glDetachShader(mPid, id);
-				glDeleteShader(id);
+				if (id > 0) {
+					glDetachShader(mPid, id);
+					glDeleteShader(id);
+				}
 			}
 			glDeleteProgram(mPid);
 		}

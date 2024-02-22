@@ -89,6 +89,7 @@ namespace neo {
 			return;
 #else
 			NEO_ASSERT(mTracyServer, "Tracy server doesn't exist..?");
+			TRACY_ZONE();
 
 			// Profiler is baked into the viewport dock space
 			{

@@ -94,7 +94,7 @@ namespace Gltf {
 		}
 
 		SourceShader* shader = Library::createSourceShader("GltfShader", SourceShader::ConstructionArgs{
-				{ ShaderStage::VERTEX, "gltf/gltf.vert"},
+				{ ShaderStage::VERTEX, "model.vert"},
 				{ ShaderStage::FRAGMENT, "gltf/gltf.frag" }
 		});
 
@@ -298,9 +298,6 @@ namespace Gltf {
 
 	void Demo::update(ECS& ecs) {
 		NEO_UNUSED(ecs);
-		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		ecs.getComponent<PerspectiveCameraComponent>(cameraEntity)->setAspectRatio(viewport.mSize.x / static_cast<float>(viewport.mSize.y));
 	}
 
 	void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {

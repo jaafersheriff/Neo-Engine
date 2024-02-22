@@ -39,6 +39,9 @@ namespace neo {
 
 		private:
 			static ECS mECS;
+			static void _startFrame(util::Profiler& profiler);
+			static void _endFrame();
+
 			static void _createPrefabs();
 			static void _swapDemo(DemoWrangler&);
 

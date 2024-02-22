@@ -173,6 +173,7 @@ namespace neo {
 	}
 
 	void Renderer::imGuiEditor(WindowSurface& window, ECS& ecs) {
+		TRACY_ZONE();
 		NEO_UNUSED(ecs);
 
 		ImGui::Begin("Viewport");

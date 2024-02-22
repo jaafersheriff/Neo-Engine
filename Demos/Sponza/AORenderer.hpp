@@ -121,8 +121,8 @@ namespace Sponza {
 			resolvedShader.bindUniform("bias", bias);
 
 			// bind gbuffer
-			resolvedShader.bindTexture("gNormal", *gbuffer.mTextures[3]);
-			resolvedShader.bindTexture("gDepth", *gbuffer.mTextures[4]);
+			resolvedShader.bindTexture("gNormal", *gbuffer.mTextures[2]);
+			resolvedShader.bindTexture("gDepth", *gbuffer.mTextures[3]);
 
 			// bind kernel and noise
 			resolvedShader.bindTexture("noise", *Library::getTexture("aoNoise"));

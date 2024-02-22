@@ -176,7 +176,7 @@ namespace neo {
 
 	void ImGuiManager::begin() {
 		NEO_ASSERT(mIsEnabled, "ImGui is disabled");
-		TRACY_ZONEN("ImGuiManager::begin");
+		TRACY_ZONE();
 
 		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
@@ -294,6 +294,7 @@ namespace neo {
 	}
 
 	void ImGuiManager::imGuiEditor() {
+		TRACY_ZONE();
 		mConsole.imGuiEditor();
 	}
 }
