@@ -127,14 +127,14 @@ namespace neo {
 					_startFrame(profiler);
 					Messenger::relayMessages(mECS);
 
+					/* Destroy and create objects and components */
+					mECS.flush();
+					Messenger::relayMessages(mECS);
+
 					{
 						TRACY_ZONEN("Demo::update");
 						demos.getCurrentDemo()->update(mECS);
 					}
-
-					/* Destroy and create objects and components */
-					mECS.flush();
-					Messenger::relayMessages(mECS);
 
 					/* Update each system */
 					mECS._updateSystems();

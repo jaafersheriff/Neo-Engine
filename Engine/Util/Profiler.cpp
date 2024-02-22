@@ -52,7 +52,7 @@ namespace neo {
 			tracy::Config config;
 			config.threadedRendering = true;
 			config.targetFps = refreshRate;
-			mTracyServer = std::make_unique<tracy::View>( RunOnMainThread, "127.0.0.1", 8086, s_fixedWidth, s_smallFont, s_bigFont, nullptr, nullptr, AttentionCallback, config);
+			mTracyServer = std::make_unique<tracy::View>(RunOnMainThread, "127.0.0.1", 8086, s_fixedWidth, s_smallFont, s_bigFont, nullptr, nullptr, AttentionCallback, config);
 			mTracyServer->GetViewData().frameTarget = refreshRate;
 			mTracyServer->GetViewData().drawFrameTargets = true;
 			mTracyServer->GetViewData().drawCpuUsageGraph = false;
@@ -63,6 +63,13 @@ namespace neo {
 			mGPUFrametimeOffset = 0;
 
 			mRefreshRate = 1000.f / refreshRate;
+
+			// Let tracy catch up
+			for (int i = 0; i < 4; i++) {
+				TRACY_GPUN("Trash");
+				std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(mRefreshRate * 2.f)));
+				TracyGpuCollect;
+			}
 #endif
 		}
 
@@ -81,24 +88,8 @@ namespace neo {
 
 #ifndef NO_LOCAL_TRACY
 			tracy::MouseFrame();
-#endif
-		}
-
-		void Profiler::imGuiEditor() const {
-#ifdef NO_LOCAL_TRACY
-			return;
-#else
-			NEO_ASSERT(mTracyServer, "Tracy server doesn't exist..?");
-			TRACY_ZONE();
-
-			// Profiler is baked into the viewport dock space
 			{
-				TRACY_ZONEN("Draw Tracy");
-				mTracyServer->Draw();
-			}
 
-			// Also have another simple graph for when the tracy profiler is collapsed
-			{
 				TRACY_ZONEN("Update frametime");
 				float latestCPUTime = mTracyServer->GetFrametime();
 				if (mCPUFrametime.size() < MAX_SAMPLES) {
@@ -118,6 +109,23 @@ namespace neo {
 					mGPUFrametimeOffset = (mGPUFrametimeOffset + 1) % MAX_SAMPLES;
 				}
 			}
+#endif
+		}
+
+		void Profiler::imGuiEditor() const {
+#ifdef NO_LOCAL_TRACY
+			return;
+#else
+			NEO_ASSERT(mTracyServer, "Tracy server doesn't exist..?");
+			TRACY_ZONE();
+
+			// Profiler is baked into the viewport dock space
+			{
+				TRACY_ZONEN("Draw Tracy");
+				mTracyServer->Draw();
+			}
+
+			// Also have another simple graph for when the tracy profiler is collapsed
 			{
 				TRACY_ZONEN("Draw BasicProfiler");
 				ImGui::Begin("BasicProfiler");
