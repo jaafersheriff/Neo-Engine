@@ -3,12 +3,12 @@ float getShadowVisibility(int pcfSize, sampler2D shadowMap, vec4 shadowCoord, fl
 	if (shadowCoord.z < 0.0 || shadowCoord.z > 1.0) {
 		return 1.0;
 	}
-	if (shadowCoord.x < 0.0 || shadowCoord.x > 1.0) {
-		return 1.0;
-	}
-	if (shadowCoord.y < 0.0 || shadowCoord.y > 1.0) {
-		return 1.0;
-	}
+	// if (shadowCoord.x < 0.0 || shadowCoord.x > 1.0) {
+	// 	return 1.0;
+	// }
+	// if (shadowCoord.y < 0.0 || shadowCoord.y > 1.0) {
+	// 	return 1.0;
+	// }
 
 	float visibility = 1.0;
 	if (pcfSize > 0) {

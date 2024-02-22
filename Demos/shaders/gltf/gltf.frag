@@ -31,7 +31,7 @@ uniform vec3 emissiveFactor;
 #endif
 
 #ifdef ENABLE_SHADOWS
-in vec4 shadowCoord;
+uniform mat4 L;
 layout(binding = 5) uniform sampler2D shadowMap;
 #endif
 
@@ -106,6 +106,7 @@ float attFactor = 1;
 #endif
 
 #ifdef ENABLE_SHADOWS
+	vec4 shadowCoord = L * fragPos;
 	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.2);
 	color.rgb *= visibility;
 #endif

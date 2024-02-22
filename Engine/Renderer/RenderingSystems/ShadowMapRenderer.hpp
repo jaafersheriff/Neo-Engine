@@ -19,6 +19,8 @@ namespace neo {
 			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data());
 		}
 
+		glCullFace(GL_FRONT);
+
 		ShaderDefines passDefines = {};
 		MakeDefine(ALPHA_TEST);
 
@@ -67,5 +69,7 @@ namespace neo {
 		if (containsAlphaTest) {
 			// glDisable(GL_BLEND);
 		}
+
+		glCullFace(GL_BACK);
 	}
 }

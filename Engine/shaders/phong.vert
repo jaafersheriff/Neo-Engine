@@ -23,6 +23,6 @@ void main() {
 	gl_Position = P * V * fragPos;
 
 #ifdef ENABLE_SHADOWS
-	shadowCoord = L * vec4(fragPos, 1.0);
+	shadowCoord = L * fragPos;
 #endif
 }
