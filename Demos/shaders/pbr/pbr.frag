@@ -38,10 +38,13 @@ layout(binding = 5) uniform sampler2D shadowMap;
 uniform vec3 lightCol;
 #if defined(DIRECTIONAL_LIGHT) || defined(ENABLE_SHADOWS)
 uniform vec3 lightDir;
-#elif defined(POINT_LIGHT)
+#endif
+#if defined(POINT_LIGHT)
 uniform vec3 lightPos;
 uniform vec3 lightAtt;
 #endif
+
+uniform mat3 N;
 
 uniform vec3 camPos;
 uniform vec3 camDir;
@@ -65,51 +68,54 @@ void main() {
 	fMetalness *= metalRoughness.b;
 	fRoughness *= metalRoughness.g;
 #endif
-
 #ifdef DEBUG_METAL_ROUGHNESS
 	color = vec4(0.0, fRoughness, fMetalness, 1.0);
 	return;
 #endif
 
-
-#ifdef DEBUG_EMISSIVE
+	vec3 fEmissive = vec3(0.0);
 #ifdef EMISSIVE
-	color = vec4(emissiveFactor * texture(emissiveMap, fragTex).rgb, 1.0);
-#else
-	color = vec4(0, 0, 0, 1);
+	fEmissive = emissiveFactor * texture(emissiveMap, fragTex).rgb;
 #endif
+#ifdef DEBUG_EMISSIVE
+	color = vec4(fEmissive, 1);
 	return;
 #endif
 
 	// TODO - normal mapping
-	vec3 N = normalize(fragNor);
+	vec3 fNorm = normalize(N * fragNor);
 #ifdef NORMAL_MAP
-// 	N = normalize(texture(normalMap, fragTex).rgb);
+	//fNorm = normalize(texture(normalMap, fragTex).rgb) * 2.0 - 1.0;
+	//fNorm = N * fNorm;
 #endif
 	vec3 V = normalize(camPos - fragPos.xyz);
 
 float attFactor = 1;
+	vec3 Ldir = vec3(0, 0, 0);
 #ifdef DIRECTIONAL_LIGHT
-	vec3 Ldir = normalize(lightDir);
-#elif defined(POINT_LIGHT)
+	Ldir = normalize(lightDir);
+#endif
+#if defined(POINT_LIGHT)
 	vec3 lightDir = lightPos - fragPos.xyz;
 	float lightDistance = length(lightDir);
-	vec3 Ldir = lightDir / lightDistance;
+	= lightDir / lightDistance;
 	if (length(lightAtt) > 0) {
 		attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
 	}
-#else
-	vec3 Ldir = vec3(0, 0, 0);
 #endif
 
-	PBRData pbrData;
+	PBRMaterial pbrData;
 	pbrData.albedo = fAlbedo.rgb;
-	pbrData.N = N;
+	pbrData.N = fNorm;
 	pbrData.V = V;
-	pbrData.L = Ldir;
 	pbrData.linearRoughness = fRoughness;
 	pbrData.metalness = fMetalness;
-	color.rgb = doPBR(pbrData);
+	pbrData.emissive = fEmissive;
+
+	PBRLight pbrLight;
+	pbrLight.L = Ldir;
+	pbrLight.radiance = lightCol;
+	color.rgb = doPBR(pbrData, pbrLight);
 
 #ifdef OCCLUSION_MAP
 	color.rgb *= texture(occlusionMap, fragTex).r;

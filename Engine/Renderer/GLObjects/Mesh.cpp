@@ -128,6 +128,10 @@ namespace neo {
 		mVBOs.erase(type);
 	}
 
+	bool Mesh::hasVBO(types::mesh::VertexType type) const {
+		return mVBOs.find(type) != mVBOs.end();
+	}
+
 	const VertexBuffer& Mesh::getVBO(types::mesh::VertexType type) const {
 		auto vbo = mVBOs.find(type);
 		NEO_ASSERT(vbo != mVBOs.end(), "Attempting to retrieve a VertexBuffer that doesn't exist");

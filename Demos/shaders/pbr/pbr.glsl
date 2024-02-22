@@ -1,13 +1,18 @@
 
 #define PI 3.141592653589
 
-struct PBRData {
+struct PBRMaterial {
     vec3 albedo;
     vec3 N;
     vec3 V;
-    vec3 L;
     float linearRoughness;
     float metalness;
+    vec3 emissive;
+};
+
+struct PBRLight {
+    vec3 L;
+    vec3 radiance;
 };
 
 float V_SmithGGXCorrelated(float NoV, float NoL, float roughness) {
@@ -28,23 +33,26 @@ vec3 F_Schlick(float u, vec3 f0) {
     return f + f0 * (1.0 - f);
 }
 
-vec3 doPBR(in PBRData pbrData) {
-	vec3 H = normalize(pbrData.L + pbrData.V);
-    float NdotH = clamp(dot(pbrData.N, H), 0.0, 1.0);
-    float LdotH = clamp(dot(pbrData.L, H), 0.0, 1.0);
-    float NdotV = abs(dot(pbrData.N, pbrData.V)) + 1e-5;
-    float NdotL = clamp(dot(pbrData.N, pbrData.L), 0.0, 1.0);
+vec3 doPBR(in PBRMaterial pbrMaterial, in PBRLight pbrLight) {
+	vec3 H = normalize(pbrLight.L + pbrMaterial.V);
+    float NdotH = clamp(dot(pbrMaterial.N, H), 0.0, 1.0);
+    float NdotV = abs(dot(pbrMaterial.N, pbrMaterial.V)) + 1e-5;
+    float NdotL = clamp(dot(pbrMaterial.N, pbrLight.L), 0.0, 1.0);
+    float VdotH = clamp(dot(pbrMaterial.V, H), 0.0, 1.0);
 
-    float roughness = pbrData.linearRoughness * pbrData.linearRoughness;
+    float roughness = pbrMaterial.linearRoughness * pbrMaterial.linearRoughness;
+    vec3 F0 = mix(vec3(0.04), pbrMaterial.albedo, vec3(pbrMaterial.metalness));
 
-    float D = D_GGX(NdotH, pbrData.linearRoughness);
-    vec3  F = F_Schlick(LdotH, vec3(0.04));
+    float D = D_GGX(NdotH, roughness);
+    vec3  F = F_Schlick(VdotH, F0);
     float V = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
 
-    vec3 Fr = D * V * F;
+    vec3 Ks = F;
+    vec3 Kd = (vec3(1.0) - Ks) * (1.0 - pbrMaterial.metalness);
 
-    vec3 diffuseColor = (1.0 - pbrData.metalness) * pbrData.albedo;
-    vec3 Fd = diffuseColor * (1.0 / PI);
+    vec3 specular = (D * F * V) / (4.0 * NdotV * NdotL + 1e-4);
+    vec3 diffuse = Kd * pbrMaterial.albedo / PI;
 
     return vec3(D);
+    return (diffuse + specular) * NdotL * pbrLight.radiance * 3.0 + pbrMaterial.emissive;
 }

@@ -52,6 +52,7 @@ namespace neo {
 				Position,
 				Normal,
 				Texture0,
+				Tangent,
 				COUNT
 			};
 		}

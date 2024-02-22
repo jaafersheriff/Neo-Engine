@@ -33,6 +33,7 @@ namespace neo {
 			void addElementBuffer(uint32_t count, types::ByteFormats format, uint32_t byteSize, const uint8_t* data = nullptr);
 			void removeElementBuffer();
 
+			bool hasVBO(types::mesh::VertexType type) const;
 			const VertexBuffer& getVBO(types::mesh::VertexType type) const;
 
 			types::mesh::Primitive mPrimitiveType = types::mesh::Primitive::TriangleStrip;

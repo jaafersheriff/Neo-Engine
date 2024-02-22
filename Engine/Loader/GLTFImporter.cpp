@@ -347,8 +347,7 @@ namespace {
 					vertexType = types::mesh::VertexType::Texture0;
 				}
 				else if (attribute.first == "TANGENT") {
-					NEO_LOG_E("TODO: Tangents aren't supported, skipping");
-					continue;
+					vertexType = types::mesh::VertexType::Tangent;
 				}
 				else {
 					NEO_FAIL("TODO: unsupported attribute: %s", attribute.first.c_str());

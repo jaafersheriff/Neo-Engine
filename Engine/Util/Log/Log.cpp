@@ -21,13 +21,13 @@ namespace neo {
 			doTheLog |= severity == neo::util::LogSeverity::Error && neo::util::sLogError;
 			if (doTheLog) {
 
-				char inbuf[1024];
+				char inbuf[2048];
 				va_list args;
 				va_start(args, format);
 				vsnprintf(inbuf, NEO_ARRAYSIZE(inbuf), format, args);
 				inbuf[NEO_ARRAYSIZE(inbuf) - 1] = 0;
 				va_end(args);
-				char buf[1024];
+				char buf[2048];
 				std::string err = severity == neo::util::LogSeverity::Error ? " (" + std::string(sig) + ")" : "";
 				sprintf(buf, "%0.4f [%c]%s: %s\n", glfwGetTime(), sLogSeverityData.at(severity).first, err.c_str(), inbuf);
 

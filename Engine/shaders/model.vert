@@ -5,14 +5,18 @@ layout(location = 2) in vec2 vertTex;
 uniform mat4 P;
 uniform mat4 V;
 uniform mat4 M;
-uniform mat3 N;
 
 out vec4 fragPos;
 out vec3 fragNor;
 out vec2 fragTex;
+
+#ifdef TANGENTS
+out vec4 fragTan;
+#endif
+
 void main() {
 	fragPos = M * vec4(vertPos, 1.0);
-	fragNor = N * vertNor;
+	fragNor = vertNor;
 	fragTex = vertTex;
 	gl_Position = P * V * fragPos;
 }

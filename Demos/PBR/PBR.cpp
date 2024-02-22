@@ -133,6 +133,12 @@ namespace PBR {
 				drawDefines.set(EMISSIVE);
 			}
 
+			const auto& mesh = view.get<const MeshComponent>(entity);
+			MakeDefine(TANGENTS);
+			if (mesh.mMesh->hasVBO(types::mesh::VertexType::Tangent)) {
+				drawDefines.set(TANGENTS);
+			}
+
 			auto& resolvedShader = shader->getResolvedInstance(drawDefines);
 			resolvedShader.bind();
 
