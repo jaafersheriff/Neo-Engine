@@ -38,21 +38,20 @@ vec3 doPBR(in PBRMaterial pbrMaterial, in PBRLight pbrLight) {
     float NdotH = clamp(dot(pbrMaterial.N, H), 0.0, 1.0);
     float NdotV = abs(dot(pbrMaterial.N, pbrMaterial.V)) + 1e-5;
     float NdotL = clamp(dot(pbrMaterial.N, pbrLight.L), 0.0, 1.0);
-    float VdotH = clamp(dot(pbrMaterial.V, H), 0.0, 1.0);
+    float LdotH = clamp(dot(pbrLight.L, H), 0.0, 1.0);
 
     float roughness = pbrMaterial.linearRoughness * pbrMaterial.linearRoughness;
     vec3 F0 = mix(vec3(0.04), pbrMaterial.albedo, vec3(pbrMaterial.metalness));
 
     float D = D_GGX(NdotH, roughness);
-    vec3  F = F_Schlick(VdotH, F0);
+    vec3  F = F_Schlick(LdotH, F0);
     float V = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
 
     vec3 Ks = F;
     vec3 Kd = (vec3(1.0) - Ks) * (1.0 - pbrMaterial.metalness);
 
-    vec3 specular = (D * F * V) / (4.0 * NdotV * NdotL + 1e-4);
+    vec3 specular = (D * F * V) / PI;
     vec3 diffuse = Kd * pbrMaterial.albedo / PI;
 
-    return vec3(D);
-    return (diffuse + specular) * NdotL * pbrLight.radiance * 3.0 + pbrMaterial.emissive;
+    return (diffuse + specular) * NdotL * pbrLight.radiance * 4.0 + pbrMaterial.emissive;
 }

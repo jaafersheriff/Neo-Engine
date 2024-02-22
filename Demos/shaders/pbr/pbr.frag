@@ -123,7 +123,7 @@ float attFactor = 1;
 
 #ifdef ENABLE_SHADOWS
 	vec4 shadowCoord = L * fragPos;
-	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.1);
+	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.3);
 	color.rgb *= visibility;
 #endif
 	color.a = 1.0;
