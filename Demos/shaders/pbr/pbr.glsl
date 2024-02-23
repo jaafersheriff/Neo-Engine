@@ -18,7 +18,7 @@ float V_SmithGGXCorrelated(float NoV, float NoL, float roughness) {
     float a2 = roughness * roughness;
     float GGXV = NoL * sqrt(NoV * NoV * (1.0 - a2) + a2);
     float GGXL = NoV * sqrt(NoL * NoL * (1.0 - a2) + a2);
-    return 0.5 / (GGXV + GGXL);
+    return 0.5 / (GGXV + GGXL + 1e-5);
 }
 
 float D_GGX(float NoH, float roughness) {

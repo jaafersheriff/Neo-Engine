@@ -25,9 +25,9 @@ layout(binding = 2) uniform sampler2D metalRoughnessMap;
 layout(binding = 3) uniform sampler2D occlusionMap; // Shouldn't be used for indirect lights
 #endif
 
+uniform vec3 emissiveFactor;
 #ifdef EMISSIVE
 layout(binding = 4) uniform sampler2D emissiveMap;
-uniform vec3 emissiveFactor;
 #endif
 
 #ifdef ENABLE_SHADOWS
@@ -73,9 +73,9 @@ void main() {
 	return;
 #endif
 
-	vec3 fEmissive = vec3(0.0);
+	vec3 fEmissive = emissiveFactor;
 #ifdef EMISSIVE
-	fEmissive = emissiveFactor * texture(emissiveMap, fragTex).rgb;
+	fEmissive *= texture(emissiveMap, fragTex).rgb;
 #endif
 #ifdef DEBUG_EMISSIVE
 	color = vec4(fEmissive, 1);
@@ -122,7 +122,7 @@ float attFactor = 1;
 
 #ifdef ENABLE_SHADOWS
 	vec4 shadowCoord = L * fragPos;
-	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.1);
+	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.01);
 	color.rgb *= visibility;
 #endif
 

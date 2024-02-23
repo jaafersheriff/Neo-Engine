@@ -177,9 +177,9 @@ namespace PBR {
 				resolvedShader.bindTexture("occlusionMap", *material.mOcclusionMap);
 			}
 
+			resolvedShader.bindUniform("emissiveFactor", material.mEmissiveFactor);
 			if (material.mEmissiveMap) {
 				resolvedShader.bindTexture("emissiveMap", *material.mEmissiveMap);
-				resolvedShader.bindUniform("emissiveFactor", material.mEmissiveFactor);
 			}
 
 			// UBO candidates
