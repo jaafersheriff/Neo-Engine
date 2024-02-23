@@ -14,6 +14,13 @@ struct PBRLight {
     vec3 radiance;
 };
 
+struct PBRColor {
+    vec3 directDiffuse;
+    vec3 directSpecular;
+    vec3 indirectDiffuse;
+    vec3 indirectSpecular;
+};
+
 float V_SmithGGXCorrelated(float NoV, float NoL, float roughness) {
     float a2 = roughness * roughness;
     float GGXV = NoL * sqrt(NoV * NoV * (1.0 - a2) + a2);
@@ -32,7 +39,7 @@ vec3 F_Schlick(float u, vec3 f0) {
     return f + f0 * (1.0 - f);
 }
 
-vec3 doPBR(in PBRMaterial pbrMaterial, in PBRLight pbrLight) {
+void brdf(in PBRMaterial pbrMaterial, in PBRLight pbrLight, out PBRColor pbrColor) {
 	vec3 H = normalize(pbrLight.L + pbrMaterial.V);
     float NdotH = clamp(dot(pbrMaterial.N, H), 0.0, 1.0);
     float NdotV = abs(dot(pbrMaterial.N, pbrMaterial.V)) + 1e-5;
@@ -49,8 +56,6 @@ vec3 doPBR(in PBRMaterial pbrMaterial, in PBRLight pbrLight) {
     vec3 Ks = F;
     vec3 Kd = (vec3(1.0) - Ks) * (1.0 - pbrMaterial.metalness);
 
-    vec3 specular = D * F * V;
-    vec3 diffuse = Kd * pbrMaterial.albedo / PI;
-
-    return (diffuse + specular) * NdotL * pbrLight.radiance;
+    pbrColor.directDiffuse  += (Kd * pbrMaterial.albedo / PI) * NdotL * pbrLight.radiance;
+    pbrColor.directSpecular += (D * F * V) * NdotL * pbrLight.radiance;
 }

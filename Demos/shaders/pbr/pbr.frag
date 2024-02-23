@@ -39,6 +39,10 @@ uniform mat4 L;
 layout(binding = 5) uniform sampler2D shadowMap;
 #endif
 
+#ifdef SKYBOX
+layout(binding = 6) uniform samplerCube skybox;
+#endif
+
 uniform vec4 lightRadiance;
 #if defined(DIRECTIONAL_LIGHT) || defined(ENABLE_SHADOWS)
 uniform vec3 lightDir;
@@ -118,18 +122,39 @@ float attFactor = 1;
 	PBRLight pbrLight;
 	pbrLight.L = Ldir;
 	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a;
-	color.rgb = doPBR(pbrData, pbrLight);
+
+	PBRColor pbrColor;
+	pbrColor.directDiffuse = vec3(0);
+	pbrColor.directSpecular = vec3(0);
+	pbrColor.indirectDiffuse = vec3(0);
+	pbrColor.indirectSpecular = vec3(0);
+
+	brdf(pbrData, pbrLight, pbrColor);
 
 #ifdef OCCLUSION_MAP
-	color.rgb *= texture(occlusionMap, fragTex).r;
+	float ao = texture(occlusionMap, fragTex).r;
+	pbrColor.directDiffuse *= ao;
+	pbrColor.directSpecular *= ao;
 #endif
 
 #ifdef ENABLE_SHADOWS
 	vec4 shadowCoord = L * fragPos;
 	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.01);
-	color.rgb *= visibility;
+	pbrColor.directDiffuse *= visibility;
+	pbrColor.directSpecular *= visibility;
 #endif
 
+#ifdef SKYBOX
+	vec3 R = reflect(-V, fNorm);
+	pbrColor.indirectSpecular += srgbToLinear(texture(skybox, R)).rgb;
+#endif
+
+	color.rgb =
+		pbrColor.directDiffuse
+		+ pbrColor.directSpecular
+		+ pbrColor.indirectDiffuse
+		+ pbrColor.indirectSpecular
+	;
 	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
 	color.rgb += fEmissive;
 	color.a = 1.0;

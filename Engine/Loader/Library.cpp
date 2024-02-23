@@ -269,6 +269,9 @@ namespace neo {
 	void Library::imGuiEditor() {
 		TRACY_ZONE();
 		auto textureFunc = [&](const Texture& texture) {
+			if (texture.mFormat.mTarget != types::texture::Target::Texture2D) {
+				return;
+			}
 			float scale = 175.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
 #pragma warning(push)
 #pragma warning(disable: 4312)

@@ -109,6 +109,12 @@ namespace PBR {
 			NEO_FAIL("Phong light needs a directional or point light component");
 		}
 
+		MakeDefine(SKYBOX);
+		auto skybox = ecs.cGetComponent<SkyboxComponent>();
+		if (skybox) {
+			passDefines.set(SKYBOX);
+		}
+
 		SourceShader* shader = Library::createSourceShader("PBR Shader", SourceShader::ConstructionArgs{
 				{ ShaderStage::VERTEX, "model.vert"},
 				{ ShaderStage::FRAGMENT, "pbr/pbr.frag" }
@@ -201,6 +207,9 @@ namespace PBR {
 				if (shadowsEnabled) {
 					resolvedShader.bindUniform("L", L);
 					resolvedShader.bindTexture("shadowMap", *shadowMap);
+				}
+				if (skybox) {
+					resolvedShader.bindTexture("skybox", *std::get<1>(*skybox).mSkybox);
 				}
 			}
 
@@ -329,8 +338,8 @@ namespace PBR {
 		}
 
 		{
-			GLTFImporter::Scene _scene = Loader::loadGltfScene("NormalTangentTest/NormalTangentTest.gltf");
-			//GLTFImporter::Scene _scene = Loader::loadGltfScene("Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
+			//GLTFImporter::Scene _scene = Loader::loadGltfScene("NormalTangentTest/NormalTangentTest.gltf");
+			GLTFImporter::Scene _scene = Loader::loadGltfScene("Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
 			for (auto& node : _scene.mMeshNodes) {
 				auto entity = ecs.createEntity();
 				if (!node.mName.empty()) {
