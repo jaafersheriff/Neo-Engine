@@ -7,7 +7,6 @@ struct PBRMaterial {
     vec3 V;
     float linearRoughness;
     float metalness;
-    vec3 emissive;
 };
 
 struct PBRLight {
@@ -50,8 +49,8 @@ vec3 doPBR(in PBRMaterial pbrMaterial, in PBRLight pbrLight) {
     vec3 Ks = F;
     vec3 Kd = (vec3(1.0) - Ks) * (1.0 - pbrMaterial.metalness);
 
-    vec3 specular = (D * F * V) / PI;
+    vec3 specular = D * F * V;
     vec3 diffuse = Kd * pbrMaterial.albedo / PI;
 
-    return (diffuse + specular) * NdotL * pbrLight.radiance * 4.0 + pbrMaterial.emissive;
+    return (diffuse + specular) * NdotL * pbrLight.radiance;
 }

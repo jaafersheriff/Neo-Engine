@@ -109,8 +109,8 @@ namespace neo {
 
 		glm::vec3 center = lightToWorld * glm::vec4(receiverBox.center(), 1.f); // receivers center back in light space
 		float bias = receiverFrustum.mBias;
-		const float boxWidth = receiverBox.width() * 0.5f * (1.f + bias);
-		const float boxHeight = receiverBox.height() * 0.5f * (1.f + bias);
+		const float boxWidth = receiverBox.width() * 0.5f;
+		const float boxHeight = receiverBox.height() * 0.5f;
 		const float boxDepth = receiverBox.depth() * 0.5f * (1.f + bias);
 
 		receiverSpatial.setPosition(center);

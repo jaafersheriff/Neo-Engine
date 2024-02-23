@@ -35,7 +35,7 @@ uniform mat4 L;
 layout(binding = 5) uniform sampler2D shadowMap;
 #endif
 
-uniform vec3 lightCol;
+uniform vec4 lightRadiance;
 #if defined(DIRECTIONAL_LIGHT) || defined(ENABLE_SHADOWS)
 uniform vec3 lightDir;
 #endif
@@ -110,11 +110,10 @@ float attFactor = 1;
 	pbrData.V = V;
 	pbrData.linearRoughness = fRoughness;
 	pbrData.metalness = fMetalness;
-	pbrData.emissive = fEmissive;
 
 	PBRLight pbrLight;
 	pbrLight.L = Ldir;
-	pbrLight.radiance = lightCol;
+	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a;
 	color.rgb = doPBR(pbrData, pbrLight);
 
 #ifdef OCCLUSION_MAP
@@ -123,9 +122,12 @@ float attFactor = 1;
 
 #ifdef ENABLE_SHADOWS
 	vec4 shadowCoord = L * fragPos;
-	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.3);
+	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.1);
 	color.rgb *= visibility;
 #endif
+
+	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+	color.rgb += fEmissive;
 	color.a = 1.0;
 }
 

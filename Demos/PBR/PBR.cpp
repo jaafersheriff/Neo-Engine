@@ -29,6 +29,22 @@
 using namespace neo;
 
 namespace PBR {
+	struct PBRLightComponent : public DirectionalLightComponent {
+		PBRLightComponent(float s) :
+			mStrength(s)
+		{}
+
+		virtual std::string getName() const override {
+			return "PBRLightComponent";
+		}
+
+		virtual void imGuiEditor() override {
+			ImGui::SliderFloat("Strength", &mStrength, 0.1f, 100.f);
+		};
+
+		float mStrength = 1.f;
+	};
+
 	template<typename... CompTs>
 	void _drawPBR(const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, Texture* shadowMap) {
 		TRACY_GPU();
@@ -37,16 +53,16 @@ namespace PBR {
 
 		MakeDefine(DEBUG_METAL_ROUGHNESS);
 		MakeDefine(DEBUG_EMISSIVE);
-		switch(debugMode) {
-			case DebugMode::MetalRoughness:
-				passDefines.set(DEBUG_METAL_ROUGHNESS);
-				break;
-			case DebugMode::Emissives:
-				passDefines.set(DEBUG_EMISSIVE);
-				break;
-			case DebugMode::Off:
-			default:
-				break;
+		switch (debugMode) {
+		case DebugMode::MetalRoughness:
+			passDefines.set(DEBUG_METAL_ROUGHNESS);
+			break;
+		case DebugMode::Emissives:
+			passDefines.set(DEBUG_EMISSIVE);
+			break;
+		case DebugMode::Off:
+		default:
+			break;
 		}
 
 		bool containsAlphaTest = false;
@@ -58,7 +74,7 @@ namespace PBR {
 
 		const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
 		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
-		auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
+		auto&& [lightEntity, _mainLight, pbrLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, PBRLightComponent, LightComponent, SpatialComponent>();
 
 		glm::mat4 L;
 		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
@@ -94,7 +110,7 @@ namespace PBR {
 		SourceShader* shader = Library::createSourceShader("PBR Shader", SourceShader::ConstructionArgs{
 				{ ShaderStage::VERTEX, "model.vert"},
 				{ ShaderStage::FRAGMENT, "pbr/pbr.frag" }
-		});
+			});
 
 		ShaderDefines drawDefines(passDefines);
 		const auto& view = ecs.getView<const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
@@ -172,7 +188,7 @@ namespace PBR {
 				resolvedShader.bindUniform("V", cameraSpatial->getView());
 				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 				resolvedShader.bindUniform("camDir", cameraSpatial->getLookDir());
-				resolvedShader.bindUniform("lightCol", light.mColor);
+				resolvedShader.bindUniform("lightRadiance", glm::vec4(light.mColor, pbrLight.mStrength));
 				if (directionalLight || shadowsEnabled) {
 					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
 				}
@@ -222,6 +238,7 @@ namespace PBR {
 			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f));
 			ecs.addComponent<MainLightComponent>(lightEntity);
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
+			ecs.addComponent<PBRLightComponent>(lightEntity, 2.f);
 		}
 		{
 			auto shadowCam = ecs.createEntity();
@@ -231,6 +248,49 @@ namespace PBR {
 			ecs.addComponent<FrustumComponent>(shadowCam);
 			ecs.addComponent<SpatialComponent>(shadowCam);
 			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
+		}
+		// Dialectric spheres
+		for (int i = 1; i < 6; i++) {
+			auto entity = ecs.createEntity();
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(i, 1.f, 0.f), glm::vec3(0.3f));
+			auto mesh = Library::getMesh("sphere");
+			ecs.addComponent<MeshComponent>(entity, mesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
+			ecs.addComponent<OpaqueComponent>(entity);
+			auto material = ecs.addComponent<MaterialComponent>(entity);
+			material->mAlbedoColor = glm::vec4(1, 0, 0, 1);
+			material->mMetallic = 0.f;
+			material->mRoughness = 1.f / i;
+			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+		}
+		// Conductive spheres
+		for (int i = 1; i < 6; i++) {
+			auto entity = ecs.createEntity();
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(i, 1.f, -1.5f), glm::vec3(0.3f));
+			auto mesh = Library::getMesh("sphere");
+			ecs.addComponent<MeshComponent>(entity, mesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
+			ecs.addComponent<OpaqueComponent>(entity);
+			auto material = ecs.addComponent<MaterialComponent>(entity);
+			material->mAlbedoColor = glm::vec4(0, 1, 0, 1);
+			material->mMetallic = 1.f;
+			material->mRoughness = 1.f / i;
+			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+		}
+		// Emissive sphere
+		{
+			auto entity = ecs.createEntity();
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f, 1.f, -0.75f), glm::vec3(0.3f));
+			auto mesh = Library::getMesh("sphere");
+			ecs.addComponent<MeshComponent>(entity, mesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
+			ecs.addComponent<OpaqueComponent>(entity);
+			auto material = ecs.addComponent<MaterialComponent>(entity);
+			material->mAlbedoColor = glm::vec4(1.f);
+			material->mMetallic = 0.f;
+			material->mRoughness = 0.f;
+			material->mEmissiveFactor = glm::vec3(100.f);
+			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 		}
 
 		{
