@@ -45,7 +45,6 @@ namespace neo {
 	struct TextureFormat {
 		types::texture::Target mTarget = types::texture::Target::Texture2D;
 		types::texture::InternalFormats mInternalFormat = types::texture::InternalFormats::RGBA8_UNORM;
-		types::texture::BaseFormats mBaseFormat = types::texture::BaseFormats::RGBA;
 		TextureFilter mFilter = {
 			types::texture::Filters::Linear,
 			types::texture::Filters::Linear
@@ -58,10 +57,10 @@ namespace neo {
 		};
 		types::ByteFormats mType = types::ByteFormats::UnsignedByte;
 
+		static types::texture::BaseFormats deriveBaseFormat(types::texture::InternalFormats format);
 		bool operator==(const TextureFormat& other) const noexcept {
 			return mTarget == other.mTarget
 				&& mInternalFormat == other.mInternalFormat
-				&& mBaseFormat == other.mBaseFormat
 				&& mFilter == other.mFilter
 				&& mWrap == other.mWrap
 				&& mType == other.mType
@@ -71,6 +70,7 @@ namespace neo {
 
 	class Texture {
 	public:
+
 		Texture(TextureFormat format, uint16_t dimension, const void* data = nullptr);
 		Texture(TextureFormat format, glm::u16vec2 dimension, const void* data = nullptr);
 		Texture(TextureFormat format, glm::u16vec3 dimension, const void* data = nullptr);

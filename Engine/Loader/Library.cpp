@@ -152,10 +152,11 @@ namespace neo {
 			pfb.mFramebuffer = new Framebuffer;
 			pfb.mFramebuffer->init();
 			for (auto& format : details.mFormats) {
-				if (format.mBaseFormat == types::texture::BaseFormats::Depth) {
+				types::texture::BaseFormats baseFormat = TextureFormat::deriveBaseFormat(format.mInternalFormat);
+				if (baseFormat == types::texture::BaseFormats::Depth) {
 					pfb.mFramebuffer->attachDepthTexture(details.mSize, format.mInternalFormat, format.mFilter, format.mWrap);
 				}
-				else if (format.mBaseFormat == types::texture::BaseFormats::DepthStencil) {
+				else if (baseFormat == types::texture::BaseFormats::DepthStencil) {
 					pfb.mFramebuffer->attachStencilTexture(details.mSize, format.mFilter, format.mWrap);
 				}
 				else {

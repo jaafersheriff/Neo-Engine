@@ -61,7 +61,6 @@ namespace neo {
 		mDefaultFBO->attachColorTexture({ 1, 1 }, { 
 			types::texture::Target::Texture2D, 
 			types::texture::InternalFormats::RGB16_F,
-			types::texture::BaseFormats::RGB,
 			{
 				types::texture::Filters::Linear,
 				types::texture::Filters::Linear

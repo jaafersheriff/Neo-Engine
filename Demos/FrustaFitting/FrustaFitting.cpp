@@ -169,7 +169,6 @@ namespace FrustaFitting {
 			TextureFormat {
 				types::texture::Target::Texture2D,
 				types::texture::InternalFormats::D16,
-				types::texture::BaseFormats::Depth
 			}
 		} }, "Shadow map");
 		shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Depth);

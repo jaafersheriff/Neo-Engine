@@ -10,6 +10,7 @@
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/RenderingComponent/ShadowCasterShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/SkyboxComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
@@ -19,6 +20,7 @@
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
+#include "Renderer/RenderingSystems/SkyboxRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
@@ -249,48 +251,61 @@ namespace PBR {
 			ecs.addComponent<SpatialComponent>(shadowCam);
 			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
 		}
-		// Dialectric spheres
-		for (int i = 1; i < 6; i++) {
-			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(i, 1.f, 0.f), glm::vec3(0.3f));
-			auto mesh = Library::getMesh("sphere");
-			ecs.addComponent<MeshComponent>(entity, mesh);
-			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
-			ecs.addComponent<OpaqueComponent>(entity);
-			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(1, 0, 0, 1);
-			material->mMetallic = 0.f;
-			material->mRoughness = 1.f / i;
-			ecs.addComponent<ShadowCasterShaderComponent>(entity);
-		}
-		// Conductive spheres
-		for (int i = 1; i < 6; i++) {
-			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(i, 1.f, -1.5f), glm::vec3(0.3f));
-			auto mesh = Library::getMesh("sphere");
-			ecs.addComponent<MeshComponent>(entity, mesh);
-			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
-			ecs.addComponent<OpaqueComponent>(entity);
-			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(0, 1, 0, 1);
-			material->mMetallic = 1.f;
-			material->mRoughness = 1.f / i;
-			ecs.addComponent<ShadowCasterShaderComponent>(entity);
-		}
-		// Emissive sphere
+
+		//// Dialectric spheres
+		//for (int i = 1; i < 6; i++) {
+		//	auto entity = ecs.createEntity();
+		//	ecs.addComponent<SpatialComponent>(entity, glm::vec3(i, 1.f, 0.f), glm::vec3(0.3f));
+		//	auto mesh = Library::getMesh("sphere");
+		//	ecs.addComponent<MeshComponent>(entity, mesh);
+		//	ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
+		//	ecs.addComponent<OpaqueComponent>(entity);
+		//	auto material = ecs.addComponent<MaterialComponent>(entity);
+		//	material->mAlbedoColor = glm::vec4(1, 0, 0, 1);
+		//	material->mMetallic = 0.f;
+		//	material->mRoughness = 1.f / i;
+		//	ecs.addComponent<ShadowCasterShaderComponent>(entity);
+		//}
+		//// Conductive spheres
+		//for (int i = 1; i < 6; i++) {
+		//	auto entity = ecs.createEntity();
+		//	ecs.addComponent<SpatialComponent>(entity, glm::vec3(i, 1.f, -1.5f), glm::vec3(0.3f));
+		//	auto mesh = Library::getMesh("sphere");
+		//	ecs.addComponent<MeshComponent>(entity, mesh);
+		//	ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
+		//	ecs.addComponent<OpaqueComponent>(entity);
+		//	auto material = ecs.addComponent<MaterialComponent>(entity);
+		//	material->mAlbedoColor = glm::vec4(0, 1, 0, 1);
+		//	material->mMetallic = 1.f;
+		//	material->mRoughness = 1.f / i;
+		//	ecs.addComponent<ShadowCasterShaderComponent>(entity);
+		//}
+		//// Emissive sphere
+		//{
+		//	auto entity = ecs.createEntity();
+		//	ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f, 1.f, -0.75f), glm::vec3(0.3f));
+		//	auto mesh = Library::getMesh("sphere");
+		//	ecs.addComponent<MeshComponent>(entity, mesh);
+		//	ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
+		//	ecs.addComponent<OpaqueComponent>(entity);
+		//	auto material = ecs.addComponent<MaterialComponent>(entity);
+		//	material->mAlbedoColor = glm::vec4(1.f);
+		//	material->mMetallic = 0.f;
+		//	material->mRoughness = 0.f;
+		//	material->mEmissiveFactor = glm::vec3(100.f);
+		//	ecs.addComponent<ShadowCasterShaderComponent>(entity);
+		//}
+
 		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f, 1.f, -0.75f), glm::vec3(0.3f));
-			auto mesh = Library::getMesh("sphere");
-			ecs.addComponent<MeshComponent>(entity, mesh);
-			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
-			ecs.addComponent<OpaqueComponent>(entity);
-			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(1.f);
-			material->mMetallic = 0.f;
-			material->mRoughness = 0.f;
-			material->mEmissiveFactor = glm::vec3(100.f);
-			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+			auto skybox = ecs.createEntity();
+			ecs.addComponent<SkyboxComponent>(skybox, Library::loadCubemap("Skybox", {
+				"envmap_miramar/miramar_ft.tga",
+				"envmap_miramar/miramar_bk.tga",
+				"envmap_miramar/miramar_up.tga",
+				"envmap_miramar/miramar_dn.tga",
+				"envmap_miramar/miramar_rt.tga",
+				"envmap_miramar/miramar_lf.tga",
+			}));
 		}
 
 		{
@@ -314,7 +329,8 @@ namespace PBR {
 		}
 
 		{
-			GLTFImporter::Scene _scene = Loader::loadGltfScene("Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
+			GLTFImporter::Scene _scene = Loader::loadGltfScene("NormalTangentTest/NormalTangentTest.gltf");
+			//GLTFImporter::Scene _scene = Loader::loadGltfScene("Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
 			for (auto& node : _scene.mMeshNodes) {
 				auto entity = ecs.createEntity();
 				if (!node.mName.empty()) {
@@ -373,12 +389,10 @@ namespace PBR {
 			TextureFormat {
 				types::texture::Target::Texture2D,
 				types::texture::InternalFormats::RGB16_F,
-				types::texture::BaseFormats::RGB
 			},
 			TextureFormat {
 				types::texture::Target::Texture2D,
 				types::texture::InternalFormats::D16,
-				types::texture::BaseFormats::Depth
 			}
 		} }, "Scene target");
 
@@ -386,7 +400,6 @@ namespace PBR {
 			TextureFormat {
 				types::texture::Target::Texture2D,
 				types::texture::InternalFormats::D16,
-				types::texture::BaseFormats::Depth
 			}
 		} }, "Shadow map");
 		if (mDrawShadows) {
@@ -401,6 +414,9 @@ namespace PBR {
 		sceneTarget->bind();
 		sceneTarget->clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+
+		drawSkybox(ecs, cameraEntity);
+
 		_drawPBR<OpaqueComponent>(ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
 		_drawPBR<AlphaTestComponent>(ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
 

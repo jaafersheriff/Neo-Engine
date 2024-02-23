@@ -76,9 +76,10 @@ namespace neo {
 		}
 
 		if (it->second.mValid) {
+			it->second.bind();
 			return it->second;
 		}
-
+		Library::getDummyShader().bind();
 		return Library::getDummyShader();
 	}
 

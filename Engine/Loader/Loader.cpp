@@ -87,7 +87,6 @@ namespace neo {
 		TextureFormat format = {
 			types::texture::Target::TextureCube,
 			types::texture::InternalFormats::RGBA8_UNORM,
-			types::texture::BaseFormats::RGBA
 		};
 		Texture* texture = new Texture(format, size, reinterpret_cast<void**>(data.data()));
 
@@ -110,7 +109,7 @@ namespace neo {
 
 		/* Use stbi if name is an existing file */
 		stbi_set_flip_vertically_on_load(flip);
-		uint8_t *data = stbi_load(_fileName.c_str(), &width, &height, &components, format.mBaseFormat == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
+		uint8_t *data = stbi_load(_fileName.c_str(), &width, &height, &components, TextureFormat::deriveBaseFormat(format.mInternalFormat) == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
 		NEO_ASSERT(data, "Error reading texture file");
 
 		NEO_LOG_I("Loaded texture %s [%d, %d]", fileName.c_str(), width, height);

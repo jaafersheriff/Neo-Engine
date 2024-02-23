@@ -2,6 +2,10 @@
 #include "shadowreceiver.glsl"
 #include "pbr/pbr.glsl"
 
+vec4 srgbToLinear(vec4 srgb) {
+	return vec4(pow(srgb.xyz, vec3(2.2)), srgb.w);;
+}
+
 in vec4 fragPos;
 in vec3 fragNor;
 in vec2 fragTex;
@@ -54,7 +58,7 @@ out vec4 color;
 void main() {
 	vec4 fAlbedo = albedo;
 #ifdef ALBEDO_MAP
-	fAlbedo *= texture(albedoMap, fragTex);
+	fAlbedo *= srgbToLinear(texture(albedoMap, fragTex));
 #endif
 
 #ifdef ALPHA_TEST
@@ -75,7 +79,7 @@ void main() {
 
 	vec3 fEmissive = emissiveFactor;
 #ifdef EMISSIVE
-	fEmissive *= texture(emissiveMap, fragTex).rgb;
+	fEmissive *= srgbToLinear(texture(emissiveMap, fragTex)).rgb;
 #endif
 #ifdef DEBUG_EMISSIVE
 	color = vec4(fEmissive, 1);

@@ -102,9 +102,45 @@ namespace neo {
 				return GL_RGB;
 			}
 		}
-
-
 	}
+
+	types::texture::BaseFormats TextureFormat::deriveBaseFormat(types::texture::InternalFormats format) {
+			switch (format) {
+			case types::texture::InternalFormats::R8_UNORM:
+			case types::texture::InternalFormats::R16_UNORM:
+			case types::texture::InternalFormats::R16_UI:
+			case types::texture::InternalFormats::R16_F:
+			case types::texture::InternalFormats::R32_F:
+				return types::texture::BaseFormats::R;
+			case types::texture::InternalFormats::RG8_UNORM:
+			case types::texture::InternalFormats::RG16_UNORM:
+			case types::texture::InternalFormats::RG16_UI:
+			case types::texture::InternalFormats::RG16_F:
+			case types::texture::InternalFormats::RG32_F:
+				return types::texture::BaseFormats::RG;
+			case types::texture::InternalFormats::RGB8_UNORM:
+			case types::texture::InternalFormats::RGB16_UNORM:
+			case types::texture::InternalFormats::RGB16_UI:
+			case types::texture::InternalFormats::RGB16_F:
+			case types::texture::InternalFormats::RGB32_F:
+				return types::texture::BaseFormats::RGB;
+			case types::texture::InternalFormats::RGBA8_UNORM:
+			case types::texture::InternalFormats::RGBA16_UNORM:
+			case types::texture::InternalFormats::RGBA16_UI:
+			case types::texture::InternalFormats::RGBA16_F:
+			case types::texture::InternalFormats::RGBA32_F:
+				return types::texture::BaseFormats::RGBA;
+			case types::texture::InternalFormats::D16:
+			case types::texture::InternalFormats::D24:
+			case types::texture::InternalFormats::D32:
+				return types::texture::BaseFormats::Depth;
+			case types::texture::InternalFormats::D24S8:
+				return types::texture::BaseFormats::DepthStencil;
+			default:
+				NEO_FAIL("Invalid base format");
+				return types::texture::BaseFormats::RGB;
+			}
+		}
 
 	Texture::Texture(TextureFormat format, uint16_t dimension, const void* data) : 
 		Texture(format, glm::u16vec3(dimension, dimension, 0), data) {}
@@ -161,9 +197,7 @@ namespace neo {
 			glTexStorage3D(GL_TEXTURE_3D, 1, _getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight, mDepth);
 			break;
 		case types::texture::Target::TextureCube:
-			for (int i = 0; i < 6; i++) {
-				glTexStorage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 1, _getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
-			}
+			glTexStorage2D(GL_TEXTURE_CUBE_MAP, 1, _getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
 			break;
 		default:
 			NEO_FAIL("Invalid texture class");
@@ -172,15 +206,16 @@ namespace neo {
 
 		// Upload
 		if (data != nullptr) {
+			types::texture::BaseFormats baseFormat = TextureFormat::deriveBaseFormat(mFormat.mInternalFormat);
 			switch (mFormat.mTarget) {
 			case types::texture::Target::Texture1D:
-				glTexSubImage1D(GL_TEXTURE_1D, 0, 0, mWidth, _getGLBaseFormat(mFormat.mBaseFormat), GLHelper::getGLByteFormat(mFormat.mType), data);
+				glTexSubImage1D(GL_TEXTURE_1D, 0, 0, mWidth, _getGLBaseFormat(baseFormat), GLHelper::getGLByteFormat(mFormat.mType), data);
 				break;
 			case types::texture::Target::Texture2D:
-				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mWidth, mHeight, _getGLBaseFormat(mFormat.mBaseFormat), GLHelper::getGLByteFormat(mFormat.mType), data);
+				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mWidth, mHeight, _getGLBaseFormat(baseFormat), GLHelper::getGLByteFormat(mFormat.mType), data);
 				break;
 			case types::texture::Target::Texture3D:
-				glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, mWidth, mHeight, mDepth, _getGLBaseFormat(mFormat.mBaseFormat), GLHelper::getGLByteFormat(mFormat.mType), data);
+				glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, mWidth, mHeight, mDepth, _getGLBaseFormat(baseFormat), GLHelper::getGLByteFormat(mFormat.mType), data);
 				break;
 			case types::texture::Target::TextureCube: {
 				// Danger!
@@ -188,7 +223,7 @@ namespace neo {
 				// F, B, U, D, R, L
 				for (int i = 0; i < 6; i++) {
 					NEO_ASSERT(_data[i], "Trying to upload a CubeMap with invalid data");
-					glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, mWidth, mHeight, _getGLBaseFormat(mFormat.mBaseFormat), GLHelper::getGLByteFormat(mFormat.mType), _data[i]);
+					glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, mWidth, mHeight, _getGLBaseFormat(baseFormat), GLHelper::getGLByteFormat(mFormat.mType), _data[i]);
 				}
 				break;
 			}

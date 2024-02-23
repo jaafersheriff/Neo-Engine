@@ -114,12 +114,10 @@ namespace Base {
 			TextureFormat {
 				types::texture::Target::Texture2D,
 				types::texture::InternalFormats::RGB16_UNORM,
-				types::texture::BaseFormats::RGB
 			},
 			TextureFormat {
 				types::texture::Target::Texture2D,
 				types::texture::InternalFormats::D16,
-				types::texture::BaseFormats::Depth
 			}
 		} }, "Scene target");
 

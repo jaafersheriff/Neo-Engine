@@ -85,10 +85,12 @@ namespace std {
 		size_t operator()(const neo::PooledFramebufferDetails& details) const noexcept {
 			size_t seed = details.mSize.x + details.mSize.y;
 			for (auto& i : details.mFormats) {
-				seed ^= static_cast<uint32_t>(i.mBaseFormat) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 				seed ^= static_cast<uint32_t>(i.mInternalFormat) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 				seed ^= static_cast<uint32_t>(i.mType) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-				// This ignores wraps and filters hehe
+				seed ^= static_cast<uint32_t>(i.mFilter.mMin) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+				seed ^= static_cast<uint32_t>(i.mFilter.mMag) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+				seed ^= static_cast<uint32_t>(i.mWrap.mS) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+				seed ^= static_cast<uint32_t>(i.mWrap.mR) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			}
 			return seed;
 		}

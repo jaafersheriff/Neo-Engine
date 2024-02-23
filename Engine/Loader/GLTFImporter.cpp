@@ -225,9 +225,8 @@ namespace {
 		}
 
 		TextureFormat format;
-		format.mBaseFormat = _getGLBaseFormat(image.component);
 		format.mType = _getGLType(image.bits);
-		format.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, format.mBaseFormat);
+		format.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, _getGLBaseFormat(image.component));
 		if (texture.sampler > -1) {
 			const auto& sampler = model.samplers[texture.sampler];
 			if (sampler.minFilter > -1) {

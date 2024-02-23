@@ -29,26 +29,22 @@ namespace Sponza {
 			TextureFormat {
 				types::texture::Target::Texture2D,
 				types::texture::InternalFormats::RGB16_F,
-				types::texture::BaseFormats::RGB
 			},
 			// World 
 			// TODO - could do everything in view space to get rid of this
 			TextureFormat {
 				types::texture::Target::Texture2D,
 				types::texture::InternalFormats::RGB16_F,
-				types::texture::BaseFormats::RGB
 			},
 			// Normals
 			TextureFormat {
 				types::texture::Target::Texture2D,
 				types::texture::InternalFormats::RGB16_F,
-				types::texture::BaseFormats::RGB
 			},
 			// Depth
 			TextureFormat {
 				types::texture::Target::Texture2D,
 				types::texture::InternalFormats::D16,
-				types::texture::BaseFormats::Depth
 			}
 		} }, "Gbuffer");
 	}

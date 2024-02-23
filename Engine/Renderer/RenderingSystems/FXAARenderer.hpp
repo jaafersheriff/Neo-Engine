@@ -8,11 +8,9 @@
 
 namespace neo {
 
-	template<typename... CompTs>
-	void drawFXAA(glm::uvec2 dimension, Texture& inputTexture) {
+	static void drawFXAA(glm::uvec2 dimension, Texture& inputTexture) {
 		TRACY_GPU();
 
-		// Where are these const chars in memory..are they being created and passed on each call?
 		auto* fxaaShader = Library::createSourceShader("FXAAShader", SourceShader::ConstructionArgs{
 			{ ShaderStage::VERTEX, "quad.vert"},
 			{ ShaderStage::FRAGMENT, "fxaa.frag" }
@@ -25,11 +23,8 @@ namespace neo {
 		resolvedShader.bindUniform("frameSize", glm::vec2(inputTexture.mWidth, inputTexture.mHeight));
 		resolvedShader.bindTexture("inputTexture", inputTexture);
 
-		bool oldDepthState = glIsEnabled(GL_DEPTH_TEST);
 		glDisable(GL_DEPTH_TEST);
 		Library::getMesh("quad")->draw();
-		if (oldDepthState) {
-			glEnable(GL_DEPTH_TEST);
-		}
+		glEnable(GL_DEPTH_TEST);
 	}
 }
