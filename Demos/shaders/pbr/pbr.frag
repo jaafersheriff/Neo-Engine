@@ -146,7 +146,7 @@ float attFactor = 1;
 
 #ifdef SKYBOX
 	vec3 R = reflect(-V, fNorm);
-	pbrColor.indirectSpecular += srgbToLinear(texture(skybox, R)).rgb;
+	//pbrColor.indirectSpecular += srgbToLinear(texture(skybox, R)).rgb;
 #endif
 
 	color.rgb =

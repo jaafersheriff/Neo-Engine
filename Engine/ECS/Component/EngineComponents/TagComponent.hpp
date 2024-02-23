@@ -13,7 +13,7 @@ namespace neo {
 		std::string mTag;
 
 		virtual std::string getName() const override {
-			return "Tag Component";
+			return "TagComponent";
 		}
 	};
 }

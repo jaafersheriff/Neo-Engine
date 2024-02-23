@@ -9,11 +9,12 @@
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
 #include "Renderer/RenderingSystems/Blitter.hpp"
 
+#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/EngineComponents/DebugBoundingBox.hpp"
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
-#include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 
 #include "Messaging/Message.hpp"
 #include "Messaging/Messenger.hpp"
@@ -154,7 +155,7 @@ namespace neo {
 		if (mShowBoundingBoxes) {
 			TRACY_GPUN("Debug Draws");
 			mDefaultFBO->bind();
-			drawLines(ecs, std::get<0>(*ecs.getComponent<MainCameraComponent>()));
+			drawLines<DebugBoundingBoxComponent>(ecs, std::get<0>(*ecs.getComponent<MainCameraComponent>()));
 		}
 		
 		/* Render imgui */
@@ -249,11 +250,12 @@ namespace neo {
 						line->addNode(FarRightBottom);
 						line->addNode(FarLeftBottom);
 					}
+					ecs.addComponent<DebugBoundingBoxComponent>(boxEntity);
 				}
 			}
 			else {
-				for (auto tuple : ecs.getView<BoundingBoxComponent, LineMeshComponent>()) {
-					ecs.removeComponent<LineMeshComponent>(tuple);
+				for (auto entity : ecs.getView<BoundingBoxComponent, DebugBoundingBoxComponent, LineMeshComponent>()) {
+					ecs.removeComponent<DebugBoundingBoxComponent>(entity);
 				}
 			}
 		}
