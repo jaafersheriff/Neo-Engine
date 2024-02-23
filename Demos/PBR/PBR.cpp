@@ -261,49 +261,49 @@ namespace PBR {
 			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
 		}
 
-		//// Dialectric spheres
-		//for (int i = 1; i < 6; i++) {
-		//	auto entity = ecs.createEntity();
-		//	ecs.addComponent<SpatialComponent>(entity, glm::vec3(i, 1.f, 0.f), glm::vec3(0.3f));
-		//	auto mesh = Library::getMesh("sphere");
-		//	ecs.addComponent<MeshComponent>(entity, mesh);
-		//	ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
-		//	ecs.addComponent<OpaqueComponent>(entity);
-		//	auto material = ecs.addComponent<MaterialComponent>(entity);
-		//	material->mAlbedoColor = glm::vec4(1, 0, 0, 1);
-		//	material->mMetallic = 0.f;
-		//	material->mRoughness = 1.f / i;
-		//	ecs.addComponent<ShadowCasterShaderComponent>(entity);
-		//}
-		//// Conductive spheres
-		//for (int i = 1; i < 6; i++) {
-		//	auto entity = ecs.createEntity();
-		//	ecs.addComponent<SpatialComponent>(entity, glm::vec3(i, 1.f, -1.5f), glm::vec3(0.3f));
-		//	auto mesh = Library::getMesh("sphere");
-		//	ecs.addComponent<MeshComponent>(entity, mesh);
-		//	ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
-		//	ecs.addComponent<OpaqueComponent>(entity);
-		//	auto material = ecs.addComponent<MaterialComponent>(entity);
-		//	material->mAlbedoColor = glm::vec4(0, 1, 0, 1);
-		//	material->mMetallic = 1.f;
-		//	material->mRoughness = 1.f / i;
-		//	ecs.addComponent<ShadowCasterShaderComponent>(entity);
-		//}
-		//// Emissive sphere
-		//{
-		//	auto entity = ecs.createEntity();
-		//	ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f, 1.f, -0.75f), glm::vec3(0.3f));
-		//	auto mesh = Library::getMesh("sphere");
-		//	ecs.addComponent<MeshComponent>(entity, mesh);
-		//	ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
-		//	ecs.addComponent<OpaqueComponent>(entity);
-		//	auto material = ecs.addComponent<MaterialComponent>(entity);
-		//	material->mAlbedoColor = glm::vec4(1.f);
-		//	material->mMetallic = 0.f;
-		//	material->mRoughness = 0.f;
-		//	material->mEmissiveFactor = glm::vec3(100.f);
-		//	ecs.addComponent<ShadowCasterShaderComponent>(entity);
-		//}
+		// Dialectric spheres
+		for (int i = 1; i < 6; i++) {
+			auto entity = ecs.createEntity();
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(i, 1.f, 0.f), glm::vec3(0.3f));
+			auto mesh = Library::getMesh("sphere");
+			ecs.addComponent<MeshComponent>(entity, mesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
+			ecs.addComponent<OpaqueComponent>(entity);
+			auto material = ecs.addComponent<MaterialComponent>(entity);
+			material->mAlbedoColor = glm::vec4(1, 0, 0, 1);
+			material->mMetallic = 0.f;
+			material->mRoughness = 1.f / i;
+			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+		}
+		// Conductive spheres
+		for (int i = 1; i < 6; i++) {
+			auto entity = ecs.createEntity();
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(i, 1.f, -1.5f), glm::vec3(0.3f));
+			auto mesh = Library::getMesh("sphere");
+			ecs.addComponent<MeshComponent>(entity, mesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
+			ecs.addComponent<OpaqueComponent>(entity);
+			auto material = ecs.addComponent<MaterialComponent>(entity);
+			material->mAlbedoColor = glm::vec4(0, 1, 0, 1);
+			material->mMetallic = 1.f;
+			material->mRoughness = 1.f / i;
+			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+		}
+		// Emissive sphere
+		{
+			auto entity = ecs.createEntity();
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f, 1.f, -0.75f), glm::vec3(0.3f));
+			auto mesh = Library::getMesh("sphere");
+			ecs.addComponent<MeshComponent>(entity, mesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
+			ecs.addComponent<OpaqueComponent>(entity);
+			auto material = ecs.addComponent<MaterialComponent>(entity);
+			material->mAlbedoColor = glm::vec4(1.f);
+			material->mMetallic = 0.f;
+			material->mRoughness = 0.f;
+			material->mEmissiveFactor = glm::vec3(100.f);
+			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+		}
 
 		{
 			auto skybox = ecs.createEntity();
