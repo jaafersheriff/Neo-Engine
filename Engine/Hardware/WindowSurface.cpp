@@ -61,7 +61,7 @@ namespace neo {
 		glfwSetWindowUserPointer(mWindow, &mDetails);
 
 		glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-			/* Toggle mFullscreen (f11 or alt+enter) */
+			// These should definitely move elsewhere lol
 			auto& imguiManager = ServiceLocator<ImGuiManager>::ref();
 			if ((key == GLFW_KEY_F11 || key == GLFW_KEY_ENTER && mods & GLFW_MOD_ALT) && action == GLFW_PRESS) {
 				Messenger::sendMessage<ToggleFullscreenMessage>(glfwGetWindowMonitor(window) != nullptr);

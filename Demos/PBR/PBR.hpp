@@ -7,6 +7,9 @@ using namespace neo;
 namespace PBR {
 	enum class DebugMode : uint8_t {
 		Off,
+		Albedo,
+		Diffuse,
+		Specular,
 		MetalRoughness,
 		Emissives,
 		COUNT

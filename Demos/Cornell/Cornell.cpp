@@ -21,6 +21,8 @@
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
+#include "Loader/MeshGenerator.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -34,6 +36,7 @@ namespace Cornell {
 			ecs.addComponent<TagComponent>(entity, name);
 			ecs.addComponent<MeshComponent>(entity, mesh);
 			ecs.addComponent<SpatialComponent>(entity, position, scale, rotation);
+			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(color.x, color.y, color.z, 1.f);
 			ecs.addComponent<PhongShaderComponent>(entity);
@@ -63,7 +66,7 @@ namespace Cornell {
 		{
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Light");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f - util::EP * 4, 0.5f), glm::vec3(0.25f), glm::vec3(glm::radians(90.f), 0.f, 0.f));
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f - 1e-3, 1.0f), glm::vec3(0.25f), glm::vec3(glm::radians(90.f), 0.f, 0.f));
 			ecs.addComponent<MainLightComponent>(entity);
 			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f));
 			ecs.addComponent<MeshComponent>(entity, Library::getMesh("quad"));
@@ -71,7 +74,7 @@ namespace Cornell {
 			material->mAlbedoColor = glm::vec4(1.f);
 			ecs.addComponent<PhongShaderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
-			ecs.addComponent<PointLightComponent>(entity, glm::vec3(3.0, 1.0, 5.0f));
+			ecs.addComponent<PointLightComponent>(entity, glm::vec3(0.75f, 1.0, 3.0f));
 		}
 
 		insertObject(ecs, "backwall",  Library::getMesh("quad"), glm::vec3(0.f, 0.5f, 0.f), glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f));
@@ -80,7 +83,9 @@ namespace Cornell {
 		insertObject(ecs, "floor", Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.5f), glm::vec3(1.f), glm::vec3(glm::radians(-90.f), 0.f, 0.f), glm::vec3(1.f));
 		insertObject(ecs, "ceiling", Library::getMesh("quad"), glm::vec3(0.f, 1.0f, 0.5f), glm::vec3(1.f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f));
 		insertObject(ecs, "box1", Library::getMesh("cube"), glm::vec3(-0.2f, 0.35f, 0.4f), glm::vec3(0.25f, 0.7f, 0.25f), glm::vec3(0.f, glm::radians(33.f), 0.f), glm::vec3(1.f));
-		insertObject(ecs, "box2", Library::getMesh("cube"), glm::vec3(0.2f, 0.15f, 0.6f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.f, glm::radians(-17.f), 0.f), glm::vec3(1.f));
+
+		Library::insertMesh(std::string("sphere3"), prefabs::generateSphere(3));
+		insertObject(ecs, "sphere", Library::getMesh("sphere3"), glm::vec3(0.2f, 0.18f, 0.6f), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.f, glm::radians(-17.f), 0.f), glm::vec3(1.f));
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
@@ -110,6 +115,14 @@ namespace Cornell {
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		drawFXAA(glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0]);
+	   // Don't forget the depth. Because reasons.
+	   glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
+		   0, 0, viewport.mSize.x, viewport.mSize.y,
+		   0, 0, viewport.mSize.x, viewport.mSize.y,
+		   GL_DEPTH_BUFFER_BIT,
+		   GL_NEAREST
+	   );
+
 	}
 
 	void Demo::update(ECS& ecs) {

@@ -5,6 +5,7 @@ in vec4 fragPos;
 in vec2 fragTex;
 
 #ifdef ENABLE_SHADOWS
+uniform vec2 shadowMapResolution;
 uniform mat4 lightTransform;
 layout(binding = 4) uniform sampler2D shadowMap;
 #endif
@@ -36,7 +37,7 @@ void main() {
 
 #ifdef ENABLE_SHADOWS
 	vec4 shadowCoord = lightTransform * vec4(worldPos, 1.0);
-	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.002), 0.2);
+	float visibility = max(getShadowVisibility(1, shadowMap, shadowMapResolution, shadowCoord, 0.002), 0.2);
 	color.rgb *= visibility;
 #endif
 

@@ -1,5 +1,5 @@
 
-float getShadowVisibility(int pcfSize, sampler2D shadowMap, vec4 shadowCoord, float bias) {
+float getShadowVisibility(int pcfSize, sampler2D shadowMap, vec2 shadowMapResolution, vec4 shadowCoord, float bias) {
 	if (shadowCoord.z < 0.0 || shadowCoord.z > 1.0) {
 		return 1.0;
 	}
@@ -13,7 +13,7 @@ float getShadowVisibility(int pcfSize, sampler2D shadowMap, vec4 shadowCoord, fl
 	float visibility = 1.0;
 	if (pcfSize > 0) {
 		float shadow = 0.0;
-		vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+		vec2 texelSize = 1.0 / shadowMapResolution;
 		for (int x = -pcfSize; x <= pcfSize; x++) {
 			for (int y = -pcfSize; y <= pcfSize; y++) {
 				float pcfDepth = texture(shadowMap, shadowCoord.xy + vec2(x, y) * texelSize).r;

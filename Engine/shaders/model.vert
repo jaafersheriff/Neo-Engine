@@ -9,6 +9,10 @@ uniform mat4 M;
 out vec4 fragPos;
 out vec3 fragNor;
 out vec2 fragTex;
+#ifdef ENABLE_SHADOWS
+uniform mat4 L;
+out vec4 shadowCoord;
+#endif
 
 #ifdef TANGENTS
 out vec4 fragTan;
@@ -19,4 +23,10 @@ void main() {
 	fragNor = vertNor;
 	fragTex = vertTex;
 	gl_Position = P * V * fragPos;
+
+#ifdef ENABLE_SHADOWS
+	shadowCoord = L * fragPos;
+#endif
+
+
 }

@@ -53,9 +53,21 @@ namespace PBR {
 
 		ShaderDefines passDefines({});
 
+		MakeDefine(DEBUG_ALBEDO);
+		MakeDefine(DEBUG_DIFFUSE);
+		MakeDefine(DEBUG_SPECULAR);
 		MakeDefine(DEBUG_METAL_ROUGHNESS);
 		MakeDefine(DEBUG_EMISSIVE);
 		switch (debugMode) {
+		case DebugMode::Albedo:
+			passDefines.set(DEBUG_ALBEDO);
+			break;
+		case DebugMode::Diffuse:
+			passDefines.set(DEBUG_DIFFUSE);
+			break;
+		case DebugMode::Specular:
+			passDefines.set(DEBUG_SPECULAR);
+			break;
 		case DebugMode::MetalRoughness:
 			passDefines.set(DEBUG_METAL_ROUGHNESS);
 			break;
@@ -206,6 +218,7 @@ namespace PBR {
 				}
 				if (shadowsEnabled) {
 					resolvedShader.bindUniform("L", L);
+					resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap->mWidth, shadowMap->mHeight));
 					resolvedShader.bindTexture("shadowMap", *shadowMap);
 				}
 				if (skybox) {
@@ -262,9 +275,10 @@ namespace PBR {
 		}
 
 		// Dialectric spheres
-		for (int i = 1; i < 6; i++) {
+		static float numSpheres = 8;
+		for (int i = 0; i < numSpheres; i++) {
 			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(i, 1.f, 0.f), glm::vec3(0.3f));
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, 0.f), glm::vec3(0.3f));
 			auto mesh = Library::getMesh("sphere");
 			ecs.addComponent<MeshComponent>(entity, mesh);
 			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
@@ -272,27 +286,27 @@ namespace PBR {
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(1, 0, 0, 1);
 			material->mMetallic = 0.f;
-			material->mRoughness = 1.f / i;
+			material->mRoughness = 1.f - i / numSpheres;
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 		}
 		// Conductive spheres
-		for (int i = 1; i < 6; i++) {
+		for (int i = 0; i < numSpheres; i++) {
 			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(i, 1.f, -1.5f), glm::vec3(0.3f));
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, -1.5f), glm::vec3(0.3f));
 			auto mesh = Library::getMesh("sphere");
 			ecs.addComponent<MeshComponent>(entity, mesh);
 			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
 			ecs.addComponent<OpaqueComponent>(entity);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(0, 1, 0, 1);
+			material->mAlbedoColor = glm::vec4(1, 1, 0, 1);
 			material->mMetallic = 1.f;
-			material->mRoughness = 1.f / i;
+			material->mRoughness = 1.f - i / numSpheres;
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 		}
 		// Emissive sphere
 		{
 			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f, 1.f, -0.75f), glm::vec3(0.3f));
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f, -0.75f), glm::vec3(0.3f));
 			auto mesh = Library::getMesh("sphere");
 			ecs.addComponent<MeshComponent>(entity, mesh);
 			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
@@ -333,7 +347,7 @@ namespace PBR {
 				ecs.addComponent<AlphaTestComponent>(entity);
 			}
 			ecs.addComponent<MaterialComponent>(entity, helmet.mMaterial);
-			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 1.0f, 0.f));
+			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 		}
 
@@ -373,8 +387,11 @@ namespace PBR {
 
 		static std::unordered_map<DebugMode, const char*> sDebugModeStrings = {
 			{DebugMode::Off, "Off"},
+			{DebugMode::Albedo, "Albedo"},
 			{DebugMode::MetalRoughness, "MetalRoughness"},
 			{DebugMode::Emissives, "Emissive"},
+			{DebugMode::Diffuse, "Diffuse"},
+			{DebugMode::Specular, "Specular"},
 		};
 		if (ImGui::BeginCombo("Debug Mode", sDebugModeStrings[mDebugMode])) {
 			for (int i = 0; i < static_cast<int>(DebugMode::COUNT); i++) {

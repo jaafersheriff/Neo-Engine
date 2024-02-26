@@ -5,6 +5,10 @@
 in vec4 fragPos;
 in vec3 fragNor;
 in vec2 fragTex;
+#ifdef ENABLE_SHADOWS
+in vec4 shadowCoord;
+#endif
+
 
 uniform vec4 albedo;
 #ifdef ALBEDO_MAP
@@ -16,7 +20,7 @@ layout(binding = 1) uniform sampler2D normalMap;
 #endif
 
 #ifdef ENABLE_SHADOWS
-uniform mat4 L;
+uniform vec2 shadowMapResolution;
 layout(binding = 2) uniform sampler2D shadowMap;
 #endif
 
@@ -63,8 +67,7 @@ float attFactor = 1;
 	color.rgb = lambertianDiffuse(Ldir, N, fAlbedo.rgb, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
-	vec4 shadowCoord = L * fragPos;
-	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.2);
+	float visibility = max(getShadowVisibility(1, shadowMap, shadowMapResolution, shadowCoord, 0.005), 0.2);
 	color.rgb *= visibility;
 #endif
 

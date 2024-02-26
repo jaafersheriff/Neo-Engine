@@ -9,6 +9,9 @@ vec4 srgbToLinear(vec4 srgb) {
 in vec4 fragPos;
 in vec3 fragNor;
 in vec2 fragTex;
+#ifdef ENABLE_SHADOWS
+in vec4 shadowCoord;
+#endif
 
 uniform vec4 albedo;
 #ifdef ALBEDO_MAP
@@ -35,7 +38,7 @@ layout(binding = 4) uniform sampler2D emissiveMap;
 #endif
 
 #ifdef ENABLE_SHADOWS
-uniform mat4 L;
+uniform vec2 shadowMapResolution;
 layout(binding = 5) uniform sampler2D shadowMap;
 #endif
 
@@ -68,6 +71,11 @@ void main() {
 #ifdef ALPHA_TEST
 	alphaDiscard(fAlbedo.a);
 #endif
+#ifdef DEBUG_ALBEDO
+	color = vec4(fAlbedo.rgb, 1.0);
+	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+	return;
+#endif
 
 	float fMetalness = metalness;
 	float fRoughness = roughness;
@@ -99,9 +107,9 @@ void main() {
 	vec3 V = normalize(camPos - fragPos.xyz);
 
 float attFactor = 1;
-	vec3 Ldir = vec3(0, 0, 0);
+	vec3 L = vec3(0, 0, 0);
 #ifdef DIRECTIONAL_LIGHT
-	Ldir = normalize(lightDir);
+	L = normalize(lightDir);
 #endif
 #if defined(POINT_LIGHT)
 	vec3 lightDir = lightPos - fragPos.xyz;
@@ -120,7 +128,7 @@ float attFactor = 1;
 	pbrData.metalness = fMetalness;
 
 	PBRLight pbrLight;
-	pbrLight.L = Ldir;
+	pbrLight.L = L;
 	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a;
 
 	PBRColor pbrColor;
@@ -130,6 +138,16 @@ float attFactor = 1;
 	pbrColor.indirectSpecular = vec3(0);
 
 	brdf(pbrData, pbrLight, pbrColor);
+#ifdef DEBUG_DIFFUSE
+	color = vec4(pbrColor.directDiffuse, 1.0);
+	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+	return;
+#endif
+#ifdef DEBUG_SPECULAR
+	color = vec4(pbrColor.directSpecular, 1.0);
+	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+	return;
+#endif
 
 #ifdef OCCLUSION_MAP
 	float ao = texture(occlusionMap, fragTex).r;
@@ -138,19 +156,20 @@ float attFactor = 1;
 #endif
 
 #ifdef ENABLE_SHADOWS
-	vec4 shadowCoord = L * fragPos;
-	float visibility = max(getShadowVisibility(1, shadowMap, shadowCoord, 0.005), 0.01);
+	float visibility = getShadowVisibility(0, shadowMap, shadowMapResolution, shadowCoord, 0.005);
 	pbrColor.directDiffuse *= visibility;
 	pbrColor.directSpecular *= visibility;
 #endif
+
+	pbrColor.indirectDiffuse = fAlbedo.rgb * 0.02 * (1.0 - fMetalness);
 
 #ifdef SKYBOX
 	vec3 R = reflect(-V, fNorm);
 	//pbrColor.indirectSpecular += srgbToLinear(texture(skybox, R)).rgb;
 #endif
 
-	color.rgb =
-		pbrColor.directDiffuse
+	color.rgb = vec3(0)
+		+ pbrColor.directDiffuse
 		+ pbrColor.directSpecular
 		+ pbrColor.indirectDiffuse
 		+ pbrColor.indirectSpecular
