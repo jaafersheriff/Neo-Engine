@@ -298,7 +298,7 @@ namespace PBR {
 			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
 			ecs.addComponent<OpaqueComponent>(entity);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(1, 1, 0, 1);
+			material->mAlbedoColor = glm::vec4(255.f / 255.f, 220.f / 255.f, 157.f / 255.f, 1);
 			material->mMetallic = 1.f;
 			material->mRoughness = 1.f - i / numSpheres;
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
