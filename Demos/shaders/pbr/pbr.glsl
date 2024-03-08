@@ -56,6 +56,6 @@ void brdf(in PBRMaterial pbrMaterial, in PBRLight pbrLight, out PBRColor pbrColo
     vec3 Ks = F;
     vec3 Kd = (vec3(1.0) - Ks) * (1.0 - pbrMaterial.metalness);
 
-    pbrColor.directDiffuse  += (Kd * pbrMaterial.albedo / PI) * NdotL * pbrLight.radiance;
+    pbrColor.directDiffuse += (Kd * pbrMaterial.albedo / PI) * NdotL * pbrLight.radiance;
     pbrColor.directSpecular += (D * F * V) * NdotL * pbrLight.radiance;
 }

@@ -101,8 +101,19 @@ void main() {
 	// TODO - normal mapping
 	vec3 fNorm = normalize(N * fragNor);
 #ifdef NORMAL_MAP
-	//fNorm = normalize(texture(normalMap, fragTex).rgb) * 2.0 - 1.0;
-	//fNorm = N * fNorm;
+	vec3 tangentNormal = texture(normalMap, fragTex).xyz * 2.0 - 1.0;
+
+	vec3 q1 = dFdx(fragPos.xyz);
+	vec3 q2 = dFdy(fragPos.xyz);
+	vec2 st1 = dFdx(fragTex);
+	vec2 st2 = dFdy(fragTex);
+
+	vec3 _N = normalize(fNorm);
+	vec3 T = normalize(q1 * st2.t - q2 * st1.t);
+	vec3 B = -normalize(cross(_N, T));
+	mat3 TBN = mat3(T, B, _N);
+
+	fNorm = normalize(TBN * tangentNormal);
 #endif
 	vec3 V = normalize(camPos - fragPos.xyz);
 
@@ -156,12 +167,12 @@ float attFactor = 1;
 #endif
 
 #ifdef ENABLE_SHADOWS
-	float visibility = getShadowVisibility(0, shadowMap, shadowMapResolution, shadowCoord, 0.005);
+	float visibility = getShadowVisibility(0, shadowMap, shadowMapResolution, shadowCoord, 0.001);
 	pbrColor.directDiffuse *= visibility;
 	pbrColor.directSpecular *= visibility;
 #endif
 
-	pbrColor.indirectDiffuse = fAlbedo.rgb * 0.02 * (1.0 - fMetalness);
+	pbrColor.indirectDiffuse = fAlbedo.rgb * 0.03 * (1.0 - fMetalness);
 
 #ifdef SKYBOX
 	vec3 R = reflect(-V, fNorm);

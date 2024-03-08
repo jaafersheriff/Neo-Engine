@@ -59,7 +59,7 @@ namespace NormalVisualizer {
 
 	void Demo::init(ECS& ecs) {
 		/* Game objects */
-		Camera camera(ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
+		Camera camera(ecs, 45.f, 0.1f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
 
 		Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f));
 
@@ -68,10 +68,10 @@ namespace NormalVisualizer {
 			const auto& bunnyNode = gltfScene.mMeshNodes[0];
 
 			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f, 0.f), glm::vec3(1.f));
-			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.6f, 0.f));
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
 			ecs.addComponent<MeshComponent>(entity, bunnyNode.mMesh);
-			ecs.addComponent<MaterialComponent>(entity);
+			auto material = ecs.addComponent<MaterialComponent>(entity);
+			material->mAlbedoColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
 			ecs.addComponent<PhongShaderComponent>(entity);
 			ecs.addComponent<WireframeShaderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
@@ -95,7 +95,6 @@ namespace NormalVisualizer {
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
-		ecs.addSystem<RotationSystem>();
 	}
 
 	void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
@@ -103,10 +102,9 @@ namespace NormalVisualizer {
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		backbuffer.clear(glm::vec4(getConfig().clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
+		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 
 		drawPhong<OpaqueComponent>(ecs, cameraEntity);
-		drawWireframe(ecs, cameraEntity);
 
 		{
 			auto normalShader = Library::createSourceShader("NormalVisualizer", SourceShader::ConstructionArgs{

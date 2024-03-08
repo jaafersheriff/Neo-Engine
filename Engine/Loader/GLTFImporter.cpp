@@ -248,6 +248,7 @@ namespace {
 			neo_texture->genMips();
 		}
 		if (!image.uri.empty()) {
+			NEO_LOG_I("Loaded texture %s", image.uri.c_str());
 			Library::insertTexture(image.uri, neo_texture);
 		}
 		return neo_texture;
@@ -370,6 +371,7 @@ namespace {
 				);
 			}
 			if (!model.meshes[node.mesh].name.empty()) {
+				NEO_LOG_I("Loaded mesh %s", model.meshes[node.mesh].name.c_str());
 				Library::insertMesh(model.meshes[node.mesh].name + std::to_string(i), outNode.mMesh);
 			}
 
