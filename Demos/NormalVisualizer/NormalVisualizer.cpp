@@ -7,6 +7,7 @@
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
+#include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
@@ -67,7 +68,7 @@ namespace NormalVisualizer {
 			const auto& bunnyNode = gltfScene.mMeshNodes[0];
 
 			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f, 0.f), glm::vec3(1.f));
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.6f, 0.f));
 			ecs.addComponent<MeshComponent>(entity, bunnyNode.mMesh);
 			ecs.addComponent<MaterialComponent>(entity);
@@ -75,6 +76,21 @@ namespace NormalVisualizer {
 			ecs.addComponent<WireframeShaderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
 			ecs.addComponent<TagComponent>(entity, "bunny");
+		}
+		{
+			GLTFImporter::Scene _scene = Loader::loadGltfScene("NormalTangentTest/NormalTangentTest.gltf", glm::scale(glm::mat4(1.f), glm::vec3(1.f)));
+			for (auto& node : _scene.mMeshNodes) {
+				auto entity = ecs.createEntity();
+				if (!node.mName.empty()) {
+					ecs.addComponent<TagComponent>(entity, node.mName);
+				}
+				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
+				ecs.addComponent<MeshComponent>(entity, node.mMesh);
+				ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh->mMin, node.mMesh->mMax);
+				ecs.addComponent<OpaqueComponent>(entity);
+				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
+				ecs.addComponent<PhongShaderComponent>(entity);
+			}
 		}
 
 		/* Systems - order matters! */
@@ -84,34 +100,51 @@ namespace NormalVisualizer {
 
 	void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
-		backbuffer.bind();
+		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		backbuffer.clear(glm::vec4(getConfig().clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 
 		drawPhong<OpaqueComponent>(ecs, cameraEntity);
 		drawWireframe(ecs, cameraEntity);
 
 		{
-			auto& normalShader = Library::createSourceShader("NormalVisualizer", SourceShader::ConstructionArgs{
+			auto normalShader = Library::createSourceShader("NormalVisualizer", SourceShader::ConstructionArgs{
 				{ShaderStage::VERTEX, "normal.vert"},
 				{ShaderStage::GEOMETRY, "normal.geom"},
 				{ShaderStage::FRAGMENT, "normal.frag"}
-				})->getResolvedInstance({});
-				normalShader.bind();
+			});
 
-				normalShader.bindUniform("magnitude", mMagnitude);
+
+			ShaderDefines drawDefines;
+			for (const auto&& [__, mesh, material, spatial] : ecs.getView<MeshComponent, MaterialComponent, SpatialComponent>().each()) {
+				drawDefines.reset();
+
+				MakeDefine(TANGENTS);
+				MakeDefine(NORMAL_MAP);
+				if (mesh.mMesh->hasVBO(types::mesh::VertexType::Tangent)) {
+					drawDefines.set(TANGENTS);
+				}
+				if (material.mNormalMap) {
+					drawDefines.set(NORMAL_MAP);
+				}
+				auto& resolvedShader = normalShader->getResolvedInstance(drawDefines);
+
+				resolvedShader.bindUniform("magnitude", mMagnitude);
+				if (material.mNormalMap) {
+					resolvedShader.bindTexture("normalMap", *material.mNormalMap);
+				}
 
 				/* Load PV */
-				normalShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
-				normalShader.bindUniform("V", cameraSpatial.getView());
+				resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+				resolvedShader.bindUniform("V", cameraSpatial.getView());
 
-				for (const auto&& [__, mesh, spatial] : ecs.getView<MeshComponent, SpatialComponent>().each()) {
-					normalShader.bindUniform("M", spatial.getModelMatrix());
-					normalShader.bindUniform("N", spatial.getNormalMatrix());
+				resolvedShader.bindUniform("M", spatial.getModelMatrix());
+				resolvedShader.bindUniform("N", spatial.getNormalMatrix());
 
-					/* DRAW */
-					mesh.mMesh->draw();
-				}
+				/* DRAW */
+				mesh.mMesh->draw();
+			}
 		}
 	}
 

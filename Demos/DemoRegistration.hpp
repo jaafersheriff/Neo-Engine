@@ -12,6 +12,7 @@
 
 static int sCurrentDemo = 0;
 static std::vector<neo::IDemo*> sDemos = {
+	new NormalVisualizer::Demo(),
 	new PBR::Demo(),
 	new Base::Demo(),
 	new Sponza::Demo(),
@@ -19,6 +20,5 @@ static std::vector<neo::IDemo*> sDemos = {
 	new Cornell::Demo(),
 	new DrawStress::Demo(),
  	new FrustaFitting::Demo(),
-	new NormalVisualizer::Demo(),
 };
 
