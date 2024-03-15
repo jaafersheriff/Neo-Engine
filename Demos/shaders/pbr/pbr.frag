@@ -167,7 +167,7 @@ float attFactor = 1;
 #endif
 
 #ifdef ENABLE_SHADOWS
-	float visibility = getShadowVisibility(0, shadowMap, shadowMapResolution, shadowCoord, 0.001);
+	float visibility = getShadowVisibility(1, shadowMap, shadowMapResolution, shadowCoord, 0.001);
 	pbrColor.directDiffuse *= visibility;
 	pbrColor.directSpecular *= visibility;
 #endif

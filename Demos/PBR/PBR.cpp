@@ -298,7 +298,7 @@ namespace PBR {
 			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
 			ecs.addComponent<OpaqueComponent>(entity);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(255.f / 255.f, 220.f / 255.f, 157.f / 255.f, 1);
+			material->mAlbedoColor = glm::vec4(0.944f, 0.776f, 0.373f, 1);
 			material->mMetallic = 1.f;
 			material->mRoughness = 1.f - i / numSpheres;
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
@@ -350,6 +350,21 @@ namespace PBR {
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 		}
+
+		{
+			GLTFImporter::Node bust = Loader::loadGltfScene("fblock.gltf", glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(-5.f, 2.5f, -0.5f)), glm::vec3(2.f))).mMeshNodes[0];
+			auto entity = ecs.createEntity();
+			ecs.addComponent<TagComponent>(entity, "Bust");
+			auto spatial = ecs.addComponent<SpatialComponent>(entity, bust.mSpatial);
+			spatial->setLookDir(glm::vec3(0.f, 0.4f, 0.1f));
+			ecs.addComponent<MeshComponent>(entity, bust.mMesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, bust.mMesh->mMin, bust.mMesh->mMax);
+			ecs.addComponent<OpaqueComponent>(entity);
+			ecs.addComponent<MaterialComponent>(entity, bust.mMaterial);
+			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
+			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+		}
+
 
 		{
 			//GLTFImporter::Scene _scene = Loader::loadGltfScene("NormalTangentTest/NormalTangentTest.gltf");
