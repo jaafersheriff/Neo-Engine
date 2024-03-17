@@ -76,25 +76,12 @@ namespace NormalVisualizer {
 			ecs.addComponent<WireframeShaderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
 			ecs.addComponent<TagComponent>(entity, "bunny");
-		}
-		{
-			GLTFImporter::Scene _scene = Loader::loadGltfScene("NormalTangentTest/NormalTangentTest.gltf", glm::scale(glm::mat4(1.f), glm::vec3(1.f)));
-			for (auto& node : _scene.mMeshNodes) {
-				auto entity = ecs.createEntity();
-				if (!node.mName.empty()) {
-					ecs.addComponent<TagComponent>(entity, node.mName);
-				}
-				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
-				ecs.addComponent<MeshComponent>(entity, node.mMesh);
-				ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh->mMin, node.mMesh->mMax);
-				ecs.addComponent<OpaqueComponent>(entity);
-				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
-				ecs.addComponent<PhongShaderComponent>(entity);
-			}
+			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 		}
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
+		ecs.addSystem<RotationSystem>();
 	}
 
 	void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
@@ -114,24 +101,11 @@ namespace NormalVisualizer {
 			});
 
 
-			ShaderDefines drawDefines;
 			for (const auto&& [__, mesh, material, spatial] : ecs.getView<MeshComponent, MaterialComponent, SpatialComponent>().each()) {
-				drawDefines.reset();
 
-				MakeDefine(TANGENTS);
-				MakeDefine(NORMAL_MAP);
-				if (mesh.mMesh->hasVBO(types::mesh::VertexType::Tangent)) {
-					drawDefines.set(TANGENTS);
-				}
-				if (material.mNormalMap) {
-					drawDefines.set(NORMAL_MAP);
-				}
-				auto& resolvedShader = normalShader->getResolvedInstance(drawDefines);
+				auto& resolvedShader = normalShader->getResolvedInstance({});
 
 				resolvedShader.bindUniform("magnitude", mMagnitude);
-				if (material.mNormalMap) {
-					resolvedShader.bindTexture("normalMap", *material.mNormalMap);
-				}
 
 				/* Load PV */
 				resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());

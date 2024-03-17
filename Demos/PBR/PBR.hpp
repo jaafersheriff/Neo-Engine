@@ -8,10 +8,11 @@ namespace PBR {
 	enum class DebugMode : uint8_t {
 		Off,
 		Albedo,
+		MetalRoughness,
+		Normals,
+		Emissives,
 		Diffuse,
 		Specular,
-		MetalRoughness,
-		Emissives,
 		COUNT
 	};
 

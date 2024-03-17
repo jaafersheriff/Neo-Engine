@@ -54,25 +54,29 @@ namespace PBR {
 		ShaderDefines passDefines({});
 
 		MakeDefine(DEBUG_ALBEDO);
-		MakeDefine(DEBUG_DIFFUSE);
-		MakeDefine(DEBUG_SPECULAR);
 		MakeDefine(DEBUG_METAL_ROUGHNESS);
 		MakeDefine(DEBUG_EMISSIVE);
+		MakeDefine(DEBUG_NORMALS);
+		MakeDefine(DEBUG_DIFFUSE);
+		MakeDefine(DEBUG_SPECULAR);
 		switch (debugMode) {
 		case DebugMode::Albedo:
 			passDefines.set(DEBUG_ALBEDO);
-			break;
-		case DebugMode::Diffuse:
-			passDefines.set(DEBUG_DIFFUSE);
-			break;
-		case DebugMode::Specular:
-			passDefines.set(DEBUG_SPECULAR);
 			break;
 		case DebugMode::MetalRoughness:
 			passDefines.set(DEBUG_METAL_ROUGHNESS);
 			break;
 		case DebugMode::Emissives:
 			passDefines.set(DEBUG_EMISSIVE);
+			break;
+		case DebugMode::Normals:
+			passDefines.set(DEBUG_NORMALS);
+			break;
+		case DebugMode::Diffuse:
+			passDefines.set(DEBUG_DIFFUSE);
+			break;
+		case DebugMode::Specular:
+			passDefines.set(DEBUG_SPECULAR);
 			break;
 		case DebugMode::Off:
 		default:
@@ -405,6 +409,7 @@ namespace PBR {
 			{DebugMode::Albedo, "Albedo"},
 			{DebugMode::MetalRoughness, "MetalRoughness"},
 			{DebugMode::Emissives, "Emissive"},
+			{DebugMode::Normals, "Normals"},
 			{DebugMode::Diffuse, "Diffuse"},
 			{DebugMode::Specular, "Specular"},
 		};

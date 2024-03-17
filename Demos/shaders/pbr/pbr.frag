@@ -2,13 +2,12 @@
 #include "shadowreceiver.glsl"
 #include "pbr/pbr.glsl"
 
-vec4 srgbToLinear(vec4 srgb) {
-	return vec4(pow(srgb.xyz, vec3(2.2)), srgb.w);;
-}
-
 in vec4 fragPos;
 in vec3 fragNor;
 in vec2 fragTex;
+#ifdef TANGENTS
+in vec3 fragTan;
+#endif
 #ifdef ENABLE_SHADOWS
 in vec4 shadowCoord;
 #endif
@@ -55,12 +54,40 @@ uniform vec3 lightPos;
 uniform vec3 lightAtt;
 #endif
 
-uniform mat3 N;
-
 uniform vec3 camPos;
 uniform vec3 camDir;
 
 out vec4 color;
+
+vec3 getNormal() {
+	vec3 baseNormal = normalize(fragNor);
+#ifndef NORMAL_MAP
+	return baseNormal;
+#else
+
+	vec3 T;
+#ifdef TANGENTS
+	T = fragTan;
+#else
+	vec3 q1 = dFdx(fragPos.xyz);
+	vec3 q2 = dFdy(fragPos.xyz);
+	vec2 st1 = dFdx(fragTex);
+	vec2 st2 = dFdy(fragTex);
+	T = normalize(q1 * st2.t - q2 * st1.t);
+#endif
+
+	vec3 _N = normalize(baseNormal);
+	vec3 B = -normalize(cross(_N, T));
+	mat3 TBN = mat3(T, B, _N);
+
+	vec3 tangentNormal = texture(normalMap, fragTex).xyz * 2.0 - 1.0;
+	return normalize(TBN * tangentNormal);
+#endif
+}
+
+vec4 srgbToLinear(vec4 srgb) {
+	return vec4(pow(srgb.xyz, vec3(2.2)), srgb.w);;
+}
 
 void main() {
 	vec4 fAlbedo = albedo;
@@ -71,11 +98,6 @@ void main() {
 #ifdef ALPHA_TEST
 	alphaDiscard(fAlbedo.a);
 #endif
-#ifdef DEBUG_ALBEDO
-	color = vec4(fAlbedo.rgb, 1.0);
-	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
-	return;
-#endif
 
 	float fMetalness = metalness;
 	float fRoughness = roughness;
@@ -84,37 +106,14 @@ void main() {
 	fMetalness *= metalRoughness.b;
 	fRoughness *= metalRoughness.g;
 #endif
-#ifdef DEBUG_METAL_ROUGHNESS
-	color = vec4(0.0, fRoughness, fMetalness, 1.0);
-	return;
-#endif
 
 	vec3 fEmissive = emissiveFactor;
 #ifdef EMISSIVE
 	fEmissive *= srgbToLinear(texture(emissiveMap, fragTex)).rgb;
 #endif
-#ifdef DEBUG_EMISSIVE
-	color = vec4(fEmissive, 1);
-	return;
-#endif
 
-	// TODO - normal mapping
-	vec3 fNorm = normalize(N * fragNor);
-#ifdef NORMAL_MAP
-	vec3 tangentNormal = texture(normalMap, fragTex).xyz * 2.0 - 1.0;
+	vec3 fNorm = getNormal();
 
-	vec3 q1 = dFdx(fragPos.xyz);
-	vec3 q2 = dFdy(fragPos.xyz);
-	vec2 st1 = dFdx(fragTex);
-	vec2 st2 = dFdy(fragTex);
-
-	vec3 _N = normalize(fNorm);
-	vec3 T = normalize(q1 * st2.t - q2 * st1.t);
-	vec3 B = -normalize(cross(_N, T));
-	mat3 TBN = mat3(T, B, _N);
-
-	fNorm = normalize(TBN * tangentNormal);
-#endif
 	vec3 V = normalize(camPos - fragPos.xyz);
 
 float attFactor = 1;
@@ -149,16 +148,6 @@ float attFactor = 1;
 	pbrColor.indirectSpecular = vec3(0);
 
 	brdf(pbrData, pbrLight, pbrColor);
-#ifdef DEBUG_DIFFUSE
-	color = vec4(pbrColor.directDiffuse, 1.0);
-	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
-	return;
-#endif
-#ifdef DEBUG_SPECULAR
-	color = vec4(pbrColor.directSpecular, 1.0);
-	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
-	return;
-#endif
 
 #ifdef OCCLUSION_MAP
 	float ao = texture(occlusionMap, fragTex).r;
@@ -188,5 +177,40 @@ float attFactor = 1;
 	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
 	color.rgb += fEmissive;
 	color.a = 1.0;
+
+#ifdef DEBUG_ALBEDO
+	color = vec4(fAlbedo.rgb, 1.0);
+	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+	return;
+#endif
+
+#ifdef DEBUG_METAL_ROUGHNESS
+	color = vec4(0.0, fRoughness, fMetalness, 1.0);
+	return;
+#endif
+
+#ifdef DEBUG_EMISSIVE
+	color = vec4(fEmissive, 1);
+	return;
+#endif
+
+#ifdef DEBUG_NORMALS
+	color = vec4(fNorm, 1);
+	return;
+#endif
+
+#ifdef DEBUG_DIFFUSE
+	color = vec4(pbrColor.directDiffuse, 1.0);
+	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+	return;
+#endif
+
+#ifdef DEBUG_SPECULAR
+	color = vec4(pbrColor.directSpecular, 1.0);
+	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+	return;
+#endif
+
+
 }
 
