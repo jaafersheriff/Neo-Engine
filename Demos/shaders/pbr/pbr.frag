@@ -6,7 +6,7 @@ in vec4 fragPos;
 in vec3 fragNor;
 in vec2 fragTex;
 #ifdef TANGENTS
-in vec3 fragTan;
+in vec4 fragTan;
 #endif
 #ifdef ENABLE_SHADOWS
 in vec4 shadowCoord;
@@ -65,23 +65,27 @@ vec3 getNormal() {
 	return baseNormal;
 #else
 
-	vec3 T;
+	mat3 TBN;
 #ifdef TANGENTS
-	T = fragTan;
+	vec3 tan = normalize(fragTan.xyz);
+	vec3 biTan = normalize(cross(baseNormal, tan)) * fragTan.w;
+	TBN = mat3(tan, biTan, baseNormal);
 #else
-	vec3 q1 = dFdx(fragPos.xyz);
-	vec3 q2 = dFdy(fragPos.xyz);
-	vec2 st1 = dFdx(fragTex);
-	vec2 st2 = dFdy(fragTex);
-	T = normalize(q1 * st2.t - q2 * st1.t);
+	// http://www.thetenthplanet.de/archives/1180
+	vec3 dp1 = dFdx( fragPos.xyz ); 
+	vec3 dp2 = dFdy( fragPos.xyz ); 
+	vec2 duv1 = dFdx( fragTex ); 
+	vec2 duv2 = dFdy( fragTex );
+	vec3 dp2perp = cross( dp2, baseNormal ); 
+	vec3 dp1perp = cross( baseNormal, dp1 ); 
+	vec3 T = dp2perp * duv1.x + dp1perp * duv2.x; 
+	vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
+	float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) ); 
+	TBN = mat3( T * invmax, B * invmax, baseNormal );
 #endif
 
-	vec3 _N = normalize(baseNormal);
-	vec3 B = -normalize(cross(_N, T));
-	mat3 TBN = mat3(T, B, _N);
-
 	vec3 tangentNormal = texture(normalMap, fragTex).xyz * 2.0 - 1.0;
-	return normalize(TBN * tangentNormal);
+	return normalize(TBN * normalize(tangentNormal));
 #endif
 }
 
@@ -116,7 +120,7 @@ void main() {
 
 	vec3 V = normalize(camPos - fragPos.xyz);
 
-float attFactor = 1;
+	float attFactor = 1;
 	vec3 L = vec3(0, 0, 0);
 #ifdef DIRECTIONAL_LIGHT
 	L = normalize(lightDir);
@@ -165,7 +169,7 @@ float attFactor = 1;
 
 #ifdef SKYBOX
 	vec3 R = reflect(-V, fNorm);
-	//pbrColor.indirectSpecular += srgbToLinear(texture(skybox, R)).rgb;
+	//pbrColor.indirectSpecular += srgbToLinear(texture(skybox, R)).rgb * (fMetalness);
 #endif
 
 	color.rgb = vec3(0)
@@ -173,9 +177,9 @@ float attFactor = 1;
 		+ pbrColor.directSpecular
 		+ pbrColor.indirectDiffuse
 		+ pbrColor.indirectSpecular
+		+ fEmissive;
 	;
 	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
-	color.rgb += fEmissive;
 	color.a = 1.0;
 
 #ifdef DEBUG_ALBEDO
@@ -195,18 +199,19 @@ float attFactor = 1;
 #endif
 
 #ifdef DEBUG_NORMALS
-	color = vec4(fNorm, 1);
+	vec3 _fNorm = fNorm * 0.5 + 0.5;
+	color = vec4(_fNorm.x, _fNorm.y, _fNorm.z, 1);
 	return;
 #endif
 
 #ifdef DEBUG_DIFFUSE
-	color = vec4(pbrColor.directDiffuse, 1.0);
+	color = vec4(pbrColor.directDiffuse + pbrColor.indirectDiffuse, 1.0);
 	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
 	return;
 #endif
 
 #ifdef DEBUG_SPECULAR
-	color = vec4(pbrColor.directSpecular, 1.0);
+	color = vec4(pbrColor.directSpecular + pbrColor.indirectSpecular, 1.0);
 	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
 	return;
 #endif

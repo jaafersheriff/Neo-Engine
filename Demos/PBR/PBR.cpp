@@ -234,6 +234,13 @@ namespace PBR {
 			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
 
+			// Yikes
+			if (material.mDoubleSided) {
+				glDisable(GL_CULL_FACE);
+			}
+			else {
+				glEnable(GL_CULL_FACE);
+			}
 			view.get<const MeshComponent>(entity).mMesh->draw();
 		}
 	}
@@ -369,11 +376,9 @@ namespace PBR {
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 		}
 
-
 		{
-			//GLTFImporter::Scene _scene = Loader::loadGltfScene("NormalTangentTest/NormalTangentTest.gltf");
-			GLTFImporter::Scene _scene = Loader::loadGltfScene("Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
-			for (auto& node : _scene.mMeshNodes) {
+			GLTFImporter::Scene scene = Loader::loadGltfScene("Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
+			for (auto& node : scene.mMeshNodes) {
 				auto entity = ecs.createEntity();
 				if (!node.mName.empty()) {
 					ecs.addComponent<TagComponent>(entity, node.mName);

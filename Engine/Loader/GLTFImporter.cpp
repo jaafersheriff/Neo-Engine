@@ -349,6 +349,10 @@ namespace {
 				else if (attribute.first == "TANGENT") {
 					vertexType = types::mesh::VertexType::Tangent;
 				}
+				else if (attribute.first == "COLOR_0") {
+					NEO_LOG_W("Unsupported attribute: COLOR_0");
+					continue;
+				}
 				else {
 					NEO_FAIL("TODO: unsupported attribute: %s", attribute.first.c_str());
 					continue;
@@ -381,12 +385,11 @@ namespace {
 				if (!material.lods.empty()) {
 					NEO_LOG_W("Material %s has LODs -- unsupported", material.name.c_str());
 				}
-				if (material.doubleSided) {
-					NEO_LOG_W("Material %s is double sided -- unsupported", material.name.c_str());
-				}
 				if (material.alphaCutoff != 0.5) {
 					NEO_LOG_W("Material %s has nonstandard alpha cutoff: %0.2f -- unsupported", material.name.c_str(), material.alphaCutoff);
 				}
+
+				outNode.mMaterial.mDoubleSided = material.doubleSided;
 
 				if (material.alphaMode == "OPAQUE") {
 					outNode.mAlphaMode = GLTFImporter::Node::AlphaMode::Opaque;

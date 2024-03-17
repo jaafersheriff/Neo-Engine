@@ -8,6 +8,8 @@ namespace neo {
 	class Texture; 
 
 	struct MaterialComponent: public Component {
+		bool mDoubleSided = false;
+
 		glm::vec4 mAlbedoColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
 		Texture* mAlbedoMap = nullptr;
 
