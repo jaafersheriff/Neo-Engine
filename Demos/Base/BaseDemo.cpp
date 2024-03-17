@@ -83,8 +83,9 @@ namespace Base {
 		{
 			auto plane = ecs.createEntity();
 			ecs.addComponent<TagComponent>(plane, "Grid");
-			ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
+			ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
 			ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad"));
+			ecs.addComponent<BoundingBoxComponent>(plane, Library::getMesh("quad")->mMin, Library::getMesh("quad")->mMax);
 			ecs.addComponent<PhongShaderComponent>(plane);
 			ecs.addComponent<AlphaTestComponent>(plane);
 			auto material = ecs.addComponent<MaterialComponent>(plane);

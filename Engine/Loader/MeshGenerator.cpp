@@ -171,8 +171,8 @@ namespace neo {
 				static_cast<uint32_t>(verts.size() * sizeof(float)),
 				reinterpret_cast<uint8_t*>(verts.data())
 			);
-			mesh->mMin = glm::vec3(-0.5f, -0.5f, -0.01f);
-			mesh->mMax = glm::vec3(0.5f, 0.5f, 0.01f);
+			mesh->mMin = glm::vec3(-0.5f, -0.5f, -0.1f);
+			mesh->mMax = glm::vec3(0.5f, 0.5f, 0.1f);
 
 			std::vector<float> normals =
 			{ 0.f, 0.f, 1.f,

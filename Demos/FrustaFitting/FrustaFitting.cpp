@@ -80,16 +80,6 @@ namespace FrustaFitting {
 				ecs.addComponent<ShadowCameraComponent>(cameraObject);
 			}
 		};
-
-		struct Renderable {
-			ECS::Entity mEntity;
-
-			Renderable(ECS& ecs, Mesh* mesh, glm::vec3 position = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), glm::vec3 rotation = glm::vec3(0.f)) {
-				mEntity = ecs.createEntity();
-				ecs.addComponent<MeshComponent>(mEntity, mesh);
-				ecs.addComponent<SpatialComponent>(mEntity, position, scale, rotation);
-			}
-		};
 	}
 
 	IDemo::Config Demo::getConfig() const {
@@ -118,23 +108,29 @@ namespace FrustaFitting {
 
 		// Renderable
 		for (int i = 0; i < 50; i++) {
+			auto entity = ecs.createEntity();
 			auto mesh = util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere");
-			Renderable sphere(ecs, mesh, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
-			ecs.addComponent<BoundingBoxComponent>(sphere.mEntity, mesh->mMin, mesh->mMax);
-			auto material = ecs.addComponent<MaterialComponent>(sphere.mEntity);
+			ecs.addComponent<MeshComponent>(entity, mesh);
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
+			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
+			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
-			ecs.addComponent<PhongShaderComponent>(sphere.mEntity);
-			ecs.addComponent<ShadowCasterShaderComponent>(sphere.mEntity);
-			ecs.addComponent<WireframeShaderComponent>(sphere.mEntity);
+			ecs.addComponent<PhongShaderComponent>(entity);
+			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+			ecs.addComponent<WireframeShaderComponent>(entity);
 		}
 
 		/* Ground plane */
-		Renderable receiver(ecs, Library::getMesh("quad"), glm::vec3(0.f, 0.f, 0.f), glm::vec3(50.f, 50.f, 1.f), glm::vec3(-1.56f, 0, 0));
-		ecs.addComponent<BoundingBoxComponent>(receiver.mEntity, Library::getMesh("quad")->mMin, Library::getMesh("quad")->mMin);
-		auto material = ecs.addComponent<MaterialComponent>(receiver.mEntity);
-		material->mAlbedoColor = glm::vec4(glm::vec3(0.7f), 1.f);
-		ecs.addComponent<PhongShaderComponent>(receiver.mEntity);
-		ecs.addComponent<TagComponent>(receiver.mEntity, "Ground");
+		{
+			auto entity = ecs.createEntity();
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(25.f, 25.f, 1.f), glm::vec3(-1.56f, 0, 0));
+			ecs.addComponent<MeshComponent>(entity, Library::getMesh("quad"));
+			ecs.addComponent<BoundingBoxComponent>(entity, Library::getMesh("quad")->mMin, Library::getMesh("quad")->mMax);
+			auto material = ecs.addComponent<MaterialComponent>(entity);
+			material->mAlbedoColor = glm::vec4(glm::vec3(0.7f), 1.f);
+			ecs.addComponent<PhongShaderComponent>(entity);
+			ecs.addComponent<TagComponent>(entity, "Ground");
+		}
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>(); // Update camera
