@@ -8,7 +8,7 @@
 
 namespace neo {
 
-	static void drawFXAA(glm::uvec2 dimension, Texture& inputTexture) {
+	static void drawFXAA(glm::uvec2 dimension, Texture& inputTexture, const MeshManager& meshManager) {
 		TRACY_GPU();
 
 		auto* fxaaShader = Library::createSourceShader("FXAAShader", SourceShader::ConstructionArgs{
@@ -24,7 +24,7 @@ namespace neo {
 		resolvedShader.bindTexture("inputTexture", inputTexture);
 
 		glDisable(GL_DEPTH_TEST);
-		Library::getMesh("quad")->draw();
+		meshManager.get("quad").draw();
 		glEnable(GL_DEPTH_TEST);
 	}
 }

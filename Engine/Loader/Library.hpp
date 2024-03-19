@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Renderer/GLObjects/Mesh.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 #include "Renderer/GLObjects/SourceShader.hpp"
 
@@ -39,10 +38,6 @@ namespace neo {
 			static void tick();
 			static void clean();
 
-			static Mesh* getMesh(const std::string&);
-			static void insertMesh(const std::string&, Mesh*);
-			static const std::unordered_map<std::string, Mesh*> getAllMeshes() { return mMeshes; }
-
 			static bool hasTexture(const std::string&); // will go away when proper resource manager happens ;( 
 			static void insertTexture(const std::string&, Texture*);
 			static Texture* getTexture(const std::string&);
@@ -63,7 +58,6 @@ namespace neo {
 			static void imGuiEditor();
 
 		private:
-			static std::unordered_map<std::string, Mesh*> mMeshes;
 			static std::unordered_map<std::string, Texture*> mTextures;
 			static std::unordered_map<std::string, Framebuffer*> mFramebuffers;
 			struct PooledFramebuffer {

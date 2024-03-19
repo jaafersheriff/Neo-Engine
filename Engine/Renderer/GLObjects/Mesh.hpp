@@ -1,9 +1,10 @@
 #pragma once
 
+#include "Renderer/Types.hpp"
+
 #include <optional>
 #include <unordered_map>
-
-#include "Renderer/Types.hpp"
+#include <glm/glm.hpp>
 
 namespace neo {
 

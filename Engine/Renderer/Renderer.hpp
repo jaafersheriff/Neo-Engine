@@ -16,6 +16,7 @@ namespace neo {
 	class Framebuffer;
 	class SourceShader;
 	struct FrameSizeMessage;
+	class MeshManager;
 
 	class Renderer {
 
@@ -53,7 +54,7 @@ namespace neo {
 			void setDemoConfig(IDemo::Config);
 			void init();
 			void resetState();
-			void render(WindowSurface&, IDemo* demo, ECS&);
+			void render(WindowSurface&, IDemo* demo, ECS&, MeshManager& meshManager);
 			void clean();
 
 			void imGuiEditor(WindowSurface& window, ECS& ecs);

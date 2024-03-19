@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 namespace neo {
 	namespace types {
 		enum class ByteFormats : uint8_t {

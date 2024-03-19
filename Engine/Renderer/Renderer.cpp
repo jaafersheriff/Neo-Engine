@@ -17,6 +17,8 @@
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
+#include "ResourceManager/MeshResourceManager.hpp"
+
 #include "Messaging/Message.hpp"
 #include "Messaging/Messenger.hpp"
 
@@ -148,7 +150,7 @@ namespace neo {
 		glUseProgram(0);
 	}
 
-	void Renderer::render(WindowSurface& window, IDemo* demo, ECS& ecs) {
+	void Renderer::render(WindowSurface& window, IDemo* demo, ECS& ecs, MeshManager& meshManager) {
 		TRACY_GPU();
 
 		mStats = {};
@@ -157,7 +159,7 @@ namespace neo {
 
 		{
 			TRACY_GPUN("Draw Demo");
-			demo->render(ecs, *mDefaultFBO);
+			demo->render(meshManager, ecs, *mDefaultFBO);
 			resetState();
 		}
 
@@ -177,7 +179,7 @@ namespace neo {
 		else {
 			TRACY_GPUN("Final Blit");
 			Framebuffer fb; // empty framebuffer is just the backbuffer -- just don't do anything with it ever
-			blit(fb, *mDefaultFBO->mTextures[0], window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
+			blit(meshManager, fb, *mDefaultFBO->mTextures[0], window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
 		}
 	}
 
