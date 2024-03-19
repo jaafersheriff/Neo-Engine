@@ -10,8 +10,6 @@ namespace neo {
 		MouseRaySystem() 
 			: System("MouseRay System")
 		{}
-
-
 		virtual void update(ECS&) override;
 	};
 }

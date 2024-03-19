@@ -14,7 +14,6 @@ extern "C" {
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/EngineComponents/SingleFrameComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
-#include "ECS/Component/CollisionComponent/MouseRayComponent.hpp"
 #include "ECS/Component/EngineComponents/DebugBoundingBox.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
@@ -132,7 +131,7 @@ namespace neo {
 						_swapDemo(demos, meshManager);
 					}
 
-					_startFrame(profiler);
+					_startFrame(profiler, meshManager);
 					Messenger::relayMessages(mECS);
 
 					/* Destroy and create objects and components */
@@ -227,9 +226,9 @@ namespace neo {
 
 	void Engine::_createPrefabs(MeshManager& meshManager) {
 		/* Generate basic meshes */
-		meshManager.load(HashedString("cube"), prefabs::generateCube());
-		meshManager.load(HashedString("quad"), prefabs::generateQuad());
-		meshManager.load(HashedString("sphere"), prefabs::generateSphere(2));
+		prefabs::generateCube("cube", meshManager);
+		prefabs::generateQuad("quad", meshManager);
+		prefabs::generateSphere("sphere", meshManager, 2);
 
 		/* Generate basic textures*/
 		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
@@ -250,7 +249,7 @@ namespace neo {
 		mWindow.shutDown();
 	}
 
-	void Engine::_startFrame(util::Profiler& profiler) {
+	void Engine::_startFrame(util::Profiler& profiler, MeshManager& meshManager) {
 		TRACY_ZONE();
 
 		/* Update frame counter */
@@ -294,6 +293,44 @@ namespace neo {
 			if (!ImGuizmo::IsUsing()) {
 				mMouseRaySystem.update(mECS);
 				mSelectingSystem.update(mECS);
+		}
+		{
+			TRACY_ZONEN("Update line meshes");
+			for (auto& entity : mECS.getView<DebugBoundingBoxComponent>()) {
+				if (!mECS.has<LineMeshComponent>(entity)) {
+					auto box = mECS.getComponent<BoundingBoxComponent>(entity);
+					auto line = mECS.addComponent<LineMeshComponent>(entity, meshManager);
+
+					line->mUseParentSpatial = true;
+					line->mWriteDepth = true;
+					line->mOverrideColor = box->mStatic ? glm::vec3(1.f, 0.f, 0.f) : util::genRandomVec3(0.3f, 1.f);
+
+					glm::vec3 NearLeftBottom{ box->mMin };
+					glm::vec3 NearLeftTop{ box->mMin.x, box->mMax.y, box->mMin.z };
+					glm::vec3 NearRightBottom{ box->mMax.x, box->mMin.y, box->mMin.z };
+					glm::vec3 NearRightTop{ box->mMax.x, box->mMax.y, box->mMin.z };
+					glm::vec3 FarLeftBottom{ box->mMin.x, box->mMin.y,  box->mMax.z };
+					glm::vec3 FarLeftTop{ box->mMin.x, box->mMax.y,	 box->mMax.z };
+					glm::vec3 FarRightBottom{ box->mMax.x, box->mMin.y, box->mMax.z };
+					glm::vec3 FarRightTop{ box->mMax };
+
+					line->addNode(NearLeftBottom);
+					line->addNode(NearLeftTop);
+					line->addNode(NearRightTop);
+					line->addNode(NearRightBottom);
+					line->addNode(NearLeftBottom);
+					line->addNode(FarLeftBottom);
+					line->addNode(FarLeftTop);
+					line->addNode(NearLeftTop);
+					line->addNode(FarLeftTop);
+					line->addNode(FarRightTop);
+					line->addNode(NearRightTop);
+					line->addNode(FarRightTop);
+					line->addNode(FarRightBottom);
+					line->addNode(NearRightBottom);
+					line->addNode(FarRightBottom);
+					line->addNode(FarLeftBottom);
+				}
 			}
 		}
 	}

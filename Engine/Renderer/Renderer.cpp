@@ -166,7 +166,7 @@ namespace neo {
 		if (mShowBoundingBoxes) {
 			TRACY_GPUN("Debug Draws");
 			mDefaultFBO->bind();
-			drawLines<DebugBoundingBoxComponent>(ecs, std::get<0>(*ecs.getComponent<MainCameraComponent>()));
+			drawLines<DebugBoundingBoxComponent>(meshManager, ecs, std::get<0>(*ecs.getComponent<MainCameraComponent>()));
 		}
 		
 		/* Render imgui */
@@ -252,41 +252,6 @@ namespace neo {
 			mShowBoundingBoxes = !mShowBoundingBoxes;
 			if (mShowBoundingBoxes) {
 				for (auto boxEntity : ecs.getView<BoundingBoxComponent>()) {
-					auto box = ecs.getComponent<BoundingBoxComponent>(boxEntity);
-					auto line = ecs.getComponent<LineMeshComponent>(boxEntity);
-					if (!line) {
-						line = ecs.addComponent<LineMeshComponent>(boxEntity);
-
-						line->mUseParentSpatial = true;
-						line->mWriteDepth = true;
-						line->mOverrideColor = box->mStatic ? glm::vec3(1.f, 0.f, 0.f) : util::genRandomVec3(0.3f, 1.f);
-
-						glm::vec3 NearLeftBottom{ box->mMin };
-						glm::vec3 NearLeftTop{ box->mMin.x, box->mMax.y, box->mMin.z };
-						glm::vec3 NearRightBottom{ box->mMax.x, box->mMin.y, box->mMin.z };
-						glm::vec3 NearRightTop{ box->mMax.x, box->mMax.y, box->mMin.z };
-						glm::vec3 FarLeftBottom{ box->mMin.x, box->mMin.y,  box->mMax.z };
-						glm::vec3 FarLeftTop{ box->mMin.x, box->mMax.y,	 box->mMax.z };
-						glm::vec3 FarRightBottom{ box->mMax.x, box->mMin.y, box->mMax.z };
-						glm::vec3 FarRightTop{ box->mMax };
-
-						line->addNode(NearLeftBottom);
-						line->addNode(NearLeftTop);
-						line->addNode(NearRightTop);
-						line->addNode(NearRightBottom);
-						line->addNode(NearLeftBottom);
-						line->addNode(FarLeftBottom);
-						line->addNode(FarLeftTop);
-						line->addNode(NearLeftTop);
-						line->addNode(FarLeftTop);
-						line->addNode(FarRightTop);
-						line->addNode(NearRightTop);
-						line->addNode(FarRightTop);
-						line->addNode(FarRightBottom);
-						line->addNode(NearRightBottom);
-						line->addNode(FarRightBottom);
-						line->addNode(FarLeftBottom);
-					}
 					ecs.addComponent<DebugBoundingBoxComponent>(boxEntity);
 				}
 			}

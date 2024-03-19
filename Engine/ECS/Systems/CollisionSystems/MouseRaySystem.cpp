@@ -22,7 +22,7 @@ namespace neo {
 		auto mouseRayComponent = ecs.getComponent<MouseRayComponent>();
 		auto mouseComponent = ecs.getComponent<MouseComponent>();
 
-		// Early exist
+		// Early exit
 		if (!viewport.has_value() || !mouseComponent.has_value()) {
 			if (mouseRayComponent.has_value()) {
 				ecs.removeComponent<MouseRayComponent>(std::get<0>(mouseRayComponent.value()));

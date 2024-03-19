@@ -43,7 +43,7 @@ namespace neo {
 
 		private:
 			static ECS mECS;
-			static void _startFrame(util::Profiler& profiler);
+			static void _startFrame(util::Profiler& profiler, MeshManager& meshManager);
 			static void _endFrame();
 
 			static void _createPrefabs(MeshManager&);
