@@ -2,6 +2,7 @@
 
 #include "Renderer/Renderer.hpp"
 #include "Loader/Library.hpp"
+#include "ResourceManager/MeshResourceManager.hpp"
 #include "Util/Util.hpp"
 
 #include "ECS/ECS.hpp"
@@ -38,15 +39,15 @@ namespace neo {
 
 			static void init();
 			static void run(DemoWrangler&);
-			static void shutDown();
+			static void shutDown(MeshManager&);
 
 		private:
 			static ECS mECS;
 			static void _startFrame(util::Profiler& profiler);
 			static void _endFrame();
 
-			static void _createPrefabs();
-			static void _swapDemo(DemoWrangler&);
+			static void _createPrefabs(MeshManager&);
+			static void _swapDemo(DemoWrangler&, MeshManager&);
 
 			/* Hardware */
 			static WindowSurface mWindow;

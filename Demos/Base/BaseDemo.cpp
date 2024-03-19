@@ -41,7 +41,7 @@ namespace Base {
 		return config;
 	}
 
-	void Demo::init(ECS& ecs) {
+	void Demo::init(ECS& ecs, MeshManager& meshManager) {
 
 		/* Camera */
 		{
@@ -65,14 +65,13 @@ namespace Base {
 		/* Bunny object */
 		{
 			GLTFImporter::Scene gltfScene = Loader::loadGltfScene("bunny.gltf");
-			const auto& bunnyNode = gltfScene.mMeshNodes[0];
-
 			auto bunny = ecs.createEntity();
 			ecs.addComponent<TagComponent>(bunny, "Bunny");
 			ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 0.0f, 0.f), glm::vec3(1.5f));
 			ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-			ecs.addComponent<MeshComponent>(bunny, bunnyNode.mMesh);
-			ecs.addComponent<BoundingBoxComponent>(bunny, bunnyNode.mMesh->mMin, bunnyNode.mMesh->mMax);
+			ecs.addComponent<MeshComponent>(bunny, gltfScene.mMeshNodes[0].mMesh);
+			Mesh& bunnyMesh = meshManager.get(gltfScene.mMeshNodes[0].mMesh);
+			ecs.addComponent<BoundingBoxComponent>(bunny, bunnyMesh.mMin, bunnyMesh.mMax);
 			ecs.addComponent<PhongShaderComponent>(bunny);
 			ecs.addComponent<OpaqueComponent>(bunny);
 			auto material = ecs.addComponent<MaterialComponent>(bunny);
@@ -84,8 +83,8 @@ namespace Base {
 			auto plane = ecs.createEntity();
 			ecs.addComponent<TagComponent>(plane, "Grid");
 			ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
-			ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad"));
-			ecs.addComponent<BoundingBoxComponent>(plane, Library::getMesh("quad")->mMin, Library::getMesh("quad")->mMax, true);
+			ecs.addComponent<MeshComponent>(plane, meshManager.get("quad"));
+			ecs.addComponent<BoundingBoxComponent>(plane, meshManager.get("quad").mMin, meshManager.get("quad").mMax, true);
 			ecs.addComponent<PhongShaderComponent>(plane);
 			ecs.addComponent<AlphaTestComponent>(plane);
 			auto material = ecs.addComponent<MaterialComponent>(plane);
@@ -106,7 +105,7 @@ namespace Base {
 		NEO_UNUSED(ecs);
 	}
 
-	void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
@@ -125,12 +124,12 @@ namespace Base {
 
 		sceneTarget->clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawPhong<OpaqueComponent>(ecs, cameraEntity);
-		drawPhong<AlphaTestComponent>(ecs, cameraEntity);
+		drawPhong<OpaqueComponent>(meshManager, ecs, cameraEntity);
+		drawPhong<AlphaTestComponent>(meshManager, ecs, cameraEntity);
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color);
-		drawFXAA(glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0]);
+		drawFXAA(glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0], meshManager);
 	   // Don't forget the depth. Because reasons.
 	   glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
 		   0, 0, viewport.mSize.x, viewport.mSize.y,

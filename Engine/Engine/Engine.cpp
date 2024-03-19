@@ -113,12 +113,12 @@ namespace neo {
 			TracyAppInfo(buf, bytes);
 		}
 		TracyGpuContext;
-
 	}
 
 	void Engine::run(DemoWrangler& demos) {
 
 		util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale);
+		MeshManager meshManager;
 		demos.setForceReload();
 		
 		while (!mWindow.shouldClose()) {
@@ -129,7 +129,7 @@ namespace neo {
 				{
 					TRACY_ZONEN("Frame Update");
 					if (demos.needsReload()) {
-						_swapDemo(demos);
+						_swapDemo(demos, meshManager);
 					}
 
 					_startFrame(profiler);
@@ -174,7 +174,7 @@ namespace neo {
 				{
 					TRACY_ZONEN("Frame Render");
 					if (!mWindow.isMinimized()) {
-						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), mECS);
+						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), mECS, meshManager);
 					}
 					Messenger::relayMessages(mECS);
 				}
@@ -189,16 +189,17 @@ namespace neo {
 		}
 
 		demos.getCurrentDemo()->destroy();
-		shutDown();
+		shutDown(meshManager);
 	}
 
-	void Engine::_swapDemo(DemoWrangler& demos) {
+	void Engine::_swapDemo(DemoWrangler& demos, MeshManager& meshManager) {
 		TRACY_ZONE();
 
 		/* Destry the old state*/
 		demos.getCurrentDemo()->destroy();
 		mECS.clean();
 		Library::clean();
+		meshManager.clear();
 		ServiceLocator<Renderer>::ref().clean();
 		Messenger::clean();
 
@@ -212,9 +213,9 @@ namespace neo {
 		ServiceLocator<Renderer>::ref().setDemoConfig(config);
 		ServiceLocator<Renderer>::ref().init();
 		Loader::init(config.resDir, config.shaderDir);
-		_createPrefabs();
+		_createPrefabs(meshManager);
 
-		demos.getCurrentDemo()->init(mECS);
+		demos.getCurrentDemo()->init(mECS, meshManager);
 
 		/* Init systems */
 		mECS._initSystems();
@@ -224,11 +225,11 @@ namespace neo {
 		Messenger::relayMessages(mECS);
 	}
 
-	void Engine::_createPrefabs() {
+	void Engine::_createPrefabs(MeshManager& meshManager) {
 		/* Generate basic meshes */
-		Library::insertMesh(std::string("cube"), prefabs::generateCube());
-		Library::insertMesh(std::string("quad"), prefabs::generateQuad());
-		Library::insertMesh(std::string("sphere"), prefabs::generateSphere(2));
+		meshManager.load(HashedString("cube"), prefabs::generateCube());
+		meshManager.load(HashedString("quad"), prefabs::generateQuad());
+		meshManager.load(HashedString("sphere"), prefabs::generateSphere(2));
 
 		/* Generate basic textures*/
 		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
@@ -237,11 +238,12 @@ namespace neo {
 		Library::createTexture("white", {}, glm::u16vec3(1), data);
 	}
 
-	void Engine::shutDown() {
+	void Engine::shutDown(MeshManager& meshManager) {
 		NEO_LOG_I("Shutting down...");
 		mECS.clean();
 		Messenger::clean();
 		Library::clean();
+		meshManager.clear();
 		ServiceLocator<Renderer>::ref().clean();
 		ServiceLocator<Renderer>::reset();
 		ServiceLocator<ImGuiManager>::ref().destroy();

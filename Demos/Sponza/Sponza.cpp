@@ -86,7 +86,7 @@ namespace Sponza {
 		return config;
 	}
 
-	void Demo::init(ECS& ecs) {
+	void Demo::init(ECS& ecs, MeshManager& meshManager) {
 
 		/* Game objects */
 		Camera camera(ecs, 45.f, 0.1f, 35.f, glm::vec3(0, 0.6f, 5), 0.4f, 15.f);
@@ -121,7 +121,8 @@ namespace Sponza {
 			}
 			ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
 			ecs.addComponent<MeshComponent>(entity, node.mMesh);
-			ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh->mMin, node.mMesh->mMax);
+			const auto& mesh = meshManager.get(node.mMesh);
+			ecs.addComponent<BoundingBoxComponent>(entity, mesh.mMin, mesh.mMax);
 			if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 				ecs.addComponent<OpaqueComponent>(entity);
 			}
@@ -166,7 +167,7 @@ namespace Sponza {
 		}
 	}
 
-	void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) {
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		auto sceneTarget = Library::getPooledFramebuffer({ viewport.mSize, {
 			TextureFormat {
@@ -192,10 +193,10 @@ namespace Sponza {
 		}
 
 		if (mDeferredShading) {
-			_deferredShading(ecs, *sceneTarget, viewport.mSize, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
+			_deferredShading(meshManager, ecs, *sceneTarget, viewport.mSize, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
 		}
 		else {
-			_forwardShading(ecs, *sceneTarget, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
+			_forwardShading(meshManager, ecs, *sceneTarget, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
 		}
 
 		backbuffer.bind();
@@ -210,18 +211,18 @@ namespace Sponza {
 		);
 	}
 
-	void Demo::_forwardShading(const ECS& ecs, Framebuffer& sceneTarget, Texture* shadowMap) {
+	void Demo::_forwardShading(const MeshManager& meshManager, const ECS& ecs, Framebuffer& sceneTarget, Texture* shadowMap) {
 		TRACY_GPU();
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		sceneTarget.bind();
 		sceneTarget.clear(glm::vec4(getConfig().clearColor, 0.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
-		drawPhong<OpaqueComponent>(ecs, cameraEntity, shadowMap);
-		drawPhong<AlphaTestComponent>(ecs, cameraEntity, shadowMap);
+		drawPhong<OpaqueComponent>(meshManager, ecs, cameraEntity, shadowMap);
+		drawPhong<AlphaTestComponent>(meshManager, ecs, cameraEntity, shadowMap);
 	}
 
-	void Demo::_deferredShading(const ECS& ecs, Framebuffer& sceneTarget, glm::uvec2 targetSize, Texture* shadowMap) {
+	void Demo::_deferredShading(const MeshManager& meshManager, const ECS& ecs, Framebuffer& sceneTarget, glm::uvec2 targetSize, Texture* shadowMap) {
 		TRACY_GPU();
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		auto& gbuffer = createGBuffer(targetSize);
@@ -231,7 +232,7 @@ namespace Sponza {
 		drawGBuffer<OpaqueComponent>(ecs, cameraEntity, {});
 		drawGBuffer<AlphaTestComponent>(ecs, cameraEntity, {});
 
-		auto ao = mDrawAO ? drawAO(ecs, cameraEntity, gbuffer, targetSize, mAORadius, mAOBias) : nullptr;
+		auto ao = mDrawAO ? drawAO(ecs, meshManager, cameraEntity, gbuffer, targetSize, mAORadius, mAOBias) : nullptr;
 
 		auto lightResolve = Library::getPooledFramebuffer({ targetSize, {
 			TextureFormat {
@@ -268,7 +269,7 @@ namespace Sponza {
 				resolvedShader.bindTexture("aoOutput", *ao->mTextures[0]);
 			}
 
-			Library::getMesh("quad")->draw();
+			meshManager.get("quad").draw();
 
 			// Don't forget the depth. Because reasons.
 			glBlitNamedFramebuffer(gbuffer.mFBOID, sceneTarget.mFBOID,
