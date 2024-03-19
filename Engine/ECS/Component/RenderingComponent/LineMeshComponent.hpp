@@ -2,9 +2,9 @@
 
 #include "ECS/Component/Component.hpp"
 
-namespace neo {
+#include "ResourceManager/MeshResourceManager.hpp"
 
-	class Mesh;
+namespace neo {
 
 	struct LineMeshComponent : public Component {
 		// TODO - replace array of structs with struct of arrays hmmm
@@ -13,15 +13,16 @@ namespace neo {
 			glm::vec3 color;
 		};
 
+		MeshHandle mMeshHandle;
 		std::optional<glm::vec3> mOverrideColor;
 		std::vector<Node> mNodes;
 		bool mWriteDepth;
 		bool mUseParentSpatial;
 		mutable bool mDirty;
 
-		LineMeshComponent(std::optional<glm::vec3> overrideColor = std::nullopt);
+		LineMeshComponent(MeshManager& meshManager, std::optional<glm::vec3> overrideColor = std::nullopt);
+		~LineMeshComponent();
 
-		const Mesh& getMesh() const;
 		const std::vector<Node>& getNodes() const { return mNodes; }
 		virtual std::string getName() const override { return "LineMeshComponent"; }
 
@@ -33,7 +34,5 @@ namespace neo {
 		void clearNodes();
 
 		virtual void imGuiEditor() override;
-	private:
-		Mesh* mMesh;
 	};
 }

@@ -7,16 +7,16 @@
 
 namespace neo {
 
-	LineMeshComponent::LineMeshComponent(std::optional<glm::vec3> overrideColor) :
-		mMesh(new Mesh(types::mesh::Primitive::LineStrip)),
+	LineMeshComponent::LineMeshComponent(MeshManager& meshManager, std::optional<glm::vec3> overrideColor) :
 		mDirty(false),
 		mWriteDepth(true),
 		mUseParentSpatial(false),
 		mOverrideColor(overrideColor)
 	{
 
-		mMesh->addVertexBuffer(
-			types::mesh::VertexType::Position, 
+		MeshLoader::MeshBuilder builder;
+		builder.mPrimtive = types::mesh::Primitive::LineStrip;
+		builder.mVertexBuffers[types::mesh::VertexType::Position] = {
 			3,
 			0,
 			types::ByteFormats::Float,
@@ -25,9 +25,8 @@ namespace neo {
 			0,
 			3 * sizeof(float),
 			nullptr
-		);
-		mMesh->addVertexBuffer(
-			types::mesh::VertexType::Normal, 
+		};
+		builder.mVertexBuffers[types::mesh::VertexType::Normal] = {
 			3,
 			0,
 			types::ByteFormats::Float,
@@ -36,40 +35,15 @@ namespace neo {
 			0,
 			3 * sizeof(float),
 			nullptr
-		);
+		};
+
+		// Heh???
+		HashedString random(reinterpret_cast<const char*>(this));
+		mMeshHandle = meshManager.load(random, builder);
 	}
 
-	const Mesh& LineMeshComponent::getMesh() const {
-		if (mDirty && mNodes.size()) {
-			TRACY_ZONE();
-			std::vector<float> positions;
-			std::vector<float> colors;
-			positions.resize(mNodes.size() * 3);
-			colors.resize(mNodes.size() * 3);
-			for (uint32_t i = 0; i < mNodes.size(); i++) {
-				positions[i * 3 + 0] = mNodes[i].position.x;
-				positions[i * 3 + 1] = mNodes[i].position.y;
-				positions[i * 3 + 2] = mNodes[i].position.z;
-				colors[i * 3 + 0] = mNodes[i].color.r;
-				colors[i * 3 + 1] = mNodes[i].color.g;
-				colors[i * 3 + 2] = mNodes[i].color.b;
-			}
-			mMesh->updateVertexBuffer(
-				types::mesh::VertexType::Position, 
-				static_cast<uint32_t>(positions.size()),
-				static_cast<uint32_t>(positions.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(positions.data())
-			);
-			mMesh->updateVertexBuffer(
-				types::mesh::VertexType::Normal, 
-				static_cast<uint32_t>(colors.size()),
-				static_cast<uint32_t>(colors.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(colors.data())
-			);
-			mDirty = false;
-		}
-
-		return *mMesh;
+	LineMeshComponent::~LineMeshComponent() {
+		// mMesh->destroy();
 	}
 
 	void LineMeshComponent::addNode(const glm::vec3 pos, glm::vec3 col) {
