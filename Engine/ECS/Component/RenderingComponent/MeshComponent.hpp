@@ -2,13 +2,13 @@
 
 #include "ECS/Component/Component.hpp"
 
-namespace neo {
-	class Mesh;
+#include "ResourceManager/MeshResourceManager.hpp"
 
+namespace neo {
 	struct MeshComponent : public Component {
-		Mesh* mMesh;
-		MeshComponent(Mesh* mesh)
-			: mMesh(mesh)
+		MeshHandle mMeshHandle;
+		MeshComponent(MeshHandle mesh)
+			: mMeshHandle(mesh)
 		{}
 
 		virtual std::string getName() const override {

@@ -4,15 +4,15 @@
 #include "Loader.hpp"
 
 #include "Renderer/GLObjects/Framebuffer.hpp"
-#include "Renderer/GLObjects/Mesh.hpp"
 
 #include "Engine/ImGuiManager.hpp"
+
+#include "ResourceManager/MeshResourceManager.hpp"
 
 #include "Util/Profiler.hpp"
 
 namespace neo {
 	/* Library */
-	std::unordered_map<std::string, Mesh*> Library::mMeshes;
 	std::unordered_map<std::string, Texture*> Library::mTextures;
 	std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
 	std::unordered_map<neo::PooledFramebufferDetails, std::vector<Library::PooledFramebuffer>> Library::mPooledFramebuffers;
@@ -69,16 +69,6 @@ namespace neo {
 				it++;
 			}
 		}
-	}
-
-	Mesh* Library::getMesh(const std::string& name) {
-		auto it = mMeshes.find(name);
-		if (it != mMeshes.end()) {
-			return it->second;
-		}
-
-		NEO_FAIL("Mesh %s not found", name.c_str());
-		return {};
 	}
 
 	Texture* Library::getTexture(const std::string& name) {
@@ -233,12 +223,6 @@ namespace neo {
 		return it->second;
 	}
 
-	void Library::insertMesh(const std::string& name, Mesh* data) {
-		if (data) {
-			mMeshes.insert({ name, data });
-		}
-	}
-
 	void Library::insertTexture(const std::string& name, Texture* texture) {
 		if (texture) {
 			mTextures.insert({ name, texture });
@@ -248,10 +232,6 @@ namespace neo {
 	void Library::clean() {
 		NEO_LOG("Cleaning library...");
 		// Clean up GL objects
-		for (auto& meshData : mMeshes) {
-			meshData.second->destroy();
-		}
-		mMeshes.clear();
 		for (auto& texture : mTextures) {
 			texture.second->destroy();
 		}
@@ -329,12 +309,12 @@ namespace neo {
 			}
 			ImGui::TreePop();
 		}
-		if (ImGui::TreeNodeEx("Meshes", ImGuiTreeNodeFlags_DefaultOpen)) {
-			for (auto& m : Library::mMeshes) {
-				ImGui::TextWrapped("%s", m.first.c_str());
-			}
-			ImGui::TreePop();
-		}
+		// if (ImGui::TreeNodeEx("Meshes", ImGuiTreeNodeFlags_DefaultOpen)) {
+		// 	for (auto& m : Library::mMeshes) {
+		// 		ImGui::TextWrapped("%s", m.first.c_str());
+		// 	}
+		// 	ImGui::TreePop();
+		// }
 		if (ImGui::TreeNodeEx("Textures", ImGuiTreeNodeFlags_DefaultOpen)) {
 			for (auto& t : Library::mTextures) {
 				if (ImGui::TreeNode(t.first.c_str())) {

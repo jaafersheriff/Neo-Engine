@@ -51,7 +51,7 @@ namespace Cornell {
 		return config;
 	}
 
-	void Demo::init(ECS& ecs) {
+	void Demo::init(ECS& ecs, MeshManager& meshManager) {
 
 		/* Camera */
 		{
@@ -69,7 +69,7 @@ namespace Cornell {
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f - 1e-3, 1.0f), glm::vec3(0.25f), glm::vec3(glm::radians(90.f), 0.f, 0.f));
 			ecs.addComponent<MainLightComponent>(entity);
 			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f));
-			ecs.addComponent<MeshComponent>(entity, Library::getMesh("quad"));
+			ecs.addComponent<MeshComponent>(entity, HashedString("quad"));
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(1.f);
 			ecs.addComponent<PhongShaderComponent>(entity);

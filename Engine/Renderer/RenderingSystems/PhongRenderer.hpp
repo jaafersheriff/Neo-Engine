@@ -26,7 +26,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawPhong(const ECS& ecs, const ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const ShaderDefines& inDefines = {}) {
+	void drawPhong(const MeshManager& meshManager, const ECS& ecs, const ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
 		SourceShader* shader = Library::createSourceShader("Phong Shader", 
@@ -150,7 +150,7 @@ namespace neo {
 			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
 
-			view.get<const MeshComponent>(entity).mMesh->draw();
+			meshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
 
 		if (containsAlphaTest) {

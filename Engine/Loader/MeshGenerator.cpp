@@ -7,8 +7,8 @@ namespace neo {
 
 	namespace prefabs {
 
-		Mesh* generateCube() {
-			Mesh* mesh = new Mesh;
+		Mesh generateCube() {
+			Mesh mesh = Mesh();
 
 			std::vector<float> verts =
 			{ -0.5f, -0.5f, -0.5f,
@@ -35,7 +35,7 @@ namespace neo {
 			  0.5f, -0.5f,  0.5f,
 			  0.5f,  0.5f,  0.5f,
 			 -0.5f,  0.5f,  0.5f };
-			mesh->addVertexBuffer(
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Position, 
 				3, 
 				0, 
@@ -46,8 +46,8 @@ namespace neo {
 				static_cast<uint32_t>(verts.size() * sizeof(float)),
 				reinterpret_cast<uint8_t*>(verts.data())
 			);
-			mesh->mMin = glm::vec3(-0.5f);
-			mesh->mMax = glm::vec3(0.5f);
+			mesh.mMin = glm::vec3(-0.5f);
+			mesh.mMax = glm::vec3(0.5f);
 
 			std::vector<float> normals =
 			{ 0,  0, -1,
@@ -74,7 +74,7 @@ namespace neo {
 			  0,  0,  1,
 			  0,  0,  1,
 			  0,  0,  1 };
-			mesh->addVertexBuffer(
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Normal, 
 				3, 
 				0, 
@@ -116,7 +116,7 @@ namespace neo {
 				1.f, 0.f,
 				1.f, 1.f,
 				0.f, 1.f };
-			mesh->addVertexBuffer(
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Texture0, 
 				2, 
 				0, 
@@ -141,26 +141,26 @@ namespace neo {
 			 16, 18, 19,
 			 20, 21, 22,
 			 20, 22, 23 };
-			mesh->addElementBuffer(
+			mesh.addElementBuffer(
 				static_cast<uint32_t>(indices.size()),
 				types::ByteFormats::UnsignedInt,
 				static_cast<uint32_t>(indices.size() * sizeof(uint32_t)),
 				reinterpret_cast<uint8_t*>(indices.data())
 			);
 
-			mesh->mPrimitiveType = types::mesh::Primitive::Triangles;
+			mesh.mPrimitiveType = types::mesh::Primitive::Triangles;
 
 			return mesh;
 		}
 
-		Mesh* generateQuad() {
-			Mesh* mesh = new Mesh;
+		Mesh generateQuad() {
+			Mesh mesh = Mesh();
 			std::vector<float> verts =
 			{ -0.5f, -0.5f,  0.f,
 			   0.5f, -0.5f,  0.f,
 			  -0.5f,  0.5f,  0.f,
 			   0.5f,  0.5f,  0.f };
-			mesh->addVertexBuffer(
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Position, 
 				3, 
 				0, 
@@ -171,15 +171,15 @@ namespace neo {
 				static_cast<uint32_t>(verts.size() * sizeof(float)),
 				reinterpret_cast<uint8_t*>(verts.data())
 			);
-			mesh->mMin = glm::vec3(-0.5f, -0.5f, -0.1f);
-			mesh->mMax = glm::vec3(0.5f, 0.5f, 0.1f);
+			mesh.mMin = glm::vec3(-0.5f, -0.5f, -0.1f);
+			mesh.mMax = glm::vec3(0.5f, 0.5f, 0.1f);
 
 			std::vector<float> normals =
 			{ 0.f, 0.f, 1.f,
 			  0.f, 0.f, 1.f,
 			  0.f, 0.f, 1.f,
 			  0.f, 0.f, 1.f };
-			mesh->addVertexBuffer(
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Normal, 
 				3, 
 				0, 
@@ -196,7 +196,7 @@ namespace neo {
 			  1.f, 0.f,
 			  0.f, 1.f,
 			  1.f, 1.f };
-			mesh->addVertexBuffer(
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Texture0, 
 				2, 
 				0, 
@@ -211,21 +211,21 @@ namespace neo {
 			std::vector<uint32_t> indices =
 			{ 0, 1, 2,
 			  1, 3, 2 };
-			mesh->addElementBuffer(
+			mesh.addElementBuffer(
 				static_cast<uint32_t>(indices.size()),
 				types::ByteFormats::UnsignedInt,
 				static_cast<uint32_t>(indices.size() * sizeof(uint32_t)),
 				reinterpret_cast<uint8_t*>(indices.data())
 			);
 
-			mesh->mPrimitiveType = types::mesh::Primitive::Triangles;
+			mesh.mPrimitiveType = types::mesh::Primitive::Triangles;
 
 			return mesh;
 		}
 
 		// http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
-		Mesh* generateSphere(int recursions) {
-			Mesh* mesh = new Mesh;
+		Mesh generateSphere(int recursions) {
+			Mesh mesh = Mesh();
 
 			float t = (float)(1.f + (glm::sqrt(5.0)) / 2.f);
 			float length = glm::length(glm::vec3(1, 0, t));
@@ -243,8 +243,8 @@ namespace neo {
 				   -t / length,  0.f / length, -1.f / length,
 				   -t / length,  0.f / length,  1.f / length
 			};
-			mesh->mMin = glm::vec3(-t / length);
-			mesh->mMax = glm::vec3(t / length);
+			mesh.mMin = glm::vec3(-t / length);
+			mesh.mMax = glm::vec3(t / length);
 
 			std::vector<unsigned> ele = {
 				  0, 11,  5,
@@ -290,8 +290,8 @@ namespace neo {
 					verts.push_back(halfC.x);
 					verts.push_back(halfC.y);
 					verts.push_back(halfC.z);
-					mesh->mMin = glm::min(mesh->mMin, glm::min(halfA, glm::min(halfB, halfC)));
-					mesh->mMax = glm::max(mesh->mMax, glm::max(halfA, glm::max(halfB, halfC)));
+					mesh.mMin = glm::min(mesh.mMin, glm::min(halfA, glm::min(halfB, halfC)));
+					mesh.mMax = glm::max(mesh.mMax, glm::max(halfA, glm::max(halfB, halfC)));
 
 					// add indices of new faces 
 					uint32_t indA = static_cast<uint32_t>(verts.size()) / 3 - 3;
@@ -321,7 +321,7 @@ namespace neo {
 				tex.push_back(glm::clamp(0.5f + std::asin(verts[i + 1]) / util::PI, 0.f, 1.f));
 			}
 
-			mesh->addVertexBuffer(
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Position, 
 				3, 
 				0, 
@@ -332,7 +332,7 @@ namespace neo {
 				static_cast<uint32_t>(verts.size() * sizeof(float)),
 				reinterpret_cast<uint8_t*>(verts.data())
 			);
-			mesh->addVertexBuffer(
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Normal, 
 				3, 
 				0, 
@@ -344,7 +344,7 @@ namespace neo {
 				reinterpret_cast<uint8_t*>(verts.data())
 			);
 
-			mesh->addVertexBuffer(
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Texture0, 
 				2, 
 				0, 
@@ -355,24 +355,24 @@ namespace neo {
 				static_cast<uint32_t>(tex.size() * sizeof(float)),
 				reinterpret_cast<uint8_t*>(tex.data())
 			);
-			mesh->addElementBuffer(
+			mesh.addElementBuffer(
 				static_cast<uint32_t>(ele.size()),
 				types::ByteFormats::UnsignedInt,
 				static_cast<uint32_t>(ele.size() * sizeof(uint32_t)),
 				reinterpret_cast<uint8_t*>(ele.data())
 			);
 
-			mesh->mPrimitiveType = types::mesh::Primitive::Triangles;
+			mesh.mPrimitiveType = types::mesh::Primitive::Triangles;
 
 			return mesh;
 		}
 
-		Mesh* generatePlane(float h, int VERTEX_COUNT, int numOctaves) {
+		Mesh generatePlane(float h, int VERTEX_COUNT, int numOctaves) {
 			siv::PerlinNoise noise(rand());
 
-			Mesh* mesh = new Mesh;
-			mesh->mMin = glm::vec3(FLT_MAX);
-			mesh->mMax = glm::vec3(FLT_MIN);
+			Mesh mesh = Mesh();
+			mesh.mMin = glm::vec3(FLT_MAX);
+			mesh.mMax = glm::vec3(FLT_MIN);
 
 			int count = VERTEX_COUNT * VERTEX_COUNT;
 
@@ -425,8 +425,8 @@ namespace neo {
 					textureCoords[vertexPointer * 2] = (float)j / ((float)VERTEX_COUNT - 1);
 					textureCoords[vertexPointer * 2 + 1] = (float)i / ((float)VERTEX_COUNT - 1);
 
-					mesh->mMin = glm::min(mesh->mMin, vert);
-					mesh->mMax = glm::max(mesh->mMax, vert);
+					mesh.mMin = glm::min(mesh.mMin, vert);
+					mesh.mMax = glm::max(mesh.mMax, vert);
 					vertexPointer++;
 				}
 			}
@@ -448,7 +448,7 @@ namespace neo {
 				}
 			}
 
-			mesh->addVertexBuffer(
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Position, 
 				3, 
 				0, 
@@ -459,7 +459,7 @@ namespace neo {
 				static_cast<uint32_t>(vertices.size() * sizeof(float)),
 				reinterpret_cast<uint8_t*>(vertices.data())
 			);
-			mesh->addVertexBuffer(
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Normal, 
 				3, 
 				0, 
@@ -471,7 +471,7 @@ namespace neo {
 				reinterpret_cast<uint8_t*>(normals.data())
 			);
 
-			mesh->addVertexBuffer(
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Texture0, 
 				2, 
 				0, 
@@ -482,7 +482,7 @@ namespace neo {
 				static_cast<uint32_t>(textureCoords.size() * sizeof(float)),
 				reinterpret_cast<uint8_t*>(textureCoords.data())
 			);
-			mesh->addElementBuffer(
+			mesh.addElementBuffer(
 				static_cast<uint32_t>(indices.size()),
 				types::ByteFormats::UnsignedInt,
 				static_cast<uint32_t>(indices.size() * sizeof(uint32_t)),
@@ -490,7 +490,7 @@ namespace neo {
 			);
 
 
-			mesh->mPrimitiveType = types::mesh::Primitive::Triangles;
+			mesh.mPrimitiveType = types::mesh::Primitive::Triangles;
 
 			return mesh;
 		}

@@ -254,7 +254,7 @@ namespace {
 		return neo_texture;
 	}
 
-	void _processNode(const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene) {
+	void _processNode(neo::MeshManager& meshManager, const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene) {
 		using namespace neo;
 		if (node.camera != -1 || node.light != -1) {
 			return;
@@ -282,7 +282,7 @@ namespace {
 		nodeSpatial.setModelMatrix(parentXform * localTransform);
 
 		for (auto& child : node.children) {
-			_processNode(model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);
+			_processNode(meshManager, model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);
 		}
 
 		// Mesh
@@ -304,8 +304,8 @@ namespace {
 			outNode.mName = node.name + std::to_string(i);
 			outNode.mSpatial = nodeSpatial;
 
-			outNode.mMesh = new Mesh;
-			outNode.mMesh->mPrimitiveType = _translateTinyGltfPrimitiveType(gltfMesh.mode);
+			Mesh mesh = Mesh();
+			mesh.mPrimitiveType = _translateTinyGltfPrimitiveType(gltfMesh.mode);
 
 			// Indices
 			if (gltfMesh.indices > -1)
@@ -318,7 +318,7 @@ namespace {
 
 				const auto& buffer = model.buffers[bufferView.buffer];
 
-				outNode.mMesh->addElementBuffer(
+				mesh.addElementBuffer(
 					static_cast<uint32_t>(accessor.count),
 					_translateTinyGltfComponentType(accessor.componentType),
 					static_cast<uint32_t>(bufferView.byteLength),
@@ -334,10 +334,10 @@ namespace {
 				types::mesh::VertexType vertexType = types::mesh::VertexType::Position;
 				if (attribute.first == "POSITION") {
 					if (accessor.maxValues.size() == 3) {
-						outNode.mMesh->mMax = glm::vec3(accessor.maxValues[0], accessor.maxValues[1], accessor.maxValues[2]);
+						mesh.mMax = glm::vec3(accessor.maxValues[0], accessor.maxValues[1], accessor.maxValues[2]);
 					}
 					if (accessor.minValues.size() == 3) {
-						outNode.mMesh->mMin = glm::vec3(accessor.minValues[0], accessor.minValues[1], accessor.minValues[2]);
+						mesh.mMin = glm::vec3(accessor.minValues[0], accessor.minValues[1], accessor.minValues[2]);
 					}
 				}
 				else if (attribute.first == "NORMAL") {
@@ -362,7 +362,7 @@ namespace {
 				const auto& buffer = model.buffers[bufferView.buffer];
 
 				// TODO : this is duplicating vertex data. Would be better to split glBufferData from glVertexAttribPointer
-				outNode.mMesh->addVertexBuffer(
+				mesh.addVertexBuffer(
 					vertexType,
 					tinygltf::GetNumComponentsInType(accessor.type),
 					accessor.ByteStride(bufferView),
@@ -374,9 +374,10 @@ namespace {
 					static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset
 				);
 			}
+			outNode.mMesh = meshManager.load(":(", mesh);
 			if (!model.meshes[node.mesh].name.empty()) {
 				NEO_LOG_I("Loaded mesh %s", model.meshes[node.mesh].name.c_str());
-				Library::insertMesh(model.meshes[node.mesh].name + std::to_string(i), outNode.mMesh);
+				// Library::insertMesh(model.meshes[node.mesh].name + std::to_string(i), outNode.mMesh);
 			}
 
 			if (gltfMesh.material > -1) {
@@ -440,7 +441,7 @@ namespace {
 namespace neo {
 	namespace GLTFImporter {
 
-		Scene loadScene(const std::string& path, glm::mat4 baseTransform) {
+		Scene loadScene(const std::string& path, glm::mat4 baseTransform, MeshManager& meshManager) {
 			NEO_ASSERT(path.length() > 4 && path.substr(path.length() - 4, 4) == "gltf", "Unsupported file type");
 
 			tinygltf::Model model;
@@ -479,7 +480,7 @@ namespace neo {
 			Scene outScene;
 			for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
 				const auto& node = model.nodes[nodeID];
-				_processNode(model, node, baseTransform, outScene);
+				_processNode(meshManager, model, node, baseTransform, outScene);
 			}
 
 			NEO_LOG_I("Successfully parsed %s", path.c_str());

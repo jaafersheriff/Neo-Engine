@@ -7,9 +7,10 @@ namespace neo {
 
 	namespace prefabs {
 
-		Mesh* generateCube();
-		Mesh* generateQuad();
-		Mesh* generateSphere(int recursions);
-		Mesh* generatePlane(float h, int VERTEX_COUNT, int numOctaves);
+		// Maybe these shoudl accept the resource manager so they can direclty load
+		Mesh generateCube();
+		Mesh generateQuad();
+		Mesh generateSphere(int recursions);
+		Mesh generatePlane(float h, int VERTEX_COUNT, int numOctaves);
 	}
 }

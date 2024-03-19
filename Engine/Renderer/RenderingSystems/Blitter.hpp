@@ -8,10 +8,11 @@
 
 #include "Loader/Library.hpp"
 #include "Loader/Loader.hpp"
+#include "ResourceManager/MeshResourceManager.hpp"
 
 namespace neo {
 
-	static void blit(Framebuffer& outputFBO, Texture& inputTexture, glm::uvec2 viewport, glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f)) {
+	static void blit(MeshManager& meshManager, Framebuffer& outputFBO, Texture& inputTexture, glm::uvec2 viewport, glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f)) {
 		TRACY_GPU();
 
 		// Where are these const chars in memory..are they being created and passed on each call?
@@ -51,7 +52,7 @@ namespace neo {
 		resolvedBlit.bindTexture("inputTexture", inputTexture);
 		
 		// Render 
-		Library::getMesh("quad")->draw();
+		meshManager.get("quad").draw();
 
 		glEnable(GL_DEPTH_TEST);
 	}

@@ -4,6 +4,7 @@
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 
 #include "Loader.hpp"
+#include "ResourceManager/MeshResourceManager.hpp"
 
 #include <string>
 #include <vector>
@@ -20,7 +21,7 @@ namespace neo {
 
 			std::string mName = "";
 
-			Mesh* mMesh;
+			MeshHandle mMesh;
 
 			SpatialComponent mSpatial = {};
 

@@ -19,14 +19,14 @@ namespace Compute {
 	class ParticleMeshComponent : public Component {
 
 	public:
-		Mesh* mMesh;
+		MeshHandle mMesh;
 		int mNumParticles = 98304;
 		float timeScale = 100.f;
 
-		ParticleMeshComponent() {
-			mMesh = new Mesh;
-			mMesh->mPrimitiveType = types::mesh::Primitive::Points;
-			mMesh->addVertexBuffer(
+		ParticleMeshComponent(MeshManager& meshManager) {
+			Mesh mesh = Mesh();
+			mesh.mPrimitiveType = types::mesh::Primitive::Points;
+			mesh.addVertexBuffer(
 				types::mesh::VertexType::Position,
 				4,
 				0,
@@ -39,7 +39,7 @@ namespace Compute {
 			);
 
 			updateBuffers();
-			Library::insertMesh("Particles", mMesh);
+			mMesh = meshManager.load("Particles", mesh);
 		}
 
 		virtual void imGuiEditor() override {
@@ -52,7 +52,7 @@ namespace Compute {
 			ImGui::SliderFloat("Time scale", &timeScale, 0.f, 1000.f);
 		}
 
-		void updateBuffers() {
+		void updateBuffers(MeshManager& mesManager) {
 			TRACY_GPUN("ParticleMeshComponent::updateBuffers");
 			std::vector<float> positions;
 			positions.resize(mNumParticles * 4);

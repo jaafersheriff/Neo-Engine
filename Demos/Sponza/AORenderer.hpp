@@ -10,6 +10,7 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "Loader/Library.hpp"
+#include "ResourceManager/MeshResourceManager.hpp"
 
 #include "Util/Util.hpp"
 
@@ -75,7 +76,7 @@ namespace Sponza {
 		}
 	}
 
-	 Framebuffer* drawAO(const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
+	 Framebuffer* drawAO(const ECS& ecs, MeshManager& meshManager, ECS::Entity cameraEntity, Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
 		TRACY_GPU();
 		if (!Library::hasTexture("aoKernel")) {
 			_generateKernel(8);
@@ -129,7 +130,7 @@ namespace Sponza {
 			resolvedShader.bindUniform("P", P);
 			resolvedShader.bindUniform("invP", glm::inverse(P));
 
-			Library::getMesh("quad")->draw();
+			meshManager.get("quad").mMesh.draw();
 		}
 
 		{
@@ -164,7 +165,7 @@ namespace Sponza {
 			resolvedShader.bindTexture("inputAO", *baseAOTarget->mTextures[0]);
 			resolvedShader.bindUniform("blurAmount", 2);
 
-			Library::getMesh("quad")->draw();
+			meshManager.get("quad").mMesh.draw();
 			return blurredAO;
 		}
 	}
