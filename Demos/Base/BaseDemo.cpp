@@ -83,7 +83,7 @@ namespace Base {
 			auto plane = ecs.createEntity();
 			ecs.addComponent<TagComponent>(plane, "Grid");
 			ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
-			ecs.addComponent<MeshComponent>(plane, meshManager.get("quad"));
+			ecs.addComponent<MeshComponent>(plane, HashedString("quad"));
 			ecs.addComponent<BoundingBoxComponent>(plane, meshManager.get("quad").mMin, meshManager.get("quad").mMax, true);
 			ecs.addComponent<PhongShaderComponent>(plane);
 			ecs.addComponent<AlphaTestComponent>(plane);
@@ -101,8 +101,8 @@ namespace Base {
 		NEO_UNUSED(ecs);
 	}
 
-	void Demo::update(ECS& ecs) {
-		NEO_UNUSED(ecs);
+	void Demo::update(ECS& ecs, MeshManager& meshManager) {
+		NEO_UNUSED(ecs, meshManager);
 	}
 
 	void Demo::render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) {

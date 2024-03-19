@@ -141,7 +141,7 @@ namespace neo {
 
 					{
 						TRACY_ZONEN("Demo::update");
-						demos.getCurrentDemo()->update(mECS);
+						demos.getCurrentDemo()->update(mECS, meshManager);
 					}
 
 					/* Update each system */

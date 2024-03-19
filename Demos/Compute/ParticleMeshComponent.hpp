@@ -19,9 +19,10 @@ namespace Compute {
 	class ParticleMeshComponent : public Component {
 
 	public:
-		MeshHandle mMesh;
+		MeshHandle mMeshHandle;
 		int mNumParticles = 98304;
 		float timeScale = 100.f;
+		bool isDirty = true;
 
 		ParticleMeshComponent(MeshManager& meshManager) {
 			Mesh mesh = Mesh();
@@ -38,37 +39,14 @@ namespace Compute {
 				nullptr
 			);
 
-			updateBuffers();
-			mMesh = meshManager.load("Particles", mesh);
+			isDirty = true;
+			mMeshHandle = meshManager.load("Particles", mesh);
 		}
 
 		virtual void imGuiEditor() override {
-			if (ImGui::DragInt("#Verts", &mNumParticles, 1.f, ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.x, 1572864)) {
-				updateBuffers();
-			}
-			if (ImGui::Button("Reset")) {
-				updateBuffers();
-			}
+			isDirty = ImGui::DragInt("#Verts", &mNumParticles, 1.f, ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.x, 1572864);
+			isDirty = ImGui::Button("Reset");
 			ImGui::SliderFloat("Time scale", &timeScale, 0.f, 1000.f);
-		}
-
-		void updateBuffers(MeshManager& mesManager) {
-			TRACY_GPUN("ParticleMeshComponent::updateBuffers");
-			std::vector<float> positions;
-			positions.resize(mNumParticles * 4);
-			for (int i = 0; i < mNumParticles; i++) {
-				glm::vec3 pos = glm::normalize(util::genRandomVec3(-1.f, 1.f));
-				positions[i * 4 + 0] = pos.x;
-				positions[i * 4 + 1] = pos.y;
-				positions[i * 4 + 2] = pos.z;
-				positions[i * 4 + 3] = 1.f; // TODO - this is useless and costs perf. Get rid of it
-			}
-			mMesh->updateVertexBuffer(
-				types::mesh::VertexType::Position, 
-				static_cast<uint32_t>(positions.size()),
-				static_cast<uint32_t>(positions.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(positions.data())
-			);
 		}
 
 		virtual std::string getName() const override {
