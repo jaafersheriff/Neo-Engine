@@ -21,6 +21,7 @@ namespace neo {
 
 			std::string mName = "";
 
+			// TODO -rename to meshhandle
 			MeshHandle mMesh;
 
 			SpatialComponent mSpatial = {};
@@ -33,6 +34,6 @@ namespace neo {
 			std::vector<Node> mMeshNodes;
 		};
 
-		Scene loadScene(const std::string& fileName, glm::mat4 baseTransform);
+		Scene loadScene(const std::string& fileName, glm::mat4 baseTransform, MeshManager& meshManager);
 	}
 }
