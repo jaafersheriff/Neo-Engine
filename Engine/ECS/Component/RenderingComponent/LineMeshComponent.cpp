@@ -14,7 +14,7 @@ namespace neo {
 		mOverrideColor(overrideColor)
 	{
 
-		MeshLoader::MeshBuilder builder;
+		MeshManager::MeshBuilder builder;
 		builder.mPrimtive = types::mesh::Primitive::LineStrip;
 		builder.mVertexBuffers[types::mesh::VertexType::Position] = {
 			3,

@@ -10,7 +10,9 @@
 
 namespace neo {
 
-	struct MeshLoader final: entt::resource_loader<MeshLoader, Mesh> {
+	using MeshHandle = entt::id_type;
+	class MeshManager {
+	public:
 		struct MeshBuilder {
 			types::mesh::Primitive mPrimtive;
 			struct VertexBuffer {
@@ -35,91 +37,16 @@ namespace neo {
 			glm::vec3 mMax = glm::vec3(0.f);
 		};
 
-		std::shared_ptr<Mesh> load(MeshBuilder meshDetails) const {
-			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meshDetails.mPrimtive);
-			mesh->init();
-			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
-				mesh->addVertexBuffer(
-					type,
-					buffer.components,
-					buffer.stride,
-					buffer.format,
-					buffer.normalized,
-					buffer.count,
-					buffer.offset,
-					buffer.byteSize,
-					buffer.data
-				);
-			}
-			if (meshDetails.mElementBuffer) {
-				mesh->addElementBuffer(
-					meshDetails.mElementBuffer->count,
-					meshDetails.mElementBuffer->format,
-					meshDetails.mElementBuffer->byteSize,
-					meshDetails.mElementBuffer->data
-				);
-			}
-			mesh->mMin = meshDetails.mMin;
-			mesh->mMax = meshDetails.mMax;
-			return mesh;
-		}
-	};
+		using MeshCache = entt::resource_cache<Mesh>;
+		MeshCache mMeshCache;
 
-	using MeshCache = entt::resource_cache<Mesh>;
-	using MeshHandle = entt::id_type;
-	class MeshManager {
-	public:
-		MeshCache meshCache;
+		Mesh& get(HashedString id);
+		const Mesh& get(HashedString id) const;
+		Mesh& get(MeshHandle id);
+		const Mesh& get(MeshHandle id) const;
 
-		Mesh& get(HashedString id) {
-			if (meshCache.contains(id)) {
-				return meshCache.handle(id).get();
-			}
-			NEO_LOG_E("Invalid mesh %s requested", id.data());
-			return meshCache.handle(HashedString("cube")).get();
-		}
+		[[nodiscard]] MeshHandle load(HashedString id, MeshBuilder meshDetails);
 
-		const Mesh& get(HashedString id) const {
-			if (meshCache.contains(id)) {
-				return meshCache.handle(id).get();
-			}
-			NEO_LOG_E("Invalid mesh %s requested", id.data());
-			return meshCache.handle(HashedString("cube")).get();
-		}
-
-		Mesh& get(MeshHandle id) {
-			if (meshCache.contains(id)) {
-				return meshCache.handle(id).get();
-			}
-			NEO_LOG_E("Invalid mesh requested");
-			return meshCache.handle(HashedString("cube")).get();
-		}
-
-		const Mesh& get(MeshHandle id) const {
-			if (meshCache.contains(id)) {
-				return meshCache.handle(id).get();
-			}
-			NEO_LOG_E("Invalid mesh requested");
-			return meshCache.handle(HashedString("cube")).get();
-		}
-
-		[[nodiscard]] MeshHandle load(HashedString id, MeshLoader::MeshBuilder meshDetails) {
-			meshCache.load<MeshLoader>(id, meshDetails);
-			return id;
-		}
-
-		void clear() {
-			meshCache.each([](Mesh& mesh) {
-				mesh.destroy();
-			});
-			meshCache.clear();
-		}
-		void imguiEditor() {
-			meshCache.each([](const entt::id_type id) {
-				NEO_UNUSED(id);
-				// ImGuiText
-			});
-		}
-	private:
+		void clear();
 	};
 }

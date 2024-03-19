@@ -304,7 +304,7 @@ namespace {
 			outNode.mName = node.name + std::to_string(i);
 			outNode.mSpatial = nodeSpatial;
 
-			MeshLoader::MeshBuilder builder;
+			MeshManager::MeshBuilder builder;
 			builder.mPrimtive = _translateTinyGltfPrimitiveType(gltfMesh.mode);
 
 			// Indices
