@@ -8,7 +8,7 @@ namespace neo {
 	namespace prefabs {
 
 		void generateCube(HashedString id, MeshManager& meshManager) {
-			MeshLoader::MeshBuilder builder;
+			MeshManager::MeshBuilder builder;
 
 			std::vector<float> verts =
 			{ -0.5f, -0.5f, -0.5f,
@@ -152,7 +152,7 @@ namespace neo {
 		}
 
 		void generateQuad(HashedString id, MeshManager& meshManager) {
-			MeshLoader::MeshBuilder builder;
+			MeshManager::MeshBuilder builder;
 
 			std::vector<float> verts =
 			{ -0.5f, -0.5f,  0.f,
@@ -222,7 +222,7 @@ namespace neo {
 
 		// http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
 		void generateSphere(HashedString id, MeshManager& meshManager, int recursions) {
-			MeshLoader::MeshBuilder builder;
+			MeshManager::MeshBuilder builder;
 
 			float t = (float)(1.f + (glm::sqrt(5.0)) / 2.f);
 			float length = glm::length(glm::vec3(1, 0, t));
