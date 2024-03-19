@@ -64,7 +64,7 @@ namespace Base {
 
 		/* Bunny object */
 		{
-			GLTFImporter::Scene gltfScene = Loader::loadGltfScene("bunny.gltf");
+			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(meshManager, "bunny.gltf");
 			auto bunny = ecs.createEntity();
 			ecs.addComponent<TagComponent>(bunny, "Bunny");
 			ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 0.0f, 0.f), glm::vec3(1.5f));

@@ -113,7 +113,7 @@ namespace Sponza {
 			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
 		}
 
-		GLTFImporter::Scene scene = Loader::loadGltfScene("Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
+		GLTFImporter::Scene scene = Loader::loadGltfScene(meshManager, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
 		for (auto& node : scene.mMeshNodes) {
 			auto entity = ecs.createEntity();
 			if (!node.mName.empty()) {
