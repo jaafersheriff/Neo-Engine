@@ -1,19 +1,9 @@
 #pragma once
 
-#include "ShaderComponent.hpp"
-
-#include "Loader/Library.hpp"
+#include "ECS/Component/Component.hpp"
 
 namespace neo {
-
-	struct ShadowCasterShaderComponent : public ShaderComponent {
-		ShadowCasterShaderComponent() : ShaderComponent({
-			Library::createSourceShader("ShadowCasterShader", SourceShader::ConstructionArgs{
-				{ ShaderStage::VERTEX, "model.vert"},
-				{ ShaderStage::FRAGMENT, "depth.frag" }
-			})
-		})
-		{}
+	struct ShadowCasterShaderComponent : public Component {
 
 		virtual std::string getName() const override {
 			return "ShadowCasterShaderComponent";

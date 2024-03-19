@@ -3,6 +3,7 @@
 #include "GL/glew.h"
 
 #include <optional>
+#include <vector>
 
 namespace neo {
 

@@ -1,22 +1,13 @@
 #pragma once
 
-#include "ECS/Component/RenderingComponent/ShaderComponent.hpp"
-
-#include "Loader/Library.hpp"
+#include "ECS/Component/Component.hpp"
 
 using namespace neo;
 
 namespace Sponza {
 
-	struct GBufferShaderComponent : public ShaderComponent {
-		GBufferShaderComponent() : ShaderComponent({
-			Library::createSourceShader("GBufferShader", SourceShader::ConstructionArgs{
-				{ ShaderStage::VERTEX, "sponza/gbuffer.vert"},
-				{ ShaderStage::FRAGMENT, "sponza/gbuffer.frag" }
-			})
-			})
-		{}
-	
+	struct GBufferShaderComponent : public Component {
+
 		virtual std::string getName() const override {
 			return "GBufferShaderComponent";
 		}

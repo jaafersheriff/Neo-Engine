@@ -21,6 +21,8 @@
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
+#include "Loader/Library.hpp"
+
 namespace Sponza {
 
 	Framebuffer& createGBuffer(glm::uvec2 targetSize) {
@@ -52,6 +54,12 @@ namespace Sponza {
 	template<typename... CompTs>
 	void drawGBuffer(const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
+
+		SourceShader* shader = Library::createSourceShader("GBuffer Shader", SourceShader::ConstructionArgs{
+			{ ShaderStage::VERTEX, "sponza/gbuffer.vert"},
+			{ ShaderStage::FRAGMENT, "sponza/gbuffer.frag" }
+		});
+
 
 		ShaderDefines passDefines(inDefines);
 		bool containsAlphaTest = false;
@@ -100,7 +108,7 @@ namespace Sponza {
 				drawDefines.set(NORMAL_MAP);
 			}
 
-			auto& resolvedShader = view.get<const GBufferShaderComponent>(entity).getResolvedInstance(drawDefines);
+			auto& resolvedShader = shader->getResolvedInstance(drawDefines);
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);

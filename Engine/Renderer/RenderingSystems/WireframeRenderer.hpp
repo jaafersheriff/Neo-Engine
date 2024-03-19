@@ -13,6 +13,12 @@ namespace neo {
 	void drawWireframe(const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
+		SourceShader* shader = Library::createSourceShader("Wireframe Shader", SourceShader::ConstructionArgs{
+			{ ShaderStage::VERTEX, "model.vert"},
+			{ ShaderStage::FRAGMENT, "color.frag" }
+		});
+
+
 		glDisable(GL_CULL_FACE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -25,7 +31,7 @@ namespace neo {
 				}
 			}
 
-			auto resolvedShader = view.get<const WireframeShaderComponent>(entity).getResolvedInstance(inDefines);
+			auto resolvedShader = shader->getResolvedInstance(inDefines);
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());

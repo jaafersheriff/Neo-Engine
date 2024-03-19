@@ -12,6 +12,11 @@ namespace neo {
 	void drawShadows(Framebuffer& depthMap, const ECS& ecs) {
 		TRACY_GPU();
 
+		SourceShader* shader = Library::createSourceShader("ShadowMap Shader", SourceShader::ConstructionArgs{
+			{ ShaderStage::VERTEX, "model.vert"},
+			{ ShaderStage::FRAGMENT, "depth.frag" }
+		});
+
 		depthMap.disableDraw();
 		glViewport(0, 0, depthMap.mTextures[0]->mWidth, depthMap.mTextures[0]->mHeight);
 		{
@@ -52,7 +57,7 @@ namespace neo {
 				alphaMap = material->mAlbedoMap;
 			}
 
-			auto& resolvedShader = view.get<const ShadowCasterShaderComponent>(entity).getResolvedInstance(passDefines);
+			auto& resolvedShader = shader->getResolvedInstance(passDefines);
 			resolvedShader.bind();
 
 			// TODO - handle the case where there's no alpha map a bit better

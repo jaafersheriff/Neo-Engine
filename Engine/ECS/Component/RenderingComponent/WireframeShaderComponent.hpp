@@ -1,22 +1,15 @@
 #pragma once
 
-#include "ShaderComponent.hpp"
-
-#include "Loader/Library.hpp"
+#include "ECS/Component/Component.hpp"
 
 #include <imgui.h>
 
 namespace neo {
-	struct WireframeShaderComponent : public ShaderComponent {
+	struct WireframeShaderComponent : public Component {
 		glm::vec3 mColor = glm::vec3(1.f);
 
 		WireframeShaderComponent(glm::vec3 color = glm::vec3(1.f)) 
-			: ShaderComponent({
-				Library::createSourceShader("WireframeShader", SourceShader::ConstructionArgs{
-					{ ShaderStage::VERTEX, "model.vert"},
-					{ ShaderStage::FRAGMENT, "color.frag" }
-				})
-			})
+			: Component()
 			, mColor(color)
 		{}
 

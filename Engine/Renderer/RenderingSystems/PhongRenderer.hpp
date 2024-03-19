@@ -29,6 +29,13 @@ namespace neo {
 	void drawPhong(const ECS& ecs, const ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
+		SourceShader* shader = Library::createSourceShader("Phong Shader", 
+			SourceShader::ConstructionArgs{
+				{ ShaderStage::VERTEX, "model.vert"},
+				{ ShaderStage::FRAGMENT, "phong.frag" }
+			}
+		);
+
 		ShaderDefines passDefines(inDefines);
 		bool containsAlphaTest = false;
 		MakeDefine(ALPHA_TEST);
@@ -108,7 +115,7 @@ namespace neo {
 				drawDefines.set(NORMAL_MAP);
 			}
 
-			auto& resolvedShader = view.get<const PhongShaderComponent>(entity).getResolvedInstance(drawDefines);
+			auto& resolvedShader = shader->getResolvedInstance(drawDefines);
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "ShaderComponent.hpp"
-
-#include "Loader/Library.hpp"
+#include "ECS/Component/Component.hpp"
 
 namespace neo {
 	struct SkyboxComponent : public Component {
