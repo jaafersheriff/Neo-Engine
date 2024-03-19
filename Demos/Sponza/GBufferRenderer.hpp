@@ -52,7 +52,7 @@ namespace Sponza {
 	}
 
 	template<typename... CompTs>
-	void drawGBuffer(const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
+	void drawGBuffer(const MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
 		SourceShader* shader = Library::createSourceShader("GBuffer Shader", SourceShader::ConstructionArgs{
@@ -130,7 +130,7 @@ namespace Sponza {
 			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
 
-			view.get<const MeshComponent>(entity).mMesh->draw();
+			meshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
 
 		if (containsAlphaTest) {

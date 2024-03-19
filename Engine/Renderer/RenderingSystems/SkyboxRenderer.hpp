@@ -15,7 +15,7 @@
 
 namespace neo {
 
-	void drawSkybox(const ECS& ecs, ECS::Entity cameraEntity) {
+	void drawSkybox(MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity) {
 		TRACY_GPU();
 
 		auto* skyboxShader = Library::createSourceShader("SkyboxShader", SourceShader::ShaderCode{
@@ -59,7 +59,7 @@ namespace neo {
 		resolvedShader.bindTexture("cubeMap", *std::get<1>(*skybox).mSkybox);
 
 		/* Draw */
-		Library::getMesh("cube")->draw();
+		meshManager.get(HashedString("cube")).draw();
 
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);

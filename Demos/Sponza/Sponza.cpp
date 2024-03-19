@@ -188,8 +188,8 @@ namespace Sponza {
 		} }, "Shadow map");
 		if (mDrawShadows) {
 			shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Depth);
-			drawShadows<OpaqueComponent>(*shadowMap, ecs);
-			drawShadows<AlphaTestComponent>(*shadowMap, ecs);
+			drawShadows<OpaqueComponent>(meshManager, *shadowMap, ecs);
+			drawShadows<AlphaTestComponent>(meshManager, *shadowMap, ecs);
 		}
 
 		if (mDeferredShading) {
@@ -201,7 +201,7 @@ namespace Sponza {
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(0,0,0, 1.f), types::framebuffer::ClearFlagBits::Color);
-		drawFXAA(glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0]);
+		drawFXAA(glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0], meshManager);
 		// Don't forget the depth. Because reasons.
 		glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
 			0, 0, viewport.mSize.x, viewport.mSize.y,
@@ -229,8 +229,8 @@ namespace Sponza {
 		gbuffer.bind();
 		gbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, targetSize.x, targetSize.y);
-		drawGBuffer<OpaqueComponent>(ecs, cameraEntity, {});
-		drawGBuffer<AlphaTestComponent>(ecs, cameraEntity, {});
+		drawGBuffer<OpaqueComponent>(meshManager, ecs, cameraEntity, {});
+		drawGBuffer<AlphaTestComponent>(meshManager, ecs, cameraEntity, {});
 
 		auto ao = mDrawAO ? drawAO(ecs, meshManager, cameraEntity, gbuffer, targetSize, mAORadius, mAOBias) : nullptr;
 
@@ -243,8 +243,8 @@ namespace Sponza {
 		lightResolve->bind();
 		lightResolve->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color);
 		glViewport(0, 0, targetSize.x, targetSize.y);
-		drawPointLights(ecs, gbuffer, cameraEntity, targetSize, mLightDebugRadius);
-		drawDirectionalLights(ecs, cameraEntity, gbuffer, shadowMap);
+		drawPointLights(meshManager, ecs, gbuffer, cameraEntity, targetSize, mLightDebugRadius);
+		drawDirectionalLights(meshManager, ecs, cameraEntity, gbuffer, shadowMap);
 
 		// I'm lazy so I'm just going to do the final combine here
 		{

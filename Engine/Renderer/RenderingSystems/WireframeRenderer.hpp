@@ -10,7 +10,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawWireframe(const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
+	void drawWireframe(const MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
 		SourceShader* shader = Library::createSourceShader("Wireframe Shader", SourceShader::ConstructionArgs{
@@ -39,7 +39,7 @@ namespace neo {
 			resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
 			resolvedShader.bindUniform("color", view.get<const WireframeShaderComponent>(entity).mColor);
 
-			view.get<const MeshComponent>(entity).mMesh->draw();
+			meshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
 
 		glEnable(GL_CULL_FACE);

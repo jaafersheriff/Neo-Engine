@@ -37,7 +37,7 @@ namespace Compute {
 		return config;
 	}
 
-	void Demo::init(ECS& ecs) {
+	void Demo::init(ECS& ecs, MeshManager& meshManager) {
 
 		/* Game objects */
 		Camera camera(ecs, 45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
@@ -47,7 +47,7 @@ namespace Compute {
 		{
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Particles");
-			ecs.addComponent<ParticleMeshComponent>(entity);
+			ecs.addComponent<ParticleMeshComponent>(entity, meshManager);
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 0.0f, 0.f));
 		}
 
@@ -55,7 +55,37 @@ namespace Compute {
 		ecs.addSystem<CameraControllerSystem>();
 	}
 
-	void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::update(ECS& ecs, MeshManager& meshManager) {
+		if (auto meshView = ecs.getComponent<ParticleMeshComponent>()) {
+			TRACY_GPUN("Update Particles");
+			auto&& [_, meshComponent] = *meshView;
+
+			// Update base verts
+			if (meshComponent.isDirty) {
+				std::vector<float> positions;
+				positions.resize(meshComponent.mNumParticles * 4);
+				for (int i = 0; i < meshComponent.mNumParticles; i++) {
+					glm::vec3 pos = glm::normalize(util::genRandomVec3(-1.f, 1.f));
+					positions[i * 4 + 0] = pos.x;
+					positions[i * 4 + 1] = pos.y;
+					positions[i * 4 + 2] = pos.z;
+					positions[i * 4 + 3] = 1.f; // TODO - this is useless and costs perf. Get rid of it
+				}
+
+				auto mesh = meshManager.get(meshComponent.mMeshHandle);
+				mesh.updateVertexBuffer(
+					types::mesh::VertexType::Position,
+					static_cast<uint32_t>(positions.size()),
+					static_cast<uint32_t>(positions.size() * sizeof(float)),
+					reinterpret_cast<uint8_t*>(positions.data())
+				);
+
+				meshComponent.isDirty = false;
+			}
+		}
+	}
+
+	void Demo::render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) {
 		TRACY_GPUN("Compute::render")
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(getConfig().clearColor, 1.0), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
@@ -63,7 +93,8 @@ namespace Compute {
 		// Update the mesh
 		if (auto meshView = ecs.cGetComponent<ParticleMeshComponent>()) {
 			TRACY_GPUN("Update Particles");
-			auto&& [_, mesh] = *meshView;
+			auto&& [_, meshComponent] = *meshView;
+
 			auto& particlesCompute = Library::createSourceShader("ParticlesCompute", SourceShader::ConstructionArgs{
 				{ ShaderStage::COMPUTE, "compute/particles.compute" }
 			})->getResolvedInstance({});
@@ -72,19 +103,20 @@ namespace Compute {
 
 			if (auto frameStatsView = ecs.cGetComponent<FrameStatsComponent>()) {
 				auto&& [__, frameStats] = *frameStatsView;
-				particlesCompute.bindUniform("timestep", frameStats.mDT / 1000.f * mesh.timeScale);
+				particlesCompute.bindUniform("timestep", frameStats.mDT / 1000.f * meshComponent.timeScale);
 			}
 			else {
 				particlesCompute.bindUniform("timestep", 0.f);
 			}
 
 			// Bind mesh
-			auto& position = mesh.mMesh->getVBO(types::mesh::VertexType::Position);
-			glBindVertexArray(mesh.mMesh->mVAOID);
+			auto mesh = meshManager.get(meshComponent.mMeshHandle);
+			auto& position = mesh.getVBO(types::mesh::VertexType::Position);
+			glBindVertexArray(mesh.mVAOID);
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, position.vboID);
 
 			// Dispatch 
-			glDispatchCompute(mesh.mNumParticles / ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.x, 1, 1);
+			glDispatchCompute(meshComponent.mNumParticles / ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.x, 1, 1);
 			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 			// Reset bind
@@ -110,7 +142,7 @@ namespace Compute {
 			particlesVis.bindUniform("spriteColor", mSpriteColor);
 
 			if (auto meshView = ecs.getSingleView<ParticleMeshComponent, SpatialComponent>()) {
-				auto&& [_, mesh, spatial] = *meshView;
+				auto&& [_, meshComponent, spatial] = *meshView;
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 				glDisable(GL_DEPTH_TEST);
@@ -119,7 +151,7 @@ namespace Compute {
 				particlesVis.bindUniform("M", spatial.getModelMatrix());
 
 				/* DRAW */
-				mesh.mMesh->draw();
+				meshManager.get(meshComponent.mMeshHandle).draw();
 			}
 		}
 	}

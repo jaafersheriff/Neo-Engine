@@ -7,13 +7,14 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "Loader/Library.hpp"
+#include "ResourceManager/MeshResourceManager.hpp"
 
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
 using namespace neo;
 
 namespace Sponza {
-	void drawPointLights(const ECS& ecs, Framebuffer& gbuffer, ECS::Entity cameraEntity, const glm::uvec2 resolution, const float debugRadius) {
+	void drawPointLights(const MeshManager& meshManager, const ECS& ecs, Framebuffer& gbuffer, ECS::Entity cameraEntity, const glm::uvec2 resolution, const float debugRadius) {
 		TRACY_GPU();
 
 		auto* lightResolveShader = Library::createSourceShader("PointLightResolveShader", SourceShader::ConstructionArgs{
@@ -70,13 +71,13 @@ namespace Sponza {
 				glCullFace(GL_BACK);
 			}
 
-			Library::getMesh("sphere")->draw();
+			meshManager.get(HashedString("sphere")).draw();
 		}
 
 		// TODO - reset state
 	}
 
-	void drawDirectionalLights(const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, Texture* shadowMap = nullptr) {
+	void drawDirectionalLights(const MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, Texture* shadowMap = nullptr) {
 		TRACY_GPU();
 
 		ShaderDefines defines;
@@ -122,7 +123,7 @@ namespace Sponza {
 
 		glDisable(GL_DEPTH_TEST);
 
-		Library::getMesh("quad")->draw();
+		meshManager.get(HashedString("quad")).draw();
 
 		// TODO - reset GL state
 	}

@@ -28,8 +28,8 @@ namespace neo {
 		virtual Config getConfig() const = 0;
 		// TODO - meshmanager could just be added to the ecs probably..but how would that work with threading
 		virtual void init(ECS& ecs, MeshManager& meshManager) = 0;
-		virtual void update(ECS& ecs) {
-			NEO_UNUSED(ecs);
+		virtual void update(ECS& ecs, MeshManager& meshManager) {
+			NEO_UNUSED(ecs, meshManager);
 		};
 		virtual void render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) = 0;
 		virtual void imGuiEditor(ECS& ecs) {

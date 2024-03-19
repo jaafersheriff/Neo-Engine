@@ -88,7 +88,7 @@ namespace FrustaFitting {
 		return config;
 	}
 
-	void Demo::init(ECS& ecs) {
+	void Demo::init(ECS& ecs, MeshManager& meshManager) {
 
 		/* Game objects */
 		Camera sceneCamera("main camera", ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
@@ -109,10 +109,12 @@ namespace FrustaFitting {
 		// Renderable
 		for (int i = 0; i < 50; i++) {
 			auto entity = ecs.createEntity();
-			auto mesh = util::genRandomBool() ? Library::getMesh("cube") : Library::getMesh("sphere");
-			ecs.addComponent<MeshComponent>(entity, mesh);
+			auto meshHandle = util::genRandomBool() ? HashedString("cube") : HashedString("sphere");
+			ecs.addComponent<MeshComponent>(entity, meshHandle);
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
-			ecs.addComponent<BoundingBoxComponent>(entity, mesh->mMin, mesh->mMax);
+
+			auto mesh = meshManager.get(meshHandle);
+			ecs.addComponent<BoundingBoxComponent>(entity, mesh.mMin, mesh.mMax);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
 			ecs.addComponent<PhongShaderComponent>(entity);
@@ -124,8 +126,9 @@ namespace FrustaFitting {
 		{
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(25.f, 25.f, 1.f), glm::vec3(-1.56f, 0, 0));
-			ecs.addComponent<MeshComponent>(entity, Library::getMesh("quad"));
-			ecs.addComponent<BoundingBoxComponent>(entity, Library::getMesh("quad")->mMin, Library::getMesh("quad")->mMax);
+			ecs.addComponent<MeshComponent>(entity, HashedString("quad"));
+			auto mesh = meshManager.get(HashedString("quad"));
+			ecs.addComponent<BoundingBoxComponent>(entity, mesh.mMin, mesh.mMax);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(glm::vec3(0.7f), 1.f);
 			ecs.addComponent<PhongShaderComponent>(entity);
@@ -141,7 +144,8 @@ namespace FrustaFitting {
 		ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
 	}
 
-	void Demo::update(ECS& ecs) {
+	void Demo::update(ECS& ecs, MeshManager& meshManager) {
+		NEO_UNUSED(meshManager);
 		const auto&& [mockCameraEntity, _, __] = *ecs.getSingleView<MockCameraComponent, SpatialComponent>();
 		const auto& view = ecs.getView<const WireframeShaderComponent, CameraCulledComponent>();
 		for (auto entity : view) {
@@ -157,7 +161,7 @@ namespace FrustaFitting {
 		}
 	}
 
-	void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) {
 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
@@ -168,15 +172,15 @@ namespace FrustaFitting {
 			}
 		} }, "Shadow map");
 		shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Depth);
-		drawShadows(*shadowMap, ecs);
+		drawShadows(meshManager, *shadowMap, ecs);
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawPhong(ecs, cameraEntity, shadowMap->mTextures[0]);
+		drawPhong(meshManager, ecs, cameraEntity, shadowMap->mTextures[0]);
 		drawLines(ecs, cameraEntity);
 
 		// Draw wireframe for anything being seen by the mock camera
-		drawWireframe<SeenByMock>(ecs, cameraEntity);
+		drawWireframe<SeenByMock>(meshManager, ecs, cameraEntity);
 	}
 }
