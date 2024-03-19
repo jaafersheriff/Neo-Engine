@@ -21,7 +21,6 @@ namespace neo {
 
 		public:
 			Mesh(types::mesh::Primitive primitive = types::mesh::Primitive::TriangleStrip);
-			~Mesh();
 
 			/* VAO ID */
 			uint32_t mVAOID;
@@ -44,8 +43,9 @@ namespace neo {
 
 			void draw(uint32_t = 0) const;
 
-			void clear();
+			void init();
 			void destroy();
+			void clear();
 
 		private:
 			std::unordered_map<types::mesh::VertexType, VertexBuffer> mVBOs;

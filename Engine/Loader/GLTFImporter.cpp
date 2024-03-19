@@ -254,7 +254,7 @@ namespace {
 		return neo_texture;
 	}
 
-	void _processNode(neo::MeshManager& meshManager, const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene) {
+	void _processNode(const char* path, const int nodeID, neo::MeshManager& meshManager, const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene) {
 		using namespace neo;
 		if (node.camera != -1 || node.light != -1) {
 			return;
@@ -282,7 +282,7 @@ namespace {
 		nodeSpatial.setModelMatrix(parentXform * localTransform);
 
 		for (auto& child : node.children) {
-			_processNode(meshManager, model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);
+			_processNode(path, child, meshManager, model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);
 		}
 
 		// Mesh
@@ -304,8 +304,8 @@ namespace {
 			outNode.mName = node.name + std::to_string(i);
 			outNode.mSpatial = nodeSpatial;
 
-			Mesh mesh = Mesh();
-			mesh.mPrimitiveType = _translateTinyGltfPrimitiveType(gltfMesh.mode);
+			MeshLoader::MeshBuilder builder;
+			builder.mPrimtive = _translateTinyGltfPrimitiveType(gltfMesh.mode);
 
 			// Indices
 			if (gltfMesh.indices > -1)
@@ -318,13 +318,13 @@ namespace {
 
 				const auto& buffer = model.buffers[bufferView.buffer];
 
-				mesh.addElementBuffer(
+				builder.mElementBuffer = {
 					static_cast<uint32_t>(accessor.count),
 					_translateTinyGltfComponentType(accessor.componentType),
 					static_cast<uint32_t>(bufferView.byteLength),
 					// TODO - this offset math might be bad
 					static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset + accessor.byteOffset
-				);
+				};
 			}
 
 			for (const auto& attribute : gltfMesh.attributes) {
@@ -334,10 +334,10 @@ namespace {
 				types::mesh::VertexType vertexType = types::mesh::VertexType::Position;
 				if (attribute.first == "POSITION") {
 					if (accessor.maxValues.size() == 3) {
-						mesh.mMax = glm::vec3(accessor.maxValues[0], accessor.maxValues[1], accessor.maxValues[2]);
+						builder.mMax = glm::vec3(accessor.maxValues[0], accessor.maxValues[1], accessor.maxValues[2]);
 					}
 					if (accessor.minValues.size() == 3) {
-						mesh.mMin = glm::vec3(accessor.minValues[0], accessor.minValues[1], accessor.minValues[2]);
+						builder.mMin = glm::vec3(accessor.minValues[0], accessor.minValues[1], accessor.minValues[2]);
 					}
 				}
 				else if (attribute.first == "NORMAL") {
@@ -362,23 +362,31 @@ namespace {
 				const auto& buffer = model.buffers[bufferView.buffer];
 
 				// TODO : this is duplicating vertex data. Would be better to split glBufferData from glVertexAttribPointer
-				mesh.addVertexBuffer(
-					vertexType,
-					tinygltf::GetNumComponentsInType(accessor.type),
-					accessor.ByteStride(bufferView),
+				builder.mVertexBuffers[vertexType] = {
+					static_cast<uint32_t>(tinygltf::GetNumComponentsInType(accessor.type)),
+					static_cast<uint32_t>(accessor.ByteStride(bufferView)),
 					_translateTinyGltfComponentType(accessor.componentType),
 					accessor.normalized,
 					static_cast<uint32_t>(accessor.count),
 					static_cast<uint32_t>(accessor.byteOffset),
 					static_cast<uint32_t>(bufferView.byteLength),
 					static_cast<const uint8_t*>(buffer.data.data()) + bufferView.byteOffset
-				);
+				};
 			}
-			outNode.mMesh = meshManager.load(":(", mesh);
+
+			std::string name;
 			if (!model.meshes[node.mesh].name.empty()) {
-				NEO_LOG_I("Loaded mesh %s", model.meshes[node.mesh].name.c_str());
-				// Library::insertMesh(model.meshes[node.mesh].name + std::to_string(i), outNode.mMesh);
+				name = model.meshes[node.mesh].name;
 			}
+			else {
+				std::stringstream ss;
+				ss << path << "_";
+				ss << nodeID << "_";
+				ss << i;
+				name = ss.str();
+			}
+			NEO_LOG_I("Loaded mesh %s", name.c_str());
+			outNode.mMesh = meshManager.load(HashedString(name.c_str()), builder);
 
 			if (gltfMesh.material > -1) {
 				auto& material = model.materials[gltfMesh.material];
@@ -480,7 +488,7 @@ namespace neo {
 			Scene outScene;
 			for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
 				const auto& node = model.nodes[nodeID];
-				_processNode(meshManager, model, node, baseTransform, outScene);
+				_processNode(path.c_str(), nodeID, meshManager, model, node, baseTransform, outScene);
 			}
 
 			NEO_LOG_I("Successfully parsed %s", path.c_str());

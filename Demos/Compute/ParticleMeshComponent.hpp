@@ -25,10 +25,9 @@ namespace Compute {
 		bool isDirty = true;
 
 		ParticleMeshComponent(MeshManager& meshManager) {
-			Mesh mesh = Mesh();
-			mesh.mPrimitiveType = types::mesh::Primitive::Points;
-			mesh.addVertexBuffer(
-				types::mesh::VertexType::Position,
+			MeshLoader::MeshBuilder builder;
+			builder.mPrimtive = types::mesh::Primitive::Points;
+			builder.mVertexBuffers[types::mesh::VertexType::Position] = {
 				4,
 				0,
 				types::ByteFormats::Float,
@@ -37,10 +36,10 @@ namespace Compute {
 				0,
 				0,
 				nullptr
-			);
+			};
 
+			mMeshHandle = meshManager.load("Particles", builder);
 			isDirty = true;
-			mMeshHandle = meshManager.load("Particles", mesh);
 		}
 
 		virtual void imGuiEditor() override {

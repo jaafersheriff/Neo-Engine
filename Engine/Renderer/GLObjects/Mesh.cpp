@@ -36,19 +36,12 @@ namespace neo {
 		, mPrimitiveType(primitive)
 		, mVBOs({})
 	{
-		/* Initialize VAO */
-		glGenVertexArrays(1, (GLuint *)&mVAOID);
-	}
-
-	Mesh::~Mesh() {
-		destroy();
 	}
 
 	// TODO - instanced
 	void Mesh::draw(uint32_t size) const {
 
 		ServiceLocator<Renderer>::ref().mStats.mNumDraws++;
-
 
 		glBindVertexArray(mVAOID);
 
@@ -177,6 +170,10 @@ namespace neo {
 		removeVertexBuffer(types::mesh::VertexType::Normal);
 		removeVertexBuffer(types::mesh::VertexType::Texture0);
 		removeElementBuffer();
+	}
+
+	void Mesh::init() {
+		glGenVertexArrays(1, (GLuint *)&mVAOID);
 	}
 
 	void Mesh::destroy() {

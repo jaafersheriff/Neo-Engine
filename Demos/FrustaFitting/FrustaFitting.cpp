@@ -59,7 +59,7 @@ namespace FrustaFitting {
 		};
 
 		struct Light {
-			Light(ECS& ecs, glm::vec3 position) {
+			Light(MeshManager& meshManager, ECS& ecs, glm::vec3 position) {
 				// Light object
 				auto lightEntity = ecs.createEntity();
 				ecs.addComponent<TagComponent>(lightEntity, "Light");
@@ -76,7 +76,7 @@ namespace FrustaFitting {
 				ecs.addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
 				ecs.addComponent<FrustumComponent>(cameraObject);
 				ecs.addComponent<FrustumFitReceiverComponent>(cameraObject);
-				ecs.addComponent<LineMeshComponent>(cameraObject, glm::vec3(1.f, 0.f, 1.f));
+				ecs.addComponent<LineMeshComponent>(cameraObject, meshManager, glm::vec3(1.f, 0.f, 1.f));
 				ecs.addComponent<ShadowCameraComponent>(cameraObject);
 			}
 		};
@@ -99,12 +99,12 @@ namespace FrustaFitting {
 		// Perspective camera
 		Camera mockCamera("mockCamera", ecs, 50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
 		ecs.addComponent<MockCameraComponent>(mockCamera.mEntity);
-		ecs.addComponent<LineMeshComponent>(mockCamera.mEntity, glm::vec3(0.f, 1.f, 1.f));
+		ecs.addComponent<LineMeshComponent>(mockCamera.mEntity, meshManager, glm::vec3(0.f, 1.f, 1.f));
 		ecs.addComponent<FrustumComponent>(mockCamera.mEntity);
 		ecs.addComponent<FrustumFitSourceComponent>(mockCamera.mEntity);
 
 		// Ortho camera, shadow camera, light
-		Light light(ecs, glm::vec3(10.f, 20.f, 0.f));
+		Light light(meshManager, ecs, glm::vec3(10.f, 20.f, 0.f));
 
 		// Renderable
 		for (int i = 0; i < 50; i++) {
@@ -178,7 +178,7 @@ namespace FrustaFitting {
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		drawPhong(meshManager, ecs, cameraEntity, shadowMap->mTextures[0]);
-		drawLines(ecs, cameraEntity);
+		drawLines(meshManager, ecs, cameraEntity);
 
 		// Draw wireframe for anything being seen by the mock camera
 		drawWireframe<SeenByMock>(meshManager, ecs, cameraEntity);

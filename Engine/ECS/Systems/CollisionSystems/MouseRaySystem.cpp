@@ -55,23 +55,9 @@ namespace neo {
 				}
 				mouseRay->mDirection = dir;
 				mouseRay->mPosition = pos;
-
-				if (mShowRay) {
-					LineMeshComponent* line = ecs.getComponent<LineMeshComponent>(mouseRayEntity);
-					if (!line) {
-						line = ecs.addComponent<LineMeshComponent>(mouseRayEntity);
-					}
-					line->clearNodes();
-					line->addNodes({ {pos, glm::vec3(1.f)}, {pos + dir * camera->getNearFar().y, glm::vec3(1.f)} });
-				}
 			}
 			else if (mouseRayView) {
-				if (!mShowRay) {
-					ecs.removeEntity(std::get<0>(*mouseRayView));
-				}
-				else {
-					ecs.removeComponent<MouseRayComponent>(std::get<0>(*mouseRayView));
-				}
+				ecs.removeComponent<MouseRayComponent>(std::get<0>(*mouseRayView));
 			}
 		}
 	}

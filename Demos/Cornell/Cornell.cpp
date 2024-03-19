@@ -86,8 +86,7 @@ namespace Cornell {
 		insertObject(meshManager, ecs, "ceiling",   quadMesh, glm::vec3(0.f, 1.0f, 0.5f), glm::vec3(1.f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f));
 		insertObject(meshManager, ecs, "box1",      quadMesh, glm::vec3(-0.2f, 0.35f, 0.4f), glm::vec3(0.25f, 0.7f, 0.25f), glm::vec3(0.f, glm::radians(33.f), 0.f), glm::vec3(1.f));
 
-		MeshHandle sphere3 = meshManager.load("sphere3", prefabs::generateSphere(3));
-		insertObject(meshManager, ecs, "sphere", sphere3, glm::vec3(0.2f, 0.18f, 0.6f), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.f, glm::radians(-17.f), 0.f), glm::vec3(1.f));
+		insertObject(meshManager, ecs, "sphere", HashedString("sphere"), glm::vec3(0.2f, 0.18f, 0.6f), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.f, glm::radians(-17.f), 0.f), glm::vec3(1.f));
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();

@@ -10,7 +10,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawLines(const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
+	void drawLines(const MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
 		bool oldDepthState = glIsEnabled(GL_DEPTH_TEST);
@@ -44,7 +44,7 @@ namespace neo {
 			}
 
 			/* Bind mesh */
-			line->getMesh().draw();
+			meshManager.get(line->mMeshHandle).draw();
 		}
 
 		if (oldDepthState) {
