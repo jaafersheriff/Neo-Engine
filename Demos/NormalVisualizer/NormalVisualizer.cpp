@@ -66,7 +66,7 @@ namespace NormalVisualizer {
 		Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f));
 
 		{
-			GLTFImporter::Scene gltfScene = Loader::loadGltfScene("bunny.gltf");
+			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(meshManager, "bunny.gltf");
 			const auto& bunnyNode = gltfScene.mMeshNodes[0];
 
 			auto entity = ecs.createEntity();

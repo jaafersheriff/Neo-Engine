@@ -11,6 +11,7 @@ namespace neo {
 	class Mesh;
 	class Texture;
 	struct TextureFormat;
+	class MeshManager;
 	namespace GLTFImporter {
 		struct Scene;
 	}
@@ -29,7 +30,7 @@ namespace neo {
 
 			static const char* loadFileString(const std::string&);
 
-			static GLTFImporter::Scene loadGltfScene(const std::string& fileName, glm::mat4 baseTransform = glm::mat4(1.f));
+			static GLTFImporter::Scene loadGltfScene(MeshManager& meshManager, const std::string& fileName, glm::mat4 baseTransform = glm::mat4(1.f));
 
 			/* Retrieve Texture pointer from an image file */
 			static Texture* loadTexture(const std::string &, TextureFormat format);

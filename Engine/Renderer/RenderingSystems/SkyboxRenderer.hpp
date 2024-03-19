@@ -15,7 +15,7 @@
 
 namespace neo {
 
-	void drawSkybox(MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity) {
+	void drawSkybox(const MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity) {
 		TRACY_GPU();
 
 		auto* skyboxShader = Library::createSourceShader("SkyboxShader", SourceShader::ShaderCode{
