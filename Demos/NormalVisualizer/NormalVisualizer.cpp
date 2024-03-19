@@ -57,7 +57,9 @@ namespace NormalVisualizer {
 		return config;
 	}
 
-	void Demo::init(ECS& ecs) {
+	void Demo::init(ECS& ecs, MeshManager& meshManager) {
+		NEO_UNUSED(meshManager);
+
 		/* Game objects */
 		Camera camera(ecs, 45.f, 0.1f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
 
@@ -84,14 +86,14 @@ namespace NormalVisualizer {
 		ecs.addSystem<RotationSystem>();
 	}
 
-	void Demo::render(const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 
-		drawPhong<OpaqueComponent>(ecs, cameraEntity);
+		drawPhong<OpaqueComponent>(meshManager, ecs, cameraEntity);
 
 		{
 			auto normalShader = Library::createSourceShader("NormalVisualizer", SourceShader::ConstructionArgs{
@@ -115,7 +117,7 @@ namespace NormalVisualizer {
 				resolvedShader.bindUniform("N", spatial.getNormalMatrix());
 
 				/* DRAW */
-				mesh.mMesh->draw();
+				meshManager.get(mesh.mMeshHandle).draw();
 			}
 		}
 	}
