@@ -8,15 +8,14 @@
 
 #include "Loader/Library.hpp"
 #include "Loader/Loader.hpp"
-#include "ResourceManager/MeshResourceManager.hpp"
+#include "ResourceManager/ResourceManagers.hpp"
 
 namespace neo {
 
-	static void blit(MeshManager& meshManager, Framebuffer& outputFBO, Texture& inputTexture, glm::uvec2 viewport, glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f)) {
+	static void blit(ResourceManagers& resourceManagers, Framebuffer& outputFBO, Texture& inputTexture, glm::uvec2 viewport, glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f)) {
 		TRACY_GPU();
 
-		// Where are these const chars in memory..are they being created and passed on each call?
-		auto* blitShader = Library::createSourceShader("Blitter", SourceShader::ShaderCode{			
+		auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blitter", SourceShader::ShaderCode{			
 			{ ShaderStage::VERTEX,
 			R"(
 				layout (location = 0) in vec3 vertPos;
@@ -45,14 +44,14 @@ namespace neo {
 
 		glDisable(GL_DEPTH_TEST);
 		
-		auto& resolvedBlit = blitShader->getResolvedInstance({});
+		auto& resolvedBlit = resourceManagers.mShaderManager.get(blitShaderHandle, {});
 		resolvedBlit.bind();
 		
 		// Bind input fbo texture
 		resolvedBlit.bindTexture("inputTexture", inputTexture);
 		
 		// Render 
-		meshManager.get("quad").draw();
+		resourceManagers.mMeshManager.get("quad").draw();
 
 		glEnable(GL_DEPTH_TEST);
 	}

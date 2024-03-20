@@ -15,10 +15,10 @@
 
 namespace neo {
 
-	void drawSkybox(const MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity) {
+	void drawSkybox(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity) {
 		TRACY_GPU();
 
-		auto* skyboxShader = Library::createSourceShader("SkyboxShader", SourceShader::ShaderCode{
+		auto skyboxShaderHandle = resourceManagers.mShaderManager.asyncLoad("SkyboxShader", SourceShader::ShaderCode{
 			{ ShaderStage::VERTEX, R"(
 				layout (location = 0) in vec3 vertPos;
 				uniform mat4 P;
@@ -52,14 +52,14 @@ namespace neo {
 		auto camSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 		NEO_ASSERT(camera, "No main camera exists");
 
-		auto& resolvedShader = skyboxShader->getResolvedInstance({});
+		auto& resolvedShader = resourceManagers.mShaderManager.get(skyboxShaderHandle, {});
 		resolvedShader.bind();
 		resolvedShader.bindUniform("P", camera->getProj());
 		resolvedShader.bindUniform("V", camSpatial->getView());
 		resolvedShader.bindTexture("cubeMap", *std::get<1>(*skybox).mSkybox);
 
 		/* Draw */
-		meshManager.get(HashedString("cube")).draw();
+		resourceManagers.mMeshManager.get(HashedString("cube")).draw();
 
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);

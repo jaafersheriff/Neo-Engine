@@ -8,7 +8,7 @@ namespace neo {
 	class ECS;
 	class Renderer;
 	class Framebuffer;
-	class MeshManager;
+	class ResourceManagers;
 
 	class IDemo {
 	public:
@@ -26,12 +26,11 @@ namespace neo {
 		IDemo& operator=(const IDemo&) = delete;
 
 		virtual Config getConfig() const = 0;
-		// TODO - meshmanager could just be added to the ecs probably..but how would that work with threading
-		virtual void init(ECS& ecs, MeshManager& meshManager) = 0;
-		virtual void update(ECS& ecs, MeshManager& meshManager) {
-			NEO_UNUSED(ecs, meshManager);
+		virtual void init(ECS& ecs, ResourceManagers& resourceManagers) = 0;
+		virtual void update(ECS& ecs, ResourceManagers& resourceManagers) {
+			NEO_UNUSED(ecs, resourceManagers);
 		};
-		virtual void render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) = 0;
+		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) = 0;
 		virtual void imGuiEditor(ECS& ecs) {
 			NEO_UNUSED(ecs);
 		}

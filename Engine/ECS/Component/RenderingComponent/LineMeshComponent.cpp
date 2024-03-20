@@ -7,14 +7,14 @@
 
 namespace neo {
 
-	LineMeshComponent::LineMeshComponent(MeshManager& meshManager, std::optional<glm::vec3> overrideColor) :
+	LineMeshComponent::LineMeshComponent(MeshResourceManager& meshManager, std::optional<glm::vec3> overrideColor) :
 		mDirty(false),
 		mWriteDepth(true),
 		mUseParentSpatial(false),
 		mOverrideColor(overrideColor)
 	{
 
-		MeshManager::MeshBuilder builder;
+		MeshResourceManager::MeshBuilder builder;
 		builder.mPrimtive = types::mesh::Primitive::LineStrip;
 		builder.mVertexBuffers[types::mesh::VertexType::Position] = {
 			3,
@@ -39,7 +39,7 @@ namespace neo {
 
 		// Heh???
 		HashedString random(reinterpret_cast<const char*>(this));
-		mMeshHandle = meshManager.load(random, builder);
+		mMeshHandle = meshManager.asyncLoad(random, builder);
 	}
 
 	LineMeshComponent::~LineMeshComponent() {

@@ -14,6 +14,8 @@
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
+#include "ResourceManager/ResourceManagers.hpp"
+
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 
 using namespace neo;
@@ -37,7 +39,7 @@ namespace Compute {
 		return config;
 	}
 
-	void Demo::init(ECS& ecs, MeshManager& meshManager) {
+	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 
 		/* Game objects */
 		Camera camera(ecs, 45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
@@ -47,7 +49,7 @@ namespace Compute {
 		{
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Particles");
-			ecs.addComponent<ParticleMeshComponent>(entity, meshManager);
+			ecs.addComponent<ParticleMeshComponent>(entity, resourceManagers.mMeshManager);
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 0.0f, 0.f));
 		}
 
@@ -55,7 +57,7 @@ namespace Compute {
 		ecs.addSystem<CameraControllerSystem>();
 	}
 
-	void Demo::update(ECS& ecs, MeshManager& meshManager) {
+	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
 		if (auto meshView = ecs.getComponent<ParticleMeshComponent>()) {
 			TRACY_GPUN("Update Particles");
 			auto&& [_, meshComponent] = *meshView;
@@ -72,7 +74,7 @@ namespace Compute {
 					positions[i * 4 + 3] = 1.f; // TODO - this is useless and costs perf. Get rid of it
 				}
 
-				auto mesh = meshManager.get(meshComponent.mMeshHandle);
+				auto& mesh = resourceManagers.mMeshManager.get(meshComponent.mMeshHandle);
 				mesh.updateVertexBuffer(
 					types::mesh::VertexType::Position,
 					static_cast<uint32_t>(positions.size()),
@@ -85,7 +87,7 @@ namespace Compute {
 		}
 	}
 
-	void Demo::render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		TRACY_GPUN("Compute::render")
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(getConfig().clearColor, 1.0), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
@@ -95,22 +97,22 @@ namespace Compute {
 			TRACY_GPUN("Update Particles");
 			auto&& [_, meshComponent] = *meshView;
 
-			auto& particlesCompute = Library::createSourceShader("ParticlesCompute", SourceShader::ConstructionArgs{
+			auto particlesComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticlesCompute", SourceShader::ConstructionArgs{
 				{ ShaderStage::COMPUTE, "compute/particles.compute" }
-			})->getResolvedInstance({});
+			});
 
-			particlesCompute.bind();
+			auto& particlesComputeShader = resourceManagers.mShaderManager.get(particlesComputeShaderHandle, {});
+			particlesComputeShader.bind();
 
+			float timeStep = 0.f;
 			if (auto frameStatsView = ecs.cGetComponent<FrameStatsComponent>()) {
 				auto&& [__, frameStats] = *frameStatsView;
-				particlesCompute.bindUniform("timestep", frameStats.mDT / 1000.f * meshComponent.timeScale);
+				timeStep = frameStats.mDT / 1000.f * meshComponent.timeScale;
 			}
-			else {
-				particlesCompute.bindUniform("timestep", 0.f);
-			}
+			particlesComputeShader.bindUniform("timestep", timeStep);
 
 			// Bind mesh
-			auto mesh = meshManager.get(meshComponent.mMeshHandle);
+			auto& mesh = resourceManagers.mMeshManager.get(meshComponent.mMeshHandle);
 			auto& position = mesh.getVBO(types::mesh::VertexType::Position);
 			glBindVertexArray(mesh.mVAOID);
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, position.vboID);
@@ -126,20 +128,22 @@ namespace Compute {
 		// Draw the mesh
 		{
 			TRACY_GPUN("Draw Particles");
-			auto& particlesVis = Library::createSourceShader("ParticleVis", SourceShader::ConstructionArgs{
+			auto particlesVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticleVis", SourceShader::ConstructionArgs{
 				{ ShaderStage::VERTEX,   "compute/particles.vert" },
 				{ ShaderStage::GEOMETRY, "compute/particles.geom" },
 				{ ShaderStage::FRAGMENT, "compute/particles.frag" },
-			})->getResolvedInstance({});
-			particlesVis.bind();
+			});
+
+			auto& particlesVisShader = resourceManagers.mShaderManager.get(particlesVisShaderHandle, {});
+			particlesVisShader.bind();
 
 			if (auto cameraView = ecs.getSingleView<MainCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
 				auto&& [_, __, camera, camSpatial] = *cameraView;
-				particlesVis.bindUniform("P", camera.getProj());
-				particlesVis.bindUniform("V", camSpatial.getView());
+				particlesVisShader.bindUniform("P", camera.getProj());
+				particlesVisShader.bindUniform("V", camSpatial.getView());
 			}
-			particlesVis.bindUniform("spriteSize", mSpriteSize);
-			particlesVis.bindUniform("spriteColor", mSpriteColor);
+			particlesVisShader.bindUniform("spriteSize", mSpriteSize);
+			particlesVisShader.bindUniform("spriteColor", mSpriteColor);
 
 			if (auto meshView = ecs.getSingleView<ParticleMeshComponent, SpatialComponent>()) {
 				auto&& [_, meshComponent, spatial] = *meshView;
@@ -148,10 +152,10 @@ namespace Compute {
 				glDisable(GL_DEPTH_TEST);
 				glDisable(GL_CULL_FACE);
 
-				particlesVis.bindUniform("M", spatial.getModelMatrix());
+				particlesVisShader.bindUniform("M", spatial.getModelMatrix());
 
 				/* DRAW */
-				meshManager.get(meshComponent.mMeshHandle).draw();
+				resourceManagers.mMeshManager.get(meshComponent.mMeshHandle).draw();
 			}
 		}
 	}

@@ -52,10 +52,10 @@ namespace Sponza {
 	}
 
 	template<typename... CompTs>
-	void drawGBuffer(const MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
+	void drawGBuffer(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
-		SourceShader* shader = Library::createSourceShader("GBuffer Shader", SourceShader::ConstructionArgs{
+		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBuffer Shader", SourceShader::ConstructionArgs{
 			{ ShaderStage::VERTEX, "sponza/gbuffer.vert"},
 			{ ShaderStage::FRAGMENT, "sponza/gbuffer.frag" }
 		});
@@ -108,7 +108,7 @@ namespace Sponza {
 				drawDefines.set(NORMAL_MAP);
 			}
 
-			auto& resolvedShader = shader->getResolvedInstance(drawDefines);
+			auto& resolvedShader = resourceManagers.mShaderManager.get(shaderHandle, drawDefines);
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
@@ -130,7 +130,7 @@ namespace Sponza {
 			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
 
-			meshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
+			resourceManagers.mMeshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
 
 		if (containsAlphaTest) {

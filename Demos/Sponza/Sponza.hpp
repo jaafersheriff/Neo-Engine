@@ -12,13 +12,13 @@ namespace Sponza {
 	class Demo : public IDemo {
 	public:
 		virtual IDemo::Config getConfig() const override;
-		virtual void init(ECS& ecs, MeshManager& meshManager) override;
-		virtual void render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) override;
+		virtual void init(ECS& ecs, ResourceManagers& resourceManagers) override;
+		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) override;
 		virtual void imGuiEditor(ECS& ecs) override;
 
 	private:
-		void _forwardShading(const MeshManager& meshManager, const ECS& ecs, Framebuffer& sceneTarget, Texture* shadowMap);
-		void _deferredShading(const MeshManager& meshManager, const ECS& ecs, Framebuffer& sceneTarget, glm::uvec2 targetSize, Texture* shadowMap);
+		void _forwardShading(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& sceneTarget, Texture* shadowMap);
+		void _deferredShading(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& sceneTarget, glm::uvec2 targetSize, Texture* shadowMap);
 		bool mDrawShadows = true;
 
 		bool mDeferredShading = false;

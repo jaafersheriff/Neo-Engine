@@ -199,7 +199,7 @@ namespace neo {
 		return mValid;
 	}
 
-	GLuint ResolvedShaderInstance::_compileShader(GLenum shaderType, const char *shaderString) {
+	uint32_t ResolvedShaderInstance::_compileShader(GLenum shaderType, const char *shaderString) {
 		TRACY_ZONE();
 		// Create the shader, assign source code, and compile it
 		GLuint shader = glCreateShader(shaderType);

@@ -6,6 +6,7 @@
 #include "Renderer/Renderer.hpp"
 
 #include "Loader/Library.hpp"
+#include "ResourceManager/MeshResourceManager.hpp"
 
 #include "Util/Profiler.hpp"
 #include "Util/ServiceLocator.hpp"
@@ -24,8 +25,8 @@ namespace Compute {
 		float timeScale = 100.f;
 		bool isDirty = true;
 
-		ParticleMeshComponent(MeshManager& meshManager) {
-			MeshLoader::MeshBuilder builder;
+		ParticleMeshComponent(MeshResourceManager& meshManager) {
+			MeshResourceManager::MeshBuilder builder;
 			builder.mPrimtive = types::mesh::Primitive::Points;
 			builder.mVertexBuffers[types::mesh::VertexType::Position] = {
 				4,
@@ -38,7 +39,7 @@ namespace Compute {
 				nullptr
 			};
 
-			mMeshHandle = meshManager.load("Particles", builder);
+			mMeshHandle = meshManager.asyncLoad("Particles", builder);
 			isDirty = true;
 		}
 
