@@ -10,6 +10,7 @@ layout(binding = 0) uniform sampler2D albedoMap;
 #endif
 
 #ifdef NORMAL_MAP
+// TODO - unused
 layout(binding = 1) uniform sampler2D normalMap;
 #endif
 

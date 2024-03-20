@@ -29,14 +29,10 @@ namespace neo {
 
 		glCullFace(GL_FRONT);
 
-		ShaderDefines passDefines = {};
-		MakeDefine(ALPHA_TEST);
-
 		bool containsAlphaTest = false;
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
 			// TODO - set GL state?
 			containsAlphaTest = true;
-			passDefines.set(ALPHA_TEST);
 		}
 
 		auto shadowCameraView = ecs.getSingleView<ShadowCameraComponent, SpatialComponent>();
@@ -45,6 +41,7 @@ namespace neo {
 		}
 		auto&& [shadowCameraEntity, shadowCamera, shadowCameraSpatial] = *shadowCameraView;
 
+		ShaderDefines drawDefines;
 		const auto& view = ecs.getView<const ShadowCasterShaderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
 		for (auto entity : view) {
 			// VFC
@@ -53,18 +50,20 @@ namespace neo {
 					continue;
 				}
 			}
+			drawDefines.reset();
 
 			auto material = ecs.cGetComponent<const MaterialComponent>(entity);
-			Texture* alphaMap = nullptr;
-			if (containsAlphaTest && material && material->mAlbedoMap) {
-				alphaMap = material->mAlbedoMap;
+
+			MakeDefine(ALPHA_TEST);
+			bool doAlphaTest = containsAlphaTest && material && resourceManagers.mTextureManager.isValid(material->mAlbedoMap);
+			if (doAlphaTest) {
+				drawDefines.set(ALPHA_TEST);
 			}
 
-			auto& resolvedShader = resourceManagers.mShaderManager.get(shaderHandle, passDefines);
+			auto& resolvedShader = resourceManagers.mShaderManager.get(shaderHandle, drawDefines);
 
-			// TODO - handle the case where there's no alpha map a bit better
-			if (alphaMap) {
-				resolvedShader.bindTexture("alphaMap", *alphaMap);
+			if (doAlphaTest) {
+				resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.get(material->mAlbedoMap));
 			}
 
 			resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCameraEntity)->getProj());

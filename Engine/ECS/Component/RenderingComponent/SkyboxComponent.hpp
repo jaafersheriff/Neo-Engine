@@ -2,13 +2,15 @@
 
 #include "ECS/Component/Component.hpp"
 
+#include "ResourceManager/TextureResourceManager.hpp"
+
 namespace neo {
 	struct SkyboxComponent : public Component {
-		SkyboxComponent(Texture* skybox) :
+		SkyboxComponent(TextureHandle skybox) :
 			mSkybox(skybox)
 		{}
 
-		Texture* mSkybox;
+		TextureHandle mSkybox;
 
 		virtual std::string getName() const override {
 			return "SkyboxComponent";

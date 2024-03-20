@@ -88,7 +88,7 @@ namespace Base {
 			ecs.addComponent<AlphaTestComponent>(plane);
 			auto material = ecs.addComponent<MaterialComponent>(plane);
 			material->mAlbedoColor = glm::vec4(1.f);
-			material->mAlbedoMap = Library::loadTexture("grid.png");
+			material->mAlbedoMap = resourceManagers.mTextureManager.asyncLoad("grid.png", {});
 		}
 
 		/* Systems - order matters! */
