@@ -49,28 +49,6 @@ namespace neo {
 			}
 		}
 
-		struct STBImageData {
-			STBImageData(const char* _filePath, types::texture::BaseFormats baseFormat, bool flip) {
-				filePath = _filePath;
-				stbi_set_flip_vertically_on_load(flip);
-				int components;
-				data = stbi_load(filePath, &width, &height, &components, baseFormat == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
-			}
-
-			~STBImageData() {
-				stbi_image_free(data);
-			}
-
-			operator bool() const {
-				return data != nullptr;
-			}
-
-			const char* filePath;
-			uint8_t* data = nullptr;
-			int width = 0;
-			int height = 0;
-		};
-
 		struct TextureLoader final : entt::resource_loader<TextureLoader, Texture> {
 
 			std::shared_ptr<Texture> load(std::vector<std::string>& filePaths, TextureFormat format, std::shared_ptr<Texture> dummy) const {
@@ -130,6 +108,18 @@ namespace neo {
 				return texture;
 			}
 		};
+
+	}
+
+	STBImageData::STBImageData(const char* _filePath, types::texture::BaseFormats baseFormat, bool flip) {
+		filePath = _filePath;
+		stbi_set_flip_vertically_on_load(flip);
+		int components;
+		data = stbi_load(filePath, &width, &height, &components, baseFormat == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
+	}
+
+	STBImageData::~STBImageData() {
+		stbi_image_free(data);
 	}
 
 	TextureResourceManager::TextureResourceManager() {
