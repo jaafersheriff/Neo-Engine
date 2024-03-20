@@ -7,6 +7,7 @@
 #include <entt/resource/cache.hpp>
 
 #include <memory>
+#include <string>
 
 namespace neo {
 	class ResourceManagers;
@@ -21,6 +22,8 @@ namespace neo {
 			const uint8_t* data = nullptr;
 		};
 
+		TextureResourceManager();
+		~TextureResourceManager();
 		bool isValid(TextureHandle id) const;
 		Texture& get(HashedString id);
 		const Texture& get(HashedString id) const;
