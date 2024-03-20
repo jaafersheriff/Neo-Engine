@@ -12,10 +12,26 @@
 namespace neo {
 	class ResourceManagers;
 
+	struct STBImageData {
+		STBImageData(const char* _filePath, types::texture::BaseFormats baseFormat, bool flip);
+		~STBImageData();
+
+		operator bool() const {
+			return data != nullptr;
+		}
+
+		const char* filePath;
+		uint8_t* data = nullptr;
+		int width = 0;
+		int height = 0;
+	};
+
+
 	using TextureHandle = entt::id_type;
 	class TextureResourceManager {
 		friend ResourceManagers;
 	public:
+
 		struct TextureBuilder {
 			TextureFormat mFormat;
 			glm::u16vec3 mDimensions = glm::u16vec3(0);
@@ -36,6 +52,7 @@ namespace neo {
 
 		void clear();
 	private:
+
 		void _tick();
 		mutable std::vector<std::pair<TextureHandle, TextureBuilder>> mQueue;
 		mutable std::vector<std::pair<TextureHandle, std::pair<std::vector<std::string>, TextureFormat>>> mFileLoadQueue; // TODO - Make these into structs pls

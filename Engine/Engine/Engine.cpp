@@ -67,13 +67,14 @@ namespace neo {
 		{
 			NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
 			GLFWimage icons[1];
-			int components;
-			uint8_t* data = Loader::_loadTextureData(icons[0].width, icons[0].height, components, "icon.png", {}, false);
-			if (data) {
-				icons[0].pixels = data;
+			std::string path = Loader::ENGINE_RES_DIR + std::string("icon.png");
+			STBImageData image(path.c_str(), types::texture::BaseFormats::RGBA, false);
+			if (image) {
+				icons[0].pixels = image.data;
+				icons[0].width = image.width;
+				icons[0].height = image.height;
 				glfwSetWindowIcon(mWindow.getWindow(), 1, icons);
 			}
-			Loader::_cleanTextureData(data);
 
 			/* Init GLEW */
 			glewExperimental = GL_FALSE;
