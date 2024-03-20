@@ -219,8 +219,6 @@ namespace neo {
 		ServiceLocator<Renderer>::ref().setDemoConfig(config);
 		ServiceLocator<Renderer>::ref().init();
 		Loader::init(config.resDir, config.shaderDir);
-		APP_RES_DIR = config.resDir;
-		APP_SHADER_DIR = config.shaderDir;
 		_createPrefabs(resourceManagers);
 		resourceManagers.tick();
 
