@@ -19,7 +19,7 @@ using namespace neo;
 namespace Sponza {
 
 	namespace {
-		void _generateKernel(uint32_t size) {
+		void _generateKernel(const neo::TextureResourceManager& textureManager, HashedString id, uint32_t size) {
 			std::vector<float> kernel;
 			for (unsigned i = 0; i < size; i++) {
 				glm::vec3 sample(
@@ -37,22 +37,24 @@ namespace Sponza {
 				kernel.push_back(sample.y);
 				kernel.push_back(sample.z);
 			};
-			Library::createTexture("aoKernel", { 
-				types::texture::Target::Texture1D, 
-				types::texture::InternalFormats::RGB32_F,
-				{
-					types::texture::Filters::Nearest,
-					types::texture::Filters::Nearest,
-				},
-				{
-					types::texture::Wraps::Repeat,
-					types::texture::Wraps::Repeat,
-				},
-				types::ByteFormats::UnsignedByte }, 
-			glm::uvec3(size, 0, 0), reinterpret_cast<uint32_t*>(kernel.data()));
+			TextureResourceManager::TextureBuilder builder;
+			builder.mFormat.mTarget = types::texture::Target::Texture1D;
+			builder.mFormat.mInternalFormat = types::texture::InternalFormats::RGB32_F;
+			builder.mFormat.mFilter = {
+				types::texture::Filters::Nearest,
+				types::texture::Filters::Nearest,
+			};
+			builder.mFormat.mWrap = {
+				types::texture::Wraps::Repeat,
+				types::texture::Wraps::Repeat,
+			};
+			builder.mFormat.mType = types::ByteFormats::UnsignedByte;
+			builder.mDimensions = glm::uvec3(size, 0, 0);
+			builder.data = reinterpret_cast<uint8_t*>(kernel.data());
+			NEO_UNUSED(textureManager.asyncLoad(id, builder));
 		}
 
-		void _generateNoise(uint32_t dim) {
+		void _generateNoise(const neo::TextureResourceManager& textureManager, HashedString id, uint32_t dim) {
 			std::vector<float> noise;
 			noise.resize(dim * dim * 3);
 			for (unsigned i = 0; i < dim * dim * 3; i += 3) {
@@ -60,29 +62,33 @@ namespace Sponza {
 				noise[i + 1] = util::genRandom();
 				noise[i + 2] = util::genRandom();
 			}
-			Library::createTexture("aoNoise", { 
-				types::texture::Target::Texture2D, 
-				types::texture::InternalFormats::RGB32_F,
-				{
-					types::texture::Filters::Nearest,
-					types::texture::Filters::Nearest,
-				},
-				{
-					types::texture::Wraps::Repeat,
-					types::texture::Wraps::Repeat,
-				},
-				types::ByteFormats::UnsignedByte }, 
-			glm::uvec3(dim, dim, 0), reinterpret_cast<uint32_t*>(noise.data()));
+			TextureResourceManager::TextureBuilder builder;
+			builder.mFormat.mTarget = types::texture::Target::Texture2D;
+			builder.mFormat.mInternalFormat = types::texture::InternalFormats::RGB32_F;
+			builder.mFormat.mFilter = {
+				types::texture::Filters::Nearest,
+				types::texture::Filters::Nearest,
+			};
+			builder.mFormat.mWrap = {
+				types::texture::Wraps::Repeat,
+				types::texture::Wraps::Repeat,
+			};
+			builder.mFormat.mType = types::ByteFormats::UnsignedByte;
+			builder.mDimensions = glm::uvec3(dim, dim, 0);
+			builder.data = reinterpret_cast<uint8_t*>(noise.data());
+			NEO_UNUSED(textureManager.asyncLoad(id, builder));
 		}
 	}
 
 	 Framebuffer* drawAO(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
 		TRACY_GPU();
-		if (!Library::hasTexture("aoKernel")) {
-			_generateKernel(8);
+		HashedString aoKernelHandle("aoKernel");
+		HashedString aoNoiseHandle("aoNoise");
+		if (!resourceManagers.mTextureManager.isValid(aoKernelHandle)) {
+			_generateKernel(resourceManagers.mTextureManager, aoKernelHandle, 8);
 		}
-		if (!Library::hasTexture("aoNoise")) {
-			_generateNoise(4);
+		if (!resourceManagers.mTextureManager.isValid(aoNoiseHandle)) {
+			_generateNoise(resourceManagers.mTextureManager, aoNoiseHandle, 4);
 		}
 
 		// Make a one-off framebuffer for the base AO
@@ -123,8 +129,8 @@ namespace Sponza {
 			resolvedShader.bindTexture("gDepth", *gbuffer.mTextures[3]);
 
 			// bind kernel and noise
-			resolvedShader.bindTexture("noise", *Library::getTexture("aoNoise"));
-			resolvedShader.bindTexture("kernel", *Library::getTexture("aoKernel"));
+			resolvedShader.bindTexture("noise", resourceManagers.mTextureManager.get(aoKernelHandle));
+			resolvedShader.bindTexture("kernel", resourceManagers.mTextureManager.get(aoNoiseHandle));
 
 			const auto P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
 			resolvedShader.bindUniform("P", P);

@@ -203,11 +203,11 @@ namespace {
 		}
 	}
 
-	neo::Texture* _loadTexture(const tinygltf::Model& model, int index, int texCoord) {
+	neo::TextureHandle _loadTexture(neo::TextureResourceManager& textureManager, const tinygltf::Model& model, int index, int texCoord) {
 		using namespace neo; 
 
 		if (index == -1) {
-			return nullptr;
+			return 0;
 		}
 		if (texCoord > 0) {
 			NEO_LOG_W("Texture wants to use a different texcoord? This probably won't work");
@@ -220,39 +220,43 @@ namespace {
 			NEO_LOG_V("Processing texture %s", texture.name.c_str());
 		}
 
-		if (!image.uri.empty() && Library::hasTexture(image.uri)) {
-			NEO_LOG_V("Texture %s is already loaded -- skipping", image.uri.c_str());
-			return Library::getTexture(image.uri);
+		if (!image.uri.empty()) {
+			HashedString textureHandle(image.uri.c_str());
+			if (textureManager.isValid(textureHandle)) {
+				NEO_LOG_V("Texture %s is already loaded -- skipping", image.uri.c_str());
+				return textureHandle;
+			}
 		}
 
-		TextureFormat format;
-		format.mType = _getGLType(image.bits);
-		format.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, _getGLBaseFormat(image.component));
+		TextureResourceManager::TextureBuilder builder;
+		builder.mFormat.mType = _getGLType(image.bits);
+		builder.mFormat.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, _getGLBaseFormat(image.component));
 		if (texture.sampler > -1) {
 			const auto& sampler = model.samplers[texture.sampler];
 			if (sampler.minFilter > -1) {
-				format.mFilter.mMin = _translateTinyGltfFilter(sampler.minFilter);
+				builder.mFormat.mFilter.mMin = _translateTinyGltfFilter(sampler.minFilter);
 			}
 			if (sampler.magFilter > -1) {
-				format.mFilter.mMag = _translateTinyGltfFilter(sampler.magFilter);
+				builder.mFormat.mFilter.mMag = _translateTinyGltfFilter(sampler.magFilter);
 			}
 			if (sampler.wrapS > -1) {
-				format.mWrap.mS = _translateTinyGltfWrap(sampler.wrapS);
+				builder.mFormat.mWrap.mS = _translateTinyGltfWrap(sampler.wrapS);
 			}
 			if (sampler.wrapT > -1) {
-				format.mWrap.mT = format.mWrap.mT = _translateTinyGltfWrap(sampler.wrapS);
+				builder.mFormat.mWrap.mT = builder.mFormat.mWrap.mR = _translateTinyGltfWrap(sampler.wrapS);
 			}
 		}
 
-		Texture* neo_texture = new Texture(format, glm::uvec2(image.width, image.height), image.image.data());
-		if (neo_texture->mFormat.mFilter.usesMipFilter()) {
-			neo_texture->genMips();
-		}
+		builder.mDimensions.x = static_cast<uint16_t>(image.width);
+		builder.mDimensions.y = static_cast<uint16_t>(image.height);
+		builder.data = image.image.data();
+		// Heh?
+		HashedString name = HashedString(reinterpret_cast<char*>(const_cast<uint8_t*>(builder.data)));
 		if (!image.uri.empty()) {
 			NEO_LOG_I("Loaded texture %s", image.uri.c_str());
-			Library::insertTexture(image.uri, neo_texture);
+			name = HashedString(image.uri.c_str());
 		}
-		return neo_texture;
+		return textureManager.asyncLoad(name, builder);
 	}
 
 	void _processNode(const char* path, const int nodeID, neo::ResourceManagers& resourceManagers, const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene) {
@@ -412,12 +416,12 @@ namespace {
 					NEO_LOG_W("Material %s is transparent -- unsupported", material.name.c_str());
 				}
 
-				outNode.mMaterial.mNormalMap = _loadTexture(model, material.normalTexture.index, material.normalTexture.texCoord);
+				outNode.mMaterial.mNormalMap = _loadTexture(resourceManagers.mTextureManager, model, material.normalTexture.index, material.normalTexture.texCoord);
 				if (material.normalTexture.scale != 1.0) {
 					NEO_LOG_W("Material %s normal map has non-uniform scale -- unsupported", material.name.c_str());
 				}
 
-				outNode.mMaterial.mOcclusionMap = _loadTexture(model, material.occlusionTexture.index, material.occlusionTexture.texCoord);
+				outNode.mMaterial.mOcclusionMap = _loadTexture(resourceManagers.mTextureManager, model, material.occlusionTexture.index, material.occlusionTexture.texCoord);
 				if (material.occlusionTexture.strength != 1.0) {
 					NEO_LOG_W("Material %s occlusion map has a non-uniform strength -- unsupported", material.name.c_str());
 				}
@@ -425,7 +429,7 @@ namespace {
 				if (material.emissiveFactor.size() == 3) {
 					outNode.mMaterial.mEmissiveFactor = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
 				}
-				outNode.mMaterial.mEmissiveMap = _loadTexture(model, material.emissiveTexture.index, material.emissiveTexture.texCoord);
+				outNode.mMaterial.mEmissiveMap = _loadTexture(resourceManagers.mTextureManager, model, material.emissiveTexture.index, material.emissiveTexture.texCoord);
 
 				outNode.mMaterial.mMetallic = static_cast<float>(material.pbrMetallicRoughness.metallicFactor);
 				outNode.mMaterial.mRoughness = static_cast<float>(material.pbrMetallicRoughness.roughnessFactor);
@@ -437,8 +441,8 @@ namespace {
 						material.pbrMetallicRoughness.baseColorFactor[3]
 					);
 				}
-				outNode.mMaterial.mAlbedoMap = _loadTexture(model, material.pbrMetallicRoughness.baseColorTexture.index, material.pbrMetallicRoughness.baseColorTexture.texCoord);
-				outNode.mMaterial.mMetallicRoughnessMap = _loadTexture(model, material.pbrMetallicRoughness.metallicRoughnessTexture.index, material.pbrMetallicRoughness.metallicRoughnessTexture.texCoord);
+				outNode.mMaterial.mAlbedoMap = _loadTexture(resourceManagers.mTextureManager, model, material.pbrMetallicRoughness.baseColorTexture.index, material.pbrMetallicRoughness.baseColorTexture.texCoord);
+				outNode.mMaterial.mMetallicRoughnessMap = _loadTexture(resourceManagers.mTextureManager, model, material.pbrMetallicRoughness.metallicRoughnessTexture.index, material.pbrMetallicRoughness.metallicRoughnessTexture.texCoord);
 			}
 
 			outScene.mMeshNodes.push_back(outNode);

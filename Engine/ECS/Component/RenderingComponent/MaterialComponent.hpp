@@ -2,26 +2,26 @@
 
 #include "ECS/Component/Component.hpp"
 
+#include "ResourceManager/TextureResourceManager.hpp"
+
 #include <imgui.h>
 
 namespace neo {
-	class Texture; 
-
 	struct MaterialComponent: public Component {
 		bool mDoubleSided = false;
 
 		glm::vec4 mAlbedoColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
-		Texture* mAlbedoMap = nullptr;
+		TextureHandle mAlbedoMap;
 
 		float mMetallic = 0.f;
 		float mRoughness = 0.7f;
-		Texture* mMetallicRoughnessMap = nullptr;
+		TextureHandle mMetallicRoughnessMap;
 
 		glm::vec3 mEmissiveFactor = glm::vec3(0.f);
-		Texture* mEmissiveMap = nullptr;
+		TextureHandle mEmissiveMap;
 
-		Texture* mNormalMap = nullptr;
-		Texture* mOcclusionMap = nullptr;
+		TextureHandle mNormalMap;
+		TextureHandle mOcclusionMap;
 
 		virtual std::string getName() const override {
 			return "MaterialComponent";
