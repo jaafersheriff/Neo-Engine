@@ -2,6 +2,10 @@
 
 #include "Util/Profiler.hpp"
 
+#pragma warning(push)
+#include <stb_image.h>
+#pragma warning(pop)
+
 namespace neo {
 	namespace {
 		uint16_t _bytesPerPixel(types::ByteFormats format) {
@@ -46,6 +50,29 @@ namespace neo {
 
 	struct TextureLoader final : entt::resource_loader<TextureLoader, Texture> {
 
+		std::shared_ptr<Texture> load(const char* filePath, TextureFormat format) const {
+			std::string _fileName = APP_RES_DIR + filePath;
+			if (!util::fileExists(_fileName.c_str())) {
+				_fileName = ENGINE_RES_DIR + filePath;
+				NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file %s", filePath);
+			}
+
+			/* Use stbi if name is an existing file */
+			stbi_set_flip_vertically_on_load(true);
+			int width, height, components;
+			uint8_t* data = stbi_load(_fileName.c_str(), &width, &height, &components, TextureFormat::deriveBaseFormat(format.mInternalFormat) == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
+			NEO_ASSERT(data, "Error reading texture file %s", filePath);
+
+			NEO_LOG_I("Loaded texture %s [%d, %d]", filePath, width, height);
+
+			TextureResourceManager::TextureBuilder details;
+			details.mFormat = format;
+			details.mDimensions = glm::u16vec3(width, height, 0);
+			details.data = data;
+
+			return // ah shit need a callback to free the datas
+		}
+
 		std::shared_ptr<Texture> load(TextureResourceManager::TextureBuilder textureDetails) const {
 			std::shared_ptr<Texture> texture = std::make_shared<Texture>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.data);
 			if (textureDetails.mFormat.mFilter.usesMipFilter()) {
@@ -84,6 +111,15 @@ namespace neo {
 		return mTextureCache.handle(HashedString("cube")).get();
 	}
 
+	[[nodiscard]] TextureHandle TextureResourceManager::asyncLoad(const char* filePath, TextureFormat format) const {
+		HashedString id(filePath);
+		if (!isValid(id)) {
+			mFileLoadQueue.push_back(std::make_pair(std::string(filePath), format));
+		}
+
+		return id;
+	}
+
 	[[nodiscard]] TextureHandle TextureResourceManager::asyncLoad(HashedString id, TextureBuilder& textureDetails) const {
 		if (!isValid(id)) {
 			TextureBuilder copy = textureDetails;
@@ -104,8 +140,11 @@ namespace neo {
 
 	void TextureResourceManager::_tick() {
 		TRACY_ZONE();
-		for (auto&& [id, meshDetails] : mQueue) {
-			mTextureCache.load<TextureLoader>(id, meshDetails);
+		for (auto&& [path, format] : mFileLoadQueue) {
+			mTextureCache.load<TextureLoader>(path.c_str(), format);
+		}
+		for (auto&& [id, textureDetails] : mQueue) {
+			mTextureCache.load<TextureLoader>(id, textureDetails);
 		}
 		mQueue.clear();
 	}
