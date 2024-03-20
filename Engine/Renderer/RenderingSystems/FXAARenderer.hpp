@@ -17,6 +17,9 @@ namespace neo {
 			{ ShaderStage::VERTEX, "quad.vert"},
 			{ ShaderStage::FRAGMENT, "fxaa.frag" }
 		});
+		if (!resourceManagers.mShaderManager.isValid(fxaaShaderHandle)) {
+			return;
+		}
 
 		glViewport(0, 0, dimension.x, dimension.y);
 

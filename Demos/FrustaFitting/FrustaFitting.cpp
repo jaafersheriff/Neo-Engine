@@ -116,7 +116,7 @@ namespace FrustaFitting {
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
 
 			auto mesh = resourceManagers.mMeshManager.get(meshHandle);
-			ecs.addComponent<BoundingBoxComponent>(entity, mesh.mMin, mesh.mMax);
+			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
 			ecs.addComponent<PhongShaderComponent>(entity);
@@ -130,7 +130,7 @@ namespace FrustaFitting {
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(25.f, 25.f, 1.f), glm::vec3(-1.56f, 0, 0));
 			ecs.addComponent<MeshComponent>(entity, HashedString("quad"));
 			auto mesh = resourceManagers.mMeshManager.get(HashedString("quad"));
-			ecs.addComponent<BoundingBoxComponent>(entity, mesh.mMin, mesh.mMax);
+			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(glm::vec3(0.7f), 1.f);
 			ecs.addComponent<PhongShaderComponent>(entity);

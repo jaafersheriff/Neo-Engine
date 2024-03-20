@@ -18,6 +18,7 @@ namespace neo {
 	void drawSkybox(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity) {
 		TRACY_GPU();
 
+		auto skybox = ecs.cGetComponent<SkyboxComponent>();
 		auto skyboxShaderHandle = resourceManagers.mShaderManager.asyncLoad("SkyboxShader", SourceShader::ShaderCode{
 			{ ShaderStage::VERTEX, R"(
 				layout (location = 0) in vec3 vertPos;
@@ -39,9 +40,7 @@ namespace neo {
 					color = texture(cubeMap, fragTex);
 			})" }
 		});
-
-		auto skybox = ecs.cGetComponent<SkyboxComponent>();
-		if (!skybox) {
+		if (!skybox || !resourceManagers.mShaderManager.isValid(skyboxShaderHandle)) {
 			return;
 		}
 

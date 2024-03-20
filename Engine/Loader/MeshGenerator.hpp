@@ -11,6 +11,5 @@ namespace neo {
 		void generateCube(HashedString, MeshResourceManager&);
 		void generateQuad(HashedString, MeshResourceManager&);
 		void generateSphere(HashedString, MeshResourceManager&, int recursions);
-		Mesh generatePlane(float h, int VERTEX_COUNT, int numOctaves);
 	}
 }

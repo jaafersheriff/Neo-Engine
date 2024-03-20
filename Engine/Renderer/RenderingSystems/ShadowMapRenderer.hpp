@@ -16,6 +16,9 @@ namespace neo {
 			{ ShaderStage::VERTEX, "model.vert"},
 			{ ShaderStage::FRAGMENT, "depth.frag" }
 		});
+		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
+			return;
+		}
 
 		depthMap.disableDraw();
 		glViewport(0, 0, depthMap.mTextures[0]->mWidth, depthMap.mTextures[0]->mHeight);
@@ -58,7 +61,6 @@ namespace neo {
 			}
 
 			auto& resolvedShader = resourceManagers.mShaderManager.get(shaderHandle, passDefines);
-			resolvedShader.bind();
 
 			// TODO - handle the case where there's no alpha map a bit better
 			if (alphaMap) {

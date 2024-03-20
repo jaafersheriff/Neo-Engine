@@ -53,6 +53,14 @@ namespace PBR {
 
 		ShaderDefines passDefines({});
 
+		auto pbrShaderHandle = resourceManagers.mShaderManager.asyncLoad("PBR Shader", SourceShader::ConstructionArgs{
+			{ ShaderStage::VERTEX, "model.vert"},
+			{ ShaderStage::FRAGMENT, "pbr/pbr.frag" }
+		});
+		if (!resourceManagers.mShaderManager.isValid(pbrShaderHandle)) {
+			return;
+		}
+
 		MakeDefine(DEBUG_ALBEDO);
 		MakeDefine(DEBUG_METAL_ROUGHNESS);
 		MakeDefine(DEBUG_EMISSIVE);
@@ -130,11 +138,6 @@ namespace PBR {
 		if (skybox) {
 			passDefines.set(SKYBOX);
 		}
-
-		auto pbrShaderHandle = resourceManagers.mShaderManager.asyncLoad("PBR Shader", SourceShader::ConstructionArgs{
-				{ ShaderStage::VERTEX, "model.vert"},
-				{ ShaderStage::FRAGMENT, "pbr/pbr.frag" }
-			});
 
 		ShaderDefines drawDefines(passDefines);
 		const auto& view = ecs.getView<const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
@@ -287,12 +290,11 @@ namespace PBR {
 
 		// Dialectric spheres
 		static float numSpheres = 8;
-		auto& sphereMesh = resourceManagers.mMeshManager.get(HashedString("sphere"));
 		for (int i = 0; i < numSpheres; i++) {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, 0.f), glm::vec3(0.3f));
 			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
-			ecs.addComponent<BoundingBoxComponent>(entity, sphereMesh.mMin, sphereMesh.mMax);
+			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			ecs.addComponent<OpaqueComponent>(entity);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(1, 0, 0, 1);
@@ -305,7 +307,7 @@ namespace PBR {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, -1.5f), glm::vec3(0.3f));
 			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
-			ecs.addComponent<BoundingBoxComponent>(entity, sphereMesh.mMin, sphereMesh.mMax);
+			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			ecs.addComponent<OpaqueComponent>(entity);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(0.944f, 0.776f, 0.373f, 1);
@@ -318,7 +320,7 @@ namespace PBR {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f, -0.75f), glm::vec3(0.3f));
 			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
-			ecs.addComponent<BoundingBoxComponent>(entity, sphereMesh.mMin, sphereMesh.mMax);
+			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			ecs.addComponent<OpaqueComponent>(entity);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(1.f);
@@ -347,9 +349,8 @@ namespace PBR {
 				ecs.addComponent<TagComponent>(entity, helmet.mName);
 			}
 			ecs.addComponent<SpatialComponent>(entity, helmet.mSpatial);
-			ecs.addComponent<MeshComponent>(entity, helmet.mMesh);
-			auto& helmetMesh = resourceManagers.mMeshManager.get(helmet.mMesh);
-			ecs.addComponent<BoundingBoxComponent>(entity, helmetMesh.mMin, helmetMesh.mMax);
+			ecs.addComponent<MeshComponent>(entity, helmet.mMeshHandle);
+			ecs.addComponent<BoundingBoxComponent>(entity, helmet.mMin, helmet.mMax);
 			if (helmet.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 				ecs.addComponent<OpaqueComponent>(entity);
 			}
@@ -367,10 +368,8 @@ namespace PBR {
 			ecs.addComponent<TagComponent>(entity, "Bust");
 			auto spatial = ecs.addComponent<SpatialComponent>(entity, bust.mSpatial);
 			spatial->setLookDir(glm::vec3(0.f, 0.4f, 0.1f));
-			ecs.addComponent<MeshComponent>(entity, bust.mMesh);
-
-			auto& bustMesh = resourceManagers.mMeshManager.get(bust.mMesh);
-			ecs.addComponent<BoundingBoxComponent>(entity, bustMesh.mMin, bustMesh.mMax);
+			ecs.addComponent<MeshComponent>(entity, bust.mMeshHandle);
+			ecs.addComponent<BoundingBoxComponent>(entity, bust.mMin, bust.mMax);
 			ecs.addComponent<OpaqueComponent>(entity);
 			ecs.addComponent<MaterialComponent>(entity, bust.mMaterial);
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
@@ -385,10 +384,8 @@ namespace PBR {
 					ecs.addComponent<TagComponent>(entity, node.mName);
 				}
 				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
-				ecs.addComponent<MeshComponent>(entity, node.mMesh);
-
-				auto& nodeMesh = resourceManagers.mMeshManager.get(node.mMesh);
-				ecs.addComponent<BoundingBoxComponent>(entity, nodeMesh.mMin, nodeMesh.mMax);
+				ecs.addComponent<MeshComponent>(entity, node.mMeshHandle);
+				ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax);
 				if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 					ecs.addComponent<OpaqueComponent>(entity);
 				}

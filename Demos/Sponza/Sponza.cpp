@@ -122,9 +122,8 @@ namespace Sponza {
 				ecs.addComponent<TagComponent>(entity, node.mName);
 			}
 			ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
-			ecs.addComponent<MeshComponent>(entity, node.mMesh);
-			const auto& mesh = resourceManagers.mMeshManager.get(node.mMesh);
-			ecs.addComponent<BoundingBoxComponent>(entity, mesh.mMin, mesh.mMax);
+			ecs.addComponent<MeshComponent>(entity, node.mMeshHandle);
+			ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax);
 			if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 				ecs.addComponent<OpaqueComponent>(entity);
 			}

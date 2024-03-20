@@ -31,13 +31,12 @@ using namespace neo;
 
 namespace Cornell {
 	namespace {
-		inline void insertObject(MeshResourceManager& meshManager, ECS& ecs, std::string name, MeshHandle meshHandle, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation, glm::vec3 color) {
+		inline void insertObject(ECS& ecs, std::string name, MeshHandle meshHandle, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation, glm::vec3 color) {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, name);
 			ecs.addComponent<MeshComponent>(entity, meshHandle);
 			ecs.addComponent<SpatialComponent>(entity, position, scale, rotation);
-			auto& mesh = meshManager.get(meshHandle);
-			ecs.addComponent<BoundingBoxComponent>(entity, mesh.mMin, mesh.mMax);
+			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(color.x, color.y, color.z, 1.f);
 			ecs.addComponent<PhongShaderComponent>(entity);
@@ -53,6 +52,7 @@ namespace Cornell {
 	}
 
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
+		NEO_UNUSED(resourceManagers);
 
 		/* Camera */
 		{
@@ -79,14 +79,14 @@ namespace Cornell {
 		}
 
 		MeshHandle quadMesh = HashedString("quad");
-		insertObject(resourceManagers.mMeshManager, ecs, "backwall",  quadMesh, glm::vec3(0.f, 0.5f, 0.f), glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f));
-		insertObject(resourceManagers.mMeshManager, ecs, "leftwall",  quadMesh, glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(1.f), glm::vec3(0.f, glm::radians(90.f), 0.f), glm::vec3(1.f, 0.f, 0.f));
-		insertObject(resourceManagers.mMeshManager, ecs, "rightwall", quadMesh, glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.f), glm::vec3(0.f, glm::radians(-90.f), 0.f), glm::vec3(0.f, 1.f, 0.f));
-		insertObject(resourceManagers.mMeshManager, ecs, "floor",     quadMesh, glm::vec3(0.f, 0.f, 0.5f), glm::vec3(1.f), glm::vec3(glm::radians(-90.f), 0.f, 0.f), glm::vec3(1.f));
-		insertObject(resourceManagers.mMeshManager, ecs, "ceiling",   quadMesh, glm::vec3(0.f, 1.0f, 0.5f), glm::vec3(1.f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f));
-		insertObject(resourceManagers.mMeshManager, ecs, "box1",      quadMesh, glm::vec3(-0.2f, 0.35f, 0.4f), glm::vec3(0.25f, 0.7f, 0.25f), glm::vec3(0.f, glm::radians(33.f), 0.f), glm::vec3(1.f));
+		insertObject(ecs, "backwall",  quadMesh, glm::vec3(0.f, 0.5f, 0.f), glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f));
+		insertObject(ecs, "leftwall",  quadMesh, glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(1.f), glm::vec3(0.f, glm::radians(90.f), 0.f), glm::vec3(1.f, 0.f, 0.f));
+		insertObject(ecs, "rightwall", quadMesh, glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.f), glm::vec3(0.f, glm::radians(-90.f), 0.f), glm::vec3(0.f, 1.f, 0.f));
+		insertObject(ecs, "floor",     quadMesh, glm::vec3(0.f, 0.f, 0.5f), glm::vec3(1.f), glm::vec3(glm::radians(-90.f), 0.f, 0.f), glm::vec3(1.f));
+		insertObject(ecs, "ceiling",   quadMesh, glm::vec3(0.f, 1.0f, 0.5f), glm::vec3(1.f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f));
+		insertObject(ecs, "box1",      quadMesh, glm::vec3(-0.2f, 0.35f, 0.4f), glm::vec3(0.25f, 0.7f, 0.25f), glm::vec3(0.f, glm::radians(33.f), 0.f), glm::vec3(1.f));
 
-		insertObject(resourceManagers.mMeshManager, ecs, "sphere", HashedString("sphere"), glm::vec3(0.2f, 0.18f, 0.6f), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.f, glm::radians(-17.f), 0.f), glm::vec3(1.f));
+		insertObject(ecs, "sphere", HashedString("sphere"), glm::vec3(0.2f, 0.18f, 0.6f), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.f, glm::radians(-17.f), 0.f), glm::vec3(1.f));
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();

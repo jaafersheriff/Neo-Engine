@@ -38,9 +38,6 @@ namespace neo {
 
 			types::mesh::Primitive mPrimitiveType = types::mesh::Primitive::TriangleStrip;
 
-			glm::vec3 mMin = glm::vec3(0.f);
-			glm::vec3 mMax = glm::vec3(0.f);
-
 			void draw(uint32_t = 0) const;
 
 			void init();

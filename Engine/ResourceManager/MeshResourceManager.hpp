@@ -35,10 +35,9 @@ namespace neo {
 			};
 			std::unordered_map<types::mesh::VertexType, VertexBuffer> mVertexBuffers;
 			std::optional<ElementBuffer> mElementBuffer;
-			glm::vec3 mMin = glm::vec3(0.f);
-			glm::vec3 mMax = glm::vec3(0.f);
 		};
 
+		bool isValid(MeshHandle id) const;
 		Mesh& get(HashedString id);
 		const Mesh& get(HashedString id) const;
 		Mesh& get(MeshHandle id);

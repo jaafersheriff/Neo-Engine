@@ -22,6 +22,7 @@ namespace neo {
 		const ResolvedShaderInstance& get(HashedString id, const ShaderDefines& defines) const;
 		const ResolvedShaderInstance& get(ShaderHandle id, const ShaderDefines& defines) const;
 
+		bool isValid(ShaderHandle id) const;
 		[[nodiscard]] ShaderHandle asyncLoad(HashedString id, ShaderBuilder meshDetails) const;
 
 		void clear();
