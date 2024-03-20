@@ -48,7 +48,8 @@ namespace neo {
 		}
 
 		struct STBImageData {
-			STBImageData(const char* filePath, types::texture::BaseFormats baseFormat) {
+			STBImageData(const char* _filePath, types::texture::BaseFormats baseFormat) {
+				filePath = _filePath;
 				stbi_set_flip_vertically_on_load(true);
 				int components;
 				data = stbi_load(filePath, &width, &height, &components, baseFormat == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
@@ -62,6 +63,7 @@ namespace neo {
 				return data != nullptr;
 			}
 
+			const char* filePath;
 			uint8_t* data = nullptr;
 			int width = 0;
 			int height = 0;
@@ -69,26 +71,50 @@ namespace neo {
 
 		struct TextureLoader final : entt::resource_loader<TextureLoader, Texture> {
 
-			std::shared_ptr<Texture> load(const char* filePath, TextureFormat format, std::shared_ptr<Texture> dummy) const {
-				std::string _fileName = APP_RES_DIR + filePath;
-				if (!util::fileExists(_fileName.c_str())) {
-					_fileName = ENGINE_RES_DIR + filePath;
-					NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file %s", filePath);
+			std::shared_ptr<Texture> load(std::vector<std::string>& filePaths, TextureFormat format, std::shared_ptr<Texture> dummy) const {
+				if (filePaths.size() == 6 && format.mTarget != types::texture::Target::TextureCube) {
+					NEO_LOG_E("Cubemap format mismatch!");
+					filePaths.erase(filePaths.begin(), filePaths.begin() + 5);
 				}
 
-				auto stbImage = std::make_unique<STBImageData>(_fileName.c_str(), TextureFormat::deriveBaseFormat(format.mInternalFormat));
+				std::vector<std::unique_ptr<STBImageData>> images;
 
-				if (stbImage) {
-					NEO_LOG_I("Loaded texture %s [%d, %d]", filePath, stbImage->width, stbImage->height);
+				for (auto& filePath : filePaths) {
+					std::string _fileName = APP_RES_DIR + filePath;
+					if (!util::fileExists(_fileName.c_str())) {
+						_fileName = ENGINE_RES_DIR + filePath;
+						NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file %s", filePath.c_str());
+					}
+
+					images.push_back(std::make_unique<STBImageData>(_fileName.c_str(), TextureFormat::deriveBaseFormat(format.mInternalFormat)));
+				}
+
+				std::vector<uint8_t*> data;
+				glm::u16vec3 dimensions(UINT16_MAX);
+				bool check = true;
+				for (auto& image : images) {
+					if (image) {
+						NEO_LOG_I("Loaded texture %s [%d, %d]", image->filePath, image->width, image->height);
+						data.push_back(image->data);
+						dimensions.x = glm::min(dimensions.x, static_cast<uint16_t>(image->width));
+						dimensions.y = glm::min(dimensions.y, static_cast<uint16_t>(image->height));
+					}
+					else {
+						NEO_FAIL("Error reading texture file %s", image->filePath);
+						check |= false;
+					}
+				}
+
+				if (check) {
 					TextureResourceManager::TextureBuilder details;
 					details.mFormat = format;
-					details.mDimensions = glm::u16vec3(stbImage->width, stbImage->height, 0);
-					details.data = stbImage->data;
+					details.mDimensions = dimensions;
+					// HEH?
+					details.data = reinterpret_cast<uint8_t*>(data.data());
 
 					auto texture = load(details);
 					return texture;
 				}
-				NEO_FAIL("Error reading texture file %s", filePath);
 				return dummy;
 			}
 
@@ -144,9 +170,15 @@ namespace neo {
 	}
 
 	[[nodiscard]] TextureHandle TextureResourceManager::asyncLoad(const char* filePath, TextureFormat format) const {
-		HashedString id(filePath);
+		return asyncLoad(filePath, { filePath }, format);
+	}
+
+	[[nodiscard]] TextureHandle TextureResourceManager::asyncLoad(const char* name, std::vector<std::string> filePath, TextureFormat format) const {
+		NEO_ASSERT(filePath.size() == 1 || filePath.size() == 6, "Invalid file path count when loading texture");
+
+		HashedString id(name);
 		if (!isValid(id)) {
-			mFileLoadQueue.push_back(std::make_pair(std::string(filePath), format));
+			mFileLoadQueue.push_back(std::make_pair(id, std::make_pair(filePath, format)));
 		}
 
 		return id;
@@ -172,8 +204,8 @@ namespace neo {
 
 	void TextureResourceManager::_tick() {
 		TRACY_ZONE();
-		for (auto&& [path, format] : mFileLoadQueue) {
-			mTextureCache.load<TextureLoader>(HashedString(path.c_str()), path.c_str(), format, mDummyTexture);
+		for (auto&& [id, pathsAndFormat] : mFileLoadQueue) {
+			mTextureCache.load<TextureLoader>(id, pathsAndFormat.first, pathsAndFormat.second, mDummyTexture);
 		}
 		for (auto&& [id, textureDetails] : mQueue) {
 			mTextureCache.load<TextureLoader>(id, textureDetails);

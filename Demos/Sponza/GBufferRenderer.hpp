@@ -101,10 +101,10 @@ namespace Sponza {
 			const auto& material = view.get<const MaterialComponent>(entity);
 			MakeDefine(ALBEDO_MAP);
 			MakeDefine(NORMAL_MAP);
-			if (material.mAlbedoMap) {
+			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
 				drawDefines.set(ALBEDO_MAP);
 			}
-			if (material.mNormalMap) {
+			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
 				drawDefines.set(NORMAL_MAP);
 			}
 
@@ -112,12 +112,12 @@ namespace Sponza {
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
-			if (material.mAlbedoMap) {
-				resolvedShader.bindTexture("albedoMap", *material.mAlbedoMap);
+			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
+				resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.get(material.mAlbedoMap));
 			}
 
-			if (material.mNormalMap) {
-				resolvedShader.bindTexture("normalMap", *material.mNormalMap);
+			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
+				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.get(material.mNormalMap));
 			}
 
 			// UBO candidates

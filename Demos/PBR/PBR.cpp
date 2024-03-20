@@ -159,19 +159,19 @@ namespace PBR {
 			MakeDefine(METAL_ROUGHNESS_MAP);
 			MakeDefine(OCCLUSION_MAP);
 			MakeDefine(EMISSIVE);
-			if (material.mAlbedoMap) {
+			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
 				drawDefines.set(ALBEDO_MAP);
 			}
-			if (material.mNormalMap) {
+			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
 				drawDefines.set(NORMAL_MAP);
 			}
-			if (material.mMetallicRoughnessMap) {
+			if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
 				drawDefines.set(METAL_ROUGHNESS_MAP);
 			}
-			if (material.mOcclusionMap) {
+			if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
 				drawDefines.set(OCCLUSION_MAP);
 			}
-			if (material.mEmissiveMap) {
+			if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
 				drawDefines.set(EMISSIVE);
 			}
 
@@ -185,27 +185,27 @@ namespace PBR {
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
-			if (material.mAlbedoMap) {
-				resolvedShader.bindTexture("albedoMap", *material.mAlbedoMap);
+			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
+				resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.get(material.mAlbedoMap));
 			}
 
-			if (material.mNormalMap) {
-				resolvedShader.bindTexture("normalMap", *material.mNormalMap);
+			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
+				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.get(material.mNormalMap));
 			}
 
 			resolvedShader.bindUniform("metalness", material.mMetallic);
 			resolvedShader.bindUniform("roughness", material.mRoughness);
-			if (material.mMetallicRoughnessMap) {
-				resolvedShader.bindTexture("metalRoughnessMap", *material.mMetallicRoughnessMap);
+			if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
+				resolvedShader.bindTexture("metalRoughnessMap", resourceManagers.mTextureManager.get(material.mMetallicRoughnessMap));
 			}
 
-			if (material.mOcclusionMap) {
-				resolvedShader.bindTexture("occlusionMap", *material.mOcclusionMap);
+			if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
+				resolvedShader.bindTexture("occlusionMap", resourceManagers.mTextureManager.get(material.mOcclusionMap));
 			}
 
 			resolvedShader.bindUniform("emissiveFactor", material.mEmissiveFactor);
-			if (material.mEmissiveMap) {
-				resolvedShader.bindTexture("emissiveMap", *material.mEmissiveMap);
+			if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
+				resolvedShader.bindTexture("emissiveMap", resourceManagers.mTextureManager.get(material.mEmissiveMap));
 			}
 
 			// UBO candidates
@@ -228,7 +228,7 @@ namespace PBR {
 					resolvedShader.bindTexture("shadowMap", *shadowMap);
 				}
 				if (skybox) {
-					resolvedShader.bindTexture("skybox", *std::get<1>(*skybox).mSkybox);
+					resolvedShader.bindTexture("skybox", resourceManagers.mTextureManager.get(std::get<1>(*skybox).mSkybox));
 				}
 			}
 
@@ -331,14 +331,17 @@ namespace PBR {
 
 		{
 			auto skybox = ecs.createEntity();
-			ecs.addComponent<SkyboxComponent>(skybox, Library::loadCubemap("Skybox", {
+			ecs.addComponent<SkyboxComponent>(skybox, resourceManagers.mTextureManager.asyncLoad("Skybox", {
 				"envmap_miramar/miramar_ft.tga",
 				"envmap_miramar/miramar_bk.tga",
 				"envmap_miramar/miramar_up.tga",
 				"envmap_miramar/miramar_dn.tga",
 				"envmap_miramar/miramar_rt.tga",
 				"envmap_miramar/miramar_lf.tga",
-			}));
+				}, TextureFormat{
+					types::texture::Target::TextureCube
+				}
+			));
 		}
 
 		{
