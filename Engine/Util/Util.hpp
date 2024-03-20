@@ -34,10 +34,6 @@ namespace neo {
 #define NEO_ARRAYSIZE(_ARR)		  ((int)(sizeof(_ARR) / sizeof(*(_ARR))))	 // Size of a static C-style array. Don't use on pointers!
 
 	using HashedString = entt::hashed_string;
-	static std::string APP_RES_DIR = "";
-	static std::string APP_SHADER_DIR = "";
-	static std::string ENGINE_RES_DIR = "../Engine/res/";
-	static std::string ENGINE_SHADER_DIR = "../Engine/shaders/";
 
 	namespace util {
 

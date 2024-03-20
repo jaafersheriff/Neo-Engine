@@ -2,6 +2,8 @@
 
 #include "Util/Profiler.hpp"
 
+#include "Loader/Loader.hpp"
+
 #pragma warning(push)
 #include <stb_image.h>
 #pragma warning(pop)
@@ -48,9 +50,9 @@ namespace neo {
 		}
 
 		struct STBImageData {
-			STBImageData(const char* _filePath, types::texture::BaseFormats baseFormat) {
+			STBImageData(const char* _filePath, types::texture::BaseFormats baseFormat, bool flip) {
 				filePath = _filePath;
-				stbi_set_flip_vertically_on_load(true);
+				stbi_set_flip_vertically_on_load(flip);
 				int components;
 				data = stbi_load(filePath, &width, &height, &components, baseFormat == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
 			}
@@ -80,13 +82,14 @@ namespace neo {
 				std::vector<std::unique_ptr<STBImageData>> images;
 
 				for (auto& filePath : filePaths) {
-					std::string _fileName = APP_RES_DIR + filePath;
+					std::string _fileName = Loader::APP_RES_DIR + filePath;
 					if (!util::fileExists(_fileName.c_str())) {
-						_fileName = ENGINE_RES_DIR + filePath;
+						_fileName = Loader::ENGINE_RES_DIR + filePath;
 						NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file %s", filePath.c_str());
 					}
 
-					images.push_back(std::make_unique<STBImageData>(_fileName.c_str(), TextureFormat::deriveBaseFormat(format.mInternalFormat)));
+					bool flip = format.mTarget != types::texture::Target::TextureCube; // This might be really dumb
+					images.push_back(std::make_unique<STBImageData>(_fileName.c_str(), TextureFormat::deriveBaseFormat(format.mInternalFormat), flip));
 				}
 
 				std::vector<uint8_t*> data;
