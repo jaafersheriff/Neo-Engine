@@ -6,4 +6,6 @@ PUBLIC
 PRIVATE
 	entt
 	glm
+	TracyClient
+	libglew_static
 )

@@ -21,6 +21,7 @@
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
 #include "Loader/GLTFImporter.hpp"
+#include "ResourceManager/ResourceManagers.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -57,16 +58,14 @@ namespace NormalVisualizer {
 		return config;
 	}
 
-	void Demo::init(ECS& ecs, MeshManager& meshManager) {
-		NEO_UNUSED(meshManager);
-
+	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 		/* Game objects */
 		Camera camera(ecs, 45.f, 0.1f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
 
 		Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f));
 
 		{
-			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(meshManager, "bunny.gltf");
+			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(resourceManagers, "bunny.gltf");
 			const auto& bunnyNode = gltfScene.mMeshNodes[0];
 
 			auto entity = ecs.createEntity();
@@ -86,26 +85,24 @@ namespace NormalVisualizer {
 		ecs.addSystem<RotationSystem>();
 	}
 
-	void Demo::render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 
-		drawPhong<OpaqueComponent>(meshManager, ecs, cameraEntity);
+		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 
 		{
-			auto normalShader = Library::createSourceShader("NormalVisualizer", SourceShader::ConstructionArgs{
+			auto normalShaderHandle = resourceManagers.mShaderManager.asyncLoad("NormalVisualizer", SourceShader::ConstructionArgs{
 				{ShaderStage::VERTEX, "normal.vert"},
 				{ShaderStage::GEOMETRY, "normal.geom"},
 				{ShaderStage::FRAGMENT, "normal.frag"}
 			});
-
+			auto& resolvedShader = resourceManagers.mShaderManager.get(normalShaderHandle, {});
 
 			for (const auto&& [__, mesh, material, spatial] : ecs.getView<MeshComponent, MaterialComponent, SpatialComponent>().each()) {
-
-				auto& resolvedShader = normalShader->getResolvedInstance({});
 
 				resolvedShader.bindUniform("magnitude", mMagnitude);
 
@@ -117,7 +114,7 @@ namespace NormalVisualizer {
 				resolvedShader.bindUniform("N", spatial.getNormalMatrix());
 
 				/* DRAW */
-				meshManager.get(mesh.mMeshHandle).draw();
+				resourceManagers.mMeshManager.get(mesh.mMeshHandle).draw();
 			}
 		}
 	}

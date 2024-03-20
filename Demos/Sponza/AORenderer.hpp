@@ -76,7 +76,7 @@ namespace Sponza {
 		}
 	}
 
-	 Framebuffer* drawAO(const ECS& ecs, const MeshManager& meshManager, ECS::Entity cameraEntity, Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
+	 Framebuffer* drawAO(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
 		TRACY_GPU();
 		if (!Library::hasTexture("aoKernel")) {
 			_generateKernel(8);
@@ -108,11 +108,11 @@ namespace Sponza {
 
 		{
 			TRACY_GPUN("Base AO");
-			auto* aoShader = Library::createSourceShader("AOShader", SourceShader::ConstructionArgs{
+			auto aoShader = resourceManagers.mShaderManager.asyncLoad("AOShader", SourceShader::ConstructionArgs{
 				{ ShaderStage::VERTEX, "quad.vert"},
 				{ ShaderStage::FRAGMENT, "sponza/ao.frag" }
 				});
-			auto& resolvedShader = aoShader->getResolvedInstance({});
+			auto& resolvedShader = resourceManagers.mShaderManager.get(aoShader, {});
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("radius", radius);
@@ -130,7 +130,7 @@ namespace Sponza {
 			resolvedShader.bindUniform("P", P);
 			resolvedShader.bindUniform("invP", glm::inverse(P));
 
-			meshManager.get("quad").draw();
+			resourceManagers.mMeshManager.get("quad").draw();
 		}
 
 		{
@@ -155,17 +155,18 @@ namespace Sponza {
 			blurredAO->clear(glm::vec4(0.f), types::framebuffer::ClearFlagBits::Color);
 			glViewport(0, 0, targetSize.x, targetSize.y);
 
-			auto* blurShader = Library::createSourceShader("BlurShader", SourceShader::ConstructionArgs{
+			auto blurShader = resourceManagers.mShaderManager.asyncLoad("BlurShader", SourceShader::ConstructionArgs{
 				{ ShaderStage::VERTEX, "quad.vert"},
 				{ ShaderStage::FRAGMENT, "sponza/blur.frag" }
 				});
-			auto& resolvedShader = blurShader->getResolvedInstance({});
+
+			auto& resolvedShader = resourceManagers.mShaderManager.get(blurShader, {});
 			resolvedShader.bind();
 
 			resolvedShader.bindTexture("inputAO", *baseAOTarget->mTextures[0]);
 			resolvedShader.bindUniform("blurAmount", 2);
 
-			meshManager.get("quad").draw();
+			resourceManagers.mMeshManager.get("quad").draw();
 			return blurredAO;
 		}
 	}

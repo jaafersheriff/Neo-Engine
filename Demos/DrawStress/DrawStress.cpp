@@ -25,6 +25,8 @@
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
+#include "ResourceManager/ResourceManagers.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -39,7 +41,7 @@ namespace DrawStress {
 		return config;
 	}
 
-	void Demo::init(ECS& ecs, MeshManager& meshManager) {
+	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 
 		/* Camera */
 		{
@@ -66,7 +68,7 @@ namespace DrawStress {
 			auto cube = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(cube, glm::vec3(util::genRandom(-50.f, 50.f), util::genRandom(-10.f, 10.f), util::genRandom(-50.f, 50.f)), glm::vec3(util::genRandom(0.5f, 1.5f)), util::genRandomVec3(-util::PI, util::PI));
 			ecs.addComponent<MeshComponent>(cube, HashedString("cube"));
-			auto& cubeMesh = meshManager.get(HashedString("cube"));
+			auto& cubeMesh = resourceManagers.mMeshManager.get(HashedString("cube"));
 			ecs.addComponent<BoundingBoxComponent>(cube, cubeMesh.mMin, cubeMesh.mMax);
 			ecs.addComponent<PhongShaderComponent>(cube);
 			ecs.addComponent<OpaqueComponent>(cube);
@@ -80,7 +82,7 @@ namespace DrawStress {
 		ecs.addSystem<FrustumCullingSystem>();
 	}
 
-	void Demo::render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
@@ -89,7 +91,7 @@ namespace DrawStress {
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawPhong<OpaqueComponent>(meshManager, ecs, cameraEntity);
+		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 	}
 
 	void Demo::destroy() {

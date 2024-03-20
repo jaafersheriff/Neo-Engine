@@ -9,10 +9,10 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawShadows(const MeshManager& meshManager, Framebuffer& depthMap, const ECS& ecs) {
+	void drawShadows(const ResourceManagers& resourceManagers, Framebuffer& depthMap, const ECS& ecs) {
 		TRACY_GPU();
 
-		SourceShader* shader = Library::createSourceShader("ShadowMap Shader", SourceShader::ConstructionArgs{
+		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", SourceShader::ConstructionArgs{
 			{ ShaderStage::VERTEX, "model.vert"},
 			{ ShaderStage::FRAGMENT, "depth.frag" }
 		});
@@ -57,7 +57,7 @@ namespace neo {
 				alphaMap = material->mAlbedoMap;
 			}
 
-			auto& resolvedShader = shader->getResolvedInstance(passDefines);
+			auto& resolvedShader = resourceManagers.mShaderManager.get(shaderHandle, passDefines);
 			resolvedShader.bind();
 
 			// TODO - handle the case where there's no alpha map a bit better
@@ -68,7 +68,7 @@ namespace neo {
 			resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCameraEntity)->getProj());
 			resolvedShader.bindUniform("V", shadowCameraSpatial.getView());
 			resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
-			meshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
+			resourceManagers.mMeshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
 
 		if (containsAlphaTest) {

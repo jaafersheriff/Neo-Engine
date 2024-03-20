@@ -35,6 +35,8 @@
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
 #include "Renderer/RenderingSystems/WireframeRenderer.hpp"
 
+#include "ResourceManager/ResourceManagers.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -59,7 +61,7 @@ namespace FrustaFitting {
 		};
 
 		struct Light {
-			Light(MeshManager& meshManager, ECS& ecs, glm::vec3 position) {
+			Light(MeshResourceManager& meshManager, ECS& ecs, glm::vec3 position) {
 				// Light object
 				auto lightEntity = ecs.createEntity();
 				ecs.addComponent<TagComponent>(lightEntity, "Light");
@@ -88,7 +90,7 @@ namespace FrustaFitting {
 		return config;
 	}
 
-	void Demo::init(ECS& ecs, MeshManager& meshManager) {
+	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 
 		/* Game objects */
 		Camera sceneCamera("main camera", ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
@@ -99,12 +101,12 @@ namespace FrustaFitting {
 		// Perspective camera
 		Camera mockCamera("mockCamera", ecs, 50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
 		ecs.addComponent<MockCameraComponent>(mockCamera.mEntity);
-		ecs.addComponent<LineMeshComponent>(mockCamera.mEntity, meshManager, glm::vec3(0.f, 1.f, 1.f));
+		ecs.addComponent<LineMeshComponent>(mockCamera.mEntity, resourceManagers.mMeshManager, glm::vec3(0.f, 1.f, 1.f));
 		ecs.addComponent<FrustumComponent>(mockCamera.mEntity);
 		ecs.addComponent<FrustumFitSourceComponent>(mockCamera.mEntity);
 
 		// Ortho camera, shadow camera, light
-		Light light(meshManager, ecs, glm::vec3(10.f, 20.f, 0.f));
+		Light light(resourceManagers.mMeshManager, ecs, glm::vec3(10.f, 20.f, 0.f));
 
 		// Renderable
 		for (int i = 0; i < 50; i++) {
@@ -113,7 +115,7 @@ namespace FrustaFitting {
 			ecs.addComponent<MeshComponent>(entity, meshHandle);
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
 
-			auto mesh = meshManager.get(meshHandle);
+			auto mesh = resourceManagers.mMeshManager.get(meshHandle);
 			ecs.addComponent<BoundingBoxComponent>(entity, mesh.mMin, mesh.mMax);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
@@ -127,7 +129,7 @@ namespace FrustaFitting {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(25.f, 25.f, 1.f), glm::vec3(-1.56f, 0, 0));
 			ecs.addComponent<MeshComponent>(entity, HashedString("quad"));
-			auto mesh = meshManager.get(HashedString("quad"));
+			auto mesh = resourceManagers.mMeshManager.get(HashedString("quad"));
 			ecs.addComponent<BoundingBoxComponent>(entity, mesh.mMin, mesh.mMax);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(glm::vec3(0.7f), 1.f);
@@ -144,8 +146,8 @@ namespace FrustaFitting {
 		ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
 	}
 
-	void Demo::update(ECS& ecs, MeshManager& meshManager) {
-		NEO_UNUSED(meshManager);
+	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
+		NEO_UNUSED(resourceManagers);
 		const auto&& [mockCameraEntity, _, __] = *ecs.getSingleView<MockCameraComponent, SpatialComponent>();
 		const auto& view = ecs.getView<const WireframeShaderComponent, CameraCulledComponent>();
 		for (auto entity : view) {
@@ -161,7 +163,7 @@ namespace FrustaFitting {
 		}
 	}
 
-	void Demo::render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
@@ -172,15 +174,15 @@ namespace FrustaFitting {
 			}
 		} }, "Shadow map");
 		shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Depth);
-		drawShadows(meshManager, *shadowMap, ecs);
+		drawShadows(resourceManagers, *shadowMap, ecs);
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawPhong(meshManager, ecs, cameraEntity, shadowMap->mTextures[0]);
-		drawLines(meshManager, ecs, cameraEntity);
+		drawPhong(resourceManagers, ecs, cameraEntity, shadowMap->mTextures[0]);
+		drawLines(resourceManagers, ecs, cameraEntity);
 
 		// Draw wireframe for anything being seen by the mock camera
-		drawWireframe<SeenByMock>(meshManager, ecs, cameraEntity);
+		drawWireframe<SeenByMock>(resourceManagers, ecs, cameraEntity);
 	}
 }

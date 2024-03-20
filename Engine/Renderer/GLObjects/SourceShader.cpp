@@ -10,14 +10,6 @@
 #include <imgui.h>
 
 namespace neo {
-	SourceShader::SourceShader(const char* name, const ConstructionArgs& args) 
-		: mName(name)
-		, mConstructionArgs(args) 
-	{
-		for (auto& arg : args) {
-			mShaderSources.emplace(arg.first, Loader::loadFileString(arg.second));
-		}
-	}
 
 	// Don't put this in a hot loop
 	SourceShader::SourceShader(const char* name, const ShaderCode& sources)
@@ -43,7 +35,7 @@ namespace neo {
 		mShaderSources.clear();
 	}
 
-	const ResolvedShaderInstance& SourceShader::getResolvedInstance(const ShaderDefines& defines) {
+	const ResolvedShaderInstance& SourceShader::getResolvedInstance(const ShaderDefines& defines) const {
 		HashedShaderDefines hash = _getDefinesHash(defines);
 		auto it = mResolvedShaders.find(hash);
 		if (it == mResolvedShaders.end()) {
@@ -75,15 +67,10 @@ namespace neo {
 			}
 		}
 
-		if (it->second.mValid) {
-			it->second.bind();
-			return it->second;
-		}
-		Library::getDummyShader().bind();
-		return Library::getDummyShader();
+		return it->second;
 	}
 
-	SourceShader::HashedShaderDefines SourceShader::_getDefinesHash(const ShaderDefines& defines) {
+	SourceShader::HashedShaderDefines SourceShader::_getDefinesHash(const ShaderDefines& defines) const {
 		HashedShaderDefines seed = static_cast<HashedShaderDefines>(defines.mDefines.size());
 		const ShaderDefines* _defines = &defines;
 		while (_defines) {
@@ -101,6 +88,7 @@ namespace neo {
 
 	void SourceShader::imguiEditor() {
 		if (mConstructionArgs && ImGui::Button("Reload all")) {
+			// TODO - move to resource manager
 			destroy();
 			for (auto& arg : *mConstructionArgs) {
 				mShaderSources.emplace(arg.first, Loader::loadFileString(arg.second));

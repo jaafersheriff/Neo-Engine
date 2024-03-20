@@ -26,10 +26,10 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawPhong(const MeshManager& meshManager, const ECS& ecs, const ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const ShaderDefines& inDefines = {}) {
+	void drawPhong(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
-		SourceShader* shader = Library::createSourceShader("Phong Shader", 
+		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Phong Shader", 
 			SourceShader::ConstructionArgs{
 				{ ShaderStage::VERTEX, "model.vert"},
 				{ ShaderStage::FRAGMENT, "phong.frag" }
@@ -115,7 +115,7 @@ namespace neo {
 				drawDefines.set(NORMAL_MAP);
 			}
 
-			auto& resolvedShader = shader->getResolvedInstance(drawDefines);
+			auto& resolvedShader = resourceManagers.mShaderManager.get(shaderHandle, drawDefines);
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
@@ -150,7 +150,7 @@ namespace neo {
 			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
 
-			meshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
+			resourceManagers.mMeshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
 
 		if (containsAlphaTest) {

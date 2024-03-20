@@ -8,9 +8,9 @@ namespace neo {
 	namespace prefabs {
 
 		// Maybe these shoudl accept the resource manager so they can direclty load
-		void generateCube(HashedString, MeshManager&);
-		void generateQuad(HashedString, MeshManager&);
-		void generateSphere(HashedString, MeshManager&, int recursions);
+		void generateCube(HashedString, MeshResourceManager&);
+		void generateQuad(HashedString, MeshResourceManager&);
+		void generateSphere(HashedString, MeshResourceManager&, int recursions);
 		Mesh generatePlane(float h, int VERTEX_COUNT, int numOctaves);
 	}
 }

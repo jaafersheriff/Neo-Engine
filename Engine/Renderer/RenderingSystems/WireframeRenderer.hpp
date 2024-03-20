@@ -10,10 +10,10 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawWireframe(const MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
+	void drawWireframe(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
-		SourceShader* shader = Library::createSourceShader("Wireframe Shader", SourceShader::ConstructionArgs{
+		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Wireframe Shader", SourceShader::ConstructionArgs{
 			{ ShaderStage::VERTEX, "model.vert"},
 			{ ShaderStage::FRAGMENT, "color.frag" }
 		});
@@ -31,7 +31,7 @@ namespace neo {
 				}
 			}
 
-			auto resolvedShader = shader->getResolvedInstance(inDefines);
+			auto& resolvedShader = resourceManagers.mShaderManager.get(shaderHandle, inDefines);
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
@@ -39,7 +39,7 @@ namespace neo {
 			resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
 			resolvedShader.bindUniform("color", view.get<const WireframeShaderComponent>(entity).mColor);
 
-			meshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
+			resourceManagers.mMeshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
 
 		glEnable(GL_CULL_FACE);

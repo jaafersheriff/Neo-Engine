@@ -9,9 +9,11 @@
 #include <memory>
 
 namespace neo {
+	class ResourceManagers;
 
 	using MeshHandle = entt::id_type;
-	class MeshManager {
+	class MeshResourceManager {
+		friend ResourceManagers;
 	public:
 		struct MeshBuilder {
 			types::mesh::Primitive mPrimtive;
@@ -37,16 +39,18 @@ namespace neo {
 			glm::vec3 mMax = glm::vec3(0.f);
 		};
 
-		using MeshCache = entt::resource_cache<Mesh>;
-		MeshCache mMeshCache;
-
 		Mesh& get(HashedString id);
 		const Mesh& get(HashedString id) const;
 		Mesh& get(MeshHandle id);
 		const Mesh& get(MeshHandle id) const;
 
-		[[nodiscard]] MeshHandle load(HashedString id, MeshBuilder meshDetails);
+		[[nodiscard]] MeshHandle asyncLoad(HashedString id, MeshBuilder& meshDetails) const;
 
 		void clear();
+	private:
+		void _tick();
+		mutable std::vector<std::pair<MeshHandle, MeshBuilder>> mQueue;
+		using MeshCache = entt::resource_cache<Mesh>;
+		MeshCache mMeshCache;
 	};
 }

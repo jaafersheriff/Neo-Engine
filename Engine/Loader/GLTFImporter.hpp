@@ -34,6 +34,6 @@ namespace neo {
 			std::vector<Node> mMeshNodes;
 		};
 
-		Scene loadScene(const std::string& fileName, glm::mat4 baseTransform, MeshManager& meshManager);
+		Scene loadScene(const std::string& fileName, glm::mat4 baseTransform, ResourceManagers& resourceManagers);
 	}
 }

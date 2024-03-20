@@ -16,30 +16,6 @@ namespace neo {
 	std::unordered_map<std::string, Texture*> Library::mTextures;
 	std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
 	std::unordered_map<neo::PooledFramebufferDetails, std::vector<Library::PooledFramebuffer>> Library::mPooledFramebuffers;
-	std::unordered_map<std::string, SourceShader*> Library::mShaders;
-	SourceShader* Library::mDummyShader;
-
-	void Library::init() {
-		mDummyShader = new SourceShader("Dummy", SourceShader::ShaderCode{
-			{ShaderStage::VERTEX, 
-				R"(
-					void main() {
-						gl_Position = vec4(0,0,0,0);
-					}
-				)"},
-			{ShaderStage::FRAGMENT,
-				R"(
-					out vec4 color;
-					void main() {
-						color = vec4(0,0,0,0);
-					}
-				)"}
-		});
-	}
-
-	const ResolvedShaderInstance& Library::getDummyShader() {
-		return mDummyShader->getResolvedInstance({});
-	}
 
 	void Library::tick() {
 		TRACY_ZONE();
@@ -189,40 +165,6 @@ namespace neo {
 		}
 	}
 
-	SourceShader* Library::createSourceShader(const std::string& name, const SourceShader::ConstructionArgs& args) {
-		auto it = mShaders.find(name);
-		if (it != mShaders.end()) {
-			return it->second;
-		}
-
-		NEO_LOG("Creating Shader %s", name.c_str());
-		SourceShader* source = new SourceShader(name.c_str(), args);
-		mShaders.emplace(name, source);
-		return source;
-	}
-
-	SourceShader* Library::createSourceShader(const std::string& name, const SourceShader::ShaderCode& shaderCode) {
-		TRACY_ZONE();
-		auto it = mShaders.find(name);
-		if (it != mShaders.end()) {
-			return it->second;
-		}
-
-		NEO_LOG("Creating Shader %s", name.c_str());
-		SourceShader* source = new SourceShader(name.c_str(), shaderCode);
-		mShaders.emplace(name, source);
-		return source;
-	}
-
-
-	SourceShader* Library::getSourceShader(const char* name) {
-		TRACY_ZONE();
-		auto it = mShaders.find(name);
-		NEO_ASSERT(it != mShaders.end(), "Shader %s doesn't exist!", name);
-
-		return it->second;
-	}
-
 	void Library::insertTexture(const std::string& name, Texture* texture) {
 		if (texture) {
 			mTextures.insert({ name, texture });
@@ -240,10 +182,6 @@ namespace neo {
 			frameBuffer.second->destroy();
 		}
 		mFramebuffers.clear();
-		for (auto& shader : mShaders) {
-			shader.second->destroy();
-		}
-		mShaders.clear();
 	}
 
 	void Library::imGuiEditor() {
@@ -300,15 +238,15 @@ namespace neo {
 			}
 			ImGui::TreePop();
 		}
-		if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
-			for (auto& shader : Library::mShaders) {
-				if (ImGui::TreeNode(shader.first.c_str())) {
-					shader.second->imguiEditor();
-					ImGui::TreePop();
-				}
-			}
-			ImGui::TreePop();
-		}
+		// if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
+		// 	for (auto& shader : Library::mShaders) {
+		// 		if (ImGui::TreeNode(shader.first.c_str())) {
+		// 			shader.second->imguiEditor();
+		// 			ImGui::TreePop();
+		// 		}
+		// 	}
+		// 	ImGui::TreePop();
+		// }
 		// if (ImGui::TreeNodeEx("Meshes", ImGuiTreeNodeFlags_DefaultOpen)) {
 		// 	for (auto& m : Library::mMeshes) {
 		// 		ImGui::TextWrapped("%s", m.first.c_str());
