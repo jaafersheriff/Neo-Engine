@@ -7,8 +7,8 @@ namespace neo {
 
 	namespace prefabs {
 
-		void generateCube(HashedString id, MeshManager& meshManager) {
-			MeshManager::MeshBuilder builder;
+		void generateCube(HashedString id, MeshResourceManager& meshManager) {
+			MeshResourceManager::MeshBuilder builder;
 
 			std::vector<float> verts =
 			{ -0.5f, -0.5f, -0.5f,
@@ -147,12 +147,12 @@ namespace neo {
 
 			builder.mPrimtive = types::mesh::Primitive::Triangles;
 
-			auto _id = meshManager.load(id, builder);
+			auto _id = meshManager.asyncLoad(id, builder);
 			NEO_UNUSED(_id);
 		}
 
-		void generateQuad(HashedString id, MeshManager& meshManager) {
-			MeshManager::MeshBuilder builder;
+		void generateQuad(HashedString id, MeshResourceManager& meshManager) {
+			MeshResourceManager::MeshBuilder builder;
 
 			std::vector<float> verts =
 			{ -0.5f, -0.5f,  0.f,
@@ -216,13 +216,13 @@ namespace neo {
 
 			builder.mPrimtive = types::mesh::Primitive::Triangles;
 
-			auto _id = meshManager.load(id, builder);
+			auto _id = meshManager.asyncLoad(id, builder);
 			NEO_UNUSED(_id);
 		}
 
 		// http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
-		void generateSphere(HashedString id, MeshManager& meshManager, int recursions) {
-			MeshManager::MeshBuilder builder;
+		void generateSphere(HashedString id, MeshResourceManager& meshManager, int recursions) {
+			MeshResourceManager::MeshBuilder builder;
 
 			float t = (float)(1.f + (glm::sqrt(5.0)) / 2.f);
 			float length = glm::length(glm::vec3(1, 0, t));
@@ -357,7 +357,7 @@ namespace neo {
 
 			builder.mPrimtive = types::mesh::Primitive::Triangles;
 
-			auto _id = meshManager.load(id, builder);
+			auto _id = meshManager.asyncLoad(id, builder);
 			NEO_UNUSED(_id);
 		}
 

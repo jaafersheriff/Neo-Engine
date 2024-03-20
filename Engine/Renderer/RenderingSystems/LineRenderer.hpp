@@ -10,17 +10,18 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawLines(const MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
+	void drawLines(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
 		bool oldDepthState = glIsEnabled(GL_DEPTH_TEST);
 		glEnable(GL_LINE_SMOOTH);
 
-		const auto& lineShader = Library::createSourceShader("LineShader", SourceShader::ConstructionArgs{
+		auto lineShaderHandle = resourceManagers.mShaderManager.asyncLoad("LineShader", SourceShader::ConstructionArgs{
 			{ ShaderStage::VERTEX, "line.vert"},
 			{ ShaderStage::FRAGMENT, "line.frag" }
-		})->getResolvedInstance(inDefines);
+		});
 
+		auto& lineShader = resourceManagers.mShaderManager.get(lineShaderHandle, inDefines);
 		lineShader.bind();
 		lineShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
 		lineShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
@@ -44,7 +45,7 @@ namespace neo {
 			}
 
 			/* Bind mesh */
-			meshManager.get(line->mMeshHandle).draw();
+			resourceManagers.mMeshManager.get(line->mMeshHandle).draw();
 		}
 
 		if (oldDepthState) {

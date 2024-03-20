@@ -7,17 +7,17 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "Loader/Library.hpp"
-#include "ResourceManager/MeshResourceManager.hpp"
+#include "ResourceManager/ResourceManagers.hpp"
 
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
 using namespace neo;
 
 namespace Sponza {
-	void drawPointLights(const MeshManager& meshManager, const ECS& ecs, Framebuffer& gbuffer, ECS::Entity cameraEntity, const glm::uvec2 resolution, const float debugRadius) {
+	void drawPointLights(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& gbuffer, ECS::Entity cameraEntity, const glm::uvec2 resolution, const float debugRadius) {
 		TRACY_GPU();
 
-		auto* lightResolveShader = Library::createSourceShader("PointLightResolveShader", SourceShader::ConstructionArgs{
+		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightResolveShader", SourceShader::ConstructionArgs{
 			{ ShaderStage::VERTEX, "sponza/pointlightresolve.vert"},
 			{ ShaderStage::FRAGMENT, "sponza/pointlightresolve.frag" }
 		});
@@ -32,7 +32,7 @@ namespace Sponza {
 		if (debugRadius > 0.f) {
 			defines.set(SHOW_LIGHTS);
 		}
-		auto& resolvedShader = lightResolveShader->getResolvedInstance(defines);
+		auto& resolvedShader = resourceManagers.mShaderManager.get(lightResolveShaderHandle, defines);
 		resolvedShader.bind();
 
 		if (debugRadius > 0.f) {
@@ -71,13 +71,13 @@ namespace Sponza {
 				glCullFace(GL_BACK);
 			}
 
-			meshManager.get(HashedString("sphere")).draw();
+			resourceManagers.mMeshManager.get(HashedString("sphere")).draw();
 		}
 
 		// TODO - reset state
 	}
 
-	void drawDirectionalLights(const MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, Texture* shadowMap = nullptr) {
+	void drawDirectionalLights(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, Texture* shadowMap = nullptr) {
 		TRACY_GPU();
 
 		ShaderDefines defines;
@@ -97,11 +97,11 @@ namespace Sponza {
 			L = biasMatrix * shadowOrtho.getProj() * shadowCameraSpatial.getView();
 		}
 
-		auto* lightResolveShader = Library::createSourceShader("DirectionalLightResolveShader", SourceShader::ConstructionArgs{
+		auto lightResolveShader = resourceManagers.mShaderManager.asyncLoad("DirectionalLightResolveShader", SourceShader::ConstructionArgs{
 			{ ShaderStage::VERTEX, "quad.vert"},
 			{ ShaderStage::FRAGMENT, "sponza/directionallightresolve.frag" }
 		});
-		auto& resolvedShader = lightResolveShader->getResolvedInstance(defines);
+		auto& resolvedShader = resourceManagers.mShaderManager.get(lightResolveShader, defines);
 		resolvedShader.bind();
 
 		if (shadowsEnabled) {
@@ -123,7 +123,7 @@ namespace Sponza {
 
 		glDisable(GL_DEPTH_TEST);
 
-		meshManager.get(HashedString("quad")).draw();
+		resourceManagers.mMeshManager.get(HashedString("quad")).draw();
 
 		// TODO - reset GL state
 	}

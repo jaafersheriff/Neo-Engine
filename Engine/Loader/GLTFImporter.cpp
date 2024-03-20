@@ -4,6 +4,7 @@
 #include "Renderer/GLObjects/Texture.hpp"
 
 #include "Library.hpp"
+#include "ResourceManager/ResourceManagers.hpp"
 
 #pragma warning(push)
 #pragma warning(disable: 4201)
@@ -254,7 +255,7 @@ namespace {
 		return neo_texture;
 	}
 
-	void _processNode(const char* path, const int nodeID, neo::MeshManager& meshManager, const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene) {
+	void _processNode(const char* path, const int nodeID, neo::ResourceManagers& resourceManagers, const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene) {
 		using namespace neo;
 		if (node.camera != -1 || node.light != -1) {
 			return;
@@ -282,7 +283,7 @@ namespace {
 		nodeSpatial.setModelMatrix(parentXform * localTransform);
 
 		for (auto& child : node.children) {
-			_processNode(path, child, meshManager, model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);
+			_processNode(path, child, resourceManagers, model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);
 		}
 
 		// Mesh
@@ -304,7 +305,7 @@ namespace {
 			outNode.mName = node.name + std::to_string(i);
 			outNode.mSpatial = nodeSpatial;
 
-			MeshManager::MeshBuilder builder;
+			MeshResourceManager::MeshBuilder builder;
 			builder.mPrimtive = _translateTinyGltfPrimitiveType(gltfMesh.mode);
 
 			// Indices
@@ -386,7 +387,7 @@ namespace {
 				name = ss.str();
 			}
 			NEO_LOG_I("Loaded mesh %s", name.c_str());
-			outNode.mMesh = meshManager.load(HashedString(name.c_str()), builder);
+			outNode.mMesh = resourceManagers.mMeshManager.asyncLoad(HashedString(name.c_str()), builder);
 
 			if (gltfMesh.material > -1) {
 				auto& material = model.materials[gltfMesh.material];
@@ -449,7 +450,7 @@ namespace {
 namespace neo {
 	namespace GLTFImporter {
 
-		Scene loadScene(const std::string& path, glm::mat4 baseTransform, MeshManager& meshManager) {
+		Scene loadScene(const std::string& path, glm::mat4 baseTransform, ResourceManagers& resourceManagers) {
 			NEO_ASSERT(path.length() > 4 && path.substr(path.length() - 4, 4) == "gltf", "Unsupported file type");
 
 			tinygltf::Model model;
@@ -488,7 +489,7 @@ namespace neo {
 			Scene outScene;
 			for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
 				const auto& node = model.nodes[nodeID];
-				_processNode(path.c_str(), nodeID, meshManager, model, node, baseTransform, outScene);
+				_processNode(path.c_str(), nodeID, resourceManagers, model, node, baseTransform, outScene);
 			}
 
 			NEO_LOG_I("Successfully parsed %s", path.c_str());

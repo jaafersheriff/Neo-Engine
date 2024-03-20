@@ -34,7 +34,6 @@ namespace neo {
 			Library(const Library&) = delete;
 			Library& operator=(const Library&) = delete;
 
-			static void init();
 			static void tick();
 			static void clean();
 
@@ -50,11 +49,6 @@ namespace neo {
 			static Framebuffer* createFramebuffer(const std::string&);
 			static Framebuffer* getPooledFramebuffer(const PooledFramebufferDetails& details, std::optional<std::string> name = std::nullopt);
 
-			static SourceShader* createSourceShader(const std::string& name, const SourceShader::ConstructionArgs& args);
-			static SourceShader* createSourceShader(const std::string& name, const SourceShader::ShaderCode& shaderCode);
-			static SourceShader* getSourceShader(const char* name);
-			static const ResolvedShaderInstance& getDummyShader();
-
 			static void imGuiEditor();
 
 		private:
@@ -67,8 +61,6 @@ namespace neo {
 				std::optional<std::string> mName = std::nullopt;
 			};
 			static std::unordered_map<PooledFramebufferDetails, std::vector<PooledFramebuffer>> mPooledFramebuffers;
-			static std::unordered_map<std::string, SourceShader*> mShaders;
-			static SourceShader* mDummyShader;
 
 			static PooledFramebuffer& _findPooledFramebuffer(const PooledFramebufferDetails& details);
 	};

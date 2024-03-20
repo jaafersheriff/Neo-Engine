@@ -9,8 +9,8 @@ namespace DrawStress {
 	class Demo : public IDemo {
 	public:
 		virtual IDemo::Config getConfig() const override;
-		virtual void init(ECS& ecs, MeshManager& meshManager) override;
-		virtual void render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) override;
+		virtual void init(ECS& ecs, ResourceManagers& resourceManagers) override;
+		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) override;
 		virtual void destroy() override;
 
 	};

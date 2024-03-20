@@ -47,7 +47,7 @@ namespace PBR {
 	};
 
 	template<typename... CompTs>
-	void _drawPBR(const MeshManager& meshManager, const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, Texture* shadowMap) {
+	void _drawPBR(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, Texture* shadowMap) {
 		TRACY_GPU();
 
 		ShaderDefines passDefines({});
@@ -130,7 +130,7 @@ namespace PBR {
 			passDefines.set(SKYBOX);
 		}
 
-		SourceShader* shader = Library::createSourceShader("PBR Shader", SourceShader::ConstructionArgs{
+		auto pbrShaderHandle = resourceManagers.mShaderManager.asyncLoad("PBR Shader", SourceShader::ConstructionArgs{
 				{ ShaderStage::VERTEX, "model.vert"},
 				{ ShaderStage::FRAGMENT, "pbr/pbr.frag" }
 			});
@@ -172,13 +172,13 @@ namespace PBR {
 				drawDefines.set(EMISSIVE);
 			}
 
-			const auto& mesh = meshManager.get(view.get<const MeshComponent>(entity).mMeshHandle);
+			const auto& mesh = resourceManagers.mMeshManager.get(view.get<const MeshComponent>(entity).mMeshHandle);
 			MakeDefine(TANGENTS);
 			if (mesh.hasVBO(types::mesh::VertexType::Tangent)) {
 				drawDefines.set(TANGENTS);
 			}
 
-			auto& resolvedShader = shader->getResolvedInstance(drawDefines);
+			auto& resolvedShader = resourceManagers.mShaderManager.get(pbrShaderHandle, drawDefines);
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
@@ -250,7 +250,7 @@ namespace PBR {
 		return config;
 	}
 
-	void Demo::init(ECS& ecs, MeshManager& meshManager) {
+	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 
 		/* Camera */
 		{
@@ -286,7 +286,7 @@ namespace PBR {
 
 		// Dialectric spheres
 		static float numSpheres = 8;
-		auto& sphereMesh = meshManager.get(HashedString("sphere"));
+		auto& sphereMesh = resourceManagers.mMeshManager.get(HashedString("sphere"));
 		for (int i = 0; i < numSpheres; i++) {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, 0.f), glm::vec3(0.3f));
@@ -340,14 +340,14 @@ namespace PBR {
 		}
 
 		{
-			GLTFImporter::Node helmet = Loader::loadGltfScene(meshManager, "DamagedHelmet/DamagedHelmet.gltf", glm::translate(glm::mat4(1.f), glm::vec3(0.f, 2.5f, -0.5f))).mMeshNodes[0];
+			GLTFImporter::Node helmet = Loader::loadGltfScene(resourceManagers, "DamagedHelmet/DamagedHelmet.gltf", glm::translate(glm::mat4(1.f), glm::vec3(0.f, 2.5f, -0.5f))).mMeshNodes[0];
 			auto entity = ecs.createEntity();
 			if (!helmet.mName.empty()) {
 				ecs.addComponent<TagComponent>(entity, helmet.mName);
 			}
 			ecs.addComponent<SpatialComponent>(entity, helmet.mSpatial);
 			ecs.addComponent<MeshComponent>(entity, helmet.mMesh);
-			auto& helmetMesh = meshManager.get(helmet.mMesh);
+			auto& helmetMesh = resourceManagers.mMeshManager.get(helmet.mMesh);
 			ecs.addComponent<BoundingBoxComponent>(entity, helmetMesh.mMin, helmetMesh.mMax);
 			if (helmet.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 				ecs.addComponent<OpaqueComponent>(entity);
@@ -361,14 +361,14 @@ namespace PBR {
 		}
 
 		{
-			GLTFImporter::Node bust = Loader::loadGltfScene(meshManager, "fblock.gltf", glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(-5.f, 2.5f, -0.5f)), glm::vec3(2.f))).mMeshNodes[0];
+			GLTFImporter::Node bust = Loader::loadGltfScene(resourceManagers, "fblock.gltf", glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(-5.f, 2.5f, -0.5f)), glm::vec3(2.f))).mMeshNodes[0];
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Bust");
 			auto spatial = ecs.addComponent<SpatialComponent>(entity, bust.mSpatial);
 			spatial->setLookDir(glm::vec3(0.f, 0.4f, 0.1f));
 			ecs.addComponent<MeshComponent>(entity, bust.mMesh);
 
-			auto& bustMesh = meshManager.get(bust.mMesh);
+			auto& bustMesh = resourceManagers.mMeshManager.get(bust.mMesh);
 			ecs.addComponent<BoundingBoxComponent>(entity, bustMesh.mMin, bustMesh.mMax);
 			ecs.addComponent<OpaqueComponent>(entity);
 			ecs.addComponent<MaterialComponent>(entity, bust.mMaterial);
@@ -377,7 +377,7 @@ namespace PBR {
 		}
 
 		{
-			GLTFImporter::Scene scene = Loader::loadGltfScene(meshManager, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
+			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
 			for (auto& node : scene.mMeshNodes) {
 				auto entity = ecs.createEntity();
 				if (!node.mName.empty()) {
@@ -385,7 +385,8 @@ namespace PBR {
 				}
 				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
 				ecs.addComponent<MeshComponent>(entity, node.mMesh);
-				auto& nodeMesh = meshManager.get(node.mMesh);
+
+				auto& nodeMesh = resourceManagers.mMeshManager.get(node.mMesh);
 				ecs.addComponent<BoundingBoxComponent>(entity, nodeMesh.mMin, nodeMesh.mMax, true);
 				if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 					ecs.addComponent<OpaqueComponent>(entity);
@@ -429,7 +430,7 @@ namespace PBR {
 		}
 	}
 
-	void Demo::render(const MeshManager& meshManager, const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
@@ -441,8 +442,8 @@ namespace PBR {
 		} }, "Shadow map");
 		if (mDrawShadows) {
 			shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Depth);
-			drawShadows<OpaqueComponent>(meshManager, *shadowMap, ecs);
-			drawShadows<AlphaTestComponent>(meshManager, *shadowMap, ecs);
+			drawShadows<OpaqueComponent>(resourceManagers, *shadowMap, ecs);
+			drawShadows<AlphaTestComponent>(resourceManagers, *shadowMap, ecs);
 		}
 
 
@@ -452,10 +453,27 @@ namespace PBR {
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
-		drawSkybox(meshManager, ecs, cameraEntity);
+		drawSkybox(resourceManagers, ecs, cameraEntity);
 
+<<<<<<< HEAD
 		_drawPBR<OpaqueComponent>(meshManager, ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
 		_drawPBR<AlphaTestComponent>(meshManager, ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
+=======
+		_drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
+		_drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
+
+		backbuffer.bind();
+		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color);
+		drawFXAA(resourceManagers, glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0]);
+		// Don't forget the depth. Because reasons.
+		glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
+			0, 0, viewport.mSize.x, viewport.mSize.y,
+			0, 0, viewport.mSize.x, viewport.mSize.y,
+			GL_DEPTH_BUFFER_BIT,
+			GL_NEAREST
+		);
+
+>>>>>>> 47b8c9b9 (Shader manager builds)
 	}
 
 	void Demo::destroy() {

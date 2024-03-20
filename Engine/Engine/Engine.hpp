@@ -2,7 +2,6 @@
 
 #include "Renderer/Renderer.hpp"
 #include "Loader/Library.hpp"
-#include "ResourceManager/MeshResourceManager.hpp"
 #include "Util/Util.hpp"
 
 #include "ECS/ECS.hpp"
@@ -25,6 +24,7 @@ namespace neo {
 	class Window;
 	class Keyboard;
 	class Mouse;
+	class ResourceManagers;
 
 	class Engine {
 
@@ -39,15 +39,15 @@ namespace neo {
 
 			static void init();
 			static void run(DemoWrangler&);
-			static void shutDown(MeshManager&);
+			static void shutDown(ResourceManagers&);
 
 		private:
 			static ECS mECS;
-			static void _startFrame(util::Profiler& profiler, MeshManager& meshManager);
+			static void _startFrame(util::Profiler& profiler, ResourceManagers& resourceManagers);
 			static void _endFrame();
 
-			static void _createPrefabs(MeshManager&);
-			static void _swapDemo(DemoWrangler&, MeshManager&);
+			static void _createPrefabs(ResourceManagers&);
+			static void _swapDemo(DemoWrangler&, ResourceManagers&);
 
 			/* Hardware */
 			static WindowSurface mWindow;
