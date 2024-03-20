@@ -87,6 +87,12 @@ namespace neo {
 		TRACY_ZONE();
 		for (auto&& [id, meshDetails] : mQueue) {
 			mMeshCache.load<MeshLoader>(id, meshDetails);
+			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
+				free(const_cast<uint8_t*>(buffer.data));
+			}
+			if (meshDetails.mElementBuffer.has_value()) {
+				free(const_cast<uint8_t*>(meshDetails.mElementBuffer->data));
+			}
 		}
 		mQueue.clear();
 	}

@@ -7,7 +7,6 @@
 #include "Util/Profiler.hpp"
 
 namespace neo {
-
 	struct ShaderLoader final : entt::resource_loader<ShaderLoader, SourceShader> {
 
 		std::shared_ptr<SourceShader> load(std::string& name, ShaderResourceManager::ShaderBuilder shaderDetails, std::shared_ptr<SourceShader> fallback) const {
@@ -49,6 +48,11 @@ namespace neo {
 					}
 				)"}
 		});
+	}
+
+	ShaderResourceManager::~ShaderResourceManager() {
+		mDummyShader->destroy();
+		mDummyShader.reset();
 	}
 
 	bool ShaderResourceManager::isValid(ShaderHandle id) const {
