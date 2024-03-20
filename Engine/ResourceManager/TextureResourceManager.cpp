@@ -46,42 +46,74 @@ namespace neo {
 				return 1;
 			}
 		}
+
+		struct STBImageData {
+			STBImageData(const char* filePath, types::texture::BaseFormats baseFormat) {
+				stbi_set_flip_vertically_on_load(true);
+				int components;
+				data = stbi_load(filePath, &width, &height, &components, baseFormat == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
+			}
+
+			~STBImageData() {
+				stbi_image_free(data);
+			}
+
+			operator bool() const {
+				return data != nullptr;
+			}
+
+			uint8_t* data = nullptr;
+			int width = 0;
+			int height = 0;
+		};
+
+		struct TextureLoader final : entt::resource_loader<TextureLoader, Texture> {
+
+			std::shared_ptr<Texture> load(const char* filePath, TextureFormat format, std::shared_ptr<Texture> dummy) const {
+				std::string _fileName = APP_RES_DIR + filePath;
+				if (!util::fileExists(_fileName.c_str())) {
+					_fileName = ENGINE_RES_DIR + filePath;
+					NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file %s", filePath);
+				}
+
+				auto stbImage = std::make_unique<STBImageData>(_fileName.c_str(), TextureFormat::deriveBaseFormat(format.mInternalFormat));
+
+				if (stbImage) {
+					NEO_LOG_I("Loaded texture %s [%d, %d]", filePath, stbImage->width, stbImage->height);
+					TextureResourceManager::TextureBuilder details;
+					details.mFormat = format;
+					details.mDimensions = glm::u16vec3(stbImage->width, stbImage->height, 0);
+					details.data = stbImage->data;
+
+					auto texture = load(details);
+					return texture;
+				}
+				NEO_FAIL("Error reading texture file %s", filePath);
+				return dummy;
+			}
+
+			std::shared_ptr<Texture> load(TextureResourceManager::TextureBuilder textureDetails) const {
+				std::shared_ptr<Texture> texture = std::make_shared<Texture>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.data);
+				if (textureDetails.mFormat.mFilter.usesMipFilter()) {
+					texture->genMips();
+				}
+
+				return texture;
+			}
+		};
 	}
 
-	struct TextureLoader final : entt::resource_loader<TextureLoader, Texture> {
+	TextureResourceManager::TextureResourceManager() {
+		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF, /**/ 0xFF, 0xFF, 0xFF, 0xFF,
+		                   0xFF, 0xFF, 0xFF, 0xFF, /**/ 0x00, 0x00, 0x00, 0xFF
+		};
+		mDummyTexture = std::make_shared<Texture>(TextureFormat{}, glm::u16vec2(2, 2), data);
+	}
 
-		std::shared_ptr<Texture> load(const char* filePath, TextureFormat format) const {
-			std::string _fileName = APP_RES_DIR + filePath;
-			if (!util::fileExists(_fileName.c_str())) {
-				_fileName = ENGINE_RES_DIR + filePath;
-				NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file %s", filePath);
-			}
-
-			/* Use stbi if name is an existing file */
-			stbi_set_flip_vertically_on_load(true);
-			int width, height, components;
-			uint8_t* data = stbi_load(_fileName.c_str(), &width, &height, &components, TextureFormat::deriveBaseFormat(format.mInternalFormat) == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
-			NEO_ASSERT(data, "Error reading texture file %s", filePath);
-
-			NEO_LOG_I("Loaded texture %s [%d, %d]", filePath, width, height);
-
-			TextureResourceManager::TextureBuilder details;
-			details.mFormat = format;
-			details.mDimensions = glm::u16vec3(width, height, 0);
-			details.data = data;
-
-			return // ah shit need a callback to free the datas
-		}
-
-		std::shared_ptr<Texture> load(TextureResourceManager::TextureBuilder textureDetails) const {
-			std::shared_ptr<Texture> texture = std::make_shared<Texture>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.data);
-			if (textureDetails.mFormat.mFilter.usesMipFilter()) {
-				texture->genMips();
-			}
-
-			return texture;
-		}
-	};
+	TextureResourceManager::~TextureResourceManager() {
+		mDummyTexture->destroy();
+		mDummyTexture.reset();
+	}
 
 	bool TextureResourceManager::isValid(TextureHandle id) const {
 		return mTextureCache.contains(id);
@@ -100,7 +132,7 @@ namespace neo {
 			return mTextureCache.handle(id).get();
 		}
 		NEO_FAIL("Invalid mesh requested");
-		return mDummyTexture;
+		return *mDummyTexture;
 	}
 
 	const Texture& TextureResourceManager::get(TextureHandle id) const {
@@ -141,7 +173,7 @@ namespace neo {
 	void TextureResourceManager::_tick() {
 		TRACY_ZONE();
 		for (auto&& [path, format] : mFileLoadQueue) {
-			mTextureCache.load<TextureLoader>(path.c_str(), format);
+			mTextureCache.load<TextureLoader>(HashedString(path.c_str()), path.c_str(), format, mDummyTexture);
 		}
 		for (auto&& [id, textureDetails] : mQueue) {
 			mTextureCache.load<TextureLoader>(id, textureDetails);

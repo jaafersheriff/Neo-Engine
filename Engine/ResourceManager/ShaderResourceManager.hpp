@@ -17,6 +17,7 @@ namespace neo {
 		friend ResourceManagers;
 	public:
 		ShaderResourceManager();
+		~ShaderResourceManager();
 		using ShaderBuilder = std::variant<SourceShader::ConstructionArgs, SourceShader::ShaderCode>;
 
 		const ResolvedShaderInstance& get(HashedString id, const ShaderDefines& defines) const;

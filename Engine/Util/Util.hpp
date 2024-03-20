@@ -5,6 +5,7 @@
 #include <glm/gtc/constants.hpp>
 
 #include <entt/core/hashed_string.hpp>
+#include <string>
 
 namespace neo {
 
