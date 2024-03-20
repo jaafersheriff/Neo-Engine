@@ -239,10 +239,15 @@ namespace neo {
 		prefabs::generateSphere("sphere", resourceManagers.mMeshManager, 2);
 
 		/* Generate basic textures*/
+		TextureResourceManager::TextureBuilder builder;
+		builder.mDimensions.x = 1;
+		builder.mDimensions.y = 1;
+
 		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
-		Library::createTexture("black", {}, glm::u16vec3(1), data);
+		builder.data = data;
+		NEO_UNUSED(resourceManagers.mTextureManager.asyncLoad(HashedString("black"), builder));
 		data[0] = data[1] = data[2] = 0xFF;
-		Library::createTexture("white", {}, glm::u16vec3(1), data);
+		NEO_UNUSED(resourceManagers.mTextureManager.asyncLoad(HashedString("white"), builder));
 	}
 
 	void Engine::shutDown(ResourceManagers& resourceManagers) {

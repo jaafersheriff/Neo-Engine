@@ -13,7 +13,6 @@
 
 namespace neo {
 	/* Library */
-	std::unordered_map<std::string, Texture*> Library::mTextures;
 	std::unordered_map<std::string, Framebuffer*> Library::mFramebuffers;
 	std::unordered_map<neo::PooledFramebufferDetails, std::vector<Library::PooledFramebuffer>> Library::mPooledFramebuffers;
 
@@ -45,60 +44,6 @@ namespace neo {
 				it++;
 			}
 		}
-	}
-
-	Texture* Library::getTexture(const std::string& name) {
-		TRACY_ZONE();
-		auto it = mTextures.find(name);
-		if (it != mTextures.end()) {
-			return it->second;
-		}
-
-		NEO_FAIL("Texture %s not found", name.c_str());
-		return nullptr;
-	}
-
-	bool Library::hasTexture(const std::string& fileName) {
-		return mTextures.find(fileName) != mTextures.end();
-	}
-
-	Texture* Library::loadTexture(const std::string& fileName, TextureFormat format) {
-		TRACY_ZONE();
-
-		auto it = mTextures.find(fileName);
-		if (it != mTextures.end()) {
-			return it->second;
-		}
-
-		NEO_LOG("First request for %s, loading...", fileName.c_str());
-		Texture* texture = Loader::loadTexture(fileName, format);
-		insertTexture(fileName, texture);
-		return texture;
-	}
-
-	Texture* Library::createTexture(const std::string& fileName, TextureFormat format, glm::u16vec3 dimension, const void* data) {
-		TRACY_ZONE();
-
-		auto it = mTextures.find(fileName);
-		if (it != mTextures.end()) {
-			return it->second;
-		}
-
-		if (data != nullptr) {
-			NEO_LOG("Uploading %s", fileName.c_str());
-		}
-		Texture* texture = new Texture(format, dimension, data);
-		insertTexture(fileName, texture);
-		return texture;
-	}
-
-	Texture* Library::loadCubemap(const std::string& name, const std::vector<std::string> &files) {
-		TRACY_ZONE();
-
-		Texture* texture = Loader::loadTexture(name, files);
-		insertTexture(name, texture);
-
-		return texture;
 	}
 
 	Framebuffer* Library::createFramebuffer(const std::string& name) {
@@ -165,19 +110,8 @@ namespace neo {
 		}
 	}
 
-	void Library::insertTexture(const std::string& name, Texture* texture) {
-		if (texture) {
-			mTextures.insert({ name, texture });
-		}
-	}
-
 	void Library::clean() {
 		NEO_LOG("Cleaning library...");
-		// Clean up GL objects
-		for (auto& texture : mTextures) {
-			texture.second->destroy();
-		}
-		mTextures.clear();
 		for (auto& frameBuffer : mFramebuffers) {
 			frameBuffer.second->destroy();
 		}
@@ -253,16 +187,16 @@ namespace neo {
 		// 	}
 		// 	ImGui::TreePop();
 		// }
-		if (ImGui::TreeNodeEx("Textures", ImGuiTreeNodeFlags_DefaultOpen)) {
-			for (auto& t : Library::mTextures) {
-				if (ImGui::TreeNode(t.first.c_str())) {
-					ImGui::Text("[%d, %d]", t.second->mWidth, t.second->mHeight);
-					textureFunc(*t.second);
-					ImGui::TreePop();
-				}
-			}
-			ImGui::TreePop();
-		}
+		// if (ImGui::TreeNodeEx("Textures", ImGuiTreeNodeFlags_DefaultOpen)) {
+		// 	for (auto& t : Library::mTextures) {
+		// 		if (ImGui::TreeNode(t.first.c_str())) {
+		// 			ImGui::Text("[%d, %d]", t.second->mWidth, t.second->mHeight);
+		// 			textureFunc(*t.second);
+		// 			ImGui::TreePop();
+		// 		}
+		// 	}
+		// 	ImGui::TreePop();
+		// }
 		ImGui::End();
 
 	}
