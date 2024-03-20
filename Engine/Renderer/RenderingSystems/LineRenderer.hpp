@@ -20,6 +20,9 @@ namespace neo {
 			{ ShaderStage::VERTEX, "line.vert"},
 			{ ShaderStage::FRAGMENT, "line.frag" }
 		});
+		if (!resourceManagers.mShaderManager.isValid(lineShaderHandle)) {
+			return;
+		}
 
 		auto& lineShader = resourceManagers.mShaderManager.get(lineShaderHandle, inDefines);
 		lineShader.bind();

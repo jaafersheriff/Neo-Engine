@@ -45,8 +45,6 @@ namespace neo {
 				static_cast<uint32_t>(verts.size() * sizeof(float)),
 				reinterpret_cast<uint8_t*>(verts.data())
 			};
-			builder.mMin = glm::vec3(-0.5f);
-			builder.mMax = glm::vec3(0.5f);
 
 			std::vector<float> normals =
 			{ 0,  0, -1,
@@ -169,8 +167,6 @@ namespace neo {
 				static_cast<uint32_t>(verts.size() * sizeof(float)),
 				reinterpret_cast<uint8_t*>(verts.data())
 			};
-			builder.mMin = glm::vec3(-0.5f, -0.5f, -0.1f);
-			builder.mMax = glm::vec3(0.5f, 0.5f, 0.1f);
 
 			std::vector<float> normals =
 			{ 0.f, 0.f, 1.f,
@@ -227,21 +223,19 @@ namespace neo {
 			float t = (float)(1.f + (glm::sqrt(5.0)) / 2.f);
 			float length = glm::length(glm::vec3(1, 0, t));
 			std::vector<float> verts = {
-				 -1.f / length,	t / length,  0.f / length,
-				  1.f / length,	t / length,  0.f / length,
-				 -1.f / length,   -t / length,  0.f / length,
-				  1.f / length,   -t / length,  0.f / length,
-				  0.f / length, -1.f / length,	t / length,
-				  0.f / length,  1.f / length,	t / length,
-				  0.f / length, -1.f / length,   -t / length,
-				  0.f / length,  1.f / length,   -t / length,
-					t / length,  0.f / length, -1.f / length,
-					t / length,  0.f / length,  1.f / length,
-				   -t / length,  0.f / length, -1.f / length,
-				   -t / length,  0.f / length,  1.f / length
+				 -0.5f / length,    t / length,  0.f / length,
+				  0.5f / length,    t / length,  0.f / length,
+				 -0.5f / length,   -t / length,  0.f / length,
+				  0.5f / length,   -t / length,  0.f / length,
+				  0.f / length, -0.5f / length,	   t / length,
+				  0.f / length,  0.5f / length,	   t / length,
+				  0.f / length, -0.5f / length,   -t / length,
+				  0.f / length,  0.5f / length,   -t / length,
+					t / length,  0.f / length, -0.5f / length,
+					t / length,  0.f / length,  0.5f / length,
+				   -t / length,  0.f / length, -0.5f / length,
+				   -t / length,  0.f / length,  0.5f / length
 			};
-			builder.mMin = glm::vec3(-t / length);
-			builder.mMax = glm::vec3(t / length);
 
 			std::vector<unsigned> ele = {
 				  0, 11,  5,
@@ -287,8 +281,6 @@ namespace neo {
 					verts.push_back(halfC.x);
 					verts.push_back(halfC.y);
 					verts.push_back(halfC.z);
-					builder.mMin = glm::min(builder.mMin, glm::min(halfA, glm::min(halfB, halfC)));
-					builder.mMax = glm::max(builder.mMax, glm::max(halfA, glm::max(halfB, halfC)));
 
 					// add indices of new faces 
 					uint32_t indA = static_cast<uint32_t>(verts.size()) / 3 - 3;
@@ -359,134 +351,6 @@ namespace neo {
 
 			auto _id = meshManager.asyncLoad(id, builder);
 			NEO_UNUSED(_id);
-		}
-
-		Mesh generatePlane(float h, int VERTEX_COUNT, int numOctaves) {
-			siv::PerlinNoise noise(rand());
-
-			Mesh mesh = Mesh();
-			mesh.mMin = glm::vec3(FLT_MAX);
-			mesh.mMax = glm::vec3(FLT_MIN);
-
-			int count = VERTEX_COUNT * VERTEX_COUNT;
-
-			std::vector<std::vector<float>> heights;
-			heights.resize(VERTEX_COUNT);
-			for (int i = 0; i < VERTEX_COUNT; i++) {
-				heights[i].resize(VERTEX_COUNT);
-			}
-
-			std::vector<float> vertices;
-			vertices.resize(count * 3);
-
-			std::vector<float> normals;
-			normals.resize(count * 3);
-
-			std::vector<float> textureCoords;
-			textureCoords.resize(count * 2);
-
-			std::vector<uint32_t> indices;
-			indices.resize(6 * (VERTEX_COUNT - 1) * (VERTEX_COUNT * 1));
-
-			for (int i = 0; i < VERTEX_COUNT; i++) {
-				for (int j = 0; j < VERTEX_COUNT; j++) {
-					heights[j][i] = h == 0.f ? h : h * static_cast<float>(noise.octaveNoise(j / static_cast<double>(VERTEX_COUNT), i / static_cast<double>(VERTEX_COUNT), numOctaves));
-				}
-			}
-
-			int vertexPointer = 0;
-			for (int i = 0; i < VERTEX_COUNT; i++) {
-				for (int j = 0; j < VERTEX_COUNT; j++) {
-
-					glm::vec3 vert = glm::vec3(
-						(float)j / ((float)VERTEX_COUNT - 1),
-						heights[j][i],
-						(float)i / ((float)VERTEX_COUNT - 1));
-
-					vertices[vertexPointer * 3 + 0] = vert.x;
-					vertices[vertexPointer * 3 + 1] = vert.y;
-					vertices[vertexPointer * 3 + 2] = vert.z;
-
-					float heightL = (h == 0.f || j == 0) ? 0.f : heights[j - 1][i] / h;
-					float heightR = (h == 0.f || j == VERTEX_COUNT - 1) ? 0.f : heights[j + 1][i] / h;
-					float heightD = (h == 0.f || i == VERTEX_COUNT - 1) ? 0.f : heights[j][i + 1] / h;
-					float heightU = (h == 0.f || i == 0) ? 0.f : heights[j][i - 1] / h;
-					glm::vec3 normal = glm::normalize(glm::vec3(heightL - heightR, 2.f / ((float)VERTEX_COUNT - 1), heightD - heightU));
-					normals[vertexPointer * 3 + 0] = normal.x;
-					normals[vertexPointer * 3 + 1] = normal.y;
-					normals[vertexPointer * 3 + 2] = normal.z;
-
-					textureCoords[vertexPointer * 2] = (float)j / ((float)VERTEX_COUNT - 1);
-					textureCoords[vertexPointer * 2 + 1] = (float)i / ((float)VERTEX_COUNT - 1);
-
-					mesh.mMin = glm::min(mesh.mMin, vert);
-					mesh.mMax = glm::max(mesh.mMax, vert);
-					vertexPointer++;
-				}
-			}
-
-			int indexPointer = 0;
-			for (int i = 0; i < VERTEX_COUNT - 1; i++) {
-				for (int j = 0; j < VERTEX_COUNT - 1; j++) {
-
-					uint32_t topLeft = (i * VERTEX_COUNT) + j;
-					uint32_t topRight = topLeft + 1;
-					uint32_t bottomLeft = ((i + 1) * VERTEX_COUNT) + j;
-					uint32_t bottomRight = bottomLeft + 1;
-					indices[indexPointer++] = topLeft;
-					indices[indexPointer++] = bottomLeft;
-					indices[indexPointer++] = topRight;
-					indices[indexPointer++] = topRight;
-					indices[indexPointer++] = bottomLeft;
-					indices[indexPointer++] = bottomRight;
-				}
-			}
-
-			mesh.addVertexBuffer(
-				types::mesh::VertexType::Position, 
-				3, 
-				0, 
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(vertices.size()),
-				0,
-				static_cast<uint32_t>(vertices.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(vertices.data())
-			);
-			mesh.addVertexBuffer(
-				types::mesh::VertexType::Normal, 
-				3, 
-				0, 
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(normals.size()),
-				0,
-				static_cast<uint32_t>(normals.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(normals.data())
-			);
-
-			mesh.addVertexBuffer(
-				types::mesh::VertexType::Texture0, 
-				2, 
-				0, 
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(textureCoords.size()),
-				0,
-				static_cast<uint32_t>(textureCoords.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(textureCoords.data())
-			);
-			mesh.addElementBuffer(
-				static_cast<uint32_t>(indices.size()),
-				types::ByteFormats::UnsignedInt,
-				static_cast<uint32_t>(indices.size() * sizeof(uint32_t)),
-				reinterpret_cast<uint8_t*>(indices.data())
-			);
-
-
-			mesh.mPrimitiveType = types::mesh::Primitive::Triangles;
-
-			return mesh;
 		}
 	}
 }

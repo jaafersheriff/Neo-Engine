@@ -69,9 +69,8 @@ namespace Base {
 			ecs.addComponent<TagComponent>(bunny, "Bunny");
 			ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 0.0f, 0.f), glm::vec3(1.5f));
 			ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-			ecs.addComponent<MeshComponent>(bunny, gltfScene.mMeshNodes[0].mMesh);
-			Mesh& bunnyMesh = resourceManagers.mMeshManager.get(gltfScene.mMeshNodes[0].mMesh);
-			ecs.addComponent<BoundingBoxComponent>(bunny, bunnyMesh.mMin, bunnyMesh.mMax);
+			ecs.addComponent<MeshComponent>(bunny, gltfScene.mMeshNodes[0].mMeshHandle);
+			ecs.addComponent<BoundingBoxComponent>(bunny, gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax);
 			ecs.addComponent<PhongShaderComponent>(bunny);
 			ecs.addComponent<OpaqueComponent>(bunny);
 			auto material = ecs.addComponent<MaterialComponent>(bunny);
@@ -84,7 +83,7 @@ namespace Base {
 			ecs.addComponent<TagComponent>(plane, "Grid");
 			ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
 			ecs.addComponent<MeshComponent>(plane, HashedString("quad"));
-			ecs.addComponent<BoundingBoxComponent>(plane, resourceManagers.mMeshManager.get("quad").mMin, resourceManagers.mMeshManager.get("quad").mMax, true);
+			ecs.addComponent<BoundingBoxComponent>(plane, glm::vec3(-0.5f), glm::vec3(0.5f), true);
 			ecs.addComponent<PhongShaderComponent>(plane);
 			ecs.addComponent<AlphaTestComponent>(plane);
 			auto material = ecs.addComponent<MaterialComponent>(plane);
