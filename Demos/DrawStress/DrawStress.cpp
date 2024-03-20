@@ -42,6 +42,7 @@ namespace DrawStress {
 	}
 
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
+		NEO_UNUSED(resourceManagers);
 
 		/* Camera */
 		{
@@ -68,8 +69,7 @@ namespace DrawStress {
 			auto cube = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(cube, glm::vec3(util::genRandom(-50.f, 50.f), util::genRandom(-10.f, 10.f), util::genRandom(-50.f, 50.f)), glm::vec3(util::genRandom(0.5f, 1.5f)), util::genRandomVec3(-util::PI, util::PI));
 			ecs.addComponent<MeshComponent>(cube, HashedString("cube"));
-			auto& cubeMesh = resourceManagers.mMeshManager.get(HashedString("cube"));
-			ecs.addComponent<BoundingBoxComponent>(cube, cubeMesh.mMin, cubeMesh.mMax);
+			ecs.addComponent<BoundingBoxComponent>(cube, glm::vec3(-0.5f), glm::vec3(0.5f));
 			ecs.addComponent<PhongShaderComponent>(cube);
 			ecs.addComponent<OpaqueComponent>(cube);
 			auto material = ecs.addComponent<MaterialComponent>(cube);

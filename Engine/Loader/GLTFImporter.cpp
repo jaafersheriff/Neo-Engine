@@ -335,10 +335,10 @@ namespace {
 				types::mesh::VertexType vertexType = types::mesh::VertexType::Position;
 				if (attribute.first == "POSITION") {
 					if (accessor.maxValues.size() == 3) {
-						builder.mMax = glm::vec3(accessor.maxValues[0], accessor.maxValues[1], accessor.maxValues[2]);
+						outNode.mMax = glm::vec3(accessor.maxValues[0], accessor.maxValues[1], accessor.maxValues[2]);
 					}
 					if (accessor.minValues.size() == 3) {
-						builder.mMin = glm::vec3(accessor.minValues[0], accessor.minValues[1], accessor.minValues[2]);
+						outNode.mMin = glm::vec3(accessor.minValues[0], accessor.minValues[1], accessor.minValues[2]);
 					}
 				}
 				else if (attribute.first == "NORMAL") {
@@ -387,7 +387,7 @@ namespace {
 				name = ss.str();
 			}
 			NEO_LOG_I("Loaded mesh %s", name.c_str());
-			outNode.mMesh = resourceManagers.mMeshManager.asyncLoad(HashedString(name.c_str()), builder);
+			outNode.mMeshHandle = resourceManagers.mMeshManager.asyncLoad(HashedString(name.c_str()), builder);
 
 			if (gltfMesh.material > -1) {
 				auto& material = model.materials[gltfMesh.material];

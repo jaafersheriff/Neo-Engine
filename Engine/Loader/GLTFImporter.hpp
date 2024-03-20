@@ -21,8 +21,9 @@ namespace neo {
 
 			std::string mName = "";
 
-			// TODO -rename to meshhandle
-			MeshHandle mMesh;
+			MeshHandle mMeshHandle;
+			glm::vec3 mMin = glm::vec3(0.f);
+			glm::vec3 mMax = glm::vec3(0.f);
 
 			SpatialComponent mSpatial = {};
 

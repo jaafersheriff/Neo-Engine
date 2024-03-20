@@ -11,7 +11,7 @@ namespace neo {
 	struct ShaderLoader final : entt::resource_loader<ShaderLoader, SourceShader> {
 
 		std::shared_ptr<SourceShader> load(std::string& name, ShaderResourceManager::ShaderBuilder shaderDetails, std::shared_ptr<SourceShader> fallback) const {
-			std::visit([&](auto&& arg) {
+			return std::visit([&](auto&& arg) {
 				using T = std::decay_t<decltype(arg)>;
 				if constexpr (std::is_same_v<T, SourceShader::ConstructionArgs>) {
 					SourceShader::ShaderCode shaderCode;
@@ -20,9 +20,6 @@ namespace neo {
 					}
 					auto result = std::make_shared<SourceShader>(name.c_str(), shaderCode);
 					result->mConstructionArgs = arg;
-					for (auto&&[type, fileString] : shaderCode) {
-						free(const_cast<char*>(fileString));
-					}
 					return result;
 				}
 				else if constexpr (std::is_same_v<T, SourceShader::ShaderCode>) {
@@ -30,9 +27,9 @@ namespace neo {
 				}
 				else {
 					static_assert(always_false_v<T>, "non-exhaustive visitor!");
+					return fallback;
 				}
 			}, shaderDetails);
-			return fallback;
 		}
 	};
 
@@ -54,6 +51,10 @@ namespace neo {
 		});
 	}
 
+	bool ShaderResourceManager::isValid(ShaderHandle id) const {
+		return mShaderCache.contains(id);
+	}
+
 	const ResolvedShaderInstance& ShaderResourceManager::get(HashedString id, const ShaderDefines& defines) const {
 		return get(id.value(), defines);
 	}
@@ -66,12 +67,18 @@ namespace neo {
 				return resolvedInstance;
 			}
 		}
-		NEO_LOG_E("Invalid shader requested");
-		return mDummyShader->getResolvedInstance({});
+		else {
+			NEO_FAIL("Invalid shader requested, did you check for validity?");
+		}
+		auto& dummy = mDummyShader->getResolvedInstance({});
+		dummy.bind();
+		return dummy;
 	}
 
 	[[nodiscard]] ShaderHandle ShaderResourceManager::asyncLoad(HashedString id, ShaderBuilder shaderDetails) const {
-		mQueue.emplace_back(std::make_pair( std::string(id.data()), shaderDetails));
+		if (!isValid(id)) {
+			mQueue.emplace_back(std::make_pair(std::string(id.data()), shaderDetails));
+		}
 		return id;
 	}
 
@@ -80,6 +87,7 @@ namespace neo {
 		for (auto&& [name, shaderDetails] : mQueue) {
 			mShaderCache.load<ShaderLoader>(HashedString(name.c_str()), name, shaderDetails, mDummyShader);
 		}
+		mQueue.clear();
 	}
 
 	void ShaderResourceManager::clear() {

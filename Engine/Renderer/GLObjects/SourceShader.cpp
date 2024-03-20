@@ -17,10 +17,6 @@ namespace neo {
 		, mShaderSources(sources) {
 	}
 
-	SourceShader::~SourceShader() {
-		destroy();
-	}
-
 	void SourceShader::destroy() {
 		for (auto& instance : mResolvedShaders) {
 			instance.second.destroy();

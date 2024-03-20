@@ -220,6 +220,7 @@ namespace neo {
 		ServiceLocator<Renderer>::ref().init();
 		Loader::init(config.resDir, config.shaderDir);
 		_createPrefabs(resourceManagers);
+		resourceManagers.tick();
 
 		demos.getCurrentDemo()->init(mECS, resourceManagers);
 

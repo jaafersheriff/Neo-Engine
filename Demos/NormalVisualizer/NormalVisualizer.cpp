@@ -70,7 +70,7 @@ namespace NormalVisualizer {
 
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
-			ecs.addComponent<MeshComponent>(entity, bunnyNode.mMesh);
+			ecs.addComponent<MeshComponent>(entity, bunnyNode.mMeshHandle);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
 			ecs.addComponent<PhongShaderComponent>(entity);

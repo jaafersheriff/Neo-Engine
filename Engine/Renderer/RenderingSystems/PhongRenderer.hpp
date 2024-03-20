@@ -35,6 +35,9 @@ namespace neo {
 				{ ShaderStage::FRAGMENT, "phong.frag" }
 			}
 		);
+		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
+			return;
+		}
 
 		ShaderDefines passDefines(inDefines);
 		bool containsAlphaTest = false;
