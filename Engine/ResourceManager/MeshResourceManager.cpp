@@ -98,6 +98,7 @@ namespace neo {
 	}
 
 	void MeshResourceManager::clear() {
+		mQueue.clear();
 		mMeshCache.each([](Mesh& mesh) {
 			mesh.destroy();
 		});

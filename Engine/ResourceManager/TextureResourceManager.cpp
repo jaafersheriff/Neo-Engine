@@ -75,13 +75,13 @@ namespace neo {
 				bool check = true;
 				for (auto& image : images) {
 					if (image) {
-						NEO_LOG_I("Loaded texture %s [%d, %d]", image->filePath, image->width, image->height);
+						NEO_LOG_I("Loaded image %s [%d, %d]", image->filePath.c_str(), image->width, image->height);
 						data.push_back(image->data);
 						dimensions.x = glm::min(dimensions.x, static_cast<uint16_t>(image->width));
 						dimensions.y = glm::min(dimensions.y, static_cast<uint16_t>(image->height));
 					}
 					else {
-						NEO_FAIL("Error reading texture file %s", image->filePath);
+						NEO_FAIL("Error reading texture file %s", image->filePath.c_str());
 						check |= false;
 					}
 				}
@@ -115,7 +115,7 @@ namespace neo {
 		filePath = _filePath;
 		stbi_set_flip_vertically_on_load(flip);
 		int components;
-		data = stbi_load(filePath, &width, &height, &components, baseFormat == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
+		data = stbi_load(filePath.c_str(), &width, &height, &components, baseFormat == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
 	}
 
 	STBImageData::~STBImageData() {
@@ -203,10 +203,13 @@ namespace neo {
 		for (auto&& [id, textureDetails] : mQueue) {
 			mTextureCache.load<TextureLoader>(id, textureDetails);
 		}
+		mFileLoadQueue.clear();
 		mQueue.clear();
 	}
 
 	void TextureResourceManager::clear() {
+		mFileLoadQueue.clear();
+		mQueue.clear();
 		mTextureCache.each([](Texture& mesh) {
 			mesh.destroy();
 		});

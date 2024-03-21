@@ -9,4 +9,5 @@ PRIVATE
 	TracyClient
 	libglew_static
 	tinygltf
+	imgui
 )

@@ -17,10 +17,10 @@ namespace neo {
 		~STBImageData();
 
 		operator bool() const {
-			return data != nullptr;
+			return data != nullptr && width > 0 && height > 0;
 		}
 
-		const char* filePath;
+		std::string filePath;
 		uint8_t* data = nullptr;
 		int width = 0;
 		int height = 0;
