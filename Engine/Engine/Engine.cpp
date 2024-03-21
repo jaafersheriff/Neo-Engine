@@ -158,7 +158,7 @@ namespace neo {
 							demos.imGuiEditor(mECS);
 						}
 						mECS.imguiEdtor();
-						Library::imGuiEditor();
+						Library::imGuiEditor(resourceManagers);
 						ServiceLocator<ImGuiManager>::ref().imGuiEditor();
 						ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
 						profiler.imGuiEditor();

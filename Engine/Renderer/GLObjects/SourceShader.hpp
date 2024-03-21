@@ -12,9 +12,11 @@
 namespace neo {
 	class ResolvedShaderInstance;
 	struct ShaderLoader;
+	class ShaderResourceManager;
 
 	class SourceShader {
 		friend ShaderLoader;
+		friend ShaderResourceManager;
 	public:
 		using ConstructionArgs = std::unordered_map<ShaderStage, std::string>;
 		using ShaderCode = std::unordered_map<ShaderStage, const char*>;
@@ -27,7 +29,6 @@ namespace neo {
 		SourceShader & operator=(SourceShader &&) = delete;
 
 		const ResolvedShaderInstance& getResolvedInstance(const ShaderDefines& defines) const;
-		void imguiEditor();
 		void destroy();
 	private:
 		std::string mName;

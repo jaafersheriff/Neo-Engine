@@ -13,6 +13,7 @@ namespace neo {
 	class Engine;
 	class Framebuffer;
 	class SourceShader;
+	class ResourceManagers;
 
 	struct PooledFramebufferDetails {
 		glm::uvec2 mSize;
@@ -42,7 +43,7 @@ namespace neo {
 			static Framebuffer* createFramebuffer(const std::string&);
 			static Framebuffer* getPooledFramebuffer(const PooledFramebufferDetails& details, std::optional<std::string> name = std::nullopt);
 
-			static void imGuiEditor();
+			static void imGuiEditor(ResourceManagers& rm);
 
 		private:
 			static std::unordered_map<std::string, Framebuffer*> mFramebuffers;

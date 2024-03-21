@@ -7,7 +7,7 @@
 
 #include "Engine/ImGuiManager.hpp"
 
-#include "ResourceManager/MeshResourceManager.hpp"
+#include "ResourceManager/ResourceManagers.hpp"
 
 #include "Util/Profiler.hpp"
 
@@ -118,7 +118,7 @@ namespace neo {
 		mFramebuffers.clear();
 	}
 
-	void Library::imGuiEditor() {
+	void Library::imGuiEditor(ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
 		auto textureFunc = [&](const Texture& texture) {
 			if (texture.mFormat.mTarget != types::texture::Target::Texture2D) {
@@ -172,15 +172,7 @@ namespace neo {
 			}
 			ImGui::TreePop();
 		}
-		// if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
-		// 	for (auto& shader : Library::mShaders) {
-		// 		if (ImGui::TreeNode(shader.first.c_str())) {
-		// 			shader.second->imguiEditor();
-		// 			ImGui::TreePop();
-		// 		}
-		// 	}
-		// 	ImGui::TreePop();
-		// }
+		resourceManagers.mShaderManager.imguiEditor();
 		// if (ImGui::TreeNodeEx("Meshes", ImGuiTreeNodeFlags_DefaultOpen)) {
 		// 	for (auto& m : Library::mMeshes) {
 		// 		ImGui::TextWrapped("%s", m.first.c_str());

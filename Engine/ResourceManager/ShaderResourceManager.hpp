@@ -21,12 +21,13 @@ namespace neo {
 		using ShaderBuilder = std::variant<SourceShader::ConstructionArgs, SourceShader::ShaderCode>;
 
 		const ResolvedShaderInstance& get(HashedString id, const ShaderDefines& defines) const;
-		const ResolvedShaderInstance& get(ShaderHandle id, const ShaderDefines& defines) const;
+		const ResolvedShaderInstance& get(ShaderHandle handle, const ShaderDefines& defines) const;
 
 		bool isValid(ShaderHandle id) const;
-		[[nodiscard]] ShaderHandle asyncLoad(HashedString id, ShaderBuilder meshDetails) const;
+		[[nodiscard]] ShaderHandle asyncLoad(const char* name, ShaderBuilder meshDetails) const;
 
 		void clear();
+		void imguiEditor();
 	private:
 		void _tick();
 		mutable std::vector<std::pair<std::string, ShaderBuilder>> mQueue;
