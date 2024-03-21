@@ -7,8 +7,6 @@
 
 #include "Loader/Library.hpp"
 
-#include <imgui.h>
-
 namespace neo {
 
 	// Don't put this in a hot loop
@@ -80,34 +78,5 @@ namespace neo {
 		}
 
 		return seed;
-	}
-
-	void SourceShader::imguiEditor() {
-		if (mConstructionArgs && ImGui::Button("Reload all")) {
-			// TODO - move to resource manager
-			destroy();
-			for (auto& arg : *mConstructionArgs) {
-				mShaderSources.emplace(arg.first, Loader::loadFileString(arg.second));
-			}
-		}
-
-		if (mResolvedShaders.size()) {
-			if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(mResolvedShaders.size()))) {
-				ImGui::Separator();
-				for (const auto& variant : mResolvedShaders) {
-					// if (mConstructionArgs && ImGui::Button("Reload")) {
-					// Just destroy the variant and evict from the map, easy
-					// }
-					// else {
-						ImGui::Text("%s", variant.second.mVariant.size() ? variant.second.mVariant.c_str() : "No defines");
-						ImGui::Separator();
-					// }
-				}
-				ImGui::TreePop();
-			}
-		}
-		else {
-			ImGui::Text("Variants (0)");
-		}
 	}
 }

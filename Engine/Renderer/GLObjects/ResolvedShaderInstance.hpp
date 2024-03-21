@@ -25,6 +25,7 @@ namespace neo {
 
 		void bind() const;
 		void unbind() const;
+		const std::string& variant() const { return mVariant; }
 
 		using UniformVariant =
 			std::variant<

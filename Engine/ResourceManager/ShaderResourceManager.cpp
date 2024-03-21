@@ -6,6 +6,8 @@
 
 #include "Util/Profiler.hpp"
 
+#include <imgui.h>
+
 namespace neo {
 	struct ShaderLoader final : entt::resource_loader<ShaderLoader, SourceShader> {
 
@@ -63,9 +65,9 @@ namespace neo {
 		return get(id.value(), defines);
 	}
 
-	const ResolvedShaderInstance& ShaderResourceManager::get(ShaderHandle id, const ShaderDefines& defines) const {
-		if (mShaderCache.contains(id)) {
-			const auto& resolvedInstance = mShaderCache.handle(id).get().getResolvedInstance(defines);
+	const ResolvedShaderInstance& ShaderResourceManager::get(ShaderHandle handle, const ShaderDefines& defines) const {
+		if (mShaderCache.contains(handle)) {
+			const auto& resolvedInstance = mShaderCache.handle(handle).get().getResolvedInstance(defines);
 			if (resolvedInstance.isValid()) {
 				resolvedInstance.bind();
 				return resolvedInstance;
@@ -79,9 +81,10 @@ namespace neo {
 		return dummy;
 	}
 
-	[[nodiscard]] ShaderHandle ShaderResourceManager::asyncLoad(HashedString id, ShaderBuilder shaderDetails) const {
+	[[nodiscard]] ShaderHandle ShaderResourceManager::asyncLoad(const char* name, ShaderBuilder shaderDetails) const {
+		HashedString id(name);
 		if (!isValid(id)) {
-			mQueue.emplace_back(std::make_pair(std::string(id.data()), shaderDetails));
+			mQueue.emplace_back(std::make_pair(std::string(name), shaderDetails));
 		}
 		return id;
 	}
@@ -95,9 +98,51 @@ namespace neo {
 	}
 
 	void ShaderResourceManager::clear() {
+		mQueue.clear();
 		mShaderCache.each([](SourceShader& shader) {
 			shader.destroy();
 		});
 		mShaderCache.clear();
+	}
+
+	void ShaderResourceManager::imguiEditor() {
+		std::optional<ShaderHandle> destroyHandle;
+		if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
+			mShaderCache.each([&](const ShaderHandle handle, SourceShader& shader) {
+				if (!isValid(handle)) {
+					return;
+				}
+				if (ImGui::TreeNode(shader.mName.c_str())) {
+					if (shader.mConstructionArgs && ImGui::Button("Reload all")) {
+						destroyHandle = handle; // Can't destroy mid-each
+						NEO_UNUSED(asyncLoad(shader.mName.c_str(), *shader.mConstructionArgs));
+					}
+
+					if (shader.mResolvedShaders.size()) {
+						if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(shader.mResolvedShaders.size()))) {
+							ImGui::Separator();
+							for (const auto& variant : shader.mResolvedShaders) {
+								// if (mConstructionArgs && ImGui::Button("Reload")) {
+								// Just destroy the variant and evict from the map, easy
+								// }
+								// else {
+								ImGui::Text("%s", variant.second.variant().size() ? variant.second.variant().c_str() : "No defines");
+								ImGui::Separator();
+								// }
+							}
+							ImGui::TreePop();
+						}
+					}
+					else {
+						ImGui::Text("Variants (0)");
+					}
+					ImGui::TreePop();
+				}
+				});
+			ImGui::TreePop();
+		}
+		if (destroyHandle) {
+			mShaderCache.discard(*destroyHandle);
+		}
 	}
 }
