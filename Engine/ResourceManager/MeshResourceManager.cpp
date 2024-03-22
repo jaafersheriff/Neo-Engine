@@ -14,22 +14,22 @@ namespace neo {
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
 				mesh->addVertexBuffer(
 					type,
-					buffer.components,
-					buffer.stride,
-					buffer.format,
-					buffer.normalized,
-					buffer.count,
-					buffer.offset,
-					buffer.byteSize,
-					buffer.data
+					buffer.mComponents,
+					buffer.mStride,
+					buffer.mFormat,
+					buffer.mNormalized,
+					buffer.mCount,
+					buffer.mOffset,
+					buffer.mByteSize,
+					buffer.mData
 				);
 			}
 			if (meshDetails.mElementBuffer) {
 				mesh->addElementBuffer(
-					meshDetails.mElementBuffer->count,
-					meshDetails.mElementBuffer->format,
-					meshDetails.mElementBuffer->byteSize,
-					meshDetails.mElementBuffer->data
+					meshDetails.mElementBuffer->mCount,
+					meshDetails.mElementBuffer->mFormat,
+					meshDetails.mElementBuffer->mByteSize,
+					meshDetails.mElementBuffer->mData
 				);
 			}
 			return mesh;
@@ -40,10 +40,10 @@ namespace neo {
 		auto cubeDetails = prefabs::generateCube();
 		mFallback = MeshLoader{}.load(*cubeDetails);
 		for (auto&& [type, buffer] : cubeDetails->mVertexBuffers) {
-			free(const_cast<uint8_t*>(buffer.data));
+			free(const_cast<uint8_t*>(buffer.mData));
 		}
 		if (cubeDetails->mElementBuffer) {
-			free(const_cast<uint8_t*>(cubeDetails->mElementBuffer->data));
+			free(const_cast<uint8_t*>(cubeDetails->mElementBuffer->mData));
 		}
 	}
 
@@ -58,14 +58,14 @@ namespace neo {
 			// Copy data so this can be ticked next frame
 			MeshLoadDetails copy = meshDetails;
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
-				if (buffer.data) {
-					copy.mVertexBuffers[type].data = static_cast<uint8_t*>(malloc(buffer.byteSize));
-					memcpy(const_cast<uint8_t*>(copy.mVertexBuffers[type].data), buffer.data, buffer.byteSize);
+				if (buffer.mData) {
+					copy.mVertexBuffers[type].mData = static_cast<uint8_t*>(malloc(buffer.mByteSize));
+					memcpy(const_cast<uint8_t*>(copy.mVertexBuffers[type].mData), buffer.mData, buffer.mByteSize);
 				}
 			}
-			if (meshDetails.mElementBuffer.has_value() && meshDetails.mElementBuffer->data) {
-				copy.mElementBuffer->data = static_cast<uint8_t*>(malloc(meshDetails.mElementBuffer->byteSize));
-				memcpy(const_cast<uint8_t*>(copy.mElementBuffer->data), meshDetails.mElementBuffer->data, meshDetails.mElementBuffer->byteSize);
+			if (meshDetails.mElementBuffer.has_value() && meshDetails.mElementBuffer->mData) {
+				copy.mElementBuffer->mData = static_cast<uint8_t*>(malloc(meshDetails.mElementBuffer->mByteSize));
+				memcpy(const_cast<uint8_t*>(copy.mElementBuffer->mData), meshDetails.mElementBuffer->mData, meshDetails.mElementBuffer->mByteSize);
 			}
 
 			mQueue.emplace(id, copy);
@@ -84,10 +84,10 @@ namespace neo {
 		for (auto&& [id, meshDetails] : swapQueue) {
 			mCache.load<MeshLoader>(id, meshDetails);
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
-				free(const_cast<uint8_t*>(buffer.data));
+				free(const_cast<uint8_t*>(buffer.mData));
 			}
 			if (meshDetails.mElementBuffer.has_value()) {
-				free(const_cast<uint8_t*>(meshDetails.mElementBuffer->data));
+				free(const_cast<uint8_t*>(meshDetails.mElementBuffer->mData));
 			}
 		}
 	}
