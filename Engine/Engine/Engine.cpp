@@ -238,10 +238,10 @@ namespace neo {
 		auto loadMesh = [&](HashedString name, MeshLoadDetails& details) {
 			NEO_UNUSED(resourceManagers.mMeshManager.asyncLoad(name, details));
 			for (auto&& [type, buffer] : details.mVertexBuffers) {
-				free(const_cast<uint8_t*>(buffer.data));
+				free(const_cast<uint8_t*>(buffer.mData));
 			}
 			if (details.mElementBuffer) {
-				free(const_cast<uint8_t*>(details.mElementBuffer->data));
+				free(const_cast<uint8_t*>(details.mElementBuffer->mData));
 			}
 		};
 		loadMesh("cube", *prefabs::generateCube());

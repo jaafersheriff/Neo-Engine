@@ -14,22 +14,21 @@ namespace neo {
 	struct MeshLoadDetails {
 		types::mesh::Primitive mPrimtive;
 
-		// TODO - add member naming convention
 		struct VertexBuffer {
-			uint32_t components; 
-			uint32_t stride; 
-			types::ByteFormats format; 
-			bool normalized; 
-			uint32_t count; 
-			uint32_t offset; 
-			uint32_t byteSize; 
-			const uint8_t* data = nullptr;
+			uint32_t mComponents; 
+			uint32_t mStride; 
+			types::ByteFormats mFormat; 
+			bool mNormalized; 
+			uint32_t mCount; 
+			uint32_t mOffset; 
+			uint32_t mByteSize; 
+			const uint8_t* mData = nullptr;
 		};
 		struct ElementBuffer {
-			uint32_t count;
-			types::ByteFormats format;
-			uint32_t byteSize;
-			const uint8_t* data = nullptr;
+			uint32_t mCount;
+			types::ByteFormats mFormat;
+			uint32_t mByteSize;
+			const uint8_t* mData = nullptr;
 		};
 		std::unordered_map<types::mesh::VertexType, VertexBuffer> mVertexBuffers;
 		std::optional<ElementBuffer> mElementBuffer;

@@ -47,8 +47,8 @@ namespace neo {
 					0,
 					byteSize
 				};
-				builder->mVertexBuffers[types::mesh::VertexType::Position].data = static_cast<uint8_t*>(malloc(byteSize));
-				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Position].data), verts.data(), byteSize);
+				builder->mVertexBuffers[types::mesh::VertexType::Position].mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Position].mData), verts.data(), byteSize);
 			}
 
 			{
@@ -87,8 +87,8 @@ namespace neo {
 					0,
 					byteSize
 				};
-				builder->mVertexBuffers[types::mesh::VertexType::Normal].data = static_cast<uint8_t*>(malloc(byteSize));
-				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Normal].data), normals.data(), byteSize);
+				builder->mVertexBuffers[types::mesh::VertexType::Normal].mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Normal].mData), normals.data(), byteSize);
 			}
 
 			{
@@ -132,8 +132,8 @@ namespace neo {
 					0,
 					byteSize
 				};
-				builder->mVertexBuffers[types::mesh::VertexType::Texture0].data = static_cast<uint8_t*>(malloc(byteSize));
-				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Texture0].data), uvs.data(), byteSize);
+				builder->mVertexBuffers[types::mesh::VertexType::Texture0].mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Texture0].mData), uvs.data(), byteSize);
 			}
 
 			{
@@ -156,8 +156,8 @@ namespace neo {
 					types::ByteFormats::UnsignedInt,
 					byteSize
 				};
-				builder->mElementBuffer->data = static_cast<uint8_t*>(malloc(byteSize));
-				memcpy(const_cast<uint8_t*>(builder->mElementBuffer->data), indices.data(), byteSize);
+				builder->mElementBuffer->mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mElementBuffer->mData), indices.data(), byteSize);
 			}
 
 			return std::move(builder);
@@ -183,8 +183,8 @@ namespace neo {
 					0,
 					byteSize
 				};
-				builder->mVertexBuffers[types::mesh::VertexType::Position].data = static_cast<uint8_t*>(malloc(byteSize));
-				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Position].data), verts.data(), byteSize);
+				builder->mVertexBuffers[types::mesh::VertexType::Position].mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Position].mData), verts.data(), byteSize);
 			}
 
 			{
@@ -203,8 +203,8 @@ namespace neo {
 					0,
 					byteSize
 				};
-				builder->mVertexBuffers[types::mesh::VertexType::Normal].data = static_cast<uint8_t*>(malloc(byteSize));
-				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Normal].data), normals.data(), byteSize);
+				builder->mVertexBuffers[types::mesh::VertexType::Normal].mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Normal].mData), normals.data(), byteSize);
 			}
 
 			{
@@ -223,8 +223,8 @@ namespace neo {
 					0,
 					byteSize
 				};
-				builder->mVertexBuffers[types::mesh::VertexType::Texture0].data = static_cast<uint8_t*>(malloc(byteSize));
-				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Texture0].data), uvs.data(), byteSize);
+				builder->mVertexBuffers[types::mesh::VertexType::Texture0].mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Texture0].mData), uvs.data(), byteSize);
 			}
 
 			{
@@ -237,8 +237,8 @@ namespace neo {
 					types::ByteFormats::UnsignedInt,
 					byteSize
 				};
-				builder->mElementBuffer->data = static_cast<uint8_t*>(malloc(byteSize));
-				memcpy(const_cast<uint8_t*>(builder->mElementBuffer->data), indices.data(), byteSize);
+				builder->mElementBuffer->mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mElementBuffer->mData), indices.data(), byteSize);
 			}
 
 			return std::move(builder);
@@ -350,8 +350,8 @@ namespace neo {
 					0,
 					byteSize
 				};
-				builder->mVertexBuffers[types::mesh::VertexType::Position].data = static_cast<uint8_t*>(malloc(byteSize));
-				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Position].data), verts.data(), byteSize);
+				builder->mVertexBuffers[types::mesh::VertexType::Position].mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Position].mData), verts.data(), byteSize);
 			}
 			{
 				builder->mVertexBuffers[types::mesh::VertexType::Normal] = builder->mVertexBuffers[types::mesh::VertexType::Position];
@@ -367,8 +367,8 @@ namespace neo {
 					0,
 					byteSize
 				};
-				builder->mVertexBuffers[types::mesh::VertexType::Texture0].data = static_cast<uint8_t*>(malloc(byteSize));
-				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Texture0].data), tex.data(), byteSize);
+				builder->mVertexBuffers[types::mesh::VertexType::Texture0].mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Texture0].mData), tex.data(), byteSize);
 			}
 			{
 				uint32_t byteSize = static_cast<uint32_t>(ele.size() * sizeof(uint32_t));
@@ -377,8 +377,8 @@ namespace neo {
 					types::ByteFormats::UnsignedInt,
 					byteSize
 				};
-				builder->mElementBuffer->data = static_cast<uint8_t*>(malloc(byteSize));
-				memcpy(const_cast<uint8_t*>(builder->mElementBuffer->data), ele.data(), byteSize);
+				builder->mElementBuffer->mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mElementBuffer->mData), ele.data(), byteSize);
 			}
 
 			return std::move(builder);
