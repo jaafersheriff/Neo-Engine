@@ -23,6 +23,8 @@
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
+#include "ResourceManager/ResourceManagers.hpp"
+
 namespace neo {
 
 	template<typename... CompTs>
