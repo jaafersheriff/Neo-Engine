@@ -50,7 +50,7 @@ namespace Sponza {
 			};
 			builder.mFormat.mType = types::ByteFormats::UnsignedByte;
 			builder.mDimensions = glm::uvec3(size, 0, 0);
-			builder.data = reinterpret_cast<uint8_t*>(kernel.data());
+			builder.mData = reinterpret_cast<uint8_t*>(kernel.data());
 			NEO_UNUSED(textureManager.asyncLoad(id, builder));
 		}
 
@@ -75,7 +75,7 @@ namespace Sponza {
 			};
 			builder.mFormat.mType = types::ByteFormats::UnsignedByte;
 			builder.mDimensions = glm::uvec3(dim, dim, 0);
-			builder.data = reinterpret_cast<uint8_t*>(noise.data());
+			builder.mData = reinterpret_cast<uint8_t*>(noise.data());
 			NEO_UNUSED(textureManager.asyncLoad(id, builder));
 		}
 	}

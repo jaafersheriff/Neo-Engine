@@ -249,9 +249,9 @@ namespace {
 
 		builder.mDimensions.x = static_cast<uint16_t>(image.width);
 		builder.mDimensions.y = static_cast<uint16_t>(image.height);
-		builder.data = image.image.data();
+		builder.mData = image.image.data();
 		// Heh?
-		HashedString name = HashedString(reinterpret_cast<char*>(const_cast<uint8_t*>(builder.data)));
+		HashedString name = HashedString(reinterpret_cast<char*>(const_cast<uint8_t*>(builder.mData)));
 		if (!image.uri.empty()) {
 			NEO_LOG_I("Loaded texture %s", image.uri.c_str());
 			name = HashedString(image.uri.c_str());
@@ -309,7 +309,7 @@ namespace {
 			outNode.mName = node.name + std::to_string(i);
 			outNode.mSpatial = nodeSpatial;
 
-			MeshResourceManager::MeshBuilder builder;
+			MeshResourceManager::MeshLoadDetails builder;
 			builder.mPrimtive = _translateTinyGltfPrimitiveType(gltfMesh.mode);
 
 			// Indices

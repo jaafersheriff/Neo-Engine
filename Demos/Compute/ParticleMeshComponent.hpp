@@ -26,7 +26,7 @@ namespace Compute {
 		bool isDirty = true;
 
 		ParticleMeshComponent(MeshResourceManager& meshManager) {
-			MeshResourceManager::MeshBuilder builder;
+			MeshResourceManager::MeshLoadDetails builder;
 			builder.mPrimtive = types::mesh::Primitive::Points;
 			builder.mVertexBuffers[types::mesh::VertexType::Position] = {
 				4,

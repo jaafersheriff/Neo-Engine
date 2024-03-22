@@ -11,7 +11,7 @@
 namespace neo {
 	struct ShaderLoader final : entt::resource_loader<ShaderLoader, SourceShader> {
 
-		std::shared_ptr<SourceShader> load(std::string& name, ShaderResourceManager::ShaderBuilder shaderDetails, std::shared_ptr<SourceShader> fallback) const {
+		std::shared_ptr<SourceShader> load(const std::string& name, const ShaderResourceManager::ShaderLoadDetails& shaderDetails, std::shared_ptr<SourceShader> fallback) const {
 			return std::visit([&](auto&& arg) {
 				using T = std::decay_t<decltype(arg)>;
 				if constexpr (std::is_same_v<T, SourceShader::ConstructionArgs>) {
@@ -66,7 +66,7 @@ namespace neo {
 	}
 
 	const ResolvedShaderInstance& ShaderResourceManager::get(ShaderHandle handle, const ShaderDefines& defines) const {
-		if (mShaderCache.contains(handle)) {
+		if (isValid(handle)) {
 			const auto& resolvedInstance = mShaderCache.handle(handle).get().getResolvedInstance(defines);
 			if (resolvedInstance.isValid()) {
 				resolvedInstance.bind();
@@ -81,20 +81,25 @@ namespace neo {
 		return dummy;
 	}
 
-	[[nodiscard]] ShaderHandle ShaderResourceManager::asyncLoad(const char* name, ShaderBuilder shaderDetails) const {
+	[[nodiscard]] ShaderHandle ShaderResourceManager::asyncLoad(const char* name, ShaderLoadDetails shaderDetails) const {
 		HashedString id(name);
-		if (!isValid(id)) {
-			mQueue.emplace_back(std::make_pair(std::string(name), shaderDetails));
+		if (!isValid(id) && mQueue.find(name) == mQueue.end()) {
+			mQueue.emplace(std::string(name), shaderDetails);
 		}
 		return id;
 	}
 
 	void ShaderResourceManager::_tick() {
 		TRACY_ZONE();
-		for (auto&& [name, shaderDetails] : mQueue) {
-			mShaderCache.load<ShaderLoader>(HashedString(name.c_str()), name, shaderDetails, mDummyShader);
-		}
+
+
+		std::map<std::string, ShaderLoadDetails> swapQueue = {};
+		std::swap(swapQueue, mQueue);
 		mQueue.clear();
+
+		for (auto&& [name, shaderDetails] : swapQueue) {
+			mShaderCache.load<ShaderLoader>(HashedString(name.c_str()).value(), name, shaderDetails, mDummyShader);
+		}
 	}
 
 	void ShaderResourceManager::clear() {

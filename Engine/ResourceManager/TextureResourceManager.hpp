@@ -9,6 +9,9 @@
 #include <memory>
 #include <string>
 
+namespace {
+	struct FileLoadDetails;
+}
 namespace neo {
 	class ResourceManagers;
 
@@ -17,13 +20,13 @@ namespace neo {
 		~STBImageData();
 
 		operator bool() const {
-			return data != nullptr && width > 0 && height > 0;
+			return mData != nullptr && mWidth > 0 && mHeight > 0;
 		}
 
-		std::string filePath;
-		uint8_t* data = nullptr;
-		int width = 0;
-		int height = 0;
+		std::string mFilePath;
+		uint8_t* mData = nullptr;
+		int mWidth = 0;
+		int mHeight = 0;
 	};
 
 
@@ -35,8 +38,13 @@ namespace neo {
 		struct TextureBuilder {
 			TextureFormat mFormat;
 			glm::u16vec3 mDimensions = glm::u16vec3(0);
-			const uint8_t* data = nullptr;
+			const uint8_t* mData = nullptr;
 		};
+		struct FileLoadDetails {
+			std::vector<std::string> mFilePaths;
+			TextureFormat mFormat;
+		};
+
 
 		TextureResourceManager();
 		~TextureResourceManager();
@@ -54,8 +62,9 @@ namespace neo {
 	private:
 
 		void _tick();
-		mutable std::vector<std::pair<TextureHandle, TextureBuilder>> mQueue;
-		mutable std::vector<std::pair<TextureHandle, std::pair<std::vector<std::string>, TextureFormat>>> mFileLoadQueue; // TODO - Make these into structs pls
+		mutable std::map<TextureHandle, TextureBuilder> mQueue;
+
+		mutable std::map<TextureHandle, FileLoadDetails> mFileLoadQueue;
 		using TextureCache = entt::resource_cache<Texture>;
 		TextureCache mTextureCache;
 		std::shared_ptr<Texture> mDummyTexture;

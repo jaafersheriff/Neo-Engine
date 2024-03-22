@@ -18,19 +18,19 @@ namespace neo {
 	public:
 		ShaderResourceManager();
 		~ShaderResourceManager();
-		using ShaderBuilder = std::variant<SourceShader::ConstructionArgs, SourceShader::ShaderCode>;
+		using ShaderLoadDetails = std::variant<SourceShader::ConstructionArgs, SourceShader::ShaderCode>;
 
 		const ResolvedShaderInstance& get(HashedString id, const ShaderDefines& defines) const;
 		const ResolvedShaderInstance& get(ShaderHandle handle, const ShaderDefines& defines) const;
 
 		bool isValid(ShaderHandle id) const;
-		[[nodiscard]] ShaderHandle asyncLoad(const char* name, ShaderBuilder meshDetails) const;
+		[[nodiscard]] ShaderHandle asyncLoad(const char* name, ShaderLoadDetails meshDetails) const;
 
 		void clear();
 		void imguiEditor();
 	private:
 		void _tick();
-		mutable std::vector<std::pair<std::string, ShaderBuilder>> mQueue;
+		mutable std::map<std::string, ShaderLoadDetails> mQueue;
 		using ShaderCache = entt::resource_cache<SourceShader>;
 		ShaderCache mShaderCache;
 		std::shared_ptr<SourceShader> mDummyShader;
