@@ -6,7 +6,7 @@ namespace neo {
 
 	struct MeshLoader final : entt::resource_loader<MeshLoader, Mesh> {
 
-		std::shared_ptr<Mesh> load(MeshResourceManager::MeshBuilder meshDetails) const {
+		std::shared_ptr<Mesh> load(MeshResourceManager::MeshLoadDetails meshDetails) const {
 			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meshDetails.mPrimtive);
 			mesh->init();
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
@@ -47,7 +47,8 @@ namespace neo {
 	}
 
 	Mesh& MeshResourceManager::get(MeshHandle id) {
-		if (mMeshCache.contains(id)) {
+		// TODO - this (and all other resource managers) are iterating through the dense map twice here
+		if (isValid(id)) {
 			return mMeshCache.handle(id).get();
 		}
 		NEO_FAIL("Invalid mesh requested");
@@ -55,17 +56,19 @@ namespace neo {
 	}
 
 	const Mesh& MeshResourceManager::get(MeshHandle id) const {
-		if (mMeshCache.contains(id)) {
+		if (isValid(id)) {
 			return mMeshCache.handle(id).get();
 		}
 		NEO_FAIL("Invalid mesh requested");
 		return mMeshCache.handle(HashedString("cube")).get();
 	}
 
-	[[nodiscard]] MeshHandle MeshResourceManager::asyncLoad(HashedString id, MeshBuilder& meshDetails) const {
-		if (!isValid(id)) {
+	[[nodiscard]] MeshHandle MeshResourceManager::asyncLoad(HashedString id, MeshLoadDetails& meshDetails) const {
+		if (!isValid(id) && mQueue.find(id) == mQueue.end()) {
+			NEO_LOG_V("Loading mesh %s", id.data());
+
 			// Copy data so this can be ticked next frame
-			MeshBuilder copy = meshDetails;
+			MeshLoadDetails copy = meshDetails;
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
 				if (buffer.data) {
 					copy.mVertexBuffers[type].data = static_cast<uint8_t*>(malloc(buffer.byteSize));
@@ -77,7 +80,7 @@ namespace neo {
 				memcpy(const_cast<uint8_t*>(copy.mElementBuffer->data), meshDetails.mElementBuffer->data, meshDetails.mElementBuffer->byteSize);
 			}
 
-			mQueue.emplace_back(std::make_pair(id, copy));
+			mQueue.emplace(id, copy);
 		}
 
 		return id;
@@ -85,7 +88,12 @@ namespace neo {
 
 	void MeshResourceManager::_tick() {
 		TRACY_ZONE();
-		for (auto&& [id, meshDetails] : mQueue) {
+
+		std::map<MeshHandle, MeshLoadDetails> swapQueue = {};
+		std::swap(mQueue, swapQueue);
+		mQueue.clear();
+
+		for (auto&& [id, meshDetails] : swapQueue) {
 			mMeshCache.load<MeshLoader>(id, meshDetails);
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
 				free(const_cast<uint8_t*>(buffer.data));
@@ -94,7 +102,6 @@ namespace neo {
 				free(const_cast<uint8_t*>(meshDetails.mElementBuffer->data));
 			}
 		}
-		mQueue.clear();
 	}
 
 	void MeshResourceManager::clear() {

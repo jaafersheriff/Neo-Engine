@@ -51,23 +51,23 @@ namespace neo {
 
 		struct TextureLoader final : entt::resource_loader<TextureLoader, Texture> {
 
-			std::shared_ptr<Texture> load(std::vector<std::string>& filePaths, TextureFormat format, std::shared_ptr<Texture> dummy) const {
-				if (filePaths.size() == 6 && format.mTarget != types::texture::Target::TextureCube) {
+			std::shared_ptr<Texture> load(TextureResourceManager::FileLoadDetails& fileDetails, std::shared_ptr<Texture> dummy) const {
+				if (fileDetails.mFilePaths.size() == 6 && fileDetails.mFormat.mTarget != types::texture::Target::TextureCube) {
 					NEO_LOG_E("Cubemap format mismatch!");
-					filePaths.erase(filePaths.begin(), filePaths.begin() + 5);
+					fileDetails.mFilePaths.erase(fileDetails.mFilePaths.begin(), fileDetails.mFilePaths.begin() + 5);
 				}
 
 				std::vector<std::unique_ptr<STBImageData>> images;
 
-				for (auto& filePath : filePaths) {
+				for (auto& filePath : fileDetails.mFilePaths) {
 					std::string _fileName = Loader::APP_RES_DIR + filePath;
 					if (!util::fileExists(_fileName.c_str())) {
 						_fileName = Loader::ENGINE_RES_DIR + filePath;
 						NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file %s", filePath.c_str());
 					}
 
-					bool flip = format.mTarget != types::texture::Target::TextureCube; // This might be really dumb
-					images.push_back(std::make_unique<STBImageData>(_fileName.c_str(), TextureFormat::deriveBaseFormat(format.mInternalFormat), flip));
+					bool flip = fileDetails.mFormat.mTarget != types::texture::Target::TextureCube; // This might be really dumb
+					images.push_back(std::make_unique<STBImageData>(_fileName.c_str(), TextureFormat::deriveBaseFormat(fileDetails.mFormat.mInternalFormat), flip));
 				}
 
 				std::vector<uint8_t*> data;
@@ -75,23 +75,23 @@ namespace neo {
 				bool check = true;
 				for (auto& image : images) {
 					if (image) {
-						NEO_LOG_I("Loaded image %s [%d, %d]", image->filePath.c_str(), image->width, image->height);
-						data.push_back(image->data);
-						dimensions.x = glm::min(dimensions.x, static_cast<uint16_t>(image->width));
-						dimensions.y = glm::min(dimensions.y, static_cast<uint16_t>(image->height));
+						NEO_LOG_I("Loaded image %s [%d, %d]", image->mFilePath.c_str(), image->mWidth, image->mHeight);
+						data.push_back(image->mData);
+						dimensions.x = glm::min(dimensions.x, static_cast<uint16_t>(image->mWidth));
+						dimensions.y = glm::min(dimensions.y, static_cast<uint16_t>(image->mHeight));
 					}
 					else {
-						NEO_FAIL("Error reading texture file %s", image->filePath.c_str());
+						NEO_FAIL("Error reading texture file %s", image->mFilePath.c_str());
 						check |= false;
 					}
 				}
 
 				if (check) {
 					TextureResourceManager::TextureBuilder details;
-					details.mFormat = format;
+					details.mFormat = details.mFormat;
 					details.mDimensions = dimensions;
 					// HEH?
-					details.data = reinterpret_cast<uint8_t*>(data.data());
+					details.mData = reinterpret_cast<uint8_t*>(data.data());
 
 					auto texture = load(details);
 					return texture;
@@ -100,7 +100,7 @@ namespace neo {
 			}
 
 			std::shared_ptr<Texture> load(TextureResourceManager::TextureBuilder textureDetails) const {
-				std::shared_ptr<Texture> texture = std::make_shared<Texture>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.data);
+				std::shared_ptr<Texture> texture = std::make_shared<Texture>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.mData);
 				if (textureDetails.mFormat.mFilter.usesMipFilter()) {
 					texture->genMips();
 				}
@@ -111,15 +111,15 @@ namespace neo {
 
 	}
 
-	STBImageData::STBImageData(const char* _filePath, types::texture::BaseFormats baseFormat, bool flip) {
-		filePath = _filePath;
+	STBImageData::STBImageData(const char* filePath, types::texture::BaseFormats baseFormat, bool flip) {
+		mFilePath = filePath;
 		stbi_set_flip_vertically_on_load(flip);
-		int components;
-		data = stbi_load(filePath.c_str(), &width, &height, &components, baseFormat == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
+		int _components;
+		mData = stbi_load(mFilePath.c_str(), &mWidth, &mHeight, &_components, baseFormat == types::texture::BaseFormats::RGBA ? STBI_rgb_alpha : STBI_rgb);
 	}
 
 	STBImageData::~STBImageData() {
-		stbi_image_free(data);
+		stbi_image_free(mData);
 	}
 
 	TextureResourceManager::TextureResourceManager() {
@@ -147,7 +147,7 @@ namespace neo {
 	}
 
 	Texture& TextureResourceManager::get(TextureHandle id) {
-		if (mTextureCache.contains(id)) {
+		if (isValid(id)) {
 			return mTextureCache.handle(id).get();
 		}
 		NEO_FAIL("Invalid mesh requested");
@@ -155,7 +155,7 @@ namespace neo {
 	}
 
 	const Texture& TextureResourceManager::get(TextureHandle id) const {
-		if (mTextureCache.contains(id)) {
+		if (isValid(id)) {
 			return mTextureCache.handle(id).get();
 		}
 		NEO_FAIL("Invalid mesh requested");
@@ -170,15 +170,15 @@ namespace neo {
 		NEO_ASSERT(filePath.size() == 1 || filePath.size() == 6, "Invalid file path count when loading texture");
 
 		HashedString id(name);
-		if (!isValid(id)) {
-			mFileLoadQueue.push_back(std::make_pair(id, std::make_pair(filePath, format)));
+		if (!isValid(id) && mFileLoadQueue.find(HashedString(name)) == mFileLoadQueue.end()) {
+			mFileLoadQueue.emplace(id, FileLoadDetails{ filePath, format });
 		}
 
 		return id;
 	}
 
 	[[nodiscard]] TextureHandle TextureResourceManager::asyncLoad(HashedString id, TextureBuilder& textureDetails) const {
-		if (!isValid(id)) {
+		if (!isValid(id) && mQueue.find(id) == mQueue.end()) {
 			TextureBuilder copy = textureDetails;
 			// Base dimension
 			uint32_t byteSize = glm::max<glm::u16>(textureDetails.mDimensions.x, 1u) * glm::max<glm::u16>(textureDetails.mDimensions.y, 1u) * glm::max<glm::u16>(textureDetails.mDimensions.z, 1u);
@@ -187,9 +187,9 @@ namespace neo {
 			// Pixel format
 			byteSize *= _bytesPerPixel(textureDetails.mFormat.mType);
 			
-			copy.data = static_cast<uint8_t*>(malloc(byteSize));
-			memcpy(const_cast<uint8_t*>(copy.data), textureDetails.data, byteSize);
-			mQueue.emplace_back(std::make_pair(id, copy));
+			copy.mData = static_cast<uint8_t*>(malloc(byteSize));
+			memcpy(const_cast<uint8_t*>(copy.mData), textureDetails.mData, byteSize);
+			mQueue.emplace(id, copy);
 		}
 
 		return id;
@@ -197,14 +197,21 @@ namespace neo {
 
 	void TextureResourceManager::_tick() {
 		TRACY_ZONE();
-		for (auto&& [id, pathsAndFormat] : mFileLoadQueue) {
-			mTextureCache.load<TextureLoader>(id, pathsAndFormat.first, pathsAndFormat.second, mDummyTexture);
-		}
-		for (auto&& [id, textureDetails] : mQueue) {
+
+		std::map<TextureHandle, TextureBuilder> swapQueue;
+		std::swap(mQueue, swapQueue);
+		mQueue.clear();
+
+		std::map<TextureHandle, FileLoadDetails> swapFileQueue;
+		std::swap(swapFileQueue, mFileLoadQueue);
+		mFileLoadQueue.clear();
+
+		for (auto&& [id, textureDetails] : swapQueue) {
 			mTextureCache.load<TextureLoader>(id, textureDetails);
 		}
-		mFileLoadQueue.clear();
-		mQueue.clear();
+		for (auto&& [id, details] : swapFileQueue) {
+			mTextureCache.load<TextureLoader>(id, details, mDummyTexture);
+		}
 	}
 
 	void TextureResourceManager::clear() {
