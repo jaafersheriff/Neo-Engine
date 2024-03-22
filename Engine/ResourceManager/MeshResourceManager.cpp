@@ -1,12 +1,14 @@
 #include "MeshResourceManager.hpp"
 
+#include "Loader/MeshGenerator.hpp"
+
 #include "Util/Profiler.hpp"
 
 namespace neo {
 
 	struct MeshLoader final : entt::resource_loader<MeshLoader, Mesh> {
 
-		std::shared_ptr<Mesh> load(MeshResourceManager::MeshLoadDetails meshDetails) const {
+		std::shared_ptr<Mesh> load(MeshLoadDetails meshDetails) const {
 			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meshDetails.mPrimtive);
 			mesh->init();
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
@@ -34,36 +36,22 @@ namespace neo {
 		}
 	};
 
-	bool MeshResourceManager::isValid(MeshHandle id) const {
-		return mMeshCache.contains(id);
-	}
-
-	Mesh& MeshResourceManager::get(HashedString id) {
-		return get(id.value());
-	}
-
-	const Mesh& MeshResourceManager::get(HashedString id) const {
-		return get(id.value());
-	}
-
-	Mesh& MeshResourceManager::get(MeshHandle id) {
-		// TODO - this (and all other resource managers) are iterating through the dense map twice here
-		if (isValid(id)) {
-			return mMeshCache.handle(id).get();
+	MeshResourceManager::MeshResourceManager() {
+		auto cubeDetails = prefabs::generateCube();
+		mFallback = MeshLoader{}.load(*cubeDetails);
+		for (auto&& [type, buffer] : cubeDetails->mVertexBuffers) {
+			free(const_cast<uint8_t*>(buffer.data));
 		}
-		NEO_FAIL("Invalid mesh requested");
-		return mMeshCache.handle(HashedString("cube")).get();
-	}
-
-	const Mesh& MeshResourceManager::get(MeshHandle id) const {
-		if (isValid(id)) {
-			return mMeshCache.handle(id).get();
+		if (cubeDetails->mElementBuffer) {
+			free(const_cast<uint8_t*>(cubeDetails->mElementBuffer->data));
 		}
-		NEO_FAIL("Invalid mesh requested");
-		return mMeshCache.handle(HashedString("cube")).get();
 	}
 
-	[[nodiscard]] MeshHandle MeshResourceManager::asyncLoad(HashedString id, MeshLoadDetails& meshDetails) const {
+	MeshResourceManager::~MeshResourceManager() {
+		mFallback.reset();
+	}
+
+	[[nodiscard]] MeshHandle MeshResourceManager::_asyncLoadImpl(HashedString id, MeshLoadDetails& meshDetails) const {
 		if (!isValid(id) && mQueue.find(id) == mQueue.end()) {
 			NEO_LOG_V("Loading mesh %s", id.data());
 
@@ -86,7 +74,7 @@ namespace neo {
 		return id;
 	}
 
-	void MeshResourceManager::_tick() {
+	void MeshResourceManager::_tickImpl() {
 		TRACY_ZONE();
 
 		std::map<MeshHandle, MeshLoadDetails> swapQueue = {};
@@ -94,7 +82,7 @@ namespace neo {
 		mQueue.clear();
 
 		for (auto&& [id, meshDetails] : swapQueue) {
-			mMeshCache.load<MeshLoader>(id, meshDetails);
+			mCache.load<MeshLoader>(id, meshDetails);
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
 				free(const_cast<uint8_t*>(buffer.data));
 			}
@@ -104,11 +92,11 @@ namespace neo {
 		}
 	}
 
-	void MeshResourceManager::clear() {
+	void MeshResourceManager::_clearImpl() {
 		mQueue.clear();
-		mMeshCache.each([](Mesh& mesh) {
+		mCache.each([](Mesh& mesh) {
 			mesh.destroy();
 		});
-		mMeshCache.clear();
+		mCache.clear();
 	}
 }

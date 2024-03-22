@@ -25,8 +25,6 @@
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
-#include "ResourceManager/ResourceManagers.hpp"
-
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
