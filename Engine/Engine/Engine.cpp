@@ -70,9 +70,9 @@ namespace neo {
 			std::string path = Loader::ENGINE_RES_DIR + std::string("icon.png");
 			STBImageData image(path.c_str(), types::texture::BaseFormats::RGBA, false);
 			if (image) {
-				icons[0].pixels = image.data;
-				icons[0].width = image.width;
-				icons[0].height = image.height;
+				icons[0].pixels = image.mData;
+				icons[0].width = image.mWidth;
+				icons[0].height = image.mHeight;
 				glfwSetWindowIcon(mWindow.getWindow(), 1, icons);
 			}
 
@@ -245,7 +245,7 @@ namespace neo {
 		builder.mDimensions.y = 1;
 
 		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
-		builder.data = data;
+		builder.mData = data;
 		NEO_UNUSED(resourceManagers.mTextureManager.asyncLoad(HashedString("black"), builder));
 		data[0] = data[1] = data[2] = 0xFF;
 		NEO_UNUSED(resourceManagers.mTextureManager.asyncLoad(HashedString("white"), builder));

@@ -15,7 +15,7 @@ namespace neo {
 	class MeshResourceManager {
 		friend ResourceManagers;
 	public:
-		struct MeshBuilder {
+		struct MeshLoadDetails {
 			types::mesh::Primitive mPrimtive;
 			struct VertexBuffer {
 				uint32_t components; 
@@ -43,12 +43,12 @@ namespace neo {
 		Mesh& get(MeshHandle id);
 		const Mesh& get(MeshHandle id) const;
 
-		[[nodiscard]] MeshHandle asyncLoad(HashedString id, MeshBuilder& meshDetails) const;
+		[[nodiscard]] MeshHandle asyncLoad(HashedString id, MeshLoadDetails& meshDetails) const;
 
 		void clear();
 	private:
 		void _tick();
-		mutable std::vector<std::pair<MeshHandle, MeshBuilder>> mQueue;
+		mutable std::map<MeshHandle, MeshLoadDetails> mQueue;
 		using MeshCache = entt::resource_cache<Mesh>;
 		MeshCache mMeshCache;
 	};
