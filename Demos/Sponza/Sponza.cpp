@@ -270,7 +270,7 @@ namespace Sponza {
 				resolvedShader.bindTexture("aoOutput", *ao->mTextures[0]);
 			}
 
-			resourceManagers.mMeshManager.get("quad").draw();
+			resourceManagers.mMeshManager.resolve("quad").draw();
 
 			// Don't forget the depth. Because reasons.
 			glBlitNamedFramebuffer(gbuffer.mFBOID, sceneTarget.mFBOID,

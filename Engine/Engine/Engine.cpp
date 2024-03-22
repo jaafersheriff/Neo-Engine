@@ -245,7 +245,7 @@ namespace neo {
 		loadMesh("sphere", *prefabs::generateSphere(2));
 
 		/* Generate basic textures*/
-		TextureResourceManager::TextureBuilder builder;
+		TextureBuilder builder;
 		builder.mDimensions.x = 1;
 		builder.mDimensions.y = 1;
 
@@ -348,7 +348,7 @@ namespace neo {
 			}
 			for (auto& entity : mECS.getView<LineMeshComponent>()) {
 				auto line = mECS.getComponent<LineMeshComponent>(entity);
-				auto& mesh = resourceManagers.mMeshManager.get(line->mMeshHandle);
+				auto& mesh = resourceManagers.mMeshManager.resolve(line->mMeshHandle);
 				if (line->mDirty && line->mNodes.size()) {
 					TRACY_ZONE();
 					std::vector<float> positions;

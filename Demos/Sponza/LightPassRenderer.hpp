@@ -71,7 +71,7 @@ namespace Sponza {
 				glCullFace(GL_BACK);
 			}
 
-			resourceManagers.mMeshManager.get(HashedString("sphere")).draw();
+			resourceManagers.mMeshManager.resolve(HashedString("sphere")).draw();
 		}
 
 		// TODO - reset state
@@ -123,7 +123,7 @@ namespace Sponza {
 
 		glDisable(GL_DEPTH_TEST);
 
-		resourceManagers.mMeshManager.get(HashedString("quad")).draw();
+		resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
 
 		// TODO - reset GL state
 	}

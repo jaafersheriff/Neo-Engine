@@ -74,7 +74,7 @@ namespace Compute {
 					positions[i * 4 + 3] = 1.f; // TODO - this is useless and costs perf. Get rid of it
 				}
 
-				auto& mesh = resourceManagers.mMeshManager.get(meshComponent.mMeshHandle);
+				auto& mesh = resourceManagers.mMeshManager.resolve(meshComponent.mMeshHandle);
 				mesh.updateVertexBuffer(
 					types::mesh::VertexType::Position,
 					static_cast<uint32_t>(positions.size()),
@@ -112,7 +112,7 @@ namespace Compute {
 			particlesComputeShader.bindUniform("timestep", timeStep);
 
 			// Bind mesh
-			auto& mesh = resourceManagers.mMeshManager.get(meshComponent.mMeshHandle);
+			auto& mesh = resourceManagers.mMeshManager.resolve(meshComponent.mMeshHandle);
 			auto& position = mesh.getVBO(types::mesh::VertexType::Position);
 			glBindVertexArray(mesh.mVAOID);
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, position.vboID);
@@ -155,7 +155,7 @@ namespace Compute {
 				particlesVisShader.bindUniform("M", spatial.getModelMatrix());
 
 				/* DRAW */
-				resourceManagers.mMeshManager.get(meshComponent.mMeshHandle).draw();
+				resourceManagers.mMeshManager.resolve(meshComponent.mMeshHandle).draw();
 			}
 		}
 	}

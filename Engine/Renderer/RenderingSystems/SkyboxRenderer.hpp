@@ -55,10 +55,10 @@ namespace neo {
 		resolvedShader.bind();
 		resolvedShader.bindUniform("P", camera->getProj());
 		resolvedShader.bindUniform("V", camSpatial->getView());
-		resolvedShader.bindTexture("cubeMap", resourceManagers.mTextureManager.get(std::get<1>(*skybox).mSkybox));
+		resolvedShader.bindTexture("cubeMap", resourceManagers.mTextureManager.resolve(std::get<1>(*skybox).mSkybox));
 
 		/* Draw */
-		resourceManagers.mMeshManager.get(HashedString("cube")).draw();
+		resourceManagers.mMeshManager.resolve(HashedString("cube")).draw();
 
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);

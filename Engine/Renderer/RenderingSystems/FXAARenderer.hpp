@@ -29,7 +29,7 @@ namespace neo {
 		resolvedShader.bindTexture("inputTexture", inputTexture);
 
 		glDisable(GL_DEPTH_TEST);
-		resourceManagers.mMeshManager.get("quad").draw();
+		resourceManagers.mMeshManager.resolve("quad").draw();
 		glEnable(GL_DEPTH_TEST);
 	}
 }

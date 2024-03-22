@@ -114,7 +114,7 @@ namespace NormalVisualizer {
 				resolvedShader.bindUniform("N", spatial.getNormalMatrix());
 
 				/* DRAW */
-				resourceManagers.mMeshManager.get(mesh.mMeshHandle).draw();
+				resourceManagers.mMeshManager.resolve(mesh.mMeshHandle).draw();
 			}
 		}
 	}
