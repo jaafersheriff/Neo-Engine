@@ -7,218 +7,247 @@ namespace neo {
 
 	namespace prefabs {
 
-		void generateCube(HashedString id, MeshResourceManager& meshManager) {
-			MeshResourceManager::MeshLoadDetails builder;
+		std::unique_ptr<MeshLoadDetails> generateCube() {
+			std::unique_ptr<MeshLoadDetails> builder = std::make_unique<MeshLoadDetails>();
+			builder->mPrimtive = types::mesh::Primitive::Triangles;
 
-			std::vector<float> verts =
-			{ -0.5f, -0.5f, -0.5f,
-			  0.5f,  0.5f, -0.5f,
-			  0.5f, -0.5f, -0.5f,
-			 -0.5f,  0.5f, -0.5f,
-			 -0.5f, -0.5f, -0.5f,
-			 -0.5f,  0.5f,  0.5f,
-			 -0.5f,  0.5f, -0.5f,
-			 -0.5f, -0.5f,  0.5f,
-			 -0.5f,  0.5f, -0.5f,
-			  0.5f,  0.5f,  0.5f,
-			  0.5f,  0.5f, -0.5f,
-			 -0.5f,  0.5f,  0.5f,
-			  0.5f, -0.5f, -0.5f,
-			  0.5f,  0.5f, -0.5f,
-			  0.5f,  0.5f,  0.5f,
-			  0.5f, -0.5f,  0.5f,
-			 -0.5f, -0.5f, -0.5f,
-			  0.5f, -0.5f, -0.5f,
-			  0.5f, -0.5f,  0.5f,
-			 -0.5f, -0.5f,  0.5f,
-			 -0.5f, -0.5f,  0.5f,
-			  0.5f, -0.5f,  0.5f,
-			  0.5f,  0.5f,  0.5f,
-			 -0.5f,  0.5f,  0.5f };
-			builder.mVertexBuffers[types::mesh::VertexType::Position] = {
-				3,
-				0,
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(verts.size()),
-				0,
-				static_cast<uint32_t>(verts.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(verts.data())
-			};
+			{
+				std::vector<float> verts =
+				{ -0.5f, -0.5f, -0.5f,
+				  0.5f,  0.5f, -0.5f,
+				  0.5f, -0.5f, -0.5f,
+				 -0.5f,  0.5f, -0.5f,
+				 -0.5f, -0.5f, -0.5f,
+				 -0.5f,  0.5f,  0.5f,
+				 -0.5f,  0.5f, -0.5f,
+				 -0.5f, -0.5f,  0.5f,
+				 -0.5f,  0.5f, -0.5f,
+				  0.5f,  0.5f,  0.5f,
+				  0.5f,  0.5f, -0.5f,
+				 -0.5f,  0.5f,  0.5f,
+				  0.5f, -0.5f, -0.5f,
+				  0.5f,  0.5f, -0.5f,
+				  0.5f,  0.5f,  0.5f,
+				  0.5f, -0.5f,  0.5f,
+				 -0.5f, -0.5f, -0.5f,
+				  0.5f, -0.5f, -0.5f,
+				  0.5f, -0.5f,  0.5f,
+				 -0.5f, -0.5f,  0.5f,
+				 -0.5f, -0.5f,  0.5f,
+				  0.5f, -0.5f,  0.5f,
+				  0.5f,  0.5f,  0.5f,
+				 -0.5f,  0.5f,  0.5f };
+				uint32_t byteSize = static_cast<uint32_t>(verts.size() * sizeof(float));
+				builder->mVertexBuffers[types::mesh::VertexType::Position] = {
+					3,
+					0,
+					types::ByteFormats::Float,
+					false,
+					static_cast<uint32_t>(verts.size()),
+					0,
+					byteSize
+				};
+				builder->mVertexBuffers[types::mesh::VertexType::Position].data = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Position].data), verts.data(), byteSize);
+			}
 
-			std::vector<float> normals =
-			{ 0,  0, -1,
-			  0,  0, -1,
-			  0,  0, -1,
-			  0,  0, -1,
-			 -1,  0,  0,
-			 -1,  0,  0,
-			 -1,  0,  0,
-			 -1,  0,  0,
-			  0,  1,  0,
-			  0,  1,  0,
-			  0,  1,  0,
-			  0,  1,  0,
-			  1,  0,  0,
-			  1,  0,  0,
-			  1,  0,  0,
-			  1,  0,  0,
-			  0, -1,  0,
-			  0, -1,  0,
-			  0, -1,  0,
-			  0, -1,  0,
-			  0,  0,  1,
-			  0,  0,  1,
-			  0,  0,  1,
-			  0,  0,  1 };
-			builder.mVertexBuffers[types::mesh::VertexType::Normal] = {
-				3, 
-				0, 
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(normals.size()),
-				0,
-				static_cast<uint32_t>(normals.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(normals.data())
-			};
+			{
+				std::vector<float> normals =
+				{ 0,  0, -1,
+				  0,  0, -1,
+				  0,  0, -1,
+				  0,  0, -1,
+				 -1,  0,  0,
+				 -1,  0,  0,
+				 -1,  0,  0,
+				 -1,  0,  0,
+				  0,  1,  0,
+				  0,  1,  0,
+				  0,  1,  0,
+				  0,  1,  0,
+				  1,  0,  0,
+				  1,  0,  0,
+				  1,  0,  0,
+				  1,  0,  0,
+				  0, -1,  0,
+				  0, -1,  0,
+				  0, -1,  0,
+				  0, -1,  0,
+				  0,  0,  1,
+				  0,  0,  1,
+				  0,  0,  1,
+				  0,  0,  1 };
+				uint32_t byteSize = static_cast<uint32_t>(normals.size() * sizeof(float));
+				builder->mVertexBuffers[types::mesh::VertexType::Normal] = {
+					3,
+					0,
+					types::ByteFormats::Float,
+					false,
+					static_cast<uint32_t>(normals.size()),
+					0,
+					byteSize
+				};
+				builder->mVertexBuffers[types::mesh::VertexType::Normal].data = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Normal].data), normals.data(), byteSize);
+			}
 
-			std::vector<float> uvs =
-			{ 1.f, 0.f,
-				0.f, 1.f,
-				0.f, 0.f,
-				1.f, 1.f,
+			{
+				std::vector<float> uvs =
+				{ 1.f, 0.f,
+					0.f, 1.f,
+					0.f, 0.f,
+					1.f, 1.f,
 
-				0.f, 0.f,
-				1.f, 1.f,
-				0.f, 1.f,
-				1.f, 0.f,
+					0.f, 0.f,
+					1.f, 1.f,
+					0.f, 1.f,
+					1.f, 0.f,
 
-				1.f, 0.f,
-				0.f, 1.f,
-				0.f, 0.f,
-				1.f, 1.f,
+					1.f, 0.f,
+					0.f, 1.f,
+					0.f, 0.f,
+					1.f, 1.f,
 
-				1.f, 0.f,
-				1.f, 1.f,
-				0.f, 1.f,
-				0.f, 0.f,
+					1.f, 0.f,
+					1.f, 1.f,
+					0.f, 1.f,
+					0.f, 0.f,
 
-				1.f, 1.f,
-				0.f, 1.f,
-				0.f, 0.f,
-				1.f, 0.f,
+					1.f, 1.f,
+					0.f, 1.f,
+					0.f, 0.f,
+					1.f, 0.f,
 
-				0.f, 0.f,
-				1.f, 0.f,
-				1.f, 1.f,
-				0.f, 1.f };
-			builder.mVertexBuffers[types::mesh::VertexType::Texture0] = {
-				2, 
-				0, 
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(uvs.size()),
-				0,
-				static_cast<uint32_t>(uvs.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(uvs.data())
-			};
+					0.f, 0.f,
+					1.f, 0.f,
+					1.f, 1.f,
+					0.f, 1.f };
+				uint32_t byteSize = static_cast<uint32_t>(uvs.size() * sizeof(float));
+				builder->mVertexBuffers[types::mesh::VertexType::Texture0] = {
+					2,
+					0,
+					types::ByteFormats::Float,
+					false,
+					static_cast<uint32_t>(uvs.size()),
+					0,
+					byteSize
+				};
+				builder->mVertexBuffers[types::mesh::VertexType::Texture0].data = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Texture0].data), uvs.data(), byteSize);
+			}
 
-			std::vector<uint32_t> indices =
-			{ 0,  1,  2,
-			  0,  3,  1,
-			  4,  5,  6,
-			  4,  7,  5,
-			  8,  9, 10,
-			  8, 11,  9,
-			 12, 13, 14,
-			 12, 14, 15,
-			 16, 17, 18,
-			 16, 18, 19,
-			 20, 21, 22,
-			 20, 22, 23 };
-			builder.mElementBuffer = {
-				static_cast<uint32_t>(indices.size()),
-				types::ByteFormats::UnsignedInt,
-				static_cast<uint32_t>(indices.size() * sizeof(uint32_t)),
-				reinterpret_cast<uint8_t*>(indices.data())
-			};
+			{
+				std::vector<uint32_t> indices =
+				{ 0,  1,  2,
+				  0,  3,  1,
+				  4,  5,  6,
+				  4,  7,  5,
+				  8,  9, 10,
+				  8, 11,  9,
+				 12, 13, 14,
+				 12, 14, 15,
+				 16, 17, 18,
+				 16, 18, 19,
+				 20, 21, 22,
+				 20, 22, 23 };
+				uint32_t byteSize = static_cast<uint32_t>(indices.size() * sizeof(uint32_t));
+				builder->mElementBuffer = {
+					static_cast<uint32_t>(indices.size()),
+					types::ByteFormats::UnsignedInt,
+					byteSize
+				};
+				builder->mElementBuffer->data = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mElementBuffer->data), indices.data(), byteSize);
+			}
 
-			builder.mPrimtive = types::mesh::Primitive::Triangles;
-
-			auto _id = meshManager.asyncLoad(id, builder);
-			NEO_UNUSED(_id);
+			return std::move(builder);
 		}
 
-		void generateQuad(HashedString id, MeshResourceManager& meshManager) {
-			MeshResourceManager::MeshLoadDetails builder;
+		std::unique_ptr<MeshLoadDetails> generateQuad() {
+			auto builder = std::make_unique<MeshLoadDetails>();
+			builder->mPrimtive = types::mesh::Primitive::Triangles;
 
-			std::vector<float> verts =
-			{ -0.5f, -0.5f,  0.f,
-			   0.5f, -0.5f,  0.f,
-			  -0.5f,  0.5f,  0.f,
-			   0.5f,  0.5f,  0.f };
-			builder.mVertexBuffers[types::mesh::VertexType::Position] = {
-				3, 
-				0, 
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(verts.size()),
-				0,
-				static_cast<uint32_t>(verts.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(verts.data())
-			};
+			{
+				std::vector<float> verts =
+				{ -0.5f, -0.5f,  0.f,
+				   0.5f, -0.5f,  0.f,
+				  -0.5f,  0.5f,  0.f,
+				   0.5f,  0.5f,  0.f };
+				uint32_t byteSize = static_cast<uint32_t>(verts.size() * sizeof(float));
+				builder->mVertexBuffers[types::mesh::VertexType::Position] = {
+					3,
+					0,
+					types::ByteFormats::Float,
+					false,
+					static_cast<uint32_t>(verts.size()),
+					0,
+					byteSize
+				};
+				builder->mVertexBuffers[types::mesh::VertexType::Position].data = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Position].data), verts.data(), byteSize);
+			}
 
-			std::vector<float> normals =
-			{ 0.f, 0.f, 1.f,
-			  0.f, 0.f, 1.f,
-			  0.f, 0.f, 1.f,
-			  0.f, 0.f, 1.f };
-			builder.mVertexBuffers[types::mesh::VertexType::Normal] = {
-				3,
-				0,
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(normals.size()),
-				0,
-				static_cast<uint32_t>(normals.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(normals.data())
-			};
+			{
+				std::vector<float> normals =
+				{ 0.f, 0.f, 1.f,
+				  0.f, 0.f, 1.f,
+				  0.f, 0.f, 1.f,
+				  0.f, 0.f, 1.f };
+				uint32_t byteSize = static_cast<uint32_t>(normals.size() * sizeof(float));
+				builder->mVertexBuffers[types::mesh::VertexType::Normal] = {
+					3,
+					0,
+					types::ByteFormats::Float,
+					false,
+					static_cast<uint32_t>(normals.size()),
+					0,
+					byteSize
+				};
+				builder->mVertexBuffers[types::mesh::VertexType::Normal].data = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Normal].data), normals.data(), byteSize);
+			}
 
-			std::vector<float> uvs =
-			{ 0.f, 0.f,
-			  1.f, 0.f,
-			  0.f, 1.f,
-			  1.f, 1.f };
-			builder.mVertexBuffers[types::mesh::VertexType::Texture0] = {
-				2,
-				0,
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(uvs.size()),
-				0,
-				static_cast<uint32_t>(uvs.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(uvs.data())
-			};
+			{
+				std::vector<float> uvs =
+				{ 0.f, 0.f,
+				  1.f, 0.f,
+				  0.f, 1.f,
+				  1.f, 1.f };
+				uint32_t byteSize = static_cast<uint32_t>(uvs.size() * sizeof(float));
+				builder->mVertexBuffers[types::mesh::VertexType::Texture0] = {
+					2,
+					0,
+					types::ByteFormats::Float,
+					false,
+					static_cast<uint32_t>(uvs.size()),
+					0,
+					byteSize
+				};
+				builder->mVertexBuffers[types::mesh::VertexType::Texture0].data = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Texture0].data), uvs.data(), byteSize);
+			}
 
-			std::vector<uint32_t> indices =
-			{ 0, 1, 2,
-			  1, 3, 2 };
-			builder.mElementBuffer = {
-				static_cast<uint32_t>(indices.size()),
-				types::ByteFormats::UnsignedInt,
-				static_cast<uint32_t>(indices.size() * sizeof(uint32_t)),
-				reinterpret_cast<uint8_t*>(indices.data())
-			};
+			{
+				std::vector<uint32_t> indices =
+				{ 0, 1, 2,
+				  1, 3, 2 };
+				uint32_t byteSize = static_cast<uint32_t>(indices.size() * sizeof(uint32_t));
+				builder->mElementBuffer = {
+					static_cast<uint32_t>(indices.size()),
+					types::ByteFormats::UnsignedInt,
+					byteSize
+				};
+				builder->mElementBuffer->data = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mElementBuffer->data), indices.data(), byteSize);
+			}
 
-			builder.mPrimtive = types::mesh::Primitive::Triangles;
-
-			auto _id = meshManager.asyncLoad(id, builder);
-			NEO_UNUSED(_id);
+			return std::move(builder);
 		}
 
 		// http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
-		void generateSphere(HashedString id, MeshResourceManager& meshManager, int recursions) {
-			MeshResourceManager::MeshLoadDetails builder;
+		std::unique_ptr<MeshLoadDetails> generateSphere(int recursions) {
+			std::unique_ptr<MeshLoadDetails> builder = std::make_unique<MeshLoadDetails>();
+			builder->mPrimtive = types::mesh::Primitive::Triangles;
 
 			float t = (float)(1.f + (glm::sqrt(5.0)) / 2.f);
 			float length = glm::length(glm::vec3(1, 0, t));
@@ -237,7 +266,7 @@ namespace neo {
 				   -t / length,  0.f / length,  0.5f / length
 			};
 
-			std::vector<unsigned> ele = {
+			std::vector<uint32_t> ele = {
 				  0, 11,  5,
 				  0,  5,  1,
 				  0,  1,  7,
@@ -310,47 +339,49 @@ namespace neo {
 				tex.push_back(glm::clamp(0.5f + std::asin(verts[i + 1]) / util::PI, 0.f, 1.f));
 			}
 
-			builder.mVertexBuffers[types::mesh::VertexType::Position] = {
-				3,
-				0,
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(verts.size()),
-				0,
-				static_cast<uint32_t>(verts.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(verts.data())
-			};
-			builder.mVertexBuffers[types::mesh::VertexType::Normal] = {
-				3, 
-				0, 
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(verts.size()),
-				0,
-				static_cast<uint32_t>(verts.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(verts.data())
-			};
-			builder.mVertexBuffers[types::mesh::VertexType::Texture0] = {
-				2, 
-				0, 
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(tex.size()),
-				0,
-				static_cast<uint32_t>(tex.size() * sizeof(float)),
-				reinterpret_cast<uint8_t*>(tex.data())
-			};
-			builder.mElementBuffer = {
-				static_cast<uint32_t>(ele.size()),
-				types::ByteFormats::UnsignedInt,
-				static_cast<uint32_t>(ele.size() * sizeof(uint32_t)),
-				reinterpret_cast<uint8_t*>(ele.data())
-			};
+			{
+				uint32_t byteSize = static_cast<uint32_t>(verts.size() * sizeof(float));
+				builder->mVertexBuffers[types::mesh::VertexType::Position] = {
+					3,
+					0,
+					types::ByteFormats::Float,
+					false,
+					static_cast<uint32_t>(verts.size()),
+					0,
+					byteSize
+				};
+				builder->mVertexBuffers[types::mesh::VertexType::Position].data = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Position].data), verts.data(), byteSize);
+			}
+			{
+				builder->mVertexBuffers[types::mesh::VertexType::Normal] = builder->mVertexBuffers[types::mesh::VertexType::Position];
+			}
+			{
+				uint32_t byteSize = static_cast<uint32_t>(tex.size() * sizeof(float));
+				builder->mVertexBuffers[types::mesh::VertexType::Texture0] = {
+					2,
+					0,
+					types::ByteFormats::Float,
+					false,
+					static_cast<uint32_t>(tex.size()),
+					0,
+					byteSize
+				};
+				builder->mVertexBuffers[types::mesh::VertexType::Texture0].data = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Texture0].data), tex.data(), byteSize);
+			}
+			{
+				uint32_t byteSize = static_cast<uint32_t>(ele.size() * sizeof(uint32_t));
+				builder->mElementBuffer = {
+					static_cast<uint32_t>(ele.size()),
+					types::ByteFormats::UnsignedInt,
+					byteSize
+				};
+				builder->mElementBuffer->data = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mElementBuffer->data), ele.data(), byteSize);
+			}
 
-			builder.mPrimtive = types::mesh::Primitive::Triangles;
-
-			auto _id = meshManager.asyncLoad(id, builder);
-			NEO_UNUSED(_id);
+			return std::move(builder);
 		}
 	}
 }

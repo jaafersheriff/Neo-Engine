@@ -235,9 +235,18 @@ namespace neo {
 
 	void Engine::_createPrefabs(ResourceManagers& resourceManagers) {
 		/* Generate basic meshes */
-		prefabs::generateCube("cube", resourceManagers.mMeshManager);
-		prefabs::generateQuad("quad", resourceManagers.mMeshManager);
-		prefabs::generateSphere("sphere", resourceManagers.mMeshManager, 2);
+		auto loadMesh = [&](HashedString name, MeshLoadDetails& details) {
+			NEO_UNUSED(resourceManagers.mMeshManager.asyncLoad(name, details));
+			for (auto&& [type, buffer] : details.mVertexBuffers) {
+				free(const_cast<uint8_t*>(buffer.data));
+			}
+			if (details.mElementBuffer) {
+				free(const_cast<uint8_t*>(details.mElementBuffer->data));
+			}
+		};
+		loadMesh("cube", *prefabs::generateCube());
+		loadMesh("quad", *prefabs::generateQuad());
+		loadMesh("sphere", *prefabs::generateSphere(2));
 
 		/* Generate basic textures*/
 		TextureResourceManager::TextureBuilder builder;
