@@ -129,14 +129,14 @@ namespace Sponza {
 			resolvedShader.bindTexture("gDepth", *gbuffer.mTextures[3]);
 
 			// bind kernel and noise
-			resolvedShader.bindTexture("noise", resourceManagers.mTextureManager.get(aoKernelHandle));
-			resolvedShader.bindTexture("kernel", resourceManagers.mTextureManager.get(aoNoiseHandle));
+			resolvedShader.bindTexture("noise", resourceManagers.mTextureManager.resolve(aoKernelHandle));
+			resolvedShader.bindTexture("kernel", resourceManagers.mTextureManager.resolve(aoNoiseHandle));
 
 			const auto P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
 			resolvedShader.bindUniform("P", P);
 			resolvedShader.bindUniform("invP", glm::inverse(P));
 
-			resourceManagers.mMeshManager.get("quad").draw();
+			resourceManagers.mMeshManager.resolve("quad").draw();
 		}
 
 		{
@@ -172,7 +172,7 @@ namespace Sponza {
 			resolvedShader.bindTexture("inputAO", *baseAOTarget->mTextures[0]);
 			resolvedShader.bindUniform("blurAmount", 2);
 
-			resourceManagers.mMeshManager.get("quad").draw();
+			resourceManagers.mMeshManager.resolve("quad").draw();
 			return blurredAO;
 		}
 	}

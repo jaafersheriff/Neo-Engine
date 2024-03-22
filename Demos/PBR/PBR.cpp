@@ -228,7 +228,7 @@ namespace PBR {
 					resolvedShader.bindTexture("shadowMap", *shadowMap);
 				}
 				if (skybox) {
-					resolvedShader.bindTexture("skybox", resourceManagers.mTextureManager.get(std::get<1>(*skybox).mSkybox));
+					resolvedShader.bindTexture("skybox", resourceManagers.mTextureManager.resolve(std::get<1>(*skybox).mSkybox));
 				}
 			}
 

@@ -51,7 +51,7 @@ namespace neo {
 		resolvedBlit.bindTexture("inputTexture", inputTexture);
 		
 		// Render 
-		resourceManagers.mMeshManager.get("quad").draw();
+		resourceManagers.mMeshManager.resolve("quad").draw();
 
 		glEnable(GL_DEPTH_TEST);
 	}

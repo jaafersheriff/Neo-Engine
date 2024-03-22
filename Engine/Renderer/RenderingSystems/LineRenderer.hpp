@@ -48,7 +48,7 @@ namespace neo {
 			}
 
 			/* Bind mesh */
-			resourceManagers.mMeshManager.get(line->mMeshHandle).draw();
+			resourceManagers.mMeshManager.resolve(line->mMeshHandle).draw();
 		}
 
 		if (oldDepthState) {

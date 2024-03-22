@@ -249,7 +249,7 @@ namespace neo {
 		loadMesh("sphere", *prefabs::generateSphere(2));
 
 		/* Generate basic textures*/
-		TextureResourceManager::TextureBuilder builder;
+		TextureBuilder builder;
 		builder.mDimensions.x = 1;
 		builder.mDimensions.y = 1;
 
