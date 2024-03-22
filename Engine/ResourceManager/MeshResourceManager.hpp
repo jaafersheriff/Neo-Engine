@@ -5,9 +5,6 @@
 
 #include "Util/Util.hpp"
 
-#include <entt/resource/cache.hpp>
-#include <memory>
-
 namespace neo {
 	class ResourceManagers;
 
@@ -35,8 +32,8 @@ namespace neo {
 	};
 
 	using MeshHandle = entt::id_type;
+
 	class MeshResourceManager final : public ResourceManagerInterface<MeshResourceManager, MeshHandle, Mesh, MeshLoadDetails> {
-		friend ResourceManagers;
 		friend ResourceManagerInterface;
 	public:
 		MeshResourceManager();

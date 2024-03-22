@@ -222,13 +222,13 @@ namespace {
 
 		if (!image.uri.empty()) {
 			HashedString textureHandle(image.uri.c_str());
-			if (textureManager.isValid(textureHandle)) {
+			if (textureManager.isValid(textureHandle) || textureManager.isQueued(textureHandle)) {
 				NEO_LOG_V("Texture %s is already loaded -- skipping", image.uri.c_str());
 				return textureHandle;
 			}
 		}
 
-		TextureResourceManager::TextureBuilder builder;
+		TextureBuilder builder;
 		builder.mFormat.mType = _getGLType(image.bits);
 		builder.mFormat.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, _getGLBaseFormat(image.component));
 		if (texture.sampler > -1) {
