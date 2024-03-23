@@ -62,7 +62,7 @@ namespace neo {
 			if (handle) {
 				return const_cast<ResourceType&>(handle.get());
 			}
-			NEO_FAIL("Invalid resource requested! Did you check for validity?");
+			NEO_LOG_W("Invalid resource requested! Did you check for validity?");
 			return *mFallback;
 		}
 	};

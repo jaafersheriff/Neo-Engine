@@ -352,9 +352,10 @@ namespace neo {
 				};
 				builder->mVertexBuffers[types::mesh::VertexType::Position].mData = static_cast<uint8_t*>(malloc(byteSize));
 				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Position].mData), verts.data(), byteSize);
-			}
-			{
+
 				builder->mVertexBuffers[types::mesh::VertexType::Normal] = builder->mVertexBuffers[types::mesh::VertexType::Position];
+				builder->mVertexBuffers[types::mesh::VertexType::Normal].mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder->mVertexBuffers[types::mesh::VertexType::Normal].mData), verts.data(), byteSize);
 			}
 			{
 				uint32_t byteSize = static_cast<uint32_t>(tex.size() * sizeof(float));
