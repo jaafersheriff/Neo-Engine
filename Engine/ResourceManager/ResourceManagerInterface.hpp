@@ -18,7 +18,7 @@ namespace neo {
 		}
 
 		bool isQueued(ResourceHandle id) const {
-			return mQueue.find(id) != mQueue.end());
+			return mQueue.find(id) != mQueue.end();
 		}
 
 		ResourceType& resolve(HashedString id) {
