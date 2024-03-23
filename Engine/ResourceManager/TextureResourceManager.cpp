@@ -51,7 +51,7 @@ namespace neo {
 
 		struct TextureLoader final : entt::resource_loader<TextureLoader, Texture> {
 
-			std::shared_ptr<Texture> load(FileLoadDetails& fileDetails, std::shared_ptr<Texture> dummy) const {
+			std::shared_ptr<Texture> load(FileLoadDetails& fileDetails) const {
 				if (fileDetails.mFilePaths.size() == 6 && fileDetails.mFormat.mTarget != types::texture::Target::TextureCube) {
 					NEO_LOG_E("Cubemap format mismatch!");
 					fileDetails.mFilePaths.erase(fileDetails.mFilePaths.begin(), fileDetails.mFilePaths.begin() + 5);
@@ -96,7 +96,7 @@ namespace neo {
 					auto texture = load(details);
 					return texture;
 				}
-				return dummy;
+				return nullptr;
 			}
 
 			std::shared_ptr<Texture> load(TextureBuilder textureDetails) const {
@@ -134,33 +134,34 @@ namespace neo {
 		mFallback.reset();
 	}
 
-	[[nodiscard]] TextureHandle TextureResourceManager::_asyncLoadImpl(HashedString id, TextureLoadDetails& textureDetails) const {
-		// TODO - variant overload
+	[[nodiscard]] TextureHandle TextureResourceManager::_asyncLoadImpl(HashedString id, TextureLoadDetails textureDetails) const {
+		std::visit([&](auto&& arg) {
+			using T = std::decay_t<decltype(arg)>;
+			if constexpr (std::is_same_v<T, TextureBuilder>) {
+				TextureBuilder copy = arg;
+				// Base dimension
+				uint32_t byteSize = glm::max<glm::u16>(arg.mDimensions.x, 1u) * glm::max<glm::u16>(arg.mDimensions.y, 1u) * glm::max<glm::u16>(arg.mDimensions.z, 1u);
+				// Components per pixel
+				byteSize *= _channelsPerPixel(TextureFormat::deriveBaseFormat(arg.mFormat.mInternalFormat));
+				// Pixel format
+				byteSize *= _bytesPerPixel(arg.mFormat.mType);
 
-		// Single file path
-		return asyncLoad(filePath, { filePath }, format);
+				copy.mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(copy.mData), arg.mData, byteSize);
+				mQueue.emplace(id, copy);
+			}
+			else if constexpr (std::is_same_v<T, FileLoadDetails>) {
+				NEO_ASSERT(arg.mFilePaths.size() == 1 || arg.mFilePaths.size() == 6, "Invalid file path count when loading texture");
 
-		// Multiple file paths
-		NEO_ASSERT(filePath.size() == 1 || filePath.size() == 6, "Invalid file path count when loading texture");
-
-		HashedString id(name);
-			mFileLoadQueue.emplace(id, FileLoadDetails{ filePath, format });
-
-		// Raw data load
-			TextureBuilder copy = textureDetails;
-			// Base dimension
-			uint32_t byteSize = glm::max<glm::u16>(textureDetails.mDimensions.x, 1u) * glm::max<glm::u16>(textureDetails.mDimensions.y, 1u) * glm::max<glm::u16>(textureDetails.mDimensions.z, 1u);
-			// Components per pixel
-			byteSize *= _channelsPerPixel(TextureFormat::deriveBaseFormat(textureDetails.mFormat.mInternalFormat));
-			// Pixel format
-			byteSize *= _bytesPerPixel(textureDetails.mFormat.mType);
-			
-			copy.mData = static_cast<uint8_t*>(malloc(byteSize));
-			memcpy(const_cast<uint8_t*>(copy.mData), textureDetails.mData, byteSize);
-			mQueue.emplace(id, copy);
+				// Can safely copy into queue
+				mQueue.emplace(id, arg);
+			}
+			else {
+				static_assert(always_false_v<T>, "non-exhaustive visitor!");
+			}
+		}, textureDetails);
 
 		return id;
-
 	}
 
 
@@ -172,9 +173,19 @@ namespace neo {
 		mQueue.clear();
 
 		for (auto&& [id, loadDetails] : swapQueue) {
-			// TODO - variant overload
-			mTextureCache.load<TextureLoader>(id, textureDetails);
-			mTextureCache.load<TextureLoader>(id, details, mDummyTexture);
+			std::visit([&](auto&& arg) {
+				using T = std::decay_t<decltype(arg)>;
+				if constexpr (std::is_same_v<T, TextureBuilder>) {
+					mCache.load<TextureLoader>(id, arg);
+					free(const_cast<uint8_t*>(arg.mData));
+				}
+				else if constexpr (std::is_same_v<T, FileLoadDetails>) {
+					mCache.load<TextureLoader>(id, arg);
+				}
+				else {
+					static_assert(always_false_v<T>, "non-exhaustive visitor!");
+				}
+				}, loadDetails);
 		}
 	}
 

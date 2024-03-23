@@ -39,7 +39,7 @@ namespace neo {
 
 		// Heh???
 		HashedString random(reinterpret_cast<const char*>(this));
-		mMeshHandle = meshManager.asyncLoad(random, builder);
+		mMeshHandle = meshManager.asyncLoad(random, std::move(builder));
 	}
 
 	LineMeshComponent::~LineMeshComponent() {

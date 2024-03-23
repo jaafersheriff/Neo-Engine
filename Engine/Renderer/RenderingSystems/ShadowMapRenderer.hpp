@@ -63,13 +63,13 @@ namespace neo {
 			auto& resolvedShader = resourceManagers.mShaderManager.get(shaderHandle, drawDefines);
 
 			if (doAlphaTest) {
-				resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.get(material->mAlbedoMap));
+				resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
 			}
 
 			resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCameraEntity)->getProj());
 			resolvedShader.bindUniform("V", shadowCameraSpatial.getView());
 			resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
-			resourceManagers.mMeshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
+			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
 
 		if (containsAlphaTest) {

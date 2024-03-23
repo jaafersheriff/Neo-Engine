@@ -39,7 +39,7 @@ namespace neo {
 			resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
 			resolvedShader.bindUniform("color", view.get<const WireframeShaderComponent>(entity).mColor);
 
-			resourceManagers.mMeshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
+			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
 
 		glEnable(GL_CULL_FACE);

@@ -125,11 +125,11 @@ namespace neo {
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
 			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-				resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.get(material.mAlbedoMap));
+				resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material.mAlbedoMap));
 			}
 
 			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.get(material.mNormalMap));
+				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
 			}
 
 			// UBO candidates
@@ -155,7 +155,7 @@ namespace neo {
 			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
 
-			resourceManagers.mMeshManager.get(view.get<const MeshComponent>(entity).mMeshHandle).draw();
+			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
 
 		if (containsAlphaTest) {

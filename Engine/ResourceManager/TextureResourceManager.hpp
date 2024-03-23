@@ -5,9 +5,13 @@
 
 #include "Util/Util.hpp"
 
+#include <string>
+#include <variant>
+
 namespace neo {
 	class ResourceManagers;
 
+	// TODO - move to its own file
 	struct STBImageData {
 		STBImageData(const char* _filePath, types::texture::BaseFormats baseFormat, bool flip);
 		~STBImageData();
@@ -27,6 +31,8 @@ namespace neo {
 		glm::u16vec3 mDimensions = glm::u16vec3(0);
 		const uint8_t* mData = nullptr;
 	};
+
+	// TODO - rename to something texture-specific 
 	struct FileLoadDetails {
 		std::vector<std::string> mFilePaths;
 		TextureFormat mFormat;
@@ -43,7 +49,7 @@ namespace neo {
 		~TextureResourceManager();
 
 	protected:
-		[[nodiscard]] TextureHandle _asyncLoadImpl(HashedString id, TextureLoadDetails& textureDetails) const;
+		[[nodiscard]] TextureHandle _asyncLoadImpl(HashedString id, TextureLoadDetails textureDetails) const;
 		void _clearImpl();
 		void _tickImpl();
 	};
