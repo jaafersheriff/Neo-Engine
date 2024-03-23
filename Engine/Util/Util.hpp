@@ -5,7 +5,6 @@
 #include <glm/gtc/constants.hpp>
 
 #include <entt/core/hashed_string.hpp>
-#include <string>
 
 namespace neo {
 
@@ -30,8 +29,6 @@ namespace neo {
 	#endif // NEO_CONFIG_DEBUG
 	#define NEO_FAIL(fmt, ...) NEO_ASSERT(false, fmt, __VA_ARGS__)
 #endif // NEO_DEBUG_ASSERT
-
-#define NEO_ARRAYSIZE(_ARR)		  ((int)(sizeof(_ARR) / sizeof(*(_ARR))))	 // Size of a static C-style array. Don't use on pointers!
 
 	using HashedString = entt::hashed_string;
 
