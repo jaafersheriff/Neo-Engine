@@ -37,7 +37,7 @@ namespace neo {
 			return _resolveFinal(id);
 		}
 
-		[[nodiscard]] ResourceHandle asyncLoad(HashedString id, ResourceLoadDetails& details) const {
+		[[nodiscard]] ResourceHandle asyncLoad(HashedString id, ResourceLoadDetails details) const {
 			if (isValid(id) || isQueued(id)) {
 				return id;
 			}

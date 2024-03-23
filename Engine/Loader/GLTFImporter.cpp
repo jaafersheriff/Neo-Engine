@@ -391,7 +391,7 @@ namespace {
 				name = ss.str();
 			}
 			NEO_LOG_I("Loaded mesh %s", name.c_str());
-			outNode.mMeshHandle = resourceManagers.mMeshManager.asyncLoad(HashedString(name.c_str()), builder);
+			outNode.mMeshHandle = resourceManagers.mMeshManager.asyncLoad(HashedString(name.c_str()), std::move(builder));
 
 			if (gltfMesh.material > -1) {
 				auto& material = model.materials[gltfMesh.material];

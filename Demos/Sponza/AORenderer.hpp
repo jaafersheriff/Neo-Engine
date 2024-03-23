@@ -37,7 +37,7 @@ namespace Sponza {
 				kernel.push_back(sample.y);
 				kernel.push_back(sample.z);
 			};
-			TextureResourceManager::TextureBuilder builder;
+			TextureBuilder builder;
 			builder.mFormat.mTarget = types::texture::Target::Texture1D;
 			builder.mFormat.mInternalFormat = types::texture::InternalFormats::RGB32_F;
 			builder.mFormat.mFilter = {
@@ -62,7 +62,7 @@ namespace Sponza {
 				noise[i + 1] = util::genRandom();
 				noise[i + 2] = util::genRandom();
 			}
-			TextureResourceManager::TextureBuilder builder;
+			TextureBuilder builder;
 			builder.mFormat.mTarget = types::texture::Target::Texture2D;
 			builder.mFormat.mInternalFormat = types::texture::InternalFormats::RGB32_F;
 			builder.mFormat.mFilter = {

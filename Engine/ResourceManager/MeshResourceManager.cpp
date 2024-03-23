@@ -52,7 +52,7 @@ namespace neo {
 		mFallback.reset();
 	}
 
-	[[nodiscard]] MeshHandle MeshResourceManager::_asyncLoadImpl(HashedString id, MeshLoadDetails& meshDetails) const {
+	[[nodiscard]] MeshHandle MeshResourceManager::_asyncLoadImpl(HashedString id, MeshLoadDetails meshDetails) const {
 		NEO_LOG_V("Loading mesh %s", id.data());
 
 		// Copy data so this can be ticked next frame

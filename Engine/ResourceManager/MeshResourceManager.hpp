@@ -40,7 +40,7 @@ namespace neo {
 		~MeshResourceManager();
 
 	protected:
-		[[nodiscard]] MeshHandle _asyncLoadImpl(HashedString id, MeshLoadDetails& meshDetails) const;
+		[[nodiscard]] MeshHandle _asyncLoadImpl(HashedString id, MeshLoadDetails meshDetails) const;
 		void _clearImpl();
 		void _tickImpl();
 	};

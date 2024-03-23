@@ -175,7 +175,7 @@ namespace PBR {
 				drawDefines.set(EMISSIVE);
 			}
 
-			const auto& mesh = resourceManagers.mMeshManager.get(view.get<const MeshComponent>(entity).mMeshHandle);
+			const auto& mesh = resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle);
 			MakeDefine(TANGENTS);
 			if (mesh.hasVBO(types::mesh::VertexType::Tangent)) {
 				drawDefines.set(TANGENTS);
@@ -186,26 +186,26 @@ namespace PBR {
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
 			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-				resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.get(material.mAlbedoMap));
+				resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material.mAlbedoMap));
 			}
 
 			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.get(material.mNormalMap));
+				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
 			}
 
 			resolvedShader.bindUniform("metalness", material.mMetallic);
 			resolvedShader.bindUniform("roughness", material.mRoughness);
 			if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
-				resolvedShader.bindTexture("metalRoughnessMap", resourceManagers.mTextureManager.get(material.mMetallicRoughnessMap));
+				resolvedShader.bindTexture("metalRoughnessMap", resourceManagers.mTextureManager.resolve(material.mMetallicRoughnessMap));
 			}
 
 			if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
-				resolvedShader.bindTexture("occlusionMap", resourceManagers.mTextureManager.get(material.mOcclusionMap));
+				resolvedShader.bindTexture("occlusionMap", resourceManagers.mTextureManager.resolve(material.mOcclusionMap));
 			}
 
 			resolvedShader.bindUniform("emissiveFactor", material.mEmissiveFactor);
 			if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
-				resolvedShader.bindTexture("emissiveMap", resourceManagers.mTextureManager.get(material.mEmissiveMap));
+				resolvedShader.bindTexture("emissiveMap", resourceManagers.mTextureManager.resolve(material.mEmissiveMap));
 			}
 
 			// UBO candidates
@@ -331,17 +331,19 @@ namespace PBR {
 
 		{
 			auto skybox = ecs.createEntity();
-			ecs.addComponent<SkyboxComponent>(skybox, resourceManagers.mTextureManager.asyncLoad("Skybox", {
-				"envmap_miramar/miramar_ft.tga",
-				"envmap_miramar/miramar_bk.tga",
-				"envmap_miramar/miramar_up.tga",
-				"envmap_miramar/miramar_dn.tga",
-				"envmap_miramar/miramar_rt.tga",
-				"envmap_miramar/miramar_lf.tga",
-				}, TextureFormat{
+			ecs.addComponent<SkyboxComponent>(skybox, resourceManagers.mTextureManager.asyncLoad("Skybox", FileLoadDetails{ 
+				{
+					"envmap_miramar/miramar_ft.tga",
+					"envmap_miramar/miramar_bk.tga",
+					"envmap_miramar/miramar_up.tga",
+					"envmap_miramar/miramar_dn.tga",
+					"envmap_miramar/miramar_rt.tga",
+					"envmap_miramar/miramar_lf.tga",
+				}, 
+				TextureFormat{
 					types::texture::Target::TextureCube
 				}
-			));
+			}));
 		}
 
 		{
