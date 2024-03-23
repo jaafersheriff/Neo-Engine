@@ -88,7 +88,7 @@ namespace neo {
 
 				if (check) {
 					TextureBuilder details;
-					details.mFormat = details.mFormat;
+					details.mFormat = fileDetails.mFormat;
 					details.mDimensions = dimensions;
 					// HEH?
 					details.mData = reinterpret_cast<uint8_t*>(data.data());
