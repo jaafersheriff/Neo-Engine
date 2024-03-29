@@ -1,38 +1,31 @@
 #pragma once
 
+#include "ResourceManagerInterface.hpp"
 #include "Renderer/GLObjects/SourceShader.hpp"
 
 #include "Util/Util.hpp"
 
-#include <entt/resource/cache.hpp>
-
 #include <variant>
-#include <memory>
 
 namespace neo {
 	class ResourceManagers;
 
+	using ShaderLoadDetails = std::variant<SourceShader::ConstructionArgs, SourceShader::ShaderCode>;
 	using ShaderHandle = entt::id_type;
-	class ShaderResourceManager {
+
+	class ShaderResourceManager final : public ResourceManagerInterface<ShaderResourceManager, ShaderHandle, SourceShader, ShaderLoadDetails> {
 		friend ResourceManagers;
 	public:
 		ShaderResourceManager();
 		~ShaderResourceManager();
-		using ShaderLoadDetails = std::variant<SourceShader::ConstructionArgs, SourceShader::ShaderCode>;
 
-		const ResolvedShaderInstance& get(HashedString id, const ShaderDefines& defines) const;
-		const ResolvedShaderInstance& get(ShaderHandle handle, const ShaderDefines& defines) const;
-
-		bool isValid(ShaderHandle id) const;
-		[[nodiscard]] ShaderHandle asyncLoad(const char* name, ShaderLoadDetails meshDetails) const;
-
-		void clear();
+		const ResolvedShaderInstance& ShaderResourceManager::resolveDefines(ShaderHandle handle, const ShaderDefines& defines) const;
 		void imguiEditor();
-	private:
-		void _tick();
-		mutable std::map<std::string, ShaderLoadDetails> mQueue;
-		using ShaderCache = entt::resource_cache<SourceShader>;
-		ShaderCache mShaderCache;
-		std::shared_ptr<SourceShader> mDummyShader;
+
+	protected:
+		[[nodiscard]] ShaderHandle _asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, std::string debugName) const;
+		void _clearImpl();
+		void _tickImpl();
+
 	};
 }

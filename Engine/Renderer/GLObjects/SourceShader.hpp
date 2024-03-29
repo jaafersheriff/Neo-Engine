@@ -23,10 +23,10 @@ namespace neo {
 		using HashedShaderDefines = uint32_t;
 
 		SourceShader(const char* name, const ShaderCode& args);
-		SourceShader(const SourceShader &) = delete;
-		SourceShader & operator=(const SourceShader &) = delete;
-		SourceShader(SourceShader &&) = delete;
-		SourceShader & operator=(SourceShader &&) = delete;
+		// SourceShader(const SourceShader &) = delete;
+		// SourceShader & operator=(const SourceShader &) = delete;
+		// SourceShader(SourceShader &&) = delete;
+		// SourceShader & operator=(SourceShader &&) = delete;
 
 		const ResolvedShaderInstance& getResolvedInstance(const ShaderDefines& defines) const;
 		void destroy();

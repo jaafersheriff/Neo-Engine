@@ -49,7 +49,7 @@ namespace neo {
 		~TextureResourceManager();
 
 	protected:
-		[[nodiscard]] TextureHandle _asyncLoadImpl(HashedString id, TextureLoadDetails textureDetails) const;
+		[[nodiscard]] TextureHandle _asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, std::string debugName) const;
 		void _clearImpl();
 		void _tickImpl();
 	};

@@ -24,7 +24,7 @@ namespace neo {
 			return;
 		}
 
-		auto& lineShader = resourceManagers.mShaderManager.get(lineShaderHandle, inDefines);
+		auto& lineShader = resourceManagers.mShaderManager.resolveDefines(lineShaderHandle, inDefines);
 		lineShader.bind();
 		lineShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
 		lineShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());

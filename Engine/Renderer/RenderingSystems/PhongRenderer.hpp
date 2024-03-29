@@ -120,7 +120,7 @@ namespace neo {
 				drawDefines.set(NORMAL_MAP);
 			}
 
-			auto& resolvedShader = resourceManagers.mShaderManager.get(shaderHandle, drawDefines);
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);

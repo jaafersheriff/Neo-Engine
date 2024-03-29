@@ -52,8 +52,8 @@ namespace neo {
 		mFallback.reset();
 	}
 
-	[[nodiscard]] MeshHandle MeshResourceManager::_asyncLoadImpl(HashedString id, MeshLoadDetails meshDetails) const {
-		NEO_LOG_V("Loading mesh %s", id.data());
+	[[nodiscard]] MeshHandle MeshResourceManager::_asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, std::string debugName) const {
+		NEO_LOG_V("Loading mesh %s", debugName.c_str());
 
 		// Copy data so this can be ticked next frame
 		MeshLoadDetails copy = meshDetails;
@@ -68,7 +68,7 @@ namespace neo {
 			memcpy(const_cast<uint8_t*>(copy.mElementBuffer->mData), meshDetails.mElementBuffer->mData, meshDetails.mElementBuffer->mByteSize);
 		}
 
-		mQueue.emplace(id, copy);
+		mQueue.emplace(id, ResourceLoadDetails_Internal{ copy, debugName });
 
 		return id;
 	}
@@ -76,17 +76,17 @@ namespace neo {
 	void MeshResourceManager::_tickImpl() {
 		TRACY_ZONE();
 
-		std::map<MeshHandle, MeshLoadDetails> swapQueue = {};
+		std::map<MeshHandle, ResourceLoadDetails_Internal> swapQueue = {};
 		std::swap(mQueue, swapQueue);
 		mQueue.clear();
 
-		for (auto&& [id, meshDetails] : swapQueue) {
-			mCache.load<MeshLoader>(id, meshDetails);
-			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
+		for (auto&& [id, details] : swapQueue) {
+			mCache.load<MeshLoader>(id, details.mLoadDetails);
+			for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
 				free(const_cast<uint8_t*>(buffer.mData));
 			}
-			if (meshDetails.mElementBuffer.has_value()) {
-				free(const_cast<uint8_t*>(meshDetails.mElementBuffer->mData));
+			if (details.mLoadDetails.mElementBuffer.has_value()) {
+				free(const_cast<uint8_t*>(details.mLoadDetails.mElementBuffer->mData));
 			}
 		}
 	}

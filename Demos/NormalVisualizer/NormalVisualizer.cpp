@@ -100,7 +100,7 @@ namespace NormalVisualizer {
 				{ShaderStage::GEOMETRY, "normal.geom"},
 				{ShaderStage::FRAGMENT, "normal.frag"}
 			});
-			auto& resolvedShader = resourceManagers.mShaderManager.get(normalShaderHandle, {});
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(normalShaderHandle, {});
 
 			for (const auto&& [__, mesh, material, spatial] : ecs.getView<MeshComponent, MaterialComponent, SpatialComponent>().each()) {
 

@@ -32,7 +32,7 @@ namespace Sponza {
 		if (debugRadius > 0.f) {
 			defines.set(SHOW_LIGHTS);
 		}
-		auto& resolvedShader = resourceManagers.mShaderManager.get(lightResolveShaderHandle, defines);
+		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
 		resolvedShader.bind();
 
 		if (debugRadius > 0.f) {
@@ -101,7 +101,7 @@ namespace Sponza {
 			{ ShaderStage::VERTEX, "quad.vert"},
 			{ ShaderStage::FRAGMENT, "sponza/directionallightresolve.frag" }
 		});
-		auto& resolvedShader = resourceManagers.mShaderManager.get(lightResolveShader, defines);
+		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShader, defines);
 		resolvedShader.bind();
 
 		if (shadowsEnabled) {
