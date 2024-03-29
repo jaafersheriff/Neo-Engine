@@ -76,9 +76,11 @@ namespace neo {
 				for (auto& image : images) {
 					if (image) {
 						NEO_LOG_I("Loaded image %s [%d, %d]", image->mFilePath.c_str(), image->mWidth, image->mHeight);
-						data.push_back(image->mData);
 						dimensions.x = glm::min(dimensions.x, static_cast<uint16_t>(image->mWidth));
 						dimensions.y = glm::min(dimensions.y, static_cast<uint16_t>(image->mHeight));
+
+						// TODO - need to memcpy the data over lmao
+						data.push_back(image->mData);
 					}
 					else {
 						NEO_FAIL("Error reading texture file %s", image->mFilePath.c_str());
@@ -134,7 +136,8 @@ namespace neo {
 		mFallback.reset();
 	}
 
-	[[nodiscard]] TextureHandle TextureResourceManager::_asyncLoadImpl(HashedString id, TextureLoadDetails textureDetails) const {
+	[[nodiscard]] TextureHandle TextureResourceManager::_asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, std::string debugName) const {
+		NEO_UNUSED(debugName);
 		std::visit([&](auto&& arg) {
 			using T = std::decay_t<decltype(arg)>;
 			if constexpr (std::is_same_v<T, TextureBuilder>) {
@@ -148,13 +151,13 @@ namespace neo {
 
 				copy.mData = static_cast<uint8_t*>(malloc(byteSize));
 				memcpy(const_cast<uint8_t*>(copy.mData), arg.mData, byteSize);
-				mQueue.emplace(id, copy);
+				mQueue.emplace(id, ResourceLoadDetails_Internal{ copy, debugName });
 			}
 			else if constexpr (std::is_same_v<T, FileLoadDetails>) {
 				NEO_ASSERT(arg.mFilePaths.size() == 1 || arg.mFilePaths.size() == 6, "Invalid file path count when loading texture");
 
 				// Can safely copy into queue
-				mQueue.emplace(id, arg);
+				mQueue.emplace(id, ResourceLoadDetails_Internal{ arg, debugName });
 			}
 			else {
 				static_assert(always_false_v<T>, "non-exhaustive visitor!");
@@ -168,11 +171,11 @@ namespace neo {
 	void TextureResourceManager::_tickImpl() {
 		TRACY_ZONE();
 
-		std::map<TextureHandle, TextureLoadDetails> swapQueue;
+		std::map<TextureHandle, ResourceLoadDetails_Internal> swapQueue;
 		std::swap(mQueue, swapQueue);
 		mQueue.clear();
 
-		for (auto&& [id, loadDetails] : swapQueue) {
+		for (auto&& [id, details] : swapQueue) {
 			std::visit([&](auto&& arg) {
 				using T = std::decay_t<decltype(arg)>;
 				if constexpr (std::is_same_v<T, TextureBuilder>) {
@@ -185,7 +188,7 @@ namespace neo {
 				else {
 					static_assert(always_false_v<T>, "non-exhaustive visitor!");
 				}
-				}, loadDetails);
+				}, details.mLoadDetails);
 		}
 	}
 

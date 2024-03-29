@@ -262,7 +262,7 @@ namespace Sponza {
 			if (mDrawAO) {
 				defines.set(DRAW_AO);
 			}
-			auto& resolvedShader = resourceManagers.mShaderManager.get(combineShaderHandle, defines);
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(combineShaderHandle, defines);
 			resolvedShader.bind();
 
 			resolvedShader.bindTexture("lightOutput", *lightResolve->mTextures[0]);

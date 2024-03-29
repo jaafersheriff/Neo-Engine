@@ -51,7 +51,7 @@ namespace neo {
 		auto camSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 		NEO_ASSERT(camera, "No main camera exists");
 
-		auto& resolvedShader = resourceManagers.mShaderManager.get(skyboxShaderHandle, {});
+		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(skyboxShaderHandle, {});
 		resolvedShader.bind();
 		resolvedShader.bindUniform("P", camera->getProj());
 		resolvedShader.bindUniform("V", camSpatial->getView());

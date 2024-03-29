@@ -23,7 +23,7 @@ namespace neo {
 
 		glViewport(0, 0, dimension.x, dimension.y);
 
-		auto& resolvedShader = resourceManagers.mShaderManager.get(fxaaShaderHandle, {});
+		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(fxaaShaderHandle, {});
 		resolvedShader.bind();
 		resolvedShader.bindUniform("frameSize", glm::vec2(inputTexture.mWidth, inputTexture.mHeight));
 		resolvedShader.bindTexture("inputTexture", inputTexture);

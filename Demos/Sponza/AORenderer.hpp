@@ -118,7 +118,7 @@ namespace Sponza {
 				{ ShaderStage::VERTEX, "quad.vert"},
 				{ ShaderStage::FRAGMENT, "sponza/ao.frag" }
 				});
-			auto& resolvedShader = resourceManagers.mShaderManager.get(aoShader, {});
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(aoShader, {});
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("radius", radius);
@@ -166,7 +166,7 @@ namespace Sponza {
 				{ ShaderStage::FRAGMENT, "sponza/blur.frag" }
 				});
 
-			auto& resolvedShader = resourceManagers.mShaderManager.get(blurShader, {});
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(blurShader, {});
 			resolvedShader.bind();
 
 			resolvedShader.bindTexture("inputAO", *baseAOTarget->mTextures[0]);

@@ -15,7 +15,7 @@ namespace neo {
 	static void blit(ResourceManagers& resourceManagers, Framebuffer& outputFBO, Texture& inputTexture, glm::uvec2 viewport, glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f)) {
 		TRACY_GPU();
 
-		auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blitter", SourceShader::ShaderCode{			
+		auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blit Shader", SourceShader::ShaderCode {			
 			{ ShaderStage::VERTEX,
 			R"(
 				layout (location = 0) in vec3 vertPos;
@@ -44,8 +44,7 @@ namespace neo {
 
 		glDisable(GL_DEPTH_TEST);
 		
-		auto& resolvedBlit = resourceManagers.mShaderManager.get(blitShaderHandle, {});
-		resolvedBlit.bind();
+		auto& resolvedBlit = resourceManagers.mShaderManager.resolveDefines(blitShaderHandle, {});
 		
 		// Bind input fbo texture
 		resolvedBlit.bindTexture("inputTexture", inputTexture);

@@ -31,7 +31,7 @@ namespace neo {
 				}
 			}
 
-			auto& resolvedShader = resourceManagers.mShaderManager.get(shaderHandle, inDefines);
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, inDefines);
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());

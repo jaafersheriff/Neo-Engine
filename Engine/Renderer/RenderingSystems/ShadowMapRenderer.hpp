@@ -60,7 +60,7 @@ namespace neo {
 				drawDefines.set(ALPHA_TEST);
 			}
 
-			auto& resolvedShader = resourceManagers.mShaderManager.get(shaderHandle, drawDefines);
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
 
 			if (doAlphaTest) {
 				resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));

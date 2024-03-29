@@ -101,7 +101,7 @@ namespace Compute {
 				{ ShaderStage::COMPUTE, "compute/particles.compute" }
 			});
 
-			auto& particlesComputeShader = resourceManagers.mShaderManager.get(particlesComputeShaderHandle, {});
+			auto& particlesComputeShader = resourceManagers.mShaderManager.resolveDefines(particlesComputeShaderHandle, {});
 			particlesComputeShader.bind();
 
 			float timeStep = 0.f;
@@ -134,7 +134,7 @@ namespace Compute {
 				{ ShaderStage::FRAGMENT, "compute/particles.frag" },
 			});
 
-			auto& particlesVisShader = resourceManagers.mShaderManager.get(particlesVisShaderHandle, {});
+			auto& particlesVisShader = resourceManagers.mShaderManager.resolveDefines(particlesVisShaderHandle, {});
 			particlesVisShader.bind();
 
 			if (auto cameraView = ecs.getSingleView<MainCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {

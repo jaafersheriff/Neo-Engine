@@ -3,6 +3,7 @@
 #include "Util/Util.hpp"
 
 #include <entt/resource/cache.hpp>
+#include <string>
 #include <memory>
 
 namespace neo {
@@ -41,10 +42,15 @@ namespace neo {
 			if (isValid(id) || isQueued(id)) {
 				return id;
 			}
-			return static_cast<const DerivedManager*>(this)->_asyncLoadImpl(id, details);
+			return static_cast<const DerivedManager*>(this)->_asyncLoadImpl(id.value(), details, std::string(id.data()));
 		}
 
 	protected:
+		struct ResourceLoadDetails_Internal {
+			ResourceLoadDetails mLoadDetails;
+			std::string mDebugName;
+		};
+
 		void clear() {
 			static_cast<DerivedManager*>(this)->_clearImpl();
 		}
@@ -52,7 +58,7 @@ namespace neo {
 		void tick() {
 			static_cast<DerivedManager*>(this)->_tickImpl();
 		}
-		mutable std::map<ResourceHandle, ResourceLoadDetails> mQueue;
+		mutable std::map<ResourceHandle, ResourceLoadDetails_Internal> mQueue;
 		entt::resource_cache<ResourceType> mCache;
 		std::shared_ptr<ResourceType> mFallback;
 
