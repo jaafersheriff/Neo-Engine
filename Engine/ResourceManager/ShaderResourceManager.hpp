@@ -14,7 +14,7 @@ namespace neo {
 	using ShaderHandle = entt::id_type;
 
 	class ShaderResourceManager final : public ResourceManagerInterface<ShaderResourceManager, ShaderHandle, SourceShader, ShaderLoadDetails> {
-		friend ResourceManagers;
+		friend ResourceManagerInterface;
 	public:
 		ShaderResourceManager();
 		~ShaderResourceManager();
