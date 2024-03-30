@@ -92,8 +92,16 @@ namespace neo {
 					TextureBuilder details;
 					details.mFormat = fileDetails.mFormat;
 					details.mDimensions = dimensions;
-					// HEH?
-					details.mData = reinterpret_cast<uint8_t*>(data.data());
+					if (fileDetails.mFilePaths.size() == 1) {
+						details.mData = data[0];
+					}
+					else if (fileDetails.mFilePaths.size() == 6) {
+						// HEH??
+						details.mData = reinterpret_cast<uint8_t*>(data.data());
+					}
+					else {
+						NEO_FAIL("How u do dis");
+					}
 
 					auto texture = load(details);
 					return texture;
