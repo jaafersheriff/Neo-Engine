@@ -181,7 +181,7 @@ namespace PBR {
 				drawDefines.set(TANGENTS);
 			}
 
-			auto& resolvedShader = resourceManagers.mShaderManager.get(pbrShaderHandle, drawDefines);
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(pbrShaderHandle, drawDefines);
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
