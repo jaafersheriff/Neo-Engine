@@ -53,7 +53,7 @@ namespace neo {
 		NEO_UNUSED(config);
 	}
 
-	void Renderer::init() {
+	void Renderer::init(ResourceManagers& resourceManager) {
 	#ifdef DEBUG_MODE
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -67,32 +67,40 @@ namespace neo {
 		/* Init default FBO */
 		glActiveTexture(GL_TEXTURE0);
 
-		mDefaultFBO = Library::createFramebuffer("backbuffer");
-		mDefaultFBO->attachColorTexture({ 1, 1 }, { 
-			types::texture::Target::Texture2D, 
-			types::texture::InternalFormats::RGB16_UNORM,
-			{
-				types::texture::Filters::Linear,
-				types::texture::Filters::Linear
-			},
-			{
-				types::texture::Wraps::Clamp,
-				types::texture::Wraps::Clamp
-			}
-		});
-		mDefaultFBO->attachDepthTexture({ 1, 1 }, 
-			types::texture::InternalFormats::D16,
-			{
-				types::texture::Filters::Linear,
-				types::texture::Filters::Linear
-			},
-			{
-				types::texture::Wraps::Clamp,
-				types::texture::Wraps::Clamp
+		// TODO - holy shit this should just be a builder
+		auto defaultFbo = resourceManager.mFramebufferManager.asyncLoad(
+			resourceManager.mTextureManager,
+			"backbuffer",
+			PooledFramebufferDetails_New {
+				{1, 1},
+				{
+					{
+						types::texture::Target::Texture2D,
+						types::texture::InternalFormats::RGB16_UNORM,
+						{
+							types::texture::Filters::Linear,
+							types::texture::Filters::Linear
+						},
+						{
+							types::texture::Wraps::Clamp,
+							types::texture::Wraps::Clamp
+						}
+					},
+					{
+						types::texture::Target::Texture2D,
+						types::texture::InternalFormats::D16,
+						{
+							types::texture::Filters::Linear,
+							types::texture::Filters::Linear
+						},
+						{
+							types::texture::Wraps::Clamp,
+							types::texture::Wraps::Clamp
+						}
+					}
+				}
 			}
 		);
-		mDefaultFBO->initDrawBuffers();
-		mDefaultFBO->bind();
 
 		/* Set max work group */
 		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);

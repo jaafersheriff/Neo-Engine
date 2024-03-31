@@ -17,24 +17,24 @@ namespace neo {
 		};
 
 		namespace framebuffer {
-			enum class ClearFlagBits : uint8_t {
+			enum class AttachmentBit : uint8_t {
 				Color = 1 << 0,
 				Depth = 1 << 1,
 				Stencil = 1 << 2,
 			};
-			inline ClearFlagBits operator|(ClearFlagBits a, ClearFlagBits b) {
-				return static_cast<ClearFlagBits>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+			inline AttachmentBit operator|(AttachmentBit a, AttachmentBit b) {
+				return static_cast<AttachmentBit>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
 			}
-			struct ClearFlags {
-				uint8_t mClearFlagBits = 0;
-				ClearFlags(uint8_t bits) {
-					mClearFlagBits = bits;
+			struct AttachmentBits {
+				uint8_t mClearBits = 0;
+				AttachmentBits(uint8_t bits) {
+					mClearBits = bits;
 				}
-				ClearFlags(ClearFlagBits bits) {
-					mClearFlagBits = static_cast<uint8_t>(bits);
+				AttachmentBits(AttachmentBit bits) {
+					mClearBits = static_cast<uint8_t>(bits);
 				}
-				inline ClearFlags operator|(ClearFlagBits b) {
-					return ClearFlags(static_cast<uint8_t>(b));
+				inline AttachmentBits operator|(AttachmentBit b) {
+					return AttachmentBits(static_cast<uint8_t>(b));
 				}
 			};
 		}

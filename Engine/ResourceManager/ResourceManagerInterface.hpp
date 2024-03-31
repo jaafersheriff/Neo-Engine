@@ -45,6 +45,20 @@ namespace neo {
 			return static_cast<const DerivedManager*>(this)->_asyncLoadImpl(id.value(), details, std::string(id.data()));
 		}
 
+		[[nodiscard]] ResourceHandle asyncLoad(ResourceHandle id, ResourceLoadDetails details) const {
+			if (isValid(id) || isQueued(id)) {
+				return id;
+			}
+			return static_cast<const DerivedManager*>(this)->_asyncLoadImpl(id, details, "");
+		}
+
+		void discard(ResourceHandle id) const {
+			// TODO - this should also be queued?
+			if (isValid(id) || isQueued(id)) {
+				static_cast<DerivedManager*>(this)->_discardImpl();
+			}
+		}
+
 	protected:
 		struct ResourceLoadDetails_Internal {
 			ResourceLoadDetails mLoadDetails;
