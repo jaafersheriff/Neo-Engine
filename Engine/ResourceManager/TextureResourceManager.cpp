@@ -8,6 +8,8 @@
 #include <stb_image.h>
 #pragma warning(pop)
 
+#include <imgui.h>
+
 namespace neo {
 	namespace {
 		uint16_t _bytesPerPixel(types::ByteFormats format) {
@@ -207,4 +209,17 @@ namespace neo {
 		});
 		mCache.clear();
 	}
+
+	void TextureResourceManager::imguiEditor(std::function<void(const Texture&)> textureFunc) {
+		mCache.each([&](TextureHandle handle, Texture& texture) {
+			if (ImGui::TreeNode(&handle, "TODO - debug names %d", handle)) {
+				ImGui::Text("[%d, %d]", texture.mWidth, texture.mHeight);
+				textureFunc(texture);
+				ImGui::TreePop();
+			}
+		});
+	}
+
+
+
 }

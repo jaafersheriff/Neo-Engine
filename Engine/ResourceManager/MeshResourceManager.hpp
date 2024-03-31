@@ -39,11 +39,12 @@ namespace neo {
 		MeshResourceManager();
 		~MeshResourceManager();
 
+		void imguiEditor();
+
 	protected:
 		[[nodiscard]] MeshHandle _asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, std::string debugName) const;
 		void _clearImpl();
 		void _tickImpl();
 
-		void imguiEditor();
 	};
 }

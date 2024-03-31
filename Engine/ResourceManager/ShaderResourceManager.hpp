@@ -20,13 +20,13 @@ namespace neo {
 		~ShaderResourceManager();
 
 		const ResolvedShaderInstance& ShaderResourceManager::resolveDefines(ShaderHandle handle, const ShaderDefines& defines) const;
+		void imguiEditor();
 
 	protected:
 		[[nodiscard]] ShaderHandle _asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, std::string debugName) const;
 		void _clearImpl();
 		void _tickImpl();
 
-		void imguiEditor();
 
 	};
 }
