@@ -443,7 +443,7 @@ namespace PBR {
 			}
 		} }, "Shadow map");
 		if (mDrawShadows) {
-			shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Depth);
+			shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
 			drawShadows<OpaqueComponent>(resourceManagers, *shadowMap, ecs);
 			drawShadows<AlphaTestComponent>(resourceManagers, *shadowMap, ecs);
 		}
@@ -452,30 +452,13 @@ namespace PBR {
 		glm::vec3 clearColor = getConfig().clearColor;
 
 		backbuffer.bind();
-		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
+		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
 		drawSkybox(resourceManagers, ecs, cameraEntity);
 
-<<<<<<< HEAD
-		_drawPBR<OpaqueComponent>(meshManager, ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
-		_drawPBR<AlphaTestComponent>(meshManager, ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
-=======
 		_drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
 		_drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
-
-		backbuffer.bind();
-		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color);
-		drawFXAA(resourceManagers, glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0]);
-		// Don't forget the depth. Because reasons.
-		glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
-			0, 0, viewport.mSize.x, viewport.mSize.y,
-			0, 0, viewport.mSize.x, viewport.mSize.y,
-			GL_DEPTH_BUFFER_BIT,
-			GL_NEAREST
-		);
-
->>>>>>> 47b8c9b9 (Shader manager builds)
 	}
 
 	void Demo::destroy() {

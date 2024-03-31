@@ -180,7 +180,7 @@ namespace Sponza {
 
 		auto shadowTexture = NEO_INVALID_HANDLE;
 		if (mDrawShadows) {
-			auto shadowTexture = resourceManagers.mTextureManager.asyncLoad("Shadow map",
+			shadowTexture = resourceManagers.mTextureManager.asyncLoad("Shadow map",
 				TextureBuilder{
 					TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 },
 					glm::u16vec3(4096, 4096, 0)

@@ -2,6 +2,8 @@
 
 #include "DemoInfra/IDemo.hpp"
 
+#include "ResourceManager/FramebufferManager.hpp"
+
 using namespace neo;
 
 namespace neo {

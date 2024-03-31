@@ -167,19 +167,30 @@ namespace FrustaFitting {
 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
-		auto shadowMap = Library::getPooledFramebuffer({ glm::uvec2(2048, 2048), {
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::D16,
+		auto shadowTexture = resourceManagers.mTextureManager.asyncLoad("Shadow map",
+			TextureBuilder{
+				TextureFormat {
+					types::texture::Target::Texture2D,
+					types::texture::InternalFormats::D16,
+				},
+				glm::u16vec3(2048, 2048, 0)
 			}
-		} }, "Shadow map");
-		shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Depth);
-		drawShadows(resourceManagers, *shadowMap, ecs);
+		);
+		auto shadowMapHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+			"Shadow map",
+			std::vector<TextureHandle>{shadowTexture}
+		);
+
+		if (resourceManagers.mFramebufferManager.isValid(shadowMapHandle)) {
+			auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowMapHandle);
+			shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
+			drawShadows(resourceManagers, shadowMap, ecs);
+		}
 
 		backbuffer.bind();
-		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
+		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawPhong(resourceManagers, ecs, cameraEntity, shadowMap->mTextures[0]);
+		drawPhong(resourceManagers, ecs, cameraEntity, shadowTexture);
 		drawLines(resourceManagers, ecs, cameraEntity);
 
 		// Draw wireframe for anything being seen by the mock camera
