@@ -18,6 +18,28 @@ namespace neo {
 			return seed;
 		}
 
+		FramebufferHandle swizzleSrcId(HashedString id, FramebufferLoadDetails& loadDetails) {
+			HashedString::hash_type seed = id;
+			std::visit([&](auto&& arg) {
+				using T = std::decay_t<decltype(arg)>;
+				if constexpr (std::is_same_v<T, FramebufferBuilder>) {
+					for (auto& format : arg.mFormats) {
+						seed = swizzleTextureId(seed, format, arg.mSize);
+					}
+				}
+				else if constexpr (std::is_same_v<T, std::vector<TextureHandle>>) {
+					for (auto& handle : arg) {
+						seed ^= static_cast<uint32_t>(handle) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+					}
+				}
+				else {
+					static_assert(always_false_v<T>, "non-exhaustive visitor!");
+				}
+			}, loadDetails);
+
+			return seed;
+		}
+
 		struct FramebufferLoader final : entt::resource_loader<FramebufferLoader, PooledFramebuffer> {
 
 			std::shared_ptr<PooledFramebuffer> load(const FramebufferQueueItem& details, const TextureResourceManager& manager) const {
@@ -48,8 +70,9 @@ namespace neo {
 	}
 
 	[[nodiscard]] FramebufferHandle FramebufferResourceManager::asyncLoad(const TextureResourceManager& textureManager, HashedString id, FramebufferLoadDetails framebufferDetails) const {
-		if (isValid(id) || isQueued(id)) {
-			return id;
+		FramebufferHandle dstId = swizzleSrcId(id, framebufferDetails);
+		if (isValid(dstId) || isQueued(dstId)) {
+			return dstId;
 		}
 
 		std::vector<TextureHandle> texIds;
@@ -58,7 +81,7 @@ namespace neo {
 			using T = std::decay_t<decltype(arg)>;
 			if constexpr (std::is_same_v<T, FramebufferBuilder>) {
 				for (auto& format : arg.mFormats) {
-					texIds.emplace_back(textureManager.asyncLoad(swizzleTextureId(id, format, arg.mSize), TextureBuilder{ format, glm::u16vec3(arg.mSize, 0.0), nullptr }));
+					texIds.emplace_back(textureManager.asyncLoad(swizzleTextureId(dstId, format, arg.mSize), TextureBuilder{ format, glm::u16vec3(arg.mSize, 0.0), nullptr }));
 				}
 			}
 			else if constexpr (std::is_same_v<T, std::vector<TextureHandle>>) {
@@ -70,10 +93,11 @@ namespace neo {
 			}
 			}, framebufferDetails);
 
-		mQueue.emplace(id, std::make_pair(texIds, owned));
+		mQueue.emplace(dstId, std::make_pair(texIds, owned));
 
-		return id;
+		return dstId;
 	}
+
 	Framebuffer& FramebufferResourceManager::_resolveFinal(FramebufferHandle id) const {
 		auto handle = mCache.handle(id);
 		if (handle) {

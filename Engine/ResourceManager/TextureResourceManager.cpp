@@ -152,15 +152,17 @@ namespace neo {
 			using T = std::decay_t<decltype(arg)>;
 			if constexpr (std::is_same_v<T, TextureBuilder>) {
 				TextureBuilder copy = arg;
-				// Base dimension
-				uint32_t byteSize = glm::max<glm::u16>(arg.mDimensions.x, 1u) * glm::max<glm::u16>(arg.mDimensions.y, 1u) * glm::max<glm::u16>(arg.mDimensions.z, 1u);
-				// Components per pixel
-				byteSize *= _channelsPerPixel(TextureFormat::deriveBaseFormat(arg.mFormat.mInternalFormat));
-				// Pixel format
-				byteSize *= _bytesPerPixel(arg.mFormat.mType);
+				if (arg.mData != nullptr) {
+					// Base dimension
+					uint32_t byteSize = glm::max<glm::u16>(arg.mDimensions.x, 1u) * glm::max<glm::u16>(arg.mDimensions.y, 1u) * glm::max<glm::u16>(arg.mDimensions.z, 1u);
+					// Components per pixel
+					byteSize *= _channelsPerPixel(TextureFormat::deriveBaseFormat(arg.mFormat.mInternalFormat));
+					// Pixel format
+					byteSize *= _bytesPerPixel(arg.mFormat.mType);
 
-				copy.mData = static_cast<uint8_t*>(malloc(byteSize));
-				memcpy(const_cast<uint8_t*>(copy.mData), arg.mData, byteSize);
+					copy.mData = static_cast<uint8_t*>(malloc(byteSize));
+					memcpy(const_cast<uint8_t*>(copy.mData), arg.mData, byteSize);
+				}
 				mQueue.emplace(id, ResourceLoadDetails_Internal{ copy, debugName });
 			}
 			else if constexpr (std::is_same_v<T, FileLoadDetails>) {

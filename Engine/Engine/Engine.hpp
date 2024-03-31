@@ -9,13 +9,6 @@
 
 #include "DemoInfra/DemoWrangler.hpp"
 
-#include <vector>
-#include <unordered_map>
-#include <typeindex>
-#include <functional>
-#include <optional>
-#include <thread>
-
 namespace neo {
 	namespace util {
 		struct FrameCounter;
@@ -37,18 +30,17 @@ namespace neo {
 			Engine & operator=(Engine &&) = delete;
 
 			static void init();
-			static void run(DemoWrangler&);
-			static void shutDown();
+			static void run(DemoWrangler& demoWrangler);
+			static void shutDown(ResourceManagers& resourceManagers);
 
 		private:
 			static ECS mECS;
 			// TODO - managers could just be added to the ecs probably..but how would that work with threading
-			static ResourceManagers mResourceManagers;
-			static void _startFrame(util::Profiler& profiler);
+			static void _startFrame(util::Profiler& profiler, ResourceManagers& resourceManagers);
 			static void _endFrame();
 
-			static void _createPrefabs();
-			static void _swapDemo(DemoWrangler&);
+			static void _createPrefabs(ResourceManagers& resourceManagers);
+			static void _swapDemo(DemoWrangler& demoWranger, ResourceManagers& resourceManagers);
 
 			/* Hardware */
 			static WindowSurface mWindow;
