@@ -9,7 +9,6 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "Loader/Library.hpp"
 #include "ResourceManager/MeshResourceManager.hpp"
 
 #include "Util/Util.hpp"

@@ -55,7 +55,9 @@ namespace neo {
 		void discard(ResourceHandle id) const {
 			// TODO - this should also be queued?
 			if (isValid(id) || isQueued(id)) {
-				static_cast<DerivedManager*>(this)->_discardImpl();
+				NEO_UNUSED(id);
+				NEO_LOG_E("Unsupported discard");
+				//static_cast<DerivedManager*>(this)->_discardImpl(id);
 			}
 		}
 

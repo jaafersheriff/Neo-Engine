@@ -6,7 +6,6 @@
 #include "ECS/Component/LightComponent/MainLightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "Loader/Library.hpp"
 #include "ResourceManager/ResourceManagers.hpp"
 
 #include "Renderer/GLObjects/Framebuffer.hpp"

@@ -53,7 +53,7 @@ namespace neo {
 		NEO_UNUSED(config);
 	}
 
-	void Renderer::init(ResourceManagers& resourceManager) {
+	void Renderer::init() {
 	#ifdef DEBUG_MODE
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -63,40 +63,6 @@ namespace neo {
 		glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_FALSE);
 		glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
 	#endif
-
-		/* Init default FBO */
-		glActiveTexture(GL_TEXTURE0);
-
-		// TODO - holy shit this should just be a builder
-		auto defaultFbo = resourceManager.mFramebufferManager.asyncLoad(
-			resourceManager.mTextureManager,
-			"backbuffer",
-			PooledFramebufferDetails_New{}
-			.setSize(glm::uvec2(1, 1))
-			.attach(TextureFormat{ types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB16_UNORM,
-				{
-					types::texture::Filters::Linear,
-					types::texture::Filters::Linear
-				},
-				{
-					types::texture::Wraps::Clamp,
-					types::texture::Wraps::Clamp
-				}
-				})
-			.attach(TextureFormat{ types::texture::Target::Texture2D,
-				types::texture::InternalFormats::D16,
-				{
-					types::texture::Filters::Linear,
-					types::texture::Filters::Linear
-				},
-				{
-					types::texture::Wraps::Clamp,
-					types::texture::Wraps::Clamp
-				}
-			})
-		);
-
 		/* Set max work group */
 		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
 		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
@@ -111,20 +77,6 @@ namespace neo {
 
 		/* Init default GL state */
 		resetState();
-
-		Messenger::removeReceiver<FrameSizeMessage>(this);
-		Messenger::addReceiver<FrameSizeMessage, &Renderer::_onFrameSizeChanged>(this);
-	}
-
-	void Renderer::_onFrameSizeChanged(const FrameSizeMessage& msg) {
-		TextureFormat colorFormat = mDefaultFBO->mTextures[0]->mFormat;
-		TextureFormat depthFormat = mDefaultFBO->mTextures[1]->mFormat;
-		mDefaultFBO->destroy();
-		mDefaultFBO->init();
-		mDefaultFBO->attachColorTexture({ msg.mSize.x, msg.mSize.y }, colorFormat);
-		mDefaultFBO->attachDepthTexture({ msg.mSize.x, msg.mSize.y }, depthFormat.mInternalFormat, depthFormat.mFilter, depthFormat.mWrap);
-		mDefaultFBO->initDrawBuffers();
-		mDefaultFBO->bind();
 	}
 
 	void Renderer::resetState() {
@@ -156,17 +108,52 @@ namespace neo {
 
 		mStats = {};
 		resetState();
-		mDefaultFBO->bind();
+
+		auto defaultFboHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			resourceManagers.mTextureManager,
+			"backbuffer",
+			FramebufferBuilder{}
+			.setSize(glm::uvec2(1, 1))
+			.attach(TextureFormat{ types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGB16_UNORM,
+				{
+					types::texture::Filters::Linear,
+					types::texture::Filters::Linear
+				},
+				{
+					types::texture::Wraps::Clamp,
+					types::texture::Wraps::Clamp
+				}
+				})
+			.attach(TextureFormat{ types::texture::Target::Texture2D,
+				types::texture::InternalFormats::D16,
+				{
+					types::texture::Filters::Linear,
+					types::texture::Filters::Linear
+				},
+				{
+					types::texture::Wraps::Clamp,
+					types::texture::Wraps::Clamp
+				}
+			})
+		);
+
+		if (!resourceManagers.mFramebufferManager.isValid(defaultFboHandle)) {
+			return;
+		}
+
+		auto& defaultFbo = resourceManagers.mFramebufferManager.resolve(defaultFboHandle);
+
 
 		{
 			TRACY_GPUN("Draw Demo");
-			demo->render(resourceManagers, ecs, *mDefaultFBO);
+			demo->render(resourceManagers, ecs, defaultFbo);
 			resetState();
 		}
 
 		if (mShowBoundingBoxes) {
 			TRACY_GPUN("Debug Draws");
-			mDefaultFBO->bind();
+			defaultFbo.bind();
 			drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.getComponent<MainCameraComponent>()));
 		}
 		
@@ -180,11 +167,11 @@ namespace neo {
 		else {
 			TRACY_GPUN("Final Blit");
 			Framebuffer fb; // empty framebuffer is just the backbuffer -- just don't do anything with it ever
-			blit(resourceManagers, fb, *mDefaultFBO->mTextures[0], window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
+			blit(resourceManagers, fb, resourceManagers.mTextureManager.resolve(defaultFbo.mTextures[0]), window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
 		}
 	}
 
-	void Renderer::imGuiEditor(WindowSurface& window, ECS& ecs) {
+	void Renderer::imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager) {
 		TRACY_ZONE();
 		NEO_UNUSED(ecs);
 
@@ -192,10 +179,14 @@ namespace neo {
 		ServiceLocator<ImGuiManager>::ref().updateViewport();
 		glm::vec2 viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
 		if (viewportSize.x != 0 && viewportSize.y != 0) {
+			if (resourceManager.mFramebufferManager.isValid(HashedString("backbuffer"))) {
+				auto& defaultFbo = resourceManager.mFramebufferManager.resolve(HashedString("backbuffer"));
+				auto& defaultFboColor = resourceManager.mTextureManager.resolve(defaultFbo.mTextures[0]);
 #pragma warning(push)
 #pragma warning(disable: 4312)
-			ImGui::Image(reinterpret_cast<ImTextureID>(mDefaultFBO->mTextures[0]->mTextureID), { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+				ImGui::Image(reinterpret_cast<ImTextureID>(defaultFboColor.mTextureID), { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
 #pragma warning(pop)
+			}
 		}
 		ImGuizmo::SetDrawlist();
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();

@@ -18,19 +18,21 @@ namespace neo {
 			return seed;
 		}
 
-		struct FramebufferLoader final : entt::resource_loader<FramebufferLoader, PooledFramebuffer_New> {
+		struct FramebufferLoader final : entt::resource_loader<FramebufferLoader, PooledFramebuffer> {
 
-			std::shared_ptr<PooledFramebuffer_New> load(const QueuedDetails& details, const TextureResourceManager& manager) const {
-				std::shared_ptr<PooledFramebuffer_New> framebuffer = std::make_shared<PooledFramebuffer_New>();
+			std::shared_ptr<PooledFramebuffer> load(const FramebufferQueueItem& details, const TextureResourceManager& manager) const {
+				std::shared_ptr<PooledFramebuffer> framebuffer = std::make_shared<PooledFramebuffer>();
 				framebuffer->mFramebuffer.init();
 				framebuffer->mFrameCount = 1;
 				framebuffer->mFullyOwned = details.second;
 				for (auto& texHandle : details.first) {
-					framebuffer->mFramebuffer.attachTexture(manager.resolve(texHandle));
+					framebuffer->mFramebuffer.attachTexture(texHandle, manager.resolve(texHandle));
 				}
 				if (framebuffer->mFramebuffer.mColorAttachments) {
 					framebuffer->mFramebuffer.initDrawBuffers();
 				}
+
+				return framebuffer;
 			}
 		};
 	}
@@ -54,7 +56,7 @@ namespace neo {
 		bool owned = false;
 		std::visit([&](auto&& arg) {
 			using T = std::decay_t<decltype(arg)>;
-			if constexpr (std::is_same_v<T, PooledFramebufferDetails_New>) {
+			if constexpr (std::is_same_v<T, FramebufferBuilder>) {
 				for (auto& format : arg.mFormats) {
 					texIds.emplace_back(textureManager.asyncLoad(swizzleTextureId(id, format, arg.mSize), TextureBuilder{ format, glm::u16vec3(arg.mSize, 0.0), nullptr }));
 				}
@@ -75,7 +77,7 @@ namespace neo {
 	Framebuffer& FramebufferResourceManager::_resolveFinal(FramebufferHandle id) const {
 		auto handle = mCache.handle(id);
 		if (handle) {
-			auto& pfb = const_cast<PooledFramebuffer_New&>(handle.get());
+			auto& pfb = const_cast<PooledFramebuffer&>(handle.get());
 			if (pfb.mFrameCount < 5) {
 				pfb.mFrameCount++;
 			}
@@ -92,16 +94,16 @@ namespace neo {
 		TRACY_ZONE();
 
 		// Create queue
-		std::map<FramebufferHandle, QueuedDetails> swapQueue = {};
+		std::map<FramebufferHandle, FramebufferQueueItem> swapQueue = {};
 		std::swap(mQueue, swapQueue);
 		mQueue.clear();
 		for (auto&& [id, texHandles] : swapQueue) {
-			mCache.load<FramebufferLoader>(id, texHandles);
+			mCache.load<FramebufferLoader>(id, texHandles, textureManager);
 		}
 
 		// Discard queue
 		std::vector<FramebufferHandle> discardQueue;
-		mCache.each([&](FramebufferHandle id, PooledFramebuffer_New& pfb) {
+		mCache.each([&](FramebufferHandle id, PooledFramebuffer& pfb) {
 			if (pfb.mFrameCount == 0) {
 				discardQueue.emplace_back(id);
 				if (!pfb.mFullyOwned) {
@@ -130,7 +132,7 @@ namespace neo {
 			ImGui::TableSetupColumn("Name/Size", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending);
 			ImGui::TableSetupColumn("Attachments");
 			ImGui::TableHeadersRow();
-			mCache.each([&](PooledFramebuffer_New& pfb) {
+			mCache.each([&](PooledFramebuffer& pfb) {
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
 				ImGui::Text(pfb.mFullyOwned ? "%s" : "*%s", pfb.mName.has_value() ? pfb.mName->c_str() : "");
@@ -154,7 +156,7 @@ namespace neo {
 
 	void FramebufferResourceManager::clear(const TextureResourceManager& textureManager) {
 		mQueue.clear();
-		mCache.each([&textureManager](PooledFramebuffer_New& framebuffer) {
+		mCache.each([&textureManager](PooledFramebuffer& framebuffer) {
 			if (framebuffer.mFullyOwned) {
 				for (auto& textureHandle : framebuffer.mFramebuffer.mTextures) {
 					textureManager.discard(textureHandle);
