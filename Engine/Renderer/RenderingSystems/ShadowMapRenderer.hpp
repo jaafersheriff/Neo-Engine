@@ -21,9 +21,10 @@ namespace neo {
 		}
 
 		depthMap.disableDraw();
-		glViewport(0, 0, depthMap.mTextures[0]->mWidth, depthMap.mTextures[0]->mHeight);
+		auto& depthTexture = resourceManagers.mTextureManager.resolve(depthMap.mTextures[0]);
+		glViewport(0, 0, depthTexture.mWidth, depthTexture.mHeight);
 		{
-			glBindTexture(GL_TEXTURE_2D, depthMap.mTextures[0]->mTextureID);
+			glBindTexture(GL_TEXTURE_2D, depthTexture.mTextureID);
 			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data());
 		}
 
