@@ -109,11 +109,12 @@ namespace neo {
 		mStats = {};
 		resetState();
 
+		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		auto defaultFboHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			resourceManagers.mTextureManager,
 			"backbuffer",
 			FramebufferBuilder{}
-			.setSize(glm::uvec2(1, 1))
+			.setSize(glm::uvec2(viewport.mSize))
 			.attach(TextureFormat{ types::texture::Target::Texture2D,
 				types::texture::InternalFormats::RGB16_UNORM,
 				{
