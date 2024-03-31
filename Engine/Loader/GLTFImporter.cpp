@@ -3,7 +3,6 @@
 #include "Renderer/GLObjects/Mesh.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 
-#include "Library.hpp"
 #include "ResourceManager/ResourceManagers.hpp"
 
 #pragma warning(push)

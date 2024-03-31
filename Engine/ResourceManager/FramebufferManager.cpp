@@ -139,7 +139,7 @@ namespace neo {
 					ImGui::Text("[%d, %d]", firstTex.mWidth, firstTex.mHeight);
 				}
 				ImGui::TableSetColumnIndex(1);
-				for (auto& texId = pfb.mFramebuffer.mTextures.begin(); texId < pfb.mFramebuffer.mTextures.end(); texId++) {
+				for (auto texId = pfb.mFramebuffer.mTextures.begin(); texId < pfb.mFramebuffer.mTextures.end(); texId++) {
 					if (textureManager.isValid(*texId)) {
 						textureFunc(textureManager.resolve(*texId));
 						if (texId != std::prev(pfb.mFramebuffer.mTextures.end())) {

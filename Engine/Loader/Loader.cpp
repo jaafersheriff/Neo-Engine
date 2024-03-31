@@ -1,8 +1,6 @@
 #include "Loader/pch.hpp"
 #include "Loader.hpp"
 
-#include "Library.hpp"
-
 #include "Renderer/GLObjects/Mesh.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
