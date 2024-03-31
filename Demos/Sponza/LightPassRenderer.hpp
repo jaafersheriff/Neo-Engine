@@ -14,7 +14,7 @@
 using namespace neo;
 
 namespace Sponza {
-	void drawPointLights(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& gbuffer, ECS::Entity cameraEntity, const glm::uvec2 resolution, const float debugRadius) {
+	void drawPointLights(const ResourceManagers& resourceManagers, const ECS& ecs, const Framebuffer& gbuffer, ECS::Entity cameraEntity, const glm::uvec2 resolution, const float debugRadius) {
 		TRACY_GPU();
 
 		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightResolveShader", SourceShader::ConstructionArgs{
@@ -77,7 +77,7 @@ namespace Sponza {
 		// TODO - reset state
 	}
 
-	void drawDirectionalLights(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, TextureHandle shadowMapHandle) {
+	void drawDirectionalLights(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const Framebuffer& gbuffer, TextureHandle shadowMapHandle) {
 		TRACY_GPU();
 
 		ShaderDefines defines;

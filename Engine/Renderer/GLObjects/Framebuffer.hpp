@@ -25,8 +25,8 @@ namespace neo {
 		void clear(glm::vec4 clearColor, types::framebuffer::AttachmentBits clearFlags) const;
 
 		void init();
-		void disableDraw();
-		void disableRead();
+		void disableDraw() const;
+		void disableRead() const;
 
 		void attachTexture(const Texture& texture);
 		void initDrawBuffers();

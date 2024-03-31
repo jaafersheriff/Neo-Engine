@@ -21,34 +21,27 @@
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
+#include "ResourceManager/ResourceManagers.hpp"
+
 #include "Loader/Library.hpp"
 
 namespace Sponza {
 
-	Framebuffer& createGBuffer(glm::uvec2 targetSize) {
-		return *Library::getPooledFramebuffer({ targetSize, {
+	FramebufferHandle createGBuffer(const ResourceManagers& resourceManagers, glm::uvec2 targetSize) {
+		return resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+			"GBuffer",
+			PooledFramebufferDetails_New{}
+			.setSize(targetSize)
 			// Albedo
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB16_F,
-			},
+			.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})
 			// World 
 			// TODO - could do everything in view space to get rid of this
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB16_F,
-			},
+			.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})
 			// Normals
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB16_F,
-			},
+			.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})
 			// Depth
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::D16,
-			}
-		} }, "Gbuffer");
+			.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::D16})
+		);
 	}
 
 	template<typename... CompTs>

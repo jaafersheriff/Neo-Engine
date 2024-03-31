@@ -81,7 +81,7 @@ namespace neo {
 		mQueue.clear();
 
 		for (auto&& [handle, details] : swapQueue) {
-			mCache.load<MeshLoader>(handle.mId, details.mLoadDetails);
+			mCache.load<MeshLoader>(handle, details.mLoadDetails);
 			for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
 				free(const_cast<uint8_t*>(buffer.mData));
 			}

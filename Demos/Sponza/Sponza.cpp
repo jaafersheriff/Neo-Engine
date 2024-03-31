@@ -248,14 +248,21 @@ namespace Sponza {
 	) {
 		TRACY_GPU();
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-		auto& gbuffer = createGBuffer(viewport);
+		FramebufferHandle gbufferHandle = createGBuffer(resourceManagers, viewport);
+		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
+			return;
+		}
+		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
 		gbuffer.bind();
 		gbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.x, viewport.y);
 		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, {});
 		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, {});
 
-		auto ao = mDrawAO ? drawAO(resourceManagers, ecs, cameraEntity, gbuffer, viewport, mAORadius, mAOBias) : nullptr;
+		TextureHandle aoHandle = NEO_INVALID_HANDLE;
+		if (mDrawAO) {
+			aoHandle = drawAO(resourceManagers, ecs, cameraEntity, gbuffer, viewport, mAORadius, mAOBias);
+		}
 
 		auto lightResolveHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
 			"Light Resolve",
@@ -296,7 +303,7 @@ namespace Sponza {
 
 			resolvedShader.bindTexture("lightOutput", resourceManagers.mTextureManager.resolve(lightResolve.mTextures[0]));
 			if (mDrawAO) {
-				resolvedShader.bindTexture("aoOutput", resourceManagers.mTextureManager.resolve(ao->mTextures[0]));
+				resolvedShader.bindTexture("aoOutput", resourceManagers.mTextureManager.resolve(aoHandle));
 			}
 
 			resourceManagers.mMeshManager.resolve("quad").draw();

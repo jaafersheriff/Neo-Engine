@@ -90,7 +90,7 @@ namespace Compute {
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		TRACY_GPUN("Compute::render")
 		backbuffer.bind();
-		backbuffer.clear(glm::vec4(getConfig().clearColor, 1.0), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
+		backbuffer.clear(glm::vec4(getConfig().clearColor, 1.0), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 
 		// Update the mesh
 		if (auto meshView = ecs.cGetComponent<ParticleMeshComponent>()) {
