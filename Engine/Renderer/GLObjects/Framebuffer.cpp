@@ -49,7 +49,7 @@ namespace neo {
 		glReadBuffer(GL_NONE);
 	}
 
-	void Framebuffer::attachTexture(const Texture& texture) {
+	void Framebuffer::attachTexture(TextureHandle id, const Texture& texture) {
 		NEO_ASSERT(texture.mFormat.mTarget == types::texture::Target::Texture2D, "Framebuffers need 2D textures");
 
 		types::framebuffer::AttachmentBit attachment = types::framebuffer::AttachmentBit::Color;
@@ -60,7 +60,7 @@ namespace neo {
 			attachment = types::framebuffer::AttachmentBit::Stencil;
 		}
 
-		mTextures.emplace_back(&texture);
+		mTextures.emplace_back(id);
 		bind();
 		glFramebufferTexture(GL_FRAMEBUFFER, _getGLAttachment(attachment), texture.mTextureID, 0);
 		CHECK_GL_FRAMEBUFFER();

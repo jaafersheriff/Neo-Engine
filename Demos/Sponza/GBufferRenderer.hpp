@@ -28,7 +28,7 @@ namespace Sponza {
 	FramebufferHandle createGBuffer(const ResourceManagers& resourceManagers, glm::uvec2 targetSize) {
 		return resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
 			"GBuffer",
-			PooledFramebufferDetails_New{}
+			FramebufferBuilder{}
 			.setSize(targetSize)
 			// Albedo
 			.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})

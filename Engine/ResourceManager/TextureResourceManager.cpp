@@ -210,6 +210,10 @@ namespace neo {
 		mCache.clear();
 	}
 
+	void TextureResourceManager::_discardImpl(TextureHandle id) {
+		mCache.discard(id);
+	}
+
 	void TextureResourceManager::imguiEditor(std::function<void(const Texture&)> textureFunc) {
 		mCache.each([&](TextureHandle handle, Texture& texture) {
 			if (ImGui::TreeNode(&handle, "TODO - debug names %d", handle)) {

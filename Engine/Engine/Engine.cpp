@@ -53,9 +53,6 @@ namespace neo {
 	MouseRaySystem Engine::mMouseRaySystem;
 	SelectingSystem Engine::mSelectingSystem;
 
-	/* Resources */
-	ResourceManagers Engine::mResourceManagers;
-
 	/* Hardware */
 	WindowSurface Engine::mWindow;
 	Keyboard Engine::mKeyboard;
@@ -86,7 +83,7 @@ namespace neo {
 		ServiceLocator<ImGuiManager>::set();
 		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
 
-		ServiceLocator<Renderer>::ref().init(mResourceManagers);
+		ServiceLocator<Renderer>::ref().init();
 		{
 			auto& details = ServiceLocator<Renderer>::ref().mDetails;
 			/* Set max work group */
@@ -161,7 +158,7 @@ namespace neo {
 						mECS.imguiEdtor();
 						mResourceManagers.imguiEditor();
 						ServiceLocator<ImGuiManager>::ref().imGuiEditor();
-						ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
+						ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS, mResourceManagers);
 						profiler.imGuiEditor();
 
 						ServiceLocator<ImGuiManager>::ref().end();
@@ -218,7 +215,7 @@ namespace neo {
 		mMouse.init();
 		mKeyboard.init();
 		ServiceLocator<Renderer>::ref().setDemoConfig(config);
-		ServiceLocator<Renderer>::ref().init(mResourceManagers);
+		ServiceLocator<Renderer>::ref().init();
 		Loader::init(config.resDir, config.shaderDir);
 		_createPrefabs();
 		mResourceManagers.tick();

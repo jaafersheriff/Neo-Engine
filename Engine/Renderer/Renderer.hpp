@@ -52,16 +52,15 @@ namespace neo {
 			RendererDetails mDetails = {};
 
 			void setDemoConfig(IDemo::Config);
-			void init(ResourceManagers& resourceManager);
+			void init();
 			void resetState();
 			void render(WindowSurface&, IDemo* demo, ECS&, ResourceManagers& resourceManager);
 			void clean();
 
-			void imGuiEditor(WindowSurface& window, ECS& ecs);
+			void imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager);
 		private:
 			bool mShowBoundingBoxes = false;
-
-			void _onFrameSizeChanged(const FrameSizeMessage& msg);
+			bool mBackbufferNeedsResize = false;
 	};
 
 }

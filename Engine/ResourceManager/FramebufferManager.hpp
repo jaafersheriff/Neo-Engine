@@ -18,29 +18,29 @@ namespace neo {
 	class ResourceManagers;
 	struct TextureFormat;
 
-	struct PooledFramebufferDetails_New {
+	struct FramebufferBuilder {
 		glm::uvec2 mSize;
 		std::vector<TextureFormat> mFormats;
 
-		PooledFramebufferDetails_New& setSize(glm::uvec2 size) {
+		FramebufferBuilder& setSize(glm::uvec2 size) {
 			mSize = size;
 			return *this;
 		}
 
-		PooledFramebufferDetails_New& attach(TextureFormat format) {
+		FramebufferBuilder& attach(TextureFormat format) {
 			mFormats.emplace_back(format);
 			return *this;
 		}
 
-		bool operator==(const PooledFramebufferDetails_New& other) const {
+		bool operator==(const FramebufferBuilder& other) const {
 			// Kinda faulty, but meh
 			return other.mSize == mSize && other.mFormats == mFormats;
 		}
 	};
-	using FramebufferLoadDetails = std::variant<PooledFramebufferDetails_New, std::vector<TextureHandle>>;
-	using QueuedDetails = std::pair<std::vector<TextureHandle>, bool>;
+	using FramebufferLoadDetails = std::variant<FramebufferBuilder, std::vector<TextureHandle>>;
+	using FramebufferQueueItem = std::pair<std::vector<TextureHandle>, bool>;
 
-	struct PooledFramebuffer_New {
+	struct PooledFramebuffer {
 		Framebuffer mFramebuffer;
 		uint8_t mFrameCount = 0;
 		bool mUsedThisFrame = false;
@@ -89,8 +89,8 @@ namespace neo {
 
 		void imguiEditor(std::function<void(Texture&)> textureFunc, TextureResourceManager& textureManager);
 
-		mutable std::map<FramebufferHandle, QueuedDetails> mQueue;
-		entt::resource_cache<PooledFramebuffer_New> mCache;
+		mutable std::map<FramebufferHandle, FramebufferQueueItem> mQueue;
+		entt::resource_cache<PooledFramebuffer> mCache;
 		std::shared_ptr<Framebuffer> mFallback;
 
 	private:

@@ -172,7 +172,7 @@ namespace Sponza {
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
 			"Scene Target",
-			PooledFramebufferDetails_New{}
+			FramebufferBuilder{}
 				.setSize(viewport.mSize)
 				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
 				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 })
@@ -266,7 +266,7 @@ namespace Sponza {
 
 		auto lightResolveHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
 			"Light Resolve",
-			PooledFramebufferDetails_New{}
+			FramebufferBuilder{}
 			.setSize(viewport)
 			.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::RGB16_UNORM })
 		);

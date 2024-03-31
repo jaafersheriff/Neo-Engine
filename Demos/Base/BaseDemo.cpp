@@ -110,7 +110,7 @@ namespace Base {
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
 			"Scene Target",
-			PooledFramebufferDetails_New{}
+			FramebufferBuilder{}
 				.setSize(viewport.mSize)
 				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
 				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 })

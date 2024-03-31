@@ -28,7 +28,7 @@ namespace neo {
 		void disableDraw() const;
 		void disableRead() const;
 
-		void attachTexture(const Texture& texture);
+		void attachTexture(TextureHandle id, const Texture& texture);
 		void initDrawBuffers();
 		void destroy();
 	};
