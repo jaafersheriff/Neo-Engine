@@ -3,16 +3,6 @@ namespace neo {
 	/*
 	void Library::imGuiEditor(ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
-		auto textureFunc = [&](const Texture& texture) {
-			if (texture.mFormat.mTarget != types::texture::Target::Texture2D) {
-				return;
-			}
-			float scale = 175.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
-#pragma warning(push)
-#pragma warning(disable: 4312)
-				ImGui::Image(reinterpret_cast<ImTextureID>(texture.mTextureID), ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
-#pragma warning(pop)
-			};
 
 		ImGui::Begin("Library");
 
@@ -52,12 +42,6 @@ namespace neo {
 		// 			}
 		// 		}
 		// 		ImGui::EndTable();
-		// 	}
-		// 	ImGui::TreePop();
-		// }
-		// if (ImGui::TreeNodeEx("Meshes", ImGuiTreeNodeFlags_DefaultOpen)) {
-		// 	for (auto& m : Library::mMeshes) {
-		// 		ImGui::TextWrapped("%s", m.first.c_str());
 		// 	}
 		// 	ImGui::TreePop();
 		// }

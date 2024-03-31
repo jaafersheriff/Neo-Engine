@@ -3,6 +3,8 @@
 
 #include "Util/Profiler.hpp"
 
+#include <imgui.h>
+
 namespace neo {
 	namespace {
 		TextureHandle swizzleTextureId(HashedString::hash_type srcId, TextureFormat format, glm::uvec2 dimension) {
@@ -120,6 +122,33 @@ namespace neo {
 		});
 		for (auto& discardId : discardQueue) {
 			mCache.discard(discardId);
+		}
+	}
+
+	void FramebufferResourceManager::imguiEditor(std::function<void(Texture&)> textureFunc, TextureResourceManager& textureManager) {
+		if (ImGui::BeginTable("##Framebuffers", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_PreciseWidths | ImGuiTableFlags_SizingStretchSame)) {
+			ImGui::TableSetupColumn("Name/Size", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending);
+			ImGui::TableSetupColumn("Attachments");
+			ImGui::TableHeadersRow();
+			mCache.each([&](PooledFramebuffer_New& pfb) {
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text(pfb.mFullyOwned ? "%s" : "*%s", pfb.mName.has_value() ? pfb.mName->c_str() : "");
+				if (textureManager.isValid(pfb.mFramebuffer.mTextures[0])) {
+					auto& firstTex = textureManager.resolve(pfb.mFramebuffer.mTextures[0]);
+					ImGui::Text("[%d, %d]", firstTex.mWidth, firstTex.mHeight);
+				}
+				ImGui::TableSetColumnIndex(1);
+				for (auto& texId = pfb.mFramebuffer.mTextures.begin(); texId < pfb.mFramebuffer.mTextures.end(); texId++) {
+					if (textureManager.isValid(*texId)) {
+						textureFunc(textureManager.resolve(*texId));
+						if (texId != std::prev(pfb.mFramebuffer.mTextures.end())) {
+							ImGui::SameLine();
+						}
+					}
+				}
+			});
+			ImGui::EndTable();
 		}
 	}
 

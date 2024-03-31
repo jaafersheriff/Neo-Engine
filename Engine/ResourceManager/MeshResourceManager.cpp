@@ -4,6 +4,8 @@
 
 #include "Util/Profiler.hpp"
 
+#include <imgui.h>
+
 namespace neo {
 
 	struct MeshLoader final : entt::resource_loader<MeshLoader, Mesh> {
@@ -97,5 +99,12 @@ namespace neo {
 			mesh.destroy();
 		});
 		mCache.clear();
+	}
+
+	void MeshResourceManager::imguiEditor() {
+		mCache.each([](const entt::id_type id, const Mesh& mesh) {
+			NEO_UNUSED(mesh);
+			ImGui::Text("TODO - debug names %d", id);
+		});
 	}
 }
