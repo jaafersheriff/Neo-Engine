@@ -21,15 +21,15 @@ namespace neo {
 		int mColorAttachments = 0;
 		std::vector<TextureHandle> mTextures;
 
-		void init();
-		void bind();
+		void bind() const;
+		void clear(glm::vec4 clearColor, types::framebuffer::AttachmentBits clearFlags) const;
 
+		void init();
 		void disableDraw();
 		void disableRead();
 
 		void attachTexture(const Texture& texture);
 		void initDrawBuffers();
-		void clear(glm::vec4 clearColor, types::framebuffer::AttachmentBits clearFlags);
 		void destroy();
 	};
 }

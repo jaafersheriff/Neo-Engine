@@ -9,7 +9,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawShadows(const ResourceManagers& resourceManagers, Framebuffer& depthMap, const ECS& ecs) {
+	void drawShadows(const ResourceManagers& resourceManagers, const Framebuffer& depthMap, const ECS& ecs) {
 		TRACY_GPU();
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", SourceShader::ConstructionArgs{

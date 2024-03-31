@@ -47,9 +47,9 @@ namespace Sponza {
 		resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 
 		/* Bind gbuffer */
-		resolvedShader.bindTexture("gAlbedo", *gbuffer.mTextures[0]);
-		resolvedShader.bindTexture("gWorld", *gbuffer.mTextures[1]);
-		resolvedShader.bindTexture("gNormal", *gbuffer.mTextures[2]);
+		resolvedShader.bindTexture("gAlbedo", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
+		resolvedShader.bindTexture("gWorld", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+		resolvedShader.bindTexture("gNormal", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
 
 		/* Render light volumes */
 		// TODO : instanced
@@ -77,14 +77,14 @@ namespace Sponza {
 		// TODO - reset state
 	}
 
-	void drawDirectionalLights(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, Texture* shadowMap = nullptr) {
+	void drawDirectionalLights(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, TextureHandle shadowMapHandle) {
 		TRACY_GPU();
 
 		ShaderDefines defines;
 
 		glm::mat4 L;
 		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
-		const bool shadowsEnabled = shadowMap && shadowCamera.has_value();
+		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && shadowCamera.has_value();
 		MakeDefine(ENABLE_SHADOWS);
 		if (shadowsEnabled) {
 			defines.set(ENABLE_SHADOWS);
@@ -106,7 +106,7 @@ namespace Sponza {
 
 		if (shadowsEnabled) {
 			resolvedShader.bindUniform("lightTransform", L);
-			resolvedShader.bindTexture("shadowMap", *shadowMap);
+			resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(shadowMapHandle));
 		}
 
 		auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
@@ -117,9 +117,9 @@ namespace Sponza {
 		resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 
 		/* Bind gbuffer */
-		resolvedShader.bindTexture("gAlbedo", *gbuffer.mTextures[0]);
-		resolvedShader.bindTexture("gWorld", *gbuffer.mTextures[1]);
-		resolvedShader.bindTexture("gNormal", *gbuffer.mTextures[2]);
+		resolvedShader.bindTexture("gAlbedo", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
+		resolvedShader.bindTexture("gWorld", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+		resolvedShader.bindTexture("gNormal", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
 
 		glDisable(GL_DEPTH_TEST);
 

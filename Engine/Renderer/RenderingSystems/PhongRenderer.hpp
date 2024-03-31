@@ -28,7 +28,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawPhong(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, const Texture* shadowMap = nullptr, const ShaderDefines& inDefines = {}) {
+	void drawPhong(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, TextureHandle shadowMapHandle = NEO_INVALID_HANDLE, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Phong Shader", 
@@ -65,7 +65,7 @@ namespace neo {
 
 		glm::mat4 L;
 		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
-		const bool shadowsEnabled = shadowMap && shadowCamera.has_value();
+		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && shadowCamera.has_value();
 		MakeDefine(ENABLE_SHADOWS);
 		if (shadowsEnabled) {
 			passDefines.set(ENABLE_SHADOWS);
@@ -147,7 +147,7 @@ namespace neo {
 				}
 				if (shadowsEnabled) {
 					resolvedShader.bindUniform("L", L);
-					resolvedShader.bindTexture("shadowMap", *shadowMap);
+					resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(shadowMapHandle));
 				}
 			}
 

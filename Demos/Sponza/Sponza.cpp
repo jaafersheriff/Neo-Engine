@@ -170,89 +170,118 @@ namespace Sponza {
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		auto sceneTarget = Library::getPooledFramebuffer({ viewport.mSize, {
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB16_UNORM,
-			},
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::D16,
-			}
-		} }, "Scene target");
-
-		auto shadowMap = Library::getPooledFramebuffer({ glm::uvec2(4096, 4096), { 
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::D16,
-			}
-		} }, "Shadow map");
-		if (mDrawShadows) {
-			shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Depth);
-			drawShadows<OpaqueComponent>(resourceManagers, *shadowMap, ecs);
-			drawShadows<AlphaTestComponent>(resourceManagers, *shadowMap, ecs);
-		}
-
-		if (mDeferredShading) {
-			_deferredShading(resourceManagers, ecs, *sceneTarget, viewport.mSize, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
-		}
-		else {
-			_forwardShading(resourceManagers, ecs, *sceneTarget, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
-		}
-
-		backbuffer.bind();
-		backbuffer.clear(glm::vec4(0,0,0, 1.f), types::framebuffer::ClearFlagBits::Color);
-		drawFXAA(resourceManagers, glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0]);
-		// Don't forget the depth. Because reasons.
-		glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
-			0, 0, viewport.mSize.x, viewport.mSize.y,
-			0, 0, viewport.mSize.x, viewport.mSize.y,
-			GL_DEPTH_BUFFER_BIT,
-			GL_NEAREST
+		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+			"Scene Target",
+			PooledFramebufferDetails_New{}
+				.setSize(viewport.mSize)
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
+				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 })
 		);
+
+		auto shadowTexture = NEO_INVALID_HANDLE;
+		if (mDrawShadows) {
+			auto shadowTexture = resourceManagers.mTextureManager.asyncLoad("Shadow map",
+				TextureBuilder{
+					TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 },
+					glm::u16vec3(4096, 4096, 0)
+				}
+			);
+			auto shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+				"Shadow map",
+				std::vector<TextureHandle>{ shadowTexture }
+			);
+
+			if (resourceManagers.mFramebufferManager.isValid(shadowTarget)) {
+				auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowTarget);
+				shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
+				drawShadows<OpaqueComponent>(resourceManagers, shadowMap, ecs);
+				drawShadows<AlphaTestComponent>(resourceManagers, shadowMap, ecs);
+			}
+		}
+
+		if (resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
+			auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
+			if (mDeferredShading) {
+				_deferredShading(resourceManagers, ecs, sceneTargetHandle, viewport.mSize, shadowTexture);
+			}
+			else {
+				_forwardShading(resourceManagers, ecs, sceneTargetHandle, shadowTexture, viewport.mSize);
+			}
+
+			backbuffer.bind();
+			backbuffer.clear(glm::vec4(0, 0, 0, 1.f), types::framebuffer::AttachmentBit::Color);
+			drawFXAA(resourceManagers, glm::uvec2(viewport.mSize.x, viewport.mSize.y), sceneTarget.mTextures[0]);
+			// Don't forget the depth. Because reasons.
+			glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
+				0, 0, viewport.mSize.x, viewport.mSize.y,
+				0, 0, viewport.mSize.x, viewport.mSize.y,
+				GL_DEPTH_BUFFER_BIT,
+				GL_NEAREST
+			);
+		}
 	}
 
-	void Demo::_forwardShading(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& sceneTarget, Texture* shadowMap) {
+	void Demo::_forwardShading(
+		const ResourceManagers& resourceManagers, 
+		const ECS& ecs, 
+		FramebufferHandle sceneTargetHandle, 
+		TextureHandle shadowMapHandle,
+		glm::uvec2 viewport
+	) {
 		TRACY_GPU();
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
-		sceneTarget.bind();
-		sceneTarget.clear(glm::vec4(getConfig().clearColor, 0.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
-		glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
-		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowMap);
-		drawPhong<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowMap);
+		auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
+		sceneTarget.clear(glm::vec4(getConfig().clearColor, 0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		glViewport(0, 0, viewport.x, viewport.y);
+
+		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowMapHandle);
+		drawPhong<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowMapHandle);
 	}
 
-	void Demo::_deferredShading(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& sceneTarget, glm::uvec2 targetSize, Texture* shadowMap) {
+	void Demo::_deferredShading(
+		const ResourceManagers& resourceManagers, 
+		const ECS& ecs, 
+		FramebufferHandle sceneTargetHandle, 
+		glm::uvec2 viewport, 
+		TextureHandle shadowMapHandle
+	) {
 		TRACY_GPU();
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-		auto& gbuffer = createGBuffer(targetSize);
+		auto& gbuffer = createGBuffer(viewport);
 		gbuffer.bind();
-		gbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
-		glViewport(0, 0, targetSize.x, targetSize.y);
+		gbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		glViewport(0, 0, viewport.x, viewport.y);
 		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, {});
 		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, {});
 
-		auto ao = mDrawAO ? drawAO(resourceManagers, ecs, cameraEntity, gbuffer, targetSize, mAORadius, mAOBias) : nullptr;
+		auto ao = mDrawAO ? drawAO(resourceManagers, ecs, cameraEntity, gbuffer, viewport, mAORadius, mAOBias) : nullptr;
 
-		auto lightResolve = Library::getPooledFramebuffer({ targetSize, {
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB16_UNORM,
-			}
-		} }, "LightResolve");
-		lightResolve->bind();
-		lightResolve->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color);
-		glViewport(0, 0, targetSize.x, targetSize.y);
-		drawPointLights(resourceManagers, ecs, gbuffer, cameraEntity, targetSize, mLightDebugRadius);
-		drawDirectionalLights(resourceManagers, ecs, cameraEntity, gbuffer, shadowMap);
+		auto lightResolveHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+			"Light Resolve",
+			PooledFramebufferDetails_New{}
+			.setSize(viewport)
+			.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::RGB16_UNORM })
+		);
+
+		if (!resourceManagers.mFramebufferManager.isValid(lightResolveHandle)) {
+			return;
+		}
+
+		auto& lightResolve = resourceManagers.mFramebufferManager.resolve(lightResolveHandle);
+		lightResolve.bind();
+		lightResolve.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
+		glViewport(0, 0, viewport.x, viewport.y);
+		drawPointLights(resourceManagers, ecs, gbuffer, cameraEntity, viewport, mLightDebugRadius);
+		drawDirectionalLights(resourceManagers, ecs, cameraEntity, gbuffer, shadowMapHandle);
 
 		// I'm lazy so I'm just going to do the final combine here
 		{
 			TRACY_GPUN("Final Combine");
+			auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
 			sceneTarget.bind();
-			sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
-			glViewport(0, 0, sceneTarget.mTextures[0]->mWidth, sceneTarget.mTextures[0]->mHeight);
+			sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+			glViewport(0, 0, viewport.x, viewport.y);
 			auto combineShaderHandle = resourceManagers.mShaderManager.asyncLoad("FinalCombine", SourceShader::ConstructionArgs{
 				{ ShaderStage::VERTEX, "quad.vert"},
 				{ ShaderStage::FRAGMENT, "sponza/combine.frag" }
@@ -265,17 +294,17 @@ namespace Sponza {
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(combineShaderHandle, defines);
 			resolvedShader.bind();
 
-			resolvedShader.bindTexture("lightOutput", *lightResolve->mTextures[0]);
+			resolvedShader.bindTexture("lightOutput", resourceManagers.mTextureManager.resolve(lightResolve.mTextures[0]));
 			if (mDrawAO) {
-				resolvedShader.bindTexture("aoOutput", *ao->mTextures[0]);
+				resolvedShader.bindTexture("aoOutput", resourceManagers.mTextureManager.resolve(ao->mTextures[0]));
 			}
 
 			resourceManagers.mMeshManager.resolve("quad").draw();
 
 			// Don't forget the depth. Because reasons.
 			glBlitNamedFramebuffer(gbuffer.mFBOID, sceneTarget.mFBOID,
-				0, 0, targetSize.x, targetSize.y,
-				0, 0, targetSize.x, targetSize.y,
+				0, 0, viewport.x, viewport.y,
+				0, 0, viewport.x, viewport.y,
 				GL_DEPTH_BUFFER_BIT,
 				GL_NEAREST
 			);
