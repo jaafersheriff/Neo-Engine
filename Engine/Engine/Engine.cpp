@@ -53,6 +53,9 @@ namespace neo {
 	MouseRaySystem Engine::mMouseRaySystem;
 	SelectingSystem Engine::mSelectingSystem;
 
+	/* Resources */
+	ResourceManagers Engine::mResourceManagers;
+
 	/* Hardware */
 	WindowSurface Engine::mWindow;
 	Keyboard Engine::mKeyboard;
@@ -83,7 +86,7 @@ namespace neo {
 		ServiceLocator<ImGuiManager>::set();
 		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
 
-		ServiceLocator<Renderer>::ref().init();
+		ServiceLocator<Renderer>::ref().init(mResourceManagers);
 		{
 			auto& details = ServiceLocator<Renderer>::ref().mDetails;
 			/* Set max work group */
@@ -117,8 +120,6 @@ namespace neo {
 	void Engine::run(DemoWrangler& demos) {
 
 		util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale);
-		// TODO - managers could just be added to the ecs probably..but how would that work with threading
-		ResourceManagers resourceManagers;
 		demos.setForceReload();
 		
 		while (!mWindow.shouldClose()) {
@@ -129,10 +130,10 @@ namespace neo {
 				{
 					TRACY_ZONEN("Frame Update");
 					if (demos.needsReload()) {
-						_swapDemo(demos, resourceManagers);
+						_swapDemo(demos);
 					}
 
-					_startFrame(profiler, resourceManagers);
+					_startFrame(profiler);
 					Messenger::relayMessages(mECS);
 
 					/* Destroy and create objects and components */
@@ -141,7 +142,7 @@ namespace neo {
 
 					{
 						TRACY_ZONEN("Demo::update");
-						demos.getCurrentDemo()->update(mECS, resourceManagers);
+						demos.getCurrentDemo()->update(mECS, mResourceManagers);
 					}
 
 					/* Update each system */
@@ -158,7 +159,7 @@ namespace neo {
 							demos.imGuiEditor(mECS);
 						}
 						mECS.imguiEdtor();
-						Library::imGuiEditor(resourceManagers);
+						mResourceManagers.imguiEditor();
 						ServiceLocator<ImGuiManager>::ref().imGuiEditor();
 						ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS);
 						profiler.imGuiEditor();
@@ -171,7 +172,7 @@ namespace neo {
 				{
 
 					TRACY_ZONEN("Resource Tick");
-					resourceManagers.tick();
+					mResourceManagers.tick();
 					Messenger::relayMessages(mECS);
 				}
 
@@ -181,7 +182,7 @@ namespace neo {
 				{
 					TRACY_ZONEN("Frame Render");
 					if (!mWindow.isMinimized()) {
-						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), mECS, resourceManagers);
+						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), mECS, mResourceManagers);
 					}
 					Messenger::relayMessages(mECS);
 				}
@@ -196,17 +197,16 @@ namespace neo {
 		}
 
 		demos.getCurrentDemo()->destroy();
-		shutDown(resourceManagers);
+		shutDown();
 	}
 
-	void Engine::_swapDemo(DemoWrangler& demos, ResourceManagers& resourceManagers) {
+	void Engine::_swapDemo(DemoWrangler& demos) {
 		TRACY_ZONE();
 
 		/* Destry the old state*/
 		demos.getCurrentDemo()->destroy();
 		mECS.clean();
-		Library::clean();
-		resourceManagers.clear();
+		mResourceManagers.clear();
 		ServiceLocator<Renderer>::ref().clean();
 		Messenger::clean();
 
@@ -218,12 +218,12 @@ namespace neo {
 		mMouse.init();
 		mKeyboard.init();
 		ServiceLocator<Renderer>::ref().setDemoConfig(config);
-		ServiceLocator<Renderer>::ref().init();
+		ServiceLocator<Renderer>::ref().init(mResourceManagers);
 		Loader::init(config.resDir, config.shaderDir);
-		_createPrefabs(resourceManagers);
-		resourceManagers.tick();
+		_createPrefabs();
+		mResourceManagers.tick();
 
-		demos.getCurrentDemo()->init(mECS, resourceManagers);
+		demos.getCurrentDemo()->init(mECS, mResourceManagers);
 
 		/* Init systems */
 		mECS._initSystems();
@@ -233,10 +233,10 @@ namespace neo {
 		Messenger::relayMessages(mECS);
 	}
 
-	void Engine::_createPrefabs(ResourceManagers& resourceManagers) {
+	void Engine::_createPrefabs() {
 		/* Generate basic meshes */
 		auto loadMesh = [&](HashedString name, MeshLoadDetails& details) {
-			NEO_UNUSED(resourceManagers.mMeshManager.asyncLoad(name, details));
+			NEO_UNUSED(mResourceManagers.mMeshManager.asyncLoad(name, details));
 			for (auto&& [type, buffer] : details.mVertexBuffers) {
 				free(const_cast<uint8_t*>(buffer.mData));
 			}
@@ -255,24 +255,23 @@ namespace neo {
 
 		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
 		builder.mData = data;
-		NEO_UNUSED(resourceManagers.mTextureManager.asyncLoad(HashedString("black"), builder));
+		NEO_UNUSED(mResourceManagers.mTextureManager.asyncLoad(HashedString("black"), builder));
 		data[0] = data[1] = data[2] = 0xFF;
-		NEO_UNUSED(resourceManagers.mTextureManager.asyncLoad(HashedString("white"), builder));
+		NEO_UNUSED(mResourceManagers.mTextureManager.asyncLoad(HashedString("white"), builder));
 	}
 
-	void Engine::shutDown(ResourceManagers& resourceManagers) {
+	void Engine::shutDown() {
 		NEO_LOG_I("Shutting down...");
 		mECS.clean();
 		Messenger::clean();
-		Library::clean();
-		resourceManagers.clear();
+		mResourceManagers.clear();
 		ServiceLocator<Renderer>::ref().clean();
 		ServiceLocator<Renderer>::reset();
 		ServiceLocator<ImGuiManager>::ref().destroy();
 		mWindow.shutDown();
 	}
 
-	void Engine::_startFrame(util::Profiler& profiler, ResourceManagers& resourceManagers) {
+	void Engine::_startFrame(util::Profiler& profiler) {
 		TRACY_ZONE();
 
 		/* Update frame counter */
@@ -322,7 +321,7 @@ namespace neo {
 			for (auto& entity : mECS.getView<DebugBoundingBoxComponent>()) {
 				if (!mECS.has<LineMeshComponent>(entity)) {
 					auto box = mECS.getComponent<BoundingBoxComponent>(entity);
-					auto line = mECS.addComponent<LineMeshComponent>(entity, resourceManagers.mMeshManager);
+					auto line = mECS.addComponent<LineMeshComponent>(entity, mResourceManagers.mMeshManager);
 
 					line->mUseParentSpatial = true;
 					line->mWriteDepth = true;
@@ -364,8 +363,5 @@ namespace neo {
 		for(auto& entity : mECS.getView<SingleFrameComponent>()) {
 			mECS.removeEntity(entity);
 		}
-
-		// Flush resources
-		Library::tick();
 	}
 }

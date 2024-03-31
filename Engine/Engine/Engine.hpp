@@ -39,15 +39,17 @@ namespace neo {
 
 			static void init();
 			static void run(DemoWrangler&);
-			static void shutDown(ResourceManagers&);
+			static void shutDown();
 
 		private:
 			static ECS mECS;
-			static void _startFrame(util::Profiler& profiler, ResourceManagers& resourceManagers);
+			// TODO - managers could just be added to the ecs probably..but how would that work with threading
+			static ResourceManagers mResourceManagers;
+			static void _startFrame(util::Profiler& profiler);
 			static void _endFrame();
 
-			static void _createPrefabs(ResourceManagers&);
-			static void _swapDemo(DemoWrangler&, ResourceManagers&);
+			static void _createPrefabs();
+			static void _swapDemo(DemoWrangler&);
 
 			/* Hardware */
 			static WindowSurface mWindow;

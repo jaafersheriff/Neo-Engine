@@ -80,8 +80,8 @@ namespace neo {
 		std::swap(mQueue, swapQueue);
 		mQueue.clear();
 
-		for (auto&& [id, details] : swapQueue) {
-			mCache.load<MeshLoader>(id, details.mLoadDetails);
+		for (auto&& [handle, details] : swapQueue) {
+			mCache.load<MeshLoader>(handle.mId, details.mLoadDetails);
 			for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
 				free(const_cast<uint8_t*>(buffer.mData));
 			}

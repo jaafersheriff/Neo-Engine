@@ -63,17 +63,19 @@ namespace Sponza {
 				noise[i + 2] = util::genRandom();
 			}
 			TextureBuilder builder;
-			builder.mFormat.mTarget = types::texture::Target::Texture2D;
-			builder.mFormat.mInternalFormat = types::texture::InternalFormats::RGB32_F;
-			builder.mFormat.mFilter = {
-				types::texture::Filters::Nearest,
-				types::texture::Filters::Nearest,
+			builder.mFormat = TextureFormat{
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGB32_F,
+				{
+					types::texture::Filters::Nearest,
+					types::texture::Filters::Nearest,
+				},
+				{
+					types::texture::Wraps::Repeat,
+					types::texture::Wraps::Repeat,
+				},
+				types::ByteFormats::UnsignedByte
 			};
-			builder.mFormat.mWrap = {
-				types::texture::Wraps::Repeat,
-				types::texture::Wraps::Repeat,
-			};
-			builder.mFormat.mType = types::ByteFormats::UnsignedByte;
 			builder.mDimensions = glm::uvec3(dim, dim, 0);
 			builder.mData = reinterpret_cast<uint8_t*>(noise.data());
 			NEO_UNUSED(textureManager.asyncLoad(id, builder));
@@ -109,7 +111,7 @@ namespace Sponza {
 			},
 		} }, "AO base");
 		baseAOTarget->bind();
-		baseAOTarget->clear(glm::vec4(0.f), types::framebuffer::ClearFlagBits::Color);
+		baseAOTarget->clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
 		glViewport(0, 0, targetSize.x / 2u, targetSize.y / 2u);
 
 		{
@@ -158,7 +160,7 @@ namespace Sponza {
 				},
 			} }, "AO blurred");
 			blurredAO->bind();
-			blurredAO->clear(glm::vec4(0.f), types::framebuffer::ClearFlagBits::Color);
+			blurredAO->clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
 			glViewport(0, 0, targetSize.x, targetSize.y);
 
 			auto blurShader = resourceManagers.mShaderManager.asyncLoad("BlurShader", SourceShader::ConstructionArgs{
