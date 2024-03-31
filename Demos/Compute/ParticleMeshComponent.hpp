@@ -5,7 +5,6 @@
 #include "Renderer/GLObjects/Mesh.hpp"
 #include "Renderer/Renderer.hpp"
 
-#include "Loader/Library.hpp"
 #include "ResourceManager/MeshResourceManager.hpp"
 
 #include "Util/Profiler.hpp"

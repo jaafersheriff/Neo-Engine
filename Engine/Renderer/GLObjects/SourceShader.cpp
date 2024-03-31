@@ -5,8 +5,6 @@
 #include "Renderer/Renderer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
-#include "Loader/Library.hpp"
-
 namespace neo {
 
 	// Don't put this in a hot loop

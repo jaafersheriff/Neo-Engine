@@ -3,9 +3,6 @@
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
-#include "Loader/Library.hpp"
-#include "Loader/Loader.hpp"
-
 #include "ResourceManager/ResourceManagers.hpp"
 
 namespace neo {

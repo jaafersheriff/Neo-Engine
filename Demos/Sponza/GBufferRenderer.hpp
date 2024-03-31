@@ -23,8 +23,6 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
-#include "Loader/Library.hpp"
-
 namespace Sponza {
 
 	FramebufferHandle createGBuffer(const ResourceManagers& resourceManagers, glm::uvec2 targetSize) {

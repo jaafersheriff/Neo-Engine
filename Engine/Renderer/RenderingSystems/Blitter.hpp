@@ -6,7 +6,6 @@
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
-#include "Loader/Library.hpp"
 #include "Loader/Loader.hpp"
 #include "ResourceManager/ResourceManagers.hpp"
 
