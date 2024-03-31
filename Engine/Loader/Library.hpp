@@ -40,8 +40,8 @@ namespace neo {
 
 			// This is only being used for the offscreen backbuffer now..
 			// getPooledFramebuffer should be extended to accept owned textures..
-			static Framebuffer* createFramebuffer(const std::string&);
-			static Framebuffer* getPooledFramebuffer(const PooledFramebufferDetails& details, std::optional<std::string> name = std::nullopt);
+			// static Framebuffer* createFramebuffer(const std::string&);
+			// static Framebuffer* getPooledFramebuffer(const PooledFramebufferDetails& details, std::optional<std::string> name = std::nullopt);
 
 			static void imGuiEditor(ResourceManagers& rm);
 

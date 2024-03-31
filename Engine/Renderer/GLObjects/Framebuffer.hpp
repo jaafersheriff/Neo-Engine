@@ -8,6 +8,8 @@
 
 #include "Renderer/Types.hpp"
 
+#include "ResourceManager/TextureResourceManager.hpp"
+
 #include <vector>
 
 namespace neo {
@@ -17,7 +19,7 @@ namespace neo {
 
 		uint32_t mFBOID = 0;
 		int mColorAttachments = 0;
-		std::vector<Texture*> mTextures;
+		std::vector<TextureHandle> mTextures;
 
 		void init();
 		void bind();
@@ -25,12 +27,9 @@ namespace neo {
 		void disableDraw();
 		void disableRead();
 
-		void attachColorTexture(glm::uvec2 size, TextureFormat format);
-		void attachDepthTexture(glm::ivec2 size, types::texture::InternalFormats format, TextureFilter filter, TextureWrap wrap);
-		void attachDepthTexture(Texture* t);
-		void attachStencilTexture(glm::uvec2 size, TextureFilter filter, TextureWrap wrap);
+		void attachTexture(const Texture& texture);
 		void initDrawBuffers();
-		void clear(glm::vec4 clearColor, types::framebuffer::ClearFlags clearFlags);
+		void clear(glm::vec4 clearColor, types::framebuffer::AttachmentBits clearFlags);
 		void destroy();
 	};
 }

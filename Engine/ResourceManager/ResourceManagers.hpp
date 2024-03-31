@@ -3,6 +3,7 @@
 #include "MeshResourceManager.hpp"
 #include "ShaderResourceManager.hpp"
 #include "TextureResourceManager.hpp"
+#include "FramebufferManager.hpp"
 
 #include "Util/Profiler.hpp"
 
@@ -16,6 +17,7 @@ namespace neo {
 		MeshResourceManager mMeshManager;
 		ShaderResourceManager mShaderManager;
 		TextureResourceManager mTextureManager;
+		FramebufferResourceManager mFramebufferManager;
 	private:
 		void clear();
 		void tick();

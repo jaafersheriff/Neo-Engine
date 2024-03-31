@@ -7,11 +7,13 @@ namespace neo {
 		mMeshManager.tick();
 		mShaderManager.tick();
 		mTextureManager.tick();
+		mFramebufferManager.tick(mTextureManager); // Do this after textures
 	}
 
 	void ResourceManagers::clear() {
 		mMeshManager.clear();
 		mShaderManager.clear();
 		mTextureManager.clear();
+		mFramebufferManager.clear(mTextureManager); // Do this after textures
 	}
 }
