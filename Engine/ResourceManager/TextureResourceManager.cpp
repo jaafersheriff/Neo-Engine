@@ -200,7 +200,7 @@ namespace neo {
 				else {
 					static_assert(always_false_v<T>, "non-exhaustive visitor!");
 				}
-				}, details.mLoadDetails);
+			}, details.mLoadDetails);
 		}
 	}
 

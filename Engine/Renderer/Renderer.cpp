@@ -117,25 +117,13 @@ namespace neo {
 			.setSize(glm::uvec2(viewport.mSize))
 			.attach(TextureFormat{ types::texture::Target::Texture2D,
 				types::texture::InternalFormats::RGB16_UNORM,
-				{
-					types::texture::Filters::Linear,
-					types::texture::Filters::Linear
-				},
-				{
-					types::texture::Wraps::Clamp,
-					types::texture::Wraps::Clamp
-				}
-				})
+				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
+				{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
+			})
 			.attach(TextureFormat{ types::texture::Target::Texture2D,
 				types::texture::InternalFormats::D16,
-				{
-					types::texture::Filters::Linear,
-					types::texture::Filters::Linear
-				},
-				{
-					types::texture::Wraps::Clamp,
-					types::texture::Wraps::Clamp
-				}
+				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
+				{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
 			})
 		);
 
@@ -144,8 +132,6 @@ namespace neo {
 		}
 
 		auto& defaultFbo = resourceManagers.mFramebufferManager.resolve(defaultFboHandle);
-
-
 		{
 			TRACY_GPUN("Draw Demo");
 			demo->render(resourceManagers, ecs, defaultFbo);
