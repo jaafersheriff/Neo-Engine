@@ -47,7 +47,7 @@ namespace PBR {
 	};
 
 	template<typename... CompTs>
-	void _drawPBR(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, Texture* shadowMap) {
+	void _drawPBR(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, TextureHandle shadowMapHandle) {
 		TRACY_GPU();
 
 		ShaderDefines passDefines({});
@@ -103,7 +103,7 @@ namespace PBR {
 
 		glm::mat4 L;
 		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
-		const bool shadowsEnabled = shadowMap && shadowCamera.has_value();
+		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && shadowCamera.has_value();
 		MakeDefine(ENABLE_SHADOWS);
 		if (shadowsEnabled) {
 			passDefines.set(ENABLE_SHADOWS);
@@ -224,8 +224,9 @@ namespace PBR {
 				}
 				if (shadowsEnabled) {
 					resolvedShader.bindUniform("L", L);
-					resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap->mWidth, shadowMap->mHeight));
-					resolvedShader.bindTexture("shadowMap", *shadowMap);
+					auto& shadowMap = resourceManagers.mTextureManager.resolve(shadowMapHandle);
+					resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
+					resolvedShader.bindTexture("shadowMap", shadowMap);
 				}
 				if (skybox) {
 					resolvedShader.bindTexture("skybox", resourceManagers.mTextureManager.resolve(std::get<1>(*skybox).mSkybox));
@@ -436,18 +437,27 @@ namespace PBR {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		auto shadowMap = Library::getPooledFramebuffer({ glm::uvec2(4096, 4096), { 
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::D16,
-			}
-		} }, "Shadow map");
-		if (mDrawShadows) {
-			shadowMap->clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
-			drawShadows<OpaqueComponent>(resourceManagers, *shadowMap, ecs);
-			drawShadows<AlphaTestComponent>(resourceManagers, *shadowMap, ecs);
-		}
 
+		auto shadowTexture = NEO_INVALID_HANDLE;
+		if (mDrawShadows) {
+			shadowTexture = resourceManagers.mTextureManager.asyncLoad("Shadow map",
+				TextureBuilder{
+					TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 },
+					glm::u16vec3(4096, 4096, 0)
+				}
+			);
+			auto shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+				"Shadow map",
+				std::vector<TextureHandle>{ shadowTexture }
+			);
+
+			if (resourceManagers.mFramebufferManager.isValid(shadowTarget)) {
+				auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowTarget);
+				shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
+				drawShadows<OpaqueComponent>(resourceManagers, shadowMap, ecs);
+				drawShadows<AlphaTestComponent>(resourceManagers, shadowMap, ecs);
+			}
+		}
 
 		glm::vec3 clearColor = getConfig().clearColor;
 
@@ -457,8 +467,8 @@ namespace PBR {
 
 		drawSkybox(resourceManagers, ecs, cameraEntity);
 
-		_drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
-		_drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
+		_drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture);
+		_drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture);
 	}
 
 	void Demo::destroy() {

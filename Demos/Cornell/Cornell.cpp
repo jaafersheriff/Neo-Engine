@@ -96,34 +96,32 @@ namespace Cornell {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		auto sceneTarget = Library::getPooledFramebuffer({ viewport.mSize, {
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB8_UNORM,
-			},
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::D16,
-			}
-		} }, "Scene target");
+		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+			"Scene Target",
+			PooledFramebufferDetails_New{}
+				.setSize(viewport.mSize)
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
+				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 })
+		);
 
-		glm::vec3 clearColor = getConfig().clearColor;
+		if (resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
+			auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
+			glm::vec3 clearColor = getConfig().clearColor;
+			sceneTarget.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+			drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 
-		sceneTarget->clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
-		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-
-		backbuffer.bind();
-		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
-		drawFXAA(resourceManagers, glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0]);
-	   // Don't forget the depth. Because reasons.
-	   glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
-		   0, 0, viewport.mSize.x, viewport.mSize.y,
-		   0, 0, viewport.mSize.x, viewport.mSize.y,
-		   GL_DEPTH_BUFFER_BIT,
-		   GL_NEAREST
-	   );
-
+			backbuffer.bind();
+			backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+			drawFXAA(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
+			// Don't forget the depth. Because reasons.
+			glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
+				0, 0, viewport.mSize.x, viewport.mSize.y,
+				0, 0, viewport.mSize.x, viewport.mSize.y,
+				GL_DEPTH_BUFFER_BIT,
+				GL_NEAREST
+			);
+		}
 	}
 
 	void Demo::destroy() {

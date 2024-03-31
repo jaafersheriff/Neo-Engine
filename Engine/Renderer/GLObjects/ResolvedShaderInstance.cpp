@@ -5,8 +5,9 @@
 #include "Renderer/Renderer.hpp"
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
+#include "Renderer/GLObjects/Texture.hpp"
 
-#include "Loader/Library.hpp"
+#include "Loader/Loader.hpp"
 
 #include <glslang/Include/glslang_c_interface.h>
 #include <glslang/Public/resource_limits_c.h>

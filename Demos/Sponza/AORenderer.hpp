@@ -82,7 +82,7 @@ namespace Sponza {
 		}
 	}
 
-	 Framebuffer* drawAO(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
+	TextureHandle drawAO(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
 		TRACY_GPU();
 		HashedString aoKernelHandle("aoKernel");
 		HashedString aoNoiseHandle("aoNoise");
@@ -93,60 +93,11 @@ namespace Sponza {
 			_generateNoise(resourceManagers.mTextureManager, aoNoiseHandle, 4);
 		}
 
-		// Make a one-off framebuffer for the base AO
 		// Do base AO at half res
-		auto baseAOTarget = Library::getPooledFramebuffer({ glm::max(glm::uvec2(1,1), targetSize / 2u), {
-			TextureFormat {
-				types::texture::Target::Texture2D, 
-				types::texture::InternalFormats::R16_F,
-				{
-					types::texture::Filters::Linear,
-					types::texture::Filters::Linear,
-				},
-				{
-					types::texture::Wraps::Repeat,
-					types::texture::Wraps::Repeat,
-				},
-				types::ByteFormats::Float 
-			},
-		} }, "AO base");
-		baseAOTarget->bind();
-		baseAOTarget->clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
-		glViewport(0, 0, targetSize.x / 2u, targetSize.y / 2u);
-
-		{
-			TRACY_GPUN("Base AO");
-			auto aoShader = resourceManagers.mShaderManager.asyncLoad("AOShader", SourceShader::ConstructionArgs{
-				{ ShaderStage::VERTEX, "quad.vert"},
-				{ ShaderStage::FRAGMENT, "sponza/ao.frag" }
-				});
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(aoShader, {});
-			resolvedShader.bind();
-
-			resolvedShader.bindUniform("radius", radius);
-			resolvedShader.bindUniform("bias", bias);
-
-			// bind gbuffer
-			resolvedShader.bindTexture("gNormal", *gbuffer.mTextures[2]);
-			resolvedShader.bindTexture("gDepth", *gbuffer.mTextures[3]);
-
-			// bind kernel and noise
-			resolvedShader.bindTexture("noise", resourceManagers.mTextureManager.resolve(aoKernelHandle));
-			resolvedShader.bindTexture("kernel", resourceManagers.mTextureManager.resolve(aoNoiseHandle));
-
-			const auto P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
-			resolvedShader.bindUniform("P", P);
-			resolvedShader.bindUniform("invP", glm::inverse(P));
-
-			resourceManagers.mMeshManager.resolve("quad").draw();
-		}
-
-		{
-			TRACY_GPUN("AO Blur");
-			// Do base AO at full res?
-			auto blurredAO = Library::getPooledFramebuffer({ targetSize, {
+		auto baseAOTexture = resourceManagers.mTextureManager.asyncLoad("AO Base",
+			TextureBuilder{
 				TextureFormat {
-					types::texture::Target::Texture2D, 
+					types::texture::Target::Texture2D,
 					types::texture::InternalFormats::R16_F,
 					{
 						types::texture::Filters::Linear,
@@ -156,27 +107,95 @@ namespace Sponza {
 						types::texture::Wraps::Repeat,
 						types::texture::Wraps::Repeat,
 					},
-					types::ByteFormats::Float 
+					types::ByteFormats::Float
 				},
-			} }, "AO blurred");
-			blurredAO->bind();
-			blurredAO->clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
-			glViewport(0, 0, targetSize.x, targetSize.y);
+				glm::u16vec3(glm::max(glm::uvec2(1, 1), targetSize / 2u), 0.0)
+			}
+		);
+		auto blurAOTexture = resourceManagers.mTextureManager.asyncLoad("AO Blur",
+			TextureBuilder{
+				TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::R16_F,
+				{
+					types::texture::Filters::Linear,
+					types::texture::Filters::Linear,
+				},
+				{
+					types::texture::Wraps::Repeat,
+					types::texture::Wraps::Repeat,
+				},
+				types::ByteFormats::Float
+				},
+				glm::u16vec3(targetSize, 0.0)
+			}
+		);
 
-			auto blurShader = resourceManagers.mShaderManager.asyncLoad("BlurShader", SourceShader::ConstructionArgs{
-				{ ShaderStage::VERTEX, "quad.vert"},
-				{ ShaderStage::FRAGMENT, "sponza/blur.frag" }
-				});
+		// Make a one-off framebuffer for the base AO
+		{
+			TRACY_GPUN("Base AO");
+			auto baseAOHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+				"AO Base",
+				std::vector<TextureHandle>{baseAOTexture}
+			);
+			if (resourceManagers.mFramebufferManager.isValid(baseAOHandle)) {
+				auto& baseAOTarget = resourceManagers.mFramebufferManager.resolve(baseAOHandle);
+				baseAOTarget.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
+				glViewport(0, 0, targetSize.x / 2u, targetSize.y / 2u);
+				auto aoShader = resourceManagers.mShaderManager.asyncLoad("AOShader", SourceShader::ConstructionArgs{
+					{ ShaderStage::VERTEX, "quad.vert"},
+					{ ShaderStage::FRAGMENT, "sponza/ao.frag" }
+					});
+				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(aoShader, {});
+				resolvedShader.bind();
 
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(blurShader, {});
-			resolvedShader.bind();
+				resolvedShader.bindUniform("radius", radius);
+				resolvedShader.bindUniform("bias", bias);
 
-			resolvedShader.bindTexture("inputAO", *baseAOTarget->mTextures[0]);
-			resolvedShader.bindUniform("blurAmount", 2);
+				// bind gbuffer
+				resolvedShader.bindTexture("gNormal", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+				resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 
-			resourceManagers.mMeshManager.resolve("quad").draw();
-			return blurredAO;
+				// bind kernel and noise
+				resolvedShader.bindTexture("noise", resourceManagers.mTextureManager.resolve(aoKernelHandle));
+				resolvedShader.bindTexture("kernel", resourceManagers.mTextureManager.resolve(aoNoiseHandle));
+
+				const auto P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+				resolvedShader.bindUniform("P", P);
+				resolvedShader.bindUniform("invP", glm::inverse(P));
+
+				resourceManagers.mMeshManager.resolve("quad").draw();
+			}
 		}
+		{
+			TRACY_GPUN("AO Blur");
+			{
+				auto blurAOHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+					"AO Base",
+					std::vector<TextureHandle>{blurAOTexture}
+				);
+				if (resourceManagers.mTextureManager.isValid(baseAOTexture) && resourceManagers.mFramebufferManager.isValid(blurAOHandle)) {
+					auto blurredAO = resourceManagers.mFramebufferManager.resolve(blurAOHandle);
+					blurredAO.bind();
+					blurredAO.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
+					glViewport(0, 0, targetSize.x, targetSize.y);
+
+					auto blurShader = resourceManagers.mShaderManager.asyncLoad("BlurShader", SourceShader::ConstructionArgs{
+						{ ShaderStage::VERTEX, "quad.vert"},
+						{ ShaderStage::FRAGMENT, "sponza/blur.frag" }
+						});
+
+					auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(blurShader, {});
+					resolvedShader.bind();
+
+					resolvedShader.bindTexture("inputAO", resourceManagers.mTextureManager.resolve(baseAOTexture));
+					resolvedShader.bindUniform("blurAmount", 2);
+
+					resourceManagers.mMeshManager.resolve("quad").draw();
+				}
+			}
+		}
+		return blurAOTexture;
 	}
 
 }

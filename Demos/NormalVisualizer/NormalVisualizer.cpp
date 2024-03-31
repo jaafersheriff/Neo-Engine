@@ -90,7 +90,7 @@ namespace NormalVisualizer {
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
+		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 
 		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 

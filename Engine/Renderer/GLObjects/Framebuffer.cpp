@@ -35,16 +35,16 @@ namespace neo {
 		glGenFramebuffers(1, &mFBOID);
 	}
 
-	void Framebuffer::bind() {
+	void Framebuffer::bind() const {
 		glBindFramebuffer(GL_FRAMEBUFFER, mFBOID);
 	}
 
-	void Framebuffer::disableDraw() {
+	void Framebuffer::disableDraw() const {
 		bind();
 		glDrawBuffer(GL_NONE);
 	}
 
-	void Framebuffer::disableRead() {
+	void Framebuffer::disableRead() const {
 		bind();
 		glReadBuffer(GL_NONE);
 	}
