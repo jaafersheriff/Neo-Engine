@@ -1,5 +1,7 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
+#include <imgui.h>
+
 namespace neo {
 
 	void ResourceManagers::tick() {
@@ -15,5 +17,14 @@ namespace neo {
 		mShaderManager.clear();
 		mTextureManager.clear();
 		mFramebufferManager.clear(mTextureManager); // Do this after textures
+	}
+
+	void ResourceManagers::imguiEditor() {
+		ImGui::Begin("Resources");
+		mFramebufferManager.imguiEditor();
+		mShaderManager.imguiEditor();
+		mMeshManager.imguiEditor();
+		mTextureManager.imguiEditor();
+		ImGui::End();
 	}
 }

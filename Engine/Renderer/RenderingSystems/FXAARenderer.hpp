@@ -10,8 +10,12 @@
 
 namespace neo {
 
-	static void drawFXAA(const ResourceManagers& resourceManagers, glm::uvec2 dimension, Texture& inputTexture) {
+	static void drawFXAA(const ResourceManagers& resourceManagers, glm::uvec2 dimension, TextureHandle inputTextureHandle) {
 		TRACY_GPU();
+
+		if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {
+			return;
+		}
 
 		auto fxaaShaderHandle = resourceManagers.mShaderManager.asyncLoad("FXAAShader", SourceShader::ConstructionArgs{
 			{ ShaderStage::VERTEX, "quad.vert"},
@@ -25,6 +29,8 @@ namespace neo {
 
 		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(fxaaShaderHandle, {});
 		resolvedShader.bind();
+
+		auto& inputTexture = resourceManagers.mTextureManager.resolve(inputTextureHandle);
 		resolvedShader.bindUniform("frameSize", glm::vec2(inputTexture.mWidth, inputTexture.mHeight));
 		resolvedShader.bindTexture("inputTexture", inputTexture);
 

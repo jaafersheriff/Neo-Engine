@@ -71,35 +71,30 @@ namespace neo {
 		auto defaultFbo = resourceManager.mFramebufferManager.asyncLoad(
 			resourceManager.mTextureManager,
 			"backbuffer",
-			PooledFramebufferDetails_New {
-				{1, 1},
+			PooledFramebufferDetails_New{}
+			.setSize(glm::uvec2(1, 1))
+			.attach(TextureFormat{ types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGB16_UNORM,
 				{
-					{
-						types::texture::Target::Texture2D,
-						types::texture::InternalFormats::RGB16_UNORM,
-						{
-							types::texture::Filters::Linear,
-							types::texture::Filters::Linear
-						},
-						{
-							types::texture::Wraps::Clamp,
-							types::texture::Wraps::Clamp
-						}
-					},
-					{
-						types::texture::Target::Texture2D,
-						types::texture::InternalFormats::D16,
-						{
-							types::texture::Filters::Linear,
-							types::texture::Filters::Linear
-						},
-						{
-							types::texture::Wraps::Clamp,
-							types::texture::Wraps::Clamp
-						}
-					}
+					types::texture::Filters::Linear,
+					types::texture::Filters::Linear
+				},
+				{
+					types::texture::Wraps::Clamp,
+					types::texture::Wraps::Clamp
 				}
-			}
+				})
+			.attach(TextureFormat{ types::texture::Target::Texture2D,
+				types::texture::InternalFormats::D16,
+				{
+					types::texture::Filters::Linear,
+					types::texture::Filters::Linear
+				},
+				{
+					types::texture::Wraps::Clamp,
+					types::texture::Wraps::Clamp
+				}
+			})
 		);
 
 		/* Set max work group */

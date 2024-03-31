@@ -22,6 +22,16 @@ namespace neo {
 		glm::uvec2 mSize;
 		std::vector<TextureFormat> mFormats;
 
+		PooledFramebufferDetails_New& setSize(glm::uvec2 size) {
+			mSize = size;
+			return *this;
+		}
+
+		PooledFramebufferDetails_New& attach(TextureFormat format) {
+			mFormats.emplace_back(format);
+			return *this;
+		}
+
 		bool operator==(const PooledFramebufferDetails_New& other) const {
 			// Kinda faulty, but meh
 			return other.mSize == mSize && other.mFormats == mFormats;
@@ -76,6 +86,9 @@ namespace neo {
 
 		void clear(const TextureResourceManager& textureManager);
 		void tick(const TextureResourceManager& textureManager);
+
+		void imguiEditor();
+
 		mutable std::map<FramebufferHandle, QueuedDetails> mQueue;
 		entt::resource_cache<PooledFramebuffer_New> mCache;
 		std::shared_ptr<Framebuffer> mFallback;

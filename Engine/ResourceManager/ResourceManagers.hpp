@@ -11,6 +11,8 @@ namespace neo {
 
 	class Engine;
 
+	constexpr HashedString::hash_type NEO_INVALID_HANDLE = 0;
+
 	class ResourceManagers {
 		friend Engine;
 	public:
@@ -19,6 +21,7 @@ namespace neo {
 		TextureResourceManager mTextureManager;
 		FramebufferResourceManager mFramebufferManager;
 	private:
+		void imguiEditor();
 		void clear();
 		void tick();
 	};
