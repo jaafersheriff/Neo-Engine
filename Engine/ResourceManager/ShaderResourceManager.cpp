@@ -98,7 +98,8 @@ namespace neo {
 			if (ImGui::TreeNode(shader.mName.c_str())) {
 				if (shader.mConstructionArgs && ImGui::Button("Reload all")) {
 					destroyHandle = handle; // Can't destroy mid-each
-					NEO_UNUSED(asyncLoad(HashedString(shader.mName.c_str()), *shader.mConstructionArgs));
+					auto newId = asyncLoad(HashedString(shader.mName.c_str()), *shader.mConstructionArgs);
+					NEO_UNUSED(newId);
 				}
 
 				if (shader.mResolvedShaders.size()) {
