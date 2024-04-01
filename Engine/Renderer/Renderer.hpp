@@ -2,6 +2,8 @@
 
 #include "DemoInfra/IDemo.hpp"
 
+#include "ResourceManager/FramebufferManager.hpp"
+
 #include <typeindex>
 #include <memory>
 #include <tuple>
@@ -59,6 +61,7 @@ namespace neo {
 
 			void imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager);
 		private:
+			FramebufferHandle mDefaultFBOHandle;
 			bool mShowBoundingBoxes = false;
 			bool mBackbufferNeedsResize = false;
 	};

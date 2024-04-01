@@ -91,40 +91,37 @@ namespace neo {
 
 	void ShaderResourceManager::imguiEditor() {
 		std::optional<ShaderHandle> destroyHandle;
-		if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
-			mCache.each([&](const ShaderHandle handle, SourceShader& shader) {
-				if (!isValid(handle)) {
-					return;
+		mCache.each([&](const ShaderHandle handle, SourceShader& shader) {
+			if (!isValid(handle)) {
+				return;
+			}
+			if (ImGui::TreeNode(shader.mName.c_str())) {
+				if (shader.mConstructionArgs && ImGui::Button("Reload all")) {
+					destroyHandle = handle; // Can't destroy mid-each
+					NEO_UNUSED(asyncLoad(HashedString(shader.mName.c_str()), *shader.mConstructionArgs));
 				}
-				if (ImGui::TreeNode(shader.mName.c_str())) {
-					if (shader.mConstructionArgs && ImGui::Button("Reload all")) {
-						destroyHandle = handle; // Can't destroy mid-each
-						NEO_UNUSED(asyncLoad(HashedString(shader.mName.c_str()), *shader.mConstructionArgs));
-					}
 
-					if (shader.mResolvedShaders.size()) {
-						if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(shader.mResolvedShaders.size()))) {
+				if (shader.mResolvedShaders.size()) {
+					if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(shader.mResolvedShaders.size()))) {
+						ImGui::Separator();
+						for (const auto& variant : shader.mResolvedShaders) {
+							// if (mConstructionArgs && ImGui::Button("Reload")) {
+							// Just destroy the variant and evict from the map, easy
+							// }
+							// else {
+							ImGui::Text("%s", variant.second.variant().size() ? variant.second.variant().c_str() : "No defines");
 							ImGui::Separator();
-							for (const auto& variant : shader.mResolvedShaders) {
-								// if (mConstructionArgs && ImGui::Button("Reload")) {
-								// Just destroy the variant and evict from the map, easy
-								// }
-								// else {
-								ImGui::Text("%s", variant.second.variant().size() ? variant.second.variant().c_str() : "No defines");
-								ImGui::Separator();
-								// }
-							}
-							ImGui::TreePop();
+							// }
 						}
+						ImGui::TreePop();
 					}
-					else {
-						ImGui::Text("Variants (0)");
-					}
-					ImGui::TreePop();
 				}
-				});
-			ImGui::TreePop();
-		}
+				else {
+					ImGui::Text("Variants (0)");
+				}
+				ImGui::TreePop();
+			}
+		});
 		if (destroyHandle) {
 			mCache.discard(*destroyHandle);
 		}

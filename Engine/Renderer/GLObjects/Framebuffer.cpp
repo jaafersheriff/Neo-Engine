@@ -1,5 +1,10 @@
 #include "Framebuffer.hpp"
 
+#include "GLHelper.hpp"
+
+#include "Util/Util.hpp"
+#include "Util/Profiler.hpp"
+
 namespace neo {
 	namespace {
 		GLbitfield _getGLClearFlags(types::framebuffer::AttachmentBits flagBits) {
@@ -31,8 +36,12 @@ namespace neo {
 
 	}
 
-	void Framebuffer::init() {
+	void Framebuffer::init(std::optional<std::string> debugName) {
 		glGenFramebuffers(1, &mFBOID);
+		if (debugName.has_value()) {
+			bind();
+			glObjectLabel(GL_FRAMEBUFFER, mFBOID, -1, debugName.value().c_str());
+		}
 	}
 
 	void Framebuffer::bind() const {
