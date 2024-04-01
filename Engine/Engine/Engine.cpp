@@ -234,13 +234,14 @@ namespace neo {
 	void Engine::_createPrefabs(ResourceManagers& resourceManagers) {
 		/* Generate basic meshes */
 		auto loadMesh = [&](HashedString name, MeshLoadDetails& details) {
-			NEO_UNUSED(resourceManagers.mMeshManager.asyncLoad(name, details));
+			auto id = resourceManagers.mMeshManager.asyncLoad(name, details);
 			for (auto&& [type, buffer] : details.mVertexBuffers) {
 				free(const_cast<uint8_t*>(buffer.mData));
 			}
 			if (details.mElementBuffer) {
 				free(const_cast<uint8_t*>(details.mElementBuffer->mData));
 			}
+			return id;
 		};
 		loadMesh("cube", *prefabs::generateCube());
 		loadMesh("quad", *prefabs::generateQuad());
@@ -252,10 +253,17 @@ namespace neo {
 		builder.mDimensions.y = 1;
 
 		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF };
-		builder.mData = data;
-		NEO_UNUSED(resourceManagers.mTextureManager.asyncLoad(HashedString("black"), builder));
-		data[0] = data[1] = data[2] = 0xFF;
-		NEO_UNUSED(resourceManagers.mTextureManager.asyncLoad(HashedString("white"), builder));
+		{
+			builder.mData = data;
+			auto id = resourceManagers.mTextureManager.asyncLoad(HashedString("black"), builder);
+			NEO_UNUSED(id);
+		}
+		{
+			data[0] = data[1] = data[2] = 0xFF;
+			builder.mData = data;
+			auto id = resourceManagers.mTextureManager.asyncLoad(HashedString("white"), builder);
+			NEO_UNUSED(id);
+		}
 	}
 
 	void Engine::shutDown(ResourceManagers& resourceManagers) {

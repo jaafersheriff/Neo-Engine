@@ -64,13 +64,13 @@ namespace Base {
 
 		/* Bunny object */
 		{
-			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(resourceManagers, "bunny.gltf");
+			// GLTFImporter::Scene gltfScene = Loader::loadGltfScene(resourceManagers, "bunny.gltf");
 			auto bunny = ecs.createEntity();
-			ecs.addComponent<TagComponent>(bunny, "Bunny");
+			// ecs.addComponent<TagComponent>(bunny, "Bunny");
 			ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 0.0f, 0.f), glm::vec3(1.5f));
 			ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-			ecs.addComponent<MeshComponent>(bunny, gltfScene.mMeshNodes[0].mMeshHandle);
-			ecs.addComponent<BoundingBoxComponent>(bunny, gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax);
+			ecs.addComponent<MeshComponent>(bunny, HashedString("sphere"));// gltfScene.mMeshNodes[0].mMeshHandle);
+			//ecs.addComponent<BoundingBoxComponent>(bunny, gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax);
 			ecs.addComponent<PhongShaderComponent>(bunny);
 			ecs.addComponent<OpaqueComponent>(bunny);
 			auto material = ecs.addComponent<MaterialComponent>(bunny);

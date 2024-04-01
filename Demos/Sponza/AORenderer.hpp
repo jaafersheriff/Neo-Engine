@@ -18,7 +18,7 @@ using namespace neo;
 namespace Sponza {
 
 	namespace {
-		void _generateKernel(const neo::TextureResourceManager& textureManager, HashedString id, uint32_t size) {
+		TextureHandle _generateKernel(const neo::TextureResourceManager& textureManager, HashedString id, uint32_t size) {
 			std::vector<float> kernel;
 			for (unsigned i = 0; i < size; i++) {
 				glm::vec3 sample(
@@ -50,10 +50,10 @@ namespace Sponza {
 			builder.mFormat.mType = types::ByteFormats::UnsignedByte;
 			builder.mDimensions = glm::uvec3(size, 0, 0);
 			builder.mData = reinterpret_cast<uint8_t*>(kernel.data());
-			NEO_UNUSED(textureManager.asyncLoad(id, builder));
+			return textureManager.asyncLoad(id, builder);
 		}
 
-		void _generateNoise(const neo::TextureResourceManager& textureManager, HashedString id, uint32_t dim) {
+		TextureHandle _generateNoise(const neo::TextureResourceManager& textureManager, HashedString id, uint32_t dim) {
 			std::vector<float> noise;
 			noise.resize(dim * dim * 3);
 			for (unsigned i = 0; i < dim * dim * 3; i += 3) {
@@ -77,19 +77,19 @@ namespace Sponza {
 			};
 			builder.mDimensions = glm::uvec3(dim, dim, 0);
 			builder.mData = reinterpret_cast<uint8_t*>(noise.data());
-			NEO_UNUSED(textureManager.asyncLoad(id, builder));
+			return textureManager.asyncLoad(id, builder);
 		}
 	}
 
 	TextureHandle drawAO(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
 		TRACY_GPU();
-		HashedString aoKernelHandle("aoKernel");
-		HashedString aoNoiseHandle("aoNoise");
-		if (!resourceManagers.mTextureManager.isValid(aoKernelHandle)) {
-			_generateKernel(resourceManagers.mTextureManager, aoKernelHandle, 8);
+		static TextureHandle aoKernel = NEO_INVALID_HANDLE;
+		static TextureHandle aoNoise = NEO_INVALID_HANDLE;
+		if (!resourceManagers.mTextureManager.isValid(aoKernel)) {
+			aoKernel = _generateKernel(resourceManagers.mTextureManager, "aoKernel", 8);
 		}
-		if (!resourceManagers.mTextureManager.isValid(aoNoiseHandle)) {
-			_generateNoise(resourceManagers.mTextureManager, aoNoiseHandle, 4);
+		if (!resourceManagers.mTextureManager.isValid(aoNoise)) {
+			aoNoise = _generateNoise(resourceManagers.mTextureManager, "aoNoise", 4);
 		}
 
 		// Do base AO at half res
@@ -156,8 +156,8 @@ namespace Sponza {
 				resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 
 				// bind kernel and noise
-				resolvedShader.bindTexture("noise", resourceManagers.mTextureManager.resolve(aoKernelHandle));
-				resolvedShader.bindTexture("kernel", resourceManagers.mTextureManager.resolve(aoNoiseHandle));
+				resolvedShader.bindTexture("noise", resourceManagers.mTextureManager.resolve(aoKernel));
+				resolvedShader.bindTexture("kernel", resourceManagers.mTextureManager.resolve(aoNoise));
 
 				const auto P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
 				resolvedShader.bindUniform("P", P);
