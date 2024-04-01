@@ -1,16 +1,11 @@
 #pragma once
 
-#include "Texture.hpp"
-#include "GLHelper.hpp"
-
-#include "Util/Util.hpp"
-#include "Util/Profiler.hpp"
-
 #include "Renderer/Types.hpp"
 
 #include "ResourceManager/TextureResourceManager.hpp"
 
 #include <vector>
+#include <optional>
 
 namespace neo {
 
@@ -24,7 +19,7 @@ namespace neo {
 		void bind() const;
 		void clear(glm::vec4 clearColor, types::framebuffer::AttachmentBits clearFlags) const;
 
-		void init();
+		void init(std::optional<std::string> debugName = std::nullopt);
 		void disableDraw() const;
 		void disableRead() const;
 

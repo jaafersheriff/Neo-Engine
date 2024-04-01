@@ -110,7 +110,7 @@ namespace neo {
 		resetState();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		auto defaultFboHandle = resourceManagers.mFramebufferManager.asyncLoad(
+		mDefaultFBOHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			resourceManagers.mTextureManager,
 			"backbuffer",
 			FramebufferBuilder{}
@@ -126,12 +126,11 @@ namespace neo {
 				{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
 			})
 		);
-
-		if (!resourceManagers.mFramebufferManager.isValid(defaultFboHandle)) {
+		if (!resourceManagers.mFramebufferManager.isValid(mDefaultFBOHandle)) {
 			return;
 		}
 
-		auto& defaultFbo = resourceManagers.mFramebufferManager.resolve(defaultFboHandle);
+		auto& defaultFbo = resourceManagers.mFramebufferManager.resolve(mDefaultFBOHandle);
 		{
 			TRACY_GPUN("Draw Demo");
 			demo->render(resourceManagers, ecs, defaultFbo);
@@ -166,8 +165,8 @@ namespace neo {
 		ServiceLocator<ImGuiManager>::ref().updateViewport();
 		glm::vec2 viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
 		if (viewportSize.x != 0 && viewportSize.y != 0) {
-			if (resourceManager.mFramebufferManager.isValid(HashedString("backbuffer"))) {
-				auto& defaultFbo = resourceManager.mFramebufferManager.resolve(HashedString("backbuffer"));
+			if (resourceManager.mFramebufferManager.isValid(mDefaultFBOHandle)) {
+				auto& defaultFbo = resourceManager.mFramebufferManager.resolve(mDefaultFBOHandle);
 				auto& defaultFboColor = resourceManager.mTextureManager.resolve(defaultFbo.mTextures[0]);
 #pragma warning(push)
 #pragma warning(disable: 4312)

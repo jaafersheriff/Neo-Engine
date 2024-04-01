@@ -44,10 +44,11 @@ namespace neo {
 
 			std::shared_ptr<PooledFramebuffer> load(const FramebufferQueueItem& details, const TextureResourceManager& manager) const {
 				std::shared_ptr<PooledFramebuffer> framebuffer = std::make_shared<PooledFramebuffer>();
-				framebuffer->mFramebuffer.init();
+				framebuffer->mFramebuffer.init(details.mDebugName);
 				framebuffer->mFrameCount = 1;
-				framebuffer->mFullyOwned = details.second;
-				for (auto& texHandle : details.first) {
+				framebuffer->mExternallyOwned = details.mExternallyOwned;
+				framebuffer->mName = details.mDebugName;
+				for (auto& texHandle : details.mTexIDs) {
 					framebuffer->mFramebuffer.attachTexture(texHandle, manager.resolve(texHandle));
 				}
 				if (framebuffer->mFramebuffer.mColorAttachments) {
@@ -93,7 +94,11 @@ namespace neo {
 			}
 			}, framebufferDetails);
 
-		mQueue.emplace(dstId, std::make_pair(texIds, owned));
+		mQueue.emplace(dstId, FramebufferQueueItem{
+			texIds,
+			owned,
+			std::string(id)
+		});
 
 		return dstId;
 	}
@@ -130,7 +135,7 @@ namespace neo {
 		mCache.each([&](FramebufferHandle id, PooledFramebuffer& pfb) {
 			if (pfb.mFrameCount == 0) {
 				discardQueue.emplace_back(id);
-				if (!pfb.mFullyOwned) {
+				if (!pfb.mExternallyOwned) {
 					for (auto& texId : pfb.mFramebuffer.mTextures) {
 						textureManager.discard(texId);
 					}
@@ -159,7 +164,7 @@ namespace neo {
 			mCache.each([&](PooledFramebuffer& pfb) {
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
-				ImGui::Text(pfb.mFullyOwned ? "%s" : "*%s", pfb.mName.has_value() ? pfb.mName->c_str() : "");
+				ImGui::Text(pfb.mExternallyOwned ? "%s" : "*%s", pfb.mName.c_str());
 				if (textureManager.isValid(pfb.mFramebuffer.mTextures[0])) {
 					auto& firstTex = textureManager.resolve(pfb.mFramebuffer.mTextures[0]);
 					ImGui::Text("[%d, %d]", firstTex.mWidth, firstTex.mHeight);
@@ -181,7 +186,7 @@ namespace neo {
 	void FramebufferResourceManager::clear(const TextureResourceManager& textureManager) {
 		mQueue.clear();
 		mCache.each([&textureManager](PooledFramebuffer& framebuffer) {
-			if (framebuffer.mFullyOwned) {
+			if (framebuffer.mExternallyOwned) {
 				for (auto& textureHandle : framebuffer.mFramebuffer.mTextures) {
 					textureManager.discard(textureHandle);
 				}

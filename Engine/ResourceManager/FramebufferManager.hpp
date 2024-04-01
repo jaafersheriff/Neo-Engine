@@ -38,14 +38,18 @@ namespace neo {
 		}
 	};
 	using FramebufferLoadDetails = std::variant<FramebufferBuilder, std::vector<TextureHandle>>;
-	using FramebufferQueueItem = std::pair<std::vector<TextureHandle>, bool>;
+	struct FramebufferQueueItem {
+		std::vector<TextureHandle> mTexIDs;
+		bool mExternallyOwned = false;
+		std::string mDebugName;
+	};
 
 	struct PooledFramebuffer {
 		Framebuffer mFramebuffer;
 		uint8_t mFrameCount = 0;
 		bool mUsedThisFrame = false;
-		std::optional<std::string> mName = std::nullopt;
-		bool mFullyOwned;
+		std::string mName = "";
+		bool mExternallyOwned = false;
 	};
 
 	using FramebufferHandle = entt::id_type;
@@ -62,14 +66,6 @@ namespace neo {
 
 		bool isQueued(FramebufferHandle id) const {
 			return mQueue.find(id) != mQueue.end();
-		}
-
-		Framebuffer& resolve(HashedString id) {
-			return _resolveFinal(id);
-		}
-
-		const Framebuffer& resolve(HashedString id) const {
-			return _resolveFinal(id);
 		}
 
 		const Framebuffer& resolve(FramebufferHandle id) const {
