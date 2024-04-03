@@ -33,6 +33,10 @@ namespace neo {
 
 	template<typename ResourceType>
 	struct BackedResource {
+		template<typename... Args>
+		BackedResource(Args... args)
+			: mResource(std::forward<Args>(args)...)
+		{}
 		ResourceType mResource;
 		std::optional<std::string> mDebugName;
 	};
@@ -122,7 +126,7 @@ namespace neo {
 				return const_cast<ResourceType&>(handle.get().mResource);
 			}
 			NEO_LOG_W("Invalid resource requested! Did you check for validity?");
-			return *mFallback;
+			return mFallback->mResource;
 		}
 	};
 }

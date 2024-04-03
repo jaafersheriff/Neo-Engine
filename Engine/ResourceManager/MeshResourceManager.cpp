@@ -11,9 +11,7 @@ namespace neo {
 	struct MeshLoader final : entt::resource_loader<MeshLoader, BackedResource<Mesh>> {
 
 		std::shared_ptr<BackedResource<Mesh>> load(MeshLoadDetails meshDetails, std::optional<std::string> debugName) const {
-			std::shared_ptr<BackedResource<Mesh>> meshResource = std::make_shared<BackedResource<Mesh>>();
-			meshResource->mDebugName = debugName;
-			meshResource->mResource = Mesh(meshDetails.mPrimtive);
+			std::shared_ptr<BackedResource<Mesh>> meshResource = std::make_shared<BackedResource<Mesh>>(meshDetails.mPrimtive);
 			meshResource->mResource.init();
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
 				meshResource->mResource.addVertexBuffer(
@@ -36,6 +34,7 @@ namespace neo {
 					meshDetails.mElementBuffer->mData
 				);
 			}
+			meshResource->mDebugName = debugName;
 			return meshResource;
 		}
 	};
