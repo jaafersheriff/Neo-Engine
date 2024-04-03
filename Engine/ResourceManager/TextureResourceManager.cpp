@@ -51,9 +51,9 @@ namespace neo {
 			}
 		}
 
-		struct TextureLoader final : entt::resource_loader<TextureLoader, Texture> {
+		struct TextureLoader final : entt::resource_loader<TextureLoader, BackedResource<Texture>> {
 
-			std::shared_ptr<Texture> load(FileLoadDetails& fileDetails, std::string debugName) const {
+			std::shared_ptr<BackedResource<Texture>> load(FileLoadDetails& fileDetails, std::optional<std::string> debugName) const {
 				if (fileDetails.mFilePaths.size() == 6 && fileDetails.mFormat.mTarget != types::texture::Target::TextureCube) {
 					NEO_LOG_E("Cubemap format mismatch!");
 					fileDetails.mFilePaths.erase(fileDetails.mFilePaths.begin(), fileDetails.mFilePaths.begin() + 5);
@@ -105,19 +105,20 @@ namespace neo {
 						NEO_FAIL("How u do dis");
 					}
 
-					auto texture = load(details, debugName);
-					return texture;
+					return load(details, debugName);
 				}
 				return nullptr;
 			}
 
-			std::shared_ptr<Texture> load(TextureBuilder textureDetails, std::string debugName) const {
-				std::shared_ptr<Texture> texture = std::make_shared<Texture>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.mData, debugName);
+			std::shared_ptr<BackedResource<Texture>> load(TextureBuilder textureDetails, std::optional<std::string> debugName) const {
+				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>();
+				textureResource->mDebugName = debugName;
+				textureResource->mResource = Texture(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.mData);
 				if (textureDetails.mFormat.mFilter.usesMipFilter()) {
-					texture->genMips();
+					textureResource->mResource.genMips();
 				}
 
-				return texture;
+				return textureResource;
 			}
 		};
 
@@ -138,11 +139,15 @@ namespace neo {
 		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF, /**/ 0xFF, 0xFF, 0xFF, 0xFF,
 		                   0xFF, 0xFF, 0xFF, 0xFF, /**/ 0x00, 0x00, 0x00, 0xFF
 		};
-		mFallback = std::make_shared<Texture>(TextureFormat{}, glm::u16vec2(2, 2), data);
+		mFallback = TextureLoader{}.load(TextureBuilder{
+			TextureFormat{},
+			glm::u16vec3(2, 2, 0),
+			data
+		}, std::nullopt);
 	}
 
 	TextureResourceManager::~TextureResourceManager() {
-		mFallback->destroy();
+		mFallback->mResource.destroy();
 		mFallback.reset();
 	}
 
@@ -206,8 +211,8 @@ namespace neo {
 
 	void TextureResourceManager::_clearImpl() {
 		mQueue.clear();
-		mCache.each([](Texture& texture) {
-			texture.destroy();
+		mCache.each([](BackedResource<Texture>& texture) {
+			texture.mResource.destroy();
 		});
 		mCache.clear();
 	}
@@ -217,10 +222,17 @@ namespace neo {
 	}
 
 	void TextureResourceManager::imguiEditor(std::function<void(const Texture&)> textureFunc) {
-		mCache.each([&](TextureHandle handle, Texture& texture) {
-			if (ImGui::TreeNode(&handle, "TODO - debug names %d", handle)) {
-				ImGui::Text("[%d, %d]", texture.mWidth, texture.mHeight);
-				textureFunc(texture);
+		mCache.each([&](auto handle, BackedResource<Texture>& textureResource) {
+			bool node = false;
+			if (textureResource.mDebugName.has_value()) {
+				node |= ImGui::TreeNode(&handle, "%s", textureResource.mDebugName->c_str());
+			}
+			else {
+				node |= ImGui::TreeNode(&handle, "%d", handle);
+			}
+			if (node) {
+				ImGui::Text("[%d, %d]", textureResource.mResource.mWidth, textureResource.mResource.mHeight);
+				textureFunc(textureResource.mResource);
 				ImGui::TreePop();
 			}
 		});

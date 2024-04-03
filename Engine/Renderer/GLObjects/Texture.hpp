@@ -71,6 +71,7 @@ namespace neo {
 	class Texture {
 	public:
 
+		Texture() = default;
 		Texture(TextureFormat format, uint16_t dimension, const void* data = nullptr);
 		Texture(TextureFormat format, glm::u16vec2 dimension, const void* data = nullptr);
 		Texture(TextureFormat format, glm::u16vec3 dimension, const void* data = nullptr);
@@ -80,7 +81,7 @@ namespace neo {
 		void destroy();
 
 		uint32_t mTextureID = 0;
-		const TextureFormat mFormat;
+		TextureFormat mFormat;
 
 		uint16_t mWidth = 1;
 		uint16_t mHeight = 1;
