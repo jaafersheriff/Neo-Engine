@@ -24,12 +24,12 @@ namespace neo {
 				using T = std::decay_t<decltype(arg)>;
 				if constexpr (std::is_same_v<T, FramebufferBuilder>) {
 					for (auto& format : arg.mFormats) {
-						seed = swizzleTextureId(seed, format, arg.mSize);
+						seed = TextureHandle(swizzleTextureId(seed, format, arg.mSize)).mHandle;
 					}
 				}
 				else if constexpr (std::is_same_v<T, std::vector<TextureHandle>>) {
 					for (auto& handle : arg) {
-						seed ^= static_cast<uint32_t>(handle) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+						seed ^= static_cast<uint32_t>(handle.mHandle) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 					}
 				}
 				else {

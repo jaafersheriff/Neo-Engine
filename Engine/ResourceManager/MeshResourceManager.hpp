@@ -30,19 +30,19 @@ namespace neo {
 		std::unordered_map<types::mesh::VertexType, VertexBuffer> mVertexBuffers;
 		std::optional<ElementBuffer> mElementBuffer;
 	};
+	using MeshHandle = ResourceHandle<Mesh>;
 
-	using MeshHandle = entt::id_type;
-
-	class MeshResourceManager final : public ResourceManagerInterface<MeshResourceManager, MeshHandle, Mesh, MeshLoadDetails> {
+	class MeshResourceManager final : public ResourceManagerInterface<MeshResourceManager, Mesh, MeshLoadDetails> {
 		friend ResourceManagerInterface;
 	public:
+
 		MeshResourceManager();
 		~MeshResourceManager();
 
 		void imguiEditor();
 
 	protected:
-		[[nodiscard]] MeshHandle _asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, std::string debugName) const;
+		[[nodiscard]] MeshHandle _asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, std::optional<std::string> debugName) const;
 		void _clearImpl();
 		void _tickImpl();
 

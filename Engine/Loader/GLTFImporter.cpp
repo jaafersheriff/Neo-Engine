@@ -202,7 +202,7 @@ namespace {
 		}
 	}
 
-	neo::TextureHandle _loadTexture(neo::TextureResourceManager& textureManager, const tinygltf::Model& model, int index, int texCoord) {
+	neo::TextureResourceManager::TextureHandle _loadTexture(neo::TextureResourceManager& textureManager, const tinygltf::Model& model, int index, int texCoord) {
 		using namespace neo; 
 
 		if (index == -1) {
@@ -220,7 +220,7 @@ namespace {
 		}
 
 		if (!image.uri.empty()) {
-			HashedString textureHandle(image.uri.c_str());
+			TextureResourceManager::TextureHandle textureHandle(HashedString(image.uri.c_str()));
 			if (textureManager.isValid(textureHandle) || textureManager.isQueued(textureHandle)) {
 				NEO_LOG_V("Texture %s is already loaded -- skipping", image.uri.c_str());
 				return textureHandle;
@@ -390,7 +390,7 @@ namespace {
 				name = ss.str();
 			}
 			NEO_LOG_I("Loaded mesh %s", name.c_str());
-			outNode.mMeshHandle = resourceManagers.mMeshManager.asyncLoad(HashedString(name.c_str()), std::move(builder));
+			outNode.mMeshHandle = resourceManagers.mMeshManager.asyncLoad(HashedString(name.c_str()), builder);
 
 			if (gltfMesh.material > -1) {
 				auto& material = model.materials[gltfMesh.material];
