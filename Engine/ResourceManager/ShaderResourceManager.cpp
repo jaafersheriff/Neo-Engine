@@ -9,9 +9,10 @@
 #include <imgui.h>
 
 namespace neo {
-	struct ShaderLoader final : entt::resource_loader<ShaderLoader, SourceShader> {
+	struct ShaderLoader final : entt::resource_loader<ShaderLoader, BackedResource<SourceShader>> {
 
-		std::shared_ptr<SourceShader> load(const ShaderLoadDetails& shaderDetails, const std::string& name) const {
+		std::shared_ptr<BackedResource<SourceShader>> load(const ShaderLoadDetails& shaderDetails, std::optional<std::string> debugName) const {
+			NEO_ASSERT(debugName.has_value(), "Shaders need to come with a name please");
 			return std::visit([&](auto&& arg) {
 				using T = std::decay_t<decltype(arg)>;
 				if constexpr (std::is_same_v<T, SourceShader::ConstructionArgs>) {
@@ -19,12 +20,12 @@ namespace neo {
 					for (auto&&[type, filePath] : arg) {
 						shaderCode.emplace(type, Loader::loadFileString(filePath));
 					}
-					auto result = std::make_shared<SourceShader>(name.c_str(), shaderCode);
-					result->mConstructionArgs = arg;
+					auto result = std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
+					result->mResource.mConstructionArgs = arg;
 					return result;
 				}
 				else if constexpr (std::is_same_v<T, SourceShader::ShaderCode>) {
-					return std::make_shared<SourceShader>(name.c_str(), arg);
+					return std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), arg);
 				}
 				else {
 					static_assert(always_false_v<T>, "non-exhaustive visitor!");
@@ -36,7 +37,7 @@ namespace neo {
 	};
 
 	ShaderResourceManager::ShaderResourceManager() {
-		mFallback = std::make_shared<SourceShader>("Dummy", SourceShader::ShaderCode{
+		mFallback = ShaderLoader{}.load(SourceShader::ShaderCode{
 			{ShaderStage::VERTEX, 
 				R"(
 					void main() {
@@ -50,11 +51,11 @@ namespace neo {
 						color = vec4(0,0,0,0);
 					}
 				)"}
-		});
+		}, "Dummy");
 	}
 
 	ShaderResourceManager::~ShaderResourceManager() {
-		mFallback->destroy();
+		mFallback->mResource.destroy();
 		mFallback.reset();
 	}
 
@@ -83,7 +84,7 @@ namespace neo {
 
 	void ShaderResourceManager::_clearImpl() {
 		mQueue.clear();
-		mCache.each([](Resource_Internal& resource) {
+		mCache.each([](BackedResource<SourceShader>& resource) {
 			resource.mResource.destroy();
 		});
 		mCache.clear();
@@ -91,7 +92,7 @@ namespace neo {
 
 	void ShaderResourceManager::imguiEditor() {
 		std::optional<entt::id_type> destroyHandle;
-		mCache.each([&](entt::id_type enttId, Resource_Internal& resource) {
+		mCache.each([&](entt::id_type enttId, BackedResource<SourceShader>&  resource) {
 			auto& shader = resource.mResource;
 			if (ImGui::TreeNode(shader.mName.c_str())) {
 				if (shader.mConstructionArgs && ImGui::Button("Reload all")) {

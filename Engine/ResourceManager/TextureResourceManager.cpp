@@ -111,9 +111,8 @@ namespace neo {
 			}
 
 			std::shared_ptr<BackedResource<Texture>> load(TextureBuilder textureDetails, std::optional<std::string> debugName) const {
-				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>();
+				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.mData);
 				textureResource->mDebugName = debugName;
-				textureResource->mResource = Texture(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.mData);
 				if (textureDetails.mFormat.mFilter.usesMipFilter()) {
 					textureResource->mResource.genMips();
 				}
