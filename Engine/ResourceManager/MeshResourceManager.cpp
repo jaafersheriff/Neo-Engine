@@ -8,13 +8,15 @@
 
 namespace neo {
 
-	struct MeshLoader final : entt::resource_loader<MeshLoader, Mesh> {
+	struct MeshLoader final : entt::resource_loader<MeshLoader, BackedResource<Mesh>> {
 
-		std::shared_ptr<Mesh> load(MeshLoadDetails meshDetails) const {
-			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meshDetails.mPrimtive);
-			mesh->init();
+		std::shared_ptr<BackedResource<Mesh>> load(MeshLoadDetails meshDetails, std::optional<std::string> debugName) const {
+			std::shared_ptr<BackedResource<Mesh>> meshResource = std::make_shared<BackedResource<Mesh>>();
+			meshResource->mDebugName = debugName;
+			meshResource->mResource = Mesh(meshDetails.mPrimtive);
+			meshResource->mResource.init();
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
-				mesh->addVertexBuffer(
+				meshResource->mResource.addVertexBuffer(
 					type,
 					buffer.mComponents,
 					buffer.mStride,
@@ -27,20 +29,20 @@ namespace neo {
 				);
 			}
 			if (meshDetails.mElementBuffer) {
-				mesh->addElementBuffer(
+				meshResource->mResource.addElementBuffer(
 					meshDetails.mElementBuffer->mCount,
 					meshDetails.mElementBuffer->mFormat,
 					meshDetails.mElementBuffer->mByteSize,
 					meshDetails.mElementBuffer->mData
 				);
 			}
-			return mesh;
+			return meshResource;
 		}
 	};
 
 	MeshResourceManager::MeshResourceManager() {
 		auto cubeDetails = prefabs::generateCube();
-		mFallback = MeshLoader{}.load(*cubeDetails);
+		mFallback = MeshLoader{}.load(*cubeDetails, std::nullopt);
 		for (auto&& [type, buffer] : cubeDetails->mVertexBuffers) {
 			free(const_cast<uint8_t*>(buffer.mData));
 		}
@@ -50,12 +52,14 @@ namespace neo {
 	}
 
 	MeshResourceManager::~MeshResourceManager() {
-		mFallback->destroy();
+		mFallback->mResource.destroy();
 		mFallback.reset();
 	}
 
-	[[nodiscard]] MeshHandle MeshResourceManager::_asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, std::string debugName) const {
-		NEO_LOG_V("Loading mesh %s", debugName.c_str());
+	[[nodiscard]] MeshHandle MeshResourceManager::_asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, std::optional<std::string> debugName) const {
+		if (debugName.has_value()) {
+			NEO_LOG_V("Loading mesh %s", debugName->c_str());
+		}
 
 		// Copy data so this can be ticked next frame
 		MeshLoadDetails copy = meshDetails;
@@ -70,7 +74,7 @@ namespace neo {
 			memcpy(const_cast<uint8_t*>(copy.mElementBuffer->mData), meshDetails.mElementBuffer->mData, meshDetails.mElementBuffer->mByteSize);
 		}
 
-		mQueue.emplace(id, ResourceLoadDetails_Internal{ copy, debugName });
+		mQueue.emplace_back(ResourceLoadDetails_Internal{ id,  copy, debugName });
 
 		return id;
 	}
@@ -78,12 +82,12 @@ namespace neo {
 	void MeshResourceManager::_tickImpl() {
 		TRACY_ZONE();
 
-		std::map<MeshHandle, ResourceLoadDetails_Internal> swapQueue = {};
+		std::vector<ResourceLoadDetails_Internal> swapQueue = {};
 		std::swap(mQueue, swapQueue);
 		mQueue.clear();
 
-		for (auto&& [handle, details] : swapQueue) {
-			mCache.load<MeshLoader>(handle, details.mLoadDetails);
+		for (auto& details : swapQueue) {
+			mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
 			for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
 				free(const_cast<uint8_t*>(buffer.mData));
 			}
@@ -95,16 +99,21 @@ namespace neo {
 
 	void MeshResourceManager::_clearImpl() {
 		mQueue.clear();
-		mCache.each([](Mesh& mesh) {
-			mesh.destroy();
+		mCache.each([](BackedResource<Mesh>& mesh) {
+			mesh.mResource.destroy();
 		});
 		mCache.clear();
 	}
 
 	void MeshResourceManager::imguiEditor() {
-		mCache.each([](const entt::id_type id, const Mesh& mesh) {
+		mCache.each([](const MeshHandle id, const BackedResource<Mesh>& mesh) {
 			NEO_UNUSED(mesh);
-			ImGui::Text("TODO - debug names %d", id);
+			if (mesh.mDebugName.has_value()) {
+				ImGui::Text(mesh.mDebugName->c_str());
+			}
+			else {
+				ImGui::Text("%d", id.mHandle);
+			}
 		});
 	}
 }

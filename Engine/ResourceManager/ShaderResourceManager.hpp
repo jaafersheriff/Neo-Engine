@@ -11,11 +11,12 @@ namespace neo {
 	class ResourceManagers;
 
 	using ShaderLoadDetails = std::variant<SourceShader::ConstructionArgs, SourceShader::ShaderCode>;
-	using ShaderHandle = entt::id_type;
 
-	class ShaderResourceManager final : public ResourceManagerInterface<ShaderResourceManager, ShaderHandle, SourceShader, ShaderLoadDetails> {
+	class ShaderResourceManager final : public ResourceManagerInterface<ShaderResourceManager, SourceShader, ShaderLoadDetails> {
 		friend ResourceManagerInterface;
 	public:
+		using ShaderHandle = ResourceHandle<SourceShader>;
+
 		ShaderResourceManager();
 		~ShaderResourceManager();
 
@@ -23,7 +24,7 @@ namespace neo {
 		void imguiEditor();
 
 	protected:
-		[[nodiscard]] ShaderHandle _asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, std::string debugName) const;
+		[[nodiscard]] ShaderHandle _asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, std::optional<std::string> debugName) const;
 		void _clearImpl();
 		void _tickImpl();
 

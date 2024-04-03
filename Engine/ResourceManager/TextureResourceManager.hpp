@@ -38,10 +38,10 @@ namespace neo {
 		TextureFormat mFormat;
 	};
 
-	using TextureHandle = entt::id_type;
 	using TextureLoadDetails = std::variant<TextureBuilder, FileLoadDetails>;
 
-	class TextureResourceManager final : public ResourceManagerInterface<TextureResourceManager, TextureHandle, Texture, TextureLoadDetails> {
+	using TextureHandle = ResourceHandle<Texture>;
+	class TextureResourceManager final : public ResourceManagerInterface<TextureResourceManager, Texture, TextureLoadDetails> {
 		friend ResourceManagerInterface;
 	public:
 
@@ -50,7 +50,7 @@ namespace neo {
 		void imguiEditor(std::function<void(const Texture&)> textureFunc);
 
 	protected:
-		[[nodiscard]] TextureHandle _asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, std::string debugName) const;
+		[[nodiscard]] TextureHandle _asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, std::optional<std::string> debugName) const;
 		void _clearImpl();
 		void _tickImpl();
 		void _discardImpl(TextureHandle id);

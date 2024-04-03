@@ -53,7 +53,7 @@ namespace neo {
 
 		struct TextureLoader final : entt::resource_loader<TextureLoader, Texture> {
 
-			std::shared_ptr<Texture> load(FileLoadDetails& fileDetails) const {
+			std::shared_ptr<Texture> load(FileLoadDetails& fileDetails, std::string debugName) const {
 				if (fileDetails.mFilePaths.size() == 6 && fileDetails.mFormat.mTarget != types::texture::Target::TextureCube) {
 					NEO_LOG_E("Cubemap format mismatch!");
 					fileDetails.mFilePaths.erase(fileDetails.mFilePaths.begin(), fileDetails.mFilePaths.begin() + 5);
@@ -105,14 +105,14 @@ namespace neo {
 						NEO_FAIL("How u do dis");
 					}
 
-					auto texture = load(details);
+					auto texture = load(details, debugName);
 					return texture;
 				}
 				return nullptr;
 			}
 
-			std::shared_ptr<Texture> load(TextureBuilder textureDetails) const {
-				std::shared_ptr<Texture> texture = std::make_shared<Texture>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.mData);
+			std::shared_ptr<Texture> load(TextureBuilder textureDetails, std::string debugName) const {
+				std::shared_ptr<Texture> texture = std::make_shared<Texture>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.mData, debugName);
 				if (textureDetails.mFormat.mFilter.usesMipFilter()) {
 					texture->genMips();
 				}
@@ -146,7 +146,7 @@ namespace neo {
 		mFallback.reset();
 	}
 
-	[[nodiscard]] TextureHandle TextureResourceManager::_asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, std::string debugName) const {
+	[[nodiscard]] TextureHandle TextureResourceManager::_asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, std::optional<std::string> debugName) const {
 		NEO_UNUSED(debugName);
 		std::visit([&](auto&& arg) {
 			using T = std::decay_t<decltype(arg)>;
@@ -163,13 +163,13 @@ namespace neo {
 					copy.mData = static_cast<uint8_t*>(malloc(byteSize));
 					memcpy(const_cast<uint8_t*>(copy.mData), arg.mData, byteSize);
 				}
-				mQueue.emplace(id, ResourceLoadDetails_Internal{ copy, debugName });
+				mQueue.emplace_back(ResourceLoadDetails_Internal{ id, copy, debugName });
 			}
 			else if constexpr (std::is_same_v<T, FileLoadDetails>) {
 				NEO_ASSERT(arg.mFilePaths.size() == 1 || arg.mFilePaths.size() == 6, "Invalid file path count when loading texture");
 
 				// Can safely copy into queue
-				mQueue.emplace(id, ResourceLoadDetails_Internal{ arg, debugName });
+				mQueue.emplace_back(ResourceLoadDetails_Internal{ id, arg, debugName });
 			}
 			else {
 				static_assert(always_false_v<T>, "non-exhaustive visitor!");
@@ -183,24 +183,24 @@ namespace neo {
 	void TextureResourceManager::_tickImpl() {
 		TRACY_ZONE();
 
-		std::map<TextureHandle, ResourceLoadDetails_Internal> swapQueue;
+		std::vector<ResourceLoadDetails_Internal> swapQueue;
 		std::swap(mQueue, swapQueue);
 		mQueue.clear();
 
-		for (auto&& [id, details] : swapQueue) {
+		for (auto& loadDetails : swapQueue) {
 			std::visit([&](auto&& arg) {
 				using T = std::decay_t<decltype(arg)>;
 				if constexpr (std::is_same_v<T, TextureBuilder>) {
-					mCache.load<TextureLoader>(id, arg);
+					mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
 					free(const_cast<uint8_t*>(arg.mData));
 				}
 				else if constexpr (std::is_same_v<T, FileLoadDetails>) {
-					mCache.load<TextureLoader>(id, arg);
+					mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
 				}
 				else {
 					static_assert(always_false_v<T>, "non-exhaustive visitor!");
 				}
-			}, details.mLoadDetails);
+			}, loadDetails.mLoadDetails);
 		}
 	}
 
@@ -213,7 +213,7 @@ namespace neo {
 	}
 
 	void TextureResourceManager::_discardImpl(TextureHandle id) {
-		mCache.discard(id);
+		mCache.discard(id.mHandle);
 	}
 
 	void TextureResourceManager::imguiEditor(std::function<void(const Texture&)> textureFunc) {

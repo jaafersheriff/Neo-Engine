@@ -11,7 +11,7 @@
 namespace neo {
 	struct ShaderLoader final : entt::resource_loader<ShaderLoader, SourceShader> {
 
-		std::shared_ptr<SourceShader> load(const std::string& name, const ShaderLoadDetails& shaderDetails) const {
+		std::shared_ptr<SourceShader> load(const ShaderLoadDetails& shaderDetails, const std::string& name) const {
 			return std::visit([&](auto&& arg) {
 				using T = std::decay_t<decltype(arg)>;
 				if constexpr (std::is_same_v<T, SourceShader::ConstructionArgs>) {
@@ -64,40 +64,38 @@ namespace neo {
 		return resolved;
 	}
 
-	[[nodiscard]] ShaderHandle ShaderResourceManager::_asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, std::string debugName) const {
-		mQueue.emplace(id, ResourceLoadDetails_Internal{ shaderDetails, debugName });
+	[[nodiscard]] ShaderResourceManager::ShaderHandle ShaderResourceManager::_asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, std::optional<std::string> debugName) const {
+		mQueue.emplace_back(ResourceLoadDetails_Internal{ id, shaderDetails, debugName });
 		return id;
 	}
 
 	void ShaderResourceManager::_tickImpl() {
 		TRACY_ZONE();
 
-		std::map<ShaderHandle, ResourceLoadDetails_Internal> swapQueue = {};
+		std::vector<ResourceLoadDetails_Internal> swapQueue = {};
 		std::swap(swapQueue, mQueue);
 		mQueue.clear();
 
-		for (auto&& [handle, details] : swapQueue) {
-			mCache.load<ShaderLoader>(handle, details.mDebugName, details.mLoadDetails);
+		for (auto& loadDetails : swapQueue) {
+			mCache.load<ShaderLoader>(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
 		}
 	}
 
 	void ShaderResourceManager::_clearImpl() {
 		mQueue.clear();
-		mCache.each([](SourceShader& shader) {
-			shader.destroy();
+		mCache.each([](Resource_Internal& resource) {
+			resource.mResource.destroy();
 		});
 		mCache.clear();
 	}
 
 	void ShaderResourceManager::imguiEditor() {
-		std::optional<ShaderHandle> destroyHandle;
-		mCache.each([&](const ShaderHandle handle, SourceShader& shader) {
-			if (!isValid(handle)) {
-				return;
-			}
+		std::optional<entt::id_type> destroyHandle;
+		mCache.each([&](entt::id_type enttId, Resource_Internal& resource) {
+			auto& shader = resource.mResource;
 			if (ImGui::TreeNode(shader.mName.c_str())) {
 				if (shader.mConstructionArgs && ImGui::Button("Reload all")) {
-					destroyHandle = handle; // Can't destroy mid-each
+					destroyHandle = enttId; // Can't destroy mid-each
 					auto newId = asyncLoad(HashedString(shader.mName.c_str()), *shader.mConstructionArgs);
 					NEO_UNUSED(newId);
 				}
