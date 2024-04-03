@@ -31,16 +31,14 @@ namespace neo {
 		glm::u16vec3 mDimensions = glm::u16vec3(0);
 		const uint8_t* mData = nullptr;
 	};
-
 	// TODO - rename to something texture-specific 
 	struct FileLoadDetails {
 		std::vector<std::string> mFilePaths;
 		TextureFormat mFormat;
 	};
-
 	using TextureLoadDetails = std::variant<TextureBuilder, FileLoadDetails>;
-
 	using TextureHandle = ResourceHandle<Texture>;
+
 	class TextureResourceManager final : public ResourceManagerInterface<TextureResourceManager, Texture, TextureLoadDetails> {
 		friend ResourceManagerInterface;
 	public:
