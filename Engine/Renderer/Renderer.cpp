@@ -27,6 +27,8 @@
 #include <imgui_impl_opengl3.h>
 #include <tracy/TracyOpenGL.hpp>
 
+#include <ImGuizmo.h>
+
 namespace neo {
 
 	Renderer::Renderer(int GLMajor, int GLMinor) {
@@ -160,6 +162,13 @@ namespace neo {
 		
 		/* Render imgui */
 		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+			{
+				TRACY_ZONEN("ImGuizmo::BeginFrame");
+				//ImGuizmo::BeginFrame();
+				ImGuizmo::SetOrthographic(false);
+				ImGuizmo::SetDrawlist();
+			}
+
 			TRACY_GPUN("ImGuiManager.render");
 			// Bind backbuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -185,6 +194,27 @@ namespace neo {
 			ImGui::Image(reinterpret_cast<ImTextureID>(mDefaultFBO->mTextures[0]->mTextureID), { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
 #pragma warning(pop)
 		}
+		ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
+		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		glm::mat4 V = cameraSpatial.getView();
+		glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+		ecs.getView<BoundingBoxComponent, SpatialComponent>().each([&](BoundingBoxComponent& /* TODO - replace w/ selected comp */, SpatialComponent& spatial) {
+			glm::mat4 transform = spatial.getModelMatrix();
+			auto m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			ImGuizmo::Manipulate(
+				&V[0][0],
+				&P[0][0],
+				static_cast<ImGuizmo::OPERATION>(m_GizmoType),
+				ImGuizmo::LOCAL,
+				&transform[0][0],
+				nullptr,
+				nullptr);
+
+			if (ImGuizmo::IsUsing()) {
+				spatial.setModelMatrix(transform);
+			}
+			});
+
 		ImGui::End();
 
 		ImGui::Begin("Renderer");

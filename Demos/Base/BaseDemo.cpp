@@ -87,7 +87,7 @@ namespace Base {
 			ecs.addComponent<TagComponent>(plane, "Grid");
 			ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
 			ecs.addComponent<MeshComponent>(plane, Library::getMesh("quad"));
-			ecs.addComponent<BoundingBoxComponent>(plane, Library::getMesh("quad")->mMin, Library::getMesh("quad")->mMax);
+			// ecs.addComponent<BoundingBoxComponent>(plane, Library::getMesh("quad")->mMin, Library::getMesh("quad")->mMax);
 			ecs.addComponent<PhongShaderComponent>(plane);
 			ecs.addComponent<AlphaTestComponent>(plane);
 			auto material = ecs.addComponent<MaterialComponent>(plane);
@@ -101,26 +101,7 @@ namespace Base {
 	}
 
 	void Demo::imGuiEditor(ECS& ecs) {
-
-		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-		glm::mat4 V = cameraSpatial.getView();
-		glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
-		ecs.getView<BoundingBoxComponent, SpatialComponent>().each([&](BoundingBoxComponent& /* TODO - replace w/ selected comp */, SpatialComponent& spatial) {
-			glm::mat4 transform = spatial.getModelMatrix();
-			auto m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-				ImGuizmo::Manipulate(
-					&V[0][0],
-					&P[0][0],
-					static_cast<ImGuizmo::OPERATION>(m_GizmoType), 
-					ImGuizmo::LOCAL, 
-					&transform[0][0],
-					nullptr, 
-					nullptr);
-
-			if (ImGuizmo::IsUsing()) {
-				spatial.setModelMatrix(transform);
-			}
-		});
+		NEO_UNUSED(ecs);
 	}
 
 	void Demo::update(ECS& ecs) {

@@ -117,12 +117,6 @@ namespace neo {
 			TRACY_ZONEN("ImGui::NewFrame");
 			ImGui::NewFrame();
 		}
-		{
-			TRACY_ZONEN("ImGuizmo::BeginFrame");
-			ImGuizmo::BeginFrame();
-			ImGuizmo::SetOrthographic(false);
-			ImGuizmo::SetDrawlist();
-		}
 
 		if (isViewportHovered()) {
 			TRACY_ZONEN("MouseMoveMessage");
