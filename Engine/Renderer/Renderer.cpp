@@ -26,8 +26,12 @@
 #include <GLFW/glfw3.h>
 #include <imgui_impl_opengl3.h>
 #include <tracy/TracyOpenGL.hpp>
-
+	
+#pragma warning( push )
+#pragma warning( disable : 4201 )
 #include <glm/gtx/matrix_major_storage.hpp>
+#include <glm/gtc/quaternion.hpp>
+#pragma warning( pop )
 
 #include <ImGuizmo.h>
 
@@ -205,7 +209,7 @@ namespace neo {
 			ImGuizmo::Manipulate(
 				&V[0][0],
 				&P[0][0],
-				ImGuizmo::OPERATION::TRANSLATE | ImGuizmo::OPERATION::SCALE,
+				ImGuizmo::OPERATION::UNIVERSAL,
 				ImGuizmo::LOCAL,
 				&transform[0][0],
 				nullptr,
@@ -216,8 +220,9 @@ namespace neo {
 				ImGuizmo::DecomposeMatrixToComponents(&transform[0][0], &translate[0], &rotate[0], &scale[0]);
 				spatial.setPosition(translate);
 				spatial.setScale(scale);
+				spatial.setOrientation(glm::mat3(glm::quat(glm::radians(rotate))));
 			}
-			});
+		});
 
 		ImGui::End();
 
