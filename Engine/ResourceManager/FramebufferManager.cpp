@@ -7,15 +7,15 @@
 
 namespace neo {
 	namespace {
-		TextureHandle swizzleTextureId(HashedString::hash_type srcId, TextureFormat format, glm::uvec2 dimension) {
-			HashedString::hash_type seed = srcId ^ dimension.x ^ dimension.y;
+		TextureHandle swizzleTextureId(FramebufferHandle srcHandle, TextureFormat format, glm::uvec2 dimension) {
+			HashedString::hash_type seed = srcHandle.mHandle ^ dimension.x ^ dimension.y;
 			seed ^= static_cast<uint32_t>(format.mInternalFormat) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mType) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mFilter.mMin) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mFilter.mMag) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mWrap.mS) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mWrap.mR) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-			return seed;
+			return TextureHandle(seed);
 		}
 
 		FramebufferHandle swizzleSrcId(HashedString id, FramebufferLoadDetails& loadDetails) {
@@ -37,23 +37,23 @@ namespace neo {
 				}
 			}, loadDetails);
 
-			return seed;
+			return FramebufferHandle(seed);
 		}
 
-		struct FramebufferLoader final : entt::resource_loader<FramebufferLoader, PooledFramebuffer> {
+		struct FramebufferLoader final : entt::resource_loader<FramebufferLoader, BackedResource<PooledFramebuffer>> {
 
-			std::shared_ptr<PooledFramebuffer> load(const FramebufferQueueItem& details, const TextureResourceManager& manager) const {
-				std::shared_ptr<PooledFramebuffer> framebuffer = std::make_shared<PooledFramebuffer>();
-				framebuffer->mFramebuffer.init(details.mDebugName);
-				framebuffer->mFrameCount = 1;
-				framebuffer->mExternallyOwned = details.mExternallyOwned;
-				framebuffer->mName = details.mDebugName;
+			std::shared_ptr<BackedResource<PooledFramebuffer>> load(const FramebufferQueueItem& details, const TextureResourceManager& manager) const {
+				std::shared_ptr<BackedResource<PooledFramebuffer>> framebuffer = std::make_shared<BackedResource<PooledFramebuffer>>();
+				framebuffer->mResource.mFramebuffer.init(details.mDebugName);
+				framebuffer->mResource.mFrameCount = 1;
+				framebuffer->mResource.mExternallyOwned = details.mExternallyOwned;
 				for (auto& texHandle : details.mTexIDs) {
-					framebuffer->mFramebuffer.attachTexture(texHandle, manager.resolve(texHandle));
+					framebuffer->mResource.mFramebuffer.attachTexture(texHandle, manager.resolve(texHandle));
 				}
-				if (framebuffer->mFramebuffer.mColorAttachments) {
-					framebuffer->mFramebuffer.initDrawBuffers();
+				if (framebuffer->mResource.mFramebuffer.mColorAttachments) {
+					framebuffer->mResource.mFramebuffer.initDrawBuffers();
 				}
+				framebuffer->mDebugName = details.mDebugName;
 
 				return framebuffer;
 			}
@@ -94,7 +94,8 @@ namespace neo {
 			}
 			}, framebufferDetails);
 
-		mQueue.emplace(dstId, FramebufferQueueItem{
+		mQueue.emplace_back(FramebufferQueueItem{
+			dstId, 
 			texIds,
 			owned,
 			std::string(id)
@@ -104,9 +105,9 @@ namespace neo {
 	}
 
 	Framebuffer& FramebufferResourceManager::_resolveFinal(FramebufferHandle id) const {
-		auto handle = mCache.handle(id);
+		auto handle = mCache.handle(id.mHandle);
 		if (handle) {
-			auto& pfb = const_cast<PooledFramebuffer&>(handle.get());
+			auto& pfb = const_cast<PooledFramebuffer&>(handle.get().mResource);
 			if (pfb.mFrameCount < 5) {
 				pfb.mFrameCount++;
 			}
@@ -123,36 +124,36 @@ namespace neo {
 		TRACY_ZONE();
 
 		// Create queue
-		std::map<FramebufferHandle, FramebufferQueueItem> swapQueue = {};
+		std::vector<FramebufferQueueItem> swapQueue = {};
 		std::swap(mQueue, swapQueue);
 		mQueue.clear();
-		for (auto&& [id, texHandles] : swapQueue) {
-			mCache.load<FramebufferLoader>(id, texHandles, textureManager);
+		for (auto& item : swapQueue) {
+			mCache.load<FramebufferLoader>(item.mHandle.mHandle, item, textureManager);
 		}
 
 		// Discard queue
 		std::vector<FramebufferHandle> discardQueue;
-		mCache.each([&](FramebufferHandle id, PooledFramebuffer& pfb) {
-			if (pfb.mFrameCount == 0) {
+		mCache.each([&](const auto id, BackedResource<PooledFramebuffer>& pfb) {
+			if (pfb.mResource.mFrameCount == 0) {
 				discardQueue.emplace_back(id);
-				if (!pfb.mExternallyOwned) {
-					for (auto& texId : pfb.mFramebuffer.mTextures) {
+				if (!pfb.mResource.mExternallyOwned) {
+					for (auto& texId : pfb.mResource.mFramebuffer.mTextures) {
 						textureManager.discard(texId);
 					}
 				}
-				pfb.mFramebuffer.destroy();
+				pfb.mResource.mFramebuffer.destroy();
 			}
 			else {
-				if (pfb.mUsedThisFrame) {
-					pfb.mUsedThisFrame = false;
+				if (pfb.mResource.mUsedThisFrame) {
+					pfb.mResource.mUsedThisFrame = false;
 				}
 				else {
-					pfb.mFrameCount--;
+					pfb.mResource.mFrameCount--;
 				}
 			}
 		});
 		for (auto& discardId : discardQueue) {
-			mCache.discard(discardId);
+			mCache.discard(discardId.mHandle);
 		}
 	}
 
@@ -161,19 +162,24 @@ namespace neo {
 			ImGui::TableSetupColumn("Name/Size", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending);
 			ImGui::TableSetupColumn("Attachments");
 			ImGui::TableHeadersRow();
-			mCache.each([&](PooledFramebuffer& pfb) {
+			mCache.each([&](auto id, BackedResource<PooledFramebuffer>& pfb) {
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
-				ImGui::Text(pfb.mExternallyOwned ? "%s" : "*%s", pfb.mName.c_str());
-				if (textureManager.isValid(pfb.mFramebuffer.mTextures[0])) {
-					auto& firstTex = textureManager.resolve(pfb.mFramebuffer.mTextures[0]);
+				if (pfb.mDebugName.has_value()) {
+					ImGui::Text(pfb.mResource.mExternallyOwned ? "%s" : "*%s", pfb.mDebugName->c_str());
+				}
+				else {
+					ImGui::Text(pfb.mResource.mExternallyOwned ? "%d" : "*%d", id);
+				}
+				if (textureManager.isValid(pfb.mResource.mFramebuffer.mTextures[0])) {
+					auto& firstTex = textureManager.resolve(pfb.mResource.mFramebuffer.mTextures[0]);
 					ImGui::Text("[%d, %d]", firstTex.mWidth, firstTex.mHeight);
 				}
 				ImGui::TableSetColumnIndex(1);
-				for (auto texId = pfb.mFramebuffer.mTextures.begin(); texId < pfb.mFramebuffer.mTextures.end(); texId++) {
+				for (auto texId = pfb.mResource.mFramebuffer.mTextures.begin(); texId < pfb.mResource.mFramebuffer.mTextures.end(); texId++) {
 					if (textureManager.isValid(*texId)) {
 						textureFunc(textureManager.resolve(*texId));
-						if (texId != std::prev(pfb.mFramebuffer.mTextures.end())) {
+						if (texId != std::prev(pfb.mResource.mFramebuffer.mTextures.end())) {
 							ImGui::SameLine();
 						}
 					}
@@ -185,13 +191,13 @@ namespace neo {
 
 	void FramebufferResourceManager::clear(const TextureResourceManager& textureManager) {
 		mQueue.clear();
-		mCache.each([&textureManager](PooledFramebuffer& framebuffer) {
-			if (framebuffer.mExternallyOwned) {
-				for (auto& textureHandle : framebuffer.mFramebuffer.mTextures) {
+		mCache.each([&textureManager](BackedResource<PooledFramebuffer>& pfb) {
+			if (pfb.mResource.mExternallyOwned) {
+				for (auto& textureHandle : pfb.mResource.mFramebuffer.mTextures) {
 					textureManager.discard(textureHandle);
 				}
 			}
-			framebuffer.mFramebuffer.destroy();
+			pfb.mResource.mFramebuffer.destroy();
 		});
 		mCache.clear();
 	}
