@@ -117,6 +117,10 @@ namespace neo {
 			TRACY_ZONEN("ImGui::NewFrame");
 			ImGui::NewFrame();
 		}
+		{
+			TRACY_ZONEN("ImGuizmo::BeginFrame");
+			ImGuizmo::BeginFrame();
+		}
 
 		if (isViewportHovered()) {
 			TRACY_ZONEN("MouseMoveMessage");
@@ -148,14 +152,15 @@ namespace neo {
 				mViewport.mOffset = glm::uvec2(offset);
 				mViewport.mSize = glm::uvec2(size);
 				Messenger::sendMessage<FrameSizeMessage>(mViewport.mSize);
-				ImGuizmo::SetRect(
-					static_cast<float>(offset.x), 
-					static_cast<float>(offset.y), 
-					static_cast<float>(size.x), 
-					static_cast<float>(size.y)
-				);
 			}
+			ImGuizmo::SetRect(
+				static_cast<float>(offset.x),
+				static_cast<float>(offset.y),
+				static_cast<float>(size.x),
+				static_cast<float>(size.y)
+			);
 		}
+		ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
 	}
 
 	void ImGuiManager::updateMouse(GLFWwindow* window, int button, int action, int mods) {

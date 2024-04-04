@@ -27,6 +27,8 @@
 #include <imgui_impl_opengl3.h>
 #include <tracy/TracyOpenGL.hpp>
 
+#include <glm/gtx/matrix_major_storage.hpp>
+
 #include <ImGuizmo.h>
 
 namespace neo {
@@ -194,24 +196,26 @@ namespace neo {
 			ImGui::Image(reinterpret_cast<ImTextureID>(mDefaultFBO->mTextures[0]->mTextureID), { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
 #pragma warning(pop)
 		}
-		ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
+		ImGuizmo::SetDrawlist();
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		glm::mat4 V = cameraSpatial.getView();
 		glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
 		ecs.getView<BoundingBoxComponent, SpatialComponent>().each([&](BoundingBoxComponent& /* TODO - replace w/ selected comp */, SpatialComponent& spatial) {
 			glm::mat4 transform = spatial.getModelMatrix();
-			auto m_GizmoType = ImGuizmo::OPERATION::ROTATE;
 			ImGuizmo::Manipulate(
 				&V[0][0],
 				&P[0][0],
-				static_cast<ImGuizmo::OPERATION>(m_GizmoType),
+				ImGuizmo::OPERATION::TRANSLATE | ImGuizmo::OPERATION::SCALE,
 				ImGuizmo::LOCAL,
 				&transform[0][0],
 				nullptr,
 				nullptr);
 
 			if (ImGuizmo::IsUsing()) {
-				spatial.setModelMatrix(transform);
+				glm::vec3 translate, scale, rotate;
+				ImGuizmo::DecomposeMatrixToComponents(&transform[0][0], &translate[0], &rotate[0], &scale[0]);
+				spatial.setPosition(translate);
+				spatial.setScale(scale);
 			}
 			});
 

@@ -286,7 +286,7 @@ namespace neo {
 		}
 		{
 			TRACY_ZONEN("MouseRaySystem");
-			mMouseRaySystem.update(mECS);
+			//mMouseRaySystem.update(mECS);
 		}
 	}
 
