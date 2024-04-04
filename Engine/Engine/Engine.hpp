@@ -6,6 +6,7 @@
 
 #include "ECS/ECS.hpp"
 #include "ECS/Systems/CollisionSystems/MouseRaySystem.hpp"
+#include "ECS/Systems/CollisionSystems/SelectingSystem.hpp"
 
 #include "DemoInfra/DemoWrangler.hpp"
 
@@ -55,6 +56,7 @@ namespace neo {
 			/* Debug */
 			bool mShowBoundingBoxes = false;
 			static MouseRaySystem mMouseRaySystem;
+			static SelectingSystem mSelectingSystem;
 	};
 
 }

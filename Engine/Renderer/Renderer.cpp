@@ -10,10 +10,11 @@
 #include "Renderer/RenderingSystems/Blitter.hpp"
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/CollisionComponent/SelectedComponent.hpp"
 #include "ECS/Component/EngineComponents/DebugBoundingBox.hpp"
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
-#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
 #include "Messaging/Message.hpp"
@@ -204,7 +205,9 @@ namespace neo {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		glm::mat4 V = cameraSpatial.getView();
 		glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
-		ecs.getView<BoundingBoxComponent, SpatialComponent>().each([&](BoundingBoxComponent& /* TODO - replace w/ selected comp */, SpatialComponent& spatial) {
+		auto selected = ecs.getSingleView<SelectedComponent, SpatialComponent>();
+		if (selected.has_value()) {
+			auto&& [selectedEntity, selectedComponent, spatial] = *selected;
 			glm::mat4 transform = spatial.getModelMatrix();
 			ImGuizmo::Manipulate(
 				&V[0][0],
@@ -222,7 +225,7 @@ namespace neo {
 				spatial.setScale(scale);
 				spatial.setOrientation(glm::mat3(glm::quat(glm::radians(rotate))));
 			}
-		});
+		}
 
 		ImGui::End();
 

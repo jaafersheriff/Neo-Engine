@@ -49,6 +49,7 @@ namespace neo {
 	/* ECS */
 	ECS Engine::mECS;
 	MouseRaySystem Engine::mMouseRaySystem;
+	SelectingSystem Engine::mSelectingSystem;
 
 	/* Hardware */
 	WindowSurface Engine::mWindow;
@@ -285,8 +286,9 @@ namespace neo {
 			}
 		}
 		{
-			TRACY_ZONEN("MouseRaySystem");
-			//mMouseRaySystem.update(mECS);
+			TRACY_ZONEN("Selecting");
+			mMouseRaySystem.update(mECS);
+			mSelectingSystem.update(mECS);
 		}
 	}
 

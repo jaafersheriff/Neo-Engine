@@ -4,11 +4,11 @@
 
 namespace neo {
 
-	class MouseRaySystem : public System {
+	class SelectingSystem : public System {
 
 	public:
-		MouseRaySystem() 
-			: System("MouseRay System")
+		SelectingSystem() 
+			: System("Selecting System")
 		{}
 
 

@@ -8,23 +8,13 @@
 namespace neo {
 
 	struct BoundingBoxComponent : public Component {
-		virtual std::string getName() const override { return "BoundingBoxComponent"; } 
+		virtual std::string getName() const override { return "BoundingBoxComponent"; }
 
 		glm::vec3 mMin, mMax;
 
 		BoundingBoxComponent() :
 			mMin(0.f),
 			mMax(0.f) {
-		}
-
-		BoundingBoxComponent(std::vector<glm::vec3>& vertices) {
-			mMin = glm::vec3(FLT_MAX);
-			mMax = glm::vec3(FLT_MIN);
-
-			for (auto vert : vertices) {
-				mMin = glm::min(mMin, vert);
-				mMax = glm::max(mMax, vert);
-			}
 		}
 
 		BoundingBoxComponent(glm::vec3 min, glm::vec3 max) {
@@ -40,8 +30,29 @@ namespace neo {
 			return mMin + ((mMax - mMin) / 2.f);
 		}
 
-		bool intersect(const glm::mat4& modelMatrix, glm::vec3 position) const {
+		bool intersect(const glm::mat4& modelMatrix, const glm::vec3& position) const {
 			return glm::length(glm::vec3(glm::inverse(modelMatrix) * glm::vec4(position, 1.f))) < getRadius();
+		}
+
+		std::optional<float> intersect(const glm::mat4 modelMatrix, const glm::vec3& rayPos, const glm::vec3& rayDir) const {
+			// Bounding box in world space
+			glm::vec3 min(modelMatrix * glm::vec4(mMin, 1.f));
+			glm::vec3 max(modelMatrix * glm::vec4(mMax, 1.f));
+
+			glm::vec3 tMin = (min - rayPos) / rayDir;
+			glm::vec3 tMax = (max - rayPos) / rayDir;
+
+			if (tMin.x > tMax.x) std::swap(tMin.x, tMax.x);
+			if (tMin.y > tMax.y) std::swap(tMin.y, tMax.y);
+			if (tMin.z > tMax.z) std::swap(tMin.z, tMax.z);
+
+			float tMinMax = glm::max(glm::max(tMin.x, tMin.y), tMin.z);
+			float tMaxMin = glm::min(glm::min(tMax.x, tMax.y), tMax.z);
+
+			if (tMaxMin >= tMinMax) {
+				return tMinMax;
+			}
+			return std::nullopt; // No intersection
 		}
 	};
 }
