@@ -16,6 +16,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <implot.h>
+#include <ImGuizmo.h>
 
 #include <tracy/Tracy.hpp>
 #include <tracy/TracyOpenGL.hpp>
@@ -114,6 +115,10 @@ namespace neo {
 		{
 			TRACY_ZONEN("ImGui::NewFrame");
 			ImGui::NewFrame();
+		}
+		{
+			TRACY_ZONEN("ImGuizmo::BeginFrame");
+			ImGuizmo::BeginFrame();
 		}
 
 		if (isViewportHovered()) {
