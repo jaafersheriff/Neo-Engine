@@ -28,6 +28,7 @@ namespace neo {
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImPlot::CreateContext();
+		ImGuizmo::Enable(true);
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		// Tracy does its own font scaling. Because of course it does.
@@ -119,6 +120,8 @@ namespace neo {
 		{
 			TRACY_ZONEN("ImGuizmo::BeginFrame");
 			ImGuizmo::BeginFrame();
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
 		}
 
 		if (isViewportHovered()) {
@@ -151,6 +154,12 @@ namespace neo {
 				mViewport.mOffset = glm::uvec2(offset);
 				mViewport.mSize = glm::uvec2(size);
 				Messenger::sendMessage<FrameSizeMessage>(mViewport.mSize);
+				ImGuizmo::SetRect(
+					static_cast<float>(offset.x), 
+					static_cast<float>(offset.y), 
+					static_cast<float>(size.x), 
+					static_cast<float>(size.y)
+				);
 			}
 		}
 	}
