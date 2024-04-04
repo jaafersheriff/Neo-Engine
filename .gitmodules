@@ -31,3 +31,6 @@
 [submodule "Engine/ext/tinygltf"]
 	path = Engine/ext/tinygltf
 	url = https://github.com/syoyo/tinygltf
+[submodule "Engine/ext/ImGuizmo"]
+	path = Engine/ext/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git
