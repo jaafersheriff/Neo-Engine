@@ -29,6 +29,8 @@
 
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
+#include <ImGuizmo.h>
+
 using namespace neo;
 
 /* Game object definitions */
@@ -96,11 +98,29 @@ namespace Base {
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
 		ecs.addSystem<RotationSystem>();
-
 	}
 
 	void Demo::imGuiEditor(ECS& ecs) {
-		NEO_UNUSED(ecs);
+
+		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		glm::mat4 V = cameraSpatial.getView();
+		glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+		ecs.getView<BoundingBoxComponent, SpatialComponent>().each([&](BoundingBoxComponent& /* TODO - replace w/ selected comp */, SpatialComponent& spatial) {
+			glm::mat4 transform = spatial.getModelMatrix();
+			auto m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+				ImGuizmo::Manipulate(
+					&V[0][0],
+					&P[0][0],
+					static_cast<ImGuizmo::OPERATION>(m_GizmoType), 
+					ImGuizmo::LOCAL, 
+					&transform[0][0],
+					nullptr, 
+					nullptr);
+
+			if (ImGuizmo::IsUsing()) {
+				spatial.setModelMatrix(transform);
+			}
+		});
 	}
 
 	void Demo::update(ECS& ecs) {

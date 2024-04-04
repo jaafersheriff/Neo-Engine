@@ -13,6 +13,10 @@ extern "C" {
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/EngineComponents/SingleFrameComponent.hpp"
+#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
+#include "ECS/Component/CollisionComponent/MouseRayComponent.hpp"
+#include "ECS/Component/EngineComponents/DebugBoundingBox.hpp"
+#include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/KeyboardComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
@@ -44,6 +48,7 @@ namespace neo {
 
 	/* ECS */
 	ECS Engine::mECS;
+	MouseRaySystem Engine::mMouseRaySystem;
 
 	/* Hardware */
 	WindowSurface Engine::mWindow;
@@ -279,10 +284,23 @@ namespace neo {
 				mECS.getComponent<PerspectiveCameraComponent>(entity)->setAspectRatio(viewportSize.x / static_cast<float>(viewportSize.y));
 			}
 		}
+		{
+			TRACY_ZONEN("MouseRaySystem");
+			mMouseRaySystem.update(mECS);
+		}
 	}
 
 	void Engine::_endFrame() {
 		TRACY_ZONE();
+
+		{
+			auto mouseRay = mECS.getComponent<MouseRayComponent>();
+			if (mouseRay.has_value()) {
+				mECS.getView<BoundingBoxComponent, SpatialComponent>().each([mouseRay](BoundingBoxComponent& boundingBox, SpatialComponent& spatial) {
+					NEO_UNUSED(boundingBox, spatial);
+				});
+			}
+		}
 
 		for(auto& entity : mECS.getView<SingleFrameComponent>()) {
 			mECS.removeEntity(entity);
