@@ -3,6 +3,8 @@
 #include "ResourceManagerInterface.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 
+#include "Loader/STBIImageData.hpp"
+
 #include "Util/Util.hpp"
 
 #include <string>
@@ -10,21 +12,6 @@
 
 namespace neo {
 	class ResourceManagers;
-
-	// TODO - move to its own file
-	struct STBImageData {
-		STBImageData(const char* _filePath, types::texture::BaseFormats baseFormat, bool flip);
-		~STBImageData();
-
-		operator bool() const {
-			return mData != nullptr && mWidth > 0 && mHeight > 0;
-		}
-
-		std::string mFilePath;
-		uint8_t* mData = nullptr;
-		int mWidth = 0;
-		int mHeight = 0;
-	};
 
 	struct TextureBuilder {
 		TextureFormat mFormat;
