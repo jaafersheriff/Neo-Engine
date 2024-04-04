@@ -29,6 +29,7 @@ extern "C" {
 #include "Messaging/Messenger.hpp"
 
 #include "Loader/Loader.hpp"
+#include "Loader/STBIImageData.hpp"
 #include "Loader/MeshGenerator.hpp"
 #include "ResourceManager/ResourceManagers.hpp"
 
