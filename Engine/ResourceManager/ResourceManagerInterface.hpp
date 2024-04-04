@@ -98,9 +98,7 @@ namespace neo {
 		void discard(ResourceHandle<ResourceType> id) const {
 			// TODO - this should also be queued?
 			if (isValid(id) || isQueued(id)) {
-				NEO_UNUSED(id);
-				NEO_LOG_E("Unsupported discard");
-				//static_cast<DerivedManager*>(this)->_discardImpl(id);
+				mDiscardQueue.emplace_back(id);
 			}
 		}
 
@@ -119,6 +117,7 @@ namespace neo {
 			static_cast<DerivedManager*>(this)->_tickImpl();
 		}
 		mutable std::vector<ResourceLoadDetails_Internal> mQueue;
+		mutable std::vector<ResourceHandle<ResourceType>> mDiscardQueue;
 		entt::resource_cache<BackedResource<ResourceType>> mCache;
 		std::shared_ptr<BackedResource<ResourceType>> mFallback;
 

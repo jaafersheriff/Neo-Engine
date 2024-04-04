@@ -128,13 +128,20 @@ namespace neo {
 		std::swap(mQueue, swapQueue);
 		mQueue.clear();
 		for (auto& item : swapQueue) {
+			bool validTextures = true;
 			for (auto& texId : item.mTexIDs) {
 				if (!textureManager.isValid(texId)) {
 					NEO_LOG_W("Trying to create a framebuffer %s with invalid texture attachments -- skipping", item.mDebugName.value_or("").c_str());
-					continue;
+					validTextures = false;
+					break;
 				}
 			}
-			mCache.load<FramebufferLoader>(item.mHandle.mHandle, item, textureManager);
+			if (validTextures) {
+				mCache.load<FramebufferLoader>(item.mHandle.mHandle, item, textureManager);
+			}
+			else {
+				mQueue.emplace_back(item);
+			}
 		}
 
 		// Discard queue
