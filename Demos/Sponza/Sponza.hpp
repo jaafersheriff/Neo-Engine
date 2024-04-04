@@ -19,8 +19,8 @@ namespace Sponza {
 		virtual void imGuiEditor(ECS& ecs) override;
 
 	private:
-		void _forwardShading(const ResourceManagers& resourceManagers, const ECS& ecs, FramebufferHandle sceneTarget, FramebufferHandle shadowMap, glm::uvec2 viewport);
-		void _deferredShading(const ResourceManagers& resourceManagers, const ECS& ecs, FramebufferHandle sceneTarget, glm::uvec2 targetSize, FramebufferHandle shadowMap);
+		void _forwardShading(const ResourceManagers& resourceManagers, const ECS& ecs, FramebufferHandle sceneTarget, glm::uvec2 viewport, TextureHandle shadowMap);
+		void _deferredShading(const ResourceManagers& resourceManagers, const ECS& ecs, FramebufferHandle sceneTarget, glm::uvec2 viewport, TextureHandle shadowMap);
 		bool mDrawShadows = true;
 
 		bool mDeferredShading = false;

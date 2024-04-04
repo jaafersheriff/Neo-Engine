@@ -47,10 +47,13 @@ namespace neo {
 	public:
 
 		bool isValid(ResourceHandle<ResourceType> id) const {
-			return mCache.contains(id.mHandle);
+			return id.mHandle != NEO_INVALID_HANDLE && mCache.contains(id.mHandle);
 		}
 
 		bool isQueued(ResourceHandle<ResourceType> id) const {
+			if (id.mHandle != NEO_INVALID_HANDLE) {
+				return false;
+			}
 			// TODO - this is a linear search :(
 			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
 			for (auto& res : mQueue) {

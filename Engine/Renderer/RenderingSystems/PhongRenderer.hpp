@@ -113,7 +113,7 @@ namespace neo {
 			MakeDefine(ALBEDO_MAP);
 			MakeDefine(NORMAL_MAP);
 
-			if (material.mAlbedoMap) {
+			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
 				drawDefines.set(ALBEDO_MAP);
 			}
 			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {

@@ -202,7 +202,7 @@ namespace {
 		}
 	}
 
-	neo::TextureResourceManager::TextureHandle _loadTexture(neo::TextureResourceManager& textureManager, const tinygltf::Model& model, int index, int texCoord) {
+	neo::TextureHandle _loadTexture(neo::TextureResourceManager& textureManager, const tinygltf::Model& model, int index, int texCoord) {
 		using namespace neo; 
 
 		if (index == -1) {
@@ -220,7 +220,7 @@ namespace {
 		}
 
 		if (!image.uri.empty()) {
-			TextureResourceManager::TextureHandle textureHandle(HashedString(image.uri.c_str()));
+			TextureHandle textureHandle(HashedString(image.uri.c_str()));
 			if (textureManager.isValid(textureHandle) || textureManager.isQueued(textureHandle)) {
 				NEO_LOG_V("Texture %s is already loaded -- skipping", image.uri.c_str());
 				return textureHandle;

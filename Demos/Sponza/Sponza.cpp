@@ -170,7 +170,7 @@ namespace Sponza {
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+		FramebufferHandle sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
 			"Scene Target",
 			FramebufferBuilder{}
 				.setSize(viewport.mSize)
@@ -178,21 +178,21 @@ namespace Sponza {
 				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 })
 		);
 
-		auto shadowTexture = NEO_INVALID_HANDLE;
+		TextureHandle shadowTextureHandle;
 		if (mDrawShadows) {
-			shadowTexture = resourceManagers.mTextureManager.asyncLoad("Shadow map",
+			shadowTextureHandle = resourceManagers.mTextureManager.asyncLoad("Shadow map",
 				TextureBuilder{
 					TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 },
 					glm::u16vec3(4096, 4096, 0)
 				}
 			);
-			auto shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+			FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
 				"Shadow map",
-				std::vector<TextureHandle>{ shadowTexture }
+				std::vector<TextureHandle>{ shadowTextureHandle }
 			);
 
-			if (resourceManagers.mFramebufferManager.isValid(shadowTarget)) {
-				auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowTarget);
+			if (resourceManagers.mFramebufferManager.isValid(shadowTargetHandle)) {
+				auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowTargetHandle);
 				shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
 				drawShadows<OpaqueComponent>(resourceManagers, shadowMap, ecs);
 				drawShadows<AlphaTestComponent>(resourceManagers, shadowMap, ecs);
@@ -202,10 +202,10 @@ namespace Sponza {
 		if (resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
 			auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
 			if (mDeferredShading) {
-				_deferredShading(resourceManagers, ecs, sceneTargetHandle, viewport.mSize, shadowTexture);
+				_deferredShading(resourceManagers, ecs, sceneTargetHandle, viewport.mSize, shadowTextureHandle);
 			}
 			else {
-				_forwardShading(resourceManagers, ecs, sceneTargetHandle, shadowTexture, viewport.mSize);
+				_forwardShading(resourceManagers, ecs, sceneTargetHandle, viewport.mSize, shadowTextureHandle);
 			}
 
 			backbuffer.bind();
@@ -225,8 +225,8 @@ namespace Sponza {
 		const ResourceManagers& resourceManagers, 
 		const ECS& ecs, 
 		FramebufferHandle sceneTargetHandle, 
-		TextureHandle shadowMapHandle,
-		glm::uvec2 viewport
+		glm::uvec2 viewport,
+		TextureHandle shadowMapHandle
 	) {
 		TRACY_GPU();
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();

@@ -21,7 +21,6 @@
 
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
-#include "Renderer/GLObjects/Framebuffer.hpp"
 
 #include "Loader/GLTFImporter.hpp"
 
@@ -42,8 +41,8 @@ namespace Base {
 	}
 
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
-
-		/* Camera */
+		NEO_UNUSED(ecs, resourceManagers);
+		/*
 		{
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Camera");
@@ -62,22 +61,20 @@ namespace Base {
 			ecs.addComponent<PointLightComponent>(entity, glm::vec3(0.1, 0.05, 0.003f));
 		}
 
-		/* Bunny object */
 		{
-			// GLTFImporter::Scene gltfScene = Loader::loadGltfScene(resourceManagers, "bunny.gltf");
+			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(resourceManagers, "bunny.gltf");
 			auto bunny = ecs.createEntity();
-			// ecs.addComponent<TagComponent>(bunny, "Bunny");
+			ecs.addComponent<TagComponent>(bunny, "Bunny");
 			ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 0.0f, 0.f), glm::vec3(1.5f));
 			ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-			ecs.addComponent<MeshComponent>(bunny, HashedString("sphere"));// gltfScene.mMeshNodes[0].mMeshHandle);
-			//ecs.addComponent<BoundingBoxComponent>(bunny, gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax);
+			ecs.addComponent<MeshComponent>(bunny, gltfScene.mMeshNodes[0].mMeshHandle);
+			ecs.addComponent<BoundingBoxComponent>(bunny, gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax);
 			ecs.addComponent<PhongShaderComponent>(bunny);
 			ecs.addComponent<OpaqueComponent>(bunny);
 			auto material = ecs.addComponent<MaterialComponent>(bunny);
 			material->mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
 		}
 
-		/* Ground plane */
 		{
 			auto plane = ecs.createEntity();
 			ecs.addComponent<TagComponent>(plane, "Grid");
@@ -88,12 +85,12 @@ namespace Base {
 			ecs.addComponent<AlphaTestComponent>(plane);
 			auto material = ecs.addComponent<MaterialComponent>(plane);
 			material->mAlbedoColor = glm::vec4(1.f);
-			material->mAlbedoMap = resourceManagers.mTextureManager.asyncLoad("grid", FileLoadDetails{ {"grid.png"}, {} });
+			//material->mAlbedoMap = resourceManagers.mTextureManager.asyncLoad("grid", FileLoadDetails{ {"grid.png"}, {} });
 		}
 
-		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
 		ecs.addSystem<RotationSystem>();
+*/
 	}
 
 	void Demo::imGuiEditor(ECS& ecs) {

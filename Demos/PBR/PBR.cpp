@@ -438,7 +438,7 @@ namespace PBR {
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
-		auto shadowTexture = NEO_INVALID_HANDLE;
+		TextureHandle shadowTexture = NEO_INVALID_HANDLE;
 		if (mDrawShadows) {
 			shadowTexture = resourceManagers.mTextureManager.asyncLoad("Shadow map",
 				TextureBuilder{
@@ -446,7 +446,7 @@ namespace PBR {
 					glm::u16vec3(4096, 4096, 0)
 				}
 			);
-			auto shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+			FramebufferHandle shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
 				"Shadow map",
 				std::vector<TextureHandle>{ shadowTexture }
 			);
