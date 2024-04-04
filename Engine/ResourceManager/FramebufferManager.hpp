@@ -38,21 +38,22 @@ namespace neo {
 		}
 	};
 	using FramebufferLoadDetails = std::variant<FramebufferBuilder, std::vector<TextureHandle>>;
-	struct FramebufferQueueItem {
-		std::vector<TextureHandle> mTexIDs;
-		bool mExternallyOwned = false;
-		std::string mDebugName;
-	};
+
 
 	struct PooledFramebuffer {
 		Framebuffer mFramebuffer;
 		uint8_t mFrameCount = 0;
 		bool mUsedThisFrame = false;
-		std::string mName = "";
 		bool mExternallyOwned = false;
 	};
+	using FramebufferHandle = ResourceHandle<PooledFramebuffer>;
+	struct FramebufferQueueItem {
+		FramebufferHandle mHandle;
+		std::vector<TextureHandle> mTexIDs;
+		bool mExternallyOwned = false;
+		std::optional<std::string> mDebugName;
+	};
 
-	using FramebufferHandle = entt::id_type;
 	class FramebufferResourceManager {
 		friend ResourceManagers;
 	public:
@@ -61,11 +62,18 @@ namespace neo {
 		FramebufferResourceManager::~FramebufferResourceManager();
 
 		bool isValid(FramebufferHandle id) const {
-			return mCache.contains(id);
+			return mCache.contains(id.mHandle);
 		}
 
 		bool isQueued(FramebufferHandle id) const {
-			return mQueue.find(id) != mQueue.end();
+			// TODO - this is a linear search :(
+			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
+			for (auto& res : mQueue) {
+				if (id == res.mHandle) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		const Framebuffer& resolve(FramebufferHandle id) const {
@@ -85,8 +93,8 @@ namespace neo {
 
 		void imguiEditor(std::function<void(Texture&)> textureFunc, TextureResourceManager& textureManager);
 
-		mutable std::map<FramebufferHandle, FramebufferQueueItem> mQueue;
-		entt::resource_cache<PooledFramebuffer> mCache;
+		mutable std::vector<FramebufferQueueItem> mQueue;
+		entt::resource_cache<BackedResource<PooledFramebuffer>> mCache;
 		std::shared_ptr<Framebuffer> mFallback;
 
 	private:
