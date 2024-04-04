@@ -96,7 +96,6 @@ namespace neo {
 		}
 
 		void discard(ResourceHandle<ResourceType> id) const {
-			// TODO - this should also be queued?
 			if (isValid(id) || isQueued(id)) {
 				mDiscardQueue.emplace_back(id);
 			}

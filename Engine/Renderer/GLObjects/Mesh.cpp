@@ -172,8 +172,12 @@ namespace neo {
 		removeElementBuffer();
 	}
 
-	void Mesh::init() {
-		glGenVertexArrays(1, (GLuint *)&mVAOID);
+	void Mesh::init(std::optional<std::string> debugName) {
+		glGenVertexArrays(1, (GLuint*)&mVAOID);
+		if (debugName.has_value() && !debugName.value().empty()) {
+			glBindVertexArray(mVAOID);
+			glObjectLabel(GL_VERTEX_ARRAY, mVAOID, -1, debugName.value().c_str());
+		}
 	}
 
 	void Mesh::destroy() {

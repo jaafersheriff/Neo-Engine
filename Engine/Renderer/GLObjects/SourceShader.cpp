@@ -18,12 +18,6 @@ namespace neo {
 			instance.second.destroy();
 		}
 		mResolvedShaders.clear();
-
-		if (mConstructionArgs) {
-			for (auto& source : mShaderSources) {
-				delete source.second;
-			}
-		}
 		mShaderSources.clear();
 	}
 

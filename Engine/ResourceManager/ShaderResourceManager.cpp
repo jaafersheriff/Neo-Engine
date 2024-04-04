@@ -73,30 +73,54 @@ namespace neo {
 	void ShaderResourceManager::_tickImpl() {
 		TRACY_ZONE();
 
-		std::vector<ResourceLoadDetails_Internal> swapQueue = {};
-		std::swap(swapQueue, mQueue);
-		mQueue.clear();
+		{
+			std::vector<ResourceLoadDetails_Internal> swapQueue = {};
+			std::swap(swapQueue, mQueue);
+			mQueue.clear();
 
-		for (auto& loadDetails : swapQueue) {
-			mCache.load<ShaderLoader>(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
+			for (auto& loadDetails : swapQueue) {
+				mCache.load<ShaderLoader>(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
+			}
+		}
+
+		{
+			std::vector<ShaderHandle> swapQueue = {};
+			std::swap(swapQueue, mDiscardQueue);
+			mDiscardQueue.clear();
+			for (auto& id : swapQueue) {
+				if (isValid(id)) {
+					auto& shader = resolve(id);
+					if (shader.mConstructionArgs.has_value()) {
+						for (auto&& [type, charString] : shader.mShaderSources) {
+							delete charString;
+						}
+					}
+					shader.destroy();
+					mCache.discard(id.mHandle);
+				}
+			}
 		}
 	}
 
 	void ShaderResourceManager::_clearImpl() {
 		mQueue.clear();
 		mCache.each([](BackedResource<SourceShader>& resource) {
+			if (resource.mResource.mConstructionArgs.has_value()) {
+				for (auto&& [type, charString] : resource.mResource.mShaderSources) {
+					delete charString;
+				}
+			}
 			resource.mResource.destroy();
 		});
 		mCache.clear();
 	}
 
 	void ShaderResourceManager::imguiEditor() {
-		std::optional<entt::id_type> destroyHandle;
 		mCache.each([&](entt::id_type enttId, BackedResource<SourceShader>&  resource) {
 			auto& shader = resource.mResource;
 			if (ImGui::TreeNode(shader.mName.c_str())) {
 				if (shader.mConstructionArgs && ImGui::Button("Reload all")) {
-					destroyHandle = enttId; // Can't destroy mid-each
+					discard(ShaderHandle(enttId));
 					auto newId = asyncLoad(HashedString(shader.mName.c_str()), *shader.mConstructionArgs);
 					NEO_UNUSED(newId);
 				}
@@ -122,8 +146,5 @@ namespace neo {
 				ImGui::TreePop();
 			}
 		});
-		if (destroyHandle) {
-			mCache.discard(*destroyHandle);
-		}
 	}
 }
