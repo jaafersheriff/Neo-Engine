@@ -12,7 +12,7 @@ namespace neo {
 
 		std::shared_ptr<BackedResource<Mesh>> load(MeshLoadDetails meshDetails, std::optional<std::string> debugName) const {
 			std::shared_ptr<BackedResource<Mesh>> meshResource = std::make_shared<BackedResource<Mesh>>(meshDetails.mPrimtive);
-			meshResource->mResource.init();
+			meshResource->mResource.init(debugName);
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
 				meshResource->mResource.addVertexBuffer(
 					type,
@@ -41,7 +41,7 @@ namespace neo {
 
 	MeshResourceManager::MeshResourceManager() {
 		auto cubeDetails = prefabs::generateCube();
-		mFallback = MeshLoader{}.load(*cubeDetails, std::nullopt);
+		mFallback = MeshLoader{}.load(*cubeDetails, "Fallback Cube");
 		for (auto&& [type, buffer] : cubeDetails->mVertexBuffers) {
 			free(const_cast<uint8_t*>(buffer.mData));
 		}

@@ -1,4 +1,4 @@
-//#include "Base/BaseDemo.hpp"
+#include "Base/BaseDemo.hpp"
 #include "Sponza/Sponza.hpp"
 #include "Compute/Compute.hpp"
 #include "Cornell/Cornell.hpp"
@@ -13,7 +13,7 @@
 static int sCurrentDemo = 0;
 static std::vector<neo::IDemo*> sDemos = {
 	new PBR::Demo(),
-	//new Base::Demo(),
+	new Base::Demo(),
 	new Sponza::Demo(),
 	new Compute::Demo(),
 	new Cornell::Demo(),

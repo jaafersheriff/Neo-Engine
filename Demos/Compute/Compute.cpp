@@ -100,6 +100,9 @@ namespace Compute {
 			auto particlesComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticlesCompute", SourceShader::ConstructionArgs{
 				{ ShaderStage::COMPUTE, "compute/particles.compute" }
 			});
+			if (!resourceManagers.mShaderManager.isValid(particlesComputeShaderHandle)) {
+				return;
+			}
 
 			auto& particlesComputeShader = resourceManagers.mShaderManager.resolveDefines(particlesComputeShaderHandle, {});
 			particlesComputeShader.bind();

@@ -111,7 +111,7 @@ namespace neo {
 			}
 
 			std::shared_ptr<BackedResource<Texture>> load(TextureBuilder textureDetails, std::optional<std::string> debugName) const {
-				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.mData);
+				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.mData, debugName);
 				textureResource->mDebugName = debugName;
 				if (textureDetails.mFormat.mFilter.usesMipFilter()) {
 					textureResource->mResource.genMips();
@@ -142,7 +142,7 @@ namespace neo {
 			TextureFormat{},
 			glm::u16vec3(2, 2, 0),
 			data
-		}, std::nullopt);
+		}, "Fallback Texture");
 	}
 
 	TextureResourceManager::~TextureResourceManager() {
@@ -235,10 +235,10 @@ namespace neo {
 		mCache.each([&](auto handle, BackedResource<Texture>& textureResource) {
 			bool node = false;
 			if (textureResource.mDebugName.has_value()) {
-				node |= ImGui::TreeNode(&handle, "%s", textureResource.mDebugName->c_str());
+				node |= ImGui::TreeNode(static_cast<void*>(&handle), "%s", textureResource.mDebugName->c_str());
 			}
 			else {
-				node |= ImGui::TreeNode(&handle, "%d", handle);
+				node |= ImGui::TreeNode(static_cast<void*>(&handle), "%d", handle);
 			}
 			if (node) {
 				ImGui::Text("[%d, %d]", textureResource.mResource.mWidth, textureResource.mResource.mHeight);
