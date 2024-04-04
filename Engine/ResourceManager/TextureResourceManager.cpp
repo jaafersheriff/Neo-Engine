@@ -187,24 +187,39 @@ namespace neo {
 	void TextureResourceManager::_tickImpl() {
 		TRACY_ZONE();
 
-		std::vector<ResourceLoadDetails_Internal> swapQueue;
-		std::swap(mQueue, swapQueue);
-		mQueue.clear();
+		{
+			std::vector<ResourceLoadDetails_Internal> swapQueue;
+			std::swap(mQueue, swapQueue);
+			mQueue.clear();
 
-		for (auto& loadDetails : swapQueue) {
-			std::visit([&](auto&& arg) {
-				using T = std::decay_t<decltype(arg)>;
-				if constexpr (std::is_same_v<T, TextureBuilder>) {
-					mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
-					free(const_cast<uint8_t*>(arg.mData));
+			for (auto& loadDetails : swapQueue) {
+				std::visit([&](auto&& arg) {
+					using T = std::decay_t<decltype(arg)>;
+					if constexpr (std::is_same_v<T, TextureBuilder>) {
+						mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
+						free(const_cast<uint8_t*>(arg.mData));
+					}
+					else if constexpr (std::is_same_v<T, FileLoadDetails>) {
+						mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
+					}
+					else {
+						static_assert(always_false_v<T>, "non-exhaustive visitor!");
+					}
+					}, loadDetails.mLoadDetails);
+			}
+		}
+
+		{
+			std::vector<TextureHandle> swapQueue;
+			std::swap(mDiscardQueue, swapQueue);
+			mDiscardQueue.clear();
+
+			for (auto& id : swapQueue) {
+				if (isValid(id)) {
+					mCache.handle(id.mHandle).get().mResource.destroy();
+					mCache.discard(id.mHandle);
 				}
-				else if constexpr (std::is_same_v<T, FileLoadDetails>) {
-					mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
-				}
-				else {
-					static_assert(always_false_v<T>, "non-exhaustive visitor!");
-				}
-			}, loadDetails.mLoadDetails);
+			}
 		}
 	}
 
@@ -214,10 +229,6 @@ namespace neo {
 			texture.mResource.destroy();
 		});
 		mCache.clear();
-	}
-
-	void TextureResourceManager::_discardImpl(TextureHandle id) {
-		mCache.discard(id.mHandle);
 	}
 
 	void TextureResourceManager::imguiEditor(std::function<void(const Texture&)> textureFunc) {
