@@ -29,8 +29,6 @@
 
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
-#include <ImGuizmo.h>
-
 using namespace neo;
 
 /* Game object definitions */

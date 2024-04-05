@@ -29,6 +29,7 @@ namespace neo {
 		ImGui::CreateContext();
 		ImPlot::CreateContext();
 		ImGuizmo::Enable(true);
+		ImGuizmo::SetOrthographic(false);
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		// Tracy does its own font scaling. Because of course it does.

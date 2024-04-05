@@ -169,13 +169,6 @@ namespace neo {
 		
 		/* Render imgui */
 		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-			{
-				TRACY_ZONEN("ImGuizmo::BeginFrame");
-				//ImGuizmo::BeginFrame();
-				ImGuizmo::SetOrthographic(false);
-				ImGuizmo::SetDrawlist();
-			}
-
 			TRACY_GPUN("ImGuiManager.render");
 			// Bind backbuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);

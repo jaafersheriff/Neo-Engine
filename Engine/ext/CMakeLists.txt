@@ -163,6 +163,7 @@ add_library(imgui STATIC
  	imgui/backends/imgui_impl_glfw.h
  	imgui/backends/imgui_impl_opengl3.h
 )
+target_compile_options(imgui PRIVATE "/WX-" "/W0")
 set_target_properties(imgui PROPERTIES FOLDER "Neo/ext")
 target_include_directories(imgui 
 PUBLIC
@@ -177,11 +178,6 @@ PRIVATE
 	glfw
 	entt
 )
-target_compile_definitions(imgui 
-PRIVATE
-	# IMGUI_DISABLE_OBSOLETE_FUNCTIONS
-)
-target_compile_options(imgui PRIVATE "/WX-" "/W0")
 
 ## implots
 file(GLOB IMPLOTS_CPP_FILES 
