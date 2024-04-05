@@ -18,7 +18,6 @@
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
-#include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/SkyboxRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
@@ -436,17 +435,6 @@ namespace PBR {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		auto sceneTarget = Library::getPooledFramebuffer(PooledFramebufferDetails{ viewport.mSize, {
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB16_F,
-			},
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::D16,
-			}
-		} }, "Scene target");
-
 		auto shadowMap = Library::getPooledFramebuffer({ glm::uvec2(4096, 4096), { 
 			TextureFormat {
 				types::texture::Target::Texture2D,
@@ -462,26 +450,14 @@ namespace PBR {
 
 		glm::vec3 clearColor = getConfig().clearColor;
 
-		sceneTarget->bind();
-		sceneTarget->clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
+		backbuffer.bind();
+		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color | types::framebuffer::ClearFlagBits::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
 		drawSkybox(ecs, cameraEntity);
 
 		_drawPBR<OpaqueComponent>(ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
 		_drawPBR<AlphaTestComponent>(ecs, cameraEntity, mDebugMode, mDrawShadows ? shadowMap->mTextures[0] : nullptr);
-
-		backbuffer.bind();
-		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::ClearFlagBits::Color);
-		drawFXAA(glm::uvec2(backbuffer.mTextures[0]->mWidth, backbuffer.mTextures[0]->mHeight), *sceneTarget->mTextures[0]);
-		// Don't forget the depth. Because reasons.
-		glBlitNamedFramebuffer(sceneTarget->mFBOID, backbuffer.mFBOID,
-			0, 0, viewport.mSize.x, viewport.mSize.y,
-			0, 0, viewport.mSize.x, viewport.mSize.y,
-			GL_DEPTH_BUFFER_BIT,
-			GL_NEAREST
-		);
-
 	}
 
 	void Demo::destroy() {
