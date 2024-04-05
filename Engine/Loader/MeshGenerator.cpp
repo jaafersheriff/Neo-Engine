@@ -249,15 +249,16 @@ namespace neo {
 			std::unique_ptr<MeshLoadDetails> builder = std::make_unique<MeshLoadDetails>();
 			builder->mPrimtive = types::mesh::Primitive::Triangles;
 
-			float t = (float)(1.f + (glm::sqrt(5.0)) / 2.f);
-			float length = glm::length(glm::vec3(1, 0, t));
+			float t = (1.f + glm::sqrt(5.f)) / 2.f;
+			float length = glm::length(glm::vec3(0.5f, 0, t));
+			length *= 2.f; // Scale [-1, 1] bounds to [-0.5, 0.5]
 			std::vector<float> verts = {
 				 -0.5f / length,    t / length,  0.f / length,
 				  0.5f / length,    t / length,  0.f / length,
 				 -0.5f / length,   -t / length,  0.f / length,
 				  0.5f / length,   -t / length,  0.f / length,
-				  0.f / length, -0.5f / length,	   t / length,
-				  0.f / length,  0.5f / length,	   t / length,
+				  0.f / length, -0.5f / length,	  t / length,
+				  0.f / length,  0.5f / length,	  t / length,
 				  0.f / length, -0.5f / length,   -t / length,
 				  0.f / length,  0.5f / length,   -t / length,
 					t / length,  0.f / length, -0.5f / length,
@@ -265,7 +266,6 @@ namespace neo {
 				   -t / length,  0.f / length, -0.5f / length,
 				   -t / length,  0.f / length,  0.5f / length
 			};
-			NEO_LOG_V("Min: %0.3f -- max: %0.3f", -t / length, t / length);
 
 			std::vector<uint32_t> ele = {
 				  0, 11,  5,
@@ -299,9 +299,10 @@ namespace neo {
 					glm::vec3 v3(verts[3 * ele[j + 2] + 0], verts[3 * ele[j + 2] + 1], verts[3 * ele[j + 2] + 2]);
 
 					// add verts of new tris
-					glm::vec3 halfA = glm::normalize((v1 + v2) / 2.f);
-					glm::vec3 halfB = glm::normalize((v2 + v3) / 2.f);
-					glm::vec3 halfC = glm::normalize((v3 + v1) / 2.f);
+					// Also scale [-1, 1] to [-0.5, 0.5]
+					glm::vec3 halfA = glm::normalize((v1 + v2) / 2.f) / 2.f;
+					glm::vec3 halfB = glm::normalize((v2 + v3) / 2.f) / 2.f;
+					glm::vec3 halfC = glm::normalize((v3 + v1) / 2.f) / 2.f;
 					verts.push_back(halfA.x);
 					verts.push_back(halfA.y);
 					verts.push_back(halfA.z);
