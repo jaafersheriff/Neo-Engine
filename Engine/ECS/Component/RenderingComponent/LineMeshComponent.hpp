@@ -20,9 +20,10 @@ namespace neo {
 		bool mUseParentSpatial;
 		mutable bool mDirty;
 
-		LineMeshComponent(MeshResourceManager& meshManager, std::optional<glm::vec3> overrideColor = std::nullopt);
+		LineMeshComponent(const MeshResourceManager& meshManager, std::optional<glm::vec3> overrideColor = std::nullopt);
 		~LineMeshComponent();
 
+		const Mesh& LineMeshComponent::getMesh(const MeshResourceManager& meshManager) const;
 		const std::vector<Node>& getNodes() const { return mNodes; }
 		virtual std::string getName() const override { return "LineMeshComponent"; }
 

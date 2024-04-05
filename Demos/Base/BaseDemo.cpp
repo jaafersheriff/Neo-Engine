@@ -42,7 +42,6 @@ namespace Base {
 
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_UNUSED(ecs, resourceManagers);
-		/*
 		{
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Camera");
@@ -80,17 +79,16 @@ namespace Base {
 			ecs.addComponent<TagComponent>(plane, "Grid");
 			ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
 			ecs.addComponent<MeshComponent>(plane, HashedString("quad"));
-			ecs.addComponent<BoundingBoxComponent>(plane, glm::vec3(-0.5f), glm::vec3(0.5f), true);
+			ecs.addComponent<BoundingBoxComponent>(plane, glm::vec3(-0.5f, -0.5f, -0.01f), glm::vec3(0.5f, 0.5f, 0.01f), true);
 			ecs.addComponent<PhongShaderComponent>(plane);
 			ecs.addComponent<AlphaTestComponent>(plane);
 			auto material = ecs.addComponent<MaterialComponent>(plane);
 			material->mAlbedoColor = glm::vec4(1.f);
-			//material->mAlbedoMap = resourceManagers.mTextureManager.asyncLoad("grid", FileLoadDetails{ {"grid.png"}, {} });
+			material->mAlbedoMap = resourceManagers.mTextureManager.asyncLoad("grid", FileLoadDetails{ {"grid.png"}, {} });
 		}
 
 		ecs.addSystem<CameraControllerSystem>();
 		ecs.addSystem<RotationSystem>();
-*/
 	}
 
 	void Demo::imGuiEditor(ECS& ecs) {

@@ -95,6 +95,10 @@ namespace neo {
 			return static_cast<const DerivedManager*>(this)->_asyncLoadImpl(id, details, std::nullopt);
 		}
 
+		void transact(ResourceHandle<ResourceType> handle, std::function<void(ResourceType&)> transaction) const {
+			mTransactionQueue.emplace_back(std::make_pair(handle, transaction));
+		}
+
 		void discard(ResourceHandle<ResourceType> id) const {
 			if (isValid(id) || isQueued(id)) {
 				mDiscardQueue.emplace_back(id);
@@ -117,6 +121,7 @@ namespace neo {
 		}
 		mutable std::vector<ResourceLoadDetails_Internal> mQueue;
 		mutable std::vector<ResourceHandle<ResourceType>> mDiscardQueue;
+		mutable std::vector<std::pair<ResourceHandle<ResourceType>, std::function<void(ResourceType&)>>> mTransactionQueue;
 		entt::resource_cache<BackedResource<ResourceType>> mCache;
 		std::shared_ptr<BackedResource<ResourceType>> mFallback;
 

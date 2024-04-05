@@ -3,11 +3,11 @@ InitLib()
 
 target_link_libraries(Loader
 PUBLIC
+	tinygltf
 PRIVATE
 	Util
 	libglew_static
 	ECS
-	tinygltf
 )
 
 add_precompiled_header(Loader

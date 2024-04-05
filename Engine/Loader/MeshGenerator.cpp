@@ -265,6 +265,7 @@ namespace neo {
 				   -t / length,  0.f / length, -0.5f / length,
 				   -t / length,  0.f / length,  0.5f / length
 			};
+			NEO_LOG_V("Min: %0.3f -- max: %0.3f", -t / length, t / length);
 
 			std::vector<uint32_t> ele = {
 				  0, 11,  5,

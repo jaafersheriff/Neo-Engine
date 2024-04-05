@@ -81,17 +81,47 @@ namespace neo {
 	void MeshResourceManager::_tickImpl() {
 		TRACY_ZONE();
 
-		std::vector<ResourceLoadDetails_Internal> swapQueue = {};
-		std::swap(mQueue, swapQueue);
-		mQueue.clear();
+		{
+			std::vector<ResourceLoadDetails_Internal> swapQueue = {};
+			std::swap(mQueue, swapQueue);
+			mQueue.clear();
 
-		for (auto& details : swapQueue) {
-			mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
-			for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
-				free(const_cast<uint8_t*>(buffer.mData));
+			for (auto& details : swapQueue) {
+				mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
+				for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
+					free(const_cast<uint8_t*>(buffer.mData));
+				}
+				if (details.mLoadDetails.mElementBuffer.has_value()) {
+					free(const_cast<uint8_t*>(details.mLoadDetails.mElementBuffer->mData));
+				}
 			}
-			if (details.mLoadDetails.mElementBuffer.has_value()) {
-				free(const_cast<uint8_t*>(details.mLoadDetails.mElementBuffer->mData));
+		}
+
+		{
+			std::vector<std::pair<MeshHandle, std::function<void(Mesh&)>>> swapQueue;
+			std::swap(mTransactionQueue, swapQueue);
+			mTransactionQueue.clear();
+
+			for (auto&& [handle, func] : swapQueue) {
+				if (isValid(handle)) {
+					func(resolve(handle));
+				}
+				else {
+					NEO_LOG_E("Attempting to transact on an invalid mesh");
+				}
+			}
+		}
+
+		{
+			std::vector<MeshHandle> swapQueue;
+			std::swap(mDiscardQueue, swapQueue);
+			mDiscardQueue.clear();
+
+			for (auto& id : swapQueue) {
+				if (isValid(id)) {
+					mCache.handle(id.mHandle).get().mResource.destroy();
+					mCache.discard(id.mHandle);
+				}
 			}
 		}
 	}
