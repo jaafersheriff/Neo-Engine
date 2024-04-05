@@ -36,6 +36,8 @@ extern "C" {
 #include "Util/Log/Log.hpp"
 #include "Util/ServiceLocator.hpp"
 
+#include <ImGuizmo.h>
+
 #include <time.h>
 #include <iostream>
 
@@ -287,22 +289,15 @@ namespace neo {
 		}
 		{
 			TRACY_ZONEN("Selecting");
-			mMouseRaySystem.update(mECS);
-			mSelectingSystem.update(mECS);
+			if (!ImGuizmo::IsUsing()) {
+				mMouseRaySystem.update(mECS);
+				mSelectingSystem.update(mECS);
+			}
 		}
 	}
 
 	void Engine::_endFrame() {
 		TRACY_ZONE();
-
-		{
-			auto mouseRay = mECS.getComponent<MouseRayComponent>();
-			if (mouseRay.has_value()) {
-				mECS.getView<BoundingBoxComponent, SpatialComponent>().each([mouseRay](BoundingBoxComponent& boundingBox, SpatialComponent& spatial) {
-					NEO_UNUSED(boundingBox, spatial);
-				});
-			}
-		}
 
 		for(auto& entity : mECS.getView<SingleFrameComponent>()) {
 			mECS.removeEntity(entity);

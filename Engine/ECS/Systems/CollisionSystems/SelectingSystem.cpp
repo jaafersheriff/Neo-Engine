@@ -7,8 +7,6 @@
 #include "ECS/Component/CollisionComponent/SelectedComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include <ImGuizmo.h>
-
 namespace neo {
 
 	void SelectingSystem::update(ECS& ecs) {
@@ -16,7 +14,7 @@ namespace neo {
 		auto mouseRayComponent = ecs.getComponent<MouseRayComponent>();
 		auto selectedComponent = ecs.getComponent<SelectedComponent>();
 
-		if (ImGuizmo::IsUsing() || !mouseRayComponent.has_value()) {
+		if (!mouseRayComponent.has_value()) {
 			return;
 		}
 
