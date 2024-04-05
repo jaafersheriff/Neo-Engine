@@ -10,17 +10,20 @@ namespace neo {
 	struct BoundingBoxComponent : public Component {
 		virtual std::string getName() const override { return "BoundingBoxComponent"; }
 
+		bool mStatic = false;
 		glm::vec3 mMin, mMax;
 
-		BoundingBoxComponent() :
-			mMin(0.f),
-			mMax(0.f) {
-		}
+		BoundingBoxComponent(bool isStatic = false) 
+			: mMin(0.f)
+			, mMax(0.f)
+			, mStatic(isStatic)
+		{ }
 
-		BoundingBoxComponent(glm::vec3 min, glm::vec3 max) {
-			mMin = min;
-			mMax = max;
-		}
+		BoundingBoxComponent(glm::vec3 min, glm::vec3 max, bool isStatic = false) 
+			: mMin(min)
+			, mMax(max)
+			, mStatic(isStatic)
+		{ }
 
 		float getRadius() const {
 			return glm::distance(mMin, mMax) / 2.f;

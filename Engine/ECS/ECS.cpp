@@ -2,6 +2,7 @@
 #include "ECS.hpp"
 
 #include "Component/EngineComponents/TagComponent.hpp"
+#include "Component/CollisionComponent/SelectedComponent.hpp"
 
 namespace neo {
 
@@ -63,8 +64,7 @@ namespace neo {
 		sprintf(buf, "Entities: %d", static_cast<int>(mRegistry.alive()));
 		if (ImGui::TreeNodeEx(buf, ImGuiTreeNodeFlags_DefaultOpen)) {
 			getView<TagComponent>().each([this](Entity entity, TagComponent& tag) {
-				NEO_UNUSED(entity);
-				if (ImGui::TreeNodeEx(tag.mTag.c_str())) {
+				if (ImGui::TreeNodeEx(tag.mTag.c_str(), has<SelectedComponent>(entity) ? ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_DefaultOpen : 0 )) {
 					mEditor.renderEditor(mRegistry, entity);
 					ImGui::TreePop();
 				}

@@ -87,7 +87,7 @@ namespace neo {
 			}
 		};
 
-		const std::vector<glm::vec4> corners = { // screen space receiver box 
+		static const std::vector<glm::vec4> corners = { // screen space receiver box 
 			{ -1.f,  1.f, depthMin, 1.f }, // corners of near plane
 			{  1.f,  1.f, depthMin, 1.f },
 			{ -1.f, -1.f, depthMin, 1.f },

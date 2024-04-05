@@ -385,7 +385,7 @@ namespace PBR {
 				}
 				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
 				ecs.addComponent<MeshComponent>(entity, node.mMesh);
-				ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh->mMin, node.mMesh->mMax);
+				ecs.addComponent<BoundingBoxComponent>(entity, node.mMesh->mMin, node.mMesh->mMax, true);
 				if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 					ecs.addComponent<OpaqueComponent>(entity);
 				}

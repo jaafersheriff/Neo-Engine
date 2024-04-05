@@ -28,6 +28,10 @@ namespace neo {
 		auto selectables = ecs.getView<BoundingBoxComponent, SpatialComponent>();
 		Collision collision;
 		for (auto&& [entity, bb, spatial] : selectables.each()) {
+			// Ignore static entities
+			if (bb.mStatic) {
+				continue;
+			}
 			auto intersection = bb.intersect(spatial.getModelMatrix(), mouseRay.mPosition, mouseRay.mDirection);
 			if (intersection.has_value() && intersection.value() < collision.mCollisionDistance) {
 				collision.mEntity = entity;

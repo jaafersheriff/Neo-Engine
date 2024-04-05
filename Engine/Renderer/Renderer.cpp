@@ -213,7 +213,7 @@ namespace neo {
 				&V[0][0],
 				&P[0][0],
 				ImGuizmo::OPERATION::UNIVERSAL,
-				ImGuizmo::LOCAL,
+				ImGuizmo::WORLD,
 				&transform[0][0],
 				nullptr,
 				nullptr);
@@ -264,7 +264,7 @@ namespace neo {
 
 						line->mUseParentSpatial = true;
 						line->mWriteDepth = true;
-						line->mOverrideColor = util::genRandomVec3(0.3f, 1.f);
+						line->mOverrideColor = box->mStatic ? glm::vec3(1.f, 0.f, 0.f) : util::genRandomVec3(0.3f, 1.f);
 
 						glm::vec3 NearLeftBottom{ box->mMin };
 						glm::vec3 NearLeftTop{ box->mMin.x, box->mMax.y, box->mMin.z };
