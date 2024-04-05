@@ -46,6 +46,11 @@ namespace neo {
 			if (tMin.y > tMax.y) std::swap(tMin.y, tMax.y);
 			if (tMin.z > tMax.z) std::swap(tMin.z, tMax.z);
 
+			// Ensure tMin is greater than 0 to ignore bounding boxes that encapsulate the ray's origin
+			if (tMin.x < 0) tMin.x = 0;
+			if (tMin.y < 0) tMin.y = 0;
+			if (tMin.z < 0) tMin.z = 0;
+
 			float tMinMax = glm::max(glm::max(tMin.x, tMin.y), tMin.z);
 			float tMaxMin = glm::min(glm::min(tMax.x, tMax.y), tMax.z);
 

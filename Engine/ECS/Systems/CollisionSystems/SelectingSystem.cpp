@@ -42,6 +42,12 @@ namespace neo {
 					ecs.addComponent<SelectedComponent>(collision.mEntity);
 				}
 			}
+			else {
+				ecs.addComponent<SelectedComponent>(collision.mEntity);
+			}
+		}
+		else if (selectedComponent.has_value()) {
+			ecs.removeComponent<SelectedComponent>(std::get<0>(*selectedComponent));
 		}
 	}
 }
