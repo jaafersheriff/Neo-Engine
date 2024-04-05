@@ -185,8 +185,10 @@ namespace neo {
 			ImGuizmo::Manipulate(
 				&V[0][0],
 				&P[0][0],
-				ImGuizmo::OPERATION::UNIVERSAL,
-				ImGuizmo::WORLD,
+				ImGuizmo::OPERATION::TRANSLATE 
+					| ImGuizmo::OPERATION::SCALEU 
+					| ImGuizmo::OPERATION::ROTATE_X | ImGuizmo::OPERATION::ROTATE_Y | ImGuizmo::OPERATION::ROTATE_Z,
+				ImGuizmo::LOCAL,
 				&transform[0][0],
 				nullptr,
 				nullptr);
