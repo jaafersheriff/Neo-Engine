@@ -292,7 +292,7 @@ namespace PBR {
 		static float numSpheres = 8;
 		for (int i = 0; i < numSpheres; i++) {
 			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, 0.f), glm::vec3(0.3f));
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, 0.f), glm::vec3(0.6f));
 			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
 			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			ecs.addComponent<OpaqueComponent>(entity);
@@ -305,7 +305,7 @@ namespace PBR {
 		// Conductive spheres
 		for (int i = 0; i < numSpheres; i++) {
 			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, -1.5f), glm::vec3(0.3f));
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, -1.5f), glm::vec3(0.6f));
 			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
 			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			ecs.addComponent<OpaqueComponent>(entity);
@@ -318,7 +318,7 @@ namespace PBR {
 		// Emissive sphere
 		{
 			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f, -0.75f), glm::vec3(0.3f));
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f, -0.75f), glm::vec3(0.6f));
 			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
 			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			ecs.addComponent<OpaqueComponent>(entity);
