@@ -322,6 +322,7 @@ namespace neo {
 			if (!ImGuizmo::IsUsing()) {
 				mMouseRaySystem.update(mECS);
 				mSelectingSystem.update(mECS);
+			}
 		}
 		{
 			TRACY_ZONEN("Update line meshes");
