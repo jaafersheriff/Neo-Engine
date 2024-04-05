@@ -7,7 +7,7 @@
 
 namespace neo {
 
-	LineMeshComponent::LineMeshComponent(MeshResourceManager& meshManager, std::optional<glm::vec3> overrideColor) :
+	LineMeshComponent::LineMeshComponent(const MeshResourceManager& meshManager, std::optional<glm::vec3> overrideColor) :
 		mDirty(false),
 		mWriteDepth(true),
 		mUseParentSpatial(false),
@@ -38,12 +38,51 @@ namespace neo {
 		};
 
 		// Heh???
-		HashedString random(reinterpret_cast<const char*>(this));
+		MeshHandle random(static_cast<uint32_t>(reinterpret_cast<std::uintptr_t>(this)));
 		mMeshHandle = meshManager.asyncLoad(random, std::move(builder));
 	}
 
 	LineMeshComponent::~LineMeshComponent() {
 		// mMesh->destroy();
+	}
+
+	const Mesh& LineMeshComponent::getMesh(const MeshResourceManager& meshManager) const {
+		NEO_ASSERT(meshManager.isValid(mMeshHandle), "Attempting to update a non-existent mesh??");
+		auto& mesh = meshManager.resolve(mMeshHandle);
+		if (mDirty && mNodes.size()) {
+			TRACY_ZONE();
+			std::vector<float> positions;
+			std::vector<float> colors;
+			positions.resize(mNodes.size() * 3);
+			colors.resize(mNodes.size() * 3);
+			for (uint32_t i = 0; i < mNodes.size(); i++) {
+				positions[i * 3 + 0] = mNodes[i].position.x;
+				positions[i * 3 + 1] = mNodes[i].position.y;
+				positions[i * 3 + 2] = mNodes[i].position.z;
+				colors[i * 3 + 0] = mNodes[i].color.r;
+				colors[i * 3 + 1] = mNodes[i].color.g;
+				colors[i * 3 + 2] = mNodes[i].color.b;
+			}
+
+			meshManager.transact(mMeshHandle, [positions, colors](Mesh& mesh) {
+				mesh.updateVertexBuffer(
+					types::mesh::VertexType::Position,
+					static_cast<uint32_t>(positions.size()),
+					static_cast<uint32_t>(positions.size() * sizeof(float)),
+					reinterpret_cast<uint8_t*>(const_cast<float*>(positions.data()))
+				);
+				mesh.updateVertexBuffer(
+					types::mesh::VertexType::Normal,
+					static_cast<uint32_t>(colors.size()),
+					static_cast<uint32_t>(colors.size() * sizeof(float)),
+					reinterpret_cast<uint8_t*>(const_cast<float*>(colors.data()))
+				);
+			});
+
+			mDirty = false;
+		}
+
+		return mesh;
 	}
 
 	void LineMeshComponent::addNode(const glm::vec3 pos, glm::vec3 col) {
@@ -60,6 +99,7 @@ namespace neo {
 		if (i < mNodes.size()) {
 			mNodes[i].position = pos;
 			mNodes[i].color = col.value_or(mOverrideColor.value_or(glm::vec3(1.f)));
+			mDirty = true;
 		}
 	}
 
@@ -86,7 +126,7 @@ namespace neo {
 
 	void LineMeshComponent::imGuiEditor() {
 		if (mOverrideColor) {
-			ImGui::ColorPicker3("Color", &(mOverrideColor.value())[0]);
+			mDirty |= ImGui::ColorPicker3("Color", &(mOverrideColor.value())[0]);
 		}
 		ImGui::Separator();
 
@@ -106,7 +146,9 @@ namespace neo {
 			bool edited = false;
 			edited = edited || ImGui::SliderFloat3("Position", &pos[0], -25.f, 25.f);
 			edited = edited || ImGui::ColorEdit3("Color", &col[0]);
-			editNode(index, pos, col);
+			if (edited) {
+				editNode(index, pos, col);
+			}
 		}
 	}
 }

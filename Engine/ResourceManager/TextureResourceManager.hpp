@@ -3,8 +3,6 @@
 #include "ResourceManagerInterface.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 
-#include "Loader/STBIImageData.hpp"
-
 #include "Util/Util.hpp"
 
 #include <string>
