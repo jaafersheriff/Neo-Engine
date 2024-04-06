@@ -123,7 +123,7 @@ namespace Sponza {
 			}
 			ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
 			ecs.addComponent<MeshComponent>(entity, node.mMeshHandle);
-			ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax);
+			ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax, true);
 			if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
 				ecs.addComponent<OpaqueComponent>(entity);
 			}
@@ -293,16 +293,19 @@ namespace Sponza {
 				{ ShaderStage::VERTEX, "quad.vert"},
 				{ ShaderStage::FRAGMENT, "sponza/combine.frag" }
 				});
+			if (!resourceManagers.mShaderManager.isValid(combineShaderHandle)) {
+				return;
+			}
 			ShaderDefines defines;
 			MakeDefine(DRAW_AO);
-			if (mDrawAO) {
+			if (mDrawAO && resourceManagers.mTextureManager.isValid(aoHandle)) {
 				defines.set(DRAW_AO);
 			}
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(combineShaderHandle, defines);
 			resolvedShader.bind();
 
 			resolvedShader.bindTexture("lightOutput", resourceManagers.mTextureManager.resolve(lightResolve.mTextures[0]));
-			if (mDrawAO) {
+			if (mDrawAO && resourceManagers.mTextureManager.isValid(aoHandle)) {
 				resolvedShader.bindTexture("aoOutput", resourceManagers.mTextureManager.resolve(aoHandle));
 			}
 

@@ -81,18 +81,14 @@ namespace neo {
 		}
 
 		[[nodiscard]] ResourceHandle<ResourceType> asyncLoad(HashedString id, ResourceLoadDetails details) const {
-			ResourceHandle<ResourceType> resourceId(id.value());
-			if (isValid(resourceId) || isQueued(resourceId)) {
-				return resourceId;
-			}
-			return static_cast<const DerivedManager*>(this)->_asyncLoadImpl(resourceId, details, std::string(id.data()));
+			return asyncLoad(ResourceHandle<ResourceType>(id.value()), details, std::string(id.data()));
 		}
 
-		[[nodiscard]] ResourceHandle<ResourceType> asyncLoad(ResourceHandle<ResourceType> id, ResourceLoadDetails details) const {
+		[[nodiscard]] ResourceHandle<ResourceType> asyncLoad(ResourceHandle<ResourceType> id, ResourceLoadDetails details, std::optional<std::string> debugName = std::nullopt) const {
 			if (isValid(id) || isQueued(id)) {
 				return id;
 			}
-			return static_cast<const DerivedManager*>(this)->_asyncLoadImpl(id, details, std::nullopt);
+			return static_cast<const DerivedManager*>(this)->_asyncLoadImpl(id, details, debugName);
 		}
 
 		void transact(ResourceHandle<ResourceType> handle, std::function<void(ResourceType&)> transaction) const {

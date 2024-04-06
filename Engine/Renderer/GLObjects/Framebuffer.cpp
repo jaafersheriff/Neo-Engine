@@ -61,12 +61,18 @@ namespace neo {
 	void Framebuffer::attachTexture(TextureHandle id, const Texture& texture) {
 		NEO_ASSERT(texture.mFormat.mTarget == types::texture::Target::Texture2D, "Framebuffers need 2D textures");
 
-		types::framebuffer::AttachmentBit attachment = types::framebuffer::AttachmentBit::Color;
-		if (TextureFormat::deriveBaseFormat(texture.mFormat.mInternalFormat) == types::texture::BaseFormats::Depth) {
-			attachment = types::framebuffer::AttachmentBit::Depth;
-		}
-		if (TextureFormat::deriveBaseFormat(texture.mFormat.mInternalFormat) == types::texture::BaseFormats::DepthStencil) {
-			attachment = types::framebuffer::AttachmentBit::Stencil;
+		types::framebuffer::AttachmentBit attachment;
+		switch (TextureFormat::deriveBaseFormat(texture.mFormat.mInternalFormat)) {
+			case types::texture::BaseFormats::Depth:
+				attachment = types::framebuffer::AttachmentBit::Depth;
+				break;
+			case types::texture::BaseFormats::DepthStencil:
+				attachment = types::framebuffer::AttachmentBit::Stencil;
+				break;
+			default:
+				attachment = types::framebuffer::AttachmentBit::Color;
+				mColorAttachments++;
+				break;
 		}
 
 		mTextures.emplace_back(id);

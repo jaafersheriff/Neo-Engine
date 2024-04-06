@@ -77,8 +77,9 @@ namespace neo {
 		bool owned = false;
 		std::visit(util::VisitOverloaded{
 			[&](FramebufferBuilder& builder) {
-				for (auto& format : builder.mFormats) {
-					texIds.emplace_back(textureManager.asyncLoad(swizzleTextureId(dstId, format, builder.mSize), TextureBuilder{ format, glm::u16vec3(builder.mSize, 0.0), nullptr }));
+				for (int i = 0; i < builder.mFormats.size(); i++) {
+					auto& format = builder.mFormats[i];
+					texIds.emplace_back(textureManager.asyncLoad(swizzleTextureId(dstId.mHandle + i, format, builder.mSize), TextureBuilder{ format, glm::u16vec3(builder.mSize, 0.0)}, std::string(id.data()) + std::to_string(i)));
 				}
 			},
 			[&](std::vector<TextureHandle>& _texIds) {
