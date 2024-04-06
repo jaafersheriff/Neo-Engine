@@ -13,23 +13,20 @@ namespace neo {
 
 		std::shared_ptr<BackedResource<SourceShader>> load(const ShaderLoadDetails& shaderDetails, std::optional<std::string> debugName) const {
 			NEO_ASSERT(debugName.has_value(), "Shaders need to come with a name please");
-			return std::visit([&](auto&& arg) {
-				using T = std::decay_t<decltype(arg)>;
-				if constexpr (std::is_same_v<T, SourceShader::ConstructionArgs>) {
+			return std::visit(util::VisitOverloaded{
+				[&](const SourceShader::ConstructionArgs& constructionArgs) {
 					SourceShader::ShaderCode shaderCode;
-					for (auto&&[type, filePath] : arg) {
+					for (auto&&[type, filePath] : constructionArgs) {
 						shaderCode.emplace(type, Loader::loadFileString(filePath));
 					}
 					auto result = std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
-					result->mResource.mConstructionArgs = arg;
+					result->mResource.mConstructionArgs = constructionArgs;
 					return result;
-				}
-				else if constexpr (std::is_same_v<T, SourceShader::ShaderCode>) {
-					return std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), arg);
-				}
-				else {
-					static_assert(always_false_v<T>, "non-exhaustive visitor!");
-				}
+				},
+				[&](const SourceShader::ShaderCode& shaderCode) {
+					return std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
+				},
+				[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
 			}, shaderDetails);
 
 			return nullptr;

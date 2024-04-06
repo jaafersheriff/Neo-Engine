@@ -267,7 +267,7 @@ namespace neo {
 			[&](glm::vec4 v) { glUniform4f(_getUniform(name), v.x, v.y, v.z, v.w); },
 			[&](glm::mat3 m) { glUniformMatrix3fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
 			[&](glm::mat4 m) { glUniformMatrix4fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
-			[&](auto) { NEO_FAIL("Invalid variant"); }
+			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
 		}, uniform);
 	}
 

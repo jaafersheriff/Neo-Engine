@@ -138,32 +138,29 @@ namespace neo {
 
 	[[nodiscard]] TextureHandle TextureResourceManager::_asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, std::optional<std::string> debugName) const {
 		NEO_UNUSED(debugName);
-		std::visit([&](auto&& arg) {
-			using T = std::decay_t<decltype(arg)>;
-			if constexpr (std::is_same_v<T, TextureBuilder>) {
-				TextureBuilder copy = arg;
-				if (arg.mData != nullptr) {
+		std::visit(util::VisitOverloaded{
+			[&](TextureBuilder& builder) {
+				TextureBuilder copy = builder;
+				if (builder.mData != nullptr) {
 					// Base dimension
-					uint32_t byteSize = glm::max<glm::u16>(arg.mDimensions.x, 1u) * glm::max<glm::u16>(arg.mDimensions.y, 1u) * glm::max<glm::u16>(arg.mDimensions.z, 1u);
+					uint32_t byteSize = glm::max<glm::u16>(builder.mDimensions.x, 1u) * glm::max<glm::u16>(builder.mDimensions.y, 1u) * glm::max<glm::u16>(builder.mDimensions.z, 1u);
 					// Components per pixel
-					byteSize *= _channelsPerPixel(TextureFormat::deriveBaseFormat(arg.mFormat.mInternalFormat));
+					byteSize *= _channelsPerPixel(TextureFormat::deriveBaseFormat(builder.mFormat.mInternalFormat));
 					// Pixel format
-					byteSize *= _bytesPerPixel(arg.mFormat.mType);
+					byteSize *= _bytesPerPixel(builder.mFormat.mType);
 
 					copy.mData = static_cast<uint8_t*>(malloc(byteSize));
-					memcpy(const_cast<uint8_t*>(copy.mData), arg.mData, byteSize);
+					memcpy(const_cast<uint8_t*>(copy.mData), builder.mData, byteSize);
 				}
 				mQueue.emplace_back(ResourceLoadDetails_Internal{ id, copy, debugName });
-			}
-			else if constexpr (std::is_same_v<T, FileLoadDetails>) {
-				NEO_ASSERT(arg.mFilePaths.size() == 1 || arg.mFilePaths.size() == 6, "Invalid file path count when loading texture");
+			},
+			[&](FileLoadDetails& loadDetails) {
+				NEO_ASSERT(loadDetails.mFilePaths.size() == 1 || loadDetails.mFilePaths.size() == 6, "Invalid file path count when loading texture");
 
 				// Can safely copy into queue
-				mQueue.emplace_back(ResourceLoadDetails_Internal{ id, arg, debugName });
-			}
-			else {
-				static_assert(always_false_v<T>, "non-exhaustive visitor!");
-			}
+				mQueue.emplace_back(ResourceLoadDetails_Internal{ id, loadDetails, debugName });
+			},
+			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
 		}, textureDetails);
 
 		return id;
