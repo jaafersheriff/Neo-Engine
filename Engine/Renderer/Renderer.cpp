@@ -111,7 +111,6 @@ namespace neo {
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		mDefaultFBOHandle = resourceManagers.mFramebufferManager.asyncLoad(
-			resourceManagers.mTextureManager,
 			"backbuffer",
 			FramebufferBuilder{}
 			.setSize(glm::uvec2(viewport.mSize))
@@ -124,7 +123,8 @@ namespace neo {
 				types::texture::InternalFormats::D16,
 				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
 				{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
-			})
+			}),
+			resourceManagers.mTextureManager
 		);
 		if (!resourceManagers.mFramebufferManager.isValid(mDefaultFBOHandle)) {
 			return;

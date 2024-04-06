@@ -37,8 +37,11 @@ namespace neo {
 			return other.mSize == mSize && other.mFormats == mFormats;
 		}
 	};
-	using FramebufferLoadDetails = std::variant<FramebufferBuilder, std::vector<TextureHandle>>;
 
+	struct FramebufferExternal {
+		std::vector<TextureHandle> mTextureHandles;
+	};
+	using FramebufferLoadDetails = std::variant<FramebufferBuilder, FramebufferExternal>;
 
 	struct PooledFramebuffer {
 		Framebuffer mFramebuffer;
@@ -84,7 +87,7 @@ namespace neo {
 			return _resolveFinal(id);
 		}
 
-		[[nodiscard]] FramebufferHandle asyncLoad(const TextureResourceManager& textureManager, HashedString id, FramebufferLoadDetails details) const;
+		[[nodiscard]] FramebufferHandle asyncLoad(HashedString id, FramebufferLoadDetails details, const TextureResourceManager& textureManager) const;
 
 	protected:
 

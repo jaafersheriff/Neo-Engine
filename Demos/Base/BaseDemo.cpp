@@ -84,7 +84,7 @@ namespace Base {
 			ecs.addComponent<AlphaTestComponent>(plane);
 			auto material = ecs.addComponent<MaterialComponent>(plane);
 			material->mAlbedoColor = glm::vec4(1.f);
-			material->mAlbedoMap = resourceManagers.mTextureManager.asyncLoad("grid", FileLoadDetails{ {"grid.png"}, {} });
+			material->mAlbedoMap = resourceManagers.mTextureManager.asyncLoad("grid", TextureFiles{ {"grid.png"}, {} });
 		}
 
 		ecs.addSystem<CameraControllerSystem>();
@@ -103,12 +103,13 @@ namespace Base {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Scene Target",
 			FramebufferBuilder{}
 				.setSize(viewport.mSize)
 				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
-				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 })
+				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
+			resourceManagers.mTextureManager
 		);
 
 		if (resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {

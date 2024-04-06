@@ -26,19 +26,20 @@
 namespace Sponza {
 
 	FramebufferHandle createGBuffer(const ResourceManagers& resourceManagers, glm::uvec2 targetSize) {
-		return resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+		return resourceManagers.mFramebufferManager.asyncLoad(
 			"GBuffer",
 			FramebufferBuilder{}
-			.setSize(targetSize)
-			// Albedo
-			.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})
-			// World 
-			// TODO - could do everything in view space to get rid of this
-			.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})
-			// Normals
-			.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})
-			// Depth
-			.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::D16})
+				.setSize(targetSize)
+				// Albedo
+				.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})
+				// World 
+				// TODO - could do everything in view space to get rid of this
+				.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})
+				// Normals
+				.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})
+				// Depth
+				.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::D16}),
+			resourceManagers.mTextureManager
 		);
 	}
 

@@ -170,25 +170,26 @@ namespace Sponza {
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		FramebufferHandle sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+		FramebufferHandle sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Scene Target",
 			FramebufferBuilder{}
 				.setSize(viewport.mSize)
 				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
-				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 })
+				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
+			resourceManagers.mTextureManager
 		);
 
 		TextureHandle shadowTextureHandle;
 		if (mDrawShadows) {
 			shadowTextureHandle = resourceManagers.mTextureManager.asyncLoad("Shadow map",
-				TextureBuilder{
-					TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 },
-					glm::u16vec3(4096, 4096, 0)
-				}
+				TextureBuilder{}
+					.setDimension(glm::u16vec3(2048, 2048, 0))
+					.setFormat(TextureFormat{types::texture::Target::Texture2D, types::texture::InternalFormats::D16})
 			);
-			FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+			FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 				"Shadow map",
-				std::vector<TextureHandle>{ shadowTextureHandle }
+				FramebufferExternal{ {shadowTextureHandle} },
+				resourceManagers.mTextureManager
 			);
 
 			if (resourceManagers.mFramebufferManager.isValid(shadowTargetHandle)) {
@@ -264,11 +265,12 @@ namespace Sponza {
 			aoHandle = drawAO(resourceManagers, ecs, cameraEntity, gbuffer, viewport, mAORadius, mAOBias);
 		}
 
-		auto lightResolveHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+		auto lightResolveHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Light Resolve",
 			FramebufferBuilder{}
-			.setSize(viewport)
-			.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::RGB16_UNORM })
+				.setSize(viewport)
+				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::RGB16_UNORM }),
+			resourceManagers.mTextureManager
 		);
 
 		if (!resourceManagers.mFramebufferManager.isValid(lightResolveHandle)) {

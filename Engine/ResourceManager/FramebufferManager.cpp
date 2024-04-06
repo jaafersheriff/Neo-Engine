@@ -26,8 +26,8 @@ namespace neo {
 						seed = TextureHandle(swizzleTextureId(seed, format, builder.mSize)).mHandle;
 					}
 				},
-				[&](std::vector<TextureHandle>& texIds) {
-					for (auto& handle : texIds) {
+				[&](FramebufferExternal& external) {
+					for (auto& handle : external.mTextureHandles) {
 						seed ^= static_cast<uint32_t>(handle.mHandle) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 					}
 				},
@@ -67,7 +67,7 @@ namespace neo {
 		mFallback.reset();
 	}
 
-	[[nodiscard]] FramebufferHandle FramebufferResourceManager::asyncLoad(const TextureResourceManager& textureManager, HashedString id, FramebufferLoadDetails framebufferDetails) const {
+	[[nodiscard]] FramebufferHandle FramebufferResourceManager::asyncLoad(HashedString id, FramebufferLoadDetails framebufferDetails, const TextureResourceManager& textureManager) const {
 		FramebufferHandle dstId = swizzleSrcId(id, framebufferDetails);
 		if (isValid(dstId) || isQueued(dstId)) {
 			return dstId;
@@ -82,8 +82,8 @@ namespace neo {
 					texIds.emplace_back(textureManager.asyncLoad(swizzleTextureId(dstId.mHandle + i, format, builder.mSize), TextureBuilder{ format, glm::u16vec3(builder.mSize, 0.0)}, std::string(id.data()) + std::to_string(i)));
 				}
 			},
-			[&](std::vector<TextureHandle>& _texIds) {
-				texIds = _texIds;
+			[&](FramebufferExternal& external) {
+				texIds = external.mTextureHandles;
 				owned = true;
 			},
 			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
