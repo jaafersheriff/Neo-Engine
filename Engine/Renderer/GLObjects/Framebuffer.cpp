@@ -42,6 +42,7 @@ namespace neo {
 			bind();
 			glObjectLabel(GL_FRAMEBUFFER, mFBOID, -1, debugName.value().c_str());
 		}
+		disableRead();
 	}
 
 	void Framebuffer::bind() const {
@@ -83,6 +84,7 @@ namespace neo {
 
 	void Framebuffer::initDrawBuffers() {
 		NEO_ASSERT(mColorAttachments, "Attempting to init FBO without any color attachments");
+		NEO_ASSERT(mColorAttachments < GL_MAX_COLOR_ATTACHMENTS, "You attached too many textures to this framebuffer");
 
 		bind();
 		std::vector<GLenum> attachments;
