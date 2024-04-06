@@ -248,7 +248,7 @@ namespace {
 
 		builder.mDimensions.x = static_cast<uint16_t>(image.width);
 		builder.mDimensions.y = static_cast<uint16_t>(image.height);
-		builder.mData = image.image.data();
+		builder.mData = const_cast<uint8_t*>(image.image.data());
 		// Heh?
 		HashedString name = HashedString(reinterpret_cast<char*>(const_cast<uint8_t*>(builder.mData)));
 		if (!image.uri.empty()) {

@@ -94,48 +94,38 @@ namespace Sponza {
 
 		// Do base AO at half res
 		auto baseAOTexture = resourceManagers.mTextureManager.asyncLoad("AO Base",
-			TextureBuilder{
-				TextureFormat {
-					types::texture::Target::Texture2D,
-					types::texture::InternalFormats::R16_F,
-					{
-						types::texture::Filters::Linear,
-						types::texture::Filters::Linear,
-					},
-					{
-						types::texture::Wraps::Repeat,
-						types::texture::Wraps::Repeat,
-					},
-					types::ByteFormats::Float
-				},
-				glm::u16vec3(glm::max(glm::uvec2(1, 1), targetSize / 2u), 0.0)
-			}
-		);
-		auto blurAOTexture = resourceManagers.mTextureManager.asyncLoad("AO Blur",
-			TextureBuilder{
-				TextureFormat {
+			TextureBuilder{}
+			.setDimension(glm::u16vec3(glm::max(glm::uvec2(1, 1), targetSize / 2u), 0.0))
+			.setFormat(TextureFormat{
 				types::texture::Target::Texture2D,
 				types::texture::InternalFormats::R16_F,
-				{
-					types::texture::Filters::Linear,
-					types::texture::Filters::Linear,
-				},
-				{
-					types::texture::Wraps::Repeat,
-					types::texture::Wraps::Repeat,
-				},
+				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
+				{ types::texture::Wraps::Repeat, types::texture::Wraps::Repeat },
 				types::ByteFormats::Float
-				},
-				glm::u16vec3(targetSize, 0.0)
-			}
+				}
+			)
+		);
+
+		auto blurAOTexture = resourceManagers.mTextureManager.asyncLoad("AO Blur",
+			TextureBuilder{}
+			.setDimension(glm::u16vec3(targetSize, 0.0))
+			.setFormat(TextureFormat{
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::R16_F,
+				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
+				{ types::texture::Wraps::Repeat, types::texture::Wraps::Repeat },
+				types::ByteFormats::Float
+				}
+			)
 		);
 
 		// Make a one-off framebuffer for the base AO
 		{
 			TRACY_GPUN("Base AO");
-			auto baseAOHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+			auto baseAOHandle = resourceManagers.mFramebufferManager.asyncLoad(
 				"AO Base",
-				std::vector<TextureHandle>{baseAOTexture}
+				FramebufferExternal{ {baseAOTexture} },
+				resourceManagers.mTextureManager
 			);
 			if (resourceManagers.mFramebufferManager.isValid(baseAOHandle)) {
 				auto& baseAOTarget = resourceManagers.mFramebufferManager.resolve(baseAOHandle);
@@ -169,9 +159,10 @@ namespace Sponza {
 		{
 			TRACY_GPUN("AO Blur");
 			{
-				auto blurAOHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+				auto blurAOHandle = resourceManagers.mFramebufferManager.asyncLoad(
 					"AO Base",
-					std::vector<TextureHandle>{blurAOTexture}
+					FramebufferExternal{ {blurAOTexture} },
+					resourceManagers.mTextureManager
 				);
 				if (resourceManagers.mTextureManager.isValid(baseAOTexture) && resourceManagers.mFramebufferManager.isValid(blurAOHandle)) {
 					auto blurredAO = resourceManagers.mFramebufferManager.resolve(blurAOHandle);

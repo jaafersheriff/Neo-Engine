@@ -168,17 +168,14 @@ namespace FrustaFitting {
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto shadowTexture = resourceManagers.mTextureManager.asyncLoad("Shadow map",
-			TextureBuilder{
-				TextureFormat {
-					types::texture::Target::Texture2D,
-					types::texture::InternalFormats::D16,
-				},
-				glm::u16vec3(2048, 2048, 0)
-			}
+			TextureBuilder{}
+				.setDimension(glm::u16vec3(2048, 2048, 0))
+				.setFormat(TextureFormat{types::texture::Target::Texture2D, types::texture::InternalFormats::D16})
 		);
-		auto shadowMapHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+		auto shadowMapHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Shadow map",
-			std::vector<TextureHandle>{shadowTexture}
+			FramebufferExternal{ {shadowTexture} },
+			resourceManagers.mTextureManager
 		);
 
 		if (resourceManagers.mFramebufferManager.isValid(shadowMapHandle)) {

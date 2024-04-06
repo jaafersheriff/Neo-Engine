@@ -332,7 +332,7 @@ namespace PBR {
 
 		{
 			auto skybox = ecs.createEntity();
-			ecs.addComponent<SkyboxComponent>(skybox, resourceManagers.mTextureManager.asyncLoad("Skybox", FileLoadDetails{ 
+			ecs.addComponent<SkyboxComponent>(skybox, resourceManagers.mTextureManager.asyncLoad("Skybox", TextureFiles{ 
 				{
 					"envmap_miramar/miramar_ft.tga",
 					"envmap_miramar/miramar_bk.tga",
@@ -441,14 +441,14 @@ namespace PBR {
 		TextureHandle shadowTexture = NEO_INVALID_HANDLE;
 		if (mDrawShadows) {
 			shadowTexture = resourceManagers.mTextureManager.asyncLoad("Shadow map",
-				TextureBuilder{
-					TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 },
-					glm::u16vec3(4096, 4096, 0)
-				}
+				TextureBuilder{}
+					.setDimension(glm::u16vec3(2048, 2048, 0))
+					.setFormat(TextureFormat{types::texture::Target::Texture2D, types::texture::InternalFormats::D16})
 			);
-			FramebufferHandle shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+			FramebufferHandle shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(
 				"Shadow map",
-				std::vector<TextureHandle>{ shadowTexture }
+				FramebufferExternal{ { shadowTexture } },
+				resourceManagers.mTextureManager
 			);
 
 			if (resourceManagers.mFramebufferManager.isValid(shadowTarget)) {

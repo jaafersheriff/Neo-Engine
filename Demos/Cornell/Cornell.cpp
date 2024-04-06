@@ -96,12 +96,13 @@ namespace Cornell {
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(resourceManagers.mTextureManager,
+		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Scene Target",
 			FramebufferBuilder{}
 				.setSize(viewport.mSize)
 				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
-				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 })
+				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
+			resourceManagers.mTextureManager
 		);
 
 		if (resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
