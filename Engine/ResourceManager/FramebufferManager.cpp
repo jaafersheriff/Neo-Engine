@@ -20,21 +20,18 @@ namespace neo {
 
 		FramebufferHandle swizzleSrcId(HashedString id, FramebufferLoadDetails& loadDetails) {
 			HashedString::hash_type seed = id;
-			std::visit([&](auto&& arg) {
-				using T = std::decay_t<decltype(arg)>;
-				if constexpr (std::is_same_v<T, FramebufferBuilder>) {
-					for (auto& format : arg.mFormats) {
-						seed = TextureHandle(swizzleTextureId(seed, format, arg.mSize)).mHandle;
+			std::visit(util::VisitOverloaded{
+				[&](FramebufferBuilder& builder) {
+					for (auto& format : builder.mFormats) {
+						seed = TextureHandle(swizzleTextureId(seed, format, builder.mSize)).mHandle;
 					}
-				}
-				else if constexpr (std::is_same_v<T, std::vector<TextureHandle>>) {
-					for (auto& handle : arg) {
+				},
+				[&](std::vector<TextureHandle>& texIds) {
+					for (auto& handle : texIds) {
 						seed ^= static_cast<uint32_t>(handle.mHandle) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 					}
-				}
-				else {
-					static_assert(always_false_v<T>, "non-exhaustive visitor!");
-				}
+				},
+				[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
 			}, loadDetails);
 
 			return FramebufferHandle(seed);
@@ -78,21 +75,18 @@ namespace neo {
 
 		std::vector<TextureHandle> texIds;
 		bool owned = false;
-		std::visit([&](auto&& arg) {
-			using T = std::decay_t<decltype(arg)>;
-			if constexpr (std::is_same_v<T, FramebufferBuilder>) {
-				for (auto& format : arg.mFormats) {
-					texIds.emplace_back(textureManager.asyncLoad(swizzleTextureId(dstId, format, arg.mSize), TextureBuilder{ format, glm::u16vec3(arg.mSize, 0.0), nullptr }));
+		std::visit(util::VisitOverloaded{
+			[&](FramebufferBuilder& builder) {
+				for (auto& format : builder.mFormats) {
+					texIds.emplace_back(textureManager.asyncLoad(swizzleTextureId(dstId, format, builder.mSize), TextureBuilder{ format, glm::u16vec3(builder.mSize, 0.0), nullptr }));
 				}
-			}
-			else if constexpr (std::is_same_v<T, std::vector<TextureHandle>>) {
-				texIds = arg;
+			},
+			[&](std::vector<TextureHandle>& _texIds) {
+				texIds = _texIds;
 				owned = true;
-			}
-			else {
-				static_assert(always_false_v<T>, "non-exhaustive visitor!");
-			}
-			}, framebufferDetails);
+			},
+			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
+		}, framebufferDetails);
 
 		mQueue.emplace_back(FramebufferQueueItem{
 			dstId, 
