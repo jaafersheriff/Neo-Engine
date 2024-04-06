@@ -34,6 +34,12 @@ namespace neo {
 
 	namespace util {
 
+		// https://en.cppreference.com/w/cpp/utility/variant/visit
+		template<class... Ts>
+		struct VisitOverloaded : Ts... { using Ts::operator()...; };
+		template<class... Ts>
+		VisitOverloaded(Ts...) -> VisitOverloaded<Ts...>;
+
 		static const float PI = glm::pi<float>();
 		static const float EP = static_cast<float>(1e-4);
 

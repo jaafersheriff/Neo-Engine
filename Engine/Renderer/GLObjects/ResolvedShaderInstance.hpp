@@ -3,6 +3,7 @@
 #include "Renderer/GLObjects/SourceShader.hpp"
 
 #include <glm/glm.hpp>
+#include <entt/container/dense_hash_map.hpp>
 
 #include <variant>
 #include <set>
@@ -48,9 +49,9 @@ namespace neo {
 	private:
 		bool mValid = false;
 		uint32_t mPid = 0;
-		std::unordered_map<ShaderStage, uint32_t> mShaderIDs;
-		std::unordered_map<HashedString::hash_type, int32_t> mUniforms;
-		std::unordered_map<HashedString::hash_type, int32_t> mBindings;
+		entt::dense_hash_map<ShaderStage, uint32_t> mShaderIDs;
+		entt::dense_hash_map<HashedString::hash_type, int32_t> mUniforms;
+		entt::dense_hash_map<HashedString::hash_type, int32_t> mBindings;
 		std::string mVariant;
 
 		uint32_t _compileShader(uint32_t shaderType, const char* shaderString);

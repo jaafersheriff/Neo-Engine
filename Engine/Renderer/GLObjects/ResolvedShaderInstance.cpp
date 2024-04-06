@@ -7,6 +7,7 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 
+#include "Util/Util.hpp"
 #include "Loader/Loader.hpp"
 
 #include <glslang/Include/glslang_c_interface.h>
@@ -253,34 +254,20 @@ namespace neo {
 	}
 
 	void ResolvedShaderInstance::bindUniform(const char* name, const UniformVariant& uniform) const {
-		std::visit([&](auto&& arg) {
-			using T = std::decay_t<decltype(arg)>;
-			if constexpr (std::is_same_v<T, bool>)
-				glUniform1i(_getUniform(name), arg);
-			else if constexpr (std::is_same_v<T, int>)
-				glUniform1i(_getUniform(name), arg);
-			else if constexpr (std::is_same_v<T, uint32_t>)
-				glUniform1ui(_getUniform(name), arg);
-			else if constexpr (std::is_same_v<T, double>)
-				glUniform1f(_getUniform(name), static_cast<float>(arg));
-			else if constexpr (std::is_same_v<T, float>)
-				glUniform1f(_getUniform(name), arg);
-			else if constexpr (std::is_same_v<T, glm::vec2>)
-				glUniform2f(_getUniform(name), arg.x, arg.y);
-			else if constexpr (std::is_same_v<T, glm::ivec2>)
-				glUniform2i(_getUniform(name), arg.x, arg.y);
-			else if constexpr (std::is_same_v<T, glm::uvec2>)
-				glUniform2i(_getUniform(name), arg.x, arg.y);
-			else if constexpr (std::is_same_v<T, glm::vec3>)
-				glUniform3f(_getUniform(name), arg.x, arg.y, arg.z);
-			else if constexpr (std::is_same_v<T, glm::vec4>)
-				glUniform4f(_getUniform(name), arg.x, arg.y, arg.z, arg.w);
-			else if constexpr (std::is_same_v<T, glm::mat3>)
-				glUniformMatrix3fv(_getUniform(name), 1, GL_FALSE, &arg[0][0]);
-			else if constexpr (std::is_same_v<T, glm::mat4>)
-				glUniformMatrix4fv(_getUniform(name), 1, GL_FALSE, &arg[0][0]);
-			else
-				static_assert(always_false_v<T>, "non-exhaustive visitor!");
+		std::visit(util::VisitOverloaded{
+			[&](bool b) { glUniform1i(_getUniform(name), b); },
+			[&](int i) { glUniform1i(_getUniform(name), i); },
+			[&](uint32_t i) { glUniform1ui(_getUniform(name), i); },
+			[&](double d) { glUniform1f(_getUniform(name), static_cast<float>(d)); },
+			[&](float f) { glUniform1f(_getUniform(name), static_cast<float>(f)); },
+			[&](glm::vec2 v) { glUniform2f(_getUniform(name), v.x, v.y); },
+			[&](glm::ivec2 v) { glUniform2i(_getUniform(name), v.x, v.y); },
+			[&](glm::uvec2 v) { glUniform2i(_getUniform(name), v.x, v.y); },
+			[&](glm::vec3 v) { glUniform3f(_getUniform(name), v.x, v.y, v.z); },
+			[&](glm::vec4 v) { glUniform4f(_getUniform(name), v.x, v.y, v.z, v.w); },
+			[&](glm::mat3 m) { glUniformMatrix3fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
+			[&](glm::mat4 m) { glUniformMatrix4fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
+			[&](auto) { NEO_FAIL("Invalid variant"); }
 		}, uniform);
 	}
 
