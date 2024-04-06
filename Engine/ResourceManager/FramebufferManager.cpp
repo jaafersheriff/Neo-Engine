@@ -39,13 +39,13 @@ namespace neo {
 
 		struct FramebufferLoader final : entt::resource_loader<FramebufferLoader, BackedResource<PooledFramebuffer>> {
 
-			std::shared_ptr<BackedResource<PooledFramebuffer>> load(const FramebufferQueueItem& details, const TextureResourceManager& manager) const {
+			std::shared_ptr<BackedResource<PooledFramebuffer>> load(const FramebufferQueueItem& details, const TextureResourceManager& textureManager) const {
 				std::shared_ptr<BackedResource<PooledFramebuffer>> framebuffer = std::make_shared<BackedResource<PooledFramebuffer>>();
 				framebuffer->mResource.mFramebuffer.init(details.mDebugName);
 				framebuffer->mResource.mFrameCount = 1;
 				framebuffer->mResource.mExternallyOwned = details.mExternallyOwned;
 				for (auto& texHandle : details.mTexIDs) {
-					framebuffer->mResource.mFramebuffer.attachTexture(texHandle, manager.resolve(texHandle));
+					framebuffer->mResource.mFramebuffer.attachTexture(texHandle, textureManager.resolve(texHandle));
 				}
 				if (framebuffer->mResource.mFramebuffer.mColorAttachments) {
 					framebuffer->mResource.mFramebuffer.initDrawBuffers();
