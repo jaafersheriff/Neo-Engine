@@ -43,11 +43,14 @@ namespace neo {
 	}
 
 	LineMeshComponent::~LineMeshComponent() {
-		// mMesh->destroy();
+		// TODO - destroy meshhandle
 	}
 
 	const Mesh& LineMeshComponent::getMesh(const MeshResourceManager& meshManager) const {
-		NEO_ASSERT(meshManager.isValid(mMeshHandle), "Attempting to update a non-existent mesh??");
+		if (!meshManager.isValid(mMeshHandle)) {
+			return meshManager.resolve(NEO_INVALID_HANDLE);
+		}
+
 		auto& mesh = meshManager.resolve(mMeshHandle);
 		if (mDirty && mNodes.size()) {
 			TRACY_ZONE();
@@ -77,11 +80,10 @@ namespace neo {
 					static_cast<uint32_t>(colors.size() * sizeof(float)),
 					reinterpret_cast<uint8_t*>(const_cast<float*>(colors.data()))
 				);
-			});
+				});
 
 			mDirty = false;
 		}
-
 		return mesh;
 	}
 
