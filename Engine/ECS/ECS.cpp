@@ -60,16 +60,29 @@ namespace neo {
 	void ECS::imguiEdtor() {
 		TRACY_ZONE();
 		ImGui::Begin("ECS");
-		char buf[64];
-		sprintf(buf, "Entities: %d", static_cast<int>(mRegistry.alive()));
-		if (ImGui::TreeNodeEx(buf, ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (ImGui::TreeNodeEx(&mRegistry, 0, "All Entities: %d", static_cast<int>(mRegistry.alive()))) {
 			getView<TagComponent>().each([this](Entity entity, TagComponent& tag) {
-				if (ImGui::TreeNodeEx(tag.mTag.c_str(), has<SelectedComponent>(entity) ? ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_DefaultOpen : 0 )) {
+				if (ImGui::TreeNodeEx(tag.mTag.c_str())) {
 					mEditor.renderEditor(mRegistry, entity);
 					ImGui::TreePop();
 				}
-				});
+			});
 			ImGui::TreePop();
+		}
+		auto selected = getComponent<SelectedComponent>();
+		if (selected.has_value()) {
+			auto&& [selectedEntity, _] = *selected;
+			char title[64];
+			if (has<TagComponent>(selectedEntity)) {
+				sprintf(title, "%s", getComponent<TagComponent>(selectedEntity)->mTag.c_str());
+			}
+			else {
+				sprintf(title, "%d", static_cast<int>(selectedEntity));
+			}
+			if (ImGui::TreeNodeEx(title, ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_DefaultOpen)) {
+				mEditor.renderEditor(mRegistry, selectedEntity);
+				ImGui::TreePop();
+			}
 		}
 		if (mSystems.size() && ImGui::TreeNodeEx("Systems", ImGuiTreeNodeFlags_DefaultOpen)) {
 			for (unsigned i = 0; i < mSystems.size(); i++) {

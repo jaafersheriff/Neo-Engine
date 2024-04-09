@@ -25,7 +25,7 @@ namespace neo {
 		// Early exit
 		if (!viewport.has_value() || !mouseComponent.has_value()) {
 			if (mouseRayComponent.has_value()) {
-				ecs.removeComponent<MouseRayComponent>(std::get<0>(mouseRayComponent.value()));
+				ecs.removeEntity(std::get<0>(*mouseRayComponent));
 			}
 		}
 
@@ -63,7 +63,7 @@ namespace neo {
 
 		}
 		else if (mouseRayComponent.has_value()) {
-			ecs.removeComponent<MouseRayComponent>(std::get<0>(mouseRayComponent.value()));
+			ecs.removeEntity(std::get<0>(*mouseRayComponent));
 		}
 	}
 }
