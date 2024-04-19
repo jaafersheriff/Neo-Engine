@@ -99,26 +99,6 @@ namespace neo {
 			}
 		}
 
-		int32_t getGLShaderStage(ShaderStage type) {
-			switch (type) {
-			case(ShaderStage::VERTEX):
-				return GL_VERTEX_SHADER;
-			case(ShaderStage::FRAGMENT):
-				return GL_FRAGMENT_SHADER;
-			case(ShaderStage::GEOMETRY):
-				return GL_GEOMETRY_SHADER;
-			case(ShaderStage::COMPUTE):
-				return GL_COMPUTE_SHADER;
-			case(ShaderStage::TESSELLATION_CONTROL):
-				return GL_TESS_CONTROL_SHADER;
-			case(ShaderStage::TESSELLATION_EVAL):
-				return GL_TESS_EVALUATION_SHADER;
-			default:
-				NEO_FAIL("Invalid ShaderStage: %d", type);
-				return 0;
-			}
-		}
-
 		uint32_t getGLByteFormat(types::ByteFormats format) {
 			switch (format) {
 			case types::ByteFormats::UnsignedByte:

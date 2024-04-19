@@ -48,8 +48,8 @@ namespace Sponza {
 		TRACY_GPU();
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBuffer Shader", SourceShader::ConstructionArgs{
-			{ ShaderStage::VERTEX, "sponza/gbuffer.vert"},
-			{ ShaderStage::FRAGMENT, "sponza/gbuffer.frag" }
+			{ types::shader::Stage::Vertex, "sponza/gbuffer.vert"},
+			{ types::shader::Stage::Fragment, "sponza/gbuffer.frag" }
 		});
 
 

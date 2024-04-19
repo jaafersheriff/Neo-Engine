@@ -13,8 +13,8 @@ namespace neo {
 		TRACY_GPU();
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", SourceShader::ConstructionArgs{
-			{ ShaderStage::VERTEX, "model.vert"},
-			{ ShaderStage::FRAGMENT, "depth.frag" }
+			{ types::shader::Stage::Vertex, "model.vert"},
+			{ types::shader::Stage::Fragment, "depth.frag" }
 		});
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;

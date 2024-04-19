@@ -35,13 +35,13 @@ namespace neo {
 
 	ShaderResourceManager::ShaderResourceManager() {
 		mFallback = ShaderLoader{}.load(SourceShader::ShaderCode{
-			{ShaderStage::VERTEX, 
+			{types::shader::Stage::Vertex, 
 				R"(
 					void main() {
 						gl_Position = vec4(0,0,0,0);
 					}
 				)"},
-			{ShaderStage::FRAGMENT,
+			{types::shader::Stage::Fragment,
 				R"(
 					out vec4 color;
 					void main() {

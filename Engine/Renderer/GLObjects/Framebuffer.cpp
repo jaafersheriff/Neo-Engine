@@ -5,6 +5,12 @@
 #include "Util/Util.hpp"
 #include "Util/Profiler.hpp"
 
+#ifdef DEBUG_MODE
+#define CHECK_GL_FRAMEBUFFER() do {GLHelper::checkFrameBuffer(); } while(0)
+#else
+#define CHECK_GL_FRAMEBUFFER()
+#endif
+
 namespace neo {
 	namespace {
 		GLbitfield _getGLClearFlags(types::framebuffer::AttachmentBits flagBits) {

@@ -12,15 +12,6 @@
 
 namespace neo {
 
-	enum class ShaderStage {
-		VERTEX,
-		FRAGMENT,
-		GEOMETRY,
-		TESSELLATION_CONTROL,
-		TESSELLATION_EVAL,
-		COMPUTE
-	};
-
 	namespace GLHelper {
 
 		void OpenGLMessageCallback(
@@ -32,16 +23,10 @@ namespace neo {
 			const char* message,
 			const void* userParam
 		);
-		int32_t getGLShaderStage(ShaderStage type);
 		uint32_t getGLByteFormat(types::ByteFormats format);
 		void checkFrameBuffer();
 		void printProgramInfoLog(uint32_t program);
 		void printShaderInfoLog(uint32_t shader);
 	}
 
-#ifdef DEBUG_MODE
-#define CHECK_GL_FRAMEBUFFER() do {GLHelper::checkFrameBuffer(); } while(0)
-#else
-#define CHECK_GL_FRAMEBUFFER()
-#endif
 }

@@ -292,8 +292,8 @@ namespace Sponza {
 			sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			glViewport(0, 0, viewport.x, viewport.y);
 			auto combineShaderHandle = resourceManagers.mShaderManager.asyncLoad("FinalCombine", SourceShader::ConstructionArgs{
-				{ ShaderStage::VERTEX, "quad.vert"},
-				{ ShaderStage::FRAGMENT, "sponza/combine.frag" }
+				{ types::shader::Stage::Vertex, "quad.vert"},
+				{ types::shader::Stage::Fragment, "sponza/combine.frag" }
 				});
 			if (!resourceManagers.mShaderManager.isValid(combineShaderHandle)) {
 				return;

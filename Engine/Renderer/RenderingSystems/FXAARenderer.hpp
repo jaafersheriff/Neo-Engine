@@ -15,8 +15,8 @@ namespace neo {
 		}
 
 		auto fxaaShaderHandle = resourceManagers.mShaderManager.asyncLoad("FXAAShader", SourceShader::ConstructionArgs{
-			{ ShaderStage::VERTEX, "quad.vert"},
-			{ ShaderStage::FRAGMENT, "fxaa.frag" }
+			{ types::shader::Stage::Vertex, "quad.vert"},
+			{ types::shader::Stage::Fragment, "fxaa.frag" }
 		});
 		if (!resourceManagers.mShaderManager.isValid(fxaaShaderHandle)) {
 			return;

@@ -14,8 +14,8 @@ namespace neo {
 		TRACY_GPU();
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Wireframe Shader", SourceShader::ConstructionArgs{
-			{ ShaderStage::VERTEX, "model.vert"},
-			{ ShaderStage::FRAGMENT, "color.frag" }
+			{ types::shader::Stage::Vertex, "model.vert"},
+			{ types::shader::Stage::Fragment, "color.frag" }
 		});
 
 
