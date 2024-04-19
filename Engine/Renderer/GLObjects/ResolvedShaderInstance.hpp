@@ -49,7 +49,7 @@ namespace neo {
 	private:
 		bool mValid = false;
 		uint32_t mPid = 0;
-		entt::dense_hash_map<ShaderStage, uint32_t> mShaderIDs;
+		entt::dense_hash_map<types::shader::Stage, uint32_t> mShaderIDs;
 		entt::dense_hash_map<HashedString::hash_type, int32_t> mUniforms;
 		entt::dense_hash_map<HashedString::hash_type, int32_t> mBindings;
 		std::string mVariant;

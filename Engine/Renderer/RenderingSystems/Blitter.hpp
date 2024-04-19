@@ -15,7 +15,7 @@ namespace neo {
 		TRACY_GPU();
 
 		auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blit Shader", SourceShader::ShaderCode {			
-			{ ShaderStage::VERTEX,
+			{ types::shader::Stage::Vertex,
 			R"(
 				layout (location = 0) in vec3 vertPos;
 				layout (location = 2) in vec2 vertTex;
@@ -25,7 +25,7 @@ namespace neo {
 					fragTex = vertTex; 
 				} 
 			)"},
-			{ ShaderStage::FRAGMENT,
+			{ types::shader::Stage::Fragment,
 			R"(
 				in vec2 fragTex;
 				layout (binding = 0) uniform sampler2D inputTexture;

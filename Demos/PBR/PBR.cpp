@@ -53,8 +53,8 @@ namespace PBR {
 		ShaderDefines passDefines({});
 
 		auto pbrShaderHandle = resourceManagers.mShaderManager.asyncLoad("PBR Shader", SourceShader::ConstructionArgs{
-			{ ShaderStage::VERTEX, "model.vert"},
-			{ ShaderStage::FRAGMENT, "pbr/pbr.frag" }
+			{ types::shader::Stage::Vertex, "model.vert"},
+			{ types::shader::Stage::Fragment, "pbr/pbr.frag" }
 		});
 		if (!resourceManagers.mShaderManager.isValid(pbrShaderHandle)) {
 			return;

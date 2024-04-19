@@ -16,6 +16,26 @@
 namespace neo {
 	namespace {
 
+
+		int32_t _getGLShaderStage(types::shader::Stage type) {
+			switch (type) {
+			case(types::shader::Stage::Vertex):
+				return GL_VERTEX_SHADER;
+			case(types::shader::Stage::Fragment):
+				return GL_FRAGMENT_SHADER;
+			case(types::shader::Stage::Geometry):
+				return GL_GEOMETRY_SHADER;
+			case(types::shader::Stage::Compute):
+				return GL_COMPUTE_SHADER;
+			case(types::shader::Stage::TessellationControl):
+				return GL_TESS_CONTROL_SHADER;
+			case(types::shader::Stage::TessellationEval):
+				return GL_TESS_EVALUATION_SHADER;
+			default:
+				NEO_FAIL("Invalid Shadertypes::shader::Stage: %d", type);
+				return 0;
+			}
+		}
 		static std::string _processShader(const char* shaderString, const ShaderDefines& defines) {
 			TRACY_ZONE();
 			if (!shaderString) {
@@ -162,7 +182,7 @@ namespace neo {
 			}
 			std::string processedSource = _processShader(source, defines);
 			if (processedSource.size()) {
-				mShaderIDs[stage] = _compileShader(GLHelper::getGLShaderStage(stage), processedSource.c_str());
+				mShaderIDs[stage] = _compileShader(_getGLShaderStage(stage), processedSource.c_str());
 				if (mShaderIDs[stage]) {
 					glAttachShader(mPid, mShaderIDs[stage]);
 					_findUniforms(processedSource.c_str(), uniforms, bindings);

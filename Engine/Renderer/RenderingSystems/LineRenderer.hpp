@@ -17,8 +17,8 @@ namespace neo {
 		glEnable(GL_LINE_SMOOTH);
 
 		auto lineShaderHandle = resourceManagers.mShaderManager.asyncLoad("LineShader", SourceShader::ConstructionArgs{
-			{ ShaderStage::VERTEX, "line.vert"},
-			{ ShaderStage::FRAGMENT, "line.frag" }
+			{ types::shader::Stage::Vertex, "line.vert"},
+			{ types::shader::Stage::Fragment, "line.frag" }
 		});
 		if (!resourceManagers.mShaderManager.isValid(lineShaderHandle)) {
 			return;

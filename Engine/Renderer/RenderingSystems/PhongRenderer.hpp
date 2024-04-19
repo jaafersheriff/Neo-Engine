@@ -33,8 +33,8 @@ namespace neo {
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Phong Shader", 
 			SourceShader::ConstructionArgs{
-				{ ShaderStage::VERTEX, "model.vert"},
-				{ ShaderStage::FRAGMENT, "phong.frag" }
+				{ types::shader::Stage::Vertex, "model.vert"},
+				{ types::shader::Stage::Fragment, "phong.frag" }
 			}
 		);
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {

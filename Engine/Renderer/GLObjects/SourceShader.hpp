@@ -18,8 +18,8 @@ namespace neo {
 		friend ShaderLoader;
 		friend ShaderResourceManager;
 	public:
-		using ConstructionArgs = std::unordered_map<ShaderStage, std::string>;
-		using ShaderCode = std::unordered_map<ShaderStage, const char*>;
+		using ConstructionArgs = std::unordered_map<types::shader::Stage, std::string>;
+		using ShaderCode = std::unordered_map<types::shader::Stage, const char*>;
 		using HashedShaderDefines = uint32_t;
 
 		SourceShader(const char* name, const ShaderCode& args);

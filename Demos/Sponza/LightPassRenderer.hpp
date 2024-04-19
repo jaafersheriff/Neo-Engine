@@ -17,8 +17,8 @@ namespace Sponza {
 		TRACY_GPU();
 
 		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightResolveShader", SourceShader::ConstructionArgs{
-			{ ShaderStage::VERTEX, "sponza/pointlightresolve.vert"},
-			{ ShaderStage::FRAGMENT, "sponza/pointlightresolve.frag" }
+			{ types::shader::Stage::Vertex, "sponza/pointlightresolve.vert"},
+			{ types::shader::Stage::Fragment, "sponza/pointlightresolve.frag" }
 		});
 
 		glEnable(GL_BLEND);
@@ -97,8 +97,8 @@ namespace Sponza {
 		}
 
 		auto lightResolveShader = resourceManagers.mShaderManager.asyncLoad("DirectionalLightResolveShader", SourceShader::ConstructionArgs{
-			{ ShaderStage::VERTEX, "quad.vert"},
-			{ ShaderStage::FRAGMENT, "sponza/directionallightresolve.frag" }
+			{ types::shader::Stage::Vertex, "quad.vert"},
+			{ types::shader::Stage::Fragment, "sponza/directionallightresolve.frag" }
 		});
 		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShader, defines);
 		resolvedShader.bind();

@@ -16,6 +16,17 @@ namespace neo {
 			Float
 		};
 
+		namespace shader {
+			enum class Stage {
+				Vertex,
+				Fragment,
+				Geometry,
+				TessellationControl,
+				TessellationEval,
+				Compute
+			};
+		}
+
 		namespace framebuffer {
 			enum class AttachmentBit : uint8_t {
 				Color = 1 << 0,

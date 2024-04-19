@@ -98,7 +98,7 @@ namespace Compute {
 			auto&& [_, meshComponent] = *meshView;
 
 			auto particlesComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticlesCompute", SourceShader::ConstructionArgs{
-				{ ShaderStage::COMPUTE, "compute/particles.compute" }
+				{ types::shader::Stage::Compute, "compute/particles.compute" }
 			});
 			if (!resourceManagers.mShaderManager.isValid(particlesComputeShaderHandle)) {
 				return;
@@ -132,9 +132,9 @@ namespace Compute {
 		{
 			TRACY_GPUN("Draw Particles");
 			auto particlesVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticleVis", SourceShader::ConstructionArgs{
-				{ ShaderStage::VERTEX,   "compute/particles.vert" },
-				{ ShaderStage::GEOMETRY, "compute/particles.geom" },
-				{ ShaderStage::FRAGMENT, "compute/particles.frag" },
+				{ types::shader::Stage::Vertex,   "compute/particles.vert" },
+				{ types::shader::Stage::Geometry, "compute/particles.geom" },
+				{ types::shader::Stage::Fragment, "compute/particles.frag" },
 			});
 
 			auto& particlesVisShader = resourceManagers.mShaderManager.resolveDefines(particlesVisShaderHandle, {});

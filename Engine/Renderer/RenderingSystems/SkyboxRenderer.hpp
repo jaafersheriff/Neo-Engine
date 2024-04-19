@@ -20,7 +20,7 @@ namespace neo {
 
 		auto skybox = ecs.cGetComponent<SkyboxComponent>();
 		auto skyboxShaderHandle = resourceManagers.mShaderManager.asyncLoad("SkyboxShader", SourceShader::ShaderCode{
-			{ ShaderStage::VERTEX, R"(
+			{ types::shader::Stage::Vertex, R"(
 				layout (location = 0) in vec3 vertPos;
 				uniform mat4 P;
 				uniform mat4 V;
@@ -32,7 +32,7 @@ namespace neo {
 					gl_Position = pos.xyww;
 					fragTex = vertPos;
 			})"},
-			{ ShaderStage::FRAGMENT, R"(
+			{ types::shader::Stage::Fragment, R"(
 				in vec3 fragTex;
 				layout(binding = 0) uniform samplerCube cubeMap;
 				out vec4 color;

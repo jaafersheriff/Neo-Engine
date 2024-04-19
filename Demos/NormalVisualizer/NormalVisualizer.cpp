@@ -96,9 +96,9 @@ namespace NormalVisualizer {
 
 		{
 			auto normalShaderHandle = resourceManagers.mShaderManager.asyncLoad("NormalVisualizer", SourceShader::ConstructionArgs{
-				{ShaderStage::VERTEX, "normal.vert"},
-				{ShaderStage::GEOMETRY, "normal.geom"},
-				{ShaderStage::FRAGMENT, "normal.frag"}
+				{types::shader::Stage::Vertex, "normal.vert"},
+				{types::shader::Stage::Geometry, "normal.geom"},
+				{types::shader::Stage::Fragment, "normal.frag"}
 			});
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(normalShaderHandle, {});
 
