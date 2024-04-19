@@ -30,72 +30,73 @@ namespace neo {
 			NEO_UNUSED(id, length, userParam);
 
 			static std::unordered_map<GLenum, const char*> sSourceString = {
-				{GL_DEBUG_SOURCE_API, "API"},
-				{GL_DEBUG_SOURCE_WINDOW_SYSTEM, "Window"},
+				{GL_DEBUG_SOURCE_API,             "API"},
+				{GL_DEBUG_SOURCE_WINDOW_SYSTEM,   "Window"},
 				{GL_DEBUG_SOURCE_SHADER_COMPILER, "Shader Compiler"},
-				{GL_DEBUG_SOURCE_THIRD_PARTY, "3rd Party"},
-				{GL_DEBUG_SOURCE_APPLICATION, "Application"},
-				{GL_DEBUG_SOURCE_OTHER, "Other"},
+				{GL_DEBUG_SOURCE_THIRD_PARTY,     "3rd Party"},
+				{GL_DEBUG_SOURCE_APPLICATION,     "Application"},
+				{GL_DEBUG_SOURCE_OTHER,           "Other"},
 			};
 
 			static std::unordered_map<GLenum, const char*> sTypeString{
-				{GL_DEBUG_TYPE_ERROR, "Error"},
+				{GL_DEBUG_TYPE_ERROR,               "Error"},
 				{GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "Deprecated Behavior"},
-				{GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, "Undefined Behavior"},
-				{GL_DEBUG_TYPE_PORTABILITY, "Portability"},
-				{GL_DEBUG_TYPE_PERFORMANCE, "Performance"},
-				{GL_DEBUG_TYPE_MARKER, "Marker"},
-				{GL_DEBUG_TYPE_PUSH_GROUP, "Push Group"},
-				{GL_DEBUG_TYPE_POP_GROUP, "Pop Group"},
-				{GL_DEBUG_TYPE_OTHER, "Other"},
+				{GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR,  "Undefined Behavior"},
+				{GL_DEBUG_TYPE_PORTABILITY,         "Portability"},
+				{GL_DEBUG_TYPE_PERFORMANCE,         "Performance"},
+				{GL_DEBUG_TYPE_MARKER,              "Marker"},
+				{GL_DEBUG_TYPE_PUSH_GROUP,          "Push Group"},
+				{GL_DEBUG_TYPE_POP_GROUP,           "Pop Group"},
+				{GL_DEBUG_TYPE_OTHER,               "Other"},
 			};
 
 			char glBuf[512];
 			sprintf(glBuf, "[GL %s] [%s]: %s", sSourceString.at(source), sTypeString.at(type), message);
 
 			switch (severity) {
-				case GL_DEBUG_SEVERITY_HIGH:		 NEO_FAIL(glBuf); return;
-				case GL_DEBUG_SEVERITY_MEDIUM:	   NEO_LOG_W(glBuf); return;
-				case GL_DEBUG_SEVERITY_LOW:		  NEO_LOG_W(glBuf); return;
+				case GL_DEBUG_SEVERITY_HIGH:         NEO_FAIL(glBuf); return;
+				case GL_DEBUG_SEVERITY_MEDIUM:       NEO_LOG_W(glBuf); return;
+				case GL_DEBUG_SEVERITY_LOW:          NEO_LOG_W(glBuf); return;
 				case GL_DEBUG_SEVERITY_NOTIFICATION: NEO_LOG_I(glBuf); return;
+				case GL_DEBUG_OUTPUT:                NEO_LOG_V(glBuf); return;
 			}
 			NEO_FAIL("%s\nUnknown severity level!", glBuf);
 		}
 
 		const char * errorString(GLenum err) {
 			switch (err) {
-			case GL_NO_ERROR:
-				return "No error";
-			case GL_INVALID_ENUM:
-				return "Invalid enum";
-			case GL_INVALID_VALUE:
-				return "Invalid value";
-			case GL_INVALID_OPERATION:
-				return "Invalid operation";
-			case GL_STACK_OVERFLOW:
-				return "Stack overflow";
-			case GL_STACK_UNDERFLOW:
-				return "Stack underflow";
-			case GL_OUT_OF_MEMORY:
-				return "Out of memory";
-			case GL_FRAMEBUFFER_UNDEFINED:
-				return "Framebuffer undefined";
-			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-				return "Incomplete attachment";
-			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-				return "Incomplete or missing attachment";
-			case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-				return "Incomplete draw buffer";
-			case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-				return "Incomplete read buffer";
-			case GL_FRAMEBUFFER_UNSUPPORTED:
-				return "Framebuffer unsupported";
-			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-				return "Incomplete multisample";
-			case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-				return "Incomplete layer targets";
-			default:
-				return "No error";
+				case GL_NO_ERROR:
+					return "No error";
+				case GL_INVALID_ENUM:
+					return "Invalid enum";
+				case GL_INVALID_VALUE:
+					return "Invalid value";
+				case GL_INVALID_OPERATION:
+					return "Invalid operation";
+				case GL_STACK_OVERFLOW:
+					return "Stack overflow";
+				case GL_STACK_UNDERFLOW:
+					return "Stack underflow";
+				case GL_OUT_OF_MEMORY:
+					return "Out of memory";
+				case GL_FRAMEBUFFER_UNDEFINED:
+					return "Framebuffer undefined";
+				case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+					return "Incomplete attachment";
+				case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+					return "Incomplete or missing attachment";
+				case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+					return "Incomplete draw buffer";
+				case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+					return "Incomplete read buffer";
+				case GL_FRAMEBUFFER_UNSUPPORTED:
+					return "Framebuffer unsupported";
+				case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+					return "Incomplete multisample";
+				case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+					return "Incomplete layer targets";
+				default:
+					return "No error";
 			}
 		}
 
