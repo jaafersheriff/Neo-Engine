@@ -25,7 +25,7 @@ namespace neo {
 
 	protected:
 		[[nodiscard]] ShaderHandle _asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, std::optional<std::string> debugName) const;
-		void _clearImpl();
+		void _destroyImpl(BackedResource<SourceShader>& sourceShader);
 		void _tickImpl();
 
 

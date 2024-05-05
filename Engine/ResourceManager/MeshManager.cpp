@@ -81,7 +81,7 @@ namespace neo {
 	void MeshManager::_tickImpl() {
 		TRACY_ZONE();
 
-		{
+		if (!mQueue.empty()) {
 			std::vector<ResourceLoadDetails_Internal> swapQueue = {};
 			std::swap(mQueue, swapQueue);
 			mQueue.clear();
@@ -97,7 +97,7 @@ namespace neo {
 			}
 		}
 
-		{
+		if (!mTransactionQueue.empty()) {
 			std::vector<std::pair<MeshHandle, std::function<void(Mesh&)>>> swapQueue;
 			std::swap(mTransactionQueue, swapQueue);
 			mTransactionQueue.clear();
@@ -112,7 +112,7 @@ namespace neo {
 			}
 		}
 
-		{
+		if (!mDiscardQueue.empty()) {
 			std::vector<MeshHandle> swapQueue;
 			std::swap(mDiscardQueue, swapQueue);
 			mDiscardQueue.clear();
@@ -126,12 +126,8 @@ namespace neo {
 		}
 	}
 
-	void MeshManager::_clearImpl() {
-		mQueue.clear();
-		mCache.each([](BackedResource<Mesh>& mesh) {
-			mesh.mResource.destroy();
-		});
-		mCache.clear();
+	void MeshManager::_destroyImpl(BackedResource<Mesh>& mesh) {
+		mesh.mResource.destroy();
 	}
 
 	void MeshManager::imguiEditor() {

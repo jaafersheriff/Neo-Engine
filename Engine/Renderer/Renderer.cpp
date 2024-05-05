@@ -77,6 +77,8 @@ namespace neo {
 
 		/* Init default GL state */
 		resetState();
+
+		mShowBoundingBoxes = false;
 	}
 
 	void Renderer::resetState() {
@@ -247,7 +249,6 @@ namespace neo {
 	}
 
 	void Renderer::clean() {
-
 		resetState();
 	}
 

@@ -51,7 +51,6 @@ namespace neo {
 			return meshManager.resolve(NEO_INVALID_HANDLE);
 		}
 
-		auto& mesh = meshManager.resolve(mMeshHandle);
 		if (mDirty && mNodes.size()) {
 			TRACY_ZONE();
 			std::vector<float> positions;
@@ -80,11 +79,11 @@ namespace neo {
 					static_cast<uint32_t>(colors.size() * sizeof(float)),
 					reinterpret_cast<uint8_t*>(const_cast<float*>(colors.data()))
 				);
-				});
+			});
 
 			mDirty = false;
 		}
-		return mesh;
+		return meshManager.resolve(mMeshHandle);
 	}
 
 	void LineMeshComponent::addNode(const glm::vec3 pos, glm::vec3 col) {

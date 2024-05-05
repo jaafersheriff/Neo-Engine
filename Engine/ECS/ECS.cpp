@@ -74,10 +74,10 @@ namespace neo {
 			auto&& [selectedEntity, _] = *selected;
 			char title[64];
 			if (has<TagComponent>(selectedEntity)) {
-				sprintf(title, "%s", getComponent<TagComponent>(selectedEntity)->mTag.c_str());
+				sprintf(title, "Selected: %s", getComponent<TagComponent>(selectedEntity)->mTag.c_str());
 			}
 			else {
-				sprintf(title, "%d", static_cast<int>(selectedEntity));
+				sprintf(title, "Selected: %d", static_cast<int>(selectedEntity));
 			}
 			if (ImGui::TreeNodeEx(title, ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_DefaultOpen)) {
 				mEditor.renderEditor(mRegistry, selectedEntity);
