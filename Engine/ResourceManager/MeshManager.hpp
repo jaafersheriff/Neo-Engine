@@ -32,12 +32,12 @@ namespace neo {
 	};
 	using MeshHandle = ResourceHandle<Mesh>;
 
-	class MeshResourceManager final : public ResourceManagerInterface<MeshResourceManager, Mesh, MeshLoadDetails> {
+	class MeshManager final : public ResourceManagerInterface<MeshManager, Mesh, MeshLoadDetails> {
 		friend ResourceManagerInterface;
 	public:
 
-		MeshResourceManager();
-		~MeshResourceManager();
+		MeshManager();
+		~MeshManager();
 
 		void imguiEditor();
 

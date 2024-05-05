@@ -39,7 +39,7 @@ namespace neo {
 
 		struct FramebufferLoader final : entt::resource_loader<FramebufferLoader, BackedResource<PooledFramebuffer>> {
 
-			std::shared_ptr<BackedResource<PooledFramebuffer>> load(const FramebufferQueueItem& details, const TextureResourceManager& textureManager) const {
+			std::shared_ptr<BackedResource<PooledFramebuffer>> load(const FramebufferQueueItem& details, const TextureManager& textureManager) const {
 				std::shared_ptr<BackedResource<PooledFramebuffer>> framebuffer = std::make_shared<BackedResource<PooledFramebuffer>>();
 				framebuffer->mResource.mFramebuffer.init(details.mDebugName);
 				framebuffer->mResource.mFrameCount = 1;
@@ -57,17 +57,17 @@ namespace neo {
 		};
 	}
 
-	FramebufferResourceManager::FramebufferResourceManager() {
+	FramebufferManager::FramebufferManager() {
 		// Fallback is back buffer
 		// Goodluck
 		mFallback = std::make_shared<Framebuffer>();
 	}
 
-	FramebufferResourceManager::~FramebufferResourceManager() {
+	FramebufferManager::~FramebufferManager() {
 		mFallback.reset();
 	}
 
-	[[nodiscard]] FramebufferHandle FramebufferResourceManager::asyncLoad(HashedString id, FramebufferLoadDetails framebufferDetails, const TextureResourceManager& textureManager) const {
+	[[nodiscard]] FramebufferHandle FramebufferManager::asyncLoad(HashedString id, FramebufferLoadDetails framebufferDetails, const TextureManager& textureManager) const {
 		FramebufferHandle dstId = swizzleSrcId(id, framebufferDetails);
 		if (isValid(dstId) || isQueued(dstId)) {
 			return dstId;
@@ -99,7 +99,7 @@ namespace neo {
 		return dstId;
 	}
 
-	Framebuffer& FramebufferResourceManager::_resolveFinal(FramebufferHandle id) const {
+	Framebuffer& FramebufferManager::_resolveFinal(FramebufferHandle id) const {
 		auto handle = mCache.handle(id.mHandle);
 		if (handle) {
 			auto& pfb = const_cast<PooledFramebuffer&>(handle.get().mResource);
@@ -115,7 +115,7 @@ namespace neo {
 		return *mFallback;
 	}
 
-	void FramebufferResourceManager::tick(const TextureResourceManager& textureManager) {
+	void FramebufferManager::tick(const TextureManager& textureManager) {
 		TRACY_ZONE();
 
 		// Create queue
@@ -165,7 +165,7 @@ namespace neo {
 		}
 	}
 
-	void FramebufferResourceManager::imguiEditor(std::function<void(Texture&)> textureFunc, TextureResourceManager& textureManager) {
+	void FramebufferManager::imguiEditor(std::function<void(Texture&)> textureFunc, TextureManager& textureManager) {
 		if (ImGui::BeginTable("##Framebuffers", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_PreciseWidths | ImGuiTableFlags_SizingStretchSame)) {
 			ImGui::TableSetupColumn("Name/Size", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending);
 			ImGui::TableSetupColumn("Attachments");
@@ -197,7 +197,7 @@ namespace neo {
 		}
 	}
 
-	void FramebufferResourceManager::clear(const TextureResourceManager& textureManager) {
+	void FramebufferManager::clear(const TextureManager& textureManager) {
 		mQueue.clear();
 		mCache.each([&textureManager](BackedResource<PooledFramebuffer>& pfb) {
 			if (pfb.mResource.mExternallyOwned) {
