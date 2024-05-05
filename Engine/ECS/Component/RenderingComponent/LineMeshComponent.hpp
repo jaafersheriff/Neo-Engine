@@ -2,7 +2,7 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include "ResourceManager/MeshResourceManager.hpp"
+#include "ResourceManager/MeshManager.hpp"
 
 namespace neo {
 
@@ -20,10 +20,10 @@ namespace neo {
 		bool mUseParentSpatial;
 		mutable bool mDirty;
 
-		LineMeshComponent(const MeshResourceManager& meshManager, std::optional<glm::vec3> overrideColor = std::nullopt);
+		LineMeshComponent(const MeshManager& meshManager, std::optional<glm::vec3> overrideColor = std::nullopt);
 		~LineMeshComponent();
 
-		const Mesh& LineMeshComponent::getMesh(const MeshResourceManager& meshManager) const;
+		const Mesh& LineMeshComponent::getMesh(const MeshManager& meshManager) const;
 		const std::vector<Node>& getNodes() const { return mNodes; }
 		virtual std::string getName() const override { return "LineMeshComponent"; }
 

@@ -2,7 +2,7 @@
 
 #include "Renderer/Types.hpp"
 
-#include "ResourceManager/TextureResourceManager.hpp"
+#include "ResourceManager/TextureManager.hpp"
 
 #include <vector>
 #include <optional>

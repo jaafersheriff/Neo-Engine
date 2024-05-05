@@ -12,11 +12,11 @@
 namespace neo {
 	class ResolvedShaderInstance;
 	struct ShaderLoader;
-	class ShaderResourceManager;
+	class ShaderManager;
 
 	class SourceShader {
 		friend ShaderLoader;
-		friend ShaderResourceManager;
+		friend ShaderManager;
 	public:
 		using ConstructionArgs = std::unordered_map<types::shader::Stage, std::string>;
 		using ShaderCode = std::unordered_map<types::shader::Stage, const char*>;

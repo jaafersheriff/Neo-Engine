@@ -2,7 +2,7 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include "ResourceManager/MeshResourceManager.hpp"
+#include "ResourceManager/MeshManager.hpp"
 
 namespace neo {
 	struct MeshComponent : public Component {

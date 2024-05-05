@@ -61,7 +61,7 @@ namespace FrustaFitting {
 		};
 
 		struct Light {
-			Light(MeshResourceManager& meshManager, ECS& ecs, glm::vec3 position) {
+			Light(MeshManager& meshManager, ECS& ecs, glm::vec3 position) {
 				// Light object
 				auto lightEntity = ecs.createEntity();
 				ecs.addComponent<TagComponent>(lightEntity, "Light");

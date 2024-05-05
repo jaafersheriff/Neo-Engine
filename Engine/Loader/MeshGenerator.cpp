@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ResourceManager/MeshResourceManager.hpp"
+#include "ResourceManager/MeshManager.hpp"
 #include "ext/PerlinNoise.hpp"
 
 namespace neo {

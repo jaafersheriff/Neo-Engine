@@ -7,7 +7,7 @@
 
 namespace neo {
 
-	LineMeshComponent::LineMeshComponent(const MeshResourceManager& meshManager, std::optional<glm::vec3> overrideColor) :
+	LineMeshComponent::LineMeshComponent(const MeshManager& meshManager, std::optional<glm::vec3> overrideColor) :
 		mDirty(false),
 		mWriteDepth(true),
 		mUseParentSpatial(false),
@@ -46,7 +46,7 @@ namespace neo {
 		// TODO - destroy meshhandle
 	}
 
-	const Mesh& LineMeshComponent::getMesh(const MeshResourceManager& meshManager) const {
+	const Mesh& LineMeshComponent::getMesh(const MeshManager& meshManager) const {
 		if (!meshManager.isValid(mMeshHandle)) {
 			return meshManager.resolve(NEO_INVALID_HANDLE);
 		}
