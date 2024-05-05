@@ -20,6 +20,9 @@ namespace Sponza {
 			{ types::shader::Stage::Vertex, "sponza/pointlightresolve.vert"},
 			{ types::shader::Stage::Fragment, "sponza/pointlightresolve.frag" }
 		});
+		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
+			return;
+		}
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);
@@ -79,8 +82,15 @@ namespace Sponza {
 	void drawDirectionalLights(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const Framebuffer& gbuffer, TextureHandle shadowMapHandle) {
 		TRACY_GPU();
 
-		ShaderDefines defines;
+		auto lightResolveShader = resourceManagers.mShaderManager.asyncLoad("DirectionalLightResolveShader", SourceShader::ConstructionArgs{
+			{ types::shader::Stage::Vertex, "quad.vert"},
+			{ types::shader::Stage::Fragment, "sponza/directionallightresolve.frag" }
+		});
+		if (!resourceManagers.mShaderManager.isValid(lightResolveShader)) {
+			return;
+		}
 
+		ShaderDefines defines;
 		glm::mat4 L;
 		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
 		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && shadowCamera.has_value();
@@ -96,10 +106,6 @@ namespace Sponza {
 			L = biasMatrix * shadowOrtho.getProj() * shadowCameraSpatial.getView();
 		}
 
-		auto lightResolveShader = resourceManagers.mShaderManager.asyncLoad("DirectionalLightResolveShader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "quad.vert"},
-			{ types::shader::Stage::Fragment, "sponza/directionallightresolve.frag" }
-		});
 		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShader, defines);
 		resolvedShader.bind();
 

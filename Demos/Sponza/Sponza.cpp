@@ -258,6 +258,10 @@ namespace Sponza {
 		gbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.x, viewport.y);
 		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, {});
+
+		NEO_UNUSED(shadowMapHandle);
+		NEO_UNUSED(sceneTargetHandle);
+		/*
 		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, {});
 
 		TextureHandle aoHandle = NEO_INVALID_HANDLE;
@@ -321,5 +325,6 @@ namespace Sponza {
 				GL_NEAREST
 			);
 		}
+		*/
 	}
 }
