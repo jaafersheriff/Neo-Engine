@@ -2,7 +2,7 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include "ResourceManager/TextureResourceManager.hpp"
+#include "ResourceManager/TextureManager.hpp"
 
 namespace neo {
 	struct SkyboxComponent : public Component {

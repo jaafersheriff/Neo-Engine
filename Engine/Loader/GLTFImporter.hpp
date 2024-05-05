@@ -4,7 +4,7 @@
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 
 #include "Loader.hpp"
-#include "ResourceManager/MeshResourceManager.hpp"
+#include "ResourceManager/MeshManager.hpp"
 
 #include <string>
 #include <vector>

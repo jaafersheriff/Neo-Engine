@@ -202,7 +202,7 @@ namespace {
 		}
 	}
 
-	neo::TextureHandle _loadTexture(neo::TextureResourceManager& textureManager, const tinygltf::Model& model, int index, int texCoord) {
+	neo::TextureHandle _loadTexture(neo::TextureManager& textureManager, const tinygltf::Model& model, int index, int texCoord) {
 		using namespace neo; 
 
 		if (index == -1) {

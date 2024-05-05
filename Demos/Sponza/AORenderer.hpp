@@ -9,7 +9,7 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "ResourceManager/MeshResourceManager.hpp"
+#include "ResourceManager/MeshManager.hpp"
 
 #include "Util/Util.hpp"
 
@@ -18,7 +18,7 @@ using namespace neo;
 namespace Sponza {
 
 	namespace {
-		TextureHandle _generateKernel(const neo::TextureResourceManager& textureManager, HashedString id, uint32_t size) {
+		TextureHandle _generateKernel(const neo::TextureManager& textureManager, HashedString id, uint32_t size) {
 			std::vector<float> kernel;
 			for (unsigned i = 0; i < size; i++) {
 				glm::vec3 sample(
@@ -53,7 +53,7 @@ namespace Sponza {
 			return textureManager.asyncLoad(id, builder);
 		}
 
-		TextureHandle _generateNoise(const neo::TextureResourceManager& textureManager, HashedString id, uint32_t dim) {
+		TextureHandle _generateNoise(const neo::TextureManager& textureManager, HashedString id, uint32_t dim) {
 			std::vector<float> noise;
 			noise.resize(dim * dim * 3);
 			for (unsigned i = 0; i < dim * dim * 3; i += 3) {

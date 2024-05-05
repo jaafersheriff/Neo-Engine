@@ -5,7 +5,7 @@
 #include "Renderer/GLObjects/Mesh.hpp"
 #include "Renderer/Renderer.hpp"
 
-#include "ResourceManager/MeshResourceManager.hpp"
+#include "ResourceManager/MeshManager.hpp"
 
 #include "Util/Profiler.hpp"
 #include "Util/ServiceLocator.hpp"
@@ -24,7 +24,7 @@ namespace Compute {
 		float timeScale = 100.f;
 		bool isDirty = true;
 
-		ParticleMeshComponent(MeshResourceManager& meshManager) {
+		ParticleMeshComponent(MeshManager& meshManager) {
 			MeshLoadDetails builder;
 			builder.mPrimtive = types::mesh::Primitive::Points;
 			builder.mVertexBuffers[types::mesh::VertexType::Position] = {
