@@ -47,7 +47,7 @@ namespace neo {
 
 	protected:
 		[[nodiscard]] TextureHandle _asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, std::optional<std::string> debugName) const;
-		void _clearImpl();
+		void _destroyImpl(BackedResource<Texture>& texture);
 		void _tickImpl();
 	};
 }

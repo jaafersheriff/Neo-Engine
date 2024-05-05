@@ -206,12 +206,8 @@ namespace neo {
 		}
 	}
 
-	void TextureManager::_clearImpl() {
-		mQueue.clear();
-		mCache.each([](BackedResource<Texture>& texture) {
-			texture.mResource.destroy();
-		});
-		mCache.clear();
+	void TextureManager::_destroyImpl(BackedResource<Texture>& texture) {
+		texture.mResource.destroy();
 	}
 
 	void TextureManager::imguiEditor(std::function<void(const Texture&)> textureFunc) {

@@ -109,7 +109,13 @@ namespace neo {
 		};
 
 		void clear() {
-			static_cast<DerivedManager*>(this)->_clearImpl();
+			mQueue.clear();
+			mDiscardQueue.clear();
+			mTransactionQueue.clear();
+			mCache.each([this](BackedResource<ResourceType>& resource) {
+				static_cast<DerivedManager*>(this)->_destroyImpl(resource);
+			});
+			mCache.clear();
 		}
 
 		void tick() {

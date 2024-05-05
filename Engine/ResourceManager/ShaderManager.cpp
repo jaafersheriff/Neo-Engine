@@ -16,7 +16,7 @@ namespace neo {
 			return std::visit(util::VisitOverloaded{
 				[&](const SourceShader::ConstructionArgs& constructionArgs) {
 					SourceShader::ShaderCode shaderCode;
-					for (auto&&[type, filePath] : constructionArgs) {
+					for (auto&& [type, filePath] : constructionArgs) {
 						shaderCode.emplace(type, Loader::loadFileString(filePath));
 					}
 					auto result = std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
@@ -27,7 +27,7 @@ namespace neo {
 					return std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
 				},
 				[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
-			}, shaderDetails);
+				}, shaderDetails);
 
 			return nullptr;
 		}
@@ -35,7 +35,7 @@ namespace neo {
 
 	ShaderManager::ShaderManager() {
 		mFallback = ShaderLoader{}.load(SourceShader::ShaderCode{
-			{types::shader::Stage::Vertex, 
+			{types::shader::Stage::Vertex,
 				R"(
 					void main() {
 						gl_Position = vec4(0,0,0,0);
@@ -48,7 +48,7 @@ namespace neo {
 						color = vec4(0,0,0,0);
 					}
 				)"}
-		}, "Dummy");
+			}, "Dummy");
 	}
 
 	ShaderManager::~ShaderManager() {
@@ -99,17 +99,13 @@ namespace neo {
 		}
 	}
 
-	void ShaderManager::_clearImpl() {
-		mQueue.clear();
-		mCache.each([](BackedResource<SourceShader>& resource) {
-			if (resource.mResource.mConstructionArgs.has_value()) {
-				for (auto&& [type, charString] : resource.mResource.mShaderSources) {
-					delete charString;
-				}
+	void ShaderManager::_destroyImpl(BackedResource<SourceShader>& sourceShader) {
+		if (sourceShader.mResource.mConstructionArgs.has_value()) {
+			for (auto&& [type, charString] : sourceShader.mResource.mShaderSources) {
+				delete charString;
 			}
-			resource.mResource.destroy();
-		});
-		mCache.clear();
+		}
+		sourceShader.mResource.destroy();
 	}
 
 	void ShaderManager::imguiEditor() {
