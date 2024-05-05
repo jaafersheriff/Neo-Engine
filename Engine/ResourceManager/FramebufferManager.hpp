@@ -2,7 +2,7 @@
 
 #include "Util/Util.hpp"
 
-#include "ResourceManager/TextureResourceManager.hpp"
+#include "ResourceManager/TextureManager.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
 #include <entt/resource/cache.hpp>
@@ -57,12 +57,12 @@ namespace neo {
 		std::optional<std::string> mDebugName;
 	};
 
-	class FramebufferResourceManager {
+	class FramebufferManager {
 		friend ResourceManagers;
 	public:
 
-		FramebufferResourceManager::FramebufferResourceManager();
-		FramebufferResourceManager::~FramebufferResourceManager();
+		FramebufferManager::FramebufferManager();
+		FramebufferManager::~FramebufferManager();
 
 		bool isValid(FramebufferHandle id) const {
 			return mCache.contains(id.mHandle);
@@ -87,14 +87,14 @@ namespace neo {
 			return _resolveFinal(id);
 		}
 
-		[[nodiscard]] FramebufferHandle asyncLoad(HashedString id, FramebufferLoadDetails details, const TextureResourceManager& textureManager) const;
+		[[nodiscard]] FramebufferHandle asyncLoad(HashedString id, FramebufferLoadDetails details, const TextureManager& textureManager) const;
 
 	protected:
 
-		void clear(const TextureResourceManager& textureManager);
-		void tick(const TextureResourceManager& textureManager);
+		void clear(const TextureManager& textureManager);
+		void tick(const TextureManager& textureManager);
 
-		void imguiEditor(std::function<void(Texture&)> textureFunc, TextureResourceManager& textureManager);
+		void imguiEditor(std::function<void(Texture&)> textureFunc, TextureManager& textureManager);
 
 		mutable std::vector<FramebufferQueueItem> mQueue;
 		entt::resource_cache<BackedResource<PooledFramebuffer>> mCache;

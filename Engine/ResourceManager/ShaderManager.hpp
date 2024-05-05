@@ -12,15 +12,15 @@ namespace neo {
 
 	using ShaderLoadDetails = std::variant<SourceShader::ConstructionArgs, SourceShader::ShaderCode>;
 
-	class ShaderResourceManager final : public ResourceManagerInterface<ShaderResourceManager, SourceShader, ShaderLoadDetails> {
+	class ShaderManager final : public ResourceManagerInterface<ShaderManager, SourceShader, ShaderLoadDetails> {
 		friend ResourceManagerInterface;
 	public:
 		using ShaderHandle = ResourceHandle<SourceShader>;
 
-		ShaderResourceManager();
-		~ShaderResourceManager();
+		ShaderManager();
+		~ShaderManager();
 
-		const ResolvedShaderInstance& ShaderResourceManager::resolveDefines(ShaderHandle handle, const ShaderDefines& defines) const;
+		const ResolvedShaderInstance& ShaderManager::resolveDefines(ShaderHandle handle, const ShaderDefines& defines) const;
 		void imguiEditor();
 
 	protected:

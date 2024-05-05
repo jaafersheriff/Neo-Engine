@@ -37,12 +37,12 @@ namespace neo {
 	using TextureLoadDetails = std::variant<TextureBuilder, TextureFiles>;
 	using TextureHandle = ResourceHandle<Texture>;
 
-	class TextureResourceManager final : public ResourceManagerInterface<TextureResourceManager, Texture, TextureLoadDetails> {
+	class TextureManager final : public ResourceManagerInterface<TextureManager, Texture, TextureLoadDetails> {
 		friend ResourceManagerInterface;
 	public:
 
-		TextureResourceManager();
-		~TextureResourceManager();
+		TextureManager();
+		~TextureManager();
 		void imguiEditor(std::function<void(const Texture&)> textureFunc);
 
 	protected:

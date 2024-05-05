@@ -1,4 +1,4 @@
-#include "MeshResourceManager.hpp"
+#include "MeshManager.hpp"
 
 #include "Loader/MeshGenerator.hpp"
 
@@ -39,7 +39,7 @@ namespace neo {
 		}
 	};
 
-	MeshResourceManager::MeshResourceManager() {
+	MeshManager::MeshManager() {
 		auto cubeDetails = prefabs::generateCube();
 		mFallback = MeshLoader{}.load(*cubeDetails, "Fallback Cube");
 		for (auto&& [type, buffer] : cubeDetails->mVertexBuffers) {
@@ -50,12 +50,12 @@ namespace neo {
 		}
 	}
 
-	MeshResourceManager::~MeshResourceManager() {
+	MeshManager::~MeshManager() {
 		mFallback->mResource.destroy();
 		mFallback.reset();
 	}
 
-	[[nodiscard]] MeshHandle MeshResourceManager::_asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, std::optional<std::string> debugName) const {
+	[[nodiscard]] MeshHandle MeshManager::_asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, std::optional<std::string> debugName) const {
 		if (debugName.has_value()) {
 			NEO_LOG_V("Loading mesh %s", debugName->c_str());
 		}
@@ -78,7 +78,7 @@ namespace neo {
 		return id;
 	}
 
-	void MeshResourceManager::_tickImpl() {
+	void MeshManager::_tickImpl() {
 		TRACY_ZONE();
 
 		{
@@ -126,7 +126,7 @@ namespace neo {
 		}
 	}
 
-	void MeshResourceManager::_clearImpl() {
+	void MeshManager::_clearImpl() {
 		mQueue.clear();
 		mCache.each([](BackedResource<Mesh>& mesh) {
 			mesh.mResource.destroy();
@@ -134,7 +134,7 @@ namespace neo {
 		mCache.clear();
 	}
 
-	void MeshResourceManager::imguiEditor() {
+	void MeshManager::imguiEditor() {
 		mCache.each([](const MeshHandle id, const BackedResource<Mesh>& mesh) {
 			NEO_UNUSED(mesh);
 			if (mesh.mDebugName.has_value()) {

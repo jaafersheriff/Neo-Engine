@@ -1,4 +1,4 @@
-#include "ShaderResourceManager.hpp"
+#include "ShaderManager.hpp"
 
 #include "Loader/Loader.hpp"
 
@@ -33,7 +33,7 @@ namespace neo {
 		}
 	};
 
-	ShaderResourceManager::ShaderResourceManager() {
+	ShaderManager::ShaderManager() {
 		mFallback = ShaderLoader{}.load(SourceShader::ShaderCode{
 			{types::shader::Stage::Vertex, 
 				R"(
@@ -51,23 +51,23 @@ namespace neo {
 		}, "Dummy");
 	}
 
-	ShaderResourceManager::~ShaderResourceManager() {
+	ShaderManager::~ShaderManager() {
 		mFallback->mResource.destroy();
 		mFallback.reset();
 	}
 
-	const ResolvedShaderInstance& ShaderResourceManager::resolveDefines(ShaderHandle handle, const ShaderDefines& defines) const {
+	const ResolvedShaderInstance& ShaderManager::resolveDefines(ShaderHandle handle, const ShaderDefines& defines) const {
 		auto& resolved = resolve(handle).getResolvedInstance(defines);
 		resolved.bind();
 		return resolved;
 	}
 
-	[[nodiscard]] ShaderResourceManager::ShaderHandle ShaderResourceManager::_asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, std::optional<std::string> debugName) const {
+	[[nodiscard]] ShaderManager::ShaderHandle ShaderManager::_asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, std::optional<std::string> debugName) const {
 		mQueue.emplace_back(ResourceLoadDetails_Internal{ id, shaderDetails, debugName });
 		return id;
 	}
 
-	void ShaderResourceManager::_tickImpl() {
+	void ShaderManager::_tickImpl() {
 		TRACY_ZONE();
 
 		{
@@ -99,7 +99,7 @@ namespace neo {
 		}
 	}
 
-	void ShaderResourceManager::_clearImpl() {
+	void ShaderManager::_clearImpl() {
 		mQueue.clear();
 		mCache.each([](BackedResource<SourceShader>& resource) {
 			if (resource.mResource.mConstructionArgs.has_value()) {
@@ -112,7 +112,7 @@ namespace neo {
 		mCache.clear();
 	}
 
-	void ShaderResourceManager::imguiEditor() {
+	void ShaderManager::imguiEditor() {
 		mCache.each([&](entt::id_type enttId, BackedResource<SourceShader>&  resource) {
 			auto& shader = resource.mResource;
 			if (ImGui::TreeNode(shader.mName.c_str())) {

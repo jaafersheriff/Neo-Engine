@@ -1,4 +1,4 @@
-#include "TextureResourceManager.hpp"
+#include "TextureManager.hpp"
 
 #include "Util/Profiler.hpp"
 
@@ -120,7 +120,7 @@ namespace neo {
 
 	}
 
-	TextureResourceManager::TextureResourceManager() {
+	TextureManager::TextureManager() {
 		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF, /**/ 0xFF, 0xFF, 0xFF, 0xFF,
 		                   0xFF, 0xFF, 0xFF, 0xFF, /**/ 0x00, 0x00, 0x00, 0xFF
 		};
@@ -131,12 +131,12 @@ namespace neo {
 		}, "Fallback Texture");
 	}
 
-	TextureResourceManager::~TextureResourceManager() {
+	TextureManager::~TextureManager() {
 		mFallback->mResource.destroy();
 		mFallback.reset();
 	}
 
-	[[nodiscard]] TextureHandle TextureResourceManager::_asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, std::optional<std::string> debugName) const {
+	[[nodiscard]] TextureHandle TextureManager::_asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, std::optional<std::string> debugName) const {
 		NEO_UNUSED(debugName);
 		std::visit(util::VisitOverloaded{
 			[&](TextureBuilder& builder) {
@@ -167,7 +167,7 @@ namespace neo {
 	}
 
 
-	void TextureResourceManager::_tickImpl() {
+	void TextureManager::_tickImpl() {
 		TRACY_ZONE();
 
 		{
@@ -206,7 +206,7 @@ namespace neo {
 		}
 	}
 
-	void TextureResourceManager::_clearImpl() {
+	void TextureManager::_clearImpl() {
 		mQueue.clear();
 		mCache.each([](BackedResource<Texture>& texture) {
 			texture.mResource.destroy();
@@ -214,7 +214,7 @@ namespace neo {
 		mCache.clear();
 	}
 
-	void TextureResourceManager::imguiEditor(std::function<void(const Texture&)> textureFunc) {
+	void TextureManager::imguiEditor(std::function<void(const Texture&)> textureFunc) {
 		mCache.each([&](auto handle, BackedResource<Texture>& textureResource) {
 			ImGui::PushID(static_cast<int>(handle));
 			bool node = false;
