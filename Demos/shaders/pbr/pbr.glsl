@@ -21,11 +21,18 @@ struct PBRColor {
     vec3 indirectSpecular;
 };
 
-float V_SmithGGXCorrelated(float NoV, float NoL, float roughness) {
-    float a2 = roughness * roughness;
-    float GGXV = NoL * sqrt(NoV * NoV * (1.0 - a2) + a2);
-    float GGXL = NoV * sqrt(NoL * NoL * (1.0 - a2) + a2);
-    return 0.5 / (GGXV + GGXL + 1e-5);
+float GeometrySchlickGGX(float NdotV, float roughness) {
+    float r = (roughness + 1.0);
+    float k = (r * r) / 8.0;
+    float num = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+    return num / denom;
+}
+
+float GeometrySmith(float NdotV, float NdotL, float roughness) {
+    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+    return ggx1 * ggx2;
 }
 
 float D_GGX(float NoH, float roughness) {
@@ -51,11 +58,11 @@ void brdf(in PBRMaterial pbrMaterial, in PBRLight pbrLight, out PBRColor pbrColo
 
     float D = D_GGX(NdotH, roughness);
     vec3  F = F_Schlick(LdotH, F0);
-    float V = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
+    float G = GeometrySmith(NdotV, NdotL, roughness);
 
     vec3 Ks = F;
     vec3 Kd = (vec3(1.0) - Ks) * (1.0 - pbrMaterial.metalness);
 
     pbrColor.directDiffuse += (Kd * pbrMaterial.albedo / PI) * NdotL * pbrLight.radiance;
-    pbrColor.directSpecular += (D * F * V) * NdotL * pbrLight.radiance;
+    pbrColor.directSpecular += ((D * F * G) / (4 * NdotV * NdotL)) * NdotL * pbrLight.radiance;
 }
