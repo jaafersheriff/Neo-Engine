@@ -26,13 +26,14 @@ if (MSVC)
 	endfunction()
 	set(MESSAGE_QUIET ON)
 
-	option(TRACY_ENABLE "" ON)
+	option(TRACY_ENABLE "" OFF)
 	option(TRACY_ON_DEMAND "" ON)
 	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tracy")
 	target_compile_options(TracyClient PRIVATE "/WX-" "/W0")
 	set_target_properties(TracyClient PROPERTIES FOLDER "Neo/ext")
 
 	## tracy server - can be disabled
+	option(NO_LOCAL_TRACY "" ON)
 	if (NOT NO_LOCAL_TRACY)
 		option(TRACY_NO_BROADCAST "" ON)
 		option(TRACY_NO_ROOT_WINDOW "" ON)
@@ -46,32 +47,32 @@ if (MSVC)
  			"${CMAKE_CURRENT_SOURCE_DIR}/capstone/include/capstone"
 		)
 
-		file(GLOB TRACY_SERVER_FONTS_CPP_FILES
-			tracy/profiler/src/Fonts.cpp
-		)
-		file(GLOB TRACY_SERVER_FONTS_HPP_FILES
-			tracy/profiler/src/Fonts.Hpp
-		)
-		add_library(TracyServerFonts STATIC
-			${TRACY_SERVER_FONTS_CPP_FILES}
-			${TRACY_SERVER_FONTS_HPP_FILES}
-		)
-		target_include_directories(TracyServerFonts
-		PUBLIC
-		 	"${CMAKE_CURRENT_SOURCE_DIR}/tracy/profiler/src"
-		)
-		target_compile_options(TracyServerFonts PUBLIC "/WX-" "/W0")
-		target_compile_definitions(TracyServerFonts PRIVATE
-			TRACY_ENABLE
-			TRACY_NO_BROADCAST
-			TRACY_NO_ROOT_WINDOW
-		)
-		set_target_properties(TracyServerFonts PROPERTIES FOLDER "Neo/ext")
-		target_link_libraries(TracyServerFonts
-		PRIVATE
-			imgui
-			capstone
-		)
+		# file(GLOB TRACY_SERVER_FONTS_CPP_FILES
+		# 	tracy/profiler/src/Fonts.cpp
+		# )
+		# file(GLOB TRACY_SERVER_FONTS_HPP_FILES
+		# 	tracy/profiler/src/Fonts.Hpp
+		# )
+		# add_library(TracyServerFonts STATIC
+		# 	${TRACY_SERVER_FONTS_CPP_FILES}
+		# 	${TRACY_SERVER_FONTS_HPP_FILES}
+		# )
+		# target_include_directories(TracyServerFonts
+		# PUBLIC
+		#  	"${CMAKE_CURRENT_SOURCE_DIR}/tracy/profiler/src"
+		# )
+		# target_compile_options(TracyServerFonts PUBLIC "/WX-" "/W0")
+		# target_compile_definitions(TracyServerFonts PRIVATE
+		# 	TRACY_ENABLE
+		# 	TRACY_NO_BROADCAST
+		# 	TRACY_NO_ROOT_WINDOW
+		# )
+		# set_target_properties(TracyServerFonts PROPERTIES FOLDER "Neo/ext")
+		# target_link_libraries(TracyServerFonts
+		# PRIVATE
+		# 	imgui
+		# 	capstone
+		# )
 
 		file(GLOB TRACY_SERVER_CPP_FILES 
 			tracy/server/*.cpp
@@ -109,7 +110,7 @@ if (MSVC)
 		set_target_properties(TracyServer PROPERTIES FOLDER "Neo/ext")
 		target_link_libraries(TracyServer
 		PUBLIC
-			TracyServerFonts
+		# TracyServerFonts
 		PRIVATE
 			imgui
 			capstone
@@ -152,10 +153,10 @@ file(GLOB IMGUI_HPP_FILES
 )
 add_library(imgui STATIC
 	${IMGUI_CPP_FILES}
-	# imgui/backends/imgui_impl_glfw.cpp 
+	imgui/backends/imgui_impl_glfw.cpp 
 	# imgui/backends/imgui_impl_opengl3.cpp 
 	${IMGUI_HPP_FILES}
-	# imgui/backends/imgui_impl_glfw.h
+	imgui/backends/imgui_impl_glfw.h
  	# imgui/backends/imgui_impl_opengl3.h
 )
 target_compile_options(imgui PRIVATE "/WX-" "/W0")

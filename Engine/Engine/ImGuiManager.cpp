@@ -14,7 +14,7 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+//#include <imgui_impl_opengl3.h>
 #include <implot.h>
 #include <ImGuizmo.h>
 
@@ -38,6 +38,7 @@ namespace neo {
 #endif
 		/*ImGui_ImplGlfw_InitForOpenGL(window, false);
 		ImGui_ImplOpenGL3_Init(ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str());*/
+		ImGui_ImplGlfw_InitForOther(window, false);
 
 		ImGuiStyle* style = &ImGui::GetStyle();
 		style->ScaleAllSizes(io.FontGlobalScale);
@@ -233,7 +234,7 @@ namespace neo {
 		{
 
 			TRACY_GPUN("ImGui_ImplOpenGL3_RenderDrawData");
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			/*ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());*/
 		}
 
 		// Only needed with multiple viewports, which I don't do
@@ -296,7 +297,7 @@ namespace neo {
 	}
 
 	void ImGuiManager::destroy() {
-		ImGui_ImplOpenGL3_Shutdown();
+		/*ImGui_ImplOpenGL3_Shutdown();*/
 		ImGui_ImplGlfw_Shutdown();
 		ImPlot::DestroyContext();
 		ImGui::DestroyContext();
