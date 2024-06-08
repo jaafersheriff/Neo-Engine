@@ -96,7 +96,10 @@ namespace Base {
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
-		NEO_UNUSED(ecs, resourceManagers);
+		NEO_UNUSED(resourceManagers);
+		auto mainCamera = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		glm::vec3 pos = std::get<2>(*mainCamera).getPosition();
+		NEO_LOG_V("%0.2f, %0.2f, %0.2f", pos.x, pos.y, pos.z);
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
