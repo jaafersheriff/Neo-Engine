@@ -26,7 +26,7 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui_impl_opengl3.h>
-#include <tracy/TracyOpenGL.hpp>
+// TODO - bring back profiling #include <tracy/TracyOpenGL.hpp>
 	
 #pragma warning( push )
 #pragma warning( disable : 4201 )
@@ -55,25 +55,25 @@ namespace neo {
 
 	void Renderer::init() {
 	#ifdef DEBUG_MODE
-		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(GLHelper::OpenGLMessageCallback, nullptr);
-		
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
-		glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_FALSE);
-		glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
+		//glEnable(GL_DEBUG_OUTPUT);
+		//glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		//glDebugMessageCallback(GLHelper::OpenGLMessageCallback, nullptr);
+		//
+		//glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+		//glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_FALSE);
+		//glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
 	#endif
 		/* Set max work group */
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z);
-		char buf[512];
-		memcpy(buf, glGetString(GL_VENDOR), 512);
-		mDetails.mVendor = buf;
-		memcpy(buf, glGetString(GL_RENDERER), 512);
-		mDetails.mRenderer = buf;
-		memcpy(buf, glGetString(GL_SHADING_LANGUAGE_VERSION), 512);
-		mDetails.mShadingLanguage = buf;
+		//glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
+		//glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
+		//glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z);
+		//char buf[512];
+		//memcpy(buf, glGetString(GL_VENDOR), 512);
+		//mDetails.mVendor = buf;
+		//memcpy(buf, glGetString(GL_RENDERER), 512);
+		//mDetails.mRenderer = buf;
+		//memcpy(buf, glGetString(GL_SHADING_LANGUAGE_VERSION), 512);
+		//mDetails.mShadingLanguage = buf;
 
 		/* Init default GL state */
 		resetState();
@@ -84,25 +84,25 @@ namespace neo {
 	void Renderer::resetState() {
 		TRACY_GPU();
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.f);
+		//glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
+		//glEnable(GL_DEPTH_TEST);
+		//glDepthFunc(GL_LESS);
 
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
+		//glEnable(GL_CULL_FACE);
+		//glCullFace(GL_BACK);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		glDisable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glDisable(GL_BLEND);
+		//glBlendEquation(GL_FUNC_ADD);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, 0);
 
-		glBindVertexArray(0);
-		glUseProgram(0);
+		//glBindVertexArray(0);
+		//glUseProgram(0);
 	}
 
 	void Renderer::render(WindowSurface& window, IDemo* demo, ECS& ecs, ResourceManagers& resourceManagers) {
@@ -149,7 +149,7 @@ namespace neo {
 		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
 			TRACY_GPUN("ImGuiManager.render");
 			// Bind backbuffer
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			/*glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
 			ServiceLocator<ImGuiManager>::ref().render();
 		}
 		else {

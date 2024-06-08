@@ -15,9 +15,7 @@
 
 namespace neo {
 	namespace {
-
-
-		int32_t _getGLShaderStage(types::shader::Stage type) {
+		/*int32_t _getGLShaderStage(types::shader::Stage type) {
 			switch (type) {
 			case(types::shader::Stage::Vertex):
 				return GL_VERTEX_SHADER;
@@ -35,8 +33,8 @@ namespace neo {
 				NEO_FAIL("Invalid Shadertypes::shader::Stage: %d", type);
 				return 0;
 			}
-		}
-		static std::string _processShader(const char* shaderString, const ShaderDefines& defines) {
+		}*/
+		std::string _processShader(const char* shaderString, const ShaderDefines& defines) {
 			TRACY_ZONE();
 			if (!shaderString) {
 				return "";
@@ -128,7 +126,7 @@ namespace neo {
 			}
 		}
 
-		static void _findUniforms(const char *shaderString, std::vector<std::string>& uniforms, std::map<std::string, GLint>& bindings) {
+		void _findUniforms(const char *shaderString, std::vector<std::string>& uniforms, std::map<std::string, int32_t>& bindings) {
 			TRACY_ZONE();
 			std::string fileText(shaderString);
 			std::string::size_type start = 0;
@@ -171,10 +169,10 @@ namespace neo {
 		NEO_ASSERT(!mValid && mPid == 0, "Trying to initialize an existing shader variant object?");
 		TRACY_ZONE();
 		mValid = false;
-		mPid = glCreateProgram();
+		/*mPid = glCreateProgram();
 
 		std::vector<std::string> uniforms;
-		std::map<std::string, GLint> bindings;
+		std::map<std::string, int32_t> bindings;
 		for (auto&& [stage, source] : shaderCode) {
 			if (!source) {
 				NEO_LOG_E("Trying to compile an empty shader source");
@@ -217,12 +215,14 @@ namespace neo {
 	   for (auto& binding : bindings) {
 		   mBindings[HashedString(binding.first.c_str()).value()] = binding.second;
 	   }
-
+		*/
+		NEO_UNUSED(defines, shaderCode);
 		return mValid;
 	}
 
-	uint32_t ResolvedShaderInstance::_compileShader(GLenum shaderType, const char *shaderString) {
+	uint32_t ResolvedShaderInstance::_compileShader(uint32_t shaderType, const char *shaderString) {
 		TRACY_ZONE();
+		/*
 		// Create the shader, assign source code, and compile it
 		GLuint shader = glCreateShader(shaderType);
 		glShaderSource(shader, 1, &shaderString, NULL);
@@ -236,12 +236,14 @@ namespace neo {
 			glDeleteShader(shader);
 			return 0;
 		}
-
 		return shader;
+		*/
+		NEO_UNUSED(shaderType, shaderString);
+		return 0;
 	}
 
 	void ResolvedShaderInstance::destroy() {
-		if (mPid) {
+		/*if (mPid) {
 			unbind();
 			for (auto&& [stage, id] : mShaderIDs) {
 				if (id > 0) {
@@ -251,19 +253,19 @@ namespace neo {
 			}
 			glDeleteProgram(mPid);
 		}
-		mPid = 0;
+		mPid = 0;*/
 	}
 
 	void ResolvedShaderInstance::bind() const {
-		glUseProgram(mPid);
+		/*glUseProgram(mPid);*/
 	}
 
 	void ResolvedShaderInstance::unbind() const {
-		glActiveTexture(GL_TEXTURE0);
-		glUseProgram(0);
+		/*glActiveTexture(GL_TEXTURE0);
+		glUseProgram(0);*/
 	}
 
-	GLint ResolvedShaderInstance::_getUniform(const char* name) const {
+	int32_t ResolvedShaderInstance::_getUniform(const char* name) const {
 		ServiceLocator<Renderer>::ref().mStats.mNumUniforms++;
 		const auto uniform = mUniforms.find(HashedString(name));
 		if (uniform == mUniforms.end()) {
@@ -274,7 +276,7 @@ namespace neo {
 	}
 
 	void ResolvedShaderInstance::bindUniform(const char* name, const UniformVariant& uniform) const {
-		std::visit(util::VisitOverloaded{
+		/*std::visit(util::VisitOverloaded{
 			[&](bool b) { glUniform1i(_getUniform(name), b); },
 			[&](int i) { glUniform1i(_getUniform(name), i); },
 			[&](uint32_t i) { glUniform1ui(_getUniform(name), i); },
@@ -288,19 +290,21 @@ namespace neo {
 			[&](glm::mat3 m) { glUniformMatrix3fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
 			[&](glm::mat4 m) { glUniformMatrix4fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
 			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
-		}, uniform);
+		}, uniform);*/
+		NEO_UNUSED(name, uniform);
 	}
 
 	void ResolvedShaderInstance::bindTexture(const char* name, const Texture& texture) const {
 		ServiceLocator<Renderer>::ref().mStats.mNumSamplers++;
 
-		GLint bindingLoc = 0;
+		/*GLint bindingLoc = 0;
 		auto binding = mBindings.find(HashedString(name));
 		if (binding != mBindings.end()) {
 			bindingLoc = binding->second;
 		}
 		glActiveTexture(GL_TEXTURE0 + bindingLoc);
 		texture.bind();
-		glUniform1i(_getUniform(name), bindingLoc);
+		glUniform1i(_getUniform(name), bindingLoc);*/
+		NEO_UNUSED(name, texture);
 	}
 }

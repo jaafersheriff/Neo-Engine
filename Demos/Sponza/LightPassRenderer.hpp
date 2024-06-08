@@ -24,10 +24,10 @@ namespace Sponza {
 			return;
 		}
 
-		glEnable(GL_BLEND);
+		/*glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);
 		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);*/
 
 		ShaderDefines defines;
 		MakeDefine(SHOW_LIGHTS);
@@ -67,10 +67,10 @@ namespace Sponza {
 			// If camera is inside light 
 			float dist = glm::distance(spatial->getPosition(), cameraSpatial->getPosition());
 			if (dist - ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getNearFar().x < spatial->getScale().x) {
-				glCullFace(GL_FRONT);
+				/*glCullFace(GL_FRONT);*/
 			}
 			else {
-				glCullFace(GL_BACK);
+				/*glCullFace(GL_BACK);*/
 			}
 
 			resourceManagers.mMeshManager.resolve(HashedString("sphere")).draw();
@@ -126,7 +126,7 @@ namespace Sponza {
 		resolvedShader.bindTexture("gWorld", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
 		resolvedShader.bindTexture("gNormal", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
 
-		glDisable(GL_DEPTH_TEST);
+		/*glDisable(GL_DEPTH_TEST);*/
 
 		resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
 

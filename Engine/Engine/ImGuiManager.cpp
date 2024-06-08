@@ -19,7 +19,7 @@
 #include <ImGuizmo.h>
 
 #include <tracy/Tracy.hpp>
-#include <tracy/TracyOpenGL.hpp>
+//#include <tracy/TracyOpenGL.hpp>
 
 namespace neo {
 
@@ -36,8 +36,8 @@ namespace neo {
 #ifdef NO_LOCAL_TRACY
 		io.FontGlobalScale = 2.f;
 #endif
-		ImGui_ImplGlfw_InitForOpenGL(window, false);
-		ImGui_ImplOpenGL3_Init(ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str());
+		/*ImGui_ImplGlfw_InitForOpenGL(window, false);
+		ImGui_ImplOpenGL3_Init(ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str());*/
 
 		ImGuiStyle* style = &ImGui::GetStyle();
 		style->ScaleAllSizes(io.FontGlobalScale);
@@ -108,7 +108,7 @@ namespace neo {
 
 		{
 			TRACY_ZONEN("ImGui_ImplOpenGL3_NewFrame");
-			ImGui_ImplOpenGL3_NewFrame();
+			/*ImGui_ImplOpenGL3_NewFrame();*/
 		}
 		{
 			TRACY_ZONEN("ImGui_ImplGlfw_NewFrame");

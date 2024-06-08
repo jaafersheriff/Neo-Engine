@@ -17,7 +17,7 @@
 
 #include "Util/Util.hpp"
 
-#include <tracy/TracyOpenGL.hpp>
+//#include <tracy/TracyOpenGL.hpp>
 
 using namespace neo;
 

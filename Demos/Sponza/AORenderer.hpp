@@ -130,7 +130,7 @@ namespace Sponza {
 			if (resourceManagers.mFramebufferManager.isValid(baseAOHandle)) {
 				auto& baseAOTarget = resourceManagers.mFramebufferManager.resolve(baseAOHandle);
 				baseAOTarget.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
-				glViewport(0, 0, targetSize.x / 2u, targetSize.y / 2u);
+				/*glViewport(0, 0, targetSize.x / 2u, targetSize.y / 2u);*/
 				auto aoShader = resourceManagers.mShaderManager.asyncLoad("AOShader", SourceShader::ConstructionArgs{
 					{ types::shader::Stage::Vertex, "quad.vert"},
 					{ types::shader::Stage::Fragment, "sponza/ao.frag" }
@@ -168,7 +168,7 @@ namespace Sponza {
 					auto blurredAO = resourceManagers.mFramebufferManager.resolve(blurAOHandle);
 					blurredAO.bind();
 					blurredAO.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
-					glViewport(0, 0, targetSize.x, targetSize.y);
+					/*glViewport(0, 0, targetSize.x, targetSize.y);*/
 
 					auto blurShader = resourceManagers.mShaderManager.asyncLoad("BlurShader", SourceShader::ConstructionArgs{
 						{ types::shader::Stage::Vertex, "quad.vert"},

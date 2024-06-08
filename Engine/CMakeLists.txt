@@ -40,7 +40,6 @@ INTERFACE
 	Util
 	glfw
 	glm
-	libglew_static
 )
 
 

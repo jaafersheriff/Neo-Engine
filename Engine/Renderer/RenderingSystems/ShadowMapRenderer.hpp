@@ -21,6 +21,7 @@ namespace neo {
 		}
 
 		depthMap.disableDraw();
+		/*
 		auto& depthTexture = resourceManagers.mTextureManager.resolve(depthMap.mTextures[0]);
 		glViewport(0, 0, depthTexture.mWidth, depthTexture.mHeight);
 		{
@@ -29,6 +30,7 @@ namespace neo {
 		}
 
 		glCullFace(GL_FRONT);
+		*/
 
 		bool containsAlphaTest = false;
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
@@ -77,6 +79,6 @@ namespace neo {
 			// glDisable(GL_BLEND);
 		}
 
-		glCullFace(GL_BACK);
+		/*glCullFace(GL_BACK);*/
 	}
 }

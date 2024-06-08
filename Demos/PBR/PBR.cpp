@@ -239,10 +239,10 @@ namespace PBR {
 
 			// Yikes
 			if (material.mDoubleSided) {
-				glDisable(GL_CULL_FACE);
+				/*glDisable(GL_CULL_FACE);*/
 			}
 			else {
-				glEnable(GL_CULL_FACE);
+				/*glEnable(GL_CULL_FACE);*/
 			}
 			mesh.draw();
 		}
@@ -463,7 +463,7 @@ namespace PBR {
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+		/*glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);*/
 
 		drawSkybox(resourceManagers, ecs, cameraEntity);
 

@@ -109,19 +109,19 @@ namespace Cornell {
 			auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
 			glm::vec3 clearColor = getConfig().clearColor;
 			sceneTarget.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+			/*glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);*/
 			drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 
 			backbuffer.bind();
 			backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			drawFXAA(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
 			// Don't forget the depth. Because reasons.
-			glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
+			/*glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
 				0, 0, viewport.mSize.x, viewport.mSize.y,
 				0, 0, viewport.mSize.x, viewport.mSize.y,
 				GL_DEPTH_BUFFER_BIT,
 				GL_NEAREST
-			);
+			);*/
 		}
 	}
 

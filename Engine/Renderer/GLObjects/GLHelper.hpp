@@ -23,10 +23,11 @@ namespace neo {
 			const char* message,
 			const void* userParam
 		);
-		uint32_t getGLByteFormat(types::ByteFormats format);
+		
+		/*uint32_t getGLByteFormat(types::ByteFormats format);
 		void checkFrameBuffer();
 		void printProgramInfoLog(uint32_t program);
-		void printShaderInfoLog(uint32_t shader);
+		void printShaderInfoLog(uint32_t shader);*/
 	}
 
 }

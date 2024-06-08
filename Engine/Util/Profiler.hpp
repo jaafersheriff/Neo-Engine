@@ -1,12 +1,11 @@
 #pragma once
 
 #include <tracy/Tracy.hpp>
-#include <GL/glew.h>
-#include <tracy/TracyOpenGL.hpp>
+// TODO - bring back profiling #include <tracy/TracyOpenGL.hpp>
 #define TRACY_ZONEN(x) ZoneScopedNC(x, (HashedString(x) & 0xfefefe) >> 1 )
 #define TRACY_ZONE() TRACY_ZONEN(TracyFunction)
-#define TRACY_GPUN(x) TRACY_ZONEN(x); TracyGpuZoneC(x, (HashedString(x) & 0xfefefe) >> 1 )
-#define TRACY_GPU() TRACY_GPUN(TracyFunction)
+#define TRACY_GPUN(x) TRACY_ZONEN(x); // TODO - bring back profiling TracyGpuZoneC(x, (HashedString(x) & 0xfefefe) >> 1 )
+#define TRACY_GPU() // TODO - bring back profiling TRACY_GPUN(TracyFunction)
 
 #include <memory>
 #include <vector>

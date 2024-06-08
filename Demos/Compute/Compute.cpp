@@ -115,6 +115,7 @@ namespace Compute {
 			particlesComputeShader.bindUniform("timestep", timeStep);
 
 			// Bind mesh
+			/*
 			auto& mesh = resourceManagers.mMeshManager.resolve(meshComponent.mMeshHandle);
 			auto& position = mesh.getVBO(types::mesh::VertexType::Position);
 			glBindVertexArray(mesh.mVAOID);
@@ -126,6 +127,7 @@ namespace Compute {
 
 			// Reset bind
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, 0);
+			*/
 		}
 
 		// Draw the mesh
@@ -150,10 +152,10 @@ namespace Compute {
 
 			if (auto meshView = ecs.getSingleView<ParticleMeshComponent, SpatialComponent>()) {
 				auto&& [_, meshComponent, spatial] = *meshView;
-				glEnable(GL_BLEND);
+				/*glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 				glDisable(GL_DEPTH_TEST);
-				glDisable(GL_CULL_FACE);
+				glDisable(GL_CULL_FACE);*/
 
 				particlesVisShader.bindUniform("M", spatial.getModelMatrix());
 

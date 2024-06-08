@@ -8,7 +8,6 @@ PRIVATE
 	Messaging
 	Hardware
 	glfw
-	libglew_static
 	imgui
 	entt
 	TracyClient

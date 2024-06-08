@@ -186,7 +186,7 @@ namespace FrustaFitting {
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+		/*glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);*/
 		drawPhong(resourceManagers, ecs, cameraEntity, shadowTexture);
 		drawLines(resourceManagers, ecs, cameraEntity);
 

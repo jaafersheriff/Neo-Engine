@@ -12,11 +12,6 @@ PRIVATE
 set_target_properties(glfw PROPERTIES FOLDER "Neo/ext/GLFW3")
 set_target_properties(update_mappings PROPERTIES FOLDER "Neo/ext/GLFW3")
 
-## GLEW
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glew-cmake")
-set_target_properties(libglew_shared PROPERTIES FOLDER "Neo/ext/glew")
-set_target_properties(libglew_static PROPERTIES FOLDER "Neo/ext/glew")
-
 ## GLM
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glm")
 
@@ -157,11 +152,11 @@ file(GLOB IMGUI_HPP_FILES
 )
 add_library(imgui STATIC
 	${IMGUI_CPP_FILES}
- 	imgui/backends/imgui_impl_glfw.cpp 
- 	imgui/backends/imgui_impl_opengl3.cpp 
+	# imgui/backends/imgui_impl_glfw.cpp 
+	# imgui/backends/imgui_impl_opengl3.cpp 
 	${IMGUI_HPP_FILES}
- 	imgui/backends/imgui_impl_glfw.h
- 	imgui/backends/imgui_impl_opengl3.h
+	# imgui/backends/imgui_impl_glfw.h
+ 	# imgui/backends/imgui_impl_opengl3.h
 )
 target_compile_options(imgui PRIVATE "/WX-" "/W0")
 set_target_properties(imgui PROPERTIES FOLDER "Neo/ext")

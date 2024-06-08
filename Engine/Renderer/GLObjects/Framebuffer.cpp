@@ -13,6 +13,7 @@
 
 namespace neo {
 	namespace {
+		/*
 		GLbitfield _getGLClearFlags(types::framebuffer::AttachmentBits flagBits) {
 
 			GLbitfield flags = 0;
@@ -39,30 +40,38 @@ namespace neo {
 
 			return GL_COLOR_ATTACHMENT0;
 		}
-
+		*/
 	}
 
 	void Framebuffer::init(std::optional<std::string> debugName) {
+		/*
 		glGenFramebuffers(1, &mFBOID);
 		if (debugName.has_value() && !debugName.value().empty()) {
 			bind();
 			glObjectLabel(GL_FRAMEBUFFER, mFBOID, -1, debugName.value().c_str());
 		}
 		disableRead();
+		*/
 	}
 
 	void Framebuffer::bind() const {
+		/*
 		glBindFramebuffer(GL_FRAMEBUFFER, mFBOID);
+		*/
 	}
 
 	void Framebuffer::disableDraw() const {
 		bind();
+		/*
 		glDrawBuffer(GL_NONE);
+		*/
 	}
 
 	void Framebuffer::disableRead() const {
 		bind();
+		/*
 		glReadBuffer(GL_NONE);
+		*/
 	}
 
 	void Framebuffer::attachTexture(TextureHandle id, const Texture& texture) {
@@ -84,12 +93,15 @@ namespace neo {
 
 		mTextures.emplace_back(id);
 		bind();
+		/*
 		glFramebufferTexture(GL_FRAMEBUFFER, _getGLAttachment(attachment), texture.mTextureID, 0);
 		CHECK_GL_FRAMEBUFFER();
+		*/
 	}
 
 	void Framebuffer::initDrawBuffers() {
 		NEO_ASSERT(mColorAttachments, "Attempting to init FBO without any color attachments");
+		/*
 		NEO_ASSERT(mColorAttachments < GL_MAX_COLOR_ATTACHMENTS, "You attached too many textures to this framebuffer");
 
 		bind();
@@ -99,16 +111,22 @@ namespace neo {
 		}
 		glDrawBuffers(mColorAttachments, attachments.data());
 		CHECK_GL_FRAMEBUFFER();
+		*/
 	}
 
 	void Framebuffer::clear(glm::vec4 clearColor, types::framebuffer::AttachmentBits clearFlags) const {
 		NEO_ASSERT(mTextures.size(), "Attempting to clear framebuffer with no textures");
+		/*
 		glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 		glClear(_getGLClearFlags(clearFlags));
+		*/
+		NEO_UNUSED(clearColor, clearFlags);
 	}
 
 	void Framebuffer::destroy() {
+		/*
 		glDeleteFramebuffers(1, &mFBOID);
+		*/
 		mColorAttachments = 0;
 		mFBOID = 0;
 	}

@@ -19,8 +19,8 @@ namespace neo {
 		});
 
 
-		glDisable(GL_CULL_FACE);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glDisable(GL_CULL_FACE);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		const auto& view = ecs.getView<const WireframeShaderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
 		for (auto entity : view) {
@@ -42,7 +42,7 @@ namespace neo {
 			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
 
-		glEnable(GL_CULL_FACE);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//glEnable(GL_CULL_FACE);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 }

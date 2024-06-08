@@ -68,7 +68,7 @@ namespace neo {
 			for (int i = 0; i < 4; i++) {
 				TRACY_GPUN("Trash");
 				std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(mRefreshRate * 2.f)));
-				TracyGpuCollect;
+				// TODO - bring back profiling TracyGpuCollect;
 			}
 #endif
 		}

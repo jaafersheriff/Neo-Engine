@@ -6,7 +6,6 @@ PUBLIC
 	tinygltf
 PRIVATE
 	Util
-	libglew_static
 	ECS
 )
 

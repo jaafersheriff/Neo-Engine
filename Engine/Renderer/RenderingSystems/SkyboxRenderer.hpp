@@ -44,8 +44,8 @@ namespace neo {
 			return;
 		}
 
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_DEPTH_TEST);
+		//glDisable(GL_CULL_FACE);
+		//glDisable(GL_DEPTH_TEST);
 
 		auto camera = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity);
 		auto camSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
@@ -60,7 +60,7 @@ namespace neo {
 		/* Draw */
 		resourceManagers.mMeshManager.resolve(HashedString("cube")).draw();
 
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_CULL_FACE);
+		//glEnable(GL_DEPTH_TEST);
 	}
 }

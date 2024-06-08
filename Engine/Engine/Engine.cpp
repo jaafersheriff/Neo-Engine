@@ -43,7 +43,7 @@ extern "C" {
 #include <iostream>
 
 #include <tracy/Tracy.hpp>
-#include <tracy/TracyOpenGL.hpp>
+// TODO - bring back profiling #include <tracy/TracyOpenGL.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -77,17 +77,18 @@ namespace neo {
 				glfwSetWindowIcon(mWindow.getWindow(), 1, icons);
 			}
 
-			/* Init GLEW */
+			/* Init GLEW 
 			glewExperimental = GL_FALSE;
 			NEO_ASSERT(glewInit()== GLEW_OK, "Failed to init GLEW");
+			*/
 		}
 		ServiceLocator<ImGuiManager>::set();
 		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
 
 		ServiceLocator<Renderer>::ref().init();
 		{
+			/*
 			auto& details = ServiceLocator<Renderer>::ref().mDetails;
-			/* Set max work group */
 			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &details.mMaxComputeWorkGroupSize.x);
 			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &details.mMaxComputeWorkGroupSize.y);
 			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &details.mMaxComputeWorkGroupSize.z);
@@ -111,8 +112,9 @@ namespace neo {
 			TracyAppInfo(buf, bytes);
 			bytes = sprintf(buf, "Max Compute Work Group Size: [%d, %d, %d]", details.mMaxComputeWorkGroupSize.x, details.mMaxComputeWorkGroupSize.y, details.mMaxComputeWorkGroupSize.z);
 			TracyAppInfo(buf, bytes);
+			*/
 		}
-		TracyGpuContext;
+		// TODO - bring back profiling TracyGpuContext;
 	}
 
 	void Engine::run(DemoWrangler& demos) {
@@ -191,7 +193,7 @@ namespace neo {
 			}
 
 			mWindow.flip();
-			TracyGpuCollect;
+			// TODO - bring back profiling TracyGpuCollect;
 			FrameMark;
 		}
 

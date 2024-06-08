@@ -37,11 +37,11 @@ namespace neo {
 		}); 
 
 		outputFBO.bind();
-		glViewport(0, 0, viewport.x, viewport.y);
+		/*glViewport(0, 0, viewport.x, viewport.y);
 		glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_DEPTH_TEST);*/
 		
 		auto& resolvedBlit = resourceManagers.mShaderManager.resolveDefines(blitShaderHandle, {});
 		
@@ -51,6 +51,7 @@ namespace neo {
 		// Render 
 		resourceManagers.mMeshManager.resolve("quad").draw();
 
-		glEnable(GL_DEPTH_TEST);
+		/*glEnable(GL_DEPTH_TEST);*/
+		NEO_UNUSED(clearColor, viewport);
 	}
 }

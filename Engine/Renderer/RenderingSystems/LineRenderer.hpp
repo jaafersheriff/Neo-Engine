@@ -13,8 +13,8 @@ namespace neo {
 	void drawLines(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
-		bool oldDepthState = glIsEnabled(GL_DEPTH_TEST);
-		glEnable(GL_LINE_SMOOTH);
+		/*bool oldDepthState = glIsEnabled(GL_DEPTH_TEST);
+		glEnable(GL_LINE_SMOOTH);*/
 
 		auto lineShaderHandle = resourceManagers.mShaderManager.asyncLoad("LineShader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "line.vert"},
@@ -40,22 +40,22 @@ namespace neo {
 				}
 			}
 			lineShader.bindUniform("M", M);
-			if (line->mWriteDepth) {
+			/*if (line->mWriteDepth) {
 				glEnable(GL_DEPTH_TEST);
 			}
 			else {
 				glDisable(GL_DEPTH_TEST);
-			}
+			}*/
 
 			/* Bind mesh */
 			line->getMesh(resourceManagers.mMeshManager).draw();
 		}
 
-		if (oldDepthState) {
+		/*if (oldDepthState) {
 			glEnable(GL_DEPTH_TEST);
 		}
 		else {
 			glDisable(GL_DEPTH_TEST);
-		}
+		}*/
 	}
 }

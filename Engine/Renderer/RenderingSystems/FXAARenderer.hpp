@@ -22,7 +22,7 @@ namespace neo {
 			return;
 		}
 
-		glViewport(0, 0, dimension.x, dimension.y);
+		/*glViewport(0, 0, dimension.x, dimension.y);*/
 
 		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(fxaaShaderHandle, {});
 		resolvedShader.bind();
@@ -31,8 +31,9 @@ namespace neo {
 		resolvedShader.bindUniform("frameSize", glm::vec2(inputTexture.mWidth, inputTexture.mHeight));
 		resolvedShader.bindTexture("inputTexture", inputTexture);
 
-		glDisable(GL_DEPTH_TEST);
+		/*glDisable(GL_DEPTH_TEST);*/
 		resourceManagers.mMeshManager.resolve("quad").draw();
-		glEnable(GL_DEPTH_TEST);
+		/*glEnable(GL_DEPTH_TEST);*/
+		NEO_UNUSED(dimension);
 	}
 }

@@ -7,7 +7,6 @@ PUBLIC
 	entt
 	imgui
 	TracyClient
-	libglew_static 
 PRIVATE
 	glfw
 	implots

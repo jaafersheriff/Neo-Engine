@@ -3,10 +3,9 @@
 
 #include "Renderer/GLObjects/GLHelper.hpp"
 
-#include "GL/glew.h"
-
 namespace neo {
 	namespace {
+		/*
 		GLenum _getGLTarget(types::texture::Target target) {
 			switch (target) {
 			case types::texture::Target::Texture1D:
@@ -102,6 +101,7 @@ namespace neo {
 				return GL_RGB;
 			}
 		}
+		*/
 	}
 
 	types::texture::BaseFormats TextureFormat::deriveBaseFormat(types::texture::InternalFormats format) {
@@ -164,6 +164,7 @@ namespace neo {
 			break;
 		}
 
+		/*
 		glGenTextures(1, &mTextureID);
 		bind();
 		if (debugName.has_value() && !debugName.value().empty()) {
@@ -239,18 +240,22 @@ namespace neo {
 		}
 
 		NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when creating Texture");
+		*/
+		NEO_UNUSED(data);
 	}
 
 	void Texture::bind() const {
+		/*
 		glBindTexture(_getGLTarget(mFormat.mTarget), mTextureID);
+		*/
 	}
 
 	void Texture::genMips() {
-		glGenerateTextureMipmap(mTextureID);
+		/*glGenerateTextureMipmap(mTextureID);*/
 	}
 
 	void Texture::destroy() {
-		glDeleteTextures(1, &mTextureID);
+		/*glDeleteTextures(1, &mTextureID);*/
 		mTextureID = 0;
 		mWidth = 1;
 		mHeight = 1;

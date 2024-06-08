@@ -88,7 +88,7 @@ namespace DrawStress {
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+		/*glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);*/
 		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 	}
 

@@ -213,12 +213,12 @@ namespace Sponza {
 			backbuffer.clear(glm::vec4(0, 0, 0, 1.f), types::framebuffer::AttachmentBit::Color);
 			drawFXAA(resourceManagers, glm::uvec2(viewport.mSize.x, viewport.mSize.y), sceneTarget.mTextures[0]);
 			// Don't forget the depth. Because reasons.
-			glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
+			/*glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
 				0, 0, viewport.mSize.x, viewport.mSize.y,
 				0, 0, viewport.mSize.x, viewport.mSize.y,
 				GL_DEPTH_BUFFER_BIT,
 				GL_NEAREST
-			);
+			);*/
 		}
 	}
 
@@ -234,7 +234,8 @@ namespace Sponza {
 
 		auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
 		sceneTarget.clear(glm::vec4(getConfig().clearColor, 0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		glViewport(0, 0, viewport.x, viewport.y);
+		/*glViewport(0, 0, viewport.x, viewport.y);*/
+		NEO_UNUSED(viewport);
 
 		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowMapHandle);
 		drawPhong<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowMapHandle);
@@ -256,7 +257,7 @@ namespace Sponza {
 		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
 		gbuffer.bind();
 		gbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		glViewport(0, 0, viewport.x, viewport.y);
+		//glViewport(0, 0, viewport.x, viewport.y);
 		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, {});
 
 		NEO_UNUSED(shadowMapHandle);

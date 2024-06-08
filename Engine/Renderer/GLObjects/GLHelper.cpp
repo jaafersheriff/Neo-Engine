@@ -1,8 +1,6 @@
 #include "Renderer/pch.hpp"
 #include "GLHelper.hpp"
 
-#include <GL/glew.h>
-
 namespace neo {
 
 	namespace GLHelper {
@@ -29,7 +27,7 @@ namespace neo {
 			const void* userParam) {
 			NEO_UNUSED(id, length, userParam);
 
-			static std::unordered_map<GLenum, const char*> sSourceString = {
+			/*static std::unordered_map<GLenum, const char*> sSourceString = {
 				{GL_DEBUG_SOURCE_API,             "API"},
 				{GL_DEBUG_SOURCE_WINDOW_SYSTEM,   "Window"},
 				{GL_DEBUG_SOURCE_SHADER_COMPILER, "Shader Compiler"},
@@ -60,10 +58,11 @@ namespace neo {
 				case GL_DEBUG_SEVERITY_NOTIFICATION: NEO_LOG_I(glBuf); return;
 				case GL_DEBUG_OUTPUT:                NEO_LOG_V(glBuf); return;
 			}
-			NEO_FAIL("%s\nUnknown severity level!", glBuf);
+			NEO_FAIL("%s\nUnknown severity level!", glBuf);*/
+			NEO_UNUSED(source, type, severity, length, message);
 		}
 
-		const char * errorString(GLenum err) {
+		/*const char * errorString(GLenum err) {
 			switch (err) {
 				case GL_NO_ERROR:
 					return "No error";
@@ -98,9 +97,9 @@ namespace neo {
 				default:
 					return "No error";
 			}
-		}
+		}*/
 
-		uint32_t getGLByteFormat(types::ByteFormats format) {
+		/*uint32_t getGLByteFormat(types::ByteFormats format) {
 			switch (format) {
 			case types::ByteFormats::UnsignedByte:
 				return GL_UNSIGNED_BYTE;
@@ -124,16 +123,16 @@ namespace neo {
 				NEO_FAIL("Invalid byte format");
 				return GL_FLOAT;
 			}
-		}
+		}*/
 
-		void checkError(const char *str) {
+		/*void checkError(const char *str) {
 			GLenum glErr = glGetError();
 			if (glErr != GL_NO_ERROR) {
 				NEO_LOG_E("GL_ERROR at %s : %s.\n", str, errorString(glErr));
 			}
-		}
+		}*/
 
-		void printShaderInfoLog(GLuint shader) {
+		/*void printShaderInfoLog(GLuint shader) {
 			GLint infologLength = 0;
 			GLint charsWritten = 0;
 			GLchar *infoLog;
@@ -151,9 +150,9 @@ namespace neo {
 				free(infoLog);
 			}
 			checkError(GET_FILE_LINE);
-		}
+		}*/
 
-		void printProgramInfoLog(GLuint program) {
+		/*void printProgramInfoLog(GLuint program) {
 			GLint infologLength = 0;
 			GLint charsWritten = 0;
 			GLchar *infoLog;
@@ -170,14 +169,14 @@ namespace neo {
 				free(infoLog);
 			}
 			checkError(GET_FILE_LINE);
-		}
+		}*/
 
-		void checkFrameBuffer() {
+		/*void checkFrameBuffer() {
 			GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			if (err != GL_FRAMEBUFFER_COMPLETE) {
 				const char *const errString = errorString(err);
 				NEO_FAIL("OpenGL error '%s' '%d 0x%X'\n", errString, err, err);
 			}
-		}
+		}*/
 	}
 }

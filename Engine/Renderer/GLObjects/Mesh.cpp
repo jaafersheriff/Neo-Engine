@@ -4,10 +4,9 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/Renderer.hpp"
 
-#include "GL/glew.h"
-
 namespace neo {
 	namespace {
+		/*
 		GLenum _translatePrimitive(types::mesh::Primitive primitive) {
 			switch (primitive) {
 			case types::mesh::Primitive::Points:
@@ -29,6 +28,7 @@ namespace neo {
 				return GL_TRIANGLE_FAN;
 			}
 		}
+	*/
 	}
 
 	Mesh::Mesh(types::mesh::Primitive primitive)
@@ -43,7 +43,7 @@ namespace neo {
 
 		ServiceLocator<Renderer>::ref().mStats.mNumDraws++;
 
-		glBindVertexArray(mVAOID);
+		/*glBindVertexArray(mVAOID);
 
 		if (mElementVBO) {
 			uint32_t usedSize = size ? size : mElementVBO->elementCount;
@@ -58,7 +58,8 @@ namespace neo {
 			const auto& positions = getVBO(types::mesh::VertexType::Position);
 			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += positions.elementCount / positions.components;
 			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, positions.elementCount / positions.components);
-		}
+		}*/
+		NEO_UNUSED(size);
 	}
 
 	void Mesh::addVertexBuffer(types::mesh::VertexType type, uint32_t components, uint32_t stride, types::ByteFormats format, bool normalized, uint32_t count, uint32_t offset, uint32_t byteSize, const uint8_t* buffer) {
@@ -69,7 +70,7 @@ namespace neo {
 		vertexBuffer.stride = stride;
 		vertexBuffer.components = components;
 		vertexBuffer.elementCount = count;
-		vertexBuffer.format = GLHelper::getGLByteFormat(format);
+		/*vertexBuffer.format = GLHelper::getGLByteFormat(format);
 
 		glBindVertexArray(mVAOID);
 		glGenBuffers(1, (GLuint*)&vertexBuffer.vboID);
@@ -88,6 +89,8 @@ namespace neo {
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
+*/
+		NEO_UNUSED(format, normalized, offset, byteSize, buffer);
 
 		mVBOs[type] = vertexBuffer;
 	}
@@ -100,23 +103,24 @@ namespace neo {
 		auto& vertexBuffer = vbo->second;
 		vertexBuffer.elementCount = count;
 
-		glBindVertexArray(mVAOID);
+		/*glBindVertexArray(mVAOID);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID);
 		if (byteSize) {
 			glBufferData(GL_ARRAY_BUFFER, byteSize, data, GL_DYNAMIC_DRAW);
 		}
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		glBindVertexArray(0);*/
+		NEO_UNUSED(byteSize, data);
 	}
 
 	void Mesh::removeVertexBuffer(types::mesh::VertexType type) {
 		const auto& vbo = mVBOs.find(type);
 
 		if (vbo != mVBOs.end()) {
-			glBindVertexArray(mVAOID);
+			/*glBindVertexArray(mVAOID);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo->second.vboID);
 			glDeleteBuffers(1, (GLuint *)&vbo->second.vboID);
-			glBindVertexArray(0);
+			glBindVertexArray(0);*/
 		}
 		mVBOs.erase(type);
 	}
@@ -138,7 +142,7 @@ namespace neo {
 		mElementVBO->elementCount = count;
 		mElementVBO->stride = 0;
 		mElementVBO->components = 1;
-		mElementVBO->format = GLHelper::getGLByteFormat(format);
+		/*mElementVBO->format = GLHelper::getGLByteFormat(format);
 
 		glBindVertexArray(mVAOID);
 
@@ -147,16 +151,17 @@ namespace neo {
 		if (byteSize) {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteSize, data, GL_STATIC_DRAW);
 		}
-		glBindVertexArray(0);
+		glBindVertexArray(0);*/
+		NEO_UNUSED(format, byteSize, data);
 	}
 
 	void Mesh::removeElementBuffer() {
 		if (mElementVBO.has_value()) {
-			glBindVertexArray(mVAOID);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID);
-			glDeleteBuffers(1, (GLuint *)&mElementVBO->vboID);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
+			//glBindVertexArray(mVAOID);
+			//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID);
+			//glDeleteBuffers(1, (GLuint *)&mElementVBO->vboID);
+			//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			//glBindVertexArray(0);
 			mElementVBO = std::nullopt;
 		}
 
@@ -173,16 +178,16 @@ namespace neo {
 	}
 
 	void Mesh::init(std::optional<std::string> debugName) {
-		glGenVertexArrays(1, (GLuint*)&mVAOID);
-		if (debugName.has_value() && !debugName.value().empty()) {
-			glBindVertexArray(mVAOID);
-			glObjectLabel(GL_VERTEX_ARRAY, mVAOID, -1, debugName.value().c_str());
-		}
+		//glGenVertexArrays(1, (GLuint*)&mVAOID);
+		//if (debugName.has_value() && !debugName.value().empty()) {
+		//	glBindVertexArray(mVAOID);
+		//	glObjectLabel(GL_VERTEX_ARRAY, mVAOID, -1, debugName.value().c_str());
+		//}
 	}
 
 	void Mesh::destroy() {
 		NEO_ASSERT(mVAOID, "Attempting to clear Mesh an empty mesh");
 		clear();
-		glDeleteVertexArrays(1, (GLuint *)&mVAOID);
+		/*glDeleteVertexArrays(1, (GLuint *)&mVAOID);*/
 	}
 }

@@ -3,8 +3,6 @@
 
 #include "Renderer/GLObjects/Mesh.hpp"
 
-#include <GL/glew.h>
-
 namespace neo {
 
 	LineMeshComponent::LineMeshComponent(const MeshManager& meshManager, std::optional<glm::vec3> overrideColor) :
