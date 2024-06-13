@@ -23,7 +23,7 @@ namespace Sponza {
 		void _deferredShading(const ResourceManagers& resourceManagers, const ECS& ecs, FramebufferHandle sceneTarget, glm::uvec2 viewport, TextureHandle shadowMap);
 		bool mDrawShadows = true;
 
-		bool mDeferredShading = true;
+		bool mDeferredShading = false;
 		int mPointLightCount = 20;
 		float mLightDebugRadius = 0.f;
 		bool mDrawAO = false;

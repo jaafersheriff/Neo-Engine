@@ -29,7 +29,7 @@ namespace neo {
 			return flags;
 		}
 
-		GLenum _getGLAttachment(types::framebuffer::AttachmentBit bit) {
+		GLenum _getGLAttachment(types::framebuffer::AttachmentBit bit, int colorAttachmentOffset) {
 			if (bit == types::framebuffer::AttachmentBit::Depth) {
 				return GL_DEPTH_ATTACHMENT;
 			}
@@ -37,7 +37,7 @@ namespace neo {
 				return GL_DEPTH_STENCIL;
 			}
 
-			return GL_COLOR_ATTACHMENT0;
+			return GL_COLOR_ATTACHMENT0 + colorAttachmentOffset;
 		}
 
 	}
@@ -84,7 +84,7 @@ namespace neo {
 
 		mTextures.emplace_back(id);
 		bind();
-		glFramebufferTexture(GL_FRAMEBUFFER, _getGLAttachment(attachment), texture.mTextureID, 0);
+		glFramebufferTexture(GL_FRAMEBUFFER, _getGLAttachment(attachment, mColorAttachments - 1), texture.mTextureID, 0);
 		CHECK_GL_FRAMEBUFFER();
 	}
 
