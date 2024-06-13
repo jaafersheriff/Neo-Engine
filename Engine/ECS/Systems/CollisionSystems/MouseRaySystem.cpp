@@ -27,6 +27,7 @@ namespace neo {
 			if (mouseRayComponent.has_value()) {
 				ecs.removeEntity(std::get<0>(*mouseRayComponent));
 			}
+			return;
 		}
 
 		auto&& [mouseEntity, mouse] = *mouseComponent;

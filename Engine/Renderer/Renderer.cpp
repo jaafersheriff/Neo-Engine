@@ -129,6 +129,11 @@ namespace neo {
 			resourceManagers.mTextureManager
 		);
 		if (!resourceManagers.mFramebufferManager.isValid(mDefaultFBOHandle)) {
+			// Need to always call ImGui::render in this function..
+			if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+				ServiceLocator<ImGuiManager>::ref().render();
+			}
+
 			return;
 		}
 

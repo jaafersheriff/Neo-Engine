@@ -136,6 +136,7 @@ namespace Sponza {
 			ecs.addComponent<GBufferShaderComponent>(entity);
 			ecs.addComponent<PhongShaderComponent>(entity);
 		}
+				_createPointLights(ecs, mPointLightCount);
 
 		/* Systems - order matters! */
 		auto& camSys = ecs.addSystem<CameraControllerSystem>();

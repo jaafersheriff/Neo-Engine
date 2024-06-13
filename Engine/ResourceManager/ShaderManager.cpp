@@ -28,8 +28,6 @@ namespace neo {
 				},
 				[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
 				}, shaderDetails);
-
-			return nullptr;
 		}
 	};
 
