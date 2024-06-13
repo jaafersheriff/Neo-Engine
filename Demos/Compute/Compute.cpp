@@ -63,7 +63,7 @@ namespace Compute {
 			auto&& [_, meshComponent] = *meshView;
 
 			// Update base verts
-			if (meshComponent.isDirty) {
+			if (resourceManagers.mMeshManager.isValid(meshComponent.mMeshHandle) && meshComponent.isDirty) {
 				std::vector<float> positions;
 				positions.resize(meshComponent.mNumParticles * 4);
 				for (int i = 0; i < meshComponent.mNumParticles; i++) {
@@ -136,6 +136,10 @@ namespace Compute {
 				{ types::shader::Stage::Geometry, "compute/particles.geom" },
 				{ types::shader::Stage::Fragment, "compute/particles.frag" },
 			});
+
+			if (!resourceManagers.mShaderManager.isValid(particlesVisShaderHandle)) {
+				return;
+			}
 
 			auto& particlesVisShader = resourceManagers.mShaderManager.resolveDefines(particlesVisShaderHandle, {});
 			particlesVisShader.bind();
