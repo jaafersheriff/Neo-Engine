@@ -34,3 +34,6 @@
 [submodule "Engine/ext/ImGuizmo"]
 	path = Engine/ext/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "Engine/ext/par"]
+	path = Engine/ext/par
+	url = https://github.com/prideout/par.git

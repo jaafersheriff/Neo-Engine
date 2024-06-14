@@ -41,6 +41,7 @@ INTERFACE
 	glfw
 	glm
 	libglew_static
+	par
 )
 
 

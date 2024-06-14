@@ -4,6 +4,7 @@ InitLib()
 target_link_libraries(Loader
 PUBLIC
 	tinygltf
+	par
 PRIVATE
 	Util
 	libglew_static

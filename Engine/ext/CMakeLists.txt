@@ -220,6 +220,24 @@ PUBLIC
 PRIVATE
 )
 
+## par
+file(GLOB_RECURSE PAR_HPP_FILES 
+	par/*.h
+)
+file(GLOB_RECURSE PAR_CPP_FILES 
+	par.cpp
+)
+add_library(par STATIC ${PAR_CPP_FILES} ${PAR_HPP_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/par FILES 
+		  ${PAR_HPP_FILES})
+set_target_properties(par PROPERTIES FOLDER "Neo/ext")
+target_include_directories(par
+PUBLIC
+	"${CMAKE_CURRENT_SOURCE_DIR}/par"
+PRIVATE
+)
+target_compile_options(par PRIVATE "/WX-" "/W0")
+
 ## tiny gltf
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
 set(TINYGLTF_INSTALL OFF CACHE BOOL "" FORCE)

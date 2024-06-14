@@ -28,6 +28,9 @@
 
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
+#include "ext/par/par_shapes.h"
+
+
 using namespace neo;
 
 /* Game object definitions */
@@ -61,6 +64,7 @@ namespace Base {
 		}
 
 		{
+			/*
 			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(resourceManagers, "bunny.gltf");
 			auto bunny = ecs.createEntity();
 			ecs.addComponent<TagComponent>(bunny, "Bunny");
@@ -72,6 +76,52 @@ namespace Base {
 			ecs.addComponent<OpaqueComponent>(bunny);
 			auto material = ecs.addComponent<MaterialComponent>(bunny);
 			material->mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
+			*/
+		}
+		{
+			auto sphere = ecs.createEntity();
+			ecs.addComponent<TagComponent>(sphere, "sphere");
+			ecs.addComponent<SpatialComponent>(sphere, glm::vec3(0.f, 0.0f, 0.f), glm::vec3(1.5f));
+			ecs.addComponent<RotationComponent>(sphere, glm::vec3(0.f, 1.0f, 0.f));
+			ecs.addComponent<PhongShaderComponent>(sphere);
+			ecs.addComponent<OpaqueComponent>(sphere);
+			auto material = ecs.addComponent<MaterialComponent>(sphere);
+			material->mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
+
+			par_shapes_mesh* mesh = par_shapes_create_icosahedron();
+			MeshLoadDetails builder{};
+			builder.mPrimtive = types::mesh::Primitive::Triangles;
+			{
+				uint32_t byteSize = static_cast<uint32_t>(mesh->npoints) * sizeof(float) * 3u;
+				builder.mVertexBuffers[types::mesh::VertexType::Position] = {
+					3,
+					0,
+					types::ByteFormats::Float,
+					false,
+					static_cast<uint32_t>(mesh->npoints * 3),
+					0,
+					byteSize
+				};
+				builder.mVertexBuffers[types::mesh::VertexType::Position].mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder.mVertexBuffers[types::mesh::VertexType::Position].mData), mesh->points, byteSize);
+			}
+			{
+				uint32_t byteSize = static_cast<uint32_t>(mesh->ntriangles) * sizeof(PAR_SHAPES_T) * 3u;
+				builder.mElementBuffer = {
+					static_cast<uint32_t>(mesh->ntriangles * 3),
+					types::ByteFormats::UnsignedShort,
+					byteSize
+				};
+				builder.mElementBuffer->mData = static_cast<uint8_t*>(malloc(byteSize));
+				memcpy(const_cast<uint8_t*>(builder.mElementBuffer->mData), mesh->triangles, byteSize);
+			}
+
+			MeshHandle handle = resourceManagers.mMeshManager.asyncLoad("icosahedron", builder);
+
+			ecs.addComponent<MeshComponent>(sphere, handle);
+			ecs.addComponent<BoundingBoxComponent>(sphere, glm::vec3(-0.5f), glm::vec3(0.5f));
+				par_shapes_free_mesh(mesh);
+
 		}
 
 		{
