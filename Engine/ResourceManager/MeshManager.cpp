@@ -10,7 +10,7 @@ namespace neo {
 
 	struct MeshLoader final : entt::resource_loader<MeshLoader, BackedResource<Mesh>> {
 
-		std::shared_ptr<BackedResource<Mesh>> load(MeshLoadDetails meshDetails, std::optional<std::string> debugName) const {
+		std::shared_ptr<BackedResource<Mesh>> load(MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const {
 			std::shared_ptr<BackedResource<Mesh>> meshResource = std::make_shared<BackedResource<Mesh>>(meshDetails.mPrimtive);
 			meshResource->mResource.init(debugName);
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
@@ -55,7 +55,7 @@ namespace neo {
 		mFallback.reset();
 	}
 
-	[[nodiscard]] MeshHandle MeshManager::_asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, std::optional<std::string> debugName) const {
+	[[nodiscard]] MeshHandle MeshManager::_asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const {
 		if (debugName.has_value()) {
 			NEO_LOG_V("Loading mesh %s", debugName->c_str());
 		}

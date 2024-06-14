@@ -142,13 +142,13 @@ namespace neo {
 			}
 		}
 
-	Texture::Texture(TextureFormat format, uint16_t dimension, const void* data, std::optional<std::string> debugName) : 
-		Texture(format, glm::u16vec3(dimension, dimension, 0), data, debugName) {}
+	Texture::Texture(TextureFormat format, uint16_t dimension, const std::optional<std::string>& debugName, const void* data) : 
+		Texture(format, glm::u16vec3(dimension, dimension, 0), debugName, data) {}
 
-	Texture::Texture(TextureFormat format, glm::u16vec2 dimension, const void* data, std::optional<std::string> debugName) :
-		Texture(format, glm::u16vec3(dimension.x, dimension.y, 0), data, debugName) {}
+	Texture::Texture(TextureFormat format, glm::u16vec2 dimension, const std::optional<std::string>& debugName, const void* data) :
+		Texture(format, glm::u16vec3(dimension.x, dimension.y, 0), debugName, data) {}
 
-	Texture::Texture(TextureFormat format, glm::u16vec3 dimension, const void* data, std::optional<std::string> debugName) :
+	Texture::Texture(TextureFormat format, glm::u16vec3 dimension, const std::optional<std::string>& debugName, const void* data) :
 		mFormat(format) {
 		switch (mFormat.mTarget) {
 		case types::texture::Target::Texture3D:

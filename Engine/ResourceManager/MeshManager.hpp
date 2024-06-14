@@ -42,7 +42,7 @@ namespace neo {
 		void imguiEditor();
 
 	protected:
-		[[nodiscard]] MeshHandle _asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, std::optional<std::string> debugName) const;
+		[[nodiscard]] MeshHandle _asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const;
 		void _destroyImpl(BackedResource<Mesh>& mesh);
 		void _tickImpl();
 

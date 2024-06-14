@@ -42,7 +42,7 @@ namespace neo {
 
 	}
 
-	void Framebuffer::init(std::optional<std::string> debugName) {
+	void Framebuffer::init(const std::optional<std::string>& debugName) {
 		glGenFramebuffers(1, &mFBOID);
 		if (debugName.has_value() && !debugName.value().empty()) {
 			bind();

@@ -24,7 +24,7 @@ namespace neo {
 		void imguiEditor();
 
 	protected:
-		[[nodiscard]] ShaderHandle _asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, std::optional<std::string> debugName) const;
+		[[nodiscard]] ShaderHandle _asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, const std::optional<std::string>& debugName) const;
 		void _destroyImpl(BackedResource<SourceShader>& sourceShader);
 		void _tickImpl();
 

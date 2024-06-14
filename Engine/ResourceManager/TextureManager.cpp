@@ -50,7 +50,7 @@ namespace neo {
 
 		struct TextureLoader final : entt::resource_loader<TextureLoader, BackedResource<Texture>> {
 
-			std::shared_ptr<BackedResource<Texture>> load(TextureFiles& fileDetails, std::optional<std::string> debugName) const {
+			std::shared_ptr<BackedResource<Texture>> load(TextureFiles& fileDetails, const std::optional<std::string>& debugName) const {
 				if (fileDetails.mFilePaths.size() == 6 && fileDetails.mFormat.mTarget != types::texture::Target::TextureCube) {
 					NEO_LOG_E("Cubemap format mismatch!");
 					fileDetails.mFilePaths.erase(fileDetails.mFilePaths.begin(), fileDetails.mFilePaths.begin() + 5);
@@ -71,7 +71,7 @@ namespace neo {
 
 				std::vector<uint8_t*> data;
 				glm::u16vec3 dimensions(UINT16_MAX);
-				bool check = true;
+				bool successfulFileLoad = true;
 				for (auto& image : images) {
 					if (image) {
 						NEO_LOG_I("Loaded image %s [%d, %d]", image->mFilePath.c_str(), image->mWidth, image->mHeight);
@@ -83,11 +83,11 @@ namespace neo {
 					}
 					else {
 						NEO_FAIL("Error reading texture file %s", image->mFilePath.c_str());
-						check |= false;
+						successfulFileLoad |= false;
 					}
 				}
 
-				if (check) {
+				if (successfulFileLoad) {
 					TextureBuilder details;
 					details.mFormat = fileDetails.mFormat;
 					details.mDimensions = dimensions;
@@ -107,8 +107,8 @@ namespace neo {
 				return nullptr;
 			}
 
-			std::shared_ptr<BackedResource<Texture>> load(TextureBuilder textureDetails, std::optional<std::string> debugName) const {
-				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.mData, debugName);
+			std::shared_ptr<BackedResource<Texture>> load(TextureBuilder textureDetails, const std::optional<std::string>& debugName) const {
+				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, debugName, textureDetails.mData);
 				textureResource->mDebugName = debugName;
 				if (textureDetails.mFormat.mFilter.usesMipFilter()) {
 					textureResource->mResource.genMips();
@@ -136,7 +136,7 @@ namespace neo {
 		mFallback.reset();
 	}
 
-	[[nodiscard]] TextureHandle TextureManager::_asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, std::optional<std::string> debugName) const {
+	[[nodiscard]] TextureHandle TextureManager::_asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, const std::optional<std::string>& debugName) const {
 		NEO_UNUSED(debugName);
 		std::visit(util::VisitOverloaded{
 			[&](TextureBuilder& builder) {

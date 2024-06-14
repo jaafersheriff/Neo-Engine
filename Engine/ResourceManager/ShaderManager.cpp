@@ -11,7 +11,7 @@
 namespace neo {
 	struct ShaderLoader final : entt::resource_loader<ShaderLoader, BackedResource<SourceShader>> {
 
-		std::shared_ptr<BackedResource<SourceShader>> load(const ShaderLoadDetails& shaderDetails, std::optional<std::string> debugName) const {
+		std::shared_ptr<BackedResource<SourceShader>> load(const ShaderLoadDetails& shaderDetails, const std::optional<std::string>& debugName) const {
 			NEO_ASSERT(debugName.has_value(), "Shaders need to come with a name please");
 			return std::visit(util::VisitOverloaded{
 				[&](const SourceShader::ConstructionArgs& constructionArgs) {
@@ -60,7 +60,7 @@ namespace neo {
 		return resolved;
 	}
 
-	[[nodiscard]] ShaderManager::ShaderHandle ShaderManager::_asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, std::optional<std::string> debugName) const {
+	[[nodiscard]] ShaderManager::ShaderHandle ShaderManager::_asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, const std::optional<std::string>& debugName) const {
 		mQueue.emplace_back(ResourceLoadDetails_Internal{ id, shaderDetails, debugName });
 		return id;
 	}

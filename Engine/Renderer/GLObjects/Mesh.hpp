@@ -40,7 +40,7 @@ namespace neo {
 
 			void draw(uint32_t = 0) const;
 
-			void init(std::optional<std::string> debugName = std::nullopt);
+			void init(const std::optional<std::string>& debugName);
 			void destroy();
 			void clear();
 

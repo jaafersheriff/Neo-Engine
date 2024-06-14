@@ -172,7 +172,7 @@ namespace neo {
 		removeElementBuffer();
 	}
 
-	void Mesh::init(std::optional<std::string> debugName) {
+	void Mesh::init(const std::optional<std::string>& debugName) {
 		glGenVertexArrays(1, (GLuint*)&mVAOID);
 		if (debugName.has_value() && !debugName.value().empty()) {
 			glBindVertexArray(mVAOID);

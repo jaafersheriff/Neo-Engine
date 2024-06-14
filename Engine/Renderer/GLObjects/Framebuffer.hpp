@@ -19,7 +19,7 @@ namespace neo {
 		void bind() const;
 		void clear(glm::vec4 clearColor, types::framebuffer::AttachmentBits clearFlags) const;
 
-		void init(std::optional<std::string> debugName = std::nullopt);
+		void init(const std::optional<std::string>& debugName);
 		void disableDraw() const;
 		void disableRead() const;
 
