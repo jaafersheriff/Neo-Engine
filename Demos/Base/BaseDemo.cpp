@@ -91,6 +91,12 @@ namespace Base {
 			par_shapes_mesh* mesh = par_shapes_create_icosahedron();
 			par_shapes_unweld(mesh, true);
 			par_shapes_compute_normals(mesh);
+			{
+				float aabb[6];
+				par_shapes_compute_aabb(mesh, aabb);
+				ecs.addComponent<BoundingBoxComponent>(sphere, glm::vec3(aabb[0], aabb[1], aabb[2]), glm::vec3(aabb[3], aabb[4], aabb[5]));
+			}
+
 			MeshLoadDetails builder{};
 			builder.mPrimtive = types::mesh::Primitive::Triangles;
 			{
@@ -131,12 +137,8 @@ namespace Base {
 				builder.mElementBuffer->mData = static_cast<uint8_t*>(malloc(byteSize));
 				memcpy(const_cast<uint8_t*>(builder.mElementBuffer->mData), mesh->triangles, byteSize);
 			}
-
-			MeshHandle handle = resourceManagers.mMeshManager.asyncLoad("icosahedron", builder);
-
-			ecs.addComponent<MeshComponent>(sphere, handle);
-			ecs.addComponent<BoundingBoxComponent>(sphere, glm::vec3(-0.5f), glm::vec3(0.5f));
-				par_shapes_free_mesh(mesh);
+			ecs.addComponent<MeshComponent>(sphere, resourceManagers.mMeshManager.asyncLoad("icosahedron", builder));
+			par_shapes_free_mesh(mesh);
 
 		}
 
