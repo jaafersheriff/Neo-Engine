@@ -17,6 +17,8 @@
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
+#include "PBR/IBLComponent.hpp"
+
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/SkyboxRenderer.hpp"
@@ -361,6 +363,7 @@ namespace PBR {
 					types::texture::Target::TextureCube
 				}
 			}));
+			ecs.addComponent<IBLComponent>(skybox);
 		}
 
 		{
