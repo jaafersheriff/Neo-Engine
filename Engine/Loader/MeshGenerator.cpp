@@ -25,7 +25,7 @@ namespace neo {
 			if (!mesh || !mesh->points || !mesh->triangles) {
 				return;
 			}
-			// TODO - scale it so it fits within -0.5, 0.5
+			par_shapes_scale(mesh, 0.5f, 0.5f, 0.5f); // [-0.5, 0.5f] bounds
 			par_shapes_unweld(mesh, true);
 			par_shapes_compute_normals(mesh);
 

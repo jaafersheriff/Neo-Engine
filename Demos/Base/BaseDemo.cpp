@@ -84,13 +84,6 @@ namespace Base {
 			ecs.addComponent<OpaqueComponent>(sphere);
 			auto material = ecs.addComponent<MaterialComponent>(sphere);
 			material->mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
-
-			/* {
-				float aabb[6];
-				par_shapes_compute_aabb(mesh, aabb);
-				ecs.addComponent<BoundingBoxComponent>(sphere, glm::vec3(aabb[0], aabb[1], aabb[2]), glm::vec3(aabb[3], aabb[4], aabb[5]));
-			}*/
-
 			ecs.addComponent<MeshComponent>(sphere, HashedString("icosahedron"));
 			ecs.addComponent<BoundingBoxComponent>(sphere, glm::vec3(-0.5f), glm::vec3(0.5f));
 
