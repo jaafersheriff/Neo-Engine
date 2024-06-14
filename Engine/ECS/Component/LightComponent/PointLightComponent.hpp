@@ -4,8 +4,6 @@
 #include "ECS/Component/Component.hpp"
 #include "Util/Util.hpp"
 
-#include <string>
-
 namespace neo {
 
 	struct PointLightComponent : public Component {

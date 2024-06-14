@@ -3,8 +3,6 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include <string>
-
 namespace neo {
 
 	struct DirectionalLightComponent : public Component {

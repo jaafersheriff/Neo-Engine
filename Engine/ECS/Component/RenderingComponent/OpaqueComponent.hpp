@@ -2,8 +2,6 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include <string>
-
 namespace neo {
 	struct OpaqueComponent : public Component {
 
