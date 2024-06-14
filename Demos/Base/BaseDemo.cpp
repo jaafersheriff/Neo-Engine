@@ -61,11 +61,10 @@ namespace Base {
 		}
 
 		{
-			/*
 			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(resourceManagers, "bunny.gltf");
 			auto bunny = ecs.createEntity();
 			ecs.addComponent<TagComponent>(bunny, "Bunny");
-			ecs.addComponent<SpatialComponent>(bunny, glm::vec3(0.f, 0.0f, 0.f), glm::vec3(1.5f));
+			ecs.addComponent<SpatialComponent>(bunny, glm::vec3(2.f, 0.0f, -1.f), glm::vec3(1.5f));
 			ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
 			ecs.addComponent<MeshComponent>(bunny, gltfScene.mMeshNodes[0].mMeshHandle);
 			ecs.addComponent<BoundingBoxComponent>(bunny, gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax);
@@ -73,21 +72,20 @@ namespace Base {
 			ecs.addComponent<OpaqueComponent>(bunny);
 			auto material = ecs.addComponent<MaterialComponent>(bunny);
 			material->mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
-			*/
 		}
 		{
-			auto sphere = ecs.createEntity();
-			ecs.addComponent<TagComponent>(sphere, "sphere");
-			ecs.addComponent<SpatialComponent>(sphere, glm::vec3(0.f, 0.0f, 0.f), glm::vec3(1.5f));
-			ecs.addComponent<RotationComponent>(sphere, glm::vec3(0.f, 1.0f, 0.f));
-			ecs.addComponent<PhongShaderComponent>(sphere);
-			ecs.addComponent<OpaqueComponent>(sphere);
-			auto material = ecs.addComponent<MaterialComponent>(sphere);
-			material->mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
-			ecs.addComponent<MeshComponent>(sphere, HashedString("icosahedron"));
-			ecs.addComponent<BoundingBoxComponent>(sphere, glm::vec3(-0.5f), glm::vec3(0.5f));
-
+			auto icosahedron = ecs.createEntity();
+			ecs.addComponent<TagComponent>(icosahedron, "Icosahedron");
+			ecs.addComponent<SpatialComponent>(icosahedron, glm::vec3(-2.f, 1.0f, -1.f), glm::vec3(1.5f));
+			ecs.addComponent<RotationComponent>(icosahedron, glm::vec3(1.f, 0.0f, 0.f));
+			ecs.addComponent<MeshComponent>(icosahedron, HashedString("icosahedron"));
+			ecs.addComponent<BoundingBoxComponent>(icosahedron, glm::vec3(-0.5f), glm::vec3(0.5f));
+			ecs.addComponent<PhongShaderComponent>(icosahedron);
+			ecs.addComponent<OpaqueComponent>(icosahedron);
+			auto material = ecs.addComponent<MaterialComponent>(icosahedron);
+			material->mAlbedoColor = glm::vec4(1.f, 1.f, 0.f, 1.f);
 		}
+
 
 		{
 			auto plane = ecs.createEntity();

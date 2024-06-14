@@ -293,7 +293,7 @@ namespace PBR {
 		for (int i = 0; i < numSpheres; i++) {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, 0.f), glm::vec3(0.6f));
-			ecs.addComponent<MeshComponent>(entity, HashedString("icosahedron"));
+			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
 			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			ecs.addComponent<OpaqueComponent>(entity);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
@@ -306,7 +306,7 @@ namespace PBR {
 		for (int i = 0; i < numSpheres; i++) {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, -1.5f), glm::vec3(0.6f));
-			ecs.addComponent<MeshComponent>(entity, HashedString("icosahedron"));
+			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
 			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			ecs.addComponent<OpaqueComponent>(entity);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
@@ -315,6 +315,22 @@ namespace PBR {
 			material->mRoughness = 1.f - i / numSpheres;
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 		}
+		{
+			auto icosahedron = ecs.createEntity();
+			ecs.addComponent<TagComponent>(icosahedron, "Icosahedron");
+			ecs.addComponent<SpatialComponent>(icosahedron, glm::vec3(-3.f, 4.0f, -0.5f), glm::vec3(1.f));
+			ecs.addComponent<RotationComponent>(icosahedron, glm::vec3(0.f, 0.0f, 1.f));
+			ecs.addComponent<MeshComponent>(icosahedron, HashedString("icosahedron"));
+			ecs.addComponent<BoundingBoxComponent>(icosahedron, glm::vec3(-0.5f), glm::vec3(0.5f));
+			ecs.addComponent<OpaqueComponent>(icosahedron);
+			auto material = ecs.addComponent<MaterialComponent>(icosahedron);
+			material->mAlbedoColor = glm::vec4(0.25f, 0.f, 1.f, 1);
+			material->mMetallic = 1.f;
+			material->mRoughness = 0.6f;
+			ecs.addComponent<ShadowCasterShaderComponent>(icosahedron);
+		}
+
+
 		// Emissive sphere
 		{
 			auto entity = ecs.createEntity();
