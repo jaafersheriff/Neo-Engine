@@ -222,7 +222,7 @@ PRIVATE
 
 ## par
 file(GLOB_RECURSE PAR_HPP_FILES 
-	par/*.h
+	par/par_shapes.h
 )
 file(GLOB_RECURSE PAR_CPP_FILES 
 	par.cpp
