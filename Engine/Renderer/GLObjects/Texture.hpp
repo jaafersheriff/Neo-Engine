@@ -18,14 +18,11 @@ namespace neo {
 		}
 
 		bool usesMipFilter() const {
+			NEO_ASSERT(mMag == types::texture::Filters::Nearest || mMag == types::texture::Filters::Linear, "These are the only allowed mag filter types");
 			return mMin == types::texture::Filters::LinearMipmapLinear
 				|| mMin == types::texture::Filters::LinearMipmapNearest
 				|| mMin == types::texture::Filters::NearestMipmapLinear
 				|| mMin == types::texture::Filters::NearestMipmapNearest
-				|| mMag == types::texture::Filters::LinearMipmapLinear
-				|| mMag == types::texture::Filters::LinearMipmapNearest
-				|| mMag == types::texture::Filters::NearestMipmapLinear
-				|| mMag == types::texture::Filters::NearestMipmapNearest
 			;
 		}
 	};

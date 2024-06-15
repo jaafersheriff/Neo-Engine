@@ -253,7 +253,7 @@ namespace PBR {
 
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
-		config.name = "PBR Demo";
+		config.name = "PBR";
 		return config;
 	}
 
@@ -360,8 +360,18 @@ namespace PBR {
 					"envmap_miramar/miramar_rt.tga",
 					"envmap_miramar/miramar_lf.tga",
 				}, 
-				TextureFormat{
-					types::texture::Target::TextureCube
+				TextureFormat {
+					types::texture::Target::TextureCube,
+					types::texture::InternalFormats::RGBA8_UNORM, // This should change for .hdr?
+					TextureFilter {
+						types::texture::Filters::LinearMipmapLinear,
+						types::texture::Filters::Linear
+					},
+					TextureWrap {
+						types::texture::Wraps::Repeat,
+						types::texture::Wraps::Repeat,
+						types::texture::Wraps::Repeat
+					}
 				}
 			}));
 			ecs.addComponent<IBLComponent>(skybox);
