@@ -18,6 +18,7 @@
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
 #include "PBR/IBLComponent.hpp"
+#include "PBR/ConvolveRenderer.hpp"
 
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
@@ -453,6 +454,8 @@ namespace PBR {
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
+		convolveCubemap(resourceManagers, ecs);
+
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Renderer/Renderer.hpp"
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
@@ -12,6 +13,7 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
 #include "Util/Util.hpp"
+#include "Util/ServiceLocator.hpp"
 
 #include <tuple>
 
@@ -20,13 +22,39 @@ namespace PBR {
 	void convolveCubemap(const ResourceManagers& resourceManagers, const ECS& ecs) {
 		TRACY_GPU();
 
-		auto skybox = ecs.getSingleView<SkyboxComponent, IBLComponent>();
-		auto convolveShader = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", SourceShader::ConstructionArgs{...});
-		auto dfgLutShader = resourceManagers.mShaderManager.asyncLoad("DFGLutShader", SourceShader::ConstructionArgs{...});
-		if (!skybox || !resourceManagers.mShaderManager.isValid(convolveShader) || !resourceManagers.mShaderManager.isValid(dfgLutShader)) {
+		auto skyboxTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
+		auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", SourceShader::ConstructionArgs { 
+			{ types::shader::Stage::Compute, "pbr/convolve.comp" }
+		});
+		auto dfgLutShaderHandle = resourceManagers.mShaderManager.asyncLoad("DFGLutShader", SourceShader::ConstructionArgs{
+			{ types::shader::Stage::Compute, "pbr/dfglut.comp" }
+		});
+		if (!skyboxTuple || !resourceManagers.mShaderManager.isValid(convolveShaderHandle) || !resourceManagers.mShaderManager.isValid(dfgLutShaderHandle)) {
 			return;
 		}
 
-		// TODO
+		const SkyboxComponent& skybox = std::get<1>(*skyboxTuple);
+		const IBLComponent& ibl = std::get<2>(*skyboxTuple);
+
+		if (!resourceManagers.mTextureManager.isValid(skybox.mSkybox)) {
+			NEO_LOG_W("There's no skybox texture to convolve");
+			return;
+		}
+		const Texture& skyboxCubemap = resourceManagers.mTextureManager.resolve(skybox.mSkybox);
+		if (!skyboxCubemap.mFormat.mFilter.usesMipFilter()) {
+			NEO_LOG_E("Skybox cubemap needs to have mips");
+			return;
+		}
+
+		if (ibl.mDFGLut == NEO_INVALID_HANDLE) {
+			auto& dfgLutShader = resourceManagers.mShaderManager.resolveDefines(dfgLutShaderHandle, {});
+			dfgLutShader.bind();
+
+			glDispatchCompute(
+				ibl.mDFGLutResolution / ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.x,
+				ibl.mDFGLutResolution / ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.y, 
+				1
+			);
+		}
 	}
 }

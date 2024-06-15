@@ -165,7 +165,7 @@ void main() {
 	pbrColor.directSpecular *= visibility;
 #endif
 
-	pbrColor.indirectDiffuse = fAlbedo.rgb * 0.03 * (1.0 - fMetalness);
+	pbrColor.indirectDiffuse = fAlbedo.rgb * 0.05 * (1.0 - fMetalness);
 
 #ifdef SKYBOX
 	vec3 R = reflect(-V, fNorm);
