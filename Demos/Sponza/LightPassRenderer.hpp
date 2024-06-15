@@ -26,6 +26,7 @@ namespace Sponza {
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);
+		glBlendColor(1.f, 1.f, 1.f, 1.f);
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 
@@ -61,7 +62,7 @@ namespace Sponza {
 			const auto spatial = ecs.cGetComponent<const SpatialComponent>(entity);
 			resolvedShader.bindUniform("M", spatial->getModelMatrix());
 			resolvedShader.bindUniform("lightPos", spatial->getPosition());
-			resolvedShader.bindUniform("lightRadius", spatial->getScale().x);
+			resolvedShader.bindUniform("lightRadius", spatial->getScale().x / 2.f);
 			resolvedShader.bindUniform("lightCol", ecs.cGetComponent<const LightComponent>(entity)->mColor);
 
 			// If camera is inside light 
@@ -110,8 +111,10 @@ namespace Sponza {
 		resolvedShader.bind();
 
 		if (shadowsEnabled) {
+			const auto& shadowMap = resourceManagers.mTextureManager.resolve(shadowMapHandle);
 			resolvedShader.bindUniform("lightTransform", L);
-			resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(shadowMapHandle));
+			resolvedShader.bindTexture("shadowMap", shadowMap);
+			resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
 		}
 
 		auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();

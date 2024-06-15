@@ -47,7 +47,7 @@ namespace Sponza {
 				types::texture::Wraps::Repeat,
 				types::texture::Wraps::Repeat,
 			};
-			builder.mFormat.mType = types::ByteFormats::UnsignedByte;
+			builder.mFormat.mType = types::ByteFormats::Float;
 			builder.mDimensions = glm::uvec3(size, 0, 0);
 			builder.mData = reinterpret_cast<uint8_t*>(kernel.data());
 			return textureManager.asyncLoad(id, builder);
@@ -73,7 +73,7 @@ namespace Sponza {
 					types::texture::Wraps::Repeat,
 					types::texture::Wraps::Repeat,
 				},
-				types::ByteFormats::UnsignedByte
+				types::ByteFormats::Float
 			};
 			builder.mDimensions = glm::uvec3(dim, dim, 0);
 			builder.mData = reinterpret_cast<uint8_t*>(noise.data());
@@ -83,13 +83,15 @@ namespace Sponza {
 
 	TextureHandle drawAO(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const Framebuffer& gbuffer, glm::uvec2 targetSize, float radius, float bias) {
 		TRACY_GPU();
-		static TextureHandle aoKernel = NEO_INVALID_HANDLE;
-		static TextureHandle aoNoise = NEO_INVALID_HANDLE;
+		TextureHandle aoKernel = HashedString("aoKernel");
+		TextureHandle aoNoise = HashedString("aoNoise");
 		if (!resourceManagers.mTextureManager.isValid(aoKernel)) {
 			aoKernel = _generateKernel(resourceManagers.mTextureManager, "aoKernel", 8);
+			return NEO_INVALID_HANDLE;
 		}
 		if (!resourceManagers.mTextureManager.isValid(aoNoise)) {
 			aoNoise = _generateNoise(resourceManagers.mTextureManager, "aoNoise", 4);
+			return NEO_INVALID_HANDLE;
 		}
 
 		// Do base AO at half res
@@ -118,6 +120,9 @@ namespace Sponza {
 				}
 			)
 		);
+		if (!resourceManagers.mTextureManager.isValid(baseAOTexture) || !resourceManagers.mTextureManager.isValid(blurAOTexture)) {
+			return NEO_INVALID_HANDLE;
+		}
 
 		// Make a one-off framebuffer for the base AO
 		{
@@ -135,6 +140,9 @@ namespace Sponza {
 					{ types::shader::Stage::Vertex, "quad.vert"},
 					{ types::shader::Stage::Fragment, "sponza/ao.frag" }
 					});
+				if (!resourceManagers.mShaderManager.isValid(aoShader)) {
+					return NEO_INVALID_HANDLE;
+				}
 				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(aoShader, {});
 				resolvedShader.bind();
 
@@ -160,7 +168,7 @@ namespace Sponza {
 			TRACY_GPUN("AO Blur");
 			{
 				auto blurAOHandle = resourceManagers.mFramebufferManager.asyncLoad(
-					"AO Base",
+					"AO Blur",
 					FramebufferExternal{ {blurAOTexture} },
 					resourceManagers.mTextureManager
 				);
@@ -174,6 +182,9 @@ namespace Sponza {
 						{ types::shader::Stage::Vertex, "quad.vert"},
 						{ types::shader::Stage::Fragment, "sponza/blur.frag" }
 						});
+					if (!resourceManagers.mShaderManager.isValid(blurShader)) {
+						return NEO_INVALID_HANDLE;
+					}
 
 					auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(blurShader, {});
 					resolvedShader.bind();
