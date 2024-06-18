@@ -56,8 +56,13 @@ namespace neo {
 
 	const ResolvedShaderInstance& ShaderManager::resolveDefines(ShaderHandle handle, const ShaderDefines& defines) const {
 		auto& resolved = resolve(handle).getResolvedInstance(defines);
-		resolved.bind();
-		return resolved;
+		if (resolved.isValid()) {
+			resolved.bind();
+			return resolved;
+		}
+		else {
+			return mFallback->mResource.getResolvedInstance({});
+		}
 	}
 
 	[[nodiscard]] ShaderManager::ShaderHandle ShaderManager::_asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, const std::optional<std::string>& debugName) const {

@@ -351,6 +351,7 @@ namespace PBR {
 
 		{
 			auto skybox = ecs.createEntity();
+			ecs.addComponent<TagComponent>(skybox, "Skybox");
 			ecs.addComponent<SkyboxComponent>(skybox, resourceManagers.mTextureManager.asyncLoad("Skybox", TextureFiles{ 
 				{
 					"envmap_miramar/miramar_ft.tga",
@@ -411,7 +412,7 @@ namespace PBR {
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 		}
 
-		{
+		/*{
 			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
 			for (auto& node : scene.mMeshNodes) {
 				auto entity = ecs.createEntity();
@@ -430,7 +431,7 @@ namespace PBR {
 				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
 				ecs.addComponent<ShadowCasterShaderComponent>(entity);
 			}
-		}
+		}*/
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();

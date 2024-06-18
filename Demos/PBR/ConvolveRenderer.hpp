@@ -47,14 +47,33 @@ namespace PBR {
 		}
 
 		if (ibl.mDFGLut == NEO_INVALID_HANDLE) {
+			ibl.mDFGLut = resourceManagers.mTextureManager.asyncLoad(
+				HashedString("dfgLut"),
+				TextureBuilder{}
+				.setDimension(glm::u16vec3(ibl.mDFGLutResolution, ibl.mDFGLutResolution, 0))
+				.setFormat(TextureFormat{
+					types::texture::Target::Texture2D,
+					types::texture::InternalFormats::RGBA8_UNORM,
+					TextureFilter { types::texture::Filters::Linear, types::texture::Filters::Linear },
+					TextureWrap { types::texture::Wraps::Clamp, types::texture::Wraps::Clamp, types::texture::Wraps::Clamp },
+					types::ByteFormats::Float
+					})
+			);
+		}
+		if (resourceManagers.mTextureManager.isValid(ibl.mDFGLut) && !ibl.mDFGGenerated) {
 			auto& dfgLutShader = resourceManagers.mShaderManager.resolveDefines(dfgLutShaderHandle, {});
 			dfgLutShader.bind();
 
+			dfgLutShader.bindTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut));
+			glBindImageTexture(0, resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mTextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F/*resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mFormat.mInternalFormat*/);
 			glDispatchCompute(
-				ibl.mDFGLutResolution / ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.x,
-				ibl.mDFGLutResolution / ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.y, 
+				ibl.mDFGLutResolution / 8,
+				ibl.mDFGLutResolution / 8,
 				1
 			);
+			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+			ibl.mDFGGenerated = true;
 		}
 	}
 }
