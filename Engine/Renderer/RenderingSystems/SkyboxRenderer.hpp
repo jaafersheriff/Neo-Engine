@@ -46,6 +46,7 @@ namespace neo {
 
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 		auto camera = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity);
 		auto camSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
