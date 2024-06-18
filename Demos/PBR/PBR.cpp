@@ -373,7 +373,7 @@ namespace PBR {
 						types::texture::Wraps::Repeat,
 						types::texture::Wraps::Repeat
 					},
-					types::ByteFormats::UnsignedByte, // TODO - this can be derived from internal format..
+					types::ByteFormats::UnsignedByte,
 					6
 				}
 			}));
@@ -414,7 +414,7 @@ namespace PBR {
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 		}
 
-		/*{
+		{
 			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
 			for (auto& node : scene.mMeshNodes) {
 				auto entity = ecs.createEntity();
@@ -433,7 +433,7 @@ namespace PBR {
 				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
 				ecs.addComponent<ShadowCasterShaderComponent>(entity);
 			}
-		}*/
+		}
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
