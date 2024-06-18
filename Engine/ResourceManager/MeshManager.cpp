@@ -11,6 +11,9 @@ namespace neo {
 	struct MeshLoader final : entt::resource_loader<MeshLoader, BackedResource<Mesh>> {
 
 		std::shared_ptr<BackedResource<Mesh>> load(MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const {
+			if (debugName.has_value()) {
+				NEO_LOG_V("Uploading mesh %s", debugName.value().c_str());
+			}
 			std::shared_ptr<BackedResource<Mesh>> meshResource = std::make_shared<BackedResource<Mesh>>(meshDetails.mPrimtive);
 			meshResource->mResource.init(debugName);
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {

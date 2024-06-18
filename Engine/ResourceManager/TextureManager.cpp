@@ -51,6 +51,9 @@ namespace neo {
 		struct TextureLoader final : entt::resource_loader<TextureLoader, BackedResource<Texture>> {
 
 			std::shared_ptr<BackedResource<Texture>> load(TextureFiles& fileDetails, const std::optional<std::string>& debugName) const {
+				if (debugName.has_value()) {
+					NEO_LOG_V("Uploading texture files for %s", debugName.value().c_str());
+				}
 				if (fileDetails.mFilePaths.size() == 6 && fileDetails.mFormat.mTarget != types::texture::Target::TextureCube) {
 					NEO_LOG_E("Cubemap format mismatch!");
 					fileDetails.mFilePaths.erase(fileDetails.mFilePaths.begin(), fileDetails.mFilePaths.begin() + 5);
@@ -108,6 +111,9 @@ namespace neo {
 			}
 
 			std::shared_ptr<BackedResource<Texture>> load(TextureBuilder textureDetails, const std::optional<std::string>& debugName) const {
+				if (debugName.has_value()) {
+					NEO_LOG_V("Uploading raw texture %s", debugName.value().c_str());
+				}
 				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, debugName, textureDetails.mData);
 				textureResource->mDebugName = debugName;
 				if (textureDetails.mFormat.mFilter.usesMipFilter() || textureDetails.mFormat.mMipCount > 1) {

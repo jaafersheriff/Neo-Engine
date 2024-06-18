@@ -191,10 +191,11 @@ namespace neo {
 		
 		// Override mips
 		uint16_t maxDim = std::max(mWidth, std::max(mHeight, mDepth));
-		uint16_t mips = 1;
+		uint16_t mips = 0;
 		while (maxDim < (1u << mips)) {
 			mips++;
 		}
+		mips++;
 		if (mips < mFormat.mMipCount) {
 			NEO_LOG_W("Too many mips requested! Overwriting %d with %d", static_cast<int>(mFormat.mMipCount), static_cast<int>(mips));
 			mFormat.mMipCount = mips;
