@@ -53,14 +53,17 @@ namespace neo {
 			types::texture::Wraps::Clamp
 		};
 		types::ByteFormats mType = types::ByteFormats::UnsignedByte;
+		uint16_t mMipCount = 1;
 
 		static types::texture::BaseFormats deriveBaseFormat(types::texture::InternalFormats format);
+
 		bool operator==(const TextureFormat& other) const noexcept {
 			return mTarget == other.mTarget
 				&& mInternalFormat == other.mInternalFormat
 				&& mFilter == other.mFilter
 				&& mWrap == other.mWrap
 				&& mType == other.mType
+				&& mMipCount == other.mMipCount
 			;
 		}
 	};

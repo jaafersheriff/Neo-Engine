@@ -110,7 +110,7 @@ namespace neo {
 			std::shared_ptr<BackedResource<Texture>> load(TextureBuilder textureDetails, const std::optional<std::string>& debugName) const {
 				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, debugName, textureDetails.mData);
 				textureResource->mDebugName = debugName;
-				if (textureDetails.mFormat.mFilter.usesMipFilter()) {
+				if (textureDetails.mFormat.mFilter.usesMipFilter() || textureDetails.mFormat.mMipCount > 1) {
 					textureResource->mResource.genMips();
 				}
 

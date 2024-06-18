@@ -230,6 +230,7 @@ namespace {
 		TextureBuilder builder;
 		builder.mFormat.mType = _getGLType(image.bits);
 		builder.mFormat.mInternalFormat = _translateTinyGltfPixelType(image.pixel_type, _getGLBaseFormat(image.component));
+		builder.mFormat.mMipCount = 6; // Don't want to risk blowing up vram?
 		if (texture.sampler > -1) {
 			const auto& sampler = model.samplers[texture.sampler];
 			if (sampler.minFilter > -1) {

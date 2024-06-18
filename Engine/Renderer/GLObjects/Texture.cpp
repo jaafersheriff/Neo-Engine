@@ -192,16 +192,16 @@ namespace neo {
 		// Lock in storage
 		switch (mFormat.mTarget) {
 		case types::texture::Target::Texture1D:
-			glTexStorage1D(GL_TEXTURE_1D, 1, _getGLInternalFormat(mFormat.mInternalFormat), mWidth);
+			glTexStorage1D(GL_TEXTURE_1D, mFormat.mMipCount, _getGLInternalFormat(mFormat.mInternalFormat), mWidth);
 			break;
 		case types::texture::Target::Texture2D:
-			glTexStorage2D(GL_TEXTURE_2D, 1, _getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
+			glTexStorage2D(GL_TEXTURE_2D, mFormat.mMipCount, _getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
 			break;
 		case types::texture::Target::Texture3D:
-			glTexStorage3D(GL_TEXTURE_3D, 1, _getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight, mDepth);
+			glTexStorage3D(GL_TEXTURE_3D, mFormat.mMipCount, _getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight, mDepth);
 			break;
 		case types::texture::Target::TextureCube:
-			glTexStorage2D(GL_TEXTURE_CUBE_MAP, 1, _getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
+			glTexStorage2D(GL_TEXTURE_CUBE_MAP, mFormat.mMipCount, _getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
 			break;
 		default:
 			NEO_FAIL("Invalid texture class");

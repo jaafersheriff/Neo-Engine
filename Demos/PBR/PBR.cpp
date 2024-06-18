@@ -372,7 +372,9 @@ namespace PBR {
 						types::texture::Wraps::Repeat,
 						types::texture::Wraps::Repeat,
 						types::texture::Wraps::Repeat
-					}
+					},
+					types::ByteFormats::UnsignedByte, // TODO - this can be derived from internal format..
+					6
 				}
 			}));
 			ecs.addComponent<IBLComponent>(skybox);
