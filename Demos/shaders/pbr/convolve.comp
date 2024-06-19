@@ -1,0 +1,13 @@
+
+
+#include "pbr/pbr.glsl"
+
+layout(binding = 0, rgba16f) uniform image2D dst;
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+void main()
+{
+    // Normalized pixel coordinates (from 0 to 1)
+    vec2 uv = vec2(gl_GlobalInvocationID.xy + 1) / vec2(imageSize(dst).xy);
+
+    imageStore(dst, ivec2(gl_GlobalInvocationID.xy), vec4(uv, 0.0, 0.0));
+}

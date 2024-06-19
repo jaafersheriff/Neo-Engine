@@ -31,7 +31,9 @@ namespace neo {
 			ImGui::ColorEdit3("Albedo", &mAlbedoColor[0]);
 			ImGui::SliderFloat("Metallness", &mMetallic, 0.f, 1.f); // This should be a bool?
 			ImGui::SliderFloat("Roughness", &mRoughness, 0.f, 1.f);
-			ImGui::ColorEdit3("Emissive Factor", &mEmissiveFactor[0]);
+			if (ImGui::ColorEdit3("Emissive Factor", &mEmissiveFactor[0], ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_NoAlpha)) {
+				mEmissiveFactor = glm::max(mEmissiveFactor, glm::vec3(0.f));
+			}
 		};
 	};
 

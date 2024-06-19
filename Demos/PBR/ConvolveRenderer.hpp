@@ -23,16 +23,9 @@ namespace PBR {
 		TRACY_GPU();
 
 		auto skyboxTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
-		auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", SourceShader::ConstructionArgs { 
-			{ types::shader::Stage::Compute, "pbr/convolve.comp" }
-		});
-		auto dfgLutShaderHandle = resourceManagers.mShaderManager.asyncLoad("DFGLutShader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Compute, "pbr/dfglut.comp" }
-		});
-		if (!skyboxTuple || !resourceManagers.mShaderManager.isValid(convolveShaderHandle) || !resourceManagers.mShaderManager.isValid(dfgLutShaderHandle)) {
+		if (!skyboxTuple) {
 			return;
 		}
-
 		const SkyboxComponent& skybox = std::get<1>(*skyboxTuple);
 		const IBLComponent& ibl = std::get<2>(*skyboxTuple);
 
@@ -61,19 +54,65 @@ namespace PBR {
 			);
 		}
 		if (resourceManagers.mTextureManager.isValid(ibl.mDFGLut) && !ibl.mDFGGenerated) {
-			auto& dfgLutShader = resourceManagers.mShaderManager.resolveDefines(dfgLutShaderHandle, {});
-			dfgLutShader.bind();
+			auto dfgLutShaderHandle = resourceManagers.mShaderManager.asyncLoad("DFGLutShader", SourceShader::ConstructionArgs{
+				{ types::shader::Stage::Compute, "pbr/dfglut.comp" }
+			});
+			if (resourceManagers.mShaderManager.isValid(dfgLutShaderHandle)) {
+				auto& dfgLutShader = resourceManagers.mShaderManager.resolveDefines(dfgLutShaderHandle, {});
+				dfgLutShader.bind();
 
-			dfgLutShader.bindTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut));
-			glBindImageTexture(0, resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mTextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F/*resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mFormat.mInternalFormat*/);
-			glDispatchCompute(
-				ibl.mDFGLutResolution / 8,
-				ibl.mDFGLutResolution / 8,
-				1
+				dfgLutShader.bindTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut));
+				glBindImageTexture(0, resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mTextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F/*resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mFormat.mInternalFormat*/);
+				glDispatchCompute(
+					ibl.mDFGLutResolution / 8,
+					ibl.mDFGLutResolution / 8,
+					1
+				);
+				glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+				ibl.mDFGGenerated = true;
+			}
+		}
+
+		if (ibl.mConvolvedSkybox == NEO_INVALID_HANDLE) {
+			ibl.mConvolvedSkybox = resourceManagers.mTextureManager.asyncLoad(
+				HashedString("convolvedSkybox"),
+				TextureBuilder{}
+				.setDimension(glm::u16vec3(ibl.mConvolvedCubemapResolution, ibl.mConvolvedCubemapResolution, 0))
+				.setFormat(TextureFormat{
+					types::texture::Target::TextureCube,
+					types::texture::InternalFormats::RGBA16_F,
+					TextureFilter { types::texture::Filters::LinearMipmapLinear, types::texture::Filters::Linear },
+					TextureWrap { types::texture::Wraps::Repeat, types::texture::Wraps::Repeat, types::texture::Wraps::Repeat },
+					types::ByteFormats::Float
+					})
 			);
-			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		}
+		if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox) && !ibl.mConvolved) {
+			auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", SourceShader::ConstructionArgs{
+				{ types::shader::Stage::Compute, "pbr/convolve.comp" }
+			});
+			if (resourceManagers.mShaderManager.isValid(convolveShaderHandle)) {
+				const auto& convolvedCubemap = resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox);
+				auto& convolveShader = resourceManagers.mShaderManager.resolveDefines(convolveShaderHandle, {});
+				convolveShader.bind();
 
-			ibl.mDFGGenerated = true;
+				convolveShader.bindTexture("inputCubemap", resourceManagers.mTextureManager.resolve(skybox.mSkybox));
+				convolveShader.bindTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut));
+				for (int mip = 0; mip < convolvedCubemap.mFormat.mMipCount; mip++) {
+					for (int face = 0; face < 6; face++) {
+						glBindImageTexture(0, convolvedCubemap.mTextureID, mip, GL_FALSE, face, GL_WRITE_ONLY, GL_RGBA16F/*resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mFormat.mInternalFormat*/);
+						glDispatchCompute(
+							ibl.mConvolvedCubemapResolution / 8,
+							ibl.mConvolvedCubemapResolution / 8,
+							1
+						);
+						glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+					}
+				}
+
+				ibl.mConvolved = true;
+			}
 		}
 	}
 }

@@ -8,10 +8,12 @@ namespace PBR {
 	struct IBLComponent : public Component {
 		IBLComponent() {}
 
-		TextureHandle mConvolvedSkybox = NEO_INVALID_HANDLE;
+		// Yikes -- these have to be mutable b/c they're set by the renderer which has a const ref to the ECS
+		// Use messaging instead?
+		mutable TextureHandle mConvolvedSkybox = NEO_INVALID_HANDLE;
+		mutable bool mConvolved = false;
 		uint16_t mConvolvedCubemapResolution = 512;
 
-		// Yikes -- these have to be mutable b/c they're set by the renderer which has a const ref to the ECS
 		mutable TextureHandle mDFGLut = NEO_INVALID_HANDLE;
 		mutable bool mDFGGenerated = false;
 		uint16_t mDFGLutResolution = 128;
@@ -24,6 +26,10 @@ namespace PBR {
 			if (ImGui::Button("Regenerate DFG Lut")) {
 				mDFGGenerated = false;
 			}
+			if (ImGui::Button("Reconvolve cubemap")) {
+				mConvolved = false;
+			}
+
 		};
 	};
 }
