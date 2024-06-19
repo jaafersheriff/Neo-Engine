@@ -5,6 +5,8 @@
 
 #include "GL/glew.h"
 
+#pragma optimize("", off)
+
 namespace neo {
 	namespace {
 		GLenum _getGLTarget(types::texture::Target target) {
@@ -192,10 +194,10 @@ namespace neo {
 		// Override mips
 		uint16_t maxDim = std::max(mWidth, std::max(mHeight, mDepth));
 		uint16_t mips = 0;
-		while (maxDim < (1u << mips)) {
+		while (maxDim > (1u << mips)) {
 			mips++;
 		}
-		mips++;
+		mips = std::max(mips, static_cast<uint16_t>(1u));
 		if (mips < mFormat.mMipCount) {
 			NEO_LOG_W("Too many mips requested! Overwriting %d with %d", static_cast<int>(mFormat.mMipCount), static_cast<int>(mips));
 			mFormat.mMipCount = mips;

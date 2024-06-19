@@ -34,7 +34,7 @@ namespace PBR {
 			return;
 		}
 		const Texture& skyboxCubemap = resourceManagers.mTextureManager.resolve(skybox.mSkybox);
-		if (!skyboxCubemap.mFormat.mFilter.usesMipFilter()) {
+		if (!skyboxCubemap.mFormat.mFilter.usesMipFilter() || skyboxCubemap.mFormat.mMipCount < 2) {
 			NEO_LOG_E("Skybox cubemap needs to have mips");
 			return;
 		}
@@ -84,8 +84,9 @@ namespace PBR {
 					types::texture::InternalFormats::RGBA16_F,
 					TextureFilter { types::texture::Filters::LinearMipmapLinear, types::texture::Filters::Linear },
 					TextureWrap { types::texture::Wraps::Repeat, types::texture::Wraps::Repeat, types::texture::Wraps::Repeat },
-					types::ByteFormats::Float
-					})
+					types::ByteFormats::Float,
+					skyboxCubemap.mFormat.mMipCount
+				})
 			);
 		}
 		if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox) && !ibl.mConvolved) {
@@ -97,7 +98,7 @@ namespace PBR {
 				auto& convolveShader = resourceManagers.mShaderManager.resolveDefines(convolveShaderHandle, {});
 				convolveShader.bind();
 
-				convolveShader.bindTexture("inputCubemap", resourceManagers.mTextureManager.resolve(skybox.mSkybox));
+				convolveShader.bindTexture("inputCubemap", skyboxCubemap);
 				convolveShader.bindTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut));
 				for (int mip = 0; mip < convolvedCubemap.mFormat.mMipCount; mip++) {
 					for (int face = 0; face < 6; face++) {
