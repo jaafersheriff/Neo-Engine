@@ -507,33 +507,15 @@ namespace PBR {
 
 				if (ibl.mDebugIBL) {
 					// Copy pasta of drawSkybox hehe
-					auto skyboxShaderHandle = resourceManagers.mShaderManager.asyncLoad("SkyboxShader", SourceShader::ShaderCode{
-						{ types::shader::Stage::Vertex, R"(
-							layout (location = 0) in vec3 vertPos;
-							uniform mat4 P;
-							uniform mat4 V;
-							out vec3 fragTex;
-							void main() {
-								mat4 skyV = V;
-								skyV[3][0] = skyV[3][1] = skyV[3][2] = 0.0;
-								vec4 pos = P * skyV * vec4(vertPos, 1.0); 
-								gl_Position = pos.xyww;
-								fragTex = vertPos;
-						})"},
-						{ types::shader::Stage::Fragment, R"(
-							in vec3 fragTex;
-							layout(binding = 0) uniform samplerCube cubeMap;
-							float mip;
-							out vec4 color;
-							void main() {
-								color = textureLod(cubeMap, fragTex, mip);
-						})" }
+					auto iblDebugShaderHandle = resourceManagers.mShaderManager.asyncLoad("IBLDebug", SourceShader::ConstructionArgs{
+						{ types::shader::Stage::Vertex, "skybox.vert"},
+						{ types::shader::Stage::Fragment, "pbr/ibldebug.frag" }
 					});
-					if (resourceManagers.mShaderManager.isValid(skyboxShaderHandle)) {
+					if (resourceManagers.mShaderManager.isValid(iblDebugShaderHandle)) {
 						glDisable(GL_CULL_FACE);
 						glDisable(GL_DEPTH_TEST);
 						glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-						auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(skyboxShaderHandle, {});
+						auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(iblDebugShaderHandle, {});
 						resolvedShader.bind();
 						resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
 						resolvedShader.bindUniform("V", cameraSpatial.getView());

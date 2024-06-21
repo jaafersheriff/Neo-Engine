@@ -19,26 +19,9 @@ namespace neo {
 		TRACY_GPU();
 
 		auto skybox = ecs.cGetComponent<SkyboxComponent>();
-		auto skyboxShaderHandle = resourceManagers.mShaderManager.asyncLoad("SkyboxShader", SourceShader::ShaderCode{
-			{ types::shader::Stage::Vertex, R"(
-				layout (location = 0) in vec3 vertPos;
-				uniform mat4 P;
-				uniform mat4 V;
-				out vec3 fragTex;
-				void main() {
-					mat4 skyV = V;
-					skyV[3][0] = skyV[3][1] = skyV[3][2] = 0.0;
-					vec4 pos = P * skyV * vec4(vertPos, 1.0); 
-					gl_Position = pos.xyww;
-					fragTex = vertPos;
-			})"},
-			{ types::shader::Stage::Fragment, R"(
-				in vec3 fragTex;
-				layout(binding = 0) uniform samplerCube cubeMap;
-				out vec4 color;
-				void main() {
-					color = texture(cubeMap, fragTex);
-			})" }
+		auto skyboxShaderHandle = resourceManagers.mShaderManager.asyncLoad("SkyboxShader", SourceShader::ConstructionArgs{
+			{ types::shader::Stage::Vertex, "skybox.vert"},
+			{ types::shader::Stage::Fragment, "skybox.frag" }
 		});
 		if (!skybox || !resourceManagers.mShaderManager.isValid(skyboxShaderHandle)) {
 			return;
