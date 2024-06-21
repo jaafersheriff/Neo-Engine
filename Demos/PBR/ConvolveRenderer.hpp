@@ -89,22 +89,23 @@ namespace PBR {
 				})
 			);
 		}
-		if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox) && !ibl.mConvolved) {
+		if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox)) {
 			auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Compute, "pbr/convolve.comp" }
 			});
-			if (resourceManagers.mShaderManager.isValid(convolveShaderHandle)) {
+			if (resourceManagers.mShaderManager.isValid(convolveShaderHandle) && !ibl.mConvolved) {
 				const auto& convolvedCubemap = resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox);
 				auto& convolveShader = resourceManagers.mShaderManager.resolveDefines(convolveShaderHandle, {});
 				convolveShader.bind();
 
 				convolveShader.bindTexture("inputCubemap", skyboxCubemap);
 				convolveShader.bindTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox));
+				convolveShader.bindUniform("resolution", convolvedCubemap.mWidth);
 				for (int mip = 0; mip < convolvedCubemap.mFormat.mMipCount; mip++) {
 					convolveShader.bindUniform("mipLevel", mip);
 					uint16_t mipResolution = convolvedCubemap.mWidth >> uint16_t(mip);
 					convolveShader.bindUniform("roughness", mip / static_cast<float>(convolvedCubemap.mFormat.mMipCount));
-					convolveShader.bindUniform("resolution", mipResolution);
+					convolveShader.bindUniform("sampleCount", ibl.mSampleCount);
 					glBindImageTexture(0, convolvedCubemap.mTextureID, mip, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F/*resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mFormat.mInternalFormat*/);
 					glDispatchCompute(
 						mipResolution / 8,

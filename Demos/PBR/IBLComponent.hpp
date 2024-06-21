@@ -13,6 +13,7 @@ namespace PBR {
 		mutable TextureHandle mConvolvedSkybox = NEO_INVALID_HANDLE;
 		mutable bool mConvolved = false;
 		uint16_t mConvolvedCubemapResolution = 512;
+		uint16_t mSampleCount = 512;
 
 		mutable TextureHandle mDFGLut = NEO_INVALID_HANDLE;
 		mutable bool mDFGGenerated = false;
@@ -29,7 +30,14 @@ namespace PBR {
 			if (ImGui::Button("Regenerate DFG Lut")) {
 				mDFGGenerated = false;
 			}
-			if (ImGui::Button("Reconvolve cubemap")) {
+			bool regen = false; 
+			int sc = mSampleCount;
+			if (ImGui::SliderInt("SampleCount", &sc, 0, 2048)) {
+				regen = true;
+				mSampleCount = static_cast<uint16_t>(sc);
+			}
+			regen |= ImGui::Button("Reconvolve cubemap");
+			if (regen) {
 				mConvolved = false;
 			}
 			ImGui::Checkbox("Debug", &mDebugIBL);

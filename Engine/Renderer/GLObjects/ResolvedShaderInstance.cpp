@@ -278,6 +278,7 @@ namespace neo {
 		std::visit(util::VisitOverloaded{
 			[&](bool b) { glUniform1i(_getUniform(name), b); },
 			[&](int i) { glUniform1i(_getUniform(name), i); },
+			[&](uint16_t i) { glUniform1ui(_getUniform(name), i); },
 			[&](uint32_t i) { glUniform1ui(_getUniform(name), i); },
 			[&](double d) { glUniform1f(_getUniform(name), static_cast<float>(d)); },
 			[&](float f) { glUniform1f(_getUniform(name), static_cast<float>(f)); },
