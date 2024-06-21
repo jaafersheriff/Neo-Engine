@@ -1,6 +1,4 @@
 
-#define PI 3.141592653589
-
 struct PBRMaterial {
     vec3 albedo;
     vec3 N;

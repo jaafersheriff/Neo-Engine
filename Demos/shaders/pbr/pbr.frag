@@ -170,6 +170,7 @@ void main() {
 #ifdef SKYBOX
 	vec3 R = reflect(-V, fNorm);
 	pbrColor.indirectSpecular = fMetalness * vec3(0.003);
+
 #endif
 
 	color.rgb = vec3(0)

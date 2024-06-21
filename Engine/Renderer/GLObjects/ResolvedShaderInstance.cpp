@@ -42,6 +42,7 @@ namespace neo {
 				return "";
 			}
 			std::string sourceString(shaderString);
+			sourceString = "#include \"universal.glsl\"\n" + sourceString;
 
 			// Handle #includes 
 			{

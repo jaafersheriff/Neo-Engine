@@ -35,6 +35,9 @@ namespace neo {
 				}
 			)"}
 		}); 
+		if (!resourceManagers.mShaderManager.isValid(blitShaderHandle)) {
+			return; // RIP
+		}
 
 		outputFBO.bind();
 		glViewport(0, 0, viewport.x, viewport.y);

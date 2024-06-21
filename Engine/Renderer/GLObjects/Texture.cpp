@@ -5,8 +5,6 @@
 
 #include "GL/glew.h"
 
-#pragma optimize("", off)
-
 namespace neo {
 	namespace {
 		GLenum _getGLTarget(types::texture::Target target) {
