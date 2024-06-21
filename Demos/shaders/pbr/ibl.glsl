@@ -1,4 +1,12 @@
 
+#include "pbr/pbrtypes.glsl"
+
+vec3 getIndirectSpecular(vec3 R, PBRMaterial pbrMaterial, int numMips, sampler2D dfgLUT, samplerCube ibl) {
+    vec2 f_ab = texture(dfgLUT, vec2(saturate(dot(pbrMaterial.N, pbrMaterial.V)), pbrMaterial.linearRoughness)).rg;
+    vec3 radiance = textureLod(ibl, R, pbrMaterial.linearRoughness * numMips).rgb;
+    return (pbrMaterial.F0 * f_ab.x + f_ab.y) * radiance;
+}
+
 float GeometrySchlickGGXIBL(float NdotV, float roughness) {
     float k = (roughness * roughness) / 2.0; // TODO - why do we use a different k here?
     float num = NdotV;
@@ -11,7 +19,6 @@ float GeometrySmithIBL(float NdotV, float NdotL, float roughness) {
     float ggx1 = GeometrySchlickGGXIBL(NdotL, roughness);
     return ggx1 * ggx2;
 }
-
 
 // Taken from https://github.com/SaschaWillems/Vulkan-glTF-PBR/blob/master/data/shaders/genbrdflut.frag
 // Based on http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html

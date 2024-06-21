@@ -1,6 +1,7 @@
 #include "alphaDiscard.glsl"
 #include "shadowreceiver.glsl"
 #include "pbr/pbr.glsl"
+#include "pbr/ibl.glsl"
 
 in vec4 fragPos;
 in vec3 fragNor;
@@ -173,10 +174,7 @@ void main() {
 
 #ifdef IBL
 	vec3 R = reflect(-V, fNorm);
-	vec2 f_ab = texture(dfgLUT, vec2(abs(dot(pbrMaterial.N, pbrMaterial.V) + 1e-5), pbrMaterial.linearRoughness)).rg;
-	float lodLevel = pbrMaterial.linearRoughness * iblMips;
-	vec3 radiance = textureLod(ibl, R, lodLevel).rgb;
-	pbrColor.indirectSpecular = (pbrMaterial.F0 * f_ab.x + f_ab.y) * radiance;
+	pbrColor.indirectSpecular = getIndirectSpecular(R, pbrMaterial, iblMips, dfgLUT, ibl);
 #endif
 
 	color.rgb = vec3(0)
