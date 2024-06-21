@@ -1,13 +1,40 @@
 
-
-#include "pbr/pbr.glsl"
+#include "pbr/ibl.glsl"
 
 layout(binding = 0, rgba16f) uniform image2D dst;
-layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
-void main()
-{
-    // Normalized pixel coordinates (from 0 to 1)
-    vec2 uv = vec2(gl_GlobalInvocationID.xy + 1) / vec2(imageSize(dst).xy);
+layout(binding = 1) uniform samplerCube skybox;
+uniform float roughness;
+uniform int mipLevel;
+uniform int resolution;
+uniform int face;
 
-    imageStore(dst, ivec2(gl_GlobalInvocationID.xy), vec4(uv, 0.0, 0.0));
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+void main() {
+    if (gl_GlobalInvocationID.x >= resolution || gl_GlobalInvocationID.y >= resolution) {
+        return;
+    }
+
+
+    vec2 baseUv = vec2(gl_GlobalInvocationID.xy + 1) / vec2(resolution);
+    baseUv = 2.0 * baseUv - 1.0;
+    baseUv.y *= -1.0; // Necessary?
+
+    vec3 R;
+    switch (face) {
+    case 0:
+        R = vec3(1.0, baseUv.y, -baseUv.x);
+    case 1:
+        R = vec3(-1.0, baseUv.y, baseUv.x);
+    case 2:
+        R = vec3(baseUv.x, 1.0, -baseUv.y);
+    case 3:
+        R = vec3(baseUv.x, -1.0, baseUv.y);
+    case 4:
+        R = vec3(baseUv.x, baseUv.y, 1.0);
+    case 5:
+    default:
+        R = vec3(-baseUv.x, baseUv.y, -1.0);
+    }
+
+    imageStore(dst, ivec2(gl_GlobalInvocationID.xy), vec4(R, 1.0));
 }

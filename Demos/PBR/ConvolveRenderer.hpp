@@ -101,11 +101,16 @@ namespace PBR {
 				convolveShader.bindTexture("inputCubemap", skyboxCubemap);
 				convolveShader.bindTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut));
 				for (int mip = 0; mip < convolvedCubemap.mFormat.mMipCount; mip++) {
+					convolveShader.bindUniform("mipLevel", mip);
+					uint16_t mipResolution = convolvedCubemap.mWidth >> uint16_t(mip);
 					for (int face = 0; face < 6; face++) {
+						convolveShader.bindUniform("roughness", mip / static_cast<float>(convolvedCubemap.mFormat.mMipCount));
+						convolveShader.bindUniform("resolution", mipResolution);
+						convolveShader.bindUniform("face", face);
 						glBindImageTexture(0, convolvedCubemap.mTextureID, mip, GL_FALSE, face, GL_WRITE_ONLY, GL_RGBA16F/*resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mFormat.mInternalFormat*/);
 						glDispatchCompute(
-							ibl.mConvolvedCubemapResolution / 8,
-							ibl.mConvolvedCubemapResolution / 8,
+							mipResolution / 8,
+							mipResolution / 8,
 							1
 						);
 						glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
