@@ -1,14 +1,13 @@
 
 #include "pbr/ibl.glsl"
 
-layout(binding = 0, rgba16f) uniform image2D dst;
+layout(binding = 0, rgba16f) uniform imageCube dst;
 layout(binding = 1) uniform samplerCube inputCubemap;
 uniform float roughness;
 uniform int mipLevel;
 uniform int resolution;
-uniform int face;
 
-layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 6) in;
 void main() {
     if (gl_GlobalInvocationID.x >= resolution || gl_GlobalInvocationID.y >= resolution) {
         return;
@@ -16,20 +15,25 @@ void main() {
 
     vec2 baseUv = vec2(gl_GlobalInvocationID.xy + 0.5) / vec2(resolution);
     baseUv = 2.0 * baseUv - 1.0;
-    //baseUv.y *= -1.0;
+    baseUv.y *= -1.0;
 
     vec3 R;
-    switch (face) {
+    switch (gl_GlobalInvocationID.z) {
     case 0:
         R = vec3(1.0, baseUv.y, -baseUv.x);
+        break;
     case 1:
         R = vec3(-1.0, baseUv.y, baseUv.x);
+        break;
     case 2:
         R = vec3(baseUv.x, 1.0, -baseUv.y);
+        break;
     case 3:
         R = vec3(baseUv.x, -1.0, baseUv.y);
+        break;
     case 4:
         R = vec3(baseUv.x, baseUv.y, 1.0);
+        break;
     case 5:
     default:
         R = vec3(-baseUv.x, baseUv.y, -1.0);
@@ -38,9 +42,9 @@ void main() {
 
     if (mipLevel == 0) {
         vec4 color = textureLod(inputCubemap, R, 0);
-        imageStore(dst, ivec2(gl_GlobalInvocationID.xy), vec4(color.rgb, 1.0));
+        imageStore(dst, ivec3(gl_GlobalInvocationID.xyz), vec4(color.rgb, 1.0));
         return;
     }
 
-    imageStore(dst, ivec2(gl_GlobalInvocationID.xy), vec4(R, 1.0));
+    imageStore(dst, ivec3(gl_GlobalInvocationID.xyz), vec4(R * 0.5 + 0.5, 1.0));
 }
