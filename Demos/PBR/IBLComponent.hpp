@@ -18,6 +18,9 @@ namespace PBR {
 		mutable bool mDFGGenerated = false;
 		uint16_t mDFGLutResolution = 128;
 
+		bool mDebugIBL = false;
+		float mDebugIBLMip = 0.f;
+
 		virtual std::string getName() const override {
 			return "IBLComponent";
 		}
@@ -29,7 +32,10 @@ namespace PBR {
 			if (ImGui::Button("Reconvolve cubemap")) {
 				mConvolved = false;
 			}
-
+			ImGui::Checkbox("Debug", &mDebugIBL);
+			if (mDebugIBL) {
+				ImGui::SliderFloat("Mip", &mDebugIBLMip, 0.f, 10.f); // Whoops, no access to mip count
+			}
 		};
 	};
 }

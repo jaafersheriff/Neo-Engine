@@ -500,7 +500,55 @@ namespace PBR {
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
-		drawSkybox(resourceManagers, ecs, cameraEntity);
+		{
+			const auto skyboxTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
+			if (skyboxTuple) {
+				const auto& [__, skybox, ibl] = *skyboxTuple;
+
+				if (ibl.mDebugIBL) {
+					// Copy pasta of drawSkybox hehe
+					auto skyboxShaderHandle = resourceManagers.mShaderManager.asyncLoad("SkyboxShader", SourceShader::ShaderCode{
+						{ types::shader::Stage::Vertex, R"(
+							layout (location = 0) in vec3 vertPos;
+							uniform mat4 P;
+							uniform mat4 V;
+							out vec3 fragTex;
+							void main() {
+								mat4 skyV = V;
+								skyV[3][0] = skyV[3][1] = skyV[3][2] = 0.0;
+								vec4 pos = P * skyV * vec4(vertPos, 1.0); 
+								gl_Position = pos.xyww;
+								fragTex = vertPos;
+						})"},
+						{ types::shader::Stage::Fragment, R"(
+							in vec3 fragTex;
+							layout(binding = 0) uniform samplerCube cubeMap;
+							float mip;
+							out vec4 color;
+							void main() {
+								color = textureLod(cubeMap, fragTex, mip);
+						})" }
+					});
+					if (resourceManagers.mShaderManager.isValid(skyboxShaderHandle)) {
+						glDisable(GL_CULL_FACE);
+						glDisable(GL_DEPTH_TEST);
+						glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+						auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(skyboxShaderHandle, {});
+						resolvedShader.bind();
+						resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+						resolvedShader.bindUniform("V", cameraSpatial.getView());
+						resolvedShader.bindTexture("cubeMap", resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox));
+						resolvedShader.bindUniform("mip", ibl.mDebugIBLMip);
+						resourceManagers.mMeshManager.resolve(HashedString("cube")).draw();
+						glEnable(GL_CULL_FACE);
+						glEnable(GL_DEPTH_TEST);
+					}
+				}
+				else {
+					drawSkybox(resourceManagers, ecs, cameraEntity);
+				}
+			}
+		}
 
 		_drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture);
 		_drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture);
