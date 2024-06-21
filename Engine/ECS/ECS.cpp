@@ -1,6 +1,7 @@
 #include "ECS/pch.hpp"
 #include "ECS.hpp"
 
+#include "Component/EngineComponents/PinnedComponent.hpp"
 #include "Component/EngineComponents/TagComponent.hpp"
 #include "Component/CollisionComponent/SelectedComponent.hpp"
 
@@ -60,13 +61,21 @@ namespace neo {
 	void ECS::imguiEdtor() {
 		TRACY_ZONE();
 		ImGui::Begin("ECS");
-		if (ImGui::TreeNodeEx(&mRegistry, 0, "All Entities: %d", static_cast<int>(mRegistry.alive()))) {
-			getView<TagComponent>().each([this](Entity entity, TagComponent& tag) {
-				if (ImGui::TreeNodeEx(tag.mTag.c_str())) {
+		auto pinnedView = getView<PinnedComponent>();
+		if (!pinnedView.empty() && ImGui::TreeNodeEx("Pinned Entities", ImGuiTreeNodeFlags_DefaultOpen)) {
+			pinnedView.each([this](Entity entity, PinnedComponent&) {
+				char title[64];
+				if (has<TagComponent>(entity)) {
+					sprintf(title, "%s", getComponent<TagComponent>(entity)->mTag.c_str());
+				}
+				else {
+					sprintf(title, "%d", static_cast<int>(entity));
+				}
+				if (ImGui::TreeNodeEx(title)) {
 					mEditor.renderEditor(mRegistry, entity);
 					ImGui::TreePop();
 				}
-			});
+				});
 			ImGui::TreePop();
 		}
 		auto selected = getComponent<SelectedComponent>();
@@ -84,6 +93,16 @@ namespace neo {
 				ImGui::TreePop();
 			}
 		}
+		if (ImGui::TreeNodeEx(&mRegistry, 0, "All Entities: %d", static_cast<int>(mRegistry.alive()))) {
+			getView<TagComponent>().each([this](Entity entity, TagComponent& tag) {
+				if (ImGui::TreeNodeEx(tag.mTag.c_str())) {
+					mEditor.renderEditor(mRegistry, entity);
+					ImGui::TreePop();
+				}
+			});
+			ImGui::TreePop();
+		}
+
 		if (mSystems.size() && ImGui::TreeNodeEx("Systems", ImGuiTreeNodeFlags_DefaultOpen)) {
 			for (unsigned i = 0; i < mSystems.size(); i++) {
 				auto& sys = mSystems[i].second;

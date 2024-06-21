@@ -7,6 +7,7 @@
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
+#include "ECS/Component/EngineComponents/PinnedComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/RenderingComponent/ShadowCasterShaderComponent.hpp"
@@ -269,6 +270,7 @@ namespace PBR {
 			ecs.addComponent<MainCameraComponent>(entity);
 			ecs.addComponent<FrustumComponent>(entity);
 			ecs.addComponent<FrustumFitSourceComponent>(entity);
+			ecs.addComponent<PinnedComponent>(entity);
 		}
 
 		{
@@ -280,6 +282,7 @@ namespace PBR {
 			ecs.addComponent<MainLightComponent>(lightEntity);
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
 			ecs.addComponent<PBRLightComponent>(lightEntity, 2.f);
+			ecs.addComponent<PinnedComponent>(lightEntity);
 		}
 		{
 			auto shadowCam = ecs.createEntity();
@@ -331,6 +334,7 @@ namespace PBR {
 			material->mMetallic = 1.f;
 			material->mRoughness = 0.6f;
 			ecs.addComponent<ShadowCasterShaderComponent>(icosahedron);
+			ecs.addComponent<PinnedComponent>(icosahedron);
 		}
 
 
@@ -378,6 +382,7 @@ namespace PBR {
 				}
 			}));
 			ecs.addComponent<IBLComponent>(skybox);
+			ecs.addComponent<PinnedComponent>(skybox);
 		}
 
 		{
@@ -398,6 +403,7 @@ namespace PBR {
 			ecs.addComponent<MaterialComponent>(entity, helmet.mMaterial);
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+			ecs.addComponent<PinnedComponent>(entity);
 		}
 
 		{
