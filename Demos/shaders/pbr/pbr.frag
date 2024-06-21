@@ -41,8 +41,10 @@ uniform vec2 shadowMapResolution;
 layout(binding = 5) uniform sampler2D shadowMap;
 #endif
 
-#ifdef SKYBOX
-layout(binding = 6) uniform samplerCube skybox;
+#ifdef IBL
+ layout(binding = 6) uniform samplerCube ibl;
+ layout(binding = 7) uniform sampler2D dfgLUT;
+ uniform int iblMips;
 #endif
 
 uniform vec4 lightRadiance;
@@ -127,19 +129,21 @@ void main() {
 #endif
 #if defined(POINT_LIGHT)
 	vec3 lightDir = lightPos - fragPos.xyz;
+	L = normalize(lightDir);
 	float lightDistance = length(lightDir);
-	= lightDir / lightDistance;
+	lightAtt = lightDir / lightDistance;
 	if (length(lightAtt) > 0) {
 		attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
 	}
 #endif
 
-	PBRMaterial pbrData;
-	pbrData.albedo = fAlbedo.rgb;
-	pbrData.N = fNorm;
-	pbrData.V = V;
-	pbrData.linearRoughness = fRoughness;
-	pbrData.metalness = fMetalness;
+	PBRMaterial pbrMaterial;
+	pbrMaterial.albedo = fAlbedo.rgb;
+	pbrMaterial.N = fNorm;
+	pbrMaterial.V = V;
+	pbrMaterial.linearRoughness = fRoughness;
+	pbrMaterial.metalness = fMetalness;
+	pbrMaterial.F0 = mix(vec3(DIALECTRIC_REFLECTANCE), fAlbedo.rgb, vec3(fMetalness));
 
 	PBRLight pbrLight;
 	pbrLight.L = L;
@@ -151,7 +155,7 @@ void main() {
 	pbrColor.indirectDiffuse = vec3(0);
 	pbrColor.indirectSpecular = vec3(0);
 
-	brdf(pbrData, pbrLight, pbrColor);
+	brdf(pbrMaterial, pbrLight, pbrColor);
 
 #ifdef OCCLUSION_MAP
 	float ao = texture(occlusionMap, fragTex).r;
@@ -167,10 +171,12 @@ void main() {
 
 	pbrColor.indirectDiffuse = fAlbedo.rgb * 0.01 * (1.0 - fMetalness);
 
-#ifdef SKYBOX
+#ifdef IBL
 	vec3 R = reflect(-V, fNorm);
-	pbrColor.indirectSpecular = fMetalness * vec3(0.003);
-
+	vec2 f_ab = texture(dfgLUT, vec2(abs(dot(pbrMaterial.N, pbrMaterial.V) + 1e-5), pbrMaterial.linearRoughness)).rg;
+	float lodLevel = pbrMaterial.linearRoughness * iblMips;
+	vec3 radiance = textureLod(ibl, R, lodLevel).rgb;
+	pbrColor.indirectSpecular = (pbrMaterial.F0 * f_ab.x + f_ab.y) * radiance;
 #endif
 
 	color.rgb = vec3(0)

@@ -1,3 +1,6 @@
+#pragma once
+
+#define DIALECTRIC_REFLECTANCE 0.04 
 
 struct PBRMaterial {
     vec3 albedo;
@@ -5,6 +8,7 @@ struct PBRMaterial {
     vec3 V;
     float linearRoughness;
     float metalness;
+    vec3 F0;
 };
 
 struct PBRLight {
@@ -52,10 +56,9 @@ void brdf(in PBRMaterial pbrMaterial, in PBRLight pbrLight, out PBRColor pbrColo
     float LdotH = clamp(dot(pbrLight.L, H), 0.0, 1.0);
 
     float roughness = pbrMaterial.linearRoughness * pbrMaterial.linearRoughness;
-    vec3 F0 = mix(vec3(0.04), pbrMaterial.albedo, vec3(pbrMaterial.metalness));
 
     float D = D_GGX(NdotH, roughness);
-    vec3  F = F_Schlick(LdotH, F0);
+    vec3  F = F_Schlick(LdotH, pbrMaterial.F0);
     float G = GeometrySmith(NdotV, NdotL, roughness);
 
     vec3 Ks = F;

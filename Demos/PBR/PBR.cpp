@@ -136,10 +136,10 @@ namespace PBR {
 			NEO_FAIL("Phong light needs a directional or point light component");
 		}
 
-		MakeDefine(SKYBOX);
-		auto skybox = ecs.cGetComponent<SkyboxComponent>();
-		if (skybox) {
-			passDefines.set(SKYBOX);
+		MakeDefine(IBL);
+		auto ibl = ecs.cGetComponent<IBLComponent>();
+		if (ibl) {
+			passDefines.set(IBL);
 		}
 
 		ShaderDefines drawDefines(passDefines);
@@ -232,8 +232,11 @@ namespace PBR {
 					resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
 					resolvedShader.bindTexture("shadowMap", shadowMap);
 				}
-				if (skybox) {
-					resolvedShader.bindTexture("skybox", resourceManagers.mTextureManager.resolve(std::get<1>(*skybox).mSkybox));
+				if (ibl) {
+					const auto& iblTexture = resourceManagers.mTextureManager.resolve(std::get<1>(*ibl).mConvolvedSkybox);
+					resolvedShader.bindTexture("dfgLUT", resourceManagers.mTextureManager.resolve(std::get<1>(*ibl).mDFGLut));
+					resolvedShader.bindTexture("ibl", iblTexture);
+					resolvedShader.bindUniform("iblMips", iblTexture.mFormat.mMipCount);
 				}
 			}
 

@@ -56,7 +56,8 @@ void main() {
 	 * Early discard if fragment is outside of light volume */
 	vec3 lightDir = lightPos - fragPos;
 	float lightDist = length(lightDir);
-	float attFactor = 1.f - clamp((lightDist / lightRadius) * (lightDist / lightRadius), 0.f, 1.f);
+	float lightAtt = lightDir / lightDistance;
+	float attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
 	if (attFactor == 0.f) {
 		discard;
 	}
