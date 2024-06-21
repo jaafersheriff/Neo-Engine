@@ -89,7 +89,7 @@ namespace PBR {
 				})
 			);
 		}
-		if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox) && !ibl.mConvolved) {
+		if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox)) {
 			auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Compute, "pbr/convolve.comp" }
 			});
@@ -99,7 +99,7 @@ namespace PBR {
 				convolveShader.bind();
 
 				convolveShader.bindTexture("inputCubemap", skyboxCubemap);
-				convolveShader.bindTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut));
+				convolveShader.bindTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox));
 				for (int mip = 0; mip < convolvedCubemap.mFormat.mMipCount; mip++) {
 					convolveShader.bindUniform("mipLevel", mip);
 					uint16_t mipResolution = convolvedCubemap.mWidth >> uint16_t(mip);

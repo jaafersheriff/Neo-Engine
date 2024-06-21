@@ -2,7 +2,7 @@
 #include "pbr/ibl.glsl"
 
 layout(binding = 0, rgba16f) uniform image2D dst;
-layout(binding = 1) uniform samplerCube skybox;
+layout(binding = 1) uniform samplerCube inputCubemap;
 uniform float roughness;
 uniform int mipLevel;
 uniform int resolution;
@@ -14,10 +14,9 @@ void main() {
         return;
     }
 
-
-    vec2 baseUv = vec2(gl_GlobalInvocationID.xy + 1) / vec2(resolution);
+    vec2 baseUv = vec2(gl_GlobalInvocationID.xy + 0.5) / vec2(resolution);
     baseUv = 2.0 * baseUv - 1.0;
-    baseUv.y *= -1.0; // Necessary?
+    //baseUv.y *= -1.0;
 
     vec3 R;
     switch (face) {
@@ -34,6 +33,13 @@ void main() {
     case 5:
     default:
         R = vec3(-baseUv.x, baseUv.y, -1.0);
+    }
+    R = normalize(R);
+
+    if (mipLevel == 0) {
+        vec4 color = textureLod(inputCubemap, R, 0);
+        imageStore(dst, ivec2(gl_GlobalInvocationID.xy), vec4(color.rgb, 1.0));
+        return;
     }
 
     imageStore(dst, ivec2(gl_GlobalInvocationID.xy), vec4(R, 1.0));
