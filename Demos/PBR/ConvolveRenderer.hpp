@@ -6,7 +6,6 @@
 
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
-#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/RenderingComponent/SkyboxComponent.hpp"
 #include "PBR/IBLComponent.hpp"
 

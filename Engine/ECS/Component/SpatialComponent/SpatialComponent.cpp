@@ -152,7 +152,6 @@ namespace neo {
 	}
 
 	void SpatialComponent::_detModelMatrix() const {
-		TRACY_ZONE();
 		mModelMatrix = glm::scale(glm::translate(glm::mat4(1.f), mPosition) * glm::mat4(getOrientation()), mScale);
 		mModelMatrixDirty = false;
 	}
@@ -169,7 +168,6 @@ namespace neo {
 	}
 
 	void SpatialComponent::_detView() const {
-		TRACY_ZONE();
 		mViewMat = glm::lookAt(getPosition(), getPosition() + getLookDir(), getUpDir());
 		mViewMatDirty = false;
 	}

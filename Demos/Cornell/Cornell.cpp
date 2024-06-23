@@ -5,7 +5,6 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
-#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
@@ -59,7 +58,7 @@ namespace Cornell {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Camera");
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 0.5f, 2.25f), glm::vec3(1.f));
-			ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 100.f, 45.f);
+			ecs.addComponent<CameraComponent>(entity, 1.f, 100.f, CameraComponent::Perspective{ 45.f, 1.f });
 			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 7.f);
 			ecs.addComponent<MainCameraComponent>(entity);
 		}

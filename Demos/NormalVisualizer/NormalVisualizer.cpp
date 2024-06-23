@@ -5,7 +5,6 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
-#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
@@ -33,7 +32,7 @@ namespace NormalVisualizer {
 		Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(entity, pos, glm::vec3(1.f));
-			ecs.addComponent<PerspectiveCameraComponent>(entity, near, far, fov);
+			ecs.addComponent<CameraComponent>(entity, near, far, CameraComponent::Perspective{fov, 1.f});
 			ecs.addComponent<CameraControllerComponent>(entity, ls, ms);
 			ecs.addComponent<MainCameraComponent>(entity);
 		}
@@ -86,7 +85,7 @@ namespace NormalVisualizer {
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
-		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
@@ -107,7 +106,7 @@ namespace NormalVisualizer {
 				resolvedShader.bindUniform("magnitude", mMagnitude);
 
 				/* Load PV */
-				resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+				resolvedShader.bindUniform("P", camera.getProj());
 				resolvedShader.bindUniform("V", cameraSpatial.getView());
 
 				resolvedShader.bindUniform("M", spatial.getModelMatrix());

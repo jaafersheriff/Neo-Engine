@@ -10,6 +10,7 @@
 #include "Renderer/RenderingSystems/Blitter.hpp"
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/CollisionComponent/SelectedComponent.hpp"
 #include "ECS/Component/EngineComponents/DebugBoundingBox.hpp"
@@ -182,9 +183,9 @@ namespace neo {
 			}
 		}
 		ImGuizmo::SetDrawlist();
-		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
 		glm::mat4 V = cameraSpatial.getView();
-		glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+		glm::mat4 P = camera.getProj();
 		auto selected = ecs.getSingleView<SelectedComponent, SpatialComponent>();
 		if (selected.has_value()) {
 			auto&& [selectedEntity, selectedComponent, spatial] = *selected;

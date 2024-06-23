@@ -47,8 +47,6 @@ namespace neo {
 		template<typename CompT> bool has(Entity e) const;
 		template<typename CompT> CompT* getComponent(Entity e);
 		template<typename CompT> CompT *const cGetComponent(Entity e) const;
-		template<typename SuperT, typename CompT> SuperT* getComponentAs(Entity e);
-		template<typename SuperT, typename CompT> const SuperT* cGetComponentAs(Entity e) const;
 
 		// All access
 		template<typename CompT> std::optional<std::tuple<Entity, CompT&>> getComponent();
@@ -229,25 +227,6 @@ namespace neo {
 		// TODO -- maybe force const inputs rather than attaching it
 		// TODO -- otherwise view.get<> breaks
 		return mRegistry.view<CompTs...>();
-	}
-
-	template<typename SuperT, typename CompT> SuperT* ECS::getComponentAs(Entity e) {
-		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
-		static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
-		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
-
-		CompT* comp = getComponent<CompT>(e);
-		NEO_ASSERT(comp, "Component doesn't exist!");
-		return dynamic_cast<SuperT*>(comp);
-	}
-	template<typename SuperT, typename CompT> const SuperT* ECS::cGetComponentAs(Entity e) const {
-		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
-		static_assert(std::is_base_of<SuperT, CompT>::value, "CompT must be derived from SuperT");
-		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
-
-		CompT *const comp = cGetComponent<CompT>(e);
-		NEO_ASSERT(comp, "Component doesn't exist!");
-		return dynamic_cast<SuperT *const>(comp);
 	}
 
 	template<typename... CompTs>

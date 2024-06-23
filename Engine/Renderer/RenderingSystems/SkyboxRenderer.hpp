@@ -5,7 +5,6 @@
 
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
-#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/RenderingComponent/SkyboxComponent.hpp"
 
@@ -31,7 +30,7 @@ namespace neo {
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-		auto camera = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity);
+		auto camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
 		auto camSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 		NEO_ASSERT(camera, "No main camera exists");
 

@@ -287,28 +287,33 @@ namespace {
 
 	neo::GLTFImporter::CameraNode _processCameraNode(const tinygltf::Model& model, const tinygltf::Node& node, const neo::SpatialComponent& nodeSpatial) {
 		using namespace neo;
-		GLTFImporter::CameraNode cameraNode;
 
+		std::optional<CameraComponent> camera;
 		const auto& gltfCamera = model.cameras[node.camera];
-		cameraNode.mName = gltfCamera.name;
-		cameraNode.mSpatial = nodeSpatial;
-
 		if (gltfCamera.type == "perspective") {
-			cameraNode.mPerspectiveCamera = std::make_optional<PerspectiveCameraComponent>(
+			camera = CameraComponent(
 				static_cast<float>(gltfCamera.perspective.znear), static_cast<float>(gltfCamera.perspective.zfar),
-				static_cast<float>(gltfCamera.perspective.yfov),
-				static_cast<float>(gltfCamera.perspective.aspectRatio)
+				CameraComponent::Perspective {
+					static_cast<float>(gltfCamera.perspective.yfov),
+					static_cast<float>(gltfCamera.perspective.aspectRatio)
+				}
 			);
 		}
 		else {
-			cameraNode.mOrthoCamera = std::make_optional<OrthoCameraComponent>(
+			camera = CameraComponent(
 				static_cast<float>(gltfCamera.perspective.znear), static_cast<float>(gltfCamera.perspective.zfar),
-				static_cast<float>(gltfCamera.orthographic.xmag) / -2.f, static_cast<float>(gltfCamera.orthographic.xmag) / 2.f,
-				static_cast<float>(gltfCamera.orthographic.ymag) / -2.f, static_cast<float>(gltfCamera.orthographic.ymag) / 2.f
+				CameraComponent::Orthographic {
+					glm::vec2(gltfCamera.orthographic.xmag / -2.f, gltfCamera.orthographic.xmag / 2.f),
+					glm::vec2(gltfCamera.orthographic.ymag / -2.f, gltfCamera.orthographic.ymag / 2.f)
+				}
 			);
 		}
 
-		return cameraNode;
+		return GLTFImporter::CameraNode{
+			gltfCamera.name,
+			nodeSpatial,
+			*camera
+		};
 	}
 
 	std::vector<neo::GLTFImporter::MeshNode> _processMeshNode(const char* path, const int nodeID, neo::ResourceManagers& resourceManagers, const tinygltf::Model& model, const tinygltf::Node& node, const neo::SpatialComponent& nodeSpatial) {

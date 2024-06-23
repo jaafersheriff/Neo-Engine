@@ -11,6 +11,7 @@ extern "C" {
 #include "Renderer/Renderer.hpp"
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/EngineComponents/SingleFrameComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
@@ -314,8 +315,13 @@ namespace neo {
 
 		{
 			TRACY_ZONEN("Aspect Ratio");
-			for (auto& entity : mECS.getView<MainCameraComponent>()) {
-				mECS.getComponent<PerspectiveCameraComponent>(entity)->setAspectRatio(viewportSize.x / static_cast<float>(viewportSize.y));
+			auto cameraTuple = mECS.getSingleView<MainCameraComponent, CameraComponent>();
+			if (cameraTuple.has_value()) {
+				auto& camera = std::get<2>(*cameraTuple);
+				camera.setPerspective(CameraComponent::Perspective{
+					camera.getPerspective().mFOV,
+					viewportSize.x / static_cast<float>(viewportSize.y)
+				});
 			}
 		}
 		{

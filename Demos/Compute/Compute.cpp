@@ -7,7 +7,7 @@
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
-#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
@@ -27,7 +27,7 @@ namespace Compute {
 		Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
 			mEntity = ecs.createEntity();
 			ecs.addComponent<SpatialComponent>(mEntity, pos, glm::vec3(1.f));
-			ecs.addComponent<PerspectiveCameraComponent>(mEntity, near, far, fov);
+			ecs.addComponent<CameraComponent>(mEntity, near, far, CameraComponent::Perspective{ fov, 1.f });
 			ecs.addComponent<CameraControllerComponent>(mEntity, ls, ms);
 		}
 	};
@@ -144,7 +144,7 @@ namespace Compute {
 			auto& particlesVisShader = resourceManagers.mShaderManager.resolveDefines(particlesVisShaderHandle, {});
 			particlesVisShader.bind();
 
-			if (auto cameraView = ecs.getSingleView<MainCameraComponent, PerspectiveCameraComponent, SpatialComponent>()) {
+			if (auto cameraView = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>()) {
 				auto&& [_, __, camera, camSpatial] = *cameraView;
 				particlesVisShader.bindUniform("P", camera.getProj());
 				particlesVisShader.bindUniform("V", camSpatial.getView());

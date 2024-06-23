@@ -2,8 +2,6 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include "PerspectiveCameraComponent.hpp"
-
 namespace neo {
 
 	START_COMPONENT(MainCameraComponent);

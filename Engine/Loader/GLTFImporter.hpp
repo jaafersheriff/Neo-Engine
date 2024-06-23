@@ -1,8 +1,7 @@
 #pragma once
 
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
-#include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
-#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 
 #include "Loader.hpp"
@@ -20,8 +19,7 @@ namespace neo {
 		};
 
 		struct CameraNode : public Node {
-			std::optional<OrthoCameraComponent> mOrthoCamera;
-			std::optional<PerspectiveCameraComponent> mPerspectiveCamera;
+			CameraComponent mCameraComponent;
 		};
 
 		struct MeshNode : public Node {

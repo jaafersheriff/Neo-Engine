@@ -6,8 +6,6 @@
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
-#include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
-#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/LightComponent/DirectionalLightComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
@@ -17,14 +15,16 @@ namespace neo {
 	void FrustaFittingSystem::update(ECS& ecs) {
 		TRACY_ZONE();
 
-		auto sourceCameraTuple = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent, PerspectiveCameraComponent>();
-		auto receiverCameraTuple = ecs.getSingleView<FrustumFitReceiverComponent, SpatialComponent, OrthoCameraComponent>();
+		auto sourceCameraTuple = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent, CameraComponent>();
+		auto receiverCameraTuple = ecs.getSingleView<FrustumFitReceiverComponent, SpatialComponent, CameraComponent>();
 		auto lightTuple = ecs.getSingleView<DirectionalLightComponent, LightComponent, SpatialComponent>();
 		if (!receiverCameraTuple || !sourceCameraTuple || !lightTuple) {
 			return;
 		}
 		auto&& [sourceCameraEntity, _, sourceSpatial, sourceCamera] = *sourceCameraTuple;
+		NEO_ASSERT(sourceCamera.getType() == CameraComponent::CameraType::Perspective, "Frustum fit source needs to be perspective");
 		auto&& [receiverCameraEntity, receiverFrustum, receiverSpatial, receiverCamera] = *receiverCameraTuple;
+		NEO_ASSERT(receiverCamera.getType() == CameraComponent::CameraType::Orthographic, "Frustum fit receiver needs to be orthographic");
 		auto&& [lightEntity, __, light, lightSpatial] = *lightTuple;
 
 		/////////////////////// Do the fitting! ///////////////////////////////
@@ -115,8 +115,9 @@ namespace neo {
 
 		receiverSpatial.setPosition(center);
 		receiverSpatial.setLookDir(lightDir);
-		receiverCamera.setOrthoBounds(glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight));
-		receiverCamera.setNearFar(-boxDepth, boxDepth);
+		receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight) });
+		receiverCamera.setNear(-boxDepth);
+		receiverCamera.setFar(boxDepth);
 
 	}
 }

@@ -9,8 +9,6 @@
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
-#include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
-#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
@@ -53,7 +51,7 @@ namespace FrustaFitting {
 				mEntity = ecs.createEntity();
 				ecs.addComponent<TagComponent>(mEntity, name);
 				ecs.addComponent<SpatialComponent>(mEntity, pos, glm::vec3(1.f));
-				ecs.addComponent<PerspectiveCameraComponent>(mEntity, near, far, fov);
+				ecs.addComponent<CameraComponent>(mEntity, near, far, CameraComponent::Perspective{ fov, 1.f });
 			}
 		};
 
@@ -71,7 +69,7 @@ namespace FrustaFitting {
 				// Shadow camera object
 				auto cameraObject = ecs.createEntity();
 				ecs.addComponent<TagComponent>(cameraObject, "Light camera");
-				ecs.addComponent<OrthoCameraComponent>(cameraObject, -2.f, 2.f, -4.f, 2.f, 0.1f, 5.f);
+				ecs.addComponent<CameraComponent>(cameraObject, -2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) });
 				ecs.addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
 				ecs.addComponent<FrustumComponent>(cameraObject);
 				ecs.addComponent<FrustumFitReceiverComponent>(cameraObject);

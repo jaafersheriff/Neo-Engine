@@ -4,14 +4,12 @@
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
-#include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
-#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 namespace neo {
 	void FrustumSystem::update(ECS& ecs) {
 		TRACY_ZONEN("FrustumSystem");
-		for (auto&& [entity, frustum, spatial] : ecs.getView<FrustumComponent, SpatialComponent>().each()) {
+		for (auto&& [entity, frustum, spatial, camera] : ecs.getView<FrustumComponent, SpatialComponent, CameraComponent>().each()) {
 
 			glm::vec3 P = spatial.getPosition();
 			glm::vec3 v = glm::normalize(spatial.getLookDir());
@@ -20,21 +18,19 @@ namespace neo {
 
 			// Update frustum bounds for camera type
 			glm::mat4 PV(1.f);
-			if (auto orthoCam = ecs.getComponent<OrthoCameraComponent>(entity)) {
-				PV = orthoCam->getProj() * spatial.getView();
-				float nDis = orthoCam->getNearFar().x;
-				float fDis = orthoCam->getNearFar().y;
-				glm::vec3 Cnear = P + v * nDis;
-				glm::vec3 Cfar = P + v * fDis;
+			if (camera.getType() == CameraComponent::CameraType::Orthographic) {
+				PV = camera.getProj() * spatial.getView();
+				glm::vec3 Cnear = P + v * camera.getNear();
+				glm::vec3 Cfar = P + v * camera.getFar();
 
-				frustum.NearLeftTop = Cnear + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().x);
-				frustum.NearRightTop = Cnear + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().y);
-				frustum.NearLeftBottom = Cnear + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().x);
-				frustum.NearRightBottom = Cnear + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().y);
-				frustum.FarLeftTop = Cfar + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().x);
-				frustum.FarRightTop = Cfar + (up * orthoCam->getVerticalBounds().y) + (w * orthoCam->getHorizontalBounds().y);
-				frustum.FarLeftBottom = Cfar + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().x);
-				frustum.FarRightBottom = Cfar + (up * orthoCam->getVerticalBounds().x) + (w * orthoCam->getHorizontalBounds().y);
+				frustum.NearLeftTop = Cnear + (up * camera.getOrthographic().mVertBounds.y) + (w * camera.getOrthographic().mHorizBounds.x);
+				frustum.NearRightTop = Cnear + (up * camera.getOrthographic().mVertBounds.y) + (w * camera.getOrthographic().mHorizBounds.y);
+				frustum.NearLeftBottom = Cnear + (up * camera.getOrthographic().mVertBounds.x) + (w * camera.getOrthographic().mHorizBounds.x);
+				frustum.NearRightBottom = Cnear + (up * camera.getOrthographic().mVertBounds.x) + (w * camera.getOrthographic().mHorizBounds.y);
+				frustum.FarLeftTop = Cfar + (up * camera.getOrthographic().mVertBounds.y) + (w * camera.getOrthographic().mHorizBounds.x);
+				frustum.FarRightTop = Cfar + (up * camera.getOrthographic().mVertBounds.y) + (w * camera.getOrthographic().mHorizBounds.y);
+				frustum.FarLeftBottom = Cfar + (up * camera.getOrthographic().mVertBounds.x) + (w * camera.getOrthographic().mHorizBounds.x);
+				frustum.FarRightBottom = Cfar + (up * camera.getOrthographic().mVertBounds.x) + (w * camera.getOrthographic().mHorizBounds.y);
 
 				frustum.mNear.x = PV[0][3] + PV[0][2];
 				frustum.mNear.y = PV[1][3] + PV[1][2];
@@ -42,15 +38,15 @@ namespace neo {
 				frustum.mNear.w = PV[3][3] + PV[3][2];
 				// frustum.mNear /= glm::length(glm::vec3(frustum.mNear));
 			}
-			else if (auto perspectiveCam = ecs.getComponent<PerspectiveCameraComponent>(entity)) {
-				PV = perspectiveCam->getProj() * spatial.getView();
-				float nDis = perspectiveCam->getNearFar().x;
-				float fDis = perspectiveCam->getNearFar().y;
+			else {
+				PV = camera.getProj() * spatial.getView();
+				float nDis = camera.getNear();
+				float fDis = camera.getFar();
 				glm::vec3 Cnear = P + v * nDis;
 				glm::vec3 Cfar = P + v * fDis;
 
-				float fov = glm::radians(perspectiveCam->getFOV());
-				float ar = perspectiveCam->getAspectRatio();
+				float fov = glm::radians(camera.getPerspective().mFOV);
+				float ar = camera.getPerspective().mAspectRatio;
 				float Hnear = 2 * glm::tan(fov / 2) * nDis;
 				float Wnear = Hnear * ar;
 				float Hfar = 2 * glm::tan(fov / 2) * fDis;

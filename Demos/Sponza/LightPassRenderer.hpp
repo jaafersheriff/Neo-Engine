@@ -2,7 +2,6 @@
 
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
-#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/LightComponent/MainLightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
@@ -43,9 +42,9 @@ namespace Sponza {
 		}
 		resolvedShader.bindUniform("resolution", glm::vec2(resolution));
 
-		const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+		const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
 		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
-		resolvedShader.bindUniform("P", P);
+		resolvedShader.bindUniform("P", camera->getProj());
 		resolvedShader.bindUniform("V", cameraSpatial->getView());
 		resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 
@@ -67,7 +66,7 @@ namespace Sponza {
 
 			// If camera is inside light 
 			float dist = glm::distance(spatial->getPosition(), cameraSpatial->getPosition());
-			if (dist - ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getNearFar().x < spatial->getScale().x) {
+			if (dist - camera->getNear() < spatial->getScale().x) {
 				glCullFace(GL_FRONT);
 			}
 			else {
@@ -93,7 +92,7 @@ namespace Sponza {
 
 		ShaderDefines defines;
 		glm::mat4 L;
-		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
+		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, CameraComponent, SpatialComponent>();
 		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && shadowCamera.has_value();
 		MakeDefine(ENABLE_SHADOWS);
 		if (shadowsEnabled) {

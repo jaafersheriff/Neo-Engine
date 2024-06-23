@@ -15,8 +15,7 @@ namespace neo {
 
 	void MouseRaySystem::update(ECS& ecs) {
 		TRACY_ZONEN("MouseRaySystem");
-		auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-		auto camera = ecs.getComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity);
+		auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
 
 		auto viewport = ecs.getComponent<ViewportDetailsComponent>();
 		auto mouseRayComponent = ecs.getComponent<MouseRayComponent>();
@@ -40,7 +39,7 @@ namespace neo {
 			mouseCoords = glm::vec2((2.f * mouseCoords.x) / framesize.x - 1.f, (2.f * mouseCoords.y) / framesize.y - 1.f);
 
 			// Mouse coords in clip space to eye space
-			glm::vec4 mouseCoordsEye = glm::inverse(camera->getProj()) * glm::vec4(mouseCoords, -1.f, 1.f);
+			glm::vec4 mouseCoordsEye = glm::inverse(camera.getProj()) * glm::vec4(mouseCoords, -1.f, 1.f);
 			mouseCoordsEye.z = -1.f;
 			mouseCoordsEye.w = 0.f;
 

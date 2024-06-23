@@ -157,7 +157,7 @@ namespace Sponza {
 				resolvedShader.bindTexture("noise", resourceManagers.mTextureManager.resolve(aoKernel));
 				resolvedShader.bindTexture("kernel", resourceManagers.mTextureManager.resolve(aoNoise));
 
-				const auto P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+				const auto P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
 				resolvedShader.bindUniform("P", P);
 				resolvedShader.bindUniform("invP", glm::inverse(P));
 
