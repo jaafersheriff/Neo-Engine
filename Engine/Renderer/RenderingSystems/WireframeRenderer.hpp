@@ -34,7 +34,7 @@ namespace neo {
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, inDefines);
 			resolvedShader.bind();
 
-			resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+			resolvedShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
 			resolvedShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
 			resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
 			resolvedShader.bindUniform("color", view.get<const WireframeRenderComponent>(entity).mColor);

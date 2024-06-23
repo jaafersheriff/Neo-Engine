@@ -72,11 +72,11 @@ namespace Sponza {
 		//		 });
 		}
 
-		const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
 		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 
 		ShaderDefines drawDefines(passDefines);
-		const auto& view = ecs.getView<const GBufferShaderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
+		const auto& view = ecs.getView<const GBufferRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
 		for (auto entity : view) {
 			// VFC
 			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {

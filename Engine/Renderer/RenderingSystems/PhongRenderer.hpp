@@ -57,12 +57,12 @@ namespace neo {
 		//		 });
 		}
 
-		const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
 		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 		auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
 
 		glm::mat4 L;
-		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
+		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, CameraComponent, SpatialComponent>();
 		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && shadowCamera.has_value();
 		MakeDefine(ENABLE_SHADOWS);
 		if (shadowsEnabled) {
@@ -137,7 +137,7 @@ namespace neo {
 				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 				resolvedShader.bindUniform("lightCol", light.mColor);
 				if (directionalLight || shadowsEnabled) {
-					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
+					resolvedShader.bindUniform("lightDir", -lightSpatial.getOrientable().getLookDir());
 				}
 				if (pointLight) {
 					resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());

@@ -28,8 +28,8 @@ namespace neo {
 		auto&& [lightEntity, __, light, lightSpatial] = *lightTuple;
 
 		/////////////////////// Do the fitting! ///////////////////////////////
-		const glm::vec3 lightDir = lightSpatial.getLookDir();
-		const glm::vec3 up = lightSpatial.getUpDir();
+		const glm::vec3 lightDir = lightSpatial.getOrientable().getLookDir();
+		const glm::vec3 up = lightSpatial.getOrientable().getUpDir();
 
 		const auto& sourceView = sourceSpatial.getView();
 		const auto& sourceProj = sourceCamera.getProj();

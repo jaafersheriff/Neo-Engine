@@ -11,8 +11,6 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
-#include "ECS/Component/CameraComponent/OrthoCameraComponent.hpp"
-#include "ECS/Component/CameraComponent/PerspectiveCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
@@ -55,7 +53,7 @@ namespace Sponza {
 				mEntity = ecs.createEntity();
 				ecs.addComponent<TagComponent>(mEntity, "Camera");
 				ecs.addComponent<SpatialComponent>(mEntity, pos, glm::vec3(1.f));
-				ecs.addComponent<PerspectiveCameraComponent>(mEntity, near, far, fov);
+				ecs.addComponent<CameraComponent>(mEntity, near, far, CameraComponent::Perspective{ fov, 1.f });
 				ecs.addComponent<CameraControllerComponent>(mEntity, ls, ms);
 			}
 		};
@@ -108,7 +106,7 @@ namespace Sponza {
 		{
 			auto shadowCam = ecs.createEntity();
 			ecs.addComponent<TagComponent>(shadowCam, "Shadow Camera");
-			ecs.addComponent<OrthoCameraComponent>(shadowCam, -1.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
+			ecs.addComponent<CameraComponent>(shadowCam, -1.f, 1000.f, CameraComponent::Orthographic{ glm::vec2(-100.f, 100.f), glm::vec2(-100.f, 100.f) });
 			ecs.addComponent<ShadowCameraComponent>(shadowCam);
 			ecs.addComponent<FrustumComponent>(shadowCam);
 			ecs.addComponent<SpatialComponent>(shadowCam);

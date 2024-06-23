@@ -26,7 +26,7 @@ namespace neo {
 
 		auto& lineShader = resourceManagers.mShaderManager.resolveDefines(lineShaderHandle, inDefines);
 		lineShader.bind();
-		lineShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+		lineShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
 		lineShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
 
 		const auto& view = ecs.getView<const LineMeshComponent, const SpatialComponent, CompTs...>();

@@ -176,7 +176,7 @@ namespace neo {
 		}
 
 		MM::EntityEditor<Entity>::ComponentInfo info;
-		info.name = component->getName();
+		info.name = std::string(component->mName);
 		info.create = [this](entt::registry& r, Entity e) {
 			NEO_UNUSED(r, e);
 			// addComponent<CompT>(e);
@@ -193,7 +193,7 @@ namespace neo {
 
 		mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
 			if (registry.try_get<CompT>(e)) {
-				NEO_LOG_E("Attempting to add a second %s to entity %d when one already exists", component->getName().c_str(), e);
+				NEO_LOG_E("Attempting to add a second %s to entity %d when one already exists", component->mName, e);
 			}
 			else {
 				registry.emplace<CompT>(e, *component);

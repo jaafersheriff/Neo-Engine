@@ -36,14 +36,14 @@ namespace neo {
 			containsAlphaTest = true;
 		}
 
-		auto shadowCameraView = ecs.getSingleView<ShadowCameraComponent, SpatialComponent>();
+		auto shadowCameraView = ecs.getSingleView<ShadowCameraComponent, CameraComponent, SpatialComponent>();
 		if (!shadowCameraView) {
 			NEO_ASSERT(shadowCameraView, "No shadow camera found");
 		}
-		auto&& [shadowCameraEntity, shadowCamera, shadowCameraSpatial] = *shadowCameraView;
+		auto&& [shadowCameraEntity, _, shadowCamera, shadowCameraSpatial] = *shadowCameraView;
 
 		ShaderDefines drawDefines;
-		const auto& view = ecs.getView<const ShadowCasterShaderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
+		const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
 		for (auto entity : view) {
 			// VFC
 			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
@@ -67,7 +67,7 @@ namespace neo {
 				resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
 			}
 
-			resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, OrthoCameraComponent>(shadowCameraEntity)->getProj());
+			resolvedShader.bindUniform("P", shadowCamera.getProj());
 			resolvedShader.bindUniform("V", shadowCameraSpatial.getView());
 			resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
 			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();

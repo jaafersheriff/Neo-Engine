@@ -34,21 +34,17 @@
 using namespace neo;
 
 namespace PBR {
-	struct PBRLightComponent : public DirectionalLightComponent {
+	START_COMPONENT(PBRLightComponent);
 		PBRLightComponent(float s) :
 			mStrength(s)
 		{}
-
-		virtual std::string getName() const override {
-			return "PBRLightComponent";
-		}
 
 		virtual void imGuiEditor() override {
 			ImGui::SliderFloat("Strength", &mStrength, 0.1f, 100.f);
 		};
 
 		float mStrength = 1.f;
-	};
+	END_COMPONENT();
 
 	template<typename... CompTs>
 	void _drawPBR(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, TextureHandle shadowMapHandle) {
@@ -101,12 +97,12 @@ namespace PBR {
 			passDefines.set(ALPHA_TEST);
 		}
 
-		const glm::mat4 P = ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj();
+		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
 		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 		auto&& [lightEntity, _mainLight, pbrLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, PBRLightComponent, LightComponent, SpatialComponent>();
 
 		glm::mat4 L;
-		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, OrthoCameraComponent, SpatialComponent>();
+		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, CameraComponent, SpatialComponent>();
 		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && shadowCamera.has_value();
 		MakeDefine(ENABLE_SHADOWS);
 		if (shadowsEnabled) {
@@ -217,10 +213,10 @@ namespace PBR {
 				resolvedShader.bindUniform("P", P);
 				resolvedShader.bindUniform("V", cameraSpatial->getView());
 				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
-				resolvedShader.bindUniform("camDir", cameraSpatial->getLookDir());
+				resolvedShader.bindUniform("camDir", cameraSpatial->getOrientable().getLookDir());
 				resolvedShader.bindUniform("lightRadiance", glm::vec4(light.mColor, pbrLight.mStrength));
 				if (directionalLight || shadowsEnabled) {
-					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
+					resolvedShader.bindUniform("lightDir", -lightSpatial.getOrientable().getLookDir());
 				}
 				if (pointLight) {
 					resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
@@ -277,7 +273,7 @@ namespace PBR {
 		{
 			auto shadowCam = ecs.createEntity();
 			ecs.addComponent<TagComponent>(shadowCam, "Shadow Camera");
-			ecs.addComponent<OrthoCameraComponent>(shadowCam, -1.f, 1000.f, -100.f, 100.f, -100.f, 100.f);
+			ecs.addComponent<CameraComponent>(shadowCam, -1.f, 1000.f, CameraComponent::Orthographic{ glm::vec2(-100.f, 100.f), glm::vec2(-100.f, 100.f) });
 			ecs.addComponent<ShadowCameraComponent>(shadowCam);
 			ecs.addComponent<FrustumComponent>(shadowCam);
 			ecs.addComponent<SpatialComponent>(shadowCam);
@@ -428,7 +424,7 @@ namespace PBR {
 					ecs.addComponent<AlphaTestComponent>(entity);
 				}
 				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
-				ecs.addComponent<ShadowCasterShaderComponent>(entity);
+				ecs.addComponent<ShadowCasterRenderComponent>(entity);
 			}
 
 			/* Camera */
@@ -443,19 +439,10 @@ namespace PBR {
 			ecs.addComponent<TagComponent>(entity, cameraNode && !cameraNode->mName.empty() ? cameraNode->mName : "Camera");
 			if (cameraNode) {
 				ecs.addComponent<SpatialComponent>(entity, cameraNode->mSpatial);
-				if (cameraNode->mPerspectiveCamera) {
-					ecs.addComponent<PerspectiveCameraComponent>(entity, *cameraNode->mPerspectiveCamera);
-				}
-				else if (cameraNode->mOrthoCamera) {
-					ecs.addComponent<OrthoCameraComponent>(entity, *cameraNode->mOrthoCamera);
-				}
-				else {
-					NEO_FAIL("GLTF Invalid Camera");
-				}
 			}
 			else {
 				ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.05f, 0.03f, 0.0f), glm::vec3(1.f));
-				ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 35.f, 45.f);
+				ecs.addComponent<CameraComponent>(entity, 0.1f, 35.f, CameraComponent::Perspective{ 45.f, 1.f });
 			}
 		}
 
@@ -541,7 +528,7 @@ namespace PBR {
 						glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 						auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(iblDebugShaderHandle, {});
 						resolvedShader.bind();
-						resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
+						resolvedShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
 						resolvedShader.bindUniform("V", cameraSpatial.getView());
 						resolvedShader.bindTexture("cubeMap", resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox));
 						resolvedShader.bindUniform("mip", ibl.mDebugIBLMip);
