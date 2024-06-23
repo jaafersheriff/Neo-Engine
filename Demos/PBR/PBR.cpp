@@ -352,36 +352,7 @@ namespace PBR {
 		{
 			auto skybox = ecs.createEntity();
 			ecs.addComponent<TagComponent>(skybox, "Skybox");
-			ecs.addComponent<SkyboxComponent>(skybox, resourceManagers.mTextureManager.asyncLoad("Skybox", TextureFiles{ 
-				{
-					"envmap_miramar/miramar_ft.tga",
-					"envmap_miramar/miramar_bk.tga",
-					"envmap_miramar/miramar_up.tga",
-					"envmap_miramar/miramar_dn.tga",
-					"envmap_miramar/miramar_rt.tga",
-					"envmap_miramar/miramar_lf.tga",
-				}, 
-				TextureFormat {
-					types::texture::Target::TextureCube,
-					types::texture::InternalFormats::RGBA8_UNORM, // This should change for .hdr?
-					TextureFilter {
-						types::texture::Filters::LinearMipmapLinear,
-						types::texture::Filters::Linear
-					},
-					TextureWrap {
-						types::texture::Wraps::Repeat,
-						types::texture::Wraps::Repeat,
-						types::texture::Wraps::Repeat
-					},
-					types::ByteFormats::UnsignedByte,
-					6
-				}
-			}));
-			ecs.addComponent<IBLComponent>(skybox);
-			ecs.addComponent<PinnedComponent>(skybox);
-		}
-		{
-			auto handle = resourceManagers.mTextureManager.asyncLoad("hdr", TextureFiles{
+			ecs.addComponent<SkyboxComponent>(skybox, resourceManagers.mTextureManager.asyncLoad("hdr", TextureFiles{
 				{"metro_noord_2k.hdr" } ,
 				TextureFormat{
 					types::texture::Target::Texture2D,
@@ -398,7 +369,9 @@ namespace PBR {
 					types::ByteFormats::Float,
 					6
 				}
-			});
+			}), true);
+			//ecs.addComponent<IBLComponent>(skybox);
+			ecs.addComponent<PinnedComponent>(skybox);
 		}
 
 		{

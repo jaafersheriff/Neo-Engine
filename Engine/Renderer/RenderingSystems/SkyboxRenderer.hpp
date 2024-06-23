@@ -17,14 +17,15 @@ namespace neo {
 	void drawSkybox(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity) {
 		TRACY_GPU();
 
-		auto skybox = ecs.cGetComponent<SkyboxComponent>();
+		auto skyboxTuple = ecs.cGetComponent<SkyboxComponent>();
 		auto skyboxShaderHandle = resourceManagers.mShaderManager.asyncLoad("SkyboxShader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "skybox.vert"},
 			{ types::shader::Stage::Fragment, "skybox.frag" }
 		});
-		if (!skybox || !resourceManagers.mShaderManager.isValid(skyboxShaderHandle)) {
+		if (!skyboxTuple || !resourceManagers.mShaderManager.isValid(skyboxShaderHandle)) {
 			return;
 		}
+		const auto& [_, skybox] = *skyboxTuple;
 
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
@@ -34,11 +35,17 @@ namespace neo {
 		auto camSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 		NEO_ASSERT(camera, "No main camera exists");
 
-		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(skyboxShaderHandle, {});
+		ShaderDefines defines;
+		MakeDefine(EQUIRECTANGULAR);
+		if (skybox.mEquirectangular) {
+			defines.set(EQUIRECTANGULAR);
+		}
+		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(skyboxShaderHandle, defines);
+
 		resolvedShader.bind();
 		resolvedShader.bindUniform("P", camera->getProj());
 		resolvedShader.bindUniform("V", camSpatial->getView());
-		resolvedShader.bindTexture("cubeMap", resourceManagers.mTextureManager.resolve(std::get<1>(*skybox).mSkybox));
+		resolvedShader.bindTexture("cubeMap", resourceManagers.mTextureManager.resolve(skybox.mSkybox));
 
 		/* Draw */
 		resourceManagers.mMeshManager.resolve(HashedString("cube")).draw();
