@@ -88,11 +88,11 @@ namespace PBR {
 				})
 			);
 		}
-		if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox)) {
+		if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox) && !ibl.mConvolved) {
 			auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Compute, "pbr/convolve.comp" }
 			});
-			if (resourceManagers.mShaderManager.isValid(convolveShaderHandle) && !ibl.mConvolved) {
+			if (resourceManagers.mShaderManager.isValid(convolveShaderHandle)) {
 				const auto& convolvedCubemap = resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox);
 				auto& convolveShader = resourceManagers.mShaderManager.resolveDefines(convolveShaderHandle, {});
 				convolveShader.bind();
@@ -115,9 +115,6 @@ namespace PBR {
 				}
 
 				ibl.mConvolved = true;
-			}
-			else {
-				ibl.mConvolved = false;
 			}
 		}
 	}

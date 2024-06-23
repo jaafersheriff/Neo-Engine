@@ -47,7 +47,7 @@ namespace PBR {
 	END_COMPONENT();
 
 	template<typename... CompTs>
-	void _drawPBR(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, TextureHandle shadowMapHandle) {
+	void _drawPBR(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, TextureHandle shadowMapHandle, std::optional<const IBLComponent> ibl) {
 		TRACY_GPU();
 
 		ShaderDefines passDefines({});
@@ -133,8 +133,7 @@ namespace PBR {
 		}
 
 		MakeDefine(IBL);
-		auto ibl = ecs.cGetComponent<IBLComponent>();
-		if (ibl) {
+		if (ibl && resourceManagers.mTextureManager.isValid(ibl->mConvolvedSkybox) && resourceManagers.mTextureManager.isValid(ibl->mDFGLut)) {
 			passDefines.set(IBL);
 		}
 
@@ -229,8 +228,8 @@ namespace PBR {
 					resolvedShader.bindTexture("shadowMap", shadowMap);
 				}
 				if (ibl) {
-					const auto& iblTexture = resourceManagers.mTextureManager.resolve(std::get<1>(*ibl).mConvolvedSkybox);
-					resolvedShader.bindTexture("dfgLUT", resourceManagers.mTextureManager.resolve(std::get<1>(*ibl).mDFGLut));
+					const auto& iblTexture = resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox);
+					resolvedShader.bindTexture("dfgLUT", resourceManagers.mTextureManager.resolve(ibl->mDFGLut));
 					resolvedShader.bindTexture("ibl", iblTexture);
 					resolvedShader.bindUniform("iblMips", iblTexture.mFormat.mMipCount);
 				}
@@ -456,6 +455,7 @@ namespace PBR {
 	void Demo::imGuiEditor(ECS& ecs) {
 		NEO_UNUSED(ecs);
 		ImGui::Checkbox("Shadows", &mDrawShadows);
+		ImGui::Checkbox("IBL", &mDrawIBL);
 
 		static std::unordered_map<DebugMode, const char*> sDebugModeStrings = {
 			{DebugMode::Off, "Off"},
@@ -514,40 +514,44 @@ namespace PBR {
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
-		{
-			const auto skyboxTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
-			if (skyboxTuple) {
-				const auto& [__, skybox, ibl] = *skyboxTuple;
-
-				if (ibl.mDebugIBL) {
-					// Copy pasta of drawSkybox hehe
-					auto iblDebugShaderHandle = resourceManagers.mShaderManager.asyncLoad("IBLDebug", SourceShader::ConstructionArgs{
-						{ types::shader::Stage::Vertex, "skybox.vert"},
-						{ types::shader::Stage::Fragment, "pbr/ibldebug.frag" }
-					});
-					if (resourceManagers.mShaderManager.isValid(iblDebugShaderHandle)) {
-						glDisable(GL_CULL_FACE);
-						glDisable(GL_DEPTH_TEST);
-						glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-						auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(iblDebugShaderHandle, {});
-						resolvedShader.bind();
-						resolvedShader.bindUniform("P", camera.getProj());
-						resolvedShader.bindUniform("V", cameraSpatial.getView());
-						resolvedShader.bindTexture("cubeMap", resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox));
-						resolvedShader.bindUniform("mip", ibl.mDebugIBLMip);
-						resourceManagers.mMeshManager.resolve(HashedString("cube")).draw();
-						glEnable(GL_CULL_FACE);
-						glEnable(GL_DEPTH_TEST);
-					}
-				}
-				else {
-					drawSkybox(resourceManagers, ecs, cameraEntity);
-				}
+		// Extract IBL
+		std::optional<IBLComponent> ibl;
+		const auto iblTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
+		if (iblTuple) {
+			const auto& _ibl = std::get<2>(*iblTuple);
+			if (_ibl.mConvolved && _ibl.mDFGGenerated) {
+				ibl = _ibl;
 			}
 		}
 
-		_drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture);
-		_drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture);
+		// Draw skybox
+		if (ibl && ibl->mDebugIBL) {
+			// Copy pasta of drawSkybox hehe
+			auto iblDebugShaderHandle = resourceManagers.mShaderManager.asyncLoad("IBLDebug", SourceShader::ConstructionArgs{
+				{ types::shader::Stage::Vertex, "skybox.vert"},
+				{ types::shader::Stage::Fragment, "pbr/ibldebug.frag" }
+				});
+			if (resourceManagers.mShaderManager.isValid(iblDebugShaderHandle)) {
+				glDisable(GL_CULL_FACE);
+				glDisable(GL_DEPTH_TEST);
+				glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(iblDebugShaderHandle, {});
+				resolvedShader.bind();
+				resolvedShader.bindUniform("P", camera.getProj());
+				resolvedShader.bindUniform("V", cameraSpatial.getView());
+				resolvedShader.bindTexture("cubeMap", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox));
+				resolvedShader.bindUniform("mip", ibl->mDebugIBLMip);
+				resourceManagers.mMeshManager.resolve(HashedString("cube")).draw();
+				glEnable(GL_CULL_FACE);
+				glEnable(GL_DEPTH_TEST);
+			}
+		}
+		else {
+			drawSkybox(resourceManagers, ecs, cameraEntity);
+		}
+
+		_drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture, mDrawIBL ? ibl : std::nullopt);
+		_drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture, mDrawIBL ? ibl : std::nullopt);
 	}
 
 	void Demo::destroy() {

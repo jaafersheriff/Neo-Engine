@@ -27,5 +27,6 @@ namespace PBR {
 	private:
 		bool mDrawShadows = true;
 		DebugMode mDebugMode = DebugMode::Off;
+		bool mDrawIBL = true;
 	};
 }
