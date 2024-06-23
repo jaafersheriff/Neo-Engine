@@ -3,7 +3,7 @@
 
 vec3 getIndirectSpecular(vec3 R, PBRMaterial pbrMaterial, int numMips, sampler2D dfgLUT, samplerCube ibl) {
     vec2 f_ab = texture(dfgLUT, vec2(saturate(dot(pbrMaterial.N, pbrMaterial.V)), pbrMaterial.linearRoughness)).rg;
-    vec3 radiance = textureLod(ibl, R, pbrMaterial.linearRoughness * numMips).rgb;
+    vec3 radiance = textureLod(ibl, R, pbrMaterial.linearRoughness * numMips - 0.2).rgb; // -0.2 so that at least some things get 0th mip
     return (pbrMaterial.F0 * f_ab.x + f_ab.y) * radiance;
 }
 

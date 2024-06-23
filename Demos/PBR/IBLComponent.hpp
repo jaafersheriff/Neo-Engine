@@ -11,7 +11,7 @@ namespace PBR {
 		mutable TextureHandle mConvolvedSkybox = NEO_INVALID_HANDLE;
 		mutable bool mConvolved = false;
 		uint16_t mConvolvedCubemapResolution = 512;
-		uint16_t mSampleCount = 512;
+		uint16_t mSampleCount = 2048;
 
 		mutable TextureHandle mDFGLut = NEO_INVALID_HANDLE;
 		mutable bool mDFGGenerated = false;

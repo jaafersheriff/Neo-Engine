@@ -109,7 +109,7 @@ namespace PBR {
 				for (int mip = 0; mip < convolvedCubemap.mFormat.mMipCount; mip++) {
 					convolveShader.bindUniform("mipLevel", mip);
 					uint16_t mipResolution = convolvedCubemap.mWidth >> uint16_t(mip);
-					convolveShader.bindUniform("roughness", mip / static_cast<float>(convolvedCubemap.mFormat.mMipCount));
+					convolveShader.bindUniform("roughness", mip / static_cast<float>(convolvedCubemap.mFormat.mMipCount - 2));
 					convolveShader.bindUniform("sampleCount", ibl.mSampleCount);
 					glBindImageTexture(0, convolvedCubemap.mTextureID, mip, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F/*resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mFormat.mInternalFormat*/);
 					glDispatchCompute(
