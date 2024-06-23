@@ -259,12 +259,8 @@ namespace {
 		return textureManager.asyncLoad(name, builder);
 	}
 
-	void _processNode(const char* path, const int nodeID, neo::ResourceManagers& resourceManagers, const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene) {
+	neo::SpatialComponent _processSpatial(const tinygltf::Node& node, glm::mat4 parentXform) {
 		using namespace neo;
-		if (node.camera != -1 || node.light != -1) {
-			return;
-		}
-
 		// Spatial
 		SpatialComponent nodeSpatial;
 		glm::mat4 localTransform(1.f);
@@ -286,26 +282,47 @@ namespace {
 		}
 		nodeSpatial.setModelMatrix(parentXform * localTransform);
 
-		for (auto& child : node.children) {
-			_processNode(path, child, resourceManagers, model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);
+		return nodeSpatial;
+	}
+
+	neo::GLTFImporter::CameraNode _processCameraNode(const tinygltf::Model& model, const tinygltf::Node& node, const neo::SpatialComponent& nodeSpatial) {
+		using namespace neo;
+		GLTFImporter::CameraNode cameraNode;
+
+		const auto& gltfCamera = model.cameras[node.camera];
+		cameraNode.mName = gltfCamera.name;
+		cameraNode.mSpatial = nodeSpatial;
+
+		if (gltfCamera.type == "perspective") {
+			cameraNode.mPerspectiveCamera = std::make_optional<PerspectiveCameraComponent>(
+				static_cast<float>(gltfCamera.perspective.znear), static_cast<float>(gltfCamera.perspective.zfar),
+				static_cast<float>(gltfCamera.perspective.yfov),
+				static_cast<float>(gltfCamera.perspective.aspectRatio)
+			);
+		}
+		else {
+			cameraNode.mOrthoCamera = std::make_optional<OrthoCameraComponent>(
+				static_cast<float>(gltfCamera.perspective.znear), static_cast<float>(gltfCamera.perspective.zfar),
+				static_cast<float>(gltfCamera.orthographic.xmag) / -2.f, static_cast<float>(gltfCamera.orthographic.xmag) / 2.f,
+				static_cast<float>(gltfCamera.orthographic.ymag) / -2.f, static_cast<float>(gltfCamera.orthographic.ymag) / 2.f
+			);
 		}
 
+		return cameraNode;
+	}
+
+	std::vector<neo::GLTFImporter::MeshNode> _processMeshNode(const char* path, const int nodeID, neo::ResourceManagers& resourceManagers, const tinygltf::Model& model, const tinygltf::Node& node, const neo::SpatialComponent& nodeSpatial) {
+		using namespace neo;
+
+		std::vector<neo::GLTFImporter::MeshNode> outNodes;
 		// Mesh
-		if (node.mesh < 0) {
-			return;
-		}
-
-		if (!node.name.empty()) {
-			NEO_LOG_V("Processing node %s", node.name.c_str());
-		}
-
 		if (!model.meshes[node.mesh].name.empty()) {
 			NEO_LOG_V("Processing mesh %s", model.meshes[node.mesh].name.c_str());
 		}
 		for (int i = 0; i < model.meshes[node.mesh].primitives.size(); i++) {
 			const auto& gltfMesh = model.meshes[node.mesh].primitives[i];
 
-			GLTFImporter::Node outNode;
+			GLTFImporter::MeshNode outNode;
 			outNode.mName = node.name + std::to_string(i);
 			outNode.mSpatial = nodeSpatial;
 
@@ -406,13 +423,13 @@ namespace {
 				outNode.mMaterial.mDoubleSided = material.doubleSided;
 
 				if (material.alphaMode == "OPAQUE") {
-					outNode.mAlphaMode = GLTFImporter::Node::AlphaMode::Opaque;
+					outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::Opaque;
 				}
 				else if (material.alphaMode == "MASK") {
-					outNode.mAlphaMode = GLTFImporter::Node::AlphaMode::AlphaTest;
+					outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::AlphaTest;
 				}
 				else if (material.alphaMode == "BLEND") {
-					outNode.mAlphaMode = GLTFImporter::Node::AlphaMode::Transparent;
+					outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::Transparent;
 					NEO_LOG_W("Material %s is transparent -- unsupported", material.name.c_str());
 				}
 
@@ -443,11 +460,39 @@ namespace {
 				}
 				outNode.mMaterial.mAlbedoMap = _loadTexture(resourceManagers.mTextureManager, model, material.pbrMetallicRoughness.baseColorTexture.index, material.pbrMetallicRoughness.baseColorTexture.texCoord);
 				outNode.mMaterial.mMetallicRoughnessMap = _loadTexture(resourceManagers.mTextureManager, model, material.pbrMetallicRoughness.metallicRoughnessTexture.index, material.pbrMetallicRoughness.metallicRoughnessTexture.texCoord);
-			}
 
-			outScene.mMeshNodes.push_back(outNode);
+				outNodes.emplace_back(outNode);
+			}
 		}
 
+		return outNodes;
+	}
+
+	void _processNode(const char* path, const int nodeID, neo::ResourceManagers& resourceManagers, const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene) {
+		using namespace neo;
+		if (!node.name.empty()) {
+			NEO_LOG_V("Processing node %s", node.name.c_str());
+		}
+
+		if (node.light != -1) {
+			NEO_LOG_I("Skipping light node");
+			return;
+		}
+
+		SpatialComponent nodeSpatial = _processSpatial(node, parentXform);
+
+		for (auto& child : node.children) {
+			_processNode(path, child, resourceManagers, model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);
+		}
+
+		if (node.camera > -1) {
+			NEO_ASSERT(outScene.mCamera == std::nullopt, "Trying to insert two cameras?");
+			outScene.mCamera = _processCameraNode(model, node, nodeSpatial);
+		}
+		else if (node.mesh > -1) {
+			auto meshNodes = _processMeshNode(path, nodeID, resourceManagers, model, node, nodeSpatial);
+			outScene.mMeshNodes.insert(outScene.mMeshNodes.end(), meshNodes.begin(), meshNodes.end());
+		}
 	}
 }
 

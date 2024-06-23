@@ -10,7 +10,7 @@
 #include "ECS/Component/EngineComponents/PinnedComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
-#include "ECS/Component/RenderingComponent/ShadowCasterShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/SkyboxComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
@@ -263,19 +263,6 @@ namespace PBR {
 
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 
-		/* Camera */
-		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(entity, "Camera");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.05f, 0.03f, 0.0f), glm::vec3(1.f));
-			ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 35.f, 45.f);
-			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 15.f);
-			ecs.addComponent<MainCameraComponent>(entity);
-			ecs.addComponent<FrustumComponent>(entity);
-			ecs.addComponent<FrustumFitSourceComponent>(entity);
-			ecs.addComponent<PinnedComponent>(entity);
-		}
-
 		{
 			auto lightEntity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(lightEntity, "Light");
@@ -297,6 +284,7 @@ namespace PBR {
 			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
 		}
 
+/*
 		// Dialectric spheres
 		static float numSpheres = 8;
 		for (int i = 0; i < numSpheres; i++) {
@@ -422,9 +410,9 @@ namespace PBR {
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 		}
-
+*/
 		{
-			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
+			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "gltf-IBL/EnvironmentTest.gltf");
 			for (auto& node : scene.mMeshNodes) {
 				auto entity = ecs.createEntity();
 				if (!node.mName.empty()) {
@@ -433,14 +421,41 @@ namespace PBR {
 				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
 				ecs.addComponent<MeshComponent>(entity, node.mMeshHandle);
 				ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax, true);
-				if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
+				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Opaque) {
 					ecs.addComponent<OpaqueComponent>(entity);
 				}
-				else if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::AlphaTest) {
+				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
 					ecs.addComponent<AlphaTestComponent>(entity);
 				}
 				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
 				ecs.addComponent<ShadowCasterShaderComponent>(entity);
+			}
+
+			/* Camera */
+			auto entity = ecs.createEntity();
+			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 15.f);
+			ecs.addComponent<MainCameraComponent>(entity);
+			ecs.addComponent<FrustumComponent>(entity);
+			ecs.addComponent<FrustumFitSourceComponent>(entity);
+			ecs.addComponent<PinnedComponent>(entity);
+			auto& cameraNode = scene.mCamera;
+
+			ecs.addComponent<TagComponent>(entity, cameraNode && !cameraNode->mName.empty() ? cameraNode->mName : "Camera");
+			if (cameraNode) {
+				ecs.addComponent<SpatialComponent>(entity, cameraNode->mSpatial);
+				if (cameraNode->mPerspectiveCamera) {
+					ecs.addComponent<PerspectiveCameraComponent>(entity, *cameraNode->mPerspectiveCamera);
+				}
+				else if (cameraNode->mOrthoCamera) {
+					ecs.addComponent<OrthoCameraComponent>(entity, *cameraNode->mOrthoCamera);
+				}
+				else {
+					NEO_FAIL("GLTF Invalid Camera");
+				}
+			}
+			else {
+				ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.05f, 0.03f, 0.0f), glm::vec3(1.f));
+				ecs.addComponent<PerspectiveCameraComponent>(entity, 0.1f, 35.f, 45.f);
 			}
 		}
 
@@ -449,7 +464,7 @@ namespace PBR {
 		ecs.addSystem<RotationSystem>();
 		ecs.addSystem<FrustumSystem>();
 		ecs.addSystem<FrustaFittingSystem>();
-		ecs.addSystem<FrustumCullingSystem>();
+		// ecs.addSystem<FrustumCullingSystem>();
 	}
 
 	void Demo::imGuiEditor(ECS& ecs) {
