@@ -21,6 +21,7 @@
 #include "PBR/IBLComponent.hpp"
 #include "PBR/ConvolveRenderer.hpp"
 
+#include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/SkyboxRenderer.hpp"
@@ -451,6 +452,18 @@ namespace PBR {
 		const auto& [cameraEntity, _, camera, cameraSpatial] = *cameraTuple;
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
+		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"Scene Target",
+			FramebufferBuilder{}
+				.setSize(viewport.mSize)
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
+				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
+			resourceManagers.mTextureManager
+		);
+		if (!resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
+			return;
+		}
+		auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
 
 		TextureHandle shadowTexture = NEO_INVALID_HANDLE;
 		if (mDrawShadows) {
@@ -475,8 +488,8 @@ namespace PBR {
 
 		glm::vec3 clearColor = getConfig().clearColor;
 
-		backbuffer.bind();
-		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		sceneTarget.bind();
+		sceneTarget.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
 		// Extract IBL
@@ -490,9 +503,19 @@ namespace PBR {
 		}
 
 		drawSkybox(resourceManagers, ecs, cameraEntity);
-
 		_drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture, mDrawIBL ? ibl : std::nullopt);
 		_drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture, mDrawIBL ? ibl : std::nullopt);
+
+		backbuffer.bind();
+		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		drawFXAA(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
+		// Don't forget the depth. Because reasons.
+		glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
+			0, 0, viewport.mSize.x, viewport.mSize.y,
+			0, 0, viewport.mSize.x, viewport.mSize.y,
+			GL_DEPTH_BUFFER_BIT,
+			GL_NEAREST
+		);
 	}
 
 	void Demo::destroy() {
