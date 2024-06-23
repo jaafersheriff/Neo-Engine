@@ -259,6 +259,17 @@ namespace PBR {
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 
 		{
+			auto entity = ecs.createEntity();
+			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 15.f);
+			ecs.addComponent<MainCameraComponent>(entity);
+			ecs.addComponent<FrustumComponent>(entity);
+			ecs.addComponent<FrustumFitSourceComponent>(entity);
+			ecs.addComponent<PinnedComponent>(entity);
+			ecs.addComponent<TagComponent>(entity, "Camera");
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.05f, 0.03f, 0.0f), glm::vec3(1.f));
+			ecs.addComponent<CameraComponent>(entity, 0.1f, 35.f, CameraComponent::Perspective{ 45.f, 1.f });
+		}
+		{
 			auto lightEntity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(lightEntity, "Light");
 			auto spat = ecs.addComponent<SpatialComponent>(lightEntity, glm::vec3(75.f, 200.f, 20.f));
@@ -403,45 +414,6 @@ namespace PBR {
 			ecs.addComponent<MaterialComponent>(entity, bust.mMaterial);
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-		}
-		{
-			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
-			for (auto& node : scene.mMeshNodes) {
-				auto entity = ecs.createEntity();
-				if (!node.mName.empty()) {
-					ecs.addComponent<TagComponent>(entity, node.mName);
-				}
-				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
-				ecs.addComponent<MeshComponent>(entity, node.mMeshHandle);
-				ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax, true);
-				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Opaque) {
-					ecs.addComponent<OpaqueComponent>(entity);
-				}
-				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
-					ecs.addComponent<AlphaTestComponent>(entity);
-				}
-				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
-				ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			}
-
-			/* Camera */
-			auto entity = ecs.createEntity();
-			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 15.f);
-			ecs.addComponent<MainCameraComponent>(entity);
-			ecs.addComponent<FrustumComponent>(entity);
-			ecs.addComponent<FrustumFitSourceComponent>(entity);
-			ecs.addComponent<PinnedComponent>(entity);
-			auto& cameraNode = scene.mCamera;
-
-			ecs.addComponent<TagComponent>(entity, cameraNode && !cameraNode->mName.empty() ? cameraNode->mName : "Camera");
-			if (cameraNode) {
-				ecs.addComponent<SpatialComponent>(entity, cameraNode->mSpatial);
-				ecs.addComponent<CameraComponent>(entity, cameraNode->mCameraComponent);
-			}
-			else {
-				ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.05f, 0.03f, 0.0f), glm::vec3(1.f));
-				ecs.addComponent<CameraComponent>(entity, 0.1f, 35.f, CameraComponent::Perspective{ 45.f, 1.f });
-			}
 		}
 
 		/* Systems - order matters! */
