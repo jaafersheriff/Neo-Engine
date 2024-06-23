@@ -315,12 +315,15 @@ namespace neo {
 
 		{
 			TRACY_ZONEN("Aspect Ratio");
-			mECS.getView<MainCameraComponent, CameraComponent>().each([viewportSize](ECS::Entity, MainCameraComponent&, CameraComponent& camera) {
-				camera.setPerspective(CameraComponent::Perspective{
-					camera.getPerspective().mFOV,
-					viewportSize.x / static_cast<float>(viewportSize.y)
-				});
-			});
+			auto cameraTuple = mECS.getSingleView<MainCameraComponent, CameraComponent>();
+			if (cameraTuple) {
+				auto& [_, __, camera] = *cameraTuple;
+				if (camera.getType() == CameraComponent::CameraType::Perspective) {
+					camera.setPerspective(CameraComponent::Perspective{
+						camera.getPerspective().mFOV,
+						viewportSize.x / static_cast<float>(viewportSize.y)
+					});
+				}
 		}
 		{
 			TRACY_ZONEN("Selecting");
