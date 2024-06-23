@@ -352,7 +352,7 @@ namespace PBR {
 		{
 			auto skybox = ecs.createEntity();
 			ecs.addComponent<TagComponent>(skybox, "Skybox");
-			ecs.addComponent<SkyboxComponent>(skybox, resourceManagers.mTextureManager.asyncLoad("hdr", TextureFiles{
+			ecs.addComponent<SkyboxComponent>(skybox, resourceManagers.mTextureManager.asyncLoad("hdr skybox", TextureFiles{
 				{"metro_noord_2k.hdr" } ,
 				TextureFormat{
 					types::texture::Target::Texture2D,
@@ -370,7 +370,7 @@ namespace PBR {
 					6
 				}
 			}), true);
-			//ecs.addComponent<IBLComponent>(skybox);
+			ecs.addComponent<IBLComponent>(skybox);
 			ecs.addComponent<PinnedComponent>(skybox);
 		}
 
@@ -489,31 +489,7 @@ namespace PBR {
 			}
 		}
 
-		// Draw skybox
-		if (ibl && ibl->mDebugIBL) {
-			// Copy pasta of drawSkybox hehe
-			auto iblDebugShaderHandle = resourceManagers.mShaderManager.asyncLoad("IBLDebug", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "skybox.vert"},
-				{ types::shader::Stage::Fragment, "pbr/ibldebug.frag" }
-				});
-			if (resourceManagers.mShaderManager.isValid(iblDebugShaderHandle)) {
-				glDisable(GL_CULL_FACE);
-				glDisable(GL_DEPTH_TEST);
-				glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(iblDebugShaderHandle, {});
-				resolvedShader.bind();
-				resolvedShader.bindUniform("P", camera.getProj());
-				resolvedShader.bindUniform("V", cameraSpatial.getView());
-				resolvedShader.bindTexture("cubeMap", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox));
-				resolvedShader.bindUniform("mip", ibl->mDebugIBLMip);
-				resourceManagers.mMeshManager.resolve(HashedString("cube")).draw();
-				glEnable(GL_CULL_FACE);
-				glEnable(GL_DEPTH_TEST);
-			}
-		}
-		else {
-			drawSkybox(resourceManagers, ecs, cameraEntity);
-		}
+		drawSkybox(resourceManagers, ecs, cameraEntity);
 
 		_drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture, mDrawIBL ? ibl : std::nullopt);
 		_drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture, mDrawIBL ? ibl : std::nullopt);

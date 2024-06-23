@@ -94,7 +94,13 @@ namespace PBR {
 			});
 			if (resourceManagers.mShaderManager.isValid(convolveShaderHandle)) {
 				const auto& convolvedCubemap = resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox);
-				auto& convolveShader = resourceManagers.mShaderManager.resolveDefines(convolveShaderHandle, {});
+
+				ShaderDefines defines;
+				MakeDefine(EQUIRECTANGULAR);
+				if (skybox.mEquirectangular) {
+					defines.set(EQUIRECTANGULAR);
+				}
+				auto& convolveShader = resourceManagers.mShaderManager.resolveDefines(convolveShaderHandle, defines);
 				convolveShader.bind();
 
 				convolveShader.bindTexture("inputCubemap", skyboxCubemap);

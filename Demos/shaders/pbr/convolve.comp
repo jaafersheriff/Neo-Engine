@@ -3,11 +3,33 @@
 #include "pbr/pbr.glsl"
 
 layout(binding = 0, rgba16f) uniform imageCube dst;
-layout(binding = 1) uniform samplerCube inputCubemap;
+#ifdef EQUIRECTANGULAR
+layout(binding = 1) uniform sampler2D cubeMap;
+#else
+layout(binding = 1) uniform samplerCube cubeMap;
+#endif
+
 uniform float roughness;
 uniform int mipLevel;
 uniform int resolution;
 uniform int sampleCount;
+
+// https://learnopengl.com/PBR/IBL/Diffuse-irradiance
+const vec2 invAtan = vec2(0.1591, 0.3183);
+vec2 SampleSphericalMap(vec3 v) {
+    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
+    uv *= invAtan;
+    uv += 0.5;
+    return uv;
+}
+
+vec3 sampleCubemap(vec3 uvw, float lod) {
+#ifdef EQUIRECTANGULAR
+	return textureLod(cubeMap, SampleSphericalMap(normalize(uvw)), lod).rgb;
+#else
+	return textureLod(cubeMap, uvw, lod).rgb;
+#endif
+}
 
 // From Karis, 2014
 vec3 prefilterEnvMap(vec3 R) {
@@ -40,7 +62,7 @@ vec3 prefilterEnvMap(vec3 R) {
             float omegaP = 4.0 * PI / (6.0 * resolution * resolution);
             // Mip level is determined by the ratio of our sample's solid angle to a texel's solid angle
             float mipLevel = max(0.5 * log2(omegaS / omegaP), 0.0);
-            prefilteredColor += textureLod(inputCubemap, L, mipLevel).rgb * NoL;
+            prefilteredColor += sampleCubemap(L, mipLevel) * NoL;
             totalWeight += NoL;
         }
     }
@@ -83,7 +105,7 @@ void main() {
     R = normalize(R);
 
     if (mipLevel == 0) {
-        vec4 color = textureLod(inputCubemap, R, 0);
+        vec3 color = sampleCubemap(R, 0);
         imageStore(dst, ivec3(gl_GlobalInvocationID.xyz), vec4(color.rgb, 1.0));
         return;
     }

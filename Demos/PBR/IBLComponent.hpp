@@ -17,9 +17,6 @@ namespace PBR {
 		mutable bool mDFGGenerated = false;
 		uint16_t mDFGLutResolution = 128;
 
-		bool mDebugIBL = false;
-		float mDebugIBLMip = 0.f;
-
 		virtual void imGuiEditor() override {
 			if (ImGui::Button("Regenerate DFG Lut")) {
 				mDFGGenerated = false;
@@ -33,10 +30,6 @@ namespace PBR {
 			regen |= ImGui::Button("Reconvolve cubemap");
 			if (regen) {
 				mConvolved = false;
-			}
-			ImGui::Checkbox("Debug", &mDebugIBL);
-			if (mDebugIBL) {
-				ImGui::SliderFloat("Mip", &mDebugIBLMip, 0.f, 10.f); // Whoops, no access to mip count
 			}
 		};
 	END_COMPONENT();
