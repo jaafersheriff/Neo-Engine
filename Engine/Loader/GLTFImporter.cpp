@@ -479,11 +479,6 @@ namespace {
 			NEO_LOG_V("Processing node %s", node.name.c_str());
 		}
 
-		if (node.light != -1) {
-			NEO_LOG_I("Skipping light node");
-			return;
-		}
-
 		SpatialComponent nodeSpatial = _processSpatial(node, parentXform);
 
 		for (auto& child : node.children) {
@@ -497,6 +492,12 @@ namespace {
 		else if (node.mesh > -1) {
 			auto meshNodes = _processMeshNode(path, nodeID, resourceManagers, model, node, nodeSpatial);
 			outScene.mMeshNodes.insert(outScene.mMeshNodes.end(), meshNodes.begin(), meshNodes.end());
+		}
+		if (node.light > -1) {
+			auto& light = model.lights[node.light];
+			if (!light.extensions.empty()) {
+				NEO_LOG_W("Light with extensions");
+			}
 		}
 	}
 }

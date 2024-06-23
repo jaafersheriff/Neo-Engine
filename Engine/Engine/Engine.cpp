@@ -322,8 +322,9 @@ namespace neo {
 					camera.setPerspective(CameraComponent::Perspective{
 						camera.getPerspective().mFOV,
 						viewportSize.x / static_cast<float>(viewportSize.y)
-					});
+						});
 				}
+			}
 		}
 		{
 			TRACY_ZONEN("Selecting");
