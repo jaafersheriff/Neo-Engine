@@ -294,7 +294,7 @@ namespace {
 			camera = CameraComponent(
 				static_cast<float>(gltfCamera.perspective.znear), static_cast<float>(gltfCamera.perspective.zfar),
 				CameraComponent::Perspective {
-					static_cast<float>(gltfCamera.perspective.yfov),
+					static_cast<float>(glm::degrees(gltfCamera.perspective.yfov)),
 					static_cast<float>(gltfCamera.perspective.aspectRatio)
 				}
 			);

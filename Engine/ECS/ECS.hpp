@@ -176,7 +176,7 @@ namespace neo {
 		}
 
 		MM::EntityEditor<Entity>::ComponentInfo info;
-		info.name = std::string(component->mName);
+		info.name = component->mName;
 		info.create = [this](entt::registry& r, Entity e) {
 			NEO_UNUSED(r, e);
 			// addComponent<CompT>(e);

@@ -106,9 +106,9 @@ namespace neo {
 			if (dir != glm::vec3()) {
 				dir = glm::normalize(dir);
 				dir = glm::normalize(
-					 spatial.getOrientable().getRightDir() * dir.x +
-					 spatial.getOrientable().getUpDir()    * dir.y +
-					-spatial.getOrientable().getLookDir()  * dir.z);
+						spatial.getRightDir() * dir.x +
+						spatial.getUpDir()	* dir.y +
+					-spatial.getLookDir()	 * dir.z);
 				spatial.move(dir * comp.mMoveSpeed * dt * (speed ? mSuperSpeed : 1.f));
 			}
 		}

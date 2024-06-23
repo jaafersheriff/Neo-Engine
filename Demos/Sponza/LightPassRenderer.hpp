@@ -117,7 +117,7 @@ namespace Sponza {
 		}
 
 		auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
-		resolvedShader.bindUniform("lightDir", -lightSpatial.getOrientable().getLookDir());
+		resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
 		resolvedShader.bindUniform("lightCol", light.mColor);
 
 		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);

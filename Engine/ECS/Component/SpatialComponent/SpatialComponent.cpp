@@ -6,7 +6,7 @@
 namespace neo {
 
 	SpatialComponent::SpatialComponent()
-		: mOrientable()
+		: Orientable()
 		, mPosition(0.f)
 		, mScale(1.f)
 		, mModelMatrix(1.f)
@@ -48,7 +48,8 @@ namespace neo {
 		}
 
 		mPosition += delta;
-		setDirty();
+		mModelMatrixDirty = true;
+		mViewMatDirty = true;
 		// Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
 	}
 
@@ -58,13 +59,17 @@ namespace neo {
 		}
 
 		mScale *= glm::clamp(factor, glm::vec3(0.f), factor);
-		setDirty();
+		mModelMatrixDirty = true;
+		mNormalMatrixDirty = true;
+		mViewMatDirty = true;
 		// Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
 	}
 
 	void SpatialComponent::rotate(const glm::mat3 & mat) {
-		mOrientable.rotate(mat);
-		setDirty();
+		Orientable::rotate(mat);
+		mModelMatrixDirty = true;
+		mNormalMatrixDirty = true;
+		mViewMatDirty = true;
 		// Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
 	}
 
@@ -74,7 +79,8 @@ namespace neo {
 		}
 
 		mPosition = loc;
-		setDirty();
+		mModelMatrixDirty = true;
+		mViewMatDirty = true;
 		// Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
 	}
 
@@ -84,7 +90,9 @@ namespace neo {
 		}
 
 		this->mScale = scale;
-		setDirty();
+		mModelMatrixDirty = true;
+		mNormalMatrixDirty = true;
+		mViewMatDirty = true;
 		// Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
 	}
 
@@ -93,33 +101,33 @@ namespace neo {
 	}
 
 	void SpatialComponent::setOrientation(const glm::mat3 & orient) {
-		mOrientable.setOrientation(orient);
-		setDirty();
+		Orientable::setOrientation(orient);
+		mModelMatrixDirty = true;
+		mNormalMatrixDirty = true;
+		mViewMatDirty = true;
 		// Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
 	}
 
-	void SpatialComponent::setLookDir(const glm::vec3& look) {
-		mOrientable.setLookDir(look);
-		setDirty();
-	}
-
 	void SpatialComponent::setModelMatrix(const glm::mat4& mat) {
-		mOrientable.setOrientation(glm::mat3(mat));
+		Orientable::setOrientation(glm::mat3(mat));
 		setPosition(glm::vec3(mat[3][0], mat[3][1], mat[3][2]));
-		setDirty();
+		mModelMatrixDirty = true;
+		mNormalMatrixDirty = true;
+		mViewMatDirty = true;
 		// Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
 	}
 
 	void SpatialComponent::setUVW(const glm::vec3 & u, const glm::vec3 & v, const glm::vec3 & w) {
-		mOrientable.setUVW(u, v, w);
-		setDirty();
+		Orientable::setUVW(u, v, w);
+		mModelMatrixDirty = true;
+		mNormalMatrixDirty = true;
+		mViewMatDirty = true;
 		// Messenger::sendMessage<SpatialChangeMessage>(&mEntity, *this);
 	}
 
 	void SpatialComponent::setDirty() {
 		mModelMatrixDirty = true;
 		mNormalMatrixDirty = true;
-		mViewMatDirty = true;
 	}
 		
 	const glm::mat4 & SpatialComponent::getModelMatrix() const {
@@ -144,7 +152,7 @@ namespace neo {
 	}
 
 	void SpatialComponent::_detModelMatrix() const {
-		mModelMatrix = glm::scale(glm::translate(glm::mat4(1.f), mPosition) * glm::mat4(mOrientable.getOrientation()), mScale);
+		mModelMatrix = glm::scale(glm::translate(glm::mat4(1.f), mPosition) * glm::mat4(getOrientation()), mScale);
 		mModelMatrixDirty = false;
 	}
 
@@ -154,20 +162,20 @@ namespace neo {
 			mNormalMatrix = glm::mat3(getModelMatrix());
 		}
 		else {
-			mNormalMatrix = mOrientable.getOrientation() * glm::mat3(glm::scale(glm::mat4(1.f), 1.0f / mScale));
+			mNormalMatrix = getOrientation() * glm::mat3(glm::scale(glm::mat4(1.f), 1.0f / mScale));
 		}
 		mNormalMatrixDirty = false;
 	}
 
 	void SpatialComponent::_detView() const {
-		mViewMat = glm::lookAt(getPosition(), getPosition() + mOrientable.getLookDir(), mOrientable.getUpDir());
+		mViewMat = glm::lookAt(getPosition(), getPosition() + getLookDir(), getUpDir());
 		mViewMatDirty = false;
 	}
 
 	void SpatialComponent::imGuiEditor() {
 		glm::vec3 moveAmount(0.f);
 		glm::vec3 scaleAmount(1.f);
-		glm::vec3 lookDir = mOrientable.getLookDir();
+		glm::vec3 lookDir = getLookDir();
 		ImGui::Text("Position: %0.2f, %0.2f, %0.2f", mPosition[0], mPosition[1], mPosition[2]);
 		if (ImGui::DragFloat3("Move", &moveAmount[0], 0.5f, -20.f, 20.f)) {
 			move(moveAmount);
@@ -177,7 +185,7 @@ namespace neo {
 			resize(scaleAmount);
 		}
 		if (ImGui::DragFloat3("LookDir", &lookDir[0], 0.1f, -1.f, 1.f)) {
-			mOrientable.setLookDir(lookDir);
+			setLookDir(lookDir);
 		}
 	}
 }

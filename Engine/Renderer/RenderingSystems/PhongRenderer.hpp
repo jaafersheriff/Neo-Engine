@@ -137,7 +137,7 @@ namespace neo {
 				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 				resolvedShader.bindUniform("lightCol", light.mColor);
 				if (directionalLight || shadowsEnabled) {
-					resolvedShader.bindUniform("lightDir", -lightSpatial.getOrientable().getLookDir());
+					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
 				}
 				if (pointLight) {
 					resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());

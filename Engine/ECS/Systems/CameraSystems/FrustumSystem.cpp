@@ -12,9 +12,9 @@ namespace neo {
 		for (auto&& [entity, frustum, spatial, camera] : ecs.getView<FrustumComponent, SpatialComponent, CameraComponent>().each()) {
 
 			glm::vec3 P = spatial.getPosition();
-			glm::vec3 v  = glm::normalize(spatial.getOrientable().getLookDir());
-			glm::vec3 up = glm::normalize(spatial.getOrientable().getUpDir());
-			glm::vec3 w  = glm::normalize(spatial.getOrientable().getRightDir());
+			glm::vec3 v = glm::normalize(spatial.getLookDir());
+			glm::vec3 up = glm::normalize(spatial.getUpDir());
+			glm::vec3 w = glm::normalize(spatial.getRightDir());
 
 			// Update frustum bounds for camera type
 			glm::mat4 PV(1.f);

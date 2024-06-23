@@ -99,23 +99,21 @@ namespace NormalVisualizer {
 				{types::shader::Stage::Geometry, "normal.geom"},
 				{types::shader::Stage::Fragment, "normal.frag"}
 			});
-			if (resourceManagers.mShaderManager.isValid(normalShaderHandle)) {
-				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(normalShaderHandle, {});
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(normalShaderHandle, {});
 
-				for (const auto&& [__, mesh, material, spatial] : ecs.getView<MeshComponent, MaterialComponent, SpatialComponent>().each()) {
+			for (const auto&& [__, mesh, material, spatial] : ecs.getView<MeshComponent, MaterialComponent, SpatialComponent>().each()) {
 
-					resolvedShader.bindUniform("magnitude", mMagnitude);
+				resolvedShader.bindUniform("magnitude", mMagnitude);
 
-					/* Load PV */
-					resolvedShader.bindUniform("P", camera.getProj());
-					resolvedShader.bindUniform("V", cameraSpatial.getView());
+				/* Load PV */
+				resolvedShader.bindUniform("P", camera.getProj());
+				resolvedShader.bindUniform("V", cameraSpatial.getView());
 
-					resolvedShader.bindUniform("M", spatial.getModelMatrix());
-					resolvedShader.bindUniform("N", spatial.getNormalMatrix());
+				resolvedShader.bindUniform("M", spatial.getModelMatrix());
+				resolvedShader.bindUniform("N", spatial.getNormalMatrix());
 
-					/* DRAW */
-					resourceManagers.mMeshManager.resolve(mesh.mMeshHandle).draw();
-				}
+				/* DRAW */
+				resourceManagers.mMeshManager.resolve(mesh.mMeshHandle).draw();
 			}
 		}
 	}
