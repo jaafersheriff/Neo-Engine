@@ -5,15 +5,11 @@
 
 namespace neo {
 
-	struct KeyboardComponent : public Component {
+	START_COMPONENT(KeyboardComponent);
 		KeyboardComponent(Keyboard engineKeyboard)
 			: mFrameKeyboard(engineKeyboard)
 		{}
 
-		virtual std::string getName() const override {
-			return "KeyboardComponent";
-		}
-
 		Keyboard mFrameKeyboard;
-	};
+	END_COMPONENT();
 }

@@ -7,10 +7,7 @@
 
 namespace neo {
 
-	struct FrustumComponent : public Component {
-		virtual std::string getName() const override {
-			return "FrustumComponent";
-		}
+	START_COMPONENT(FrustumComponent);
 
 		// Bounds
 		glm::vec3 NearLeftBottom{ 0.f, 0.f, 0.f };
@@ -32,6 +29,5 @@ namespace neo {
 
 		// Test if an object is inside the frustum
 		bool isInFrustum(const SpatialComponent& spatial, const BoundingBoxComponent& box) const;
-
-	};
+	END_COMPONENT();
 }

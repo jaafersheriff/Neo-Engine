@@ -4,9 +4,6 @@
 
 namespace neo {
 
-	struct DebugBoundingBoxComponent : public Component {
-		virtual std::string getName() const override {
-			return "DebugBoundingBoxComponent";
-		}
-	};
+	START_COMPONENT(DebugBoundingBoxComponent);
+	END_COMPONENT();
 }

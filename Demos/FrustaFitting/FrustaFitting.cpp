@@ -44,11 +44,8 @@ using namespace neo;
 /* Game object definitions */
 namespace FrustaFitting {
 	namespace {
-		struct SeenByMock : public Component {
-			virtual std::string getName() const override {
-				return "SeenByMock";
-			}
-		};
+		START_COMPONENT(SeenByMock);
+		END_COMPONENT();
 
 		struct Camera {
 			ECS::Entity mEntity;
@@ -119,7 +116,7 @@ namespace FrustaFitting {
 			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
-			ecs.addComponent<PhongShaderComponent>(entity);
+			ecs.addComponent<PhongRenderComponent>(entity);
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 			ecs.addComponent<WireframeShaderComponent>(entity);
 		}
@@ -133,7 +130,7 @@ namespace FrustaFitting {
 			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(glm::vec3(0.7f), 1.f);
-			ecs.addComponent<PhongShaderComponent>(entity);
+			ecs.addComponent<PhongRenderComponent>(entity);
 			ecs.addComponent<TagComponent>(entity, "Ground");
 		}
 

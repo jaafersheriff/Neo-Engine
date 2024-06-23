@@ -5,7 +5,7 @@
 
 namespace neo {
 
-	struct CameraControllerComponent : public Component {
+	START_COMPONENT(CameraControllerComponent);
 		float mLookSpeed;
 		float mMoveSpeed;
 
@@ -25,8 +25,6 @@ namespace neo {
 		float mPhi;
 
 		CameraControllerComponent(float ls, float ms);
-		virtual std::string getName() const override { return "CameraControllerComponent"; };
 		virtual void imGuiEditor();
-
-	};
+	END_COMPONENT();
 }

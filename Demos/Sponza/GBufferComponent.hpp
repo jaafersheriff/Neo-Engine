@@ -6,10 +6,6 @@ using namespace neo;
 
 namespace Sponza {
 
-	struct GBufferShaderComponent : public Component {
-
-		virtual std::string getName() const override {
-			return "GBufferShaderComponent";
-		}
-	};
+	START_COMPONENT(GBufferRenderComponent);
+	END_COMPONENT();
 }

@@ -4,9 +4,8 @@
 
 namespace neo {
 
-	struct CameraComponent : public Component {
+	START_COMPONENT(CameraComponent);
 		CameraComponent();
-		virtual std::string getName() const override { return "CameraComponent"; }
 		virtual void imGuiEditor() override;
 
 		/* Setters */
@@ -25,6 +24,6 @@ namespace neo {
 		mutable glm::mat4 mProjMat;
 		mutable bool mProjMatDirty;
 
-	};
+	END_COMPONENT();
 
 }

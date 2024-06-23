@@ -7,7 +7,7 @@
 #include <imgui.h>
 
 namespace neo {
-	struct MaterialComponent: public Component {
+	START_COMPONENT(MaterialComponent);
 		bool mDoubleSided = false;
 
 		glm::vec4 mAlbedoColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
@@ -23,10 +23,6 @@ namespace neo {
 		TextureHandle mNormalMap;
 		TextureHandle mOcclusionMap;
 
-		virtual std::string getName() const override {
-			return "MaterialComponent";
-		}
-
 		virtual void imGuiEditor() override {
 			ImGui::ColorEdit3("Albedo", &mAlbedoColor[0]);
 			ImGui::SliderFloat("Metallness", &mMetallic, 0.f, 1.f); // This should be a bool?
@@ -35,6 +31,5 @@ namespace neo {
 				mEmissiveFactor = glm::max(mEmissiveFactor, glm::vec3(0.f));
 			}
 		};
-	};
-
+	END_COMPONENT();
 }

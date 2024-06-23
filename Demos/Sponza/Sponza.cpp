@@ -124,17 +124,17 @@ namespace Sponza {
 			ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
 			ecs.addComponent<MeshComponent>(entity, node.mMeshHandle);
 			ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax, true);
-			if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
+			if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Opaque) {
 				ecs.addComponent<OpaqueComponent>(entity);
 			}
-			else if (node.mAlphaMode == GLTFImporter::Node::AlphaMode::AlphaTest) {
+			else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
 				ecs.addComponent<AlphaTestComponent>(entity);
 			}
 			ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
 
 			ecs.addComponent<ShadowCasterShaderComponent>(entity);
 			ecs.addComponent<GBufferShaderComponent>(entity);
-			ecs.addComponent<PhongShaderComponent>(entity);
+			ecs.addComponent<PhongRenderComponent>(entity);
 		}
 
 		/* Systems - order matters! */

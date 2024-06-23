@@ -4,16 +4,12 @@
 
 namespace neo {
 
-	struct TagComponent : public Component {
-		TagComponent() = default;
+	START_COMPONENT(TagComponent);
 		TagComponent(std::string tag) :
 			mTag(tag)
 		{}
 
 		std::string mTag;
 
-		virtual std::string getName() const override {
-			return "TagComponent";
-		}
-	};
+	END_COMPONENT();
 }

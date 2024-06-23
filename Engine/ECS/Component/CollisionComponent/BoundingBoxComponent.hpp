@@ -7,8 +7,7 @@
 
 namespace neo {
 
-	struct BoundingBoxComponent : public Component {
-		virtual std::string getName() const override { return "BoundingBoxComponent"; }
+	START_COMPONENT(BoundingBoxComponent);
 
 		bool mStatic = false;
 		glm::vec3 mMin, mMax;
@@ -62,5 +61,5 @@ namespace neo {
 			}
 			return std::nullopt; // No intersection
 		}
-	};
+	END_COMPONENT();
 }

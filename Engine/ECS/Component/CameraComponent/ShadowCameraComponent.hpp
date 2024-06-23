@@ -4,10 +4,6 @@
 
 namespace neo
 {
-	struct ShadowCameraComponent : public Component {
-		ShadowCameraComponent()
-		{}
-
-		virtual std::string getName() const override { return "ShadowCameraComponent"; }
-	};
+	START_COMPONENT(ShadowCameraComponent);
+	END_COMPONENT();
 }

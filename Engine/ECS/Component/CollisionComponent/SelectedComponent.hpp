@@ -4,9 +4,6 @@
 
 namespace neo {
 
-	struct SelectedComponent : public Component {
-		virtual std::string getName() const override {
-			return "SelectedComponent";
-		}
-	};
+	START_COMPONENT(SelectedComponent);
+	END_COMPONENT();
 }

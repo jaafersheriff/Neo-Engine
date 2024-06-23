@@ -73,7 +73,7 @@ namespace NormalVisualizer {
 			ecs.addComponent<MeshComponent>(entity, bunnyNode.mMeshHandle);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
-			ecs.addComponent<PhongShaderComponent>(entity);
+			ecs.addComponent<PhongRenderComponent>(entity);
 			ecs.addComponent<WireframeShaderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
 			ecs.addComponent<TagComponent>(entity, "bunny");

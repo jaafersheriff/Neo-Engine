@@ -5,7 +5,7 @@
 
 namespace neo {
 
-	struct SinTranslateComponent : public Component {
+	START_COMPONENT(SinTranslateComponent);
 		glm::vec3 mOffset;
 		glm::vec3 mBasePosition;
 
@@ -15,14 +15,10 @@ namespace neo {
 		{
 		}
 
-		virtual std::string getName() const override {
-			return "SinTranslateComponent";
-		}
-
 		virtual void imGuiEditor() override {
 			ImGui::SliderFloat3("Offset", &mOffset[0], -10.f, 10.f);
 			ImGui::SliderFloat3("Base position", &mBasePosition[0], -100.f, 100.f);
 		}
 
-	};
+	END_COMPONENT();
 }

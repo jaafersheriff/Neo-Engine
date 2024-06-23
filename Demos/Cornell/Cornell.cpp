@@ -39,7 +39,7 @@ namespace Cornell {
 			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(color.x, color.y, color.z, 1.f);
-			ecs.addComponent<PhongShaderComponent>(entity);
+			ecs.addComponent<PhongRenderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
 		}
 	}
@@ -73,7 +73,7 @@ namespace Cornell {
 			ecs.addComponent<MeshComponent>(entity, HashedString("quad"));
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(1.f);
-			ecs.addComponent<PhongShaderComponent>(entity);
+			ecs.addComponent<PhongRenderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
 			ecs.addComponent<PointLightComponent>(entity, glm::vec3(0.75f, 1.0, 3.0f));
 		}

@@ -8,15 +8,11 @@
 
 namespace neo {
 
-	struct ViewportDetailsComponent : public Component {
+	START_COMPONENT(ViewportDetailsComponent);
 		ViewportDetailsComponent(glm::uvec2 size, glm::uvec2 pos) 
 			: mSize(size)
 			, mPos(pos)
 		{}
-
-		virtual std::string getName() const override {
-			return "ViewportDetailsComponent";
-		}
 
 		virtual void imGuiEditor() override {
 			ImGui::Text("Viewport Size: [%d, %d]", mSize.x, mSize.y);
@@ -25,5 +21,5 @@ namespace neo {
 
 		glm::uvec2 mSize;
 		glm::uvec2 mPos;
-	};
+	END_COMPONENT();
 }

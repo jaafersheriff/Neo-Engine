@@ -68,7 +68,7 @@ namespace Base {
 			ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
 			ecs.addComponent<MeshComponent>(bunny, gltfScene.mMeshNodes[0].mMeshHandle);
 			ecs.addComponent<BoundingBoxComponent>(bunny, gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax);
-			ecs.addComponent<PhongShaderComponent>(bunny);
+			ecs.addComponent<PhongRenderComponent>(bunny);
 			ecs.addComponent<OpaqueComponent>(bunny);
 			auto material = ecs.addComponent<MaterialComponent>(bunny);
 			material->mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
@@ -80,7 +80,7 @@ namespace Base {
 			ecs.addComponent<RotationComponent>(icosahedron, glm::vec3(1.f, 0.0f, 0.f));
 			ecs.addComponent<MeshComponent>(icosahedron, HashedString("icosahedron"));
 			ecs.addComponent<BoundingBoxComponent>(icosahedron, glm::vec3(-0.5f), glm::vec3(0.5f));
-			ecs.addComponent<PhongShaderComponent>(icosahedron);
+			ecs.addComponent<PhongRenderComponent>(icosahedron);
 			ecs.addComponent<OpaqueComponent>(icosahedron);
 			auto material = ecs.addComponent<MaterialComponent>(icosahedron);
 			material->mAlbedoColor = glm::vec4(1.f, 1.f, 0.f, 1.f);
@@ -93,7 +93,7 @@ namespace Base {
 			ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
 			ecs.addComponent<MeshComponent>(plane, HashedString("quad"));
 			ecs.addComponent<BoundingBoxComponent>(plane, glm::vec3(-0.5f, -0.5f, -0.01f), glm::vec3(0.5f, 0.5f, 0.01f), true);
-			ecs.addComponent<PhongShaderComponent>(plane);
+			ecs.addComponent<PhongRenderComponent>(plane);
 			ecs.addComponent<AlphaTestComponent>(plane);
 			auto material = ecs.addComponent<MaterialComponent>(plane);
 			material->mAlbedoColor = glm::vec4(1.f);

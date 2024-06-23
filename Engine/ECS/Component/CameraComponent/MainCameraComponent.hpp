@@ -6,8 +6,7 @@
 
 namespace neo {
 
-	struct MainCameraComponent : public Component {
-		virtual std::string getName() const override { return "MainCameraComponent"; }
+	START_COMPONENT(MainCameraComponent);
 		// MainCameraComponent(GameObject* go)
 		//	 : Component(go)
 		// {
@@ -20,5 +19,5 @@ namespace neo {
 		//		 }
 		//	 });
 		// }
-	};
+	END_COMPONENT();
 }

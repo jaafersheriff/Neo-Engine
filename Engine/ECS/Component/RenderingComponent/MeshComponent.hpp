@@ -5,14 +5,10 @@
 #include "ResourceManager/MeshManager.hpp"
 
 namespace neo {
-	struct MeshComponent : public Component {
+	START_COMPONENT(MeshComponent);
 		MeshHandle mMeshHandle;
 		MeshComponent(MeshHandle mesh)
 			: mMeshHandle(mesh)
 		{}
-
-		virtual std::string getName() const override {
-			return "MeshComponent";
-		}
-	};
+	END_COMPONENT();
 }

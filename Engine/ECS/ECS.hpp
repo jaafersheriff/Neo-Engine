@@ -88,7 +88,7 @@ namespace neo {
 	
 		auto view = mRegistry.view<CompT>();
 		if (view.size() > 1) {
-			NEO_LOG_E("Attempting to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->getName().c_str());
+			NEO_LOG_E("Attempting to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->mName);
 		}
 		if (view.size()) {
 			return { *view.each().begin() };
@@ -103,7 +103,7 @@ namespace neo {
 	
 		auto view = mRegistry.view<CompT>();
 		if (view.size() > 1) {
-			NEO_LOG_E("Attempting to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->getName().c_str());
+			NEO_LOG_E("Attempting to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->mName);
 		}
 		if (view.size()) {
 			return { *view.each().begin() };

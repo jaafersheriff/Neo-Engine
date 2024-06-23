@@ -4,10 +4,6 @@
 
 namespace neo {
 
-	struct PinnedComponent : public Component {
-		PinnedComponent() = default;
-		virtual std::string getName() const override {
-			return "PinnedComponent";
-		}
-	};
+	START_COMPONENT(PinnedComponent);
+	END_COMPONENT();
 }

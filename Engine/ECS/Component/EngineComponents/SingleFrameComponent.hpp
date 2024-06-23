@@ -4,10 +4,7 @@
 
 namespace neo {
 
-	struct SingleFrameComponent : public Component {
-		SingleFrameComponent() {}
-		virtual std::string getName() const override {
-			return "SingleFrameComponent";
-		}
-	};
+	// Deletes the entity on end frame
+	START_COMPONENT(SingleFrameComponent);
+	END_COMPONENT();
 }

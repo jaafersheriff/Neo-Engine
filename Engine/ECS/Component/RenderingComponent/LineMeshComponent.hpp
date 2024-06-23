@@ -6,7 +6,7 @@
 
 namespace neo {
 
-	struct LineMeshComponent : public Component {
+	START_COMPONENT(LineMeshComponent);
 		// TODO - replace array of structs with struct of arrays hmmm
 		struct Node {
 			glm::vec3 position;
@@ -25,7 +25,6 @@ namespace neo {
 
 		const Mesh& LineMeshComponent::getMesh(const MeshManager& meshManager) const;
 		const std::vector<Node>& getNodes() const { return mNodes; }
-		virtual std::string getName() const override { return "LineMeshComponent"; }
 
 		void addNode(const glm::vec3 pos, glm::vec3 col = glm::vec3(1.f));
 		void addNodes(const std::vector<Node>& oNodes);
@@ -35,5 +34,5 @@ namespace neo {
 		void clearNodes();
 
 		virtual void imGuiEditor() override;
-	};
+	END_COMPONENT();
 }

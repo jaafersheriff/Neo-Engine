@@ -16,9 +16,7 @@
 using namespace neo;
 
 namespace Compute {
-	class ParticleMeshComponent : public Component {
-
-	public:
+	START_COMPONENT(ParticleMeshComponent);
 		MeshHandle mMeshHandle;
 		int mNumParticles = 98304;
 		float timeScale = 100.f;
@@ -48,8 +46,5 @@ namespace Compute {
 			ImGui::SliderFloat("Time scale", &timeScale, 0.f, 1000.f);
 		}
 
-		virtual std::string getName() const override {
-			return "ParticleMeshComponent";
-		}
-	};
+	END_COMPONENT();
 }

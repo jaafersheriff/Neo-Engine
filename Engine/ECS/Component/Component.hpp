@@ -1,11 +1,15 @@
 #pragma once
-#include <string>
-
 namespace neo {
 
 	struct Component {
 		/* Components can have an editor */
-		virtual std::string getName() const = 0;
 		virtual void imGuiEditor() {};
 	};
+
+
+#define START_COMPONENT(inComponent) \
+	struct inComponent : public Component { \
+		const char* mName = #inComponent
+
+#define END_COMPONENT() }
 }

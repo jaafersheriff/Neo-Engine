@@ -10,9 +10,7 @@
 
 namespace neo {
 
-	struct CameraCulledComponent : public Component {
-		virtual std::string getName() const override { return "CameraCulledComponent"; } 
-
+	START_COMPONENT(CameraCulledComponent);
 		CameraCulledComponent(std::vector<ECS::Entity> set = {}) :
 			mCameraViews(set)
 		{}
@@ -26,5 +24,5 @@ namespace neo {
 		}
 
 		std::vector<ECS::Entity> mCameraViews;
-	};
+	END_COMPONENT();
 }
