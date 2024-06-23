@@ -5,7 +5,7 @@
 
 namespace neo {
 	struct STBImageData {
-		STBImageData(const char* _filePath, types::texture::BaseFormats baseFormat, bool flip);
+		STBImageData(const char* _filePath, types::texture::BaseFormats baseFormat, types::ByteFormats byteFormat, bool flip);
 		~STBImageData();
 
 		operator bool() const {

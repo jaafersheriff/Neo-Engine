@@ -380,6 +380,26 @@ namespace PBR {
 			ecs.addComponent<IBLComponent>(skybox);
 			ecs.addComponent<PinnedComponent>(skybox);
 		}
+		{
+			auto handle = resourceManagers.mTextureManager.asyncLoad("hdr", TextureFiles{
+				{"metro_noord_2k.hdr" } ,
+				TextureFormat{
+					types::texture::Target::Texture2D,
+					types::texture::InternalFormats::RGBA16_F,
+					TextureFilter {
+						types::texture::Filters::LinearMipmapLinear,
+						types::texture::Filters::Linear
+					},
+					TextureWrap {
+						types::texture::Wraps::Repeat,
+						types::texture::Wraps::Repeat,
+						types::texture::Wraps::Repeat
+					},
+					types::ByteFormats::Float,
+					6
+				}
+			});
+		}
 
 		{
 			GLTFImporter::MeshNode helmet = Loader::loadGltfScene(resourceManagers, "DamagedHelmet/DamagedHelmet.gltf", glm::translate(glm::mat4(1.f), glm::vec3(0.f, 2.5f, -0.5f))).mMeshNodes[0];

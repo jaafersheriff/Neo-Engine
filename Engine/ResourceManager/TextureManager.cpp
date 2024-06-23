@@ -69,7 +69,7 @@ namespace neo {
 					}
 
 					bool flip = fileDetails.mFormat.mTarget != types::texture::Target::TextureCube; // This might be really dumb
-					images.push_back(std::make_unique<STBImageData>(_fileName.c_str(), TextureFormat::deriveBaseFormat(fileDetails.mFormat.mInternalFormat), flip));
+					images.push_back(std::make_unique<STBImageData>(_fileName.c_str(), TextureFormat::deriveBaseFormat(fileDetails.mFormat.mInternalFormat), fileDetails.mFormat.mType, flip));
 				}
 
 				std::vector<uint8_t*> data;

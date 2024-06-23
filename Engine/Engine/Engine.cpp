@@ -70,7 +70,7 @@ namespace neo {
 			NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
 			GLFWimage icons[1];
 			std::string path = Loader::ENGINE_RES_DIR + std::string("icon.png");
-			STBImageData image(path.c_str(), types::texture::BaseFormats::RGBA, false);
+			STBImageData image(path.c_str(), types::texture::BaseFormats::RGBA, types::ByteFormats::UnsignedByte, false);
 			if (image) {
 				icons[0].pixels = image.mData;
 				icons[0].width = image.mWidth;
