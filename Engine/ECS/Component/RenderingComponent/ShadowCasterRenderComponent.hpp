@@ -3,6 +3,6 @@
 #include "ECS/Component/Component.hpp"
 
 namespace neo {
-	START_COMPONENT(ShadowCasterShaderComponent);
+	START_COMPONENT(ShadowCasterRenderComponent);
 	END_COMPONENT();
 }

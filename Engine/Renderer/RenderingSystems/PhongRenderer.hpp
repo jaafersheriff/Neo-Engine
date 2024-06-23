@@ -4,7 +4,7 @@
 #include "Util/Profiler.hpp"
 
 #include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
-#include "ECS/Component/RenderingComponent/PhongShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
 

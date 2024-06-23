@@ -3,7 +3,7 @@
 #include "ECS/ECS.hpp"
 #include "Util/Profiler.hpp"
 
-#include "ECS/Component/RenderingComponent/PhongShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
 #include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
 

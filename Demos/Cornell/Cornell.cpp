@@ -13,7 +13,7 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 
-#include "ECS/Component/RenderingComponent/PhongShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 

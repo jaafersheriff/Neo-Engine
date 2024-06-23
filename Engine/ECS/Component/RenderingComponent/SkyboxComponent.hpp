@@ -5,15 +5,11 @@
 #include "ResourceManager/TextureManager.hpp"
 
 namespace neo {
-	struct SkyboxComponent : public Component {
+	START_COMPONENT(SkyboxComponent);
 		SkyboxComponent(TextureHandle skybox) :
 			mSkybox(skybox)
 		{}
 
 		TextureHandle mSkybox;
-
-		virtual std::string getName() const override {
-			return "SkyboxComponent";
-		}
-	};
+	END_COMPONENT();
 }

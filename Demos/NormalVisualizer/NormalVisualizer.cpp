@@ -74,7 +74,7 @@ namespace NormalVisualizer {
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
 			ecs.addComponent<PhongRenderComponent>(entity);
-			ecs.addComponent<WireframeShaderComponent>(entity);
+			ecs.addComponent<WireframeRenderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
 			ecs.addComponent<TagComponent>(entity, "bunny");
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));

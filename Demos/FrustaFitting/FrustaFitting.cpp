@@ -18,9 +18,9 @@
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
-#include "ECS/Component/RenderingComponent/PhongShaderComponent.hpp"
-#include "ECS/Component/RenderingComponent/ShadowCasterShaderComponent.hpp"
-#include "ECS/Component/RenderingComponent/WireframeShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
+#include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
+#include "ECS/Component/RenderingComponent/WireframeRenderComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
@@ -117,8 +117,8 @@ namespace FrustaFitting {
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
 			ecs.addComponent<PhongRenderComponent>(entity);
-			ecs.addComponent<ShadowCasterShaderComponent>(entity);
-			ecs.addComponent<WireframeShaderComponent>(entity);
+			ecs.addComponent<ShadowCasterRenderComponent>(entity);
+			ecs.addComponent<WireframeRenderComponent>(entity);
 		}
 
 		/* Ground plane */
@@ -146,7 +146,7 @@ namespace FrustaFitting {
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_UNUSED(resourceManagers);
 		const auto&& [mockCameraEntity, _, __] = *ecs.getSingleView<MockCameraComponent, SpatialComponent>();
-		const auto& view = ecs.getView<const WireframeShaderComponent, CameraCulledComponent>();
+		const auto& view = ecs.getView<const WireframeRenderComponent, CameraCulledComponent>();
 		for (auto entity : view) {
 			auto& culled = view.get<CameraCulledComponent>(entity);
 			if (culled.isInView(ecs, entity, mockCameraEntity)) {

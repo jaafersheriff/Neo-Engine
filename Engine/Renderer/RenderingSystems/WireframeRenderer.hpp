@@ -5,7 +5,7 @@
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
-#include "ECS/Component/RenderingComponent/WireframeShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/WireframeRenderComponent.hpp"
 
 namespace neo {
 
@@ -22,7 +22,7 @@ namespace neo {
 		glDisable(GL_CULL_FACE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		const auto& view = ecs.getView<const WireframeShaderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
+		const auto& view = ecs.getView<const WireframeRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
 		for (auto entity : view) {
 			// VFC
 			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
@@ -37,7 +37,7 @@ namespace neo {
 			resolvedShader.bindUniform("P", ecs.cGetComponentAs<CameraComponent, PerspectiveCameraComponent>(cameraEntity)->getProj());
 			resolvedShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
 			resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
-			resolvedShader.bindUniform("color", view.get<const WireframeShaderComponent>(entity).mColor);
+			resolvedShader.bindUniform("color", view.get<const WireframeRenderComponent>(entity).mColor);
 
 			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}

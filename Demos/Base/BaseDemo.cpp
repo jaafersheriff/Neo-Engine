@@ -14,7 +14,7 @@
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
-#include "ECS/Component/RenderingComponent/PhongShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"

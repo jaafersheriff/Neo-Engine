@@ -5,10 +5,10 @@
 #include <imgui.h>
 
 namespace neo {
-	START_COMPONENT(WireframeShaderComponent);
+	START_COMPONENT(WireframeRenderComponent);
 		glm::vec3 mColor = glm::vec3(1.f);
 
-		WireframeShaderComponent(glm::vec3 color = glm::vec3(1.f)) 
+		WireframeRenderComponent(glm::vec3 color = glm::vec3(1.f)) 
 			: mColor(color)
 		{}
 

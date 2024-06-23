@@ -24,8 +24,8 @@
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
-#include "ECS/Component/RenderingComponent/ShadowCasterShaderComponent.hpp"
-#include "ECS/Component/RenderingComponent/WireframeShaderComponent.hpp"
+#include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
+#include "ECS/Component/RenderingComponent/WireframeRenderComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
@@ -132,8 +132,8 @@ namespace Sponza {
 			}
 			ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
 
-			ecs.addComponent<ShadowCasterShaderComponent>(entity);
-			ecs.addComponent<GBufferShaderComponent>(entity);
+			ecs.addComponent<ShadowCasterRenderComponent>(entity);
+			ecs.addComponent<GBufferRenderComponent>(entity);
 			ecs.addComponent<PhongRenderComponent>(entity);
 		}
 
