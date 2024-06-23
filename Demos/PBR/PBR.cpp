@@ -280,7 +280,6 @@ namespace PBR {
 			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
 		}
 
-/*
 		// Dialectric spheres
 		static float numSpheres = 8;
 		for (int i = 0; i < numSpheres; i++) {
@@ -293,7 +292,7 @@ namespace PBR {
 			material->mAlbedoColor = glm::vec4(1, 0, 0, 1);
 			material->mMetallic = 0.f;
 			material->mRoughness = 1.f - i / numSpheres;
-			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 		}
 		// Conductive spheres
 		for (int i = 0; i < numSpheres; i++) {
@@ -306,7 +305,7 @@ namespace PBR {
 			material->mAlbedoColor = glm::vec4(0.944f, 0.776f, 0.373f, 1);
 			material->mMetallic = 1.f;
 			material->mRoughness = 1.f - i / numSpheres;
-			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 		}
 		{
 			auto icosahedron = ecs.createEntity();
@@ -320,7 +319,7 @@ namespace PBR {
 			material->mAlbedoColor = glm::vec4(0.25f, 0.f, 1.f, 1);
 			material->mMetallic = 1.f;
 			material->mRoughness = 0.6f;
-			ecs.addComponent<ShadowCasterShaderComponent>(icosahedron);
+			ecs.addComponent<ShadowCasterRenderComponent>(icosahedron);
 			ecs.addComponent<PinnedComponent>(icosahedron);
 		}
 
@@ -337,7 +336,7 @@ namespace PBR {
 			material->mMetallic = 0.f;
 			material->mRoughness = 0.f;
 			material->mEmissiveFactor = glm::vec3(100.f);
-			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 		}
 
 		{
@@ -373,7 +372,7 @@ namespace PBR {
 		}
 
 		{
-			GLTFImporter::Node helmet = Loader::loadGltfScene(resourceManagers, "DamagedHelmet/DamagedHelmet.gltf", glm::translate(glm::mat4(1.f), glm::vec3(0.f, 2.5f, -0.5f))).mMeshNodes[0];
+			GLTFImporter::MeshNode helmet = Loader::loadGltfScene(resourceManagers, "DamagedHelmet/DamagedHelmet.gltf", glm::translate(glm::mat4(1.f), glm::vec3(0.f, 2.5f, -0.5f))).mMeshNodes[0];
 			auto entity = ecs.createEntity();
 			if (!helmet.mName.empty()) {
 				ecs.addComponent<TagComponent>(entity, helmet.mName);
@@ -381,20 +380,20 @@ namespace PBR {
 			ecs.addComponent<SpatialComponent>(entity, helmet.mSpatial);
 			ecs.addComponent<MeshComponent>(entity, helmet.mMeshHandle);
 			ecs.addComponent<BoundingBoxComponent>(entity, helmet.mMin, helmet.mMax);
-			if (helmet.mAlphaMode == GLTFImporter::Node::AlphaMode::Opaque) {
+			if (helmet.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Opaque) {
 				ecs.addComponent<OpaqueComponent>(entity);
 			}
-			else if (helmet.mAlphaMode == GLTFImporter::Node::AlphaMode::AlphaTest) {
+			else if (helmet.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
 				ecs.addComponent<AlphaTestComponent>(entity);
 			}
 			ecs.addComponent<MaterialComponent>(entity, helmet.mMaterial);
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
-			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 			ecs.addComponent<PinnedComponent>(entity);
 		}
 
 		{
-			GLTFImporter::Node bust = Loader::loadGltfScene(resourceManagers, "fblock.gltf", glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(-5.f, 2.5f, -0.5f)), glm::vec3(2.f))).mMeshNodes[0];
+			GLTFImporter::MeshNode bust = Loader::loadGltfScene(resourceManagers, "fblock.gltf", glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(-5.f, 2.5f, -0.5f)), glm::vec3(2.f))).mMeshNodes[0];
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Bust");
 			auto spatial = ecs.addComponent<SpatialComponent>(entity, bust.mSpatial);
@@ -404,9 +403,8 @@ namespace PBR {
 			ecs.addComponent<OpaqueComponent>(entity);
 			ecs.addComponent<MaterialComponent>(entity, bust.mMaterial);
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
-			ecs.addComponent<ShadowCasterShaderComponent>(entity);
+			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 		}
-*/
 		{
 			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "gltf-IBL/EnvironmentTest.gltf");
 			for (auto& node : scene.mMeshNodes) {
@@ -437,13 +435,13 @@ namespace PBR {
 			auto& cameraNode = scene.mCamera;
 
 			ecs.addComponent<TagComponent>(entity, cameraNode && !cameraNode->mName.empty() ? cameraNode->mName : "Camera");
-			if (cameraNode) {
-				ecs.addComponent<SpatialComponent>(entity, cameraNode->mSpatial);
-			}
-			else {
+			//if (cameraNode) {
+				//ecs.addComponent<SpatialComponent>(entity, cameraNode->mSpatial);
+			//}
+			//else {
 				ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.05f, 0.03f, 0.0f), glm::vec3(1.f));
 				ecs.addComponent<CameraComponent>(entity, 0.1f, 35.f, CameraComponent::Perspective{ 45.f, 1.f });
-			}
+			//}
 		}
 
 		/* Systems - order matters! */
@@ -480,7 +478,11 @@ namespace PBR {
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		convolveCubemap(resourceManagers, ecs);
 
-		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		const auto& cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
+		if (!cameraTuple) {
+			return;
+		}
+		const auto& [cameraEntity, _, camera, cameraSpatial] = *cameraTuple;
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 

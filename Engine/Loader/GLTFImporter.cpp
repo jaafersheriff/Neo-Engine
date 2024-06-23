@@ -466,8 +466,8 @@ namespace {
 				outNode.mMaterial.mAlbedoMap = _loadTexture(resourceManagers.mTextureManager, model, material.pbrMetallicRoughness.baseColorTexture.index, material.pbrMetallicRoughness.baseColorTexture.texCoord);
 				outNode.mMaterial.mMetallicRoughnessMap = _loadTexture(resourceManagers.mTextureManager, model, material.pbrMetallicRoughness.metallicRoughnessTexture.index, material.pbrMetallicRoughness.metallicRoughnessTexture.texCoord);
 
-				outNodes.emplace_back(outNode);
 			}
+			outNodes.emplace_back(outNode);
 		}
 
 		return outNodes;

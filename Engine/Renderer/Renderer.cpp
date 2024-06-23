@@ -183,33 +183,35 @@ namespace neo {
 			}
 		}
 		ImGuizmo::SetDrawlist();
-		const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
-		glm::mat4 V = cameraSpatial.getView();
-		glm::mat4 P = camera.getProj();
-		auto selected = ecs.getSingleView<SelectedComponent, SpatialComponent>();
-		if (selected.has_value()) {
-			auto&& [selectedEntity, selectedComponent, spatial] = *selected;
-			glm::mat4 transform = spatial.getModelMatrix();
-			ImGuizmo::Manipulate(
-				&V[0][0],
-				&P[0][0],
-				ImGuizmo::OPERATION::TRANSLATE 
-					| ImGuizmo::OPERATION::SCALEU 
+		const auto cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
+		if (cameraTuple) {
+			const auto& [cameraEntity, _, camera, cameraSpatial] = *cameraTuple;
+			glm::mat4 V = cameraSpatial.getView();
+			glm::mat4 P = camera.getProj();
+			auto selected = ecs.getSingleView<SelectedComponent, SpatialComponent>();
+			if (selected.has_value()) {
+				auto&& [selectedEntity, selectedComponent, spatial] = *selected;
+				glm::mat4 transform = spatial.getModelMatrix();
+				ImGuizmo::Manipulate(
+					&V[0][0],
+					&P[0][0],
+					ImGuizmo::OPERATION::TRANSLATE
+					| ImGuizmo::OPERATION::SCALEU
 					| ImGuizmo::OPERATION::ROTATE_X | ImGuizmo::OPERATION::ROTATE_Y | ImGuizmo::OPERATION::ROTATE_Z,
-				ImGuizmo::LOCAL,
-				&transform[0][0],
-				nullptr,
-				nullptr);
+					ImGuizmo::LOCAL,
+					&transform[0][0],
+					nullptr,
+					nullptr);
 
-			if (ImGuizmo::IsUsing()) {
-				glm::vec3 translate, scale, rotate;
-				ImGuizmo::DecomposeMatrixToComponents(&transform[0][0], &translate[0], &rotate[0], &scale[0]);
-				spatial.setPosition(translate);
-				spatial.setScale(scale);
-				spatial.setOrientation(glm::mat3(glm::quat(glm::radians(rotate))));
+				if (ImGuizmo::IsUsing()) {
+					glm::vec3 translate, scale, rotate;
+					ImGuizmo::DecomposeMatrixToComponents(&transform[0][0], &translate[0], &rotate[0], &scale[0]);
+					spatial.setPosition(translate);
+					spatial.setScale(scale);
+					spatial.setOrientation(glm::mat3(glm::quat(glm::radians(rotate))));
+				}
 			}
 		}
-
 		ImGui::End();
 
 		ImGui::Begin("Renderer");

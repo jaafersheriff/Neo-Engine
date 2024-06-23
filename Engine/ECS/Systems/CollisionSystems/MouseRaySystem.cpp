@@ -15,8 +15,12 @@ namespace neo {
 
 	void MouseRaySystem::update(ECS& ecs) {
 		TRACY_ZONEN("MouseRaySystem");
-		auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
+		auto cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
+		if (!cameraTuple) {
+			return;
+		}
 
+		auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
 		auto viewport = ecs.getComponent<ViewportDetailsComponent>();
 		auto mouseRayComponent = ecs.getComponent<MouseRayComponent>();
 		auto mouseComponent = ecs.getComponent<MouseComponent>();

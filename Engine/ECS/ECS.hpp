@@ -236,7 +236,7 @@ namespace neo {
 		if (view.size_hint() > 1) {
 			NEO_LOG_E("Found %d entities when one was requested in %s", view.size_hint(), __FUNCSIG__);
 		}
-		if (view.size_hint()) {
+		if (view.begin() != view.end()) {
 			return { *view.each().begin() };
 		}
 		return std::nullopt;
@@ -251,7 +251,7 @@ namespace neo {
 		if (view.size_hint() > 1) {
 			NEO_LOG_E("Found %d entities when one was requested in %s", view.size_hint(), __FUNCSIG__);
 		}
-		if (view.size_hint() == 1) {
+		if (view.begin() != view.end()) {
 			return { *view.each().begin() };
 		}
 		return std::nullopt;
