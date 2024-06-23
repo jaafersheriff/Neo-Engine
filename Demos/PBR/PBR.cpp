@@ -369,7 +369,7 @@ namespace PBR {
 					types::ByteFormats::Float,
 					6
 				}
-			}), true);
+			}));
 			ecs.addComponent<IBLComponent>(skybox);
 			ecs.addComponent<PinnedComponent>(skybox);
 		}

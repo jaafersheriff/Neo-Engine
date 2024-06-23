@@ -97,13 +97,13 @@ namespace PBR {
 
 				ShaderDefines defines;
 				MakeDefine(EQUIRECTANGULAR);
-				if (skybox.mEquirectangular) {
+				if (skyboxCubemap.mFormat.mTarget == types::texture::Target::Texture2D) {
 					defines.set(EQUIRECTANGULAR);
 				}
 				auto& convolveShader = resourceManagers.mShaderManager.resolveDefines(convolveShaderHandle, defines);
 				convolveShader.bind();
 
-				convolveShader.bindTexture("inputCubemap", skyboxCubemap);
+				convolveShader.bindTexture("cubeMap", skyboxCubemap);
 				convolveShader.bindTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox));
 				convolveShader.bindUniform("resolution", convolvedCubemap.mWidth);
 				for (int mip = 0; mip < convolvedCubemap.mFormat.mMipCount; mip++) {

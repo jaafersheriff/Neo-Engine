@@ -26,6 +26,7 @@ namespace neo {
 			return;
 		}
 		const auto& [_, skybox] = *skyboxTuple;
+		const auto& skyboxTexture = resourceManagers.mTextureManager.resolve(skybox.mSkybox);
 
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
@@ -37,7 +38,7 @@ namespace neo {
 
 		ShaderDefines defines;
 		MakeDefine(EQUIRECTANGULAR);
-		if (skybox.mEquirectangular) {
+		if (skyboxTexture.mFormat.mTarget == types::texture::Target::Texture2D) {
 			defines.set(EQUIRECTANGULAR);
 		}
 		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(skyboxShaderHandle, defines);
@@ -45,7 +46,7 @@ namespace neo {
 		resolvedShader.bind();
 		resolvedShader.bindUniform("P", camera->getProj());
 		resolvedShader.bindUniform("V", camSpatial->getView());
-		resolvedShader.bindTexture("cubeMap", resourceManagers.mTextureManager.resolve(skybox.mSkybox));
+		resolvedShader.bindTexture("cubeMap", skyboxTexture);
 
 		/* Draw */
 		resourceManagers.mMeshManager.resolve(HashedString("cube")).draw();
