@@ -57,7 +57,7 @@ namespace PBR {
 			ecs.addComponent<TagComponent>(lightEntity, "Light");
 			auto spat = ecs.addComponent<SpatialComponent>(lightEntity, glm::vec3(75.f, 200.f, 20.f));
 			spat->setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
-			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f), 2.f);
+			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f), 15.f);
 			ecs.addComponent<MainLightComponent>(lightEntity);
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
 			ecs.addComponent<PinnedComponent>(lightEntity);
@@ -83,7 +83,7 @@ namespace PBR {
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(1, 0, 0, 1);
 			material->mMetallic = 0.f;
-			material->mRoughness = 1.f - i / numSpheres;
+			material->mRoughness = 1.f - i / (numSpheres-1);
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 			ecs.addComponent<PBRRenderComponent>(entity);
 		}
@@ -97,7 +97,7 @@ namespace PBR {
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(0.944f, 0.776f, 0.373f, 1);
 			material->mMetallic = 1.f;
-			material->mRoughness = 1.f - i / numSpheres;
+			material->mRoughness = 1.f - i / (numSpheres-1);
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 			ecs.addComponent<PBRRenderComponent>(entity);
 		}
@@ -111,8 +111,8 @@ namespace PBR {
 			ecs.addComponent<OpaqueComponent>(icosahedron);
 			auto material = ecs.addComponent<MaterialComponent>(icosahedron);
 			material->mAlbedoColor = glm::vec4(0.25f, 0.f, 1.f, 1);
-			material->mMetallic = 1.f;
-			material->mRoughness = 0.25f;
+			material->mMetallic = 0.f;
+			material->mRoughness = 0.15f;
 			ecs.addComponent<ShadowCasterRenderComponent>(icosahedron);
 			ecs.addComponent<PinnedComponent>(icosahedron);
 			ecs.addComponent<PBRRenderComponent>(icosahedron);

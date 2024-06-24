@@ -8,7 +8,7 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
 vec3 getIndirectSpecular(vec3 R, PBRMaterial pbrMaterial, int numMips, sampler2D dfgLUT, samplerCube ibl) {
     float NdotV = saturate(dot(pbrMaterial.N, pbrMaterial.V));
     vec2 f_ab = texture(dfgLUT, vec2(NdotV, pbrMaterial.linearRoughness)).rg;
-    vec3 radiance = textureLod(ibl, R, pbrMaterial.linearRoughness * numMips - 0.2).rgb; // -0.2 so that at least some things get 0th mip
+    vec3 radiance = textureLod(ibl, R, pbrMaterial.linearRoughness * numMips).rgb;
     return (fresnelSchlickRoughness(NdotV, pbrMaterial.F0, pbrMaterial.linearRoughness) * f_ab.x + f_ab.y) * radiance;
 }
 
