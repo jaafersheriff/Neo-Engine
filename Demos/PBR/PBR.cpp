@@ -11,6 +11,7 @@
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
+#include "ECS/Component/RenderingComponent/IBLComponent.hpp"
 #include "ECS/Component/RenderingComponent/SkyboxComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
@@ -18,11 +19,8 @@
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
-#include "PBR/IBLComponent.hpp"
-#include "PBR/ConvolveRenderer.hpp"
-
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
-#include "Renderer/RenderingSystems/PhongRenderer.hpp"
+#include "Renderer/RenderingSystems/ConvolveRenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/SkyboxRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
@@ -35,222 +33,6 @@
 using namespace neo;
 
 namespace PBR {
-	START_COMPONENT(PBRLightComponent);
-		PBRLightComponent(float s) :
-			mStrength(s)
-		{}
-
-		virtual void imGuiEditor() override {
-			ImGui::SliderFloat("Strength", &mStrength, 0.1f, 100.f);
-		};
-
-		float mStrength = 1.f;
-	END_COMPONENT();
-
-	template<typename... CompTs>
-	void _drawPBR(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, DebugMode debugMode, TextureHandle shadowMapHandle, std::optional<const IBLComponent> ibl) {
-		TRACY_GPU();
-
-		ShaderDefines passDefines({});
-
-		auto pbrShaderHandle = resourceManagers.mShaderManager.asyncLoad("PBR Shader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "model.vert"},
-			{ types::shader::Stage::Fragment, "pbr/pbr.frag" }
-		});
-		if (!resourceManagers.mShaderManager.isValid(pbrShaderHandle)) {
-			return;
-		}
-
-		MakeDefine(DEBUG_ALBEDO);
-		MakeDefine(DEBUG_METAL_ROUGHNESS);
-		MakeDefine(DEBUG_EMISSIVE);
-		MakeDefine(DEBUG_NORMALS);
-		MakeDefine(DEBUG_DIFFUSE);
-		MakeDefine(DEBUG_SPECULAR);
-		switch (debugMode) {
-		case DebugMode::Albedo:
-			passDefines.set(DEBUG_ALBEDO);
-			break;
-		case DebugMode::MetalRoughness:
-			passDefines.set(DEBUG_METAL_ROUGHNESS);
-			break;
-		case DebugMode::Emissives:
-			passDefines.set(DEBUG_EMISSIVE);
-			break;
-		case DebugMode::Normals:
-			passDefines.set(DEBUG_NORMALS);
-			break;
-		case DebugMode::Diffuse:
-			passDefines.set(DEBUG_DIFFUSE);
-			break;
-		case DebugMode::Specular:
-			passDefines.set(DEBUG_SPECULAR);
-			break;
-		case DebugMode::Off:
-		default:
-			break;
-		}
-
-		bool containsAlphaTest = false;
-		MakeDefine(ALPHA_TEST);
-		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
-			containsAlphaTest = true;
-			passDefines.set(ALPHA_TEST);
-		}
-
-		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
-		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
-		auto&& [lightEntity, _mainLight, pbrLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, PBRLightComponent, LightComponent, SpatialComponent>();
-
-		glm::mat4 L;
-		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, CameraComponent, SpatialComponent>();
-		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && shadowCamera.has_value();
-		MakeDefine(ENABLE_SHADOWS);
-		if (shadowsEnabled) {
-			passDefines.set(ENABLE_SHADOWS);
-			const auto& [_, __, shadowOrtho, shadowCameraSpatial] = *shadowCamera;
-			static glm::mat4 biasMatrix(
-				0.5f, 0.0f, 0.0f, 0.0f,
-				0.0f, 0.5f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.5f, 0.0f,
-				0.5f, 0.5f, 0.5f, 1.0f);
-			L = biasMatrix * shadowOrtho.getProj() * shadowCameraSpatial.getView();
-		}
-
-		bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
-		bool pointLight = ecs.has<PointLightComponent>(lightEntity);
-		glm::vec3 attenuation(0.f);
-		MakeDefine(DIRECTIONAL_LIGHT);
-		MakeDefine(POINT_LIGHT);
-		if (directionalLight) {
-			passDefines.set(DIRECTIONAL_LIGHT);
-		}
-		else if (pointLight) {
-			attenuation = ecs.cGetComponent<PointLightComponent>(lightEntity)->mAttenuation;
-			passDefines.set(POINT_LIGHT);
-		}
-		else {
-			NEO_FAIL("Phong light needs a directional or point light component");
-		}
-
-		MakeDefine(IBL);
-		if (ibl && resourceManagers.mTextureManager.isValid(ibl->mConvolvedSkybox) && resourceManagers.mTextureManager.isValid(ibl->mDFGLut)) {
-			passDefines.set(IBL);
-		}
-
-		ShaderDefines drawDefines(passDefines);
-		const auto& view = ecs.getView<const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
-		for (auto entity : view) {
-			// VFC
-			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-				if (!culled->isInView(ecs, entity, cameraEntity)) {
-					continue;
-				}
-			}
-
-			if (containsAlphaTest) {
-				NEO_ASSERT(!ecs.has<OpaqueComponent>(entity), "Entity has opaque and alpha test component?");
-			}
-
-			drawDefines.reset();
-			const auto& material = view.get<const MaterialComponent>(entity);
-			MakeDefine(ALBEDO_MAP);
-			MakeDefine(NORMAL_MAP);
-			MakeDefine(METAL_ROUGHNESS_MAP);
-			MakeDefine(OCCLUSION_MAP);
-			MakeDefine(EMISSIVE);
-			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-				drawDefines.set(ALBEDO_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-				drawDefines.set(NORMAL_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
-				drawDefines.set(METAL_ROUGHNESS_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
-				drawDefines.set(OCCLUSION_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
-				drawDefines.set(EMISSIVE);
-			}
-
-			const auto& mesh = resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle);
-			MakeDefine(TANGENTS);
-			if (mesh.hasVBO(types::mesh::VertexType::Tangent)) {
-				drawDefines.set(TANGENTS);
-			}
-
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(pbrShaderHandle, drawDefines);
-			resolvedShader.bind();
-
-			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
-			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-				resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material.mAlbedoMap));
-			}
-
-			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
-			}
-
-			resolvedShader.bindUniform("metalness", material.mMetallic);
-			resolvedShader.bindUniform("roughness", material.mRoughness);
-			if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
-				resolvedShader.bindTexture("metalRoughnessMap", resourceManagers.mTextureManager.resolve(material.mMetallicRoughnessMap));
-			}
-
-			if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
-				resolvedShader.bindTexture("occlusionMap", resourceManagers.mTextureManager.resolve(material.mOcclusionMap));
-			}
-
-			resolvedShader.bindUniform("emissiveFactor", material.mEmissiveFactor);
-			if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
-				resolvedShader.bindTexture("emissiveMap", resourceManagers.mTextureManager.resolve(material.mEmissiveMap));
-			}
-
-			// UBO candidates
-			{
-				resolvedShader.bindUniform("P", P);
-				resolvedShader.bindUniform("V", cameraSpatial->getView());
-				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
-				resolvedShader.bindUniform("camDir", cameraSpatial->getLookDir());
-				resolvedShader.bindUniform("lightRadiance", glm::vec4(light.mColor, pbrLight.mStrength));
-				if (directionalLight || shadowsEnabled) {
-					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
-				}
-				if (pointLight) {
-					resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
-					resolvedShader.bindUniform("lightAtt", attenuation);
-				}
-				if (shadowsEnabled) {
-					resolvedShader.bindUniform("L", L);
-					auto& shadowMap = resourceManagers.mTextureManager.resolve(shadowMapHandle);
-					resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
-					resolvedShader.bindTexture("shadowMap", shadowMap);
-				}
-				if (ibl) {
-					const auto& iblTexture = resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox);
-					resolvedShader.bindTexture("dfgLUT", resourceManagers.mTextureManager.resolve(ibl->mDFGLut));
-					resolvedShader.bindTexture("ibl", iblTexture);
-					resolvedShader.bindUniform("iblMips", iblTexture.mFormat.mMipCount - 2);
-				}
-			}
-
-			const auto& drawSpatial = view.get<const SpatialComponent>(entity);
-			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
-			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
-
-			// Yikes
-			if (material.mDoubleSided) {
-				glDisable(GL_CULL_FACE);
-			}
-			else {
-				glEnable(GL_CULL_FACE);
-			}
-			mesh.draw();
-		}
-	}
-
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
 		config.name = "PBR";
@@ -275,10 +57,9 @@ namespace PBR {
 			ecs.addComponent<TagComponent>(lightEntity, "Light");
 			auto spat = ecs.addComponent<SpatialComponent>(lightEntity, glm::vec3(75.f, 200.f, 20.f));
 			spat->setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
-			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f));
+			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f), 2.f);
 			ecs.addComponent<MainLightComponent>(lightEntity);
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
-			ecs.addComponent<PBRLightComponent>(lightEntity, 2.f);
 			ecs.addComponent<PinnedComponent>(lightEntity);
 		}
 		{
@@ -304,6 +85,7 @@ namespace PBR {
 			material->mMetallic = 0.f;
 			material->mRoughness = 1.f - i / numSpheres;
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
+			ecs.addComponent<PBRRenderComponent>(entity);
 		}
 		// Conductive spheres
 		for (int i = 0; i < numSpheres; i++) {
@@ -317,6 +99,7 @@ namespace PBR {
 			material->mMetallic = 1.f;
 			material->mRoughness = 1.f - i / numSpheres;
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
+			ecs.addComponent<PBRRenderComponent>(entity);
 		}
 		{
 			auto icosahedron = ecs.createEntity();
@@ -332,6 +115,7 @@ namespace PBR {
 			material->mRoughness = 0.25f;
 			ecs.addComponent<ShadowCasterRenderComponent>(icosahedron);
 			ecs.addComponent<PinnedComponent>(icosahedron);
+			ecs.addComponent<PBRRenderComponent>(icosahedron);
 		}
 
 
@@ -348,6 +132,7 @@ namespace PBR {
 			material->mRoughness = 0.f;
 			material->mEmissiveFactor = glm::vec3(100.f);
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
+			ecs.addComponent<PBRRenderComponent>(entity);
 		}
 
 		{
@@ -394,6 +179,7 @@ namespace PBR {
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 			ecs.addComponent<PinnedComponent>(entity);
+			ecs.addComponent<PBRRenderComponent>(entity);
 		}
 
 		{
@@ -408,6 +194,7 @@ namespace PBR {
 			ecs.addComponent<MaterialComponent>(entity, bust.mMaterial);
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
+			ecs.addComponent<PBRRenderComponent>(entity);
 		}
 		{
 			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
@@ -428,6 +215,7 @@ namespace PBR {
 				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
 
 				ecs.addComponent<ShadowCasterRenderComponent>(entity);
+				ecs.addComponent<PBRRenderComponent>(entity);
 			}
 		}
 
@@ -444,19 +232,19 @@ namespace PBR {
 		ImGui::Checkbox("Shadows", &mDrawShadows);
 		ImGui::Checkbox("IBL", &mDrawIBL);
 
-		static std::unordered_map<DebugMode, const char*> sDebugModeStrings = {
-			{DebugMode::Off, "Off"},
-			{DebugMode::Albedo, "Albedo"},
-			{DebugMode::MetalRoughness, "MetalRoughness"},
-			{DebugMode::Emissives, "Emissive"},
-			{DebugMode::Normals, "Normals"},
-			{DebugMode::Diffuse, "Diffuse"},
-			{DebugMode::Specular, "Specular"},
+		static std::unordered_map<PBRDebugMode, const char*> sDebugModeStrings = {
+			{PBRDebugMode::Off, "Off"},
+			{PBRDebugMode::Albedo, "Albedo"},
+			{PBRDebugMode::MetalRoughness, "MetalRoughness"},
+			{PBRDebugMode::Emissives, "Emissive"},
+			{PBRDebugMode::Normals, "Normals"},
+			{PBRDebugMode::Diffuse, "Diffuse"},
+			{PBRDebugMode::Specular, "Specular"},
 		};
 		if (ImGui::BeginCombo("Debug Mode", sDebugModeStrings[mDebugMode])) {
-			for (int i = 0; i < static_cast<int>(DebugMode::COUNT); i++) {
-				if (ImGui::Selectable(sDebugModeStrings[static_cast<DebugMode>(i)], mDebugMode == static_cast<DebugMode>(i))) {
-					mDebugMode = static_cast<DebugMode>(i);
+			for (int i = 0; i < static_cast<int>(PBRDebugMode::COUNT); i++) {
+				if (ImGui::Selectable(sDebugModeStrings[static_cast<PBRDebugMode>(i)], mDebugMode == static_cast<PBRDebugMode>(i))) {
+					mDebugMode = static_cast<PBRDebugMode>(i);
 				}
 			}
 			ImGui::EndCombo();
@@ -524,8 +312,8 @@ namespace PBR {
 		}
 
 		drawSkybox(resourceManagers, ecs, cameraEntity);
-		_drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture, mDrawIBL ? ibl : std::nullopt);
-		_drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, mDebugMode, shadowTexture, mDrawIBL ? ibl : std::nullopt);
+		drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, mDrawIBL ? ibl : std::nullopt, mDebugMode);
+		drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, mDrawIBL ? ibl : std::nullopt, mDebugMode);
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
@@ -537,6 +325,9 @@ namespace PBR {
 			GL_DEPTH_BUFFER_BIT,
 			GL_NEAREST
 		);
+
+		// Apply tonemap
+
 	}
 
 	void Demo::destroy() {

@@ -1,4 +1,4 @@
-#include "pbr/ibl.glsl"
+#include "ibl.glsl"
 
 layout(binding = 0, rgba16f) uniform image2D dst;
 

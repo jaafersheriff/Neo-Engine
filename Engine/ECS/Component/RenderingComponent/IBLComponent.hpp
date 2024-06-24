@@ -2,9 +2,9 @@
 
 #include "ECS/Component/Component.hpp"
 
-using namespace neo;
+#include "ResourceManager/TextureManager.hpp"
 
-namespace PBR {
+namespace neo {
 	START_COMPONENT(IBLComponent);
 		// Yikes -- these have to be mutable b/c they're set by the renderer which has a const ref to the ECS
 		// Use messaging instead?

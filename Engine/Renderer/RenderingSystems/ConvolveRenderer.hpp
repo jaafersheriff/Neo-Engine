@@ -6,8 +6,8 @@
 
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/RenderingComponent/IBLComponent.hpp"
 #include "ECS/Component/RenderingComponent/SkyboxComponent.hpp"
-#include "PBR/IBLComponent.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"
 
@@ -16,7 +16,7 @@
 
 #include <tuple>
 
-namespace PBR {
+namespace neo {
 
 	void convolveCubemap(const ResourceManagers& resourceManagers, const ECS& ecs) {
 		TRACY_GPU();
@@ -54,7 +54,7 @@ namespace PBR {
 		}
 		if (resourceManagers.mTextureManager.isValid(ibl.mDFGLut) && !ibl.mDFGGenerated) {
 			auto dfgLutShaderHandle = resourceManagers.mShaderManager.asyncLoad("DFGLutShader", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Compute, "pbr/dfglut.comp" }
+				{ types::shader::Stage::Compute, "dfglut.comp" }
 			});
 			if (resourceManagers.mShaderManager.isValid(dfgLutShaderHandle)) {
 				auto& dfgLutShader = resourceManagers.mShaderManager.resolveDefines(dfgLutShaderHandle, {});
@@ -90,7 +90,7 @@ namespace PBR {
 		}
 		if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox) && !ibl.mConvolved) {
 			auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Compute, "pbr/convolve.comp" }
+				{ types::shader::Stage::Compute, "convolve.comp" }
 			});
 			if (resourceManagers.mShaderManager.isValid(convolveShaderHandle)) {
 				const auto& convolvedCubemap = resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox);

@@ -2,19 +2,11 @@
 
 #include "DemoInfra/IDemo.hpp"
 
+#include "Renderer/RenderingSystems/PBRRenderer.hpp"
+
 using namespace neo;
 
 namespace PBR {
-	enum class DebugMode : uint8_t {
-		Off,
-		Albedo,
-		MetalRoughness,
-		Normals,
-		Emissives,
-		Diffuse,
-		Specular,
-		COUNT
-	};
 
 	class Demo : public IDemo {
 	public:
@@ -26,7 +18,7 @@ namespace PBR {
 
 	private:
 		bool mDrawShadows = true;
-		DebugMode mDebugMode = DebugMode::Off;
+		PBRDebugMode mDebugMode = PBRDebugMode::Off;
 		bool mDrawIBL = true;
 	};
 }

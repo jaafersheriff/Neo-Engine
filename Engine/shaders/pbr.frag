@@ -127,10 +127,9 @@ void main() {
 #if defined(POINT_LIGHT)
 	vec3 lightDir = lightPos - fragPos.xyz;
 	L = normalize(lightDir);
-	float lightDistance = length(lightDir);
-	lightAtt = lightDir / lightDistance;
 	if (length(lightAtt) > 0) {
-		attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
+		float lightDistance = length(lightDir);
+		attFactor = 1.f / (lightAtt.x + lightAtt.y * lightDistance + lightAtt.z * lightDistance * lightDistance);
 	}
 #endif
 
@@ -144,7 +143,7 @@ void main() {
 
 	PBRLight pbrLight;
 	pbrLight.L = L;
-	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a;
+	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a * attFactor;
 
 	PBRColor pbrColor;
 	pbrColor.directDiffuse = vec3(0);

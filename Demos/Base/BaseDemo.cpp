@@ -13,12 +13,12 @@
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
-#include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
+#include "ECS/Component/RenderingComponent/PBRRenderComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
-#include "Renderer/RenderingSystems/PhongRenderer.hpp"
+#include "Renderer/RenderingSystems/PBRRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 
 #include "Loader/GLTFImporter.hpp"
@@ -67,7 +67,7 @@ namespace Base {
 			ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
 			ecs.addComponent<MeshComponent>(bunny, gltfScene.mMeshNodes[0].mMeshHandle);
 			ecs.addComponent<BoundingBoxComponent>(bunny, gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax);
-			ecs.addComponent<PhongRenderComponent>(bunny);
+			ecs.addComponent<PBRRenderComponent>(bunny);
 			ecs.addComponent<OpaqueComponent>(bunny);
 			auto material = ecs.addComponent<MaterialComponent>(bunny);
 			material->mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
@@ -79,7 +79,7 @@ namespace Base {
 			ecs.addComponent<RotationComponent>(icosahedron, glm::vec3(1.f, 0.0f, 0.f));
 			ecs.addComponent<MeshComponent>(icosahedron, HashedString("icosahedron"));
 			ecs.addComponent<BoundingBoxComponent>(icosahedron, glm::vec3(-0.5f), glm::vec3(0.5f));
-			ecs.addComponent<PhongRenderComponent>(icosahedron);
+			ecs.addComponent<PBRRenderComponent>(icosahedron);
 			ecs.addComponent<OpaqueComponent>(icosahedron);
 			auto material = ecs.addComponent<MaterialComponent>(icosahedron);
 			material->mAlbedoColor = glm::vec4(1.f, 1.f, 0.f, 1.f);
@@ -92,7 +92,7 @@ namespace Base {
 			ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
 			ecs.addComponent<MeshComponent>(plane, HashedString("quad"));
 			ecs.addComponent<BoundingBoxComponent>(plane, glm::vec3(-0.5f, -0.5f, -0.01f), glm::vec3(0.5f, 0.5f, 0.01f), true);
-			ecs.addComponent<PhongRenderComponent>(plane);
+			ecs.addComponent<PBRRenderComponent>(plane);
 			ecs.addComponent<AlphaTestComponent>(plane);
 			auto material = ecs.addComponent<MaterialComponent>(plane);
 			material->mAlbedoColor = glm::vec4(1.f);
@@ -130,8 +130,8 @@ namespace Base {
 
 			sceneTarget.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-			drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-			drawPhong<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
+			drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
+			drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
 
 			backbuffer.bind();
 			backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color);
