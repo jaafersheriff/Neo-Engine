@@ -329,7 +329,7 @@ namespace PBR {
 			auto material = ecs.addComponent<MaterialComponent>(icosahedron);
 			material->mAlbedoColor = glm::vec4(0.25f, 0.f, 1.f, 1);
 			material->mMetallic = 1.f;
-			material->mRoughness = 0.6f;
+			material->mRoughness = 0.25f;
 			ecs.addComponent<ShadowCasterRenderComponent>(icosahedron);
 			ecs.addComponent<PinnedComponent>(icosahedron);
 		}
@@ -408,6 +408,27 @@ namespace PBR {
 			ecs.addComponent<MaterialComponent>(entity, bust.mMaterial);
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
+		}
+		{
+			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
+			for (auto& node : scene.mMeshNodes) {
+				auto entity = ecs.createEntity();
+				if (!node.mName.empty()) {
+					ecs.addComponent<TagComponent>(entity, node.mName);
+				}
+				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
+				ecs.addComponent<MeshComponent>(entity, node.mMeshHandle);
+				ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax, true);
+				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Opaque) {
+					ecs.addComponent<OpaqueComponent>(entity);
+				}
+				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
+					ecs.addComponent<AlphaTestComponent>(entity);
+				}
+				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
+
+				ecs.addComponent<ShadowCasterRenderComponent>(entity);
+			}
 		}
 
 		/* Systems - order matters! */

@@ -1,10 +1,15 @@
 
 #include "pbr/pbrtypes.glsl"
 
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}  
+
 vec3 getIndirectSpecular(vec3 R, PBRMaterial pbrMaterial, int numMips, sampler2D dfgLUT, samplerCube ibl) {
-    vec2 f_ab = texture(dfgLUT, vec2(saturate(dot(pbrMaterial.N, pbrMaterial.V)), pbrMaterial.linearRoughness)).rg;
+    float NdotV = saturate(dot(pbrMaterial.N, pbrMaterial.V));
+    vec2 f_ab = texture(dfgLUT, vec2(NdotV, pbrMaterial.linearRoughness)).rg;
     vec3 radiance = textureLod(ibl, R, pbrMaterial.linearRoughness * numMips - 0.2).rgb; // -0.2 so that at least some things get 0th mip
-    return (pbrMaterial.F0 * f_ab.x + f_ab.y) * radiance;
+    return (fresnelSchlickRoughness(NdotV, pbrMaterial.F0, pbrMaterial.linearRoughness) * f_ab.x + f_ab.y) * radiance;
 }
 
 float GeometrySchlickGGXIBL(float NdotV, float roughness) {
