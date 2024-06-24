@@ -12,11 +12,11 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 
-#include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
+#include "ECS/Component/RenderingComponent/PBRRenderComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 
-#include "Renderer/RenderingSystems/PhongRenderer.hpp"
+#include "Renderer/RenderingSystems/PBRRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
@@ -38,7 +38,7 @@ namespace Cornell {
 			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(color.x, color.y, color.z, 1.f);
-			ecs.addComponent<PhongRenderComponent>(entity);
+			ecs.addComponent<PBRRenderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
 		}
 	}
@@ -72,17 +72,17 @@ namespace Cornell {
 			ecs.addComponent<MeshComponent>(entity, HashedString("quad"));
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(1.f);
-			ecs.addComponent<PhongRenderComponent>(entity);
+			ecs.addComponent<PBRRenderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
 			ecs.addComponent<PointLightComponent>(entity, glm::vec3(0.75f, 1.0, 3.0f));
 		}
 
 		HashedString quadMesh("quad");
-		insertObject(ecs, "backwall",  quadMesh, glm::vec3(0.f, 0.5f, 0.f), glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f));
-		insertObject(ecs, "leftwall",  quadMesh, glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(1.f), glm::vec3(0.f, glm::radians(90.f), 0.f), glm::vec3(1.f, 0.f, 0.f));
-		insertObject(ecs, "rightwall", quadMesh, glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.f), glm::vec3(0.f, glm::radians(-90.f), 0.f), glm::vec3(0.f, 1.f, 0.f));
-		insertObject(ecs, "floor",     quadMesh, glm::vec3(0.f, 0.f, 0.5f), glm::vec3(1.f), glm::vec3(glm::radians(-90.f), 0.f, 0.f), glm::vec3(1.f));
-		insertObject(ecs, "ceiling",   quadMesh, glm::vec3(0.f, 1.0f, 0.5f), glm::vec3(1.f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f));
+		insertObject(ecs, "backwall",  quadMesh, glm::vec3(0.f, 0.5f, 0.f),    glm::vec3(1.f, 1.f, 0.05f), glm::vec3(0.f), glm::vec3(1.f));
+		insertObject(ecs, "leftwall",  quadMesh, glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(1.f, 1.f, 0.05f), glm::vec3(0.f, glm::radians(90.f), 0.f), glm::vec3(1.f, 0.f, 0.f));
+		insertObject(ecs, "rightwall", quadMesh, glm::vec3(0.5f, 0.5f, 0.5f),  glm::vec3(1.f, 1.f, 0.05f), glm::vec3(0.f, glm::radians(-90.f), 0.f), glm::vec3(0.f, 1.f, 0.f));
+		insertObject(ecs, "floor",     quadMesh, glm::vec3(0.f, 0.f, 0.5f),    glm::vec3(1.f, 1.f, 0.05f), glm::vec3(glm::radians(-90.f), 0.f, 0.f), glm::vec3(1.f));
+		insertObject(ecs, "ceiling",   quadMesh, glm::vec3(0.f, 1.0f, 0.5f),   glm::vec3(1.f, 1.f, 0.05f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f));
 		insertObject(ecs, "box1",      HashedString("cube"), glm::vec3(-0.2f, 0.35f, 0.4f), glm::vec3(0.25f, 0.7f, 0.25f), glm::vec3(0.f, glm::radians(33.f), 0.f), glm::vec3(1.f));
 
 		insertObject(ecs, "sphere", HashedString("sphere"), glm::vec3(0.2f, 0.18f, 0.6f), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.f, glm::radians(-17.f), 0.f), glm::vec3(1.f));
@@ -109,7 +109,7 @@ namespace Cornell {
 			glm::vec3 clearColor = getConfig().clearColor;
 			sceneTarget.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-			drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
+			drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 
 			backbuffer.bind();
 			backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);

@@ -17,7 +17,9 @@ namespace neo {
 			{ types::shader::Stage::Vertex, "model.vert"},
 			{ types::shader::Stage::Fragment, "color.frag" }
 		});
-
+		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
+			return;
+		}
 
 		glDisable(GL_CULL_FACE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

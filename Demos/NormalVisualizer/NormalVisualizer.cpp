@@ -99,6 +99,10 @@ namespace NormalVisualizer {
 				{types::shader::Stage::Geometry, "normal.geom"},
 				{types::shader::Stage::Fragment, "normal.frag"}
 			});
+			if (!resourceManagers.mShaderManager.isValid(normalShaderHandle)) {
+				return;
+			}
+
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(normalShaderHandle, {});
 
 			for (const auto&& [__, mesh, material, spatial] : ecs.getView<MeshComponent, MaterialComponent, SpatialComponent>().each()) {
