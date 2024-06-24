@@ -221,7 +221,7 @@ namespace neo {
 					const auto& iblTexture = resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox);
 					resolvedShader.bindTexture("dfgLUT", resourceManagers.mTextureManager.resolve(ibl->mDFGLut));
 					resolvedShader.bindTexture("ibl", iblTexture);
-					resolvedShader.bindUniform("iblMips", iblTexture.mFormat.mMipCount - 2);
+					resolvedShader.bindUniform("iblMips", iblTexture.mFormat.mMipCount - 1);
 				}
 			}
 

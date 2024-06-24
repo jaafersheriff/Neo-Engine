@@ -179,12 +179,9 @@ void main() {
 		+ pbrColor.indirectSpecular
 		+ fEmissive;
 	;
-	//color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
-	color.a = 1.0;
 
 #ifdef DEBUG_ALBEDO
 	color = vec4(fAlbedo.rgb, 1.0);
-	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
 	return;
 #endif
 
@@ -206,13 +203,11 @@ void main() {
 
 #ifdef DEBUG_DIFFUSE
 	color = vec4(pbrColor.directDiffuse + pbrColor.indirectDiffuse, 1.0);
-	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
 	return;
 #endif
 
 #ifdef DEBUG_SPECULAR
 	color = vec4(pbrColor.directSpecular + pbrColor.indirectSpecular, 1.0);
-	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
 	return;
 #endif
 

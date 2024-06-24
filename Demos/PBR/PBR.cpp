@@ -23,6 +23,7 @@
 #include "Renderer/RenderingSystems/ConvolveRenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/SkyboxRenderer.hpp"
+#include "Renderer/RenderingSystems/TonemapRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
@@ -57,7 +58,7 @@ namespace PBR {
 			ecs.addComponent<TagComponent>(lightEntity, "Light");
 			auto spat = ecs.addComponent<SpatialComponent>(lightEntity, glm::vec3(75.f, 200.f, 20.f));
 			spat->setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
-			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f), 15.f);
+			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(0.978f, 0.903f, 0.714f), 15.f);
 			ecs.addComponent<MainLightComponent>(lightEntity);
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
 			ecs.addComponent<PinnedComponent>(lightEntity);
@@ -118,7 +119,6 @@ namespace PBR {
 			ecs.addComponent<PBRRenderComponent>(icosahedron);
 		}
 
-
 		// Emissive sphere
 		{
 			auto entity = ecs.createEntity();
@@ -153,7 +153,7 @@ namespace PBR {
 						types::texture::Wraps::Repeat
 					},
 					types::ByteFormats::Float,
-					6
+					7
 				}
 			}));
 			ecs.addComponent<IBLComponent>(skybox);
@@ -315,9 +315,25 @@ namespace PBR {
 		drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, mDrawIBL ? ibl : std::nullopt, mDebugMode);
 		drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, mDrawIBL ? ibl : std::nullopt, mDebugMode);
 
+		// Apply tonemap
+		auto tonemapTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"Tonemapped",
+			FramebufferBuilder{}
+				.setSize(viewport.mSize)
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB8_UNORM }),
+			resourceManagers.mTextureManager
+		);
+		if (!resourceManagers.mFramebufferManager.isValid(tonemapTargetHandle)) {
+			return;
+		}
+		auto& tonemapTarget = resourceManagers.mFramebufferManager.resolve(tonemapTargetHandle);
+		tonemapTarget.bind();
+		tonemapTarget.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
+		tonemap(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
+
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		drawFXAA(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
+		drawFXAA(resourceManagers, viewport.mSize, tonemapTarget.mTextures[0]);
 		// Don't forget the depth. Because reasons.
 		glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
 			0, 0, viewport.mSize.x, viewport.mSize.y,
@@ -325,8 +341,6 @@ namespace PBR {
 			GL_DEPTH_BUFFER_BIT,
 			GL_NEAREST
 		);
-
-		// Apply tonemap
 
 	}
 

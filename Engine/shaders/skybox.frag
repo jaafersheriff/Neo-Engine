@@ -26,6 +26,6 @@ void main() {
 #endif
 
 #ifndef HDR
-    color = srgbToLinear(color);
+    color = linearToSrgb(color);
 #endif
 }

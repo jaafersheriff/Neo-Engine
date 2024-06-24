@@ -66,6 +66,7 @@ namespace neo {
 					if (!util::fileExists(_fileName.c_str())) {
 						_fileName = Loader::ENGINE_RES_DIR + filePath;
 						NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file %s", filePath.c_str());
+						continue;
 					}
 
 					bool flip = fileDetails.mFormat.mTarget != types::texture::Target::TextureCube; // This might be really dumb
@@ -74,7 +75,7 @@ namespace neo {
 
 				std::vector<uint8_t*> data;
 				glm::u16vec3 dimensions(UINT16_MAX);
-				bool successfulFileLoad = true;
+				bool successfulFileLoad = !images.empty();
 				for (auto& image : images) {
 					if (image) {
 						NEO_LOG_I("Loaded image %s [%d, %d]", image->mFilePath.c_str(), image->mWidth, image->mHeight);
