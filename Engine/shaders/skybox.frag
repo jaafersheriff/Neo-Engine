@@ -24,4 +24,8 @@ void main() {
 #else
 	color = texture(cubeMap, fragTex);
 #endif
+
+#ifndef HDR
+    color = srgbToLinear(color);
+#endif
 }

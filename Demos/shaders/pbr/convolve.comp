@@ -25,10 +25,16 @@ vec2 SampleSphericalMap(vec3 v) {
 
 vec3 sampleCubemap(vec3 uvw, float lod) {
 #ifdef EQUIRECTANGULAR
-	return textureLod(cubeMap, SampleSphericalMap(normalize(uvw)), lod).rgb;
+    vec4 color = textureLod(cubeMap, SampleSphericalMap(normalize(uvw)), lod);
 #else
-	return textureLod(cubeMap, uvw, lod).rgb;
+    vec4 color = textureLod(cubeMap, uvw, lod);
 #endif
+
+#ifndef HDR
+    color = srgbToLinear(color);
+#endif
+
+    return color.rgb;
 }
 
 // From Karis, 2014

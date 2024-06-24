@@ -97,8 +97,12 @@ namespace PBR {
 
 				ShaderDefines defines;
 				MakeDefine(EQUIRECTANGULAR);
+				MakeDefine(HDR);
 				if (skyboxCubemap.mFormat.mTarget == types::texture::Target::Texture2D) {
 					defines.set(EQUIRECTANGULAR);
+				}
+				if (skyboxCubemap.mFormat.mType != types::ByteFormats::UnsignedByte) {
+					defines.set(HDR);
 				}
 				auto& convolveShader = resourceManagers.mShaderManager.resolveDefines(convolveShaderHandle, defines);
 				convolveShader.bind();

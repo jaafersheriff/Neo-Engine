@@ -38,9 +38,14 @@ namespace neo {
 
 		ShaderDefines defines;
 		MakeDefine(EQUIRECTANGULAR);
+		MakeDefine(HDR);
 		if (skyboxTexture.mFormat.mTarget == types::texture::Target::Texture2D) {
 			defines.set(EQUIRECTANGULAR);
 		}
+		if (skyboxTexture.mFormat.mType != types::ByteFormats::UnsignedByte) {
+			defines.set(HDR);
+		}
+
 		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(skyboxShaderHandle, defines);
 
 		resolvedShader.bind();

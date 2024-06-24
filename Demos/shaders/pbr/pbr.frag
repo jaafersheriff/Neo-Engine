@@ -92,10 +92,6 @@ vec3 getNormal() {
 #endif
 }
 
-vec4 srgbToLinear(vec4 srgb) {
-	return vec4(pow(srgb.xyz, vec3(2.2)), srgb.w);;
-}
-
 void main() {
 	vec4 fAlbedo = albedo;
 #ifdef ALBEDO_MAP
@@ -184,7 +180,7 @@ void main() {
 		+ pbrColor.indirectSpecular
 		+ fEmissive;
 	;
-	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+	//color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
 	color.a = 1.0;
 
 #ifdef DEBUG_ALBEDO
