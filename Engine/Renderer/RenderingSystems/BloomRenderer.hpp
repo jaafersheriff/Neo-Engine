@@ -64,6 +64,7 @@ namespace neo {
 					glViewport(0, 0, mipDimension.x, mipDimension.y);
 					resolvedShader.bindUniform("texelSize", glm::vec2(1.f / glm::vec2(mipDimension)));
 					resourceManagers.mMeshManager.resolve("quad").draw();
+					resolvedShader.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(bloomTextures[i]));
 				}
 			}
 		}
@@ -80,19 +81,18 @@ namespace neo {
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(bloomUpShaderHandle, {});
 			resolvedShader.bind();
 
-			auto& inputTexture = resourceManagers.mTextureManager.resolve(inputTextureHandle);
-			resolvedShader.bindTexture("inputTexture", inputTexture);
 			resolvedShader.bindUniform("filterRadius", radius);
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ONE, GL_ONE);
 			glBlendEquation(GL_FUNC_ADD);
-			for (int i = downSampleSteps - 1; i >= 0; i--) {
+			for (int i = downSampleSteps - 1; i > 0; i--) {
 				if (resourceManagers.mFramebufferManager.isValid(bloomTargets[i])) {
-					auto& bloomUp = resourceManagers.mFramebufferManager.resolve(bloomTargets[i]);
+					resolvedShader.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(bloomTextures[i]));
+					auto& bloomUp = resourceManagers.mFramebufferManager.resolve(bloomTargets[i-1]);
 					bloomUp.bind();
 
-					glm::uvec2 mipDimension(dimension.x >> i, dimension.y >> i);
+					glm::uvec2 mipDimension(dimension.x >> (i-1), dimension.y >> (i-1));
 					glViewport(0, 0, mipDimension.x, mipDimension.y);
 					resourceManagers.mMeshManager.resolve("quad").draw();
 				}

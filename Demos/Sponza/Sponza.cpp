@@ -232,6 +232,7 @@ namespace Sponza {
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
+		sceneTarget.bind();
 		sceneTarget.clear(glm::vec4(getConfig().clearColor, 0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.x, viewport.y);
 

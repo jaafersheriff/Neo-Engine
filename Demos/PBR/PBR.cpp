@@ -271,7 +271,7 @@ namespace PBR {
 			"Scene Target",
 			FramebufferBuilder{}
 				.setSize(viewport.mSize)
-				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F })
 				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
 			resourceManagers.mTextureManager
 		);
