@@ -8,8 +8,6 @@ namespace neo {
 
 	ImGuiConsole::ImGuiConsole() {
 		clearLog();
-		memset(mInputBuffer, 0, sizeof(mInputBuffer));
-		mHistoryPos = -1;
 
 		mAutoScrollEnabled = true;
 		mScrollToBottom = false;
@@ -17,9 +15,6 @@ namespace neo {
 
 	ImGuiConsole::~ImGuiConsole() {
 		clearLog();
-		for (int i = 0; i < mHistory.size(); i++) {
-			free(mHistory[i]);
-		}
 	}
 
 	void ImGuiConsole::clearLog() {

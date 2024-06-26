@@ -231,6 +231,7 @@ namespace PBR {
 		NEO_UNUSED(ecs);
 		ImGui::Checkbox("Shadows", &mDrawShadows);
 		ImGui::Checkbox("IBL", &mDrawIBL);
+		ImGui::Checkbox("Tonemap", &mDoTonemap);
 
 		static std::unordered_map<PBRDebugMode, const char*> sDebugModeStrings = {
 			{PBRDebugMode::Off, "Off"},
@@ -289,6 +290,7 @@ namespace PBR {
 
 			if (resourceManagers.mFramebufferManager.isValid(shadowTarget)) {
 				auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowTarget);
+				shadowMap.bind();
 				shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
 				drawShadows<OpaqueComponent>(resourceManagers, shadowMap, ecs);
 				drawShadows<AlphaTestComponent>(resourceManagers, shadowMap, ecs);
@@ -304,7 +306,7 @@ namespace PBR {
 		// Extract IBL
 		std::optional<IBLComponent> ibl;
 		const auto iblTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
-		if (iblTuple) {
+		if (iblTuple && mDrawIBL) {
 			const auto& _ibl = std::get<2>(*iblTuple);
 			if (_ibl.mConvolved && _ibl.mDFGGenerated) {
 				ibl = _ibl;
@@ -312,28 +314,18 @@ namespace PBR {
 		}
 
 		drawSkybox(resourceManagers, ecs, cameraEntity);
-		drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, mDrawIBL ? ibl : std::nullopt, mDebugMode);
-		drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, mDrawIBL ? ibl : std::nullopt, mDebugMode);
+		drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl, mDebugMode);
+		drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl, mDebugMode);
 
 		// Apply tonemap
-		auto tonemapTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
-			"Tonemapped",
-			FramebufferBuilder{}
-				.setSize(viewport.mSize)
-				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB8_UNORM }),
-			resourceManagers.mTextureManager
-		);
-		if (!resourceManagers.mFramebufferManager.isValid(tonemapTargetHandle)) {
-			return;
+		FramebufferHandle tonemappedHandle = mDoTonemap ? tonemap(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]) : sceneTargetHandle;
+		if (mDoTonemap && !resourceManagers.mFramebufferManager.isValid(tonemappedHandle)) {
+			tonemappedHandle = sceneTargetHandle;
 		}
-		auto& tonemapTarget = resourceManagers.mFramebufferManager.resolve(tonemapTargetHandle);
-		tonemapTarget.bind();
-		tonemapTarget.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
-		tonemap(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		drawFXAA(resourceManagers, viewport.mSize, tonemapTarget.mTextures[0]);
+		drawFXAA(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(tonemappedHandle).mTextures[0]);
 		// Don't forget the depth. Because reasons.
 		glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
 			0, 0, viewport.mSize.x, viewport.mSize.y,

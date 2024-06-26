@@ -108,7 +108,7 @@ namespace neo {
 				pfb.mFrameCount++;
 			}
 			pfb.mUsedThisFrame = true;
-			pfb.mFramebuffer.bind();
+			//pfb.mFramebuffer.bind();
 			return pfb.mFramebuffer;
 		}
 		NEO_LOG_W("Invalid resource requested! Did you check for validity?");

@@ -51,7 +51,7 @@ namespace neo {
 		}
 
 		bool isQueued(ResourceHandle<ResourceType> id) const {
-			if (id.mHandle != NEO_INVALID_HANDLE) {
+			if (id.mHandle == NEO_INVALID_HANDLE) {
 				return false;
 			}
 			// TODO - this is a linear search :(

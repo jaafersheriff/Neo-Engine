@@ -10,6 +10,7 @@ namespace PBR {
 
 	class Demo : public IDemo {
 	public:
+		Demo() = default;
 		virtual IDemo::Config getConfig() const override;
 		virtual void init(ECS& ecs, ResourceManagers& resourceManagers) override;
 		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) override;
@@ -17,8 +18,9 @@ namespace PBR {
 		virtual void imGuiEditor(ECS& ecs) override;
 
 	private:
-		bool mDrawShadows = true;
 		PBRDebugMode mDebugMode = PBRDebugMode::Off;
+		bool mDrawShadows = true;
+		bool mDoTonemap = true;
 		bool mDrawIBL = true;
 	};
 }

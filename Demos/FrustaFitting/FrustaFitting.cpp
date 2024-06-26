@@ -175,6 +175,7 @@ namespace FrustaFitting {
 
 		if (resourceManagers.mFramebufferManager.isValid(shadowMapHandle)) {
 			auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowMapHandle);
+			shadowMap.bind();
 			shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
 			drawShadows(resourceManagers, shadowMap, ecs);
 		}

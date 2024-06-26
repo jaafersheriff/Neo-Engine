@@ -478,6 +478,9 @@ namespace {
 		if (!node.name.empty()) {
 			NEO_LOG_V("Processing node %s", node.name.c_str());
 		}
+		else {
+			NEO_LOG_V("Processing node %d", nodeID);
+		}
 
 		SpatialComponent nodeSpatial = _processSpatial(node, parentXform);
 
@@ -506,6 +509,7 @@ namespace neo {
 	namespace GLTFImporter {
 
 		Scene loadScene(const std::string& path, glm::mat4 baseTransform, ResourceManagers& resourceManagers) {
+			TRACY_ZONE();
 			NEO_ASSERT(path.length() > 4 && path.substr(path.length() - 4, 4) == "gltf", "Unsupported file type");
 
 			tinygltf::Model model;
@@ -515,6 +519,7 @@ namespace neo {
 
 			bool ret = false;
 			stbi_set_flip_vertically_on_load(false);
+			NEO_LOG_I("Loading gltf %s", path.c_str());
 			ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
 
 			if (!warn.empty()) {
@@ -530,7 +535,6 @@ namespace neo {
 			}
 
 			// Translate tinygltf::Model to Loader::GltfScene
-			NEO_LOG_V("Translating %s to neo", path.c_str());
 			if (model.lights.size()) {
 				NEO_LOG_W("%s contains lights - ignoring", path.c_str());
 			}
