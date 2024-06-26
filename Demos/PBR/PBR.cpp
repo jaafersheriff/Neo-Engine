@@ -234,6 +234,9 @@ namespace PBR {
 		ImGui::Checkbox("IBL", &mDrawIBL);
 		ImGui::Checkbox("Tonemap", &mDoTonemap);
 		ImGui::Checkbox("Bloom", &mDoBloom);
+		if (mDoBloom) {
+			ImGui::SliderFloat("Bloom Radius", &mBloomRadius, 0.f, 10.f);
+		}
 
 		static std::unordered_map<PBRDebugMode, const char*> sDebugModeStrings = {
 			{PBRDebugMode::Off, "Off"},
@@ -319,12 +322,12 @@ namespace PBR {
 		drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl, mDebugMode);
 		drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl, mDebugMode);
 
-		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]) : sceneTargetHandle;
+		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, sceneTarget.mTextures[0], mBloomRadius, 8) : sceneTargetHandle;
 		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
 			bloomHandle = sceneTargetHandle;
 		}
 
-		FramebufferHandle tonemappedHandle = mDoTonemap ? tonemap(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]) : bloomHandle;
+		FramebufferHandle tonemappedHandle = mDoTonemap ? tonemap(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0]) : bloomHandle;
 		if (mDoTonemap && !resourceManagers.mFramebufferManager.isValid(tonemappedHandle)) {
 			tonemappedHandle = bloomHandle;
 		}

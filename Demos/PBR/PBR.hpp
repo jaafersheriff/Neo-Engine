@@ -22,6 +22,7 @@ namespace PBR {
 		bool mDrawIBL = true;
 		bool mDoTonemap = true;
 		bool mDoBloom = true;
+		float mBloomRadius = 2.f;
 		PBRDebugMode mDebugMode = PBRDebugMode::Off;
 	};
 }
