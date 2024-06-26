@@ -18,9 +18,10 @@ namespace PBR {
 		virtual void imGuiEditor(ECS& ecs) override;
 
 	private:
-		PBRDebugMode mDebugMode = PBRDebugMode::Off;
 		bool mDrawShadows = true;
-		bool mDoTonemap = true;
 		bool mDrawIBL = true;
+		bool mDoTonemap = true;
+		bool mDoBloom = true;
+		PBRDebugMode mDebugMode = PBRDebugMode::Off;
 	};
 }

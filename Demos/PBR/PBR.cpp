@@ -19,8 +19,9 @@
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
-#include "Renderer/RenderingSystems/FXAARenderer.hpp"
+#include "Renderer/RenderingSystems/BloomRenderer.hpp"
 #include "Renderer/RenderingSystems/ConvolveRenderer.hpp"
+#include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/SkyboxRenderer.hpp"
 #include "Renderer/RenderingSystems/TonemapRenderer.hpp"
@@ -232,6 +233,7 @@ namespace PBR {
 		ImGui::Checkbox("Shadows", &mDrawShadows);
 		ImGui::Checkbox("IBL", &mDrawIBL);
 		ImGui::Checkbox("Tonemap", &mDoTonemap);
+		ImGui::Checkbox("Bloom", &mDoBloom);
 
 		static std::unordered_map<PBRDebugMode, const char*> sDebugModeStrings = {
 			{PBRDebugMode::Off, "Off"},
@@ -317,10 +319,14 @@ namespace PBR {
 		drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl, mDebugMode);
 		drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl, mDebugMode);
 
-		// Apply tonemap
-		FramebufferHandle tonemappedHandle = mDoTonemap ? tonemap(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]) : sceneTargetHandle;
+		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]) : sceneTargetHandle;
+		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
+			bloomHandle = sceneTargetHandle;
+		}
+
+		FramebufferHandle tonemappedHandle = mDoTonemap ? tonemap(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]) : bloomHandle;
 		if (mDoTonemap && !resourceManagers.mFramebufferManager.isValid(tonemappedHandle)) {
-			tonemappedHandle = sceneTargetHandle;
+			tonemappedHandle = bloomHandle;
 		}
 
 		backbuffer.bind();
