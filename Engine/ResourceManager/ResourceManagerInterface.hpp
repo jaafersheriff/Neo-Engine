@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include "Util/Util.hpp"
 
 #include <entt/resource/cache.hpp>
@@ -51,11 +52,12 @@ namespace neo {
 		}
 
 		bool isQueued(ResourceHandle<ResourceType> id) const {
-			if (id.mHandle != NEO_INVALID_HANDLE) {
+			if (id.mHandle == NEO_INVALID_HANDLE) {
 				return false;
 			}
 			// TODO - this is a linear search :(
 			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
+			std::lock_guard<std::mutex> lock{ mQueueMutex };
 			for (auto& res : mQueue) {
 				if (id == res.mHandle) {
 					return true;
@@ -88,6 +90,7 @@ namespace neo {
 			if (isValid(id) || isQueued(id)) {
 				return id;
 			}
+			std::lock_guard<std::mutex> lock{mQueueMutex};
 			return static_cast<const DerivedManager*>(this)->_asyncLoadImpl(id, details, debugName);
 		}
 
@@ -109,6 +112,7 @@ namespace neo {
 		};
 
 		void clear() {
+			std::lock_guard<std::mutex> lock{mQueueMutex};
 			mQueue.clear();
 			mDiscardQueue.clear();
 			mTransactionQueue.clear();
@@ -119,6 +123,7 @@ namespace neo {
 		}
 
 		void tick() {
+			std::lock_guard<std::mutex> lock{ mQueueMutex };
 			static_cast<DerivedManager*>(this)->_tickImpl();
 		}
 		mutable std::vector<ResourceLoadDetails_Internal> mQueue;
@@ -128,6 +133,7 @@ namespace neo {
 		std::shared_ptr<BackedResource<ResourceType>> mFallback;
 
 	private:
+		mutable std::mutex mQueueMutex;
 		ResourceType& _resolveFinal(ResourceHandle<ResourceType> id) const {
 			auto handle = mCache.handle(id.mHandle);
 			if (handle) {

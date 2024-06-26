@@ -197,7 +197,7 @@ namespace PBR {
 			ecs.addComponent<PBRRenderComponent>(entity);
 		}
 		{
-			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
+			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "Bistro GLTF/bistro.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
 			for (auto& node : scene.mMeshNodes) {
 				auto entity = ecs.createEntity();
 				if (!node.mName.empty()) {

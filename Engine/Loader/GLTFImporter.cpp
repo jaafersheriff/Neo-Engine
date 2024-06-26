@@ -5,6 +5,8 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
+#include <Util/Util.hpp>
+
 #pragma warning(push)
 #pragma warning(disable: 4201)
 #include <glm/gtc/quaternion.hpp>
@@ -20,6 +22,9 @@
 #include <tiny_gltf.h>
 #include <stb_image.h>
 #pragma warning(pop)
+
+#include <algorithm>
+#include <execution>
 
 namespace {
 	inline neo::types::mesh::Primitive _translateTinyGltfPrimitiveType(int mode) {
@@ -381,7 +386,7 @@ namespace {
 					continue;
 				}
 				else {
-					NEO_FAIL("TODO: unsupported attribute: %s", attribute.first.c_str());
+					NEO_LOG_E("TODO: unsupported attribute: %s", attribute.first.c_str());
 					continue;
 				}
 
@@ -473,25 +478,40 @@ namespace {
 		return outNodes;
 	}
 
-	void _processNode(const char* path, const int nodeID, neo::ResourceManagers& resourceManagers, const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene) {
+	std::atomic_int childCount = 0;
+	void _processNode(const char* path, const int nodeID, neo::ResourceManagers& resourceManagers, const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene, std::shared_mutex& sceneMutex) {
+		TRACY_ZONE();
 		using namespace neo;
+
+		childCount += static_cast<int>(node.children.size());
 		if (!node.name.empty()) {
 			NEO_LOG_V("Processing node %s", node.name.c_str());
+		}
+		else {
+			NEO_LOG_V("Processing node %d", nodeID);
 		}
 
 		SpatialComponent nodeSpatial = _processSpatial(node, parentXform);
 
-		for (auto& child : node.children) {
-			_processNode(path, child, resourceManagers, model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);
+		for (int child : node.children) {
+			std::thread t([&]() {
+				tracy::SetThreadName(model.nodes[child].name.c_str());
+				_processNode(path, child, resourceManagers, model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene, sceneMutex); 
+				childCount--;
+			});
+			t.detach();
 		}
 
-		if (node.camera > -1) {
-			NEO_ASSERT(outScene.mCamera == std::nullopt, "Trying to insert two cameras?");
-			outScene.mCamera = _processCameraNode(model, node, nodeSpatial);
-		}
-		else if (node.mesh > -1) {
-			auto meshNodes = _processMeshNode(path, nodeID, resourceManagers, model, node, nodeSpatial);
-			outScene.mMeshNodes.insert(outScene.mMeshNodes.end(), meshNodes.begin(), meshNodes.end());
+		{
+			std::unique_lock lock{ sceneMutex };
+			if (node.camera > -1) {
+				NEO_ASSERT(outScene.mCamera == std::nullopt, "Trying to insert two cameras?");
+				outScene.mCamera = _processCameraNode(model, node, nodeSpatial);
+			}
+			else if (node.mesh > -1) {
+				auto meshNodes = _processMeshNode(path, nodeID, resourceManagers, model, node, nodeSpatial);
+				outScene.mMeshNodes.insert(outScene.mMeshNodes.end(), meshNodes.begin(), meshNodes.end());
+			}
 		}
 		if (node.light > -1) {
 			auto& light = model.lights[node.light];
@@ -499,6 +519,14 @@ namespace {
 				NEO_LOG_W("Light with extensions");
 			}
 		}
+		if (!node.name.empty()) {
+			NEO_LOG_V("Done with node %s", node.name.c_str());
+			tracy::SetThreadName(node.name.c_str());
+		}
+		else {
+			NEO_LOG_V("Done with node %d", nodeID);
+		}
+
 	}
 }
 
@@ -506,6 +534,8 @@ namespace neo {
 	namespace GLTFImporter {
 
 		Scene loadScene(const std::string& path, glm::mat4 baseTransform, ResourceManagers& resourceManagers) {
+			TRACY_ZONE();
+			NEO_LOG_I("Loading gltf %s", path.c_str());
 			NEO_ASSERT(path.length() > 4 && path.substr(path.length() - 4, 4) == "gltf", "Unsupported file type");
 
 			tinygltf::Model model;
@@ -515,7 +545,10 @@ namespace neo {
 
 			bool ret = false;
 			stbi_set_flip_vertically_on_load(false);
-			ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
+			{
+				TRACY_ZONEN("Tiny GLTF");
+				ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
+			}
 
 			if (!warn.empty()) {
 				NEO_LOG_W("tingltf Warning: %s", warn.c_str());
@@ -542,9 +575,16 @@ namespace neo {
 			}
 
 			Scene outScene;
-			for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
-				const auto& node = model.nodes[nodeID];
-				_processNode(path.c_str(), nodeID, resourceManagers, model, node, baseTransform, outScene);
+			std::shared_mutex sceneMutex;
+
+			std::for_each(std::execution::par, model.scenes[model.defaultScene].nodes.begin(), model.scenes[model.defaultScene].nodes.end(), [&](int nodeID) {
+				tracy::SetThreadName(model.nodes[nodeID].name.c_str());
+				_processNode(path.c_str(), nodeID, resourceManagers, model, model.nodes[nodeID], baseTransform, outScene, sceneMutex);
+
+			});
+
+			while (childCount > 0) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(150));
 			}
 
 			NEO_LOG_I("Successfully parsed %s", path.c_str());

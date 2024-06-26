@@ -8,8 +8,6 @@ namespace neo {
 
 	ImGuiConsole::ImGuiConsole() {
 		clearLog();
-		memset(mInputBuffer, 0, sizeof(mInputBuffer));
-		mHistoryPos = -1;
 
 		mAutoScrollEnabled = true;
 		mScrollToBottom = false;
@@ -17,12 +15,10 @@ namespace neo {
 
 	ImGuiConsole::~ImGuiConsole() {
 		clearLog();
-		for (int i = 0; i < mHistory.size(); i++) {
-			free(mHistory[i]);
-		}
 	}
 
 	void ImGuiConsole::clearLog() {
+		std::lock_guard<std::mutex> lock(mLogMutex);
 		for (int i = 0; i < mLogs.size(); i++) {
 			free(mLogs[i].second);
 		}
@@ -34,6 +30,7 @@ namespace neo {
 		size_t len = strlen(log) + 1; 
 		void* buf = malloc(len); 
 		memcpy(buf, (const void*)log, len);
+		std::lock_guard<std::mutex> lock(mLogMutex);
 		mLogs.push_back({ severity, static_cast<char*>(buf) });
 		while (!mInfiniteLog && mLogs.size() > mMaxLogSize) {
 			mLogs.erase(mLogs.begin());
@@ -81,18 +78,21 @@ namespace neo {
 			ImGui::LogToClipboard();
 		}
 
-		for (int i = 0; i < mLogs.size(); i++) {
-			auto&& [severity, log] = mLogs[i];
-			if (!mFilter.PassFilter(log)) {
-				continue;
-			}
+		{
+			std::lock_guard<std::mutex> lock(mLogMutex);
+			for (int i = 0; i < mLogs.size(); i++) {
+				auto&& [severity, log] = mLogs[i];
+				if (!mFilter.PassFilter(log)) {
+					continue;
+				}
 
-			// Normally you would store more information in your item than just a string.
-			// (e.g. make Items[] an array of structure, store color/type etc.)
-			glm::vec3 color = util::sLogSeverityData.at(severity).second;
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(color.x, color.y, color.z, 1.0));
-			ImGui::TextWrapped(log);
-			ImGui::PopStyleColor();
+				// Normally you would store more information in your item than just a string.
+				// (e.g. make Items[] an array of structure, store color/type etc.)
+				glm::vec3 color = util::sLogSeverityData.at(severity).second;
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(color.x, color.y, color.z, 1.0));
+				ImGui::TextWrapped(log);
+				ImGui::PopStyleColor();
+			}
 		}
 
 		if (copy_to_clipboard) {

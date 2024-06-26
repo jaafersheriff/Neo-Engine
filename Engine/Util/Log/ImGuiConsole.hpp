@@ -3,6 +3,7 @@
 #include "Util/Log/Log.hpp"
 
 #include <vector>
+#include <mutex>
 
 #include <imgui.h>
 
@@ -18,10 +19,8 @@ namespace neo {
 		void imGuiEditor();
 
 	private:
-		char mInputBuffer[256];
+		std::mutex mLogMutex;
 		std::vector<std::pair<util::LogSeverity, char*>> mLogs;
-		std::vector<char*> mHistory;
-		int mHistoryPos;	// -1: new line, 0..History.size()-1 browsing history.
 		ImGuiTextFilter mFilter;
 		bool mAutoScrollEnabled;
 		bool mScrollToBottom;
