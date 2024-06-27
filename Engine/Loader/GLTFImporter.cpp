@@ -381,7 +381,7 @@ namespace {
 					continue;
 				}
 				else {
-					NEO_FAIL("TODO: unsupported attribute: %s", attribute.first.c_str());
+					NEO_LOG_E("TODO: unsupported attribute: %s", attribute.first.c_str());
 					continue;
 				}
 
@@ -434,8 +434,8 @@ namespace {
 					outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::AlphaTest;
 				}
 				else if (material.alphaMode == "BLEND") {
-					outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::Transparent;
 					NEO_LOG_W("Material %s is transparent -- unsupported", material.name.c_str());
+					outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::AlphaTest;
 				}
 
 				outNode.mMaterial.mNormalMap = _loadTexture(resourceManagers.mTextureManager, model, material.normalTexture.index, material.normalTexture.texCoord);
