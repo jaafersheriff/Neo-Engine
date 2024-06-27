@@ -5,8 +5,6 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
-#include "Blitter.hpp"
-
 namespace neo {
 
 	static FramebufferHandle bloom(const ResourceManagers& resourceManagers, const glm::uvec2 dimension, const TextureHandle inputTextureHandle, const float radius, const int downSampleSteps = 6) {
@@ -101,10 +99,7 @@ namespace neo {
 					quadMesh.draw();
 				}
 			}
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE);
-			glBlendEquation(GL_FUNC_ADD);
-
+			glDisable(GL_BLEND);
 
 			// Create a new full-res render target
 			auto bloomOutputHandle = resourceManagers.mFramebufferManager.asyncLoad(
@@ -117,9 +112,6 @@ namespace neo {
 			if (resourceManagers.mFramebufferManager.isValid(bloomOutputHandle)) {
 				auto bloomOutput = resourceManagers.mFramebufferManager.resolve(bloomOutputHandle);
 
-				// Lmao
-				blit(resourceManagers, bloomOutput, inputTexture, dimension);
-
 				auto bloomMixShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomMix Shader", SourceShader::ConstructionArgs{
 					{ types::shader::Stage::Vertex, "quad.vert"},
 					{ types::shader::Stage::Fragment, "bloomMix.frag" }
@@ -127,12 +119,13 @@ namespace neo {
 				if (resourceManagers.mShaderManager.isValid(bloomMixShaderHandle)) {
 					bloomOutput.bind();
 
-					resolvedShader.bind();
-					resolvedShader.bindTexture("bloomResults", resourceManagers.mTextureManager.resolve(bloomTextures[0]));
-					resolvedShader.bindTexture("hdrColor", inputTexture);
+					auto bloomMixShader = resourceManagers.mShaderManager.resolveDefines(bloomMixShaderHandle, {});
+
+					bloomMixShader.bind();
+					bloomMixShader.bindTexture("bloomResults", resourceManagers.mTextureManager.resolve(bloomTextures[0]));
+					bloomMixShader.bindTexture("hdrColor", inputTexture);
 					glViewport(0, 0, dimension.x, dimension.y);
 					quadMesh.draw();
-					glDisable(GL_BLEND);
 					glEnable(GL_DEPTH_TEST);
 				}
 			}
