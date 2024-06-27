@@ -38,5 +38,5 @@ void main() {
     upsample += (a+c+g+i);
     upsample *= 1.0 / 16.0;
 
-    color = vec4(upsample, 1.0);
+    color = vec4(min(upsample, 65534), 1.0);
 }

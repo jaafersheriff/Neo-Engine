@@ -235,7 +235,7 @@ namespace PBR {
 		ImGui::Checkbox("Tonemap", &mDoTonemap);
 		ImGui::Checkbox("Bloom", &mDoBloom);
 		if (mDoBloom) {
-			ImGui::SliderFloat("Bloom Radius", &mBloomRadius, 0.f, 10.f);
+			ImGui::SliderFloat("Bloom Radius", &mBloomRadius, 0.f, 0.01f);
 		}
 
 		static std::unordered_map<PBRDebugMode, const char*> sDebugModeStrings = {

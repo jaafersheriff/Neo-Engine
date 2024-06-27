@@ -11,7 +11,7 @@
 
 namespace neo {
 
-	static void blit(ResourceManagers& resourceManagers, Framebuffer& outputFBO, Texture& inputTexture, glm::uvec2 viewport, glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f)) {
+	static void blit(const ResourceManagers& resourceManagers, Framebuffer& outputFBO, const Texture& inputTexture, glm::uvec2 viewport, glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f)) {
 		TRACY_GPU();
 
 		auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blit Shader", SourceShader::ShaderCode {			
@@ -41,8 +41,7 @@ namespace neo {
 
 		outputFBO.bind();
 		glViewport(0, 0, viewport.x, viewport.y);
-		glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
-		glClear(GL_COLOR_BUFFER_BIT);
+		outputFBO.clear(clearColor, types::framebuffer::AttachmentBit::Color);
 
 		glDisable(GL_DEPTH_TEST);
 		
