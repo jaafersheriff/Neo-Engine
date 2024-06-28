@@ -73,7 +73,11 @@ vec3 getNormal() {
 #ifdef TANGENTS
 	vec3 tan = normalize(fragTan.xyz);
 	vec3 biTan = normalize(cross(baseNormal, tan)) * fragTan.w;
+	if (any(isnan(biTan))) {
+		biTan = vec3(0, 1, 0); // uhhh
+	}
 	TBN = mat3(tan, biTan, baseNormal);
+
 #else
 	// http://www.thetenthplanet.de/archives/1180
 	vec3 dp1 = dFdx( fragPos.xyz ); 
@@ -87,7 +91,6 @@ vec3 getNormal() {
 	float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) ); 
 	TBN = mat3( T * invmax, B * invmax, baseNormal );
 #endif
-
 	vec3 tangentNormal = texture(normalMap, fragTex).xyz * 2.0 - 1.0;
 	return normalize(TBN * normalize(tangentNormal));
 #endif
@@ -199,6 +202,7 @@ void main() {
 #ifdef DEBUG_NORMALS
 	vec3 _fNorm = fNorm * 0.5 + 0.5;
 	color = vec4(_fNorm.x, _fNorm.y, _fNorm.z, 1);
+
 	return;
 #endif
 
