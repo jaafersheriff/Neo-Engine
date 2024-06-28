@@ -2,6 +2,7 @@
 #include "shadowreceiver.glsl"
 #include "pbr.glsl"
 #include "ibl.glsl"
+#include "color.glsl"
 
 in vec4 fragPos;
 in vec3 fragNor;

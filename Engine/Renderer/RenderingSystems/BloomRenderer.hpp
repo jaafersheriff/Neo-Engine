@@ -52,16 +52,22 @@ namespace neo {
 			if (!resourceManagers.mShaderManager.isValid(bloomDownShaderHandle)) {
 				return NEO_INVALID_HANDLE;
 			}
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(bloomDownShaderHandle, {});
-			resolvedShader.bind();
+			MakeDefine(MIP_0);
+			ShaderDefines Mip0Defines;
+			Mip0Defines.set(MIP_0);
 
-			resolvedShader.bindTexture("inputTexture", inputTexture);
 			glDisable(GL_DEPTH_TEST);
 			for (int i = 0; i < downSampleSteps; i++) {
 				if (resourceManagers.mFramebufferManager.isValid(bloomTargets[i])) {
 					auto& bloomDown = resourceManagers.mFramebufferManager.resolve(bloomTargets[i]);
 					bloomDown.bind();
 					bloomDown.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
+
+					auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(bloomDownShaderHandle, i == 0 ? Mip0Defines : ShaderDefines{});
+					resolvedShader.bind();
+					if (i == 0) {
+						resolvedShader.bindTexture("inputTexture", inputTexture);
+					}
 
 					glm::uvec2 mipDimension(baseDimension.x >> i, baseDimension.y >> i);
 					glViewport(0, 0, mipDimension.x, mipDimension.y);
