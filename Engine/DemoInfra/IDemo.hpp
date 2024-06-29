@@ -16,7 +16,6 @@ namespace neo {
 			std::string name = "";
 			std::string resDir = "res/";
 			std::string shaderDir = "shaders/";
-			glm::vec3 clearColor = { 0.2f, 0.3f, 0.4f };
 		};
 
 		/* Construction flow goes through init/destroy */

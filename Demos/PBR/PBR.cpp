@@ -21,12 +21,12 @@
 
 #include "GBufferRenderer.hpp"
 
-//#include "Renderer/RenderingSystems/BloomRenderer.hpp"
+#include "Renderer/RenderingSystems/BloomRenderer.hpp"
 #include "Renderer/RenderingSystems/ConvolveRenderer.hpp"
-//#include "Renderer/RenderingSystems/FXAARenderer.hpp"
+#include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/SkyboxRenderer.hpp"
-//#include "Renderer/RenderingSystems/TonemapRenderer.hpp"
+#include "Renderer/RenderingSystems/TonemapRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
@@ -303,25 +303,26 @@ namespace PBR {
 		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 
 		NEO_UNUSED(backbuffer);
-		/*
-		glm::vec3 clearColor = getConfig().clearColor;
-		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
-			"Scene Target",
+
+		auto hdrColorOutput = resourceManagers.mFramebufferManager.asyncLoad(
+			"HDR Color",
 			FramebufferBuilder{}
 				.setSize(viewport.mSize)
-				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F })
-				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F }),
 			resourceManagers.mTextureManager
 		);
-		if (!resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
+		if (!resourceManagers.mFramebufferManager.isValid(hdrColorOutput)) {
 			return;
 		}
-		auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
+		auto& hdrColor = resourceManagers.mFramebufferManager.resolve(hdrColorOutput);
 
-		sceneTarget.bind();
-		sceneTarget.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		hdrColor.bind();
+		hdrColor.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
+		drawSkybox(resourceManagers, ecs, cameraEntity);
+
+		/*
 		// Extract IBL
 		std::optional<IBLComponent> ibl;
 		const auto iblTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
@@ -332,13 +333,13 @@ namespace PBR {
 			}
 		}
 
-		drawSkybox(resourceManagers, ecs, cameraEntity);
 		drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl, mDebugMode);
 		drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl, mDebugMode);
+		*/
 
-		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, sceneTarget.mTextures[0], mBloomRadius, 8) : sceneTargetHandle;
+		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomRadius, 8) : hdrColorOutput;
 		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
-			bloomHandle = sceneTargetHandle;
+			bloomHandle = hdrColorOutput;
 		}
 
 		FramebufferHandle tonemappedHandle = mDoTonemap ? tonemap(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0]) : bloomHandle;
@@ -347,16 +348,15 @@ namespace PBR {
 		}
 
 		backbuffer.bind();
-		backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		drawFXAA(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(tonemappedHandle).mTextures[0]);
 		// Don't forget the depth. Because reasons.
-		glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
+		glBlitNamedFramebuffer(gbuffer.mFBOID, backbuffer.mFBOID,
 			0, 0, viewport.mSize.x, viewport.mSize.y,
 			0, 0, viewport.mSize.x, viewport.mSize.y,
 			GL_DEPTH_BUFFER_BIT,
 			GL_NEAREST
 		);
-		*/
 	}
 
 	void Demo::destroy() {

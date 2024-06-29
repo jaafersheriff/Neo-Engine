@@ -126,16 +126,15 @@ namespace Base {
 
 		if (resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
 			auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
-			glm::vec3 clearColor = getConfig().clearColor;
 
 			sceneTarget.bind();
-			sceneTarget.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+			sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 			drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 			drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
 
 			backbuffer.bind();
-			backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color);
+			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
 			drawFXAA(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
 			// Don't forget the depth. Because reasons.
 			glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,

@@ -35,7 +35,6 @@ namespace Compute {
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
 		config.name = "Compute";
-		config.clearColor = { 0.f, 0.f, 0.f };
 		return config;
 	}
 
@@ -90,7 +89,7 @@ namespace Compute {
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		TRACY_GPUN("Compute::render")
 		backbuffer.bind();
-		backbuffer.clear(glm::vec4(getConfig().clearColor, 1.0), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.0), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 
 		// Update the mesh
 		if (auto meshView = ecs.cGetComponent<ParticleMeshComponent>()) {

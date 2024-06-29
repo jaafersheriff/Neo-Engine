@@ -231,7 +231,7 @@ namespace Sponza {
 
 		auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
 		sceneTarget.bind();
-		sceneTarget.clear(glm::vec4(getConfig().clearColor, 0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.x, viewport.y);
 
 		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowMapHandle);

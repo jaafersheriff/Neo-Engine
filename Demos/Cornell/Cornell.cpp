@@ -46,7 +46,6 @@ namespace Cornell {
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
 		config.name = "Cornell";
-		config.clearColor = glm::vec3(0.f);
 		return config;
 	}
 
@@ -106,14 +105,13 @@ namespace Cornell {
 
 		if (resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
 			auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
-			glm::vec3 clearColor = getConfig().clearColor;
 			sceneTarget.bind();
-			sceneTarget.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+			sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 			drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 
 			backbuffer.bind();
-			backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			drawFXAA(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(sceneTargetHandle).mTextures[0]);
 			// Don't forget the depth. Because reasons.
 			glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
