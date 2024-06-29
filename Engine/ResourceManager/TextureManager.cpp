@@ -7,6 +7,8 @@
 
 #include <imgui.h>
 
+#pragma optimize("", off)
+
 namespace neo {
 	namespace {
 		uint16_t _bytesPerPixel(types::ByteFormats format) {
@@ -65,8 +67,10 @@ namespace neo {
 					std::string _fileName = Loader::APP_RES_DIR + filePath;
 					if (!util::fileExists(_fileName.c_str())) {
 						_fileName = Loader::ENGINE_RES_DIR + filePath;
-						NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file %s", filePath.c_str());
-						continue;
+						if (!util::fileExists(_fileName.c_str())) {
+							NEO_FAIL("Unable to find file %s", filePath.c_str());
+							continue;
+						}
 					}
 
 					bool flip = fileDetails.mFormat.mTarget != types::texture::Target::TextureCube; // This might be really dumb
@@ -107,6 +111,9 @@ namespace neo {
 					}
 
 					return load(details, debugName);
+				}
+				else {
+					NEO_LOG_E("Failed to load %s", debugName.has_value() ? debugName.value().c_str() : "");
 				}
 				return nullptr;
 			}
