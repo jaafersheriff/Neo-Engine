@@ -7,7 +7,7 @@
 
 namespace neo {
 
-	static FramebufferHandle bloom(const ResourceManagers& resourceManagers, const glm::uvec2 dimension, const TextureHandle inputTextureHandle, const float radius, const int downSampleSteps = 6) {
+	static FramebufferHandle bloom(const ResourceManagers& resourceManagers, const glm::uvec2 dimension, const TextureHandle inputTextureHandle, const float radius = 0.005, const int downSampleSteps = 6) {
 		TRACY_GPU();
 
 		NEO_ASSERT(downSampleSteps > 0, "Gotta bloom with something");

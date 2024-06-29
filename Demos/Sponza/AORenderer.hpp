@@ -9,7 +9,7 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "ResourceManager/MeshManager.hpp"
+#include "ResourceManager/ResourceManagers.hpp"
 
 #include "Util/Util.hpp"
 
@@ -127,73 +127,73 @@ namespace Sponza {
 		// Make a one-off framebuffer for the base AO
 		{
 			TRACY_GPUN("Base AO");
-			auto baseAOHandle = resourceManagers.mFramebufferManager.asyncLoad(
-				"AO Base",
-				FramebufferExternal{ {baseAOTexture} },
-				resourceManagers.mTextureManager
-			);
-			if (resourceManagers.mFramebufferManager.isValid(baseAOHandle)) {
-				auto& baseAOTarget = resourceManagers.mFramebufferManager.resolve(baseAOHandle);
-				baseAOTarget.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
-				glViewport(0, 0, targetSize.x / 2u, targetSize.y / 2u);
-				auto aoShader = resourceManagers.mShaderManager.asyncLoad("AOShader", SourceShader::ConstructionArgs{
-					{ types::shader::Stage::Vertex, "quad.vert"},
-					{ types::shader::Stage::Fragment, "sponza/ao.frag" }
-					});
-				if (!resourceManagers.mShaderManager.isValid(aoShader)) {
-					return NEO_INVALID_HANDLE;
-				}
-				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(aoShader, {});
-				resolvedShader.bind();
+			// auto baseAOHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			// 	"AO Base",
+			// 	FramebufferExternal{ {baseAOTexture} },
+			// 	resourceManagers.mTextureManager
+			// );
+			// if (resourceManagers.mFramebufferManager.isValid(baseAOHandle)) {
+			// 	auto& baseAOTarget = resourceManagers.mFramebufferManager.resolve(baseAOHandle);
+			// 	baseAOTarget.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
+			// 	glViewport(0, 0, targetSize.x / 2u, targetSize.y / 2u);
+			// 	auto aoShader = resourceManagers.mShaderManager.asyncLoad("AOShader", SourceShader::ConstructionArgs{
+			// 		{ types::shader::Stage::Vertex, "quad.vert"},
+			// 		{ types::shader::Stage::Fragment, "sponza/ao.frag" }
+			// 		});
+			// 	if (!resourceManagers.mShaderManager.isValid(aoShader)) {
+			// 		return NEO_INVALID_HANDLE;
+			// 	}
+			// 	auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(aoShader, {});
+			// 	resolvedShader.bind();
 
-				resolvedShader.bindUniform("radius", radius);
-				resolvedShader.bindUniform("bias", bias);
+			// 	resolvedShader.bindUniform("radius", radius);
+			// 	resolvedShader.bindUniform("bias", bias);
 
-				// bind gbuffer
-				resolvedShader.bindTexture("gNormal", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-				resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
+			// 	// bind gbuffer
+			// 	resolvedShader.bindTexture("gNormal", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+			// 	resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 
-				// bind kernel and noise
-				resolvedShader.bindTexture("noise", resourceManagers.mTextureManager.resolve(aoKernel));
-				resolvedShader.bindTexture("kernel", resourceManagers.mTextureManager.resolve(aoNoise));
+			// 	// bind kernel and noise
+			// 	resolvedShader.bindTexture("noise", resourceManagers.mTextureManager.resolve(aoKernel));
+			// 	resolvedShader.bindTexture("kernel", resourceManagers.mTextureManager.resolve(aoNoise));
 
-				const auto P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
-				resolvedShader.bindUniform("P", P);
-				resolvedShader.bindUniform("invP", glm::inverse(P));
+			// 	const auto P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
+			// 	resolvedShader.bindUniform("P", P);
+			// 	resolvedShader.bindUniform("invP", glm::inverse(P));
 
-				resourceManagers.mMeshManager.resolve("quad").draw();
-			}
+			// 	resourceManagers.mMeshManager.resolve("quad").draw();
+			// }
 		}
 		{
 			TRACY_GPUN("AO Blur");
 			{
-				auto blurAOHandle = resourceManagers.mFramebufferManager.asyncLoad(
-					"AO Blur",
-					FramebufferExternal{ {blurAOTexture} },
-					resourceManagers.mTextureManager
-				);
-				if (resourceManagers.mTextureManager.isValid(baseAOTexture) && resourceManagers.mFramebufferManager.isValid(blurAOHandle)) {
-					auto blurredAO = resourceManagers.mFramebufferManager.resolve(blurAOHandle);
-					blurredAO.bind();
-					blurredAO.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
-					glViewport(0, 0, targetSize.x, targetSize.y);
+				// auto blurAOHandle = resourceManagers.mFramebufferManager.asyncLoad(
+				// 	"AO Blur",
+				// 	FramebufferExternal{ {blurAOTexture} },
+				// 	resourceManagers.mTextureManager
+				// );
+				// if (resourceManagers.mTextureManager.isValid(baseAOTexture) && resourceManagers.mFramebufferManager.isValid(blurAOHandle)) {
+				// 	auto blurredAO = resourceManagers.mFramebufferManager.resolve(blurAOHandle);
+				// 	blurredAO.bind();
+				// 	blurredAO.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
+				// 	glViewport(0, 0, targetSize.x, targetSize.y);
 
-					auto blurShader = resourceManagers.mShaderManager.asyncLoad("BlurShader", SourceShader::ConstructionArgs{
-						{ types::shader::Stage::Vertex, "quad.vert"},
-						{ types::shader::Stage::Fragment, "sponza/blur.frag" }
-						});
-					if (!resourceManagers.mShaderManager.isValid(blurShader)) {
-						return NEO_INVALID_HANDLE;
-					}
+				// 	auto blurShader = resourceManagers.mShaderManager.asyncLoad("BlurShader", SourceShader::ConstructionArgs{
+				// 		{ types::shader::Stage::Vertex, "quad.vert"},
+				// 		{ types::shader::Stage::Fragment, "sponza/blur.frag" }
+				// 		});
+				// 	if (!resourceManagers.mShaderManager.isValid(blurShader)) {
+				// 		return NEO_INVALID_HANDLE;
+				// 	}
 
-					auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(blurShader, {});
-					resolvedShader.bind();
+				// 	auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(blurShader, {});
+				// 	resolvedShader.bind();
 
-					resolvedShader.bindTexture("inputAO", resourceManagers.mTextureManager.resolve(baseAOTexture));
-					resolvedShader.bindUniform("blurAmount", 2);
+				// 	resolvedShader.bindTexture("inputAO", resourceManagers.mTextureManager.resolve(baseAOTexture));
+				// 	resolvedShader.bindUniform("blurAmount", 2);
 
-					resourceManagers.mMeshManager.resolve("quad").draw();
-				}
+				// 	resourceManagers.mMeshManager.resolve("quad").draw();
+				// }
 			}
 		}
 		return blurAOTexture;

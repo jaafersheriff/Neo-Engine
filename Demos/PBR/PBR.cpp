@@ -19,12 +19,14 @@
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
-#include "Renderer/RenderingSystems/BloomRenderer.hpp"
+#include "GBufferRenderer.hpp"
+
+//#include "Renderer/RenderingSystems/BloomRenderer.hpp"
 #include "Renderer/RenderingSystems/ConvolveRenderer.hpp"
-#include "Renderer/RenderingSystems/FXAARenderer.hpp"
+//#include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/SkyboxRenderer.hpp"
-#include "Renderer/RenderingSystems/TonemapRenderer.hpp"
+//#include "Renderer/RenderingSystems/TonemapRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
@@ -87,7 +89,7 @@ namespace PBR {
 			material->mMetallic = 0.f;
 			material->mRoughness = 1.f - i / (numSpheres-1);
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<PBRRenderComponent>(entity);
+			ecs.addComponent<PBRDeferredComponent>(entity);
 		}
 		// Conductive spheres
 		for (int i = 0; i < numSpheres; i++) {
@@ -101,7 +103,7 @@ namespace PBR {
 			material->mMetallic = 1.f;
 			material->mRoughness = 1.f - i / (numSpheres-1);
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<PBRRenderComponent>(entity);
+			ecs.addComponent<PBRDeferredComponent>(entity);
 		}
 		{
 			auto icosahedron = ecs.createEntity();
@@ -117,7 +119,7 @@ namespace PBR {
 			material->mRoughness = 0.15f;
 			ecs.addComponent<ShadowCasterRenderComponent>(icosahedron);
 			ecs.addComponent<PinnedComponent>(icosahedron);
-			ecs.addComponent<PBRRenderComponent>(icosahedron);
+			ecs.addComponent<PBRDeferredComponent>(icosahedron);
 		}
 
 		// Emissive sphere
@@ -133,7 +135,7 @@ namespace PBR {
 			material->mRoughness = 0.f;
 			material->mEmissiveFactor = glm::vec3(100.f);
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<PBRRenderComponent>(entity);
+			ecs.addComponent<PBRDeferredComponent>(entity);
 		}
 
 		{
@@ -180,7 +182,7 @@ namespace PBR {
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 			ecs.addComponent<PinnedComponent>(entity);
-			ecs.addComponent<PBRRenderComponent>(entity);
+			ecs.addComponent<PBRDeferredComponent>(entity);
 		}
 
 		{
@@ -195,7 +197,7 @@ namespace PBR {
 			ecs.addComponent<MaterialComponent>(entity, bust.mMaterial);
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<PBRRenderComponent>(entity);
+			ecs.addComponent<PBRDeferredComponent>(entity);
 		}
 		{
 			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
@@ -216,7 +218,7 @@ namespace PBR {
 				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
 
 				ecs.addComponent<ShadowCasterRenderComponent>(entity);
-				ecs.addComponent<PBRRenderComponent>(entity);
+				ecs.addComponent<PBRDeferredComponent>(entity);
 			}
 		}
 
@@ -266,19 +268,7 @@ namespace PBR {
 		}
 		const auto& [cameraEntity, _, camera, cameraSpatial] = *cameraTuple;
 
-		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
-			"Scene Target",
-			FramebufferBuilder{}
-				.setSize(viewport.mSize)
-				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F })
-				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
-			resourceManagers.mTextureManager
-		);
-		if (!resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
-			return;
-		}
-		auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
+		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
 		TextureHandle shadowTexture = NEO_INVALID_HANDLE;
 		if (mDrawShadows) {
@@ -289,7 +279,7 @@ namespace PBR {
 			);
 			FramebufferHandle shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(
 				"Shadow map",
-				FramebufferExternal{ { shadowTexture } },
+				FramebufferExternalHandles{ shadowTexture },
 				resourceManagers.mTextureManager
 			);
 
@@ -302,7 +292,31 @@ namespace PBR {
 			}
 		}
 
+		auto gbufferHandle = createGbuffer(resourceManagers, viewport.mSize);
+		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
+			return;
+		}
+		auto gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
+		gbuffer.bind();
+		gbuffer.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
+		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
+
+		NEO_UNUSED(backbuffer);
+		/*
 		glm::vec3 clearColor = getConfig().clearColor;
+		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"Scene Target",
+			FramebufferBuilder{}
+				.setSize(viewport.mSize)
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F })
+				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
+			resourceManagers.mTextureManager
+		);
+		if (!resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
+			return;
+		}
+		auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
 
 		sceneTarget.bind();
 		sceneTarget.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
@@ -342,7 +356,7 @@ namespace PBR {
 			GL_DEPTH_BUFFER_BIT,
 			GL_NEAREST
 		);
-
+		*/
 	}
 
 	void Demo::destroy() {

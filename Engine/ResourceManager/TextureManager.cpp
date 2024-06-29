@@ -68,7 +68,7 @@ namespace neo {
 					if (!util::fileExists(_fileName.c_str())) {
 						_fileName = Loader::ENGINE_RES_DIR + filePath;
 						if (!util::fileExists(_fileName.c_str())) {
-							NEO_FAIL("Unable to find file %s", filePath.c_str());
+							NEO_LOG_E("Unable to find file %s", filePath.c_str());
 							continue;
 						}
 					}

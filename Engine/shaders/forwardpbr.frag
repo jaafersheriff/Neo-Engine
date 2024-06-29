@@ -63,39 +63,6 @@ uniform vec3 camDir;
 
 out vec4 color;
 
-vec3 getNormal() {
-	vec3 baseNormal = normalize(fragNor);
-#ifndef NORMAL_MAP
-	return baseNormal;
-#else
-
-	mat3 TBN;
-#ifdef TANGENTS
-	vec3 tan = normalize(fragTan.xyz);
-	vec3 biTan = normalize(cross(baseNormal, tan)) * fragTan.w;
-	if (any(isnan(biTan))) {
-		biTan = vec3(0, 1, 0); // uhhh
-	}
-	TBN = mat3(tan, biTan, baseNormal);
-
-#else
-	// http://www.thetenthplanet.de/archives/1180
-	vec3 dp1 = dFdx( fragPos.xyz ); 
-	vec3 dp2 = dFdy( fragPos.xyz ); 
-	vec2 duv1 = dFdx( fragTex ); 
-	vec2 duv2 = dFdy( fragTex );
-	vec3 dp2perp = cross( dp2, baseNormal ); 
-	vec3 dp1perp = cross( baseNormal, dp1 ); 
-	vec3 T = dp2perp * duv1.x + dp1perp * duv2.x; 
-	vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
-	float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) ); 
-	TBN = mat3( T * invmax, B * invmax, baseNormal );
-#endif
-	vec3 tangentNormal = texture(normalMap, fragTex).xyz * 2.0 - 1.0;
-	return normalize(TBN * normalize(tangentNormal));
-#endif
-}
-
 void main() {
 	vec4 fAlbedo = albedo;
 #ifdef ALBEDO_MAP
@@ -119,7 +86,14 @@ void main() {
 	fEmissive *= srgbToLinear(texture(emissiveMap, fragTex)).rgb;
 #endif
 
-	vec3 fNorm = getNormal();
+	vec3 fNorm = normalize(fragNor);
+#ifdef NORMAL_MAP
+	#ifdef TANGENTS
+	fNorm = getNormal(fNorm, texture(normalMap, fragTex).rgb, fragTan);
+	#else
+	fNorm = getNormal(fNorm, texture(normalMap, fragTex).rgb, fragPos.xyz, fragTex);
+	#endif
+#endif
 
 	vec3 V = normalize(camPos - fragPos.xyz);
 

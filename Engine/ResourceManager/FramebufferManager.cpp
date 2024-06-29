@@ -27,8 +27,8 @@ namespace neo {
 						seed = TextureHandle(swizzleTextureId(seed, format, builder.mSize)).mHandle;
 					}
 				},
-				[&](FramebufferExternal& external) {
-					for (auto& handle : external.mTextureHandles) {
+				[&](FramebufferExternalHandles& externalHandles) {
+					for (auto& handle : externalHandles) {
 						seed ^= static_cast<uint32_t>(handle.mHandle) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 					}
 				},
@@ -83,8 +83,8 @@ namespace neo {
 					texIds.emplace_back(textureManager.asyncLoad(swizzleTextureId(dstId.mHandle + i, format, builder.mSize), TextureBuilder{ format, glm::u16vec3(builder.mSize, 0.0)}, std::string(id.data()) + "_" + std::to_string(i)));
 				}
 			},
-			[&](FramebufferExternal& external) {
-				texIds = external.mTextureHandles;
+			[&](FramebufferExternalHandles& externalHandles) {
+				texIds = externalHandles;
 				owned = true;
 			},
 			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }

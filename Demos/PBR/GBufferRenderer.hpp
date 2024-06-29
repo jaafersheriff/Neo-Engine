@@ -3,6 +3,8 @@
 #include "ECS/ECS.hpp"
 #include "Util/Profiler.hpp"
 
+#include "PBRDeferredComponent.hpp"
+
 #include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
 #include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
@@ -22,43 +24,54 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
-namespace Sponza {
+namespace PBR {
 
-	FramebufferHandle createGBuffer(const ResourceManagers& resourceManagers, glm::uvec2 targetSize) {
-		return resourceManagers.mFramebufferManager.asyncLoad(
-			"GBuffer",
+	FramebufferHandle createGbuffer(const ResourceManagers& resourceManagers, glm::uvec2 dimension) {
+		return resourceManagers.mFramebufferManager.asyncLoad("Gbuffer",
 			FramebufferBuilder{}
-				.setSize(targetSize)
-				// Albedo
-				.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})
-				// World 
-				// TODO - could do everything in view space to get rid of this
-				.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})
-				// Normals
-				.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F})
-				// Depth
-				.attach({types::texture::Target::Texture2D, types::texture::InternalFormats::D16}),
+			.setSize(dimension)
+			// AlbedoAO
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
+			// Normal
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F })
+			// World roughness - World could go away if you do everything in view space...
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
+			// Emissive Metalness
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
+			// Depth
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::D16 }),
 			resourceManagers.mTextureManager
 		);
+
 	}
 
 	template<typename... CompTs>
-	void drawGBuffer(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
+	void drawGBuffer(
+		const ResourceManagers& resourceManagers, 
+		const ECS& ecs, 
+		const ECS::Entity cameraEntity, 
+		const FramebufferHandle gbufferHandle,
+		const ShaderDefines& inDefines = {}
+	) {
 		TRACY_GPU();
 
+		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
+			return;
+		}
+		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
+		gbuffer.bind();
+
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBuffer Shader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "sponza/gbuffer.vert"},
-			{ types::shader::Stage::Fragment, "sponza/gbuffer.frag" }
+			{ types::shader::Stage::Vertex, "model.vert"},
+			{ types::shader::Stage::Fragment, "pbr/gbuffer.frag" }
 		});
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
 		}
 
 		ShaderDefines passDefines(inDefines);
-		bool containsAlphaTest = false;
 		MakeDefine(ALPHA_TEST);
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
-			containsAlphaTest = true;
 			passDefines.set(ALPHA_TEST);
 			// Transparency sorting..for later
 		//	 glEnable(GL_BLEND);
@@ -72,11 +85,8 @@ namespace Sponza {
 		//		 });
 		}
 
-		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
-		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
-
 		ShaderDefines drawDefines(passDefines);
-		const auto& view = ecs.getView<const GBufferRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
+		const auto& view = ecs.getView<const PBRDeferredComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
 		for (auto entity : view) {
 			// VFC
 			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
@@ -85,20 +95,33 @@ namespace Sponza {
 				}
 			}
 
-			if (containsAlphaTest) {
-				NEO_ASSERT(!ecs.has<OpaqueComponent>(entity), "Entity has opaque and alpha test component?");
-			}
-
 			drawDefines.reset();
-
 			const auto& material = view.get<const MaterialComponent>(entity);
 			MakeDefine(ALBEDO_MAP);
 			MakeDefine(NORMAL_MAP);
+			MakeDefine(METAL_ROUGHNESS_MAP);
+			MakeDefine(OCCLUSION_MAP);
+			MakeDefine(EMISSIVE);
 			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
 				drawDefines.set(ALBEDO_MAP);
 			}
 			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
 				drawDefines.set(NORMAL_MAP);
+			}
+			if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
+				drawDefines.set(METAL_ROUGHNESS_MAP);
+			}
+			if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
+				drawDefines.set(OCCLUSION_MAP);
+			}
+			if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
+				drawDefines.set(EMISSIVE);
+			}
+
+			const auto& mesh = resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle);
+			MakeDefine(TANGENTS);
+			if (mesh.hasVBO(types::mesh::VertexType::Tangent)) {
+				drawDefines.set(TANGENTS);
 			}
 
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
@@ -113,10 +136,25 @@ namespace Sponza {
 				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
 			}
 
+			resolvedShader.bindUniform("metalness", material.mMetallic);
+			resolvedShader.bindUniform("roughness", material.mRoughness);
+			if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
+				resolvedShader.bindTexture("metalRoughnessMap", resourceManagers.mTextureManager.resolve(material.mMetallicRoughnessMap));
+			}
+
+			if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
+				resolvedShader.bindTexture("occlusionMap", resourceManagers.mTextureManager.resolve(material.mOcclusionMap));
+			}
+
+			resolvedShader.bindUniform("emissiveFactor", material.mEmissiveFactor);
+			if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
+				resolvedShader.bindTexture("emissiveMap", resourceManagers.mTextureManager.resolve(material.mEmissiveMap));
+			}
+
 			// UBO candidates
 			{
-				resolvedShader.bindUniform("P", P);
-				resolvedShader.bindUniform("V", cameraSpatial->getView());
+				resolvedShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
+				resolvedShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
 			}
 
 			const auto& drawSpatial = view.get<const SpatialComponent>(entity);
@@ -124,10 +162,6 @@ namespace Sponza {
 			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
 
 			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
-		}
-
-		if (containsAlphaTest) {
-			// glDisable(GL_BLEND);
 		}
 	}
 }

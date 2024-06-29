@@ -44,7 +44,7 @@ namespace neo {
 
 		auto pbrShaderHandle = resourceManagers.mShaderManager.asyncLoad("PBR Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
-			{ types::shader::Stage::Fragment, "pbr.frag" }
+			{ types::shader::Stage::Fragment, "forwardpbr.frag" }
 			});
 		if (!resourceManagers.mShaderManager.isValid(pbrShaderHandle)) {
 			return;
@@ -232,11 +232,13 @@ namespace neo {
 			// Yikes
 			if (material.mDoubleSided) {
 				glDisable(GL_CULL_FACE);
+				mesh.draw();
+				glEnable(GL_CULL_FACE);
+				mesh.draw();
 			}
 			else {
-				glEnable(GL_CULL_FACE);
+				mesh.draw();
 			}
-			mesh.draw();
 		}
 	}
 }

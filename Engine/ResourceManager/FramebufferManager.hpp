@@ -38,10 +38,8 @@ namespace neo {
 		}
 	};
 
-	struct FramebufferExternal {
-		std::vector<TextureHandle> mTextureHandles;
-	};
-	using FramebufferLoadDetails = std::variant<FramebufferBuilder, FramebufferExternal>;
+	using FramebufferExternalHandles = std::vector<TextureHandle>;
+	using FramebufferLoadDetails = std::variant<FramebufferBuilder, FramebufferExternalHandles>;
 
 	struct PooledFramebuffer {
 		Framebuffer mFramebuffer;

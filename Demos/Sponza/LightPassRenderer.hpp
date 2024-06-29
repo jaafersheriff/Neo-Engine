@@ -8,6 +8,7 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
 #include "Renderer/GLObjects/Framebuffer.hpp"
+#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
 using namespace neo;
 

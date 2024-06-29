@@ -61,7 +61,7 @@ vec3 prefilterEnvMap(vec3 R) {
             // Typically you'd have the following:
             // float pdf = D_GGX(NdotH, roughness) * NdotH / (4.0 * VdotH);
             // but since V = N => VdotH == NdotH
-            float pdf = D_GGX(NdotH, roughness) / 4.0 + 1e-5;
+            float pdf = D_GGX(NdotH, roughness) / 4.0 + EP;
             // Solid angle of current sample -- bigger for less likely samples
             float omegaS = 1.0 / (float(sampleCount) * pdf);
             // Solid angle of texel

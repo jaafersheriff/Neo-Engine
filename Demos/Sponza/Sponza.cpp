@@ -1,9 +1,7 @@
 #include "Sponza/Sponza.hpp"
 
-#include "GBufferComponent.hpp"
-#include "GBufferRenderer.hpp"
-#include "LightPassRenderer.hpp"
-#include "AORenderer.hpp"
+//#include "LightPassRenderer.hpp"
+//#include "AORenderer.hpp"
 
 #include "Engine/Engine.hpp"
 #include "Loader/Loader.hpp"
@@ -131,7 +129,7 @@ namespace Sponza {
 			ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
 
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<GBufferRenderComponent>(entity);
+			//ecs.addComponent<GBufferRenderComponent>(entity);
 			ecs.addComponent<PhongRenderComponent>(entity);
 		}
 
@@ -186,7 +184,7 @@ namespace Sponza {
 			);
 			FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 				"Shadow map",
-				FramebufferExternal{ {shadowTextureHandle} },
+				FramebufferExternalHandles { shadowTextureHandle },
 				resourceManagers.mTextureManager
 			);
 
@@ -247,23 +245,24 @@ namespace Sponza {
 		glm::uvec2 viewport, 
 		TextureHandle shadowMapHandle
 	) {
+		NEO_UNUSED(shadowMapHandle);
 		TRACY_GPU();
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-		FramebufferHandle gbufferHandle = createGBuffer(resourceManagers, viewport);
-		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
-			return;
-		}
-		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-		gbuffer.bind();
-		gbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		glViewport(0, 0, viewport.x, viewport.y);
-		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, {});
-		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, {});
+		// FramebufferHandle gbufferHandle = createGBuffer(resourceManagers, viewport);
+		// if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
+		// 	return;
+		// }
+		// auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
+		// gbuffer.bind();
+		// gbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		// glViewport(0, 0, viewport.x, viewport.y);
+		// drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, {});
+		// drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, {});
 
-		TextureHandle aoHandle = NEO_INVALID_HANDLE;
-		if (mDrawAO) {
-			aoHandle = drawAO(resourceManagers, ecs, cameraEntity, gbuffer, viewport, mAORadius, mAOBias);
-		}
+		// TextureHandle aoHandle = NEO_INVALID_HANDLE;
+		// if (mDrawAO) {
+		// 	aoHandle = drawAO(resourceManagers, ecs, cameraEntity, gbuffer, viewport, mAORadius, mAOBias);
+		// }
 
 		auto lightResolveHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Light Resolve",
@@ -281,8 +280,8 @@ namespace Sponza {
 		lightResolve.bind();
 		lightResolve.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
 		glViewport(0, 0, viewport.x, viewport.y);
-		drawPointLights(resourceManagers, ecs, gbuffer, cameraEntity, viewport, mLightDebugRadius);
-		drawDirectionalLights(resourceManagers, ecs, cameraEntity, gbuffer, shadowMapHandle);
+		// drawPointLights(resourceManagers, ecs, gbuffer, cameraEntity, viewport, mLightDebugRadius);
+		// drawDirectionalLights(resourceManagers, ecs, cameraEntity, gbuffer, shadowMapHandle);
 
 		// I'm lazy so I'm just going to do the final combine here
 		{
@@ -300,26 +299,26 @@ namespace Sponza {
 			}
 			ShaderDefines defines;
 			MakeDefine(DRAW_AO);
-			if (mDrawAO && resourceManagers.mTextureManager.isValid(aoHandle)) {
-				defines.set(DRAW_AO);
-			}
+			// if (mDrawAO && resourceManagers.mTextureManager.isValid(aoHandle)) {
+			// 	defines.set(DRAW_AO);
+			// }
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(combineShaderHandle, defines);
 			resolvedShader.bind();
 
 			resolvedShader.bindTexture("lightOutput", resourceManagers.mTextureManager.resolve(lightResolve.mTextures[0]));
-			if (mDrawAO && resourceManagers.mTextureManager.isValid(aoHandle)) {
-				resolvedShader.bindTexture("aoOutput", resourceManagers.mTextureManager.resolve(aoHandle));
-			}
+			// if (mDrawAO && resourceManagers.mTextureManager.isValid(aoHandle)) {
+			// 	resolvedShader.bindTexture("aoOutput", resourceManagers.mTextureManager.resolve(aoHandle));
+			// }
 
 			resourceManagers.mMeshManager.resolve("quad").draw();
 
 			// Don't forget the depth. Because reasons.
-			glBlitNamedFramebuffer(gbuffer.mFBOID, sceneTarget.mFBOID,
-				0, 0, viewport.x, viewport.y,
-				0, 0, viewport.x, viewport.y,
-				GL_DEPTH_BUFFER_BIT,
-				GL_NEAREST
-			);
+			// glBlitNamedFramebuffer(gbuffer.mFBOID, sceneTarget.mFBOID,
+			// 	0, 0, viewport.x, viewport.y,
+			// 	0, 0, viewport.x, viewport.y,
+			// 	GL_DEPTH_BUFFER_BIT,
+			// 	GL_NEAREST
+			// );
 		}
 	}
 }

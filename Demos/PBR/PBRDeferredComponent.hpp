@@ -4,8 +4,8 @@
 
 using namespace neo;
 
-namespace Sponza {
+namespace PBR {
 
-	START_COMPONENT(GBufferRenderComponent);
+	START_COMPONENT(PBRDeferredComponent);
 	END_COMPONENT();
 }

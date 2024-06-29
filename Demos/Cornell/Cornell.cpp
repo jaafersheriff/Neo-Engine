@@ -114,7 +114,7 @@ namespace Cornell {
 
 			backbuffer.bind();
 			backbuffer.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-			drawFXAA(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
+			drawFXAA(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(sceneTargetHandle).mTextures[0]);
 			// Don't forget the depth. Because reasons.
 			glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
 				0, 0, viewport.mSize.x, viewport.mSize.y,
