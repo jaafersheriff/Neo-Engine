@@ -20,25 +20,17 @@ namespace neo {
 		glm::uvec2 baseDimension = dimension / glm::uvec2(2);
 
 		// Create textures and targets
-		std::vector<TextureHandle> bloomTextures;
 		std::vector<FramebufferHandle> bloomTargets;
 		for (int i = 0; i < downSampleSteps; i++) {
-			bloomTextures.push_back(resourceManagers.mTextureManager.asyncLoad(
-				HashedString((std::string("BloomTex") + std::to_string(i)).c_str()),
-				TextureBuilder{}
-				.setDimension(glm::u16vec3(baseDimension.x >> i, baseDimension.y >> i, 0))
-				.setFormat(TextureFormat{
-					types::texture::Target::Texture2D,
-					types::texture::InternalFormats::RGB16_F
-					})
-			));
-
 			bloomTargets.push_back(resourceManagers.mFramebufferManager.asyncLoad(
 				HashedString((std::string("BloomTarget") + std::to_string(i)).c_str()),
-				// Needs to be external because FramebufferBuilder will make all attached textures the same size
-				FramebufferExternal{
-					{bloomTextures[i]}
-				},
+				FramebufferBuilder{}
+					.setSize(glm::uvec2(baseDimension.x >> i, baseDimension.y >> i))
+					.attach(TextureFormat{
+						types::texture::Target::Texture2D,
+						types::texture::InternalFormats::RGB16_F
+					}
+				),
 				resourceManagers.mTextureManager
 			));
 		}
@@ -73,7 +65,7 @@ namespace neo {
 					glViewport(0, 0, mipDimension.x, mipDimension.y);
 					resolvedShader.bindUniform("texelSize", glm::vec2(1.f / glm::vec2(mipDimension)));
 					quadMesh.draw();
-					resolvedShader.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(bloomTextures[i]));
+					resolvedShader.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(bloomDown.mTextures[0]));
 				}
 			}
 		}
@@ -96,7 +88,7 @@ namespace neo {
 			glBlendEquation(GL_FUNC_ADD);
 			for (int i = downSampleSteps - 1; i > 0; i--) {
 				if (resourceManagers.mFramebufferManager.isValid(bloomTargets[i])) {
-					resolvedShader.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(bloomTextures[i]));
+					resolvedShader.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(resourceManagers.mFramebufferManager.resolve(bloomTargets[i]).mTextures[0]));
 					auto& bloomUp = resourceManagers.mFramebufferManager.resolve(bloomTargets[i - 1]);
 					bloomUp.bind();
 
@@ -128,7 +120,7 @@ namespace neo {
 					auto bloomMixShader = resourceManagers.mShaderManager.resolveDefines(bloomMixShaderHandle, {});
 
 					bloomMixShader.bind();
-					bloomMixShader.bindTexture("bloomResults", resourceManagers.mTextureManager.resolve(bloomTextures[0]));
+					bloomMixShader.bindTexture("bloomResults", resourceManagers.mTextureManager.resolve(resourceManagers.mFramebufferManager.resolve(bloomTargets[0]).mTextures[0]));
 					bloomMixShader.bindTexture("hdrColor", inputTexture);
 					glViewport(0, 0, dimension.x, dimension.y);
 					quadMesh.draw();

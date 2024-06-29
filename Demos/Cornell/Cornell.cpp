@@ -107,6 +107,7 @@ namespace Cornell {
 		if (resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
 			auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
 			glm::vec3 clearColor = getConfig().clearColor;
+			sceneTarget.bind();
 			sceneTarget.clear(glm::vec4(clearColor, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 			drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);

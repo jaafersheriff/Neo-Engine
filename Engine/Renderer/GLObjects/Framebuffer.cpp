@@ -102,7 +102,6 @@ namespace neo {
 	}
 
 	void Framebuffer::clear(glm::vec4 clearColor, types::framebuffer::AttachmentBits clearFlags) const {
-		NEO_ASSERT(mTextures.size(), "Attempting to clear framebuffer with no textures");
 		glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 		glClear(_getGLClearFlags(clearFlags));
 	}
