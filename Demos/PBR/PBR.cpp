@@ -13,11 +13,13 @@
 #include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/IBLComponent.hpp"
 #include "ECS/Component/RenderingComponent/SkyboxComponent.hpp"
+#include "ECS/Component/SpatialComponent/SinTranslateComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
+#include "ECS/Systems/TranslationSystems/SinTranslateSystem.hpp"
 
 #include "GBufferRenderer.hpp"
 #include "DeferredPBRRenderer.hpp"
@@ -38,6 +40,29 @@
 using namespace neo;
 
 namespace PBR {
+	namespace {
+		void _createPointLights(ECS& ecs, const int count) {
+			for (auto& e : ecs.getView<PointLightComponent>()) {
+				ecs.removeEntity(e);
+			}
+
+			for (int i = 0; i < count; i++) {
+				glm::vec3 position(
+					util::genRandom(-15.f, 15.f),
+					util::genRandom(0.f, 10.f),
+					util::genRandom(-7.5f, 7.5f)
+				);
+				glm::vec3 scale(util::genRandom(1.f, 5.f));
+				const auto entity = ecs.createEntity();
+				ecs.addComponent<LightComponent>(entity, util::genRandomVec3(0.3f, 1.f), util::genRandom(15.f, 40.f));
+				ecs.addComponent<PointLightComponent>(entity);
+				ecs.addComponent<SinTranslateComponent>(entity, glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position);
+				ecs.addComponent<SpatialComponent>(entity, position, scale);
+				ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
+			}
+		}
+	}
+
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
 		config.name = "PBR";
@@ -76,6 +101,7 @@ namespace PBR {
 			ecs.addComponent<SpatialComponent>(shadowCam);
 			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
 		}
+		_createPointLights(ecs, mPointLightCount);
 
 		// Dialectric spheres
 		static float numSpheres = 8;
@@ -226,6 +252,7 @@ namespace PBR {
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
 		ecs.addSystem<RotationSystem>();
+		ecs.addSystem<SinTranslateSystem>();
 		ecs.addSystem<FrustumSystem>();
 		ecs.addSystem<FrustaFittingSystem>();
 		ecs.addSystem<FrustumCullingSystem>();
@@ -234,6 +261,11 @@ namespace PBR {
 	void Demo::imGuiEditor(ECS& ecs) {
 		NEO_UNUSED(ecs);
 		ImGui::Checkbox("Shadows", &mDrawShadows);
+		ImGui::SliderFloat("Debug Radius", &mLightDebugRadius, 0.f, 10.f);
+		if (ImGui::SliderInt("# Point Lights", &mPointLightCount, 0, 100)) {
+			_createPointLights(ecs, mPointLightCount);
+		}
+
 		ImGui::Checkbox("IBL", &mDrawIBL);
 		ImGui::Checkbox("Tonemap", &mDoTonemap);
 		ImGui::Checkbox("Bloom", &mDoBloom);
@@ -304,9 +336,8 @@ namespace PBR {
 		hdrColor.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		drawSkybox(resourceManagers, ecs, cameraEntity);
-		drawDirectionalLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, shadowTexture);
-
-		/*
+		drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle, shadowTexture);
+		drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
 		// Extract IBL
 		std::optional<IBLComponent> ibl;
 		const auto iblTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
@@ -316,10 +347,7 @@ namespace PBR {
 				ibl = _ibl;
 			}
 		}
-
-		drawPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl, mDebugMode);
-		drawPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl, mDebugMode);
-		*/
+		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle);
 
 		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomRadius, 8) : hdrColorOutput;
 		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {

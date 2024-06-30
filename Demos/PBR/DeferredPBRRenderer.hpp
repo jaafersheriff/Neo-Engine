@@ -81,10 +81,109 @@ namespace PBR {
 		}
 	}
 
-	void drawPointLightResolve() {
+	template<typename... CompTs>
+	void drawPointLightResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle, glm::uvec2 resolution, float debugRadius = 0.f) {
 		TRACY_GPU();
 
-		NEO_LOG_E("Unimplemented");
+		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightResolve Shader", SourceShader::ConstructionArgs{
+			{ types::shader::Stage::Vertex, "model.vert"},
+			{ types::shader::Stage::Fragment, "pbr/pointlightresolve.frag" }
+		});
+		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
+			return;
+		}
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+		glBlendColor(1.f, 1.f, 1.f, 1.f);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+
+		ShaderDefines defines;
+
+		MakeDefine(SHOW_LIGHTS);
+		if (debugRadius > 0.f) {
+			defines.set(SHOW_LIGHTS);
+		}
+		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
+		resolvedShader.bind();
+
+		if (debugRadius > 0.f) {
+			resolvedShader.bindUniform("debugRadius", debugRadius);
+		}
+
+		const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
+		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
+		resolvedShader.bindUniform("P", camera->getProj());
+		resolvedShader.bindUniform("V", cameraSpatial->getView());
+		resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
+		resolvedShader.bindUniform("resolution", glm::vec2(resolution));
+
+		/* Bind gbuffer */
+		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
+		resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
+		resolvedShader.bindTexture("gNormal", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+		resolvedShader.bindTexture("gWorldRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
+		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[4]));
+
+		/* Render light volumes */
+		// TODO : instanced
+		const auto& view = ecs.getView<const LightComponent, const PointLightComponent, const SpatialComponent, CompTs...>();
+		for (auto entity : view) {
+			// TODO : Could do VFC
+			const auto& light = ecs.cGetComponent<const LightComponent>(entity);
+			const auto& spatial = ecs.cGetComponent<const SpatialComponent>(entity);
+			resolvedShader.bindUniform("M", spatial->getModelMatrix());
+			resolvedShader.bindUniform("lightPos", spatial->getPosition());
+			resolvedShader.bindUniform("lightRadiance", glm::vec4(light->mColor, light->mIntensity));
+			resolvedShader.bindUniform("lightRadius", spatial->getScale().x);
+
+			// If camera is inside light 
+			float dist = glm::distance(spatial->getPosition(), cameraSpatial->getPosition());
+			if (dist - camera->getNear() < spatial->getScale().x) {
+				glCullFace(GL_FRONT);
+			}
+			else {
+				glCullFace(GL_BACK);
+			}
+
+			resourceManagers.mMeshManager.resolve(HashedString("sphere")).draw();
+		}
+
+		glEnable(GL_BLEND);
+		glCullFace(GL_BACK);
+	}
+
+	void drawIndirectResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle, ) {
+		TRACY_GPU();
+
+		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
+			return;
+		}
+
+		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("Indirect Resolve", SourceShader::ConstructionArgs{
+			{ types::shader::Stage::Vertex, "quad.vert" },
+			{ types::shader::Stage::Fragment, "pbr/indirectresolve.frag" }
+			});
+		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
+			return;
+		}
+
+		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, {});
+		resolvedShader.bind();
+
+		/* Bind gbuffer */
+		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
+		resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
+		resolvedShader.bindTexture("gNormal", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+		resolvedShader.bindTexture("gWorldRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
+		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[4]));
+
+		glDisable(GL_DEPTH_TEST);
+		resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
+		glEnable(GL_DEPTH_TEST);
 	}
 }
 

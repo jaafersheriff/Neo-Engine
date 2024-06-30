@@ -38,8 +38,8 @@ void main() {
 	pbrMaterial.ao = albedoAO.a;
 
 	PBRLight pbrLight;
-	pbrLight.L = normalize(lightDir);
 	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a;
+	pbrLight.L = normalize(lightDir);
 
 	PBRColor pbrColor;
 	pbrColor.directDiffuse = vec3(0);
@@ -60,9 +60,7 @@ void main() {
 	color.rgb = vec3(0)
 		+ pbrColor.directDiffuse
 		+ pbrColor.directSpecular
-		+ pbrColor.indirectDiffuse // Unused
-		+ pbrColor.indirectSpecular // Unused
-		+ emissiveMetalness.rgb
+		//+ emissiveMetalness.rgb TODO - move to indirect light pass
 	;
 
 }
