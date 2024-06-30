@@ -59,7 +59,6 @@ uniform vec3 lightAtt;
 #endif
 
 uniform vec3 camPos;
-uniform vec3 camDir;
 
 out vec4 color;
 
@@ -123,7 +122,7 @@ void main() {
 	pbrMaterial.linearRoughness = fRoughness;
 	pbrMaterial.metalness = fMetalness;
 	pbrMaterial.F0 = calculateF0(fAlbedo.rgb, fMetalness);
-	pbrMaterial.ao = 
+	pbrMaterial.ao = ao;
 
 	PBRLight pbrLight;
 	pbrLight.L = L;
@@ -137,17 +136,18 @@ void main() {
 
 	brdf(pbrMaterial, pbrLight, pbrColor);
 
-#ifdef ENABLE_SHADOWS
-	float visibility = getShadowVisibility(1, shadowMap, shadowMapResolution, shadowCoord, 0.001);
-	pbrColor.directDiffuse *= visibility;
-	pbrColor.directSpecular *= visibility;
-#endif
-
 	pbrColor.indirectDiffuse = fAlbedo.rgb * 0.03 * (1.0 - fMetalness);
 
 #ifdef IBL
 	vec3 R = reflect(-V, fNorm);
 	pbrColor.indirectSpecular = getIndirectSpecular(R, pbrMaterial, iblMips, dfgLUT, ibl);
+#endif
+
+
+#ifdef ENABLE_SHADOWS
+	float visibility = getShadowVisibility(1, shadowMap, shadowMapResolution, shadowCoord, 0.001);
+	pbrColor.directDiffuse *= visibility;
+	pbrColor.directSpecular *= visibility;
 #endif
 
 	color.rgb = vec3(0)
@@ -157,39 +157,5 @@ void main() {
 		+ pbrColor.indirectSpecular
 		+ fEmissive;
 	;
-
-#ifdef DEBUG_ALBEDO
-	color = vec4(fAlbedo.rgb, 1.0);
-	return;
-#endif
-
-#ifdef DEBUG_METAL_ROUGHNESS
-	color = vec4(0.0, fRoughness, fMetalness, 1.0);
-	return;
-#endif
-
-#ifdef DEBUG_EMISSIVE
-	color = vec4(fEmissive, 1);
-	return;
-#endif
-
-#ifdef DEBUG_NORMALS
-	vec3 _fNorm = fNorm * 0.5 + 0.5;
-	color = vec4(_fNorm.x, _fNorm.y, _fNorm.z, 1);
-
-	return;
-#endif
-
-#ifdef DEBUG_DIFFUSE
-	color = vec4(pbrColor.directDiffuse + pbrColor.indirectDiffuse, 1.0);
-	return;
-#endif
-
-#ifdef DEBUG_SPECULAR
-	color = vec4(pbrColor.directSpecular + pbrColor.indirectSpecular, 1.0);
-	return;
-#endif
-
-
 }
 

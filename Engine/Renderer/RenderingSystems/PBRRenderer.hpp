@@ -25,19 +25,9 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
 namespace neo {
-	enum class PBRDebugMode : uint8_t {
-		Off,
-		Albedo,
-		MetalRoughness,
-		Normals,
-		Emissives,
-		Diffuse,
-		Specular,
-		COUNT
-	};
 
 	template<typename... CompTs>
-	void drawPBR(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, TextureHandle shadowMapHandle = NEO_INVALID_HANDLE, std::optional<IBLComponent> ibl = std::nullopt, PBRDebugMode debugMode = PBRDebugMode::Off) {
+	void drawPBR(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, TextureHandle shadowMapHandle = NEO_INVALID_HANDLE, std::optional<IBLComponent> ibl = std::nullopt) {
 		TRACY_GPU();
 
 		ShaderDefines passDefines({});
@@ -48,36 +38,6 @@ namespace neo {
 			});
 		if (!resourceManagers.mShaderManager.isValid(pbrShaderHandle)) {
 			return;
-		}
-
-		MakeDefine(DEBUG_ALBEDO);
-		MakeDefine(DEBUG_METAL_ROUGHNESS);
-		MakeDefine(DEBUG_EMISSIVE);
-		MakeDefine(DEBUG_NORMALS);
-		MakeDefine(DEBUG_DIFFUSE);
-		MakeDefine(DEBUG_SPECULAR);
-		switch (debugMode) {
-		case PBRDebugMode::Albedo:
-			passDefines.set(DEBUG_ALBEDO);
-			break;
-		case PBRDebugMode::MetalRoughness:
-			passDefines.set(DEBUG_METAL_ROUGHNESS);
-			break;
-		case PBRDebugMode::Emissives:
-			passDefines.set(DEBUG_EMISSIVE);
-			break;
-		case PBRDebugMode::Normals:
-			passDefines.set(DEBUG_NORMALS);
-			break;
-		case PBRDebugMode::Diffuse:
-			passDefines.set(DEBUG_DIFFUSE);
-			break;
-		case PBRDebugMode::Specular:
-			passDefines.set(DEBUG_SPECULAR);
-			break;
-		case PBRDebugMode::Off:
-		default:
-			break;
 		}
 
 		bool containsAlphaTest = false;
@@ -202,7 +162,6 @@ namespace neo {
 				resolvedShader.bindUniform("P", P);
 				resolvedShader.bindUniform("V", cameraSpatial->getView());
 				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
-				resolvedShader.bindUniform("camDir", cameraSpatial->getLookDir());
 				resolvedShader.bindUniform("lightRadiance", glm::vec4(light.mColor, light.mIntensity));
 				if (directionalLight || shadowsEnabled) {
 					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());

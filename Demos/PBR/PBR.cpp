@@ -240,24 +240,6 @@ namespace PBR {
 		if (mDoBloom) {
 			ImGui::SliderFloat("Bloom Radius", &mBloomRadius, 0.f, 0.01f);
 		}
-
-		static std::unordered_map<PBRDebugMode, const char*> sDebugModeStrings = {
-			{PBRDebugMode::Off, "Off"},
-			{PBRDebugMode::Albedo, "Albedo"},
-			{PBRDebugMode::MetalRoughness, "MetalRoughness"},
-			{PBRDebugMode::Emissives, "Emissive"},
-			{PBRDebugMode::Normals, "Normals"},
-			{PBRDebugMode::Diffuse, "Diffuse"},
-			{PBRDebugMode::Specular, "Specular"},
-		};
-		if (ImGui::BeginCombo("Debug Mode", sDebugModeStrings[mDebugMode])) {
-			for (int i = 0; i < static_cast<int>(PBRDebugMode::COUNT); i++) {
-				if (ImGui::Selectable(sDebugModeStrings[static_cast<PBRDebugMode>(i)], mDebugMode == static_cast<PBRDebugMode>(i))) {
-					mDebugMode = static_cast<PBRDebugMode>(i);
-				}
-			}
-			ImGui::EndCombo();
-		}
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {

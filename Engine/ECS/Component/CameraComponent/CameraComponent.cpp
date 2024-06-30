@@ -21,23 +21,33 @@ namespace neo {
 	{}
 
 	void CameraComponent::setNear(float near) {
-		mNear = near;
-		mProjMatDirty = true;
+		if (near != mNear) {
+			mNear = near;
+			mProjMatDirty = true;
+		}
 	}
 
 	void CameraComponent::setFar(float far) {
-		mFar = far;
-		mProjMatDirty = true;
+		if (far != mFar) {
+			mFar = far;
+			mProjMatDirty = true;
+		}
 	}
 
 	void CameraComponent::setPerspective(Perspective camera) {
 		NEO_ASSERT(mPerspective.has_value(), "This isn't an perspective camera..");
+		if (camera == *mPerspective) {
+			return;
+		}
 		mPerspective = camera;
 		mProjMatDirty = true;
 	}
 
 	void CameraComponent::setOrthographic(Orthographic camera) {
 		NEO_ASSERT(mOrthographic.has_value(), "This isn't an orthograhpic camera..");
+		if (camera == *mOrthographic) {
+			return;
+		}
 		mOrthographic = camera;
 		mProjMatDirty = true;
 	}

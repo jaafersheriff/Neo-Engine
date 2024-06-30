@@ -11,12 +11,19 @@ namespace neo {
 			float mFOV;
 			float mAspectRatio;
 
+			bool operator==(const Perspective& other) const {
+				return mFOV == other.mFOV && mAspectRatio == other.mAspectRatio;
+			}
+
 			bool imGuiEditor();
 		};
 
 		struct Orthographic {
 			glm::vec2 mHorizBounds;
 			glm::vec2 mVertBounds;
+			bool operator==(const Orthographic& other) const {
+				return mHorizBounds == other.mHorizBounds && mVertBounds == other.mVertBounds;
+			}
 
 			bool imGuiEditor();
 		};
