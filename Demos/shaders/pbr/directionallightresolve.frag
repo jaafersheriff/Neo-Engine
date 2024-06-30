@@ -51,7 +51,7 @@ void main() {
 
 #ifdef ENABLE_SHADOWS
 	vec4 shadowCoord = lightTransform * vec4(worldRoughness.rgb, 1.0);
-	float visibility = max(getShadowVisibility(1, shadowMap, shadowMapResolution, shadowCoord, 0.002), 0.2);
+	float visibility = getShadowVisibility(1, shadowMap, shadowMapResolution, shadowCoord, 0.002);
 	pbrColor.directDiffuse *= visibility;
 	pbrColor.directSpecular *= visibility;
 #endif
@@ -60,7 +60,6 @@ void main() {
 	color.rgb = vec3(0)
 		+ pbrColor.directDiffuse
 		+ pbrColor.directSpecular
-		//+ emissiveMetalness.rgb TODO - move to indirect light pass
 	;
 
 }

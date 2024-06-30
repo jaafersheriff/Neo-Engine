@@ -136,11 +136,10 @@ void main() {
 
 	brdf(pbrMaterial, pbrLight, pbrColor);
 
-	pbrColor.indirectDiffuse = fAlbedo.rgb * 0.03 * (1.0 - fMetalness);
+	pbrColor.indirectDiffuse = calculateIndirectDiffuse(pbrMaterial.albedo, pbrMaterial.metalness);
 
 #ifdef IBL
-	vec3 R = reflect(-V, fNorm);
-	pbrColor.indirectSpecular = getIndirectSpecular(R, pbrMaterial, iblMips, dfgLUT, ibl);
+	pbrColor.indirectSpecular = getIndirectSpecular(pbrMaterial, iblMips, dfgLUT, ibl);
 #endif
 
 

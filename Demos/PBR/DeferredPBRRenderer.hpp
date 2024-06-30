@@ -155,7 +155,7 @@ namespace PBR {
 		glCullFace(GL_BACK);
 	}
 
-	void drawIndirectResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle, ) {
+	void drawIndirectResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle, std::optional<IBLComponent> ibl = std::nullopt) {
 		TRACY_GPU();
 
 		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
@@ -170,8 +170,15 @@ namespace PBR {
 			return;
 		}
 
-		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, {});
+		ShaderDefines defines;
+		MakeDefine(IBL);
+		if (ibl.has_value()) {
+			defines.set(IBL);
+		}
+		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
 		resolvedShader.bind();
+
+		resolvedShader.bindUniform("camPos", ecs.cGetComponent<const SpatialComponent>(cameraEntity)->getPosition());
 
 		/* Bind gbuffer */
 		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
@@ -180,6 +187,12 @@ namespace PBR {
 		resolvedShader.bindTexture("gWorldRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
 		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[4]));
+
+		if (ibl.has_value()) {
+			resolvedShader.bindTexture("ibl", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox));
+			resolvedShader.bindTexture("dfgLUT", resourceManagers.mTextureManager.resolve(ibl->mDFGLut));
+			resolvedShader.bindUniform("iblMips", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox).mFormat.mMipCount);
+		}
 
 		glDisable(GL_DEPTH_TEST);
 		resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();

@@ -347,7 +347,7 @@ namespace PBR {
 				ibl = _ibl;
 			}
 		}
-		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle);
+		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
 
 		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomRadius, 8) : hdrColorOutput;
 		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {

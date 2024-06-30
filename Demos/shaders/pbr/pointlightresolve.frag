@@ -89,8 +89,7 @@ void main() {
 	color.rgb = vec3(0)
 		+ pbrColor.directDiffuse
 		+ pbrColor.directSpecular
-		//+ emissiveMetalness.rgb TODO - move to indirect light pass
-		;
+	;
 
 }
 

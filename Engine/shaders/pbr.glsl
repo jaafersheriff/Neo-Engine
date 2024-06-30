@@ -4,6 +4,10 @@
 
 #include "pbrtypes.glsl"
 
+vec3 calculateIndirectDiffuse(vec3 albedo, float metalness, float ambient = 0.03) {
+	return albedo.rgb * ambient * (1.0 - metalness);
+}
+
 vec3 calculateF0(vec3 albedo, float metalness) {
 	return mix(vec3(DIALECTRIC_REFLECTANCE), albedo, vec3(metalness));
 }
