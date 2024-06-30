@@ -282,6 +282,7 @@ namespace PBR {
 		auto gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
 		gbuffer.bind();
 		gbuffer.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 
@@ -302,7 +303,6 @@ namespace PBR {
 		hdrColor.bind();
 		hdrColor.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-
 		drawSkybox(resourceManagers, ecs, cameraEntity);
 		drawDirectionalLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, shadowTexture);
 

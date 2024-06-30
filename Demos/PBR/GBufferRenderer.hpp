@@ -126,6 +126,13 @@ namespace PBR {
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
 			resolvedShader.bind();
 
+			// UBO candidates
+			{
+				NEO_ASSERT(!ecs.has<ShadowCameraComponent>(cameraEntity), "HEH");
+				resolvedShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
+				resolvedShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
+			}
+
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
 			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
 				resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material.mAlbedoMap));
@@ -148,12 +155,6 @@ namespace PBR {
 			resolvedShader.bindUniform("emissiveFactor", material.mEmissiveFactor);
 			if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
 				resolvedShader.bindTexture("emissiveMap", resourceManagers.mTextureManager.resolve(material.mEmissiveMap));
-			}
-
-			// UBO candidates
-			{
-				resolvedShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
-				resolvedShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
 			}
 
 			const auto& drawSpatial = view.get<const SpatialComponent>(entity);

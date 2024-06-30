@@ -11,7 +11,6 @@ namespace neo {
 	template<typename... CompTs>
 	void drawShadows(const ResourceManagers& resourceManagers, const Framebuffer& depthMap, const ECS& ecs) {
 		TRACY_GPU();
-
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
 			{ types::shader::Stage::Fragment, "depth.frag" }
@@ -62,6 +61,7 @@ namespace neo {
 			}
 
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
+			resolvedShader.bind();
 
 			if (doAlphaTest) {
 				resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
