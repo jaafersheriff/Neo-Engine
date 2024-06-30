@@ -61,9 +61,9 @@ namespace neo {
 			resolved.bind();
 			return resolved;
 		}
-		else {
-			return mFallback->mResource.getResolvedInstance({});
-		}
+		auto& fallback = mFallback->mResource.getResolvedInstance({});
+		fallback.bind();
+		return fallback;
 	}
 
 	[[nodiscard]] ShaderManager::ShaderHandle ShaderManager::_asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, const std::optional<std::string>& debugName) const {

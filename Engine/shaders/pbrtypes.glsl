@@ -6,6 +6,7 @@ struct PBRMaterial {
     float linearRoughness;
     float metalness;
     vec3 F0;
+    float ao;
 };
 
 struct PBRLight {

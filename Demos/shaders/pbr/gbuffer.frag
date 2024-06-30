@@ -61,7 +61,7 @@ void main() {
 	fNorm = getNormal(fNorm, texture(normalMap, fragTex).rgb, fragPos.xyz, fragTex);
 	#endif
 #endif
- 	gNormal= vec4(fNorm, 1.0);
+ 	gNormal= vec4(fNorm * 0.5 + 0.5, 1.0);
 
 	float fMetalness = metalness;
 	float fRoughness = roughness;

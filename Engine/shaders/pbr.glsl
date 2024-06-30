@@ -4,6 +4,10 @@
 
 #include "pbrtypes.glsl"
 
+vec3 calculateF0(vec3 albedo, float metalness) {
+	return mix(vec3(DIALECTRIC_REFLECTANCE), albedo, vec3(metalness));
+}
+
 float GeometrySchlickGGX(float NdotV, float roughness) {
     float r = (roughness + 1.0);
     float k = (r * r) / 8.0;
@@ -45,6 +49,6 @@ void brdf(in PBRMaterial pbrMaterial, in PBRLight pbrLight, out PBRColor pbrColo
     vec3 Ks = F;
     vec3 Kd = (vec3(1.0) - Ks) * (1.0 - pbrMaterial.metalness);
 
-    pbrColor.directDiffuse += (Kd * pbrMaterial.albedo / PI) * NdotL * pbrLight.radiance;
-    pbrColor.directSpecular += ((D * F * G) / (4 * NdotV * dot(pbrMaterial.N, pbrLight.L))) * NdotL * pbrLight.radiance;
+    pbrColor.directDiffuse += (Kd * pbrMaterial.albedo / PI) * NdotL * pbrLight.radiance * pbrMaterial.ao;
+    pbrColor.directSpecular += ((D * F * G) / (4 * NdotV * dot(pbrMaterial.N, pbrLight.L))) * NdotL * pbrLight.radiance * pbrMaterial.ao;
 }

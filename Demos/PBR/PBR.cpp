@@ -20,6 +20,7 @@
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
 #include "GBufferRenderer.hpp"
+#include "DeferredPBRRenderer.hpp"
 
 #include "Renderer/RenderingSystems/BloomRenderer.hpp"
 #include "Renderer/RenderingSystems/ConvolveRenderer.hpp"
@@ -321,6 +322,7 @@ namespace PBR {
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
 		drawSkybox(resourceManagers, ecs, cameraEntity);
+		drawDirectionalLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, shadowTexture);
 
 		/*
 		// Extract IBL

@@ -111,13 +111,19 @@ void main() {
 	}
 #endif
 
+	float ao = 1.f;
+#ifdef OCCLUSION_MAP
+	float ao = texture(occlusionMap, fragTex).r;
+#endif
+
 	PBRMaterial pbrMaterial;
 	pbrMaterial.albedo = fAlbedo.rgb;
 	pbrMaterial.N = fNorm;
 	pbrMaterial.V = V;
 	pbrMaterial.linearRoughness = fRoughness;
 	pbrMaterial.metalness = fMetalness;
-	pbrMaterial.F0 = mix(vec3(DIALECTRIC_REFLECTANCE), fAlbedo.rgb, vec3(fMetalness));
+	pbrMaterial.F0 = calculateF0(fAlbedo.rgb, fMetalness);
+	pbrMaterial.ao = 
 
 	PBRLight pbrLight;
 	pbrLight.L = L;
@@ -130,12 +136,6 @@ void main() {
 	pbrColor.indirectSpecular = vec3(0);
 
 	brdf(pbrMaterial, pbrLight, pbrColor);
-
-#ifdef OCCLUSION_MAP
-	float ao = texture(occlusionMap, fragTex).r;
-	pbrColor.directDiffuse *= ao;
-	pbrColor.directSpecular *= ao;
-#endif
 
 #ifdef ENABLE_SHADOWS
 	float visibility = getShadowVisibility(1, shadowMap, shadowMapResolution, shadowCoord, 0.001);
