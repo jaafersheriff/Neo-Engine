@@ -170,11 +170,15 @@ namespace neo {
 		NEO_ASSERT(!mValid && mPid == 0, "Trying to initialize an existing shader variant object?");
 		TRACY_ZONE();
 		mValid = false;
+		isCompute = false;
 		mPid = glCreateProgram();
 
 		std::vector<std::string> uniforms;
 		std::map<std::string, GLint> bindings;
 		for (auto&& [stage, source] : shaderCode) {
+			if (stage == types::shader::Stage::Compute) {
+				isCompute = true;
+			}
 			if (!source) {
 				NEO_LOG_E("Trying to compile an empty shader source");
 				return mValid;
@@ -260,6 +264,13 @@ namespace neo {
 	void ResolvedShaderInstance::unbind() const {
 		glActiveTexture(GL_TEXTURE0);
 		glUseProgram(0);
+	}
+
+	void ResolvedShaderInstance::dispatch(glm::uvec3 workGroups) const {
+		NEO_ASSERT(isCompute, "Can't dispatch a non-compute shader");
+		if (isValid) {
+			glDispatchCompute(workGroups.x, workGroups.y, workGroups.z);
+		}
 	}
 
 	GLint ResolvedShaderInstance::_getUniform(const char* name) const {

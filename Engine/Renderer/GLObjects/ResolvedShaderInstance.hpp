@@ -46,8 +46,11 @@ namespace neo {
 		void bindUniform(const char* name, const UniformVariant& uniform) const;
 		void bindTexture(const char* name, const Texture& texture) const;
 
+		void dispatch(glm::uvec3 workGroups) const;
+
 	private:
 		bool mValid = false;
+		bool isCompute = false;
 		uint32_t mPid = 0;
 		entt::dense_hash_map<types::shader::Stage, uint32_t> mShaderIDs;
 		entt::dense_hash_map<HashedString::hash_type, int32_t> mUniforms;

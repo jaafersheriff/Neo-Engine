@@ -116,11 +116,11 @@ namespace neo {
 					convolveShader.bindUniform("roughness", mip / static_cast<float>(convolvedCubemap.mFormat.mMipCount - 2));
 					convolveShader.bindUniform("sampleCount", ibl.mSampleCount);
 					glBindImageTexture(0, convolvedCubemap.mTextureID, mip, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F/*resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mFormat.mInternalFormat*/);
-					glDispatchCompute(
+					convolveShader.dispatch({
 						mipResolution / 8,
 						mipResolution / 8,
 						1
-					);
+					});
 					glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 				}
 
