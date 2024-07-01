@@ -25,6 +25,19 @@ namespace neo {
 				TessellationEval,
 				Compute
 			};
+
+			enum class Barrier {
+				ImageAccess,
+				AtomicCounter,
+				StorageBuffer,
+				// There's way more that are unsupported hehe
+			};
+
+			enum class Access {
+				Ready,
+				Write,
+				ReadWrite
+			};
 		}
 
 		namespace framebuffer {

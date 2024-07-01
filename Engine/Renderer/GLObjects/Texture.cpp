@@ -57,38 +57,6 @@ namespace neo {
 			}
 		}
 
-		GLenum _getGLInternalFormat(types::texture::InternalFormats format) {
-			switch (format) {
-			case types::texture::InternalFormats::R8_UNORM: return GL_R8;
-			case types::texture::InternalFormats::RG8_UNORM: return GL_RG8;
-			case types::texture::InternalFormats::RGB8_UNORM: return GL_RGB8;
-			case types::texture::InternalFormats::RGBA8_UNORM: return GL_RGBA8;
-			case types::texture::InternalFormats::R16_UNORM: return GL_R16;
-			case types::texture::InternalFormats::RG16_UNORM: return GL_RG16;
-			case types::texture::InternalFormats::RGB16_UNORM: return GL_RGB16;
-			case types::texture::InternalFormats::RGBA16_UNORM: return GL_RGBA16;
-			case types::texture::InternalFormats::R16_UI: return GL_R16UI;
-			case types::texture::InternalFormats::RG16_UI: return GL_RG16UI;
-			case types::texture::InternalFormats::RGB16_UI: return GL_RGB16UI;
-			case types::texture::InternalFormats::RGBA16_UI: return GL_RGBA16UI;
-			case types::texture::InternalFormats::R16_F: return GL_R16F;
-			case types::texture::InternalFormats::RG16_F: return GL_RG16F;
-			case types::texture::InternalFormats::RGB16_F: return GL_RGB16F;
-			case types::texture::InternalFormats::RGBA16_F: return GL_RGBA16F;
-			case types::texture::InternalFormats::R32_F: return GL_R32F;
-			case types::texture::InternalFormats::RG32_F: return GL_RG32F;
-			case types::texture::InternalFormats::RGB32_F: return GL_RGB32F;
-			case types::texture::InternalFormats::RGBA32_F: return GL_RGBA32F;
-			case types::texture::InternalFormats::D16: return GL_DEPTH_COMPONENT16;
-			case types::texture::InternalFormats::D24: return GL_DEPTH_COMPONENT24;
-			case types::texture::InternalFormats::D32: return GL_DEPTH_COMPONENT32F;
-			case types::texture::InternalFormats::D24S8: return GL_DEPTH24_STENCIL8;
-			default:
-				NEO_FAIL("Invalid internal format");
-				return GL_RGB8;
-			}
-		}
-
 		GLenum _getGLBaseFormat(types::texture::BaseFormats format) {
 			switch (format) {
 			case types::texture::BaseFormats::R: return GL_RED;
@@ -204,16 +172,16 @@ namespace neo {
 		// Lock in storage
 		switch (mFormat.mTarget) {
 		case types::texture::Target::Texture1D:
-			glTexStorage1D(GL_TEXTURE_1D, mFormat.mMipCount, _getGLInternalFormat(mFormat.mInternalFormat), mWidth);
+			glTexStorage1D(GL_TEXTURE_1D, mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth);
 			break;
 		case types::texture::Target::Texture2D:
-			glTexStorage2D(GL_TEXTURE_2D, mFormat.mMipCount, _getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
+			glTexStorage2D(GL_TEXTURE_2D, mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
 			break;
 		case types::texture::Target::Texture3D:
-			glTexStorage3D(GL_TEXTURE_3D, mFormat.mMipCount, _getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight, mDepth);
+			glTexStorage3D(GL_TEXTURE_3D, mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight, mDepth);
 			break;
 		case types::texture::Target::TextureCube:
-			glTexStorage2D(GL_TEXTURE_CUBE_MAP, mFormat.mMipCount, _getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
+			glTexStorage2D(GL_TEXTURE_CUBE_MAP, mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
 			break;
 		default:
 			NEO_FAIL("Invalid texture class");

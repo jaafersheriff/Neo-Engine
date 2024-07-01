@@ -13,6 +13,17 @@ namespace neo {
 	class Texture;
 	class SourceShader;
 
+	struct ShaderBarrier {
+		ShaderBarrier(types::shader::Barrier barrierType) :
+			mBarrierType(barrierType)
+		{}
+		ShaderBarrier(const ShaderBarrier&) = delete;
+		~ShaderBarrier();
+
+		private:
+			types::shader::Barrier mBarrierType;
+	};
+
 	class ResolvedShaderInstance {
 		friend SourceShader;
 	public:
@@ -45,6 +56,7 @@ namespace neo {
 			>;
 		void bindUniform(const char* name, const UniformVariant& uniform) const;
 		void bindTexture(const char* name, const Texture& texture) const;
+		[[nodiscard]] std::unique_ptr<ShaderBarrier> bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip = 0) const;
 
 		void dispatch(glm::uvec3 workGroups) const;
 

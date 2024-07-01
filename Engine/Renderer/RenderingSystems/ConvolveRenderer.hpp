@@ -60,15 +60,12 @@ namespace neo {
 				auto& dfgLutShader = resourceManagers.mShaderManager.resolveDefines(dfgLutShaderHandle, {});
 				dfgLutShader.bind();
 
-				dfgLutShader.bindTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut));
-				glBindImageTexture(0, resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mTextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F/*resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mFormat.mInternalFormat*/);
-				glDispatchCompute(
+				auto barrier = dfgLutShader.bindImageTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut), types::shader::Access::Write);
+				dfgLutShader.dispatch({
 					ibl.mDFGLutResolution / 8,
 					ibl.mDFGLutResolution / 8,
 					1
-				);
-				glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
+				});
 				ibl.mDFGGenerated = true;
 			}
 		}
@@ -108,20 +105,18 @@ namespace neo {
 				convolveShader.bind();
 
 				convolveShader.bindTexture("cubeMap", skyboxCubemap);
-				convolveShader.bindTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox));
 				convolveShader.bindUniform("resolution", convolvedCubemap.mWidth);
 				for (int mip = 0; mip < convolvedCubemap.mFormat.mMipCount; mip++) {
 					convolveShader.bindUniform("mipLevel", mip);
 					uint16_t mipResolution = convolvedCubemap.mWidth >> uint16_t(mip);
 					convolveShader.bindUniform("roughness", mip / static_cast<float>(convolvedCubemap.mFormat.mMipCount - 2));
 					convolveShader.bindUniform("sampleCount", ibl.mSampleCount);
-					glBindImageTexture(0, convolvedCubemap.mTextureID, mip, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F/*resourceManagers.mTextureManager.resolve(ibl.mDFGLut).mFormat.mInternalFormat*/);
+					auto barrier = convolveShader.bindImageTexture("dst", convolvedCubemap, types::shader::Access::Write, mip);
 					convolveShader.dispatch({
 						mipResolution / 8,
 						mipResolution / 8,
 						1
 					});
-					glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 				}
 
 				ibl.mConvolved = true;

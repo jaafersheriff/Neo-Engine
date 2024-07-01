@@ -12,7 +12,33 @@
 
 namespace neo {
 	namespace {
+		int32_t _getGLAccessType(types::shader::Access accessType) {
+			switch (accessType) {
+			case types::shader::Access::Ready:
+				return GL_READ_ONLY;
+			case types::shader::Access::Write:
+				return GL_WRITE_ONLY;
+			case types::shader::Access::ReadWrite:
+				return GL_READ_WRITE;
+			default:
+				NEO_FAIL("Invalid access type");
+				return 0;
+			}
+		}
 
+		int32_t _getGLBarrierType(types::shader::Barrier barrierType) {
+			switch (barrierType) {
+			case types::shader::Barrier::AtomicCounter:
+				return GL_ATOMIC_COUNTER_BARRIER_BIT;
+			case types::shader::Barrier::ImageAccess:
+				return GL_SHADER_IMAGE_ACCESS_BARRIER_BIT;
+			case types::shader::Barrier::StorageBuffer:
+				return GL_SHADER_STORAGE_BARRIER_BIT;
+			default:
+				NEO_FAIL("Invalid barrier type");
+				return 0;
+			}
+		}
 
 		int32_t _getGLShaderStage(types::shader::Stage type) {
 			switch (type) {
@@ -166,6 +192,11 @@ namespace neo {
 		}
 	}
 
+	ShaderBarrier::~ShaderBarrier() {
+		NEO_LOG_V("BARRIER");
+		glMemoryBarrier(_getGLBarrierType(mBarrierType));
+	}
+
 	bool ResolvedShaderInstance::init(const SourceShader::ShaderCode& shaderCode, const ShaderDefines& defines) {
 		NEO_ASSERT(!mValid && mPid == 0, "Trying to initialize an existing shader variant object?");
 		TRACY_ZONE();
@@ -268,7 +299,7 @@ namespace neo {
 
 	void ResolvedShaderInstance::dispatch(glm::uvec3 workGroups) const {
 		NEO_ASSERT(isCompute, "Can't dispatch a non-compute shader");
-		if (isValid) {
+		if (isValid()) {
 			glDispatchCompute(workGroups.x, workGroups.y, workGroups.z);
 		}
 	}
@@ -313,5 +344,15 @@ namespace neo {
 		glActiveTexture(GL_TEXTURE0 + bindingLoc);
 		texture.bind();
 		glUniform1i(_getUniform(name), bindingLoc);
+	}
+
+	[[nodiscard]] std::unique_ptr<ShaderBarrier> ResolvedShaderInstance::bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip) const {
+		GLint bindingLoc = 0;
+		auto binding = mBindings.find(HashedString(name));
+		if (binding != mBindings.end()) {
+			bindingLoc = binding->second;
+		}
+		glBindImageTexture(bindingLoc, texture.mTextureID, mip, GL_FALSE, 0, _getGLAccessType(accessType), GLHelper::getGLInternalFormat(texture.mFormat.mInternalFormat));
+		return std::make_unique<ShaderBarrier>(types::shader::Barrier::ImageAccess);
 	}
 }
