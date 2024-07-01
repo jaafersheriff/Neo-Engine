@@ -346,13 +346,13 @@ namespace neo {
 		glUniform1i(_getUniform(name), bindingLoc);
 	}
 
-	[[nodiscard]] std::unique_ptr<ShaderBarrier> ResolvedShaderInstance::bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip) const {
+	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip) const {
 		GLint bindingLoc = 0;
 		auto binding = mBindings.find(HashedString(name));
 		if (binding != mBindings.end()) {
 			bindingLoc = binding->second;
 		}
 		glBindImageTexture(bindingLoc, texture.mTextureID, mip, GL_FALSE, 0, _getGLAccessType(accessType), GLHelper::getGLInternalFormat(texture.mFormat.mInternalFormat));
-		return std::make_unique<ShaderBarrier>(types::shader::Barrier::ImageAccess);
+		return ShaderBarrier(types::shader::Barrier::ImageAccess); // I'm really trusting the compiler to use copy elision here
 	}
 }
