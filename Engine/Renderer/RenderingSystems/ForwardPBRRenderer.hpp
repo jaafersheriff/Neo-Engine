@@ -102,6 +102,7 @@ namespace neo {
 
 		ShaderDefines drawDefines(passDefines);
 		if (containsTransparency) {
+			TRACY_ZONEN("Transparency sorting");
 			ecs.sort<ForwardPBRRenderComponent, TransparentComponent>([&cameraSpatial, &ecs](const ECS::Entity entityLeft, const ECS::Entity entityRight) {
 				auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
 				auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);

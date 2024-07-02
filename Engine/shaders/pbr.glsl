@@ -28,7 +28,7 @@ float GeometrySmith(float NdotV, float NdotL, float roughness) {
 
 float D_GGX(float NoH, float roughness) {
     float a = NoH * roughness;
-    float k = roughness / (1.0 - NoH * NoH + a * a);
+    float k = roughness / (1.0 - NoH * NoH + a * a + 1e-5);
     return k * k * (1.0 / PI);
 }
 
