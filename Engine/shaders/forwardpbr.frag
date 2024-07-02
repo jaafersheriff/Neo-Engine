@@ -3,6 +3,7 @@
 #include "pbr.glsl"
 #include "ibl.glsl"
 #include "color.glsl"
+#include "normal.glsl"
 
 in vec4 fragPos;
 in vec3 fragNor;
@@ -157,5 +158,8 @@ void main() {
 		+ fEmissive;
 	;
 	color.a = 1.0;
+#ifdef TRANSPARENT
+	color.a = fAlbedo.a;
+#endif
 }
 

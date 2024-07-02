@@ -45,16 +45,6 @@ namespace neo {
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
 			containsAlphaTest = true;
 			passDefines.set(ALPHA_TEST);
-			// Transparency sorting..for later
-		//	 glEnable(GL_BLEND);
-		//	 ecs.sort<AlphaTestComponent>([&cameraSpatial, &ecs](ECS::Entity entityLeft, ECS::Entity entityRight) {
-		//		 auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
-		//		 auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
-		//		 if (leftSpatial && rightSpatial) {
-		//			 return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) < glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
-		//		 }
-		//		 return false;
-		//		 });
 		}
 
 		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
@@ -154,10 +144,6 @@ namespace neo {
 			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
 
 			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
-		}
-
-		if (containsAlphaTest) {
-			// glDisable(GL_BLEND);
 		}
 	}
 }

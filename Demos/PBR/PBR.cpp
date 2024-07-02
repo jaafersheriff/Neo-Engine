@@ -27,6 +27,7 @@
 #include "Renderer/RenderingSystems/AutoexposureRenderer.hpp"
 #include "Renderer/RenderingSystems/BloomRenderer.hpp"
 #include "Renderer/RenderingSystems/ConvolveRenderer.hpp"
+#include "Renderer/RenderingSystems/ForwardPBRRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/SkyboxRenderer.hpp"
@@ -117,7 +118,7 @@ namespace PBR {
 			material->mMetallic = 0.f;
 			material->mRoughness = 1.f - i / (numSpheres-1);
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<PBRDeferredComponent>(entity);
+			ecs.addComponent<DeferredPBRRenderComponent>(entity);
 		}
 		// Conductive spheres
 		for (int i = 0; i < numSpheres; i++) {
@@ -131,7 +132,7 @@ namespace PBR {
 			material->mMetallic = 1.f;
 			material->mRoughness = 1.f - i / (numSpheres-1);
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<PBRDeferredComponent>(entity);
+			ecs.addComponent<DeferredPBRRenderComponent>(entity);
 		}
 		{
 			auto icosahedron = ecs.createEntity();
@@ -147,7 +148,7 @@ namespace PBR {
 			material->mRoughness = 0.15f;
 			ecs.addComponent<ShadowCasterRenderComponent>(icosahedron);
 			ecs.addComponent<PinnedComponent>(icosahedron);
-			ecs.addComponent<PBRDeferredComponent>(icosahedron);
+			ecs.addComponent<DeferredPBRRenderComponent>(icosahedron);
 		}
 
 		// Emissive sphere
@@ -163,7 +164,7 @@ namespace PBR {
 			material->mRoughness = 0.f;
 			material->mEmissiveFactor = glm::vec3(100.f);
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<PBRDeferredComponent>(entity);
+			ecs.addComponent<DeferredPBRRenderComponent>(entity);
 		}
 
 		{
@@ -210,7 +211,7 @@ namespace PBR {
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 			ecs.addComponent<PinnedComponent>(entity);
-			ecs.addComponent<PBRDeferredComponent>(entity);
+			ecs.addComponent<DeferredPBRRenderComponent>(entity);
 		}
 
 		{
@@ -225,7 +226,7 @@ namespace PBR {
 			ecs.addComponent<MaterialComponent>(entity, bust.mMaterial);
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<PBRDeferredComponent>(entity);
+			ecs.addComponent<DeferredPBRRenderComponent>(entity);
 		}
 		{
 			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
@@ -237,16 +238,48 @@ namespace PBR {
 				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
 				ecs.addComponent<MeshComponent>(entity, node.mMeshHandle);
 				ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax, true);
-				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Opaque) {
-					ecs.addComponent<OpaqueComponent>(entity);
+				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Transparent) {
+					ecs.addComponent<TransparentComponent>(entity);
+					ecs.addComponent<ForwardPBRRenderComponent>(entity);
 				}
 				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
 					ecs.addComponent<AlphaTestComponent>(entity);
+					ecs.addComponent<DeferredPBRRenderComponent>(entity);
+				}
+				else {
+					ecs.addComponent<OpaqueComponent>(entity);
+					ecs.addComponent<DeferredPBRRenderComponent>(entity);
 				}
 				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
 
 				ecs.addComponent<ShadowCasterRenderComponent>(entity);
-				ecs.addComponent<PBRDeferredComponent>(entity);
+			}
+		}
+		{
+			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "porsche/scene.gltf", glm::rotate(glm::translate(glm::mat4(1.f), glm::vec3(-5.5f, 0.25f, -0.75f)), 90.f, glm::vec3(0,1,0)));
+			for (auto& node : scene.mMeshNodes) {
+				auto entity = ecs.createEntity();
+				if (!node.mName.empty()) {
+					ecs.addComponent<TagComponent>(entity, node.mName);
+				}
+				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
+				ecs.addComponent<MeshComponent>(entity, node.mMeshHandle);
+				ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax, false);
+				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Transparent) {
+					ecs.addComponent<TransparentComponent>(entity);
+					ecs.addComponent<ForwardPBRRenderComponent>(entity);
+				}
+				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
+					ecs.addComponent<AlphaTestComponent>(entity);
+					ecs.addComponent<DeferredPBRRenderComponent>(entity);
+				}
+				else {
+					ecs.addComponent<OpaqueComponent>(entity);
+					ecs.addComponent<DeferredPBRRenderComponent>(entity);
+				}
+				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
+
+				ecs.addComponent<ShadowCasterRenderComponent>(entity);
 			}
 		}
 
@@ -349,6 +382,7 @@ namespace PBR {
 			}
 		}
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
+		//drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl);
 
 		calculateAutoexposure(resourceManagers, hdrColor.mTextures[0]);
 

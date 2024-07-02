@@ -3,7 +3,7 @@
 #include "ECS/ECS.hpp"
 #include "Util/Profiler.hpp"
 
-#include "PBRDeferredComponent.hpp"
+#include "DeferredPBRRenderComponent.hpp"
 
 #include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
@@ -85,7 +85,7 @@ namespace PBR {
 		}
 
 		ShaderDefines drawDefines(passDefines);
-		const auto& view = ecs.getView<const PBRDeferredComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
+		const auto& view = ecs.getView<const DeferredPBRRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
 		for (auto entity : view) {
 			// VFC
 			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {

@@ -57,7 +57,7 @@ namespace neo {
 		template<typename... CompTs> std::optional<std::tuple<Entity, CompTs&...>> getSingleView();
 		template<typename... CompTs> std::optional<std::tuple<Entity, const CompTs&...>> getSingleView() const;
 
-		template<typename Comp> void sort(std::function<bool(Entity left, Entity right)> compare) const;
+		template<typename FilterCompT, typename SortCompT> void sort(std::function<bool(Entity left, Entity right)> compare) const;
 
 		/* Attach a system */
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
@@ -263,9 +263,10 @@ namespace neo {
 	}
 
 
-	template<typename CompT> 
-	void ECS::sort(std::function<bool(Entity left, Entity right)> compare) const {
-		mRegistry.sort<CompT>(compare);
+	template<typename FilterCompT, typename SortCompT> 
+	void ECS::sort(std::function<bool(const Entity left, const Entity right)> compare) const {
+		mRegistry.sort<SortCompT>(compare);
+		mRegistry.sort<FilterCompT, SortCompT>();
 	}
 }
 

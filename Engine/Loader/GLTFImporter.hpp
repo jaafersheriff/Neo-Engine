@@ -25,7 +25,8 @@ namespace neo {
 		struct MeshNode : public Node {
 			enum class AlphaMode {
 				Opaque,
-				AlphaTest
+				AlphaTest,
+				Transparent
 			};
 
 			MeshHandle mMeshHandle;

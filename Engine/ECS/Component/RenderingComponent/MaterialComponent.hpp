@@ -24,7 +24,7 @@ namespace neo {
 		TextureHandle mOcclusionMap;
 
 		virtual void imGuiEditor() override {
-			ImGui::ColorEdit3("Albedo", &mAlbedoColor[0]);
+			ImGui::ColorEdit4("Albedo", &mAlbedoColor[0]);
 			ImGui::SliderFloat("Metallness", &mMetallic, 0.f, 1.f); // This should be a bool?
 			ImGui::SliderFloat("Roughness", &mRoughness, 0.f, 1.f);
 			if (ImGui::ColorEdit3("Emissive Factor", &mEmissiveFactor[0], ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_NoAlpha)) {

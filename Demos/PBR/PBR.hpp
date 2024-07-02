@@ -2,8 +2,6 @@
 
 #include "DemoInfra/IDemo.hpp"
 
-#include "Renderer/RenderingSystems/PBRRenderer.hpp"
-
 using namespace neo;
 
 namespace PBR {
