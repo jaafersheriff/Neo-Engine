@@ -24,6 +24,7 @@
 #include "GBufferRenderer.hpp"
 #include "DeferredPBRRenderer.hpp"
 
+#include "Renderer/RenderingSystems/AutoexposureRenderer.hpp"
 #include "Renderer/RenderingSystems/BloomRenderer.hpp"
 #include "Renderer/RenderingSystems/ConvolveRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
@@ -324,7 +325,7 @@ namespace PBR {
 			"HDR Color",
 			FramebufferBuilder{}
 				.setSize(viewport.mSize)
-				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F }),
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
 			resourceManagers.mTextureManager
 		);
 		if (!resourceManagers.mFramebufferManager.isValid(hdrColorOutput)) {
@@ -348,6 +349,8 @@ namespace PBR {
 			}
 		}
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
+
+		calculateAutoexposure(resourceManagers, hdrColor.mTextures[0]);
 
 		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomRadius, 8) : hdrColorOutput;
 		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {

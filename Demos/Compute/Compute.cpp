@@ -117,14 +117,14 @@ namespace Compute {
 			auto& mesh = resourceManagers.mMeshManager.resolve(meshComponent.mMeshHandle);
 			auto& position = mesh.getVBO(types::mesh::VertexType::Position);
 			glBindVertexArray(mesh.mVAOID);
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, position.vboID);
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, position.vboID);
 
 			// Dispatch 
 			particlesComputeShader.dispatch({meshComponent.mNumParticles / ServiceLocator<Renderer>::ref().mDetails.mMaxComputeWorkGroupSize.x, 1, 1});
 			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 			// Reset bind
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, position.attribArray, 0);
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
 		}
 
 		// Draw the mesh

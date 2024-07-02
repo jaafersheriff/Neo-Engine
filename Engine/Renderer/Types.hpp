@@ -27,14 +27,15 @@ namespace neo {
 			};
 
 			enum class Barrier {
+				None,
 				ImageAccess,
 				AtomicCounter,
 				StorageBuffer,
 				// There's way more that are unsupported hehe
 			};
 
-			enum class Access {
-				Ready,
+			enum class Access : uint8_t {
+				Read,
 				Write,
 				ReadWrite
 			};

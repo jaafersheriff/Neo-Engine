@@ -42,6 +42,7 @@ void main() {
 #endif
 		+ emissiveMetalness.rgb
 	;
+	color.a = 1.0;
 
 }
 

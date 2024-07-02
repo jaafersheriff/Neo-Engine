@@ -90,6 +90,7 @@ void main() {
 		+ pbrColor.directDiffuse
 		+ pbrColor.directSpecular
 	;
+	color.a = 1.0;
 
 }
 

@@ -14,7 +14,7 @@ namespace neo {
 	namespace {
 		int32_t _getGLAccessType(types::shader::Access accessType) {
 			switch (accessType) {
-			case types::shader::Access::Ready:
+			case types::shader::Access::Read:
 				return GL_READ_ONLY;
 			case types::shader::Access::Write:
 				return GL_WRITE_ONLY;
@@ -193,8 +193,9 @@ namespace neo {
 	}
 
 	ShaderBarrier::~ShaderBarrier() {
-		NEO_LOG_V("BARRIER");
-		glMemoryBarrier(_getGLBarrierType(mBarrierType));
+		if (mBarrierType != types::shader::Barrier::None) {
+			glMemoryBarrier(_getGLBarrierType(mBarrierType));
+		}
 	}
 
 	bool ResolvedShaderInstance::init(const SourceShader::ShaderCode& shaderCode, const ShaderDefines& defines) {
@@ -298,8 +299,8 @@ namespace neo {
 	}
 
 	void ResolvedShaderInstance::dispatch(glm::uvec3 workGroups) const {
-		NEO_ASSERT(isCompute, "Can't dispatch a non-compute shader");
 		if (isValid()) {
+			NEO_ASSERT(isCompute, "Can't dispatch a non-compute shader");
 			glDispatchCompute(workGroups.x, workGroups.y, workGroups.z);
 		}
 	}
@@ -353,6 +354,16 @@ namespace neo {
 			bindingLoc = binding->second;
 		}
 		glBindImageTexture(bindingLoc, texture.mTextureID, mip, GL_FALSE, 0, _getGLAccessType(accessType), GLHelper::getGLInternalFormat(texture.mFormat.mInternalFormat));
-		return ShaderBarrier(types::shader::Barrier::ImageAccess); // I'm really trusting the compiler to use copy elision here
+		return ShaderBarrier(accessType > types::shader::Access::Read ? types::shader::Barrier::ImageAccess : types::shader::Barrier::None); // I'm really trusting the compiler to use copy elision here
+	}
+
+	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const {
+		GLint bindingLoc = 0;
+		auto binding = mBindings.find(HashedString(name));
+		if (binding != mBindings.end()) {
+			bindingLoc = binding->second;
+		}
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingLoc, id);
+		return ShaderBarrier(accessType > types::shader::Access::Read ? types::shader::Barrier::StorageBuffer : types::shader::Barrier::None); // I'm really trusting the compiler to use copy elision here
 	}
 }

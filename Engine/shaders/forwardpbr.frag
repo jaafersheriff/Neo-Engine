@@ -156,5 +156,6 @@ void main() {
 		+ pbrColor.indirectSpecular
 		+ fEmissive;
 	;
+	color.a = 1.0;
 }
 
