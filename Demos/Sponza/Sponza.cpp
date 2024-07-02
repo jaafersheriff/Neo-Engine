@@ -18,6 +18,7 @@
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SinTranslateComponent.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
 #include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"

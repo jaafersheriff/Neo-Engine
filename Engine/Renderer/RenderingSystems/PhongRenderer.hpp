@@ -43,7 +43,7 @@ namespace neo {
 		bool containsAlphaTest = false;
 		bool containsTransparency = false;
 		MakeDefine(ALPHA_TEST);
-		MakeDefine(TRANSPARENT)
+		MakeDefine(TRANSPARENT);
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
 			containsAlphaTest = true;
 			passDefines.set(ALPHA_TEST);
@@ -92,6 +92,7 @@ namespace neo {
 		}
 
 		ShaderDefines drawDefines(passDefines);
+		// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
 		const auto& view = ecs.getView<const PhongRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
 		for (auto entity : view) {
 			// VFC

@@ -72,5 +72,8 @@ float attFactor = 1;
 #endif
 
 	color.a = 1.0;
+#ifdef TRANSPARENT
+	color.a = fAlbedo.a;
+#endif
 }
 
