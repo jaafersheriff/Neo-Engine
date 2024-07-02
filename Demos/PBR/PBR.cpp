@@ -352,13 +352,12 @@ namespace PBR {
 		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 
-		NEO_UNUSED(backbuffer);
-
 		auto hdrColorOutput = resourceManagers.mFramebufferManager.asyncLoad(
 			"HDR Color",
 			FramebufferBuilder{}
 				.setSize(viewport.mSize)
-				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
+				.attach(TextureFormat{types::texture::Target::Texture2D, types::texture::InternalFormats::D16}),
 			resourceManagers.mTextureManager
 		);
 		if (!resourceManagers.mFramebufferManager.isValid(hdrColorOutput)) {
@@ -367,8 +366,14 @@ namespace PBR {
 		auto& hdrColor = resourceManagers.mFramebufferManager.resolve(hdrColorOutput);
 
 		hdrColor.bind();
-		hdrColor.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
+		hdrColor.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+		glBlitNamedFramebuffer(gbuffer.mFBOID, hdrColor.mFBOID,
+			0, 0, viewport.mSize.x, viewport.mSize.y,
+			0, 0, viewport.mSize.x, viewport.mSize.y,
+			GL_DEPTH_BUFFER_BIT,
+			GL_NEAREST
+		);
 		drawSkybox(resourceManagers, ecs, cameraEntity);
 		drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle, shadowTexture);
 		drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
@@ -382,7 +387,7 @@ namespace PBR {
 			}
 		}
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
-		//drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl);
+		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl);
 
 		calculateAutoexposure(resourceManagers, hdrColor.mTextures[0]);
 
@@ -400,7 +405,7 @@ namespace PBR {
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		drawFXAA(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(tonemappedHandle).mTextures[0]);
 		// Don't forget the depth. Because reasons.
-		glBlitNamedFramebuffer(gbuffer.mFBOID, backbuffer.mFBOID,
+		glBlitNamedFramebuffer(hdrColor.mFBOID, backbuffer.mFBOID,
 			0, 0, viewport.mSize.x, viewport.mSize.y,
 			0, 0, viewport.mSize.x, viewport.mSize.y,
 			GL_DEPTH_BUFFER_BIT,

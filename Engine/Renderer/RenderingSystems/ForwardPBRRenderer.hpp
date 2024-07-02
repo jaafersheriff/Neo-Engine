@@ -53,7 +53,6 @@ namespace neo {
 		if constexpr ((std::is_same_v<TransparentComponent, CompTs> || ...)) {
 			containsTransparency = true;
 			passDefines.set(TRANSPARENT);
-			// TODO - sort components?
 
 			glEnable(GL_BLEND);
 			glBlendEquation(GL_FUNC_ADD);
@@ -102,7 +101,6 @@ namespace neo {
 
 		ShaderDefines drawDefines(passDefines);
 		if (containsTransparency) {
-			// EnTT can only sort against a single component ;(
 			ecs.sort<ForwardPBRRenderComponent, TransparentComponent>([&cameraSpatial, &ecs](const ECS::Entity entityLeft, const ECS::Entity entityRight) {
 				auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
 				auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);

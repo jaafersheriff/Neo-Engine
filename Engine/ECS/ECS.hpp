@@ -266,6 +266,7 @@ namespace neo {
 	template<typename FilterCompT, typename SortCompT> 
 	void ECS::sort(std::function<bool(const Entity left, const Entity right)> compare) const {
 		mRegistry.sort<SortCompT>(compare);
+		// EnTT can only sort against a single component ;( and then FilterCompT will be sorted against SortCompT
 		mRegistry.sort<FilterCompT, SortCompT>();
 	}
 }

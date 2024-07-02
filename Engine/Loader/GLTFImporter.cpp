@@ -434,7 +434,9 @@ namespace {
 					outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::AlphaTest;
 				}
 				else if (material.alphaMode == "BLEND") {
+					NEO_LOG_W("Transparency is currently unsupported");
 					outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::Transparent;
+					//outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::AlphaTest;
 				}
 
 				outNode.mMaterial.mNormalMap = _loadTexture(resourceManagers.mTextureManager, model, material.normalTexture.index, material.normalTexture.texCoord);

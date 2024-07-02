@@ -6,7 +6,7 @@
 #include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
 #include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
-#include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
+#include "ECS/Component/RenderingComponent/TransparentComponent.hpp"
 
 #include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
@@ -41,10 +41,20 @@ namespace neo {
 
 		ShaderDefines passDefines(inDefines);
 		bool containsAlphaTest = false;
+		bool containsTransparency = false;
 		MakeDefine(ALPHA_TEST);
+		MakeDefine(TRANSPARENT)
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
 			containsAlphaTest = true;
 			passDefines.set(ALPHA_TEST);
+		}
+		if constexpr ((std::is_same_v<TransparentComponent, CompTs> || ...)) {
+			containsTransparency = true;
+			passDefines.set(TRANSPARENT);
+
+			glEnable(GL_BLEND);
+			glBlendEquation(GL_FUNC_ADD);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
@@ -89,10 +99,6 @@ namespace neo {
 				if (!culled->isInView(ecs, entity, cameraEntity)) {
 					continue;
 				}
-			}
-
-			if (containsAlphaTest) {
-				NEO_ASSERT(!ecs.has<OpaqueComponent>(entity), "Entity has opaque and alpha test component?");
 			}
 
 			drawDefines.reset();
@@ -145,5 +151,10 @@ namespace neo {
 
 			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
+
+		if (containsTransparency) {
+			glDisable(GL_BLEND);
+		}
+
 	}
 }
