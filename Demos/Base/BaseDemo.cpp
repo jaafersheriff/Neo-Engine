@@ -84,7 +84,16 @@ namespace Base {
 			auto material = ecs.addComponent<MaterialComponent>(icosahedron);
 			material->mAlbedoColor = glm::vec4(1.f, 1.f, 0.f, 1.f);
 		}
-
+		for (int i = 0; i < 5; i++) {
+			auto cube = ecs.createEntity();
+			ecs.addComponent<SpatialComponent>(cube, glm::vec3(0.f, 1.0f, -1.f * i), glm::vec3(0.75f));
+			ecs.addComponent<MeshComponent>(cube, HashedString("cube"));
+			ecs.addComponent<BoundingBoxComponent>(cube, glm::vec3(-0.5f), glm::vec3(0.5f));
+			ecs.addComponent<ForwardPBRRenderComponent>(cube);
+			ecs.addComponent<TransparentComponent>(cube);
+			auto material = ecs.addComponent<MaterialComponent>(cube);
+			material->mAlbedoColor = glm::vec4(util::genRandomVec3(0.3f, 1.f), 0.3f);
+		}
 
 		{
 			auto plane = ecs.createEntity();
@@ -128,7 +137,7 @@ namespace Base {
 			auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
 
 			sceneTarget.bind();
-			sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+			sceneTarget.clear(glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 			drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 			drawForwardPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);

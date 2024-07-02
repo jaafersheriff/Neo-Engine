@@ -57,6 +57,7 @@ namespace neo {
 			glEnable(GL_BLEND);
 			glBlendEquation(GL_FUNC_ADD);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDepthMask(GL_FALSE);
 		}
 
 		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
@@ -105,7 +106,7 @@ namespace neo {
 				auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
 				auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
 				if (leftSpatial && rightSpatial) {
-					return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) < glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
+					return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) > glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
 				}
 				return false;
 			});
@@ -220,6 +221,7 @@ namespace neo {
 
 		if (containsTransparency) {
 			glDisable(GL_BLEND);
+			glDepthMask(GL_TRUE);
 		}
 	}
 }
