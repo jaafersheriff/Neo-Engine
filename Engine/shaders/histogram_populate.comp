@@ -5,16 +5,7 @@ layout(binding = 1, std430) writeonly buffer histogramBuffer {
     uint histogram[];
 };
 
-#ifdef CLEAR
-layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
-void main() {
-
-    histogram[gl_LocalInvocationIndex] = 0;
-    return;
-}
-
-#else
-layout(binding = 0, rgba16f) readonly uniform image2D currentHDRColor;
+layout(binding = 0, rgba16f) readonly uniform image2D previousHDRColor;
 uniform uvec2 inputResolution;
 
 uniform float minLogLum;
@@ -50,7 +41,7 @@ void main() {
 
     // Ignore threads that map to areas beyond the bounds of our HDR image
     if (gl_GlobalInvocationID.x < inputResolution.x && gl_GlobalInvocationID.y < inputResolution.y) {
-        vec3 hdrColor = imageLoad(currentHDRColor, ivec2(gl_GlobalInvocationID.xy)).xyz;
+        vec3 hdrColor = imageLoad(previousHDRColor, ivec2(gl_GlobalInvocationID.xy)).xyz;
         uint binIndex = colorToBin(hdrColor);
         // We use an atomic add to ensure we don't write to the same bin in our
         // histogram from two different threads at the same time.
@@ -65,5 +56,3 @@ void main() {
     // but different work groups might! So we still need the atomic add.
     atomicAdd(histogram[gl_LocalInvocationIndex], localHistogram[gl_LocalInvocationIndex]);
 }
-
-#endif`

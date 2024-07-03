@@ -401,7 +401,7 @@ namespace PBR {
 			);
 			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
 				const auto& previousHDRColor = resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle);
-				calculateAutoexposure(resourceManagers, hdrColor.mTextures[0], previousHDRColor.mTextures[0], mAutoExposureParams);
+				calculateAutoexposure(resourceManagers, previousHDRColor.mTextures[0], mAutoExposureParams);
 				blit(resourceManagers, previousHDRColor, hdrColor.mTextures[0], viewport.mSize);
 			}
 		}
