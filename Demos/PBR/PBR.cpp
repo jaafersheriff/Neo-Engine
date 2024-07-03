@@ -256,7 +256,7 @@ namespace PBR {
 			}
 		}
 		{
-			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "porsche/scene.gltf", glm::rotate(glm::translate(glm::mat4(1.f), glm::vec3(-5.5f, 0.25f, -0.75f)), 90.f, glm::vec3(0,1,0)));
+			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "porsche/scene.gltf", glm::rotate(glm::translate(glm::mat4(1.f), glm::vec3(-6.75f, 0.25f, -0.25f)), util::PI / 2.f, glm::vec3(0,1,0)));
 			for (auto& node : scene.mMeshNodes) {
 				auto entity = ecs.createEntity();
 				if (!node.mName.empty()) {
@@ -264,7 +264,7 @@ namespace PBR {
 				}
 				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
 				ecs.addComponent<MeshComponent>(entity, node.mMeshHandle);
-				ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax, false);
+				ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax, true);
 				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Transparent) {
 					ecs.addComponent<TransparentComponent>(entity);
 					ecs.addComponent<ForwardPBRRenderComponent>(entity);

@@ -72,16 +72,6 @@ namespace PBR {
 		MakeDefine(ALPHA_TEST);
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
 			passDefines.set(ALPHA_TEST);
-			// Transparency sorting..for later
-		//	 glEnable(GL_BLEND);
-		//	 ecs.sort<AlphaTestComponent>([&cameraSpatial, &ecs](ECS::Entity entityLeft, ECS::Entity entityRight) {
-		//		 auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
-		//		 auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
-		//		 if (leftSpatial && rightSpatial) {
-		//			 return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) < glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
-		//		 }
-		//		 return false;
-		//		 });
 		}
 
 		ShaderDefines drawDefines(passDefines);
@@ -161,7 +151,16 @@ namespace PBR {
 			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
 
+			// Yikes
+			if (material.mDoubleSided) {
+				glDisable(GL_CULL_FACE);
+			}
+			else {
+				glEnable(GL_CULL_FACE);
+			}
+
 			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
+		glEnable(GL_CULL_FACE);
 	}
 }

@@ -210,19 +210,18 @@ namespace neo {
 
 			// Yikes
 			if (material.mDoubleSided) {
-				glCullFace(GL_FRONT);
-				mesh.draw();
-				glCullFace(GL_BACK);
-				mesh.draw();
+				glDisable(GL_CULL_FACE);
 			}
 			else {
-				mesh.draw();
+				glEnable(GL_CULL_FACE);
 			}
+			mesh.draw();
 		}
 
 		if (containsTransparency) {
 			glDisable(GL_BLEND);
 			glDepthMask(GL_TRUE);
 		}
+		glCullFace(GL_BACK);
 	}
 }
