@@ -23,5 +23,8 @@ namespace PBR {
 		bool mDoTonemap = true;
 		bool mDoBloom = true;
 		float mBloomRadius = 0.005f;
+
+		float mMinLuminance = 0.f;
+		float mMaxLuminance = 10.f;
 	};
 }

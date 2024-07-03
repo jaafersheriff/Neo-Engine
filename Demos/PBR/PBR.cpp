@@ -302,6 +302,10 @@ namespace PBR {
 
 		ImGui::Checkbox("IBL", &mDrawIBL);
 		ImGui::Checkbox("Tonemap", &mDoTonemap);
+		if (mDoTonemap) {
+			ImGui::SliderFloat("Min Lum", &mMinLuminance, 0.f, mMaxLuminance);
+			ImGui::SliderFloat("Max Lum", &mMaxLuminance, mMinLuminance, 10.f);
+		}
 		ImGui::Checkbox("Bloom", &mDoBloom);
 		if (mDoBloom) {
 			ImGui::SliderFloat("Bloom Radius", &mBloomRadius, 0.f, 0.01f);
@@ -389,7 +393,7 @@ namespace PBR {
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
 		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl);
 
-		calculateAutoexposure(resourceManagers, hdrColor.mTextures[0]);
+		calculateAutoexposure(resourceManagers, hdrColor.mTextures[0], mMinLuminance, mMaxLuminance);
 
 		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomRadius, 8) : hdrColorOutput;
 		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {

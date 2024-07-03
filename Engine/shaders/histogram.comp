@@ -1,19 +1,69 @@
+// https://bruop.github.io/exposure/
 
+#include "color.glsl"
 layout(binding = 1, std430) writeonly buffer histogramBuffer {
     uint histogram[];
 };
 
-#ifndef CLEAR
+#ifdef CLEAR
+layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+void main() {
+
+    histogram[gl_LocalInvocationIndex] = 0;
+    return;
+}
+
+#else
 layout(binding = 0, rgba16f) readonly uniform image2D inputTexture;
-#endif
+uniform uvec2 inputResolution;
+
+uniform float minLogLum;
+uniform float inverseLogLumRange;
+
+// Shared histogram buffer used for storing intermediate sums for each work group
+shared uint localHistogram[256];
+
+// For a given color and luminance range, return the histogram bin index
+uint colorToBin(vec3 hdrColor) {
+    // Convert our RGB value to Luminance, see note for RGB_TO_LUM macro above
+    float lum = luminance(hdrColor);
+
+    // Avoid taking the log of zero
+    if (lum < EP) {
+        return 0;
+    }
+
+    // Calculate the log_2 luminance and express it as a value in [0.0, 1.0]
+    // where 0.0 represents the minimum luminance, and 1.0 represents the max.
+    float logLum = clamp((log2(lum) - minLogLum) * inverseLogLumRange, 0.0, 1.0);
+
+    // Map [0, 1] to [1, 255]. The zeroth bin is handled by the epsilon check above.
+    return uint(logLum * 254.0 + 1.0);
+}
 
 layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 void main() {
-    
-#ifdef CLEAR
-    histogram[gl_LocalInvocationIndex] = 0;
-    return;
-#endif
 
-    histogram[gl_LocalInvocationIndex] = gl_LocalInvocationIndex;
+    // Initialize the bin for this thread to 0
+    localHistogram[gl_LocalInvocationIndex] = 0;
+    memoryBarrierShared(); // TODO - this should be barrier(); ?
+
+    // Ignore threads that map to areas beyond the bounds of our HDR image
+    if (gl_GlobalInvocationID.x < inputResolution.x && gl_GlobalInvocationID.y < inputResolution.y) {
+        vec3 hdrColor = imageLoad(inputTexture, ivec2(gl_GlobalInvocationID.xy)).xyz;
+        uint binIndex = colorToBin(hdrColor);
+        // We use an atomic add to ensure we don't write to the same bin in our
+        // histogram from two different threads at the same time.
+        atomicAdd(localHistogram[binIndex], 1);
+    }
+
+    // Wait for all threads in the work group to reach this point before adding our
+    // local histogram to the global one
+    barrier();
+
+    // Technically there's no chance that two threads write to the same bin here,
+    // but different work groups might! So we still need the atomic add.
+     atomicAdd(histogram[gl_LocalInvocationIndex], localHistogram[gl_LocalInvocationIndex]);
 }
+
+#endif`
