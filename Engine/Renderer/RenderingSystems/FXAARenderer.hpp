@@ -7,7 +7,7 @@
 
 namespace neo {
 
-	static void drawFXAA(const ResourceManagers& resourceManagers, glm::uvec2 dimension, TextureHandle inputTextureHandle) {
+	inline void drawFXAA(const ResourceManagers& resourceManagers, glm::uvec2 dimension, TextureHandle inputTextureHandle) {
 		TRACY_GPU();
 
 		if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {

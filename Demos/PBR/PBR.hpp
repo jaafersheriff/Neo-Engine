@@ -2,6 +2,9 @@
 
 #include "DemoInfra/IDemo.hpp"
 
+#include "Renderer/RenderingSystems/AutoexposureRenderer.hpp"
+#include "Renderer/RenderingSystems/BloomRenderer.hpp"
+
 using namespace neo;
 
 namespace PBR {
@@ -20,11 +23,12 @@ namespace PBR {
 		int mPointLightCount = 20;
 		float mLightDebugRadius = 0.f;
 		bool mDrawIBL = true;
-		bool mDoTonemap = true;
-		bool mDoBloom = true;
-		float mBloomRadius = 0.005f;
 
-		float mMinLuminance = 0.f;
-		float mMaxLuminance = 10.f;
+		bool mDoTonemap = true;
+		AutoExposureParameters mAutoExposureParams;
+		bool mUsePing = true;
+
+		bool mDoBloom = true;
+		BloomParameters mBloomParameters;
 	};
 }

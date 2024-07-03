@@ -24,8 +24,7 @@
 #include "GBufferRenderer.hpp"
 #include "DeferredPBRRenderer.hpp"
 
-#include "Renderer/RenderingSystems/AutoexposureRenderer.hpp"
-#include "Renderer/RenderingSystems/BloomRenderer.hpp"
+#include "Renderer/RenderingSystems/Blitter.hpp"
 #include "Renderer/RenderingSystems/ConvolveRenderer.hpp"
 #include "Renderer/RenderingSystems/ForwardPBRRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
@@ -303,12 +302,11 @@ namespace PBR {
 		ImGui::Checkbox("IBL", &mDrawIBL);
 		ImGui::Checkbox("Tonemap", &mDoTonemap);
 		if (mDoTonemap) {
-			ImGui::SliderFloat("Min Lum", &mMinLuminance, 0.f, mMaxLuminance);
-			ImGui::SliderFloat("Max Lum", &mMaxLuminance, mMinLuminance, 10.f);
+			mAutoExposureParams.imguiEditor();
 		}
 		ImGui::Checkbox("Bloom", &mDoBloom);
 		if (mDoBloom) {
-			ImGui::SliderFloat("Bloom Radius", &mBloomRadius, 0.f, 0.01f);
+			mBloomParameters.imguiEditor();
 		}
 	}
 
@@ -393,9 +391,22 @@ namespace PBR {
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
 		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl);
 
-		calculateAutoexposure(resourceManagers, hdrColor.mTextures[0], mMinLuminance, mMaxLuminance);
+		{
+			auto previousHDRColorHandle = resourceManagers.mFramebufferManager.asyncLoad(
+				"Previous HDR Color",
+				FramebufferBuilder{}
+				.setSize(viewport.mSize)
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
+				resourceManagers.mTextureManager
+			);
+			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
+				const auto& previousHDRColor = resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle);
+				calculateAutoexposure(resourceManagers, hdrColor.mTextures[0], previousHDRColor.mTextures[0], mAutoExposureParams);
+				blit(resourceManagers, previousHDRColor, hdrColor.mTextures[0], viewport.mSize);
+			}
+		}
 
-		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomRadius, 8) : hdrColorOutput;
+		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParameters) : hdrColorOutput;
 		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
 			bloomHandle = hdrColorOutput;
 		}

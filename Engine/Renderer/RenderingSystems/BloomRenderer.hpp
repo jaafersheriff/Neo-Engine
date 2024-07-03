@@ -7,10 +7,20 @@
 
 namespace neo {
 
-	static FramebufferHandle bloom(const ResourceManagers& resourceManagers, const glm::uvec2 dimension, const TextureHandle inputTextureHandle, const float radius = 0.005, const int downSampleSteps = 6) {
+	struct BloomParameters {
+		float mRadius = 0.005f; 
+		int mDownSampleSteps = 6;
+
+		void imguiEditor() {
+			ImGui::SliderFloat("Radius", &mRadius, 0.001f, 0.010f);
+			ImGui::SliderInt("Down Samples", &mDownSampleSteps, 1, 10);
+		}
+	};
+
+	inline FramebufferHandle bloom(const ResourceManagers& resourceManagers, const glm::uvec2 dimension, const TextureHandle inputTextureHandle, const BloomParameters& parameters) {
 		TRACY_GPU();
 
-		NEO_ASSERT(downSampleSteps > 0, "Gotta bloom with something");
+		NEO_ASSERT(parameters.mDownSampleSteps > 0, "Gotta bloom with something");
 
 		if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {
 			return NEO_INVALID_HANDLE;
@@ -21,7 +31,7 @@ namespace neo {
 
 		// Create textures and targets
 		std::vector<FramebufferHandle> bloomTargets;
-		for (int i = 0; i < downSampleSteps; i++) {
+		for (int i = 0; i < parameters.mDownSampleSteps; i++) {
 			bloomTargets.push_back(resourceManagers.mFramebufferManager.asyncLoad(
 				HashedString((std::string("BloomTarget") + std::to_string(i)).c_str()),
 				FramebufferBuilder{}
@@ -49,7 +59,7 @@ namespace neo {
 			Mip0Defines.set(MIP_0);
 
 			glDisable(GL_DEPTH_TEST);
-			for (int i = 0; i < downSampleSteps; i++) {
+			for (int i = 0; i < parameters.mDownSampleSteps; i++) {
 				if (resourceManagers.mFramebufferManager.isValid(bloomTargets[i])) {
 					auto& bloomDown = resourceManagers.mFramebufferManager.resolve(bloomTargets[i]);
 					bloomDown.bind();
@@ -81,12 +91,12 @@ namespace neo {
 			}
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(bloomUpShaderHandle, {});
 			resolvedShader.bind();
-			resolvedShader.bindUniform("filterRadius", radius);
+			resolvedShader.bindUniform("filterRadius", parameters.mRadius);
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ONE, GL_ONE);
 			glBlendEquation(GL_FUNC_ADD);
-			for (int i = downSampleSteps - 1; i > 0; i--) {
+			for (int i = parameters.mDownSampleSteps - 1; i > 0; i--) {
 				if (resourceManagers.mFramebufferManager.isValid(bloomTargets[i])) {
 					resolvedShader.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(resourceManagers.mFramebufferManager.resolve(bloomTargets[i]).mTextures[0]));
 					auto& bloomUp = resourceManagers.mFramebufferManager.resolve(bloomTargets[i - 1]);

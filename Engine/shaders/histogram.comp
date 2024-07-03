@@ -14,7 +14,7 @@ void main() {
 }
 
 #else
-layout(binding = 0, rgba16f) readonly uniform image2D inputTexture;
+layout(binding = 0, rgba16f) readonly uniform image2D currentHDRColor;
 uniform uvec2 inputResolution;
 
 uniform float minLogLum;
@@ -46,11 +46,11 @@ void main() {
 
     // Initialize the bin for this thread to 0
     localHistogram[gl_LocalInvocationIndex] = 0;
-    memoryBarrierShared(); // TODO - this should be barrier(); ?
+    barrier();
 
     // Ignore threads that map to areas beyond the bounds of our HDR image
     if (gl_GlobalInvocationID.x < inputResolution.x && gl_GlobalInvocationID.y < inputResolution.y) {
-        vec3 hdrColor = imageLoad(inputTexture, ivec2(gl_GlobalInvocationID.xy)).xyz;
+        vec3 hdrColor = imageLoad(currentHDRColor, ivec2(gl_GlobalInvocationID.xy)).xyz;
         uint binIndex = colorToBin(hdrColor);
         // We use an atomic add to ensure we don't write to the same bin in our
         // histogram from two different threads at the same time.
@@ -63,7 +63,7 @@ void main() {
 
     // Technically there's no chance that two threads write to the same bin here,
     // but different work groups might! So we still need the atomic add.
-     atomicAdd(histogram[gl_LocalInvocationIndex], localHistogram[gl_LocalInvocationIndex]);
+    atomicAdd(histogram[gl_LocalInvocationIndex], localHistogram[gl_LocalInvocationIndex]);
 }
 
 #endif`

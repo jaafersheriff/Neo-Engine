@@ -162,7 +162,7 @@ namespace neo {
 		else {
 			TRACY_GPUN("Final Blit");
 			Framebuffer fb; // empty framebuffer is just the backbuffer -- just don't do anything with it ever
-			blit(resourceManagers, fb, resourceManagers.mTextureManager.resolve(defaultFbo.mTextures[0]), window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
+			blit(resourceManagers, fb, defaultFbo.mTextures[0], window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
 		}
 	}
 
