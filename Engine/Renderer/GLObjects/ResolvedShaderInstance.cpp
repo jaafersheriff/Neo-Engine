@@ -10,9 +10,6 @@
 #include "Util/Util.hpp"
 #include "Loader/Loader.hpp"
 
-#include <glslang/Include/glslang_c_interface.h>
-#include <glslang/Public/resource_limits_c.h>
-
 namespace neo {
 	namespace {
 
@@ -36,7 +33,8 @@ namespace neo {
 				return 0;
 			}
 		}
-		static std::string _processShader(const char* shaderString, const ShaderDefines& defines) {
+
+		inline std::string _processShader(const char* shaderString, const ShaderDefines& defines) {
 			TRACY_ZONE();
 			if (!shaderString) {
 				return "";
@@ -81,7 +79,7 @@ namespace neo {
 			std::stringstream preambleBuilder;
 			{
 				TRACY_ZONEN("Construct preamble");
-				preambleBuilder << ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion << "\n";
+				preambleBuilder << ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion << "\n\n";
 				const ShaderDefines* _defines = &defines;
 				while (_defines) {
 					for (auto& define : _defines->mDefines) {
@@ -95,51 +93,44 @@ namespace neo {
 				sourceString.insert(0, preambleBuilder.str());
 			}
 
-			// Use glslang just for the preprocessor..for now
-			// Maybe spirv and validators and stuff can happen later
-			{
-				TRACY_ZONEN("glslang");
-				NEO_ASSERT(glslang_initialize_process(), "Failed to initialize glslang");
+			return sourceString;
+		}
 
-				glslang_input_t input;
-				input.language = GLSLANG_SOURCE_GLSL;
-				input.stage = GLSLANG_STAGE_VERTEX;
-				input.client = GLSLANG_CLIENT_OPENGL;
-				input.client_version = GLSLANG_TARGET_OPENGL_450;
-				input.target_language = GLSLANG_TARGET_NONE;
-				// input.target_language_version;
-				input.code = sourceString.c_str();
-				input.default_version = 430;
-				input.default_profile = GLSLANG_NO_PROFILE;
-				input.force_default_version_and_profile = false;
-				input.forward_compatible = false;
-				input.messages = GLSLANG_MSG_ONLY_PREPROCESSOR_BIT;
-				input.resource = glslang_default_resource();
-
-				glslang_shader_t* shader = glslang_shader_create(&input);
-				NEO_ASSERT(shader, "glslang_shader_create failed");
-
-				glslang_shader_preprocess(shader, &input);
-
-				std::string ret = glslang_shader_get_preprocessed_code(shader);
-
-				glslang_finalize_process();
-
-				return ret;
+		inline void _findBinding(const std::string& line, const std::string& uniformName, std::map<std::string, GLint>& bindings) {
+			std::string::size_type bindingLoc = line.find("binding =");
+			if (bindingLoc != std::string::npos) {
+				std::string::size_type bindingValueStart = line.find_first_not_of(' ', bindingLoc + 9);
+				std::string::size_type bindingValueEnd = std::string::npos;
+				std::string::size_type bindingValueEndComma = line.find(",", bindingValueStart);
+				std::string::size_type bindingValueEndParen = line.find(")", bindingValueStart);
+				if (bindingValueEndComma != std::string::npos && bindingValueEndParen != std::string::npos) {
+					bindingValueEnd = bindingValueEndComma < bindingValueEndParen ? bindingValueEndComma : bindingValueEndParen;
+				}
+				else {
+					bindingValueEnd = bindingValueEndParen;
+				}
+				NEO_ASSERT(
+					bindingValueStart != std::string::npos
+					&& bindingValueEnd != std::string::npos, "Failed to parse binding at %s", line.c_str());
+				bindings.emplace(uniformName, std::stoi(line.substr(bindingValueStart, bindingValueEnd - bindingValueStart)));
 			}
 		}
 
-		static void _findUniforms(const char *shaderString, std::vector<std::string>& uniforms, std::map<std::string, GLint>& bindings) {
+		inline void _findUniforms(const char *shaderString, std::vector<std::string>& uniforms, std::map<std::string, GLint>& bindings) {
 			TRACY_ZONE();
 			std::string fileText(shaderString);
 			std::string::size_type start = 0;
 			std::string::size_type end = 0;
 			while ((end = fileText.find("\n", start)) != std::string::npos) {
 				std::string line = fileText.substr(start, end - start);
+				std::string::size_type commentStart = line.find("//");
+				if (commentStart == 0) {
+					start = end + 1;
+					continue;
+				}
 
 				std::string::size_type uniformStart = line.find("uniform");
-				std::string::size_type bindingLoc = line.find("binding =");
-				if (uniformStart != std::string::npos) {
+				if (uniformStart != std::string::npos && uniformStart < commentStart) {
 					std::string::size_type uniformTypeStart = line.find_first_not_of(' ', uniformStart + 7);
 					std::string::size_type uniformTypeEnd = line.find_first_of(' ', uniformTypeStart);
 					std::string::size_type uniformNameStart = line.find_first_not_of(' ', uniformTypeEnd);
@@ -153,14 +144,21 @@ namespace neo {
 					NEO_ASSERT(uniform.find(" ") == std::string::npos && uniform.find(",") == std::string::npos, "Can't have nested uniform definitions at %s", line.c_str());
 					uniforms.push_back(uniform);
 
-					if (bindingLoc != std::string::npos) {
-						std::string::size_type bindingValueStart = line.find_first_not_of(' ', bindingLoc + 9);
-						std::string::size_type bindingValueEnd = line.find(")", bindingValueStart);
-						NEO_ASSERT(
-							bindingValueStart != std::string::npos
-							&& bindingValueEnd != std::string::npos, "Failed to parse binding at %s", line.c_str());
-					   bindings.emplace(uniform, std::stoi(line.substr(bindingValueStart, bindingValueEnd - bindingValueStart)));
-					}
+					_findBinding(line, uniform, bindings);
+				}
+
+				std::string::size_type bufferStart = line.find("buffer");
+				if (bufferStart != std::string::npos && bufferStart < commentStart) {
+					std::string::size_type bufferNameStart = line.find_first_not_of(' ', bufferStart + 7);
+					std::string::size_type bufferNameEnd = line.find_first_of(' ', bufferNameStart);
+					NEO_ASSERT(
+						bufferNameStart != std::string::npos
+						&& bufferNameEnd != std::string::npos, "Failed to parse buffer at line %s", line.c_str());
+					std::string buffer = line.substr(bufferNameStart, bufferNameEnd - bufferNameStart);
+					NEO_ASSERT(buffer.find(" ") == std::string::npos && buffer.find(",") == std::string::npos, "Can't have nested uniform definitions at %s", line.c_str());
+					uniforms.push_back(buffer);
+
+					_findBinding(line, buffer, bindings);
 				}
 
 				start = end + 1;

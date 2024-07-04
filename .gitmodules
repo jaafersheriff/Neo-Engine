@@ -25,9 +25,6 @@
 [submodule "Engine/ext/implot"]
 	path = Engine/ext/implot
 	url = https://github.com/epezent/implot
-[submodule "Engine/ext/glslang"]
-	path = Engine/ext/glslang
-	url = https://github.com/KhronosGroup/glslang.git
 [submodule "Engine/ext/tinygltf"]
 	path = Engine/ext/tinygltf
 	url = https://github.com/syoyo/tinygltf

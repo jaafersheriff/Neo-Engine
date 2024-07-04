@@ -125,26 +125,6 @@ if (MSVC)
 	unset(MESSAGE_QUIET)
 endif()
 
-## glslang
-set(SKIP_GLSLANG_INSTALL ON)
-set(ENABLE_SPVREMAPPER OFF)
-set(ENABLE_GLSLANG_BINARIES OFF)
-set(ENABLE_HLSL OFF)
-set(ENABLE_OPT OFF)
-set(ENABLE_CTEST OFF)
-set(BUILD_EXTERNAL OFF)
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glslang")
-target_compile_options(glslang PRIVATE "/WX-" "/W0")
-target_compile_options(MachineIndependent PRIVATE "/WX-" "/W0")
-target_compile_options(SPIRV PRIVATE "/WX-" "/W0")
-set_target_properties(glslang PROPERTIES FOLDER "Neo/ext/glslang")
-set_target_properties(GenericCodeGen PROPERTIES FOLDER "Neo/ext/glslang")
-set_target_properties(glslang-default-resource-limits PROPERTIES FOLDER "Neo/ext/glslang")
-set_target_properties(MachineIndependent PROPERTIES FOLDER "Neo/ext/glslang")
-set_target_properties(OGLCompiler PROPERTIES FOLDER "Neo/ext/glslang")
-set_target_properties(OSDependent PROPERTIES FOLDER "Neo/ext/glslang")
-set_target_properties(SPIRV PROPERTIES FOLDER "Neo/ext/glslang")
-
 ## imgui
 file(GLOB IMGUI_CPP_FILES 
 	imgui/*.cpp
