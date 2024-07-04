@@ -28,11 +28,18 @@ namespace PBR {
 		bool mDrawIBL = true;
 
 		bool mDoTonemap = true;
-		AutoExposureParameters mAutoExposureParams;
+		AutoExposureParameters mAutoExposureParams = {
+			0.45f,
+			45.f,
+			0.02f
+		};
 		bool mUsePing = true;
 
 		bool mDoBloom = true;
-		BloomParameters mBloomParameters;
+		BloomParameters mBloomParameters = {
+			0.004f,
+			3
+		};
 
 		GBufferDebugMode mDebugMode;
 	};

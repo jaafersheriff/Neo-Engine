@@ -92,7 +92,7 @@ namespace neo {
 			passDefines.set(POINT_LIGHT);
 		}
 		else {
-			NEO_FAIL("Phong light needs a directional or point light component");
+			NEO_FAIL("No lights?");
 		}
 
 		MakeDefine(IBL);

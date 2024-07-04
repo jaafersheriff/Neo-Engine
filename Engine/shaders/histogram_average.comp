@@ -45,7 +45,7 @@ void main() {
 		// The new stored value will be interpolated using the last frames value
 		// to prevent sudden shifts in the exposure.
 		float lumLastFrame = imageLoad(dst, ivec2(0, 0)).x;
-		float adaptedLum = mix(lumLastFrame, weightedAvgLum, 0.16);
+		float adaptedLum = mix(lumLastFrame, weightedAvgLum, timeCoefficient);
 		imageStore(dst, ivec2(0, 0), vec4(adaptedLum, 0.0, 0.0, 0.0));
 	}
 }

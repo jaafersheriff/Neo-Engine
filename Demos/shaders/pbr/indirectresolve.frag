@@ -36,7 +36,7 @@ void main() {
 	pbrMaterial.ao = albedoAO.a;
 
 	color.rgb = vec3(0)
-		+ calculateIndirectDiffuse(pbrMaterial.albedo, pbrMaterial.metalness, 0.08)
+		+ calculateIndirectDiffuse(pbrMaterial.albedo, pbrMaterial.metalness, 0.1)
 #ifdef IBL
 		+ getIndirectSpecular(pbrMaterial, iblMips, dfgLUT, ibl)
 #endif

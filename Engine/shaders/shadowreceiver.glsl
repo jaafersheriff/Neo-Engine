@@ -27,5 +27,5 @@ float getShadowVisibility(int pcfSize, sampler2D shadowMap, vec2 shadowMapResolu
 		visibility = 0.0;
 	}
 
-	return visibility;
+	return saturate(visibility);
 }
