@@ -121,6 +121,7 @@ namespace neo {
 				RG16_UI,
 				RGB16_UI,
 				RGBA16_UI,
+				R32_UI,
 				R16_F,
 				RG16_F,
 				RGB16_F,

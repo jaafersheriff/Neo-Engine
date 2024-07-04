@@ -1,10 +1,8 @@
 // https://bruop.github.io/exposure/
 
 #include "color.glsl"
-// layout(binding = 1, std430) writeonly buffer histogramBuffer {
-//     uint histogram[];
-// };
-layout(binding = 1, r16f) writeonly uniform image1D histogram;
+
+layout(binding = 1, r32ui) coherent uniform uimage2D histogram;
 
 layout(binding = 0, rgba16f) readonly uniform image2D previousHDRColor;
 uniform uvec2 inputResolution;
@@ -55,6 +53,5 @@ void main() {
 
     // Technically there's no chance that two threads write to the same bin here,
     // but different work groups might! So we still need the atomic add.
-    //atomicAdd(histogram[gl_LocalInvocationIndex], localHistogram[gl_LocalInvocationIndex]);
-    imageAtomicAdd(histogram, int(gl_LocalInvocationIndex), localHistogram[gl_LocalInvocationIndex]);
+    imageAtomicAdd(histogram, ivec2(gl_LocalInvocationIndex, 0), localHistogram[gl_LocalInvocationIndex]);
 }

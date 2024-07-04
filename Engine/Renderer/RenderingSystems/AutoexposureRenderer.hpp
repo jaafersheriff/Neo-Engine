@@ -13,29 +13,6 @@
 #include <tuple>
 
 namespace neo {
-	namespace {
-
-		// TODO - wtf do I do with this...
-		/*
-		struct ShaderBuffer {
-			uint32_t glId = 0;
-			bool isInit = false;
-
-			void init(uint32_t byteSize) {
-				NEO_UNUSED(byteSize);
-				glGenBuffers(1, &glId);
-				glBindBuffer(GL_SHADER_STORAGE_BUFFER, glId);
-				glBufferData(GL_SHADER_STORAGE_BUFFER, byteSize, 0, GL_DYNAMIC_DRAW);
-				isInit = true;
-
-			}
-			void destroy() {
-				glDeleteBuffers(1, &glId);
-			}
-		};
-
-		*/
-	}
 
 	struct AutoExposureParameters {
 		float mMinLuminance = 0.f;
@@ -57,13 +34,14 @@ namespace neo {
 		}
 		const auto& previousFrame = resourceManagers.mTextureManager.resolve(previousFrameHDR);
 
-		// static ShaderBuffer histogram;
-		// if (!histogram.isInit) {
-		// 	histogram.init(sizeof(unsigned int) * 256);
-		// }
 		auto histogram = resourceManagers.mTextureManager.asyncLoad("Histogram", TextureBuilder{}
 			.setDimension({ 256, 1, 0 })
-			.setFormat(TextureFormat{ types::texture::Target::Texture1D, types::texture::InternalFormats::R16_F })
+			.setFormat(TextureFormat{ 
+				types::texture::Target::Texture2D, 
+				types::texture::InternalFormats::R32_UI, 
+				TextureFilter {types::texture::Filters::Nearest, types::texture::Filters::Nearest}, // R32UI needs nearest filter wahoo
+				TextureWrap{ types::texture::Wraps::Mirrored, types::texture::Wraps::Mirrored}
+			})
 		);
 		if (!resourceManagers.mTextureManager.isValid(histogram)) {
 			return NEO_INVALID_HANDLE;
@@ -79,8 +57,7 @@ namespace neo {
 			populateShader.bindUniform("minLogLum", glm::log2(params.mMinLuminance + util::EP));
 			populateShader.bindUniform("inverseLogLumRange", 1.f / (glm::log2(glm::abs(params.mMaxLuminance - params.mMinLuminance + util::EP))));
 			auto imageBarrier1 = populateShader.bindImageTexture("previousHDRColor", previousFrame, types::shader::Access::Read);
-			//auto histogramBarrier = populateShader.bindShaderBuffer("histogramBuffer", histogram.glId, types::shader::Access::Write);
-			auto imageBarrier2 = populateShader.bindImageTexture("histogram", resourceManagers.mTextureManager.resolve(histogram), types::shader::Access::Write);
+			auto imageBarrier2 = populateShader.bindImageTexture("histogram", resourceManagers.mTextureManager.resolve(histogram), types::shader::Access::ReadWrite);
 			populateShader.dispatch({ previousFrame.mWidth / 16, previousFrame.mHeight / 16, 1 });
 		}
 
