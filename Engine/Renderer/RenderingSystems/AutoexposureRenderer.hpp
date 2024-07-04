@@ -20,14 +20,17 @@ namespace neo {
 		float mMaxLogLuminance = 10.f;
 		float mTimeCoefficient = 1.f + util::EP;
 
+		float _data;
+
 		void imguiEditor() {
 			ImGui::SliderFloat("Min Log Lum", &mMinLogLuminance, util::EP, mMaxLogLuminance);
 			ImGui::SliderFloat("Max Log Lum", &mMaxLogLuminance, mMinLogLuminance, 100.f);
 			ImGui::SliderFloat("Time Coeff", &mTimeCoefficient, 0.001f, 1.f);
+			ImGui::Text("Luminance: %0.5f", _data);
 		}
 	};
 
-	inline TextureHandle calculateAutoexposure(const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle previousFrameHDR, const AutoExposureParameters& params) {
+	inline TextureHandle calculateAutoexposure(const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle previousFrameHDR, AutoExposureParameters& params) {
 		TRACY_GPU();
 
 		if (!resourceManagers.mTextureManager.isValid(previousFrameHDR)) {
@@ -98,6 +101,10 @@ namespace neo {
 			averageShader.dispatch({ 1, 1, 1 });
 		}
 
+		if (resourceManagers.mTextureManager.isValid(outputTexture)) {
+			resourceManagers.mTextureManager.resolve(outputTexture).bind();
+			glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, &params._data);
+		}
 		return outputTexture;
 	}
 }

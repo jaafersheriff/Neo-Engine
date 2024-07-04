@@ -65,20 +65,25 @@ float Reinhard2(float x, float L_white) {
     return (x * (1.0 + x / (L_white * L_white))) / (1.0 + x);
 }
 
+vec3 reinhard2(vec3 _x, float _whiteSqr)
+{
+	return (_x * (1.0 + _x/_whiteSqr) ) / (1.0 + _x);
+}
 
 void main() {
-    // Reinhard-Jodie
-    vec3 v = texture(inputTexture, fragTex).rgb;
-    float inputLuminance = luminance(v);
-	float l = inputLuminance;
+	// Reinhard-Jodie
+	vec3 v = texture(inputTexture, fragTex).rgb;
+	float inputLuminance = luminance(v);
 #ifdef AUTO_EXPOSURE
-    float avgLum = texture(averageLuminance, vec2(1, 1)).r;
-    if (!isnan(avgLum)) {
-        l = inputLuminance / (9.6 * avgLum + EP);
-	}
+	float avgLum = texture(averageLuminance, vec2(0, 0)).r;
+	vec3 Yxy = convertRGB2Yxy(v);
+
+	float lp = Yxy.x / (9.6 * avgLum + 0.0001);
+	Yxy.x = Reinhard2(lp, 4.f);
+
+	color = vec4(convertYxy2RGB(Yxy), 1.0);
+#else
+	color = vec4(reinhard2(v, 4.f), 1.0);
 #endif
-    vec3 tv = v / (1.0f + v);
-	color = vec4(tv, 1.0); 
-	//color = linearToSrgb(color); 
-    color = vec4(mix(v / (1.0f + l), tv, tv), 1.0);
+	color = linearToSrgb(color);
 }
