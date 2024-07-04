@@ -390,6 +390,10 @@ namespace PBR {
 		}
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
 		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl);
+		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParameters) : hdrColorOutput;
+		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
+			bloomHandle = hdrColorOutput;
+		}
 
 		TextureHandle averageLuminance = NEO_INVALID_HANDLE;
 		{
@@ -402,14 +406,9 @@ namespace PBR {
 			);
 			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
 				const auto& previousHDRColor = resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle);
-				averageLuminance = calculateAutoexposure(resourceManagers, previousHDRColor.mTextures[0], mAutoExposureParams);
-				blit(resourceManagers, previousHDRColor, hdrColor.mTextures[0], viewport.mSize);
+				averageLuminance = calculateAutoexposure(resourceManagers, ecs, previousHDRColor.mTextures[0], mAutoExposureParams);
+				blit(resourceManagers, previousHDRColor, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0], viewport.mSize);
 			}
-		}
-
-		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParameters) : hdrColorOutput;
-		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
-			bloomHandle = hdrColorOutput;
 		}
 
 		FramebufferHandle tonemappedHandle = mDoTonemap ? tonemap(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0], averageLuminance) : bloomHandle;

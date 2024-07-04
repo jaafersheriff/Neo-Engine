@@ -2,11 +2,9 @@
 
 #include "color.glsl"
 
-layout(binding = 0, std430) volatile buffer histogramBuffer {
-	uint histogram[];
-};
+layout(binding = 0, r32ui) readonly uniform uimage2D histogram;
 
-layout(binding = 1, r16f) volatile uniform image2D dst;
+layout(binding = 1, r16f) coherent uniform image2D dst;
 
 uniform uvec2 inputResolution;
 
@@ -17,15 +15,12 @@ uniform float timeCoefficient;
 // Shared histogram buffer used for storing intermediate sums for each work group
 shared uint localHistogram[256];
 
-layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+layout (local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 void main() {
 	// Get the count from the histogram buffer
-	uint countForThisBin = histogram[gl_LocalInvocationIndex];
+	uint countForThisBin = uint(imageLoad(histogram, ivec2(gl_LocalInvocationIndex, 0)).r);
 	localHistogram[gl_LocalInvocationIndex] = countForThisBin * gl_LocalInvocationIndex;
 	barrier();
-
-	// Reset the count stored in the buffer in anticipation of the next pass
-	histogram[gl_LocalInvocationIndex] = 0;
 
 	// This loop will perform a weighted count of the luminance range
 	for (uint cutoff = (256 >> 1); cutoff > 0; cutoff >>= 1) {
@@ -50,7 +45,7 @@ void main() {
 		// The new stored value will be interpolated using the last frames value
 		// to prevent sudden shifts in the exposure.
 		float lumLastFrame = imageLoad(dst, ivec2(0, 0)).x;
-		float adaptedLum = lumLastFrame + (weightedAvgLum - lumLastFrame) * (1.0 - exp(timeCoefficient, 6.2831853));
+		float adaptedLum = mix(lumLastFrame, weightedAvgLum, 0.0016);
 		imageStore(dst, ivec2(0, 0), vec4(adaptedLum, 0.0, 0.0, 0.0));
 	}
 }

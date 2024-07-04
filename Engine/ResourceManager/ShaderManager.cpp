@@ -7,7 +7,6 @@
 #include "Util/Profiler.hpp"
 
 #include <imgui.h>
-#pragma optimize("", off)
 
 namespace neo {
 	struct ShaderLoader final : entt::resource_loader<ShaderLoader, BackedResource<SourceShader>> {
