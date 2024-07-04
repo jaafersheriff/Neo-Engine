@@ -11,8 +11,6 @@ PRIVATE
 	glm
 	entt
 	TracyClient
-	glslang
-	glslang-default-resource-limits
 )
 
 add_precompiled_header(Renderer
