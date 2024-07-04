@@ -45,6 +45,7 @@ namespace neo {
 		}
 
 		ImGui::Separator();
+		ImGui::Separator();
 		getCurrentDemo()->imGuiEditor(ecs);
 		ImGui::End();
 

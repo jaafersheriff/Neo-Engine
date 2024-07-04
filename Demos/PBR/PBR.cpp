@@ -21,7 +21,6 @@
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 #include "ECS/Systems/TranslationSystems/SinTranslateSystem.hpp"
 
-#include "GBufferRenderer.hpp"
 #include "DeferredPBRRenderer.hpp"
 
 #include "Renderer/RenderingSystems/Blitter.hpp"
@@ -293,6 +292,9 @@ namespace PBR {
 
 	void Demo::imGuiEditor(ECS& ecs) {
 		NEO_UNUSED(ecs);
+
+		GBufferDebugImGuiEditor(mDebugMode);
+
 		ImGui::Checkbox("Shadows", &mDrawShadows);
 		ImGui::SliderFloat("Debug Radius", &mLightDebugRadius, 0.f, 10.f);
 		if (ImGui::SliderInt("# Point Lights", &mPointLightCount, 0, 100)) {
@@ -354,6 +356,14 @@ namespace PBR {
 		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 
+		if (mDebugMode != GBufferDebugMode::Off) {
+			auto debugOutput = drawGBufferDebug(resourceManagers, mDebugMode, gbufferHandle, viewport.mSize);
+			if (resourceManagers.mFramebufferManager.isValid(debugOutput)) {
+				blit(resourceManagers, backbuffer, resourceManagers.mFramebufferManager.resolve(debugOutput).mTextures[0], viewport.mSize);
+				return;
+			}
+		}
+
 		auto hdrColorOutput = resourceManagers.mFramebufferManager.asyncLoad(
 			"HDR Color",
 			FramebufferBuilder{}
@@ -390,6 +400,7 @@ namespace PBR {
 		}
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
 		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl);
+
 		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParameters) : hdrColorOutput;
 		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
 			bloomHandle = hdrColorOutput;

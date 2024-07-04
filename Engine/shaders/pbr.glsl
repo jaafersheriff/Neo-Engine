@@ -1,5 +1,3 @@
-#pragma once
-
 #define DIALECTRIC_REFLECTANCE 0.04 
 
 #include "pbrtypes.glsl"

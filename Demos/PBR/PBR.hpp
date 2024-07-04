@@ -4,6 +4,7 @@
 
 #include "Renderer/RenderingSystems/AutoexposureRenderer.hpp"
 #include "Renderer/RenderingSystems/BloomRenderer.hpp"
+#include "GBufferRenderer.hpp"
 
 using namespace neo;
 
@@ -20,8 +21,10 @@ namespace PBR {
 
 	private:
 		bool mDrawShadows = true;
+
 		int mPointLightCount = 20;
 		float mLightDebugRadius = 0.f;
+
 		bool mDrawIBL = true;
 
 		bool mDoTonemap = true;
@@ -30,5 +33,7 @@ namespace PBR {
 
 		bool mDoBloom = true;
 		BloomParameters mBloomParameters;
+
+		GBufferDebugMode mDebugMode;
 	};
 }

@@ -243,10 +243,9 @@ namespace neo {
 	   // This might break if different shader stages use the same uniform..?
 	   for (auto& uniform : uniforms) {
 		   GLint r = glGetUniformLocation(mPid, uniform.c_str());
-		   if (r < 0) {
-			   NEO_LOG_S(util::LogSeverity::Warning, "%s uniform cannot be bound (it either doesn't exist or has been optimized away)", uniform.c_str());
+		   if (r >= 0) {
+			   mUniforms[HashedString(uniform.c_str()).value()] = r;
 		   }
-		   mUniforms[HashedString(uniform.c_str()).value()] = r;
 	   }
 	   for (auto& binding : bindings) {
 		   mBindings[HashedString(binding.first.c_str()).value()] = binding.second;
