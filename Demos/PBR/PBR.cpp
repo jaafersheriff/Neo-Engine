@@ -391,6 +391,7 @@ namespace PBR {
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
 		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl);
 
+		TextureHandle averageLuminance = NEO_INVALID_HANDLE;
 		{
 			auto previousHDRColorHandle = resourceManagers.mFramebufferManager.asyncLoad(
 				"Previous HDR Color",
@@ -401,7 +402,7 @@ namespace PBR {
 			);
 			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
 				const auto& previousHDRColor = resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle);
-				calculateAutoexposure(resourceManagers, previousHDRColor.mTextures[0], mAutoExposureParams);
+				averageLuminance = calculateAutoexposure(resourceManagers, previousHDRColor.mTextures[0], mAutoExposureParams);
 				blit(resourceManagers, previousHDRColor, hdrColor.mTextures[0], viewport.mSize);
 			}
 		}
@@ -411,7 +412,7 @@ namespace PBR {
 			bloomHandle = hdrColorOutput;
 		}
 
-		FramebufferHandle tonemappedHandle = mDoTonemap ? tonemap(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0]) : bloomHandle;
+		FramebufferHandle tonemappedHandle = mDoTonemap ? tonemap(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0], averageLuminance) : bloomHandle;
 		if (mDoTonemap && !resourceManagers.mFramebufferManager.isValid(tonemappedHandle)) {
 			tonemappedHandle = bloomHandle;
 		}

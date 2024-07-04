@@ -7,6 +7,7 @@
 #include "Util/Profiler.hpp"
 
 #include <imgui.h>
+#pragma optimize("", off)
 
 namespace neo {
 	struct ShaderLoader final : entt::resource_loader<ShaderLoader, BackedResource<SourceShader>> {
@@ -48,6 +49,8 @@ namespace neo {
 					}
 				)"}
 			}, "Dummy");
+
+		mFallback->mResource.getResolvedInstance({});
 	}
 
 	ShaderManager::~ShaderManager() {
@@ -90,13 +93,7 @@ namespace neo {
 			mDiscardQueue.clear();
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
-					auto& shader = resolve(id);
-					if (shader.mConstructionArgs.has_value()) {
-						for (auto&& [type, charString] : shader.mShaderSources) {
-							delete charString;
-						}
-					}
-					shader.destroy();
+					_destroyImpl(mCache.handle(id.mHandle).get());
 					mCache.discard(id.mHandle);
 				}
 			}
@@ -116,10 +113,8 @@ namespace neo {
 		mCache.each([&](entt::id_type enttId, BackedResource<SourceShader>&  resource) {
 			auto& shader = resource.mResource;
 			if (ImGui::TreeNode(shader.mName.c_str())) {
-				if (shader.mConstructionArgs && ImGui::Button("Reload all")) {
+				if (shader.mConstructionArgs && ImGui::Button("Reload")) {
 					discard(ShaderHandle(enttId));
-					auto newId = asyncLoad(HashedString(shader.mName.c_str()), *shader.mConstructionArgs);
-					NEO_UNUSED(newId);
 				}
 
 				if (shader.mResolvedShaders.size()) {

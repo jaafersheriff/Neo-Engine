@@ -16,6 +16,7 @@ namespace neo {
 	namespace {
 
 		// TODO - wtf do I do with this...
+		/*
 		struct ShaderBuffer {
 			uint32_t glId = 0;
 			bool isInit = false;
@@ -32,6 +33,8 @@ namespace neo {
 				glDeleteBuffers(1, &glId);
 			}
 		};
+
+		*/
 	}
 
 	struct AutoExposureParameters {
@@ -40,23 +43,30 @@ namespace neo {
 		float mTimeCoefficient = 1.f;
 
 		void imguiEditor() {
-			ImGui::SliderFloat("Min Lum", &mMinLuminance, 0.f, mMaxLuminance);
-			ImGui::SliderFloat("Max Lum", &mMaxLuminance, mMinLuminance, 10.f);
-			ImGui::SliderFloat("Time Coeff", &mTimeCoefficient, 0.01f, 10.f);
+			ImGui::SliderFloat("Min Lum", &mMinLuminance, 0.001f, mMaxLuminance);
+			ImGui::SliderFloat("Max Lum", &mMaxLuminance, mMinLuminance, 100.f);
+			ImGui::SliderFloat("Time Coeff", &mTimeCoefficient, 0.001f, 1.f);
 		}
 	};
 
-	inline void calculateAutoexposure(const ResourceManagers& resourceManagers, const TextureHandle previousFrameHDR, const AutoExposureParameters& params) {
+	inline TextureHandle calculateAutoexposure(const ResourceManagers& resourceManagers, const TextureHandle previousFrameHDR, const AutoExposureParameters& params) {
 		TRACY_GPU();
 
 		if (!resourceManagers.mTextureManager.isValid(previousFrameHDR)) {
-			return;
+			return NEO_INVALID_HANDLE;
 		}
 		const auto& previousFrame = resourceManagers.mTextureManager.resolve(previousFrameHDR);
 
-		static ShaderBuffer histogram;
-		if (!histogram.isInit) {
-			histogram.init(sizeof(unsigned int) * 256);
+		// static ShaderBuffer histogram;
+		// if (!histogram.isInit) {
+		// 	histogram.init(sizeof(unsigned int) * 256);
+		// }
+		auto histogram = resourceManagers.mTextureManager.asyncLoad("Histogram", TextureBuilder{}
+			.setDimension({ 256, 1, 0 })
+			.setFormat(TextureFormat{ types::texture::Target::Texture1D, types::texture::InternalFormats::R16_F })
+		);
+		if (!resourceManagers.mTextureManager.isValid(histogram)) {
+			return NEO_INVALID_HANDLE;
 		}
 
 		auto histogramPopulateHandle = resourceManagers.mShaderManager.asyncLoad("HistogramPopulate Shader", SourceShader::ConstructionArgs{
@@ -67,9 +77,10 @@ namespace neo {
 
 			populateShader.bindUniform("inputResolution", glm::uvec2(previousFrame.mWidth, previousFrame.mHeight));
 			populateShader.bindUniform("minLogLum", glm::log2(params.mMinLuminance + util::EP));
-			populateShader.bindUniform("inverseLogLumRange", 1.f / glm::log2(params.mMaxLuminance - params.mMinLuminance) + util::EP);
-			auto imageBarrier = populateShader.bindImageTexture("previousHDRColor", previousFrame, types::shader::Access::Read);
-			auto histogramBarrier = populateShader.bindShaderBuffer("histogramBuffer", histogram.glId, types::shader::Access::Write);
+			populateShader.bindUniform("inverseLogLumRange", 1.f / (glm::log2(glm::abs(params.mMaxLuminance - params.mMinLuminance + util::EP))));
+			auto imageBarrier1 = populateShader.bindImageTexture("previousHDRColor", previousFrame, types::shader::Access::Read);
+			//auto histogramBarrier = populateShader.bindShaderBuffer("histogramBuffer", histogram.glId, types::shader::Access::Write);
+			auto imageBarrier2 = populateShader.bindImageTexture("histogram", resourceManagers.mTextureManager.resolve(histogram), types::shader::Access::Write);
 			populateShader.dispatch({ previousFrame.mWidth / 16, previousFrame.mHeight / 16, 1 });
 		}
 
@@ -81,18 +92,20 @@ namespace neo {
 				TextureFilter { types::texture::Filters::Nearest, types::texture::Filters::Nearest } 
 			})
 		);
-		auto histogramAverageHandle = resourceManagers.mShaderManager.asyncLoad("HistogramAverage Shader", SourceShader::ConstructionArgs{
-			{types::shader::Stage::Compute, "histogram_average.comp" }
-		});
-		if (resourceManagers.mTextureManager.isValid(outputTexture) && resourceManagers.mShaderManager.isValid(histogramAverageHandle)) {
-			auto& averageShader = resourceManagers.mShaderManager.resolveDefines(histogramAverageHandle, {});
-			averageShader.bindUniform("inputResolution", glm::uvec2(previousFrame.mWidth, previousFrame.mHeight));
-			averageShader.bindUniform("minLogLum", glm::log2(params.mMinLuminance + util::EP));
-			averageShader.bindUniform("logLumRange", glm::log2(params.mMaxLuminance - params.mMinLuminance));
-			averageShader.bindUniform("timeCoefficient", params.mTimeCoefficient);
-			auto histogramBarrier = averageShader.bindShaderBuffer("histogramBuffer", histogram.glId, types::shader::Access::ReadWrite);
-			auto imageBarrier = averageShader.bindImageTexture("dst", resourceManagers.mTextureManager.resolve(outputTexture), types::shader::Access::Write);
-			averageShader.dispatch({ 1, 1, 1 });
-		}
+		// auto histogramAverageHandle = resourceManagers.mShaderManager.asyncLoad("HistogramAverage Shader", SourceShader::ConstructionArgs{
+		// 	{types::shader::Stage::Compute, "histogram_average.comp" }
+		// });
+		// if (resourceManagers.mTextureManager.isValid(outputTexture) && resourceManagers.mShaderManager.isValid(histogramAverageHandle)) {
+		// 	auto& averageShader = resourceManagers.mShaderManager.resolveDefines(histogramAverageHandle, {});
+		// 	averageShader.bindUniform("inputResolution", glm::uvec2(previousFrame.mWidth, previousFrame.mHeight));
+		// 	averageShader.bindUniform("minLogLum", glm::log2(params.mMinLuminance + util::EP));
+		// 	averageShader.bindUniform("logLumRange", glm::log2(glm::abs(params.mMaxLuminance - params.mMinLuminance + util::EP)));
+		// 	averageShader.bindUniform("timeCoefficient", params.mTimeCoefficient);
+		// 	auto histogramBarrier = averageShader.bindShaderBuffer("histogramBuffer", histogram.glId, types::shader::Access::ReadWrite);
+		// 	auto imageBarrier = averageShader.bindImageTexture("dst", resourceManagers.mTextureManager.resolve(outputTexture), types::shader::Access::Write);
+		// 	averageShader.dispatch({ 1, 1, 1 });
+
+		// }
+		return outputTexture;
 	}
 }

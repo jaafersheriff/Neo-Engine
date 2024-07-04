@@ -201,7 +201,7 @@ namespace neo {
 	void FramebufferManager::clear(const TextureManager& textureManager) {
 		mQueue.clear();
 		mCache.each([&textureManager](BackedResource<PooledFramebuffer>& pfb) {
-			if (pfb.mResource.mExternallyOwned) {
+			if (!pfb.mResource.mExternallyOwned) {
 				for (auto& textureHandle : pfb.mResource.mFramebuffer.mTextures) {
 					textureManager.discard(textureHandle);
 				}

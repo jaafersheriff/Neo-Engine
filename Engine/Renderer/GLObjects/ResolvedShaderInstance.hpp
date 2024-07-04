@@ -33,7 +33,7 @@ namespace neo {
 
 		bool init(const SourceShader::ShaderCode& args, const ShaderDefines& defines);
 		void destroy();
-		bool isValid() const { return mValid; }
+		bool isValid() const { return mPid != 0; }
 
 		void bind() const;
 		void unbind() const;
@@ -62,7 +62,6 @@ namespace neo {
 		void dispatch(glm::uvec3 workGroups) const;
 
 	private:
-		bool mValid = false;
 		bool isCompute = false;
 		uint32_t mPid = 0;
 		entt::dense_hash_map<types::shader::Stage, uint32_t> mShaderIDs;

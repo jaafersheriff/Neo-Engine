@@ -213,7 +213,7 @@ namespace neo {
 
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
-					mCache.handle(id.mHandle).get().mResource.destroy();
+					_destroyImpl(mCache.handle(id.mHandle).get());
 					mCache.discard(id.mHandle);
 				}
 			}

@@ -107,7 +107,7 @@ namespace neo {
 
 			for (auto&& [handle, func] : swapQueue) {
 				if (isValid(handle)) {
-					func(resolve(handle));
+					func(mCache.handle(handle.mHandle).get().mResource);
 				}
 				else {
 					NEO_LOG_E("Attempting to transact on an invalid mesh");
@@ -122,7 +122,7 @@ namespace neo {
 
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
-					mCache.handle(id.mHandle).get().mResource.destroy();
+					_destroyImpl(mCache.handle(id.mHandle).get());
 					mCache.discard(id.mHandle);
 				}
 			}

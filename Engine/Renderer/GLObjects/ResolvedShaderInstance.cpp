@@ -199,9 +199,8 @@ namespace neo {
 	}
 
 	bool ResolvedShaderInstance::init(const SourceShader::ShaderCode& shaderCode, const ShaderDefines& defines) {
-		NEO_ASSERT(!mValid && mPid == 0, "Trying to initialize an existing shader variant object?");
+		NEO_ASSERT(!isValid() && mPid == 0, "Trying to initialize an existing shader variant object?");
 		TRACY_ZONE();
-		mValid = false;
 		isCompute = false;
 		mPid = glCreateProgram();
 
@@ -213,7 +212,9 @@ namespace neo {
 			}
 			if (!source) {
 				NEO_LOG_E("Trying to compile an empty shader source");
-				return mValid;
+				glDeleteProgram(mPid);
+				mPid = 0;
+				return false;
 			}
 			std::string processedSource = _processShader(source, defines);
 			if (processedSource.size()) {
@@ -223,8 +224,9 @@ namespace neo {
 					_findUniforms(processedSource.c_str(), uniforms, bindings);
 				}
 				else {
-					mValid = false;
-					return mValid;
+					glDeleteProgram(mPid);
+					mPid = 0;
+					return false;
 				}
 			}
 		}
@@ -235,12 +237,9 @@ namespace neo {
 		glGetProgramiv(mPid, GL_LINK_STATUS, &linkSuccess);
 		if (!linkSuccess) {
 			GLHelper::printProgramInfoLog(mPid);
-			destroy();
-			mValid = false;
-			return mValid;
+			return false;
 		}
 
-	   mValid = true;
 	   // This might break if different shader stages use the same uniform..?
 	   for (auto& uniform : uniforms) {
 		   GLint r = glGetUniformLocation(mPid, uniform.c_str());
@@ -253,7 +252,7 @@ namespace neo {
 		   mBindings[HashedString(binding.first.c_str()).value()] = binding.second;
 	   }
 
-		return mValid;
+		return true;
 	}
 
 	uint32_t ResolvedShaderInstance::_compileShader(GLenum shaderType, const char *shaderString) {
@@ -299,9 +298,11 @@ namespace neo {
 	}
 
 	void ResolvedShaderInstance::dispatch(glm::uvec3 workGroups) const {
-		if (isValid()) {
-			NEO_ASSERT(isCompute, "Can't dispatch a non-compute shader");
+		if (isCompute) {
 			glDispatchCompute(workGroups.x, workGroups.y, workGroups.z);
+		}
+		else {
+			//NEO_LOG_E("Trying to dispatch non-compute shader");
 		}
 	}
 
@@ -357,6 +358,7 @@ namespace neo {
 		return ShaderBarrier(accessType > types::shader::Access::Read ? types::shader::Barrier::ImageAccess : types::shader::Barrier::None); // I'm really trusting the compiler to use copy elision here
 	}
 
+	/*
 	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const {
 		GLint bindingLoc = 0;
 		auto binding = mBindings.find(HashedString(name));
@@ -366,4 +368,5 @@ namespace neo {
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingLoc, id);
 		return ShaderBarrier(accessType > types::shader::Access::Read ? types::shader::Barrier::StorageBuffer : types::shader::Barrier::None); // I'm really trusting the compiler to use copy elision here
 	}
+	*/
 }

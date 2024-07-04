@@ -3,7 +3,7 @@
 #include "color.glsl"
 
 layout(binding = 0, std430) volatile buffer histogramBuffer {
-    uint histogram[];
+	uint histogram[];
 };
 
 layout(binding = 1, r16f) volatile uniform image2D dst;
@@ -19,39 +19,38 @@ shared uint localHistogram[256];
 
 layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 void main() {
-    // Get the count from the histogram buffer
-    uint countForThisBin = histogram[gl_LocalInvocationIndex];
-    localHistogram[gl_LocalInvocationIndex] = countForThisBin * gl_LocalInvocationIndex;
-    barrier();
+	// Get the count from the histogram buffer
+	uint countForThisBin = histogram[gl_LocalInvocationIndex];
+	localHistogram[gl_LocalInvocationIndex] = countForThisBin * gl_LocalInvocationIndex;
+	barrier();
 
-    // Reset the count stored in the buffer in anticipation of the next pass
-    histogram[gl_LocalInvocationIndex] = 0;
+	// Reset the count stored in the buffer in anticipation of the next pass
+	histogram[gl_LocalInvocationIndex] = 0;
 
-    // This loop will perform a weighted count of the luminance range
-    //UNROLL
-        for (uint cutoff = (256 >> 1); cutoff > 0; cutoff >>= 1) {
-            if (uint(gl_LocalInvocationIndex) < cutoff) {
-                localHistogram[gl_LocalInvocationIndex] += localHistogram[gl_LocalInvocationIndex + cutoff];
-            }
+	// This loop will perform a weighted count of the luminance range
+	for (uint cutoff = (256 >> 1); cutoff > 0; cutoff >>= 1) {
+		if (uint(gl_LocalInvocationIndex) < cutoff) {
+			localHistogram[gl_LocalInvocationIndex] += localHistogram[gl_LocalInvocationIndex + cutoff];
+		}
 
-            barrier();
-        }
+		barrier();
+	}
 
-    // We only need to calculate this once, so only a single thread is needed.
-    if (gl_LocalInvocationIndex == 0) {
-        float numPixels = inputResolution.x * inputResolution.y;
-        // Here we take our weighted sum and divide it by the number of pixels
-        // that had luminance greater than zero (since the index == 0, we can
-        // use countForThisBin to find the number of black pixels)
-        float weightedLogAverage = (localHistogram[0] / max(numPixels - float(countForThisBin), 1.0)) - 1.0;
+	// We only need to calculate this once, so only a single thread is needed.
+	if (gl_LocalInvocationIndex == 0) {
+		float numPixels = inputResolution.x * inputResolution.y;
+		// Here we take our weighted sum and divide it by the number of pixels
+		// that had luminance greater than zero (since the index == 0, we can
+		// use countForThisBin to find the number of black pixels)
+		float weightedLogAverage = (localHistogram[0] / max(numPixels - float(countForThisBin), 1.0)) - 1.0;
 
-        // Map from our histogram space to actual luminance
-        float weightedAvgLum = exp2(((weightedLogAverage / 254.0) * logLumRange) + minLogLum);
+		// Map from our histogram space to actual luminance
+		float weightedAvgLum = exp2(((weightedLogAverage / 254.0) * logLumRange) + minLogLum);
 
-        // The new stored value will be interpolated using the last frames value
-        // to prevent sudden shifts in the exposure.
-        float lumLastFrame = imageLoad(dst, ivec2(0, 0)).x;
-        float adaptedLum = lumLastFrame + (weightedAvgLum - lumLastFrame) * timeCoefficient;
-        imageStore(dst, ivec2(0, 0), vec4(adaptedLum, 0.0, 0.0, 0.0));
-    }
+		// The new stored value will be interpolated using the last frames value
+		// to prevent sudden shifts in the exposure.
+		float lumLastFrame = imageLoad(dst, ivec2(0, 0)).x;
+		float adaptedLum = lumLastFrame + (weightedAvgLum - lumLastFrame) * (1.0 - exp(timeCoefficient, 6.2831853));
+		imageStore(dst, ivec2(0, 0), vec4(adaptedLum, 0.0, 0.0, 0.0));
+	}
 }

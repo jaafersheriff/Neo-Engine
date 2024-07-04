@@ -7,7 +7,7 @@
 
 namespace neo {
 
-	static FramebufferHandle tonemap(const ResourceManagers& resourceManagers, glm::uvec2 dimension, TextureHandle inputTextureHandle) {
+	static FramebufferHandle tonemap(const ResourceManagers& resourceManagers, glm::uvec2 dimension, TextureHandle inputTextureHandle, TextureHandle averageLuminance) {
 		TRACY_GPU();
 
 		if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {
@@ -25,6 +25,7 @@ namespace neo {
 		}
 		auto& tonemapTarget = resourceManagers.mFramebufferManager.resolve(tonemapTargetHandle);
 		tonemapTarget.bind();
+		glViewport(0, 0, dimension.x, dimension.y);
 
 		tonemapTarget.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
 
@@ -36,13 +37,20 @@ namespace neo {
 			return NEO_INVALID_HANDLE;
 		}
 
-		glViewport(0, 0, dimension.x, dimension.y);
+		ShaderDefines defines;
+		MakeDefine(AUTO_EXPOSURE);
+		if (resourceManagers.mTextureManager.isValid(averageLuminance)) {
+			defines.set(AUTO_EXPOSURE);
+		}
 
-		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(tonemapShaderHandle, {});
+		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(tonemapShaderHandle, defines);
 		resolvedShader.bind();
 
 		auto& inputTexture = resourceManagers.mTextureManager.resolve(inputTextureHandle);
 		resolvedShader.bindTexture("inputTexture", inputTexture);
+		if (resourceManagers.mTextureManager.isValid(averageLuminance)) {
+			resolvedShader.bindTexture("averageLuminance", resourceManagers.mTextureManager.resolve(averageLuminance));
+		}
 
 		glDisable(GL_DEPTH_TEST);
 		resourceManagers.mMeshManager.resolve("quad").draw();
