@@ -31,6 +31,7 @@ namespace neo {
 		memcpy(buf, (const void*)log, len);
 		mLogs.push_back({ severity, static_cast<char*>(buf) });
 		while (!mInfiniteLog && mLogs.size() > mMaxLogSize) {
+			free(mLogs.front().second);
 			mLogs.erase(mLogs.begin());
 		}
 	}
