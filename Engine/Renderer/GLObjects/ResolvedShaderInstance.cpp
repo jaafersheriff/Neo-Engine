@@ -316,7 +316,7 @@ namespace neo {
 	}
 
 	void ResolvedShaderInstance::bindUniform(const char* name, const UniformVariant& uniform) const {
-		std::visit(util::VisitOverloaded{
+		util::visit(uniform, 
 			[&](bool b) { glUniform1i(_getUniform(name), b); },
 			[&](int i) { glUniform1i(_getUniform(name), i); },
 			[&](uint16_t i) { glUniform1ui(_getUniform(name), i); },
@@ -331,7 +331,7 @@ namespace neo {
 			[&](glm::mat3 m) { glUniformMatrix3fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
 			[&](glm::mat4 m) { glUniformMatrix4fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
 			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
-		}, uniform);
+		);
 	}
 
 	void ResolvedShaderInstance::bindTexture(const char* name, const Texture& texture) const {

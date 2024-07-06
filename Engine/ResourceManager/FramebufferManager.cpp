@@ -21,7 +21,7 @@ namespace neo {
 
 		FramebufferHandle swizzleSrcId(HashedString id, FramebufferLoadDetails& loadDetails) {
 			HashedString::hash_type seed = id;
-			std::visit(util::VisitOverloaded{
+			util::visit(loadDetails,
 				[&](FramebufferBuilder& builder) {
 					for (auto& format : builder.mFormats) {
 						seed = TextureHandle(swizzleTextureId(seed, format, builder.mSize)).mHandle;
@@ -33,7 +33,7 @@ namespace neo {
 					}
 				},
 				[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
-			}, loadDetails);
+			);
 
 			return FramebufferHandle(seed);
 		}
@@ -76,7 +76,7 @@ namespace neo {
 
 		std::vector<TextureHandle> texIds;
 		bool owned = false;
-		std::visit(util::VisitOverloaded{
+		util::visit(framebufferDetails,
 			[&](FramebufferBuilder& builder) {
 				for (int i = 0; i < builder.mFormats.size(); i++) {
 					auto& format = builder.mFormats[i];
@@ -88,7 +88,7 @@ namespace neo {
 				owned = true;
 			},
 			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
-		}, framebufferDetails);
+		);
 
 		mQueue.emplace_back(FramebufferQueueItem{
 			dstId, 

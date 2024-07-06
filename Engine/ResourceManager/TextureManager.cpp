@@ -150,7 +150,7 @@ namespace neo {
 
 	[[nodiscard]] TextureHandle TextureManager::_asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, const std::optional<std::string>& debugName) const {
 		NEO_UNUSED(debugName);
-		std::visit(util::VisitOverloaded{
+		util::visit(textureDetails,
 			[&](TextureBuilder& builder) {
 				TextureBuilder copy = builder;
 				if (builder.mData != nullptr) {
@@ -173,7 +173,7 @@ namespace neo {
 				mQueue.emplace_back(ResourceLoadDetails_Internal{ id, loadDetails, debugName });
 			},
 			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
-		}, textureDetails);
+		);
 
 		return id;
 	}

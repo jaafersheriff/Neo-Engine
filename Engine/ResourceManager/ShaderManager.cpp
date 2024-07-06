@@ -15,7 +15,7 @@ namespace neo {
 		std::shared_ptr<BackedResource<SourceShader>> load(const ShaderLoadDetails& shaderDetails, const std::optional<std::string>& debugName) const {
 			NEO_ASSERT(debugName.has_value(), "Shaders need to come with a name please");
 			NEO_LOG_V("Uploading shader %s", debugName.value().c_str());
-			return std::visit(util::VisitOverloaded{
+			return util::visit(shaderDetails,
 				[&](const SourceShader::ConstructionArgs& constructionArgs) {
 					SourceShader::ShaderCode shaderCode;
 					time_t lastModTime = 0;
@@ -32,7 +32,7 @@ namespace neo {
 					return std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
 				},
 				[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
-				}, shaderDetails);
+			);
 		}
 	};
 

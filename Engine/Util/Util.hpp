@@ -42,6 +42,11 @@ namespace neo {
 		template<class... Ts>
 		VisitOverloaded(Ts...) -> VisitOverloaded<Ts...>;
 
+		template <class T, class... Ts>
+		constexpr auto visit(T&& t, Ts&&... funcs) {
+			return std::visit(VisitOverloaded{std::forward<Ts>(funcs)...}, t);
+		}
+
 		static const float PI = glm::pi<float>();
 		static const float EP = static_cast<float>(1e-4);
 
