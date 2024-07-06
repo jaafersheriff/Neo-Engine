@@ -81,9 +81,8 @@ namespace neo {
 		TRACY_ZONE();
 
 		// TODO this should run entirely on a separate thread tbh
-		static uint64_t fc = 0;
-		fc++;
-		if (fc % 10 == 0) {
+		mHotReloadCounter = (mHotReloadCounter + 1) % mHotReloadLimit;
+		if (!mHotReloadCounter) {
 			TRACY_ZONEN("Shader Hot Reload");
 			// Entt Cache doesn't support iterators :/ 
 			std::vector<entt::id_type> list;
