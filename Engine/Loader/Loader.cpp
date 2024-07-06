@@ -25,41 +25,51 @@ namespace neo {
 		APP_SHADER_DIR = shaderDir;
 	}
 
+	time_t Loader::getFileModTime(const std::string& fileName) {
+		time_t ret = 0;
+		bool success = _operate(fileName, [&ret](const char* fullPath) {
+			ret = util::getFileModTime(fullPath);
+		});
+		if (!success) {
+			NEO_LOG_E("Unable to get mod time for %s", fileName.c_str());
+		}
+		return ret;
+	}
+
 	const char* Loader::loadFileString(const std::string& fileName) {
-		auto load = [](const char* fullPath, const char** ret) {
+		const char* ret = nullptr;
+		bool success = _operate(fileName, [&ret](const char* fullPath) {
+			// This does a malloc..
+			ret = util::textFileRead(fullPath);
+		});
+
+		if (!success) {
+			NEO_LOG_E("Unable to find string file %s", fileName.c_str());
+		}
+		return ret;
+	}
+
+	GLTFImporter::Scene Loader::loadGltfScene(ResourceManagers& resourceManagers, const std::string& fileName, glm::mat4 baseTransform) {
+		GLTFImporter::Scene ret;
+		bool success = _operate(fileName, [&](const char* fullPath) {
+			ret = GLTFImporter::loadScene(fullPath, baseTransform, resourceManagers);
+		});
+		if (!success) {
+			NEO_LOG_E("Unable to find GLTF scene %s", fileName.c_str());
+		}
+		return ret;
+	}
+
+	bool Loader::_operate(const std::string& fileName, std::function<void(const char*)> callback) {
+		char fullPath[512];
+		auto searchDir = [&fullPath, fileName, callback](const std::string& dir) {
+			sprintf(fullPath, "%s%s\0", dir.c_str(), fileName.c_str());
 			if (util::fileExists(fullPath)) {
-				// Each of these util::textFileReads does a malloc..
-				*ret = util::textFileRead(fullPath);
+				callback(fullPath);
 				return true;
 			}
 			return false;
 		};
-
-		const char* ret;
-		// TODO - this should be extended to other load funcs..
-		if (load((APP_RES_DIR + fileName).c_str(), &ret)) {
-			return ret;
-		}
-		if (load((APP_SHADER_DIR + fileName).c_str(), &ret)) {
-			return ret;
-		}
-		if (load((ENGINE_RES_DIR + fileName).c_str(), &ret)) {
-			return ret;
-		}
-		if (load((ENGINE_SHADER_DIR + fileName).c_str(), &ret)) {
-			return ret;
-		}
-		NEO_LOG_E("Unable to find string file %s", fileName.c_str());
-		return nullptr;
-	}
-
-	GLTFImporter::Scene Loader::loadGltfScene(ResourceManagers& resourceManagers, const std::string& fileName, glm::mat4 baseTransform) {
-		std::string _fileName = APP_RES_DIR + fileName;
-		if (!util::fileExists(_fileName.c_str())) {
-			_fileName = ENGINE_RES_DIR + fileName;
-		}
-		NEO_ASSERT(util::fileExists(_fileName.c_str()), "Unable to find file: %s after checking:\n\t%s\n\t%s\n", fileName.c_str(), APP_RES_DIR.c_str(), ENGINE_RES_DIR.c_str());
-
-		return GLTFImporter::loadScene(_fileName, baseTransform, resourceManagers);
+		return searchDir(APP_RES_DIR) || searchDir(APP_SHADER_DIR) || searchDir(ENGINE_RES_DIR) || searchDir(ENGINE_SHADER_DIR);
 	}
 }

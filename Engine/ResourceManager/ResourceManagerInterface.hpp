@@ -64,6 +64,20 @@ namespace neo {
 			return false;
 		}
 
+		bool isDiscardQueued(ResourceHandle<ResourceType> id) const {
+			if (id.mHandle == NEO_INVALID_HANDLE) {
+				return false;
+			}
+			// TODO - this is a linear search :(
+			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
+			for (auto& res : mDiscardQueue) {
+				if (id == res.mHandle) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		ResourceType& resolve(HashedString id) {
 			return _resolveFinal(ResourceHandle<ResourceType>(id));
 		}
@@ -85,7 +99,7 @@ namespace neo {
 		}
 
 		[[nodiscard]] ResourceHandle<ResourceType> asyncLoad(ResourceHandle<ResourceType> id, ResourceLoadDetails details, std::optional<std::string> debugName = std::nullopt) const {
-			if (isValid(id) || isQueued(id)) {
+			if (!isDiscardQueued(id) && (isValid(id) || isQueued(id))) {
 				return id;
 			}
 			return static_cast<const DerivedManager*>(this)->_asyncLoadImpl(id, details, debugName);
@@ -96,7 +110,7 @@ namespace neo {
 		}
 
 		void discard(ResourceHandle<ResourceType> id) const {
-			if (isValid(id) || isQueued(id)) {
+			if (!isDiscardQueued(id) && (isValid(id) || isQueued(id))) {
 				mDiscardQueue.emplace_back(id);
 			}
 		}

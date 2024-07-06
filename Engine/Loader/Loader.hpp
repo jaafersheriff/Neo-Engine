@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <vector>
+#include <functional>
 
 namespace neo {
 
@@ -26,6 +27,7 @@ namespace neo {
 
 			static void init(const std::string &resDir, const std::string &shaderDir);
 
+			static time_t getFileModTime(const std::string& fileName);
 			static const char* loadFileString(const std::string&);
 
 			static GLTFImporter::Scene loadGltfScene(ResourceManagers& resourceManagers, const std::string& fileName, glm::mat4 baseTransform = glm::mat4(1.f));
@@ -35,5 +37,7 @@ namespace neo {
 			static std::string ENGINE_RES_DIR;
 			static std::string ENGINE_SHADER_DIR;
 
+		private:
+			static bool _operate(const std::string& fileName, std::function<void(const char*)> callback);
 	};
 }

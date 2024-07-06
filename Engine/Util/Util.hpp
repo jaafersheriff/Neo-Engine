@@ -148,5 +148,14 @@ namespace neo {
 			}
 			return(status);
 		}
+
+
+		static inline time_t getFileModTime(const char* fn) {
+			struct stat fileInfo;
+			if (stat(fn, &fileInfo) == 0) {
+				return fileInfo.st_mtime;
+			}
+			return 0;
+		}
 	}
 }

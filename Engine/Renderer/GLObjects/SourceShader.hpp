@@ -29,6 +29,7 @@ namespace neo {
 	private:
 		std::string mName;
 		std::optional<ConstructionArgs> mConstructionArgs;
+		time_t mModifiedTime;
 		ShaderCode mShaderSources;
 		
 		// Can't store ShaderDefines in the map because of const char* and mParent*

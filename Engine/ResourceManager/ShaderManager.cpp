@@ -17,11 +17,14 @@ namespace neo {
 			return std::visit(util::VisitOverloaded{
 				[&](const SourceShader::ConstructionArgs& constructionArgs) {
 					SourceShader::ShaderCode shaderCode;
+					time_t lastModTime = 0;
 					for (auto&& [type, filePath] : constructionArgs) {
 						shaderCode.emplace(type, Loader::loadFileString(filePath));
+						lastModTime = std::max(lastModTime, Loader::getFileModTime(filePath));
 					}
 					auto result = std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
 					result->mResource.mConstructionArgs = constructionArgs;
+					result->mResource.mModifiedTime = lastModTime;
 					return result;
 				},
 				[&](const SourceShader::ShaderCode& shaderCode) {
@@ -76,6 +79,21 @@ namespace neo {
 	void ShaderManager::_tickImpl() {
 		TRACY_ZONE();
 
+		mCache.each([&](entt::id_type enttId, BackedResource<SourceShader>& resource) {
+			auto& shader = resource.mResource;
+			if (shader.mConstructionArgs) {
+				time_t lastModTime = shader.mModifiedTime;
+				for (auto& [stage, fileName] : *shader.mConstructionArgs) {
+					lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
+				}
+				if (lastModTime > shader.mModifiedTime) {
+					NEO_LOG_I("Hot reloading %s", shader.mName.c_str());
+					ShaderHandle handle(enttId);
+					discard(handle);
+				}
+			}
+		});
+
 		{
 			std::vector<ResourceLoadDetails_Internal> swapQueue = {};
 			std::swap(swapQueue, mQueue);
@@ -109,11 +127,12 @@ namespace neo {
 	}
 
 	void ShaderManager::imguiEditor() {
-		mCache.each([&](entt::id_type enttId, BackedResource<SourceShader>&  resource) {
+		mCache.each([&](entt::id_type enttId, BackedResource<SourceShader>& resource) {
 			auto& shader = resource.mResource;
 			if (ImGui::TreeNode(shader.mName.c_str())) {
 				if (shader.mConstructionArgs && ImGui::Button("Reload")) {
-					discard(ShaderHandle(enttId));
+					ShaderHandle handle(enttId);
+					discard(handle);
 				}
 
 				if (shader.mResolvedShaders.size()) {
