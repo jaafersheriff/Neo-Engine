@@ -36,11 +36,13 @@ namespace PBR {
 		bool mUsePing = true;
 
 		bool mDoBloom = true;
-		BloomParameters mBloomParameters = {
+		BloomParameters mBloomParams = {
 			0.004f,
 			3
 		};
 
-		GBufferDebugMode mDebugMode;
+		GBufferDebugParameters mGbufferDebugParams {
+			GBufferDebugParameters::DebugMode::Off
+		};
 	};
 }

@@ -293,7 +293,7 @@ namespace PBR {
 	void Demo::imGuiEditor(ECS& ecs) {
 		NEO_UNUSED(ecs);
 
-		GBufferDebugImGuiEditor(mDebugMode);
+		mGbufferDebugParams.imguiEditor();
 
 		ImGui::Checkbox("Shadows", &mDrawShadows);
 		ImGui::SliderFloat("Debug Radius", &mLightDebugRadius, 0.f, 10.f);
@@ -308,7 +308,7 @@ namespace PBR {
 		}
 		ImGui::Checkbox("Bloom", &mDoBloom);
 		if (mDoBloom) {
-			mBloomParameters.imguiEditor();
+			mBloomParams.imguiEditor();
 		}
 	}
 
@@ -356,8 +356,8 @@ namespace PBR {
 		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 
-		if (mDebugMode != GBufferDebugMode::Off) {
-			auto debugOutput = drawGBufferDebug(resourceManagers, mDebugMode, gbufferHandle, viewport.mSize);
+		if (mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
+			auto debugOutput = drawGBufferDebug(resourceManagers, gbufferHandle, viewport.mSize, mGbufferDebugParams);
 			if (resourceManagers.mFramebufferManager.isValid(debugOutput)) {
 				blit(resourceManagers, backbuffer, resourceManagers.mFramebufferManager.resolve(debugOutput).mTextures[0], viewport.mSize);
 				return;
@@ -377,15 +377,18 @@ namespace PBR {
 		}
 		auto& hdrColor = resourceManagers.mFramebufferManager.resolve(hdrColorOutput);
 
-		hdrColor.bind();
-		hdrColor.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		glBlitNamedFramebuffer(gbuffer.mFBOID, hdrColor.mFBOID,
-			0, 0, viewport.mSize.x, viewport.mSize.y,
-			0, 0, viewport.mSize.x, viewport.mSize.y,
-			GL_DEPTH_BUFFER_BIT,
-			GL_NEAREST
-		);
+		{
+			TRACY_GPUN("GBuffer Depth Blit")
+			hdrColor.bind();
+			hdrColor.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+			glBlitNamedFramebuffer(gbuffer.mFBOID, hdrColor.mFBOID,
+				0, 0, viewport.mSize.x, viewport.mSize.y,
+				0, 0, viewport.mSize.x, viewport.mSize.y,
+				GL_DEPTH_BUFFER_BIT,
+				GL_NEAREST
+			);
+		}
 		drawSkybox(resourceManagers, ecs, cameraEntity);
 		drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle, shadowTexture);
 		drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
@@ -401,7 +404,7 @@ namespace PBR {
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
 		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl);
 
-		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParameters) : hdrColorOutput;
+		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParams) : hdrColorOutput;
 		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
 			bloomHandle = hdrColorOutput;
 		}
@@ -418,6 +421,7 @@ namespace PBR {
 			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
 				const auto& previousHDRColor = resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle);
 				averageLuminance = calculateAutoexposure(resourceManagers, ecs, previousHDRColor.mTextures[0], mAutoExposureParams);
+				TRACY_GPUN("Blit Previous HDR Color");
 				blit(resourceManagers, previousHDRColor, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0], viewport.mSize);
 			}
 		}

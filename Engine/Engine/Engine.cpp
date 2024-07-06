@@ -287,8 +287,6 @@ namespace neo {
 		float runTime = static_cast<float>(glfwGetTime());
 		profiler.update(runTime);
 
-		/* Update display, mouse, keyboard */
-		mWindow.updateHardware();
 		if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
 			ServiceLocator<ImGuiManager>::ref().update();
 		}
@@ -380,5 +378,9 @@ namespace neo {
 		for(auto& entity : mECS.getView<SingleFrameComponent>()) {
 			mECS.removeEntity(entity);
 		}
+
+		// Update display, mouse, keyboard 
+		// Do it here so it coincides w/ vsync instead of stalling engine tick
+		mWindow.updateHardware();
 	}
 }

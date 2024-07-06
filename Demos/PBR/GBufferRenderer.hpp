@@ -25,43 +25,6 @@
 
 namespace PBR {
 
-	enum class GBufferDebugMode {
-		Off,
-		Normal,
-		Albedo,
-		AO,
-		Roughness,
-		Emissive,
-		Metalness,
-		World,
-		Depth,
-		COUNT
-	};
-	inline bool GBufferDebugImGuiEditor(GBufferDebugMode& debugMode) {
-		static std::unordered_map<GBufferDebugMode, const char*> sGBufferDebugModeStrings = {
-			{ GBufferDebugMode::Off, "Off"},
-			{ GBufferDebugMode::Normal, "Normal"},
-			{ GBufferDebugMode::Albedo, "Albedo"},
-			{ GBufferDebugMode::AO, "AO"},
-			{ GBufferDebugMode::Roughness, "Roughness"},
-			{ GBufferDebugMode::Emissive, "Emissive"},
-			{ GBufferDebugMode::Metalness, "Metalness"},
-			{ GBufferDebugMode::World, "World"},
-			{ GBufferDebugMode::Depth, "Depth"},
-		};
-		bool mod = false;
-		if (ImGui::BeginCombo("Debug Mode", sGBufferDebugModeStrings[debugMode])) {
-			for (int i = 0; i < static_cast<int>(GBufferDebugMode::COUNT); i++) {
-				if (ImGui::Selectable(sGBufferDebugModeStrings[static_cast<GBufferDebugMode>(i)], debugMode == static_cast<GBufferDebugMode>(i))) {
-					debugMode = static_cast<GBufferDebugMode>(i);
-					mod = true;
-				}
-			}
-			ImGui::EndCombo();
-		}
-		return mod;
-	}
-
 	inline FramebufferHandle createGbuffer(const ResourceManagers& resourceManagers, glm::uvec2 dimension) {
 		return resourceManagers.mFramebufferManager.asyncLoad("Gbuffer",
 			FramebufferBuilder{}
@@ -200,10 +163,53 @@ namespace PBR {
 		glEnable(GL_CULL_FACE);
 	}
 
-	inline FramebufferHandle drawGBufferDebug(const ResourceManagers& resourceManagers, const GBufferDebugMode debugMode, FramebufferHandle gbufferHandle, glm::uvec2 viewportSize) {
+
+	struct GBufferDebugParameters {
+
+		enum class DebugMode : uint8_t{
+			Off,
+			Normal,
+			Albedo,
+			AO,
+			Roughness,
+			Emissive,
+			Metalness,
+			World,
+			Depth,
+			COUNT
+		};
+		DebugMode mDebugMode = DebugMode::Off;
+
+		bool imguiEditor() {
+			static std::unordered_map<DebugMode, const char*> sDebugModeStrings = {
+				{ DebugMode::Off, "Off"},
+				{ DebugMode::Normal, "Normal"},
+				{ DebugMode::Albedo, "Albedo"},
+				{ DebugMode::AO, "AO"},
+				{ DebugMode::Roughness, "Roughness"},
+				{ DebugMode::Emissive, "Emissive"},
+				{ DebugMode::Metalness, "Metalness"},
+				{ DebugMode::World, "World"},
+				{ DebugMode::Depth, "Depth"},
+			};
+			bool mod = false;
+			if (ImGui::BeginCombo("Debug Mode", sDebugModeStrings[mDebugMode])) {
+				for (int i = 0; i < static_cast<int>(DebugMode::COUNT); i++) {
+					if (ImGui::Selectable(sDebugModeStrings[static_cast<DebugMode>(i)], mDebugMode == static_cast<DebugMode>(i))) {
+						mDebugMode = static_cast<DebugMode>(i);
+						mod = true;
+					}
+				}
+				ImGui::EndCombo();
+			}
+			return mod;
+		}
+	};
+
+	inline FramebufferHandle drawGBufferDebug(const ResourceManagers& resourceManagers, FramebufferHandle gbufferHandle, glm::uvec2 viewportSize, const GBufferDebugParameters& debugParameters) {
 		TRACY_GPU();
 
-		if (debugMode == GBufferDebugMode::Off) {
+		if (debugParameters.mDebugMode == GBufferDebugParameters::DebugMode::Off) {
 			return NEO_INVALID_HANDLE;
 		}
 
@@ -234,29 +240,29 @@ namespace PBR {
 			MakeDefine(METALNESS);
 			MakeDefine(WORLD);
 			MakeDefine(DEPTH);
-			switch (debugMode) {
-			case GBufferDebugMode::Normal:
+			switch (debugParameters.mDebugMode) {
+			case GBufferDebugParameters::DebugMode::Normal:
 				defines.set(NORMAL);
 				break;
-			case GBufferDebugMode::Albedo:
+			case GBufferDebugParameters::DebugMode::Albedo:
 				defines.set(ALBEDO);
 				break;
-			case GBufferDebugMode::AO:
+			case GBufferDebugParameters::DebugMode::AO:
 				defines.set(AO);
 				break;
-			case GBufferDebugMode::Roughness:
+			case GBufferDebugParameters::DebugMode::Roughness:
 				defines.set(ROUGHNESS);
 				break;
-			case GBufferDebugMode::Emissive:
+			case GBufferDebugParameters::DebugMode::Emissive:
 				defines.set(EMISSIVE);
 				break;
-			case GBufferDebugMode::Metalness:
+			case GBufferDebugParameters::DebugMode::Metalness:
 				defines.set(METALNESS);
 				break;
-			case GBufferDebugMode::World:
+			case GBufferDebugParameters::DebugMode::World:
 				defines.set(WORLD);
 				break;
-			case GBufferDebugMode::Depth:
+			case GBufferDebugParameters::DebugMode::Depth:
 				defines.set(DEPTH);
 				break;
 			default:
