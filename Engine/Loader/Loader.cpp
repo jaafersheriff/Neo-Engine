@@ -26,8 +26,10 @@ namespace neo {
 	}
 
 	time_t Loader::getFileModTime(const std::string& fileName) {
+		TRACY_ZONE();
 		time_t ret = 0;
 		bool success = _operate(fileName, [&ret](const char* fullPath) {
+			TRACY_ZONEN("Loader callback");
 			ret = util::getFileModTime(fullPath);
 		});
 		if (!success) {
@@ -61,10 +63,21 @@ namespace neo {
 	}
 
 	bool Loader::_operate(const std::string& fileName, std::function<void(const char*)> callback) {
+		TRACY_ZONE();
 		char fullPath[512];
 		auto searchDir = [&fullPath, &fileName, callback](const std::string& dir) {
-			sprintf(fullPath, "%s%s\0", dir.c_str(), fileName.c_str());
-			if (util::fileExists(fullPath)) {
+			TRACY_ZONEN("searchDir");
+			{
+				TRACY_ZONEN("sprintf");
+				sprintf(fullPath, "%s%s\0", dir.c_str(), fileName.c_str());
+			}
+			bool exists = false;
+			{
+				TRACY_ZONEN("fileExists");
+				exists = util::fileExists(fullPath);
+			}
+			if (exists) {
+				TRACY_ZONEN("invoke callback");
 				callback(fullPath);
 				return true;
 			}

@@ -84,28 +84,35 @@ namespace neo {
 			TRACY_ZONEN("Shader Hot Reload");
 			// Cache doesn't support iterators :/ 
 			std::vector<entt::id_type> list;
-			list.reserve(mCache.size());
-			mCache.each([&list](const entt::id_type enttId) {
-				list.emplace_back(enttId);
-			});
+			{
+				TRACY_ZONEN("Prealloc");
+				list.reserve(mCache.size());
+				mCache.each([&list](const entt::id_type enttId) {
+					list.emplace_back(enttId);
+					});
+			}
 
-			std::for_each(std::execution::par, list.begin(), list.end(), [this](const entt::id_type& id) {
-				if (auto resource = mCache.handle(id)) {
-					if (resource->mResource.mConstructionArgs) {
-						time_t lastModTime = resource->mResource.mModifiedTime;
-						for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
-							lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
-						}
-						if (lastModTime > resource->mResource.mModifiedTime) {
-							NEO_LOG_I("Hot reloading %s", resource->mResource.mName.c_str());
-							ShaderHandle handle(id);
+			{
+				TRACY_ZONEN("Parallel");
+				std::for_each(std::execution::par, list.begin(), list.end(), [this](const entt::id_type& id) {
+					if (auto resource = mCache.handle(id)) {
+						tracy::SetThreadName(resource->mResource.mName.c_str());
+						if (resource->mResource.mConstructionArgs) {
+							time_t lastModTime = resource->mResource.mModifiedTime;
+							for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
+								lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
+							}
+							if (lastModTime > resource->mResource.mModifiedTime) {
+								NEO_LOG_I("Hot reloading %s", resource->mResource.mName.c_str());
+								ShaderHandle handle(id);
 
-							// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
-							discard(handle);
+								// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
+								discard(handle);
+							}
 						}
 					}
-				}
-			});
+					});
+			}
 		}
 
 		{
