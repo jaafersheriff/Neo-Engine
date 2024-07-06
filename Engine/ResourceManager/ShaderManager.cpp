@@ -80,7 +80,9 @@ namespace neo {
 	void ShaderManager::_tickImpl() {
 		TRACY_ZONE();
 
-		{
+		static uint64_t fc = 0;
+		fc++;
+		if (fc % 10 == 0) {
 			TRACY_ZONEN("Shader Hot Reload");
 			// Cache doesn't support iterators :/ 
 			std::vector<entt::id_type> list;

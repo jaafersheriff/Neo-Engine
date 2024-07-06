@@ -83,6 +83,6 @@ namespace neo {
 			}
 			return false;
 		};
-		return searchDir(APP_RES_DIR) || searchDir(APP_SHADER_DIR) || searchDir(ENGINE_RES_DIR) || searchDir(ENGINE_SHADER_DIR);
+		return searchDir(ENGINE_SHADER_DIR) || searchDir(APP_SHADER_DIR) || searchDir(APP_RES_DIR) || searchDir(ENGINE_RES_DIR);
 	}
 }
