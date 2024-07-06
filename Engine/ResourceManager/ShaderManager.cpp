@@ -81,6 +81,7 @@ namespace neo {
 		TRACY_ZONE();
 
 		// TODO this should run entirely on a separate thread tbh
+		// Also this doesn't do anything for #include wop wop
 		mHotReloadCounter = (mHotReloadCounter + 1) % mHotReloadLimit;
 		if (!mHotReloadCounter) {
 			TRACY_ZONEN("Shader Hot Reload");
