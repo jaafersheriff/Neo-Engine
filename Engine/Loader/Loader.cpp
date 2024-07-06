@@ -62,7 +62,7 @@ namespace neo {
 
 	bool Loader::_operate(const std::string& fileName, std::function<void(const char*)> callback) {
 		char fullPath[512];
-		auto searchDir = [&fullPath, fileName, callback](const std::string& dir) {
+		auto searchDir = [&fullPath, &fileName, callback](const std::string& dir) {
 			sprintf(fullPath, "%s%s\0", dir.c_str(), fileName.c_str());
 			if (util::fileExists(fullPath)) {
 				callback(fullPath);
