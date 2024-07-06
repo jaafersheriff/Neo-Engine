@@ -6,6 +6,8 @@
 
 #include <entt/core/hashed_string.hpp>
 
+#include <fstream>
+
 namespace neo {
 
 #define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
@@ -98,16 +100,9 @@ namespace neo {
 			return sphericalToCartesian(v.x, v.y, v.z);
 		}
 
-		static inline bool fileExists(const char* fn) {
-			FILE* fp;
-			if (fn != NULL) {
-				fp = fopen(fn, "rt");
-				if (fp != NULL) {
-					fclose(fp);
-					return true;
-				}
-			}
-			return false;
+		static inline bool fileExists(const char* path) {
+			std::ifstream f(path);
+			return f.good();
 		}
 
 		static inline char* textFileRead(const char* fn) {
