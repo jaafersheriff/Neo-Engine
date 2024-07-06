@@ -80,28 +80,33 @@ namespace neo {
 	void ShaderManager::_tickImpl() {
 		TRACY_ZONE();
 
-		std::vector<entt::id_type> list;
-		list.reserve(mCache.size());
-		mCache.each([&list](const entt::id_type enttId) {
-			list.emplace_back(enttId);
-		});
-		std::for_each(std::execution::par, list.begin(), list.end(), [this](const entt::id_type& id) {
-			if (auto resource = mCache.handle(id)) {
-				if (resource->mResource.mConstructionArgs) {
-					time_t lastModTime = resource->mResource.mModifiedTime;
-					for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
-						lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
-					}
-					if (lastModTime > resource->mResource.mModifiedTime) {
-						NEO_LOG_I("Hot reloading %s", resource->mResource.mName.c_str());
-						ShaderHandle handle(id);
+		{
+			TRACY_ZONEN("Shader Hot Reload");
+			// Cache doesn't support iterators :/ 
+			std::vector<entt::id_type> list;
+			list.reserve(mCache.size());
+			mCache.each([&list](const entt::id_type enttId) {
+				list.emplace_back(enttId);
+			});
 
-						// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
-						discard(handle);
+			std::for_each(std::execution::par, list.begin(), list.end(), [this](const entt::id_type& id) {
+				if (auto resource = mCache.handle(id)) {
+					if (resource->mResource.mConstructionArgs) {
+						time_t lastModTime = resource->mResource.mModifiedTime;
+						for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
+							lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
+						}
+						if (lastModTime > resource->mResource.mModifiedTime) {
+							NEO_LOG_I("Hot reloading %s", resource->mResource.mName.c_str());
+							ShaderHandle handle(id);
+
+							// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
+							discard(handle);
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 
 		{
 			std::vector<ResourceLoadDetails_Internal> swapQueue = {};
@@ -136,14 +141,9 @@ namespace neo {
 	}
 
 	void ShaderManager::imguiEditor() {
-		mCache.each([&](entt::id_type enttId, BackedResource<SourceShader>& resource) {
+		mCache.each([&](entt::id_type, BackedResource<SourceShader>& resource) {
 			auto& shader = resource.mResource;
 			if (ImGui::TreeNode(shader.mName.c_str())) {
-				if (shader.mConstructionArgs && ImGui::Button("Reload")) {
-					ShaderHandle handle(enttId);
-					discard(handle);
-				}
-
 				if (shader.mResolvedShaders.size()) {
 					if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(shader.mResolvedShaders.size()))) {
 						ImGui::Separator();
