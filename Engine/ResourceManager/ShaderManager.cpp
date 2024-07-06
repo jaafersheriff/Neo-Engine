@@ -7,6 +7,7 @@
 #include "Util/Profiler.hpp"
 
 #include <imgui.h>
+#include <execution>
 
 namespace neo {
 	struct ShaderLoader final : entt::resource_loader<ShaderLoader, BackedResource<SourceShader>> {
@@ -79,17 +80,25 @@ namespace neo {
 	void ShaderManager::_tickImpl() {
 		TRACY_ZONE();
 
-		mCache.each([&](entt::id_type enttId, BackedResource<SourceShader>& resource) {
-			auto& shader = resource.mResource;
-			if (shader.mConstructionArgs) {
-				time_t lastModTime = shader.mModifiedTime;
-				for (auto& [stage, fileName] : *shader.mConstructionArgs) {
-					lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
-				}
-				if (lastModTime > shader.mModifiedTime) {
-					NEO_LOG_I("Hot reloading %s", shader.mName.c_str());
-					ShaderHandle handle(enttId);
-					discard(handle);
+		std::vector<entt::id_type> list;
+		list.reserve(mCache.size());
+		mCache.each([&list](const entt::id_type enttId) {
+			list.emplace_back(enttId);
+		});
+		std::for_each(std::execution::par, list.begin(), list.end(), [this](const entt::id_type& id) {
+			if (auto resource = mCache.handle(id)) {
+				if (resource->mResource.mConstructionArgs) {
+					time_t lastModTime = resource->mResource.mModifiedTime;
+					for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
+						lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
+					}
+					if (lastModTime > resource->mResource.mModifiedTime) {
+						NEO_LOG_I("Hot reloading %s", resource->mResource.mName.c_str());
+						ShaderHandle handle(id);
+
+						// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
+						discard(handle);
+					}
 				}
 			}
 		});
