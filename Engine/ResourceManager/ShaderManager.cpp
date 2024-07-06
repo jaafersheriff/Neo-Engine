@@ -80,41 +80,33 @@ namespace neo {
 	void ShaderManager::_tickImpl() {
 		TRACY_ZONE();
 
+		// TODO this should run entirely on a separate thread tbh
 		static uint64_t fc = 0;
 		fc++;
 		if (fc % 10 == 0) {
 			TRACY_ZONEN("Shader Hot Reload");
-			// Cache doesn't support iterators :/ 
+			// Entt Cache doesn't support iterators :/ 
 			std::vector<entt::id_type> list;
-			{
-				TRACY_ZONEN("Prealloc");
-				list.reserve(mCache.size());
-				mCache.each([&list](const entt::id_type enttId) {
-					list.emplace_back(enttId);
-					});
-			}
+			list.reserve(mCache.size());
+			mCache.each([&list](const entt::id_type enttId) {
+				list.emplace_back(enttId);
+			});
 
-			{
-				TRACY_ZONEN("Parallel");
-				std::for_each(std::execution::par, list.begin(), list.end(), [this](const entt::id_type& id) {
-					if (auto resource = mCache.handle(id)) {
-						tracy::SetThreadName(resource->mResource.mName.c_str());
-						if (resource->mResource.mConstructionArgs) {
-							time_t lastModTime = resource->mResource.mModifiedTime;
-							for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
-								lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
-							}
-							if (lastModTime > resource->mResource.mModifiedTime) {
-								NEO_LOG_I("Hot reloading %s", resource->mResource.mName.c_str());
-								ShaderHandle handle(id);
-
-								// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
-								discard(handle);
-							}
-						}
+			std::for_each(std::execution::par, list.begin(), list.end(), [this](const entt::id_type& id) {
+				if (auto resource = mCache.handle(id); resource && resource->mResource.mConstructionArgs) {
+					time_t lastModTime = resource->mResource.mModifiedTime;
+					for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
+						lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
 					}
-					});
-			}
+					if (lastModTime > resource->mResource.mModifiedTime) {
+						NEO_LOG_I("Hot reloading %s", resource->mResource.mName.c_str());
+						ShaderHandle handle(id);
+
+						// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
+						discard(handle);
+					}
+				}
+			});
 		}
 
 		{
