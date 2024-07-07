@@ -202,7 +202,7 @@ namespace {
 		}
 	}
 
-	neo::TextureHandle _loadTexture(neo::TextureManager& textureManager, const tinygltf::Model& model, int index, int texCoord) {
+	neo::TextureHandle _loadTexture(neo::TextureManager& textureManager, const char* path, const tinygltf::Model& model, int index, int texCoord) {
 		using namespace neo; 
 
 		if (index == -1) {
@@ -219,12 +219,14 @@ namespace {
 			NEO_LOG_V("Processing texture %s", texture.name.c_str());
 		}
 
-		if (!image.uri.empty()) {
-			TextureHandle textureHandle(HashedString(image.uri.c_str()));
-			if (textureManager.isValid(textureHandle) || textureManager.isQueued(textureHandle)) {
-				NEO_LOG_V("Texture %s is already loaded -- skipping", image.uri.c_str());
-				return textureHandle;
-			}
+		std::string handleName = !image.uri.empty()
+			? image.uri
+			: (std::string(path) + "_Image" + std::to_string(texture.source) + "_Texture" + std::to_string(index));
+		TextureHandle textureHandle = HashedString(handleName.c_str());
+
+		if (textureManager.isValid(textureHandle) || textureManager.isQueued(textureHandle)) {
+			NEO_LOG_V("Texture %s is already loaded -- skipping", image.uri.c_str());
+			return textureHandle;
 		}
 
 		TextureBuilder builder;
@@ -250,13 +252,7 @@ namespace {
 		builder.mDimensions.x = static_cast<uint16_t>(image.width);
 		builder.mDimensions.y = static_cast<uint16_t>(image.height);
 		builder.mData = const_cast<uint8_t*>(image.image.data());
-		// Heh?
-		HashedString name = HashedString(reinterpret_cast<char*>(const_cast<uint8_t*>(builder.mData)));
-		if (!image.uri.empty()) {
-			NEO_LOG_I("Loaded texture %s", image.uri.c_str());
-			name = HashedString(image.uri.c_str());
-		}
-		return textureManager.asyncLoad(name, builder);
+		return textureManager.asyncLoad(textureHandle, builder);
 	}
 
 	neo::SpatialComponent _processSpatial(const tinygltf::Node& node, glm::mat4 parentXform) {
@@ -437,12 +433,12 @@ namespace {
 					outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::Transparent;
 				}
 
-				outNode.mMaterial.mNormalMap = _loadTexture(resourceManagers.mTextureManager, model, material.normalTexture.index, material.normalTexture.texCoord);
+				outNode.mMaterial.mNormalMap = _loadTexture(resourceManagers.mTextureManager, path, model, material.normalTexture.index, material.normalTexture.texCoord);
 				if (material.normalTexture.scale != 1.0) {
 					NEO_LOG_W("Material %s normal map has non-uniform scale -- unsupported", material.name.c_str());
 				}
 
-				outNode.mMaterial.mOcclusionMap = _loadTexture(resourceManagers.mTextureManager, model, material.occlusionTexture.index, material.occlusionTexture.texCoord);
+				outNode.mMaterial.mOcclusionMap = _loadTexture(resourceManagers.mTextureManager, path, model, material.occlusionTexture.index, material.occlusionTexture.texCoord);
 				if (material.occlusionTexture.strength != 1.0) {
 					NEO_LOG_W("Material %s occlusion map has a non-uniform strength -- unsupported", material.name.c_str());
 				}
@@ -450,7 +446,7 @@ namespace {
 				if (material.emissiveFactor.size() == 3) {
 					outNode.mMaterial.mEmissiveFactor = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
 				}
-				outNode.mMaterial.mEmissiveMap = _loadTexture(resourceManagers.mTextureManager, model, material.emissiveTexture.index, material.emissiveTexture.texCoord);
+				outNode.mMaterial.mEmissiveMap = _loadTexture(resourceManagers.mTextureManager, path, model, material.emissiveTexture.index, material.emissiveTexture.texCoord);
 
 				outNode.mMaterial.mMetallic = static_cast<float>(material.pbrMetallicRoughness.metallicFactor);
 				outNode.mMaterial.mRoughness = static_cast<float>(material.pbrMetallicRoughness.roughnessFactor);
@@ -462,8 +458,8 @@ namespace {
 						material.pbrMetallicRoughness.baseColorFactor[3]
 					);
 				}
-				outNode.mMaterial.mAlbedoMap = _loadTexture(resourceManagers.mTextureManager, model, material.pbrMetallicRoughness.baseColorTexture.index, material.pbrMetallicRoughness.baseColorTexture.texCoord);
-				outNode.mMaterial.mMetallicRoughnessMap = _loadTexture(resourceManagers.mTextureManager, model, material.pbrMetallicRoughness.metallicRoughnessTexture.index, material.pbrMetallicRoughness.metallicRoughnessTexture.texCoord);
+				outNode.mMaterial.mAlbedoMap = _loadTexture(resourceManagers.mTextureManager, path, model, material.pbrMetallicRoughness.baseColorTexture.index, material.pbrMetallicRoughness.baseColorTexture.texCoord);
+				outNode.mMaterial.mMetallicRoughnessMap = _loadTexture(resourceManagers.mTextureManager, path, model, material.pbrMetallicRoughness.metallicRoughnessTexture.index, material.pbrMetallicRoughness.metallicRoughnessTexture.texCoord);
 
 			}
 			outNodes.emplace_back(outNode);
@@ -509,7 +505,6 @@ namespace neo {
 
 		Scene loadScene(const std::string& path, glm::mat4 baseTransform, ResourceManagers& resourceManagers) {
 			TRACY_ZONE();
-			NEO_ASSERT(path.length() > 4 && path.substr(path.length() - 4, 4) == "gltf", "Unsupported file type");
 
 			tinygltf::Model model;
 			tinygltf::TinyGLTF loader;
@@ -519,7 +514,12 @@ namespace neo {
 			bool ret = false;
 			stbi_set_flip_vertically_on_load(false);
 			NEO_LOG_I("Loading gltf %s", path.c_str());
-			ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
+			if (path.size() > 5 && path.find(".gltf", path.size() - 5) != std::string::npos) {
+				ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
+			}
+			else if (path.size() > 4 && path.find(".glb", path.size() - 4) != std::string::npos) {
+				ret = loader.LoadBinaryFromFile(&model, &err, &warn, path.c_str());
+			}
 
 			if (!warn.empty()) {
 				NEO_LOG_W("tingltf Warning: %s", warn.c_str());
