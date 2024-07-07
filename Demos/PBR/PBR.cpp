@@ -191,7 +191,7 @@ namespace PBR {
 		}
 
 		{
-			GLTFImporter::MeshNode helmet = Loader::loadGltfScene(resourceManagers, "DamagedHelmet/DamagedHelmet.gltf", glm::translate(glm::mat4(1.f), glm::vec3(0.f, 2.5f, -0.5f))).mMeshNodes[0];
+			GLTFImporter::MeshNode helmet = Loader::loadGltfScene(resourceManagers, "DamagedHelmet.glb", glm::translate(glm::mat4(1.f), glm::vec3(0.f, 2.5f, -0.5f))).mMeshNodes[0];
 			auto entity = ecs.createEntity();
 			if (!helmet.mName.empty()) {
 				ecs.addComponent<TagComponent>(entity, helmet.mName);
