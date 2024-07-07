@@ -24,7 +24,7 @@ out vec4 color;
 
 void main() {
 	vec4 albedoAO = texture(gAlbedoAO, fragTex);
-	vec3 normal = texture(gNormal, fragTex).rgb;
+	vec4 normal = texture(gNormal, fragTex);
 	vec4 worldRoughness = texture(gWorldRoughness, fragTex);
 	vec4 emissiveMetalness = texture(gEmissiveMetalness, fragTex);
 
@@ -61,7 +61,7 @@ void main() {
 		+ pbrColor.directDiffuse
 		+ pbrColor.directSpecular
 	;
-	color.a = 1.0;
+	color.a = normal.a;
 
 }
 

@@ -219,6 +219,10 @@ namespace neo {
 
 		}
 
+		if (mFormat.mTarget == types::texture::Target::TextureCube) {
+			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		}
+
 		NEO_ASSERT(glGetError() == GL_NO_ERROR, "GLError when creating Texture");
 	}
 

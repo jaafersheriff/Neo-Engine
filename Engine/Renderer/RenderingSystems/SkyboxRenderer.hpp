@@ -29,8 +29,8 @@ namespace neo {
 		const auto& skyboxTexture = resourceManagers.mTextureManager.resolve(skybox.mSkybox);
 
 		glDisable(GL_CULL_FACE);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		glDepthMask(GL_FALSE);
+		glDepthFunc(GL_LEQUAL);
 
 		auto camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
 		auto camSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
@@ -57,6 +57,7 @@ namespace neo {
 		resourceManagers.mMeshManager.resolve(HashedString("cube")).draw();
 
 		glEnable(GL_CULL_FACE);
-		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+		glDepthFunc(GL_LESS);
 	}
 }
