@@ -421,7 +421,9 @@ namespace {
 					NEO_LOG_W("Material %s has nonstandard alpha cutoff: %0.2f -- unsupported", material.name.c_str(), material.alphaCutoff);
 				}
 
-				outNode.mMaterial.mDoubleSided = material.doubleSided;
+				if (material.doubleSided) {
+					NEO_LOG_W("Double sided not supported");
+				}
 
 				if (material.alphaMode == "OPAQUE") {
 					outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::Opaque;

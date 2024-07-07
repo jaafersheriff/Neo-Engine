@@ -150,14 +150,6 @@ namespace PBR {
 			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
 
-			// Yikes
-			if (material.mDoubleSided) {
-				glDisable(GL_CULL_FACE);
-			}
-			else {
-				glEnable(GL_CULL_FACE);
-			}
-
 			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
 		glEnable(GL_CULL_FACE);

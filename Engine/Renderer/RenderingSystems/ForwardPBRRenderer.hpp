@@ -208,13 +208,6 @@ namespace neo {
 			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
 
-			// Yikes
-			if (material.mDoubleSided) {
-				glDisable(GL_CULL_FACE);
-			}
-			else {
-				glEnable(GL_CULL_FACE);
-			}
 			mesh.draw();
 		}
 

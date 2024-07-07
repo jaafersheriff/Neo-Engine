@@ -8,8 +8,6 @@
 
 namespace neo {
 	START_COMPONENT(MaterialComponent);
-		bool mDoubleSided = false;
-
 		glm::vec4 mAlbedoColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
 		TextureHandle mAlbedoMap;
 
