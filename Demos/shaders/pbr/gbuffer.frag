@@ -35,9 +35,8 @@ layout(binding = 4) uniform sampler2D emissiveMap;
 
 
 layout (location = 0) out vec4 gAlbedoAO;
-layout (location = 1) out vec4 gNormal;
-layout (location = 2) out vec4 gWorldRoughness;
-layout (location = 3) out vec4 gEmissiveMetalness;
+layout (location = 1) out vec4 gNormalRoughness;
+layout (location = 2) out vec4 gEmissiveMetalness;
 
 void main() {
 	vec4 fAlbedo = albedo;
@@ -61,7 +60,7 @@ void main() {
 	fNorm = getNormal(fNorm, texture(normalMap, fragTex).rgb, fragPos.xyz, fragTex);
 	#endif
 #endif
- 	gNormal= vec4(fNorm * 0.5 + 0.5, 1.0);
+	gNormalRoughness.rgb = fNorm * 0.5 + 0.5;
 
 	float fMetalness = metalness;
 	float fRoughness = roughness;
@@ -70,7 +69,7 @@ void main() {
 	fMetalness *= metalRoughness.b;
 	fRoughness *= metalRoughness.g;
 #endif
-	gWorldRoughness = vec4(fragPos.xyz, fRoughness);
+	gNormalRoughness.a = fRoughness;
 
 	vec3 fEmissive = emissiveFactor;
 #ifdef EMISSIVE

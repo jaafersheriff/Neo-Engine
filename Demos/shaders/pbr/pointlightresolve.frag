@@ -3,11 +3,12 @@
 in vec4 fragPos;
 
 layout(binding = 0) uniform sampler2D gAlbedoAO;
-layout(binding = 1) uniform sampler2D gNormal;
-layout(binding = 2) uniform sampler2D gWorldRoughness;
-layout(binding = 3) uniform sampler2D gEmissiveMetalness;
-layout(binding = 4) uniform sampler2D gDepth;
+layout(binding = 1) uniform sampler2D gNormalRoughness;
+layout(binding = 2) uniform sampler2D gEmissiveMetalness;
+layout(binding = 3) uniform sampler2D gDepth;
 
+uniform mat4 invP;
+uniform mat4 invV;
 uniform vec3 camPos;
 uniform vec2 resolution;
 
@@ -55,22 +56,23 @@ void main() {
 
 	vec2 uv = gl_FragCoord.xy / resolution.xy;
 	vec4 albedoAO = texture(gAlbedoAO, uv);
-	vec3 normal = texture(gNormal, uv).rgb;
-	vec4 worldRoughness = texture(gWorldRoughness, uv);
+	vec4 normalRoughness = texture(gNormalRoughness, uv);
 	vec4 emissiveMetalness = texture(gEmissiveMetalness, uv);
+	float depth = texture(gDepth, uv).r;
+	vec3 worldPos = reconstructWorldPos(uv, depth, invP, invV);
 
 	PBRMaterial pbrMaterial;
 	pbrMaterial.albedo = albedoAO.rgb;
-	pbrMaterial.N = normalize(normal.xyz * 2.0 - 1.0);
-	pbrMaterial.V = normalize(camPos - worldRoughness.xyz); // TODO - negative world pos is clamped to 0?
-	pbrMaterial.linearRoughness = worldRoughness.a;
+	pbrMaterial.N = normalize(normalRoughness.xyz * 2.0 - 1.0);
+	pbrMaterial.V = normalize(camPos - worldPos);
+	pbrMaterial.linearRoughness = normalRoughness.a;
 	pbrMaterial.metalness = emissiveMetalness.a;
 	pbrMaterial.F0 = calculateF0(albedoAO.rgb, emissiveMetalness.a);
 	pbrMaterial.ao = albedoAO.a;
 
 	PBRLight pbrLight;
 	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a;
-	vec3 lightDir = lightPos - worldRoughness.xyz; // TODO - might break with negative world pos
+	vec3 lightDir = lightPos - worldPos;
 	float lightDistance = length(lightDir);
 	pbrLight.L = normalize(lightDir / lightDistance);
 	if (lightDistance > lightRadius) {

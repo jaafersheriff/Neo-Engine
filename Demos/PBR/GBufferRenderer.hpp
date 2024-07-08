@@ -31,9 +31,7 @@ namespace PBR {
 			.setSize(dimension)
 			// AlbedoAO
 			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
-			// Normal
-			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F })
-			// World roughness - World could go away if you do everything in view space...
+			// NormalRoughness
 			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
 			// Emissive Metalness
 			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
@@ -166,7 +164,6 @@ namespace PBR {
 			Roughness,
 			Emissive,
 			Metalness,
-			World,
 			Depth,
 			COUNT
 		};
@@ -181,7 +178,6 @@ namespace PBR {
 				{ DebugMode::Roughness, "Roughness"},
 				{ DebugMode::Emissive, "Emissive"},
 				{ DebugMode::Metalness, "Metalness"},
-				{ DebugMode::World, "World"},
 				{ DebugMode::Depth, "Depth"},
 			};
 			bool mod = false;
@@ -230,7 +226,6 @@ namespace PBR {
 			MakeDefine(ROUGHNESS);
 			MakeDefine(EMISSIVE);
 			MakeDefine(METALNESS);
-			MakeDefine(WORLD);
 			MakeDefine(DEPTH);
 			switch (debugParameters.mDebugMode) {
 			case GBufferDebugParameters::DebugMode::Normal:
@@ -251,9 +246,6 @@ namespace PBR {
 			case GBufferDebugParameters::DebugMode::Metalness:
 				defines.set(METALNESS);
 				break;
-			case GBufferDebugParameters::DebugMode::World:
-				defines.set(WORLD);
-				break;
 			case GBufferDebugParameters::DebugMode::Depth:
 				defines.set(DEPTH);
 				break;
@@ -267,10 +259,9 @@ namespace PBR {
 
 			auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
 			resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-			resolvedShader.bindTexture("gNormal", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-			resolvedShader.bindTexture("gWorldRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-			resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
-			resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[4]));
+			resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+			resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+			resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 
 			resourceManagers.mMeshManager.resolve("quad").draw();
 		}

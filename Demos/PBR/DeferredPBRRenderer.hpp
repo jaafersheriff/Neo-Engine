@@ -59,15 +59,20 @@ namespace PBR {
 			resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
 		}
 
-		resolvedShader.bindUniform("camPos", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getPosition());
+		const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
+		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
+		resolvedShader.bindUniform("P", camera->getProj());
+		resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
+		resolvedShader.bindUniform("V", cameraSpatial->getView());
+		resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
+		resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 
 		/* Bind gbuffer */
 		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
 		resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-		resolvedShader.bindTexture("gNormal", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-		resolvedShader.bindTexture("gWorldRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
-		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[4]));
+		resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 
 		const auto& lightView = ecs.getView<LightComponent, SpatialComponent, CompTs...>();
 		for (auto& entity : lightView) {
@@ -115,17 +120,18 @@ namespace PBR {
 		const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
 		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
 		resolvedShader.bindUniform("P", camera->getProj());
+		resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
 		resolvedShader.bindUniform("V", cameraSpatial->getView());
+		resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
 		resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 		resolvedShader.bindUniform("resolution", glm::vec2(resolution));
 
 		/* Bind gbuffer */
 		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
 		resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-		resolvedShader.bindTexture("gNormal", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-		resolvedShader.bindTexture("gWorldRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
-		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[4]));
+		resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 
 		/* Render light volumes */
 		// TODO : instanced
@@ -178,15 +184,18 @@ namespace PBR {
 		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
 		resolvedShader.bind();
 
-		resolvedShader.bindUniform("camPos", ecs.cGetComponent<const SpatialComponent>(cameraEntity)->getPosition());
+		const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
+		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
+		resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
+		resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
+		resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 
 		/* Bind gbuffer */
 		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
 		resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-		resolvedShader.bindTexture("gNormal", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-		resolvedShader.bindTexture("gWorldRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
-		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[4]));
+		resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 
 		if (ibl.has_value()) {
 			resolvedShader.bindTexture("ibl", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox));

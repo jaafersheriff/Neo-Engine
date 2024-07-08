@@ -2,6 +2,19 @@
 
 #include "pbrtypes.glsl"
 
+vec3 reconstructWorldPos(vec2 texCoord, float depth, mat4 invP, mat4 invV) {
+    // Clip space
+    vec3 ndc = vec3(texCoord, depth) * 2.0 - vec3(1.0);
+    // View space
+    vec4 view = invP * vec4(ndc, 1.0);
+
+    // Perspective divide
+    view.xyz /= view.w;
+
+    // World space
+    return (invV * vec4(view.xyz, 1.0)).xyz;
+}
+
 vec3 calculateIndirectDiffuse(vec3 albedo, float metalness, float ambient = 0.03) {
 	return albedo.rgb * ambient * (1.0 - metalness);
 }

@@ -1,8 +1,7 @@
 in vec2 fragTex;
 
 layout(binding = 0) uniform sampler2D gAlbedoAO;
-layout(binding = 1) uniform sampler2D gNormal;
-layout(binding = 2) uniform sampler2D gWorldRoughness;
+layout(binding = 1) uniform sampler2D gNormalRoughness;
 layout(binding = 3) uniform sampler2D gEmissiveMetalness;
 layout(binding = 4) uniform sampler2D gDepth;
 
@@ -11,15 +10,13 @@ out vec4 color;
 void main() {
 
 #ifdef NORMAL
-	color.rgb = texture(gNormal, fragTex).rgb * 2.0 - 1.0;
+	color.rgb = texture(gNormalRoughness, fragTex).rgb * 2.0 - 1.0;
 #elif defined ALBEDO
 	color.rgb = texture(gAlbedoAO, fragTex).rgb;
 #elif defined AO
 	color.rgb = vec3(texture(gAlbedoAO, fragTex).a);
-#elif defined WORLD
-	color.rgb = texture(gWorldRoughness, fragTex).rgb;
 #elif defined ROUGHNESS
-	color.rgb = vec3(texture(gWorldRoughness, fragTex).a);
+	color.rgb = vec3(texture(gNormalRoughness, fragTex).a);
 #elif defined EMISSIVE
 	color.rgb = texture(gEmissiveMetalness, fragTex).rgb;
 #elif defined METALNESS

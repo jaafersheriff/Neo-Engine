@@ -205,6 +205,8 @@ namespace PBR {
 			else if (helmet.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
 				ecs.addComponent<AlphaTestComponent>(entity);
 			}
+			// The emissive factor is 1.0 for some reason
+			helmet.mMaterial.mEmissiveFactor = glm::vec3(100.f);
 			ecs.addComponent<MaterialComponent>(entity, helmet.mMaterial);
 			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
