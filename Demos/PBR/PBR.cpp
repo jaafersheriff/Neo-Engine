@@ -80,7 +80,7 @@ namespace PBR {
 			ecs.addComponent<PinnedComponent>(entity);
 			ecs.addComponent<TagComponent>(entity, "Camera");
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.05f, 0.03f, 0.0f), glm::vec3(1.f));
-			ecs.addComponent<CameraComponent>(entity, 0.1f, 35.f, CameraComponent::Perspective{ 45.f, 1.f });
+			ecs.addComponent<CameraComponent>(entity, 1.f, 35.f, CameraComponent::Perspective{ 45.f, 1.f });
 		}
 		{
 			auto lightEntity = ecs.createEntity();

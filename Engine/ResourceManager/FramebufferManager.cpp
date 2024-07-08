@@ -24,7 +24,7 @@ namespace neo {
 			util::visit(loadDetails,
 				[&](FramebufferBuilder& builder) {
 					for (auto& format : builder.mFormats) {
-						seed = TextureHandle(swizzleTextureId(seed, format, builder.mSize)).mHandle;
+						seed ^= TextureHandle(swizzleTextureId(seed, format, builder.mSize)).mHandle;
 					}
 				},
 				[&](FramebufferExternalHandles& externalHandles) {

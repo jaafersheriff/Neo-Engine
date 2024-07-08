@@ -4,6 +4,7 @@ in vec2 fragTex;
 
 layout(binding = 0) uniform sampler2D inputTexture;
 uniform vec2 texelSize;
+uniform float threshold;
 
 out vec4 color;
 
@@ -55,6 +56,10 @@ void main() {
 	groups[3] *= KarisAverage(groups[3]);
 	groups[4] *= KarisAverage(groups[4]);
 	downsample = groups[0]+groups[1]+groups[2]+groups[3]+groups[4];
+	if (luminance(downsample) <= threshold) {
+		color = vec4(0, 0, 0, 1);
+		return;
+	}
 #else
 	// Apply weighted distribution:
 	// 0.5 + 0.125 + 0.125 + 0.125 + 0.125 = 1

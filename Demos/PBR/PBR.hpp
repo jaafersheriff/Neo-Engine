@@ -38,7 +38,8 @@ namespace PBR {
 		bool mDoBloom = true;
 		BloomParameters mBloomParams = {
 			0.004f,
-			3
+			3,
+			30.f
 		};
 
 		GBufferDebugParameters mGbufferDebugParams {

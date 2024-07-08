@@ -5,15 +5,19 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
+#pragma optimize("", off)
+
 namespace neo {
 
 	struct BloomParameters {
 		float mRadius = 0.005f; 
 		int mDownSampleSteps = 6;
+		float mLuminanceThreshold = 1.f;
 
 		void imguiEditor() {
 			ImGui::SliderFloat("Radius", &mRadius, 0.001f, 0.010f);
 			ImGui::SliderInt("Down Samples", &mDownSampleSteps, 1, 10);
+			ImGui::SliderFloat("Luminance Threshold", &mLuminanceThreshold, 0.f, 100000.f);
 		}
 	};
 
@@ -31,9 +35,11 @@ namespace neo {
 
 		// Create textures and targets
 		std::vector<FramebufferHandle> bloomTargets;
+		std::string targetName = "BloomTargetN";
 		for (int i = 0; i < parameters.mDownSampleSteps; i++) {
+			targetName.back() = static_cast<char>(static_cast<int>('0') + i);
 			bloomTargets.push_back(resourceManagers.mFramebufferManager.asyncLoad(
-				HashedString((std::string("BloomTarget") + std::to_string(i)).c_str()),
+				HashedString(targetName.c_str()),
 				FramebufferBuilder{}
 					.setSize(glm::uvec2(baseDimension.x >> i, baseDimension.y >> i))
 					.attach(TextureFormat{
@@ -69,6 +75,7 @@ namespace neo {
 					resolvedShader.bind();
 					if (i == 0) {
 						resolvedShader.bindTexture("inputTexture", inputTexture);
+						resolvedShader.bindUniform("threshold", parameters.mLuminanceThreshold);
 					}
 
 					glm::uvec2 mipDimension(baseDimension.x >> i, baseDimension.y >> i);
