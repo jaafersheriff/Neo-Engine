@@ -3,6 +3,7 @@
 #include "ECS/ECS.hpp"
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
@@ -29,9 +30,9 @@ namespace neo {
 			return NEO_INVALID_HANDLE;
 		}
 
-		std::string handle = "pointLightShadow" + std::to_string(static_cast<int>(lightEntity));
+		std::string textureName = "pointLightShadow" + std::to_string(static_cast<int>(lightEntity));
 		TextureHandle shadowCubeHandle = resourceManagers.mTextureManager.asyncLoad(
-			HashedString(handle.c_str()),
+			HashedString(textureName.c_str()),
 			TextureBuilder{}
 				.setDimension(glm::u16vec3(params.mDimension, params.mDimension, 0))
 				.setFormat(TextureFormat{
@@ -48,24 +49,31 @@ namespace neo {
 			containsAlphaTest = true;
 		}
 
+		FrustumComponent frustum;
 		CameraComponent camera(1.f, 100.f, CameraComponent::Perspective{90.f, 1.f}); // TODO - parameters
-		const glm::mat4 P = camera.getProj();
-		const glm::vec3 lightPosition = ecs.cGetComponent<SpatialComponent>(lightEntity)->getPosition();
-		static std::vector<std::vector<glm::vec3>> lookAndUpVectors = {
-			{glm::vec3(1,0,0), glm::vec3(0,1,0)},
-			{ glm::vec3(-1,0,0), glm::vec3(0,1,0) },
-			{ glm::vec3(0,1,0), glm::vec3(0,0,1) },
-			{ glm::vec3(0,-1,0), glm::vec3(0,0,-1) },
-			{ glm::vec3(0,0,1), glm::vec3(0,1,0) },
-			{ glm::vec3(0,0,-1), glm::vec3(0,1,0) }
+		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity), "Point light shadows need a spatial");
+		SpatialComponent cameraSpatial = *ecs.cGetComponent<SpatialComponent>(lightEntity); // Copy
+		static std::vector<glm::vec3> lookDirs = {
+			glm::vec3(1,0,0),
+			glm::vec3(-1,0,0),
+			glm::vec3(0,1,0),
+			glm::vec3(0,-1,0),
+			glm::vec3(0,0,1),
+			glm::vec3(0,0,-1),
 		};
 
 		const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
+		ShaderDefines drawDefines;
+		std::string targetName = textureName + "_N";
 		for (int i = 0; i < 6; i++) {
 			TRACY_GPUN("Draw Face");
+			cameraSpatial.setLookDir(lookDirs[i]);
+			frustum.calculateFrustum(camera, cameraSpatial);
+
 			types::framebuffer::AttachmentTarget target = static_cast<types::framebuffer::AttachmentTarget>(static_cast<uint8_t>(types::framebuffer::AttachmentTarget::TargetCubeX_Positive) + i);
+			targetName.back() = '0' + static_cast<char>(i);
 			FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
-				HashedString((handle + "_" + std::to_string(i)).c_str()),
+				HashedString(targetName.c_str()),
 				FramebufferExternalAttachments { 
 					FramebufferAttachment {
 						shadowCubeHandle,
@@ -81,17 +89,14 @@ namespace neo {
 			auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowTargetHandle);
 			shadowTarget.disableDraw();
 			shadowTarget.bind();
-			shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
+			shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth); // TODO - this will break if multiple passes (opaque, alphatest, etc) are called
 
-			glm::mat4 V = glm::lookAt(lightPosition, lightPosition + lookAndUpVectors[i][0], lookAndUpVectors[i][1]);
-			ShaderDefines drawDefines;
 			for (auto entity : view) {
-				// TODO - frustum culling is precomputed on camera components...
-				// if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-				// 	if (!culled->isInView(ecs, entity, shadowCameraEntity)) {
-				// 		continue;
-				// 	}
-				// }
+				const SpatialComponent& drawSpatial = view.get<const SpatialComponent>(entity);
+				// VFC
+				if (ecs.has<BoundingBoxComponent>(entity) && !frustum.isInFrustum(drawSpatial, *ecs.cGetComponent<BoundingBoxComponent>(entity))) {
+					continue;
+				}
 				drawDefines.reset();
 
 				auto material = ecs.cGetComponent<const MaterialComponent>(entity);
@@ -109,9 +114,9 @@ namespace neo {
 					resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
 				}
 
-				resolvedShader.bindUniform("P", P);
-				resolvedShader.bindUniform("V", V);
-				resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
+				resolvedShader.bindUniform("P", camera.getProj());
+				resolvedShader.bindUniform("V", cameraSpatial.getView());
+				resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 				resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 			}
 		}

@@ -2,10 +2,11 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
-#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 namespace neo {
+	struct BoundingBoxComponent;
+	struct SpatialComponent;
+	struct CameraComponent;
 
 	START_COMPONENT(FrustumComponent);
 
@@ -26,6 +27,8 @@ namespace neo {
 		glm::vec4 mBottom{ 0.f, 0.f, 0.f, 0.f };
 		glm::vec4 mNear{ 0.f, 0.f, 0.f, 0.f };
 		glm::vec4 mFar{ 0.f, 0.f, 0.f, 0.f };
+
+		void calculateFrustum(const CameraComponent& camera, const SpatialComponent& cameraSpatial);
 
 		// Test if an object is inside the frustum
 		bool isInFrustum(const SpatialComponent& spatial, const BoundingBoxComponent& box) const;

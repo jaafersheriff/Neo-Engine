@@ -84,8 +84,6 @@ namespace neo {
 	}
 
 	void Framebuffer::attachTexture(TextureHandle id, const Texture& texture, const types::framebuffer::AttachmentTarget& target, uint8_t mip) {
-		//NEO_ASSERT(texture.mFormat.mTarget == types::texture::Target::Texture2D, "Framebuffers need 2D textures");
-
 		types::framebuffer::AttachmentBit attachment;
 		switch (TextureFormat::deriveBaseFormat(texture.mFormat.mInternalFormat)) {
 			case types::texture::BaseFormats::Depth:
@@ -102,7 +100,6 @@ namespace neo {
 
 		mTextures.emplace_back(id);
 		bind();
-		glFramebufferTexture(GL_FRAMEBUFFER, _getGLAttachment(attachment, mColorAttachments - 1), texture.mTextureID, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, _getGLAttachment(attachment, mColorAttachments - 1), _getGLTarget(target), texture.mTextureID, mip);
 		CHECK_GL_FRAMEBUFFER();
 	}
