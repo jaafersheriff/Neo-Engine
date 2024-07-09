@@ -14,7 +14,6 @@
 namespace neo {
 	namespace {
 		GLbitfield _getGLClearFlags(types::framebuffer::AttachmentBits flagBits) {
-
 			GLbitfield flags = 0;
 			if (flagBits.mClearBits & static_cast<uint8_t>(types::framebuffer::AttachmentBit::Color)) {
 				flags |= GL_COLOR_BUFFER_BIT;
@@ -25,7 +24,6 @@ namespace neo {
 			if (flagBits.mClearBits & static_cast<uint8_t>(types::framebuffer::AttachmentBit::Stencil)) {
 				flags |= GL_STENCIL_BUFFER_BIT;
 			}
-
 			return flags;
 		}
 
@@ -36,8 +34,28 @@ namespace neo {
 			if (bit == types::framebuffer::AttachmentBit::Stencil) {
 				return GL_DEPTH_STENCIL;
 			}
-
 			return GL_COLOR_ATTACHMENT0 + colorAttachmentOffset;
+		}
+
+		GLenum _getGLTarget(types::framebuffer::AttachmentTarget target) {
+			switch (target) {
+			case types::framebuffer::AttachmentTarget::Target2D:
+				return GL_TEXTURE_2D;
+			case types::framebuffer::AttachmentTarget::TargetCubeX_Positive:
+				return GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+			case types::framebuffer::AttachmentTarget::TargetCubeX_Negative:
+				return GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+			case types::framebuffer::AttachmentTarget::TargetCubeY_Positive:
+				return GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+			case types::framebuffer::AttachmentTarget::TargetCubeY_Negative:
+				return GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+			case types::framebuffer::AttachmentTarget::TargetCubeZ_Positive:
+				return GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+			case types::framebuffer::AttachmentTarget::TargetCubeZ_Negative:
+				return GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+			default:
+				return 0;
+			}
 		}
 
 	}
@@ -65,8 +83,8 @@ namespace neo {
 		glReadBuffer(GL_NONE);
 	}
 
-	void Framebuffer::attachTexture(TextureHandle id, const Texture& texture) {
-		NEO_ASSERT(texture.mFormat.mTarget == types::texture::Target::Texture2D, "Framebuffers need 2D textures");
+	void Framebuffer::attachTexture(TextureHandle id, const Texture& texture, const types::framebuffer::AttachmentTarget& target, uint8_t mip) {
+		//NEO_ASSERT(texture.mFormat.mTarget == types::texture::Target::Texture2D, "Framebuffers need 2D textures");
 
 		types::framebuffer::AttachmentBit attachment;
 		switch (TextureFormat::deriveBaseFormat(texture.mFormat.mInternalFormat)) {
@@ -85,6 +103,7 @@ namespace neo {
 		mTextures.emplace_back(id);
 		bind();
 		glFramebufferTexture(GL_FRAMEBUFFER, _getGLAttachment(attachment, mColorAttachments - 1), texture.mTextureID, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, _getGLAttachment(attachment, mColorAttachments - 1), _getGLTarget(target), texture.mTextureID, mip);
 		CHECK_GL_FRAMEBUFFER();
 	}
 

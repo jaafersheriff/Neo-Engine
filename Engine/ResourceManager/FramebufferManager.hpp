@@ -19,27 +19,42 @@ namespace neo {
 	struct TextureFormat;
 
 	struct FramebufferBuilder {
+		// Hmmm this forces all internally-created textures to be the same size...
 		glm::uvec2 mSize;
-		std::vector<TextureFormat> mFormats;
+		struct BuilderAttachment {
+			TextureFormat mFormat;
+			types::framebuffer::AttachmentTarget mTarget;
+			uint8_t mMip;
+			bool operator==(const BuilderAttachment& other) const {
+				return mFormat == other.mFormat && mTarget == other.mTarget && mMip == other.mMip;
+			}
+
+		};
+		std::vector<BuilderAttachment> mAttachments;
 
 		FramebufferBuilder& setSize(glm::uvec2 size) {
 			mSize = size;
 			return *this;
 		}
 
-		FramebufferBuilder& attach(TextureFormat format) {
-			mFormats.emplace_back(format);
+		FramebufferBuilder& attach(TextureFormat format, types::framebuffer::AttachmentTarget target = types::framebuffer::AttachmentTarget::Target2D, uint8_t mip = 0) {
+			mAttachments.emplace_back(BuilderAttachment{ format, target, mip });
 			return *this;
 		}
 
 		bool operator==(const FramebufferBuilder& other) const {
-			// Kinda faulty, but meh
-			return other.mSize == mSize && other.mFormats == mFormats;
+			return other.mSize == mSize && other.mAttachments == mAttachments;
 		}
 	};
 
-	using FramebufferExternalHandles = std::vector<TextureHandle>;
-	using FramebufferLoadDetails = std::variant<FramebufferBuilder, FramebufferExternalHandles>;
+	struct FramebufferAttachment {
+		TextureHandle mHandle = NEO_INVALID_HANDLE;
+		types::framebuffer::AttachmentTarget mTarget = types::framebuffer::AttachmentTarget::Target2D;
+		uint8_t mMip = 0;
+	};
+
+	using FramebufferExternalAttachments = std::vector<FramebufferAttachment>;
+	using FramebufferLoadDetails = std::variant<FramebufferBuilder, FramebufferExternalAttachments>;
 
 	struct PooledFramebuffer {
 		Framebuffer mFramebuffer;
@@ -50,7 +65,7 @@ namespace neo {
 	using FramebufferHandle = ResourceHandle<PooledFramebuffer>;
 	struct FramebufferQueueItem {
 		FramebufferHandle mHandle;
-		std::vector<TextureHandle> mTexIDs;
+		std::vector<FramebufferAttachment> mAttachments;
 		bool mExternallyOwned = false;
 		std::optional<std::string> mDebugName;
 	};

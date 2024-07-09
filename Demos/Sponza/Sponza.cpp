@@ -185,7 +185,7 @@ namespace Sponza {
 			);
 			FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 				"Shadow map",
-				FramebufferExternalHandles { shadowTextureHandle },
+				FramebufferExternalAttachments{ {shadowTextureHandle } },
 				resourceManagers.mTextureManager
 			);
 

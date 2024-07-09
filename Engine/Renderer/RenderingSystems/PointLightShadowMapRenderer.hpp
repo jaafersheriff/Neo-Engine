@@ -40,19 +40,6 @@ namespace neo {
 				})
 		);
 
-		// TODO - this might break because cube
-		FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
-			HashedString(handle.c_str()),
-			FramebufferExternalHandles { shadowCubeHandle },
-			resourceManagers.mTextureManager
-		);
-		if (!resourceManagers.mTextureManager.isValid(shadowCubeHandle) || !resourceManagers.mFramebufferManager.isValid(shadowTargetHandle)) {
-			return NEO_INVALID_HANDLE;
-		}
-
-		auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowTargetHandle);
-		shadowTarget.disableDraw();
-		shadowTarget.bind();
 		glViewport(0, 0, params.mDimension, params.mDimension);
 		glCullFace(GL_FRONT);
 
@@ -72,10 +59,32 @@ namespace neo {
 			{ glm::vec3(0,0,1), glm::vec3(0,1,0) },
 			{ glm::vec3(0,0,-1), glm::vec3(0,1,0) }
 		};
+
+		const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
 		for (int i = 0; i < 6; i++) {
+			TRACY_GPUN("Draw Face");
+			types::framebuffer::AttachmentTarget target = static_cast<types::framebuffer::AttachmentTarget>(static_cast<uint8_t>(types::framebuffer::AttachmentTarget::TargetCubeX_Positive) + i);
+			FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+				HashedString((handle + "_" + std::to_string(i)).c_str()),
+				FramebufferExternalAttachments { 
+					FramebufferAttachment {
+						shadowCubeHandle,
+						target,
+						0
+					}
+				},
+				resourceManagers.mTextureManager
+			);
+			if (!resourceManagers.mTextureManager.isValid(shadowCubeHandle) || !resourceManagers.mFramebufferManager.isValid(shadowTargetHandle)) {
+				return NEO_INVALID_HANDLE;
+			}
+			auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowTargetHandle);
+			shadowTarget.disableDraw();
+			shadowTarget.bind();
+			shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
+
 			glm::mat4 V = glm::lookAt(lightPosition, lightPosition + lookAndUpVectors[i][0], lookAndUpVectors[i][1]);
 			ShaderDefines drawDefines;
-			const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
 			for (auto entity : view) {
 				// TODO - frustum culling is precomputed on camera components...
 				// if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {

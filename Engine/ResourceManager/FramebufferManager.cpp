@@ -7,7 +7,7 @@
 
 namespace neo {
 	namespace {
-		TextureHandle swizzleTextureId(FramebufferHandle srcHandle, TextureFormat format, glm::uvec2 dimension) {
+		TextureHandle swizzleTextureId(FramebufferHandle srcHandle, TextureFormat format, types::framebuffer::AttachmentTarget target, uint8_t mip, glm::uvec2 dimension) {
 			HashedString::hash_type seed = srcHandle.mHandle ^ dimension.x ^ dimension.y;
 			seed ^= static_cast<uint32_t>(format.mInternalFormat) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mType) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -16,6 +16,8 @@ namespace neo {
 			seed ^= static_cast<uint32_t>(format.mWrap.mS) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mWrap.mR) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mMipCount) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= static_cast<uint32_t>(target) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= static_cast<uint32_t>(mip) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			return TextureHandle(seed);
 		}
 
@@ -23,13 +25,15 @@ namespace neo {
 			HashedString::hash_type seed = id;
 			util::visit(loadDetails,
 				[&](FramebufferBuilder& builder) {
-					for (auto& format : builder.mFormats) {
-						seed ^= TextureHandle(swizzleTextureId(seed, format, builder.mSize)).mHandle;
+					for (auto& attachment : builder.mAttachments) {
+						seed ^= TextureHandle(swizzleTextureId(seed, attachment.mFormat, attachment.mTarget, attachment.mMip, builder.mSize)).mHandle;
 					}
 				},
-				[&](FramebufferExternalHandles& externalHandles) {
+				[&](FramebufferExternalAttachments& externalHandles) {
 					for (auto& handle : externalHandles) {
-						seed ^= static_cast<uint32_t>(handle.mHandle) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+						seed ^= static_cast<uint32_t>(handle.mHandle.mHandle) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+						seed ^= static_cast<uint32_t>(handle.mTarget) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+						seed ^= static_cast<uint32_t>(handle.mMip) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 					}
 				},
 				[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
@@ -45,8 +49,8 @@ namespace neo {
 				framebuffer->mResource.mFramebuffer.init(details.mDebugName);
 				framebuffer->mResource.mFrameCount = 1;
 				framebuffer->mResource.mExternallyOwned = details.mExternallyOwned;
-				for (auto& texHandle : details.mTexIDs) {
-					framebuffer->mResource.mFramebuffer.attachTexture(texHandle, textureManager.resolve(texHandle));
+				for (auto& attachment : details.mAttachments) {
+					framebuffer->mResource.mFramebuffer.attachTexture(attachment.mHandle, textureManager.resolve(attachment.mHandle), attachment.mTarget, attachment.mMip);
 				}
 				if (framebuffer->mResource.mFramebuffer.mColorAttachments) {
 					framebuffer->mResource.mFramebuffer.initDrawBuffers();
@@ -74,17 +78,23 @@ namespace neo {
 			return dstId;
 		}
 
-		std::vector<TextureHandle> texIds;
+		std::vector<FramebufferAttachment> attachments;
 		bool owned = false;
 		util::visit(framebufferDetails,
 			[&](FramebufferBuilder& builder) {
-				for (int i = 0; i < builder.mFormats.size(); i++) {
-					auto& format = builder.mFormats[i];
-					texIds.emplace_back(textureManager.asyncLoad(swizzleTextureId(dstId.mHandle + i, format, builder.mSize), TextureBuilder{ format, glm::u16vec3(builder.mSize, 0.0)}, std::string(id.data()) + "_" + std::to_string(i)));
+				for (int i = 0; i < builder.mAttachments.size(); i++) {
+					auto& attachment = builder.mAttachments[i];
+					attachments.emplace_back(FramebufferAttachment{
+						textureManager.asyncLoad(
+							swizzleTextureId(dstId.mHandle + i, attachment.mFormat, attachment.mTarget, attachment.mMip, builder.mSize), 
+							TextureBuilder{ attachment.mFormat, glm::u16vec3(builder.mSize, 0.0)}, std::string(id.data()) + "_" + std::to_string(i)),
+						attachment.mTarget,
+						attachment.mMip
+					});
 				}
 			},
-			[&](FramebufferExternalHandles& externalHandles) {
-				texIds = externalHandles;
+			[&](FramebufferExternalAttachments& externalAttachments) {
+				attachments = externalAttachments;
 				owned = true;
 			},
 			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
@@ -92,7 +102,7 @@ namespace neo {
 
 		mQueue.emplace_back(FramebufferQueueItem{
 			dstId, 
-			texIds,
+			attachments,
 			owned,
 			std::string(id)
 		});
@@ -125,11 +135,19 @@ namespace neo {
 		mQueue.clear();
 		for (auto& item : swapQueue) {
 			bool validTextures = true;
-			for (auto& texId : item.mTexIDs) {
-				if (!textureManager.isValid(texId)) {
+			for (auto& attachment : item.mAttachments) {
+				if (!textureManager.isValid(attachment.mHandle)) {
 					NEO_LOG_W("Trying to create a framebuffer %s with invalid texture attachments -- skipping", item.mDebugName.value_or("").c_str());
 					validTextures = false;
 					break;
+				}
+				else {
+					auto& texture = textureManager.resolve(attachment.mHandle);
+					if (texture.mFormat.mTarget == types::texture::Target::Texture2D && attachment.mTarget != types::framebuffer::AttachmentTarget::Target2D) {
+						NEO_LOG_E("Trying to bind non-2D target to a 2D texture");
+						validTextures = false;
+						break;
+					}
 				}
 			}
 			if (validTextures) {

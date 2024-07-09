@@ -169,7 +169,7 @@ namespace FrustaFitting {
 		);
 		auto shadowMapHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Shadow map",
-			FramebufferExternalHandles{ shadowTexture },
+			FramebufferExternalAttachments{ {shadowTexture} },
 			resourceManagers.mTextureManager
 		);
 

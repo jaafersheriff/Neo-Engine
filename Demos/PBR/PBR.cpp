@@ -334,7 +334,7 @@ namespace PBR {
 			);
 			FramebufferHandle shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(
 				"Shadow map",
-				FramebufferExternalHandles{ shadowTexture },
+				FramebufferExternalAttachments{ {shadowTexture } },
 				resourceManagers.mTextureManager
 			);
 

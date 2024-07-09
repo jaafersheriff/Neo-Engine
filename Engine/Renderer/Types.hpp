@@ -42,6 +42,16 @@ namespace neo {
 		}
 
 		namespace framebuffer {
+			enum class AttachmentTarget : uint8_t {
+				Target2D,
+				TargetCubeX_Positive,
+				TargetCubeX_Negative,
+				TargetCubeY_Positive,
+				TargetCubeY_Negative,
+				TargetCubeZ_Positive,
+				TargetCubeZ_Negative,
+			};
+
 			enum class AttachmentBit : uint8_t {
 				Color = 1 << 0,
 				Depth = 1 << 1,
