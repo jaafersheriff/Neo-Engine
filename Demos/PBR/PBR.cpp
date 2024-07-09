@@ -344,6 +344,7 @@ namespace PBR {
 				shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
 				drawShadows<OpaqueComponent>(resourceManagers, shadowMap, ecs);
 				drawShadows<AlphaTestComponent>(resourceManagers, shadowMap, ecs);
+				drawShadows<TransparentComponent>(resourceManagers, shadowMap, ecs);
 			}
 		}
 

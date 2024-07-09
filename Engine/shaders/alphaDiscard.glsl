@@ -1,5 +1,5 @@
-void alphaDiscard(float alpha) {
-	if (alpha < 0.5) {
+void alphaDiscard(float alpha, float cutoff = 0.5) {
+	if (alpha < cutoff) {
 		discard;
 	}
 }

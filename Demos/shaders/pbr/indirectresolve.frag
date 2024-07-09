@@ -26,6 +26,10 @@ void main() {
 	vec4 normalRoughness = texture(gNormalRoughness, fragTex);
 	vec4 emissiveMetalness = texture(gEmissiveMetalness, fragTex);
 	float depth = texture(gDepth, fragTex).r;
+	if (depth >= 1.0) {
+		color = vec4(0, 0, 0, 1);
+		return;
+	}
 	vec3 worldPos = reconstructWorldPos(fragTex, depth, invP, invV);
 
 	PBRMaterial pbrMaterial;

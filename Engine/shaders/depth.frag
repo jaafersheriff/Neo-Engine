@@ -1,14 +1,16 @@
 
 in vec2 fragTex;
 
-#ifdef ALPHA_TEST
 #include "alphaDiscard.glsl"
+
+#ifdef ALPHA_TEST
 layout (binding = 0) uniform sampler2D alphaMap;
 #endif
 
 
 void main() {
 #ifdef ALPHA_TEST
-	alphaDiscard(texture(alphaMap, fragTex).a);
+	vec4 fAlbedo = texture(alphaMap, fragTex);
+	alphaDiscard(fAlbedo.a);
 #endif
 }

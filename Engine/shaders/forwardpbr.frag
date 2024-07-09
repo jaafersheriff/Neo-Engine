@@ -72,6 +72,9 @@ void main() {
 #ifdef ALPHA_TEST
 	alphaDiscard(fAlbedo.a);
 #endif
+#ifdef TRANSPARENT
+	alphaDiscard(fAlbedo.a, 0.1);
+#endif
 
 	float fMetalness = metalness;
 	float fRoughness = roughness;

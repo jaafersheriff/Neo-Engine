@@ -30,7 +30,7 @@ namespace neo {
 		glCullFace(GL_FRONT);
 
 		bool containsAlphaTest = false;
-		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
+		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
 			// TODO - set GL state?
 			containsAlphaTest = true;
 		}
@@ -71,10 +71,6 @@ namespace neo {
 			resolvedShader.bindUniform("V", shadowCameraSpatial.getView());
 			resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
 			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
-		}
-
-		if (containsAlphaTest) {
-			// glDisable(GL_BLEND);
 		}
 
 		glCullFace(GL_BACK);
