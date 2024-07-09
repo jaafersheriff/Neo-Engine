@@ -37,9 +37,9 @@ float GeometrySmith(float NdotV, float NdotL, float roughness) {
     return ggx1 * ggx2;
 }
 
-float D_GGX(float NoH, float roughness) {
-    float a = NoH * roughness;
-    float k = roughness / (1.0 - NoH * NoH + a * a + EP);
+float D_GGX(float NdotH, float roughness) {
+    float a = NdotH * roughness;
+    float k = roughness / (1.0 - NdotH * NdotH + a * a + EP);
     return k * k * (1.0 / PI);
 }
 
@@ -50,10 +50,10 @@ vec3 F_Schlick(float u, vec3 f0) {
 
 void brdf(in PBRMaterial pbrMaterial, in PBRLight pbrLight, out PBRColor pbrColor) {
 	vec3 H = normalize(pbrLight.L + pbrMaterial.V);
-    float NdotH = clamp(dot(pbrMaterial.N, H), 0.0, 1.0);
-    float NdotV = abs(dot(pbrMaterial.N, pbrMaterial.V)) + EP;
-    float NdotL = clamp(dot(pbrMaterial.N, pbrLight.L), 0.0, 1.0);
-    float LdotH = clamp(dot(pbrLight.L, H), 0.0, 1.0);
+    float NdotH = saturate(dot(pbrMaterial.N, H));
+    float NdotV = abs(dot(pbrMaterial.N, pbrMaterial.V));
+    float NdotL = saturate(dot(pbrMaterial.N, pbrLight.L));
+    float LdotH = saturate(dot(pbrLight.L, H));
 
     float roughness = pbrMaterial.linearRoughness * pbrMaterial.linearRoughness;
 

@@ -296,7 +296,8 @@ namespace PBR {
 
 		mGbufferDebugParams.imguiEditor();
 
-		ImGui::Checkbox("Shadows", &mDrawShadows);
+		ImGui::Checkbox("Directional Shadows", &mDrawDirectionalShadows);
+		ImGui::Checkbox("Point Light Shadows", &mDrawPointLightShadows);
 		ImGui::SliderFloat("Debug Radius", &mLightDebugRadius, 0.f, 10.f);
 		if (ImGui::SliderInt("# Point Lights", &mPointLightCount, 0, 100)) {
 			_createPointLights(ecs, mPointLightCount);
@@ -325,7 +326,7 @@ namespace PBR {
 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
 		TextureHandle shadowTexture = NEO_INVALID_HANDLE;
-		if (mDrawShadows) {
+		if (mDrawDirectionalShadows) {
 			shadowTexture = resourceManagers.mTextureManager.asyncLoad("Shadow map",
 				TextureBuilder{}
 					.setDimension(glm::u16vec3(2048, 2048, 0))
@@ -344,6 +345,14 @@ namespace PBR {
 				drawShadows<OpaqueComponent>(resourceManagers, shadowMap, ecs);
 				drawShadows<AlphaTestComponent>(resourceManagers, shadowMap, ecs);
 				drawShadows<TransparentComponent>(resourceManagers, shadowMap, ecs);
+			}
+		}
+		std::vector<TextureHandle> pointLightShadowHandles;
+		if (mDrawPointLightShadows) {
+			auto pointLightView = ecs.getView<PointLightComponent, SpatialComponent>();
+			for (auto& entity : pointLightView) {
+				// TODO - what if the returned handle is invalid
+				pointLightShadowHandles.emplace_back(drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters));
 			}
 		}
 

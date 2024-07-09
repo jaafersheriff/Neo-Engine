@@ -2,6 +2,7 @@
 
 #include "DemoInfra/IDemo.hpp"
 
+#include "Renderer/RenderingSystems/PointLightShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/AutoexposureRenderer.hpp"
 #include "Renderer/RenderingSystems/BloomRenderer.hpp"
 #include "GBufferRenderer.hpp"
@@ -20,7 +21,11 @@ namespace PBR {
 		virtual void imGuiEditor(ECS& ecs) override;
 
 	private:
-		bool mDrawShadows = true;
+		bool mDrawDirectionalShadows = true;
+		bool mDrawPointLightShadows = true;
+		PointLightShadowParameters mPointLightShadowParameters{
+			512
+		};
 
 		int mPointLightCount = 20;
 		float mLightDebugRadius = 0.f;

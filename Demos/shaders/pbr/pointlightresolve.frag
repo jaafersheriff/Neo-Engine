@@ -71,11 +71,10 @@ void main() {
 	pbrMaterial.ao = albedoAO.a;
 
 	vec3 lightDir = lightPos - worldPos;
-	float lightDistance = length(lightDir);
+	float lightDistance = length(lightDir) + EP;
 	PBRLight pbrLight;
 	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a / (lightDistance * lightDistance);
 	pbrLight.L = normalize(lightDir / lightDistance);
-
 
 	PBRColor pbrColor;
 	pbrColor.directDiffuse = vec3(0);
