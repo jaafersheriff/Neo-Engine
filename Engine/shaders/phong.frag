@@ -29,7 +29,7 @@ uniform vec3 lightCol;
 uniform vec3 lightDir;
 #elif defined(POINT_LIGHT)
 uniform vec3 lightPos;
-uniform vec3 lightAtt;
+uniform float lightRadiance;
 #endif
 
 uniform vec3 camPos;
@@ -57,9 +57,8 @@ float attFactor = 1;
 	vec3 lightDir = lightPos - fragPos.xyz;
 	float lightDistance = length(lightDir);
 	vec3 Ldir = lightDir / lightDistance;
-	if (length(lightAtt) > 0) {
-		attFactor = lightAtt.x + lightAtt.y*lightDistance + lightAtt.z*lightDistance*lightDistance;
-	}
+
+	attFactor = lightDistance / lightRadiance;
 #else
 	vec3 Ldir = vec3(0, 0, 0);
 #endif

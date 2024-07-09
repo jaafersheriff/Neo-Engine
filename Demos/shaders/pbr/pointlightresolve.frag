@@ -14,7 +14,6 @@ uniform vec2 resolution;
 
 uniform vec4 lightRadiance;
 uniform vec3 lightPos;
-uniform float lightRadius;
 
 #ifdef SHOW_LIGHTS
 uniform float debugRadius;
@@ -45,21 +44,22 @@ float raySphereIntersect(vec3 r0, vec3 rd, vec3 s0, float sr)
 
 
 void main() {
-
-#ifdef SHOW_LIGHTS
-	float rayDist = raySphereIntersect(camPos, normalize(fragPos.xyz - camPos), lightPos, debugRadius);
-	if (rayDist > 0.0 && rayDist < length(fragPos.xyz - camPos)) {
-		color = vec4(lightRadiance.rgb * lightRadiance.a, 1.f);
-		return;
-	}
-#endif
-
 	vec2 uv = gl_FragCoord.xy / resolution.xy;
 	vec4 albedoAO = texture(gAlbedoAO, uv);
 	vec4 normalRoughness = texture(gNormalRoughness, uv);
 	vec4 emissiveMetalness = texture(gEmissiveMetalness, uv);
 	float depth = texture(gDepth, uv).r;
 	vec3 worldPos = reconstructWorldPos(uv, depth, invP, invV);
+
+#ifdef SHOW_LIGHTS
+	float rayDist = raySphereIntersect(camPos, normalize(fragPos.xyz - camPos), lightPos, debugRadius);
+	if (rayDist > 0.0 && distance(camPos, worldPos) > rayDist) {
+		color = vec4(lightRadiance.rgb * lightRadiance.a, 1.f);
+		return;
+	}
+#endif
+
+
 
 	PBRMaterial pbrMaterial;
 	pbrMaterial.albedo = albedoAO.rgb;
@@ -70,16 +70,12 @@ void main() {
 	pbrMaterial.F0 = calculateF0(albedoAO.rgb, emissiveMetalness.a);
 	pbrMaterial.ao = albedoAO.a;
 
-	PBRLight pbrLight;
-	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a;
 	vec3 lightDir = lightPos - worldPos;
 	float lightDistance = length(lightDir);
+	PBRLight pbrLight;
+	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a / (lightDistance * lightDistance);
 	pbrLight.L = normalize(lightDir / lightDistance);
-	if (lightDistance > lightRadius) {
-		return;
-	}
-	float att = 1 / pow(1.0 + lightDistance / lightRadius, 2);
-	pbrLight.radiance *= att;
+
 
 	PBRColor pbrColor;
 	pbrColor.directDiffuse = vec3(0);
@@ -93,6 +89,5 @@ void main() {
 		+ pbrColor.directSpecular
 	;
 	color.a = 1.0;
-
 }
 

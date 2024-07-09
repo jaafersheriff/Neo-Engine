@@ -52,13 +52,12 @@ namespace PBR {
 					util::genRandom(0.f, 10.f),
 					util::genRandom(-7.5f, 7.5f)
 				);
-				glm::vec3 scale(util::genRandom(1.f, 5.f));
 				const auto entity = ecs.createEntity();
 				ecs.addComponent<LightComponent>(entity, util::genRandomVec3(0.3f, 1.f), util::genRandom(35.f, 75.f));
 				ecs.addComponent<PointLightComponent>(entity);
 				ecs.addComponent<SinTranslateComponent>(entity, glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position);
-				ecs.addComponent<SpatialComponent>(entity, position, scale);
-				ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
+				ecs.addComponent<SpatialComponent>(entity, position, glm::vec3(50.f));
+				ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), false);
 			}
 		}
 	}

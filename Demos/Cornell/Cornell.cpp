@@ -65,15 +65,10 @@ namespace Cornell {
 		{
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Light");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f - 1e-3, 1.0f), glm::vec3(0.25f), glm::vec3(glm::radians(90.f), 0.f, 0.f));
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f - util::EP, 0.5f), glm::vec3(10.f));
 			ecs.addComponent<MainLightComponent>(entity);
 			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f));
-			ecs.addComponent<MeshComponent>(entity, HashedString("quad"));
-			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(1.f);
-			ecs.addComponent<ForwardPBRRenderComponent>(entity);
-			ecs.addComponent<OpaqueComponent>(entity);
-			ecs.addComponent<PointLightComponent>(entity, glm::vec3(0.75f, 1.0, 3.0f));
+			ecs.addComponent<PointLightComponent>(entity);
 		}
 
 		HashedString quadMesh("quad");

@@ -34,6 +34,4 @@ void main() {
 #ifdef ENABLE_SHADOWS
 	shadowCoord = L * fragPos;
 #endif
-
-
 }

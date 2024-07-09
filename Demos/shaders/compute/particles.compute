@@ -1,8 +1,7 @@
 
 
 
-layout(std140, binding = 0) buffer Pos
-{
+layout(std140, binding = 0) buffer Pos {
 	vec4 pos[];
 };
 

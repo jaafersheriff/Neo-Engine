@@ -175,8 +175,11 @@ namespace neo {
 
 				std::string::size_type bufferStart = line.find("buffer");
 				if (bufferStart != std::string::npos && bufferStart < commentStart) {
-					std::string::size_type bufferNameStart = line.find_first_not_of(' ', bufferStart + 7);
+					std::string::size_type bufferNameStart = line.find_first_not_of(' ', bufferStart + 6);
 					std::string::size_type bufferNameEnd = line.find_first_of(' ', bufferNameStart);
+					if (bufferNameEnd == std::string::npos) {
+						bufferNameEnd = line.find_first_of('\n', bufferNameStart);
+					}
 					NEO_ASSERT(
 						bufferNameStart != std::string::npos
 						&& bufferNameEnd != std::string::npos, "Failed to parse buffer at line %s", line.c_str());

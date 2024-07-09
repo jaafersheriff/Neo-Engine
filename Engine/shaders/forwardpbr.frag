@@ -56,7 +56,7 @@ uniform vec3 lightDir;
 #endif
 #if defined(POINT_LIGHT)
 uniform vec3 lightPos;
-uniform vec3 lightAtt;
+uniform float lightRadius;
 #endif
 
 uniform vec3 camPos;
@@ -108,10 +108,12 @@ void main() {
 #if defined(POINT_LIGHT)
 	vec3 lightDir = lightPos - fragPos.xyz;
 	L = normalize(lightDir);
-	if (length(lightAtt) > 0) {
-		float lightDistance = length(lightDir);
-		attFactor = 1.f / (lightAtt.x + lightAtt.y * lightDistance + lightAtt.z * lightDistance * lightDistance);
+	float lightDistance = length(lightDir);
+	if (lightDistance == 0.0 || lightDistance > lightRadius) {
+		color = vec4(0, 0, 0, fAlbedo.a);
+		return;
 	}
+	attFactor = lightDistance * lightDistance;
 #endif
 
 	float ao = 1.f;
@@ -130,7 +132,7 @@ void main() {
 
 	PBRLight pbrLight;
 	pbrLight.L = L;
-	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a * attFactor;
+	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a / attFactor;
 
 	PBRColor pbrColor;
 	pbrColor.directDiffuse = vec3(0);

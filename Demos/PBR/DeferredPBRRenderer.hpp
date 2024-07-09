@@ -74,16 +74,16 @@ namespace PBR {
 		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
 		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 
+		glDisable(GL_DEPTH_TEST);
 		const auto& lightView = ecs.getView<LightComponent, SpatialComponent, CompTs...>();
 		for (auto& entity : lightView) {
 			const auto& light = ecs.cGetComponent<LightComponent>(entity);
 			resolvedShader.bindUniform("lightRadiance", glm::vec4(light->mColor, light->mIntensity));
 			resolvedShader.bindUniform("lightDir", -ecs.cGetComponent<SpatialComponent>(entity)->getLookDir());
 
-			glDisable(GL_DEPTH_TEST);
 			resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
-			glEnable(GL_DEPTH_TEST);
 		}
+		glEnable(GL_DEPTH_TEST);
 	}
 
 	template<typename... CompTs>
@@ -91,21 +91,14 @@ namespace PBR {
 		TRACY_GPU();
 
 		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightResolve Shader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "model.vert"},
+			{ types::shader::Stage::Vertex, "pbr/pointlightresolve.vert"},
 			{ types::shader::Stage::Fragment, "pbr/pointlightresolve.frag" }
 		});
 		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
 			return;
 		}
 
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE);
-		glBlendColor(1.f, 1.f, 1.f, 1.f);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-
 		ShaderDefines defines;
-
 		MakeDefine(SHOW_LIGHTS);
 		if (debugRadius > 0.f) {
 			defines.set(SHOW_LIGHTS);
@@ -133,6 +126,11 @@ namespace PBR {
 		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
 		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+		glBlendColor(1.f, 1.f, 1.f, 1.f);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
 		/* Render light volumes */
 		// TODO : instanced
 		const auto& view = ecs.getView<const LightComponent, const PointLightComponent, const SpatialComponent, CompTs...>();
@@ -143,7 +141,6 @@ namespace PBR {
 			resolvedShader.bindUniform("M", spatial->getModelMatrix());
 			resolvedShader.bindUniform("lightPos", spatial->getPosition());
 			resolvedShader.bindUniform("lightRadiance", glm::vec4(light->mColor, light->mIntensity));
-			resolvedShader.bindUniform("lightRadius", spatial->getScale().x);
 
 			// If camera is inside light 
 			float dist = glm::distance(spatial->getPosition(), cameraSpatial->getPosition());
@@ -153,10 +150,10 @@ namespace PBR {
 			else {
 				glCullFace(GL_BACK);
 			}
-
 			resourceManagers.mMeshManager.resolve(HashedString("sphere")).draw();
 		}
 
+		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glCullFace(GL_BACK);
 	}

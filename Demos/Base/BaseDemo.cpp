@@ -53,10 +53,10 @@ namespace Base {
 		{
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Light");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 2.f, 20.f));
-			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f));
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 2.f, 20.f), glm::vec3(100.f));
+			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f), 1000.f);
 			ecs.addComponent<MainLightComponent>(entity);
-			ecs.addComponent<PointLightComponent>(entity, glm::vec3(0.0, 0.0, 0.001f));
+			ecs.addComponent<PointLightComponent>(entity);
 		}
 
 		{

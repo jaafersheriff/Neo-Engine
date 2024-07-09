@@ -77,14 +77,12 @@ namespace neo {
 		}
 		bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
 		bool pointLight = ecs.has<PointLightComponent>(lightEntity);
-		glm::vec3 attenuation(0.f);
 		MakeDefine(DIRECTIONAL_LIGHT);
 		MakeDefine(POINT_LIGHT);
 		if (directionalLight) {
 			passDefines.set(DIRECTIONAL_LIGHT);
 		}
 		else if (pointLight) {
-			attenuation = ecs.cGetComponent<PointLightComponent>(lightEntity)->mAttenuation;
 			passDefines.set(POINT_LIGHT);
 		}
 		else {
@@ -138,7 +136,7 @@ namespace neo {
 				}
 				if (pointLight) {
 					resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
-					resolvedShader.bindUniform("lightAtt", attenuation);
+					resolvedShader.bindUniform("lightRadiance", light.mIntensity);
 				}
 				if (shadowsEnabled) {
 					resolvedShader.bindUniform("L", L);
