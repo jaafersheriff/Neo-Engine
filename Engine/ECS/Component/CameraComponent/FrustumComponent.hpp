@@ -11,14 +11,14 @@ namespace neo {
 	START_COMPONENT(FrustumComponent);
 
 		// Bounds
-		glm::vec3 NearLeftBottom{ 0.f, 0.f, 0.f };
-		glm::vec3 NearLeftTop{ 0.f, 0.f, 0.f };
-		glm::vec3 NearRightBottom{ 0.f, 0.f, 0.f };
-		glm::vec3 NearRightTop{ 0.f, 0.f, 0.f };
-		glm::vec3 FarLeftBottom{ 0.f, 0.f, 0.f };
-		glm::vec3 FarLeftTop{ 0.f, 0.f, 0.f };
-		glm::vec3 FarRightBottom{ 0.f, 0.f, 0.f };
-		glm::vec3 FarRightTop{ 0.f, 0.f, 0.f };
+		glm::vec3 mNearLeftBottom{ 0.f, 0.f, 0.f };
+		glm::vec3 mNearLeftTop{ 0.f, 0.f, 0.f };
+		glm::vec3 mNearRightBottom{ 0.f, 0.f, 0.f };
+		glm::vec3 mNearRightTop{ 0.f, 0.f, 0.f };
+		glm::vec3 mFarLeftBottom{ 0.f, 0.f, 0.f };
+		glm::vec3 mFarLeftTop{ 0.f, 0.f, 0.f };
+		glm::vec3 mFarRightBottom{ 0.f, 0.f, 0.f };
+		glm::vec3 mFarRightTop{ 0.f, 0.f, 0.f };
 
 		// Planes
 		glm::vec4 mLeft{ 0.f, 0.f, 0.f, 0.f };

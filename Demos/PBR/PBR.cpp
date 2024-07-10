@@ -90,15 +90,10 @@ namespace PBR {
 			ecs.addComponent<MainLightComponent>(lightEntity);
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
 			ecs.addComponent<PinnedComponent>(lightEntity);
-		}
-		{
-			auto shadowCam = ecs.createEntity();
-			ecs.addComponent<TagComponent>(shadowCam, "Shadow Camera");
-			ecs.addComponent<CameraComponent>(shadowCam, -1.f, 1000.f, CameraComponent::Orthographic{ glm::vec2(-100.f, 100.f), glm::vec2(-100.f, 100.f) });
-			ecs.addComponent<ShadowCameraComponent>(shadowCam);
-			ecs.addComponent<FrustumComponent>(shadowCam);
-			ecs.addComponent<SpatialComponent>(shadowCam);
-			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);
+			ecs.addComponent<CameraComponent>(lightEntity, -1.f, 1000.f, CameraComponent::Orthographic{ glm::vec2(-100.f, 100.f), glm::vec2(-100.f, 100.f) });
+			ecs.addComponent<ShadowCameraComponent>(lightEntity);
+			ecs.addComponent<FrustumComponent>(lightEntity);
+			ecs.addComponent<FrustumFitReceiverComponent>(lightEntity, 1.f);
 		}
 		_createPointLights(ecs, mPointLightCount);
 

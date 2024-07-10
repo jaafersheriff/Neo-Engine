@@ -35,11 +35,11 @@ namespace neo {
 			containsAlphaTest = true;
 		}
 
-		auto shadowCameraView = ecs.getSingleView<ShadowCameraComponent, CameraComponent, SpatialComponent>();
+		auto shadowCameraView = ecs.getSingleView<DirectionalLightComponent, ShadowCameraComponent, CameraComponent, SpatialComponent>();
 		if (!shadowCameraView) {
 			NEO_ASSERT(shadowCameraView, "No shadow camera found");
 		}
-		auto&& [shadowCameraEntity, _, shadowCamera, shadowCameraSpatial] = *shadowCameraView;
+		auto&& [shadowCameraEntity, _, __, shadowCamera, shadowCameraSpatial] = *shadowCameraView;
 
 		ShaderDefines drawDefines;
 		const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();

@@ -64,18 +64,17 @@ namespace neo {
 		auto&& [lightEntity, _mainLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
 
 		glm::mat4 L;
-		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, CameraComponent, SpatialComponent>();
-		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && shadowCamera.has_value();
+		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && ecs.has<DirectionalLightComponent>(lightEntity) && ecs.has<ShadowCameraComponent>(lightEntity) && ecs.has<CameraComponent>(lightEntity);
 		MakeDefine(ENABLE_SHADOWS);
 		if (shadowsEnabled) {
 			passDefines.set(ENABLE_SHADOWS);
-			const auto& [_, __, shadowOrtho, shadowCameraSpatial] = *shadowCamera;
+			const auto& shadowCamera = *ecs.cGetComponent<CameraComponent>(lightEntity);
 			static glm::mat4 biasMatrix(
 				0.5f, 0.0f, 0.0f, 0.0f,
 				0.0f, 0.5f, 0.0f, 0.0f,
 				0.0f, 0.0f, 0.5f, 0.0f,
 				0.5f, 0.5f, 0.5f, 1.0f);
-			L = biasMatrix * shadowOrtho.getProj() * shadowCameraSpatial.getView();
+			L = biasMatrix * shadowCamera.getProj() * lightSpatial.getView();
 		}
 
 		bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);

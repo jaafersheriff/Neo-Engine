@@ -65,16 +65,11 @@ namespace FrustaFitting {
 				ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f));
 				ecs.addComponent<DirectionalLightComponent>(lightEntity);
 				ecs.addComponent<MainLightComponent>(lightEntity);
-
-				// Shadow camera object
-				auto cameraObject = ecs.createEntity();
-				ecs.addComponent<TagComponent>(cameraObject, "Light camera");
-				ecs.addComponent<CameraComponent>(cameraObject, -2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) });
-				ecs.addComponent<SpatialComponent>(cameraObject, position, glm::vec3(1.f));
-				ecs.addComponent<FrustumComponent>(cameraObject);
-				ecs.addComponent<FrustumFitReceiverComponent>(cameraObject);
-				ecs.addComponent<LineMeshComponent>(cameraObject, meshManager, glm::vec3(1.f, 0.f, 1.f));
-				ecs.addComponent<ShadowCameraComponent>(cameraObject);
+				ecs.addComponent<CameraComponent>(lightEntity, -2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) });
+				ecs.addComponent<FrustumComponent>(lightEntity);
+				ecs.addComponent<FrustumFitReceiverComponent>(lightEntity);
+				ecs.addComponent<LineMeshComponent>(lightEntity, meshManager, glm::vec3(1.f, 0.f, 1.f));
+				ecs.addComponent<ShadowCameraComponent>(lightEntity);
 			}
 		};
 	}

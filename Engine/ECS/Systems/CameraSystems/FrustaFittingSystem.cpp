@@ -16,24 +16,20 @@ namespace neo {
 		TRACY_ZONE();
 
 		auto sourceCameraTuple = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent, CameraComponent>();
-		auto receiverCameraTuple = ecs.getSingleView<FrustumFitReceiverComponent, SpatialComponent, CameraComponent>();
-		auto lightTuple = ecs.getSingleView<DirectionalLightComponent, LightComponent, SpatialComponent>();
-		if (!receiverCameraTuple || !sourceCameraTuple || !lightTuple) {
+		auto receiverCameraTuple = ecs.getSingleView<FrustumFitReceiverComponent, SpatialComponent, CameraComponent, DirectionalLightComponent>();
+		if (!receiverCameraTuple || !sourceCameraTuple) {
 			return;
 		}
 		auto&& [sourceCameraEntity, _, sourceSpatial, sourceCamera] = *sourceCameraTuple;
 		NEO_ASSERT(sourceCamera.getType() == CameraComponent::CameraType::Perspective, "Frustum fit source needs to be perspective");
-		auto&& [receiverCameraEntity, receiverFrustum, receiverSpatial, receiverCamera] = *receiverCameraTuple;
+		auto&& [receiverCameraEntity, receiverFrustum, receiverSpatial, receiverCamera, __] = *receiverCameraTuple;
 		NEO_ASSERT(receiverCamera.getType() == CameraComponent::CameraType::Orthographic, "Frustum fit receiver needs to be orthographic");
-		auto&& [lightEntity, __, light, lightSpatial] = *lightTuple;
 
 		/////////////////////// Do the fitting! ///////////////////////////////
-		const glm::vec3 lightDir = lightSpatial.getLookDir();
-		const glm::vec3 up = lightSpatial.getUpDir();
 
 		const auto& sourceView = sourceSpatial.getView();
 		const auto& sourceProj = sourceCamera.getProj();
-		const auto& worldToLight = glm::lookAt(lightDir, glm::vec3(0.f), up);
+		const auto& worldToLight = receiverSpatial.getView();
 		const auto& lightToWorld = glm::inverse(worldToLight);
 
 		// const float aspect = sourceProj[1][1] / sourceProj[0][0];
@@ -50,14 +46,14 @@ namespace neo {
 			BoundingBox() {}
 
 			BoundingBox(const FrustumComponent* bounds) {
-				addNewPosition(bounds->NearLeftBottom);
-				addNewPosition(bounds->NearLeftTop);
-				addNewPosition(bounds->NearRightBottom);
-				addNewPosition(bounds->NearRightTop);
-				addNewPosition(bounds->FarLeftBottom);
-				addNewPosition(bounds->FarLeftTop);
-				addNewPosition(bounds->FarRightBottom);
-				addNewPosition(bounds->FarRightTop);
+				addNewPosition(bounds->mNearLeftBottom);
+				addNewPosition(bounds->mNearLeftTop);
+				addNewPosition(bounds->mNearRightBottom);
+				addNewPosition(bounds->mNearRightTop);
+				addNewPosition(bounds->mFarLeftBottom);
+				addNewPosition(bounds->mFarLeftTop);
+				addNewPosition(bounds->mFarRightBottom);
+				addNewPosition(bounds->mFarRightTop);
 
 			}
 
@@ -113,11 +109,11 @@ namespace neo {
 		const float boxHeight = receiverBox.height() * 0.5f;
 		const float boxDepth = receiverBox.depth() * 0.5f * (1.f + bias);
 
-		receiverSpatial.setPosition(center);
-		receiverSpatial.setLookDir(lightDir);
+		receiverSpatial.setPosition(center); // Doesn't matter b/c it's an analytic directional light
 		receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight) });
-		receiverCamera.setNear(-boxDepth);
-		receiverCamera.setFar(boxDepth);
+		float distToCenter = glm::distance(receiverSpatial.getPosition(), center);
+		receiverCamera.setNear(distToCenter - boxDepth);
+		receiverCamera.setFar(distToCenter + boxDepth);
 
 	}
 }

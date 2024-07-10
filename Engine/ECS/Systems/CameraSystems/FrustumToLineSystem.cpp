@@ -15,22 +15,22 @@ namespace neo {
 			line.clearNodes();
 
 			// We have to do this ridiculousness because line strip (:
-			line.addNode(frustum.NearLeftBottom);
-			line.addNode(frustum.NearLeftTop);
-			line.addNode(frustum.NearRightTop);
-			line.addNode(frustum.NearRightBottom);
-			line.addNode(frustum.NearLeftBottom);
-			line.addNode(frustum.FarLeftBottom);
-			line.addNode(frustum.FarLeftTop);
-			line.addNode(frustum.NearLeftTop);
-			line.addNode(frustum.FarLeftTop);
-			line.addNode(frustum.FarRightTop);
-			line.addNode(frustum.NearRightTop);
-			line.addNode(frustum.FarRightTop);
-			line.addNode(frustum.FarRightBottom);
-			line.addNode(frustum.NearRightBottom);
-			line.addNode(frustum.FarRightBottom);
-			line.addNode(frustum.FarLeftBottom);
+			line.addNode(frustum.mNearLeftBottom);
+			line.addNode(frustum.mNearLeftTop);
+			line.addNode(frustum.mNearRightTop);
+			line.addNode(frustum.mNearRightBottom);
+			line.addNode(frustum.mNearLeftBottom);
+			line.addNode(frustum.mFarLeftBottom);
+			line.addNode(frustum.mFarLeftTop);
+			line.addNode(frustum.mNearLeftTop);
+			line.addNode(frustum.mFarLeftTop);
+			line.addNode(frustum.mFarRightTop);
+			line.addNode(frustum.mNearRightTop);
+			line.addNode(frustum.mFarRightTop);
+			line.addNode(frustum.mFarRightBottom);
+			line.addNode(frustum.mNearRightBottom);
+			line.addNode(frustum.mFarRightBottom);
+			line.addNode(frustum.mFarLeftBottom);
 		}
 	}
 }

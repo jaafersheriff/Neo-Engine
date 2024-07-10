@@ -57,14 +57,14 @@ namespace neo {
 			glm::vec3 Cnear = P + v * camera.getNear();
 			glm::vec3 Cfar = P + v * camera.getFar();
 
-			NearLeftTop = Cnear + (up * camera.getOrthographic().mVertBounds.y) + (w * camera.getOrthographic().mHorizBounds.x);
-			NearRightTop = Cnear + (up * camera.getOrthographic().mVertBounds.y) + (w * camera.getOrthographic().mHorizBounds.y);
-			NearLeftBottom = Cnear + (up * camera.getOrthographic().mVertBounds.x) + (w * camera.getOrthographic().mHorizBounds.x);
-			NearRightBottom = Cnear + (up * camera.getOrthographic().mVertBounds.x) + (w * camera.getOrthographic().mHorizBounds.y);
-			FarLeftTop = Cfar + (up * camera.getOrthographic().mVertBounds.y) + (w * camera.getOrthographic().mHorizBounds.x);
-			FarRightTop = Cfar + (up * camera.getOrthographic().mVertBounds.y) + (w * camera.getOrthographic().mHorizBounds.y);
-			FarLeftBottom = Cfar + (up * camera.getOrthographic().mVertBounds.x) + (w * camera.getOrthographic().mHorizBounds.x);
-			FarRightBottom = Cfar + (up * camera.getOrthographic().mVertBounds.x) + (w * camera.getOrthographic().mHorizBounds.y);
+			mNearLeftTop = Cnear + (up * camera.getOrthographic().mVertBounds.y) + (w * camera.getOrthographic().mHorizBounds.x);
+			mNearRightTop = Cnear + (up * camera.getOrthographic().mVertBounds.y) + (w * camera.getOrthographic().mHorizBounds.y);
+			mNearLeftBottom = Cnear + (up * camera.getOrthographic().mVertBounds.x) + (w * camera.getOrthographic().mHorizBounds.x);
+			mNearRightBottom = Cnear + (up * camera.getOrthographic().mVertBounds.x) + (w * camera.getOrthographic().mHorizBounds.y);
+			mFarLeftTop = Cfar + (up * camera.getOrthographic().mVertBounds.y) + (w * camera.getOrthographic().mHorizBounds.x);
+			mFarRightTop = Cfar + (up * camera.getOrthographic().mVertBounds.y) + (w * camera.getOrthographic().mHorizBounds.y);
+			mFarLeftBottom = Cfar + (up * camera.getOrthographic().mVertBounds.x) + (w * camera.getOrthographic().mHorizBounds.x);
+			mFarRightBottom = Cfar + (up * camera.getOrthographic().mVertBounds.x) + (w * camera.getOrthographic().mHorizBounds.y);
 
 			mNear.x = PV[0][3] + PV[0][2];
 			mNear.y = PV[1][3] + PV[1][2];
@@ -85,14 +85,14 @@ namespace neo {
 			float Wnear = Hnear * ar;
 			float Hfar = 2 * glm::tan(fov / 2) * fDis;
 			float Wfar = Hfar * ar;
-			NearLeftTop = Cnear + (up * (Hnear / 2)) - (w * (Wnear / 2));
-			NearRightTop = Cnear + (up * (Hnear / 2)) + (w * (Wnear / 2));
-			NearLeftBottom = Cnear - (up * (Hnear / 2)) - (w * (Wnear / 2));
-			NearRightBottom = Cnear - (up * (Hnear / 2)) + (w * (Wnear / 2));
-			FarLeftTop = Cfar + (up * (Hfar / 2)) - (w * (Wfar / 2));
-			FarRightTop = Cfar + (up * (Hfar / 2)) + (w * (Wfar / 2));
-			FarLeftBottom = Cfar - (up * (Hfar / 2)) - (w * (Wfar / 2));
-			FarRightBottom = Cfar - (up * (Hfar / 2)) + (w * (Wfar / 2));
+			mNearLeftTop = Cnear + (up * (Hnear / 2)) - (w * (Wnear / 2));
+			mNearRightTop = Cnear + (up * (Hnear / 2)) + (w * (Wnear / 2));
+			mNearLeftBottom = Cnear - (up * (Hnear / 2)) - (w * (Wnear / 2));
+			mNearRightBottom = Cnear - (up * (Hnear / 2)) + (w * (Wnear / 2));
+			mFarLeftTop = Cfar + (up * (Hfar / 2)) - (w * (Wfar / 2));
+			mFarRightTop = Cfar + (up * (Hfar / 2)) + (w * (Wfar / 2));
+			mFarLeftBottom = Cfar - (up * (Hfar / 2)) - (w * (Wfar / 2));
+			mFarRightBottom = Cfar - (up * (Hfar / 2)) + (w * (Wfar / 2));
 
 			mNear.x = PV[0][2];
 			mNear.y = PV[1][2];
