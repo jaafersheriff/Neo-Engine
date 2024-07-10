@@ -26,7 +26,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawPhong(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, TextureHandle shadowMapHandle = NEO_INVALID_HANDLE, const ShaderDefines& inDefines = {}) {
+	void drawPhong(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Phong Shader", 
@@ -62,7 +62,11 @@ namespace neo {
 		auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
 
 		glm::mat4 L;
-		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && ecs.has<DirectionalLightComponent>(lightEntity) && ecs.has<ShadowCameraComponent>(lightEntity) && ecs.has<CameraComponent>(lightEntity);
+		const bool shadowsEnabled = 
+			ecs.has<DirectionalLightComponent>(lightEntity) 
+			&& ecs.has<CameraComponent>(lightEntity) 
+			&& ecs.has<ShadowCameraComponent>(lightEntity) 
+			&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
 		MakeDefine(ENABLE_SHADOWS);
 		if (shadowsEnabled) {
 			passDefines.set(ENABLE_SHADOWS);
@@ -139,7 +143,7 @@ namespace neo {
 				}
 				if (shadowsEnabled) {
 					resolvedShader.bindUniform("L", L);
-					resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(shadowMapHandle));
+					resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap));
 				}
 			}
 

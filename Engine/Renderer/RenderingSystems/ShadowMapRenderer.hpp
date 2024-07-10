@@ -9,7 +9,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawShadows(const ResourceManagers& resourceManagers, const Framebuffer& depthMap, const ECS& ecs) {
+	void drawShadows(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity lightEntity) {
 		TRACY_GPU();
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
@@ -17,14 +17,6 @@ namespace neo {
 		});
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
-		}
-
-		depthMap.disableDraw();
-		auto& depthTexture = resourceManagers.mTextureManager.resolve(depthMap.mTextures[0]);
-		glViewport(0, 0, depthTexture.mWidth, depthTexture.mHeight);
-		{
-			glBindTexture(GL_TEXTURE_2D, depthTexture.mTextureID);
-			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, std::vector<float>{1.f, 1.f, 1.f, 1.f}.data());
 		}
 
 		glCullFace(GL_FRONT);
@@ -35,18 +27,16 @@ namespace neo {
 			containsAlphaTest = true;
 		}
 
-		auto shadowCameraView = ecs.getSingleView<DirectionalLightComponent, ShadowCameraComponent, CameraComponent, SpatialComponent>();
-		if (!shadowCameraView) {
-			NEO_ASSERT(shadowCameraView, "No shadow camera found");
-		}
-		auto&& [shadowCameraEntity, _, __, shadowCamera, shadowCameraSpatial] = *shadowCameraView;
+		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity) && ecs.has<CameraComponent>(lightEntity), "Invalid light for shadow draws");
+		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(lightEntity)->getProj();
+		const glm::mat4 V = ecs.cGetComponent<SpatialComponent>(lightEntity)->getView();
 
 		ShaderDefines drawDefines;
 		const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
 		for (auto entity : view) {
 			// VFC
 			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-				if (!culled->isInView(ecs, entity, shadowCameraEntity)) {
+				if (!culled->isInView(ecs, entity, lightEntity)) {
 					continue;
 				}
 			}
@@ -67,8 +57,8 @@ namespace neo {
 				resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
 			}
 
-			resolvedShader.bindUniform("P", shadowCamera.getProj());
-			resolvedShader.bindUniform("V", shadowCameraSpatial.getView());
+			resolvedShader.bindUniform("P", P);
+			resolvedShader.bindUniform("V", V);
 			resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
 			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}

@@ -18,7 +18,7 @@ using namespace neo;
 namespace PBR {
 
 	template<typename... CompTs>
-	void drawDirectionalLightResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle, TextureHandle shadowMapHandle = NEO_INVALID_HANDLE) {
+	void drawDirectionalLightResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle) {
 		TRACY_GPU();
 
 		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
@@ -33,50 +33,54 @@ namespace PBR {
 			return;
 		}
 
-		ShaderDefines defines;
-		glm::mat4 L;
-		const auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, CameraComponent, SpatialComponent>();
-		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && shadowCamera.has_value();
-		MakeDefine(ENABLE_SHADOWS);
-		if (shadowsEnabled) {
-			defines.set(ENABLE_SHADOWS);
-			const auto& [_, __, shadowOrtho, shadowCameraSpatial] = *shadowCamera;
-			static glm::mat4 biasMatrix(
-				0.5f, 0.0f, 0.0f, 0.0f,
-				0.0f, 0.5f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.5f, 0.0f,
-				0.5f, 0.5f, 0.5f, 1.0f);
-			L = biasMatrix * shadowOrtho.getProj() * shadowCameraSpatial.getView();
-		}
-
-		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
-		resolvedShader.bind();
-
-		if (shadowsEnabled) {
-			const auto& shadowMap = resourceManagers.mTextureManager.resolve(shadowMapHandle);
-			resolvedShader.bindUniform("lightTransform", L);
-			resolvedShader.bindTexture("shadowMap", shadowMap);
-			resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
-		}
-
-		const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
-		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
-		resolvedShader.bindUniform("P", camera->getProj());
-		resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
-		resolvedShader.bindUniform("V", cameraSpatial->getView());
-		resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
-		resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
-
-		/* Bind gbuffer */
-		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-		resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-		resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
-
 		glDisable(GL_DEPTH_TEST);
 		const auto& lightView = ecs.getView<LightComponent, SpatialComponent, CompTs...>();
+		ShaderDefines defines;
 		for (auto& entity : lightView) {
+			defines.reset();
+
+			const bool shadowsEnabled = 
+				ecs.has<DirectionalLightComponent>(entity) 
+				&& ecs.has<CameraComponent>(entity) 
+				&& ecs.has<ShadowCameraComponent>(entity) 
+				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
+			MakeDefine(ENABLE_SHADOWS);
+			glm::mat4 L;
+			if (shadowsEnabled) {
+				defines.set(ENABLE_SHADOWS);
+				static glm::mat4 biasMatrix(
+					0.5f, 0.0f, 0.0f, 0.0f,
+					0.0f, 0.5f, 0.0f, 0.0f,
+					0.0f, 0.0f, 0.5f, 0.0f,
+					0.5f, 0.5f, 0.5f, 1.0f);
+				L = biasMatrix * ecs.cGetComponent<CameraComponent>(entity)->getProj() * ecs.cGetComponent<SpatialComponent>(entity)->getView();
+			}
+
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
+			resolvedShader.bind();
+
+			if (shadowsEnabled) {
+				const auto& shadowMap = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
+				resolvedShader.bindUniform("lightTransform", L);
+				resolvedShader.bindTexture("shadowMap", shadowMap);
+				resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
+			}
+
+			const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
+			const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
+			resolvedShader.bindUniform("P", camera->getProj());
+			resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
+			resolvedShader.bindUniform("V", cameraSpatial->getView());
+			resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
+			resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
+
+			/* Bind gbuffer */
+			auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
+			resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
+			resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+			resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+			resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
+
 			const auto& light = ecs.cGetComponent<LightComponent>(entity);
 			resolvedShader.bindUniform("lightRadiance", glm::vec4(light->mColor, light->mIntensity));
 			resolvedShader.bindUniform("lightDir", -ecs.cGetComponent<SpatialComponent>(entity)->getLookDir());

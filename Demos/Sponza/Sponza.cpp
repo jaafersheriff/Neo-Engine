@@ -193,8 +193,8 @@ namespace Sponza {
 				auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowTargetHandle);
 				shadowMap.bind();
 				shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
-				drawShadows<OpaqueComponent>(resourceManagers, shadowMap, ecs);
-				drawShadows<AlphaTestComponent>(resourceManagers, shadowMap, ecs);
+				//drawShadows<OpaqueComponent>(resourceManagers, shadowMap, ecs);
+				//drawShadows<AlphaTestComponent>(resourceManagers, shadowMap, ecs);
 			}
 		}
 
@@ -227,6 +227,7 @@ namespace Sponza {
 		glm::uvec2 viewport,
 		TextureHandle shadowMapHandle
 	) {
+		NEO_UNUSED(shadowMapHandle);
 		TRACY_GPU();
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
@@ -235,8 +236,8 @@ namespace Sponza {
 		sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.x, viewport.y);
 
-		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowMapHandle);
-		drawPhong<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowMapHandle);
+		//drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity, shadowMapHandle);
+		//drawPhong<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, shadowMapHandle);
 	}
 
 	void Demo::_deferredShading(

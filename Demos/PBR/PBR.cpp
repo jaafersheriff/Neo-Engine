@@ -320,26 +320,29 @@ namespace PBR {
 
 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
-		TextureHandle shadowTexture = NEO_INVALID_HANDLE;
 		if (mDrawDirectionalShadows) {
-			shadowTexture = resourceManagers.mTextureManager.asyncLoad("Shadow map",
+			auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent, ShadowCameraComponent>();
+			NEO_ASSERT(lightView.has_value(), "Can't draw shadows without a directional main point light");
+			auto& [lightEntity, __, ___, shadowCamera] = *lightView;
+			shadowCamera.mShadowMap = resourceManagers.mTextureManager.asyncLoad("Shadow map",
 				TextureBuilder{}
-					.setDimension(glm::u16vec3(2048, 2048, 0))
+					.setDimension(glm::u16vec3(shadowCamera.mResolution, shadowCamera.mResolution, 0))
 					.setFormat(TextureFormat{types::texture::Target::Texture2D, types::texture::InternalFormats::D16})
 			);
+
 			FramebufferHandle shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(
 				"Shadow map",
-				FramebufferExternalAttachments{ {shadowTexture } },
+				FramebufferExternalAttachments{ { shadowCamera.mShadowMap } },
 				resourceManagers.mTextureManager
 			);
-
 			if (resourceManagers.mFramebufferManager.isValid(shadowTarget)) {
 				auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowTarget);
 				shadowMap.bind();
 				shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
-				drawShadows<OpaqueComponent>(resourceManagers, shadowMap, ecs);
-				drawShadows<AlphaTestComponent>(resourceManagers, shadowMap, ecs);
-				drawShadows<TransparentComponent>(resourceManagers, shadowMap, ecs);
+				glViewport(0, 0, shadowCamera.mResolution, shadowCamera.mResolution);
+				drawShadows<OpaqueComponent>(resourceManagers, ecs, lightEntity);
+				drawShadows<AlphaTestComponent>(resourceManagers, ecs, lightEntity);
+				drawShadows<TransparentComponent>(resourceManagers, ecs, lightEntity);
 			}
 		}
 		std::vector<TextureHandle> pointLightShadowHandles;
@@ -395,7 +398,7 @@ namespace PBR {
 				GL_NEAREST
 			);
 		}
-		drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle, shadowTexture);
+		drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 		drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
 		// Extract IBL
 		std::optional<IBLComponent> ibl;
@@ -407,7 +410,7 @@ namespace PBR {
 			}
 		}
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
-		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, shadowTexture, ibl);
+		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
 		drawSkybox(resourceManagers, ecs, cameraEntity);
 
 		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParams) : hdrColorOutput;

@@ -28,7 +28,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawForwardPBR(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, TextureHandle shadowMapHandle = NEO_INVALID_HANDLE, std::optional<IBLComponent> ibl = std::nullopt) {
+	void drawForwardPBR(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, std::optional<IBLComponent> ibl = std::nullopt) {
 		TRACY_GPU();
 
 		ShaderDefines passDefines({});
@@ -64,7 +64,11 @@ namespace neo {
 		auto&& [lightEntity, _mainLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
 
 		glm::mat4 L;
-		const bool shadowsEnabled = resourceManagers.mTextureManager.isValid(shadowMapHandle) && ecs.has<DirectionalLightComponent>(lightEntity) && ecs.has<ShadowCameraComponent>(lightEntity) && ecs.has<CameraComponent>(lightEntity);
+		const bool shadowsEnabled = 
+			ecs.has<DirectionalLightComponent>(lightEntity) 
+			&& ecs.has<CameraComponent>(lightEntity) 
+			&& ecs.has<ShadowCameraComponent>(lightEntity) 
+			&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
 		MakeDefine(ENABLE_SHADOWS);
 		if (shadowsEnabled) {
 			passDefines.set(ENABLE_SHADOWS);
@@ -188,7 +192,7 @@ namespace neo {
 				}
 				if (shadowsEnabled) {
 					resolvedShader.bindUniform("L", L);
-					auto& shadowMap = resourceManagers.mTextureManager.resolve(shadowMapHandle);
+					auto& shadowMap = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
 					resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
 					resolvedShader.bindTexture("shadowMap", shadowMap);
 				}
