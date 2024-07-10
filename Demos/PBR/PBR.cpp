@@ -58,6 +58,7 @@ namespace PBR {
 				ecs.addComponent<SinTranslateComponent>(entity, glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position);
 				ecs.addComponent<SpatialComponent>(entity, position, glm::vec3(50.f));
 				ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), false);
+				ecs.addComponent<ShadowCameraComponent>(entity, 128);
 			}
 		}
 	}
@@ -91,7 +92,7 @@ namespace PBR {
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
 			ecs.addComponent<PinnedComponent>(lightEntity);
 			ecs.addComponent<CameraComponent>(lightEntity, -1.f, 1000.f, CameraComponent::Orthographic{ glm::vec2(-100.f, 100.f), glm::vec2(-100.f, 100.f) });
-			ecs.addComponent<ShadowCameraComponent>(lightEntity);
+			ecs.addComponent<ShadowCameraComponent>(lightEntity, 2048);
 			ecs.addComponent<FrustumComponent>(lightEntity);
 			ecs.addComponent<FrustumFitReceiverComponent>(lightEntity, 1.f);
 		}
@@ -320,8 +321,8 @@ namespace PBR {
 
 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
+		auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent, ShadowCameraComponent>();
 		if (mDrawDirectionalShadows) {
-			auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent, ShadowCameraComponent>();
 			NEO_ASSERT(lightView.has_value(), "Can't draw shadows without a directional main point light");
 			auto& [lightEntity, __, ___, shadowCamera] = *lightView;
 			shadowCamera.mShadowMap = resourceManagers.mTextureManager.asyncLoad("Shadow map",
@@ -345,12 +346,25 @@ namespace PBR {
 				drawShadows<TransparentComponent>(resourceManagers, ecs, lightEntity);
 			}
 		}
-		std::vector<TextureHandle> pointLightShadowHandles;
+		else if (lightView) {
+			resourceManagers.mTextureManager.discard(std::get<3>(*lightView).mShadowMap);
+		}
+
 		if (mDrawPointLightShadows) {
-			auto pointLightView = ecs.getView<PointLightComponent, SpatialComponent>();
+			auto pointLightView = ecs.getView<PointLightComponent, ShadowCameraComponent, SpatialComponent>();
 			for (auto& entity : pointLightView) {
-				// TODO - what if the returned handle is invalid
-				pointLightShadowHandles.emplace_back(drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters));
+				const auto& shadowCamera = pointLightView.get<ShadowCameraComponent>(entity);
+				std::string textureName = "pointLightShadow" + std::to_string(static_cast<int>(entity));
+				shadowCamera.mShadowMap = resourceManagers.mTextureManager.asyncLoad(
+					HashedString(textureName.c_str()),
+					TextureBuilder{}
+					.setDimension(glm::u16vec3(shadowCamera.mResolution, shadowCamera.mResolution, 0))
+					.setFormat(TextureFormat{ types::texture::Target::TextureCube, types::texture::InternalFormats::D16 })
+				);
+				glViewport(0, 0, shadowCamera.mResolution, shadowCamera.mResolution);
+				drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters, true);
+				drawPointLightShadows<AlphaTestComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters, false);
+				drawPointLightShadows<TransparentComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters, false);
 			}
 		}
 

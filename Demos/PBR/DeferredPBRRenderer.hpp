@@ -102,33 +102,15 @@ namespace PBR {
 			return;
 		}
 
-		ShaderDefines defines;
+		ShaderDefines passDefines;
 		MakeDefine(SHOW_LIGHTS);
 		if (debugRadius > 0.f) {
-			defines.set(SHOW_LIGHTS);
-		}
-		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
-		resolvedShader.bind();
-
-		if (debugRadius > 0.f) {
-			resolvedShader.bindUniform("debugRadius", debugRadius);
+			passDefines.set(SHOW_LIGHTS);
 		}
 
 		const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
 		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
-		resolvedShader.bindUniform("P", camera->getProj());
-		resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
-		resolvedShader.bindUniform("V", cameraSpatial->getView());
-		resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
-		resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
-		resolvedShader.bindUniform("resolution", glm::vec2(resolution));
-
-		/* Bind gbuffer */
 		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-		resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-		resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);
@@ -136,15 +118,50 @@ namespace PBR {
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		/* Render light volumes */
+		ShaderDefines drawDefines(passDefines);
 		// TODO : instanced
 		const auto& view = ecs.getView<const LightComponent, const PointLightComponent, const SpatialComponent, CompTs...>();
 		for (auto entity : view) {
 			// TODO : Could do VFC
+
+			MakeDefine(ENABLE_SHADOWS);
+			const bool shadowsEnabled =
+				ecs.has<ShadowCameraComponent>(entity)
+				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
+			if (shadowsEnabled) {
+				drawDefines.set(ENABLE_SHADOWS);
+			}
+
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, drawDefines);
+			resolvedShader.bind();
+
 			const auto& light = ecs.cGetComponent<const LightComponent>(entity);
 			const auto& spatial = ecs.cGetComponent<const SpatialComponent>(entity);
 			resolvedShader.bindUniform("M", spatial->getModelMatrix());
 			resolvedShader.bindUniform("lightPos", spatial->getPosition());
 			resolvedShader.bindUniform("lightRadiance", glm::vec4(light->mColor, light->mIntensity));
+
+
+			if (debugRadius > 0.f) {
+				resolvedShader.bindUniform("debugRadius", debugRadius);
+			}
+
+			if (shadowsEnabled) {
+				resolvedShader.bindTexture("shadowCube", resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap));
+			}
+
+			resolvedShader.bindUniform("P", camera->getProj());
+			resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
+			resolvedShader.bindUniform("V", cameraSpatial->getView());
+			resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
+			resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
+			resolvedShader.bindUniform("resolution", glm::vec2(resolution));
+
+			/* Bind gbuffer */
+			resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
+			resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+			resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+			resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 
 			// If camera is inside light 
 			float dist = glm::distance(spatial->getPosition(), cameraSpatial->getPosition());

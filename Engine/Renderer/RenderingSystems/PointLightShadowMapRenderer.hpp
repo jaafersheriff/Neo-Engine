@@ -16,38 +16,26 @@
 namespace neo {
 
 	struct PointLightShadowParameters {
-		uint32_t mDimension = 128;
 	};
 
 	template<typename... CompTs>
-	inline TextureHandle drawPointLightShadows(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity& lightEntity, const PointLightShadowParameters& params) {
+	inline void drawPointLightShadows(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity& lightEntity, const PointLightShadowParameters& params, const bool clear) {
+		NEO_UNUSED(params);
 		TRACY_GPU();
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
 			{ types::shader::Stage::Fragment, "depth.frag" }
 		});
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
-			return NEO_INVALID_HANDLE;
+			return;
 		}
 
-		std::string textureName = "pointLightShadow" + std::to_string(static_cast<int>(lightEntity));
-		TextureHandle shadowCubeHandle = resourceManagers.mTextureManager.asyncLoad(
-			HashedString(textureName.c_str()),
-			TextureBuilder{}
-				.setDimension(glm::u16vec3(params.mDimension, params.mDimension, 0))
-				.setFormat(TextureFormat{
-					types::texture::Target::TextureCube,
-					types::texture::InternalFormats::D16
-				})
-		);
-
-		glViewport(0, 0, params.mDimension, params.mDimension);
-		glCullFace(GL_FRONT);
-
-		bool containsAlphaTest = false;
-		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
-			containsAlphaTest = true;
+		NEO_ASSERT(ecs.has<PointLightComponent>(lightEntity) && ecs.has<ShadowCameraComponent>(lightEntity), "Invalid light entity for point ligth shadows");
+		TextureHandle shadowCubeHandle = ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap;
+		if (!resourceManagers.mTextureManager.isValid(shadowCubeHandle)) {
+			return;
 		}
+		NEO_ASSERT(resourceManagers.mTextureManager.resolve(shadowCubeHandle).mFormat.mTarget == types::texture::Target::TextureCube, "Can only draw point light shadows to a cube texture");
 
 		FrustumComponent frustum;
 		CameraComponent camera(1.f, 100.f, CameraComponent::Perspective{90.f, 1.f}); // TODO - parameters
@@ -62,35 +50,43 @@ namespace neo {
 			glm::vec3(0,0,-1),
 		};
 
+		glCullFace(GL_FRONT);
+		bool containsAlphaTest = false;
+		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
+			containsAlphaTest = true;
+		}
+
+		char targetName[128];
 		const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
 		ShaderDefines drawDefines;
-		std::string targetName = textureName + "_N";
 		for (int i = 0; i < 6; i++) {
 			TRACY_GPUN("Draw Face");
-			cameraSpatial.setLookDir(lookDirs[i]);
-			frustum.calculateFrustum(camera, cameraSpatial);
 
-			types::framebuffer::AttachmentTarget target = static_cast<types::framebuffer::AttachmentTarget>(static_cast<uint8_t>(types::framebuffer::AttachmentTarget::TargetCubeX_Positive) + i);
-			targetName.back() = '0' + static_cast<char>(i);
+			sprintf(targetName, "%s_%d_%d", "PointLightShadowMap", lightEntity, i);
+
 			FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
-				HashedString(targetName.c_str()),
+				HashedString(targetName),
 				FramebufferExternalAttachments { 
 					FramebufferAttachment {
 						shadowCubeHandle,
-						target,
+						static_cast<types::framebuffer::AttachmentTarget>(static_cast<uint8_t>(types::framebuffer::AttachmentTarget::TargetCubeX_Positive) + i),
 						0
 					}
 				},
 				resourceManagers.mTextureManager
 			);
-			if (!resourceManagers.mTextureManager.isValid(shadowCubeHandle) || !resourceManagers.mFramebufferManager.isValid(shadowTargetHandle)) {
-				return NEO_INVALID_HANDLE;
+			if (!resourceManagers.mFramebufferManager.isValid(shadowTargetHandle)) {
+				return;
 			}
 			auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowTargetHandle);
 			shadowTarget.disableDraw();
 			shadowTarget.bind();
-			shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth); // TODO - this will break if multiple passes (opaque, alphatest, etc) are called
+			if (clear) {
+				shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth); // TODO - this will break if multiple passes (opaque, alphatest, etc) are called
+			}
 
+			cameraSpatial.setLookDir(lookDirs[i]);
+			frustum.calculateFrustum(camera, cameraSpatial);
 			for (auto entity : view) {
 				const SpatialComponent& drawSpatial = view.get<const SpatialComponent>(entity);
 				// VFC
@@ -122,6 +118,5 @@ namespace neo {
 		}
 
 		glCullFace(GL_BACK);
-		return shadowCubeHandle;
 	}
 }

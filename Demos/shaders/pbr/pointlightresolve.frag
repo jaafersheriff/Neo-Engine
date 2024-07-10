@@ -15,6 +15,10 @@ uniform vec2 resolution;
 uniform vec4 lightRadiance;
 uniform vec3 lightPos;
 
+#ifdef ENABLE_SHADOWS
+layout(binding = 4) uniform samplerCube shadowMap;
+#endif
+
 #ifdef SHOW_LIGHTS
 uniform float debugRadius;
 #endif

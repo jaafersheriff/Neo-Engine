@@ -24,7 +24,6 @@ namespace PBR {
 		bool mDrawDirectionalShadows = true;
 		bool mDrawPointLightShadows = true;
 		PointLightShadowParameters mPointLightShadowParameters{
-			512
 		};
 
 		int mPointLightCount = 20;
