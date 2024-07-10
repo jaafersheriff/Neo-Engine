@@ -61,7 +61,7 @@ namespace PBR {
 				ecs.addComponent<SinTranslateComponent>(entity, glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position);
 				ecs.addComponent<SpatialComponent>(entity, position, glm::vec3(50.f));
 				ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), false);
-				ecs.addComponent<ShadowCameraComponent>(entity, 128);
+				ecs.addComponent<ShadowCameraComponent>(entity, 512);
 			}
 		}
 	}

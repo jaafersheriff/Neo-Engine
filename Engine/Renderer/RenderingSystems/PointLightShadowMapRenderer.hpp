@@ -24,7 +24,7 @@ namespace neo {
 		TRACY_GPU();
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
-			{ types::shader::Stage::Fragment, "depth.frag" }
+			{ types::shader::Stage::Fragment, "pointlightdepth.frag" }
 		});
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
@@ -40,18 +40,18 @@ namespace neo {
 		SpatialComponent cameraSpatial = *ecs.cGetComponent<SpatialComponent>(lightEntity); // Copy
 
 		FrustumComponent frustum;
-		CameraComponent camera(1.f, cameraSpatial.getScale().x / 2.f, CameraComponent::Perspective{90.f, 1.f});
+		CameraComponent camera(0.5f, cameraSpatial.getScale().x / 2.f, CameraComponent::Perspective{90.f, 1.f});
 		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity), "Point light shadows need a spatial");
 		static std::vector<glm::vec3> lookDirs = {
 			glm::vec3(1,0,0),
 			glm::vec3(-1,0,0),
-			glm::vec3(0,1,0),
-			glm::vec3(0,-1,0),
+			glm::vec3(0,1 - util::EP,0),
+			glm::vec3(0,-1 + util::EP,0),
 			glm::vec3(0,0,1),
 			glm::vec3(0,0,-1),
 		};
 
-		glCullFace(GL_FRONT);
+		//glCullFace(GL_FRONT);
 		bool containsAlphaTest = false;
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
 			containsAlphaTest = true;
@@ -113,6 +113,9 @@ namespace neo {
 
 				resolvedShader.bindUniform("P", camera.getProj());
 				resolvedShader.bindUniform("V", cameraSpatial.getView());
+				resolvedShader.bindUniform("lightPos", cameraSpatial.getPosition());
+				resolvedShader.bindUniform("lightRange", (cameraSpatial.getScale().x - 0.5) / 2.f);
+
 				resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 				resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 			}

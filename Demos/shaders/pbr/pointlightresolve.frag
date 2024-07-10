@@ -1,4 +1,5 @@
 #include "pbr.glsl"
+#include "shadowreceiver.glsl"
 
 in vec4 fragPos;
 
@@ -87,14 +88,13 @@ void main() {
 	brdf(pbrMaterial, pbrLight, pbrColor);
 
 #ifdef ENABLE_SHADOWS
-	vec3 shadowCoord = worldPos - lightPos;
-	float shadowDepth = (texture(shadowCube, shadowCoord).r * shadowRange) * 2.0 - shadowRange;
-	float visibility = length(shadowCoord) - 0.005 < shadowDepth ? 1.0 : 0.0;
-	pbrColor.directDiffuse *= visibility;
-	pbrColor.directSpecular *= visibility;
+	if (sign(dot(pbrMaterial.N, pbrMaterial.V)) > 0.0) {
+		vec3 shadowCoord = worldPos - lightPos;
+		float visibility = getShadowVisibility(4, shadowCube, shadowCoord, 512, shadowRange, 0.00);
+		pbrColor.directDiffuse *= visibility;
+		pbrColor.directSpecular *= visibility;
+	}
 #endif
-
-
 
 	color.rgb = vec3(0)
 		+ pbrColor.directDiffuse
