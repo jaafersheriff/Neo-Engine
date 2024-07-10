@@ -148,6 +148,7 @@ namespace PBR {
 
 			if (shadowsEnabled) {
 				resolvedShader.bindTexture("shadowCube", resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap));
+				resolvedShader.bindUniform("shadowRange", spatial->getScale().x / 2.f - 1.0);
 			}
 
 			resolvedShader.bindUniform("P", camera->getProj());

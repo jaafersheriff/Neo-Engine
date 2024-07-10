@@ -37,10 +37,11 @@ namespace neo {
 		}
 		NEO_ASSERT(resourceManagers.mTextureManager.resolve(shadowCubeHandle).mFormat.mTarget == types::texture::Target::TextureCube, "Can only draw point light shadows to a cube texture");
 
-		FrustumComponent frustum;
-		CameraComponent camera(1.f, 100.f, CameraComponent::Perspective{90.f, 1.f}); // TODO - parameters
-		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity), "Point light shadows need a spatial");
 		SpatialComponent cameraSpatial = *ecs.cGetComponent<SpatialComponent>(lightEntity); // Copy
+
+		FrustumComponent frustum;
+		CameraComponent camera(1.f, cameraSpatial.getScale().x / 2.f, CameraComponent::Perspective{90.f, 1.f});
+		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity), "Point light shadows need a spatial");
 		static std::vector<glm::vec3> lookDirs = {
 			glm::vec3(1,0,0),
 			glm::vec3(-1,0,0),

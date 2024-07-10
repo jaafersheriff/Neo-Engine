@@ -16,7 +16,8 @@ uniform vec4 lightRadiance;
 uniform vec3 lightPos;
 
 #ifdef ENABLE_SHADOWS
-layout(binding = 4) uniform samplerCube shadowMap;
+layout(binding = 4) uniform samplerCube shadowCube;
+uniform float shadowRange;
 #endif
 
 #ifdef SHOW_LIGHTS
@@ -63,8 +64,6 @@ void main() {
 	}
 #endif
 
-
-
 	PBRMaterial pbrMaterial;
 	pbrMaterial.albedo = albedoAO.rgb;
 	pbrMaterial.N = normalize(normalRoughness.xyz * 2.0 - 1.0);
@@ -86,6 +85,16 @@ void main() {
 	pbrColor.indirectDiffuse = vec3(0);
 	pbrColor.indirectSpecular = vec3(0);
 	brdf(pbrMaterial, pbrLight, pbrColor);
+
+#ifdef ENABLE_SHADOWS
+	vec3 shadowCoord = worldPos - lightPos;
+	float shadowDepth = (texture(shadowCube, shadowCoord).r * shadowRange) * 2.0 - shadowRange;
+	float visibility = length(shadowCoord) - 0.005 < shadowDepth ? 1.0 : 0.0;
+	pbrColor.directDiffuse *= visibility;
+	pbrColor.directSpecular *= visibility;
+#endif
+
+
 
 	color.rgb = vec3(0)
 		+ pbrColor.directDiffuse
