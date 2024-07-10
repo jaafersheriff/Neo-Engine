@@ -34,19 +34,19 @@ namespace neo {
 			};
 
 		ImGui::Begin("Resources");
-		if (ImGui::TreeNodeEx("Framebuffers", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (ImGui::TreeNodeEx(&mFramebufferManager, ImGuiTreeNodeFlags_DefaultOpen, "Framebuffers (%d)", mFramebufferManager.mCache.size())) {
 			mFramebufferManager.imguiEditor(textureFunc, mTextureManager);
 			ImGui::TreePop();
 		}
-		if (ImGui::TreeNodeEx("Shaders", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (ImGui::TreeNodeEx(&mShaderManager, ImGuiTreeNodeFlags_DefaultOpen, "Shaders (%d)", mShaderManager.mCache.size())) {
 			mShaderManager.imguiEditor();
 			ImGui::TreePop();
 		}
-		if (ImGui::TreeNodeEx("Textures", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (ImGui::TreeNodeEx(&mTextureManager, ImGuiTreeNodeFlags_None, "Texture (%d)", mTextureManager.mCache.size())) {
 			mTextureManager.imguiEditor(textureFunc);
 			ImGui::TreePop();
 		}
-		if (ImGui::TreeNodeEx("Meshes", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (ImGui::TreeNodeEx(&mMeshManager, ImGuiTreeNodeFlags_None, "Meshes (%d)", mMeshManager.mCache.size())) {
 			mMeshManager.imguiEditor();
 			ImGui::TreePop();
 		}

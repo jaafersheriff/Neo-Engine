@@ -20,7 +20,7 @@ namespace neo {
 		void swap();
 		void setForceReload();
 		bool needsReload();
-		void imGuiEditor(ECS& ecs);
+		void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers);
 	private:
 		int& mCurrentDemoIndex;
 		std::vector<IDemo*>& mDemos;

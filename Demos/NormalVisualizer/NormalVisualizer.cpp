@@ -123,8 +123,8 @@ namespace NormalVisualizer {
 		}
 	}
 
-	void Demo::imGuiEditor(ECS& ecs) {
-		NEO_UNUSED(ecs);
+	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
+		NEO_UNUSED(ecs, resourceManagers);
 		ImGui::SliderFloat("Magnitude", &mMagnitude, 0.f, 1.f);
 	}
 }

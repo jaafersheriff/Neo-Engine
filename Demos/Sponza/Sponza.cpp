@@ -143,7 +143,8 @@ namespace Sponza {
 		ecs.addSystem<FrustumCullingSystem>();
 	}
 
-	void Demo::imGuiEditor(ECS& ecs) {
+	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
+		NEO_UNUSED(resourceManagers);
 		ImGui::Checkbox("Shadows", &mDrawShadows);
 
 		if (ImGui::Checkbox("Deferred Shading", &mDeferredShading)) {

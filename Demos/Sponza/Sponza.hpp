@@ -16,7 +16,7 @@ namespace Sponza {
 		virtual IDemo::Config getConfig() const override;
 		virtual void init(ECS& ecs, ResourceManagers& resourceManagers) override;
 		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) override;
-		virtual void imGuiEditor(ECS& ecs) override;
+		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
 
 	private:
 		void _forwardShading(const ResourceManagers& resourceManagers, const ECS& ecs, FramebufferHandle sceneTarget, glm::uvec2 viewport, TextureHandle shadowMap);

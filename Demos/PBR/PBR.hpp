@@ -18,7 +18,7 @@ namespace PBR {
 		virtual void init(ECS& ecs, ResourceManagers& resourceManagers) override;
 		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) override;
 		virtual void destroy() override;
-		virtual void imGuiEditor(ECS& ecs) override;
+		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
 
 	private:
 		bool mDrawDirectionalShadows = true;

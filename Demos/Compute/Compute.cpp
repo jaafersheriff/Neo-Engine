@@ -166,8 +166,8 @@ namespace Compute {
 		}
 	}
 
-	void Demo::imGuiEditor(ECS& ecs) {
-		NEO_UNUSED(ecs);
+	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
+		NEO_UNUSED(ecs, resourceManagers);
 		ImGui::SliderFloat("Sprite size", &mSpriteSize, 0.1f, 2.f);
 		ImGui::ColorEdit3("Sprite color", &mSpriteColor[0]);
 	}

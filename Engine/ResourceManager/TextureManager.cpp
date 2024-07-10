@@ -183,6 +183,27 @@ namespace neo {
 		TRACY_ZONE();
 
 		{
+			std::vector<TextureHandle> swapQueue;
+			std::swap(mDiscardQueue, swapQueue);
+			mDiscardQueue.clear();
+
+			for (auto& id : swapQueue) {
+				if (isValid(id)) {
+					_destroyImpl(mCache.handle(id.mHandle).get());
+					mCache.discard(id.mHandle);
+				}
+				else {
+					for (int i = 0; i < mQueue.size(); i++) {
+						if (id == mQueue[i].mHandle) {
+							mQueue.erase(mQueue.begin() + i);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		{
 			std::vector<ResourceLoadDetails_Internal> swapQueue;
 			std::swap(mQueue, swapQueue);
 			mQueue.clear();
@@ -201,19 +222,6 @@ namespace neo {
 						static_assert(always_false_v<T>, "non-exhaustive visitor!");
 					}
 					}, loadDetails.mLoadDetails);
-			}
-		}
-
-		{
-			std::vector<TextureHandle> swapQueue;
-			std::swap(mDiscardQueue, swapQueue);
-			mDiscardQueue.clear();
-
-			for (auto& id : swapQueue) {
-				if (isValid(id)) {
-					_destroyImpl(mCache.handle(id.mHandle).get());
-					mCache.discard(id.mHandle);
-				}
 			}
 		}
 	}

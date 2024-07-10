@@ -156,7 +156,7 @@ namespace neo {
 
 						{
 							TRACY_ZONEN("Demo Imgui");
-							demos.imGuiEditor(mECS);
+							demos.imGuiEditor(mECS, resourceManagers);
 						}
 						mECS.imguiEdtor();
 						resourceManagers.imguiEditor();

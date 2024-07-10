@@ -41,8 +41,11 @@ using namespace neo;
 
 namespace PBR {
 	namespace {
-		void _createPointLights(ECS& ecs, const int count) {
+		void _createPointLights(ECS& ecs, ResourceManagers& resourceManagers, const int count) {
 			for (auto& e : ecs.getView<PointLightComponent>()) {
+				if (ecs.has<ShadowCameraComponent>(e)) {
+					resourceManagers.mTextureManager.discard(ecs.getComponent<ShadowCameraComponent>(e)->mShadowMap);
+				}
 				ecs.removeEntity(e);
 			}
 
@@ -96,7 +99,7 @@ namespace PBR {
 			ecs.addComponent<FrustumComponent>(lightEntity);
 			ecs.addComponent<FrustumFitReceiverComponent>(lightEntity, 1.f);
 		}
-		_createPointLights(ecs, mPointLightCount);
+		_createPointLights(ecs, resourceManagers, mPointLightCount);
 
 		// Dialectric spheres
 		static float numSpheres = 8;
@@ -287,7 +290,7 @@ namespace PBR {
 		ecs.addSystem<FrustumCullingSystem>();
 	}
 
-	void Demo::imGuiEditor(ECS& ecs) {
+	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_UNUSED(ecs);
 
 		mGbufferDebugParams.imguiEditor();
@@ -296,7 +299,7 @@ namespace PBR {
 		ImGui::Checkbox("Point Light Shadows", &mDrawPointLightShadows);
 		ImGui::SliderFloat("Debug Radius", &mLightDebugRadius, 0.f, 10.f);
 		if (ImGui::SliderInt("# Point Lights", &mPointLightCount, 0, 100)) {
-			_createPointLights(ecs, mPointLightCount);
+			_createPointLights(ecs, resourceManagers, mPointLightCount);
 		}
 
 		ImGui::Checkbox("IBL", &mDrawIBL);

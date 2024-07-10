@@ -30,7 +30,7 @@ namespace neo {
 		return mForceReload || mNextDemoIndex != mCurrentDemoIndex; 
 	};
 	
-	void DemoWrangler::imGuiEditor(ECS& ecs) {
+	void DemoWrangler::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
 		ImGui::Begin("Demos");
 		if (ImGui::BeginCombo("##Demos", getCurrentDemo()->getConfig().name.c_str())) {
 			for (int i = 0; i < getDemos().size(); i++) {
@@ -46,7 +46,7 @@ namespace neo {
 
 		ImGui::Separator();
 		ImGui::Separator();
-		getCurrentDemo()->imGuiEditor(ecs);
+		getCurrentDemo()->imGuiEditor(ecs, resourceManagers);
 		ImGui::End();
 
 	}

@@ -112,8 +112,8 @@ namespace Base {
 		ecs.addSystem<RotationSystem>();
 	}
 
-	void Demo::imGuiEditor(ECS& ecs) {
-		NEO_UNUSED(ecs);
+	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
+		NEO_UNUSED(ecs, resourceManagers);
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {

@@ -30,8 +30,8 @@ namespace neo {
 			NEO_UNUSED(ecs, resourceManagers);
 		};
 		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) = 0;
-		virtual void imGuiEditor(ECS& ecs) {
-			NEO_UNUSED(ecs);
+		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
+			NEO_UNUSED(ecs, resourceManagers);
 		}
 		virtual void destroy() {}
 
