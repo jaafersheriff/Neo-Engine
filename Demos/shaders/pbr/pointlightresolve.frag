@@ -88,12 +88,10 @@ void main() {
 	brdf(pbrMaterial, pbrLight, pbrColor);
 
 #ifdef ENABLE_SHADOWS
-	if (sign(dot(pbrMaterial.N, pbrMaterial.V)) > 0.0) {
-		vec3 shadowCoord = worldPos - lightPos;
-		float visibility = getShadowVisibility(4, shadowCube, shadowCoord, 512, shadowRange, 0.00);
-		pbrColor.directDiffuse *= visibility;
-		pbrColor.directSpecular *= visibility;
-	}
+	vec3 shadowCoord = worldPos - lightPos;
+	float visibility = getShadowVisibility(2, shadowCube, shadowCoord, 512, shadowRange, 0.001);
+	pbrColor.directDiffuse *= visibility;
+	pbrColor.directSpecular *= visibility;
 #endif
 
 	color.rgb = vec3(0)

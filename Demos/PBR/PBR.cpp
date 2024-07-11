@@ -367,7 +367,7 @@ namespace PBR {
 				glViewport(0, 0, shadowCamera.mResolution, shadowCamera.mResolution);
 				drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters, true);
 				drawPointLightShadows<AlphaTestComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters, false);
-				drawPointLightShadows<TransparentComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters, false);
+				//drawPointLightShadows<TransparentComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters, false);
 			}
 		}
 

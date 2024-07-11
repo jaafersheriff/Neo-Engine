@@ -53,7 +53,7 @@ void main() {
 
 #ifdef ENABLE_SHADOWS
 	vec4 shadowCoord = lightTransform * vec4(worldPos, 1.0);
-	float visibility = getShadowVisibility(1, shadowMap, shadowMapResolution, shadowCoord, 0.002);
+	float visibility = getShadowVisibility(2, shadowMap, shadowMapResolution, shadowCoord, 0.001);
 	pbrColor.directDiffuse *= visibility;
 	pbrColor.directSpecular *= visibility;
 #endif

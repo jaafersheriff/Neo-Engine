@@ -43,7 +43,7 @@ float getShadowVisibility(int pcfSize, samplerCube shadowMap, vec3 shadowCoord, 
 		shadowCoord.x *= -1.0;
 		shadowCoord.z *= -1.0;
 	}
-	float worldDepth = length(shadowCoord);
+	float worldDepth = length(shadowCoord) / shadowRange;
 
 	float texelSize = 8.0 / shadowMapResolution;
 
@@ -53,7 +53,7 @@ float getShadowVisibility(int pcfSize, samplerCube shadowMap, vec3 shadowCoord, 
 		for (int x = -pcfSize; x <= pcfSize; x++) {
 			for (int y = -pcfSize; y <= pcfSize; y++) {
 				for (int z = -pcfSize; z <= pcfSize; z++) {
-					float pcfDepth = texture(shadowMap, shadowCoord + vec3(x, y, z) * texelSize).r * shadowRange;
+					float pcfDepth = texture(shadowMap, shadowCoord + vec3(x, y, z) * texelSize).r;
 					shadow += worldDepth - bias < pcfDepth ? 1.0 : 0.0;
 				}
 			}
@@ -61,7 +61,7 @@ float getShadowVisibility(int pcfSize, samplerCube shadowMap, vec3 shadowCoord, 
 		shadow /= (2 * pcfSize + 1) * (2 * pcfSize + 1);
 		visibility = shadow;
 	}
-	else if (worldDepth - bias > texture(shadowMap, shadowCoord).r * shadowRange) {
+	else if (worldDepth - bias > texture(shadowMap, shadowCoord).r) {
 		visibility = 0.0;
 	}
 
