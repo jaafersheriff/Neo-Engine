@@ -106,7 +106,7 @@ namespace Sponza {
 			auto shadowCam = ecs.createEntity();
 			ecs.addComponent<TagComponent>(shadowCam, "Shadow Camera");
 			ecs.addComponent<CameraComponent>(shadowCam, -1.f, 1000.f, CameraComponent::Orthographic{ glm::vec2(-100.f, 100.f), glm::vec2(-100.f, 100.f) });
-			ecs.addComponent<ShadowCameraComponent>(shadowCam);
+			//ecs.addComponent<ShadowCameraComponent>(shadowCam);
 			ecs.addComponent<FrustumComponent>(shadowCam);
 			ecs.addComponent<SpatialComponent>(shadowCam);
 			ecs.addComponent<FrustumFitReceiverComponent>(shadowCam, 1.f);

@@ -56,7 +56,7 @@ namespace FrustaFitting {
 		};
 
 		struct Light {
-			Light(MeshManager& meshManager, ECS& ecs, glm::vec3 position) {
+			Light(ResourceManagers& resourceManagers, ECS& ecs, glm::vec3 position) {
 				// Light object
 				auto lightEntity = ecs.createEntity();
 				ecs.addComponent<TagComponent>(lightEntity, "Light");
@@ -68,8 +68,8 @@ namespace FrustaFitting {
 				ecs.addComponent<CameraComponent>(lightEntity, -2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) });
 				ecs.addComponent<FrustumComponent>(lightEntity);
 				ecs.addComponent<FrustumFitReceiverComponent>(lightEntity);
-				ecs.addComponent<LineMeshComponent>(lightEntity, meshManager, glm::vec3(1.f, 0.f, 1.f));
-				ecs.addComponent<ShadowCameraComponent>(lightEntity);
+				ecs.addComponent<LineMeshComponent>(lightEntity, resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
+				ecs.addComponent<ShadowCameraComponent>(lightEntity, "ShadowMap", types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
 			}
 		};
 	}
@@ -96,7 +96,7 @@ namespace FrustaFitting {
 		ecs.addComponent<FrustumFitSourceComponent>(mockCamera.mEntity);
 
 		// Ortho camera, shadow camera, light
-		Light light(resourceManagers.mMeshManager, ecs, glm::vec3(10.f, 20.f, 0.f));
+		Light light(resourceManagers, ecs, glm::vec3(10.f, 20.f, 0.f));
 
 		// Renderable
 		for (int i = 0; i < 50; i++) {
@@ -158,23 +158,20 @@ namespace FrustaFitting {
 		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		const auto&& [lightEntity, ___, shadowCamera] = *ecs.getSingleView<MainLightComponent, ShadowCameraComponent>();
 
-		shadowCamera.mShadowMap = resourceManagers.mTextureManager.asyncLoad("Shadow map",
-			TextureBuilder{}
-				.setDimension(glm::u16vec3(2048, 2048, 0))
-				.setFormat(TextureFormat{types::texture::Target::Texture2D, types::texture::InternalFormats::D16})
-		);
-
-		auto shadowMapHandle = resourceManagers.mFramebufferManager.asyncLoad(
-			"Shadow map",
-			FramebufferExternalAttachments{ { shadowCamera.mShadowMap } },
-			resourceManagers.mTextureManager
-		);
-		if (resourceManagers.mFramebufferManager.isValid(shadowMapHandle)) {
-			auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowMapHandle);
-			shadowMap.bind();
-			shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
-			glViewport(0, 0, shadowCamera.mResolution, shadowCamera.mResolution);
-			drawShadows(resourceManagers, ecs, lightEntity);
+		if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
+			auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
+			auto shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+				"Shadow map",
+				FramebufferExternalAttachments{ { shadowCamera.mShadowMap } },
+				resourceManagers.mTextureManager
+			);
+			if (resourceManagers.mFramebufferManager.isValid(shadowTargetHandle)) {
+				auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowTargetHandle);
+				shadowTarget.bind();
+				shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
+				glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
+				drawShadows(resourceManagers, ecs, lightEntity);
+			}
 		}
 
 		backbuffer.bind();
