@@ -146,7 +146,7 @@ namespace Fireworks {
 				fireworksVisShader.bindUniform("M", spatial.getModelMatrix());
 
 				/* DRAW */
-				resourceManagers.mMeshManager.resolve(firework.mBuffer).draw();
+				resourceManagers.mMeshManager.resolve(firework.mBuffer).draw(firework.mCount);
 			}
 		}
 	}
@@ -232,42 +232,6 @@ namespace Fireworks {
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_UNUSED(ecs, resourceManagers);
-		/*
-		for (auto lightView : ecs.getView<FireworkComponent, SpatialComponent>().each()) {
-			auto&& [_, firework, spatial] = lightView;
-			if (firework.mNeedsInit && resourceManagers.mMeshManager.isValid(firework.mBuffer)) {
-				int count = firework.mCount;
-				glm::vec3 position = spatial.getPosition();
-				resourceManagers.mMeshManager.transact(firework.mBuffer, [count, position](Mesh& mesh) {
-					struct dataSpec {
-						float pos[3];
-						float vel[3];
-						float decay = 1.f;
-						float unused = 0.f;
-					} prototype;
-					prototype.pos[0] = position.x;
-					prototype.pos[1] = position.y;
-					prototype.pos[2] = position.z;
-					prototype.vel[0] = prototype.vel[1] = prototype.vel[2] = 0.0;
-					prototype.decay = 1.f;
-					prototype.unused = 0.f;
-					std::vector<dataSpec> data;
-					data.resize(count);
-					for (int i = 0; i < count; i++) {
-						data[i] = prototype;
-					}
-
-					mesh.updateVertexBuffer(
-						types::mesh::VertexType::Position, 
-						count,
-						count * sizeof(dataSpec),
-						reinterpret_cast<uint8_t*>(data.data())
-					);
-				});
-				firework.mNeedsInit = false;
-			}
-		}
-		*/
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {

@@ -51,13 +51,13 @@ namespace neo {
 			glDrawElements(_translatePrimitive(mPrimitiveType), usedSize, mElementVBO->format, nullptr);
 		}
 		else if (size) {
-			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += size / 3;
+			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += size;
 			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, size);
 		}
 		else {
 			const auto& positions = getVBO(types::mesh::VertexType::Position);
-			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += positions.elementCount / positions.components;
-			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, positions.elementCount / positions.components);
+			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += positions.elementCount;
+			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, positions.elementCount);
 		}
 	}
 
