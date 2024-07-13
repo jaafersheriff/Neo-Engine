@@ -372,9 +372,9 @@ namespace DeferredPBR {
 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 					auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
 					glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-					drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters, true);
-					drawPointLightShadows<AlphaTestComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters, false);
-					//drawPointLightShadows<TransparentComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters, false);
+					drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, entity, true);
+					drawPointLightShadows<AlphaTestComponent>(resourceManagers, ecs, entity, false);
+					//drawPointLightShadows<TransparentComponent>(resourceManagers, ecs, entity, false);
 				}
 			}
 		}

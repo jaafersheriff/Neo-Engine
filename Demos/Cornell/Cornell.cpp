@@ -17,6 +17,7 @@
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 
 #include "Renderer/RenderingSystems/ForwardPBRRenderer.hpp"
+#include "Renderer/RenderingSystems/PointLightShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
@@ -35,11 +36,12 @@ namespace Cornell {
 			ecs.addComponent<TagComponent>(entity, name);
 			ecs.addComponent<MeshComponent>(entity, meshHandle);
 			ecs.addComponent<SpatialComponent>(entity, position, scale, rotation);
-			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
+			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), true);
 			auto material = ecs.addComponent<MaterialComponent>(entity);
 			material->mAlbedoColor = glm::vec4(color.x, color.y, color.z, 1.f);
 			ecs.addComponent<ForwardPBRRenderComponent>(entity);
 			ecs.addComponent<OpaqueComponent>(entity);
+			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 		}
 	}
 
@@ -69,6 +71,8 @@ namespace Cornell {
 			ecs.addComponent<MainLightComponent>(entity);
 			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f));
 			ecs.addComponent<PointLightComponent>(entity);
+			ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
+			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), false);
 		}
 
 		HashedString quadMesh("quad");
@@ -86,8 +90,18 @@ namespace Cornell {
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
-		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		{
+			if (auto lightView = ecs.getSingleView<MainLightComponent, PointLightComponent, ShadowCameraComponent>()) {
+				auto&& [lightEntity, __, ___, shadowCamera] = lightView.value();
+				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
+					auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
+					glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
+					drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, lightEntity, true);
+				}
+			}
+		}
 
+		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Scene Target",

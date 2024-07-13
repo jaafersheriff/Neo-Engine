@@ -23,8 +23,6 @@ namespace DeferredPBR {
 	private:
 		bool mDrawDirectionalShadows = true;
 		bool mDrawPointLightShadows = true;
-		PointLightShadowParameters mPointLightShadowParameters{
-		};
 
 		int mPointLightCount = 2;
 		float mLightDebugRadius = 0.f;

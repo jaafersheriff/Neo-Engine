@@ -11,7 +11,7 @@ in vec2 fragTex;
 #ifdef TANGENTS
 in vec4 fragTan;
 #endif
-#ifdef ENABLE_SHADOWS
+#if defined(ENABLE_SHADOWS) && defined(DIRECTIONAL_LIGHT)
 in vec4 shadowCoord;
 #endif
 
@@ -41,17 +41,22 @@ layout(binding = 4) uniform sampler2D emissiveMap;
 
 #ifdef ENABLE_SHADOWS
 uniform vec2 shadowMapResolution;
-layout(binding = 5) uniform sampler2D shadowMap;
+#	ifdef DIRECTIONAL_LIGHT
+	layout(binding = 5) uniform sampler2D shadowMap;
+#	elif defined(POINT_LIGHT)
+	layout(binding = 5) uniform samplerCube shadowMap;
+	uniform float shadowRange;
+#	endif
 #endif
 
 #ifdef IBL
- layout(binding = 6) uniform samplerCube ibl;
- layout(binding = 7) uniform sampler2D dfgLUT;
- uniform int iblMips;
+layout(binding = 6) uniform samplerCube ibl;
+layout(binding = 7) uniform sampler2D dfgLUT;
+uniform int iblMips;
 #endif
 
 uniform vec4 lightRadiance;
-#if defined(DIRECTIONAL_LIGHT) || defined(ENABLE_SHADOWS)
+#if defined(DIRECTIONAL_LIGHT)
 uniform vec3 lightDir;
 #endif
 #if defined(POINT_LIGHT)
@@ -104,8 +109,7 @@ void main() {
 	vec3 L = vec3(0, 0, 0);
 #ifdef DIRECTIONAL_LIGHT
 	L = normalize(lightDir);
-#endif
-#if defined(POINT_LIGHT)
+#elif defined(POINT_LIGHT)
 	vec3 lightDir = lightPos - fragPos.xyz;
 	L = normalize(lightDir);
 	float lightDistance = length(lightDir);
@@ -150,7 +154,11 @@ void main() {
 
 
 #ifdef ENABLE_SHADOWS
+#	ifdef DIRECTIONAL_LIGHT
 	float visibility = getShadowVisibility(1, shadowMap, shadowMapResolution, shadowCoord, 0.001);
+#	elif defined(POINT_LIGHT)
+	float visibility = getShadowVisibility(1, shadowMap, fragPos.xyz - lightPos, shadowMapResolution.x, shadowRange, 0.001);
+#	endif
 	pbrColor.directDiffuse *= visibility;
 	pbrColor.directSpecular *= visibility;
 #endif

@@ -4,6 +4,7 @@
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
+#include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
 
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
@@ -15,12 +16,8 @@
 
 namespace neo {
 
-	struct PointLightShadowParameters {
-	};
-
 	template<typename... CompTs>
-	inline void drawPointLightShadows(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity& lightEntity, const PointLightShadowParameters& params, const bool clear) {
-		NEO_UNUSED(params);
+	inline void drawPointLightShadows(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity& lightEntity, const bool clear) {
 		TRACY_GPU();
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightShadowMap Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
