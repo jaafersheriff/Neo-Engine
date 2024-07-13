@@ -32,21 +32,21 @@ namespace neo {
 		}
 
 		std::string targetName = "ShadowMap_" + std::to_string(static_cast<uint32_t>(lightEntity));
-		FramebufferHandle shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(
+		FramebufferHandle shadowMapHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			HashedString(targetName.c_str()),
 			FramebufferExternalAttachments{ { shadowCamera->mShadowMap } },
 			resourceManagers.mTextureManager
 		);
-		if (!resourceManagers.mFramebufferManager.isValid(shadowTarget)) {
+		if (!resourceManagers.mFramebufferManager.isValid(shadowMapHandle)) {
 			return;
 		}
-		auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowTarget);
-		shadowMap.disableDraw();
-		shadowMap.disableRead();
-		shadowMap.bind();
+		auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowMapHandle);
+		shadowTarget.disableDraw();
+		shadowTarget.disableRead();
+		shadowTarget.bind();
 
 		if (clear) {
-			shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
+			shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
 		}
 
 		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity) && ecs.has<CameraComponent>(lightEntity), "Light entity is just wrong");
