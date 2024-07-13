@@ -1,0 +1,23 @@
+
+struct Data {
+	vec3 position;
+	vec3 velocity;
+	float decay;
+	float unused;
+};
+layout(std140, binding = 0) coherent buffer Buffer {
+	Data data[];
+};
+uniform float timestep;
+
+layout (local_size_x = 8, local_size_y = 1, local_size_z = 1) in;
+void main()
+{
+	Data localData = data[gl_LocalInvocationIndex];
+
+	localData.position += localData.velocity;
+	localData.decay *= 0.9;
+
+	data[gl_LocalInvocationIndex] = localData;
+
+}
