@@ -61,8 +61,7 @@ namespace PBR {
 				ecs.addComponent<SinTranslateComponent>(entity, glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position);
 				ecs.addComponent<SpatialComponent>(entity, position, glm::vec3(50.f));
 				ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), false);
-				std::string textureName = "pointLightShadow" + std::to_string(static_cast<int>(entity));
-				ecs.addComponent<ShadowCameraComponent>(entity, textureName.c_str(), types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
+				ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 256, resourceManagers.mTextureManager);
 			}
 		}
 	}
@@ -96,7 +95,7 @@ namespace PBR {
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
 			ecs.addComponent<PinnedComponent>(lightEntity);
 			ecs.addComponent<CameraComponent>(lightEntity, -1.f, 1000.f, CameraComponent::Orthographic{ glm::vec2(-100.f, 100.f), glm::vec2(-100.f, 100.f) });
-			ecs.addComponent<ShadowCameraComponent>(lightEntity, "Directional Shadow map", types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
+			ecs.addComponent<ShadowCameraComponent>(lightEntity, lightEntity, types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
 
 			ecs.addComponent<FrustumComponent>(lightEntity);
 			ecs.addComponent<FrustumFitReceiverComponent>(lightEntity, 1.f);
@@ -297,8 +296,34 @@ namespace PBR {
 
 		mGbufferDebugParams.imguiEditor();
 
-		ImGui::Checkbox("Directional Shadows", &mDrawDirectionalShadows);
-		ImGui::Checkbox("Point Light Shadows", &mDrawPointLightShadows);
+		if (ImGui::Checkbox("Directional Shadows", &mDrawDirectionalShadows)) {
+			for (auto& entity : ecs.getView<DirectionalLightComponent, ShadowCameraComponent>()) {
+				auto shadowCamera = ecs.getComponent<ShadowCameraComponent>(entity);
+				resourceManagers.mTextureManager.discard(shadowCamera->mShadowMap);
+				if (mDrawDirectionalShadows) {
+					shadowCamera->mShadowMap = resourceManagers.mTextureManager.asyncLoad(
+						HashedString(shadowCamera->mID.c_str()),
+						TextureBuilder{}
+						.setDimension(glm::u16vec3(static_cast<uint16_t>(2048), static_cast<uint16_t>(2048), 0))
+						.setFormat(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::D16 })
+					);
+				}
+			}
+		}
+		if (ImGui::Checkbox("Point Light Shadows", &mDrawPointLightShadows)) {
+			for (auto& entity : ecs.getView<PointLightComponent, ShadowCameraComponent>()) {
+				auto shadowCamera = ecs.getComponent<ShadowCameraComponent>(entity);
+				resourceManagers.mTextureManager.discard(shadowCamera->mShadowMap);
+				if (mDrawPointLightShadows) {
+					shadowCamera->mShadowMap = resourceManagers.mTextureManager.asyncLoad(
+						HashedString(shadowCamera->mID.c_str()),
+						TextureBuilder{}
+						.setDimension(glm::u16vec3(static_cast<uint16_t>(256), static_cast<uint16_t>(256), 0))
+						.setFormat(TextureFormat{ types::texture::Target::TextureCube, types::texture::InternalFormats::D16 })
+					);
+				}
+			}
+		}
 		ImGui::SliderFloat("Debug Radius", &mLightDebugRadius, 0.f, 10.f);
 		if (ImGui::SliderInt("# Point Lights", &mPointLightCount, 0, 100)) {
 			_createPointLights(ecs, resourceManagers, mPointLightCount);
@@ -332,24 +357,11 @@ namespace PBR {
 			if (mDrawDirectionalShadows) {
 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 					auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
-					FramebufferHandle shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(
-						"Shadow map",
-						FramebufferExternalAttachments{ { shadowCamera.mShadowMap } },
-						resourceManagers.mTextureManager
-					);
-					if (resourceManagers.mFramebufferManager.isValid(shadowTarget)) {
-						auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowTarget);
-						shadowMap.bind();
-						shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
-						glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-						drawShadows<OpaqueComponent>(resourceManagers, ecs, lightEntity);
-						drawShadows<AlphaTestComponent>(resourceManagers, ecs, lightEntity);
-						drawShadows<TransparentComponent>(resourceManagers, ecs, lightEntity);
-					}
+					glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
+					drawShadows<OpaqueComponent>(resourceManagers, ecs, lightEntity, true);
+					drawShadows<AlphaTestComponent>(resourceManagers, ecs, lightEntity, false);
+					drawShadows<TransparentComponent>(resourceManagers, ecs, lightEntity, false);
 				}
-			}
-			else {
-				resourceManagers.mTextureManager.discard(shadowCamera.mShadowMap);
 			}
 		}
 
@@ -364,9 +376,6 @@ namespace PBR {
 					drawPointLightShadows<AlphaTestComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters, false);
 					//drawPointLightShadows<TransparentComponent>(resourceManagers, ecs, entity, mPointLightShadowParameters, false);
 				}
-			}
-			else {
-				resourceManagers.mTextureManager.discard(shadowCamera.mShadowMap);
 			}
 		}
 

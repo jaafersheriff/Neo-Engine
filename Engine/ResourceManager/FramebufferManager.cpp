@@ -153,9 +153,6 @@ namespace neo {
 			if (validTextures) {
 				mCache.load<FramebufferLoader>(item.mHandle.mHandle, item, textureManager);
 			}
-			else {
-				mQueue.emplace_back(item);
-			}
 		}
 
 		// Discard queue

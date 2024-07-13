@@ -51,7 +51,6 @@ namespace neo {
 			glm::vec3(0,0,-1),
 		};
 
-		//glCullFace(GL_FRONT);
 		bool containsAlphaTest = false;
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
 			containsAlphaTest = true;
@@ -120,7 +119,5 @@ namespace neo {
 				resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 			}
 		}
-
-		glCullFace(GL_BACK);
 	}
 }

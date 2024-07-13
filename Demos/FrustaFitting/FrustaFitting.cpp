@@ -69,7 +69,7 @@ namespace FrustaFitting {
 				ecs.addComponent<FrustumComponent>(lightEntity);
 				ecs.addComponent<FrustumFitReceiverComponent>(lightEntity);
 				ecs.addComponent<LineMeshComponent>(lightEntity, resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
-				ecs.addComponent<ShadowCameraComponent>(lightEntity, "ShadowMap", types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
+				ecs.addComponent<ShadowCameraComponent>(lightEntity, lightEntity, types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
 			}
 		};
 	}
@@ -160,18 +160,8 @@ namespace FrustaFitting {
 
 		if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 			auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
-			auto shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
-				"Shadow map",
-				FramebufferExternalAttachments{ { shadowCamera.mShadowMap } },
-				resourceManagers.mTextureManager
-			);
-			if (resourceManagers.mFramebufferManager.isValid(shadowTargetHandle)) {
-				auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowTargetHandle);
-				shadowTarget.bind();
-				shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
-				glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-				drawShadows(resourceManagers, ecs, lightEntity);
-			}
+			glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
+			drawShadows(resourceManagers, ecs, lightEntity, true);
 		}
 
 		backbuffer.bind();

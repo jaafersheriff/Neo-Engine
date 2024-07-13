@@ -9,7 +9,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawShadows(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity lightEntity) {
+	void drawShadows(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity lightEntity, bool clear) {
 		TRACY_GPU();
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
@@ -19,18 +19,39 @@ namespace neo {
 			return;
 		}
 
-		glCullFace(GL_FRONT);
-
 		bool containsAlphaTest = false;
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
 			// TODO - set GL state?
 			containsAlphaTest = true;
 		}
 
-		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity) && ecs.has<CameraComponent>(lightEntity), "Invalid light for shadow draws");
+		NEO_ASSERT(ecs.has<DirectionalLightComponent>(lightEntity) && ecs.has<ShadowCameraComponent>(lightEntity), "Invalid light entity");
+		auto shadowCamera = ecs.cGetComponent<ShadowCameraComponent>(lightEntity);
+		if (!resourceManagers.mTextureManager.isValid(shadowCamera->mShadowMap)) {
+			return;
+		}
+
+		std::string targetName = "ShadowMap_" + std::to_string(static_cast<uint32_t>(lightEntity));
+		FramebufferHandle shadowTarget = resourceManagers.mFramebufferManager.asyncLoad(
+			HashedString(targetName.c_str()),
+			FramebufferExternalAttachments{ { shadowCamera->mShadowMap } },
+			resourceManagers.mTextureManager
+		);
+		if (!resourceManagers.mFramebufferManager.isValid(shadowTarget)) {
+			return;
+		}
+		auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowTarget);
+		shadowMap.bind();
+
+		if (clear) {
+			shadowMap.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
+		}
+
+		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity) && ecs.has<CameraComponent>(lightEntity), "Light entity is just wrong");
 		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(lightEntity)->getProj();
 		const glm::mat4 V = ecs.cGetComponent<SpatialComponent>(lightEntity)->getView();
 
+		glCullFace(GL_FRONT);
 		ShaderDefines drawDefines;
 		const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
 		for (auto entity : view) {
