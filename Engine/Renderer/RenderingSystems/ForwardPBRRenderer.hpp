@@ -221,6 +221,5 @@ namespace neo {
 		if (containsTransparency) {
 			glDisable(GL_BLEND);
 		}
-		glCullFace(GL_BACK);
 	}
 }

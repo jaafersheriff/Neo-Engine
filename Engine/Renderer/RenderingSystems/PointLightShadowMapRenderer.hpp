@@ -16,8 +16,13 @@
 
 namespace neo {
 
+	struct PointLightShadowMapParameters {
+		float mNearPlane = 0.5f;
+		std::optional<float> mFarPlaneOverride;
+	};
+
 	template<typename... CompTs>
-	inline void drawPointLightShadows(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity& lightEntity, const bool clear) {
+	inline void drawPointLightShadows(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity& lightEntity, const bool clear, PointLightShadowMapParameters params = {}) {
 		TRACY_GPU();
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightShadowMap Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
@@ -37,15 +42,19 @@ namespace neo {
 		SpatialComponent cameraSpatial = *ecs.cGetComponent<SpatialComponent>(lightEntity); // Copy
 
 		FrustumComponent frustum;
-		CameraComponent camera(0.5f, cameraSpatial.getScale().x / 2.f, CameraComponent::Perspective{90.f, 1.f});
+		CameraComponent camera(
+			params.mNearPlane, 
+			params.mFarPlaneOverride.value_or(cameraSpatial.getScale().x / 2.f), 
+			CameraComponent::Perspective{90.f, 1.f}
+		);
 		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity), "Point light shadows need a spatial");
 		static std::vector<std::vector<glm::vec3>> lookDirs = {
-			{ glm::vec3( 1, 0, 0), glm::vec3( 0, 1, 0) },
-			{ glm::vec3(-1, 0, 0), glm::vec3( 0, 1, 0) },
-			{ glm::vec3( 0, 1, 0), glm::vec3( 0, 0,-1) },
-			{ glm::vec3( 0,-1, 0), glm::vec3( 0, 0, 1) },
-			{ glm::vec3( 0, 0, 1), glm::vec3( 0, 1, 0) },
-			{ glm::vec3( 0, 0,-1), glm::vec3( 0, 1, 0) }
+			{ glm::vec3( 1, 0, 0), glm::vec3( 0, -1, 0) },
+			{ glm::vec3(-1, 0, 0), glm::vec3( 0, -1, 0) },
+			{ glm::vec3( 0, 1, 0), glm::vec3( 0,  0, 1) },
+			{ glm::vec3( 0,-1, 0), glm::vec3( 0,  0,-1) },
+			{ glm::vec3( 0, 0, 1), glm::vec3( 0, -1, 0) },
+			{ glm::vec3( 0, 0,-1), glm::vec3( 0, -1, 0) }
 		};
 
 		bool containsAlphaTest = false;

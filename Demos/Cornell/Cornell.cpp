@@ -67,7 +67,7 @@ namespace Cornell {
 		{
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Light");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f - util::EP, 0.5f), glm::vec3(10.f));
+			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f - util::EP * 3, 0.5f), glm::vec3(10.f));
 			ecs.addComponent<MainLightComponent>(entity);
 			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f));
 			ecs.addComponent<PointLightComponent>(entity);
@@ -82,8 +82,7 @@ namespace Cornell {
 		insertObject(ecs, "floor",     quadMesh, glm::vec3(0.f, 0.f, 0.5f),    glm::vec3(1.f, 1.f, 0.05f), glm::vec3(glm::radians(-90.f), 0.f, 0.f), glm::vec3(1.f));
 		insertObject(ecs, "ceiling",   quadMesh, glm::vec3(0.f, 1.0f, 0.5f),   glm::vec3(1.f, 1.f, 0.05f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f));
 		insertObject(ecs, "box1",      HashedString("cube"), glm::vec3(-0.2f, 0.35f, 0.4f), glm::vec3(0.25f, 0.7f, 0.25f), glm::vec3(0.f, glm::radians(33.f), 0.f), glm::vec3(1.f));
-
-		insertObject(ecs, "sphere", HashedString("sphere"), glm::vec3(0.2f, 0.18f, 0.6f), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.f, glm::radians(-17.f), 0.f), glm::vec3(1.f));
+		insertObject(ecs, "sphere", HashedString("sphere"), glm::vec3(0.2f, 0.15f, 0.6f), glm::vec3(0.3f), glm::vec3(0.f), glm::vec3(1.f));
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
@@ -91,12 +90,15 @@ namespace Cornell {
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		{
+			PointLightShadowMapParameters params = {
+				0.01f
+			};
 			if (auto lightView = ecs.getSingleView<MainLightComponent, PointLightComponent, ShadowCameraComponent>()) {
 				auto&& [lightEntity, __, ___, shadowCamera] = lightView.value();
 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 					auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
 					glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-					drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, lightEntity, true);
+					drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, lightEntity, true, params);
 				}
 			}
 		}
