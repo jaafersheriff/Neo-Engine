@@ -7,6 +7,7 @@
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
+#include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
@@ -34,6 +35,106 @@
 using namespace neo;
 
 namespace Fireworks {
+	namespace {
+		START_COMPONENT(FireworkComponent);
+		FireworkComponent(const MeshManager& meshManager, uint32_t count) 
+			: mCount(count)
+		{
+			MeshLoadDetails details;
+			details.mPrimtive = types::mesh::Primitive::Points;
+			// Position, decay
+			details.mVertexBuffers[types::mesh::VertexType::Position] = {
+				8,
+				0,
+				types::ByteFormats::Float,
+				false,
+				mCount,
+				0,
+				0,
+				nullptr
+			};
+			mBuffer = meshManager.asyncLoad("Particles Buffer", details);
+		}
+		MeshHandle mBuffer;
+		uint32_t mCount;
+		END_COMPONENT();
+
+		void _tickParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
+			// Update the mesh
+			for(const auto fireworkView : ecs.getView<SpatialComponent, FireworkComponent>().each()) {
+				TRACY_GPUN("Update Particles");
+				const auto& [_, spatial, firework] = fireworkView;
+
+				if (!resourceManagers.mMeshManager.isValid(firework.mBuffer)) {
+					continue;
+				}
+
+				auto fireworksComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworksCompute", SourceShader::ConstructionArgs{
+					{ types::shader::Stage::Compute, "firework/firework_tick.compute" }
+					});
+				if (!resourceManagers.mShaderManager.isValid(fireworksComputeShaderHandle)) {
+					return;
+				}
+
+				auto& fireworksComputeShader = resourceManagers.mShaderManager.resolveDefines(fireworksComputeShaderHandle, {});
+				fireworksComputeShader.bind();
+
+				float timeStep = 0.f;
+				if (auto frameStatsView = ecs.cGetComponent<FrameStatsComponent>()) {
+					auto&& [__, frameStats] = *frameStatsView;
+					timeStep = frameStats.mDT / 1000.f;
+				}
+				fireworksComputeShader.bindUniform("timestep", timeStep);
+
+				// Bind mesh
+				auto& mesh = resourceManagers.mMeshManager.resolve(firework.mBuffer);
+				glBindVertexArray(mesh.mVAOID);
+				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mesh.getVBO(types::mesh::VertexType::Position).vboID);
+				ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
+
+				// Dispatch 
+				fireworksComputeShader.dispatch({ firework.mCount / 8, 1, 1 });
+
+				// Reset bind
+				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+			}
+		}
+
+		void _drawParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_GPUN("Draw Particles");
+			auto fireworksVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworkDraw", SourceShader::ConstructionArgs{
+				{ types::shader::Stage::Vertex,   "firework/firework.vert" },
+				{ types::shader::Stage::Geometry, "firework/firework.geom" },
+				{ types::shader::Stage::Fragment, "firework/firework.frag" },
+				});
+
+			if (!resourceManagers.mShaderManager.isValid(fireworksVisShaderHandle)) {
+				return;
+			}
+
+			auto& fireworksVisShader = resourceManagers.mShaderManager.resolveDefines(fireworksVisShaderHandle, {});
+			fireworksVisShader.bind();
+
+			if (auto cameraView = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>()) {
+				auto&& [_, __, camera, camSpatial] = *cameraView;
+				fireworksVisShader.bindUniform("P", camera.getProj());
+				fireworksVisShader.bindUniform("V", camSpatial.getView());
+			}
+
+			if (auto meshView = ecs.getSingleView<FireworkComponent, SpatialComponent>()) {
+				auto&& [_, firework, spatial] = *meshView;
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+				glDisable(GL_DEPTH_TEST);
+				glDisable(GL_CULL_FACE);
+
+				fireworksVisShader.bindUniform("M", spatial.getModelMatrix());
+
+				/* DRAW */
+				resourceManagers.mMeshManager.resolve(firework.mBuffer).draw();
+			}
+		}
+	}
 
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
@@ -63,6 +164,7 @@ namespace Fireworks {
 			ecs.addComponent<WireframeRenderComponent>(entity);
 			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
 			ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
+			ecs.addComponent<FireworkComponent>(entity, resourceManagers.mMeshManager, 1000);
 		}
 
 		{
@@ -118,6 +220,8 @@ namespace Fireworks {
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
+		_tickParticles(resourceManagers, ecs);
+
 		if (const auto& lightView = ecs.getSingleView<MainLightComponent, PointLightComponent, ShadowCameraComponent>()) {
 			const auto& [lightEntity, _, __, shadowCamera] = *lightView;
 			if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
@@ -147,6 +251,7 @@ namespace Fireworks {
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
 		drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
+		//_drawParticles(resourceManagers, ecs);
 		drawWireframe<LightComponent>(resourceManagers, ecs, cameraEntity);
 
 		FramebufferHandle tonemappedHandle = tonemap(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(sceneTargetHandle).mTextures[0]);

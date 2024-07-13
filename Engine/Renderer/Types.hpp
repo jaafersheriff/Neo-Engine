@@ -86,10 +86,10 @@ namespace neo {
 			};
 
 			enum class VertexType : uint8_t {
-				Position,
-				Normal,
-				Texture0,
-				Tangent,
+				Position = 0,
+				Normal = 1,
+				Texture0 = 2,
+				Tangent = 3,
 				COUNT
 			};
 		}
