@@ -35,6 +35,7 @@
 using namespace neo;
 
 namespace Fireworks {
+
 	namespace {
 		START_COMPONENT(FireworkComponent);
 		FireworkComponent(const MeshManager& meshManager, uint32_t count) 
@@ -266,7 +267,7 @@ namespace Fireworks {
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
 		drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-		//_drawParticles(resourceManagers, ecs);
+		_drawParticles(resourceManagers, ecs);
 		drawWireframe<LightComponent>(resourceManagers, ecs, cameraEntity);
 
 		FramebufferHandle tonemappedHandle = tonemap(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(sceneTargetHandle).mTextures[0]);
