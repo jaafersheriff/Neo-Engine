@@ -46,12 +46,12 @@ namespace neo {
 				mOrientationDirty = true;
 			}
 
-			void setLookDir(glm::vec3 dir) {
+			void setLookDir(glm::vec3 dir, glm::vec3 up = glm::vec3(0,1,0)) {
 				glm::vec3 w = -glm::normalize(dir);
 				if (w == -getLookDir()) {
 					return;
 				}
-				glm::vec3 u = glm::cross(w, glm::vec3(0, 1, 0));
+				glm::vec3 u = glm::cross(w, up);
 				glm::vec3 v = glm::cross(u, w);
 				u = glm::cross(v, w);
 				setUVW(u, v, w);

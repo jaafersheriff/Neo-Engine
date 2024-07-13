@@ -42,13 +42,13 @@ namespace neo {
 		FrustumComponent frustum;
 		CameraComponent camera(0.5f, cameraSpatial.getScale().x / 2.f, CameraComponent::Perspective{90.f, 1.f});
 		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity), "Point light shadows need a spatial");
-		static std::vector<glm::vec3> lookDirs = {
-			glm::vec3(1,0,0),
-			glm::vec3(-1,0,0),
-			glm::vec3(0,1 - util::EP,0),
-			glm::vec3(0,-1 + util::EP,0),
-			glm::vec3(0,0,1),
-			glm::vec3(0,0,-1),
+		static std::vector<std::vector<glm::vec3>> lookDirs = {
+			{ glm::vec3( 1, 0, 0), glm::vec3( 0, 1, 0) },
+			{ glm::vec3(-1, 0, 0), glm::vec3( 0, 1, 0) },
+			{ glm::vec3( 0, 1, 0), glm::vec3( 0, 0,-1) },
+			{ glm::vec3( 0,-1, 0), glm::vec3( 0, 0, 1) },
+			{ glm::vec3( 0, 0, 1), glm::vec3( 0, 1, 0) },
+			{ glm::vec3( 0, 0,-1), glm::vec3( 0, 1, 0) }
 		};
 
 		bool containsAlphaTest = false;
@@ -85,7 +85,7 @@ namespace neo {
 				shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth); // TODO - this will break if multiple passes (opaque, alphatest, etc) are called
 			}
 
-			cameraSpatial.setLookDir(lookDirs[i]);
+			cameraSpatial.setLookDir(lookDirs[i][0], lookDirs[i][1]);
 			frustum.calculateFrustum(camera, cameraSpatial);
 			for (auto entity : view) {
 				const SpatialComponent& drawSpatial = view.get<const SpatialComponent>(entity);

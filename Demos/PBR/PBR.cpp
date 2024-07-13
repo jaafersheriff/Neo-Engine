@@ -56,7 +56,7 @@ namespace PBR {
 					util::genRandom(-7.5f, 7.5f)
 				);
 				const auto entity = ecs.createEntity();
-				ecs.addComponent<LightComponent>(entity, util::genRandomVec3(0.3f, 1.f), util::genRandom(35.f, 75.f));
+				ecs.addComponent<LightComponent>(entity, util::genRandomVec3(0.3f, 1.f), util::genRandom(300.f, 1000.f));
 				ecs.addComponent<PointLightComponent>(entity);
 				ecs.addComponent<SinTranslateComponent>(entity, glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position);
 				ecs.addComponent<SpatialComponent>(entity, position, glm::vec3(50.f));
@@ -90,7 +90,7 @@ namespace PBR {
 			ecs.addComponent<TagComponent>(lightEntity, "Light");
 			auto spat = ecs.addComponent<SpatialComponent>(lightEntity, glm::vec3(75.f, 200.f, 20.f));
 			spat->setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
-			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(0.978f, 0.903f, 0.714f), 2000.f);
+			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(0.978f, 0.903f, 0.714f), 3000.f);
 			ecs.addComponent<MainLightComponent>(lightEntity);
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
 			ecs.addComponent<PinnedComponent>(lightEntity);
@@ -100,7 +100,7 @@ namespace PBR {
 			ecs.addComponent<FrustumComponent>(lightEntity);
 			ecs.addComponent<FrustumFitReceiverComponent>(lightEntity, 1.f);
 		}
-		_createPointLights(ecs, resourceManagers, mPointLightCount);
+		_createPointLights(ecs, resourceManagers, 1);
 
 		// Dialectric spheres
 		static float numSpheres = 8;
