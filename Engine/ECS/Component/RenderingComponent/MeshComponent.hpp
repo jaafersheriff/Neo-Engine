@@ -6,9 +6,9 @@
 
 namespace neo {
 	START_COMPONENT(MeshComponent);
-		MeshHandle mMeshHandle;
 		MeshComponent(MeshHandle mesh)
 			: mMeshHandle(mesh)
 		{}
+		MeshHandle mMeshHandle;
 	END_COMPONENT();
 }
