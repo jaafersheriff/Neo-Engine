@@ -1,14 +1,14 @@
 
 
 // TODO - move this to include
-// struct Data {
-// 	vec3 position;
-// 	vec3 velocity;
-// 	float intensity;
-// 	float unused;
-// };
+ struct Data {
+ 	vec3 position;
+ 	vec3 velocity;
+ 	float intensity;
+ 	float unused;
+ };
 
-layout(location = 0) in vec3 data;
+layout(location = 0) in Data data;
 
 uniform mat4 P;
 uniform mat4 V;

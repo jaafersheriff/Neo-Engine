@@ -15,12 +15,12 @@ void main() {
 	// base 
 	//gl_Position = gl_in[0].gl_Position;
 	//fDecay = gDecay;
-	//EmitVertex();
+	EmitVertex();
 
 	// tail
 	//gl_Position = P * V * vec4(gPos + gVelocity, 1.0);
 	//fDecay = gDecay;
-	//EmitVertex();
+	EmitVertex();
 
-	//EndPrimitive();
+	EndPrimitive();
 }  
