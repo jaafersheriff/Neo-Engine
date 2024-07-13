@@ -9,7 +9,7 @@
 
 using namespace neo;
 
-namespace PBR {
+namespace DeferredPBR {
 
 	class Demo : public IDemo {
 	public:
@@ -26,7 +26,7 @@ namespace PBR {
 		PointLightShadowParameters mPointLightShadowParameters{
 		};
 
-		int mPointLightCount = 20;
+		int mPointLightCount = 2;
 		float mLightDebugRadius = 0.f;
 
 		bool mDrawIBL = true;

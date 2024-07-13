@@ -15,7 +15,7 @@
 
 using namespace neo;
 
-namespace PBR {
+namespace DeferredPBR {
 
 	template<typename... CompTs>
 	void drawDirectionalLightResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle) {
@@ -27,7 +27,7 @@ namespace PBR {
 
 		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("DirectionalLightResolveShader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "quad.vert" },
-			{ types::shader::Stage::Fragment, "pbr/directionallightresolve.frag" }
+			{ types::shader::Stage::Fragment, "deferredpbr/directionallightresolve.frag" }
 			});
 		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
 			return;
@@ -95,8 +95,8 @@ namespace PBR {
 		TRACY_GPU();
 
 		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightResolve Shader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "pbr/pointlightresolve.vert"},
-			{ types::shader::Stage::Fragment, "pbr/pointlightresolve.frag" }
+			{ types::shader::Stage::Vertex, "deferredpbr/pointlightresolve.vert"},
+			{ types::shader::Stage::Fragment, "deferredpbr/pointlightresolve.frag" }
 		});
 		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
 			return;
@@ -191,7 +191,7 @@ namespace PBR {
 
 		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("Indirect Resolve", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "quad.vert" },
-			{ types::shader::Stage::Fragment, "pbr/indirectresolve.frag" }
+			{ types::shader::Stage::Fragment, "deferredpbr/indirectresolve.frag" }
 			});
 		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
 			return;

@@ -1,4 +1,4 @@
-#include "PBR/PBR.hpp"
+#include "DeferredPBR/DeferredPBR.hpp"
 #include "Engine/Engine.hpp"
 
 #include "ECS/ECS.hpp"
@@ -39,7 +39,7 @@
 
 using namespace neo;
 
-namespace PBR {
+namespace DeferredPBR {
 	namespace {
 		void _createPointLights(ECS& ecs, ResourceManagers& resourceManagers, const int count) {
 			for (auto& e : ecs.getView<PointLightComponent>()) {
@@ -100,7 +100,7 @@ namespace PBR {
 			ecs.addComponent<FrustumComponent>(lightEntity);
 			ecs.addComponent<FrustumFitReceiverComponent>(lightEntity, 1.f);
 		}
-		_createPointLights(ecs, resourceManagers, 1);
+		_createPointLights(ecs, resourceManagers, 2);
 
 		// Dialectric spheres
 		static float numSpheres = 8;

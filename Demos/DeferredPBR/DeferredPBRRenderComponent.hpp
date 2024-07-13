@@ -4,7 +4,7 @@
 
 using namespace neo;
 
-namespace PBR {
+namespace DeferredPBR {
 
 	START_COMPONENT(DeferredPBRRenderComponent);
 	END_COMPONENT();

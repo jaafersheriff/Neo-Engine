@@ -5,7 +5,7 @@
 #include "DrawStress/DrawStress.hpp"
 #include "FrustaFitting/FrustaFitting.hpp"
 #include "NormalVisualizer/NormalVisualizer.hpp"
-#include "PBR/PBR.hpp"
+#include "DeferredPBR/DeferredPBR.hpp"
 
 #include <vector>
 #include <memory>
@@ -13,7 +13,7 @@
 static int sCurrentDemo = 0;
 static std::vector<neo::IDemo*> sDemos = {
 	new Base::Demo(),
-	new PBR::Demo(),
+	new DeferredPBR::Demo(),
 	new Compute::Demo(),
 	//new Sponza::Demo(),
 	new Cornell::Demo(),

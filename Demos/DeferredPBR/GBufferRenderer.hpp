@@ -23,7 +23,7 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
-namespace PBR {
+namespace DeferredPBR {
 
 	inline FramebufferHandle createGbuffer(const ResourceManagers& resourceManagers, glm::uvec2 dimension) {
 		return resourceManagers.mFramebufferManager.asyncLoad("Gbuffer",
@@ -60,7 +60,7 @@ namespace PBR {
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBuffer Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
-			{ types::shader::Stage::Fragment, "pbr/gbuffer.frag" }
+			{ types::shader::Stage::Fragment, "deferredpbr/gbuffer.frag" }
 		});
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
@@ -211,7 +211,7 @@ namespace PBR {
 		);
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBufferDebug", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "quad.vert"},
-			{ types::shader::Stage::Fragment, "pbr/gbuffer_debug.frag" }
+			{ types::shader::Stage::Fragment, "deferredpbr/gbuffer_debug.frag" }
 		});
 
 		if (resourceManagers.mFramebufferManager.isValid(gbufferHandle) && resourceManagers.mFramebufferManager.isValid(outputHandle) && resourceManagers.mShaderManager.isValid(shaderHandle)) {
