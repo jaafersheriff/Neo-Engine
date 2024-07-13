@@ -31,6 +31,7 @@ float getShadowVisibility(int pcfSize, sampler2D shadowMap, vec2 shadowMapResolu
 }
 
 float getShadowVisibility(int pcfSize, samplerCube shadowMap, vec3 shadowCoord, float shadowMapResolution, float shadowRange, float bias) {
+	// Cubemaps are annoying
 	if (abs(shadowCoord.x) > abs(shadowCoord.y) && abs(shadowCoord.x) > abs(shadowCoord.z)) {
 		shadowCoord.y *= -1.0;
 		shadowCoord.z *= -1.0;
@@ -45,11 +46,10 @@ float getShadowVisibility(int pcfSize, samplerCube shadowMap, vec3 shadowCoord, 
 	}
 	float worldDepth = length(shadowCoord) / shadowRange;
 
-	float texelSize = 8.0 / shadowMapResolution;
-
 	float visibility = 1.0;
 	if (pcfSize > 0) {
 		float shadow = 0.0;
+		float texelSize = 2.0 / shadowMapResolution;
 		for (int x = -pcfSize; x <= pcfSize; x++) {
 			for (int y = -pcfSize; y <= pcfSize; y++) {
 				for (int z = -pcfSize; z <= pcfSize; z++) {

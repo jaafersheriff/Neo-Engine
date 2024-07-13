@@ -103,6 +103,8 @@ namespace neo {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}

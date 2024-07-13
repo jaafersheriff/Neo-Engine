@@ -147,8 +147,10 @@ namespace PBR {
 			}
 
 			if (shadowsEnabled) {
-				resolvedShader.bindTexture("shadowCube", resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap));
-				resolvedShader.bindUniform("shadowRange", (spatial->getScale().x - 0.5) / 2.f);
+				auto& shadowCube = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
+				resolvedShader.bindTexture("shadowCube", shadowCube);
+				resolvedShader.bindUniform("shadowRange", static_cast<float>(spatial->getScale().x) / 2.f);
+				resolvedShader.bindUniform("shadowMapResolution", static_cast<float>(shadowCube.mWidth));
 			}
 
 			resolvedShader.bindUniform("P", camera->getProj());

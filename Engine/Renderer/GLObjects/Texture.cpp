@@ -218,10 +218,6 @@ namespace neo {
 			}
 
 		}
-
-		if (mFormat.mTarget == types::texture::Target::TextureCube) {
-			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		}
 	}
 
 	void Texture::bind() const {

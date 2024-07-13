@@ -19,6 +19,7 @@ uniform vec3 lightPos;
 #ifdef ENABLE_SHADOWS
 layout(binding = 4) uniform samplerCube shadowCube;
 uniform float shadowRange;
+uniform float shadowMapResolution;
 #endif
 
 #ifdef SHOW_LIGHTS
@@ -89,7 +90,7 @@ void main() {
 
 #ifdef ENABLE_SHADOWS
 	vec3 shadowCoord = worldPos - lightPos;
-	float visibility = getShadowVisibility(2, shadowCube, shadowCoord, 512, shadowRange, 0.001);
+	float visibility = getShadowVisibility(2, shadowCube, shadowCoord, shadowMapResolution, shadowRange, 0.001);
 	pbrColor.directDiffuse *= visibility;
 	pbrColor.directSpecular *= visibility;
 #endif
