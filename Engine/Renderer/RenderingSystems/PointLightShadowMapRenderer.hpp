@@ -86,6 +86,7 @@ namespace neo {
 			}
 			auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowTargetHandle);
 			shadowTarget.disableDraw();
+			shadowTarget.disableRead();
 			shadowTarget.bind();
 			if (clear) {
 				shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);

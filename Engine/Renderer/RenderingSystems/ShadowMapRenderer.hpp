@@ -41,6 +41,8 @@ namespace neo {
 			return;
 		}
 		auto& shadowMap = resourceManagers.mFramebufferManager.resolve(shadowTarget);
+		shadowTarget.disableDraw();
+		shadowTarget.disableRead();
 		shadowMap.bind();
 
 		if (clear) {
