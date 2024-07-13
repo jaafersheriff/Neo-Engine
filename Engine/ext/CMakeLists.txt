@@ -1,4 +1,5 @@
 
+message(STATUS "Generating Neo/ext")
 
 ## GLFW
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
