@@ -88,7 +88,7 @@ namespace neo {
 			shadowTarget.disableDraw();
 			shadowTarget.bind();
 			if (clear) {
-				shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth); // TODO - this will break if multiple passes (opaque, alphatest, etc) are called
+				shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
 			}
 
 			cameraSpatial.setLookDir(lookDirs[i][0], lookDirs[i][1]);
