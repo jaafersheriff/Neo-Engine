@@ -2,21 +2,30 @@
 struct Data {
 	vec3 position;
 	vec3 velocity;
-	float decay;
+	float intensity;
 	float unused;
 };
 layout(std140, binding = 0) coherent buffer Buffer {
 	Data data[];
 };
+
+uniform vec3 lightPos;
 uniform float timestep;
 
-layout (local_size_x = 8, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
 	Data localData = data[gl_LocalInvocationIndex];
 
-	localData.position += localData.velocity;
-	localData.decay *= 0.9;
+#ifdef INIT
+	localData.position = lightPos;
+	localData.velocity = vec3(0,0,0);
+	localData.intensity = 1.0;
+#else
+	localData.velocity.y -= 9.8 * timestep;
+	localData.position += localData.velocity * timestep;
+	localData.intensity *= 0.9; // TODO decay uniform?
+#endif
 
 	data[gl_LocalInvocationIndex] = localData;
 

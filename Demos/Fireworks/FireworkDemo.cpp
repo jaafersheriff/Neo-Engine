@@ -39,10 +39,10 @@ namespace Fireworks {
 		START_COMPONENT(FireworkComponent);
 		FireworkComponent(const MeshManager& meshManager, uint32_t count) 
 			: mCount(count)
+			, mNeedsInit(true)
 		{
 			MeshLoadDetails details;
 			details.mPrimtive = types::mesh::Primitive::Points;
-			// Position, decay
 			details.mVertexBuffers[types::mesh::VertexType::Position] = {
 				8,
 				0,
@@ -50,19 +50,27 @@ namespace Fireworks {
 				false,
 				mCount,
 				0,
-				0,
+				static_cast<uint32_t>(sizeof(float) * 8 * mCount),
 				nullptr
 			};
 			mBuffer = meshManager.asyncLoad("Particles Buffer", details);
 		}
+
+		virtual void imGuiEditor() {
+			if (ImGui::Button("Reset")) {
+				mNeedsInit = true;
+			}
+		}
+
 		MeshHandle mBuffer;
 		uint32_t mCount;
+		bool mNeedsInit;
 		END_COMPONENT();
 
 		void _tickParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
 			// Update the mesh
 			for(const auto fireworkView : ecs.getView<SpatialComponent, FireworkComponent>().each()) {
-				TRACY_GPUN("Update Particles");
+				TRACY_GPU();
 				const auto& [_, spatial, firework] = fireworkView;
 
 				if (!resourceManagers.mMeshManager.isValid(firework.mBuffer)) {
@@ -75,8 +83,14 @@ namespace Fireworks {
 				if (!resourceManagers.mShaderManager.isValid(fireworksComputeShaderHandle)) {
 					return;
 				}
+				ShaderDefines defines;
+				MakeDefine(INIT);
+				if (firework.mNeedsInit) {
+					defines.set(INIT);
+					firework.mNeedsInit = false;
+				}
 
-				auto& fireworksComputeShader = resourceManagers.mShaderManager.resolveDefines(fireworksComputeShaderHandle, {});
+				auto& fireworksComputeShader = resourceManagers.mShaderManager.resolveDefines(fireworksComputeShaderHandle, defines);
 				fireworksComputeShader.bind();
 
 				float timeStep = 0.f;
@@ -85,6 +99,7 @@ namespace Fireworks {
 					timeStep = frameStats.mDT / 1000.f;
 				}
 				fireworksComputeShader.bindUniform("timestep", timeStep);
+				fireworksComputeShader.bindUniform("lightPos", spatial.getPosition());
 
 				// Bind mesh
 				auto& mesh = resourceManagers.mMeshManager.resolve(firework.mBuffer);
@@ -93,7 +108,7 @@ namespace Fireworks {
 				ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
 
 				// Dispatch 
-				fireworksComputeShader.dispatch({ firework.mCount / 8, 1, 1 });
+				fireworksComputeShader.dispatch({ std::ceil(firework.mCount / 16), 1, 1 });
 
 				// Reset bind
 				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
@@ -101,7 +116,7 @@ namespace Fireworks {
 		}
 
 		void _drawParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
-			TRACY_GPUN("Draw Particles");
+			TRACY_GPU();
 			auto fireworksVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworkDraw", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex,   "firework/firework.vert" },
 				{ types::shader::Stage::Geometry, "firework/firework.geom" },
@@ -217,6 +232,42 @@ namespace Fireworks {
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_UNUSED(ecs, resourceManagers);
+		/*
+		for (auto lightView : ecs.getView<FireworkComponent, SpatialComponent>().each()) {
+			auto&& [_, firework, spatial] = lightView;
+			if (firework.mNeedsInit && resourceManagers.mMeshManager.isValid(firework.mBuffer)) {
+				int count = firework.mCount;
+				glm::vec3 position = spatial.getPosition();
+				resourceManagers.mMeshManager.transact(firework.mBuffer, [count, position](Mesh& mesh) {
+					struct dataSpec {
+						float pos[3];
+						float vel[3];
+						float decay = 1.f;
+						float unused = 0.f;
+					} prototype;
+					prototype.pos[0] = position.x;
+					prototype.pos[1] = position.y;
+					prototype.pos[2] = position.z;
+					prototype.vel[0] = prototype.vel[1] = prototype.vel[2] = 0.0;
+					prototype.decay = 1.f;
+					prototype.unused = 0.f;
+					std::vector<dataSpec> data;
+					data.resize(count);
+					for (int i = 0; i < count; i++) {
+						data[i] = prototype;
+					}
+
+					mesh.updateVertexBuffer(
+						types::mesh::VertexType::Position, 
+						count,
+						count * sizeof(dataSpec),
+						reinterpret_cast<uint8_t*>(data.data())
+					);
+				});
+				firework.mNeedsInit = false;
+			}
+		}
+		*/
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
