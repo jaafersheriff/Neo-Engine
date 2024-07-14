@@ -5,7 +5,7 @@ layout(std140, binding = 0) coherent buffer BufferA {
 };
 
 layout(std140, binding = 1) coherent buffer BufferB {
-	vec3 velocity[];
+	vec4 velocity[];
 };
 
 
@@ -17,8 +17,12 @@ float rand(vec2 co){
 }
 
 void init() {
-	posIntensity[gl_GlobalInvocationID.x] = vec4(lightPos, rand(gl_GlobalInvocationID.yx / 120938.1981273) * 100);
-	velocity[gl_GlobalInvocationID.x] = vec3(0, -0.75, 0);
+	float ra = rand(gl_GlobalInvocationID.yx) * -sign(rand(gl_GlobalInvocationID.xy * timestep) - 0.5);
+	float rb = rand(gl_GlobalInvocationID.xy) * -sign(rand(gl_GlobalInvocationID.yx * timestep) - 0.5);
+	float offset = 0.2;
+	posIntensity[gl_GlobalInvocationID.x] = vec4(lightPos + offset * vec3(ra, 0.0, rb), rand(gl_GlobalInvocationID.xx * timestep));
+	float downward = 3.0;
+	velocity[gl_GlobalInvocationID.x] = vec4(ra, downward * -98 * timestep, rb, 0);
 }
 
 layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
@@ -34,10 +38,10 @@ void main() {
 	}
 	vec3 pos = posIntensity[gl_GlobalInvocationID.x].xyz;
 	vec3 vel = velocity[gl_GlobalInvocationID.x].xyz;
-	//vel += vec3(0, -0.98 * timestep, 0);
+	vel += vec3(0, -0.98 * timestep, 0);
 	pos += vel * timestep;
-	intensity *= 0.97; // TODO uniform
+	intensity *= 0.90; // TODO uniform
 
 	posIntensity[gl_GlobalInvocationID.x] = vec4(pos, intensity);
-	velocity[gl_GlobalInvocationID.x] = vec3(0,0,0);
+	velocity[gl_GlobalInvocationID.x] = vec4(vel, 0.0);
 }
