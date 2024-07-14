@@ -18,7 +18,8 @@ void main() {
 	EmitVertex();
 
 	// tail
-	gl_Position = P * V * (gl_in[0].gl_Position + vec4(gVelocity[0] * 0.5, 0));
+	float scale = 0.9;
+	gl_Position = P * V * (gl_in[0].gl_Position + vec4(normalize(gVelocity[0]) * scale, 0));
 	fIntensity = gIntensity[0];
 	EmitVertex();
 

@@ -60,31 +60,17 @@ namespace Fireworks {
 			};
 			// Velocity
 			details.mVertexBuffers[types::mesh::VertexType::Normal] = {
-				3,
+				4,
 				0,
 				types::ByteFormats::Float,
 				false,
 				mCount,
 				0,
-				static_cast<uint32_t>(sizeof(float) * 3 * mCount),
+				static_cast<uint32_t>(sizeof(float) * 4 * mCount),
 				reinterpret_cast<uint8_t*>(emptyData.data())
 			};
 
 			mBuffer = meshManager.asyncLoad("Particles Buffer", details);
-
-			//meshManager.transact(mBuffer, [this](Mesh& mesh) {
-			//	std::vector<float> data;
-			//	data.resize(8 * mCount);
-			//	for (int i = 0; i < data.size(); i++) {
-			//		data[i] = 0.f;
-			//	}
-			//	mesh.updateVertexBuffer(
-			//		types::mesh::VertexType::Position, 
-			//		static_cast<uint32_t>(data.size()),
-			//		static_cast<uint32_t>(sizeof(float) * data.size()),
-			//		reinterpret_cast<uint8_t*>(data.data()));
-			//	mNeedsInit = false;
-			//});
 		}
 
 		virtual void imGuiEditor() {
