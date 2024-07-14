@@ -42,19 +42,49 @@ namespace Fireworks {
 			: mCount(count)
 			, mNeedsInit(true)
 		{
+
+			std::vector<float> emptyData;
+			emptyData.resize(mCount * 4);
 			MeshLoadDetails details;
 			details.mPrimtive = types::mesh::Primitive::Points;
+			// Position, intensity
 			details.mVertexBuffers[types::mesh::VertexType::Position] = {
-				8,
+				4,
 				0,
 				types::ByteFormats::Float,
 				false,
 				mCount,
 				0,
-				static_cast<uint32_t>(sizeof(float) * 8 * mCount),
-				nullptr
+				static_cast<uint32_t>(sizeof(float) * 4 * mCount),
+				reinterpret_cast<uint8_t*>(emptyData.data())
 			};
+			// Velocity
+			details.mVertexBuffers[types::mesh::VertexType::Normal] = {
+				3,
+				0,
+				types::ByteFormats::Float,
+				false,
+				mCount,
+				0,
+				static_cast<uint32_t>(sizeof(float) * 3 * mCount),
+				reinterpret_cast<uint8_t*>(emptyData.data())
+			};
+
 			mBuffer = meshManager.asyncLoad("Particles Buffer", details);
+
+			//meshManager.transact(mBuffer, [this](Mesh& mesh) {
+			//	std::vector<float> data;
+			//	data.resize(8 * mCount);
+			//	for (int i = 0; i < data.size(); i++) {
+			//		data[i] = 0.f;
+			//	}
+			//	mesh.updateVertexBuffer(
+			//		types::mesh::VertexType::Position, 
+			//		static_cast<uint32_t>(data.size()),
+			//		static_cast<uint32_t>(sizeof(float) * data.size()),
+			//		reinterpret_cast<uint8_t*>(data.data()));
+			//	mNeedsInit = false;
+			//});
 		}
 
 		virtual void imGuiEditor() {
@@ -120,7 +150,7 @@ namespace Fireworks {
 			TRACY_GPU();
 			auto fireworksVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworkDraw", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex,   "firework/firework.vert" },
-				{ types::shader::Stage::Geometry, "firework/firework.geom" },
+				//{ types::shader::Stage::Geometry, "firework/firework.geom" },
 				{ types::shader::Stage::Fragment, "firework/firework.frag" },
 				});
 
@@ -147,7 +177,7 @@ namespace Fireworks {
 				fireworksVisShader.bindUniform("M", spatial.getModelMatrix());
 
 				/* DRAW */
-				resourceManagers.mMeshManager.resolve(firework.mBuffer).draw(firework.mCount);
+				resourceManagers.mMeshManager.resolve(firework.mBuffer).draw();
 			}
 		}
 	}
