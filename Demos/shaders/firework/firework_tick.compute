@@ -16,26 +16,28 @@ float rand(vec2 co){
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
-void main()
-{
-	vec3 pos = posIntensity[gl_GlobalInvocationID.x].xyz;
-	float intensity = posIntensity[gl_GlobalInvocationID.x].a;
-	vec3 vel = velocity[gl_GlobalInvocationID.x].xyz;
+void init() {
+	posIntensity[gl_GlobalInvocationID.x] = vec4(lightPos, rand(gl_GlobalInvocationID.yx / 120938.1981273) * 100);
+	velocity[gl_GlobalInvocationID.x] = vec3(0, -0.75, 0);
+}
 
+layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
+void main() {
 #ifdef INIT
-	pos = lightPos;
-	vel = vec3(rand(gl_GlobalInvocationID.xy), rand(gl_GlobalInvocationID.yz), rand(gl_GlobalInvocationID.yy));
-	intensity = 1.0;
-#else
-	vel.x += rand(pos.xz);
-	vel.z -= rand(pos.zx);
-	vel.y -= 9.8 * timestep;
-	pos += vel * timestep;
-	intensity *= 0.9; // TODO decay uniform?
+	init();
+	return;
 #endif
+	float intensity = posIntensity[gl_GlobalInvocationID.x].a;
+	if (intensity < EP) {
+		init();
+		return;
+	}
+	vec3 pos = posIntensity[gl_GlobalInvocationID.x].xyz;
+	vec3 vel = velocity[gl_GlobalInvocationID.x].xyz;
+	//vel += vec3(0, -0.98 * timestep, 0);
+	pos += vel * timestep;
+	intensity *= 0.97; // TODO uniform
 
 	posIntensity[gl_GlobalInvocationID.x] = vec4(pos, intensity);
-	velocity[gl_GlobalInvocationID.x] = vel;
-
+	velocity[gl_GlobalInvocationID.x] = vec3(0,0,0);
 }

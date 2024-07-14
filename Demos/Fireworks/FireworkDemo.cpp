@@ -127,7 +127,7 @@ namespace Fireworks {
 				float timeStep = 0.f;
 				if (auto frameStatsView = ecs.cGetComponent<FrameStatsComponent>()) {
 					auto&& [__, frameStats] = *frameStatsView;
-					timeStep = frameStats.mDT / 1000.f;
+					timeStep = frameStats.mDT;
 				}
 				fireworksComputeShader.bindUniform("timestep", timeStep);
 				fireworksComputeShader.bindUniform("lightPos", spatial.getPosition());
@@ -144,6 +144,7 @@ namespace Fireworks {
 
 				// Reset bind
 				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
 			}
 		}
 
@@ -211,7 +212,7 @@ namespace Fireworks {
 			ecs.addComponent<WireframeRenderComponent>(entity);
 			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
 			ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
-			ecs.addComponent<FireworkComponent>(entity, resourceManagers.mMeshManager, 1000);
+			ecs.addComponent<FireworkComponent>(entity, resourceManagers.mMeshManager, 1000000);
 		}
 
 		{
