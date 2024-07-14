@@ -14,13 +14,13 @@ out float fIntensity;
 void main() {
 
 	// base 
-	//gl_Position = gl_in[0].gl_Position;
-	//fIntensity = gIntensity[0];
+	gl_Position = gl_in[0].gl_Position;
+	fIntensity = gIntensity[0];
 	EmitVertex();
 
 	// tail
-	//gl_Position = P * V * M * vec4(gPos[0] + gVelocity[0], 1.0);
-	//fIntensity = gIntensity[0];
+	gl_Position = P * V * M * vec4(gPos[0] + normalize(gVelocity[0]), 1.0);
+	fIntensity = gIntensity[0];
 	EmitVertex();
 
 	EndPrimitive();

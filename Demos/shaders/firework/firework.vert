@@ -13,7 +13,7 @@ uniform mat4 M;
 void main() {
 	vec4 pos = M * vec4(positionIntensity.xyz, 1.0);
 	gl_Position = P * V * pos;
-	//gPos = pos.xyz;
-	//gVelocity = data.velocity;
-	//gIntensity = data.intensity;
+	gPos = pos.xyz;
+	gIntensity = positionIntensity.a;
+	gVelocity = velocity;
 }
