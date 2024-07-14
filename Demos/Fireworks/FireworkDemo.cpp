@@ -136,6 +136,7 @@ namespace Fireworks {
 				auto& mesh = resourceManagers.mMeshManager.resolve(firework.mBuffer);
 				glBindVertexArray(mesh.mVAOID);
 				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mesh.getVBO(types::mesh::VertexType::Position).vboID);
+				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, mesh.getVBO(types::mesh::VertexType::Normal).vboID);
 				ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
 
 				// Dispatch 
@@ -150,7 +151,7 @@ namespace Fireworks {
 			TRACY_GPU();
 			auto fireworksVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworkDraw", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex,   "firework/firework.vert" },
-				//{ types::shader::Stage::Geometry, "firework/firework.geom" },
+				{ types::shader::Stage::Geometry, "firework/firework.geom" },
 				{ types::shader::Stage::Fragment, "firework/firework.frag" },
 				});
 

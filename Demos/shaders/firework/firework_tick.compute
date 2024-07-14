@@ -1,32 +1,41 @@
 
-struct Data {
-	vec3 position;
-	vec3 velocity;
-	float intensity;
-	float unused;
+
+layout(std140, binding = 0) coherent buffer BufferA {
+	vec4 posIntensity[];
 };
-layout(std140, binding = 0) coherent buffer Buffer {
-	Data data[];
+
+layout(std140, binding = 1) coherent buffer BufferB {
+	vec3 velocity[];
 };
+
 
 uniform vec3 lightPos;
 uniform float timestep;
 
+float rand(vec2 co){
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
-	Data localData = data[gl_GlobalInvocationID.x];
+	vec3 pos = posIntensity[gl_GlobalInvocationID.x].xyz;
+	float intensity = posIntensity[gl_GlobalInvocationID.x].a;
+	vec3 vel = velocity[gl_GlobalInvocationID.x].xyz;
 
 #ifdef INIT
-	localData.position = lightPos;
-	localData.velocity = vec3(0,0,0);
-	localData.intensity = 1.0;
+	pos = lightPos;
+	vel = vec3(rand(gl_GlobalInvocationID.xy), rand(gl_GlobalInvocationID.yz), rand(gl_GlobalInvocationID.yy));
+	intensity = 1.0;
 #else
-	localData.velocity.y -= 9.8 * timestep;
-	localData.position += localData.velocity * timestep;
-	localData.intensity *= 0.9; // TODO decay uniform?
+	vel.x += rand(pos.xz);
+	vel.z -= rand(pos.zx);
+	vel.y -= 9.8 * timestep;
+	pos += vel * timestep;
+	intensity *= 0.9; // TODO decay uniform?
 #endif
 
-	data[gl_GlobalInvocationID.x] = localData;
+	posIntensity[gl_GlobalInvocationID.x] = vec4(pos, intensity);
+	velocity[gl_GlobalInvocationID.x] = vel;
 
 }
