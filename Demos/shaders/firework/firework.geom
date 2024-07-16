@@ -5,22 +5,25 @@ uniform mat4 P;
 uniform mat4 V;
 uniform mat4 M;
 
-in vec3[] gVelocity;
+in vec4[] gVelocity;
 in float[] gIntensity;
 
 out float fIntensity;
+out float fParent;
 
 void main() {
 
 	// base 
 	gl_Position = P * V * gl_in[0].gl_Position;
 	fIntensity = gIntensity[0];
+	fParent = gVelocity[0].a;
 	EmitVertex();
 
 	// tail
 	float scale = saturate(gIntensity[0]);
-	gl_Position = P * V * (gl_in[0].gl_Position + vec4(normalize(gVelocity[0]) * scale, 0));
+	gl_Position = P * V * (gl_in[0].gl_Position + vec4(normalize(gVelocity[0].xyz) * scale, 0));
 	fIntensity = gIntensity[0] / 9;
+	fParent = gVelocity[0].a;
 	EmitVertex();
 
 	EndPrimitive();

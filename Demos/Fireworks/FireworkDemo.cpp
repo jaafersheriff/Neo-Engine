@@ -198,7 +198,7 @@ namespace Fireworks {
 			ecs.addComponent<WireframeRenderComponent>(entity);
 			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
 			ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
-			ecs.addComponent<FireworkComponent>(entity, resourceManagers.mMeshManager, 4096);
+			ecs.addComponent<FireworkComponent>(entity, resourceManagers.mMeshManager, 16384);
 		}
 
 		{
