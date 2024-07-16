@@ -23,6 +23,17 @@ void init() {
 	posIntensity[gl_GlobalInvocationID.x] = vec4(lightPos + offset * vec3(ra, 0.0, rb), rand(gl_GlobalInvocationID.xx * timestep));
 	float downward = 3.0;
 	velocity[gl_GlobalInvocationID.x] = vec4(ra, downward * -98 * timestep, rb, 0);
+
+	if (gl_GlobalInvocationID.x % 4 == 0.0) {
+		velocity[gl_GlobalInvocationID.x] *= -2.0;
+		posIntensity[gl_GlobalInvocationID.x].a *= 8.0;
+		barrier();
+	}
+	else {
+		posIntensity[gl_GlobalInvocationID.x].xyz = posIntensity[gl_GlobalInvocationID.x - (gl_GlobalInvocationID.x % 4)].xyz;
+		posIntensity[gl_GlobalInvocationID.x].a *= 0.3;
+		barrier();
+	}
 }
 
 layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
@@ -40,6 +51,7 @@ void main() {
 	vec3 vel = velocity[gl_GlobalInvocationID.x].xyz;
 	vel += vec3(0, -0.98 * timestep, 0);
 	pos += vel * timestep;
+
 	intensity *= 0.98; // TODO uniform
 
 	posIntensity[gl_GlobalInvocationID.x] = vec4(pos, intensity);
