@@ -35,7 +35,6 @@ namespace DeferredPBR {
 			45.f,
 			0.02f
 		};
-		bool mUsePing = true;
 
 		bool mDoBloom = true;
 		BloomParameters mBloomParams = {

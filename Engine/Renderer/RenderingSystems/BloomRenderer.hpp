@@ -15,9 +15,12 @@ namespace neo {
 		float mLuminanceThreshold = 1.f;
 
 		void imguiEditor() {
-			ImGui::SliderFloat("Radius", &mRadius, 0.001f, 0.010f);
-			ImGui::SliderInt("Down Samples", &mDownSampleSteps, 1, 10);
-			ImGui::SliderFloat("Luminance Threshold", &mLuminanceThreshold, 0.f, 100000.f);
+			if (ImGui::TreeNodeEx("Bloom Parameters", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::SliderFloat("Radius", &mRadius, 0.001f, 0.010f);
+				ImGui::SliderInt("Down Samples", &mDownSampleSteps, 1, 10);
+				ImGui::SliderFloat("Luminance Threshold", &mLuminanceThreshold, 0.f, 100000.f);
+				ImGui::TreePop();
+			}
 		}
 	};
 
