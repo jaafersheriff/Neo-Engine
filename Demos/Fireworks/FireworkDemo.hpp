@@ -25,8 +25,8 @@ namespace Fireworks {
 			0.f
 		};
 		AutoExposureParameters mAutoExposureParams = {
-			-5.f,
-			2.f,
+			-8.f,
+			1.f,
 			0.02f
 		};
 
