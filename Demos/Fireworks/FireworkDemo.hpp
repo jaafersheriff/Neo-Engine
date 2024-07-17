@@ -2,6 +2,9 @@
 
 #include "DemoInfra/IDemo.hpp"
 
+#include "Renderer/RenderingSystems/AutoexposureRenderer.hpp"
+#include "Renderer/RenderingSystems/BloomRenderer.hpp"
+
 using namespace neo;
 
 namespace Fireworks {
@@ -14,6 +17,19 @@ namespace Fireworks {
 		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) override;
 		virtual void destroy() override;
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
+
+	private:
+		BloomParameters mBloomParams = {
+			0.005f,
+			4,
+			0.f
+		};
+		AutoExposureParameters mAutoExposureParams = {
+			-5.f,
+			2.f,
+			0.02f
+		};
+
 
 	};
 }

@@ -13,17 +13,16 @@
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 #include "ECS/Component/RenderingComponent/ForwardPBRRenderComponent.hpp"
-#include "ECS/Component/RenderingComponent/WireframeRenderComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
+#include "Renderer/RenderingSystems/Blitter.hpp"
 #include "Renderer/RenderingSystems/ForwardPBRRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/RenderingSystems/PointLightShadowMapRenderer.hpp"
-#include "Renderer/RenderingSystems/WireframeRenderer.hpp"
 #include "Renderer/RenderingSystems/TonemapRenderer.hpp"
 
 #include "Loader/GLTFImporter.hpp"
@@ -195,7 +194,6 @@ namespace Fireworks {
 			ecs.addComponent<MainLightComponent>(entity);
 			ecs.addComponent<PointLightComponent>(entity);
 			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
-			ecs.addComponent<WireframeRenderComponent>(entity);
 			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
 			ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
 			ecs.addComponent<FireworkComponent>(entity, resourceManagers.mMeshManager, 16384);
@@ -247,6 +245,8 @@ namespace Fireworks {
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_UNUSED(ecs, resourceManagers);
+		mBloomParams.imguiEditor();
+		mAutoExposureParams.imguiEditor();
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -286,11 +286,32 @@ namespace Fireworks {
 
 		drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 		_drawParticles(resourceManagers, ecs);
-		drawWireframe<LightComponent>(resourceManagers, ecs, cameraEntity);
 
-		FramebufferHandle tonemappedHandle = tonemap(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(sceneTargetHandle).mTextures[0]);
+		FramebufferHandle bloomHandle = bloom(resourceManagers, viewport.mSize, sceneTarget.mTextures[0], mBloomParams);
+		if (!resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
+			bloomHandle = sceneTargetHandle;
+		}
+
+		TextureHandle averageLuminance = NEO_INVALID_HANDLE;
+		{
+			auto previousHDRColorHandle = resourceManagers.mFramebufferManager.asyncLoad(
+				"Previous HDR Color",
+				FramebufferBuilder{}
+				.setSize(viewport.mSize)
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
+				resourceManagers.mTextureManager
+			);
+			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
+				const auto& previousHDRColor = resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle);
+				averageLuminance = calculateAutoexposure(resourceManagers, ecs, previousHDRColor.mTextures[0], mAutoExposureParams);
+				TRACY_GPUN("Blit Previous HDR Color");
+				blit(resourceManagers, previousHDRColor, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0], viewport.mSize);
+			}
+		}
+
+		FramebufferHandle tonemappedHandle = tonemap(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0], averageLuminance);
 		if (!resourceManagers.mFramebufferManager.isValid(tonemappedHandle)) {
-			return;
+			tonemappedHandle = bloomHandle;
 		}
 
 		backbuffer.bind();

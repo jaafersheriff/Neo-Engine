@@ -21,9 +21,13 @@ namespace neo {
 		float mTimeCoefficient = 1.f + util::EP;
 
 		void imguiEditor() {
-			ImGui::SliderFloat("Min Log Lum", &mMinLogLuminance, util::EP, mMaxLogLuminance);
-			ImGui::SliderFloat("Max Log Lum", &mMaxLogLuminance, mMinLogLuminance, 100.f);
-			ImGui::SliderFloat("Time Coeff", &mTimeCoefficient, 0.001f, 1.f);
+			if (ImGui::TreeNodeEx("AutoExposure Parameters", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::SliderFloat("Min Log Lum", &mMinLogLuminance, util::EP, mMaxLogLuminance);
+				ImGui::SliderFloat("Max Log Lum", &mMaxLogLuminance, mMinLogLuminance, 100.f);
+				ImGui::SliderFloat("Time Coeff", &mTimeCoefficient, 0.001f, 1.f);
+
+				ImGui::TreePop();
+			}
 		}
 	};
 
