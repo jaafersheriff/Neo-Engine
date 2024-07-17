@@ -17,32 +17,33 @@ float rand(vec2 co){
 }
 
 void init() {
-	float speed = 8.0;
-	float vel =   speed * (rand(1.19827 + gl_GlobalInvocationID.yx + timestep) * 2.0 - 1.0);
-	float theta = rand(timestep * 2.78631 + gl_GlobalInvocationID.xy + timestep) * 2.0 - 1.0;
-	float phi =   rand(timestep * 3.52049 + gl_GlobalInvocationID.xx + timestep) * 2.0 - 1.0;
-	float x = vel * sin(phi) * sin(theta);
-	float z = vel * sin(phi) * cos(theta);
-	float y = vel * cos(phi);
-	vec3 v = vec3(x, abs(y), z);
+	float speed = 4.0;
+	float vel = speed * (rand(1.19827 + gl_GlobalInvocationID.yx + timestep) * 2.0 - 1.0);
+	float theta = rand(mod(12.78631, timestep) + gl_GlobalInvocationID.xy) * 2.0 - 1.0;
+	float phi = rand(mod(43.52049, timestep) + gl_GlobalInvocationID.xx) * 2.0 - 1.0;
+	float x = -sin(phi) * cos(theta);
+	float z = -sin(phi) * sin(theta);
+	float y = cos(phi);
+	vec3 v = vel * vec3(x, y, z);
 
 	velocity[gl_GlobalInvocationID.x] = vec4(v, 0.0);
 	float offset = 0.1;
 	posIntensity[gl_GlobalInvocationID.x].rgb = lightPos;
 	posIntensity[gl_GlobalInvocationID.x].a = rand(gl_GlobalInvocationID.xx + timestep);
 
-	 if (gl_GlobalInvocationID.x % 64 == 0.0) {
-	 	posIntensity[gl_GlobalInvocationID.x].a *= 1000.0;
+	if (gl_GlobalInvocationID.x % 16 == 0.0) {
+		posIntensity[gl_GlobalInvocationID.x].a *= 300.0;
 		velocity[gl_GlobalInvocationID.x].a = 1.0;
-		velocity[gl_GlobalInvocationID.x].y *= 3.0;
-		velocity[gl_GlobalInvocationID.x].xz *= 1.5;
-	 }
-	 else {
-	 	posIntensity[gl_GlobalInvocationID.x].xyz = posIntensity[gl_GlobalInvocationID.x - (gl_GlobalInvocationID.x % 64)].xyz;
-	 	posIntensity[gl_GlobalInvocationID.x].a *= 0.45;
+		velocity[gl_GlobalInvocationID.x].xyz *= 4.5;
+	}
+	else {
+		vec3 parentVel = velocity[gl_GlobalInvocationID.x - (gl_GlobalInvocationID.x % 16)].xyz;
+		posIntensity[gl_GlobalInvocationID.x].xyz = posIntensity[gl_GlobalInvocationID.x - (gl_GlobalInvocationID.x % 16)].xyz - parentVel * 0.05;
+		posIntensity[gl_GlobalInvocationID.x].a *= 0.65;
 		velocity[gl_GlobalInvocationID.x].a = 0.0;
-		velocity[gl_GlobalInvocationID.x].y = -abs(velocity[gl_GlobalInvocationID.x].y);
-	 }
+		velocity[gl_GlobalInvocationID.x].xyz = -parentVel * 0.2 + v * 0.2;
+		//velocity[gl_GlobalInvocationID.x].y = -abs(velocity[gl_GlobalInvocationID.x].y);
+	}
 }
 
 layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
@@ -53,11 +54,17 @@ void main() {
 #endif
 	float intensity = posIntensity[gl_GlobalInvocationID.x].a;
 	if (intensity < 0.15) {
-		init();
-		return;
+		if (gl_GlobalInvocationID.x % 16 != 0.0) {
+			init();
+			if (posIntensity[gl_GlobalInvocationID.x - (gl_GlobalInvocationID.x % 16)].a < 0.1) {
+				posIntensity[gl_GlobalInvocationID.x].a = 0.0;
+			}
+			return;
+		}
 	}
 	vec3 pos = posIntensity[gl_GlobalInvocationID.x].xyz;
 	vec4 vel = velocity[gl_GlobalInvocationID.x];
+	vel.xyz *= 0.99;
 	vel.xyz += vec3(0, -2.98 * timestep, 0);
 	pos += vel.xyz * timestep;
 

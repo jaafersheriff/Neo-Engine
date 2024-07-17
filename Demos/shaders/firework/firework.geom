@@ -21,9 +21,15 @@ void main() {
 
 	// tail
 	float scale = saturate(gIntensity[0]);
+	fParent = gVelocity[0].a;
+	if (fParent > 0.9) {
+		scale *= 0.22;
+	}
+	else {
+		scale *= 0.4;
+	}
 	gl_Position = P * V * (gl_in[0].gl_Position - vec4(normalize(gVelocity[0].xyz) * scale, 0));
 	fIntensity = 0.0;
-	fParent = gVelocity[0].a;
 	EmitVertex();
 
 	EndPrimitive();
