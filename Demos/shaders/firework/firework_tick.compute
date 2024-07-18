@@ -1,10 +1,10 @@
 
 
-layout(std140, binding = 0) coherent buffer BufferA {
+layout(std140, binding = 0) volatile buffer BufferA {
 	vec4 posIntensity[];
 };
 
-layout(std140, binding = 1) coherent buffer BufferB {
+layout(std140, binding = 1) volatile buffer BufferB {
 	vec4 velocity[];
 };
 
@@ -17,22 +17,21 @@ float rand(vec2 co){
 }
 
 void init() {
-	float speed = 4.0;
-	float vel = speed * (rand(1.19827 + gl_GlobalInvocationID.yx + timestep) * 2.0 - 1.0);
+	float speed = 3.0;
+	float vel = speed * rand(mod(1.19827, timestep) * gl_GlobalInvocationID.yx + timestep);
 	float theta = rand(mod(12.78631, timestep) + gl_GlobalInvocationID.xy) * 2.0 - 1.0;
 	float phi = rand(mod(43.52049, timestep) + gl_GlobalInvocationID.xx) * 2.0 - 1.0;
-	float x = -sin(phi) * cos(theta);
-	float z = -sin(phi) * sin(theta);
+	float x = sin(phi) * cos(theta);
+	float z = sin(phi) * sin(theta);
 	float y = cos(phi);
 	vec3 v = vel * vec3(x, y, z);
 
 	velocity[gl_GlobalInvocationID.x] = vec4(v, 0.0);
-	float offset = 0.1;
 	posIntensity[gl_GlobalInvocationID.x].rgb = lightPos;
 	posIntensity[gl_GlobalInvocationID.x].a = rand(gl_GlobalInvocationID.xx + timestep);
 
 	if (gl_GlobalInvocationID.x % 16 == 0.0) {
-		posIntensity[gl_GlobalInvocationID.x].a *= 300.0;
+		posIntensity[gl_GlobalInvocationID.x].a *= 100.0;
 		velocity[gl_GlobalInvocationID.x].a = 1.0;
 		velocity[gl_GlobalInvocationID.x].xyz *= 4.5;
 	}
@@ -40,9 +39,8 @@ void init() {
 		vec3 parentVel = velocity[gl_GlobalInvocationID.x - (gl_GlobalInvocationID.x % 16)].xyz;
 		posIntensity[gl_GlobalInvocationID.x].xyz = posIntensity[gl_GlobalInvocationID.x - (gl_GlobalInvocationID.x % 16)].xyz - parentVel * 0.05;
 		posIntensity[gl_GlobalInvocationID.x].a *= 0.65;
+		velocity[gl_GlobalInvocationID.x].xyz = mix(-parentVel, v, 0.4);
 		velocity[gl_GlobalInvocationID.x].a = 0.0;
-		velocity[gl_GlobalInvocationID.x].xyz = -parentVel * 0.2 + v * 0.2;
-		//velocity[gl_GlobalInvocationID.x].y = -abs(velocity[gl_GlobalInvocationID.x].y);
 	}
 }
 
@@ -54,13 +52,13 @@ void main() {
 #endif
 	float intensity = posIntensity[gl_GlobalInvocationID.x].a;
 	if (intensity < 0.15) {
-		if (gl_GlobalInvocationID.x % 16 != 0.0) {
+		//if (gl_GlobalInvocationID.x % 16 != 0.0) {
 			init();
 			if (posIntensity[gl_GlobalInvocationID.x - (gl_GlobalInvocationID.x % 16)].a < 0.1) {
 				posIntensity[gl_GlobalInvocationID.x].a = 0.0;
 			}
 			return;
-		}
+		//}
 	}
 	vec3 pos = posIntensity[gl_GlobalInvocationID.x].xyz;
 	vec4 vel = velocity[gl_GlobalInvocationID.x];
