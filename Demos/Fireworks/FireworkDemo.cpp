@@ -117,13 +117,20 @@ namespace Fireworks {
 				fireworksComputeShader.bindUniform("timestep", timeStep);
 				fireworksComputeShader.bindUniform("lightPos", spatial.getPosition());
 
+				fireworksComputeShader.bindUniform("infinite", fireworkParameters.mInfinite);
 				fireworksComputeShader.bindUniform("baseSpeed", fireworkParameters.mBaseSpeed);
 				fireworksComputeShader.bindUniform("numParents", 1 << fireworkParameters.mParents);
+				fireworksComputeShader.bindUniform("velocityDecay", 1.f - fireworkParameters.mVelocityDecay);
+				fireworksComputeShader.bindUniform("gravity", fireworkParameters.mGravity);
+
 				fireworksComputeShader.bindUniform("parentIntensity", fireworkParameters.mParentIntensity);
 				fireworksComputeShader.bindUniform("parentSpeed", fireworkParameters.mParentSpeed);
+				fireworksComputeShader.bindUniform("parentIntensityDecay", 1.f - fireworkParameters.mParentIntensityDecay);
+
 				fireworksComputeShader.bindUniform("childPosOffset", fireworkParameters.mChildPositionOffset);
 				fireworksComputeShader.bindUniform("childIntensity", fireworkParameters.mChildIntensity);
 				fireworksComputeShader.bindUniform("childVelocityBias", fireworkParameters.mChildVelocityBias);
+				fireworksComputeShader.bindUniform("childIntensityDecay", 1.f - fireworkParameters.mChildIntensityDecay);
 
 				// Bind mesh
 				auto& mesh = resourceManagers.mMeshManager.resolve(firework.mBuffer);
@@ -141,7 +148,7 @@ namespace Fireworks {
 			}
 		}
 
-		void _drawParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
+		void _drawParticles(const ResourceManagers& resourceManagers, const ECS& ecs, const FireworkParameters& fireworkParameters) {
 			TRACY_GPU();
 			auto fireworksVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworkDraw", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex,   "firework/firework.vert" },
@@ -161,6 +168,8 @@ namespace Fireworks {
 				fireworksVisShader.bindUniform("P", camera.getProj());
 				fireworksVisShader.bindUniform("V", camSpatial.getView());
 			}
+
+			fireworksVisShader.bindUniform("parentColor", fireworkParameters.mParentColor);
 
 			if (auto meshView = ecs.getSingleView<FireworkComponent, SpatialComponent>()) {
 				auto&& [_, firework, spatial] = *meshView;
@@ -257,12 +266,21 @@ namespace Fireworks {
 		mAutoExposureParams.imguiEditor();
 		if (ImGui::TreeNode("Firework")) {
 			ImGui::SliderFloat("Base Speed", &mFireworkParameters.mBaseSpeed, 0.f, 5.f);
+			ImGui::SliderFloat("Velocity Decay", &mFireworkParameters.mVelocityDecay, 0.f, 1.f);
+			ImGui::SliderFloat("Gravity", &mFireworkParameters.mGravity, 0.f, 10.f);
+			ImGui::Checkbox("Infinite", &mFireworkParameters.mInfinite);
+
 			ImGui::SliderInt("Num Parents", &mFireworkParameters.mParents, 0, 10);
+			ImGui::ColorEdit3("Parent Color", &mFireworkParameters.mParentColor[0]);
 			ImGui::SliderFloat("Parent Intensity", &mFireworkParameters.mParentIntensity , 0.f, 10000.f);
 			ImGui::SliderFloat("Parent Speed", &mFireworkParameters.mParentSpeed , 0.f, 10.f);
+			ImGui::SliderFloat("Parent Intensity Decay", &mFireworkParameters.mParentIntensityDecay, 0.f, 1.f);
+
 			ImGui::SliderFloat("Child Position Offset", &mFireworkParameters.mChildPositionOffset, 0.f, 0.2f);
 			ImGui::SliderFloat("Child Intensity", &mFireworkParameters.mChildIntensity, 0.f, 5.f);
 			ImGui::SliderFloat("Child Velocity Bias", &mFireworkParameters.mChildVelocityBias, 0.f, 1.f);
+			ImGui::SliderFloat("CHild Intensity Decay", &mFireworkParameters.mChildIntensityDecay, 0.f, 1.f);
+
 			ImGui::TreePop();
 		}
 	}
@@ -303,7 +321,7 @@ namespace Fireworks {
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
 		drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-		_drawParticles(resourceManagers, ecs);
+		_drawParticles(resourceManagers, ecs, mFireworkParameters);
 
 		FramebufferHandle bloomHandle = bloom(resourceManagers, viewport.mSize, sceneTarget.mTextures[0], mBloomParams);
 		if (!resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
