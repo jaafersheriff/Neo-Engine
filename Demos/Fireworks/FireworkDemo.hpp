@@ -10,12 +10,22 @@ using namespace neo;
 namespace Fireworks {
 	struct FireworkParameters {
 		float mBaseSpeed = 3.0;
+		float mVelocityDecay = 0.07f;
+		float mGravity = 2.98f;
+
 		int mParents = 5;
-		float mParentIntensity = 100.f;
+		glm::vec3 mParentColor = glm::vec3(1.f, 0.25f, 0);
+		float mParentIntensity = 6000.f;
 		float mParentSpeed = 4.5f;
-		float mChildPositionOffset = 0.05f;
-		float mChildIntensity = 0.65f;
-		float mChildVelocityBias = 0.4f;
+		float mParentIntensityDecay = 0.02f;
+
+		float mChildPositionOffset = 0.08f;
+		float mChildIntensity = 0.3f;
+		float mChildVelocityBias = 0.6f;
+		float mChildIntensityDecay = 0.008f;
+
+
+		bool mInfinite = true;
 	};
 
 	class Demo : public IDemo {

@@ -13,13 +13,19 @@ uniform vec3 lightPos;
 uniform float timestep;
 
 uniform float baseSpeed;
+uniform float velocityDecay;
+uniform float gravity;
 uniform int numParents;
+uniform int infinite;
+
 uniform float parentIntensity;
 uniform float parentSpeed;
+uniform float parentIntensityDecay;
 
 uniform float childPosOffset;
 uniform float childIntensity;
 uniform float childVelocityBias;
+uniform float childIntensityDecay;
 
 float rand(vec2 co){
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
@@ -30,12 +36,12 @@ uint getParentIndex() {
 }
 
 void init() {
-	float vel = baseSpeed * rand(mod(1.19827, timestep) * gl_GlobalInvocationID.yx + timestep);
+	float vel = max(0.8, baseSpeed * rand(mod(1.19827, timestep) * gl_GlobalInvocationID.yx + timestep));
 	float theta = rand(mod(12.78631, timestep) + gl_GlobalInvocationID.xy) * 2.0 - 1.0;
 	float phi = rand(mod(43.52049, timestep) + gl_GlobalInvocationID.xx) * 2.0 - 1.0;
 	float x = sin(phi) * cos(theta);
-	float z = sin(phi) * sin(theta);
-	float y = cos(phi);
+	float z = -sin(phi) * sin(theta);
+	float y = sin(rand(mod(948.9817, timestep) + gl_GlobalInvocationID.xx) * 2.0 - 1.0);
 	vec3 v = vel * vec3(x, y, z);
 
 	if (gl_GlobalInvocationID.x % numParents == 0.0) {
@@ -62,7 +68,7 @@ void main() {
 #endif
 	float intensity = posIntensity[gl_GlobalInvocationID.x].a;
 	if (intensity < 0.15) {
-		//if (gl_GlobalInvocationID.x % numParents != 0.0) {
+		//if (infinite != 1 && gl_GlobalInvocationID.x % numParents != 0.0) {
 			init();
 			float parentIntensity = posIntensity[getParentIndex()].a;
 			if (parentIntensity < 0.1) {
@@ -71,17 +77,18 @@ void main() {
 			return;
 		//}
 	}
+
 	vec3 pos = posIntensity[gl_GlobalInvocationID.x].xyz;
 	vec4 vel = velocity[gl_GlobalInvocationID.x];
-	vel.xyz *= 0.99;
-	vel.xyz += vec3(0, -2.98 * timestep, 0);
+	vel.xyz *= velocityDecay;
+	vel.xyz += vec3(0, -gravity * timestep, 0);
 	pos += vel.xyz * timestep;
 
 	if (vel.a > 0.9) {
-		intensity *= 0.98; // TODO uniform
+		intensity *= parentIntensityDecay;
 	}
 	else {
-		intensity *= 0.97; // TODO uniform
+		intensity *= childIntensityDecay;
 	}
 
 	posIntensity[gl_GlobalInvocationID.x] = vec4(pos, intensity);
