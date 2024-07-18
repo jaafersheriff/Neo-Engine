@@ -8,6 +8,15 @@
 using namespace neo;
 
 namespace Fireworks {
+	struct FireworkParameters {
+		float mBaseSpeed = 3.0;
+		int mParents = 5;
+		float mParentIntensity = 100.f;
+		float mParentSpeed = 4.5f;
+		float mChildPositionOffset = 0.05f;
+		float mChildIntensity = 0.65f;
+		float mChildVelocityBias = 0.4f;
+	};
 
 	class Demo : public IDemo {
 	public:
@@ -30,6 +39,6 @@ namespace Fireworks {
 			0.02f
 		};
 
-
+		FireworkParameters mFireworkParameters;
 	};
 }
