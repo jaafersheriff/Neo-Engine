@@ -83,7 +83,7 @@ namespace Fireworks {
 		bool mNeedsInit;
 		END_COMPONENT();
 
-		void _tickParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
+		void _tickParticles(const ResourceManagers& resourceManagers, const ECS& ecs, const FireworkParameters& fireworkParameters ) {
 			// Update the mesh
 			for(const auto fireworkView : ecs.getView<SpatialComponent, FireworkComponent>().each()) {
 				TRACY_GPU();
@@ -116,6 +116,14 @@ namespace Fireworks {
 				}
 				fireworksComputeShader.bindUniform("timestep", timeStep);
 				fireworksComputeShader.bindUniform("lightPos", spatial.getPosition());
+
+				fireworksComputeShader.bindUniform("baseSpeed", fireworkParameters.mBaseSpeed);
+				fireworksComputeShader.bindUniform("numParents", 1 << fireworkParameters.mParents);
+				fireworksComputeShader.bindUniform("parentIntensity", fireworkParameters.mParentIntensity);
+				fireworksComputeShader.bindUniform("parentSpeed", fireworkParameters.mParentSpeed);
+				fireworksComputeShader.bindUniform("childPosOffset", fireworkParameters.mChildPositionOffset);
+				fireworksComputeShader.bindUniform("childIntensity", fireworkParameters.mChildIntensity);
+				fireworksComputeShader.bindUniform("childVelocityBias", fireworkParameters.mChildVelocityBias);
 
 				// Bind mesh
 				auto& mesh = resourceManagers.mMeshManager.resolve(firework.mBuffer);
@@ -247,6 +255,16 @@ namespace Fireworks {
 		NEO_UNUSED(ecs, resourceManagers);
 		mBloomParams.imguiEditor();
 		mAutoExposureParams.imguiEditor();
+		if (ImGui::TreeNode("Firework")) {
+			ImGui::SliderFloat("Base Speed", &mFireworkParameters.mBaseSpeed, 0.f, 5.f);
+			ImGui::SliderInt("Num Parents", &mFireworkParameters.mParents, 0, 10);
+			ImGui::SliderFloat("Parent Intensity", &mFireworkParameters.mParentIntensity , 0.f, 10000.f);
+			ImGui::SliderFloat("Parent Speed", &mFireworkParameters.mParentSpeed , 0.f, 10.f);
+			ImGui::SliderFloat("Child Position Offset", &mFireworkParameters.mChildPositionOffset, 0.f, 0.2f);
+			ImGui::SliderFloat("Child Intensity", &mFireworkParameters.mChildIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Child Velocity Bias", &mFireworkParameters.mChildVelocityBias, 0.f, 1.f);
+			ImGui::TreePop();
+		}
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -254,7 +272,7 @@ namespace Fireworks {
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
-		_tickParticles(resourceManagers, ecs);
+		_tickParticles(resourceManagers, ecs, mFireworkParameters);
 
 		if (const auto& lightView = ecs.getSingleView<MainLightComponent, PointLightComponent, ShadowCameraComponent>()) {
 			const auto& [lightEntity, _, __, shadowCamera] = *lightView;
