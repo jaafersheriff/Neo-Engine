@@ -69,14 +69,14 @@ void main() {
 #endif
 	float intensity = posIntensity[gl_GlobalInvocationID.x].a;
 	if (intensity < minIntensity) {
-		if (gl_GlobalInvocationID.x % numParents != 0.0) {
+		//if (gl_GlobalInvocationID.x % numParents != 0.0) {
 			init();
 			float parentIntensity = posIntensity[getParentIndex()].a;
 			if (parentIntensity < minIntensity) {
 				posIntensity[gl_GlobalInvocationID.x].a = 0.0;
 			}
 			return;
-		}
+		//}
 	}
 
 	vec3 pos = posIntensity[gl_GlobalInvocationID.x].xyz;

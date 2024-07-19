@@ -27,6 +27,8 @@ namespace Fireworks {
 		float mChildVelocityBias = 0.6f;
 		float mChildIntensityDecay = 0.008f;
 		float mChildLength = 0.4f;
+		glm::vec3 mChildColor = glm::vec3(1.f);
+		float mChildColorBias = 0.4f;
 
 	};
 

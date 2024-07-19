@@ -3,6 +3,8 @@ in float fIntensity;
 in float fParent;
 
 uniform vec3 parentColor;
+uniform vec3 childColor;
+uniform float childColorBias;
 
 out vec4 color;
 
@@ -12,7 +14,8 @@ void main() {
 		color.a = 1.0;
 	}
 	else {
-		color = vec4(vec3(fIntensity) * 0.4, 1.0);
+		color.rgb = fIntensity * mix(parentColor, childColor, childColorBias);
+		color.a = 1.0;
 	}
 
 }

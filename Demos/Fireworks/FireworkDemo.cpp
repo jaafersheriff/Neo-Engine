@@ -173,14 +173,16 @@ namespace Fireworks {
 			fireworksVisShader.bindUniform("parentColor", fireworkParameters.mParentColor);
 			fireworksVisShader.bindUniform("parentLength", fireworkParameters.mParentLength);
 
+			fireworksVisShader.bindUniform("childColor", fireworkParameters.mChildColor);
+			fireworksVisShader.bindUniform("childColorBias", fireworkParameters.mChildColorBias);
 			fireworksVisShader.bindUniform("childLength", fireworkParameters.mChildLength);
+
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+			glDisable(GL_CULL_FACE);
 
 			if (auto meshView = ecs.getSingleView<FireworkComponent, SpatialComponent>()) {
 				auto&& [_, firework, spatial] = *meshView;
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-				glDisable(GL_DEPTH_TEST);
-				glDisable(GL_CULL_FACE);
 
 				fireworksVisShader.bindUniform("M", spatial.getModelMatrix());
 
@@ -291,6 +293,8 @@ namespace Fireworks {
 			ImGui::SliderFloat("Child Velocity Bias", &mFireworkParameters.mChildVelocityBias, 0.f, 1.f);
 			ImGui::SliderFloat("Child Intensity Decay", &mFireworkParameters.mChildIntensityDecay, 0.f, 1.f);
 			ImGui::SliderFloat("Child Length", &mFireworkParameters.mChildLength, 0.f, 2.f);
+			ImGui::ColorEdit3("Child Color", &mFireworkParameters.mChildColor[0]);
+			ImGui::SliderFloat("Child Color Bias", &mFireworkParameters.mChildColorBias, 0.f, 1.f);
 
 			ImGui::TreePop();
 		}
