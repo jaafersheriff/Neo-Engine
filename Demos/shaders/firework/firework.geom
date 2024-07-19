@@ -5,6 +5,9 @@ uniform mat4 P;
 uniform mat4 V;
 uniform mat4 M;
 
+uniform float parentLength;
+uniform float childLength;
+
 in vec4[] gVelocity;
 in float[] gIntensity;
 
@@ -23,10 +26,10 @@ void main() {
 	float scale = saturate(gIntensity[0]);
 	fParent = gVelocity[0].a;
 	if (fParent > 0.9) {
-		scale *= 0.22;
+		scale *= parentLength;
 	}
 	else {
-		scale *= 0.4;
+		scale *= childLength;
 	}
 	gl_Position = P * V * (gl_in[0].gl_Position - vec4(normalize(gVelocity[0].xyz) * scale, 0));
 	fIntensity = 0.0;
