@@ -15,6 +15,7 @@ uniform float timestep;
 uniform float baseSpeed;
 uniform float velocityDecay;
 uniform float gravity;
+uniform float minIntensity;
 uniform int numParents;
 uniform int infinite;
 
@@ -67,15 +68,15 @@ void main() {
 	return;
 #endif
 	float intensity = posIntensity[gl_GlobalInvocationID.x].a;
-	if (intensity < 0.15) {
-		//if (infinite != 1 && gl_GlobalInvocationID.x % numParents != 0.0) {
+	if (intensity < minIntensity) {
+		if (gl_GlobalInvocationID.x % numParents != 0.0) {
 			init();
 			float parentIntensity = posIntensity[getParentIndex()].a;
-			if (parentIntensity < 0.1) {
+			if (parentIntensity < minIntensity) {
 				posIntensity[gl_GlobalInvocationID.x].a = 0.0;
 			}
 			return;
-		//}
+		}
 	}
 
 	vec3 pos = posIntensity[gl_GlobalInvocationID.x].xyz;

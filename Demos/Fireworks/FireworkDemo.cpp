@@ -117,11 +117,12 @@ namespace Fireworks {
 				fireworksComputeShader.bindUniform("timestep", timeStep);
 				fireworksComputeShader.bindUniform("lightPos", spatial.getPosition());
 
-				fireworksComputeShader.bindUniform("infinite", fireworkParameters.mInfinite);
+				fireworksComputeShader.bindUniform("infinite", fireworkParameters.mInfinite ? 1 : 0);
 				fireworksComputeShader.bindUniform("baseSpeed", fireworkParameters.mBaseSpeed);
 				fireworksComputeShader.bindUniform("numParents", 1 << fireworkParameters.mParents);
 				fireworksComputeShader.bindUniform("velocityDecay", 1.f - fireworkParameters.mVelocityDecay);
 				fireworksComputeShader.bindUniform("gravity", fireworkParameters.mGravity);
+				fireworksComputeShader.bindUniform("minIntensity", fireworkParameters.mMinIntensity);
 
 				fireworksComputeShader.bindUniform("parentIntensity", fireworkParameters.mParentIntensity);
 				fireworksComputeShader.bindUniform("parentSpeed", fireworkParameters.mParentSpeed);
@@ -170,6 +171,9 @@ namespace Fireworks {
 			}
 
 			fireworksVisShader.bindUniform("parentColor", fireworkParameters.mParentColor);
+			fireworksVisShader.bindUniform("parentLength", fireworkParameters.mParentLength);
+
+			fireworksVisShader.bindUniform("childLength", fireworkParameters.mChildLength);
 
 			if (auto meshView = ecs.getSingleView<FireworkComponent, SpatialComponent>()) {
 				auto&& [_, firework, spatial] = *meshView;
@@ -264,22 +268,29 @@ namespace Fireworks {
 		NEO_UNUSED(ecs, resourceManagers);
 		mBloomParams.imguiEditor();
 		mAutoExposureParams.imguiEditor();
-		if (ImGui::TreeNode("Firework")) {
+		if (ImGui::TreeNodeEx("Firework", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::SliderFloat("Base Speed", &mFireworkParameters.mBaseSpeed, 0.f, 5.f);
 			ImGui::SliderFloat("Velocity Decay", &mFireworkParameters.mVelocityDecay, 0.f, 1.f);
 			ImGui::SliderFloat("Gravity", &mFireworkParameters.mGravity, 0.f, 10.f);
 			ImGui::Checkbox("Infinite", &mFireworkParameters.mInfinite);
+			ImGui::SliderFloat("Min Intensity", &mFireworkParameters.mMinIntensity, util::EP, 10.f);
+
+			ImGui::Separator();
 
 			ImGui::SliderInt("Num Parents", &mFireworkParameters.mParents, 0, 10);
 			ImGui::ColorEdit3("Parent Color", &mFireworkParameters.mParentColor[0]);
 			ImGui::SliderFloat("Parent Intensity", &mFireworkParameters.mParentIntensity , 0.f, 10000.f);
 			ImGui::SliderFloat("Parent Speed", &mFireworkParameters.mParentSpeed , 0.f, 10.f);
 			ImGui::SliderFloat("Parent Intensity Decay", &mFireworkParameters.mParentIntensityDecay, 0.f, 1.f);
+			ImGui::SliderFloat("Parent Length", &mFireworkParameters.mParentLength, 0.f, 2.f);
+
+			ImGui::Separator();
 
 			ImGui::SliderFloat("Child Position Offset", &mFireworkParameters.mChildPositionOffset, 0.f, 0.2f);
 			ImGui::SliderFloat("Child Intensity", &mFireworkParameters.mChildIntensity, 0.f, 5.f);
 			ImGui::SliderFloat("Child Velocity Bias", &mFireworkParameters.mChildVelocityBias, 0.f, 1.f);
-			ImGui::SliderFloat("CHild Intensity Decay", &mFireworkParameters.mChildIntensityDecay, 0.f, 1.f);
+			ImGui::SliderFloat("Child Intensity Decay", &mFireworkParameters.mChildIntensityDecay, 0.f, 1.f);
+			ImGui::SliderFloat("Child Length", &mFireworkParameters.mChildLength, 0.f, 2.f);
 
 			ImGui::TreePop();
 		}
