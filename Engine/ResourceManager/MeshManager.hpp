@@ -3,8 +3,6 @@
 #include "ResourceManagerInterface.hpp"
 #include "Renderer/GLObjects/Mesh.hpp"
 
-#include "Util/Util.hpp"
-
 namespace neo {
 	class ResourceManagers;
 

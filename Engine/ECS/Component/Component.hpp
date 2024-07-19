@@ -8,7 +8,7 @@ namespace neo {
 
 
 #define START_COMPONENT(inComponent) \
-	struct inComponent : public Component { \
+	struct inComponent : public neo::Component { \
 		const char* mName = #inComponent
 
 #define END_COMPONENT() }

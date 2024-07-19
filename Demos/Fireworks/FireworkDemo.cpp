@@ -1,4 +1,5 @@
 #include "FireworkDemo.hpp"
+#include "FireworkComponent.hpp"
 #include "Engine/Engine.hpp"
 
 #include "ECS/ECS.hpp"
@@ -34,60 +35,17 @@
 using namespace neo;
 
 namespace Fireworks {
-
 	namespace {
-		START_COMPONENT(FireworkComponent);
-		FireworkComponent(const MeshManager& meshManager, uint32_t count) 
-			: mCount(count)
-			, mNeedsInit(true)
-		{
+		void _tickParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_GPU();
 
-			std::vector<float> emptyData;
-			emptyData.resize(mCount * 4);
-			MeshLoadDetails details;
-			details.mPrimtive = types::mesh::Primitive::Points;
-			// Position, intensity
-			details.mVertexBuffers[types::mesh::VertexType::Position] = {
-				4,
-				0,
-				types::ByteFormats::Float,
-				false,
-				mCount,
-				0,
-				static_cast<uint32_t>(sizeof(float) * 4 * mCount),
-				reinterpret_cast<uint8_t*>(emptyData.data())
-			};
-			// Velocity
-			details.mVertexBuffers[types::mesh::VertexType::Normal] = {
-				4,
-				0,
-				types::ByteFormats::Float,
-				false,
-				mCount,
-				0,
-				static_cast<uint32_t>(sizeof(float) * 4 * mCount),
-				reinterpret_cast<uint8_t*>(emptyData.data())
-			};
-
-			mBuffer = meshManager.asyncLoad("Particles Buffer", details);
-		}
-
-		virtual void imGuiEditor() {
-			if (ImGui::Button("Reset")) {
-				mNeedsInit = true;
+			float timeStep = 0.f;
+			if (auto frameStatsView = ecs.cGetComponent<FrameStatsComponent>()) {
+				auto&& [__, frameStats] = *frameStatsView;
+				timeStep = frameStats.mDT;
 			}
-		}
 
-		MeshHandle mBuffer;
-		uint32_t mCount;
-		bool mNeedsInit;
-		END_COMPONENT();
-
-		void _tickParticles(const ResourceManagers& resourceManagers, const ECS& ecs, const FireworkParameters& fireworkParameters ) {
-			// Update the mesh
-			for(const auto fireworkView : ecs.getView<SpatialComponent, FireworkComponent>().each()) {
-				TRACY_GPU();
-				const auto& [_, spatial, firework] = fireworkView;
+			for (const auto& [_, spatial, firework] : ecs.getView<SpatialComponent, FireworkComponent>().each()) {
 
 				if (!resourceManagers.mMeshManager.isValid(firework.mBuffer)) {
 					continue;
@@ -97,7 +55,7 @@ namespace Fireworks {
 					{ types::shader::Stage::Compute, "firework/firework_tick.compute" }
 					});
 				if (!resourceManagers.mShaderManager.isValid(fireworksComputeShaderHandle)) {
-					return;
+					continue;
 				}
 				ShaderDefines defines;
 				MakeDefine(INIT);
@@ -109,29 +67,24 @@ namespace Fireworks {
 				auto& fireworksComputeShader = resourceManagers.mShaderManager.resolveDefines(fireworksComputeShaderHandle, defines);
 				fireworksComputeShader.bind();
 
-				float timeStep = 0.f;
-				if (auto frameStatsView = ecs.cGetComponent<FrameStatsComponent>()) {
-					auto&& [__, frameStats] = *frameStatsView;
-					timeStep = frameStats.mDT;
-				}
 				fireworksComputeShader.bindUniform("timestep", timeStep);
 				fireworksComputeShader.bindUniform("lightPos", spatial.getPosition());
 
-				fireworksComputeShader.bindUniform("infinite", fireworkParameters.mInfinite ? 1 : 0);
-				fireworksComputeShader.bindUniform("baseSpeed", fireworkParameters.mBaseSpeed);
-				fireworksComputeShader.bindUniform("numParents", 1 << fireworkParameters.mParents);
-				fireworksComputeShader.bindUniform("velocityDecay", 1.f - fireworkParameters.mVelocityDecay);
-				fireworksComputeShader.bindUniform("gravity", fireworkParameters.mGravity);
-				fireworksComputeShader.bindUniform("minIntensity", fireworkParameters.mMinIntensity);
+				fireworksComputeShader.bindUniform("infinite", firework.mParameters.mInfinite ? 1 : 0);
+				fireworksComputeShader.bindUniform("baseSpeed", firework.mParameters.mBaseSpeed);
+				fireworksComputeShader.bindUniform("numParents", 1 << firework.mParameters.mParents);
+				fireworksComputeShader.bindUniform("velocityDecay", 1.f - firework.mParameters.mVelocityDecay);
+				fireworksComputeShader.bindUniform("gravity", firework.mParameters.mGravity);
+				fireworksComputeShader.bindUniform("minIntensity", firework.mParameters.mMinIntensity);
 
-				fireworksComputeShader.bindUniform("parentIntensity", fireworkParameters.mParentIntensity);
-				fireworksComputeShader.bindUniform("parentSpeed", fireworkParameters.mParentSpeed);
-				fireworksComputeShader.bindUniform("parentIntensityDecay", 1.f - fireworkParameters.mParentIntensityDecay);
+				fireworksComputeShader.bindUniform("parentIntensity", firework.mParameters.mParentIntensity);
+				fireworksComputeShader.bindUniform("parentSpeed", firework.mParameters.mParentSpeed);
+				fireworksComputeShader.bindUniform("parentIntensityDecay", 1.f - firework.mParameters.mParentIntensityDecay);
 
-				fireworksComputeShader.bindUniform("childPosOffset", fireworkParameters.mChildPositionOffset);
-				fireworksComputeShader.bindUniform("childIntensity", fireworkParameters.mChildIntensity);
-				fireworksComputeShader.bindUniform("childVelocityBias", fireworkParameters.mChildVelocityBias);
-				fireworksComputeShader.bindUniform("childIntensityDecay", 1.f - fireworkParameters.mChildIntensityDecay);
+				fireworksComputeShader.bindUniform("childPosOffset", firework.mParameters.mChildPositionOffset);
+				fireworksComputeShader.bindUniform("childIntensity", firework.mParameters.mChildIntensity);
+				fireworksComputeShader.bindUniform("childVelocityBias", firework.mParameters.mChildVelocityBias);
+				fireworksComputeShader.bindUniform("childIntensityDecay", 1.f - firework.mParameters.mChildIntensityDecay);
 
 				// Bind mesh
 				auto& mesh = resourceManagers.mMeshManager.resolve(firework.mBuffer);
@@ -149,7 +102,7 @@ namespace Fireworks {
 			}
 		}
 
-		void _drawParticles(const ResourceManagers& resourceManagers, const ECS& ecs, const FireworkParameters& fireworkParameters) {
+		void _drawParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPU();
 			auto fireworksVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworkDraw", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex,   "firework/firework.vert" },
@@ -164,31 +117,31 @@ namespace Fireworks {
 			auto& fireworksVisShader = resourceManagers.mShaderManager.resolveDefines(fireworksVisShaderHandle, {});
 			fireworksVisShader.bind();
 
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
 			if (auto cameraView = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>()) {
 				auto&& [_, __, camera, camSpatial] = *cameraView;
 				fireworksVisShader.bindUniform("P", camera.getProj());
 				fireworksVisShader.bindUniform("V", camSpatial.getView());
 			}
 
-			fireworksVisShader.bindUniform("parentColor", fireworkParameters.mParentColor);
-			fireworksVisShader.bindUniform("parentLength", fireworkParameters.mParentLength);
+			for (const auto& [_, spatial, firework] : ecs.getView<SpatialComponent, FireworkComponent>().each()) {
+				fireworksVisShader.bindUniform("parentColor", firework.mParameters.mParentColor);
+				fireworksVisShader.bindUniform("parentLength", firework.mParameters.mParentLength);
 
-			fireworksVisShader.bindUniform("childColor", fireworkParameters.mChildColor);
-			fireworksVisShader.bindUniform("childColorBias", fireworkParameters.mChildColorBias);
-			fireworksVisShader.bindUniform("childLength", fireworkParameters.mChildLength);
-
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-			glDisable(GL_CULL_FACE);
-
-			if (auto meshView = ecs.getSingleView<FireworkComponent, SpatialComponent>()) {
-				auto&& [_, firework, spatial] = *meshView;
+				fireworksVisShader.bindUniform("childColor", firework.mParameters.mChildColor);
+				fireworksVisShader.bindUniform("childColorBias", firework.mParameters.mChildColorBias);
+				fireworksVisShader.bindUniform("childLength", firework.mParameters.mChildLength);
 
 				fireworksVisShader.bindUniform("M", spatial.getModelMatrix());
 
 				/* DRAW */
 				resourceManagers.mMeshManager.resolve(firework.mBuffer).draw();
+
 			}
+
+			glDisable(GL_BLEND);
 		}
 	}
 
@@ -219,7 +172,7 @@ namespace Fireworks {
 			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
 			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
 			ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
-			ecs.addComponent<FireworkComponent>(entity, resourceManagers.mMeshManager, 16384);
+			ecs.addComponent<FireworkComponent>(entity, entity, resourceManagers.mMeshManager, 16384);
 		}
 
 		{
@@ -270,42 +223,18 @@ namespace Fireworks {
 		NEO_UNUSED(ecs, resourceManagers);
 		mBloomParams.imguiEditor();
 		mAutoExposureParams.imguiEditor();
-		if (ImGui::TreeNodeEx("Firework", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::SliderFloat("Base Speed", &mFireworkParameters.mBaseSpeed, 0.f, 5.f);
-			ImGui::SliderFloat("Velocity Decay", &mFireworkParameters.mVelocityDecay, 0.f, 1.f);
-			ImGui::SliderFloat("Gravity", &mFireworkParameters.mGravity, 0.f, 10.f);
-			ImGui::Checkbox("Infinite", &mFireworkParameters.mInfinite);
-			ImGui::SliderFloat("Min Intensity", &mFireworkParameters.mMinIntensity, util::EP, 10.f);
-
-			ImGui::Separator();
-
-			ImGui::SliderInt("Num Parents", &mFireworkParameters.mParents, 0, 10);
-			ImGui::ColorEdit3("Parent Color", &mFireworkParameters.mParentColor[0]);
-			ImGui::SliderFloat("Parent Intensity", &mFireworkParameters.mParentIntensity , 0.f, 10000.f);
-			ImGui::SliderFloat("Parent Speed", &mFireworkParameters.mParentSpeed , 0.f, 10.f);
-			ImGui::SliderFloat("Parent Intensity Decay", &mFireworkParameters.mParentIntensityDecay, 0.f, 1.f);
-			ImGui::SliderFloat("Parent Length", &mFireworkParameters.mParentLength, 0.f, 2.f);
-
-			ImGui::Separator();
-
-			ImGui::SliderFloat("Child Position Offset", &mFireworkParameters.mChildPositionOffset, 0.f, 0.2f);
-			ImGui::SliderFloat("Child Intensity", &mFireworkParameters.mChildIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Child Velocity Bias", &mFireworkParameters.mChildVelocityBias, 0.f, 1.f);
-			ImGui::SliderFloat("Child Intensity Decay", &mFireworkParameters.mChildIntensityDecay, 0.f, 1.f);
-			ImGui::SliderFloat("Child Length", &mFireworkParameters.mChildLength, 0.f, 2.f);
-			ImGui::ColorEdit3("Child Color", &mFireworkParameters.mChildColor[0]);
-			ImGui::SliderFloat("Child Color Bias", &mFireworkParameters.mChildColorBias, 0.f, 1.f);
-
-			ImGui::TreePop();
-		}
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
-		NEO_UNUSED(ecs, resourceManagers);
+		NEO_UNUSED(resourceManagers);
+
+		for (auto&& [entity, firework, spatial, light] : ecs.getView<FireworkComponent, SpatialComponent, LightComponent>().each()) {
+			// TODO
+		}
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
-		_tickParticles(resourceManagers, ecs, mFireworkParameters);
+		_tickParticles(resourceManagers, ecs);
 
 		if (const auto& lightView = ecs.getSingleView<MainLightComponent, PointLightComponent, ShadowCameraComponent>()) {
 			const auto& [lightEntity, _, __, shadowCamera] = *lightView;
@@ -336,7 +265,7 @@ namespace Fireworks {
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
 		drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-		_drawParticles(resourceManagers, ecs, mFireworkParameters);
+		_drawParticles(resourceManagers, ecs);
 
 		FramebufferHandle bloomHandle = bloom(resourceManagers, viewport.mSize, sceneTarget.mTextures[0], mBloomParams);
 		if (!resourceManagers.mFramebufferManager.isValid(bloomHandle)) {

@@ -2,9 +2,8 @@
 
 #include "ECS/Systems/System.hpp"
 
-#include "Loader/Loader.hpp"
-
 #include "Util/Profiler.hpp"
+#include "Util/Util.hpp"
 
 #ifndef ENTT_ASSERT
 #define ENTT_ASSERT(condition, ...) NEO_ASSERT(condition, __VA_ARGS__)
@@ -15,6 +14,7 @@
 #include <imgui_entt_entity_editor.hpp>
 
 #include <typeindex>
+#include <optional>
 
 namespace neo {
 	class System;

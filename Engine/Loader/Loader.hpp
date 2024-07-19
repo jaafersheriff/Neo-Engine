@@ -4,6 +4,8 @@
 #include <vector>
 #include <functional>
 
+#include <glm/glm.hpp>
+
 namespace neo {
 
 	class Engine;
