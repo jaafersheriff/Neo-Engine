@@ -545,6 +545,12 @@ namespace neo {
 			if (model.defaultScene < 0 || model.scenes.size() > 1) {
 				NEO_LOG_W("%s has multiple scenes. Just using the default", path.c_str());
 			}
+			if (!model.extensions.empty()) {
+				NEO_LOG_W("%s has extensions??", path.c_str());
+			}
+			if (!model.extensionsRequired.empty()) {
+				NEO_FAIL("%s has required extensions", path.c_str());
+			}
 
 			Scene outScene;
 			for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
