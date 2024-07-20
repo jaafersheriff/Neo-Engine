@@ -55,7 +55,6 @@ namespace Fireworks {
 		}
 
 		if (ImGui::TreeNodeEx("Parent", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::SliderInt("Num Parents", &mParameters.mParents, 0, 10);
 			ImGui::ColorEdit3("Parent Color", &mParameters.mParentColor[0]);
 			ImGui::SliderFloat("Parent Intensity", &mParameters.mParentIntensity , 0.f, 10000.f);
 			ImGui::SliderFloat("Parent Speed", &mParameters.mParentSpeed , 0.f, 10.f);
@@ -65,6 +64,7 @@ namespace Fireworks {
 		}
 
 		if (ImGui::TreeNodeEx("Children", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::SliderInt("Num Children", &mParameters.mChildren, 0, mCount);
 			ImGui::SliderFloat("Child Position Offset", &mParameters.mChildPositionOffset, 0.f, 0.2f);
 			ImGui::SliderFloat("Child Intensity", &mParameters.mChildIntensity, 0.f, 5.f);
 			ImGui::SliderFloat("Child Velocity Bias", &mParameters.mChildVelocityBias, 0.f, 1.f);

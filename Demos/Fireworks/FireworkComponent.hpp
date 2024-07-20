@@ -18,13 +18,13 @@ namespace Fireworks {
 		float mMinIntensity = 0.15f;
 		bool mInfinite = true;
 
-		int mParents = 5;
 		glm::vec3 mParentColor = glm::vec3(1.f, 0.25f, 0);
 		float mParentIntensity = 6000.f;
 		float mParentSpeed = 4.5f;
 		float mParentIntensityDecay = 0.02f;
 		float mParentLength = 0.22f;
 
+		int mChildren = 32;
 		float mChildPositionOffset = 0.08f;
 		float mChildIntensity = 0.3f;
 		float mChildVelocityBias = 0.6f;

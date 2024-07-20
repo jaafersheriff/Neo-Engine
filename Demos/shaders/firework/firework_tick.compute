@@ -8,7 +8,7 @@ layout(std140, binding = 1) volatile buffer BufferB {
 	vec4 velocity[];
 };
 
-
+uniform vec4 random;
 uniform vec3 lightPos;
 uniform float timestep;
 
@@ -16,13 +16,13 @@ uniform float baseSpeed;
 uniform float velocityDecay;
 uniform float gravity;
 uniform float minIntensity;
-uniform int numParents;
 uniform int infinite;
 
 uniform float parentIntensity;
 uniform float parentSpeed;
 uniform float parentIntensityDecay;
 
+uniform int numChildren;
 uniform float childPosOffset;
 uniform float childIntensity;
 uniform float childVelocityBias;
@@ -33,21 +33,21 @@ float rand(vec2 co){
 }
 
 uint getParentIndex() {
-	return gl_GlobalInvocationID.x - (gl_GlobalInvocationID.x % numParents);
+	return gl_GlobalInvocationID.x - (gl_GlobalInvocationID.x % numChildren);
 }
 
 void init() {
-	float vel = max(0.8, baseSpeed * rand(mod(1.19827, timestep) * gl_GlobalInvocationID.yx + timestep));
-	float theta = rand(mod(12.78631, timestep) + gl_GlobalInvocationID.xy) * 2.0 - 1.0;
-	float phi = rand(mod(43.52049, timestep) + gl_GlobalInvocationID.xx) * 2.0 - 1.0;
-	float x = sin(phi) * cos(theta);
-	float z = -sin(phi) * sin(theta);
-	float y = sin(rand(mod(948.9817, timestep) + gl_GlobalInvocationID.xx) * 2.0 - 1.0);
+	float vel = baseSpeed * rand(random.xy + gl_GlobalInvocationID.xx);
+	float theta = rand(random.yx + gl_GlobalInvocationID.xx) * PI;
+	float phi = rand(random.zy + gl_GlobalInvocationID.xx) * 2.0 * PI;
+	float x = sin(theta) * cos(phi);
+	float z = sin(theta) * sin(phi);
+	float y = cos(theta);
 	vec3 v = vel * vec3(x, y, z);
 
-	if (gl_GlobalInvocationID.x % numParents == 0.0) {
+	if (gl_GlobalInvocationID.x % numChildren == 0.0) {
 		posIntensity[gl_GlobalInvocationID.x].xyz = lightPos;
-		posIntensity[gl_GlobalInvocationID.x].a = rand(gl_GlobalInvocationID.xx + timestep) * parentIntensity;
+		posIntensity[gl_GlobalInvocationID.x].a = rand(random.az + gl_GlobalInvocationID.xx) * parentIntensity;
 		velocity[gl_GlobalInvocationID.x].xyz = v * parentSpeed;
 		velocity[gl_GlobalInvocationID.x].a = 1.0;
 	}
@@ -55,7 +55,7 @@ void init() {
 		vec3 parentPos = posIntensity[getParentIndex()].xyz;
 		vec3 parentVel = velocity[getParentIndex()].xyz;
 		posIntensity[gl_GlobalInvocationID.x].xyz = parentPos - parentVel * childPosOffset;
-		posIntensity[gl_GlobalInvocationID.x].a = rand(gl_GlobalInvocationID.xx + timestep) * childIntensity;
+		posIntensity[gl_GlobalInvocationID.x].a = rand(random.za + gl_GlobalInvocationID.xx) * childIntensity;
 		velocity[gl_GlobalInvocationID.x].xyz = mix(-parentVel, v, childVelocityBias);
 		velocity[gl_GlobalInvocationID.x].a = 0.0;
 	}
@@ -69,7 +69,7 @@ void main() {
 #endif
 	float intensity = posIntensity[gl_GlobalInvocationID.x].a;
 	if (intensity < minIntensity) {
-		//if (gl_GlobalInvocationID.x % numParents != 0.0) {
+		//if (gl_GlobalInvocationID.x % numChildren != 0.0) {
 			init();
 			float parentIntensity = posIntensity[getParentIndex()].a;
 			if (parentIntensity < minIntensity) {

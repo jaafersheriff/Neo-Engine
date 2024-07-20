@@ -67,12 +67,13 @@ namespace Fireworks {
 				auto& fireworksComputeShader = resourceManagers.mShaderManager.resolveDefines(fireworksComputeShaderHandle, defines);
 				fireworksComputeShader.bind();
 
+				fireworksComputeShader.bindUniform("random", glm::vec4(util::genRandomVec3(), util::genRandom()));
+
 				fireworksComputeShader.bindUniform("timestep", timeStep);
 				fireworksComputeShader.bindUniform("lightPos", spatial.getPosition());
 
 				fireworksComputeShader.bindUniform("infinite", firework.mParameters.mInfinite ? 1 : 0);
 				fireworksComputeShader.bindUniform("baseSpeed", firework.mParameters.mBaseSpeed);
-				fireworksComputeShader.bindUniform("numParents", 1 << firework.mParameters.mParents);
 				fireworksComputeShader.bindUniform("velocityDecay", 1.f - firework.mParameters.mVelocityDecay);
 				fireworksComputeShader.bindUniform("gravity", firework.mParameters.mGravity);
 				fireworksComputeShader.bindUniform("minIntensity", firework.mParameters.mMinIntensity);
@@ -81,6 +82,7 @@ namespace Fireworks {
 				fireworksComputeShader.bindUniform("parentSpeed", firework.mParameters.mParentSpeed);
 				fireworksComputeShader.bindUniform("parentIntensityDecay", 1.f - firework.mParameters.mParentIntensityDecay);
 
+				fireworksComputeShader.bindUniform("numChildren", firework.mParameters.mChildren);
 				fireworksComputeShader.bindUniform("childPosOffset", firework.mParameters.mChildPositionOffset);
 				fireworksComputeShader.bindUniform("childIntensity", firework.mParameters.mChildIntensity);
 				fireworksComputeShader.bindUniform("childVelocityBias", firework.mParameters.mChildVelocityBias);
