@@ -27,6 +27,7 @@ endif()
 if(MSVC)
 	add_compile_options(
 		/FC
+		/MP
 		/Zc:rvalueCast
 	)
 	add_compile_definitions(
