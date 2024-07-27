@@ -45,7 +45,7 @@ namespace Fireworks {
 				timeStep = frameStats.mDT;
 			}
 
-			for (const auto& [_, spatial, firework] : ecs.getView<SpatialComponent, FireworkComponent>().each()) {
+			for (const auto& [_, spatial, firework, light] : ecs.getView<SpatialComponent, FireworkComponent, LightComponent>().each()) {
 
 				if (!resourceManagers.mMeshManager.isValid(firework.mBuffer)) {
 					continue;
@@ -78,7 +78,7 @@ namespace Fireworks {
 				fireworksComputeShader.bindUniform("gravity", firework.mParameters.mGravity);
 				fireworksComputeShader.bindUniform("minIntensity", firework.mParameters.mMinIntensity);
 
-				fireworksComputeShader.bindUniform("parentIntensity", firework.mParameters.mParentIntensity);
+				fireworksComputeShader.bindUniform("parentIntensity", light.mIntensity);
 				fireworksComputeShader.bindUniform("parentSpeed", firework.mParameters.mParentSpeed);
 				fireworksComputeShader.bindUniform("parentIntensityDecay", 1.f - firework.mParameters.mParentIntensityDecay);
 
@@ -128,8 +128,8 @@ namespace Fireworks {
 				fireworksVisShader.bindUniform("V", camSpatial.getView());
 			}
 
-			for (const auto& [_, spatial, firework] : ecs.getView<SpatialComponent, FireworkComponent>().each()) {
-				fireworksVisShader.bindUniform("parentColor", firework.mParameters.mParentColor);
+			for (const auto& [_, spatial, firework, light] : ecs.getView<SpatialComponent, FireworkComponent, LightComponent>().each()) {
+				fireworksVisShader.bindUniform("parentColor", light.mColor);
 				fireworksVisShader.bindUniform("parentLength", firework.mParameters.mParentLength);
 
 				fireworksVisShader.bindUniform("childColor", firework.mParameters.mChildColor);

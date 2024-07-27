@@ -11,11 +11,11 @@ out vec4 color;
 void main() {
 	if (fParent > 0.9) {
 		color.rgb = parentColor * fIntensity;
-		color.a = 1.0;
+		color.a = fIntensity;
 	}
 	else {
 		color.rgb = fIntensity * mix(parentColor, childColor, childColorBias);
-		color.a = 1.0;
+		color.a = fIntensity;
 	}
 
 }

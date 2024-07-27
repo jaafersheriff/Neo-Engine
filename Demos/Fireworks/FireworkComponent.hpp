@@ -14,22 +14,20 @@ namespace Fireworks {
 	struct Parameters {
 		float mBaseSpeed = 3.0;
 		float mVelocityDecay = 0.007f;
-		float mGravity = 2.98f;
-		float mMinIntensity = 0.15f;
+		float mGravity = 4.98f;
+		float mMinIntensity = 0.45f;
 		bool mInfinite = true;
 
-		glm::vec3 mParentColor = glm::vec3(1.f, 0.25f, 0);
-		float mParentIntensity = 6000.f;
-		float mParentSpeed = 4.5f;
-		float mParentIntensityDecay = 0.02f;
+		float mParentSpeed = 5.5f;
+		float mParentIntensityDecay = 0.025f;
 		float mParentLength = 0.22f;
 
-		int mChildren = 32;
-		float mChildPositionOffset = 0.08f;
-		float mChildIntensity = 0.3f;
-		float mChildVelocityBias = 0.6f;
-		float mChildIntensityDecay = 0.008f;
-		float mChildLength = 0.4f;
+		int mChildren = 16;
+		float mChildPositionOffset = 0.04f;
+		float mChildIntensity = 5.f;
+		float mChildVelocityBias = 0.4f;
+		float mChildIntensityDecay = 0.05f;
+		float mChildLength = 0.1f;
 		glm::vec3 mChildColor = glm::vec3(1.f);
 		float mChildColorBias = 0.4f;
 	};

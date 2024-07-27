@@ -37,26 +37,25 @@ uint getParentIndex() {
 }
 
 void init() {
-	float vel = baseSpeed * rand(random.xy + gl_GlobalInvocationID.xx);
 	float theta = rand(random.yx + gl_GlobalInvocationID.xx) * PI;
 	float phi = rand(random.zy + gl_GlobalInvocationID.xx) * 2.0 * PI;
 	float x = sin(theta) * cos(phi);
 	float z = sin(theta) * sin(phi);
 	float y = cos(theta);
-	vec3 v = vel * vec3(x, y, z);
+	vec3 v = vec3(x, y, z);
 
 	if (gl_GlobalInvocationID.x % numChildren == 0.0) {
 		posIntensity[gl_GlobalInvocationID.x].xyz = lightPos;
 		posIntensity[gl_GlobalInvocationID.x].a = rand(random.az + gl_GlobalInvocationID.xx) * parentIntensity;
-		velocity[gl_GlobalInvocationID.x].xyz = v * parentSpeed;
+		velocity[gl_GlobalInvocationID.x].xyz = v * (baseSpeed + parentSpeed * rand(random.zy * timestep + gl_GlobalInvocationID.xx));
 		velocity[gl_GlobalInvocationID.x].a = 1.0;
 	}
 	else {
-		vec3 parentPos = posIntensity[getParentIndex()].xyz;
+		vec4 parentPos = posIntensity[getParentIndex()];
 		vec3 parentVel = velocity[getParentIndex()].xyz;
-		posIntensity[gl_GlobalInvocationID.x].xyz = parentPos - parentVel * childPosOffset;
+		posIntensity[gl_GlobalInvocationID.x].xyz = parentPos.xyz - parentVel * childPosOffset;
 		posIntensity[gl_GlobalInvocationID.x].a = rand(random.za + gl_GlobalInvocationID.xx) * childIntensity;
-		velocity[gl_GlobalInvocationID.x].xyz = mix(-parentVel, v, childVelocityBias);
+		velocity[gl_GlobalInvocationID.x].xyz = mix(-parentVel, v * baseSpeed / 2, childVelocityBias);
 		velocity[gl_GlobalInvocationID.x].a = 0.0;
 	}
 }
@@ -69,21 +68,21 @@ void main() {
 #endif
 	float intensity = posIntensity[gl_GlobalInvocationID.x].a;
 	if (intensity < minIntensity) {
-		//if (gl_GlobalInvocationID.x % numChildren != 0.0) {
+		if (gl_GlobalInvocationID.x % numChildren != 0.0) {
 			init();
 			float parentIntensity = posIntensity[getParentIndex()].a;
 			if (parentIntensity < minIntensity) {
 				posIntensity[gl_GlobalInvocationID.x].a = 0.0;
 			}
 			return;
-		//}
+		}
 	}
 
-	vec3 pos = posIntensity[gl_GlobalInvocationID.x].xyz;
-	vec4 vel = velocity[gl_GlobalInvocationID.x];
-	vel.xyz *= velocityDecay;
-	vel.xyz += vec3(0, -gravity * timestep, 0);
-	pos += vel.xyz * timestep;
+	 vec3 pos = posIntensity[gl_GlobalInvocationID.x].xyz;
+	 vec4 vel = velocity[gl_GlobalInvocationID.x];
+	 vel.xyz *= velocityDecay;
+	 vel.xyz += vec3(0, -gravity * timestep, 0);
+	 pos += vel.xyz * timestep;
 
 	if (vel.a > 0.9) {
 		intensity *= parentIntensityDecay;

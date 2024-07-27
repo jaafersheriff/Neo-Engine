@@ -24,7 +24,7 @@ namespace Fireworks {
 			static_cast<uint32_t>(sizeof(float) * 4 * mCount),
 			reinterpret_cast<uint8_t*>(emptyData.data())
 		};
-		// Velocity
+		// Velocity, isParent
 		details.mVertexBuffers[types::mesh::VertexType::Normal] = {
 			4,
 			0,
@@ -55,8 +55,6 @@ namespace Fireworks {
 		}
 
 		if (ImGui::TreeNodeEx("Parent", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::ColorEdit3("Parent Color", &mParameters.mParentColor[0]);
-			ImGui::SliderFloat("Parent Intensity", &mParameters.mParentIntensity , 0.f, 10000.f);
 			ImGui::SliderFloat("Parent Speed", &mParameters.mParentSpeed , 0.f, 10.f);
 			ImGui::SliderFloat("Parent Intensity Decay", &mParameters.mParentIntensityDecay, 0.f, 1.f);
 			ImGui::SliderFloat("Parent Length", &mParameters.mParentLength, 0.f, 2.f);
