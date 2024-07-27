@@ -21,7 +21,6 @@ uniform vec3 camPos;
 out vec4 color;
 
 void main() {
-
 	vec4 albedoAO = texture(gAlbedoAO, fragTex);
 	vec4 normalRoughness = texture(gNormalRoughness, fragTex);
 	vec4 emissiveMetalness = texture(gEmissiveMetalness, fragTex);
@@ -42,13 +41,11 @@ void main() {
 	pbrMaterial.ao = albedoAO.a;
 
 	color.rgb = vec3(0)
-		+ calculateIndirectDiffuse(pbrMaterial.albedo, pbrMaterial.metalness, 0.1)
 #ifdef IBL
 		+ getIndirectSpecular(pbrMaterial, iblMips, dfgLUT, ibl)
 #endif
 		+ emissiveMetalness.rgb
 	;
 	color.a = 1.0;
-
 }
 

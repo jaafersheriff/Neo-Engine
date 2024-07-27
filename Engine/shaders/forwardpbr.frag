@@ -146,7 +146,7 @@ void main() {
 
 	brdf(pbrMaterial, pbrLight, pbrColor);
 
-	pbrColor.indirectDiffuse = calculateIndirectDiffuse(pbrMaterial.albedo, pbrMaterial.metalness);
+	pbrColor.indirectDiffuse = calculateIndirectDiffuse(pbrMaterial.albedo, pbrMaterial.metalness, pbrLight.radiance);
 
 #ifdef IBL
 	pbrColor.indirectSpecular = getIndirectSpecular(pbrMaterial, iblMips, dfgLUT, ibl);
@@ -168,7 +168,7 @@ void main() {
 		+ pbrColor.directSpecular
 		+ pbrColor.indirectDiffuse
 		+ pbrColor.indirectSpecular
-		+ fEmissive;
+		+ fEmissive
 	;
 	color.a = 1.0;
 #ifdef TRANSPARENT

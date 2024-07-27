@@ -15,8 +15,8 @@ vec3 reconstructWorldPos(vec2 texCoord, float depth, mat4 invP, mat4 invV) {
     return (invV * vec4(view.xyz, 1.0)).xyz;
 }
 
-vec3 calculateIndirectDiffuse(vec3 albedo, float metalness, float ambient = 0.03) {
-	return albedo.rgb * ambient * (1.0 - metalness);
+vec3 calculateIndirectDiffuse(vec3 albedo, float metalness, vec3 lightRadiance, float ambient = 0.001) {
+    return albedo.rgb * (1.0 - metalness) * lightRadiance * ambient;
 }
 
 vec3 calculateF0(vec3 albedo, float metalness) {

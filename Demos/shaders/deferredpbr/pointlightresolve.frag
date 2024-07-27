@@ -96,6 +96,7 @@ void main() {
 #endif
 
 	color.rgb = vec3(0)
+		+ calculateIndirectDiffuse(pbrMaterial.albedo, pbrMaterial.metalness, pbrLight.radiance)
 		+ pbrColor.directDiffuse
 		+ pbrColor.directSpecular
 	;
