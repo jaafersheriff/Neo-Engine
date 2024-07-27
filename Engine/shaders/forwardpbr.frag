@@ -117,7 +117,7 @@ void main() {
 		color = vec4(0, 0, 0, fAlbedo.a);
 		return;
 	}
-	attFactor = lightDistance * lightDistance;
+	attFactor = lightDistance * lightDistance * lightDistance; // Not physically based, but better falloff :) 
 #endif
 
 	float ao = 1.f;

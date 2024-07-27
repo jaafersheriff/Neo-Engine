@@ -80,5 +80,6 @@ void main() {
 	downsample += (j + k + l + m) * 0.125;
 #endif
 
+	downsample = max(downsample, vec3(0.0)); // Protect from INF, not sure if this works on all drivers
 	color = vec4(downsample, 1.0);
 }

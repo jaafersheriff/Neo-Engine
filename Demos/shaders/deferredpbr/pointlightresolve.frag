@@ -78,8 +78,8 @@ void main() {
 	vec3 lightDir = lightPos - worldPos;
 	float lightDistance = length(lightDir) + EP;
 	PBRLight pbrLight;
-	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a / (lightDistance * lightDistance);
-	pbrLight.L = normalize(lightDir / lightDistance);
+	pbrLight.radiance = lightRadiance.rgb * lightRadiance.a / (lightDistance * lightDistance * lightDistance);  // Not physically based, but better falloff :) 
+	pbrLight.L = normalize(lightDir);
 
 	PBRColor pbrColor;
 	pbrColor.directDiffuse = vec3(0);

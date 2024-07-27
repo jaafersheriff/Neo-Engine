@@ -94,7 +94,7 @@ namespace DeferredPBR {
 			ecs.addComponent<TagComponent>(lightEntity, "Light");
 			auto spat = ecs.addComponent<SpatialComponent>(lightEntity, glm::vec3(75.f, 200.f, 20.f));
 			spat->setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
-			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(0.978f, 0.903f, 0.714f), 3000.f);
+			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(0.64f, 0.72f, 1.f), 1.f);
 			ecs.addComponent<MainLightComponent>(lightEntity);
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
 			ecs.addComponent<PinnedComponent>(lightEntity);
@@ -163,7 +163,7 @@ namespace DeferredPBR {
 			material->mAlbedoColor = glm::vec4(1.f);
 			material->mMetallic = 0.f;
 			material->mRoughness = 0.f;
-			material->mEmissiveFactor = glm::vec3(10000.f);
+			material->mEmissiveFactor = glm::vec3(400.f);
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 			ecs.addComponent<DeferredPBRRenderComponent>(entity);
 		}
