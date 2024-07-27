@@ -35,6 +35,9 @@
 
 #include "Loader/GLTFImporter.hpp"
 
+#include "../Fireworks/FireworkComponent.hpp"
+#include "../Fireworks/FireworkRenderer.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
@@ -58,6 +61,7 @@ namespace DeferredPBR {
 				const auto entity = ecs.createEntity();
 				ecs.addComponent<LightComponent>(entity, util::genRandomVec3(0.3f, 1.f), util::genRandom(300.f, 1000.f));
 				ecs.addComponent<PointLightComponent>(entity);
+				ecs.addComponent<Fireworks::FireworkComponent>(entity, entity, resourceManagers.mMeshManager, 16384);
 				ecs.addComponent<SinTranslateComponent>(entity, glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position);
 				ecs.addComponent<SpatialComponent>(entity, position, glm::vec3(50.f));
 				ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), false);
@@ -342,6 +346,7 @@ namespace DeferredPBR {
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		convolveCubemap(resourceManagers, ecs);
+		Fireworks::_tickParticles(resourceManagers, ecs);
 
 		const auto& cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
 		if (!cameraTuple) {
@@ -435,7 +440,9 @@ namespace DeferredPBR {
 			}
 		}
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
+
 		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
+		Fireworks::_drawParticles(resourceManagers, ecs);
 		drawSkybox(resourceManagers, ecs, cameraEntity);
 
 		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParams) : hdrColorOutput;

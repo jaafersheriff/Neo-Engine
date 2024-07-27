@@ -46,7 +46,7 @@ void init() {
 
 	if (gl_GlobalInvocationID.x % numChildren == 0.0) {
 		posIntensity[gl_GlobalInvocationID.x].xyz = lightPos;
-		posIntensity[gl_GlobalInvocationID.x].a = rand(random.az + gl_GlobalInvocationID.xx) * parentIntensity;
+		posIntensity[gl_GlobalInvocationID.x].a = rand(random.az + gl_GlobalInvocationID.xx) * parentIntensity * 2.0;
 		velocity[gl_GlobalInvocationID.x].xyz = v * (baseSpeed + parentSpeed * rand(random.zy * timestep + gl_GlobalInvocationID.xx));
 		velocity[gl_GlobalInvocationID.x].a = 1.0;
 	}

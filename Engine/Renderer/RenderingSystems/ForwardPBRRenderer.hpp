@@ -31,7 +31,12 @@ namespace neo {
 	void drawForwardPBR(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, std::optional<IBLComponent> ibl = std::nullopt) {
 		TRACY_GPU();
 
-		ShaderDefines passDefines({});
+		// Forward draws are only lit by the single MainLightComponent
+		const auto& lightView = ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
+		if (!lightView) {
+			return;
+		}
+		auto&& [lightEntity, _mainLight, light, lightSpatial] = *lightView;
 
 		auto pbrShaderHandle = resourceManagers.mShaderManager.asyncLoad("ForwardPBR Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
@@ -41,6 +46,7 @@ namespace neo {
 			return;
 		}
 
+		ShaderDefines passDefines({});
 		bool containsAlphaTest = false;
 		MakeDefine(ALPHA_TEST);
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
@@ -59,8 +65,6 @@ namespace neo {
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
-		// Forward draws are only lit by the single MainLightComponent
-		auto&& [lightEntity, _mainLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
 		bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
 		bool pointLight = ecs.has<PointLightComponent>(lightEntity);
 		MakeDefine(DIRECTIONAL_LIGHT);

@@ -5,8 +5,6 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
-#pragma optimize("", off)
-
 namespace neo {
 
 	struct BloomParameters {
