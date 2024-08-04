@@ -13,13 +13,11 @@
 #include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/IBLComponent.hpp"
 #include "ECS/Component/RenderingComponent/SkyboxComponent.hpp"
-#include "ECS/Component/SpatialComponent/SinTranslateComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
-#include "ECS/Systems/TranslationSystems/SinTranslateSystem.hpp"
 
 #include "DeferredPBRRenderer.hpp"
 
@@ -44,29 +42,29 @@ using namespace neo;
 
 namespace DeferredPBR {
 	namespace {
-		void _createPointLights(ECS& ecs, ResourceManagers& resourceManagers, const int count) {
-			for (auto& e : ecs.getView<PointLightComponent>()) {
-				if (ecs.has<ShadowCameraComponent>(e)) {
-					resourceManagers.mTextureManager.discard(ecs.getComponent<ShadowCameraComponent>(e)->mShadowMap);
-				}
-				ecs.removeEntity(e);
+		void _discardPointLight(ECS& ecs, ResourceManagers& resourceManagers, const ECS::Entity entity) {
+			if (auto shadowCamera = ecs.getComponent<ShadowCameraComponent>(entity)) {
+				resourceManagers.mTextureManager.discard(shadowCamera->mShadowMap);
 			}
+			if (auto firework = ecs.getComponent<Fireworks::FireworkComponent>(entity)) {
+				resourceManagers.mMeshManager.discard(firework->mBuffer);
+			}
+			ecs.removeEntity(entity);
+		}
 
-			for (int i = 0; i < count; i++) {
-				glm::vec3 position(
-					util::genRandom(-15.f, 15.f),
-					util::genRandom(0.f, 10.f),
-					util::genRandom(-7.5f, 7.5f)
-				);
-				const auto entity = ecs.createEntity();
-				ecs.addComponent<LightComponent>(entity, util::genRandomVec3(0.3f, 1.f), util::genRandom(300.f, 1000.f));
-				ecs.addComponent<PointLightComponent>(entity);
-				ecs.addComponent<Fireworks::FireworkComponent>(entity, entity, resourceManagers.mMeshManager, 16384);
-				ecs.addComponent<SinTranslateComponent>(entity, glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position);
-				ecs.addComponent<SpatialComponent>(entity, position, glm::vec3(50.f));
-				ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), false);
-				ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 256, resourceManagers.mTextureManager);
-			}
+		void _createPointLights(ECS& ecs, ResourceManagers& resourceManagers) {
+			glm::vec3 position(
+				util::genRandom(-15.f, 15.f),
+				util::genRandom(0.f, 10.f),
+				util::genRandom(-7.5f, 7.5f)
+			);
+			const auto entity = ecs.createEntity();
+			ecs.addComponent<LightComponent>(entity, util::genRandomVec3(0.3f, 1.f), util::genRandom(1000.f, 4000.f));
+			ecs.addComponent<PointLightComponent>(entity);
+			ecs.addComponent<Fireworks::FireworkComponent>(entity, entity, resourceManagers.mMeshManager, 65536);
+			ecs.addComponent<SpatialComponent>(entity, position, glm::vec3(50.f));
+			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), false);
+			ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
 		}
 	}
 
@@ -104,7 +102,7 @@ namespace DeferredPBR {
 			ecs.addComponent<FrustumComponent>(lightEntity);
 			ecs.addComponent<FrustumFitReceiverComponent>(lightEntity, 1.f);
 		}
-		_createPointLights(ecs, resourceManagers, 2);
+		_createPointLights(ecs, resourceManagers);
 
 		// Dialectric spheres
 		static float numSpheres = 8;
@@ -289,10 +287,13 @@ namespace DeferredPBR {
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
 		ecs.addSystem<RotationSystem>();
-		ecs.addSystem<SinTranslateSystem>();
 		ecs.addSystem<FrustumSystem>();
 		ecs.addSystem<FrustaFittingSystem>();
 		ecs.addSystem<FrustumCullingSystem>();
+	}
+
+	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
+		NEO_UNUSED(ecs, resourceManagers);
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -330,7 +331,13 @@ namespace DeferredPBR {
 		}
 		ImGui::SliderFloat("Debug Radius", &mLightDebugRadius, 0.f, 10.f);
 		if (ImGui::SliderInt("# Point Lights", &mPointLightCount, 0, 100)) {
-			_createPointLights(ecs, resourceManagers, mPointLightCount);
+			for (auto& entity : ecs.getView<PointLightComponent, SpatialComponent>()) {
+				_discardPointLight(ecs, resourceManagers, entity);
+			}
+
+			for (int i = 0; i < mPointLightCount; i++) {
+				_createPointLights(ecs, resourceManagers);
+			}
 		}
 
 		ImGui::Checkbox("IBL", &mDrawIBL);

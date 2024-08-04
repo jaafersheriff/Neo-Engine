@@ -36,6 +36,10 @@ uint getParentIndex() {
 	return gl_GlobalInvocationID.x - (gl_GlobalInvocationID.x % numChildren);
 }
 
+bool isParent() {
+	return gl_GlobalInvocationID.x % numChildren == 0.0;
+}
+
 void init() {
 	float theta = rand(random.yx + gl_GlobalInvocationID.xx) * PI;
 	float phi = rand(random.zy + gl_GlobalInvocationID.xx) * 2.0 * PI;
@@ -44,9 +48,9 @@ void init() {
 	float y = cos(theta);
 	vec3 v = vec3(x, y, z);
 
-	if (gl_GlobalInvocationID.x % numChildren == 0.0) {
+	if (isParent()) {
 		posIntensity[gl_GlobalInvocationID.x].xyz = lightPos;
-		posIntensity[gl_GlobalInvocationID.x].a = rand(random.az + gl_GlobalInvocationID.xx) * parentIntensity * 2.0;
+ 		posIntensity[gl_GlobalInvocationID.x].a = rand(random.az + gl_GlobalInvocationID.xx) * parentIntensity * 2.0;
 		velocity[gl_GlobalInvocationID.x].xyz = v * (baseSpeed + parentSpeed * rand(random.zy * timestep + gl_GlobalInvocationID.xx));
 		velocity[gl_GlobalInvocationID.x].a = 1.0;
 	}
@@ -62,20 +66,14 @@ void init() {
 
 layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
 void main() {
-#ifdef INIT
+#ifdef INITIALIZING
 	init();
 	return;
 #endif
 	float intensity = posIntensity[gl_GlobalInvocationID.x].a;
 	if (intensity < minIntensity) {
-		if (gl_GlobalInvocationID.x % numChildren != 0.0) {
-			init();
-			float parentIntensity = posIntensity[getParentIndex()].a;
-			if (parentIntensity < minIntensity) {
-				posIntensity[gl_GlobalInvocationID.x].a = 0.0;
-			}
-			return;
-		}
+		init();
+		return;
 	}
 
 	 vec3 pos = posIntensity[gl_GlobalInvocationID.x].xyz;

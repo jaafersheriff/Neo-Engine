@@ -33,14 +33,8 @@ namespace Fireworks {
 			if (!resourceManagers.mShaderManager.isValid(fireworksComputeShaderHandle)) {
 				continue;
 			}
-			ShaderDefines defines;
-			MakeDefine(INIT);
-			if (firework.mNeedsInit) {
-				defines.set(INIT);
-				firework.mNeedsInit = false;
-			}
-
-			auto& fireworksComputeShader = resourceManagers.mShaderManager.resolveDefines(fireworksComputeShaderHandle, defines);
+			
+			auto& fireworksComputeShader = resourceManagers.mShaderManager.resolveDefines(fireworksComputeShaderHandle, {});
 			fireworksComputeShader.bind();
 
 			fireworksComputeShader.bindUniform("random", glm::vec4(util::genRandomVec3(), util::genRandom()));
@@ -115,7 +109,9 @@ namespace Fireworks {
 			fireworksVisShader.bindUniform("M", spatial.getModelMatrix());
 
 			/* DRAW */
-			resourceManagers.mMeshManager.resolve(firework.mBuffer).draw();
+			if (resourceManagers.mMeshManager.isValid(firework.mBuffer)) {
+				resourceManagers.mMeshManager.resolve(firework.mBuffer).draw();
+			}
 
 		}
 

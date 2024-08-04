@@ -37,7 +37,6 @@ namespace Fireworks {
 
 	neo::MeshHandle mBuffer;
 	uint32_t mCount;
-	bool mNeedsInit;
 
 	Parameters mParameters;
 

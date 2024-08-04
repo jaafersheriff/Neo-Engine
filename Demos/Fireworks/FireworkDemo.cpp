@@ -118,11 +118,7 @@ namespace Fireworks {
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
-		NEO_UNUSED(resourceManagers);
-
-		for (auto&& [entity, firework, spatial, light] : ecs.getView<FireworkComponent, SpatialComponent, LightComponent>().each()) {
-			// TODO
-		}
+		NEO_UNUSED(ecs, resourceManagers);
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {

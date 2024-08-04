@@ -7,7 +7,6 @@ using namespace neo;
 namespace Fireworks {
 	FireworkComponent::FireworkComponent(const ECS::Entity& entity, const MeshManager& meshManager, uint32_t count)
 		: mCount(count)
-		, mNeedsInit(true)
 	{
 		std::vector<float> emptyData;
 		emptyData.resize(mCount * 4);
@@ -36,15 +35,11 @@ namespace Fireworks {
 			reinterpret_cast<uint8_t*>(emptyData.data())
 		};
 
-		char targetName[256];
-		sprintf(targetName, "FireworkBuffer_%d", static_cast<uint32_t>(entity));
-		mBuffer = meshManager.asyncLoad(targetName, details);
+		std::string bufferName = "FireworkBuffer_" + std::to_string(static_cast<uint32_t>(entity));
+		mBuffer = meshManager.asyncLoad(HashedString(bufferName.c_str()), details);
 	}
 
 	void FireworkComponent::imGuiEditor() {
-		if (ImGui::Button("Reset")) {
-			mNeedsInit = true;
-		}
 		if (ImGui::TreeNodeEx("Base", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::SliderFloat("Base Speed", &mParameters.mBaseSpeed, 0.f, 5.f);
 			ImGui::SliderFloat("Velocity Decay", &mParameters.mVelocityDecay, 0.f, 1.f);
