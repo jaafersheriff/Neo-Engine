@@ -2,6 +2,8 @@
 #include "FramebufferManager.hpp"
 
 #include "Util/Profiler.hpp"
+#include "Util/ServiceLocator.hpp"
+#include "Util/RenderThread.hpp"
 
 #include <imgui.h>
 
@@ -45,6 +47,8 @@ namespace neo {
 		struct FramebufferLoader final : entt::resource_loader<FramebufferLoader, BackedResource<PooledFramebuffer>> {
 
 			std::shared_ptr<BackedResource<PooledFramebuffer>> load(const FramebufferQueueItem& details, const TextureManager& textureManager) const {
+				NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
+
 				std::shared_ptr<BackedResource<PooledFramebuffer>> framebuffer = std::make_shared<BackedResource<PooledFramebuffer>>();
 				framebuffer->mResource.mFramebuffer.init(details.mDebugName);
 				framebuffer->mResource.mFrameCount = 1;
@@ -112,7 +116,11 @@ namespace neo {
 	}
 
 	Framebuffer& FramebufferManager::_resolveFinal(FramebufferHandle id) const {
-		auto handle = mCache.handle(id.mHandle);
+		entt::resource_handle<const BackedResource<PooledFramebuffer>> handle;
+		{
+			std::lock_guard<std::mutex> lock(mCacheMutex);
+			handle = mCache.handle(id.mHandle);
+		}
 		if (handle) {
 			auto& pfb = const_cast<PooledFramebuffer&>(handle.get().mResource);
 			if (pfb.mFrameCount < 5) {
@@ -127,7 +135,7 @@ namespace neo {
 		return *mFallback;
 	}
 
-	void FramebufferManager::tick(const TextureManager& textureManager) {
+	void FramebufferManager::tick(const TextureManager& textureManager, RenderThread& renderThread) {
 		TRACY_ZONE();
 
 		// Create
@@ -155,12 +163,16 @@ namespace neo {
 				}
 			}
 			if (validTextures) {
-				mCache.load<FramebufferLoader>(item.mHandle.mHandle, item, textureManager);
+				renderThread.pushRenderFunc([&]() {
+					std::lock_guard<std::mutex> lock(mCacheMutex);
+					mCache.load<FramebufferLoader>(item.mHandle.mHandle, item, textureManager);
+				});
 			}
 		}
 
 		// Destroy
 		std::vector<FramebufferHandle> discardQueue;
+		std::lock_guard<std::mutex> lock(mCacheMutex);
 		mCache.each([&](const auto id, BackedResource<PooledFramebuffer>& pfb) {
 			if (pfb.mResource.mFrameCount == 0) {
 				discardQueue.emplace_back(id);
@@ -190,6 +202,7 @@ namespace neo {
 			ImGui::TableSetupColumn("Name/Size", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending);
 			ImGui::TableSetupColumn("Attachments");
 			ImGui::TableHeadersRow();
+			std::lock_guard<std::mutex> lock(mCacheMutex);
 			mCache.each([&](auto id, BackedResource<PooledFramebuffer>& pfb) {
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
@@ -222,6 +235,7 @@ namespace neo {
 			std::lock_guard<std::mutex> lock(mQueueMutex);
 			mQueue.clear();
 		}
+		std::lock_guard<std::mutex> lock(mCacheMutex);
 		mCache.each([&textureManager](BackedResource<PooledFramebuffer>& pfb) {
 			if (!pfb.mResource.mExternallyOwned) {
 				for (auto& textureHandle : pfb.mResource.mFramebuffer.mTextures) {

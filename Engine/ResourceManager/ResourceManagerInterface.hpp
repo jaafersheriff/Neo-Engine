@@ -10,6 +10,7 @@
 
 namespace neo {
 	class ResourceManagers;
+	class RenderThread;
 
 	constexpr HashedString::hash_type NEO_INVALID_HANDLE = 0;
 
@@ -160,14 +161,14 @@ namespace neo {
 		mutable std::mutex mTransactionMutex;
 		mutable std::vector<std::pair<ResourceHandle<ResourceType>, std::function<void(ResourceType&)>>> mTransactionQueue;
 
-		std::mutex mCacheMutex;
+		mutable std::mutex mCacheMutex;
 		entt::resource_cache<BackedResource<ResourceType>> mCache;
 
 		std::shared_ptr<BackedResource<ResourceType>> mFallback;
 
 	private:
 		ResourceType& _resolveFinal(ResourceHandle<ResourceType> id) const {
-			entt::resource_handle<BackedResource<ResourceType>> handle;
+			entt::resource_handle<const BackedResource<ResourceType>> handle;
 			{
 				std::lock_guard<std::mutex> lock(mCacheMutex);
 				handle = mCache.handle(id.mHandle);

@@ -15,6 +15,7 @@ namespace neo {
 	struct ShaderLoader final : entt::resource_loader<ShaderLoader, BackedResource<SourceShader>> {
 
 		std::shared_ptr<BackedResource<SourceShader>> load(const ShaderLoadDetails& shaderDetails, const std::optional<std::string>& debugName) const {
+			NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
 			NEO_ASSERT(debugName.has_value(), "Shaders need to come with a name please");
 			NEO_LOG_V("Uploading shader %s", debugName.value().c_str());
 			return util::visit(shaderDetails,

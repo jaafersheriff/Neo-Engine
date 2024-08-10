@@ -13,6 +13,7 @@ namespace neo {
 	struct MeshLoader final : entt::resource_loader<MeshLoader, BackedResource<Mesh>> {
 
 		std::shared_ptr<BackedResource<Mesh>> load(MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const {
+			NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
 			if (debugName.has_value()) {
 				NEO_LOG_V("Uploading mesh %s", debugName.value().c_str());
 			}

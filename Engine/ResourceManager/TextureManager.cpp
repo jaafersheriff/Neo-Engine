@@ -52,7 +52,8 @@ namespace neo {
 
 		struct TextureLoader final : entt::resource_loader<TextureLoader, BackedResource<Texture>> {
 
-			std::shared_ptr<BackedResource<Texture>> load(TextureFiles& fileDetails, const std::optional<std::string>& debugName) const {
+			std::shared_ptr<BackedResource<Texture>> load(TextureFiles fileDetails, const std::optional<std::string>& debugName) const {
+				NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
 				if (debugName.has_value()) {
 					NEO_LOG_V("Uploading texture files for %s", debugName.value().c_str());
 				}
@@ -119,6 +120,7 @@ namespace neo {
 			}
 
 			std::shared_ptr<BackedResource<Texture>> load(TextureBuilder textureDetails, const std::optional<std::string>& debugName) const {
+				NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
 				if (debugName.has_value()) {
 					NEO_LOG_V("Uploading raw texture %s", debugName.value().c_str());
 				}
@@ -185,8 +187,7 @@ namespace neo {
 		return id;
 	}
 
-
-	void TextureManager::_tickImpl() {
+	void TextureManager::_tickImpl(RenderThread& renderThread) {
 		TRACY_ZONE();
 
 		// Destroy
@@ -198,19 +199,25 @@ namespace neo {
 				mDiscardQueue.clear();
 			}
 			for (auto& id : swapQueue) {
-				if (isValid(id)) {
-					_destroyImpl(mCache.handle(id.mHandle).get());
-					mCache.discard(id.mHandle);
-				}
-				else {
-					std::lock_guard<std::mutex> lock(mQueueMutex);
-					for (int i = 0; i < mQueue.size(); i++) {
-						if (id == mQueue[i].mHandle) {
-							mQueue.erase(mQueue.begin() + i);
-							break;
-						}
+				bool foundInQueue = false;
+				std::lock_guard<std::mutex> lock(mQueueMutex);
+				for (int i = 0; i < mQueue.size(); i++) {
+					if (id == mQueue[i].mHandle) {
+						mQueue.erase(mQueue.begin() + i);
+						foundInQueue = true;
+						break;
 					}
 				}
+				if (foundInQueue) {
+					continue;
+				}
+				renderThread.pushRenderFunc([this, id]() {
+					if (isValid(id)) {
+						std::lock_guard<std::mutex> lock(mCacheMutex);
+						_destroyImpl(mCache.handle(id.mHandle).get());
+						mCache.discard(id.mHandle);
+					}
+				});
 			}
 		}
 
@@ -224,28 +231,37 @@ namespace neo {
 			}
 
 			for (auto& loadDetails : swapQueue) {
-				std::visit([&](auto&& arg) {
-					using T = std::decay_t<decltype(arg)>;
-					if constexpr (std::is_same_v<T, TextureBuilder>) {
-						mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
-						free(const_cast<uint8_t*>(arg.mData));
-					}
-					else if constexpr (std::is_same_v<T, TextureFiles>) {
-						mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
-					}
-					else {
+				util::visit(loadDetails.mLoadDetails,
+					[&](TextureBuilder builder) {
+						renderThread.pushRenderFunc([this, builder, loadDetails]() {
+							{
+								std::lock_guard<std::mutex> lock(mCacheMutex);
+								mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, builder, loadDetails.mDebugName);
+							}
+							free(const_cast<uint8_t*>(builder.mData));
+						});
+					},
+					[&](TextureFiles files) {
+						renderThread.pushRenderFunc([this, files, loadDetails]() {
+							std::lock_guard<std::mutex> lock(mCacheMutex);
+							mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, files, loadDetails.mDebugName);
+						});
+					},
+					[](auto) {
 						static_assert(always_false_v<T>, "non-exhaustive visitor!");
 					}
-					}, loadDetails.mLoadDetails);
+				);
 			}
 		}
 	}
 
 	void TextureManager::_destroyImpl(BackedResource<Texture>& texture) {
+		NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
 		texture.mResource.destroy();
 	}
 
 	void TextureManager::imguiEditor(std::function<void(const Texture&)> textureFunc) {
+		std::lock_guard<std::mutex> lock(mCacheMutex);
 		mCache.each([&](auto handle, BackedResource<Texture>& textureResource) {
 			ImGui::PushID(static_cast<int>(handle));
 			bool node = false;

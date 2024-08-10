@@ -17,6 +17,7 @@
 namespace neo {
 	class ResourceManagers;
 	struct TextureFormat;
+	class RenderThread;
 
 	struct FramebufferBuilder {
 		// Hmmm this forces all internally-created textures to be the same size...
@@ -78,6 +79,7 @@ namespace neo {
 		FramebufferManager::~FramebufferManager();
 
 		bool isValid(FramebufferHandle id) const {
+			std::lock_guard<std::mutex> lock(mCacheMutex);
 			return mCache.contains(id.mHandle);
 		}
 
@@ -106,13 +108,16 @@ namespace neo {
 	protected:
 
 		void clear(const TextureManager& textureManager);
-		void tick(const TextureManager& textureManager);
+		void tick(const TextureManager& textureManager, RenderThread& renderThread);
 
 		void imguiEditor(std::function<void(Texture&)> textureFunc, TextureManager& textureManager);
 
 		mutable std::mutex mQueueMutex;
 		mutable std::vector<FramebufferQueueItem> mQueue;
+
+		mutable std::mutex mCacheMutex;
 		entt::resource_cache<BackedResource<PooledFramebuffer>> mCache;
+
 		std::shared_ptr<Framebuffer> mFallback;
 
 	private:
