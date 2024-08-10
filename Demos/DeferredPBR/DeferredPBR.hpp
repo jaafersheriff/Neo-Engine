@@ -16,7 +16,6 @@ namespace DeferredPBR {
 		Demo() = default;
 		virtual IDemo::Config getConfig() const override;
 		virtual void init(ECS& ecs, ResourceManagers& resourceManagers) override;
-		virtual void update(ECS& ecs, ResourceManagers& resourceManagers) override;
 		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) override;
 		virtual void destroy() override;
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
@@ -36,6 +35,7 @@ namespace DeferredPBR {
 			45.f,
 			0.02f
 		};
+		bool mUsePing = true;
 
 		bool mDoBloom = true;
 		BloomParameters mBloomParams = {

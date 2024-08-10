@@ -13,11 +13,13 @@
 #include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/IBLComponent.hpp"
 #include "ECS/Component/RenderingComponent/SkyboxComponent.hpp"
+#include "ECS/Component/SpatialComponent/SinTranslateComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
+#include "ECS/Systems/TranslationSystems/SinTranslateSystem.hpp"
 
 #include "DeferredPBRRenderer.hpp"
 
@@ -33,38 +35,34 @@
 
 #include "Loader/GLTFImporter.hpp"
 
-#include "../Fireworks/FireworkComponent.hpp"
-#include "../Fireworks/FireworkRenderer.hpp"
-
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace neo;
 
 namespace DeferredPBR {
 	namespace {
-		void _discardPointLight(ECS& ecs, ResourceManagers& resourceManagers, const ECS::Entity entity) {
-			if (auto shadowCamera = ecs.getComponent<ShadowCameraComponent>(entity)) {
-				resourceManagers.mTextureManager.discard(shadowCamera->mShadowMap);
+		void _createPointLights(ECS& ecs, ResourceManagers& resourceManagers, const int count) {
+			for (auto& e : ecs.getView<PointLightComponent>()) {
+				if (ecs.has<ShadowCameraComponent>(e)) {
+					resourceManagers.mTextureManager.discard(ecs.getComponent<ShadowCameraComponent>(e)->mShadowMap);
+				}
+				ecs.removeEntity(e);
 			}
-			if (auto firework = ecs.getComponent<Fireworks::FireworkComponent>(entity)) {
-				resourceManagers.mMeshManager.discard(firework->mBuffer);
-			}
-			ecs.removeEntity(entity);
-		}
 
-		void _createPointLights(ECS& ecs, ResourceManagers& resourceManagers) {
-			glm::vec3 position(
-				util::genRandom(-15.f, 15.f),
-				util::genRandom(0.f, 10.f),
-				util::genRandom(-7.5f, 7.5f)
-			);
-			const auto entity = ecs.createEntity();
-			ecs.addComponent<LightComponent>(entity, util::genRandomVec3(0.3f, 1.f), util::genRandom(1000.f, 4000.f));
-			ecs.addComponent<PointLightComponent>(entity);
-			ecs.addComponent<Fireworks::FireworkComponent>(entity, entity, resourceManagers.mMeshManager, 65536);
-			ecs.addComponent<SpatialComponent>(entity, position, glm::vec3(50.f));
-			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), false);
-			ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
+			for (int i = 0; i < count; i++) {
+				glm::vec3 position(
+					util::genRandom(-15.f, 15.f),
+					util::genRandom(0.f, 10.f),
+					util::genRandom(-7.5f, 7.5f)
+				);
+				const auto entity = ecs.createEntity();
+				ecs.addComponent<LightComponent>(entity, util::genRandomVec3(0.3f, 1.f), util::genRandom(300.f, 1000.f));
+				ecs.addComponent<PointLightComponent>(entity);
+				ecs.addComponent<SinTranslateComponent>(entity, glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position);
+				ecs.addComponent<SpatialComponent>(entity, position, glm::vec3(50.f));
+				ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), false);
+				ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 256, resourceManagers.mTextureManager);
+			}
 		}
 	}
 
@@ -92,7 +90,7 @@ namespace DeferredPBR {
 			ecs.addComponent<TagComponent>(lightEntity, "Light");
 			auto spat = ecs.addComponent<SpatialComponent>(lightEntity, glm::vec3(75.f, 200.f, 20.f));
 			spat->setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
-			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(0.64f, 0.72f, 1.f), 1.f);
+			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(0.978f, 0.903f, 0.714f), 3000.f);
 			ecs.addComponent<MainLightComponent>(lightEntity);
 			ecs.addComponent<DirectionalLightComponent>(lightEntity);
 			ecs.addComponent<PinnedComponent>(lightEntity);
@@ -102,7 +100,7 @@ namespace DeferredPBR {
 			ecs.addComponent<FrustumComponent>(lightEntity);
 			ecs.addComponent<FrustumFitReceiverComponent>(lightEntity, 1.f);
 		}
-		_createPointLights(ecs, resourceManagers);
+		_createPointLights(ecs, resourceManagers, 2);
 
 		// Dialectric spheres
 		static float numSpheres = 8;
@@ -161,7 +159,7 @@ namespace DeferredPBR {
 			material->mAlbedoColor = glm::vec4(1.f);
 			material->mMetallic = 0.f;
 			material->mRoughness = 0.f;
-			material->mEmissiveFactor = glm::vec3(400.f);
+			material->mEmissiveFactor = glm::vec3(10000.f);
 			ecs.addComponent<ShadowCasterRenderComponent>(entity);
 			ecs.addComponent<DeferredPBRRenderComponent>(entity);
 		}
@@ -287,13 +285,10 @@ namespace DeferredPBR {
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
 		ecs.addSystem<RotationSystem>();
+		ecs.addSystem<SinTranslateSystem>();
 		ecs.addSystem<FrustumSystem>();
 		ecs.addSystem<FrustaFittingSystem>();
 		ecs.addSystem<FrustumCullingSystem>();
-	}
-
-	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
-		NEO_UNUSED(ecs, resourceManagers);
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -331,13 +326,7 @@ namespace DeferredPBR {
 		}
 		ImGui::SliderFloat("Debug Radius", &mLightDebugRadius, 0.f, 10.f);
 		if (ImGui::SliderInt("# Point Lights", &mPointLightCount, 0, 100)) {
-			for (auto& entity : ecs.getView<PointLightComponent, SpatialComponent>()) {
-				_discardPointLight(ecs, resourceManagers, entity);
-			}
-
-			for (int i = 0; i < mPointLightCount; i++) {
-				_createPointLights(ecs, resourceManagers);
-			}
+			_createPointLights(ecs, resourceManagers, mPointLightCount);
 		}
 
 		ImGui::Checkbox("IBL", &mDrawIBL);
@@ -353,7 +342,6 @@ namespace DeferredPBR {
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		convolveCubemap(resourceManagers, ecs);
-		Fireworks::_tickParticles(resourceManagers, ecs);
 
 		const auto& cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
 		if (!cameraTuple) {
@@ -447,9 +435,7 @@ namespace DeferredPBR {
 			}
 		}
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
-
 		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
-		Fireworks::_drawParticles(resourceManagers, ecs);
 		drawSkybox(resourceManagers, ecs, cameraEntity);
 
 		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParams) : hdrColorOutput;
