@@ -50,32 +50,32 @@ namespace neo {
 	void Engine::init() {
 
 		srand((unsigned int)(time(0)));
+		ServiceLocator<Renderer>::set(4, 4);
+
+		{
+			NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
+			GLFWimage icons[1];
+			std::string path = Loader::ENGINE_RES_DIR + std::string("icon.png");
+			STBImageData image(path.c_str(), types::texture::BaseFormats::RGBA, types::ByteFormats::UnsignedByte, false);
+			if (image) {
+				icons[0].pixels = image.mData;
+				icons[0].width = image.mWidth;
+				icons[0].height = image.mHeight;
+				glfwSetWindowIcon(mWindow.getWindow(), 1, icons);
+			}
+		}
 
 		ServiceLocator<RenderThread>::set();
 		RenderThread& renderThread = ServiceLocator<RenderThread>::ref();
 
 		renderThread.start();
 		renderThread.pushRenderFunc([]() {
-			ServiceLocator<Renderer>::set(4, 4);
+			/* Init GLEW */
+			glfwMakeContextCurrent(nullptr);
+			glewExperimental = GL_FALSE;
+			NEO_ASSERT(glewInit() == GLEW_OK, "Failed to init GLEW");
 
-			{
-				NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
-				GLFWimage icons[1];
-				std::string path = Loader::ENGINE_RES_DIR + std::string("icon.png");
-				STBImageData image(path.c_str(), types::texture::BaseFormats::RGBA, types::ByteFormats::UnsignedByte, false);
-				if (image) {
-					icons[0].pixels = image.mData;
-					icons[0].width = image.mWidth;
-					icons[0].height = image.mHeight;
-					glfwSetWindowIcon(mWindow.getWindow(), 1, icons);
-				}
-
-				/* Init GLEW */
-				glewExperimental = GL_FALSE;
-				NEO_ASSERT(glewInit() == GLEW_OK, "Failed to init GLEW");
-			}
 			ServiceLocator<ImGuiManager>::set();
-			ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
 
 			ServiceLocator<Renderer>::ref().init();
 			{
@@ -107,6 +107,8 @@ namespace neo {
 			}
 			TracyGpuContext;
 		});
+		renderThread.wait();
+		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow(), ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str(), renderThread);
 		renderThread.wait();
 	}
 

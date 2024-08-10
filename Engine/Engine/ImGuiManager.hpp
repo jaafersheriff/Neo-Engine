@@ -10,6 +10,7 @@
 struct GLFWwindow;
 
 namespace neo {
+	class RenderThread;
 
 	class ImGuiManager {
 	public:
@@ -25,7 +26,7 @@ namespace neo {
 		ImGuiManager(const ImGuiManager&) = delete;
 		ImGuiManager & operator=(const ImGuiManager&) = delete;
 
-		void init(GLFWwindow* window);
+		void init(GLFWwindow* window, const char* glslVersion, RenderThread& renderThread);
 		void update();
 		void render();
 		void reset();

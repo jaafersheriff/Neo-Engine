@@ -3,14 +3,13 @@
 #include "Messaging/Messenger.hpp"
 
 #include "Engine/Engine.hpp"
-#include "Renderer/Renderer.hpp"
 #include "Hardware/WindowSurface.hpp"
 #include "Hardware/Mouse.hpp"
 
 #include "Util/Util.hpp"
 #include "Util/Profiler.hpp"
 #include "Util/Log/Log.hpp"
-#include "Util/ServiceLocator.hpp"
+#include "Util/RenderThread.hpp"
 
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
@@ -23,7 +22,7 @@
 
 namespace neo {
 
-	void ImGuiManager::init(GLFWwindow* window) {
+	void ImGuiManager::init(GLFWwindow* window, const char* glslVersion, RenderThread& renderThread) {
 		/* Init ImGui */
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -36,8 +35,6 @@ namespace neo {
 #ifdef NO_LOCAL_TRACY
 		io.FontGlobalScale = 2.f;
 #endif
-		ImGui_ImplGlfw_InitForOpenGL(window, false);
-		ImGui_ImplOpenGL3_Init(ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str());
 
 		ImGuiStyle* style = &ImGui::GetStyle();
 		style->ScaleAllSizes(io.FontGlobalScale);
@@ -100,6 +97,10 @@ namespace neo {
 		style->AntiAliasedFill = false;
 		style->AntiAliasedFill = false;
 
+		renderThread.pushRenderFunc([&]() {
+			ImGui_ImplGlfw_InitForOpenGL(window, false);
+			ImGui_ImplOpenGL3_Init(glslVersion);
+		});
 	}
 
 	void ImGuiManager::update() {

@@ -42,7 +42,7 @@ namespace neo {
 		while (true) {
 			{
 				std::lock_guard<std::mutex> lock(mRenderQueueMutex);
-				if (!mRenderQueue.empty()) {
+				if (mRenderQueue.empty()) {
 					return;
 				}
 			}

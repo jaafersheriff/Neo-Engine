@@ -5,6 +5,8 @@
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
 #include "Util/Profiler.hpp"
+#include "Util/RenderThread.hpp"
+#include "Util/ServiceLocator.hpp"
 
 #include <imgui.h>
 #include <execution>
@@ -37,9 +39,10 @@ namespace neo {
 	};
 
 	ShaderManager::ShaderManager() {
-		mFallback = ShaderLoader{}.load(SourceShader::ShaderCode{
-			{types::shader::Stage::Vertex,
-				R"(
+		ServiceLocator<RenderThread>::ref().pushRenderFunc([this]() {
+			mFallback = ShaderLoader{}.load(SourceShader::ShaderCode{
+				{types::shader::Stage::Vertex,
+					R"(
 					void main() {
 						gl_Position = vec4(0,0,0,0);
 					}
@@ -51,9 +54,10 @@ namespace neo {
 						color = vec4(0,0,0,0);
 					}
 				)"}
-			}, "Dummy");
+				}, "Dummy");
 
-		mFallback->mResource.getResolvedInstance({});
+			mFallback->mResource.getResolvedInstance({});
+		});
 	}
 
 	ShaderManager::~ShaderManager() {

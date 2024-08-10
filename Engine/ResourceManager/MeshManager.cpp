@@ -3,6 +3,8 @@
 #include "Loader/MeshGenerator.hpp"
 
 #include "Util/Profiler.hpp"
+#include "Util/RenderThread.hpp"
+#include "Util/ServiceLocator.hpp"
 
 #include <imgui.h>
 
@@ -43,14 +45,16 @@ namespace neo {
 	};
 
 	MeshManager::MeshManager() {
-		auto cubeDetails = prefabs::generateCube();
-		mFallback = MeshLoader{}.load(*cubeDetails, "Fallback Cube");
-		for (auto&& [type, buffer] : cubeDetails->mVertexBuffers) {
-			free(const_cast<uint8_t*>(buffer.mData));
-		}
-		if (cubeDetails->mElementBuffer) {
-			free(const_cast<uint8_t*>(cubeDetails->mElementBuffer->mData));
-		}
+		ServiceLocator<RenderThread>::ref().pushRenderFunc([this]() {
+			auto cubeDetails = prefabs::generateCube();
+			mFallback = MeshLoader{}.load(*cubeDetails, "Fallback Cube");
+			for (auto&& [type, buffer] : cubeDetails->mVertexBuffers) {
+				free(const_cast<uint8_t*>(buffer.mData));
+			}
+			if (cubeDetails->mElementBuffer) {
+				free(const_cast<uint8_t*>(cubeDetails->mElementBuffer->mData));
+			}
+		});
 	}
 
 	MeshManager::~MeshManager() {

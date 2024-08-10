@@ -1,6 +1,8 @@
 #include "TextureManager.hpp"
 
 #include "Util/Profiler.hpp"
+#include "Util/RenderThread.hpp"
+#include "Util/ServiceLocator.hpp"
 
 #include "Loader/Loader.hpp"
 #include "Loader/STBIImageData.hpp"
@@ -133,14 +135,16 @@ namespace neo {
 	}
 
 	TextureManager::TextureManager() {
-		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF, /**/ 0xFF, 0xFF, 0xFF, 0xFF,
-		                   0xFF, 0xFF, 0xFF, 0xFF, /**/ 0x00, 0x00, 0x00, 0xFF
-		};
-		mFallback = TextureLoader{}.load(TextureBuilder{
-			TextureFormat{},
-			glm::u16vec3(2, 2, 0),
-			data
-		}, "Fallback Texture");
+		ServiceLocator<RenderThread>::ref().pushRenderFunc([this]() {
+			uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF, /**/ 0xFF, 0xFF, 0xFF, 0xFF,
+							   0xFF, 0xFF, 0xFF, 0xFF, /**/ 0x00, 0x00, 0x00, 0xFF
+			};
+			mFallback = TextureLoader{}.load(TextureBuilder{
+				TextureFormat{},
+				glm::u16vec3(2, 2, 0),
+				data
+				}, "Fallback Texture");
+		});
 	}
 
 	TextureManager::~TextureManager() {
