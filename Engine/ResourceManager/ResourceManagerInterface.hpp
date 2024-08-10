@@ -142,7 +142,7 @@ namespace neo {
 			mDiscardQueue.clear();
 			mTransactionQueue.clear();
 			mCache.each([this](BackedResource<ResourceType>& resource) {
-				ServiceLocator<RenderThread>::ref().pushRenderFunc([this, resource]() {
+				ServiceLocator<RenderThread>::ref().pushRenderFunc([this, &resource]() {
 					static_cast<DerivedManager*>(this)->_destroyImpl(resource);
 				});
 			});

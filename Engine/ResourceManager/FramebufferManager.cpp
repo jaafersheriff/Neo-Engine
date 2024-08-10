@@ -163,7 +163,7 @@ namespace neo {
 				}
 			}
 			if (validTextures) {
-				renderThread.pushRenderFunc([&]() {
+				renderThread.pushRenderFunc([this, item, &textureManager]() {
 					std::lock_guard<std::mutex> lock(mCacheMutex);
 					mCache.load<FramebufferLoader>(item.mHandle.mHandle, item, textureManager);
 				});
@@ -181,7 +181,8 @@ namespace neo {
 						textureManager.discard(texId);
 					}
 				}
-				pfb.mResource.mFramebuffer.destroy();
+
+				_destroyImpl(pfb);
 			}
 			else {
 				if (pfb.mResource.mUsedThisFrame) {
@@ -236,14 +237,21 @@ namespace neo {
 			mQueue.clear();
 		}
 		std::lock_guard<std::mutex> lock(mCacheMutex);
-		mCache.each([&textureManager](BackedResource<PooledFramebuffer>& pfb) {
+		mCache.each([this, &textureManager](BackedResource<PooledFramebuffer>& pfb) {
 			if (!pfb.mResource.mExternallyOwned) {
 				for (auto& textureHandle : pfb.mResource.mFramebuffer.mTextures) {
 					textureManager.discard(textureHandle);
 				}
 			}
-			pfb.mResource.mFramebuffer.destroy();
+			ServiceLocator<RenderThread>::ref().pushRenderFunc([this, &pfb]() {
+				_destroyImpl(pfb);
+			});
 		});
 		mCache.clear();
+	}
+
+	void FramebufferManager::_destroyImpl(BackedResource<PooledFramebuffer>& pfb) {
+		NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
+		pfb.mResource.mFramebuffer.destroy();
 	}
 }

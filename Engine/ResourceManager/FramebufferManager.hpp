@@ -122,5 +122,6 @@ namespace neo {
 
 	private:
 		Framebuffer& _resolveFinal(FramebufferHandle id) const;
+		void _destroyImpl(BackedResource<PooledFramebuffer>& mesh);
 	};
 }
