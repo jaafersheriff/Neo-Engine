@@ -9,6 +9,8 @@
 #include "Messaging/Messenger.hpp"
 
 #include "Util/Profiler.hpp"
+#include "Util/RenderThread.hpp"
+#include "Util/ServiceLocator.hpp"
 #include <GLFW/glfw3.h>
 
 namespace neo {
@@ -16,7 +18,7 @@ namespace neo {
 	namespace {
 
 		static void _errorCallback(int error, const char* desc) {
-			NEO_LOG_E("GLFW Error %d: %s", error, desc);
+			NEO_FAIL("GLFW Error %d: %s", error, desc);
 		}
 
 	}
@@ -57,7 +59,6 @@ namespace neo {
 			glfwTerminate();
 			NEO_FAIL("Failed to create window");
 		}
-		glfwMakeContextCurrent(mWindow);
 		glfwSetWindowUserPointer(mWindow, &mDetails);
 
 		glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -146,8 +147,6 @@ namespace neo {
 			Messenger::sendMessage<Mouse::MouseResetMessage>();
 		});
 
-		glfwSwapInterval(mDetails.mVSyncEnabled);
-
 		reset(name);
 
 		return 0;
@@ -226,7 +225,7 @@ namespace neo {
 
 	void WindowSurface::toggleVSync() {
 		mDetails.mVSyncEnabled = !mDetails.mVSyncEnabled;
-		glfwSwapInterval(mDetails.mVSyncEnabled);
+		_setVsync();
 	}
 
 	int WindowSurface::shouldClose() const {
@@ -246,5 +245,11 @@ namespace neo {
 		/* Clean up GLFW */
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
+	}
+
+	void WindowSurface::_setVsync() {
+		ServiceLocator<RenderThread>::ref().pushRenderFunc([vsync = mDetails.mVSyncEnabled]() {
+			glfwSwapInterval(vsync);
+		});
 	}
 }

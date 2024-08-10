@@ -51,6 +51,7 @@ namespace neo {
 
 		srand((unsigned int)(time(0)));
 		ServiceLocator<Renderer>::set(4, 4);
+		ServiceLocator<RenderThread>::set();
 
 		{
 			NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
@@ -65,13 +66,12 @@ namespace neo {
 			}
 		}
 
-		ServiceLocator<RenderThread>::set();
 		RenderThread& renderThread = ServiceLocator<RenderThread>::ref();
-
 		renderThread.start();
-		renderThread.pushRenderFunc([]() {
+		auto window = mWindow.getWindow();
+		renderThread.pushRenderFunc([window]() {
+			glfwMakeContextCurrent(window);
 			/* Init GLEW */
-			glfwMakeContextCurrent(nullptr);
 			glewExperimental = GL_FALSE;
 			NEO_ASSERT(glewInit() == GLEW_OK, "Failed to init GLEW");
 
@@ -108,6 +108,9 @@ namespace neo {
 			TracyGpuContext;
 		});
 		renderThread.wait();
+		mWindow.toggleVSync();
+		mWindow.toggleVSync(); // Lmao
+
 		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow(), ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str(), renderThread);
 		renderThread.wait();
 	}

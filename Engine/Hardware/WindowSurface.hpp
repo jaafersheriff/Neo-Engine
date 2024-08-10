@@ -43,5 +43,6 @@ namespace neo {
 
 		void _onFrameSizeChanged(const FrameSizeMessage& msg);
 		void _onToggleFullscreen(const ToggleFullscreenMessage& msg);
+		void _setVsync();
 	};
 }
