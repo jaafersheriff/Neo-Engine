@@ -49,62 +49,66 @@ namespace neo {
 	void Engine::init() {
 
 		srand((unsigned int)(time(0)));
+		mRenderThread.start();
 
-		ServiceLocator<Renderer>::set(4, 4);
+		mRenderThread.setRenderFunc([]() {
+			ServiceLocator<Renderer>::set(4, 4);
 
-		{
-			NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
-			GLFWimage icons[1];
-			std::string path = Loader::ENGINE_RES_DIR + std::string("icon.png");
-			STBImageData image(path.c_str(), types::texture::BaseFormats::RGBA, types::ByteFormats::UnsignedByte, false);
-			if (image) {
-				icons[0].pixels = image.mData;
-				icons[0].width = image.mWidth;
-				icons[0].height = image.mHeight;
-				glfwSetWindowIcon(mWindow.getWindow(), 1, icons);
+			{
+				NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
+				GLFWimage icons[1];
+				std::string path = Loader::ENGINE_RES_DIR + std::string("icon.png");
+				STBImageData image(path.c_str(), types::texture::BaseFormats::RGBA, types::ByteFormats::UnsignedByte, false);
+				if (image) {
+					icons[0].pixels = image.mData;
+					icons[0].width = image.mWidth;
+					icons[0].height = image.mHeight;
+					glfwSetWindowIcon(mWindow.getWindow(), 1, icons);
+				}
+
+				/* Init GLEW */
+				glewExperimental = GL_FALSE;
+				NEO_ASSERT(glewInit() == GLEW_OK, "Failed to init GLEW");
 			}
+			ServiceLocator<ImGuiManager>::set();
+			ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
 
-			/* Init GLEW */
-			glewExperimental = GL_FALSE;
-			NEO_ASSERT(glewInit()== GLEW_OK, "Failed to init GLEW");
-		}
-		ServiceLocator<ImGuiManager>::set();
-		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
+			ServiceLocator<Renderer>::ref().init();
+			{
+				auto& details = ServiceLocator<Renderer>::ref().mDetails;
+				/* Set max work group */
+				glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &details.mMaxComputeWorkGroupSize.x);
+				glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &details.mMaxComputeWorkGroupSize.y);
+				glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &details.mMaxComputeWorkGroupSize.z);
+				char buf[512];
+				sprintf(buf, "%s", glGetString(GL_VENDOR));
+				details.mVendor = buf;
+				sprintf(buf, "%s", glGetString(GL_RENDERER));
+				details.mRenderer = buf;
+				sprintf(buf, "%s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+				details.mShadingLanguage = buf;
 
-		ServiceLocator<Renderer>::ref().init();
-		{
-			auto& details = ServiceLocator<Renderer>::ref().mDetails;
-			/* Set max work group */
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &details.mMaxComputeWorkGroupSize.x);
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &details.mMaxComputeWorkGroupSize.y);
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &details.mMaxComputeWorkGroupSize.z);
-			char buf[512];
-			sprintf(buf, "%s", glGetString(GL_VENDOR));
-			details.mVendor = buf;
-			sprintf(buf, "%s", glGetString(GL_RENDERER));
-			details.mRenderer = buf;
-			sprintf(buf, "%s", glGetString(GL_SHADING_LANGUAGE_VERSION));
-			details.mShadingLanguage = buf;
-
-			int bytes = sprintf(buf, "OpenGL Version: %d.%d", details.mGLMajorVersion, details.mGLMinorVersion);;
-			TracyAppInfo(buf, bytes);
-			bytes = sprintf(buf, "Max Shading Language:  %s", details.mShadingLanguage.c_str());
-			TracyAppInfo(buf, bytes);
-			bytes = sprintf(buf, "Used Shading Language: %s", details.mGLSLVersion.c_str());
-			TracyAppInfo(buf, bytes);
-			bytes = sprintf(buf, "Vendor: %s", details.mVendor.c_str());
-			TracyAppInfo(buf, bytes);
-			bytes = sprintf(buf, "Renderer: %s", details.mRenderer.c_str());
-			TracyAppInfo(buf, bytes);
-			bytes = sprintf(buf, "Max Compute Work Group Size: [%d, %d, %d]", details.mMaxComputeWorkGroupSize.x, details.mMaxComputeWorkGroupSize.y, details.mMaxComputeWorkGroupSize.z);
-			TracyAppInfo(buf, bytes);
-		}
-		TracyGpuContext;
+				int bytes = sprintf(buf, "OpenGL Version: %d.%d", details.mGLMajorVersion, details.mGLMinorVersion);;
+				TracyAppInfo(buf, bytes);
+				bytes = sprintf(buf, "Max Shading Language:  %s", details.mShadingLanguage.c_str());
+				TracyAppInfo(buf, bytes);
+				bytes = sprintf(buf, "Used Shading Language: %s", details.mGLSLVersion.c_str());
+				TracyAppInfo(buf, bytes);
+				bytes = sprintf(buf, "Vendor: %s", details.mVendor.c_str());
+				TracyAppInfo(buf, bytes);
+				bytes = sprintf(buf, "Renderer: %s", details.mRenderer.c_str());
+				TracyAppInfo(buf, bytes);
+				bytes = sprintf(buf, "Max Compute Work Group Size: [%d, %d, %d]", details.mMaxComputeWorkGroupSize.x, details.mMaxComputeWorkGroupSize.y, details.mMaxComputeWorkGroupSize.z);
+				TracyAppInfo(buf, bytes);
+			}
+			TracyGpuContext;
+		});
+		mRenderThread.wait();
 	}
 
 	void Engine::run(DemoWrangler&& demos) {
 
-		util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale);
+		util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale, mRenderThread);
 
 		ECS ecs;
 		// TODO - managers could just be added to the ecs probably..but how would that work with threading
@@ -113,6 +117,9 @@ namespace neo {
 		demos.setForceReload();
 		
 		while (!mWindow.shouldClose()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			continue;
+
 			TRACY_ZONEN("Engine::run");
 
 			{

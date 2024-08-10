@@ -1,6 +1,7 @@
 #include "Util/pch.hpp"
 
 #include "Util/Util.hpp"
+#include "Util/RenderThread.hpp"
 
 #include "Profiler.hpp"
 
@@ -42,12 +43,15 @@ namespace {
 namespace neo {
 	namespace util {
 
-		Profiler::Profiler(int refreshRate, float scale) {
+		Profiler::Profiler(int refreshRate, float scale, RenderThread& renderThread) {
 #ifdef NO_LOCAL_TRACY
 			NEO_UNUSED(refreshRate, scale);
 
 #else
-			LoadFonts(scale, s_fixedWidth, s_smallFont, s_bigFont);
+			renderThread.setRenderFunc([&]() {
+				LoadFonts(scale, s_fixedWidth, s_smallFont, s_bigFont);
+			});
+			renderThread.wait();
 
 			tracy::Config config;
 			config.threadedRendering = true;
@@ -65,11 +69,14 @@ namespace neo {
 			mRefreshRate = 1000.f / refreshRate;
 
 			// Let tracy catch up
-			for (int i = 0; i < 4; i++) {
-				TRACY_GPUN("Trash");
-				std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(mRefreshRate * 2.f)));
-				TracyGpuCollect;
-			}
+			renderThread.setRenderFunc([&]() {
+				for (int i = 0; i < 4; i++) {
+					TRACY_GPUN("Trash");
+					std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(mRefreshRate * 2.f)));
+					TracyGpuCollect;
+				}
+			});
+			renderThread.wait();
 #endif
 		}
 

@@ -18,10 +18,13 @@ namespace tracy {
 #endif
 
 namespace neo {
+	class RenderThread;
+
 	namespace util {
+
 		class Profiler {
 		public:
-			Profiler(int refreshRate, float scale);
+			Profiler(int refreshRate, float scale, RenderThread& renderThread);
 			~Profiler();
 			Profiler(const Profiler&) = delete;
 			Profiler& operator=(const Profiler&) = delete;
