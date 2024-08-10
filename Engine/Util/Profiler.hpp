@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Util/Util.hpp"
+
 #include <tracy/Tracy.hpp>
 #include <GL/glew.h>
 #include <tracy/TracyOpenGL.hpp>

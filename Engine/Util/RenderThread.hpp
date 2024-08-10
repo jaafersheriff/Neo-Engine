@@ -11,6 +11,7 @@ namespace neo {
 	public:
 		using RenderFunc = std::function<void(void)>;
 
+		// TODO - ability to disregard multithreading and run everything on main thread
 		void start();
 		void pushRenderFunc(RenderFunc func);
 		void wait();

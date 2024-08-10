@@ -166,6 +166,9 @@ namespace neo {
 			Framebuffer fb; // empty framebuffer is just the backbuffer -- just don't do anything with it ever
 			blit(resourceManagers, fb, defaultFbo.mTextures[0], window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
 		}
+
+		window.flip();
+		TracyGpuCollect;
 	}
 
 	void Renderer::imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager) {
@@ -258,10 +261,4 @@ namespace neo {
 		ImGui::End();
 
 	}
-
-	void Renderer::clean() {
-		resetState();
-	}
-
-
 }

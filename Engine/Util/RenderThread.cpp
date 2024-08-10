@@ -1,5 +1,7 @@
 #include "Util/pch.hpp"
 
+#include "Util/Profiler.hpp"
+
 #include "RenderThread.hpp"
 
 namespace neo {
@@ -8,7 +10,10 @@ namespace neo {
 		mThread = std::thread([this]() {
 			tracy::SetThreadName("Render Thread");
 			while (true) {
-				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				{
+					TRACY_ZONEN("Sleep...");
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				}
 
 				int jobs = 0;
 				{
@@ -39,6 +44,7 @@ namespace neo {
 	}
 
 	void RenderThread::wait() {
+		TRACY_ZONEN("Wait on render thread");
 		while (true) {
 			{
 				std::lock_guard<std::mutex> lock(mRenderQueueMutex);

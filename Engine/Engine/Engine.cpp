@@ -68,8 +68,7 @@ namespace neo {
 
 		RenderThread& renderThread = ServiceLocator<RenderThread>::ref();
 		renderThread.start();
-		auto window = mWindow.getWindow();
-		renderThread.pushRenderFunc([window]() {
+		renderThread.pushRenderFunc([window = mWindow.getWindow()]() {
 			glfwMakeContextCurrent(window);
 			/* Init GLEW */
 			glewExperimental = GL_FALSE;
@@ -126,9 +125,6 @@ namespace neo {
 		demos.setForceReload();
 		
 		while (!mWindow.shouldClose()) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			continue;
-
 			TRACY_ZONEN("Engine::run");
 
 			{
@@ -175,6 +171,13 @@ namespace neo {
 					}
 				}
 
+
+				RenderThread& renderThread = ServiceLocator<RenderThread>::ref();
+				{
+
+					TRACY_ZONEN("Wait on previous frame");
+					renderThread.wait();
+				}
 				{
 
 					TRACY_ZONEN("Resource Tick");
@@ -188,17 +191,19 @@ namespace neo {
 				{
 					TRACY_ZONEN("Frame Render");
 					if (!mWindow.isMinimized()) {
-						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), ecs, resourceManagers);
+						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), &resourceManagers, &ecs]() {
+							// TODO - deep copy ECS
+							// TODO - deep copy imgui state
+							ServiceLocator<Renderer>::ref().render(mWindow, demo, ecs, resourceManagers);
+							Messenger::relayMessages(ecs);
+						});
 					}
-					Messenger::relayMessages(ecs);
 				}
 
 				_endFrame(ecs);
 				Messenger::relayMessages(ecs);
 			}
 
-			mWindow.flip();
-			TracyGpuCollect;
 			FrameMark;
 		}
 
@@ -208,12 +213,14 @@ namespace neo {
 
 	void Engine::_swapDemo(DemoWrangler& demos, ECS& ecs, ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
+		RenderThread& renderThread = ServiceLocator<RenderThread>::ref();
+
+		renderThread.wait();
 
 		/* Destry the old state*/
 		demos.getCurrentDemo()->destroy();
 		ecs.clean();
 		resourceManagers.clear();
-		ServiceLocator<Renderer>::ref().clean();
 		Messenger::clean();
 
 		/* Init the new state */
@@ -224,7 +231,9 @@ namespace neo {
 		mMouse.init();
 		mKeyboard.init();
 		ServiceLocator<Renderer>::ref().setDemoConfig(config);
-		ServiceLocator<Renderer>::ref().init();
+		renderThread.pushRenderFunc([]() {
+			ServiceLocator<Renderer>::ref().init();
+		});
 		Loader::init(config.resDir, config.shaderDir);
 		_createPrefabs(resourceManagers);
 		resourceManagers.tick();
@@ -280,7 +289,6 @@ namespace neo {
 		ecs.clean();
 		Messenger::clean();
 		resourceManagers.clear();
-		ServiceLocator<Renderer>::ref().clean();
 		ServiceLocator<Renderer>::reset();
 		ServiceLocator<ImGuiManager>::ref().destroy();
 		mWindow.shutDown();

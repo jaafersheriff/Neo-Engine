@@ -57,7 +57,6 @@ namespace neo {
 			void init();
 			void resetState();
 			void render(WindowSurface&, IDemo* demo, ECS&, ResourceManagers& resourceManager);
-			void clean();
 
 			void imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager);
 		private:

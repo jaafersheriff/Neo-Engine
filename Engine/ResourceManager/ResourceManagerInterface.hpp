@@ -36,7 +36,9 @@ namespace neo {
 		template<typename... Args>
 		BackedResource(Args... args)
 			: mResource(std::forward<Args>(args)...)
-		{}
+		{
+			// TODO - assert that this only happens on the render thread..
+		}
 		ResourceType mResource;
 		std::optional<std::string> mDebugName;
 	};

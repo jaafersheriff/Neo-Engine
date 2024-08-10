@@ -97,7 +97,7 @@ namespace neo {
 		style->AntiAliasedFill = false;
 		style->AntiAliasedFill = false;
 
-		renderThread.pushRenderFunc([&]() {
+		renderThread.pushRenderFunc([window, glslVersion]() {
 			ImGui_ImplGlfw_InitForOpenGL(window, false);
 			ImGui_ImplOpenGL3_Init(glslVersion);
 		});
@@ -107,10 +107,6 @@ namespace neo {
 		NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 		TRACY_ZONE();
 
-		{
-			TRACY_ZONEN("ImGui_ImplOpenGL3_NewFrame");
-			ImGui_ImplOpenGL3_NewFrame();
-		}
 		{
 			TRACY_ZONEN("ImGui_ImplGlfw_NewFrame");
 			ImGui_ImplGlfw_NewFrame();
@@ -227,6 +223,10 @@ namespace neo {
 	void ImGuiManager::render() {
 		NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
+		{
+			TRACY_ZONEN("ImGui_ImplOpenGL3_NewFrame");
+			ImGui_ImplOpenGL3_NewFrame();
+		}
 		{
 			TRACY_GPUN("ImGui::render");
 			ImGui::Render();
