@@ -80,7 +80,10 @@ namespace neo {
 			memcpy(const_cast<uint8_t*>(copy.mElementBuffer->mData), meshDetails.mElementBuffer->mData, meshDetails.mElementBuffer->mByteSize);
 		}
 
-		mQueue.emplace_back(ResourceLoadDetails_Internal{ id,  copy, debugName });
+		{
+			std::lock_guard<std::mutex> lock(mQueueMutex);
+			mQueue.emplace_back(ResourceLoadDetails_Internal{ id,  copy, debugName });
+		}
 
 		return id;
 	}
@@ -88,11 +91,16 @@ namespace neo {
 	void MeshManager::_tickImpl() {
 		TRACY_ZONE();
 
-		if (!mQueue.empty()) {
+		// Create
+		{
 			std::vector<ResourceLoadDetails_Internal> swapQueue = {};
-			std::swap(mQueue, swapQueue);
-			mQueue.clear();
-
+			{
+				std::lock_guard<std::mutex> lock(mQueueMutex);
+				if (!mQueue.empty()) {
+					std::swap(mQueue, swapQueue);
+					mQueue.clear();
+				}
+			}
 			for (auto& details : swapQueue) {
 				mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
 				for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
@@ -104,10 +112,16 @@ namespace neo {
 			}
 		}
 
-		if (!mTransactionQueue.empty()) {
+		// Update
+		{
 			std::vector<std::pair<MeshHandle, std::function<void(Mesh&)>>> swapQueue;
-			std::swap(mTransactionQueue, swapQueue);
-			mTransactionQueue.clear();
+			{
+				std::lock_guard<std::mutex> lock(mTransactionMutex);
+				if (!mTransactionQueue.empty()) {
+					std::swap(mTransactionQueue, swapQueue);
+					mTransactionQueue.clear();
+				}
+			}
 
 			for (auto&& [handle, func] : swapQueue) {
 				if (isValid(handle)) {
@@ -119,10 +133,16 @@ namespace neo {
 			}
 		}
 
-		if (!mDiscardQueue.empty()) {
+		// Delete
+		{
 			std::vector<MeshHandle> swapQueue;
-			std::swap(mDiscardQueue, swapQueue);
-			mDiscardQueue.clear();
+			{
+				std::lock_guard<std::mutex> lock(mDiscardMutex);
+				if (!mDiscardQueue.empty()) {
+					std::swap(mDiscardQueue, swapQueue);
+					mDiscardQueue.clear();
+				}
+			}
 
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {

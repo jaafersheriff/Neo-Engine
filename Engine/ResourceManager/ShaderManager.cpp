@@ -77,6 +77,7 @@ namespace neo {
 	}
 
 	[[nodiscard]] ShaderManager::ShaderHandle ShaderManager::_asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, const std::optional<std::string>& debugName) const {
+		std::lock_guard<std::mutex> lock(mQueueMutex);
 		mQueue.emplace_back(ResourceLoadDetails_Internal{ id, shaderDetails, debugName });
 		return id;
 	}
@@ -113,20 +114,28 @@ namespace neo {
 			});
 		}
 
+		// Create
 		{
 			std::vector<ResourceLoadDetails_Internal> swapQueue = {};
-			std::swap(swapQueue, mQueue);
-			mQueue.clear();
+			{
+				std::lock_guard<std::mutex> lock(mQueueMutex);
+				std::swap(swapQueue, mQueue);
+				mQueue.clear();
+			}
 
 			for (auto& loadDetails : swapQueue) {
 				mCache.load<ShaderLoader>(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
 			}
 		}
 
+		// Destroy
 		{
 			std::vector<ShaderHandle> swapQueue = {};
-			std::swap(swapQueue, mDiscardQueue);
-			mDiscardQueue.clear();
+			{
+				std::lock_guard<std::mutex> lock(mDiscardMutex);
+				std::swap(swapQueue, mDiscardQueue);
+				mDiscardQueue.clear();
+			}
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
 					_destroyImpl(mCache.handle(id.mHandle).get());

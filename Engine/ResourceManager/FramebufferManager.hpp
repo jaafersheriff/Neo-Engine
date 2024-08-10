@@ -84,6 +84,7 @@ namespace neo {
 		bool isQueued(FramebufferHandle id) const {
 			// TODO - this is a linear search :(
 			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
+			std::lock_guard<std::mutex> lock(mQueueMutex);
 			for (auto& res : mQueue) {
 				if (id == res.mHandle) {
 					return true;
@@ -109,6 +110,7 @@ namespace neo {
 
 		void imguiEditor(std::function<void(Texture&)> textureFunc, TextureManager& textureManager);
 
+		mutable std::mutex mQueueMutex;
 		mutable std::vector<FramebufferQueueItem> mQueue;
 		entt::resource_cache<BackedResource<PooledFramebuffer>> mCache;
 		std::shared_ptr<Framebuffer> mFallback;

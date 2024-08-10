@@ -6,6 +6,7 @@
 #include <string>
 #include <memory>
 #include <optional>
+#include <mutex>
 
 namespace neo {
 	class ResourceManagers;
@@ -58,6 +59,7 @@ namespace neo {
 			}
 			// TODO - this is a linear search :(
 			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
+			std::lock_guard<std::mutex> lock(mQueueMutex);
 			for (auto& res : mQueue) {
 				if (id == res.mHandle) {
 					return true;
@@ -72,6 +74,7 @@ namespace neo {
 			}
 			// TODO - this is a linear search :(
 			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
+			std::lock_guard<std::mutex> lock(mDiscardMutex);
 			for (auto& res : mDiscardQueue) {
 				if (id == res.mHandle) {
 					return true;
@@ -108,11 +111,13 @@ namespace neo {
 		}
 
 		void transact(ResourceHandle<ResourceType> handle, std::function<void(ResourceType&)> transaction) const {
+			std::lock_guard<std::mutex> lock(mTransactionMutex);
 			mTransactionQueue.emplace_back(std::make_pair(handle, transaction));
 		}
 
 		void discard(ResourceHandle<ResourceType> id) const {
 			if (!isDiscardQueued(id) && (isValid(id) || isQueued(id))) {
+				std::lock_guard<std::mutex> lock(mDiscardMutex);
 				mDiscardQueue.emplace_back(id);
 			}
 		}
@@ -125,6 +130,9 @@ namespace neo {
 		};
 
 		void clear() {
+			std::lock_guard<std::mutex> lock1(mQueueMutex);
+			std::lock_guard<std::mutex> lock2(mDiscardMutex);
+			std::lock_guard<std::mutex> lock3(mTransactionMutex);
 			mQueue.clear();
 			mDiscardQueue.clear();
 			mTransactionQueue.clear();
@@ -137,9 +145,17 @@ namespace neo {
 		void tick() {
 			static_cast<DerivedManager*>(this)->_tickImpl();
 		}
+		mutable std::mutex mQueueMutex;
 		mutable std::vector<ResourceLoadDetails_Internal> mQueue;
+
+		mutable std::mutex mDiscardMutex;
 		mutable std::vector<ResourceHandle<ResourceType>> mDiscardQueue;
+
+		mutable std::mutex mTransactionMutex;
 		mutable std::vector<std::pair<ResourceHandle<ResourceType>, std::function<void(ResourceType&)>>> mTransactionQueue;
+
+		 // TODO - this is busted because it holds shared_ptr<gpu resource> that gets constructed on main thread
+		// ResourceType (Cache->Resource) should only ever be accessed on main therad
 		entt::resource_cache<BackedResource<ResourceType>> mCache;
 		std::shared_ptr<BackedResource<ResourceType>> mFallback;
 

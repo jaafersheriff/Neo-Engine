@@ -168,12 +168,15 @@ namespace neo {
 					copy.mData = static_cast<uint8_t*>(malloc(byteSize));
 					memcpy(const_cast<uint8_t*>(copy.mData), builder.mData, byteSize);
 				}
+
+				std::lock_guard<std::mutex> lock(mQueueMutex);
 				mQueue.emplace_back(ResourceLoadDetails_Internal{ id, copy, debugName });
 			},
 			[&](TextureFiles& loadDetails) {
 				NEO_ASSERT(loadDetails.mFilePaths.size() == 1 || loadDetails.mFilePaths.size() == 6, "Invalid file path count when loading texture");
 
 				// Can safely copy into queue
+				std::lock_guard<std::mutex> lock(mQueueMutex);
 				mQueue.emplace_back(ResourceLoadDetails_Internal{ id, loadDetails, debugName });
 			},
 			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
@@ -186,17 +189,21 @@ namespace neo {
 	void TextureManager::_tickImpl() {
 		TRACY_ZONE();
 
+		// Destroy
 		{
 			std::vector<TextureHandle> swapQueue;
-			std::swap(mDiscardQueue, swapQueue);
-			mDiscardQueue.clear();
-
+			{
+				std::lock_guard<std::mutex> lock(mDiscardMutex);
+				std::swap(mDiscardQueue, swapQueue);
+				mDiscardQueue.clear();
+			}
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
 					_destroyImpl(mCache.handle(id.mHandle).get());
 					mCache.discard(id.mHandle);
 				}
 				else {
+					std::lock_guard<std::mutex> lock(mQueueMutex);
 					for (int i = 0; i < mQueue.size(); i++) {
 						if (id == mQueue[i].mHandle) {
 							mQueue.erase(mQueue.begin() + i);
@@ -207,10 +214,14 @@ namespace neo {
 			}
 		}
 
+		// Create
 		{
 			std::vector<ResourceLoadDetails_Internal> swapQueue;
-			std::swap(mQueue, swapQueue);
-			mQueue.clear();
+			{
+				std::lock_guard<std::mutex> lock(mQueueMutex);
+				std::swap(mQueue, swapQueue);
+				mQueue.clear();
+			}
 
 			for (auto& loadDetails : swapQueue) {
 				std::visit([&](auto&& arg) {

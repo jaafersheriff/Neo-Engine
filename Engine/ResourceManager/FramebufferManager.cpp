@@ -100,6 +100,7 @@ namespace neo {
 			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
 		);
 
+		std::lock_guard<std::mutex> lock(mQueueMutex);
 		mQueue.emplace_back(FramebufferQueueItem{
 			dstId, 
 			attachments,
@@ -129,10 +130,13 @@ namespace neo {
 	void FramebufferManager::tick(const TextureManager& textureManager) {
 		TRACY_ZONE();
 
-		// Create queue
+		// Create
 		std::vector<FramebufferQueueItem> swapQueue = {};
-		std::swap(mQueue, swapQueue);
-		mQueue.clear();
+		{
+			std::lock_guard<std::mutex> lock(mQueueMutex);
+			std::swap(mQueue, swapQueue);
+			mQueue.clear();
+		}
 		for (auto& item : swapQueue) {
 			bool validTextures = true;
 			for (auto& attachment : item.mAttachments) {
@@ -155,7 +159,7 @@ namespace neo {
 			}
 		}
 
-		// Discard queue
+		// Destroy
 		std::vector<FramebufferHandle> discardQueue;
 		mCache.each([&](const auto id, BackedResource<PooledFramebuffer>& pfb) {
 			if (pfb.mResource.mFrameCount == 0) {
@@ -214,7 +218,10 @@ namespace neo {
 	}
 
 	void FramebufferManager::clear(const TextureManager& textureManager) {
-		mQueue.clear();
+		{
+			std::lock_guard<std::mutex> lock(mQueueMutex);
+			mQueue.clear();
+		}
 		mCache.each([&textureManager](BackedResource<PooledFramebuffer>& pfb) {
 			if (!pfb.mResource.mExternallyOwned) {
 				for (auto& textureHandle : pfb.mResource.mFramebuffer.mTextures) {
