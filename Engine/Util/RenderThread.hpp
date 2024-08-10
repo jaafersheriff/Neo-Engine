@@ -4,6 +4,7 @@
 #include <thread>
 #include <optional>
 #include <mutex>
+#include <queue>
 
 namespace neo {
 	class RenderThread {
@@ -11,13 +12,13 @@ namespace neo {
 		using RenderFunc = std::function<void(void)>;
 
 		void start();
-		void setRenderFunc(RenderFunc func);
+		void pushRenderFunc(RenderFunc func);
 		void wait();
 		void kill();
 
 	private:
-		std::mutex mRenderFuncMutex;
-		std::optional<RenderFunc> mRenderFunc;
+		std::mutex mRenderQueueMutex;
+		std::queue<RenderFunc> mRenderQueue;
 
 		std::thread mThread;
 	};

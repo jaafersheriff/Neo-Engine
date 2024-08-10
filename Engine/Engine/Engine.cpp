@@ -32,6 +32,7 @@ extern "C" {
 
 #include "Util/Profiler.hpp"
 #include "Util/Log/Log.hpp"
+#include "Util/RenderThread.hpp"
 #include "Util/ServiceLocator.hpp"
 
 #include <ImGuizmo.h>
@@ -49,9 +50,12 @@ namespace neo {
 	void Engine::init() {
 
 		srand((unsigned int)(time(0)));
-		mRenderThread.start();
 
-		mRenderThread.setRenderFunc([]() {
+		ServiceLocator<RenderThread>::set();
+		RenderThread& renderThread = ServiceLocator<RenderThread>::ref();
+
+		renderThread.start();
+		renderThread.pushRenderFunc([]() {
 			ServiceLocator<Renderer>::set(4, 4);
 
 			{
@@ -103,12 +107,12 @@ namespace neo {
 			}
 			TracyGpuContext;
 		});
-		mRenderThread.wait();
+		renderThread.wait();
 	}
 
 	void Engine::run(DemoWrangler&& demos) {
 
-		util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale, mRenderThread);
+		util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale, ServiceLocator<RenderThread>::ref());
 
 		ECS ecs;
 		// TODO - managers could just be added to the ecs probably..but how would that work with threading

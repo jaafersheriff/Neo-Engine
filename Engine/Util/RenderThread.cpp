@@ -10,28 +10,39 @@ namespace neo {
 			while (true) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
+				int jobs = 0;
 				{
-					std::lock_guard<std::mutex> lock(mRenderFuncMutex);
-					if (mRenderFunc) {
-						mRenderFunc.value()(); // Invoke
-						mRenderFunc.reset();
+					std::lock_guard<std::mutex> lock(mRenderQueueMutex);
+					jobs = mRenderQueue.size();
+				}
+
+				while (jobs > 0) {
+					RenderFunc func;
+
+					{
+						std::lock_guard<std::mutex> lock(mRenderQueueMutex);
+						func = mRenderQueue.front();
+						mRenderQueue.pop();
 					}
+
+					func(); // Invoke
+					jobs--;
 				}
 			}
 			});
 		mThread.detach();
 	}
 
-	void RenderThread::setRenderFunc(RenderFunc func) {
-		std::lock_guard<std::mutex> lock(mRenderFuncMutex);
-		mRenderFunc = func;
+	void RenderThread::pushRenderFunc(RenderFunc func) {
+		std::lock_guard<std::mutex> lock(mRenderQueueMutex);
+		mRenderQueue.push(func);
 	}
 
 	void RenderThread::wait() {
 		while (true) {
 			{
-				std::lock_guard<std::mutex> lock(mRenderFuncMutex);
-				if (!mRenderFunc.has_value()) {
+				std::lock_guard<std::mutex> lock(mRenderQueueMutex);
+				if (!mRenderQueue.empty()) {
 					return;
 				}
 			}

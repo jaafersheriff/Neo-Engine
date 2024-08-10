@@ -48,7 +48,7 @@ namespace neo {
 			NEO_UNUSED(refreshRate, scale);
 
 #else
-			renderThread.setRenderFunc([&]() {
+			renderThread.pushRenderFunc([&]() {
 				LoadFonts(scale, s_fixedWidth, s_smallFont, s_bigFont);
 			});
 			renderThread.wait();
@@ -69,7 +69,7 @@ namespace neo {
 			mRefreshRate = 1000.f / refreshRate;
 
 			// Let tracy catch up
-			renderThread.setRenderFunc([&]() {
+			renderThread.pushRenderFunc([&]() {
 				for (int i = 0; i < 4; i++) {
 					TRACY_GPUN("Trash");
 					std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(mRefreshRate * 2.f)));

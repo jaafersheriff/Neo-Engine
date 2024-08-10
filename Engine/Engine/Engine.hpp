@@ -2,7 +2,6 @@
 
 #include "Renderer/Renderer.hpp"
 #include "Util/Util.hpp"
-#include "Util/RenderThread.hpp"
 
 #include "ECS/ECS.hpp"
 #include "ECS/Systems/CollisionSystems/MouseRaySystem.hpp"
@@ -50,9 +49,9 @@ namespace neo {
 		
 		/* Debug */
 		bool mShowBoundingBoxes = false;
+
 		MouseRaySystem mMouseRaySystem;
 		SelectingSystem mSelectingSystem;
 		
-		RenderThread mRenderThread;
 	};
 }
