@@ -58,7 +58,7 @@ namespace Fireworks {
 			auto entity = ecs.createEntity();
 			ecs.addComponent<TagComponent>(entity, "Light");
 			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 4.f, 7.f), glm::vec3(100.f));
-			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f), 1000.f);
+			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f, 0.25f, 0.f), 1000.f);
 			ecs.addComponent<MainLightComponent>(entity);
 			ecs.addComponent<PointLightComponent>(entity);
 			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
