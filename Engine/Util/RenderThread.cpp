@@ -14,7 +14,7 @@ namespace neo {
 			while (true) {
 				{
 					TRACY_ZONEN("Sleep...");
-					std::this_thread::sleep_for(std::chrono::milliseconds(100));
+					std::this_thread::sleep_for(std::chrono::milliseconds(10));
 				}
 
 				int jobs = 0;
@@ -55,7 +55,7 @@ namespace neo {
 				}
 			}
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 	}
 

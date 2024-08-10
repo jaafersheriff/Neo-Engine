@@ -80,15 +80,19 @@ namespace neo {
 			ImGui::LogToClipboard();
 		}
 
-		for (int i = 0; i < mLogs.size(); i++) {
-			auto&& [severity, log] = mLogs[i];
+		// TODO - this is stalling ALL logs...
+		{
+			std::lock_guard<std::mutex> lock(mLogMutex);
+			for (int i = 0; i < mLogs.size(); i++) {
+				auto&& [severity, log] = mLogs[i];
 
-			// Normally you would store more information in your item than just a string.
-			// (e.g. make Items[] an array of structure, store color/type etc.)
-			glm::vec3 color = util::sLogSeverityData.at(severity).second;
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(color.x, color.y, color.z, 1.0));
-			ImGui::TextWrapped(log);
-			ImGui::PopStyleColor();
+				// Normally you would store more information in your item than just a string.
+				// (e.g. make Items[] an array of structure, store color/type etc.)
+				glm::vec3 color = util::sLogSeverityData.at(severity).second;
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(color.x, color.y, color.z, 1.0));
+				ImGui::TextWrapped(log);
+				ImGui::PopStyleColor();
+			}
 		}
 
 		if (copy_to_clipboard) {
