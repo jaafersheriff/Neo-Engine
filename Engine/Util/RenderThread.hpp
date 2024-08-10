@@ -17,10 +17,17 @@ namespace neo {
 		void wait();
 		void kill();
 
+		// TODO - this should be part of some threadmanager utility class
+		bool isMainThread();
+		bool isRenderThread();
+
 	private:
 		std::mutex mRenderQueueMutex;
 		std::queue<RenderFunc> mRenderQueue;
 
 		std::thread mThread;
+
+		std::thread::id mMainThreadID;
+		std::thread::id mRenderThreadID;
 	};
 }

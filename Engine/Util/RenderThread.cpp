@@ -7,8 +7,10 @@
 namespace neo {
 
 	void RenderThread::start() {
+		mMainThreadID = std::this_thread::get_id();
 		mThread = std::thread([this]() {
 			tracy::SetThreadName("Render Thread");
+			mRenderThreadID = std::this_thread::get_id();
 			while (true) {
 				{
 					TRACY_ZONEN("Sleep...");
@@ -59,5 +61,13 @@ namespace neo {
 
 	void RenderThread::kill() {
 		mThread.join();
+	}
+
+	bool RenderThread::isMainThread() {
+		return std::this_thread::get_id() == mMainThreadID;
+	}
+
+	bool RenderThread::isRenderThread() {
+		return std::this_thread::get_id() == mRenderThreadID;
 	}
 }

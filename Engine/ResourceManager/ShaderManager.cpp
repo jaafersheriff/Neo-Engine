@@ -160,6 +160,7 @@ namespace neo {
 	}
 
 	void ShaderManager::_destroyImpl(BackedResource<SourceShader>& sourceShader) {
+		NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
 		if (sourceShader.mResource.mConstructionArgs.has_value()) {
 			for (auto&& [type, charString] : sourceShader.mResource.mShaderSources) {
 				delete charString;

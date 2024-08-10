@@ -165,6 +165,7 @@ namespace neo {
 	}
 
 	void MeshManager::_destroyImpl(BackedResource<Mesh>& mesh) {
+		NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
 		mesh.mResource.destroy();
 	}
 
