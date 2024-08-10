@@ -172,22 +172,18 @@ namespace neo {
 				}
 
 
+				/* Render */
 				RenderThread& renderThread = ServiceLocator<RenderThread>::ref();
 				{
-
 					TRACY_ZONEN("Wait on previous frame");
 					renderThread.wait();
 				}
 				{
-
 					TRACY_ZONEN("Resource Tick");
 					resourceManagers.tick();
 					Messenger::relayMessages(ecs);
 				}
 
-				/* Render */
-				// TODO - only run this at 60FPS in its own thread
-				// TODO - should this go after processkillqueue?
 				{
 					TRACY_ZONEN("Frame Render");
 					if (!mWindow.isMinimized()) {
@@ -217,7 +213,7 @@ namespace neo {
 
 		renderThread.wait();
 
-		/* Destry the old state*/
+		/* Destroy the old state*/
 		demos.getCurrentDemo()->destroy();
 		ecs.clean();
 		resourceManagers.clear();

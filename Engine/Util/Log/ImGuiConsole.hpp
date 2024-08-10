@@ -18,8 +18,8 @@ namespace neo {
 		void imGuiEditor();
 
 	private:
+		std::mutex mLogMutex;
 		std::vector<std::pair<util::LogSeverity, char*>> mLogs;
-		ImGuiTextFilter mFilter;
 		bool mAutoScrollEnabled;
 		bool mScrollToBottom;
 		int mMaxLogSize = 100;

@@ -18,6 +18,7 @@ namespace neo {
 	}
 
 	void ImGuiConsole::clearLog() {
+		std::lock_guard<std::mutex> lock(mLogMutex);
 		for (int i = 0; i < mLogs.size(); i++) {
 			free(mLogs[i].second);
 		}
@@ -29,6 +30,8 @@ namespace neo {
 		size_t len = strlen(log) + 1; 
 		void* buf = malloc(len); 
 		memcpy(buf, (const void*)log, len);
+
+		std::lock_guard<std::mutex> lock(mLogMutex);
 		mLogs.push_back({ severity, static_cast<char*>(buf) });
 		while (!mInfiniteLog && mLogs.size() > mMaxLogSize) {
 			free(mLogs.front().second);
@@ -79,9 +82,6 @@ namespace neo {
 
 		for (int i = 0; i < mLogs.size(); i++) {
 			auto&& [severity, log] = mLogs[i];
-			if (!mFilter.PassFilter(log)) {
-				continue;
-			}
 
 			// Normally you would store more information in your item than just a string.
 			// (e.g. make Items[] an array of structure, store color/type etc.)
