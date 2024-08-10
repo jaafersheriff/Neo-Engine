@@ -7,6 +7,8 @@
 #include <typeindex>
 #include <memory>
 #include <functional>
+#include <mutex>
+
 #include <entt/signal/dispatcher.hpp>
 
 namespace neo {
@@ -29,26 +31,31 @@ namespace neo {
             static void clean();
 
         private:
+            static std::mutex mDisaptcherMutex;
             static entt::dispatcher mDispatcher;
     };
 
     template <typename MsgT, typename... Args>
     void Messenger::sendMessage(Args &&... args) {
+        std::lock_guard<std::mutex> lock(mDisaptcherMutex);
         mDispatcher.enqueue<MsgT>(std::forward<Args>(args)...);
     }
 
     template<typename MsgT, auto Func, typename Caller> 
     void Messenger::addReceiver(Caller &&caller) {
+        std::lock_guard<std::mutex> lock(mDisaptcherMutex);
         mDispatcher.sink<MsgT>().connect<Func>(caller);
     }
     
     template<typename MsgT, auto Func, typename Caller> 
     void Messenger::removeReceiver(Caller&& caller) {
+        std::lock_guard<std::mutex> lock(mDisaptcherMutex);
         mDispatcher.sink<MsgT>().disconnect<Func>(caller);
     }
 
     template<typename MsgT, typename Caller> 
     void Messenger::removeReceiver(Caller&& caller) {
+        std::lock_guard<std::mutex> lock(mDisaptcherMutex);
         mDispatcher.sink<MsgT>().disconnect(caller);
     }
 }
