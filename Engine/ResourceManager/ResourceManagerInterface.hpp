@@ -37,9 +37,11 @@ namespace neo {
 		template<typename... Args>
 		BackedResource(Args... args)
 			: mResource(std::forward<Args>(args)...)
-		{
-			// TODO - assert that this only happens on the render thread..
-		}
+		{}
+
+		// TODO
+		// This is a GPU-backed resource, plus metadata...
+		// GPU-backed stuff should only happen on the render thread, but metadata might be accessed on main thread..
 		ResourceType mResource;
 		std::optional<std::string> mDebugName;
 	};
@@ -50,6 +52,7 @@ namespace neo {
 	public:
 
 		bool isValid(ResourceHandle<ResourceType> id) const {
+			std::lock_guard<std::mutex> lock(mCacheMutex);
 			return id.mHandle != NEO_INVALID_HANDLE && mCache.contains(id.mHandle);
 		}
 
@@ -133,17 +136,20 @@ namespace neo {
 			std::lock_guard<std::mutex> lock1(mQueueMutex);
 			std::lock_guard<std::mutex> lock2(mDiscardMutex);
 			std::lock_guard<std::mutex> lock3(mTransactionMutex);
+			std::lock_guard<std::mutex> lock4(mCacheMutex);
 			mQueue.clear();
 			mDiscardQueue.clear();
 			mTransactionQueue.clear();
 			mCache.each([this](BackedResource<ResourceType>& resource) {
-				static_cast<DerivedManager*>(this)->_destroyImpl(resource);
+				ServiceLocator<RenderThread>::ref().pushRenderFunc([this, resource]() {
+					static_cast<DerivedManager*>(this)->_destroyImpl(resource);
+				});
 			});
 			mCache.clear();
 		}
 
-		void tick() {
-			static_cast<DerivedManager*>(this)->_tickImpl();
+		void tick(RenderThread& renderThread) {
+			static_cast<DerivedManager*>(this)->_tickImpl(renderThread);
 		}
 		mutable std::mutex mQueueMutex;
 		mutable std::vector<ResourceLoadDetails_Internal> mQueue;
@@ -154,14 +160,18 @@ namespace neo {
 		mutable std::mutex mTransactionMutex;
 		mutable std::vector<std::pair<ResourceHandle<ResourceType>, std::function<void(ResourceType&)>>> mTransactionQueue;
 
-		 // TODO - this is busted because it holds shared_ptr<gpu resource> that gets constructed on main thread
-		// ResourceType (Cache->Resource) should only ever be accessed on main therad
+		std::mutex mCacheMutex;
 		entt::resource_cache<BackedResource<ResourceType>> mCache;
+
 		std::shared_ptr<BackedResource<ResourceType>> mFallback;
 
 	private:
 		ResourceType& _resolveFinal(ResourceHandle<ResourceType> id) const {
-			auto handle = mCache.handle(id.mHandle);
+			entt::resource_handle<BackedResource<ResourceType>> handle;
+			{
+				std::lock_guard<std::mutex> lock(mCacheMutex);
+				handle = mCache.handle(id.mHandle);
+			}
 			if (handle) {
 				return const_cast<ResourceType&>(handle.get().mResource);
 			}

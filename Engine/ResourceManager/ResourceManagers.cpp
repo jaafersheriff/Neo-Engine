@@ -1,15 +1,19 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
+#include "Util/RenderThread.hpp"
+#include "Util/ServiceLocator.hpp"
+
 #include <imgui.h>
 
 namespace neo {
 
 	void ResourceManagers::tick() {
 		TRACY_ZONE();
-		mMeshManager.tick();
-		mShaderManager.tick();
-		mTextureManager.tick();
-		mFramebufferManager.tick(mTextureManager); // Do this after textures
+		auto& renderThread = ServiceLocator<RenderThread>::ref();
+		mMeshManager.tick(renderThread);
+		mShaderManager.tick(renderThread);
+		mTextureManager.tick(renderThread);
+		mFramebufferManager.tick(mTextureManager, renderThread); // Do this after textures
 	}
 
 	void ResourceManagers::clear() {
