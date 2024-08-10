@@ -82,7 +82,7 @@ namespace neo {
 		return id;
 	}
 
-	void ShaderManager::_tickImpl() {
+	void ShaderManager::_tickImpl(RenderThread& renderThread) {
 		TRACY_ZONE();
 
 		// TODO this should run entirely on a separate thread tbh
@@ -92,13 +92,21 @@ namespace neo {
 			TRACY_ZONEN("Shader Hot Reload");
 			// Entt Cache doesn't support iterators :/ 
 			std::vector<entt::id_type> list;
-			list.reserve(mCache.size());
-			mCache.each([&list](const entt::id_type enttId) {
-				list.emplace_back(enttId);
-			});
+			{
+				std::lock_guard<std::mutex> lock(mCacheMutex);
+				list.reserve(mCache.size());
+				mCache.each([&list](const entt::id_type enttId) {
+					list.emplace_back(enttId);
+				});
+			}
 
 			std::for_each(std::execution::par, list.begin(), list.end(), [this](const entt::id_type& id) {
-				if (auto resource = mCache.handle(id); resource && resource->mResource.mConstructionArgs) {
+				entt::resource_handle<BackedResource<SourceShader>> resource;
+				{
+					std::lock_guard<std::mutex> lock(mCacheMutex);
+					resource = mCache.handle(id);
+				}
+				if (resource && resource->mResource.mConstructionArgs) {
 					time_t lastModTime = resource->mResource.mModifiedTime;
 					for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
 						lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
@@ -124,7 +132,10 @@ namespace neo {
 			}
 
 			for (auto& loadDetails : swapQueue) {
-				mCache.load<ShaderLoader>(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
+				renderThread.pushRenderFunc([this, loadDetails]() {
+					std::lock_guard<std::mutex> lock(mCacheMutex);
+					mCache.load<ShaderLoader>(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
+				});
 			}
 		}
 
@@ -137,10 +148,13 @@ namespace neo {
 				mDiscardQueue.clear();
 			}
 			for (auto& id : swapQueue) {
-				if (isValid(id)) {
-					_destroyImpl(mCache.handle(id.mHandle).get());
-					mCache.discard(id.mHandle);
-				}
+				renderThread.pushRenderFunc([this, id]() {
+					if (isValid(id)) {
+						std::lock_guard<std::mutex> lock(mCacheMutex);
+						mCache.discard(id.mHandle);
+						_destroyImpl(mCache.handle(id.mHandle).get());
+					}
+				});
 			}
 		}
 	}
@@ -155,6 +169,7 @@ namespace neo {
 	}
 
 	void ShaderManager::imguiEditor() {
+		std::lock_guard<std::mutex> lock(mCacheMutex);
 		mCache.each([&](entt::id_type, BackedResource<SourceShader>& resource) {
 			auto& shader = resource.mResource;
 			if (ImGui::TreeNode(shader.mName.c_str())) {
@@ -162,13 +177,8 @@ namespace neo {
 					if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(shader.mResolvedShaders.size()))) {
 						ImGui::Separator();
 						for (const auto& variant : shader.mResolvedShaders) {
-							// if (mConstructionArgs && ImGui::Button("Reload")) {
-							// Just destroy the variant and evict from the map, easy
-							// }
-							// else {
 							ImGui::Text("%s", variant.second.variant().size() ? variant.second.variant().c_str() : "No defines");
 							ImGui::Separator();
-							// }
 						}
 						ImGui::TreePop();
 					}
