@@ -25,7 +25,7 @@ namespace DeferredPBR {
 		bool mDrawPointLightShadows = true;
 
 		int mPointLightCount = 2;
-		float mLightDebugRadius = 0.f;
+		float mLightDebugRadius = 0.1f;
 
 		bool mDrawIBL = true;
 
@@ -35,7 +35,6 @@ namespace DeferredPBR {
 			45.f,
 			0.02f
 		};
-		bool mUsePing = true;
 
 		bool mDoBloom = true;
 		BloomParameters mBloomParams = {

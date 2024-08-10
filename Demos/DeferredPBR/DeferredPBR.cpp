@@ -68,7 +68,7 @@ namespace DeferredPBR {
 
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
-		config.name = "PBR";
+		config.name = "DeferredPBR";
 		return config;
 	}
 
