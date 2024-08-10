@@ -117,13 +117,24 @@ namespace DeferredPBR {
 		glBlendColor(1.f, 1.f, 1.f, 1.f);
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
+
 		/* Render light volumes */
-		ShaderDefines drawDefines(passDefines);
 		// TODO : instanced
+
+		// Sort them back to front first
+		ecs.sort<PointLightComponent, SpatialComponent>([&cameraSpatial, &ecs](const ECS::Entity entityLeft, const ECS::Entity entityRight) {
+			auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
+			auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
+			if (leftSpatial && rightSpatial) {
+				return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) > glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
+			}
+			return false;
+		});
+
+		ShaderDefines drawDefines(passDefines);
 		const auto& view = ecs.getView<const LightComponent, const PointLightComponent, const SpatialComponent, CompTs...>();
 		for (auto entity : view) {
 			// TODO : Could do VFC
-
 			MakeDefine(ENABLE_SHADOWS);
 			const bool shadowsEnabled =
 				ecs.has<ShadowCameraComponent>(entity)
