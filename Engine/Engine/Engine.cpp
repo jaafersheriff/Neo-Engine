@@ -105,7 +105,11 @@ namespace neo {
 	void Engine::run(DemoWrangler&& demos) {
 
 		util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale);
+
+		ECS ecs;
+		// TODO - managers could just be added to the ecs probably..but how would that work with threading
 		ResourceManagers resourceManagers;
+
 		demos.setForceReload();
 		
 		while (!mWindow.shouldClose()) {
@@ -116,24 +120,24 @@ namespace neo {
 				{
 					TRACY_ZONEN("Frame Update");
 					if (demos.needsReload()) {
-						_swapDemo(demos, resourceManagers);
+						_swapDemo(demos, ecs, resourceManagers);
 					}
 
-					_startFrame(profiler, resourceManagers);
-					Messenger::relayMessages(mECS);
+					_startFrame(profiler, ecs, resourceManagers);
+					Messenger::relayMessages(ecs);
 
 					/* Destroy and create objects and components */
-					mECS.flush();
-					Messenger::relayMessages(mECS);
+					ecs.flush();
+					Messenger::relayMessages(ecs);
 
 					{
 						TRACY_ZONEN("Demo::update");
-						demos.getCurrentDemo()->update(mECS, resourceManagers);
+						demos.getCurrentDemo()->update(ecs, resourceManagers);
 					}
 
 					/* Update each system */
-					mECS._updateSystems();
-					Messenger::relayMessages(mECS);
+					ecs._updateSystems();
+					Messenger::relayMessages(ecs);
 
 					/* Update imgui functions */
 					if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
@@ -142,16 +146,16 @@ namespace neo {
 
 						{
 							TRACY_ZONEN("Demo Imgui");
-							demos.imGuiEditor(mECS, resourceManagers);
+							demos.imGuiEditor(ecs, resourceManagers);
 						}
-						mECS.imguiEdtor();
+						ecs.imguiEdtor();
 						resourceManagers.imguiEditor();
 						ServiceLocator<ImGuiManager>::ref().imGuiEditor();
-						ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, mECS, resourceManagers);
+						ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, ecs, resourceManagers);
 						profiler.imGuiEditor();
 
 						ServiceLocator<ImGuiManager>::ref().end();
-						Messenger::relayMessages(mECS);
+						Messenger::relayMessages(ecs);
 					}
 				}
 
@@ -159,7 +163,7 @@ namespace neo {
 
 					TRACY_ZONEN("Resource Tick");
 					resourceManagers.tick();
-					Messenger::relayMessages(mECS);
+					Messenger::relayMessages(ecs);
 				}
 
 				/* Render */
@@ -168,13 +172,13 @@ namespace neo {
 				{
 					TRACY_ZONEN("Frame Render");
 					if (!mWindow.isMinimized()) {
-						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), mECS, resourceManagers);
+						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), ecs, resourceManagers);
 					}
-					Messenger::relayMessages(mECS);
+					Messenger::relayMessages(ecs);
 				}
 
-				_endFrame();
-				Messenger::relayMessages(mECS);
+				_endFrame(ecs);
+				Messenger::relayMessages(ecs);
 			}
 
 			mWindow.flip();
@@ -183,15 +187,15 @@ namespace neo {
 		}
 
 		demos.getCurrentDemo()->destroy();
-		shutDown(resourceManagers);
+		shutDown(ecs, resourceManagers);
 	}
 
-	void Engine::_swapDemo(DemoWrangler& demos, ResourceManagers& resourceManagers) {
+	void Engine::_swapDemo(DemoWrangler& demos, ECS& ecs, ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
 
 		/* Destry the old state*/
 		demos.getCurrentDemo()->destroy();
-		mECS.clean();
+		ecs.clean();
 		resourceManagers.clear();
 		ServiceLocator<Renderer>::ref().clean();
 		Messenger::clean();
@@ -209,14 +213,14 @@ namespace neo {
 		_createPrefabs(resourceManagers);
 		resourceManagers.tick();
 
-		demos.getCurrentDemo()->init(mECS, resourceManagers);
+		demos.getCurrentDemo()->init(ecs, resourceManagers);
 
 		/* Init systems */
-		mECS._initSystems();
+		ecs._initSystems();
 
 		/* Initialize new objects and components */
-		mECS.flush();
-		Messenger::relayMessages(mECS);
+		ecs.flush();
+		Messenger::relayMessages(ecs);
 	}
 
 	void Engine::_createPrefabs(ResourceManagers& resourceManagers) {
@@ -255,9 +259,9 @@ namespace neo {
 		}
 	}
 
-	void Engine::shutDown(ResourceManagers& resourceManagers) {
+	void Engine::shutDown(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_LOG_I("Shutting down...");
-		mECS.clean();
+		ecs.clean();
 		Messenger::clean();
 		resourceManagers.clear();
 		ServiceLocator<Renderer>::ref().clean();
@@ -266,7 +270,7 @@ namespace neo {
 		mWindow.shutDown();
 	}
 
-	void Engine::_startFrame(util::Profiler& profiler, ResourceManagers& resourceManagers) {
+	void Engine::_startFrame(util::Profiler& profiler, ECS& ecs, ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
 
 		/* Update frame counter */
@@ -289,17 +293,17 @@ namespace neo {
 			}
 		{
 			TRACY_ZONEN("FrameStats Entity");
-			auto hardware = mECS.createEntity();
-			mECS.addComponent<MouseComponent>(hardware, mMouse);
-			mECS.addComponent<KeyboardComponent>(hardware, mKeyboard);
-			mECS.addComponent<ViewportDetailsComponent>(hardware, viewportSize, viewportPosition);
-			mECS.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(profiler.mTimeStep));
-			mECS.addComponent<SingleFrameComponent>(hardware);
+			auto hardware = ecs.createEntity();
+			ecs.addComponent<MouseComponent>(hardware, mMouse);
+			ecs.addComponent<KeyboardComponent>(hardware, mKeyboard);
+			ecs.addComponent<ViewportDetailsComponent>(hardware, viewportSize, viewportPosition);
+			ecs.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(profiler.mTimeStep));
+			ecs.addComponent<SingleFrameComponent>(hardware);
 		}
 
 		{
 			TRACY_ZONEN("Aspect Ratio");
-			auto cameraTuple = mECS.getSingleView<MainCameraComponent, CameraComponent>();
+			auto cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent>();
 			if (cameraTuple) {
 				auto& [_, __, camera] = *cameraTuple;
 				if (camera.getType() == CameraComponent::CameraType::Perspective) {
@@ -313,16 +317,16 @@ namespace neo {
 		{
 			TRACY_ZONEN("Selecting");
 			if (!ImGuizmo::IsUsing()) {
-				mMouseRaySystem.update(mECS);
-				mSelectingSystem.update(mECS);
+				mMouseRaySystem.update(ecs);
+				mSelectingSystem.update(ecs);
 			}
 		}
 		{
 			TRACY_ZONEN("Update line meshes");
-			for (auto& entity : mECS.getView<DebugBoundingBoxComponent>()) {
-				if (!mECS.has<LineMeshComponent>(entity)) {
-					auto box = mECS.getComponent<BoundingBoxComponent>(entity);
-					auto line = mECS.addComponent<LineMeshComponent>(entity, resourceManagers.mMeshManager);
+			for (auto& entity : ecs.getView<DebugBoundingBoxComponent>()) {
+				if (!ecs.has<LineMeshComponent>(entity)) {
+					auto box = ecs.getComponent<BoundingBoxComponent>(entity);
+					auto line = ecs.addComponent<LineMeshComponent>(entity, resourceManagers.mMeshManager);
 
 					line->mUseParentSpatial = true;
 					line->mWriteDepth = true;
@@ -358,11 +362,11 @@ namespace neo {
 		}
 	}
 
-	void Engine::_endFrame() {
+	void Engine::_endFrame(ECS& ecs) {
 		TRACY_ZONE();
 
-		for(auto& entity : mECS.getView<SingleFrameComponent>()) {
-			mECS.removeEntity(entity);
+		for(auto& entity : ecs.getView<SingleFrameComponent>()) {
+			ecs.removeEntity(entity);
 		}
 
 		// Update display, mouse, keyboard 
