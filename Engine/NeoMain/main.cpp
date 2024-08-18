@@ -7,9 +7,9 @@
 #include <memory>
 
 int main() {
-	neo::DemoWrangler demos(sCurrentDemo, sDemos);
-	neo::Engine::init();
-	neo::Engine::run(demos);
+	neo::Engine engine;
+	engine.init();
+	engine.run(std::move(neo::DemoWrangler(sCurrentDemo, sDemos)));
 
 	return EXIT_SUCCESS;
 }

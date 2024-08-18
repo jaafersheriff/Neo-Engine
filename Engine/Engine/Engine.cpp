@@ -23,10 +23,6 @@ extern "C" {
 
 #include "ImGuiManager.hpp"
 
-#include "Hardware/WindowSurface.hpp"
-#include "Hardware/Keyboard.hpp"
-#include "Hardware/Mouse.hpp"
-
 #include "Messaging/Messenger.hpp"
 
 #include "Loader/Loader.hpp"
@@ -49,16 +45,6 @@ extern "C" {
 #include <GLFW/glfw3.h>
 
 namespace neo {
-
-	/* ECS */
-	ECS Engine::mECS;
-	MouseRaySystem Engine::mMouseRaySystem;
-	SelectingSystem Engine::mSelectingSystem;
-
-	/* Hardware */
-	WindowSurface Engine::mWindow;
-	Keyboard Engine::mKeyboard;
-	Mouse Engine::mMouse;
 
 	void Engine::init() {
 
@@ -116,7 +102,7 @@ namespace neo {
 		TracyGpuContext;
 	}
 
-	void Engine::run(DemoWrangler& demos) {
+	void Engine::run(DemoWrangler&& demos) {
 
 		util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale);
 		ResourceManagers resourceManagers;
