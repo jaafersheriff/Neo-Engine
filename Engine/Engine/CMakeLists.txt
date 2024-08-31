@@ -14,3 +14,12 @@ PRIVATE
 	TracyClient
 	implots
 )
+
+if (NOT NO_LOCAL_TRACY) 
+	target_link_libraries(Engine
+	PRIVATE
+		TracyServer
+	)
+endif()
+
+

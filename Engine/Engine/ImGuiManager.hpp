@@ -36,7 +36,7 @@ namespace neo {
 		void reset();
 		void destroy();
 
-		void reload(ResourceManagers& resourceManagers);
+		void reload(ResourceManagers& resourceManagers, float scale);
 		void resolveDrawData(ECS& ecs, ResourceManagers& resourceManagers);
 
 		void begin();

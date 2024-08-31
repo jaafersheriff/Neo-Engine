@@ -152,13 +152,13 @@ namespace neo {
 		
 		/* Render imgui */
 		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-			TRACY_GPUN("ImGuiManager.render");
+			TRACY_GPUN("ImGui Render");
 			// Bind backbuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			resourceManagers.mShaderManager.asyncLoad("ImGuiShader", SourceShader::ConstructionArgs{
-				{types::shader::Stage::Vertex, "imgui.vert"},
-				{types::shader::Stage::Fragment, "imgui.frag"},
-			});
+			glm::uvec2 viewportOffset = ServiceLocator<ImGuiManager>::ref().getViewportOffset();
+			glm::uvec2 viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
+			glViewport(0, 0, viewportSize.x, viewportSize.y);
+			drawImGui(resourceManagers, ecs, viewportOffset, viewportSize);
 		}
 		else {
 			TRACY_GPUN("Final Blit");

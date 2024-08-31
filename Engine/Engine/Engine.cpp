@@ -116,7 +116,7 @@ namespace neo {
 
 	void Engine::run(DemoWrangler&& demos) {
 
-		util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale, ServiceLocator<RenderThread>::ref());
+		util::Profiler profiler(mWindow.getDetails().mRefreshRate, ServiceLocator<RenderThread>::ref());
 
 		ECS ecs;
 		// TODO - managers could just be added to the ecs probably..but how would that work with threading
@@ -187,18 +187,17 @@ namespace neo {
 				{
 					TRACY_ZONEN("Frame Render");
 					if (!mWindow.isMinimized()) {
+						// TODO - deep copy ECS
+
+						// TODO - this needs to go into the renderer's ecs
+						if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+							ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
+						}
+						ecs.flush(); // Ah shit
+						resourceManagers.tick(); // Ah shit
+
 						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), &resourceManagers, &ecs]() {
-							// TODO - deep copy ECS
-
-
-							// TODO - deep copy imgui state
-							// TODO - this needs to go into the renderer's ecs
-							if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-								ServiceLocator<ImGuiManager>::ref().resolveDrawData(mECS, resourceManagers);
-							}
-							mECS.flush(); // Ah shit
-
-							ServiceLocator<Renderer>::ref().render(mWindow, demo, mECS, resourceManagers);
+							ServiceLocator<Renderer>::ref().render(mWindow, demo, ecs, resourceManagers);
 						});
 					}
 				}
@@ -239,7 +238,7 @@ namespace neo {
 		});
 		Loader::init(config.resDir, config.shaderDir);
 		_createPrefabs(resourceManagers);
-		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers);
+		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers, mWindow.getDetails().mDPIScale);
 		resourceManagers.tick();
 
 		demos.getCurrentDemo()->init(ecs, resourceManagers);

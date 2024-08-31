@@ -22,7 +22,11 @@
 #include <ImGuizmo.h>
 
 #include <tracy/Tracy.hpp>
- #include <tracy/TracyOpenGL.hpp>
+#include <tracy/TracyOpenGL.hpp>
+
+#ifndef NO_LOCAL_TRACY
+#include <Fonts.hpp>
+#endif
 
 namespace neo {
 
@@ -263,8 +267,9 @@ namespace neo {
 		// }
 	}
 
-	void ImGuiManager::reload(ResourceManagers& resourceManagers) {
+	void ImGuiManager::reload(ResourceManagers& resourceManagers, float dpiScale) {
 		TRACY_ZONE();
+		LoadFonts(dpiScale, s_fixedWidth, s_smallFont, s_bigFont);
 		uint8_t* pixels;
 		int width, height;
 		ImGuiIO io = ImGui::GetIO();
@@ -277,6 +282,7 @@ namespace neo {
 			glm::u16vec3(width, height, 0),
 			pixels
 		});
+		ImGui::GetIO().Fonts->SetTexID(reinterpret_cast<void*>(&mFontTexture));
 	}
 
 	void ImGuiManager::resolveDrawData(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -357,14 +363,14 @@ namespace neo {
 				auto entity = ecs.createEntity();
 				ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
 				component->mMeshHandle = mesh;
-				component->mTextureHandle = reinterpret_cast<entt::id_type>(cmd->TextureId);
+				component->mTextureHandle = TextureHandle(*reinterpret_cast<entt::id_type*>(cmd->TextureId));
 				component->mScissorRect = glm::vec4(
 					cmd->ClipRect.x,
 					cmd->ClipRect.y,
 					cmd->ClipRect.z,
 					cmd->ClipRect.w
 				);
-				component->mElementCount = cmd->ElemCount;
+				component->mElementCount = static_cast<uint16_t>(cmd->ElemCount);
 				component->mElementBufferOffset = indexBufferOffset;
 
 				indexBufferOffset += cmd->ElemCount;
