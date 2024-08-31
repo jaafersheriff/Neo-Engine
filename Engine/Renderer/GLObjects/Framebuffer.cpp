@@ -122,10 +122,10 @@ namespace neo {
 		glClear(_getGLClearFlags(clearFlags));
 	}
 
-	void Framebuffer::destroy() {
+	void Framebuffer::destroy() const {
 		glDeleteFramebuffers(1, &mFBOID);
-		mColorAttachments = 0;
-		mFBOID = 0;
+		//mColorAttachments = 0;
+		//mFBOID = 0;
 	}
 
 }

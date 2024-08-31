@@ -171,18 +171,21 @@ namespace neo {
 		}
 
 		// Destroy
-		std::vector<FramebufferHandle> discardQueue;
+		std::vector<Framebuffer> discardQueue;
 		std::lock_guard<std::mutex> lock(mCacheMutex);
 		mCache.each([&](const auto id, BackedResource<PooledFramebuffer>& pfb) {
+			if (&pfb == nullptr) {
+				NEO_LOG_W("PFB IS INVALUD THREADING ISSUE AHHHHHHHHHHHHH");
+				return;
+			}
 			if (pfb.mResource.mFrameCount == 0) {
-				discardQueue.emplace_back(id);
 				if (!pfb.mResource.mExternallyOwned) {
 					for (auto& texId : pfb.mResource.mFramebuffer.mTextures) {
 						textureManager.discard(texId);
 					}
 				}
-
-				_destroyImpl(pfb);
+				discardQueue.push_back(pfb.mResource.mFramebuffer);
+				mCache.discard(id);
 			}
 			else {
 				if (pfb.mResource.mUsedThisFrame) {
@@ -193,8 +196,12 @@ namespace neo {
 				}
 			}
 		});
-		for (auto& discardId : discardQueue) {
-			mCache.discard(discardId.mHandle);
+		if (!discardQueue.empty()) {
+			renderThread.pushRenderFunc([this, queue = std::move(discardQueue)]() {
+				for (int i = 0; i < queue.size(); i++) {
+					queue[i].destroy();
+				}
+			});
 		}
 	}
 

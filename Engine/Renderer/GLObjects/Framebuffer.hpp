@@ -25,6 +25,6 @@ namespace neo {
 
 		void attachTexture(TextureHandle id, const Texture& texture, const types::framebuffer::AttachmentTarget& target, uint8_t mip);
 		void initDrawBuffers();
-		void destroy();
+		void destroy() const; // TODO - why is this const :(
 	};
 }

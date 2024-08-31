@@ -64,7 +64,7 @@ namespace neo {
 		//ImFont* getSmallFont();
 		//ImFont* getBigFont();
 	private:
-		bool mIsEnabled = true;
+		bool mIsEnabled = false;
 		Viewport mViewport;
 		ImGuiConsole mConsole;
 	};

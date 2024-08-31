@@ -95,7 +95,7 @@ namespace neo {
 				ImGui::TreePop();
 			}
 		}
-		if (ImGui::TreeNodeEx(&mRegistry, 0, "All Entities: %d", static_cast<int>(mRegistry.alive()))) {
+		if (ImGui::TreeNodeEx(&mRegistry, 0, "All Entities: %d", 0 /*TODO - this dies static_cast<int>(mRegistry.alive())*/)) {
 			getView<TagComponent>().each([this](Entity entity, TagComponent& tag) {
 				if (ImGui::TreeNodeEx(tag.mTag.c_str())) {
 					mEditor.renderEditor(mRegistry, entity);
