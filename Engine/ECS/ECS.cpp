@@ -56,7 +56,6 @@ namespace neo {
 			mRegistry.destroy(entity);
 		});
 		mRegistry.clear();
-		NEO_ASSERT(mRegistry.alive() == 0, "What");
 		mSystems.clear();
 	}
 

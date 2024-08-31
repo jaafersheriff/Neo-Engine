@@ -154,8 +154,10 @@ namespace neo {
 		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
 			TRACY_GPUN("ImGui Render");
 			// Bind backbuffer
+			resetState();
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y);
+			glClear(GL_COLOR_BUFFER_BIT);
 			drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
 
 			// Clear all the imgui draws now hehe

@@ -342,17 +342,16 @@ namespace neo {
 		ImGui::Render();
 
 		ImDrawData* drawData = ImGui::GetDrawData();
-		NEO_ASSERT(drawData->Valid, "ImDrawData is invalid");
+		NEO_ASSERT(drawData && drawData->Valid, "ImDrawData is invalid");
 		if (drawData->CmdListsCount == 0) {
 			return;
 		}
 
-		
-	    const ImVec2 clipOffset = drawData->DisplayPos;         // (0,0) unless using multi-viewports
+		const ImVec2 clipOffset = drawData->DisplayPos;         // (0,0) unless using multi-viewports
 		const ImVec2 clipScale = drawData->FramebufferScale; // (1,1) unless using retina display which are often (2,2)0
 
 		for (int i = 0; i < drawData->CmdListsCount; i++) {
-			ImDrawList* cmdList = drawData->CmdLists[i];
+	        const ImDrawList* cmdList = drawData->CmdLists[i];
 
 			// Need to break this struct apart into individual buffers and upload them into individual VBOs...
 			{
@@ -406,15 +405,15 @@ namespace neo {
 					});
 			}
 
-			for (int j = 0; j < cmdList->CmdBuffer.Size; j++) {
-				const ImDrawCmd* cmd = &cmdList->CmdBuffer[j];
+	        for (int cmd_i = 0; cmd_i < cmdList->CmdBuffer.Size; cmd_i++) {
+	            const ImDrawCmd* cmd = &cmdList->CmdBuffer[cmd_i];
 				if (cmd->UserCallback != nullptr) {
 					if (cmd->UserCallback == ImDrawCallback_ResetRenderState) {
 						NEO_LOG_W("Reset the render state wahoo");
 					}
 					else {
-						NEO_LOG_W("WTF USER CALLBACK?");
-						cmd->UserCallback(cmdList, cmd);
+						NEO_LOG_W("Callback function!?");
+						//cmd->UserCallback(cmdList, cmd);
 					}
 				}
 				else {

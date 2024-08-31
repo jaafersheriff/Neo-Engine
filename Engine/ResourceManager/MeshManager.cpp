@@ -13,6 +13,7 @@ namespace neo {
 	struct MeshLoader final : entt::resource_loader<MeshLoader, BackedResource<Mesh>> {
 
 		std::shared_ptr<BackedResource<Mesh>> load(MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const {
+			TRACY_GPU();
 			NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
 			if (debugName.has_value()) {
 				NEO_LOG_V("Uploading mesh %s", debugName.value().c_str());
@@ -138,6 +139,7 @@ namespace neo {
 					for (auto&& [handle, func] : queue) {
 						if (isValid(handle)) {
 							std::lock_guard<std::mutex> lock(mCacheMutex);
+							TRACY_GPUN("MeshManager::UpdateSingle");
 							func(mCache.handle(handle.mHandle).get().mResource);
 						}
 						else {
@@ -175,6 +177,7 @@ namespace neo {
 	}
 
 	void MeshManager::_destroyImpl(BackedResource<Mesh>& mesh) {
+		TRACY_GPU();
 		NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
 		mesh.mResource.destroy();
 	}
