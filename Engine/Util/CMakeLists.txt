@@ -22,7 +22,6 @@ else()
 	target_link_libraries(Util
 	PRIVATE
 		TracyServer
-		TracyServerFonts
 	)
 endif()
 
