@@ -196,7 +196,7 @@ namespace neo {
 						ecs.flush(); // Ah shit
 						resourceManagers.tick(); // Ah shit
 
-						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), &resourceManagers, &ecs]() {
+						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &ecs]() {
 							ServiceLocator<Renderer>::ref().render(mWindow, demo, ecs, resourceManagers);
 						});
 					}
