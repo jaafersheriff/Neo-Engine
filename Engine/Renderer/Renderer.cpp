@@ -110,7 +110,7 @@ namespace neo {
 		glUseProgram(0);
 	}
 
-	void Renderer::render(WindowSurface& window, IDemo* demo, ECS& ecs, ResourceManagers& resourceManagers) {
+	void Renderer::render(WindowSurface& window, IDemo* demo, const ECS& ecs, ResourceManagers& resourceManagers) {
 		TRACY_GPU();
 
 		mStats = {};
@@ -147,7 +147,7 @@ namespace neo {
 		if (mShowBoundingBoxes) {
 			TRACY_GPUN("Debug Draws");
 			defaultFbo.bind();
-			drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.getComponent<MainCameraComponent>()));
+			drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.cGetComponent<const MainCameraComponent>()));
 		}
 		
 		/* Render imgui */
@@ -159,6 +159,15 @@ namespace neo {
 			glm::uvec2 viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
 			glViewport(0, 0, viewportSize.x, viewportSize.y);
 			drawImGui(resourceManagers, ecs, viewportOffset, viewportSize);
+
+			// Clear all the imgui draws now hehe
+			for(const ECS::Entity& entity : ecs.getView<const ImGuiDrawComponent, const ImGuiComponent>()) {
+				MeshHandle imguiMesh = ecs.cGetComponent<const ImGuiDrawComponent>(entity)->mMeshHandle;
+				if (resourceManagers.mMeshManager.isValid(imguiMesh)) {
+					resourceManagers.mMeshManager.discard(imguiMesh);
+				}
+				ecs.removeEntity(entity);
+			};
 		}
 		else {
 			TRACY_GPUN("Final Blit");

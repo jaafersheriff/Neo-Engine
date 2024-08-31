@@ -5,6 +5,10 @@
 #include "ResourceManager/MeshManager.hpp"
 
 namespace neo {
+	// Needed for views
+	START_COMPONENT(ImGuiComponent);
+	END_COMPONENT();
+
 	START_COMPONENT(ImGuiDrawComponent);
 		ImGuiDrawComponent() {}
 		MeshHandle mMeshHandle = NEO_INVALID_HANDLE;

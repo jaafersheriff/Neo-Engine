@@ -38,7 +38,7 @@ namespace neo {
 		using Registry = entt::registry;
 
 		Entity createEntity();
-		void removeEntity(Entity e);
+		void removeEntity(Entity e) const;
 
 		// Entity access
 		template<typename CompT, typename... Args> CompT* addComponent(Entity e, Args &&... args);
@@ -69,7 +69,8 @@ namespace neo {
 		mutable MM::EntityEditor<Entity> mEditor;
 
 		/* Active containers */
-		std::vector<Entity> mEntityKillQueue;
+		mutable std::mutex mEntityKillMutex;
+		mutable std::vector<Entity> mEntityKillQueue;
 		using ComponentModFunc = std::function<void(Registry&)>;
 		std::vector<ComponentModFunc> mAddComponentFuncs;
 		std::vector<ComponentModFunc> mRemoveComponentFuncs;

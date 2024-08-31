@@ -303,12 +303,12 @@ namespace neo {
 
 			// Need to break this struct apart into individual buffers and upload them into individual VBOs...
 			std::vector<ImVec2> vertices;
-			vertices.resize(cmdList->VtxBuffer.size());
+			vertices.resize(cmdList->VtxBuffer.Size);
 			std::vector<ImVec2> uvs;
-			uvs.resize(cmdList->VtxBuffer.size());
+			uvs.resize(cmdList->VtxBuffer.Size);
 			std::vector<ImU32> colors;
-			colors.resize(cmdList->VtxBuffer.size());
-			for (int j = 0; j < cmdList->VtxBuffer.size(); j++) {
+			colors.resize(cmdList->VtxBuffer.Size);
+			for (int j = 0; j < cmdList->VtxBuffer.Size; j++) {
 				vertices[j] = cmdList->VtxBuffer[j].pos;
 				uvs[j] = cmdList->VtxBuffer[j].uv;
 				colors[j] = cmdList->VtxBuffer[j].col;
@@ -345,9 +345,9 @@ namespace neo {
 				reinterpret_cast<const uint8_t*>(uvs.data())
 			};
 			meshDetails.mElementBuffer = MeshLoadDetails::ElementBuffer{
-				static_cast<uint32_t>(cmdList->IdxBuffer.size()),
+				static_cast<uint32_t>(cmdList->IdxBuffer.Size),
 				sizeof(ImDrawIdx) == 2 ? types::ByteFormats::UnsignedShort : types::ByteFormats::UnsignedInt,
-				static_cast<uint32_t>(cmdList->IdxBuffer.size() * sizeof(ImDrawIdx)),
+				static_cast<uint32_t>(cmdList->IdxBuffer.Size * sizeof(ImDrawIdx)),
 				reinterpret_cast<const uint8_t*>(&cmdList->IdxBuffer.front())
 			};
 
@@ -356,15 +356,23 @@ namespace neo {
 			meshId << "imgui_" << util::genRandom();
 			MeshHandle mesh = resourceManagers.mMeshManager.asyncLoad(HashedString(meshId.str().c_str()), meshDetails);
 
-			for (const ImDrawCmd* cmd = cmdList->CmdBuffer.begin(); cmd != cmdList->CmdBuffer.end(); cmd++) {
-				if (cmd->UserCallback) {
-					cmd->UserCallback(cmdList, cmd);
-					NEO_LOG_W("WTF USER CALLBACK?");
+			for (int j = 0; j < cmdList->CmdBuffer.Size; j++) {
+				const ImDrawCmd* cmd = &cmdList->CmdBuffer[j];
+				if (cmd->UserCallback != nullptr) {
+					if (cmd->UserCallback == ImDrawCallback_ResetRenderState) {
+						NEO_LOG_W("Reset the render state wahoo");
+					}
+					else {
+						NEO_LOG_W("WTF USER CALLBACK?");
+						//cmd->UserCallback(cmdList, cmd);
+					}
 				}
 				else {
 					NEO_ASSERT(cmd->UserCallback == nullptr, "User callback unsupported?");
 
 					auto entity = ecs.createEntity();
+					ecs.addComponent<ImGuiComponent>(entity);
+
 					ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
 					component->mMeshHandle = mesh;
 					component->mTextureHandle = cmd->TextureId;

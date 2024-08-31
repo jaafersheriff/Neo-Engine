@@ -4,6 +4,8 @@
 
 #include "RenderThread.hpp"
 
+//#define DEBUG_DISABLE_THREADING
+
 namespace neo {
 
 	void RenderThread::start() {
@@ -41,12 +43,19 @@ namespace neo {
 	}
 
 	void RenderThread::pushRenderFunc(RenderFunc func) {
+#ifdef DEBUG_DISABLE_THREADING
+		func();
+#else
 		std::lock_guard<std::mutex> lock(mRenderQueueMutex);
 		mRenderQueue.push(func);
+#endif
 	}
 
 	void RenderThread::wait() {
 		TRACY_ZONEN("Wait on render thread");
+#ifdef DEBUG_DISABLE_THREADING
+		return;
+#else
 		while (true) {
 			{
 				std::lock_guard<std::mutex> lock(mRenderQueueMutex);
@@ -57,6 +66,7 @@ namespace neo {
 
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
+#endif
 	}
 
 	void RenderThread::kill() {
@@ -64,10 +74,18 @@ namespace neo {
 	}
 
 	bool RenderThread::isMainThread() {
+#ifdef DEBUG_DISABLE_THREADING
+		return true;
+#else
 		return std::this_thread::get_id() == mMainThreadID;
+#endif
 	}
 
 	bool RenderThread::isRenderThread() {
+#ifdef DEBUG_DISABLE_THREADING
+		return true;
+#else
 		return std::this_thread::get_id() == mRenderThreadID;
+#endif
 	}
 }

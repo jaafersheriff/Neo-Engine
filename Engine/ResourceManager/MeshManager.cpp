@@ -157,8 +157,8 @@ namespace neo {
 				renderThread.pushRenderFunc([this, id]() {
 					if (isValid(id)) {
 						std::lock_guard<std::mutex> lock(mCacheMutex);
-						mCache.discard(id.mHandle);
 						_destroyImpl(mCache.handle(id.mHandle).get());
+						mCache.discard(id.mHandle);
 					}
 				});
 			}

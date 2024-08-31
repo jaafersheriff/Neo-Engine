@@ -27,7 +27,8 @@ namespace neo {
 		return mRegistry.create();
 	}
 
-	void ECS::removeEntity(Entity e) {
+	void ECS::removeEntity(Entity e) const {
+		std::lock_guard<std::mutex> lock(mEntityKillMutex);
 		mEntityKillQueue.push_back(e);
 	}
 
@@ -43,6 +44,7 @@ namespace neo {
 		}
 		mRemoveComponentFuncs.clear();
 
+		std::lock_guard<std::mutex> lock(mEntityKillMutex);
 		mRegistry.destroy(mEntityKillQueue.cbegin(), mEntityKillQueue.cend());
 		mEntityKillQueue.clear();
 	}

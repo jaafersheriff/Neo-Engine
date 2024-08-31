@@ -18,9 +18,9 @@ namespace neo {
 			{ types::shader::Stage::Vertex, "imgui.vert"},
 			{ types::shader::Stage::Fragment, "imgui.frag" }
 			});
-		auto imguiDraws = ecs.getView<ImGuiDrawComponent>(); // TODO - this will break
+		auto imguiDraws = ecs.getView<ImGuiDrawComponent, ImGuiComponent>(); 
 
-		if (!imguiDraws.size() || !resourceManagers.mShaderManager.isValid(shaderHandle)) {
+		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
 		}
 
@@ -45,7 +45,7 @@ namespace neo {
 		};
 
 
-		imguiDraws.each([&](ECS::Entity, ImGuiDrawComponent& draw) {
+		imguiDraws.each([&](ECS::Entity, ImGuiDrawComponent& draw, ImGuiComponent&) {
 			if (!resourceManagers.mMeshManager.isValid(draw.mMeshHandle)) {
 				return;
 			}
