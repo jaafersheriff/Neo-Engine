@@ -3,6 +3,8 @@
 #include "Util/Log/ImGuiConsole.hpp"
 #include "Util/Log/Log.hpp"
 
+#include "ResourceManager/TextureManager.hpp"
+
 #include <imgui.h>
 #include <glm/glm.hpp>
 #include <vector>
@@ -10,6 +12,8 @@
 struct GLFWwindow;
 
 namespace neo {
+	class ECS;
+	class ResourceManagers;
 	class RenderThread;
 
 	class ImGuiManager {
@@ -31,6 +35,9 @@ namespace neo {
 		void render();
 		void reset();
 		void destroy();
+
+		void reload(ResourceManagers& resourceManagers);
+		void resolveDrawData(ECS& ecs, ResourceManagers& resourceManagers);
 
 		void begin();
 		void end();
@@ -55,5 +62,7 @@ namespace neo {
 		bool mIsEnabled = true;
 		Viewport mViewport;
 		ImGuiConsole mConsole;
+
+		TextureHandle mFontTexture;
 	};
 }

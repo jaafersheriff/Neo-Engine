@@ -8,6 +8,7 @@
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
 #include "Renderer/RenderingSystems/Blitter.hpp"
+#include "Renderer/RenderingSystems/ImGuiRenderer.hpp"
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
@@ -133,11 +134,6 @@ namespace neo {
 			resourceManagers.mTextureManager
 		);
 		if (!resourceManagers.mFramebufferManager.isValid(mDefaultFBOHandle)) {
-			// Need to always call ImGui::render in this function..
-			if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-				ServiceLocator<ImGuiManager>::ref().render();
-			}
-
 			return;
 		}
 
@@ -159,7 +155,10 @@ namespace neo {
 			TRACY_GPUN("ImGuiManager.render");
 			// Bind backbuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			ServiceLocator<ImGuiManager>::ref().render();
+			resourceManagers.mShaderManager.asyncLoad("ImGuiShader", SourceShader::ConstructionArgs{
+				{types::shader::Stage::Vertex, "imgui.vert"},
+				{types::shader::Stage::Fragment, "imgui.frag"},
+			});
 		}
 		else {
 			TRACY_GPUN("Final Blit");

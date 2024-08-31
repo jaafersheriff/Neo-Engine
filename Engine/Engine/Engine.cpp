@@ -189,9 +189,14 @@ namespace neo {
 					if (!mWindow.isMinimized()) {
 						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), &resourceManagers, &ecs]() {
 							// TODO - deep copy ECS
+
+
 							// TODO - deep copy imgui state
-							ServiceLocator<Renderer>::ref().render(mWindow, demo, ecs, resourceManagers);
-							Messenger::relayMessages(ecs);
+							if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+								ServiceLocator<ImGuiManager>::ref().resolveDrawData(mECS);
+							}
+
+							ServiceLocator<Renderer>::ref().render(mWindow, demo, mECS, resourceManagers);
 						});
 					}
 				}
@@ -232,6 +237,7 @@ namespace neo {
 		});
 		Loader::init(config.resDir, config.shaderDir);
 		_createPrefabs(resourceManagers);
+		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers);
 		resourceManagers.tick();
 
 		demos.getCurrentDemo()->init(ecs, resourceManagers);

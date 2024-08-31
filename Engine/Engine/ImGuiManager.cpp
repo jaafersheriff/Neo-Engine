@@ -2,9 +2,13 @@
 
 #include "Messaging/Messenger.hpp"
 
+#include "ECS/Component/RenderingComponent/ImGuiDrawComponent.hpp"
+
 #include "Engine/Engine.hpp"
 #include "Hardware/WindowSurface.hpp"
 #include "Hardware/Mouse.hpp"
+
+#include "ResourceManager/ResourceManagers.hpp"
 
 #include "Util/Util.hpp"
 #include "Util/Profiler.hpp"
@@ -13,12 +17,12 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+// #include <imgui_impl_opengl3.h>
 #include <implot.h>
 #include <ImGuizmo.h>
 
 #include <tracy/Tracy.hpp>
-#include <tracy/TracyOpenGL.hpp>
+ #include <tracy/TracyOpenGL.hpp>
 
 namespace neo {
 
@@ -99,7 +103,7 @@ namespace neo {
 
 		renderThread.pushRenderFunc([window, glslVersion]() {
 			ImGui_ImplGlfw_InitForOpenGL(window, false);
-			ImGui_ImplOpenGL3_Init(glslVersion);
+			//ImGui_ImplOpenGL3_Init(glslVersion);
 		});
 	}
 
@@ -220,22 +224,23 @@ namespace neo {
 		ImGui::End();
 	}
 
+	// No longer needed? I roll my own renderer now hehe
 	void ImGuiManager::render() {
 		NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 
-		{
-			TRACY_ZONEN("ImGui_ImplOpenGL3_NewFrame");
-			ImGui_ImplOpenGL3_NewFrame();
-		}
-		{
-			TRACY_GPUN("ImGui::render");
-			ImGui::Render();
-		}
-		{
-
-			TRACY_GPUN("ImGui_ImplOpenGL3_RenderDrawData");
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-		}
+		// No longer needed? I roll my own renderer now hehe
+		// {
+		// 	TRACY_ZONEN("ImGui_ImplOpenGL3_NewFrame");
+		// 	ImGui_ImplOpenGL3_NewFrame();
+		// }
+		// {
+		// 	TRACY_GPUN("ImGui::render");
+		// 	ImGui::Render();
+		// }
+		// {
+		// 	TRACY_GPUN("ImGui_ImplOpenGL3_RenderDrawData");
+		// 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		// }
 
 		// Only needed with multiple viewports, which I don't do
 		// 
@@ -256,6 +261,98 @@ namespace neo {
 		//	  glfwMakeContextCurrent(backup_current_context);
 		//	 
 		// }
+	}
+
+	void ImGuiManager::reload(ResourceManagers& resourceManagers) {
+		TRACY_ZONE();
+		uint8_t* pixels;
+		int width, height;
+		ImGuiIO io = ImGui::GetIO();
+		io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+		mFontTexture = resourceManagers.mTextureManager.asyncLoad("ImGuiFont", TextureBuilder{
+			TextureFormat {
+				types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGBA8_UNORM,
+			},
+			glm::u16vec3(width, height, 0),
+			pixels
+		});
+	}
+
+	void ImGuiManager::resolveDrawData(ECS& ecs, ResourceManagers& resourceManagers) {
+		TRACY_ZONE();
+		ImGui::Render();
+
+		ImDrawData* drawData = ImGui::GetDrawData();
+		NEO_ASSERT(drawData->Valid, "ImDrawData is invalid");
+		if (drawData->CmdListsCount == 0) {
+			return;
+		}
+		
+		for (int i = 0; i < drawData->CmdListsCount; i++) {
+			auto entity = ecs.createEntity();
+			ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
+			ImDrawList* cmdList = drawData->CmdLists[i];
+			ImDrawIdx* indexBufferOffset = 0;
+
+			MeshLoadDetails meshDetails;
+			meshDetails.mPrimtive = types::mesh::Primitive::Triangles;
+
+			// Need to break this struct apart into individual buffers and upload them into individual VBOs...
+			std::vector<ImVec2> vertices;
+			vertices.resize(cmdList->VtxBuffer.size());
+			std::vector<ImVec2> uvs;
+			uvs.resize(cmdList->VtxBuffer.size());
+			std::vector<ImU32> colors;
+			colors.resize(cmdList->VtxBuffer.size());
+			for (int j = 0; j < cmdList->VtxBuffer.size(); j++) {
+				vertices[j] = cmdList->VtxBuffer[j].pos;
+				uvs[j] = cmdList->VtxBuffer[j].uv;
+				colors[j] = cmdList->VtxBuffer[j].col;
+			}
+			meshDetails.mVertexBuffers[types::mesh::VertexType::Position] = MeshLoadDetails::VertexBuffer{
+				2, 
+				2, // TODO - is this right?
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(vertices.size()),
+				0,
+				static_cast<uint32_t>(vertices.size() * sizeof(float) * 2),
+				reinterpret_cast<const uint8_t*>(vertices.data())
+			};
+			// HEHEHE STORE COLOR IN NORMAL HEHEHE
+			meshDetails.mVertexBuffers[types::mesh::VertexType::Normal] = MeshLoadDetails::VertexBuffer{
+				1, 
+				1, // TODO - is this right?
+				types::ByteFormats::UnsignedInt,
+				false,
+				static_cast<uint32_t>(colors.size()),
+				0,
+				static_cast<uint32_t>(colors.size() * sizeof(uint32_t)),
+				reinterpret_cast<const uint8_t*>(uvs.data())
+			};
+			meshDetails.mVertexBuffers[types::mesh::VertexType::Texture0] = MeshLoadDetails::VertexBuffer{
+				2, 
+				2, // TODO - is this right?
+				types::ByteFormats::Float,
+				false,
+				static_cast<uint32_t>(uvs.size()),
+				0,
+				static_cast<uint32_t>(uvs.size() * sizeof(float) * 2),
+				reinterpret_cast<const uint8_t*>(uvs.data())
+			};
+			meshDetails.mElementBuffer = MeshLoadDetails::ElementBuffer{
+				static_cast<uint32_t>(cmdList->IdxBuffer.size()),
+				types::ByteFormats::UnsignedShort,
+				static_cast<uint32_t>(cmdList->IdxBuffer.size() * sizeof(ImDrawIdx)),
+				reinterpret_cast<const uint8_t*>(& cmdList->IdxBuffer.front())
+			};
+
+			// TODO - omg this is so bad
+			std::stringstream meshId;
+			meshId << "imgui_" << static_cast<uint32_t>(entity) << i;
+			component->mMeshHandle = resourceManagers.mMeshManager.asyncLoad(HashedString(meshId.str().c_str()), meshDetails);
+		}
 	}
 
 	void ImGuiManager::toggleImGui() {
@@ -297,7 +394,7 @@ namespace neo {
 	}
 
 	void ImGuiManager::destroy() {
-		ImGui_ImplOpenGL3_Shutdown();
+		//ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImPlot::DestroyContext();
 		ImGui::DestroyContext();
