@@ -326,33 +326,33 @@ namespace neo {
 			}
 			meshDetails.mVertexBuffers[types::mesh::VertexType::Position] = MeshLoadDetails::VertexBuffer{
 				2,
-				2, // TODO - is this right?
+				sizeof(ImVec2),
 				types::ByteFormats::Float,
 				false,
 				static_cast<uint32_t>(vertices.size()),
 				0,
-				static_cast<uint32_t>(vertices.size() * sizeof(float) * 2),
+				static_cast<uint32_t>(vertices.size() * sizeof(ImVec2)),
 				reinterpret_cast<const uint8_t*>(vertices.data())
 			};
 			// HEHEHE STORE COLOR IN NORMAL HEHEHE
 			meshDetails.mVertexBuffers[types::mesh::VertexType::Normal] = MeshLoadDetails::VertexBuffer{
 				1,
-				1, // TODO - is this right?
+				sizeof(ImU32),
 				types::ByteFormats::UnsignedInt,
 				false,
 				static_cast<uint32_t>(colors.size()),
 				0,
-				static_cast<uint32_t>(colors.size() * sizeof(uint32_t)),
+				static_cast<uint32_t>(colors.size() * sizeof(ImU32)),
 				reinterpret_cast<const uint8_t*>(uvs.data())
 			};
 			meshDetails.mVertexBuffers[types::mesh::VertexType::Texture0] = MeshLoadDetails::VertexBuffer{
 				2,
-				2, // TODO - is this right?
+				sizeof(ImVec2),
 				types::ByteFormats::Float,
 				false,
 				static_cast<uint32_t>(uvs.size()),
 				0,
-				static_cast<uint32_t>(uvs.size() * sizeof(float) * 2),
+				static_cast<uint32_t>(uvs.size() * sizeof(ImVec2)),
 				reinterpret_cast<const uint8_t*>(uvs.data())
 			};
 			meshDetails.mElementBuffer = MeshLoadDetails::ElementBuffer{
@@ -379,6 +379,12 @@ namespace neo {
 					}
 				}
 				else {
+					glm::vec2 clipMin = glm::vec2((cmd->ClipRect.x - clipOffset.x) * clipScale.x, (cmd->ClipRect.y - clipOffset.y) * clipScale.y);
+					glm::vec2 clipMax = glm::vec2((cmd->ClipRect.z - clipOffset.x) * clipScale.x, (cmd->ClipRect.w - clipOffset.y) * clipScale.y);
+					//if (clipMax.x <= clipMin.x || clipMax.y <= clipMin.y) {
+						//continue;
+					//}
+
 					auto entity = ecs.createEntity();
 					ecs.addComponent<ImGuiComponent>(entity);
 
@@ -386,11 +392,6 @@ namespace neo {
 					component->mMeshHandle = mesh;
 					component->mTextureHandle = cmd->TextureId;
 
-					glm::vec2 clipMin = glm::vec2((cmd->ClipRect.x - clipOffset.x) * clipScale.x, (cmd->ClipRect.y - clipOffset.y) * clipScale.y);
-					glm::vec2 clipMax = glm::vec2((cmd->ClipRect.z - clipOffset.x) * clipScale.x, (cmd->ClipRect.w - clipOffset.y) * clipScale.y);
-					if (clipMax.x <= clipMin.x || clipMax.y <= clipMin.y) {
-						continue;
-					}
 					component->mScissorRect = glm::vec4(
 						clipMin.x,
 						clipMax.y,

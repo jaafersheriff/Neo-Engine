@@ -155,10 +155,8 @@ namespace neo {
 			TRACY_GPUN("ImGui Render");
 			// Bind backbuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glm::uvec2 viewportOffset = ServiceLocator<ImGuiManager>::ref().getViewportOffset();
-			glm::uvec2 viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
-			glViewport(0, 0, viewportSize.x, viewportSize.y);
-			drawImGui(resourceManagers, ecs, viewportOffset, viewportSize);
+			glViewport(0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y);
+			drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
 
 			// Clear all the imgui draws now hehe
 			for(const ECS::Entity& entity : ecs.getView<const ImGuiDrawComponent, const ImGuiComponent>()) {
