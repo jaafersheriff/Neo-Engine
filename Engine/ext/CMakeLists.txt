@@ -135,14 +135,14 @@ file(GLOB IMGUI_HPP_FILES
 	imgui/*.h
 	imgui_entt_entity_editor/*.hpp
 	ImGuizmo/*.h
+	imgui_config.hpp
+	imgui_incl.hpp
 )
 add_library(imgui STATIC
 	${IMGUI_CPP_FILES}
  	imgui/backends/imgui_impl_glfw.cpp 
- 	imgui/backends/imgui_impl_opengl3.cpp 
 	${IMGUI_HPP_FILES}
  	imgui/backends/imgui_impl_glfw.h
- 	imgui/backends/imgui_impl_opengl3.h
 )
 target_compile_options(imgui PRIVATE "/WX-" "/W0")
 set_target_properties(imgui PROPERTIES FOLDER "Neo/ext")
@@ -158,6 +158,7 @@ PUBLIC
 PRIVATE
 	glfw
 	entt
+	ResourceManager
 )
 
 ## implots

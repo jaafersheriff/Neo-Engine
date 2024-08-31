@@ -3,7 +3,7 @@
 #include "Util/RenderThread.hpp"
 #include "Util/ServiceLocator.hpp"
 
-#include <imgui.h>
+#include <ext/imgui_incl.hpp>
 
 namespace neo {
 
@@ -25,16 +25,20 @@ namespace neo {
 
 	void ResourceManagers::imguiEditor() {
 		TRACY_ZONE();
-		auto textureFunc = [&](const Texture& texture) {
-			if (texture.mFormat.mTarget != types::texture::Target::Texture2D) {
-				ImGui::Text("Non-2D texture");
-				return;
+		auto textureFunc = [&](TextureHandle& textureHandle, TextureManager& textureManager) {
+			if (!textureManager.isValid(textureHandle)) {
+				ImGui::Text("Invalid texture");
 			}
-			float scale = 175.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
-#pragma warning(push)
-#pragma warning(disable: 4312)
-			ImGui::Image(reinterpret_cast<ImTextureID>(texture.mTextureID), ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
-#pragma warning(pop)
+			else {
+				Texture& texture = textureManager.resolve(textureHandle);
+				if (texture.mFormat.mTarget != types::texture::Target::Texture2D) {
+					ImGui::Text("Non-2D texture");
+				}
+				else {
+					float scale = 175.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
+					ImGui::Image(textureHandle, ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
+				}
+			}
 			};
 
 		ImGui::Begin("Resources");

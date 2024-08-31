@@ -7,7 +7,7 @@
 #include "Loader/Loader.hpp"
 #include "Loader/STBIImageData.hpp"
 
-#include <imgui.h>
+#include <ext/imgui_incl.hpp>
 
 namespace neo {
 	namespace {

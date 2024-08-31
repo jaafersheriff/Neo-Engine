@@ -20,7 +20,7 @@ namespace neo {
 			});
 		auto imguiDraws = ecs.getView<ImGuiDrawComponent>(); // TODO - this will break
 
-		if (!imguiDraws.size() || resourceManagers.mShaderManager.isValid(shaderHandle)) {
+		if (!imguiDraws.size() || !resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
 		}
 

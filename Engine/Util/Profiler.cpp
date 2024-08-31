@@ -5,7 +5,7 @@
 
 #include "Profiler.hpp"
 
-#include <imgui.h>
+#include <ext/imgui_incl.hpp>
 
 #ifndef NO_LOCAL_TRACY
 #include <TracyView.hpp>

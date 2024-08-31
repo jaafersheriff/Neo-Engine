@@ -5,7 +5,7 @@
 #include "Util/ServiceLocator.hpp"
 #include "Util/RenderThread.hpp"
 
-#include <imgui.h>
+#include <ext/imgui_incl.hpp>
 
 namespace neo {
 	namespace {
