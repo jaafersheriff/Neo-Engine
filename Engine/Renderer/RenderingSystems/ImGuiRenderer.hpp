@@ -57,12 +57,12 @@ namespace neo {
 			resolvedShader.bindUniform("P", ortho_projection);
 			resolvedShader.bindTexture("Texture", resourceManagers.mTextureManager.resolve(HashedString("ImGuiFont")));
 
-			// glScissor(
-			// 	draw.mScissorRect.x,
-			// 	viewportSize.y - draw.mScissorRect.w,
-			// 	draw.mScissorRect.z - draw.mScissorRect.x,
-			// 	draw.mScissorRect.w - draw.mScissorRect.y
-			// );
+			glScissor(
+				draw.mScissorRect.x,
+				viewportSize.y - draw.mScissorRect.y,
+				draw.mScissorRect.z,
+				draw.mScissorRect.w
+			);
 
 			resourceManagers.mMeshManager.resolve(draw.mMeshHandle).draw(draw.mElementCount, draw.mElementBufferOffset);
 		});

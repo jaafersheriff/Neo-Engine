@@ -302,6 +302,10 @@ namespace neo {
 			return;
 		}
 
+		
+	    const ImVec2 clipOffset = drawData->DisplayPos;         // (0,0) unless using multi-viewports
+		const ImVec2 clipScale = drawData->FramebufferScale; // (1,1) unless using retina display which are often (2,2)0
+
 		for (int i = 0; i < drawData->CmdListsCount; i++) {
 			ImDrawList* cmdList = drawData->CmdLists[i];
 
@@ -381,11 +385,17 @@ namespace neo {
 					ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
 					component->mMeshHandle = mesh;
 					component->mTextureHandle = cmd->TextureId;
+
+					glm::vec2 clipMin = glm::vec2((cmd->ClipRect.x - clipOffset.x) * clipScale.x, (cmd->ClipRect.y - clipOffset.y) * clipScale.y);
+					glm::vec2 clipMax = glm::vec2((cmd->ClipRect.z - clipOffset.x) * clipScale.x, (cmd->ClipRect.w - clipOffset.y) * clipScale.y);
+					if (clipMax.x <= clipMin.x || clipMax.y <= clipMin.y) {
+						continue;
+					}
 					component->mScissorRect = glm::vec4(
-						cmd->ClipRect.x,
-						cmd->ClipRect.y,
-						cmd->ClipRect.z,
-						cmd->ClipRect.w
+						clipMin.x,
+						clipMax.y,
+						clipMax.x - clipMin.x,
+						clipMax.y - clipMin.y
 					);
 					component->mElementCount = static_cast<uint16_t>(cmd->ElemCount);
 					component->mElementBufferOffset = static_cast<uint16_t>(cmd->IdxOffset * sizeof(ImDrawIdx));
