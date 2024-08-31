@@ -18,7 +18,7 @@ PRIVATE
 if (NOT NO_LOCAL_TRACY) 
 	target_link_libraries(Engine
 	PRIVATE
-		TracyServer
+		TracyServerFonts
 	)
 endif()
 

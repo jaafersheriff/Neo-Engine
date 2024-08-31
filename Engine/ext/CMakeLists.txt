@@ -114,8 +114,6 @@ if (MSVC)
 		)
 		set_target_properties(TracyServer PROPERTIES FOLDER "Neo/ext")
 		target_link_libraries(TracyServer
-		PUBLIC
-			TracyServerFonts
 		PRIVATE
 			imgui
 			capstone
