@@ -64,7 +64,7 @@ namespace neo {
 				draw.mScissorRect.w - draw.mScissorRect.y
 			);
 
-			resourceManagers.mMeshManager.resolve(draw.mMeshHandle).draw(draw.mElementCount, reinterpret_cast<void*>(draw.mElementBufferOffset));
+			resourceManagers.mMeshManager.resolve(draw.mMeshHandle).draw(draw.mElementCount, draw.mElementBufferOffset);
 		});
 	}
 }

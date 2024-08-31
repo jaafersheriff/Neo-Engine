@@ -116,7 +116,7 @@ namespace neo {
 
 	void Engine::run(DemoWrangler&& demos) {
 
-		util::Profiler profiler(mWindow.getDetails().mRefreshRate, ServiceLocator<RenderThread>::ref());
+		util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale, ServiceLocator<RenderThread>::ref());
 
 		ECS ecs;
 		// TODO - managers could just be added to the ecs probably..but how would that work with threading

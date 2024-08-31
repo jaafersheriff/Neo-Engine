@@ -135,6 +135,8 @@ file(GLOB IMGUI_HPP_FILES
 	imgui/*.h
 	imgui_entt_entity_editor/*.hpp
 	ImGuizmo/*.h
+	imgui_config.hpp
+	imgui_incl.hpp
 )
 add_library(imgui STATIC
 	${IMGUI_CPP_FILES}

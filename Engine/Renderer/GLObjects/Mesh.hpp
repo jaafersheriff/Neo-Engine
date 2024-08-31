@@ -38,7 +38,7 @@ namespace neo {
 
 			types::mesh::Primitive mPrimitiveType = types::mesh::Primitive::TriangleStrip;
 
-			void draw(uint32_t = 0, void* offset = nullptr) const;
+			void draw(uint32_t = 0, uint16_t = 0) const;
 
 			void init(const std::optional<std::string>& debugName);
 			void destroy();

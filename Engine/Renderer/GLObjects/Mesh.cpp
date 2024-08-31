@@ -39,7 +39,7 @@ namespace neo {
 	}
 
 	// TODO - instanced
-	void Mesh::draw(uint32_t size, void* offset) const {
+	void Mesh::draw(uint32_t size, uint16_t offset) const {
 
 		ServiceLocator<Renderer>::ref().mStats.mNumDraws++;
 
@@ -49,7 +49,7 @@ namespace neo {
 		if (mElementVBO) {
 			uint32_t usedSize = size ? size : mElementVBO->elementCount;
 			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += usedSize / positions.components;
-			glDrawElements(_translatePrimitive(mPrimitiveType), usedSize, mElementVBO->format, offset);
+			glDrawElements(_translatePrimitive(mPrimitiveType), usedSize, mElementVBO->format, reinterpret_cast<void*>(offset));
 		}
 		else if (size) {
 			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += size / positions.components;

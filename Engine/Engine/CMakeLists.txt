@@ -15,11 +15,11 @@ PRIVATE
 	implots
 )
 
-if (NOT NO_LOCAL_TRACY) 
-	target_link_libraries(Engine
-	PRIVATE
-		TracyServerFonts
-	)
-endif()
+# if (NOT NO_LOCAL_TRACY) 
+# 	target_link_libraries(Engine
+# 	PRIVATE
+# 		TracyServerFonts
+# 	)
+# endif()
 
 

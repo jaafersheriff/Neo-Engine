@@ -25,7 +25,7 @@
 #include <tracy/TracyOpenGL.hpp>
 
 #ifndef NO_LOCAL_TRACY
-#include <Fonts.hpp>
+// #include <Fonts.hpp>
 #endif
 
 namespace neo {
@@ -268,8 +268,8 @@ namespace neo {
 	}
 
 	void ImGuiManager::reload(ResourceManagers& resourceManagers, float dpiScale) {
+		NEO_UNUSED(dpiScale);
 		TRACY_ZONE();
-		LoadFonts(dpiScale, s_fixedWidth, s_smallFont, s_bigFont);
 		uint8_t* pixels;
 		int width, height;
 		ImGuiIO io = ImGui::GetIO();
@@ -297,7 +297,6 @@ namespace neo {
 
 		for (int i = 0; i < drawData->CmdListsCount; i++) {
 			ImDrawList* cmdList = drawData->CmdLists[i];
-			ImDrawIdx* indexBufferOffset = 0;
 
 			MeshLoadDetails meshDetails;
 			meshDetails.mPrimtive = types::mesh::Primitive::Triangles;
@@ -347,7 +346,7 @@ namespace neo {
 			};
 			meshDetails.mElementBuffer = MeshLoadDetails::ElementBuffer{
 				static_cast<uint32_t>(cmdList->IdxBuffer.size()),
-				types::ByteFormats::UnsignedShort,
+				sizeof(ImDrawIdx) == 2 ? types::ByteFormats::UnsignedShort : types::ByteFormats::UnsignedInt,
 				static_cast<uint32_t>(cmdList->IdxBuffer.size() * sizeof(ImDrawIdx)),
 				reinterpret_cast<const uint8_t*>(&cmdList->IdxBuffer.front())
 			};
@@ -358,22 +357,26 @@ namespace neo {
 			MeshHandle mesh = resourceManagers.mMeshManager.asyncLoad(HashedString(meshId.str().c_str()), meshDetails);
 
 			for (const ImDrawCmd* cmd = cmdList->CmdBuffer.begin(); cmd != cmdList->CmdBuffer.end(); cmd++) {
-				NEO_ASSERT(!cmd->UserCallback, "User callback unsupported?");
+				if (cmd->UserCallback) {
+					cmd->UserCallback(cmdList, cmd);
+					NEO_LOG_W("WTF USER CALLBACK?");
+				}
+				else {
+					NEO_ASSERT(cmd->UserCallback == nullptr, "User callback unsupported?");
 
-				auto entity = ecs.createEntity();
-				ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
-				component->mMeshHandle = mesh;
-				component->mTextureHandle = cmd->TextureId;
-				component->mScissorRect = glm::vec4(
-					cmd->ClipRect.x,
-					cmd->ClipRect.y,
-					cmd->ClipRect.z,
-					cmd->ClipRect.w
-				);
-				component->mElementCount = static_cast<uint16_t>(cmd->ElemCount);
-				component->mElementBufferOffset = indexBufferOffset;
-
-				indexBufferOffset += cmd->ElemCount;
+					auto entity = ecs.createEntity();
+					ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
+					component->mMeshHandle = mesh;
+					component->mTextureHandle = cmd->TextureId;
+					component->mScissorRect = glm::vec4(
+						cmd->ClipRect.x,
+						cmd->ClipRect.y,
+						cmd->ClipRect.z,
+						cmd->ClipRect.w
+					);
+					component->mElementCount = static_cast<uint16_t>(cmd->ElemCount);
+					component->mElementBufferOffset = static_cast<uint16_t>(cmd->IdxOffset * sizeof(ImDrawIdx));
+				}
 			}
 		}
 	}

@@ -43,10 +43,12 @@ namespace {
 namespace neo {
 	namespace util {
 
-		Profiler::Profiler(int refreshRate, RenderThread& renderThread) {
+		Profiler::Profiler(int refreshRate, float scale, RenderThread& renderThread) {
 #ifdef NO_LOCAL_TRACY
 			NEO_UNUSED(refreshRate, scale);
 #else
+			// This is gunna break things
+			LoadFonts(scale, s_fixedWidth, s_smallFont, s_bigFont);
 			tracy::Config config;
 			config.threadedRendering = true;
 			config.targetFps = refreshRate;
