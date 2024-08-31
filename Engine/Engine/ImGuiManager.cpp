@@ -282,7 +282,7 @@ namespace neo {
 			glm::u16vec3(width, height, 0),
 			pixels
 		});
-		ImGui::GetIO().Fonts->SetTexID(reinterpret_cast<void*>(&mFontTexture));
+		ImGui::GetIO().Fonts->SetTexID(mFontTexture);
 	}
 
 	void ImGuiManager::resolveDrawData(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -363,7 +363,7 @@ namespace neo {
 				auto entity = ecs.createEntity();
 				ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
 				component->mMeshHandle = mesh;
-				component->mTextureHandle = TextureHandle(*reinterpret_cast<entt::id_type*>(cmd->TextureId));
+				component->mTextureHandle = cmd->TextureId;
 				component->mScissorRect = glm::vec4(
 					cmd->ClipRect.x,
 					cmd->ClipRect.y,

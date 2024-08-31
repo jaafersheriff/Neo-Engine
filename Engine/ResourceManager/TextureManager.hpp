@@ -43,7 +43,7 @@ namespace neo {
 
 		TextureManager();
 		~TextureManager();
-		void imguiEditor(std::function<void(const Texture&)> textureFunc);
+		void imguiEditor(std::function<void(TextureHandle&, TextureManager&)> textureFunc);
 
 	protected:
 		[[nodiscard]] TextureHandle _asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, const std::optional<std::string>& debugName) const;

@@ -260,20 +260,21 @@ namespace neo {
 		texture.mResource.destroy();
 	}
 
-	void TextureManager::imguiEditor(std::function<void(const Texture&)> textureFunc) {
+	void TextureManager::imguiEditor(std::function<void(TextureHandle&, TextureManager&)> textureFunc) {
 		std::lock_guard<std::mutex> lock(mCacheMutex);
-		mCache.each([&](auto handle, BackedResource<Texture>& textureResource) {
-			ImGui::PushID(static_cast<int>(handle));
+		mCache.each([&](TextureHandle handle) {
+			ImGui::PushID(static_cast<int>(handle.mHandle));
 			bool node = false;
-			if (textureResource.mDebugName.has_value()) {
-				node |= ImGui::TreeNode(static_cast<void*>(&handle), "%s", textureResource.mDebugName->c_str());
+			const BackedResource<Texture>& texture = mCache.handle(handle.mHandle).get();
+			if (texture.mDebugName.has_value()) {
+				node |= ImGui::TreeNode(static_cast<void*>(&handle), "%s", texture.mDebugName->c_str());
 			}
 			else {
 				node |= ImGui::TreeNode(static_cast<void*>(&handle), "%d", handle);
 			}
 			if (node) {
-				ImGui::Text("[%d, %d]", textureResource.mResource.mWidth, textureResource.mResource.mHeight);
-				textureFunc(textureResource.mResource);
+				ImGui::Text("[%d, %d]", texture.mResource.mWidth, texture.mResource.mHeight);
+				textureFunc(handle, *this);
 				ImGui::TreePop();
 			}
 			ImGui::PopID();

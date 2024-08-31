@@ -110,7 +110,7 @@ namespace neo {
 		void clear(const TextureManager& textureManager);
 		void tick(const TextureManager& textureManager, RenderThread& renderThread);
 
-		void imguiEditor(std::function<void(Texture&)> textureFunc, TextureManager& textureManager);
+		void imguiEditor(std::function<void(TextureHandle&, TextureManager&)> textureFunc, TextureManager& textureManager);
 
 		mutable std::mutex mQueueMutex;
 		mutable std::vector<FramebufferQueueItem> mQueue;
