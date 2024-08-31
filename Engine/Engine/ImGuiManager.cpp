@@ -288,10 +288,8 @@ namespace neo {
 		if (drawData->CmdListsCount == 0) {
 			return;
 		}
-		
+
 		for (int i = 0; i < drawData->CmdListsCount; i++) {
-			auto entity = ecs.createEntity();
-			ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
 			ImDrawList* cmdList = drawData->CmdLists[i];
 			ImDrawIdx* indexBufferOffset = 0;
 
@@ -311,7 +309,7 @@ namespace neo {
 				colors[j] = cmdList->VtxBuffer[j].col;
 			}
 			meshDetails.mVertexBuffers[types::mesh::VertexType::Position] = MeshLoadDetails::VertexBuffer{
-				2, 
+				2,
 				2, // TODO - is this right?
 				types::ByteFormats::Float,
 				false,
@@ -322,7 +320,7 @@ namespace neo {
 			};
 			// HEHEHE STORE COLOR IN NORMAL HEHEHE
 			meshDetails.mVertexBuffers[types::mesh::VertexType::Normal] = MeshLoadDetails::VertexBuffer{
-				1, 
+				1,
 				1, // TODO - is this right?
 				types::ByteFormats::UnsignedInt,
 				false,
@@ -332,7 +330,7 @@ namespace neo {
 				reinterpret_cast<const uint8_t*>(uvs.data())
 			};
 			meshDetails.mVertexBuffers[types::mesh::VertexType::Texture0] = MeshLoadDetails::VertexBuffer{
-				2, 
+				2,
 				2, // TODO - is this right?
 				types::ByteFormats::Float,
 				false,
@@ -345,13 +343,32 @@ namespace neo {
 				static_cast<uint32_t>(cmdList->IdxBuffer.size()),
 				types::ByteFormats::UnsignedShort,
 				static_cast<uint32_t>(cmdList->IdxBuffer.size() * sizeof(ImDrawIdx)),
-				reinterpret_cast<const uint8_t*>(& cmdList->IdxBuffer.front())
+				reinterpret_cast<const uint8_t*>(&cmdList->IdxBuffer.front())
 			};
 
 			// TODO - omg this is so bad
 			std::stringstream meshId;
-			meshId << "imgui_" << static_cast<uint32_t>(entity) << i;
-			component->mMeshHandle = resourceManagers.mMeshManager.asyncLoad(HashedString(meshId.str().c_str()), meshDetails);
+			meshId << "imgui_" << util::genRandom();
+			MeshHandle mesh = resourceManagers.mMeshManager.asyncLoad(HashedString(meshId.str().c_str()), meshDetails);
+
+			for (const ImDrawCmd* cmd = cmdList->CmdBuffer.begin(); cmd != cmdList->CmdBuffer.end(); cmd++) {
+				NEO_ASSERT(!cmd->UserCallback, "User callback unsupported?");
+
+				auto entity = ecs.createEntity();
+				ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
+				component->mMeshHandle = mesh;
+				component->mTextureHandle = reinterpret_cast<entt::id_type>(cmd->TextureId);
+				component->mScissorRect = glm::vec4(
+					cmd->ClipRect.x,
+					cmd->ClipRect.y,
+					cmd->ClipRect.z,
+					cmd->ClipRect.w
+				);
+				component->mElementCount = cmd->ElemCount;
+				component->mElementBufferOffset = indexBufferOffset;
+
+				indexBufferOffset += cmd->ElemCount;
+			}
 		}
 	}
 

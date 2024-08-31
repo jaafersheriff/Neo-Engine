@@ -192,9 +192,11 @@ namespace neo {
 
 
 							// TODO - deep copy imgui state
+							// TODO - this needs to go into the renderer's ecs
 							if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-								ServiceLocator<ImGuiManager>::ref().resolveDrawData(mECS);
+								ServiceLocator<ImGuiManager>::ref().resolveDrawData(mECS, resourceManagers);
 							}
+							mECS.flush(); // Ah shit
 
 							ServiceLocator<Renderer>::ref().render(mWindow, demo, mECS, resourceManagers);
 						});
