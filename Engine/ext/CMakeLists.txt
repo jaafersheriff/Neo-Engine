@@ -82,6 +82,7 @@ if (MSVC)
 		file(GLOB TRACY_SERVER_CPP_FILES 
 			tracy/server/*.cpp
 			tracy/public/common/*.cpp
+			tracy/profiler/src/imgui/*.cpp
 			tracy/nfd/nfd_win.cpp
 			tracy/zstd/common/*.c
 			tracy/zstd/compress/*.c
@@ -91,6 +92,7 @@ if (MSVC)
 		file(GLOB TRACY_SERVER_HPP_FILES 
 			tracy/server/*.hpp
 			tracy/public/common/*.hpp
+			tracy/profiler/src/imgui/*.h
 			tracy/nfd/nfd.h
 			tracy/zstd/*.h
 			tracy/zstd/common/*.h
@@ -117,6 +119,7 @@ if (MSVC)
 		PRIVATE
 			imgui
 			capstone
+			glfw
 		)
 
 
@@ -139,10 +142,10 @@ file(GLOB IMGUI_HPP_FILES
 add_library(imgui STATIC
 	${IMGUI_CPP_FILES}
  	imgui/backends/imgui_impl_glfw.cpp 
- 	imgui/backends/imgui_impl_opengl3.cpp 
+ 	# imgui/backends/imgui_impl_opengl3.cpp 
 	${IMGUI_HPP_FILES}
  	imgui/backends/imgui_impl_glfw.h
- 	imgui/backends/imgui_impl_opengl3.h
+ 	# imgui/backends/imgui_impl_opengl3.h
 )
 target_compile_options(imgui PRIVATE "/WX-" "/W0")
 set_target_properties(imgui PROPERTIES FOLDER "Neo/ext")

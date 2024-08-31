@@ -34,8 +34,8 @@ namespace neo {
 		glDisable(GL_STENCIL_TEST);
 		glEnable(GL_SCISSOR_TEST);
 
-		float R = static_cast<float>(viewportOffset.x + viewportSize.x);
 		float L = static_cast<float>(viewportOffset.x);
+		float R = static_cast<float>(viewportOffset.x + viewportSize.x);
 		float T = static_cast<float>(viewportOffset.y);
 		float B = static_cast<float>(viewportOffset.y + viewportSize.y);
 		const glm::mat4 ortho_projection = glm::mat4(

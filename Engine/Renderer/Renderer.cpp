@@ -186,8 +186,8 @@ namespace neo {
 		glm::vec2 viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
 		if (viewportSize.x != 0 && viewportSize.y != 0) {
 			if (resourceManager.mFramebufferManager.isValid(mDefaultFBOHandle)) {
-				//auto& defaultFbo = resourceManager.mFramebufferManager.resolve(mDefaultFBOHandle);
-				//ImGui::Image(defaultFbo.mTextures[0], { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+				auto& defaultFbo = resourceManager.mFramebufferManager.resolve(mDefaultFBOHandle);
+				ImGui::Image(defaultFbo.mTextures[0], { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
 			}
 		}
 		ImGuizmo::SetDrawlist();

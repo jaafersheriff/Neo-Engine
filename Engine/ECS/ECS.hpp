@@ -10,6 +10,7 @@
 #endif
 #include <entt/entt.hpp>
 
+#include <ext/imgui_incl.hpp>
 #define MM_IEEE_ASSERT(x) NEO_UNUSED(x)
 #include <imgui_entt_entity_editor.hpp>
 

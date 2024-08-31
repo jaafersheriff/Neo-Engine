@@ -162,7 +162,7 @@ namespace neo {
 			if (glm::uvec2(size) != mViewport.mSize || glm::uvec2(offset) != mViewport.mOffset) {
 				mViewport.mOffset = glm::uvec2(offset);
 				mViewport.mSize = glm::uvec2(size);
-				Messenger::sendMessage<FrameSizeMessage>(mViewport.mSize);
+				//Messenger::sendMessage<FrameSizeMessage>(mViewport.mSize);
 			}
 			ImGuizmo::SetRect(
 				static_cast<float>(offset.x),
@@ -339,7 +339,7 @@ namespace neo {
 				1,
 				sizeof(ImU32),
 				types::ByteFormats::UnsignedInt,
-				false,
+				true,
 				static_cast<uint32_t>(colors.size()),
 				0,
 				static_cast<uint32_t>(colors.size() * sizeof(ImU32)),

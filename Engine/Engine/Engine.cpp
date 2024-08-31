@@ -203,7 +203,6 @@ namespace neo {
 						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &ecs]() {
 							ServiceLocator<Renderer>::ref().render(mWindow, demo, ecs, resourceManagers);
 						});
-						ecs.flush(); // Ah shit
 					}
 				}
 
