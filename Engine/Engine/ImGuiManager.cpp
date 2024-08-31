@@ -25,12 +25,12 @@
 #include <tracy/TracyOpenGL.hpp>
 
 #ifndef NO_LOCAL_TRACY
-// #include <Fonts.hpp>
+ #include <Fonts.hpp>
 #endif
 
 namespace neo {
 
-	void ImGuiManager::init(GLFWwindow* window, const char* glslVersion, RenderThread& renderThread) {
+	void ImGuiManager::init(GLFWwindow* window, const char* glslVersion, float dpiScale, RenderThread& renderThread) {
 		/* Init ImGui */
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -109,6 +109,9 @@ namespace neo {
 			ImGui_ImplGlfw_InitForOpenGL(window, false);
 			//ImGui_ImplOpenGL3_Init(glslVersion);
 		});
+
+		// This is gunna break things
+		LoadFonts(dpiScale, s_fixedWidth, s_smallFont, s_bigFont);
 	}
 
 	void ImGuiManager::update() {
@@ -267,12 +270,13 @@ namespace neo {
 		// }
 	}
 
-	void ImGuiManager::reload(ResourceManagers& resourceManagers, float dpiScale) {
-		NEO_UNUSED(dpiScale);
+	void ImGuiManager::reload(ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
+
 		uint8_t* pixels;
 		int width, height;
 		ImGuiIO io = ImGui::GetIO();
+
 		io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 		mFontTexture = resourceManagers.mTextureManager.asyncLoad("ImGuiFont", TextureBuilder{
 			TextureFormat {
@@ -443,4 +447,17 @@ namespace neo {
 		TRACY_ZONE();
 		mConsole.imGuiEditor();
 	}
+
+	ImFont* ImGuiManager::getFixedWidthFont() {
+		return s_fixedWidth;
+	}
+
+	ImFont* ImGuiManager::getSmallFont() {
+		return s_smallFont;
+	}
+
+	ImFont* ImGuiManager::getBigFont() {
+		return s_bigFont;
+	}
+
 }

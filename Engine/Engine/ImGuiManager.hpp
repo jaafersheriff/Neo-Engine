@@ -5,7 +5,7 @@
 
 #include "ResourceManager/TextureManager.hpp"
 
-#include <imgui.h>
+#include <ext/imgui_incl.hpp>
 #include <glm/glm.hpp>
 #include <vector>
 
@@ -30,13 +30,13 @@ namespace neo {
 		ImGuiManager(const ImGuiManager&) = delete;
 		ImGuiManager & operator=(const ImGuiManager&) = delete;
 
-		void init(GLFWwindow* window, const char* glslVersion, RenderThread& renderThread);
+		void init(GLFWwindow* window, const char* glslVersion, float dpiScale, RenderThread& renderThread);
 		void update();
 		void render();
 		void reset();
 		void destroy();
 
-		void reload(ResourceManagers& resourceManagers, float scale);
+		void reload(ResourceManagers& resourceManagers);
 		void resolveDrawData(ECS& ecs, ResourceManagers& resourceManagers);
 
 		void begin();
@@ -58,6 +58,11 @@ namespace neo {
 		bool isViewportHovered();
 		glm::uvec2 getViewportOffset();
 		glm::uvec2 getViewportSize();
+
+		// Tracy madness
+		ImFont* getFixedWidthFont();
+		ImFont* getSmallFont();
+		ImFont* getBigFont();
 	private:
 		bool mIsEnabled = true;
 		Viewport mViewport;

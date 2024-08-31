@@ -19,6 +19,8 @@ namespace tracy {
 }
 #endif
 
+struct ImFont;
+
 namespace neo {
 	class RenderThread;
 
@@ -26,7 +28,7 @@ namespace neo {
 
 		class Profiler {
 		public:
-			Profiler(int refreshRate, float scale, RenderThread& renderThread);
+			Profiler(int refreshRate, ImFont* fixedFont, ImFont* smallFont, ImFont* bigFont, RenderThread& renderThread);
 			~Profiler();
 			Profiler(const Profiler&) = delete;
 			Profiler& operator=(const Profiler&) = delete;

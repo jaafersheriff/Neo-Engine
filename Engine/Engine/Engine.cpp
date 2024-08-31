@@ -110,17 +110,21 @@ namespace neo {
 		mWindow.toggleVSync();
 		mWindow.toggleVSync(); // Lmao
 
-		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow(), ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str(), renderThread);
+		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow(), ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str(), mWindow.getDetails().mDPIScale, renderThread);
 		renderThread.wait();
 	}
 
 	void Engine::run(DemoWrangler&& demos) {
 
-		util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale, ServiceLocator<RenderThread>::ref());
-
 		ECS ecs;
 		// TODO - managers could just be added to the ecs probably..but how would that work with threading
 		ResourceManagers resourceManagers;
+		util::Profiler profiler(
+			mWindow.getDetails().mRefreshRate, 
+			ServiceLocator<ImGuiManager>::ref().getFixedWidthFont(), 
+			ServiceLocator<ImGuiManager>::ref().getSmallFont(), 
+			ServiceLocator<ImGuiManager>::ref().getBigFont(), 
+			ServiceLocator<RenderThread>::ref());
 
 		demos.setForceReload();
 		
@@ -239,7 +243,7 @@ namespace neo {
 		});
 		Loader::init(config.resDir, config.shaderDir);
 		_createPrefabs(resourceManagers);
-		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers, mWindow.getDetails().mDPIScale);
+		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers);
 		resourceManagers.tick();
 
 		demos.getCurrentDemo()->init(ecs, resourceManagers);

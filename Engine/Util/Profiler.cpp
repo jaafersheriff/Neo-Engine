@@ -5,12 +5,10 @@
 
 #include "Profiler.hpp"
 
-#include <ext/imgui_incl.hpp>
-
 #ifndef NO_LOCAL_TRACY
 #include <TracyView.hpp>
 #include <TracyMouse.hpp>
-#include <Fonts.hpp>
+//#include <Fonts.hpp>
 #include <implot.h>
 #endif
 
@@ -43,16 +41,14 @@ namespace {
 namespace neo {
 	namespace util {
 
-		Profiler::Profiler(int refreshRate, float scale, RenderThread& renderThread) {
+		Profiler::Profiler(int refreshRate, ImFont* fixedFont, ImFont* smallFont, ImFont* bigFont, RenderThread& renderThread) {
 #ifdef NO_LOCAL_TRACY
 			NEO_UNUSED(refreshRate, scale);
 #else
-			// This is gunna break things
-			LoadFonts(scale, s_fixedWidth, s_smallFont, s_bigFont);
 			tracy::Config config;
 			config.threadedRendering = true;
 			config.targetFps = refreshRate;
-			mTracyServer = std::make_unique<tracy::View>(RunOnMainThread, "127.0.0.1", 8086, s_fixedWidth, s_smallFont, s_bigFont, nullptr, nullptr, AttentionCallback, config);
+			mTracyServer = std::make_unique<tracy::View>(RunOnMainThread, "127.0.0.1", 8086, fixedFont, smallFont, bigFont, nullptr, nullptr, AttentionCallback, config);
 			mTracyServer->GetViewData().frameTarget = refreshRate;
 			mTracyServer->GetViewData().drawFrameTargets = true;
 			mTracyServer->GetViewData().drawCpuUsageGraph = false;
