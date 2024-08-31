@@ -121,9 +121,9 @@ namespace neo {
 		ResourceManagers resourceManagers;
 		util::Profiler profiler(
 			mWindow.getDetails().mRefreshRate, 
-			ServiceLocator<ImGuiManager>::ref().getFixedWidthFont(), 
-			ServiceLocator<ImGuiManager>::ref().getSmallFont(), 
-			ServiceLocator<ImGuiManager>::ref().getBigFont(), 
+			ImGui::GetIO().FontDefault, // ServiceLocator<ImGuiManager>::ref().getFixedWidthFont(), 
+			ImGui::GetIO().FontDefault, // ServiceLocator<ImGuiManager>::ref().getSmallFont(), 
+			ImGui::GetIO().FontDefault, // ServiceLocator<ImGuiManager>::ref().getBigFont(), 
 			ServiceLocator<RenderThread>::ref());
 
 		demos.setForceReload();

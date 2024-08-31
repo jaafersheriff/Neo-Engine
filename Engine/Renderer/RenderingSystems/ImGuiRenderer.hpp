@@ -9,6 +9,8 @@
 
 #include "Util/Util.hpp"
 
+#include <glm/glm.hpp>
+
 namespace neo {
 
 	void drawImGui(const ResourceManagers& resourceManagers, const ECS& ecs, glm::uvec2 viewportOffset, glm::uvec2 viewportSize) {
@@ -36,33 +38,31 @@ namespace neo {
 		float L = static_cast<float>(viewportOffset.x);
 		float T = static_cast<float>(viewportOffset.y);
 		float B = static_cast<float>(viewportOffset.y + viewportSize.y);
-		const float ortho_projection[4][4] =
-		{
-			{ 2.0f / (R - L),   0.0f,         0.0f,   0.0f },
-			{ 0.0f,         2.0f / (T - B),   0.0f,   0.0f },
-			{ 0.0f,         0.0f,        -1.0f,   0.0f },
-			{ (R + L) / (L - R),  (T + B) / (B - T),  0.0f,   1.0f },
-		};
-
+		const glm::mat4 ortho_projection = glm::mat4(
+			2.0f / (R - L),   0.0f,         0.0f,   0.0f,
+			0.0f,         2.0f / (T - B),   0.0f,   0.0f,
+			0.0f,         0.0f,        -1.0f,   0.0f,
+			(R + L) / (L - R),  (T + B) / (B - T),  0.0f,   1.0f
+		);
 
 		imguiDraws.each([&](ECS::Entity, ImGuiDrawComponent& draw, ImGuiComponent&) {
 			if (!resourceManagers.mMeshManager.isValid(draw.mMeshHandle)) {
 				return;
 			}
-			if (!resourceManagers.mTextureManager.isValid(draw.mTextureHandle)) {
+			if (!resourceManagers.mTextureManager.isValid(HashedString("ImGuiFont"))) {
 				return;
 			}
 
 			auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, {});
 			resolvedShader.bindUniform("P", ortho_projection);
-			resolvedShader.bindTexture("Texture", resourceManagers.mTextureManager.resolve(draw.mTextureHandle));
+			resolvedShader.bindTexture("Texture", resourceManagers.mTextureManager.resolve(HashedString("ImGuiFont")));
 
-			glScissor(
-				draw.mScissorRect.x,
-				viewportSize.y - draw.mScissorRect.w,
-				draw.mScissorRect.z - draw.mScissorRect.x,
-				draw.mScissorRect.w - draw.mScissorRect.y
-			);
+			// glScissor(
+			// 	draw.mScissorRect.x,
+			// 	viewportSize.y - draw.mScissorRect.w,
+			// 	draw.mScissorRect.z - draw.mScissorRect.x,
+			// 	draw.mScissorRect.w - draw.mScissorRect.y
+			// );
 
 			resourceManagers.mMeshManager.resolve(draw.mMeshHandle).draw(draw.mElementCount, draw.mElementBufferOffset);
 		});

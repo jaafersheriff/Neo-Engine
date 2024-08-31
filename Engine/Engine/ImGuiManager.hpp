@@ -60,14 +60,12 @@ namespace neo {
 		glm::uvec2 getViewportSize();
 
 		// Tracy madness
-		ImFont* getFixedWidthFont();
-		ImFont* getSmallFont();
-		ImFont* getBigFont();
+		//ImFont* getFixedWidthFont();
+		//ImFont* getSmallFont();
+		//ImFont* getBigFont();
 	private:
 		bool mIsEnabled = true;
 		Viewport mViewport;
 		ImGuiConsole mConsole;
-
-		TextureHandle mFontTexture;
 	};
 }

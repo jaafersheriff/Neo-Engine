@@ -28,6 +28,8 @@
  #include <Fonts.hpp>
 #endif
 
+#pragma optimize("", off)
+
 namespace neo {
 
 	void ImGuiManager::init(GLFWwindow* window, const char* glslVersion, float dpiScale, RenderThread& renderThread) {
@@ -111,7 +113,7 @@ namespace neo {
 		});
 
 		// This is gunna break things
-		LoadFonts(dpiScale, s_fixedWidth, s_smallFont, s_bigFont);
+		//LoadFonts(dpiScale, s_fixedWidth, s_smallFont, s_bigFont);
 	}
 
 	void ImGuiManager::update() {
@@ -278,15 +280,16 @@ namespace neo {
 		ImGuiIO io = ImGui::GetIO();
 
 		io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-		mFontTexture = resourceManagers.mTextureManager.asyncLoad("ImGuiFont", TextureBuilder{
-			TextureFormat {
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGBA8_UNORM,
-			},
-			glm::u16vec3(width, height, 0),
-			pixels
-		});
-		ImGui::GetIO().Fonts->SetTexID(mFontTexture);
+		ImGui::GetIO().Fonts->SetTexID(
+			resourceManagers.mTextureManager.asyncLoad("ImGuiFont", TextureBuilder{
+				TextureFormat {
+					types::texture::Target::Texture2D,
+					types::texture::InternalFormats::RGBA32_F,
+				},
+				glm::u16vec3(width, height, 0),
+				pixels
+			})
+		);
 	}
 
 	void ImGuiManager::resolveDrawData(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -372,8 +375,6 @@ namespace neo {
 					}
 				}
 				else {
-					NEO_ASSERT(cmd->UserCallback == nullptr, "User callback unsupported?");
-
 					auto entity = ecs.createEntity();
 					ecs.addComponent<ImGuiComponent>(entity);
 
@@ -448,16 +449,16 @@ namespace neo {
 		mConsole.imGuiEditor();
 	}
 
-	ImFont* ImGuiManager::getFixedWidthFont() {
-		return s_fixedWidth;
-	}
+	// ImFont* ImGuiManager::getFixedWidthFont() {
+	// 	return s_fixedWidth;
+	// }
 
-	ImFont* ImGuiManager::getSmallFont() {
-		return s_smallFont;
-	}
+	// ImFont* ImGuiManager::getSmallFont() {
+	// 	return s_smallFont;
+	// }
 
-	ImFont* ImGuiManager::getBigFont() {
-		return s_bigFont;
-	}
+	// ImFont* ImGuiManager::getBigFont() {
+	// 	return s_bigFont;
+	// }
 
 }
