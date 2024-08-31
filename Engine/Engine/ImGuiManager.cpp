@@ -414,7 +414,7 @@ namespace neo {
 					}
 					else {
 						NEO_LOG_W("WTF USER CALLBACK?");
-						//cmd->UserCallback(cmdList, cmd);
+						cmd->UserCallback(cmdList, cmd);
 					}
 				}
 				else {

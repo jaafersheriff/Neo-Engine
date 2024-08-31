@@ -102,21 +102,23 @@ namespace neo {
 					mQueue.clear();
 				}
 			}
-			renderThread.pushRenderFunc([this, swapQueue = std::move(swapQueue)]() {
-				TRACY_GPUN("MeshManager::Create")
-				for (auto& details : swapQueue) {
-					{
-						std::lock_guard<std::mutex> lock(mCacheMutex);
-						mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
+			if (!swapQueue.empty()) {
+				renderThread.pushRenderFunc([this, swapQueue = std::move(swapQueue)]() {
+					TRACY_GPUN("MeshManager::Create");
+					for (auto& details : swapQueue) {
+						{
+							std::lock_guard<std::mutex> lock(mCacheMutex);
+							mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
+						}
+						for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
+							free(const_cast<uint8_t*>(buffer.mData));
+						}
+						if (details.mLoadDetails.mElementBuffer.has_value()) {
+							free(const_cast<uint8_t*>(details.mLoadDetails.mElementBuffer->mData));
+						}
 					}
-					for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
-						free(const_cast<uint8_t*>(buffer.mData));
-					}
-					if (details.mLoadDetails.mElementBuffer.has_value()) {
-						free(const_cast<uint8_t*>(details.mLoadDetails.mElementBuffer->mData));
-					}
-				}
-			});
+				});
+			}
 		}
 
 		// Update
@@ -130,15 +132,17 @@ namespace neo {
 				}
 			}
 
-			for (auto&& [handle, func] : swapQueue) {
-				renderThread.pushRenderFunc([this, handle, func]() {
-					TRACY_GPUN("MeshManager::Update")
-					if (isValid(handle)) {
-						std::lock_guard<std::mutex> lock(mCacheMutex);
-						func(mCache.handle(handle.mHandle).get().mResource);
-					}
-					else {
-						NEO_LOG_E("Attempting to transact on an invalid mesh");
+			if (!swapQueue.empty()) {
+				renderThread.pushRenderFunc([this, queue = std::move(swapQueue)]() {
+					TRACY_GPUN("MeshManager::Update");
+					for (auto&& [handle, func] : queue) {
+						if (isValid(handle)) {
+							std::lock_guard<std::mutex> lock(mCacheMutex);
+							func(mCache.handle(handle.mHandle).get().mResource);
+						}
+						else {
+							NEO_LOG_E("Attempting to transact on an invalid mesh");
+						}
 					}
 				});
 			}
@@ -155,16 +159,18 @@ namespace neo {
 				}
 			}
 
-			renderThread.pushRenderFunc([this, swapQueue = std::move(swapQueue)]() {
-				TRACY_GPUN("MeshManager::Delete")
-				for (auto& id : swapQueue) {
+			if (!swapQueue.empty()) {
+				renderThread.pushRenderFunc([this, swapQueue = std::move(swapQueue)]() {
+					TRACY_GPUN("MeshManager::Delete");
+					for (auto& id : swapQueue) {
 						if (isValid(id)) {
 							std::lock_guard<std::mutex> lock(mCacheMutex);
 							_destroyImpl(mCache.handle(id.mHandle).get());
 							mCache.discard(id.mHandle);
 						}
-				}
-			});
+					}
+				});
+			}
 		}
 	}
 
