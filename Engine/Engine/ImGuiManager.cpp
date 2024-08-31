@@ -290,6 +290,51 @@ namespace neo {
 				pixels
 			})
 		);
+
+		for (int i = 0; i < 16; i++) {
+			MeshLoadDetails loadDetails;
+			loadDetails.mPrimtive = types::mesh::Primitive::Triangles;
+			loadDetails.mVertexBuffers[types::mesh::VertexType::Position] = MeshLoadDetails::VertexBuffer{
+				2,
+				sizeof(ImVec2),
+				types::ByteFormats::Float,
+				false,
+				0,
+				0,
+				0,
+				nullptr
+			};
+			// HEHEHE STORE COLOR IN NORMAL HEHEHE
+			loadDetails.mVertexBuffers[types::mesh::VertexType::Normal] = MeshLoadDetails::VertexBuffer{
+				1,
+				sizeof(ImU32),
+				types::ByteFormats::UnsignedInt,
+				true,
+				0,
+				0,
+				0,
+				nullptr
+			};
+			loadDetails.mVertexBuffers[types::mesh::VertexType::Texture0] = MeshLoadDetails::VertexBuffer{
+				2,
+				sizeof(ImVec2),
+				types::ByteFormats::Float,
+				false,
+				0,
+				0,
+				0,
+				nullptr
+			};
+			loadDetails.mElementBuffer = MeshLoadDetails::ElementBuffer{
+				0,
+				sizeof(ImDrawIdx) == 2 ? types::ByteFormats::UnsignedShort : types::ByteFormats::UnsignedInt,
+				0,
+				nullptr
+			};
+
+			std::string handle = "ImGuiMesh_" + std::to_string(i);
+			mImGuiMeshes[i] = resourceManagers.mMeshManager.asyncLoad(HashedString(handle.c_str()), loadDetails);
+		}
 	}
 
 	void ImGuiManager::resolveDrawData(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -309,63 +354,57 @@ namespace neo {
 		for (int i = 0; i < drawData->CmdListsCount; i++) {
 			ImDrawList* cmdList = drawData->CmdLists[i];
 
-			MeshLoadDetails meshDetails;
-			meshDetails.mPrimtive = types::mesh::Primitive::Triangles;
-
 			// Need to break this struct apart into individual buffers and upload them into individual VBOs...
-			std::vector<ImVec2> vertices;
-			vertices.resize(cmdList->VtxBuffer.Size);
-			std::vector<ImVec2> uvs;
-			uvs.resize(cmdList->VtxBuffer.Size);
-			std::vector<ImU32> colors;
-			colors.resize(cmdList->VtxBuffer.Size);
-			for (int j = 0; j < cmdList->VtxBuffer.Size; j++) {
-				vertices[j] = cmdList->VtxBuffer[j].pos;
-				uvs[j] = cmdList->VtxBuffer[j].uv;
-				colors[j] = cmdList->VtxBuffer[j].col;
+			{
+				std::vector<ImVec2> vertices;
+				vertices.resize(cmdList->VtxBuffer.Size);
+				std::vector<ImVec2> uvs;
+				uvs.resize(cmdList->VtxBuffer.Size);
+				std::vector<ImU32> colors;
+				colors.resize(cmdList->VtxBuffer.Size);
+				for (int j = 0; j < cmdList->VtxBuffer.Size; j++) {
+					vertices[j] = cmdList->VtxBuffer[j].pos;
+					uvs[j] = cmdList->VtxBuffer[j].uv;
+					colors[j] = cmdList->VtxBuffer[j].col;
+				}
+				std::vector<ImDrawIdx> elements;
+				elements.resize(cmdList->IdxBuffer.Size);
+				memcpy(elements.data(), cmdList->IdxBuffer.Data, cmdList->IdxBuffer.Size * sizeof(ImDrawIdx));
+				NEO_ASSERT(i < mImGuiMeshes.size(), "ImGui is requesting too many meshes :(");
+				resourceManagers.mMeshManager.transact(mImGuiMeshes[i],
+					[vertices = std::move(vertices),
+					uvs = std::move(uvs),
+					colors = std::move(colors),
+					elements = std::move(elements)]
+					(Mesh& mesh) {
+						mesh.updateVertexBuffer(
+							types::mesh::VertexType::Position,
+							vertices.size(),
+							vertices.size() * sizeof(ImVec2),
+							reinterpret_cast<const uint8_t*>(vertices.data())
+						);
+						mesh.updateVertexBuffer(
+							types::mesh::VertexType::Texture0,
+							uvs.size(),
+							uvs.size() * sizeof(ImVec2),
+							reinterpret_cast<const uint8_t*>(uvs.data())
+						);
+						mesh.updateVertexBuffer(
+							types::mesh::VertexType::Normal,
+							colors.size(),
+							colors.size() * sizeof(ImU32),
+							reinterpret_cast<const uint8_t*>(colors.data())
+						);
+						mesh.removeElementBuffer();
+						mesh.addElementBuffer(
+							elements.size(),
+							sizeof(ImDrawIdx) == 2 ? types::ByteFormats::UnsignedShort : types::ByteFormats::UnsignedInt,
+							elements.size() * sizeof(ImDrawIdx),
+							reinterpret_cast<const uint8_t*>(elements.data())
+						);
+						mesh.mPrimitiveType = types::mesh::Primitive::Triangles;
+					});
 			}
-			meshDetails.mVertexBuffers[types::mesh::VertexType::Position] = MeshLoadDetails::VertexBuffer{
-				2,
-				sizeof(ImVec2),
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(vertices.size()),
-				0,
-				static_cast<uint32_t>(vertices.size() * sizeof(ImVec2)),
-				reinterpret_cast<const uint8_t*>(vertices.data())
-			};
-			// HEHEHE STORE COLOR IN NORMAL HEHEHE
-			meshDetails.mVertexBuffers[types::mesh::VertexType::Normal] = MeshLoadDetails::VertexBuffer{
-				1,
-				sizeof(ImU32),
-				types::ByteFormats::UnsignedInt,
-				true,
-				static_cast<uint32_t>(colors.size()),
-				0,
-				static_cast<uint32_t>(colors.size() * sizeof(ImU32)),
-				reinterpret_cast<const uint8_t*>(uvs.data())
-			};
-			meshDetails.mVertexBuffers[types::mesh::VertexType::Texture0] = MeshLoadDetails::VertexBuffer{
-				2,
-				sizeof(ImVec2),
-				types::ByteFormats::Float,
-				false,
-				static_cast<uint32_t>(uvs.size()),
-				0,
-				static_cast<uint32_t>(uvs.size() * sizeof(ImVec2)),
-				reinterpret_cast<const uint8_t*>(uvs.data())
-			};
-			meshDetails.mElementBuffer = MeshLoadDetails::ElementBuffer{
-				static_cast<uint32_t>(cmdList->IdxBuffer.Size),
-				sizeof(ImDrawIdx) == 2 ? types::ByteFormats::UnsignedShort : types::ByteFormats::UnsignedInt,
-				static_cast<uint32_t>(cmdList->IdxBuffer.Size * sizeof(ImDrawIdx)),
-				reinterpret_cast<const uint8_t*>(&cmdList->IdxBuffer.front())
-			};
-
-			// TODO - omg this is so bad
-			std::stringstream meshId;
-			meshId << "imgui_" << util::genRandom();
-			MeshHandle mesh = resourceManagers.mMeshManager.asyncLoad(HashedString(meshId.str().c_str()), meshDetails);
 
 			for (int j = 0; j < cmdList->CmdBuffer.Size; j++) {
 				const ImDrawCmd* cmd = &cmdList->CmdBuffer[j];
@@ -389,7 +428,7 @@ namespace neo {
 					ecs.addComponent<ImGuiComponent>(entity);
 
 					ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
-					component->mMeshHandle = mesh;
+					component->mMeshHandle = mImGuiMeshes[i];
 					component->mTextureHandle = cmd->TextureId;
 
 					component->mScissorRect = glm::vec4(
@@ -445,6 +484,7 @@ namespace neo {
 
 	void ImGuiManager::destroy() {
 		//ImGui_ImplOpenGL3_Shutdown();
+		// TODO - delete imgui meshes
 		ImGui_ImplGlfw_Shutdown();
 		ImPlot::DestroyContext();
 		ImGui::DestroyContext();

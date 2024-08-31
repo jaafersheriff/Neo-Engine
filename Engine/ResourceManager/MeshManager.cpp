@@ -102,8 +102,9 @@ namespace neo {
 					mQueue.clear();
 				}
 			}
-			for (auto& details : swapQueue) {
-				renderThread.pushRenderFunc([this, details]() {
+			renderThread.pushRenderFunc([this, swapQueue = std::move(swapQueue)]() {
+				TRACY_GPUN("MeshManager::Create")
+				for (auto& details : swapQueue) {
 					{
 						std::lock_guard<std::mutex> lock(mCacheMutex);
 						mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
@@ -114,8 +115,8 @@ namespace neo {
 					if (details.mLoadDetails.mElementBuffer.has_value()) {
 						free(const_cast<uint8_t*>(details.mLoadDetails.mElementBuffer->mData));
 					}
-				});
-			}
+				}
+			});
 		}
 
 		// Update
@@ -131,6 +132,7 @@ namespace neo {
 
 			for (auto&& [handle, func] : swapQueue) {
 				renderThread.pushRenderFunc([this, handle, func]() {
+					TRACY_GPUN("MeshManager::Update")
 					if (isValid(handle)) {
 						std::lock_guard<std::mutex> lock(mCacheMutex);
 						func(mCache.handle(handle.mHandle).get().mResource);
@@ -153,15 +155,16 @@ namespace neo {
 				}
 			}
 
-			for (auto& id : swapQueue) {
-				renderThread.pushRenderFunc([this, id]() {
-					if (isValid(id)) {
-						std::lock_guard<std::mutex> lock(mCacheMutex);
-						_destroyImpl(mCache.handle(id.mHandle).get());
-						mCache.discard(id.mHandle);
-					}
-				});
-			}
+			renderThread.pushRenderFunc([this, swapQueue = std::move(swapQueue)]() {
+				TRACY_GPUN("MeshManager::Delete")
+				for (auto& id : swapQueue) {
+						if (isValid(id)) {
+							std::lock_guard<std::mutex> lock(mCacheMutex);
+							_destroyImpl(mCache.handle(id.mHandle).get());
+							mCache.discard(id.mHandle);
+						}
+				}
+			});
 		}
 	}
 

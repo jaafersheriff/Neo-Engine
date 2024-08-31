@@ -160,10 +160,10 @@ namespace neo {
 
 			// Clear all the imgui draws now hehe
 			for(const ECS::Entity& entity : ecs.getView<const ImGuiDrawComponent, const ImGuiComponent>()) {
-				MeshHandle imguiMesh = ecs.cGetComponent<const ImGuiDrawComponent>(entity)->mMeshHandle;
-				if (resourceManagers.mMeshManager.isValid(imguiMesh)) {
-					resourceManagers.mMeshManager.discard(imguiMesh);
-				}
+				// MeshHandle imguiMesh = ecs.cGetComponent<const ImGuiDrawComponent>(entity)->mMeshHandle;
+				// if (resourceManagers.mMeshManager.isValid(imguiMesh)) {
+				// 	resourceManagers.mMeshManager.discard(imguiMesh);
+				// }
 				ecs.removeEntity(entity);
 			};
 		}

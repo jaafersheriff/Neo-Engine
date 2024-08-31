@@ -3,11 +3,12 @@
 #include "Util/Log/ImGuiConsole.hpp"
 #include "Util/Log/Log.hpp"
 
-#include "ResourceManager/TextureManager.hpp"
+#include "ResourceManager/MeshManager.hpp"
 
 #include <ext/imgui_incl.hpp>
 #include <glm/glm.hpp>
 #include <vector>
+#include <array>
 
 struct GLFWwindow;
 
@@ -64,8 +65,10 @@ namespace neo {
 		//ImFont* getSmallFont();
 		//ImFont* getBigFont();
 	private:
-		bool mIsEnabled = false;
+		bool mIsEnabled = true;
 		Viewport mViewport;
 		ImGuiConsole mConsole;
+
+		std::array<MeshHandle, 16> mImGuiMeshes;
 	};
 }

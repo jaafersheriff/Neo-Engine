@@ -92,7 +92,7 @@ namespace neo {
 		mVBOs[type] = vertexBuffer;
 	}
 
-	void Mesh::updateVertexBuffer(types::mesh::VertexType type, uint32_t count, uint32_t byteSize, uint8_t* data) {
+	void Mesh::updateVertexBuffer(types::mesh::VertexType type, uint32_t count, uint32_t byteSize, const uint8_t* data) {
 		TRACY_GPU();
 
 		const auto& vbo = mVBOs.find(type);
