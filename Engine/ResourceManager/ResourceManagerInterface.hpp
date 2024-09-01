@@ -2,7 +2,9 @@
 
 #include "Util/Util.hpp"
 
+#include <ext/entt_incl.hpp>
 #include <entt/resource/cache.hpp>
+
 #include <string>
 #include <memory>
 #include <optional>
@@ -19,17 +21,24 @@ namespace neo {
 		ResourceHandle()
 			: mHandle(NEO_INVALID_HANDLE)
 		{}
-		ResourceHandle(entt::id_type handle)
-			: mHandle(handle)
-		{}
 		ResourceHandle(HashedString id)
 			: mHandle(id.value())
 		{}
+		ResourceHandle(uint64_t id)
+			: mHandle(id)
+		{}
 
-		entt::id_type mHandle;
+
+		uint64_t mHandle;
+		operator uint64_t() const {
+			return mHandle;
+		}
 
 		bool operator==(const ResourceHandle<ResourceType>& other) const noexcept {
 			return mHandle == other.mHandle;
+		}
+		bool operator==(const uint64_t& other) const noexcept {
+			return mHandle == other;
 		}
 	};
 
@@ -80,7 +89,7 @@ namespace neo {
 			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
 			std::lock_guard<std::mutex> lock(mDiscardMutex);
 			for (auto& res : mDiscardQueue) {
-				if (id == res.mHandle) {
+				if (id == res) {
 					return true;
 				}
 			}

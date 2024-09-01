@@ -435,7 +435,7 @@ namespace neo {
 
 					ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
 					component->mMeshHandle = mImGuiMeshes[i];
-					component->mTextureHandle = TextureHandle(reinterpret_cast<entt::id_type>(cmd->TextureId));
+					component->mTextureHandle = TextureHandle(cmd->TextureId);
 					component->mScissorRect = glm::vec4(
 						clipMin.x,
 						clipMax.y,

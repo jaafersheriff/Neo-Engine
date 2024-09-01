@@ -194,7 +194,7 @@ file(GLOB_RECURSE ENTT_HPP_FILES
 file(GLOB_RECURSE ENTT_CPP_FILES 
 	entt.cpp
 )
-add_library(entt STATIC ${ENTT_CPP_FILES} ${ENTT_HPP_FILES})
+add_library(entt STATIC ${ENTT_CPP_FILES} ${ENTT_HPP_FILES} entt_incl.hpp)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/entt/src FILES 
 	${ENTT_HPP_FILES})
 set_target_properties(entt PROPERTIES FOLDER "Neo/ext")

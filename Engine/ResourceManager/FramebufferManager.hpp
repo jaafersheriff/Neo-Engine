@@ -5,7 +5,9 @@
 #include "ResourceManager/TextureManager.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
+#include <ext/entt_incl.hpp>
 #include <entt/resource/cache.hpp>
+
 #include <variant>
 #include <optional>
 #include <memory>

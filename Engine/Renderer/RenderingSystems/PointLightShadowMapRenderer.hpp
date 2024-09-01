@@ -68,7 +68,7 @@ namespace neo {
 		for (int i = 0; i < 6; i++) {
 			TRACY_GPUN("Draw Face");
 
-			sprintf(targetName, "%s_%d_%d", "PointLightShadowMap", lightEntity, i);
+			sprintf(targetName, "%s_%d_%d", "PointLightShadowMap", static_cast<uint32_t>(lightEntity), i);
 
 			FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 				HashedString(targetName),

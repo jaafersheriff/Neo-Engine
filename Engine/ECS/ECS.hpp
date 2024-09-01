@@ -5,14 +5,14 @@
 #include "Util/Profiler.hpp"
 #include "Util/Util.hpp"
 
-#ifndef ENTT_ASSERT
-#define ENTT_ASSERT(condition, ...) NEO_ASSERT(condition, __VA_ARGS__)
-#endif
+#include <ext/entt_incl.hpp>
 #include <entt/entt.hpp>
-
 #include <ext/imgui_incl.hpp>
 #define MM_IEEE_ASSERT(x) NEO_UNUSED(x)
+#pragma warning( push )
+#pragma warning( disable : 4244 )
 #include <imgui_entt_entity_editor.hpp>
+#pragma warning( pop )
 
 #include <typeindex>
 #include <optional>

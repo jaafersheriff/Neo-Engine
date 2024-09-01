@@ -2,6 +2,8 @@
 
 #include "Message.hpp"
 
+#include "Util/Util.hpp"
+
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
@@ -9,6 +11,7 @@
 #include <functional>
 #include <mutex>
 
+#include <ext/entt_incl.hpp>
 #include <entt/signal/dispatcher.hpp>
 
 namespace neo {

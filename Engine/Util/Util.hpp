@@ -4,6 +4,7 @@
 
 #include <glm/gtc/constants.hpp>
 
+#include <ext/entt_incl.hpp>
 #include <entt/core/hashed_string.hpp>
 
 #include <fstream>
