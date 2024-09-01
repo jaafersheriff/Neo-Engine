@@ -49,13 +49,14 @@ namespace neo {
 			if (!resourceManagers.mMeshManager.isValid(draw.mMeshHandle)) {
 				return;
 			}
-			if (!resourceManagers.mTextureManager.isValid(HashedString("ImGuiFont"))) {
+
+			if (!resourceManagers.mTextureManager.isValid(draw.mTextureHandle)) {
 				return;
 			}
 
 			auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, {});
 			resolvedShader.bindUniform("P", ortho_projection);
-			resolvedShader.bindTexture("Texture", resourceManagers.mTextureManager.resolve(HashedString("ImGuiFont")));
+			resolvedShader.bindTexture("Texture", resourceManagers.mTextureManager.resolve(draw.mTextureHandle));
 
 			// glScissor(
 			// 	draw.mScissorRect.x,

@@ -28,7 +28,11 @@
  #include <Fonts.hpp>
 #endif
 
-#pragma optimize("", off)
+namespace {
+	static void weirdImGuiDrawData(ImGuiViewport* viewport, void*) {
+		NEO_FAIL("HEH");
+	}
+}
 
 namespace neo {
 
@@ -40,6 +44,7 @@ namespace neo {
 		ImGuizmo::Enable(true);
 		ImGuizmo::SetOrthographic(false);
 		ImGuiIO& io = ImGui::GetIO();
+		io.BackendRendererName = "Neo Engine";
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		// Tracy does its own font scaling. Because of course it does.
 #ifdef NO_LOCAL_TRACY
@@ -111,6 +116,7 @@ namespace neo {
 			ImGui_ImplGlfw_InitForOpenGL(window, false);
 			//ImGui_ImplOpenGL3_Init(glslVersion);
 		});
+		renderThread.wait();
 
 		// This is gunna break things
 		//LoadFonts(dpiScale, s_fixedWidth, s_smallFont, s_bigFont);
@@ -280,8 +286,8 @@ namespace neo {
 		ImGuiIO io = ImGui::GetIO();
 
 		io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-		ImGui::GetIO().Fonts->SetTexID(
-			resourceManagers.mTextureManager.asyncLoad("ImGuiFont", TextureBuilder{
+
+		ImGui::GetIO().Fonts->SetTexID(resourceManagers.mTextureManager.asyncLoad("ImGuiFont", TextureBuilder{
 				TextureFormat {
 					types::texture::Target::Texture2D,
 					types::texture::InternalFormats::RGBA32_F,

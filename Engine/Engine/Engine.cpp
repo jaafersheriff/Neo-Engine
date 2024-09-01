@@ -74,8 +74,6 @@ namespace neo {
 			glewExperimental = GL_FALSE;
 			NEO_ASSERT(glewInit() == GLEW_OK, "Failed to init GLEW");
 
-			ServiceLocator<ImGuiManager>::set();
-
 			ServiceLocator<Renderer>::ref().init();
 			{
 				auto& details = ServiceLocator<Renderer>::ref().mDetails;
@@ -110,8 +108,8 @@ namespace neo {
 		mWindow.toggleVSync();
 		mWindow.toggleVSync(); // Lmao
 
+		ServiceLocator<ImGuiManager>::set();
 		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow(), ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str(), mWindow.getDetails().mDPIScale, renderThread);
-		renderThread.wait();
 	}
 
 	void Engine::run(DemoWrangler&& demos) {

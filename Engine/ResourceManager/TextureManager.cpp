@@ -155,7 +155,9 @@ namespace neo {
 	}
 
 	[[nodiscard]] TextureHandle TextureManager::_asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, const std::optional<std::string>& debugName) const {
-		NEO_UNUSED(debugName);
+		if (debugName.has_value()) {
+			NEO_LOG_V("Loading texture %s", debugName->c_str());
+		}
 		util::visit(textureDetails,
 			[&](TextureBuilder& builder) {
 				TextureBuilder copy = builder;
