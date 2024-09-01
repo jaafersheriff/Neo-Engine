@@ -48,8 +48,6 @@ namespace neo {
 				return false;
 			});
 		}
-		auto imguiDraws = ecs.getView<ImGuiDrawComponent, ImGuiComponent>(); 
-
 		glEnable(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -57,8 +55,10 @@ namespace neo {
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_STENCIL_TEST);
 		glEnable(GL_SCISSOR_TEST);
+		auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, {});
+		resolvedShader.bindUniform("P", ortho_projection);
 
-		imguiDraws.each([&](ECS::Entity, ImGuiDrawComponent& draw, ImGuiComponent&) {
+		for(auto &&[_, draw, __]: ecs.getView<ImGuiDrawComponent, ImGuiComponent>().each()) {
 			if (!resourceManagers.mMeshManager.isValid(draw.mMeshHandle)) {
 				return;
 			}
@@ -67,18 +67,18 @@ namespace neo {
 				return;
 			}
 
-			auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, {});
-			resolvedShader.bindUniform("P", ortho_projection);
 			resolvedShader.bindTexture("Texture", resourceManagers.mTextureManager.resolve(draw.mTextureHandle));
 
-			// glScissor(
-			// 	draw.mScissorRect.x,
-			// 	viewportSize.y - draw.mScissorRect.y,
-			// 	draw.mScissorRect.z,
-			// 	draw.mScissorRect.w
-			// );
+			glScissor(
+				draw.mScissorRect.x,
+				viewportSize.y - draw.mScissorRect.y,
+				draw.mScissorRect.z,
+				draw.mScissorRect.w
+			);
 
 			resourceManagers.mMeshManager.resolve(draw.mMeshHandle).draw(draw.mElementCount, draw.mElementBufferOffset);
-		});
+		}
+
+		glDisable(GL_SCISSOR_TEST);
 	}
 }
