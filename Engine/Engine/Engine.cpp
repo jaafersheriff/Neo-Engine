@@ -170,10 +170,6 @@ namespace neo {
 
 						ServiceLocator<ImGuiManager>::ref().end();
 						Messenger::relayMessages(ecs);
-
-						// TODO - this needs to go into the renderer's ecs
-						//ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
-						//ecs.flush(); // Ah shit
 					}
 				}
 
@@ -194,6 +190,13 @@ namespace neo {
 					TRACY_ZONEN("Frame Render");
 					if (!mWindow.isMinimized()) {
 						// TODO - deep copy ECS
+
+						if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+							// TODO - this needs to go into the renderer's ecs
+							ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
+							ecs.flush(); // Ah shit
+							resourceManagers.tick(); // Ah shit
+						}
 
 						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &ecs]() {
 							ServiceLocator<Renderer>::ref().render(mWindow, demo, ecs, resourceManagers);

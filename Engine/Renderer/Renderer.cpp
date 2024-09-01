@@ -153,23 +153,23 @@ namespace neo {
 		/* Render imgui */
 		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
 			TRACY_GPUN("ImGui Render");
-			 glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			ServiceLocator<ImGuiManager>::ref().render();
-			// Bind backbuffer
-			// resetState();
 			 //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			 //glViewport(0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y);
-			// glClear(GL_COLOR_BUFFER_BIT);
-			// drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
+			//ServiceLocator<ImGuiManager>::ref().render();
+			// Bind backbuffer
+			resetState();
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y);
+			glClear(GL_COLOR_BUFFER_BIT);
+			drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
 
-			// // Clear all the imgui draws now hehe
-			// for(const ECS::Entity& entity : ecs.getView<const ImGuiDrawComponent, const ImGuiComponent>()) {
-			// 	// MeshHandle imguiMesh = ecs.cGetComponent<const ImGuiDrawComponent>(entity)->mMeshHandle;
-			// 	// if (resourceManagers.mMeshManager.isValid(imguiMesh)) {
-			// 	// 	resourceManagers.mMeshManager.discard(imguiMesh);
-			// 	// }
-			// 	ecs.removeEntity(entity);
-			// };
+			// Clear all the imgui draws now hehe
+			for(const ECS::Entity& entity : ecs.getView<const ImGuiDrawComponent, const ImGuiComponent>()) {
+				// MeshHandle imguiMesh = ecs.cGetComponent<const ImGuiDrawComponent>(entity)->mMeshHandle;
+				// if (resourceManagers.mMeshManager.isValid(imguiMesh)) {
+				// 	resourceManagers.mMeshManager.discard(imguiMesh);
+				// }
+				ecs.removeEntity(entity);
+			};
 		}
 		else {
 			TRACY_GPUN("Final Blit");
