@@ -3,6 +3,7 @@
 #include "ECS/Component/Component.hpp"
 
 #include "ResourceManager/MeshManager.hpp"
+#include "ResourceManager/TextureManager.hpp"
 
 namespace neo {
 	// Needed for views
