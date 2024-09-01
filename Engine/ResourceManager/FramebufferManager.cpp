@@ -51,7 +51,7 @@ namespace neo {
 
 				std::shared_ptr<BackedResource<PooledFramebuffer>> framebuffer = std::make_shared<BackedResource<PooledFramebuffer>>();
 				framebuffer->mResource.mFramebuffer.init(details.mDebugName);
-				framebuffer->mResource.mFrameCount = 1;
+				framebuffer->mResource.mFrameCount = 4;
 				framebuffer->mResource.mExternallyOwned = details.mExternallyOwned;
 				for (auto& attachment : details.mAttachments) {
 					framebuffer->mResource.mFramebuffer.attachTexture(attachment.mHandle, textureManager.resolve(attachment.mHandle), attachment.mTarget, attachment.mMip);
