@@ -28,7 +28,7 @@ namespace neo {
 
 		class Profiler {
 		public:
-			Profiler(int refreshRate, ImFont* fixedFont, ImFont* smallFont, ImFont* bigFont, RenderThread& renderThread);
+			Profiler(int refreshRate, std::array<ImFont*, 3> fonts, RenderThread& renderThread);
 			~Profiler();
 			Profiler(const Profiler&) = delete;
 			Profiler& operator=(const Profiler&) = delete;

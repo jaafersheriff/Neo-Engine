@@ -61,9 +61,7 @@ namespace neo {
 		glm::uvec2 getViewportSize();
 
 		// Tracy madness
-		ImFont* getFixedWidthFont();
-		ImFont* getSmallFont();
-		ImFont* getBigFont();
+		std::array<ImFont*, 3> getFonts();
 	private:
 		bool mIsEnabled = true;
 		Viewport mViewport;

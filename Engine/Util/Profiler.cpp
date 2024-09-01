@@ -41,14 +41,14 @@ namespace {
 namespace neo {
 	namespace util {
 
-		Profiler::Profiler(int refreshRate, ImFont* fixedFont, ImFont* smallFont, ImFont* bigFont, RenderThread& renderThread) {
+		Profiler::Profiler(int refreshRate, std::array<ImFont*, 3> fonts, RenderThread& renderThread) {
 #ifdef NO_LOCAL_TRACY
-			NEO_UNUSED(refreshRate, scale);
+			NEO_UNUSED(refreshRate, fonts, renderThread);
 #else
 			tracy::Config config;
 			config.threadedRendering = true;
 			config.targetFps = refreshRate;
-			mTracyServer = std::make_unique<tracy::View>(RunOnMainThread, "127.0.0.1", 8086, fixedFont, smallFont, bigFont, nullptr, nullptr, AttentionCallback, config);
+			mTracyServer = std::make_unique<tracy::View>(RunOnMainThread, "127.0.0.1", 8086, fonts[0], fonts[1], fonts[2], nullptr, nullptr, AttentionCallback, config);
 			mTracyServer->GetViewData().frameTarget = refreshRate;
 			mTracyServer->GetViewData().drawFrameTargets = true;
 			mTracyServer->GetViewData().drawCpuUsageGraph = false;

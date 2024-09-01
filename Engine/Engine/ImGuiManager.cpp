@@ -25,11 +25,11 @@
 #include <tracy/TracyOpenGL.hpp>
 
 #ifndef NO_LOCAL_TRACY
- #include <Fonts.hpp>
+#include <Fonts.hpp>
 #endif
 
 namespace {
-	static void weirdImGuiDrawData(ImGuiViewport* viewport, void*) {
+	static void weirdImGuiDrawData(ImGuiViewport*, void*) {
 		NEO_FAIL("HEH");
 	}
 }
@@ -120,7 +120,11 @@ namespace neo {
 		});
 		renderThread.wait();
 
+#ifndef NO_LOCAL_TRACY
 		LoadFonts(dpiScale, s_fixedWidth, s_smallFont, s_bigFont);
+#else
+		NEO_UNUSED(dpiScale);
+#endif
 	}
 
 	void ImGuiManager::update() {
@@ -385,27 +389,27 @@ namespace neo {
 					(Mesh& mesh) {
 						mesh.updateVertexBuffer(
 							types::mesh::VertexType::Position,
-							vertices.size(),
-							vertices.size() * sizeof(ImVec2),
+							static_cast<uint32_t>(vertices.size()),
+							static_cast<uint32_t>(vertices.size() * sizeof(ImVec2)),
 							reinterpret_cast<const uint8_t*>(vertices.data())
 						);
 						mesh.updateVertexBuffer(
 							types::mesh::VertexType::Texture0,
-							uvs.size(),
-							uvs.size() * sizeof(ImVec2),
+							static_cast<uint32_t>(uvs.size()),
+							static_cast<uint32_t>(uvs.size() * sizeof(ImVec2)),
 							reinterpret_cast<const uint8_t*>(uvs.data())
 						);
 						mesh.updateVertexBuffer(
 							types::mesh::VertexType::Normal,
-							colors.size(),
-							colors.size() * sizeof(ImU32),
+							static_cast<uint32_t>(colors.size()),
+							static_cast<uint32_t>(colors.size() * sizeof(ImU32)),
 							reinterpret_cast<const uint8_t*>(colors.data())
 						);
 						mesh.removeElementBuffer();
 						mesh.addElementBuffer(
-							elements.size(),
+							static_cast<uint32_t>(elements.size()),
 							sizeof(ImDrawIdx) == 2 ? types::ByteFormats::UnsignedShort : types::ByteFormats::UnsignedInt,
-							elements.size() * sizeof(ImDrawIdx),
+							static_cast<uint32_t>(elements.size() * sizeof(ImDrawIdx)),
 							reinterpret_cast<const uint8_t*>(elements.data())
 						);
 						mesh.mPrimitiveType = types::mesh::Primitive::Triangles;
@@ -506,16 +510,13 @@ namespace neo {
 		mConsole.imGuiEditor();
 	}
 
-	ImFont* ImGuiManager::getFixedWidthFont() {
-		return s_fixedWidth;
-	}
-
-	ImFont* ImGuiManager::getSmallFont() {
-		return s_smallFont;
-	}
-
-	ImFont* ImGuiManager::getBigFont() {
-		return s_bigFont;
+	std::array<ImFont*, 3> ImGuiManager::getFonts() {
+#ifdef NO_LOCAL_TRACY
+		ImFont* defaultFont = ImGui::GetIO().FontDefault;
+		return { defaultFont, defaultFont, defaultFont };
+#else
+		return { s_fixedWidth, s_smallFont, s_bigFont };
+#endif
 	}
 
 }
