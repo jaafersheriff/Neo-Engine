@@ -29,7 +29,7 @@ namespace neo {
 		void shutDown();
 
 		int shouldClose() const;
-		const WindowDetails& getDetails() const { return mDetails; }
+		const WindowDetails& getDetails() const;
 		float getAspectRatio() const { return mDetails.mSize.x / (float)mDetails.mSize.y; }
 		int isMinimized() const;
 

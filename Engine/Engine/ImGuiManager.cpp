@@ -17,7 +17,7 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
-// #include <imgui_impl_opengl3.h>
+ #include <imgui_impl_opengl3.h>
 #include <implot.h>
 #include <ImGuizmo.h>
 
@@ -114,7 +114,7 @@ namespace neo {
 
 		renderThread.pushRenderFunc([window, glslVersion]() {
 			ImGui_ImplGlfw_InitForOpenGL(window, false);
-			//ImGui_ImplOpenGL3_Init(glslVersion);
+			ImGui_ImplOpenGL3_Init(glslVersion);
 		});
 		renderThread.wait();
 
@@ -125,6 +125,8 @@ namespace neo {
 	void ImGuiManager::update() {
 		NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 		TRACY_ZONE();
+
+		ImGui_ImplOpenGL3_NewFrame();
 
 		{
 			TRACY_ZONEN("ImGui_ImplGlfw_NewFrame");
@@ -168,7 +170,6 @@ namespace neo {
 			if (glm::uvec2(size) != mViewport.mSize || glm::uvec2(offset) != mViewport.mOffset) {
 				mViewport.mOffset = glm::uvec2(offset);
 				mViewport.mSize = glm::uvec2(size);
-				//Messenger::sendMessage<FrameSizeMessage>(mViewport.mSize);
 			}
 			ImGuizmo::SetRect(
 				static_cast<float>(offset.x),
@@ -246,15 +247,15 @@ namespace neo {
 		// No longer needed? I roll my own renderer now hehe
 		// {
 		// 	TRACY_ZONEN("ImGui_ImplOpenGL3_NewFrame");
-		// 	ImGui_ImplOpenGL3_NewFrame();
+		 	ImGui_ImplOpenGL3_NewFrame();
 		// }
 		// {
 		// 	TRACY_GPUN("ImGui::render");
-		// 	ImGui::Render();
+		 	ImGui::Render();
 		// }
 		// {
 		// 	TRACY_GPUN("ImGui_ImplOpenGL3_RenderDrawData");
-		// 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		// }
 
 		// Only needed with multiple viewports, which I don't do

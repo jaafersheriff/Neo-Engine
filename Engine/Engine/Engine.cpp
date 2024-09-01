@@ -172,8 +172,8 @@ namespace neo {
 						Messenger::relayMessages(ecs);
 
 						// TODO - this needs to go into the renderer's ecs
-						ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
-						ecs.flush(); // Ah shit
+						//ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
+						//ecs.flush(); // Ah shit
 					}
 				}
 

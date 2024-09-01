@@ -252,4 +252,8 @@ namespace neo {
 			glfwSwapInterval(vsync);
 		});
 	}
+
+	const WindowDetails& WindowSurface::getDetails() const {
+		return mDetails;
+	}
 }
