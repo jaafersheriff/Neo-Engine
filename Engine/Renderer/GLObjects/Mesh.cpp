@@ -86,9 +86,6 @@ namespace neo {
 		glVertexAttribPointer(vertexBuffer.attribArray, components, vertexBuffer.format, normalized ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<uint8_t*>(NULL + offset));
 #pragma warning(pop)
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
 		mVBOs[type] = vertexBuffer;
 	}
 
@@ -103,8 +100,6 @@ namespace neo {
 		if (byteSize) {
 			glBufferData(GL_ARRAY_BUFFER, byteSize, data, GL_DYNAMIC_DRAW);
 		}
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
 	}
 
 	void Mesh::removeVertexBuffer(types::mesh::VertexType type) {
@@ -114,7 +109,6 @@ namespace neo {
 			glBindVertexArray(mVAOID);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo->second.vboID);
 			glDeleteBuffers(1, (GLuint *)&vbo->second.vboID);
-			glBindVertexArray(0);
 		}
 		mVBOs.erase(type);
 	}
@@ -145,7 +139,6 @@ namespace neo {
 		if (byteSize) {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteSize, data, GL_STATIC_DRAW);
 		}
-		glBindVertexArray(0);
 	}
 
 	void Mesh::removeElementBuffer() {
@@ -153,8 +146,6 @@ namespace neo {
 			glBindVertexArray(mVAOID);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID);
 			glDeleteBuffers(1, (GLuint *)&mElementVBO->vboID);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
 			mElementVBO = std::nullopt;
 		}
 

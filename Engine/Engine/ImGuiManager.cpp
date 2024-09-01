@@ -120,8 +120,7 @@ namespace neo {
 		});
 		renderThread.wait();
 
-		// This is gunna break things
-		//LoadFonts(dpiScale, s_fixedWidth, s_smallFont, s_bigFont);
+		LoadFonts(dpiScale, s_fixedWidth, s_smallFont, s_bigFont);
 	}
 
 	void ImGuiManager::update() {
@@ -313,9 +312,9 @@ namespace neo {
 			};
 			// HEHEHE STORE COLOR IN NORMAL HEHEHE
 			loadDetails.mVertexBuffers[types::mesh::VertexType::Normal] = MeshLoadDetails::VertexBuffer{
-				1,
+				4,
 				sizeof(ImU32),
-				types::ByteFormats::UnsignedInt,
+				types::ByteFormats::UnsignedByte,
 				true,
 				0,
 				0,
@@ -357,6 +356,7 @@ namespace neo {
 		const ImVec2 clipOffset = drawData->DisplayPos;         // (0,0) unless using multi-viewports
 		const ImVec2 clipScale = drawData->FramebufferScale; // (1,1) unless using retina display which are often (2,2)0
 
+		uint32_t drawIndex = 0;
 		for (int i = 0; i < drawData->CmdListsCount; i++) {
 	        const ImDrawList* cmdList = drawData->CmdLists[i];
 
@@ -436,7 +436,6 @@ namespace neo {
 					ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
 					component->mMeshHandle = mImGuiMeshes[i];
 					component->mTextureHandle = TextureHandle(reinterpret_cast<entt::id_type>(cmd->TextureId));
-
 					component->mScissorRect = glm::vec4(
 						clipMin.x,
 						clipMax.y,
@@ -445,6 +444,7 @@ namespace neo {
 					);
 					component->mElementCount = static_cast<uint16_t>(cmd->ElemCount);
 					component->mElementBufferOffset = static_cast<uint16_t>(cmd->IdxOffset * sizeof(ImDrawIdx));
+					component->mDrawOrder = drawIndex++;
 				}
 			}
 		}
@@ -506,16 +506,16 @@ namespace neo {
 		mConsole.imGuiEditor();
 	}
 
-	// ImFont* ImGuiManager::getFixedWidthFont() {
-	// 	return s_fixedWidth;
-	// }
+	ImFont* ImGuiManager::getFixedWidthFont() {
+		return s_fixedWidth;
+	}
 
-	// ImFont* ImGuiManager::getSmallFont() {
-	// 	return s_smallFont;
-	// }
+	ImFont* ImGuiManager::getSmallFont() {
+		return s_smallFont;
+	}
 
-	// ImFont* ImGuiManager::getBigFont() {
-	// 	return s_bigFont;
-	// }
+	ImFont* ImGuiManager::getBigFont() {
+		return s_bigFont;
+	}
 
 }

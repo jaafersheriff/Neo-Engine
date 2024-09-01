@@ -19,20 +19,12 @@ namespace neo {
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ImGuiShader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "imgui.vert"},
 			{ types::shader::Stage::Fragment, "imgui.frag" }
-			});
-		auto imguiDraws = ecs.getView<ImGuiDrawComponent, ImGuiComponent>(); 
+		});
 
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
 		}
 
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_STENCIL_TEST);
-		glEnable(GL_SCISSOR_TEST);
 
 		float L = static_cast<float>(viewportOffset.x);
 		float R = static_cast<float>(viewportOffset.x + viewportSize.x);
@@ -44,6 +36,27 @@ namespace neo {
 			0.0f,         0.0f,        -1.0f,   0.0f,
 			(R + L) / (L - R),  (T + B) / (B - T),  0.0f,   1.0f
 		);
+
+		{
+			TRACY_ZONEN("Draw sorting");
+			ecs.sort<ImGuiComponent, ImGuiDrawComponent>([&ecs](const ECS::Entity entityLeft, const ECS::Entity entityRight) {
+				auto leftDraw = ecs.cGetComponent<ImGuiDrawComponent>(entityLeft);
+				auto rightDraw = ecs.cGetComponent<ImGuiDrawComponent>(entityRight);
+				if (leftDraw && rightDraw) {
+					return leftDraw->mDrawOrder < rightDraw->mDrawOrder;
+				}
+				return false;
+			});
+		}
+		auto imguiDraws = ecs.getView<ImGuiDrawComponent, ImGuiComponent>(); 
+
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_STENCIL_TEST);
+		glEnable(GL_SCISSOR_TEST);
 
 		imguiDraws.each([&](ECS::Entity, ImGuiDrawComponent& draw, ImGuiComponent&) {
 			if (!resourceManagers.mMeshManager.isValid(draw.mMeshHandle)) {
