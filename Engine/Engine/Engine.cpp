@@ -123,12 +123,12 @@ namespace neo {
 		
 		while (!mWindow.shouldClose()) {
 			TRACY_ZONEN("Engine::run");
-			ZoneValue(profiler.getFrameCount());
 
 			{
 				TRACY_ZONEN("Frame");
 				{
 					TRACY_ZONEN("Frame Update");
+					ZoneValue(profiler.getFrameCount());
 					if (demos.needsReload()) {
 						_swapDemo(demos, ecs, resourceManagers);
 					}
@@ -169,19 +169,7 @@ namespace neo {
 					}
 				}
 
-
 				/* Render */
-				RenderThread& renderThread = ServiceLocator<RenderThread>::ref();
-				{
-					TRACY_ZONEN("Wait on previous frame");
-					renderThread.wait();
-				}
-				{
-					TRACY_ZONEN("Resource Tick");
-					resourceManagers.tick();
-					Messenger::relayMessages(ecs);
-				}
-
 				{
 					TRACY_ZONEN("Frame Render");
 					if (!mWindow.isMinimized()) {
@@ -192,6 +180,13 @@ namespace neo {
 							ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
 							ecs.flush(); // Ah shit
 							resourceManagers.tick(); // Ah shit
+							Messenger::relayMessages(ecs);
+						}
+
+						RenderThread& renderThread = ServiceLocator<RenderThread>::ref();
+						{
+							TRACY_ZONEN("Wait on previous frame");
+							renderThread.wait();
 						}
 
 						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &ecs, frame = profiler.getFrameCount()]() {
