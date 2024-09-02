@@ -28,3 +28,6 @@
 [submodule "Engine/ext/par"]
 	path = Engine/ext/par
 	url = https://github.com/prideout/par.git
+[submodule "Engine/ext/tracy"]
+	path = Engine/ext/tracy
+	url = https://github.com/wolfpld/tracy.git
