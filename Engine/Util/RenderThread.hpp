@@ -24,8 +24,12 @@ namespace neo {
 	private:
 		std::mutex mRenderQueueMutex;
 		std::queue<RenderFunc> mRenderQueue;
+		uint64_t mQueuedJobIndex = 0;
+		std::atomic<uint64_t> mFinishedJobIndex = 0;
 
 		std::thread mThread;
+		std::condition_variable mWakeCondition;
+		std::mutex mWakeMutex;
 
 		std::thread::id mMainThreadID;
 		std::thread::id mRenderThreadID;

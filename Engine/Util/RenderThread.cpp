@@ -16,27 +16,22 @@ namespace neo {
 			mRenderThreadID = std::this_thread::get_id();
 			while (true) {
 				{
-					TRACY_ZONEN("Sleep...");
-					std::this_thread::sleep_for(std::chrono::microseconds(100));
-				}
-
-				int jobs = 0;
-				{
-					std::lock_guard<std::mutex> lock(mRenderQueueMutex);
-					jobs = static_cast<int>(mRenderQueue.size());
-				}
-
-				while (jobs > 0) {
-					RenderFunc func;
-
+					TRACY_ZONEN("Execute");
+					std::queue<RenderFunc> renderQueue;
 					{
 						std::lock_guard<std::mutex> lock(mRenderQueueMutex);
-						func = mRenderQueue.front();
-						mRenderQueue.pop();
+						std::swap(mRenderQueue, renderQueue);
 					}
-
-					func(); // Invoke
-					jobs--;
+					while(!renderQueue.empty()) {
+						renderQueue.front()();
+						renderQueue.pop();
+						mFinishedJobIndex.fetch_add(1);
+					}
+				}
+				{
+					TRACY_ZONEN("Sleep");
+					std::unique_lock<std::mutex> lock(mWakeMutex);
+					mWakeCondition.wait(lock);
 				}
 			}
 #endif
@@ -48,23 +43,22 @@ namespace neo {
 #ifdef DEBUG_DISABLE_THREADING
 		func();
 #else
+		mQueuedJobIndex++;
 		std::lock_guard<std::mutex> lock(mRenderQueueMutex);
 		mRenderQueue.push(func);
 #endif
 	}
 
 	void RenderThread::wait() {
+#ifdef DEBUG_DISABLE_THREADING
+		return;
+#else
 		TRACY_ZONEN("Wait on render thread");
-		while (true) {
-			{
-				std::lock_guard<std::mutex> lock(mRenderQueueMutex);
-				if (mRenderQueue.empty()) {
-					return;
-				}
-			}
-
-			std::this_thread::sleep_for(std::chrono::microseconds(100));
+		while (mFinishedJobIndex.load() < mQueuedJobIndex) {
+			mWakeCondition.notify_one();
+			std::this_thread::yield();
 		}
+#endif
 	}
 
 	void RenderThread::kill() {
