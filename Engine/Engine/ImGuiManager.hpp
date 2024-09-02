@@ -59,9 +59,6 @@ namespace neo {
 		bool isViewportHovered();
 		glm::uvec2 getViewportOffset();
 		glm::uvec2 getViewportSize();
-
-		// Tracy madness
-		std::array<ImFont*, 3> getFonts();
 	private:
 		bool mIsEnabled = true;
 		Viewport mViewport;

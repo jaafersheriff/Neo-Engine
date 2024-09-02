@@ -117,10 +117,7 @@ namespace neo {
 		ECS ecs;
 		// TODO - managers could just be added to the ecs probably..but how would that work with threading
 		ResourceManagers resourceManagers;
-		util::Profiler profiler(
-			mWindow.getDetails().mRefreshRate, 
-			ServiceLocator<ImGuiManager>::ref().getFonts(), 
-			ServiceLocator<RenderThread>::ref());
+		util::Profiler profiler;
 
 		demos.setForceReload();
 		

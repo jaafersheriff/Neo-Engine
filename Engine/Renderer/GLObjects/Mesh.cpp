@@ -158,6 +158,7 @@ namespace neo {
 		removeVertexBuffer(types::mesh::VertexType::Position);
 		removeVertexBuffer(types::mesh::VertexType::Normal);
 		removeVertexBuffer(types::mesh::VertexType::Texture0);
+		removeVertexBuffer(types::mesh::VertexType::Tangent);
 		removeElementBuffer();
 	}
 

@@ -24,10 +24,6 @@
 #include <tracy/Tracy.hpp>
 #include <tracy/TracyOpenGL.hpp>
 
-#ifndef NO_LOCAL_TRACY
-#include <Fonts.hpp>
-#endif
-
 namespace {
 	static void weirdImGuiDrawData(ImGuiViewport*, void*) {
 		NEO_FAIL("HEH");
@@ -46,10 +42,7 @@ namespace neo {
 		ImGuiIO& io = ImGui::GetIO();
 		io.BackendRendererName = "Neo Engine";
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-		// Tracy does its own font scaling. Because of course it does.
-#ifdef NO_LOCAL_TRACY
 		io.FontGlobalScale = dpiScale;
-#endif
 
 		ImGuiStyle* style = &ImGui::GetStyle();
 		style->ScaleAllSizes(io.FontGlobalScale);
@@ -119,10 +112,6 @@ namespace neo {
 			ImGui::GetPlatformIO().Renderer_RenderWindow = weirdImGuiDrawData;
 		});
 		renderThread.wait();
-
-#ifndef NO_LOCAL_TRACY
-		LoadFonts(dpiScale, s_fixedWidth, s_smallFont, s_bigFont);
-#endif
 	}
 
 	void ImGuiManager::update() {
@@ -507,14 +496,4 @@ namespace neo {
 		TRACY_ZONE();
 		mConsole.imGuiEditor();
 	}
-
-	std::array<ImFont*, 3> ImGuiManager::getFonts() {
-#ifdef NO_LOCAL_TRACY
-		ImFont* defaultFont = ImGui::GetIO().FontDefault;
-		return { defaultFont, defaultFont, defaultFont };
-#else
-		return { s_fixedWidth, s_smallFont, s_bigFont };
-#endif
-	}
-
 }

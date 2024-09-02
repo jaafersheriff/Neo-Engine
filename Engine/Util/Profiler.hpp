@@ -28,7 +28,7 @@ namespace neo {
 
 		class Profiler {
 		public:
-			Profiler(int refreshRate, std::array<ImFont*, 3> fonts, RenderThread& renderThread);
+			Profiler();
 			~Profiler();
 			Profiler(const Profiler&) = delete;
 			Profiler& operator=(const Profiler&) = delete;
@@ -39,16 +39,6 @@ namespace neo {
 			double mTimeStep = 0.0;		 /* Delta time */
 		private:
 			double mLastFrameTime = 0.0;	/* Time at which last frame was rendered */
-#ifndef NO_LOCAL_TRACY
-			float mRefreshRate; // Milliseconds
-			std::unique_ptr<tracy::View> mTracyServer;
-
-			mutable std::vector<float> mCPUFrametime;
-			mutable int mCPUFrametimeOffset;
-
-			mutable std::vector<float> mGPUFrametime;
-			mutable int mGPUFrametimeOffset;
-#endif
 		};
 	}
 }
