@@ -23,7 +23,6 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glm")
 
 ## tracy
 if (MSVC) 
-
 	# Quiet the spew
 	function(message)
 	    if (NOT MESSAGE_QUIET)

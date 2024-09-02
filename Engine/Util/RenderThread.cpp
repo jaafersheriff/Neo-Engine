@@ -4,7 +4,7 @@
 
 #include "RenderThread.hpp"
 
-#define DEBUG_DISABLE_THREADING
+//#define DEBUG_DISABLE_THREADING
 
 namespace neo {
 

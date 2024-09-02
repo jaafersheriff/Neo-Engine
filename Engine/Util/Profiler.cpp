@@ -1,7 +1,6 @@
 #include "Util/pch.hpp"
 
 #include "Util/Util.hpp"
-#include "Util/RenderThread.hpp"
 
 #include "Profiler.hpp"
 
@@ -21,7 +20,6 @@ namespace neo {
 	namespace util {
 
 		Profiler::Profiler() {
-			NEO_LOG_E("TODO - reimplement profiler");
 		}
 
 		Profiler::~Profiler() {
@@ -36,7 +34,9 @@ namespace neo {
 		}
 
 		void Profiler::imGuiEditor() const {
-			return;
+			ImGui::Begin("Profiler");
+			ImGui::Text("TODO");
+			ImGui::End();
 		}
 	}
 }

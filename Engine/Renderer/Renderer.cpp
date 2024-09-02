@@ -77,9 +77,6 @@ namespace neo {
 		memcpy(buf, glGetString(GL_SHADING_LANGUAGE_VERSION), 512);
 		mDetails.mShadingLanguage = buf;
 
-		/* Init default GL state */
-		resetState();
-
 		mShowBoundingBoxes = false;
 	}
 
