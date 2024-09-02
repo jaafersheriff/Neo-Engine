@@ -36,9 +36,13 @@ namespace neo {
 			void update(double);
 			void imGuiEditor() const;
 
-			double mTimeStep = 0.0;		 /* Delta time */
+			uint64_t getFrameCount() const { return mFrame; }
+			double getDeltaTime() const { return mTimeStep; } // I think this is in seconds
+
 		private:
 			double mLastFrameTime = 0.0;	/* Time at which last frame was rendered */
+			uint64_t mFrame = 0;
+			double mTimeStep = 0.0;		 /* Delta time */
 		};
 	}
 }

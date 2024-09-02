@@ -123,6 +123,7 @@ namespace neo {
 		
 		while (!mWindow.shouldClose()) {
 			TRACY_ZONEN("Engine::run");
+			ZoneValue(profiler.getFrameCount());
 
 			{
 				TRACY_ZONEN("Frame");
@@ -193,8 +194,8 @@ namespace neo {
 							resourceManagers.tick(); // Ah shit
 						}
 
-						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &ecs]() {
-							ServiceLocator<Renderer>::ref().render(mWindow, demo, ecs, resourceManagers);
+						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &ecs, frame = profiler.getFrameCount()]() {
+							ServiceLocator<Renderer>::ref().render(mWindow, demo, ecs, resourceManagers, frame);
 						});
 					}
 				}
@@ -321,7 +322,7 @@ namespace neo {
 			ecs.addComponent<MouseComponent>(hardware, mMouse);
 			ecs.addComponent<KeyboardComponent>(hardware, mKeyboard);
 			ecs.addComponent<ViewportDetailsComponent>(hardware, viewportSize, viewportPosition);
-			ecs.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(profiler.mTimeStep));
+			ecs.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(profiler.getDeltaTime()));
 			ecs.addComponent<SingleFrameComponent>(hardware);
 		}
 

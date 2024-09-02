@@ -107,9 +107,10 @@ namespace neo {
 		glUseProgram(0);
 	}
 
-	void Renderer::render(WindowSurface& window, IDemo* demo, const ECS& ecs, ResourceManagers& resourceManagers) {
+	void Renderer::render(WindowSurface& window, IDemo* demo, const ECS& ecs, ResourceManagers& resourceManagers, uint64_t frame) {
 		{
 			TRACY_GPU();
+			ZoneValue(frame);
 
 			mStats = {};
 			resetState();

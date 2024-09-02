@@ -27,6 +27,7 @@ namespace neo {
 
 		void Profiler::update(double _runTime) {
 			TRACY_ZONE();
+			mFrame++;
 			/* Update delta time and FPS */
 			float runTime = static_cast<float>(_runTime);
 			mTimeStep = runTime - mLastFrameTime;
