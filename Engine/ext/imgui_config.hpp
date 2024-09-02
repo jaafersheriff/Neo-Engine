@@ -7,5 +7,3 @@
 
 #define ImTextureID std::uint64_t
 
-#define ImTextureID std::uint64_t
-

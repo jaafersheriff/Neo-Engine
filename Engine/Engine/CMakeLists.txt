@@ -12,7 +12,6 @@ PRIVATE
 	imgui
 	entt
 	TracyClient
-	# implots
 )
 
 if (NO_LOCAL_TRACY) 

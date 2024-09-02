@@ -36,7 +36,7 @@
 #include <glm/gtc/quaternion.hpp>
 #pragma warning( pop )
 
-//#include <ImGuizmo.h>
+#include <ImGuizmo.h>
 
 namespace neo {
 
@@ -188,40 +188,40 @@ namespace neo {
 		glm::vec2 viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
 		if (viewportSize.x != 0 && viewportSize.y != 0) {
 			if (resourceManager.mFramebufferManager.isValid(mDefaultFBOHandle)) {
-				//auto& defaultFbo = resourceManager.mFramebufferManager.resolve(mDefaultFBOHandle);
-				//ImGui::Image(defaultFbo.mTextures[0], { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+				auto& defaultFbo = resourceManager.mFramebufferManager.resolve(mDefaultFBOHandle);
+				ImGui::Image(defaultFbo.mTextures[0], { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
 			}
 		}
-		// ImGuizmo::SetDrawlist();
-		// const auto cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
-		// if (cameraTuple) {
-		// 	const auto& [cameraEntity, _, camera, cameraSpatial] = *cameraTuple;
-		// 	glm::mat4 V = cameraSpatial.getView();
-		// 	glm::mat4 P = camera.getProj();
-		// 	auto selected = ecs.getSingleView<SelectedComponent, SpatialComponent>();
-		// 	if (selected.has_value()) {
-		// 		auto&& [selectedEntity, selectedComponent, spatial] = *selected;
-		// 		glm::mat4 transform = spatial.getModelMatrix();
-		// 		ImGuizmo::Manipulate(
-		// 			&V[0][0],
-		// 			&P[0][0],
-		// 			ImGuizmo::OPERATION::TRANSLATE
-		// 			| ImGuizmo::OPERATION::SCALEU
-		// 			| ImGuizmo::OPERATION::ROTATE_X | ImGuizmo::OPERATION::ROTATE_Y | ImGuizmo::OPERATION::ROTATE_Z,
-		// 			ImGuizmo::LOCAL,
-		// 			&transform[0][0],
-		// 			nullptr,
-		// 			nullptr);
+		ImGuizmo::SetDrawlist();
+		const auto cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
+		if (cameraTuple) {
+			const auto& [cameraEntity, _, camera, cameraSpatial] = *cameraTuple;
+			glm::mat4 V = cameraSpatial.getView();
+			glm::mat4 P = camera.getProj();
+			auto selected = ecs.getSingleView<SelectedComponent, SpatialComponent>();
+			if (selected.has_value()) {
+				auto&& [selectedEntity, selectedComponent, spatial] = *selected;
+				glm::mat4 transform = spatial.getModelMatrix();
+				ImGuizmo::Manipulate(
+					&V[0][0],
+					&P[0][0],
+					ImGuizmo::OPERATION::TRANSLATE
+					| ImGuizmo::OPERATION::SCALEU
+					| ImGuizmo::OPERATION::ROTATE_X | ImGuizmo::OPERATION::ROTATE_Y | ImGuizmo::OPERATION::ROTATE_Z,
+					ImGuizmo::LOCAL,
+					&transform[0][0],
+					nullptr,
+					nullptr);
 
-		// 		if (ImGuizmo::IsUsing()) {
-		// 			glm::vec3 translate, scale, rotate;
-		// 			ImGuizmo::DecomposeMatrixToComponents(&transform[0][0], &translate[0], &rotate[0], &scale[0]);
-		// 			spatial.setPosition(translate);
-		// 			spatial.setScale(scale);
-		// 			spatial.setOrientation(glm::mat3(glm::quat(glm::radians(rotate))));
-		// 		}
-		// 	}
-		// }
+				if (ImGuizmo::IsUsing()) {
+					glm::vec3 translate, scale, rotate;
+					ImGuizmo::DecomposeMatrixToComponents(&transform[0][0], &translate[0], &rotate[0], &scale[0]);
+					spatial.setPosition(translate);
+					spatial.setScale(scale);
+					spatial.setOrientation(glm::mat3(glm::quat(glm::radians(rotate))));
+				}
+			}
+		}
 		ImGui::End();
 
 		ImGui::Begin("Renderer");

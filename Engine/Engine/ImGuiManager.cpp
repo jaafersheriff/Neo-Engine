@@ -18,8 +18,8 @@
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
  //#include <imgui_impl_opengl3.h>
-//#include <implot.h>
-//#include <ImGuizmo.h>
+#include <implot.h>
+#include <ImGuizmo.h>
 
 #include <tracy/Tracy.hpp>
 #include <tracy/TracyOpenGL.hpp>
@@ -40,15 +40,15 @@ namespace neo {
 		/* Init ImGui */
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
-		// ImPlot::CreateContext();
-		// ImGuizmo::Enable(true);
-		// ImGuizmo::SetOrthographic(false);
+		ImPlot::CreateContext();
+		ImGuizmo::Enable(true);
+		ImGuizmo::SetOrthographic(false);
 		ImGuiIO& io = ImGui::GetIO();
 		io.BackendRendererName = "Neo Engine";
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		// Tracy does its own font scaling. Because of course it does.
 #ifdef NO_LOCAL_TRACY
-		io.FontGlobalScale = 2.f;
+		io.FontGlobalScale = dpiScale;
 #endif
 
 		ImGuiStyle* style = &ImGui::GetStyle();
@@ -122,8 +122,6 @@ namespace neo {
 
 #ifndef NO_LOCAL_TRACY
 		LoadFonts(dpiScale, s_fixedWidth, s_smallFont, s_bigFont);
-#else
-		NEO_UNUSED(dpiScale);
 #endif
 	}
 
@@ -143,7 +141,7 @@ namespace neo {
 		}
 		{
 			TRACY_ZONEN("ImGuizmo::BeginFrame");
-			//ImGuizmo::BeginFrame();
+			ImGuizmo::BeginFrame();
 		}
 
 		if (isViewportHovered()) {
@@ -176,14 +174,14 @@ namespace neo {
 				mViewport.mOffset = glm::uvec2(offset);
 				mViewport.mSize = glm::uvec2(size);
 			}
-			// ImGuizmo::SetRect(
-			// 	static_cast<float>(offset.x),
-			// 	static_cast<float>(offset.y),
-			// 	static_cast<float>(size.x),
-			// 	static_cast<float>(size.y)
-			// );
+			ImGuizmo::SetRect(
+				static_cast<float>(offset.x),
+				static_cast<float>(offset.y),
+				static_cast<float>(size.x),
+				static_cast<float>(size.y)
+			);
 		}
-		//ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
+		ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
 	}
 
 	void ImGuiManager::updateMouse(GLFWwindow* window, int button, int action, int mods) {
@@ -496,7 +494,7 @@ namespace neo {
 		//ImGui_ImplOpenGL3_Shutdown();
 		// TODO - delete imgui meshes
 		ImGui_ImplGlfw_Shutdown();
-		//ImPlot::DestroyContext();
+		ImPlot::DestroyContext();
 		ImGui::DestroyContext();
 	}
 

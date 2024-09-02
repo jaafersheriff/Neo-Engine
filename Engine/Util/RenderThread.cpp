@@ -4,7 +4,7 @@
 
 #include "RenderThread.hpp"
 
-#define DEBUG_DISABLE_THREADING
+//#define DEBUG_DISABLE_THREADING
 
 namespace neo {
 
@@ -23,7 +23,7 @@ namespace neo {
 				int jobs = 0;
 				{
 					std::lock_guard<std::mutex> lock(mRenderQueueMutex);
-					jobs = mRenderQueue.size();
+					jobs = static_cast<int>(mRenderQueue.size());
 				}
 
 				while (jobs > 0) {
