@@ -73,7 +73,7 @@ namespace neo {
 					sprintf(title, "%d", static_cast<int>(entity));
 				}
 				if (ImGui::TreeNodeEx(title)) {
-					mEditor.renderEditor(mRegistry, entity);
+					//mEditor.renderEditor(mRegistry, entity);
 					ImGui::TreePop();
 				}
 				});
@@ -90,14 +90,14 @@ namespace neo {
 				sprintf(title, "Selected: %d", static_cast<int>(selectedEntity));
 			}
 			if (ImGui::TreeNodeEx(title, ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_DefaultOpen)) {
-				mEditor.renderEditor(mRegistry, selectedEntity);
+				//mEditor.renderEditor(mRegistry, selectedEntity);
 				ImGui::TreePop();
 			}
 		}
 		if (ImGui::TreeNodeEx(&mRegistry, 0, "All Entities: %d", 0 /*TODO - this dies static_cast<int>(mRegistry.alive())*/)) {
-			getView<TagComponent>().each([this](Entity entity, TagComponent& tag) {
+			getView<TagComponent>().each([this](Entity, TagComponent& tag) {
 				if (ImGui::TreeNodeEx(tag.mTag.c_str())) {
-					mEditor.renderEditor(mRegistry, entity);
+					//mEditor.renderEditor(mRegistry, entity);
 					ImGui::TreePop();
 				}
 			});

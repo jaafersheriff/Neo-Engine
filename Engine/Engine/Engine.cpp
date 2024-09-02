@@ -35,7 +35,7 @@ extern "C" {
 #include "Util/RenderThread.hpp"
 #include "Util/ServiceLocator.hpp"
 
-#include <ImGuizmo.h>
+//#include <ImGuizmo.h>
 
 #include <time.h>
 #include <iostream>
@@ -343,10 +343,10 @@ namespace neo {
 		}
 		{
 			TRACY_ZONEN("Selecting");
-			if (!ImGuizmo::IsUsing()) {
+			//if (!ImGuizmo::IsUsing()) {
 				mMouseRaySystem.update(ecs);
 				mSelectingSystem.update(ecs);
-			}
+			//}
 		}
 		{
 			TRACY_ZONEN("Update line meshes");

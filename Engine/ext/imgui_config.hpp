@@ -1,9 +1,11 @@
 
 #pragma once
 
-#define IMGUI_USER_CONFIG "imgui_config.hpp"
 
-#define IM_ASSERT(_EXPR) NEO_ASSERT(_EXPR, "ImGui Failed")
+#include "Util/Util.hpp"
+#define IM_ASSERT(_EXPR) do { NEO_ASSERT(_EXPR, "ImGui Failed"); } while (0)
+
+#define ImTextureID std::uint64_t
 
 #define ImTextureID std::uint64_t
 

@@ -130,22 +130,22 @@ endif()
 ## imgui
 file(GLOB IMGUI_CPP_FILES 
 	imgui/*.cpp
-	ImGuizmo/*.cpp
+#	ImGuizmo/*.cpp
 )
 file(GLOB IMGUI_HPP_FILES 
 	imgui/*.h
-	imgui_entt_entity_editor/*.hpp
-	ImGuizmo/*.h
+#	imgui_entt_entity_editor/*.hpp
+#	ImGuizmo/*.h
 	imgui_config.hpp
 	imgui_incl.hpp
 )
 add_library(imgui STATIC
 	${IMGUI_CPP_FILES}
  	imgui/backends/imgui_impl_glfw.cpp 
- 	imgui/backends/imgui_impl_opengl3.cpp 
+# 	imgui/backends/imgui_impl_opengl3.cpp 
 	${IMGUI_HPP_FILES}
  	imgui/backends/imgui_impl_glfw.h
- 	imgui/backends/imgui_impl_opengl3.h
+# 	imgui/backends/imgui_impl_opengl3.h
 )
 target_compile_options(imgui PRIVATE "/WX-" "/W0")
 set_target_properties(imgui PROPERTIES FOLDER "Neo/ext")
@@ -153,38 +153,44 @@ target_include_directories(imgui
 PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/"
  	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/"
- 	"${CMAKE_CURRENT_SOURCE_DIR}/imgui_entt_entity_editor"
- 	"${CMAKE_CURRENT_SOURCE_DIR}/ImGuizmo"
+# 	"${CMAKE_CURRENT_SOURCE_DIR}/imgui_entt_entity_editor"
+# 	"${CMAKE_CURRENT_SOURCE_DIR}/ImGuizmo"
+ 	"${CMAKE_CURRENT_SOURCE_DIR}"
 )
 target_link_libraries(imgui
 PUBLIC
 PRIVATE
 	glfw
 	entt
+	Util
+)
+target_compile_definitions(imgui 
+PRIVATE
+IMGUI_USER_CONFIG="imgui_config.hpp"
 )
 
 ## implots
-file(GLOB IMPLOTS_CPP_FILES 
-	implot/*.cpp
-)
-file(GLOB IMPLOTS_HPP_FILES 
-	implot/*.h
-)
-add_library(implots STATIC
-	${IMPLOTS_CPP_FILES}
-	${IMPLOTS_HPP_FILES}
-)
-set_target_properties(implots PROPERTIES FOLDER "Neo/ext")
-target_include_directories(implots
-PUBLIC
-	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/"
- 	"${CMAKE_CURRENT_SOURCE_DIR}/implot"
-)
-target_link_libraries(implots
-PUBLIC
-PRIVATE
-	glfw
-)
+# file(GLOB IMPLOTS_CPP_FILES 
+# 	implot/*.cpp
+# )
+# file(GLOB IMPLOTS_HPP_FILES 
+# 	implot/*.h
+# )
+# add_library(implots STATIC
+# 	${IMPLOTS_CPP_FILES}
+# 	${IMPLOTS_HPP_FILES}
+# )
+# set_target_properties(implots PROPERTIES FOLDER "Neo/ext")
+# target_include_directories(implots
+# PUBLIC
+# 	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/"
+#  	"${CMAKE_CURRENT_SOURCE_DIR}/implot"
+# )
+# target_link_libraries(implots
+# PUBLIC
+# PRIVATE
+# 	glfw
+# )
 
 ## entt
 file(GLOB_RECURSE ENTT_HPP_FILES 
