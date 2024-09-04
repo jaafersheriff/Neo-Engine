@@ -123,7 +123,7 @@ namespace neo {
 		mutable std::vector<FramebufferQueueItem> mQueue;
 
 		mutable std::mutex mCacheMutex;
-		entt::resource_cache<BackedResource<PooledFramebuffer>> mCache;
+		entt::resource_cache<BackedResource<PooledFramebuffer>, FramebufferLoader> mCache;
 
 		std::shared_ptr<Framebuffer> mFallback;
 

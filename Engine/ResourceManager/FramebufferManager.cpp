@@ -107,7 +107,6 @@ namespace neo {
 				pfb.mFrameCount++;
 			}
 			pfb.mUsedThisFrame = true;
-			//pfb.mFramebuffer.bind();
 			return pfb.mFramebuffer;
 		}
 	}
