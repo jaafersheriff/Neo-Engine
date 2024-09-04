@@ -7,6 +7,11 @@
 
 namespace neo {
 
+	ECS::ECS(const ECS& other) {
+		TRACY_ZONE();
+		other.clone(*this);
+	}
+
 	void ECS::_initSystems() {
 		for (auto& system : mSystems) {
 			system.second->init(*this);

@@ -179,7 +179,7 @@ namespace neo {
 							if (!mWindow.isMinimized()) {
 								ecs.clone(renderECS);
 								if (ServiceLocator<ImGuiManager>::value().isEnabled()) {
-									ServiceLocator<ImGuiManager>::value().resolveDrawData(ecs, resourceManagers);
+									ServiceLocator<ImGuiManager>::value().resolveDrawData(renderECS, resourceManagers);
 								}
 							}
 							renderECS.flush();

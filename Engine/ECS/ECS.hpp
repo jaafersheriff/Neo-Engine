@@ -27,7 +27,7 @@ namespace neo {
 	public:
 		ECS() = default;
 		~ECS() = default;
-		ECS(const ECS&) = delete;
+		ECS(const ECS&);
 		ECS& operator=(const ECS&) = delete;
 
 		void flush();
