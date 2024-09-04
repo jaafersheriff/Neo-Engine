@@ -150,11 +150,11 @@ namespace neo {
 			mQueue.clear();
 			mDiscardQueue.clear();
 			mTransactionQueue.clear();
-			mCache.each([this](BackedResource<ResourceType>& resource) {
-				ServiceLocator<RenderThread>::ref().pushRenderFunc([this, &resource]() {
+			for (auto [id, resource] : mCache) {
+				ServiceLocator<RenderThread>::value().pushRenderFunc([this, resource]() {
 					static_cast<DerivedManager*>(this)->_destroyImpl(resource);
-				});
-			});
+					});
+			}
 			mCache.clear();
 		}
 
@@ -177,13 +177,11 @@ namespace neo {
 
 	private:
 		ResourceType& _resolveFinal(ResourceHandle<ResourceType> id) const {
-			entt::resource_handle<const BackedResource<ResourceType>> handle;
 			{
 				std::lock_guard<std::mutex> lock(mCacheMutex);
-				handle = mCache.handle(id.mHandle);
-			}
-			if (handle) {
-				return const_cast<ResourceType&>(handle.get().mResource);
+				if (mCache.contains(id)) {
+					return const_cast<ResourceType&>(mCache[id]->mResource);
+				}
 			}
 			NEO_FAIL("Invalid resource requested! Did you check for validity?");
 			return mFallback->mResource;

@@ -75,29 +75,28 @@ namespace neo {
 				}
 			}
 
-			std::for_each(std::execution::par, list.begin(), list.end(), [this](const entt::id_type& id) {
-				BackedResource<SourceShader> resource;
-				{
-					std::lock_guard<std::mutex> lock(mCacheMutex);
+			{
+				std::lock_guard<std::mutex> lock(mCacheMutex);
+				std::for_each(std::execution::par, list.begin(), list.end(), [this](const entt::id_type& id) {
 					if (!mCache.contains(id)) {
 						return;
 					}
-					resource = mCache[id];
-				}
-				if (resource.mResource.mConstructionArgs) {
-					time_t lastModTime = resource.mResource.mModifiedTime;
-					for (auto&& [stage, fileName] : *resource.mResource.mConstructionArgs) {
-						lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
-					}
-					if (lastModTime > resource.mResource.mModifiedTime) {
-						NEO_LOG_I("Hot reloading %s", resource.mResource.mName.c_str());
-						ShaderHandle handle(id);
+					auto& resource = mCache[id]->mResource;
+					if (resource.mConstructionArgs) {
+						time_t lastModTime = resource.mModifiedTime;
+						for (auto&& [stage, fileName] : *resource.mConstructionArgs) {
+							lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
+						}
+						if (lastModTime > resource.mModifiedTime) {
+							NEO_LOG_I("Hot reloading %s", resource.mName.c_str());
+							ShaderHandle handle(id);
 
-						// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
-						discard(handle);
+							// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
+							discard(handle);
+						}
 					}
-				}
 				});
+			}
 		}
 
 		// Create

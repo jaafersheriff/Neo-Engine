@@ -73,6 +73,11 @@ namespace neo {
 		std::optional<std::string> mDebugName;
 	};
 
+
+	struct FramebufferLoader final {
+		using result_type = std::shared_ptr<BackedResource<PooledFramebuffer>>;
+		result_type operator()(const FramebufferQueueItem& details, const TextureManager& textureManager) const;
+	};
 	class FramebufferManager {
 		friend ResourceManagers;
 	public:

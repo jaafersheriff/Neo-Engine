@@ -9,7 +9,7 @@ namespace neo {
 
 	void ResourceManagers::tick() {
 		TRACY_ZONE();
-		auto& renderThread = ServiceLocator<RenderThread>::ref();
+		auto& renderThread = ServiceLocator<RenderThread>::value();
 		mMeshManager.tick(renderThread);
 		mShaderManager.tick(renderThread);
 		mTextureManager.tick(renderThread);

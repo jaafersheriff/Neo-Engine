@@ -43,27 +43,6 @@ namespace neo {
 
 			return FramebufferHandle(seed);
 		}
-
-		struct FramebufferLoader final : entt::resource_loader<FramebufferLoader, BackedResource<PooledFramebuffer>> {
-
-			std::shared_ptr<BackedResource<PooledFramebuffer>> load(const FramebufferQueueItem& details, const TextureManager& textureManager) const {
-				NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
-
-				std::shared_ptr<BackedResource<PooledFramebuffer>> framebuffer = std::make_shared<BackedResource<PooledFramebuffer>>();
-				framebuffer->mResource.mFramebuffer.init(details.mDebugName);
-				framebuffer->mResource.mFrameCount = 4;
-				framebuffer->mResource.mExternallyOwned = details.mExternallyOwned;
-				for (auto& attachment : details.mAttachments) {
-					framebuffer->mResource.mFramebuffer.attachTexture(attachment.mHandle, textureManager.resolve(attachment.mHandle), attachment.mTarget, attachment.mMip);
-				}
-				if (framebuffer->mResource.mFramebuffer.mColorAttachments) {
-					framebuffer->mResource.mFramebuffer.initDrawBuffers();
-				}
-				framebuffer->mDebugName = details.mDebugName;
-
-				return framebuffer;
-			}
-		};
 	}
 
 	FramebufferManager::FramebufferManager() {
@@ -116,13 +95,14 @@ namespace neo {
 	}
 
 	Framebuffer& FramebufferManager::_resolveFinal(FramebufferHandle id) const {
-		entt::resource_handle<const BackedResource<PooledFramebuffer>> handle;
-		{
-			std::lock_guard<std::mutex> lock(mCacheMutex);
-			handle = mCache.handle(id.mHandle);
+		std::lock_guard<std::mutex> lock(mCacheMutex);
+		if (!mCache.contains(id.mHandle)) {
+			NEO_LOG_W("Invalid resource requested! Did you check for validity?");
+			mFallback->bind();
+			return *mFallback;
 		}
-		if (handle) {
-			auto& pfb = const_cast<PooledFramebuffer&>(handle.get().mResource);
+		else {
+			auto& pfb = const_cast<PooledFramebuffer&>(mCache[id.mHandle]->mResource);
 			if (pfb.mFrameCount < 5) {
 				pfb.mFrameCount++;
 			}
@@ -130,9 +110,6 @@ namespace neo {
 			//pfb.mFramebuffer.bind();
 			return pfb.mFramebuffer;
 		}
-		NEO_LOG_W("Invalid resource requested! Did you check for validity?");
-		mFallback->bind();
-		return *mFallback;
 	}
 
 	void FramebufferManager::tick(const TextureManager& textureManager, RenderThread& renderThread) {
@@ -165,37 +142,35 @@ namespace neo {
 			if (validTextures) {
 				renderThread.pushRenderFunc([this, item, &textureManager]() {
 					std::lock_guard<std::mutex> lock(mCacheMutex);
-					mCache.load<FramebufferLoader>(item.mHandle.mHandle, item, textureManager);
+					mCache.load(item.mHandle.mHandle, item, textureManager);
 				});
 			}
 		}
 
 		// Destroy
 		std::vector<Framebuffer> discardQueue;
-		std::lock_guard<std::mutex> lock(mCacheMutex);
-		mCache.each([&](const auto id, BackedResource<PooledFramebuffer>& pfb) {
-			if (&pfb == nullptr) {
-				NEO_LOG_W("PFB IS INVALUD THREADING ISSUE AHHHHHHHHHHHHH");
-				return;
-			}
-			if (pfb.mResource.mFrameCount == 0) {
-				if (!pfb.mResource.mExternallyOwned) {
-					for (auto& texId : pfb.mResource.mFramebuffer.mTextures) {
-						textureManager.discard(texId);
+		{
+			std::lock_guard<std::mutex> lock(mCacheMutex);
+			for (auto [id, resource] : mCache) {
+				if (resource->mResource.mFrameCount == 0) {
+					if (!resource->mResource.mExternallyOwned) {
+						for (auto& texId : resource->mResource.mFramebuffer.mTextures) {
+							textureManager.discard(texId);
+						}
 					}
-				}
-				discardQueue.push_back(pfb.mResource.mFramebuffer);
-				mCache.discard(id);
-			}
-			else {
-				if (pfb.mResource.mUsedThisFrame) {
-					pfb.mResource.mUsedThisFrame = false;
+					discardQueue.push_back(resource->mResource.mFramebuffer);
+					mCache.erase(id);
 				}
 				else {
-					pfb.mResource.mFrameCount--;
+					if (resource->mResource.mUsedThisFrame) {
+						resource->mResource.mUsedThisFrame = false;
+					}
+					else {
+						resource->mResource.mFrameCount--;
+					}
 				}
 			}
-		});
+		}
 		if (!discardQueue.empty()) {
 			renderThread.pushRenderFunc([this, queue = std::move(discardQueue)]() {
 				for (int i = 0; i < queue.size(); i++) {
@@ -211,29 +186,29 @@ namespace neo {
 			ImGui::TableSetupColumn("Attachments");
 			ImGui::TableHeadersRow();
 			std::lock_guard<std::mutex> lock(mCacheMutex);
-			mCache.each([&](auto id, BackedResource<PooledFramebuffer>& pfb) {
+			for(auto [id, pfb] : mCache) {
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
-				if (pfb.mDebugName.has_value()) {
-					ImGui::Text(pfb.mResource.mExternallyOwned ? "%s" : "*%s", pfb.mDebugName->c_str());
+				if (pfb->mDebugName.has_value()) {
+					ImGui::Text(pfb->mResource.mExternallyOwned ? "%s" : "*%s", pfb->mDebugName->c_str());
 				}
 				else {
-					ImGui::Text(pfb.mResource.mExternallyOwned ? "%d" : "*%d", id);
+					ImGui::Text(pfb->mResource.mExternallyOwned ? "%d" : "*%d", id);
 				}
-				if (textureManager.isValid(pfb.mResource.mFramebuffer.mTextures[0])) {
-					auto& firstTex = textureManager.resolve(pfb.mResource.mFramebuffer.mTextures[0]);
+				if (textureManager.isValid(pfb->mResource.mFramebuffer.mTextures[0])) {
+					auto& firstTex = textureManager.resolve(pfb->mResource.mFramebuffer.mTextures[0]);
 					ImGui::Text("[%d, %d]", firstTex.mWidth, firstTex.mHeight);
 				}
 				ImGui::TableSetColumnIndex(1);
-				for (auto texId = pfb.mResource.mFramebuffer.mTextures.begin(); texId < pfb.mResource.mFramebuffer.mTextures.end(); texId++) {
+				for (auto texId = pfb->mResource.mFramebuffer.mTextures.begin(); texId < pfb->mResource.mFramebuffer.mTextures.end(); texId++) {
 					if (textureManager.isValid(*texId)) {
 						textureFunc(*texId, textureManager);
-						if (texId != std::prev(pfb.mResource.mFramebuffer.mTextures.end())) {
+						if (texId != std::prev(pfb->mResource.mFramebuffer.mTextures.end())) {
 							ImGui::SameLine();
 						}
 					}
 				}
-			});
+			}
 			ImGui::EndTable();
 		}
 	}
@@ -244,21 +219,40 @@ namespace neo {
 			mQueue.clear();
 		}
 		std::lock_guard<std::mutex> lock(mCacheMutex);
-		mCache.each([this, &textureManager](BackedResource<PooledFramebuffer>& pfb) {
-			if (!pfb.mResource.mExternallyOwned) {
-				for (auto& textureHandle : pfb.mResource.mFramebuffer.mTextures) {
+		for (auto [id, pfb] : mCache) {
+			if (!pfb->mResource.mExternallyOwned) {
+				for (auto& textureHandle : pfb->mResource.mFramebuffer.mTextures) {
 					textureManager.discard(textureHandle);
 				}
 			}
-			ServiceLocator<RenderThread>::ref().pushRenderFunc([this, &pfb]() {
+			ServiceLocator<RenderThread>::value().pushRenderFunc([this, &pfb]() {
 				_destroyImpl(pfb);
-			});
-		});
+				});
+		}
 		mCache.clear();
 	}
 
 	void FramebufferManager::_destroyImpl(BackedResource<PooledFramebuffer>& pfb) {
-		NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
+		NEO_ASSERT(ServiceLocator<RenderThread>::value().isRenderThread(), "Only call this from render thread");
 		pfb.mResource.mFramebuffer.destroy();
 	}
+
+	std::shared_ptr<BackedResource<PooledFramebuffer>> FramebufferLoader::operator()(const FramebufferQueueItem& details, const TextureManager& textureManager) const {
+		NEO_ASSERT(ServiceLocator<RenderThread>::value().isRenderThread(), "Only call this from render thread");
+
+		std::shared_ptr<BackedResource<PooledFramebuffer>> framebuffer = std::make_shared<BackedResource<PooledFramebuffer>>();
+		framebuffer->mResource.mFramebuffer.init(details.mDebugName);
+		framebuffer->mResource.mFrameCount = 4;
+		framebuffer->mResource.mExternallyOwned = details.mExternallyOwned;
+		for (auto& attachment : details.mAttachments) {
+			framebuffer->mResource.mFramebuffer.attachTexture(attachment.mHandle, textureManager.resolve(attachment.mHandle), attachment.mTarget, attachment.mMip);
+		}
+		if (framebuffer->mResource.mFramebuffer.mColorAttachments) {
+			framebuffer->mResource.mFramebuffer.initDrawBuffers();
+		}
+		framebuffer->mDebugName = details.mDebugName;
+
+		return framebuffer;
+	}
+
 }
