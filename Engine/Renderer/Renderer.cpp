@@ -157,12 +157,6 @@ namespace neo {
 				glViewport(0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y);
 				glClear(GL_COLOR_BUFFER_BIT);
 				drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
-
-				// Clear all the imgui draws now hehe
-				auto imguiView = ecs.getView<const ImGuiDrawComponent, const ImGuiComponent>();
-				for (const ECS::Entity& entity : imguiView) {
-					ecs.removeEntity(entity);
-				};
 			}
 			else {
 				TRACY_GPUN("Final Blit");

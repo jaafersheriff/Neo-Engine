@@ -22,6 +22,19 @@ namespace neo {
 		}
 	}
 
+	void ECS::clone(ECS& otherECS) const {
+		TRACY_ZONE();
+
+		using namespace entt::literals;
+		mRegistry.each([&](ECS::Entity srcEntity) {
+			for (auto [id, storage] : mRegistry.storage()) {
+				if (auto it = otherECS.mRegistry.storage(id); it != otherECS.mRegistry.storage().end() && storage.contains(srcEntity)) {
+					it->second.emplace(otherECS.createEntity(), storage.get(srcEntity));
+				}
+			}
+		});
+	}
+
 	ECS::Entity ECS::createEntity() {
 		// TODO - this might break while threading
 		return mRegistry.create();

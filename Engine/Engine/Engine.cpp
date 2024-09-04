@@ -172,26 +172,26 @@ namespace neo {
 				/* Render */
 				{
 					TRACY_ZONEN("Frame Render");
-					if (!mWindow.isMinimized()) {
-						if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
-							TRACY_ZONEN("Prep Render Data");
-							// TODO - this needs to go into the renderer's ecs
-							ServiceLocator<ImGuiManager>::value().resolveDrawData(ecs, resourceManagers);
-							ecs.flush(); // Ah shit
-							resourceManagers.tick(); // Ah shit
+					{
+						ECS renderECS;
+						TRACY_ZONEN("Prep Render Data");
+						{
+							if (!mWindow.isMinimized()) {
+								ecs.clone(renderECS);
+								if (ServiceLocator<ImGuiManager>::value().isEnabled()) {
+									ServiceLocator<ImGuiManager>::value().resolveDrawData(ecs, resourceManagers);
+								}
+							}
+							renderECS.flush();
+							resourceManagers.tick();
 							Messenger::relayMessages(ecs);
 						}
 
 						RenderThread& renderThread = ServiceLocator<RenderThread>::value();
 						{
-							TRACY_ZONEN("Wait on previous frame");
 							renderThread.wait();
-						}
-
-						{
-							TRACY_ZONEN("Push Render Func");
-							renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &ecs, frame = profiler.getFrameCount()]() {
-								ServiceLocator<Renderer>::value().render(mWindow, demo, ecs, resourceManagers, frame);
+							renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, rECS = std::move(renderECS), frame = profiler.getFrameCount()]() {
+								ServiceLocator<Renderer>::value().render(mWindow, demo, rECS, resourceManagers, frame);
 							});
 							renderThread.trigger();
 						}

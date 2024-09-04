@@ -33,6 +33,7 @@ namespace neo {
 		void flush();
 		void clean();
 		void imguiEdtor();
+		void clone(ECS& other) const;
 
 		/* ECS */
 		using Entity = entt::entity;

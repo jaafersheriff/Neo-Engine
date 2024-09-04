@@ -44,6 +44,7 @@ namespace neo {
 #ifdef DEBUG_DISABLE_THREADING
 		func();
 #else
+		TRACY_ZONE();
 		std::lock_guard<std::mutex> lock(mRenderQueueMutex);
 		mRenderQueue.push(func);
 #endif
@@ -53,8 +54,9 @@ namespace neo {
 #ifdef DEBUG_DISABLE_THREADING
 		return;
 #else
-		mWakeCondition.notify_one();
+		TRACY_ZONE();
 		while (mIsSleeping.load()) {
+			mWakeCondition.notify_one();
 			std::this_thread::yield(); // TODO - this is bad...?
 		}
 #endif
