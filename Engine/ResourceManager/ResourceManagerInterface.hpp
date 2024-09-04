@@ -56,7 +56,7 @@ namespace neo {
 		std::optional<std::string> mDebugName;
 	};
 
-	template<typename DerivedManager, typename ResourceType, typename ResourceLoadDetails>
+	template<typename DerivedManager, typename ResourceType, typename ResourceLoadDetails, typename LoaderType>
 	class ResourceManagerInterface {
 		friend ResourceManagers;
 	public:
@@ -171,7 +171,7 @@ namespace neo {
 		mutable std::vector<std::pair<ResourceHandle<ResourceType>, std::function<void(ResourceType&)>>> mTransactionQueue;
 
 		mutable std::mutex mCacheMutex;
-		entt::resource_cache<BackedResource<ResourceType>> mCache;
+		entt::resource_cache<BackedResource<ResourceType>, LoaderType> mCache;
 
 		std::shared_ptr<BackedResource<ResourceType>> mFallback;
 
