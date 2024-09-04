@@ -10,46 +10,10 @@
 
 namespace neo {
 
-	struct MeshLoader final : entt::resource_loader<MeshLoader, BackedResource<Mesh>> {
-
-		std::shared_ptr<BackedResource<Mesh>> load(MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const {
-			TRACY_GPU();
-			NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
-			if (debugName.has_value()) {
-				NEO_LOG_V("Uploading mesh %s", debugName.value().c_str());
-			}
-			std::shared_ptr<BackedResource<Mesh>> meshResource = std::make_shared<BackedResource<Mesh>>(meshDetails.mPrimtive);
-			meshResource->mResource.init(debugName);
-			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
-				meshResource->mResource.addVertexBuffer(
-					type,
-					buffer.mComponents,
-					buffer.mStride,
-					buffer.mFormat,
-					buffer.mNormalized,
-					buffer.mCount,
-					buffer.mOffset,
-					buffer.mByteSize,
-					buffer.mData
-				);
-			}
-			if (meshDetails.mElementBuffer) {
-				meshResource->mResource.addElementBuffer(
-					meshDetails.mElementBuffer->mCount,
-					meshDetails.mElementBuffer->mFormat,
-					meshDetails.mElementBuffer->mByteSize,
-					meshDetails.mElementBuffer->mData
-				);
-			}
-			meshResource->mDebugName = debugName;
-			return meshResource;
-		}
-	};
-
 	MeshManager::MeshManager() {
-		ServiceLocator<RenderThread>::ref().pushRenderFunc([this]() {
+		ServiceLocator<RenderThread>::value().pushRenderFunc([this]() {
 			auto cubeDetails = prefabs::generateCube();
-			mFallback = MeshLoader{}.load(*cubeDetails, "Fallback Cube");
+			mFallback = MeshLoader()(*cubeDetails, "Fallback Cube");
 			for (auto&& [type, buffer] : cubeDetails->mVertexBuffers) {
 				free(const_cast<uint8_t*>(buffer.mData));
 			}
@@ -109,7 +73,7 @@ namespace neo {
 					for (auto& details : swapQueue) {
 						{
 							std::lock_guard<std::mutex> lock(mCacheMutex);
-							mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
+							mCache.load(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
 						}
 						for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
 							free(const_cast<uint8_t*>(buffer.mData));
@@ -140,7 +104,7 @@ namespace neo {
 						if (isValid(handle)) {
 							std::lock_guard<std::mutex> lock(mCacheMutex);
 							TRACY_GPUN("MeshManager::UpdateSingle");
-							func(mCache.handle(handle.mHandle).get().mResource);
+							func(mCache[handle.mHandle]->mResource);
 						}
 						else {
 							NEO_LOG_E("Attempting to transact on an invalid mesh");
@@ -167,8 +131,8 @@ namespace neo {
 					for (auto& id : swapQueue) {
 						if (isValid(id)) {
 							std::lock_guard<std::mutex> lock(mCacheMutex);
-							_destroyImpl(mCache.handle(id.mHandle).get());
-							mCache.discard(id.mHandle);
+							_destroyImpl(mCache[id.mHandle]);
+							mCache.erase(id.mHandle);
 						}
 					}
 				});
@@ -178,20 +142,52 @@ namespace neo {
 
 	void MeshManager::_destroyImpl(BackedResource<Mesh>& mesh) {
 		TRACY_GPU();
-		NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
+		NEO_ASSERT(ServiceLocator<RenderThread>::value().isRenderThread(), "Only call this from render thread");
 		mesh.mResource.destroy();
 	}
 
 	void MeshManager::imguiEditor() {
 		std::lock_guard<std::mutex> lock(mCacheMutex);
-		mCache.each([](const MeshHandle id, const BackedResource<Mesh>& mesh) {
-			NEO_UNUSED(mesh);
-			if (mesh.mDebugName.has_value()) {
-				ImGui::Text(mesh.mDebugName->c_str());
+		for (auto [handle, mesh] : mCache) {
+			if (mesh->mDebugName.has_value()) {
+				ImGui::Text(mesh->mDebugName->c_str());
 			}
 			else {
-				ImGui::Text("%d", id.mHandle);
+				ImGui::Text("%d", handle);
 			}
-		});
+		}
+	}
+
+	std::shared_ptr<BackedResource<Mesh>> MeshLoader::operator()(MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const {
+		TRACY_GPU();
+		NEO_ASSERT(ServiceLocator<RenderThread>::value().isRenderThread(), "Only call this from render thread");
+		if (debugName.has_value()) {
+			NEO_LOG_V("Uploading mesh %s", debugName.value().c_str());
+		}
+		std::shared_ptr<BackedResource<Mesh>> meshResource = std::make_shared<BackedResource<Mesh>>(meshDetails.mPrimtive);
+		meshResource->mResource.init(debugName);
+		for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
+			meshResource->mResource.addVertexBuffer(
+				type,
+				buffer.mComponents,
+				buffer.mStride,
+				buffer.mFormat,
+				buffer.mNormalized,
+				buffer.mCount,
+				buffer.mOffset,
+				buffer.mByteSize,
+				buffer.mData
+			);
+		}
+		if (meshDetails.mElementBuffer) {
+			meshResource->mResource.addElementBuffer(
+				meshDetails.mElementBuffer->mCount,
+				meshDetails.mElementBuffer->mFormat,
+				meshDetails.mElementBuffer->mByteSize,
+				meshDetails.mElementBuffer->mData
+			);
+		}
+		meshResource->mDebugName = debugName;
+		return meshResource;
 	}
 }

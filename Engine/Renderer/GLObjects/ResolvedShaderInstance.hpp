@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 #include <ext/entt_incl.hpp>
-#include <entt/container/dense_hash_map.hpp>
+#include <entt/container/dense_map.hpp>
 
 #include <variant>
 #include <set>
@@ -66,9 +66,9 @@ namespace neo {
 	private:
 		bool isCompute = false;
 		uint32_t mPid = 0;
-		entt::dense_hash_map<types::shader::Stage, uint32_t> mShaderIDs;
-		entt::dense_hash_map<HashedString::hash_type, int32_t> mUniforms;
-		entt::dense_hash_map<HashedString::hash_type, int32_t> mBindings;
+		entt::dense_map<types::shader::Stage, uint32_t> mShaderIDs;
+		entt::dense_map<HashedString::hash_type, int32_t> mUniforms;
+		entt::dense_map<HashedString::hash_type, int32_t> mBindings;
 		std::string mVariant;
 
 		uint32_t _compileShader(uint32_t shaderType, const char* shaderString);

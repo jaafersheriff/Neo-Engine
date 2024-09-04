@@ -12,36 +12,10 @@
 #include <execution>
 
 namespace neo {
-	struct ShaderLoader final : entt::resource_loader<ShaderLoader, BackedResource<SourceShader>> {
-
-		std::shared_ptr<BackedResource<SourceShader>> load(const ShaderLoadDetails& shaderDetails, const std::optional<std::string>& debugName) const {
-			NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
-			NEO_ASSERT(debugName.has_value(), "Shaders need to come with a name please");
-			NEO_LOG_V("Uploading shader %s", debugName.value().c_str());
-			return util::visit(shaderDetails,
-				[&](const SourceShader::ConstructionArgs& constructionArgs) {
-					SourceShader::ShaderCode shaderCode;
-					time_t lastModTime = 0;
-					for (auto&& [type, filePath] : constructionArgs) {
-						shaderCode.emplace(type, Loader::loadFileString(filePath));
-						lastModTime = std::max(lastModTime, Loader::getFileModTime(filePath));
-					}
-					auto result = std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
-					result->mResource.mConstructionArgs = constructionArgs;
-					result->mResource.mModifiedTime = lastModTime;
-					return result;
-				},
-				[&](const SourceShader::ShaderCode& shaderCode) {
-					return std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
-				},
-				[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
-			);
-		}
-	};
 
 	ShaderManager::ShaderManager() {
-		ServiceLocator<RenderThread>::ref().pushRenderFunc([this]() {
-			mFallback = ShaderLoader{}.load(SourceShader::ShaderCode{
+		ServiceLocator<RenderThread>::value().pushRenderFunc([this]() {
+			mFallback = ShaderLoader()(SourceShader::ShaderCode{
 				{types::shader::Stage::Vertex,
 					R"(
 					void main() {
@@ -58,7 +32,7 @@ namespace neo {
 				}, "Dummy");
 
 			mFallback->mResource.getResolvedInstance({});
-		});
+			});
 	}
 
 	ShaderManager::~ShaderManager() {
@@ -96,31 +70,34 @@ namespace neo {
 			{
 				std::lock_guard<std::mutex> lock(mCacheMutex);
 				list.reserve(mCache.size());
-				mCache.each([&list](const entt::id_type enttId) {
-					list.emplace_back(enttId);
-				});
+				for (auto [handle, shader] : mCache) {
+					list.emplace_back(handle);
+				}
 			}
 
 			std::for_each(std::execution::par, list.begin(), list.end(), [this](const entt::id_type& id) {
-				entt::resource_handle<BackedResource<SourceShader>> resource;
+				BackedResource<SourceShader> resource;
 				{
 					std::lock_guard<std::mutex> lock(mCacheMutex);
-					resource = mCache.handle(id);
+					if (!mCache.contains(id)) {
+						return;
+					}
+					resource = mCache[id];
 				}
-				if (resource && resource->mResource.mConstructionArgs) {
-					time_t lastModTime = resource->mResource.mModifiedTime;
-					for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
+				if (resource.mResource.mConstructionArgs) {
+					time_t lastModTime = resource.mResource.mModifiedTime;
+					for (auto&& [stage, fileName] : *resource.mResource.mConstructionArgs) {
 						lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
 					}
-					if (lastModTime > resource->mResource.mModifiedTime) {
-						NEO_LOG_I("Hot reloading %s", resource->mResource.mName.c_str());
+					if (lastModTime > resource.mResource.mModifiedTime) {
+						NEO_LOG_I("Hot reloading %s", resource.mResource.mName.c_str());
 						ShaderHandle handle(id);
 
 						// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
 						discard(handle);
 					}
 				}
-			});
+				});
 		}
 
 		// Create
@@ -135,8 +112,8 @@ namespace neo {
 			for (auto& loadDetails : swapQueue) {
 				renderThread.pushRenderFunc([this, loadDetails]() {
 					std::lock_guard<std::mutex> lock(mCacheMutex);
-					mCache.load<ShaderLoader>(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
-				});
+					mCache.load(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
+					});
 			}
 		}
 
@@ -152,16 +129,16 @@ namespace neo {
 				renderThread.pushRenderFunc([this, id]() {
 					if (isValid(id)) {
 						std::lock_guard<std::mutex> lock(mCacheMutex);
-						_destroyImpl(mCache.handle(id.mHandle).get());
-						mCache.discard(id.mHandle);
+						_destroyImpl(mCache[id.mHandle]);
+						mCache.erase(id.mHandle);
 					}
-				});
+					});
 			}
 		}
 	}
 
 	void ShaderManager::_destroyImpl(BackedResource<SourceShader>& sourceShader) {
-		NEO_ASSERT(ServiceLocator<RenderThread>::ref().isRenderThread(), "Only call this from render thread");
+		NEO_ASSERT(ServiceLocator<RenderThread>::value().isRenderThread(), "Only call this from render thread");
 		if (sourceShader.mResource.mConstructionArgs.has_value()) {
 			for (auto&& [type, charString] : sourceShader.mResource.mShaderSources) {
 				delete charString;
@@ -172,13 +149,12 @@ namespace neo {
 
 	void ShaderManager::imguiEditor() {
 		std::lock_guard<std::mutex> lock(mCacheMutex);
-		mCache.each([&](entt::id_type, BackedResource<SourceShader>& resource) {
-			auto& shader = resource.mResource;
-			if (ImGui::TreeNode(shader.mName.c_str())) {
-				if (shader.mResolvedShaders.size()) {
-					if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(shader.mResolvedShaders.size()))) {
+		for (auto [handle, shader] : mCache) {
+			if (ImGui::TreeNode(shader->mResource.mName.c_str())) {
+				if (shader->mResource.mResolvedShaders.size()) {
+					if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(shader->mResource.mResolvedShaders.size()))) {
 						ImGui::Separator();
-						for (const auto& variant : shader.mResolvedShaders) {
+						for (const auto& variant : shader->mResource.mResolvedShaders) {
 							ImGui::Text("%s", variant.second.variant().size() ? variant.second.variant().c_str() : "No defines");
 							ImGui::Separator();
 						}
@@ -190,6 +166,30 @@ namespace neo {
 				}
 				ImGui::TreePop();
 			}
-		});
+		}
+	}
+
+	std::shared_ptr<BackedResource<SourceShader>> ShaderLoader::operator()(const ShaderLoadDetails& shaderDetails, const std::optional<std::string>& debugName) const {
+		NEO_ASSERT(ServiceLocator<RenderThread>::value().isRenderThread(), "Only call this from render thread");
+		NEO_ASSERT(debugName.has_value(), "Shaders need to come with a name please");
+		NEO_LOG_V("Uploading shader %s", debugName.value().c_str());
+		return util::visit(shaderDetails,
+			[&](const SourceShader::ConstructionArgs& constructionArgs) {
+				SourceShader::ShaderCode shaderCode;
+				time_t lastModTime = 0;
+				for (auto&& [type, filePath] : constructionArgs) {
+					shaderCode.emplace(type, Loader::loadFileString(filePath));
+					lastModTime = std::max(lastModTime, Loader::getFileModTime(filePath));
+				}
+				auto result = std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
+				result->mResource.mConstructionArgs = constructionArgs;
+				result->mResource.mModifiedTime = lastModTime;
+				return result;
+			},
+			[&](const SourceShader::ShaderCode& shaderCode) {
+				return std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
+			},
+			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
+		);
 	}
 }
