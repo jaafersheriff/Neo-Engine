@@ -111,6 +111,7 @@ namespace neo {
 			ImGui::GetIO().BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
 			ImGui::GetPlatformIO().Renderer_RenderWindow = weirdImGuiDrawData;
 		});
+		renderThread.trigger();
 		renderThread.wait();
 	}
 

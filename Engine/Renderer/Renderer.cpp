@@ -159,7 +159,8 @@ namespace neo {
 				drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
 
 				// Clear all the imgui draws now hehe
-				for (const ECS::Entity& entity : ecs.getView<const ImGuiDrawComponent, const ImGuiComponent>()) {
+				auto imguiView = ecs.getView<const ImGuiDrawComponent, const ImGuiComponent>();
+				for (const ECS::Entity& entity : imguiView) {
 					ecs.removeEntity(entity);
 				};
 			}

@@ -104,6 +104,7 @@ namespace neo {
 			}
 			TracyGpuContext;
 		});
+		renderThread.trigger();
 		renderThread.wait();
 		mWindow.toggleVSync();
 		mWindow.toggleVSync(); // Lmao
@@ -125,7 +126,6 @@ namespace neo {
 			TRACY_ZONEN("Engine::run");
 
 			{
-				TRACY_ZONEN("Frame");
 				{
 					TRACY_ZONEN("Frame Update");
 					ZoneValue(profiler.getFrameCount());
@@ -173,9 +173,11 @@ namespace neo {
 				{
 					TRACY_ZONEN("Frame Render");
 					if (!mWindow.isMinimized()) {
-						// TODO - deep copy ECS
+						ECS renderECS;
+						ecs.clone(renderECS);
 
 						if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+							TRACY_ZONEN("Prep Render Data");
 							// TODO - this needs to go into the renderer's ecs
 							ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
 							ecs.flush(); // Ah shit
@@ -189,9 +191,13 @@ namespace neo {
 							renderThread.wait();
 						}
 
-						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &ecs, frame = profiler.getFrameCount()]() {
-							ServiceLocator<Renderer>::ref().render(mWindow, demo, ecs, resourceManagers, frame);
-						});
+						{
+							TRACY_ZONEN("Push Render Func");
+							renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &ecs, frame = profiler.getFrameCount()]() {
+								ServiceLocator<Renderer>::ref().render(mWindow, demo, ecs, resourceManagers, frame);
+							});
+							renderThread.trigger();
+						}
 					}
 				}
 
@@ -210,6 +216,7 @@ namespace neo {
 		TRACY_ZONE();
 		RenderThread& renderThread = ServiceLocator<RenderThread>::ref();
 
+		renderThread.trigger();
 		renderThread.wait();
 
 		/* Destroy the old state*/
