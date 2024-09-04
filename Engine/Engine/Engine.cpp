@@ -173,9 +173,6 @@ namespace neo {
 				{
 					TRACY_ZONEN("Frame Render");
 					if (!mWindow.isMinimized()) {
-						ECS renderECS;
-						ecs.clone(renderECS);
-
 						if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
 							TRACY_ZONEN("Prep Render Data");
 							// TODO - this needs to go into the renderer's ecs
