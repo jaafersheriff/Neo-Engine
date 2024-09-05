@@ -32,9 +32,10 @@ namespace neo {
 
 		using namespace entt::literals;
 		mRegistry.each([&](ECS::Entity srcEntity) {
+			auto newEntity = otherECS.createEntity();
 			for (auto [id, storage] : mRegistry.storage()) {
 				if (auto it = otherECS.mRegistry.storage(id); it != otherECS.mRegistry.storage().end() && storage.contains(srcEntity)) {
-					it->second.emplace(otherECS.createEntity(), storage.get(srcEntity));
+					it->second.emplace(newEntity, storage.get(srcEntity));
 				}
 			}
 		});
