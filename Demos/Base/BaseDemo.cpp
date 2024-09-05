@@ -122,7 +122,11 @@ namespace Base {
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
-		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		auto cameraView = ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		if (!cameraView) {
+			return;
+		}
+		const auto& [cameraEntity, _, cameraSpatial] = cameraView.value();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(

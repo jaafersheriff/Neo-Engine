@@ -7,6 +7,8 @@
 
 #include <ext/imgui_incl.hpp>
 
+#pragma optimize("", off)
+
 namespace neo {
 	namespace {
 		TextureHandle swizzleTextureId(FramebufferHandle srcHandle, TextureFormat format, types::framebuffer::AttachmentTarget target, uint8_t mip, glm::uvec2 dimension) {

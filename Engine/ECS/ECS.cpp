@@ -7,10 +7,10 @@
 
 namespace neo {
 
-	ECS::ECS(const ECS& other) {
-		TRACY_ZONE();
-		other.clone(*this);
-	}
+	// ECS::ECS(const ECS& other) {
+	// 	TRACY_ZONE();
+	// 	other.clone(*this);
+	// }
 
 	void ECS::_initSystems() {
 		for (auto& system : mSystems) {
@@ -72,7 +72,7 @@ namespace neo {
 		flush();
 		mRegistry.each([this](auto entity) {
 			mRegistry.destroy(entity);
-		});
+			});
 		mRegistry.clear();
 		mSystems.clear();
 	}
@@ -149,6 +149,13 @@ namespace neo {
 			}
 
 			ImGui::TreePop();
+		}
+
+		if (mRenderECS) {
+			if (ImGui::TreeNode(mRenderECS, "Render ECS")) {
+				mRenderECS->imguiEdtor();
+				ImGui::TreePop();
+			}
 		}
 		ImGui::End();
 	}

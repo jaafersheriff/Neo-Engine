@@ -27,7 +27,7 @@ namespace neo {
 	public:
 		ECS() = default;
 		~ECS() = default;
-		ECS(const ECS&);
+		//ECS(const ECS&);
 		ECS& operator=(const ECS&) = delete;
 
 		void flush();
@@ -65,6 +65,7 @@ namespace neo {
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
 		template <typename SysT> bool isSystemEnabled() const;
 
+		void setRenderECS(ECS* ecs) { mRenderECS = ecs; }
 
 	private:
 		mutable Registry mRegistry;
@@ -80,6 +81,8 @@ namespace neo {
 		std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
 		void _initSystems();
 		void _updateSystems();
+
+		ECS* mRenderECS = nullptr;
 	};
 
 	template<typename CompT>
@@ -169,6 +172,11 @@ namespace neo {
 	CompT* ECS::addComponent(Entity e, Args &&... args) {
 		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
 		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+
+		if (mRenderECS) {
+			// Register the storage w/ render registry so it can be copied over later
+			static_cast<void>(mRenderECS->mRegistry.storage<CompT>());
+		}
 
 		CompT* component;
 		if constexpr (sizeof...(Args) > 0) {

@@ -67,17 +67,8 @@ namespace neo {
 		return;
 #else
 		TRACY_ZONEN("Wait on render thread");
-		bool queuedTasks = false;
-		{
-			std::lock_guard<std::mutex> lock(mRenderQueueMutex);
-			queuedTasks = mRenderQueue.size() != 0;
-		}
-
-		while (!mIsSleeping.load() && queuedTasks) {
+		while (!mIsSleeping.load()) {
 			std::this_thread::yield(); // TODO - this is bad...?
-
-			std::lock_guard<std::mutex> lock(mRenderQueueMutex);
-			queuedTasks = mRenderQueue.size() != 0;
 		}
 #endif
 	}

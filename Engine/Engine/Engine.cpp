@@ -116,6 +116,8 @@ namespace neo {
 	void Engine::run(DemoWrangler&& demos) {
 
 		ECS ecs;
+		ECS renderECS;
+		ecs.setRenderECS(&renderECS);
 		// TODO - managers could just be added to the ecs probably..but how would that work with threading
 		ResourceManagers resourceManagers;
 		util::Profiler profiler;
@@ -173,28 +175,27 @@ namespace neo {
 				{
 					TRACY_ZONEN("Frame Render");
 					{
-						ECS renderECS;
-						TRACY_ZONEN("Prep Render Data");
-						{
-							if (!mWindow.isMinimized()) {
-								ecs.clone(renderECS);
-								if (ServiceLocator<ImGuiManager>::value().isEnabled()) {
-									ServiceLocator<ImGuiManager>::value().resolveDrawData(renderECS, resourceManagers);
-								}
+						RenderThread& renderThread = ServiceLocator<RenderThread>::value();
+						renderThread.wait();
+
+						if (!mWindow.isMinimized()) {
+							if (ServiceLocator<ImGuiManager>::value().isEnabled()) {
+								ServiceLocator<ImGuiManager>::value().resolveDrawData(renderECS, resourceManagers);
 							}
-							renderECS.flush();
-							resourceManagers.tick();
-							Messenger::relayMessages(ecs);
 						}
 
-						RenderThread& renderThread = ServiceLocator<RenderThread>::value();
-						{
-							renderThread.wait();
-							renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, rECS = std::move(renderECS), frame = profiler.getFrameCount()]() {
-								ServiceLocator<Renderer>::value().render(mWindow, demo, rECS, resourceManagers, frame);
-							});
-							renderThread.trigger();
-						}
+						resourceManagers.tick();
+						Messenger::relayMessages(ecs);
+
+						ecs.clone(renderECS);
+						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &renderECS, frame = profiler.getFrameCount()]() {
+							renderECS.flush();
+							ServiceLocator<Renderer>::value().render(mWindow, demo, renderECS, resourceManagers, frame);
+							for (auto [id, storage] : renderECS.mRegistry.storage()) {
+								storage.clear();
+							}
+						});
+						renderThread.trigger();
 					}
 				}
 

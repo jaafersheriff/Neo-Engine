@@ -31,27 +31,26 @@ namespace neo {
 		Engine(Engine&&) = delete;
 		Engine& operator=(Engine&&) = delete;
 
-			void init();
-			void run(DemoWrangler&& demoWrangler);
-			void shutDown(ECS& ecs, ResourceManagers& resourceManagers);
+		void init();
+		void run(DemoWrangler&& demoWrangler);
+		void shutDown(ECS& ecs, ResourceManagers& resourceManagers);
 
 	private:
 		void _startFrame(util::Profiler& profiler, ECS& ecs, ResourceManagers& resourceManagers);
 		void _endFrame(ECS& ecs);
-		
+
 		void _createPrefabs(ResourceManagers& resourceManagers);
 		void _swapDemo(DemoWrangler& demoWranger, ECS& ecs, ResourceManagers& resourceManagers);
-		
+
 		/* Hardware */
 		WindowSurface mWindow;
 		Keyboard mKeyboard;
 		Mouse mMouse;
-		
+
 		/* Debug */
 		bool mShowBoundingBoxes = false;
 
 		MouseRaySystem mMouseRaySystem;
 		SelectingSystem mSelectingSystem;
-		
 	};
 }

@@ -11,8 +11,8 @@
 namespace neo {
 
 	class Engine;
-	class ImGuiManager;
 	class ECS;
+	class ImGuiManager;
 	class WindowSurface;
 	class PostProcessShader;
 	class Framebuffer;
