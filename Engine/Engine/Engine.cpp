@@ -189,11 +189,17 @@ namespace neo {
 
 						ecs.clone(renderECS);
 						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &renderECS, frame = profiler.getFrameCount()]() {
-							renderECS.flush();
+							{
+								TRACY_ZONEN("Flush RenderECS");
+								renderECS.flush();
+							}
 							ServiceLocator<Renderer>::value().render(mWindow, demo, renderECS, resourceManagers, frame);
-							renderECS.mRegistry.each([&](ECS::Entity entity) {
-								renderECS.mRegistry.destroy(entity);
-							});
+							{
+								TRACY_ZONEN("Clear RenderECS");
+								renderECS.mRegistry.each([&](ECS::Entity entity) {
+									renderECS.mRegistry.destroy(entity);
+								});
+							}
 
 						});
 						renderThread.trigger();
