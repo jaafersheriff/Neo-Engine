@@ -57,6 +57,32 @@ namespace neo {
 	void MeshManager::_tickImpl(RenderThread& renderThread) {
 		TRACY_ZONE();
 
+		// Delete
+		{
+			std::vector<MeshHandle> swapQueue;
+			{
+				std::lock_guard<std::mutex> lock(mDiscardMutex);
+				if (!mDiscardQueue.empty()) {
+					std::swap(mDiscardQueue, swapQueue);
+					mDiscardQueue.clear();
+				}
+			}
+
+			if (!swapQueue.empty()) {
+				renderThread.pushRenderFunc([this, swapQueue = std::move(swapQueue)]() {
+					TRACY_GPUN("MeshManager::Delete");
+					for (auto& id : swapQueue) {
+						if (isValid(id)) {
+							std::lock_guard<std::mutex> lock(mCacheMutex);
+							_destroyImpl(mCache[id.mHandle]);
+							mCache.erase(id.mHandle);
+						}
+					}
+				});
+			}
+		}
+
+
 		// Create
 		{
 			std::vector<ResourceLoadDetails_Internal> swapQueue = {};
@@ -108,31 +134,6 @@ namespace neo {
 						}
 						else {
 							NEO_LOG_E("Attempting to transact on an invalid mesh");
-						}
-					}
-				});
-			}
-		}
-
-		// Delete
-		{
-			std::vector<MeshHandle> swapQueue;
-			{
-				std::lock_guard<std::mutex> lock(mDiscardMutex);
-				if (!mDiscardQueue.empty()) {
-					std::swap(mDiscardQueue, swapQueue);
-					mDiscardQueue.clear();
-				}
-			}
-
-			if (!swapQueue.empty()) {
-				renderThread.pushRenderFunc([this, swapQueue = std::move(swapQueue)]() {
-					TRACY_GPUN("MeshManager::Delete");
-					for (auto& id : swapQueue) {
-						if (isValid(id)) {
-							std::lock_guard<std::mutex> lock(mCacheMutex);
-							_destroyImpl(mCache[id.mHandle]);
-							mCache.erase(id.mHandle);
 						}
 					}
 				});

@@ -110,6 +110,7 @@ namespace neo {
 
 			for (auto& loadDetails : swapQueue) {
 				renderThread.pushRenderFunc([this, loadDetails]() {
+					TRACY_GPUN("ShaderManager::Create");
 					std::lock_guard<std::mutex> lock(mCacheMutex);
 					mCache.load(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
 					});
@@ -126,6 +127,7 @@ namespace neo {
 			}
 			for (auto& id : swapQueue) {
 				renderThread.pushRenderFunc([this, id]() {
+					TRACY_GPUN("ShaderManager::Destroy");
 					if (isValid(id)) {
 						std::lock_guard<std::mutex> lock(mCacheMutex);
 						_destroyImpl(mCache[id.mHandle]);

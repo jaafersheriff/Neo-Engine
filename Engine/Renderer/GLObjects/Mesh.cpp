@@ -90,6 +90,7 @@ namespace neo {
 	}
 
 	void Mesh::updateVertexBuffer(types::mesh::VertexType type, uint32_t count, uint32_t byteSize, const uint8_t* data) {
+		TRACY_GPU();
 		const auto& vbo = mVBOs.find(type);
 		NEO_ASSERT(vbo != mVBOs.end(), "Attempting to update a VertexBuffer that doesn't exist");
 		auto& vertexBuffer = vbo->second;

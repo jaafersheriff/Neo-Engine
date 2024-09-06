@@ -131,6 +131,7 @@ namespace neo {
 					continue;
 				}
 				renderThread.pushRenderFunc([this, id]() {
+					TRACY_GPUN("TextureManager::Destroy");
 					if (isValid(id)) {
 						std::lock_guard<std::mutex> lock(mCacheMutex);
 						_destroyImpl(mCache[id.mHandle]);
@@ -153,6 +154,7 @@ namespace neo {
 				util::visit(loadDetails.mLoadDetails,
 					[&](TextureBuilder builder) {
 						renderThread.pushRenderFunc([this, builder, loadDetails]() {
+							TRACY_GPUN("TextureManager::Create");
 							{
 								std::lock_guard<std::mutex> lock(mCacheMutex);
 								mCache.load(loadDetails.mHandle.mHandle, builder, loadDetails.mDebugName);
@@ -161,6 +163,7 @@ namespace neo {
 							});
 					},
 					[&](TextureFiles files) {
+						TRACY_GPUN("TextureManager::Create");
 						renderThread.pushRenderFunc([this, files, loadDetails]() {
 							std::lock_guard<std::mutex> lock(mCacheMutex);
 							mCache.load(loadDetails.mHandle.mHandle, files, loadDetails.mDebugName);

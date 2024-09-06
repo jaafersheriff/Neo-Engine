@@ -189,10 +189,7 @@ namespace neo {
 
 						ecs.clone(renderECS);
 						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &renderECS, frame = profiler.getFrameCount()]() {
-							{
-								TRACY_ZONEN("Flush RenderECS");
-								renderECS.flush();
-							}
+							renderECS.flush();
 							ServiceLocator<Renderer>::value().render(mWindow, demo, renderECS, resourceManagers, frame);
 							{
 								TRACY_ZONEN("Clear RenderECS");

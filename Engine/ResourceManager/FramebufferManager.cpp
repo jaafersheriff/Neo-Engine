@@ -142,6 +142,7 @@ namespace neo {
 			}
 			if (validTextures) {
 				renderThread.pushRenderFunc([this, item, &textureManager]() {
+					TRACY_GPUN("FramebufferManager::Create");
 					std::lock_guard<std::mutex> lock(mCacheMutex);
 					mCache.load(item.mHandle.mHandle, item, textureManager);
 				});
@@ -149,18 +150,24 @@ namespace neo {
 		}
 
 		// Destroy
-		std::vector<Framebuffer> discardQueue;
+		std::vector<entt::id_type> handleDiscardQueue;
+		std::vector<Framebuffer> resourceDiscardQueue;
 		{
 			std::lock_guard<std::mutex> lock(mCacheMutex);
 			for (auto [id, resource] : mCache) {
+				if (!resource) {
+					NEO_LOG_W("Uhh, framebuffer resource doesn't exist I guess");
+					handleDiscardQueue.push_back(id);
+					continue;
+				}
 				if (resource->mResource.mFrameCount == 0) {
 					if (!resource->mResource.mExternallyOwned) {
 						for (auto& texId : resource->mResource.mFramebuffer.mTextures) {
 							textureManager.discard(texId);
 						}
 					}
-					discardQueue.push_back(resource->mResource.mFramebuffer);
-					mCache.erase(id);
+					handleDiscardQueue.push_back(id);
+					resourceDiscardQueue.push_back(resource->mResource.mFramebuffer);
 				}
 				else {
 					if (resource->mResource.mUsedThisFrame) {
@@ -172,8 +179,12 @@ namespace neo {
 				}
 			}
 		}
-		if (!discardQueue.empty()) {
-			renderThread.pushRenderFunc([this, queue = std::move(discardQueue)]() {
+		for (auto& id : handleDiscardQueue) {
+			mCache.erase(id);
+		}
+		if (!resourceDiscardQueue.empty()) {
+			renderThread.pushRenderFunc([this, queue = std::move(resourceDiscardQueue)]() {
+				TRACY_GPUN("FramebufferManager::Destroy");
 				for (int i = 0; i < queue.size(); i++) {
 					queue[i].destroy();
 				}
@@ -226,16 +237,11 @@ namespace neo {
 					textureManager.discard(textureHandle);
 				}
 			}
-			ServiceLocator<RenderThread>::value().pushRenderFunc([this, &pfb]() {
-				_destroyImpl(pfb);
-				});
+			ServiceLocator<RenderThread>::value().pushRenderFunc([this, fb = pfb->mResource.mFramebuffer]() {
+				fb.destroy();
+			});
 		}
 		mCache.clear();
-	}
-
-	void FramebufferManager::_destroyImpl(BackedResource<PooledFramebuffer>& pfb) {
-		NEO_ASSERT(ServiceLocator<RenderThread>::value().isRenderThread(), "Only call this from render thread");
-		pfb.mResource.mFramebuffer.destroy();
 	}
 
 	std::shared_ptr<BackedResource<PooledFramebuffer>> FramebufferLoader::operator()(const FramebufferQueueItem& details, const TextureManager& textureManager) const {
