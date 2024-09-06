@@ -16,7 +16,7 @@ namespace neo {
 		{}
 
 		bool isInView(const ECS& ecs, ECS::Entity thisID, ECS::Entity cameraID) const {
-			if (ecs.isSystemEnabled<FrustumSystem>() && ecs.isSystemEnabled<FrustumCullingSystem>() && ecs.has<BoundingBoxComponent>(thisID)) {
+			if (ecs.has<BoundingBoxComponent>(thisID)) {
 				return std::find(mCameraViews.begin(), mCameraViews.end(), cameraID) != mCameraViews.end();
 			}
 

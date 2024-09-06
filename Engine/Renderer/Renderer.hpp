@@ -63,6 +63,7 @@ namespace neo {
 			FramebufferHandle mDefaultFBOHandle;
 			bool mShowBoundingBoxes = false;
 			bool mBackbufferNeedsResize = false;
+			FrameStats mStoredStats = {};
 	};
 
 }

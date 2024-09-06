@@ -165,6 +165,8 @@ namespace neo {
 			Framebuffer fb; // empty framebuffer is just the backbuffer -- just don't do anything with it ever
 			blit(resourceManagers, fb, defaultFbo.mTextures[0], window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
 		}
+
+		mStoredStats = mStats;
 	}
 
 	void Renderer::imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager) {
@@ -214,10 +216,10 @@ namespace neo {
 
 		ImGui::Begin("Renderer");
 		if (ImGui::TreeNodeEx("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::TextWrapped("Num Draws: %d", mStats.mNumDraws);
-			ImGui::TextWrapped("Num Triangles: %d", mStats.mNumPrimitives);
-			ImGui::TextWrapped("Num Uniforms: %d", mStats.mNumUniforms);
-			ImGui::TextWrapped("Num Samplers: %d", mStats.mNumSamplers);
+			ImGui::TextWrapped("Num Draws: %d", mStoredStats.mNumDraws);
+			ImGui::TextWrapped("Num Triangles: %d", mStoredStats.mNumPrimitives);
+			ImGui::TextWrapped("Num Uniforms: %d", mStoredStats.mNumUniforms);
+			ImGui::TextWrapped("Num Samplers: %d", mStoredStats.mNumSamplers);
 			ImGui::TreePop();
 		}
 		if (auto hardwareDetails = ecs.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
