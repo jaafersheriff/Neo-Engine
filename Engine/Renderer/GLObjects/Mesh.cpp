@@ -39,24 +39,24 @@ namespace neo {
 	}
 
 	// TODO - instanced
-	void Mesh::draw(uint32_t size) const {
+	void Mesh::draw(uint32_t size, uint16_t offset) const {
 
-		ServiceLocator<Renderer>::ref().mStats.mNumDraws++;
+		ServiceLocator<Renderer>::value().mStats.mNumDraws++;
 
 		glBindVertexArray(mVAOID);
 
 		const auto& positions = getVBO(types::mesh::VertexType::Position);
 		if (mElementVBO) {
 			uint32_t usedSize = size ? size : mElementVBO->elementCount;
-			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += usedSize / positions.components;
-			glDrawElements(_translatePrimitive(mPrimitiveType), usedSize, mElementVBO->format, nullptr);
+			ServiceLocator<Renderer>::value().mStats.mNumPrimitives += usedSize / positions.components;
+			glDrawElements(_translatePrimitive(mPrimitiveType), usedSize, mElementVBO->format, reinterpret_cast<void*>(offset));
 		}
 		else if (size) {
-			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += size / positions.components;
+			ServiceLocator<Renderer>::value().mStats.mNumPrimitives += size / positions.components;
 			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, size / positions.components);
 		}
 		else {
-			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += positions.elementCount / positions.components;
+			ServiceLocator<Renderer>::value().mStats.mNumPrimitives += positions.elementCount / positions.components;
 			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, positions.elementCount / positions.components);
 		}
 	}
@@ -86,15 +86,10 @@ namespace neo {
 		glVertexAttribPointer(vertexBuffer.attribArray, components, vertexBuffer.format, normalized ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<uint8_t*>(NULL + offset));
 #pragma warning(pop)
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
 		mVBOs[type] = vertexBuffer;
 	}
 
-	void Mesh::updateVertexBuffer(types::mesh::VertexType type, uint32_t count, uint32_t byteSize, uint8_t* data) {
-		TRACY_GPU();
-
+	void Mesh::updateVertexBuffer(types::mesh::VertexType type, uint32_t count, uint32_t byteSize, const uint8_t* data) {
 		const auto& vbo = mVBOs.find(type);
 		NEO_ASSERT(vbo != mVBOs.end(), "Attempting to update a VertexBuffer that doesn't exist");
 		auto& vertexBuffer = vbo->second;
@@ -105,8 +100,6 @@ namespace neo {
 		if (byteSize) {
 			glBufferData(GL_ARRAY_BUFFER, byteSize, data, GL_DYNAMIC_DRAW);
 		}
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
 	}
 
 	void Mesh::removeVertexBuffer(types::mesh::VertexType type) {
@@ -116,7 +109,6 @@ namespace neo {
 			glBindVertexArray(mVAOID);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo->second.vboID);
 			glDeleteBuffers(1, (GLuint *)&vbo->second.vboID);
-			glBindVertexArray(0);
 		}
 		mVBOs.erase(type);
 	}
@@ -147,7 +139,6 @@ namespace neo {
 		if (byteSize) {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteSize, data, GL_STATIC_DRAW);
 		}
-		glBindVertexArray(0);
 	}
 
 	void Mesh::removeElementBuffer() {
@@ -155,8 +146,6 @@ namespace neo {
 			glBindVertexArray(mVAOID);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID);
 			glDeleteBuffers(1, (GLuint *)&mElementVBO->vboID);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
 			mElementVBO = std::nullopt;
 		}
 
@@ -169,6 +158,7 @@ namespace neo {
 		removeVertexBuffer(types::mesh::VertexType::Position);
 		removeVertexBuffer(types::mesh::VertexType::Normal);
 		removeVertexBuffer(types::mesh::VertexType::Texture0);
+		removeVertexBuffer(types::mesh::VertexType::Tangent);
 		removeElementBuffer();
 	}
 

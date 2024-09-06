@@ -12,5 +12,6 @@ PRIVATE
 	imgui
 	entt
 	TracyClient
-	implots
 )
+
+

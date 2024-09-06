@@ -6,7 +6,7 @@
 
 #include "Util/Profiler.hpp"
 
-#include <imgui.h>
+#include <imgui_incl.hpp>
 #include <execution>
 
 namespace neo {

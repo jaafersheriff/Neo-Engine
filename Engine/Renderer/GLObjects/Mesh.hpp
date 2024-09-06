@@ -27,7 +27,7 @@ namespace neo {
 
 			/* VBOs */
 			void addVertexBuffer(types::mesh::VertexType type, uint32_t components, uint32_t stride, types::ByteFormats format, bool normalized, uint32_t count, uint32_t offset, uint32_t byteSize, const uint8_t* data = nullptr);
-			void updateVertexBuffer(types::mesh::VertexType type, uint32_t count, uint32_t byteSize, uint8_t* data);
+			void updateVertexBuffer(types::mesh::VertexType type, uint32_t count, uint32_t byteSize, const uint8_t* data);
 			void removeVertexBuffer(types::mesh::VertexType type);
 
 			void addElementBuffer(uint32_t count, types::ByteFormats format, uint32_t byteSize, const uint8_t* data = nullptr);
@@ -38,7 +38,7 @@ namespace neo {
 
 			types::mesh::Primitive mPrimitiveType = types::mesh::Primitive::TriangleStrip;
 
-			void draw(uint32_t = 0) const;
+			void draw(uint32_t = 0, uint16_t = 0) const;
 
 			void init(const std::optional<std::string>& debugName);
 			void destroy();

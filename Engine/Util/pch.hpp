@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
-#include <imgui.h>
+#include <imgui_incl.hpp>
 
 #include <entt/core/hashed_string.hpp>
 

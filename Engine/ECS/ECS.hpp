@@ -10,8 +10,12 @@
 #endif
 #include <entt/entt.hpp>
 
+#include <ext/imgui_incl.hpp>
+#pragma warning( push )
+#pragma warning( disable : 4244 )
 #define MM_IEEE_ASSERT(x) NEO_UNUSED(x)
 #include <imgui_entt_entity_editor.hpp>
+#pragma warning( pop )
 
 #include <typeindex>
 #include <optional>

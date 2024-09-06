@@ -3,7 +3,7 @@
 #include "ECS/Component/Component.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include <imgui.h>
+#include <imgui_incl.hpp>
 
 namespace neo {
 

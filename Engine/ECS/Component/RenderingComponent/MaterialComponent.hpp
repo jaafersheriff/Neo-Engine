@@ -4,7 +4,7 @@
 
 #include "ResourceManager/TextureManager.hpp"
 
-#include <imgui.h>
+#include <imgui_incl.hpp>
 
 namespace neo {
 	START_COMPONENT(MaterialComponent);

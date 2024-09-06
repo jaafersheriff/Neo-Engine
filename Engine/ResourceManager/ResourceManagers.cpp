@@ -1,6 +1,6 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
-#include <imgui.h>
+#include <imgui_incl.hpp>
 
 namespace neo {
 
