@@ -89,7 +89,9 @@ namespace neo {
 			std::swap(mQueue, swapQueue);
 			mQueue.clear();
 
+			TRACY_GPUN("Create");
 			for (auto& details : swapQueue) {
+				TRACY_GPUN("Create Single");
 				mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
 				for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
 					free(const_cast<uint8_t*>(buffer.mData));
@@ -105,7 +107,9 @@ namespace neo {
 			std::swap(mTransactionQueue, swapQueue);
 			mTransactionQueue.clear();
 
+			TRACY_GPUN("Transact");
 			for (auto&& [handle, func] : swapQueue) {
+				TRACY_GPUN("Transact Single");
 				if (isValid(handle)) {
 					func(mCache.handle(handle.mHandle).get().mResource);
 				}
@@ -120,7 +124,9 @@ namespace neo {
 			std::swap(mDiscardQueue, swapQueue);
 			mDiscardQueue.clear();
 
+			TRACY_GPUN("Destroy");
 			for (auto& id : swapQueue) {
+				TRACY_GPUN("Destroy Single");
 				if (isValid(id)) {
 					_destroyImpl(mCache.handle(id.mHandle).get());
 					mCache.discard(id.mHandle);

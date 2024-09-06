@@ -17,6 +17,7 @@ extern "C" {
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/DebugBoundingBox.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/ImGuiDrawComponent.hpp"
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/KeyboardComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
@@ -69,7 +70,7 @@ namespace neo {
 			NEO_ASSERT(glewInit()== GLEW_OK, "Failed to init GLEW");
 		}
 		ServiceLocator<ImGuiManager>::set();
-		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow());
+		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow(), mWindow.getDetails().mDPIScale);
 
 		ServiceLocator<Renderer>::ref().init();
 		{
@@ -161,7 +162,13 @@ namespace neo {
 
 				{
 
-					TRACY_ZONEN("Resource Tick");
+					TRACY_GPUN("Prepare draw data");
+					if (!mWindow.isMinimized()) {
+						// None of this will actually be valid until next frame in ECS::flush(), so imgui is always 1 frame behind
+						if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+							ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
+						}
+					}
 					resourceManagers.tick();
 					Messenger::relayMessages(ecs);
 				}
@@ -170,9 +177,15 @@ namespace neo {
 				// TODO - only run this at 60FPS in its own thread
 				// TODO - should this go after processkillqueue?
 				{
-					TRACY_ZONEN("Frame Render");
+					TRACY_GPUN("Frame Render");
 					if (!mWindow.isMinimized()) {
 						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), ecs, resourceManagers);
+						{
+							TRACY_GPUN("Remove draw data");
+							for (auto entity : ecs.getView<ImGuiComponent, ImGuiDrawComponent>()) {
+								ecs.removeEntity(entity);
+							}
+						}
 					}
 					Messenger::relayMessages(ecs);
 				}
@@ -211,6 +224,7 @@ namespace neo {
 		ServiceLocator<Renderer>::ref().init();
 		Loader::init(config.resDir, config.shaderDir);
 		_createPrefabs(resourceManagers);
+		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers);
 		resourceManagers.tick();
 
 		demos.getCurrentDemo()->init(ecs, resourceManagers);

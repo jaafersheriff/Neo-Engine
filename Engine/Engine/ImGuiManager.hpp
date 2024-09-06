@@ -3,13 +3,18 @@
 #include "Util/Log/ImGuiConsole.hpp"
 #include "Util/Log/Log.hpp"
 
-#include <imgui.h>
+#include "ResourceManager/MeshManager.hpp"
+
+#include <ext/imgui_incl.hpp>
 #include <glm/glm.hpp>
 #include <vector>
+#include <array>
 
 struct GLFWwindow;
 
 namespace neo {
+	class ECS;
+	class ResourceManagers;
 
 	class ImGuiManager {
 	public:
@@ -25,11 +30,14 @@ namespace neo {
 		ImGuiManager(const ImGuiManager&) = delete;
 		ImGuiManager & operator=(const ImGuiManager&) = delete;
 
-		void init(GLFWwindow* window);
+		void init(GLFWwindow* window, float dpiScale);
 		void update();
 		void render();
 		void reset();
 		void destroy();
+
+		void reload(ResourceManagers& resourceManagers);
+		void resolveDrawData(ECS& ecs, ResourceManagers& resourceManagers);
 
 		void begin();
 		void end();
@@ -54,5 +62,7 @@ namespace neo {
 		bool mIsEnabled = true;
 		Viewport mViewport;
 		ImGuiConsole mConsole;
+		
+		std::array<MeshHandle, 16> mImGuiMeshes;
 	};
 }

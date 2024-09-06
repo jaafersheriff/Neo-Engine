@@ -46,11 +46,11 @@ namespace neo {
 		friend ResourceManagers;
 	public:
 
-		bool isValid(ResourceHandle<ResourceType> id) const {
+		bool isValid(const ResourceHandle<ResourceType>& id) const {
 			return id.mHandle != NEO_INVALID_HANDLE && mCache.contains(id.mHandle);
 		}
 
-		bool isQueued(ResourceHandle<ResourceType> id) const {
+		bool isQueued(const ResourceHandle<ResourceType>& id) const {
 			if (id.mHandle == NEO_INVALID_HANDLE) {
 				return false;
 			}
@@ -64,7 +64,7 @@ namespace neo {
 			return false;
 		}
 
-		bool isDiscardQueued(ResourceHandle<ResourceType> id) const {
+		bool isDiscardQueued(const ResourceHandle<ResourceType>& id) const {
 			if (id.mHandle == NEO_INVALID_HANDLE) {
 				return false;
 			}
@@ -82,15 +82,15 @@ namespace neo {
 			return _resolveFinal(ResourceHandle<ResourceType>(id));
 		}
 
-		const ResourceType& resolve(HashedString id) const {
+		const ResourceType& resolve(const HashedString& id) const {
 			return _resolveFinal(ResourceHandle<ResourceType>(id));
 		}
 
-		const ResourceType& resolve(ResourceHandle<ResourceType> id) const {
+		const ResourceType& resolve(const ResourceHandle<ResourceType>& id) const {
 			return _resolveFinal(id);
 		}
 
-		ResourceType& resolve(ResourceHandle<ResourceType> id) {
+		ResourceType& resolve(const ResourceHandle<ResourceType>& id) {
 			return _resolveFinal(id);
 		}
 
@@ -142,7 +142,7 @@ namespace neo {
 		std::shared_ptr<BackedResource<ResourceType>> mFallback;
 
 	private:
-		ResourceType& _resolveFinal(ResourceHandle<ResourceType> id) const {
+		ResourceType& _resolveFinal(const ResourceHandle<ResourceType>& id) const {
 			auto handle = mCache.handle(id.mHandle);
 			if (handle) {
 				return const_cast<ResourceType&>(handle.get().mResource);

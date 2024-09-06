@@ -238,7 +238,7 @@ namespace neo {
 	}
 
 	void WindowSurface::flip() {
-		TRACY_ZONE();
+		TRACY_GPU();
 		glfwSwapBuffers(mWindow);
 	}
 

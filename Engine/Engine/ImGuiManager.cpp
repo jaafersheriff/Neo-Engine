@@ -2,6 +2,10 @@
 
 #include "Messaging/Messenger.hpp"
 
+#include "ECS/Component/RenderingComponent/ImGuiDrawComponent.hpp"
+
+#include "ResourceManager/ResourceManagers.hpp"
+
 #include "Engine/Engine.hpp"
 #include "Renderer/Renderer.hpp"
 #include "Hardware/WindowSurface.hpp"
@@ -14,16 +18,21 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
 #include <ext/implot/implot.h>
 #include <ImGuizmo.h>
 
 #include <tracy/Tracy.hpp>
 #include <tracy/TracyOpenGL.hpp>
 
+namespace {
+	static void weirdImGuiDrawData(ImGuiViewport*, void*) {
+		NEO_FAIL("HEH");
+	}
+}
+
 namespace neo {
 
-	void ImGuiManager::init(GLFWwindow* window) {
+	void ImGuiManager::init(GLFWwindow* window, float dpiScale) {
 		/* Init ImGui */
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -32,12 +41,7 @@ namespace neo {
 		ImGuizmo::SetOrthographic(false);
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-		// Tracy does its own font scaling. Because of course it does.
-#ifdef NO_LOCAL_TRACY
-		io.FontGlobalScale = 2.f;
-#endif
-		ImGui_ImplGlfw_InitForOpenGL(window, false);
-		ImGui_ImplOpenGL3_Init(ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion.c_str());
+		io.FontGlobalScale = dpiScale;
 
 		ImGuiStyle* style = &ImGui::GetStyle();
 		style->ScaleAllSizes(io.FontGlobalScale);
@@ -100,16 +104,17 @@ namespace neo {
 		style->AntiAliasedFill = false;
 		style->AntiAliasedFill = false;
 
+		
+		ImGui_ImplGlfw_InitForOpenGL(window, false);
+		ImGui::GetIO().BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
+		ImGui::GetPlatformIO().Renderer_RenderWindow = weirdImGuiDrawData;
+
 	}
 
 	void ImGuiManager::update() {
 		NEO_ASSERT(mIsEnabled, "ImGui is disabled");
 		TRACY_ZONE();
 
-		{
-			TRACY_ZONEN("ImGui_ImplOpenGL3_NewFrame");
-			ImGui_ImplOpenGL3_NewFrame();
-		}
 		{
 			TRACY_ZONEN("ImGui_ImplGlfw_NewFrame");
 			ImGui_ImplGlfw_NewFrame();
@@ -152,7 +157,6 @@ namespace neo {
 			if (glm::uvec2(size) != mViewport.mSize || glm::uvec2(offset) != mViewport.mOffset) {
 				mViewport.mOffset = glm::uvec2(offset);
 				mViewport.mSize = glm::uvec2(size);
-				Messenger::sendMessage<FrameSizeMessage>(mViewport.mSize);
 			}
 			ImGuizmo::SetRect(
 				static_cast<float>(offset.x),
@@ -223,38 +227,174 @@ namespace neo {
 		ImGui::End();
 	}
 
-	void ImGuiManager::render() {
-		NEO_ASSERT(mIsEnabled, "ImGui is disabled");
+	void ImGuiManager::reload(ResourceManagers& resourceManagers) {
+		TRACY_ZONE();
 
-		{
-			TRACY_GPUN("ImGui::render");
-			ImGui::Render();
+		uint8_t* pixels;
+		int width, height;
+		ImGuiIO io = ImGui::GetIO();
+		io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+		ImGui::GetIO().Fonts->SetTexID(resourceManagers.mTextureManager.asyncLoad("ImGuiFont", TextureBuilder{
+				TextureFormat {
+					types::texture::Target::Texture2D,
+					types::texture::InternalFormats::RGBA32_F,
+				},
+				glm::u16vec3(width, height, 0),
+				pixels
+			}).mHandle
+		);
+
+		for (int i = 0; i < 16; i++) {
+			MeshLoadDetails loadDetails;
+			loadDetails.mPrimtive = types::mesh::Primitive::Triangles;
+			loadDetails.mVertexBuffers[types::mesh::VertexType::Position] = MeshLoadDetails::VertexBuffer{
+				2,
+				sizeof(ImVec2),
+				types::ByteFormats::Float,
+				false,
+				0,
+				0,
+				0,
+				nullptr
+			};
+			// HEHEHE STORE COLOR IN NORMAL HEHEHE
+			loadDetails.mVertexBuffers[types::mesh::VertexType::Normal] = MeshLoadDetails::VertexBuffer{
+				4,
+				sizeof(ImU32),
+				types::ByteFormats::UnsignedByte,
+				true,
+				0,
+				0,
+				0,
+				nullptr
+			};
+			loadDetails.mVertexBuffers[types::mesh::VertexType::Texture0] = MeshLoadDetails::VertexBuffer{
+				2,
+				sizeof(ImVec2),
+				types::ByteFormats::Float,
+				false,
+				0,
+				0,
+				0,
+				nullptr
+			};
+			loadDetails.mElementBuffer = MeshLoadDetails::ElementBuffer{
+				0,
+				sizeof(ImDrawIdx) == 2 ? types::ByteFormats::UnsignedShort : types::ByteFormats::UnsignedInt,
+				0,
+				nullptr
+			};
+
+			std::string handle = "ImGuiMesh_" + std::to_string(i);
+			mImGuiMeshes[i] = resourceManagers.mMeshManager.asyncLoad(HashedString(handle.c_str()), loadDetails);
 		}
-		{
+	}
 
-			TRACY_GPUN("ImGui_ImplOpenGL3_RenderDrawData");
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	void ImGuiManager::resolveDrawData(ECS& ecs, ResourceManagers& resourceManagers) {
+		TRACY_GPU();
+		ImGui::Render();
+
+		ImDrawData* drawData = ImGui::GetDrawData();
+		NEO_ASSERT(drawData && drawData->Valid, "ImDrawData is invalid");
+		if (drawData->CmdListsCount == 0) {
+			return;
 		}
 
-		// Only needed with multiple viewports, which I don't do
-		// 
-		// ImGuiIO& io = ImGui::GetIO();
-		// if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-		//	 
-		//	 GLFWwindow* backup_current_context = glfwGetCurrentContext();
-		//	 {
-		//		 TRACY_GPUN("ImGui::UpdatePlatformWindows");
-		//		 ImGui::UpdatePlatformWindows();
-		//	 }
-		//	 {
+		const ImVec2 clipOffset = drawData->DisplayPos;         // (0,0) unless using multi-viewports
+		const ImVec2 clipScale = drawData->FramebufferScale; // (1,1) unless using retina display which are often (2,2)0
 
-		//		 TRACY_GPUN("ImGui::RenderPlatformWindowsDefault");
-		//		 ImGui::RenderPlatformWindowsDefault();
-		//	 }
-		// 
-		//	  glfwMakeContextCurrent(backup_current_context);
-		//	 
-		// }
+		uint32_t drawIndex = 0;
+		for (int i = 0; i < drawData->CmdListsCount; i++) {
+			const ImDrawList* cmdList = drawData->CmdLists[i];
+
+			// Need to break this struct apart into individual buffers and upload them into individual VBOs...
+			{
+				std::vector<ImVec2> vertices;
+				vertices.resize(cmdList->VtxBuffer.Size);
+				std::vector<ImVec2> uvs;
+				uvs.resize(cmdList->VtxBuffer.Size);
+				std::vector<ImU32> colors;
+				colors.resize(cmdList->VtxBuffer.Size);
+				for (int j = 0; j < cmdList->VtxBuffer.Size; j++) {
+					vertices[j] = cmdList->VtxBuffer[j].pos;
+					uvs[j] = cmdList->VtxBuffer[j].uv;
+					colors[j] = cmdList->VtxBuffer[j].col;
+				}
+				std::vector<ImDrawIdx> elements;
+				elements.resize(cmdList->IdxBuffer.Size);
+				memcpy(elements.data(), cmdList->IdxBuffer.Data, cmdList->IdxBuffer.Size * sizeof(ImDrawIdx));
+				NEO_ASSERT(i < mImGuiMeshes.size(), "ImGui is requesting too many meshes :(");
+				resourceManagers.mMeshManager.transact(mImGuiMeshes[i],
+					[vertices = std::move(vertices),
+					uvs = std::move(uvs),
+					colors = std::move(colors),
+					elements = std::move(elements)]
+					(Mesh& mesh) {
+						mesh.updateVertexBuffer(
+							types::mesh::VertexType::Position,
+							static_cast<uint32_t>(vertices.size()),
+							static_cast<uint32_t>(vertices.size() * sizeof(ImVec2)),
+							reinterpret_cast<const uint8_t*>(vertices.data())
+						);
+						mesh.updateVertexBuffer(
+							types::mesh::VertexType::Texture0,
+							static_cast<uint32_t>(uvs.size()),
+							static_cast<uint32_t>(uvs.size() * sizeof(ImVec2)),
+							reinterpret_cast<const uint8_t*>(uvs.data())
+						);
+						mesh.updateVertexBuffer(
+							types::mesh::VertexType::Normal,
+							static_cast<uint32_t>(colors.size()),
+							static_cast<uint32_t>(colors.size() * sizeof(ImU32)),
+							reinterpret_cast<const uint8_t*>(colors.data())
+						);
+						mesh.removeElementBuffer();
+						mesh.addElementBuffer(
+							static_cast<uint32_t>(elements.size()),
+							sizeof(ImDrawIdx) == 2 ? types::ByteFormats::UnsignedShort : types::ByteFormats::UnsignedInt,
+							static_cast<uint32_t>(elements.size() * sizeof(ImDrawIdx)),
+							reinterpret_cast<const uint8_t*>(elements.data())
+						);
+						mesh.mPrimitiveType = types::mesh::Primitive::Triangles;
+					});
+			}
+
+			for (int cmd_i = 0; cmd_i < cmdList->CmdBuffer.Size; cmd_i++) {
+				const ImDrawCmd* cmd = &cmdList->CmdBuffer[cmd_i];
+				if (cmd->UserCallback != nullptr) {
+					if (cmd->UserCallback == ImDrawCallback_ResetRenderState) {
+						NEO_LOG_W("Reset the render state wahoo");
+					}
+					else {
+						NEO_LOG_W("Callback function!?");
+						//cmd->UserCallback(cmdList, cmd);
+					}
+				}
+				else {
+					glm::vec2 clipMin = glm::vec2((cmd->ClipRect.x - clipOffset.x) * clipScale.x, (cmd->ClipRect.y - clipOffset.y) * clipScale.y);
+					glm::vec2 clipMax = glm::vec2((cmd->ClipRect.z - clipOffset.x) * clipScale.x, (cmd->ClipRect.w - clipOffset.y) * clipScale.y);
+					//if (clipMax.x <= clipMin.x || clipMax.y <= clipMin.y) {
+						//continue;
+					//}
+
+					auto entity = ecs.createEntity();
+					ecs.addComponent<ImGuiComponent>(entity);
+
+					ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
+					component->mMeshHandle = mImGuiMeshes[i];
+					component->mTextureHandle = TextureHandle(cmd->TextureId);
+					component->mScissorRect = glm::vec4(
+						clipMin.x,
+						clipMax.y,
+						clipMax.x - clipMin.x,
+						clipMax.y - clipMin.y
+					);
+					component->mElementCount = static_cast<uint16_t>(cmd->ElemCount);
+					component->mElementBufferOffset = static_cast<uint16_t>(cmd->IdxOffset * sizeof(ImDrawIdx));
+					component->mDrawOrder = drawIndex++;
+				}
+			}
+		}
 	}
 
 	void ImGuiManager::toggleImGui() {
@@ -296,7 +436,6 @@ namespace neo {
 	}
 
 	void ImGuiManager::destroy() {
-		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImPlot::DestroyContext();
 		ImGui::DestroyContext();

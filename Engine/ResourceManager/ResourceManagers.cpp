@@ -5,7 +5,7 @@
 namespace neo {
 
 	void ResourceManagers::tick() {
-		TRACY_ZONE();
+		TRACY_GPU();
 		mMeshManager.tick();
 		mShaderManager.tick();
 		mTextureManager.tick();

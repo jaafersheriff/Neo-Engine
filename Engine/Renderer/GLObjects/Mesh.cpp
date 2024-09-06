@@ -98,6 +98,7 @@ namespace neo {
 		glBindVertexArray(mVAOID);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vboID);
 		if (byteSize) {
+			TRACY_GPUN("glBufferData");
 			glBufferData(GL_ARRAY_BUFFER, byteSize, data, GL_DYNAMIC_DRAW);
 		}
 	}
