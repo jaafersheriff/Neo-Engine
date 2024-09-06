@@ -163,8 +163,8 @@ namespace neo {
 							});
 					},
 					[&](TextureFiles files) {
-						TRACY_GPUN("TextureManager::Create");
 						renderThread.pushRenderFunc([this, files, loadDetails]() {
+							TRACY_GPUN("TextureManager::Create");
 							std::lock_guard<std::mutex> lock(mCacheMutex);
 							mCache.load(loadDetails.mHandle.mHandle, files, loadDetails.mDebugName);
 							});

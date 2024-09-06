@@ -352,29 +352,36 @@ namespace neo {
 		for (int i = 0; i < drawData->CmdListsCount; i++) {
 	        const ImDrawList* cmdList = drawData->CmdLists[i];
 
-			// Need to break this struct apart into individual buffers and upload them into individual VBOs...
 			{
-				std::vector<ImVec2> vertices;
-				vertices.resize(cmdList->VtxBuffer.Size);
-				std::vector<ImVec2> uvs;
-				uvs.resize(cmdList->VtxBuffer.Size);
-				std::vector<ImU32> colors;
-				colors.resize(cmdList->VtxBuffer.Size);
-				for (int j = 0; j < cmdList->VtxBuffer.Size; j++) {
-					vertices[j] = cmdList->VtxBuffer[j].pos;
-					uvs[j] = cmdList->VtxBuffer[j].uv;
-					colors[j] = cmdList->VtxBuffer[j].col;
-				}
-				std::vector<ImDrawIdx> elements;
-				elements.resize(cmdList->IdxBuffer.Size);
-				memcpy(elements.data(), cmdList->IdxBuffer.Data, cmdList->IdxBuffer.Size * sizeof(ImDrawIdx));
+				ImDrawVert* vertexBuffer = static_cast<ImDrawVert*>(malloc(cmdList->VtxBuffer.Size * sizeof(ImDrawVert)));
+				memcpy(vertexBuffer, cmdList->VtxBuffer.Data, cmdList->VtxBuffer.Size * sizeof(ImDrawVert));
+				ImDrawIdx* indexBuffer = static_cast<ImDrawIdx*>(malloc(cmdList->IdxBuffer.Size * sizeof(ImDrawIdx)));
+				memcpy(indexBuffer, cmdList->IdxBuffer.Data, cmdList->IdxBuffer.Size * sizeof(ImDrawIdx));
 				NEO_ASSERT(i < mImGuiMeshes.size(), "ImGui is requesting too many meshes :(");
 				resourceManagers.mMeshManager.transact(mImGuiMeshes[i],
-					[vertices = std::move(vertices),
-					uvs = std::move(uvs),
-					colors = std::move(colors),
-					elements = std::move(elements)]
+					[vbuffer = std::move(vertexBuffer),
+					vBufferSize = cmdList->VtxBuffer.Size,
+					idxBuffer = std::move(indexBuffer),
+					idxBufferSize = cmdList->IdxBuffer.Size
+					]
 					(Mesh& mesh) {
+						// Need to break this struct apart into individual buffers and upload them into individual VBOs...
+						std::vector<ImVec2> vertices;
+						vertices.resize(vBufferSize);
+						std::vector<ImVec2> uvs;
+						uvs.resize(vBufferSize);
+						std::vector<ImU32> colors;
+						colors.resize(vBufferSize);
+						for (int j = 0; j < vBufferSize; j++) {
+							vertices[j] = vbuffer[j].pos;
+							uvs[j] = vbuffer[j].uv;
+							colors[j] = vbuffer[j].col;
+						}
+						std::vector<ImDrawIdx> elements;
+						elements.resize(idxBufferSize);
+						memcpy(elements.data(), idxBuffer, idxBufferSize * sizeof(ImDrawIdx));
+
+						TRACY_GPU();
 						mesh.updateVertexBuffer(
 							types::mesh::VertexType::Position,
 							static_cast<uint32_t>(vertices.size()),
@@ -401,6 +408,8 @@ namespace neo {
 							reinterpret_cast<const uint8_t*>(elements.data())
 						);
 						mesh.mPrimitiveType = types::mesh::Primitive::Triangles;
+						free(vbuffer);
+						free(idxBuffer);
 					});
 			}
 

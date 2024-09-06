@@ -58,7 +58,7 @@ namespace Compute {
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
 		if (auto meshView = ecs.getComponent<ParticleMeshComponent>()) {
-			TRACY_GPUN("Update Particles");
+			TRACY_ZONEN("Update Particles");
 			auto&& [_, meshComponent] = *meshView;
 
 			// Update base verts

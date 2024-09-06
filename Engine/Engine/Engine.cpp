@@ -177,6 +177,12 @@ namespace neo {
 					{
 						RenderThread& renderThread = ServiceLocator<RenderThread>::value();
 						renderThread.wait();
+						{
+							TRACY_ZONEN("Clear RenderECS");
+							renderECS.mRegistry.each([&](ECS::Entity entity) {
+								renderECS.removeEntity(entity);
+							});
+						}
 
 						if (!mWindow.isMinimized()) {
 							if (ServiceLocator<ImGuiManager>::value().isEnabled()) {
@@ -188,16 +194,10 @@ namespace neo {
 						Messenger::relayMessages(ecs);
 
 						ecs.clone(renderECS);
-						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &renderECS, frame = profiler.getFrameCount()]() {
-							renderECS.flush();
-							ServiceLocator<Renderer>::value().render(mWindow, demo, renderECS, resourceManagers, frame);
-							{
-								TRACY_ZONEN("Clear RenderECS");
-								renderECS.mRegistry.each([&](ECS::Entity entity) {
-									renderECS.mRegistry.destroy(entity);
-								});
-							}
+						renderECS.flush();
 
+						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &renderECS, frame = profiler.getFrameCount()]() {
+							ServiceLocator<Renderer>::value().render(mWindow, demo, renderECS, resourceManagers, frame);
 						});
 						renderThread.trigger();
 					}
