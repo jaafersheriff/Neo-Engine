@@ -15,7 +15,7 @@
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <implot.h>
+#include <ext/implot/implot.h>
 #include <ImGuizmo.h>
 
 #include <tracy/Tracy.hpp>

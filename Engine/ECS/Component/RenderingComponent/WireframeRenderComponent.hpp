@@ -2,7 +2,7 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include <imgui_incl.hpp>
+#include <ext/imgui_incl.hpp>
 
 namespace neo {
 	START_COMPONENT(WireframeRenderComponent);

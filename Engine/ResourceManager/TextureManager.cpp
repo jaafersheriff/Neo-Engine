@@ -5,7 +5,7 @@
 #include "Loader/Loader.hpp"
 #include "Loader/STBIImageData.hpp"
 
-#include <imgui_incl.hpp>
+#include <ext/imgui_incl.hpp>
 
 namespace neo {
 	namespace {
@@ -230,7 +230,7 @@ namespace neo {
 		texture.mResource.destroy();
 	}
 
-	void TextureManager::imguiEditor(std::function<void(const Texture&)> textureFunc) {
+	void TextureManager::imguiEditor(std::function<void(const TextureHandle&)> textureFunc) {
 		mCache.each([&](auto handle, BackedResource<Texture>& textureResource) {
 			ImGui::PushID(static_cast<int>(handle));
 			bool node = false;
@@ -242,7 +242,7 @@ namespace neo {
 			}
 			if (node) {
 				ImGui::Text("[%d, %d]", textureResource.mResource.mWidth, textureResource.mResource.mHeight);
-				textureFunc(textureResource.mResource);
+				textureFunc(handle);
 				ImGui::TreePop();
 			}
 			ImGui::PopID();

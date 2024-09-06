@@ -8,6 +8,7 @@
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
 #include "Renderer/RenderingSystems/Blitter.hpp"
+#include "Renderer/RenderingSystems/ImGuiRenderer.hpp"
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
@@ -26,7 +27,6 @@
 #include "Hardware/WindowSurface.hpp"
 
 #include <GLFW/glfw3.h>
-#include <imgui_impl_opengl3.h>
 #include <tracy/TracyOpenGL.hpp>
 	
 #pragma warning( push )
@@ -124,12 +124,12 @@ namespace neo {
 				types::texture::InternalFormats::RGB16_UNORM,
 				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
 				{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
-			})
+				})
 			.attach(TextureFormat{ types::texture::Target::Texture2D,
 				types::texture::InternalFormats::D16,
 				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
 				{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
-			}),
+				}),
 			resourceManagers.mTextureManager
 		);
 		if (!resourceManagers.mFramebufferManager.isValid(mDefaultFBOHandle)) {
@@ -153,13 +153,15 @@ namespace neo {
 			defaultFbo.bind();
 			drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.getComponent<MainCameraComponent>()));
 		}
-		
+
 		/* Render imgui */
 		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-			TRACY_GPUN("ImGuiManager.render");
-			// Bind backbuffer
+			TRACY_GPUN("ImGui Render");
+			resetState();
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			ServiceLocator<ImGuiManager>::ref().render();
+			glViewport(0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y);
+			glClear(GL_COLOR_BUFFER_BIT);
+			drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
 		}
 		else {
 			TRACY_GPUN("Final Blit");
@@ -178,10 +180,9 @@ namespace neo {
 		if (viewportSize.x != 0 && viewportSize.y != 0) {
 			if (resourceManager.mFramebufferManager.isValid(mDefaultFBOHandle)) {
 				auto& defaultFbo = resourceManager.mFramebufferManager.resolve(mDefaultFBOHandle);
-				auto& defaultFboColor = resourceManager.mTextureManager.resolve(defaultFbo.mTextures[0]);
 #pragma warning(push)
 #pragma warning(disable: 4312)
-				ImGui::Image(reinterpret_cast<ImTextureID>(defaultFboColor.mTextureID), { viewportSize.x, viewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+				ImGui::Image(defaultFbo.mTextures[0].mHandle, {viewportSize.x, viewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));
 #pragma warning(pop)
 			}
 		}

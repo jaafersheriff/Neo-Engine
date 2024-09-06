@@ -1,6 +1,6 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
-#include <imgui_incl.hpp>
+#include <ext/imgui_incl.hpp>
 
 namespace neo {
 
@@ -21,18 +21,21 @@ namespace neo {
 
 	void ResourceManagers::imguiEditor() {
 		TRACY_ZONE();
-		auto textureFunc = [&](const Texture& texture) {
-			if (texture.mFormat.mTarget != types::texture::Target::Texture2D) {
-				ImGui::Text("Non-2D texture");
-				return;
+		auto textureFunc = [&](const TextureHandle& textureHandle) {
+			if (!mTextureManager.isValid(textureHandle)) {
+				ImGui::Text("Invalid texture");
 			}
-			float scale = 175.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
-#pragma warning(push)
-#pragma warning(disable: 4312)
-			ImGui::Image(reinterpret_cast<ImTextureID>(texture.mTextureID), ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
-#pragma warning(pop)
-			};
-
+			else {
+				Texture& texture = mTextureManager.resolve(textureHandle);
+				if (texture.mFormat.mTarget != types::texture::Target::Texture2D) {
+					ImGui::Text("Non-2D texture");
+				}
+				else {
+					float scale = 175.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
+					ImGui::Image(textureHandle.mHandle, ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
+				}
+			}
+		};
 		ImGui::Begin("Resources");
 		if (ImGui::TreeNodeEx(&mFramebufferManager, ImGuiTreeNodeFlags_DefaultOpen, "Framebuffers (%d)", mFramebufferManager.mCache.size())) {
 			mFramebufferManager.imguiEditor(textureFunc, mTextureManager);

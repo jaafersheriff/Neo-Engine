@@ -3,7 +3,7 @@
 
 #include "Util/Profiler.hpp"
 
-#include <imgui_incl.hpp>
+#include <ext/imgui_incl.hpp>
 
 namespace neo {
 	namespace {
@@ -181,7 +181,7 @@ namespace neo {
 		}
 	}
 
-	void FramebufferManager::imguiEditor(std::function<void(Texture&)> textureFunc, TextureManager& textureManager) {
+	void FramebufferManager::imguiEditor(std::function<void(const TextureHandle&)> textureFunc, TextureManager& textureManager) {
 		if (ImGui::BeginTable("##Framebuffers", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_PreciseWidths | ImGuiTableFlags_SizingStretchSame)) {
 			ImGui::TableSetupColumn("Name/Size", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending);
 			ImGui::TableSetupColumn("Attachments");
@@ -202,7 +202,7 @@ namespace neo {
 				ImGui::TableSetColumnIndex(1);
 				for (auto texId = pfb.mResource.mFramebuffer.mTextures.begin(); texId < pfb.mResource.mFramebuffer.mTextures.end(); texId++) {
 					if (textureManager.isValid(*texId)) {
-						textureFunc(textureManager.resolve(*texId));
+						textureFunc(*texId);
 						if (texId != std::prev(pfb.mResource.mFramebuffer.mTextures.end())) {
 							ImGui::SameLine();
 						}

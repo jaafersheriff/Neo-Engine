@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Util/Util.hpp"
+
 #include <tracy/Tracy.hpp>
 #include <GL/glew.h>
 #include <tracy/TracyOpenGL.hpp>
@@ -17,11 +19,16 @@ namespace tracy {
 }
 #endif
 
+struct ImFont;
+
 namespace neo {
+	class RenderThread;
+
 	namespace util {
+
 		class Profiler {
 		public:
-			Profiler(int refreshRate, float scale);
+			Profiler();
 			~Profiler();
 			Profiler(const Profiler&) = delete;
 			Profiler& operator=(const Profiler&) = delete;
@@ -29,19 +36,13 @@ namespace neo {
 			void update(double);
 			void imGuiEditor() const;
 
-			double mTimeStep = 0.0;		 /* Delta time */
+			uint64_t getFrameCount() const { return mFrame; }
+			double getDeltaTime() const { return mTimeStep; } // I think this is in seconds
+
 		private:
 			double mLastFrameTime = 0.0;	/* Time at which last frame was rendered */
-#ifndef NO_LOCAL_TRACY
-			float mRefreshRate; // Milliseconds
-			std::unique_ptr<tracy::View> mTracyServer;
-
-			mutable std::vector<float> mCPUFrametime;
-			mutable int mCPUFrametimeOffset;
-
-			mutable std::vector<float> mGPUFrametime;
-			mutable int mGPUFrametimeOffset;
-#endif
+			uint64_t mFrame = 0;
+			double mTimeStep = 0.0;		 /* Delta time */
 		};
 	}
 }

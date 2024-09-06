@@ -104,7 +104,7 @@ namespace neo {
 
 	void Engine::run(DemoWrangler&& demos) {
 
-		util::Profiler profiler(mWindow.getDetails().mRefreshRate, mWindow.getDetails().mDPIScale);
+		util::Profiler profiler{};
 
 		ECS ecs;
 		// TODO - managers could just be added to the ecs probably..but how would that work with threading
@@ -297,7 +297,7 @@ namespace neo {
 				.attachComponent<MouseComponent>(mMouse)
 				.attachComponent<KeyboardComponent>(mKeyboard)
 				.attachComponent<ViewportDetailsComponent>(viewportSize, viewportPosition)
-				.attachComponent<FrameStatsComponent>(runTime, static_cast<float>(profiler.mTimeStep))
+				.attachComponent<FrameStatsComponent>(runTime, static_cast<float>(profiler.getDeltaTime()))
 				.attachComponent<SingleFrameComponent>()
 			));
 		}
