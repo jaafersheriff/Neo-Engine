@@ -65,7 +65,8 @@ namespace neo {
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
 		template <typename SysT> bool isSystemEnabled() const;
 
-		void setRenderECS(ECS* ecs) { mRenderECS = ecs; }
+		void setRenderECS_A(ECS* ecs) { mRenderECS_A = ecs; }
+		void setRenderECS_B(ECS* ecs) { mRenderECS_B = ecs; }
 
 	private:
 		mutable Registry mRegistry;
@@ -82,7 +83,8 @@ namespace neo {
 		void _initSystems();
 		void _updateSystems();
 
-		ECS* mRenderECS = nullptr;
+		ECS* mRenderECS_A = nullptr;
+		ECS* mRenderECS_B = nullptr;
 	};
 
 	template<typename CompT>
@@ -173,9 +175,12 @@ namespace neo {
 		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
 		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
 
-		if (mRenderECS) {
-			// Register the storage w/ render registry so it can be copied over later
-			static_cast<void>(mRenderECS->mRegistry.storage<CompT>());
+		// Register the storage w/ render registry so it can be copied over later
+		if (mRenderECS_A) {
+			static_cast<void>(mRenderECS_A->mRegistry.storage<CompT>());
+		}
+		if (mRenderECS_B) {
+			static_cast<void>(mRenderECS_B->mRegistry.storage<CompT>());
 		}
 
 		CompT* component;

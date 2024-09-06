@@ -129,7 +129,6 @@ namespace neo {
 					for (auto&& [handle, func] : queue) {
 						if (isValid(handle)) {
 							std::lock_guard<std::mutex> lock(mCacheMutex);
-							TRACY_GPUN("MeshManager::UpdateSingle");
 							func(mCache[handle.mHandle]->mResource);
 						}
 						else {

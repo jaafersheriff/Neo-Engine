@@ -108,67 +108,62 @@ namespace neo {
 	}
 
 	void Renderer::render(WindowSurface& window, IDemo* demo, const ECS& ecs, ResourceManagers& resourceManagers, uint64_t frame) {
-		{
-			TRACY_GPU();
-			ZoneValue(frame);
+		TRACY_GPU();
+		ZoneValue(frame);
 
-			mStats = {};
-			resetState();
+		mStats = {};
+		resetState();
 
-			auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-			mDefaultFBOHandle = resourceManagers.mFramebufferManager.asyncLoad(
-				"backbuffer",
-				FramebufferBuilder{}
-				.setSize(glm::uvec2(viewport.mSize))
-				.attach(TextureFormat{ types::texture::Target::Texture2D,
-					types::texture::InternalFormats::RGB16_UNORM,
-					{ types::texture::Filters::Linear, types::texture::Filters::Linear },
-					{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
-					})
-				.attach(TextureFormat{ types::texture::Target::Texture2D,
-					types::texture::InternalFormats::D16,
-					{ types::texture::Filters::Linear, types::texture::Filters::Linear },
-					{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
-					}),
-				resourceManagers.mTextureManager
-			);
-			if (!resourceManagers.mFramebufferManager.isValid(mDefaultFBOHandle)) {
-				return;
-			}
-
-			auto& defaultFbo = resourceManagers.mFramebufferManager.resolve(mDefaultFBOHandle);
-			{
-				TRACY_GPUN("Draw Demo");
-				demo->render(resourceManagers, ecs, defaultFbo);
-				resetState();
-			}
-
-			if (mShowBoundingBoxes) {
-				TRACY_GPUN("Debug Draws");
-				defaultFbo.bind();
-				drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.cGetComponent<const MainCameraComponent>()));
-			}
-
-			/* Render imgui */
-			if (ServiceLocator<ImGuiManager>::has_value() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
-				TRACY_GPUN("ImGui Render");
-				resetState();
-				glBindFramebuffer(GL_FRAMEBUFFER, 0);
-				glViewport(0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y);
-				glClear(GL_COLOR_BUFFER_BIT);
-				drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
-			}
-			else {
-				TRACY_GPUN("Final Blit");
-				Framebuffer fb; // empty framebuffer is just the backbuffer -- just don't do anything with it ever
-				blit(resourceManagers, fb, defaultFbo.mTextures[0], window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
-			}
+		glm::uvec2 viewportSize = { 1, 1 };
+		if (auto viewport = ecs.cGetComponent<ViewportDetailsComponent>()) {
+			viewportSize = std::get<1>(*viewport).mSize;
+		}
+		mDefaultFBOHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"backbuffer",
+			FramebufferBuilder{}
+			.setSize(viewportSize)
+			.attach(TextureFormat{ types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGB16_UNORM,
+				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
+				{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
+				})
+			.attach(TextureFormat{ types::texture::Target::Texture2D,
+				types::texture::InternalFormats::D16,
+				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
+				{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
+				}),
+			resourceManagers.mTextureManager
+		);
+		if (!resourceManagers.mFramebufferManager.isValid(mDefaultFBOHandle)) {
+			return;
 		}
 
+		auto& defaultFbo = resourceManagers.mFramebufferManager.resolve(mDefaultFBOHandle);
 		{
-			TRACY_GPUN("Swapbuffers")
-			window.flip();
-			TracyGpuCollect;
+			TRACY_GPUN("Draw Demo");
+			demo->render(resourceManagers, ecs, defaultFbo);
+			resetState();
+		}
+
+		if (mShowBoundingBoxes) {
+			TRACY_GPUN("Debug Draws");
+			defaultFbo.bind();
+			drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.cGetComponent<const MainCameraComponent>()));
+		}
+
+		/* Render imgui */
+		if (ServiceLocator<ImGuiManager>::has_value() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
+			TRACY_GPUN("ImGui Render");
+			resetState();
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y);
+			glClear(GL_COLOR_BUFFER_BIT);
+			drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
+		}
+		else {
+			TRACY_GPUN("Final Blit");
+			Framebuffer fb; // empty framebuffer is just the backbuffer -- just don't do anything with it ever
+			blit(resourceManagers, fb, defaultFbo.mTextures[0], window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
 		}
 	}
 

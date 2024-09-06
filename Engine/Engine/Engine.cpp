@@ -116,8 +116,11 @@ namespace neo {
 	void Engine::run(DemoWrangler&& demos) {
 
 		ECS ecs;
-		ECS renderECS;
-		ecs.setRenderECS(&renderECS);
+		ECS renderECS_A;
+		ECS renderECS_B;
+		bool useRenderECS_A = true;
+		ecs.setRenderECS_A(&renderECS_A);
+		ecs.setRenderECS_B(&renderECS_B);
 		// TODO - managers could just be added to the ecs probably..but how would that work with threading
 		ResourceManagers resourceManagers;
 		util::Profiler profiler;
@@ -126,11 +129,13 @@ namespace neo {
 		
 		while (!mWindow.shouldClose()) {
 			TRACY_ZONEN("Engine::run");
+			const uint64_t FrameCount = profiler.getFrameCount();
 
 			{
+				TRACY_ZONEN("Frame update");
 				{
-					TRACY_ZONEN("Frame Update");
-					ZoneValue(profiler.getFrameCount());
+					TRACY_ZONEN("Gameplay tick");
+					ZoneValue(FrameCount);
 					if (demos.needsReload()) {
 						_swapDemo(demos, ecs, resourceManagers);
 					}
@@ -173,39 +178,59 @@ namespace neo {
 
 				/* Render */
 				{
-					TRACY_ZONEN("Frame Render");
+					TRACY_ZONEN("Prepare Render Data");
 					{
-						RenderThread& renderThread = ServiceLocator<RenderThread>::value();
-						renderThread.wait();
+						useRenderECS_A = !useRenderECS_A;
+						ECS* renderECS = useRenderECS_A ? &renderECS_A : &renderECS_B;
 						{
 							TRACY_ZONEN("Clear RenderECS");
-							renderECS.mRegistry.each([&](ECS::Entity entity) {
-								renderECS.removeEntity(entity);
+							renderECS->mRegistry.each([&](ECS::Entity entity) {
+								renderECS->removeEntity(entity);
 							});
 						}
 
 						if (!mWindow.isMinimized()) {
 							if (ServiceLocator<ImGuiManager>::value().isEnabled()) {
-								ServiceLocator<ImGuiManager>::value().resolveDrawData(renderECS, resourceManagers);
+								ServiceLocator<ImGuiManager>::value().resolveDrawData(*renderECS, resourceManagers);
 							}
 						}
 
 						resourceManagers.tick();
 						Messenger::relayMessages(ecs);
 
-						ecs.clone(renderECS);
-						renderECS.flush();
+						ecs.clone(*renderECS);
+						renderECS->flush();
+						{
+							TRACY_ZONEN("Resolve spatial");
+							for (auto entity : renderECS->mRegistry.view<SpatialComponent>()) {
+								renderECS->getComponent<SpatialComponent>(entity)->getModelMatrix();
+								renderECS->getComponent<SpatialComponent>(entity)->getNormalMatrix();
+								renderECS->getComponent<SpatialComponent>(entity)->getView();
 
-						renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, &renderECS, frame = profiler.getFrameCount()]() {
-							ServiceLocator<Renderer>::value().render(mWindow, demo, renderECS, resourceManagers, frame);
-						});
-						renderThread.trigger();
+							}
+						}
 					}
 				}
 
 				_endFrame(ecs);
 				Messenger::relayMessages(ecs);
 			}
+			{
+				TRACY_ZONEN("Push Render");
+				ECS* renderECS = useRenderECS_A ? &renderECS_A : &renderECS_B; 
+
+				RenderThread& renderThread = ServiceLocator<RenderThread>::value();
+				renderThread.wait();
+				renderThread.pushRenderFunc([demo = demos.getCurrentDemo(), this, &resourceManagers, renderECS, FrameCount]() {
+					ServiceLocator<Renderer>::value().render(mWindow, demo, *renderECS, resourceManagers, FrameCount);
+				});
+				renderThread.pushRenderFunc([this]() {
+					mWindow.flip();
+					TracyGpuCollect;
+				});
+				renderThread.trigger();
+			}
+
 
 			FrameMark;
 		}

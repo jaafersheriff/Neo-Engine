@@ -152,12 +152,6 @@ namespace neo {
 			ImGui::TreePop();
 		}
 
-		if (mRenderECS) {
-			if (ImGui::TreeNode(mRenderECS, "Render ECS")) {
-				mRenderECS->imguiEdtor();
-				ImGui::TreePop();
-			}
-		}
 		ImGui::End();
 	}
 }
