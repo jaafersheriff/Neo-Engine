@@ -25,13 +25,18 @@ namespace neo {
 		Profiler::~Profiler() {
 		}
 
-		void Profiler::update(double _runTime) {
+		void Profiler::begin(double _runTime) {
 			TRACY_ZONE();
 			mFrame++;
 			/* Update delta time and FPS */
 			float runTime = static_cast<float>(_runTime);
 			mTimeStep = runTime - mLastFrameTime;
 			mLastFrameTime = runTime;
+		}
+
+		void Profiler::end(double _runTime) {
+			NEO_UNUSED(_runTime);
+			NEO_LOG_E("TODO");
 		}
 
 		void Profiler::imGuiEditor() const {

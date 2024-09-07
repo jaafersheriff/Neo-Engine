@@ -102,7 +102,7 @@ namespace Compute {
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
-		TRACY_GPUN("Compute::render")
+		TRACY_GPUN("Compute::render");
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.0), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 

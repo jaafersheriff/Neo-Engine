@@ -36,7 +36,7 @@ namespace neo {
 
 		private:
 			void _startFrame(util::Profiler& profiler, ECS& ecs, ResourceManagers& resourceManagers);
-			void _endFrame(ECS& ecs);
+			void _endFrame(ECS& ecs, util::Profiler& profiler);
 
 			void _createPrefabs(ResourceManagers& resourceManagers);
 			void _swapDemo(DemoWrangler& demoWranger, ECS& ecs, ResourceManagers& resourceManagers);

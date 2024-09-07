@@ -182,7 +182,7 @@ namespace neo {
 					}
 				}
 
-				_endFrame(ecs);
+				_endFrame(ecs, profiler);
 				Messenger::relayMessages(ecs);
 			}
 
@@ -281,7 +281,7 @@ namespace neo {
 
 		/* Update frame counter */
 		float runTime = static_cast<float>(glfwGetTime());
-		profiler.update(runTime);
+		profiler.begin(runTime);
 
 		if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
 			ServiceLocator<ImGuiManager>::ref().update();
@@ -369,7 +369,7 @@ namespace neo {
 		}
 	}
 
-	void Engine::_endFrame(ECS& ecs) {
+	void Engine::_endFrame(ECS& ecs, util::Profiler& profiler) {
 		TRACY_ZONE();
 
 		for(auto& entity : ecs.getView<SingleFrameComponent>()) {
@@ -379,5 +379,7 @@ namespace neo {
 		// Update display, mouse, keyboard 
 		// Do it here so it coincides w/ vsync instead of stalling engine tick
 		mWindow.updateHardware();
+
+		profiler.end(glfwGetTime());
 	}
 }

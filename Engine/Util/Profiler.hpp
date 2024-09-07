@@ -7,7 +7,24 @@
 #include <tracy/TracyOpenGL.hpp>
 #define TRACY_ZONEN(x) ZoneScopedNC(x, (neo::HashedString(x) & 0xfefefe) >> 1 )
 #define TRACY_ZONE() TRACY_ZONEN(TracyFunction)
-#define TRACY_GPUN(x) TRACY_ZONEN(x); TracyGpuZoneC(x, (neo::HashedString(x) & 0xfefefe) >> 1 )
+
+
+struct _NEO_GPU_CONTEXT {
+	_NEO_GPU_CONTEXT(const char* name) {
+#ifdef DEBUG_MODE
+		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, static_cast<GLsizei>(-1), name);
+	}
+#endif
+
+	~_NEO_GPU_CONTEXT() {
+#ifdef DEBUG_MODE
+		if (glIsEnabled(GL_DEBUG_OUTPUT)) {
+			glPopDebugGroup();
+		}
+#endif
+	}
+};
+#define TRACY_GPUN(x) TRACY_ZONEN(x); TracyGpuZoneC(x, (neo::HashedString(x) & 0xfefefe) >> 1 ); _NEO_GPU_CONTEXT ___NEO_GPU_SCOPE##__LINE__(x)
 #define TRACY_GPU() TRACY_GPUN(TracyFunction)
 
 #include <memory>
@@ -33,7 +50,8 @@ namespace neo {
 			Profiler(const Profiler&) = delete;
 			Profiler& operator=(const Profiler&) = delete;
 
-			void update(double);
+			void begin(double time);
+			void end(double time);
 			void imGuiEditor() const;
 
 			uint64_t getFrameCount() const { return mFrame; }

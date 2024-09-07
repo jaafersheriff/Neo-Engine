@@ -433,7 +433,7 @@ namespace DeferredPBR {
 		auto& hdrColor = resourceManagers.mFramebufferManager.resolve(hdrColorOutput);
 
 		{
-			TRACY_GPUN("GBuffer Depth Blit")
+			TRACY_GPUN("GBuffer Depth Blit");
 			hdrColor.bind();
 			hdrColor.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
