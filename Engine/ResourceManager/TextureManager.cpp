@@ -9,8 +9,6 @@
 
 #include <ext/imgui_incl.hpp>
 
-#pragma optimize("", off)
-
 namespace neo {
 	namespace {
 		uint16_t _bytesPerPixel(types::ByteFormats format) {

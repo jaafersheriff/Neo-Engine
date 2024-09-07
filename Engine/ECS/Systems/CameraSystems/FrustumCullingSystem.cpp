@@ -13,7 +13,7 @@ namespace neo {
 
 	void FrustumCullingSystem::update(ECS& ecs) {
 		TRACY_ZONEN("FrustumCullingSystem");
-		NEO_ASSERT(ecs.isSystemEnabled<FrustumSystem>(), "This system can only be used with the FrustumSystem!");
+		//NEO_ASSERT(ecs.isSystemEnabled<FrustumSystem>(), "This system can only be used with the FrustumSystem!");
 		mCulledCount = 0;
 
 		const auto& cameras = ecs.getView<FrustumComponent, CameraComponent>();

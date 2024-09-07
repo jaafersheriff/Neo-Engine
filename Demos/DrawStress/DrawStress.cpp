@@ -76,7 +76,6 @@ namespace DrawStress {
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
 		ecs.addSystem<FrustumSystem>();
-		ecs.addSystem<FrustumCullingSystem>();
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {

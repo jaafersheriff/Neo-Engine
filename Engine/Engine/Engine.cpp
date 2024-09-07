@@ -21,6 +21,8 @@ extern "C" {
 #include "ECS/Component/HardwareComponent/KeyboardComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 
+#include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
+
 #include "ImGuiManager.hpp"
 
 #include "Messaging/Messenger.hpp"
@@ -200,13 +202,16 @@ namespace neo {
 
 						ecs.clone(*renderECS);
 						renderECS->flush();
+						if (ecs.isSystemEnabled<FrustumSystem>()) {
+							mFrustumCullingSystem.update(*renderECS);
+						}
+						renderECS->flush();
 						{
 							TRACY_ZONEN("Resolve spatial");
 							for (auto entity : renderECS->mRegistry.view<SpatialComponent>()) {
 								renderECS->getComponent<SpatialComponent>(entity)->getModelMatrix();
 								renderECS->getComponent<SpatialComponent>(entity)->getNormalMatrix();
 								renderECS->getComponent<SpatialComponent>(entity)->getView();
-
 							}
 						}
 					}

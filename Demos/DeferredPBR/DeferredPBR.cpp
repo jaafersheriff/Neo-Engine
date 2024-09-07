@@ -288,7 +288,6 @@ namespace DeferredPBR {
 		ecs.addSystem<SinTranslateSystem>();
 		ecs.addSystem<FrustumSystem>();
 		ecs.addSystem<FrustaFittingSystem>();
-		ecs.addSystem<FrustumCullingSystem>();
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {

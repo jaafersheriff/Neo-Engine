@@ -6,6 +6,7 @@
 #include "ECS/ECS.hpp"
 #include "ECS/Systems/CollisionSystems/MouseRaySystem.hpp"
 #include "ECS/Systems/CollisionSystems/SelectingSystem.hpp"
+#include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 
 #include "DemoInfra/DemoWrangler.hpp"
 
@@ -52,5 +53,6 @@ namespace neo {
 
 		MouseRaySystem mMouseRaySystem;
 		SelectingSystem mSelectingSystem;
+		FrustumCullingSystem mFrustumCullingSystem; // Use it always pre-render
 	};
 }

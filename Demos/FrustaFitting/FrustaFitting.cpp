@@ -24,7 +24,6 @@
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
-#include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumToLineSystem.hpp"
 
 #include "Renderer/GLObjects/Framebuffer.hpp"
@@ -130,7 +129,6 @@ namespace FrustaFitting {
 		ecs.addSystem<FrustumSystem>(); // Calculate original frusta bounds
 		ecs.addSystem<FrustaFittingSystem>(); // Fit one frusta into another
 		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
-		ecs.addSystem<FrustumCullingSystem>();
 		ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
 	}
 
