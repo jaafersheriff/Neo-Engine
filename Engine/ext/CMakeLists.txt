@@ -36,7 +36,7 @@ if (MSVC)
 	option(TRACY_ON_DEMAND "" ON)
 	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tracy")
 	target_compile_options(TracyClient PRIVATE "/WX-" "/W0")
-	set_target_properties(TracyClient PROPERTIES FOLDER "Neo/ext/Tracy")
+	set_target_properties(TracyClient PROPERTIES FOLDER "Neo/ext")
 	unset(MESSAGE_QUIET)
 endif()
 
@@ -68,6 +68,7 @@ PUBLIC
  	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/"
  	"${CMAKE_CURRENT_SOURCE_DIR}/imgui_entt_entity_editor"
  	"${CMAKE_CURRENT_SOURCE_DIR}/ImGuizmo"
+ 	"${CMAKE_CURRENT_SOURCE_DIR}/implot"
 PRIVATE
  	"${CMAKE_CURRENT_SOURCE_DIR}"
 )

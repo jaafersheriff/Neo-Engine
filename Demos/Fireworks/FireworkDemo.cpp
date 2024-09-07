@@ -110,6 +110,7 @@ namespace Fireworks {
 				.attachComponent<SpatialComponent>(glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f))
 				.attachComponent<MeshComponent>(HashedString("quad"))
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f, -0.5f, -0.01f), glm::vec3(0.5f, 0.5f, 0.01f), true)
+				.attachComponent<MaterialComponent>(material)
 				.attachComponent<ForwardPBRRenderComponent>()
 				.attachComponent<OpaqueComponent>()
 				.attachComponent<ShadowCasterRenderComponent>()

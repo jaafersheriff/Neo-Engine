@@ -18,15 +18,15 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
-#include <ext/implot/implot.h>
+#include <implot.h>
 #include <ImGuizmo.h>
 
 #include <tracy/Tracy.hpp>
 #include <tracy/TracyOpenGL.hpp>
 
 namespace {
-	static void weirdImGuiDrawData(ImGuiViewport*, void*) {
-		NEO_FAIL("HEH");
+	static void _renderWindow(ImGuiViewport*, void*) {
+		NEO_FAIL("Neo doesn't support multiple windows");
 	}
 }
 
@@ -107,7 +107,7 @@ namespace neo {
 		
 		ImGui_ImplGlfw_InitForOpenGL(window, false);
 		ImGui::GetIO().BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
-		ImGui::GetPlatformIO().Renderer_RenderWindow = weirdImGuiDrawData;
+		ImGui::GetPlatformIO().Renderer_RenderWindow = _renderWindow;
 
 	}
 
@@ -244,7 +244,7 @@ namespace neo {
 			}).mHandle
 		);
 
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < MAX_IMGUI_MESHES; i++) {
 			MeshLoadDetails loadDetails;
 			loadDetails.mPrimtive = types::mesh::Primitive::Triangles;
 			loadDetails.mVertexBuffers[types::mesh::VertexType::Position] = MeshLoadDetails::VertexBuffer{
@@ -323,7 +323,8 @@ namespace neo {
 				std::vector<ImDrawIdx> elements;
 				elements.resize(cmdList->IdxBuffer.Size);
 				memcpy(elements.data(), cmdList->IdxBuffer.Data, cmdList->IdxBuffer.Size * sizeof(ImDrawIdx));
-				NEO_ASSERT(i < mImGuiMeshes.size(), "ImGui is requesting too many meshes :(");
+
+				NEO_ASSERT(i < MAX_IMGUI_MESHES, "ImGui is requesting too many meshes :(");
 				resourceManagers.mMeshManager.transact(mImGuiMeshes[i],
 					[vertices = std::move(vertices),
 					uvs = std::move(uvs),
@@ -367,31 +368,33 @@ namespace neo {
 					}
 					else {
 						NEO_LOG_W("Callback function!?");
-						//cmd->UserCallback(cmdList, cmd);
+						cmd->UserCallback(cmdList, cmd);
 					}
 				}
 				else {
 					glm::vec2 clipMin = glm::vec2((cmd->ClipRect.x - clipOffset.x) * clipScale.x, (cmd->ClipRect.y - clipOffset.y) * clipScale.y);
 					glm::vec2 clipMax = glm::vec2((cmd->ClipRect.z - clipOffset.x) * clipScale.x, (cmd->ClipRect.w - clipOffset.y) * clipScale.y);
-					//if (clipMax.x <= clipMin.x || clipMax.y <= clipMin.y) {
-						//continue;
-					//}
+					if (clipMax.x <= clipMin.x || clipMax.y <= clipMin.y) {
+						continue;
+					}
 
-					auto entity = ecs.createEntity();
-					ecs.addComponent<ImGuiComponent>(entity);
-
-					ImGuiDrawComponent* component = ecs.addComponent<ImGuiDrawComponent>(entity);
-					component->mMeshHandle = mImGuiMeshes[i];
-					component->mTextureHandle = TextureHandle(cmd->TextureId);
-					component->mScissorRect = glm::vec4(
+					ImGuiDrawComponent draw;
+					draw.mMeshHandle = mImGuiMeshes[i];
+					draw.mTextureHandle = TextureHandle(cmd->TextureId);
+					draw.mScissorRect = glm::vec4(
 						clipMin.x,
 						clipMax.y,
 						clipMax.x - clipMin.x,
 						clipMax.y - clipMin.y
 					);
-					component->mElementCount = static_cast<uint16_t>(cmd->ElemCount);
-					component->mElementBufferOffset = static_cast<uint16_t>(cmd->IdxOffset * sizeof(ImDrawIdx));
-					component->mDrawOrder = drawIndex++;
+					draw.mElementCount = static_cast<uint16_t>(cmd->ElemCount);
+					draw.mElementBufferOffset = static_cast<uint16_t>(cmd->IdxOffset * sizeof(ImDrawIdx));
+					draw.mDrawOrder = drawIndex++;
+
+					ecs.submitEntity(std::move(ECS::EntityBuilder{}
+						.attachComponent<ImGuiComponent>()
+						.attachComponent<ImGuiDrawComponent>(draw)
+					));
 				}
 			}
 		}

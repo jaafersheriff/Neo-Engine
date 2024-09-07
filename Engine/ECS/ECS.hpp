@@ -24,9 +24,6 @@ namespace neo {
 	class System;
 	class Engine;
 
-	// TODO - move the whole struct in here after dev
-	struct EntityBuilder;
-
 	class ECS {
 		friend Engine;
 

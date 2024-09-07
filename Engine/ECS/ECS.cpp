@@ -5,8 +5,6 @@
 #include "Component/EngineComponents/TagComponent.hpp"
 #include "Component/CollisionComponent/SelectedComponent.hpp"
 
-#include "ECS/EntityBuilder.hpp"
-
 namespace neo {
 
 	void ECS::_initSystems() {

@@ -11,6 +11,7 @@
 #include <array>
 
 struct GLFWwindow;
+#define MAX_IMGUI_MESHES 16
 
 namespace neo {
 	class ECS;
@@ -63,6 +64,6 @@ namespace neo {
 		Viewport mViewport;
 		ImGuiConsole mConsole;
 		
-		std::array<MeshHandle, 16> mImGuiMeshes;
+		std::array<MeshHandle, MAX_IMGUI_MESHES> mImGuiMeshes;
 	};
 }

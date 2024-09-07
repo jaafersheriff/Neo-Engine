@@ -27,8 +27,6 @@
 
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
-#include "ECS/EntityBuilder.hpp"
-
 using namespace neo;
 
 /* Game object definitions */
