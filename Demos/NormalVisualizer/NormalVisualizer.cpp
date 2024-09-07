@@ -29,26 +29,25 @@ using namespace neo;
 
 /* Game object definitions */
 namespace NormalVisualizer {
-	struct Camera {
-		Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, pos, glm::vec3(1.f));
-			ecs.addComponent<CameraComponent>(entity, near, far, CameraComponent::Perspective{fov, 1.f});
-			ecs.addComponent<CameraControllerComponent>(entity, ls, ms);
-			ecs.addComponent<MainCameraComponent>(entity);
+	namespace {
+		ECS::EntityBuilder _createCamera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
+			return std::move(ECS::EntityBuilder{}
+				.attachComponent<SpatialComponent>(pos, glm::vec3(1.f))
+				.attachComponent<CameraComponent>(near, far, CameraComponent::Perspective{ fov, 1.f })
+				.attachComponent<CameraControllerComponent>(ls, ms)
+				.attachComponent<MainCameraComponent>()
+			);
 		}
-	};
 
-	struct Light {
-
-		Light(ECS& ecs, glm::vec3 pos, glm::vec3 col) {
-			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, pos);
-			ecs.addComponent<LightComponent>(entity, col);
-			ecs.addComponent<MainLightComponent>(entity);
-			ecs.addComponent<DirectionalLightComponent>(entity);
+		ECS::EntityBuilder _createLight(glm::vec3 pos, glm::vec3 col) {
+			return std::move(ECS::EntityBuilder{}
+				.attachComponent<SpatialComponent>(pos)
+				.attachComponent<LightComponent>(col)
+				.attachComponent<MainLightComponent>()
+				.attachComponent<DirectionalLightComponent>()
+			);
 		}
-	};
+	}
 
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
@@ -59,24 +58,25 @@ namespace NormalVisualizer {
 
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 		/* Game objects */
-		Camera camera(ecs, 45.f, 0.1f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-
-		Light(ecs, glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f));
+		ecs.submitEntity(_createCamera(45.f, 0.1f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f));
+		ecs.submitEntity(_createLight(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f)));
 
 		{
 			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(resourceManagers, "bunny.gltf");
 			const auto& bunnyNode = gltfScene.mMeshNodes[0];
 
-			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(1.f));
-			ecs.addComponent<MeshComponent>(entity, bunnyNode.mMeshHandle);
-			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
-			ecs.addComponent<PhongRenderComponent>(entity);
-			ecs.addComponent<WireframeRenderComponent>(entity);
-			ecs.addComponent<OpaqueComponent>(entity);
-			ecs.addComponent<TagComponent>(entity, "bunny");
-			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<SpatialComponent>(glm::vec3(0.f), glm::vec3(1.f))
+				.attachComponent<MeshComponent>(bunnyNode.mMeshHandle)
+				.attachComponent<MaterialComponent>(material)
+				.attachComponent<PhongRenderComponent>()
+				.attachComponent<WireframeRenderComponent>()
+				.attachComponent<OpaqueComponent>()
+				.attachComponent<TagComponent>("bunny")
+				.attachComponent<RotationComponent>(glm::vec3(0.f, 0.5f, 0.f))
+			));
 		}
 
 		/* Systems - order matters! */

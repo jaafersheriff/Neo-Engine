@@ -5,7 +5,7 @@
 using namespace neo;
 
 namespace Fireworks {
-	FireworkComponent::FireworkComponent(const ECS::Entity& entity, const MeshManager& meshManager, uint32_t count)
+	FireworkComponent::FireworkComponent(const MeshManager& meshManager, uint32_t count)
 		: mCount(count)
 	{
 		std::vector<float> emptyData;
@@ -35,7 +35,7 @@ namespace Fireworks {
 			reinterpret_cast<uint8_t*>(emptyData.data())
 		};
 
-		std::string bufferName = "FireworkBuffer_" + std::to_string(static_cast<uint32_t>(entity));
+		std::string bufferName = "FireworkBuffer_" + std::to_string(util::genRandom());
 		mBuffer = meshManager.asyncLoad(HashedString(bufferName.c_str()), details);
 	}
 

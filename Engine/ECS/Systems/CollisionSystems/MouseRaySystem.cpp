@@ -53,17 +53,18 @@ namespace neo {
 
 			// Create new mouseray if one doesnt exist
 			ECS::Entity mouseRayEntity = entt::null;
-			MouseRayComponent* mouseRay;
+			MouseRayComponent mouseRay;
+			mouseRay.mDirection = dir;
+			mouseRay.mPosition = pos;
 			if (mouseRayComponent.has_value()) {
 				mouseRayEntity = std::get<0>(*mouseRayComponent);
-				mouseRay = &std::get<1>(*mouseRayComponent);
+				std::get<1>(*mouseRayComponent) = mouseRay;
 			}
 			else {
-				mouseRayEntity = ecs.createEntity();
-				mouseRay = ecs.addComponent<MouseRayComponent>(mouseRayEntity);
+				ecs.submitEntity(std::move(ECS::EntityBuilder{}
+					.attachComponent<MouseRayComponent>(mouseRay)
+				));
 			}
-			mouseRay->mDirection = dir;
-			mouseRay->mPosition = pos;
 
 		}
 		else if (mouseRayComponent.has_value()) {

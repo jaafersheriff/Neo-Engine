@@ -32,16 +32,18 @@ using namespace neo;
 namespace Cornell {
 	namespace {
 		inline void insertObject(ECS& ecs, std::string name, MeshHandle meshHandle, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation, glm::vec3 color) {
-			auto entity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(entity, name);
-			ecs.addComponent<MeshComponent>(entity, meshHandle);
-			ecs.addComponent<SpatialComponent>(entity, position, scale, rotation);
-			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), true);
-			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(color.x, color.y, color.z, 1.f);
-			ecs.addComponent<ForwardPBRRenderComponent>(entity);
-			ecs.addComponent<OpaqueComponent>(entity);
-			ecs.addComponent<ShadowCasterRenderComponent>(entity);
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(color.x, color.y, color.z, 1.f);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>(name)
+				.attachComponent<MeshComponent>(meshHandle)
+				.attachComponent<MaterialComponent>(material)
+				.attachComponent<SpatialComponent>(position, scale, rotation)
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f), true)
+				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<OpaqueComponent>()
+				.attachComponent<ShadowCasterRenderComponent>()
+			));
 		}
 	}
 
@@ -56,23 +58,26 @@ namespace Cornell {
 
 		/* Camera */
 		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(entity, "Camera");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 0.5f, 2.25f), glm::vec3(1.f));
-			ecs.addComponent<CameraComponent>(entity, 1.f, 100.f, CameraComponent::Perspective{ 45.f, 1.f });
-			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 7.f);
-			ecs.addComponent<MainCameraComponent>(entity);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Camera")
+				.attachComponent<SpatialComponent>(glm::vec3(0.f, 0.5f, 2.25f), glm::vec3(1.f))
+				.attachComponent<CameraComponent>(1.f, 100.f, CameraComponent::Perspective{ 45.f, 1.f })
+				.attachComponent<CameraControllerComponent>(0.4f, 7.f)
+				.attachComponent<MainCameraComponent>()
+			));
 		}
 
 		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(entity, "Light");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f - util::EP * 3, 0.5f), glm::vec3(10.f));
-			ecs.addComponent<MainLightComponent>(entity);
-			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f));
-			ecs.addComponent<PointLightComponent>(entity);
-			ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
-			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), false);
+			ShadowCameraComponent shadowCamera(types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Light")
+				.attachComponent<SpatialComponent>(glm::vec3(0.f, 1.f - util::EP * 3, 0.5f), glm::vec3(10.f))
+				.attachComponent<MainLightComponent>()
+				.attachComponent<LightComponent>(glm::vec3(1.f))
+				.attachComponent<PointLightComponent>()
+				.attachComponent<ShadowCameraComponent>(shadowCamera)
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f), false)
+			));
 		}
 
 		HashedString quadMesh("quad");

@@ -54,62 +54,72 @@ namespace Base {
 		}
 
 		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(entity, "Light");
-			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f), 5.f);
-			ecs.addComponent<MainLightComponent>(entity);
-			ecs.addComponent<DirectionalLightComponent>(entity);
-			auto lightSpatial = ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 2.f, 20.f), glm::vec3(100.f));
-			lightSpatial->setLookDir(glm::vec3(-0.7f, -0.6f, -0.32f));
+			SpatialComponent spatial(glm::vec3(0.f, 2.f, 20.f), glm::vec3(100.f));
+			spatial.setLookDir(glm::vec3(-0.7f, -0.6f, -0.32f));
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Light")
+				.attachComponent<LightComponent>(glm::vec3(1.f), 5.f)
+				.attachComponent<MainLightComponent>()
+				.attachComponent<DirectionalLightComponent>()
+				.attachComponent<SpatialComponent>(spatial)
+			));
 		}
 
 		{
 			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(resourceManagers, "bunny.gltf");
-			auto bunny = ecs.createEntity();
-			ecs.addComponent<TagComponent>(bunny, "Bunny");
-			ecs.addComponent<SpatialComponent>(bunny, glm::vec3(2.f, 0.0f, -1.f), glm::vec3(1.5f));
-			ecs.addComponent<RotationComponent>(bunny, glm::vec3(0.f, 1.0f, 0.f));
-			ecs.addComponent<MeshComponent>(bunny, gltfScene.mMeshNodes[0].mMeshHandle);
-			ecs.addComponent<BoundingBoxComponent>(bunny, gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax);
-			ecs.addComponent<ForwardPBRRenderComponent>(bunny);
-			ecs.addComponent<OpaqueComponent>(bunny);
-			auto material = ecs.addComponent<MaterialComponent>(bunny);
-			material->mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Bunny")
+				.attachComponent<SpatialComponent>(glm::vec3(2.f, 0.0f, -1.f), glm::vec3(1.5f))
+				.attachComponent<RotationComponent>(glm::vec3(0.f, 1.0f, 0.f))
+				.attachComponent<MeshComponent>(gltfScene.mMeshNodes[0].mMeshHandle)
+				.attachComponent<BoundingBoxComponent>(gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax)
+				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<OpaqueComponent>()
+				.attachComponent<MaterialComponent>(material)
+			));
 		}
 		{
-			auto icosahedron = ecs.createEntity();
-			ecs.addComponent<TagComponent>(icosahedron, "Icosahedron");
-			ecs.addComponent<SpatialComponent>(icosahedron, glm::vec3(-2.f, 1.0f, -1.f), glm::vec3(1.5f));
-			ecs.addComponent<RotationComponent>(icosahedron, glm::vec3(1.f, 0.0f, 0.f));
-			ecs.addComponent<MeshComponent>(icosahedron, HashedString("icosahedron"));
-			ecs.addComponent<BoundingBoxComponent>(icosahedron, glm::vec3(-0.5f), glm::vec3(0.5f));
-			ecs.addComponent<ForwardPBRRenderComponent>(icosahedron);
-			ecs.addComponent<OpaqueComponent>(icosahedron);
-			auto material = ecs.addComponent<MaterialComponent>(icosahedron);
-			material->mAlbedoColor = glm::vec4(1.f, 1.f, 0.f, 1.f);
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(1.f, 1.f, 0.f, 1.f);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Icosahedron")
+				.attachComponent<SpatialComponent>(glm::vec3(-2.f, 1.0f, -1.f), glm::vec3(1.5f))
+				.attachComponent<RotationComponent>(glm::vec3(1.f, 0.0f, 0.f))
+				.attachComponent<MeshComponent>(HashedString("icosahedron"))
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
+				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<OpaqueComponent>()
+				.attachComponent<MaterialComponent>(material)
+			));
 		}
 		for (int i = 0; i < 5; i++) {
-			auto cube = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(cube, glm::vec3(0.f, 1.0f, -1.f * i), glm::vec3(0.75f));
-			ecs.addComponent<MeshComponent>(cube, HashedString("cube"));
-			ecs.addComponent<BoundingBoxComponent>(cube, glm::vec3(-0.5f), glm::vec3(0.5f));
-			ecs.addComponent<ForwardPBRRenderComponent>(cube);
-			ecs.addComponent<TransparentComponent>(cube);
-			auto material = ecs.addComponent<MaterialComponent>(cube);
-			material->mAlbedoColor = glm::vec4(util::genRandomVec3(0.3f, 1.f), 0.3f);
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(util::genRandomVec3(0.3f, 1.f), 0.3f);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<SpatialComponent>(glm::vec3(0.f, 1.0f, -1.f * i), glm::vec3(0.75f))
+				.attachComponent<MeshComponent>(HashedString("cube"))
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
+				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<TransparentComponent>()
+				.attachComponent<MaterialComponent>(material)
+			));
 		}
 
 		{
-			auto plane = ecs.createEntity();
-			ecs.addComponent<TagComponent>(plane, "Grid");
-			ecs.addComponent<SpatialComponent>(plane, glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f));
-			ecs.addComponent<MeshComponent>(plane, HashedString("quad"));
-			ecs.addComponent<BoundingBoxComponent>(plane, glm::vec3(-0.5f, -0.5f, -0.01f), glm::vec3(0.5f, 0.5f, 0.01f), true);
-			ecs.addComponent<ForwardPBRRenderComponent>(plane);
-			ecs.addComponent<AlphaTestComponent>(plane);
-			auto material = ecs.addComponent<MaterialComponent>(plane);
-			material->mAlbedoColor = glm::vec4(1.f);
-			material->mAlbedoMap = resourceManagers.mTextureManager.asyncLoad("grid", TextureFiles{ {"grid.png"}, {} });
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(1.f);
+			material.mAlbedoMap = resourceManagers.mTextureManager.asyncLoad("grid", TextureFiles{ {"grid.png"}, {} });
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Grid")
+				.attachComponent<SpatialComponent>(glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f))
+				.attachComponent<MeshComponent>(HashedString("quad"))
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f, -0.5f, -0.01f), glm::vec3(0.5f, 0.5f, 0.01f), true)
+				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<AlphaTestComponent>()
+				.attachComponent<MaterialComponent>(material)
+			));
 		}
 
 		ecs.addSystem<CameraControllerSystem>();

@@ -28,11 +28,6 @@ namespace neo {
 		mEntityCreateQueue.push_back(builder);
 	}
 
-	ECS::Entity ECS::createEntity() {
-		// TODO - this might break while threading
-		return mRegistry.create();
-	}
-
 	void ECS::removeEntity(Entity e) {
 		mEntityKillQueue.push_back(e);
 	}

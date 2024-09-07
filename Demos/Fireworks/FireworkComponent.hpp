@@ -32,7 +32,7 @@ namespace Fireworks {
 		float mChildColorBias = 0.4f;
 	};
 
-	FireworkComponent(const neo::ECS::Entity& entity, const neo::MeshManager& meshManager, uint32_t count);
+	FireworkComponent(const neo::MeshManager& meshManager, uint32_t count);
 	virtual void imGuiEditor() override;
 
 	neo::MeshHandle mBuffer;

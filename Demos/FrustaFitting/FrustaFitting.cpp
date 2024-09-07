@@ -45,33 +45,32 @@ namespace FrustaFitting {
 		START_COMPONENT(SeenByMock);
 		END_COMPONENT();
 
-		struct Camera {
-			ECS::Entity mEntity;
-			Camera(std::string name, ECS& ecs, float fov, float near, float far, glm::vec3 pos) {
-				mEntity = ecs.createEntity();
-				ecs.addComponent<TagComponent>(mEntity, name);
-				ecs.addComponent<SpatialComponent>(mEntity, pos, glm::vec3(1.f));
-				ecs.addComponent<CameraComponent>(mEntity, near, far, CameraComponent::Perspective{ fov, 1.f });
-			}
-		};
+		ECS::EntityBuilder _createCamera(std::string name, float fov, float near, float far, glm::vec3 pos) {
+			return std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>(name)
+				.attachComponent<SpatialComponent>(pos, glm::vec3(1.f))
+				.attachComponent<CameraComponent>(near, far, CameraComponent::Perspective{ fov, 1.f })
+			);
+		}
 
-		struct Light {
-			Light(ResourceManagers& resourceManagers, ECS& ecs, glm::vec3 position) {
-				// Light object
-				auto lightEntity = ecs.createEntity();
-				ecs.addComponent<TagComponent>(lightEntity, "Light");
-				auto spatial = ecs.addComponent<SpatialComponent>(lightEntity, position, glm::vec3(1.f));
-				spatial->setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
-				ecs.addComponent<LightComponent>(lightEntity, glm::vec3(1.f));
-				ecs.addComponent<DirectionalLightComponent>(lightEntity);
-				ecs.addComponent<MainLightComponent>(lightEntity);
-				ecs.addComponent<CameraComponent>(lightEntity, -2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) });
-				ecs.addComponent<FrustumComponent>(lightEntity);
-				ecs.addComponent<FrustumFitReceiverComponent>(lightEntity);
-				ecs.addComponent<LineMeshComponent>(lightEntity, resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
-				ecs.addComponent<ShadowCameraComponent>(lightEntity, lightEntity, types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
-			}
-		};
+		ECS::EntityBuilder _createLight(ResourceManagers& resourceManagers, glm::vec3 position) {
+			SpatialComponent spatial(position, glm::vec3(1.f));
+			spatial.setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
+			ShadowCameraComponent shadowCamera(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
+			LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
+			return std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Light")
+				.attachComponent<LightComponent>(glm::vec3(1.f))
+				.attachComponent<DirectionalLightComponent>()
+				.attachComponent<SpatialComponent>(spatial)
+				.attachComponent<MainLightComponent>()
+				.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
+				.attachComponent<FrustumComponent>()
+				.attachComponent<FrustumFitReceiverComponent>()
+				.attachComponent<LineMeshComponent>(lineMesh)
+				.attachComponent<ShadowCameraComponent>(shadowCamera)
+			);
+		}
 	}
 
 	IDemo::Config Demo::getConfig() const {
@@ -83,48 +82,55 @@ namespace FrustaFitting {
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 
 		/* Game objects */
-		Camera sceneCamera("main camera", ecs, 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5));
-		ecs.addComponent<CameraControllerComponent>(sceneCamera.mEntity, 0.4f, 7.f);
-		ecs.addComponent<MainCameraComponent>(sceneCamera.mEntity);
-		ecs.addComponent<FrustumComponent>(sceneCamera.mEntity);
+		ecs.submitEntity(std::move(_createCamera("main camera", 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5))
+			.attachComponent<CameraControllerComponent>(0.4f, 7.f)
+			.attachComponent<MainCameraComponent>()
+			.attachComponent<FrustumComponent>()
+		));
 
 		// Perspective camera
-		Camera mockCamera("mockCamera", ecs, 50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f));
-		ecs.addComponent<MockCameraComponent>(mockCamera.mEntity);
-		ecs.addComponent<LineMeshComponent>(mockCamera.mEntity, resourceManagers.mMeshManager, glm::vec3(0.f, 1.f, 1.f));
-		ecs.addComponent<FrustumComponent>(mockCamera.mEntity);
-		ecs.addComponent<FrustumFitSourceComponent>(mockCamera.mEntity);
+		{
+			LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(0.f, 1.f, 1.f));
+			ecs.submitEntity(std::move(_createCamera("mockCamera", 50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f))
+				.attachComponent<MockCameraComponent>()
+				.attachComponent<LineMeshComponent>(lineMesh)
+				.attachComponent<FrustumComponent>()
+				.attachComponent<FrustumFitSourceComponent>()
+			));
+		}
 
 		// Ortho camera, shadow camera, light
-		Light light(resourceManagers, ecs, glm::vec3(10.f, 20.f, 0.f));
+		ecs.submitEntity(_createLight(resourceManagers, glm::vec3(10.f, 20.f, 0.f)));
 
 		// Renderable
 		for (int i = 0; i < 50; i++) {
-			auto entity = ecs.createEntity();
 			auto meshHandle = util::genRandomBool() ? HashedString("cube") : HashedString("sphere");
-			ecs.addComponent<MeshComponent>(entity, meshHandle);
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f));
-
-			auto mesh = resourceManagers.mMeshManager.resolve(meshHandle);
-			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
-			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
-			ecs.addComponent<PhongRenderComponent>(entity);
-			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<WireframeRenderComponent>(entity);
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<MeshComponent>(meshHandle)
+				.attachComponent<MaterialComponent>(material)
+				.attachComponent<SpatialComponent>(glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f))
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
+				.attachComponent<PhongRenderComponent>()
+				.attachComponent<ShadowCasterRenderComponent>()
+				.attachComponent<WireframeRenderComponent>()
+			));
 		}
 
 		/* Ground plane */
 		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f), glm::vec3(25.f, 25.f, 1.f), glm::vec3(-1.56f, 0, 0));
-			ecs.addComponent<MeshComponent>(entity, HashedString("quad"));
 			auto mesh = resourceManagers.mMeshManager.resolve(HashedString("quad"));
-			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
-			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(glm::vec3(0.7f), 1.f);
-			ecs.addComponent<PhongRenderComponent>(entity);
-			ecs.addComponent<TagComponent>(entity, "Ground");
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(glm::vec3(0.7f), 1.f);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<MeshComponent>(HashedString("quad"))
+				.attachComponent<MaterialComponent>(material)
+				.attachComponent<SpatialComponent>(glm::vec3(0.f), glm::vec3(25.f, 25.f, 1.f), glm::vec3(-1.56f, 0, 0))
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
+				.attachComponent<PhongRenderComponent>()
+				.attachComponent<TagComponent>("Ground")
+			));
 		}
 
 		/* Systems - order matters! */

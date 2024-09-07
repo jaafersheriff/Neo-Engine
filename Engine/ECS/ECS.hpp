@@ -29,8 +29,9 @@ namespace neo {
 	public:
 		using Entity = entt::entity;
 		using Registry = entt::registry;
-		struct EntityBuilder {
+		class EntityBuilder {
 			friend ECS;
+		public:
 			template<typename CompT, typename... Args>
 			EntityBuilder& attachComponent(Args &&... args) {
 				// Holy moly wtf c++
@@ -43,6 +44,7 @@ namespace neo {
 				return *this;
 			}
 	
+		private:
 			using AttachFunc = std::function<void(ECS& ecs, ECS::Entity e)>;
 			std::vector<AttachFunc> mComponents;
 		};
@@ -58,7 +60,6 @@ namespace neo {
 		void imguiEdtor();
 
 		void submitEntity(EntityBuilder&& builder);
-		Entity createEntity();
 		void removeEntity(Entity e);
 
 		// Entity access

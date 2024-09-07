@@ -55,13 +55,15 @@ namespace DeferredPBR {
 					util::genRandom(0.f, 10.f),
 					util::genRandom(-7.5f, 7.5f)
 				);
-				const auto entity = ecs.createEntity();
-				ecs.addComponent<LightComponent>(entity, util::genRandomVec3(0.3f, 1.f), util::genRandom(300.f, 1000.f));
-				ecs.addComponent<PointLightComponent>(entity);
-				ecs.addComponent<SinTranslateComponent>(entity, glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position);
-				ecs.addComponent<SpatialComponent>(entity, position, glm::vec3(50.f));
-				ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f), false);
-				ecs.addComponent<ShadowCameraComponent>(entity, entity, types::texture::Target::TextureCube, 256, resourceManagers.mTextureManager);
+				ShadowCameraComponent shadowCamera(types::texture::Target::TextureCube, 256, resourceManagers.mTextureManager);
+				ecs.submitEntity(std::move(ECS::EntityBuilder{}
+					.attachComponent<LightComponent>(util::genRandomVec3(0.3f, 1.f), util::genRandom(300.f, 1000.f))
+					.attachComponent<PointLightComponent>()
+					.attachComponent<SinTranslateComponent>(glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position)
+					.attachComponent<SpatialComponent>(position, glm::vec3(50.f))
+					.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f), false)
+					.attachComponent<ShadowCameraComponent>(shadowCamera)
+				));
 			}
 		}
 	}
@@ -75,210 +77,229 @@ namespace DeferredPBR {
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 
 		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 15.f);
-			ecs.addComponent<MainCameraComponent>(entity);
-			ecs.addComponent<FrustumComponent>(entity);
-			ecs.addComponent<FrustumFitSourceComponent>(entity);
-			ecs.addComponent<PinnedComponent>(entity);
-			ecs.addComponent<TagComponent>(entity, "Camera");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.05f, 0.03f, 0.0f), glm::vec3(1.f));
-			ecs.addComponent<CameraComponent>(entity, 1.f, 35.f, CameraComponent::Perspective{ 45.f, 1.f });
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<CameraControllerComponent>(0.4f, 15.f)
+				.attachComponent<MainCameraComponent>()
+				.attachComponent<FrustumComponent>()
+				.attachComponent<FrustumFitSourceComponent>()
+				.attachComponent<PinnedComponent>()
+				.attachComponent<TagComponent>("Camera")
+				.attachComponent<SpatialComponent>(glm::vec3(0.05f, 0.03f, 0.0f), glm::vec3(1.f))
+				.attachComponent<CameraComponent>(1.f, 35.f, CameraComponent::Perspective{ 45.f, 1.f })
+			));
 		}
 		{
-			auto lightEntity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(lightEntity, "Light");
-			auto spat = ecs.addComponent<SpatialComponent>(lightEntity, glm::vec3(75.f, 200.f, 20.f));
-			spat->setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
-			ecs.addComponent<LightComponent>(lightEntity, glm::vec3(0.978f, 0.903f, 0.714f), 3000.f);
-			ecs.addComponent<MainLightComponent>(lightEntity);
-			ecs.addComponent<DirectionalLightComponent>(lightEntity);
-			ecs.addComponent<PinnedComponent>(lightEntity);
-			ecs.addComponent<CameraComponent>(lightEntity, -1.f, 1000.f, CameraComponent::Orthographic{ glm::vec2(-100.f, 100.f), glm::vec2(-100.f, 100.f) });
-			ecs.addComponent<ShadowCameraComponent>(lightEntity, lightEntity, types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
+			SpatialComponent spatial(glm::vec3(75.f, 200.f, 20.f));
+			spatial.setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
+			ShadowCameraComponent shadowCamera(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
 
-			ecs.addComponent<FrustumComponent>(lightEntity);
-			ecs.addComponent<FrustumFitReceiverComponent>(lightEntity, 1.f);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Light")
+				.attachComponent<SpatialComponent>(spatial)
+				.attachComponent<LightComponent>(glm::vec3(0.978f, 0.903f, 0.714f), 3000.f)
+				.attachComponent<MainLightComponent>()
+				.attachComponent<DirectionalLightComponent>()
+				.attachComponent<PinnedComponent>()
+				.attachComponent<CameraComponent>(-1.f, 1000.f, CameraComponent::Orthographic{ glm::vec2(-100.f, 100.f), glm::vec2(-100.f, 100.f) })
+				.attachComponent<ShadowCameraComponent>(shadowCamera)
+				.attachComponent<FrustumComponent>()
+				.attachComponent<FrustumFitReceiverComponent>(1.f)
+			));
 		}
 		_createPointLights(ecs, resourceManagers, 2);
 
 		// Dialectric spheres
 		static float numSpheres = 8;
 		for (int i = 0; i < numSpheres; i++) {
-			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, 0.f), glm::vec3(0.6f));
-			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
-			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
-			ecs.addComponent<OpaqueComponent>(entity);
-			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(1, 0, 0, 1);
-			material->mMetallic = 0.f;
-			material->mRoughness = 1.f - i / (numSpheres-1);
-			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<DeferredPBRRenderComponent>(entity);
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(1, 0, 0, 1);
+			material.mMetallic = 0.f;
+			material.mRoughness = 1.f - i / (numSpheres-1);
+
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<SpatialComponent>(glm::vec3(-2.f + i, 1.f, 0.f), glm::vec3(0.6f))
+				.attachComponent<MeshComponent>(HashedString("sphere"))
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
+				.attachComponent<OpaqueComponent>()
+				.attachComponent<MaterialComponent>(material)
+				.attachComponent<ShadowCasterRenderComponent>()
+				.attachComponent<DeferredPBRRenderComponent>()
+			));
 		}
 		// Conductive spheres
 		for (int i = 0; i < numSpheres; i++) {
-			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(-2.f + i, 1.f, -1.5f), glm::vec3(0.6f));
-			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
-			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
-			ecs.addComponent<OpaqueComponent>(entity);
-			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(0.944f, 0.776f, 0.373f, 1);
-			material->mMetallic = 1.f;
-			material->mRoughness = 1.f - i / (numSpheres-1);
-			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<DeferredPBRRenderComponent>(entity);
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(0.944f, 0.776f, 0.373f, 1);
+			material.mMetallic = 1.f;
+			material.mRoughness = 1.f - i / (numSpheres-1);
+
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<SpatialComponent>(glm::vec3(-2.f + i, 1.f, -1.5f), glm::vec3(0.6f))
+				.attachComponent<MeshComponent>(HashedString("sphere"))
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
+				.attachComponent<OpaqueComponent>()
+				.attachComponent<ShadowCasterRenderComponent>()
+				.attachComponent<DeferredPBRRenderComponent>()
+			));
 		}
 		{
-			auto icosahedron = ecs.createEntity();
-			ecs.addComponent<TagComponent>(icosahedron, "Icosahedron");
-			ecs.addComponent<SpatialComponent>(icosahedron, glm::vec3(-3.f, 4.0f, -0.5f), glm::vec3(1.f));
-			ecs.addComponent<RotationComponent>(icosahedron, glm::vec3(0.f, 0.0f, 1.f));
-			ecs.addComponent<MeshComponent>(icosahedron, HashedString("icosahedron"));
-			ecs.addComponent<BoundingBoxComponent>(icosahedron, glm::vec3(-0.5f), glm::vec3(0.5f));
-			ecs.addComponent<OpaqueComponent>(icosahedron);
-			auto material = ecs.addComponent<MaterialComponent>(icosahedron);
-			material->mAlbedoColor = glm::vec4(0.25f, 0.f, 1.f, 1);
-			material->mMetallic = 0.f;
-			material->mRoughness = 0.15f;
-			ecs.addComponent<ShadowCasterRenderComponent>(icosahedron);
-			ecs.addComponent<PinnedComponent>(icosahedron);
-			ecs.addComponent<DeferredPBRRenderComponent>(icosahedron);
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(0.25f, 0.f, 1.f, 1);
+			material.mMetallic = 0.f;
+			material.mRoughness = 0.15f;
+
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Icosahedron")
+				.attachComponent<SpatialComponent>(glm::vec3(-3.f, 4.0f, -0.5f), glm::vec3(1.f))
+				.attachComponent<RotationComponent>(glm::vec3(0.f, 0.0f, 1.f))
+				.attachComponent<MeshComponent>(HashedString("icosahedron"))
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
+				.attachComponent<OpaqueComponent>()
+				.attachComponent<MaterialComponent>(material)
+				.attachComponent<ShadowCasterRenderComponent>()
+				.attachComponent<PinnedComponent>()
+				.attachComponent<DeferredPBRRenderComponent>()
+			));
 		}
 
 		// Emissive sphere
 		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 1.f, -0.75f), glm::vec3(0.6f));
-			ecs.addComponent<MeshComponent>(entity, HashedString("sphere"));
-			ecs.addComponent<BoundingBoxComponent>(entity, glm::vec3(-0.5f), glm::vec3(0.5f));
-			ecs.addComponent<OpaqueComponent>(entity);
-			auto material = ecs.addComponent<MaterialComponent>(entity);
-			material->mAlbedoColor = glm::vec4(1.f);
-			material->mMetallic = 0.f;
-			material->mRoughness = 0.f;
-			material->mEmissiveFactor = glm::vec3(10000.f);
-			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<DeferredPBRRenderComponent>(entity);
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(1.f);
+			material.mMetallic = 0.f;
+			material.mRoughness = 0.f;
+			material.mEmissiveFactor = glm::vec3(10000.f);
+
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<SpatialComponent>(glm::vec3(0.f, 1.f, -0.75f), glm::vec3(0.6f))
+				.attachComponent<MeshComponent>(HashedString("sphere"))
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
+				.attachComponent<OpaqueComponent>()
+				.attachComponent<MaterialComponent>(material)
+				.attachComponent<ShadowCasterRenderComponent>()
+				.attachComponent<DeferredPBRRenderComponent>()
+			));
 		}
 
 		{
-			auto skybox = ecs.createEntity();
-			ecs.addComponent<TagComponent>(skybox, "Skybox");
-			ecs.addComponent<SkyboxComponent>(skybox, resourceManagers.mTextureManager.asyncLoad("hdr skybox", TextureFiles{
-				{"metro_noord_2k.hdr" } ,
-				TextureFormat{
-					types::texture::Target::Texture2D,
-					types::texture::InternalFormats::RGBA16_F,
-					TextureFilter {
-						types::texture::Filters::LinearMipmapLinear,
-						types::texture::Filters::Linear
-					},
-					TextureWrap {
-						types::texture::Wraps::Repeat,
-						types::texture::Wraps::Repeat,
-						types::texture::Wraps::Repeat
-					},
-					types::ByteFormats::Float,
-					7
-				}
-			}));
-			ecs.addComponent<IBLComponent>(skybox);
-			ecs.addComponent<PinnedComponent>(skybox);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Skybox")
+				.attachComponent<SkyboxComponent>(resourceManagers.mTextureManager.asyncLoad("hdr skybox", TextureFiles{
+					{"metro_noord_2k.hdr" } ,
+					TextureFormat{
+						types::texture::Target::Texture2D,
+						types::texture::InternalFormats::RGBA16_F,
+						TextureFilter {
+							types::texture::Filters::LinearMipmapLinear,
+							types::texture::Filters::Linear
+						},
+						TextureWrap {
+							types::texture::Wraps::Repeat,
+							types::texture::Wraps::Repeat,
+							types::texture::Wraps::Repeat
+						},
+						types::ByteFormats::Float,
+						7
+					}
+					}))
+				.attachComponent<IBLComponent>()
+				.attachComponent<PinnedComponent>()
+			));
 		}
 
 		{
 			GLTFImporter::MeshNode helmet = Loader::loadGltfScene(resourceManagers, "DamagedHelmet.glb", glm::translate(glm::mat4(1.f), glm::vec3(0.f, 2.5f, -0.5f))).mMeshNodes[0];
-			auto entity = ecs.createEntity();
+			ECS::EntityBuilder builder;
 			if (!helmet.mName.empty()) {
-				ecs.addComponent<TagComponent>(entity, helmet.mName);
+				builder.attachComponent<TagComponent>(helmet.mName);
 			}
-			ecs.addComponent<SpatialComponent>(entity, helmet.mSpatial);
-			ecs.addComponent<MeshComponent>(entity, helmet.mMeshHandle);
-			ecs.addComponent<BoundingBoxComponent>(entity, helmet.mMin, helmet.mMax);
+			builder.attachComponent<SpatialComponent>(helmet.mSpatial);
+			builder.attachComponent<MeshComponent>(helmet.mMeshHandle);
+			builder.attachComponent<BoundingBoxComponent>(helmet.mMin, helmet.mMax);
 			if (helmet.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Opaque) {
-				ecs.addComponent<OpaqueComponent>(entity);
+				builder.attachComponent<OpaqueComponent>();
 			}
 			else if (helmet.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
-				ecs.addComponent<AlphaTestComponent>(entity);
+				builder.attachComponent<AlphaTestComponent>();
 			}
 			// The emissive factor is 1.0 for some reason
 			helmet.mMaterial.mEmissiveFactor = glm::vec3(100.f);
-			ecs.addComponent<MaterialComponent>(entity, helmet.mMaterial);
-			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
-			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<PinnedComponent>(entity);
-			ecs.addComponent<DeferredPBRRenderComponent>(entity);
+			builder.attachComponent<MaterialComponent>(helmet.mMaterial);
+			builder.attachComponent<RotationComponent>(glm::vec3(0.f, 0.5f, 0.f));
+			builder.attachComponent<ShadowCasterRenderComponent>();
+			builder.attachComponent<PinnedComponent>();
+			builder.attachComponent<DeferredPBRRenderComponent>();
+			ecs.submitEntity(std::move(builder));
 		}
 
 		{
 			GLTFImporter::MeshNode bust = Loader::loadGltfScene(resourceManagers, "fblock.gltf", glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(-5.f, 2.5f, -0.5f)), glm::vec3(2.f))).mMeshNodes[0];
-			auto entity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(entity, "Bust");
-			auto spatial = ecs.addComponent<SpatialComponent>(entity, bust.mSpatial);
-			spatial->setLookDir(glm::vec3(0.f, 0.4f, 0.1f));
-			ecs.addComponent<MeshComponent>(entity, bust.mMeshHandle);
-			ecs.addComponent<BoundingBoxComponent>(entity, bust.mMin, bust.mMax);
-			ecs.addComponent<OpaqueComponent>(entity);
-			ecs.addComponent<MaterialComponent>(entity, bust.mMaterial);
-			ecs.addComponent<RotationComponent>(entity, glm::vec3(0.f, 0.5f, 0.f));
-			ecs.addComponent<ShadowCasterRenderComponent>(entity);
-			ecs.addComponent<DeferredPBRRenderComponent>(entity);
+			SpatialComponent spatial = bust.mSpatial;
+			spatial.setLookDir(glm::vec3(0.f, 0.4f, 0.1f));
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Bust")
+				.attachComponent<MeshComponent>(bust.mMeshHandle)
+				.attachComponent<BoundingBoxComponent>(bust.mMin, bust.mMax)
+				.attachComponent<OpaqueComponent>()
+				.attachComponent<SpatialComponent>(spatial)
+				.attachComponent<MaterialComponent>(bust.mMaterial)
+				.attachComponent<RotationComponent>(glm::vec3(0.f, 0.5f, 0.f))
+				.attachComponent<ShadowCasterRenderComponent>()
+				.attachComponent<DeferredPBRRenderComponent>()
+			));
 		}
 		{
 			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)));
 			for (auto& node : scene.mMeshNodes) {
-				auto entity = ecs.createEntity();
+				ECS::EntityBuilder builder;
 				if (!node.mName.empty()) {
-					ecs.addComponent<TagComponent>(entity, node.mName);
+					builder.attachComponent<TagComponent>(node.mName);
 				}
-				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
-				ecs.addComponent<MeshComponent>(entity, node.mMeshHandle);
-				ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax, true);
+				builder.attachComponent<SpatialComponent>(node.mSpatial);
+				builder.attachComponent<MeshComponent>(node.mMeshHandle);
+				builder.attachComponent<BoundingBoxComponent>(node.mMin, node.mMax, true);
 				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Transparent) {
-					ecs.addComponent<TransparentComponent>(entity);
-					ecs.addComponent<ForwardPBRRenderComponent>(entity);
+					builder.attachComponent<TransparentComponent>();
+					builder.attachComponent<ForwardPBRRenderComponent>();
 				}
 				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
-					ecs.addComponent<AlphaTestComponent>(entity);
-					ecs.addComponent<DeferredPBRRenderComponent>(entity);
+					builder.attachComponent<AlphaTestComponent>();
+					builder.attachComponent<DeferredPBRRenderComponent>();
 				}
 				else {
-					ecs.addComponent<OpaqueComponent>(entity);
-					ecs.addComponent<DeferredPBRRenderComponent>(entity);
+					builder.attachComponent<OpaqueComponent>();
+					builder.attachComponent<DeferredPBRRenderComponent>();
 				}
-				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
-
-				ecs.addComponent<ShadowCasterRenderComponent>(entity);
+				builder.attachComponent<MaterialComponent>(node.mMaterial);
+				builder.attachComponent<ShadowCasterRenderComponent>();
+				ecs.submitEntity(std::move(builder));
 			}
 		}
 		{
 			GLTFImporter::Scene scene = Loader::loadGltfScene(resourceManagers, "porsche/scene.gltf", glm::rotate(glm::translate(glm::mat4(1.f), glm::vec3(-6.75f, 0., -0.25f)), util::PI / 2.f, glm::vec3(0,1,0)));
 			for (auto& node : scene.mMeshNodes) {
-				auto entity = ecs.createEntity();
+				ECS::EntityBuilder builder;
 				if (!node.mName.empty()) {
-					ecs.addComponent<TagComponent>(entity, node.mName);
+					builder.attachComponent<TagComponent>(node.mName);
 				}
-				ecs.addComponent<SpatialComponent>(entity, node.mSpatial);
-				ecs.addComponent<MeshComponent>(entity, node.mMeshHandle);
-				ecs.addComponent<BoundingBoxComponent>(entity, node.mMin, node.mMax, true);
+				builder.attachComponent<SpatialComponent>(node.mSpatial);
+				builder.attachComponent<MeshComponent>(node.mMeshHandle);
+				builder.attachComponent<BoundingBoxComponent>(node.mMin, node.mMax, true);
 				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Transparent) {
-					ecs.addComponent<TransparentComponent>(entity);
-					ecs.addComponent<ForwardPBRRenderComponent>(entity);
+					builder.attachComponent<TransparentComponent>();
+					builder.attachComponent<ForwardPBRRenderComponent>();
 				}
 				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
-					ecs.addComponent<AlphaTestComponent>(entity);
-					ecs.addComponent<DeferredPBRRenderComponent>(entity);
+					builder.attachComponent<AlphaTestComponent>();
+					builder.attachComponent<DeferredPBRRenderComponent>();
 				}
 				else {
-					ecs.addComponent<OpaqueComponent>(entity);
-					ecs.addComponent<DeferredPBRRenderComponent>(entity);
+					builder.attachComponent<OpaqueComponent>();
+					builder.attachComponent<DeferredPBRRenderComponent>();
 				}
-				ecs.addComponent<MaterialComponent>(entity, node.mMaterial);
-
-				ecs.addComponent<ShadowCasterRenderComponent>(entity);
+				builder.attachComponent<MaterialComponent>(node.mMaterial);
+				builder.attachComponent<ShadowCasterRenderComponent>();
+				ecs.submitEntity(std::move(builder));
 			}
 		}
 

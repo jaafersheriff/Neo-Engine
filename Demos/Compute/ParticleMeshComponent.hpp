@@ -22,21 +22,9 @@ namespace Compute {
 		float timeScale = 100.f;
 		bool isDirty = true;
 
-		ParticleMeshComponent(MeshManager& meshManager) {
-			MeshLoadDetails builder;
-			builder.mPrimtive = types::mesh::Primitive::Points;
-			builder.mVertexBuffers[types::mesh::VertexType::Position] = {
-				4,
-				0,
-				types::ByteFormats::Float,
-				false,
-				0,
-				0,
-				0,
-				nullptr
-			};
-
-			mMeshHandle = meshManager.asyncLoad("Particles", builder);
+		ParticleMeshComponent(MeshHandle handle)
+			: mMeshHandle(handle)
+		{
 			isDirty = true;
 		}
 

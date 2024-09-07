@@ -293,12 +293,13 @@ namespace neo {
 			}
 		{
 			TRACY_ZONEN("FrameStats Entity");
-			auto hardware = ecs.createEntity();
-			ecs.addComponent<MouseComponent>(hardware, mMouse);
-			ecs.addComponent<KeyboardComponent>(hardware, mKeyboard);
-			ecs.addComponent<ViewportDetailsComponent>(hardware, viewportSize, viewportPosition);
-			ecs.addComponent<FrameStatsComponent>(hardware, runTime, static_cast<float>(profiler.mTimeStep));
-			ecs.addComponent<SingleFrameComponent>(hardware);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<MouseComponent>(mMouse)
+				.attachComponent<KeyboardComponent>(mKeyboard)
+				.attachComponent<ViewportDetailsComponent>(viewportSize, viewportPosition)
+				.attachComponent<FrameStatsComponent>(runTime, static_cast<float>(profiler.mTimeStep))
+				.attachComponent<SingleFrameComponent>()
+			));
 		}
 
 		{

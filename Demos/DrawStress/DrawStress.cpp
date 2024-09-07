@@ -43,34 +43,38 @@ namespace DrawStress {
 
 		/* Camera */
 		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(entity, "Camera");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0, 0.6f, 5), glm::vec3(1.f));
-			ecs.addComponent<CameraComponent>(entity, 1.f, 100.f, CameraComponent::Perspective{ 45.f, 1.f });
-			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 7.f);
-			ecs.addComponent<MainCameraComponent>(entity);
-			ecs.addComponent<FrustumComponent>(entity);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Camera")
+				.attachComponent<SpatialComponent>(glm::vec3(0, 0.6f, 5), glm::vec3(1.f))
+				.attachComponent<CameraComponent>(1.f, 100.f, CameraComponent::Perspective{ 45.f, 1.f })
+				.attachComponent<CameraControllerComponent>(0.4f, 7.f)
+				.attachComponent<MainCameraComponent>()
+				.attachComponent<FrustumComponent>()
+			));
 		}
 
 		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(entity, "Light");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 2.f, 20.f));
-			ecs.addComponent<MainLightComponent>(entity);
-			ecs.addComponent<LightComponent>(entity, glm::vec3(1.f), 15.f);
-			ecs.addComponent<PointLightComponent>(entity);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Light")
+				.attachComponent<SpatialComponent>(glm::vec3(0.f, 2.f, 20.f))
+				.attachComponent<MainLightComponent>()
+				.attachComponent<LightComponent>(glm::vec3(1.f), 15.f)
+				.attachComponent<PointLightComponent>()
+			));
 		}
 
 		/* Bunny object */
 		for(int i = 0; i < 10000; i++) {
-			auto cube = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(cube, glm::vec3(util::genRandom(-50.f, 50.f), util::genRandom(-10.f, 10.f), util::genRandom(-50.f, 50.f)), glm::vec3(util::genRandom(0.5f, 1.5f)), util::genRandomVec3(-util::PI, util::PI));
-			ecs.addComponent<MeshComponent>(cube, HashedString("cube"));
-			ecs.addComponent<BoundingBoxComponent>(cube, glm::vec3(-0.5f), glm::vec3(0.5f));
-			ecs.addComponent<PhongRenderComponent>(cube);
-			ecs.addComponent<OpaqueComponent>(cube);
-			auto material = ecs.addComponent<MaterialComponent>(cube);
-			material->mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
+			MaterialComponent material;
+			material.mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<SpatialComponent>(glm::vec3(util::genRandom(-50.f, 50.f), util::genRandom(-10.f, 10.f), util::genRandom(-50.f, 50.f)), glm::vec3(util::genRandom(0.5f, 1.5f)), util::genRandomVec3(-util::PI, util::PI))
+				.attachComponent<MeshComponent>(HashedString("cube"))
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
+				.attachComponent<PhongRenderComponent>()
+				.attachComponent<OpaqueComponent>()
+				.attachComponent<MaterialComponent>(material)
+			));
 		}
 
 		/* Systems - order matters! */

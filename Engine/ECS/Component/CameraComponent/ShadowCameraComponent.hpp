@@ -5,8 +5,8 @@
 namespace neo
 {
 	START_COMPONENT(ShadowCameraComponent);
-	ShadowCameraComponent(ECS::Entity entity, types::texture::Target target, int resolution, const TextureManager& textureManager) 
-		: mID("ShadowMap_" + std::to_string(static_cast<uint32_t>(entity)))
+	ShadowCameraComponent(types::texture::Target target, int resolution, const TextureManager& textureManager)
+		: mID("ShadowMap_" + std::to_string(util::genRandom()))
 	{
 		NEO_ASSERT(target == types::texture::Target::Texture2D || target == types::texture::Target::TextureCube, "Shadows can only be 2D or cube");
 		TextureWrap wrap = target == types::texture::Target::Texture2D 

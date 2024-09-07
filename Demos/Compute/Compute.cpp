@@ -22,15 +22,15 @@ using namespace neo;
 
 /* Game object definitions */
 namespace Compute {
-	struct Camera {
-		ECS::Entity mEntity;
-		Camera(ECS& ecs, float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
-			mEntity = ecs.createEntity();
-			ecs.addComponent<SpatialComponent>(mEntity, pos, glm::vec3(1.f));
-			ecs.addComponent<CameraComponent>(mEntity, near, far, CameraComponent::Perspective{ fov, 1.f });
-			ecs.addComponent<CameraControllerComponent>(mEntity, ls, ms);
+	namespace {
+		ECS::EntityBuilder _createCamera(float fov, float near, float far, glm::vec3 pos, float ls, float ms) {
+			return std::move(ECS::EntityBuilder{}
+				.attachComponent<SpatialComponent>(pos, glm::vec3(1.f))
+				.attachComponent<CameraComponent>(near, far, CameraComponent::Perspective{ fov, 1.f })
+				.attachComponent<CameraControllerComponent>(ls, ms)
+			);
 		}
-	};
+	}
 
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
@@ -41,15 +41,30 @@ namespace Compute {
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 
 		/* Game objects */
-		Camera camera(ecs, 45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f);
-		ecs.addComponent<MainCameraComponent>(camera.mEntity);
+		ecs.submitEntity(std::move(_createCamera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f)
+			.attachComponent<MainCameraComponent>()
+		));
 
 		// Create mesh
 		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(entity, "Particles");
-			ecs.addComponent<ParticleMeshComponent>(entity, resourceManagers.mMeshManager);
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0.f, 0.0f, 0.f));
+			MeshLoadDetails builder;
+			builder.mPrimtive = types::mesh::Primitive::Points;
+			builder.mVertexBuffers[types::mesh::VertexType::Position] = {
+				4,
+				0,
+				types::ByteFormats::Float,
+				false,
+				0,
+				0,
+				0,
+				nullptr
+			};
+
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Particles")
+				.attachComponent<ParticleMeshComponent>(resourceManagers.mMeshManager.asyncLoad("Particles", builder))
+				.attachComponent<SpatialComponent>(glm::vec3(0.f, 0.0f, 0.f))
+			));
 		}
 
 		/* Systems - order matters! */
