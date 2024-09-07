@@ -121,7 +121,7 @@ namespace neo {
 					count = (int)ftell(fp);
 					rewind(fp);
 					if (count > 0) {
-						content = (char*)malloc(sizeof(char) * (count + 1));
+						content = new char[count + 1];
 						count = (int)fread(content, sizeof(char), count, fp);
 						content[count] = '\0';
 					}

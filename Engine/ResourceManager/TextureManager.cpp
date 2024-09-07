@@ -161,8 +161,9 @@ namespace neo {
 					// Pixel format
 					byteSize *= _bytesPerPixel(builder.mFormat.mType);
 
-					copy.mData = static_cast<uint8_t*>(malloc(byteSize));
-					memcpy(const_cast<uint8_t*>(copy.mData), builder.mData, byteSize);
+					uint8_t* copiedData = new uint8_t[byteSize];
+					memcpy(copiedData, builder.mData, byteSize);
+					copy.mData = copiedData;
 				}
 				mQueue.emplace_back(ResourceLoadDetails_Internal{ id, copy, debugName });
 			},
