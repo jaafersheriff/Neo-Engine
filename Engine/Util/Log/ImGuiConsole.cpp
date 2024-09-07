@@ -28,11 +28,11 @@ namespace neo {
 	void ImGuiConsole::addLog(const char* log, util::LogSeverity severity) {
 		NEO_ASSERT(log, "Trying to log nothing"); 
 		size_t len = strlen(log) + 1; 
-		void* buf = malloc(len); 
-		memcpy(buf, (const void*)log, len);
+		char* buf = new char[len]; 
+		memcpy(buf, log, len);
 
 		std::lock_guard<std::mutex> lock(mLogMutex);
-		mLogs.push_back({ severity, static_cast<char*>(buf) });
+		mLogs.push_back({ severity, buf });
 		while (!mInfiniteLog && mLogs.size() > mMaxLogSize) {
 			free(mLogs.front().second);
 			mLogs.erase(mLogs.begin());

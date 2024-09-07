@@ -37,12 +37,12 @@ namespace neo {
 		MeshLoadDetails copy = meshDetails;
 		for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
 			if (buffer.mData) {
-				copy.mVertexBuffers[type].mData = static_cast<uint8_t*>(malloc(buffer.mByteSize));
+				copy.mVertexBuffers[type].mData = new uint8_t[buffer.mByteSize];
 				memcpy(const_cast<uint8_t*>(copy.mVertexBuffers[type].mData), buffer.mData, buffer.mByteSize);
 			}
 		}
 		if (meshDetails.mElementBuffer.has_value() && meshDetails.mElementBuffer->mData) {
-			copy.mElementBuffer->mData = static_cast<uint8_t*>(malloc(meshDetails.mElementBuffer->mByteSize));
+			copy.mElementBuffer->mData = new uint8_t[meshDetails.mElementBuffer->mByteSize];
 			memcpy(const_cast<uint8_t*>(copy.mElementBuffer->mData), meshDetails.mElementBuffer->mData, meshDetails.mElementBuffer->mByteSize);
 		}
 
