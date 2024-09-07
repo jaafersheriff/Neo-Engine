@@ -76,9 +76,6 @@ namespace neo {
 		memcpy(buf, glGetString(GL_SHADING_LANGUAGE_VERSION), 512);
 		mDetails.mShadingLanguage = buf;
 
-		/* Init default GL state */
-		resetState();
-
 		mShowBoundingBoxes = false;
 	}
 
@@ -114,6 +111,10 @@ namespace neo {
 
 		mStats = {};
 		resetState();
+
+		if (window.isMinimized()) {
+			return;
+		}
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		mDefaultFBOHandle = resourceManagers.mFramebufferManager.asyncLoad(

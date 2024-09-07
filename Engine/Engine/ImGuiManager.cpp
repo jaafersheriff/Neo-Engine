@@ -291,7 +291,7 @@ namespace neo {
 	}
 
 	void ImGuiManager::resolveDrawData(ECS& ecs, ResourceManagers& resourceManagers) {
-		TRACY_GPU();
+		TRACY_ZONE();
 		ImGui::Render();
 
 		ImDrawData* drawData = ImGui::GetDrawData();

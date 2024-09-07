@@ -161,33 +161,25 @@ namespace neo {
 				}
 
 				{
+					TRACY_GPUN("Frame Render");
 
-					TRACY_GPUN("Prepare draw data");
 					if (!mWindow.isMinimized()) {
+						TRACY_ZONEN("Prepare draw data");
 						// None of this will actually be valid until next frame in ECS::flush(), so imgui is always 1 frame behind
 						if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
 							ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
-						}
-					}
-					resourceManagers.tick();
-					Messenger::relayMessages(ecs);
-				}
-
-				/* Render */
-				// TODO - only run this at 60FPS in its own thread
-				// TODO - should this go after processkillqueue?
-				{
-					TRACY_GPUN("Frame Render");
-					if (!mWindow.isMinimized()) {
-						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), ecs, resourceManagers);
-						{
-							TRACY_GPUN("Remove draw data");
+							TRACY_ZONEN("Remove draw data");
 							for (auto entity : ecs.getView<ImGuiComponent, ImGuiDrawComponent>()) {
 								ecs.removeEntity(entity);
 							}
 						}
+						Messenger::relayMessages(ecs);
 					}
-					Messenger::relayMessages(ecs);
+					{
+						resourceManagers.tick();
+						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), ecs, resourceManagers);
+						Messenger::relayMessages(ecs);
+					}
 				}
 
 				_endFrame(ecs);
