@@ -27,6 +27,8 @@
 
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
+#include "ECS/EntityBuilder.hpp"
+
 using namespace neo;
 
 /* Game object definitions */
@@ -42,12 +44,13 @@ namespace Base {
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_UNUSED(ecs, resourceManagers);
 		{
-			auto entity = ecs.createEntity();
-			ecs.addComponent<TagComponent>(entity, "Camera");
-			ecs.addComponent<SpatialComponent>(entity, glm::vec3(0, 0.6f, 5), glm::vec3(1.f));
-			ecs.addComponent<CameraComponent>(entity, 1.f, 100.f, CameraComponent::Perspective{ 45.f, 1.f });
-			ecs.addComponent<CameraControllerComponent>(entity, 0.4f, 7.f);
-			ecs.addComponent<MainCameraComponent>(entity);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Camera")
+				.attachComponent<SpatialComponent>(glm::vec3(0, 0.6f, 5), glm::vec3(1.f))
+				.attachComponent<CameraComponent>(1.f, 100.f, CameraComponent::Perspective{ 45.f, 1.f })
+				.attachComponent<CameraControllerComponent>(0.4f, 7.f)
+				.attachComponent<MainCameraComponent>()
+			));
 		}
 
 		{

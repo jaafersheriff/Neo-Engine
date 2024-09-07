@@ -5,6 +5,8 @@
 #include "Component/EngineComponents/TagComponent.hpp"
 #include "Component/CollisionComponent/SelectedComponent.hpp"
 
+#include "ECS/EntityBuilder.hpp"
+
 namespace neo {
 
 	void ECS::_initSystems() {
@@ -22,6 +24,10 @@ namespace neo {
 		}
 	}
 
+	void ECS::submitEntity(EntityBuilder&& builder) {
+		mEntityCreateQueue.push_back(builder);
+	}
+
 	ECS::Entity ECS::createEntity() {
 		// TODO - this might break while threading
 		return mRegistry.create();
@@ -33,6 +39,14 @@ namespace neo {
 
 	void ECS::flush() {
 		TRACY_ZONE();
+		for (auto&& builder : mEntityCreateQueue) {
+			auto entity = mRegistry.create();
+			for (auto&& job : builder.mComponents) {
+				job(*this, entity);
+			}
+		}
+		mEntityCreateQueue.clear();
+
 		for (auto&& job : mAddComponentFuncs) {
 			job(mRegistry);
 		}

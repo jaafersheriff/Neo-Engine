@@ -20,10 +20,34 @@ namespace neo {
 	class System;
 	class Engine;
 
+	// TODO - move the whole struct in here after dev
+	struct EntityBuilder;
+
 	class ECS {
 		friend Engine;
 
 	public:
+		using Entity = entt::entity;
+		using Registry = entt::registry;
+		struct EntityBuilder {
+			friend ECS;
+			template<typename CompT, typename... Args>
+			EntityBuilder& attachComponent(Args &&... args) {
+				// Holy moly wtf c++
+				mComponents.emplace_back([args = std::make_tuple(std::forward<Args>(args) ...)](ECS& ecs, ECS::Entity e) mutable {
+					std::apply([&ecs, e](auto&& ... args) {
+						ecs.addComponent<CompT>(e, std::forward<decltype(args)>(args) ...);
+						}, std::move(args));
+					});
+
+				return *this;
+			}
+	
+			using AttachFunc = std::function<void(ECS& ecs, ECS::Entity e)>;
+			std::vector<AttachFunc> mComponents;
+		};
+
+
 		ECS() = default;
 		~ECS() = default;
 		ECS(const ECS&) = delete;
@@ -33,10 +57,7 @@ namespace neo {
 		void clean();
 		void imguiEdtor();
 
-		/* ECS */
-		using Entity = entt::entity;
-		using Registry = entt::registry;
-
+		void submitEntity(EntityBuilder&& builder);
 		Entity createEntity();
 		void removeEntity(Entity e);
 
@@ -69,6 +90,7 @@ namespace neo {
 		mutable MM::EntityEditor<Entity> mEditor;
 
 		/* Active containers */
+		std::vector<EntityBuilder> mEntityCreateQueue;
 		std::vector<Entity> mEntityKillQueue;
 		using ComponentModFunc = std::function<void(Registry&)>;
 		std::vector<ComponentModFunc> mAddComponentFuncs;
@@ -179,7 +201,6 @@ namespace neo {
 		info.name = component->mName;
 		info.create = [this](entt::registry& r, Entity e) {
 			NEO_UNUSED(r, e);
-			// addComponent<CompT>(e);
 			NEO_LOG_W("Component creation unsupported");
 		};
 		info.destroy = [this](entt::registry& r, Entity e) {
