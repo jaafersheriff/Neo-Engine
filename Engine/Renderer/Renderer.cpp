@@ -106,15 +106,68 @@ namespace neo {
 		glUseProgram(0);
 	}
 
-	void Renderer::render(WindowSurface& window, IDemo* demo, ECS& ecs, ResourceManagers& resourceManagers) {
+	struct Query {
+		struct Scope {
+			Scope(uint32_t handle) {
+				glBeginQuery(GL_TIME_ELAPSED, handle);
+			}
+			~Scope() {
+				glEndQuery(GL_TIME_ELAPSED);
+			}
+		};
+
+		void init() {
+			if (!_handlesValid()) {
+				glGenQueries(2, mHandles.data());
+			}
+		}
+
+		float getGPUTime() {
+			NEO_ASSERT(_handlesValid(), "HEH");
+			if (!_handlesValid()) {
+				return 0.f;
+			}
+			uint32_t handle = mUseHandle0 ? mHandles[1] : mHandles[0];
+
+			int32_t done;
+		    glGetQueryObjectiv(handle, GL_QUERY_RESULT_AVAILABLE, &done);
+			if (done) {
+				uint64_t time;
+				glGetQueryObjectui64v(handle, GL_QUERY_RESULT, &time);
+				return time / 1000000.f;
+			}
+			NEO_LOG_W("NOT DONE?");
+
+			return 0.f;
+		}
+
+		uint32_t getHandle() {
+			mUseHandle0 = !mUseHandle0;
+			return mUseHandle0 ? mHandles[0] : mHandles[1];
+		}
+
+	private:
+		bool _handlesValid() {
+			return mHandles[0] && mHandles[1];
+		}
+
+		std::array<uint32_t, 2> mHandles = { 0,0 };
+		bool mUseHandle0 = true;
+	};
+	void Renderer::render(WindowSurface& window, IDemo* demo, util::Profiler& profiler, ECS& ecs, ResourceManagers& resourceManagers) {
 		TRACY_GPU();
-
-		mStats = {};
-		resetState();
-
 		if (window.isMinimized()) {
 			return;
 		}
+
+		static Query query; // should be a member
+		query.init();
+		profiler.markFrameGPU(query.getGPUTime());
+
+		Query::Scope _scope(query.getHandle());
+
+		mStats = {};
+		resetState();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		mDefaultFBOHandle = resourceManagers.mFramebufferManager.asyncLoad(

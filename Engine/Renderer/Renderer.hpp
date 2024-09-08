@@ -9,6 +9,9 @@
 #include <tuple>
 
 namespace neo {
+	namespace util {
+		class Profiler;
+	}
 
 	class Engine;
 	class ImGuiManager;
@@ -30,6 +33,7 @@ namespace neo {
 			uint32_t mNumPrimitives = 0;
 			uint32_t mNumUniforms = 0;
 			uint32_t mNumSamplers = 0;
+			float mGPUTime = 0.f;
 		};
 
 		struct RendererDetails {
@@ -56,7 +60,7 @@ namespace neo {
 			void setDemoConfig(IDemo::Config);
 			void init();
 			void resetState();
-			void render(WindowSurface&, IDemo* demo, ECS&, ResourceManagers& resourceManager);
+			void render(WindowSurface&, IDemo* demo, util::Profiler& profiler, ECS&, ResourceManagers& resourceManager);
 			void clean();
 
 			void imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager);
@@ -64,6 +68,7 @@ namespace neo {
 			FramebufferHandle mDefaultFBOHandle;
 			bool mShowBoundingBoxes = false;
 			bool mBackbufferNeedsResize = false;
+			std::uint32_t mTimerQuery = 0;
 	};
 
 }

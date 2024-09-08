@@ -156,10 +156,9 @@ namespace neo {
 	}
 
 	void Mesh::clear() {
-		removeVertexBuffer(types::mesh::VertexType::Position);
-		removeVertexBuffer(types::mesh::VertexType::Normal);
-		removeVertexBuffer(types::mesh::VertexType::Texture0);
-		removeVertexBuffer(types::mesh::VertexType::Tangent);
+		for (int i = 0; i < static_cast<int>(types::mesh::VertexType::COUNT); i++) {
+			removeVertexBuffer(static_cast<types::mesh::VertexType>(i));
+		}
 		removeElementBuffer();
 	}
 

@@ -29,6 +29,6 @@ namespace neo {
 		void _tickImpl();
 	private:
 		uint8_t mHotReloadCounter = 1;
-		const uint8_t mHotReloadLimit = 30;
+		const uint8_t mHotReloadLimit = 200;
 	};
 }

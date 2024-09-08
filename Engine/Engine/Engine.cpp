@@ -105,7 +105,7 @@ namespace neo {
 
 	void Engine::run(DemoWrangler&& demos) {
 
-		util::Profiler profiler{};
+		util::Profiler profiler(mWindow.getDetails().mRefreshRate);
 
 		ECS ecs;
 		// TODO - managers could just be added to the ecs probably..but how would that work with threading
@@ -120,6 +120,10 @@ namespace neo {
 				TRACY_ZONEN("Frame");
 				{
 					TRACY_ZONEN("Frame Update");
+					{
+						float runTime = static_cast<float>(glfwGetTime());
+						profiler.begin(runTime);
+					}
 					if (demos.needsReload()) {
 						_swapDemo(demos, ecs, resourceManagers);
 					}
@@ -177,18 +181,19 @@ namespace neo {
 					}
 					{
 						resourceManagers.tick();
-						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), ecs, resourceManagers);
+						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), profiler, ecs, resourceManagers);
 						Messenger::relayMessages(ecs);
 					}
 				}
 
-				_endFrame(ecs, profiler);
+				_endFrame(profiler, ecs);
 				Messenger::relayMessages(ecs);
 			}
 
 			mWindow.flip();
 			TracyGpuCollect;
 			FrameMark;
+			profiler.end(glfwGetTime());
 		}
 
 		demos.getCurrentDemo()->destroy();
@@ -279,10 +284,6 @@ namespace neo {
 	void Engine::_startFrame(util::Profiler& profiler, ECS& ecs, ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
 
-		/* Update frame counter */
-		float runTime = static_cast<float>(glfwGetTime());
-		profiler.begin(runTime);
-
 		if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
 			ServiceLocator<ImGuiManager>::ref().update();
 		}
@@ -303,7 +304,7 @@ namespace neo {
 				.attachComponent<MouseComponent>(mMouse)
 				.attachComponent<KeyboardComponent>(mKeyboard)
 				.attachComponent<ViewportDetailsComponent>(viewportSize, viewportPosition)
-				.attachComponent<FrameStatsComponent>(runTime, static_cast<float>(profiler.getDeltaTime()))
+				.attachComponent<FrameStatsComponent>(static_cast<float>(profiler.getRunTime()), static_cast<float>(profiler.getDeltaTime()))
 				.attachComponent<SingleFrameComponent>()
 			));
 		}
@@ -369,7 +370,7 @@ namespace neo {
 		}
 	}
 
-	void Engine::_endFrame(ECS& ecs, util::Profiler& profiler) {
+	void Engine::_endFrame(util::Profiler& profiler, ECS& ecs) {
 		TRACY_ZONE();
 
 		for(auto& entity : ecs.getView<SingleFrameComponent>()) {
@@ -380,6 +381,6 @@ namespace neo {
 		// Do it here so it coincides w/ vsync instead of stalling engine tick
 		mWindow.updateHardware();
 
-		profiler.end(glfwGetTime());
+		profiler.markFrame(glfwGetTime());
 	}
 }
