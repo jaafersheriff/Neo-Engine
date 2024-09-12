@@ -76,5 +76,4 @@ void main() {
 	fEmissive *= srgbToLinear(texture(emissiveMap, fragTex)).rgb;
 #endif
 	gEmissiveMetalness = vec4(fEmissive, fMetalness);
-
 }  

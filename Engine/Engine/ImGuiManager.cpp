@@ -380,7 +380,7 @@ namespace neo {
 
 					ImGuiDrawComponent draw;
 					draw.mMeshHandle = mImGuiMeshes[i];
-					draw.mTextureHandle = TextureHandle(cmd->TextureId);
+					draw.mTextureHandle = TextureHandle(cmd->GetTexID());
 					draw.mScissorRect = glm::vec4(
 						clipMin.x,
 						clipMax.y,

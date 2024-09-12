@@ -69,7 +69,9 @@ namespace neo {
 
 		void Profiler::imGuiEditor() const {
 			ImGui::Begin("Profiler");
-			if (ImPlot::BeginPlot(std::string("Frametime (" + std::to_string(mTimeStep * 1000.0) + "ms)").c_str())) {
+			char title[256];
+			sprintf(title, "(FrameTime (%0.3fms)", mTimeStep * 1000.0);
+			if (ImPlot::BeginPlot(title)) {
 				ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoLabel);
 				ImPlot::SetupAxis(ImAxis_Y1, "ms", ImPlotAxisFlags_NoInitialFit);
 				ImPlot::SetupAxisLimits(ImAxis_X1, 0, MAX_SAMPLES, ImPlotCond_Always);
