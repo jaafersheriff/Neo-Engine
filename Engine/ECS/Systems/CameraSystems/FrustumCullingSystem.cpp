@@ -9,6 +9,8 @@
 
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
 
+#include <execution>
+
 namespace neo {
 
 	void FrustumCullingSystem::update(ECS& ecs) {
@@ -22,15 +24,15 @@ namespace neo {
 		for (auto&& [cameraEntity, frustum, _] : cameras.each()) {
 			cameraViews.push_back(static_cast<ECS::Entity>(std::numeric_limits<uint32_t>::max()));
 		}
-		for (auto&& [entity, spatial, bb] : ecs.getView<SpatialComponent, BoundingBoxComponent>().each()) {
-			for (auto camera = cameraViews.begin(); camera < cameraViews.end(); camera++) {
-				*camera = static_cast<ECS::Entity>(std::numeric_limits<uint32_t>::max());
-			}
+
+		auto bbView = ecs.getView<SpatialComponent, BoundingBoxComponent>();
+		std::for_each(std::execution::seq, bbView.begin(), bbView.end(), [cameraViews, &cameras, &ecs, this](auto& entity) {
+			std::vector<ECS::Entity> localCameraViews = cameraViews;
 
 			int i = 0;
 			for (auto&& [cameraEntity, frustum, _] : cameras.each()) {
-				if (frustum.isInFrustum(spatial, bb)) {
-					cameraViews[i++] = cameraEntity;
+				if (frustum.isInFrustum(*ecs.getComponent<SpatialComponent>(entity), *ecs.getComponent<BoundingBoxComponent>(entity))) {
+					localCameraViews[i++] = cameraEntity;
 				}
 				else {
 					mCulledCount++;
@@ -38,12 +40,12 @@ namespace neo {
 			}
 
 			if (auto* existingComp = ecs.getComponent<CameraCulledComponent>(entity)) {
-				existingComp->mCameraViews.swap(cameraViews);
+				existingComp->mCameraViews.swap(localCameraViews);
 			}
 			else {
-				ecs.addComponent<CameraCulledComponent>(entity, cameraViews);
+				ecs.addComponent<CameraCulledComponent>(entity, localCameraViews);
 			}
-		}
+		});
 	}
 
 	void FrustumCullingSystem::imguiEditor(ECS&) {

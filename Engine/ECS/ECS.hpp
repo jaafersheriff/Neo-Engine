@@ -212,8 +212,8 @@ namespace neo {
 		info.widget = [this](entt::registry& r, Entity e) {
 			r.get<CompT>(e).imGuiEditor();
 		};
-		mEditor.registerComponent<CompT>(info);
 
+		mEditor.registerComponent<CompT>(info);
 		mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
 			if (registry.try_get<CompT>(e)) {
 				NEO_LOG_E("Attempting to add a second %s to entity %d when one already exists", component->mName, e);
