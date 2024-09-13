@@ -138,6 +138,7 @@ namespace DeferredPBR {
 				.attachComponent<MeshComponent>(HashedString("sphere"))
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
 				.attachComponent<OpaqueComponent>()
+				.attachComponent<MaterialComponent>(material)
 				.attachComponent<ShadowCasterRenderComponent>()
 				.attachComponent<DeferredPBRRenderComponent>()
 			));

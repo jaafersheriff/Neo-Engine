@@ -1,10 +1,12 @@
 #pragma once
 
 #include "ResourceManagerInterface.hpp"
+
 #include "Renderer/GLObjects/SourceShader.hpp"
 
 #include "Util/Util.hpp"
 
+#include <thread>
 #include <variant>
 
 namespace neo {
@@ -28,7 +30,8 @@ namespace neo {
 		void _destroyImpl(BackedResource<SourceShader>& sourceShader);
 		void _tickImpl();
 	private:
-		uint8_t mHotReloadCounter = 1;
-		const uint8_t mHotReloadLimit = 200;
+		std::thread* mHotReloader;
+		std::atomic<bool> mKillSwitch = false;
+		void _hotReloadFunc();
 	};
 }

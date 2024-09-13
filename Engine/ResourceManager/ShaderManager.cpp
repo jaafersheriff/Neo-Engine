@@ -9,6 +9,8 @@
 #include <ext/imgui_incl.hpp>
 #include <execution>
 
+#define HOT_RELOAD_MILLSECONDS 100
+
 namespace neo {
 	struct ShaderLoader final : entt::resource_loader<ShaderLoader, BackedResource<SourceShader>> {
 
@@ -37,6 +39,7 @@ namespace neo {
 	};
 
 	ShaderManager::ShaderManager() {
+
 		mFallback = ShaderLoader{}.load(SourceShader::ShaderCode{
 			{types::shader::Stage::Vertex,
 				R"(
@@ -54,11 +57,18 @@ namespace neo {
 			}, "Dummy");
 
 		mFallback->mResource.getResolvedInstance({});
+
+		mKillSwitch.store(false);
+		mHotReloader = new std::thread(&ShaderManager::_hotReloadFunc, this);
 	}
 
 	ShaderManager::~ShaderManager() {
 		mFallback->mResource.destroy();
 		mFallback.reset();
+
+		mKillSwitch.store(true);
+		mHotReloader->join();
+		delete mHotReloader;
 	}
 
 	const ResolvedShaderInstance& ShaderManager::resolveDefines(ShaderHandle handle, const ShaderDefines& defines) const {
@@ -79,35 +89,6 @@ namespace neo {
 
 	void ShaderManager::_tickImpl() {
 		TRACY_ZONE();
-
-		// TODO this should run entirely on a separate thread tbh
-		// Also this doesn't do anything for #include wop wop
-		mHotReloadCounter = (mHotReloadCounter + 1) % mHotReloadLimit;
-		if (!mHotReloadCounter) {
-			TRACY_ZONEN("Shader Hot Reload");
-			// Entt Cache doesn't support iterators :/ 
-			std::vector<entt::id_type> list;
-			list.reserve(mCache.size());
-			mCache.each([&list](const entt::id_type enttId) {
-				list.emplace_back(enttId);
-			});
-
-			std::for_each(std::execution::par, list.begin(), list.end(), [this](const entt::id_type& id) {
-				if (auto resource = mCache.handle(id); resource && resource->mResource.mConstructionArgs) {
-					time_t lastModTime = resource->mResource.mModifiedTime;
-					for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
-						lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
-					}
-					if (lastModTime > resource->mResource.mModifiedTime) {
-						NEO_LOG_I("Hot reloading %s", resource->mResource.mName.c_str());
-						ShaderHandle handle(id);
-
-						// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
-						discard(handle);
-					}
-				}
-			});
-		}
 
 		{
 			std::vector<ResourceLoadDetails_Internal> swapQueue = {};
@@ -166,5 +147,43 @@ namespace neo {
 				ImGui::TreePop();
 			}
 		});
+	}
+
+	void ShaderManager::_hotReloadFunc() {
+		tracy::SetThreadName("Shader Hot Reloader");
+		// Doesn't handle #includes
+		// Might break during swap demo
+		// TODO How to exit this thread..?
+		while (mKillSwitch.load() == false) {
+			{
+				TRACY_ZONEN("Sleep");
+				std::this_thread::sleep_for(std::chrono::milliseconds(HOT_RELOAD_MILLSECONDS));
+			}
+
+			TRACY_ZONEN("Hot reload");
+
+			// Entt Cache doesn't support iterators :/ 
+			std::vector<entt::id_type> list;
+			list.reserve(mCache.size());
+			mCache.each([&list](const entt::id_type enttId) {
+				list.emplace_back(enttId);
+			});
+
+			for (auto id = list.begin(); id < list.end(); id++) {
+				if (auto resource = mCache.handle(*id); resource && resource->mResource.mConstructionArgs) {
+					time_t lastModTime = resource->mResource.mModifiedTime;
+					for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
+						lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
+					}
+					if (lastModTime > resource->mResource.mModifiedTime) {
+						NEO_LOG_I("Hot reloading %s", resource->mResource.mName.c_str());
+						ShaderHandle handle(*id);
+
+						// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
+						discard(handle);
+					}
+				}
+			}
+		}
 	}
 }
