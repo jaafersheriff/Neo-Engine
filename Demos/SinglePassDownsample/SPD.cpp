@@ -159,11 +159,6 @@ namespace SPD {
 		drawForwardPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
 		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity);
 
-		auto hiZ = downSample();
-		if (resourceManagers.mFramebufferManager.isValid(hiZ)) {
-			NEO_LOG_W("TODO");
-		}
-
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
 		drawFXAA(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
@@ -174,6 +169,11 @@ namespace SPD {
 			GL_DEPTH_BUFFER_BIT,
 			GL_NEAREST
 		);
+
+		auto hiZ = downSample(sceneTarget.mTextures[1], resourceManagers);
+		if (resourceManagers.mTextureManager.isValid(hiZ)) {
+			downSampleDebugBlit(backbuffer, hiZ, resourceManagers);
+		}
 	}
 
 	void Demo::destroy() {

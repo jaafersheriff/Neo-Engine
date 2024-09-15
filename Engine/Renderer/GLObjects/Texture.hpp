@@ -38,6 +38,7 @@ namespace neo {
 				&& mR == other.mT;
 		}
 	};
+	static TextureWrap ClampWrap = TextureWrap{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp, types::texture::Wraps::Clamp };
 
 	struct TextureFormat {
 		types::texture::Target mTarget = types::texture::Target::Texture2D;
