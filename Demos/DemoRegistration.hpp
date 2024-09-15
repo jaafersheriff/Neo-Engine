@@ -6,12 +6,14 @@
 #include "FrustaFitting/FrustaFitting.hpp"
 #include "NormalVisualizer/NormalVisualizer.hpp"
 #include "DeferredPBR/DeferredPBR.hpp"
+#include "SinglePassDownsample/SPD.hpp"
 
 #include <vector>
 #include <memory>
 
 static int sCurrentDemo = 0;
 static std::vector<neo::IDemo*> sDemos = {
+	new SPD::Demo(),
 	new Base::Demo(),
 	new DeferredPBR::Demo(),
 	new Compute::Demo(),
