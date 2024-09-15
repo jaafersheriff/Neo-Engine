@@ -63,27 +63,11 @@ namespace SPD {
 			));
 		}
 
-		{
-			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(resourceManagers, "bunny.gltf");
+		for(int i = 0; i < 20; i++) {
 			MaterialComponent material;
-			material.mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
+			material.mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}
-				.attachComponent<TagComponent>("Bunny")
-				.attachComponent<SpatialComponent>(glm::vec3(2.f, 0.0f, -1.f), glm::vec3(1.5f))
-				.attachComponent<RotationComponent>(glm::vec3(0.f, 1.0f, 0.f))
-				.attachComponent<MeshComponent>(gltfScene.mMeshNodes[0].mMeshHandle)
-				.attachComponent<BoundingBoxComponent>(gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax)
-				.attachComponent<ForwardPBRRenderComponent>()
-				.attachComponent<OpaqueComponent>()
-				.attachComponent<MaterialComponent>(material)
-			));
-		}
-		{
-			MaterialComponent material;
-			material.mAlbedoColor = glm::vec4(1.f, 1.f, 0.f, 1.f);
-			ecs.submitEntity(std::move(ECS::EntityBuilder{}
-				.attachComponent<TagComponent>("Icosahedron")
-				.attachComponent<SpatialComponent>(glm::vec3(-2.f, 1.0f, -1.f), glm::vec3(1.5f))
+				.attachComponent<SpatialComponent>(util::genRandomVec3(-8.f, 8.f), glm::vec3(util::genRandom(1.f, 3.f)))
 				.attachComponent<RotationComponent>(glm::vec3(1.f, 0.0f, 0.f))
 				.attachComponent<MeshComponent>(HashedString("icosahedron"))
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
@@ -182,6 +166,8 @@ namespace SPD {
 			backbuffer.bind();
 			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 
+			glDisable(GL_DEPTH_TEST);
+
 			auto occlusionTestHandle = resourceManagers.mShaderManager.asyncLoad("Occlusion Test", SourceShader::ConstructionArgs{
 				{types::shader::Stage::Vertex, "model.vert"},
 				{types::shader::Stage::Fragment, "spd/occlusiontest.frag"},
@@ -200,6 +186,9 @@ namespace SPD {
 						continue;
 					}
 				}
+				if (ecs.has<TransparentComponent>(entity)) {
+					continue;
+				}
 
 				glm::vec3 bbMin(0.f);
 				glm::vec3 bbMax(0.f);
@@ -213,7 +202,10 @@ namespace SPD {
 
 				occlusionShader.bindUniform("bbMin", bbMin);
 				occlusionShader.bindUniform("bbMax", bbMax);
-				occlusionShader.bindTexture("hiZ", resourceManagers.mTextureManager.resolve(hiZ));
+				auto& hiZTexture = resourceManagers.mTextureManager.resolve(hiZ);
+				occlusionShader.bindTexture("hiZ", hiZTexture);
+				occlusionShader.bindUniform("hiZMips", hiZTexture.mFormat.mMipCount);
+				occlusionShader.bindUniform("hiZDimension", glm::vec2(hiZTexture.mWidth, hiZTexture.mHeight));
 				occlusionShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
 				occlusionShader.bindUniform("V", cameraSpatial.getView());
 
