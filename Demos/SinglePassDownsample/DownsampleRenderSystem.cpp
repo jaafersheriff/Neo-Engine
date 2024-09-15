@@ -27,10 +27,10 @@ namespace SPD {
 					types::texture::Filters::NearestMipmapNearest,
 					types::texture::Filters::Nearest
 				},
-				TextureWrap{ 
-					types::texture::Wraps::Clamp, 
-					types::texture::Wraps::Clamp, 
-					types::texture::Wraps::Clamp 
+				TextureWrap{
+					types::texture::Wraps::Clamp,
+					types::texture::Wraps::Clamp,
+					types::texture::Wraps::Clamp
 				},
 				types::ByteFormats::Float,
 				UINT8_MAX // this will auto resolve in the back to max # of mips 
@@ -49,10 +49,14 @@ namespace SPD {
 			return NEO_INVALID_HANDLE;
 		}
 
-		auto& downsamplerShader = resourceManagers.mShaderManager.resolveDefines(downsampleShaderHandle, {});
-		downsamplerShader.bindTexture("src", inputDepth);
-		for (int i = 1; i < outputDepth.mFormat.mMipCount; i++) {
-			downsamplerShader.bindUniform("textureDimensions", glm::vec2(inputDepth.mWidth >> (i-1), inputDepth.mHeight >> (i-1)));
+		MakeDefine(RAW_BLIT); // First mip
+		ShaderDefines blitDefines;
+		blitDefines.set(RAW_BLIT);
+
+		for (int i = 0; i < outputDepth.mFormat.mMipCount; i++) {
+			auto& downsamplerShader = resourceManagers.mShaderManager.resolveDefines(downsampleShaderHandle, i == 0 ? blitDefines : ShaderDefines{});
+			downsamplerShader.bindTexture("src", i == 0 ? inputDepth : outputDepth);
+			downsamplerShader.bindUniform("textureDimensions", glm::vec2(inputDepth.mWidth >> (i - 1), inputDepth.mHeight >> (i - 1)));
 			downsamplerShader.bindUniform("currentMip", i);
 			auto barrier = downsamplerShader.bindImageTexture("dst", outputDepth, types::shader::Access::ReadWrite, i);
 

@@ -1,5 +1,5 @@
 
-layout(binding = 0, r16f) uniform image2D dst;
+layout(binding = 0, r16f) volatile uniform image2D dst;
 
 layout(binding = 1) uniform sampler2D src;
 uniform vec2 textureDimensions;
@@ -7,6 +7,12 @@ uniform int currentMip;
 
 layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 void main() {
+#ifdef RAW_BLIT
+	float depth = textureLod(src, vec2(gl_GlobalInvocationID.xy / textureDimensions), 0).r;
+#else
 	float depth = textureLod(src, vec2(gl_GlobalInvocationID.xy / textureDimensions), currentMip-1).r;
+#endif
 	imageStore(dst, ivec2(gl_GlobalInvocationID.xy), vec4(depth, 0, 0, 1));
+	return;
+
 }
