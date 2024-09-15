@@ -16,8 +16,5 @@ namespace SPD {
 		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) override;
 		virtual void destroy() override;
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
-
-	private:
-		DownSampleBlitParameters mDebugParams;
 	};
 }

@@ -79,20 +79,4 @@ namespace SPD {
 
 		return outputHandle;
 	}
-
-	void DownSampleBlitParameters::imguiEditor() {
-		int m = static_cast<int>(mip);
-		if (ImGui::SliderInt("Mip", &m, 0, 20)) { // uhhh
-			mip = static_cast<uint8_t>(m);
-		}
-	}
-	void downSampleDebugBlit(Framebuffer& outputFBO, TextureHandle hiz, const ResourceManagers& resourceManagers, DownSampleBlitParameters params) {
-		TRACY_GPU();
-		if (!resourceManagers.mTextureManager.isValid(hiz)) {
-			return;
-		}
-		auto& hizTexture = resourceManagers.mTextureManager.resolve(hiz);
-
-		blit(resourceManagers, outputFBO, hiz, glm::uvec2(hizTexture.mWidth, hizTexture.mHeight), glm::vec4(0.f, 0.f, 0.f, 1.f), params.mip);
-	}
 }

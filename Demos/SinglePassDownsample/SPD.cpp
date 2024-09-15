@@ -126,7 +126,6 @@ namespace SPD {
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_UNUSED(ecs, resourceManagers);
-		mDebugParams.imguiEditor();
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -156,22 +155,72 @@ namespace SPD {
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 		drawForwardPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
-		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity);
 
-		backbuffer.bind();
-		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
-		drawFXAA(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
-		// Don't forget the depth. Because reasons.
-		glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
-			0, 0, viewport.mSize.x, viewport.mSize.y,
-			0, 0, viewport.mSize.x, viewport.mSize.y,
-			GL_DEPTH_BUFFER_BIT,
-			GL_NEAREST
-		);
+		// backbuffer.bind();
+		// backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
+		// drawFXAA(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
 
+		// TODO - this needs ro be generated from last frame and then reused for occlusion test
 		auto hiZ = downSample(sceneTarget.mTextures[1], resourceManagers);
-		if (resourceManagers.mTextureManager.isValid(hiZ)) {
-			downSampleDebugBlit(backbuffer, hiZ, resourceManagers, mDebugParams);
+		if (!resourceManagers.mTextureManager.isValid(hiZ)) {
+			return;
+		}
+
+		// Do transparent draws after hiz 
+		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity);
+		// Don't forget the depth. Because reasons.
+		// glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
+		// 	0, 0, viewport.mSize.x, viewport.mSize.y,
+		// 	0, 0, viewport.mSize.x, viewport.mSize.y,
+		// 	GL_DEPTH_BUFFER_BIT,
+		// 	GL_NEAREST
+		// );
+
+		// I'm lazy
+		{
+			TRACY_GPUN("Occlusion Test");
+			backbuffer.bind();
+			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+
+			auto occlusionTestHandle = resourceManagers.mShaderManager.asyncLoad("Occlusion Test", SourceShader::ConstructionArgs{
+				{types::shader::Stage::Vertex, "model.vert"},
+				{types::shader::Stage::Fragment, "spd/occlusiontest.frag"},
+				});
+			if (!resourceManagers.mShaderManager.isValid(occlusionTestHandle)) {
+				return;
+			}
+			ShaderDefines drawDefines;
+			MakeDefine(BOUNDING_BOX);
+
+			const auto& view = ecs.getView<const MeshComponent, const MaterialComponent, const SpatialComponent>();
+			for (auto entity : view) {
+				// VFC
+				if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+					if (!culled->isInView(ecs, entity, cameraEntity)) {
+						continue;
+					}
+				}
+
+				glm::vec3 bbMin(0.f);
+				glm::vec3 bbMax(0.f);
+				drawDefines.reset();
+				if (auto* bb = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
+					drawDefines.set(BOUNDING_BOX);
+					bbMin = bb->mMin;
+					bbMax = bb->mMax;
+				}
+				auto& occlusionShader = resourceManagers.mShaderManager.resolveDefines(occlusionTestHandle, drawDefines);
+
+				occlusionShader.bindUniform("bbMin", bbMin);
+				occlusionShader.bindUniform("bbMax", bbMax);
+				occlusionShader.bindTexture("hiZ", resourceManagers.mTextureManager.resolve(hiZ));
+				occlusionShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
+				occlusionShader.bindUniform("V", cameraSpatial.getView());
+
+				const auto& drawSpatial = view.get<const SpatialComponent>(entity);
+				occlusionShader.bindUniform("M", drawSpatial.getModelMatrix());
+				resourceManagers.mMeshManager.resolve(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle).draw();
+			}
 		}
 	}
 
