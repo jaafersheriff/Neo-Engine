@@ -10,6 +10,7 @@ using namespace neo;
 namespace SPD {
 
 	TextureHandle downSample(TextureHandle inputDepthHandle, const ResourceManagers& resourceManagers) {
+		TRACY_GPU();
 		// Get input depth details
 		if (!resourceManagers.mTextureManager.isValid(inputDepthHandle)) {
 			return NEO_INVALID_HANDLE;
@@ -41,6 +42,11 @@ namespace SPD {
 			return NEO_INVALID_HANDLE;
 		}
 		auto& outputDepth = resourceManagers.mTextureManager.resolve(outputHandle);
+		// On framesize change
+		if (outputDepth.mWidth != inputDepth.mWidth || outputDepth.mHeight != inputDepth.mHeight) {
+			resourceManagers.mTextureManager.discard(outputHandle);
+			return NEO_INVALID_HANDLE;
+		}
 
 		auto downsampleShaderHandle = resourceManagers.mShaderManager.asyncLoad("Downsample Compute", SourceShader::ConstructionArgs{
 			{types::shader::Stage::Compute, "spd/spd.compute"}
@@ -54,6 +60,7 @@ namespace SPD {
 		blitDefines.set(RAW_BLIT);
 
 		for (int i = 0; i < outputDepth.mFormat.mMipCount; i++) {
+			TRACY_GPUN("Single Mip");
 			auto& downsamplerShader = resourceManagers.mShaderManager.resolveDefines(downsampleShaderHandle, i == 0 ? blitDefines : ShaderDefines{});
 			downsamplerShader.bindTexture("src", i == 0 ? inputDepth : outputDepth);
 			glm::ivec2 textureDimensions(inputDepth.mWidth, inputDepth.mHeight);
@@ -65,7 +72,9 @@ namespace SPD {
 			downsamplerShader.bindUniform("currentMip", i);
 			auto barrier = downsamplerShader.bindImageTexture("dst", outputDepth, types::shader::Access::ReadWrite, i);
 
-			downsamplerShader.dispatch({ std::ceil((inputDepth.mWidth >> i) / 32), std::ceil((inputDepth.mHeight >> i) / 32), 1 });
+			int xGroups = std::max(static_cast<int>(std::ceil(textureDimensions.x / 32.f)), 1);
+			int yGroups = std::max(static_cast<int>(std::ceil(textureDimensions.y / 32.f)), 1);
+			downsamplerShader.dispatch({ xGroups, yGroups, 1 });
 		}
 
 		return outputHandle;
@@ -78,6 +87,7 @@ namespace SPD {
 		}
 	}
 	void downSampleDebugBlit(Framebuffer& outputFBO, TextureHandle hiz, const ResourceManagers& resourceManagers, DownSampleBlitParameters params) {
+		TRACY_GPU();
 		if (!resourceManagers.mTextureManager.isValid(hiz)) {
 			return;
 		}
