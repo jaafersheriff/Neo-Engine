@@ -56,11 +56,16 @@ namespace SPD {
 		for (int i = 0; i < outputDepth.mFormat.mMipCount; i++) {
 			auto& downsamplerShader = resourceManagers.mShaderManager.resolveDefines(downsampleShaderHandle, i == 0 ? blitDefines : ShaderDefines{});
 			downsamplerShader.bindTexture("src", i == 0 ? inputDepth : outputDepth);
-			downsamplerShader.bindUniform("textureDimensions", glm::vec2(inputDepth.mWidth >> (i - 1), inputDepth.mHeight >> (i - 1)));
+			glm::ivec2 textureDimensions(inputDepth.mWidth, inputDepth.mHeight);
+			if (i > 0) {
+				textureDimensions.x = (textureDimensions.x >> (i));
+				textureDimensions.y = (textureDimensions.y >> (i));
+			}
+			downsamplerShader.bindUniform("textureDimensions", glm::vec2(textureDimensions));
 			downsamplerShader.bindUniform("currentMip", i);
 			auto barrier = downsamplerShader.bindImageTexture("dst", outputDepth, types::shader::Access::ReadWrite, i);
 
-			downsamplerShader.dispatch({ (inputDepth.mWidth >> i) / 32, (inputDepth.mHeight >> i) / 32, 1 });
+			downsamplerShader.dispatch({ std::ceil((inputDepth.mWidth >> i) / 32), std::ceil((inputDepth.mHeight >> i) / 32), 1 });
 		}
 
 		return outputHandle;
