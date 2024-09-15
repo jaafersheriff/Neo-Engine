@@ -17,10 +17,10 @@ namespace SPD {
 		NEO_ASSERT(inputDepth.mFormat.mInternalFormat >= types::texture::InternalFormats::D16 &&
 			inputDepth.mFormat.mInternalFormat <= types::texture::InternalFormats::D24S8, "Hi z expects depth buffer");
 
-		return resourceManagers.mTextureManager.asyncLoad("hi z", TextureBuilder{
+		auto outputHandle = resourceManagers.mTextureManager.asyncLoad("hi z", TextureBuilder{
 			TextureFormat {
 				types::texture::Target::Texture2D,
-				inputDepth.mFormat.mInternalFormat,
+				types::texture::InternalFormats::R16_F,
 				TextureFilter {
 					types::texture::Filters::NearestMipmapNearest,
 					types::texture::Filters::Nearest
@@ -35,7 +35,29 @@ namespace SPD {
 			},
 			glm::u16vec3(inputDepth.mWidth, inputDepth.mHeight, 0)
 		});
+		if (!resourceManagers.mTextureManager.isValid(outputHandle)) {
+			return NEO_INVALID_HANDLE;
+		}
+		auto& outputDepth = resourceManagers.mTextureManager.resolve(outputHandle);
 
+		auto downsampleShaderHandle = resourceManagers.mShaderManager.asyncLoad("Downsample Compute", SourceShader::ConstructionArgs{
+			{types::shader::Stage::Compute, "spd/spd.compute"}
+		});
+		if (!resourceManagers.mShaderManager.isValid(downsampleShaderHandle)) {
+			return NEO_INVALID_HANDLE;
+		}
+
+		auto& downsamplerShader = resourceManagers.mShaderManager.resolveDefines(downsampleShaderHandle, {});
+		downsamplerShader.bindTexture("src", inputDepth);
+		for (int i = 1; i < outputDepth.mFormat.mMipCount; i++) {
+			downsamplerShader.bindUniform("textureDimensions", glm::vec2(inputDepth.mWidth << (i-1), inputDepth.mHeight << (i-1)));
+			downsamplerShader.bindUniform("currentMip", i);
+			auto barrier = downsamplerShader.bindImageTexture("dst", outputDepth, types::shader::Access::ReadWrite, i);
+
+			downsamplerShader.dispatch({ (inputDepth.mWidth << i) / 32, (inputDepth.mHeight << i) / 32, 1 });
+		}
+
+		return outputHandle;
 	}
 
 	void downSampleDebugBlit(Framebuffer& outputFBO, TextureHandle hiz, const ResourceManagers& resourceManagers) {
@@ -44,6 +66,6 @@ namespace SPD {
 		}
 		auto& hizTexture = resourceManagers.mTextureManager.resolve(hiz);
 
-		blit(resourceManagers, outputFBO, hiz, glm::uvec2(hizTexture.mWidth, hizTexture.mHeight));
+		blit(resourceManagers, outputFBO, hiz, glm::uvec2(hizTexture.mWidth, hizTexture.mHeight), glm::vec4(0.f, 0.f, 0.f, 1.f), 0);
 	}
 }

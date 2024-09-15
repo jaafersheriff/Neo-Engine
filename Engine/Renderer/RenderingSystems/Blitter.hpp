@@ -11,7 +11,7 @@
 
 namespace neo {
 
-	inline void blit(const ResourceManagers& resourceManagers, const Framebuffer& outputFBO, TextureHandle inputTextureHandle, glm::uvec2 viewport, glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f)) {
+	inline void blit(const ResourceManagers& resourceManagers, const Framebuffer& outputFBO, TextureHandle inputTextureHandle, glm::uvec2 viewport, glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f), uint8_t mip = 0) {
 		TRACY_GPU();
 
 		auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blit Shader", SourceShader::ShaderCode {			
@@ -29,9 +29,10 @@ namespace neo {
 			R"(
 				in vec2 fragTex;
 				layout (binding = 0) uniform sampler2D inputTexture;
+				uniform int mip;
 				out vec4 color;
 				void main() {
-					color = texture(inputTexture, fragTex);
+					color = textureLod(inputTexture, fragTex, mip);
 				}
 			)"}
 		}); 
@@ -53,6 +54,7 @@ namespace neo {
 		
 		// Bind input fbo texture
 		resolvedBlit.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(inputTextureHandle));
+		resolvedBlit.bindUniform("mip", mip);
 		
 		// Render 
 		resourceManagers.mMeshManager.resolve("quad").draw();
