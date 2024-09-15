@@ -27,8 +27,6 @@
 
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
-#include "DownsampleRenderSystem.hpp"
-
 using namespace neo;
 
 /* Game object definitions */
@@ -128,6 +126,7 @@ namespace SPD {
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_UNUSED(ecs, resourceManagers);
+		mDebugParams.imguiEditor();
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -172,7 +171,7 @@ namespace SPD {
 
 		auto hiZ = downSample(sceneTarget.mTextures[1], resourceManagers);
 		if (resourceManagers.mTextureManager.isValid(hiZ)) {
-			downSampleDebugBlit(backbuffer, hiZ, resourceManagers);
+			downSampleDebugBlit(backbuffer, hiZ, resourceManagers, mDebugParams);
 		}
 	}
 

@@ -2,6 +2,8 @@
 
 #include "DemoInfra/IDemo.hpp"
 
+#include "DownsampleRenderSystem.hpp"
+
 using namespace neo;
 
 namespace SPD {
@@ -15,5 +17,7 @@ namespace SPD {
 		virtual void destroy() override;
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
 
+	private:
+		DownSampleBlitParameters mDebugParams;
 	};
 }

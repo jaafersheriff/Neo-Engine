@@ -4,6 +4,8 @@
 
 #include "Renderer/RenderingSystems/Blitter.hpp"
 
+#include <ext/imgui_incl.hpp>
+
 using namespace neo;
 namespace SPD {
 
@@ -50,22 +52,28 @@ namespace SPD {
 		auto& downsamplerShader = resourceManagers.mShaderManager.resolveDefines(downsampleShaderHandle, {});
 		downsamplerShader.bindTexture("src", inputDepth);
 		for (int i = 1; i < outputDepth.mFormat.mMipCount; i++) {
-			downsamplerShader.bindUniform("textureDimensions", glm::vec2(inputDepth.mWidth << (i-1), inputDepth.mHeight << (i-1)));
+			downsamplerShader.bindUniform("textureDimensions", glm::vec2(inputDepth.mWidth >> (i-1), inputDepth.mHeight >> (i-1)));
 			downsamplerShader.bindUniform("currentMip", i);
 			auto barrier = downsamplerShader.bindImageTexture("dst", outputDepth, types::shader::Access::ReadWrite, i);
 
-			downsamplerShader.dispatch({ (inputDepth.mWidth << i) / 32, (inputDepth.mHeight << i) / 32, 1 });
+			downsamplerShader.dispatch({ (inputDepth.mWidth >> i) / 32, (inputDepth.mHeight >> i) / 32, 1 });
 		}
 
 		return outputHandle;
 	}
 
-	void downSampleDebugBlit(Framebuffer& outputFBO, TextureHandle hiz, const ResourceManagers& resourceManagers) {
+	void DownSampleBlitParameters::imguiEditor() {
+		int m = static_cast<int>(mip);
+		if (ImGui::SliderInt("Mip", &m, 0, 20)) { // uhhh
+			mip = static_cast<uint8_t>(m);
+		}
+	}
+	void downSampleDebugBlit(Framebuffer& outputFBO, TextureHandle hiz, const ResourceManagers& resourceManagers, DownSampleBlitParameters params) {
 		if (!resourceManagers.mTextureManager.isValid(hiz)) {
 			return;
 		}
 		auto& hizTexture = resourceManagers.mTextureManager.resolve(hiz);
 
-		blit(resourceManagers, outputFBO, hiz, glm::uvec2(hizTexture.mWidth, hizTexture.mHeight), glm::vec4(0.f, 0.f, 0.f, 1.f), 0);
+		blit(resourceManagers, outputFBO, hiz, glm::uvec2(hizTexture.mWidth, hizTexture.mHeight), glm::vec4(0.f, 0.f, 0.f, 1.f), params.mip);
 	}
 }
