@@ -63,6 +63,7 @@ namespace neo {
 			glEnable(GL_BLEND);
 			glBlendEquation(GL_FUNC_ADD);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDepthMask(GL_FALSE);
 		}
 
 		bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
@@ -224,6 +225,7 @@ namespace neo {
 
 		if (containsTransparency) {
 			glDisable(GL_BLEND);
+			glDepthMask(GL_TRUE);
 		}
 	}
 }

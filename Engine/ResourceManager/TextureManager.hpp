@@ -43,6 +43,7 @@ namespace neo {
 
 		TextureManager();
 		~TextureManager();
+
 		void imguiEditor(std::function<void(const TextureHandle&)> textureFunc);
 
 	protected:

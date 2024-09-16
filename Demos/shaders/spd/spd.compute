@@ -16,6 +16,7 @@ void main() {
 	float d_d = textureLod(src, vec2((gl_GlobalInvocationID.xy + ivec2(0, 1)) / textureDimensions), currentMip-1).r;
 
 	float depth = max(d_a, max(d_b, max(d_c, d_d)));
+	// TODO - odd width/height - 
 
 #endif
 	imageStore(dst, ivec2(gl_GlobalInvocationID.xy), vec4(depth, 0, 0, 1));
