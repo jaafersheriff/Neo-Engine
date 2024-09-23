@@ -249,32 +249,32 @@ namespace neo {
 			loadDetails.mPrimtive = types::mesh::Primitive::Triangles;
 			loadDetails.mVertexBuffers[types::mesh::VertexType::Position] = MeshLoadDetails::VertexBuffer{
 				2,
-				sizeof(ImVec2),
+				sizeof(ImDrawVert),
 				types::ByteFormats::Float,
 				false,
 				0,
-				0,
+				offsetof(ImDrawVert, ImDrawVert::pos),
 				0,
 				nullptr
 			};
 			// HEHEHE STORE COLOR IN NORMAL HEHEHE
 			loadDetails.mVertexBuffers[types::mesh::VertexType::Normal] = MeshLoadDetails::VertexBuffer{
 				4,
-				sizeof(ImU32),
+				sizeof(ImDrawVert),
 				types::ByteFormats::UnsignedByte,
 				true,
 				0,
-				0,
+				offsetof(ImDrawVert, ImDrawVert::col),
 				0,
 				nullptr
 			};
 			loadDetails.mVertexBuffers[types::mesh::VertexType::Texture0] = MeshLoadDetails::VertexBuffer{
 				2,
-				sizeof(ImVec2),
+				sizeof(ImDrawVert),
 				types::ByteFormats::Float,
 				false,
 				0,
-				0,
+				offsetof(ImDrawVert, ImDrawVert::uv),
 				0,
 				nullptr
 			};
@@ -307,19 +307,10 @@ namespace neo {
 		for (int i = 0; i < drawData->CmdListsCount; i++) {
 			const ImDrawList* cmdList = drawData->CmdLists[i];
 
-			// Need to break this struct apart into individual buffers and upload them into individual VBOs...
 			{
-				std::vector<ImVec2> vertices;
+				std::vector<ImDrawVert> vertices;
 				vertices.resize(cmdList->VtxBuffer.Size);
-				std::vector<ImVec2> uvs;
-				uvs.resize(cmdList->VtxBuffer.Size);
-				std::vector<ImU32> colors;
-				colors.resize(cmdList->VtxBuffer.Size);
-				for (int j = 0; j < cmdList->VtxBuffer.Size; j++) {
-					vertices[j] = cmdList->VtxBuffer[j].pos;
-					uvs[j] = cmdList->VtxBuffer[j].uv;
-					colors[j] = cmdList->VtxBuffer[j].col;
-				}
+				memcpy(vertices.data(), cmdList->VtxBuffer.Data, cmdList->VtxBuffer.Size * sizeof(ImDrawVert));
 				std::vector<ImDrawIdx> elements;
 				elements.resize(cmdList->IdxBuffer.Size);
 				memcpy(elements.data(), cmdList->IdxBuffer.Data, cmdList->IdxBuffer.Size * sizeof(ImDrawIdx));
@@ -327,27 +318,26 @@ namespace neo {
 				NEO_ASSERT(i < MAX_IMGUI_MESHES, "ImGui is requesting too many meshes :(");
 				resourceManagers.mMeshManager.transact(mImGuiMeshes[i],
 					[vertices = std::move(vertices),
-					uvs = std::move(uvs),
-					colors = std::move(colors),
 					elements = std::move(elements)]
 					(Mesh& mesh) {
+						// Duping the vertex buffer 3x because they need to be indexed separately :(
 						mesh.updateVertexBuffer(
 							types::mesh::VertexType::Position,
 							static_cast<uint32_t>(vertices.size()),
-							static_cast<uint32_t>(vertices.size() * sizeof(ImVec2)),
+							static_cast<uint32_t>(vertices.size() * sizeof(ImDrawVert)),
 							reinterpret_cast<const uint8_t*>(vertices.data())
 						);
 						mesh.updateVertexBuffer(
 							types::mesh::VertexType::Texture0,
-							static_cast<uint32_t>(uvs.size()),
-							static_cast<uint32_t>(uvs.size() * sizeof(ImVec2)),
-							reinterpret_cast<const uint8_t*>(uvs.data())
+							static_cast<uint32_t>(vertices.size()),
+							static_cast<uint32_t>(vertices.size() * sizeof(ImDrawVert)),
+							reinterpret_cast<const uint8_t*>(vertices.data())
 						);
 						mesh.updateVertexBuffer(
 							types::mesh::VertexType::Normal,
-							static_cast<uint32_t>(colors.size()),
-							static_cast<uint32_t>(colors.size() * sizeof(ImU32)),
-							reinterpret_cast<const uint8_t*>(colors.data())
+							static_cast<uint32_t>(vertices.size()),
+							static_cast<uint32_t>(vertices.size() * sizeof(ImDrawVert)),
+							reinterpret_cast<const uint8_t*>(vertices.data())
 						);
 						mesh.removeElementBuffer();
 						mesh.addElementBuffer(
@@ -393,7 +383,7 @@ namespace neo {
 
 					ecs.submitEntity(std::move(ECS::EntityBuilder{}
 						.attachComponent<ImGuiComponent>()
-						.attachComponent<ImGuiDrawComponent>(draw)
+						.attachComponent<ImGuiDrawComponent>(std::move(draw))
 					));
 				}
 			}
