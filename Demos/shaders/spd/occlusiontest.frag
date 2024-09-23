@@ -16,7 +16,7 @@ void main() {
 		//discard;
 	}
 
-	color = vec4(debugColor, 1.0);
+	//color = vec4(debugColor, 1.0);
 
 }
 

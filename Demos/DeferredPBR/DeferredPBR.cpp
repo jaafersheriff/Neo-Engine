@@ -363,7 +363,9 @@ namespace DeferredPBR {
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
-		convolveCubemap(resourceManagers, ecs);
+		if (mDrawIBL) {
+			convolveCubemap(resourceManagers, ecs);
+		}
 
 		const auto& cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
 		if (!cameraTuple) {

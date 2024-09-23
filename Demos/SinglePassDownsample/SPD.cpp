@@ -125,7 +125,7 @@ namespace SPD {
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
 		backbuffer.bind();
-		backbuffer.clear(glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		backbuffer.clear(glm::vec4(0.0f, 0.0f, 0.0f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 
 		// I'm lazy

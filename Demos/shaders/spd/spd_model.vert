@@ -36,15 +36,16 @@ void main() {
 	ndcMin.xy = ndcMin.xy * 0.5 + 0.5;
 	ndcMax.xy = ndcMax.xy * 0.5 + 0.5;
 
-	float viewSizeX = (ndcMax.x - ndcMin.x) * (hiZDimension.x);
-	float viewSizeY = (ndcMax.y - ndcMin.y) * (hiZDimension.y);
-	float LOD = ceil(log2(max(viewSizeX, viewSizeY) / 2.0));
+	float viewSizeX = abs(ndcMax.x - ndcMin.x);
+	float viewSizeY = abs(ndcMax.y - ndcMin.y);
+	float LOD = ceil(log2(max(viewSizeX, viewSizeY) / 2.0)) * hiZMips;
 
 	float nearestBoxDepth = max(ndcMin.z, ndcMax.z);
 
 	vec2 sampleCoords = vec2(ndcMin.x + (ndcMax.x - ndcMin.x) / 2.0, ndcMin.y + (ndcMax.y - ndcMin.y) / 2.0);
-	debugColor = vec3(sampleCoords.x);
 	float hiZSample = textureLod(hiZ, sampleCoords, LOD).r;
+	//debugColor = vec3(viewSizeX / hiZDimension.x, viewSizeY / hiZDimension.y, LOD / hiZMips);
+	//debugColor = vec3(hiZSample);
 	isVisible = nearestBoxDepth <= hiZSample ? 1 : 0;
 #endif
 }
