@@ -305,8 +305,11 @@ namespace neo {
 
 		uint32_t drawIndex = 0;
 		for (int i = 0; i < drawData->CmdListsCount; i++) {
-			const ImDrawList* cmdList = drawData->CmdLists[i];
+			NEO_ASSERT(i < MAX_IMGUI_MESHES, "ImGui is requesting too many meshes :(");
+			const MeshHandle currentMesh = mImGuiMeshes[mImGuiMeshesOffset];
+			mImGuiMeshesOffset = (mImGuiMeshesOffset + 1) % MAX_IMGUI_MESHES;
 
+			const ImDrawList* cmdList = drawData->CmdLists[i];
 			{
 				std::vector<ImDrawVert> vertices;
 				vertices.resize(cmdList->VtxBuffer.Size);
@@ -315,8 +318,7 @@ namespace neo {
 				elements.resize(cmdList->IdxBuffer.Size);
 				memcpy(elements.data(), cmdList->IdxBuffer.Data, cmdList->IdxBuffer.Size * sizeof(ImDrawIdx));
 
-				NEO_ASSERT(i < MAX_IMGUI_MESHES, "ImGui is requesting too many meshes :(");
-				resourceManagers.mMeshManager.transact(mImGuiMeshes[i],
+				resourceManagers.mMeshManager.transact(currentMesh,
 					[vertices = std::move(vertices),
 					elements = std::move(elements)]
 					(Mesh& mesh) {
@@ -369,7 +371,7 @@ namespace neo {
 					}
 
 					ImGuiDrawComponent draw;
-					draw.mMeshHandle = mImGuiMeshes[i];
+					draw.mMeshHandle = currentMesh;
 					draw.mTextureHandle = TextureHandle(cmd->GetTexID());
 					draw.mScissorRect = glm::vec4(
 						clipMin.x,
