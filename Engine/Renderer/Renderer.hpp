@@ -4,14 +4,13 @@
 
 #include "ResourceManager/FramebufferManager.hpp"
 
+#include "Util/Profiler.hpp"
+
 #include <typeindex>
 #include <memory>
 #include <tuple>
 
 namespace neo {
-	namespace util {
-		class Profiler;
-	}
 
 	class Engine;
 	class ImGuiManager;
@@ -68,7 +67,8 @@ namespace neo {
 			FramebufferHandle mDefaultFBOHandle;
 			bool mShowBoundingBoxes = false;
 			bool mBackbufferNeedsResize = false;
-			std::uint32_t mTimerQuery = 0;
+
+			util::Profiler::GPUQuery mGPUQuery;
 	};
 
 }

@@ -25,21 +25,34 @@ struct _NEO_GPU_SCOPE {
 #include <memory>
 #include <vector>
 
-#ifndef NO_LOCAL_TRACY
-namespace tracy {
-	class View;
-}
-#endif
-
-struct ImFont;
-
 namespace neo {
-	class RenderThread;
 
 	namespace util {
 
 		class Profiler {
 		public:
+			struct GPUQuery {
+
+				void init();
+				float getGPUTime() const;
+				uint32_t tickHandle();
+				void destroy();
+
+				// Scoped or manual
+				struct Scope {
+					Scope(uint32_t handle);
+					~Scope();
+				};
+				void start();
+				void end();
+
+			private:
+				bool _handlesValid() const;
+
+				std::array<uint32_t, 2> mHandles = { 0,0 };
+				bool mUseHandle0 = true; // Double buffer
+			};
+
 			Profiler(int refreshRate);
 			~Profiler();
 			Profiler(const Profiler&) = delete;
@@ -65,18 +78,22 @@ namespace neo {
 
 			double mBeginFrameTime = 0.0;
 
-			// Full swap
+			// Full CPU swap
 			std::vector<float> mCPUFrametime;
 			int mCPUFrametimeOffset = 0;
 
-			// GPU
+			// Full GPU swap
+			GPUQuery mGPUQuery;
 			std::vector<float> mGPUFrametime;
 			int mGPUFrametimeOffset = 0;
 
-			// Neo tick
-			std::vector<float> mFrametime;
-			int mFrametimeOffset = 0;
+			// Neo CPU tick
+			std::vector<float> mNeoCPUTime;
+			int mNeoCPUTimeOffset = 0;
 
+			// Neo GPU render
+			std::vector<float> mNeoGPUTime;
+			int mNeoGPUTimeOffset = 0;
 		};
 	}
 }
