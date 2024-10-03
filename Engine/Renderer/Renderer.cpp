@@ -115,7 +115,7 @@ namespace neo {
 		if (window.isMinimized()) {
 			return;
 		}
-		mGPUQuery.init();
+
 		profiler.markFrameGPU(mGPUQuery.getGPUTime());
 		util::Profiler::GPUQuery::Scope _scope(mGPUQuery.tickHandle());
 
