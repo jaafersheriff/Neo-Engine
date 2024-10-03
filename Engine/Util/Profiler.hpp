@@ -82,11 +82,6 @@ namespace neo {
 			std::vector<float> mCPUFrametime;
 			int mCPUFrametimeOffset = 0;
 
-			// Full GPU swap
-			GPUQuery mGPUQuery;
-			std::vector<float> mGPUFrametime;
-			int mGPUFrametimeOffset = 0;
-
 			// Neo CPU tick
 			std::vector<float> mNeoCPUTime;
 			int mNeoCPUTimeOffset = 0;

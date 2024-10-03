@@ -7,6 +7,8 @@
 #include <ext/imgui_incl.hpp>
 #include <implot.h>
 
+#pragma optimize("", off)
+
 void* operator new(std::size_t count) {
 	auto ptr = malloc(count);
 	TracyAlloc(ptr, count);
@@ -46,13 +48,6 @@ namespace neo {
 			}
 		}
 
-		void Profiler::GPUQuery::start() {
-			glBeginQuery(GL_TIME_ELAPSED, tickHandle());
-		}
-		void Profiler::GPUQuery::end() {
-			glEndQuery(GL_TIME_ELAPSED);
-		}
-
 		float Profiler::GPUQuery::getGPUTime() const {
 			if (!_handlesValid()) {
 				return 0.f;
@@ -80,6 +75,7 @@ namespace neo {
 
 		void Profiler::GPUQuery::destroy() {
 			glDeleteQueries(2, mHandles.data());
+			mHandles = { 0,0 };
 		}
 
 		bool Profiler::GPUQuery::_handlesValid() const {
@@ -90,15 +86,11 @@ namespace neo {
 			: mRefreshRate(refreshRate)
 		{
 			mCPUFrametime.reserve(MAX_SAMPLES);
-			mGPUFrametime.reserve(MAX_SAMPLES);
 			mNeoCPUTime.reserve(MAX_SAMPLES);
 			mNeoGPUTime.reserve(MAX_SAMPLES);
-
-			mGPUQuery.init();
 		}
 
 		Profiler::~Profiler() {
-			mGPUQuery.destroy();
 		}
 
 		void Profiler::begin(double _runTime) {
@@ -106,9 +98,6 @@ namespace neo {
 			mFrame++;
 			mBeginFrameTime = _runTime;
 			mRunTime = _runTime;
-
-			_markTime(mGPUQuery.getGPUTime(), mGPUFrametime, mGPUFrametimeOffset); // Seconds to ms
-			mGPUQuery.start();
 		}
 
 		void Profiler::markFrame(double _runTime) {
@@ -123,8 +112,6 @@ namespace neo {
 		void Profiler::end(double _runTime) {
 			mTimeStep = (_runTime - mBeginFrameTime);
 			_markTime(mTimeStep * 1000.0, mCPUFrametime, mCPUFrametimeOffset); // Seconds to ms
-
-			mGPUQuery.end();
 		}
 
 		void Profiler::imGuiEditor() const {
@@ -142,9 +129,6 @@ namespace neo {
 
 				ImPlot::SetNextLineStyle(ImVec4(0.11f, 0.63f, 0.2f, 1.0f));
 				ImPlot::PlotLine("CPU tick", mNeoCPUTime.data(), static_cast<int>(mNeoCPUTime.size()), 1.0, 0.0, 0, mNeoCPUTimeOffset);
-
-				ImPlot::SetNextLineStyle(ImVec4(0.7f, 0.0f, 0.7f, 1.0f));
-				ImPlot::PlotLine("GPU", mGPUFrametime.data(), static_cast<int>(mGPUFrametime.size()), 1.0, 0.0, 0, mCPUFrametimeOffset);
 
 				ImPlot::SetNextLineStyle(ImVec4(0.7f, 0.0f, 0.7f, 1.0f));
 				ImPlot::PlotLine("GPU tick", mNeoGPUTime.data(), static_cast<int>(mNeoGPUTime.size()), 1.0, 0.0, 0, mNeoGPUTimeOffset);

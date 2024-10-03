@@ -48,6 +48,7 @@ namespace neo {
 	}
 
 	Renderer::~Renderer() {
+		mGPUQuery.destroy();
 	}
 
 	void Renderer::setDemoConfig(IDemo::Config config) {
@@ -114,6 +115,7 @@ namespace neo {
 		if (window.isMinimized()) {
 			return;
 		}
+		mGPUQuery.init();
 		profiler.markFrameGPU(mGPUQuery.getGPUTime());
 		util::Profiler::GPUQuery::Scope _scope(mGPUQuery.tickHandle());
 
