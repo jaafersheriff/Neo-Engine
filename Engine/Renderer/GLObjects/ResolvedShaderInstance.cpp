@@ -105,7 +105,7 @@ namespace neo {
 			std::stringstream preambleBuilder;
 			{
 				TRACY_ZONEN("Construct preamble");
-				preambleBuilder << ServiceLocator<Renderer>::ref().mDetails.mGLSLVersion << "\n\n";
+				preambleBuilder << ServiceLocator<Renderer>::ref().getDetails().mGLSLVersion << "\n\n";
 				const ShaderDefines* _defines = &defines;
 				while (_defines) {
 					for (auto& define : _defines->mDefines) {

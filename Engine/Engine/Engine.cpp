@@ -74,7 +74,7 @@ namespace neo {
 
 		ServiceLocator<Renderer>::ref().init();
 		{
-			auto& details = ServiceLocator<Renderer>::ref().mDetails;
+			auto details = ServiceLocator<Renderer>::ref().getDetails();
 			/* Set max work group */
 			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &details.mMaxComputeWorkGroupSize.x);
 			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &details.mMaxComputeWorkGroupSize.y);

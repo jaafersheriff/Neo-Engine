@@ -32,8 +32,8 @@ namespace neo {
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 		glfwWindowHint(GLFW_DEPTH_BITS, 0);
 		glfwWindowHint(GLFW_STENCIL_BITS, 0);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, ServiceLocator<Renderer>::ref().mDetails.mGLMajorVersion);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, ServiceLocator<Renderer>::ref().mDetails.mGLMinorVersion);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, ServiceLocator<Renderer>::ref().getDetails().mGLMajorVersion);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, ServiceLocator<Renderer>::ref().getDetails().mGLMinorVersion);
 		glfwWindowHint(GLFW_AUTO_ICONIFY, false);
 		glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 

@@ -54,7 +54,8 @@ namespace neo {
 			Renderer & operator=(Renderer &&) = delete;
 
 			FrameStats mStats = {};
-			RendererDetails mDetails = {};
+
+			RendererDetails getDetails() const { return mDetails; }
 
 			void setDemoConfig(IDemo::Config);
 			void init();
@@ -63,7 +64,10 @@ namespace neo {
 			void clean();
 
 			void imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager);
+
 		private:
+			RendererDetails mDetails = {};
+
 			FramebufferHandle mDefaultFBOHandle;
 			bool mShowBoundingBoxes = false;
 			bool mBackbufferNeedsResize = false;
