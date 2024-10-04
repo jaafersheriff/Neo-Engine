@@ -17,6 +17,7 @@
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
+#include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 
 #include "Loader/GLTFImporter.hpp"
@@ -125,6 +126,8 @@ namespace Base {
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_UNUSED(ecs, resourceManagers);
+
+		ImGui::Checkbox("Decl", &useDecl);
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -145,18 +148,32 @@ namespace Base {
 			resourceManagers.mTextureManager
 		);
 
-		Decl decl;
+		if (useDecl) {
+			TRACY_GPUN("USE DECL");
+			Decl decl;
+			decl.declareClearCommand(
+				sceneTargetHandle,
+				glm::vec4(0.2f, 0.2f, 0.2f, 1.f),
+				types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth
+			);
+			_drawPhong<OpaqueComponent>(decl, sceneTargetHandle, glm::uvec4(0, 0, viewport.mSize.x, viewport.mSize.y), resourceManagers, ecs, cameraEntity, {});
+			_drawPhong<AlphaTestComponent>(decl, sceneTargetHandle, glm::uvec4(0, 0, viewport.mSize), resourceManagers, ecs, cameraEntity, {});
+			_drawPhong<TransparentComponent>(decl, sceneTargetHandle, glm::uvec4(0, 0, viewport.mSize), resourceManagers, ecs, cameraEntity, {});
+			decl.execute(resourceManagers);
+		}
+		else {
+			TRACY_GPUN("NO DECL");
+			if (resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
+				auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
+				sceneTarget.bind();
+				sceneTarget.clear(glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+				glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+				drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity, {});
+				drawPhong<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, {});
+				drawPhong<TransparentComponent>(resourceManagers, ecs, cameraEntity, {});
+			}
+		}
 
-		decl.declareClearCommand(
-			sceneTargetHandle, 
-			glm::vec4(0.2f, 0.2f, 0.2f, 1.f), 
-			types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth 
-		);
-		_drawPhong<OpaqueComponent>(decl, sceneTargetHandle, glm::uvec4(0,0,viewport.mSize.x, viewport.mSize.y), resourceManagers, ecs, cameraEntity, {});
-		_drawPhong<AlphaTestComponent>(decl, sceneTargetHandle, glm::uvec4(0,0,viewport.mSize), resourceManagers, ecs, cameraEntity, {});
-		_drawPhong<TransparentComponent>(decl, sceneTargetHandle, glm::uvec4(0,0,viewport.mSize), resourceManagers, ecs, cameraEntity, {});
-
-		decl.execute(resourceManagers);
 		NEO_UNUSED(backbuffer);
 	}
 

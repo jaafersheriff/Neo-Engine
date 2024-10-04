@@ -37,6 +37,9 @@ namespace Base {
 		virtual void destroy() override;
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
 
+	private:
+		bool useDecl = true;
+
 		template<typename... CompTs>
 		void _drawPhong(Decl& decl, FramebufferHandle target, glm::uvec4 viewport, const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 			TRACY_GPU();
