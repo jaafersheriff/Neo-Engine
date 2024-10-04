@@ -10,14 +10,18 @@
 
 
 struct _NEO_GPU_SCOPE {
-#ifdef DEBUG_MODE
 	_NEO_GPU_SCOPE(const char* name) {
+#ifdef DEBUG_MODE
 		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, static_cast<GLsizei>(-1), name);
+#else
+		NEO_UNUSED(name);
+#endif
 	}
 	~_NEO_GPU_SCOPE() {
+#ifdef DEBUG_MODE
 		glPopDebugGroup();
-	}
 #endif
+	}
 };
 #define TRACY_GPUN(x) TRACY_ZONEN(x); TracyGpuZoneC(x, (neo::HashedString(x) & 0xfefefe) >> 1 ); _NEO_GPU_SCOPE ___NEO_GPU_SCOPE##__LINE__(x)
 #define TRACY_GPU() TRACY_GPUN(TracyFunction)
