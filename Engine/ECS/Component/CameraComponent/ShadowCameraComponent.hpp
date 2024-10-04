@@ -2,6 +2,8 @@
 
 #include "ECS/Component/Component.hpp"
 
+#include "ResourceManager/TextureManager.hpp"
+
 namespace neo
 {
 	START_COMPONENT(ShadowCameraComponent);

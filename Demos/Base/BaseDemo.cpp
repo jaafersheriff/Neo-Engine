@@ -13,12 +13,10 @@
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
-#include "ECS/Component/RenderingComponent/ForwardPBRRenderComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
-#include "Renderer/RenderingSystems/ForwardPBRRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 
 #include "Loader/GLTFImporter.hpp"
@@ -57,6 +55,7 @@ namespace Base {
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Light")
 				.attachComponent<LightComponent>(glm::vec3(1.f), 5.f)
+				.attachComponent<PhongRenderComponent>()
 				.attachComponent<MainLightComponent>()
 				.attachComponent<DirectionalLightComponent>()
 				.attachComponent<SpatialComponent>(spatial)
@@ -73,7 +72,7 @@ namespace Base {
 				.attachComponent<RotationComponent>(glm::vec3(0.f, 1.0f, 0.f))
 				.attachComponent<MeshComponent>(gltfScene.mMeshNodes[0].mMeshHandle)
 				.attachComponent<BoundingBoxComponent>(gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax)
-				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<PhongRenderComponent>()
 				.attachComponent<OpaqueComponent>()
 				.attachComponent<MaterialComponent>(material)
 			));
@@ -87,7 +86,7 @@ namespace Base {
 				.attachComponent<RotationComponent>(glm::vec3(1.f, 0.0f, 0.f))
 				.attachComponent<MeshComponent>(HashedString("icosahedron"))
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
-				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<PhongRenderComponent>()
 				.attachComponent<OpaqueComponent>()
 				.attachComponent<MaterialComponent>(material)
 			));
@@ -99,7 +98,7 @@ namespace Base {
 				.attachComponent<SpatialComponent>(glm::vec3(0.f, 1.0f, -1.f * i), glm::vec3(0.75f))
 				.attachComponent<MeshComponent>(HashedString("cube"))
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
-				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<PhongRenderComponent>()
 				.attachComponent<TransparentComponent>()
 				.attachComponent<MaterialComponent>(material)
 			));
@@ -114,7 +113,7 @@ namespace Base {
 				.attachComponent<SpatialComponent>(glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f))
 				.attachComponent<MeshComponent>(HashedString("quad"))
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f, -0.5f, -0.01f), glm::vec3(0.5f, 0.5f, 0.01f), true)
-				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<PhongRenderComponent>()
 				.attachComponent<AlphaTestComponent>()
 				.attachComponent<MaterialComponent>(material)
 			));
@@ -133,39 +132,32 @@ namespace Base {
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
+
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Scene Target",
 			FramebufferBuilder{}
-				.setSize(viewport.mSize)
-				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
-				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
+			.setSize(viewport.mSize)
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
+			.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
 			resourceManagers.mTextureManager
 		);
 
-		if (resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
-			auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
+		Decl decl;
 
-			sceneTarget.bind();
-			sceneTarget.clear(glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-			drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-			drawForwardPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
-			drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity);
+		decl.declareClearCommand(
+			sceneTargetHandle, 
+			glm::vec4(0.2f, 0.2f, 0.2f, 1.f), 
+			types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth 
+		);
+		_drawPhong<OpaqueComponent>(decl, sceneTargetHandle, glm::uvec4(0,0,viewport.mSize.x, viewport.mSize.y), resourceManagers, ecs, cameraEntity, {});
+		_drawPhong<AlphaTestComponent>(decl, sceneTargetHandle, glm::uvec4(0,0,viewport.mSize), resourceManagers, ecs, cameraEntity, {});
+		_drawPhong<TransparentComponent>(decl, sceneTargetHandle, glm::uvec4(0,0,viewport.mSize), resourceManagers, ecs, cameraEntity, {});
 
-			backbuffer.bind();
-			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
-			drawFXAA(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
-			// Don't forget the depth. Because reasons.
-			glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
-				0, 0, viewport.mSize.x, viewport.mSize.y,
-				0, 0, viewport.mSize.x, viewport.mSize.y,
-				GL_DEPTH_BUFFER_BIT,
-				GL_NEAREST
-			);
-		}
+		decl.execute(resourceManagers);
+		NEO_UNUSED(backbuffer);
 	}
 
 	void Demo::destroy() {

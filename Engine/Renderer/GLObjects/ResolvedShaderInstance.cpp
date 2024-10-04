@@ -308,9 +308,9 @@ namespace neo {
 		}
 	}
 
-	GLint ResolvedShaderInstance::_getUniform(const char* name) const {
+	GLint ResolvedShaderInstance::_getUniform(HashedString::hash_type hash) const {
 		ServiceLocator<Renderer>::ref().mStats.mNumUniforms++;
-		const auto uniform = mUniforms.find(HashedString(name));
+		const auto uniform = mUniforms.find(hash);
 		if (uniform == mUniforms.end()) {
 			// NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable", name);
 			return -1;
@@ -319,35 +319,43 @@ namespace neo {
 	}
 
 	void ResolvedShaderInstance::bindUniform(const char* name, const UniformVariant& uniform) const {
+		return bindUniform(HashedString(name).value(), uniform);
+	}
+
+	void ResolvedShaderInstance::bindUniform(HashedString::hash_type hash, const UniformVariant& uniform) const {
 		util::visit(uniform, 
-			[&](bool b) { glUniform1i(_getUniform(name), b); },
-			[&](int i) { glUniform1i(_getUniform(name), i); },
-			[&](uint16_t i) { glUniform1ui(_getUniform(name), i); },
-			[&](uint32_t i) { glUniform1ui(_getUniform(name), i); },
-			[&](double d) { glUniform1f(_getUniform(name), static_cast<float>(d)); },
-			[&](float f) { glUniform1f(_getUniform(name), static_cast<float>(f)); },
-			[&](glm::vec2 v) { glUniform2f(_getUniform(name), v.x, v.y); },
-			[&](glm::ivec2 v) { glUniform2i(_getUniform(name), v.x, v.y); },
-			[&](glm::uvec2 v) { glUniform2ui(_getUniform(name), v.x, v.y); },
-			[&](glm::vec3 v) { glUniform3f(_getUniform(name), v.x, v.y, v.z); },
-			[&](glm::vec4 v) { glUniform4f(_getUniform(name), v.x, v.y, v.z, v.w); },
-			[&](glm::mat3 m) { glUniformMatrix3fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
-			[&](glm::mat4 m) { glUniformMatrix4fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
+			[&](bool b) { glUniform1i(_getUniform(hash), b); },
+			[&](int i) { glUniform1i(_getUniform(hash), i); },
+			[&](uint16_t i) { glUniform1ui(_getUniform(hash), i); },
+			[&](uint32_t i) { glUniform1ui(_getUniform(hash), i); },
+			[&](double d) { glUniform1f(_getUniform(hash), static_cast<float>(d)); },
+			[&](float f) { glUniform1f(_getUniform(hash), static_cast<float>(f)); },
+			[&](glm::vec2 v) { glUniform2f(_getUniform(hash), v.x, v.y); },
+			[&](glm::ivec2 v) { glUniform2i(_getUniform(hash), v.x, v.y); },
+			[&](glm::uvec2 v) { glUniform2ui(_getUniform(hash), v.x, v.y); },
+			[&](glm::vec3 v) { glUniform3f(_getUniform(hash), v.x, v.y, v.z); },
+			[&](glm::vec4 v) { glUniform4f(_getUniform(hash), v.x, v.y, v.z, v.w); },
+			[&](glm::mat3 m) { glUniformMatrix3fv(_getUniform(hash), 1, GL_FALSE, &m[0][0]); },
+			[&](glm::mat4 m) { glUniformMatrix4fv(_getUniform(hash), 1, GL_FALSE, &m[0][0]); },
 			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
 		);
 	}
 
 	void ResolvedShaderInstance::bindTexture(const char* name, const Texture& texture) const {
+		return bindTexture(HashedString(name).value(), texture);
+	}
+
+	void ResolvedShaderInstance::bindTexture(HashedString::hash_type hash, const Texture& texture) const {
 		ServiceLocator<Renderer>::ref().mStats.mNumSamplers++;
 
 		GLint bindingLoc = 0;
-		auto binding = mBindings.find(HashedString(name));
+		auto binding = mBindings.find(hash);
 		if (binding != mBindings.end()) {
 			bindingLoc = binding->second;
 		}
 		glActiveTexture(GL_TEXTURE0 + bindingLoc);
 		texture.bind();
-		glUniform1i(_getUniform(name), bindingLoc);
+		glUniform1i(_getUniform(hash), bindingLoc);
 	}
 
 	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip) const {
