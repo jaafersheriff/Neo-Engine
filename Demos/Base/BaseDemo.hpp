@@ -50,105 +50,117 @@ namespace Base {
 				}
 			);
 
-			NEO_ASSERT(inDefines.mDefines.size() == 0, "TODO");
-			MakeDefine(ALPHA_TEST);
-			MakeDefine(TRANSPARENT);
-			if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
-				renderPass.passDefines.set(ALPHA_TEST);
-			}
-			if constexpr ((std::is_same_v<TransparentComponent, CompTs> || ...)) {
-				renderPass.passDefines.set(TRANSPARENT);
-				renderPass.state.blendState = BlendState::Enabled;
+			{
+				TRACY_ZONEN("Base");
+				NEO_ASSERT(inDefines.mDefines.size() == 0, "TODO");
+				MakeDefine(ALPHA_TEST);
+				MakeDefine(TRANSPARENT);
+				if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
+					renderPass.passDefines.set(ALPHA_TEST);
+				}
+				if constexpr ((std::is_same_v<TransparentComponent, CompTs> || ...)) {
+					renderPass.passDefines.set(TRANSPARENT);
+					renderPass.state.blendState = BlendState::Enabled;
+				}
 			}
 
-			const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
-			MakeUniform(P);
-			MakeUniform(V);
-			MakeUniform(camPos);
-			renderPass.passUniforms.set(P, ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
-			renderPass.passUniforms.set(V, cameraSpatial->getView());
-			renderPass.passUniforms.set(camPos, cameraSpatial->getPosition());
+			{
+				TRACY_ZONEN("Camera");
+				const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
+				MakeUniform(P);
+				MakeUniform(V);
+				MakeUniform(camPos);
+				renderPass.passUniforms.set(P, ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
+				renderPass.passUniforms.set(V, cameraSpatial->getView());
+				renderPass.passUniforms.set(camPos, cameraSpatial->getPosition());
+			}
 
 			auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
-
 			const bool shadowsEnabled =
 				ecs.has<DirectionalLightComponent>(lightEntity)
 				&& ecs.has<CameraComponent>(lightEntity)
 				&& ecs.has<ShadowCameraComponent>(lightEntity)
 				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
-			MakeDefine(ENABLE_SHADOWS);
-			MakeUniform(L);
-			MakeUniform(shadowMap);
-			if (shadowsEnabled) {
-				renderPass.passDefines.set(ENABLE_SHADOWS);
+			{
+				TRACY_ZONEN("Light");
 
-				const auto& shadowCamera = *ecs.cGetComponent<CameraComponent>(lightEntity);
-				static glm::mat4 biasMatrix(
-					0.5f, 0.0f, 0.0f, 0.0f,
-					0.0f, 0.5f, 0.0f, 0.0f,
-					0.0f, 0.0f, 0.5f, 0.0f,
-					0.5f, 0.5f, 0.5f, 1.0f);
-				renderPass.passUniforms.set(L, biasMatrix * shadowCamera.getProj() * lightSpatial.getView());
-				renderPass.passTextures.set(shadowMap, ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
-			}
-			bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
-			bool pointLight = ecs.has<PointLightComponent>(lightEntity);
-			MakeDefine(DIRECTIONAL_LIGHT);
-			MakeDefine(POINT_LIGHT);
-			MakeUniform(lightDir);
-			MakeUniform(lightPos);
-			MakeUniform(lightRadiance);
-			MakeUniform(lightCol);
-			renderPass.passUniforms.set(lightCol, light.mColor);
-			renderPass.passUniforms.set(lightRadiance, light.mIntensity);
-			if (directionalLight || shadowsEnabled) {
-				renderPass.passDefines.set(DIRECTIONAL_LIGHT);
-				renderPass.passUniforms.set(lightDir, -lightSpatial.getLookDir());
-			}
-			else if (pointLight) {
-				renderPass.passDefines.set(POINT_LIGHT);
-				renderPass.passUniforms.set(lightPos, lightSpatial.getPosition());
-			}
-			else {
-				NEO_FAIL("Phong light needs a directional or point light component");
+				MakeDefine(ENABLE_SHADOWS);
+				MakeUniform(L);
+				MakeUniform(shadowMap);
+				if (shadowsEnabled) {
+					renderPass.passDefines.set(ENABLE_SHADOWS);
+
+					const auto& shadowCamera = *ecs.cGetComponent<CameraComponent>(lightEntity);
+					static glm::mat4 biasMatrix(
+						0.5f, 0.0f, 0.0f, 0.0f,
+						0.0f, 0.5f, 0.0f, 0.0f,
+						0.0f, 0.0f, 0.5f, 0.0f,
+						0.5f, 0.5f, 0.5f, 1.0f);
+					renderPass.passUniforms.set(L, biasMatrix * shadowCamera.getProj() * lightSpatial.getView());
+					renderPass.passTextures.set(shadowMap, ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
+				}
+				bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
+				bool pointLight = ecs.has<PointLightComponent>(lightEntity);
+				MakeDefine(DIRECTIONAL_LIGHT);
+				MakeDefine(POINT_LIGHT);
+				MakeUniform(lightDir);
+				MakeUniform(lightPos);
+				MakeUniform(lightRadiance);
+				MakeUniform(lightCol);
+				renderPass.passUniforms.set(lightCol, light.mColor);
+				renderPass.passUniforms.set(lightRadiance, light.mIntensity);
+				if (directionalLight || shadowsEnabled) {
+					renderPass.passDefines.set(DIRECTIONAL_LIGHT);
+					renderPass.passUniforms.set(lightDir, -lightSpatial.getLookDir());
+				}
+				else if (pointLight) {
+					renderPass.passDefines.set(POINT_LIGHT);
+					renderPass.passUniforms.set(lightPos, lightSpatial.getPosition());
+				}
+				else {
+					NEO_FAIL("Phong light needs a directional or point light component");
+				}
 			}
 
 			// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
-			const auto& view = ecs.getView<const PhongRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
-			for (auto entity : view) {
-				// VFC
-				if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-					if (!culled->isInView(ecs, entity, cameraEntity)) {
-						continue;
+			{
+				TRACY_ZONEN("View Iter");
+				const auto& view = ecs.getView<const PhongRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
+				for (auto entity : view) {
+					// VFC
+					if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+						if (!culled->isInView(ecs, entity, cameraEntity)) {
+							continue;
+						}
 					}
+
+					auto& draw = renderPass.declareDraw();
+
+					const auto& material = view.get<const MaterialComponent>(entity);
+					MakeDefine(ALBEDO_MAP);
+					MakeUniform(albedo);
+					MakeUniform(albedoMap);
+					if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
+						draw.drawDefines.set(ALBEDO_MAP);
+						draw.textures.set(albedoMap, material.mAlbedoMap);
+					}
+					draw.uniforms.set(albedo, material.mAlbedoColor);
+
+					MakeDefine(NORMAL_MAP);
+					MakeUniform(normalMap);
+					if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
+						draw.drawDefines.set(NORMAL_MAP);
+						draw.textures.set(normalMap, material.mNormalMap);
+					}
+
+					const auto& drawSpatial = view.get<const SpatialComponent>(entity);
+					MakeUniform(M);
+					MakeUniform(N);
+					draw.uniforms.set(M, drawSpatial.getModelMatrix());
+					draw.uniforms.set(N, drawSpatial.getNormalMatrix());
+
+					draw.mesh = view.get<const MeshComponent>(entity).mMeshHandle;
 				}
-
-				auto& draw = renderPass.declareDraw();
-
-				const auto& material = view.get<const MaterialComponent>(entity);
-				MakeDefine(ALBEDO_MAP);
-				MakeUniform(albedo);
-				MakeUniform(albedoMap);
-				if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-					draw.drawDefines.set(ALBEDO_MAP);
-					draw.textures.set(albedoMap, material.mAlbedoMap);
-				}
-				draw.uniforms.set(albedo, material.mAlbedoColor);
-
-				MakeDefine(NORMAL_MAP);
-				MakeUniform(normalMap);
-				if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-					draw.drawDefines.set(NORMAL_MAP);
-					draw.textures.set(normalMap, material.mNormalMap);
-				}
-
-				const auto& drawSpatial = view.get<const SpatialComponent>(entity);
-				MakeUniform(M);
-				MakeUniform(N);
-				draw.uniforms.set(M, drawSpatial.getModelMatrix());
-				draw.uniforms.set(N, drawSpatial.getNormalMatrix());
-
-				draw.mesh = view.get<const MeshComponent>(entity).mMeshHandle;
 			}
 		}
 

@@ -44,7 +44,7 @@ namespace neo {
 		}
 
 		// Stack overflow :( 
-		std::array<std::pair<HashedString::hash_type, TextureHandle >, 16> mTextures;
+		std::pair<HashedString::hash_type, TextureHandle > mTextures[16];
 		int textureCount = 0;
 
 	};
@@ -95,13 +95,12 @@ namespace neo {
 		ShaderTextureBinds passTextures = {};
 
 		Draw& declareDraw() {
-			NEO_ASSERT(drawCount < 1024, "TODO");
-			return draws[drawCount++];
+			draws.emplace_back(Draw{});
+			return draws.back();
 		}
 
 		// ARRAY OF STRUCTS AH
-		std::array<Draw, 1024> draws = {};
-		int drawCount = 0;
+		std::vector<Draw> draws;
 	};
 
 	class Decl {

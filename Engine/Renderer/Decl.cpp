@@ -34,8 +34,7 @@ namespace neo {
 			}
 
 			ShaderDefines drawDefines(passDefines);
-			for (int i = 0; i < renderPass.drawCount; i++) {
-				const auto& draw = renderPass.draws[i];
+			for (auto& draw : renderPass.draws) {
 				drawDefines.reset();
 
 				// Yikes
@@ -74,9 +73,11 @@ namespace neo {
 	}
 
 	RenderPass& Decl::declareRenderPass(FramebufferHandle target, glm::uvec4 viewport) {
+		TRACY_ZONE();
 		auto& pass = std::get<RenderPass>(mCommands.emplace_back(std::move(RenderPass{})));
 		pass.fboHandle = target;
 		pass.state.viewport = viewport;
+		pass.draws.reserve(1024);
 		return pass;
 	}
 
