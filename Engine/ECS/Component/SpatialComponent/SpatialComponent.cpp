@@ -180,7 +180,7 @@ namespace neo {
 		if (ImGui::DragFloat3("Move", &moveAmount[0], 0.5f, -20.f, 20.f)) {
 			move(moveAmount);
 		}
-		ImGui::Text("Scale: %0.2f, %0.2f, %0.2f", mScale[0], mScale[1], mScale[2]);
+		ImGui::Text("Scale: %0.2f, %0.2f, %0.2f", mScale.x, mScale.y, mScale.z);
 		if (ImGui::DragFloat3("Scale", &scaleAmount[0], 0.05f, 0.001f, 2.f)) {
 			resize(scaleAmount);
 		}

@@ -5,6 +5,7 @@
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
@@ -20,7 +21,7 @@
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
-#include "ECS/Systems/CameraSystems/FrustumToLineSystem.hpp"
+#include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
@@ -47,10 +48,11 @@ namespace CSM {
 		ecs.submitEntity(std::move(ECS::EntityBuilder{}		
 			.attachComponent<TagComponent>("Scene Camera")
 			.attachComponent<SpatialComponent>(glm::vec3(0, 0.6f, 5), glm::vec3(1.f))
-			.attachComponent<CameraComponent>(1.f, 100.f, CameraComponent::Perspective{ 45.f, 1.f })
+			.attachComponent<CameraComponent>(0.5f, 100.f, CameraComponent::Perspective{ 45.f, 1.f })
 			.attachComponent<CameraControllerComponent>(0.4f, 7.f)
 			.attachComponent<MainCameraComponent>()
 			.attachComponent<FrustumComponent>()
+			.attachComponent<FrustumFitSourceComponent>()
 		));
 
 		// Ortho camera, shadow camera, light
@@ -103,8 +105,9 @@ namespace CSM {
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>(); // Update camera
 		ecs.addSystem<FrustumSystem>(); // Calculate original frusta bounds
-		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
+		ecs.addSystem<FrustaFittingSystem>();
 		ecs.addSystem<FrustumCullingSystem>();
+
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
