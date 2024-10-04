@@ -40,7 +40,7 @@ namespace neo {
 
 		void set(const ShaderUniform& uniformDefine, const TextureHandle& handle) {
 			NEO_ASSERT(textureCount < 16, "TODO");
-			mTextures[textureCount] = std::make_pair(uniformDefine.mVal.value(), handle);
+			mTextures[textureCount++] = std::make_pair(uniformDefine.mVal.value(), handle);
 		}
 
 		// Stack overflow :( 

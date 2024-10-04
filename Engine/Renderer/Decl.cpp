@@ -3,6 +3,7 @@
 namespace neo {
 	namespace {
 		void _executeClear(const ResourceManagers& resourceManagers, const ClearCommand& clearCommand) {
+			TRACY_GPU();
 			if (resourceManagers.mFramebufferManager.isValid(clearCommand.handle)) {
 				auto& target = resourceManagers.mFramebufferManager.resolve(clearCommand.handle);
 
@@ -12,6 +13,7 @@ namespace neo {
 		}
 
 		void _executeRenderPass(const ResourceManagers& resourceManagers, const RenderPass& renderPass) {
+			TRACY_GPU();
 			if (renderPass.state.blendState == BlendState::Disabled) {
 				glDisable(GL_BLEND);
 			}
@@ -79,6 +81,7 @@ namespace neo {
 	}
 
 	void Decl::execute(const ResourceManagers& resourceManagers) {
+		TRACY_GPU();
 		for (auto& command : mCommands) {
 			util::visit(command,
 				[&](ClearCommand& clearCommand) {
