@@ -1,17 +1,19 @@
 #include "CSM/CSM.hpp"
 #include "Engine/Engine.hpp"
 
+#include "PerspectiveUpdateSystem.hpp"
+
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
-#include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
+#include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
@@ -19,9 +21,10 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
+#include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
-#include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
+#include "ECS/Systems/CameraSystems/FrustumToLineSystem.hpp"
 
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
@@ -37,6 +40,43 @@ using namespace neo;
 
 /* Game object definitions */
 namespace CSM {
+	namespace {
+		START_COMPONENT(SeenByMock);
+		END_COMPONENT();
+
+		START_COMPONENT(MockCameraComponent);
+		END_COMPONENT();
+
+		START_COMPONENT(CSMDebugComponent);
+		END_COMPONENT();
+
+		ECS::EntityBuilder _createCamera(std::string name, float fov, float near, float far, glm::vec3 pos) {
+			return std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>(name)
+				.attachComponent<SpatialComponent>(pos, glm::vec3(1.f))
+				.attachComponent<CameraComponent>(near, far, CameraComponent::Perspective{ fov, 1.f })
+			);
+		}
+
+		ECS::EntityBuilder _createLight(ResourceManagers& resourceManagers, glm::vec3 position) {
+			SpatialComponent spatial(position, glm::vec3(1.f));
+			spatial.setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
+			ShadowCameraComponent shadowCamera(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
+			LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
+			return std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Light")
+				.attachComponent<LightComponent>(glm::vec3(1.f))
+				.attachComponent<DirectionalLightComponent>()
+				.attachComponent<SpatialComponent>(spatial)
+				.attachComponent<MainLightComponent>()
+				.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
+				.attachComponent<FrustumComponent>()
+				.attachComponent<FrustumFitReceiverComponent>()
+				.attachComponent<LineMeshComponent>(lineMesh)
+				.attachComponent<ShadowCameraComponent>(shadowCamera)
+			);
+		}
+	}
 
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
@@ -45,31 +85,40 @@ namespace CSM {
 	}
 
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
-		ecs.submitEntity(std::move(ECS::EntityBuilder{}		
-			.attachComponent<TagComponent>("Scene Camera")
-			.attachComponent<SpatialComponent>(glm::vec3(0, 0.6f, 5), glm::vec3(1.f))
-			.attachComponent<CameraComponent>(0.5f, 100.f, CameraComponent::Perspective{ 45.f, 1.f })
+
+		/* Game objects */
+		ecs.submitEntity(std::move(_createCamera("main camera", 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5))
 			.attachComponent<CameraControllerComponent>(0.4f, 7.f)
 			.attachComponent<MainCameraComponent>()
 			.attachComponent<FrustumComponent>()
-			.attachComponent<FrustumFitSourceComponent>()
 		));
 
+		// Perspective camera
+		{
+			LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(0.f, 1.f, 1.f));
+			ecs.submitEntity(std::move(_createCamera("mockCamera", 50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f))
+				.attachComponent<MockCameraComponent>()
+				.attachComponent<LineMeshComponent>(lineMesh)
+				.attachComponent<FrustumComponent>()
+				.attachComponent<FrustumFitSourceComponent>()
+			));
+		}
+
 		// Ortho camera, shadow camera, light
-		SpatialComponent spatial(glm::vec3(10.f, 20.f, 0.f), glm::vec3(1.f));
-		spatial.setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
-		ShadowCameraComponent shadowCamera(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
-		ecs.submitEntity(std::move(ECS::EntityBuilder{}
-			.attachComponent<TagComponent>("Light")
-			.attachComponent<LightComponent>(glm::vec3(1.f))
-			.attachComponent<DirectionalLightComponent>()
-			.attachComponent<SpatialComponent>(spatial)
-			.attachComponent<MainLightComponent>()
-			.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
-			.attachComponent<FrustumComponent>()
-			.attachComponent<FrustumFitReceiverComponent>()
-			.attachComponent<ShadowCameraComponent>(shadowCamera)
-		));
+		ecs.submitEntity(_createLight(resourceManagers, glm::vec3(10.f, 20.f, 0.f)));
+
+		// Debug view
+		{
+
+			LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<LineMeshComponent>(lineMesh)
+				.attachComponent<FrustumComponent>()
+				.attachComponent<CSMDebugComponent>()
+				.attachComponent<SpatialComponent>()
+				.attachComponent<TagComponent>("CSM Debug")
+			));
+		}
 
 		// Renderable
 		for (int i = 0; i < 50; i++) {
@@ -105,13 +154,38 @@ namespace CSM {
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>(); // Update camera
 		ecs.addSystem<FrustumSystem>(); // Calculate original frusta bounds
-		ecs.addSystem<FrustaFittingSystem>();
+		ecs.addSystem<FrustaFittingSystem>(); // Fit one frusta into another
+		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
 		ecs.addSystem<FrustumCullingSystem>();
-
+		ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
-		NEO_UNUSED(resourceManagers, ecs);
+		NEO_UNUSED(resourceManagers);
+		const auto&& [mockCameraEntity, _, __] = *ecs.getSingleView<MockCameraComponent, SpatialComponent>();
+		const auto& view = ecs.getView<const WireframeRenderComponent, CameraCulledComponent>();
+		for (auto entity : view) {
+			auto& culled = view.get<CameraCulledComponent>(entity);
+			if (culled.isInView(ecs, entity, mockCameraEntity)) {
+				if (!ecs.has<SeenByMock>(entity)) {
+					ecs.addComponent<SeenByMock>(entity);
+				}
+			}
+			else if (ecs.has<SeenByMock>(entity)) {
+				ecs.removeComponent<SeenByMock>(entity);
+			}
+		}
+
+		if (auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, CameraComponent, SpatialComponent>()) {
+			for (auto&& [___, frustum, spatial, csm] : ecs.getView<FrustumComponent, SpatialComponent, CSMDebugComponent>().each()) {
+				const auto& shadowCameraSpatial = std::get<3>(*shadowCamera);
+				CameraComponent clippedCamera = std::get<2>(*shadowCamera); // Copy
+				clippedCamera.setNear(clippedCamera.getNear() * 2.f);
+				spatial.setModelMatrix(shadowCameraSpatial.getModelMatrix());
+				
+				frustum.calculateFrustum(clippedCamera, shadowCameraSpatial);
+			}
+		}
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
@@ -129,5 +203,9 @@ namespace CSM {
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		drawPhong(resourceManagers, ecs, cameraEntity);
+		drawLines(resourceManagers, ecs, cameraEntity);
+
+		// Draw wireframe for anything being seen by the mock camera
+		drawWireframe<SeenByMock>(resourceManagers, ecs, cameraEntity);
 	}
 }

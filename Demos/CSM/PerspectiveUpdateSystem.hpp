@@ -15,7 +15,7 @@
 
 using namespace neo;
 
-namespace FrustaFitting {
+namespace CSM {
 	class PerspectiveUpdateSystem : public System {
 
 	public:

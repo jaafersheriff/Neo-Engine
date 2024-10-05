@@ -21,7 +21,7 @@
 
 using namespace neo;
 
-namespace FrustaFitting {
+namespace CSM {
 	class WireShader : public Shader {
 
 	public:
