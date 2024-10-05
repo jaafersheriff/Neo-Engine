@@ -33,6 +33,11 @@ namespace neo {
 		class EntityBuilder {
 			friend ECS;
 		public:
+			EntityBuilder() = default;
+			EntityBuilder(const EntityBuilder& other) {
+				this->mComponents = other.mComponents;
+			}
+
 			template<typename CompT, typename... Args>
 			EntityBuilder& attachComponent(Args &&... args) {
 				// Holy moly wtf c++

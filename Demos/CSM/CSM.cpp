@@ -47,7 +47,13 @@ namespace CSM {
 		START_COMPONENT(MockCameraComponent);
 		END_COMPONENT();
 
-		START_COMPONENT(CSMDebugComponent);
+		START_COMPONENT(CSMCamera0);
+		END_COMPONENT();
+		START_COMPONENT(CSMCamera1);
+		END_COMPONENT();
+		START_COMPONENT(CSMCamera2);
+		END_COMPONENT();
+		START_COMPONENT(CSMCamera3);
 		END_COMPONENT();
 
 		ECS::EntityBuilder _createCamera(std::string name, float fov, float near, float far, glm::vec3 pos) {
@@ -71,7 +77,7 @@ namespace CSM {
 				.attachComponent<MainLightComponent>()
 				.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
 				.attachComponent<FrustumComponent>()
-				.attachComponent<FrustumFitReceiverComponent>()
+				//.attachComponent<FrustumFitReceiverComponent>()
 				.attachComponent<LineMeshComponent>(lineMesh)
 				.attachComponent<ShadowCameraComponent>(shadowCamera)
 			);
@@ -107,18 +113,28 @@ namespace CSM {
 		// Ortho camera, shadow camera, light
 		ecs.submitEntity(_createLight(resourceManagers, glm::vec3(10.f, 20.f, 0.f)));
 
-		// Debug view
-		{
-
-			LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
-			ecs.submitEntity(std::move(ECS::EntityBuilder{}
-				.attachComponent<LineMeshComponent>(lineMesh)
-				.attachComponent<FrustumComponent>()
-				.attachComponent<CSMDebugComponent>()
-				.attachComponent<SpatialComponent>()
-				.attachComponent<TagComponent>("CSM Debug")
-			));
-		}
+		// CSM cameras
+		auto csmCameraProto = ECS::EntityBuilder{}
+			.attachComponent<SpatialComponent>()
+			.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
+			.attachComponent<FrustumComponent>()
+		;
+		ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
+			.attachComponent<CSMCamera0>()
+			.attachComponent<TagComponent>("CSMCamera0")
+		));
+		ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
+			.attachComponent<CSMCamera1>()
+			.attachComponent<TagComponent>("CSMCamera1")
+		));
+		ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
+			.attachComponent<CSMCamera2>()
+			.attachComponent<TagComponent>("CSMCamera2")
+		));
+		ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
+			.attachComponent<CSMCamera3>()
+			.attachComponent<TagComponent>("CSMCamera3")
+		));
 
 		// Renderable
 		for (int i = 0; i < 50; i++) {
@@ -176,16 +192,17 @@ namespace CSM {
 			}
 		}
 
-		if (auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, CameraComponent, SpatialComponent>()) {
-			for (auto&& [___, frustum, spatial, csm] : ecs.getView<FrustumComponent, SpatialComponent, CSMDebugComponent>().each()) {
-				const auto& shadowCameraSpatial = std::get<3>(*shadowCamera);
-				CameraComponent clippedCamera = std::get<2>(*shadowCamera); // Copy
-				clippedCamera.setNear(clippedCamera.getNear() * 2.f);
-				spatial.setModelMatrix(shadowCameraSpatial.getModelMatrix());
-				
-				frustum.calculateFrustum(clippedCamera, shadowCameraSpatial);
-			}
-		}
+		// if (auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, CameraComponent, SpatialComponent>()) {
+		// 	for (auto&& [___, frustum, spatial, csm] : ecs.getView<FrustumComponent, SpatialComponent, CSMDebugComponent>().each()) {
+		// 		const auto& shadowCameraSpatial = std::get<3>(*shadowCamera);
+		// 		CameraComponent clippedCamera = std::get<2>(*shadowCamera); // Copy
+		// 		spatial.setModelMatrix(shadowCameraSpatial.getModelMatrix());
+		// 		
+		// 		float dist = clippedCamera.getFar() - clippedCamera.getNear();
+		// 		clippedCamera.setNear(clippedCamera.getNear() + dist / 2.f);
+		// 		frustum.calculateFrustum(clippedCamera, shadowCameraSpatial);
+		// 	}
+		// }
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
