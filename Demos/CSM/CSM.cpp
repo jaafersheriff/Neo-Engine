@@ -5,6 +5,7 @@
 #include "CSMFitting.hpp"
 #include "CSMCameraComponent.hpp"
 #include "CSMShadowRenderer.hpp"
+#include "CSMShadowMapComponent.hpp"
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
@@ -62,6 +63,7 @@ namespace CSM {
 			SpatialComponent spatial(position, glm::vec3(1.f));
 			spatial.setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
 			ShadowCameraComponent shadowCamera(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
+			CSMShadowMapComponent csmShadowMap(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
 			LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
 			return std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Light")
@@ -74,6 +76,7 @@ namespace CSM {
 				.attachComponent<FrustumFitReceiverComponent>()
 				.attachComponent<LineMeshComponent>(lineMesh)
 				.attachComponent<ShadowCameraComponent>(shadowCamera)
+				.attachComponent<CSMShadowMapComponent>(csmShadowMap)
 			);
 		}
 	}
@@ -207,7 +210,7 @@ namespace CSM {
 		if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 			auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
 			glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-			//drawShadows(resourceManagers, ecs, lightEntity, true);
+			drawShadows(resourceManagers, ecs, lightEntity, true);
 			drawCSMShadows(resourceManagers, ecs, lightEntity, true);
 		}
 
