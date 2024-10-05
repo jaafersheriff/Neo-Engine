@@ -26,9 +26,21 @@ namespace CSM {
 		) {
 			/////////////////////// Do the fitting! ///////////////////////////////
 
-			NEO_UNUSED(slice);
 			const auto& sourceView = sourceSpatial.getView();
-			const auto& sourceProj = sourceCamera.getProj();
+
+			auto sourceProj = sourceCamera.getProj();
+			{
+				auto depth = sourceCamera.getFar() - sourceCamera.getNear();
+				auto sliceDepth = depth / 4;
+
+				auto newNear = sourceCamera.getNear() + sliceDepth * slice;
+				auto newFar = newNear + sliceDepth;
+				CameraComponent sourceCopy = sourceCamera;
+				sourceCopy.setNear(newNear);
+				sourceCopy.setFar(newFar);
+
+				sourceProj = sourceCopy.getProj();
+			}
 
 			receiverSpatial.setModelMatrix(lightSpatial.getModelMatrix());
 			const auto& worldToLight = receiverSpatial.getView();

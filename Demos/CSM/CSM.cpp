@@ -119,19 +119,19 @@ namespace CSM {
 				.attachComponent<TagComponent>("CSMCamera0")
 				.attachComponent<LineMeshComponent>(lineMesh0)
 			));
-			LineMeshComponent lineMesh1(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
+			LineMeshComponent lineMesh1(resourceManagers.mMeshManager, glm::vec3(0.f, 1.f, 0.f));
 			ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
 				.attachComponent<CSMCamera1>()
 				.attachComponent<TagComponent>("CSMCamera1")
 				.attachComponent<LineMeshComponent>(lineMesh1)
 			));
-			LineMeshComponent lineMesh2(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
+			LineMeshComponent lineMesh2(resourceManagers.mMeshManager, glm::vec3(0.f, 0.f, 1.f));
 			ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
 				.attachComponent<CSMCamera2>()
 				.attachComponent<TagComponent>("CSMCamera2")
 				.attachComponent<LineMeshComponent>(lineMesh2)
 			));
-			LineMeshComponent lineMesh3(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
+			LineMeshComponent lineMesh3(resourceManagers.mMeshManager, glm::vec3(1.f, 1.f, 0.f));
 			ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
 				.attachComponent<CSMCamera3>()
 				.attachComponent<TagComponent>("CSMCamera3")
