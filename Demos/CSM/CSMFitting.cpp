@@ -42,7 +42,9 @@ namespace CSM {
 				sourceProj = sourceCopy.getProj();
 			}
 
-			receiverSpatial.setModelMatrix(lightSpatial.getModelMatrix());
+			receiverSpatial.setPosition(lightSpatial.getPosition());
+			receiverSpatial.setScale(lightSpatial.getScale());
+			receiverSpatial.setLookDir(lightSpatial.getLookDir());
 			const auto& worldToLight = receiverSpatial.getView();
 			const auto& lightToWorld = glm::inverse(worldToLight);
 

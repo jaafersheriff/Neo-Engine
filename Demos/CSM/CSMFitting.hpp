@@ -9,7 +9,7 @@ namespace CSM {
 	public:
 
 		CSMFitting() :
-			neo::System("FrustaFitting System") {
+			neo::System("CSM Fitting System") {
 		}
 
 		virtual void update(neo::ECS& ecs) override;

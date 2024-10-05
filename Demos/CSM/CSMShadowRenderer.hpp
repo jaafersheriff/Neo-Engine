@@ -3,6 +3,7 @@
 #include "ECS/ECS.hpp"
 
 #include "CSMCameraComponent.hpp"
+#include "CSMShadowMapComponent.hpp"
 
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
@@ -25,14 +26,16 @@ namespace CSM {
 			const uint8_t slice, 
 			const bool clear
 		) {
+			TRACY_GPU();
 			bool containsAlphaTest = false;
 			if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
 				containsAlphaTest = true;
 			}
 
-			std::string targetName = "ShadowMap_" + std::to_string(static_cast<uint32_t>(cameraEntity));
+			char targetName[32];
+			sprintf(targetName, "ShadowMap_%d_%d", static_cast<int>(cameraEntity), slice);
 			FramebufferHandle shadowMapHandle = resourceManagers.mFramebufferManager.asyncLoad(
-				HashedString(targetName.c_str()),
+				HashedString(targetName),
 				FramebufferExternalAttachments{ {
 						shadowMap,
 						types::framebuffer::AttachmentTarget::Target2D,
@@ -47,6 +50,10 @@ namespace CSM {
 			shadowTarget.disableDraw();
 			shadowTarget.disableRead();
 			shadowTarget.bind();
+			{
+				const auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap);
+				glViewport(0, 0, shadowTexture.mWidth >> slice, shadowTexture.mHeight >> slice);
+			}
 
 			if (clear) {
 				shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
@@ -101,9 +108,9 @@ namespace CSM {
 			return;
 		}
 
-		NEO_ASSERT(ecs.has<DirectionalLightComponent>(lightEntity) && ecs.has<ShadowCameraComponent>(lightEntity), "Invalid light entity");
-		auto shadowCamera = ecs.cGetComponent<ShadowCameraComponent>(lightEntity);
-		if (!resourceManagers.mTextureManager.isValid(shadowCamera->mShadowMap)) {
+		NEO_ASSERT(ecs.has<DirectionalLightComponent>(lightEntity) && ecs.has<CSMShadowMapComponent>(lightEntity), "Invalid light entity");
+		auto shadowMap = ecs.cGetComponent<CSMShadowMapComponent>(lightEntity);
+		if (!resourceManagers.mTextureManager.isValid(shadowMap->mShadowMap)) {
 			return;
 		}
 
@@ -111,20 +118,17 @@ namespace CSM {
 
 		// TODO - this should have asserts
 		if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0>()) {
-			_drawSingleCSM<CompTs...>(resourceManagers, ecs, std::get<0>(*csmCamera0), shadowCamera->mShadowMap, shaderHandle, 0, clear);
+			_drawSingleCSM<CompTs...>(resourceManagers, ecs, std::get<0>(*csmCamera0), shadowMap->mShadowMap, shaderHandle, 0, clear);
 		}
 		if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1>()) {
-			_drawSingleCSM<CompTs...>(resourceManagers, ecs, std::get<0>(*csmCamera1), shadowCamera->mShadowMap, shaderHandle, 1, clear);
+			_drawSingleCSM<CompTs...>(resourceManagers, ecs, std::get<0>(*csmCamera1), shadowMap->mShadowMap, shaderHandle, 1, clear);
 		}
 		if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2>()) {
-			_drawSingleCSM<CompTs...>(resourceManagers, ecs, std::get<0>(*csmCamera2), shadowCamera->mShadowMap, shaderHandle, 2, clear);
+			_drawSingleCSM<CompTs...>(resourceManagers, ecs, std::get<0>(*csmCamera2), shadowMap->mShadowMap, shaderHandle, 2, clear);
 		}
 		if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3>()) {
-			_drawSingleCSM<CompTs...>(resourceManagers, ecs, std::get<0>(*csmCamera3), shadowCamera->mShadowMap, shaderHandle, 3, clear);
+			_drawSingleCSM<CompTs...>(resourceManagers, ecs, std::get<0>(*csmCamera3), shadowMap->mShadowMap, shaderHandle, 3, clear);
 		}
-
-
-
 		glCullFace(GL_BACK);
 	}
 }
