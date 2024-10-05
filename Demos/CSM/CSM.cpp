@@ -2,6 +2,8 @@
 #include "Engine/Engine.hpp"
 
 #include "PerspectiveUpdateSystem.hpp"
+#include "CSMFitting.hpp"
+#include "CSMCameraComponent.hpp"
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
@@ -47,15 +49,6 @@ namespace CSM {
 		START_COMPONENT(MockCameraComponent);
 		END_COMPONENT();
 
-		START_COMPONENT(CSMCamera0);
-		END_COMPONENT();
-		START_COMPONENT(CSMCamera1);
-		END_COMPONENT();
-		START_COMPONENT(CSMCamera2);
-		END_COMPONENT();
-		START_COMPONENT(CSMCamera3);
-		END_COMPONENT();
-
 		ECS::EntityBuilder _createCamera(std::string name, float fov, float near, float far, glm::vec3 pos) {
 			return std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>(name)
@@ -77,7 +70,7 @@ namespace CSM {
 				.attachComponent<MainLightComponent>()
 				.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
 				.attachComponent<FrustumComponent>()
-				//.attachComponent<FrustumFitReceiverComponent>()
+				.attachComponent<FrustumFitReceiverComponent>()
 				.attachComponent<LineMeshComponent>(lineMesh)
 				.attachComponent<ShadowCameraComponent>(shadowCamera)
 			);
@@ -114,27 +107,37 @@ namespace CSM {
 		ecs.submitEntity(_createLight(resourceManagers, glm::vec3(10.f, 20.f, 0.f)));
 
 		// CSM cameras
-		auto csmCameraProto = ECS::EntityBuilder{}
-			.attachComponent<SpatialComponent>()
-			.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
-			.attachComponent<FrustumComponent>()
-		;
-		ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
-			.attachComponent<CSMCamera0>()
-			.attachComponent<TagComponent>("CSMCamera0")
-		));
-		ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
-			.attachComponent<CSMCamera1>()
-			.attachComponent<TagComponent>("CSMCamera1")
-		));
-		ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
-			.attachComponent<CSMCamera2>()
-			.attachComponent<TagComponent>("CSMCamera2")
-		));
-		ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
-			.attachComponent<CSMCamera3>()
-			.attachComponent<TagComponent>("CSMCamera3")
-		));
+		{
+			auto csmCameraProto = ECS::EntityBuilder{}
+				.attachComponent<SpatialComponent>()
+				.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
+				.attachComponent<FrustumComponent>()
+				;
+			LineMeshComponent lineMesh0(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
+			ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
+				.attachComponent<CSMCamera0>()
+				.attachComponent<TagComponent>("CSMCamera0")
+				.attachComponent<LineMeshComponent>(lineMesh0)
+			));
+			LineMeshComponent lineMesh1(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
+			ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
+				.attachComponent<CSMCamera1>()
+				.attachComponent<TagComponent>("CSMCamera1")
+				.attachComponent<LineMeshComponent>(lineMesh1)
+			));
+			LineMeshComponent lineMesh2(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
+			ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
+				.attachComponent<CSMCamera2>()
+				.attachComponent<TagComponent>("CSMCamera2")
+				.attachComponent<LineMeshComponent>(lineMesh2)
+			));
+			LineMeshComponent lineMesh3(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
+			ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
+				.attachComponent<CSMCamera3>()
+				.attachComponent<TagComponent>("CSMCamera3")
+				.attachComponent<LineMeshComponent>(lineMesh3)
+			));
+		}
 
 		// Renderable
 		for (int i = 0; i < 50; i++) {
@@ -171,6 +174,7 @@ namespace CSM {
 		ecs.addSystem<CameraControllerSystem>(); // Update camera
 		ecs.addSystem<FrustumSystem>(); // Calculate original frusta bounds
 		ecs.addSystem<FrustaFittingSystem>(); // Fit one frusta into another
+		ecs.addSystem<CSMFitting>(); // Break scene frustum into slices and fit CSMCameraN to those slices
 		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
 		ecs.addSystem<FrustumCullingSystem>();
 		ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
