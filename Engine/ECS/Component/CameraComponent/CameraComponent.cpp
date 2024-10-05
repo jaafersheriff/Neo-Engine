@@ -117,7 +117,7 @@ namespace neo {
 	bool CameraComponent::Perspective::imGuiEditor() {
 		bool edited = false;
 		edited |= ImGui::SliderFloat("FOV", &mFOV, 0.f, 180.f);
-		edited |= ImGui::SliderFloat("Aspect Ratio", &mAspectRatio, 0.f, 1.f);
+		edited |= ImGui::SliderFloat("Aspect Ratio", &mAspectRatio, 0.f, 10.f);
 		return edited;
 	}
 

@@ -59,7 +59,7 @@ namespace neo {
 	
 		/* Should never be used directly -- call getters */
 		mutable glm::mat4 mProjMat;
-		mutable bool mProjMatDirty;
+		mutable bool mProjMatDirty = false;
 
 	END_COMPONENT();
 
