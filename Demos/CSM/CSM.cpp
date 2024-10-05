@@ -4,6 +4,7 @@
 #include "PerspectiveUpdateSystem.hpp"
 #include "CSMFitting.hpp"
 #include "CSMCameraComponent.hpp"
+#include "CSMShadowRenderer.hpp"
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
@@ -196,17 +197,6 @@ namespace CSM {
 			}
 		}
 
-		// if (auto shadowCamera = ecs.getSingleView<ShadowCameraComponent, CameraComponent, SpatialComponent>()) {
-		// 	for (auto&& [___, frustum, spatial, csm] : ecs.getView<FrustumComponent, SpatialComponent, CSMDebugComponent>().each()) {
-		// 		const auto& shadowCameraSpatial = std::get<3>(*shadowCamera);
-		// 		CameraComponent clippedCamera = std::get<2>(*shadowCamera); // Copy
-		// 		spatial.setModelMatrix(shadowCameraSpatial.getModelMatrix());
-		// 		
-		// 		float dist = clippedCamera.getFar() - clippedCamera.getNear();
-		// 		clippedCamera.setNear(clippedCamera.getNear() + dist / 2.f);
-		// 		frustum.calculateFrustum(clippedCamera, shadowCameraSpatial);
-		// 	}
-		// }
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
@@ -217,7 +207,8 @@ namespace CSM {
 		if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 			auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
 			glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-			drawShadows(resourceManagers, ecs, lightEntity, true);
+			//drawShadows(resourceManagers, ecs, lightEntity, true);
+			drawCSMShadows(resourceManagers, ecs, lightEntity, true);
 		}
 
 		backbuffer.bind();

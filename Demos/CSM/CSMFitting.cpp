@@ -147,7 +147,7 @@ namespace CSM {
 		auto&& [lightEntity, __, lightSpatial, ___, ____] = *lightTuple;
 		//NEO_ASSERT(receiverCamera.getType() == CameraComponent::CameraType::Orthographic, "Frustum fit receiver needs to be orthographic");
 
-		auto receiverCameras = ecs.getView<FrustumFitReceiverComponent, SpatialComponent, CameraComponent>();
+		// TODO - this should have asserts
 		if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0>()) {
 			_doFitting(sourceSpatial, sourceCamera, lightSpatial, std::get<1>(*csmCamera0), std::get<2>(*csmCamera0), 0);
 		}
