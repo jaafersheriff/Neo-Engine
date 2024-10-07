@@ -21,9 +21,6 @@
 #include <implot.h>
 #include <ImGuizmo.h>
 
-#include <tracy/Tracy.hpp>
-#include <tracy/TracyOpenGL.hpp>
-
 namespace {
 	static void _renderWindow(ImGuiViewport*, void*) {
 		NEO_FAIL("Neo doesn't support multiple windows");

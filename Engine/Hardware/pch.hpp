@@ -8,5 +8,3 @@
 #include <string>
 
 #include <glm/glm.hpp>
-
-#include <tracy/Tracy.hpp>

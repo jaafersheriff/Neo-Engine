@@ -14,5 +14,3 @@
 #include <ext/imgui_incl.hpp>
 
 #include <entt/core/hashed_string.hpp>
-
-#include <tracy/Tracy.hpp>
