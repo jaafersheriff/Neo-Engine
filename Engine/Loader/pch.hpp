@@ -9,5 +9,3 @@
 #include <unordered_map>
 
 #include <ext/imgui_incl.hpp>
-
-#include <tracy/Tracy.hpp>

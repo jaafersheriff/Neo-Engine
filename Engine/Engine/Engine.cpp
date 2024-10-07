@@ -42,9 +42,6 @@ extern "C" {
 #include <time.h>
 #include <iostream>
 
-#include <tracy/Tracy.hpp>
-#include <tracy/TracyOpenGL.hpp>
-
 #include <GLFW/glfw3.h>
 
 namespace neo {

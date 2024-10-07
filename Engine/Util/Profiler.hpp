@@ -2,7 +2,11 @@
 
 #include "Util/Util.hpp"
 
+#define _CAT(X,Y) _CAT2(X,Y)
+#define _CAT2(X,Y) X##Y
+#define TracyLine _CAT(__LINE__,U)
 #include <tracy/Tracy.hpp>
+
 #include <GL/glew.h>
 #include <tracy/TracyOpenGL.hpp>
 #define TRACY_ZONEN(x) ZoneScopedNC(x, (neo::HashedString(x) & 0xfefefe) >> 1 )
@@ -28,6 +32,7 @@ struct _NEO_GPU_SCOPE {
 
 #include <memory>
 #include <vector>
+#include <array>
 
 namespace neo {
 
@@ -47,8 +52,6 @@ namespace neo {
 					Scope(uint32_t handle);
 					~Scope();
 				};
-				void start();
-				void end();
 
 			private:
 				bool _handlesValid() const;

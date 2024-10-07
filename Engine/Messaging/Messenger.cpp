@@ -3,8 +3,6 @@
 #include "Util/Util.hpp"
 #include "Util/Profiler.hpp"
 
-#include <tracy/Tracy.hpp>
-
 namespace neo {
 
     entt::dispatcher Messenger::mDispatcher;
