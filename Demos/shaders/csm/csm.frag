@@ -5,10 +5,14 @@
 in vec4 fragPos;
 in vec3 fragNor;
 in vec2 fragTex;
-#ifdef ENABLE_SHADOWS
-in vec4 shadowCoord;
-#endif
 
+#ifdef ENABLE_SHADOWS
+in vec4 mockTransform;
+in vec4 shadowCoord0;
+in vec4 shadowCoord1;
+in vec4 shadowCoord2;
+in vec4 shadowCoord3;
+#endif
 
 uniform vec4 albedo;
 #ifdef ALBEDO_MAP
@@ -66,8 +70,34 @@ float attFactor = 1;
 	color.rgb = lambertianDiffuse(Ldir, N, fAlbedo.rgb, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
-	float visibility = max(getShadowVisibility(0, shadowMap, shadowMapResolution, shadowCoord, 0.005), 0.2);
-	color.rgb *= visibility;
+	float mockDepth = saturate(mockTransform.z / mockTransform.w);
+	vec2 shadowTex;
+	float L0Depth = shadowCoord0.z / shadowCoord0.w;
+	float L1Depth = shadowCoord1.z / shadowCoord1.w;
+	float L2Depth = shadowCoord2.z / shadowCoord2.w;
+	float L3Depth = shadowCoord3.z / shadowCoord3.w;
+	int layer = 0;
+	if (L0Depth > 0.0 && L0Depth < 1.0 && shadowCoord0.x < 1.0 && shadowCoord0.x > 0.0 && shadowCoord0.y > 0.0 && shadowCoord0.y < 1.0) {
+		layer = 0;
+		shadowTex = shadowCoord0.xy;
+	}
+	else if (L1Depth > 0.0 && L1Depth < 1.0 && shadowCoord1.x < 1.0 && shadowCoord1.x > 0.0 && shadowCoord1.y > 0.0 && shadowCoord1.y < 1.0) {
+		layer = 0;
+		shadowTex = shadowCoord1.xy;
+	}
+	else if (L2Depth > 0.0 && L2Depth < 1.0 && shadowCoord2.x < 1.0 && shadowCoord2.x > 0.0 && shadowCoord2.y > 0.0 && shadowCoord2.y < 1.0) {
+		layer = 2;
+		shadowTex = shadowCoord2.xy;
+	}
+	else if (L3Depth > 0.0 && L3Depth < 1.0 && shadowCoord3.x < 1.0 && shadowCoord3.x > 0.0 && shadowCoord3.y > 0.0 && shadowCoord3.y < 1.0) {
+		layer = 3;
+		shadowTex = shadowCoord3.xy;
+	}
+	color *= vec4(vec3(texture(shadowMap, shadowTex, layer).r), 1.0);
+
+	//float visibility = max(getShadowVisibility(0, shadowMap, shadowMapResolution, shadowCoord, 0.005), 0.2);
+	//color.rgb *= visibility;
+
 #endif
 
 	color.a = 1.0;
