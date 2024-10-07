@@ -161,7 +161,8 @@ namespace CSM {
 					resolvedShader.bindUniform("lightRadiance", light.mIntensity);
 				}
 				if (shadowsEnabled) {
-					resolvedShader.bindUniform("L", L);
+					const auto&& [_, __, mockCamera, mockSpatial] = *ecs.getSingleView<MockCameraComponent, CameraComponent, SpatialComponent>();
+					resolvedShader.bindUniform("mockPV", mockCamera.getProj() * mockSpatial.getView()); // This should just be the main scene projection 
 					// These could be an array tbh
 					resolvedShader.bindUniform("L0", L0);
 					resolvedShader.bindUniform("L1", L1);
