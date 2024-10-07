@@ -6,6 +6,7 @@
 #include "CSMCameraComponent.hpp"
 #include "CSMShadowRenderer.hpp"
 #include "CSMShadowMapComponent.hpp"
+#include "LambertianCSMShadowsRenderer.hpp"
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
@@ -217,7 +218,8 @@ namespace CSM {
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawPhong(resourceManagers, ecs, cameraEntity);
+		//drawPhong(resourceManagers, ecs, cameraEntity);
+		drawCSMResolve(resourceManagers, ecs, cameraEntity);
 		drawLines(resourceManagers, ecs, cameraEntity);
 
 		// Draw wireframe for anything being seen by the mock camera
