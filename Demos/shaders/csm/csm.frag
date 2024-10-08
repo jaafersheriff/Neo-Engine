@@ -1,6 +1,7 @@
 #include "alphaDiscard.glsl"
 #include "shadowreceiver.glsl"
 #include "phong.glsl"
+#include "normal.glsl"
 
 in vec4 fragPos;
 in vec3 fragNor;
@@ -40,6 +41,38 @@ uniform vec3 camPos;
 
 out vec4 color;
 
+float getSingleShadow(vec4 shadowCoord, sampler2D _shadowMap, int lod) {
+	if (shadowCoord.z < 0.0 || shadowCoord.z > 1.0) {
+		return 0.0;
+	}
+	if (shadowCoord.x < 0.0 || shadowCoord.x > 1.0) {
+		return 0.0;
+	}
+	if (shadowCoord.y < 0.0 || shadowCoord.y > 1.0) {
+		return 0.0;
+	}
+
+	return saturate(shadowCoord.z) - 0.002 > textureLod(_shadowMap, saturate(shadowCoord.xy), 0).r ? 1.0 : 0.0;
+}
+
+float getShadow(
+	vec4 mockTransform, 
+	vec4 _shadowCoord0, 
+	vec4 _shadowCoord1, 
+	vec4 _shadowCoord2, 
+	vec4 _shadowCoord3,
+	sampler2D _shadowMap
+) {
+	float mockDepth = saturate(mockTransform.z / mockTransform.w); // TODO - use this to minimize texture samples
+	float shadow = 0.0;
+	shadow += getSingleShadow(_shadowCoord0, _shadowMap, 0);
+	shadow += getSingleShadow(_shadowCoord1, _shadowMap, 1);
+	shadow += getSingleShadow(_shadowCoord2, _shadowMap, 2);
+	shadow += getSingleShadow(_shadowCoord3, _shadowMap, 3);
+
+	return 1.0 - saturate(shadow);
+}
+
 void main() {
 	vec4 fAlbedo = albedo;
 #ifdef ALBEDO_MAP
@@ -50,8 +83,10 @@ void main() {
 	alphaDiscard(fAlbedo.a);
 #endif
 
-	// TODO - normal mapping
 	vec3 N = normalize(fragNor);
+#ifdef NORMAL_MAP
+	N = getNormal(fNorm, texture(normalMap, fragTex).rgb, fragPos.xyz, fragTex);
+#endif
 	vec3 V = normalize(camPos - fragPos.xyz);
 
 float attFactor = 1;
@@ -70,30 +105,16 @@ float attFactor = 1;
 	color.rgb = lambertianDiffuse(Ldir, N, fAlbedo.rgb, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
-	float mockDepth = saturate(mockTransform.z / mockTransform.w);
-	vec2 shadowTex;
-	float L0Depth = shadowCoord0.z / shadowCoord0.w;
-	float L1Depth = shadowCoord1.z / shadowCoord1.w;
-	float L2Depth = shadowCoord2.z / shadowCoord2.w;
-	float L3Depth = shadowCoord3.z / shadowCoord3.w;
-	int layer = 0;
-	if (L0Depth > 0.0 && L0Depth < 1.0 && shadowCoord0.x < 1.0 && shadowCoord0.x > 0.0 && shadowCoord0.y > 0.0 && shadowCoord0.y < 1.0) {
-		layer = 0;
-		shadowTex = shadowCoord0.xy;
-	}
-	else if (L1Depth > 0.0 && L1Depth < 1.0 && shadowCoord1.x < 1.0 && shadowCoord1.x > 0.0 && shadowCoord1.y > 0.0 && shadowCoord1.y < 1.0) {
-		layer = 0;
-		shadowTex = shadowCoord1.xy;
-	}
-	else if (L2Depth > 0.0 && L2Depth < 1.0 && shadowCoord2.x < 1.0 && shadowCoord2.x > 0.0 && shadowCoord2.y > 0.0 && shadowCoord2.y < 1.0) {
-		layer = 2;
-		shadowTex = shadowCoord2.xy;
-	}
-	else if (L3Depth > 0.0 && L3Depth < 1.0 && shadowCoord3.x < 1.0 && shadowCoord3.x > 0.0 && shadowCoord3.y > 0.0 && shadowCoord3.y < 1.0) {
-		layer = 3;
-		shadowTex = shadowCoord3.xy;
-	}
-	color *= vec4(vec3(texture(shadowMap, shadowTex, layer).r), 1.0);
+	float visibility = getShadow(
+		mockTransform,
+		shadowCoord0,
+		shadowCoord1,
+		shadowCoord2,
+		shadowCoord3,
+		shadowMap
+	);
+
+	color *= vec4(vec3(visibility), 1.0);
 
 	//float visibility = max(getShadowVisibility(0, shadowMap, shadowMapResolution, shadowCoord, 0.005), 0.2);
 	//color.rgb *= visibility;

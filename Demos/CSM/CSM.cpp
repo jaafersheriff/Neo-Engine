@@ -215,6 +215,28 @@ namespace CSM {
 			drawCSMShadows(resourceManagers, ecs, lightEntity, true);
 		}
 
+		{
+			// Just to see what the mock camera sees
+			auto mockViewHandle = resourceManagers.mFramebufferManager.asyncLoad(
+				"MocK View",
+				FramebufferBuilder{}
+				.setSize(viewport.mSize)
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
+				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
+				resourceManagers.mTextureManager
+			);
+			if (resourceManagers.mFramebufferManager.isValid(mockViewHandle)) {
+				const auto& mockView = resourceManagers.mFramebufferManager.resolve(mockViewHandle);
+				mockView.bind();
+				mockView.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+				glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+				/*
+				const auto&& [mockCamera, ____, _____] = *ecs.getSingleView<MockCameraComponent, SpatialComponent>();
+				drawCSMResolve(resourceManagers, ecs, mockCamera);
+				*/
+			}
+		}
+
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
