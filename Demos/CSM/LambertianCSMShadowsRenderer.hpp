@@ -51,22 +51,6 @@ namespace CSM {
 		const auto& [lightEntity, ____, light, lightSpatial] = *lightView;
 
 		ShaderDefines passDefines(inDefines);
-		bool containsAlphaTest = false;
-		bool containsTransparency = false;
-		MakeDefine(ALPHA_TEST);
-		MakeDefine(TRANSPARENT);
-		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
-			containsAlphaTest = true;
-			passDefines.set(ALPHA_TEST);
-		}
-		if constexpr ((std::is_same_v<TransparentComponent, CompTs> || ...)) {
-			containsTransparency = true;
-			passDefines.set(TRANSPARENT);
-
-			glEnable(GL_BLEND);
-			glBlendEquation(GL_FUNC_ADD);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
 
 		glm::mat4 L, L0, L1, L2, L3;
 		const bool shadowsEnabled = 
@@ -98,19 +82,6 @@ namespace CSM {
 				L3 = biasMatrix * std::get<2>(*csmCamera3).getProj() * std::get<1>(*csmCamera3).getView();
 			}
 		}
-		bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
-		bool pointLight = ecs.has<PointLightComponent>(lightEntity);
-		MakeDefine(DIRECTIONAL_LIGHT);
-		MakeDefine(POINT_LIGHT);
-		if (directionalLight) {
-			passDefines.set(DIRECTIONAL_LIGHT);
-		}
-		else if (pointLight) {
-			passDefines.set(POINT_LIGHT);
-		}
-		else {
-			NEO_FAIL("Phong light needs a directional or point light component");
-		}
 
 		ShaderDefines drawDefines(passDefines);
 		// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
@@ -140,13 +111,6 @@ namespace CSM {
 			resolvedShader.bind();
 
 			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
-			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-				resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material.mAlbedoMap));
-			}
-
-			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
-			}
 
 			// UBO candidates
 			{
@@ -154,16 +118,8 @@ namespace CSM {
 				resolvedShader.bindUniform("V", cameraSpatial->getView());
 				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 				resolvedShader.bindUniform("lightCol", light.mColor);
-				if (directionalLight || shadowsEnabled) {
-					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
-				}
-				if (pointLight) {
-					resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
-					resolvedShader.bindUniform("lightRadiance", light.mIntensity);
-				}
+				resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
 				if (shadowsEnabled) {
-					const auto&& [_, __, mockCamera, mockSpatial] = *ecs.getSingleView<MockCameraComponent, CameraComponent, SpatialComponent>();
-					resolvedShader.bindUniform("mockPV", mockCamera.getProj() * mockSpatial.getView()); // This should just be the main scene projection 
 					// These could be an array tbh
 					resolvedShader.bindUniform("L0", L0);
 					resolvedShader.bindUniform("L1", L1);
@@ -179,10 +135,5 @@ namespace CSM {
 
 			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
-
-		if (containsTransparency) {
-			glDisable(GL_BLEND);
-		}
-
 	}
 }

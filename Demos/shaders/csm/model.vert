@@ -1,9 +1,6 @@
 layout(location = 0) in vec3 vertPos;
 layout(location = 1) in vec3 vertNor;
 layout(location = 2) in vec2 vertTex;
-#ifdef TANGENTS
-layout(location = 3) in vec4 vertTan;
-#endif
 
 uniform mat4 P;
 uniform mat4 V;
@@ -13,17 +10,12 @@ uniform mat3 N;
 out vec4 fragPos;
 out vec3 fragNor;
 out vec2 fragTex;
-#ifdef TANGENTS
-out vec4 fragTan;
-#endif
 
 #ifdef ENABLE_SHADOWS
-uniform mat4 mockPV;
 uniform mat4 L0;
 uniform mat4 L1;
 uniform mat4 L2;
 uniform mat4 L3;
-out vec4 mockTransform; // should just be the main scene transform
 out vec4 shadowCoord0; // csm frustum transforms
 out vec4 shadowCoord1;
 out vec4 shadowCoord2;
@@ -34,13 +26,9 @@ void main() {
 	fragPos = M * vec4(vertPos, 1.0);
 	fragNor = N * vertNor;
 	fragTex = vertTex;
-#ifdef TANGENTS
-	fragTan = vertTan;
-#endif
 	gl_Position = P * V * fragPos;
 
 #ifdef ENABLE_SHADOWS
-	mockTransform = mockPV * fragPos;
 	shadowCoord0 = L0 * fragPos;
 	shadowCoord1 = L1 * fragPos;
 	shadowCoord2 = L2 * fragPos;
