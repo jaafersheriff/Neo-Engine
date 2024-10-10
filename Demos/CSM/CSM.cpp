@@ -60,7 +60,6 @@ namespace CSM {
 			SpatialComponent spatial(position, glm::vec3(1.f));
 			spatial.setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
 			CSMShadowMapComponent csmShadowMap(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
-			LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
 			return std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Light")
 				.attachComponent<LightComponent>(glm::vec3(1.f))
@@ -70,9 +69,48 @@ namespace CSM {
 				.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
 				.attachComponent<FrustumComponent>()
 				.attachComponent<FrustumFitReceiverComponent>()
-				.attachComponent<LineMeshComponent>(lineMesh)
 				.attachComponent<CSMShadowMapComponent>(csmShadowMap)
 			);
+		}
+
+		std::vector<ECS::EntityBuilder> _createCSMCamera(ResourceManagers& resourceManagers) {
+
+			std::vector<ECS::EntityBuilder> ret;
+			// CSM cameras
+			// These need to be separate entities because 
+			//	- CSM requires multiple Frustum and Camera components, and entities can only have one copy of a component
+			//	- Frustum culling works off of camera entity
+			// CSMFitting system is responsible for setting the various spatial/camera/frustum components
+			auto csmCameraProto = ECS::EntityBuilder{}
+				.attachComponent<SpatialComponent>()
+				.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
+				.attachComponent<FrustumComponent>()
+				;
+			LineMeshComponent lineMesh0(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
+			ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
+				.attachComponent<CSMCamera0>()
+				.attachComponent<LineMeshComponent>(lineMesh0)
+			);
+
+			LineMeshComponent lineMesh1(resourceManagers.mMeshManager, glm::vec3(0.f, 1.f, 0.f));
+			ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
+				.attachComponent<CSMCamera1>()
+				.attachComponent<LineMeshComponent>(lineMesh1)
+			);
+
+			LineMeshComponent lineMesh2(resourceManagers.mMeshManager, glm::vec3(0.f, 0.f, 1.f));
+			ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
+				.attachComponent<CSMCamera2>()
+				.attachComponent<LineMeshComponent>(lineMesh2)
+			);
+
+			LineMeshComponent lineMesh3(resourceManagers.mMeshManager, glm::vec3(1.f, 1.f, 0.f));
+			ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
+				.attachComponent<CSMCamera3>()
+				.attachComponent<LineMeshComponent>(lineMesh3)
+			);
+
+			return ret;
 		}
 	}
 
@@ -104,38 +142,12 @@ namespace CSM {
 
 		// Ortho camera, shadow camera, light
 		ecs.submitEntity(_createLight(resourceManagers, glm::vec3(10.f, 20.f, 0.f)));
-
-		// CSM cameras
+		
 		{
-			auto csmCameraProto = ECS::EntityBuilder{}
-				.attachComponent<SpatialComponent>()
-				.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
-				.attachComponent<FrustumComponent>()
-				;
-			LineMeshComponent lineMesh0(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
-			ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
-				.attachComponent<CSMCamera0>()
-				.attachComponent<TagComponent>("CSMCamera0")
-				.attachComponent<LineMeshComponent>(lineMesh0)
-			));
-			LineMeshComponent lineMesh1(resourceManagers.mMeshManager, glm::vec3(0.f, 1.f, 0.f));
-			ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
-				.attachComponent<CSMCamera1>()
-				.attachComponent<TagComponent>("CSMCamera1")
-				.attachComponent<LineMeshComponent>(lineMesh1)
-			));
-			LineMeshComponent lineMesh2(resourceManagers.mMeshManager, glm::vec3(0.f, 0.f, 1.f));
-			ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
-				.attachComponent<CSMCamera2>()
-				.attachComponent<TagComponent>("CSMCamera2")
-				.attachComponent<LineMeshComponent>(lineMesh2)
-			));
-			LineMeshComponent lineMesh3(resourceManagers.mMeshManager, glm::vec3(1.f, 1.f, 0.f));
-			ecs.submitEntity(std::move(ECS::EntityBuilder(csmCameraProto)
-				.attachComponent<CSMCamera3>()
-				.attachComponent<TagComponent>("CSMCamera3")
-				.attachComponent<LineMeshComponent>(lineMesh3)
-			));
+			auto csmCameras = _createCSMCamera(resourceManagers);
+			for (auto& camera : csmCameras) {
+				ecs.submitEntity(std::move(camera)); // is this safe?
+			}
 		}
 
 		// Renderable
@@ -183,21 +195,75 @@ namespace CSM {
 		NEO_UNUSED(resourceManagers, ecs);
 	}
 
+	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
+		if (ImGui::Checkbox("Use CSM", &mUseCSM)) {
+			auto&& [lightEntity, _, __] = *ecs.getSingleView<MainLightComponent, LightComponent>();
+			if (mUseCSM) {
+				NEO_ASSERT(ecs.has<ShadowCameraComponent>(lightEntity) && !ecs.has<CSMShadowMapComponent>(lightEntity), "Incorrect component movement");
+				auto shadowCamera = ecs.getComponent<ShadowCameraComponent>(lightEntity);
+				resourceManagers.mTextureManager.discard(shadowCamera->mShadowMap);
+				ecs.removeComponent<ShadowCameraComponent>(lightEntity);
+				ecs.removeComponent<LineMeshComponent>(lightEntity);
+
+				CSMShadowMapComponent csmShadowMap(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
+				ecs.addComponent<CSMShadowMapComponent>(lightEntity, csmShadowMap);
+
+				auto csmCameras = _createCSMCamera(resourceManagers);
+				for (auto& camera : csmCameras) {
+					ecs.submitEntity(std::move(camera)); // is this safe?
+				}
+			}
+			else {
+				NEO_ASSERT(!ecs.has<ShadowCameraComponent>(lightEntity) && ecs.has<CSMShadowMapComponent>(lightEntity), "Incorrect component movement");
+				auto shadowMap = ecs.getComponent<CSMShadowMapComponent>(lightEntity);
+				resourceManagers.mTextureManager.discard(shadowMap->mShadowMap);
+				ecs.removeComponent<CSMShadowMapComponent>(lightEntity);
+
+				ShadowCameraComponent shadowCamera(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
+				ecs.addComponent<ShadowCameraComponent>(lightEntity, shadowCamera);
+				LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
+				ecs.addComponent<LineMeshComponent>(lightEntity, lineMesh);
+
+				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera0, SpatialComponent>()));
+				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera1, SpatialComponent>()));
+				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera2, SpatialComponent>()));
+				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera3, SpatialComponent>()));
+			}
+		}
+	}
+
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		const auto& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-		const auto& [lightEntity, ___, shadowMap] = *ecs.getSingleView<MainLightComponent, CSMShadowMapComponent>();
+		const auto& [lightEntity, ___, ____] = *ecs.getSingleView<MainLightComponent, LightComponent>();
 
-		if (resourceManagers.mTextureManager.isValid(shadowMap.mShadowMap)) {
-			auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap.mShadowMap);
-			glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-			drawCSMShadows(resourceManagers, ecs, lightEntity, true);
+		if (ecs.has<ShadowCameraComponent>(lightEntity)) {
+			const auto& shadowCamera = ecs.cGetComponent<ShadowCameraComponent>(lightEntity);
+			if (resourceManagers.mTextureManager.isValid(shadowCamera->mShadowMap)) {
+				auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera->mShadowMap);
+				glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
+				drawShadows(resourceManagers, ecs, lightEntity, true);
+			}
+
+			backbuffer.bind();
+			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+			drawPhong(resourceManagers, ecs, cameraEntity);
+		}
+		else if (ecs.has<CSMShadowMapComponent>(lightEntity)) {
+			const auto& shadowMap = ecs.cGetComponent<CSMShadowMapComponent>(lightEntity);
+			if (resourceManagers.mTextureManager.isValid(shadowMap->mShadowMap)) {
+				auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap->mShadowMap);
+				glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
+				drawCSMShadows(resourceManagers, ecs, lightEntity, true);
+			}
+
+			backbuffer.bind();
+			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+			drawCSMResolve(resourceManagers, ecs, cameraEntity);
 		}
 
-		backbuffer.bind();
-		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawCSMResolve(resourceManagers, ecs, cameraEntity);
 		drawLines(resourceManagers, ecs, cameraEntity);
 	}
 }

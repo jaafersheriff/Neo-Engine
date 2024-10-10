@@ -290,7 +290,6 @@ namespace neo {
 		return mRegistry.view<CompTs...>().size_hint() != 0;
 	}
 
-
 	template<typename FilterCompT, typename SortCompT> 
 	void ECS::sort(std::function<bool(const Entity left, const Entity right)> compare) const {
 		mRegistry.sort<SortCompT>(compare);
