@@ -32,7 +32,7 @@ if (MSVC)
 	endfunction()
 	set(MESSAGE_QUIET ON)
 
-	option(TRACY_ENABLE "" OFF)
+	option(TRACY_ENABLE "" ON)
 	option(TRACY_ON_DEMAND "" ON)
 	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tracy")
 	target_compile_options(TracyClient PRIVATE "/WX-" "/W0")
