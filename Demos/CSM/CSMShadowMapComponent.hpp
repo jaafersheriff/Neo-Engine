@@ -24,7 +24,7 @@ namespace CSM {
 				TextureFormat { 
 					target, 
 					types::texture::InternalFormats::D16,
-					TextureFilter { types::texture::Filters::Linear, types::texture::Filters::Linear },
+					TextureFilter { types::texture::Filters::LinearMipmapNearest, types::texture::Filters::Linear },
 					wrap,
 					types::ByteFormats::UnsignedByte,
 					4

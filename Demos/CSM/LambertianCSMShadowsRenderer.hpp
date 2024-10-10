@@ -41,6 +41,15 @@ namespace CSM {
 			return;
 		}
 
+
+		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
+		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
+		auto lightView = ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
+		if (!lightView) {
+			return;
+		}
+		const auto& [lightEntity, ____, light, lightSpatial] = *lightView;
+
 		ShaderDefines passDefines(inDefines);
 		bool containsAlphaTest = false;
 		bool containsTransparency = false;
@@ -58,14 +67,6 @@ namespace CSM {
 			glBlendEquation(GL_FUNC_ADD);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
-
-		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
-		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
-		auto lightView = ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
-		if (!lightView) {
-			return;
-		}
-		const auto& [lightEntity, ____, light, lightSpatial] = *lightView;
 
 		glm::mat4 L, L0, L1, L2, L3;
 		const bool shadowsEnabled = 
