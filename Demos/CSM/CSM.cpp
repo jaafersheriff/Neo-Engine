@@ -59,7 +59,7 @@ namespace CSM {
 		ECS::EntityBuilder _createLight(ResourceManagers& resourceManagers, glm::vec3 position) {
 			SpatialComponent spatial(position, glm::vec3(1.f));
 			spatial.setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
-			CSMShadowMapComponent csmShadowMap(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
+			CSMShadowMapComponent csmShadowMap(types::texture::Target::Texture2D, 1024, resourceManagers.mTextureManager);
 			return std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Light")
 				.attachComponent<LightComponent>(glm::vec3(1.f))
@@ -151,7 +151,7 @@ namespace CSM {
 		}
 
 		// Renderable
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 250; i++) {
 			auto meshHandle = util::genRandomBool() ? HashedString("cube") : HashedString("sphere");
 			MaterialComponent material;
 			material.mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
@@ -205,7 +205,7 @@ namespace CSM {
 				ecs.removeComponent<ShadowCameraComponent>(lightEntity);
 				ecs.removeComponent<LineMeshComponent>(lightEntity);
 
-				CSMShadowMapComponent csmShadowMap(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
+				CSMShadowMapComponent csmShadowMap(types::texture::Target::Texture2D, 1024, resourceManagers.mTextureManager);
 				ecs.addComponent<CSMShadowMapComponent>(lightEntity, csmShadowMap);
 
 				auto csmCameras = _createCSMCamera(resourceManagers);
