@@ -11,5 +11,8 @@ namespace CSM {
 		virtual void init(ECS& ecs, ResourceManagers& resourceManagers) override;
 		virtual void update(ECS& ecs, ResourceManagers& resourceManagers) override;
 		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) override;
+		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
+
+		bool mUseCSM = true;
 	};
 }
