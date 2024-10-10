@@ -13,7 +13,6 @@
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
-#include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
@@ -46,9 +45,6 @@ using namespace neo;
 /* Game object definitions */
 namespace CSM {
 	namespace {
-		START_COMPONENT(SeenByMock);
-		END_COMPONENT();
-
 		START_COMPONENT(MockCameraComponent);
 		END_COMPONENT();
 
@@ -63,7 +59,6 @@ namespace CSM {
 		ECS::EntityBuilder _createLight(ResourceManagers& resourceManagers, glm::vec3 position) {
 			SpatialComponent spatial(position, glm::vec3(1.f));
 			spatial.setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
-			ShadowCameraComponent shadowCamera(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
 			CSMShadowMapComponent csmShadowMap(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
 			LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
 			return std::move(ECS::EntityBuilder{}
@@ -76,7 +71,6 @@ namespace CSM {
 				.attachComponent<FrustumComponent>()
 				.attachComponent<FrustumFitReceiverComponent>()
 				.attachComponent<LineMeshComponent>(lineMesh)
-				.attachComponent<ShadowCameraComponent>(shadowCamera)
 				.attachComponent<CSMShadowMapComponent>(csmShadowMap)
 			);
 		}
@@ -186,65 +180,24 @@ namespace CSM {
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
-		NEO_UNUSED(resourceManagers);
-		const auto&& [mockCameraEntity, _, __] = *ecs.getSingleView<MockCameraComponent, SpatialComponent>();
-		const auto& view = ecs.getView<const WireframeRenderComponent, CameraCulledComponent>();
-		for (auto entity : view) {
-			auto& culled = view.get<CameraCulledComponent>(entity);
-			if (culled.isInView(ecs, entity, mockCameraEntity)) {
-				if (!ecs.has<SeenByMock>(entity)) {
-					ecs.addComponent<SeenByMock>(entity);
-				}
-			}
-			else if (ecs.has<SeenByMock>(entity)) {
-				ecs.removeComponent<SeenByMock>(entity);
-			}
-		}
-
+		NEO_UNUSED(resourceManagers, ecs);
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		const auto&& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-		const auto&& [lightEntity, ___, shadowCamera] = *ecs.getSingleView<MainLightComponent, ShadowCameraComponent>();
+		const auto& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		const auto& [lightEntity, ___, shadowMap] = *ecs.getSingleView<MainLightComponent, CSMShadowMapComponent>();
 
-		if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
-			auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
+		if (resourceManagers.mTextureManager.isValid(shadowMap.mShadowMap)) {
+			auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap.mShadowMap);
 			glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-			drawShadows(resourceManagers, ecs, lightEntity, true);
 			drawCSMShadows(resourceManagers, ecs, lightEntity, true);
-		}
-
-		{
-			// Just to see what the mock camera sees
-			auto mockViewHandle = resourceManagers.mFramebufferManager.asyncLoad(
-				"MocK View",
-				FramebufferBuilder{}
-				.setSize(viewport.mSize)
-				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
-				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
-				resourceManagers.mTextureManager
-			);
-			if (resourceManagers.mFramebufferManager.isValid(mockViewHandle)) {
-				const auto& mockView = resourceManagers.mFramebufferManager.resolve(mockViewHandle);
-				mockView.bind();
-				mockView.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-				glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-				/*
-				const auto&& [mockCamera, ____, _____] = *ecs.getSingleView<MockCameraComponent, SpatialComponent>();
-				drawCSMResolve(resourceManagers, ecs, mockCamera);
-				*/
-			}
 		}
 
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		//drawPhong(resourceManagers, ecs, cameraEntity);
 		drawCSMResolve(resourceManagers, ecs, cameraEntity);
 		drawLines(resourceManagers, ecs, cameraEntity);
-
-		// Draw wireframe for anything being seen by the mock camera
-		drawWireframe<SeenByMock>(resourceManagers, ecs, cameraEntity);
 	}
 }

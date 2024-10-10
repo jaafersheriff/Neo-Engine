@@ -122,6 +122,9 @@ namespace neo {
 				}
 				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, debugName, textureDetails.mData);
 				textureResource->mDebugName = debugName;
+				if (textureDetails.mFormat.mMipCount > 1 && !textureDetails.mFormat.mFilter.usesMipFilter()) {
+					NEO_LOG_W("Mipped texture doesn't use a valid mip filter - sampling the mip chain may always use the 0th mip");
+				}
 				if (textureDetails.mFormat.mFilter.usesMipFilter() || textureDetails.mFormat.mMipCount > 1) {
 					textureResource->mResource.genMips();
 				}

@@ -52,7 +52,7 @@ float getSingleShadow(vec4 shadowCoord, sampler2D _shadowMap, int lod) {
 		return 0.0;
 	}
 
-	return saturate(shadowCoord.z) - 0.002 > textureLod(_shadowMap, saturate(shadowCoord.xy), 0).r ? 1.0 : 0.0;
+	return saturate(shadowCoord.z) - 0.002 > textureLod(_shadowMap, saturate(shadowCoord.xy), lod).r ? 1.0 : 0.0;
 }
 
 float getShadow(
@@ -115,9 +115,6 @@ float attFactor = 1;
 	);
 
 	color *= vec4(vec3(visibility), 1.0);
-
-	//float visibility = max(getShadowVisibility(0, shadowMap, shadowMapResolution, shadowCoord, 0.005), 0.2);
-	//color.rgb *= visibility;
 
 #endif
 
