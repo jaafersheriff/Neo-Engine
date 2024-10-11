@@ -11,18 +11,19 @@
 namespace neo {
 
 	START_COMPONENT(CameraCulledComponent);
-		CameraCulledComponent(std::vector<ECS::Entity> set = {}) :
-			mCameraViews(set)
+		using CameraIDs = std::vector<ECS::Entity>;
+		CameraCulledComponent(CameraIDs ids = {}) :
+			mCameraIDs(ids)
 		{}
 
 		bool isInView(const ECS& ecs, ECS::Entity thisID, ECS::Entity cameraID) const {
 			if (ecs.isSystemEnabled<FrustumSystem>() && ecs.isSystemEnabled<FrustumCullingSystem>() && ecs.has<BoundingBoxComponent>(thisID)) {
-				return std::find(mCameraViews.begin(), mCameraViews.end(), cameraID) != mCameraViews.end();
+				return std::find(mCameraIDs.begin(), mCameraIDs.end(), cameraID) != mCameraIDs.end();
 			}
 
 			return true;
 		}
 
-		std::vector<ECS::Entity> mCameraViews;
+		CameraIDs mCameraIDs;
 	END_COMPONENT();
 }

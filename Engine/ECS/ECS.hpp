@@ -79,7 +79,9 @@ namespace neo {
 		// All access
 		template<typename CompT> std::optional<std::tuple<Entity, CompT&>> getComponent();
 		template<typename CompT> std::optional<std::tuple<ECS::Entity, const CompT&>> cGetComponent() const;
-		template<typename... CompTs> bool has() const;
+		template<typename CompT> uint32_t entityCount() const;
+		template<typename CompT> bool has() const;
+		template<typename CompT, typename... CompTs> bool has() const;
 		template<typename... CompTs> auto getView();
 		template<typename... CompTs> const auto getView() const;
 		template<typename... CompTs> std::optional<std::tuple<Entity, CompTs&...>> getSingleView();
@@ -296,9 +298,19 @@ namespace neo {
 		return std::nullopt;
 	}
 
-	template<typename... CompTs> 
+	template<typename CompT> 
+	uint32_t ECS::entityCount() const {
+		return static_cast<uint32_t>(mRegistry.storage<CompT>().size());
+	}
+
+	template<typename CompT>
 	bool ECS::has() const {
-		return mRegistry.view<CompTs...>().size_hint() != 0;
+		return entityCount<CompT>() > 0;
+	}
+
+	template<typename CompT, typename... CompTs> 
+	bool ECS::has() const {
+		return has<CompT>();&& has<CompTs...>();
 	}
 
 	template<typename FilterCompT, typename SortCompT> 
