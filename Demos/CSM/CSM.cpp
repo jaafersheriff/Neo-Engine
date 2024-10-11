@@ -2,12 +2,9 @@
 #include "Engine/Engine.hpp"
 
 #include "PerspectiveUpdateSystem.hpp"
-#include "CSMFitting.hpp"
-#include "CSMCameraComponent.hpp"
-#include "CSMShadowRenderer.hpp"
-#include "CSMShadowMapComponent.hpp"
 #include "LambertianCSMShadowsRenderer.hpp"
 
+#include "ECS/Component/CameraComponent/CSMCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
@@ -17,6 +14,7 @@
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
+#include "ECS/Component/RenderingComponent/CSMShadowMapComponent.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
@@ -29,12 +27,13 @@
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumToLineSystem.hpp"
+#include "ECS/Systems/CameraSystems/CSMFitting.hpp"
 
 #include "Renderer/GLObjects/Framebuffer.hpp"
+#include "Renderer/RenderingSystems/CSMShadowRenderer.hpp"
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
-#include "Renderer/RenderingSystems/WireframeRenderer.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"
 
@@ -59,7 +58,7 @@ namespace CSM {
 		ECS::EntityBuilder _createLight(ResourceManagers& resourceManagers, glm::vec3 position) {
 			SpatialComponent spatial(position, glm::vec3(1.f));
 			spatial.setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
-			CSMShadowMapComponent csmShadowMap(types::texture::Target::Texture2D, 1024, resourceManagers.mTextureManager);
+			CSMShadowMapComponent csmShadowMap(1024, resourceManagers.mTextureManager);
 			return std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Light")
 				.attachComponent<LightComponent>(glm::vec3(1.f))
@@ -205,7 +204,7 @@ namespace CSM {
 				ecs.removeComponent<ShadowCameraComponent>(lightEntity);
 				ecs.removeComponent<LineMeshComponent>(lightEntity);
 
-				CSMShadowMapComponent csmShadowMap(types::texture::Target::Texture2D, 1024, resourceManagers.mTextureManager);
+				CSMShadowMapComponent csmShadowMap(1024, resourceManagers.mTextureManager);
 				ecs.addComponent<CSMShadowMapComponent>(lightEntity, csmShadowMap);
 
 				auto csmCameras = _createCSMCamera(resourceManagers);

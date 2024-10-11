@@ -2,8 +2,8 @@
 
 #include "ECS/ECS.hpp"
 
-#include "CSMCameraComponent.hpp"
-#include "CSMShadowMapComponent.hpp"
+#include "ECS/Component/CameraComponent/CSMCameraComponent.hpp"
+#include "ECS/Component/RenderingComponent/CSMShadowMapComponent.hpp"
 
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
@@ -11,9 +11,7 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
-namespace CSM {
-
-	using namespace neo;
+namespace neo {
 
 	namespace {
 		template<typename... CompTs>
