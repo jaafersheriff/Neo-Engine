@@ -219,7 +219,7 @@ namespace CSM {
 				resourceManagers.mTextureManager.discard(shadowMap->mShadowMap);
 				ecs.removeComponent<CSMShadowMapComponent>(lightEntity);
 
-				ShadowCameraComponent shadowCamera(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
+				ShadowCameraComponent shadowCamera(2048, resourceManagers.mTextureManager);
 				ecs.addComponent<ShadowCameraComponent>(lightEntity, shadowCamera);
 				LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
 				ecs.addComponent<LineMeshComponent>(lightEntity, lineMesh);

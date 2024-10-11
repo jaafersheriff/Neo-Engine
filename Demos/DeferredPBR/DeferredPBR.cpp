@@ -43,8 +43,8 @@ namespace DeferredPBR {
 	namespace {
 		void _createPointLights(ECS& ecs, ResourceManagers& resourceManagers, const int count) {
 			for (auto& e : ecs.getView<PointLightComponent>()) {
-				if (ecs.has<ShadowCameraComponent>(e)) {
-					resourceManagers.mTextureManager.discard(ecs.getComponent<ShadowCameraComponent>(e)->mShadowMap);
+				if (ecs.has<PointLightShadowMapComponent>(e)) {
+					resourceManagers.mTextureManager.discard(ecs.getComponent<PointLightShadowMapComponent>(e)->mShadowMap);
 				}
 				ecs.removeEntity(e);
 			}
@@ -55,14 +55,14 @@ namespace DeferredPBR {
 					util::genRandom(0.f, 10.f),
 					util::genRandom(-7.5f, 7.5f)
 				);
-				ShadowCameraComponent shadowCamera(types::texture::Target::TextureCube, 256, resourceManagers.mTextureManager);
+				PointLightShadowMapComponent shadowMap(256, resourceManagers.mTextureManager);
 				ecs.submitEntity(std::move(ECS::EntityBuilder{}
 					.attachComponent<LightComponent>(util::genRandomVec3(0.3f, 1.f), util::genRandom(300.f, 1000.f))
 					.attachComponent<PointLightComponent>()
 					.attachComponent<SinTranslateComponent>(glm::vec3(0.f, util::genRandom(0.f, 5.f), 0.f), position)
 					.attachComponent<SpatialComponent>(position, glm::vec3(50.f))
 					.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f), false)
-					.attachComponent<ShadowCameraComponent>(shadowCamera)
+					.attachComponent<PointLightShadowMapComponent>(shadowMap)
 				));
 			}
 		}
@@ -91,7 +91,7 @@ namespace DeferredPBR {
 		{
 			SpatialComponent spatial(glm::vec3(75.f, 200.f, 20.f));
 			spatial.setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
-			ShadowCameraComponent shadowCamera(types::texture::Target::Texture2D, 2048, resourceManagers.mTextureManager);
+			ShadowCameraComponent shadowCamera(2048, resourceManagers.mTextureManager);
 
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Light")
@@ -331,8 +331,8 @@ namespace DeferredPBR {
 			}
 		}
 		if (ImGui::Checkbox("Point Light Shadows", &mDrawPointLightShadows)) {
-			for (auto& entity : ecs.getView<PointLightComponent, ShadowCameraComponent>()) {
-				auto shadowCamera = ecs.getComponent<ShadowCameraComponent>(entity);
+			for (auto& entity : ecs.getView<PointLightComponent, PointLightShadowMapComponent>()) {
+				auto shadowCamera = ecs.getComponent<PointLightShadowMapComponent>(entity);
 				resourceManagers.mTextureManager.discard(shadowCamera->mShadowMap);
 				if (mDrawPointLightShadows) {
 					shadowCamera->mShadowMap = resourceManagers.mTextureManager.asyncLoad(
@@ -385,9 +385,9 @@ namespace DeferredPBR {
 			}
 		}
 
-		auto pointLightView = ecs.getView<PointLightComponent, ShadowCameraComponent, SpatialComponent>();
+		auto pointLightView = ecs.getView<PointLightComponent, PointLightShadowMapComponent, SpatialComponent>();
 		for (auto& entity : pointLightView) {
-			const auto& shadowCamera = pointLightView.get<ShadowCameraComponent>(entity);
+			const auto& shadowCamera = pointLightView.get<PointLightShadowMapComponent>(entity);
 			if (mDrawPointLightShadows) {
 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 					auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);

@@ -68,14 +68,14 @@ namespace Cornell {
 		}
 
 		{
-			ShadowCameraComponent shadowCamera(types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
+			PointLightShadowMapComponent shadowMap(512, resourceManagers.mTextureManager);
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Light")
 				.attachComponent<SpatialComponent>(glm::vec3(0.f, 1.f - util::EP * 3, 0.5f), glm::vec3(10.f))
 				.attachComponent<MainLightComponent>()
 				.attachComponent<LightComponent>(glm::vec3(1.f))
 				.attachComponent<PointLightComponent>()
-				.attachComponent<ShadowCameraComponent>(shadowCamera)
+				.attachComponent<PointLightShadowMapComponent>(shadowMap)
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f), false)
 			));
 		}
@@ -98,7 +98,7 @@ namespace Cornell {
 			PointLightShadowMapParameters params = {
 				0.01f
 			};
-			if (auto lightView = ecs.getSingleView<MainLightComponent, PointLightComponent, ShadowCameraComponent>()) {
+			if (auto lightView = ecs.getSingleView<MainLightComponent, PointLightComponent, PointLightShadowMapComponent>()) {
 				auto&& [lightEntity, __, ___, shadowCamera] = lightView.value();
 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 					auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);

@@ -56,7 +56,7 @@ namespace Fireworks {
 		}
 
 		{
-			ShadowCameraComponent shadowCamera(types::texture::Target::TextureCube, 512, resourceManagers.mTextureManager);
+			PointLightShadowMapComponent shadowMap(512, resourceManagers.mTextureManager);
 			FireworkComponent firework(resourceManagers.mMeshManager, 16384);
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Light")
@@ -66,7 +66,7 @@ namespace Fireworks {
 				.attachComponent<PointLightComponent>()
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
 				.attachComponent<MeshComponent>(HashedString("sphere"))
-				.attachComponent<ShadowCameraComponent>(shadowCamera)
+				.attachComponent<PointLightShadowMapComponent>(shadowMap)
 				.attachComponent<FireworkComponent>(firework)
 			));
 		}
@@ -135,7 +135,7 @@ namespace Fireworks {
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		_tickParticles(resourceManagers, ecs);
 
-		if (const auto& lightView = ecs.getSingleView<MainLightComponent, PointLightComponent, ShadowCameraComponent>()) {
+		if (const auto& lightView = ecs.getSingleView<MainLightComponent, PointLightComponent, PointLightShadowMapComponent>()) {
 			const auto& [lightEntity, _, __, shadowCamera] = *lightView;
 			if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 				auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);

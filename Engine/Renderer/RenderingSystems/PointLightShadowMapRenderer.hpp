@@ -4,6 +4,7 @@
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
+#include "ECS/Component/RenderingComponent/PointLightShadowMapComponent.hpp"
 #include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
 
 #include "Renderer/GLObjects/SourceShader.hpp"
@@ -32,12 +33,11 @@ namespace neo {
 			return;
 		}
 
-		NEO_ASSERT(ecs.has<PointLightComponent>(lightEntity) && ecs.has<ShadowCameraComponent>(lightEntity), "Invalid light entity for point ligth shadows");
-		TextureHandle shadowCubeHandle = ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap;
+		NEO_ASSERT(ecs.has<PointLightComponent>(lightEntity) && ecs.has<PointLightShadowMapComponent>(lightEntity), "Invalid light entity for point ligth shadows");
+		TextureHandle shadowCubeHandle = ecs.cGetComponent<PointLightShadowMapComponent>(lightEntity)->mShadowMap;
 		if (!resourceManagers.mTextureManager.isValid(shadowCubeHandle)) {
 			return;
 		}
-		NEO_ASSERT(resourceManagers.mTextureManager.resolve(shadowCubeHandle).mFormat.mTarget == types::texture::Target::TextureCube, "Can only draw point light shadows to a cube texture");
 
 		SpatialComponent cameraSpatial = *ecs.cGetComponent<SpatialComponent>(lightEntity); // Copy
 
