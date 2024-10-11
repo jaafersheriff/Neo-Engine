@@ -4,7 +4,7 @@
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
-#include "ECS/Component/RenderingComponent/PointLightShadowMapComponent.hpp"
+#include "ECS/Component/RenderingComponent/ShadowMapComponents.hpp"
 #include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
 
 #include "Renderer/GLObjects/SourceShader.hpp"

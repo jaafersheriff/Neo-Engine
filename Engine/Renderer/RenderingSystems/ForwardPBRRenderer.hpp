@@ -11,9 +11,8 @@
 #include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
 #include "ECS/Component/RenderingComponent/IBLComponent.hpp"
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
-#include "ECS/Component/RenderingComponent/PointLightShadowMapComponent.hpp"
+#include "ECS/Component/RenderingComponent/ShadowMapComponents.hpp"
 
-#include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 

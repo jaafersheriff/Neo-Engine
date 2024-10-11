@@ -317,30 +317,23 @@ namespace DeferredPBR {
 		mGbufferDebugParams.imguiEditor();
 
 		if (ImGui::Checkbox("Directional Shadows", &mDrawDirectionalShadows)) {
-			for (auto& entity : ecs.getView<DirectionalLightComponent, ShadowCameraComponent>()) {
-				auto shadowCamera = ecs.getComponent<ShadowCameraComponent>(entity);
-				resourceManagers.mTextureManager.discard(shadowCamera->mShadowMap);
-				if (mDrawDirectionalShadows) {
-					shadowCamera->mShadowMap = resourceManagers.mTextureManager.asyncLoad(
-						HashedString(shadowCamera->mID.c_str()),
-						TextureBuilder{}
-						.setDimension(glm::u16vec3(static_cast<uint16_t>(2048), static_cast<uint16_t>(2048), 0))
-						.setFormat(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::D16 })
-					);
-				}
+			auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent>();
+			if (mDrawDirectionalShadows) {
+				ShadowCameraComponent shadowCamera(2048, resourceManagers.mTextureManager);
+				ecs.addComponent<ShadowCameraComponent>(std::get<0>(*lightView), shadowCamera);
+			}
+			else {
+				ecs.removeComponent<ShadowCameraComponent>(std::get<0>(*lightView));
 			}
 		}
 		if (ImGui::Checkbox("Point Light Shadows", &mDrawPointLightShadows)) {
-			for (auto& entity : ecs.getView<PointLightComponent, PointLightShadowMapComponent>()) {
-				auto shadowCamera = ecs.getComponent<PointLightShadowMapComponent>(entity);
-				resourceManagers.mTextureManager.discard(shadowCamera->mShadowMap);
+			for (auto& entity : ecs.getView<PointLightComponent, SpatialComponent>()) {
 				if (mDrawPointLightShadows) {
-					shadowCamera->mShadowMap = resourceManagers.mTextureManager.asyncLoad(
-						HashedString(shadowCamera->mID.c_str()),
-						TextureBuilder{}
-						.setDimension(glm::u16vec3(static_cast<uint16_t>(256), static_cast<uint16_t>(256), 0))
-						.setFormat(TextureFormat{ types::texture::Target::TextureCube, types::texture::InternalFormats::D16 })
-					);
+					PointLightShadowMapComponent shadowMap(256, resourceManagers.mTextureManager);
+					ecs.addComponent<PointLightShadowMapComponent>(entity, shadowMap);
+				}
+				else {
+					ecs.removeComponent<PointLightShadowMapComponent>(entity);
 				}
 			}
 		}
