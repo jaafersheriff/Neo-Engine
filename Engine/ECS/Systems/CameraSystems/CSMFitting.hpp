@@ -2,7 +2,7 @@
 
 #include "ECS/Systems/System.hpp"
 
-namespace CSM {
+namespace neo {
 
 	class CSMFitting : public neo::System {
 

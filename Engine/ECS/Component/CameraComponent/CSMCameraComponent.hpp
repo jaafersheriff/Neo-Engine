@@ -2,7 +2,7 @@
 
 #include "ECS/Component/Component.hpp"
 
-namespace CSM {
+namespace neo {
 	START_COMPONENT(CSMCamera0);
 	END_COMPONENT();
 	START_COMPONENT(CSMCamera1);

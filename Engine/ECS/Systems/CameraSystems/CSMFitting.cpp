@@ -1,9 +1,9 @@
 #include "ECS/pch.hpp"
 #include "CSMFitting.hpp"
-#include "CSMCameraComponent.hpp"
 
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CameraComponent/CSMCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
@@ -11,8 +11,7 @@
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-namespace CSM {
-	using namespace neo;
+namespace neo {
 
 	namespace {
 
