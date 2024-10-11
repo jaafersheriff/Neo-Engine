@@ -7,7 +7,8 @@
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
 
-#include "ECS/Systems/ShadowSystems/FrustumSystem.hpp"
+#include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
+
 
 namespace neo {
 
