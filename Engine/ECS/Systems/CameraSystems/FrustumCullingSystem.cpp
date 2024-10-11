@@ -7,9 +7,7 @@
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"
 
-#include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
-
-#pragma optimize("", off)
+#include "ECS/Systems/ShadowSystems/FrustumSystem.hpp"
 
 namespace neo {
 
@@ -19,33 +17,40 @@ namespace neo {
 		mCulledCount = 0;
 
 		const auto& cameras = ecs.getView<FrustumComponent, CameraComponent>();
+		// This is risky
+		uint32_t cameraCount = ecs.entityCount<FrustumComponent>();
+
+		CameraCulledComponent::CameraIDs cameraIDs;
+		cameraIDs.resize(cameraCount);
 
 		for (auto&& [entity, spatial, bb] : ecs.getView<SpatialComponent, BoundingBoxComponent>().each()) {
-			CameraCulledComponent* component;
-			if (auto* existingComp = ecs.getComponent<CameraCulledComponent>(entity)) {
-				component = existingComp;
-			}
-			else {
-				component = ecs.addComponent<CameraCulledComponent>(entity);
-			}
-
-			for (auto camera = component->mCameraViews.begin(); camera < component->mCameraViews.end(); camera++) {
+			// Reset the camera ID
+			for (auto camera = cameraIDs.begin(); camera < cameraIDs.end(); camera++) {
 				*camera = static_cast<ECS::Entity>(std::numeric_limits<uint32_t>::max());
 			}
 
+			// Populate the cameraIDs
 			int i = 0;
 			for (auto&& [cameraEntity, frustum, _] : cameras.each()) {
 				if (frustum.isInFrustum(spatial, bb)) {
-					if (component->mCameraViews.size() <= i) {
-						component->mCameraViews.push_back(cameraEntity);
+					if (cameraIDs.size() <= i) {
+						cameraIDs.push_back(cameraEntity);
 					}
 					else {
-						component->mCameraViews[i++] = cameraEntity;
+						cameraIDs[i++] = cameraEntity;
 					}
 				}
 				else {
 					mCulledCount++;
 				}
+			}
+
+			// Shove it into ECS
+			if (auto* existingComp = ecs.getComponent<CameraCulledComponent>(entity)) {
+				existingComp->mCameraIDs = cameraIDs;
+			}
+			else {
+				ecs.addComponent<CameraCulledComponent>(entity, cameraIDs);
 			}
 		}
 	}
