@@ -14,7 +14,7 @@
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
-#include "ECS/Component/RenderingComponent/CSMShadowMapComponent.hpp"
+#include "ECS/Component/RenderingComponent/ShadowMapComponents.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"

@@ -8,7 +8,6 @@
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/TransparentComponent.hpp"
 
-#include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 #include "ECS/Component/CollisionComponent/CameraCulledComponent.hpp"

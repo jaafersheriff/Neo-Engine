@@ -3,7 +3,6 @@
 #include "ECS/ECS.hpp"
 
 #include "ECS/Component/CameraComponent/CSMCameraComponent.hpp"
-#include "ECS/Component/RenderingComponent/CSMShadowMapComponent.hpp"
 
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"

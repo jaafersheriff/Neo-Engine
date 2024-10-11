@@ -4,7 +4,6 @@
 
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
-#include "ECS/Component/CameraComponent/ShadowCameraComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/LightComponent/MainLightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
