@@ -118,7 +118,6 @@ namespace DeferredPBR {
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 
-		/* Render light volumes */
 		// TODO : instanced
 
 		// Sort them back to front first
@@ -137,8 +136,8 @@ namespace DeferredPBR {
 			// TODO : Could do VFC
 			MakeDefine(ENABLE_SHADOWS);
 			const bool shadowsEnabled =
-				ecs.has<ShadowCameraComponent>(entity)
-				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
+				ecs.has<PointLightShadowMapComponent>(entity)
+				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<PointLightShadowMapComponent>(entity)->mShadowMap);
 			if (shadowsEnabled) {
 				drawDefines.set(ENABLE_SHADOWS);
 			}
@@ -158,7 +157,7 @@ namespace DeferredPBR {
 			}
 
 			if (shadowsEnabled) {
-				auto& shadowCube = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
+				auto& shadowCube = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<PointLightShadowMapComponent>(entity)->mShadowMap);
 				resolvedShader.bindTexture("shadowCube", shadowCube);
 				resolvedShader.bindUniform("shadowRange", static_cast<float>(spatial->getScale().x) / 2.f);
 				resolvedShader.bindUniform("shadowMapResolution", static_cast<float>(shadowCube.mWidth));
