@@ -87,25 +87,25 @@ namespace CSM {
 				;
 			LineMeshComponent lineMesh0(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
 			ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
-				.attachComponent<CSMCamera0>()
+				.attachComponent<CSMCamera0Component>()
 				.attachComponent<LineMeshComponent>(lineMesh0)
 			);
 
 			LineMeshComponent lineMesh1(resourceManagers.mMeshManager, glm::vec3(0.f, 1.f, 0.f));
 			ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
-				.attachComponent<CSMCamera1>()
+				.attachComponent<CSMCamera1Component>()
 				.attachComponent<LineMeshComponent>(lineMesh1)
 			);
 
 			LineMeshComponent lineMesh2(resourceManagers.mMeshManager, glm::vec3(0.f, 0.f, 1.f));
 			ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
-				.attachComponent<CSMCamera2>()
+				.attachComponent<CSMCamera2Component>()
 				.attachComponent<LineMeshComponent>(lineMesh2)
 			);
 
 			LineMeshComponent lineMesh3(resourceManagers.mMeshManager, glm::vec3(1.f, 1.f, 0.f));
 			ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
-				.attachComponent<CSMCamera3>()
+				.attachComponent<CSMCamera3Component>()
 				.attachComponent<LineMeshComponent>(lineMesh3)
 			);
 
@@ -151,13 +151,13 @@ namespace CSM {
 
 		// Renderable
 		for (int i = 0; i < 250; i++) {
-			auto meshHandle = util::genRandomBool() ? HashedString("cube") : HashedString("sphere");
+			auto meshHandle = util::genRandomBool() ? HashedString("icosahedron") : HashedString("tetrahedron");
 			MaterialComponent material;
 			material.mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}
 				.attachComponent<MeshComponent>(meshHandle)
 				.attachComponent<MaterialComponent>(material)
-				.attachComponent<SpatialComponent>(glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.5f))
+				.attachComponent<SpatialComponent>(glm::vec3(util::genRandom(-10.f, 10.f), util::genRandom(0.5f, 1.f), util::genRandom(-10.f, 10.f)), glm::vec3(0.75f))
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
 				.attachComponent<PhongRenderComponent>()
 				.attachComponent<ShadowCasterRenderComponent>()
@@ -195,6 +195,8 @@ namespace CSM {
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
+		ImGui::Checkbox("DebugView", &mDebugView);
+
 		if (ImGui::Checkbox("Use CSM", &mUseCSM)) {
 			auto&& [lightEntity, _, __] = *ecs.getSingleView<MainLightComponent, LightComponent>();
 			if (mUseCSM) {
@@ -218,15 +220,15 @@ namespace CSM {
 				resourceManagers.mTextureManager.discard(shadowMap->mShadowMap);
 				ecs.removeComponent<CSMShadowMapComponent>(lightEntity);
 
-				ShadowCameraComponent shadowCamera(2048, resourceManagers.mTextureManager);
+				ShadowCameraComponent shadowCamera(1024, resourceManagers.mTextureManager);
 				ecs.addComponent<ShadowCameraComponent>(lightEntity, shadowCamera);
 				LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
 				ecs.addComponent<LineMeshComponent>(lightEntity, lineMesh);
 
-				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera0, SpatialComponent>()));
-				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera1, SpatialComponent>()));
-				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera2, SpatialComponent>()));
-				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera3, SpatialComponent>()));
+				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera0Component, SpatialComponent>()));
+				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera1Component, SpatialComponent>()));
+				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera2Component, SpatialComponent>()));
+				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera3Component, SpatialComponent>()));
 			}
 		}
 	}
@@ -243,7 +245,6 @@ namespace CSM {
 				glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
 				drawShadows(resourceManagers, ecs, lightEntity, true);
 			}
-
 			backbuffer.bind();
 			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
@@ -260,7 +261,7 @@ namespace CSM {
 			backbuffer.bind();
 			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-			drawCSMResolve(resourceManagers, ecs, cameraEntity);
+			drawCSMResolve(resourceManagers, ecs, cameraEntity, mDebugView);
 		}
 
 		drawLines(resourceManagers, ecs, cameraEntity);

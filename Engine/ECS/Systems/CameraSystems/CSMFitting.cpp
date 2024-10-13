@@ -21,7 +21,7 @@ namespace neo {
 			const SpatialComponent& lightSpatial, 
 			SpatialComponent& receiverSpatial, 
 			CameraComponent& receiverCamera, 
-			int slice
+			CSMCameraComponent& csmCamera
 		) {
 			/////////////////////// Do the fitting! ///////////////////////////////
 
@@ -32,13 +32,14 @@ namespace neo {
 				auto depth = sourceCamera.getFar() - sourceCamera.getNear();
 				auto sliceDepth = depth / 4;
 
-				auto newNear = sourceCamera.getNear() + sliceDepth * slice;
+				auto newNear = sourceCamera.getNear() + sliceDepth * csmCamera.getLod();
 				auto newFar = newNear + sliceDepth;
 				CameraComponent sourceCopy = sourceCamera;
 				sourceCopy.setNear(newNear);
 				sourceCopy.setFar(newFar);
 
 				sourceProj = sourceCopy.getProj();
+				csmCamera.mSliceDepthEnd = newFar; // Use this in shadow resolve to compute which cascade to sample
 			}
 
 			receiverSpatial.setPosition(lightSpatial.getPosition());
@@ -145,21 +146,25 @@ namespace neo {
 		auto&& [sourceCameraEntity, _, sourceSpatial, sourceCamera] = *sourceCameraTuple;
 		NEO_ASSERT(sourceCamera.getType() == CameraComponent::CameraType::Perspective, "Frustum fit source needs to be perspective");
 
-		auto&& [lightEntity, __, lightSpatial, ___, ____] = *lightTuple;
+		const auto& lightSpatial = std::get<2>(*lightTuple);
 		//NEO_ASSERT(receiverCamera.getType() == CameraComponent::CameraType::Orthographic, "Frustum fit receiver needs to be orthographic");
 
 		// TODO - this should have asserts
-		if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0>()) {
-			_doFitting(sourceSpatial, sourceCamera, lightSpatial, std::get<1>(*csmCamera0), std::get<2>(*csmCamera0), 0);
+		if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>()) {
+			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera0;
+			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, reinterpret_cast<CSMCameraComponent&>(csmCamera));
 		}
-		if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1>()) {
-			_doFitting(sourceSpatial, sourceCamera, lightSpatial, std::get<1>(*csmCamera1), std::get<2>(*csmCamera1), 1);
+		if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>()) {
+			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera1;
+			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, reinterpret_cast<CSMCameraComponent&>(csmCamera));
 		}
-		if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2>()) {
-			_doFitting(sourceSpatial, sourceCamera, lightSpatial, std::get<1>(*csmCamera2), std::get<2>(*csmCamera2), 2);
+		if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>()) {
+			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera2;
+			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, reinterpret_cast<CSMCameraComponent&>(csmCamera));
 		}
-		if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3>()) {
-			_doFitting(sourceSpatial, sourceCamera, lightSpatial, std::get<1>(*csmCamera3), std::get<2>(*csmCamera3), 3);
+		if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>()) {
+			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera3;
+			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, reinterpret_cast<CSMCameraComponent&>(csmCamera));
 		}
 
 	}
