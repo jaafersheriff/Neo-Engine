@@ -27,7 +27,7 @@ namespace CSM {
 	using namespace neo;
 
 	template<typename... CompTs>
-	void drawCSMResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
+	void drawCSMResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, bool debugView, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("CSM Resolve Shader", 
@@ -50,8 +50,14 @@ namespace CSM {
 		const auto& [lightEntity, ____, light, lightSpatial] = *lightView;
 
 		ShaderDefines passDefines(inDefines);
+		MakeDefine(DEBUG_VIEW);
+		if (debugView) {
+			passDefines.set(DEBUG_VIEW);
+		}
 
-		glm::mat4 L, L0, L1, L2, L3;
+		glm::mat4 L0, L1, L2, L3;
+		float depth0, depth1, depth2, depth3;
+		glm::mat4 mockPV;
 		const bool shadowsEnabled = 
 			ecs.has<DirectionalLightComponent>(lightEntity) 
 			&& ecs.has<CameraComponent>(lightEntity) 
@@ -60,25 +66,36 @@ namespace CSM {
 		MakeDefine(ENABLE_SHADOWS);
 		if (shadowsEnabled) {
 			passDefines.set(ENABLE_SHADOWS);
-			const auto& shadowCamera = *ecs.cGetComponent<CameraComponent>(lightEntity);
 			static glm::mat4 biasMatrix(
 				0.5f, 0.0f, 0.0f, 0.0f,
 				0.0f, 0.5f, 0.0f, 0.0f,
 				0.0f, 0.0f, 0.5f, 0.0f,
 				0.5f, 0.5f, 0.5f, 1.0f);
-			L = biasMatrix * shadowCamera.getProj() * lightSpatial.getView();
 			// TODO - this should have asserts
-			if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0>()) {
-				L0 = biasMatrix * std::get<2>(*csmCamera0).getProj() * std::get<1>(*csmCamera0).getView();
+			if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>()) {
+				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera0;
+				L0 = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+				depth0 = csm.mSliceDepthEnd;
 			}
-			if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1>()) {
-				L1 = biasMatrix * std::get<2>(*csmCamera1).getProj() * std::get<1>(*csmCamera1).getView();
+			if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>()) {
+				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera1;
+				L1 = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+				depth1 = csm.mSliceDepthEnd;
 			}
-			if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2>()) {
-				L2 = biasMatrix * std::get<2>(*csmCamera2).getProj() * std::get<1>(*csmCamera2).getView();
+			if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>()) {
+				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera2;
+				L2 = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+				depth2 = csm.mSliceDepthEnd;
 			}
-			if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3>()) {
-				L3 = biasMatrix * std::get<2>(*csmCamera3).getProj() * std::get<1>(*csmCamera3).getView();
+			if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>()) {
+				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera3;
+				L3 = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+				depth3 = csm.mSliceDepthEnd;
+			}
+
+			auto mockView = ecs.getSingleView<MockCameraComponent, SpatialComponent, CameraComponent>();
+			if (mockView) {
+				mockPV = std::get<3>(*mockView).getProj() * std::get<2>(*mockView).getView();
 			}
 		}
 
@@ -120,10 +137,15 @@ namespace CSM {
 				resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
 				if (shadowsEnabled) {
 					// These could be an array tbh
+					resolvedShader.bindUniform("mockPV", mockPV);
 					resolvedShader.bindUniform("L0", L0);
 					resolvedShader.bindUniform("L1", L1);
 					resolvedShader.bindUniform("L2", L2);
 					resolvedShader.bindUniform("L3", L3);
+					resolvedShader.bindUniform("depth0", depth0);
+					resolvedShader.bindUniform("depth1", depth1);
+					resolvedShader.bindUniform("depth2", depth2);
+					resolvedShader.bindUniform("depth3", depth3);
 					resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap));
 				}
 			}

@@ -422,7 +422,6 @@ namespace neo {
 			std::unique_ptr<MeshLoadDetails> builder = std::make_unique<MeshLoadDetails>();
 			_uploadParShape(*builder, par_shapes_create_tetrahedron());
 			return std::move(builder);
-
 		}
 
 	}

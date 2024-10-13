@@ -12,6 +12,13 @@ in vec4 shadowCoord0;
 in vec4 shadowCoord1;
 in vec4 shadowCoord2;
 in vec4 shadowCoord3;
+uniform float depth0;
+uniform float depth1;
+uniform float depth2;
+uniform float depth3;
+
+
+in float sceneDepth;
 #endif
 
 uniform vec4 albedo;
@@ -77,6 +84,23 @@ float attFactor = 1;
 	);
 
 	color *= vec4(vec3(max(visibility, 0.2)), 1.0);
+#endif
+
+#ifdef DEBUG_VIEW
+	if (sceneDepth > 0) {
+		if (sceneDepth < depth0) {
+			color.yz *= 0.3;
+		}
+		else if (sceneDepth < depth1) {
+			color.xz *= 0.3;
+		}
+		else if (sceneDepth < depth2) {
+			color.xy *= 0.3;
+		}
+		else if (sceneDepth < depth3) {
+			color.z *= 0.3;
+		}
+	}
 #endif
 
 	color.a = 1.0;

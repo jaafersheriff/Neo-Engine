@@ -16,10 +16,18 @@ uniform mat4 L0;
 uniform mat4 L1;
 uniform mat4 L2;
 uniform mat4 L3;
+uniform float depth0;
+uniform float depth1;
+uniform float depth2;
+uniform float depth3;
+
 out vec4 shadowCoord0; // csm frustum transforms
 out vec4 shadowCoord1;
 out vec4 shadowCoord2;
 out vec4 shadowCoord3;
+
+uniform mat4 mockPV;
+out float sceneDepth;
 #endif
 
 void main() {
@@ -33,5 +41,6 @@ void main() {
 	shadowCoord1 = L1 * fragPos;
 	shadowCoord2 = L2 * fragPos;
 	shadowCoord3 = L3 * fragPos;
+	sceneDepth = (mockPV * fragPos).z; // This should just be gl_position.z
 #endif
 }

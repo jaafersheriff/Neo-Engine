@@ -21,7 +21,6 @@ namespace neo {
 
 		bool containsAlphaTest = false;
 		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
-			// TODO - set GL state?
 			containsAlphaTest = true;
 		}
 

@@ -247,6 +247,7 @@ namespace neo {
 		loadMesh("quad", *prefabs::generateQuad());
 		loadMesh("sphere", *prefabs::generateSphere(2));
 		loadMesh("icosahedron", *prefabs::generateIcosahedron());
+		loadMesh("tetrahedron", *prefabs::generateTetrahedron());
 
 		/* Generate basic textures*/
 		TextureBuilder builder;

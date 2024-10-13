@@ -14,5 +14,6 @@ namespace CSM {
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
 
 		bool mUseCSM = true;
+		bool mDebugView = false;
 	};
 }

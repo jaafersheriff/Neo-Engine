@@ -27,7 +27,7 @@ namespace CSM {
 			TRACY_ZONEN("PerspectiveUpdateSystem");
 			if (auto sourceCamera = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent>()) {
 				if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {
-					mOffset += std::get<1>(*frameStats).mDT;
+					mOffset += std::get<1>(*frameStats).mDT * mSpeed;
 					auto&& [_, __, sourceSpatial] = *sourceCamera;
 					float f = static_cast<float>(glm::sin(mOffset));
 					float g = static_cast<float>(glm::cos(mOffset));
@@ -35,7 +35,12 @@ namespace CSM {
 				}
 			}
 		}
+
+		virtual void imguiEditor(ECS&) override {
+			ImGui::SliderFloat("Speed", &mSpeed, 0.f, 3.f);
+		};
 	private: 
 		float mOffset = 0.f;
+		float mSpeed = 1.f;
 	};
 }

@@ -20,7 +20,7 @@ namespace neo {
 			ECS::Entity cameraEntity, 
 			const TextureHandle& shadowMap, 
 			const ShaderHandle& shaderHandle, 
-			const uint8_t slice, 
+			const int slice, 
 			const bool clear
 		) {
 			TRACY_GPU();
@@ -36,7 +36,7 @@ namespace neo {
 				FramebufferExternalAttachments{ {
 						shadowMap,
 						types::framebuffer::AttachmentTarget::Target2D,
-						slice
+						static_cast<uint8_t>(slice)
 				} },
 				resourceManagers.mTextureManager
 			);
@@ -114,17 +114,21 @@ namespace neo {
 		glCullFace(GL_FRONT);
 
 		// TODO - this should have asserts
-		if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0>()) {
-			_drawSingleCSM<CompTs...>(resourceManagers, ecs, std::get<0>(*csmCamera0), shadowMap->mShadowMap, shaderHandle, 0, clear);
+		if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>()) {
+			auto& [cameraEntity, csmSpatial, csmCamera, csm] = *csmCamera0;
+			_drawSingleCSM<CompTs...>(resourceManagers, ecs, cameraEntity, shadowMap->mShadowMap, shaderHandle, csm.getLod(), clear);
 		}
-		if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1>()) {
-			_drawSingleCSM<CompTs...>(resourceManagers, ecs, std::get<0>(*csmCamera1), shadowMap->mShadowMap, shaderHandle, 1, clear);
+		if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>()) {
+			auto& [cameraEntity, csmSpatial, csmCamera, csm] = *csmCamera1;
+			_drawSingleCSM<CompTs...>(resourceManagers, ecs, cameraEntity, shadowMap->mShadowMap, shaderHandle, csm.getLod(), clear);
 		}
-		if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2>()) {
-			_drawSingleCSM<CompTs...>(resourceManagers, ecs, std::get<0>(*csmCamera2), shadowMap->mShadowMap, shaderHandle, 2, clear);
+		if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>()) {
+			auto& [cameraEntity, csmSpatial, csmCamera, csm] = *csmCamera2;
+			_drawSingleCSM<CompTs...>(resourceManagers, ecs, cameraEntity, shadowMap->mShadowMap, shaderHandle, csm.getLod(), clear);
 		}
-		if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3>()) {
-			_drawSingleCSM<CompTs...>(resourceManagers, ecs, std::get<0>(*csmCamera3), shadowMap->mShadowMap, shaderHandle, 3, clear);
+		if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>()) {
+			auto& [cameraEntity, csmSpatial, csmCamera, csm] = *csmCamera3;
+			_drawSingleCSM<CompTs...>(resourceManagers, ecs, cameraEntity, shadowMap->mShadowMap, shaderHandle, csm.getLod(), clear);
 		}
 		glCullFace(GL_BACK);
 	}
