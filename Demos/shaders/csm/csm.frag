@@ -16,8 +16,6 @@ uniform float depth0;
 uniform float depth1;
 uniform float depth2;
 uniform float depth3;
-
-
 in float sceneDepth;
 #endif
 
@@ -49,17 +47,45 @@ float getSingleShadow(vec4 shadowCoord, sampler2D _shadowMap, int lod) {
 }
 
 float getShadow(
+	float _depth0,
+	float _depth1,
+	float _depth2,
+	float _depth3,
 	vec4 _shadowCoord0, 
 	vec4 _shadowCoord1, 
 	vec4 _shadowCoord2, 
 	vec4 _shadowCoord3,
 	sampler2D _shadowMap
 ) {
+	int lod = 0;
+	if (sceneDepth < _depth0) {
+		lod = 0;
+	}
+	else if (sceneDepth < _depth1) {
+		lod = 1;
+	}
+	else if (sceneDepth < _depth2) {
+		lod = 2;
+	}
+	else if (sceneDepth < _depth3) {
+		lod = 3;
+	}
+
 	float shadow = 0.0;
-	shadow += getSingleShadow(_shadowCoord0, _shadowMap, 0);
-	shadow += getSingleShadow(_shadowCoord1, _shadowMap, 1);
-	shadow += getSingleShadow(_shadowCoord2, _shadowMap, 2);
-	shadow += getSingleShadow(_shadowCoord3, _shadowMap, 3);
+
+	// TODO This should just be array access 
+	if (lod == 0) {
+		shadow = getSingleShadow(_shadowCoord0, _shadowMap, lod);
+	}
+	if (lod == 1) {
+		shadow = getSingleShadow(_shadowCoord1, _shadowMap, lod);
+	}
+	if (lod == 2) {
+		shadow = getSingleShadow(_shadowCoord2, _shadowMap, lod);
+	}
+	if (lod == 3) {
+		shadow = getSingleShadow(_shadowCoord3, _shadowMap, lod);
+	}
 
 	return 1.0 - saturate(shadow);
 }
@@ -76,6 +102,10 @@ float attFactor = 1;
 
 #ifdef ENABLE_SHADOWS
 	float visibility = getShadow(
+		depth0,
+		depth1,
+		depth2,
+		depth3,
 		shadowCoord0,
 		shadowCoord1,
 		shadowCoord2,
