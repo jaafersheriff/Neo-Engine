@@ -299,7 +299,7 @@ namespace neo {
 
 	template<typename CompT, typename... CompTs> 
 	bool ECS::has() const {
-		return has<CompT>();&& has<CompTs...>();
+		return has<CompT>() && has<CompTs...>();
 	}
 
 	template<typename FilterCompT, typename SortCompT> 

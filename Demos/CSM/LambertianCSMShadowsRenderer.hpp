@@ -58,6 +58,7 @@ namespace CSM {
 		glm::mat4 L0, L1, L2, L3;
 		float depth0, depth1, depth2, depth3;
 		glm::mat4 mockPV;
+		float mockNear;
 		const bool shadowsEnabled = 
 			ecs.has<DirectionalLightComponent>(lightEntity) 
 			&& ecs.has<CameraComponent>(lightEntity) 
@@ -96,6 +97,7 @@ namespace CSM {
 			auto mockView = ecs.getSingleView<MockCameraComponent, SpatialComponent, CameraComponent>();
 			if (mockView) {
 				mockPV = std::get<3>(*mockView).getProj() * std::get<2>(*mockView).getView();
+				mockNear = std::get<3>(*mockView).getNear();
 			}
 		}
 
@@ -138,6 +140,7 @@ namespace CSM {
 				if (shadowsEnabled) {
 					// These could be an array tbh
 					resolvedShader.bindUniform("mockPV", mockPV);
+					resolvedShader.bindUniform("mockNear", mockNear);
 					resolvedShader.bindUniform("L0", L0);
 					resolvedShader.bindUniform("L1", L1);
 					resolvedShader.bindUniform("L2", L2);
