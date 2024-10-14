@@ -32,18 +32,19 @@ uniform vec3 camPos;
 
 out vec4 color;
 
-float getSingleShadow(vec4 shadowCoord, sampler2D _shadowMap, int lod) {
-	if (shadowCoord.z < 0.0 || shadowCoord.z > 1.0) {
-		return 0.0;
-	}
-	if (shadowCoord.x < 0.0 || shadowCoord.x > 1.0) {
-		return 0.0;
-	}
-	if (shadowCoord.y < 0.0 || shadowCoord.y > 1.0) {
-		return 0.0;
-	}
+bool validCascade(vec4 shadowCoord) {
+	return true
+		&& shadowCoord.x > 0.0 && shadowCoord.x < 1.0
+		&& shadowCoord.y > 0.0 && shadowCoord.y < 1.0
+		&& shadowCoord.z > 0.0 && shadowCoord.z < 1.0
+	;
+}
 
-	return saturate(shadowCoord.z) - 0.002 > textureLod(_shadowMap, saturate(shadowCoord.xy), lod).r ? 1.0 : 0.0;
+float getSingleShadow(vec4 shadowCoord, sampler2D _shadowMap, int lod) {
+	if (validCascade(shadowCoord)) {
+		return saturate(shadowCoord.z) - 0.002 > textureLod(_shadowMap, saturate(shadowCoord.xy), lod).r ? 1.0 : 0.0;
+	}
+	return 0.f;
 }
 
 float getShadow(
@@ -95,7 +96,7 @@ void main() {
 	vec3 N = normalize(fragNor);
 	vec3 V = normalize(camPos - fragPos.xyz);
 
-float attFactor = 1;
+	float attFactor = 1;
 	vec3 Ldir = normalize(lightDir);
 
 	color.rgb = lambertianDiffuse(Ldir, N, fAlbedo.rgb, lightCol, attFactor);
@@ -117,18 +118,19 @@ float attFactor = 1;
 #endif
 
 #ifdef DEBUG_VIEW
+	const float scale = 0.5;
 	if (sceneDepth > 0) {
-		if (sceneDepth < depth0) {
-			color.yz *= 0.3;
+		if (sceneDepth <= depth0 && validCascade(shadowCoord0)) {
+			color.yz *= scale;
 		}
-		else if (sceneDepth < depth1) {
-			color.xz *= 0.3;
+		else if (sceneDepth < depth1 && validCascade(shadowCoord1)) {
+			color.xz *= scale;
 		}
-		else if (sceneDepth < depth2) {
-			color.xy *= 0.3;
+		else if (sceneDepth < depth2 && validCascade(shadowCoord2)) {
+			color.xy *= scale;
 		}
-		else if (sceneDepth < depth3) {
-			color.z *= 0.3;
+		else if (sceneDepth < depth3 && validCascade(shadowCoord3)) {
+			color.z *= scale;
 		}
 	}
 #endif

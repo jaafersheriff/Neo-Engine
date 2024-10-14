@@ -27,6 +27,8 @@ out vec4 shadowCoord2;
 out vec4 shadowCoord3;
 
 uniform mat4 mockPV;
+uniform float mockNear;
+
 out float sceneDepth;
 #endif
 
@@ -41,6 +43,8 @@ void main() {
 	shadowCoord1 = L1 * fragPos;
 	shadowCoord2 = L2 * fragPos;
 	shadowCoord3 = L3 * fragPos;
-	sceneDepth = (mockPV * fragPos).z; // This should just be gl_position.z
+
+ // This should just be gl_position.z
+	sceneDepth = (mockPV * fragPos).z + mockNear; // Add near plane b/c GL NDC is -1, 1 ?
 #endif
 }
