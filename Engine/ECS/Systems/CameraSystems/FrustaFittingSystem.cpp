@@ -12,9 +12,10 @@
 
 namespace neo {
 
-	void FrustaFittingSystem::update(ECS& ecs) {
-		TRACY_ZONE();
+	void FrustaFittingSystem::update(ECS& ecs, const ResourceManagers& resourceManagers) {
+		NEO_UNUSED(resourceManagers);
 
+		TRACY_ZONE();
 		auto sourceCameraTuple = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent, CameraComponent>();
 		auto receiverCameraTuple = ecs.getSingleView<FrustumFitReceiverComponent, SpatialComponent, CameraComponent, DirectionalLightComponent>();
 		if (!receiverCameraTuple || !sourceCameraTuple) {

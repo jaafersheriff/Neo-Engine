@@ -21,6 +21,7 @@
 #include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/WireframeRenderComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+#include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
@@ -28,6 +29,7 @@
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumToLineSystem.hpp"
 #include "ECS/Systems/CameraSystems/CSMFitting.hpp"
+#include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/RenderingSystems/CSMShadowRenderer.hpp"
@@ -150,7 +152,7 @@ namespace CSM {
 		}
 
 		// Renderable
-		for (int i = 0; i < 250; i++) {
+		for (int i = 0; i < 500; i++) {
 			auto meshHandle = util::genRandomBool() ? HashedString("icosahedron") : HashedString("tetrahedron");
 			MaterialComponent material;
 			material.mAlbedoColor = glm::vec4(util::genRandomVec3(), 1.f);
@@ -162,6 +164,7 @@ namespace CSM {
 				.attachComponent<PhongRenderComponent>()
 				.attachComponent<ShadowCasterRenderComponent>()
 				.attachComponent<WireframeRenderComponent>()
+				.attachComponent<RotationComponent>(util::genRandomVec3(-1.f, 1.f))
 			));
 		}
 
@@ -188,6 +191,7 @@ namespace CSM {
 		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
 		ecs.addSystem<FrustumCullingSystem>();
 		ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
+		ecs.addSystem<RotationSystem>();
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {

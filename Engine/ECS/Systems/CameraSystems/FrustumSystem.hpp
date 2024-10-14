@@ -11,6 +11,6 @@ namespace neo {
 			System("Frustum System")
 		{}
 
-		virtual void update(ECS& ecs) override;
+		virtual void update(ECS& ecs, const ResourceManagers& resourceManagers) override;
 	};
 }

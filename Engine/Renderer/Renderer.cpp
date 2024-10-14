@@ -172,7 +172,7 @@ namespace neo {
 		}
 	}
 
-	void Renderer::imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager) {
+	void Renderer::_imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager) {
 		TRACY_ZONE();
 		NEO_UNUSED(ecs);
 

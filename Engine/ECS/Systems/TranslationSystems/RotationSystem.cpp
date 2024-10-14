@@ -8,7 +8,9 @@
 
 namespace neo {
 
-	void RotationSystem::update(ECS& ecs) {
+	void RotationSystem::update(ECS& ecs, const ResourceManagers& resourceManagers) {
+		NEO_UNUSED(resourceManagers);
+
 		TRACY_ZONEN("RotationSystem");
 
 		if (auto frameStatsOpt = ecs.getComponent<FrameStatsComponent>()) {

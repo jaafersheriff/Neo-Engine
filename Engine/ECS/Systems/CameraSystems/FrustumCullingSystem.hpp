@@ -11,7 +11,7 @@ namespace neo {
 			System("FrustumCulling System")
 		{}
 
-		virtual void update(ECS& ecs) override;
+		virtual void update(ECS& ecs, const ResourceManagers& resourceManagers) override;
 		virtual void imguiEditor(ECS&) override;
 
 	private:

@@ -4,7 +4,7 @@
 
 namespace neo {
 
-	void ResourceManagers::tick() {
+	void ResourceManagers::_tick() {
 		TRACY_GPU();
 		mMeshManager.tick();
 		mShaderManager.tick();
@@ -12,14 +12,14 @@ namespace neo {
 		mFramebufferManager.tick(mTextureManager); // Do this after textures
 	}
 
-	void ResourceManagers::clear() {
+	void ResourceManagers::_clear() {
 		mMeshManager.clear();
 		mShaderManager.clear();
 		mTextureManager.clear();
 		mFramebufferManager.clear(mTextureManager); // Do this after textures
 	}
 
-	void ResourceManagers::imguiEditor() {
+	void ResourceManagers::_imguiEditor() {
 		TRACY_ZONE();
 		auto textureFunc = [&](const TextureHandle& textureHandle) {
 			if (!mTextureManager.isValid(textureHandle)) {

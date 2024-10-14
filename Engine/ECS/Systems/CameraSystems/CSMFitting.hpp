@@ -12,6 +12,6 @@ namespace neo {
 			neo::System("CSM Fitting System") {
 		}
 
-		virtual void update(neo::ECS& ecs) override;
+		virtual void update(neo::ECS& ecs, const ResourceManagers& resourceManagers) override;
 	};
 }

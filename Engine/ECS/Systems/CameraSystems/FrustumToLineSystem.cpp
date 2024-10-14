@@ -8,7 +8,9 @@
 
 namespace neo {
 
-	void FrustumToLineSystem::update(ECS& ecs) {
+	void FrustumToLineSystem::update(ECS& ecs, const ResourceManagers& resourceManagers) {
+		NEO_UNUSED(resourceManagers);
+
 		TRACY_ZONEN("FrustumToLineSystem");
 		for (auto&& [entity, line, frustum] : ecs.getView<LineMeshComponent, FrustumComponent>().each()) {
 

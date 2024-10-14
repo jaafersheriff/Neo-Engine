@@ -7,9 +7,14 @@
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
+#include "ECS/Component/RenderingComponent/ShadowMapComponents.hpp"
 #include "ECS/Component/LightComponent/DirectionalLightComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+
+#include "ResourceManager/ResourceManagers.hpp"
+
+#pragma optimize("", off)
 
 namespace neo {
 
@@ -21,6 +26,7 @@ namespace neo {
 			const SpatialComponent& lightSpatial, 
 			SpatialComponent& receiverSpatial, 
 			CameraComponent& receiverCamera, 
+			const uint32_t shadowMapResolution,
 			CSMCameraComponent& csmCamera
 		) {
 			/////////////////////// Do the fitting! ///////////////////////////////
@@ -42,9 +48,15 @@ namespace neo {
 				csmCamera.mSliceDepthEnd = newFar; // Use this in shadow resolve to compute which cascade to sample
 			}
 
-			receiverSpatial.setPosition(lightSpatial.getPosition());
-			receiverSpatial.setScale(lightSpatial.getScale());
-			receiverSpatial.setLookDir(lightSpatial.getLookDir());
+			{
+				receiverSpatial.setPosition(lightSpatial.getPosition());
+				receiverSpatial.setScale(lightSpatial.getScale());
+
+				glm::vec3 lookDir = lightSpatial.getLookDir();
+				float shadowRes = static_cast<float>(shadowMapResolution >> csmCamera.getLod());
+				lookDir = glm::round(lookDir / shadowRes) * shadowRes;
+				receiverSpatial.setLookDir(lookDir);
+			}
 			const auto& worldToLight = receiverSpatial.getView();
 			const auto& lightToWorld = glm::inverse(worldToLight);
 
@@ -134,11 +146,11 @@ namespace neo {
 		}
 	}
 
-	void CSMFitting::update(ECS& ecs) {
+	void CSMFitting::update(ECS& ecs, const ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
 
 		auto sourceCameraTuple = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent, CameraComponent>();
-		auto lightTuple = ecs.getSingleView<FrustumFitReceiverComponent, SpatialComponent, CameraComponent, DirectionalLightComponent>();
+		auto lightTuple = ecs.getSingleView<FrustumFitReceiverComponent, SpatialComponent, CameraComponent, DirectionalLightComponent, CSMShadowMapComponent>();
 
 		if (!lightTuple || !sourceCameraTuple) {
 			return;
@@ -147,24 +159,30 @@ namespace neo {
 		NEO_ASSERT(sourceCamera.getType() == CameraComponent::CameraType::Perspective, "Frustum fit source needs to be perspective");
 
 		const auto& lightSpatial = std::get<2>(*lightTuple);
-		//NEO_ASSERT(receiverCamera.getType() == CameraComponent::CameraType::Orthographic, "Frustum fit receiver needs to be orthographic");
+		const auto& shadowMap = std::get<5>(*lightTuple);
+		uint32_t shadowMapResolution = 0;
+		if (resourceManagers.mTextureManager.isValid(shadowMap.mShadowMap)) {
+			const auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap.mShadowMap);
+			shadowMapResolution = std::max(shadowTexture.mWidth, shadowTexture.mHeight);
+		}
 
+		//NEO_ASSERT(receiverCamera.getType() == CameraComponent::CameraType::Orthographic, "Frustum fit receiver needs to be orthographic");
 		// TODO - this should have asserts
 		if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>()) {
 			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera0;
-			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, reinterpret_cast<CSMCameraComponent&>(csmCamera));
+			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, shadowMapResolution, reinterpret_cast<CSMCameraComponent&>(csmCamera));
 		}
 		if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>()) {
 			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera1;
-			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, reinterpret_cast<CSMCameraComponent&>(csmCamera));
+			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, shadowMapResolution, reinterpret_cast<CSMCameraComponent&>(csmCamera));
 		}
 		if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>()) {
 			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera2;
-			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, reinterpret_cast<CSMCameraComponent&>(csmCamera));
+			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, shadowMapResolution, reinterpret_cast<CSMCameraComponent&>(csmCamera));
 		}
 		if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>()) {
 			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera3;
-			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, reinterpret_cast<CSMCameraComponent&>(csmCamera));
+			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, shadowMapResolution, reinterpret_cast<CSMCameraComponent&>(csmCamera));
 		}
 
 	}

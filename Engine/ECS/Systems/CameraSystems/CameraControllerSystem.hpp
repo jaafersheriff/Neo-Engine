@@ -15,7 +15,7 @@ namespace neo {
 			System("CameraController System")
 		{}
 
-		virtual void update(ECS& ecs) override;
+		virtual void update(ECS& ecs, const ResourceManagers& resourceManagers) override;
 		virtual void imguiEditor(ECS& ecs) override;
 
 		float mSuperSpeed = 2.5f;
