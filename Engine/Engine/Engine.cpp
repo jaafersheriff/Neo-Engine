@@ -137,7 +137,7 @@ namespace neo {
 					Messenger::relayMessages(ecs);
 
 					/* Destroy and create objects and components */
-					ecs.flush();
+					ecs._flush();
 					Messenger::relayMessages(ecs);
 
 					{
@@ -146,7 +146,7 @@ namespace neo {
 					}
 
 					/* Update each system */
-					ecs._updateSystems();
+					ecs._updateSystems(resourceManagers);
 					Messenger::relayMessages(ecs);
 
 					/* Update imgui functions */
@@ -158,10 +158,10 @@ namespace neo {
 							TRACY_ZONEN("Demo Imgui");
 							demos.imGuiEditor(ecs, resourceManagers);
 						}
-						ecs.imguiEdtor();
-						resourceManagers.imguiEditor();
+						ecs._imguiEdtor();
+						resourceManagers._imguiEditor();
 						ServiceLocator<ImGuiManager>::ref().imGuiEditor();
-						ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, ecs, resourceManagers);
+						ServiceLocator<Renderer>::ref()._imGuiEditor(mWindow, ecs, resourceManagers);
 						profiler.imGuiEditor();
 						{
 							// TODO - move to its own function hehe
@@ -210,7 +210,7 @@ namespace neo {
 						Messenger::relayMessages(ecs);
 					}
 					{
-						resourceManagers.tick();
+						resourceManagers._tick();
 						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), profiler, ecs, resourceManagers);
 						Messenger::relayMessages(ecs);
 					}
@@ -235,8 +235,8 @@ namespace neo {
 
 		/* Destry the old state*/
 		demos.getCurrentDemo()->destroy();
-		ecs.clean();
-		resourceManagers.clear();
+		ecs._clean();
+		resourceManagers._clear();
 		ServiceLocator<Renderer>::ref().clean();
 		Messenger::clean();
 
@@ -252,7 +252,7 @@ namespace neo {
 		Loader::init(config.resDir, config.shaderDir);
 		_createPrefabs(resourceManagers);
 		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers);
-		resourceManagers.tick();
+		resourceManagers._tick();
 
 		demos.getCurrentDemo()->init(ecs, resourceManagers);
 
@@ -260,7 +260,7 @@ namespace neo {
 		ecs._initSystems();
 
 		/* Initialize new objects and components */
-		ecs.flush();
+		ecs._flush();
 		Messenger::relayMessages(ecs);
 	}
 
@@ -303,9 +303,9 @@ namespace neo {
 
 	void Engine::shutDown(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_LOG_I("Shutting down...");
-		ecs.clean();
+		ecs._clean();
 		Messenger::clean();
-		resourceManagers.clear();
+		resourceManagers._clear();
 		ServiceLocator<Renderer>::ref().clean();
 		ServiceLocator<Renderer>::reset();
 		ServiceLocator<ImGuiManager>::ref().destroy();
@@ -356,8 +356,8 @@ namespace neo {
 		{
 			TRACY_ZONEN("Selecting");
 			if (!ImGuizmo::IsUsing()) {
-				mMouseRaySystem.update(ecs);
-				mSelectingSystem.update(ecs);
+				mMouseRaySystem.update(ecs, resourceManagers);
+				mSelectingSystem.update(ecs, resourceManagers);
 			}
 		}
 		{

@@ -7,7 +7,9 @@
 #include "ECS/Component/SpatialComponent/SinTranslateComponent.hpp"
 
 namespace neo {
-	void SinTranslateSystem::update(ECS& ecs) {
+	void SinTranslateSystem::update(ECS& ecs, const ResourceManagers& resourceManagers) {
+		NEO_UNUSED(resourceManagers);
+
 		TRACY_ZONEN("SinTranslateSystem");
 
 		if (auto frameStatsOpt = ecs.getComponent<FrameStatsComponent>()) {

@@ -61,10 +61,6 @@ namespace neo {
 		ECS(const ECS&) = delete;
 		ECS& operator=(const ECS&) = delete;
 
-		void flush();
-		void clean();
-		void imguiEdtor();
-
 		void submitEntity(EntityBuilder&& builder);
 		void removeEntity(Entity e);
 
@@ -114,7 +110,12 @@ namespace neo {
 
 		std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
 		void _initSystems();
-		void _updateSystems();
+		void _updateSystems(const ResourceManagers& resourceManagers);
+
+
+		void _flush();
+		void _clean();
+		void _imguiEdtor();
 	};
 
 	template<typename CompT>

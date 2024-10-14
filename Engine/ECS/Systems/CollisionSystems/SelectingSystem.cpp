@@ -9,7 +9,9 @@
 
 namespace neo {
 
-	void SelectingSystem::update(ECS& ecs) {
+	void SelectingSystem::update(ECS& ecs, const ResourceManagers& resourceManagers) {
+		NEO_UNUSED(resourceManagers);
+
 		TRACY_ZONEN("SelectingSystem");
 		auto mouseRayComponent = ecs.getComponent<MouseRayComponent>();
 		auto selectedComponent = ecs.getComponent<SelectedComponent>();

@@ -13,11 +13,11 @@ namespace neo {
 		}
 	}
 
-	void ECS::_updateSystems() {
+	void ECS::_updateSystems(const ResourceManagers& resourceManagers) {
 		TRACY_ZONEN("Update Systems");
 		for (auto& system : mSystems) {
 			if (system.second->mActive) {
-				system.second->update(*this);
+				system.second->update(*this, resourceManagers);
 			}
 		}
 	}
@@ -32,7 +32,7 @@ namespace neo {
 		mEntityKillQueue.push_back(e);
 	}
 
-	void ECS::flush() {
+	void ECS::_flush() {
 		TRACY_ZONE();
 
 		{
@@ -88,9 +88,9 @@ namespace neo {
 		}
 	}
 
-	void ECS::clean() {
+	void ECS::_clean() {
 		NEO_LOG_I("Cleaning ECS...");
-		flush();
+		_flush();
 		mRegistry.each([this](auto entity) {
 			mRegistry.destroy(entity);
 		});
@@ -99,7 +99,7 @@ namespace neo {
 		mSystems.clear();
 	}
 
-	void ECS::imguiEdtor() {
+	void ECS::_imguiEdtor() {
 		TRACY_ZONE();
 		ImGui::Begin("ECS");
 		auto pinnedView = getView<PinnedComponent>();

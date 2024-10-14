@@ -118,7 +118,7 @@ void main() {
 #endif
 
 #ifdef DEBUG_VIEW
-	const float scale = 0.5;
+	const float scale = 0.2;
 	if (sceneDepth > 0) {
 		if (sceneDepth <= depth0 && validCascade(shadowCoord0)) {
 			color.yz *= scale;

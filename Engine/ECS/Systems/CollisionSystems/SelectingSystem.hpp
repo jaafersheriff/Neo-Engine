@@ -11,7 +11,7 @@ namespace neo {
 			: System("Selecting System")
 		{}
 
-		virtual void update(ECS&) override;
+		virtual void update(ECS& ecs, const ResourceManagers& resourceManagers) override;
 
 	private:
 		// This is owned by the Engine...

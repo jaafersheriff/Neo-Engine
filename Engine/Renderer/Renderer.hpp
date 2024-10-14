@@ -24,7 +24,8 @@ namespace neo {
 
 	class Renderer {
 
-		friend ImGuiManager;
+		//friend ImGuiManager;
+		friend Engine;
 
 		// This should be moved to its own file/service locator..?
 		struct FrameStats {
@@ -63,9 +64,10 @@ namespace neo {
 			void render(WindowSurface&, IDemo* demo, util::Profiler& profiler, const ECS&, ResourceManagers& resourceManager);
 			void clean();
 
-			void imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager);
 
 		private:
+			void _imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager);
+
 			RendererDetails mDetails = {};
 
 			FramebufferHandle mDefaultFBOHandle;

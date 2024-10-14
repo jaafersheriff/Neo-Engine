@@ -23,7 +23,8 @@ namespace CSM {
 			System("PerspectiveUpdate System") {
 		}
 
-		virtual void update(ECS& ecs) override {
+		virtual void update(ECS& ecs, const ResourceManagers& resourceManagers) override {
+			NEO_UNUSED(resourceManagers);
 			TRACY_ZONEN("PerspectiveUpdateSystem");
 			if (auto sourceCamera = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent>()) {
 				if (auto frameStats = ecs.getComponent<FrameStatsComponent>()) {

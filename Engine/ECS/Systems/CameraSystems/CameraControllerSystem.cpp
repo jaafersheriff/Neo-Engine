@@ -11,7 +11,9 @@
 
 namespace neo {
 
-	void CameraControllerSystem::update(ECS& ecs) {
+	void CameraControllerSystem::update(ECS& ecs, const ResourceManagers& resourceManagers) {
+		NEO_UNUSED(resourceManagers);
+
 		TRACY_ZONE();
 		for (auto&& [entity, controller, spatial] : ecs.getView<CameraControllerComponent, SpatialComponent>().each()) {
 			if (auto frameStatsOpt = ecs.getComponent<FrameStatsComponent>()) {

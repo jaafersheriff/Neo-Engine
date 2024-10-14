@@ -33,7 +33,6 @@ namespace neo {
 
 		void init(GLFWwindow* window, float dpiScale);
 		void update();
-		void render();
 		void reset();
 		void destroy();
 
