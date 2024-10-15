@@ -60,7 +60,7 @@ namespace CSM {
 		ECS::EntityBuilder _createLight(ResourceManagers& resourceManagers, glm::vec3 position) {
 			SpatialComponent spatial(position, glm::vec3(1.f));
 			spatial.setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
-			CSMShadowMapComponent csmShadowMap(1024, resourceManagers.mTextureManager);
+			CSMShadowMapComponent csmShadowMap(256, resourceManagers.mTextureManager);
 			return std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Light")
 				.attachComponent<LightComponent>(glm::vec3(1.f))
