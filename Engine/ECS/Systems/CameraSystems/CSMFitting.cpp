@@ -26,7 +26,7 @@ namespace neo {
 			const SpatialComponent& lightSpatial, 
 			SpatialComponent& receiverSpatial, 
 			CameraComponent& receiverCamera, 
-			const uint32_t shadowMapResolution,
+			const uint16_t shadowMapResolution,
 			CSMCameraComponent& csmCamera
 		) {
 			/////////////////////// Do the fitting! ///////////////////////////////
@@ -48,15 +48,8 @@ namespace neo {
 				csmCamera.mSliceDepthEnd = newFar; // Use this in shadow resolve to compute which cascade to sample
 			}
 
-			{
-				receiverSpatial.setPosition(lightSpatial.getPosition());
-				receiverSpatial.setScale(lightSpatial.getScale());
-
-				glm::vec3 lookDir = lightSpatial.getLookDir();
-				float shadowRes = static_cast<float>(shadowMapResolution >> csmCamera.getLod());
-				lookDir = glm::round(lookDir / shadowRes) * shadowRes;
-				receiverSpatial.setLookDir(lookDir);
-			}
+			receiverSpatial.setPosition(lightSpatial.getPosition());
+			receiverSpatial.setScale(lightSpatial.getScale());
 			const auto& worldToLight = receiverSpatial.getView();
 			const auto& lightToWorld = glm::inverse(worldToLight);
 
@@ -133,15 +126,19 @@ namespace neo {
 
 			glm::vec3 center = lightToWorld * glm::vec4(receiverBox.center(), 1.f); // receivers center back in light space
 			//float bias = 10.f; // receiverFrustum.mBias; TODO bring this back
-			const float boxWidth = receiverBox.width() * 0.5f;
-			const float boxHeight = receiverBox.height() * 0.5f;
-			const float boxDepth = receiverBox.depth() * 0.5f; // TODO - bring back bias
+			float shadowRes = static_cast<float>(shadowMapResolution >> csmCamera.getLod());
+			float boxWidth = receiverBox.width();
+			boxWidth = glm::round(boxWidth * shadowRes) / shadowRes;
+			float boxHeight = receiverBox.height();
+			boxHeight = glm::round(boxHeight * shadowRes) / shadowRes;
+			float boxDepth = receiverBox.depth(); // TODO - bring back bias
+			boxDepth = glm::round(boxDepth * shadowRes) / shadowRes;
 
 			receiverSpatial.setPosition(center); // Doesn't matter b/c it's an analytic directional light
-			receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight) });
+			receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-boxWidth / 2.f, boxWidth / 2.f), glm::vec2(-boxHeight / 2.f, boxHeight / 2.f) });
 			float distToCenter = glm::distance(receiverSpatial.getPosition(), center);
-			receiverCamera.setNear(distToCenter - boxDepth);
-			receiverCamera.setFar(distToCenter + boxDepth);
+			receiverCamera.setNear(distToCenter - boxDepth / 2.f);
+			receiverCamera.setFar(distToCenter + boxDepth / 2.f);
 
 		}
 	}
@@ -160,7 +157,7 @@ namespace neo {
 
 		const auto& lightSpatial = std::get<2>(*lightTuple);
 		const auto& shadowMap = std::get<5>(*lightTuple);
-		uint32_t shadowMapResolution = 0;
+		uint16_t shadowMapResolution = 0;
 		if (resourceManagers.mTextureManager.isValid(shadowMap.mShadowMap)) {
 			const auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap.mShadowMap);
 			shadowMapResolution = std::max(shadowTexture.mWidth, shadowTexture.mHeight);
