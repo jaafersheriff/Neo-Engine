@@ -8,8 +8,8 @@ namespace neo {
 				: TextureWrap{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp, types::texture::Wraps::Clamp } 
 			;
 			types::texture::Filters minFilter = mips > 1
-				? types::texture::Filters::LinearMipmapNearest
-				: types::texture::Filters::Linear
+				? types::texture::Filters::NearestMipmapNearest
+				: types::texture::Filters::Nearest
 			;
 
 			return textureManager.asyncLoad(
@@ -20,7 +20,7 @@ namespace neo {
 					TextureFormat{
 						target,
 						types::texture::InternalFormats::D16,
-						TextureFilter { minFilter, types::texture::Filters::Linear },
+						TextureFilter { minFilter, types::texture::Filters::Nearest },
 						wrap,
 						types::ByteFormats::UnsignedByte,
 						mips

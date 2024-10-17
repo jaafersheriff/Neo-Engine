@@ -191,7 +191,7 @@ namespace CSM {
 		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
 		ecs.addSystem<FrustumCullingSystem>();
 		ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
-		ecs.addSystem<RotationSystem>();
+		//ecs.addSystem<RotationSystem>();
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -224,7 +224,7 @@ namespace CSM {
 				resourceManagers.mTextureManager.discard(shadowMap->mShadowMap);
 				ecs.removeComponent<CSMShadowMapComponent>(lightEntity);
 
-				ShadowCameraComponent shadowCamera(1024, resourceManagers.mTextureManager);
+				ShadowCameraComponent shadowCamera(256, resourceManagers.mTextureManager);
 				ecs.addComponent<ShadowCameraComponent>(lightEntity, shadowCamera);
 				LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
 				ecs.addComponent<LineMeshComponent>(lightEntity, lineMesh);
