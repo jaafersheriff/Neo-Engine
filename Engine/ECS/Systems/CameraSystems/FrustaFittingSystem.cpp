@@ -10,7 +10,17 @@
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
+#pragma optimize("", off)
+
 namespace neo {
+
+	namespace {
+		void _quantize(glm::vec3& pos, float texelSize) {
+			pos.x -= glm::mod(pos.x, texelSize);
+			pos.y -= glm::mod(pos.y, texelSize);
+			pos.z -= glm::mod(pos.z, texelSize);
+		}
+	}
 
 	void FrustaFittingSystem::update(ECS& ecs, const ResourceManagers& resourceManagers) {
 		NEO_UNUSED(resourceManagers);
@@ -95,26 +105,30 @@ namespace neo {
 			{  1.f, -1.f,	  1.f, 1.f }
 		};
 
-		glm::mat4 shadowToWorld = glm::inverse(sourceProj * sourceView); // source view pos
+		float texelSize = 2.f / 256.f;
+		glm::mat4 sceneToWorld = glm::inverse(sourceProj * sourceView); // source view pos
 		BoundingBox receiverBox;
 		for (const auto& corner : corners) {
-			glm::vec4 worldPos = shadowToWorld * corner; // transform corners of screen space unit receiver box into source PV space
+			glm::vec4 worldPos = sceneToWorld * corner; // transform corners of screen space unit receiver box into source PV space
 			worldPos = worldPos / worldPos.w;
 			worldPos = worldToLight * worldPos; // rotate corners with light's world rotation
 			receiverBox.addNewPosition(worldPos);
 		}
 
 		glm::vec3 center = lightToWorld * glm::vec4(receiverBox.center(), 1.f); // receivers center back in light space
-		float bias = receiverFrustum.mBias;
-		const float boxWidth = receiverBox.width() * 0.5f;
-		const float boxHeight = receiverBox.height() * 0.5f;
-		const float boxDepth = receiverBox.depth() * 0.5f * (1.f + bias);
-
+		_quantize(center, texelSize);
 		receiverSpatial.setPosition(center); // Doesn't matter b/c it's an analytic directional light
-		receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-boxWidth, boxWidth), glm::vec2(-boxHeight, boxHeight) });
-		float distToCenter = glm::distance(receiverSpatial.getPosition(), center);
-		receiverCamera.setNear(distToCenter - boxDepth);
-		receiverCamera.setFar(distToCenter + boxDepth);
 
+		float bias = receiverFrustum.mBias;
+		glm::vec3 boxBounds(receiverBox.width(), receiverBox.height(), receiverBox.depth() * (1.f + bias));
+		_quantize(boxBounds, texelSize);
+		float radius = std::max(boxBounds.x, std::max(boxBounds.y, boxBounds.z));
+		const float boxWidth = radius;
+		const float boxHeight = radius;
+		const float boxDepth = radius;
+
+		receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-boxWidth * 0.5f, boxWidth * 0.5f), glm::vec2(-boxHeight * 0.5f, boxHeight * 0.5f) });
+		receiverCamera.setNear(-boxDepth * 0.5f);
+		receiverCamera.setFar(boxDepth * 0.5f);
 	}
 }

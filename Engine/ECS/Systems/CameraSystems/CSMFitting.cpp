@@ -7,18 +7,21 @@
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitReceiverComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumFitSourceComponent.hpp"
-#include "ECS/Component/RenderingComponent/ShadowMapComponents.hpp"
 #include "ECS/Component/LightComponent/DirectionalLightComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
+#include "ECS/Component/RenderingComponent/ShadowMapComponents.hpp"
 #include "ResourceManager/ResourceManagers.hpp"
-
-#pragma optimize("", off)
 
 namespace neo {
 
 	namespace {
+		void _quantize(glm::vec3& pos, float texelSize) {
+			pos.x -= glm::mod(pos.x, texelSize);
+			pos.y -= glm::mod(pos.y, texelSize);
+			pos.z -= glm::mod(pos.z, texelSize);
+		}
 
 		void _doFitting(
 			const SpatialComponent& sourceSpatial, 
@@ -50,6 +53,7 @@ namespace neo {
 
 			receiverSpatial.setPosition(lightSpatial.getPosition());
 			receiverSpatial.setScale(lightSpatial.getScale());
+			receiverSpatial.setLookDir(lightSpatial.getLookDir());
 			const auto& worldToLight = receiverSpatial.getView();
 			const auto& lightToWorld = glm::inverse(worldToLight);
 
@@ -124,21 +128,21 @@ namespace neo {
 				receiverBox.addNewPosition(worldPos);
 			}
 
+			float texelSize = 1.f / static_cast<float>(shadowMapResolution >> csmCamera.getLod());
+
 			glm::vec3 center = lightToWorld * glm::vec4(receiverBox.center(), 1.f); // receivers center back in light space
 			//float bias = 10.f; // receiverFrustum.mBias; TODO bring this back
-			float shadowRes = static_cast<float>(shadowMapResolution >> csmCamera.getLod());
-			float boxWidth = receiverBox.width();
-			boxWidth = glm::round(boxWidth * shadowRes) / shadowRes;
-			float boxHeight = receiverBox.height();
-			boxHeight = glm::round(boxHeight * shadowRes) / shadowRes;
-			float boxDepth = receiverBox.depth(); // TODO - bring back bias
-			boxDepth = glm::round(boxDepth * shadowRes) / shadowRes;
+			glm::vec3 boxBounds(receiverBox.width(), receiverBox.height(), receiverBox.depth());
+			_quantize(boxBounds, texelSize);
+			float radius = std::max(boxBounds.x, std::max(boxBounds.y, boxBounds.z));
+			const float boxWidth = radius;
+			const float boxHeight = radius;
+			const float boxDepth = radius;
 
 			receiverSpatial.setPosition(center); // Doesn't matter b/c it's an analytic directional light
-			receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-boxWidth / 2.f, boxWidth / 2.f), glm::vec2(-boxHeight / 2.f, boxHeight / 2.f) });
-			float distToCenter = glm::distance(receiverSpatial.getPosition(), center);
-			receiverCamera.setNear(distToCenter - boxDepth / 2.f);
-			receiverCamera.setFar(distToCenter + boxDepth / 2.f);
+			receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-boxWidth * 0.5f, boxWidth * 0.5f), glm::vec2(-boxHeight * 0.5f, boxHeight * 0.5f) });
+			receiverCamera.setNear(-boxDepth * 0.5f);
+			receiverCamera.setFar(boxDepth * 0.5f);
 
 		}
 	}
@@ -157,13 +161,13 @@ namespace neo {
 
 		const auto& lightSpatial = std::get<2>(*lightTuple);
 		const auto& shadowMap = std::get<5>(*lightTuple);
-		uint16_t shadowMapResolution = 0;
+		uint16_t shadowMapResolution = 1;
 		if (resourceManagers.mTextureManager.isValid(shadowMap.mShadowMap)) {
 			const auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap.mShadowMap);
 			shadowMapResolution = std::max(shadowTexture.mWidth, shadowTexture.mHeight);
 		}
-
 		//NEO_ASSERT(receiverCamera.getType() == CameraComponent::CameraType::Orthographic, "Frustum fit receiver needs to be orthographic");
+
 		// TODO - this should have asserts
 		if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>()) {
 			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera0;
