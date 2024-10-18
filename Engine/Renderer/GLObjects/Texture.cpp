@@ -146,8 +146,8 @@ namespace neo {
 		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, _getGLFilter(mFormat.mFilter.mMag));
 		switch (mFormat.mTarget) {
 		case types::texture::Target::Texture3D:
-			glTexParameteri(target, GL_TEXTURE_WRAP_R, _getGLWrap(mFormat.mWrap.mR));
 		case types::texture::Target::TextureCube:
+			glTexParameteri(target, GL_TEXTURE_WRAP_R, _getGLWrap(mFormat.mWrap.mR));
 		case types::texture::Target::Texture2D:
 			glTexParameteri(target, GL_TEXTURE_WRAP_T, _getGLWrap(mFormat.mWrap.mT));
 		case types::texture::Target::Texture1D:
