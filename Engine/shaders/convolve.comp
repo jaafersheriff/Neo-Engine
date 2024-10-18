@@ -1,6 +1,7 @@
 
 #include "ibl.glsl"
 #include "pbr.glsl"
+#include "color.glsl"
 
 layout(binding = 0, rgba16f) uniform imageCube dst;
 #ifdef EQUIRECTANGULAR

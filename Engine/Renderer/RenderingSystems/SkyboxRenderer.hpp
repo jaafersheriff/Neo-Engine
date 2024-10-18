@@ -26,6 +26,9 @@ namespace neo {
 			return;
 		}
 		const auto& [_, skybox] = *skyboxTuple;
+		if (!resourceManagers.mTextureManager.isValid(skybox.mSkybox)) {
+			return;
+		}
 		const auto& skyboxTexture = resourceManagers.mTextureManager.resolve(skybox.mSkybox);
 
 		glDisable(GL_CULL_FACE);
