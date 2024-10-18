@@ -105,7 +105,6 @@ namespace neo {
 			{  1.f, -1.f,	  1.f, 1.f }
 		};
 
-		float texelSize = 2.f / 256.f;
 		glm::mat4 sceneToWorld = glm::inverse(sourceProj * sourceView); // source view pos
 		BoundingBox receiverBox;
 		for (const auto& corner : corners) {
@@ -114,21 +113,24 @@ namespace neo {
 			worldPos = worldToLight * worldPos; // rotate corners with light's world rotation
 			receiverBox.addNewPosition(worldPos);
 		}
-
-		glm::vec3 center = lightToWorld * glm::vec4(receiverBox.center(), 1.f); // receivers center back in light space
-		_quantize(center, texelSize);
-		receiverSpatial.setPosition(center); // Doesn't matter b/c it's an analytic directional light
-
-		float bias = receiverFrustum.mBias;
+		const float bias = receiverFrustum.mBias;
 		glm::vec3 boxBounds(receiverBox.width(), receiverBox.height(), receiverBox.depth() * (1.f + bias));
+
+		float texelSize = glm::max(boxBounds.x, glm::max(boxBounds.y, boxBounds.z)) / 256.f;
 		_quantize(boxBounds, texelSize);
 		float radius = std::max(boxBounds.x, std::max(boxBounds.y, boxBounds.z));
 		const float boxWidth = radius;
 		const float boxHeight = radius;
 		const float boxDepth = radius;
-
 		receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-boxWidth * 0.5f, boxWidth * 0.5f), glm::vec2(-boxHeight * 0.5f, boxHeight * 0.5f) });
 		receiverCamera.setNear(-boxDepth * 0.5f);
 		receiverCamera.setFar(boxDepth * 0.5f);
+
+		const glm::vec3 originalCenter(receiverBox.center());
+		// Quantize in light space
+		texelSize = radius / 256.f;
+		glm::vec3 center(originalCenter);
+		_quantize(center, texelSize);
+		receiverSpatial.setPosition(lightToWorld * glm::vec4(center, 1.f)); // Doesn't matter b/c it's an analytic directional light
 	}
 }
