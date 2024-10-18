@@ -67,7 +67,7 @@ namespace neo {
 						_fileName = Loader::ENGINE_RES_DIR + filePath;
 						if (!util::fileExists(_fileName.c_str())) {
 							NEO_LOG_E("Unable to find file %s", filePath.c_str());
-							return; // This works because STBIImageData does RAII dealloc
+							return nullptr; // This works because STBIImageData does RAII dealloc
 						}
 					}
 
