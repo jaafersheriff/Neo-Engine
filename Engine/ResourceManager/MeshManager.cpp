@@ -84,52 +84,58 @@ namespace neo {
 	void MeshManager::_tickImpl() {
 		TRACY_ZONE();
 
-		if (!mQueue.empty()) {
+		{
 			std::vector<ResourceLoadDetails_Internal> swapQueue = {};
 			std::swap(mQueue, swapQueue);
 			mQueue.clear();
 
-			TRACY_GPUN("Create");
-			for (auto& details : swapQueue) {
-				TRACY_GPUN("Create Single");
-				mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
-				for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
-					free(const_cast<uint8_t*>(buffer.mData));
-				}
-				if (details.mLoadDetails.mElementBuffer.has_value()) {
-					free(const_cast<uint8_t*>(details.mLoadDetails.mElementBuffer->mData));
+			if (!swapQueue.empty()) {
+				TRACY_GPUN("Create");
+				for (auto& details : swapQueue) {
+					TRACY_GPUN("Create Single");
+					mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
+					for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
+						free(const_cast<uint8_t*>(buffer.mData));
+					}
+					if (details.mLoadDetails.mElementBuffer.has_value()) {
+						free(const_cast<uint8_t*>(details.mLoadDetails.mElementBuffer->mData));
+					}
 				}
 			}
 		}
 
-		if (!mTransactionQueue.empty()) {
+		{
 			std::vector<std::pair<MeshHandle, std::function<void(Mesh&)>>> swapQueue;
 			std::swap(mTransactionQueue, swapQueue);
 			mTransactionQueue.clear();
 
-			TRACY_GPUN("Transact");
-			for (auto&& [handle, func] : swapQueue) {
-				TRACY_GPUN("Transact Single");
-				if (isValid(handle)) {
-					func(mCache.handle(handle.mHandle).get().mResource);
-				}
-				else {
-					NEO_LOG_E("Attempting to transact on an invalid mesh");
+			if (!swapQueue.empty()) {
+				TRACY_GPUN("Transact");
+				for (auto&& [handle, func] : swapQueue) {
+					TRACY_GPUN("Transact Single");
+					if (isValid(handle)) {
+						func(mCache.handle(handle.mHandle).get().mResource);
+					}
+					else {
+						NEO_LOG_E("Attempting to transact on an invalid mesh");
+					}
 				}
 			}
 		}
 
-		if (!mDiscardQueue.empty()) {
+		{
 			std::vector<MeshHandle> swapQueue;
 			std::swap(mDiscardQueue, swapQueue);
 			mDiscardQueue.clear();
 
-			TRACY_GPUN("Destroy");
-			for (auto& id : swapQueue) {
-				TRACY_GPUN("Destroy Single");
-				if (isValid(id)) {
-					_destroyImpl(mCache.handle(id.mHandle).get());
-					mCache.discard(id.mHandle);
+			if (!swapQueue.empty()) {
+				TRACY_GPUN("Destroy");
+				for (auto& id : swapQueue) {
+					TRACY_GPUN("Destroy Single");
+					if (isValid(id)) {
+						_destroyImpl(mCache.handle(id.mHandle).get());
+						mCache.discard(id.mHandle);
+					}
 				}
 			}
 		}

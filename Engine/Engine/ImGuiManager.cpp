@@ -105,7 +105,6 @@ namespace neo {
 		ImGui_ImplGlfw_InitForOpenGL(window, false);
 		ImGui::GetIO().BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
 		ImGui::GetPlatformIO().Renderer_RenderWindow = _renderWindow;
-
 	}
 
 	void ImGuiManager::update() {
