@@ -156,6 +156,7 @@ namespace neo {
 		if (mShowBoundingBoxes) {
 			TRACY_GPUN("Debug Draws");
 			defaultFbo.bind();
+			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 			drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.cGetComponent<MainCameraComponent>()));
 		}
 

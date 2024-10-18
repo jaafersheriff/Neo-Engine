@@ -115,14 +115,16 @@ namespace neo {
 				mTransactionQueue.clear();
 			}
 
-			TRACY_GPUN("Transact");
-			for (auto&& [handle, func] : swapQueue) {
-				TRACY_GPUN("Transact Single");
-				if (isValid(handle)) {
-					func(mCache.handle(handle.mHandle).get().mResource);
-				}
-				else {
-					NEO_LOG_E("Attempting to transact on an invalid mesh");
+			if (!swapQueue.empty()) {
+				TRACY_GPUN("Transact");
+				for (auto&& [handle, func] : swapQueue) {
+					TRACY_GPUN("Transact Single");
+					if (isValid(handle)) {
+						func(mCache.handle(handle.mHandle).get().mResource);
+					}
+					else {
+						NEO_LOG_E("Attempting to transact on an invalid mesh");
+					}
 				}
 			}
 		}
@@ -135,12 +137,14 @@ namespace neo {
 				mDiscardQueue.clear();
 			}
 
-			TRACY_GPUN("Destroy");
-			for (auto& id : swapQueue) {
-				TRACY_GPUN("Destroy Single");
-				if (isValid(id)) {
-					_destroyImpl(mCache.handle(id.mHandle).get());
-					mCache.discard(id.mHandle);
+			if (!swapQueue.empty()) {
+				TRACY_GPUN("Destroy");
+				for (auto& id : swapQueue) {
+					TRACY_GPUN("Destroy Single");
+					if (isValid(id)) {
+						_destroyImpl(mCache.handle(id.mHandle).get());
+						mCache.discard(id.mHandle);
+					}
 				}
 			}
 		}

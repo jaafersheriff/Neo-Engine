@@ -54,10 +54,11 @@ namespace neo {
 
 		{
 			NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
-			GLFWimage icons[1];
+
 			std::string path = Loader::ENGINE_RES_DIR + std::string("icon.png");
 			STBImageData image(path.c_str(), types::texture::BaseFormats::RGBA, types::ByteFormats::UnsignedByte, false);
 			if (image) {
+				GLFWimage icons[1];
 				icons[0].pixels = image.mData;
 				icons[0].width = image.mWidth;
 				icons[0].height = image.mHeight;
@@ -66,12 +67,14 @@ namespace neo {
 
 			/* Init GLEW */
 			glewExperimental = GL_FALSE;
-			NEO_ASSERT(glewInit()== GLEW_OK, "Failed to init GLEW");
+			NEO_ASSERT(glewInit() == GLEW_OK, "Failed to init GLEW");
 		}
 		ServiceLocator<ImGuiManager>::set();
 		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow(), mWindow.getDetails().mDPIScale);
 
 		ServiceLocator<Renderer>::ref().init();
+
+		// TODO - this should all move to renderer::init ?
 		{
 			auto details = ServiceLocator<Renderer>::ref().getDetails();
 			/* Set max work group */
@@ -119,10 +122,7 @@ namespace neo {
 				TRACY_ZONEN("Frame");
 				{
 					TRACY_ZONEN("Frame Update");
-					{
-						float runTime = static_cast<float>(glfwGetTime());
-						profiler.begin(runTime);
-					}
+					profiler.begin(glfwGetTime());
 					if (demos.needsReload()) {
 						if (ecs.mRegistry.storage<AsyncJobComponent>().empty()) {
 							_swapDemo(demos, ecs, resourceManagers);
@@ -199,9 +199,11 @@ namespace neo {
 
 					if (!mWindow.isMinimized()) {
 						TRACY_ZONEN("Prepare draw data");
-						// None of this will actually be valid until next frame in ECS::flush(), so imgui is always 1 frame behind
 						if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+							 // Current frame data gets generated now, then flushed and drawn next frame
 							ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
+
+							 // Last frame's data is about to be drawn, queue deletion now and it'll be flushed next frame
 							TRACY_ZONEN("Remove draw data");
 							for (auto entity : ecs.getView<ImGuiComponent, ImGuiDrawComponent>()) {
 								ecs.removeEntity(entity);
