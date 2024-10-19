@@ -106,10 +106,6 @@ namespace neo {
 			enum class Filters : uint8_t {
 				Linear,
 				Nearest,
-				NearestMipmapNearest,
-				LinearMipmapNearest,
-				NearestMipmapLinear,
-				LinearMipmapLinear
 			};
 
 			enum class Wraps : uint8_t {

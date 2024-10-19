@@ -23,24 +23,47 @@ namespace neo {
 			}
 		}
 
-		GLenum _getGLFilter(types::texture::Filters filter) {
-			switch (filter) {
-			case types::texture::Filters::Linear:
-				return GL_LINEAR;
+		std::pair<GLenum, GLenum> _getGLFilter(const TextureFilter& filter) {
+			GLenum min, mag;
+
+			switch (filter.mMag) {
 			case types::texture::Filters::Nearest:
-				return GL_NEAREST;
-			case types::texture::Filters::NearestMipmapNearest:
-				return GL_NEAREST_MIPMAP_NEAREST;
-			case types::texture::Filters::LinearMipmapNearest:
-				return GL_LINEAR_MIPMAP_NEAREST;
-			case types::texture::Filters::NearestMipmapLinear:
-				return GL_NEAREST_MIPMAP_LINEAR;
-			case types::texture::Filters::LinearMipmapLinear:
-				return GL_LINEAR_MIPMAP_LINEAR;
+				mag = GL_NEAREST;
+				break;
+			case types::texture::Filters::Linear:
 			default:
-				NEO_FAIL("Invalid texture filter");
-				return 0;
+				mag = GL_LINEAR;
+				break;
 			}
+
+			if (filter.mMip == types::texture::Filters::Nearest) {
+				switch (filter.mMin) {
+				case types::texture::Filters::Nearest:
+					min = GL_NEAREST_MIPMAP_NEAREST;
+					break;
+				case types::texture::Filters::Linear:
+				default:
+					min = GL_LINEAR_MIPMAP_NEAREST;
+					break;
+				}
+			}
+			else if (filter.mMip == types::texture::Filters::Linear) {
+				switch (filter.mMin) {
+				case types::texture::Filters::Nearest:
+					min = GL_NEAREST_MIPMAP_LINEAR;
+					break;
+				case types::texture::Filters::Linear:
+				default:
+					min = GL_LINEAR_MIPMAP_LINEAR;
+					break;
+				}
+			}
+			else {
+				NEO_FAIL("Invalid texture filter");
+				min = GL_LINEAR_MIPMAP_LINEAR;
+			}
+
+			return std::make_pair(min, mag);
 		}
 
 		GLenum _getGLWrap(types::texture::Wraps wrap) {
@@ -142,8 +165,9 @@ namespace neo {
 
 		// Apply format
 		GLenum target = _getGLTarget(format.mTarget);
-		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, _getGLFilter(mFormat.mFilter.mMin));
-		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, _getGLFilter(mFormat.mFilter.mMag));
+		std::pair<GLenum, GLenum> glFilters = _getGLFilter(mFormat.mFilter);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, glFilters.first);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, glFilters.second);
 		switch (mFormat.mTarget) {
 		case types::texture::Target::Texture3D:
 		case types::texture::Target::TextureCube:

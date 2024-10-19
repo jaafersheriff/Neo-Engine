@@ -9,21 +9,12 @@ namespace neo {
 	struct TextureFilter {
 		types::texture::Filters mMin = types::texture::Filters::Linear;
 		types::texture::Filters mMag = types::texture::Filters::Linear;
-		//types::texture::Filters mMip = types::texture::Filters::Linear;
+		types::texture::Filters mMip = types::texture::Filters::Linear;
 
 		bool operator==(const TextureFilter& other) const noexcept {
 			return mMin == other.mMin
-				&& mMag == other.mMag;
-				//&& mMip == other.mMip;
-		}
-
-		bool usesMipFilter() const {
-			NEO_ASSERT(mMag == types::texture::Filters::Nearest || mMag == types::texture::Filters::Linear, "These are the only allowed mag filter types");
-			return mMin == types::texture::Filters::LinearMipmapLinear
-				|| mMin == types::texture::Filters::LinearMipmapNearest
-				|| mMin == types::texture::Filters::NearestMipmapLinear
-				|| mMin == types::texture::Filters::NearestMipmapNearest
-			;
+				&& mMag == other.mMag
+				&& mMip == other.mMip;
 		}
 	};
 
@@ -44,8 +35,8 @@ namespace neo {
 		types::texture::InternalFormats mInternalFormat = types::texture::InternalFormats::RGBA8_UNORM;
 		TextureFilter mFilter = {
 			types::texture::Filters::Linear,
+			types::texture::Filters::Linear,
 			types::texture::Filters::Linear
-			//types::texture::Filters::Linear
 		};
 		TextureWrap mWrap = {
 			types::texture::Wraps::Clamp,
