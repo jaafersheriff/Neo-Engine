@@ -192,13 +192,14 @@ namespace DeferredPBR {
 						types::texture::Target::Texture2D,
 						types::texture::InternalFormats::RGBA16_F,
 						TextureFilter {
-							types::texture::Filters::LinearMipmapLinear,
+							types::texture::Filters::Linear,
+							types::texture::Filters::Linear,
 							types::texture::Filters::Linear
 						},
 						TextureWrap {
-							types::texture::Wraps::Repeat,
-							types::texture::Wraps::Repeat,
-							types::texture::Wraps::Repeat
+							types::texture::Wraps::Clamp,
+							types::texture::Wraps::Clamp,
+							types::texture::Wraps::Clamp
 						},
 						types::ByteFormats::Float,
 						7

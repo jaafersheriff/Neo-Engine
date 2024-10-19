@@ -161,7 +161,7 @@ namespace {
 		}
 	}
 
-	inline neo::types::texture::Filters _translateTinyGltfFilter(int filter) {
+	inline neo::types::texture::Filters _translateTinyGltfFilter(int filter, bool useMip) {
 		switch (filter) {
 		case TINYGLTF_TEXTURE_FILTER_NEAREST:
 			return neo::types::texture::Filters::Nearest;
@@ -170,16 +170,36 @@ namespace {
 			return neo::types::texture::Filters::Linear;
 			break;
 		case TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST:
-			return neo::types::texture::Filters::NearestMipmapNearest;
+			if (useMip) {
+				return neo::types::texture::Filters::Nearest;
+			}
+			else {
+				return neo::types::texture::Filters::Nearest;
+			}
 			break;
 		case TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST:
-			return neo::types::texture::Filters::LinearMipmapNearest;
+			if (useMip) {
+				return neo::types::texture::Filters::Nearest;
+			}
+			else {
+				return neo::types::texture::Filters::Linear;
+			}
 			break;
 		case TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR:
-			return neo::types::texture::Filters::NearestMipmapLinear;
+			if (useMip) {
+				return neo::types::texture::Filters::Linear;
+			}
+			else {
+				return neo::types::texture::Filters::Nearest;
+			}
 			break;
 		case TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR:
-			return neo::types::texture::Filters::LinearMipmapLinear;
+			if (useMip) {
+				return neo::types::texture::Filters::Linear;
+			}
+			else {
+				return neo::types::texture::Filters::Linear;
+			}
 			break;
 		default:
 			NEO_FAIL("Unsupported texture filter");
@@ -244,10 +264,11 @@ namespace {
 		if (texture.sampler > -1) {
 			const auto& sampler = model.samplers[texture.sampler];
 			if (sampler.minFilter > -1) {
-				builder.mFormat.mFilter.mMin = _translateTinyGltfFilter(sampler.minFilter);
+				builder.mFormat.mFilter.mMin = _translateTinyGltfFilter(sampler.minFilter, false);
+				builder.mFormat.mFilter.mMip = _translateTinyGltfFilter(sampler.minFilter, true);
 			}
 			if (sampler.magFilter > -1) {
-				builder.mFormat.mFilter.mMag = _translateTinyGltfFilter(sampler.magFilter);
+				builder.mFormat.mFilter.mMag = _translateTinyGltfFilter(sampler.magFilter, false);
 			}
 			if (sampler.wrapS > -1) {
 				builder.mFormat.mWrap.mS = _translateTinyGltfWrap(sampler.wrapS);

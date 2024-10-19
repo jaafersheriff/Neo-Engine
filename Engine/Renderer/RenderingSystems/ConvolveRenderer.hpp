@@ -33,7 +33,7 @@ namespace neo {
 			return;
 		}
 		const Texture& skyboxCubemap = resourceManagers.mTextureManager.resolve(skybox.mSkybox);
-		if (!skyboxCubemap.mFormat.mFilter.usesMipFilter() || skyboxCubemap.mFormat.mMipCount < 2) {
+		if (skyboxCubemap.mFormat.mMipCount < 2) {
 			NEO_LOG_E("Skybox cubemap needs to have mips");
 			return;
 		}
@@ -78,8 +78,8 @@ namespace neo {
 				.setFormat(TextureFormat{
 					types::texture::Target::TextureCube,
 					types::texture::InternalFormats::RGBA16_F,
-					TextureFilter { types::texture::Filters::LinearMipmapLinear, types::texture::Filters::Linear },
-					TextureWrap { types::texture::Wraps::Repeat, types::texture::Wraps::Repeat, types::texture::Wraps::Repeat },
+					TextureFilter { types::texture::Filters::Linear, types::texture::Filters::Linear, types::texture::Filters::Linear },
+					TextureWrap { types::texture::Wraps::Clamp , types::texture::Wraps::Clamp , types::texture::Wraps::Clamp  },
 					types::ByteFormats::Float,
 					skyboxCubemap.mFormat.mMipCount
 				})
