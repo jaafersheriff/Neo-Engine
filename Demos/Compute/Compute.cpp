@@ -88,13 +88,14 @@ namespace Compute {
 					positions[i * 4 + 3] = 1.f; // TODO - this is useless and costs perf. Get rid of it
 				}
 
-				auto& mesh = resourceManagers.mMeshManager.resolve(meshComponent.mMeshHandle);
-				mesh.updateVertexBuffer(
-					types::mesh::VertexType::Position,
-					static_cast<uint32_t>(positions.size()),
-					static_cast<uint32_t>(positions.size() * sizeof(float)),
-					reinterpret_cast<uint8_t*>(positions.data())
-				);
+				resourceManagers.mMeshManager.transact(meshComponent.mMeshHandle, [=](Mesh& mesh) {
+					mesh.updateVertexBuffer(
+						types::mesh::VertexType::Position,
+						static_cast<uint32_t>(positions.size()),
+						static_cast<uint32_t>(positions.size() * sizeof(float)),
+						reinterpret_cast<const uint8_t*>(positions.data())
+					);
+				});
 
 				meshComponent.isDirty = false;
 			}
