@@ -88,6 +88,7 @@ namespace neo {
 		/* Attach a system */
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
 		template <typename SysT> bool isSystemEnabled() const;
+		template <typename SysT> void setSystemActive(bool active);
 
 
 	private:
@@ -183,6 +184,18 @@ namespace neo {
 			}
 		}
 		return false;
+	}
+
+	template <typename SysT> 
+	void ECS::setSystemActive(bool active) {
+		static_assert(std::is_base_of<System, SysT>::value, "SysT must be a System type");
+		static_assert(!std::is_same<SysT, System>::value, "SysT must be a derived System type");
+		std::type_index typeI(typeid(SysT));
+		for (auto & sys : mSystems) {
+			if (sys.first == typeI) {
+				sys.second->mActive = active;
+			}
+		}
 	}
 
 	template<typename CompT>
