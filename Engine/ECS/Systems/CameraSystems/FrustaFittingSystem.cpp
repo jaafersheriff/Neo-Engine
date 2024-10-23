@@ -15,10 +15,11 @@
 namespace neo {
 
 	namespace {
-		void _quantize(glm::vec3& pos, float texelSize) {
+		glm::vec3 _quantize(glm::vec3& pos, float texelSize) {
 			pos.x -= glm::mod(pos.x, texelSize);
 			pos.y -= glm::mod(pos.y, texelSize);
 			pos.z -= glm::mod(pos.z, texelSize);
+			return pos;
 		}
 	}
 
@@ -113,22 +114,24 @@ namespace neo {
 			worldPos = worldToLight * worldPos; // rotate corners with light's world rotation
 			receiverBox.addNewPosition(worldPos);
 		}
-		const float bias = receiverFrustum.mBias;
-		glm::vec3 boxBounds(receiverBox.width(), receiverBox.height(), receiverBox.depth() * (1.f + bias));
+		// Quantize radius in light space
+		{
+			glm::vec3 boxBounds(receiverBox.width(), receiverBox.height(), receiverBox.depth());
+			float radius = std::max(boxBounds.x, std::max(boxBounds.y, boxBounds.z));
+			_quantize(receiverBox.mMin, radius / 256.f);
+			_quantize(receiverBox.mMax, radius / 256.f);
+		}
 
-		float texelSize = glm::max(boxBounds.x, glm::max(boxBounds.y, boxBounds.z)) / 256.f;
-		_quantize(boxBounds, texelSize);
-		float radius = std::max(boxBounds.x, std::max(boxBounds.y, boxBounds.z));
-		const float boxWidth = radius;
-		const float boxHeight = radius;
-		const float boxDepth = radius;
-		receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-boxWidth * 0.5f, boxWidth * 0.5f), glm::vec2(-boxHeight * 0.5f, boxHeight * 0.5f) });
-		receiverCamera.setNear(-boxDepth * 0.5f);
-		receiverCamera.setFar(boxDepth * 0.5f);
+		//const float bias = receiverFrustum.mBias;
+		glm::vec3 boxBounds(receiverBox.width(), receiverBox.height(), receiverBox.depth());
+		const float radius = std::max(boxBounds.x, std::max(boxBounds.y, boxBounds.z));
+		receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-radius * 0.5f, radius * 0.5f), glm::vec2(-radius * 0.5f, radius * 0.5f) });
+		receiverCamera.setNear(-radius * 0.5f);
+		receiverCamera.setFar(radius * 0.5f);
 
 		const glm::vec3 originalCenter(receiverBox.center());
 		// Quantize in light space
-		texelSize = radius / 256.f;
+		const float texelSize = radius / 256.f;
 		glm::vec3 center(originalCenter);
 		_quantize(center, texelSize);
 		receiverSpatial.setPosition(lightToWorld * glm::vec4(center, 1.f)); // Doesn't matter b/c it's an analytic directional light

@@ -186,7 +186,10 @@ namespace CSM {
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>(); // Update camera
 		ecs.addSystem<FrustumSystem>(); // Calculate original frusta bounds
-		ecs.addSystem<FrustaFittingSystem>(); // Fit one frusta into another
+		{
+			auto& sys = ecs.addSystem<FrustaFittingSystem>(); // Fit one frusta into another
+			sys.mActive = false;
+		}
 		ecs.addSystem<CSMFitting>(); // Break scene frustum into slices and fit CSMCameraN to those slices
 		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
 		ecs.addSystem<FrustumCullingSystem>();
@@ -217,6 +220,9 @@ namespace CSM {
 				for (auto& camera : csmCameras) {
 					ecs.submitEntity(std::move(camera)); // is this safe?
 				}
+
+				ecs.setSystemActive<CSMFitting>(true);
+				ecs.setSystemActive<FrustaFittingSystem>(false);
 			}
 			else {
 				NEO_ASSERT(!ecs.has<ShadowCameraComponent>(lightEntity) && ecs.has<CSMShadowMapComponent>(lightEntity), "Incorrect component movement");
@@ -233,6 +239,9 @@ namespace CSM {
 				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera1Component, SpatialComponent>()));
 				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera2Component, SpatialComponent>()));
 				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera3Component, SpatialComponent>()));
+
+				ecs.setSystemActive<CSMFitting>(false);
+				ecs.setSystemActive<FrustaFittingSystem>(true);
 			}
 		}
 	}
