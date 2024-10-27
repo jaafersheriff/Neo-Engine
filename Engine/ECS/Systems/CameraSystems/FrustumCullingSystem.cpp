@@ -37,7 +37,7 @@ namespace neo {
 			for (auto&& [cameraEntity, frustum, _] : cameras.each()) {
 				if (frustum.isInFrustum(spatial, bb)) {
 					if (cameraIDs.size() <= i) {
-						cameraIDs.push_back(cameraEntity);
+						cameraIDs.emplace_back(cameraEntity);
 					}
 					else {
 						cameraIDs[i++] = cameraEntity;

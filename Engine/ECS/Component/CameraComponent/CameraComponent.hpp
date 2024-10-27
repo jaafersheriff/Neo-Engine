@@ -58,8 +58,8 @@ namespace neo {
 		float mNear, mFar;
 	
 		/* Should never be used directly -- call getters */
-		mutable glm::mat4 mProjMat;
 		mutable bool mProjMatDirty = false;
+		mutable glm::mat4 mProjMat;
 
 	END_COMPONENT();
 

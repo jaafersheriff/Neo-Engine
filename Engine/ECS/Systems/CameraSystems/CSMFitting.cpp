@@ -24,11 +24,11 @@ namespace neo {
 		}
 
 		void _doFitting(
-			const SpatialComponent& sourceSpatial, 
-			const CameraComponent& sourceCamera, 
-			const SpatialComponent& lightSpatial, 
-			SpatialComponent& receiverSpatial, 
-			CameraComponent& receiverCamera, 
+			const SpatialComponent& sourceSpatial,
+			const CameraComponent& sourceCamera,
+			const SpatialComponent& lightSpatial,
+			SpatialComponent& receiverSpatial,
+			CameraComponent& receiverCamera,
 			const uint16_t shadowMapResolution,
 			CSMCameraComponent& csmCamera
 		) {
@@ -128,21 +128,48 @@ namespace neo {
 				receiverBox.addNewPosition(worldPos);
 			}
 
-			float texelSize = 1.f / static_cast<float>(shadowMapResolution >> csmCamera.getLod());
+			// https://alextardif.com/shadowmapping.html
+			float radius = std::max(receiverBox.width(), std::max(receiverBox.height(), receiverBox.depth())) / 2.f;
+			float textureSize = static_cast<float>(shadowMapResolution >> csmCamera.getLod());
+			float texelsPerUnit = textureSize / (radius * 2.f);
+			glm::mat4 scalar(glm::scale(glm::mat4(1.f), glm::vec3(texelsPerUnit)));
 
-			glm::vec3 center = lightToWorld * glm::vec4(receiverBox.center(), 1.f); // receivers center back in light space
-			//float bias = 10.f; // receiverFrustum.mBias; TODO bring this back
-			glm::vec3 boxBounds(receiverBox.width(), receiverBox.height(), receiverBox.depth());
-			_quantize(boxBounds, texelSize);
-			float radius = std::max(boxBounds.x, std::max(boxBounds.y, boxBounds.z));
-			const float boxWidth = radius;
-			const float boxHeight = radius;
-			const float boxDepth = radius;
+			glm::mat4 quantizedWorldToLight = scalar * worldToLight;
+			glm::mat4 quantizedLightToWorld = glm::inverse(quantizedWorldToLight);
 
-			receiverSpatial.setPosition(center); // Doesn't matter b/c it's an analytic directional light
-			receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-boxWidth * 0.5f, boxWidth * 0.5f), glm::vec2(-boxHeight * 0.5f, boxHeight * 0.5f) });
-			receiverCamera.setNear(-boxDepth * 0.5f);
-			receiverCamera.setFar(boxDepth * 0.5f);
+			glm::vec3 worldSpaceCenter = lightToWorld * glm::vec4(receiverBox.center(), 1.f);
+			glm::vec3 quantizedLightSpaceCenter = quantizedWorldToLight * glm::vec4(worldSpaceCenter, 1.f);
+			quantizedLightSpaceCenter.x = glm::floor(quantizedLightSpaceCenter.x);
+			quantizedLightSpaceCenter.y = glm::floor(quantizedLightSpaceCenter.y);
+			glm::vec3 quantizedWorldSpaceCenter = quantizedLightToWorld * glm::vec4(quantizedLightSpaceCenter, 1.f);
+
+			glm::vec3 eye = quantizedWorldSpaceCenter - (receiverSpatial.getLookDir() * radius * 2.f);
+			glm::mat4 finalLightView = glm::lookAt(eye, quantizedWorldSpaceCenter, glm::vec3(0, 1, 0));
+
+			receiverSpatial.setOrientation(finalLightView);
+			receiverSpatial.setPosition(quantizedWorldSpaceCenter);
+
+
+			float finalRadius = radius - glm::mod(radius, 1.f / 256.f);
+			receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-finalRadius, finalRadius), glm::vec2(-finalRadius, finalRadius) });
+			receiverCamera.setNear(-finalRadius);
+			receiverCamera.setFar(finalRadius);
+
+			// float texelSize = 1.f / static_cast<float>(shadowMapResolution >> csmCamera.getLod());
+
+			// glm::vec3 center = lightToWorld * glm::vec4(receiverBox.center(), 1.f); // receivers center back in light space
+			// //float bias = 10.f; // receiverFrustum.mBias; TODO bring this back
+			// glm::vec3 boxBounds(receiverBox.width(), receiverBox.height(), receiverBox.depth());
+			// _quantize(boxBounds, texelSize);
+			// float radius = std::max(boxBounds.x, std::max(boxBounds.y, boxBounds.z));
+			// const float boxWidth = radius;
+			// const float boxHeight = radius;
+			// const float boxDepth = radius;
+
+			// receiverSpatial.setPosition(center); // Doesn't matter b/c it's an analytic directional light
+			// receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-boxWidth * 0.5f, boxWidth * 0.5f), glm::vec2(-boxHeight * 0.5f, boxHeight * 0.5f) });
+			// receiverCamera.setNear(-boxDepth * 0.5f);
+			// receiverCamera.setFar(boxDepth * 0.5f);
 
 		}
 	}
