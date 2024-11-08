@@ -44,7 +44,7 @@ namespace neo {
 		}
 
 		fg.pass(outTarget, vp, [viewportOffset, viewportSize, shaderHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
-			TRACY_GPU();
+			TRACY_GPUN("Draw ImGui");
 			float L = static_cast<float>(viewportOffset.x);
 			float R = static_cast<float>(viewportOffset.x + viewportSize.x);
 			float T = static_cast<float>(viewportOffset.y);
@@ -63,6 +63,11 @@ namespace neo {
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_STENCIL_TEST);
 			glEnable(GL_SCISSOR_TEST);
+
+			if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
+				return;
+			}
+
 			auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, {});
 			resolvedShader.bindUniform("P", ortho_projection);
 

@@ -74,7 +74,7 @@ namespace {
 		}
 
 		fg.pass(outhandle, viewport, [pdef = std::move(passDefines), cameraEntity, shaderHandle, ubo = std::move(_ubo)](const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
-			TRACY_GPU();
+			TRACY_GPUN("_Phong");
 
 			// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
 			const auto& view = ecs.getView<const MeshComponent, const MaterialComponent, const SpatialComponent>();

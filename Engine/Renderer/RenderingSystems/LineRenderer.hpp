@@ -30,7 +30,7 @@ namespace neo {
 
 		ShaderDefines passDefines(inDefines);
 		fg.pass(outTarget, vp, [passDefines, cameraEntity, shaderHandle](const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
-			TRACY_GPU();
+			TRACY_GPUN("Draw Lines");
 
 			glEnable(GL_LINE_SMOOTH);
 

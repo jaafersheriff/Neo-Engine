@@ -48,7 +48,7 @@ namespace neo {
 		}); 
 
 		fg.pass(dstHandle, vp, [srcHandle, dstHandle, srcImage, blitShaderHandle](const ResourceManagers& resourceManagers, const ECS&) {
-			TRACY_GPU();
+			TRACY_GPUN("Blit");
 			if (!resourceManagers.mFramebufferManager.isValid(srcHandle) || !resourceManagers.mFramebufferManager.isValid(dstHandle)) {
 				return;
 			}
