@@ -1,4 +1,4 @@
-#include <entt/locator/locator.hpp>
+#include <ext/entt_incl.hpp>
 
 namespace neo {
 	template<typename T>

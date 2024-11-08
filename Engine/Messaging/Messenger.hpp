@@ -2,12 +2,13 @@
 
 #include "Message.hpp"
 
+#include <ext/entt_incl.hpp>
+
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
 #include <functional>
-#include <entt/signal/dispatcher.hpp>
 
 namespace neo {
 

@@ -13,6 +13,7 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <inttypes.h>
 
 namespace neo {
 
@@ -68,7 +69,7 @@ namespace neo {
 		for (int i = 0; i < 6; i++) {
 			TRACY_GPUN("Draw Face");
 
-			sprintf(targetName, "%s_%d_%d", "PointLightShadowMap", lightEntity, i);
+			sprintf(targetName, "%s_%" PRIu64 "_%d", "PointLightShadowMap", lightEntity, i);
 
 			FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 				HashedString(targetName),

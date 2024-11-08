@@ -2,6 +2,8 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
+#include <ext/entt_incl.hpp>
+
 namespace neo {
 
 	class FrameGraph {

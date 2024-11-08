@@ -92,15 +92,22 @@ file(GLOB_RECURSE ENTT_HPP_FILES
 file(GLOB_RECURSE ENTT_CPP_FILES 
 	entt.cpp
 )
-add_library(entt STATIC ${ENTT_CPP_FILES} ${ENTT_HPP_FILES})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/entt/src FILES 
-	${ENTT_HPP_FILES})
+add_library(entt STATIC ${ENTT_CPP_FILES} ${ENTT_HPP_FILES} entt_incl.hpp)
+source_group(
+	TREE  ${CMAKE_CURRENT_SOURCE_DIR}/entt/src 
+	FILES ${ENTT_HPP_FILES}
+)
 set_target_properties(entt PROPERTIES FOLDER "Neo/ext")
 target_include_directories(entt
 PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/entt/src"
 PRIVATE
 )
+target_link_libraries(entt
+PUBLIC
+	Util
+)
+
 
 ## par
 file(GLOB_RECURSE PAR_HPP_FILES 

@@ -3,7 +3,7 @@
 #include "Renderer/GLObjects/SourceShader.hpp"
 
 #include <glm/glm.hpp>
-#include <entt/container/dense_map.hpp>
+#include <ext/entt_incl.hpp>
 
 #include <variant>
 #include <set>
