@@ -28,6 +28,7 @@
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
 #include <entt/graph/flow.hpp>
+#include <Renderer/FrameGraph.hpp>
 
 using namespace neo;
 
@@ -136,6 +137,8 @@ namespace Base {
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		entt::flow builder{};
+		FrameGraph fg;
+
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
@@ -155,6 +158,7 @@ namespace Base {
 			sceneTarget.clear(glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 			builder.bind(HashedString("clear - sceneTarget"))
 				.rw(sceneTargetHandle.mHandle);
+			fg.clear(sceneTargetHandle, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 
 			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 			drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
