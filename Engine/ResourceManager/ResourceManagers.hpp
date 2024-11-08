@@ -10,18 +10,19 @@
 namespace neo {
 
 	class Engine;
-
+	class Renderer;
 
 	class ResourceManagers {
 		friend Engine;
+		friend Renderer;
 	public:
 		MeshManager mMeshManager;
 		ShaderManager mShaderManager;
 		TextureManager mTextureManager;
 		FramebufferManager mFramebufferManager;
 	private:
-		void imguiEditor();
-		void clear();
-		void tick();
+		void _imguiEditor();
+		void _clear();
+		void _tick();
 	};
 }

@@ -78,7 +78,7 @@ namespace neo {
 		FramebufferManager::~FramebufferManager();
 
 		bool isValid(FramebufferHandle id) const {
-			return mCache.contains(id.mHandle);
+			return mCache.contains(id.mHandle) || id == 0;
 		}
 
 		bool isQueued(FramebufferHandle id) const {
@@ -111,6 +111,7 @@ namespace neo {
 
 		mutable std::vector<FramebufferQueueItem> mQueue;
 		std::shared_ptr<Framebuffer> mFallback;
+		mutable Framebuffer mBackbuffer;
 
 	private:
 		Framebuffer& _resolveFinal(FramebufferHandle id) const;

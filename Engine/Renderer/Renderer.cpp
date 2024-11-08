@@ -9,6 +9,7 @@
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
 #include "Renderer/RenderingSystems/Blitter.hpp"
 #include "Renderer/RenderingSystems/ImGuiRenderer.hpp"
+#include <Renderer/FrameGraph.hpp>
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
@@ -139,36 +140,42 @@ namespace neo {
 				}),
 			resourceManagers.mTextureManager
 		);
-		if (!resourceManagers.mFramebufferManager.isValid(mDefaultFBOHandle)) {
-			return;
-		}
 
-		auto& defaultFbo = resourceManagers.mFramebufferManager.resolve(mDefaultFBOHandle);
 		{
-			TRACY_GPUN("Draw Demo");
-			demo->render(resourceManagers, ecs, defaultFbo);
-			resetState();
-		}
+			FrameGraph fg;
+			Viewport vp = { 0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y };
+			{
+				TRACY_GPUN("Draw Demo");
+				demo->render(fg, resourceManagers, ecs, mDefaultFBOHandle);
+			}
 
-		if (mShowBoundingBoxes) {
-			TRACY_GPUN("Debug Draws");
-			defaultFbo.bind();
-			drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.getComponent<MainCameraComponent>()));
-		}
+			fg.task(std::move([this](const ResourceManagers&, const ECS&) {
+				resetState();
+			}), mDefaultFBOHandle);
 
-		/* Render imgui */
-		if (!ServiceLocator<ImGuiManager>::has_value() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
-			TRACY_GPUN("ImGui Render");
-			resetState();
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glViewport(0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y);
-			glClear(GL_COLOR_BUFFER_BIT);
-			drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
-		}
-		else {
-			TRACY_GPUN("Final Blit");
-			Framebuffer fb; // empty framebuffer is just the backbuffer -- just don't do anything with it ever
-			blit(resourceManagers, fb, defaultFbo.mTextures[0], window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
+			if (mShowBoundingBoxes) {
+				TRACY_GPUN("Debug Draws");
+				drawLines<DebugBoundingBoxComponent>(
+					fg, 
+					mDefaultFBOHandle, 
+					vp,
+					resourceManagers, 
+					std::get<0>(*ecs.getComponent<MainCameraComponent>())
+				);
+			}
+
+			fg.clear(FramebufferHandle(0), glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
+
+			/* Render imgui */
+			if (!ServiceLocator<ImGuiManager>::has_value() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
+				drawImGui(fg, FramebufferHandle(0), vp, resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
+			}
+			else {
+				TRACY_GPUN("Final Blit");
+				blit(fg, vp, resourceManagers, mDefaultFBOHandle, FramebufferHandle(0), 0);
+			}
+
+			fg.execute(resourceManagers, ecs);
 		}
 	}
 
@@ -180,7 +187,7 @@ namespace neo {
 		ServiceLocator<ImGuiManager>::value().updateViewport();
 		glm::vec2 viewportSize = ServiceLocator<ImGuiManager>::value().getViewportSize();
 		if (viewportSize.x != 0 && viewportSize.y != 0) {
-			if (resourceManager.mFramebufferManager.isValid(mDefaultFBOHandle)) {
+			if ( resourceManager.mFramebufferManager.isValid(mDefaultFBOHandle)) {
 				auto& defaultFbo = resourceManager.mFramebufferManager.resolve(mDefaultFBOHandle);
 #pragma warning(push)
 #pragma warning(disable: 4312)

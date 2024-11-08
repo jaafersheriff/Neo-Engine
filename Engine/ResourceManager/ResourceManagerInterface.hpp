@@ -24,7 +24,7 @@ namespace neo {
 			: mHandle(id.value())
 		{}
 
-		entt::id_type mHandle;
+		entt::id_type mHandle = NEO_INVALID_HANDLE;
 
 		bool operator==(const ResourceHandle<ResourceType>& other) const noexcept {
 			return mHandle == other.mHandle;

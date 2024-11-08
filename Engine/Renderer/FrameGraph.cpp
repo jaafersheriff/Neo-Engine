@@ -2,16 +2,17 @@
 
 namespace neo {
 	void FrameGraph::execute(const ResourceManagers& resourceManagers, const ECS& ecs) {
+		TRACY_GPU();
 		NEO_UNUSED(resourceManagers, ecs);
 
 		auto graph = mBuilder.graph();
 
-		std::ostringstream output{};
-		entt::dot(output, graph, [&](auto& output, auto vertex) {
-			auto node2 = mBuilder[vertex];
-			output << "label=\"v" << node2 << "\",shape=\"box\"";
-			});
-		printf("%s\n", output.str().c_str());
+		//std::ostringstream output{};
+		//entt::dot(output, graph, [&](auto& output, auto vertex) {
+		//	auto node2 = mBuilder[vertex];
+		//	output << "label=\"v" << node2 << "\",shape=\"box\"";
+		//	});
+		//printf("%s\n", output.str().c_str());
 
 		// TODO - sort
 		std::deque<entt::flow::basic_flow::graph_type::vertex_type> nodesToVisit;

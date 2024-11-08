@@ -47,6 +47,7 @@ namespace neo {
 		// Fallback is back buffer
 		// Goodluck
 		mFallback = std::make_shared<Framebuffer>();
+		mBackbuffer = Framebuffer{};
 	}
 
 	FramebufferManager::~FramebufferManager() {
@@ -92,6 +93,10 @@ namespace neo {
 	}
 
 	Framebuffer& FramebufferManager::_resolveFinal(FramebufferHandle id) const {
+		// 0 is backbuffer, goodluck
+		if (id == 0) {
+			return mBackbuffer;
+		}
 		if (mCache.contains(id.mHandle)) {
 			auto& pfb = const_cast<PooledFramebuffer&>(mCache[id.mHandle]->mResource);
 			if (pfb.mFrameCount < 5) {

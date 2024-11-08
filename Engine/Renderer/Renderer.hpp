@@ -68,7 +68,7 @@ namespace neo {
 		private:
 			RendererDetails mDetails = {};
 
-			FramebufferHandle mDefaultFBOHandle;
+			FramebufferHandle mDefaultFBOHandle = UINT64_MAX;
 			bool mShowBoundingBoxes = false;
 			bool mBackbufferNeedsResize = false;
 

@@ -154,7 +154,7 @@ namespace neo {
 							demos.imGuiEditor(ecs, resourceManagers);
 						}
 						ecs.imguiEdtor();
-						resourceManagers.imguiEditor();
+						resourceManagers._imguiEditor();
 						ServiceLocator<ImGuiManager>::value().imGuiEditor();
 						ServiceLocator<Renderer>::value().imGuiEditor(mWindow, ecs, resourceManagers);
 						profiler.imGuiEditor();
@@ -180,7 +180,7 @@ namespace neo {
 						Messenger::relayMessages(ecs);
 					}
 					{
-						resourceManagers.tick();
+						resourceManagers._tick();
 						ServiceLocator<Renderer>::value().render(mWindow, demos.getCurrentDemo(), profiler, ecs, resourceManagers);
 						Messenger::relayMessages(ecs);
 					}
@@ -206,7 +206,7 @@ namespace neo {
 		/* Destry the old state*/
 		demos.getCurrentDemo()->destroy();
 		ecs.clean();
-		resourceManagers.clear();
+		resourceManagers._clear();
 		ServiceLocator<Renderer>::value().clean();
 		Messenger::clean();
 
@@ -222,7 +222,7 @@ namespace neo {
 		Loader::init(config.resDir, config.shaderDir);
 		_createPrefabs(resourceManagers);
 		ServiceLocator<ImGuiManager>::value().reload(resourceManagers);
-		resourceManagers.tick();
+		resourceManagers._tick();
 
 		demos.getCurrentDemo()->init(ecs, resourceManagers);
 
@@ -274,7 +274,7 @@ namespace neo {
 		NEO_LOG_I("Shutting down...");
 		ecs.clean();
 		Messenger::clean();
-		resourceManagers.clear();
+		resourceManagers._clear();
 		ServiceLocator<Renderer>::value().clean();
 		ServiceLocator<Renderer>::reset();
 		ServiceLocator<ImGuiManager>::value().destroy();

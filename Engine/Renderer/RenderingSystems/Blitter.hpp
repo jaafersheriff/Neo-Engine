@@ -6,13 +6,24 @@
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
+#include "Renderer/FrameGraph.hpp"
+
 #include "Loader/Loader.hpp"
 #include "ResourceManager/ResourceManagers.hpp"
 
 namespace neo {
 
-	inline void blit(const ResourceManagers& resourceManagers, const Framebuffer& outputFBO, TextureHandle inputTextureHandle, glm::uvec2 viewport, glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f)) {
-		TRACY_GPU();
+	template<typename... Deps>
+	inline void blit(
+		FrameGraph& fg,
+		Viewport vp,
+		const ResourceManagers& resourceManagers,
+		FramebufferHandle srcHandle,
+		FramebufferHandle dstHandle,
+		uint8_t srcImage = 0,
+		Deps... deps
+	) {
+		TRACY_ZONE();
 
 		auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blit Shader", SourceShader::ShaderCode {			
 			{ types::shader::Stage::Vertex,
@@ -35,28 +46,29 @@ namespace neo {
 				}
 			)"}
 		}); 
-		if (!resourceManagers.mShaderManager.isValid(blitShaderHandle)) {
-			return; // RIP
-		}
 
-		if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {
-			return;
-		}
+		fg.pass(dstHandle, vp, [srcHandle, dstHandle, srcImage, blitShaderHandle](const ResourceManagers& resourceManagers, const ECS&) {
+			TRACY_GPU();
+			if (!resourceManagers.mFramebufferManager.isValid(srcHandle) || !resourceManagers.mFramebufferManager.isValid(dstHandle)) {
+				return;
+			}
+			const auto& src = resourceManagers.mFramebufferManager.resolve(srcHandle);
 
-		outputFBO.bind();
-		glViewport(0, 0, viewport.x, viewport.y);
-		outputFBO.clear(clearColor, types::framebuffer::AttachmentBit::Color);
+			if (src.mTextures.size() < srcImage || !resourceManagers.mTextureManager.isValid(src.mTextures[srcImage])) {
+				return;
+			}
 
-		glDisable(GL_DEPTH_TEST);
-		
-		auto& resolvedBlit = resourceManagers.mShaderManager.resolveDefines(blitShaderHandle, {});
-		
-		// Bind input fbo texture
-		resolvedBlit.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(inputTextureHandle));
-		
-		// Render 
-		resourceManagers.mMeshManager.resolve("quad").draw();
+			glDisable(GL_DEPTH_TEST);
+			
+			auto& resolvedBlit = resourceManagers.mShaderManager.resolveDefines(blitShaderHandle, {});
+			
+			// Bind input fbo texture
+			resolvedBlit.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(src.mTextures[srcImage]));
+			
+			// Render 
+			resourceManagers.mMeshManager.resolve("quad").draw();
 
-		glEnable(GL_DEPTH_TEST);
+			glEnable(GL_DEPTH_TEST);
+		}, srcHandle, deps...);
 	}
 }

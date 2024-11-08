@@ -26,8 +26,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
-
-#include <Renderer/FrameGraph.hpp>
+#include "Renderer/RenderingSystems/Blitter.hpp"
 
 using namespace neo;
 
@@ -41,8 +40,6 @@ namespace {
 		const ECS::Entity cameraEntity, 
 		FramebufferHandle outhandle
 	) {
-		TRACY_GPU();
-
 		auto shaderHandle = _resourceManagers.mShaderManager.asyncLoad("Phong Shader", 
 			SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex, "model.vert"},
@@ -77,6 +74,7 @@ namespace {
 		}
 
 		fg.pass(outhandle, viewport, [pdef = std::move(passDefines), cameraEntity, shaderHandle, ubo = std::move(_ubo)](const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
+			TRACY_GPU();
 
 			// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
 			const auto& view = ecs.getView<const MeshComponent, const MaterialComponent, const SpatialComponent>();
@@ -229,9 +227,7 @@ namespace Base {
 		NEO_UNUSED(ecs, resourceManagers);
 	}
 
-	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer&) {
-		FrameGraph fg;
-
+	void Demo::render(FrameGraph& fg, const ResourceManagers& resourceManagers, const ECS& ecs, FramebufferHandle backbufferHandle) {
 		const auto&& [cameraEntity, __, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
@@ -246,11 +242,8 @@ namespace Base {
 		fg.clear(sceneTargetHandle, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 
 		_drawPhong(fg, resourceManagers, ecs, Viewport(0, 0, viewport.mSize), cameraEntity, sceneTargetHandle);
-		
-		//FramebufferHandle backbufferHandle; // Fake backbuffer handle for now
-		//fg.clear(backbufferHandle, glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
 
-		fg.execute(resourceManagers, ecs);
+		blit(fg, Viewport(0, 0, viewport.mSize), resourceManagers, sceneTargetHandle, backbufferHandle);
 	}
 
 	void Demo::destroy() {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ResourceManager/FramebufferManager.hpp"
+
 #include "Util/Util.hpp"
 #include <string>
 
@@ -7,8 +9,8 @@ namespace neo {
 
 	class ECS;
 	class Renderer;
-	class Framebuffer;
 	class ResourceManagers;
+	class FrameGraph;
 
 	class IDemo {
 	public:
@@ -29,7 +31,7 @@ namespace neo {
 		virtual void update(ECS& ecs, ResourceManagers& resourceManagers) {
 			NEO_UNUSED(ecs, resourceManagers);
 		};
-		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) = 0;
+		virtual void render(FrameGraph& fg, const ResourceManagers& resourceManagers, const ECS& ecs, FramebufferHandle backbufferHandle) = 0;
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
 			NEO_UNUSED(ecs, resourceManagers);
 		}
