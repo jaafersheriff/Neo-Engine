@@ -31,6 +31,7 @@ namespace neo {
 				for (auto e : graph.out_edges(vertex)) {
 					nodesToVisit.push_back(e.second);
 				}
+				mTasks.erase(mBuilder[vertex]);
 			}
 		}
 

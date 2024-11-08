@@ -27,24 +27,19 @@ namespace neo {
 
 		template<typename... Deps>
 		void pass(FramebufferHandle target, Viewport viewport, Task t, Deps... deps) {
-				NEO_LOG_V("Creating pass task");
 			task(std::move([_t = std::move(t), target, viewport](const ResourceManagers& resourceManager, const ECS& ecs) {
-				//NEO_ASSERT(resourceManager.mFramebufferManager.isValid(target), "Invalid target handle");
-				NEO_LOG_V("Executing pass task");
 				if (!resourceManager.mFramebufferManager.isValid(target)) {
 					return;
 				}
 				glViewport(viewport.x, viewport.y, viewport.z, viewport.w);
 				const auto& fb = resourceManager.mFramebufferManager.resolve(target);
 				fb.bind();
-				NEO_LOG_V("Executing draw func");
 				_t(resourceManager, ecs);
 			}), target, std::forward<Deps>(deps)...);
 		}
 
 		void clear(FramebufferHandle handle, glm::vec4 color, types::framebuffer::AttachmentBits clearFlags) {
 			task(std::move([=](const ResourceManagers& resourceManager, const ECS&) {
-				//NEO_ASSERT(resourceManager.mFramebufferManager.isValid(handle), "Invalid clear handle");
 				if (!resourceManager.mFramebufferManager.isValid(handle)) {
 					return;
 				}
