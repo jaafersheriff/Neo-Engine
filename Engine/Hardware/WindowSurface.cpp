@@ -190,14 +190,12 @@ namespace neo {
 		Messenger::addReceiver<ToggleFullscreenMessage, &WindowSurface::_onToggleFullscreen>(this);
 		Messenger::addReceiver<FrameSizeMessage, &WindowSurface::_onFrameSizeChanged>(this);
 
-		if (!ServiceLocator<ImGuiManager>::has_value()) {
-			if (!ServiceLocator<ImGuiManager>::value().isEnabled()) {
-				int x, y;
-				glfwGetFramebufferSize(mWindow, &x, &y);
-				mDetails.mSize.x = x;
-				mDetails.mSize.y = y;
-				Messenger::sendMessage<FrameSizeMessage>(mDetails.mSize);
-			}
+		if (!ServiceLocator<ImGuiManager>::has_value() || !ServiceLocator<ImGuiManager>::value().isEnabled()) {
+			int x, y;
+			glfwGetFramebufferSize(mWindow, &x, &y);
+			mDetails.mSize.x = x;
+			mDetails.mSize.y = y;
+			Messenger::sendMessage<FrameSizeMessage>(mDetails.mSize);
 		}
 	}
 

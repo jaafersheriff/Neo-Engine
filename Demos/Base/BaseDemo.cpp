@@ -135,6 +135,7 @@ namespace Base {
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
+		entt::flow builder{};
 		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
@@ -152,14 +153,28 @@ namespace Base {
 
 			sceneTarget.bind();
 			sceneTarget.clear(glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+			builder.bind(HashedString("clear - sceneTarget"))
+				.rw(sceneTargetHandle.mHandle);
+
 			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 			drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
+			builder.bind(HashedString("drawForwardPBR - Opaque"))
+				.rw(sceneTargetHandle.mHandle);
 			drawForwardPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
+			builder.bind(HashedString("drawForwardPBR - AlphaTest"))
+				.rw(sceneTargetHandle.mHandle);
 			drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity);
+			builder.bind(HashedString("drawForwardPBR - Transparent"))
+				.rw(sceneTargetHandle.mHandle);
 
 			backbuffer.bind();
 			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
+			builder.bind(HashedString("clear - backbuffer"))
+				.rw(HashedString("Backbuffer"));
 			drawFXAA(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
+			builder.bind(HashedString("fxaa - sceneTarget --> backbuffer"))
+				.ro(sceneTargetHandle.mHandle)
+				.rw(HashedString("Backbuffer"));
 			// Don't forget the depth. Because reasons.
 			glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
 				0, 0, viewport.mSize.x, viewport.mSize.y,
@@ -167,7 +182,20 @@ namespace Base {
 				GL_DEPTH_BUFFER_BIT,
 				GL_NEAREST
 			);
+			builder.bind(HashedString("depth blit - sceneTarget --> backbuffer"))
+				.ro(sceneTargetHandle.mHandle)
+				.rw(HashedString("Backbuffer"));
 		}
+
+		auto graph = builder.graph();
+		std::ostringstream output{};
+		//entt::dot(output, graph);
+		entt::dot(output, graph, [&](auto& output, auto vertex) {
+			//auto node1 = graph[vertex];
+			auto node2 = builder[vertex];
+			output << "label=\"v" << node2 << "\",shape=\"box\"";
+		});
+		printf("%s\n", output.str().c_str());
 	}
 
 	void Demo::destroy() {
