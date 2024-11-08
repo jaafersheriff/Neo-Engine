@@ -31,7 +31,103 @@
 
 using namespace neo;
 
-/* Game object definitions */
+namespace {
+
+	void _drawPhong(
+		FrameGraph& fg,
+		const ResourceManagers& _resourceManagers, 
+		const ECS& _ecs, 
+		const Viewport& viewport, 
+		const ECS::Entity cameraEntity, 
+		FramebufferHandle outhandle
+	) {
+		TRACY_GPU();
+
+		auto shaderHandle = _resourceManagers.mShaderManager.asyncLoad("Phong Shader", 
+			SourceShader::ConstructionArgs{
+				{ types::shader::Stage::Vertex, "model.vert"},
+				{ types::shader::Stage::Fragment, "phong.frag" }
+			}
+		);
+
+		ShaderDefines passDefines;
+
+		UBO _ubo;
+		_ubo["P"] = _ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
+		const auto& cameraSpatial = _ecs.cGetComponent<SpatialComponent>(cameraEntity);
+		_ubo["V"] = cameraSpatial->getView();
+		_ubo["camPos"] = cameraSpatial->getPosition();
+
+		auto&& [lightEntity, _lightLight, light, lightSpatial] = *_ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
+		_ubo["lightCol"] = light.mColor;
+
+		MakeDefine(DIRECTIONAL_LIGHT);
+		MakeDefine(POINT_LIGHT);
+		if (_ecs.has<DirectionalLightComponent>(lightEntity)) {
+			passDefines.set(DIRECTIONAL_LIGHT);
+			_ubo["lightDir"] = -lightSpatial.getLookDir();
+		}
+		else if (_ecs.has<PointLightComponent>(lightEntity)) {
+			passDefines.set(POINT_LIGHT);
+			_ubo["lightPos"] = lightSpatial.getPosition();
+			_ubo["lightRadiance"] = light.mIntensity;
+		}
+		else {
+			NEO_FAIL("Phong light needs a directional or point light component");
+		}
+
+		fg.pass(outhandle, viewport, [passDefines, cameraEntity, shaderHandle, ubo = std::move(_ubo)](const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
+
+			ShaderDefines drawDefines(passDefines);
+			// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
+			const auto& view = ecs.getView<const MeshComponent, const MaterialComponent, const SpatialComponent>();
+			for (auto entity : view) {
+				// VFC
+				if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+					if (!culled->isInView(ecs, entity, cameraEntity)) {
+						continue;
+					}
+				}
+
+				drawDefines.reset();
+
+				const auto& material = view.get<const MaterialComponent>(entity);
+				MakeDefine(ALBEDO_MAP);
+				MakeDefine(NORMAL_MAP);
+
+				if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
+					drawDefines.set(ALBEDO_MAP);
+				}
+				if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
+					drawDefines.set(NORMAL_MAP);
+				}
+
+				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
+				resolvedShader.bind();
+
+				resolvedShader.bindUniform("albedo", material.mAlbedoColor);
+				if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
+					resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material.mAlbedoMap));
+				}
+
+				if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
+					resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
+				}
+
+				const auto& drawSpatial = view.get<const SpatialComponent>(entity);
+				resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
+				resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
+
+				for (const auto& [key, val] : ubo) {
+					resolvedShader.bindUniform(key, val);
+				}
+
+				resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
+			}
+		});
+	}
+
+}
 
 namespace Base {
 
@@ -134,71 +230,28 @@ namespace Base {
 		NEO_UNUSED(ecs, resourceManagers);
 	}
 
-	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
-		entt::flow builder{};
+	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer&) {
 		FrameGraph fg;
 
-		const auto&& [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		const auto&& [cameraEntity, __, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Scene Target",
 			FramebufferBuilder{}
-				.setSize(viewport.mSize)
-				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
-				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
+			.setSize(viewport.mSize)
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
+			.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
 			resourceManagers.mTextureManager
 		);
+		fg.clear(sceneTargetHandle, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 
-		if (resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
-			auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
+		_drawPhong(fg, resourceManagers, ecs, Viewport(0, 0, viewport.mSize), cameraEntity, sceneTargetHandle);
+		
+		//FramebufferHandle backbufferHandle; // Fake backbuffer handle for now
+		//fg.clear(backbufferHandle, glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
 
-			sceneTarget.bind();
-			sceneTarget.clear(glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-			builder.bind(HashedString("clear - sceneTarget"))
-				.rw(sceneTargetHandle.mHandle);
-			fg.clear(sceneTargetHandle, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-
-			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-			drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-			builder.bind(HashedString("drawForwardPBR - Opaque"))
-				.rw(sceneTargetHandle.mHandle);
-			drawForwardPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
-			builder.bind(HashedString("drawForwardPBR - AlphaTest"))
-				.rw(sceneTargetHandle.mHandle);
-			drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity);
-			builder.bind(HashedString("drawForwardPBR - Transparent"))
-				.rw(sceneTargetHandle.mHandle);
-
-			backbuffer.bind();
-			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
-			builder.bind(HashedString("clear - backbuffer"))
-				.rw(HashedString("Backbuffer"));
-			drawFXAA(resourceManagers, viewport.mSize, sceneTarget.mTextures[0]);
-			builder.bind(HashedString("fxaa - sceneTarget --> backbuffer"))
-				.ro(sceneTargetHandle.mHandle)
-				.rw(HashedString("Backbuffer"));
-			// Don't forget the depth. Because reasons.
-			glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
-				0, 0, viewport.mSize.x, viewport.mSize.y,
-				0, 0, viewport.mSize.x, viewport.mSize.y,
-				GL_DEPTH_BUFFER_BIT,
-				GL_NEAREST
-			);
-			builder.bind(HashedString("depth blit - sceneTarget --> backbuffer"))
-				.ro(sceneTargetHandle.mHandle)
-				.rw(HashedString("Backbuffer"));
-		}
-
-		auto graph = builder.graph();
-		std::ostringstream output{};
-		//entt::dot(output, graph);
-		entt::dot(output, graph, [&](auto& output, auto vertex) {
-			//auto node1 = graph[vertex];
-			auto node2 = builder[vertex];
-			output << "label=\"v" << node2 << "\",shape=\"box\"";
-		});
-		printf("%s\n", output.str().c_str());
+		fg.execute(resourceManagers, ecs);
 	}
 
 	void Demo::destroy() {

@@ -19,10 +19,10 @@ namespace neo {
 		result_type operator()(const ShaderLoadDetails& shaderDetails, const std::optional<std::string>& debugName) const;
 	};
 
+	using ShaderHandle = ResourceHandle<SourceShader>;
 	class ShaderManager final : public ResourceManagerInterface<ShaderManager, SourceShader, ShaderLoadDetails, ShaderLoader> {
 		friend ResourceManagerInterface;
 	public:
-		using ShaderHandle = ResourceHandle<SourceShader>;
 
 		ShaderManager();
 		~ShaderManager();
