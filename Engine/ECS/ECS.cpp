@@ -57,11 +57,11 @@ namespace neo {
 	void ECS::clean() {
 		NEO_LOG_I("Cleaning ECS...");
 		flush();
-		mRegistry.each([this](auto entity) {
-			mRegistry.destroy(entity);
-		});
+		for (auto&& entity : mRegistry.storage<Entity>().each()) {
+			mRegistry.destroy(std::get<0>(entity));
+		}
 		mRegistry.clear();
-		NEO_ASSERT(mRegistry.alive() == 0, "What");
+		NEO_ASSERT(mRegistry.storage<Entity>().size() == 0, "What");
 		mSystems.clear();
 	}
 
@@ -79,7 +79,7 @@ namespace neo {
 					sprintf(title, "%d", static_cast<int>(entity));
 				}
 				if (ImGui::TreeNodeEx(title)) {
-					mEditor.renderEditor(mRegistry, entity);
+					//mEditor.renderEditor(mRegistry, entity);
 					ImGui::TreePop();
 				}
 				});
@@ -96,14 +96,15 @@ namespace neo {
 				sprintf(title, "Selected: %d", static_cast<int>(selectedEntity));
 			}
 			if (ImGui::TreeNodeEx(title, ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_DefaultOpen)) {
-				mEditor.renderEditor(mRegistry, selectedEntity);
+				//mEditor.renderEditor(mRegistry, selectedEntity);
 				ImGui::TreePop();
 			}
 		}
-		if (ImGui::TreeNodeEx(&mRegistry, 0, "All Entities: %d", static_cast<int>(mRegistry.alive()))) {
+		if (ImGui::TreeNodeEx(&mRegistry, 0, "All Entities: %d", static_cast<int>(mRegistry.storage<Entity>().size()))) {
 			getView<TagComponent>().each([this](Entity entity, TagComponent& tag) {
 				if (ImGui::TreeNodeEx(tag.mTag.c_str())) {
-					mEditor.renderEditor(mRegistry, entity);
+					NEO_UNUSED(entity);
+					//mEditor.renderEditor(mRegistry, entity);
 					ImGui::TreePop();
 				}
 			});

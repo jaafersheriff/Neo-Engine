@@ -14,7 +14,7 @@
 #pragma warning( push )
 #pragma warning( disable : 4244 )
 #define MM_IEEE_ASSERT(x) NEO_UNUSED(x)
-#include <imgui_entt_entity_editor.hpp>
+// #include <imgui_entt_entity_editor.hpp>
 #pragma warning( pop )
 
 #include <typeindex>
@@ -89,7 +89,7 @@ namespace neo {
 
 	private:
 		mutable Registry mRegistry;
-		mutable MM::EntityEditor<Entity> mEditor;
+		//mutable MM::EntityEditor<Entity> mEditor;
 
 		/* Active containers */
 		std::vector<EntityBuilder> mEntityCreateQueue;
@@ -199,20 +199,20 @@ namespace neo {
 			component = new CompT();
 		}
 
-		MM::EntityEditor<Entity>::ComponentInfo info;
-		info.name = component->mName;
-		info.create = [this](entt::registry& r, Entity e) {
-			NEO_UNUSED(r, e);
-			NEO_LOG_W("Component creation unsupported");
-		};
-		info.destroy = [this](entt::registry& r, Entity e) {
-			NEO_UNUSED(r);
-			removeComponent<CompT>(e);
-		};
-		info.widget = [this](entt::registry& r, Entity e) {
-			r.get<CompT>(e).imGuiEditor();
-		};
-		mEditor.registerComponent<CompT>(info);
+		// MM::EntityEditor<Entity>::ComponentInfo info;
+		// info.name = component->mName;
+		// info.create = [this](entt::registry& r, Entity e) {
+		// 	NEO_UNUSED(r, e);
+		// 	NEO_LOG_W("Component creation unsupported");
+		// };
+		// info.destroy = [this](entt::registry& r, Entity e) {
+		// 	NEO_UNUSED(r);
+		// 	removeComponent<CompT>(e);
+		// };
+		// info.widget = [this](entt::registry& r, Entity e) {
+		// 	r.get<CompT>(e).imGuiEditor();
+		// };
+		// mEditor.registerComponent<CompT>(info);
 
 		mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
 			if (registry.try_get<CompT>(e)) {

@@ -41,22 +41,22 @@ namespace neo {
 	// TODO - instanced
 	void Mesh::draw(uint32_t size, uint16_t offset) const {
 
-		ServiceLocator<Renderer>::ref().mStats.mNumDraws++;
+		ServiceLocator<Renderer>::value().mStats.mNumDraws++;
 
 		glBindVertexArray(mVAOID);
 
 		const auto& positions = getVBO(types::mesh::VertexType::Position);
 		if (mElementVBO) {
 			uint32_t usedSize = size ? size : mElementVBO->elementCount;
-			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += usedSize / positions.components;
+			ServiceLocator<Renderer>::value().mStats.mNumPrimitives += usedSize / positions.components;
 			glDrawElements(_translatePrimitive(mPrimitiveType), usedSize, mElementVBO->format, reinterpret_cast<void*>(offset));
 		}
 		else if (size) {
-			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += size / positions.components;
+			ServiceLocator<Renderer>::value().mStats.mNumPrimitives += size / positions.components;
 			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, size / positions.components);
 		}
 		else {
-			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += positions.elementCount / positions.components;
+			ServiceLocator<Renderer>::value().mStats.mNumPrimitives += positions.elementCount / positions.components;
 			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, positions.elementCount / positions.components);
 		}
 	}

@@ -27,6 +27,8 @@
 
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
+#include <entt/graph/flow.hpp>
+
 using namespace neo;
 
 /* Game object definitions */

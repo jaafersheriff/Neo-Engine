@@ -51,7 +51,7 @@ namespace neo {
 
 		srand((unsigned int)(time(0)));
 
-		ServiceLocator<Renderer>::set(4, 4);
+		ServiceLocator<Renderer>::emplace(4, 4);
 
 		{
 			NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
@@ -69,12 +69,12 @@ namespace neo {
 			glewExperimental = GL_FALSE;
 			NEO_ASSERT(glewInit()== GLEW_OK, "Failed to init GLEW");
 		}
-		ServiceLocator<ImGuiManager>::set();
-		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow(), mWindow.getDetails().mDPIScale);
+		ServiceLocator<ImGuiManager>::emplace();
+		ServiceLocator<ImGuiManager>::value().init(mWindow.getWindow(), mWindow.getDetails().mDPIScale);
 
-		ServiceLocator<Renderer>::ref().init();
+		ServiceLocator<Renderer>::value().init();
 		{
-			auto details = ServiceLocator<Renderer>::ref().getDetails();
+			auto details = ServiceLocator<Renderer>::value().getDetails();
 			/* Set max work group */
 			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &details.mMaxComputeWorkGroupSize.x);
 			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &details.mMaxComputeWorkGroupSize.y);
@@ -145,9 +145,9 @@ namespace neo {
 					Messenger::relayMessages(ecs);
 
 					/* Update imgui functions */
-					if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+					if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
 						TRACY_ZONEN("ImGui");
-						ServiceLocator<ImGuiManager>::ref().begin();
+						ServiceLocator<ImGuiManager>::value().begin();
 
 						{
 							TRACY_ZONEN("Demo Imgui");
@@ -155,11 +155,11 @@ namespace neo {
 						}
 						ecs.imguiEdtor();
 						resourceManagers.imguiEditor();
-						ServiceLocator<ImGuiManager>::ref().imGuiEditor();
-						ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, ecs, resourceManagers);
+						ServiceLocator<ImGuiManager>::value().imGuiEditor();
+						ServiceLocator<Renderer>::value().imGuiEditor(mWindow, ecs, resourceManagers);
 						profiler.imGuiEditor();
 
-						ServiceLocator<ImGuiManager>::ref().end();
+						ServiceLocator<ImGuiManager>::value().end();
 						Messenger::relayMessages(ecs);
 					}
 				}
@@ -170,8 +170,8 @@ namespace neo {
 					if (!mWindow.isMinimized()) {
 						TRACY_ZONEN("Prepare draw data");
 						// None of this will actually be valid until next frame in ECS::flush(), so imgui is always 1 frame behind
-						if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-							ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
+						if (ServiceLocator<ImGuiManager>::value().isEnabled()) {
+							ServiceLocator<ImGuiManager>::value().resolveDrawData(ecs, resourceManagers);
 							TRACY_ZONEN("Remove draw data");
 							for (auto entity : ecs.getView<ImGuiComponent, ImGuiDrawComponent>()) {
 								ecs.removeEntity(entity);
@@ -181,7 +181,7 @@ namespace neo {
 					}
 					{
 						resourceManagers.tick();
-						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), profiler, ecs, resourceManagers);
+						ServiceLocator<Renderer>::value().render(mWindow, demos.getCurrentDemo(), profiler, ecs, resourceManagers);
 						Messenger::relayMessages(ecs);
 					}
 				}
@@ -207,21 +207,21 @@ namespace neo {
 		demos.getCurrentDemo()->destroy();
 		ecs.clean();
 		resourceManagers.clear();
-		ServiceLocator<Renderer>::ref().clean();
+		ServiceLocator<Renderer>::value().clean();
 		Messenger::clean();
 
 		/* Init the new state */
-		ServiceLocator<ImGuiManager>::ref().reset();
+		ServiceLocator<ImGuiManager>::value().reset();
 		demos.swap();
 		auto config = demos.getConfig();
 		mWindow.reset(config.name);
 		mMouse.init();
 		mKeyboard.init();
-		ServiceLocator<Renderer>::ref().setDemoConfig(config);
-		ServiceLocator<Renderer>::ref().init();
+		ServiceLocator<Renderer>::value().setDemoConfig(config);
+		ServiceLocator<Renderer>::value().init();
 		Loader::init(config.resDir, config.shaderDir);
 		_createPrefabs(resourceManagers);
-		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers);
+		ServiceLocator<ImGuiManager>::value().reload(resourceManagers);
 		resourceManagers.tick();
 
 		demos.getCurrentDemo()->init(ecs, resourceManagers);
@@ -275,24 +275,24 @@ namespace neo {
 		ecs.clean();
 		Messenger::clean();
 		resourceManagers.clear();
-		ServiceLocator<Renderer>::ref().clean();
+		ServiceLocator<Renderer>::value().clean();
 		ServiceLocator<Renderer>::reset();
-		ServiceLocator<ImGuiManager>::ref().destroy();
+		ServiceLocator<ImGuiManager>::value().destroy();
 		mWindow.shutDown();
 	}
 
 	void Engine::_startFrame(util::Profiler& profiler, ECS& ecs, ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
 
-		if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-			ServiceLocator<ImGuiManager>::ref().update();
+		if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
+			ServiceLocator<ImGuiManager>::value().update();
 		}
 
 		glm::uvec2 viewportSize;
 		glm::uvec2 viewportPosition;
-			if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-				viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
-				viewportPosition = mWindow.getDetails().mPos + ServiceLocator<ImGuiManager>::ref().getViewportOffset();
+			if (ServiceLocator<ImGuiManager>::value().isEnabled()) {
+				viewportSize = ServiceLocator<ImGuiManager>::value().getViewportSize();
+				viewportPosition = mWindow.getDetails().mPos + ServiceLocator<ImGuiManager>::value().getViewportOffset();
 			}
 			else {
 				viewportSize = mWindow.getDetails().mSize;

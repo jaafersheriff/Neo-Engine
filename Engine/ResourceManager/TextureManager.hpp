@@ -37,7 +37,12 @@ namespace neo {
 	using TextureLoadDetails = std::variant<TextureBuilder, TextureFiles>;
 	using TextureHandle = ResourceHandle<Texture>;
 
-	class TextureManager final : public ResourceManagerInterface<TextureManager, Texture, TextureLoadDetails> {
+	struct TextureLoader {
+		using result_type = std::shared_ptr<BackedResource<Texture>>;
+		result_type operator()(TextureFiles& fileDetails, const std::optional<std::string>& debugName) const;
+		result_type operator()(TextureBuilder textureDetails, const std::optional<std::string>& debugName) const;
+	};
+	class TextureManager final : public ResourceManagerInterface<TextureManager, Texture, TextureLoadDetails, TextureLoader> {
 		friend ResourceManagerInterface;
 	public:
 

@@ -41,7 +41,7 @@ namespace neo {
 		std::optional<std::string> mDebugName;
 	};
 
-	template<typename DerivedManager, typename ResourceType, typename ResourceLoadDetails>
+	template<typename DerivedManager, typename ResourceType, typename ResourceLoadDetails, typename Loader>
 	class ResourceManagerInterface {
 		friend ResourceManagers;
 	public:
@@ -126,9 +126,9 @@ namespace neo {
 			mQueue.clear();
 			mDiscardQueue.clear();
 			mTransactionQueue.clear();
-			mCache.each([this](BackedResource<ResourceType>& resource) {
+			for(auto&& [_, resource] : mCache) {
 				static_cast<DerivedManager*>(this)->_destroyImpl(resource);
-			});
+			}
 			mCache.clear();
 		}
 
@@ -138,14 +138,13 @@ namespace neo {
 		mutable std::vector<ResourceLoadDetails_Internal> mQueue;
 		mutable std::vector<ResourceHandle<ResourceType>> mDiscardQueue;
 		mutable std::vector<std::pair<ResourceHandle<ResourceType>, std::function<void(ResourceType&)>>> mTransactionQueue;
-		entt::resource_cache<BackedResource<ResourceType>> mCache;
+		entt::resource_cache<BackedResource<ResourceType>, Loader> mCache;
 		std::shared_ptr<BackedResource<ResourceType>> mFallback;
 
 	private:
 		ResourceType& _resolveFinal(const ResourceHandle<ResourceType>& id) const {
-			auto handle = mCache.handle(id.mHandle);
-			if (handle) {
-				return const_cast<ResourceType&>(handle.get().mResource);
+			if (mCache.contains(id.mHandle)) {
+				return const_cast<ResourceType&>(mCache[id.mHandle]->mResource);
 			}
 			NEO_FAIL("Invalid resource requested! Did you check for validity?");
 			return mFallback->mResource;

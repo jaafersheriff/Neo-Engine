@@ -11,35 +11,10 @@
 #define HOT_RELOAD_MILLSECONDS 100
 
 namespace neo {
-	struct ShaderLoader final : entt::resource_loader<ShaderLoader, BackedResource<SourceShader>> {
-
-		std::shared_ptr<BackedResource<SourceShader>> load(const ShaderLoadDetails& shaderDetails, const std::optional<std::string>& debugName) const {
-			NEO_ASSERT(debugName.has_value(), "Shaders need to come with a name please");
-			NEO_LOG_V("Uploading shader %s", debugName.value().c_str());
-			return util::visit(shaderDetails,
-				[&](const SourceShader::ConstructionArgs& constructionArgs) {
-					SourceShader::ShaderCode shaderCode;
-					time_t lastModTime = 0;
-					for (auto&& [type, filePath] : constructionArgs) {
-						shaderCode.emplace(type, Loader::loadFileString(filePath));
-						lastModTime = std::max(lastModTime, Loader::getFileModTime(filePath));
-					}
-					auto result = std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
-					result->mResource.mConstructionArgs = constructionArgs;
-					result->mResource.mModifiedTime = lastModTime;
-					return result;
-				},
-				[&](const SourceShader::ShaderCode& shaderCode) {
-					return std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
-				},
-				[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
-			);
-		}
-	};
 
 	ShaderManager::ShaderManager() {
 
-		mFallback = ShaderLoader{}.load(SourceShader::ShaderCode{
+		mFallback = ShaderLoader{}(SourceShader::ShaderCode{
 			{types::shader::Stage::Vertex,
 				R"(
 					void main() {
@@ -95,7 +70,7 @@ namespace neo {
 			mQueue.clear();
 
 			for (auto& loadDetails : swapQueue) {
-				mCache.load<ShaderLoader>(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
+				mCache.load(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
 			}
 		}
 
@@ -105,8 +80,8 @@ namespace neo {
 			mDiscardQueue.clear();
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
-					_destroyImpl(mCache.handle(id.mHandle).get());
-					mCache.discard(id.mHandle);
+					_destroyImpl(mCache[id.mHandle]);
+					mCache.erase(id.mHandle);
 				}
 			}
 		}
@@ -122,8 +97,8 @@ namespace neo {
 	}
 
 	void ShaderManager::imguiEditor() {
-		mCache.each([&](entt::id_type, BackedResource<SourceShader>& resource) {
-			auto& shader = resource.mResource;
+		for(auto&& [_, resource] : mCache) {
+			auto& shader = resource->mResource;
 			if (ImGui::TreeNode(shader.mName.c_str())) {
 				if (shader.mResolvedShaders.size()) {
 					if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(shader.mResolvedShaders.size()))) {
@@ -145,7 +120,7 @@ namespace neo {
 				}
 				ImGui::TreePop();
 			}
-		});
+		}
 	}
 
 	void ShaderManager::_hotReloadFunc() {
@@ -164,12 +139,12 @@ namespace neo {
 			// Entt Cache doesn't support iterators :/ 
 			std::vector<entt::id_type> list;
 			list.reserve(mCache.size());
-			mCache.each([&list](const entt::id_type enttId) {
+			for(auto&& [enttId, _] : mCache) {
 				list.emplace_back(enttId);
-			});
+			}
 
 			for (auto id = list.begin(); id < list.end(); id++) {
-				if (auto resource = mCache.handle(*id); resource && resource->mResource.mConstructionArgs) {
+				if (auto resource = mCache[*id]; resource && resource->mResource.mConstructionArgs) {
 					time_t lastModTime = resource->mResource.mModifiedTime;
 					for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
 						lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
@@ -184,5 +159,28 @@ namespace neo {
 				}
 			}
 		}
+	}
+
+	ShaderLoader::result_type ShaderLoader::operator()(const ShaderLoadDetails& shaderDetails, const std::optional<std::string>& debugName) const {
+		NEO_ASSERT(debugName.has_value(), "Shaders need to come with a name please");
+		NEO_LOG_V("Uploading shader %s", debugName.value().c_str());
+		return util::visit(shaderDetails,
+			[&](const SourceShader::ConstructionArgs& constructionArgs) {
+				SourceShader::ShaderCode shaderCode;
+				time_t lastModTime = 0;
+				for (auto&& [type, filePath] : constructionArgs) {
+					shaderCode.emplace(type, Loader::loadFileString(filePath));
+					lastModTime = std::max(lastModTime, Loader::getFileModTime(filePath));
+				}
+				auto result = std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
+				result->mResource.mConstructionArgs = constructionArgs;
+				result->mResource.mModifiedTime = lastModTime;
+				return result;
+			},
+			[&](const SourceShader::ShaderCode& shaderCode) {
+				return std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
+			},
+			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
+		);
 	}
 }

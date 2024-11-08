@@ -41,8 +41,8 @@ namespace neo {
 #ifdef DEBUG_MODE
 				fprintf(stderr, buf);
 #endif
-				if (!ServiceLocator<ImGuiManager>::empty()) {
-					ServiceLocator<ImGuiManager>::ref().log(buf, severity);
+				if (!ServiceLocator<ImGuiManager>::has_value()) {
+					ServiceLocator<ImGuiManager>::value().log(buf, severity);
 				}
 			}
 		}

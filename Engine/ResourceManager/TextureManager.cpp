@@ -47,96 +47,13 @@ namespace neo {
 				return 1;
 			}
 		}
-
-		struct TextureLoader final : entt::resource_loader<TextureLoader, BackedResource<Texture>> {
-
-			std::shared_ptr<BackedResource<Texture>> load(TextureFiles& fileDetails, const std::optional<std::string>& debugName) const {
-				if (debugName.has_value()) {
-					NEO_LOG_V("Uploading texture files for %s", debugName.value().c_str());
-				}
-				if (fileDetails.mFilePaths.size() == 6 && fileDetails.mFormat.mTarget != types::texture::Target::TextureCube) {
-					NEO_LOG_E("Cubemap format mismatch!");
-					fileDetails.mFilePaths.erase(fileDetails.mFilePaths.begin(), fileDetails.mFilePaths.begin() + 5);
-				}
-
-				std::vector<std::unique_ptr<STBImageData>> images;
-
-				for (auto& filePath : fileDetails.mFilePaths) {
-					std::string _fileName = Loader::APP_RES_DIR + filePath;
-					if (!util::fileExists(_fileName.c_str())) {
-						_fileName = Loader::ENGINE_RES_DIR + filePath;
-						if (!util::fileExists(_fileName.c_str())) {
-							NEO_LOG_E("Unable to find file %s", filePath.c_str());
-							continue;
-						}
-					}
-
-					bool flip = fileDetails.mFormat.mTarget != types::texture::Target::TextureCube; // This might be really dumb
-					images.push_back(std::make_unique<STBImageData>(_fileName.c_str(), TextureFormat::deriveBaseFormat(fileDetails.mFormat.mInternalFormat), fileDetails.mFormat.mType, flip));
-				}
-
-				std::vector<uint8_t*> data;
-				glm::u16vec3 dimensions(UINT16_MAX);
-				bool successfulFileLoad = !images.empty();
-				for (auto& image : images) {
-					if (image) {
-						NEO_LOG_I("Loaded image %s [%d, %d]", image->mFilePath.c_str(), image->mWidth, image->mHeight);
-						dimensions.x = glm::min(dimensions.x, static_cast<uint16_t>(image->mWidth));
-						dimensions.y = glm::min(dimensions.y, static_cast<uint16_t>(image->mHeight));
-
-						// TODO - need to memcpy the data over lmao
-						data.push_back(image->mData);
-					}
-					else {
-						NEO_FAIL("Error reading texture file %s", image->mFilePath.c_str());
-						successfulFileLoad |= false;
-					}
-				}
-
-				if (successfulFileLoad) {
-					TextureBuilder details;
-					details.mFormat = fileDetails.mFormat;
-					details.mDimensions = dimensions;
-					if (fileDetails.mFilePaths.size() == 1) {
-						details.mData = data[0];
-					}
-					else if (fileDetails.mFilePaths.size() == 6) {
-						// HEH??
-						details.mData = reinterpret_cast<uint8_t*>(data.data());
-					}
-					else {
-						NEO_FAIL("How u do dis");
-					}
-
-					return load(details, debugName);
-				}
-				else {
-					NEO_LOG_E("Failed to load %s", debugName.has_value() ? debugName.value().c_str() : "");
-				}
-				return nullptr;
-			}
-
-			std::shared_ptr<BackedResource<Texture>> load(TextureBuilder textureDetails, const std::optional<std::string>& debugName) const {
-				if (debugName.has_value()) {
-					NEO_LOG_V("Uploading raw texture %s", debugName.value().c_str());
-				}
-				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, debugName, textureDetails.mData);
-				textureResource->mDebugName = debugName;
-				if (textureDetails.mFormat.mFilter.usesMipFilter() || textureDetails.mFormat.mMipCount > 1) {
-					textureResource->mResource.genMips();
-				}
-
-				return textureResource;
-			}
-		};
-
 	}
 
 	TextureManager::TextureManager() {
 		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF, /**/ 0xFF, 0xFF, 0xFF, 0xFF,
 		                   0xFF, 0xFF, 0xFF, 0xFF, /**/ 0x00, 0x00, 0x00, 0xFF
 		};
-		mFallback = TextureLoader{}.load(TextureBuilder{
+		mFallback = TextureLoader{}(TextureBuilder{
 			TextureFormat{},
 			glm::u16vec3(2, 2, 0),
 			data
@@ -190,8 +107,8 @@ namespace neo {
 
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
-					_destroyImpl(mCache.handle(id.mHandle).get());
-					mCache.discard(id.mHandle);
+					_destroyImpl(mCache[id.mHandle]);
+					mCache.erase(id.mHandle);
 				}
 				else {
 					for (int i = 0; i < mQueue.size(); i++) {
@@ -213,11 +130,11 @@ namespace neo {
 				std::visit([&](auto&& arg) {
 					using T = std::decay_t<decltype(arg)>;
 					if constexpr (std::is_same_v<T, TextureBuilder>) {
-						mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
+						mCache.load(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
 						free(const_cast<uint8_t*>(arg.mData));
 					}
 					else if constexpr (std::is_same_v<T, TextureFiles>) {
-						mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
+						mCache.load(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
 					}
 					else {
 						static_assert(always_false_v<T>, "non-exhaustive visitor!");
@@ -232,24 +149,101 @@ namespace neo {
 	}
 
 	void TextureManager::imguiEditor(std::function<void(const TextureHandle&)> textureFunc) {
-		mCache.each([&](auto handle, BackedResource<Texture>& textureResource) {
+		for (auto&& [handle, textureResource] : mCache) {
 			ImGui::PushID(static_cast<int>(handle));
 			bool node = false;
-			if (textureResource.mDebugName.has_value()) {
-				node |= ImGui::TreeNode(static_cast<void*>(&handle), "%s", textureResource.mDebugName->c_str());
+			if (textureResource->mDebugName.has_value()) {
+				node |= ImGui::TreeNode(static_cast<void*>(&handle), "%s", textureResource->mDebugName->c_str());
 			}
 			else {
 				node |= ImGui::TreeNode(static_cast<void*>(&handle), "%d", handle);
 			}
 			if (node) {
-				ImGui::Text("[%d, %d]", textureResource.mResource.mWidth, textureResource.mResource.mHeight);
+				ImGui::Text("[%d, %d]", textureResource->mResource.mWidth, textureResource->mResource.mHeight);
 				textureFunc(handle);
 				ImGui::TreePop();
 			}
 			ImGui::PopID();
-		});
+		}
 	}
 
+	TextureLoader::result_type TextureLoader::operator()(TextureFiles& fileDetails, const std::optional<std::string>& debugName) const {
+		if (debugName.has_value()) {
+			NEO_LOG_V("Uploading texture files for %s", debugName.value().c_str());
+		}
+		if (fileDetails.mFilePaths.size() == 6 && fileDetails.mFormat.mTarget != types::texture::Target::TextureCube) {
+			NEO_LOG_E("Cubemap format mismatch!");
+			fileDetails.mFilePaths.erase(fileDetails.mFilePaths.begin(), fileDetails.mFilePaths.begin() + 5);
+		}
 
+		std::vector<std::unique_ptr<STBImageData>> images;
+
+		for (auto& filePath : fileDetails.mFilePaths) {
+			std::string _fileName = Loader::APP_RES_DIR + filePath;
+			if (!util::fileExists(_fileName.c_str())) {
+				_fileName = Loader::ENGINE_RES_DIR + filePath;
+				if (!util::fileExists(_fileName.c_str())) {
+					NEO_LOG_E("Unable to find file %s", filePath.c_str());
+					continue;
+				}
+			}
+
+			bool flip = fileDetails.mFormat.mTarget != types::texture::Target::TextureCube; // This might be really dumb
+			images.push_back(std::make_unique<STBImageData>(_fileName.c_str(), TextureFormat::deriveBaseFormat(fileDetails.mFormat.mInternalFormat), fileDetails.mFormat.mType, flip));
+		}
+
+		std::vector<uint8_t*> data;
+		glm::u16vec3 dimensions(UINT16_MAX);
+		bool successfulFileLoad = !images.empty();
+		for (auto& image : images) {
+			if (image) {
+				NEO_LOG_I("Loaded image %s [%d, %d]", image->mFilePath.c_str(), image->mWidth, image->mHeight);
+				dimensions.x = glm::min(dimensions.x, static_cast<uint16_t>(image->mWidth));
+				dimensions.y = glm::min(dimensions.y, static_cast<uint16_t>(image->mHeight));
+
+				// TODO - need to memcpy the data over lmao
+				data.push_back(image->mData);
+			}
+			else {
+				NEO_FAIL("Error reading texture file %s", image->mFilePath.c_str());
+				successfulFileLoad |= false;
+			}
+		}
+
+		if (successfulFileLoad) {
+			TextureBuilder details;
+			details.mFormat = fileDetails.mFormat;
+			details.mDimensions = dimensions;
+			if (fileDetails.mFilePaths.size() == 1) {
+				details.mData = data[0];
+			}
+			else if (fileDetails.mFilePaths.size() == 6) {
+				// HEH??
+				details.mData = reinterpret_cast<uint8_t*>(data.data());
+			}
+			else {
+				NEO_FAIL("How u do dis");
+			}
+
+			return TextureLoader{}(details, debugName);
+		}
+		else {
+			NEO_LOG_E("Failed to load %s", debugName.has_value() ? debugName.value().c_str() : "");
+		}
+		return nullptr;
+	}
+
+	TextureLoader::result_type TextureLoader::operator()(TextureBuilder textureDetails, const std::optional<std::string>& debugName) const {
+		if (debugName.has_value()) {
+			NEO_LOG_V("Uploading raw texture %s", debugName.value().c_str());
+		}
+		std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, debugName, textureDetails.mData);
+		textureResource->mDebugName = debugName;
+		if (textureDetails.mFormat.mFilter.usesMipFilter() || textureDetails.mFormat.mMipCount > 1) {
+			textureResource->mResource.genMips();
+		}
+
+		return textureResource;
+	}
 
 }

@@ -41,25 +41,6 @@ namespace neo {
 
 			return FramebufferHandle(seed);
 		}
-
-		struct FramebufferLoader final : entt::resource_loader<FramebufferLoader, BackedResource<PooledFramebuffer>> {
-
-			std::shared_ptr<BackedResource<PooledFramebuffer>> load(const FramebufferQueueItem& details, const TextureManager& textureManager) const {
-				std::shared_ptr<BackedResource<PooledFramebuffer>> framebuffer = std::make_shared<BackedResource<PooledFramebuffer>>();
-				framebuffer->mResource.mFramebuffer.init(details.mDebugName);
-				framebuffer->mResource.mFrameCount = 1;
-				framebuffer->mResource.mExternallyOwned = details.mExternallyOwned;
-				for (auto& attachment : details.mAttachments) {
-					framebuffer->mResource.mFramebuffer.attachTexture(attachment.mHandle, textureManager.resolve(attachment.mHandle), attachment.mTarget, attachment.mMip);
-				}
-				if (framebuffer->mResource.mFramebuffer.mColorAttachments) {
-					framebuffer->mResource.mFramebuffer.initDrawBuffers();
-				}
-				framebuffer->mDebugName = details.mDebugName;
-
-				return framebuffer;
-			}
-		};
 	}
 
 	FramebufferManager::FramebufferManager() {
@@ -111,9 +92,8 @@ namespace neo {
 	}
 
 	Framebuffer& FramebufferManager::_resolveFinal(FramebufferHandle id) const {
-		auto handle = mCache.handle(id.mHandle);
-		if (handle) {
-			auto& pfb = const_cast<PooledFramebuffer&>(handle.get().mResource);
+		if (mCache.contains(id.mHandle)) {
+			auto& pfb = const_cast<PooledFramebuffer&>(mCache[id.mHandle]->mResource);
 			if (pfb.mFrameCount < 5) {
 				pfb.mFrameCount++;
 			}
@@ -151,33 +131,33 @@ namespace neo {
 				}
 			}
 			if (validTextures) {
-				mCache.load<FramebufferLoader>(item.mHandle.mHandle, item, textureManager);
+				mCache.load(item.mHandle.mHandle, item, textureManager);
 			}
 		}
 
 		// Discard queue
 		std::vector<FramebufferHandle> discardQueue;
-		mCache.each([&](const auto id, BackedResource<PooledFramebuffer>& pfb) {
-			if (pfb.mResource.mFrameCount == 0) {
+		for (auto&& [id, pfb] : mCache) {
+			if (pfb->mResource.mFrameCount == 0) {
 				discardQueue.emplace_back(id);
-				if (!pfb.mResource.mExternallyOwned) {
-					for (auto& texId : pfb.mResource.mFramebuffer.mTextures) {
+				if (!pfb->mResource.mExternallyOwned) {
+					for (auto& texId : pfb->mResource.mFramebuffer.mTextures) {
 						textureManager.discard(texId);
 					}
 				}
-				pfb.mResource.mFramebuffer.destroy();
+				pfb->mResource.mFramebuffer.destroy();
 			}
 			else {
-				if (pfb.mResource.mUsedThisFrame) {
-					pfb.mResource.mUsedThisFrame = false;
+				if (pfb->mResource.mUsedThisFrame) {
+					pfb->mResource.mUsedThisFrame = false;
 				}
 				else {
-					pfb.mResource.mFrameCount--;
+					pfb->mResource.mFrameCount--;
 				}
 			}
-		});
+		}
 		for (auto& discardId : discardQueue) {
-			mCache.discard(discardId.mHandle);
+			mCache.erase(discardId.mHandle);
 		}
 	}
 
@@ -186,43 +166,59 @@ namespace neo {
 			ImGui::TableSetupColumn("Name/Size", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending);
 			ImGui::TableSetupColumn("Attachments");
 			ImGui::TableHeadersRow();
-			mCache.each([&](auto id, BackedResource<PooledFramebuffer>& pfb) {
+			for(auto&& [id, pfb] : mCache) {
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
-				if (pfb.mDebugName.has_value()) {
-					ImGui::Text(pfb.mResource.mExternallyOwned ? "%s" : "*%s", pfb.mDebugName->c_str());
+				if (pfb->mDebugName.has_value()) {
+					ImGui::Text(pfb->mResource.mExternallyOwned ? "%s" : "*%s", pfb->mDebugName->c_str());
 				}
 				else {
-					ImGui::Text(pfb.mResource.mExternallyOwned ? "%d" : "*%d", id);
+					ImGui::Text(pfb->mResource.mExternallyOwned ? "%d" : "*%d", id);
 				}
-				if (textureManager.isValid(pfb.mResource.mFramebuffer.mTextures[0])) {
-					auto& firstTex = textureManager.resolve(pfb.mResource.mFramebuffer.mTextures[0]);
+				if (textureManager.isValid(pfb->mResource.mFramebuffer.mTextures[0])) {
+					auto& firstTex = textureManager.resolve(pfb->mResource.mFramebuffer.mTextures[0]);
 					ImGui::Text("[%d, %d]", firstTex.mWidth, firstTex.mHeight);
 				}
 				ImGui::TableSetColumnIndex(1);
-				for (auto texId = pfb.mResource.mFramebuffer.mTextures.begin(); texId < pfb.mResource.mFramebuffer.mTextures.end(); texId++) {
+				for (auto texId = pfb->mResource.mFramebuffer.mTextures.begin(); texId < pfb->mResource.mFramebuffer.mTextures.end(); texId++) {
 					if (textureManager.isValid(*texId)) {
 						textureFunc(*texId);
-						if (texId != std::prev(pfb.mResource.mFramebuffer.mTextures.end())) {
+						if (texId != std::prev(pfb->mResource.mFramebuffer.mTextures.end())) {
 							ImGui::SameLine();
 						}
 					}
 				}
-			});
+			}
 			ImGui::EndTable();
 		}
 	}
 
 	void FramebufferManager::clear(const TextureManager& textureManager) {
 		mQueue.clear();
-		mCache.each([&textureManager](BackedResource<PooledFramebuffer>& pfb) {
-			if (!pfb.mResource.mExternallyOwned) {
-				for (auto& textureHandle : pfb.mResource.mFramebuffer.mTextures) {
+		for(auto&& [_, pfb] : mCache) {
+			if (!pfb->mResource.mExternallyOwned) {
+				for (auto& textureHandle : pfb->mResource.mFramebuffer.mTextures) {
 					textureManager.discard(textureHandle);
 				}
 			}
-			pfb.mResource.mFramebuffer.destroy();
-		});
+			pfb->mResource.mFramebuffer.destroy();
+		}
 		mCache.clear();
+	}
+
+	FramebufferManager::FramebufferLoader::result_type FramebufferManager::FramebufferLoader::operator()(const FramebufferQueueItem& details, const TextureManager& textureManager) const {
+		result_type framebuffer = std::make_shared<BackedResource<PooledFramebuffer>>();
+		framebuffer->mResource.mFramebuffer.init(details.mDebugName);
+		framebuffer->mResource.mFrameCount = 1;
+		framebuffer->mResource.mExternallyOwned = details.mExternallyOwned;
+		for (auto& attachment : details.mAttachments) {
+			framebuffer->mResource.mFramebuffer.attachTexture(attachment.mHandle, textureManager.resolve(attachment.mHandle), attachment.mTarget, attachment.mMip);
+		}
+		if (framebuffer->mResource.mFramebuffer.mColorAttachments) {
+			framebuffer->mResource.mFramebuffer.initDrawBuffers();
+		}
+		framebuffer->mDebugName = details.mDebugName;
+
+		return framebuffer;
 	}
 }

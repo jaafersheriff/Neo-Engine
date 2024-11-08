@@ -30,7 +30,11 @@ namespace neo {
 	};
 	using MeshHandle = ResourceHandle<Mesh>;
 
-	class MeshManager final : public ResourceManagerInterface<MeshManager, Mesh, MeshLoadDetails> {
+	struct MeshLoader {
+		using result_type = std::shared_ptr<BackedResource<Mesh>>;
+		result_type operator()(MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const;
+	};
+	class MeshManager final : public ResourceManagerInterface<MeshManager, Mesh, MeshLoadDetails, MeshLoader> {
 		friend ResourceManagerInterface;
 	public:
 
@@ -43,6 +47,5 @@ namespace neo {
 		[[nodiscard]] MeshHandle _asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const;
 		void _destroyImpl(BackedResource<Mesh>& mesh);
 		void _tickImpl();
-
 	};
 }

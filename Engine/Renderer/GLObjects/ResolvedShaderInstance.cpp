@@ -105,7 +105,7 @@ namespace neo {
 			std::stringstream preambleBuilder;
 			{
 				TRACY_ZONEN("Construct preamble");
-				preambleBuilder << ServiceLocator<Renderer>::ref().getDetails().mGLSLVersion << "\n\n";
+				preambleBuilder << ServiceLocator<Renderer>::value().getDetails().mGLSLVersion << "\n\n";
 				const ShaderDefines* _defines = &defines;
 				while (_defines) {
 					for (auto& define : _defines->mDefines) {
@@ -309,7 +309,7 @@ namespace neo {
 	}
 
 	GLint ResolvedShaderInstance::_getUniform(const char* name) const {
-		ServiceLocator<Renderer>::ref().mStats.mNumUniforms++;
+		ServiceLocator<Renderer>::value().mStats.mNumUniforms++;
 		const auto uniform = mUniforms.find(HashedString(name));
 		if (uniform == mUniforms.end()) {
 			// NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable", name);
@@ -338,7 +338,7 @@ namespace neo {
 	}
 
 	void ResolvedShaderInstance::bindTexture(const char* name, const Texture& texture) const {
-		ServiceLocator<Renderer>::ref().mStats.mNumSamplers++;
+		ServiceLocator<Renderer>::value().mStats.mNumSamplers++;
 
 		GLint bindingLoc = 0;
 		auto binding = mBindings.find(HashedString(name));

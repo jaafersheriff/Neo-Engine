@@ -157,7 +157,7 @@ namespace neo {
 		}
 
 		/* Render imgui */
-		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+		if (!ServiceLocator<ImGuiManager>::has_value() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
 			TRACY_GPUN("ImGui Render");
 			resetState();
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -177,8 +177,8 @@ namespace neo {
 		NEO_UNUSED(ecs);
 
 		ImGui::Begin("Viewport");
-		ServiceLocator<ImGuiManager>::ref().updateViewport();
-		glm::vec2 viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
+		ServiceLocator<ImGuiManager>::value().updateViewport();
+		glm::vec2 viewportSize = ServiceLocator<ImGuiManager>::value().getViewportSize();
 		if (viewportSize.x != 0 && viewportSize.y != 0) {
 			if (resourceManager.mFramebufferManager.isValid(mDefaultFBOHandle)) {
 				auto& defaultFbo = resourceManager.mFramebufferManager.resolve(mDefaultFBOHandle);

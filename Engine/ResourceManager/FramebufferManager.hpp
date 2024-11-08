@@ -110,10 +110,16 @@ namespace neo {
 		void imguiEditor(std::function<void(const TextureHandle&)> textureFunc, TextureManager& textureManager);
 
 		mutable std::vector<FramebufferQueueItem> mQueue;
-		entt::resource_cache<BackedResource<PooledFramebuffer>> mCache;
 		std::shared_ptr<Framebuffer> mFallback;
 
 	private:
 		Framebuffer& _resolveFinal(FramebufferHandle id) const;
+
+		struct FramebufferLoader {
+			using result_type = std::shared_ptr<BackedResource<PooledFramebuffer>>;
+			result_type operator()(const FramebufferQueueItem& details, const TextureManager& textureManager) const;
+		};
+
+		entt::resource_cache<BackedResource<PooledFramebuffer>, FramebufferLoader> mCache;
 	};
 }

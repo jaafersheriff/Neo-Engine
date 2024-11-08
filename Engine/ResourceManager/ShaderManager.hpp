@@ -14,7 +14,12 @@ namespace neo {
 
 	using ShaderLoadDetails = std::variant<SourceShader::ConstructionArgs, SourceShader::ShaderCode>;
 
-	class ShaderManager final : public ResourceManagerInterface<ShaderManager, SourceShader, ShaderLoadDetails> {
+	struct ShaderLoader {
+		using result_type = std::shared_ptr<BackedResource<SourceShader>>;
+		result_type operator()(const ShaderLoadDetails& shaderDetails, const std::optional<std::string>& debugName) const;
+	};
+
+	class ShaderManager final : public ResourceManagerInterface<ShaderManager, SourceShader, ShaderLoadDetails, ShaderLoader> {
 		friend ResourceManagerInterface;
 	public:
 		using ShaderHandle = ResourceHandle<SourceShader>;

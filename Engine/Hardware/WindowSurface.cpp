@@ -32,8 +32,8 @@ namespace neo {
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 		glfwWindowHint(GLFW_DEPTH_BITS, 0);
 		glfwWindowHint(GLFW_STENCIL_BITS, 0);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, ServiceLocator<Renderer>::ref().getDetails().mGLMajorVersion);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, ServiceLocator<Renderer>::ref().getDetails().mGLMinorVersion);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, ServiceLocator<Renderer>::value().getDetails().mGLMajorVersion);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, ServiceLocator<Renderer>::value().getDetails().mGLMinorVersion);
 		glfwWindowHint(GLFW_AUTO_ICONIFY, false);
 		glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 
@@ -62,7 +62,7 @@ namespace neo {
 
 		glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
 			// These should definitely move elsewhere lol
-			auto& imguiManager = ServiceLocator<ImGuiManager>::ref();
+			auto& imguiManager = ServiceLocator<ImGuiManager>::value();
 			if ((key == GLFW_KEY_F11 || key == GLFW_KEY_ENTER && mods & GLFW_MOD_ALT) && action == GLFW_PRESS) {
 				Messenger::sendMessage<ToggleFullscreenMessage>(glfwGetWindowMonitor(window) != nullptr);
 				return;
@@ -79,7 +79,7 @@ namespace neo {
 				}
 			}
 			if (imguiManager.isEnabled()) {
-				ServiceLocator<ImGuiManager>::ref().updateKeyboard(window, key, scancode, action, mods);
+				ServiceLocator<ImGuiManager>::value().updateKeyboard(window, key, scancode, action, mods);
 			}
 			if (!imguiManager.isEnabled() || imguiManager.isViewportFocused()) {
 				Messenger::sendMessage<Keyboard::KeyPressedMessage>(key, action);
@@ -90,7 +90,7 @@ namespace neo {
 		});
 
 		glfwSetMouseButtonCallback(mWindow, [](GLFWwindow* window, int button, int action, int mods) {
-			auto& imguiManager = ServiceLocator<ImGuiManager>::ref();
+			auto& imguiManager = ServiceLocator<ImGuiManager>::value();
 			if (imguiManager.isEnabled()) {
 				imguiManager.updateMouse(window, button, action, mods);
 			}
@@ -106,7 +106,7 @@ namespace neo {
 		});
 
 		glfwSetScrollCallback(mWindow, [](GLFWwindow* window, double dx, double dy) {
-			auto& imguiManager = ServiceLocator<ImGuiManager>::ref();
+			auto& imguiManager = ServiceLocator<ImGuiManager>::value();
 			if (imguiManager.isEnabled()) {
 				imguiManager.updateScroll(window, dx, dy);
 			}
@@ -118,8 +118,8 @@ namespace neo {
 			}
 			});
 		glfwSetCharCallback(mWindow, [](GLFWwindow* window, unsigned int c) {
-			if (ServiceLocator<ImGuiManager>::ref().isEnabled() && !ServiceLocator<ImGuiManager>::ref().isViewportFocused()) {
-				ServiceLocator<ImGuiManager>::ref().updateCharacter(window, c);
+			if (ServiceLocator<ImGuiManager>::value().isEnabled() && !ServiceLocator<ImGuiManager>::value().isViewportFocused()) {
+				ServiceLocator<ImGuiManager>::value().updateCharacter(window, c);
 			}
 			});
 
@@ -190,8 +190,8 @@ namespace neo {
 		Messenger::addReceiver<ToggleFullscreenMessage, &WindowSurface::_onToggleFullscreen>(this);
 		Messenger::addReceiver<FrameSizeMessage, &WindowSurface::_onFrameSizeChanged>(this);
 
-		if (!ServiceLocator<ImGuiManager>::empty()) {
-			if (!ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+		if (!ServiceLocator<ImGuiManager>::has_value()) {
+			if (!ServiceLocator<ImGuiManager>::value().isEnabled()) {
 				int x, y;
 				glfwGetFramebufferSize(mWindow, &x, &y);
 				mDetails.mSize.x = x;
@@ -203,7 +203,7 @@ namespace neo {
 
 	void WindowSurface::updateHardware() {
 		TRACY_ZONE();
-		if (!ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+		if (!ServiceLocator<ImGuiManager>::value().isEnabled()) {
 			double x, y;
 			glfwGetCursorPos(mWindow, &x, &y);
 			y = mDetails.mSize.y - y;

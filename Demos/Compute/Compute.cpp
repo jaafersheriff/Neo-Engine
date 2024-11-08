@@ -135,7 +135,7 @@ namespace Compute {
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, position.vboID);
 
 			// Dispatch 
-			particlesComputeShader.dispatch({meshComponent.mNumParticles / ServiceLocator<Renderer>::ref().getDetails().mMaxComputeWorkGroupSize.x, 1, 1});
+			particlesComputeShader.dispatch({meshComponent.mNumParticles / ServiceLocator<Renderer>::value().getDetails().mMaxComputeWorkGroupSize.x, 1, 1});
 			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 			// Reset bind
