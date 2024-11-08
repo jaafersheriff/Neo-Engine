@@ -62,7 +62,7 @@ namespace neo {
 		while (_defines) {
 			for (auto& define : _defines->mDefines) {
 				if (define.second) {
-					seed ^= define.first.mVal.value() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+					seed ^= HashedString(define.first.mVal.c_str()).value() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 				}
 			}
 

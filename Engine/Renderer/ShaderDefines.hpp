@@ -13,20 +13,27 @@ namespace neo {
 		ShaderDefine(const char* c) :
 			mVal(c)
 		{}
-		HashedString mVal;
+		std::string mVal;
 
 		friend bool operator<(const ShaderDefine& l, const ShaderDefine& r) {
-			return l.mVal.value() < r.mVal.value();
+			return HashedString(l.mVal.c_str()).value() < HashedString(r.mVal.c_str()).value();
 		}
 	};
 
 	struct ShaderDefines {
 		ShaderDefines() = default;
-		ShaderDefines(const ShaderDefines& parent)
-			: mParent(&parent) {
+		ShaderDefines(const ShaderDefines& parent) {
+			const ShaderDefines* defines = &parent;
+			while (defines) {
+				for (auto& [d, b] : defines->mDefines) {
+					mDefines[d] = b;
+				}
+				defines = defines->mParent;
+			}
 		}
-		//ShaderDefines& operator=(const ShaderDefines&) = delete;
-		//ShaderDefines& operator=(ShaderDefines&&) = delete;
+		ShaderDefines operator=(const ShaderDefines&) = delete;
+		ShaderDefines operator=(ShaderDefines&&) = delete;
+		ShaderDefines& operator=(const ShaderDefines&&) = delete;
 
 		void set(const ShaderDefine& define) {
 			mDefines[define] = true;
@@ -51,7 +58,7 @@ namespace neo {
 			return ss.str();
 		}
 
-		const ShaderDefines* const mParent = nullptr;
+		ShaderDefines* mParent = nullptr;
 		std::map<ShaderDefine, bool> mDefines;
 	};
 }

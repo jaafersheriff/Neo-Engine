@@ -76,9 +76,8 @@ namespace {
 			NEO_FAIL("Phong light needs a directional or point light component");
 		}
 
-		fg.pass(outhandle, viewport, [passDefines, cameraEntity, shaderHandle, ubo = std::move(_ubo)](const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
+		fg.pass(outhandle, viewport, [pdef = std::move(passDefines), cameraEntity, shaderHandle, ubo = std::move(_ubo)](const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
 
-			ShaderDefines drawDefines(passDefines);
 			// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
 			const auto& view = ecs.getView<const MeshComponent, const MaterialComponent, const SpatialComponent>();
 			for (auto entity : view) {
@@ -89,7 +88,7 @@ namespace {
 					}
 				}
 
-				drawDefines.reset();
+				ShaderDefines drawDefines(pdef);
 
 				const auto& material = view.get<const MaterialComponent>(entity);
 				MakeDefine(ALBEDO_MAP);
