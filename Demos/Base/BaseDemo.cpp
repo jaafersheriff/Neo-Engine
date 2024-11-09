@@ -9,16 +9,18 @@
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
+#include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
+#include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
+#include "ECS/Component/RenderingComponent/TransparentComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
-#include "ECS/Component/RenderingComponent/ForwardPBRRenderComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
-#include "Renderer/RenderingSystems/ForwardPBRRenderer.hpp"
+#include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 
 #include "Loader/GLTFImporter.hpp"
@@ -29,84 +31,6 @@
 #include "Renderer/RenderingSystems/Blitter.hpp"
 
 using namespace neo;
-
-namespace {
-
-	void _drawPhong(
-		FrameGraph& fg,
-		const ResourceManagers& _resourceManagers, 
-		const Viewport& viewport, 
-		const ECS::Entity cameraEntity, 
-		FramebufferHandle outhandle
-	) {
-		auto shaderHandle = _resourceManagers.mShaderManager.asyncLoad("Phong Shader", 
-			SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "model.vert"},
-				{ types::shader::Stage::Fragment, "phong.frag" }
-			}
-		);
-
-		fg.pass(outhandle, viewport, viewport, {}, shaderHandle, [=](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
-			TRACY_ZONEN("_Phong");
-
-			const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
-			auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
-
-			MakeDefine(DIRECTIONAL_LIGHT);
-			MakeDefine(POINT_LIGHT);
-			if (ecs.has<DirectionalLightComponent>(lightEntity)) {
-				pass.setDefine(DIRECTIONAL_LIGHT);
-				pass.bindUniform("lightDir", -lightSpatial.getLookDir());
-			}
-			else if (ecs.has<PointLightComponent>(lightEntity)) {
-				pass.setDefine(POINT_LIGHT);
-				pass.bindUniform("lightPos", lightSpatial.getPosition());
-				pass.bindUniform("lightRadiance", light.mIntensity);
-			}
-			else {
-				NEO_FAIL("Phong light needs a directional or point light component");
-			}
-			pass.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
-			pass.bindUniform("V", cameraSpatial->getView());
-			pass.bindUniform("camPos", cameraSpatial->getPosition());
-			pass.bindUniform("lightCol", light.mColor);
-
-			// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
-			const auto& view = ecs.getView<const MeshComponent, const MaterialComponent, const SpatialComponent>();
-			for (auto entity : view) {
-				// VFC
-				if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-					if (!culled->isInView(ecs, entity, cameraEntity)) {
-						continue;
-					}
-				}
-
-				ShaderDefines drawDefines;
-				UBO ubo;
-				const auto& material = view.get<const MaterialComponent>(entity);
-				MakeDefine(ALBEDO_MAP);
-				MakeDefine(NORMAL_MAP);
-				ubo.bindUniform("albedo", material.mAlbedoColor);
-				if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-					drawDefines.set(ALBEDO_MAP);
-					ubo.bindTexture("albedoMap", material.mAlbedoMap);
-				}
-				if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-					drawDefines.set(NORMAL_MAP);
-					ubo.bindTexture("normalMap", material.mNormalMap);
-				}
-
-				const auto& drawSpatial = view.get<const SpatialComponent>(entity);
-				ubo.bindUniform("M", drawSpatial.getModelMatrix());
-				ubo.bindUniform("N", drawSpatial.getNormalMatrix());
-
-				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, ubo, drawDefines);
-			}
-		});
-	}
-
-}
-
 namespace Base {
 
 	IDemo::Config Demo::getConfig() const {
@@ -149,7 +73,7 @@ namespace Base {
 				.attachComponent<RotationComponent>(glm::vec3(0.f, 1.0f, 0.f))
 				.attachComponent<MeshComponent>(gltfScene.mMeshNodes[0].mMeshHandle)
 				.attachComponent<BoundingBoxComponent>(gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax)
-				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<PhongRenderComponent>()
 				.attachComponent<OpaqueComponent>()
 				.attachComponent<MaterialComponent>(material)
 			));
@@ -163,7 +87,7 @@ namespace Base {
 				.attachComponent<RotationComponent>(glm::vec3(1.f, 0.0f, 0.f))
 				.attachComponent<MeshComponent>(HashedString("icosahedron"))
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
-				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<PhongRenderComponent>()
 				.attachComponent<OpaqueComponent>()
 				.attachComponent<MaterialComponent>(material)
 			));
@@ -175,7 +99,7 @@ namespace Base {
 				.attachComponent<SpatialComponent>(glm::vec3(0.f, 1.0f, -1.f * i), glm::vec3(0.75f))
 				.attachComponent<MeshComponent>(HashedString("cube"))
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
-				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<PhongRenderComponent>()
 				.attachComponent<TransparentComponent>()
 				.attachComponent<MaterialComponent>(material)
 			));
@@ -190,7 +114,7 @@ namespace Base {
 				.attachComponent<SpatialComponent>(glm::vec3(0.f), glm::vec3(15.f, 15.f, 1.f), glm::vec3(-util::PI / 2.f, 0.f, 0.f))
 				.attachComponent<MeshComponent>(HashedString("quad"))
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f, -0.5f, -0.01f), glm::vec3(0.5f, 0.5f, 0.01f), true)
-				.attachComponent<ForwardPBRRenderComponent>()
+				.attachComponent<PhongRenderComponent>()
 				.attachComponent<AlphaTestComponent>()
 				.attachComponent<MaterialComponent>(material)
 			));
@@ -222,9 +146,12 @@ namespace Base {
 		);
 		fg.clear(sceneTargetHandle, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 
-		_drawPhong(fg, resourceManagers, Viewport(0, 0, viewport.mSize), cameraEntity, sceneTargetHandle);
+		Viewport vp(0, 0, viewport.mSize);
+		drawPhong<OpaqueComponent>(fg, vp, resourceManagers, ecs, cameraEntity, sceneTargetHandle);
+		drawPhong<AlphaTestComponent>(fg, vp, resourceManagers, ecs, cameraEntity, sceneTargetHandle);
+		drawPhong<TransparentComponent>(fg, vp, resourceManagers, ecs, cameraEntity, sceneTargetHandle);
 
-		blit(fg, Viewport(0, 0, viewport.mSize), resourceManagers, sceneTargetHandle, backbufferHandle);
+		blit(fg, vp, resourceManagers, sceneTargetHandle, backbufferHandle);
 	}
 
 	void Demo::destroy() {
