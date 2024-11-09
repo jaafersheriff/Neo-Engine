@@ -7,12 +7,12 @@ namespace neo {
 
 		auto graph = mBuilder.graph();
 
-		//std::ostringstream output{};
-		//entt::dot(output, graph, [&](auto& output, auto vertex) {
-		//	auto node2 = mBuilder[vertex];
-		//	output << "label=\"v" << node2 << "\",shape=\"box\"";
-		//	});
-		//printf("%s\n", output.str().c_str());
+		std::ostringstream output{};
+		entt::dot(output, graph, [&](auto& output, auto vertex) {
+			auto node2 = mBuilder[vertex];
+			output << "label=\"v" << mTasks[node2].mDebugName.value_or("empty") << "\",shape=\"box\"";
+			});
+		printf("%s\n", output.str().c_str());
 
 		std::deque<entt::flow::basic_flow::graph_type::vertex_type> nodesToVisit;
 		for (auto&& vertex : graph.vertices()) {

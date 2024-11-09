@@ -150,8 +150,8 @@ namespace neo {
 
 				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, ubo, drawDefines);
 			}
+			})
+			.mDebugName = "Phong";
 
-
-		});
 	}
 }

@@ -224,22 +224,23 @@ namespace neo {
 
 			uint16_t mPassIndex;
 			Functor f;
+			std::optional<std::string> mDebugName;
 		};
 
 		void execute(const ResourceManagers& resourceManagers, const ECS& ecs);
 
 		template<typename... Deps>
-		void pass(FramebufferHandle target, Viewport viewport, Viewport scissor, PassState state, ShaderHandle shader, Task::Functor t, Deps... deps) {
+		Task& pass(FramebufferHandle target, Viewport viewport, Viewport scissor, PassState state, ShaderHandle shader, Task::Functor t, Deps... deps) {
 			TRACY_ZONE();
 			uint16_t passIndex = mPassQueue.addPass(target, viewport, scissor, state, shader);
-			_task(std::move(Task(passIndex, [_t = std::move(t)](Pass& pass, const ResourceManagers& resourceManager, const ECS& ecs) {
+			return _task(std::move(Task(passIndex, [_t = std::move(t)](Pass& pass, const ResourceManagers& resourceManager, const ECS& ecs) {
 				pass.startCommand();
 				_t(pass, resourceManager, ecs);
 			})), target, std::forward<Deps>(deps)...);
 		}
 
-		void clear(FramebufferHandle handle, glm::vec4 color, types::framebuffer::AttachmentBits clearFlags) {
-			pass(handle, {}, {}, {}, {}, [=](Pass& pass, const ResourceManagers&, const ECS&) {
+		Task& clear(FramebufferHandle handle, glm::vec4 color, types::framebuffer::AttachmentBits clearFlags) {
+			return pass(handle, {}, {}, {}, {}, [=](Pass& pass, const ResourceManagers&, const ECS&) {
 				pass.clearCommand(color, clearFlags);
 			});
 		}
@@ -251,12 +252,13 @@ namespace neo {
 		void _draw(Pass& pass, Command& command, const ResourceManagers& resourceManagers);
 
 		template<typename... Deps>
-		void _task(Task&& t, Deps... deps) {
+		Task& _task(Task&& t, Deps... deps) {
 			entt::id_type taskHandle = mTasks.size();
 			mBuilder.bind(taskHandle);
 			_assignDeps(std::forward<Deps>(deps)...);
 
 			mTasks.emplace_back(std::move(t));
+			return mTasks.back();
 		}
 
 		template<typename Dep, typename... Deps>

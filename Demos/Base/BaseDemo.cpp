@@ -144,7 +144,8 @@ namespace Base {
 			.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
 			resourceManagers.mTextureManager
 		);
-		fg.clear(sceneTargetHandle, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		fg.clear(sceneTargetHandle, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth)
+			.mDebugName = "Clear scene target";
 
 		Viewport vp(0, 0, viewport.mSize);
 		drawPhong<OpaqueComponent>(fg, vp, resourceManagers, ecs, cameraEntity, sceneTargetHandle);

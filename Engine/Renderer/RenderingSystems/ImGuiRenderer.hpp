@@ -82,7 +82,7 @@ namespace neo {
 				pass.bindTexture("Texture", draw.mTextureHandle);
 
 				pass.drawCommand(draw.mMeshHandle, {}, {}, draw.mElementCount, draw.mElementBufferOffset);
-			}, deps...);
+			}, deps...).mDebugName = "DrawImgui";
 		}
 	}
 #pragma warning(pop)

@@ -139,7 +139,8 @@ namespace neo {
 			// 	);
 			// }
 
-			fg.clear(FramebufferHandle(0), glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
+			fg.clear(FramebufferHandle(0), glm::vec4(0.f), types::framebuffer::AttachmentBit::Color)
+				.mDebugName = "Clear backbuffer";
 
 			/* Render imgui */
 			if (ServiceLocator<ImGuiManager>::has_value() && ServiceLocator<ImGuiManager>::value().isEnabled()) {

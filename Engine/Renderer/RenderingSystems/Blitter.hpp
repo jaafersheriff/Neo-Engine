@@ -62,6 +62,7 @@ namespace neo {
 
 			pass.bindTexture("inputTexture", src.mTextures[srcImage]);
 			pass.drawCommand(MeshHandle("quad"), {}, {});
-		}, srcHandle, deps...);
+			}, srcHandle, deps...)
+			.mDebugName = "Blit";
 	}
 }
