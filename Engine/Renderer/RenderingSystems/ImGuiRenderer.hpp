@@ -13,14 +13,16 @@
 
 namespace neo {
 
+#pragma warning(push)
+	#pragma warning (disable : 4100 )
 	template<typename... Deps>
-	void drawImGui(
+	inline void drawImGui(
 		FrameGraph& fg,
 		FramebufferHandle outTarget,
 		Viewport vp,
-		const ResourceManagers& resourceManagers, 
-		const ECS& ecs, 
-		glm::uvec2 viewportOffset, 
+		const ResourceManagers& resourceManagers,
+		const ECS& ecs,
+		glm::uvec2 viewportOffset,
 		glm::uvec2 viewportSize,
 		Deps... deps
 	) {
@@ -29,7 +31,7 @@ namespace neo {
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ImGuiShader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "imgui.vert"},
 			{ types::shader::Stage::Fragment, "imgui.frag" }
-		});
+			});
 
 		{
 			TRACY_ZONEN("Draw sorting");
@@ -40,59 +42,48 @@ namespace neo {
 					return leftDraw->mDrawOrder < rightDraw->mDrawOrder;
 				}
 				return false;
-			});
+				});
 		}
 
-		fg.pass(outTarget, vp, [viewportOffset, viewportSize, shaderHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
-			TRACY_GPUN("Draw ImGui");
-			float L = static_cast<float>(viewportOffset.x);
-			float R = static_cast<float>(viewportOffset.x + viewportSize.x);
-			float T = static_cast<float>(viewportOffset.y);
-			float B = static_cast<float>(viewportOffset.y + viewportSize.y);
-			const glm::mat4 ortho_projection = glm::mat4(
-				2.0f / (R - L),   0.0f,         0.0f,   0.0f,
-				0.0f,         2.0f / (T - B),   0.0f,   0.0f,
-				0.0f,         0.0f,        -1.0f,   0.0f,
-				(R + L) / (L - R),  (T + B) / (B - T),  0.0f,   1.0f
+		PassState passState;
+		passState.mBlending = true;
+		passState.mBlendEquation = BlendEquation::Add;
+		passState.mBlendSrcRGB = BlendFactor::Alpha;
+		passState.mBlendDstRGB = BlendFactor::OneMinusAlpha;
+		passState.mBlendSrcAlpha = BlendFactor::One;
+		passState.mBlendDstAlpha = BlendFactor::OneMinusAlpha;
+		passState.mCullFace = false;
+		passState.mDepthTest = false;
+		passState.mStencilTest = false;
+		passState.mScissorTest = true;
+		float L = static_cast<float>(viewportOffset.x);
+		float R = static_cast<float>(viewportOffset.x + viewportSize.x);
+		float T = static_cast<float>(viewportOffset.y);
+		float B = static_cast<float>(viewportOffset.y + viewportSize.y);
+		const glm::mat4 ortho_projection = glm::mat4(
+			2.0f / (R - L), 0.0f, 0.0f, 0.0f,
+			0.0f, 2.0f / (T - B), 0.0f, 0.0f,
+			0.0f, 0.0f, -1.0f, 0.0f,
+			(R + L) / (L - R), (T + B) / (B - T), 0.0f, 1.0f
+		);
+
+		for (auto&& [_, draw, __] : ecs.getView<ImGuiDrawComponent, ImGuiComponent>().each()) {
+
+			// Need an individual pass per draw b/c scissor..........
+			Viewport scissor(
+				draw.mScissorRect.x,
+				viewportSize.y - draw.mScissorRect.y,
+				draw.mScissorRect.z,
+				draw.mScissorRect.w
+
 			);
+			fg.pass(outTarget, vp, scissor, passState, shaderHandle, [draw, ortho_projection, viewportOffset, viewportSize](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+				pass.bindUniform("P", ortho_projection);
+				pass.bindTexture("Texture", draw.mTextureHandle);
 
-			glEnable(GL_BLEND);
-			glBlendEquation(GL_FUNC_ADD);
-			glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-			glDisable(GL_CULL_FACE);
-			glDisable(GL_DEPTH_TEST);
-			glDisable(GL_STENCIL_TEST);
-			glEnable(GL_SCISSOR_TEST);
-
-			if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
-				return;
-			}
-
-			auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, {});
-			resolvedShader.bindUniform("P", ortho_projection);
-
-			for (auto&& [_, draw, __] : ecs.getView<ImGuiDrawComponent, ImGuiComponent>().each()) {
-				if (!resourceManagers.mMeshManager.isValid(draw.mMeshHandle)) {
-					continue;
-				}
-
-				if (!resourceManagers.mTextureManager.isValid(draw.mTextureHandle)) {
-					continue;
-				}
-
-				resolvedShader.bindTexture("Texture", resourceManagers.mTextureManager.resolve(draw.mTextureHandle));
-
-				glScissor(
-					draw.mScissorRect.x,
-					viewportSize.y - draw.mScissorRect.y,
-					draw.mScissorRect.z,
-					draw.mScissorRect.w
-				);
-
-				resourceManagers.mMeshManager.resolve(draw.mMeshHandle).draw(draw.mElementCount, draw.mElementBufferOffset);
-			}
-
-			glDisable(GL_SCISSOR_TEST);
-		}, deps...);
+				pass.drawCommand(draw.mMeshHandle, {}, {}, draw.mElementCount, draw.mElementBufferOffset);
+			}, deps...);
+		}
 	}
+#pragma warning(pop)
 }

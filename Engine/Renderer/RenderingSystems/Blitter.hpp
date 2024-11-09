@@ -48,8 +48,8 @@ namespace neo {
 		}); 
 
 		PassState state;
-		state.mDepthTest = DepthTest::Disabled;
-		fg.pass(dstHandle, vp, state, blitShaderHandle, [srcHandle, srcImage](Pass& pass, const ResourceManagers& resourceManagers, const ECS&) {
+		state.mDepthTest = false;
+		fg.pass(dstHandle, vp, vp, state, blitShaderHandle, [srcHandle, srcImage](Pass& pass, const ResourceManagers& resourceManagers, const ECS&) {
 			TRACY_GPUN("Blit");
 			if (!resourceManagers.mFramebufferManager.isValid(srcHandle)) {
 				return;

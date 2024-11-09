@@ -7,12 +7,38 @@
 #include <ext/entt_incl.hpp>
 
 namespace neo {
-	enum class DepthTest {
-		Enabled,
-		Disabled
+	enum class DepthFunc {
+		Less
+	};
+	enum class CullOrder {
+		Front,
+		Back
+	};
+	enum class BlendEquation {
+		Add
+	};
+	enum class BlendFactor {
+		One,
+		Alpha,
+		OneMinusAlpha
 	};
 	struct PassState {
-		DepthTest mDepthTest = DepthTest::Enabled;
+		bool mDepthTest = true;
+		DepthFunc mDepthFunc = DepthFunc::Less;
+		bool mDepthMask = true;
+
+		bool mCullFace = true;
+		CullOrder mCullOrder = CullOrder::Back;
+
+		bool mBlending = false;
+		BlendEquation mBlendEquation = BlendEquation::Add;
+		BlendFactor mBlendSrcRGB = BlendFactor::Alpha;
+		BlendFactor mBlendDstRGB = BlendFactor::OneMinusAlpha;
+		BlendFactor mBlendSrcAlpha = BlendFactor::Alpha;
+		BlendFactor mBlendDstAlpha = BlendFactor::OneMinusAlpha;
+
+		bool mStencilTest = false;
+		bool mScissorTest = false;
 	};
 
 	using Viewport = glm::uvec4;
@@ -48,9 +74,10 @@ namespace neo {
 	};
 
 	struct Pass {
-		Pass(uint8_t fbID, uint8_t vpID, uint8_t shaderID, PassState& state, UBO& ubo)
+		Pass(uint8_t fbID, uint8_t vpID, uint8_t scId, uint8_t shaderID, PassState& state, UBO& ubo)
 			: mFramebufferIndex(fbID)
 			, mViewportIndex(vpID)
+			, mScissorIndex(scId)
 			, mShaderIndex(shaderID)
 			, mPassState(state)
 			, mPassUBO(ubo)
@@ -68,9 +95,9 @@ namespace neo {
 			;
 		}
 
-		void drawCommand(const MeshHandle& mesh, const UBO& ubo, const ShaderDefines& drawDefines) {
-			uint64_t meshIndex = mMeshIndex;
-			mMeshes[mMeshIndex++] = mesh;
+		void drawCommand(const MeshHandle& mesh, const UBO& ubo, const ShaderDefines& drawDefines, uint16_t elements = 0, uint16_t bufferOffset = 0) {
+			uint64_t drawIndex = mDrawIndex;
+			mDraws[mDrawIndex++] = { mesh, elements, bufferOffset };
 			uint64_t uboIndex = mUBOIndex;
 			mUBOs[mUBOIndex++] = ubo;
 			uint64_t definesIndex = mShaderDefinesIndex;
@@ -79,7 +106,7 @@ namespace neo {
 			Command& command = mCommands[mCommandIndex++];
 			command = 0
 				| static_cast<uint64_t>(CommandType::Draw) << (64 - 3)
-				| meshIndex << (64 - 3 - 10)
+				| drawIndex << (64 - 3 - 10)
 				| uboIndex << (64 - 3 - 10 - 10)
 				| definesIndex << (64 - 3 - 10 - 10 - 10)
 			;
@@ -122,6 +149,7 @@ namespace neo {
 	//private:
 		uint8_t mFramebufferIndex = 0;
 		uint8_t mViewportIndex = 0;
+		uint8_t mScissorIndex = 0;
 		uint8_t mShaderIndex = 0;
 		UBO mPassUBO;
 		ShaderDefines mPassDefines;
@@ -139,19 +167,29 @@ namespace neo {
 		UBO mUBOs[1024];
 		uint16_t mUBOIndex = 0; // 10 bits
 
-		MeshHandle mMeshes[1024];
-		uint16_t mMeshIndex = 0; // 10 bits
+		struct Draw {
+			MeshHandle mMeshHandle;
+			uint16_t mElementCount = 0;
+			uint16_t mElementBufferOffset = 0;
+		};
+		Draw mDraws[1024];
+		uint16_t mDrawIndex = 0; // 10 bits
 	};
 
 
 	struct PassQueue {
 
-		uint16_t addPass(FramebufferHandle handle, Viewport vp, UBO& ubo, PassState& state, ShaderHandle shaderHandle = {}) {
+		uint16_t addPass(FramebufferHandle handle, Viewport vp, Viewport scissor, UBO& ubo, PassState& state, ShaderHandle shaderHandle = {}) {
 			mFramebufferHandles[mFramebufferHandleIndex] = handle;
-			mViewports[mViewportIndex] = vp;
 			mShaderHandles[mShaderHandleIndex] = shaderHandle;
-
-			mCommandQueues.emplace_back(mFramebufferHandleIndex++, mViewportIndex++, mShaderHandleIndex++, state, ubo);
+			auto vpId = mViewportIndex;
+			mViewports[mViewportIndex++] = vp;
+			auto scId = vpId;
+			if (vp != scissor) {
+				scId = mViewportIndex;
+				mViewports[mViewportIndex++] = scissor;
+			}
+			mCommandQueues.emplace_back(mFramebufferHandleIndex++, vpId, scId, mShaderHandleIndex++, state, ubo);
 			return static_cast<uint16_t>(mCommandQueues.size() - 1);
 		}
 
@@ -192,9 +230,9 @@ namespace neo {
 		void execute(const ResourceManagers& resourceManagers, const ECS& ecs);
 
 		template<typename... Deps>
-		void pass(FramebufferHandle target, Viewport viewport, PassState state, ShaderHandle shader, Task::Functor t, Deps... deps) {
+		void pass(FramebufferHandle target, Viewport viewport, Viewport scissor, PassState state, ShaderHandle shader, Task::Functor t, Deps... deps) {
 			UBO emptyUBO;
-			uint16_t passIndex = mPassQueue.addPass(target, viewport, emptyUBO, state, shader);
+			uint16_t passIndex = mPassQueue.addPass(target, viewport, scissor, emptyUBO, state, shader);
 			_task(std::move(Task(passIndex, [_t = std::move(t)](Pass& pass, const ResourceManagers& resourceManager, const ECS& ecs) {
 				pass.startCommand();
 				_t(pass, resourceManager, ecs);
@@ -202,7 +240,7 @@ namespace neo {
 		}
 
 		void clear(FramebufferHandle handle, glm::vec4 color, types::framebuffer::AttachmentBits clearFlags) {
-			pass(handle, {}, {}, {}, [=](Pass& pass, const ResourceManagers&, const ECS&) {
+			pass(handle, {}, {}, {}, {}, [=](Pass& pass, const ResourceManagers&, const ECS&) {
 				pass.clearCommand(color, clearFlags);
 			});
 		}

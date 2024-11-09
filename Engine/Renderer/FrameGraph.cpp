@@ -42,6 +42,7 @@ namespace neo {
 			NEO_LOG_E("Dangling tasks!");
 		}
 
+		NEO_LOG_V("Passes (%d)", passSeq.size());
 		for (auto& passID : passSeq) {
 			Pass& pass = mPassQueue.getPass(passID);
 			NEO_LOG_V("Pass (%d)", pass.getCommandSize());
@@ -83,15 +84,85 @@ namespace neo {
 			glViewport(vp.x, vp.y, vp.z, vp.w);
 		}
 
-		switch (pass.mPassState.mDepthTest) {
-		case DepthTest::Enabled:
+		if (pass.mPassState.mDepthTest) {
 			glEnable(GL_DEPTH_TEST);
-			break;
-		case DepthTest::Disabled:
+			switch (pass.mPassState.mDepthFunc) {
+			case DepthFunc::Less:
+				glDepthFunc(GL_LESS);
+				break;
+			default:
+				NEO_FAIL("Invalid");
+				break;
+			}
+		}
+		else {
 			glDisable(GL_DEPTH_TEST);
-			break;
-		default:
-			break;
+		}
+		glDepthMask(pass.mPassState.mDepthMask ? GL_TRUE : GL_FALSE);
+		if (pass.mPassState.mCullFace) {
+			glEnable(GL_CULL_FACE);
+			switch (pass.mPassState.mCullOrder) {
+			case CullOrder::Front:
+				glCullFace(GL_FRONT);
+				break;
+			case CullOrder::Back:
+				glCullFace(GL_BACK);
+				break;
+			default:
+				NEO_FAIL("Invalid");
+				break;
+			}
+		}
+		else {
+			glDisable(GL_CULL_FACE);
+		}
+		if (pass.mPassState.mBlending) {
+			glEnable(GL_BLEND);
+			switch (pass.mPassState.mBlendEquation) {
+			case BlendEquation::Add:
+				glBlendEquation(GL_FUNC_ADD);
+				break;
+			default:
+				NEO_FAIL("Invalid");
+				break;
+			}
+
+			auto getBlendFactor = [](BlendFactor factor) {
+				switch (factor) {
+				case BlendFactor::Alpha:
+					return GL_SRC_ALPHA;
+				case BlendFactor::OneMinusAlpha:
+					return GL_ONE_MINUS_SRC_ALPHA;
+				case BlendFactor::One:
+					return GL_ONE;
+				default:
+					NEO_FAIL("Invalid");
+					return 0;
+				}
+			};
+			glBlendFuncSeparate(
+				getBlendFactor(pass.mPassState.mBlendSrcRGB),
+				getBlendFactor(pass.mPassState.mBlendDstRGB),
+				getBlendFactor(pass.mPassState.mBlendSrcAlpha),
+				getBlendFactor(pass.mPassState.mBlendDstAlpha)
+			);
+		}
+		else {
+			glDisable(GL_BLEND);
+		}
+		if (pass.mPassState.mStencilTest) {
+			NEO_LOG_E("Stencil Test unsupported");
+		}
+		else {
+			glDisable(GL_STENCIL_TEST);
+		}
+		if (pass.mPassState.mScissorTest) {
+			glEnable(GL_SCISSOR_TEST);
+			Viewport scissor = mPassQueue.mViewports[pass.mScissorIndex];
+			glScissor(scissor.x, scissor.y, scissor.z, scissor.w);
+		}
+		else {
+			glDisable(GL_SCISSOR_TEST);
 		}
 	}
 
@@ -113,10 +184,10 @@ namespace neo {
 			return;
 		}
 
-		const auto& mesh = pass.mMeshes[static_cast<uint16_t>(
+		const auto& draw = pass.mDraws[static_cast<uint16_t>(
 			command >> (64 - 3 - 10) & 0b1111111111
 		)];
-		if (!resourceManagers.mMeshManager.isValid(mesh)) {
+		if (!resourceManagers.mMeshManager.isValid(draw.mMeshHandle)) {
 			return;
 		}
 		const auto& ubo = pass.mUBOs[static_cast<uint16_t>(
@@ -156,6 +227,6 @@ namespace neo {
 			}
 		}
 
-		resourceManagers.mMeshManager.resolve(mesh).draw();
+		resourceManagers.mMeshManager.resolve(draw.mMeshHandle).draw(draw.mElementCount, draw.mElementBufferOffset);
 	}
 }

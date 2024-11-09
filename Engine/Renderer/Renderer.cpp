@@ -82,31 +82,11 @@ namespace neo {
 
 		mGPUQuery.destroy();
 		mGPUQuery.init();
-	}
-
-	void Renderer::resetState() {
-		TRACY_GPU();
-
-		glClearColor(0.0f, 0.0f, 0.0f, 1.f);
-
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
-		glDepthMask(GL_TRUE);
-
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-		glDisable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
-
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
@@ -121,7 +101,6 @@ namespace neo {
 		util::Profiler::GPUQuery::Scope _scope(mGPUQuery.tickHandle());
 
 		mStats = {};
-		resetState();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		mDefaultFBOHandle = resourceManagers.mFramebufferManager.asyncLoad(
@@ -149,10 +128,6 @@ namespace neo {
 				demo->render(fg, resourceManagers, ecs, mDefaultFBOHandle);
 			}
 
-			// fg.task(std::move([this](const ResourceManagers&, const ECS&) {
-			// 	resetState();
-			// }), mDefaultFBOHandle);
-
 			// if (mShowBoundingBoxes) {
 			// 	TRACY_GPUN("Debug Draws");
 			// 	drawLines<DebugBoundingBoxComponent>(
@@ -167,13 +142,13 @@ namespace neo {
 			fg.clear(FramebufferHandle(0), glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
 
 			/* Render imgui */
-			// if (ServiceLocator<ImGuiManager>::has_value() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
-			// 	drawImGui(fg, FramebufferHandle(0), vp, resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize, mDefaultFBOHandle);
-			// }
-			// else {
-			// 	TRACY_GPUN("Final Blit");
-			blit(fg, vp, resourceManagers, mDefaultFBOHandle, FramebufferHandle(0), 0);
-			// }
+			if (ServiceLocator<ImGuiManager>::has_value() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
+				drawImGui(fg, FramebufferHandle(0), vp, resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize, mDefaultFBOHandle);
+			}
+			else {
+				TRACY_GPUN("Final Blit");
+				blit(fg, vp, resourceManagers, mDefaultFBOHandle, FramebufferHandle(0), 0);
+			}
 
 			fg.execute(resourceManagers, ecs);
 		}
@@ -268,10 +243,4 @@ namespace neo {
 		ImGui::End();
 
 	}
-
-	void Renderer::clean() {
-		resetState();
-	}
-
-
 }

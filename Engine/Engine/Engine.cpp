@@ -207,7 +207,6 @@ namespace neo {
 		demos.getCurrentDemo()->destroy();
 		ecs.clean();
 		resourceManagers._clear();
-		ServiceLocator<Renderer>::value().clean();
 		Messenger::clean();
 
 		/* Init the new state */
@@ -275,7 +274,6 @@ namespace neo {
 		ecs.clean();
 		Messenger::clean();
 		resourceManagers._clear();
-		ServiceLocator<Renderer>::value().clean();
 		ServiceLocator<Renderer>::reset();
 		ServiceLocator<ImGuiManager>::value().destroy();
 		mWindow.shutDown();

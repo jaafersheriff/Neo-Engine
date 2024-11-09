@@ -46,7 +46,7 @@ namespace {
 			}
 		);
 
-		fg.pass(outhandle, viewport, {}, shaderHandle, [=](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
+		fg.pass(outhandle, viewport, viewport, {}, shaderHandle, [=](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
 			TRACY_ZONEN("_Phong");
 
 			const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
