@@ -74,13 +74,12 @@ namespace neo {
 	};
 
 	struct Pass {
-		Pass(uint8_t fbID, uint8_t vpID, uint8_t scId, uint8_t shaderID, PassState& state, UBO& ubo)
+		Pass(uint8_t fbID, uint8_t vpID, uint8_t scId, uint8_t shaderID, PassState& state)
 			: mFramebufferIndex(fbID)
 			, mViewportIndex(vpID)
 			, mScissorIndex(scId)
 			, mShaderIndex(shaderID)
 			, mPassState(state)
-			, mPassUBO(ubo)
 		{}
 
 		// 0-3: StartPass Key
@@ -123,10 +122,10 @@ namespace neo {
 			return mUBOs[mUBOIndex++];
 		}
 		void bindUniform(const char* name, const ResolvedShaderInstance::UniformVariant& variant) {
-			mPassUBO.mUniforms[name] = variant;
+			mPassUBO.bindUniform(name, variant);
 		}
 		void bindTexture(const char* name, TextureHandle handle) {
-			mPassUBO.mTextures[name] = handle;
+			mPassUBO.bindTexture(name, handle);
 		}
 
 		struct ClearParams {
@@ -179,7 +178,7 @@ namespace neo {
 
 	struct PassQueue {
 
-		uint16_t addPass(FramebufferHandle handle, Viewport vp, Viewport scissor, UBO& ubo, PassState& state, ShaderHandle shaderHandle = {}) {
+		uint16_t addPass(FramebufferHandle handle, Viewport vp, Viewport scissor, PassState& state, ShaderHandle shaderHandle = {}) {
 			mFramebufferHandles[mFramebufferHandleIndex] = handle;
 			mShaderHandles[mShaderHandleIndex] = shaderHandle;
 			auto vpId = mViewportIndex;
@@ -189,7 +188,7 @@ namespace neo {
 				scId = mViewportIndex;
 				mViewports[mViewportIndex++] = scissor;
 			}
-			mCommandQueues.emplace_back(mFramebufferHandleIndex++, vpId, scId, mShaderHandleIndex++, state, ubo);
+			mCommandQueues.emplace_back(mFramebufferHandleIndex++, vpId, scId, mShaderHandleIndex++, state);
 			return static_cast<uint16_t>(mCommandQueues.size() - 1);
 		}
 
@@ -231,8 +230,8 @@ namespace neo {
 
 		template<typename... Deps>
 		void pass(FramebufferHandle target, Viewport viewport, Viewport scissor, PassState state, ShaderHandle shader, Task::Functor t, Deps... deps) {
-			UBO emptyUBO;
-			uint16_t passIndex = mPassQueue.addPass(target, viewport, scissor, emptyUBO, state, shader);
+			TRACY_ZONE();
+			uint16_t passIndex = mPassQueue.addPass(target, viewport, scissor, state, shader);
 			_task(std::move(Task(passIndex, [_t = std::move(t)](Pass& pass, const ResourceManagers& resourceManager, const ECS& ecs) {
 				pass.startCommand();
 				_t(pass, resourceManager, ecs);
@@ -253,11 +252,11 @@ namespace neo {
 
 		template<typename... Deps>
 		void _task(Task&& t, Deps... deps) {
-			entt::id_type taskHandle = reinterpret_cast<entt::id_type>(&t); // Stop it
+			entt::id_type taskHandle = mTasks.size();
 			mBuilder.bind(taskHandle);
 			_assignDeps(std::forward<Deps>(deps)...);
 
-			mTasks.emplace(taskHandle, std::move(t));
+			mTasks.emplace_back(std::move(t));
 		}
 
 		template<typename Dep, typename... Deps>
@@ -273,7 +272,7 @@ namespace neo {
 			}
 		}
 
-		std::map<entt::id_type, Task> mTasks;
+		std::vector<Task> mTasks;
 		entt::flow mBuilder;
 			
 		PassQueue mPassQueue;

@@ -14,7 +14,6 @@ namespace neo {
 		//	});
 		//printf("%s\n", output.str().c_str());
 
-		// TODO - sort
 		std::deque<entt::flow::basic_flow::graph_type::vertex_type> nodesToVisit;
 		for (auto&& vertex : graph.vertices()) {
 			if (auto in_edges = graph.in_edges(vertex); in_edges.begin() == in_edges.end()) {
@@ -22,30 +21,27 @@ namespace neo {
 			}
 		}
 
-		std::vector<uint16_t> passSeq;
+		std::set<uint16_t> passSeq;
 		while (!nodesToVisit.empty()) {
 			auto vertex = nodesToVisit.front();
 			nodesToVisit.pop_front();
-			auto it = mTasks.find(mBuilder[vertex]);
-			if (it != mTasks.end()) {
-				auto& task = mTasks[mBuilder[vertex]];
-				passSeq.push_back(task.mPassIndex);
+			auto& task = mTasks[mBuilder[vertex]];
+			if (passSeq.find(task.mPassIndex) == passSeq.end()) {
+				passSeq.insert(task.mPassIndex);
 				task.f(mPassQueue.getPass(task.mPassIndex), resourceManagers, ecs);
 				for (auto e : graph.out_edges(vertex)) {
 					nodesToVisit.push_back(e.second);
 				}
-				mTasks.erase(mBuilder[vertex]);
 			}
 		}
 
-		if (mTasks.size()) {
-			NEO_LOG_E("Dangling tasks!");
+		if (passSeq.size() != mTasks.size()) {
+			NEO_LOG_E("Incorrect task exection count");
 		}
 
-		NEO_LOG_V("Passes (%d)", passSeq.size());
 		for (auto& passID : passSeq) {
+			TRACY_GPUN("Pass");
 			Pass& pass = mPassQueue.getPass(passID);
-			NEO_LOG_V("Pass (%d)", pass.getCommandSize());
 			for (uint16_t i = 0; i < pass.getCommandSize(); i++) {
 				Command& c = pass.getCommand(i);
 				CommandType type = static_cast<CommandType>(c >> (64 - 3) & 0b111);
@@ -68,7 +64,6 @@ namespace neo {
 	}
 
 	void FrameGraph::_startPass(Pass& pass, const Command& command, const ResourceManagers& resourceManagers) {
-		NEO_LOG_V("\tStart Pass");
 		uint8_t fbID = static_cast<uint8_t>(
 			command >> (64 - 3 - 8) & 0xFF
 			);
@@ -167,7 +162,6 @@ namespace neo {
 	}
 
 	void FrameGraph::_clear(Pass& pass, Command& command) {
-		NEO_LOG_V("\tClear");
 		const auto& clearParams = pass.mClearParams[static_cast<uint8_t>(
 			command >> (64 - 3 - 3) & 0b111
 		)];
@@ -178,7 +172,6 @@ namespace neo {
 	}
 
 	void FrameGraph::_draw(Pass& pass, Command& command, const ResourceManagers& resourceManagers) {
-		NEO_LOG_V("\tDraw");
 		const auto& shaderHandle = mPassQueue.mShaderHandles[pass.mShaderIndex];
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
