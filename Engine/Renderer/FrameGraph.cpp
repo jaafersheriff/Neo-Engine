@@ -56,7 +56,7 @@ namespace neo {
 					_draw(pass, c, resourceManagers);
 					break;
 				case CommandType::StartPass:
-					_startPass(c, resourceManagers);
+					_startPass(pass, c, resourceManagers);
 					break;
 				default:
 					NEO_FAIL("Invalid pass type");
@@ -66,7 +66,7 @@ namespace neo {
 		}
 	}
 
-	void FrameGraph::_startPass(const Command& command, const ResourceManagers& resourceManagers) {
+	void FrameGraph::_startPass(Pass& pass, const Command& command, const ResourceManagers& resourceManagers) {
 		NEO_LOG_V("\tStart Pass");
 		uint8_t fbID = static_cast<uint8_t>(
 			command >> (64 - 3 - 8) & 0xFF
@@ -81,6 +81,17 @@ namespace neo {
 		if (resourceManagers.mFramebufferManager.isValid(fbHandle)) {
 			resourceManagers.mFramebufferManager.resolve(fbHandle).bind();
 			glViewport(vp.x, vp.y, vp.z, vp.w);
+		}
+
+		switch (pass.mPassState.mDepthTest) {
+		case DepthTest::Enabled:
+			glEnable(GL_DEPTH_TEST);
+			break;
+		case DepthTest::Disabled:
+			glDisable(GL_DEPTH_TEST);
+			break;
+		default:
+			break;
 		}
 	}
 

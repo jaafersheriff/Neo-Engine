@@ -7,10 +7,17 @@
 #include <ext/entt_incl.hpp>
 
 namespace neo {
+	enum class DepthTest {
+		Enabled,
+		Disabled
+	};
+	struct PassState {
+		DepthTest mDepthTest = DepthTest::Enabled;
+	};
+
 	using Viewport = glm::uvec4;
 
 	struct UBO {
-
 		void bindUniform(const char* name, const ResolvedShaderInstance::UniformVariant& variant) {
 			mUniforms[name] = variant;
 		}
@@ -41,10 +48,11 @@ namespace neo {
 	};
 
 	struct Pass {
-		Pass(uint8_t fbID, uint8_t vpID, uint8_t shaderID, UBO& ubo)
+		Pass(uint8_t fbID, uint8_t vpID, uint8_t shaderID, PassState& state, UBO& ubo)
 			: mFramebufferIndex(fbID)
 			, mViewportIndex(vpID)
 			, mShaderIndex(shaderID)
+			, mPassState(state)
 			, mPassUBO(ubo)
 		{}
 
@@ -117,6 +125,7 @@ namespace neo {
 		uint8_t mShaderIndex = 0;
 		UBO mPassUBO;
 		ShaderDefines mPassDefines;
+		PassState mPassState;
 
 		Command mCommands[1024];
 		uint16_t mCommandIndex = 0;
@@ -137,12 +146,12 @@ namespace neo {
 
 	struct PassQueue {
 
-		uint16_t addPass(FramebufferHandle handle, Viewport vp, UBO& ubo, ShaderHandle shaderHandle = {}) {
+		uint16_t addPass(FramebufferHandle handle, Viewport vp, UBO& ubo, PassState& state, ShaderHandle shaderHandle = {}) {
 			mFramebufferHandles[mFramebufferHandleIndex] = handle;
 			mViewports[mViewportIndex] = vp;
 			mShaderHandles[mShaderHandleIndex] = shaderHandle;
 
-			mCommandQueues.emplace_back(mFramebufferHandleIndex++, mViewportIndex++, mShaderHandleIndex++, ubo);
+			mCommandQueues.emplace_back(mFramebufferHandleIndex++, mViewportIndex++, mShaderHandleIndex++, state, ubo);
 			return static_cast<uint16_t>(mCommandQueues.size() - 1);
 		}
 
@@ -183,9 +192,9 @@ namespace neo {
 		void execute(const ResourceManagers& resourceManagers, const ECS& ecs);
 
 		template<typename... Deps>
-		void pass(FramebufferHandle target, Viewport viewport, ShaderHandle shader, Task::Functor t, Deps... deps) {
+		void pass(FramebufferHandle target, Viewport viewport, PassState state, ShaderHandle shader, Task::Functor t, Deps... deps) {
 			UBO emptyUBO;
-			uint16_t passIndex = mPassQueue.addPass(target, viewport, emptyUBO, shader);
+			uint16_t passIndex = mPassQueue.addPass(target, viewport, emptyUBO, state, shader);
 			_task(std::move(Task(passIndex, [_t = std::move(t)](Pass& pass, const ResourceManagers& resourceManager, const ECS& ecs) {
 				pass.startCommand();
 				_t(pass, resourceManager, ecs);
@@ -193,14 +202,14 @@ namespace neo {
 		}
 
 		void clear(FramebufferHandle handle, glm::vec4 color, types::framebuffer::AttachmentBits clearFlags) {
-			pass(handle, {}, {}, [=](Pass& pass, const ResourceManagers&, const ECS&) {
+			pass(handle, {}, {}, {}, [=](Pass& pass, const ResourceManagers&, const ECS&) {
 				pass.clearCommand(color, clearFlags);
 			});
 		}
 
 	private:
 		// TODO - these should go elsewhere
-		void _startPass(const Command& command, const ResourceManagers& resourceManagers);
+		void _startPass(Pass& pass, const Command& command, const ResourceManagers& resourceManagers);
 		void _clear(Pass& pass, Command& command);
 		void _draw(Pass& pass, Command& command, const ResourceManagers& resourceManagers);
 

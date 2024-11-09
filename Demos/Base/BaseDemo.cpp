@@ -46,7 +46,7 @@ namespace {
 			}
 		);
 
-		fg.pass(outhandle, viewport, shaderHandle, [=](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
+		fg.pass(outhandle, viewport, {}, shaderHandle, [=](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
 			TRACY_ZONEN("_Phong");
 
 			const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
@@ -224,8 +224,7 @@ namespace Base {
 
 		_drawPhong(fg, resourceManagers, Viewport(0, 0, viewport.mSize), cameraEntity, sceneTargetHandle);
 
-		NEO_UNUSED(backbufferHandle);
-		// blit(fg, Viewport(0, 0, viewport.mSize), resourceManagers, sceneTargetHandle, backbufferHandle);
+		blit(fg, Viewport(0, 0, viewport.mSize), resourceManagers, sceneTargetHandle, backbufferHandle);
 	}
 
 	void Demo::destroy() {
