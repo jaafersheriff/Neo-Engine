@@ -35,7 +35,6 @@ namespace {
 	void _drawPhong(
 		FrameGraph& fg,
 		const ResourceManagers& _resourceManagers, 
-		const ECS& _ecs, 
 		const Viewport& viewport, 
 		const ECS::Entity cameraEntity, 
 		FramebufferHandle outhandle
@@ -47,34 +46,30 @@ namespace {
 			}
 		);
 
-		ShaderDefines passDefines;
+		fg.pass(outhandle, viewport, shaderHandle, [=](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
+			TRACY_ZONEN("_Phong");
 
-		UBO _ubo;
-		_ubo["P"] = _ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
-		const auto& cameraSpatial = _ecs.cGetComponent<SpatialComponent>(cameraEntity);
-		_ubo["V"] = cameraSpatial->getView();
-		_ubo["camPos"] = cameraSpatial->getPosition();
+			const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
+			auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
 
-		auto&& [lightEntity, _lightLight, light, lightSpatial] = *_ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
-		_ubo["lightCol"] = light.mColor;
-
-		MakeDefine(DIRECTIONAL_LIGHT);
-		MakeDefine(POINT_LIGHT);
-		if (_ecs.has<DirectionalLightComponent>(lightEntity)) {
-			passDefines.set(DIRECTIONAL_LIGHT);
-			_ubo["lightDir"] = -lightSpatial.getLookDir();
-		}
-		else if (_ecs.has<PointLightComponent>(lightEntity)) {
-			passDefines.set(POINT_LIGHT);
-			_ubo["lightPos"] = lightSpatial.getPosition();
-			_ubo["lightRadiance"] = light.mIntensity;
-		}
-		else {
-			NEO_FAIL("Phong light needs a directional or point light component");
-		}
-
-		fg.pass(outhandle, viewport, [pdef = std::move(passDefines), cameraEntity, shaderHandle, ubo = std::move(_ubo)](const ResourceManagers& resourceManagers, const ECS& ecs) mutable {
-			TRACY_GPUN("_Phong");
+			MakeDefine(DIRECTIONAL_LIGHT);
+			MakeDefine(POINT_LIGHT);
+			if (ecs.has<DirectionalLightComponent>(lightEntity)) {
+				pass.setDefine(DIRECTIONAL_LIGHT);
+				pass.bindUniform("lightDir", -lightSpatial.getLookDir());
+			}
+			else if (ecs.has<PointLightComponent>(lightEntity)) {
+				pass.setDefine(POINT_LIGHT);
+				pass.bindUniform("lightPos", lightSpatial.getPosition());
+				pass.bindUniform("lightRadiance", light.mIntensity);
+			}
+			else {
+				NEO_FAIL("Phong light needs a directional or point light component");
+			}
+			pass.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
+			pass.bindUniform("V", cameraSpatial->getView());
+			pass.bindUniform("camPos", cameraSpatial->getPosition());
+			pass.bindUniform("lightCol", light.mColor);
 
 			// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
 			const auto& view = ecs.getView<const MeshComponent, const MaterialComponent, const SpatialComponent>();
@@ -86,40 +81,26 @@ namespace {
 					}
 				}
 
-				ShaderDefines drawDefines(pdef);
-
+				ShaderDefines drawDefines;
+				UBO ubo;
 				const auto& material = view.get<const MaterialComponent>(entity);
 				MakeDefine(ALBEDO_MAP);
 				MakeDefine(NORMAL_MAP);
-
+				ubo.bindUniform("albedo", material.mAlbedoColor);
 				if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
 					drawDefines.set(ALBEDO_MAP);
+					ubo.bindTexture("albedoMap", material.mAlbedoMap);
 				}
 				if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
 					drawDefines.set(NORMAL_MAP);
-				}
-
-				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
-				resolvedShader.bind();
-
-				resolvedShader.bindUniform("albedo", material.mAlbedoColor);
-				if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-					resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material.mAlbedoMap));
-				}
-
-				if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-					resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
+					ubo.bindTexture("normalMap", material.mNormalMap);
 				}
 
 				const auto& drawSpatial = view.get<const SpatialComponent>(entity);
-				resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
-				resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
+				ubo.bindUniform("M", drawSpatial.getModelMatrix());
+				ubo.bindUniform("N", drawSpatial.getNormalMatrix());
 
-				for (const auto& [key, val] : ubo) {
-					resolvedShader.bindUniform(key, val);
-				}
-
-				resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
+				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, ubo, drawDefines);
 			}
 		});
 	}
@@ -241,9 +222,10 @@ namespace Base {
 		);
 		fg.clear(sceneTargetHandle, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 
-		_drawPhong(fg, resourceManagers, ecs, Viewport(0, 0, viewport.mSize), cameraEntity, sceneTargetHandle);
+		_drawPhong(fg, resourceManagers, Viewport(0, 0, viewport.mSize), cameraEntity, sceneTargetHandle);
 
-		blit(fg, Viewport(0, 0, viewport.mSize), resourceManagers, sceneTargetHandle, backbufferHandle);
+		NEO_UNUSED(backbufferHandle);
+		// blit(fg, Viewport(0, 0, viewport.mSize), resourceManagers, sceneTargetHandle, backbufferHandle);
 	}
 
 	void Demo::destroy() {

@@ -149,31 +149,31 @@ namespace neo {
 				demo->render(fg, resourceManagers, ecs, mDefaultFBOHandle);
 			}
 
-			fg.task(std::move([this](const ResourceManagers&, const ECS&) {
-				resetState();
-			}), mDefaultFBOHandle);
+			// fg.task(std::move([this](const ResourceManagers&, const ECS&) {
+			// 	resetState();
+			// }), mDefaultFBOHandle);
 
-			if (mShowBoundingBoxes) {
-				TRACY_GPUN("Debug Draws");
-				drawLines<DebugBoundingBoxComponent>(
-					fg, 
-					mDefaultFBOHandle, 
-					vp,
-					resourceManagers, 
-					std::get<0>(*ecs.getComponent<MainCameraComponent>())
-				);
-			}
+			// if (mShowBoundingBoxes) {
+			// 	TRACY_GPUN("Debug Draws");
+			// 	drawLines<DebugBoundingBoxComponent>(
+			// 		fg, 
+			// 		mDefaultFBOHandle, 
+			// 		vp,
+			// 		resourceManagers, 
+			// 		std::get<0>(*ecs.getComponent<MainCameraComponent>())
+			// 	);
+			// }
 
 			fg.clear(FramebufferHandle(0), glm::vec4(0.f), types::framebuffer::AttachmentBit::Color);
 
 			/* Render imgui */
-			if (ServiceLocator<ImGuiManager>::has_value() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
-				drawImGui(fg, FramebufferHandle(0), vp, resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
-			}
-			else {
-				TRACY_GPUN("Final Blit");
-				blit(fg, vp, resourceManagers, mDefaultFBOHandle, FramebufferHandle(0), 0);
-			}
+			// if (ServiceLocator<ImGuiManager>::has_value() && ServiceLocator<ImGuiManager>::value().isEnabled()) {
+			// 	drawImGui(fg, FramebufferHandle(0), vp, resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize, mDefaultFBOHandle);
+			// }
+			// else {
+			// 	TRACY_GPUN("Final Blit");
+			blit(fg, vp, resourceManagers, mDefaultFBOHandle, FramebufferHandle(0), 0);
+			// }
 
 			fg.execute(resourceManagers, ecs);
 		}
