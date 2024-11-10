@@ -56,6 +56,8 @@ namespace neo {
 			>;
 		void bindUniform(const char* name, const UniformVariant& uniform) const;
 		void bindTexture(const char* name, const Texture& texture) const;
+		void bindUniform(entt::id_type, const UniformVariant& uniform) const;
+		void bindTexture(entt::id_type, const Texture& texture) const;
 		[[nodiscard]] ShaderBarrier bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip = 0) const;
 		[[nodiscard]] ShaderBarrier bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const;
 
@@ -71,5 +73,6 @@ namespace neo {
 
 		uint32_t _compileShader(uint32_t shaderType, const char* shaderString);
 		int32_t _getUniform(const char* name) const;
+		int32_t _getUniform(entt::id_type value) const;
 	};
 }

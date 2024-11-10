@@ -7,36 +7,42 @@ namespace neo {
 
 		auto graph = mBuilder.graph();
 
-		std::ostringstream output{};
-		entt::dot(output, graph, [&](auto& output, auto vertex) {
-			auto node2 = mBuilder[vertex];
-			output << "label=\"v" << mTasks[node2].mDebugName.value_or("empty") << "\",shape=\"box\"";
-			});
-		printf("%s\n", output.str().c_str());
-
-		std::deque<entt::flow::basic_flow::graph_type::vertex_type> nodesToVisit;
-		for (auto&& vertex : graph.vertices()) {
-			if (auto in_edges = graph.in_edges(vertex); in_edges.begin() == in_edges.end()) {
-				nodesToVisit.push_back(vertex);
-			}
-		}
+		// std::ostringstream output{};
+		// entt::dot(output, graph, [&](auto& output, auto vertex) {
+		// 	auto node2 = mBuilder[vertex];
+		// 	output << "label=\"" << mTasks[node2].mDebugName.value_or("empty") << "\",shape=\"box\"";
+		// 	});
+		// printf("%s\n", output.str().c_str());
 
 		std::set<uint16_t> passSeq;
-		while (!nodesToVisit.empty()) {
-			auto vertex = nodesToVisit.front();
-			nodesToVisit.pop_front();
-			auto& task = mTasks[mBuilder[vertex]];
-			if (passSeq.find(task.mPassIndex) == passSeq.end()) {
-				passSeq.insert(task.mPassIndex);
-				task.f(mPassQueue.getPass(task.mPassIndex), resourceManagers, ecs);
-				for (auto e : graph.out_edges(vertex)) {
-					nodesToVisit.push_back(e.second);
+		{
+			TRACY_ZONEN("Graph traverse");
+			std::deque<entt::flow::basic_flow::graph_type::vertex_type> nodesToVisit;
+			for (auto&& vertex : graph.vertices()) {
+				if (auto in_edges = graph.in_edges(vertex); in_edges.begin() == in_edges.end()) {
+					nodesToVisit.push_back(vertex);
 				}
 			}
-		}
 
-		if (passSeq.size() != mTasks.size()) {
-			NEO_LOG_E("Incorrect task exection count");
+			while (!nodesToVisit.empty()) {
+				auto vertex = nodesToVisit.front();
+				nodesToVisit.pop_front();
+				auto& task = mTasks[mBuilder[vertex]];
+				if (passSeq.find(task.mPassIndex) == passSeq.end()) {
+					passSeq.insert(task.mPassIndex);
+					{
+						TRACY_ZONEN("Execute task");
+						task.f(mPassQueue.getPass(task.mPassIndex), resourceManagers, ecs);
+					}
+					for (auto e : graph.out_edges(vertex)) {
+						nodesToVisit.push_back(e.second);
+					}
+				}
+			}
+
+			if (passSeq.size() != mTasks.size()) {
+				NEO_LOG_E("Incorrect task exection count");
+			}
 		}
 
 		for (auto& passID : passSeq) {
@@ -63,7 +69,7 @@ namespace neo {
 		}
 	}
 
-	void FrameGraph::_startPass(Pass& pass, const Command& command, const ResourceManagers& resourceManagers) {
+	void FrameGraph::_startPass(const Pass& pass, const Command& command, const ResourceManagers& resourceManagers) {
 		uint8_t fbID = static_cast<uint8_t>(
 			command >> (64 - 3 - 8) & 0xFF
 			);
@@ -161,7 +167,7 @@ namespace neo {
 		}
 	}
 
-	void FrameGraph::_clear(Pass& pass, Command& command) {
+	void FrameGraph::_clear(const Pass& pass, Command& command) {
 		const auto& clearParams = pass.mClearParams[static_cast<uint8_t>(
 			command >> (64 - 3 - 3) & 0b111
 		)];
@@ -171,7 +177,7 @@ namespace neo {
 		fb.clear(clearParams.color, clearParams.clearFlags);
 	}
 
-	void FrameGraph::_draw(Pass& pass, Command& command, const ResourceManagers& resourceManagers) {
+	void FrameGraph::_draw(const Pass& pass, Command& command, const ResourceManagers& resourceManagers) {
 		const auto& shaderHandle = mPassQueue.mShaderHandles[pass.mShaderIndex];
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
@@ -191,33 +197,30 @@ namespace neo {
 		)];
 
 		ShaderDefines defines;
-		for (auto& [d, b] : pass.mPassDefines.mDefines) {
-			if (b) {
-				defines.set(d);
-			}
+		for (int i = 0; i < pass.mPassDefines.mDefinesIndex; i++) {
+			defines.set(pass.mPassDefines.mDefines[i].mVal);
+
 		}
-		for (auto& [d, b] : drawDefines.mDefines) {
-			if (b) {
-				defines.set(d);
-			}
+		for (int i = 0; i < drawDefines.mDefinesIndex; i++) {
+			defines.set(drawDefines.mDefines[i].mVal);
 		}
 
 		const auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, defines);
-		for (auto& [k, v] : pass.mPassUBO.mUniforms) {
-			resolvedShader.bindUniform(k, v);
+		for (int i = 0; i < pass.mPassUBO.mUniformIndex; i++) {
+			const auto& pair = pass.mPassUBO.mUniforms[i];
+			resolvedShader.bindUniform(pair.bindhash, pair.val);
 		}
-		for (auto& [k, t] : pass.mPassUBO.mTextures) {
-			if (resourceManagers.mTextureManager.isValid(t)) {
-				resolvedShader.bindTexture(k, resourceManagers.mTextureManager.resolve(t));
-			}
+		for (int i = 0; i < pass.mPassUBO.mTextureIndex; i++) {
+			const auto& pair = pass.mPassUBO.mTextures[i];
+			resolvedShader.bindTexture(pair.bindhash, resourceManagers.mTextureManager.resolve(pair.val));
 		}
-		for (auto& [k, v] : ubo.mUniforms) {
-			resolvedShader.bindUniform(k, v);
+		for (int i = 0; i < ubo.mUniformIndex; i++) {
+			const auto& pair = ubo.mUniforms[i];
+			resolvedShader.bindUniform(pair.bindhash, pair.val);
 		}
-		for (auto& [k, t] : ubo.mTextures) {
-			if (resourceManagers.mTextureManager.isValid(t)) {
-				resolvedShader.bindTexture(k, resourceManagers.mTextureManager.resolve(t));
-			}
+		for (int i = 0; i < ubo.mTextureIndex; i++) {
+			const auto& pair = ubo.mTextures[i];
+			resolvedShader.bindTexture(pair.bindhash, resourceManagers.mTextureManager.resolve(pair.val));
 		}
 
 		resourceManagers.mMeshManager.resolve(draw.mMeshHandle).draw(draw.mElementCount, draw.mElementBufferOffset);

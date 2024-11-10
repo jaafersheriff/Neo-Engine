@@ -23,6 +23,9 @@ namespace neo {
 		OneMinusAlpha
 	};
 	struct PassState {
+		PassState() {
+			TRACY_ZONE();
+		}
 		bool mDepthTest = true;
 		DepthFunc mDepthFunc = DepthFunc::Less;
 		bool mDepthMask = true;
@@ -44,25 +47,103 @@ namespace neo {
 	using Viewport = glm::uvec4;
 
 	struct UBO {
+		UBO() {
+			mUniformIndex = 0;
+			mTextureIndex = 0;
+		}
 		void bindUniform(const char* name, const ResolvedShaderInstance::UniformVariant& variant) {
-			mUniforms[name] = variant;
+			mUniforms[mUniformIndex++] = { HashedString(name).value(), variant };
 		}
 
 		void bindTexture(const char* name, TextureHandle handle) {
-			mTextures[name] = handle;
+			mTextures[mTextureIndex] = { HashedString(name).value(), handle };
 		}
 
-		std::map<const char*, ResolvedShaderInstance::UniformVariant> mUniforms;
-		std::map<const char*, TextureHandle> mTextures;
+		// TODO - store as enum type pair
+		struct UniformPair {
+			entt::id_type bindhash; 
+			ResolvedShaderInstance::UniformVariant val;
+		};
+		UniformPair mUniforms[128];
+		uint16_t mUniformIndex = 0;
+
+		struct TexturePair {
+			entt::id_type bindhash; 
+			TextureHandle val;
+		};
+		TexturePair mTextures[16];
+		uint16_t mTextureIndex = 0;
+	};
+
+	struct ShaderDefineFG {
+		ShaderDefineFG(const char* c = nullptr) {
+			NEO_FAIL("NO");
+			if (c) {
+				mVal = reinterpret_cast<char*>(malloc(64));
+				if (mVal) {
+					strcpy(mVal, c);
+				}
+				else {
+					mVal = 0;
+				}
+			}
+		}
+		ShaderDefineFG(const ShaderDefineFG& other) {
+			NEO_FAIL("NO");
+			if (other.mVal) {
+				if (mVal) {
+					free(mVal);
+					mVal = 0;
+				}
+				mVal = reinterpret_cast<char*>(malloc(64));
+				if (mVal) {
+					strcpy(mVal, other.mVal);
+				}
+				else {
+					mVal = 0;
+				}
+			}
+
+		}
+		~ShaderDefineFG() {
+			if (mVal) {
+				free(mVal);
+			}
+		}
+		char* mVal = nullptr;
+
+		friend bool operator<(const ShaderDefineFG& l, const ShaderDefineFG& r) {
+			return HashedString(l.mVal).value() < HashedString(r.mVal).value();
+		}
 	};
 	struct ShaderDefinesFG {
-		ShaderDefinesFG() = default;
-
+		ShaderDefinesFG() {
+			reset();
+		}
+		ShaderDefinesFG(const ShaderDefinesFG& other) {
+			reset();
+			for (int i = 0; i < other.mDefinesIndex; i++) {
+				set(ShaderDefine(other.mDefines[i].mVal));
+			}
+		}
+		void set(const ShaderDefinesFG&& other) {
+			reset();
+			for (int i = 0; i < other.mDefinesIndex; i++) {
+				set(ShaderDefine(other.mDefines[i].mVal));
+			}
+		}
 		void set(const ShaderDefine& define) {
-			mDefines[define] = true;
+			mDefines[mDefinesIndex++] = ShaderDefineFG(define.mVal.c_str());
+		}
+		void reset() {
+			mDefinesIndex = 0;
+			for (int i = 0; i < 32; i++) {
+				mDefines[i].~ShaderDefineFG();
+			}
 		}
 
-		std::map<ShaderDefine, bool> mDefines;
+		ShaderDefineFG mDefines[32];
+		uint16_t mDefinesIndex = 0;
 	};
 
 
@@ -74,14 +155,6 @@ namespace neo {
 	};
 
 	struct Pass {
-		Pass(uint8_t fbID, uint8_t vpID, uint8_t scId, uint8_t shaderID, PassState& state)
-			: mFramebufferIndex(fbID)
-			, mViewportIndex(vpID)
-			, mScissorIndex(scId)
-			, mShaderIndex(shaderID)
-			, mPassState(state)
-		{}
-
 		// 0-3: StartPass Key
 		// 4-12: FBO ID
 		// 13-21: Viewport ID
@@ -94,13 +167,13 @@ namespace neo {
 			;
 		}
 
-		void drawCommand(const MeshHandle& mesh, const UBO& ubo, const ShaderDefines& drawDefines, uint16_t elements = 0, uint16_t bufferOffset = 0) {
+		void drawCommand(const MeshHandle& mesh, const UBO& ubo, const ShaderDefinesFG&& drawDefines, uint16_t elements = 0, uint16_t bufferOffset = 0) {
 			uint64_t drawIndex = mDrawIndex;
 			mDraws[mDrawIndex++] = { mesh, elements, bufferOffset };
 			uint64_t uboIndex = mUBOIndex;
 			mUBOs[mUBOIndex++] = ubo;
 			uint64_t definesIndex = mShaderDefinesIndex;
-			mShaderDefines[mShaderDefinesIndex++].mDefines = drawDefines.mDefines;
+			mShaderDefines[mShaderDefinesIndex++].set(std::move(drawDefines));
 
 			Command& command = mCommands[mCommandIndex++];
 			command = 0
@@ -151,7 +224,7 @@ namespace neo {
 		uint8_t mScissorIndex = 0;
 		uint8_t mShaderIndex = 0;
 		UBO mPassUBO;
-		ShaderDefines mPassDefines;
+		ShaderDefinesFG mPassDefines;
 		PassState mPassState;
 
 		Command mCommands[1024];
@@ -177,8 +250,15 @@ namespace neo {
 
 
 	struct PassQueue {
+		~PassQueue() {
+			TRACY_ZONE();
+			for (auto pass : mCommandQueues) {
+				free(reinterpret_cast<void*>(pass));
+			}
+		}
 
 		uint16_t addPass(FramebufferHandle handle, Viewport vp, Viewport scissor, PassState& state, ShaderHandle shaderHandle = {}) {
+			TRACY_ZONE();
 			mFramebufferHandles[mFramebufferHandleIndex] = handle;
 			mShaderHandles[mShaderHandleIndex] = shaderHandle;
 			auto vpId = mViewportIndex;
@@ -188,12 +268,34 @@ namespace neo {
 				scId = mViewportIndex;
 				mViewports[mViewportIndex++] = scissor;
 			}
-			mCommandQueues.emplace_back(mFramebufferHandleIndex++, vpId, scId, mShaderHandleIndex++, state);
+			{
+				TRACY_ZONEN("Construct pass");
+				void* pm = malloc(sizeof(Pass));
+				if (pm) {
+					Pass* p = reinterpret_cast<Pass*>(pm);
+					p->mFramebufferIndex = mFramebufferHandleIndex++;
+					p->mViewportIndex = vpId;
+					p->mScissorIndex = scId;
+					p->mShaderIndex = mShaderHandleIndex++;
+					p->mPassState = state;
+					p->mPassUBO = UBO();
+					p->mPassDefines.mDefinesIndex = 0;
+					p->mCommandIndex = 0;
+					p->mClearParamsIndex = 0;
+					p->mShaderDefinesIndex = 0;
+					p->mUBOIndex = 0;
+					p->mDrawIndex = 0;
+					mCommandQueues.push_back(p);
+				}
+				else {
+					NEO_FAIL("Err");
+				}
+			}
 			return static_cast<uint16_t>(mCommandQueues.size() - 1);
 		}
 
 		Pass& getPass(uint16_t index) {
-			return mCommandQueues[index];
+			return *mCommandQueues[index];
 		}
 
 		FramebufferHandle mFramebufferHandles[256];
@@ -206,7 +308,7 @@ namespace neo {
 		uint8_t mShaderHandleIndex = 0;
 
 	private:
-		std::vector<Pass> mCommandQueues;
+		std::vector<Pass*> mCommandQueues;
 	};
 
 	class FrameGraph {
@@ -247,12 +349,13 @@ namespace neo {
 
 	private:
 		// TODO - these should go elsewhere
-		void _startPass(Pass& pass, const Command& command, const ResourceManagers& resourceManagers);
-		void _clear(Pass& pass, Command& command);
-		void _draw(Pass& pass, Command& command, const ResourceManagers& resourceManagers);
+		void _startPass(const Pass& pass, const Command& command, const ResourceManagers& resourceManagers);
+		void _clear(const Pass& pass, Command& command);
+		void _draw(const Pass& pass, Command& command, const ResourceManagers& resourceManagers);
 
 		template<typename... Deps>
 		Task& _task(Task&& t, Deps... deps) {
+			TRACY_ZONE();
 			entt::id_type taskHandle = mTasks.size();
 			mBuilder.bind(taskHandle);
 			_assignDeps(std::forward<Deps>(deps)...);

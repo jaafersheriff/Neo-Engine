@@ -10,6 +10,9 @@ namespace neo {
 #define MakeDefine(x) static ShaderDefine x(#x)
 
 	struct ShaderDefine {
+		ShaderDefine() :
+			mVal("")
+		{}
 		ShaderDefine(const char* c) :
 			mVal(c)
 		{}

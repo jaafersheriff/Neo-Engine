@@ -127,7 +127,7 @@ namespace neo {
 					}
 				}
 
-				ShaderDefines drawDefines;
+				ShaderDefinesFG drawDefines;
 				UBO ubo;
 
 				const auto& material = view.get<const MaterialComponent>(entity);
@@ -148,7 +148,7 @@ namespace neo {
 				ubo.bindUniform("M", drawSpatial.getModelMatrix());
 				ubo.bindUniform("N", drawSpatial.getNormalMatrix());
 
-				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, ubo, drawDefines);
+				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, std::move(ubo), std::move(drawDefines));
 			}
 			})
 			.mDebugName = "Phong";
