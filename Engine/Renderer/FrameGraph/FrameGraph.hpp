@@ -5,6 +5,7 @@
 #include "Renderer/GLObjects/PassState.hpp"
 #include "Renderer/GLObjects/UniformBuffer.hpp"
 #include "Renderer/FrameGraph/ShaderDefinesFG.hpp"
+#include "Renderer/FrameGraph/FrameData.hpp"
 
 #include <ext/entt_incl.hpp>
 
@@ -18,41 +19,17 @@ namespace neo {
 	};
 
 	struct Pass {
-		Pass(uint8_t fbID, uint8_t vpID, uint8_t scId, uint8_t shaderID, PassState& state)
-			: mFramebufferIndex(fbID)
+		Pass(FrameData& frameData, uint8_t fbID, uint8_t vpID, uint8_t scId, uint8_t shaderID, PassState& state)
+			: mFrameData(frameData)
+			, mFramebufferIndex(fbID)
 			, mViewportIndex(vpID)
 			, mScissorIndex(scId)
 			, mShaderIndex(shaderID)
 			, mPassState(state)
 		{
-			TRACY_ZONE();
-			{
-				TRACY_ZONEN("UBO Alloc");
-				mUBOs = reinterpret_cast<UniformBuffer*>(malloc(1024 * sizeof(UniformBuffer)));
-				NEO_ASSERT(mUBOs, "Can't alloc");
-			}
-			{
-				TRACY_ZONEN("UBO Reset");
-				for (int i = 0; i < 1024; i++) {
-					mUBOs[i].reset();
-				}
-			}
-			{
-				TRACY_ZONEN("Defines Alloc");
-				mShaderDefines = reinterpret_cast<ShaderDefinesFG*>(malloc(1024 * sizeof(ShaderDefinesFG)));
-				NEO_ASSERT(mShaderDefines, "Can't alloc");
-			}
-			{
-				TRACY_ZONEN("Defines Reset");
-				for (int i = 0; i < 1024; i++) {
-					mShaderDefines[i].reset();
-				}
-			}
 		}
 
 		~Pass() {
-			free(mUBOs);
-			free(mShaderDefines);
 		}
 
 		// 0-3: StartPass Key
@@ -70,10 +47,10 @@ namespace neo {
 		void drawCommand(const MeshHandle& mesh, const UniformBuffer& ubo, const ShaderDefinesFG& drawDefines, uint16_t elements = 0, uint16_t bufferOffset = 0) {
 			uint64_t drawIndex = mDrawIndex;
 			mDraws[mDrawIndex++] = { mesh, elements, bufferOffset };
-			uint64_t uboIndex = mUBOIndex;
-			mUBOs[mUBOIndex++] = ubo;
-			uint64_t definesIndex = mShaderDefinesIndex;
-			mShaderDefines[mShaderDefinesIndex++] = drawDefines;
+
+			// Bad copies :(
+			uint64_t uboIndex = mFrameData.createUBO(ubo);
+			uint64_t definesIndex = mFrameData.createShaderDefines(drawDefines);
 
 			Command& command = mCommands[mCommandIndex++];
 			command = 0
@@ -84,16 +61,11 @@ namespace neo {
 			;
 		}
 
-		ShaderDefinesFG& createShaderDefines() {
-			return mShaderDefines[mShaderDefinesIndex++];
-		}
+
 		void setDefine(const ShaderDefine& define) {
 			mPassDefines.set(define);
 		}
 
-		UniformBuffer& createUBO() {
-			return mUBOs[mUBOIndex++];
-		}
 		void bindUniform(const char* name, const ResolvedShaderInstance::UniformVariant& variant) {
 			mPassUBO.bindUniform(name, variant);
 		}
@@ -121,14 +93,9 @@ namespace neo {
 
 		const PassState& getPassState() const { return mPassState; }
 		
-		void destroy() {
-			TRACY_ZONE();
-			mPassUBO.destroy();
-			for (int i = 0; i < mUBOIndex; i++) {
-				mUBOs[i].destroy();
-			}
-		}
 	//private:
+		FrameData& mFrameData;
+
 		uint8_t mFramebufferIndex = 0;
 		uint8_t mViewportIndex = 0;
 		uint8_t mScissorIndex = 0;
@@ -143,12 +110,6 @@ namespace neo {
 		ClearParams mClearParams[8];
 		uint8_t mClearParamsIndex = 0; // 3 bits
 
-		ShaderDefinesFG* mShaderDefines = nullptr;
-		uint16_t mShaderDefinesIndex = 0; // 10 bits, max of 1024
-
-		UniformBuffer* mUBOs = nullptr;
-		uint16_t mUBOIndex = 0; // 10 bits, max of 1024
-
 		struct Draw {
 			MeshHandle mMeshHandle;
 			uint16_t mElementCount = 0;
@@ -156,60 +117,6 @@ namespace neo {
 		};
 		Draw mDraws[1024];
 		uint16_t mDrawIndex = 0; // 10 bits
-	};
-
-
-	struct FrameData {
-
-		uint16_t addPass(FramebufferHandle handle, Viewport vp, Viewport scissor, PassState& state, ShaderHandle shaderHandle = {}) {
-			mFramebufferHandles[mFramebufferHandleIndex] = handle;
-			mShaderHandles[mShaderHandleIndex] = shaderHandle;
-			auto vpId = mViewportIndex;
-			mViewports[mViewportIndex++] = vp;
-			auto scId = vpId;
-			if (vp != scissor) {
-				scId = mViewportIndex;
-				mViewports[mViewportIndex++] = scissor;
-			}
-			{
-				TRACY_ZONEN("Construct pass");
-				mPasses.emplace_back(std::make_unique<Pass>(mFramebufferHandleIndex++, vpId, scId, mShaderHandleIndex++, state));
-			}
-			return static_cast<uint16_t>(mPasses.size() - 1);
-		}
-
-		Pass& getPass(uint16_t index) {
-			NEO_ASSERT(mPasses.size() > index, "Invalid index");
-			return *mPasses[index];
-		}
-
-		const FramebufferHandle& getFrameBufferHandle(uint8_t index) const {
-			NEO_ASSERT(mFramebufferHandleIndex > index, "Invalid index");
-			return mFramebufferHandles[index];
-		}
-
-		const Viewport& getViewport(uint8_t index) const {
-			NEO_ASSERT(mViewportIndex > index, "Invalid index");
-			return mViewports[index];
-		}
-
-		const ShaderHandle& getShaderHandle(uint8_t index) const {
-			NEO_ASSERT(mShaderHandleIndex > index, "Invalid index");
-			return mShaderHandles[index];
-		}
-
-	private:
-		FramebufferHandle mFramebufferHandles[256];
-		uint8_t mFramebufferHandleIndex = 0;
-
-		Viewport mViewports[256];
-		uint8_t mViewportIndex = 0;
-
-		ShaderHandle mShaderHandles[256];
-		uint8_t mShaderHandleIndex = 0;
-
-	private:
-		std::vector<std::unique_ptr<Pass>> mPasses;
 	};
 
 	class FrameGraph {

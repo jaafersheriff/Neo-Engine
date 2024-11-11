@@ -123,12 +123,12 @@ namespace neo {
 			if (!resourceManagers.mMeshManager.isValid(draw.mMeshHandle)) {
 				return;
 			}
-			const auto& ubo = pass.mUBOs[static_cast<uint16_t>(
+			const auto& ubo = frameData.getUBO(static_cast<uint16_t>(
 				command >> (64 - 3 - 10 - 10) & 0b1111111111
-				)];
-			const auto& drawDefines = pass.mShaderDefines[static_cast<uint16_t>(
+			));
+			const auto& drawDefines = frameData.getDefines(static_cast<uint16_t>(
 				command >> (64 - 3 - 10 - 10 - 10) & 0b1111111111
-				)];
+			));
 
 			ShaderDefines defines;
 			pass.mPassDefines.toOldStyle(defines);
