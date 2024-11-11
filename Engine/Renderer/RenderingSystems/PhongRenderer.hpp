@@ -23,7 +23,7 @@
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"
-#include "Renderer/FrameGraph.hpp"
+#include "Renderer/FrameGraph/FrameGraph.hpp"
 
 namespace neo {
 

@@ -9,7 +9,7 @@
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
 #include "Renderer/RenderingSystems/Blitter.hpp"
 #include "Renderer/RenderingSystems/ImGuiRenderer.hpp"
-#include <Renderer/FrameGraph.hpp>
+#include <Renderer/FrameGraph/FrameGraph.hpp>
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"

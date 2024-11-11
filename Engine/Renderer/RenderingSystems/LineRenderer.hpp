@@ -7,7 +7,7 @@
 
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
-#include "Renderer/FrameGraph.hpp"
+#include "Renderer/FrameGraph/FrameGraph.hpp"
 
 namespace neo {
 
