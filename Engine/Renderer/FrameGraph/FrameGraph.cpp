@@ -16,12 +16,12 @@ namespace neo {
 
 		auto graph = enttGraph(mBuilder);
 
-		std::ostringstream output{};
-		entt::dot(output, graph, [&](auto& output, auto vertex) {
-			auto node2 = mBuilder[vertex];
-			output << "label=\"" << mTasks[node2].mDebugName.value_or("empty") << "\",shape=\"box\"";
-			});
-		printf("%s\n", output.str().c_str());
+		// std::ostringstream output{};
+		// entt::dot(output, graph, [&](auto& output, auto vertex) {
+		// 	auto node2 = mBuilder[vertex];
+		// 	output << "label=\"" << mTasks[node2].mDebugName.value_or("empty") << "\",shape=\"box\"";
+		// 	});
+		// printf("%s\n", output.str().c_str());
 
 		std::set<uint16_t> passSeq;
 		{

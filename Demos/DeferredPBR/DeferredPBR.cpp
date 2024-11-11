@@ -463,10 +463,10 @@ namespace DeferredPBR {
 		drawForwardPBR<TransparentComponent>(fg, hdrColorTarget, sceneViewport, resourceManagers, ecs, cameraEntity);
 		drawSkybox(fg, hdrColorTarget, sceneViewport, resourceManagers, cameraEntity);
 
-		// FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParams) : hdrColorOutput;
-		// if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
-		// 	bloomHandle = hdrColorOutput;
-		// }
+		FramebufferHandle bloomHandle = mDoBloom ? bloom(fg, hdrColorTarget, sceneViewport, resourceManagers, mBloomParams) : hdrColorTarget;
+		if (!resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
+			bloomHandle = hdrColorTarget;
+		}
 
 		// TextureHandle averageLuminance = NEO_INVALID_HANDLE;
 		// {
@@ -490,8 +490,7 @@ namespace DeferredPBR {
 		// 	tonemappedHandle = bloomHandle;
 		// }
 
-		// backbuffer.bind();
-		// backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		fg.clear(backbufferHandle, glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		// drawFXAA(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(tonemappedHandle).mTextures[0]);
 		// // Don't forget the depth. Because reasons.
 		// glBlitNamedFramebuffer(hdrColor.mFBOID, backbuffer.mFBOID,
