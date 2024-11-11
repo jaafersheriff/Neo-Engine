@@ -23,6 +23,8 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
+#include "Renderer/FrameGraph/FrameGraph.hpp"
+
 namespace DeferredPBR {
 
 	inline FramebufferHandle createGbuffer(const ResourceManagers& resourceManagers, glm::uvec2 dimension) {
@@ -42,115 +44,87 @@ namespace DeferredPBR {
 
 	}
 
-	template<typename... CompTs>
+	template<typename... CompTs, typename... Deps>
 	void drawGBuffer(
-		const ResourceManagers& resourceManagers, 
-		const ECS& ecs, 
-		const ECS::Entity cameraEntity, 
+		FrameGraph& fg,
 		const FramebufferHandle gbufferHandle,
-		const ShaderDefines& inDefines = {}
+		Viewport vp,
+		const ResourceManagers& resourceManagers,
+		const ECS::Entity cameraEntity,
+		Deps... deps
 	) {
-		TRACY_GPU();
-
-		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
-			return;
-		}
-		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-		gbuffer.bind();
+		TRACY_ZONE();
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBuffer Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
 			{ types::shader::Stage::Fragment, "deferredpbr/gbuffer.frag" }
-		});
-		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
-			return;
-		}
+			});
 
-		ShaderDefines passDefines(inDefines);
-		MakeDefine(ALPHA_TEST);
-		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
-			passDefines.set(ALPHA_TEST);
-		}
-
-		ShaderDefines drawDefines(passDefines);
-		const auto& view = ecs.getView<const DeferredPBRRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
-		for (auto entity : view) {
-			// VFC
-			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-				if (!culled->isInView(ecs, entity, cameraEntity)) {
-					continue;
+		fg.pass(gbufferHandle, vp, vp, {}, shaderHandle, [cameraEntity](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+			MakeDefine(ALPHA_TEST);
+			if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
+				pass.setDefine(ALPHA_TEST);
+			}
+			const auto& view = ecs.getView<const DeferredPBRRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
+			for (auto entity : view) {
+				// VFC
+				if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+					if (!culled->isInView(ecs, entity, cameraEntity)) {
+						continue;
+					}
 				}
-			}
 
-			drawDefines.reset();
-			const auto& material = view.get<const MaterialComponent>(entity);
-			MakeDefine(ALBEDO_MAP);
-			MakeDefine(NORMAL_MAP);
-			MakeDefine(METAL_ROUGHNESS_MAP);
-			MakeDefine(OCCLUSION_MAP);
-			MakeDefine(EMISSIVE);
-			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-				drawDefines.set(ALBEDO_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-				drawDefines.set(NORMAL_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
-				drawDefines.set(METAL_ROUGHNESS_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
-				drawDefines.set(OCCLUSION_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
-				drawDefines.set(EMISSIVE);
-			}
+				ShaderDefinesFG drawDefines;
+				UniformBuffer uniforms;
 
-			const auto& mesh = resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle);
-			MakeDefine(TANGENTS);
-			if (mesh.hasVBO(types::mesh::VertexType::Tangent)) {
-				drawDefines.set(TANGENTS);
+				uniforms.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
+				uniforms.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
+
+				const auto& material = view.get<const MaterialComponent>(entity);
+
+				MakeDefine(ALBEDO_MAP);
+				uniforms.bindUniform("albedo", material.mAlbedoColor);
+				if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
+					drawDefines.set(ALBEDO_MAP);
+					uniforms.bindTexture("albedoMap", material.mAlbedoMap);
+				}
+				MakeDefine(NORMAL_MAP);
+				if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
+					drawDefines.set(NORMAL_MAP);
+					uniforms.bindTexture("normalMap", material.mNormalMap);
+				}
+				uniforms.bindUniform("metalness", material.mMetallic);
+				uniforms.bindUniform("roughness", material.mRoughness);
+				MakeDefine(METAL_ROUGHNESS_MAP);
+				if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
+					drawDefines.set(METAL_ROUGHNESS_MAP);
+					uniforms.bindTexture("metalRoughnessMap", material.mMetallicRoughnessMap);
+				}
+				MakeDefine(OCCLUSION_MAP);
+				if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
+					drawDefines.set(OCCLUSION_MAP);
+					uniforms.bindTexture("occlusionMap", material.mOcclusionMap);
+				}
+				uniforms.bindUniform("emissiveFactor", material.mEmissiveFactor);
+				MakeDefine(EMISSIVE);
+				if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
+					drawDefines.set(EMISSIVE);
+					uniforms.bindTexture("emissiveMap", material.mEmissiveMap);
+				}
+
+				const auto& mesh = resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle);
+				MakeDefine(TANGENTS);
+				if (mesh.hasVBO(types::mesh::VertexType::Tangent)) {
+					drawDefines.set(TANGENTS);
+				}
+
+				const auto& drawSpatial = view.get<const SpatialComponent>(entity);
+				uniforms.bindUniform("M", drawSpatial.getModelMatrix());
+				uniforms.bindUniform("N", drawSpatial.getNormalMatrix());
+
+				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, uniforms, drawDefines);
 			}
-
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
-			resolvedShader.bind();
-
-			// UBO candidates
-			{
-				resolvedShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
-				resolvedShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
-			}
-
-			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
-			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-				resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material.mAlbedoMap));
-			}
-
-			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
-			}
-
-			resolvedShader.bindUniform("metalness", material.mMetallic);
-			resolvedShader.bindUniform("roughness", material.mRoughness);
-			if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
-				resolvedShader.bindTexture("metalRoughnessMap", resourceManagers.mTextureManager.resolve(material.mMetallicRoughnessMap));
-			}
-
-			if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
-				resolvedShader.bindTexture("occlusionMap", resourceManagers.mTextureManager.resolve(material.mOcclusionMap));
-			}
-
-			resolvedShader.bindUniform("emissiveFactor", material.mEmissiveFactor);
-			if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
-				resolvedShader.bindTexture("emissiveMap", resourceManagers.mTextureManager.resolve(material.mEmissiveMap));
-			}
-
-			const auto& drawSpatial = view.get<const SpatialComponent>(entity);
-			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
-			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
-
-			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
-		}
-		glEnable(GL_CULL_FACE);
+		}, deps...).mDebugName = "Gbuffer Pass";
 	}
 
 

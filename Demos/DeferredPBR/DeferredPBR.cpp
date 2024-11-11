@@ -417,16 +417,11 @@ namespace DeferredPBR {
 			}
 		}
 
-		// auto gbufferHandle = createGbuffer(resourceManagers, viewport.mSize);
-		// if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
-		// 	return;
-		// }
-		// auto gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-		// gbuffer.bind();
-		// gbuffer.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		// glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		// drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
-		// drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
+		Viewport sceneViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+		auto gbufferHandle = createGbuffer(resourceManagers, viewport.mSize);
+		fg.clear(gbufferHandle, glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		drawGBuffer<OpaqueComponent>(fg, gbufferHandle, sceneViewport, resourceManagers, cameraEntity);
+		//drawGBuffer<AlphaTestComponent>(fg, gbufferHandle, sceneViewport, resourceManagers, ecs, cameraEntity);
 
 		// if (mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
 		// 	auto debugOutput = drawGBufferDebug(resourceManagers, gbufferHandle, viewport.mSize, mGbufferDebugParams);
