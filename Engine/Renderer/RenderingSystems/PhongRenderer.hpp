@@ -128,7 +128,7 @@ namespace neo {
 				}
 
 				ShaderDefinesFG drawDefines;
-				UBO ubo;
+				UniformBuffer ubo;
 
 				const auto& material = view.get<const MaterialComponent>(entity);
 				MakeDefine(ALBEDO_MAP);

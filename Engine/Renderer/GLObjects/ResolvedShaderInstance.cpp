@@ -308,17 +308,22 @@ namespace neo {
 		}
 	}
 
-	GLint ResolvedShaderInstance::_getUniform(const char* name) const {
+	GLint ResolvedShaderInstance::_getUniform(const entt::id_type& nameHash) const {
 		ServiceLocator<Renderer>::value().mStats.mNumUniforms++;
-		const auto uniform = mUniforms.find(HashedString(name));
+		const auto uniform = mUniforms.find(nameHash);
 		if (uniform == mUniforms.end()) {
 			// NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable", name);
 			return -1;
 		}
 		return uniform->second;
+
 	}
 
-	void ResolvedShaderInstance::bindUniform(const char* name, const UniformVariant& uniform) const {
+	GLint ResolvedShaderInstance::_getUniform(const char* name) const {
+		return _getUniform(HashedString(name).value());
+	}
+
+	void ResolvedShaderInstance::bindUniform(const entt::id_type& name, const UniformVariant& uniform) const {
 		util::visit(uniform, 
 			[&](bool b) { glUniform1i(_getUniform(name), b); },
 			[&](int i) { glUniform1i(_getUniform(name), i); },
@@ -337,17 +342,26 @@ namespace neo {
 		);
 	}
 
-	void ResolvedShaderInstance::bindTexture(const char* name, const Texture& texture) const {
+	void ResolvedShaderInstance::bindUniform(const char* name, const UniformVariant& uniform) const {
+		return bindUniform(HashedString(name).value(), uniform);
+	}
+
+
+	void ResolvedShaderInstance::bindTexture(const entt::id_type& name, const Texture& texture) const {
 		ServiceLocator<Renderer>::value().mStats.mNumSamplers++;
 
 		GLint bindingLoc = 0;
-		auto binding = mBindings.find(HashedString(name));
+		auto binding = mBindings.find(name);
 		if (binding != mBindings.end()) {
 			bindingLoc = binding->second;
 		}
 		glActiveTexture(GL_TEXTURE0 + bindingLoc);
 		texture.bind();
 		glUniform1i(_getUniform(name), bindingLoc);
+	}
+
+	void ResolvedShaderInstance::bindTexture(const char* name, const Texture& texture) const {
+		return bindTexture(HashedString(name).value(), texture);
 	}
 
 	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip) const {

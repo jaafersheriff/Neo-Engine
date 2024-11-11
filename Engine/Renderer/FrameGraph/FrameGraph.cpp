@@ -47,6 +47,7 @@ namespace neo {
 				Command& c = pass.getCommand(i);
 				GLFrameGraphResolve(mFrameData, pass, c, resourceManagers);
 			}
+			pass.destroy();
 		}
 	}
 }

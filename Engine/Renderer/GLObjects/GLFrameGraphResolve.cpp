@@ -135,20 +135,24 @@ namespace neo {
 			drawDefines.toOldStyle(defines);
 
 			const auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, defines);
-			for (auto& [k, v] : pass.mPassUBO.mUniforms) {
-				resolvedShader.bindUniform(k, v);
+			for (uint8_t i = 0; i < pass.mPassUBO.getUniformsSize(); i++) {
+				const auto pair = pass.mPassUBO.getUniform(i);
+				resolvedShader.bindUniform(pair.first, pair.second);
 			}
-			for (auto& [k, t] : pass.mPassUBO.mTextures) {
-				if (resourceManagers.mTextureManager.isValid(t)) {
-					resolvedShader.bindTexture(k, resourceManagers.mTextureManager.resolve(t));
+			for (uint8_t i = 0; i < ubo.getUniformsSize(); i++) {
+				const auto pair = ubo.getUniform(i);
+				resolvedShader.bindUniform(pair.first, pair.second);
+			}
+			for (uint8_t i = 0; i < pass.mPassUBO.getTextureBindSize(); i++) {
+				const auto pair = pass.mPassUBO.getTexture(i);
+				if (resourceManagers.mTextureManager.isValid(pair.second)) {
+					resolvedShader.bindTexture(pair.first, resourceManagers.mTextureManager.resolve(pair.second));
 				}
 			}
-			for (auto& [k, v] : ubo.mUniforms) {
-				resolvedShader.bindUniform(k, v);
-			}
-			for (auto& [k, t] : ubo.mTextures) {
-				if (resourceManagers.mTextureManager.isValid(t)) {
-					resolvedShader.bindTexture(k, resourceManagers.mTextureManager.resolve(t));
+			for (uint8_t i = 0; i < ubo.getTextureBindSize(); i++) {
+				const auto pair = ubo.getTexture(i);
+				if (resourceManagers.mTextureManager.isValid(pair.second)) {
+					resolvedShader.bindTexture(pair.first, resourceManagers.mTextureManager.resolve(pair.second));
 				}
 			}
 

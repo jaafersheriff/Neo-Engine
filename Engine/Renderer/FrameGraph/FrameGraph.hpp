@@ -2,25 +2,13 @@
 
 #include "ECS/ECS.hpp"
 #include "ResourceManager/ResourceManagers.hpp"
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 #include "Renderer/GLObjects/PassState.hpp"
+#include "Renderer/GLObjects/UniformBuffer.hpp"
 
 #include <ext/entt_incl.hpp>
 
 namespace neo {
 
-	struct UBO {
-		void bindUniform(const char* name, const ResolvedShaderInstance::UniformVariant& variant) {
-			mUniforms[name] = variant;
-		}
-
-		void bindTexture(const char* name, TextureHandle handle) {
-			mTextures[name] = handle;
-		}
-
-		std::map<const char*, ResolvedShaderInstance::UniformVariant> mUniforms;
-		std::map<const char*, TextureHandle> mTextures;
-	};
 	struct ShaderDefinesFG {
 		ShaderDefinesFG() = default;
 
@@ -66,7 +54,9 @@ namespace neo {
 			, mScissorIndex(scId)
 			, mShaderIndex(shaderID)
 			, mPassState(state)
-		{}
+		{
+			TRACY_ZONE();
+		}
 
 		// 0-3: StartPass Key
 		// 4-12: FBO ID
@@ -80,7 +70,7 @@ namespace neo {
 			;
 		}
 
-		void drawCommand(const MeshHandle& mesh, const UBO& ubo, const ShaderDefinesFG& drawDefines, uint16_t elements = 0, uint16_t bufferOffset = 0) {
+		void drawCommand(const MeshHandle& mesh, const UniformBuffer& ubo, const ShaderDefinesFG& drawDefines, uint16_t elements = 0, uint16_t bufferOffset = 0) {
 			uint64_t drawIndex = mDrawIndex;
 			mDraws[mDrawIndex++] = { mesh, elements, bufferOffset };
 			uint64_t uboIndex = mUBOIndex;
@@ -104,7 +94,7 @@ namespace neo {
 			mPassDefines.set(define);
 		}
 
-		UBO& createUBO() {
+		UniformBuffer& createUBO() {
 			return mUBOs[mUBOIndex++];
 		}
 		void bindUniform(const char* name, const ResolvedShaderInstance::UniformVariant& variant) {
@@ -133,12 +123,20 @@ namespace neo {
 		Command& getCommand(uint16_t index) { return mCommands[index]; }
 
 		const PassState& getPassState() const { return mPassState; }
+		
+		void destroy() {
+			TRACY_ZONE();
+			mPassUBO.destroy();
+			for (int i = 0; i < mUBOIndex; i++) {
+				mUBOs[i].destroy();
+			}
+		}
 	//private:
 		uint8_t mFramebufferIndex = 0;
 		uint8_t mViewportIndex = 0;
 		uint8_t mScissorIndex = 0;
 		uint8_t mShaderIndex = 0;
-		UBO mPassUBO;
+		UniformBuffer mPassUBO;
 		ShaderDefinesFG mPassDefines;
 		PassState mPassState;
 
@@ -151,7 +149,7 @@ namespace neo {
 		ShaderDefinesFG mShaderDefines[1024];
 		uint16_t mShaderDefinesIndex = 0; // 10 bits
 
-		UBO mUBOs[1024];
+		UniformBuffer mUBOs[1024];
 		uint16_t mUBOIndex = 0; // 10 bits
 
 		struct Draw {
