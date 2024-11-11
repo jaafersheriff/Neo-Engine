@@ -49,7 +49,8 @@ namespace neo {
 
 		PassState state;
 		state.mDepthTest = false;
-		fg.pass(dstHandle, vp, vp, state, blitShaderHandle, [srcHandle, srcImage](Pass& pass, const ResourceManagers& resourceManagers, const ECS&) {
+		fg.pass(dstHandle, vp, vp, state, blitShaderHandle)
+			.with([srcHandle, srcImage](Pass& pass, const ResourceManagers& resourceManagers, const ECS&) {
 			TRACY_ZONEN("Blit Task");
 			if (!resourceManagers.mFramebufferManager.isValid(srcHandle)) {
 				return;
@@ -62,7 +63,8 @@ namespace neo {
 
 			pass.bindTexture("inputTexture", src.mTextures[srcImage]);
 			pass.drawCommand(MeshHandle("quad"), {}, {});
-			}, srcHandle, deps...)
-			.mDebugName = "Blit";
+			})
+			.dependsOn(resourceManagers, srcHandle, std::forward<Deps>(deps)...)
+			.setDebugName("Blit");
 	}
 }

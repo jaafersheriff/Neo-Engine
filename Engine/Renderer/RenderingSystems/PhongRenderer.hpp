@@ -68,7 +68,8 @@ namespace neo {
 				});
 			}
 		}
-		fg.pass(outhandle, vp, vp, passState, shaderHandle, [cameraEntity, cameraSpatial](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+		fg.pass(outhandle, vp, vp, passState, shaderHandle)
+			.with([cameraEntity, cameraSpatial](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
 			MakeDefine(ALPHA_TEST);
 			MakeDefine(TRANSPARENT);
 			if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
@@ -151,7 +152,7 @@ namespace neo {
 				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, ubo, drawDefines);
 			}
 			})
-			.mDebugName = "Phong";
+			.setDebugName("Phong");
 
 	}
 }

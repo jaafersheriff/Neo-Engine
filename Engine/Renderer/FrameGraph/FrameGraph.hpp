@@ -126,75 +126,100 @@ namespace neo {
 		{}
 
 		struct Task {
+			friend FrameGraph;
+
 			using Functor = std::function<void(Pass&, const ResourceManagers&, const ECS&)>;
-			Task()
+			Task(entt::flow& builder)
 				: mPassIndex(UINT16_MAX)
-				, f([](Pass&, const ResourceManagers&, const ECS&) {})
+				, mBuilder(builder)
 			{}
-			Task(uint16_t passIndex, Functor _f) :
-				mPassIndex(passIndex),
-				f(_f)
+			Task(uint16_t passIndex, entt::flow& builder)
+				: mPassIndex(passIndex)
+				, mBuilder(builder)
 			{}
 
+			Task& with(Functor _f) {
+				mPassBuilder = [f = std::move(_f)](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+					pass.startCommand();
+					f(pass, resourceManagers, ecs);
+				};
+				return *this;
+			}
+
+			template<typename... Deps>
+			Task& dependsOn(const ResourceManagers& resourceManagers, Deps... deps) {
+				if constexpr (sizeof...(Deps) > 0) {
+					_assignDeps(resourceManagers, std::forward<Deps>(deps)...);
+				}
+
+				return *this;
+			}
+
+			Task& setDebugName(const char* name) {
+				mDebugName = std::string(name);
+				return *this;
+			}
+
+		private:
 			uint16_t mPassIndex;
-			Functor f;
+			std::optional<Functor> mPassBuilder;
 			std::optional<std::string> mDebugName;
+			entt::flow& mBuilder;
+
+			template<typename Dep, typename... Deps>
+			void _assignDeps(const ResourceManagers& resourceManagers, const Dep& dep, Deps... deps) {
+				if (dep == NEO_INVALID_HANDLE) {
+					return;
+				}
+				if constexpr (std::is_same_v<Dep, FramebufferHandle>) {
+					mBuilder.rw(dep.mHandle);
+					if (resourceManagers.mFramebufferManager.isValid(dep)) {
+						const Framebuffer& fb = resourceManagers.mFramebufferManager.resolve(dep);
+						for (const TextureHandle& tex : fb.mTextures) {
+							mBuilder.rw(tex.mHandle);
+						}
+					}
+				}
+				else if constexpr (std::is_same_v<Dep, TextureHandle>) {
+					mBuilder.ro(dep.mHandle);
+				}
+				else {
+					static_assert(false, "dead");
+				}
+				if constexpr (sizeof...(Deps) > 0) {
+					return _assignDeps(resourceManagers, std::forward<Deps>(deps)...);
+				}
+			}
 		};
 
 		void execute(const ResourceManagers& resourceManagers, const ECS& ecs);
 
-		template<typename... Deps>
-		Task& pass(FramebufferHandle target, Viewport viewport, Viewport scissor, PassState state, ShaderHandle shader, Task::Functor t, Deps... deps) {
+		Task& pass(FramebufferHandle target, Viewport viewport, Viewport scissor, PassState state, ShaderHandle shader) {
 			uint16_t passIndex = mFrameData.addPass(target, viewport, scissor, state, shader);
-			return _task(std::move(Task(passIndex, [_t = std::move(t)](Pass& pass, const ResourceManagers& resourceManager, const ECS& ecs) {
-				pass.startCommand();
-				_t(pass, resourceManager, ecs);
-			})), target, std::forward<Deps>(deps)...);
+			return _task(std::move(Task(passIndex, mBuilder)));
 		}
 
 		Task& clear(FramebufferHandle handle, glm::vec4 color, types::framebuffer::AttachmentBits clearFlags) {
-			return pass(handle, {}, {}, {}, {}, [=](Pass& pass, const ResourceManagers&, const ECS&) {
-				pass.clearCommand(color, clearFlags);
-			});
+			return pass(handle, {}, {}, {}, {})
+				.with([=](Pass& pass, const ResourceManagers&, const ECS&) {
+					pass.clearCommand(color, clearFlags);
+				})
+				.dependsOn(mResourceManagers, handle)
+				.setDebugName("Clear")
+			;
 		}
 
 	private:
 		const ResourceManagers& mResourceManagers;
 
-		template<typename... Deps>
-		Task& _task(Task&& t, Deps... deps) {
+		Task& _task(Task&& t) {
 			entt::id_type taskHandle = mTasks.size();
 			mBuilder.bind(taskHandle);
-			_assignDeps(std::forward<Deps>(deps)...);
 
 			mTasks.emplace_back(std::move(t));
 			return mTasks.back();
 		}
 
-		template<typename Dep, typename... Deps>
-		void _assignDeps(Dep dep, Deps... deps) {
-			if (dep == NEO_INVALID_HANDLE) {
-				return;
-			}
-			if constexpr (std::is_same_v<Dep, FramebufferHandle>) {
-				mBuilder.rw(dep.mHandle);
-				if (mResourceManagers.mFramebufferManager.isValid(dep)) {
-					const Framebuffer& fb = mResourceManagers.mFramebufferManager.resolve(dep);
-					for (const TextureHandle& tex : fb.mTextures) {
-						mBuilder.rw(tex.mHandle);
-					}
-				}
-			}
-			else if constexpr (std::is_same_v<Dep, TextureHandle>) {
-				mBuilder.ro(dep.mHandle);
-			}
-			else {
-				static_assert(false, "dead");
-			}
-			if constexpr (sizeof...(Deps) > 0) {
-				_assignDeps(deps...);
-			}
-		}
 
 		std::vector<Task> mTasks;
 		entt::flow mBuilder;

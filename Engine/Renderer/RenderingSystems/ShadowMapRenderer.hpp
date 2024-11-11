@@ -40,7 +40,8 @@ namespace neo {
 		PassState passState;
 		passState.mCullFace = true;
 		passState.mCullOrder = CullOrder::Front;
-		fg.pass(outputTarget, vp, vp, passState, shaderHandle, [lightEntity](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+		fg.pass(outputTarget, vp, vp, passState, shaderHandle)
+			.with([lightEntity](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_ZONEN("drawShadows PassBuilder");
 			NEO_ASSERT(ecs.has<DirectionalLightComponent>(lightEntity) && ecs.has<ShadowCameraComponent>(lightEntity), "Invalid light entity");
 			NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity) && ecs.has<CameraComponent>(lightEntity), "Light entity is just wrong");
@@ -73,6 +74,8 @@ namespace neo {
 				uniforms.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
 				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, uniforms, drawDefines);
 			}
-		}, deps...).mDebugName = "Draw Shadows";
+		})
+			.dependsOn(resourceManagers, std::forward<Deps>(deps)...)
+			.setDebugName("Draw Shadows");
 	}
 }

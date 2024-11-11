@@ -44,7 +44,7 @@ namespace neo {
 					passSeq.insert(task.mPassIndex);
 					threads.push_back(std::thread([&]() {
 						TRACY_ZONEN("Builder task");
-						task.f(mFrameData.getPass(task.mPassIndex), resourceManagers, ecs);
+						(*task.mPassBuilder)(mFrameData.getPass(task.mPassIndex), resourceManagers, ecs);
 					}));
 					i++;
 					for (auto e : graph.out_edges(vertex)) {

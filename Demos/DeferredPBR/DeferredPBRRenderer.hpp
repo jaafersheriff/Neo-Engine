@@ -60,7 +60,8 @@ namespace DeferredPBR {
 			&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap)
 			;
 
-		fg.pass(outputHandle, vp, vp, passState, lightResolveShaderHandle, [cameraEntity, gbufferHandle, lightEntity, light, lightSpatial, shadowsEnabled](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+		fg.pass(outputHandle, vp, vp, passState, lightResolveShaderHandle)
+			.with([cameraEntity, gbufferHandle, lightEntity, light, lightSpatial, shadowsEnabled](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
 
 			MakeDefine(ENABLE_SHADOWS);
 			if (shadowsEnabled) {
@@ -95,8 +96,9 @@ namespace DeferredPBR {
 			pass.bindUniform("lightDir", -lightSpatial.getLookDir());
 
 			pass.drawCommand(MeshHandle("quad"), {}, {});
-		}, 
-			gbufferHandle, shadowsEnabled ? ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap : NEO_INVALID_HANDLE, deps...).mDebugName = "DirectionalLightResolve";
+		})
+			.dependsOn(resourceManagers, gbufferHandle, shadowsEnabled ? ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap : NEO_INVALID_HANDLE, std::forward<Deps>(deps)...)
+			.setDebugName("DirectionalLightResolve");
 	}
 
 	template<typename... CompTs>

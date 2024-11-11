@@ -60,7 +60,8 @@ namespace DeferredPBR {
 			{ types::shader::Stage::Fragment, "deferredpbr/gbuffer.frag" }
 			});
 
-		fg.pass(gbufferHandle, vp, vp, {}, shaderHandle, [cameraEntity](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+		fg.pass(gbufferHandle, vp, vp, {}, shaderHandle)
+			.with([cameraEntity](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_ZONEN("drawGBuffer Task");
 			MakeDefine(ALPHA_TEST);
 			if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
@@ -125,7 +126,9 @@ namespace DeferredPBR {
 
 				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, uniforms, drawDefines);
 			}
-		}, deps...).mDebugName = "Gbuffer Pass";
+		})
+			.dependsOn(resourceManagers, deps...)
+			.setDebugName("Gbuffer Pass");
 	}
 
 
@@ -201,7 +204,8 @@ namespace DeferredPBR {
 
 		PassState passState;
 		passState.mDepthTest = false;
-		fg.pass(outputHandle, vp, vp, passState, shaderHandle, [debugParameters, gbufferHandle](Pass& pass, const ResourceManagers& resourceManagers, const ECS&) {
+		fg.pass(outputHandle, vp, vp, passState, shaderHandle)
+			.with([debugParameters, gbufferHandle](Pass& pass, const ResourceManagers& resourceManagers, const ECS&) {
 			TRACY_ZONEN("GbufferDebug Task");
 			MakeDefine(NORMAL);
 			MakeDefine(ALBEDO);
@@ -245,7 +249,9 @@ namespace DeferredPBR {
 			uniforms.bindTexture("gDepth", gbuffer.mTextures[3]);
 
 			pass.drawCommand(MeshHandle("quad"), uniforms, {});
-		}).mDebugName = "GbufferDebug";
+		})
+			.dependsOn(resourceManagers, gbufferHandle)
+			.setDebugName("GbufferDebug");
 
 		return outputHandle;
 	}

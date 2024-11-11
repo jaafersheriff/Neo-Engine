@@ -77,12 +77,15 @@ namespace neo {
 				draw.mScissorRect.w
 
 			);
-			fg.pass(outTarget, vp, scissor, passState, shaderHandle, [draw, ortho_projection, viewportOffset, viewportSize](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+			fg.pass(outTarget, vp, scissor, passState, shaderHandle)
+				.with([draw, ortho_projection, viewportOffset, viewportSize](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
 				pass.bindUniform("P", ortho_projection);
 				pass.bindTexture("Texture", draw.mTextureHandle);
-
 				pass.drawCommand(draw.mMeshHandle, {}, {}, draw.mElementCount, draw.mElementBufferOffset);
-			}, deps...).mDebugName = "DrawImgui";
+					})
+				.dependsOn(resourceManagers, std::forward<Deps>(deps)...)
+				.setDebugName("Draw ImGui")
+				;
 		}
 	}
 #pragma warning(pop)
