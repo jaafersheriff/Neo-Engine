@@ -5,7 +5,6 @@
 
 namespace neo {
 	struct UniformBuffer {
-		UniformBuffer();
 		void destroy();
 
 		void bindUniform(const char* name, const ResolvedShaderInstance::UniformVariant& variant);
@@ -16,6 +15,10 @@ namespace neo {
 
 		std::pair<entt::id_type, ResolvedShaderInstance::UniformVariant> getUniform(uint8_t index) const;
 		std::pair<entt::id_type, TextureHandle> getTexture(uint8_t index) const;
+
+		void reset() {
+			mUniformIndex = mTextureIndex = 0;
+		}
 
 	private:
 		enum class UniformType : uint8_t {

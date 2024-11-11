@@ -2,10 +2,6 @@
 
 namespace neo {
 	struct ShaderDefinesFG {
-		ShaderDefinesFG()
-			: mDefinesIndex(0)
-		{}
-
 		void destroy() {
 			for (int i = 0; i < mDefinesIndex; i++) {
 				delete mDefines[i];
@@ -42,6 +38,10 @@ namespace neo {
 			for (int i = 0; i < mDefinesIndex; i++) {
 				defines.set(mDefines[i]);
 			}
+		}
+
+		void reset() {
+			mDefinesIndex = 0;
 		}
 
 	private:

@@ -26,6 +26,33 @@ namespace neo {
 			, mPassState(state)
 		{
 			TRACY_ZONE();
+			{
+				TRACY_ZONEN("UBO Alloc");
+				mUBOs = reinterpret_cast<UniformBuffer*>(malloc(1024 * sizeof(UniformBuffer)));
+				NEO_ASSERT(mUBOs, "Can't alloc");
+			}
+			{
+				TRACY_ZONEN("UBO Reset");
+				for (int i = 0; i < 1024; i++) {
+					mUBOs[i].reset();
+				}
+			}
+			{
+				TRACY_ZONEN("Defines Alloc");
+				mShaderDefines = reinterpret_cast<ShaderDefinesFG*>(malloc(1024 * sizeof(ShaderDefinesFG)));
+				NEO_ASSERT(mShaderDefines, "Can't alloc");
+			}
+			{
+				TRACY_ZONEN("Defines Reset");
+				for (int i = 0; i < 1024; i++) {
+					mShaderDefines[i].reset();
+				}
+			}
+		}
+
+		~Pass() {
+			free(mUBOs);
+			free(mShaderDefines);
 		}
 
 		// 0-3: StartPass Key
@@ -116,11 +143,11 @@ namespace neo {
 		ClearParams mClearParams[8];
 		uint8_t mClearParamsIndex = 0; // 3 bits
 
-		ShaderDefinesFG mShaderDefines[1024];
-		uint16_t mShaderDefinesIndex = 0; // 10 bits
+		ShaderDefinesFG* mShaderDefines = nullptr;
+		uint16_t mShaderDefinesIndex = 0; // 10 bits, max of 1024
 
-		UniformBuffer mUBOs[1024];
-		uint16_t mUBOIndex = 0; // 10 bits
+		UniformBuffer* mUBOs = nullptr;
+		uint16_t mUBOIndex = 0; // 10 bits, max of 1024
 
 		struct Draw {
 			MeshHandle mMeshHandle;
@@ -144,13 +171,16 @@ namespace neo {
 				scId = mViewportIndex;
 				mViewports[mViewportIndex++] = scissor;
 			}
-			mPasses.emplace_back(mFramebufferHandleIndex++, vpId, scId, mShaderHandleIndex++, state);
+			{
+				TRACY_ZONEN("Construct pass");
+				mPasses.emplace_back(std::make_unique<Pass>(mFramebufferHandleIndex++, vpId, scId, mShaderHandleIndex++, state));
+			}
 			return static_cast<uint16_t>(mPasses.size() - 1);
 		}
 
 		Pass& getPass(uint16_t index) {
 			NEO_ASSERT(mPasses.size() > index, "Invalid index");
-			return mPasses[index];
+			return *mPasses[index];
 		}
 
 		const FramebufferHandle& getFrameBufferHandle(uint8_t index) const {
@@ -179,7 +209,7 @@ namespace neo {
 		uint8_t mShaderHandleIndex = 0;
 
 	private:
-		std::vector<Pass> mPasses;
+		std::vector<std::unique_ptr<Pass>> mPasses;
 	};
 
 	class FrameGraph {
@@ -204,7 +234,6 @@ namespace neo {
 
 		template<typename... Deps>
 		Task& pass(FramebufferHandle target, Viewport viewport, Viewport scissor, PassState state, ShaderHandle shader, Task::Functor t, Deps... deps) {
-			TRACY_ZONE();
 			uint16_t passIndex = mFrameData.addPass(target, viewport, scissor, state, shader);
 			return _task(std::move(Task(passIndex, [_t = std::move(t)](Pass& pass, const ResourceManagers& resourceManager, const ECS& ecs) {
 				pass.startCommand();

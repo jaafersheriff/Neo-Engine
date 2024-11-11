@@ -1,12 +1,6 @@
 #include "UniformBuffer.hpp"
 
 namespace neo {
-	UniformBuffer::UniformBuffer() 
-		: mUniformIndex(0)
-		, mTextureIndex(0)
-	{
-		TRACY_ZONE();
-	}
 
 	void UniformBuffer::destroy() {
 		for (int i = 0; i < mUniformIndex; i++) {

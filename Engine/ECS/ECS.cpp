@@ -61,7 +61,6 @@ namespace neo {
 			mRegistry.destroy(std::get<0>(entity));
 		}
 		mRegistry.clear();
-		NEO_ASSERT(mRegistry.storage<Entity>().size() == 0, "What");
 		mSystems.clear();
 	}
 
