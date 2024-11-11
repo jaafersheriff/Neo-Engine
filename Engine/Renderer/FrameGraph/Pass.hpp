@@ -18,6 +18,8 @@ namespace neo {
 			, mShaderIndex(shaderID)
 		{
 			mPassStateIndex = mFrameData.createPassState(state);
+			mPassUBOIndex = mFrameData.createUBO({});
+			mPassDefinesIndex = mFrameData.createShaderDefines({});
 		}
 
 		~Pass() {
@@ -54,14 +56,14 @@ namespace neo {
 
 
 		void setDefine(const ShaderDefine& define) {
-			mPassDefines.set(define);
+			mFrameData.getDefines(mPassDefinesIndex).set(define);
 		}
 
 		void bindUniform(const char* name, const ResolvedShaderInstance::UniformVariant& variant) {
-			mPassUBO.bindUniform(name, variant);
+			mFrameData.getUBO(mPassUBOIndex).bindUniform(name, variant);
 		}
 		void bindTexture(const char* name, TextureHandle handle) {
-			mPassUBO.bindTexture(name, handle);
+			mFrameData.getUBO(mPassUBOIndex).bindTexture(name, handle);
 		}
 
 		struct ClearParams {
@@ -90,8 +92,8 @@ namespace neo {
 		uint8_t mScissorIndex = 0;
 		uint8_t mShaderIndex = 0;
 		uint16_t mPassStateIndex = 0;
-		UniformBuffer mPassUBO;
-		ShaderDefinesFG mPassDefines;
+		uint16_t mPassUBOIndex = 0;
+		uint16_t mPassDefinesIndex = 0;
 
 		Command mCommands[1024];
 		uint16_t mCommandIndex = 0;

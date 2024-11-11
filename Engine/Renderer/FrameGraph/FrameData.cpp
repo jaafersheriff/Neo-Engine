@@ -74,6 +74,36 @@ namespace neo {
 		return *mPasses[index];
 	}
 
+	FramebufferHandle& FrameData::getFrameBufferHandle(uint8_t index) {
+		NEO_ASSERT(mFramebufferHandleIndex > index, "Invalid index");
+		return mFramebufferHandles[index];
+	}
+
+	Viewport& FrameData::getViewport(uint8_t index) {
+		NEO_ASSERT(mViewportIndex > index, "Invalid index");
+		return mViewports[index];
+	}
+
+	ShaderHandle& FrameData::getShaderHandle(uint8_t index) {
+		NEO_ASSERT(mShaderHandleIndex > index, "Invalid index");
+		return mShaderHandles[index];
+	}
+
+	UniformBuffer& FrameData::getUBO(uint16_t index) {
+		NEO_ASSERT(mUBOIndex > index, "Invalid index");
+		return mUBOs[index];
+	}
+
+	ShaderDefinesFG& FrameData::getDefines(uint16_t index) {
+		NEO_ASSERT(mShaderDefinesIndex > index, "Invalid index");
+		return mShaderDefines[index];
+	}
+
+	PassState& FrameData::getPassState(uint16_t index) {
+		NEO_ASSERT(mPassStateIndex > index, "Invalid index");
+		return mPassStates[index];
+	}
+
 	const FramebufferHandle& FrameData::getFrameBufferHandle(uint8_t index) const {
 		NEO_ASSERT(mFramebufferHandleIndex > index, "Invalid index");
 		return mFramebufferHandles[index];

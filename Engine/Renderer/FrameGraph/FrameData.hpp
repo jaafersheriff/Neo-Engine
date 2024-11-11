@@ -14,12 +14,20 @@ namespace neo {
 		uint16_t addPass(FramebufferHandle handle, Viewport vp, Viewport scissor, PassState& state, ShaderHandle shaderHandle = NEO_INVALID_HANDLE);
 		Pass& getPass(uint16_t index);
 
+		FramebufferHandle& getFrameBufferHandle(uint8_t index);
+		Viewport& getViewport(uint8_t index);
+		ShaderHandle& getShaderHandle(uint8_t index);
+		UniformBuffer& getUBO(uint16_t index);
+		ShaderDefinesFG& getDefines(uint16_t index);
+		PassState& getPassState(uint16_t index);
+
+		// Do these need to be explicit..?
 		const FramebufferHandle& getFrameBufferHandle(uint8_t index) const;
 		const Viewport& getViewport(uint8_t index) const;
-		const ShaderHandle& getShaderHandle(uint8_t index) const;
-		const UniformBuffer& getUBO(uint16_t index) const;
-		const ShaderDefinesFG& getDefines(uint16_t index) const;
-		const PassState& getPassState(uint16_t index) const;
+		const ShaderHandle& getShaderHandle(uint8_t index) const ;
+		const UniformBuffer& getUBO(uint16_t index) const ;
+		const ShaderDefinesFG& getDefines(uint16_t index) const ;
+		const PassState& getPassState(uint16_t index) const ;
 
 		uint16_t createUBO(const UniformBuffer& ubo);
 		uint16_t createShaderDefines(const ShaderDefinesFG& defines);

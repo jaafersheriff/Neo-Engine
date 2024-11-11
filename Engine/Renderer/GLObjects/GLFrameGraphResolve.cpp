@@ -4,7 +4,7 @@ namespace neo {
 
 	namespace {
 
-		void _startPass(const FrameData& frameData, const  Pass& pass, const Command& command, const ResourceManagers& resourceManagers) {
+		void _startPass(const FrameData& frameData, const Pass& pass, const Command& command, const ResourceManagers& resourceManagers) {
 			uint8_t fbID = static_cast<uint8_t>(
 				command >> (64 - 3 - 8) & 0xFF
 				);
@@ -132,20 +132,21 @@ namespace neo {
 			));
 
 			ShaderDefines defines;
-			pass.mPassDefines.toOldStyle(defines);
+			frameData.getDefines(pass.mPassDefinesIndex).toOldStyle(defines);
 			drawDefines.toOldStyle(defines);
 
 			const auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, defines);
-			for (uint8_t i = 0; i < pass.mPassUBO.getUniformsSize(); i++) {
-				const auto pair = pass.mPassUBO.getUniform(i);
+			const UniformBuffer& passUniforms = frameData.getUBO(pass.mPassUBOIndex);
+			for (uint8_t i = 0; i < passUniforms.getUniformsSize(); i++) {
+				const auto pair = passUniforms.getUniform(i);
 				resolvedShader.bindUniform(pair.first, pair.second);
 			}
 			for (uint8_t i = 0; i < ubo.getUniformsSize(); i++) {
 				const auto pair = ubo.getUniform(i);
 				resolvedShader.bindUniform(pair.first, pair.second);
 			}
-			for (uint8_t i = 0; i < pass.mPassUBO.getTextureBindSize(); i++) {
-				const auto pair = pass.mPassUBO.getTexture(i);
+			for (uint8_t i = 0; i < passUniforms.getTextureBindSize(); i++) {
+				const auto pair = passUniforms.getTexture(i);
 				if (resourceManagers.mTextureManager.isValid(pair.second)) {
 					resolvedShader.bindTexture(pair.first, resourceManagers.mTextureManager.resolve(pair.second));
 				}
