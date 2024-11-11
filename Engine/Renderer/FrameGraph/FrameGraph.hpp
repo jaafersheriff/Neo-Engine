@@ -31,7 +31,6 @@ namespace neo {
 		std::map<ShaderDefine, bool> mDefines;
 	};
 
-
 	using Command = uint64_t;
 	enum class CommandType : uint8_t {
 		StartPass = 0,
@@ -142,7 +141,7 @@ namespace neo {
 	};
 
 
-	struct PassQueue {
+	struct FrameData {
 
 		uint16_t addPass(FramebufferHandle handle, Viewport vp, Viewport scissor, PassState& state, ShaderHandle shaderHandle = {}) {
 			mFramebufferHandles[mFramebufferHandleIndex] = handle;
@@ -154,12 +153,12 @@ namespace neo {
 				scId = mViewportIndex;
 				mViewports[mViewportIndex++] = scissor;
 			}
-			mPassQueue.emplace_back(mFramebufferHandleIndex++, vpId, scId, mShaderHandleIndex++, state);
-			return static_cast<uint16_t>(mPassQueue.size() - 1);
+			mFrameData.emplace_back(mFramebufferHandleIndex++, vpId, scId, mShaderHandleIndex++, state);
+			return static_cast<uint16_t>(mFrameData.size() - 1);
 		}
 
 		Pass& getPass(uint16_t index) {
-			return mPassQueue[index];
+			return mFrameData[index];
 		}
 
 		FramebufferHandle mFramebufferHandles[256];
@@ -172,7 +171,7 @@ namespace neo {
 		uint8_t mShaderHandleIndex = 0;
 
 	private:
-		std::vector<Pass> mPassQueue;
+		std::vector<Pass> mFrameData;
 	};
 
 	class FrameGraph {
@@ -198,7 +197,7 @@ namespace neo {
 		template<typename... Deps>
 		Task& pass(FramebufferHandle target, Viewport viewport, Viewport scissor, PassState state, ShaderHandle shader, Task::Functor t, Deps... deps) {
 			TRACY_ZONE();
-			uint16_t passIndex = mPassQueue.addPass(target, viewport, scissor, state, shader);
+			uint16_t passIndex = mFrameData.addPass(target, viewport, scissor, state, shader);
 			return _task(std::move(Task(passIndex, [_t = std::move(t)](Pass& pass, const ResourceManagers& resourceManager, const ECS& ecs) {
 				pass.startCommand();
 				_t(pass, resourceManager, ecs);
@@ -212,10 +211,6 @@ namespace neo {
 		}
 
 	private:
-		// TODO - these should go elsewhere
-		void _startPass(Pass& pass, const Command& command, const ResourceManagers& resourceManagers);
-		void _clear(Pass& pass, Command& command);
-		void _draw(Pass& pass, Command& command, const ResourceManagers& resourceManagers);
 
 		template<typename... Deps>
 		Task& _task(Task&& t, Deps... deps) {
@@ -243,6 +238,6 @@ namespace neo {
 		std::vector<Task> mTasks;
 		entt::flow mBuilder;
 			
-		PassQueue mPassQueue;
+		FrameData mFrameData;
 	};
 }
