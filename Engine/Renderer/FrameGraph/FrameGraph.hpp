@@ -25,8 +25,8 @@ namespace neo {
 			, mViewportIndex(vpID)
 			, mScissorIndex(scId)
 			, mShaderIndex(shaderID)
-			, mPassState(state)
 		{
+			mPassStateIndex = mFrameData.createPassState(state);
 		}
 
 		~Pass() {
@@ -90,8 +90,6 @@ namespace neo {
 
 		uint16_t getCommandSize() const { return mCommandIndex; }
 		Command& getCommand(uint16_t index) { return mCommands[index]; }
-
-		const PassState& getPassState() const { return mPassState; }
 		
 	//private:
 		FrameData& mFrameData;
@@ -100,9 +98,9 @@ namespace neo {
 		uint8_t mViewportIndex = 0;
 		uint8_t mScissorIndex = 0;
 		uint8_t mShaderIndex = 0;
+		uint16_t mPassStateIndex = 0;
 		UniformBuffer mPassUBO;
 		ShaderDefinesFG mPassDefines;
-		PassState mPassState;
 
 		Command mCommands[1024];
 		uint16_t mCommandIndex = 0;

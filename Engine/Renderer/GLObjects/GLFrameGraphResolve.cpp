@@ -20,9 +20,10 @@ namespace neo {
 				glViewport(vp.x, vp.y, vp.z, vp.w);
 			}
 
-			if (pass.mPassState.mDepthTest) {
+			const PassState& passState = frameData.getPassState(pass.mPassStateIndex);
+			if (passState.mDepthTest) {
 				glEnable(GL_DEPTH_TEST);
-				switch (pass.mPassState.mDepthFunc) {
+				switch (passState.mDepthFunc) {
 				case DepthFunc::Less:
 					glDepthFunc(GL_LESS);
 					break;
@@ -34,10 +35,10 @@ namespace neo {
 			else {
 				glDisable(GL_DEPTH_TEST);
 			}
-			glDepthMask(pass.mPassState.mDepthMask ? GL_TRUE : GL_FALSE);
-			if (pass.mPassState.mCullFace) {
+			glDepthMask(passState.mDepthMask ? GL_TRUE : GL_FALSE);
+			if (passState.mCullFace) {
 				glEnable(GL_CULL_FACE);
-				switch (pass.mPassState.mCullOrder) {
+				switch (passState.mCullOrder) {
 				case CullOrder::Front:
 					glCullFace(GL_FRONT);
 					break;
@@ -52,9 +53,9 @@ namespace neo {
 			else {
 				glDisable(GL_CULL_FACE);
 			}
-			if (pass.mPassState.mBlending) {
+			if (passState.mBlending) {
 				glEnable(GL_BLEND);
-				switch (pass.mPassState.mBlendEquation) {
+				switch (passState.mBlendEquation) {
 				case BlendEquation::Add:
 					glBlendEquation(GL_FUNC_ADD);
 					break;
@@ -77,22 +78,22 @@ namespace neo {
 					}
 					};
 				glBlendFuncSeparate(
-					getBlendFactor(pass.mPassState.mBlendSrcRGB),
-					getBlendFactor(pass.mPassState.mBlendDstRGB),
-					getBlendFactor(pass.mPassState.mBlendSrcAlpha),
-					getBlendFactor(pass.mPassState.mBlendDstAlpha)
+					getBlendFactor(passState.mBlendSrcRGB),
+					getBlendFactor(passState.mBlendDstRGB),
+					getBlendFactor(passState.mBlendSrcAlpha),
+					getBlendFactor(passState.mBlendDstAlpha)
 				);
 			}
 			else {
 				glDisable(GL_BLEND);
 			}
-			if (pass.mPassState.mStencilTest) {
+			if (passState.mStencilTest) {
 				NEO_LOG_E("Stencil Test unsupported");
 			}
 			else {
 				glDisable(GL_STENCIL_TEST);
 			}
-			if (pass.mPassState.mScissorTest) {
+			if (passState.mScissorTest) {
 				glEnable(GL_SCISSOR_TEST);
 				Viewport scissor = frameData.getViewport(pass.mScissorIndex);
 				glScissor(scissor.x, scissor.y, scissor.z, scissor.w);
