@@ -28,6 +28,14 @@ namespace neo {
 			mDefines[define] = true;
 		}
 
+		void toOldStyle(ShaderDefines& defines) const {
+			for (auto& [d, b] : mDefines) {
+				if (b) {
+					defines.set(d);
+				}
+			}
+		}
+
 		std::map<ShaderDefine, bool> mDefines;
 	};
 
@@ -59,7 +67,7 @@ namespace neo {
 			;
 		}
 
-		void drawCommand(const MeshHandle& mesh, const UBO& ubo, const ShaderDefines& drawDefines, uint16_t elements = 0, uint16_t bufferOffset = 0) {
+		void drawCommand(const MeshHandle& mesh, const UBO& ubo, const ShaderDefinesFG& drawDefines, uint16_t elements = 0, uint16_t bufferOffset = 0) {
 			uint64_t drawIndex = mDrawIndex;
 			mDraws[mDrawIndex++] = { mesh, elements, bufferOffset };
 			uint64_t uboIndex = mUBOIndex;
@@ -116,7 +124,7 @@ namespace neo {
 		uint8_t mScissorIndex = 0;
 		uint8_t mShaderIndex = 0;
 		UBO mPassUBO;
-		ShaderDefines mPassDefines;
+		ShaderDefinesFG mPassDefines;
 		PassState mPassState;
 
 		Command mCommands[1024];

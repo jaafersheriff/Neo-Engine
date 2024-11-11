@@ -132,16 +132,8 @@ namespace neo {
 				)];
 
 			ShaderDefines defines;
-			for (auto& [d, b] : pass.mPassDefines.mDefines) {
-				if (b) {
-					defines.set(d);
-				}
-			}
-			for (auto& [d, b] : drawDefines.mDefines) {
-				if (b) {
-					defines.set(d);
-				}
-			}
+			pass.mPassDefines.toOldStyle(defines);
+			drawDefines.toOldStyle(defines);
 
 			const auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, defines);
 			for (auto& [k, v] : pass.mPassUBO.mUniforms) {
@@ -163,7 +155,6 @@ namespace neo {
 
 			resourceManagers.mMeshManager.resolve(draw.mMeshHandle).draw(draw.mElementCount, draw.mElementBufferOffset);
 		}
-
 	}
 
 	void GLFrameGraphResolve(const FrameData& frameData, const Pass& pass, const Command& command, const ResourceManagers& resourceManagers) {
