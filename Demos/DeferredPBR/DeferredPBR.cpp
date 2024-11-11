@@ -492,6 +492,7 @@ namespace DeferredPBR {
 
 		fg.clear(backbufferHandle, glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		// drawFXAA(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(tonemappedHandle).mTextures[0]);
+		blit(fg, sceneViewport, resourceManagers, hdrColorTarget, backbufferHandle);
 		// // Don't forget the depth. Because reasons.
 		// glBlitNamedFramebuffer(hdrColor.mFBOID, backbuffer.mFBOID,
 		// 	0, 0, viewport.mSize.x, viewport.mSize.y,
