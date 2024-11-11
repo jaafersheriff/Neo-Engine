@@ -78,9 +78,8 @@ namespace neo {
 					// Pixel format
 					byteSize *= _bytesPerPixel(builder.mFormat.mType);
 
-					uint8_t* copiedData = new uint8_t[byteSize];
-					memcpy(copiedData, builder.mData, byteSize);
-					copy.mData = copiedData;
+					copy.mData = new uint8_t[byteSize];
+					memcpy(copy.mData, builder.mData, byteSize);
 				}
 				mQueue.emplace_back(ResourceLoadDetails_Internal{ id, copy, debugName });
 			},
@@ -113,6 +112,15 @@ namespace neo {
 				else {
 					for (int i = 0; i < mQueue.size(); i++) {
 						if (id == mQueue[i].mHandle) {
+							util::visit(mQueue[i].mLoadDetails,
+								[&](TextureBuilder& builder) {
+									if (builder.mData != nullptr) {
+										delete const_cast<uint8_t*>(builder.mData);
+									}
+								},
+								[&](TextureFiles&) { },
+								[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
+							);
 							mQueue.erase(mQueue.begin() + i);
 							break;
 						}
@@ -127,19 +135,18 @@ namespace neo {
 			mQueue.clear();
 
 			for (auto& loadDetails : swapQueue) {
-				std::visit([&](auto&& arg) {
-					using T = std::decay_t<decltype(arg)>;
-					if constexpr (std::is_same_v<T, TextureBuilder>) {
-						mCache.load(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
-						free(const_cast<uint8_t*>(arg.mData));
-					}
-					else if constexpr (std::is_same_v<T, TextureFiles>) {
-						mCache.load(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
-					}
-					else {
-						static_assert(always_false_v<T>, "non-exhaustive visitor!");
-					}
-					}, loadDetails.mLoadDetails);
+				util::visit(loadDetails.mLoadDetails,
+					[&](TextureBuilder& builder) {
+						mCache.load(loadDetails.mHandle.mHandle, builder, loadDetails.mDebugName);
+						if (builder.mData != nullptr) {
+							delete const_cast<uint8_t*>(builder.mData);
+						}
+					},
+					[&](TextureFiles& files) {
+						mCache.load(loadDetails.mHandle.mHandle, files, loadDetails.mDebugName);
+					},
+					[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
+				);
 			}
 		}
 	}
