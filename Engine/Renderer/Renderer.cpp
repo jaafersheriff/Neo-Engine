@@ -39,6 +39,7 @@
 #include <ImGuizmo.h>
 
 namespace neo {
+	static FrameData sFrameData;
 
 	Renderer::Renderer(int GLMajor, int GLMinor) {
 		mDetails.mGLMajorVersion = GLMajor;
@@ -121,7 +122,7 @@ namespace neo {
 		);
 
 		{
-			FrameGraph fg(resourceManagers);
+			FrameGraph fg(resourceManagers, sFrameData);
 			Viewport vp = { 0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y };
 			{
 				TRACY_GPUN("Draw Demo");
@@ -152,6 +153,7 @@ namespace neo {
 			}
 
 			fg.execute(resourceManagers, ecs);
+			sFrameData.destroy();
 		}
 	}
 

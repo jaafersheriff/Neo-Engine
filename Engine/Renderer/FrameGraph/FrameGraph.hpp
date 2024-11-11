@@ -14,8 +14,9 @@ namespace neo {
 
 	class FrameGraph {
 	public:
-		FrameGraph(const ResourceManagers& rm)
+		FrameGraph(const ResourceManagers& rm, FrameData& frameData)
 			: mResourceManagers(rm)
+			, mFrameData(frameData)
 		{}
 
 		struct Task {
@@ -104,6 +105,7 @@ namespace neo {
 
 	private:
 		const ResourceManagers& mResourceManagers;
+		FrameData& mFrameData;
 
 		Task& _task(Task&& t) {
 			entt::id_type taskHandle = mTasks.size();
@@ -117,6 +119,5 @@ namespace neo {
 		std::vector<Task> mTasks;
 		entt::flow mBuilder;
 			
-		FrameData mFrameData;
 	};
 }

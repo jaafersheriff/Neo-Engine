@@ -45,6 +45,7 @@ namespace neo {
 				NEO_FAIL("Invalid");
 			}
 		}
+		mUniformIndex = mTextureIndex = 0;
 	}
 
 	void UniformBuffer::bindUniform(const char* name, const ResolvedShaderInstance::UniformVariant& variant) {

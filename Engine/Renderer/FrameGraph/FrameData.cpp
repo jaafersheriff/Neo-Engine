@@ -22,6 +22,20 @@ namespace neo {
 
 	FrameData::~FrameData() {
 		TRACY_ZONE();
+		destroy();
+		{
+			TRACY_ZONEN("Dealloc");
+			free(reinterpret_cast<void*>(mUBOs));
+			free(reinterpret_cast<void*>(mShaderDefines));
+			free(reinterpret_cast<void*>(mPassStates));
+			free(reinterpret_cast<void*>(mFramebufferHandles));
+			free(reinterpret_cast<void*>(mViewports));
+			free(reinterpret_cast<void*>(mShaderHandles));
+		}
+	}
+
+	void FrameData::destroy() {
+		TRACY_ZONE();
 		{
 			TRACY_ZONEN("Destroy UBO");
 			for (int i = 0; i < mUBOIndex; i++) {
@@ -34,17 +48,15 @@ namespace neo {
 				mShaderDefines[i].destroy();
 			}
 		}
-		{
-			TRACY_ZONEN("Dealloc");
-			free(reinterpret_cast<void*>(mUBOs));
-			free(reinterpret_cast<void*>(mShaderDefines));
-			free(reinterpret_cast<void*>(mPassStates));
-			free(reinterpret_cast<void*>(mFramebufferHandles));
-			free(reinterpret_cast<void*>(mViewports));
-			free(reinterpret_cast<void*>(mShaderHandles));
-		}
-	}
+		mFramebufferHandleIndex = 0;
+		mViewportIndex = 0;
+		mShaderHandleIndex = 0;
+		mUBOIndex = 0;
+		mShaderDefinesIndex = 0;
+		mPassStateIndex = 0;
+		mPasses.clear();
 
+	}
 
 	uint16_t FrameData::addPass(FramebufferHandle handle, Viewport vp, Viewport scissor, PassState& state, ShaderHandle shaderHandle) {
 		mFramebufferHandles[mFramebufferHandleIndex] = handle;

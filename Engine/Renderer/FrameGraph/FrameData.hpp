@@ -10,6 +10,7 @@ namespace neo {
 	struct FrameData {
 		FrameData();
 		~FrameData();
+		void destroy();
 
 		uint16_t addPass(FramebufferHandle handle, Viewport vp, Viewport scissor, PassState& state, ShaderHandle shaderHandle = NEO_INVALID_HANDLE);
 		Pass& getPass(uint16_t index);

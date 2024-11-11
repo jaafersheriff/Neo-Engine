@@ -6,6 +6,7 @@ namespace neo {
 			for (int i = 0; i < mDefinesIndex; i++) {
 				delete mDefines[i];
 			}
+			mDefinesIndex = 0;
 		}
 
 		uint8_t getDefinesSize() const { return mDefinesIndex; }
@@ -38,10 +39,6 @@ namespace neo {
 			for (int i = 0; i < mDefinesIndex; i++) {
 				defines.set(mDefines[i]);
 			}
-		}
-
-		void reset() {
-			mDefinesIndex = 0;
 		}
 
 	private:
