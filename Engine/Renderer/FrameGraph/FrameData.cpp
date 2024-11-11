@@ -55,25 +55,13 @@ namespace neo {
 		TRACY_ZONE();
 		{
 			TRACY_ZONEN("UBO Alloc");
-			mUBOs = reinterpret_cast<UniformBuffer*>(malloc(4096 * sizeof(UniformBuffer)));
+			mUBOs = reinterpret_cast<UniformBuffer*>(calloc(4096, sizeof(UniformBuffer)));
 			NEO_ASSERT(mUBOs, "Can't alloc");
 		}
 		{
-			TRACY_ZONEN("UBO Reset");
-			for (int i = 0; i < 4096; i++) {
-				mUBOs[i].reset();
-			}
-		}
-		{
 			TRACY_ZONEN("Defines Alloc");
-			mShaderDefines = reinterpret_cast<ShaderDefinesFG*>(malloc(4096 * sizeof(ShaderDefinesFG)));
+			mShaderDefines = reinterpret_cast<ShaderDefinesFG*>(calloc(4096, sizeof(ShaderDefinesFG)));
 			NEO_ASSERT(mShaderDefines, "Can't alloc");
-		}
-		{
-			TRACY_ZONEN("Defines Reset");
-			for (int i = 0; i < 4096; i++) {
-				mShaderDefines[i].reset();
-			}
 		}
 	}
 
@@ -88,7 +76,26 @@ namespace neo {
 	}
 
 	FrameData::~FrameData() {
-		free(mUBOs);
-		free(mShaderDefines);
+		TRACY_ZONE();
+		{
+			TRACY_ZONEN("Destroy UBO");
+			for (int i = 0; i < mUBOIndex; i++) {
+				mUBOs[i].destroy();
+			}
+		}
+		{
+			TRACY_ZONEN("Dealloc UBO");
+			free(reinterpret_cast<void*>(mUBOs));
+		}
+		{
+			TRACY_ZONEN("Destroy Shader Defines");
+			for (int i = 0; i < mShaderDefinesIndex; i++) {
+				mShaderDefines[i].destroy();
+			}
+		}
+		{
+			TRACY_ZONEN("Dealloc Shader Defines");
+			free(reinterpret_cast<void*>(mShaderDefines));
+		}
 	}
 }
