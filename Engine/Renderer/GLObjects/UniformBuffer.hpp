@@ -18,7 +18,7 @@ namespace neo {
 		std::pair<entt::id_type, TextureHandle> getTexture(uint8_t index) const;
 
 	private:
-		enum class UniformType {
+		enum class UniformType : uint8_t {
 			Bool,
 			Int,
 			Uint32_t,
@@ -44,7 +44,7 @@ namespace neo {
 			entt::id_type mStringHash;
 			TextureHandle mHandle;
 		};
-		TextureBind mTextures[64] = {};
+		TextureBind mTextures[16] = {};
 		uint8_t mTextureIndex = 0;
 	};
 }
