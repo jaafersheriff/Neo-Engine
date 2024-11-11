@@ -73,6 +73,6 @@ namespace neo {
 				uniforms.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
 				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, uniforms, drawDefines);
 			}
-		});
+		}, deps...).mDebugName = "Draw Shadows";
 	}
 }

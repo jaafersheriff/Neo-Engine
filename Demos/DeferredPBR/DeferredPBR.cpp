@@ -389,23 +389,33 @@ namespace DeferredPBR {
 				fg.clear(shadowMapHandle, glm::vec4(0.f), types::framebuffer::AttachmentBit::Depth);
 				drawShadows<OpaqueComponent>(fg, shadowMapHandle, resourceManagers, lightEntity);
 				drawShadows<AlphaTestComponent>(fg, shadowMapHandle, resourceManagers, lightEntity);
-				drawShadows<TransparentComponent>(fg, shadowMapHandle, resourceManagers, lightEntity);
 			}
 		}
 
-		// auto pointLightView = ecs.getView<PointLightComponent, ShadowCameraComponent, SpatialComponent>();
-		// for (auto& entity : pointLightView) {
-		// 	const auto& shadowCamera = pointLightView.get<ShadowCameraComponent>(entity);
-		// 	if (mDrawPointLightShadows) {
-		// 		if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
-		// 			auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
-		// 			glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-		// 			drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, entity, true);
-		// 			drawPointLightShadows<AlphaTestComponent>(resourceManagers, ecs, entity, false);
-		// 			//drawPointLightShadows<TransparentComponent>(resourceManagers, ecs, entity, false);
-		// 		}
-		// 	}
-		// }
+		auto pointLightView = ecs.getView<PointLightComponent, ShadowCameraComponent, SpatialComponent>();
+		for (auto& pointLightEntity : pointLightView) {
+			const auto& shadowCamera = pointLightView.get<ShadowCameraComponent>(pointLightEntity);
+			if (mDrawPointLightShadows && resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
+				for (uint8_t i = 0; i < 6; i++) {
+					char targetName[128];
+					sprintf(targetName, "%s_%" PRIu64 "_%d", "PointLightShadowMap", pointLightEntity, i);
+					FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+						HashedString(targetName),
+						FramebufferExternalAttachments{
+							FramebufferAttachment {
+								shadowCamera.mShadowMap,
+								static_cast<types::framebuffer::AttachmentTarget>(static_cast<uint8_t>(types::framebuffer::AttachmentTarget::TargetCubeX_Positive) + i),
+								0
+							}
+						},
+						resourceManagers.mTextureManager
+					);
+					fg.clear(shadowTargetHandle, glm::vec4(0.f), types::framebuffer::AttachmentBit::Depth);
+					drawPointLightShadows<OpaqueComponent>(fg, shadowTargetHandle, resourceManagers, ecs, pointLightEntity, i);
+					drawPointLightShadows<AlphaTestComponent>(fg, shadowTargetHandle, resourceManagers, ecs, pointLightEntity, i);
+				}
+			}
+		}
 
 		// auto gbufferHandle = createGbuffer(resourceManagers, viewport.mSize);
 		// if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
