@@ -24,90 +24,29 @@
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"
+#include "Renderer/FrameGraph/FrameGraph.hpp"
 
 namespace neo {
 
-	template<typename... CompTs>
-	void drawForwardPBR(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, std::optional<IBLComponent> ibl = std::nullopt) {
-		TRACY_GPU();
-
-		// Forward draws are only lit by the single MainLightComponent
-		const auto& lightView = ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
-		if (!lightView) {
-			return;
-		}
-		auto&& [lightEntity, _mainLight, light, lightSpatial] = *lightView;
+	template<typename... CompTs, typename... Deps>
+	inline void drawForwardPBR(
+		FrameGraph& fg, 
+		FramebufferHandle outTarget,
+		Viewport vp,
+		const ResourceManagers& resourceManagers, 
+		const ECS& ecs, 
+		const ECS::Entity cameraEntity, 
+		Deps... deps
+	) {
+		TRACY_ZONE();
 
 		auto pbrShaderHandle = resourceManagers.mShaderManager.asyncLoad("ForwardPBR Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
 			{ types::shader::Stage::Fragment, "forwardpbr.frag" }
 			});
-		if (!resourceManagers.mShaderManager.isValid(pbrShaderHandle)) {
-			return;
-		}
 
-		ShaderDefines passDefines({});
-		bool containsAlphaTest = false;
-		MakeDefine(ALPHA_TEST);
-		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
-			containsAlphaTest = true;
-			passDefines.set(ALPHA_TEST);
-		}
-
-		bool containsTransparency = false;
-		MakeDefine(TRANSPARENT);
-		if constexpr ((std::is_same_v<TransparentComponent, CompTs> || ...)) {
-			containsTransparency = true;
-			passDefines.set(TRANSPARENT);
-
-			glEnable(GL_BLEND);
-			glBlendEquation(GL_FUNC_ADD);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
-
-		bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
-		bool pointLight = ecs.has<PointLightComponent>(lightEntity);
-		MakeDefine(DIRECTIONAL_LIGHT);
-		MakeDefine(POINT_LIGHT);
-		if (directionalLight) {
-			passDefines.set(DIRECTIONAL_LIGHT);
-		}
-		else if (pointLight) {
-			passDefines.set(POINT_LIGHT);
-		}
-		else {
-			NEO_FAIL("Invalid light entity");
-		}
-
-		const bool shadowsEnabled =
-			ecs.has<ShadowCameraComponent>(lightEntity)
-			&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
-		glm::mat4 L;
-		MakeDefine(ENABLE_SHADOWS);
-		if (shadowsEnabled) {
-			passDefines.set(ENABLE_SHADOWS);
-			if (directionalLight) {
-				NEO_ASSERT(ecs.has<CameraComponent>(lightEntity), "Directional shadows need a camera component");
-				const auto& shadowCamera = *ecs.cGetComponent<CameraComponent>(lightEntity);
-				static glm::mat4 biasMatrix(
-					0.5f, 0.0f, 0.0f, 0.0f,
-					0.0f, 0.5f, 0.0f, 0.0f,
-					0.0f, 0.0f, 0.5f, 0.0f,
-					0.5f, 0.5f, 0.5f, 1.0f);
-				L = biasMatrix * shadowCamera.getProj() * lightSpatial.getView();
-			}
-		}
-
-		MakeDefine(IBL);
-		if (ibl && resourceManagers.mTextureManager.isValid(ibl->mConvolvedSkybox) && resourceManagers.mTextureManager.isValid(ibl->mDFGLut)) {
-			passDefines.set(IBL);
-		}
-
-		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
 		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
-
-		ShaderDefines drawDefines(passDefines);
-		if (containsTransparency) {
+		if constexpr ((std::is_same_v<TransparentComponent, CompTs> || ...)) {
 			TRACY_ZONEN("Transparency sorting");
 			ecs.sort<ForwardPBRRenderComponent, TransparentComponent>([&cameraSpatial, &ecs](const ECS::Entity entityLeft, const ECS::Entity entityRight) {
 				auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
@@ -118,112 +57,148 @@ namespace neo {
 				return false;
 			});
 		}
-		const auto& view = ecs.getView<const ForwardPBRRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
-		for (auto entity : view) {
-			// VFC
-			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-				if (!culled->isInView(ecs, entity, cameraEntity)) {
-					continue;
+
+		// Forward draws are only lit by the single MainLightComponent
+		const auto& lightView = ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
+		if (!lightView) {
+			return;
+		}
+
+		auto&& [lightEntity, _mainLight, light, lightSpatial] = *lightView;
+		const bool shadowsEnabled = 
+			ecs.has<CameraComponent>(lightEntity) 
+			&& ecs.has<ShadowCameraComponent>(lightEntity) 
+			&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
+
+		PassState passState;
+		if constexpr ((std::is_same_v<TransparentComponent, CompTs> || ...)) {
+			passState.mBlending = true;
+			passState.mBlendEquation = BlendEquation::Add;
+			passState.mBlendSrcRGB = passState.mBlendSrcAlpha = BlendFactor::Alpha;
+			passState.mBlendDstRGB = passState.mBlendDstAlpha = BlendFactor::OneMinusAlpha;
+		}
+		fg.pass(outTarget, vp, vp, passState, pbrShaderHandle)
+			.with([light, shadowsEnabled, lightEntity, lightSpatial, cameraEntity, cameraSpatial](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_ZONEN("Forward PBR");
+				MakeDefine(ALPHA_TEST);
+				if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
+					pass.setDefine(ALPHA_TEST);
 				}
-			}
 
-			drawDefines.reset();
-			const auto& material = view.get<const MaterialComponent>(entity);
-			MakeDefine(ALBEDO_MAP);
-			MakeDefine(NORMAL_MAP);
-			MakeDefine(METAL_ROUGHNESS_MAP);
-			MakeDefine(OCCLUSION_MAP);
-			MakeDefine(EMISSIVE);
-			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-				drawDefines.set(ALBEDO_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-				drawDefines.set(NORMAL_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
-				drawDefines.set(METAL_ROUGHNESS_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
-				drawDefines.set(OCCLUSION_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
-				drawDefines.set(EMISSIVE);
-			}
-
-			const auto& mesh = resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle);
-			MakeDefine(TANGENTS);
-			if (mesh.hasVBO(types::mesh::VertexType::Tangent)) {
-				drawDefines.set(TANGENTS);
-			}
-
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(pbrShaderHandle, drawDefines);
-			resolvedShader.bind();
-
-			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
-			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-				resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material.mAlbedoMap));
-			}
-
-			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
-			}
-
-			resolvedShader.bindUniform("metalness", material.mMetallic);
-			resolvedShader.bindUniform("roughness", material.mRoughness);
-			if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
-				resolvedShader.bindTexture("metalRoughnessMap", resourceManagers.mTextureManager.resolve(material.mMetallicRoughnessMap));
-			}
-
-			if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
-				resolvedShader.bindTexture("occlusionMap", resourceManagers.mTextureManager.resolve(material.mOcclusionMap));
-			}
-
-			resolvedShader.bindUniform("emissiveFactor", material.mEmissiveFactor);
-			if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
-				resolvedShader.bindTexture("emissiveMap", resourceManagers.mTextureManager.resolve(material.mEmissiveMap));
-			}
-
-			// UBO candidates
-			{
-				resolvedShader.bindUniform("P", P);
-				resolvedShader.bindUniform("V", cameraSpatial->getView());
-				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
-				resolvedShader.bindUniform("lightRadiance", glm::vec4(light.mColor, light.mIntensity));
-				if (directionalLight) {
-					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
+				MakeDefine(TRANSPARENT);
+				if constexpr ((std::is_same_v<TransparentComponent, CompTs> || ...)) {
+					pass.setDefine(TRANSPARENT);
 				}
-				if (pointLight) {
-					resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
-					resolvedShader.bindUniform("lightRadius", lightSpatial.getScale().x / 2.f);
-				}
+				MakeDefine(ENABLE_SHADOWS);
+				MakeDefine(DIRECTIONAL_LIGHT);
+				MakeDefine(POINT_LIGHT);
+				pass.bindUniform("lightRadiance", glm::vec4(light.mColor, light.mIntensity));
 				if (shadowsEnabled) {
+					pass.setDefine(ENABLE_SHADOWS);
 					auto& shadowMap = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
-					resolvedShader.bindTexture("shadowMap", shadowMap);
-					resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
-					if (directionalLight) {
-						resolvedShader.bindUniform("L", L);
-					}
-					if (pointLight) {
-						resolvedShader.bindUniform("shadowRange", static_cast<float>(lightSpatial.getScale().x) / 2.f);
+					pass.bindTexture("shadowMap", ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
+					pass.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
+				}
+				if (ecs.has<DirectionalLightComponent>(lightEntity)) {
+					pass.setDefine(DIRECTIONAL_LIGHT);
+					pass.bindUniform("lightDir", -lightSpatial.getLookDir());
+					if (shadowsEnabled) {
+						const auto& shadowCamera = *ecs.cGetComponent<CameraComponent>(lightEntity);
+						static glm::mat4 biasMatrix(
+							0.5f, 0.0f, 0.0f, 0.0f,
+							0.0f, 0.5f, 0.0f, 0.0f,
+							0.0f, 0.0f, 0.5f, 0.0f,
+							0.5f, 0.5f, 0.5f, 1.0f);
+						pass.bindUniform("L", biasMatrix * shadowCamera.getProj() * lightSpatial.getView());
 					}
 				}
-				if (ibl) {
-					const auto& iblTexture = resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox);
-					resolvedShader.bindTexture("dfgLUT", resourceManagers.mTextureManager.resolve(ibl->mDFGLut));
-					resolvedShader.bindTexture("ibl", iblTexture);
-					resolvedShader.bindUniform("iblMips", iblTexture.mFormat.mMipCount - 1);
+				else if (ecs.has<PointLightComponent>(lightEntity)) {
+					pass.setDefine(POINT_LIGHT);
+					pass.bindUniform("lightPos", lightSpatial.getPosition());
+					pass.bindUniform("lightRadius", lightSpatial.getScale().x / 2.f);
+					if (shadowsEnabled) {
+						pass.bindUniform("shadowRange", static_cast<float>(lightSpatial.getScale().x) / 2.f);
+					}
 				}
-			}
+				else {
+					NEO_FAIL("Invalid light entity");
+				}
 
-			const auto& drawSpatial = view.get<const SpatialComponent>(entity);
-			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
-			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
+				MakeDefine(IBL);
+				if (const auto iblView = ecs.getSingleView<IBLComponent, SkyboxComponent>()) {
+					const auto& ibl = std::get<1>(*iblView);
+					if (ibl.mConvolved && ibl.mDFGGenerated && resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox) && resourceManagers.mTextureManager.isValid(ibl.mDFGLut)) {
+						pass.setDefine(IBL);
+						const auto& iblTexture = resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox);
+						pass.bindTexture("dfgLUT", ibl.mDFGLut);
+						pass.bindTexture("ibl", ibl.mConvolvedSkybox);
+						pass.bindUniform("iblMips", iblTexture.mFormat.mMipCount - 1);
+					}
+				}
 
-			mesh.draw();
-		}
+				pass.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
+				pass.bindUniform("V", cameraSpatial->getView());
+				pass.bindUniform("camPos", cameraSpatial->getPosition());
 
-		if (containsTransparency) {
-			glDisable(GL_BLEND);
-		}
+				const auto& view = ecs.getView<const ForwardPBRRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
+				for (auto entity : view) {
+					// VFC
+					if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+						if (!culled->isInView(ecs, entity, cameraEntity)) {
+							continue;
+						}
+					}
+		
+					ShaderDefinesFG drawDefines;
+					UniformBuffer uniforms;
+
+					const auto& material = view.get<const MaterialComponent>(entity);
+					MakeDefine(ALBEDO_MAP);
+					uniforms.bindUniform("albedo", material.mAlbedoColor);
+					if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
+						drawDefines.set(ALBEDO_MAP);
+						uniforms.bindTexture("albedoMap", material.mAlbedoMap);
+					}
+					MakeDefine(NORMAL_MAP);
+					if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
+						drawDefines.set(NORMAL_MAP);
+						uniforms.bindTexture("normalMap", material.mNormalMap);
+					}
+					MakeDefine(METAL_ROUGHNESS_MAP);
+					uniforms.bindUniform("metalness", material.mMetallic);
+					uniforms.bindUniform("roughness", material.mRoughness);
+					if (resourceManagers.mTextureManager.isValid(material.mMetallicRoughnessMap)) {
+						drawDefines.set(METAL_ROUGHNESS_MAP);
+						uniforms.bindTexture("metalRoughnessMap", material.mMetallicRoughnessMap);
+					}
+					MakeDefine(OCCLUSION_MAP);
+					if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
+						drawDefines.set(OCCLUSION_MAP);
+						uniforms.bindTexture("occlusionMap", material.mOcclusionMap);
+					}
+					MakeDefine(EMISSIVE);
+					uniforms.bindUniform("emissiveFactor", material.mEmissiveFactor);
+					if (resourceManagers.mTextureManager.isValid(material.mEmissiveMap)) {
+						drawDefines.set(EMISSIVE);
+						uniforms.bindTexture("emissiveMap", material.mEmissiveMap);
+					}
+		
+					const auto& mesh = resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle);
+					MakeDefine(TANGENTS);
+					if (mesh.hasVBO(types::mesh::VertexType::Tangent)) {
+						drawDefines.set(TANGENTS);
+					}
+	
+					const auto& drawSpatial = view.get<const SpatialComponent>(entity);
+					uniforms.bindUniform("M", drawSpatial.getModelMatrix());
+					uniforms.bindUniform("N", drawSpatial.getNormalMatrix());
+		
+					pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, uniforms, drawDefines);
+				}
+
+			})
+			.dependsOn(resourceManagers, shadowsEnabled ? ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap : NEO_INVALID_HANDLE)
+			.setDebugName("ForwardPBR");
+
 	}
 }

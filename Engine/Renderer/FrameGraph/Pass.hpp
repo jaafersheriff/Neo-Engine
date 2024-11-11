@@ -17,12 +17,30 @@ namespace neo {
 			, mScissorIndex(scId)
 			, mShaderIndex(shaderID)
 		{
-			mPassStateIndex = mFrameData.createPassState(state);
-			mPassUBOIndex = mFrameData.createUBO({});
-			mPassDefinesIndex = mFrameData.createShaderDefines({});
+			TRACY_ZONE();
+			{
+				TRACY_ZONEN("FrameData copies");
+				mPassStateIndex = mFrameData.createPassState(state);
+				mPassUBOIndex = mFrameData.createUBO({});
+				mPassDefinesIndex = mFrameData.createShaderDefines({});
+			}
+			{
+				TRACY_ZONEN("Commands Alloc");
+				mCommands = reinterpret_cast<Command*>(malloc(1024 * sizeof(Command)));
+				NEO_ASSERT(mCommands, "Can't alloc");
+			}
+			{
+				TRACY_ZONEN("Draws Alloc");
+				mDraws = reinterpret_cast<Draw*>(malloc(1024 * sizeof(Draw)));
+				NEO_ASSERT(mDraws, "Can't alloc");
+			}
+
 		}
 
 		~Pass() {
+			TRACY_ZONE();
+			free(reinterpret_cast<void*>(mCommands));
+			free(reinterpret_cast<void*>(mDraws));
 		}
 
 		// 0-3: StartPass Key
@@ -95,7 +113,7 @@ namespace neo {
 		uint16_t mPassUBOIndex = 0;
 		uint16_t mPassDefinesIndex = 0;
 
-		Command mCommands[1024];
+		Command* mCommands; // 1024 max 
 		uint16_t mCommandIndex = 0;
 
 		ClearParams mClearParams[8];
@@ -106,7 +124,7 @@ namespace neo {
 			uint16_t mElementCount = 0;
 			uint16_t mElementBufferOffset = 0;
 		};
-		Draw mDraws[1024];
+		Draw* mDraws; // 1024 max
 		uint16_t mDrawIndex = 0; // 10 bits
 	};
 

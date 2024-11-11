@@ -62,7 +62,7 @@ namespace DeferredPBR {
 
 		fg.pass(outputHandle, vp, vp, passState, lightResolveShaderHandle)
 			.with([cameraEntity, gbufferHandle, lightEntity, light, lightSpatial, shadowsEnabled](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
-
+			TRACY_ZONEN("Directional light resolve");
 			MakeDefine(ENABLE_SHADOWS);
 			if (shadowsEnabled) {
 				pass.setDefine(ENABLE_SHADOWS);

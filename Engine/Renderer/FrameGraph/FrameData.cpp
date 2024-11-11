@@ -6,21 +6,16 @@ namespace neo {
 
 	FrameData::FrameData() {
 		TRACY_ZONE();
-		{
-			TRACY_ZONEN("UBO Alloc");
-			mUBOs = reinterpret_cast<UniformBuffer*>(calloc(4096, sizeof(UniformBuffer)));
-			NEO_ASSERT(mUBOs, "Can't alloc");
-		}
-		{
-			TRACY_ZONEN("Defines Alloc");
-			mShaderDefines = reinterpret_cast<ShaderDefinesFG*>(calloc(4096, sizeof(ShaderDefinesFG)));
-			NEO_ASSERT(mShaderDefines, "Can't alloc");
-		}
-		{
-			TRACY_ZONEN("PassState Alloc");
-			mPassStates = reinterpret_cast<PassState*>(calloc(4096, sizeof(PassState)));
-			NEO_ASSERT(mPassStates, "Can't alloc");
-		}
+		mUBOs = reinterpret_cast<UniformBuffer*>(calloc(4096, sizeof(UniformBuffer)));
+		NEO_ASSERT(mUBOs, "Can't alloc");
+		mShaderDefines = reinterpret_cast<ShaderDefinesFG*>(calloc(4096, sizeof(ShaderDefinesFG)));
+		NEO_ASSERT(mShaderDefines, "Can't alloc");
+		mPassStates = reinterpret_cast<PassState*>(calloc(4096, sizeof(PassState)));
+		NEO_ASSERT(mPassStates, "Can't alloc");
+		mFramebufferHandles = reinterpret_cast<FramebufferHandle*>(malloc(256 * sizeof(FramebufferHandle)));
+		NEO_ASSERT(mFramebufferHandles, "Can't alloc");
+		mViewports = reinterpret_cast<Viewport*>(malloc(256 * sizeof(Viewport)));
+		NEO_ASSERT(mViewports, "Can't alloc");
 	}
 
 	FrameData::~FrameData() {
@@ -32,22 +27,18 @@ namespace neo {
 			}
 		}
 		{
-			TRACY_ZONEN("Dealloc UBO");
-			free(reinterpret_cast<void*>(mUBOs));
-		}
-		{
 			TRACY_ZONEN("Destroy Shader Defines");
 			for (int i = 0; i < mShaderDefinesIndex; i++) {
 				mShaderDefines[i].destroy();
 			}
 		}
 		{
-			TRACY_ZONEN("Dealloc Shader Defines");
+			TRACY_ZONEN("Dealloc");
+			free(reinterpret_cast<void*>(mUBOs));
 			free(reinterpret_cast<void*>(mShaderDefines));
-		}
-		{
-			TRACY_ZONEN("Dealloc PassStates");
 			free(reinterpret_cast<void*>(mPassStates));
+			free(reinterpret_cast<void*>(mFramebufferHandles));
+			free(reinterpret_cast<void*>(mViewports));
 		}
 	}
 

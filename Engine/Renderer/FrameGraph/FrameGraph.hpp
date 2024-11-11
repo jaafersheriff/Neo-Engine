@@ -87,9 +87,9 @@ namespace neo {
 
 		void execute(const ResourceManagers& resourceManagers, const ECS& ecs);
 
-		Task& pass(FramebufferHandle target, Viewport viewport, Viewport scissor, PassState state, ShaderHandle shader) {
+		Task& pass(const FramebufferHandle& target, Viewport viewport, Viewport scissor, PassState state, ShaderHandle shader) {
 			uint16_t passIndex = mFrameData.addPass(target, viewport, scissor, state, shader);
-			return _task(std::move(Task(passIndex, mBuilder)));
+			return _task(std::move(Task(passIndex, mBuilder))).dependsOn(mResourceManagers, target);
 		}
 
 		Task& clear(FramebufferHandle handle, glm::vec4 color, types::framebuffer::AttachmentBits clearFlags) {

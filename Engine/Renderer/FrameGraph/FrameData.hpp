@@ -34,10 +34,10 @@ namespace neo {
 		uint16_t createPassState(const PassState& passState);
 
 	private:
-		FramebufferHandle mFramebufferHandles[256];
+		FramebufferHandle* mFramebufferHandles;
 		uint8_t mFramebufferHandleIndex = 0;
 
-		Viewport mViewports[256];
+		Viewport* mViewports;
 		uint8_t mViewportIndex = 0;
 
 		ShaderHandle mShaderHandles[256];

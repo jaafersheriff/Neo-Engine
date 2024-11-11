@@ -459,17 +459,8 @@ namespace DeferredPBR {
 
 		drawDirectionalLightResolve<MainLightComponent>(fg, hdrColorTarget, sceneViewport, resourceManagers, ecs, cameraEntity, gbufferHandle);
 		// drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
-		// // Extract IBL
-		// std::optional<IBLComponent> ibl;
-		// const auto iblTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
-		// if (iblTuple && mDrawIBL) {
-		// 	const auto& _ibl = std::get<2>(*iblTuple);
-		// 	if (_ibl.mConvolved && _ibl.mDFGGenerated) {
-		// 		ibl = _ibl;
-		// 	}
-		// }
 		// drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
-		// drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
+		drawForwardPBR<TransparentComponent>(fg, hdrColorTarget, sceneViewport, resourceManagers, ecs, cameraEntity);
 		// drawSkybox(resourceManagers, ecs, cameraEntity);
 
 		// FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParams) : hdrColorOutput;
