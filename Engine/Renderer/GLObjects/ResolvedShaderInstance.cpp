@@ -60,7 +60,7 @@ namespace neo {
 			}
 		}
 
-		inline std::string _processShader(const char* shaderString, const ShaderDefines& defines) {
+		inline std::string _processShader(const char* shaderString, const std::vector<ShaderDefinesFG>& defines) {
 			TRACY_ZONE();
 			if (!shaderString) {
 				return "";
@@ -106,15 +106,11 @@ namespace neo {
 			{
 				TRACY_ZONEN("Construct preamble");
 				preambleBuilder << ServiceLocator<Renderer>::value().getDetails().mGLSLVersion << "\n\n";
-				const ShaderDefines* _defines = &defines;
-				while (_defines) {
-					for (auto& define : _defines->mDefines) {
-						if (define.second) {
-							preambleBuilder << "#define " << define.first.mVal.data() << "\n";
-						}
+				for (const auto& define : defines) {
+					for (uint8_t i = 0; i < define.getDefinesSize(); i++) {
+						preambleBuilder << "#define " << define.getDefine(i) << "\n";
 
 					}
-					_defines = _defines->mParent;
 				}
 				sourceString.insert(0, preambleBuilder.str());
 			}
@@ -201,7 +197,7 @@ namespace neo {
 		}
 	}
 
-	bool ResolvedShaderInstance::init(const SourceShader::ShaderCode& shaderCode, const ShaderDefines& defines) {
+	bool ResolvedShaderInstance::init(const SourceShader::ShaderCode& shaderCode, const std::vector<ShaderDefinesFG>& defines) {
 		NEO_ASSERT(!isValid() && mPid == 0, "Trying to initialize an existing shader variant object?");
 		TRACY_ZONE();
 		isCompute = false;

@@ -134,11 +134,7 @@ namespace neo {
 				command >> (64 - 3 - 10 - 10 - 10) & 0b1111111111
 			));
 
-			ShaderDefines defines;
-			frameData.getDefines(pass.mPassDefinesIndex).toOldStyle(defines);
-			drawDefines.toOldStyle(defines);
-
-			const auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, defines);
+			const auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, {frameData.getDefines(pass.mPassDefinesIndex), drawDefines});
 			const UniformBuffer& passUniforms = frameData.getUBO(pass.mPassUBOIndex);
 			for (uint8_t i = 0; i < passUniforms.getUniformsSize(); i++) {
 				const auto pair = passUniforms.getUniform(i);

@@ -2,6 +2,7 @@
 
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/ShaderDefines.hpp"
+#include "Renderer/FrameGraph/ShaderDefinesFG.hpp"
 
 #include <sstream>
 #include <set>
@@ -24,7 +25,7 @@ namespace neo {
 
 		SourceShader(const char* name, const ShaderCode& args);
 
-		const ResolvedShaderInstance& getResolvedInstance(const ShaderDefines& defines) const;
+		const ResolvedShaderInstance& getResolvedInstance(const std::vector<ShaderDefinesFG>& defines) const;
 		void destroy();
 	private:
 		std::string mName;
@@ -35,6 +36,6 @@ namespace neo {
 		// Can't store ShaderDefines in the map because of const char* and mParent*
 		// Also this is faster than specialized std::hash
 		mutable std::unordered_map<HashedShaderDefines, ResolvedShaderInstance> mResolvedShaders;
-		HashedShaderDefines _getDefinesHash(const ShaderDefines& defines) const;
+		HashedShaderDefines _getDefinesHash(const std::vector<ShaderDefinesFG>& defines) const;
 	};
 }

@@ -21,28 +21,23 @@ namespace neo {
 		mShaderSources.clear();
 	}
 
-	const ResolvedShaderInstance& SourceShader::getResolvedInstance(const ShaderDefines& defines) const {
+	const ResolvedShaderInstance& SourceShader::getResolvedInstance(const std::vector<ShaderDefinesFG>& defines) const {
 		HashedShaderDefines hash = _getDefinesHash(defines);
 		auto it = mResolvedShaders.find(hash);
 		if (it == mResolvedShaders.end()) {
-			mResolvedShaders.emplace(hash, ResolvedShaderInstance(defines));
+
+			std::stringstream ss;
+			ss << "\n";
+			for (const auto& define : defines) {
+				for (uint8_t i = 0; i < define.getDefinesSize(); i++) {
+					ss << "\t" << define.getDefine(i) << "\n";
+				}
+			}
+
+			mResolvedShaders.emplace(hash, ResolvedShaderInstance(ss.str()));
 			it = mResolvedShaders.find(hash);
 			it->second.init(mShaderSources, defines);
 
-			std::stringstream ss;
-			if (defines.mDefines.size() || defines.mParent != nullptr) {
-				ss << "with\n";
-				const ShaderDefines* _defines = &defines;
-				while (_defines) {
-					for (auto& define : _defines->mDefines) {
-						if (define.second) {
-							ss << "\t" << define.first.mVal.data() << "\n";
-						}
-					}
-
-					_defines = _defines->mParent;
-				}
-			}
 			// Remove the last newline hehe
 			ss.seekp(-1, ss.cur); ss << '\0';
 			if (it->second.isValid()) {
@@ -56,19 +51,14 @@ namespace neo {
 		return it->second;
 	}
 
-	SourceShader::HashedShaderDefines SourceShader::_getDefinesHash(const ShaderDefines& defines) const {
-		HashedShaderDefines seed = static_cast<HashedShaderDefines>(defines.mDefines.size());
-		const ShaderDefines* _defines = &defines;
-		while (_defines) {
-			for (auto& define : _defines->mDefines) {
-				if (define.second) {
-					seed ^= HashedString(define.first.mVal.c_str()).value() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-				}
+	SourceShader::HashedShaderDefines SourceShader::_getDefinesHash(const std::vector<ShaderDefinesFG>& defines) const {
+		HashedShaderDefines seed = static_cast<HashedShaderDefines>(defines.size());
+		for (const auto& define : defines) {
+			seed ^= define.getDefinesSize();
+			for (uint8_t i = 0; i < define.getDefinesSize(); i++) {
+				seed ^= HashedString(define.getDefine(i)).value() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			}
-
-			_defines = _defines->mParent;
 		}
-
 		return seed;
 	}
 }

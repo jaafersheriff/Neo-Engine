@@ -28,10 +28,11 @@ namespace neo {
 		friend SourceShader;
 	public:
 
+		// This is pretty dumb to create+store variant here, and then redo it in init()
 		ResolvedShaderInstance(std::string variant) : mVariant(variant) {}
 		~ResolvedShaderInstance() = default;
 
-		bool init(const SourceShader::ShaderCode& args, const ShaderDefines& defines);
+		bool init(const SourceShader::ShaderCode& args, const std::vector<ShaderDefinesFG>& defines);
 		void destroy();
 		bool isValid() const { return mPid != 0; }
 

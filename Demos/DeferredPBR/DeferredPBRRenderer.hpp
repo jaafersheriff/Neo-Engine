@@ -207,50 +207,51 @@ namespace DeferredPBR {
 	}
 
 	void drawIndirectResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle, std::optional<IBLComponent> ibl = std::nullopt) {
-		TRACY_GPU();
-
-		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
-			return;
-		}
-
-		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("Indirect Resolve", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "quad.vert" },
-			{ types::shader::Stage::Fragment, "deferredpbr/indirectresolve.frag" }
-			});
-		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
-			return;
-		}
-
-		ShaderDefines defines;
-		MakeDefine(IBL);
-		if (ibl.has_value()) {
-			defines.set(IBL);
-		}
-		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
-		resolvedShader.bind();
-
-		const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
-		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
-		resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
-		resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
-		resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
-
-		/* Bind gbuffer */
-		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-		resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-		resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
-
-		if (ibl.has_value()) {
-			resolvedShader.bindTexture("ibl", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox));
-			resolvedShader.bindTexture("dfgLUT", resourceManagers.mTextureManager.resolve(ibl->mDFGLut));
-			resolvedShader.bindUniform("iblMips", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox).mFormat.mMipCount);
-		}
-
-		glDisable(GL_DEPTH_TEST);
-		resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
-		glEnable(GL_DEPTH_TEST);
+		NEO_UNUSED(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
+//		TRACY_GPU();
+//
+//		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
+//			return;
+//		}
+//
+//		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("Indirect Resolve", SourceShader::ConstructionArgs{
+//			{ types::shader::Stage::Vertex, "quad.vert" },
+//			{ types::shader::Stage::Fragment, "deferredpbr/indirectresolve.frag" }
+//			});
+//		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
+//			return;
+//		}
+//
+//		ShaderDefines defines;
+//		MakeDefine(IBL);
+//		if (ibl.has_value()) {
+//			defines.set(IBL);
+//		}
+//		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
+//		resolvedShader.bind();
+//
+//		const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
+//		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
+//		resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
+//		resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
+//		resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
+//
+//		/* Bind gbuffer */
+//		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
+//		resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
+//		resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+//		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+//		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
+//
+//		if (ibl.has_value()) {
+//			resolvedShader.bindTexture("ibl", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox));
+//			resolvedShader.bindTexture("dfgLUT", resourceManagers.mTextureManager.resolve(ibl->mDFGLut));
+//			resolvedShader.bindUniform("iblMips", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox).mFormat.mMipCount);
+//		}
+//
+//		glDisable(GL_DEPTH_TEST);
+//		resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
+//		glEnable(GL_DEPTH_TEST);
 	}
 }
 

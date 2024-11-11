@@ -18,7 +18,6 @@ namespace neo {
 		Viewport vp,
 		const ResourceManagers& resourceManagers,
 		ECS::Entity cameraEntity,
-		const ShaderDefines& inDefines = {},
 		Deps... deps
 	) {
 		TRACY_ZONE();

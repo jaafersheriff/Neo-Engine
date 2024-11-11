@@ -31,14 +31,8 @@ namespace neo {
 
 		void set(const ShaderDefine& define) {
 			char* b = new char[define.mVal.size() + 1] {};
-			memcpy(b, define.mVal.c_str(), define.mVal.size());
+			memcpy(b, define.mVal, define.mVal.size());
 			mDefines[mDefinesIndex++] = b;
-		}
-
-		void toOldStyle(ShaderDefines& defines) const {
-			for (int i = 0; i < mDefinesIndex; i++) {
-				defines.set(mDefines[i]);
-			}
 		}
 
 	private:

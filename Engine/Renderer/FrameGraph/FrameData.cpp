@@ -55,7 +55,6 @@ namespace neo {
 		mShaderDefinesIndex = 0;
 		mPassStateIndex = 0;
 		mPasses.clear();
-
 	}
 
 	uint16_t FrameData::addPass(FramebufferHandle handle, Viewport vp, Viewport scissor, PassState& state, ShaderHandle shaderHandle) {

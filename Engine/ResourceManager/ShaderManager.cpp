@@ -45,7 +45,7 @@ namespace neo {
 		delete mHotReloader;
 	}
 
-	const ResolvedShaderInstance& ShaderManager::resolveDefines(ShaderHandle handle, const ShaderDefines& defines) const {
+	const ResolvedShaderInstance& ShaderManager::resolveDefines(ShaderHandle handle, const std::vector<ShaderDefinesFG>& defines) const {
 		auto& resolved = resolve(handle).getResolvedInstance(defines);
 		if (resolved.isValid()) {
 			resolved.bind();

@@ -27,7 +27,7 @@ namespace neo {
 		ShaderManager();
 		~ShaderManager();
 
-		const ResolvedShaderInstance& ShaderManager::resolveDefines(ShaderHandle handle, const ShaderDefines& defines) const;
+		const ResolvedShaderInstance& ShaderManager::resolveDefines(ShaderHandle handle, const std::vector<ShaderDefinesFG>& defines) const;
 		void imguiEditor();
 
 	protected:
