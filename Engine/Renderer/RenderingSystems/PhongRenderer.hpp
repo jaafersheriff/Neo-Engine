@@ -127,7 +127,7 @@ namespace neo {
 					}
 				}
 
-				ShaderDefines drawDefines;
+				ShaderDefinesFG drawDefines;
 				UBO ubo;
 
 				const auto& material = view.get<const MaterialComponent>(entity);

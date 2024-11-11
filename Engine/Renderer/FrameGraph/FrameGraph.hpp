@@ -24,6 +24,14 @@ namespace neo {
 	struct ShaderDefinesFG {
 		ShaderDefinesFG() = default;
 
+		void operator=(const ShaderDefinesFG& other) {
+			for (auto& [d, b] : other.getDefines()) {
+				if (b) {
+					set(d);
+				}
+			}
+		}
+
 		void set(const ShaderDefine& define) {
 			mDefines[define] = true;
 		}
@@ -36,6 +44,11 @@ namespace neo {
 			}
 		}
 
+		const std::map<ShaderDefine, bool>& getDefines() const {
+			return mDefines;
+		}
+
+	private:
 		std::map<ShaderDefine, bool> mDefines;
 	};
 
@@ -73,7 +86,7 @@ namespace neo {
 			uint64_t uboIndex = mUBOIndex;
 			mUBOs[mUBOIndex++] = ubo;
 			uint64_t definesIndex = mShaderDefinesIndex;
-			mShaderDefines[mShaderDefinesIndex++].mDefines = drawDefines.mDefines;
+			mShaderDefines[mShaderDefinesIndex++] = drawDefines;
 
 			Command& command = mCommands[mCommandIndex++];
 			command = 0
@@ -118,6 +131,8 @@ namespace neo {
 
 		uint16_t getCommandSize() const { return mCommandIndex; }
 		Command& getCommand(uint16_t index) { return mCommands[index]; }
+
+		const PassState& getPassState() const { return mPassState; }
 	//private:
 		uint8_t mFramebufferIndex = 0;
 		uint8_t mViewportIndex = 0;
@@ -161,14 +176,31 @@ namespace neo {
 				scId = mViewportIndex;
 				mViewports[mViewportIndex++] = scissor;
 			}
-			mFrameData.emplace_back(mFramebufferHandleIndex++, vpId, scId, mShaderHandleIndex++, state);
-			return static_cast<uint16_t>(mFrameData.size() - 1);
+			mPasses.emplace_back(mFramebufferHandleIndex++, vpId, scId, mShaderHandleIndex++, state);
+			return static_cast<uint16_t>(mPasses.size() - 1);
 		}
 
 		Pass& getPass(uint16_t index) {
-			return mFrameData[index];
+			NEO_ASSERT(mPasses.size() > index, "Invalid index");
+			return mPasses[index];
 		}
 
+		const FramebufferHandle& getFrameBufferHandle(uint8_t index) const {
+			NEO_ASSERT(mFramebufferHandleIndex > index, "Invalid index");
+			return mFramebufferHandles[index];
+		}
+
+		const Viewport& getViewport(uint8_t index) const {
+			NEO_ASSERT(mViewportIndex > index, "Invalid index");
+			return mViewports[index];
+		}
+
+		const ShaderHandle& getShaderHandle(uint8_t index) const {
+			NEO_ASSERT(mShaderHandleIndex > index, "Invalid index");
+			return mShaderHandles[index];
+		}
+
+	private:
 		FramebufferHandle mFramebufferHandles[256];
 		uint8_t mFramebufferHandleIndex = 0;
 
@@ -179,7 +211,7 @@ namespace neo {
 		uint8_t mShaderHandleIndex = 0;
 
 	private:
-		std::vector<Pass> mFrameData;
+		std::vector<Pass> mPasses;
 	};
 
 	class FrameGraph {

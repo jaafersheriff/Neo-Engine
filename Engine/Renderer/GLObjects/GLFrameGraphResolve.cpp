@@ -12,8 +12,8 @@ namespace neo {
 				command >> (64 - 3 - 8 - 8) & 0xFF
 				);
 
-			const auto& fbHandle = frameData.mFramebufferHandles[fbID];
-			const auto& vp = frameData.mViewports[vpID];
+			const auto& fbHandle = frameData.getFrameBufferHandle(fbID);
+			const auto& vp = frameData.getViewport(vpID);
 
 			if (resourceManagers.mFramebufferManager.isValid(fbHandle)) {
 				resourceManagers.mFramebufferManager.resolve(fbHandle).bind();
@@ -94,7 +94,7 @@ namespace neo {
 			}
 			if (pass.mPassState.mScissorTest) {
 				glEnable(GL_SCISSOR_TEST);
-				Viewport scissor = frameData.mViewports[pass.mScissorIndex];
+				Viewport scissor = frameData.getViewport(pass.mScissorIndex);
 				glScissor(scissor.x, scissor.y, scissor.z, scissor.w);
 			}
 			else {
@@ -108,12 +108,11 @@ namespace neo {
 				)];
 
 			// temp framebuffer to make gl calls
-			Framebuffer fb;
-			fb.clear(clearParams.color, clearParams.clearFlags);
+			Framebuffer{}.clear(clearParams.color, clearParams.clearFlags);
 		}
 
 		void _draw(const FrameData& frameData, const Pass& pass, const Command& command, const ResourceManagers& resourceManagers) {
-			const auto& shaderHandle = frameData.mShaderHandles[pass.mShaderIndex];
+			const auto& shaderHandle = frameData.getShaderHandle(pass.mShaderIndex);
 			if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 				return;
 			}
