@@ -219,9 +219,7 @@ namespace neo {
 		for (auto& attachment : details.mAttachments) {
 			framebuffer->mResource.mFramebuffer.attachTexture(attachment.mHandle, textureManager.resolve(attachment.mHandle), attachment.mTarget, attachment.mMip);
 		}
-		if (framebuffer->mResource.mFramebuffer.mColorAttachments) {
-			framebuffer->mResource.mFramebuffer.initDrawBuffers();
-		}
+		framebuffer->mResource.mFramebuffer.initDrawBuffers();
 		framebuffer->mDebugName = details.mDebugName;
 
 		return framebuffer;

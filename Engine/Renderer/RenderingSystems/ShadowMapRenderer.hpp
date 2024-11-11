@@ -8,84 +8,71 @@
 
 namespace neo {
 
-	template<typename... CompTs>
-	void drawShadows(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity lightEntity, bool clear) {
-		TRACY_GPU();
+	template<typename... CompTs, typename... Deps>
+	void drawShadows(
+		FrameGraph& fg,
+		FramebufferHandle outputTarget,
+		const ResourceManagers& resourceManagers,
+		ECS::Entity lightEntity,
+		Deps... deps
+	) {
+		TRACY_ZONE();
+
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
 			{ types::shader::Stage::Fragment, "depth.frag" }
-		});
-		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
-			return;
+			});
+
+		Viewport vp(0);
+		{
+			if (!resourceManagers.mFramebufferManager.isValid(outputTarget)) {
+				return;
+			}
+			TextureHandle shadowTextureHandle = resourceManagers.mFramebufferManager.resolve(outputTarget).mTextures[0];
+			if (!resourceManagers.mTextureManager.isValid(shadowTextureHandle)) {
+				return;
+			}
+			const Texture& shadowTexture = resourceManagers.mTextureManager.resolve(shadowTextureHandle);
+			vp.z = shadowTexture.mWidth;
+			vp.w = shadowTexture.mHeight;
 		}
 
-		bool containsAlphaTest = false;
-		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
-			// TODO - set GL state?
-			containsAlphaTest = true;
-		}
+		PassState passState;
+		passState.mCullFace = true;
+		passState.mCullOrder = CullOrder::Front;
+		fg.pass(outputTarget, vp, vp, passState, shaderHandle, [lightEntity](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
 
-		NEO_ASSERT(ecs.has<DirectionalLightComponent>(lightEntity) && ecs.has<ShadowCameraComponent>(lightEntity), "Invalid light entity");
-		auto shadowCamera = ecs.cGetComponent<ShadowCameraComponent>(lightEntity);
-		if (!resourceManagers.mTextureManager.isValid(shadowCamera->mShadowMap)) {
-			return;
-		}
+			NEO_ASSERT(ecs.has<DirectionalLightComponent>(lightEntity) && ecs.has<ShadowCameraComponent>(lightEntity), "Invalid light entity");
+			NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity) && ecs.has<CameraComponent>(lightEntity), "Light entity is just wrong");
+			const glm::mat4 P = ecs.cGetComponent<CameraComponent>(lightEntity)->getProj();
+			const glm::mat4 V = ecs.cGetComponent<SpatialComponent>(lightEntity)->getView();
 
-		std::string targetName = "ShadowMap_" + std::to_string(static_cast<uint32_t>(lightEntity));
-		FramebufferHandle shadowMapHandle = resourceManagers.mFramebufferManager.asyncLoad(
-			HashedString(targetName.c_str()),
-			FramebufferExternalAttachments{ { shadowCamera->mShadowMap } },
-			resourceManagers.mTextureManager
-		);
-		if (!resourceManagers.mFramebufferManager.isValid(shadowMapHandle)) {
-			return;
-		}
-		auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowMapHandle);
-		shadowTarget.disableDraw();
-		shadowTarget.disableRead();
-		shadowTarget.bind();
-
-		if (clear) {
-			shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
-		}
-
-		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity) && ecs.has<CameraComponent>(lightEntity), "Light entity is just wrong");
-		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(lightEntity)->getProj();
-		const glm::mat4 V = ecs.cGetComponent<SpatialComponent>(lightEntity)->getView();
-
-		glCullFace(GL_FRONT);
-		ShaderDefines drawDefines;
-		const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
-		for (auto entity : view) {
-			// VFC
-			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-				if (!culled->isInView(ecs, entity, lightEntity)) {
-					continue;
+			const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
+			for (auto entity : view) {
+				// VFC
+				if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+					if (!culled->isInView(ecs, entity, lightEntity)) {
+						continue;
+					}
 				}
+				ShaderDefinesFG drawDefines;
+				UniformBuffer uniforms;
+
+				auto material = ecs.cGetComponent<const MaterialComponent>(entity);
+
+				MakeDefine(ALPHA_TEST);
+				if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
+					if (material && resourceManagers.mTextureManager.isValid(material->mAlbedoMap)) {
+						drawDefines.set(ALPHA_TEST);
+						uniforms.bindTexture("alphaMap", material->mAlbedoMap);
+					}
+				}
+
+				uniforms.bindUniform("P", P);
+				uniforms.bindUniform("V", V);
+				uniforms.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
+				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, uniforms, drawDefines);
 			}
-			drawDefines.reset();
-
-			auto material = ecs.cGetComponent<const MaterialComponent>(entity);
-
-			MakeDefine(ALPHA_TEST);
-			bool doAlphaTest = containsAlphaTest && material && resourceManagers.mTextureManager.isValid(material->mAlbedoMap);
-			if (doAlphaTest) {
-				drawDefines.set(ALPHA_TEST);
-			}
-
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
-			resolvedShader.bind();
-
-			if (doAlphaTest) {
-				resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
-			}
-
-			resolvedShader.bindUniform("P", P);
-			resolvedShader.bindUniform("V", V);
-			resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
-			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
-		}
-
-		glCullFace(GL_BACK);
+		});
 	}
 }

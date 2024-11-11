@@ -66,21 +66,11 @@ namespace neo {
 			bind();
 			glObjectLabel(GL_FRAMEBUFFER, mFBOID, -1, debugName.value().c_str());
 		}
-		disableRead();
+		glReadBuffer(GL_NONE);
 	}
 
 	void Framebuffer::bind() const {
 		glBindFramebuffer(GL_FRAMEBUFFER, mFBOID);
-	}
-
-	void Framebuffer::disableDraw() const {
-		bind();
-		glDrawBuffer(GL_NONE);
-	}
-
-	void Framebuffer::disableRead() const {
-		bind();
-		glReadBuffer(GL_NONE);
 	}
 
 	void Framebuffer::attachTexture(TextureHandle id, const Texture& texture, const types::framebuffer::AttachmentTarget& target, uint8_t mip) {
@@ -105,15 +95,20 @@ namespace neo {
 	}
 
 	void Framebuffer::initDrawBuffers() {
-		NEO_ASSERT(mColorAttachments, "Attempting to init FBO without any color attachments");
 		NEO_ASSERT(mColorAttachments < GL_MAX_COLOR_ATTACHMENTS, "You attached too many textures to this framebuffer");
 
 		bind();
-		std::vector<GLenum> attachments;
-		for (int i = 0; i < mColorAttachments; i++) {
-			attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
+		if (mColorAttachments) {
+			std::vector<GLenum> attachments;
+			for (int i = 0; i < mColorAttachments; i++) {
+				attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
+			}
+			glDrawBuffers(mColorAttachments, attachments.data());
 		}
-		glDrawBuffers(mColorAttachments, attachments.data());
+		else {
+			// No color
+			glDrawBuffer(GL_NONE);
+		}
 		CHECK_GL_FRAMEBUFFER();
 	}
 

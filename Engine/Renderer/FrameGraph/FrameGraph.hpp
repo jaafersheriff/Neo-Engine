@@ -121,6 +121,10 @@ namespace neo {
 
 	class FrameGraph {
 	public:
+		FrameGraph(const ResourceManagers& rm)
+			: mResourceManagers(rm)
+		{}
+
 		struct Task {
 			using Functor = std::function<void(Pass&, const ResourceManagers&, const ECS&)>;
 			Task()
@@ -155,6 +159,7 @@ namespace neo {
 		}
 
 	private:
+		const ResourceManagers& mResourceManagers;
 
 		template<typename... Deps>
 		Task& _task(Task&& t, Deps... deps) {
@@ -170,6 +175,15 @@ namespace neo {
 		void _assignDeps(Dep dep, Deps... deps) {
 			if constexpr (std::is_same_v<Dep, FramebufferHandle>) {
 				mBuilder.rw(dep.mHandle);
+				if (mResourceManagers.mFramebufferManager.isValid(dep)) {
+					const Framebuffer& fb = mResourceManagers.mFramebufferManager.resolve(dep);
+					for (const TextureHandle& tex : fb.mTextures) {
+						mBuilder.rw(tex.mHandle);
+					}
+				}
+			}
+			else if constexpr (std::is_same_v<Dep, TextureHandle>) {
+				mBuilder.ro(dep.mHandle);
 			}
 			else {
 				static_assert(false, "dead");

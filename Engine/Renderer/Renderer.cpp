@@ -121,7 +121,7 @@ namespace neo {
 		);
 
 		{
-			FrameGraph fg;
+			FrameGraph fg(resourceManagers);
 			Viewport vp = { 0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y };
 			{
 				TRACY_GPUN("Draw Demo");
