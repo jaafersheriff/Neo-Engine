@@ -102,35 +102,29 @@ namespace DeferredPBR {
 	}
 
 	template<typename... CompTs>
-	void drawPointLightResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle, glm::uvec2 resolution, float debugRadius = 0.f) {
-		TRACY_GPU();
+	void drawPointLightResolve(
+		FrameGraph& fg,
+		FramebufferHandle outTarget,
+		Viewport vp,
+		const ResourceManagers& resourceManagers,
+		const ECS& ecs,
+		const ECS::Entity cameraEntity,
+		FramebufferHandle gbufferHandle,
+		float debugRadius = 0.f
+	) {
+		TRACY_ZONE();
+
+		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
+			return;
+		}
 
 		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightResolve Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "deferredpbr/pointlightresolve.vert"},
 			{ types::shader::Stage::Fragment, "deferredpbr/pointlightresolve.frag" }
-		});
-		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
-			return;
-		}
-
-		ShaderDefines passDefines;
-		MakeDefine(SHOW_LIGHTS);
-		if (debugRadius > 0.f) {
-			passDefines.set(SHOW_LIGHTS);
-		}
+			});
 
 		const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
 		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
-		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE);
-		glBlendColor(1.f, 1.f, 1.f, 1.f);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-
-		/* Render light volumes */
-		// TODO : instanced
 
 		// Sort them back to front first
 		ecs.sort<PointLightComponent, SpatialComponent>([&cameraSpatial, &ecs](const ECS::Entity entityLeft, const ECS::Entity entityRight) {
@@ -140,68 +134,76 @@ namespace DeferredPBR {
 				return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) > glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
 			}
 			return false;
-		});
+			});
 
-		ShaderDefines drawDefines(passDefines);
+		// Inidividual passes to set up dependencies wahoo
 		const auto& view = ecs.getView<const LightComponent, const PointLightComponent, const SpatialComponent, CompTs...>();
 		for (auto entity : view) {
-			// TODO : Could do VFC
-			MakeDefine(ENABLE_SHADOWS);
+			PassState passState;
+			passState.mBlending = true;
+			passState.mBlendSrcRGB = passState.mBlendSrcAlpha = passState.mBlendDstRGB = passState.mBlendDstAlpha = types::passState::BlendFactor::One;
+			//glBlendColor(1.f, 1.f, 1.f, 1.f);
+			passState.mDepthTest = false;
+			passState.mCullFace = true;
+
+			const auto& light = view.get<const LightComponent>(entity);
+			const auto& spatial = view.get<const SpatialComponent>(entity);
+
+			// If camera is inside light 
+			float dist = glm::distance(spatial.getPosition(), cameraSpatial->getPosition());
+			if (dist - camera->getNear() < spatial.getScale().x) {
+				passState.mCullOrder = types::passState::CullOrder::Front;
+			}
+			else {
+				passState.mCullOrder = types::passState::CullOrder::Back;
+			}
+
 			const bool shadowsEnabled =
 				ecs.has<ShadowCameraComponent>(entity)
 				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
-			if (shadowsEnabled) {
-				drawDefines.set(ENABLE_SHADOWS);
-			}
 
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, drawDefines);
-			resolvedShader.bind();
+			fg.pass(outTarget, vp, vp, passState, lightResolveShaderHandle)
+				.with([debugRadius, camera, cameraSpatial, vp, shadowsEnabled, entity, light, spatial, gbufferHandle](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+				TRACY_ZONEN("Point Light Resolve");
+				MakeDefine(SHOW_LIGHTS);
+				if (debugRadius > 0.f) {
+					pass.setDefine(SHOW_LIGHTS);
+					pass.bindUniform("debugRadius", debugRadius);
+				}
+				pass.bindUniform("P", camera->getProj());
+				pass.bindUniform("invP", glm::inverse(camera->getProj()));
+				pass.bindUniform("V", cameraSpatial->getView());
+				pass.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
+				pass.bindUniform("camPos", cameraSpatial->getPosition());
+				pass.bindUniform("resolution", glm::vec2(vp.z, vp.w));
 
-			const auto& light = ecs.cGetComponent<const LightComponent>(entity);
-			const auto& spatial = ecs.cGetComponent<const SpatialComponent>(entity);
-			resolvedShader.bindUniform("M", spatial->getModelMatrix());
-			resolvedShader.bindUniform("lightPos", spatial->getPosition());
-			resolvedShader.bindUniform("lightRadiance", glm::vec4(light->mColor, light->mIntensity));
+				// TODO : Could do VFC
+				MakeDefine(ENABLE_SHADOWS);
+				if (shadowsEnabled) {
+					pass.setDefine(ENABLE_SHADOWS);
+					auto& shadowCube = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
+					pass.bindTexture("shadowCube", ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
+					pass.bindUniform("shadowRange", static_cast<float>(spatial.getScale().x) / 2.f);
+					pass.bindUniform("shadowMapResolution", static_cast<float>(shadowCube.mWidth));
+				}
 
+				pass.bindUniform("M", spatial.getModelMatrix());
+				pass.bindUniform("lightPos", spatial.getPosition());
+				pass.bindUniform("lightRadiance", glm::vec4(light.mColor, light.mIntensity));
 
-			if (debugRadius > 0.f) {
-				resolvedShader.bindUniform("debugRadius", debugRadius);
-			}
+				/* Bind gbuffer */
+				auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
+				pass.bindTexture("gAlbedoAO", gbuffer.mTextures[0]);
+				pass.bindTexture("gNormalRoughness", gbuffer.mTextures[1]);
+				pass.bindTexture("gEmissiveMetalness", gbuffer.mTextures[2]);
+				pass.bindTexture("gDepth", gbuffer.mTextures[3]);
 
-			if (shadowsEnabled) {
-				auto& shadowCube = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
-				resolvedShader.bindTexture("shadowCube", shadowCube);
-				resolvedShader.bindUniform("shadowRange", static_cast<float>(spatial->getScale().x) / 2.f);
-				resolvedShader.bindUniform("shadowMapResolution", static_cast<float>(shadowCube.mWidth));
-			}
-
-			resolvedShader.bindUniform("P", camera->getProj());
-			resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
-			resolvedShader.bindUniform("V", cameraSpatial->getView());
-			resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
-			resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
-			resolvedShader.bindUniform("resolution", glm::vec2(resolution));
-
-			/* Bind gbuffer */
-			resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-			resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-			resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-			resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
-
-			// If camera is inside light 
-			float dist = glm::distance(spatial->getPosition(), cameraSpatial->getPosition());
-			if (dist - camera->getNear() < spatial->getScale().x) {
-				glCullFace(GL_FRONT);
-			}
-			else {
-				glCullFace(GL_BACK);
-			}
-			resourceManagers.mMeshManager.resolve(HashedString("sphere")).draw();
+				// TODO : instanced
+				pass.drawCommand(HashedString("sphere"), {}, {});
+					})
+				.dependsOn(resourceManagers, gbufferHandle, shadowsEnabled ? ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap : NEO_INVALID_HANDLE)
+				.setDebugName("Point Light Resolve");
 		}
-
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glCullFace(GL_BACK);
 	}
 
 	void drawIndirectResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle, std::optional<IBLComponent> ibl = std::nullopt) {

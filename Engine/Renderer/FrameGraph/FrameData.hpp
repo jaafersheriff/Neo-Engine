@@ -40,7 +40,7 @@ namespace neo {
 		Viewport* mViewports;
 		uint8_t mViewportIndex = 0;
 
-		ShaderHandle mShaderHandles[256];
+		ShaderHandle* mShaderHandles; // 256
 		uint8_t mShaderHandleIndex = 0;
 
 		UniformBuffer* mUBOs = nullptr;

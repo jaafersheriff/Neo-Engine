@@ -155,6 +155,25 @@ namespace neo {
 				DepthStencil
 			};
 		}
-	}
+	
+		namespace passState {
+			enum class DepthFunc {
+				Less,
+				LessEqual
+			};
+			enum class CullOrder {
+				Front,
+				Back
+			};
+			enum class BlendEquation {
+				Add
+			};
+			enum class BlendFactor {
+				One,
+				Alpha,
+				OneMinusAlpha
+			};
+		}
+}
 
 }

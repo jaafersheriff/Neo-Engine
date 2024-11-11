@@ -50,11 +50,11 @@ namespace neo {
 		PassState passState;
 		if constexpr ((std::is_same_v<TransparentComponent, CompTs> || ...)) {
 			passState.mBlending = true;
-			passState.mBlendEquation = BlendEquation::Add;
-			passState.mBlendSrcRGB = BlendFactor::Alpha;
-			passState.mBlendSrcAlpha = BlendFactor::Alpha;
-			passState.mBlendDstRGB = BlendFactor::OneMinusAlpha;
-			passState.mBlendDstAlpha = BlendFactor::OneMinusAlpha;
+			passState.mBlendEquation = types::passState::BlendEquation::Add;
+			passState.mBlendSrcRGB = types::passState::BlendFactor::Alpha;
+			passState.mBlendSrcAlpha = types::passState::BlendFactor::Alpha;
+			passState.mBlendDstRGB = types::passState::BlendFactor::OneMinusAlpha;
+			passState.mBlendDstAlpha = types::passState::BlendFactor::OneMinusAlpha;
 
 			{
 				TRACY_ZONEN("Transparency sorting");

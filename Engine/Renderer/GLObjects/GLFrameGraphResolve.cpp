@@ -24,8 +24,11 @@ namespace neo {
 			if (passState.mDepthTest) {
 				glEnable(GL_DEPTH_TEST);
 				switch (passState.mDepthFunc) {
-				case DepthFunc::Less:
+				case types::passState::DepthFunc::Less:
 					glDepthFunc(GL_LESS);
+					break;
+				case types::passState::DepthFunc::LessEqual:
+					glDepthFunc(GL_LEQUAL);
 					break;
 				default:
 					NEO_FAIL("Invalid");
@@ -39,10 +42,10 @@ namespace neo {
 			if (passState.mCullFace) {
 				glEnable(GL_CULL_FACE);
 				switch (passState.mCullOrder) {
-				case CullOrder::Front:
+				case types::passState::CullOrder::Front:
 					glCullFace(GL_FRONT);
 					break;
-				case CullOrder::Back:
+				case types::passState::CullOrder::Back:
 					glCullFace(GL_BACK);
 					break;
 				default:
@@ -56,7 +59,7 @@ namespace neo {
 			if (passState.mBlending) {
 				glEnable(GL_BLEND);
 				switch (passState.mBlendEquation) {
-				case BlendEquation::Add:
+				case types::passState::BlendEquation::Add:
 					glBlendEquation(GL_FUNC_ADD);
 					break;
 				default:
@@ -64,13 +67,13 @@ namespace neo {
 					break;
 				}
 
-				auto getBlendFactor = [](BlendFactor factor) {
+				auto getBlendFactor = [](types::passState::BlendFactor factor) {
 					switch (factor) {
-					case BlendFactor::Alpha:
+					case types::passState::BlendFactor::Alpha:
 						return GL_SRC_ALPHA;
-					case BlendFactor::OneMinusAlpha:
+					case types::passState::BlendFactor::OneMinusAlpha:
 						return GL_ONE_MINUS_SRC_ALPHA;
-					case BlendFactor::One:
+					case types::passState::BlendFactor::One:
 						return GL_ONE;
 					default:
 						NEO_FAIL("Invalid");

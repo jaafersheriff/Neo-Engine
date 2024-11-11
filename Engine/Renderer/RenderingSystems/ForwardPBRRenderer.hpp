@@ -73,9 +73,9 @@ namespace neo {
 		PassState passState;
 		if constexpr ((std::is_same_v<TransparentComponent, CompTs> || ...)) {
 			passState.mBlending = true;
-			passState.mBlendEquation = BlendEquation::Add;
-			passState.mBlendSrcRGB = passState.mBlendSrcAlpha = BlendFactor::Alpha;
-			passState.mBlendDstRGB = passState.mBlendDstAlpha = BlendFactor::OneMinusAlpha;
+			passState.mBlendEquation = types::passState::BlendEquation::Add;
+			passState.mBlendSrcRGB = passState.mBlendSrcAlpha = types::passState::BlendFactor::Alpha;
+			passState.mBlendDstRGB = passState.mBlendDstAlpha = types::passState::BlendFactor::OneMinusAlpha;
 		}
 		fg.pass(outTarget, vp, vp, passState, pbrShaderHandle)
 			.with([light, shadowsEnabled, lightEntity, lightSpatial, cameraEntity, cameraSpatial](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {

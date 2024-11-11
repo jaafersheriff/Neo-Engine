@@ -14,50 +14,53 @@
 
 namespace neo {
 
-	void drawSkybox(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity) {
-		TRACY_GPU();
+	void drawSkybox(
+		FrameGraph& fg,
+		FramebufferHandle outTarget,
+		Viewport vp,
+		const ResourceManagers& resourceManagers,
+		ECS::Entity cameraEntity) {
+		TRACY_ZONE();
 
-		auto skyboxTuple = ecs.cGetComponent<SkyboxComponent>();
 		auto skyboxShaderHandle = resourceManagers.mShaderManager.asyncLoad("SkyboxShader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "skybox.vert"},
 			{ types::shader::Stage::Fragment, "skybox.frag" }
-		});
-		if (!skyboxTuple || !resourceManagers.mShaderManager.isValid(skyboxShaderHandle)) {
-			return;
-		}
-		const auto& [_, skybox] = *skyboxTuple;
-		const auto& skyboxTexture = resourceManagers.mTextureManager.resolve(skybox.mSkybox);
+			});
 
-		glDisable(GL_CULL_FACE);
-		glDepthMask(GL_FALSE);
-		glDepthFunc(GL_LEQUAL);
 
-		auto camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
-		auto camSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
-		NEO_ASSERT(camera, "No main camera exists");
+		PassState passState;
+		passState.mCullFace = false;
+		passState.mDepthMask = false;
+		passState.mDepthFunc = types::passState::DepthFunc::LessEqual;
+		fg.pass(outTarget, vp, vp, passState, skyboxShaderHandle)
+			.with([cameraEntity](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+			auto skyboxTuple = ecs.cGetComponent<SkyboxComponent>();
+			if (!skyboxTuple) {
+				return;
+			}
+			const auto& [_, skybox] = *skyboxTuple;
 
-		ShaderDefines defines;
-		MakeDefine(EQUIRECTANGULAR);
-		MakeDefine(HDR);
-		if (skyboxTexture.mFormat.mTarget == types::texture::Target::Texture2D) {
-			defines.set(EQUIRECTANGULAR);
-		}
-		if (skyboxTexture.mFormat.mType != types::ByteFormats::UnsignedByte) {
-			defines.set(HDR);
-		}
 
-		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(skyboxShaderHandle, defines);
+			auto camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
+			auto camSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
+			NEO_ASSERT(camera, "No main camera exists");
+			const auto& skyboxTexture = resourceManagers.mTextureManager.resolve(skybox.mSkybox);
+			MakeDefine(EQUIRECTANGULAR);
+			MakeDefine(HDR);
+			if (skyboxTexture.mFormat.mTarget == types::texture::Target::Texture2D) {
+				pass.setDefine(EQUIRECTANGULAR);
+			}
+			if (skyboxTexture.mFormat.mType != types::ByteFormats::UnsignedByte) {
+				pass.setDefine(HDR);
+			}
 
-		resolvedShader.bind();
-		resolvedShader.bindUniform("P", camera->getProj());
-		resolvedShader.bindUniform("V", camSpatial->getView());
-		resolvedShader.bindTexture("cubeMap", skyboxTexture);
+			pass.bindUniform("P", camera->getProj());
+			pass.bindUniform("V", camSpatial->getView());
+			pass.bindTexture("cubeMap", skybox.mSkybox);
 
-		/* Draw */
-		resourceManagers.mMeshManager.resolve(HashedString("cube")).draw();
+			pass.drawCommand(HashedString("cube"), {}, {});
 
-		glEnable(GL_CULL_FACE);
-		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LESS);
+			})
+			.setDebugName("Skybox");
 	}
 }

@@ -458,10 +458,10 @@ namespace DeferredPBR {
 		}
 
 		drawDirectionalLightResolve<MainLightComponent>(fg, hdrColorTarget, sceneViewport, resourceManagers, ecs, cameraEntity, gbufferHandle);
-		// drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
+		drawPointLightResolve(fg, hdrColorTarget, sceneViewport, resourceManagers, ecs, cameraEntity, gbufferHandle, mLightDebugRadius);
 		// drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
 		drawForwardPBR<TransparentComponent>(fg, hdrColorTarget, sceneViewport, resourceManagers, ecs, cameraEntity);
-		// drawSkybox(resourceManagers, ecs, cameraEntity);
+		drawSkybox(fg, hdrColorTarget, sceneViewport, resourceManagers, cameraEntity);
 
 		// FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParams) : hdrColorOutput;
 		// if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {

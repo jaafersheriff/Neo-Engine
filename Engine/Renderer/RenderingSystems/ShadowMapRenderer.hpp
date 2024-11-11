@@ -39,7 +39,7 @@ namespace neo {
 
 		PassState passState;
 		passState.mCullFace = true;
-		passState.mCullOrder = CullOrder::Front;
+		passState.mCullOrder = types::passState::CullOrder::Front;
 		fg.pass(outputTarget, vp, vp, passState, shaderHandle)
 			.with([lightEntity](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_ZONEN("drawShadows PassBuilder");

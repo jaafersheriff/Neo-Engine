@@ -16,6 +16,8 @@ namespace neo {
 		NEO_ASSERT(mFramebufferHandles, "Can't alloc");
 		mViewports = reinterpret_cast<Viewport*>(malloc(256 * sizeof(Viewport)));
 		NEO_ASSERT(mViewports, "Can't alloc");
+		mShaderHandles = reinterpret_cast<ShaderHandle*>(malloc(256 * sizeof(ShaderHandle)));
+		NEO_ASSERT(mShaderHandles, "Can't alloc");
 	}
 
 	FrameData::~FrameData() {
@@ -39,6 +41,7 @@ namespace neo {
 			free(reinterpret_cast<void*>(mPassStates));
 			free(reinterpret_cast<void*>(mFramebufferHandles));
 			free(reinterpret_cast<void*>(mViewports));
+			free(reinterpret_cast<void*>(mShaderHandles));
 		}
 	}
 

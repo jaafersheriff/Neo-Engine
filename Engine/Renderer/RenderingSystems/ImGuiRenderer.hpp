@@ -47,11 +47,11 @@ namespace neo {
 
 		PassState passState;
 		passState.mBlending = true;
-		passState.mBlendEquation = BlendEquation::Add;
-		passState.mBlendSrcRGB = BlendFactor::Alpha;
-		passState.mBlendDstRGB = BlendFactor::OneMinusAlpha;
-		passState.mBlendSrcAlpha = BlendFactor::One;
-		passState.mBlendDstAlpha = BlendFactor::OneMinusAlpha;
+		passState.mBlendEquation = types::passState::BlendEquation::Add;
+		passState.mBlendSrcRGB = types::passState::BlendFactor::Alpha;
+		passState.mBlendDstRGB = types::passState::BlendFactor::OneMinusAlpha;
+		passState.mBlendSrcAlpha = types::passState::BlendFactor::One;
+		passState.mBlendDstAlpha = types::passState::BlendFactor::OneMinusAlpha;
 		passState.mCullFace = false;
 		passState.mDepthTest = false;
 		passState.mStencilTest = false;
