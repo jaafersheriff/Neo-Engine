@@ -23,8 +23,9 @@ namespace neo {
 		// 	});
 		// printf("%s\n", output.str().c_str());
 
-		std::set<uint16_t> passSeq;
+		std::set<std::pair<entt::id_type, uint16_t>> passSeq;
 		{
+
 			TRACY_ZONEN("Traverse Graph");
 			std::deque<entt::flow::basic_flow::graph_type::vertex_type> nodesToVisit;
 			for (auto&& vertex : graph.vertices()) {
@@ -38,9 +39,12 @@ namespace neo {
 				auto vertex = nodesToVisit.front();
 				nodesToVisit.pop_front();
 				auto& task = mTasks[mBuilder[vertex]];
-				if (passSeq.find(task.mPassIndex) == passSeq.end()) {
-					passSeq.insert(task.mPassIndex);
-					(*task.mPassBuilder)(mFrameData.getPass(task.mPassIndex), resourceManagers, ecs);
+				if (passSeq.find({ mBuilder[vertex], task.mPassIndex }) == passSeq.end()) {
+					passSeq.insert({ mBuilder[vertex], task.mPassIndex });
+					{
+						TRACY_ZONEF("%s", task.mDebugName.value_or("Task").c_str());
+						(*task.mPassBuilder)(mFrameData.getPass(task.mPassIndex), resourceManagers, ecs);
+					}
 					for (auto e : graph.out_edges(vertex)) {
 						nodesToVisit.push_back(e.second);
 					}
@@ -50,12 +54,15 @@ namespace neo {
 		}
 
 		// Sequentially walk through passes, make GL calls
-		for (auto& passID : passSeq) {
-			TRACY_GPUN("Pass");
-			Pass& pass = mFrameData.getPass(passID);
-			for (uint16_t i = 0; i < pass.getCommandSize(); i++) {
-				Command& c = pass.getCommand(i);
-				GLFrameGraphResolve(mFrameData, pass, c, resourceManagers);
+		{
+			TRACY_GPUN("GL Calls");
+			for (auto& passID : passSeq) {
+				TRACY_GPUF(mTasks[passID.first].mDebugName.value_or("Pass").c_str());
+				Pass& pass = mFrameData.getPass(passID.second);
+				for (uint16_t i = 0; i < pass.getCommandSize(); i++) {
+					Command& c = pass.getCommand(i);
+					GLFrameGraphResolve(mFrameData, pass, c, resourceManagers);
+				}
 			}
 		}
 	}

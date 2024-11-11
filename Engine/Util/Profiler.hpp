@@ -6,6 +6,7 @@
 #include <GL/glew.h>
 #include <tracy/TracyOpenGL.hpp>
 #define TRACY_ZONEN(x) ZoneScopedNC(x, (neo::HashedString(x) & 0xfefefe) >> 1 )
+#define TRACY_ZONEF(fmt, ...) TRACY_ZONEN("") ; ZoneNameF(fmt, ##__VA_ARGS__) 
 #define TRACY_ZONE() TRACY_ZONEN(TracyFunction)
 
 
@@ -23,7 +24,14 @@ struct _NEO_GPU_SCOPE {
 #endif
 	}
 };
-#define TRACY_GPUN(x) TRACY_ZONEN(x); TracyGpuZoneC(x, (neo::HashedString(x) & 0xfefefe) >> 1 ); _NEO_GPU_SCOPE ___NEO_GPU_SCOPE##__LINE__(x)
+#define TRACY_GPUN(x) \
+	TRACY_ZONEN(x); \
+	TracyGpuZoneC(x, (neo::HashedString(x) & 0xfefefe) >> 1 ); \
+	_NEO_GPU_SCOPE ___NEO_GPU_SCOPE##__LINE__(x)
+#define TRACY_GPUF(x) \
+	TRACY_ZONEF("%s", x); \
+	TracyGpuZoneTransient(__tracy_gpu_zone, x, true); \
+	_NEO_GPU_SCOPE ___NEO_GPU_SCOPE##__LINE__(x)
 #define TRACY_GPU() TRACY_GPUN(TracyFunction)
 
 #include <memory>
