@@ -4,41 +4,11 @@
 #include "ResourceManager/ResourceManagers.hpp"
 #include "Renderer/GLObjects/PassState.hpp"
 #include "Renderer/GLObjects/UniformBuffer.hpp"
+#include "Renderer/FrameGraph/ShaderDefinesFG.hpp"
 
 #include <ext/entt_incl.hpp>
 
 namespace neo {
-
-	struct ShaderDefinesFG {
-		ShaderDefinesFG() = default;
-
-		void operator=(const ShaderDefinesFG& other) {
-			for (auto& [d, b] : other.getDefines()) {
-				if (b) {
-					set(d);
-				}
-			}
-		}
-
-		void set(const ShaderDefine& define) {
-			mDefines[define] = true;
-		}
-
-		void toOldStyle(ShaderDefines& defines) const {
-			for (auto& [d, b] : mDefines) {
-				if (b) {
-					defines.set(d);
-				}
-			}
-		}
-
-		const std::map<ShaderDefine, bool>& getDefines() const {
-			return mDefines;
-		}
-
-	private:
-		std::map<ShaderDefine, bool> mDefines;
-	};
 
 	using Command = uint64_t;
 	enum class CommandType : uint8_t {
