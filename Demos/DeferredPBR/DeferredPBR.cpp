@@ -421,42 +421,43 @@ namespace DeferredPBR {
 		auto gbufferHandle = createGbuffer(resourceManagers, viewport.mSize);
 		fg.clear(gbufferHandle, glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		drawGBuffer<OpaqueComponent>(fg, gbufferHandle, sceneViewport, resourceManagers, cameraEntity);
-		//drawGBuffer<AlphaTestComponent>(fg, gbufferHandle, sceneViewport, resourceManagers, ecs, cameraEntity);
+		drawGBuffer<AlphaTestComponent>(fg, gbufferHandle, sceneViewport, resourceManagers, cameraEntity);
 
-		// if (mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
-		// 	auto debugOutput = drawGBufferDebug(resourceManagers, gbufferHandle, viewport.mSize, mGbufferDebugParams);
-		// 	if (resourceManagers.mFramebufferManager.isValid(debugOutput)) {
-		// 		blit(resourceManagers, backbuffer, resourceManagers.mFramebufferManager.resolve(debugOutput).mTextures[0], viewport.mSize);
-		// 		return;
-		// 	}
-		// }
+		if (mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
+			auto debugOutput = drawGBufferDebug(fg, gbufferHandle, sceneViewport, resourceManagers, mGbufferDebugParams);
+			blit(fg, sceneViewport, resourceManagers, debugOutput, backbufferHandle);
+			return;
+		}
 
-		// auto hdrColorOutput = resourceManagers.mFramebufferManager.asyncLoad(
-		// 	"HDR Color",
-		// 	FramebufferBuilder{}
-		// 		.setSize(viewport.mSize)
-		// 		.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
-		// 		.attach(TextureFormat{types::texture::Target::Texture2D, types::texture::InternalFormats::D16}),
-		// 	resourceManagers.mTextureManager
-		// );
-		// if (!resourceManagers.mFramebufferManager.isValid(hdrColorOutput)) {
-		// 	return;
-		// }
-		// auto& hdrColor = resourceManagers.mFramebufferManager.resolve(hdrColorOutput);
+		// Handle resizing wahoo
+		TextureHandle hdrColorHandle("HDR Color");
+		if (resourceManagers.mTextureManager.isValid(hdrColorHandle)) {
+			const Texture& hdrColor = resourceManagers.mTextureManager.resolve(hdrColorHandle);
+			if (viewport.mSize.x != hdrColor.mWidth || viewport.mSize.y != hdrColor.mHeight) {
+				resourceManagers.mTextureManager.discard(hdrColorHandle);
+			}
+		}
+		hdrColorHandle = resourceManagers.mTextureManager.asyncLoad(hdrColorHandle, TextureBuilder{}
+			.setFormat({ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
+			.setDimension(glm::u16vec3(viewport.mSize, 0))
+		);
+		FramebufferHandle hdrColorTarget;
+		if (resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
+			const auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
+			hdrColorTarget = resourceManagers.mFramebufferManager.asyncLoad(
+				"HDR Color",
+				FramebufferExternalAttachments{
+					FramebufferAttachment{hdrColorHandle},
+					FramebufferAttachment{gbuffer.mTextures[3]},
+				},
+				resourceManagers.mTextureManager
+			);
+		}
+		else {
+			return;
+		}
 
-		// {
-		// 	TRACY_GPUN("GBuffer Depth Blit");
-		// 	hdrColor.bind();
-		// 	hdrColor.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		// 	glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		// 	glBlitNamedFramebuffer(gbuffer.mFBOID, hdrColor.mFBOID,
-		// 		0, 0, viewport.mSize.x, viewport.mSize.y,
-		// 		0, 0, viewport.mSize.x, viewport.mSize.y,
-		// 		GL_DEPTH_BUFFER_BIT,
-		// 		GL_NEAREST
-		// 	);
-		// }
-		// drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
+		drawDirectionalLightResolve<MainLightComponent>(fg, hdrColorTarget, sceneViewport, resourceManagers, ecs, cameraEntity, gbufferHandle);
 		// drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
 		// // Extract IBL
 		// std::optional<IBLComponent> ibl;

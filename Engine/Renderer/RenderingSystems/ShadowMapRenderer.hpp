@@ -41,7 +41,7 @@ namespace neo {
 		passState.mCullFace = true;
 		passState.mCullOrder = CullOrder::Front;
 		fg.pass(outputTarget, vp, vp, passState, shaderHandle, [lightEntity](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
-
+			TRACY_ZONEN("drawShadows PassBuilder");
 			NEO_ASSERT(ecs.has<DirectionalLightComponent>(lightEntity) && ecs.has<ShadowCameraComponent>(lightEntity), "Invalid light entity");
 			NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity) && ecs.has<CameraComponent>(lightEntity), "Light entity is just wrong");
 			const glm::mat4 P = ecs.cGetComponent<CameraComponent>(lightEntity)->getProj();

@@ -61,6 +61,7 @@ namespace DeferredPBR {
 			});
 
 		fg.pass(gbufferHandle, vp, vp, {}, shaderHandle, [cameraEntity](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_ZONEN("drawGBuffer Task");
 			MakeDefine(ALPHA_TEST);
 			if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
 				pass.setDefine(ALPHA_TEST);
@@ -168,32 +169,40 @@ namespace DeferredPBR {
 		}
 	};
 
-	inline FramebufferHandle drawGBufferDebug(const ResourceManagers& resourceManagers, FramebufferHandle gbufferHandle, glm::uvec2 viewportSize, const GBufferDebugParameters& debugParameters) {
-		TRACY_GPU();
+	inline FramebufferHandle drawGBufferDebug(
+		FrameGraph& fg,
+		FramebufferHandle gbufferHandle,
+		Viewport vp,
+		const ResourceManagers& resourceManagers,
+		const GBufferDebugParameters& debugParameters
+	) {
+		TRACY_ZONE();
 
 		if (debugParameters.mDebugMode == GBufferDebugParameters::DebugMode::Off) {
 			return NEO_INVALID_HANDLE;
 		}
+		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
+			return NEO_INVALID_HANDLE;
+		}
 
 		auto outputHandle = resourceManagers.mFramebufferManager.asyncLoad("GBuffer Debug", FramebufferBuilder{}
-			.setSize(viewportSize)
+			.setSize(glm::uvec2(vp.z, vp.w))
 			.attach(TextureFormat{
 				types::texture::Target::Texture2D,
 				types::texture::InternalFormats::RGB8_UNORM
-			}),
+				}),
 			resourceManagers.mTextureManager
 		);
+
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBufferDebug", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "quad.vert"},
 			{ types::shader::Stage::Fragment, "deferredpbr/gbuffer_debug.frag" }
-		});
+			});
 
-		if (resourceManagers.mFramebufferManager.isValid(gbufferHandle) && resourceManagers.mFramebufferManager.isValid(outputHandle) && resourceManagers.mShaderManager.isValid(shaderHandle)) {
-			auto output = resourceManagers.mFramebufferManager.resolve(outputHandle);
-			output.bind();
-			glViewport(0, 0, viewportSize.x, viewportSize.y);
-
-			ShaderDefines defines;
+		PassState passState;
+		passState.mDepthTest = false;
+		fg.pass(outputHandle, vp, vp, passState, shaderHandle, [debugParameters, gbufferHandle](Pass& pass, const ResourceManagers& resourceManagers, const ECS&) {
+			TRACY_ZONEN("GbufferDebug Task");
 			MakeDefine(NORMAL);
 			MakeDefine(ALBEDO);
 			MakeDefine(AO);
@@ -203,42 +212,40 @@ namespace DeferredPBR {
 			MakeDefine(DEPTH);
 			switch (debugParameters.mDebugMode) {
 			case GBufferDebugParameters::DebugMode::Normal:
-				defines.set(NORMAL);
+				pass.setDefine(NORMAL);
 				break;
 			case GBufferDebugParameters::DebugMode::Albedo:
-				defines.set(ALBEDO);
+				pass.setDefine(ALBEDO);
 				break;
 			case GBufferDebugParameters::DebugMode::AO:
-				defines.set(AO);
+				pass.setDefine(AO);
 				break;
 			case GBufferDebugParameters::DebugMode::Roughness:
-				defines.set(ROUGHNESS);
+				pass.setDefine(ROUGHNESS);
 				break;
 			case GBufferDebugParameters::DebugMode::Emissive:
-				defines.set(EMISSIVE);
+				pass.setDefine(EMISSIVE);
 				break;
 			case GBufferDebugParameters::DebugMode::Metalness:
-				defines.set(METALNESS);
+				pass.setDefine(METALNESS);
 				break;
 			case GBufferDebugParameters::DebugMode::Depth:
-				defines.set(DEPTH);
+				pass.setDefine(DEPTH);
 				break;
 			default:
 				NEO_FAIL("Invalid debug mode");
-				return NEO_INVALID_HANDLE;
+				return;
 			}
 
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, defines);
-			resolvedShader.bind();
+			const Framebuffer& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
+			UniformBuffer uniforms;
+			uniforms.bindTexture("gAlbedoAO", gbuffer.mTextures[0]);
+			uniforms.bindTexture("gNormalRoughness", gbuffer.mTextures[1]);
+			uniforms.bindTexture("gEmissiveMetalness", gbuffer.mTextures[2]);
+			uniforms.bindTexture("gDepth", gbuffer.mTextures[3]);
 
-			auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-			resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-			resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-			resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-			resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
-
-			resourceManagers.mMeshManager.resolve("quad").draw();
-		}
+			pass.drawCommand(MeshHandle("quad"), uniforms, {});
+		}).mDebugName = "GbufferDebug";
 
 		return outputHandle;
 	}

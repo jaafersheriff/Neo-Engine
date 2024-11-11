@@ -50,7 +50,7 @@ namespace neo {
 		PassState state;
 		state.mDepthTest = false;
 		fg.pass(dstHandle, vp, vp, state, blitShaderHandle, [srcHandle, srcImage](Pass& pass, const ResourceManagers& resourceManagers, const ECS&) {
-			TRACY_GPUN("Blit");
+			TRACY_ZONEN("Blit Task");
 			if (!resourceManagers.mFramebufferManager.isValid(srcHandle)) {
 				return;
 			}

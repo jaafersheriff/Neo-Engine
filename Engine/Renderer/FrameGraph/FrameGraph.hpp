@@ -173,6 +173,9 @@ namespace neo {
 
 		template<typename Dep, typename... Deps>
 		void _assignDeps(Dep dep, Deps... deps) {
+			if (dep == NEO_INVALID_HANDLE) {
+				return;
+			}
 			if constexpr (std::is_same_v<Dep, FramebufferHandle>) {
 				mBuilder.rw(dep.mHandle);
 				if (mResourceManagers.mFramebufferManager.isValid(dep)) {

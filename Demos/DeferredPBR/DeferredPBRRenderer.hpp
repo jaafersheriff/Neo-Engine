@@ -12,13 +12,23 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "Renderer/FrameGraph/FrameGraph.hpp"
 
 using namespace neo;
 
 namespace DeferredPBR {
 
-	template<typename... CompTs>
-	void drawDirectionalLightResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle) {
+	template<typename... CompTs, typename... Deps>
+	inline void drawDirectionalLightResolve(
+		FrameGraph& fg,
+		FramebufferHandle outputHandle,
+		Viewport vp,
+		const ResourceManagers& resourceManagers, 
+		const ECS& ecs,
+		const ECS::Entity cameraEntity, 
+		FramebufferHandle gbufferHandle,
+		Deps... deps
+	) {
 		TRACY_GPU();
 
 		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
@@ -28,66 +38,65 @@ namespace DeferredPBR {
 		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("DirectionalLightResolveShader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "quad.vert" },
 			{ types::shader::Stage::Fragment, "deferredpbr/directionallightresolve.frag" }
-			});
-		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
+		});
+
+		PassState passState;
+		passState.mDepthTest = false;
+
+		TextureHandle shadowMapHandle = NEO_INVALID_HANDLE;
+		const auto lightView = ecs.getSingleView<LightComponent, SpatialComponent, CompTs...>();
+		if (!lightView) {
 			return;
 		}
 
-		glDisable(GL_DEPTH_TEST);
-		const auto& lightView = ecs.getView<LightComponent, SpatialComponent, CompTs...>();
-		ShaderDefines defines;
-		for (auto& entity : lightView) {
-			defines.reset();
+		// This could all go in a for loop tbh
+		const ECS::Entity& lightEntity = std::get<0>(*lightView);
+		const LightComponent& light = std::get<1>(*lightView);
+		const SpatialComponent& lightSpatial = std::get<2>(*lightView);
+		const bool shadowsEnabled =
+			ecs.has<DirectionalLightComponent>(lightEntity)
+			&& ecs.has<CameraComponent>(lightEntity)
+			&& ecs.has<ShadowCameraComponent>(lightEntity)
+			&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap)
+			;
 
-			const bool shadowsEnabled = 
-				ecs.has<DirectionalLightComponent>(entity) 
-				&& ecs.has<CameraComponent>(entity) 
-				&& ecs.has<ShadowCameraComponent>(entity) 
-				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
+		fg.pass(outputHandle, vp, vp, passState, lightResolveShaderHandle, [cameraEntity, gbufferHandle, lightEntity, light, lightSpatial, shadowsEnabled](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+
 			MakeDefine(ENABLE_SHADOWS);
-			glm::mat4 L;
 			if (shadowsEnabled) {
-				defines.set(ENABLE_SHADOWS);
+				pass.setDefine(ENABLE_SHADOWS);
 				static glm::mat4 biasMatrix(
 					0.5f, 0.0f, 0.0f, 0.0f,
 					0.0f, 0.5f, 0.0f, 0.0f,
 					0.0f, 0.0f, 0.5f, 0.0f,
 					0.5f, 0.5f, 0.5f, 1.0f);
-				L = biasMatrix * ecs.cGetComponent<CameraComponent>(entity)->getProj() * ecs.cGetComponent<SpatialComponent>(entity)->getView();
-			}
-
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
-			resolvedShader.bind();
-
-			if (shadowsEnabled) {
-				const auto& shadowMap = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
-				resolvedShader.bindUniform("lightTransform", L);
-				resolvedShader.bindTexture("shadowMap", shadowMap);
-				resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
+				pass.bindUniform("lightTransform", biasMatrix * ecs.cGetComponent<CameraComponent>(lightEntity)->getProj() * lightSpatial.getView());
+				pass.bindTexture("shadowMap", ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
+				const Texture& shadowTexture = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
+				pass.bindUniform("shadowMapResolution", glm::vec2(shadowTexture.mWidth, shadowTexture.mHeight));
 			}
 
 			const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
 			const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
-			resolvedShader.bindUniform("P", camera->getProj());
-			resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
-			resolvedShader.bindUniform("V", cameraSpatial->getView());
-			resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
-			resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
+			pass.bindUniform("P", camera->getProj());
+			pass.bindUniform("invP", glm::inverse(camera->getProj()));
+			pass.bindUniform("V", cameraSpatial->getView());
+			pass.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
+			pass.bindUniform("camPos", cameraSpatial->getPosition());
 
 			/* Bind gbuffer */
 			auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-			resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-			resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-			resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-			resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
+			pass.bindTexture("gAlbedoAO", gbuffer.mTextures[0]);
+			pass.bindTexture("gNormalRoughness", gbuffer.mTextures[1]);
+			pass.bindTexture("gEmissiveMetalness", gbuffer.mTextures[2]);
+			pass.bindTexture("gDepth", gbuffer.mTextures[3]);
 
-			const auto& light = ecs.cGetComponent<LightComponent>(entity);
-			resolvedShader.bindUniform("lightRadiance", glm::vec4(light->mColor, light->mIntensity));
-			resolvedShader.bindUniform("lightDir", -ecs.cGetComponent<SpatialComponent>(entity)->getLookDir());
+			pass.bindUniform("lightRadiance", glm::vec4(light.mColor, light.mIntensity));
+			pass.bindUniform("lightDir", -lightSpatial.getLookDir());
 
-			resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
-		}
-		glEnable(GL_DEPTH_TEST);
+			pass.drawCommand(MeshHandle("quad"), {}, {});
+		}, 
+			gbufferHandle, shadowsEnabled ? ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap : NEO_INVALID_HANDLE, deps...).mDebugName = "DirectionalLightResolve";
 	}
 
 	template<typename... CompTs>

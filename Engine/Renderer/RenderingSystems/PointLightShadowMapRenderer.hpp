@@ -48,7 +48,7 @@ namespace neo {
 		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity), "Point light shadows need a spatial");
 
 		fg.pass(outputTarget, vp, vp, {}, shaderHandle, [lightEntity, faceIndex](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
-
+			TRACY_ZONEN("drawPointLightShadows PassBuilder");
 			SpatialComponent cameraSpatial = *ecs.cGetComponent<SpatialComponent>(lightEntity); // Copy
 			FrustumComponent frustum;
 			CameraComponent camera(
