@@ -83,7 +83,7 @@ namespace neo {
 				pass.bindTexture("Texture", draw.mTextureHandle);
 				pass.drawCommand(draw.mMeshHandle, {}, {}, draw.mElementCount, draw.mElementBufferOffset);
 					})
-				.dependsOn(resourceManagers, std::forward<Deps>(deps)...)
+				.dependsOn(std::forward<Deps>(deps)...)
 				.setDebugName("Draw ImGui")
 				;
 		}

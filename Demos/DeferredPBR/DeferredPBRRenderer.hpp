@@ -29,7 +29,7 @@ namespace DeferredPBR {
 		FramebufferHandle gbufferHandle,
 		Deps... deps
 	) {
-		TRACY_GPU();
+		TRACY_ZONE();
 
 		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
 			return;
@@ -97,7 +97,7 @@ namespace DeferredPBR {
 
 			pass.drawCommand(MeshHandle("quad"), {}, {});
 		})
-			.dependsOn(resourceManagers, gbufferHandle, shadowsEnabled ? ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap : NEO_INVALID_HANDLE, std::forward<Deps>(deps)...)
+			.dependsOn(gbufferHandle, shadowsEnabled ? ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap : NEO_INVALID_HANDLE, std::forward<Deps>(deps)...)
 			.setDebugName("DirectionalLightResolve");
 	}
 
@@ -201,7 +201,7 @@ namespace DeferredPBR {
 				// TODO : instanced
 				pass.drawCommand(HashedString("sphere"), {}, {});
 					})
-				.dependsOn(resourceManagers, gbufferHandle, shadowsEnabled ? ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap : NEO_INVALID_HANDLE)
+				.dependsOn(gbufferHandle, shadowsEnabled ? ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap : NEO_INVALID_HANDLE)
 				.setDebugName("Point Light Resolve");
 		}
 	}

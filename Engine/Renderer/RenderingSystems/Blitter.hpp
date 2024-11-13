@@ -64,7 +64,7 @@ namespace neo {
 			pass.bindTexture("inputTexture", src.mTextures[srcImage]);
 			pass.drawCommand(MeshHandle("quad"), {}, {});
 			})
-			.dependsOn(resourceManagers, srcHandle, std::forward<Deps>(deps)...)
+			.dependsOn(srcHandle, std::forward<Deps>(deps)...)
 			.setDebugName("Blit");
 	}
 }

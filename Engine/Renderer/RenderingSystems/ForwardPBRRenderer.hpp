@@ -197,7 +197,7 @@ namespace neo {
 				}
 
 			})
-			.dependsOn(resourceManagers, shadowsEnabled ? ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap : NEO_INVALID_HANDLE)
+			.dependsOn(shadowsEnabled ? ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap : NEO_INVALID_HANDLE)
 			.setDebugName("ForwardPBR");
 
 	}

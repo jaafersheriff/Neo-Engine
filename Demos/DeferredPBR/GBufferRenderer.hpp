@@ -127,7 +127,7 @@ namespace DeferredPBR {
 				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, uniforms, drawDefines);
 			}
 		})
-			.dependsOn(resourceManagers, deps...)
+			.dependsOn(deps...)
 			.setDebugName("Gbuffer Pass");
 	}
 
@@ -250,7 +250,7 @@ namespace DeferredPBR {
 
 			pass.drawCommand(MeshHandle("quad"), uniforms, {});
 		})
-			.dependsOn(resourceManagers, gbufferHandle)
+			.dependsOn(gbufferHandle)
 			.setDebugName("GbufferDebug");
 
 		return outputHandle;

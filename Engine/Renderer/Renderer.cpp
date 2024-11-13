@@ -141,7 +141,7 @@ namespace neo {
 			// }
 
 			fg.clear(FramebufferHandle(0), glm::vec4(0.f), types::framebuffer::AttachmentBit::Color)
-				.dependsOn(resourceManagers, mDefaultFBOHandle)
+				.dependsOn(mDefaultFBOHandle)
 				.setDebugName("Clear backbuffer");
 
 			/* Render imgui */

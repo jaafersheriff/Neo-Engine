@@ -99,7 +99,7 @@ namespace neo {
 				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, ubo, drawDefines);
 			}
 		})
-		.dependsOn(resourceManagers, std::forward<Deps>(deps)...)
+		.dependsOn(std::forward<Deps>(deps)...)
 		.setDebugName("PointLightShadows");
 	}
 }

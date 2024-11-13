@@ -95,7 +95,7 @@ namespace neo {
 					pass.bindUniform("texelSize", glm::vec2(1.f / glm::vec2(mipDimension)));
 					pass.drawCommand(MeshHandle("quad"), {}, {});
 						})
-					.dependsOn(resourceManagers, i == 0 ? outTarget : bloomTargets[i-1])
+					.dependsOn(i == 0 ? outTarget : bloomTargets[i-1])
 					.setDebugName("Bloom Down");
 			}
 		}
@@ -129,7 +129,7 @@ namespace neo {
 					pass.bindTexture("inputTexture", bloomTarget.mTextures[0]);
 					pass.drawCommand(MeshHandle("quad"), {}, {});
 						})
-					.dependsOn(resourceManagers, bloomTargets[i])
+					.dependsOn(bloomTargets[i])
 					.setDebugName("Bloom Up")
 					;
 			}
@@ -165,7 +165,7 @@ namespace neo {
 					pass.bindTexture("hdrColor", inputTexture);
 					pass.drawCommand(MeshHandle("quad"), {}, {});
 				})
-				.dependsOn(resourceManagers, inputTexture, bloomTargets[0])
+				.dependsOn(inputTexture, bloomTargets[0])
 				.setDebugName("Bloom final")
 			;
 

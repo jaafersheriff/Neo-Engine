@@ -41,9 +41,9 @@ namespace neo {
 			}
 
 			template<typename... Deps>
-			Task& dependsOn(const ResourceManagers& resourceManagers, Deps... deps) {
+			Task& dependsOn(Deps... deps) {
 				if constexpr (sizeof...(Deps) > 0) {
-					_assignDeps(resourceManagers, std::forward<Deps>(deps)...);
+					_assignRODeps(std::forward<Deps>(deps)...);
 				}
 
 				return *this;
@@ -61,18 +61,12 @@ namespace neo {
 			entt::flow& mBuilder;
 
 			template<typename Dep, typename... Deps>
-			void _assignDeps(const ResourceManagers& resourceManagers, const Dep& dep, Deps... deps) {
+			Task& _assignRODeps(const Dep& dep, Deps... deps) {
 				if (dep == NEO_INVALID_HANDLE) {
-					return;
+					return *this;
 				}
 				if constexpr (std::is_same_v<Dep, FramebufferHandle>) {
-					mBuilder.rw(dep.mHandle);
-					if (resourceManagers.mFramebufferManager.isValid(dep)) {
-						const Framebuffer& fb = resourceManagers.mFramebufferManager.resolve(dep);
-						for (const TextureHandle& tex : fb.mTextures) {
-							mBuilder.rw(tex.mHandle);
-						}
-					}
+					mBuilder.ro(dep.mHandle);
 				}
 				else if constexpr (std::is_same_v<Dep, TextureHandle>) {
 					mBuilder.ro(dep.mHandle);
@@ -81,7 +75,39 @@ namespace neo {
 					static_assert(false, "dead");
 				}
 				if constexpr (sizeof...(Deps) > 0) {
-					return _assignDeps(resourceManagers, std::forward<Deps>(deps)...);
+					return _assignRODeps(std::forward<Deps>(deps)...);
+				}
+				else {
+					return *this;
+				}
+			}
+
+			template<typename Dep, typename... Deps>
+			Task& _assignRWDeps(const ResourceManagers& resourceManagers, const Dep& dep, Deps... deps) {
+				if (dep == NEO_INVALID_HANDLE) {
+					return *this;
+				}
+				if constexpr (std::is_same_v<Dep, FramebufferHandle>) {
+					mBuilder.rw(dep.mHandle);
+					NEO_UNUSED(resourceManagers);
+					if (resourceManagers.mFramebufferManager.isValid(dep)) {
+						const Framebuffer& fb = resourceManagers.mFramebufferManager.resolve(dep);
+						for (const TextureHandle& tex : fb.mTextures) {
+							mBuilder.rw(tex.mHandle);
+						}
+					}
+				}
+				else if constexpr (std::is_same_v<Dep, TextureHandle>) {
+					mBuilder.rw(dep.mHandle);
+				}
+				else {
+					static_assert(false, "dead");
+				}
+				if constexpr (sizeof...(Deps) > 0) {
+					return _assignRWDeps(resourceManagers, std::forward<Deps>(deps)...);
+				}
+				else {
+					return *this;
 				}
 			}
 		};
@@ -90,7 +116,7 @@ namespace neo {
 
 		Task& pass(const FramebufferHandle& target, Viewport viewport, Viewport scissor, PassState state, ShaderHandle shader) {
 			uint16_t passIndex = mFrameData.addPass(target, viewport, scissor, state, shader);
-			return _task(std::move(Task(passIndex, mBuilder))).dependsOn(mResourceManagers, target);
+			return _task(std::move(Task(passIndex, mBuilder)))._assignRWDeps(mResourceManagers, target);
 		}
 
 		Task& clear(FramebufferHandle handle, glm::vec4 color, types::framebuffer::AttachmentBits clearFlags) {
@@ -98,7 +124,7 @@ namespace neo {
 				.with([=](Pass& pass, const ResourceManagers&, const ECS&) {
 					pass.clearCommand(color, clearFlags);
 				})
-				.dependsOn(mResourceManagers, handle)
+				._assignRWDeps(mResourceManagers, handle)
 				.setDebugName("Clear")
 			;
 		}
