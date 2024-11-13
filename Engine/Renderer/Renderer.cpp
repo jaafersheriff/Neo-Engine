@@ -212,6 +212,7 @@ namespace neo {
 			ImGui::TextWrapped("Num Triangles: %d", mStats.mNumPrimitives);
 			ImGui::TextWrapped("Num Uniforms: %d", mStats.mNumUniforms);
 			ImGui::TextWrapped("Num Samplers: %d", mStats.mNumSamplers);
+			ImGui::TextWrapped("Num Passes: %d", mStats.mNumPasses);
 			ImGui::TreePop();
 		}
 		if (auto hardwareDetails = ecs.getSingleView<MouseComponent, ViewportDetailsComponent>()) {

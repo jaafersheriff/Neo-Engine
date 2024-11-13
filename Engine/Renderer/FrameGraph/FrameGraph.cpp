@@ -1,6 +1,9 @@
 #include "FrameGraph.hpp"
 
 #include "Renderer/GLObjects/GLFrameGraphResolve.hpp"
+#include "Renderer/Renderer.hpp"
+
+#include "Util/ServiceLocator.hpp"
 
 namespace neo {
 	namespace {
@@ -43,6 +46,7 @@ namespace neo {
 					passSeq.insert({ mBuilder[vertex], task.mPassIndex });
 					{
 						TRACY_ZONEF("%s", task.mDebugName.value_or("Task").c_str());
+						NEO_ASSERT(task.mPassBuilder.has_value(), "heh?");
 						(*task.mPassBuilder)(mFrameData.getPass(task.mPassIndex), resourceManagers, ecs);
 					}
 					for (auto e : graph.out_edges(vertex)) {
@@ -51,6 +55,7 @@ namespace neo {
 				}
 			}
 			NEO_ASSERT(passSeq.size() == mTasks.size(), "Incorrect task exection count");
+			ServiceLocator<Renderer>::value().mStats.mNumPasses = static_cast<uint32_t>(passSeq.size());
 		}
 
 		// Sequentially walk through passes, make GL calls

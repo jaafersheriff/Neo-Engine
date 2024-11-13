@@ -44,7 +44,6 @@ void main() {
 #ifdef IBL
 		+ getIndirectSpecular(pbrMaterial, iblMips, dfgLUT, ibl)
 #endif
-		+ emissiveMetalness.rgb
 	;
 	color.a = 1.0;
 }
