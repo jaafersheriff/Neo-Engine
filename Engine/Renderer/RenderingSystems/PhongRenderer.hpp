@@ -149,7 +149,7 @@ namespace neo {
 				ubo.bindUniform("M", drawSpatial.getModelMatrix());
 				ubo.bindUniform("N", drawSpatial.getNormalMatrix());
 
-				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, ubo, drawDefines);
+				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, ubo, std::move(drawDefines));
 			}
 			})
 			.setDebugName("Phong");

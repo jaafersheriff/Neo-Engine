@@ -96,7 +96,7 @@ namespace neo {
 				ubo.bindUniform("lightRange", (cameraSpatial.getScale().x - 0.5) / 2.f);
 
 				ubo.bindUniform("M", drawSpatial.getModelMatrix());
-				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, ubo, drawDefines);
+				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, ubo, std::move(drawDefines));
 			}
 		})
 		.dependsOn(std::forward<Deps>(deps)...)

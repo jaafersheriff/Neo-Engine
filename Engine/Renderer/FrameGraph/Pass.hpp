@@ -55,13 +55,14 @@ namespace neo {
 			;
 		}
 
-		void drawCommand(const MeshHandle& mesh, const UniformBuffer& ubo, const ShaderDefinesFG& drawDefines, uint16_t elements = 0, uint16_t bufferOffset = 0) {
+		void drawCommand(const MeshHandle& mesh, const UniformBuffer& ubo, ShaderDefinesFG&& drawDefines, uint16_t elements = 0, uint16_t bufferOffset = 0) {
 			uint64_t drawIndex = mDrawIndex;
 			mDraws[mDrawIndex++] = { mesh, elements, bufferOffset };
 
 			// Bad copies :(
 			uint64_t uboIndex = mFrameData.createUBO(ubo);
 			uint64_t definesIndex = mFrameData.createShaderDefines(drawDefines);
+			drawDefines.destroy();
 
 			Command& command = mCommands[mCommandIndex++];
 			command = 0

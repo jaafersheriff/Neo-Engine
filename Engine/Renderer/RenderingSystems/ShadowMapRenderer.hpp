@@ -72,7 +72,7 @@ namespace neo {
 				uniforms.bindUniform("P", P);
 				uniforms.bindUniform("V", V);
 				uniforms.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
-				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, uniforms, drawDefines);
+				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, uniforms, std::move(drawDefines));
 			}
 		})
 			.dependsOn(std::forward<Deps>(deps)...)

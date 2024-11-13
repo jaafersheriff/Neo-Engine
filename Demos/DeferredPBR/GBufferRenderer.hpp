@@ -124,7 +124,7 @@ namespace DeferredPBR {
 				uniforms.bindUniform("M", drawSpatial.getModelMatrix());
 				uniforms.bindUniform("N", drawSpatial.getNormalMatrix());
 
-				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, uniforms, drawDefines);
+				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, uniforms, std::move(drawDefines));
 			}
 		})
 			.dependsOn(deps...)
