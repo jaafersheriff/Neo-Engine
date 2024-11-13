@@ -34,7 +34,7 @@ namespace neo {
 		struct Uniform {
 			entt::id_type mStringHash;
 			UniformType mType;
-			void* mData;
+			uint8_t mData[64]; // Biggest var is mat4, which is 4x4x4 bytes = 64
 		};
 		Uniform mUniforms[64] = {};
 		uint8_t mUniformIndex = 0;
