@@ -21,7 +21,6 @@ namespace neo {
 	public:
 		using ConstructionArgs = std::unordered_map<types::shader::Stage, std::string>;
 		using ShaderCode = std::unordered_map<types::shader::Stage, const char*>;
-		using HashedShaderDefines = uint32_t;
 
 		SourceShader(const char* name, const ShaderCode& args);
 
@@ -35,7 +34,6 @@ namespace neo {
 		
 		// Can't store ShaderDefines in the map because of const char* and mParent*
 		// Also this is faster than specialized std::hash
-		mutable std::unordered_map<HashedShaderDefines, ResolvedShaderInstance> mResolvedShaders;
-		HashedShaderDefines _getDefinesHash(const std::vector<ShaderDefinesFG>& defines) const;
+		mutable std::unordered_map<ShaderDefinesFG::HashedShaderDefines, ResolvedShaderInstance> mResolvedShaders;
 	};
 }

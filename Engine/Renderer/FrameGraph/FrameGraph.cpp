@@ -4,6 +4,7 @@
 #include "Renderer/Renderer.hpp"
 
 #include "Util/ServiceLocator.hpp"
+#include <stdlib.h>
 
 namespace neo {
 	namespace {
@@ -64,6 +65,37 @@ namespace neo {
 			for (auto& passID : passSeq) {
 				TRACY_GPUF(mTasks[passID.first].mDebugName.value_or("Pass").c_str());
 				Pass& pass = mFrameData.getPass(passID.second);
+				// Sort results
+				{
+					TRACY_ZONEN("Sort draws");
+					// Selection sort nooooooooooooooooooooooo
+					for (uint16_t i = 0; i < pass.mCommandIndex; i++) {
+						uint16_t min = i;
+						const Command& a = pass.getCommand(i);
+						if (static_cast<CommandType>(a >> (64 - 3) & 0b111) != CommandType::Draw) {
+							continue;
+						}
+						ShaderDefinesFG::HashedShaderDefines definesHashA = ShaderDefinesFG::getDefinesHash(mFrameData.getDefines(static_cast<uint16_t>(a >> (64 - 3 - 10 - 10 - 10) & 0b1111111111)));
+
+						for (uint16_t j = i + 1; j < pass.mCommandIndex; j++) {
+							const Command& b = pass.getCommand(j);
+							if (static_cast<CommandType>(b >> (64 - 3) & 0b111) != CommandType::Draw) {
+								continue;
+							}
+
+							ShaderDefinesFG::HashedShaderDefines definesHashB = ShaderDefinesFG::getDefinesHash(mFrameData.getDefines(static_cast<uint16_t>(b >> (64 - 3 - 10 - 10 - 10) & 0b1111111111)));
+							if (definesHashA < definesHashB) {
+								min = j;
+							}
+						}
+						if (min != i) {
+							Command t = a;
+							pass.mCommands[i] = pass.getCommand(min);
+							pass.mCommands[min] = t;
+						}
+					}
+				}
+				
 				for (uint16_t i = 0; i < pass.getCommandSize(); i++) {
 					Command& c = pass.getCommand(i);
 					GLFrameGraphResolve(mFrameData, pass, c, resourceManagers);

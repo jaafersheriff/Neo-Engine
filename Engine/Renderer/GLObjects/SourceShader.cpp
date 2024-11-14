@@ -22,7 +22,7 @@ namespace neo {
 	}
 
 	const ResolvedShaderInstance& SourceShader::getResolvedInstance(const std::vector<ShaderDefinesFG>& defines) const {
-		HashedShaderDefines hash = _getDefinesHash(defines);
+		const ShaderDefinesFG::HashedShaderDefines hash = ShaderDefinesFG::getDefinesHash(defines);
 		auto it = mResolvedShaders.find(hash);
 		if (it == mResolvedShaders.end()) {
 
@@ -49,16 +49,5 @@ namespace neo {
 		}
 
 		return it->second;
-	}
-
-	SourceShader::HashedShaderDefines SourceShader::_getDefinesHash(const std::vector<ShaderDefinesFG>& defines) const {
-		HashedShaderDefines seed = static_cast<HashedShaderDefines>(defines.size());
-		for (const auto& define : defines) {
-			seed ^= define.getDefinesSize();
-			for (uint8_t i = 0; i < define.getDefinesSize(); i++) {
-				seed ^= HashedString(define.getDefine(i)).value() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-			}
-		}
-		return seed;
 	}
 }

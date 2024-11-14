@@ -2,6 +2,23 @@
 
 namespace neo {
 	struct ShaderDefinesFG {
+		using HashedShaderDefines = ENTT_ID_TYPE;
+		static HashedShaderDefines getDefinesHash(const ShaderDefinesFG& define, HashedShaderDefines seed = 0) {
+			seed = define.getDefinesSize() ^ seed;
+			for (uint8_t i = 0; i < define.getDefinesSize(); i++) {
+				seed ^= HashedString(define.getDefine(i)).value() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			}
+			return seed;
+		}
+
+		static HashedShaderDefines getDefinesHash(const std::vector<ShaderDefinesFG>& defines) {
+			HashedShaderDefines seed = static_cast<HashedShaderDefines>(defines.size());
+			for (const auto& define : defines) {
+				seed ^= getDefinesHash(define, seed);
+			}
+			return seed;
+		}
+
 		void destroy() {
 			for (int i = 0; i < mDefinesIndex; i++) {
 				delete mDefines[i];
