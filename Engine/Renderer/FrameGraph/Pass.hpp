@@ -60,6 +60,7 @@ namespace neo {
 			mDraws[mDrawIndex++] = { mesh, elements, bufferOffset };
 
 			// Bad copies :(
+			// Also what to do if these are empty hmmm
 			uint64_t uboIndex = mFrameData.createUBO(ubo);
 			uint64_t definesIndex = mFrameData.createShaderDefines(drawDefines);
 			drawDefines.destroy();

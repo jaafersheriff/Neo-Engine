@@ -4,6 +4,7 @@
 #include "Renderer/GLObjects/Mesh.hpp"
 
 namespace neo {
+	class ECS;
 	class ResourceManagers;
 
 	struct MeshLoadDetails {
@@ -41,7 +42,7 @@ namespace neo {
 		MeshManager();
 		~MeshManager();
 
-		void imguiEditor();
+		void imguiEditor(ECS& ecs);
 
 	protected:
 		[[nodiscard]] MeshHandle _asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const;

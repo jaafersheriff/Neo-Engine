@@ -10,6 +10,7 @@
 namespace neo {
 
 	class Engine;
+	class ECS;
 	class Renderer;
 
 	class ResourceManagers {
@@ -21,7 +22,7 @@ namespace neo {
 		TextureManager mTextureManager;
 		FramebufferManager mFramebufferManager;
 	private:
-		void _imguiEditor();
+		void _imguiEditor(ECS& ecs);
 		void _clear();
 		void _tick();
 	};

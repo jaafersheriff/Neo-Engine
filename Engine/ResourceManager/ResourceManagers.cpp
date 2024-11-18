@@ -19,7 +19,7 @@ namespace neo {
 		mFramebufferManager.clear(mTextureManager); // Do this after textures
 	}
 
-	void ResourceManagers::_imguiEditor() {
+	void ResourceManagers::_imguiEditor(ECS& ecs) {
 		TRACY_ZONE();
 		auto textureFunc = [&](const TextureHandle& textureHandle) {
 			if (!mTextureManager.isValid(textureHandle)) {
@@ -50,7 +50,7 @@ namespace neo {
 			ImGui::TreePop();
 		}
 		if (ImGui::TreeNodeEx(&mMeshManager, ImGuiTreeNodeFlags_None, "Meshes (%d)", mMeshManager.mCache.size())) {
-			mMeshManager.imguiEditor();
+			mMeshManager.imguiEditor(ecs);
 			ImGui::TreePop();
 		}
 		ImGui::End();

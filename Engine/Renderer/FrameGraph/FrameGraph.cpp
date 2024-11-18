@@ -61,7 +61,6 @@ namespace neo {
 
 		// Sequentially walk through passes, make GL calls
 		{
-			TRACY_GPUN("GL Calls");
 			for (auto& passID : passSeq) {
 				TRACY_GPUF(mTasks[passID.first].mDebugName.value_or("Pass").c_str());
 				Pass& pass = mFrameData.getPass(passID.second);

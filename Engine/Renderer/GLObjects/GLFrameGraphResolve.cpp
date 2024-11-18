@@ -162,6 +162,7 @@ namespace neo {
 	}
 
 	void GLFrameGraphResolve(const FrameData& frameData, const Pass& pass, const Command& command, const ResourceManagers& resourceManagers) {
+		// This should just be one big for loop tbh
 		CommandType type = static_cast<CommandType>(command >> (64 - 3) & 0b111);
 		switch (type) {
 		case CommandType::Clear:

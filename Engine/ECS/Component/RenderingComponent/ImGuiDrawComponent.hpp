@@ -18,6 +18,14 @@ namespace neo {
 		uint16_t mElementCount = 0;
 		uint16_t mElementBufferOffset = 0;
 		uint32_t mDrawOrder = 0;
-
 	END_COMPONENT();
+
+	START_COMPONENT(ImGuiMeshViewComponent);
+		ImGuiMeshViewComponent() {}
+		MeshHandle mMeshHandle = NEO_INVALID_HANDLE;
+		glm::uvec4 mBounds;
+	END_COMPONENT();
+
+
+
 }

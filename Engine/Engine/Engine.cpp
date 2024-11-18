@@ -154,7 +154,7 @@ namespace neo {
 							demos.imGuiEditor(ecs, resourceManagers);
 						}
 						ecs.imguiEdtor();
-						resourceManagers._imguiEditor();
+						resourceManagers._imguiEditor(ecs);
 						ServiceLocator<ImGuiManager>::value().imGuiEditor();
 						ServiceLocator<Renderer>::value().imGuiEditor(mWindow, ecs, resourceManagers);
 						profiler.imGuiEditor();
@@ -174,6 +174,9 @@ namespace neo {
 							ServiceLocator<ImGuiManager>::value().resolveDrawData(ecs, resourceManagers);
 							TRACY_ZONEN("Remove draw data");
 							for (auto entity : ecs.getView<ImGuiComponent, ImGuiDrawComponent>()) {
+								ecs.removeEntity(entity);
+							}
+							for (auto entity : ecs.getView<ImGuiComponent, ImGuiMeshViewComponent>()) {
 								ecs.removeEntity(entity);
 							}
 						}

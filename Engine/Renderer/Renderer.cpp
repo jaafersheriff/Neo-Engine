@@ -93,7 +93,7 @@ namespace neo {
 	}
 
 	void Renderer::render(WindowSurface& window, IDemo* demo, util::Profiler& profiler, ECS& ecs, ResourceManagers& resourceManagers) {
-		TRACY_GPU();
+		TRACY_ZONE();
 		if (window.isMinimized()) {
 			return;
 		}
@@ -125,7 +125,7 @@ namespace neo {
 			FrameGraph fg(resourceManagers, sFrameData);
 			Viewport vp = { 0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y };
 			{
-				TRACY_GPUN("Draw Demo");
+				TRACY_ZONEN("Draw Demo");
 				demo->render(fg, resourceManagers, ecs, mDefaultFBOHandle);
 			}
 
@@ -149,7 +149,7 @@ namespace neo {
 				drawImGui(fg, FramebufferHandle(0), vp, resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize, mDefaultFBOHandle);
 			}
 			else {
-				TRACY_GPUN("Final Blit");
+				TRACY_ZONEN("Final Blit");
 				blit(fg, vp, resourceManagers, mDefaultFBOHandle, FramebufferHandle(0), 0);
 			}
 

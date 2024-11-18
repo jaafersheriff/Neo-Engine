@@ -1,6 +1,8 @@
 #include "MeshManager.hpp"
 
 #include "Loader/MeshGenerator.hpp"
+#include "ECS/ECS.hpp"
+#include "ECS/Component/RenderingComponent/ImGuiDrawComponent.hpp"
 
 #include "Util/Profiler.hpp"
 
@@ -105,15 +107,31 @@ namespace neo {
 		mesh.mResource.destroy();
 	}
 
-	void MeshManager::imguiEditor() {
-		for(auto&& [id, mesh] : mCache) {
-			NEO_UNUSED(mesh);
-			if (mesh->mDebugName.has_value()) {
-				ImGui::Text(mesh->mDebugName->c_str());
+	void MeshManager::imguiEditor(ECS& ecs) {
+		for(auto&& [handle, meshResource] : mCache) {
+			ImGui::PushID(static_cast<int>(handle));
+			bool node = false;
+			if (meshResource->mDebugName.has_value()) {
+				node |= ImGui::TreeNode(static_cast<void*>(&handle), "%s", meshResource->mDebugName->c_str());
 			}
 			else {
-				ImGui::Text("%d", id);
+				node |= ImGui::TreeNode(static_cast<void*>(&handle), "%d", handle);
 			}
+			if (node) {
+				ImGui::InvisibleButton("Show mesh", ImVec2(175.f, 175.f));
+				ImGuiMeshViewComponent component;
+				component.mMeshHandle = handle;
+				component.mBounds.x = static_cast<uint16_t>(ImGui::GetItemRectMin().x);
+				component.mBounds.y = static_cast<uint16_t>(ImGui::GetItemRectMin().y);
+				component.mBounds.z = static_cast<uint16_t>(ImGui::GetItemRectMax().x);
+				component.mBounds.w = static_cast<uint16_t>(ImGui::GetItemRectMax().y);
+				ecs.submitEntity(std::move(ECS::EntityBuilder{}
+					.attachComponent<ImGuiComponent>()
+					.attachComponent<ImGuiMeshViewComponent>(std::move(component))
+				));
+				ImGui::TreePop();
+			}
+			ImGui::PopID();
 		}
 	}
 

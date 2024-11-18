@@ -118,7 +118,6 @@ namespace neo {
 				pass.bindTexture("shadowMap", ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
 			}
 
-
 			const auto& view = ecs.getView<const PhongRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
 			for (auto entity : view) {
 				// VFC
@@ -152,6 +151,7 @@ namespace neo {
 				pass.drawCommand(view.get<const MeshComponent>(entity).mMeshHandle, ubo, std::move(drawDefines));
 			}
 			})
+			.dependsOn(std::forward<Deps>(deps)...)
 			.setDebugName("Phong");
 
 	}
