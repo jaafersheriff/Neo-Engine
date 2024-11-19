@@ -111,9 +111,10 @@ namespace neo {
 			{ types::shader::Stage::Fragment, "forwardpbr.frag" }
 			});
 
-		const auto& meshView = ecs.getView<ImGuiMeshViewComponent, ImGuiComponent>();
+		const auto& meshView = ecs.getView<ImGuiMeshViewComponent, ImGuiComponent, SpatialComponent>();
 		for (const ECS::Entity& meshViewEntity : meshView) {
 			const ImGuiMeshViewComponent& drawComponent = meshView.get<ImGuiMeshViewComponent>(meshViewEntity);
+			const SpatialComponent& drawSpatial = meshView.get<SpatialComponent>(meshViewEntity);
 			Viewport drawVP(0, 0, 175, 175);
 			auto targetHandle = resourceManagers.mFramebufferManager.asyncLoad("MeshView",
 				FramebufferBuilder{}
@@ -123,17 +124,17 @@ namespace neo {
 				resourceManagers.mTextureManager
 			);
 
-			fg.clear(targetHandle, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth)
+			fg.clear(targetHandle, glm::vec4(0.05f, 0.05f, 0.05f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth)
 				.setDebugName("Clear ImGuiMesh View");
 			fg.pass(targetHandle, drawVP, drawVP, {}, shaderHandle)
-				.with([meshViewEntity, drawComponent](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
+				.with([meshViewEntity, drawComponent, drawSpatial](Pass& pass, const ResourceManagers& resourceManagers, const ECS& ecs) {
 				TRACY_ZONEN("ImGuiMeshView");
 				MakeDefine(DIRECTIONAL_LIGHT);
 				pass.setDefine(DIRECTIONAL_LIGHT);
 
 				// TODO - make static above
 				pass.bindUniform("lightRadiance", glm::vec4(1.f));
-				pass.bindUniform("lightDir", glm::vec3(0.f, 1.f, 0.f));
+				pass.bindUniform("lightDir", glm::vec3(0.2f, 1.f, 0.f));
 
 				BoundingBoxComponent bb(drawComponent.mMin, drawComponent.mMax);
 				glm::vec3 camPos(0.f, 0.f, bb.getRadius() * 2.f);
@@ -142,14 +143,14 @@ namespace neo {
 				pass.bindUniform("V", glm::lookAt(camPos, camLook, glm::vec3(0, 1, 0)));
 				pass.bindUniform("camPos", camPos);
 
-				pass.bindUniform("albedo", glm::vec4(1.f));
+				pass.bindUniform("albedo", glm::vec4(util::sLogSeverityData.at(util::LogSeverity::Info).second, 1.f));
 				pass.bindUniform("metalness", 0.f);
-				pass.bindUniform("roughness", 0.f);
+				pass.bindUniform("roughness", 0.9f);
 				pass.bindUniform("emissiveFactor", glm::vec3(0.f));
 
 				// TODO - make static above
-				pass.bindUniform("M", glm::mat4(1.f));
-				pass.bindUniform("N", glm::mat3(1.f));
+				pass.bindUniform("M", drawSpatial.getModelMatrix());
+				pass.bindUniform("N", drawSpatial.getNormalMatrix());
 
 				pass.drawCommand(drawComponent.mMeshHandle, {}, {});
 				})

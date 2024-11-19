@@ -176,9 +176,6 @@ namespace neo {
 							for (auto entity : ecs.getView<ImGuiComponent, ImGuiDrawComponent>()) {
 								ecs.removeEntity(entity);
 							}
-							for (auto entity : ecs.getView<ImGuiComponent, ImGuiMeshViewComponent>()) {
-								ecs.removeEntity(entity);
-							}
 						}
 						Messenger::relayMessages(ecs);
 					}

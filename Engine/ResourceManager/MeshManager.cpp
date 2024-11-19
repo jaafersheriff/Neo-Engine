@@ -3,10 +3,12 @@
 #include "Loader/MeshGenerator.hpp"
 #include "ECS/ECS.hpp"
 #include "ECS/Component/RenderingComponent/ImGuiDrawComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "Util/Profiler.hpp"
 
 #include <ext/imgui_incl.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace neo {
 
@@ -127,11 +129,34 @@ namespace neo {
 				component.mBounds.w = static_cast<uint16_t>(ImGui::GetItemRectMax().y);
 				component.mMin = meshResource->mResource.mVerticesMin;
 				component.mMax = meshResource->mResource.mVerticesMax;
-				ecs.submitEntity(std::move(ECS::EntityBuilder{}
-					.attachComponent<ImGuiComponent>()
-					.attachComponent<ImGuiMeshViewComponent>(std::move(component))
-				));
+
+				bool componentExists = false;
+				// Update existing component if one already exists
+				for (auto&& [_, __, meshViewComp, meshSpatial] : ecs.getView<ImGuiComponent, ImGuiMeshViewComponent, SpatialComponent>().each()) {
+					if (meshViewComp.mMeshHandle == handle) {
+						meshViewComp = component;
+						meshSpatial.rotate(glm::mat3(glm::rotate(glm::mat4(1.f), 0.01f, glm::vec3(0.f, 1.f, 0.f))));
+						componentExists = true;
+					}
+				}
+				// Create a new one otherwise
+				if (!componentExists) {
+					ecs.submitEntity(std::move(ECS::EntityBuilder{}
+						.attachComponent<ImGuiComponent>()
+						.attachComponent<ImGuiMeshViewComponent>(std::move(component))
+						.attachComponent<SpatialComponent>()
+					));
+				}
 				ImGui::TreePop();
+			}
+			else {
+				// Node was closed, remove the component
+				// TODO - also do this if the image was scrolled out of view
+				for (auto&& [e, __, meshViewComp, meshSpatial] : ecs.getView<ImGuiComponent, ImGuiMeshViewComponent, SpatialComponent>().each()) {
+					if (meshViewComp.mMeshHandle == handle) {
+						ecs.removeEntity(e);
+					}
+				}
 			}
 			ImGui::PopID();
 		}
