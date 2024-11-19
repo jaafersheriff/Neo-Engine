@@ -37,6 +37,8 @@ namespace neo {
 			const VertexBuffer& getVBO(types::mesh::VertexType type) const;
 
 			types::mesh::Primitive mPrimitiveType = types::mesh::Primitive::TriangleStrip;
+			glm::vec3 mVerticesMin = glm::vec3(0.f);
+			glm::vec3 mVerticesMax = glm::vec3(0.f);
 
 			void draw(uint32_t = 0, uint16_t = 0) const;
 

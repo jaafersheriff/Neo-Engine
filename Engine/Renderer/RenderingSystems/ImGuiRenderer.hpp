@@ -135,13 +135,9 @@ namespace neo {
 				pass.bindUniform("lightRadiance", glm::vec4(1.f));
 				pass.bindUniform("lightDir", glm::vec3(0.f, 1.f, 0.f));
 
-				// TODO - make static above
-				glm::vec3 camPos(0.f, 0.f, -1.f);
-				glm::vec3 camLook(0.f);
-				if (ecs.has<BoundingBoxComponent>(meshViewEntity)) {
-					camPos.z = ecs.cGetComponent<BoundingBoxComponent>(meshViewEntity)->getRadius() * 2.f;
-					camLook = -ecs.cGetComponent<BoundingBoxComponent>(meshViewEntity)->getCenter();
-				}
+				BoundingBoxComponent bb(drawComponent.mMin, drawComponent.mMax);
+				glm::vec3 camPos(0.f, 0.f, bb.getRadius() * 2.f);
+				glm::vec3 camLook = bb.getCenter();
 				pass.bindUniform("P", glm::perspective(45.f, 1.f, 0.1f, 10.f));
 				pass.bindUniform("V", glm::lookAt(camPos, camLook, glm::vec3(0, 1, 0)));
 				pass.bindUniform("camPos", camPos);
@@ -156,7 +152,7 @@ namespace neo {
 				pass.bindUniform("N", glm::mat3(1.f));
 
 				pass.drawCommand(drawComponent.mMeshHandle, {}, {});
-					})
+				})
 				.setDebugName("ImGuiMeshView");
 
 			Viewport vp;

@@ -9,6 +9,8 @@ namespace neo {
 
 	struct MeshLoadDetails {
 		types::mesh::Primitive mPrimtive;
+		glm::vec3 mMin;
+		glm::vec3 mMax;
 
 		struct VertexBuffer {
 			uint32_t mComponents; 

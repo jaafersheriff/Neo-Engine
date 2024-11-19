@@ -125,6 +125,8 @@ namespace neo {
 				component.mBounds.y = static_cast<uint16_t>(ImGui::GetItemRectMin().y);
 				component.mBounds.z = static_cast<uint16_t>(ImGui::GetItemRectMax().x);
 				component.mBounds.w = static_cast<uint16_t>(ImGui::GetItemRectMax().y);
+				component.mMin = meshResource->mResource.mVerticesMin;
+				component.mMax = meshResource->mResource.mVerticesMax;
 				ecs.submitEntity(std::move(ECS::EntityBuilder{}
 					.attachComponent<ImGuiComponent>()
 					.attachComponent<ImGuiMeshViewComponent>(std::move(component))
@@ -141,6 +143,8 @@ namespace neo {
 		}
 		result_type meshResource = std::make_shared<BackedResource<Mesh>>(meshDetails.mPrimtive);
 		meshResource->mResource.init(debugName);
+		meshResource->mResource.mVerticesMin = meshDetails.mMin;
+		meshResource->mResource.mVerticesMax = meshDetails.mMax;
 		for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
 			meshResource->mResource.addVertexBuffer(
 				type,

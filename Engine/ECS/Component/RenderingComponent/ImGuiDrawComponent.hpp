@@ -24,6 +24,7 @@ namespace neo {
 		ImGuiMeshViewComponent() {}
 		MeshHandle mMeshHandle = NEO_INVALID_HANDLE;
 		glm::uvec4 mBounds;
+		glm::vec3 mMin, mMax;
 	END_COMPONENT();
 
 

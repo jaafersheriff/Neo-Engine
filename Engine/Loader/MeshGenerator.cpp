@@ -26,6 +26,8 @@ namespace neo {
 				return;
 			}
 			par_shapes_scale(mesh, 0.5f, 0.5f, 0.5f); // [-0.5, 0.5f] bounds
+			details.mMin = glm::vec3(-0.5f);
+			details.mMax = glm::vec3( 0.5f);
 			par_shapes_unweld(mesh, true);
 			par_shapes_compute_normals(mesh);
 
@@ -67,6 +69,8 @@ namespace neo {
 		std::unique_ptr<MeshLoadDetails> generateCube() {
 			std::unique_ptr<MeshLoadDetails> builder = std::make_unique<MeshLoadDetails>();
 			builder->mPrimtive = types::mesh::Primitive::Triangles;
+			builder->mMin = glm::vec3(-0.5f);
+			builder->mMax = glm::vec3(0.5f);
 
 			{
 				std::vector<float> verts =
@@ -208,6 +212,8 @@ namespace neo {
 		std::unique_ptr<MeshLoadDetails> generateQuad() {
 			auto builder = std::make_unique<MeshLoadDetails>();
 			builder->mPrimtive = types::mesh::Primitive::Triangles;
+			builder->mMin = glm::vec3(-0.5f, -0.5f, 0.f);
+			builder->mMax = glm::vec3(0.5f, 0.5f, 0.f);
 
 			{
 				std::vector<float> verts =
@@ -293,6 +299,8 @@ namespace neo {
 				   -t / length,  0.f / length, -0.5f / length,
 				   -t / length,  0.f / length,  0.5f / length
 			};
+			builder->mMin = glm::vec3(-t / length);
+			builder->mMin = glm::vec3(t / length);
 
 			std::vector<uint32_t> ele = {
 				  0, 11,  5,
@@ -330,6 +338,12 @@ namespace neo {
 					glm::vec3 halfA = glm::normalize((v1 + v2) / 2.f) / 2.f;
 					glm::vec3 halfB = glm::normalize((v2 + v3) / 2.f) / 2.f;
 					glm::vec3 halfC = glm::normalize((v3 + v1) / 2.f) / 2.f;
+					builder->mMin = glm::min(builder->mMin, halfA);
+					builder->mMin = glm::min(builder->mMin, halfB);
+					builder->mMin = glm::min(builder->mMin, halfC);
+					builder->mMax = glm::max(builder->mMax, halfA);
+					builder->mMax = glm::max(builder->mMax, halfB);
+					builder->mMax = glm::max(builder->mMax, halfC);
 					verts.push_back(halfA.x);
 					verts.push_back(halfA.y);
 					verts.push_back(halfA.z);
