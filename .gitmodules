@@ -16,9 +16,6 @@
 [submodule "Engine/ext/imgui_entt_entity_editor"]
 	path = Engine/ext/imgui_entt_entity_editor
 	url = https://github.com/Green-Sky/imgui_entt_entity_editor.git
-[submodule "Engine/ext/capstone"]
-	path = Engine/ext/capstone
-	url = https://github.com/capstone-engine/capstone.git
 [submodule "Engine/ext/implot"]
 	path = Engine/ext/implot
 	url = https://github.com/epezent/implot
