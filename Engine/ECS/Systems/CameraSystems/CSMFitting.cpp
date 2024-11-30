@@ -18,12 +18,9 @@
 namespace neo {
 
 	namespace {
-		void _quantize(glm::vec3& pos, float texelSize) {
-			pos.x -= glm::mod(pos.x, texelSize);
-			pos.y -= glm::mod(pos.y, texelSize);
-			pos.z -= glm::mod(pos.z, texelSize);
-		}
 
+
+		// https://alextardif.com/shadowmapping.html
 		void _doFitting(
 			const SpatialComponent& sourceSpatial,
 			const CameraComponent& sourceCamera,
@@ -39,13 +36,11 @@ namespace neo {
 			receiverSpatial.setScale(lightSpatial.getScale());
 			receiverSpatial.setLookDir(lightSpatial.getLookDir());
 
-			/////////////////////// Do the fitting! ///////////////////////////////
-
 			// Get main scene's proj matrix for this cascade
 			glm::mat4 sourceProj = sourceCamera.getProj();
 			{
 				float depthLength = sourceCamera.getFar() - sourceCamera.getNear();
-				float sliceDepth = depthLength / 4;
+				float sliceDepth = depthLength / 4; // TODO - use log2
 
 				float newNear = sourceCamera.getNear() + sliceDepth * csmCamera.getLod();
 				float newFar = newNear + sliceDepth;
