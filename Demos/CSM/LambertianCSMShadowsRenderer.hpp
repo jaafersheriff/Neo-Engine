@@ -32,7 +32,7 @@ namespace CSM {
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("CSM Resolve Shader", 
 			SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "csm/model.vert"},
+				{ types::shader::Stage::Vertex, "csm/csm_model.vert"},
 				{ types::shader::Stage::Fragment, "csm/csm.frag" }
 			}
 		);

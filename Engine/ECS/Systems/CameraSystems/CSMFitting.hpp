@@ -4,11 +4,11 @@
 
 namespace neo {
 
-	class CSMFitting : public neo::System {
+	class CSMFittingSystem : public neo::System {
 
 	public:
 
-		CSMFitting() :
+		CSMFittingSystem() :
 			neo::System("CSM Fitting System") {
 		}
 
