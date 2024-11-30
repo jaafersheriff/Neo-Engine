@@ -45,7 +45,7 @@ namespace neo {
 			glm::mat4 sourceProj = sourceCamera.getProj();
 			{
 				float depthLength = sourceCamera.getFar() - sourceCamera.getNear();
-				float sliceDepth = depthLength / 4; // TODO - log2
+				float sliceDepth = depthLength / 4;
 
 				float newNear = sourceCamera.getNear() + sliceDepth * csmCamera.getLod();
 				float newFar = newNear + sliceDepth;
@@ -69,8 +69,7 @@ namespace neo {
 				{ -1.f, -1.f,	   1.f }
 			};
 
-			glm::mat4 PV = sourceProj * sourceSpatial.getView();
-			glm::mat4 iPV = glm::inverse(PV);
+			const glm::mat4 iPV = glm::inverse(sourceProj * sourceSpatial.getView());
 
 			BoundingBoxComponent frustumWorldBB;
 			for (auto& corner : corners) {
@@ -78,10 +77,9 @@ namespace neo {
 				frustumWorldBB.addPoint(tCorner / tCorner.w);
 			}
 
-			const float radius = frustumWorldBB.getRadius();
+			const float radius = glm::ceil(frustumWorldBB.getRadius());
 			const float texelsPerUnit = (shadowMapResolution >> csmCamera.getLod()) / (radius * 2.f);
 			const glm::mat4 scalar = glm::scale(glm::mat4(1.f), glm::vec3(texelsPerUnit));
-
 			const glm::mat4 lookAt = scalar * lightSpatial.getView();
 			const glm::mat4 iLookAt = glm::inverse(lookAt);
 
@@ -93,6 +91,11 @@ namespace neo {
 			frustumCenter /= frustumCenter.w;
 
 			receiverSpatial.setPosition(frustumCenter);
+			receiverSpatial.setOrientation(glm::lookAt(
+				glm::vec3(frustumCenter), 
+				glm::vec3(frustumCenter) + (lightSpatial.getLookDir() * radius * 2.f), 
+				glm::vec3(0.f, 1.f, 0.f)
+			));
 
 			receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-radius, radius), glm::vec2(-radius, radius) });
 			receiverCamera.setNear(-radius);
