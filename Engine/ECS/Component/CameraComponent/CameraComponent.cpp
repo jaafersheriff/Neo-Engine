@@ -52,7 +52,7 @@ namespace neo {
 		mProjMatDirty = true;
 	}
 
-	const glm::mat4 & CameraComponent::getProj() const {
+	const glm::mat4& CameraComponent::getProj() const {
 		if (mProjMatDirty) {
 			if (mPerspective) {
 				mProjMat = glm::perspective(

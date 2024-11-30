@@ -10,11 +10,12 @@ namespace neo {
 	START_COMPONENT(BoundingBoxComponent);
 
 		bool mStatic = false;
-		glm::vec3 mMin, mMax;
+		glm::vec3 mMin = glm::vec3(FLT_MAX);
+		glm::vec3 mMax = glm::vec3(FLT_MIN);
 
 		BoundingBoxComponent(bool isStatic = false) 
-			: mMin(0.f)
-			, mMax(0.f)
+			: mMin(FLT_MAX)
+			, mMax(FLT_MIN)
 			, mStatic(isStatic)
 		{ }
 
@@ -23,6 +24,16 @@ namespace neo {
 			, mMax(max)
 			, mStatic(isStatic)
 		{ }
+
+		void addPoint(const glm::vec3& point) {
+			mMin.x = glm::min(mMin.x, point.x);
+			mMin.y = glm::min(mMin.y, point.y);
+			mMin.z = glm::min(mMin.z, point.z);
+
+			mMax.x = glm::max(mMax.x, point.x);
+			mMax.y = glm::max(mMax.y, point.y);
+			mMax.z = glm::max(mMax.z, point.z);
+		}
 
 		float getRadius() const {
 			return glm::distance(mMin, mMax) / 2.f;
