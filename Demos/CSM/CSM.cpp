@@ -194,7 +194,6 @@ namespace CSM {
 		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
 		ecs.addSystem<FrustumCullingSystem>();
 		ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
-		//ecs.addSystem<RotationSystem>();
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -202,48 +201,8 @@ namespace CSM {
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
+		NEO_UNUSED(resourceManagers, ecs);
 		ImGui::Checkbox("DebugView", &mDebugView);
-
-		if (ImGui::Checkbox("Use CSM", &mUseCSM)) {
-			auto&& [lightEntity, _, __] = *ecs.getSingleView<MainLightComponent, LightComponent>();
-			if (mUseCSM) {
-				NEO_ASSERT(ecs.has<ShadowCameraComponent>(lightEntity) && !ecs.has<CSMShadowMapComponent>(lightEntity), "Incorrect component movement");
-				auto shadowCamera = ecs.getComponent<ShadowCameraComponent>(lightEntity);
-				resourceManagers.mTextureManager.discard(shadowCamera->mShadowMap);
-				ecs.removeComponent<ShadowCameraComponent>(lightEntity);
-				ecs.removeComponent<LineMeshComponent>(lightEntity);
-
-				CSMShadowMapComponent csmShadowMap(2048, resourceManagers.mTextureManager);
-				ecs.addComponent<CSMShadowMapComponent>(lightEntity, csmShadowMap);
-
-				auto csmCameras = _createCSMCamera(resourceManagers);
-				for (auto& camera : csmCameras) {
-					ecs.submitEntity(std::move(camera)); // is this safe?
-				}
-
-				ecs.setSystemActive<CSMFitting>(true);
-				ecs.setSystemActive<FrustaFittingSystem>(false);
-			}
-			else {
-				NEO_ASSERT(!ecs.has<ShadowCameraComponent>(lightEntity) && ecs.has<CSMShadowMapComponent>(lightEntity), "Incorrect component movement");
-				auto shadowMap = ecs.getComponent<CSMShadowMapComponent>(lightEntity);
-				resourceManagers.mTextureManager.discard(shadowMap->mShadowMap);
-				ecs.removeComponent<CSMShadowMapComponent>(lightEntity);
-
-				ShadowCameraComponent shadowCamera(256, resourceManagers.mTextureManager);
-				ecs.addComponent<ShadowCameraComponent>(lightEntity, shadowCamera);
-				LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 1.f));
-				ecs.addComponent<LineMeshComponent>(lightEntity, lineMesh);
-
-				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera0Component, SpatialComponent>()));
-				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera1Component, SpatialComponent>()));
-				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera2Component, SpatialComponent>()));
-				ecs.removeEntity(std::get<0>(*ecs.getSingleView<CSMCamera3Component, SpatialComponent>()));
-
-				ecs.setSystemActive<CSMFitting>(false);
-				ecs.setSystemActive<FrustaFittingSystem>(true);
-			}
-		}
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {

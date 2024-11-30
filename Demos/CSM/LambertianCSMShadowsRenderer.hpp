@@ -57,6 +57,7 @@ namespace CSM {
 
 		glm::mat4 L0, L1, L2, L3;
 		float depth0, depth1, depth2, depth3;
+		depth0 = depth1 = depth2 = depth3 = 0.f;
 		glm::mat4 mockPV;
 		float mockNear;
 		const bool shadowsEnabled = 
@@ -145,10 +146,7 @@ namespace CSM {
 					resolvedShader.bindUniform("L1", L1);
 					resolvedShader.bindUniform("L2", L2);
 					resolvedShader.bindUniform("L3", L3);
-					resolvedShader.bindUniform("depth0", depth0);
-					resolvedShader.bindUniform("depth1", depth1);
-					resolvedShader.bindUniform("depth2", depth2);
-					resolvedShader.bindUniform("depth3", depth3);
+					resolvedShader.bindUniform("csmDepths", glm::vec4(depth0, depth1, depth2, depth3));
 					resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap));
 				}
 			}
