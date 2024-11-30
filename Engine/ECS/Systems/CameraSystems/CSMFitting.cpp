@@ -98,7 +98,7 @@ namespace neo {
 		}
 	}
 
-	void CSMFitting::update(ECS& ecs, const ResourceManagers& resourceManagers) {
+	void CSMFittingSystem::update(ECS& ecs, const ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
 
 		auto sourceCameraTuple = ecs.getSingleView<FrustumFitSourceComponent, SpatialComponent, CameraComponent>();

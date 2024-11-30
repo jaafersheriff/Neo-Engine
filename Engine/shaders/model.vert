@@ -18,8 +18,13 @@ out vec4 fragTan;
 #endif
 
 #ifdef ENABLE_SHADOWS
-uniform mat4 L;
-out vec4 shadowCoord;
+uniform mat4 L0;
+uniform mat4 L1;
+uniform mat4 L2;
+uniform mat4 L3;
+
+// csm frustum transforms
+out vec4 shadowCoord[4];
 #endif
 
 void main() {
@@ -32,6 +37,9 @@ void main() {
 	gl_Position = P * V * fragPos;
 
 #ifdef ENABLE_SHADOWS
-	shadowCoord = L * fragPos;
+	shadowCoord[0] = L0 * fragPos;
+	shadowCoord[1] = L1 * fragPos;
+	shadowCoord[2] = L2 * fragPos;
+	shadowCoord[3] = L3 * fragPos;
 #endif
 }

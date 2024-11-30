@@ -94,6 +94,35 @@ namespace neo {
 		}
 	}
 
+	inline std::vector<ECS::EntityBuilder> createCSMCameras() {
+
+		std::vector<ECS::EntityBuilder> ret;
+		// CSM cameras
+		// These need to be separate entities because 
+		//	- CSM requires multiple Frustum and Camera components, and entities can only have one copy of a component
+		//	- Frustum culling works off of camera entity
+		// CSMFitting system is responsible for setting the various spatial/camera/frustum components
+		auto csmCameraProto = ECS::EntityBuilder{}
+			.attachComponent<SpatialComponent>()
+			.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
+			.attachComponent<FrustumComponent>()
+			;
+		ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
+			.attachComponent<CSMCamera0Component>()
+		);
+		ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
+			.attachComponent<CSMCamera1Component>()
+		);
+		ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
+			.attachComponent<CSMCamera2Component>()
+		);
+		ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
+			.attachComponent<CSMCamera3Component>()
+		);
+
+		return ret;
+	}
+
 	template<typename... CompTs>
 	inline void drawCSMShadows(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity lightEntity, bool clear) {
 		TRACY_GPU();

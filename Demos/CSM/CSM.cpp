@@ -60,7 +60,7 @@ namespace CSM {
 		ECS::EntityBuilder _createLight(ResourceManagers& resourceManagers, glm::vec3 position) {
 			SpatialComponent spatial(position, glm::vec3(1.f));
 			spatial.setLookDir(glm::vec3(0.f, -0.5f, 0.7f));
-			CSMShadowMapComponent csmShadowMap(2048, resourceManagers.mTextureManager);
+			CSMShadowMapComponent csmShadowMap(512, resourceManagers.mTextureManager);
 			return std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Light")
 				.attachComponent<LightComponent>(glm::vec3(1.f))
@@ -72,46 +72,6 @@ namespace CSM {
 				.attachComponent<FrustumFitReceiverComponent>()
 				.attachComponent<CSMShadowMapComponent>(csmShadowMap)
 			);
-		}
-
-		std::vector<ECS::EntityBuilder> _createCSMCamera(ResourceManagers& resourceManagers) {
-
-			std::vector<ECS::EntityBuilder> ret;
-			// CSM cameras
-			// These need to be separate entities because 
-			//	- CSM requires multiple Frustum and Camera components, and entities can only have one copy of a component
-			//	- Frustum culling works off of camera entity
-			// CSMFitting system is responsible for setting the various spatial/camera/frustum components
-			auto csmCameraProto = ECS::EntityBuilder{}
-				.attachComponent<SpatialComponent>()
-				.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
-				.attachComponent<FrustumComponent>()
-				;
-			LineMeshComponent lineMesh0(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f));
-			ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
-				.attachComponent<CSMCamera0Component>()
-				.attachComponent<LineMeshComponent>(lineMesh0)
-			);
-
-			LineMeshComponent lineMesh1(resourceManagers.mMeshManager, glm::vec3(0.f, 1.f, 0.f));
-			ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
-				.attachComponent<CSMCamera1Component>()
-				.attachComponent<LineMeshComponent>(lineMesh1)
-			);
-
-			LineMeshComponent lineMesh2(resourceManagers.mMeshManager, glm::vec3(0.f, 0.f, 1.f));
-			ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
-				.attachComponent<CSMCamera2Component>()
-				.attachComponent<LineMeshComponent>(lineMesh2)
-			);
-
-			LineMeshComponent lineMesh3(resourceManagers.mMeshManager, glm::vec3(1.f, 1.f, 0.f));
-			ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
-				.attachComponent<CSMCamera3Component>()
-				.attachComponent<LineMeshComponent>(lineMesh3)
-			);
-
-			return ret;
 		}
 	}
 
@@ -145,9 +105,17 @@ namespace CSM {
 		ecs.submitEntity(_createLight(resourceManagers, glm::vec3(10.f, 20.f, 0.f)));
 		
 		{
-			auto csmCameras = _createCSMCamera(resourceManagers);
-			for (auto& camera : csmCameras) {
-				ecs.submitEntity(std::move(camera)); // is this safe?
+			auto csmCameras = createCSMCameras();
+			LineMeshComponent lines[4] = {
+				LineMeshComponent(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f)),
+				LineMeshComponent(resourceManagers.mMeshManager, glm::vec3(0.f, 1.f, 0.f)),
+				LineMeshComponent(resourceManagers.mMeshManager, glm::vec3(0.f, 0.f, 1.f)),
+				LineMeshComponent(resourceManagers.mMeshManager, glm::vec3(1.f, 1.f, 0.f))
+			};
+			for (int i = 0; i < csmCameras.size(); i++) {
+				ecs.submitEntity(std::move(csmCameras[i]
+					.attachComponent<LineMeshComponent>(lines[i])
+				)); // is this safe?
 			}
 		}
 
@@ -186,7 +154,7 @@ namespace CSM {
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>(); // Update camera
 		ecs.addSystem<FrustumSystem>(); // Calculate original frusta bounds
-		ecs.addSystem<CSMFitting>(); // Break scene frustum into slices and fit CSMCameraN to those slices
+		ecs.addSystem<CSMFittingSystem>(); // Break scene frustum into slices and fit CSMCameraN to those slices
 		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
 		ecs.addSystem<FrustumCullingSystem>();
 		ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
