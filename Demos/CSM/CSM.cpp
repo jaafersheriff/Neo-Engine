@@ -186,10 +186,6 @@ namespace CSM {
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>(); // Update camera
 		ecs.addSystem<FrustumSystem>(); // Calculate original frusta bounds
-		{
-			auto& sys = ecs.addSystem<FrustaFittingSystem>(); // Fit one frusta into another
-			sys.mActive = false;
-		}
 		ecs.addSystem<CSMFitting>(); // Break scene frustum into slices and fit CSMCameraN to those slices
 		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
 		ecs.addSystem<FrustumCullingSystem>();
@@ -210,31 +206,17 @@ namespace CSM {
 		const auto& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		const auto& [lightEntity, ___, ____] = *ecs.getSingleView<MainLightComponent, LightComponent>();
 
-		if (ecs.has<ShadowCameraComponent>(lightEntity)) {
-			const auto& shadowCamera = ecs.cGetComponent<ShadowCameraComponent>(lightEntity);
-			if (resourceManagers.mTextureManager.isValid(shadowCamera->mShadowMap)) {
-				auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera->mShadowMap);
-				glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-				drawShadows(resourceManagers, ecs, lightEntity, true);
-			}
-			backbuffer.bind();
-			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-			drawPhong(resourceManagers, ecs, cameraEntity);
+		const auto& shadowMap = ecs.cGetComponent<CSMShadowMapComponent>(lightEntity);
+		if (resourceManagers.mTextureManager.isValid(shadowMap->mShadowMap)) {
+			auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap->mShadowMap);
+			glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
+			drawCSMShadows(resourceManagers, ecs, lightEntity, true);
 		}
-		else if (ecs.has<CSMShadowMapComponent>(lightEntity)) {
-			const auto& shadowMap = ecs.cGetComponent<CSMShadowMapComponent>(lightEntity);
-			if (resourceManagers.mTextureManager.isValid(shadowMap->mShadowMap)) {
-				auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap->mShadowMap);
-				glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-				drawCSMShadows(resourceManagers, ecs, lightEntity, true);
-			}
 
-			backbuffer.bind();
-			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-			drawCSMResolve(resourceManagers, ecs, cameraEntity, mDebugView);
-		}
+		backbuffer.bind();
+		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+		drawCSMResolve(resourceManagers, ecs, cameraEntity, mDebugView);
 
 		drawLines(resourceManagers, ecs, cameraEntity);
 	}
