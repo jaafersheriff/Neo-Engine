@@ -273,10 +273,12 @@ namespace DeferredPBR {
 				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
 					builder.attachComponent<AlphaTestComponent>();
 					builder.attachComponent<DeferredPBRRenderComponent>();
+					builder.attachComponent<ForwardPBRRenderComponent>();
 				}
 				else {
 					builder.attachComponent<OpaqueComponent>();
 					builder.attachComponent<DeferredPBRRenderComponent>();
+					builder.attachComponent<ForwardPBRRenderComponent>();
 				}
 				builder.attachComponent<MaterialComponent>(node.mMaterial);
 				builder.attachComponent<ShadowCasterRenderComponent>();
@@ -411,8 +413,8 @@ namespace DeferredPBR {
 		gbuffer.bind();
 		gbuffer.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
-		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
+		// drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
+		// drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 
 		if (mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
 			auto debugOutput = drawGBufferDebug(resourceManagers, gbufferHandle, viewport.mSize, mGbufferDebugParams);
@@ -447,8 +449,8 @@ namespace DeferredPBR {
 				GL_NEAREST
 			);
 		}
-		drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
-		drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
+		//drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
+		// drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
 		// Extract IBL
 		std::optional<IBLComponent> ibl;
 		const auto iblTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
@@ -459,7 +461,8 @@ namespace DeferredPBR {
 			}
 		}
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
-		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
+		drawForwardPBR(resourceManagers, ecs, cameraEntity, ibl);
+		//drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
 		drawSkybox(resourceManagers, ecs, cameraEntity);
 
 		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParams) : hdrColorOutput;

@@ -61,23 +61,6 @@ namespace neo {
 		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 		auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
 
-		glm::mat4 L;
-		const bool shadowsEnabled = 
-			ecs.has<DirectionalLightComponent>(lightEntity) 
-			&& ecs.has<CameraComponent>(lightEntity) 
-			&& ecs.has<ShadowCameraComponent>(lightEntity) 
-			&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
-		MakeDefine(ENABLE_SHADOWS);
-		if (shadowsEnabled) {
-			passDefines.set(ENABLE_SHADOWS);
-			const auto& shadowCamera = *ecs.cGetComponent<CameraComponent>(lightEntity);
-			static glm::mat4 biasMatrix(
-				0.5f, 0.0f, 0.0f, 0.0f,
-				0.0f, 0.5f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.5f, 0.0f,
-				0.5f, 0.5f, 0.5f, 1.0f);
-			L = biasMatrix * shadowCamera.getProj() * lightSpatial.getView();
-		}
 		bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
 		bool pointLight = ecs.has<PointLightComponent>(lightEntity);
 		MakeDefine(DIRECTIONAL_LIGHT);
@@ -134,16 +117,12 @@ namespace neo {
 				resolvedShader.bindUniform("V", cameraSpatial->getView());
 				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 				resolvedShader.bindUniform("lightCol", light.mColor);
-				if (directionalLight || shadowsEnabled) {
+				if (directionalLight) {
 					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
 				}
 				if (pointLight) {
 					resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
 					resolvedShader.bindUniform("lightRadiance", light.mIntensity);
-				}
-				if (shadowsEnabled) {
-					resolvedShader.bindUniform("L", L);
-					resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap));
 				}
 			}
 

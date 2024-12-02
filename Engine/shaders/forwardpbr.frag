@@ -11,9 +11,6 @@ in vec2 fragTex;
 #ifdef TANGENTS
 in vec4 fragTan;
 #endif
-#if defined(ENABLE_SHADOWS) && defined(DIRECTIONAL_LIGHT)
-in vec4 shadowCoord;
-#endif
 
 uniform vec4 albedo;
 #ifdef ALBEDO_MAP
@@ -159,7 +156,7 @@ void main() {
 
 #ifdef ENABLE_SHADOWS
 #	ifdef DIRECTIONAL_LIGHT
-	float visibility = getShadowVisibility(gl_FragDepth, csmDepths, shadowCoord, shadowMap);
+	float visibility = getCSMShadowVisibility(gl_FragDepth, csmDepths, shadowCoord, shadowMap);
 #	elif defined(POINT_LIGHT)
 	float visibility = getShadowVisibility(1, shadowMap, fragPos.xyz - lightPos, shadowMapResolution.x, shadowRange, 0.001);
 #	endif
