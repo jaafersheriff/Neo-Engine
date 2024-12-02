@@ -7,15 +7,13 @@ in vec4 fragPos;
 in vec3 fragNor;
 in vec2 fragTex;
 
+uniform vec4 albedo;
+
 #ifdef ENABLE_SHADOWS
 in vec4 shadowCoord[4];
 uniform vec4 csmDepths;
 in float sceneDepth;
-#endif
 
-uniform vec4 albedo;
-
-#ifdef ENABLE_SHADOWS
 layout(binding = 2) uniform sampler2D shadowMap;
 #endif
 
@@ -25,40 +23,6 @@ uniform vec3 lightDir;
 uniform vec3 camPos;
 
 out vec4 color;
-
-bool validCascade(vec4 shadowCoord) {
-	return true
-		&& shadowCoord.x > 0.0 && shadowCoord.x < 1.0
-		&& shadowCoord.y > 0.0 && shadowCoord.y < 1.0
-		&& shadowCoord.z > 0.0 && shadowCoord.z < 1.0
-	;
-}
-
-float getSingleShadow(vec4 shadowCoord, sampler2D _shadowMap, int lod) {
-	if (validCascade(shadowCoord)) {
-		return saturate(shadowCoord.z) - 0.002 > textureLod(_shadowMap, saturate(shadowCoord.xy), lod).r ? 1.0 : 0.0;
-	}
-	return 0.f;
-}
-
-float getShadow(vec4 _csmDepths, vec4 _shadowCoord[4], sampler2D _shadowMap) {
-	int lod = 0;
-	if (sceneDepth < _csmDepths.x) {
-		lod = 0;
-	}
-	else if (sceneDepth < _csmDepths.y) {
-		lod = 1;
-	}
-	else if (sceneDepth < _csmDepths.z) {
-		lod = 2;
-	}
-	else if (sceneDepth < _csmDepths.w) {
-		lod = 3;
-	}
-
-	float shadow = getSingleShadow(_shadowCoord[lod], _shadowMap, lod);
-	return 1.0 - saturate(shadow);
-}
 
 void main() {
 	vec4 fAlbedo = albedo;
@@ -72,8 +36,7 @@ void main() {
 	color.a = 1.0;
 
 #ifdef ENABLE_SHADOWS
-	float visibility = getShadow(csmDepths, shadowCoord, shadowMap);
-
+	float visibility = getShadowVisibility(sceneDepth, csmDepths, shadowCoord, shadowMap);
 	color *= vec4(vec3(max(visibility, 0.2)), 1.0);
 #endif
 

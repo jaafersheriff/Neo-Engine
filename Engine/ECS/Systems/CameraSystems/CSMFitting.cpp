@@ -18,8 +18,6 @@
 namespace neo {
 
 	namespace {
-
-
 		// https://alextardif.com/shadowmapping.html
 		void _doFitting(
 			const SpatialComponent& sourceSpatial,
