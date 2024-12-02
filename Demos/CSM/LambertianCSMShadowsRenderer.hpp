@@ -55,16 +55,19 @@ namespace CSM {
 			passDefines.set(DEBUG_VIEW);
 		}
 
-		glm::mat4 L0, L1, L2, L3;
-		float depth0, depth1, depth2, depth3;
-		depth0 = depth1 = depth2 = depth3 = 0.f;
+		std::array<glm::mat4, 4> lightArrays;
+		glm::vec4 csmDepths(0.f);
 		glm::mat4 mockPV;
 		float mockNear;
-		const bool shadowsEnabled = 
-			ecs.has<DirectionalLightComponent>(lightEntity) 
-			&& ecs.has<CameraComponent>(lightEntity) 
-			&& ecs.has<CSMShadowMapComponent>(lightEntity) 
-			&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap);
+		const bool shadowsEnabled =
+			ecs.has<DirectionalLightComponent>(lightEntity)
+			&& ecs.has<CameraComponent>(lightEntity)
+			&& ecs.has<CSMShadowMapComponent>(lightEntity)
+			&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap)
+			&& ecs.entityCount<CSMCamera0Component>()
+			&& ecs.entityCount<CSMCamera1Component>()
+			&& ecs.entityCount<CSMCamera2Component>()
+			&& ecs.entityCount<CSMCamera3Component>();
 		MakeDefine(ENABLE_SHADOWS);
 		if (shadowsEnabled) {
 			passDefines.set(ENABLE_SHADOWS);
@@ -73,26 +76,25 @@ namespace CSM {
 				0.0f, 0.5f, 0.0f, 0.0f,
 				0.0f, 0.0f, 0.5f, 0.0f,
 				0.5f, 0.5f, 0.5f, 1.0f);
-			// TODO - this should have asserts
 			if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>()) {
 				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera0;
-				L0 = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
-				depth0 = csm.mSliceDepthEnd;
+				lightArrays[0] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+				csmDepths.x = csm.mSliceDepthEnd;
 			}
 			if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>()) {
 				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera1;
-				L1 = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
-				depth1 = csm.mSliceDepthEnd;
+				lightArrays[1] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+				csmDepths.y = csm.mSliceDepthEnd;
 			}
 			if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>()) {
 				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera2;
-				L2 = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
-				depth2 = csm.mSliceDepthEnd;
+				lightArrays[2] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+				csmDepths.y = csm.mSliceDepthEnd;
 			}
 			if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>()) {
 				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera3;
-				L3 = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
-				depth3 = csm.mSliceDepthEnd;
+				lightArrays[3] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+				csmDepths.w = csm.mSliceDepthEnd;
 			}
 
 			auto mockView = ecs.getSingleView<MockCameraComponent, SpatialComponent, CameraComponent>();
@@ -142,11 +144,11 @@ namespace CSM {
 					// These could be an array tbh
 					resolvedShader.bindUniform("mockPV", mockPV);
 					resolvedShader.bindUniform("mockNear", mockNear);
-					resolvedShader.bindUniform("L0", L0);
-					resolvedShader.bindUniform("L1", L1);
-					resolvedShader.bindUniform("L2", L2);
-					resolvedShader.bindUniform("L3", L3);
-					resolvedShader.bindUniform("csmDepths", glm::vec4(depth0, depth1, depth2, depth3));
+					resolvedShader.bindUniform("L0", lightArrays[0]);
+					resolvedShader.bindUniform("L1", lightArrays[1]);
+					resolvedShader.bindUniform("L2", lightArrays[2]);
+					resolvedShader.bindUniform("L3", lightArrays[3]);
+					resolvedShader.bindUniform("csmDepths", csmDepths);
 					resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap));
 				}
 			}

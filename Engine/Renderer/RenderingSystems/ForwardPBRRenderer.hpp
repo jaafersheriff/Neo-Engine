@@ -3,6 +3,8 @@
 #include "ECS/ECS.hpp"
 #include "Util/Profiler.hpp"
 
+#include "ECS/Component/CameraComponent/CSMCameraComponent.hpp"
+
 #include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
 #include "ECS/Component/RenderingComponent/TransparentComponent.hpp"
 #include "ECS/Component/RenderingComponent/ForwardPBRRenderComponent.hpp"
@@ -74,36 +76,60 @@ namespace neo {
 
 		bool shadowsEnabled = false;
 		MakeDefine(ENABLE_SHADOWS);
-		glm::mat4 L;
+		std::array<glm::mat4, 4> lightArrays;
+		glm::vec4 csmDepths(0.f);
 
 		if (directionalLight) {
 			passDefines.set(DIRECTIONAL_LIGHT);
-			shadowsEnabled =
-				ecs.has<ShadowCameraComponent>(lightEntity)
-				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap);
+			shadowsEnabled = true
+				&& ecs.has<CameraComponent>(lightEntity)
+				&& ecs.has<CSMShadowMapComponent>(lightEntity)
+				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap)
+				&& ecs.entityCount<CSMCamera0Component>()
+				&& ecs.entityCount<CSMCamera1Component>()
+				&& ecs.entityCount<CSMCamera2Component>()
+				&& ecs.entityCount<CSMCamera3Component>();
+			if (shadowsEnabled) {
+				passDefines.set(ENABLE_SHADOWS);
+				NEO_ASSERT(ecs.has<CameraComponent>(lightEntity), "Directional shadows need a camera component");
+				static glm::mat4 biasMatrix(
+					0.5f, 0.0f, 0.0f, 0.0f,
+					0.0f, 0.5f, 0.0f, 0.0f,
+					0.0f, 0.0f, 0.5f, 0.0f,
+					0.5f, 0.5f, 0.5f, 1.0f);
+				if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>()) {
+					const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera0;
+					lightArrays[0] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+					csmDepths.x = csm.mSliceDepthEnd;
+				}
+				if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>()) {
+					const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera1;
+					lightArrays[1] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+					csmDepths.y = csm.mSliceDepthEnd;
+				}
+				if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>()) {
+					const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera2;
+					lightArrays[2] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+					csmDepths.y = csm.mSliceDepthEnd;
+				}
+				if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>()) {
+					const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera3;
+					lightArrays[3] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+					csmDepths.w = csm.mSliceDepthEnd;
+				}
+			}
 		}
 		else if (pointLight) {
 			passDefines.set(POINT_LIGHT);
 			shadowsEnabled =
 				ecs.has<PointLightShadowMapComponent>(lightEntity)
 				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<PointLightShadowMapComponent>(lightEntity)->mShadowMap);
+			if (shadowsEnabled) {
+				passDefines.set(ENABLE_SHADOWS);
+			}
 		}
 		else {
 			NEO_FAIL("Invalid light entity");
-		}
-
-		if (shadowsEnabled) {
-			passDefines.set(ENABLE_SHADOWS);
-			if (directionalLight) {
-				NEO_ASSERT(ecs.has<CameraComponent>(lightEntity), "Directional shadows need a camera component");
-				const auto& shadowCamera = *ecs.cGetComponent<CameraComponent>(lightEntity);
-				static glm::mat4 biasMatrix(
-					0.5f, 0.0f, 0.0f, 0.0f,
-					0.0f, 0.5f, 0.0f, 0.0f,
-					0.0f, 0.0f, 0.5f, 0.0f,
-					0.5f, 0.5f, 0.5f, 1.0f);
-				L = biasMatrix * shadowCamera.getProj() * lightSpatial.getView();
-			}
 		}
 
 		MakeDefine(IBL);
@@ -209,8 +235,12 @@ namespace neo {
 				if (shadowsEnabled) {
 					TextureHandle shadowMapHandle;
 					if (directionalLight) {
-						shadowMapHandle = ecs.cGetComponent<ShadowCameraComponent>(lightEntity)->mShadowMap;
-						resolvedShader.bindUniform("L", L);
+						shadowMapHandle = ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap;
+						resolvedShader.bindUniform("L0", lightArrays[0]);
+						resolvedShader.bindUniform("L1", lightArrays[1]);
+						resolvedShader.bindUniform("L2", lightArrays[2]);
+						resolvedShader.bindUniform("L3", lightArrays[3]);
+						resolvedShader.bindUniform("csmDepths", csmDepths);
 					}
 					if (pointLight) {
 						shadowMapHandle = ecs.cGetComponent<PointLightShadowMapComponent>(lightEntity)->mShadowMap;

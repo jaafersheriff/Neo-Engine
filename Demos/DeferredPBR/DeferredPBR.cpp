@@ -17,7 +17,7 @@
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
-#include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
+#include "ECS/Systems/CameraSystems/CSMFitting.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 #include "ECS/Systems/TranslationSystems/SinTranslateSystem.hpp"
 
@@ -25,9 +25,9 @@
 
 #include "Renderer/RenderingSystems/Blitter.hpp"
 #include "Renderer/RenderingSystems/ConvolveRenderer.hpp"
+#include "Renderer/RenderingSystems/CSMShadowRenderer.hpp"
 #include "Renderer/RenderingSystems/ForwardPBRRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
-#include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/SkyboxRenderer.hpp"
 #include "Renderer/RenderingSystems/TonemapRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
@@ -91,7 +91,7 @@ namespace DeferredPBR {
 		{
 			SpatialComponent spatial(glm::vec3(75.f, 200.f, 20.f));
 			spatial.setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
-			ShadowCameraComponent shadowCamera(2048, resourceManagers.mTextureManager);
+			CSMShadowMapComponent csmShadowMap(1024, resourceManagers.mTextureManager);
 
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Light")
@@ -101,10 +101,15 @@ namespace DeferredPBR {
 				.attachComponent<DirectionalLightComponent>()
 				.attachComponent<PinnedComponent>()
 				.attachComponent<CameraComponent>(-1.f, 1000.f, CameraComponent::Orthographic{ glm::vec2(-100.f, 100.f), glm::vec2(-100.f, 100.f) })
-				.attachComponent<ShadowCameraComponent>(shadowCamera)
+				.attachComponent<CSMShadowMapComponent>(csmShadowMap)
 				.attachComponent<FrustumComponent>()
 				.attachComponent<FrustumFitReceiverComponent>(1.f)
 			));
+
+			auto csmCameras = createCSMCameras();
+			for (int i = 0; i < csmCameras.size(); i++) {
+				ecs.submitEntity(std::move(csmCameras[i]));
+			}
 		}
 
 		// _createPointLights(ecs, resourceManagers, 2);
@@ -308,7 +313,7 @@ namespace DeferredPBR {
 		ecs.addSystem<RotationSystem>();
 		ecs.addSystem<SinTranslateSystem>();
 		ecs.addSystem<FrustumSystem>();
-		ecs.addSystem<FrustaFittingSystem>();
+		ecs.addSystem<CSMFittingSystem>();
 		ecs.addSystem<FrustumCullingSystem>();
 	}
 
@@ -320,11 +325,16 @@ namespace DeferredPBR {
 		if (ImGui::Checkbox("Directional Shadows", &mDrawDirectionalShadows)) {
 			auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent>();
 			if (mDrawDirectionalShadows) {
-				ShadowCameraComponent shadowCamera(2048, resourceManagers.mTextureManager);
-				ecs.addComponent<ShadowCameraComponent>(std::get<0>(*lightView), shadowCamera);
+				CSMShadowMapComponent shadowCamera(2048, resourceManagers.mTextureManager);
+				ecs.addComponent<CSMShadowMapComponent>(std::get<0>(*lightView), shadowCamera);
+				auto csmCameras = createCSMCameras();
+				for (int i = 0; i < csmCameras.size(); i++) {
+					ecs.submitEntity(std::move(csmCameras[i]));
+				}
 			}
 			else {
-				ecs.removeComponent<ShadowCameraComponent>(std::get<0>(*lightView));
+				ecs.removeComponent<CSMShadowMapComponent>(std::get<0>(*lightView));
+				removeCSMCameras(ecs);
 			}
 		}
 		if (ImGui::Checkbox("Point Light Shadows", &mDrawPointLightShadows)) {
@@ -365,16 +375,16 @@ namespace DeferredPBR {
 
 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
-		auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent, ShadowCameraComponent>();
+		auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent, CSMShadowMapComponent>();
 		if (lightView) {
 			auto& [lightEntity, __, ___, shadowCamera] = *lightView;
 			if (mDrawDirectionalShadows) {
 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 					auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
 					glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-					drawShadows<OpaqueComponent>(resourceManagers, ecs, lightEntity, true);
-					drawShadows<AlphaTestComponent>(resourceManagers, ecs, lightEntity, false);
-					//drawShadows<TransparentComponent>(resourceManagers, ecs, lightEntity, false);
+					drawCSMShadows<OpaqueComponent>(resourceManagers, ecs, lightEntity, true);
+					drawCSMShadows<AlphaTestComponent>(resourceManagers, ecs, lightEntity);
+					// drawCSMShadows<TransparentComponent>(resourceManagers, ecs, lightEntity);
 				}
 			}
 		}
