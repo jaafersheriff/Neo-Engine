@@ -123,8 +123,23 @@ namespace neo {
 		return ret;
 	}
 
+	inline void removeCSMCameras(ECS& ecs) {
+		if (auto csm0 = ecs.getSingleView<SpatialComponent, CSMCamera0Component>()) {
+			ecs.removeEntity(std::get<0>(*csm0));
+		}
+		if (auto csm1 = ecs.getSingleView<SpatialComponent, CSMCamera1Component>()) {
+			ecs.removeEntity(std::get<0>(*csm1));
+		}
+		if (auto csm2 = ecs.getSingleView<SpatialComponent, CSMCamera2Component>()) {
+			ecs.removeEntity(std::get<0>(*csm2));
+		}
+		if (auto csm3 = ecs.getSingleView<SpatialComponent, CSMCamera3Component>()) {
+			ecs.removeEntity(std::get<0>(*csm3));
+		}
+	}
+
 	template<typename... CompTs>
-	inline void drawCSMShadows(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity lightEntity, bool clear) {
+	inline void drawCSMShadows(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity lightEntity, bool clear = false) {
 		TRACY_GPU();
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},

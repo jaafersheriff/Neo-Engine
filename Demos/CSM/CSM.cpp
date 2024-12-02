@@ -24,7 +24,6 @@
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
-#include "ECS/Systems/CameraSystems/FrustaFittingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumToLineSystem.hpp"

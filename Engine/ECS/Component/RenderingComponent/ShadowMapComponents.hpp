@@ -5,11 +5,6 @@
 #include "ResourceManager/TextureManager.hpp"
 
 namespace neo {
-	START_COMPONENT(ShadowCameraComponent);
-	ShadowCameraComponent(int resolution, const TextureManager& textureManager);
-	TextureHandle mShadowMap;
-	END_COMPONENT();
-
 	START_COMPONENT(PointLightShadowMapComponent);
 	PointLightShadowMapComponent(int resolution, const TextureManager& textureManager);
 	TextureHandle mShadowMap;

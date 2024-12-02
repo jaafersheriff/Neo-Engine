@@ -26,16 +26,6 @@ namespace neo {
 		}
 	}
 
-	ShadowCameraComponent::ShadowCameraComponent(int resolution, const TextureManager& textureManager) {
-		mShadowMap = _createShadowMap(
-			textureManager,
-			"ShadowMap",
-			types::texture::Target::Texture2D,
-			resolution,
-			1
-		);
-	}
-
 	PointLightShadowMapComponent::PointLightShadowMapComponent(int resolution, const TextureManager& textureManager) {
 		mShadowMap = _createShadowMap(
 			textureManager,

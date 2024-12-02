@@ -10,7 +10,7 @@ bool validCascade(vec4 shadowCoord) {
 float getSingleShadow(vec4 shadowCoord, sampler2D shadowMap, int lod) {
 	float bias = 0.002;
 	if (validCascade(shadowCoord)) {
-		return saturate(shadowCoord.z) - bias > textureLod(_shadowMap, saturate(shadowCoord.xy), lod).r ? 1.0 : 0.0;
+		return saturate(shadowCoord.z) - bias > textureLod(shadowMap, saturate(shadowCoord.xy), lod).r ? 1.0 : 0.0;
 	}
 	return 0.f;
 }
