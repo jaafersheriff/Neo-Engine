@@ -388,7 +388,6 @@ namespace DeferredPBR {
 					glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
 					drawCSMShadows<OpaqueComponent>(resourceManagers, ecs, lightEntity, true);
 					drawCSMShadows<AlphaTestComponent>(resourceManagers, ecs, lightEntity);
-					drawCSMShadows<TransparentComponent>(resourceManagers, ecs, lightEntity);
 				}
 			}
 		}
