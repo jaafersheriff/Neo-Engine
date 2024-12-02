@@ -20,6 +20,8 @@ layout(binding = 1) uniform sampler2D normalMap;
 #endif
 
 #ifdef ENABLE_SHADOWS
+in vec4 shadowCoord[4];
+uniform vec4 csmDepths;
 uniform vec2 shadowMapResolution;
 layout(binding = 2) uniform sampler2D shadowMap;
 #endif
@@ -66,7 +68,7 @@ float attFactor = 1;
 	color.rgb = lambertianDiffuse(Ldir, N, fAlbedo.rgb, lightCol, attFactor);
 
 #ifdef ENABLE_SHADOWS
-	float visibility = max(getShadowVisibility(0, shadowMap, shadowMapResolution, shadowCoord, 0.005), 0.2);
+	float visibility = getShadowVisibility(gl_FragDepth, csmDepths, shadowCoord, shadowMap);
 	color.rgb *= visibility;
 #endif
 
