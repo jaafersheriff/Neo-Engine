@@ -19,15 +19,8 @@ layout(binding = 0) uniform sampler2D albedoMap;
 layout(binding = 1) uniform sampler2D normalMap;
 #endif
 
-#ifdef ENABLE_SHADOWS
-in vec4 shadowCoord[4];
-uniform vec4 csmDepths;
-uniform vec2 shadowMapResolution;
-layout(binding = 2) uniform sampler2D shadowMap;
-#endif
-
 uniform vec3 lightCol;
-#if defined(DIRECTIONAL_LIGHT) || defined(ENABLE_SHADOWS)
+#if defined(DIRECTIONAL_LIGHT)
 uniform vec3 lightDir;
 #elif defined(POINT_LIGHT)
 uniform vec3 lightPos;
@@ -66,11 +59,6 @@ float attFactor = 1;
 #endif
 
 	color.rgb = lambertianDiffuse(Ldir, N, fAlbedo.rgb, lightCol, attFactor);
-
-#ifdef ENABLE_SHADOWS
-	float visibility = getShadowVisibility(gl_FragDepth, csmDepths, shadowCoord, shadowMap);
-	color.rgb *= visibility;
-#endif
 
 	color.a = 1.0;
 #ifdef TRANSPARENT
