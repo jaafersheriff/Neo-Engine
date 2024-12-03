@@ -91,7 +91,7 @@ namespace DeferredPBR {
 		{
 			SpatialComponent spatial(glm::vec3(75.f, 200.f, 20.f));
 			spatial.setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
-			CSMShadowMapComponent csmShadowMap(1024, resourceManagers.mTextureManager);
+			CSMShadowMapComponent csmShadowMap(2048, resourceManagers.mTextureManager);
 
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Light")
@@ -272,12 +272,10 @@ namespace DeferredPBR {
 				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
 					builder.attachComponent<AlphaTestComponent>();
 					builder.attachComponent<DeferredPBRRenderComponent>();
-					builder.attachComponent<ForwardPBRRenderComponent>();
 				}
 				else {
 					builder.attachComponent<OpaqueComponent>();
 					builder.attachComponent<DeferredPBRRenderComponent>();
-					builder.attachComponent<ForwardPBRRenderComponent>();
 				}
 				builder.attachComponent<MaterialComponent>(node.mMaterial);
 				builder.attachComponent<ShadowCasterRenderComponent>();
@@ -401,7 +399,6 @@ namespace DeferredPBR {
 					glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
 					drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, entity, true);
 					drawPointLightShadows<AlphaTestComponent>(resourceManagers, ecs, entity, false);
-					//drawPointLightShadows<TransparentComponent>(resourceManagers, ecs, entity, false);
 				}
 			}
 		}
@@ -414,8 +411,8 @@ namespace DeferredPBR {
 		gbuffer.bind();
 		gbuffer.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		// drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
-		// drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
+		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
+		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 
 		if (mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
 			auto debugOutput = drawGBufferDebug(resourceManagers, gbufferHandle, viewport.mSize, mGbufferDebugParams);
@@ -450,8 +447,8 @@ namespace DeferredPBR {
 				GL_NEAREST
 			);
 		}
-		//drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
-		// drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
+		drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
+		drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
 		// Extract IBL
 		std::optional<IBLComponent> ibl;
 		const auto iblTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
@@ -462,8 +459,7 @@ namespace DeferredPBR {
 			}
 		}
 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
-		drawForwardPBR(resourceManagers, ecs, cameraEntity, ibl);
-		//drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
+		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
 		drawSkybox(resourceManagers, ecs, cameraEntity);
 
 		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParams) : hdrColorOutput;
