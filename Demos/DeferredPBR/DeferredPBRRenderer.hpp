@@ -37,18 +37,21 @@ namespace DeferredPBR {
 		glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		const auto& lightView = ecs.getView<LightComponent, SpatialComponent, CompTs...>();
+		const auto& lightView = ecs.getView<DirectionalLightComponent, LightComponent, SpatialComponent, CompTs...>();
 		ShaderDefines defines;
 		for (auto& entity : lightView) {
 			defines.reset();
-
-			const bool shadowsEnabled = 
-				ecs.has<DirectionalLightComponent>(entity) 
-				&& ecs.has<CameraComponent>(entity) 
-				&& ecs.has<ShadowCameraComponent>(entity) 
-				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
+			const bool shadowsEnabled = true
+				&& ecs.has<CameraComponent>(entity)
+				&& ecs.has<CSMShadowMapComponent>(entity)
+				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<CSMShadowMapComponent>(entity)->mShadowMap)
+				&& ecs.entityCount<CSMCamera0Component>()
+				&& ecs.entityCount<CSMCamera1Component>()
+				&& ecs.entityCount<CSMCamera2Component>()
+				&& ecs.entityCount<CSMCamera3Component>();
 			MakeDefine(ENABLE_SHADOWS);
-			glm::mat4 L;
+			std::array<glm::mat4, 4> lightArrays;
+			glm::vec4 csmDepths(0.f);
 			if (shadowsEnabled) {
 				defines.set(ENABLE_SHADOWS);
 				static glm::mat4 biasMatrix(
@@ -56,17 +59,40 @@ namespace DeferredPBR {
 					0.0f, 0.5f, 0.0f, 0.0f,
 					0.0f, 0.0f, 0.5f, 0.0f,
 					0.5f, 0.5f, 0.5f, 1.0f);
-				L = biasMatrix * ecs.cGetComponent<CameraComponent>(entity)->getProj() * ecs.cGetComponent<SpatialComponent>(entity)->getView();
+				if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>()) {
+					const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera0;
+					lightArrays[0] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+					csmDepths.x = csm.mSliceDepthEnd;
+				}
+				if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>()) {
+					const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera1;
+					lightArrays[1] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+					csmDepths.y = csm.mSliceDepthEnd;
+				}
+				if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>()) {
+					const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera2;
+					lightArrays[2] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+					csmDepths.z = csm.mSliceDepthEnd;
+				}
+				if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>()) {
+					const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera3;
+					lightArrays[3] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
+					csmDepths.w = csm.mSliceDepthEnd;
+				}
 			}
 
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
 			resolvedShader.bind();
 
 			if (shadowsEnabled) {
-				const auto& shadowMap = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<ShadowCameraComponent>(entity)->mShadowMap);
-				resolvedShader.bindUniform("lightTransform", L);
+				const auto& shadowMap = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<CSMShadowMapComponent>(entity)->mShadowMap);
 				resolvedShader.bindTexture("shadowMap", shadowMap);
 				resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
+				resolvedShader.bindUniform("L0", lightArrays[0]);
+				resolvedShader.bindUniform("L1", lightArrays[1]);
+				resolvedShader.bindUniform("L2", lightArrays[2]);
+				resolvedShader.bindUniform("L3", lightArrays[3]);
+				resolvedShader.bindUniform("csmDepths", csmDepths);
 			}
 
 			const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);

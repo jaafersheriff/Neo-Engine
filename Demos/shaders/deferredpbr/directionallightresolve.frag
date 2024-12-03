@@ -9,7 +9,10 @@ layout(binding = 2) uniform sampler2D gEmissiveMetalness;
 layout(binding = 3) uniform sampler2D gDepth;
 
 #ifdef ENABLE_SHADOWS
-in vec4 shadowCoord[4];
+uniform mat4 L0;
+uniform mat4 L1;
+uniform mat4 L2;
+uniform mat4 L3;
 uniform vec4 csmDepths;
 layout(binding = 5) uniform sampler2D shadowMap;
 #endif
@@ -52,7 +55,12 @@ void main() {
 
 
 #ifdef ENABLE_SHADOWS
-	float visibility = getShadowVisibility(gl_FragDepth, csmDepths, shadowCoord, shadowMap);
+	vec4 shadowCoord[4];
+	shadowCoord[0] = L0 * vec4(worldPos, 1.0);
+	shadowCoord[1] = L1 * vec4(worldPos, 1.0);
+	shadowCoord[2] = L2 * vec4(worldPos, 1.0);
+	shadowCoord[3] = L3 * vec4(worldPos, 1.0);
+	float visibility = getCSMShadowVisibility(depth, csmDepths, shadowCoord, shadowMap);
 	pbrColor.directDiffuse *= visibility;
 	pbrColor.directSpecular *= visibility;
 #endif

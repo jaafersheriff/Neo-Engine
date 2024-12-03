@@ -89,7 +89,7 @@ namespace CSM {
 			if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>()) {
 				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera2;
 				lightArrays[2] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
-				csmDepths.y = csm.mSliceDepthEnd;
+				csmDepths.z = csm.mSliceDepthEnd;
 			}
 			if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>()) {
 				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera3;
