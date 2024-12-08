@@ -23,10 +23,12 @@ namespace neo {
 			const SpatialComponent& sourceSpatial,
 			const CameraComponent& sourceCamera,
 			const SpatialComponent& lightSpatial,
+			const uint16_t shadowMapResolution,
 			SpatialComponent& receiverSpatial,
 			CameraComponent& receiverCamera,
-			const uint16_t shadowMapResolution,
-			CSMCameraComponent& csmCamera
+			const float near,
+			const float far,
+			const int lod
 		) {
 
 			// Set base
@@ -37,17 +39,10 @@ namespace neo {
 			// Get main scene's proj matrix for this cascade
 			glm::mat4 sourceProj = sourceCamera.getProj();
 			{
-				float depthLength = sourceCamera.getFar() - sourceCamera.getNear();
-				float sliceDepth = depthLength / 4; // TODO - use log2
-
-				float newNear = sourceCamera.getNear() + sliceDepth * csmCamera.getLod();
-				float newFar = newNear + sliceDepth;
 				CameraComponent sourceCopy = sourceCamera;
-				sourceCopy.setNear(newNear);
-				sourceCopy.setFar(newFar);
-
+				sourceCopy.setNear(near);
+				sourceCopy.setFar(far);
 				sourceProj = sourceCopy.getProj();
-				csmCamera.mSliceDepthEnd = newFar; // Use this in shadow resolve to compute which cascade to sample
 			}
 
 			const float depthMin = -1.f; // GL things
@@ -71,7 +66,7 @@ namespace neo {
 			}
 
 			const float radius = glm::ceil(frustumWorldBB.getRadius());
-			const float texelsPerUnit = (shadowMapResolution >> csmCamera.getLod()) / (radius * 2.f);
+			const float texelsPerUnit = (shadowMapResolution >> lod) / (radius * 2.f);
 			const glm::mat4 scalar = glm::scale(glm::mat4(1.f), glm::vec3(texelsPerUnit));
 			const glm::mat4 lookAt = scalar * lightSpatial.getView();
 			const glm::mat4 iLookAt = glm::inverse(lookAt);
@@ -115,25 +110,33 @@ namespace neo {
 			const auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap.mShadowMap);
 			shadowMapResolution = std::max(shadowTexture.mWidth, shadowTexture.mHeight);
 		}
-		//NEO_ASSERT(receiverCamera.getType() == CameraComponent::CameraType::Orthographic, "Frustum fit receiver needs to be orthographic");
 
-		// TODO - this should have asserts
-		if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>()) {
-			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera0;
-			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, shadowMapResolution, reinterpret_cast<CSMCameraComponent&>(csmCamera));
-		}
-		if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>()) {
-			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera1;
-			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, shadowMapResolution, reinterpret_cast<CSMCameraComponent&>(csmCamera));
-		}
-		if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>()) {
-			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera2;
-			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, shadowMapResolution, reinterpret_cast<CSMCameraComponent&>(csmCamera));
-		}
-		if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>()) {
-			auto& [__, cameraSpatial, cameraCamera, csmCamera] = *csmCamera3;
-			_doFitting(sourceSpatial, sourceCamera, lightSpatial, cameraSpatial, cameraCamera, shadowMapResolution, reinterpret_cast<CSMCameraComponent&>(csmCamera));
-		}
+		auto csmCamera0Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>();
+		auto csmCamera1Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>();
+		auto csmCamera2Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>();
+		auto csmCamera3Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>();
+		NEO_ASSERT(csmCamera0Tuple && csmCamera1Tuple && csmCamera2Tuple && csmCamera3Tuple, "CSM Camera's dont exist");
+		auto& [cameraEntity0, cameraSpatial0, cameraCamera0, csmCamera0] = *csmCamera0Tuple;
+		auto& [cameraEntity1, cameraSpatial1, cameraCamera1, csmCamera1] = *csmCamera1Tuple;
+		auto& [cameraEntity2, cameraSpatial2, cameraCamera2, csmCamera2] = *csmCamera2Tuple;
+		auto& [cameraEntity3, cameraSpatial3, cameraCamera3, csmCamera3] = *csmCamera3Tuple;
 
+		NEO_ASSERT(
+			cameraCamera0.getType() == CameraComponent::CameraType::Orthographic 
+			&& cameraCamera0.getType() == cameraCamera1.getType() 
+			&& cameraCamera1.getType() == cameraCamera2.getType()
+			&& cameraCamera2.getType() == cameraCamera3.getType(), "Frustum fit receiver needs to be orthographic");
+
+		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial0, cameraCamera0, sourceCamera.getNear(), csmCamera0.mSliceDepth, 0);
+
+		NEO_ASSERT(csmCamera0.mSliceDepth < csmCamera1.mSliceDepth, "Invalid CSM depth ranges");
+		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial1, cameraCamera1, csmCamera0.mSliceDepth, csmCamera1.mSliceDepth, 1);
+
+		NEO_ASSERT(csmCamera1.mSliceDepth < csmCamera2.mSliceDepth, "Invalid CSM depth ranges");
+		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial2, cameraCamera2, csmCamera1.mSliceDepth, csmCamera2.mSliceDepth, 2);
+
+		NEO_ASSERT(csmCamera2.mSliceDepth < csmCamera3.mSliceDepth, "Invalid CSM depth ranges");
+		// TODO - this should just go to source camera far plane?
+		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial3, cameraCamera3, csmCamera2.mSliceDepth, csmCamera3.mSliceDepth, 3);
 	}
 }

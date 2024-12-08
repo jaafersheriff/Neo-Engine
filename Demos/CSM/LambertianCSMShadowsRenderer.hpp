@@ -76,26 +76,24 @@ namespace CSM {
 				0.0f, 0.5f, 0.0f, 0.0f,
 				0.0f, 0.0f, 0.5f, 0.0f,
 				0.5f, 0.5f, 0.5f, 1.0f);
-			if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>()) {
-				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera0;
-				lightArrays[0] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
-				csmDepths.x = csm.mSliceDepthEnd;
-			}
-			if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>()) {
-				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera1;
-				lightArrays[1] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
-				csmDepths.y = csm.mSliceDepthEnd;
-			}
-			if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>()) {
-				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera2;
-				lightArrays[2] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
-				csmDepths.z = csm.mSliceDepthEnd;
-			}
-			if (auto csmCamera3 = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>()) {
-				const auto& [_, csmSpatial, csmCamera, csm] = *csmCamera3;
-				lightArrays[3] = biasMatrix * csmCamera.getProj() * csmSpatial.getView();
-				csmDepths.w = csm.mSliceDepthEnd;
-			}
+			auto csmCamera0Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>();
+			auto csmCamera1Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>();
+			auto csmCamera2Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>();
+			auto csmCamera3Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>();
+			NEO_ASSERT(csmCamera0Tuple && csmCamera1Tuple && csmCamera2Tuple && csmCamera3Tuple, "CSM Camera's dont exist");
+			auto& [cameraEntity0, cameraSpatial0, csmCameraCamera0, csmCamera0] = *csmCamera0Tuple;
+			auto& [cameraEntity1, cameraSpatial1, csmCameraCamera1, csmCamera1] = *csmCamera1Tuple;
+			auto& [cameraEntity2, cameraSpatial2, csmCameraCamera2, csmCamera2] = *csmCamera2Tuple;
+			auto& [cameraEntity3, cameraSpatial3, csmCameraCamera3, csmCamera3] = *csmCamera3Tuple;
+
+			lightArrays[0] = biasMatrix * csmCameraCamera0.getProj() * cameraSpatial0.getView();
+			lightArrays[1] = biasMatrix * csmCameraCamera1.getProj() * cameraSpatial1.getView();
+			lightArrays[2] = biasMatrix * csmCameraCamera2.getProj() * cameraSpatial2.getView();
+			lightArrays[3] = biasMatrix * csmCameraCamera3.getProj() * cameraSpatial3.getView();
+			csmDepths.x = csmCamera0.mSliceDepth;
+			csmDepths.y = csmCamera1.mSliceDepth;
+			csmDepths.z = csmCamera2.mSliceDepth;
+			csmDepths.w = csmCamera3.mSliceDepth;
 
 			auto mockView = ecs.getSingleView<MockCameraComponent, SpatialComponent, CameraComponent>();
 			if (mockView) {
