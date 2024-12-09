@@ -17,7 +17,7 @@
 #include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
-#include "ECS/Systems/CameraSystems/CSMFitting.hpp"
+#include "ECS/Systems/CameraSystems/CSMFittingSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 #include "ECS/Systems/TranslationSystems/SinTranslateSystem.hpp"
 

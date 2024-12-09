@@ -1,5 +1,5 @@
 #include "ECS/pch.hpp"
-#include "CSMFitting.hpp"
+#include "CSMFittingSystem.hpp"
 
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"

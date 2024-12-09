@@ -27,7 +27,7 @@
 #include "ECS/Systems/CameraSystems/FrustumSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumCullingSystem.hpp"
 #include "ECS/Systems/CameraSystems/FrustumToLineSystem.hpp"
-#include "ECS/Systems/CameraSystems/CSMFitting.hpp"
+#include "ECS/Systems/CameraSystems/CSMFittingSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
 #include "Renderer/GLObjects/Framebuffer.hpp"
