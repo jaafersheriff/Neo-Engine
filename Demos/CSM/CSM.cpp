@@ -114,6 +114,7 @@ namespace CSM {
 			for (int i = 0; i < csmCameras.size(); i++) {
 				ecs.submitEntity(std::move(csmCameras[i]
 					.attachComponent<LineMeshComponent>(lines[i])
+					.attachComponent<TagComponent>("CSMCamera" + std::to_string(i))
 				)); // is this safe?
 			}
 		}

@@ -36,7 +36,7 @@ void main() {
 	color.a = 1.0;
 
 #ifdef ENABLE_SHADOWS
-	float visibility = getShadowVisibility(sceneDepth, csmDepths, shadowCoord, shadowMap);
+	float visibility = getCSMShadowVisibility(sceneDepth, csmDepths, shadowCoord, shadowMap);
 	color *= vec4(vec3(max(visibility, 0.2)), 1.0);
 #endif
 

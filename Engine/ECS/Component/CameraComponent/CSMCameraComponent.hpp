@@ -9,6 +9,9 @@ namespace neo {
 	{}
 
 	float mSliceDepth = 0.f;
+	virtual void imGuiEditor() override {
+		ImGui::SliderFloat("Slice Depth", &mSliceDepth, util::EP, 1000.f);
+	};
 	END_COMPONENT();
 
 	// Really shouldn't be using inheritance like this
