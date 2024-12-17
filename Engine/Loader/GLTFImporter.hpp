@@ -11,6 +11,8 @@
 #include <vector>
 
 namespace neo {
+	class ECS;
+
 	namespace GLTFImporter {
 
 		struct Node {
@@ -37,11 +39,12 @@ namespace neo {
 			MaterialComponent mMaterial = {};
 		};
 
-		struct Scene {
-			std::optional<CameraNode> mCamera = std::nullopt;
-			std::vector<MeshNode> mMeshNodes = {};
-		};
-
-		Scene loadScene(const std::string& fileName, glm::mat4 baseTransform, ResourceManagers& resourceManagers);
+		using MeshNodeOp = std::function<void(ECS&, const MeshNode&)>;
+		using CameraNodeOp = std::function<void(ECS&, const CameraNode&)>;
+		void loadScene(const std::string& fileName, glm::mat4 baseTransform, ResourceManagers& resourceManagers, ECS& ecs, 
+			MeshNodeOp meshOperator, CameraNodeOp = [](ECS&, const CameraNode&){
+				NEO_LOG_W("Default CameraNodeOp called");
+			}
+		);
 	}
 }

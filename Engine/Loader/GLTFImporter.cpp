@@ -204,6 +204,7 @@ namespace {
 
 	neo::TextureHandle _loadTexture(neo::TextureManager& textureManager, const char* path, const tinygltf::Model& model, int index, int texCoord) {
 		using namespace neo; 
+		TRACY_ZONE();
 
 		if (index == -1) {
 			return 0;
@@ -257,6 +258,8 @@ namespace {
 
 	neo::SpatialComponent _processSpatial(const tinygltf::Node& node, glm::mat4 parentXform) {
 		using namespace neo;
+		TRACY_ZONE();
+
 		// Spatial
 		SpatialComponent nodeSpatial;
 		glm::mat4 localTransform(1.f);
@@ -283,6 +286,7 @@ namespace {
 
 	neo::GLTFImporter::CameraNode _processCameraNode(const tinygltf::Model& model, const tinygltf::Node& node, const neo::SpatialComponent& nodeSpatial) {
 		using namespace neo;
+		TRACY_ZONE();
 
 		std::optional<CameraComponent> camera;
 		const auto& gltfCamera = model.cameras[node.camera];
@@ -314,6 +318,7 @@ namespace {
 
 	std::vector<neo::GLTFImporter::MeshNode> _processMeshNode(const char* path, const int nodeID, neo::ResourceManagers& resourceManagers, const tinygltf::Model& model, const tinygltf::Node& node, const neo::SpatialComponent& nodeSpatial) {
 		using namespace neo;
+		TRACY_ZONE();
 
 		std::vector<neo::GLTFImporter::MeshNode> outNodes;
 		// Mesh
@@ -470,8 +475,20 @@ namespace {
 		return outNodes;
 	}
 
-	void _processNode(const char* path, const int nodeID, neo::ResourceManagers& resourceManagers, const tinygltf::Model& model, const tinygltf::Node& node, glm::mat4 parentXform, neo::GLTFImporter::Scene& outScene) {
+	void _processNode(
+		const char* path, 
+		const int nodeID, 
+		neo::ResourceManagers& resourceManagers, 
+		const tinygltf::Model& model, 
+		const tinygltf::Node& node, 
+		glm::mat4 parentXform,
+		neo::ECS& ecs,
+		neo::GLTFImporter::MeshNodeOp meshNodeOperator,
+		neo::GLTFImporter::CameraNodeOp cameraNodeOperator
+	) {
+
 		using namespace neo;
+		TRACY_ZONE();
 		if (!node.name.empty()) {
 			NEO_LOG_V("Processing node %s", node.name.c_str());
 		}
@@ -482,16 +499,18 @@ namespace {
 		SpatialComponent nodeSpatial = _processSpatial(node, parentXform);
 
 		for (auto& child : node.children) {
-			_processNode(path, child, resourceManagers, model, model.nodes[child], nodeSpatial.getModelMatrix(), outScene);
+			_processNode(path, child, resourceManagers, model, model.nodes[child], nodeSpatial.getModelMatrix());
 		}
 
 		if (node.camera > -1) {
-			NEO_ASSERT(outScene.mCamera == std::nullopt, "Trying to insert two cameras?");
-			outScene.mCamera = _processCameraNode(model, node, nodeSpatial);
+			TRACY_ZONE("CameraNodeOp");
+			cameraNodeOperator(ecs, _processCameraNode(model, node, nodeSpatial));
 		}
 		else if (node.mesh > -1) {
-			auto meshNodes = _processMeshNode(path, nodeID, resourceManagers, model, node, nodeSpatial);
-			outScene.mMeshNodes.insert(outScene.mMeshNodes.end(), meshNodes.begin(), meshNodes.end());
+			for (const GLTFImporter::MeshNode& mesh : _processMeshNode(path, nodeID, resourceManagers, model, node, nodeSpatial)) {
+				TRACY_ZONE("MeshNodeOp");
+				meshNodeOperator(ecs, mesh);
+			}
 		}
 		if (node.light > -1) {
 			auto& light = model.lights[node.light];
@@ -505,62 +524,60 @@ namespace {
 namespace neo {
 	namespace GLTFImporter {
 
-		Scene loadScene(const std::string& path, glm::mat4 baseTransform, ResourceManagers& resourceManagers) {
-			TRACY_ZONE();
+		void loadScene(const std::string& path, glm::mat4 baseTransform, ResourceManagers& resourceManagers, ECS& ecs, MeshNodeOp meshOperator, CameraNodeOp cameraOperator) {
+			std::thread([&]() {
+				tracy::SetThreadName(path.c_str());
+				TRACY_ZONEN("GLTFImpoter::LoadScene");
+				tinygltf::Model model;
+				tinygltf::TinyGLTF loader;
+				std::string err;
+				std::string warn;
 
-			tinygltf::Model model;
-			tinygltf::TinyGLTF loader;
-			std::string err;
-			std::string warn;
+				bool ret = false;
+				stbi_set_flip_vertically_on_load(false);
+				NEO_LOG_I("Loading gltf %s", path.c_str());
+				if (path.size() > 5 && path.find(".gltf", path.size() - 5) != std::string::npos) {
+					ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
+				}
+				else if (path.size() > 4 && path.find(".glb", path.size() - 4) != std::string::npos) {
+					ret = loader.LoadBinaryFromFile(&model, &err, &warn, path.c_str());
+				}
 
-			bool ret = false;
-			stbi_set_flip_vertically_on_load(false);
-			NEO_LOG_I("Loading gltf %s", path.c_str());
-			if (path.size() > 5 && path.find(".gltf", path.size() - 5) != std::string::npos) {
-				ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
-			}
-			else if (path.size() > 4 && path.find(".glb", path.size() - 4) != std::string::npos) {
-				ret = loader.LoadBinaryFromFile(&model, &err, &warn, path.c_str());
-			}
+				if (!warn.empty()) {
+					NEO_LOG_W("tingltf Warning: %s", warn.c_str());
+				}
+				if (!err.empty()) {
+					NEO_LOG_E("tinygltf Error: %s", err.c_str());
+				}
 
-			if (!warn.empty()) {
-				NEO_LOG_W("tingltf Warning: %s", warn.c_str());
-			}
-			if (!err.empty()) {
-				NEO_LOG_E("tinygltf Error: %s", err.c_str());
-			}
+				NEO_ASSERT(ret, "tinygltf failed to parse %s", path.c_str());
+				if (!ret) {
+					return;
+				}
 
-			NEO_ASSERT(ret, "tinygltf failed to parse %s", path.c_str());
-			if (!ret) {
-				return {};
-			}
+				// Translate tinygltf::Model to Loader::GltfScene
+				if (model.lights.size()) {
+					NEO_LOG_W("%s contains lights - ignoring", path.c_str());
+				}
+				if (model.cameras.size()) {
+					NEO_LOG_W("%s contains cameras - ignoring", path.c_str());
+				}
+				if (model.defaultScene < 0 || model.scenes.size() > 1) {
+					NEO_LOG_W("%s has multiple scenes. Just using the default", path.c_str());
+				}
+				if (!model.extensions.empty()) {
+					NEO_LOG_W("%s has extensions??", path.c_str());
+				}
+				if (!model.extensionsRequired.empty()) {
+					NEO_FAIL("%s has required extensions", path.c_str());
+				}
 
-			// Translate tinygltf::Model to Loader::GltfScene
-			if (model.lights.size()) {
-				NEO_LOG_W("%s contains lights - ignoring", path.c_str());
-			}
-			if (model.cameras.size()) {
-				NEO_LOG_W("%s contains cameras - ignoring", path.c_str());
-			}
-			if (model.defaultScene < 0 || model.scenes.size() > 1) {
-				NEO_LOG_W("%s has multiple scenes. Just using the default", path.c_str());
-			}
-			if (!model.extensions.empty()) {
-				NEO_LOG_W("%s has extensions??", path.c_str());
-			}
-			if (!model.extensionsRequired.empty()) {
-				NEO_FAIL("%s has required extensions", path.c_str());
-			}
+				for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
+					const auto& node = model.nodes[nodeID];
+					_processNode(path.c_str(), nodeID, resourceManagers, model, node, baseTransform);
+				}
 
-			Scene outScene;
-			for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
-				const auto& node = model.nodes[nodeID];
-				_processNode(path.c_str(), nodeID, resourceManagers, model, node, baseTransform, outScene);
-			}
-
-			NEO_LOG_I("Successfully parsed %s", path.c_str());
-			return outScene;
-
-		}
+				NEO_LOG_I("Successfully parsed %s", path.c_str());
+			}).detach();
 	}
 }
