@@ -23,35 +23,69 @@ namespace neo {
 	}
 
 	void ECS::submitEntity(EntityBuilder&& builder) {
+		std::lock_guard<std::mutex> lock(mEntityCreationMutex);
 		mEntityCreateQueue.push_back(builder);
 	}
 
 	void ECS::removeEntity(Entity e) {
+		std::lock_guard<std::mutex> lock(mEntityKillMutex);
 		mEntityKillQueue.push_back(e);
 	}
 
 	void ECS::flush() {
 		TRACY_ZONE();
-		for (auto&& builder : mEntityCreateQueue) {
-			auto entity = mRegistry.create();
-			for (auto&& job : builder.mComponents) {
-				job(*this, entity);
+
+		{
+			TRACY_ZONEN("Create Entities");
+			std::vector<EntityBuilder> swapQueue;
+			{
+				std::lock_guard<std::mutex> lock(mEntityCreationMutex);
+				std::swap(swapQueue, mEntityCreateQueue);
+				mEntityCreateQueue.clear();
+			}
+			for (auto&& builder : swapQueue) {
+				auto entity = mRegistry.create();
+				for (auto&& job : builder.mComponents) {
+					job(*this, entity);
+				}
 			}
 		}
-		mEntityCreateQueue.clear();
 
-		for (auto&& job : mAddComponentFuncs) {
-			job(mRegistry);
+		{
+			TRACY_ZONEN("Add Component");
+			std::vector<ComponentModFunc> swapQueue;
+			{
+				std::lock_guard<std::mutex> lock(mAddComponentMutex);
+				std::swap(swapQueue, mAddComponentFuncs);
+				mAddComponentFuncs.clear();
+			}
+			for (auto&& job : swapQueue) {
+				job(mRegistry);
+			}
 		}
-		mAddComponentFuncs.clear();
 
-		for (auto&& job : mRemoveComponentFuncs) {
-			job(mRegistry);
+		{
+			TRACY_ZONEN("Remove Component");
+			std::vector<ComponentModFunc> swapQueue;
+			{
+				std::lock_guard<std::mutex> lock(mRemoveComponentMutex);
+				std::swap(swapQueue, mRemoveComponentFuncs);
+				mRemoveComponentFuncs.clear();
+			}
+			for (auto&& job : swapQueue) {
+				job(mRegistry);
+			}
 		}
-		mRemoveComponentFuncs.clear();
-
-		mRegistry.destroy(mEntityKillQueue.cbegin(), mEntityKillQueue.cend());
-		mEntityKillQueue.clear();
+		{
+			TRACY_ZONEN("Kill Entities");
+			std::vector<Entity> swapQueue;
+			{
+				std::lock_guard<std::mutex> lock(mEntityKillMutex);
+				std::swap(swapQueue, mEntityKillQueue);
+				mEntityKillQueue.clear();
+			}
+			mRegistry.destroy(swapQueue.cbegin(), swapQueue.cend());
+		}
 	}
 
 	void ECS::clean() {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GLTFImporter.hpp"
+
 #include <optional>
 #include <vector>
 #include <functional>
@@ -9,13 +11,11 @@
 namespace neo {
 
 	class Engine;
+	class ECS;
 	class Mesh;
 	class Texture;
 	struct TextureFormat;
 	class ResourceManagers;
-	namespace GLTFImporter {
-		struct Scene;
-	}
 
 	class Loader {
 		friend Engine;
@@ -32,7 +32,16 @@ namespace neo {
 			static time_t getFileModTime(const std::string& fileName);
 			static const char* loadFileString(const std::string&);
 
-			static GLTFImporter::Scene loadGltfScene(ResourceManagers& resourceManagers, const std::string& fileName, glm::mat4 baseTransform = glm::mat4(1.f));
+			static void loadGltfScene(
+				ECS& ecs, 
+				ResourceManagers& resourceManagers, 
+				const std::string& fileName, 
+				glm::mat4 baseTransform,
+				GLTFImporter::MeshNodeOp meshOperator,
+				GLTFImporter::CameraNodeOp cameraOperator = [](ECS&, const GLTFImporter::CameraNode&) {
+					NEO_LOG_W("Default CameraNodeOp called?");
+				}
+			);
 
 			static std::string APP_RES_DIR;
 			static std::string APP_SHADER_DIR;

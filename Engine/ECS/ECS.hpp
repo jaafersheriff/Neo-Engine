@@ -92,10 +92,17 @@ namespace neo {
 		mutable MM::EntityEditor<Entity> mEditor;
 
 		/* Active containers */
+		std::mutex mEntityCreationMutex;
 		std::vector<EntityBuilder> mEntityCreateQueue;
+
+		std::mutex mEntityKillMutex;
 		std::vector<Entity> mEntityKillQueue;
+
 		using ComponentModFunc = std::function<void(Registry&)>;
+		std::mutex mAddComponentMutex;
 		std::vector<ComponentModFunc> mAddComponentFuncs;
+
+		std::mutex mRemoveComponentMutex;
 		std::vector<ComponentModFunc> mRemoveComponentFuncs;
 
 		std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
@@ -214,17 +221,20 @@ namespace neo {
 		};
 		mEditor.registerComponent<CompT>(info);
 
-		mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
-			if (registry.try_get<CompT>(e)) {
-				NEO_LOG_E("Attempting to add a second %s to entity %d when one already exists", component->mName, e);
-			}
-			else {
-				registry.emplace<CompT>(e, *component);
-			}
+		{
+			std::lock_guard<std::mutex> lock(mAddComponentMutex);
+			mAddComponentFuncs.push_back([e, component](Registry& registry) mutable {
+				if (registry.try_get<CompT>(e)) {
+					NEO_LOG_E("Attempting to add a second %s to entity %d when one already exists", component->mName, e);
+				}
+				else {
+					registry.emplace<CompT>(e, *component);
+				}
 
-			delete component;
-			component = nullptr;
-		});
+				delete component;
+				component = nullptr;
+			});
+		}
 
 		return component;
 	}
@@ -233,9 +243,10 @@ namespace neo {
 	void ECS::removeComponent(Entity e) {
 		static_assert(std::is_base_of<Component, CompT>::value, "CompT must be a component type");
 		static_assert(!std::is_same<CompT, Component>::value, "CompT must be a derived component type");
+		std::lock_guard<std::mutex> lock(mRemoveComponentMutex);
 		mRemoveComponentFuncs.push_back([e](Registry& registry) mutable {
 			registry.remove<CompT>(e);
-			});
+		});
 	}
 
 	template<typename... CompTs>

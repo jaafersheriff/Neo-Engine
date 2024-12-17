@@ -62,21 +62,20 @@ namespace NormalVisualizer {
 		ecs.submitEntity(_createLight(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f)));
 
 		{
-			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(resourceManagers, "bunny.gltf");
-			const auto& bunnyNode = gltfScene.mMeshNodes[0];
-
-			MaterialComponent material;
-			material.mAlbedoColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
-			ecs.submitEntity(std::move(ECS::EntityBuilder{}
-				.attachComponent<SpatialComponent>(glm::vec3(0.f), glm::vec3(1.f))
-				.attachComponent<MeshComponent>(bunnyNode.mMeshHandle)
-				.attachComponent<MaterialComponent>(material)
-				.attachComponent<PhongRenderComponent>()
-				.attachComponent<WireframeRenderComponent>()
-				.attachComponent<OpaqueComponent>()
-				.attachComponent<TagComponent>("bunny")
-				.attachComponent<RotationComponent>(glm::vec3(0.f, 0.5f, 0.f))
-			));
+			Loader::loadGltfScene(ecs, resourceManagers, "bunny.gltf", glm::mat4(1.f), [](ECS& ecs, const GLTFImporter::MeshNode& node) {
+				MaterialComponent material = node.mMaterial;
+				material.mAlbedoColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
+				ecs.submitEntity(std::move(ECS::EntityBuilder{}
+					.attachComponent<SpatialComponent>(glm::vec3(0.f), glm::vec3(1.f))
+					.attachComponent<MeshComponent>(node.mMeshHandle)
+					.attachComponent<MaterialComponent>(material)
+					.attachComponent<PhongRenderComponent>()
+					.attachComponent<WireframeRenderComponent>()
+					.attachComponent<OpaqueComponent>()
+					.attachComponent<TagComponent>("bunny")
+					.attachComponent<RotationComponent>(glm::vec3(0.f, 0.5f, 0.f))
+				));
+			});
 		}
 
 		/* Systems - order matters! */
