@@ -14,6 +14,8 @@ extern "C" {
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/EngineComponents/SingleFrameComponent.hpp"
+#include "ECS/Component/EngineComponents/AsyncJobComponent.hpp"
+#include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/DebugBoundingBox.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
@@ -158,6 +160,13 @@ namespace neo {
 						ServiceLocator<ImGuiManager>::ref().imGuiEditor();
 						ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, ecs, resourceManagers);
 						profiler.imGuiEditor();
+						{
+							ImGui::Begin("Engine");
+							for (auto&& [_, __, tag] : ecs.getView<AsyncJobComponent, TagComponent>().each()) {
+								ImGui::Text("Async Job: %s", tag.mTag.c_str());
+							}
+							ImGui::End();
+						}
 
 						ServiceLocator<ImGuiManager>::ref().end();
 						Messenger::relayMessages(ecs);
