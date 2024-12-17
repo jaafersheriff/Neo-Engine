@@ -538,9 +538,11 @@ namespace neo {
 				stbi_set_flip_vertically_on_load(false);
 				NEO_LOG_I("Loading gltf %s", path.c_str());
 				if (path.size() > 5 && path.find(".gltf", path.size() - 5) != std::string::npos) {
+					TRACY_ZONEN("LoadASCIIFromFile");
 					ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
 				}
 				else if (path.size() > 4 && path.find(".glb", path.size() - 4) != std::string::npos) {
+					TRACY_ZONEN("LoadBinaryFromFile");
 					ret = loader.LoadBinaryFromFile(&model, &err, &warn, path.c_str());
 				}
 

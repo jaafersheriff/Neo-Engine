@@ -198,6 +198,7 @@ namespace neo {
 			}
 
 			for (auto& id : swapQueue) {
+				TRACY_ZONEN("Destroy Single");
 				if (isValid(id)) {
 					_destroyImpl(mCache.handle(id.mHandle).get());
 					mCache.discard(id.mHandle);
@@ -223,6 +224,7 @@ namespace neo {
 			}
 
 			for (auto& loadDetails : swapQueue) {
+				TRACY_ZONEN("Create Single");
 				std::visit([&](auto&& arg) {
 					using T = std::decay_t<decltype(arg)>;
 					if constexpr (std::is_same_v<T, TextureBuilder>) {
