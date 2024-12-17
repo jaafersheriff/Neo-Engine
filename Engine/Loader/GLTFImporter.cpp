@@ -3,6 +3,10 @@
 #include "Renderer/GLObjects/Mesh.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 
+#include "ECS/ECS.hpp"
+#include "ECS/Component/EngineComponents/AsyncJobComponent.hpp"
+#include "ECS/Component/EngineComponents/TagComponent.hpp"
+
 #include "ResourceManager/ResourceManagers.hpp"
 
 #pragma warning(push)
@@ -529,6 +533,12 @@ namespace neo {
 			std::thread([path, baseTransform, &resourceManagers, &ecs, meshOperator, cameraOperator]() {
 				tracy::SetThreadName(path.c_str());
 				TRACY_ZONEN("GLTFImpoter::LoadScene");
+
+				ecs.submitEntity(std::move(ECS::EntityBuilder{}
+					.attachComponent<TagComponent>(path)
+					.attachComponent<AsyncJobComponent>(std::this_thread::get_id())
+				));
+
 				tinygltf::Model model;
 				tinygltf::TinyGLTF loader;
 				std::string err;
@@ -580,7 +590,13 @@ namespace neo {
 					_processNode(path.c_str(), nodeID, resourceManagers, model, node, baseTransform, ecs, meshOperator, cameraOperator);
 				}
 
-				NEO_LOG_I("Successfully parsed %s", path.c_str());
+				for (auto&& [entity, job, _] : ecs.getView<AsyncJobComponent, TagComponent>().each()) {
+					if (job.mPid == std::this_thread::get_id()) {
+						ecs.removeEntity(entity);
+					}
+				}
+
+				NEO_LOG_I("Successfully imported %s", path.c_str());
 				}).detach();
 		}
 	}
