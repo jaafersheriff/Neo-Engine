@@ -41,7 +41,7 @@ namespace neo {
 
 		using MeshNodeOp = std::function<void(ECS&, const MeshNode&)>;
 		using CameraNodeOp = std::function<void(ECS&, const CameraNode&)>;
-		void loadScene(const std::string& fileName, glm::mat4 baseTransform, ResourceManagers& resourceManagers, 
+		void loadScene(std::string fileName, glm::mat4 baseTransform, ResourceManagers& resourceManagers, 
 			ECS& ecs, MeshNodeOp meshOperator, CameraNodeOp cameraOperator);
 	}
 }

@@ -524,8 +524,9 @@ namespace {
 namespace neo {
 	namespace GLTFImporter {
 
-		void loadScene(const std::string& path, glm::mat4 baseTransform, ResourceManagers& resourceManagers, ECS& ecs, MeshNodeOp meshOperator, CameraNodeOp cameraOperator) {
-			std::thread([&]() {
+		void loadScene(std::string _path, glm::mat4 baseTransform, ResourceManagers& resourceManagers, ECS& ecs, MeshNodeOp meshOperator, CameraNodeOp cameraOperator) {
+			std::string path = _path;
+			std::thread([path, baseTransform, &resourceManagers, &ecs, meshOperator, cameraOperator]() {
 				tracy::SetThreadName(path.c_str());
 				TRACY_ZONEN("GLTFImpoter::LoadScene");
 				tinygltf::Model model;
