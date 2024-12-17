@@ -4,11 +4,11 @@
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 
-#include "Loader.hpp"
 #include "ResourceManager/MeshManager.hpp"
 
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace neo {
 	class ECS;
@@ -41,10 +41,7 @@ namespace neo {
 
 		using MeshNodeOp = std::function<void(ECS&, const MeshNode&)>;
 		using CameraNodeOp = std::function<void(ECS&, const CameraNode&)>;
-		void loadScene(const std::string& fileName, glm::mat4 baseTransform, ResourceManagers& resourceManagers, ECS& ecs, 
-			MeshNodeOp meshOperator, CameraNodeOp = [](ECS&, const CameraNode&){
-				NEO_LOG_W("Default CameraNodeOp called");
-			}
-		);
+		void loadScene(const std::string& fileName, glm::mat4 baseTransform, ResourceManagers& resourceManagers, 
+			ECS& ecs, MeshNodeOp meshOperator, CameraNodeOp cameraOperator);
 	}
 }

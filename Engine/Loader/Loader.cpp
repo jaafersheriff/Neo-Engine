@@ -50,7 +50,14 @@ namespace neo {
 		return ret;
 	}
 
-	void Loader::loadGltfScene(ECS& ecs, ResourceManagers& resourceManagers, const std::string& fileName, glm::mat4 baseTransform, GLTFImporter::MeshNodeOp meshOperator, GLTFImporter::CameraNodeOp cameraOperator) {
+	void Loader::loadGltfScene(
+		ECS& ecs, 
+		ResourceManagers& resourceManagers, 
+		const std::string& fileName, 
+		glm::mat4 baseTransform, 
+		GLTFImporter::MeshNodeOp meshOperator, 
+		GLTFImporter::CameraNodeOp cameraOperator
+	) {
 		bool success = _operate(fileName, [&](const char* fullPath) {
 			GLTFImporter::loadScene(fullPath, baseTransform, resourceManagers, ecs, meshOperator, cameraOperator);
 		});

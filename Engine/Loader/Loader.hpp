@@ -4,7 +4,6 @@
 
 #include <optional>
 #include <vector>
-#include <functional>
 
 #include <glm/glm.hpp>
 
@@ -37,7 +36,7 @@ namespace neo {
 				ResourceManagers& resourceManagers, 
 				const std::string& fileName, 
 				glm::mat4 baseTransform,
-				GLTFImporter::MeshNodeOp meshOperator,
+				GLTFImporter::MeshNodeOp meshOp,
 				GLTFImporter::CameraNodeOp cameraOperator = [](ECS&, const GLTFImporter::CameraNode&) {
 					NEO_LOG_W("Default CameraNodeOp called?");
 				}

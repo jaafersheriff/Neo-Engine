@@ -72,20 +72,21 @@ namespace Fireworks {
 		}
 
 		{
-			GLTFImporter::Scene gltfScene = Loader::loadGltfScene(resourceManagers, "bunny.gltf");
-			MaterialComponent material;
-			material.mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
-			ecs.submitEntity(std::move(ECS::EntityBuilder{}
-				.attachComponent<TagComponent>("Bunny")
-				.attachComponent<SpatialComponent>(glm::vec3(2.f, 0.0f, -1.f), glm::vec3(1.5f))
-				.attachComponent<RotationComponent>(glm::vec3(0.f, 1.0f, 0.f))
-				.attachComponent<MeshComponent>(gltfScene.mMeshNodes[0].mMeshHandle)
-				.attachComponent<MaterialComponent>(material)
-				.attachComponent<BoundingBoxComponent>(gltfScene.mMeshNodes[0].mMin, gltfScene.mMeshNodes[0].mMax)
-				.attachComponent<ForwardPBRRenderComponent>()
-				.attachComponent<OpaqueComponent>()
-				.attachComponent<ShadowCasterRenderComponent>()
-			));
+			Loader::loadGltfScene(ecs, resourceManagers, "bunny.gltf", glm::mat4(1.f), [](ECS& ecs, const GLTFImporter::MeshNode& node) {
+				MaterialComponent material = node.mMaterial;
+				material.mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
+				ecs.submitEntity(std::move(ECS::EntityBuilder{}
+					.attachComponent<TagComponent>(node.mName.c_str())
+					.attachComponent<SpatialComponent>(glm::vec3(2.f, 0.0f, -1.f), glm::vec3(1.5f))
+					.attachComponent<RotationComponent>(glm::vec3(0.f, 1.0f, 0.f))
+					.attachComponent<MeshComponent>(node.mMeshHandle)
+					.attachComponent<MaterialComponent>(material)
+					.attachComponent<BoundingBoxComponent>(node.mMin, node.mMax)
+					.attachComponent<ForwardPBRRenderComponent>()
+					.attachComponent<OpaqueComponent>()
+					.attachComponent<ShadowCasterRenderComponent>()
+				));
+			});
 		}
 		{
 			MaterialComponent material;

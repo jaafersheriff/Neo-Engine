@@ -499,16 +499,16 @@ namespace {
 		SpatialComponent nodeSpatial = _processSpatial(node, parentXform);
 
 		for (auto& child : node.children) {
-			_processNode(path, child, resourceManagers, model, model.nodes[child], nodeSpatial.getModelMatrix());
+			_processNode(path, child, resourceManagers, model, model.nodes[child], nodeSpatial.getModelMatrix(), ecs, meshNodeOperator, cameraNodeOperator);
 		}
 
 		if (node.camera > -1) {
-			TRACY_ZONE("CameraNodeOp");
+			TRACY_ZONEN("CameraNodeOp");
 			cameraNodeOperator(ecs, _processCameraNode(model, node, nodeSpatial));
 		}
 		else if (node.mesh > -1) {
 			for (const GLTFImporter::MeshNode& mesh : _processMeshNode(path, nodeID, resourceManagers, model, node, nodeSpatial)) {
-				TRACY_ZONE("MeshNodeOp");
+				TRACY_ZONEN("MeshNodeOp");
 				meshNodeOperator(ecs, mesh);
 			}
 		}
@@ -574,10 +574,11 @@ namespace neo {
 
 				for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
 					const auto& node = model.nodes[nodeID];
-					_processNode(path.c_str(), nodeID, resourceManagers, model, node, baseTransform);
+					_processNode(path.c_str(), nodeID, resourceManagers, model, node, baseTransform, ecs, meshOperator, cameraOperator);
 				}
 
 				NEO_LOG_I("Successfully parsed %s", path.c_str());
-			}).detach();
+				}).detach();
+		}
 	}
 }
