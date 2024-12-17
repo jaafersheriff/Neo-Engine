@@ -20,7 +20,7 @@ namespace neo {
 	void ImGuiConsole::clearLog() {
 		std::lock_guard<std::mutex> lock(mLogMutex);
 		for (int i = 0; i < mLogs.size(); i++) {
-			free(mLogs[i].second);
+			delete[] mLogs[i].second;
 		}
 		mLogs.clear();
 	}
@@ -35,7 +35,7 @@ namespace neo {
 			std::lock_guard<std::mutex> lock(mLogMutex);
 			mLogs.push_back({ severity, buf });
 			while (!mInfiniteLog && mLogs.size() > mMaxLogSize) {
-				free(mLogs.front().second);
+				delete[] mLogs.front().second;
 				mLogs.erase(mLogs.begin());
 			}
 		}

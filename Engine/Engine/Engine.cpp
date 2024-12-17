@@ -239,10 +239,10 @@ namespace neo {
 		auto loadMesh = [&](HashedString name, MeshLoadDetails& details) {
 			auto id = resourceManagers.mMeshManager.asyncLoad(name, details);
 			for (auto&& [type, buffer] : details.mVertexBuffers) {
-				free(const_cast<uint8_t*>(buffer.mData));
+				delete[] buffer.mData;
 			}
 			if (details.mElementBuffer) {
-				free(const_cast<uint8_t*>(details.mElementBuffer->mData));
+				delete[] details.mElementBuffer->mData;
 			}
 			return id;
 		};

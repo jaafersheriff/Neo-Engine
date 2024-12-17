@@ -46,10 +46,10 @@ namespace neo {
 		auto cubeDetails = prefabs::generateCube();
 		mFallback = MeshLoader{}.load(*cubeDetails, "Fallback Cube");
 		for (auto&& [type, buffer] : cubeDetails->mVertexBuffers) {
-			free(const_cast<uint8_t*>(buffer.mData));
+			delete[] buffer.mData;
 		}
 		if (cubeDetails->mElementBuffer) {
-			free(const_cast<uint8_t*>(cubeDetails->mElementBuffer->mData));
+			delete[] cubeDetails->mElementBuffer->mData;
 		}
 	}
 
@@ -99,10 +99,10 @@ namespace neo {
 				TRACY_GPUN("Create Single");
 				mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
 				for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
-					free(const_cast<uint8_t*>(buffer.mData));
+					delete[] buffer.mData;
 				}
 				if (details.mLoadDetails.mElementBuffer.has_value()) {
-					free(const_cast<uint8_t*>(details.mLoadDetails.mElementBuffer->mData));
+					delete[] details.mLoadDetails.mElementBuffer->mData;
 				}
 			}
 		}

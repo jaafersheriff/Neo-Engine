@@ -15,7 +15,7 @@ namespace neo {
 			buffer.mCount = elements;
 			buffer.mOffset = 0;
 			buffer.mByteSize = byteSize;
-			buffer.mData = static_cast<uint8_t*>(malloc(byteSize));
+			buffer.mData = new uint8_t[byteSize];
 			if (buffer.mData) {
 				memcpy(const_cast<uint8_t*>(buffer.mData), data, byteSize);
 			}
@@ -53,7 +53,7 @@ namespace neo {
 					types::ByteFormats::UnsignedShort,
 					byteSize
 				};
-				details.mElementBuffer->mData = static_cast<uint8_t*>(malloc(byteSize));
+				details.mElementBuffer->mData = new uint8_t[byteSize];
 				memcpy(const_cast<uint8_t*>(details.mElementBuffer->mData), mesh->triangles, byteSize);
 			}
 
@@ -198,7 +198,7 @@ namespace neo {
 					types::ByteFormats::UnsignedInt,
 					byteSize
 				};
-				builder->mElementBuffer->mData = static_cast<uint8_t*>(malloc(byteSize));
+				builder->mElementBuffer->mData = new uint8_t[byteSize];
 				memcpy(const_cast<uint8_t*>(builder->mElementBuffer->mData), indices.data(), byteSize);
 			}
 
@@ -264,7 +264,7 @@ namespace neo {
 					types::ByteFormats::UnsignedInt,
 					byteSize
 				};
-				builder->mElementBuffer->mData = static_cast<uint8_t*>(malloc(byteSize));
+				builder->mElementBuffer->mData = new uint8_t[byteSize];
 				memcpy(const_cast<uint8_t*>(builder->mElementBuffer->mData), indices.data(), byteSize);
 			}
 
@@ -401,7 +401,7 @@ namespace neo {
 					types::ByteFormats::UnsignedInt,
 					byteSize
 				};
-				builder->mElementBuffer->mData = static_cast<uint8_t*>(malloc(byteSize));
+				builder->mElementBuffer->mData = new uint8_t[byteSize];
 				memcpy(const_cast<uint8_t*>(builder->mElementBuffer->mData), ele.data(), byteSize);
 			}
 

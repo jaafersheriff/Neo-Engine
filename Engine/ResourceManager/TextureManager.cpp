@@ -227,7 +227,7 @@ namespace neo {
 					using T = std::decay_t<decltype(arg)>;
 					if constexpr (std::is_same_v<T, TextureBuilder>) {
 						mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
-						free(const_cast<uint8_t*>(arg.mData));
+						delete[] arg.mData;
 					}
 					else if constexpr (std::is_same_v<T, TextureFiles>) {
 						mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
