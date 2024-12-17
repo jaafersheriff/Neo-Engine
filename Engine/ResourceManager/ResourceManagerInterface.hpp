@@ -6,6 +6,7 @@
 #include <string>
 #include <memory>
 #include <optional>
+#include <mutex>
 
 namespace neo {
 	class ResourceManagers;
@@ -56,9 +57,12 @@ namespace neo {
 			}
 			// TODO - this is a linear search :(
 			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
-			for (auto& res : mQueue) {
-				if (id == res.mHandle) {
-					return true;
+			std::lock_guard<std::mutex> lock(mLoadQueueMutex);
+			{
+				for (auto& res : mLoadQueue) {
+					if (id == res.mHandle) {
+						return true;
+					}
 				}
 			}
 			return false;
@@ -70,9 +74,12 @@ namespace neo {
 			}
 			// TODO - this is a linear search :(
 			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
-			for (auto& res : mDiscardQueue) {
-				if (id == res.mHandle) {
-					return true;
+			{
+				std::lock_guard<std::mutex> lock(mDiscardQueueMutex);
+				for (auto& res : mDiscardQueue) {
+					if (id == res.mHandle) {
+						return true;
+					}
 				}
 			}
 			return false;
@@ -106,11 +113,13 @@ namespace neo {
 		}
 
 		void transact(ResourceHandle<ResourceType> handle, std::function<void(ResourceType&)> transaction) const {
+			std::lock_guard<std::mutex> lock(mTransactionQueueMutex);
 			mTransactionQueue.emplace_back(std::make_pair(handle, transaction));
 		}
 
 		void discard(ResourceHandle<ResourceType> id) const {
 			if (!isDiscardQueued(id) && (isValid(id) || isQueued(id))) {
+				std::lock_guard<std::mutex> lock(mDiscardQueueMutex);
 				mDiscardQueue.emplace_back(id);
 			}
 		}
@@ -123,9 +132,18 @@ namespace neo {
 		};
 
 		void clear() {
-			mQueue.clear();
-			mDiscardQueue.clear();
-			mTransactionQueue.clear();
+			{
+				std::lock_guard<std::mutex> lock(mLoadQueueMutex);
+				mLoadQueue.clear();
+			}
+			{
+				std::lock_guard<std::mutex> lock(mDiscardQueueMutex);
+				mDiscardQueue.clear();
+			}
+			{
+				std::lock_guard<std::mutex> lock(mTransactionQueueMutex);
+				mTransactionQueue.clear();
+			}
 			mCache.each([this](BackedResource<ResourceType>& resource) {
 				static_cast<DerivedManager*>(this)->_destroyImpl(resource);
 			});
@@ -135,9 +153,15 @@ namespace neo {
 		void tick() {
 			static_cast<DerivedManager*>(this)->_tickImpl();
 		}
-		mutable std::vector<ResourceLoadDetails_Internal> mQueue;
+		mutable std::mutex mLoadQueueMutex;
+		mutable std::vector<ResourceLoadDetails_Internal> mLoadQueue;
+
+		mutable std::mutex mDiscardQueueMutex;
 		mutable std::vector<ResourceHandle<ResourceType>> mDiscardQueue;
+
+		mutable std::mutex mTransactionQueueMutex;
 		mutable std::vector<std::pair<ResourceHandle<ResourceType>, std::function<void(ResourceType&)>>> mTransactionQueue;
+
 		entt::resource_cache<BackedResource<ResourceType>> mCache;
 		std::shared_ptr<BackedResource<ResourceType>> mFallback;
 

@@ -165,13 +165,19 @@ namespace neo {
 					memcpy(copiedData, builder.mData, byteSize);
 					copy.mData = copiedData;
 				}
-				mQueue.emplace_back(ResourceLoadDetails_Internal{ id, copy, debugName });
+				{
+					std::lock_guard<std::mutex> lock(mLoadQueueMutex);
+					mLoadQueue.emplace_back(ResourceLoadDetails_Internal{ id, copy, debugName });
+				}
 			},
 			[&](TextureFiles& loadDetails) {
 				NEO_ASSERT(loadDetails.mFilePaths.size() == 1 || loadDetails.mFilePaths.size() == 6, "Invalid file path count when loading texture");
 
 				// Can safely copy into queue
-				mQueue.emplace_back(ResourceLoadDetails_Internal{ id, loadDetails, debugName });
+				{
+					std::lock_guard<std::mutex> lock(mLoadQueueMutex);
+					mLoadQueue.emplace_back(ResourceLoadDetails_Internal{ id, loadDetails, debugName });
+				}
 			},
 			[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
 		);
@@ -185,8 +191,11 @@ namespace neo {
 
 		{
 			std::vector<TextureHandle> swapQueue;
-			std::swap(mDiscardQueue, swapQueue);
-			mDiscardQueue.clear();
+			{
+				std::lock_guard<std::mutex> lock(mDiscardQueueMutex);
+				std::swap(mDiscardQueue, swapQueue);
+				mDiscardQueue.clear();
+			}
 
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
@@ -194,9 +203,10 @@ namespace neo {
 					mCache.discard(id.mHandle);
 				}
 				else {
-					for (int i = 0; i < mQueue.size(); i++) {
-						if (id == mQueue[i].mHandle) {
-							mQueue.erase(mQueue.begin() + i);
+					std::lock_guard<std::mutex> lock(mLoadQueueMutex);
+					for (int i = 0; i < mLoadQueue.size(); i++) {
+						if (id == mLoadQueue[i].mHandle) {
+							mLoadQueue.erase(mLoadQueue.begin() + i);
 							break;
 						}
 					}
@@ -206,8 +216,11 @@ namespace neo {
 
 		{
 			std::vector<ResourceLoadDetails_Internal> swapQueue;
-			std::swap(mQueue, swapQueue);
-			mQueue.clear();
+			{
+				std::lock_guard<std::mutex> lock(mLoadQueueMutex);
+				std::swap(mLoadQueue, swapQueue);
+				mLoadQueue.clear();
+			}
 
 			for (auto& loadDetails : swapQueue) {
 				std::visit([&](auto&& arg) {
@@ -225,6 +238,8 @@ namespace neo {
 					}, loadDetails.mLoadDetails);
 			}
 		}
+
+		NEO_ASSERT(mTransactionQueue.empty(), "Texture transactions unsupported");
 	}
 
 	void TextureManager::_destroyImpl(BackedResource<Texture>& texture) {

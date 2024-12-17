@@ -82,7 +82,10 @@ namespace neo {
 	}
 
 	[[nodiscard]] ShaderManager::ShaderHandle ShaderManager::_asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, const std::optional<std::string>& debugName) const {
-		mQueue.emplace_back(ResourceLoadDetails_Internal{ id, shaderDetails, debugName });
+		{
+			std::lock_guard<std::mutex> lock(mLoadQueueMutex);
+			mLoadQueue.emplace_back(ResourceLoadDetails_Internal{ id, shaderDetails, debugName });
+		}
 		return id;
 	}
 
@@ -91,8 +94,11 @@ namespace neo {
 
 		{
 			std::vector<ResourceLoadDetails_Internal> swapQueue = {};
-			std::swap(swapQueue, mQueue);
-			mQueue.clear();
+			{
+				std::lock_guard<std::mutex> lock(mLoadQueueMutex);
+				std::swap(swapQueue, mLoadQueue);
+				mLoadQueue.clear();
+			}
 
 			for (auto& loadDetails : swapQueue) {
 				mCache.load<ShaderLoader>(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
@@ -101,8 +107,11 @@ namespace neo {
 
 		{
 			std::vector<ShaderHandle> swapQueue = {};
-			std::swap(swapQueue, mDiscardQueue);
-			mDiscardQueue.clear();
+			{
+				std::lock_guard<std::mutex> lock(mDiscardQueueMutex);
+				std::swap(swapQueue, mDiscardQueue);
+				mDiscardQueue.clear();
+			}
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
 					_destroyImpl(mCache.handle(id.mHandle).get());
@@ -110,6 +119,8 @@ namespace neo {
 				}
 			}
 		}
+
+		NEO_ASSERT(mTransactionQueue.empty(), "Shader transactions unsupported");
 	}
 
 	void ShaderManager::_destroyImpl(BackedResource<SourceShader>& sourceShader) {

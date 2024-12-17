@@ -3,6 +3,7 @@
 #include "Util/Log/Log.hpp"
 
 #include <vector>
+#include <mutex>
 
 #include <ext/imgui_incl.hpp>
 
@@ -18,6 +19,7 @@ namespace neo {
 		void imGuiEditor();
 
 	private:
+		std::mutex mLogMutex;
 		std::vector<std::pair<util::LogSeverity, char*>> mLogs;
 		ImGuiTextFilter mFilter;
 		bool mAutoScrollEnabled;

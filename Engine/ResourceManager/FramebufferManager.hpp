@@ -109,6 +109,8 @@ namespace neo {
 
 		void imguiEditor(std::function<void(const TextureHandle&)> textureFunc, TextureManager& textureManager);
 
+		// TODO - missing mutexes to match ResourceManagerIntereface, but that's not really a problem because this resource manager
+		// doesn't interop with anything threaded - yet. Just noting the divergence 
 		mutable std::vector<FramebufferQueueItem> mQueue;
 		entt::resource_cache<BackedResource<PooledFramebuffer>> mCache;
 		std::shared_ptr<Framebuffer> mFallback;
