@@ -5,11 +5,11 @@
 namespace neo {
 
 	START_COMPONENT(AsyncJobComponent);
-		AsyncJobComponent(std::thread::id pid) :
+		AsyncJobComponent(uint32_t pid) :
 			mPid(pid)
 		{}
 
-		const std::thread::id mPid;
+		uint32_t mPid = 0;
 
 	END_COMPONENT();
 }

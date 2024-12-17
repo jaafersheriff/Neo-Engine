@@ -534,10 +534,13 @@ namespace neo {
 				tracy::SetThreadName(path.c_str());
 				TRACY_ZONEN("GLTFImpoter::LoadScene");
 
-				ecs.submitEntity(std::move(ECS::EntityBuilder{}
-					.attachComponent<TagComponent>(path)
-					.attachComponent<AsyncJobComponent>(std::this_thread::get_id())
-				));
+				{
+					AsyncJobComponent asyncJob(static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id())));
+					ecs.submitEntity(std::move(ECS::EntityBuilder{}
+						.attachComponent<TagComponent>(path)
+						.attachComponent<AsyncJobComponent>(asyncJob)
+					));
+				}
 
 				tinygltf::Model model;
 				tinygltf::TinyGLTF loader;
@@ -591,7 +594,7 @@ namespace neo {
 				}
 
 				for (auto&& [entity, job, _] : ecs.getView<AsyncJobComponent, TagComponent>().each()) {
-					if (job.mPid == std::this_thread::get_id()) {
+					if (job.mPid == static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id()))) {
 						ecs.removeEntity(entity);
 					}
 				}
