@@ -593,11 +593,10 @@ namespace neo {
 					_processNode(path.c_str(), nodeID, resourceManagers, model, node, baseTransform, ecs, meshOperator, cameraOperator);
 				}
 
-				for (auto&& [entity, job, _] : ecs.getView<AsyncJobComponent, TagComponent>().each()) {
-					if (job.mPid == static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id()))) {
-						ecs.removeEntity(entity);
-					}
-				}
+				RemoveAsyncJobComponent asyncJob(static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id())));
+				ecs.submitEntity(std::move(ECS::EntityBuilder{}
+					.attachComponent<RemoveAsyncJobComponent>(asyncJob)
+				));
 
 				NEO_LOG_I("Successfully imported %s", path.c_str());
 				}).detach();
