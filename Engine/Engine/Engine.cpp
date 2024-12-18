@@ -126,7 +126,7 @@ namespace neo {
 						float runTime = static_cast<float>(glfwGetTime());
 						profiler.begin(runTime);
 					}
-					if (demos.needsReload()) {
+					if (demos.needsReload() && ecs.mRegistry.storage<AsyncJobComponent>().empty()) {
 						_swapDemo(demos, ecs, resourceManagers);
 					}
 
@@ -411,7 +411,7 @@ namespace neo {
 					break;
 				}
 			}
-			NEO_ASSERT(jobFound, "Trying to remove a non-existent async job?");
+			NEO_ASSERT(jobFound, "Trying to remove a non-existant async job?");
 		}
 
 		// Update display, mouse, keyboard 
