@@ -164,8 +164,10 @@ namespace neo {
 							// TODO - move to its own function hehe
 							ImGui::Begin("Engine");
 							if (ImGui::TreeNodeEx("Async Jobs", ImGuiTreeNodeFlags_DefaultOpen)) {
+								glm::vec3 warningColor = util::sLogSeverityData.at(util::LogSeverity::Warning).second;
+								ImVec4 imguiColor(warningColor.x, warningColor.y, warningColor.z, 1.f);
 								for (auto&& [_, __, tag] : ecs.getView<AsyncJobComponent, TagComponent>().each()) {
-									ImGui::Text("%s", tag.mTag.c_str());
+									ImGui::TextColored(imguiColor, "%s", tag.mTag.c_str());
 								}
 								ImGui::TreePop();
 							}
