@@ -19,7 +19,8 @@ namespace neo {
 
 	void DemoWrangler::swap() { 
 		NEO_LOG_I("Swapping to demo %s", mDemos[mNextDemoIndex]->getConfig().name.c_str());
-		mCurrentDemoIndex = mNextDemoIndex; mForceReload = false; 
+		mCurrentDemoIndex = mNextDemoIndex; 
+		mForceReload = false; 
 	}
 
 	void DemoWrangler::setForceReload() { 
