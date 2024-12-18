@@ -161,9 +161,24 @@ namespace neo {
 						ServiceLocator<Renderer>::ref().imGuiEditor(mWindow, ecs, resourceManagers);
 						profiler.imGuiEditor();
 						{
+							// TODO - move to its own function hehe
 							ImGui::Begin("Engine");
-							for (auto&& [_, __, tag] : ecs.getView<AsyncJobComponent, TagComponent>().each()) {
-								ImGui::Text("Async Job: %s", tag.mTag.c_str());
+							if (ImGui::TreeNodeEx("Async Jobs", ImGuiTreeNodeFlags_DefaultOpen)) {
+								for (auto&& [_, __, tag] : ecs.getView<AsyncJobComponent, TagComponent>().each()) {
+									ImGui::Text("%s", tag.mTag.c_str());
+								}
+								ImGui::TreePop();
+							}
+							if (auto hardwareDetails = ecs.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
+								auto&& [entity, mouse, viewport] = hardwareDetails.value();
+								if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
+									viewport.imGuiEditor();
+									ImGui::TreePop();
+								}
+								if (ImGui::TreeNodeEx("Mouse", ImGuiTreeNodeFlags_DefaultOpen)) {
+									mouse.imGuiEditor();
+									ImGui::TreePop();
+								}
 							}
 							ImGui::End();
 						}
@@ -384,6 +399,19 @@ namespace neo {
 
 		for(auto& entity : ecs.getView<SingleFrameComponent>()) {
 			ecs.removeEntity(entity);
+		}
+
+		for (auto&& [removeEntity, removeJob] : ecs.getView<RemoveAsyncJobComponent>().each()) {
+			bool jobFound = false;
+			for (auto&& [jobEntity, job] : ecs.getView<AsyncJobComponent>().each()) {
+				if (removeJob.mPid == job.mPid) {
+					ecs.removeEntity(removeEntity);
+					ecs.removeEntity(jobEntity);
+					jobFound = true;
+					break;
+				}
+			}
+			NEO_ASSERT(jobFound, "Trying to remove a non-existent async job?");
 		}
 
 		// Update display, mouse, keyboard 

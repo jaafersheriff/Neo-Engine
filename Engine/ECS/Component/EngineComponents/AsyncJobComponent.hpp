@@ -8,8 +8,13 @@ namespace neo {
 		AsyncJobComponent(uint32_t pid) :
 			mPid(pid)
 		{}
-
 		uint32_t mPid = 0;
-
 	END_COMPONENT();
+	START_COMPONENT(RemoveAsyncJobComponent);
+		RemoveAsyncJobComponent(uint32_t pid) :
+			mPid(pid)
+		{}
+		uint32_t mPid = 0;
+	END_COMPONENT();
+
 }
