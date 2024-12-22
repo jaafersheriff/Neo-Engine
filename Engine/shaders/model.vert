@@ -21,10 +21,9 @@ out vec4 fragTan;
 uniform mat4 L0;
 uniform mat4 L1;
 uniform mat4 L2;
-uniform mat4 L3;
 
 // csm frustum transforms
-out vec4 shadowCoord[4];
+out vec4 shadowCoord[3];
 #endif
 
 void main() {
@@ -40,6 +39,5 @@ void main() {
 	shadowCoord[0] = L0 * fragPos;
 	shadowCoord[1] = L1 * fragPos;
 	shadowCoord[2] = L2 * fragPos;
-	shadowCoord[3] = L3 * fragPos;
 #endif
 }

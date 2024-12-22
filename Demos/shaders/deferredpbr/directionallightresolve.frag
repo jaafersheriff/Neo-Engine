@@ -18,6 +18,8 @@ layout(binding = 5) uniform sampler2D shadowMap;
 
 uniform mat4 invP;
 uniform mat4 invV;
+uniform mat4 P;
+uniform mat4 V;
 uniform vec3 camPos;
 
 uniform vec4 lightRadiance;
@@ -58,11 +60,11 @@ void main() {
 	shadowCoord[0] = L0 * vec4(worldPos, 1.0);
 	shadowCoord[1] = L1 * vec4(worldPos, 1.0);
 	shadowCoord[2] = L2 * vec4(worldPos, 1.0);
-	float visibility = getCSMShadowVisibility(depth, csmDepths, shadowCoord, shadowMap);
+	vec4 _d = P * V * vec4(worldPos, 1.0);
+	float visibility = getCSMShadowVisibility(_d.z, csmDepths, shadowCoord, shadowMap);
 	pbrColor.directDiffuse *= visibility;
 	pbrColor.directSpecular *= visibility;
 #endif
-
 	
 	color.rgb = vec3(0)
 		+ calculateIndirectDiffuse(pbrMaterial.albedo, pbrMaterial.metalness, pbrLight.radiance, 0.0002)
@@ -70,6 +72,18 @@ void main() {
 		+ pbrColor.directSpecular
 	;
 	color.a = 1.0;
+
+#if defined(ENABLE_SHADOWS) && 1
+	 if (_d.z < csmDepths.x) {
+	 	color.rgb *= vec3(1, 0, 0); 
+	 }
+	 else if (_d.z < csmDepths.y) {
+	 	color.rgb *= vec3(0, 1, 0); 
+	 }
+	 else if (_d.z < csmDepths.z) {
+	 	color.rgb *= vec3(0, 0, 1); 
+	 }
+#endif
 
 }
 

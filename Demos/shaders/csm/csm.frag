@@ -46,10 +46,10 @@ void main() {
 		if (sceneDepth <= csmDepths.x && validCascade(shadowCoord[0])) {
 			color.yz *= scale;
 		}
-		else if (sceneDepth < csmDepths.y && validCascade(shadowCoord[1])) {
+		else if (sceneDepth <= csmDepths.y && validCascade(shadowCoord[1])) {
 			color.xz *= scale;
 		}
-		else if (sceneDepth < csmDepths.z && validCascade(shadowCoord[2])) {
+		else if (sceneDepth <= csmDepths.z && validCascade(shadowCoord[2])) {
 			color.xy *= scale;
 		}
 	}
