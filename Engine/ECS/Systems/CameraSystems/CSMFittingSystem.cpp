@@ -24,6 +24,7 @@ namespace neo {
 			const CameraComponent& sourceCamera,
 			const SpatialComponent& lightSpatial,
 			const uint16_t shadowMapResolution,
+			const float bias,
 			SpatialComponent& receiverSpatial,
 			CameraComponent& receiverCamera,
 			CSMCameraComponent* csmCamera
@@ -109,9 +110,10 @@ namespace neo {
 				glm::vec3(0.f, 1.f, 0.f)
 			));
 
-			receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-radius, radius), glm::vec2(-radius, radius) });
-			receiverCamera.setNear(-radius);
-			receiverCamera.setFar(radius);
+			const float biasedRadius = radius + bias;
+			receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-biasedRadius, biasedRadius), glm::vec2(-biasedRadius, biasedRadius) });
+			receiverCamera.setNear(-biasedRadius);
+			receiverCamera.setFar(biasedRadius);
 		}
 	}
 
@@ -127,6 +129,7 @@ namespace neo {
 		auto&& [sourceCameraEntity, _, sourceSpatial, sourceCamera] = *sourceCameraTuple;
 		NEO_ASSERT(sourceCamera.getType() == CameraComponent::CameraType::Perspective, "Frustum fit source needs to be perspective");
 
+		const auto& lightReceiver = std::get<1>(*lightTuple);
 		const auto& lightSpatial = std::get<2>(*lightTuple);
 		const auto& shadowMap = std::get<5>(*lightTuple);
 		uint16_t shadowMapResolution = 1;
@@ -148,8 +151,8 @@ namespace neo {
 			&& cameraCamera0.getType() == cameraCamera1.getType() 
 			&& cameraCamera1.getType() == cameraCamera2.getType(), "Frustum fit receiver needs to be orthographic");
 
-		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial0, cameraCamera0, &csmCamera0);
-		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial1, cameraCamera1, &csmCamera1);
-		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial2, cameraCamera2, &csmCamera2);
+		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, lightReceiver.mBias, cameraSpatial0, cameraCamera0, &csmCamera0);
+		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, lightReceiver.mBias, cameraSpatial1, cameraCamera1, &csmCamera1);
+		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, lightReceiver.mBias, cameraSpatial2, cameraCamera2, &csmCamera2);
 	}
 }

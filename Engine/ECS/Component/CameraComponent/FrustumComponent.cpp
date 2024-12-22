@@ -48,14 +48,14 @@ namespace neo {
 			&& _boxInsideOfPlane(mBottom, min, max)
 			&& _boxInsideOfPlane(mNear, min, max)
 			&& _boxInsideOfPlane(mFar, min, max)
-			&& _planeInsideOfBox(mNearLeftBottom, min, max)
-			&& _planeInsideOfBox(mNearLeftTop, min, max)
-			&& _planeInsideOfBox(mNearRightBottom, min, max)
-			&& _planeInsideOfBox(mNearRightTop, min, max)
-			&& _planeInsideOfBox(mFarLeftBottom, min, max)
-			&& _planeInsideOfBox(mFarLeftTop, min, max)
-			&& _planeInsideOfBox(mFarRightBottom, min, max)
-			&& _planeInsideOfBox(mFarRightTop, min, max)
+			//&& _planeInsideOfBox(mNearLeftBottom, min, max)
+			//&& _planeInsideOfBox(mNearLeftTop, min, max)
+			//&& _planeInsideOfBox(mNearRightBottom, min, max)
+			//&& _planeInsideOfBox(mNearRightTop, min, max)
+			//&& _planeInsideOfBox(mFarLeftBottom, min, max)
+			//&& _planeInsideOfBox(mFarLeftTop, min, max)
+			//&& _planeInsideOfBox(mFarRightBottom, min, max)
+			//&& _planeInsideOfBox(mFarRightTop, min, max)
 			;
 	}
 
