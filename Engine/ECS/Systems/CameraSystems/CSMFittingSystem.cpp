@@ -110,10 +110,9 @@ namespace neo {
 				glm::vec3(0.f, 1.f, 0.f)
 			));
 
-			const float biasedRadius = radius + bias;
-			receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-biasedRadius, biasedRadius), glm::vec2(-biasedRadius, biasedRadius) });
-			receiverCamera.setNear(-biasedRadius);
-			receiverCamera.setFar(biasedRadius);
+			receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-radius, radius), glm::vec2(-radius, radius) });
+			receiverCamera.setNear(-radius - bias);
+			receiverCamera.setFar(radius + bias);
 		}
 	}
 

@@ -73,7 +73,7 @@ void main() {
 	;
 	color.a = 1.0;
 
-#if defined(ENABLE_SHADOWS) && 1
+#if defined(ENABLE_SHADOWS) && 0
 	 if (_d.z < csmDepths.x) {
 	 	color.rgb *= vec3(1, 0, 0); 
 	 }
