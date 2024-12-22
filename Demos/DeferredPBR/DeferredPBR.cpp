@@ -103,7 +103,7 @@ namespace DeferredPBR {
 				.attachComponent<CameraComponent>(-1.f, 1000.f, CameraComponent::Orthographic{ glm::vec2(-100.f, 100.f), glm::vec2(-100.f, 100.f) })
 				.attachComponent<CSMShadowMapComponent>(csmShadowMap)
 				.attachComponent<FrustumComponent>()
-				.attachComponent<FrustumFitReceiverComponent>(1.f)
+				.attachComponent<FrustumFitReceiverComponent>(15.f)
 			));
 
 			auto csmCameras = createCSMCameras();
