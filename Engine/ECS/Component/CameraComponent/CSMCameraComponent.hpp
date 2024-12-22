@@ -14,6 +14,7 @@ namespace neo {
 	};
 	END_COMPONENT();
 
+#define CSM_CAMERA_COUNT 3
 	// Really shouldn't be using inheritance like this
 	struct CSMCamera0Component : public CSMCameraComponent {
 		CSMCamera0Component(float sliceDepth)
@@ -33,11 +34,4 @@ namespace neo {
 		{}
 		const char* mName = "CSMCamera2Component";
 	};
-	struct CSMCamera3Component : public CSMCameraComponent {
-		CSMCamera3Component(float sliceDepth)
-			: CSMCameraComponent(sliceDepth)
-		{}
-		const char* mName = "CSMCamera3Component";
-	};
-
 }

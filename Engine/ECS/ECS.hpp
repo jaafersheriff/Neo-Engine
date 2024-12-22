@@ -77,7 +77,7 @@ namespace neo {
 		template<typename CompT> std::optional<std::tuple<ECS::Entity, const CompT&>> cGetComponent() const;
 		template<typename CompT> uint32_t entityCount() const;
 		template<typename CompT> bool has() const;
-		template<typename CompT, typename... CompTs> bool has() const;
+		template<typename CompTA, typename CompTB, typename... CompTs> bool has() const;
 		template<typename... CompTs> auto getView();
 		template<typename... CompTs> const auto getView() const;
 		template<typename... CompTs> std::optional<std::tuple<Entity, CompTs&...>> getSingleView();
@@ -322,9 +322,9 @@ namespace neo {
 		return entityCount<CompT>() > 0;
 	}
 
-	template<typename CompT, typename... CompTs> 
+	template<typename CompTA, typename CompTB, typename... CompTs> 
 	bool ECS::has() const {
-		return has<CompT>() && has<CompTs...>();
+		return has<CompTA>() && has<ComptB> && has<CompTs...>();
 	}
 
 	template<typename FilterCompT, typename SortCompT> 

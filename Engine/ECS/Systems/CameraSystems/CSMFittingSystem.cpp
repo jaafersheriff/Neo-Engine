@@ -114,18 +114,15 @@ namespace neo {
 		auto csmCamera0Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>();
 		auto csmCamera1Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>();
 		auto csmCamera2Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>();
-		auto csmCamera3Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>();
-		NEO_ASSERT(csmCamera0Tuple && csmCamera1Tuple && csmCamera2Tuple && csmCamera3Tuple, "CSM Camera's dont exist");
+		NEO_ASSERT(csmCamera0Tuple && csmCamera1Tuple && csmCamera2Tuple, "CSM Camera's dont exist");
 		auto& [cameraEntity0, cameraSpatial0, cameraCamera0, csmCamera0] = *csmCamera0Tuple;
 		auto& [cameraEntity1, cameraSpatial1, cameraCamera1, csmCamera1] = *csmCamera1Tuple;
 		auto& [cameraEntity2, cameraSpatial2, cameraCamera2, csmCamera2] = *csmCamera2Tuple;
-		auto& [cameraEntity3, cameraSpatial3, cameraCamera3, csmCamera3] = *csmCamera3Tuple;
 
 		NEO_ASSERT(
 			cameraCamera0.getType() == CameraComponent::CameraType::Orthographic 
 			&& cameraCamera0.getType() == cameraCamera1.getType() 
-			&& cameraCamera1.getType() == cameraCamera2.getType()
-			&& cameraCamera2.getType() == cameraCamera3.getType(), "Frustum fit receiver needs to be orthographic");
+			&& cameraCamera1.getType() == cameraCamera2.getType(), "Frustum fit receiver needs to be orthographic");
 
 		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial0, cameraCamera0, sourceCamera.getNear(), csmCamera0.mSliceDepth, 0);
 
@@ -133,10 +130,7 @@ namespace neo {
 		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial1, cameraCamera1, csmCamera0.mSliceDepth, csmCamera1.mSliceDepth, 1);
 
 		NEO_ASSERT(csmCamera1.mSliceDepth < csmCamera2.mSliceDepth, "Invalid CSM depth ranges");
-		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial2, cameraCamera2, csmCamera1.mSliceDepth, csmCamera2.mSliceDepth, 2);
-
-		NEO_ASSERT(csmCamera2.mSliceDepth < csmCamera3.mSliceDepth, "Invalid CSM depth ranges");
 		// TODO - this should just go to source camera far plane?
-		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial3, cameraCamera3, csmCamera2.mSliceDepth, csmCamera3.mSliceDepth, 3);
+		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial2, cameraCamera2, csmCamera1.mSliceDepth, csmCamera2.mSliceDepth, 2);
 	}
 }

@@ -15,7 +15,7 @@ float getSingleShadow(vec4 _shadowCoord, sampler2D _shadowMap, int _lod) {
 	return 0.f;
 }
 
-float getCSMShadowVisibility(float _sceneDepth, vec4 _csmDepths, vec4 _shadowCoord[4], sampler2D _shadowMap) {
+float getCSMShadowVisibility(float _sceneDepth, vec3 _csmDepths, vec4 _shadowCoord[3], sampler2D _shadowMap) {
 	int lod = 0;
 	if (_sceneDepth < _csmDepths.x) {
 		lod = 0;
@@ -25,9 +25,6 @@ float getCSMShadowVisibility(float _sceneDepth, vec4 _csmDepths, vec4 _shadowCoo
 	}
 	else if (_sceneDepth < _csmDepths.z) {
 		lod = 2;
-	}
-	else if (_sceneDepth < _csmDepths.w) {
-		lod = 3;
 	}
 
 	float shadow = getSingleShadow(_shadowCoord[lod], _shadowMap, lod);

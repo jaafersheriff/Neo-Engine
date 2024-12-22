@@ -116,9 +116,6 @@ namespace neo {
 		ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
 			.attachComponent<CSMCamera2Component>(bounds.has_value() ? bounds.value()[0] : 200.f)
 		);
-		ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
-			.attachComponent<CSMCamera3Component>(bounds.has_value() ? bounds.value()[0] : 400.f)
-		);
 
 		return ret;
 	}
@@ -132,9 +129,6 @@ namespace neo {
 		}
 		if (auto csm2 = ecs.getSingleView<SpatialComponent, CSMCamera2Component>()) {
 			ecs.removeEntity(std::get<0>(*csm2));
-		}
-		if (auto csm3 = ecs.getSingleView<SpatialComponent, CSMCamera3Component>()) {
-			ecs.removeEntity(std::get<0>(*csm3));
 		}
 	}
 
@@ -160,17 +154,14 @@ namespace neo {
 		auto csmCamera0Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>();
 		auto csmCamera1Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>();
 		auto csmCamera2Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>();
-		auto csmCamera3Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>();
-		NEO_ASSERT(csmCamera0Tuple && csmCamera1Tuple && csmCamera2Tuple && csmCamera3Tuple, "CSM Camera's dont exist");
+		NEO_ASSERT(csmCamera0Tuple && csmCamera1Tuple && csmCamera2Tuple, "CSM Camera's dont exist");
 		auto& [cameraEntity0, cameraSpatial0, cameraCamera0, csmCamera0] = *csmCamera0Tuple;
 		auto& [cameraEntity1, cameraSpatial1, cameraCamera1, csmCamera1] = *csmCamera1Tuple;
 		auto& [cameraEntity2, cameraSpatial2, cameraCamera2, csmCamera2] = *csmCamera2Tuple;
-		auto& [cameraEntity3, cameraSpatial3, cameraCamera3, csmCamera3] = *csmCamera3Tuple;
 
 		_drawSingleCSM<CompTs...>(resourceManagers, ecs, cameraEntity0, shadowMap->mShadowMap, shaderHandle, 0, clear);
 		_drawSingleCSM<CompTs...>(resourceManagers, ecs, cameraEntity1, shadowMap->mShadowMap, shaderHandle, 1, clear);
 		_drawSingleCSM<CompTs...>(resourceManagers, ecs, cameraEntity2, shadowMap->mShadowMap, shaderHandle, 2, clear);
-		_drawSingleCSM<CompTs...>(resourceManagers, ecs, cameraEntity3, shadowMap->mShadowMap, shaderHandle, 3, clear);
 
 		glCullFace(GL_BACK);
 	}

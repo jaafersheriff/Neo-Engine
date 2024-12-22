@@ -10,8 +10,8 @@ in vec2 fragTex;
 uniform vec4 albedo;
 
 #ifdef ENABLE_SHADOWS
-in vec4 shadowCoord[4];
-uniform vec4 csmDepths;
+in vec4 shadowCoord[3];
+uniform vec3 csmDepths;
 in float sceneDepth;
 
 layout(binding = 2) uniform sampler2D shadowMap;
@@ -51,9 +51,6 @@ void main() {
 		}
 		else if (sceneDepth < csmDepths.z && validCascade(shadowCoord[2])) {
 			color.xy *= scale;
-		}
-		else if (sceneDepth < csmDepths.w && validCascade(shadowCoord[3])) {
-			color.z *= scale;
 		}
 	}
 #endif

@@ -3,6 +3,8 @@
 #include "ECS/ECS.hpp"
 #include "Util/Profiler.hpp"
 
+#include "ECS/Component/CameraComponent/CSMCameraComponent.hpp"
+
 #include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
 #include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
@@ -55,8 +57,8 @@ namespace CSM {
 			passDefines.set(DEBUG_VIEW);
 		}
 
-		std::array<glm::mat4, 4> lightArrays;
-		glm::vec4 csmDepths(0.f);
+		std::array<glm::mat4, CSM_CAMERA_COUNT> lightArrays;
+		glm::vec3 csmDepths(0.f);
 		glm::mat4 mockPV;
 		float mockNear;
 		const bool shadowsEnabled =
@@ -64,10 +66,9 @@ namespace CSM {
 			&& ecs.has<CameraComponent>(lightEntity)
 			&& ecs.has<CSMShadowMapComponent>(lightEntity)
 			&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap)
-			&& ecs.entityCount<CSMCamera0Component>()
-			&& ecs.entityCount<CSMCamera1Component>()
-			&& ecs.entityCount<CSMCamera2Component>()
-			&& ecs.entityCount<CSMCamera3Component>();
+			&& ecs.has<CSMCamera0Component>()
+			&& ecs.has<CSMCamera1Component>()
+			&& ecs.has<CSMCamera2Component>();
 		MakeDefine(ENABLE_SHADOWS);
 		if (shadowsEnabled) {
 			passDefines.set(ENABLE_SHADOWS);
@@ -79,21 +80,17 @@ namespace CSM {
 			auto csmCamera0Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>();
 			auto csmCamera1Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>();
 			auto csmCamera2Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>();
-			auto csmCamera3Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera3Component>();
-			NEO_ASSERT(csmCamera0Tuple && csmCamera1Tuple && csmCamera2Tuple && csmCamera3Tuple, "CSM Camera's dont exist");
+			NEO_ASSERT(csmCamera0Tuple && csmCamera1Tuple && csmCamera2Tuple, "CSM Camera's dont exist");
 			auto& [cameraEntity0, cameraSpatial0, csmCameraCamera0, csmCamera0] = *csmCamera0Tuple;
 			auto& [cameraEntity1, cameraSpatial1, csmCameraCamera1, csmCamera1] = *csmCamera1Tuple;
 			auto& [cameraEntity2, cameraSpatial2, csmCameraCamera2, csmCamera2] = *csmCamera2Tuple;
-			auto& [cameraEntity3, cameraSpatial3, csmCameraCamera3, csmCamera3] = *csmCamera3Tuple;
 
 			lightArrays[0] = biasMatrix * csmCameraCamera0.getProj() * cameraSpatial0.getView();
 			lightArrays[1] = biasMatrix * csmCameraCamera1.getProj() * cameraSpatial1.getView();
 			lightArrays[2] = biasMatrix * csmCameraCamera2.getProj() * cameraSpatial2.getView();
-			lightArrays[3] = biasMatrix * csmCameraCamera3.getProj() * cameraSpatial3.getView();
 			csmDepths.x = csmCamera0.mSliceDepth;
 			csmDepths.y = csmCamera1.mSliceDepth;
 			csmDepths.z = csmCamera2.mSliceDepth;
-			csmDepths.w = csmCamera3.mSliceDepth;
 
 			auto mockView = ecs.getSingleView<MockCameraComponent, SpatialComponent, CameraComponent>();
 			if (mockView) {
@@ -145,7 +142,6 @@ namespace CSM {
 					resolvedShader.bindUniform("L0", lightArrays[0]);
 					resolvedShader.bindUniform("L1", lightArrays[1]);
 					resolvedShader.bindUniform("L2", lightArrays[2]);
-					resolvedShader.bindUniform("L3", lightArrays[3]);
 					resolvedShader.bindUniform("csmDepths", csmDepths);
 					resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap));
 				}
