@@ -250,7 +250,7 @@ namespace DeferredPBR {
 					.attachComponent<DeferredPBRRenderComponent>()
 				));
 			});
-		Loader::loadGltfScene(ecs, resourceManagers, "Bistro GLTF/bistro.gltf", glm::scale(glm::mat4(1.f), glm::vec3(100.f)),
+		Loader::loadGltfScene(ecs, resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(100.f)),
 			[](ECS& ecs, const GLTFImporter::MeshNode& node) {
 				ECS::EntityBuilder builder;
 				if (!node.mName.empty()) {
@@ -379,7 +379,7 @@ namespace DeferredPBR {
 					glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
 					drawShadows<OpaqueComponent>(resourceManagers, ecs, lightEntity, true);
 					drawShadows<AlphaTestComponent>(resourceManagers, ecs, lightEntity, false);
-					drawShadows<TransparentComponent>(resourceManagers, ecs, lightEntity, false);
+					//drawShadows<TransparentComponent>(resourceManagers, ecs, lightEntity, false);
 				}
 			}
 		}

@@ -162,6 +162,7 @@ namespace neo {
 						profiler.imGuiEditor();
 						{
 							// TODO - move to its own function hehe
+							TRACY_ZONEN("Engine ImGui");
 							ImGui::Begin("Engine");
 							if (ImGui::TreeNodeEx("Async Jobs", ImGuiTreeNodeFlags_DefaultOpen)) {
 								glm::vec3 warningColor = util::sLogSeverityData.at(util::LogSeverity::Warning).second;
