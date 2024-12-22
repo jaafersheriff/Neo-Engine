@@ -94,7 +94,7 @@ namespace neo {
 		}
 	}
 
-	inline std::vector<ECS::EntityBuilder> createCSMCameras(std::optional<std::array<float, 4>> bounds = {}) {
+	inline std::vector<ECS::EntityBuilder> createCSMCameras() {
 
 		std::vector<ECS::EntityBuilder> ret;
 		// CSM cameras
@@ -108,13 +108,13 @@ namespace neo {
 			.attachComponent<FrustumComponent>()
 			;
 		ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
-			.attachComponent<CSMCamera0Component>(bounds.has_value() ? bounds.value()[0] : 20.f)
+			.attachComponent<CSMCamera0Component>()
 		);
 		ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
-			.attachComponent<CSMCamera1Component>(bounds.has_value() ? bounds.value()[0] : 80.f)
+			.attachComponent<CSMCamera1Component>()
 		);
 		ret.emplace_back(ECS::EntityBuilder(csmCameraProto)
-			.attachComponent<CSMCamera2Component>(bounds.has_value() ? bounds.value()[0] : 200.f)
+			.attachComponent<CSMCamera2Component>()
 		);
 
 		return ret;

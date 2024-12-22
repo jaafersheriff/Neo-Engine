@@ -26,9 +26,7 @@ namespace neo {
 			const uint16_t shadowMapResolution,
 			SpatialComponent& receiverSpatial,
 			CameraComponent& receiverCamera,
-			const float near,
-			const float far,
-			const int lod
+			CSMCameraComponent* csmCamera
 		) {
 
 			// Set base
@@ -40,8 +38,34 @@ namespace neo {
 			glm::mat4 sourceProj = sourceCamera.getProj();
 			{
 				CameraComponent sourceCopy = sourceCamera;
-				sourceCopy.setNear(near);
-				sourceCopy.setFar(far);
+				float range = sourceCopy.getFar() - sourceCopy.getNear();
+
+				float nearOffset, farOffset;
+				// [0, 0.2]
+				if (csmCamera->getLod() == 0) {
+					nearOffset = 0.f;
+					farOffset = range * 0.2f;
+				}
+				// [0.2, 0.5]
+				else if (csmCamera->getLod() == 1) {
+					nearOffset = range * 0.2f;
+					farOffset = range * 0.5f;
+				}
+				// [0.5, 1.0]
+				else if (csmCamera->getLod() == 2) {
+					nearOffset = range * 0.5f;
+					farOffset = range;
+				}
+				else {
+					nearOffset = farOffset = -1.f;
+					NEO_FAIL("Invalid LOD");
+				}
+
+				csmCamera->mSliceDepths.x = sourceCopy.getNear() + nearOffset;
+				csmCamera->mSliceDepths.y = sourceCopy.getNear() + farOffset;
+
+				sourceCopy.setNear(csmCamera->mSliceDepths.x);
+				sourceCopy.setFar(csmCamera->mSliceDepths.y);
 				sourceProj = sourceCopy.getProj();
 			}
 
@@ -66,7 +90,7 @@ namespace neo {
 			}
 
 			const float radius = glm::ceil(frustumWorldBB.getRadius());
-			const float texelsPerUnit = (shadowMapResolution >> lod) / (radius * 2.f);
+			const float texelsPerUnit = (shadowMapResolution >> csmCamera->getLod()) / (radius * 2.f);
 			const glm::mat4 scalar = glm::scale(glm::mat4(1.f), glm::vec3(texelsPerUnit));
 			const glm::mat4 lookAt = scalar * lightSpatial.getView();
 			const glm::mat4 iLookAt = glm::inverse(lookAt);
@@ -124,13 +148,8 @@ namespace neo {
 			&& cameraCamera0.getType() == cameraCamera1.getType() 
 			&& cameraCamera1.getType() == cameraCamera2.getType(), "Frustum fit receiver needs to be orthographic");
 
-		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial0, cameraCamera0, sourceCamera.getNear(), csmCamera0.mSliceDepth, 0);
-
-		NEO_ASSERT(csmCamera0.mSliceDepth < csmCamera1.mSliceDepth, "Invalid CSM depth ranges");
-		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial1, cameraCamera1, csmCamera0.mSliceDepth, csmCamera1.mSliceDepth, 1);
-
-		NEO_ASSERT(csmCamera1.mSliceDepth < csmCamera2.mSliceDepth, "Invalid CSM depth ranges");
-		// TODO - this should just go to source camera far plane?
-		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial2, cameraCamera2, csmCamera1.mSliceDepth, csmCamera2.mSliceDepth, 2);
+		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial0, cameraCamera0, &csmCamera0);
+		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial1, cameraCamera1, &csmCamera1);
+		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, cameraSpatial2, cameraCamera2, &csmCamera2);
 	}
 }

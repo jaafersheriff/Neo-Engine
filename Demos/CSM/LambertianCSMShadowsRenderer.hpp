@@ -88,9 +88,9 @@ namespace CSM {
 			lightArrays[0] = biasMatrix * csmCameraCamera0.getProj() * cameraSpatial0.getView();
 			lightArrays[1] = biasMatrix * csmCameraCamera1.getProj() * cameraSpatial1.getView();
 			lightArrays[2] = biasMatrix * csmCameraCamera2.getProj() * cameraSpatial2.getView();
-			csmDepths.x = csmCamera0.mSliceDepth;
-			csmDepths.y = csmCamera1.mSliceDepth;
-			csmDepths.z = csmCamera2.mSliceDepth;
+			csmDepths.x = csmCamera0.mSliceDepths.y;
+			csmDepths.y = csmCamera1.mSliceDepths.y;
+			csmDepths.z = csmCamera2.mSliceDepths.y;
 
 			auto mockView = ecs.getSingleView<MockCameraComponent, SpatialComponent, CameraComponent>();
 			if (mockView) {

@@ -3,35 +3,43 @@
 #include "ECS/Component/Component.hpp"
 
 namespace neo {
-	START_COMPONENT(CSMCameraComponent);
-	CSMCameraComponent(float sliceDepth) 
-		: mSliceDepth(sliceDepth)
-	{}
+#define CSM_CAMERA_COUNT 3
 
-	float mSliceDepth = 0.f;
+	START_COMPONENT(CSMCameraComponent);
+	CSMCameraComponent() {}
+
+	glm::vec2 mSliceDepths = glm::vec2(0.f);
+	
+	virtual int getLod() const = 0;
+
 	virtual void imGuiEditor() override {
-		ImGui::SliderFloat("Slice Depth", &mSliceDepth, util::EP, 1000.f);
+		ImGui::Text("Slice Depths: (%0.2f, %0.2f]", &mSliceDepths.x, mSliceDepths.y);
 	};
 	END_COMPONENT();
 
-#define CSM_CAMERA_COUNT 3
 	// Really shouldn't be using inheritance like this
 	struct CSMCamera0Component : public CSMCameraComponent {
-		CSMCamera0Component(float sliceDepth)
-			: CSMCameraComponent(sliceDepth)
+		CSMCamera0Component()
+			: CSMCameraComponent()
 		{}
 		const char* mName = "CSMCamera0Component";
+
+		virtual int getLod() const override { return 0; }
 	};
 	struct CSMCamera1Component : public CSMCameraComponent {
-		CSMCamera1Component(float sliceDepth)
-			: CSMCameraComponent(sliceDepth)
+		CSMCamera1Component()
+			: CSMCameraComponent()
 		{}
 		const char* mName = "CSMCamera1Component";
+
+		virtual int getLod() const override { return 1; }
 	};
 	struct CSMCamera2Component : public CSMCameraComponent {
-		CSMCamera2Component(float sliceDepth)
-			: CSMCameraComponent(sliceDepth)
+		CSMCamera2Component()
+			: CSMCameraComponent()
 		{}
 		const char* mName = "CSMCamera2Component";
+
+		virtual int getLod() const override { return 2; }
 	};
 }
