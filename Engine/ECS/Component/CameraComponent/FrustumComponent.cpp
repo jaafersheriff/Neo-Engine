@@ -9,14 +9,11 @@
 namespace neo {
 
 	namespace {
-		inline float _distanceToPlane(glm::vec4 plane, glm::vec3 position) {
-			return plane.x * position.x + plane.y * position.y + plane.z * position.z + plane.w;
-		}
-
 		// https://iquilezles.org/articles/frustumcorrect/
-		inline bool _boxInsideOfPlane(glm::vec4 plane, glm::vec3 min, glm::vec3 max) {
+		inline bool _boxInsideOfPlane(const glm::vec4& plane, const glm::vec3& min, const glm::vec3& max) {
 			return !
-				(glm::dot(plane, glm::vec4(min.x, min.y, min.z, 1.f)) < 0.f
+				(true
+					&& glm::dot(plane, glm::vec4(min.x, min.y, min.z, 1.f)) < 0.f
 					&& glm::dot(plane, glm::vec4(max.x, min.y, min.z, 1.f)) < 0.f
 					&& glm::dot(plane, glm::vec4(min.x, max.y, min.z, 1.f)) < 0.f
 					&& glm::dot(plane, glm::vec4(max.x, max.y, min.z, 1.f)) < 0.f
@@ -24,14 +21,25 @@ namespace neo {
 					&& glm::dot(plane, glm::vec4(max.x, min.y, max.z, 1.f)) < 0.f
 					&& glm::dot(plane, glm::vec4(min.x, max.y, max.z, 1.f)) < 0.f
 					&& glm::dot(plane, glm::vec4(max.x, max.y, max.z, 1.f)) < 0.f
-					);
+				);
+		}
+		inline bool _planeInsideOfBox(const glm::vec3& corner, const glm::vec3& min, const glm::vec3& max) {
+			return !(
+				true
+				&& corner.x < max.x
+				&& corner.x > min.x
+				&& corner.y < max.y
+				&& corner.y > min.y
+				&& corner.z < max.z
+				&& corner.z > min.z
+				)
+			;
 		}
 	}
 
-	// Test if an object is inside the frustum
 	bool FrustumComponent::isInFrustum(const SpatialComponent& spatial, const BoundingBoxComponent& box) const {
-		glm::vec3 min = spatial.getModelMatrix() * glm::vec4(box.mMin, 1.f);
-		glm::vec3 max = spatial.getModelMatrix() * glm::vec4(box.mMax, 1.f);
+		const glm::vec3 min = spatial.getModelMatrix() * glm::vec4(box.mMin, 1.f);
+		const glm::vec3 max = spatial.getModelMatrix() * glm::vec4(box.mMax, 1.f);
 
 		return true
 			&& _boxInsideOfPlane(mLeft, min, max)
@@ -40,7 +48,15 @@ namespace neo {
 			&& _boxInsideOfPlane(mBottom, min, max)
 			&& _boxInsideOfPlane(mNear, min, max)
 			&& _boxInsideOfPlane(mFar, min, max)
-		;
+			&& _planeInsideOfBox(mNearLeftBottom, min, max)
+			&& _planeInsideOfBox(mNearLeftTop, min, max)
+			&& _planeInsideOfBox(mNearRightBottom, min, max)
+			&& _planeInsideOfBox(mNearRightTop, min, max)
+			&& _planeInsideOfBox(mFarLeftBottom, min, max)
+			&& _planeInsideOfBox(mFarLeftTop, min, max)
+			&& _planeInsideOfBox(mFarRightBottom, min, max)
+			&& _planeInsideOfBox(mFarRightTop, min, max)
+			;
 	}
 
 	void FrustumComponent::calculateFrustum(const CameraComponent& camera, const SpatialComponent& cameraSpatial) {
