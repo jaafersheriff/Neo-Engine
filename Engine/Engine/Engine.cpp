@@ -126,8 +126,14 @@ namespace neo {
 						float runTime = static_cast<float>(glfwGetTime());
 						profiler.begin(runTime);
 					}
-					if (demos.needsReload() && ecs.mRegistry.storage<AsyncJobComponent>().empty()) {
-						_swapDemo(demos, ecs, resourceManagers);
+					if (demos.needsReload()) {
+						if (ecs.mRegistry.storage<AsyncJobComponent>().empty()) {
+							_swapDemo(demos, ecs, resourceManagers);
+						}
+						else {
+							NEO_LOG_V("Waiting for async jobs to complete...");
+							std::this_thread::sleep_for(std::chrono::milliseconds(100));
+						}
 					}
 
 					_startFrame(profiler, ecs, resourceManagers);

@@ -40,7 +40,7 @@ void main() {
 		float weightedLogAverage = (localHistogram[0] / max(numPixels - float(countForThisBin), 1.0)) - 1.0;
 
 		// Map from our histogram space to actual luminance
-		float weightedAvgLum = exp2(((weightedLogAverage / 254.0) * logLumRange) + minLogLum);
+		float weightedAvgLum = max(0.0, exp2(((weightedLogAverage / 254.0) * logLumRange) + minLogLum));
 
 		// The new stored value will be interpolated using the last frames value
 		// to prevent sudden shifts in the exposure.

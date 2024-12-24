@@ -235,72 +235,72 @@ namespace DeferredPBR {
 
 				ecs.submitEntity(std::move(builder));
 			});
-//		Loader::loadGltfScene(ecs, resourceManagers, "fblock.gltf", glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(-5.f, 2.5f, -0.5f)), glm::vec3(2.f)),
-//			[](ECS& ecs, const GLTFImporter::MeshNode& node) {
-//				SpatialComponent spatial = node.mSpatial;
-//				spatial.setLookDir(glm::vec3(0.f, 0.4f, 0.1f));
-//				ecs.submitEntity(std::move(ECS::EntityBuilder{}
-//					.attachComponent<TagComponent>("Bust")
-//					.attachComponent<MeshComponent>(node.mMeshHandle)
-//					.attachComponent<BoundingBoxComponent>(node.mMin, node.mMax)
-//					.attachComponent<OpaqueComponent>()
-//					.attachComponent<SpatialComponent>(spatial)
-//					.attachComponent<MaterialComponent>(node.mMaterial)
-//					.attachComponent<RotationComponent>(glm::vec3(0.f, 0.5f, 0.f))
-//					.attachComponent<ShadowCasterRenderComponent>()
-//					.attachComponent<DeferredPBRRenderComponent>()
-//				));
-//			});
-//		Loader::loadGltfScene(ecs, resourceManagers, "Bistro GLTF/bistro.gltf", glm::scale(glm::mat4(1.f), glm::vec3(100.f)),
-//			[](ECS& ecs, const GLTFImporter::MeshNode& node) {
-//				ECS::EntityBuilder builder;
-//				if (!node.mName.empty()) {
-//					builder.attachComponent<TagComponent>(node.mName);
-//				}
-//				builder.attachComponent<SpatialComponent>(node.mSpatial);
-//				builder.attachComponent<MeshComponent>(node.mMeshHandle);
-//				builder.attachComponent<BoundingBoxComponent>(node.mMin, node.mMax, true);
-//				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Transparent) {
-//					builder.attachComponent<TransparentComponent>();
-//					builder.attachComponent<ForwardPBRRenderComponent>();
-//				}
-//				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
-//					builder.attachComponent<AlphaTestComponent>();
-//					builder.attachComponent<DeferredPBRRenderComponent>();
-//				}
-//				else {
-//					builder.attachComponent<OpaqueComponent>();
-//					builder.attachComponent<DeferredPBRRenderComponent>();
-//				}
-//				builder.attachComponent<MaterialComponent>(node.mMaterial);
-//				builder.attachComponent<ShadowCasterRenderComponent>();
-//				ecs.submitEntity(std::move(builder));
-//			});
-//		Loader::loadGltfScene(ecs, resourceManagers, "porsche/scene.gltf", glm::rotate(glm::translate(glm::mat4(1.f), glm::vec3(-6.75f, 0., -0.25f)), util::PI / 2.f, glm::vec3(0, 1, 0)),
-//			[](ECS& ecs, const GLTFImporter::MeshNode& node) {
-//				ECS::EntityBuilder builder;
-//				if (!node.mName.empty()) {
-//					builder.attachComponent<TagComponent>(node.mName);
-//				}
-//				builder.attachComponent<SpatialComponent>(node.mSpatial);
-//				builder.attachComponent<MeshComponent>(node.mMeshHandle);
-//				builder.attachComponent<BoundingBoxComponent>(node.mMin, node.mMax, true);
-//				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Transparent) {
-//					builder.attachComponent<TransparentComponent>();
-//					builder.attachComponent<ForwardPBRRenderComponent>();
-//				}
-//				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
-//					builder.attachComponent<AlphaTestComponent>();
-//					builder.attachComponent<DeferredPBRRenderComponent>();
-//				}
-//				else {
-//					builder.attachComponent<OpaqueComponent>();
-//					builder.attachComponent<DeferredPBRRenderComponent>();
-//				}
-//				builder.attachComponent<MaterialComponent>(node.mMaterial);
-//				builder.attachComponent<ShadowCasterRenderComponent>();
-//				ecs.submitEntity(std::move(builder));
-//			});
+		Loader::loadGltfScene(ecs, resourceManagers, "fblock.gltf", glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(-5.f, 2.5f, -0.5f)), glm::vec3(2.f)),
+			[](ECS& ecs, const GLTFImporter::MeshNode& node) {
+				SpatialComponent spatial = node.mSpatial;
+				spatial.setLookDir(glm::vec3(0.f, 0.4f, 0.1f));
+				ecs.submitEntity(std::move(ECS::EntityBuilder{}
+					.attachComponent<TagComponent>("Bust")
+					.attachComponent<MeshComponent>(node.mMeshHandle)
+					.attachComponent<BoundingBoxComponent>(node.mMin, node.mMax)
+					.attachComponent<OpaqueComponent>()
+					.attachComponent<SpatialComponent>(spatial)
+					.attachComponent<MaterialComponent>(node.mMaterial)
+					.attachComponent<RotationComponent>(glm::vec3(0.f, 0.5f, 0.f))
+					.attachComponent<ShadowCasterRenderComponent>()
+					.attachComponent<DeferredPBRRenderComponent>()
+				));
+			});
+		Loader::loadGltfScene(ecs, resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(100.f)),
+			[](ECS& ecs, const GLTFImporter::MeshNode& node) {
+				ECS::EntityBuilder builder;
+				if (!node.mName.empty()) {
+					builder.attachComponent<TagComponent>(node.mName);
+				}
+				builder.attachComponent<SpatialComponent>(node.mSpatial);
+				builder.attachComponent<MeshComponent>(node.mMeshHandle);
+				builder.attachComponent<BoundingBoxComponent>(node.mMin, node.mMax, true);
+				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Transparent) {
+					builder.attachComponent<TransparentComponent>();
+					builder.attachComponent<ForwardPBRRenderComponent>();
+				}
+				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
+					builder.attachComponent<AlphaTestComponent>();
+					builder.attachComponent<DeferredPBRRenderComponent>();
+				}
+				else {
+					builder.attachComponent<OpaqueComponent>();
+					builder.attachComponent<DeferredPBRRenderComponent>();
+				}
+				builder.attachComponent<MaterialComponent>(node.mMaterial);
+				builder.attachComponent<ShadowCasterRenderComponent>();
+				ecs.submitEntity(std::move(builder));
+			});
+		Loader::loadGltfScene(ecs, resourceManagers, "porsche/scene.gltf", glm::rotate(glm::translate(glm::mat4(1.f), glm::vec3(-6.75f, 0., -0.25f)), util::PI / 2.f, glm::vec3(0, 1, 0)),
+			[](ECS& ecs, const GLTFImporter::MeshNode& node) {
+				ECS::EntityBuilder builder;
+				if (!node.mName.empty()) {
+					builder.attachComponent<TagComponent>(node.mName);
+				}
+				builder.attachComponent<SpatialComponent>(node.mSpatial);
+				builder.attachComponent<MeshComponent>(node.mMeshHandle);
+				builder.attachComponent<BoundingBoxComponent>(node.mMin, node.mMax, true);
+				if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Transparent) {
+					builder.attachComponent<TransparentComponent>();
+					builder.attachComponent<ForwardPBRRenderComponent>();
+				}
+				else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
+					builder.attachComponent<AlphaTestComponent>();
+					builder.attachComponent<DeferredPBRRenderComponent>();
+				}
+				else {
+					builder.attachComponent<OpaqueComponent>();
+					builder.attachComponent<DeferredPBRRenderComponent>();
+				}
+				builder.attachComponent<MaterialComponent>(node.mMaterial);
+				builder.attachComponent<ShadowCasterRenderComponent>();
+				ecs.submitEntity(std::move(builder));
+			});
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
