@@ -211,10 +211,10 @@ namespace {
 		TRACY_ZONE();
 
 		if (index == -1) {
-			return 0;
+			return NEO_INVALID_HANDLE;
 		}
 		if (texCoord > 0) {
-			NEO_LOG_W("Texture wants to use a different texcoord? This probably won't work");
+			NEO_FAIL("Texture wants to use a different texcoord? This probably won't work");
 		}
 
 		const auto& texture = model.textures[index];
@@ -385,7 +385,7 @@ namespace {
 					vertexType = types::mesh::VertexType::Tangent;
 				}
 				else {
-					NEO_LOG_E("TODO: unsupported attribute: %s", attribute.first.c_str());
+					NEO_FAIL("TODO: unsupported attribute: %s", attribute.first.c_str());
 					continue;
 				}
 
@@ -423,15 +423,13 @@ namespace {
 				auto& material = model.materials[gltfMesh.material];
 
 				if (!material.lods.empty()) {
-					NEO_LOG_E("Material %s has LODs -- unsupported", material.name.c_str());
+					NEO_FAIL("Material %s has LODs -- unsupported", material.name.c_str());
 				}
 				if (material.alphaCutoff != 0.5) {
-					NEO_LOG_E("Material %s has nonstandard alpha cutoff: %0.2f -- unsupported", material.name.c_str(), material.alphaCutoff);
+					NEO_FAIL("Material %s has nonstandard alpha cutoff: %0.2f -- unsupported", material.name.c_str(), material.alphaCutoff);
 				}
 
-				if (material.doubleSided) {
-					NEO_LOG_E("Double sided not supported");
-				}
+				outNode.mDoubleSided = material.doubleSided;
 
 				if (material.alphaMode == "OPAQUE") {
 					outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::Opaque;
@@ -442,15 +440,16 @@ namespace {
 				else if (material.alphaMode == "BLEND") {
 					outNode.mAlphaMode = GLTFImporter::MeshNode::AlphaMode::Transparent;
 				}
+				else {
+					NEO_FAIL("Invalid alpha mode");
+				}
 
 				outNode.mMaterial.mNormalMap = _loadTexture(resourceManagers.mTextureManager, path, model, material.normalTexture.index, material.normalTexture.texCoord);
-				if (material.normalTexture.scale != 1.0) {
-					NEO_LOG_E("Material %s normal map has non-uniform scale -- unsupported", material.name.c_str());
-				}
+				outNode.mMaterial.mNormalScale = static_cast<float>(material.normalTexture.scale);
 
 				outNode.mMaterial.mOcclusionMap = _loadTexture(resourceManagers.mTextureManager, path, model, material.occlusionTexture.index, material.occlusionTexture.texCoord);
 				if (material.occlusionTexture.strength != 1.0) {
-					NEO_LOG_E("Material %s occlusion map has a non-uniform strength -- unsupported", material.name.c_str());
+					NEO_FAIL("Material %s occlusion map has a non-uniform strength -- unsupported", material.name.c_str());
 				}
 
 				if (material.emissiveFactor.size() == 3) {
@@ -518,7 +517,7 @@ namespace {
 		if (node.light > -1) {
 			auto& light = model.lights[node.light];
 			if (!light.extensions.empty()) {
-				NEO_LOG_W("Light with extensions");
+				NEO_FAIL("Light with extensions");
 			}
 		}
 	}
@@ -562,7 +561,7 @@ namespace neo {
 					NEO_LOG_W("tingltf Warning: %s", warn.c_str());
 				}
 				if (!err.empty()) {
-					NEO_LOG_E("tinygltf Error: %s", err.c_str());
+					NEO_FAIL("tinygltf Error: %s", err.c_str());
 				}
 
 				NEO_ASSERT(ret, "tinygltf failed to parse %s", path.c_str());
@@ -572,22 +571,19 @@ namespace neo {
 
 				// Translate tinygltf::Model to Loader::GltfScene
 				if (model.lights.size()) {
-					NEO_LOG_W("%s contains lights - ignoring", path.c_str());
+					NEO_FAIL("%s contains lights - ignoring", path.c_str());
 				}
 				if (model.cameras.size()) {
-					NEO_LOG_W("%s contains cameras - ignoring", path.c_str());
+					NEO_FAIL("%s contains cameras - ignoring", path.c_str());
 				}
 				if (model.defaultScene < 0 || model.scenes.size() > 1) {
-					NEO_LOG_W("%s has multiple scenes. Just using the default", path.c_str());
+					NEO_FAIL("%s has multiple scenes. Just using the default", path.c_str());
 				}
 				if (!model.extensions.empty()) {
-					NEO_LOG_W("%s has extensions??", path.c_str());
+					NEO_FAIL("%s has extensions??", path.c_str());
 				}
 				if (!model.extensionsRequired.empty()) {
-					NEO_LOG_W("%s has required extensions", path.c_str());
-					for (const auto& ext : model.extensionsRequired) {
-						NEO_LOG_W("\t%s", ext.c_str());
-					}
+					NEO_FAIL("%s has required extensions", path.c_str());
 				}
 
 				for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {

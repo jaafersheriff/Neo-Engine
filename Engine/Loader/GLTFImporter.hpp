@@ -37,6 +37,7 @@ namespace neo {
 
 			AlphaMode mAlphaMode = AlphaMode::Opaque;
 			MaterialComponent mMaterial = {};
+			bool mDoubleSided = false;
 		};
 
 		using MeshNodeOp = std::function<void(ECS&, const MeshNode&)>;

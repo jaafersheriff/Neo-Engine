@@ -19,6 +19,8 @@ namespace neo {
 		TextureHandle mEmissiveMap;
 
 		TextureHandle mNormalMap;
+		float mNormalScale = 1.f;
+
 		TextureHandle mOcclusionMap;
 
 		virtual void imGuiEditor() override {

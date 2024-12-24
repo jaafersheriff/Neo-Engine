@@ -7,6 +7,7 @@
 #include "ECS/Component/RenderingComponent/TransparentComponent.hpp"
 #include "ECS/Component/RenderingComponent/ForwardPBRRenderComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
 #include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
 #include "ECS/Component/RenderingComponent/IBLComponent.hpp"
 
@@ -166,6 +167,7 @@ namespace neo {
 
 			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
 				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
+				resolvedShader.bindUniform("normalMapScale", material.mNormalScale);
 			}
 
 			resolvedShader.bindUniform("metalness", material.mMetallic);

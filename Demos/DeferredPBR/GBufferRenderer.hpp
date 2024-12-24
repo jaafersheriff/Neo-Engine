@@ -127,6 +127,7 @@ namespace DeferredPBR {
 
 			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
 				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
+				resolvedShader.bindUniform("normalMapScale", material.mNormalScale);
 			}
 
 			resolvedShader.bindUniform("metalness", material.mMetallic);

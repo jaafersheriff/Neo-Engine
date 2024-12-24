@@ -1,4 +1,4 @@
-vec3 getNormal(vec3 modelNormal, vec3 texNormal, vec4 modelTangent) {
+vec3 getNormal(vec3 modelNormal, vec3 texNormal, float normalMapScale, vec4 modelTangent) {
 	mat3 TBN;
 
 	vec3 tan = normalize(modelTangent.xyz);
@@ -8,11 +8,11 @@ vec3 getNormal(vec3 modelNormal, vec3 texNormal, vec4 modelTangent) {
 	}
 	TBN = mat3(tan, biTan, modelNormal);
 
-	vec3 tangentNormal = texNormal * 2.0 - 1.0;
-	return normalize(TBN * normalize(tangentNormal));
+	vec3 tangentNormal = normalize(texNormal * 2.0 - 1.0) * vec3(normalMapScale, normalMapScale, 1.0);
+	return normalize(TBN * tangentNormal);
 }
 
-vec3 getNormal(vec3 modelNormal, vec3 texNormal, vec3 worldPos, vec2 modelUV) {
+vec3 getNormal(vec3 modelNormal, vec3 texNormal, float normalMapScale, vec3 worldPos, vec2 modelUV) {
 	mat3 TBN;
 	// http://www.thetenthplanet.de/archives/1180
 	vec3 dp1 = dFdx( worldPos ); 
@@ -26,8 +26,8 @@ vec3 getNormal(vec3 modelNormal, vec3 texNormal, vec3 worldPos, vec2 modelUV) {
 	float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) ); 
 	TBN = mat3( T * invmax, B * invmax, modelNormal );
 
-	vec3 tangentNormal = texNormal * 2.0 - 1.0;
-	return normalize(TBN * normalize(tangentNormal));
+	vec3 tangentNormal = normalize(texNormal * 2.0 - 1.0) * vec3(normalMapScale, normalMapScale, 1.0);
+	return normalize(TBN * tangentNormal);
 }
 
 

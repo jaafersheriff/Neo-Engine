@@ -22,6 +22,7 @@ layout(binding = 0) uniform sampler2D albedoMap;
 
 #ifdef NORMAL_MAP
 layout(binding = 1) uniform sampler2D normalMap;
+uniform float normalMapScale;
 #endif
 
 uniform float metalness;
@@ -97,9 +98,9 @@ void main() {
 	vec3 fNorm = normalize(fragNor);
 #ifdef NORMAL_MAP
 	#ifdef TANGENTS
-	fNorm = getNormal(fNorm, texture(normalMap, fragTex).rgb, fragTan);
+	fNorm = getNormal(fNorm, texture(normalMap, fragTex).rgb, normalMapScale, fragTan);
 	#else
-	fNorm = getNormal(fNorm, texture(normalMap, fragTex).rgb, fragPos.xyz, fragTex);
+	fNorm = getNormal(fNorm, texture(normalMap, fragTex).rgb, normalMapScale, fragPos.xyz, fragTex);
 	#endif
 #endif
 
