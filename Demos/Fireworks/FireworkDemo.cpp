@@ -39,7 +39,7 @@ namespace Fireworks {
 
 	IDemo::Config Demo::getConfig() const {
 		IDemo::Config config;
-		config.name = "Fireworks";
+		config.name = "Fireworks Demo";
 		return config;
 	}
 

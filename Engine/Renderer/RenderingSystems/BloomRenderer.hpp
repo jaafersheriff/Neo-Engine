@@ -52,20 +52,40 @@ namespace neo {
 			));
 		}
 
+		// Create shaders
+		auto bloomDownShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomDown Shader", SourceShader::ConstructionArgs{
+			{ types::shader::Stage::Vertex, "quad.vert"},
+			{ types::shader::Stage::Fragment, "bloomDown.frag" }
+			});
+		if (!resourceManagers.mShaderManager.isValid(bloomDownShaderHandle)) {
+			return NEO_INVALID_HANDLE;
+		}
+		auto bloomUpShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomUp Shader", SourceShader::ConstructionArgs{
+			{ types::shader::Stage::Vertex, "quad.vert"},
+			{ types::shader::Stage::Fragment, "bloomUp.frag" }
+			});
+		if (!resourceManagers.mShaderManager.isValid(bloomUpShaderHandle)) {
+			return NEO_INVALID_HANDLE;
+		}
+		auto bloomMixShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomMix Shader", SourceShader::ConstructionArgs{
+			{ types::shader::Stage::Vertex, "quad.vert"},
+			{ types::shader::Stage::Fragment, "bloomMix.frag" }
+		});
+		if (!resourceManagers.mShaderManager.isValid(bloomMixShaderHandle)) {
+			return NEO_INVALID_HANDLE;
+		}
+
+		glDisable(GL_DEPTH_TEST);
+		int oldPolygonMode;
+		glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 		// Down sample
 		{
-			auto bloomDownShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomDown Shader", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "quad.vert"},
-				{ types::shader::Stage::Fragment, "bloomDown.frag" }
-				});
-			if (!resourceManagers.mShaderManager.isValid(bloomDownShaderHandle)) {
-				return NEO_INVALID_HANDLE;
-			}
 			MakeDefine(MIP_0);
 			ShaderDefines Mip0Defines;
 			Mip0Defines.set(MIP_0);
 
-			glDisable(GL_DEPTH_TEST);
 			for (int i = 0; i < parameters.mDownSampleSteps; i++) {
 				if (resourceManagers.mFramebufferManager.isValid(bloomTargets[i])) {
 					auto& bloomDown = resourceManagers.mFramebufferManager.resolve(bloomTargets[i]);
@@ -90,13 +110,6 @@ namespace neo {
 
 		// Up sample
 		{
-			auto bloomUpShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomUp Shader", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "quad.vert"},
-				{ types::shader::Stage::Fragment, "bloomUp.frag" }
-				});
-			if (!resourceManagers.mShaderManager.isValid(bloomUpShaderHandle)) {
-				return NEO_INVALID_HANDLE;
-			}
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(bloomUpShaderHandle, {});
 			resolvedShader.bind();
 			resolvedShader.bindUniform("filterRadius", parameters.mRadius);
@@ -116,7 +129,10 @@ namespace neo {
 				}
 			}
 			glDisable(GL_BLEND);
+		}
 
+		// Mix results
+		{
 			// Create a new full-res render target
 			auto bloomOutputHandle = resourceManagers.mFramebufferManager.asyncLoad(
 				HashedString("BloomOutput"),
@@ -127,24 +143,18 @@ namespace neo {
 			);
 			if (resourceManagers.mFramebufferManager.isValid(bloomOutputHandle)) {
 				auto bloomOutput = resourceManagers.mFramebufferManager.resolve(bloomOutputHandle);
+				bloomOutput.bind();
 
-				auto bloomMixShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomMix Shader", SourceShader::ConstructionArgs{
-					{ types::shader::Stage::Vertex, "quad.vert"},
-					{ types::shader::Stage::Fragment, "bloomMix.frag" }
-					});
-				if (resourceManagers.mShaderManager.isValid(bloomMixShaderHandle)) {
-					bloomOutput.bind();
-
-					auto bloomMixShader = resourceManagers.mShaderManager.resolveDefines(bloomMixShaderHandle, {});
-
-					bloomMixShader.bind();
-					bloomMixShader.bindTexture("bloomResults", resourceManagers.mTextureManager.resolve(resourceManagers.mFramebufferManager.resolve(bloomTargets[0]).mTextures[0]));
-					bloomMixShader.bindTexture("hdrColor", inputTexture);
-					glViewport(0, 0, dimension.x, dimension.y);
-					quadMesh.draw();
-					glEnable(GL_DEPTH_TEST);
-				}
+				auto bloomMixShader = resourceManagers.mShaderManager.resolveDefines(bloomMixShaderHandle, {});
+				bloomMixShader.bind();
+				bloomMixShader.bindTexture("bloomResults", resourceManagers.mTextureManager.resolve(resourceManagers.mFramebufferManager.resolve(bloomTargets[0]).mTextures[0]));
+				bloomMixShader.bindTexture("hdrColor", inputTexture);
+				glViewport(0, 0, dimension.x, dimension.y);
+				quadMesh.draw();
 			}
+
+			glEnable(GL_DEPTH_TEST);
+			glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 
 			return bloomOutputHandle;
 		}

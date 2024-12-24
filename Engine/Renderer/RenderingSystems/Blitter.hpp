@@ -48,6 +48,9 @@ namespace neo {
 		outputFBO.clear(clearColor, types::framebuffer::AttachmentBit::Color);
 
 		glDisable(GL_DEPTH_TEST);
+		int oldPolygonMode;
+		glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		
 		auto& resolvedBlit = resourceManagers.mShaderManager.resolveDefines(blitShaderHandle, {});
 		
@@ -58,5 +61,6 @@ namespace neo {
 		resourceManagers.mMeshManager.resolve("quad").draw();
 
 		glEnable(GL_DEPTH_TEST);
+		glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 	}
 }

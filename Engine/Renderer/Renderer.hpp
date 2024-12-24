@@ -70,7 +70,7 @@ namespace neo {
 
 			FramebufferHandle mDefaultFBOHandle;
 			bool mShowBoundingBoxes = false;
-			bool mBackbufferNeedsResize = false;
+			bool mWireframe = false;
 
 			util::Profiler::GPUQuery mGPUQuery;
 	};

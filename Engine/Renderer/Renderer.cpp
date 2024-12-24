@@ -120,7 +120,6 @@ namespace neo {
 		util::Profiler::GPUQuery::Scope _scope(mGPUQuery.tickHandle());
 
 		mStats = {};
-		resetState();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		mDefaultFBOHandle = resourceManagers.mFramebufferManager.asyncLoad(
@@ -143,9 +142,13 @@ namespace neo {
 			return;
 		}
 
+		resetState();
 		auto& defaultFbo = resourceManagers.mFramebufferManager.resolve(mDefaultFBOHandle);
 		{
 			TRACY_GPUN("Draw Demo");
+			if (mWireframe) {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			}
 			demo->render(resourceManagers, ecs, defaultFbo);
 			resetState();
 		}
@@ -220,6 +223,8 @@ namespace neo {
 		}
 		ImGui::End();
 
+		///////////////////////////////
+
 		ImGui::Begin("Renderer");
 		if (ImGui::TreeNodeEx("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::TextWrapped("Num Draws: %d", mStats.mNumDraws);
@@ -233,8 +238,7 @@ namespace neo {
 			window.toggleVSync();
 		}
 
-		if (ImGui::Button("Show BoundingBoxes")) {
-			mShowBoundingBoxes = !mShowBoundingBoxes;
+		if (ImGui::Checkbox("Show BoundingBoxes", &mShowBoundingBoxes)) {
 			if (mShowBoundingBoxes) {
 				for (auto boxEntity : ecs.getView<BoundingBoxComponent>()) {
 					ecs.addComponent<DebugBoundingBoxComponent>(boxEntity);
@@ -246,9 +250,9 @@ namespace neo {
 				}
 			}
 		}
+		ImGui::Checkbox("Wireframe", &mWireframe);
 
 		ImGui::End();
-
 	}
 
 	void Renderer::clean() {
