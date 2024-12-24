@@ -138,6 +138,7 @@ namespace DeferredPBR {
 
 			if (resourceManagers.mTextureManager.isValid(material.mOcclusionMap)) {
 				resolvedShader.bindTexture("occlusionMap", resourceManagers.mTextureManager.resolve(material.mOcclusionMap));
+				resolvedShader.bindUniform("occlusionStrength", material.mOcclusionStrength);
 			}
 
 			resolvedShader.bindUniform("emissiveFactor", material.mEmissiveFactor);

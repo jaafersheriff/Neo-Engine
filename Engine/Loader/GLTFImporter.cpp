@@ -448,9 +448,7 @@ namespace {
 				outNode.mMaterial.mNormalScale = static_cast<float>(material.normalTexture.scale);
 
 				outNode.mMaterial.mOcclusionMap = _loadTexture(resourceManagers.mTextureManager, path, model, material.occlusionTexture.index, material.occlusionTexture.texCoord);
-				if (material.occlusionTexture.strength != 1.0) {
-					NEO_FAIL("Material %s occlusion map has a non-uniform strength -- unsupported", material.name.c_str());
-				}
+				outNode.mMaterial.mOcclusionStrength = static_cast<float>(material.occlusionTexture.strength);
 
 				if (material.emissiveFactor.size() == 3) {
 					outNode.mMaterial.mEmissiveFactor = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);

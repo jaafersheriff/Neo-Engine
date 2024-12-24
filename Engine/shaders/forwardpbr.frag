@@ -33,6 +33,7 @@ layout(binding = 2) uniform sampler2D metalRoughnessMap;
 
 #ifdef OCCLUSION_MAP
 layout(binding = 3) uniform sampler2D occlusionMap; // Shouldn't be used for indirect lights
+uniform float occlusionStrength;
 #endif
 
 uniform vec3 emissiveFactor;
@@ -123,7 +124,7 @@ void main() {
 
 	float ao = 1.f;
 #ifdef OCCLUSION_MAP
-	float ao = texture(occlusionMap, fragTex).r;
+	float ao = 1.0 + occlusionStrength * (texture(occlusionMap, fragTex).r - 1.0);
 #endif
 
 	PBRMaterial pbrMaterial;
