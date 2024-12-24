@@ -252,7 +252,7 @@ namespace DeferredPBR {
 				));
 			});
 		//Loader::loadGltfScene(ecs, resourceManagers, "Bistro GLTF/bistro.gltf", glm::scale(glm::mat4(1.f), glm::vec3(100.f)),
-		Loader::loadGltfScene(ecs, resourceManagers, "bistro.glb", glm::scale(glm::mat4(1.f), glm::vec3(100.f)),
+		Loader::loadGltfScene(ecs, resourceManagers, "Bistro_Godot.glb", glm::scale(glm::mat4(1.f), glm::vec3(1.f)),
 			[](ECS& ecs, const GLTFImporter::MeshNode& node) {
 				ECS::EntityBuilder builder;
 				if (!node.mName.empty()) {

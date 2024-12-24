@@ -110,7 +110,7 @@ namespace neo {
 		glUseProgram(0);
 	}
 
-	void Renderer::render(WindowSurface& window, IDemo* demo, util::Profiler& profiler, ECS& ecs, ResourceManagers& resourceManagers) {
+	void Renderer::render(WindowSurface& window, IDemo* demo, util::Profiler& profiler, const ECS& ecs, ResourceManagers& resourceManagers) {
 		TRACY_GPU();
 		if (window.isMinimized()) {
 			return;
@@ -156,7 +156,7 @@ namespace neo {
 		if (mShowBoundingBoxes) {
 			TRACY_GPUN("Debug Draws");
 			defaultFbo.bind();
-			drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.getComponent<MainCameraComponent>()));
+			drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.cGetComponent<MainCameraComponent>()));
 		}
 
 		/* Render imgui */
