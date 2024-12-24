@@ -35,10 +35,7 @@ namespace DeferredPBR {
 
 		glDisable(GL_DEPTH_TEST);
 		int oldPolygonMode;
-		{
-			TRACY_ZONEN("GlGet");
-			glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
-		}
+		glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		const auto& lightView = ecs.getView<LightComponent, SpatialComponent, CompTs...>();

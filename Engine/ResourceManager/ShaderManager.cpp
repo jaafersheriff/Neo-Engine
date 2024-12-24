@@ -170,6 +170,8 @@ namespace neo {
 				std::this_thread::sleep_for(std::chrono::milliseconds(HOT_RELOAD_MILLSECONDS));
 			}
 
+			TRACY_ZONEN("Hot reload");
+
 			// Entt Cache doesn't support iterators :/ 
 			std::vector<entt::id_type> list;
 			list.reserve(mCache.size());
