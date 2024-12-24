@@ -220,14 +220,17 @@ namespace {
 		const auto& texture = model.textures[index];
 		const auto& image = model.images[texture.source];
 
-		if (!texture.name.empty()) {
-			NEO_LOG_V("Processing texture %s", texture.name.c_str());
-		}
-
 		std::string handleName = !image.uri.empty()
 			? image.uri
 			: (std::string(path) + "_Image" + std::to_string(texture.source) + "_Texture" + std::to_string(index));
+
 		TextureHandle textureHandle = HashedString(handleName.c_str());
+		if (!texture.name.empty()) {
+			NEO_LOG_V("Processing texture %s", texture.name.c_str());
+		}
+		else {
+			NEO_LOG_V("Processing texture %s", handleName.c_str());
+		}
 
 		if (textureManager.isValid(textureHandle) || textureManager.isQueued(textureHandle)) {
 			NEO_LOG_V("Texture %s is already loaded -- skipping", image.uri.c_str());
@@ -257,7 +260,7 @@ namespace {
 		builder.mDimensions.x = static_cast<uint16_t>(image.width);
 		builder.mDimensions.y = static_cast<uint16_t>(image.height);
 		builder.mData = const_cast<uint8_t*>(image.image.data());
-		return textureManager.asyncLoad(textureHandle, builder);
+		return textureManager.asyncLoad(textureHandle, builder, !texture.name.empty() ? texture.name : handleName);
 	}
 
 	neo::SpatialComponent _processSpatial(const tinygltf::Node& node, glm::mat4 parentXform) {
@@ -548,7 +551,7 @@ namespace neo {
 				std::string warn;
 
 				bool ret = false;
-				stbi_set_flip_vertically_on_load(false);
+				stbi_set_flip_vertically_on_load_thread(false);
 				NEO_LOG_I("Loading gltf %s", path.c_str());
 				if (path.size() > 5 && path.find(".gltf", path.size() - 5) != std::string::npos) {
 					TRACY_ZONEN("LoadASCIIFromFile");
@@ -599,7 +602,8 @@ namespace neo {
 				));
 
 				NEO_LOG_I("Successfully imported %s", path.c_str());
-				}).detach();
+				})
+				.detach();
 		}
 	}
 }
