@@ -384,10 +384,6 @@ namespace {
 				else if (attribute.first == "TANGENT") {
 					vertexType = types::mesh::VertexType::Tangent;
 				}
-				else if (attribute.first == "COLOR_0") {
-					NEO_LOG_W("Unsupported attribute: COLOR_0");
-					continue;
-				}
 				else {
 					NEO_LOG_E("TODO: unsupported attribute: %s", attribute.first.c_str());
 					continue;
@@ -427,14 +423,14 @@ namespace {
 				auto& material = model.materials[gltfMesh.material];
 
 				if (!material.lods.empty()) {
-					NEO_LOG_W("Material %s has LODs -- unsupported", material.name.c_str());
+					NEO_LOG_E("Material %s has LODs -- unsupported", material.name.c_str());
 				}
 				if (material.alphaCutoff != 0.5) {
-					NEO_LOG_W("Material %s has nonstandard alpha cutoff: %0.2f -- unsupported", material.name.c_str(), material.alphaCutoff);
+					NEO_LOG_E("Material %s has nonstandard alpha cutoff: %0.2f -- unsupported", material.name.c_str(), material.alphaCutoff);
 				}
 
 				if (material.doubleSided) {
-					NEO_LOG_W("Double sided not supported");
+					NEO_LOG_E("Double sided not supported");
 				}
 
 				if (material.alphaMode == "OPAQUE") {
@@ -449,12 +445,12 @@ namespace {
 
 				outNode.mMaterial.mNormalMap = _loadTexture(resourceManagers.mTextureManager, path, model, material.normalTexture.index, material.normalTexture.texCoord);
 				if (material.normalTexture.scale != 1.0) {
-					NEO_LOG_W("Material %s normal map has non-uniform scale -- unsupported", material.name.c_str());
+					NEO_LOG_E("Material %s normal map has non-uniform scale -- unsupported", material.name.c_str());
 				}
 
 				outNode.mMaterial.mOcclusionMap = _loadTexture(resourceManagers.mTextureManager, path, model, material.occlusionTexture.index, material.occlusionTexture.texCoord);
 				if (material.occlusionTexture.strength != 1.0) {
-					NEO_LOG_W("Material %s occlusion map has a non-uniform strength -- unsupported", material.name.c_str());
+					NEO_LOG_E("Material %s occlusion map has a non-uniform strength -- unsupported", material.name.c_str());
 				}
 
 				if (material.emissiveFactor.size() == 3) {
@@ -588,7 +584,10 @@ namespace neo {
 					NEO_LOG_W("%s has extensions??", path.c_str());
 				}
 				if (!model.extensionsRequired.empty()) {
-					NEO_FAIL("%s has required extensions", path.c_str());
+					NEO_LOG_W("%s has required extensions", path.c_str());
+					for (const auto& ext : model.extensionsRequired) {
+						NEO_LOG_W("\t%s", ext.c_str());
+					}
 				}
 
 				for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {

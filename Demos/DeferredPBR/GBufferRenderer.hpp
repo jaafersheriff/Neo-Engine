@@ -150,7 +150,6 @@ namespace DeferredPBR {
 
 			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 		}
-		glEnable(GL_CULL_FACE);
 	}
 
 

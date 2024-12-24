@@ -251,7 +251,8 @@ namespace DeferredPBR {
 					.attachComponent<DeferredPBRRenderComponent>()
 				));
 			});
-		Loader::loadGltfScene(ecs, resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(100.f)),
+		//Loader::loadGltfScene(ecs, resourceManagers, "Bistro GLTF/bistro.gltf", glm::scale(glm::mat4(1.f), glm::vec3(100.f)),
+		Loader::loadGltfScene(ecs, resourceManagers, "bistro.glb", glm::scale(glm::mat4(1.f), glm::vec3(100.f)),
 			[](ECS& ecs, const GLTFImporter::MeshNode& node) {
 				ECS::EntityBuilder builder;
 				if (!node.mName.empty()) {
