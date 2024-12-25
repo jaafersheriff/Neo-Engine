@@ -57,47 +57,17 @@ namespace CSM {
 			passDefines.set(DEBUG_VIEW);
 		}
 
-		std::array<glm::mat4, CSM_CAMERA_COUNT> lightArrays;
-		glm::vec3 csmDepths(0.f);
-		glm::mat4 mockPV;
-		float mockNear;
-		const bool shadowsEnabled =
-			ecs.has<DirectionalLightComponent>(lightEntity)
-			&& ecs.has<CameraComponent>(lightEntity)
-			&& ecs.has<CSMShadowMapComponent>(lightEntity)
-			&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap)
-			&& ecs.has<CSMCamera0Component>()
-			&& ecs.has<CSMCamera1Component>()
-			&& ecs.has<CSMCamera2Component>();
-		MakeDefine(ENABLE_SHADOWS);
-		if (shadowsEnabled) {
-			passDefines.set(ENABLE_SHADOWS);
-			static glm::mat4 biasMatrix(
-				0.5f, 0.0f, 0.0f, 0.0f,
-				0.0f, 0.5f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.5f, 0.0f,
-				0.5f, 0.5f, 0.5f, 1.0f);
-			auto csmCamera0Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>();
-			auto csmCamera1Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>();
-			auto csmCamera2Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>();
-			NEO_ASSERT(csmCamera0Tuple && csmCamera1Tuple && csmCamera2Tuple, "CSM Camera's dont exist");
-			auto& [cameraEntity0, cameraSpatial0, csmCameraCamera0, csmCamera0] = *csmCamera0Tuple;
-			auto& [cameraEntity1, cameraSpatial1, csmCameraCamera1, csmCamera1] = *csmCamera1Tuple;
-			auto& [cameraEntity2, cameraSpatial2, csmCameraCamera2, csmCamera2] = *csmCamera2Tuple;
-
-			lightArrays[0] = biasMatrix * csmCameraCamera0.getProj() * cameraSpatial0.getView();
-			lightArrays[1] = biasMatrix * csmCameraCamera1.getProj() * cameraSpatial1.getView();
-			lightArrays[2] = biasMatrix * csmCameraCamera2.getProj() * cameraSpatial2.getView();
-			csmDepths.x = csmCamera0.mSliceDepths.y;
-			csmDepths.y = csmCamera1.mSliceDepths.y;
-			csmDepths.z = csmCamera2.mSliceDepths.y;
-
-			auto mockView = ecs.getSingleView<MockCameraComponent, SpatialComponent, CameraComponent>();
-			if (mockView) {
-				mockPV = std::get<3>(*mockView).getProj() * std::get<2>(*mockView).getView();
-				mockNear = std::get<3>(*mockView).getNear();
-			}
+		CSMShadowInfo csmShadowInfo = extractCSMShadowInfo(ecs, lightEntity, resourceManagers.mTextureManager);
+		if (!csmShadowInfo.mValidCSMShadows) {
+			return;
 		}
+
+		auto mockView = ecs.getSingleView<MockCameraComponent, SpatialComponent, CameraComponent>();
+		if (!mockView) {
+			NEO_FAIL("Heh?");
+		}
+		glm::mat4 mockPV = std::get<3>(*mockView).getProj() * std::get<2>(*mockView).getView();
+		float mockNear = std::get<3>(*mockView).getNear();
 
 		ShaderDefines drawDefines(passDefines);
 		// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
@@ -135,16 +105,15 @@ namespace CSM {
 				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 				resolvedShader.bindUniform("lightCol", light.mColor);
 				resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
-				if (shadowsEnabled) {
-					// These could be an array tbh
-					resolvedShader.bindUniform("mockPV", mockPV);
-					resolvedShader.bindUniform("mockNear", mockNear);
-					resolvedShader.bindUniform("L0", lightArrays[0]);
-					resolvedShader.bindUniform("L1", lightArrays[1]);
-					resolvedShader.bindUniform("L2", lightArrays[2]);
-					resolvedShader.bindUniform("csmDepths", csmDepths);
-					resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap));
-				}
+
+				// These could be an array tbh
+				resolvedShader.bindUniform("mockPV", mockPV);
+				resolvedShader.bindUniform("mockNear", mockNear);
+				resolvedShader.bindUniform("L0", csmShadowInfo.mLightArrays[0]);
+				resolvedShader.bindUniform("L1", csmShadowInfo.mLightArrays[1]);
+				resolvedShader.bindUniform("L2", csmShadowInfo.mLightArrays[2]);
+				resolvedShader.bindUniform("csmDepths", csmShadowInfo.mCSMDepths);
+				resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap));
 			}
 
 			const auto& drawSpatial = view.get<const SpatialComponent>(entity);

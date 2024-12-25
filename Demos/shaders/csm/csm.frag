@@ -9,13 +9,11 @@ in vec2 fragTex;
 
 uniform vec4 albedo;
 
-#ifdef ENABLE_SHADOWS
 in vec4 shadowCoord[3];
 uniform vec3 csmDepths;
 in float sceneDepth;
 
 layout(binding = 2) uniform sampler2D shadowMap;
-#endif
 
 uniform vec3 lightCol;
 uniform vec3 lightDir;
@@ -35,10 +33,8 @@ void main() {
 	color.rgb = lambertianDiffuse(Ldir, N, fAlbedo.rgb, lightCol, attFactor);
 	color.a = 1.0;
 
-#ifdef ENABLE_SHADOWS
 	float visibility = getCSMShadowVisibility(sceneDepth, csmDepths, shadowCoord, shadowMap);
 	color *= vec4(vec3(max(visibility, 0.2)), 1.0);
-#endif
 
 #ifdef DEBUG_VIEW
 	const float scale = 0.2;
