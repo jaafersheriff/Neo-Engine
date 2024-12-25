@@ -71,7 +71,7 @@ void main() {
 	fMetalness *= metalRoughness.b;
 	fRoughness *= metalRoughness.g;
 #endif
-	gNormalRoughness.a = fRoughness;
+	gNormalRoughness.a = max(0.01, fRoughness);
 
 	vec3 fEmissive = emissiveFactor;
 #ifdef EMISSIVE

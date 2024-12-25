@@ -50,6 +50,7 @@ namespace neo {
 		}
 		glEnable(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_ZERO, GL_ZERO);
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);

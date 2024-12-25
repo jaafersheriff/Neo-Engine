@@ -131,7 +131,7 @@ void main() {
 	pbrMaterial.N = fNorm;
 	pbrMaterial.V = V;
 	pbrMaterial.linearRoughness = fRoughness;
-	pbrMaterial.metalness = fMetalness;
+	pbrMaterial.metalness = max(0.01, fMetalness);
 	pbrMaterial.F0 = calculateF0(fAlbedo.rgb, fMetalness);
 	pbrMaterial.ao = ao;
 

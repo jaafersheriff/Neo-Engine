@@ -1,4 +1,5 @@
 #include "ShadowMapComponents.hpp"
+#include "ECS/Component/CameraComponent/CSMCameraComponent.hpp"
 
 namespace neo {
 	namespace {
@@ -42,7 +43,7 @@ namespace neo {
 			"CSMShadowMap",
 			types::texture::Target::Texture2D,
 			resolution,
-			4
+			CSM_CAMERA_COUNT
 		);
 	}
 }
