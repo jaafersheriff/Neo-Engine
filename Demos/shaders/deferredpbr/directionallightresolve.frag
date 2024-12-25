@@ -76,5 +76,17 @@ void main() {
 	;
 	color.a = 1.0;
 
+#if defined(ENABLE_SHADOWS) && 1
+	if (viewSpaceDepth < csmDepths.x) {
+		color.rgb *= vec3(1, 0, 0);
+	}
+	else if (viewSpaceDepth < csmDepths.y) {
+		color.rgb *= vec3(0, 1, 0);
+	}
+	else if (viewSpaceDepth < csmDepths.z) {
+		color.rgb *= vec3(0, 0, 1);
+	}
+
+#endif
 }
 

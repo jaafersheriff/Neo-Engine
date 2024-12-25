@@ -18,8 +18,20 @@
 namespace neo {
 
 	namespace {
+		// https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-10-parallel-split-shadow-maps-programmable-gpus
+		float _calculateNearSplit(const float lambda, const int lod, const float sourceNear, const float sourceFar) {
+			if (lod == 0) {
+				return sourceNear;
+			}
+			float splitCount = CSM_CAMERA_COUNT + 1; // Near and far are technically their own splits, near already accounted for 
+			float cLog = sourceNear * static_cast<float>(glm::pow(sourceFar / sourceNear, lod / splitCount));
+			float cUniform = sourceNear + (sourceFar - sourceNear) * lod / splitCount;
+			return lambda * cLog + (1.f - lambda) * cUniform;
+		}
+
 		// https://alextardif.com/shadowmapping.html
 		void _doFitting(
+			const float lambda,
 			const SpatialComponent& sourceSpatial,
 			const CameraComponent& sourceCamera,
 			const SpatialComponent& lightSpatial,
@@ -38,33 +50,13 @@ namespace neo {
 			// Get main scene's proj matrix for this cascade
 			glm::mat4 sourceProj = sourceCamera.getProj();
 			{
+
+				csmCamera->mSliceDepths.x = _calculateNearSplit(lambda, csmCamera->getLod(), sourceCamera.getNear(), sourceCamera.getFar());
+				csmCamera->mSliceDepths.y = csmCamera->getLod() == CSM_CAMERA_COUNT - 1
+					? sourceCamera.getFar()
+					: _calculateNearSplit(lambda, csmCamera->getLod() + 1, sourceCamera.getNear(), sourceCamera.getFar());
+
 				CameraComponent sourceCopy = sourceCamera;
-				float range = sourceCopy.getFar() - sourceCopy.getNear();
-
-				float nearOffset, farOffset;
-				// [0, 0.2]
-				if (csmCamera->getLod() == 0) {
-					nearOffset = 0.f;
-					farOffset = range * 0.2f;
-				}
-				// [0.2, 0.5]
-				else if (csmCamera->getLod() == 1) {
-					nearOffset = range * 0.2f;
-					farOffset = range * 0.5f;
-				}
-				// [0.5, 1.0]
-				else if (csmCamera->getLod() == 2) {
-					nearOffset = range * 0.5f;
-					farOffset = range;
-				}
-				else {
-					nearOffset = farOffset = -1.f;
-					NEO_FAIL("Invalid LOD");
-				}
-
-				csmCamera->mSliceDepths.x = sourceCopy.getNear() + nearOffset;
-				csmCamera->mSliceDepths.y = sourceCopy.getNear() + farOffset;
-
 				sourceCopy.setNear(csmCamera->mSliceDepths.x);
 				sourceCopy.setFar(csmCamera->mSliceDepths.y);
 				sourceProj = sourceCopy.getProj();
@@ -150,8 +142,13 @@ namespace neo {
 			&& cameraCamera0.getType() == cameraCamera1.getType() 
 			&& cameraCamera1.getType() == cameraCamera2.getType(), "Frustum fit receiver needs to be orthographic");
 
-		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, lightReceiver.mBias, cameraSpatial0, cameraCamera0, &csmCamera0);
-		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, lightReceiver.mBias, cameraSpatial1, cameraCamera1, &csmCamera1);
-		_doFitting(sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, lightReceiver.mBias, cameraSpatial2, cameraCamera2, &csmCamera2);
+		_doFitting(mLambda, sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, lightReceiver.mBias, cameraSpatial0, cameraCamera0, &csmCamera0);
+		_doFitting(mLambda, sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, lightReceiver.mBias, cameraSpatial1, cameraCamera1, &csmCamera1);
+		_doFitting(mLambda, sourceSpatial, sourceCamera, lightSpatial, shadowMapResolution, lightReceiver.mBias, cameraSpatial2, cameraCamera2, &csmCamera2);
 	}
+
+	void CSMFittingSystem::imguiEditor(ECS&) {
+		ImGui::SliderFloat("Lambda", &mLambda, 0.f, 1.f);
+	}
+
 }

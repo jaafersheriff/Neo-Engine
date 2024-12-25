@@ -313,7 +313,7 @@ namespace DeferredPBR {
 		ecs.addSystem<RotationSystem>();
 		ecs.addSystem<SinTranslateSystem>();
 		ecs.addSystem<FrustumSystem>();
-		ecs.addSystem<CSMFittingSystem>();
+		ecs.addSystem<CSMFittingSystem>(0.2f);
 		ecs.addSystem<FrustumCullingSystem>();
 	}
 
