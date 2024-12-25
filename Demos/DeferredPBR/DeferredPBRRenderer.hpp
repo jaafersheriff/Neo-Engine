@@ -42,50 +42,24 @@ namespace DeferredPBR {
 		ShaderDefines defines;
 		for (auto& entity : lightView) {
 			defines.reset();
-			const bool shadowsEnabled = true
-				&& ecs.has<CameraComponent>(entity)
-				&& ecs.has<CSMShadowMapComponent>(entity)
-				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<CSMShadowMapComponent>(entity)->mShadowMap)
-				&& ecs.entityCount<CSMCamera0Component>()
-				&& ecs.entityCount<CSMCamera1Component>()
-				&& ecs.entityCount<CSMCamera2Component>();
-			MakeDefine(ENABLE_SHADOWS);
-			std::array<glm::mat4, CSM_CAMERA_COUNT> lightArrays;
-			glm::vec3 csmDepths(0.f);
-			if (shadowsEnabled) {
-				defines.set(ENABLE_SHADOWS);
-				static glm::mat4 biasMatrix(
-					0.5f, 0.0f, 0.0f, 0.0f,
-					0.0f, 0.5f, 0.0f, 0.0f,
-					0.0f, 0.0f, 0.5f, 0.0f,
-					0.5f, 0.5f, 0.5f, 1.0f);
-				auto csmCamera0Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>();
-				auto csmCamera1Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>();
-				auto csmCamera2Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>();
-				NEO_ASSERT(csmCamera0Tuple && csmCamera1Tuple && csmCamera2Tuple, "CSM Camera's dont exist");
-				auto& [cameraEntity0, cameraSpatial0, csmCameraCamera0, csmCamera0] = *csmCamera0Tuple;
-				auto& [cameraEntity1, cameraSpatial1, csmCameraCamera1, csmCamera1] = *csmCamera1Tuple;
-				auto& [cameraEntity2, cameraSpatial2, csmCameraCamera2, csmCamera2] = *csmCamera2Tuple;
 
-				lightArrays[0] = biasMatrix * csmCameraCamera0.getProj() * cameraSpatial0.getView();
-				lightArrays[1] = biasMatrix * csmCameraCamera1.getProj() * cameraSpatial1.getView();
-				lightArrays[2] = biasMatrix * csmCameraCamera2.getProj() * cameraSpatial2.getView();
-				csmDepths.x = csmCamera0.mSliceDepths.y;
-				csmDepths.y = csmCamera1.mSliceDepths.y;
-				csmDepths.z = csmCamera2.mSliceDepths.y;
+			MakeDefine(ENABLE_SHADOWS);
+			CSMShadowInfo csmShadowInfo = extractCSMShadowInfo(ecs, entity, resourceManagers.mTextureManager);
+			if (csmShadowInfo.mValidCSMShadows) {
+				defines.set(ENABLE_SHADOWS);
 			}
 
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
 			resolvedShader.bind();
 
-			if (shadowsEnabled) {
+			if (csmShadowInfo.mValidCSMShadows) {
 				const auto& shadowMap = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<CSMShadowMapComponent>(entity)->mShadowMap);
 				resolvedShader.bindTexture("shadowMap", shadowMap);
 				resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
-				resolvedShader.bindUniform("L0", lightArrays[0]);
-				resolvedShader.bindUniform("L1", lightArrays[1]);
-				resolvedShader.bindUniform("L2", lightArrays[2]);
-				resolvedShader.bindUniform("csmDepths", csmDepths);
+				resolvedShader.bindUniform("L0", csmShadowInfo.mLightArrays[0]);
+				resolvedShader.bindUniform("L1", csmShadowInfo.mLightArrays[1]);
+				resolvedShader.bindUniform("L2", csmShadowInfo.mLightArrays[2]);
+				resolvedShader.bindUniform("csmDepths", csmShadowInfo.mCSMDepths);
 			}
 
 			const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
@@ -176,7 +150,6 @@ namespace DeferredPBR {
 			resolvedShader.bindUniform("M", spatial->getModelMatrix());
 			resolvedShader.bindUniform("lightPos", spatial->getPosition());
 			resolvedShader.bindUniform("lightRadiance", glm::vec4(light->mColor, light->mIntensity));
-
 
 			if (debugRadius > 0.f) {
 				resolvedShader.bindUniform("debugRadius", debugRadius);

@@ -105,8 +105,7 @@ namespace neo {
 		CSMShadowInfo ret;
 		ret.mValidCSMShadows = true
 			&& ecs.has<CameraComponent>(lightEntity)
-			&& ecs.has<CSMShadowMapComponent>(lightEntity)
-			&& textureManager.isValid(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap)
+			&& ecs.has<CSMShadowMapComponent>(lightEntity) && textureManager.isValid(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap)
 			&& ecs.has<CSMCamera0Component>()
 			&& ecs.has<CSMCamera1Component>()
 			&& ecs.has<CSMCamera2Component>();
