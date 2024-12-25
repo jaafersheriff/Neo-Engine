@@ -33,7 +33,6 @@
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/RenderingSystems/CSMShadowRenderer.hpp"
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
-#include "Renderer/RenderingSystems/ShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"

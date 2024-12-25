@@ -3,6 +3,7 @@
 #include "ECS/ECS.hpp"
 
 #include "ECS/Component/CameraComponent/CSMCameraComponent.hpp"
+#include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
@@ -13,6 +14,7 @@
 namespace neo {
 
 	namespace {
+		// This can be remapped to drawing a single shadow map tbh
 		template<typename... CompTs>
 		void _drawSingleCSM(
 			const ResourceManagers& resourceManagers, 
@@ -92,6 +94,45 @@ namespace neo {
 				resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 			}
 		}
+	}
+
+	struct CSMShadowInfo {
+		bool mValidCSMShadows = false;
+		std::array<glm::mat4, CSM_CAMERA_COUNT> mLightArrays = {};
+		glm::vec3 mCSMDepths = glm::vec3(0.f);
+	};
+	inline CSMShadowInfo extractCSMShadowInfo(const ECS& ecs, const ECS::Entity lightEntity, const TextureManager& textureManager) {
+		CSMShadowInfo ret;
+		ret.mValidCSMShadows = true
+			&& ecs.has<CameraComponent>(lightEntity)
+			&& ecs.has<CSMShadowMapComponent>(lightEntity)
+			&& textureManager.isValid(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap)
+			&& ecs.has<CSMCamera0Component>()
+			&& ecs.has<CSMCamera1Component>()
+			&& ecs.has<CSMCamera2Component>();
+		if (ret.mValidCSMShadows) {
+			static glm::mat4 biasMatrix(
+				0.5f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.5f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.5f, 0.0f,
+				0.5f, 0.5f, 0.5f, 1.0f);
+			auto csmCamera0Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>();
+			auto csmCamera1Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>();
+			auto csmCamera2Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>();
+			NEO_ASSERT(csmCamera0Tuple && csmCamera1Tuple && csmCamera2Tuple, "CSM Camera's dont exist");
+			auto& [cameraEntity0, cameraSpatial0, csmCameraCamera0, csmCamera0] = *csmCamera0Tuple;
+			auto& [cameraEntity1, cameraSpatial1, csmCameraCamera1, csmCamera1] = *csmCamera1Tuple;
+			auto& [cameraEntity2, cameraSpatial2, csmCameraCamera2, csmCamera2] = *csmCamera2Tuple;
+
+			ret.mLightArrays[0] = biasMatrix * csmCameraCamera0.getProj() * cameraSpatial0.getView();
+			ret.mLightArrays[1] = biasMatrix * csmCameraCamera1.getProj() * cameraSpatial1.getView();
+			ret.mLightArrays[2] = biasMatrix * csmCameraCamera2.getProj() * cameraSpatial2.getView();
+			ret.mCSMDepths.x = csmCamera0.mSliceDepths.y;
+			ret.mCSMDepths.y = csmCamera1.mSliceDepths.y;
+			ret.mCSMDepths.z = csmCamera2.mSliceDepths.y;
+		}
+
+		return ret;
 	}
 
 	inline std::vector<ECS::EntityBuilder> createCSMCameras() {
