@@ -14,5 +14,7 @@ namespace CSM {
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
 
 		bool mDebugView = false;
+		bool mDrawCascadeLines = true;
+		bool mDrawCascadeSpheres = true;
 	};
 }

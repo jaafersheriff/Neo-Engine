@@ -34,6 +34,7 @@
 #include "Renderer/RenderingSystems/CSMShadowRenderer.hpp"
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
+#include "Renderer/RenderingSystems/WireframeRenderer.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"
 
@@ -104,16 +105,23 @@ namespace CSM {
 		
 		{
 			auto csmCameras = createCSMCameras();
-			LineMeshComponent lines[4] = {
-				LineMeshComponent(resourceManagers.mMeshManager, glm::vec3(1.f, 0.f, 0.f)),
-				LineMeshComponent(resourceManagers.mMeshManager, glm::vec3(0.f, 1.f, 0.f)),
-				LineMeshComponent(resourceManagers.mMeshManager, glm::vec3(0.f, 0.f, 1.f)),
-				LineMeshComponent(resourceManagers.mMeshManager, glm::vec3(1.f, 1.f, 0.f))
+			glm::vec3 lineColors[CSM_CAMERA_COUNT] = {
+				glm::vec3(1.f, 0.f, 0.f),
+				glm::vec3(0.f, 1.f, 0.f),
+				glm::vec3(0.f, 0.f, 1.f)
 			};
+			LineMeshComponent lineMeshes[CSM_CAMERA_COUNT] = {
+				LineMeshComponent(resourceManagers.mMeshManager, lineColors[0]),
+				LineMeshComponent(resourceManagers.mMeshManager, lineColors[1]),
+				LineMeshComponent(resourceManagers.mMeshManager, lineColors[2])
+			};
+
 			for (int i = 0; i < csmCameras.size(); i++) {
 				ecs.submitEntity(std::move(csmCameras[i]
-					.attachComponent<LineMeshComponent>(lines[i])
+					.attachComponent<LineMeshComponent>(lineMeshes[i])
 					.attachComponent<TagComponent>("CSMCamera" + std::to_string(i))
+					.attachComponent<MeshComponent>(MeshHandle("sphere"))
+					.attachComponent<WireframeRenderComponent>(lineColors[i])
 				)); // is this safe?
 			}
 		}
@@ -166,6 +174,8 @@ namespace CSM {
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_UNUSED(resourceManagers, ecs);
 		ImGui::Checkbox("DebugView", &mDebugView);
+		ImGui::Checkbox("Cascade lines", &mDrawCascadeLines);
+		ImGui::Checkbox("Cascade spheres", &mDrawCascadeSpheres);
 	}
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
@@ -185,6 +195,16 @@ namespace CSM {
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		drawCSMResolve(resourceManagers, ecs, cameraEntity, mDebugView);
 
-		drawLines(resourceManagers, ecs, cameraEntity);
+		drawLines<MockCameraComponent>(resourceManagers, ecs, cameraEntity);
+		if (mDrawCascadeLines) {
+			drawLines<CSMCamera0Component>(resourceManagers, ecs, cameraEntity);
+			drawLines<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
+			drawLines<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);
+		}
+		if (mDrawCascadeSpheres) {
+			drawWireframe<CSMCamera0Component>(resourceManagers, ecs, cameraEntity);
+			drawWireframe<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
+			drawWireframe<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);
+		}
 	}
 }

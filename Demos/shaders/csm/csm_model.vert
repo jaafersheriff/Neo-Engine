@@ -34,5 +34,6 @@ void main() {
 	shadowCoord[2] = L2 * fragPos;
 
 	 // This should just be gl_position.z
-	sceneDepth = (mockPV * fragPos).z;
+	vec4 mockClip = (mockPV * fragPos);
+	sceneDepth = mockClip.z / mockClip.w;
 }

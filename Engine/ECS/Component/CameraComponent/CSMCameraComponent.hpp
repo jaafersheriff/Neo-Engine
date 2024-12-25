@@ -13,7 +13,7 @@ namespace neo {
 	virtual int getLod() const = 0;
 
 	virtual void imGuiEditor() override {
-		ImGui::Text("Slice Depths: (%0.2f, %0.2f]", &mSliceDepths.x, mSliceDepths.y);
+		ImGui::Text("Slice Depths: (%0.2f, %0.2f]", mSliceDepths.x, mSliceDepths.y);
 	};
 	END_COMPONENT();
 

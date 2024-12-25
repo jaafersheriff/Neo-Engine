@@ -15,6 +15,8 @@
 #include "ECS/Component/RenderingComponent/ShadowMapComponents.hpp"
 #include "ResourceManager/ResourceManagers.hpp"
 
+#pragma optimize("", off)
+
 namespace neo {
 
 	namespace {
@@ -82,7 +84,7 @@ namespace neo {
 				frustumWorldBB.addPoint(tCorner / tCorner.w);
 			}
 
-			const float radius = glm::ceil(frustumWorldBB.getRadius());
+			const float radius = std::ceil(frustumWorldBB.getRadius());
 			const float texelsPerUnit = (shadowMapResolution >> csmCamera->getLod()) / (radius * 2.f);
 			const glm::mat4 scalar = glm::scale(glm::mat4(1.f), glm::vec3(texelsPerUnit));
 			const glm::mat4 lookAt = scalar * lightSpatial.getView();
@@ -100,6 +102,11 @@ namespace neo {
 				glm::vec3(frustumCenter), 
 				glm::vec3(frustumCenter) + (lightSpatial.getLookDir() * radius * 2.f), 
 				glm::vec3(0.f, 1.f, 0.f)
+			));
+			receiverSpatial.setScale(glm::vec3(
+				radius * 2.f,
+				radius * 2.f,
+				(radius + bias) * 2.f
 			));
 
 			receiverCamera.setOrthographic(CameraComponent::Orthographic{ glm::vec2(-radius, radius), glm::vec2(-radius, radius) });

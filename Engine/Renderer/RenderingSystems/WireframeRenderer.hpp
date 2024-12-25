@@ -22,6 +22,8 @@ namespace neo {
 		}
 
 		glDisable(GL_CULL_FACE);
+		int oldPolygonMode;
+		glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		const auto& view = ecs.getView<const WireframeRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
@@ -45,6 +47,6 @@ namespace neo {
 		}
 
 		glEnable(GL_CULL_FACE);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 	}
 }

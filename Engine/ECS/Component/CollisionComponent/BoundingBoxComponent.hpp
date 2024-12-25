@@ -26,13 +26,13 @@ namespace neo {
 		{ }
 
 		void addPoint(const glm::vec3& point) {
-			mMin.x = glm::min(mMin.x, point.x);
-			mMin.y = glm::min(mMin.y, point.y);
-			mMin.z = glm::min(mMin.z, point.z);
+			mMin.x = std::min(mMin.x, point.x);
+			mMin.y = std::min(mMin.y, point.y);
+			mMin.z = std::min(mMin.z, point.z);
 
-			mMax.x = glm::max(mMax.x, point.x);
-			mMax.y = glm::max(mMax.y, point.y);
-			mMax.z = glm::max(mMax.z, point.z);
+			mMax.x = std::max(mMax.x, point.x);
+			mMax.y = std::max(mMax.y, point.y);
+			mMax.z = std::max(mMax.z, point.z);
 		}
 
 		float getRadius() const {
