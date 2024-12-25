@@ -67,6 +67,7 @@ namespace Base {
 			Loader::loadGltfScene(ecs, resourceManagers, "bunny.gltf", glm::mat4(1.f), [](ECS& ecs, const GLTFImporter::MeshNode& node) {
 				MaterialComponent material = node.mMaterial;
 				material.mAlbedoColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
+				material.mMetallic = 1.f;
 				ecs.submitEntity(std::move(ECS::EntityBuilder{}
 					.attachComponent<TagComponent>("Bunny")
 					.attachComponent<SpatialComponent>(glm::vec3(2.f, 0.0f, -1.f), glm::vec3(1.5f))

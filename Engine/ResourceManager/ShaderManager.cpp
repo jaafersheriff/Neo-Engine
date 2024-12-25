@@ -81,7 +81,7 @@ namespace neo {
 		return fallback;
 	}
 
-	[[nodiscard]] ShaderManager::ShaderHandle ShaderManager::_asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, const std::optional<std::string>& debugName) const {
+	[[nodiscard]] ShaderHandle ShaderManager::_asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, const std::optional<std::string>& debugName) const {
 		{
 			std::lock_guard<std::mutex> lock(mLoadQueueMutex);
 			mLoadQueue.emplace_back(ResourceLoadDetails_Internal{ id, shaderDetails, debugName });
@@ -163,7 +163,6 @@ namespace neo {
 		tracy::SetThreadName("Shader Hot Reloader");
 		// Doesn't handle #includes
 		// Might break during swap demo
-		// TODO How to exit this thread..?
 		while (mKillSwitch.load() == false) {
 			{
 				TRACY_ZONEN("Sleep");

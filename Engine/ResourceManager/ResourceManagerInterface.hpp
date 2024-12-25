@@ -30,6 +30,13 @@ namespace neo {
 		bool operator==(const ResourceHandle<ResourceType>& other) const noexcept {
 			return mHandle == other.mHandle;
 		}
+		bool operator==(const entt::id_type& other) const noexcept {
+			return mHandle == other;
+		}
+		bool operator!=(const entt::id_type& other) const noexcept {
+			return !(mHandle == other);
+		}
+
 	};
 
 	template<typename ResourceType>
@@ -48,11 +55,11 @@ namespace neo {
 	public:
 
 		bool isValid(const ResourceHandle<ResourceType>& id) const {
-			return id.mHandle != NEO_INVALID_HANDLE && mCache.contains(id.mHandle);
+			return id != NEO_INVALID_HANDLE && mCache.contains(id.mHandle);
 		}
 
 		bool isQueued(const ResourceHandle<ResourceType>& id) const {
-			if (id.mHandle == NEO_INVALID_HANDLE) {
+			if (id == NEO_INVALID_HANDLE) {
 				return false;
 			}
 			// TODO - this is a linear search :(
@@ -69,7 +76,7 @@ namespace neo {
 		}
 
 		bool isDiscardQueued(const ResourceHandle<ResourceType>& id) const {
-			if (id.mHandle == NEO_INVALID_HANDLE) {
+			if (id == NEO_INVALID_HANDLE) {
 				return false;
 			}
 			// TODO - this is a linear search :(
