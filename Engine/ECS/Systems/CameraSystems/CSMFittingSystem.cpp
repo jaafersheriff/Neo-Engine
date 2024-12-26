@@ -15,9 +15,12 @@
 #include "ECS/Component/RenderingComponent/ShadowMapComponents.hpp"
 #include "ResourceManager/ResourceManagers.hpp"
 
-#pragma optimize("", off)
-
 namespace neo {
+
+	struct DebugInfo {
+		std::vector<float> minZs;
+	};
+	static DebugInfo _dbi;
 
 	namespace {
 		// https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-10-parallel-split-shadow-maps-programmable-gpus
@@ -79,9 +82,11 @@ namespace neo {
 			const glm::mat4 iPV = glm::inverse(sourceProj * sourceSpatial.getView());
 
 			BoundingBoxComponent frustumWorldBB;
+			_dbi.minZs.push_back(frustumWorldBB.mMax.z);
 			for (auto& corner : corners) {
 				glm::vec4 tCorner = iPV * glm::vec4(corner, 1.f);
 				frustumWorldBB.addPoint(tCorner / tCorner.w);
+				_dbi.minZs.push_back(frustumWorldBB.mMax.z);
 			}
 
 			const float radius = std::ceil(frustumWorldBB.getRadius());
@@ -156,6 +161,10 @@ namespace neo {
 
 	void CSMFittingSystem::imguiEditor(ECS&) {
 		ImGui::SliderFloat("Lambda", &mLambda, 0.f, 1.f);
+		for (auto& f : _dbi.minZs) {
+			ImGui::Text("MinZ: %0.2f", f);
+		}
+		_dbi.minZs.clear();
 	}
 
 }

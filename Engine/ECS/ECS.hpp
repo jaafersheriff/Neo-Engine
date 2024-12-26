@@ -19,6 +19,7 @@
 
 #include <typeindex>
 #include <optional>
+#include <mutex>
 
 namespace neo {
 	class System;

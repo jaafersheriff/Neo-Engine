@@ -11,11 +11,11 @@ namespace neo {
 
 		bool mStatic = false;
 		glm::vec3 mMin = glm::vec3(FLT_MAX);
-		glm::vec3 mMax = glm::vec3(FLT_MIN);
+		glm::vec3 mMax = glm::vec3(-FLT_MAX);
 
 		BoundingBoxComponent(bool isStatic = false) 
 			: mMin(FLT_MAX)
-			, mMax(FLT_MIN)
+			, mMax(-FLT_MAX)
 			, mStatic(isStatic)
 		{ }
 
