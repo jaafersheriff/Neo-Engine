@@ -180,8 +180,8 @@ namespace CSM {
 
 	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		const auto& [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-		const auto& [lightEntity, ___, ____] = *ecs.getSingleView<MainLightComponent, LightComponent>();
+		const auto [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		const auto [lightEntity, ___, ____] = *ecs.getSingleView<MainLightComponent, LightComponent>();
 
 		const auto& shadowMap = ecs.cGetComponent<CSMShadowMapComponent>(lightEntity);
 		if (resourceManagers.mTextureManager.isValid(shadowMap->mShadowMap)) {

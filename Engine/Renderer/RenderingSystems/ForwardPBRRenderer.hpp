@@ -33,7 +33,7 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawForwardPBR(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, std::optional<IBLComponent> ibl = std::nullopt) {
+	inline void drawForwardPBR(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, std::optional<IBLComponent> ibl = std::nullopt) {
 		TRACY_GPU();
 
 		// Forward draws are only lit by the single MainLightComponent!

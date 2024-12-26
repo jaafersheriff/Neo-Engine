@@ -63,7 +63,7 @@ namespace neo {
 			const glm::mat4 V = ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView();
 
 			ShaderDefines drawDefines;
-			const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
+			const auto view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
 			for (auto entity : view) {
 				// VFC
 				if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
