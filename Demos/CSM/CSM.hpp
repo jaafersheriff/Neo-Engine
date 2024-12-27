@@ -13,8 +13,8 @@ namespace CSM {
 		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) override;
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
 
-		bool mDebugView = false;
+		bool mDebugView = true;
 		bool mDrawCascadeLines = true;
-		bool mDrawCascadeSpheres = true;
+		bool mDrawCascadeSpheres = false;
 	};
 }

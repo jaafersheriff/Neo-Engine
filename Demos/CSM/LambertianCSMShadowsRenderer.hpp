@@ -34,7 +34,7 @@ namespace CSM {
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("CSM Resolve Shader", 
 			SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "csm/csm_model.vert"},
+				{ types::shader::Stage::Vertex, "model.vert"},
 				{ types::shader::Stage::Fragment, "csm/csm.frag" }
 			}
 		);
@@ -52,6 +52,9 @@ namespace CSM {
 		const auto& [lightEntity, ____, light, lightSpatial] = *lightView;
 
 		ShaderDefines passDefines(inDefines);
+		MakeDefine(ENABLE_SHADOWS);
+		passDefines.set(ENABLE_SHADOWS);
+
 		MakeDefine(DEBUG_VIEW);
 		if (debugView) {
 			passDefines.set(DEBUG_VIEW);
@@ -71,7 +74,7 @@ namespace CSM {
 
 		ShaderDefines drawDefines(passDefines);
 		// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
-		const auto& view = ecs.getView<const PhongRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
+		const auto& view = ecs.getView<const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
 		for (auto entity : view) {
 			// VFC
 			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
