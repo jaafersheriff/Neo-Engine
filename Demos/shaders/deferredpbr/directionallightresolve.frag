@@ -60,11 +60,7 @@ void main() {
 	shadowCoord[0] = L0 * vec4(worldPos, 1.0);
 	shadowCoord[1] = L1 * vec4(worldPos, 1.0);
 	shadowCoord[2] = L2 * vec4(worldPos, 1.0);
-	// Reconstruct view space depth to compare with CSM depth ranges
-    vec3 ndc = vec3(fragTex, depth) * 2.0 - vec3(1.0);
-	vec4 viewSpacePos = invP * vec4(ndc, 1.0);
-	float viewSpaceDepth = viewSpacePos.z / -viewSpacePos.w - 1; // ?
-	float visibility = getCSMShadowVisibility(viewSpaceDepth, csmDepths, shadowCoord, shadowMap);
+	float visibility = getCSMShadowVisibility(csmDepths, shadowCoord, shadowMap);
 	pbrColor.directDiffuse *= visibility;
 	pbrColor.directSpecular *= visibility;
 #endif
@@ -75,18 +71,5 @@ void main() {
 		+ pbrColor.directSpecular
 	;
 	color.a = 1.0;
-
-#if defined(ENABLE_SHADOWS) && 1
-	if (viewSpaceDepth < csmDepths.x) {
-		color.rgb *= vec3(1, 0, 0);
-	}
-	else if (viewSpaceDepth < csmDepths.y) {
-		color.rgb *= vec3(0, 1, 0);
-	}
-	else if (viewSpaceDepth < csmDepths.z) {
-		color.rgb *= vec3(0, 0, 1);
-	}
-
-#endif
 }
 

@@ -13,7 +13,7 @@ float getSingleShadow(vec4 _shadowCoord, sampler2D _shadowMap, int _lod) {
 	return saturate(_shadowCoord.z * 0.5 + 0.5) + bias < shadowSample ? 1.0 : 0.0;
 }
 
-float getCSMShadowVisibility(float _sceneDepth, vec3 _csmDepths, vec4 _shadowCoord[3], sampler2D _shadowMap) {
+float getCSMShadowVisibility(vec3 _csmDepths, vec4 _shadowCoord[3], sampler2D _shadowMap) {
 	int lod = 0;
 	if (validCascade(_shadowCoord[0])) {
 		lod = 0;
