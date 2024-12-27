@@ -166,8 +166,7 @@ namespace CSM {
 		ecs.addSystem<CSMFittingSystem>(); // Break scene frustum into slices and fit CSMCameraN to those slices
 		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
 		ecs.addSystem<FrustumCullingSystem>();
-		auto& s = ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
-		s.mActive = false;
+		ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -196,7 +195,7 @@ namespace CSM {
 		backbuffer.bind();
 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawCSMResolve(resourceManagers, ecs, cameraEntity, mDebugView);
+		drawCSMResolve<PhongRenderComponent>(resourceManagers, ecs, cameraEntity, mDebugView);
 
 		drawLines<MockCameraComponent>(resourceManagers, ecs, cameraEntity);
 		if (mDrawCascadeLines) {
