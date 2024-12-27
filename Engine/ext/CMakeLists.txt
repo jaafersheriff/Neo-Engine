@@ -32,7 +32,11 @@ if (MSVC)
 	endfunction()
 	set(MESSAGE_QUIET ON)
 
-	option(TRACY_ENABLE "" OFF)
+	option(TRACY_ENABLE "" ON)
+	if (VS_HOT_RELOAD)
+		set(TRACY_ENABLE OFF CACHE BOOL "" FORCE)
+	endif()
+
 	if (TRACY_ENABLE)
 		add_compile_definitions(
 			TRACY_ENABLE

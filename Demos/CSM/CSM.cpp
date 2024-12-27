@@ -49,9 +49,11 @@ namespace CSM {
 		END_COMPONENT();
 
 		ECS::EntityBuilder _createCamera(std::string name, float fov, float near, float far, glm::vec3 pos) {
+			SpatialComponent s(pos, glm::vec3(1.f));
+			s.setLookDir(glm::vec3(0.f, 0.f, -1.f));
 			return std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>(name)
-				.attachComponent<SpatialComponent>(pos, glm::vec3(1.f))
+				.attachComponent<SpatialComponent>(s)
 				.attachComponent<CameraComponent>(near, far, CameraComponent::Perspective{ fov, 1.f })
 			);
 		}
@@ -92,7 +94,7 @@ namespace CSM {
 		// Perspective camera
 		{
 			LineMeshComponent lineMesh(resourceManagers.mMeshManager, glm::vec3(0.f, 1.f, 1.f));
-			ecs.submitEntity(std::move(_createCamera("mockCamera", 50.f, 0.1f, 5.f, glm::vec3(0.f, 2.f, -0.f))
+			ecs.submitEntity(std::move(_createCamera("mockCamera", 50.f, 0.01f, 10.f, glm::vec3(0.f, 2.f, -0.f))
 				.attachComponent<MockCameraComponent>()
 				.attachComponent<LineMeshComponent>(lineMesh)
 				.attachComponent<FrustumComponent>()
@@ -164,7 +166,8 @@ namespace CSM {
 		ecs.addSystem<CSMFittingSystem>(); // Break scene frustum into slices and fit CSMCameraN to those slices
 		ecs.addSystem<FrustumToLineSystem>(); // Create line mesh
 		ecs.addSystem<FrustumCullingSystem>();
-		ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
+		auto& s = ecs.addSystem<PerspectiveUpdateSystem>(); // Update mock perspective camera
+		s.mActive = false;
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {

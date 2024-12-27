@@ -17,11 +17,6 @@
 
 namespace neo {
 
-	struct DebugInfo {
-		std::vector<float> minZs;
-	};
-	static DebugInfo _dbi;
-
 	namespace {
 		// https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-10-parallel-split-shadow-maps-programmable-gpus
 		float _calculateNearSplit(const float lambda, const int lod, const float sourceNear, const float sourceFar) {
@@ -56,14 +51,14 @@ namespace neo {
 			glm::mat4 sourceProj = sourceCamera.getProj();
 			{
 
-				csmCamera->mSliceDepths.x = _calculateNearSplit(lambda, csmCamera->getLod(), sourceCamera.getNear(), sourceCamera.getFar());
-				csmCamera->mSliceDepths.y = csmCamera->getLod() == CSM_CAMERA_COUNT - 1
+				float near = _calculateNearSplit(lambda, csmCamera->getLod(), sourceCamera.getNear(), sourceCamera.getFar());
+				float far = csmCamera->getLod() == CSM_CAMERA_COUNT - 1
 					? sourceCamera.getFar()
 					: _calculateNearSplit(lambda, csmCamera->getLod() + 1, sourceCamera.getNear(), sourceCamera.getFar());
 
 				CameraComponent sourceCopy = sourceCamera;
-				sourceCopy.setNear(csmCamera->mSliceDepths.x);
-				sourceCopy.setFar(csmCamera->mSliceDepths.y);
+				sourceCopy.setNear(near);
+				sourceCopy.setFar(far);
 				sourceProj = sourceCopy.getProj();
 			}
 
@@ -82,11 +77,9 @@ namespace neo {
 			const glm::mat4 iPV = glm::inverse(sourceProj * sourceSpatial.getView());
 
 			BoundingBoxComponent frustumWorldBB;
-			_dbi.minZs.push_back(frustumWorldBB.mMax.z);
 			for (auto& corner : corners) {
 				glm::vec4 tCorner = iPV * glm::vec4(corner, 1.f);
 				frustumWorldBB.addPoint(tCorner / tCorner.w);
-				_dbi.minZs.push_back(frustumWorldBB.mMax.z);
 			}
 
 			const float radius = std::ceil(frustumWorldBB.getRadius());
@@ -161,10 +154,6 @@ namespace neo {
 
 	void CSMFittingSystem::imguiEditor(ECS&) {
 		ImGui::SliderFloat("Lambda", &mLambda, 0.f, 1.f);
-		for (auto& f : _dbi.minZs) {
-			ImGui::Text("MinZ: %0.2f", f);
-		}
-		_dbi.minZs.clear();
 	}
 
 }

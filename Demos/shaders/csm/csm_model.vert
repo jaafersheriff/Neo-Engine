@@ -22,6 +22,7 @@ uniform mat4 mockPV;
 uniform float mockNear;
 
 out float sceneDepth;
+out float denom;
 
 void main() {
 	fragPos = M * vec4(vertPos, 1.0);
@@ -33,7 +34,8 @@ void main() {
 	shadowCoord[1] = L1 * fragPos;
 	shadowCoord[2] = L2 * fragPos;
 
-	 // This should just be gl_position.z
-	vec4 mockClip = (mockPV * fragPos);
-	sceneDepth = mockClip.z / mockClip.w;
+	 // This should just be gl_position.z?
+	vec4 clip = mockPV * fragPos;
+	float denom = clip.w;
+	sceneDepth = clip.z / clip.w;
 }

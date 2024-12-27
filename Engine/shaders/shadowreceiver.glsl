@@ -1,34 +1,35 @@
 bool validCascade(vec4 _shadowCoord) {
 	return true
-		&& _shadowCoord.x > 0.0 && _shadowCoord.x < 1.0
-		&& _shadowCoord.y > 0.0 && _shadowCoord.y < 1.0
-		&& _shadowCoord.z > 0.0 && _shadowCoord.z < 1.0
+		&& _shadowCoord.x >= 0.0 && _shadowCoord.x <= 1.0
+		&& _shadowCoord.y >= 0.0 && _shadowCoord.y <= 1.0
+		&& _shadowCoord.z >= 0.0 && _shadowCoord.z <= 1.0
 	;
 }
 
 // TODO - PCF
 float getSingleShadow(vec4 _shadowCoord, sampler2D _shadowMap, int _lod) {
 	float bias = 0.0001;
-	if (validCascade(_shadowCoord)) {
-		return saturate(_shadowCoord.z) + bias > textureLod(_shadowMap, saturate(_shadowCoord.xy), _lod).r ? 1.0 : 0.0;
-	}
-	return 0.f;
+	float shadowSample = textureLod(_shadowMap, saturate(_shadowCoord.xy), _lod).r * 0.5 + 0.5;
+	return saturate(_shadowCoord.z * 0.5 + 0.5) + bias < shadowSample ? 1.0 : 0.0;
 }
 
 float getCSMShadowVisibility(float _sceneDepth, vec3 _csmDepths, vec4 _shadowCoord[3], sampler2D _shadowMap) {
 	int lod = 0;
-	if (_sceneDepth < _csmDepths.x) {
+	if (validCascade(_shadowCoord[0])) {
 		lod = 0;
 	}
-	else if (_sceneDepth < _csmDepths.y) {
+	else if (validCascade(_shadowCoord[1])) {
 		lod = 1;
 	}
-	else if (_sceneDepth < _csmDepths.z) {
+	else if (validCascade(_shadowCoord[2])) {
 		lod = 2;
+	}
+	else {
+		return 1.0;
 	}
 
 	float shadow = getSingleShadow(_shadowCoord[lod], _shadowMap, lod);
-	return 1.0 - saturate(shadow);
+	return saturate(shadow);
 }
 
 float getShadowVisibility(int pcfSize, samplerCube _shadowMap, vec3 _shadowCoord, float _shadowMapResolution, float shadowRange, float bias) {

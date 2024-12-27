@@ -126,9 +126,9 @@ namespace neo {
 			ret.mLightArrays[0] = biasMatrix * csmCameraCamera0.getProj() * cameraSpatial0.getView();
 			ret.mLightArrays[1] = biasMatrix * csmCameraCamera1.getProj() * cameraSpatial1.getView();
 			ret.mLightArrays[2] = biasMatrix * csmCameraCamera2.getProj() * cameraSpatial2.getView();
-			ret.mCSMDepths.x = csmCamera0.mSliceDepths.y;
-			ret.mCSMDepths.y = csmCamera1.mSliceDepths.y;
-			ret.mCSMDepths.z = csmCamera2.mSliceDepths.y;
+			ret.mCSMDepths.x = csmCamera0.mSliceDepth;
+			ret.mCSMDepths.y = csmCamera1.mSliceDepth;
+			ret.mCSMDepths.z = csmCamera2.mSliceDepth;
 		}
 
 		return ret;

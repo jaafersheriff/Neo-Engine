@@ -12,6 +12,7 @@ uniform vec4 albedo;
 in vec4 shadowCoord[3];
 uniform vec3 csmDepths;
 in float sceneDepth;
+in float denom;
 
 layout(binding = 2) uniform sampler2D shadowMap;
 
@@ -21,6 +22,7 @@ uniform vec3 lightDir;
 uniform vec3 camPos;
 
 out vec4 color;
+
 
 void main() {
 	vec4 fAlbedo = albedo;
@@ -36,19 +38,18 @@ void main() {
 	float visibility = getCSMShadowVisibility(sceneDepth, csmDepths, shadowCoord, shadowMap);
 	color *= vec4(vec3(max(visibility, 0.2)), 1.0);
 
-#ifdef DEBUG_VIEW
+#if defined(DEBUG_VIEW)
 	const float scale = 0.2;
-	if (sceneDepth > 0) {
-		if (sceneDepth <= csmDepths.x && validCascade(shadowCoord[0])) {
-			color.yz *= scale;
-		}
-		else if (sceneDepth <= csmDepths.y && validCascade(shadowCoord[1])) {
-			color.xz *= scale;
-		}
-		else if (sceneDepth <= csmDepths.z && validCascade(shadowCoord[2])) {
-			color.xy *= scale;
-		}
+	if (validCascade(shadowCoord[0])) {
+		color.yz *= scale;
 	}
+	else if (validCascade(shadowCoord[1])) {
+		color.xz *= scale;
+	}
+	else if (validCascade(shadowCoord[2])) {
+		color.xy *= scale;
+	}
+
 #endif
 
 	color.a = 1.0;

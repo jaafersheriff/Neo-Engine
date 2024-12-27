@@ -8,12 +8,12 @@ namespace neo {
 	START_COMPONENT(CSMCameraComponent);
 	CSMCameraComponent() {}
 
-	glm::vec2 mSliceDepths = glm::vec2(0.f);
+	float mSliceDepth = 0.f; // Normalized (linear) distance to camera
 	
 	virtual int getLod() const = 0;
 
 	virtual void imGuiEditor() override {
-		ImGui::Text("Slice Depths: (%0.2f, %0.2f]", mSliceDepths.x, mSliceDepths.y);
+		ImGui::Text("Slice Depth: %0.2f", mSliceDepth);
 	};
 	END_COMPONENT();
 
