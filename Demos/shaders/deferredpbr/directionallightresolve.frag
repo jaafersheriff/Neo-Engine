@@ -12,8 +12,8 @@ layout(binding = 3) uniform sampler2D gDepth;
 uniform mat4 L0;
 uniform mat4 L1;
 uniform mat4 L2;
-uniform vec3 csmDepths;
 layout(binding = 5) uniform sampler2D shadowMap;
+uniform vec2 shadowMapResolution;
 #endif
 
 uniform mat4 invP;
@@ -60,7 +60,7 @@ void main() {
 	shadowCoord[0] = L0 * vec4(worldPos, 1.0);
 	shadowCoord[1] = L1 * vec4(worldPos, 1.0);
 	shadowCoord[2] = L2 * vec4(worldPos, 1.0);
-	float visibility = getCSMShadowVisibility(csmDepths, shadowCoord, shadowMap);
+	float visibility = getCSMShadowVisibility(1, shadowCoord, shadowMap, shadowMapResolution.x, 0.001);
 	pbrColor.directDiffuse *= visibility;
 	pbrColor.directSpecular *= visibility;
 #endif

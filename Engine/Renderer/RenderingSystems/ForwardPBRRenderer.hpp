@@ -209,7 +209,6 @@ namespace neo {
 						resolvedShader.bindUniform("L0", csmShadowInfo.mLightArrays[0]);
 						resolvedShader.bindUniform("L1", csmShadowInfo.mLightArrays[1]);
 						resolvedShader.bindUniform("L2", csmShadowInfo.mLightArrays[2]);
-						resolvedShader.bindUniform("csmDepths", csmShadowInfo.mCSMDepths);
 					}
 					if (pointLight) {
 						shadowMapHandle = ecs.cGetComponent<PointLightShadowMapComponent>(lightEntity)->mShadowMap;

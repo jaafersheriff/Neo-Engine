@@ -115,8 +115,9 @@ namespace CSM {
 				resolvedShader.bindUniform("L0", csmShadowInfo.mLightArrays[0]);
 				resolvedShader.bindUniform("L1", csmShadowInfo.mLightArrays[1]);
 				resolvedShader.bindUniform("L2", csmShadowInfo.mLightArrays[2]);
-				resolvedShader.bindUniform("csmDepths", csmShadowInfo.mCSMDepths);
-				resolvedShader.bindTexture("shadowMap", resourceManagers.mTextureManager.resolve(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap));
+				const auto shadowTexture = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)->mShadowMap);
+				resolvedShader.bindTexture("shadowMap", shadowTexture);
+				resolvedShader.bindUniform("shadowMapResolution", static_cast<float>(shadowTexture.mWidth));
 			}
 
 			const auto& drawSpatial = view.get<const SpatialComponent>(entity);

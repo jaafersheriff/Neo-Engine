@@ -7,14 +7,10 @@ namespace neo {
 
 	START_COMPONENT(CSMCameraComponent);
 	CSMCameraComponent() {}
-
-	float mSliceDepth = 0.f; // Normalized (linear) distance to camera
 	
 	virtual int getLod() const = 0;
+	virtual void imGuiEditor() override {};
 
-	virtual void imGuiEditor() override {
-		ImGui::Text("Slice Depth: %0.2f", mSliceDepth);
-	};
 	END_COMPONENT();
 
 	// Really shouldn't be using inheritance like this

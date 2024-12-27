@@ -42,7 +42,6 @@ layout(binding = 4) uniform sampler2D emissiveMap;
 uniform vec2 shadowMapResolution;
 #	ifdef DIRECTIONAL_LIGHT
 	in vec4 shadowCoord[3];
-	uniform vec3 csmDepths;
 	layout(binding = 5) uniform sampler2D shadowMap;
 #	elif defined(POINT_LIGHT)
 	layout(binding = 5) uniform samplerCube shadowMap;
@@ -156,7 +155,7 @@ void main() {
 
 #ifdef ENABLE_SHADOWS
 #	ifdef DIRECTIONAL_LIGHT
-	float visibility = getCSMShadowVisibility(csmDepths, shadowCoord, shadowMap);
+	float visibility = getCSMShadowVisibility(1, shadowCoord, shadowMap, shadowMapResolution.x, 0.0001);
 #	elif defined(POINT_LIGHT)
 	float visibility = getShadowVisibility(1, shadowMap, fragPos.xyz - lightPos, shadowMapResolution.x, shadowRange, 0.001);
 #	endif

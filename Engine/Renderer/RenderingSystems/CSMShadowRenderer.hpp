@@ -99,7 +99,6 @@ namespace neo {
 	struct CSMShadowInfo {
 		bool mValidCSMShadows = false;
 		std::array<glm::mat4, CSM_CAMERA_COUNT> mLightArrays = {};
-		glm::vec3 mCSMDepths = glm::vec3(0.f);
 	};
 	inline CSMShadowInfo extractCSMShadowInfo(const ECS& ecs, const ECS::Entity lightEntity, const TextureManager& textureManager) {
 		CSMShadowInfo ret;
@@ -126,9 +125,6 @@ namespace neo {
 			ret.mLightArrays[0] = biasMatrix * csmCameraCamera0.getProj() * cameraSpatial0.getView();
 			ret.mLightArrays[1] = biasMatrix * csmCameraCamera1.getProj() * cameraSpatial1.getView();
 			ret.mLightArrays[2] = biasMatrix * csmCameraCamera2.getProj() * cameraSpatial2.getView();
-			ret.mCSMDepths.x = csmCamera0.mSliceDepth;
-			ret.mCSMDepths.y = csmCamera1.mSliceDepth;
-			ret.mCSMDepths.z = csmCamera2.mSliceDepth;
 		}
 
 		return ret;
