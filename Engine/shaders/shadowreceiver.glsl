@@ -14,7 +14,7 @@ float getSingleShadow(float _pcfSize, vec4 _shadowCoord, sampler2D _shadowMap, f
 			for (float y = -_pcfSize; y <= _pcfSize; y++) {
 				vec2 sampleCoords = saturate(_shadowCoord.xy + vec2(x, y) * texelSize);
 				float shadowSample = textureLod(_shadowMap, sampleCoords, _lod).r * 0.5 + 0.5;
-				shadow += saturate(_shadowCoord.z * 0.5 + 0.5) + _bias < shadowSample ? 1.0 : 0.0;
+				shadow += saturate(_shadowCoord.z * 0.5 + 0.5) - _bias < shadowSample ? 1.0 : 0.0;
 			}
 		}
 		shadow /= (2 * _pcfSize + 1) * (2 * _pcfSize + 1);
