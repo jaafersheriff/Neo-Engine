@@ -4,11 +4,6 @@
 namespace neo {
 	namespace {
 		TextureHandle _createShadowMap(const TextureManager& textureManager, const char* handle, types::texture::Target target, int resolution, uint8_t mips) {
-			TextureWrap wrap = target == types::texture::Target::TextureCube 
-				? TextureWrap{ types::texture::Wraps::Repeat, types::texture::Wraps::Repeat, types::texture::Wraps::Repeat }
-				: TextureWrap{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp, types::texture::Wraps::Clamp } 
-			;
-
 			return textureManager.asyncLoad(
 				HashedString(handle),
 				TextureBuilder{}
@@ -18,7 +13,7 @@ namespace neo {
 						target,
 						types::texture::InternalFormats::D16,
 						TextureFilter { types::texture::Filters::Nearest, types::texture::Filters::Nearest, mips > 1 ? types::texture::Filters::Linear : types::texture::Filters::Nearest},
-						wrap,
+						TextureWrap{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp, types::texture::Wraps::Clamp },
 						types::ByteFormats::UnsignedByte,
 						mips
 					}
