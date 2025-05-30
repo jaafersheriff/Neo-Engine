@@ -31,6 +31,7 @@
 	
 #pragma warning( push )
 #pragma warning( disable : 4201 )
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_major_storage.hpp>
 #include <glm/gtc/quaternion.hpp>
 #pragma warning( pop )
