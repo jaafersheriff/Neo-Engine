@@ -157,6 +157,7 @@ namespace Base {
 
 		renderPasses.clear(sceneTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.2f, 0.2f, 0.2f, 1.f));
 		renderPasses.declarePass(sceneTargetHandle, viewport.mSize, [](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_GPUN("Forward Draws");
 			const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 			drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 			drawForwardPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);

@@ -1,8 +1,10 @@
 # pragma once
 
+#include "ResourceManager/ResourceManagers.hpp"
 #include <glm/glm.hpp>
 
 namespace neo {
+	class ECS;
 
 	class RenderPasses {
 		friend class Renderer;
@@ -11,11 +13,20 @@ namespace neo {
 
 		using DrawFunction = std::function<void(const ResourceManagers& resourceManagers, const ECS& ecs)>;
 		void declarePass(FramebufferHandle target, glm::uvec2 viewport, DrawFunction draw);
-	private:
-		void _execute();
 
-		class RenderPass {
+	private:
+		void _execute(const ResourceManagers& resourceManagers, const ECS& ecs);
+
+		struct RenderPass {
+			FramebufferHandle mTarget; 
+			glm::uvec2 mViewport; 
+			DrawFunction mDrawFunction;
 		};
-		std::vector<RenderPass> mRenderPasses;
+		struct ClearPass {
+			FramebufferHandle mTarget;
+			types::framebuffer::AttachmentBits mClearFlags; 
+			glm::vec4 mClearColor;
+		};
+		std::vector<std::variant<RenderPass, ClearPass>> mPasses;
 	};
 }

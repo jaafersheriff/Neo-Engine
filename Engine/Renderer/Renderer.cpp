@@ -196,7 +196,7 @@ namespace neo {
 			});
 		}
 
-		renderPasses._execute();
+		renderPasses._execute(resourceManagers, ecs);
 	}
 
 	void Renderer::_imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager) {
