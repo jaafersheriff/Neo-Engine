@@ -11,7 +11,7 @@
 
 namespace neo {
 
-	inline void blit(const ResourceManagers& resourceManagers, const Framebuffer& outputFBO, TextureHandle inputTextureHandle, glm::uvec2 viewport, glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f)) {
+	inline void blit(const ResourceManagers& resourceManagers, TextureHandle inputTextureHandle) {
 		TRACY_GPU();
 
 		auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blit Shader", SourceShader::ShaderCode {			
@@ -43,10 +43,6 @@ namespace neo {
 			return;
 		}
 
-		outputFBO.bind();
-		glViewport(0, 0, viewport.x, viewport.y);
-		outputFBO.clear(clearColor, types::framebuffer::AttachmentBit::Color);
-
 		glDisable(GL_DEPTH_TEST);
 		int oldPolygonMode;
 		glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
@@ -63,4 +59,15 @@ namespace neo {
 		glEnable(GL_DEPTH_TEST);
 		glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 	}
+
+	// inline void blitDepth(const ResourceManagers& resourceManagers, TextureHandle inputTextureHandle) {
+	// 	// typedef void (GLAPIENTRY * PFNGLBLITNAMEDFRAMEBUFFERPROC) (GLuint readFramebuffer, GLuint drawFramebuffer, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
+	// 	glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
+	// 		0, 0, viewport.mSize.x, viewport.mSize.y,
+	// 		0, 0, viewport.mSize.x, viewport.mSize.y,
+	// 		GL_DEPTH_BUFFER_BIT,
+	// 		GL_NEAREST
+	// 	);
+	// }
+
 }

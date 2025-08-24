@@ -1,8 +1,9 @@
 #pragma once
 
+#include "ResourceManager/TextureManager.hpp"
 #include "DemoInfra/IDemo.hpp"
 
-#include "ResourceManager/FramebufferManager.hpp"
+#include "RenderDetails.hpp"
 
 #include "Util/Profiler.hpp"
 
@@ -17,7 +18,6 @@ namespace neo {
 	class ECS;
 	class WindowSurface;
 	class PostProcessShader;
-	class Framebuffer;
 	class SourceShader;
 	struct FrameSizeMessage;
 	class ResourceManagers;
@@ -36,15 +36,6 @@ namespace neo {
 			float mGPUTime = 0.f;
 		};
 
-		struct RendererDetails {
-			int mGLMajorVersion = 0;
-			int mGLMinorVersion = 0;
-			std::string mGLSLVersion = "";
-			glm::ivec3 mMaxComputeWorkGroupSize = { 0,0,0 };
-			std::string mVendor = "";
-			std::string mRenderer = "";
-			std::string mShadingLanguage = "";
-		};
 
 		public:
 			Renderer(int GLMajor, int GLMinor);
@@ -64,13 +55,12 @@ namespace neo {
 			void render(WindowSurface&, IDemo* demo, util::Profiler& profiler, const ECS&, ResourceManagers& resourceManager);
 			void clean();
 
-
 		private:
 			void _imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager);
 
 			RendererDetails mDetails = {};
 
-			FramebufferHandle mDefaultFBOHandle;
+			TextureHandle mSceneColorTextureHandle;
 			bool mShowBoundingBoxes = false;
 			bool mWireframe = false;
 

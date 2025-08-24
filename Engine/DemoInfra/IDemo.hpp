@@ -3,12 +3,15 @@
 #include "Util/Util.hpp"
 #include <string>
 
+#include "ResourceManager/TextureManager.hpp"
+
 namespace neo {
 
 	class ECS;
 	class Renderer;
 	class Framebuffer;
 	class ResourceManagers;
+	class RenderPasses;
 
 	class IDemo {
 	public:
@@ -29,7 +32,7 @@ namespace neo {
 		virtual void update(ECS& ecs, ResourceManagers& resourceManagers) {
 			NEO_UNUSED(ecs, resourceManagers);
 		};
-		virtual void render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) = 0;
+		virtual void render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) = 0;
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
 			NEO_UNUSED(ecs, resourceManagers);
 		}

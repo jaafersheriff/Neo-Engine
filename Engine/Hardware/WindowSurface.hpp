@@ -7,6 +7,8 @@ struct GLFWwindow;
 
 namespace neo {
 
+	struct RendererDetails;
+
 	class WindowSurface {
 
 		struct ToggleFullscreenMessage : public Message {
@@ -22,7 +24,7 @@ namespace neo {
 		WindowSurface(const WindowSurface&) = delete;
 		WindowSurface& operator=(const WindowSurface&) = delete;
 
-		int init(const std::string&);
+		int init(const std::string&, const RendererDetails& renderDetails);
 		void reset(const std::string&);
 		void updateHardware();
 		void flip();

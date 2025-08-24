@@ -4,9 +4,9 @@
 #include "Mouse.hpp"
 #include "Keyboard.hpp"
 
-#include "Renderer/Renderer.hpp"
 #include "Engine/ImGuiManager.hpp"
 #include "Messaging/Messenger.hpp"
+#include "Renderer/RenderDetails.hpp"
 
 #include "Util/Profiler.hpp"
 #include <GLFW/glfw3.h>
@@ -14,13 +14,12 @@
 namespace neo {
 
 	namespace {
-
 		static void _errorCallback(int error, const char* desc) {
 			NEO_LOG_E("GLFW Error %d: %s", error, desc);
 		}
-
 	}
-	int WindowSurface::init(const std::string& name) {
+
+	int WindowSurface::init(const std::string& name, const RendererDetails& renderDetails) {
 		/* Set error callback */
 		glfwSetErrorCallback(_errorCallback);
 
@@ -32,8 +31,8 @@ namespace neo {
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 		glfwWindowHint(GLFW_DEPTH_BITS, 0);
 		glfwWindowHint(GLFW_STENCIL_BITS, 0);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, ServiceLocator<Renderer>::ref().getDetails().mGLMajorVersion);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, ServiceLocator<Renderer>::ref().getDetails().mGLMinorVersion);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, renderDetails.mGLMajorVersion);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, renderDetails.mGLMinorVersion);
 		glfwWindowHint(GLFW_AUTO_ICONIFY, false);
 		glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 

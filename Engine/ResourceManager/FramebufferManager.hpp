@@ -93,10 +93,16 @@ namespace neo {
 		}
 
 		const Framebuffer& resolve(FramebufferHandle id) const {
+			if (id == 0) {
+				return *mFallback; // Special-case backbuffer
+			}
 			return _resolveFinal(id);
 		}
 
 		Framebuffer& resolve(FramebufferHandle id) {
+			if (id == 0) {
+				return *mFallback; // Special-case backbuffer
+			}
 			return _resolveFinal(id);
 		}
 

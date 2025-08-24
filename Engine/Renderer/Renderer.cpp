@@ -9,6 +9,7 @@
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
 #include "Renderer/RenderingSystems/Blitter.hpp"
 #include "Renderer/RenderingSystems/ImGuiRenderer.hpp"
+#include "Renderer/RenderingSystems/RenderPass.hpp"
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
@@ -123,58 +124,79 @@ namespace neo {
 		mStats = {};
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		mDefaultFBOHandle = resourceManagers.mFramebufferManager.asyncLoad(
-			"backbuffer",
-			FramebufferBuilder{}
-			.setSize(glm::uvec2(viewport.mSize))
-			.attach(TextureFormat{ types::texture::Target::Texture2D,
+		mSceneColorTextureHandle = resourceManagers.mTextureManager.asyncLoad("Main Color",
+			TextureBuilder{}
+			.setFormat(TextureFormat{ types::texture::Target::Texture2D,
 				types::texture::InternalFormats::RGB16_UNORM,
 				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
 				{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
 				})
-			.attach(TextureFormat{ types::texture::Target::Texture2D,
+			.setDimension(glm::u16vec3(viewport.mSize.x, viewport.mSize.y, 0))
+		);
+		TextureHandle sceneDepthTextureHandle = resourceManagers.mTextureManager.asyncLoad("Main Depth",
+			TextureBuilder{}
+			.setFormat(TextureFormat{ types::texture::Target::Texture2D,
 				types::texture::InternalFormats::D16,
 				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
 				{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
-				}),
-			resourceManagers.mTextureManager
+				})
+			.setDimension(glm::u16vec3(viewport.mSize.x, viewport.mSize.y, 0))
 		);
-		if (!resourceManagers.mFramebufferManager.isValid(mDefaultFBOHandle)) {
+
+		if (!resourceManagers.mTextureManager.isValid(mSceneColorTextureHandle) || resourceManagers.mTextureManager.isValid(sceneDepthTextureHandle)) {
 			return;
 		}
 
-		resetState();
-		auto& defaultFbo = resourceManagers.mFramebufferManager.resolve(mDefaultFBOHandle);
 		{
-			TRACY_GPUN("Draw Demo");
+			TRACY_GPUN("Prepare Frame");
+			resetState();
 			if (mWireframe) {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			}
-			demo->render(resourceManagers, ecs, defaultFbo);
-			resetState();
+		}
+
+		RenderPasses renderPasses;
+		{
+			TRACY_GPUN("Prepare Demo Draws");
+			demo->render(renderPasses, resourceManagers, ecs, mSceneColorTextureHandle, sceneDepthTextureHandle);
 		}
 
 		if (mShowBoundingBoxes) {
-			TRACY_GPUN("Debug Draws");
-			defaultFbo.bind();
-			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-			drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.cGetComponent<MainCameraComponent>()));
+			auto debugDrawTarget = resourceManagers.mFramebufferManager.asyncLoad(
+				"DebugDraw Target",
+				FramebufferExternalAttachments{
+					FramebufferAttachment{mSceneColorTextureHandle},
+					FramebufferAttachment{sceneDepthTextureHandle},
+				},
+				resourceManagers.mTextureManager
+			);
+			renderPasses.declarePass(debugDrawTarget, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+				TRACY_GPUN("Debug Draws");
+				resetState();
+				drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.cGetComponent<MainCameraComponent>()));
+			});
 		}
 
 		/* Render imgui */
 		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-			TRACY_GPUN("ImGui Render");
-			resetState();
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glViewport(0, 0, window.getDetails().mSize.x, window.getDetails().mSize.y);
-			glClear(GL_COLOR_BUFFER_BIT);
-			drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
+			// This is kinda garbage and totally ignored
+			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color);
+
+			renderPasses.declarePass(FramebufferHandle(0), window.getDetails().mSize, [this, &window](const ResourceManagers& resourceManagers, const ECS& ecs) {
+				TRACY_GPUN("ImGui Render");
+				resetState();
+				drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
+			});
 		}
 		else {
-			TRACY_GPUN("Final Blit");
-			Framebuffer fb; // empty framebuffer is just the backbuffer -- just don't do anything with it ever
-			blit(resourceManagers, fb, defaultFbo.mTextures[0], window.getDetails().mSize, glm::vec4(0.f, 0.f, 0.f, 1.f));
+			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
+			renderPasses.declarePass(FramebufferHandle(0), window.getDetails().mSize, [this](const ResourceManagers& resourceManagers, const ECS&) {
+				TRACY_GPUN("Final Blit");
+				blit(resourceManagers, mSceneColorTextureHandle);
+			});
 		}
+
+		renderPasses._execute();
 	}
 
 	void Renderer::_imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager) {
@@ -185,11 +207,10 @@ namespace neo {
 		ServiceLocator<ImGuiManager>::ref().updateViewport();
 		glm::vec2 viewportSize = ServiceLocator<ImGuiManager>::ref().getViewportSize();
 		if (viewportSize.x != 0 && viewportSize.y != 0) {
-			if (resourceManager.mFramebufferManager.isValid(mDefaultFBOHandle)) {
-				auto& defaultFbo = resourceManager.mFramebufferManager.resolve(mDefaultFBOHandle);
+			if (resourceManager.mTextureManager.isValid(mSceneColorTextureHandle)) {
 #pragma warning(push)
 #pragma warning(disable: 4312)
-				ImGui::Image(defaultFbo.mTextures[0].mHandle, {viewportSize.x, viewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));
+				ImGui::Image(mSceneColorTextureHandle.mHandle, {viewportSize.x, viewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));
 #pragma warning(pop)
 			}
 		}

@@ -8,11 +8,13 @@ add_library(Demos)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE CPP_FILES 
-	${CMAKE_CURRENT_SOURCE_DIR}/*/*.cpp
+#	${CMAKE_CURRENT_SOURCE_DIR}/*/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Base/BaseDemo.cpp
 )
 file(GLOB_RECURSE HPP_FILES 
 	${CMAKE_CURRENT_SOURCE_DIR}/DemoRegistration.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/*/*.hpp
+#	${CMAKE_CURRENT_SOURCE_DIR}/*/*.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Base/BaseDemo.hpp
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES 

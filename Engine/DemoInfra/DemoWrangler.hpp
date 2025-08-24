@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ResourceManager/TextureManager.hpp"
 #include "DemoInfra/IDemo.hpp"
 
 #include <string>

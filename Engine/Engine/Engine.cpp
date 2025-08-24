@@ -53,7 +53,7 @@ namespace neo {
 		ServiceLocator<Renderer>::set(4, 4);
 
 		{
-			NEO_ASSERT(mWindow.init("") == 0, "Failed initializing Window");
+			NEO_ASSERT(mWindow.init("", ServiceLocator<Renderer>::ref().getDetails()) == 0, "Failed initializing Window");
 
 			std::string path = Loader::ENGINE_RES_DIR + std::string("icon.png");
 			STBImageData image(path.c_str(), types::texture::BaseFormats::RGBA, types::ByteFormats::UnsignedByte, false);
