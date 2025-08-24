@@ -7,7 +7,7 @@
 
 namespace neo {
 
-	inline void drawFXAA(const ResourceManagers& resourceManagers, glm::uvec2 dimension, TextureHandle inputTextureHandle) {
+	inline void drawFXAA(const ResourceManagers& resourceManagers, TextureHandle inputTextureHandle) {
 		TRACY_GPU();
 
 		if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {
@@ -21,8 +21,6 @@ namespace neo {
 		if (!resourceManagers.mShaderManager.isValid(fxaaShaderHandle)) {
 			return;
 		}
-
-		glViewport(0, 0, dimension.x, dimension.y);
 
 		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(fxaaShaderHandle, {});
 		resolvedShader.bind();

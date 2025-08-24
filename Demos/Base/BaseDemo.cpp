@@ -165,7 +165,7 @@ namespace Base {
 		}, "Forward Draws");
 
 		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
-			"Output Target",
+			"FXAA Target",
 			FramebufferExternalAttachments{
 				FramebufferAttachment{outputColor},
 			},
@@ -173,7 +173,7 @@ namespace Base {
 		);
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
 		renderPasses.declarePass(outputTargetHandle, viewport.mSize, [&](const ResourceManagers& resourceManagers, const ECS&) {
-			drawFXAA(resourceManagers, viewport.mSize, sceneColor);
+			drawFXAA(resourceManagers, sceneColor);
 		}, "FXAA");
 	}
 

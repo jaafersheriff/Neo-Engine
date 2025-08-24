@@ -146,6 +146,15 @@ namespace neo {
 		if (!resourceManagers.mTextureManager.isValid(mSceneColorTextureHandle) || !resourceManagers.mTextureManager.isValid(sceneDepthTextureHandle)) {
 			return;
 		}
+		else {
+			const Texture& sceneColor = resourceManagers.mTextureManager.resolve(mSceneColorTextureHandle);
+			if (sceneColor.mWidth != viewport.mSize.x || sceneColor.mHeight != viewport.mSize.y) {
+				// Resize, evict it
+				resourceManagers.mTextureManager.discard(mSceneColorTextureHandle);
+				resourceManagers.mTextureManager.discard(sceneDepthTextureHandle);
+				return;
+			}
+		}
 
 		// {
 		// 	TRACY_GPUN("Prepare Frame");
@@ -158,6 +167,7 @@ namespace neo {
 		RenderPasses renderPasses;
 		{
 			TRACY_GPUN("Prepare Demo Draws");
+			resetState();
 			demo->render(renderPasses, resourceManagers, ecs, mSceneColorTextureHandle, sceneDepthTextureHandle);
 		}
 
