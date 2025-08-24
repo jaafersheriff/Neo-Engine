@@ -78,10 +78,17 @@ namespace neo {
 		FramebufferManager::~FramebufferManager();
 
 		bool isValid(FramebufferHandle id) const {
+			if (id == 0) {
+				return true; // Special-case backbuffer
+			}
 			return mCache.contains(id.mHandle);
 		}
 
 		bool isQueued(FramebufferHandle id) const {
+			if (id == 0) {
+				return false; // Special-case backbuffer
+			}
+
 			// TODO - this is a linear search :(
 			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
 			for (auto& res : mQueue) {
