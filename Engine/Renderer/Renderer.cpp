@@ -143,17 +143,17 @@ namespace neo {
 			.setDimension(glm::u16vec3(viewport.mSize.x, viewport.mSize.y, 0))
 		);
 
-		if (!resourceManagers.mTextureManager.isValid(mSceneColorTextureHandle) || resourceManagers.mTextureManager.isValid(sceneDepthTextureHandle)) {
+		if (!resourceManagers.mTextureManager.isValid(mSceneColorTextureHandle) || !resourceManagers.mTextureManager.isValid(sceneDepthTextureHandle)) {
 			return;
 		}
 
-		{
-			TRACY_GPUN("Prepare Frame");
-			resetState();
-			if (mWireframe) {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			}
-		}
+		// {
+		// 	TRACY_GPUN("Prepare Frame");
+		// 	resetState();
+		// 	if (mWireframe) {
+		// 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		// 	}
+		// }
 
 		RenderPasses renderPasses;
 		{
@@ -174,7 +174,7 @@ namespace neo {
 				TRACY_GPUN("Debug Draws");
 				resetState();
 				drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.cGetComponent<MainCameraComponent>()));
-			});
+			}, "Debug Draws");
 		}
 
 		/* Render imgui */
@@ -186,14 +186,14 @@ namespace neo {
 				TRACY_GPUN("ImGui Render");
 				resetState();
 				drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
-			});
+			}, "ImGui");
 		}
 		else {
 			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
 			renderPasses.declarePass(FramebufferHandle(0), window.getDetails().mSize, [this](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Final Blit");
 				blit(resourceManagers, mSceneColorTextureHandle);
-			});
+			}, "Final Blit");
 		}
 
 		renderPasses._execute(resourceManagers, ecs);

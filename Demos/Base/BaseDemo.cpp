@@ -155,14 +155,14 @@ namespace Base {
 			resourceManagers.mTextureManager
 		);
 
-		renderPasses.clear(sceneTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.2f, 0.2f, 0.2f, 1.f));
+		renderPasses.clear(sceneTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), "Clear Scene Target");
 		renderPasses.declarePass(sceneTargetHandle, viewport.mSize, [](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Forward Draws");
 			const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 			drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 			drawForwardPBR<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
 			drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity);
-		});
+		}, "Forward Draws");
 
 		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Output Target",
@@ -171,10 +171,10 @@ namespace Base {
 			},
 			resourceManagers.mTextureManager
 		);
-		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
+		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
 		renderPasses.declarePass(outputTargetHandle, viewport.mSize, [&](const ResourceManagers& resourceManagers, const ECS&) {
 			drawFXAA(resourceManagers, viewport.mSize, sceneColor);
-		});
+		}, "FXAA");
 	}
 
 	void Demo::destroy() {

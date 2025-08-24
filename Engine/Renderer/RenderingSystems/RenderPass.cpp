@@ -2,20 +2,23 @@
 
 #include "RenderPass.hpp"
 
+#pragma optimize("", off)
 namespace neo {
-	void RenderPasses::clear(FramebufferHandle target, types::framebuffer::AttachmentBits clearFlags, glm::vec4 clearColor) {
+	void RenderPasses::clear(FramebufferHandle target, types::framebuffer::AttachmentBits clearFlags, glm::vec4 clearColor, std::optional<std::string> debugName) {
 		mPasses.emplace_back(ClearPass{
 			target,
 			clearFlags,
-			clearColor
+			clearColor,
+			debugName
 		});
 	}
 
-	void RenderPasses::declarePass(FramebufferHandle target, glm::uvec2 viewport, DrawFunction draw) {
+	void RenderPasses::declarePass(FramebufferHandle target, glm::uvec2 viewport, DrawFunction draw, std::optional<std::string> debugName) {
 		mPasses.emplace_back(RenderPass{
 			target,
 			viewport,
-			draw
+			draw,
+			debugName
 		});
 	}
 
@@ -25,7 +28,7 @@ namespace neo {
 				[&](const RenderPass& renderPass) {
 					// TODO: Debug string?
 					if (!resourceManagers.mFramebufferManager.isValid(renderPass.mTarget)) {
-						NEO_LOG_E("Unable to resolve target, skipping pass");
+						NEO_LOG_E("Unable to resolve target, skipping pass %s", renderPass.mDebugName.value_or("").c_str());
 						return;
 					}
 					resourceManagers.mFramebufferManager.resolve(renderPass.mTarget).bind();
@@ -34,7 +37,7 @@ namespace neo {
 				},
 				[&](const ClearPass& clearPass) {
 					if (!resourceManagers.mFramebufferManager.isValid(clearPass.mTarget)) {
-						NEO_LOG_E("Unable to resolve target, skipping clear");
+						NEO_LOG_E("Unable to resolve target, skipping clear %s", clearPass.mDebugName.value_or("").c_str());
 						return;
 					}
 					resourceManagers.mFramebufferManager.resolve(clearPass.mTarget).bind();
