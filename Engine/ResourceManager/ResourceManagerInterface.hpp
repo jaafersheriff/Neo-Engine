@@ -7,8 +7,16 @@
 #include <memory>
 #include <optional>
 #include <mutex>
+#include <chrono>
 
 namespace neo {
+	namespace {
+		uint64_t getCurrentTimestamp() {
+			using namespace std::chrono;
+			return duration_cast<microseconds>(steady_clock::now().time_since_epoch()).count();
+		}
+	}
+
 	class ResourceManagers;
 
 	constexpr HashedString::hash_type NEO_INVALID_HANDLE = 65535;
@@ -44,9 +52,11 @@ namespace neo {
 		template<typename... Args>
 		BackedResource(Args... args)
 			: mResource(std::forward<Args>(args)...)
+			, mCreationTimeStamp(getCurrentTimestamp())
 		{}
 		ResourceType mResource;
 		std::optional<std::string> mDebugName;
+		const uint64_t mCreationTimeStamp;
 	};
 
 	template<typename DerivedManager, typename ResourceType, typename ResourceLoadDetails>
@@ -93,19 +103,27 @@ namespace neo {
 		}
 
 		ResourceType& resolve(HashedString id) {
-			return _resolveFinal(ResourceHandle<ResourceType>(id));
+			return resolve(ResourceHandle<ResourceType>(id));
 		}
 
 		const ResourceType& resolve(const HashedString& id) const {
-			return _resolveFinal(ResourceHandle<ResourceType>(id));
+			return resolve(ResourceHandle<ResourceType>(id));
 		}
 
 		const ResourceType& resolve(const ResourceHandle<ResourceType>& id) const {
-			return _resolveFinal(id);
+			return _resolveFinal(id).mResource;
 		}
 
 		ResourceType& resolve(const ResourceHandle<ResourceType>& id) {
-			return _resolveFinal(id);
+			return _resolveFinal(id).mResource;
+		}
+
+		uint64_t getTimeStamp(const HashedString& id) const {
+			return getTimeStamp(ResourceHandle<ResourceType>(id));
+		}
+
+		uint64_t getTimeStamp(const ResourceHandle<ResourceType>& id) const {
+			return _resolveFinal(id).mCreationTimeStamp;
 		}
 
 		[[nodiscard]] ResourceHandle<ResourceType> asyncLoad(HashedString id, ResourceLoadDetails details) const {
@@ -173,13 +191,13 @@ namespace neo {
 		std::shared_ptr<BackedResource<ResourceType>> mFallback;
 
 	private:
-		ResourceType& _resolveFinal(const ResourceHandle<ResourceType>& id) const {
+		BackedResource<ResourceType>& _resolveFinal(const ResourceHandle<ResourceType>& id) const {
 			auto handle = mCache.handle(id.mHandle);
 			if (handle) {
-				return const_cast<ResourceType&>(handle.get().mResource);
+				return const_cast<BackedResource<ResourceType>&>(handle.get());
 			}
 			NEO_FAIL("Invalid resource requested! Did you check for validity?");
-			return mFallback->mResource;
+			return *mFallback;
 		}
 	};
 }

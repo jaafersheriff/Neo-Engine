@@ -5,6 +5,8 @@
 
 #include <ext/imgui_incl.hpp>
 
+#pragma optimize("", off)
+
 namespace neo {
 	namespace {
 		TextureHandle swizzleTextureId(FramebufferHandle srcHandle, TextureFormat format, types::framebuffer::AttachmentTarget target, uint8_t mip, glm::uvec2 dimension) {
@@ -21,7 +23,7 @@ namespace neo {
 			return TextureHandle(seed);
 		}
 
-		FramebufferHandle swizzleSrcId(HashedString id, FramebufferLoadDetails& loadDetails) {
+		FramebufferHandle swizzleSrcId(HashedString id, FramebufferLoadDetails& loadDetails, const TextureManager& textureManager) {
 			HashedString::hash_type seed = id;
 			util::visit(loadDetails,
 				[&](FramebufferBuilder& builder) {
@@ -34,6 +36,10 @@ namespace neo {
 						seed ^= static_cast<uint32_t>(handle.mHandle.mHandle) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 						seed ^= static_cast<uint32_t>(handle.mTarget) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 						seed ^= static_cast<uint32_t>(handle.mMip) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+						if (textureManager.isValid(handle.mHandle)) {
+							seed ^= static_cast<uint32_t>(textureManager.resolve(handle.mHandle).mTextureID) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+							seed ^= static_cast<uint32_t>(textureManager.getTimeStamp(handle.mHandle)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+						}
 					}
 				},
 				[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
@@ -55,7 +61,10 @@ namespace neo {
 				if (framebuffer->mResource.mFramebuffer.mColorAttachments) {
 					framebuffer->mResource.mFramebuffer.initDrawBuffers();
 				}
-				framebuffer->mDebugName = details.mDebugName;
+				if (details.mDebugName.has_value()) {
+					NEO_LOG_V("Loaded framebuffer %s", details.mDebugName.value().c_str());
+					framebuffer->mDebugName = details.mDebugName;
+				}
 
 				return framebuffer;
 			}
@@ -73,7 +82,7 @@ namespace neo {
 	}
 
 	[[nodiscard]] FramebufferHandle FramebufferManager::asyncLoad(HashedString id, FramebufferLoadDetails framebufferDetails, const TextureManager& textureManager) const {
-		FramebufferHandle dstId = swizzleSrcId(id, framebufferDetails);
+		FramebufferHandle dstId = swizzleSrcId(id, framebufferDetails, textureManager);
 		if (isValid(dstId) || isQueued(dstId)) {
 			return dstId;
 		}

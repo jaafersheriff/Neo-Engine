@@ -140,7 +140,7 @@ namespace neo {
 	Texture::Texture(TextureFormat format, glm::u16vec2 dimension, const std::optional<std::string>& debugName, const void* data) :
 		Texture(format, glm::u16vec3(dimension.x, dimension.y, 0), debugName, data) {}
 
-	Texture::Texture(TextureFormat format, glm::u16vec3 dimension, const std::optional<std::string>& debugName, const void* data) :
+	Texture::Texture(TextureFormat format, glm::u16vec3 dimension, [[maybe_unused]] const std::optional<std::string>& debugName, const void* data) :
 		mFormat(format) {
 		switch (mFormat.mTarget) {
 		case types::texture::Target::Texture3D:
@@ -158,10 +158,9 @@ namespace neo {
 
 		glGenTextures(1, &mTextureID);
 		bind();
-		if (debugName.has_value() && !debugName.value().empty()) {
-			glObjectLabel(GL_TEXTURE, mTextureID, -1, debugName.value().c_str());
-		}
-
+		// if (debugName.has_value() && !debugName.value().empty()) {
+		// 	glObjectLabel(GL_TEXTURE, mTextureID, -1, debugName.value().c_str());
+		// }
 
 		// Apply format
 		GLenum target = _getGLTarget(format.mTarget);

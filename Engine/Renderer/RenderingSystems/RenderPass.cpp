@@ -34,6 +34,7 @@ namespace neo {
 					resourceManagers.mFramebufferManager.resolve(renderPass.mTarget).bind();
 					glViewport(0, 0, renderPass.mViewport.x, renderPass.mViewport.y);
 					renderPass.mDrawFunction(resourceManagers, ecs);
+					glFlush();
 				},
 				[&](const ClearPass& clearPass) {
 					if (!resourceManagers.mFramebufferManager.isValid(clearPass.mTarget)) {

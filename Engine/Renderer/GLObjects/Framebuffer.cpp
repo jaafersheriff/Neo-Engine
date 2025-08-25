@@ -60,12 +60,12 @@ namespace neo {
 
 	}
 
-	void Framebuffer::init(const std::optional<std::string>& debugName) {
+	void Framebuffer::init([[maybe_unused]] const std::optional<std::string>& debugName) {
 		glGenFramebuffers(1, &mFBOID);
-		if (debugName.has_value() && !debugName.value().empty()) {
-			bind();
-			glObjectLabel(GL_FRAMEBUFFER, mFBOID, -1, debugName.value().c_str());
-		}
+		// if (debugName.has_value() && !debugName.value().empty()) {
+		// 	bind();
+		// 	glObjectLabel(GL_FRAMEBUFFER, mFBOID, -1, debugName.value().c_str());
+		// }
 		disableRead();
 	}
 
