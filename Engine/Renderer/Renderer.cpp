@@ -156,18 +156,13 @@ namespace neo {
 			}
 		}
 
-		// {
-		// 	TRACY_GPUN("Prepare Frame");
-		// 	resetState();
-		// 	if (mWireframe) {
-		// 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		// 	}
-		// }
-
 		RenderPasses renderPasses;
 		{
 			TRACY_GPUN("Prepare Demo Draws");
 			resetState();
+			if (mWireframe) {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			}
 			demo->render(renderPasses, resourceManagers, ecs, mSceneColorTextureHandle, sceneDepthTextureHandle);
 		}
 
@@ -189,7 +184,6 @@ namespace neo {
 
 		/* Render imgui */
 		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-			// This is kinda garbage and totally ignored
 			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color);
 
 			renderPasses.declarePass(FramebufferHandle(0), window.getDetails().mSize, [this, &window](const ResourceManagers& resourceManagers, const ECS& ecs) {

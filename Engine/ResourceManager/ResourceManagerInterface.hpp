@@ -11,7 +11,7 @@
 namespace neo {
 	class ResourceManagers;
 
-	constexpr HashedString::hash_type NEO_INVALID_HANDLE = 0;
+	constexpr HashedString::hash_type NEO_INVALID_HANDLE = 65535;
 
 	template<typename ResourceType>
 	struct ResourceHandle {
