@@ -175,7 +175,7 @@ namespace neo {
 				},
 				resourceManagers.mTextureManager
 			);
-			renderPasses.declarePass(debugDrawTarget, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			renderPasses.renderPass(debugDrawTarget, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
 				TRACY_GPUN("Debug Draws");
 				resetState();
 				drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.cGetComponent<MainCameraComponent>()));
@@ -186,7 +186,7 @@ namespace neo {
 		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
 			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color);
 
-			renderPasses.declarePass(FramebufferHandle(0), window.getDetails().mSize, [this, &window](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, [this, &window](const ResourceManagers& resourceManagers, const ECS& ecs) {
 				TRACY_GPUN("ImGui Render");
 				resetState();
 				drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
@@ -194,7 +194,7 @@ namespace neo {
 		}
 		else {
 			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
-			renderPasses.declarePass(FramebufferHandle(0), window.getDetails().mSize, [this](const ResourceManagers& resourceManagers, const ECS&) {
+			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, [this](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Final Blit");
 				blit(resourceManagers, mSceneColorTextureHandle);
 			}, "Final Blit");

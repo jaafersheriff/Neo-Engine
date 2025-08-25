@@ -23,15 +23,8 @@ namespace neo {
 	};
 
 	template<typename... CompTs>
-	inline void drawPointLightShadows(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity& lightEntity, const bool clear, PointLightShadowMapParameters params = {}) {
+	inline void drawPointLightShadows(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity& lightEntity, const bool clear, PointLightShadowMapParameters params = {}) {
 		TRACY_GPU();
-		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightShadowMap Shader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "model.vert"},
-			{ types::shader::Stage::Fragment, "pointlightdepth.frag" }
-		});
-		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
-			return;
-		}
 
 		NEO_ASSERT(ecs.has<PointLightComponent>(lightEntity) && ecs.has<PointLightShadowMapComponent>(lightEntity), "Invalid light entity for point ligth shadows");
 		TextureHandle shadowCubeHandle = ecs.cGetComponent<PointLightShadowMapComponent>(lightEntity)->mShadowMap;
@@ -39,32 +32,9 @@ namespace neo {
 			return;
 		}
 
-		SpatialComponent cameraSpatial = *ecs.cGetComponent<SpatialComponent>(lightEntity); // Copy
-
-		FrustumComponent frustum;
-		CameraComponent camera(
-			params.mNearPlane, 
-			params.mFarPlaneOverride.value_or(cameraSpatial.getScale().x / 2.f), 
-			CameraComponent::Perspective{90.f, 1.f}
-		);
 		NEO_ASSERT(ecs.has<SpatialComponent>(lightEntity), "Point light shadows need a spatial");
-		static std::vector<std::vector<glm::vec3>> lookDirs = {
-			{ glm::vec3( 1, 0, 0), glm::vec3( 0, -1, 0) },
-			{ glm::vec3(-1, 0, 0), glm::vec3( 0, -1, 0) },
-			{ glm::vec3( 0, 1, 0), glm::vec3( 0,  0, 1) },
-			{ glm::vec3( 0,-1, 0), glm::vec3( 0,  0,-1) },
-			{ glm::vec3( 0, 0, 1), glm::vec3( 0, -1, 0) },
-			{ glm::vec3( 0, 0,-1), glm::vec3( 0, -1, 0) }
-		};
-
-		bool containsAlphaTest = false;
-		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
-			containsAlphaTest = true;
-		}
 
 		char targetName[128];
-		const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
-		ShaderDefines drawDefines;
 		for (int i = 0; i < 6; i++) {
 			TRACY_GPUN("Draw Face");
 
@@ -81,50 +51,76 @@ namespace neo {
 				},
 				resourceManagers.mTextureManager
 			);
-			if (!resourceManagers.mFramebufferManager.isValid(shadowTargetHandle)) {
-				return;
-			}
-			auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowTargetHandle);
-			shadowTarget.disableDraw();
-			shadowTarget.disableRead();
-			shadowTarget.bind();
 			if (clear) {
-				shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
+				renderPasses.clear(shadowTargetHandle, types::framebuffer::AttachmentBit::Depth, glm::uvec4(0));
 			}
 
-			cameraSpatial.setLookDir(lookDirs[i][0], lookDirs[i][1]);
-			frustum.calculateFrustum(camera, cameraSpatial);
-			for (auto entity : view) {
-				const SpatialComponent& drawSpatial = view.get<const SpatialComponent>(entity);
-				// VFC
-				if (ecs.has<BoundingBoxComponent>(entity) && !frustum.isInFrustum(drawSpatial, *ecs.cGetComponent<BoundingBoxComponent>(entity))) {
-					continue;
+			const Texture& shadowCube = resourceManagers.mTextureManager.resolve(shadowCubeHandle);
+			renderPasses.renderPass(shadowTargetHandle, glm::uvec2(shadowCube.mWidth, shadowCube.mHeight), [i, lightEntity, params](const ResourceManagers& resourceManagers, const ECS& ecs) {
+				auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightShadowMap Shader", SourceShader::ConstructionArgs{
+					{ types::shader::Stage::Vertex, "model.vert"},
+					{ types::shader::Stage::Fragment, "pointlightdepth.frag" }
+				});
+				if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
+					return;
 				}
-				drawDefines.reset();
-
-				auto material = ecs.cGetComponent<const MaterialComponent>(entity);
-
-				MakeDefine(ALPHA_TEST);
-				bool doAlphaTest = containsAlphaTest && material && resourceManagers.mTextureManager.isValid(material->mAlbedoMap);
-				if (doAlphaTest) {
-					drawDefines.set(ALPHA_TEST);
+	
+				static std::vector<std::vector<glm::vec3>> lookDirs = {
+					{ glm::vec3( 1, 0, 0), glm::vec3( 0, -1, 0) },
+					{ glm::vec3(-1, 0, 0), glm::vec3( 0, -1, 0) },
+					{ glm::vec3( 0, 1, 0), glm::vec3( 0,  0, 1) },
+					{ glm::vec3( 0,-1, 0), glm::vec3( 0,  0,-1) },
+					{ glm::vec3( 0, 0, 1), glm::vec3( 0, -1, 0) },
+					{ glm::vec3( 0, 0,-1), glm::vec3( 0, -1, 0) }
+				};
+				SpatialComponent cameraSpatial = *ecs.cGetComponent<SpatialComponent>(lightEntity); // Copy
+				cameraSpatial.setLookDir(lookDirs[i][0], lookDirs[i][1]);
+				FrustumComponent frustum;
+				CameraComponent camera(
+					params.mNearPlane, 
+					params.mFarPlaneOverride.value_or(cameraSpatial.getScale().x / 2.f), 
+					CameraComponent::Perspective{90.f, 1.f}
+				);
+				frustum.calculateFrustum(camera, cameraSpatial);
+	
+				ShaderDefines drawDefines;
+				const auto& view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
+				for (auto entity : view) {
+					const SpatialComponent& drawSpatial = view.get<const SpatialComponent>(entity);
+					// VFC
+					if (ecs.has<BoundingBoxComponent>(entity) && !frustum.isInFrustum(drawSpatial, *ecs.cGetComponent<BoundingBoxComponent>(entity))) {
+						continue;
+					}
+					drawDefines.reset();
+	
+					auto material = ecs.cGetComponent<const MaterialComponent>(entity);
+	
+					MakeDefine(ALPHA_TEST);
+					bool containsAlphaTest = false;
+					if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
+						containsAlphaTest = true;
+					}
+					bool doAlphaTest = containsAlphaTest && material && resourceManagers.mTextureManager.isValid(material->mAlbedoMap);
+					if (doAlphaTest) {
+						drawDefines.set(ALPHA_TEST);
+					}
+	
+					auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
+					resolvedShader.bind();
+	
+					if (doAlphaTest) {
+						resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
+					}
+	
+					resolvedShader.bindUniform("P", camera.getProj());
+					resolvedShader.bindUniform("V", cameraSpatial.getView());
+					resolvedShader.bindUniform("lightPos", cameraSpatial.getPosition());
+					resolvedShader.bindUniform("lightRange", (cameraSpatial.getScale().x - 0.5) / 2.f);
+	
+					resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
+					resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 				}
-
-				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
-				resolvedShader.bind();
-
-				if (doAlphaTest) {
-					resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
-				}
-
-				resolvedShader.bindUniform("P", camera.getProj());
-				resolvedShader.bindUniform("V", cameraSpatial.getView());
-				resolvedShader.bindUniform("lightPos", cameraSpatial.getPosition());
-				resolvedShader.bindUniform("lightRange", (cameraSpatial.getScale().x - 0.5) / 2.f);
-
-				resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
-				resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
-			}
+			});
 		}
 	}
 }

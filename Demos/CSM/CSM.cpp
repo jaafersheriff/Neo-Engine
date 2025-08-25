@@ -198,7 +198,7 @@ namespace CSM {
 		);
 
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
-		renderPasses.declarePass(outputTargetHandle, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Main pass");
 			const auto [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 			drawCSMResolve<PhongRenderComponent>(resourceManagers, ecs, cameraEntity, mDebugView);

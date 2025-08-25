@@ -12,7 +12,7 @@ namespace neo {
 		});
 	}
 
-	void RenderPasses::declarePass(FramebufferHandle target, glm::uvec2 viewport, DrawFunction draw, std::optional<std::string> debugName) {
+	void RenderPasses::renderPass(FramebufferHandle target, glm::uvec2 viewport, DrawFunction draw, std::optional<std::string> debugName) {
 		mPasses.emplace_back(RenderPass{
 			target,
 			viewport,
@@ -21,9 +21,20 @@ namespace neo {
 		});
 	}
 
+	void RenderPasses::computePass(DrawFunction draw, std::optional<std::string> debugName) {
+		mPasses.emplace_back(ComputePass{
+			draw,
+			debugName
+		});
+	}
+
 	void RenderPasses::_execute(const ResourceManagers& resourceManagers, const ECS& ecs) {
 		for (const auto& pass : mPasses) {
 			util::visit(pass,
+				[&](const ComputePass& computePass) {
+					// TODO: Debug string?
+					computePass.mDrawFunction(resourceManagers, ecs);
+				},
 				[&](const RenderPass& renderPass) {
 					// TODO: Debug string?
 					if (!resourceManagers.mFramebufferManager.isValid(renderPass.mTarget)) {
@@ -33,7 +44,6 @@ namespace neo {
 					resourceManagers.mFramebufferManager.resolve(renderPass.mTarget).bind();
 					glViewport(0, 0, renderPass.mViewport.x, renderPass.mViewport.y);
 					renderPass.mDrawFunction(resourceManagers, ecs);
-					glFlush();
 				},
 				[&](const ClearPass& clearPass) {
 					if (!resourceManagers.mFramebufferManager.isValid(clearPass.mTarget)) {

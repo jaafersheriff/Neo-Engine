@@ -365,44 +365,39 @@ namespace DeferredPBR {
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
-		NEO_UNUSED(renderPasses, resourceManagers, ecs, outputColor, outputDepth);
-// 		convolveCubemap(resourceManagers, ecs);
-// 
-// 		const auto& cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
-// 		if (!cameraTuple) {
-// 			return;
-// 		}
-// 		const auto& [cameraEntity, _, camera, cameraSpatial] = *cameraTuple;
-// 
-// 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-// 
-// 		auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent, CSMShadowMapComponent>();
-// 		if (lightView) {
-// 			auto& [lightEntity, __, ___, shadowCamera] = *lightView;
-// 			if (mDrawDirectionalShadows) {
-// 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
-// 					auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
-// 					glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-// 					drawCSMShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, lightEntity, true);
-// 					drawCSMShadows<AlphaTestComponent>(renderPasses, resourceManagers, ecs, lightEntity);
-// 					// drawCSMShadows<TransparentComponent>(resourceManagers, ecs, lightEntity);
-// 				}
-// 			}
-// 		}
-// 
-// 		auto pointLightView = ecs.getView<PointLightComponent, PointLightShadowMapComponent, SpatialComponent>();
-// 		for (auto& entity : pointLightView) {
-// 			const auto& shadowCamera = pointLightView.get<PointLightShadowMapComponent>(entity);
-// 			if (mDrawPointLightShadows) {
-// 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
-// 					auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
-// 					glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-// 					drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, entity, true);
-// 					drawPointLightShadows<AlphaTestComponent>(resourceManagers, ecs, entity, false);
-// 				}
-// 			}
-// 		}
-// 
+ 		convolveCubemap(renderPasses, resourceManagers, ecs);
+ 
+ 		const auto& cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
+ 		if (!cameraTuple) {
+ 			return;
+ 		}
+ 		const auto& [cameraEntity, _, camera, cameraSpatial] = *cameraTuple;
+ 
+ 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
+ 
+ 		auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent, CSMShadowMapComponent>();
+ 		if (lightView) {
+ 			auto& [lightEntity, __, ___, shadowCamera] = *lightView;
+ 			if (mDrawDirectionalShadows) {
+ 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
+ 					drawCSMShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, lightEntity, true);
+ 					drawCSMShadows<AlphaTestComponent>(renderPasses, resourceManagers, ecs, lightEntity);
+ 					// drawCSMShadows<TransparentComponent>(resourceManagers, ecs, lightEntity);
+ 				}
+ 			}
+ 		}
+ 
+ 		auto pointLightView = ecs.getView<PointLightComponent, PointLightShadowMapComponent, SpatialComponent>();
+ 		for (auto& entity : pointLightView) {
+ 			const auto& shadowCamera = pointLightView.get<PointLightShadowMapComponent>(entity);
+ 			if (mDrawPointLightShadows) {
+ 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
+ 					drawPointLightShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, entity, true);
+ 					drawPointLightShadows<AlphaTestComponent>(renderPasses, resourceManagers, ecs, entity, false);
+ 				}
+ 			}
+ 		}
+ 
 // 		auto gbufferHandle = createGbuffer(resourceManagers, viewport.mSize);
 // 		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
 // 			return;
@@ -489,6 +484,7 @@ namespace DeferredPBR {
 // 			tonemappedHandle = bloomHandle;
 // 		}
 // 
+		NEO_UNUSED(outputColor, outputDepth);
 // 		backbuffer.bind();
 // 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
 // 		drawFXAA(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(tonemappedHandle).mTextures[0]);

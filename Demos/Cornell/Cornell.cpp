@@ -103,7 +103,7 @@ namespace Cornell {
 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 					auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
 					glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-					drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, lightEntity, true, params);
+					drawPointLightShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, lightEntity, true, params);
 				}
 			}
 		}
@@ -134,7 +134,7 @@ namespace Cornell {
 		);
 
 		renderPasses.clear(sceneTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
-		renderPasses.declarePass(sceneTargetHandle, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(sceneTargetHandle, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 			drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 		});
@@ -147,7 +147,7 @@ namespace Cornell {
 			resourceManagers.mTextureManager
 		);
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
-		renderPasses.declarePass(outputTargetHandle, viewport.mSize, [sceneColor](const ResourceManagers& resourceManagers, const ECS&) {
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [sceneColor](const ResourceManagers& resourceManagers, const ECS&) {
 			drawFXAA(resourceManagers, sceneColor);
 		}, "FXAA");
 	}

@@ -53,7 +53,7 @@ namespace neo {
 			// shadowTarget.disableRead();
 			// shadowTarget.bind();
 			const Texture& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap);
-			renderPasses.declarePass(shadowMapHandle, glm::uvec2(shadowTexture.mWidth >> slice, shadowTexture.mHeight >> slice), [cameraEntity, shaderHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			renderPasses.renderPass(shadowMapHandle, glm::uvec2(shadowTexture.mWidth >> slice, shadowTexture.mHeight >> slice), [cameraEntity, shaderHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
 				TRACY_GPUN("_drawSingleCSM");
 
 				glCullFace(GL_FRONT);
