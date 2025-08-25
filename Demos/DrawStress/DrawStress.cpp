@@ -23,6 +23,7 @@
 
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
+#include "Renderer/RenderingSystems/RenderPass.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -83,13 +84,21 @@ namespace DrawStress {
 		ecs.addSystem<FrustumCullingSystem>();
 	}
 
-	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
 		const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
-		backbuffer.bind();
-		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"Output Target",
+			FramebufferExternalAttachments{
+				FramebufferAttachment{outputColor},
+				FramebufferAttachment{outputDepth},
+			},
+			resourceManagers.mTextureManager
+		);
+		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
+
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
 		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 	}

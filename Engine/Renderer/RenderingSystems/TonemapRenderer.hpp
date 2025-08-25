@@ -7,7 +7,7 @@
 
 namespace neo {
 
-	static FramebufferHandle tonemap(const ResourceManagers& resourceManagers, glm::uvec2 dimension, TextureHandle inputTextureHandle, TextureHandle averageLuminance = NEO_INVALID_HANDLE) {
+	inline FramebufferHandle tonemap(const ResourceManagers& resourceManagers, glm::uvec2 dimension, TextureHandle inputTextureHandle, TextureHandle averageLuminance = NEO_INVALID_HANDLE) {
 		TRACY_GPU();
 
 		if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {

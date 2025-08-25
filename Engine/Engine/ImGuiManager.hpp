@@ -59,7 +59,7 @@ namespace neo {
 		glm::uvec2 getViewportOffset();
 		glm::uvec2 getViewportSize();
 	private:
-		bool mIsEnabled = false;
+		bool mIsEnabled = true;
 		Viewport mViewport;
 		ImGuiConsole mConsole;
 		

@@ -180,33 +180,40 @@ namespace CSM {
 		ImGui::Checkbox("Cascade spheres", &mDrawCascadeSpheres);
 	}
 
-	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		const auto [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		const auto [lightEntity, ___, ____] = *ecs.getSingleView<MainLightComponent, LightComponent>();
 
-		const auto& shadowMap = ecs.cGetComponent<CSMShadowMapComponent>(lightEntity);
-		if (resourceManagers.mTextureManager.isValid(shadowMap->mShadowMap)) {
-			auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap->mShadowMap);
-			glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-			drawCSMShadows(resourceManagers, ecs, lightEntity, true);
+		if (const auto shadowMap = ecs.cGetComponent<CSMShadowMapComponent>(lightEntity)) {
+			drawCSMShadows(renderPasses, resourceManagers, ecs, lightEntity, true);
 		}
 
-		backbuffer.bind();
-		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawCSMResolve<PhongRenderComponent>(resourceManagers, ecs, cameraEntity, mDebugView);
+		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"Output Target",
+			FramebufferExternalAttachments{
+				FramebufferAttachment{outputColor},
+				FramebufferAttachment{outputDepth},
+			},
+			resourceManagers.mTextureManager
+		);
 
-		drawLines<MockCameraComponent>(resourceManagers, ecs, cameraEntity);
-		if (mDrawCascadeLines) {
-			drawLines<CSMCamera0Component>(resourceManagers, ecs, cameraEntity);
-			drawLines<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
-			drawLines<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);
-		}
-		if (mDrawCascadeSpheres) {
-			drawWireframe<CSMCamera0Component>(resourceManagers, ecs, cameraEntity);
-			drawWireframe<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
-			drawWireframe<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);
-		}
+		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
+		renderPasses.declarePass(outputTargetHandle, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_GPUN("Main pass");
+			const auto [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+			drawCSMResolve<PhongRenderComponent>(resourceManagers, ecs, cameraEntity, mDebugView);
+
+			drawLines<MockCameraComponent>(resourceManagers, ecs, cameraEntity);
+			if (mDrawCascadeLines) {
+				drawLines<CSMCamera0Component>(resourceManagers, ecs, cameraEntity);
+				drawLines<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
+				drawLines<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);
+			}
+			if (mDrawCascadeSpheres) {
+				drawWireframe<CSMCamera0Component>(resourceManagers, ecs, cameraEntity);
+				drawWireframe<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
+				drawWireframe<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);
+			}
+		});
 	}
 }

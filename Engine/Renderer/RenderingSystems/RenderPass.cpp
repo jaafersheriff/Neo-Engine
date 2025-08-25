@@ -27,7 +27,7 @@ namespace neo {
 				[&](const RenderPass& renderPass) {
 					// TODO: Debug string?
 					if (!resourceManagers.mFramebufferManager.isValid(renderPass.mTarget)) {
-						NEO_LOG_E("Unable to resolve target, skipping pass %s", renderPass.mDebugName.value_or("").c_str());
+						NEO_LOG_W("Unable to resolve target, skipping pass %s", renderPass.mDebugName.value_or("").c_str());
 						return;
 					}
 					resourceManagers.mFramebufferManager.resolve(renderPass.mTarget).bind();
@@ -37,7 +37,7 @@ namespace neo {
 				},
 				[&](const ClearPass& clearPass) {
 					if (!resourceManagers.mFramebufferManager.isValid(clearPass.mTarget)) {
-						NEO_LOG_E("Unable to resolve target, skipping clear %s", clearPass.mDebugName.value_or("").c_str());
+						NEO_LOG_W("Unable to resolve target, skipping clear %s", clearPass.mDebugName.value_or("").c_str());
 						return;
 					}
 					resourceManagers.mFramebufferManager.resolve(clearPass.mTarget).bind();

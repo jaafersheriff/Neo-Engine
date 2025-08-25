@@ -9,6 +9,8 @@
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
+#include "Renderer/RenderingSystems/RenderPass.hpp"
+
 #include "ResourceManager/ResourceManagers.hpp"
 
 namespace neo {
@@ -17,18 +19,16 @@ namespace neo {
 		// This can be remapped to drawing a single shadow map tbh
 		template<typename... CompTs>
 		void _drawSingleCSM(
-			const ResourceManagers& resourceManagers, 
-			const ECS& ecs, 
-			ECS::Entity cameraEntity, 
-			const TextureHandle& shadowMap, 
-			const ShaderHandle& shaderHandle, 
-			const int slice, 
+			RenderPasses& renderPasses,
+			const ResourceManagers& resourceManagers,
+			ECS::Entity cameraEntity,
+			const TextureHandle& shadowMap,
+			const ShaderHandle& shaderHandle,
+			const int slice,
 			const bool clear
 		) {
-			TRACY_GPU();
-			bool containsAlphaTest = false;
-			if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
-				containsAlphaTest = true;
+			if (!resourceManagers.mTextureManager.isValid(shadowMap)) {
+				return;
 			}
 
 			char targetName[32];
@@ -42,57 +42,65 @@ namespace neo {
 				} },
 				resourceManagers.mTextureManager
 			);
-			if (!resourceManagers.mFramebufferManager.isValid(shadowMapHandle)) {
-				return;
-			}
-			auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowMapHandle);
-			shadowTarget.disableDraw();
-			shadowTarget.disableRead();
-			shadowTarget.bind();
-			{
-				const auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap);
-				glViewport(0, 0, shadowTexture.mWidth >> slice, shadowTexture.mHeight >> slice);
-			}
 
 			if (clear) {
-				shadowTarget.clear(glm::uvec4(0.f, 0.f, 0.f, 0.f), types::framebuffer::AttachmentBit::Depth);
+				renderPasses.clear(shadowMapHandle, types::framebuffer::AttachmentBit::Depth, glm::uvec4(0));
 			}
 
-			NEO_ASSERT(ecs.has<SpatialComponent>(cameraEntity) && ecs.has<CameraComponent>(cameraEntity), "Light entity is just wrong");
-			const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
-			const glm::mat4 V = ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView();
+			// Uhh is this important?
+			// auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowMapHandle);
+			// shadowTarget.disableDraw();
+			// shadowTarget.disableRead();
+			// shadowTarget.bind();
+			const Texture& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap);
+			renderPasses.declarePass(shadowMapHandle, glm::uvec2(shadowTexture.mWidth >> slice, shadowTexture.mHeight >> slice), [cameraEntity, shaderHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
+				TRACY_GPUN("_drawSingleCSM");
 
-			ShaderDefines drawDefines;
-			const auto view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
-			for (auto entity : view) {
-				// VFC
-				if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-					if (!culled->isInView(ecs, entity, cameraEntity)) {
-						continue;
+				glCullFace(GL_FRONT);
+
+				NEO_ASSERT(ecs.has<SpatialComponent>(cameraEntity) && ecs.has<CameraComponent>(cameraEntity), "Light entity is just wrong");
+				const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
+				const glm::mat4 V = ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView();
+
+				ShaderDefines drawDefines;
+				const auto view = ecs.getView<const ShadowCasterRenderComponent, const MeshComponent, const SpatialComponent, CompTs...>();
+				for (auto entity : view) {
+					// VFC
+					if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+						if (!culled->isInView(ecs, entity, cameraEntity)) {
+							continue;
+						}
 					}
+					drawDefines.reset();
+
+					auto material = ecs.cGetComponent<const MaterialComponent>(entity);
+
+					MakeDefine(ALPHA_TEST);
+					bool containsAlphaTest = false;
+					if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...) || (std::is_same_v<TransparentComponent, CompTs> || ...)) {
+						containsAlphaTest = true;
+					}
+
+					bool doAlphaTest = containsAlphaTest && material && resourceManagers.mTextureManager.isValid(material->mAlbedoMap);
+					if (doAlphaTest) {
+						drawDefines.set(ALPHA_TEST);
+					}
+
+					auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
+					resolvedShader.bind();
+
+					if (doAlphaTest) {
+						resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
+					}
+
+					resolvedShader.bindUniform("P", P);
+					resolvedShader.bindUniform("V", V);
+					resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
+					resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 				}
-				drawDefines.reset();
 
-				auto material = ecs.cGetComponent<const MaterialComponent>(entity);
-
-				MakeDefine(ALPHA_TEST);
-				bool doAlphaTest = containsAlphaTest && material && resourceManagers.mTextureManager.isValid(material->mAlbedoMap);
-				if (doAlphaTest) {
-					drawDefines.set(ALPHA_TEST);
-				}
-
-				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
-				resolvedShader.bind();
-
-				if (doAlphaTest) {
-					resolvedShader.bindTexture("alphaMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
-				}
-
-				resolvedShader.bindUniform("P", P);
-				resolvedShader.bindUniform("V", V);
-				resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
-				resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
-			}
+				glCullFace(GL_BACK);
+			});
 		}
 	}
 
@@ -169,7 +177,7 @@ namespace neo {
 	}
 
 	template<typename... CompTs>
-	inline void drawCSMShadows(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity lightEntity, bool clear = false) {
+	inline void drawCSMShadows(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity lightEntity, bool clear = false) {
 		TRACY_GPU();
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
@@ -185,8 +193,6 @@ namespace neo {
 			return;
 		}
 
-		glCullFace(GL_FRONT);
-
 		auto csmCamera0Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>();
 		auto csmCamera1Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera1Component>();
 		auto csmCamera2Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera2Component>();
@@ -195,10 +201,8 @@ namespace neo {
 		auto& [cameraEntity1, cameraSpatial1, cameraCamera1, csmCamera1] = *csmCamera1Tuple;
 		auto& [cameraEntity2, cameraSpatial2, cameraCamera2, csmCamera2] = *csmCamera2Tuple;
 
-		_drawSingleCSM<CompTs...>(resourceManagers, ecs, cameraEntity0, shadowMap->mShadowMap, shaderHandle, 0, clear);
-		_drawSingleCSM<CompTs...>(resourceManagers, ecs, cameraEntity1, shadowMap->mShadowMap, shaderHandle, 1, clear);
-		_drawSingleCSM<CompTs...>(resourceManagers, ecs, cameraEntity2, shadowMap->mShadowMap, shaderHandle, 2, clear);
-
-		glCullFace(GL_BACK);
+		_drawSingleCSM<CompTs...>(renderPasses, resourceManagers, cameraEntity0, shadowMap->mShadowMap, shaderHandle, 0, clear);
+		_drawSingleCSM<CompTs...>(renderPasses, resourceManagers, cameraEntity1, shadowMap->mShadowMap, shaderHandle, 1, clear);
+		_drawSingleCSM<CompTs...>(renderPasses, resourceManagers, cameraEntity2, shadowMap->mShadowMap, shaderHandle, 2, clear);
 	}
 }

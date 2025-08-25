@@ -13,6 +13,7 @@
 
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
+#include "Renderer/RenderingSystems/RenderPass.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"
 
@@ -102,10 +103,18 @@ namespace Compute {
 		}
 	}
 
-	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
 		TRACY_GPUN("Compute::render");
-		backbuffer.bind();
-		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.0), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
+
+		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"Output Target",
+			FramebufferExternalAttachments{
+				FramebufferAttachment{outputColor},
+				FramebufferAttachment{outputDepth},
+			},
+			resourceManagers.mTextureManager
+		);
+		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.0));
 
 		// Update the mesh
 		if (auto meshView = ecs.cGetComponent<ParticleMeshComponent>()) {

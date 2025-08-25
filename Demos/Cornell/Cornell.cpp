@@ -93,7 +93,7 @@ namespace Cornell {
 		ecs.addSystem<CameraControllerSystem>();
 	}
 
-	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
 		{
 			PointLightShadowMapParameters params = {
 				0.01f
@@ -108,35 +108,48 @@ namespace Cornell {
 			}
 		}
 
-		const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
+		TextureHandle sceneColor = resourceManagers.mTextureManager.asyncLoad("Scene Color",
+			TextureBuilder{}
+			.setFormat(TextureFormat{ types::texture::Target::Texture2D,
+				types::texture::InternalFormats::RGB16_UNORM,
+			})
+			.setDimension(glm::u16vec3(viewport.mSize.x, viewport.mSize.y, 0))
+		);
+		if (resourceManagers.mTextureManager.isValid(sceneColor)) {
+			const Texture& sceneColorTex = resourceManagers.mTextureManager.resolve(sceneColor);
+			if (sceneColorTex.mWidth != viewport.mSize.x || sceneColorTex.mHeight != viewport.mSize.y) {
+				resourceManagers.mTextureManager.discard(sceneColor);
+				return;
+			}
+		}
+
 		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Scene Target",
-			FramebufferBuilder{}
-				.setSize(viewport.mSize)
-				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
-				.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
+			FramebufferExternalAttachments{
+				FramebufferAttachment{sceneColor},
+				FramebufferAttachment{outputDepth},
+			},
 			resourceManagers.mTextureManager
 		);
 
-		if (resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
-			auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
-			sceneTarget.bind();
-			sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+		renderPasses.clear(sceneTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
+		renderPasses.declarePass(sceneTargetHandle, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 			drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
+		});
 
-			backbuffer.bind();
-			backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-			drawFXAA(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(sceneTargetHandle).mTextures[0]);
-			// Don't forget the depth. Because reasons.
-			glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
-				0, 0, viewport.mSize.x, viewport.mSize.y,
-				0, 0, viewport.mSize.x, viewport.mSize.y,
-				GL_DEPTH_BUFFER_BIT,
-				GL_NEAREST
-			);
-		}
+		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"FXAA Target",
+			FramebufferExternalAttachments{
+				FramebufferAttachment{outputColor},
+			},
+			resourceManagers.mTextureManager
+		);
+		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
+		renderPasses.declarePass(outputTargetHandle, viewport.mSize, [sceneColor](const ResourceManagers& resourceManagers, const ECS&) {
+			drawFXAA(resourceManagers, sceneColor);
+		}, "FXAA");
 	}
 
 	void Demo::destroy() {

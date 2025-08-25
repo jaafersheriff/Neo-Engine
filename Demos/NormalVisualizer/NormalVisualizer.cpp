@@ -19,6 +19,7 @@
 #include "Renderer/RenderingSystems/WireframeRenderer.hpp"
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
+#include "Renderer/RenderingSystems/RenderPass.hpp"
 
 #include "Loader/GLTFImporter.hpp"
 #include "ResourceManager/ResourceManagers.hpp"
@@ -83,16 +84,24 @@ namespace NormalVisualizer {
 		ecs.addSystem<RotationSystem>();
 	}
 
-	void Demo::render(const ResourceManagers& resourceManagers, const ECS& ecs, Framebuffer& backbuffer) {
+	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
 		const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
+
+		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"Output Target",
+			FramebufferExternalAttachments{
+				FramebufferAttachment{outputColor},
+				FramebufferAttachment{outputDepth},
+			},
+			resourceManagers.mTextureManager
+		);
+
+		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
+
 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		backbuffer.bind();
-		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-
 		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-
 		{
 			auto normalShaderHandle = resourceManagers.mShaderManager.asyncLoad("NormalVisualizer", SourceShader::ConstructionArgs{
 				{types::shader::Stage::Vertex, "normal.vert"},
