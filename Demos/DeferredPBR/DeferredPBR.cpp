@@ -398,25 +398,29 @@ namespace DeferredPBR {
  			}
  		}
  
-// 		auto gbufferHandle = createGbuffer(resourceManagers, viewport.mSize);
-// 		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
-// 			return;
-// 		}
-// 		auto gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-// 		gbuffer.bind();
-// 		gbuffer.clear(glm::vec4(0.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-// 		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-// 		drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
-// 		drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
-// 
-// 		if (mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
-// 			auto debugOutput = drawGBufferDebug(resourceManagers, gbufferHandle, viewport.mSize, mGbufferDebugParams);
-// 			if (resourceManagers.mFramebufferManager.isValid(debugOutput)) {
-// 				blit(resourceManagers, backbuffer, resourceManagers.mFramebufferManager.resolve(debugOutput).mTextures[0], viewport.mSize);
-// 				return;
-// 			}
-// 		}
-// 
+ 		FramebufferHandle gbufferHandle = createGbuffer(resourceManagers, viewport.mSize);
+		renderPasses.clear(gbufferHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f));
+		renderPasses.renderPass(gbufferHandle, viewport.mSize, [cameraEntity](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_GPUN("Draw Gbuffer");
+ 			drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
+ 			drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
+		}, "GBuffer");
+ 
+ 		if (mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
+			auto outputHandle = resourceManagers.mFramebufferManager.asyncLoad("GBuffer Debug",
+				FramebufferExternalAttachments{
+					FramebufferAttachment{outputColor},
+				},
+				resourceManagers.mTextureManager
+			);
+			renderPasses.clear(outputHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0));
+			renderPasses.renderPass(outputHandle, viewport.mSize, [gbufferHandle, this](const ResourceManagers& resourceManagers, const ECS&) {
+				TRACY_GPUN("GBuffer debug");
+ 				drawGBufferDebug(resourceManagers, gbufferHandle, mGbufferDebugParams);
+			}, "GBuffer debug");
+			return;
+ 		}
+ 
 // 		auto hdrColorOutput = resourceManagers.mFramebufferManager.asyncLoad(
 // 			"HDR Color",
 // 			FramebufferBuilder{}

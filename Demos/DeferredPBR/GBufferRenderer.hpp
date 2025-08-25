@@ -47,16 +47,9 @@ namespace DeferredPBR {
 		const ResourceManagers& resourceManagers, 
 		const ECS& ecs, 
 		const ECS::Entity cameraEntity, 
-		const FramebufferHandle gbufferHandle,
 		const ShaderDefines& inDefines = {}
 	) {
 		TRACY_GPU();
-
-		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
-			return;
-		}
-		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-		gbuffer.bind();
 
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBuffer Shader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "model.vert"},
@@ -195,31 +188,22 @@ namespace DeferredPBR {
 		}
 	};
 
-	inline FramebufferHandle drawGBufferDebug(const ResourceManagers& resourceManagers, FramebufferHandle gbufferHandle, glm::uvec2 viewportSize, const GBufferDebugParameters& debugParameters) {
+	inline void drawGBufferDebug(const ResourceManagers& resourceManagers, FramebufferHandle gbufferHandle, const GBufferDebugParameters& debugParameters) {
 		TRACY_GPU();
 
 		if (debugParameters.mDebugMode == GBufferDebugParameters::DebugMode::Off) {
-			return NEO_INVALID_HANDLE;
+			return;
 		}
 
-		auto outputHandle = resourceManagers.mFramebufferManager.asyncLoad("GBuffer Debug", FramebufferBuilder{}
-			.setSize(viewportSize)
-			.attach(TextureFormat{
-				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB8_UNORM
-			}),
-			resourceManagers.mTextureManager
-		);
 		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBufferDebug", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "quad.vert"},
 			{ types::shader::Stage::Fragment, "deferredpbr/gbuffer_debug.frag" }
 		});
+		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
+			return;
+		}
 
-		if (resourceManagers.mFramebufferManager.isValid(gbufferHandle) && resourceManagers.mFramebufferManager.isValid(outputHandle) && resourceManagers.mShaderManager.isValid(shaderHandle)) {
-			auto output = resourceManagers.mFramebufferManager.resolve(outputHandle);
-			output.bind();
-			glViewport(0, 0, viewportSize.x, viewportSize.y);
-
+		if (resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
 			ShaderDefines defines;
 			MakeDefine(NORMAL);
 			MakeDefine(ALBEDO);
@@ -252,7 +236,7 @@ namespace DeferredPBR {
 				break;
 			default:
 				NEO_FAIL("Invalid debug mode");
-				return NEO_INVALID_HANDLE;
+				return;
 			}
 
 			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, defines);
@@ -266,7 +250,5 @@ namespace DeferredPBR {
 
 			resourceManagers.mMeshManager.resolve("quad").draw();
 		}
-
-		return outputHandle;
 	}
 }
