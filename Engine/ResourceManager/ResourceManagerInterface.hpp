@@ -19,8 +19,9 @@ namespace neo {
 
 	class ResourceManagers;
 
-	constexpr HashedString::hash_type NEO_INVALID_HANDLE = 65535;
+	constexpr HashedString::hash_type NEO_INVALID_HANDLE = UINT32_MAX;
 
+	// CRTP
 	template<typename ResourceType>
 	struct ResourceHandle {
 		ResourceHandle()

@@ -2,7 +2,6 @@
 
 #include "RenderPass.hpp"
 
-#pragma optimize("", off)
 namespace neo {
 	void RenderPasses::clear(FramebufferHandle target, types::framebuffer::AttachmentBits clearFlags, glm::vec4 clearColor, std::optional<std::string> debugName) {
 		mPasses.emplace_back(ClearPass{

@@ -145,6 +145,13 @@ namespace Base {
 			})
 			.setDimension(glm::u16vec3(viewport.mSize.x, viewport.mSize.y, 0))
 		);
+		if (resourceManagers.mTextureManager.isValid(sceneColor)) {
+			const Texture& sceneColorTex = resourceManagers.mTextureManager.resolve(sceneColor);
+			if (sceneColorTex.mWidth != viewport.mSize.x || sceneColorTex.mHeight != viewport.mSize.y) {
+				resourceManagers.mTextureManager.discard(sceneColor);
+				return;
+			}
+		}
 
 		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Scene Target",
