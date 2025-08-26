@@ -488,7 +488,7 @@ namespace DeferredPBR {
 		}
  
 		FramebufferHandle tonemappedHandle = bloomResults;
- 		if (mDoTonemap && !resourceManagers.mFramebufferManager.isValid(tonemappedHandle)) {
+ 		if (mDoTonemap && resourceManagers.mFramebufferManager.isValid(bloomResults)) {
  			tonemappedHandle = tonemap(renderPasses, resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(bloomResults).mTextures[0], averageLuminance);
  		}
 
