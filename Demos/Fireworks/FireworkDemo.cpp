@@ -134,76 +134,76 @@ namespace Fireworks {
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
 		NEO_UNUSED(renderPasses, resourceManagers, ecs, outputColor, outputDepth);
-		// _tickParticles(resourceManagers, ecs);
+		renderPasses.computePass([](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			tickParticles(resourceManagers, ecs);
+		});
 
-		// if (const auto& lightView = ecs.getSingleView<MainLightComponent, PointLightComponent, PointLightShadowMapComponent>()) {
-		// 	const auto& [lightEntity, _, __, shadowCamera] = *lightView;
-		// 	if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
-		// 		auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
-		// 		glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-		// 		drawPointLightShadows<OpaqueComponent>(resourceManagers, ecs, lightEntity, true);
-		// 	}
-		// }
+		if (const auto& lightView = ecs.getSingleView<MainLightComponent, PointLightComponent, PointLightShadowMapComponent>()) {
+			const auto& [lightEntity, _, __, shadowCamera] = *lightView;
+			drawPointLightShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, lightEntity, true);
+		}
 
-		// const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-		// auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
+		 const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		 auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 
-		// auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
-		// 	"Scene Target",
-		// 	FramebufferBuilder{}
-		// 	.setSize(viewport.mSize)
-		// 	.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_UNORM })
-		// 	.attach(TextureFormat{ types::texture::Target::Texture2D,types::texture::InternalFormats::D16 }),
-		// 	resourceManagers.mTextureManager
-		// );
-		// if (!resourceManagers.mFramebufferManager.isValid(sceneTargetHandle)) {
-		// 	return;
-		// }
-		// auto& sceneTarget = resourceManagers.mFramebufferManager.resolve(sceneTargetHandle);
-		// sceneTarget.bind();
-		// sceneTarget.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-		// glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
+		TextureHandle hdrColorTexture = resourceManagers.mTextureManager.asyncLoad("HDR Color",
+			TextureBuilder{}
+			.setDimension(glm::u16vec3(viewport.mSize, 0))
+			.setFormat(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
+		);
 
-		// drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-		// _drawParticles(resourceManagers, ecs);
+		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"Scene Target",
+		    FramebufferExternalAttachments{
+				FramebufferAttachment{hdrColorTexture},
+				FramebufferAttachment{outputDepth},
+		    }, resourceManagers.mTextureManager
+		);
+		renderPasses.clear(sceneTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
+		renderPasses.renderPass(sceneTargetHandle, viewport.mSize, [cameraEntity](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
+			_drawParticles(resourceManagers, ecs);
+		});
 
-		// FramebufferHandle bloomHandle = bloom(resourceManagers, viewport.mSize, sceneTarget.mTextures[0], mBloomParams);
-		// if (!resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
-		// 	bloomHandle = sceneTargetHandle;
-		// }
+ 		TextureHandle bloomResults = bloom(renderPasses, resourceManagers, viewport.mSize, hdrColorTexture, mBloomParams);
 
-		// TextureHandle averageLuminance = NEO_INVALID_HANDLE;
-		// {
-		// 	auto previousHDRColorHandle = resourceManagers.mFramebufferManager.asyncLoad(
-		// 		"Previous HDR Color",
-		// 		FramebufferBuilder{}
-		// 		.setSize(viewport.mSize)
-		// 		.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
-		// 		resourceManagers.mTextureManager
-		// 	);
-		// 	if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
-		// 		const auto& previousHDRColor = resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle);
-		// 		averageLuminance = calculateAutoexposure(resourceManagers, ecs, previousHDRColor.mTextures[0], mAutoExposureParams);
-		// 		TRACY_GPUN("Blit Previous HDR Color");
-		// 		blit(resourceManagers, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0]);
-		// 	}
-		// }
+		auto previousHDRColorHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"Previous HDR Color",
+			FramebufferBuilder{}
+			.setSize(viewport.mSize)
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
+			resourceManagers.mTextureManager
+		);
+		renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
+			TRACY_GPUN("Blit Previous HDR Color");
+			blit(resourceManagers, bloomResults);
+		});
 
-		// FramebufferHandle tonemappedHandle = tonemap(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0], averageLuminance);
-		// if (!resourceManagers.mFramebufferManager.isValid(tonemappedHandle)) {
-		// 	tonemappedHandle = bloomHandle;
-		// }
+		TextureHandle averageLuminance = NEO_INVALID_HANDLE;
+		if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
+			averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mTextures[0], mAutoExposureParams);
+		}
+ 
+		TextureHandle tonemappedHandle = tonemap(renderPasses, resourceManagers, viewport.mSize, bloomResults, averageLuminance);
 
-		// backbuffer.bind();
-		// backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color);
-		// drawFXAA(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(tonemappedHandle).mTextures[0]);
-		// // Don't forget the depth. Because reasons.
-		// glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
-		// 	0, 0, viewport.mSize.x, viewport.mSize.y,
-		// 	0, 0, viewport.mSize.x, viewport.mSize.y,
-		// 	GL_DEPTH_BUFFER_BIT,
-		// 	GL_NEAREST
-		// );
+		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"FXAA Target",
+			FramebufferExternalAttachments{
+				FramebufferAttachment{outputColor},
+			},
+			resourceManagers.mTextureManager
+		);
+		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
+			drawFXAA(resourceManagers, tonemappedHandle);
+		}, "FXAA");
+// 		// Don't forget the depth. Because reasons.
+// 		glBlitNamedFramebuffer(hdrColor.mFBOID, backbuffer.mFBOID,
+// 			0, 0, viewport.mSize.x, viewport.mSize.y,
+// 			0, 0, viewport.mSize.x, viewport.mSize.y,
+// 			GL_DEPTH_BUFFER_BIT,
+// 			GL_NEAREST
+// 		);
 	}
 
 	void Demo::destroy() {

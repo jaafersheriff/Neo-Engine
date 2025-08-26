@@ -5,6 +5,7 @@
 
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
+#include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
@@ -106,6 +107,46 @@ namespace Compute {
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
 		TRACY_GPUN("Compute::render");
 
+		// Update the mesh
+		renderPasses.computePass([](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			if (auto meshView = ecs.cGetComponent<ParticleMeshComponent>()) {
+				TRACY_GPUN("Update Particles");
+				auto&& [_, meshComponent] = *meshView;
+	
+				auto particlesComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticlesCompute", SourceShader::ConstructionArgs{
+					{ types::shader::Stage::Compute, "compute/particles.compute" }
+				});
+				if (!resourceManagers.mShaderManager.isValid(particlesComputeShaderHandle)) {
+					return;
+				}
+	
+				auto& particlesComputeShader = resourceManagers.mShaderManager.resolveDefines(particlesComputeShaderHandle, {});
+				particlesComputeShader.bind();
+	
+				float timeStep = 0.f;
+				if (auto frameStatsView = ecs.cGetComponent<FrameStatsComponent>()) {
+					auto&& [__, frameStats] = *frameStatsView;
+					timeStep = frameStats.mDT / 1000.f * meshComponent.timeScale;
+				}
+				particlesComputeShader.bindUniform("timestep", timeStep);
+	
+				// Bind mesh
+				auto& mesh = resourceManagers.mMeshManager.resolve(meshComponent.mMeshHandle);
+				auto& position = mesh.getVBO(types::mesh::VertexType::Position);
+				glBindVertexArray(mesh.mVAOID);
+				// This is pretty gross
+				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, position.vboID);
+	
+				// Dispatch 
+				particlesComputeShader.dispatch({meshComponent.mNumParticles / ServiceLocator<Renderer>::ref().getDetails().mMaxComputeWorkGroupSize.x, 1, 1});
+				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	
+				// Reset bind
+				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+			}
+		});
+
+
 		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Output Target",
 			FramebufferExternalAttachments{
@@ -115,45 +156,9 @@ namespace Compute {
 			resourceManagers.mTextureManager
 		);
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.0));
-
-		// Update the mesh
-		if (auto meshView = ecs.cGetComponent<ParticleMeshComponent>()) {
-			TRACY_GPUN("Update Particles");
-			auto&& [_, meshComponent] = *meshView;
-
-			auto particlesComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticlesCompute", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Compute, "compute/particles.compute" }
-			});
-			if (!resourceManagers.mShaderManager.isValid(particlesComputeShaderHandle)) {
-				return;
-			}
-
-			auto& particlesComputeShader = resourceManagers.mShaderManager.resolveDefines(particlesComputeShaderHandle, {});
-			particlesComputeShader.bind();
-
-			float timeStep = 0.f;
-			if (auto frameStatsView = ecs.cGetComponent<FrameStatsComponent>()) {
-				auto&& [__, frameStats] = *frameStatsView;
-				timeStep = frameStats.mDT / 1000.f * meshComponent.timeScale;
-			}
-			particlesComputeShader.bindUniform("timestep", timeStep);
-
-			// Bind mesh
-			auto& mesh = resourceManagers.mMeshManager.resolve(meshComponent.mMeshHandle);
-			auto& position = mesh.getVBO(types::mesh::VertexType::Position);
-			glBindVertexArray(mesh.mVAOID);
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, position.vboID);
-
-			// Dispatch 
-			particlesComputeShader.dispatch({meshComponent.mNumParticles / ServiceLocator<Renderer>::ref().getDetails().mMaxComputeWorkGroupSize.x, 1, 1});
-			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-			// Reset bind
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
-		}
-
+ 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		// Draw the mesh
-		{
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Draw Particles");
 			auto particlesVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticleVis", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex,   "compute/particles.vert" },
@@ -188,7 +193,7 @@ namespace Compute {
 				/* DRAW */
 				resourceManagers.mMeshManager.resolve(meshComponent.mMeshHandle).draw();
 			}
-		}
+		});
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {

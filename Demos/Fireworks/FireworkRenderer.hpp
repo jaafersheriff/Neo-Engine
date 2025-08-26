@@ -12,7 +12,7 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 namespace Fireworks {
-	inline void _tickParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
+	inline void tickParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
 		TRACY_GPU();
 
 		float timeStep = 0.f;
@@ -61,6 +61,8 @@ namespace Fireworks {
 			// Bind mesh
 			auto& mesh = resourceManagers.mMeshManager.resolve(firework.mBuffer);
 			glBindVertexArray(mesh.mVAOID);
+
+			// This is pretty gross
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mesh.getVBO(types::mesh::VertexType::Position).vboID);
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, mesh.getVBO(types::mesh::VertexType::Normal).vboID);
 			ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
