@@ -459,12 +459,12 @@ namespace DeferredPBR {
 			drawSkybox(resourceManagers, ecs, cameraEntity);
 		});
 
-// 
-// 		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParams) : hdrColorOutput;
-// 		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
-// 			bloomHandle = hdrColorOutput;
-// 		}
-// 
+
+ 		FramebufferHandle bloomResults = hdrColorTarget;
+		if (mDoBloom) {
+			bloomResults = bloom(renderPasses, resourceManagers, viewport.mSize, hdrColorTexture, mBloomParams);
+		}
+
 // 		TextureHandle averageLuminance = NEO_INVALID_HANDLE;
 // 		{
 // 			auto previousHDRColorHandle = resourceManagers.mFramebufferManager.asyncLoad(
