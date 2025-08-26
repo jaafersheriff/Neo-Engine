@@ -439,20 +439,26 @@ namespace DeferredPBR {
 		);
 		// Don't clear depth because we just grabbed the gbuffer's attachment
 		renderPasses.clear(hdrColorTarget, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
-// 		drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
-// 		drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
-// 		// Extract IBL
-// 		std::optional<IBLComponent> ibl;
-// 		const auto iblTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
-// 		if (iblTuple && mDrawIBL) {
-// 			const auto& _ibl = std::get<2>(*iblTuple);
-// 			if (_ibl.mConvolved && _ibl.mDFGGenerated) {
-// 				ibl = _ibl;
-// 			}
-// 		}
-// 		drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
-// 		drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
-// 		drawSkybox(resourceManagers, ecs, cameraEntity);
+
+		// Main lighting resolve
+		renderPasses.renderPass(hdrColorTarget, viewport.mSize, [cameraEntity, gbufferHandle, viewport, this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
+			drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
+
+			// Extract IBL
+			std::optional<IBLComponent> ibl;
+			const auto iblTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
+			if (iblTuple && mDrawIBL) {
+				const auto& _ibl = std::get<2>(*iblTuple);
+				if (_ibl.mConvolved && _ibl.mDFGGenerated) {
+					ibl = _ibl;
+				}
+			}
+			drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
+			drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
+			drawSkybox(resourceManagers, ecs, cameraEntity);
+		});
+
 // 
 // 		FramebufferHandle bloomHandle = mDoBloom ? bloom(resourceManagers, viewport.mSize, hdrColor.mTextures[0], mBloomParams) : hdrColorOutput;
 // 		if (mDoBloom && !resourceManagers.mFramebufferManager.isValid(bloomHandle)) {
