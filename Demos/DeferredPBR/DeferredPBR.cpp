@@ -421,31 +421,24 @@ namespace DeferredPBR {
 			return;
  		}
  
-// 		auto hdrColorOutput = resourceManagers.mFramebufferManager.asyncLoad(
-// 			"HDR Color",
-// 			FramebufferBuilder{}
-// 				.setSize(viewport.mSize)
-// 				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
-// 				.attach(TextureFormat{types::texture::Target::Texture2D, types::texture::InternalFormats::D16}),
-// 			resourceManagers.mTextureManager
-// 		);
-// 		if (!resourceManagers.mFramebufferManager.isValid(hdrColorOutput)) {
-// 			return;
-// 		}
-// 		auto& hdrColor = resourceManagers.mFramebufferManager.resolve(hdrColorOutput);
-// 
-// 		{
-// 			TRACY_GPUN("GBuffer Depth Blit");
-// 			hdrColor.bind();
-// 			hdrColor.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-// 			glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-// 			glBlitNamedFramebuffer(gbuffer.mFBOID, hdrColor.mFBOID,
-// 				0, 0, viewport.mSize.x, viewport.mSize.y,
-// 				0, 0, viewport.mSize.x, viewport.mSize.y,
-// 				GL_DEPTH_BUFFER_BIT,
-// 				GL_NEAREST
-// 			);
-// 		}
+		TextureHandle hdrColorTexture = resourceManagers.mTextureManager.asyncLoad("HDR Color",
+			TextureBuilder{}
+			.setDimension(glm::u16vec3(viewport.mSize, 0))
+			.setFormat(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
+		);
+
+		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
+			return;
+		}
+		FramebufferHandle hdrColorTarget = resourceManagers.mFramebufferManager.asyncLoad("HDR Target",
+			FramebufferExternalAttachments{
+				FramebufferAttachment{hdrColorTexture},
+				FramebufferAttachment{resourceManagers.mFramebufferManager.resolve(gbufferHandle).mTextures[3]}, // Oof
+			},
+			resourceManagers.mTextureManager
+		);
+		// Don't clear depth because we just grabbed the gbuffer's attachment
+		renderPasses.clear(hdrColorTarget, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
 // 		drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 // 		drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
 // 		// Extract IBL
