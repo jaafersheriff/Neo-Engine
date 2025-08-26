@@ -53,6 +53,7 @@ namespace neo {
 		}
 
 		renderPasses.computePass([histogramHandle](const ResourceManagers& resourceManagers, const ECS&) {
+			TRACY_GPUN("Histogram clear");
 			auto histogramClearHandle = resourceManagers.mShaderManager.asyncLoad("HistogramClear Shader", SourceShader::ConstructionArgs{
 				{types::shader::Stage::Compute, "histogram_clear.comp" }
 			});
@@ -64,6 +65,7 @@ namespace neo {
 		});
 
 		renderPasses.computePass([histogramHandle, previousFrameHDR, params](const ResourceManagers& resourceManagers, const ECS&) {
+			TRACY_GPUN("Histogram populate");
 			if (!resourceManagers.mTextureManager.isValid(previousFrameHDR)) {
 				return;
 			}
@@ -92,6 +94,7 @@ namespace neo {
 			})
 		);
 		renderPasses.computePass([histogramHandle, outputTexture, params, previousFrameHDR](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_GPUN("Histogram Average");
 			if (!resourceManagers.mTextureManager.isValid(previousFrameHDR)) {
 				return;
 			}

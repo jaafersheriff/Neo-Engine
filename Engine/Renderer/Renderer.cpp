@@ -158,11 +158,14 @@ namespace neo {
 
 		RenderPasses renderPasses;
 		{
-			TRACY_GPUN("Demo::render");
+			TRACY_GPUN("Prepare demo passes");
 			resetState();
 			if (mWireframe) {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			}
+		}
+		{
+			TRACY_GPUN("Demo::render");
 			demo->render(renderPasses, resourceManagers, ecs, mSceneColorTextureHandle, sceneDepthTextureHandle);
 		}
 
