@@ -486,12 +486,12 @@ namespace DeferredPBR {
 				averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mTextures[0], mAutoExposureParams);
 			}
 		}
-// 
-// 		FramebufferHandle tonemappedHandle = mDoTonemap ? tonemap(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0], averageLuminance) : bloomHandle;
-// 		if (mDoTonemap && !resourceManagers.mFramebufferManager.isValid(tonemappedHandle)) {
-// 			tonemappedHandle = bloomHandle;
-// 		}
-// 
+ 
+		FramebufferHandle tonemappedHandle = bloomResults;
+ 		if (mDoTonemap && !resourceManagers.mFramebufferManager.isValid(tonemappedHandle)) {
+ 			tonemappedHandle = tonemap(renderPasses, resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(bloomResults).mTextures[0], averageLuminance);
+ 		}
+
 		NEO_UNUSED(outputColor, outputDepth);
 // 		backbuffer.bind();
 // 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
