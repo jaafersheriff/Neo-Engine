@@ -85,9 +85,6 @@ namespace NormalVisualizer {
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
-		const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
-		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-
 
 		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Output Target",
@@ -100,9 +97,13 @@ namespace NormalVisualizer {
 
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
 
-		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-		{
+		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
+			drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
+		});
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
 			auto normalShaderHandle = resourceManagers.mShaderManager.asyncLoad("NormalVisualizer", SourceShader::ConstructionArgs{
 				{types::shader::Stage::Vertex, "normal.vert"},
 				{types::shader::Stage::Geometry, "normal.geom"},
@@ -128,7 +129,7 @@ namespace NormalVisualizer {
 				/* DRAW */
 				resourceManagers.mMeshManager.resolve(mesh.mMeshHandle).draw();
 			}
-		}
+		});
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {

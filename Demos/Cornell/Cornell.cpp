@@ -100,11 +100,7 @@ namespace Cornell {
 			};
 			if (auto lightView = ecs.getSingleView<MainLightComponent, PointLightComponent, PointLightShadowMapComponent>()) {
 				auto&& [lightEntity, __, ___, shadowCamera] = lightView.value();
-				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
-					auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowCamera.mShadowMap);
-					glViewport(0, 0, shadowTexture.mWidth, shadowTexture.mHeight);
-					drawPointLightShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, lightEntity, true, params);
-				}
+				drawPointLightShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, lightEntity, true, params);
 			}
 		}
 

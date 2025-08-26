@@ -87,8 +87,6 @@ namespace DrawStress {
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
 		const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 
-		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-
 		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Output Target",
 			FramebufferExternalAttachments{
@@ -98,9 +96,10 @@ namespace DrawStress {
 			resourceManagers.mTextureManager
 		);
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
-
-		glViewport(0, 0, viewport.mSize.x, viewport.mSize.y);
-		drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
+		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [cameraEntity](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
+		});
 	}
 
 	void Demo::destroy() {
