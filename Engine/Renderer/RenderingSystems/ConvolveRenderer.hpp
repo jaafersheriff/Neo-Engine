@@ -20,7 +20,7 @@
 namespace neo {
 
 	void convolveCubemap(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
-		TRACY_GPU();
+		TRACY_ZONE();
 
 		auto skyboxTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
 		if (!skyboxTuple) {
@@ -56,6 +56,7 @@ namespace neo {
 		}
 
 		renderPasses.computePass([&ibl](const ResourceManagers& resourceManagers, const ECS&) {
+			TRACY_GPUN("DFG LUT");
 			if (resourceManagers.mTextureManager.isValid(ibl.mDFGLut) && !ibl.mDFGGenerated) {
 				auto dfgLutShaderHandle = resourceManagers.mShaderManager.asyncLoad("DFGLutShader", SourceShader::ConstructionArgs{
 					{ types::shader::Stage::Compute, "dfglut.comp" }
@@ -93,6 +94,7 @@ namespace neo {
 		}
 
 		renderPasses.computePass([&ibl, &skyboxCubemap](const ResourceManagers& resourceManagers, const ECS&) {
+			TRACY_GPUN("Convolve");
 			if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox) && !ibl.mConvolved) {
 				auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", SourceShader::ConstructionArgs{
 					{ types::shader::Stage::Compute, "convolve.comp" }

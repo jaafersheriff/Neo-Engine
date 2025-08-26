@@ -2,6 +2,7 @@
 
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "Renderer/RenderingSystems/RenderPass.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"
 
@@ -23,7 +24,7 @@ namespace neo {
 	};
 
 	inline FramebufferHandle bloom(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const glm::uvec2 dimension, const TextureHandle inputTextureHandle, const BloomParameters& parameters) {
-		TRACY_GPU();
+		TRACY_ZONE();
 
 		NEO_ASSERT(parameters.mDownSampleSteps > 0, "Gotta bloom with something");
 
@@ -61,83 +62,79 @@ namespace neo {
 		}
 
 		// Down sample
-		{
-			MakeDefine(MIP_0);
-			ShaderDefines Mip0Defines;
-			Mip0Defines.set(MIP_0);
+		for (int i = 0; i < parameters.mDownSampleSteps; i++) {
+			renderPasses.clear(bloomTargets[i], types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
+			glm::uvec2 mipDimension(baseDimension.x >> i, baseDimension.y >> i);
+			renderPasses.renderPass(bloomTargets[i], mipDimension, [i, bloomTextures, mipDimension, inputTextureHandle, parameters](const ResourceManagers& resourceManagers, const ECS&) {
+				TRACY_GPUN("Bloom Down");
 
-			for (int i = 0; i < parameters.mDownSampleSteps; i++) {
-				renderPasses.clear(bloomTargets[i], types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
-				glm::uvec2 mipDimension(baseDimension.x >> i, baseDimension.y >> i);
-				renderPasses.renderPass(bloomTargets[i], mipDimension, [i, Mip0Defines, bloomTextures, mipDimension, inputTextureHandle, parameters](const ResourceManagers& resourceManagers, const ECS& ecs) {
-					glDisable(GL_DEPTH_TEST);
-					int oldPolygonMode;
-					glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
-					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glDisable(GL_DEPTH_TEST);
+				int oldPolygonMode;
+				glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-					auto bloomDownShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomDown Shader", SourceShader::ConstructionArgs{
-						{ types::shader::Stage::Vertex, "quad.vert"},
-						{ types::shader::Stage::Fragment, "bloomDown.frag" }
-						});
-					if (!resourceManagers.mShaderManager.isValid(bloomDownShaderHandle)) {
-						return;
-					}
-					auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(bloomDownShaderHandle, i == 0 ? Mip0Defines : ShaderDefines{});
-					resolvedShader.bind();
-					if (i == 0) {
-						const auto& inputTexture = resourceManagers.mTextureManager.resolve(inputTextureHandle);
-						resolvedShader.bindTexture("inputTexture", inputTexture);
-						resolvedShader.bindUniform("threshold", parameters.mLuminanceThreshold);
-					}
-					else {
-						resolvedShader.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(bloomTextures[i - 1]));
-					}
+				auto bloomDownShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomDown Shader", SourceShader::ConstructionArgs{
+					{ types::shader::Stage::Vertex, "quad.vert"},
+					{ types::shader::Stage::Fragment, "bloomDown.frag" }
+					});
+				if (!resourceManagers.mShaderManager.isValid(bloomDownShaderHandle)) {
+					return;
+				}
+				MakeDefine(MIP_0);
+				ShaderDefines Mip0Defines;
+				Mip0Defines.set(MIP_0);
 
-					resolvedShader.bindUniform("texelSize", glm::vec2(1.f / glm::vec2(mipDimension)));
-					const auto& quadMesh = resourceManagers.mMeshManager.resolve("quad");
-					quadMesh.draw();
-					glEnable(GL_DEPTH_TEST);
-					glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
-				});
-			}
+				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(bloomDownShaderHandle, i == 0 ? Mip0Defines : ShaderDefines{});
+				resolvedShader.bind();
+				if (i == 0) {
+					const auto& inputTexture = resourceManagers.mTextureManager.resolve(inputTextureHandle);
+					resolvedShader.bindTexture("inputTexture", inputTexture);
+					resolvedShader.bindUniform("threshold", parameters.mLuminanceThreshold);
+				}
+				else {
+					resolvedShader.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(bloomTextures[i - 1]));
+				}
+
+				resolvedShader.bindUniform("texelSize", glm::vec2(1.f / glm::vec2(mipDimension)));
+				resourceManagers.mMeshManager.resolve("quad").draw();
+				glEnable(GL_DEPTH_TEST);
+				glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
+			});
 		}
 
 		// Up sample
-		{
+		for (int i = parameters.mDownSampleSteps - 1; i > 0; i--) {
+			renderPasses.renderPass(bloomTargets[i - 1], glm::uvec2(baseDimension.x >> (i - 1), baseDimension.y >> (i - 1)), [parameters, i, bloomTextures](const ResourceManagers& resourceManagers, const ECS&) {
+				TRACY_GPUN("Bloom Up");
 
-			for (int i = parameters.mDownSampleSteps - 1; i > 0; i--) {
-				renderPasses.renderPass(bloomTargets[i - 1], glm::uvec2(baseDimension.x >> (i - 1), baseDimension.y >> (i - 1)), [parameters, i, bloomTextures](const ResourceManagers& resourceManagers, const ECS& ecs) {
+				glDisable(GL_DEPTH_TEST);
+				int oldPolygonMode;
+				glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-					glDisable(GL_DEPTH_TEST);
-					int oldPolygonMode;
-					glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
-					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_ONE, GL_ONE);
+				glBlendEquation(GL_FUNC_ADD);
 
-					glEnable(GL_BLEND);
-					glBlendFunc(GL_ONE, GL_ONE);
-					glBlendEquation(GL_FUNC_ADD);
-
-					auto bloomUpShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomUp Shader", SourceShader::ConstructionArgs{
-						{ types::shader::Stage::Vertex, "quad.vert"},
-						{ types::shader::Stage::Fragment, "bloomUp.frag" }
-						});
-					if (!resourceManagers.mShaderManager.isValid(bloomUpShaderHandle)) {
-						return;
-					}
-
-					auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(bloomUpShaderHandle, {});
-					resolvedShader.bind();
-					resolvedShader.bindUniform("filterRadius", parameters.mRadius);
-					resolvedShader.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(bloomTextures[i]));
-
-					const auto& quadMesh = resourceManagers.mMeshManager.resolve("quad");
-					quadMesh.draw();
-
-					glDisable(GL_BLEND);
-					glEnable(GL_DEPTH_TEST);
-					glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
+				auto bloomUpShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomUp Shader", SourceShader::ConstructionArgs{
+					{ types::shader::Stage::Vertex, "quad.vert"},
+					{ types::shader::Stage::Fragment, "bloomUp.frag" }
 					});
-			}
+				if (!resourceManagers.mShaderManager.isValid(bloomUpShaderHandle)) {
+					return;
+				}
+
+				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(bloomUpShaderHandle, {});
+				resolvedShader.bind();
+				resolvedShader.bindUniform("filterRadius", parameters.mRadius);
+				resolvedShader.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(bloomTextures[i]));
+
+				resourceManagers.mMeshManager.resolve("quad").draw();
+
+				glDisable(GL_BLEND);
+				glEnable(GL_DEPTH_TEST);
+				glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
+			});
 		}
 
 		// Create a new full-res render target
@@ -149,7 +146,9 @@ namespace neo {
 			resourceManagers.mTextureManager
 		);
 		// Mix results
-		renderPasses.renderPass(bloomOutputHandle, dimension, [inputTextureHandle, bloomTextures](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(bloomOutputHandle, dimension, [inputTextureHandle, bloomTextures](const ResourceManagers& resourceManagers, const ECS&) {
+			TRACY_GPUN("Bloom Mix");
+
 			auto bloomMixShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomMix Shader", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex, "quad.vert"},
 				{ types::shader::Stage::Fragment, "bloomMix.frag" }
@@ -173,7 +172,7 @@ namespace neo {
 
 			glEnable(GL_DEPTH_TEST);
 			glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
-			});
+		});
 
 		return bloomOutputHandle;
 	}

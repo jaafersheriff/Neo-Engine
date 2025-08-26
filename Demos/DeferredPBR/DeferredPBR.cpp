@@ -442,6 +442,7 @@ namespace DeferredPBR {
 
 		// Main lighting resolve
 		renderPasses.renderPass(hdrColorTarget, viewport.mSize, [cameraEntity, gbufferHandle, viewport, this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_GPUN("Main Lighting Resolve");
 			drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
 			drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
 
@@ -465,22 +466,26 @@ namespace DeferredPBR {
 			bloomResults = bloom(renderPasses, resourceManagers, viewport.mSize, hdrColorTexture, mBloomParams);
 		}
 
-// 		TextureHandle averageLuminance = NEO_INVALID_HANDLE;
-// 		{
-// 			auto previousHDRColorHandle = resourceManagers.mFramebufferManager.asyncLoad(
-// 				"Previous HDR Color",
-// 				FramebufferBuilder{}
-// 				.setSize(viewport.mSize)
-// 				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
-// 				resourceManagers.mTextureManager
-// 			);
-// 			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
-// 				const auto& previousHDRColor = resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle);
-// 				averageLuminance = calculateAutoexposure(resourceManagers, ecs, previousHDRColor.mTextures[0], mAutoExposureParams);
-// 				TRACY_GPUN("Blit Previous HDR Color");
-// 				blit(resourceManagers, previousHDRColor, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0], viewport.mSize);
-// 			}
-// 		}
+		TextureHandle averageLuminance = NEO_INVALID_HANDLE;
+		{
+			auto previousHDRColorHandle = resourceManagers.mFramebufferManager.asyncLoad(
+				"Previous HDR Color",
+				FramebufferBuilder{}
+				.setSize(viewport.mSize)
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
+				resourceManagers.mTextureManager
+			);
+			if (resourceManagers.mFramebufferManager.isValid(bloomResults)) {
+				renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
+					TRACY_GPUN("Blit Previous HDR Color");
+					blit(resourceManagers, resourceManagers.mFramebufferManager.resolve(bloomResults).mTextures[0]);
+				});
+			}
+
+			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
+				averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mTextures[0], mAutoExposureParams);
+			}
+		}
 // 
 // 		FramebufferHandle tonemappedHandle = mDoTonemap ? tonemap(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(bloomHandle).mTextures[0], averageLuminance) : bloomHandle;
 // 		if (mDoTonemap && !resourceManagers.mFramebufferManager.isValid(tonemappedHandle)) {

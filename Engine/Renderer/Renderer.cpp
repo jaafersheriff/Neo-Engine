@@ -158,7 +158,7 @@ namespace neo {
 
 		RenderPasses renderPasses;
 		{
-			TRACY_GPUN("Prepare Demo Draws");
+			TRACY_GPUN("Demo::render");
 			resetState();
 			if (mWireframe) {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -167,6 +167,7 @@ namespace neo {
 		}
 
 		if (mShowBoundingBoxes) {
+			TRACY_ZONEN("Bounding boxes");
 			auto debugDrawTarget = resourceManagers.mFramebufferManager.asyncLoad(
 				"DebugDraw Target",
 				FramebufferExternalAttachments{
@@ -184,6 +185,7 @@ namespace neo {
 
 		/* Render imgui */
 		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
+			TRACY_ZONEN("ImGui");
 			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color);
 
 			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, [this, &window](const ResourceManagers& resourceManagers, const ECS& ecs) {
@@ -193,6 +195,7 @@ namespace neo {
 			}, "ImGui");
 		}
 		else {
+			TRACY_ZONEN("Final Blit");
 			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
 			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, [this](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Final Blit");

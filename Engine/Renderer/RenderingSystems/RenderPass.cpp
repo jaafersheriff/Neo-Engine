@@ -29,6 +29,7 @@ namespace neo {
 	}
 
 	void RenderPasses::_execute(const ResourceManagers& resourceManagers, const ECS& ecs) {
+		TRACY_GPU();
 		for (const auto& pass : mPasses) {
 			util::visit(pass,
 				[&](const ComputePass& computePass) {

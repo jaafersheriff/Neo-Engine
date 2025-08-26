@@ -24,7 +24,7 @@ namespace neo {
 
 	template<typename... CompTs>
 	inline void drawPointLightShadows(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity& lightEntity, const bool clear, PointLightShadowMapParameters params = {}) {
-		TRACY_GPU();
+		TRACY_ZONE();
 
 		NEO_ASSERT(ecs.has<PointLightComponent>(lightEntity) && ecs.has<PointLightShadowMapComponent>(lightEntity), "Invalid light entity for point ligth shadows");
 		TextureHandle shadowCubeHandle = ecs.cGetComponent<PointLightShadowMapComponent>(lightEntity)->mShadowMap;
@@ -36,8 +36,6 @@ namespace neo {
 
 		char targetName[128];
 		for (int i = 0; i < 6; i++) {
-			TRACY_GPUN("Draw Face");
-
 			sprintf(targetName, "%s_%d_%d", "PointLightShadowMap", lightEntity, i);
 
 			FramebufferHandle shadowTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
@@ -57,6 +55,7 @@ namespace neo {
 
 			const Texture& shadowCube = resourceManagers.mTextureManager.resolve(shadowCubeHandle);
 			renderPasses.renderPass(shadowTargetHandle, glm::uvec2(shadowCube.mWidth, shadowCube.mHeight), [i, lightEntity, params](const ResourceManagers& resourceManagers, const ECS& ecs) {
+				TRACY_GPUN("Draw Face");
 				auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightShadowMap Shader", SourceShader::ConstructionArgs{
 					{ types::shader::Stage::Vertex, "model.vert"},
 					{ types::shader::Stage::Fragment, "pointlightdepth.frag" }
