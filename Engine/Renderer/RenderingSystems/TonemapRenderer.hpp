@@ -7,7 +7,7 @@
 
 namespace neo {
 
-	inline FramebufferHandle tonemap(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, glm::uvec2 dimension, TextureHandle inputTextureHandle, TextureHandle averageLuminance = NEO_INVALID_HANDLE) {
+	inline TextureHandle tonemap(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, glm::uvec2 dimension, TextureHandle inputTextureHandle, TextureHandle averageLuminance = NEO_INVALID_HANDLE) {
 		TRACY_GPU();
 
 		if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {
@@ -56,6 +56,10 @@ namespace neo {
 			glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 		});
 
-		return tonemapTargetHandle;
+		if (resourceManagers.mFramebufferManager.isValid(tonemapTargetHandle)) {
+			return resourceManagers.mFramebufferManager.resolve(tonemapTargetHandle).mTextures[0];
+		}
+
+		return NEO_INVALID_HANDLE;
 	}
 }

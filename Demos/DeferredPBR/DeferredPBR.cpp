@@ -461,7 +461,7 @@ namespace DeferredPBR {
 		});
 
 
- 		FramebufferHandle bloomResults = hdrColorTarget;
+ 		TextureHandle bloomResults = hdrColorTexture;
 		if (mDoBloom) {
 			bloomResults = bloom(renderPasses, resourceManagers, viewport.mSize, hdrColorTexture, mBloomParams);
 		}
@@ -475,28 +475,34 @@ namespace DeferredPBR {
 				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
 				resourceManagers.mTextureManager
 			);
-			if (resourceManagers.mFramebufferManager.isValid(bloomResults)) {
-				renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
-					TRACY_GPUN("Blit Previous HDR Color");
-					blit(resourceManagers, resourceManagers.mFramebufferManager.resolve(bloomResults).mTextures[0]);
-				});
-			}
+			renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
+				TRACY_GPUN("Blit Previous HDR Color");
+				blit(resourceManagers, bloomResults);
+			});
 
 			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
 				averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mTextures[0], mAutoExposureParams);
 			}
 		}
  
-		FramebufferHandle tonemappedHandle = bloomResults;
- 		if (mDoTonemap && resourceManagers.mFramebufferManager.isValid(bloomResults)) {
- 			tonemappedHandle = tonemap(renderPasses, resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(bloomResults).mTextures[0], averageLuminance);
+		TextureHandle tonemappedHandle = bloomResults;
+ 		if (mDoTonemap && resourceManagers.mTextureManager.isValid(bloomResults)) {
+ 			tonemappedHandle = tonemap(renderPasses, resourceManagers, viewport.mSize, bloomResults, averageLuminance);
  		}
 
-		NEO_UNUSED(outputColor, outputDepth);
-// 		backbuffer.bind();
-// 		backbuffer.clear(glm::vec4(0.f, 0.f, 0.f, 1.f), types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth);
-// 		drawFXAA(resourceManagers, viewport.mSize, resourceManagers.mFramebufferManager.resolve(tonemappedHandle).mTextures[0]);
+		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+			"FXAA Target",
+			FramebufferExternalAttachments{
+				FramebufferAttachment{outputColor},
+			},
+			resourceManagers.mTextureManager
+		);
+		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
+			drawFXAA(resourceManagers, tonemappedHandle);
+		}, "FXAA");
 // 		// Don't forget the depth. Because reasons.
+		NEO_UNUSED(outputDepth);
 // 		glBlitNamedFramebuffer(hdrColor.mFBOID, backbuffer.mFBOID,
 // 			0, 0, viewport.mSize.x, viewport.mSize.y,
 // 			0, 0, viewport.mSize.x, viewport.mSize.y,

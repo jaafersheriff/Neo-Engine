@@ -23,7 +23,7 @@ namespace neo {
 		}
 	};
 
-	inline FramebufferHandle bloom(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const glm::uvec2 dimension, const TextureHandle inputTextureHandle, const BloomParameters& parameters) {
+	inline TextureHandle bloom(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const glm::uvec2 dimension, const TextureHandle inputTextureHandle, const BloomParameters& parameters) {
 		TRACY_ZONE();
 
 		NEO_ASSERT(parameters.mDownSampleSteps > 0, "Gotta bloom with something");
@@ -174,6 +174,10 @@ namespace neo {
 			glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 		});
 
-		return bloomOutputHandle;
+		if (resourceManagers.mFramebufferManager.isValid(bloomOutputHandle)) {
+			return resourceManagers.mFramebufferManager.resolve(bloomOutputHandle).mTextures[0];
+		}
+
+		return NEO_INVALID_HANDLE;
 	}
 }
