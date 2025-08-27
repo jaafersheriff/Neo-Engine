@@ -430,6 +430,16 @@ namespace DeferredPBR {
 		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
 			return;
 		}
+
+		// Don't forget the depth. Because reasons.
+		blitDepth(
+			renderPasses,
+			resourceManagers,
+			resourceManagers.mFramebufferManager.resolve(gbufferHandle).mTextures[3], // Oof
+			outputDepth,
+			viewport.mSize
+		);
+
 		FramebufferHandle hdrColorTarget = resourceManagers.mFramebufferManager.asyncLoad("HDR Target",
 			FramebufferExternalAttachments{
 				FramebufferAttachment{hdrColorTexture},
@@ -459,7 +469,6 @@ namespace DeferredPBR {
 			drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
 			drawSkybox(resourceManagers, ecs, cameraEntity);
 		});
-
 
  		TextureHandle bloomResults = hdrColorTexture;
 		if (mDoBloom) {
@@ -501,14 +510,6 @@ namespace DeferredPBR {
 		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
 			drawFXAA(resourceManagers, tonemappedHandle);
 		}, "FXAA");
-// 		// Don't forget the depth. Because reasons.
-		NEO_UNUSED(outputDepth);
-// 		glBlitNamedFramebuffer(hdrColor.mFBOID, backbuffer.mFBOID,
-// 			0, 0, viewport.mSize.x, viewport.mSize.y,
-// 			0, 0, viewport.mSize.x, viewport.mSize.y,
-// 			GL_DEPTH_BUFFER_BIT,
-// 			GL_NEAREST
-// 		);
 	}
 
 	void Demo::destroy() {

@@ -197,13 +197,7 @@ namespace Fireworks {
 		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
 			drawFXAA(resourceManagers, tonemappedHandle);
 		}, "FXAA");
-// 		// Don't forget the depth. Because reasons.
-// 		glBlitNamedFramebuffer(hdrColor.mFBOID, backbuffer.mFBOID,
-// 			0, 0, viewport.mSize.x, viewport.mSize.y,
-// 			0, 0, viewport.mSize.x, viewport.mSize.y,
-// 			GL_DEPTH_BUFFER_BIT,
-// 			GL_NEAREST
-// 		);
+
 	}
 
 	void Demo::destroy() {

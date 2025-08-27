@@ -5,6 +5,7 @@
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "Renderer/RenderingSystems/RenderPass.hpp"
 
 #include "Loader/Loader.hpp"
 #include "ResourceManager/ResourceManagers.hpp"
@@ -14,7 +15,7 @@ namespace neo {
 	inline void blit(const ResourceManagers& resourceManagers, TextureHandle inputTextureHandle) {
 		TRACY_GPU();
 
-		auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blit Shader", SourceShader::ShaderCode {			
+		auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blit Shader", SourceShader::ShaderCode{
 			{ types::shader::Stage::Vertex,
 			R"(
 				layout (location = 0) in vec3 vertPos;
@@ -34,7 +35,7 @@ namespace neo {
 					color = texture(inputTexture, fragTex);
 				}
 			)"}
-		}); 
+			});
 		if (!resourceManagers.mShaderManager.isValid(blitShaderHandle)) {
 			return; // RIP
 		}
@@ -47,12 +48,12 @@ namespace neo {
 		int oldPolygonMode;
 		glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		
+
 		auto& resolvedBlit = resourceManagers.mShaderManager.resolveDefines(blitShaderHandle, {});
-		
+
 		// Bind input fbo texture
 		resolvedBlit.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(inputTextureHandle));
-		
+
 		// Render 
 		resourceManagers.mMeshManager.resolve("quad").draw();
 
@@ -60,14 +61,36 @@ namespace neo {
 		glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 	}
 
-	// inline void blitDepth(const ResourceManagers& resourceManagers, TextureHandle inputTextureHandle) {
-	// 	// typedef void (GLAPIENTRY * PFNGLBLITNAMEDFRAMEBUFFERPROC) (GLuint readFramebuffer, GLuint drawFramebuffer, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
-	// 	glBlitNamedFramebuffer(sceneTarget.mFBOID, backbuffer.mFBOID,
-	// 		0, 0, viewport.mSize.x, viewport.mSize.y,
-	// 		0, 0, viewport.mSize.x, viewport.mSize.y,
-	// 		GL_DEPTH_BUFFER_BIT,
-	// 		GL_NEAREST
-	// 	);
-	// }
+	inline void blitDepth(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, TextureHandle srcTexture, TextureHandle dstTexture, glm::uvec2 dimension) {
+		TRACY_ZONE();
 
+		FramebufferHandle inputTarget = resourceManagers.mFramebufferManager.asyncLoad("Input Depth Blit",
+			FramebufferExternalAttachments{
+				FramebufferAttachment{srcTexture},
+			},
+			resourceManagers.mTextureManager
+		);
+		FramebufferHandle outputTarget = resourceManagers.mFramebufferManager.asyncLoad("Output Depth Blit",
+			FramebufferExternalAttachments{
+				FramebufferAttachment{dstTexture},
+			},
+			resourceManagers.mTextureManager
+		);
+
+		// use compute pass to avoid useless/invalid overhead of renderpasses
+		renderPasses.computePass([inputTarget, outputTarget, dimension](const ResourceManagers& resourceManagers, const ECS&) {
+			if (resourceManagers.mFramebufferManager.isValid(inputTarget) && resourceManagers.mFramebufferManager.isValid(outputTarget)) {
+				const Framebuffer& inputFramebuffer = resourceManagers.mFramebufferManager.resolve(inputTarget);
+				const Framebuffer& outputFramebuffer = resourceManagers.mFramebufferManager.resolve(outputTarget);
+				glBlitNamedFramebuffer(inputFramebuffer.mFBOID, outputFramebuffer.mFBOID,
+					0, 0, dimension.x, dimension.y,
+					0, 0, dimension.x, dimension.y,
+					GL_DEPTH_BUFFER_BIT,
+					GL_NEAREST
+				);
+			}
+		});
+
+
+	}
 }

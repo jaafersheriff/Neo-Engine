@@ -30,26 +30,35 @@ namespace neo {
 		lineShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
 
 		const auto& view = ecs.getView<const LineMeshComponent, const SpatialComponent, CompTs...>();
-		for (auto entity : view) {
-			const auto line = ecs.cGetComponent<const LineMeshComponent>(entity);
-
-			glm::mat4 M(1.f);
-			if (line->mUseParentSpatial) {
-				if (auto spatial = ecs.cGetComponent<SpatialComponent>(entity)) {
-					M = spatial->getModelMatrix();
-				}
-			}
-			lineShader.bindUniform("M", M);
-			if (line->mWriteDepth) {
+		auto drawView = [&](const bool writeDepth) {
+			TRACY_GPUN("Draw view");
+			if (writeDepth) {
 				glEnable(GL_DEPTH_TEST);
 			}
 			else {
 				glDisable(GL_DEPTH_TEST);
 			}
 
-			/* Bind mesh */
-			line->getMesh(resourceManagers.mMeshManager).draw();
-		}
+			for (auto entity : view) {
+				const auto line = ecs.cGetComponent<const LineMeshComponent>(entity);
+				if (writeDepth != line->mWriteDepth) {
+					continue;
+				}
+
+				glm::mat4 M(1.f);
+				if (line->mUseParentSpatial) {
+					if (auto spatial = ecs.cGetComponent<SpatialComponent>(entity)) {
+						M = spatial->getModelMatrix();
+					}
+				}
+				lineShader.bindUniform("M", M);
+
+				line->getMesh(resourceManagers.mMeshManager).draw();
+			}
+		};
+
+		drawView(true);
+		drawView(false);
 
 		if (oldDepthState) {
 			glEnable(GL_DEPTH_TEST);
