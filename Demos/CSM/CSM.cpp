@@ -197,7 +197,7 @@ namespace CSM {
 			resourceManagers.mTextureManager
 		);
 
-		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
+		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear output target");
 		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Main pass");
 			const auto [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
@@ -214,6 +214,6 @@ namespace CSM {
 				drawWireframe<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
 				drawWireframe<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);
 			}
-		});
+		}, "Draw scene");
 	}
 }

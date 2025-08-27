@@ -189,7 +189,7 @@ namespace neo {
 		/* Render imgui */
 		if (!ServiceLocator<ImGuiManager>::empty() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
 			TRACY_ZONEN("ImGui");
-			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color);
+			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color, glm::vec4(0,0,0,1), "Clear backbuffer");
 
 			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, [this, &window](const ResourceManagers& resourceManagers, const ECS& ecs) {
 				TRACY_GPUN("ImGui Render");
@@ -206,7 +206,7 @@ namespace neo {
 			}, "Final Blit");
 		}
 
-		renderPasses._execute(resourceManagers, ecs);
+		renderPasses._execute(mStats, resourceManagers, ecs);
 	}
 
 	void Renderer::_imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager) {
@@ -266,6 +266,13 @@ namespace neo {
 			ImGui::TextWrapped("Num Samplers: %d", mStats.mNumSamplers);
 			ImGui::TreePop();
 		}
+		if (ImGui::TreeNodeEx("Render Passes")) {
+			for (const auto& pass : mStats.mRenderPasses) {
+				ImGui::TextWrapped("%s", pass.c_str());
+			}
+			ImGui::TreePop();
+		}
+
 
 		if (ImGui::Button("VSync")) {
 			window.toggleVSync();

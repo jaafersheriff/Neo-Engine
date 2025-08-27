@@ -1,5 +1,6 @@
 #include "Renderer/pch.hpp"
 
+#include "Renderer/FrameStats.hpp"
 #include "RenderPass.hpp"
 
 namespace neo {
@@ -28,16 +29,19 @@ namespace neo {
 		});
 	}
 
-	void RenderPasses::_execute(const ResourceManagers& resourceManagers, const ECS& ecs) {
+	void RenderPasses::_execute(FrameStats& renderStats, const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderStats.mRenderPasses.clear();
 		TRACY_GPU();
 		for (const auto& pass : mPasses) {
 			util::visit(pass,
 				[&](const ComputePass& computePass) {
-					// TODO: Debug string?
+					renderStats.mRenderPasses.emplace_back(computePass.mDebugName.value_or("Nameless compute pass"));
+
 					computePass.mDrawFunction(resourceManagers, ecs);
 				},
 				[&](const RenderPass& renderPass) {
-					// TODO: Debug string?
+					renderStats.mRenderPasses.emplace_back(renderPass.mDebugName.value_or("Nameless compute pass"));
+
 					if (!resourceManagers.mFramebufferManager.isValid(renderPass.mTarget)) {
 						NEO_LOG_W("Unable to resolve target, skipping pass %s", renderPass.mDebugName.value_or("").c_str());
 						return;
@@ -47,6 +51,8 @@ namespace neo {
 					renderPass.mDrawFunction(resourceManagers, ecs);
 				},
 				[&](const ClearPass& clearPass) {
+					renderStats.mRenderPasses.emplace_back(clearPass.mDebugName.value_or("Nameless render pass"));
+
 					TRACY_GPUN("Clear");
 					if (!resourceManagers.mFramebufferManager.isValid(clearPass.mTarget)) {
 						NEO_LOG_W("Unable to resolve target, skipping clear %s", clearPass.mDebugName.value_or("").c_str());

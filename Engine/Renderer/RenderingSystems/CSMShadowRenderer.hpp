@@ -44,7 +44,7 @@ namespace neo {
 			);
 
 			if (clear) {
-				renderPasses.clear(shadowMapHandle, types::framebuffer::AttachmentBit::Depth, glm::uvec4(0));
+				renderPasses.clear(shadowMapHandle, types::framebuffer::AttachmentBit::Depth, glm::uvec4(0), "Clear single CSM");
 			}
 
 			// Uhh is this important?
@@ -100,7 +100,7 @@ namespace neo {
 				}
 
 				glCullFace(GL_BACK);
-			});
+			}, "Draw single CSM");
 		}
 	}
 

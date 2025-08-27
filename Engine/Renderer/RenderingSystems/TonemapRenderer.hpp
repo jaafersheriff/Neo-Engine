@@ -21,7 +21,7 @@ namespace neo {
 				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB8_UNORM }),
 			resourceManagers.mTextureManager
 		);
-		renderPasses.clear(tonemapTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
+		renderPasses.clear(tonemapTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear tonemap target");
 		renderPasses.renderPass(tonemapTargetHandle, dimension, [averageLuminance, inputTextureHandle](const ResourceManagers& resourceManagers, const ECS&) {
 			auto tonemapShaderHandle = resourceManagers.mShaderManager.asyncLoad("Tonemap Shader", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex, "quad.vert"},
@@ -54,7 +54,7 @@ namespace neo {
 			resourceManagers.mMeshManager.resolve("quad").draw();
 			glEnable(GL_DEPTH_TEST);
 			glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
-		});
+		}, "Tonemap");
 
 		if (resourceManagers.mFramebufferManager.isValid(tonemapTargetHandle)) {
 			return resourceManagers.mFramebufferManager.resolve(tonemapTargetHandle).mTextures[0];

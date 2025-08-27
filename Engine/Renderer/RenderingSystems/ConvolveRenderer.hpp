@@ -55,26 +55,28 @@ namespace neo {
 			return;
 		}
 
-		renderPasses.computePass([&ibl](const ResourceManagers& resourceManagers, const ECS&) {
-			TRACY_GPUN("DFG LUT");
-			if (resourceManagers.mTextureManager.isValid(ibl.mDFGLut) && !ibl.mDFGGenerated) {
-				auto dfgLutShaderHandle = resourceManagers.mShaderManager.asyncLoad("DFGLutShader", SourceShader::ConstructionArgs{
-					{ types::shader::Stage::Compute, "dfglut.comp" }
-				});
-				if (resourceManagers.mShaderManager.isValid(dfgLutShaderHandle)) {
-					auto& dfgLutShader = resourceManagers.mShaderManager.resolveDefines(dfgLutShaderHandle, {});
-					dfgLutShader.bind();
+		if (!ibl.mDFGGenerated) {
+			renderPasses.computePass([&ibl](const ResourceManagers& resourceManagers, const ECS&) {
+				TRACY_GPUN("DFG LUT");
+				if (resourceManagers.mTextureManager.isValid(ibl.mDFGLut)) {
+					auto dfgLutShaderHandle = resourceManagers.mShaderManager.asyncLoad("DFGLutShader", SourceShader::ConstructionArgs{
+						{ types::shader::Stage::Compute, "dfglut.comp" }
+						});
+					if (resourceManagers.mShaderManager.isValid(dfgLutShaderHandle)) {
+						auto& dfgLutShader = resourceManagers.mShaderManager.resolveDefines(dfgLutShaderHandle, {});
+						dfgLutShader.bind();
 
-					auto barrier = dfgLutShader.bindImageTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut), types::shader::Access::Write);
-					dfgLutShader.dispatch({
-						ibl.mDFGLutResolution / 8,
-						ibl.mDFGLutResolution / 8,
-						1
-					});
-					ibl.mDFGGenerated = true;
+						auto barrier = dfgLutShader.bindImageTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut), types::shader::Access::Write);
+						dfgLutShader.dispatch({
+							ibl.mDFGLutResolution / 8,
+							ibl.mDFGLutResolution / 8,
+							1
+							});
+						ibl.mDFGGenerated = true;
+					}
 				}
-			}
-		}, "DFG LUT");
+			}, "DFG LUT");
+		}
 
 		if (ibl.mConvolvedSkybox == NEO_INVALID_HANDLE) {
 			ibl.mConvolvedSkybox = resourceManagers.mTextureManager.asyncLoad(
@@ -93,46 +95,47 @@ namespace neo {
 			return;
 		}
 
-		renderPasses.computePass([&ibl, &skyboxCubemap](const ResourceManagers& resourceManagers, const ECS&) {
-			TRACY_GPUN("Convolve");
-			if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox) && !ibl.mConvolved) {
-				auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", SourceShader::ConstructionArgs{
-					{ types::shader::Stage::Compute, "convolve.comp" }
-				});
-				if (resourceManagers.mShaderManager.isValid(convolveShaderHandle)) {
-					const auto& convolvedCubemap = resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox);
-	
-					ShaderDefines defines;
-					MakeDefine(EQUIRECTANGULAR);
-					MakeDefine(HDR);
-					if (skyboxCubemap.mFormat.mTarget == types::texture::Target::Texture2D) {
-						defines.set(EQUIRECTANGULAR);
-					}
-					if (skyboxCubemap.mFormat.mType != types::ByteFormats::UnsignedByte) {
-						defines.set(HDR);
-					}
-					auto& convolveShader = resourceManagers.mShaderManager.resolveDefines(convolveShaderHandle, defines);
-					convolveShader.bind();
-	
-					convolveShader.bindTexture("cubeMap", skyboxCubemap);
-					convolveShader.bindUniform("resolution", convolvedCubemap.mWidth);
-					for (int mip = 0; mip < convolvedCubemap.mFormat.mMipCount; mip++) {
-						convolveShader.bindUniform("mipLevel", mip);
-						uint16_t mipResolution = convolvedCubemap.mWidth >> uint16_t(mip);
-						convolveShader.bindUniform("roughness", mip / static_cast<float>(convolvedCubemap.mFormat.mMipCount - 2));
-						convolveShader.bindUniform("sampleCount", ibl.mSampleCount);
-						auto barrier = convolveShader.bindImageTexture("dst", convolvedCubemap, types::shader::Access::Write, mip);
-						convolveShader.dispatch({
-							mipResolution / 8,
-							mipResolution / 8,
-							1
+		if (!ibl.mConvolved) {
+			renderPasses.computePass([&ibl, &skyboxCubemap](const ResourceManagers& resourceManagers, const ECS&) {
+				TRACY_GPUN("Convolve");
+				if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox)) {
+					auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", SourceShader::ConstructionArgs{
+						{ types::shader::Stage::Compute, "convolve.comp" }
 						});
-					}
-	
-					ibl.mConvolved = true;
-				}
-			}
+					if (resourceManagers.mShaderManager.isValid(convolveShaderHandle)) {
+						const auto& convolvedCubemap = resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox);
 
-		}, "Convolve");
+						ShaderDefines defines;
+						MakeDefine(EQUIRECTANGULAR);
+						MakeDefine(HDR);
+						if (skyboxCubemap.mFormat.mTarget == types::texture::Target::Texture2D) {
+							defines.set(EQUIRECTANGULAR);
+						}
+						if (skyboxCubemap.mFormat.mType != types::ByteFormats::UnsignedByte) {
+							defines.set(HDR);
+						}
+						auto& convolveShader = resourceManagers.mShaderManager.resolveDefines(convolveShaderHandle, defines);
+						convolveShader.bind();
+
+						convolveShader.bindTexture("cubeMap", skyboxCubemap);
+						convolveShader.bindUniform("resolution", convolvedCubemap.mWidth);
+						for (int mip = 0; mip < convolvedCubemap.mFormat.mMipCount; mip++) {
+							convolveShader.bindUniform("mipLevel", mip);
+							uint16_t mipResolution = convolvedCubemap.mWidth >> uint16_t(mip);
+							convolveShader.bindUniform("roughness", mip / static_cast<float>(convolvedCubemap.mFormat.mMipCount - 2));
+							convolveShader.bindUniform("sampleCount", ibl.mSampleCount);
+							auto barrier = convolveShader.bindImageTexture("dst", convolvedCubemap, types::shader::Access::Write, mip);
+							convolveShader.dispatch({
+								mipResolution / 8,
+								mipResolution / 8,
+								1
+								});
+						}
+
+						ibl.mConvolved = true;
+					}
+				}
+			}, "Convolve");
+		}
 	}
 }

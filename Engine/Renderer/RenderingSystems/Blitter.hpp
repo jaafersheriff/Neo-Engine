@@ -89,7 +89,7 @@ namespace neo {
 					GL_NEAREST
 				);
 			}
-		});
+		}, "Depth blit");
 
 
 	}

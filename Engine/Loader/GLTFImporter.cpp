@@ -616,7 +616,7 @@ namespace neo {
 				));
 
 				NEO_LOG_I("Successfully imported %s", path.c_str());
-				})
+			})
 				.detach();
 		}
 	}

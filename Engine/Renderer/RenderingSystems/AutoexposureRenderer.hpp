@@ -62,7 +62,7 @@ namespace neo {
 				auto imageBarrier2 = clearShader.bindImageTexture("histogram", resourceManagers.mTextureManager.resolve(histogramHandle), types::shader::Access::Write);
 				clearShader.dispatch({ 16, 16, 1 });
 			}
-		});
+		}, "Histogram clear");
 
 		renderPasses.computePass([histogramHandle, previousFrameHDR, params](const ResourceManagers& resourceManagers, const ECS&) {
 			TRACY_GPUN("Histogram populate");
@@ -83,7 +83,7 @@ namespace neo {
 				auto imageBarrier2 = populateShader.bindImageTexture("histogram", resourceManagers.mTextureManager.resolve(histogramHandle), types::shader::Access::ReadWrite);
 				populateShader.dispatch({ std::ceil(previousFrame.mWidth / 16.f), std::ceil(previousFrame.mHeight / 16.f), 1 });
 			}
-		});
+		}, "Histogram populate");
 
 		auto outputTexture = resourceManagers.mTextureManager.asyncLoad("Histogram Average", TextureBuilder{}
 			.setDimension({ 1, 1, 0 })
@@ -117,7 +117,7 @@ namespace neo {
 				auto imageBarrier2 = averageShader.bindImageTexture("dst", resourceManagers.mTextureManager.resolve(outputTexture), types::shader::Access::Write);
 				averageShader.dispatch({ 1, 1, 1 });
 			}
-		});
+		}, "Histogram average");
 
 		return outputTexture;
 	}

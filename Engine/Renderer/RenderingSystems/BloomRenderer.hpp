@@ -99,7 +99,7 @@ namespace neo {
 				resourceManagers.mMeshManager.resolve("quad").draw();
 				glEnable(GL_DEPTH_TEST);
 				glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
-			});
+			}, "Bloom down");
 		}
 
 		// Up sample
@@ -134,7 +134,7 @@ namespace neo {
 				glDisable(GL_BLEND);
 				glEnable(GL_DEPTH_TEST);
 				glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
-			});
+			}, "Bloom up");
 		}
 
 		// Create a new full-res render target
@@ -172,7 +172,7 @@ namespace neo {
 
 			glEnable(GL_DEPTH_TEST);
 			glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
-		});
+		}, "Bloom mix");
 
 		if (resourceManagers.mFramebufferManager.isValid(bloomOutputHandle)) {
 			return resourceManagers.mFramebufferManager.resolve(bloomOutputHandle).mTextures[0];

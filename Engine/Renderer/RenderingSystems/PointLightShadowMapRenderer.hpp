@@ -50,7 +50,7 @@ namespace neo {
 				resourceManagers.mTextureManager
 			);
 			if (clear) {
-				renderPasses.clear(shadowTargetHandle, types::framebuffer::AttachmentBit::Depth, glm::uvec4(0));
+				renderPasses.clear(shadowTargetHandle, types::framebuffer::AttachmentBit::Depth, glm::uvec4(0), "Clear point light shadow face");
 			}
 
 			const Texture& shadowCube = resourceManagers.mTextureManager.resolve(shadowCubeHandle);
@@ -119,7 +119,7 @@ namespace neo {
 					resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
 					resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 				}
-			});
+			}, "Draw pointlight shadow face");
 		}
 	}
 }

@@ -399,7 +399,7 @@ namespace DeferredPBR {
  		}
  
  		FramebufferHandle gbufferHandle = createGbuffer(resourceManagers, viewport.mSize);
-		renderPasses.clear(gbufferHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f));
+		renderPasses.clear(gbufferHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f), "Clear buffer");
 		renderPasses.renderPass(gbufferHandle, viewport.mSize, [cameraEntity](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Draw Gbuffer");
  			drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
@@ -468,7 +468,7 @@ namespace DeferredPBR {
 			drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
 			drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
 			drawSkybox(resourceManagers, ecs, cameraEntity);
-		});
+		}, "Main lighting resolve");
 
  		TextureHandle bloomResults = hdrColorTexture;
 		if (mDoBloom) {
@@ -487,7 +487,7 @@ namespace DeferredPBR {
 			renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Blit Previous HDR Color");
 				blit(resourceManagers, bloomResults);
-			});
+			}, "Blit previous frame");
 
 			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
 				averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mTextures[0], mAutoExposureParams);
