@@ -65,7 +65,7 @@ namespace neo {
 			// TODO - this is a linear search :(
 			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
 			{
-				std::lock_guard<std::mutex> lock(mLoadQueueMutex);
+				std::shared_lock<std::mutex> lock(mLoadQueueMutex);
 				for (auto& res : mLoadQueue) {
 					if (id == res.mHandle) {
 						return true;
@@ -82,7 +82,7 @@ namespace neo {
 			// TODO - this is a linear search :(
 			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
 			{
-				std::lock_guard<std::mutex> lock(mDiscardQueueMutex);
+				std::shared_lock<std::mutex> lock(mDiscardQueueMutex);
 				for (auto& res : mDiscardQueue) {
 					if (id == res.mHandle) {
 						return true;
