@@ -47,16 +47,11 @@ namespace neo {
 				renderPasses.clear(shadowMapHandle, types::framebuffer::AttachmentBit::Depth, glm::uvec4(0), "Clear single CSM");
 			}
 
-			// Uhh is this important?
-			// auto& shadowTarget = resourceManagers.mFramebufferManager.resolve(shadowMapHandle);
-			// shadowTarget.disableDraw();
-			// shadowTarget.disableRead();
-			// shadowTarget.bind();
+			RenderState cullFront;
+			cullFront.mCullFace = CullFace::Front;
 			const Texture& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap);
-			renderPasses.renderPass(shadowMapHandle, glm::uvec2(shadowTexture.mWidth >> slice, shadowTexture.mHeight >> slice), [cameraEntity, shaderHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			renderPasses.renderPass(shadowMapHandle, glm::uvec2(shadowTexture.mWidth >> slice, shadowTexture.mHeight >> slice), cullFront, [cameraEntity, shaderHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
 				TRACY_GPUN("_drawSingleCSM");
-
-				glCullFace(GL_FRONT);
 
 				NEO_ASSERT(ecs.has<SpatialComponent>(cameraEntity) && ecs.has<CameraComponent>(cameraEntity), "Light entity is just wrong");
 				const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
@@ -98,8 +93,6 @@ namespace neo {
 					resolvedShader.bindUniform("M", view.get<const SpatialComponent>(entity).getModelMatrix());
 					resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
 				}
-
-				glCullFace(GL_BACK);
 			}, "Draw single CSM");
 		}
 	}

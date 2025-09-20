@@ -158,7 +158,15 @@ namespace Compute {
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.0));
  		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		// Draw the mesh
-		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		RenderState renderState;
+		renderState.mDepthState = std::nullopt;
+		renderState.mCullFace = std::nullopt;
+		renderState.mBlendState = BlendState{
+			BlendEquation::Add,
+			BlendFuncSrc::Alpha,
+			BlendFuncDst::One
+		};
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, renderState, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Draw Particles");
 			auto particlesVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticleVis", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex,   "compute/particles.vert" },
@@ -183,14 +191,7 @@ namespace Compute {
 
 			if (auto meshView = ecs.getSingleView<ParticleMeshComponent, SpatialComponent>()) {
 				auto&& [_, meshComponent, spatial] = *meshView;
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-				glDisable(GL_DEPTH_TEST);
-				glDisable(GL_CULL_FACE);
-
 				particlesVisShader.bindUniform("M", spatial.getModelMatrix());
-
-				/* DRAW */
 				resourceManagers.mMeshManager.resolve(meshComponent.mMeshHandle).draw();
 			}
 		});
