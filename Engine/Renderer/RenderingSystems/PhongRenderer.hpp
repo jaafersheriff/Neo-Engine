@@ -26,116 +26,124 @@
 namespace neo {
 
 	template<typename... CompTs>
-	void drawPhong(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
-		TRACY_GPU();
+	void drawPhong(
+		RenderPasses& renderPasses, 
+		const FramebufferHandle& outputTargetHandle, 
+		const glm::uvec2 viewport, 
+		const ECS::Entity cameraEntity, 
+		const ShaderDefines& inDefines = {}
+	) {
+		TRACY_ZONE();
 
-		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Phong Shader", 
-			SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "model.vert"},
-				{ types::shader::Stage::Fragment, "phong.frag" }
-			}
-		);
-		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
-			return;
-		}
+		constexpr bool containsAlphaTest = (std::is_same_v<AlphaTestComponent, CompTs> || ...);
+		constexpr bool containsTransparency = (std::is_same_v<TransparentComponent, CompTs> || ...);
 
-		ShaderDefines passDefines(inDefines);
-		bool containsAlphaTest = false;
-		bool containsTransparency = false;
-		MakeDefine(ALPHA_TEST);
-		MakeDefine(TRANSPARENT);
-		if constexpr ((std::is_same_v<AlphaTestComponent, CompTs> || ...)) {
-			containsAlphaTest = true;
-			passDefines.set(ALPHA_TEST);
-		}
-		if constexpr ((std::is_same_v<TransparentComponent, CompTs> || ...)) {
-			containsTransparency = true;
-			passDefines.set(TRANSPARENT);
-
-			glEnable(GL_BLEND);
-			glBlendEquation(GL_FUNC_ADD);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
-
-		const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
-		const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
-		auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
-
-		bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
-		bool pointLight = ecs.has<PointLightComponent>(lightEntity);
-		MakeDefine(DIRECTIONAL_LIGHT);
-		MakeDefine(POINT_LIGHT);
-		if (directionalLight) {
-			passDefines.set(DIRECTIONAL_LIGHT);
-		}
-		else if (pointLight) {
-			passDefines.set(POINT_LIGHT);
-		}
-		else {
-			NEO_FAIL("Phong light needs a directional or point light component");
-		}
-
-		ShaderDefines drawDefines(passDefines);
-		// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
-		const auto& view = ecs.getView<const PhongRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
-		for (auto entity : view) {
-			// VFC
-			if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
-				if (!culled->isInView(ecs, entity, cameraEntity)) {
-					continue;
-				}
-			}
-
-			drawDefines.reset();
-
-			const auto& material = view.get<const MaterialComponent>(entity);
-			MakeDefine(ALBEDO_MAP);
-			MakeDefine(NORMAL_MAP);
-
-			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-				drawDefines.set(ALBEDO_MAP);
-			}
-			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-				drawDefines.set(NORMAL_MAP);
-			}
-
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
-			resolvedShader.bind();
-
-			resolvedShader.bindUniform("albedo", material.mAlbedoColor);
-			if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
-				resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material.mAlbedoMap));
-			}
-
-			if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
-				resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
-			}
-
-			// UBO candidates
-			{
-				resolvedShader.bindUniform("P", P);
-				resolvedShader.bindUniform("V", cameraSpatial->getView());
-				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
-				resolvedShader.bindUniform("lightCol", light.mColor);
-				if (directionalLight) {
-					resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
-				}
-				if (pointLight) {
-					resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
-					resolvedShader.bindUniform("lightRadiance", light.mIntensity);
-				}
-			}
-
-			const auto& drawSpatial = view.get<const SpatialComponent>(entity);
-			resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
-			resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
-
-			resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
-		}
-
+		RenderState renderState;
 		if (containsTransparency) {
-			glDisable(GL_BLEND);
+			renderState.mBlendState = BlendState{
+				BlendEquation::Add,
+				BlendFuncSrc::Alpha,
+				BlendFuncDst::OneMinusSrcAlpha
+			};
 		}
 
+		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [&](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_GPU();
+			auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Phong Shader",
+				SourceShader::ConstructionArgs{
+					{ types::shader::Stage::Vertex, "model.vert"},
+					{ types::shader::Stage::Fragment, "phong.frag" }
+				}
+			);
+			if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
+				return;
+			}
+
+			ShaderDefines passDefines(inDefines);
+			MakeDefine(ALPHA_TEST);
+			MakeDefine(TRANSPARENT);
+			if (containsAlphaTest) {
+				passDefines.set(ALPHA_TEST);
+			}
+			if (containsTransparency) {
+				passDefines.set(TRANSPARENT);
+			}
+
+			const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
+			const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
+			auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
+
+			bool directionalLight = ecs.has<DirectionalLightComponent>(lightEntity);
+			bool pointLight = ecs.has<PointLightComponent>(lightEntity);
+			MakeDefine(DIRECTIONAL_LIGHT);
+			MakeDefine(POINT_LIGHT);
+			if (directionalLight) {
+				passDefines.set(DIRECTIONAL_LIGHT);
+			}
+			else if (pointLight) {
+				passDefines.set(POINT_LIGHT);
+			}
+			else {
+				NEO_FAIL("Phong light needs a directional or point light component");
+			}
+
+			ShaderDefines drawDefines(passDefines);
+			// No transparency sorting on the view, because I'm lazy, and this is stinky phong renderer
+			const auto& view = ecs.getView<const PhongRenderComponent, const MeshComponent, const MaterialComponent, const SpatialComponent, const CompTs...>();
+			for (auto entity : view) {
+				// VFC
+				if (auto* culled = ecs.cGetComponent<CameraCulledComponent>(entity)) {
+					if (!culled->isInView(ecs, entity, cameraEntity)) {
+						continue;
+					}
+				}
+
+				drawDefines.reset();
+
+				const auto& material = view.get<const MaterialComponent>(entity);
+				MakeDefine(ALBEDO_MAP);
+				MakeDefine(NORMAL_MAP);
+
+				if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
+					drawDefines.set(ALBEDO_MAP);
+				}
+				if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
+					drawDefines.set(NORMAL_MAP);
+				}
+
+				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
+				resolvedShader.bind();
+
+				resolvedShader.bindUniform("albedo", material.mAlbedoColor);
+				if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
+					resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material.mAlbedoMap));
+				}
+
+				if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
+					resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
+				}
+
+				// UBO candidates
+				{
+					resolvedShader.bindUniform("P", P);
+					resolvedShader.bindUniform("V", cameraSpatial->getView());
+					resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
+					resolvedShader.bindUniform("lightCol", light.mColor);
+					if (directionalLight) {
+						resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
+					}
+					if (pointLight) {
+						resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
+						resolvedShader.bindUniform("lightRadiance", light.mIntensity);
+					}
+				}
+
+				const auto& drawSpatial = view.get<const SpatialComponent>(entity);
+				resolvedShader.bindUniform("M", drawSpatial.getModelMatrix());
+				resolvedShader.bindUniform("N", drawSpatial.getNormalMatrix());
+
+				resourceManagers.mMeshManager.resolve(view.get<const MeshComponent>(entity).mMeshHandle).draw();
+			}
+		}, "Draw Phong");
 	}
 }

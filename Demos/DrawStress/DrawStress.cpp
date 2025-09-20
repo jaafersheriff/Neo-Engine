@@ -97,9 +97,7 @@ namespace DrawStress {
 		);
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [cameraEntity](const ResourceManagers& resourceManagers, const ECS& ecs) {
-			drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-		});
+		drawPhong<OpaqueComponent>(renderPasses, outputTargetHandle, viewport.mSize, cameraEntity);
 	}
 
 	void Demo::destroy() {
