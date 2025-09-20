@@ -159,8 +159,8 @@ namespace Fireworks {
 		    }, resourceManagers.mTextureManager
 		);
 		renderPasses.clear(sceneTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
+		drawForwardPBR<OpaqueComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);
 		renderPasses.renderPass(sceneTargetHandle, viewport.mSize, [cameraEntity](const ResourceManagers& resourceManagers, const ECS& ecs) {
-			drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 			_drawParticles(resourceManagers, ecs);
 		});
 

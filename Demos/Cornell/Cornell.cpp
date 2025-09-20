@@ -130,10 +130,8 @@ namespace Cornell {
 		);
 
 		renderPasses.clear(sceneTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
-		renderPasses.renderPass(sceneTargetHandle, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
-			const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-			drawForwardPBR<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-		});
+		const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+		drawForwardPBR<OpaqueComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);
 
 		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"FXAA Target",

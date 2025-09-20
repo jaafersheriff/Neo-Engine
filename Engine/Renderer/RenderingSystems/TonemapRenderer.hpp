@@ -22,7 +22,9 @@ namespace neo {
 			resourceManagers.mTextureManager
 		);
 		renderPasses.clear(tonemapTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear tonemap target");
-		renderPasses.renderPass(tonemapTargetHandle, dimension, [averageLuminance, inputTextureHandle](const ResourceManagers& resourceManagers, const ECS&) {
+		RenderState disableDepthState;
+		disableDepthState.mDepthState = std::nullopt;
+		renderPasses.renderPass(tonemapTargetHandle, dimension, disableDepthState, [averageLuminance, inputTextureHandle](const ResourceManagers& resourceManagers, const ECS&) {
 			auto tonemapShaderHandle = resourceManagers.mShaderManager.asyncLoad("Tonemap Shader", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex, "quad.vert"},
 				{ types::shader::Stage::Fragment, "tonemap.frag" }
@@ -46,14 +48,7 @@ namespace neo {
 				resolvedShader.bindTexture("averageLuminance", resourceManagers.mTextureManager.resolve(averageLuminance));
 			}
 
-			glDisable(GL_DEPTH_TEST);
-			int oldPolygonMode;
-			glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
 			resourceManagers.mMeshManager.resolve("quad").draw();
-			glEnable(GL_DEPTH_TEST);
-			glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 		}, "Tonemap");
 
 		if (resourceManagers.mFramebufferManager.isValid(tonemapTargetHandle)) {
