@@ -48,6 +48,8 @@ namespace neo {
 				return false;
 			});
 		}
+
+		// I'm too lazy to translate these into some Neo interface thing
 		glEnable(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ZERO, GL_ZERO);

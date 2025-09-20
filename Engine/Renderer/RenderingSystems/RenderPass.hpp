@@ -9,6 +9,7 @@ namespace neo {
 	// TODO - these should move to their own file
 	enum class DepthFunc {
 		Less,
+		LessEqual
 	};
 	struct DepthState {
 		DepthFunc mDepthFunc;
@@ -34,17 +35,18 @@ namespace neo {
 		One
 	};
 	struct BlendState {
-		BlendEquation mBlendEquation;
-		BlendFuncSrc mBlendSrc;
-		BlendFuncDst mBlendDst;
+		BlendEquation mBlendEquation  = BlendEquation::Add;
+		BlendFuncSrc mBlendSrc = BlendFuncSrc::Alpha;
+		BlendFuncDst mBlendDst = BlendFuncDst::OneMinusSrcAlpha;
+		glm::vec4 mBlendColor = glm::vec4(0.f);
 	};
 
 	// TODO - these should move to their own file
 	struct RenderState {
 		// Default render state
 		std::optional<DepthState> mDepthState = DepthState{
-				DepthFunc::Less,
-				true
+			DepthFunc::Less,
+			true
 		};
 		std::optional<CullFace> mCullFace = CullFace::Back;
 		std::optional<BlendState> mBlendState = std::nullopt;

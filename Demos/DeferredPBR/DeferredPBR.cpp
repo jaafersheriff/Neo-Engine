@@ -449,15 +449,14 @@ namespace DeferredPBR {
 				FramebufferAttachment{resourceManagers.mFramebufferManager.resolve(gbufferHandle).mTextures[3]}, // Oof
 			},
 			resourceManagers.mTextureManager
-			);
+		);
 		// Don't clear depth because we just grabbed the gbuffer's attachment
 		renderPasses.clear(hdrColorTarget, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
 
 		// Main lighting resolve
-		renderPasses.renderPass(hdrColorTarget, viewport.mSize, [cameraEntity, gbufferHandle, viewport, this](const ResourceManagers& resourceManagers, const ECS& ecs) {
-			TRACY_GPUN("Main Lighting Resolve");
-			drawDirectionalLightResolve<MainLightComponent>(resourceManagers, ecs, cameraEntity, gbufferHandle);
-			drawPointLightResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, viewport.mSize, mLightDebugRadius);
+		{
+			drawDirectionalLightResolve<MainLightComponent>(renderPasses, hdrColorTarget, viewport.mSize, cameraEntity, gbufferHandle);
+			drawPointLightResolve(renderPasses, hdrColorTarget, viewport.mSize, cameraEntity, gbufferHandle, mLightDebugRadius);
 
 			// Extract IBL
 			std::optional<IBLComponent> ibl;
@@ -468,10 +467,11 @@ namespace DeferredPBR {
 					ibl = _ibl;
 				}
 			}
-			drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
-			drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
-			drawSkybox(resourceManagers, ecs, cameraEntity);
-			}, "Main lighting resolve");
+
+			drawIndirectResolve(renderPasses, hdrColorTarget, viewport.mSize, cameraEntity, gbufferHandle, ibl);
+			drawForwardPBR<TransparentComponent>(renderPasses, hdrColorTarget, viewport.mSize, cameraEntity, ibl);
+			drawSkybox(renderPasses, hdrColorTarget, viewport.mSize, cameraEntity);
+		}
 
 		TextureHandle bloomResults = hdrColorTexture;
 		if (mDoBloom) {

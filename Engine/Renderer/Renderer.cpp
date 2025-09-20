@@ -161,7 +161,7 @@ namespace neo {
 			TRACY_ZONEN("ImGui");
 			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color, glm::vec4(0,0,0,1), "Clear backbuffer");
 
-			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, [this, &window](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, RenderState{}, [this, &window](const ResourceManagers& resourceManagers, const ECS& ecs) {
 				TRACY_GPUN("ImGui Render");
 				drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
 			}, "ImGui");

@@ -18,51 +18,248 @@ using namespace neo;
 namespace DeferredPBR {
 
 	template<typename... CompTs>
-	void drawDirectionalLightResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle) {
-		TRACY_GPU();
+	void drawDirectionalLightResolve(
+		RenderPasses& renderPasses,
+		const FramebufferHandle& outputTargetHandle,
+		const glm::uvec2& viewport,
+		const ECS::Entity cameraEntity,
+		const FramebufferHandle& gbufferHandle) {
+		TRACY_ZONE();
 
-		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
-			return;
-		}
+		RenderState disableDepth;
+		disableDepth.mDepthState = std::nullopt;
 
-		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("DirectionalLightResolveShader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "quad.vert" },
-			{ types::shader::Stage::Fragment, "deferredpbr/directionallightresolve.frag" }
-			});
-		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
-			return;
-		}
-
-		glDisable(GL_DEPTH_TEST);
-
-		const auto& lightView = ecs.getView<DirectionalLightComponent, LightComponent, SpatialComponent, CompTs...>();
-		ShaderDefines defines;
-		for (auto& entity : lightView) {
-			defines.reset();
-
-			MakeDefine(ENABLE_SHADOWS);
-			CSMShadowInfo csmShadowInfo = extractCSMShadowInfo(ecs, entity, resourceManagers.mTextureManager);
-			if (csmShadowInfo.mValidCSMShadows) {
-				defines.set(ENABLE_SHADOWS);
+		renderPasses.renderPass(outputTargetHandle, viewport, disableDepth, [&](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_GPU();
+			if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
+				return;
 			}
 
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
-			resolvedShader.bind();
+			auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("DirectionalLightResolveShader", SourceShader::ConstructionArgs{
+				{ types::shader::Stage::Vertex, "quad.vert" },
+				{ types::shader::Stage::Fragment, "deferredpbr/directionallightresolve.frag" }
+				});
+			if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
+				return;
+			}
 
-			if (csmShadowInfo.mValidCSMShadows) {
-				const auto& shadowMap = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<CSMShadowMapComponent>(entity)->mShadowMap);
-				resolvedShader.bindTexture("shadowMap", shadowMap);
-				resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
-				resolvedShader.bindUniform("L0", csmShadowInfo.mLightArrays[0]);
-				resolvedShader.bindUniform("L1", csmShadowInfo.mLightArrays[1]);
-				resolvedShader.bindUniform("L2", csmShadowInfo.mLightArrays[2]);
+			const auto& lightView = ecs.getView<DirectionalLightComponent, LightComponent, SpatialComponent, CompTs...>();
+			ShaderDefines defines;
+			for (auto& entity : lightView) {
+				defines.reset();
+
+				MakeDefine(ENABLE_SHADOWS);
+				CSMShadowInfo csmShadowInfo = extractCSMShadowInfo(ecs, entity, resourceManagers.mTextureManager);
+				if (csmShadowInfo.mValidCSMShadows) {
+					defines.set(ENABLE_SHADOWS);
+				}
+
+				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
+				resolvedShader.bind();
+
+				if (csmShadowInfo.mValidCSMShadows) {
+					const auto& shadowMap = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<CSMShadowMapComponent>(entity)->mShadowMap);
+					resolvedShader.bindTexture("shadowMap", shadowMap);
+					resolvedShader.bindUniform("shadowMapResolution", glm::vec2(shadowMap.mWidth, shadowMap.mHeight));
+					resolvedShader.bindUniform("L0", csmShadowInfo.mLightArrays[0]);
+					resolvedShader.bindUniform("L1", csmShadowInfo.mLightArrays[1]);
+					resolvedShader.bindUniform("L2", csmShadowInfo.mLightArrays[2]);
+				}
+
+				const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
+				const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
+				resolvedShader.bindUniform("P", camera->getProj());
+				resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
+				resolvedShader.bindUniform("V", cameraSpatial->getView());
+				resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
+				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
+
+				/* Bind gbuffer */
+				auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
+				resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
+				resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+				resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+				resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
+
+				const auto& light = ecs.cGetComponent<LightComponent>(entity);
+				resolvedShader.bindUniform("lightRadiance", glm::vec4(light->mColor, light->mIntensity));
+				resolvedShader.bindUniform("lightDir", -ecs.cGetComponent<SpatialComponent>(entity)->getLookDir());
+
+				resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
+			}
+		}, "Directional Light Resolve");
+	}
+
+	template<typename... CompTs>
+	void drawPointLightResolve(
+		RenderPasses& renderPasses,
+		const FramebufferHandle& outputTargetHandle,
+		const glm::uvec2& viewport,
+		const ECS::Entity cameraEntity,
+		const FramebufferHandle& gbufferHandle,
+		float debugRadius = 0.f
+	) {
+		TRACY_ZONE();
+
+		auto drawFunc = [&](const ResourceManagers& resourceManagers, const ECS& ecs, bool drawInsideLights) {
+			TRACY_GPUN("Point Light Resolve");
+
+			auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightResolve Shader", SourceShader::ConstructionArgs{
+				{ types::shader::Stage::Vertex, "deferredpbr/pointlightresolve.vert"},
+				{ types::shader::Stage::Fragment, "deferredpbr/pointlightresolve.frag" }
+				});
+			if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
+				return;
+			}
+
+			ShaderDefines passDefines;
+			MakeDefine(SHOW_LIGHTS);
+			if (debugRadius > 0.f) {
+				passDefines.set(SHOW_LIGHTS);
 			}
 
 			const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
 			const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
-			resolvedShader.bindUniform("P", camera->getProj());
+			auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
+
+			// TODO : instanced
+
+			// Sort them back to front first
+			ecs.sort<PointLightComponent, SpatialComponent>([&cameraSpatial, &ecs](const ECS::Entity entityLeft, const ECS::Entity entityRight) {
+				auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
+				auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
+				if (leftSpatial && rightSpatial) {
+					return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) > glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
+				}
+				return false;
+				});
+
+			ShaderDefines drawDefines(passDefines);
+			const auto& view = ecs.getView<const LightComponent, const PointLightComponent, const SpatialComponent, CompTs...>();
+			for (auto entity : view) {
+				const auto& light = ecs.cGetComponent<const LightComponent>(entity);
+				const auto& spatial = ecs.cGetComponent<const SpatialComponent>(entity);
+
+				// If camera is inside light 
+				float dist = glm::distance(spatial->getPosition(), cameraSpatial->getPosition());
+				bool lightInsideCamera = dist - camera->getNear() < spatial->getScale().x;
+				if (drawInsideLights && !lightInsideCamera) {
+					continue;
+				}
+				if (!drawInsideLights && lightInsideCamera) {
+					continue;
+				}
+
+				// TODO : Could do VFC
+				MakeDefine(ENABLE_SHADOWS);
+				const bool shadowsEnabled =
+					ecs.has<PointLightShadowMapComponent>(entity)
+					&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<PointLightShadowMapComponent>(entity)->mShadowMap);
+				if (shadowsEnabled) {
+					drawDefines.set(ENABLE_SHADOWS);
+				}
+
+				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, drawDefines);
+				resolvedShader.bind();
+
+				resolvedShader.bindUniform("M", spatial->getModelMatrix());
+				resolvedShader.bindUniform("lightPos", spatial->getPosition());
+				resolvedShader.bindUniform("lightRadiance", glm::vec4(light->mColor, light->mIntensity));
+
+				if (debugRadius > 0.f) {
+					resolvedShader.bindUniform("debugRadius", debugRadius);
+				}
+
+				if (shadowsEnabled) {
+					auto& shadowCube = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<PointLightShadowMapComponent>(entity)->mShadowMap);
+					resolvedShader.bindTexture("shadowCube", shadowCube);
+					resolvedShader.bindUniform("shadowRange", static_cast<float>(spatial->getScale().x) / 2.f);
+					resolvedShader.bindUniform("shadowMapResolution", static_cast<float>(shadowCube.mWidth));
+				}
+
+				resolvedShader.bindUniform("P", camera->getProj());
+				resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
+				resolvedShader.bindUniform("V", cameraSpatial->getView());
+				resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
+				resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
+				resolvedShader.bindUniform("resolution", glm::vec2(viewport));
+
+				/* Bind gbuffer */
+				resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
+				resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
+				resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
+				resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
+
+				resourceManagers.mMeshManager.resolve(HashedString("sphere")).draw();
+			}
+		};
+
+		RenderState renderState;
+		renderState.mDepthState = std::nullopt;
+		renderState.mBlendState = BlendState{
+			BlendEquation::Add,
+			BlendFuncSrc::One,
+			BlendFuncDst::One,
+			glm::vec4(1.f)
+		};
+
+		renderState.mCullFace = CullFace::Front;
+		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [&](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			return drawFunc(resourceManagers, ecs, true);
+		}, "Point light resolve - Intersecting");
+
+		renderState.mCullFace = CullFace::Back;
+		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [&](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			return drawFunc(resourceManagers, ecs, false);
+		}, "Point light resolve");
+
+	}
+
+	void drawIndirectResolve(
+		RenderPasses& renderPasses,
+		const FramebufferHandle& outputTargetHandle,
+		const glm::uvec2& viewport,
+		const ECS::Entity cameraEntity,
+		const FramebufferHandle& gbufferHandle,
+		std::optional<IBLComponent> ibl = std::nullopt
+	) {
+		TRACY_ZONE();
+
+		RenderState renderState;
+		renderState.mDepthState = std::nullopt;
+		renderState.mBlendState = BlendState{
+			BlendEquation::Add,
+			BlendFuncSrc::One,
+			BlendFuncDst::One,
+			glm::vec4(1.f)
+		};
+
+		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [&](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_GPU();
+
+			if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
+				return;
+			}
+
+			auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("Indirect Resolve", SourceShader::ConstructionArgs{
+				{ types::shader::Stage::Vertex, "quad.vert" },
+				{ types::shader::Stage::Fragment, "deferredpbr/indirectresolve.frag" }
+				});
+			if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
+				return;
+			}
+
+			ShaderDefines defines;
+			MakeDefine(IBL);
+			if (ibl.has_value()) {
+				defines.set(IBL);
+			}
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
+			resolvedShader.bind();
+
+			const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
+			const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
 			resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
-			resolvedShader.bindUniform("V", cameraSpatial->getView());
 			resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
 			resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
 
@@ -73,160 +270,14 @@ namespace DeferredPBR {
 			resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
 			resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
 
-			const auto& light = ecs.cGetComponent<LightComponent>(entity);
-			resolvedShader.bindUniform("lightRadiance", glm::vec4(light->mColor, light->mIntensity));
-			resolvedShader.bindUniform("lightDir", -ecs.cGetComponent<SpatialComponent>(entity)->getLookDir());
+			if (ibl.has_value()) {
+				resolvedShader.bindTexture("ibl", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox));
+				resolvedShader.bindTexture("dfgLUT", resourceManagers.mTextureManager.resolve(ibl->mDFGLut));
+				resolvedShader.bindUniform("iblMips", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox).mFormat.mMipCount);
+			}
 
 			resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
-		}
-	}
-
-	template<typename... CompTs>
-	void drawPointLightResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle, glm::uvec2 resolution, float debugRadius = 0.f) {
-		TRACY_GPU();
-
-		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightResolve Shader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "deferredpbr/pointlightresolve.vert"},
-			{ types::shader::Stage::Fragment, "deferredpbr/pointlightresolve.frag" }
-		});
-		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
-			return;
-		}
-
-		ShaderDefines passDefines;
-		MakeDefine(SHOW_LIGHTS);
-		if (debugRadius > 0.f) {
-			passDefines.set(SHOW_LIGHTS);
-		}
-
-		const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
-		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
-		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE);
-		glBlendColor(1.f, 1.f, 1.f, 1.f);
-
-		// TODO : instanced
-
-		// Sort them back to front first
-		ecs.sort<PointLightComponent, SpatialComponent>([&cameraSpatial, &ecs](const ECS::Entity entityLeft, const ECS::Entity entityRight) {
-			auto leftSpatial = ecs.cGetComponent<SpatialComponent>(entityLeft);
-			auto rightSpatial = ecs.cGetComponent<SpatialComponent>(entityRight);
-			if (leftSpatial && rightSpatial) {
-				return glm::distance(cameraSpatial->getPosition(), leftSpatial->getPosition()) > glm::distance(cameraSpatial->getPosition(), rightSpatial->getPosition());
-			}
-			return false;
-		});
-
-		ShaderDefines drawDefines(passDefines);
-		const auto& view = ecs.getView<const LightComponent, const PointLightComponent, const SpatialComponent, CompTs...>();
-		for (auto entity : view) {
-			// TODO : Could do VFC
-			MakeDefine(ENABLE_SHADOWS);
-			const bool shadowsEnabled =
-				ecs.has<PointLightShadowMapComponent>(entity)
-				&& resourceManagers.mTextureManager.isValid(ecs.cGetComponent<PointLightShadowMapComponent>(entity)->mShadowMap);
-			if (shadowsEnabled) {
-				drawDefines.set(ENABLE_SHADOWS);
-			}
-
-			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, drawDefines);
-			resolvedShader.bind();
-
-			const auto& light = ecs.cGetComponent<const LightComponent>(entity);
-			const auto& spatial = ecs.cGetComponent<const SpatialComponent>(entity);
-			resolvedShader.bindUniform("M", spatial->getModelMatrix());
-			resolvedShader.bindUniform("lightPos", spatial->getPosition());
-			resolvedShader.bindUniform("lightRadiance", glm::vec4(light->mColor, light->mIntensity));
-
-			if (debugRadius > 0.f) {
-				resolvedShader.bindUniform("debugRadius", debugRadius);
-			}
-
-			if (shadowsEnabled) {
-				auto& shadowCube = resourceManagers.mTextureManager.resolve(ecs.cGetComponent<PointLightShadowMapComponent>(entity)->mShadowMap);
-				resolvedShader.bindTexture("shadowCube", shadowCube);
-				resolvedShader.bindUniform("shadowRange", static_cast<float>(spatial->getScale().x) / 2.f);
-				resolvedShader.bindUniform("shadowMapResolution", static_cast<float>(shadowCube.mWidth));
-			}
-
-			resolvedShader.bindUniform("P", camera->getProj());
-			resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
-			resolvedShader.bindUniform("V", cameraSpatial->getView());
-			resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
-			resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
-			resolvedShader.bindUniform("resolution", glm::vec2(resolution));
-
-			/* Bind gbuffer */
-			resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-			resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-			resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-			resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
-
-			// If camera is inside light 
-			float dist = glm::distance(spatial->getPosition(), cameraSpatial->getPosition());
-			if (dist - camera->getNear() < spatial->getScale().x) {
-				glCullFace(GL_FRONT);
-			}
-			else {
-				glCullFace(GL_BACK);
-			}
-			resourceManagers.mMeshManager.resolve(HashedString("sphere")).draw();
-		}
-	}
-
-	void drawIndirectResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle, std::optional<IBLComponent> ibl = std::nullopt) {
-		TRACY_GPU();
-
-		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
-			return;
-		}
-
-		auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("Indirect Resolve", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "quad.vert" },
-			{ types::shader::Stage::Fragment, "deferredpbr/indirectresolve.frag" }
-			});
-		if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
-			return;
-		}
-
-		ShaderDefines defines;
-		MakeDefine(IBL);
-		if (ibl.has_value()) {
-			defines.set(IBL);
-		}
-		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(lightResolveShaderHandle, defines);
-		resolvedShader.bind();
-
-		const auto& camera = ecs.cGetComponent<CameraComponent>(cameraEntity);
-		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
-		resolvedShader.bindUniform("invP", glm::inverse(camera->getProj()));
-		resolvedShader.bindUniform("invV", glm::inverse(cameraSpatial->getView()));
-		resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
-
-		/* Bind gbuffer */
-		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-		resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-		resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-		resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-		resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
-
-		if (ibl.has_value()) {
-			resolvedShader.bindTexture("ibl", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox));
-			resolvedShader.bindTexture("dfgLUT", resourceManagers.mTextureManager.resolve(ibl->mDFGLut));
-			resolvedShader.bindUniform("iblMips", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox).mFormat.mMipCount);
-		}
-
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE);
-		glBlendColor(1.f, 1.f, 1.f, 1.f);
-
-		resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
+		}, "Indirect Resolve");
 	}
 }
 
