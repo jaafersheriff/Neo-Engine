@@ -29,13 +29,6 @@ namespace neo {
 		resolvedShader.bindUniform("frameSize", glm::vec2(inputTexture.mWidth, inputTexture.mHeight));
 		resolvedShader.bindTexture("inputTexture", inputTexture);
 
-		glDisable(GL_DEPTH_TEST);
-		int oldPolygonMode;
-		glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
 		resourceManagers.mMeshManager.resolve("quad").draw();
-		glEnable(GL_DEPTH_TEST);
-		glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 	}
 }

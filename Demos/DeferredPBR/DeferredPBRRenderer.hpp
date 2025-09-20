@@ -34,9 +34,6 @@ namespace DeferredPBR {
 		}
 
 		glDisable(GL_DEPTH_TEST);
-		int oldPolygonMode;
-		glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		const auto& lightView = ecs.getView<DirectionalLightComponent, LightComponent, SpatialComponent, CompTs...>();
 		ShaderDefines defines;
@@ -82,8 +79,6 @@ namespace DeferredPBR {
 
 			resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
 		}
-		glEnable(GL_DEPTH_TEST);
-		glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 	}
 
 	template<typename... CompTs>
@@ -108,14 +103,12 @@ namespace DeferredPBR {
 		const auto& cameraSpatial = ecs.cGetComponent<const SpatialComponent>(cameraEntity);
 		auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
 
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);
 		glBlendColor(1.f, 1.f, 1.f, 1.f);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		int oldPolygonMode;
-		glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		// TODO : instanced
 
@@ -184,11 +177,6 @@ namespace DeferredPBR {
 			}
 			resourceManagers.mMeshManager.resolve(HashedString("sphere")).draw();
 		}
-
-		glEnable(GL_DEPTH_TEST);
-		glDisable(GL_BLEND);
-		glCullFace(GL_BACK);
-		glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 	}
 
 	void drawIndirectResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, FramebufferHandle gbufferHandle, std::optional<IBLComponent> ibl = std::nullopt) {
@@ -237,15 +225,8 @@ namespace DeferredPBR {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);
 		glBlendColor(1.f, 1.f, 1.f, 1.f);
-		glDisable(GL_DEPTH_TEST);
-		int oldPolygonMode;
-		glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
-		glDisable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-		glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 	}
 }
 

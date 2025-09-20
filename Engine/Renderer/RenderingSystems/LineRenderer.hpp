@@ -13,13 +13,10 @@ namespace neo {
 	void drawLines(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
-		bool oldDepthState = glIsEnabled(GL_DEPTH_TEST);
-		glEnable(GL_LINE_SMOOTH);
-
 		auto lineShaderHandle = resourceManagers.mShaderManager.asyncLoad("LineShader", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex, "line.vert"},
 			{ types::shader::Stage::Fragment, "line.frag" }
-		});
+			});
 		if (!resourceManagers.mShaderManager.isValid(lineShaderHandle)) {
 			return;
 		}
@@ -30,41 +27,20 @@ namespace neo {
 		lineShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
 
 		const auto& view = ecs.getView<const LineMeshComponent, const SpatialComponent, CompTs...>();
-		auto drawView = [&](const bool writeDepth) {
-			TRACY_GPUN("Draw view");
-			if (writeDepth) {
-				glEnable(GL_DEPTH_TEST);
-			}
-			else {
-				glDisable(GL_DEPTH_TEST);
-			}
+		TRACY_GPUN("Draw view");
 
-			for (auto entity : view) {
-				const auto line = ecs.cGetComponent<const LineMeshComponent>(entity);
-				if (writeDepth != line->mWriteDepth) {
-					continue;
+		for (auto entity : view) {
+			const auto line = ecs.cGetComponent<const LineMeshComponent>(entity);
+
+			glm::mat4 M(1.f);
+			if (line->mUseParentSpatial) {
+				if (auto spatial = ecs.cGetComponent<SpatialComponent>(entity)) {
+					M = spatial->getModelMatrix();
 				}
-
-				glm::mat4 M(1.f);
-				if (line->mUseParentSpatial) {
-					if (auto spatial = ecs.cGetComponent<SpatialComponent>(entity)) {
-						M = spatial->getModelMatrix();
-					}
-				}
-				lineShader.bindUniform("M", M);
-
-				line->getMesh(resourceManagers.mMeshManager).draw();
 			}
-		};
+			lineShader.bindUniform("M", M);
 
-		drawView(true);
-		drawView(false);
-
-		if (oldDepthState) {
-			glEnable(GL_DEPTH_TEST);
-		}
-		else {
-			glDisable(GL_DEPTH_TEST);
+			line->getMesh(resourceManagers.mMeshManager).draw();
 		}
 	}
 }

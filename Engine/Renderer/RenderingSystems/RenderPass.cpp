@@ -4,6 +4,18 @@
 #include "RenderPass.hpp"
 
 namespace neo {
+	namespace {
+		void _applyState(const RenderState& renderState) {
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+			glBindVertexArray(0);
+			glUseProgram(0);
+
+			NEO_UNUSED(renderState);
+			NEO_FAIL("Apply the state");
+		}
+	}
 	void RenderPasses::clear(FramebufferHandle target, types::framebuffer::AttachmentBits clearFlags, glm::vec4 clearColor, std::optional<std::string> debugName) {
 		mPasses.emplace_back(ClearPass{
 			target,
@@ -13,10 +25,12 @@ namespace neo {
 		});
 	}
 
-	void RenderPasses::renderPass(FramebufferHandle target, glm::uvec2 viewport, DrawFunction draw, std::optional<std::string> debugName) {
+	void RenderPasses::renderPass(FramebufferHandle target, glm::uvec2 viewport, RenderState renderState, DrawFunction draw, std::optional<std::string> debugName) {
+		renderState.mWireframe = mWireframeOverride;
 		mPasses.emplace_back(RenderPass{
 			target,
 			viewport,
+			renderState,
 			draw,
 			debugName
 		});
@@ -48,6 +62,8 @@ namespace neo {
 					}
 					resourceManagers.mFramebufferManager.resolve(renderPass.mTarget).bind();
 					glViewport(0, 0, renderPass.mViewport.x, renderPass.mViewport.y);
+
+					_applyState(renderPass.mRenderState);
 					renderPass.mDrawFunction(resourceManagers, ecs);
 				},
 				[&](const ClearPass& clearPass) {

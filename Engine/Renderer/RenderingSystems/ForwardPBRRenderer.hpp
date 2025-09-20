@@ -232,9 +232,5 @@ namespace neo {
 
 			mesh.draw();
 		}
-
-		if (containsTransparency) {
-			glDisable(GL_BLEND);
-		}
 	}
 }

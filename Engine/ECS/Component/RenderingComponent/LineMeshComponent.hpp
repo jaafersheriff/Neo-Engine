@@ -16,7 +16,6 @@ namespace neo {
 		MeshHandle mMeshHandle;
 		std::optional<glm::vec3> mOverrideColor;
 		std::vector<Node> mNodes;
-		bool mWriteDepth;
 		bool mUseParentSpatial;
 		mutable bool mDirty;
 

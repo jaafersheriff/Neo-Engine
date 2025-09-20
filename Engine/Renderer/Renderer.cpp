@@ -83,33 +83,9 @@ namespace neo {
 
 		mGPUQuery.destroy();
 		mGPUQuery.init();
-	}
 
-	void Renderer::resetState() {
-		TRACY_GPU();
-
-		glClearColor(0.0f, 0.0f, 0.0f, 1.f);
-
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
-		glDepthMask(GL_TRUE);
-
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-		glDisable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
+		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
-		glBindVertexArray(0);
-		glUseProgram(0);
 	}
 
 	void Renderer::render(WindowSurface& window, IDemo* demo, util::Profiler& profiler, const ECS& ecs, ResourceManagers& resourceManagers) {
@@ -158,15 +134,10 @@ namespace neo {
 
 		RenderPasses renderPasses;
 		{
-			TRACY_GPUN("Prepare demo passes");
-			resetState();
-			if (mWireframe) {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			}
-		}
-		{
 			TRACY_GPUN("Demo::render");
+			renderPasses.mWireframeOverride = mWireframe;
 			demo->render(renderPasses, resourceManagers, ecs, mSceneColorTextureHandle, sceneDepthTextureHandle);
+			renderPasses.mWireframeOverride = false;
 		}
 
 		if (mShowBoundingBoxes) {
@@ -178,10 +149,9 @@ namespace neo {
 					FramebufferAttachment{sceneDepthTextureHandle},
 				},
 				resourceManagers.mTextureManager
-			);
-			renderPasses.renderPass(debugDrawTarget, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+				);
+			renderPasses.renderPass(debugDrawTarget, viewport.mSize, RenderState{}, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
 				TRACY_GPUN("Debug Draws");
-				resetState();
 				drawLines<DebugBoundingBoxComponent>(resourceManagers, ecs, std::get<0>(*ecs.cGetComponent<MainCameraComponent>()));
 			}, "Debug Draws");
 		}
@@ -193,14 +163,15 @@ namespace neo {
 
 			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, [this, &window](const ResourceManagers& resourceManagers, const ECS& ecs) {
 				TRACY_GPUN("ImGui Render");
-				resetState();
 				drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
 			}, "ImGui");
 		}
 		else {
 			TRACY_ZONEN("Final Blit");
 			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
-			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, [this](const ResourceManagers& resourceManagers, const ECS&) {
+			RenderState blitState;
+			blitState.mDepthState = std::nullopt;
+			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, blitState, [this](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Final Blit");
 				blit(resourceManagers, mSceneColorTextureHandle);
 			}, "Final Blit");
@@ -296,7 +267,6 @@ namespace neo {
 	}
 
 	void Renderer::clean() {
-		resetState();
 	}
 
 

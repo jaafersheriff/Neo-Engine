@@ -370,7 +370,6 @@ namespace neo {
 					auto line = ecs.addComponent<LineMeshComponent>(entity, resourceManagers.mMeshManager);
 
 					line->mUseParentSpatial = true;
-					line->mWriteDepth = true;
 					line->mOverrideColor = box->mStatic ? glm::vec3(1.f, 0.f, 0.f) : util::genRandomVec3(0.3f, 1.f);
 
 					glm::vec3 NearLeftBottom{ box->mMin };

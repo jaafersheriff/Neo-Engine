@@ -7,7 +7,6 @@ namespace neo {
 
 	LineMeshComponent::LineMeshComponent(const MeshManager& meshManager, std::optional<glm::vec3> overrideColor) :
 		mDirty(false),
-		mWriteDepth(true),
 		mUseParentSpatial(false),
 		mOverrideColor(overrideColor)
 	{

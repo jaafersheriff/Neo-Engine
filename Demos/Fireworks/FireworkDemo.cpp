@@ -133,7 +133,6 @@ namespace Fireworks {
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
-		NEO_UNUSED(renderPasses, resourceManagers, ecs, outputColor, outputDepth);
 		renderPasses.computePass([](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			tickParticles(resourceManagers, ecs);
 		});
@@ -174,29 +173,36 @@ namespace Fireworks {
 			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
 			resourceManagers.mTextureManager
 		);
-		renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
-			TRACY_GPUN("Blit Previous HDR Color");
-			blit(resourceManagers, bloomResults);
-		});
+		{
+			RenderState blitState;
+			blitState.mDepthState = std::nullopt;
+			renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, blitState, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
+				TRACY_GPUN("Blit Previous HDR Color");
+				blit(resourceManagers, bloomResults);
+			});
+		}
 
 		TextureHandle averageLuminance = NEO_INVALID_HANDLE;
 		if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
 			averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mTextures[0], mAutoExposureParams);
 		}
- 
 		TextureHandle tonemappedHandle = tonemap(renderPasses, resourceManagers, viewport.mSize, bloomResults, averageLuminance);
 
-		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
-			"FXAA Target",
-			FramebufferExternalAttachments{
-				FramebufferAttachment{outputColor},
-			},
-			resourceManagers.mTextureManager
-		);
-		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
-		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
-			drawFXAA(resourceManagers, tonemappedHandle);
-		}, "FXAA");
+		{
+			auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+				"FXAA Target",
+				FramebufferExternalAttachments{
+					FramebufferAttachment{outputColor},
+				},
+				resourceManagers.mTextureManager
+				);
+			renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
+			RenderState blitState;
+			blitState.mDepthState = std::nullopt;
+			renderPasses.renderPass(outputTargetHandle, viewport.mSize, blitState, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
+				drawFXAA(resourceManagers, tonemappedHandle);
+				}, "FXAA");
+		}
 
 	}
 

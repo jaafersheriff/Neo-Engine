@@ -114,9 +114,6 @@ namespace Fireworks {
 			if (resourceManagers.mMeshManager.isValid(firework.mBuffer)) {
 				resourceManagers.mMeshManager.resolve(firework.mBuffer).draw();
 			}
-
 		}
-
-		glDisable(GL_BLEND);
 	}
 }

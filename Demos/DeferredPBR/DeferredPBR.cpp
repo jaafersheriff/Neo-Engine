@@ -365,62 +365,65 @@ namespace DeferredPBR {
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
- 		convolveCubemap(renderPasses, resourceManagers, ecs);
- 
- 		const auto& cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
- 		if (!cameraTuple) {
- 			return;
- 		}
- 		const auto& [cameraEntity, _, camera, cameraSpatial] = *cameraTuple;
- 
- 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
- 
- 		auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent, CSMShadowMapComponent>();
- 		if (lightView) {
- 			auto& [lightEntity, __, ___, shadowCamera] = *lightView;
- 			if (mDrawDirectionalShadows) {
- 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
- 					drawCSMShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, lightEntity, true);
- 					drawCSMShadows<AlphaTestComponent>(renderPasses, resourceManagers, ecs, lightEntity);
- 					// drawCSMShadows<TransparentComponent>(resourceManagers, ecs, lightEntity);
- 				}
- 			}
- 		}
- 
- 		auto pointLightView = ecs.getView<PointLightComponent, PointLightShadowMapComponent, SpatialComponent>();
- 		for (auto& entity : pointLightView) {
- 			const auto& shadowCamera = pointLightView.get<PointLightShadowMapComponent>(entity);
- 			if (mDrawPointLightShadows) {
- 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
- 					drawPointLightShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, entity, true);
- 					drawPointLightShadows<AlphaTestComponent>(renderPasses, resourceManagers, ecs, entity, false);
- 				}
- 			}
- 		}
- 
- 		FramebufferHandle gbufferHandle = createGbuffer(resourceManagers, viewport.mSize);
+		convolveCubemap(renderPasses, resourceManagers, ecs);
+
+		const auto& cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
+		if (!cameraTuple) {
+			return;
+		}
+		const auto& [cameraEntity, _, camera, cameraSpatial] = *cameraTuple;
+
+		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
+
+		auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent, CSMShadowMapComponent>();
+		if (lightView) {
+			auto& [lightEntity, __, ___, shadowCamera] = *lightView;
+			if (mDrawDirectionalShadows) {
+				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
+					drawCSMShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, lightEntity, true);
+					drawCSMShadows<AlphaTestComponent>(renderPasses, resourceManagers, ecs, lightEntity);
+					// drawCSMShadows<TransparentComponent>(resourceManagers, ecs, lightEntity);
+				}
+			}
+		}
+
+		auto pointLightView = ecs.getView<PointLightComponent, PointLightShadowMapComponent, SpatialComponent>();
+		for (auto& entity : pointLightView) {
+			const auto& shadowCamera = pointLightView.get<PointLightShadowMapComponent>(entity);
+			if (mDrawPointLightShadows) {
+				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
+					drawPointLightShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, entity, true);
+					drawPointLightShadows<AlphaTestComponent>(renderPasses, resourceManagers, ecs, entity, false);
+				}
+			}
+		}
+
+		FramebufferHandle gbufferHandle = createGbuffer(resourceManagers, viewport.mSize);
 		renderPasses.clear(gbufferHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f), "Clear buffer");
-		renderPasses.renderPass(gbufferHandle, viewport.mSize, [cameraEntity](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(gbufferHandle, viewport.mSize, RenderState{}, [cameraEntity](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Draw Gbuffer");
- 			drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
- 			drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
-		}, "GBuffer");
- 
- 		if (mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
+			drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
+			drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
+			}, "GBuffer");
+
+		if (mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
 			auto outputHandle = resourceManagers.mFramebufferManager.asyncLoad("GBuffer Debug",
 				FramebufferExternalAttachments{
 					FramebufferAttachment{outputColor},
 				},
 				resourceManagers.mTextureManager
-			);
+				);
 			renderPasses.clear(outputHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0));
-			renderPasses.renderPass(outputHandle, viewport.mSize, [gbufferHandle, this](const ResourceManagers& resourceManagers, const ECS&) {
+
+			RenderState blitState;
+			blitState.mDepthState = std::nullopt;
+			renderPasses.renderPass(outputHandle, viewport.mSize, blitState, [gbufferHandle, this](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("GBuffer debug");
- 				drawGBufferDebug(resourceManagers, gbufferHandle, mGbufferDebugParams);
-			}, "GBuffer debug");
+				drawGBufferDebug(resourceManagers, gbufferHandle, mGbufferDebugParams);
+				}, "GBuffer debug");
 			return;
- 		}
- 
+		}
+
 		TextureHandle hdrColorTexture = resourceManagers.mTextureManager.asyncLoad("HDR Color",
 			TextureBuilder{}
 			.setDimension(glm::u16vec3(viewport.mSize, 0))
@@ -446,7 +449,7 @@ namespace DeferredPBR {
 				FramebufferAttachment{resourceManagers.mFramebufferManager.resolve(gbufferHandle).mTextures[3]}, // Oof
 			},
 			resourceManagers.mTextureManager
-		);
+			);
 		// Don't clear depth because we just grabbed the gbuffer's attachment
 		renderPasses.clear(hdrColorTarget, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
 
@@ -468,9 +471,9 @@ namespace DeferredPBR {
 			drawIndirectResolve(resourceManagers, ecs, cameraEntity, gbufferHandle, ibl);
 			drawForwardPBR<TransparentComponent>(resourceManagers, ecs, cameraEntity, ibl);
 			drawSkybox(resourceManagers, ecs, cameraEntity);
-		}, "Main lighting resolve");
+			}, "Main lighting resolve");
 
- 		TextureHandle bloomResults = hdrColorTexture;
+		TextureHandle bloomResults = hdrColorTexture;
 		if (mDoBloom) {
 			bloomResults = bloom(renderPasses, resourceManagers, viewport.mSize, hdrColorTexture, mBloomParams);
 		}
@@ -484,32 +487,39 @@ namespace DeferredPBR {
 				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
 				resourceManagers.mTextureManager
 			);
-			renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
+
+			RenderState blitState;
+			blitState.mDepthState = std::nullopt;
+			renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, blitState, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Blit Previous HDR Color");
 				blit(resourceManagers, bloomResults);
-			}, "Blit previous frame");
+				}, "Blit previous frame");
 
 			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
 				averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mTextures[0], mAutoExposureParams);
 			}
 		}
- 
-		TextureHandle tonemappedHandle = bloomResults;
- 		if (mDoTonemap && resourceManagers.mTextureManager.isValid(bloomResults)) {
- 			tonemappedHandle = tonemap(renderPasses, resourceManagers, viewport.mSize, bloomResults, averageLuminance);
- 		}
 
-		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
-			"FXAA Target",
-			FramebufferExternalAttachments{
-				FramebufferAttachment{outputColor},
-			},
-			resourceManagers.mTextureManager
-		);
-		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
-		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
-			drawFXAA(resourceManagers, tonemappedHandle);
-		}, "FXAA");
+		TextureHandle tonemappedHandle = bloomResults;
+		if (mDoTonemap && resourceManagers.mTextureManager.isValid(bloomResults)) {
+			tonemappedHandle = tonemap(renderPasses, resourceManagers, viewport.mSize, bloomResults, averageLuminance);
+		}
+
+		{
+			auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+				"FXAA Target",
+				FramebufferExternalAttachments{
+					FramebufferAttachment{outputColor},
+				},
+				resourceManagers.mTextureManager
+				);
+			renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
+			RenderState blitState;
+			blitState.mDepthState = std::nullopt;
+			renderPasses.renderPass(outputTargetHandle, viewport.mSize, blitState, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
+				drawFXAA(resourceManagers, tonemappedHandle);
+				}, "FXAA");
+		}
 	}
 
 	void Demo::destroy() {

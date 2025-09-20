@@ -45,9 +45,6 @@ namespace neo {
 		}
 
 		glDisable(GL_DEPTH_TEST);
-		int oldPolygonMode;
-		glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		auto& resolvedBlit = resourceManagers.mShaderManager.resolveDefines(blitShaderHandle, {});
 
@@ -56,9 +53,6 @@ namespace neo {
 
 		// Render 
 		resourceManagers.mMeshManager.resolve("quad").draw();
-
-		glEnable(GL_DEPTH_TEST);
-		glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 	}
 
 	inline void blitDepth(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, TextureHandle srcTexture, TextureHandle dstTexture, glm::uvec2 dimension) {

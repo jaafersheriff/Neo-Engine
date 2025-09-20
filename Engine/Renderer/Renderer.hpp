@@ -42,7 +42,6 @@ namespace neo {
 
 			void setDemoConfig(IDemo::Config);
 			void init();
-			void resetState();
 			void render(WindowSurface&, IDemo* demo, util::Profiler& profiler, const ECS&, ResourceManagers& resourceManager);
 			void clean();
 
