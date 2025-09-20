@@ -141,9 +141,13 @@ namespace Cornell {
 			resourceManagers.mTextureManager
 		);
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
-		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [sceneColor](const ResourceManagers& resourceManagers, const ECS&) {
-			drawFXAA(resourceManagers, sceneColor);
-		}, "FXAA");
+		{
+			RenderState blitState;
+			blitState.mDepthState = std::nullopt;
+			renderPasses.renderPass(outputTargetHandle, viewport.mSize, blitState, [sceneColor](const ResourceManagers& resourceManagers, const ECS&) {
+				drawFXAA(resourceManagers, sceneColor);
+			}, "FXAA");
+		}
 	}
 
 	void Demo::destroy() {

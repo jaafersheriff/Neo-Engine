@@ -27,8 +27,6 @@ namespace neo {
 		lineShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
 
 		const auto& view = ecs.getView<const LineMeshComponent, const SpatialComponent, CompTs...>();
-		TRACY_GPUN("Draw view");
-
 		for (auto entity : view) {
 			const auto line = ecs.cGetComponent<const LineMeshComponent>(entity);
 

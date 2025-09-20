@@ -98,11 +98,10 @@ namespace NormalVisualizer {
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
 
 		auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
-		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [](const ResourceManagers& resourceManagers, const ECS& ecs) {
-			const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
-			drawPhong<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
-		});
-		renderPasses.renderPass(outputTargetHandle, viewport.mSize, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
+		drawPhong<OpaqueComponent>(renderPasses, outputTargetHandle, viewport.mSize, cameraEntity);
+
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, RenderState{}, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
 			auto normalShaderHandle = resourceManagers.mShaderManager.asyncLoad("NormalVisualizer", SourceShader::ConstructionArgs{
 				{types::shader::Stage::Vertex, "normal.vert"},

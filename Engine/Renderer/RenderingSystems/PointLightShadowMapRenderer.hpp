@@ -54,7 +54,7 @@ namespace neo {
 			}
 
 			const Texture& shadowCube = resourceManagers.mTextureManager.resolve(shadowCubeHandle);
-			renderPasses.renderPass(shadowTargetHandle, glm::uvec2(shadowCube.mWidth, shadowCube.mHeight), [i, lightEntity, params](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			renderPasses.renderPass(shadowTargetHandle, glm::uvec2(shadowCube.mWidth, shadowCube.mHeight), RenderState{}, [i, lightEntity, params](const ResourceManagers& resourceManagers, const ECS& ecs) {
 				TRACY_GPUN("Draw Face");
 				auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightShadowMap Shader", SourceShader::ConstructionArgs{
 					{ types::shader::Stage::Vertex, "model.vert"},

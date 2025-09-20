@@ -76,7 +76,7 @@ namespace Fireworks {
 		}
 	}
 
-	inline void _drawParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
+	inline void drawParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
 		TRACY_GPU();
 		auto fireworksVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworkDraw", SourceShader::ConstructionArgs{
 			{ types::shader::Stage::Vertex,   "firework/firework.vert" },
@@ -90,9 +90,6 @@ namespace Fireworks {
 
 		auto& fireworksVisShader = resourceManagers.mShaderManager.resolveDefines(fireworksVisShaderHandle, {});
 		fireworksVisShader.bind();
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 		if (auto cameraView = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>()) {
 			auto&& [_, __, camera, camSpatial] = *cameraView;

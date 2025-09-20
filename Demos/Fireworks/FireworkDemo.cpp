@@ -160,9 +160,15 @@ namespace Fireworks {
 		);
 		renderPasses.clear(sceneTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
 		drawForwardPBR<OpaqueComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);
-		renderPasses.renderPass(sceneTargetHandle, viewport.mSize, [cameraEntity](const ResourceManagers& resourceManagers, const ECS& ecs) {
-			_drawParticles(resourceManagers, ecs);
-		});
+		{
+			RenderState particleState;
+			particleState.mBlendState = BlendState{
+				BlendEquation::Add,
+				BlendFuncSrc::Alpha,
+				BlendFuncDst::One
+			};
+			renderPasses.renderPass(sceneTargetHandle, viewport.mSize, particleState, drawParticles);
+		}
 
  		TextureHandle bloomResults = bloom(renderPasses, resourceManagers, viewport.mSize, hdrColorTexture, mBloomParams);
 
@@ -201,7 +207,7 @@ namespace Fireworks {
 			blitState.mDepthState = std::nullopt;
 			renderPasses.renderPass(outputTargetHandle, viewport.mSize, blitState, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
 				drawFXAA(resourceManagers, tonemappedHandle);
-				}, "FXAA");
+			}, "FXAA");
 		}
 
 	}

@@ -51,7 +51,7 @@ namespace neo {
 				BlendEquation::Add,
 				BlendFuncSrc::Alpha,
 				BlendFuncDst::OneMinusSrcAlpha
-			}
+			};
 		}
 
 		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [&](const ResourceManagers& resourceManagers, const ECS& ecs) {
