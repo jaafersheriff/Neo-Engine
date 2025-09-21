@@ -47,7 +47,7 @@ namespace neo {
 			};
 		}
 
-		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [&](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPU();
 			auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Phong Shader",
 				SourceShader::ConstructionArgs{

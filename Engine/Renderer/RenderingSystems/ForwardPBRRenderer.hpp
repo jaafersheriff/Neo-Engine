@@ -54,7 +54,7 @@ namespace neo {
 			};
 		}
 
-		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [&](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPU();
 			// Forward draws are only lit by the single MainLightComponent!
 			const auto& lightView = ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
