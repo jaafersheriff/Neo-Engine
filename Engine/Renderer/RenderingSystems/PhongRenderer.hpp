@@ -30,8 +30,7 @@ namespace neo {
 		RenderPasses& renderPasses, 
 		const FramebufferHandle& outputTargetHandle, 
 		const glm::uvec2 viewport, 
-		const ECS::Entity cameraEntity, 
-		const ShaderDefines& inDefines = {}
+		const ECS::Entity cameraEntity
 	) {
 		TRACY_ZONE();
 
@@ -59,7 +58,7 @@ namespace neo {
 				return;
 			}
 
-			ShaderDefines passDefines(inDefines);
+			ShaderDefines passDefines;
 			MakeDefine(ALPHA_TEST);
 			MakeDefine(TRANSPARENT);
 			if (containsAlphaTest) {

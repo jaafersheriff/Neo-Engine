@@ -328,7 +328,6 @@ namespace neo {
 		return has<CompTA>() && has<ComptB> && has<CompTs...>();
 	}
 
-	// TODO - this shouldn't be const tbh
 	template<typename FilterCompT, typename SortCompT> 
 	void ECS::sort(std::function<bool(const Entity left, const Entity right)> compare) const {
 		mRegistry.sort<SortCompT>(compare);

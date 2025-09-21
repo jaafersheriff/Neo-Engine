@@ -29,7 +29,7 @@ namespace DeferredPBR {
 		RenderState disableDepth;
 		disableDepth.mDepthState = std::nullopt;
 
-		renderPasses.renderPass(outputTargetHandle, viewport, disableDepth, [&](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport, disableDepth, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPU();
 			if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
 				return;
@@ -101,7 +101,7 @@ namespace DeferredPBR {
 	) {
 		TRACY_ZONE();
 
-		auto drawFunc = [&](const ResourceManagers& resourceManagers, const ECS& ecs, bool drawInsideLights) {
+		auto drawFunc = [=](const ResourceManagers& resourceManagers, const ECS& ecs, bool drawInsideLights) {
 			TRACY_GPUN("Point Light Resolve");
 
 			auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightResolve Shader", SourceShader::ConstructionArgs{
@@ -204,12 +204,12 @@ namespace DeferredPBR {
 		};
 
 		renderState.mCullFace = CullFace::Front;
-		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [&](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			return drawFunc(resourceManagers, ecs, true);
 		}, "Point light resolve - Intersecting");
 
 		renderState.mCullFace = CullFace::Back;
-		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [&](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			return drawFunc(resourceManagers, ecs, false);
 		}, "Point light resolve");
 
@@ -234,7 +234,7 @@ namespace DeferredPBR {
 			glm::vec4(1.f)
 		};
 
-		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [&](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPU();
 
 			if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
