@@ -36,6 +36,7 @@ namespace neo {
 
 	void RenderPasses::_execute(FrameStats& renderStats, const ResourceManagers& resourceManagers, const ECS& ecs) {
 		renderStats.mRenderPasses.clear();
+
 		TRACY_GPU();
 		for (const auto& pass : mPasses) {
 			util::visit(pass,

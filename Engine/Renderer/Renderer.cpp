@@ -134,7 +134,7 @@ namespace neo {
 
 		RenderPasses renderPasses;
 		{
-			TRACY_GPUN("Demo::render");
+			TRACY_ZONEN("Demo::render");
 			renderPasses.mWireframeOverride = mWireframe;
 			demo->render(renderPasses, resourceManagers, ecs, mSceneColorTextureHandle, sceneDepthTextureHandle);
 			renderPasses.mWireframeOverride = false;
@@ -169,10 +169,7 @@ namespace neo {
 		else {
 			TRACY_ZONEN("Final Blit");
 			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
-			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, sDisableDepthState, [this](const ResourceManagers& resourceManagers, const ECS&) {
-				TRACY_GPUN("Final Blit");
-				blit(resourceManagers, mSceneColorTextureHandle);
-			}, "Final Blit");
+			blit(renderPasses, FramebufferHandle(0), window.getDetails().mSize, mSceneColorTextureHandle, "Final Blit");
 		}
 
 		renderPasses._execute(mStats, resourceManagers, ecs);

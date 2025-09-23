@@ -12,47 +12,56 @@
 
 namespace neo {
 
-	inline void blit(const ResourceManagers& resourceManagers, TextureHandle inputTextureHandle) {
-		TRACY_GPU();
+	inline void blit(
+		RenderPasses& renderPasses, 
+		FramebufferHandle outputTargetHandle, 
+		const glm::uvec2& viewport, 
+		TextureHandle inputTextureHandle,
+		std::optional<std::string> debugName = std::nullopt
+		) 
+	{
+		TRACY_ZONE();
 
-		auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blit Shader", SourceShader::ShaderCode{
-			{ types::shader::Stage::Vertex,
-			R"(
-				layout (location = 0) in vec3 vertPos;
-				layout (location = 2) in vec2 vertTex;
-				out vec2 fragTex;
-				void main() { 
-					gl_Position = vec4(2 * vertPos, 1); 
-					fragTex = vertTex; 
-				} 
-			)"},
-			{ types::shader::Stage::Fragment,
-			R"(
-				in vec2 fragTex;
-				layout (binding = 0) uniform sampler2D inputTexture;
-				out vec4 color;
-				void main() {
-					color = texture(inputTexture, fragTex);
-				}
-			)"}
-			});
-		if (!resourceManagers.mShaderManager.isValid(blitShaderHandle)) {
-			return; // RIP
-		}
+		renderPasses.renderPass(outputTargetHandle, viewport, sDisableDepthState, [=](const ResourceManagers& resourceManagers, const ECS&) {
+			TRACY_GPU();
+			auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blit Shader", SourceShader::ShaderCode{
+				{ types::shader::Stage::Vertex,
+				R"(
+					layout (location = 0) in vec3 vertPos;
+					layout (location = 2) in vec2 vertTex;
+					out vec2 fragTex;
+					void main() { 
+						gl_Position = vec4(2 * vertPos, 1); 
+						fragTex = vertTex; 
+					} 
+				)"},
+				{ types::shader::Stage::Fragment,
+				R"(
+					in vec2 fragTex;
+					layout (binding = 0) uniform sampler2D inputTexture;
+					out vec4 color;
+					void main() {
+						color = texture(inputTexture, fragTex);
+					}
+				)"}
+				});
 
-		if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {
-			return;
-		}
-
-		glDisable(GL_DEPTH_TEST);
-
-		auto& resolvedBlit = resourceManagers.mShaderManager.resolveDefines(blitShaderHandle, {});
-
-		// Bind input fbo texture
-		resolvedBlit.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(inputTextureHandle));
-
-		// Render 
-		resourceManagers.mMeshManager.resolve("quad").draw();
+			if (!resourceManagers.mShaderManager.isValid(blitShaderHandle)) {
+				return; // RIP
+			}
+	
+			if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {
+				return;
+			}
+	
+			auto& resolvedBlit = resourceManagers.mShaderManager.resolveDefines(blitShaderHandle, {});
+	
+			// Bind input fbo texture
+			resolvedBlit.bindTexture("inputTexture", resourceManagers.mTextureManager.resolve(inputTextureHandle));
+	
+			// Render 
+			resourceManagers.mMeshManager.resolve("quad").draw();
+		}, debugName.value_or("Blit"));
 	}
 
 	inline void blitDepth(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, TextureHandle srcTexture, TextureHandle dstTexture, glm::uvec2 dimension) {

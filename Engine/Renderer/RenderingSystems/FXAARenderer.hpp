@@ -7,28 +7,36 @@
 
 namespace neo {
 
-	inline void drawFXAA(const ResourceManagers& resourceManagers, TextureHandle inputTextureHandle) {
-		TRACY_GPU();
+	inline void drawFXAA(
+		RenderPasses& renderPasses,
+		FramebufferHandle outputTargetHandle,
+		const glm::uvec2& viewport,
+		TextureHandle inputTextureHandle) {
+		TRACY_ZONE();
 
-		if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {
-			return;
-		}
+		renderPasses.renderPass(outputTargetHandle, viewport, sDisableDepthState, [=](const ResourceManagers& resourceManagers, const ECS&) {
+			TRACY_GPU();
 
-		auto fxaaShaderHandle = resourceManagers.mShaderManager.asyncLoad("FXAAShader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "quad.vert"},
-			{ types::shader::Stage::Fragment, "fxaa.frag" }
+			if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {
+				return;
+			}
+
+			auto fxaaShaderHandle = resourceManagers.mShaderManager.asyncLoad("FXAAShader", SourceShader::ConstructionArgs{
+				{ types::shader::Stage::Vertex, "quad.vert"},
+				{ types::shader::Stage::Fragment, "fxaa.frag" }
+				});
+			if (!resourceManagers.mShaderManager.isValid(fxaaShaderHandle)) {
+				return;
+			}
+
+			auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(fxaaShaderHandle, {});
+			resolvedShader.bind();
+
+			auto& inputTexture = resourceManagers.mTextureManager.resolve(inputTextureHandle);
+			resolvedShader.bindUniform("frameSize", glm::vec2(inputTexture.mWidth, inputTexture.mHeight));
+			resolvedShader.bindTexture("inputTexture", inputTexture);
+
+			resourceManagers.mMeshManager.resolve("quad").draw();
 		});
-		if (!resourceManagers.mShaderManager.isValid(fxaaShaderHandle)) {
-			return;
-		}
-
-		auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(fxaaShaderHandle, {});
-		resolvedShader.bind();
-
-		auto& inputTexture = resourceManagers.mTextureManager.resolve(inputTextureHandle);
-		resolvedShader.bindUniform("frameSize", glm::vec2(inputTexture.mWidth, inputTexture.mHeight));
-		resolvedShader.bindTexture("inputTexture", inputTexture);
-
-		resourceManagers.mMeshManager.resolve("quad").draw();
 	}
 }

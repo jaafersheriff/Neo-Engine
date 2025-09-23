@@ -404,7 +404,7 @@ namespace DeferredPBR {
 			TRACY_GPUN("Draw Gbuffer");
 			drawGBuffer<OpaqueComponent>(resourceManagers, ecs, cameraEntity);
 			drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
-			}, "GBuffer");
+		}, "GBuffer");
 
 		if (mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
 			auto outputHandle = resourceManagers.mFramebufferManager.asyncLoad("GBuffer Debug",
@@ -418,7 +418,7 @@ namespace DeferredPBR {
 			renderPasses.renderPass(outputHandle, viewport.mSize, sDisableDepthState, [gbufferHandle, this](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("GBuffer debug");
 				drawGBufferDebug(resourceManagers, gbufferHandle, mGbufferDebugParams);
-				}, "GBuffer debug");
+			}, "GBuffer debug");
 			return;
 		}
 
@@ -486,10 +486,7 @@ namespace DeferredPBR {
 				resourceManagers.mTextureManager
 			);
 
-			renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, sDisableDepthState, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
-				TRACY_GPUN("Blit Previous HDR Color");
-				blit(resourceManagers, bloomResults);
-				}, "Blit previous frame");
+			blit(renderPasses, previousHDRColorHandle, viewport.mSize, bloomResults, "Blit previous frame");
 
 			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
 				averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mTextures[0], mAutoExposureParams);
@@ -510,9 +507,7 @@ namespace DeferredPBR {
 				resourceManagers.mTextureManager
 				);
 			renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
-			renderPasses.renderPass(outputTargetHandle, viewport.mSize, sDisableDepthState, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
-				drawFXAA(resourceManagers, tonemappedHandle);
-				}, "FXAA");
+			drawFXAA(renderPasses, outputTargetHandle, viewport.mSize, tonemappedHandle);
 		}
 	}
 

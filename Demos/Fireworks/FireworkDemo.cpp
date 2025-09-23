@@ -179,10 +179,7 @@ namespace Fireworks {
 			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
 			resourceManagers.mTextureManager
 		);
-		renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, sDisableDepthState, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
-			TRACY_GPUN("Blit Previous HDR Color");
-			blit(resourceManagers, bloomResults);
-		});
+		blit(renderPasses, previousHDRColorHandle, viewport.mSize, bloomResults, "Blit Previous HDR Color");
 
 		TextureHandle averageLuminance = NEO_INVALID_HANDLE;
 		if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
@@ -199,9 +196,7 @@ namespace Fireworks {
 				resourceManagers.mTextureManager
 				);
 			renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
-			renderPasses.renderPass(outputTargetHandle, viewport.mSize, sDisableDepthState, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
-				drawFXAA(resourceManagers, tonemappedHandle);
-			}, "FXAA");
+			drawFXAA(renderPasses, outputTargetHandle, viewport.mSize, tonemappedHandle);
 		}
 
 	}
