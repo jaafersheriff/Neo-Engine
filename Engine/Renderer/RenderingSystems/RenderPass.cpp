@@ -52,9 +52,8 @@ namespace neo {
 						return;
 					}
 					resourceManagers.mFramebufferManager.resolve(renderPass.mTarget).bind();
-					glViewport(0, 0, renderPass.mViewport.x, renderPass.mViewport.y);
 
-					applyRenderState(renderPass.mRenderState, wireframe && renderPass.mRenderState.mWireframeable);
+					applyRenderState(renderPass.mRenderState, renderPass.mViewport, wireframe && renderPass.mRenderState.mWireframeable);
 
 					renderPass.mDrawFunction(resourceManagers, ecs);
 				},

@@ -4,7 +4,9 @@
 #include <GL/glew.h>
 
 namespace neo {
-	void applyRenderState(const RenderState& renderState, bool wireframeOverride) {
+	void applyRenderState(const RenderState& renderState, const glm::uvec2& viewport, bool wireframeOverride) {
+		glViewport(0, 0, viewport.x, viewport.y);
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
