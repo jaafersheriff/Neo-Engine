@@ -22,7 +22,7 @@ namespace neo {
 	{
 		TRACY_ZONE();
 
-		renderPasses.renderPass(outputTargetHandle, viewport, sDisableDepthState, [=](const ResourceManagers& resourceManagers, const ECS&) {
+		renderPasses.renderPass(outputTargetHandle, viewport, sBlitRenderState, [=](const ResourceManagers& resourceManagers, const ECS&) {
 			TRACY_GPU();
 			auto blitShaderHandle = resourceManagers.mShaderManager.asyncLoad("Blit Shader", SourceShader::ShaderCode{
 				{ types::shader::Stage::Vertex,

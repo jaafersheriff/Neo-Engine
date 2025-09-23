@@ -14,7 +14,7 @@ namespace neo {
 		TextureHandle inputTextureHandle) {
 		TRACY_ZONE();
 
-		renderPasses.renderPass(outputTargetHandle, viewport, sDisableDepthState, [=](const ResourceManagers& resourceManagers, const ECS&) {
+		renderPasses.renderPass(outputTargetHandle, viewport, sBlitRenderState, [=](const ResourceManagers& resourceManagers, const ECS&) {
 			TRACY_GPU();
 
 			if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {
@@ -37,6 +37,6 @@ namespace neo {
 			resolvedShader.bindTexture("inputTexture", inputTexture);
 
 			resourceManagers.mMeshManager.resolve("quad").draw();
-		});
+		}, "FXAA");
 	}
 }

@@ -62,12 +62,10 @@ namespace neo {
 		}
 
 		// Down sample
-		RenderState downSampleState;
-		downSampleState.mDepthState = std::nullopt;
 		for (int i = 0; i < parameters.mDownSampleSteps; i++) {
 			renderPasses.clear(bloomTargets[i], types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
 			glm::uvec2 mipDimension(baseDimension.x >> i, baseDimension.y >> i);
-			renderPasses.renderPass(bloomTargets[i], mipDimension, downSampleState, [i, bloomTextures, mipDimension, inputTextureHandle, parameters](const ResourceManagers& resourceManagers, const ECS&) {
+			renderPasses.renderPass(bloomTargets[i], mipDimension, sBlitRenderState, [i, bloomTextures, mipDimension, inputTextureHandle, parameters](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Bloom Down");
 
 				auto bloomDownShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomDown Shader", SourceShader::ConstructionArgs{
@@ -98,7 +96,7 @@ namespace neo {
 		}
 
 		// Up sample
-		RenderState upSampleState;
+		RenderState upSampleState = sBlitRenderState;
 		upSampleState.mDepthState = std::nullopt;
 		upSampleState.mBlendState = BlendState{
 			BlendEquation::Add,
@@ -135,9 +133,7 @@ namespace neo {
 			resourceManagers.mTextureManager
 		);
 		// Mix results
-		RenderState mixState;
-		mixState.mDepthState = std::nullopt;
-		renderPasses.renderPass(bloomOutputHandle, dimension, mixState, [inputTextureHandle, bloomTextures](const ResourceManagers& resourceManagers, const ECS&) {
+		renderPasses.renderPass(bloomOutputHandle, dimension, sBlitRenderState, [inputTextureHandle, bloomTextures](const ResourceManagers& resourceManagers, const ECS&) {
 			TRACY_GPUN("Bloom Mix");
 
 			auto bloomMixShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomMix Shader", SourceShader::ConstructionArgs{

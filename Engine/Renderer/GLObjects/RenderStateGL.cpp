@@ -4,12 +4,13 @@
 #include <GL/glew.h>
 
 namespace neo {
-	void applyRenderState(const RenderState& renderState) {
+	void applyRenderState(const RenderState& renderState, bool wireframeOverride) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 		glBindVertexArray(0);
 		glUseProgram(0);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		if (renderState.mDepthState) {
 			glEnable(GL_DEPTH_TEST);
@@ -96,11 +97,8 @@ namespace neo {
 			glDisable(GL_BLEND);
 		}
 
-		if (renderState.mWireframe) {
+		if (wireframeOverride) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		}
-		else {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 	}
 }

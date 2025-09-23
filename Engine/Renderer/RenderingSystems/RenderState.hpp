@@ -49,15 +49,23 @@ namespace neo {
 		};
 		std::optional<CullFace> mCullFace = CullFace::Back;
 		std::optional<BlendState> mBlendState = std::nullopt;
-		bool mWireframe = false;
+		bool mWireframeable = true;
 	};
 
 	constexpr static RenderState sDisableDepthState = RenderState {
 		std::nullopt,
 		CullFace::Back,
 		std::nullopt,
+		true
+	};
+
+	constexpr static RenderState sBlitRenderState = RenderState {
+		std::nullopt,
+		CullFace::Back,
+		std::nullopt,
 		false
 	};
+
 
 
 }

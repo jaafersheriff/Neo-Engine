@@ -135,9 +135,7 @@ namespace neo {
 		RenderPasses renderPasses;
 		{
 			TRACY_ZONEN("Demo::render");
-			renderPasses.mWireframeOverride = mWireframe;
 			demo->render(renderPasses, resourceManagers, ecs, mSceneColorTextureHandle, sceneDepthTextureHandle);
-			renderPasses.mWireframeOverride = false;
 		}
 
 		if (mShowBoundingBoxes) {
@@ -161,7 +159,9 @@ namespace neo {
 			TRACY_ZONEN("ImGui");
 			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color, glm::vec4(0,0,0,1), "Clear backbuffer");
 
-			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, RenderState{}, [this, &window](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			RenderState imguiRenderState{};
+			imguiRenderState.mWireframeable = false;
+			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, imguiRenderState, [this, &window](const ResourceManagers& resourceManagers, const ECS& ecs) {
 				TRACY_GPUN("ImGui Render");
 				drawImGui(resourceManagers, ecs, window.getDetails().mPos, window.getDetails().mSize);
 			}, "ImGui");
@@ -172,7 +172,7 @@ namespace neo {
 			blit(renderPasses, FramebufferHandle(0), window.getDetails().mSize, mSceneColorTextureHandle, "Final Blit");
 		}
 
-		renderPasses._execute(mStats, resourceManagers, ecs);
+		renderPasses._execute(mStats, resourceManagers, ecs, mWireframe);
 	}
 
 	void Renderer::_imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager) {

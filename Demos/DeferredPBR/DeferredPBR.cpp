@@ -415,7 +415,7 @@ namespace DeferredPBR {
 				);
 			renderPasses.clear(outputHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0));
 
-			renderPasses.renderPass(outputHandle, viewport.mSize, sDisableDepthState, [gbufferHandle, this](const ResourceManagers& resourceManagers, const ECS&) {
+			renderPasses.renderPass(outputHandle, viewport.mSize, sBlitRenderState, [gbufferHandle, this](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("GBuffer debug");
 				drawGBufferDebug(resourceManagers, gbufferHandle, mGbufferDebugParams);
 			}, "GBuffer debug");

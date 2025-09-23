@@ -16,8 +16,7 @@ namespace neo {
 		});
 	}
 
-	void RenderPasses::renderPass(FramebufferHandle target, glm::uvec2 viewport, RenderState renderState, DrawFunction draw, std::optional<std::string> debugName) {
-		renderState.mWireframe = mWireframeOverride;
+	void RenderPasses::renderPass(FramebufferHandle target, const glm::uvec2& viewport, const RenderState& renderState, DrawFunction draw, std::optional<std::string> debugName) {
 		mPasses.emplace_back(RenderPass{
 			target,
 			viewport,
@@ -34,7 +33,7 @@ namespace neo {
 		});
 	}
 
-	void RenderPasses::_execute(FrameStats& renderStats, const ResourceManagers& resourceManagers, const ECS& ecs) {
+	void RenderPasses::_execute(FrameStats& renderStats, const ResourceManagers& resourceManagers, const ECS& ecs, bool wireframe) {
 		renderStats.mRenderPasses.clear();
 
 		TRACY_GPU();
@@ -55,7 +54,8 @@ namespace neo {
 					resourceManagers.mFramebufferManager.resolve(renderPass.mTarget).bind();
 					glViewport(0, 0, renderPass.mViewport.x, renderPass.mViewport.y);
 
-					applyRenderState(renderPass.mRenderState);
+					applyRenderState(renderPass.mRenderState, wireframe && renderPass.mRenderState.mWireframeable);
+
 					renderPass.mDrawFunction(resourceManagers, ecs);
 				},
 				[&](const ClearPass& clearPass) {

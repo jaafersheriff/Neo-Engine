@@ -12,12 +12,12 @@ namespace neo {
 		void clear(FramebufferHandle target, types::framebuffer::AttachmentBits clearFlags, glm::vec4 clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f), std::optional<std::string> debugName = std::nullopt);
 
 		using DrawFunction = std::function<void(const ResourceManagers& resourceManagers, const ECS& ecs)>;
-		void renderPass(FramebufferHandle target, glm::uvec2 viewport, RenderState renderState, DrawFunction draw, std::optional<std::string> debugName = std::nullopt);
+		void renderPass(FramebufferHandle target, const glm::uvec2& viewport, const RenderState& renderState, DrawFunction draw, std::optional<std::string> debugName = std::nullopt);
 
 		void computePass(DrawFunction draw, std::optional<std::string> debugName = std::nullopt);
 
 	private:
-		void _execute(FrameStats& stats, const ResourceManagers& resourceManagers, const ECS& ecs);
+		void _execute(FrameStats& stats, const ResourceManagers& resourceManagers, const ECS& ecs, bool wireframe);
 		bool mWireframeOverride = false;
 
 		struct ComputePass {

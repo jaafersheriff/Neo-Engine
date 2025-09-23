@@ -26,7 +26,7 @@ namespace DeferredPBR {
 		const FramebufferHandle& gbufferHandle) {
 		TRACY_ZONE();
 
-		renderPasses.renderPass(outputTargetHandle, viewport, sDisableDepthState, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport, sBlitRenderState, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPU();
 			if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
 				return;
@@ -230,6 +230,7 @@ namespace DeferredPBR {
 			BlendFuncDst::One,
 			glm::vec4(1.f)
 		};
+		renderState.mWireframeable = false;
 
 		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPU();

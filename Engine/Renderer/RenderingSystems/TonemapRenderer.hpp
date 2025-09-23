@@ -23,7 +23,7 @@ namespace neo {
 		);
 		renderPasses.clear(tonemapTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear tonemap target");
 
-		renderPasses.renderPass(tonemapTargetHandle, dimension, sDisableDepthState, [averageLuminance, inputTextureHandle](const ResourceManagers& resourceManagers, const ECS&) {
+		renderPasses.renderPass(tonemapTargetHandle, dimension, sBlitRenderState, [averageLuminance, inputTextureHandle](const ResourceManagers& resourceManagers, const ECS&) {
 			TRACY_GPU();
 			auto tonemapShaderHandle = resourceManagers.mShaderManager.asyncLoad("Tonemap Shader", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex, "quad.vert"},
