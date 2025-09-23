@@ -176,13 +176,9 @@ namespace Base {
 			resourceManagers.mTextureManager
 		);
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
-		{
-			RenderState blitState;
-			blitState.mDepthState = std::nullopt;
-			renderPasses.renderPass(outputTargetHandle, viewport.mSize, blitState, [sceneColor](const ResourceManagers& resourceManagers, const ECS&) {
-				drawFXAA(resourceManagers, sceneColor);
-			}, "FXAA");
-		}
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, sDisableDepthState, [sceneColor](const ResourceManagers& resourceManagers, const ECS&) {
+			drawFXAA(resourceManagers, sceneColor);
+		}, "FXAA");
 	}
 
 	void Demo::destroy() {

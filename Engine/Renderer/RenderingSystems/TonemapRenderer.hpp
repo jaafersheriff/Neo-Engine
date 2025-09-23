@@ -8,7 +8,7 @@
 namespace neo {
 
 	inline TextureHandle tonemap(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, glm::uvec2 dimension, TextureHandle inputTextureHandle, TextureHandle averageLuminance = NEO_INVALID_HANDLE) {
-		TRACY_GPU();
+		TRACY_ZONE();
 
 		if (!resourceManagers.mTextureManager.isValid(inputTextureHandle)) {
 			return NEO_INVALID_HANDLE;
@@ -22,9 +22,9 @@ namespace neo {
 			resourceManagers.mTextureManager
 		);
 		renderPasses.clear(tonemapTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear tonemap target");
-		RenderState disableDepthState;
-		disableDepthState.mDepthState = std::nullopt;
-		renderPasses.renderPass(tonemapTargetHandle, dimension, disableDepthState, [averageLuminance, inputTextureHandle](const ResourceManagers& resourceManagers, const ECS&) {
+
+		renderPasses.renderPass(tonemapTargetHandle, dimension, sDisableDepthState, [averageLuminance, inputTextureHandle](const ResourceManagers& resourceManagers, const ECS&) {
+			TRACY_GPU();
 			auto tonemapShaderHandle = resourceManagers.mShaderManager.asyncLoad("Tonemap Shader", SourceShader::ConstructionArgs{
 				{ types::shader::Stage::Vertex, "quad.vert"},
 				{ types::shader::Stage::Fragment, "tonemap.frag" }

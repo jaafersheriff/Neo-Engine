@@ -1,57 +1,10 @@
 # pragma once
 
 #include "ResourceManager/ResourceManagers.hpp"
-#include <glm/glm.hpp>
+#include "Renderer/RenderingSystems/RenderState.hpp"
 
 namespace neo {
 	class ECS;
-
-	// TODO - these should move to their own file
-	enum class DepthFunc {
-		Less,
-		LessEqual
-	};
-	struct DepthState {
-		DepthFunc mDepthFunc;
-		bool mDepthMask;
-	};
-
-	// TODO - these should move to their own file
-	enum class CullFace {
-		Back,
-		Front
-	};
-
-	// TODO - these should move to their own file
-	enum class BlendEquation {
-		Add,
-	};
-	enum class BlendFuncSrc {
-		Alpha,
-		One
-	};
-	enum class BlendFuncDst {
-		OneMinusSrcAlpha,
-		One
-	};
-	struct BlendState {
-		BlendEquation mBlendEquation  = BlendEquation::Add;
-		BlendFuncSrc mBlendSrc = BlendFuncSrc::Alpha;
-		BlendFuncDst mBlendDst = BlendFuncDst::OneMinusSrcAlpha;
-		glm::vec4 mBlendColor = glm::vec4(0.f);
-	};
-
-	// TODO - these should move to their own file
-	struct RenderState {
-		// Default render state
-		std::optional<DepthState> mDepthState = DepthState{
-			DepthFunc::Less,
-			true
-		};
-		std::optional<CullFace> mCullFace = CullFace::Back;
-		std::optional<BlendState> mBlendState = std::nullopt;
-		bool mWireframe = false;
-	};
 
 	class RenderPasses {
 		friend class Renderer;

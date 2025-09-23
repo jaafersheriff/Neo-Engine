@@ -33,7 +33,7 @@ namespace neo {
 	};
 
 	inline TextureHandle calculateAutoexposure(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS&, const TextureHandle previousFrameHDR, AutoExposureParameters& params) {
-		TRACY_GPU();
+		TRACY_ZONE();
 
 		if (!resourceManagers.mTextureManager.isValid(previousFrameHDR)) {
 			return NEO_INVALID_HANDLE;

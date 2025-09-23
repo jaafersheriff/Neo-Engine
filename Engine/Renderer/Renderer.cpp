@@ -169,9 +169,7 @@ namespace neo {
 		else {
 			TRACY_ZONEN("Final Blit");
 			renderPasses.clear(FramebufferHandle(0), types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f));
-			RenderState blitState;
-			blitState.mDepthState = std::nullopt;
-			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, blitState, [this](const ResourceManagers& resourceManagers, const ECS&) {
+			renderPasses.renderPass(FramebufferHandle(0), window.getDetails().mSize, sDisableDepthState, [this](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Final Blit");
 				blit(resourceManagers, mSceneColorTextureHandle);
 			}, "Final Blit");

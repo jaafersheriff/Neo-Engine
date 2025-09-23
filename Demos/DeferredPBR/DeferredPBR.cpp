@@ -415,9 +415,7 @@ namespace DeferredPBR {
 				);
 			renderPasses.clear(outputHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0));
 
-			RenderState blitState;
-			blitState.mDepthState = std::nullopt;
-			renderPasses.renderPass(outputHandle, viewport.mSize, blitState, [gbufferHandle, this](const ResourceManagers& resourceManagers, const ECS&) {
+			renderPasses.renderPass(outputHandle, viewport.mSize, sDisableDepthState, [gbufferHandle, this](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("GBuffer debug");
 				drawGBufferDebug(resourceManagers, gbufferHandle, mGbufferDebugParams);
 				}, "GBuffer debug");
@@ -488,9 +486,7 @@ namespace DeferredPBR {
 				resourceManagers.mTextureManager
 			);
 
-			RenderState blitState;
-			blitState.mDepthState = std::nullopt;
-			renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, blitState, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
+			renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, sDisableDepthState, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Blit Previous HDR Color");
 				blit(resourceManagers, bloomResults);
 				}, "Blit previous frame");
@@ -514,9 +510,7 @@ namespace DeferredPBR {
 				resourceManagers.mTextureManager
 				);
 			renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
-			RenderState blitState;
-			blitState.mDepthState = std::nullopt;
-			renderPasses.renderPass(outputTargetHandle, viewport.mSize, blitState, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
+			renderPasses.renderPass(outputTargetHandle, viewport.mSize, sDisableDepthState, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
 				drawFXAA(resourceManagers, tonemappedHandle);
 				}, "FXAA");
 		}

@@ -26,10 +26,7 @@ namespace DeferredPBR {
 		const FramebufferHandle& gbufferHandle) {
 		TRACY_ZONE();
 
-		RenderState disableDepth;
-		disableDepth.mDepthState = std::nullopt;
-
-		renderPasses.renderPass(outputTargetHandle, viewport, disableDepth, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport, sDisableDepthState, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPU();
 			if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
 				return;

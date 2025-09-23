@@ -179,14 +179,10 @@ namespace Fireworks {
 			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
 			resourceManagers.mTextureManager
 		);
-		{
-			RenderState blitState;
-			blitState.mDepthState = std::nullopt;
-			renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, blitState, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
-				TRACY_GPUN("Blit Previous HDR Color");
-				blit(resourceManagers, bloomResults);
-			});
-		}
+		renderPasses.renderPass(previousHDRColorHandle, viewport.mSize, sDisableDepthState, [bloomResults](const ResourceManagers& resourceManagers, const ECS&) {
+			TRACY_GPUN("Blit Previous HDR Color");
+			blit(resourceManagers, bloomResults);
+		});
 
 		TextureHandle averageLuminance = NEO_INVALID_HANDLE;
 		if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
@@ -203,9 +199,7 @@ namespace Fireworks {
 				resourceManagers.mTextureManager
 				);
 			renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear Output");
-			RenderState blitState;
-			blitState.mDepthState = std::nullopt;
-			renderPasses.renderPass(outputTargetHandle, viewport.mSize, blitState, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
+			renderPasses.renderPass(outputTargetHandle, viewport.mSize, sDisableDepthState, [tonemappedHandle](const ResourceManagers& resourceManagers, const ECS&) {
 				drawFXAA(resourceManagers, tonemappedHandle);
 			}, "FXAA");
 		}
