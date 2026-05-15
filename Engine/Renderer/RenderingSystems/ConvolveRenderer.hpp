@@ -59,9 +59,9 @@ namespace neo {
 			renderPasses.computePass([&ibl](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("DFG LUT");
 				if (resourceManagers.mTextureManager.isValid(ibl.mDFGLut)) {
-					auto dfgLutShaderHandle = resourceManagers.mShaderManager.asyncLoad("DFGLutShader", SourceShader::ConstructionArgs{
-						{ types::shader::Stage::Compute, "dfglut.comp" }
-						});
+					auto dfgLutShaderHandle = resourceManagers.mShaderManager.asyncLoad("DFGLutShader", ShaderBuilder{}
+						.setStage(types::shader::Stage::Compute, "dfglut.comp")
+					);
 					if (resourceManagers.mShaderManager.isValid(dfgLutShaderHandle)) {
 						auto& dfgLutShader = resourceManagers.mShaderManager.resolveDefines(dfgLutShaderHandle, {});
 						dfgLutShader.bind();
@@ -99,9 +99,9 @@ namespace neo {
 			renderPasses.computePass([&ibl, &skyboxCubemap](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Convolve");
 				if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox)) {
-					auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", SourceShader::ConstructionArgs{
-						{ types::shader::Stage::Compute, "convolve.comp" }
-						});
+					auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", ShaderBuilder{}
+						.setStage(types::shader::Stage::Compute, "convolve.comp")
+					);
 					if (resourceManagers.mShaderManager.isValid(convolveShaderHandle)) {
 						const auto& convolvedCubemap = resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox);
 

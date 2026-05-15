@@ -172,10 +172,10 @@ namespace neo {
 	template<typename... CompTs>
 	inline void drawCSMShadows(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity lightEntity, bool clear = false) {
 		TRACY_ZONE();
-		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "model.vert"},
-			{ types::shader::Stage::Fragment, "depth.frag" }
-		});
+		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ShadowMap Shader", ShaderBuilder{}
+			.setStage(types::shader::Stage::Vertex, "model.vert")
+			.setStage(types::shader::Stage::Fragment, "depth.frag")
+		);
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
 		}

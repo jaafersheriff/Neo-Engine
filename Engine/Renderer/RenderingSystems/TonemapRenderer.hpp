@@ -25,10 +25,10 @@ namespace neo {
 
 		renderPasses.renderPass(tonemapTargetHandle, dimension, sBlitRenderState, [averageLuminance, inputTextureHandle](const ResourceManagers& resourceManagers, const ECS&) {
 			TRACY_GPU();
-			auto tonemapShaderHandle = resourceManagers.mShaderManager.asyncLoad("Tonemap Shader", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "quad.vert"},
-				{ types::shader::Stage::Fragment, "tonemap.frag" }
-				});
+			auto tonemapShaderHandle = resourceManagers.mShaderManager.asyncLoad("Tonemap Shader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "quad.vert")
+				.setStage(types::shader::Stage::Fragment, "tonemap.frag")
+			);
 			if (!resourceManagers.mShaderManager.isValid(tonemapShaderHandle)) {
 				return;
 			}

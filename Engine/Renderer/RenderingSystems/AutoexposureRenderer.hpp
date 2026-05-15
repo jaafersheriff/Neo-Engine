@@ -54,9 +54,9 @@ namespace neo {
 
 		renderPasses.computePass([histogramHandle](const ResourceManagers& resourceManagers, const ECS&) {
 			TRACY_GPUN("Histogram clear");
-			auto histogramClearHandle = resourceManagers.mShaderManager.asyncLoad("HistogramClear Shader", SourceShader::ConstructionArgs{
-				{types::shader::Stage::Compute, "histogram_clear.comp" }
-			});
+			auto histogramClearHandle = resourceManagers.mShaderManager.asyncLoad("HistogramClear Shader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Compute, "histogram_clear.comp")
+			);
 			if (resourceManagers.mShaderManager.isValid(histogramClearHandle)) {
 				auto& clearShader = resourceManagers.mShaderManager.resolveDefines(histogramClearHandle, {});
 				auto imageBarrier2 = clearShader.bindImageTexture("histogram", resourceManagers.mTextureManager.resolve(histogramHandle), types::shader::Access::Write);
@@ -69,9 +69,9 @@ namespace neo {
 			if (!resourceManagers.mTextureManager.isValid(previousFrameHDR)) {
 				return;
 			}
-			auto histogramPopulateHandle = resourceManagers.mShaderManager.asyncLoad("HistogramPopulate Shader", SourceShader::ConstructionArgs{
-				{types::shader::Stage::Compute, "histogram_populate.comp" }
-				});
+			auto histogramPopulateHandle = resourceManagers.mShaderManager.asyncLoad("HistogramPopulate Shader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Compute, "histogram_populate.comp")
+			);
 			if (resourceManagers.mShaderManager.isValid(histogramPopulateHandle)) {
 				auto& populateShader = resourceManagers.mShaderManager.resolveDefines(histogramPopulateHandle, {});
 
@@ -98,9 +98,9 @@ namespace neo {
 			if (!resourceManagers.mTextureManager.isValid(previousFrameHDR)) {
 				return;
 			}
-			auto histogramAverageHandle = resourceManagers.mShaderManager.asyncLoad("HistogramAverage Shader", SourceShader::ConstructionArgs{
-				{types::shader::Stage::Compute, "histogram_average.comp" }
-				});
+			auto histogramAverageHandle = resourceManagers.mShaderManager.asyncLoad("HistogramAverage Shader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Compute, "histogram_average.comp")
+			);
 			if (resourceManagers.mTextureManager.isValid(outputTexture) && resourceManagers.mShaderManager.isValid(histogramAverageHandle)) {
 				float dt = 1.f;
 				if (auto frameStats = ecs.cGetComponent<FrameStatsComponent>()) {

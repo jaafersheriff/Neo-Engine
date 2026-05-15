@@ -113,9 +113,9 @@ namespace Compute {
 				TRACY_GPUN("Update Particles");
 				auto&& [_, meshComponent] = *meshView;
 	
-				auto particlesComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticlesCompute", SourceShader::ConstructionArgs{
-					{ types::shader::Stage::Compute, "compute/particles.compute" }
-				});
+				auto particlesComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticlesCompute", ShaderBuilder{}
+					.setStage(types::shader::Stage::Compute, "compute/particles.compute")
+				);
 				if (!resourceManagers.mShaderManager.isValid(particlesComputeShaderHandle)) {
 					return;
 				}
@@ -161,11 +161,11 @@ namespace Compute {
 		};
 		renderPasses.renderPass(outputTargetHandle, viewport.mSize, renderState, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Draw Particles");
-			auto particlesVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticleVis", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex,   "compute/particles.vert" },
-				{ types::shader::Stage::Geometry, "compute/particles.geom" },
-				{ types::shader::Stage::Fragment, "compute/particles.frag" },
-			});
+			auto particlesVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticleVis", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "compute/particles.vert")
+				.setStage(types::shader::Stage::Geometry, "compute/particles.geom")
+				.setStage(types::shader::Stage::Fragment, "compute/particles.frag")
+			);
 
 			if (!resourceManagers.mShaderManager.isValid(particlesVisShaderHandle)) {
 				return;

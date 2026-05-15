@@ -51,10 +51,10 @@ namespace DeferredPBR {
 	) {
 		TRACY_GPU();
 
-		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBuffer Shader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "model.vert"},
-			{ types::shader::Stage::Fragment, "deferredpbr/gbuffer.frag" }
-		});
+		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBuffer Shader", ShaderBuilder{}
+			.setStage(types::shader::Stage::Vertex, "model.vert")
+			.setStage(types::shader::Stage::Fragment, "deferredpbr/gbuffer.frag")
+		);
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
 		}
@@ -195,10 +195,10 @@ namespace DeferredPBR {
 			return;
 		}
 
-		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBufferDebug", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "quad.vert"},
-			{ types::shader::Stage::Fragment, "deferredpbr/gbuffer_debug.frag" }
-		});
+		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("GBufferDebug", ShaderBuilder{}
+			.setStage(types::shader::Stage::Vertex, "quad.vert")
+			.setStage(types::shader::Stage::Fragment, "deferredpbr/gbuffer_debug.frag")
+		);
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
 		}

@@ -16,10 +16,10 @@ namespace neo {
 	void drawImGui(const ResourceManagers& resourceManagers, const ECS& ecs, glm::uvec2 viewportOffset, glm::uvec2 viewportSize) {
 		TRACY_GPU();
 
-		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ImGuiShader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "imgui.vert"},
-			{ types::shader::Stage::Fragment, "imgui.frag" }
-		});
+		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("ImGuiShader", ShaderBuilder{}
+			.setStage(types::shader::Stage::Vertex, "imgui.vert")
+			.setStage(types::shader::Stage::Fragment, "imgui.frag")
+		);
 
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;

@@ -32,10 +32,10 @@ namespace DeferredPBR {
 				return;
 			}
 
-			auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("DirectionalLightResolveShader", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "quad.vert" },
-				{ types::shader::Stage::Fragment, "deferredpbr/directionallightresolve.frag" }
-				});
+			auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("DirectionalLightResolveShader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "quad.vert")
+				.setStage(types::shader::Stage::Fragment, "deferredpbr/directionallightresolve.frag")
+			);
 			if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
 				return;
 			}
@@ -101,10 +101,10 @@ namespace DeferredPBR {
 		auto drawFunc = [=](const ResourceManagers& resourceManagers, const ECS& ecs, bool drawInsideLights) {
 			TRACY_GPUN("Point Light Resolve");
 
-			auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightResolve Shader", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "deferredpbr/pointlightresolve.vert"},
-				{ types::shader::Stage::Fragment, "deferredpbr/pointlightresolve.frag" }
-				});
+			auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightResolve Shader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "deferredpbr/pointlightresolve.vert")
+				.setStage(types::shader::Stage::Fragment, "deferredpbr/pointlightresolve.frag")
+			);
 			if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
 				return;
 			}
@@ -239,10 +239,10 @@ namespace DeferredPBR {
 				return;
 			}
 
-			auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("Indirect Resolve", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "quad.vert" },
-				{ types::shader::Stage::Fragment, "deferredpbr/indirectresolve.frag" }
-				});
+			auto lightResolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("Indirect Resolve", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "quad.vert")
+				.setStage(types::shader::Stage::Fragment, "deferredpbr/indirectresolve.frag")
+			);
 			if (!resourceManagers.mShaderManager.isValid(lightResolveShaderHandle)) {
 				return;
 			}

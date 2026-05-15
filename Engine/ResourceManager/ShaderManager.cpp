@@ -17,15 +17,28 @@ namespace neo {
 			NEO_ASSERT(debugName.has_value(), "Shaders need to come with a name please");
 			NEO_LOG_V("Uploading shader %s", debugName.value().c_str());
 			return util::visit(shaderDetails,
-				[&](const SourceShader::ConstructionArgs& constructionArgs) {
+				[&](const ShaderBuilder& builder) {
 					SourceShader::ShaderCode shaderCode;
 					time_t lastModTime = 0;
-					for (auto&& [type, filePath] : constructionArgs) {
-						shaderCode.emplace(type, Loader::loadFileString(filePath));
-						lastModTime = std::max(lastModTime, Loader::getFileModTime(filePath));
+					bool notCompute = false;
+					for (int i = 0; i < static_cast<int>(types::shader::Stage::COUNT); i++) {
+						types::shader::Stage stage = static_cast<types::shader::Stage>(i);
+						if (!builder.mConstructionArgs[i].empty()) {
+							shaderCode.emplace(stage, Loader::loadFileString(builder.mConstructionArgs[i]));
+							lastModTime = std::max(lastModTime, Loader::getFileModTime(builder.mConstructionArgs[i]));
+
+							if (stage != types::shader::Stage::Compute) {
+								notCompute = true;
+							}
+							else if (notCompute) {
+								NEO_FAIL("Shader %s has a compute shader and non-compute shader", debugName->c_str());
+							}
+						}
 					}
+
 					auto result = std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
-					result->mResource.mConstructionArgs = constructionArgs;
+
+					result->mResource.mConstructionArgs = SourceShader::ConstructionArgs(builder.mConstructionArgs.begin(), builder.mConstructionArgs.end());
 					result->mResource.mModifiedTime = lastModTime;
 					return result;
 				},
@@ -181,8 +194,10 @@ namespace neo {
 			for (auto id = list.begin(); id < list.end(); id++) {
 				if (auto resource = mCache.handle(*id); resource && resource->mResource.mConstructionArgs) {
 					time_t lastModTime = resource->mResource.mModifiedTime;
-					for (auto&& [stage, fileName] : *resource->mResource.mConstructionArgs) {
-						lastModTime = std::max(lastModTime, Loader::getFileModTime(fileName));
+					for (auto& stage : *resource->mResource.mConstructionArgs) {
+						if (!stage.empty()) {
+							lastModTime = std::max(lastModTime, Loader::getFileModTime(stage));
+						}
 					}
 					if (lastModTime > resource->mResource.mModifiedTime) {
 						NEO_LOG_I("Hot reloading %s", resource->mResource.mName.c_str());

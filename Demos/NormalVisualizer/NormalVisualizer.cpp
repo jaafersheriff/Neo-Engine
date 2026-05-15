@@ -103,11 +103,11 @@ namespace NormalVisualizer {
 
 		renderPasses.renderPass(outputTargetHandle, viewport.mSize, RenderState{}, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
-			auto normalShaderHandle = resourceManagers.mShaderManager.asyncLoad("NormalVisualizer", SourceShader::ConstructionArgs{
-				{types::shader::Stage::Vertex, "normal.vert"},
-				{types::shader::Stage::Geometry, "normal.geom"},
-				{types::shader::Stage::Fragment, "normal.frag"}
-			});
+			auto normalShaderHandle = resourceManagers.mShaderManager.asyncLoad("NormalVisualizer", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "normal.vert")
+				.setStage(types::shader::Stage::Geometry, "normal.geom")
+				.setStage(types::shader::Stage::Fragment, "normal.frag")
+			);
 			if (!resourceManagers.mShaderManager.isValid(normalShaderHandle)) {
 				return;
 			}

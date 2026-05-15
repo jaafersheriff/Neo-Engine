@@ -17,13 +17,14 @@ namespace neo {
 		};
 
 		namespace shader {
-			enum class Stage {
+			enum class Stage : uint8_t {
 				Vertex,
 				Fragment,
 				Geometry,
 				TessellationControl,
 				TessellationEval,
-				Compute
+				Compute,
+				COUNT
 			};
 
 			enum class Barrier {

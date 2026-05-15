@@ -56,10 +56,10 @@ namespace neo {
 			const Texture& shadowCube = resourceManagers.mTextureManager.resolve(shadowCubeHandle);
 			renderPasses.renderPass(shadowTargetHandle, glm::uvec2(shadowCube.mWidth, shadowCube.mHeight), RenderState{}, [i, lightEntity, params](const ResourceManagers& resourceManagers, const ECS& ecs) {
 				TRACY_GPUN("Draw Face");
-				auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightShadowMap Shader", SourceShader::ConstructionArgs{
-					{ types::shader::Stage::Vertex, "model.vert"},
-					{ types::shader::Stage::Fragment, "pointlightdepth.frag" }
-				});
+				auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("PointLightShadowMap Shader", ShaderBuilder{}
+					.setStage(types::shader::Stage::Vertex, "model.vert")
+					.setStage(types::shader::Stage::Fragment, "pointlightdepth.frag")
+				);
 				if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 					return;
 				}

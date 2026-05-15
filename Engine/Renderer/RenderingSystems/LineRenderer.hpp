@@ -13,10 +13,10 @@ namespace neo {
 	void drawLines(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
-		auto lineShaderHandle = resourceManagers.mShaderManager.asyncLoad("LineShader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "line.vert"},
-			{ types::shader::Stage::Fragment, "line.frag" }
-			});
+		auto lineShaderHandle = resourceManagers.mShaderManager.asyncLoad("LineShader", ShaderBuilder{}
+			.setStage(types::shader::Stage::Vertex, "line.vert")
+			.setStage(types::shader::Stage::Fragment, "line.frag")
+		);
 		if (!resourceManagers.mShaderManager.isValid(lineShaderHandle)) {
 			return;
 		}

@@ -29,9 +29,9 @@ namespace Fireworks {
 				continue;
 			}
 
-			auto fireworksComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworksCompute", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Compute, "firework/firework_tick.compute" }
-				});
+			auto fireworksComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworksCompute", ShaderBuilder{}
+				.setStage(types::shader::Stage::Compute, "firework/firework_tick.compute")
+			);
 			if (!resourceManagers.mShaderManager.isValid(fireworksComputeShaderHandle)) {
 				continue;
 			}
@@ -72,11 +72,11 @@ namespace Fireworks {
 
 	inline void drawParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
 		TRACY_GPU();
-		auto fireworksVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworkDraw", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex,   "firework/firework.vert" },
-			{ types::shader::Stage::Geometry, "firework/firework.geom" },
-			{ types::shader::Stage::Fragment, "firework/firework.frag" },
-			});
+		auto fireworksVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworkDraw", ShaderBuilder{}
+			.setStage(types::shader::Stage::Vertex,   "firework/firework.vert")
+			.setStage(types::shader::Stage::Geometry, "firework/firework.geom")
+			.setStage(types::shader::Stage::Fragment, "firework/firework.frag")
+		);
 
 		if (!resourceManagers.mShaderManager.isValid(fireworksVisShaderHandle)) {
 			return;

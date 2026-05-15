@@ -32,11 +32,9 @@ namespace CSM {
 	void drawCSMResolve(const ResourceManagers& resourceManagers, const ECS& ecs, const ECS::Entity cameraEntity, bool debugView, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
-		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("CSM Resolve Shader", 
-			SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "model.vert"},
-				{ types::shader::Stage::Fragment, "csm/csm.frag" }
-			}
+		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("CSM Resolve Shader", ShaderBuilder{}
+			.setStage(types::shader::Stage::Vertex, "model.vert")
+			.setStage(types::shader::Stage::Fragment, "csm/csm.frag")
 		);
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;

@@ -68,10 +68,10 @@ namespace neo {
 			renderPasses.renderPass(bloomTargets[i], mipDimension, sBlitRenderState, [i, bloomTextures, mipDimension, inputTextureHandle, parameters](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Bloom Down");
 
-				auto bloomDownShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomDown Shader", SourceShader::ConstructionArgs{
-					{ types::shader::Stage::Vertex, "quad.vert"},
-					{ types::shader::Stage::Fragment, "bloomDown.frag" }
-					});
+				auto bloomDownShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomDown Shader", ShaderBuilder{}
+					.setStage(types::shader::Stage::Vertex, "quad.vert")
+					.setStage(types::shader::Stage::Fragment, "bloomDown.frag")
+				);
 				if (!resourceManagers.mShaderManager.isValid(bloomDownShaderHandle)) {
 					return;
 				}
@@ -107,10 +107,10 @@ namespace neo {
 			renderPasses.renderPass(bloomTargets[i - 1], glm::uvec2(baseDimension.x >> (i - 1), baseDimension.y >> (i - 1)), upSampleState, [parameters, i, bloomTextures](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Bloom Up");
 
-				auto bloomUpShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomUp Shader", SourceShader::ConstructionArgs{
-					{ types::shader::Stage::Vertex, "quad.vert"},
-					{ types::shader::Stage::Fragment, "bloomUp.frag" }
-					});
+				auto bloomUpShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomUp Shader", ShaderBuilder{}
+					.setStage(types::shader::Stage::Vertex, "quad.vert")
+					.setStage(types::shader::Stage::Fragment, "bloomUp.frag")
+				);
 				if (!resourceManagers.mShaderManager.isValid(bloomUpShaderHandle)) {
 					return;
 				}
@@ -136,10 +136,10 @@ namespace neo {
 		renderPasses.renderPass(bloomOutputHandle, dimension, sBlitRenderState, [inputTextureHandle, bloomTextures](const ResourceManagers& resourceManagers, const ECS&) {
 			TRACY_GPUN("Bloom Mix");
 
-			auto bloomMixShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomMix Shader", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "quad.vert"},
-				{ types::shader::Stage::Fragment, "bloomMix.frag" }
-				});
+			auto bloomMixShaderHandle = resourceManagers.mShaderManager.asyncLoad("BloomMix Shader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "quad.vert")
+				.setStage(types::shader::Stage::Fragment, "bloomMix.frag")
+			);
 			if (!resourceManagers.mShaderManager.isValid(bloomMixShaderHandle)) {
 				return;
 			}

@@ -13,10 +13,10 @@ namespace neo {
 	void drawWireframe(const ResourceManagers& resourceManagers, const ECS& ecs, ECS::Entity cameraEntity, const ShaderDefines& inDefines = {}) {
 		TRACY_GPU();
 
-		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Wireframe Shader", SourceShader::ConstructionArgs{
-			{ types::shader::Stage::Vertex, "model.vert"},
-			{ types::shader::Stage::Fragment, "color.frag" }
-		});
+		auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Wireframe Shader", ShaderBuilder{}
+			.setStage(types::shader::Stage::Vertex, "model.vert")
+			.setStage(types::shader::Stage::Fragment, "color.frag")
+		);
 		if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 			return;
 		}

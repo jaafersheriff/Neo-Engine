@@ -6,14 +6,29 @@
 
 #include "Util/Util.hpp"
 
+#include <array>
 #include <thread>
 #include <variant>
 
 namespace neo {
 	class ResourceManagers;
 
+	struct ShaderBuilder {
+	public:
+		ShaderBuilder& setStage(types::shader::Stage stage, std::string src) {
+			mConstructionArgs[toIndex(stage)] = src;
+			return *this;
+		}
+
+		static constexpr size_t toIndex(types::shader::Stage s) {
+			return static_cast<size_t>(s);
+		}
+
+		using ConstructionArgs = std::array<std::string, static_cast<size_t>(types::shader::Stage::COUNT)>;
+		ConstructionArgs mConstructionArgs;
+	};
+	using ShaderLoadDetails = std::variant<ShaderBuilder, SourceShader::ShaderCode>;
 	using ShaderHandle = ResourceHandle<SourceShader>;
-	using ShaderLoadDetails = std::variant<SourceShader::ConstructionArgs, SourceShader::ShaderCode>;
 
 	class ShaderManager final : public ResourceManagerInterface<ShaderManager, SourceShader, ShaderLoadDetails> {
 		friend ResourceManagerInterface;

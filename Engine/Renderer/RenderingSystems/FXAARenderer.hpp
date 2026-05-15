@@ -21,10 +21,10 @@ namespace neo {
 				return;
 			}
 
-			auto fxaaShaderHandle = resourceManagers.mShaderManager.asyncLoad("FXAAShader", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "quad.vert"},
-				{ types::shader::Stage::Fragment, "fxaa.frag" }
-				});
+			auto fxaaShaderHandle = resourceManagers.mShaderManager.asyncLoad("FXAAShader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "quad.vert")
+				.setStage(types::shader::Stage::Fragment, "fxaa.frag")
+			);
 			if (!resourceManagers.mShaderManager.isValid(fxaaShaderHandle)) {
 				return;
 			}

@@ -63,10 +63,10 @@ namespace neo {
 			}
 			auto&& [lightEntity, _mainLight, light, lightSpatial] = *lightView;
 
-			auto pbrShaderHandle = resourceManagers.mShaderManager.asyncLoad("ForwardPBR Shader", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "model.vert"},
-				{ types::shader::Stage::Fragment, "forwardpbr.frag" }
-				});
+			auto pbrShaderHandle = resourceManagers.mShaderManager.asyncLoad("ForwardPBR Shader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "model.vert")
+				.setStage(types::shader::Stage::Fragment, "forwardpbr.frag")
+			);
 			if (!resourceManagers.mShaderManager.isValid(pbrShaderHandle)) {
 				return;
 			}

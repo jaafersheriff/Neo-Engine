@@ -33,10 +33,10 @@ namespace neo {
 			TRACY_GPU();
 
 			auto skyboxTuple = ecs.cGetComponent<SkyboxComponent>();
-			auto skyboxShaderHandle = resourceManagers.mShaderManager.asyncLoad("SkyboxShader", SourceShader::ConstructionArgs{
-				{ types::shader::Stage::Vertex, "skybox.vert"},
-				{ types::shader::Stage::Fragment, "skybox.frag" }
-				});
+			auto skyboxShaderHandle = resourceManagers.mShaderManager.asyncLoad("SkyboxShader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "skybox.vert")
+				.setStage(types::shader::Stage::Fragment, "skybox.frag")
+			);
 			if (!skyboxTuple || !resourceManagers.mShaderManager.isValid(skyboxShaderHandle)) {
 				return;
 			}

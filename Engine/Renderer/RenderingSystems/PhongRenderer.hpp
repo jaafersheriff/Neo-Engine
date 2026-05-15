@@ -48,11 +48,9 @@ namespace neo {
 
 		renderPasses.renderPass(outputTargetHandle, viewport, renderState, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPU();
-			auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Phong Shader",
-				SourceShader::ConstructionArgs{
-					{ types::shader::Stage::Vertex, "model.vert"},
-					{ types::shader::Stage::Fragment, "phong.frag" }
-				}
+			auto shaderHandle = resourceManagers.mShaderManager.asyncLoad("Phong Shader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "model.vert")
+				.setStage(types::shader::Stage::Fragment, "phong.frag")
 			);
 			if (!resourceManagers.mShaderManager.isValid(shaderHandle)) {
 				return;
