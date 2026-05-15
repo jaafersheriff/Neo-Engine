@@ -11,18 +11,9 @@
 
 namespace neo {
 	class Texture;
-	class SourceShader;
-
-	struct ShaderBarrier {
-		ShaderBarrier(types::shader::Barrier barrierType) :
-			mBarrierType(barrierType)
-		{}
-		ShaderBarrier(const ShaderBarrier&) = delete;
-		~ShaderBarrier();
-
-		private:
-			types::shader::Barrier mBarrierType;
-	};
+	class Mesh;
+	class ShaderBuffer;
+	struct ShaderBarrier;
 
 	class ResolvedShaderInstance {
 		friend SourceShader;
@@ -57,11 +48,14 @@ namespace neo {
 		void bindUniform(const char* name, const UniformVariant& uniform) const;
 		void bindTexture(const char* name, const Texture& texture) const;
 		[[nodiscard]] ShaderBarrier bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip = 0) const;
-		[[nodiscard]] ShaderBarrier bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const;
+		[[nodiscard]] ShaderBarrier bindShaderBuffer(const char* name, const ShaderBuffer& buffer, types::shader::Access accessType) const;
+		[[nodiscard]] ShaderBarrier bindShaderBuffer(const char* name, const Mesh& mesh, types::mesh::VertexType vertexType, types::shader::Access accessType) const;
 
 		void dispatch(glm::uvec3 workGroups) const;
 
 	private:
+		[[nodiscard]] ShaderBarrier _bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const;
+
 		bool isCompute = false;
 		uint32_t mPid = 0;
 		entt::dense_hash_map<types::shader::Stage, uint32_t> mShaderIDs;

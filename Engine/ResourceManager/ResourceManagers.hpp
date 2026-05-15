@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MeshManager.hpp"
+#include "ShaderBufferManager.hpp"
 #include "ShaderManager.hpp"
 #include "TextureManager.hpp"
 #include "FramebufferManager.hpp"
@@ -16,6 +17,7 @@ namespace neo {
 		friend Engine;
 	public:
 		MeshManager mMeshManager;
+		ShaderBufferManager mShaderBufferManager;
 		ShaderManager mShaderManager;
 		TextureManager mTextureManager;
 		FramebufferManager mFramebufferManager;

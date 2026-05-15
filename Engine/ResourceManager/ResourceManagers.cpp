@@ -7,6 +7,7 @@ namespace neo {
 	void ResourceManagers::_tick() {
 		TRACY_GPU();
 		mMeshManager.tick();
+		mShaderBufferManager.tick();
 		mShaderManager.tick();
 		mTextureManager.tick();
 		mFramebufferManager.tick(mTextureManager); // Do this after textures
@@ -14,6 +15,7 @@ namespace neo {
 
 	void ResourceManagers::_clear() {
 		mMeshManager.clear();
+		mShaderBufferManager.clear();
 		mShaderManager.clear();
 		mTextureManager.clear();
 		mFramebufferManager.clear(mTextureManager); // Do this after textures
@@ -51,6 +53,10 @@ namespace neo {
 		}
 		if (ImGui::TreeNodeEx(&mMeshManager, ImGuiTreeNodeFlags_None, "Meshes (%d)", mMeshManager.mCache.size())) {
 			mMeshManager.imguiEditor();
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNodeEx(&mShaderBufferManager, ImGuiTreeNodeFlags_None, "Shader Buffers (%d)", mShaderBufferManager.mCache.size())) {
+			mShaderBufferManager.imguiEditor();
 			ImGui::TreePop();
 		}
 		ImGui::End();

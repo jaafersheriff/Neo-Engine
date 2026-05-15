@@ -129,20 +129,13 @@ namespace Compute {
 					timeStep = frameStats.mDT / 1000.f * meshComponent.timeScale;
 				}
 				particlesComputeShader.bindUniform("timestep", timeStep);
-	
-				// Bind mesh
+
+				// Bind mesh vertex buffer as shader storage buffer
 				auto& mesh = resourceManagers.mMeshManager.resolve(meshComponent.mMeshHandle);
-				auto& position = mesh.getVBO(types::mesh::VertexType::Position);
-				glBindVertexArray(mesh.mVAOID);
-				// This is pretty gross
-				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, position.vboID);
-	
-				// Dispatch 
+				auto posBarrier = particlesComputeShader.bindShaderBuffer("Pos", mesh, types::mesh::VertexType::Position, types::shader::Access::ReadWrite);
+
+				// Dispatch
 				particlesComputeShader.dispatch({meshComponent.mNumParticles / ServiceLocator<Renderer>::ref().getDetails().mMaxComputeWorkGroupSize.x, 1, 1});
-				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-	
-				// Reset bind
-				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
 			}
 		});
 

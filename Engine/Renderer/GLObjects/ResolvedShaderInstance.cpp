@@ -6,6 +6,9 @@
 #include "Renderer/GLObjects/SourceShader.hpp"
 #include "Renderer/GLObjects/GLHelper.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
+#include "Renderer/GLObjects/Mesh.hpp"
+#include "Renderer/GLObjects/ShaderBuffer.hpp"
+#include "Renderer/GLObjects/ShaderBarrier.hpp"
 
 #include "Util/Util.hpp"
 #include "Loader/Loader.hpp"
@@ -22,20 +25,6 @@ namespace neo {
 				return GL_READ_WRITE;
 			default:
 				NEO_FAIL("Invalid access type");
-				return 0;
-			}
-		}
-
-		int32_t _getGLBarrierType(types::shader::Barrier barrierType) {
-			switch (barrierType) {
-			case types::shader::Barrier::AtomicCounter:
-				return GL_ATOMIC_COUNTER_BARRIER_BIT;
-			case types::shader::Barrier::ImageAccess:
-				return GL_SHADER_IMAGE_ACCESS_BARRIER_BIT;
-			case types::shader::Barrier::StorageBuffer:
-				return GL_SHADER_STORAGE_BARRIER_BIT;
-			default:
-				NEO_FAIL("Invalid barrier type");
 				return 0;
 			}
 		}
@@ -192,12 +181,6 @@ namespace neo {
 
 				start = end + 1;
 			}
-		}
-	}
-
-	ShaderBarrier::~ShaderBarrier() {
-		if (mBarrierType != types::shader::Barrier::None) {
-			glMemoryBarrier(_getGLBarrierType(mBarrierType));
 		}
 	}
 
@@ -360,8 +343,15 @@ namespace neo {
 		return ShaderBarrier(accessType > types::shader::Access::Read ? types::shader::Barrier::ImageAccess : types::shader::Barrier::None); // I'm really trusting the compiler to use copy elision here
 	}
 
-	/*
-	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const {
+	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindShaderBuffer(const char* name, const ShaderBuffer& buffer, types::shader::Access accessType) const {
+		return _bindShaderBuffer(name, buffer.mBufferID, accessType);
+	}
+
+	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindShaderBuffer(const char* name, const Mesh& mesh, types::mesh::VertexType vertexType, types::shader::Access accessType) const {
+		return _bindShaderBuffer(name, mesh.getVBO(vertexType).vboID, accessType);
+	}
+
+	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::_bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const {
 		GLint bindingLoc = 0;
 		auto binding = mBindings.find(HashedString(name));
 		if (binding != mBindings.end()) {
@@ -370,5 +360,5 @@ namespace neo {
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingLoc, id);
 		return ShaderBarrier(accessType > types::shader::Access::Read ? types::shader::Barrier::StorageBuffer : types::shader::Barrier::None); // I'm really trusting the compiler to use copy elision here
 	}
-	*/
+
 }

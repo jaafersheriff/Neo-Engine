@@ -11,6 +11,8 @@
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
+#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+
 namespace Fireworks {
 	inline void tickParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {
 		TRACY_GPU();
@@ -58,21 +60,13 @@ namespace Fireworks {
 			fireworksComputeShader.bindUniform("childVelocityBias", firework.mParameters.mChildVelocityBias);
 			fireworksComputeShader.bindUniform("childIntensityDecay", 1.f - firework.mParameters.mChildIntensityDecay);
 
-			// Bind mesh
+			// Bind mesh vertex buffers as shader storage buffers
 			auto& mesh = resourceManagers.mMeshManager.resolve(firework.mBuffer);
-			glBindVertexArray(mesh.mVAOID);
-
-			// This is pretty gross
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mesh.getVBO(types::mesh::VertexType::Position).vboID);
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, mesh.getVBO(types::mesh::VertexType::Normal).vboID);
-			ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
+			auto posBarrier = fireworksComputeShader.bindShaderBuffer("BufferA", mesh, types::mesh::VertexType::Position, types::shader::Access::ReadWrite);
+			auto velBarrier = fireworksComputeShader.bindShaderBuffer("BufferB", mesh, types::mesh::VertexType::Normal, types::shader::Access::ReadWrite);
 
 			// Dispatch 
 			fireworksComputeShader.dispatch({ std::ceil(firework.mCount / 16), 1, 1 });
-
-			// Reset bind
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
 		}
 	}
 
