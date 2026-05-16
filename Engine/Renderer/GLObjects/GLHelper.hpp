@@ -25,9 +25,8 @@ namespace neo {
 		);
 		uint32_t getGLByteFormat(types::ByteFormats format);
 		uint32_t getGLInternalFormat(types::texture::InternalFormats format);
-		void checkFrameBuffer();
-		void printProgramInfoLog(uint32_t program);
-		void printShaderInfoLog(uint32_t shader);
+		const char* errorString(GLenum err);
+		void checkError(const char* str);
 	}
 
 }

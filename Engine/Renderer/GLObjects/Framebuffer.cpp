@@ -5,8 +5,18 @@
 #include "Util/Util.hpp"
 #include "Util/Profiler.hpp"
 
+namespace {
+	void checkFrameBuffer() {
+		GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (err != GL_FRAMEBUFFER_COMPLETE) {
+			const char* const errString = neo::GLHelper::errorString(err);
+			NEO_FAIL("OpenGL error '%s' '%d 0x%X'\n", errString, err, err);
+		}
+	}
+}
+
 #ifdef DEBUG_MODE
-#define CHECK_GL_FRAMEBUFFER() do {GLHelper::checkFrameBuffer(); } while(0)
+#define CHECK_GL_FRAMEBUFFER() do {checkFrameBuffer(); } while(0)
 #else
 #define CHECK_GL_FRAMEBUFFER()
 #endif
