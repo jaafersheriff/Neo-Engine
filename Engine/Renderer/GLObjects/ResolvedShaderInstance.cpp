@@ -353,6 +353,8 @@ namespace neo {
 			[&](glm::ivec2 v) { glUniform2i(_getUniform(name), v.x, v.y); },
 			[&](glm::uvec2 v) { glUniform2ui(_getUniform(name), v.x, v.y); },
 			[&](glm::vec3 v) { glUniform3f(_getUniform(name), v.x, v.y, v.z); },
+			[&](glm::ivec3 v) { glUniform3i(_getUniform(name), v.x, v.y, v.z); },
+			[&](glm::uvec3 v) { glUniform3ui(_getUniform(name), v.x, v.y, v.z); },
 			[&](glm::vec4 v) { glUniform4f(_getUniform(name), v.x, v.y, v.z, v.w); },
 			[&](glm::mat3 m) { glUniformMatrix3fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
 			[&](glm::mat4 m) { glUniformMatrix4fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },

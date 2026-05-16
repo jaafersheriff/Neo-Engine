@@ -41,6 +41,8 @@ namespace neo {
 			glm::ivec2,
 			glm::uvec2,
 			glm::vec3,
+			glm::ivec3,
+			glm::uvec3,
 			glm::vec4,
 			glm::mat3,
 			glm::mat4

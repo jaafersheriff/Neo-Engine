@@ -12,7 +12,7 @@ namespace neo {
 			if (debugName.has_value()) {
 				NEO_LOG_V("Uploading shader buffer %s", debugName.value().c_str());
 			}
-			NEO_ASSERT(details.mByteSize != 0 && details.mData != nullptr, "Empty shader buffer");
+			NEO_ASSERT(details.mByteSize != 0, "Empty shader buffer");
 			if (details.mByteSize > 0) {
 				std::shared_ptr<BackedResource<ShaderBuffer>> resource = std::make_shared<BackedResource<ShaderBuffer>>(details.mByteSize, details.mData, debugName);
 				resource->mDebugName = debugName;
@@ -45,7 +45,7 @@ namespace neo {
 
 		// Copy data so this can be ticked next frame
 		ShaderBufferLoadDetails copy = details;
-		if (details.mData && details.mByteSize > 0) {
+		if (details.mData) {
 			copy.mData = new uint8_t[details.mByteSize];
 			memcpy(const_cast<uint8_t*>(copy.mData), details.mData, details.mByteSize);
 		}

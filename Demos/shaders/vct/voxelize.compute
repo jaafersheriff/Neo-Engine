@@ -1,10 +1,116 @@
-layout(std140, binding = 0) volatile buffer BufferA {
-	vec4 posIntensity[];
+// 1. Read-Only Positions Buffer 
+// Packed tightly as floats (x0, y0, z0, x1, y1, z1...)
+layout(std430, binding = 0) readonly buffer Positions {
+	float positions[];
 };
 
-uniform mat4 volumeWorldMatrix;
-uniform mat4 meshWorldMatrix;
+// 2. Read-Only Index Buffer
+#ifdef HasIndices
+layout(std430, binding = 1) readonly buffer Indices {
+	uint indices[]; // Using uint to match standard 32-bit unsigned int elements
+};
+#endif
 
-layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+// 3. Read-Write Volume Buffer
+struct VoxelNode {
+	uint mData;
+	uint mChildData;
+};
+
+layout(std430, binding = 2) buffer Volume {
+	VoxelNode nodes[];
+};
+
+// Uniforms
+uniform mat4 volumeWorldMatrix;
+uniform mat4 inverseVolumeWorldMatrix;
+uniform mat4 meshWorldMatrix;
+uniform ivec3 volumeDimensions;
+uniform int triangleCount; // Passed from CPU to prevent out-of-bounds threads
+
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+
+// Helper function to safely fetch a vec3 position from the tightly packed float array
+vec3 getPosition(uint vertexIndex) {
+	uint baseIndex = vertexIndex * 3;
+	return vec3(
+		positions[baseIndex + 0],
+		positions[baseIndex + 1],
+		positions[baseIndex + 2]
+	);
+}
+
+ivec3 getVoxelCoords(vec3 wPos) {
+	// Volume-local space
+	vec3 localPos = (inverseVolumeWorldMatrix * vec4(wPos, 1.0)).xyz;
+
+	// 1. Normalize the position to a 0.0 to 1.0 range.
+	// If your volume's local bounds are already 0 to 1, skip this step.
+	// If your volume centers around the origin (-0.5 to 0.5), remap it:
+	vec3 normalizedPos = localPos + vec3(0.5); 
+
+	// 2. Scale by the resolution and clamp to avoid out-of-bounds array access
+	ivec3 voxelCoords = ivec3(normalizedPos * vec3(volumeDimensions));
+	
+	return clamp(voxelCoords, ivec3(0), volumeDimensions - ivec3(1));
+}
+
+uint getFlattenedIndex(ivec3 coords) {
+	// Standard 3D to 1D array indexing (X + Y * Width + Z * Width * Height)
+	return coords.x + 
+		   (coords.y * volumeDimensions.x) + 
+		   (coords.z * volumeDimensions.x * volumeDimensions.y);
+}
+
 void main() {
+	uint triangleID = gl_GlobalInvocationID.x;
+
+	// Safety guard against rounded-up dispatch sizes
+	if (triangleID >= triangleCount) {
+		return;
+	}
+
+	vec3 v0, v1, v2;
+#ifdef HasIndices
+	uint i0 = indices[triangleID * 3 + 0];
+	uint i1 = indices[triangleID * 3 + 1];
+	uint i2 = indices[triangleID * 3 + 2];
+
+	v0 = getPosition(i0);
+	v1 = getPosition(i1);
+	v2 = getPosition(i2);
+#else
+	v0 = getPosition(triangleID * 3 + 0);
+	v1 = getPosition(triangleID * 3 + 1);
+	v2 = getPosition(triangleID * 3 + 2);
+#endif
+	// Transform vertices to World Space if needed
+	vec3 wPos0 = (meshWorldMatrix * vec4(v0, 1.0)).xyz;
+	vec3 wPos1 = (meshWorldMatrix * vec4(v1, 1.0)).xyz;
+	vec3 wPos2 = (meshWorldMatrix * vec4(v2, 1.0)).xyz;
+
+	// World space AABB
+	ivec3 triangleMin = ivec3(
+		int(min(wPos0.x, min(wPos1.x, wPos2.x))),
+		int(min(wPos0.y, min(wPos1.y, wPos2.y))),
+		int(min(wPos0.z, min(wPos1.z, wPos2.z)))
+	);
+	ivec3 triangleMax = ivec3(
+		int(max(wPos0.x, max(wPos1.x, wPos2.x))),
+		int(max(wPos0.y, max(wPos1.y, wPos2.y))),
+		int(max(wPos0.z, max(wPos1.z, wPos2.z)))
+	);
+
+    for (int x = triangleMin.x; x <= triangleMax.x; ++x) {
+        for (int y = triangleMin.y; y <= triangleMax.y; ++y) {
+            for (int z = triangleMin.z; z <= triangleMax.z; ++z) {
+                // if (TriangleIntersectsVoxel(v0, v1, v2, uint3(x, y, z))) {
+                // uint flatIndex = getFlattenedIndex(getVoxelCoords(vec3(x, y, z)));
+				
+				// Write to your Phase 1 buffer!
+                    // InterlockedMax(VoxelBuffer[flatIndex].colorMask, packedColor);
+                // }
+            }
+        }
+    }
 }

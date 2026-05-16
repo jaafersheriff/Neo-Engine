@@ -4,6 +4,7 @@
 #include "VoxelizeComponent.hpp"
 
 #include "ECS/ECS.hpp"
+#include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
@@ -16,76 +17,86 @@ namespace VCT {
 
 	using namespace neo;
 
-	void voxelize(RenderPasses& renderPasses) {
+	void voxelize(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
+		TRACY_ZONE();
+		auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>();
+		if (!volumeView) {
+			return;
+		}
 
-		renderPasses.computePass([](const ResourceManagers& resourceManagers, const ECS& ecs) {
-			auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>();
-			if (!volumeView) {
+		const auto& [_, volume, volumeSpatial] = *volumeView;
+
+		// Raster path to create voxel fragments
+		ShaderBufferHandle voxelFragmentsHandle;
+		{
+			TRACY_ZONEN("VoxelFragments");
+			struct VoxelFragment {
+				glm::vec3 worldPosition;
+				glm::vec4 albedo; // TODO : Packed RGBA
+				glm::vec3 normal; // TODO : Packed Normal
+			};
+
+#define SCENE_COMPLEXITY 128u
+			int bufferSize = volume.mDimension * volume.mDimension * volume.mDimension * SCENE_COMPLEXITY;
+			voxelFragmentsHandle = resourceManagers.mShaderBufferManager.asyncLoad("VolumeFragments", ShaderBufferLoadDetails{
+				static_cast<uint32_t>(bufferSize * sizeof(VoxelFragment)),
+				nullptr
+				});
+
+			if (!resourceManagers.mShaderBufferManager.isValid(voxelFragmentsHandle)) {
 				return;
 			}
 
-			const auto& [_, volume, volumeSpatial] = *volumeView;
-
-			if (!resourceManagers.mShaderBufferManager.isValid(volume.mBufferHandle)) {
-				return;
-			}
-
-			auto voxelizeComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("VoxelizeCompute", ShaderBuilder{}
-				.setStage(types::shader::Stage::Compute, "vct/voxelize.compute")
+			auto voxelFragmentTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+				"Voxel Fragments",
+				FramebufferBuilder{}
+				.setSize(glm::uvec2(volume.mDimension, volume.mDimension))
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB8_UNORM }),
+				resourceManagers.mTextureManager
 			);
-			if (!resourceManagers.mShaderManager.isValid(voxelizeComputeShaderHandle)) {
-				return;
-			}
 
-			MakeDefine(NoIndices);
-			ShaderDefines noIndices;
-			noIndices.set(NoIndices);
+			renderPasses.clear(voxelFragmentTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f)); // Probably unnecessary
+			renderPasses.renderPass(voxelFragmentTargetHandle, glm::uvec2(volume.mDimension), RenderState{},
+				[bufferSize, voxelFragmentsHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
+					TRACY_GPUN("Voxel Fragments");
+					const auto& [_, volume, volumeSpatial, volumeCamera] = *ecs.getSingleView<VolumeComponent, SpatialComponent, CameraComponent>();
 
-			auto& positionsOnlyShader = resourceManagers.mShaderManager.resolveDefines(voxelizeComputeShaderHandle, noIndices);
-			auto& indicesShader = resourceManagers.mShaderManager.resolveDefines(voxelizeComputeShaderHandle, {});
-
-			const auto& meshView = ecs.getView<
-				const VoxelizeComponent,
-				const OpaqueComponent, // Only want to voxelize opaque objects for now
-				const MeshComponent,
-				const MaterialComponent,
-				const SpatialComponent>();
-			for (auto entity : meshView) {
-
-				// Bind mesh vertex buffers as shader storage buffers
-				auto& mesh = resourceManagers.mMeshManager.resolve(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle);
-				if (mesh.mPrimitiveType != types::mesh::Primitive::Triangles) {
-					NEO_LOG_E("Mesh is not made of triangles and cannot be voxelized!");
-					continue;
-				}
-				auto& shader = mesh.hasIBO() ? indicesShader : positionsOnlyShader;
-
-				auto volumeBarrier = shader.bindShaderBuffer("Volume", resourceManagers.mShaderBufferManager.resolve(volume.mBufferHandle), types::shader::Access::ReadWrite);
-				shader.bindUniform("volumeWorldMatrix", volumeSpatial.getModelMatrix());
-				shader.bindUniform("meshWorldMatrix", ecs.cGetComponent<SpatialComponent>(entity)->getModelMatrix());
-
-				auto posBarrier = shader.bindShaderBuffer("Positions", mesh, types::mesh::VertexType::Position, types::shader::Access::Read);
-				const int threadGroupSize = 64;
-				if (mesh.hasIBO()) {
-					int triangleCount = mesh.getIBO().elementCount / 3;
-					shader.bindUniform("triangleCount", triangleCount);
-
-					auto indBarrier = shader.bindMeshIndices("Indices", mesh, types::shader::Access::Read);
-					shader.bind();
-					shader.dispatch({ triangleCount + threadGroupSize - 1 / threadGroupSize, 1, 1 });
-				}
-				else {
-					auto& positionBuffer = mesh.getVBO(types::mesh::VertexType::Position);
-					if (positionBuffer.components != 3) {
-						NEO_LOG_E("Position buffer isn't in 3D space");
-						continue;
+					auto voxelFragmentShaderHandle = resourceManagers.mShaderManager.asyncLoad("VoxelFragmentsShader", ShaderBuilder{}
+						.setStage(types::shader::Stage::Vertex, "vct/voxelfragments.vert")
+						.setStage(types::shader::Stage::Geometry, "vct/voxelfragments.geom")
+						.setStage(types::shader::Stage::Fragment, "vct/voxelfragments.frag")
+					);
+					if (!resourceManagers.mShaderManager.isValid(voxelFragmentShaderHandle)) {
+						return;
 					}
-					int triangleCount = positionBuffer.elementCount / positionBuffer.components / 3;
-					shader.bindUniform("triangleCount", triangleCount);
-					shader.bind();
-					shader.dispatch({ triangleCount + threadGroupSize - 1 / threadGroupSize, 1, 1 });
-				}
-			}
-		});
+
+					auto voxelFragmentShader = resourceManagers.mShaderManager.resolveDefines(voxelFragmentShaderHandle, {});
+					voxelFragmentShader.bind();
+
+					voxelFragmentShader.bindUniform("volumeDimension", volume.mDimension);
+					voxelFragmentShader.bindUniform("outputBufferSize", bufferSize);
+					voxelFragmentShader.bindUniform("P", volumeCamera.getProj());
+					voxelFragmentShader.bindUniform("V", volumeSpatial.getView());
+					auto barrier = voxelFragmentShader.bindShaderBuffer("VoxelFragments", resourceManagers.mShaderBufferManager.resolve(voxelFragmentsHandle), types::shader::Access::ReadWrite);
+
+					const auto& meshView = ecs.getView<
+						const VoxelizeComponent,
+						const OpaqueComponent, // Only want to voxelize opaque objects for now
+						const MeshComponent,
+						const MaterialComponent,
+						const SpatialComponent>();
+					for (auto entity : meshView) {
+						if (resourceManagers.mMeshManager.isValid(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle)) {
+							auto& mesh = resourceManagers.mMeshManager.resolve(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle);
+
+							auto meshSpatial = ecs.cGetComponent<SpatialComponent>(entity);
+							voxelFragmentShader.bindUniform("M", meshSpatial->getModelMatrix());
+							voxelFragmentShader.bindUniform("N", meshSpatial->getNormalMatrix());
+
+							mesh.draw();
+						}
+					}
+				}, "VoxelFragments");
+		}
 	}
 }

@@ -102,13 +102,16 @@ namespace VCT {
 
 		// Volume
 		{
-
+			// Cenetered around cornell, for now
+			SpatialComponent volumeSpatial(glm::vec3(0.f, 2.5f, 2.5f), glm::vec3(5.f));
+			volumeSpatial.setLookDir(glm::vec3(0, 0, 1));
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Volume")
-				.attachComponent<SpatialComponent>(glm::vec3(0.f, 2.5f, 2.5f), glm::vec3(5.f)) // Cenetered around cornell, for now
+				.attachComponent<SpatialComponent>(volumeSpatial)
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f), true)
 				.attachComponent<WireframeRenderComponent>(glm::vec3(1.f))
 				.attachComponent<VolumeComponent>(ShaderBufferHandle{})
+				.attachComponent<CameraComponent>(-0.5f, 0.5f, CameraComponent::Orthographic{ glm::vec2(-0.5f, 0.5f), glm::vec2(-0.5f, 0.5f) }) // Dealt with later
 			));
 		}
 
@@ -124,7 +127,7 @@ namespace VCT {
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
-		if (auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>()) {
+		if (auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent, CameraComponent, BoundingBoxComponent>()) {
 			auto& volume = std::get<VolumeComponent&>(*volumeView);
 			if (volume.mNeedsReconstruction) {
 				std::vector<VoxelNode> data;
@@ -137,11 +140,24 @@ namespace VCT {
 
 				volume.mNeedsReconstruction = false;
 			}
+
+			const auto& spatial = std::get<SpatialComponent&>(*volumeView);
+			const auto& aabb = std::get<BoundingBoxComponent&>(*volumeView);
+			glm::vec3 volumeWorldMin = glm::vec3(spatial.getModelMatrix() * glm::vec4(aabb.mMin, 1.0));
+			glm::vec3 volumeWorldMax = glm::vec3(spatial.getModelMatrix() * glm::vec4(aabb.mMax, 1.0));
+			auto& camera = std::get<CameraComponent&>(*volumeView);
+			camera.setNear(volumeWorldMin.z);
+			camera.setFar(volumeWorldMax.z);
+			camera.setOrthographic(CameraComponent::Orthographic{
+				glm::vec2(volumeWorldMin.x, volumeWorldMax.x), 
+				glm::vec2(volumeWorldMin.y, volumeWorldMax.y)}
+				);
 		}
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
-		voxelize(renderPasses);
+		voxelize(renderPasses, resourceManagers, ecs);
+
 		{
 			PointLightShadowMapParameters params = {
 				0.01f
