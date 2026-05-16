@@ -40,6 +40,12 @@ namespace neo {
 		glm::vec4 mBlendColor = glm::vec4(0.f);
 	};
 
+	/// 
+	enum class PolygonMode {
+		Fill,
+		Line,
+		Point
+	};
 
 	struct RenderState {
 		// Default render state
@@ -49,6 +55,7 @@ namespace neo {
 		};
 		std::optional<CullFace> mCullFace = CullFace::Back;
 		std::optional<BlendState> mBlendState = std::nullopt;
+		PolygonMode mPolygonMode = PolygonMode::Fill;
 		bool mWireframeable = true;
 	};
 
@@ -56,6 +63,7 @@ namespace neo {
 		std::nullopt,
 		CullFace::Back,
 		std::nullopt,
+		PolygonMode::Fill,
 		true
 	};
 
@@ -63,9 +71,8 @@ namespace neo {
 		std::nullopt,
 		CullFace::Back,
 		std::nullopt,
+		PolygonMode::Fill,
 		false
 	};
-
-
 
 }

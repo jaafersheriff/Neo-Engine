@@ -197,10 +197,10 @@ namespace CSM {
 			resourceManagers.mTextureManager
 		);
 
+		const auto [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear output target");
-		renderPasses.renderPass(outputTargetHandle, viewport.mSize, RenderState{}, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, RenderState{}, [this, cameraEntity](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Main pass");
-			const auto [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 			drawCSMResolve<PhongRenderComponent>(resourceManagers, ecs, cameraEntity, mDebugView);
 
 			drawLines<MockCameraComponent>(resourceManagers, ecs, cameraEntity);
@@ -209,11 +209,12 @@ namespace CSM {
 				drawLines<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
 				drawLines<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);
 			}
-			if (mDrawCascadeSpheres) {
-				drawWireframe<CSMCamera0Component>(resourceManagers, ecs, cameraEntity);
-				drawWireframe<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
-				drawWireframe<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);
-			}
 		}, "Draw scene");
+		if (mDrawCascadeSpheres) {
+			drawWireframe<CSMCamera0Component>(outputTargetHandle, viewport.mSize, renderPasses, cameraEntity);
+			drawWireframe<CSMCamera1Component>(outputTargetHandle, viewport.mSize, renderPasses, cameraEntity);
+			drawWireframe<CSMCamera2Component>(outputTargetHandle, viewport.mSize, renderPasses, cameraEntity);
+		}
+
 	}
 }

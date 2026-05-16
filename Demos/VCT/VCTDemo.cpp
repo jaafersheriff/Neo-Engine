@@ -111,6 +111,7 @@ namespace VCT {
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f), true)
 				.attachComponent<WireframeRenderComponent>(glm::vec3(1.f))
 				.attachComponent<VolumeComponent>(ShaderBufferHandle{})
+				.attachComponent<MeshComponent>(MeshHandle("cube"))
 				.attachComponent<CameraComponent>(-0.5f, 0.5f, CameraComponent::Orthographic{ glm::vec2(-0.5f, 0.5f), glm::vec2(-0.5f, 0.5f) }) // Dealt with later
 			));
 		}
@@ -195,13 +196,12 @@ namespace VCT {
 
 		renderPasses.clear(sceneTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
 		const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-		drawForwardPBR<OpaqueComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);
 
 		if (mDebugDraw) {
-			renderPasses.renderPass(sceneTargetHandle, viewport.mSize, {}, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
-				TRACY_GPU();
-				drawWireframe<VolumeComponent>(resourceManagers, ecs, cameraEntity);
-			});
+			drawWireframe<VolumeComponent>(sceneTargetHandle, viewport.mSize, renderPasses, cameraEntity);
+		}
+		else {
+			drawForwardPBR<OpaqueComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);
 		}
 
 		auto previousHDRColorHandle = resourceManagers.mFramebufferManager.asyncLoad(

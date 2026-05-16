@@ -7,6 +7,8 @@ in vec2 fragTex;
 uniform int volumeDimension;
 uniform int outputBufferSize;
 
+uniform vec3 albedo;
+
 struct VoxelFragment {
 	vec3 worldPosition;
 	vec4 albedo;
@@ -37,7 +39,7 @@ void main() {
         flattenedIndex < outputBufferSize) {
 
         fragments[flattenedIndex].worldPosition = fragPos;
-        fragments[flattenedIndex].albedo = vec4(1); // TOOD
+        fragments[flattenedIndex].albedo = vec4(albedo, 1.0);
         fragments[flattenedIndex].normal = fragNor;
         color = vec3(1);
     }

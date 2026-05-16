@@ -53,7 +53,12 @@ namespace neo {
 					}
 					resourceManagers.mFramebufferManager.resolve(renderPass.mTarget).bind();
 
-					applyRenderState(renderPass.mRenderState, renderPass.mViewport, wireframe && renderPass.mRenderState.mWireframeable);
+					RenderState state = renderPass.mRenderState;
+					if (wireframe && renderPass.mRenderState.mWireframeable) {
+						// Override polygon mode
+						state.mPolygonMode = PolygonMode::Line;
+					}
+					applyRenderState(state, renderPass.mViewport);
 
 					renderPass.mDrawFunction(resourceManagers, ecs);
 				},

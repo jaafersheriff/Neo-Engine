@@ -56,6 +56,9 @@ namespace VCT {
 			);
 
 			renderPasses.clear(voxelFragmentTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f)); // Probably unnecessary
+
+			RenderState renderState;
+			renderState.mDepthState = std::nullopt;
 			renderPasses.renderPass(voxelFragmentTargetHandle, glm::uvec2(volume.mDimension), RenderState{},
 				[bufferSize, voxelFragmentsHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
 					TRACY_GPUN("Voxel Fragments");
@@ -88,10 +91,12 @@ namespace VCT {
 					for (auto entity : meshView) {
 						if (resourceManagers.mMeshManager.isValid(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle)) {
 							auto& mesh = resourceManagers.mMeshManager.resolve(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle);
+							const auto& material = ecs.cGetComponent<MaterialComponent>(entity);
 
 							auto meshSpatial = ecs.cGetComponent<SpatialComponent>(entity);
 							voxelFragmentShader.bindUniform("M", meshSpatial->getModelMatrix());
 							voxelFragmentShader.bindUniform("N", meshSpatial->getNormalMatrix());
+							voxelFragmentShader.bindUniform("albedo", glm::vec3(material->mAlbedoColor) + material->mEmissiveFactor);
 
 							mesh.draw();
 						}
