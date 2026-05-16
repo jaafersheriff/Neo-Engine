@@ -391,6 +391,11 @@ namespace neo {
 		return _bindShaderBuffer(name, mesh.getVBO(vertexType).vboID, accessType);
 	}
 
+	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindMeshIndices(const char* name, const Mesh& mesh, types::shader::Access accessType) const {
+		NEO_ASSERT(mesh.hasIBO(), "Trying to bind mesh indices but mesh doesn't have an IBO");
+		return _bindShaderBuffer(name, mesh.getIBO().vboID, accessType);
+	}
+
 	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::_bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const {
 		GLint bindingLoc = 0;
 		auto binding = mBindings.find(HashedString(name));

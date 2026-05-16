@@ -1,5 +1,8 @@
 #include "VCT/VCTDemo.hpp"
-#include "Engine/Engine.hpp"
+
+#include "VoxelTypes.hpp"
+#include "VolumeComponent.hpp"
+#include "Voxelizer.hpp"
 
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
@@ -9,6 +12,7 @@
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/WireframeRenderComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 
@@ -19,6 +23,7 @@
 #include "Renderer/RenderingSystems/Blitter.hpp"
 #include "Renderer/RenderingSystems/ForwardPBRRenderer.hpp"
 #include "Renderer/RenderingSystems/PointLightShadowMapRenderer.hpp"
+#include "Renderer/RenderingSystems/WireframeRenderer.hpp"
 #include "Renderer/RenderingSystems/TonemapRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
@@ -45,6 +50,7 @@ namespace VCT {
 				.attachComponent<ForwardPBRRenderComponent>()
 				.attachComponent<OpaqueComponent>()
 				.attachComponent<ShadowCasterRenderComponent>()
+				.attachComponent<VoxelizeComponent>()
 			));
 		}
 	}
@@ -82,14 +88,29 @@ namespace VCT {
 			));
 		}
 
-		HashedString quadMesh("quad");
-		insertObject(ecs, "backwall",  quadMesh, glm::vec3(0.f, 2.5f, 0.f),    glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f), glm::vec3(1.f));
-		insertObject(ecs, "leftwall",  quadMesh, glm::vec3(-2.5f, 2.5f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f, glm::radians(90.f), 0.f), glm::vec3(1.f, 0.f, 0.f));
-		insertObject(ecs, "rightwall", quadMesh, glm::vec3(2.5f, 2.5f, 2.5f),  glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f, glm::radians(-90.f), 0.f), glm::vec3(0.f, 1.f, 0.f));
-		insertObject(ecs, "floor",     quadMesh, glm::vec3(0.f, 0.f, 2.5f),    glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(-90.f), 0.f, 0.f), glm::vec3(1.f));
-		insertObject(ecs, "ceiling",   quadMesh, glm::vec3(0.f, 5.0f, 2.5f),   glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f));
-		insertObject(ecs, "box1",      HashedString("cube"), glm::vec3(-0.85f, 1.5f, 2.5f), glm::vec3(1.25f, 3.f, 1.25f), glm::vec3(0.f, glm::radians(33.f), 0.f), glm::vec3(1.f));
-		insertObject(ecs, "sphere", HashedString("sphere"), glm::vec3(1.25f, 0.85f, 3.0f), glm::vec3(1.5f), glm::vec3(0.f), glm::vec3(1.f));
+		// Cornell box
+		{
+			HashedString quadMesh("quad");
+			insertObject(ecs, "backwall", quadMesh, glm::vec3(0.f, 2.5f, 0.f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f), glm::vec3(1.f));
+			insertObject(ecs, "leftwall", quadMesh, glm::vec3(-2.5f, 2.5f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f, glm::radians(90.f), 0.f), glm::vec3(1.f, 0.f, 0.f));
+			insertObject(ecs, "rightwall", quadMesh, glm::vec3(2.5f, 2.5f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f, glm::radians(-90.f), 0.f), glm::vec3(0.f, 1.f, 0.f));
+			insertObject(ecs, "floor", quadMesh, glm::vec3(0.f, 0.f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(-90.f), 0.f, 0.f), glm::vec3(1.f));
+			insertObject(ecs, "ceiling", quadMesh, glm::vec3(0.f, 5.0f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f));
+			insertObject(ecs, "box1", HashedString("cube"), glm::vec3(-0.85f, 1.5f, 2.5f), glm::vec3(1.25f, 3.f, 1.25f), glm::vec3(0.f, glm::radians(33.f), 0.f), glm::vec3(1.f));
+			insertObject(ecs, "sphere", HashedString("sphere"), glm::vec3(1.25f, 0.85f, 3.0f), glm::vec3(1.5f), glm::vec3(0.f), glm::vec3(1.f));
+		}
+
+		// Volume
+		{
+
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Volume")
+				.attachComponent<SpatialComponent>(glm::vec3(0.f, 2.5f, 2.5f), glm::vec3(5.f)) // Cenetered around cornell, for now
+				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f), true)
+				.attachComponent<WireframeRenderComponent>(glm::vec3(1.f))
+				.attachComponent<VolumeComponent>(ShaderBufferHandle{})
+			));
+		}
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
@@ -98,9 +119,29 @@ namespace VCT {
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
 		NEO_UNUSED(ecs, resourceManagers);
 		mAutoExposureParams.imguiEditor();
+
+		ImGui::Checkbox("Debug Draw", &mDebugDraw);
+	}
+
+	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
+		if (auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>()) {
+			auto& volume = std::get<VolumeComponent&>(*volumeView);
+			if (volume.mNeedsReconstruction) {
+				std::vector<VoxelNode> data;
+				data.resize(volume.mDimension * volume.mDimension * volume.mDimension);
+				std::fill(data.begin(), data.end(), VoxelNode{ 0u, 0u });
+				volume.mBufferHandle = resourceManagers.mShaderBufferManager.asyncLoad("Volume", ShaderBufferLoadDetails{
+					static_cast<uint32_t>(data.size() * sizeof(VoxelNode)),
+					reinterpret_cast<const uint8_t*>(data.data())
+				});
+
+				volume.mNeedsReconstruction = false;
+			}
+		}
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
+		voxelize(renderPasses);
 		{
 			PointLightShadowMapParameters params = {
 				0.01f
@@ -139,6 +180,13 @@ namespace VCT {
 		renderPasses.clear(sceneTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f));
 		const auto [cameraEntity, _, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
 		drawForwardPBR<OpaqueComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);
+
+		if (mDebugDraw) {
+			renderPasses.renderPass(sceneTargetHandle, viewport.mSize, {}, [=](const ResourceManagers& resourceManagers, const ECS& ecs) {
+				TRACY_GPU();
+				drawWireframe<VolumeComponent>(resourceManagers, ecs, cameraEntity);
+			});
+		}
 
 		auto previousHDRColorHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Previous HDR Color",

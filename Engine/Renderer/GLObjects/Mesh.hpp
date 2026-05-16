@@ -35,6 +35,8 @@ namespace neo {
 
 			bool hasVBO(types::mesh::VertexType type) const;
 			const VertexBuffer& getVBO(types::mesh::VertexType type) const;
+			bool hasIBO() const;
+			const VertexBuffer& getIBO() const;
 
 			types::mesh::Primitive mPrimitiveType = types::mesh::Primitive::TriangleStrip;
 

@@ -6,7 +6,6 @@
 namespace neo {
 
 	namespace GLHelper {
-		namespace {
 
 		void OpenGLMessageCallback(
 			unsigned source,

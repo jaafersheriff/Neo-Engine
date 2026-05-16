@@ -23,16 +23,16 @@ namespace Fireworks {
 			timeStep = frameStats.mDT;
 		}
 
+		auto fireworksComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworksCompute", ShaderBuilder{}
+			.setStage(types::shader::Stage::Compute, "firework/firework_tick.compute")
+		);
+		if (!resourceManagers.mShaderManager.isValid(fireworksComputeShaderHandle)) {
+			return;
+		}
+
 		for (const auto& [_, spatial, firework, light] : ecs.getView<SpatialComponent, FireworkComponent, LightComponent>().each()) {
 
 			if (!resourceManagers.mMeshManager.isValid(firework.mBuffer)) {
-				continue;
-			}
-
-			auto fireworksComputeShaderHandle = resourceManagers.mShaderManager.asyncLoad("FireworksCompute", ShaderBuilder{}
-				.setStage(types::shader::Stage::Compute, "firework/firework_tick.compute")
-			);
-			if (!resourceManagers.mShaderManager.isValid(fireworksComputeShaderHandle)) {
 				continue;
 			}
 			
