@@ -288,7 +288,10 @@ namespace neo {
 
 	void ImGuiManager::resolveDrawData(ECS& ecs, ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
-		ImGui::Render();
+		{
+			TRACY_ZONEN("ImGui::Render");
+			ImGui::Render();
+		}
 
 		ImDrawData* drawData = ImGui::GetDrawData();
 		NEO_ASSERT(drawData && drawData->Valid, "ImDrawData is invalid");
@@ -301,6 +304,7 @@ namespace neo {
 
 		uint32_t drawIndex = 0;
 		for (int i = 0; i < drawData->CmdListsCount; i++) {
+			TRACY_ZONEN("CmdList");
 			NEO_ASSERT(i < MAX_IMGUI_MESHES, "ImGui is requesting too many meshes :(");
 			const MeshHandle currentMesh = mImGuiMeshes[mImGuiMeshesOffset];
 			mImGuiMeshesOffset = (mImGuiMeshesOffset + 1) % MAX_IMGUI_MESHES;
@@ -349,6 +353,7 @@ namespace neo {
 			}
 
 			for (int cmd_i = 0; cmd_i < cmdList->CmdBuffer.Size; cmd_i++) {
+				TRACY_ZONEN("CmdBuffer");
 				const ImDrawCmd* cmd = &cmdList->CmdBuffer[cmd_i];
 				if (cmd->UserCallback != nullptr) {
 					if (cmd->UserCallback == ImDrawCallback_ResetRenderState) {
