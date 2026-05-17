@@ -25,11 +25,17 @@ layout(std430, binding = 2) buffer FragmentCounter {
 out vec3 color;
 
 void main() {
-    // Convert volume position from [-1, 1] to [0, 1] range
-    vec3 voxelTexCoord = volumePos * 0.5 + 0.5;
+    vec3 volumeNormPos = volumePos;
+    if (
+    volumeNormPos.x < 0.0 || volumeNormPos.x > 1.0
+    || volumeNormPos.y < 0.0 || volumeNormPos.y > 1.0
+    || volumeNormPos.z < 0.0 || volumeNormPos.z > 1.0
+    ) {
+        return;
+    }
     
     // Scale up to your actual integer grid address (e.g., 0 to 255)
-    ivec3 voxelIndex = ivec3(voxelTexCoord * float(volumeDimension));
+    ivec3 voxelIndex = clamp(ivec3(volumeNormPos * float(volumeDimension)), ivec3(0), ivec3(volumeDimension-1));
     uint flatVoxelIndex = getFlattenedIndex(voxelIndex, volumeDimension);
     
     int lock = atomicCompSwap(locks[flatVoxelIndex], -1, 1);
@@ -40,10 +46,11 @@ void main() {
         if (bufferIdx < outputBufferSize) {
             fragments[bufferIdx].worldPosition = fragPos;
             fragments[bufferIdx].albedo = vec4(albedo, 1.0);
-            fragments[bufferIdx].worldPosition = fragPos;
-            fragments[bufferIdx].albedo = vec4(albedo, 1.0);
             fragments[bufferIdx].normal = normalize(fragNor);
             color = vec3(1);
+        }
+        else {
+        color = vec3(0,1,0);
         }
     }
     else {

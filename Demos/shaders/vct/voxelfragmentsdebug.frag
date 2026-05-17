@@ -21,12 +21,13 @@ void main() {
 	vec3 rayDir = normalize(fragPos.xyz - cameraPos);
 
 	// A step size roughly matching a fraction of a voxel unit keeps it accurate.
-	float voxelSize = abs((volumeMax.x - volumeMin.x)) / float(volumeDimension);
-	float stepSize = voxelSize * 0.5; 
-	int maxSteps = 16;
+	float voxelSize = (volumeMax.x - volumeMin.x) / float(volumeDimension);
+	float stepSize = voxelSize * 0.75;
+	int maxSteps = 8;
 
-	vec3 currentPos = fragPos.xyz + rayDir * 0.01; // Start right at the surface of the debug box
+	vec3 currentPos = fragPos.xyz + rayDir * 0.1; // Start right at the surface of the debug box
 
+	int voxelCount = 0;
 	for (int step = 0; step < maxSteps; ++step) {
 		if (currentPos.x < volumeMin.x || currentPos.x > volumeMax.x ||
 			currentPos.y < volumeMin.y || currentPos.y > volumeMax.y ||
@@ -37,28 +38,29 @@ void main() {
 	
 		// Calculate what integer voxel coordinate this 3D point lands in
 		ivec3 targetVoxelIndex = getVoxelIndex(currentPos, volumeMin, volumeMax, volumeDimension);
-		// outColor.rgb = vec3(targetVoxelIndex) / float(volumeDimension); return;
+		// outColor.rgb = vec3(targetVoxelIndex) / float(volumeDimension); // return;
 	
 		// BRUTE FORCE SEARCH
 		for (int i = 0; i < fragmentBufferSize; ++i) {
 			// Optimization: Stop checking if we hit completely uninitialized fragments
 			if (fragments[i].worldPosition == vec3(0.0)) {
-				// continue;
+				continue;
 			}
 	
 			// Convert the stored fragment's world position to its voxel coordinates
 			ivec3 fragVoxelIndex = getVoxelIndex(fragments[i].worldPosition, volumeMin, volumeMax, volumeDimension);
 			// // If the fragment in the buffer matches where our ray currently is...
 			if (targetVoxelIndex == fragVoxelIndex) {
-			// 	// 	// Perfect hit! Draw it and stop marching this ray
-			outColor = vec4(fragments[i].albedo.rgb, 1.0);
-			return;
+				// Perfect hit! Draw it and stop marching this ray
+				outColor += vec4(fragments[i].albedo.rgb, 1.0);
+				voxelCount++;
 			}
 		}
 	
 		// // Advance the ray deeper into the volume
 		currentPos += rayDir * stepSize;
 	}
+	outColor.rgb /= float(voxelCount);
 
 }
 
