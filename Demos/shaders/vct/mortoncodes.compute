@@ -1,0 +1,45 @@
+#include "vct/voxels.glsl"
+
+uniform int volumeDimension;
+uniform vec3 volumeMin; // world space
+uniform vec3 volumeMax; // world space
+
+layout(std430, binding = 0) buffer VoxelFragments {
+	VoxelFragment fragments[];
+};
+
+layout(std430, binding = 1) buffer MortonCodes {
+	uint mortonCodes[];
+};
+
+uint generateMorton3D(ivec3 v) {
+    uint x = uint(v.x);
+    uint y = uint(v.y);
+    uint z = uint(v.z);
+    x = (x | (x << 16)) & 0x030000FF;
+    x = (x | (x << 8)) & 0x0300F00F;
+    x = (x | (x << 4)) & 0x030C30C3;
+    x = (x | (x << 2)) & 0x09249249;
+    y = (y | (y << 16)) & 0x030000FF;
+    y = (y | (y << 8)) & 0x0300F00F;
+    y = (y | (y << 4)) & 0x030C30C3;
+    y = (y | (y << 2)) & 0x09249249;
+    z = (z | (z << 16)) & 0x030000FF;
+    z = (z | (z << 8)) & 0x0300F00F;
+    z = (z | (z << 4)) & 0x030C30C3;
+    z = (z | (z << 2)) & 0x09249249;
+    return x | (y << 1) | (z << 2);
+}
+
+layout (local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+void main() {
+    uint numVoxels = uint(volumeDimension * volumeDimension * volumeDimension);
+    uint index = gl_GlobalInvocationID.x;
+    if (index >= numVoxels) {
+        return;
+    }
+
+    ivec3 volumeIndex = getVoxelIndex(fragments[index].worldPosition, volumeMin, volumeMax, volumeDimension);
+    uint mortonCode = generateMorton3D(volumeIndex);
+    mortonCodes[index] = mortonCode;
+}

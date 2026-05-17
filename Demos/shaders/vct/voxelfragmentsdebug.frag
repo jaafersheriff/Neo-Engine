@@ -36,8 +36,7 @@ void main() {
 		}
 	
 		// Calculate what integer voxel coordinate this 3D point lands in
-		vec3 normalizedPos = (currentPos - volumeMin) / (volumeMax - volumeMin);
-		ivec3 targetVoxelIndex = ivec3(normalizedPos * volumeDimension);
+		ivec3 targetVoxelIndex = getVoxelIndex(currentPos, volumeMin, volumeMax, volumeDimension);
 		// outColor.rgb = vec3(targetVoxelIndex) / float(volumeDimension); return;
 	
 		// BRUTE FORCE SEARCH
@@ -48,8 +47,7 @@ void main() {
 			}
 	
 			// Convert the stored fragment's world position to its voxel coordinates
-			vec3 fragNormPos = (fragments[i].worldPosition - volumeMin) / (volumeMax - volumeMin);
-			ivec3 fragVoxelIndex = ivec3(fragNormPos * volumeDimension);
+			ivec3 fragVoxelIndex = getVoxelIndex(fragments[i].worldPosition, volumeMin, volumeMax, volumeDimension);
 			// // If the fragment in the buffer matches where our ray currently is...
 			if (targetVoxelIndex == fragVoxelIndex) {
 			// 	// 	// Perfect hit! Draw it and stop marching this ray

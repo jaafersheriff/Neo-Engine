@@ -71,11 +71,11 @@ namespace VCT {
 
 				// Clear the buffers...
 				resourceManagers.mShaderBufferManager.transact(voxelFragmentsHandle, [numVoxels](ShaderBuffer& buffer) {
-					std::vector<uint8_t> data(numVoxels * sizeof(VoxelFragment), 0);
+					static std::vector<uint8_t> data(numVoxels * sizeof(VoxelFragment), 0);
 					buffer.update(numVoxels * sizeof(VoxelFragment), data.data());
 					});
 				resourceManagers.mShaderBufferManager.transact(voxelLocksHandle, [numVoxels](ShaderBuffer& buffer) {
-					std::vector<int> voxelLockData(numVoxels, -1);
+					static std::vector<int> voxelLockData(numVoxels, -1);
 					buffer.update(numVoxels * sizeof(int), reinterpret_cast<const uint8_t*>(voxelLockData.data()));
 					});
 				resourceManagers.mShaderBufferManager.transact(atomicCounterHandle, [](ShaderBuffer& buffer) {
@@ -147,20 +147,16 @@ namespace VCT {
 
 		void _sortFragments(ShaderBufferHandle voxelFragmentsHandle, RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_ZONE();
-			if (!resourceManagers.mShaderBufferManager.isValid(voxelFragmentsHandle)) {
-				return;
-			}
-
-			auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>();
-			if (!volumeView) {
-				return;
-			}
-
-			const auto& [_, volume, volumeSpatial] = *volumeView;
-			int numVoxels = volume.mDimension * volume.mDimension * volume.mDimension;
 
 			ShaderBufferHandle mortonCodesHandle;
 			{
+				auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent, BoundingBoxComponent>();
+				if (!volumeView) {
+					return;
+				}
+				const auto& [_, volume, volumeSpatial, volumeBB] = *volumeView;
+				int numVoxels = volume.mDimension * volume.mDimension * volume.mDimension;
+
 				uint32_t mortonCodesByteSize = numVoxels * sizeof(uint32_t);
 				mortonCodesHandle = resourceManagers.mShaderBufferManager.asyncLoad("MortonCodes", ShaderBufferLoadDetails{
 					static_cast<uint32_t>(mortonCodesByteSize),
@@ -178,13 +174,30 @@ namespace VCT {
 
 				// Clear the buffers...
 				resourceManagers.mShaderBufferManager.transact(mortonCodesHandle, [mortonCodesByteSize](ShaderBuffer& buffer) {
-					uint32_t zero = 0;
-					buffer.update(mortonCodesByteSize, reinterpret_cast<const uint8_t*>(&zero));
+					static std::vector<uint8_t> data(mortonCodesByteSize, 0);
+					buffer.update(mortonCodesByteSize, reinterpret_cast<const uint8_t*>(data.data()));
 					});
+			}
 
-				renderPasses.computePass([](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			renderPasses.computePass(
+				[voxelFragmentsHandle,
+				mortonCodesHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
+					TRACY_GPUN("Generate Morton Codes");
+					if (!resourceManagers.mShaderBufferManager.isValid(voxelFragmentsHandle)) {
+						return;
+					}
 
-				auto mortonCodeShaderHandle = resourceManagers.mShaderManager.asyncLoad("MortonCode Shader", ShaderBuilder{}
+					auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent, BoundingBoxComponent>();
+					if (!volumeView) {
+						return;
+					}
+
+					const auto& [_, volume, volumeSpatial, volumeBB] = *volumeView;
+					int numVoxels = volume.mDimension * volume.mDimension * volume.mDimension;
+					glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
+					glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
+
+					auto mortonCodeShaderHandle = resourceManagers.mShaderManager.asyncLoad("MortonCode Shader", ShaderBuilder{}
 						.setStage(types::shader::Stage::Compute, "vct/mortoncodes.compute")
 					);
 					if (!resourceManagers.mShaderManager.isValid(mortonCodeShaderHandle)) {
@@ -195,12 +208,17 @@ namespace VCT {
 					shader.bind();
 
 					// TODO - bind uniforms
+					auto fragmentsBarrier = shader.bindShaderBuffer("VoxelFragments", resourceManagers.mShaderBufferManager.resolve(voxelFragmentsHandle), types::shader::Access::Read);
+					auto mortonBarrier = shader.bindShaderBuffer("MortonCodes", resourceManagers.mShaderBufferManager.resolve(mortonCodesHandle), types::shader::Access::Write);
 
-					shader.dispatch();
+					shader.bindUniform("volumeDimension", volume.mDimension);
+					shader.bindUniform("volumeMin", volumeWorldMin);
+					shader.bindUniform("volumeMax", volumeWorldMax);
 
+					const int threadGroupSize = 256;
+					shader.dispatch(glm::uvec3((numVoxels + threadGroupSize - 1) / threadGroupSize, 1, 1));
 
-					}, "Generate Morton Codes");
-			}
+				}, "Generate Morton Codes");
 		}
 	}
 
