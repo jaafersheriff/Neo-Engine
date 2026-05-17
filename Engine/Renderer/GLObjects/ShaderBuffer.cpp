@@ -18,6 +18,16 @@ namespace neo {
 
 	}
 
+	void ShaderBuffer::update(uint32_t byteSize, const uint8_t* data, uint32_t offset) {
+		NEO_ASSERT(offset + byteSize <= mByteSize, "Shader buffer update out of bounds");
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, mBufferID);
+		if (byteSize) {
+			TRACY_GPUN("glBufferSubData");
+			glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, byteSize, data);
+		}
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	}
+
 	void ShaderBuffer::destroy() {
 		if (mBufferID) {
 			glDeleteBuffers(1, reinterpret_cast<GLuint*>(&mBufferID));

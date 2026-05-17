@@ -9,6 +9,7 @@ namespace neo {
 	class ShaderBuffer {
 	public:
 		ShaderBuffer(uint32_t byteSize, const uint8_t* data, const std::optional<std::string>& debugName);
+		void update(uint32_t byteSize, const uint8_t* data, uint32_t offset = 0);
 
 		uint32_t mBufferID = 0;
 		uint32_t mByteSize = 0;

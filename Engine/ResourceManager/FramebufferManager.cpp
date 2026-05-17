@@ -8,7 +8,9 @@
 namespace neo {
 	namespace {
 		TextureHandle swizzleTextureId(FramebufferHandle srcHandle, TextureFormat format, types::framebuffer::AttachmentTarget target, uint8_t mip, glm::uvec2 dimension) {
-			HashedString::hash_type seed = srcHandle.mHandle ^ dimension.x ^ dimension.y;
+			HashedString::hash_type seed = srcHandle.mHandle;
+			seed ^= static_cast<uint32_t>(dimension.x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= static_cast<uint32_t>(dimension.y) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mInternalFormat) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mType) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mFilter.mMin) + 0x9e3779b9 + (seed << 6) + (seed >> 2);

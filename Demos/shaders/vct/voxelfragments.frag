@@ -14,6 +14,14 @@ layout(std430, binding = 0) buffer VoxelFragments {
 	VoxelFragment fragments[];
 };
 
+layout(std430, binding = 1) buffer VoxelLocks {
+	int locks[];
+};
+
+layout(std430, binding = 2) buffer FragmentCounter {
+    uint fragmentCounter; 
+};
+
 out vec3 color;
 
 void main() {
@@ -22,19 +30,22 @@ void main() {
     
     // Scale up to your actual integer grid address (e.g., 0 to 255)
     ivec3 voxelIndex = ivec3(voxelTexCoord * float(volumeDimension));
+    uint flatVoxelIndex = getFlattenedIndex(voxelIndex, volumeDimension);
 
-    int flattenedIndex = getFlattenedIndex(voxelIndex, volumeDimension);
+    
+    int lock = atomicCompSwap(locks[flatVoxelIndex], -1, 1);
 
-    // Guard bounds just in case a floating-point error pushes a edge vertex to 256
-    if (voxelIndex.x >= 0 && voxelIndex.x < volumeDimension && 
-        voxelIndex.y >= 0 && voxelIndex.y < volumeDimension && 
-        voxelIndex.z >= 0 && voxelIndex.z < volumeDimension && 
-        flattenedIndex < outputBufferSize) {
-
-        fragments[flattenedIndex].worldPosition = fragPos;
-        fragments[flattenedIndex].albedo = vec4(albedo, 1.0);
-        fragments[flattenedIndex].normal = fragNor;
-        color = vec3(1);
+    // First come first serve, only one fragment written out per voxel
+    if (lock == -1) {
+        uint bufferIdx = atomicAdd(fragmentCounter, 1);
+        if (bufferIdx < outputBufferSize) {
+            fragments[bufferIdx].worldPosition = fragPos;
+            fragments[bufferIdx].albedo = vec4(albedo, 1.0);
+            fragments[bufferIdx].worldPosition = fragPos;
+            fragments[bufferIdx].albedo = vec4(albedo, 1.0);
+            fragments[bufferIdx].normal = fragNor;
+            color = vec3(1);
+        }
     }
     else {
         color = vec3(1,0,0);
