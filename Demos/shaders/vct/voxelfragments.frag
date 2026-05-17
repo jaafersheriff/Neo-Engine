@@ -1,3 +1,4 @@
+#include "vct/voxels.glsl"
 
 in vec3 fragPos;
 in vec3 volumePos;
@@ -8,12 +9,6 @@ uniform int volumeDimension;
 uniform int outputBufferSize;
 
 uniform vec3 albedo;
-
-struct VoxelFragment {
-	vec3 worldPosition;
-	vec4 albedo;
-    vec3 normal;
-};
 
 layout(std430, binding = 0) buffer VoxelFragments {
 	VoxelFragment fragments[];
@@ -28,9 +23,7 @@ void main() {
     // Scale up to your actual integer grid address (e.g., 0 to 255)
     ivec3 voxelIndex = ivec3(voxelTexCoord * float(volumeDimension));
 
-    int flattenedIndex = voxelIndex.x 
-        + voxelIndex.y * volumeDimension
-        + voxelIndex.z * volumeDimension * volumeDimension;
+    int flattenedIndex = getFlattenedIndex(voxelIndex, volumeDimension);
 
     // Guard bounds just in case a floating-point error pushes a edge vertex to 256
     if (voxelIndex.x >= 0 && voxelIndex.x < volumeDimension && 

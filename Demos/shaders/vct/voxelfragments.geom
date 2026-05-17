@@ -1,5 +1,5 @@
 layout (triangles) in;
-layout (line_strip, max_vertices = 3) out;
+layout (triangle_strip, max_vertices = 3) out;
 
 in vec4 geomPos[];
 in vec3 geomNor[];

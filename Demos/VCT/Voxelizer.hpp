@@ -5,6 +5,7 @@
 
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/RenderingComponent/OpaqueComponent.hpp"
 #include "ECS/Component/RenderingComponent/MaterialComponent.hpp"
@@ -17,11 +18,13 @@ namespace VCT {
 
 	using namespace neo;
 
-	void voxelize(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
+#define SCENE_COMPLEXITY 16u
+
+	ShaderBufferHandle voxelize(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
 		TRACY_ZONE();
 		auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>();
 		if (!volumeView) {
-			return;
+			return ShaderBufferHandle{};
 		}
 
 		const auto& [_, volume, volumeSpatial] = *volumeView;
@@ -36,7 +39,6 @@ namespace VCT {
 				glm::vec3 normal; // TODO : Packed Normal
 			};
 
-#define SCENE_COMPLEXITY 128u
 			int bufferSize = volume.mDimension * volume.mDimension * volume.mDimension * SCENE_COMPLEXITY;
 			voxelFragmentsHandle = resourceManagers.mShaderBufferManager.asyncLoad("VolumeFragments", ShaderBufferLoadDetails{
 				static_cast<uint32_t>(bufferSize * sizeof(VoxelFragment)),
@@ -44,7 +46,7 @@ namespace VCT {
 				});
 
 			if (!resourceManagers.mShaderBufferManager.isValid(voxelFragmentsHandle)) {
-				return;
+				return ShaderBufferHandle{};
 			}
 
 			auto voxelFragmentTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
@@ -103,5 +105,48 @@ namespace VCT {
 					}
 				}, "VoxelFragments");
 		}
+
+		return voxelFragmentsHandle;
+	}
+
+	void debugVoxelFragments(const ResourceManagers& resourceManagers, const ECS& ecs, ShaderBufferHandle voxelFragmentsBuffer, ECS::Entity cameraEntity) {
+		TRACY_ZONE();
+		if (!resourceManagers.mShaderBufferManager.isValid(voxelFragmentsBuffer)) {
+			return;
+		}
+
+		auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent, BoundingBoxComponent>();
+		if (!volumeView) {
+			return;
+		}
+		const auto& [_, volume, volumeSpatial, volumeBB] = *volumeView;
+		int bufferSize = volume.mDimension * volume.mDimension * volume.mDimension * SCENE_COMPLEXITY;
+
+		auto voxelFragmentDebugShaderHandle = resourceManagers.mShaderManager.asyncLoad("VoxelFragmentsDebugShader", ShaderBuilder{}
+			.setStage(types::shader::Stage::Vertex, "model.vert")
+			.setStage(types::shader::Stage::Fragment, "vct/voxelfragmentsdebug.frag")
+		);
+		if (!resourceManagers.mShaderManager.isValid(voxelFragmentDebugShaderHandle)) {
+			return;
+		}
+
+		auto voxelFragmentShader = resourceManagers.mShaderManager.resolveDefines(voxelFragmentDebugShaderHandle, {});
+		voxelFragmentShader.bind();
+
+		glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
+		glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
+
+		voxelFragmentShader.bindUniform("volumeDimension", volume.mDimension);
+		voxelFragmentShader.bindUniform("outputBufferSize", bufferSize);
+		voxelFragmentShader.bindUniform("volumeMin", glm::min(volumeWorldMin, volumeWorldMax));
+		voxelFragmentShader.bindUniform("volumeMax", glm::max(volumeWorldMin, volumeWorldMax));
+		voxelFragmentShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
+		voxelFragmentShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
+		voxelFragmentShader.bindUniform("cameraPos", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getPosition());
+		auto barrier = voxelFragmentShader.bindShaderBuffer("VoxelFragments", resourceManagers.mShaderBufferManager.resolve(voxelFragmentsBuffer), types::shader::Access::Read);
+
+		auto& mesh = resourceManagers.mMeshManager.resolve(MeshHandle("cube"));
+		voxelFragmentShader.bindUniform("M", volumeSpatial.getModelMatrix());
+		mesh.draw();
 	}
 }

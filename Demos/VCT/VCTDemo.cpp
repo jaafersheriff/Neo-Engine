@@ -157,7 +157,7 @@ namespace VCT {
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
-		voxelize(renderPasses, resourceManagers, ecs);
+		auto voxelFragmentsBuffer = voxelize(renderPasses, resourceManagers, ecs);
 
 		{
 			PointLightShadowMapParameters params = {
@@ -199,6 +199,9 @@ namespace VCT {
 
 		if (mDebugDraw) {
 			drawWireframe<VolumeComponent>(sceneTargetHandle, viewport.mSize, renderPasses, cameraEntity);
+			renderPasses.renderPass(sceneTargetHandle, viewport.mSize, RenderState{}, [cameraEntity, voxelFragmentsBuffer](const ResourceManagers& resourceManagers, const ECS& ecs) {
+				debugVoxelFragments(resourceManagers, ecs, voxelFragmentsBuffer, cameraEntity);
+				}, "Debug voxel fragments");
 		}
 		else {
 			drawForwardPBR<OpaqueComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);
