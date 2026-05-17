@@ -40,6 +40,8 @@ namespace neo {
 
 	// TODO - instanced
 	void Mesh::draw(uint32_t size, uint16_t offset) const {
+		TRACY_ZONE();
+
 		ServiceLocator<Renderer>::ref().mStats.mNumDraws++;
 
 		glBindVertexArray(mVAOID);

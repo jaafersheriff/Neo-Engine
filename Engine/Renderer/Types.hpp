@@ -16,13 +16,6 @@ namespace neo {
 			Float
 		};
 
-		namespace buffer {
-			enum class Target : uint8_t {
-				Uniform,
-				ShaderStorage
-			};
-		}
-
 		namespace shader {
 			enum class Stage : uint8_t {
 				Vertex,

@@ -9,7 +9,6 @@ namespace neo {
 	class ResourceManagers;
 
 	struct ShaderBufferLoadDetails {
-		types::buffer::Target mTarget = types::buffer::Target::ShaderStorage;
 		uint32_t mByteSize = 0;
 		const uint8_t* mData = nullptr;
 	};
