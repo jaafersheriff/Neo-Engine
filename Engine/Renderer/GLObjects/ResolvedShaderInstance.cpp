@@ -184,24 +184,65 @@ namespace neo {
 					continue;
 				}
 
-				std::string::size_type uniformStart = line.find("uniform");
-				if (uniformStart != std::string::npos && uniformStart < commentStart) {
-					std::string::size_type uniformTypeStart = line.find_first_not_of(' ', uniformStart + 7);
-					std::string::size_type uniformTypeEnd = line.find_first_of(' ', uniformTypeStart);
-					std::string::size_type uniformNameStart = line.find_first_not_of(' ', uniformTypeEnd);
-					std::string::size_type uniformNameEnd = line.find(";", uniformNameStart);
-					NEO_ASSERT(
-						uniformTypeStart != std::string::npos
-						&& uniformTypeEnd != std::string::npos
-						&& uniformNameStart != std::string::npos
-						&& uniformNameEnd != std::string::npos, "Failed to parse uniform at line %s", line.c_str());
-					std::string uniform = line.substr(uniformNameStart, uniformNameEnd - uniformNameStart);
-					NEO_ASSERT(uniform.find(" ") == std::string::npos && uniform.find(",") == std::string::npos, "Can't have nested uniform definitions at %s", line.c_str());
-					uniforms.push_back(uniform);
+				// Handle layout syntax
+				std::string::size_type layoutStart = line.find("layout");
+				if (layoutStart != std::string::npos && layoutStart < commentStart) {
+					std::string::size_type bindingLoc = line.find("binding =", layoutStart);
+					if (bindingLoc != std::string::npos) {
+						std::string::size_type bindingValueStart = line.find_first_not_of(' ', bindingLoc + 9);
+						std::string::size_type bindingValueEnd = line.find_first_of(",)", bindingValueStart);
+						GLint bindingValue = std::stoi(line.substr(bindingValueStart, bindingValueEnd - bindingValueStart));
 
-					_findBinding(line, uniform, bindings);
+						std::string::size_type uniformStart = line.find("uniform", bindingValueEnd);
+						if (uniformStart != std::string::npos) {
+							std::string::size_type uniformNameStart = line.find_first_not_of(' ', uniformStart + 7);
+							std::string::size_type uniformNameEnd = line.find_first_of(' ', uniformNameStart);
+							std::string uniform = line.substr(uniformNameStart, uniformNameEnd - uniformNameStart);
+
+							uniforms.push_back(uniform);
+							bindings.emplace(uniform, bindingValue);
+						}
+					}
 				}
 
+				// Handle old uniform syntax
+				std::string::size_type uniformStart = line.find("uniform");
+				if (uniformStart != std::string::npos && (commentStart == std::string::npos || uniformStart < commentStart)) {
+                    std::string::size_type uniformTypeStart = line.find_first_not_of(' ', uniformStart + 7);
+                    if (uniformTypeStart == std::string::npos) {
+                        start = end + 1;
+                        continue; // Skip if no type is found
+                    }
+
+                    std::string::size_type uniformTypeEnd = line.find_first_of(' ', uniformTypeStart);
+                    if (uniformTypeEnd == std::string::npos) {
+                        start = end + 1;
+                        continue; // Skip if no type end is found
+                    }
+
+                    std::string::size_type uniformNameStart = line.find_first_not_of(' ', uniformTypeEnd);
+                    if (uniformNameStart == std::string::npos) {
+                        start = end + 1;
+                        continue; // Skip if no name start is found
+                    }
+
+                    std::string::size_type uniformNameEnd = line.find(";", uniformNameStart);
+                    if (uniformNameEnd == std::string::npos) {
+                        start = end + 1;
+                        continue; // Skip if no semicolon is found
+                    }
+
+                    std::string uniform = line.substr(uniformNameStart, uniformNameEnd - uniformNameStart);
+                    if (uniform.find(" ") != std::string::npos || uniform.find(",") != std::string::npos) {
+                        start = end + 1;
+                        continue; // Skip if the uniform name is malformed
+                    }
+
+                    uniforms.push_back(uniform);
+                    _findBinding(line, uniform, bindings);
+                }
+
+				// Handle buffer syntax
 				std::string::size_type bufferStart = line.find("buffer");
 				if (bufferStart != std::string::npos && bufferStart < commentStart) {
 					std::string::size_type bufferNameStart = line.find_first_not_of(' ', bufferStart + 6);
@@ -386,25 +427,30 @@ namespace neo {
 	}
 
 	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindShaderBuffer(const char* name, const ShaderBuffer& buffer, types::shader::Access accessType) const {
-		return _bindShaderBuffer(name, buffer.mBufferID, accessType);
+		if (buffer.mTarget == types::buffer::Target::ShaderStorage) {
+			return _bindShaderBuffer(name, GL_SHADER_STORAGE_BUFFER, buffer.mBufferID, accessType);
+		}
+		else {
+			return _bindShaderBuffer(name, GL_UNIFORM_BUFFER, buffer.mBufferID, accessType);
+		}
 	}
 
 	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindShaderBuffer(const char* name, const Mesh& mesh, types::mesh::VertexType vertexType, types::shader::Access accessType) const {
-		return _bindShaderBuffer(name, mesh.getVBO(vertexType).vboID, accessType);
+		return _bindShaderBuffer(name, GL_SHADER_STORAGE_BUFFER, mesh.getVBO(vertexType).vboID, accessType);
 	}
 
 	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindMeshIndices(const char* name, const Mesh& mesh, types::shader::Access accessType) const {
 		NEO_ASSERT(mesh.hasIBO(), "Trying to bind mesh indices but mesh doesn't have an IBO");
-		return _bindShaderBuffer(name, mesh.getIBO().vboID, accessType);
+		return _bindShaderBuffer(name, GL_SHADER_STORAGE_BUFFER, mesh.getIBO().vboID, accessType);
 	}
 
-	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::_bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const {
+	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::_bindShaderBuffer(const char* name, unsigned int glTarget, uint32_t id, types::shader::Access accessType) const {
 		GLint bindingLoc = 0;
 		auto binding = mBindings.find(HashedString(name));
 		if (binding != mBindings.end()) {
 			bindingLoc = binding->second;
 		}
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingLoc, id);
+		glBindBufferBase(glTarget, bindingLoc, id);
 		return ShaderBarrier(accessType > types::shader::Access::Read ? types::shader::Barrier::StorageBuffer : types::shader::Barrier::None); // I'm really trusting the compiler to use copy elision here
 	}
 

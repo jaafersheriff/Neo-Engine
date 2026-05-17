@@ -14,7 +14,7 @@ namespace neo {
 			}
 			NEO_ASSERT(details.mByteSize != 0, "Empty shader buffer");
 			if (details.mByteSize > 0) {
-				std::shared_ptr<BackedResource<ShaderBuffer>> resource = std::make_shared<BackedResource<ShaderBuffer>>(details.mByteSize, details.mData, debugName);
+				std::shared_ptr<BackedResource<ShaderBuffer>> resource = std::make_shared<BackedResource<ShaderBuffer>>(details.mTarget, details.mByteSize, details.mData, debugName);
 				resource->mDebugName = debugName;
 				return resource;
 			}
@@ -26,6 +26,7 @@ namespace neo {
 	ShaderBufferManager::ShaderBufferManager() {
 		// Small fallback buffer
 		ShaderBufferLoadDetails fallbackDetails;
+		fallbackDetails.mTarget = types::buffer::Target::ShaderStorage;
 		fallbackDetails.mByteSize = 16;
 		std::vector<uint8_t> data(16);
 		std::fill(data.begin(), data.end(), 0u);

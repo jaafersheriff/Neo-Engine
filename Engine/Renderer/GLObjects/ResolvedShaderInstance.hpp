@@ -58,7 +58,7 @@ namespace neo {
 		void dispatch(glm::uvec3 workGroups) const;
 
 	private:
-		[[nodiscard]] ShaderBarrier _bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const;
+		[[nodiscard]] ShaderBarrier _bindShaderBuffer(const char* name, unsigned int glTarget, uint32_t id, types::shader::Access accessType) const;
 
 		bool isCompute = false;
 		uint32_t mPid = 0;
