@@ -104,7 +104,7 @@ namespace VCT {
 		{
 			// Cenetered around cornell, for now
 			SpatialComponent volumeSpatial(glm::vec3(0.f, 2.5f, 2.5f), glm::vec3(5.f));
-			volumeSpatial.setLookDir(glm::vec3(0, 0, 1));
+			volumeSpatial.setLookDir(glm::vec3(0, 0, -1));
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>("Volume")
 				.attachComponent<SpatialComponent>(volumeSpatial)

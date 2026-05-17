@@ -31,7 +31,6 @@ void main() {
     // Scale up to your actual integer grid address (e.g., 0 to 255)
     ivec3 voxelIndex = ivec3(voxelTexCoord * float(volumeDimension));
     uint flatVoxelIndex = getFlattenedIndex(voxelIndex, volumeDimension);
-
     
     int lock = atomicCompSwap(locks[flatVoxelIndex], -1, 1);
 
@@ -43,7 +42,7 @@ void main() {
             fragments[bufferIdx].albedo = vec4(albedo, 1.0);
             fragments[bufferIdx].worldPosition = fragPos;
             fragments[bufferIdx].albedo = vec4(albedo, 1.0);
-            fragments[bufferIdx].normal = fragNor;
+            fragments[bufferIdx].normal = normalize(fragNor);
             color = vec3(1);
         }
     }

@@ -39,6 +39,8 @@ void main() {
 			gl_Position = vec4(gl_in[i].gl_Position.x, gl_in[i].gl_Position.y, 0.0, 1.0);
 		}
 
+		// TODO - why is this necessary....
+		gl_Position.y = gl_Position.y *0.5 + 0.5;
 		volumePos = gl_Position.xyz / gl_Position.w;
 
 		EmitVertex();

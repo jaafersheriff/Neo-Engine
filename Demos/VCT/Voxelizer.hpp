@@ -68,7 +68,11 @@ namespace VCT {
 				return ShaderBufferHandle{};
 			}
 
-			// Reset the temp buffers...
+			// Clear the buffers...
+			resourceManagers.mShaderBufferManager.transact(voxelFragmentsHandle, [bufferSize](ShaderBuffer& buffer) {
+				std::vector<uint8_t> data(bufferSize * sizeof(VoxelFragment), 0);
+				buffer.update(bufferSize * sizeof(VoxelFragment), data.data());
+			});
 			resourceManagers.mShaderBufferManager.transact(voxelLocksHandle, [bufferSize](ShaderBuffer& buffer) {
 				std::vector<int> voxelLockData(bufferSize, -1);
 				buffer.update(bufferSize * sizeof(int), reinterpret_cast<const uint8_t*>(voxelLockData.data()));
