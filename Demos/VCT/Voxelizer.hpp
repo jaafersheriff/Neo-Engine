@@ -95,6 +95,7 @@ namespace VCT {
 
 				RenderState renderState;
 				renderState.mDepthState = std::nullopt;
+				renderState.mCullFace = std::nullopt;
 				renderPasses.renderPass(voxelFragmentTargetHandle, glm::uvec2(volume.mDimension), RenderState{},
 					[numVoxels, voxelFragmentsHandle, atomicCounterHandle, voxelLocksHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
 						TRACY_GPUN("Voxel Fragments");

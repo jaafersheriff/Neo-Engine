@@ -98,6 +98,7 @@ namespace VCT {
 			insertObject(ecs, "ceiling", quadMesh, glm::vec3(0.f, 5.0f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f));
 			insertObject(ecs, "box1", HashedString("cube"), glm::vec3(-0.85f, 1.5f, 2.5f), glm::vec3(1.25f, 3.f, 1.25f), glm::vec3(0.f, glm::radians(33.f), 0.f), glm::vec3(1.f));
 			insertObject(ecs, "sphere", HashedString("sphere"), glm::vec3(1.25f, 0.85f, 3.0f), glm::vec3(1.5f), glm::vec3(0.f), glm::vec3(1.f));
+			// insertObject(ecs, "sphere", HashedString("sphere"), glm::vec3(0.f, 2.5f, 2.5f), glm::vec3(4.5f), glm::vec3(0.f), glm::vec3(1.f));
 		}
 
 		// Volume
@@ -146,13 +147,14 @@ namespace VCT {
 			const auto& aabb = std::get<BoundingBoxComponent&>(*volumeView);
 			glm::vec3 volumeWorldMin = glm::vec3(spatial.getModelMatrix() * glm::vec4(aabb.mMin, 1.0));
 			glm::vec3 volumeWorldMax = glm::vec3(spatial.getModelMatrix() * glm::vec4(aabb.mMax, 1.0));
+			glm::vec3 halfExtents = glm::abs(volumeWorldMax - volumeWorldMin) / 2.f;
 			auto& camera = std::get<CameraComponent&>(*volumeView);
-			camera.setNear(volumeWorldMin.z);
-			camera.setFar(volumeWorldMax.z);
+			camera.setNear(-halfExtents.z);
+			camera.setFar(halfExtents.z);
 			camera.setOrthographic(CameraComponent::Orthographic{
-				glm::vec2(volumeWorldMin.x, volumeWorldMax.x), 
-				glm::vec2(volumeWorldMin.y, volumeWorldMax.y)}
-				);
+				glm::vec2(-halfExtents.x, halfExtents.x),
+				glm::vec2(-halfExtents.y, halfExtents.y)
+				});
 		}
 	}
 
