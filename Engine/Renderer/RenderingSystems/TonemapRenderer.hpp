@@ -18,7 +18,7 @@ namespace neo {
 			"Tonemapped",
 			FramebufferBuilder{}
 				.setSize(dimension)
-				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB8_UNORM }),
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGB8_UNORM }),
 			resourceManagers.mTextureManager
 		);
 		renderPasses.clear(tonemapTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear tonemap target");

@@ -103,7 +103,7 @@ namespace neo {
 		mSceneColorTextureHandle = resourceManagers.mTextureManager.asyncLoad("Main Color",
 			TextureBuilder{}
 			.setFormat(TextureFormat{ types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB16_UNORM,
+				types::InternalFormats::RGB16_UNORM,
 				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
 				{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
 				})
@@ -112,7 +112,7 @@ namespace neo {
 		TextureHandle sceneDepthTextureHandle = resourceManagers.mTextureManager.asyncLoad("Main Depth",
 			TextureBuilder{}
 			.setFormat(TextureFormat{ types::texture::Target::Texture2D,
-				types::texture::InternalFormats::D16,
+				types::InternalFormats::D16,
 				{ types::texture::Filters::Linear, types::texture::Filters::Linear },
 				{ types::texture::Wraps::Clamp, types::texture::Wraps::Clamp }
 				})

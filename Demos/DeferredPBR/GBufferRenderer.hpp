@@ -30,13 +30,13 @@ namespace DeferredPBR {
 			FramebufferBuilder{}
 			.setSize(dimension)
 			// AlbedoAO
-			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGBA16_F })
 			// NormalRoughness
-			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGBA16_F })
 			// Emissive Metalness
-			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGBA16_F })
 			// Depth
-			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::D16 }),
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::D16 }),
 			resourceManagers.mTextureManager
 		);
 

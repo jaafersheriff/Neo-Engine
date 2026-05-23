@@ -46,7 +46,7 @@ namespace neo {
 				.setDimension(glm::u16vec3(ibl.mDFGLutResolution, ibl.mDFGLutResolution, 0))
 				.setFormat(TextureFormat{
 					types::texture::Target::Texture2D,
-					types::texture::InternalFormats::RGBA16_F,
+					types::InternalFormats::RGBA16_F,
 					TextureFilter { types::texture::Filters::Linear, types::texture::Filters::Linear },
 					TextureWrap { types::texture::Wraps::Clamp, types::texture::Wraps::Clamp, types::texture::Wraps::Clamp },
 					types::ByteFormats::Float
@@ -85,7 +85,7 @@ namespace neo {
 				.setDimension(glm::u16vec3(ibl.mConvolvedCubemapResolution, ibl.mConvolvedCubemapResolution, 0))
 				.setFormat(TextureFormat{
 					types::texture::Target::TextureCube,
-					types::texture::InternalFormats::RGBA16_F,
+					types::InternalFormats::RGBA16_F,
 					TextureFilter { types::texture::Filters::Linear, types::texture::Filters::Linear, types::texture::Filters::Linear },
 					TextureWrap { types::texture::Wraps::Clamp , types::texture::Wraps::Clamp , types::texture::Wraps::Clamp  },
 					types::ByteFormats::Float,

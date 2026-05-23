@@ -195,7 +195,7 @@ namespace DeferredPBR {
 					{"metro_noord_2k.hdr" } ,
 					TextureFormat{
 						types::texture::Target::Texture2D,
-						types::texture::InternalFormats::RGBA16_F,
+						types::InternalFormats::RGBA16_F,
 						TextureFilter {
 							types::texture::Filters::Linear,
 							types::texture::Filters::Linear,
@@ -425,7 +425,7 @@ namespace DeferredPBR {
 		TextureHandle hdrColorTexture = resourceManagers.mTextureManager.asyncLoad("HDR Color",
 			TextureBuilder{}
 			.setDimension(glm::u16vec3(viewport.mSize, 0))
-			.setFormat(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
+			.setFormat(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGBA16_F })
 		);
 
 		if (!resourceManagers.mFramebufferManager.isValid(gbufferHandle)) {
@@ -482,7 +482,7 @@ namespace DeferredPBR {
 				"Previous HDR Color",
 				FramebufferBuilder{}
 				.setSize(viewport.mSize)
-				.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGBA16_F }),
 				resourceManagers.mTextureManager
 			);
 

@@ -233,7 +233,7 @@ namespace neo {
 		ImGui::GetIO().Fonts->SetTexID(resourceManagers.mTextureManager.asyncLoad("ImGuiFont", TextureBuilder{
 				TextureFormat {
 					types::texture::Target::Texture2D,
-					types::texture::InternalFormats::RGBA32_F,
+					types::InternalFormats::RGBA32_F,
 				},
 				glm::u16vec3(width, height, 0),
 				pixels

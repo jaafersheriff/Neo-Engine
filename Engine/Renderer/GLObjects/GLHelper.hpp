@@ -24,7 +24,7 @@ namespace neo {
 			const void* userParam
 		);
 		uint32_t getGLByteFormat(types::ByteFormats format);
-		uint32_t getGLInternalFormat(types::texture::InternalFormats format);
+		uint32_t getGLInternalFormat(types::InternalFormats format);
 		const char* errorString(unsigned int err);
 		void checkError(const char* str);
 	}
