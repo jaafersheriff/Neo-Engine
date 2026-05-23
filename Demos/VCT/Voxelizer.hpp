@@ -135,11 +135,17 @@ namespace VCT {
 							const MaterialComponent,
 							const SpatialComponent>();
 						for (auto entity : meshView) {
+							auto meshSpatial = ecs.cGetComponent<SpatialComponent>(entity);
+							if (auto meshBB = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
+								if (!volumeBB.intersect(volumeSpatial.getModelMatrix(), *meshBB, meshSpatial->getModelMatrix())) {
+									continue;
+								}
+							}
+
 							if (resourceManagers.mMeshManager.isValid(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle)) {
 								auto& mesh = resourceManagers.mMeshManager.resolve(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle);
 								const auto& material = ecs.cGetComponent<MaterialComponent>(entity);
 
-								auto meshSpatial = ecs.cGetComponent<SpatialComponent>(entity);
 								voxelNodeShader.bindUniform("M", meshSpatial->getModelMatrix());
 								voxelNodeShader.bindUniform("N", meshSpatial->getNormalMatrix());
 								voxelNodeShader.bindUniform("albedo", glm::vec3(material->mAlbedoColor) + material->mEmissiveFactor);

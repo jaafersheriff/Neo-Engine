@@ -130,11 +130,11 @@ namespace VCT {
 			// Cornell box
 			{
 				HashedString quadMesh("quad");
-				ecs.submitEntity(std::move(createEntity("backwall", quadMesh, glm::vec3(0.f, 2.5f, 0.f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f), glm::vec3(1.f))));
-				ecs.submitEntity(std::move(createEntity("leftwall", quadMesh, glm::vec3(-2.5f, 2.5f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f, glm::radians(90.f), 0.f), glm::vec3(1.f, 0.f, 0.f))));
-				ecs.submitEntity(std::move(createEntity("rightwall", quadMesh, glm::vec3(2.5f, 2.5f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f, glm::radians(-90.f), 0.f), glm::vec3(0.f, 1.f, 0.f))));
-				ecs.submitEntity(std::move(createEntity("floor", quadMesh, glm::vec3(0.f, 0.f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(-90.f), 0.f, 0.f), glm::vec3(1.f))));
-				ecs.submitEntity(std::move(createEntity("ceiling", quadMesh, glm::vec3(0.f, 5.0f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f))));
+				ecs.submitEntity(std::move(createEntity("backwall", quadMesh, glm::vec3(0.f, 2.45f, 0.f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f), glm::vec3(1.f))));
+				ecs.submitEntity(std::move(createEntity("leftwall", quadMesh, glm::vec3(-2.45f, 2.5f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f, glm::radians(90.f), 0.f), glm::vec3(1.f, 0.f, 0.f))));
+				ecs.submitEntity(std::move(createEntity("rightwall", quadMesh, glm::vec3(2.45f, 2.5f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f, glm::radians(-90.f), 0.f), glm::vec3(0.f, 1.f, 0.f))));
+				ecs.submitEntity(std::move(createEntity("floor", quadMesh, glm::vec3(0.f, 0.05f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(-90.f), 0.f, 0.f), glm::vec3(1.f))));
+				ecs.submitEntity(std::move(createEntity("ceiling", quadMesh, glm::vec3(0.f, 4.95f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f))));
 				ecs.submitEntity(std::move(createEntity("sphere", HashedString("sphere"), glm::vec3(1.25f, 0.85f, 3.0f), glm::vec3(1.5f), glm::vec3(0.f), glm::vec3(1.f))));
 				auto&& box = createEntity("box1", HashedString("cube"), glm::vec3(-0.85f, 1.5f, 2.5f), glm::vec3(1.25f, 3.f, 1.25f), glm::vec3(0.f, glm::radians(33.f), 0.f), glm::vec3(1.f));
 				box.attachComponent<RotationComponent>(glm::vec3(0.f, 1.0f, 0.f));
@@ -189,7 +189,7 @@ namespace VCT {
 		inline void createSponzaScene(ECS& ecs, ResourceManagers& resourceManagers) {
 			destroyScene(ecs, resourceManagers);
 
-			createVolume(ecs, glm::vec3(0.f, 2.5f, 2.5f), glm::vec3(5.f));
+			createVolume(ecs, glm::vec3(1.f, 6.5f, -0.5f), glm::vec3(36.0, 15.0, 15.0));
 
 			SpatialComponent spatial(glm::vec3(75.f, 200.f, 20.f));
 			spatial.setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));

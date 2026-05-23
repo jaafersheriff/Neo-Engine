@@ -72,5 +72,18 @@ namespace neo {
 			}
 			return std::nullopt; // No intersection
 		}
+
+		bool intersect(const glm::mat4& modelMatrix, const BoundingBoxComponent& other, const glm::mat4& otherModelMatrix) const {
+			glm::vec3 aMin = glm::vec3(modelMatrix * glm::vec4(mMin, 1.0));
+			glm::vec3 aMax = glm::vec3(modelMatrix * glm::vec4(mMax, 1.0));
+			glm::vec3 bMin = glm::vec3(otherModelMatrix * glm::vec4(other.mMin, 1.0));
+			glm::vec3 bMax = glm::vec3(otherModelMatrix * glm::vec4(other.mMax, 1.0));
+
+			// Axis overlap test in world space
+			bool overlapX = (aMin.x <= bMax.x) && (aMax.x >= bMin.x);
+			bool overlapY = (aMin.y <= bMax.y) && (aMax.y >= bMin.y);
+			bool overlapZ = (aMin.z <= bMax.z) && (aMax.z >= bMin.z);
+			return overlapX && overlapY && overlapZ;
+		}
 	END_COMPONENT();
 }
