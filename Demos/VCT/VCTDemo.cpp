@@ -13,12 +13,14 @@
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/WireframeRenderComponent.hpp"
+#include "ECS/Component/SpatialComponent/RotationComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 
 #include "ECS/Component/RenderingComponent/ForwardPBRRenderComponent.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
+#include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
 #include "Renderer/RenderingSystems/Blitter.hpp"
 #include "Renderer/RenderingSystems/ForwardPBRRenderer.hpp"
@@ -38,10 +40,10 @@ using namespace neo;
 
 namespace VCT {
 	namespace {
-		inline void insertObject(ECS& ecs, std::string name, MeshHandle meshHandle, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation, glm::vec3 color) {
+		inline ECS::EntityBuilder createEntity(std::string name, MeshHandle meshHandle, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation, glm::vec3 color) {
 			MaterialComponent material;
 			material.mAlbedoColor = glm::vec4(color.x, color.y, color.z, 1.f);
-			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+			return std::move(ECS::EntityBuilder{}
 				.attachComponent<TagComponent>(name)
 				.attachComponent<MeshComponent>(meshHandle)
 				.attachComponent<MaterialComponent>(material)
@@ -51,7 +53,7 @@ namespace VCT {
 				.attachComponent<OpaqueComponent>()
 				.attachComponent<ShadowCasterRenderComponent>()
 				.attachComponent<VoxelizeComponent>()
-			));
+			);
 		}
 	}
 
@@ -91,14 +93,17 @@ namespace VCT {
 		// Cornell box
 		{
 			HashedString quadMesh("quad");
-			insertObject(ecs, "backwall", quadMesh, glm::vec3(0.f, 2.5f, 0.f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f), glm::vec3(1.f));
-			insertObject(ecs, "leftwall", quadMesh, glm::vec3(-2.5f, 2.5f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f, glm::radians(90.f), 0.f), glm::vec3(1.f, 0.f, 0.f));
-			insertObject(ecs, "rightwall", quadMesh, glm::vec3(2.5f, 2.5f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f, glm::radians(-90.f), 0.f), glm::vec3(0.f, 1.f, 0.f));
-			insertObject(ecs, "floor", quadMesh, glm::vec3(0.f, 0.f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(-90.f), 0.f, 0.f), glm::vec3(1.f));
-			insertObject(ecs, "ceiling", quadMesh, glm::vec3(0.f, 5.0f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f));
-			insertObject(ecs, "box1", HashedString("cube"), glm::vec3(-0.85f, 1.5f, 2.5f), glm::vec3(1.25f, 3.f, 1.25f), glm::vec3(0.f, glm::radians(33.f), 0.f), glm::vec3(1.f));
-			insertObject(ecs, "sphere", HashedString("sphere"), glm::vec3(1.25f, 0.85f, 3.0f), glm::vec3(1.5f), glm::vec3(0.f), glm::vec3(1.f));
-			// insertObject(ecs, "sphere", HashedString("sphere"), glm::vec3(0.f, 2.5f, 2.5f), glm::vec3(4.5f), glm::vec3(0.f), glm::vec3(1.f));
+			ecs.submitEntity(std::move(createEntity("backwall", quadMesh, glm::vec3(0.f, 2.5f, 0.f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f), glm::vec3(1.f))));
+			ecs.submitEntity(std::move(createEntity("leftwall", quadMesh, glm::vec3(-2.5f, 2.5f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f, glm::radians(90.f), 0.f), glm::vec3(1.f, 0.f, 0.f))));
+			ecs.submitEntity(std::move(createEntity("rightwall", quadMesh, glm::vec3(2.5f, 2.5f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(0.f, glm::radians(-90.f), 0.f), glm::vec3(0.f, 1.f, 0.f))));
+			ecs.submitEntity(std::move(createEntity("floor", quadMesh, glm::vec3(0.f, 0.f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(-90.f), 0.f, 0.f), glm::vec3(1.f))));
+			ecs.submitEntity(std::move(createEntity("ceiling", quadMesh, glm::vec3(0.f, 5.0f, 2.5f), glm::vec3(5.f, 5.f, 0.05f), glm::vec3(glm::radians(90.f), 0.f, 0.f), glm::vec3(1.f))));
+			ecs.submitEntity(std::move(createEntity("sphere", HashedString("sphere"), glm::vec3(1.25f, 0.85f, 3.0f), glm::vec3(1.5f), glm::vec3(0.f), glm::vec3(1.f))));
+			auto&& box = createEntity("box1", HashedString("cube"), glm::vec3(-0.85f, 1.5f, 2.5f), glm::vec3(1.25f, 3.f, 1.25f), glm::vec3(0.f, glm::radians(33.f), 0.f), glm::vec3(1.f));
+			box.attachComponent<RotationComponent>(glm::vec3(0.f, 1.0f, 0.f));
+			ecs.submitEntity(std::move(box));
+
+			// ecs.submitEntity(createEntity("sphere", HashedString("sphere"), glm::vec3(0.f, 2.5f, 2.5f), glm::vec3(4.5f), glm::vec3(0.f), glm::vec3(1.f))));
 		}
 
 		// Volume
@@ -119,6 +124,7 @@ namespace VCT {
 
 		/* Systems - order matters! */
 		ecs.addSystem<CameraControllerSystem>();
+		ecs.addSystem<RotationSystem>();
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
