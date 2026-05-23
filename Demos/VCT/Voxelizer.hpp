@@ -159,44 +159,73 @@ namespace VCT {
 		return _generateVoxelNodes(renderPasses, resourceManagers, ecs);
 	}
 
-	void debugVoxelNodes(const ResourceManagers& resourceManagers, const ECS& ecs, ShaderBufferHandle headerBuffer, ShaderBufferHandle voxelNodesBuffer, ECS::Entity cameraEntity) {
+	void debugVoxelNodes(FramebufferHandle outputHandle, glm::uvec2 viewport, RenderPasses& renderPasses, const ECS& ecs, ShaderBufferHandle headerBuffer, ShaderBufferHandle voxelNodesBuffer, ECS::Entity cameraEntity) {
 		TRACY_ZONE();
-		if (!resourceManagers.mShaderBufferManager.isValid(voxelNodesBuffer)
-		 || !resourceManagers.mShaderBufferManager.isValid(headerBuffer)) {
-			return;
+
+		RenderState blendState;
+		blendState.mBlendState = BlendState{
+			BlendEquation::Add,
+			BlendFuncSrc::Alpha,
+			BlendFuncDst::OneMinusSrcAlpha
+		};
+		{
+			auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent, BoundingBoxComponent>();
+			if (!volumeView) {
+				return;
+			}
+			const auto& [_, volume, volumeSpatial, volumeBB] = *volumeView;
+			glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
+			glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
+
+			glm::vec3 camPos = ecs.cGetComponent<SpatialComponent>(cameraEntity)->getPosition();
+			bool cameraInside =
+				camPos.x >= glm::min(volumeWorldMin.x, volumeWorldMax.x) && camPos.x <= glm::max(volumeWorldMin.x, volumeWorldMax.x) &&
+				camPos.y >= glm::min(volumeWorldMin.y, volumeWorldMax.y) && camPos.y <= glm::max(volumeWorldMin.y, volumeWorldMax.y) &&
+				camPos.z >= glm::min(volumeWorldMin.z, volumeWorldMax.z) && camPos.z <= glm::max(volumeWorldMin.z, volumeWorldMax.z);
+			if (cameraInside) {
+				blendState.mCullFace = CullFace::Front;
+			}
 		}
 
-		auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent, BoundingBoxComponent>();
-		if (!volumeView) {
-			return;
-		}
-		const auto& [_, volume, volumeSpatial, volumeBB] = *volumeView;
+		renderPasses.renderPass(outputHandle, viewport, blendState, [cameraEntity, voxelNodesBuffer, headerBuffer](const ResourceManagers& resourceManagers, const ECS& ecs) {
 
-		auto voxelNodeDebugShaderHandle = resourceManagers.mShaderManager.asyncLoad("VoxelNodesDebugShader", ShaderBuilder{}
-			.setStage(types::shader::Stage::Vertex, "model.vert")
-			.setStage(types::shader::Stage::Fragment, "vct/voxelnodesdebug.frag")
-		);
-		if (!resourceManagers.mShaderManager.isValid(voxelNodeDebugShaderHandle)) {
-			return;
-		}
+			if (!resourceManagers.mShaderBufferManager.isValid(voxelNodesBuffer)
+				|| !resourceManagers.mShaderBufferManager.isValid(headerBuffer)) {
+				return;
+			}
 
-		auto voxelNodeShader = resourceManagers.mShaderManager.resolveDefines(voxelNodeDebugShaderHandle, {});
-		voxelNodeShader.bind();
+			auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent, BoundingBoxComponent>();
+			if (!volumeView) {
+				return;
+			}
+			const auto& [_, volume, volumeSpatial, volumeBB] = *volumeView;
 
-		glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
-		glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
+			auto voxelNodeDebugShaderHandle = resourceManagers.mShaderManager.asyncLoad("VoxelNodesDebugShader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "model.vert")
+				.setStage(types::shader::Stage::Fragment, "vct/voxelnodesdebug.frag")
+			);
+			if (!resourceManagers.mShaderManager.isValid(voxelNodeDebugShaderHandle)) {
+				return;
+			}
 
-		voxelNodeShader.bindUniform("volumeMin", glm::min(volumeWorldMin, volumeWorldMax));
-		voxelNodeShader.bindUniform("volumeMax", glm::max(volumeWorldMin, volumeWorldMax));
-		voxelNodeShader.bindUniform("volumeDimension", volume.mDimension);
-		voxelNodeShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
-		voxelNodeShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
-		voxelNodeShader.bindUniform("cameraPos", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getPosition());
-		auto nodesBarrier = voxelNodeShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(voxelNodesBuffer), types::shader::Access::Read);
-		auto headerBarrier = voxelNodeShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerBuffer), types::shader::Access::Read);
+			auto voxelNodeShader = resourceManagers.mShaderManager.resolveDefines(voxelNodeDebugShaderHandle, {});
+			voxelNodeShader.bind();
 
-		auto& mesh = resourceManagers.mMeshManager.resolve(MeshHandle("cube"));
-		voxelNodeShader.bindUniform("M", volumeSpatial.getModelMatrix());
-		mesh.draw();
+			glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
+			glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
+
+			voxelNodeShader.bindUniform("volumeMin", glm::min(volumeWorldMin, volumeWorldMax));
+			voxelNodeShader.bindUniform("volumeMax", glm::max(volumeWorldMin, volumeWorldMax));
+			voxelNodeShader.bindUniform("volumeDimension", volume.mDimension);
+			voxelNodeShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
+			voxelNodeShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
+			voxelNodeShader.bindUniform("cameraPos", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getPosition());
+			auto nodesBarrier = voxelNodeShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(voxelNodesBuffer), types::shader::Access::Read);
+			auto headerBarrier = voxelNodeShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerBuffer), types::shader::Access::Read);
+
+			auto& mesh = resourceManagers.mMeshManager.resolve(MeshHandle("cube"));
+			voxelNodeShader.bindUniform("M", volumeSpatial.getModelMatrix());
+			mesh.draw();
+		});
 	}
 }

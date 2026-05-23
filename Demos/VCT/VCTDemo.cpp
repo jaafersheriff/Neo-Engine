@@ -357,16 +357,7 @@ namespace VCT {
 
 		if (mDebugDraw) {
 			drawWireframe<VolumeComponent>(sceneTargetHandle, viewport.mSize, renderPasses, cameraEntity);
-
-			RenderState blend;
-			blend.mBlendState = BlendState{
-				BlendEquation::Add,
-				BlendFuncSrc::Alpha,
-				BlendFuncDst::OneMinusSrcAlpha
-			};
-			renderPasses.renderPass(sceneTargetHandle, viewport.mSize, blend, [cameraEntity, voxelizeBuffers](const ResourceManagers& resourceManagers, const ECS& ecs) {
-				debugVoxelNodes(resourceManagers, ecs, voxelizeBuffers.first, voxelizeBuffers.second, cameraEntity);
-				}, "Debug voxel nodes");
+			debugVoxelNodes(sceneTargetHandle, viewport.mSize, renderPasses, ecs, voxelizeBuffers.first, voxelizeBuffers.second, cameraEntity);
 		}
 		else {
 			drawForwardPBR<OpaqueComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);

@@ -22,7 +22,14 @@ out vec4 outColor;
 void main() {
 	vec3 rayOrigin = cameraPos;
 	vec3 rayDir = normalize(fragPos.xyz - cameraPos);
-
+	bool cameraInside =
+		(cameraPos.x >= volumeMin.x && cameraPos.x <= volumeMax.x) &&
+		(cameraPos.y >= volumeMin.y && cameraPos.y <= volumeMax.y) &&
+		(cameraPos.z >= volumeMin.z && cameraPos.z <= volumeMax.z);
+	if (cameraInside) {
+		rayDir = -rayDir;
+	}
+ 
 	// A step size roughly matching a fraction of a voxel unit keeps it accurate.
 	float voxelSize = abs(volumeMax.x - volumeMin.x) / float(volumeDimension);
 	float stepSize = voxelSize * 0.5;
