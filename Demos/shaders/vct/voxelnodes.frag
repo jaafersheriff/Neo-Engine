@@ -1,7 +1,6 @@
 #include "vct/voxels.glsl"
 
 in vec3 fragPos;
-// in vec3 volumePos;
 in vec3 fragNor;
 in vec2 fragTex;
 
@@ -28,8 +27,6 @@ layout(std430, binding = 2) coherent buffer NodeCounter {
 out vec3 outColor;
 
 void main() {
-	// ivec3 iVolumePos = clamp(ivec3(volumePos * volumeDimension), ivec3(0), ivec3(volumeDimension-1));
-	// int flattenedIndex = getFlattenedIndex(iVolumePos, volumeDimension);
 	ivec3 targetVoxelIndex = getVoxelIndex(fragPos, volumeMin, volumeMax, volumeDimension);
 	int flattenedIndex = getFlattenedIndex(targetVoxelIndex, volumeDimension);
 
@@ -41,7 +38,6 @@ void main() {
 	}
 
 	int oldHeader = atomicExchange(headerPointers[flattenedIndex], nodeIdx);
-	// nodes[nodeIdx].albedo = vec4(albedo, 1.0);
 	nodes[nodeIdx].aR = albedo.r;
 	nodes[nodeIdx].aG = albedo.g;
 	nodes[nodeIdx].aB = albedo.b;
@@ -53,7 +49,7 @@ void main() {
 	nodes[nodeIdx].header = oldHeader;
 
 	// TODO - remove heheheheheh
-	memoryBarrierBuffer();
+	// memoryBarrierBuffer();
 
 	outColor = vec3(targetVoxelIndex) / float(volumeDimension);
 }

@@ -5,9 +5,7 @@ struct VoxelNode {
 };
 
 ivec3 getVoxelIndex(vec3 worldPos, vec3 volumeWorldMin, vec3 volumeWorldMax, int volumeDimension) {
-    vec3 _vmin = min(volumeWorldMin, volumeWorldMax);
-    vec3 _vmax = max(volumeWorldMin, volumeWorldMax);
-    vec3 relativePos = (worldPos - _vmin) / (_vmax - _vmin);
+    vec3 relativePos = (worldPos - volumeWorldMin) / (volumeWorldMax - volumeWorldMin);
     return clamp(ivec3(floor(relativePos * float(volumeDimension))), ivec3(0), ivec3(volumeDimension-1));
 }
 
@@ -31,12 +29,13 @@ uint generateMorton3D(ivec3 v) {
 }
 
 int getFlattenedIndex(ivec3 voxelIndex, int volumeDimension) {
+    // Morton
+    return int(generateMorton3D(voxelIndex));
+
+    // Spatial
     return 
-    // generateMorton3D(ivec3(
         voxelIndex.x 
         + voxelIndex.y * volumeDimension
-        + voxelIndex.z * volumeDimension * volumeDimension
-    // ))
-    ;
+        + voxelIndex.z * volumeDimension * volumeDimension;
 }
 

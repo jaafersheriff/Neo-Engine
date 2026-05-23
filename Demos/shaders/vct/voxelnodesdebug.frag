@@ -55,7 +55,7 @@ void main() {
 			outColor.b += nodes[header].aB;
 			outColor.a = 1;
 
-			header = floatBitsToInt(nodes[header].header);
+			header = int(nodes[header].header);
 			nodeCount++;
 			safety--;
 		}
