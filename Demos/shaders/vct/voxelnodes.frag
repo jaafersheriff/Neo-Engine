@@ -1,4 +1,6 @@
 #include "vct/voxels.glsl"
+#include "alphaDiscard.glsl"
+#include "color.glsl"
 
 in vec3 fragPos;
 in vec3 fragNor;
@@ -10,17 +12,20 @@ uniform vec3 volumeMax;
 uniform int numVoxels;
 uniform int numNodes;
 
-uniform vec3 albedo;
+uniform vec4 albedo;
+#ifdef ALBEDO_MAP
+layout(binding = 0) uniform sampler2D albedoMap;
+#endif
 
-layout(std430, binding = 0) coherent buffer VoxelNodes {
+layout(std430, binding = 1) coherent buffer VoxelNodes {
 	VoxelNode nodes[];
 };
 
-layout(std430, binding = 1) coherent buffer HeaderPointers {
+layout(std430, binding = 2) coherent buffer HeaderPointers {
 	int headerPointers[];
 };
 
-layout(std430, binding = 2) coherent buffer NodeCounter {
+layout(std430, binding = 3) coherent buffer NodeCounter {
 	uint nodeCounter; 
 };
 
@@ -37,11 +42,17 @@ void main() {
 		discard;
 	}
 
+	vec4 fAlbedo = albedo;
+#ifdef ALBEDO_MAP
+	fAlbedo *= srgbToLinear(texture(albedoMap, fragTex));
+#endif
+	alphaDiscard(fAlbedo.a);
+
 	int oldHeader = atomicExchange(headerPointers[flattenedIndex], nodeIdx);
-	nodes[nodeIdx].aR = albedo.r;
-	nodes[nodeIdx].aG = albedo.g;
-	nodes[nodeIdx].aB = albedo.b;
-	nodes[nodeIdx].aA = 1.0;
+	nodes[nodeIdx].aR = fAlbedo.r;
+	nodes[nodeIdx].aG = fAlbedo.g;
+	nodes[nodeIdx].aB = fAlbedo.b;
+	nodes[nodeIdx].aA = fAlbedo.a;
 	vec3 n = normalize(fragNor);
 	nodes[nodeIdx].nX = n.x;
 	nodes[nodeIdx].nY = n.y;
