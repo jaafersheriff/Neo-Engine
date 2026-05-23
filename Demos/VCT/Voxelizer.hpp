@@ -74,12 +74,10 @@ namespace VCT {
 
 				// Clear the buffers...
 				resourceManagers.mShaderBufferManager.transact(voxelNodesHandle, [numNodes](ShaderBuffer& buffer) {
-					std::vector<uint8_t> data(numNodes * sizeof(VoxelNode), 0);
-					buffer.update(numNodes * sizeof(VoxelNode), data.data());
+					buffer.clear(numNodes * sizeof(VoxelNode), 0);
 					});
 				resourceManagers.mShaderBufferManager.transact(headerPointersHandle, [numVoxels](ShaderBuffer& buffer) {
-					std::vector<int> headerPointerData(numVoxels, -1);
-					buffer.update(numVoxels * sizeof(int), reinterpret_cast<const uint8_t*>(headerPointerData.data()));
+					buffer.clear(numVoxels * sizeof(int), -1);
 					});
 				resourceManagers.mShaderBufferManager.transact(atomicCounterHandle, [](ShaderBuffer& buffer) {
 					uint32_t zero = 0;

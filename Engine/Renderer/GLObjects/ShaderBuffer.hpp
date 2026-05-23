@@ -28,7 +28,6 @@ namespace neo {
     void ShaderBuffer::clear(uint32_t byteSize, T clearValue, uint32_t offset) {
         static_assert(sizeof(T) == 4, "Clear value must be a 32-bit type (int, uint32_t, float, etc.)");
 
-        // Deduce the OpenGL format based on whether T is signed, unsigned, or floating-point
 		types::InternalFormats internalFormat;
         types::ByteFormats format;
 
@@ -44,17 +43,6 @@ namespace neo {
             internalFormat = types::InternalFormats::R32_UI;
             format = types::ByteFormats::UnsignedInt;
         }
-
-        this->bind();
-        glClearBufferSubData(
-            GL_SHADER_STORAGE_BUFFER, // Assuming SSBO target, change if needed
-            internalFormat,
-            offset,
-            sizeInBytes,
-            format,
-            type,
-            &clearValue
-        );
 
         _clear(byteSize, offset, internalFormat, format, reinterpret_cast<uint8_t*>(&clearValue));
     }
