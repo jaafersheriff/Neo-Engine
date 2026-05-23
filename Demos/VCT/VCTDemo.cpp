@@ -159,7 +159,7 @@ namespace VCT {
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
-		auto voxelFragmentsBuffer = voxelize(renderPasses, resourceManagers, ecs);
+		auto voxelizeBuffers = voxelize(renderPasses, resourceManagers, ecs);
 
 		{
 			PointLightShadowMapParameters params = {
@@ -175,7 +175,7 @@ namespace VCT {
 		TextureHandle sceneColor = resourceManagers.mTextureManager.asyncLoad("Scene Color",
 			TextureBuilder{}
 			.setFormat(TextureFormat{ types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB16_UNORM,
+				types::InternalFormats::RGB16_UNORM,
 				})
 			.setDimension(glm::u16vec3(viewport.mSize.x, viewport.mSize.y, 0))
 		);
@@ -201,9 +201,16 @@ namespace VCT {
 
 		if (mDebugDraw) {
 			drawWireframe<VolumeComponent>(sceneTargetHandle, viewport.mSize, renderPasses, cameraEntity);
-			renderPasses.renderPass(sceneTargetHandle, viewport.mSize, RenderState{}, [cameraEntity, voxelFragmentsBuffer](const ResourceManagers& resourceManagers, const ECS& ecs) {
-				debugVoxelFragments(resourceManagers, ecs, voxelFragmentsBuffer, cameraEntity);
-				}, "Debug voxel fragments");
+
+			RenderState blend;
+			blend.mBlendState = BlendState{
+				BlendEquation::Add,
+				BlendFuncSrc::Alpha,
+				BlendFuncDst::OneMinusSrcAlpha
+			};
+			renderPasses.renderPass(sceneTargetHandle, viewport.mSize, blend, [cameraEntity, voxelizeBuffers](const ResourceManagers& resourceManagers, const ECS& ecs) {
+				debugVoxelNodes(resourceManagers, ecs, voxelizeBuffers.first, voxelizeBuffers.second, cameraEntity);
+				}, "Debug voxel nodes");
 		}
 		else {
 			drawForwardPBR<OpaqueComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);
@@ -213,7 +220,7 @@ namespace VCT {
 			"Previous HDR Color",
 			FramebufferBuilder{}
 			.setSize(viewport.mSize)
-			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGBA16_F }),
 			resourceManagers.mTextureManager
 		);
 		blit(renderPasses, previousHDRColorHandle, viewport.mSize, sceneColor, "Blit Previous HDR Color");

@@ -64,7 +64,7 @@ void main() {
 
         // Safely convert the 3D volume position from [-1,1] to [0,1] 
         // without altering gl_Position and corrupting the fixed-function pipeline.
-        volumePos = gl_in[i].gl_Position.xyz / gl_in[i].gl_Position.w * 0.5 + vec3(0.5);
+        // volumePos = gl_in[i].gl_Position.xyz / gl_in[i].gl_Position.w * 0.5 + vec3(0.5);
 
         // Apply conservative bloat to the 2D raster position
         gl_Position = projPos[i];
