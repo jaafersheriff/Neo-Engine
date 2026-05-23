@@ -10,6 +10,7 @@
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
+#include "ECS/Component/EngineComponents/PinnedComponent.hpp"
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/RenderingComponent/MeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/WireframeRenderComponent.hpp"
@@ -112,6 +113,7 @@ namespace VCT {
 			SpatialComponent volumeSpatial(glm::vec3(0.f, 2.5f, 2.5f), glm::vec3(5.f));
 			volumeSpatial.setLookDir(glm::vec3(0, 0, -1));
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<PinnedComponent>()
 				.attachComponent<TagComponent>("Volume")
 				.attachComponent<SpatialComponent>(volumeSpatial)
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f), true)

@@ -10,8 +10,8 @@ namespace VCT {
 		int mDimension = 32;
 		int mNodesPerVoxel = 4;
 		void imGuiEditor() override {
-			ImGui::SliderInt("Dimension", &mDimension, 1, 128);
-			ImGui::SliderInt("Nodes Per Voxel", &mNodesPerVoxel, 1, 8);
+			ImGui::SliderPowerOfTwo("Dimension", &mDimension, 1, 1024);
+			ImGui::SliderPowerOfTwo("Nodes Per Voxel", &mNodesPerVoxel, 1, 32);
 		}
 	END_COMPONENT();
 }
