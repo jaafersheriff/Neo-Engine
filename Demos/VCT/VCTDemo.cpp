@@ -62,6 +62,15 @@ namespace VCT {
 					resourceManagers.mTextureManager.discard(ecs.cGetComponent<CSMShadowMapComponent>(std::get<ECS::Entity>(*lightView))->mShadowMap);
 				}
 			}
+			if (auto csmCamera0 = ecs.getSingleView<SpatialComponent, CSMCamera0Component>()) {
+				ecs.removeEntity(std::get<ECS::Entity>(*csmCamera0));
+			}
+			if (auto csmCamera1 = ecs.getSingleView<SpatialComponent, CSMCamera1Component>()) {
+				ecs.removeEntity(std::get<ECS::Entity>(*csmCamera1));
+			}
+			if (auto csmCamera2 = ecs.getSingleView<SpatialComponent, CSMCamera2Component>()) {
+				ecs.removeEntity(std::get<ECS::Entity>(*csmCamera2));
+			}
 
 			const auto& meshView = ecs.getView<VoxelizeComponent, MeshComponent, SpatialComponent>();
 			for (auto entity : meshView) {
@@ -176,6 +185,64 @@ namespace VCT {
 				.attachComponent<VoxelizeComponent>()
 			));
 		}
+
+		inline void createSponzaScene(ECS& ecs, ResourceManagers& resourceManagers) {
+			destroyScene(ecs, resourceManagers);
+
+			createVolume(ecs, glm::vec3(0.f, 2.5f, 2.5f), glm::vec3(5.f));
+
+			SpatialComponent spatial(glm::vec3(75.f, 200.f, 20.f));
+			spatial.setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
+			CSMShadowMapComponent csmShadowMap(2048, resourceManagers.mTextureManager);
+			ecs.submitEntity(std::move(ECS::EntityBuilder{}
+				.attachComponent<TagComponent>("Light")
+				.attachComponent<LightComponent>(glm::vec3(0.978f, 0.903f, 0.714f), 3.f)
+				.attachComponent<DirectionalLightComponent>()
+				.attachComponent<SpatialComponent>(spatial)
+				.attachComponent<MainLightComponent>()
+				.attachComponent<CameraComponent>(-2.f, 2.f, CameraComponent::Orthographic{ glm::vec2(-4.f, 2.f), glm::vec2(0.1f, 5.f) })
+				.attachComponent<FrustumComponent>()
+				.attachComponent<FrustumFitReceiverComponent>()
+				.attachComponent<CSMShadowMapComponent>(csmShadowMap)
+			));
+
+			{
+				auto csmCameras = createCSMCameras();
+				for (int i = 0; i < csmCameras.size(); i++) {
+					ecs.submitEntity(std::move(csmCameras[i]
+						.attachComponent<TagComponent>("CSMCamera" + std::to_string(i))
+					));
+				}
+			}
+
+			Loader::loadGltfScene(ecs, resourceManagers, "Sponza/Sponza.gltf", glm::scale(glm::mat4(1.f), glm::vec3(200.f)),
+				[](ECS& ecs, const GLTFImporter::MeshNode& node) {
+					ECS::EntityBuilder builder;
+					if (!node.mName.empty()) {
+						builder.attachComponent<TagComponent>(node.mName);
+					}
+					builder.attachComponent<SpatialComponent>(node.mSpatial);
+					builder.attachComponent<MeshComponent>(node.mMeshHandle);
+					builder.attachComponent<BoundingBoxComponent>(node.mMin, node.mMax, true);
+					if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::Transparent) {
+						builder.attachComponent<TransparentComponent>();
+						// builder.attachComponent<ForwardPBRRenderComponent>();
+					}
+					else if (node.mAlphaMode == GLTFImporter::MeshNode::AlphaMode::AlphaTest) {
+						builder.attachComponent<AlphaTestComponent>();
+						// builder.attachComponent<DeferredPBRRenderComponent>();
+					}
+					else {
+						builder.attachComponent<OpaqueComponent>();
+						// builder.attachComponent<DeferredPBRRenderComponent>();
+					}
+					builder.attachComponent<ForwardPBRRenderComponent>();
+					builder.attachComponent<VoxelizeComponent>();
+					builder.attachComponent<MaterialComponent>(node.mMaterial);
+					builder.attachComponent<ShadowCasterRenderComponent>();
+					ecs.submitEntity(std::move(builder));
+				});
+		}
 	}
 
 	IDemo::Config Demo::getConfig() const {
@@ -207,7 +274,7 @@ namespace VCT {
 		ecs.addSystem<RotationSystem>();
 		ecs.addSystem<FrustumSystem>(); // Calculate original frusta bounds
 		ecs.addSystem<CSMFittingSystem>(); // Break scene frustum into slices and fit CSMCameraN to those slices
-		// ecs.addSystem<FrustumCullingSystem>();
+		ecs.addSystem<FrustumCullingSystem>();
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
@@ -219,6 +286,9 @@ namespace VCT {
 		}
 		if (ImGui::Button("Create Sphere Scene")) {
 			createSphereScene(ecs, resourceManagers);
+		}
+		if (ImGui::Button("Create Sponza Scene")) {
+			createSponzaScene(ecs, resourceManagers);
 		}
 
 		ImGui::Checkbox("Debug Draw", &mDebugDraw);
