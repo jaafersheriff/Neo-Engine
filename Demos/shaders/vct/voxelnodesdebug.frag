@@ -25,8 +25,8 @@ void main() {
 
 	// A step size roughly matching a fraction of a voxel unit keeps it accurate.
 	float voxelSize = abs(volumeMax.x - volumeMin.x) / float(volumeDimension);
-	float stepSize = voxelSize * 0.75;
-	int maxSteps = 32;
+	float stepSize = voxelSize * 0.25;
+	int maxSteps = 128;
 
 	vec3 currentPos = fragPos.xyz + rayDir * 0.1; // Start right at the surface of the debug box
 

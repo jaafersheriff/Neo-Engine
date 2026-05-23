@@ -124,14 +124,26 @@ namespace neo {
 	}
 
 	void ShaderBufferManager::imguiEditor() {
-		mCache.each([](const ShaderBufferHandle id, const BackedResource<ShaderBuffer>& buffer) {
-			NEO_UNUSED(buffer);
-			if (buffer.mDebugName.has_value()) {
-				ImGui::Text("%s (%u bytes)", buffer.mDebugName->c_str(), buffer.mResource.mByteSize);
+		const uint32_t kb = 1024;
+		const uint32_t mb = kb * 1024;
+		mCache.each([kb, mb](const ShaderBufferHandle id, const BackedResource<ShaderBuffer>& buffer) {
+			char buf[32];
+			if (buffer.mResource.mByteSize >= mb) {
+				std::snprintf(buf, sizeof(buf), "%.2f MB", buffer.mResource.mByteSize / static_cast<double>(mb));
+			}
+			else if (buffer.mResource.mByteSize >= kb) {
+				std::snprintf(buf, sizeof(buf), "%.2f KB", buffer.mResource.mByteSize / static_cast<double>(kb));
 			}
 			else {
-				ImGui::Text("%d (%u bytes)", id.mHandle, buffer.mResource.mByteSize);
+				std::snprintf(buf, sizeof(buf), "%u Bytes", buffer.mResource.mByteSize);
 			}
-		});
+
+			if (buffer.mDebugName.has_value()) {
+				ImGui::Text("%s (%s)", buffer.mDebugName->c_str(), buf);
+			}
+			else {
+				ImGui::Text("%d (%s)", id.mHandle, buf);
+			}
+			});
 	}
 }

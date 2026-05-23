@@ -111,7 +111,7 @@ namespace VCT {
 				.attachComponent<SpatialComponent>(volumeSpatial)
 				.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f), true)
 				.attachComponent<WireframeRenderComponent>(glm::vec3(1.f))
-				.attachComponent<VolumeComponent>(ShaderBufferHandle{})
+				.attachComponent<VolumeComponent>()
 				.attachComponent<MeshComponent>(MeshHandle("cube"))
 				.attachComponent<CameraComponent>(-0.5f, 0.5f, CameraComponent::Orthographic{ glm::vec2(-0.5f, 0.5f), glm::vec2(-0.5f, 0.5f) }) // Dealt with later
 			));
@@ -128,21 +128,8 @@ namespace VCT {
 		ImGui::Checkbox("Debug Draw", &mDebugDraw);
 	}
 
-	void Demo::update(ECS& ecs, ResourceManagers& resourceManagers) {
+	void Demo::update(ECS& ecs, ResourceManagers&) {
 		if (auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent, CameraComponent, BoundingBoxComponent>()) {
-			auto& volume = std::get<VolumeComponent&>(*volumeView);
-			if (volume.mNeedsReconstruction) {
-				std::vector<VoxelNode> data;
-				data.resize(volume.mDimension * volume.mDimension * volume.mDimension);
-				std::fill(data.begin(), data.end(), VoxelNode{ 0u, 0u });
-				volume.mBufferHandle = resourceManagers.mShaderBufferManager.asyncLoad("Volume", ShaderBufferLoadDetails{
-					static_cast<uint32_t>(data.size() * sizeof(VoxelNode)),
-					reinterpret_cast<const uint8_t*>(data.data())
-				});
-
-				volume.mNeedsReconstruction = false;
-			}
-
 			const auto& spatial = std::get<SpatialComponent&>(*volumeView);
 			const auto& aabb = std::get<BoundingBoxComponent&>(*volumeView);
 			glm::vec3 volumeWorldMin = glm::vec3(spatial.getModelMatrix() * glm::vec4(aabb.mMin, 1.0));
