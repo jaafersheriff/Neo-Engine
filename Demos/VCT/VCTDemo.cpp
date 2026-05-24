@@ -260,13 +260,13 @@ namespace VCT {
 				MaterialComponent material;
 				material.mAlbedoColor = glm::vec4(1.0);
 				material.mEmissiveFactor = glm::vec3(10.0, 0.0, 10.0);
-				createSphere(material, glm::vec3(-15.35f, 1.8f, -5.8f), glm::vec3(1.0f));
+				createSphere(material, glm::vec3(14.3f, 1.8f, -5.7f), glm::vec3(1.0f));
 			}
 			{
 				MaterialComponent material;
 				material.mAlbedoColor = glm::vec4(1.0);
 				material.mEmissiveFactor = glm::vec3(0.0, 10.0, 10.0);
-				createSphere(material, glm::vec3(-15.35f, 1.8f, 5.15f), glm::vec3(1.0f));
+				createSphere(material, glm::vec3(14.3f, 1.8f, 5.15f), glm::vec3(1.0f));
 			}
 		}
 	}

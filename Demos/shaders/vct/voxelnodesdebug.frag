@@ -20,16 +20,22 @@ layout(std430, binding = 1) coherent buffer HeaderPointers {
 out vec4 outColor;
 
 
-bool rayAABBIntersect(vec3 ro, vec3 rd, vec3 bmin, vec3 bmax, out float tNear, out float tFar) {
-    // slab method
-    vec3 invD = 1.0 / max(abs(rd), vec3(EP));
-    vec3 t0s = (bmin - ro) * invD;
-    vec3 t1s = (bmax - ro) * invD;
+bool rayAABBIntersect(vec3 rayOrigin, vec3 rayDir, vec3 boxMin, vec3 boxMax, out float tNear, out float tFar) {
+	// Correctly handle division by zero for all directions without breaking negative signs
+    vec3 invD = 1.0 / (rayDir + sign(rayDir) * vec3(rayDir.x == 0.0 ? EP : 0.0, rayDir.y == 0.0 ? EP : 0.0, rayDir.z == 0.0 ? EP : 0.0));
+    
+    vec3 t0s = (boxMin - rayOrigin) * invD;
+    vec3 t1s = (boxMax - rayOrigin) * invD;
+    
     vec3 tmin3 = min(t0s, t1s);
     vec3 tmax3 = max(t0s, t1s);
+    
     tNear = max(max(tmin3.x, tmin3.y), tmin3.z);
     tFar  = min(min(tmax3.x, tmax3.y), tmax3.z);
-    return tFar >= max(tNear, 0.0);
+    
+    // An intersection happens if tFar is greater than tNear, 
+    // AND tFar is in front of the ray (tFar >= 0.0)
+    return tFar >= tNear && tFar >= 0.0;
 }
 
 
@@ -42,13 +48,14 @@ void main() {
 		(cameraPos.y >= volumeMin.y && cameraPos.y <= volumeMax.y) &&
 		(cameraPos.z >= volumeMin.z && cameraPos.z <= volumeMax.z);
 
-	// voxel / grid parameters
+	// world-space voxel size
 	vec3 voxelSize = abs(volumeMax - volumeMin) / float(volumeDimension);
 
 	// intersect with box to find entry point
 	float tNear, tFar;
 	if (!rayAABBIntersect(rayOrigin, rayDir, volumeMin, volumeMax, tNear, tFar)) {
-		rayDir *= -1.0;
+		outColor = vec4(0.0);
+		return;
 	}
 
 	float t = max(tNear, 0.0);
@@ -63,9 +70,9 @@ void main() {
 	vec3 voxelBoundY = volumeMin + (vec3(voxel) + vec3(0.0, stepSize.y > 0 ? 1.0 : 0.0, 0.0)) * voxelSize.y;
 	vec3 voxelBoundZ = volumeMin + (vec3(voxel) + vec3(0.0, 0.0, stepSize.z > 0 ? 1.0 : 0.0)) * voxelSize.z;
 
-	float tMaxX = (abs(rayDir.x) < EP) ? INF : (voxelBoundX.x - pos.x) / rayDir.x;
-	float tMaxY = (abs(rayDir.y) < EP) ? INF : (voxelBoundY.y - pos.y) / rayDir.y;
-	float tMaxZ = (abs(rayDir.z) < EP) ? INF : (voxelBoundZ.z - pos.z) / rayDir.z;
+	float tMaxX = (abs(rayDir.x) < EP) ? INF : (voxelBoundX.x - rayOrigin.x) / rayDir.x;
+	float tMaxY = (abs(rayDir.y) < EP) ? INF : (voxelBoundY.y - rayOrigin.y) / rayDir.y;
+	float tMaxZ = (abs(rayDir.z) < EP) ? INF : (voxelBoundZ.z - rayOrigin.z) / rayDir.z;
 
 	float tDeltaX = (abs(rayDir.x) < EP) ? INF : (voxelSize.x / abs(rayDir.x));
 	float tDeltaY = (abs(rayDir.y) < EP) ? INF : (voxelSize.y / abs(rayDir.y));
@@ -137,15 +144,16 @@ void main() {
 				tMaxZ += tDeltaZ;
 			}
 		}
-		pos = rayOrigin + rayDir * (t + 1e-4); // update sample position for edge calculation
 		// bail out if we've passed the exit plane
 		if (t > tFar) break;
+
+		pos = rayOrigin + rayDir * (t + 1e-4); // update sample position for edge calculation
 	}
 
 	if (found) {
 		outColor = vec4(finalColor, 1.0);
 	}
 	else {
-		outColor = vec4(0, 0, 0, 0);
+		outColor = vec4(1, 0, 0, 0);
 	}
 }
