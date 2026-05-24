@@ -132,7 +132,8 @@ namespace Compute {
 
 				// Bind mesh vertex buffer as shader storage buffer
 				auto& mesh = resourceManagers.mMeshManager.resolve(meshComponent.mMeshHandle);
-				auto posBarrier = particlesComputeShader.bindShaderBuffer("Pos", mesh, types::mesh::VertexType::Position, types::shader::Access::ReadWrite);
+				particlesComputeShader.bindShaderBuffer("Pos", mesh, types::mesh::VertexType::Position, types::shader::Access::ReadWrite);
+				ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
 
 				// Dispatch
 				particlesComputeShader.dispatch({meshComponent.mNumParticles / ServiceLocator<Renderer>::ref().getDetails().mMaxComputeWorkGroupSize.x, 1, 1});

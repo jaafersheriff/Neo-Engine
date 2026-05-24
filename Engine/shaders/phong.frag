@@ -9,25 +9,27 @@ in vec2 fragTex;
 in vec4 shadowCoord;
 #endif
 
+layout (std140, binding = 0) uniform UBO {
+	vec4 camPos;
+	vec4 lightCol;
+	// DIRECTIONAL_LIGHT
+	vec4 lightDir;
+	// POINT_LIGHT
+	vec4 lightPos;
+	float lightRadiance;
+	int pad0;
+	int pad1;
+	int pad2;
+};
 
 uniform vec4 albedo;
 #ifdef ALBEDO_MAP
-layout(binding = 0) uniform sampler2D albedoMap;
+layout(binding = 1) uniform sampler2D albedoMap;
 #endif
 
 #ifdef NORMAL_MAP
-layout(binding = 1) uniform sampler2D normalMap;
+layout(binding = 2) uniform sampler2D normalMap;
 #endif
-
-uniform vec3 lightCol;
-#if defined(DIRECTIONAL_LIGHT)
-uniform vec3 lightDir;
-#elif defined(POINT_LIGHT)
-uniform vec3 lightPos;
-uniform float lightRadiance;
-#endif
-
-uniform vec3 camPos;
 
 out vec4 color;
 
@@ -43,22 +45,22 @@ void main() {
 
 	// TODO - normal mapping
 	vec3 N = normalize(fragNor);
-	vec3 V = normalize(camPos - fragPos.xyz);
+	vec3 V = normalize(camPos.xyz - fragPos.xyz);
 
 float attFactor = 1;
 #ifdef DIRECTIONAL_LIGHT
-	vec3 Ldir = normalize(lightDir);
+	vec3 Ldir = normalize(lightDir.xyz);
 #elif defined(POINT_LIGHT)
-	vec3 lightDir = lightPos - fragPos.xyz;
-	float lightDistance = length(lightDir);
-	vec3 Ldir = lightDir / lightDistance;
+	vec3 pointLightDir = lightPos.xyz - fragPos.xyz;
+	float lightDistance = length(pointLightDir);
+	vec3 Ldir = pointLightDir / lightDistance;
 
 	attFactor = lightDistance / lightRadiance;
 #else
 	vec3 Ldir = vec3(0, 0, 0);
 #endif
 
-	color.rgb = lambertianDiffuse(Ldir, N, fAlbedo.rgb, lightCol, attFactor);
+	color.rgb = lambertianDiffuse(Ldir, N, fAlbedo.rgb, lightCol.rgb, attFactor);
 
 	color.a = 1.0;
 #ifdef TRANSPARENT

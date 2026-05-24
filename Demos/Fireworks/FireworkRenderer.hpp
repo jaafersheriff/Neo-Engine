@@ -62,8 +62,9 @@ namespace Fireworks {
 
 			// Bind mesh vertex buffers as shader storage buffers
 			auto& mesh = resourceManagers.mMeshManager.resolve(firework.mBuffer);
-			auto posBarrier = fireworksComputeShader.bindShaderBuffer("BufferA", mesh, types::mesh::VertexType::Position, types::shader::Access::ReadWrite);
-			auto velBarrier = fireworksComputeShader.bindShaderBuffer("BufferB", mesh, types::mesh::VertexType::Normal, types::shader::Access::ReadWrite);
+			fireworksComputeShader.bindShaderBuffer("BufferA", mesh, types::mesh::VertexType::Position, types::shader::Access::ReadWrite);
+			fireworksComputeShader.bindShaderBuffer("BufferB", mesh, types::mesh::VertexType::Normal, types::shader::Access::ReadWrite);
+			ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
 
 			// Dispatch 
 			fireworksComputeShader.dispatch({ std::ceil(firework.mCount / 16), 1, 1 });

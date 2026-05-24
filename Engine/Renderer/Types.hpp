@@ -49,6 +49,13 @@ namespace neo {
 			D24S8
 		};
 
+		namespace buffer {
+			enum class Target : uint8_t {
+				Uniform,
+				ShaderStorage
+			};
+		}
+
 		namespace shader {
 			enum class Stage : uint8_t {
 				Vertex,
@@ -65,6 +72,7 @@ namespace neo {
 				ImageAccess,
 				AtomicCounter,
 				StorageBuffer,
+				UniformBuffer
 				// There's way more that are unsupported hehe
 			};
 

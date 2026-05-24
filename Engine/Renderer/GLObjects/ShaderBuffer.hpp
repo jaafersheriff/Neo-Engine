@@ -10,16 +10,17 @@ namespace neo {
 
 	class ShaderBuffer {
 	public:
-		ShaderBuffer(uint32_t byteSize, const uint8_t* data, const std::optional<std::string>& debugName);
+		ShaderBuffer(types::buffer::Target target, uint32_t byteSize, const uint8_t* data, const std::optional<std::string>& debugName);
 		void update(uint32_t byteSize, const uint8_t* data, uint32_t offset = 0);
 
 		template<typename T>
 		void clear(uint32_t byteSize, T clearValue, uint32_t offset = 0);
+		void destroy();
 
+		types::buffer::Target mTarget = types::buffer::Target::ShaderStorage;
 		uint32_t mBufferID = 0;
 		uint32_t mByteSize = 0;
 
-		void destroy();
     private:
         void _clear(uint32_t byteSize, uint32_t offset, types::InternalFormats internalFormat, types::ByteFormats format, const uint8_t* clearValue);
 	};

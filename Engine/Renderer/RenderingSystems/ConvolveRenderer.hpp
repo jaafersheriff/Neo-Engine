@@ -66,12 +66,13 @@ namespace neo {
 						auto& dfgLutShader = resourceManagers.mShaderManager.resolveDefines(dfgLutShaderHandle, {});
 						dfgLutShader.bind();
 
-						auto barrier = dfgLutShader.bindImageTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut), types::shader::Access::Write);
+						dfgLutShader.bindImageTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut), types::shader::Access::Write);
 						dfgLutShader.dispatch({
 							ibl.mDFGLutResolution / 8,
 							ibl.mDFGLutResolution / 8,
 							1
 							});
+						ShaderBarrier barrier(types::shader::Barrier::ImageAccess);
 						ibl.mDFGGenerated = true;
 					}
 				}
@@ -124,12 +125,13 @@ namespace neo {
 							uint16_t mipResolution = convolvedCubemap.mWidth >> uint16_t(mip);
 							convolveShader.bindUniform("roughness", mip / static_cast<float>(convolvedCubemap.mFormat.mMipCount - 2));
 							convolveShader.bindUniform("sampleCount", ibl.mSampleCount);
-							auto barrier = convolveShader.bindImageTexture("dst", convolvedCubemap, types::shader::Access::Write, mip);
+							convolveShader.bindImageTexture("dst", convolvedCubemap, types::shader::Access::Write, mip);
 							convolveShader.dispatch({
 								mipResolution / 8,
 								mipResolution / 8,
 								1
 								});
+							ShaderBarrier barrier(types::shader::Barrier::ImageAccess);
 						}
 
 						ibl.mConvolved = true;
