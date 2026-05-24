@@ -104,8 +104,9 @@ void main() {
 			while (header != -1 && safety-- > 0) {
 				vec4 albedo = unpackRGBA8(nodes[header].albedo);
 				vec3 emissive = unpackR11G11B10(nodes[header].emissive);
-				vec3 normal = unpackNormal(nodes[header].normal);
+				vec3 normal = normalize(unpackNormal(nodes[header].normal));
 				voxelColor += albedo.rgb + emissive;
+				// voxelColor += (albedo.rgb + emissive) * saturate(dot(normal, normalize(vec3(-0.3, 0.8, -0.4))));
 
 				nodeCount++;
 				header = nodes[header].header;

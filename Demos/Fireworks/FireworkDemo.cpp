@@ -150,6 +150,16 @@ namespace Fireworks {
 			.setDimension(glm::u16vec3(viewport.mSize, 0))
 			.setFormat(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGBA16_F })
 		);
+		if (resourceManagers.mTextureManager.isValid(hdrColorTexture)) {
+			auto& tex = resourceManagers.mTextureManager.resolve(hdrColorTexture);
+			if (glm::uvec2(tex.mWidth, tex.mHeight) != viewport.mSize) {
+				resourceManagers.mTextureManager.discard(hdrColorTexture);
+				return;
+			}
+		}
+		else {
+			return;
+		}
 
 		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Scene Target",
