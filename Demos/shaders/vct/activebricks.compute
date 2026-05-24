@@ -17,12 +17,10 @@ uniform int volumeDimension;
 
 shared bool sharedBrickIsActive;
 
-#ifdef VOXELS_PER_BRICK_4
-layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
-#elif VOXELS_PER_BRICK_8
-layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
-#elif VOXELS_PER_BRICK_16
-layout(local_size_x = 16, local_size_y = 16, local_size_z = 16) in;
+#if defined(VOXELS_PER_BRICK_4)
+    layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
+#elif defined(VOXELS_PER_BRICK_8)
+    layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 #endif
 
 void main() {

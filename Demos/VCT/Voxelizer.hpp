@@ -226,16 +226,12 @@ namespace VCT {
 				const auto& [_, volume, volumeSpatial] = *volumeView;
 				MakeDefine(VOXELS_PER_BRICK_4);
 				MakeDefine(VOXELS_PER_BRICK_8);
-				MakeDefine(VOXELS_PER_BRICK_16);
 				ShaderDefines shaderDefines;
 				if (volume.mVoxelsPerBrick == 4) {
 					shaderDefines.set(VOXELS_PER_BRICK_4);
 				}
 				else if (volume.mVoxelsPerBrick == 8) {
 					shaderDefines.set(VOXELS_PER_BRICK_8);
-				}
-				else if (volume.mVoxelsPerBrick == 16) {
-					shaderDefines.set(VOXELS_PER_BRICK_16);
 				}
 				else {
 					NEO_LOG_E("Unsupported voxels per brick count %d", volume.mVoxelsPerBrick);

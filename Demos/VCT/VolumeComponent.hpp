@@ -13,7 +13,7 @@ namespace VCT {
 		void imGuiEditor() override {
 			ImGui::SliderPowerOfTwo("Dimension", &mDimension, 1, 1024);
 			ImGui::SliderPowerOfTwo("Nodes Per Voxel", &mNodesPerVoxel, 1, 32);
-			ImGui::SliderPowerOfTwo("Voxels Per Brick", &mVoxelsPerBrick, 4, 16);
+			ImGui::SliderPowerOfTwo("Voxels Per Brick", &mVoxelsPerBrick, 4, 8);
 		}
 	END_COMPONENT();
 }
