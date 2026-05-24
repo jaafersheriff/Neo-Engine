@@ -17,7 +17,7 @@ uniform vec3 emissive;
 
 layout(binding = 0) uniform sampler2D albedoMap;
 
-layout(std430, binding = 1) coherent buffer VoxelNodes {
+layout(std430, binding = 1) coherent writeonly buffer VoxelNodes {
 	VoxelNode nodes[];
 };
 

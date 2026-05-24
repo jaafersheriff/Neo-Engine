@@ -9,11 +9,11 @@ uniform int volumeDimension;
 uniform vec3 volumeMin; // world space
 uniform vec3 volumeMax; // world space
 
-layout(std430, binding = 0) coherent buffer VoxelNodes {
+layout(std430, binding = 0) coherent readonly buffer VoxelNodes {
 	VoxelNode nodes[];
 };
 
-layout(std430, binding = 1) coherent buffer HeaderPointers {
+layout(std430, binding = 1) coherent readonly buffer HeaderPointers {
 	int headerPointers[];
 };
 

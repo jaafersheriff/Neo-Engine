@@ -34,6 +34,7 @@ namespace VCT {
 			// Raster path to create voxel nodes
 			ShaderBufferHandle voxelNodesHandle;
 			ShaderBufferHandle headerPointersHandle;
+			ShaderBufferHandle atomicCounterHandle;
 			{
 				TRACY_ZONEN("VoxelNodes");
 				struct alignas(16) VoxelNode {
@@ -47,16 +48,14 @@ namespace VCT {
 					static_cast<uint32_t>(numNodes * sizeof(VoxelNode)),
 					nullptr
 					});
-				ShaderBufferHandle atomicCounterHandle = resourceManagers.mShaderBufferManager.asyncLoad("VolumeNodesAtomicCounter", ShaderBufferLoadDetails{
+				atomicCounterHandle = resourceManagers.mShaderBufferManager.asyncLoad("VolumeNodesAtomicCounter", ShaderBufferLoadDetails{
 					sizeof(uint32_t),
 					nullptr
 					});
-				std::vector<int> headerPointerData(numVoxels, -1);
 				headerPointersHandle = resourceManagers.mShaderBufferManager.asyncLoad("HeaderPointers", ShaderBufferLoadDetails{
-					static_cast<uint32_t>(headerPointerData.size() * sizeof(int)),
-					reinterpret_cast<const uint8_t*>(headerPointerData.data())
+					static_cast<uint32_t>(numVoxels * sizeof(int)),
+					nullptr
 					});
-
 
 				if (!resourceManagers.mShaderBufferManager.isValid(voxelNodesHandle)
 					|| !resourceManagers.mShaderBufferManager.isValid(headerPointersHandle)
@@ -84,97 +83,184 @@ namespace VCT {
 					uint32_t zero = 0;
 					buffer.update(sizeof(uint32_t), reinterpret_cast<const uint8_t*>(&zero));
 					});
-
-				auto voxelNodeTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
-					"Voxel Nodes Target",
-					FramebufferBuilder{}
-					.setSize(glm::uvec2(volume.mDimension, volume.mDimension))
-					.attach(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGB8_UNORM }),
-					resourceManagers.mTextureManager
-				);
-
-				renderPasses.clear(voxelNodeTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f)); // Probably unnecessary
-
-				RenderState renderState;
-				renderState.mDepthState = std::nullopt;
-				renderState.mCullFace = std::nullopt;
-				renderPasses.renderPass(voxelNodeTargetHandle, glm::uvec2(volume.mDimension), renderState,
-					[numVoxels, numNodes, voxelNodesHandle, atomicCounterHandle, headerPointersHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
-						TRACY_GPUN("Voxel Nodes");
-						const auto& [_, volume, volumeSpatial, volumeCamera, volumeBB] = *ecs.getSingleView<VolumeComponent, SpatialComponent, CameraComponent, BoundingBoxComponent>();
-
-						auto voxelNodeShaderHandle = resourceManagers.mShaderManager.asyncLoad("VoxelNodesShader", ShaderBuilder{}
-							.setStage(types::shader::Stage::Vertex, "vct/voxelnodes.vert")
-							.setStage(types::shader::Stage::Geometry, "vct/voxelnodes.geom")
-							.setStage(types::shader::Stage::Fragment, "vct/voxelnodes.frag")
-						);
-						if (!resourceManagers.mShaderManager.isValid(voxelNodeShaderHandle)) {
-							return;
-						}
-
-						glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
-						glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
-
-						ShaderDefines albedoDefines;
-						MakeDefine(ALBEDO_MAP);
-						albedoDefines.set(ALBEDO_MAP);
-
-						const auto& meshView = ecs.getView<
-							const VoxelizeComponent,
-							const MeshComponent,
-							const MaterialComponent,
-							const SpatialComponent>();
-						for (auto entity : meshView) {
-
-							auto meshSpatial = ecs.cGetComponent<SpatialComponent>(entity);
-							if (auto meshBB = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
-								if (!volumeBB.intersect(volumeSpatial.getModelMatrix(), *meshBB, meshSpatial->getModelMatrix())) {
-									continue;
-								}
-							}
-
-							if (!resourceManagers.mMeshManager.isValid(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle)) {
-								continue;
-							}
-
-							const auto& material = ecs.cGetComponent<MaterialComponent>(entity);
-
-							auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(voxelNodeShaderHandle, resourceManagers.mTextureManager.isValid(material->mAlbedoMap) ? albedoDefines : ShaderDefines{});
-
-							resolvedShader.bindShaderBuffer("NodeCounter", resourceManagers.mShaderBufferManager.resolve(atomicCounterHandle), types::shader::Access::ReadWrite);
-							resolvedShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(voxelNodesHandle), types::shader::Access::ReadWrite);
-							resolvedShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerPointersHandle), types::shader::Access::ReadWrite);
-
-							resolvedShader.bindUniform("volumeMin", glm::min(volumeWorldMin, volumeWorldMax));
-							resolvedShader.bindUniform("volumeMax", glm::max(volumeWorldMin, volumeWorldMax));
-							resolvedShader.bindUniform("volumeDimension", volume.mDimension);
-							resolvedShader.bindUniform("numVoxels", numVoxels);
-							resolvedShader.bindUniform("numNodes", numNodes);
-							resolvedShader.bindUniform("P", volumeCamera.getProj());
-							resolvedShader.bindUniform("V", volumeSpatial.getView());
-
-							resolvedShader.bindUniform("M", meshSpatial->getModelMatrix());
-							resolvedShader.bindUniform("N", meshSpatial->getNormalMatrix());
-							resolvedShader.bindUniform("albedo", material->mAlbedoColor);
-							resolvedShader.bindUniform("emissive", material->mEmissiveFactor);
-							if (resourceManagers.mTextureManager.isValid(material->mAlbedoMap)) {
-								resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
-							}
-
-							resourceManagers.mMeshManager.resolve(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle).draw();
-						}
-
-						ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
-					}, "Generate VoxelNodes");
 			}
 
+			auto voxelNodeTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
+				"Voxel Nodes Target",
+				FramebufferBuilder{}
+				.setSize(glm::uvec2(volume.mDimension, volume.mDimension))
+				.attach(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGB8_UNORM }),
+				resourceManagers.mTextureManager
+			);
+
+			renderPasses.clear(voxelNodeTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f)); // Probably unnecessary
+
+			RenderState renderState;
+			renderState.mDepthState = std::nullopt;
+			renderState.mCullFace = std::nullopt;
+			renderPasses.renderPass(voxelNodeTargetHandle, glm::uvec2(volume.mDimension), renderState,
+				[numVoxels, numNodes, voxelNodesHandle, atomicCounterHandle, headerPointersHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
+					TRACY_GPUN("Voxel Nodes");
+					const auto& [_, volume, volumeSpatial, volumeCamera, volumeBB] = *ecs.getSingleView<VolumeComponent, SpatialComponent, CameraComponent, BoundingBoxComponent>();
+
+					auto voxelNodeShaderHandle = resourceManagers.mShaderManager.asyncLoad("VoxelNodesShader", ShaderBuilder{}
+						.setStage(types::shader::Stage::Vertex, "vct/voxelnodes.vert")
+						.setStage(types::shader::Stage::Geometry, "vct/voxelnodes.geom")
+						.setStage(types::shader::Stage::Fragment, "vct/voxelnodes.frag")
+					);
+					if (!resourceManagers.mShaderManager.isValid(voxelNodeShaderHandle)) {
+						return;
+					}
+
+					glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
+					glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
+
+					ShaderDefines albedoDefines;
+					MakeDefine(ALBEDO_MAP);
+					albedoDefines.set(ALBEDO_MAP);
+
+					const auto& meshView = ecs.getView<
+						const VoxelizeComponent,
+						const MeshComponent,
+						const MaterialComponent,
+						const SpatialComponent>();
+					for (auto entity : meshView) {
+
+						auto meshSpatial = ecs.cGetComponent<SpatialComponent>(entity);
+						if (auto meshBB = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
+							if (!volumeBB.intersect(volumeSpatial.getModelMatrix(), *meshBB, meshSpatial->getModelMatrix())) {
+								continue;
+							}
+						}
+
+						if (!resourceManagers.mMeshManager.isValid(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle)) {
+							continue;
+						}
+
+						const auto& material = ecs.cGetComponent<MaterialComponent>(entity);
+
+						auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(voxelNodeShaderHandle, resourceManagers.mTextureManager.isValid(material->mAlbedoMap) ? albedoDefines : ShaderDefines{});
+
+						resolvedShader.bindShaderBuffer("NodeCounter", resourceManagers.mShaderBufferManager.resolve(atomicCounterHandle), types::shader::Access::ReadWrite);
+						resolvedShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(voxelNodesHandle), types::shader::Access::ReadWrite);
+						resolvedShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerPointersHandle), types::shader::Access::ReadWrite);
+
+						resolvedShader.bindUniform("volumeMin", glm::min(volumeWorldMin, volumeWorldMax));
+						resolvedShader.bindUniform("volumeMax", glm::max(volumeWorldMin, volumeWorldMax));
+						resolvedShader.bindUniform("volumeDimension", volume.mDimension);
+						resolvedShader.bindUniform("numVoxels", numVoxels);
+						resolvedShader.bindUniform("numNodes", numNodes);
+						resolvedShader.bindUniform("P", volumeCamera.getProj());
+						resolvedShader.bindUniform("V", volumeSpatial.getView());
+
+						resolvedShader.bindUniform("M", meshSpatial->getModelMatrix());
+						resolvedShader.bindUniform("N", meshSpatial->getNormalMatrix());
+						resolvedShader.bindUniform("albedo", material->mAlbedoColor);
+						resolvedShader.bindUniform("emissive", material->mEmissiveFactor);
+						if (resourceManagers.mTextureManager.isValid(material->mAlbedoMap)) {
+							resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
+						}
+
+						resourceManagers.mMeshManager.resolve(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle).draw();
+					}
+
+					ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
+				}, "Generate VoxelNodes");
+
 			return std::make_pair(headerPointersHandle, voxelNodesHandle);
+		}
+
+		void _generateBricks(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const ShaderBufferHandle headerPointersHandle, const ShaderBufferHandle voxelNodesHandle) {
+			TRACY_ZONE();
+
+			if (!resourceManagers.mShaderBufferManager.isValid(headerPointersHandle)
+				|| !resourceManagers.mShaderBufferManager.isValid(voxelNodesHandle)) {
+				return;
+			}
+			auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>();
+			if (!volumeView) {
+				return;
+			}
+
+			const auto& [_, volume, volumeSpatial] = *volumeView;
+			int bricksPerAxis = static_cast<int>(std::ceil((volume.mDimension + volume.mVoxelsPerBrick - 1) / static_cast<float>(volume.mVoxelsPerBrick)));
+			int numBricks = bricksPerAxis * bricksPerAxis * bricksPerAxis;
+
+			ShaderBufferHandle brickIDsHandle;
+			{
+				brickIDsHandle = resourceManagers.mShaderBufferManager.asyncLoad("BrickIDs", ShaderBufferLoadDetails{
+					static_cast<uint32_t>(numBricks * sizeof(int)),
+					nullptr
+					});
+
+
+				if (!resourceManagers.mShaderBufferManager.isValid(brickIDsHandle)) {
+					return;
+				}
+
+				// Resolution changed, destroy everything and try again next frame
+				if (resourceManagers.mShaderBufferManager.resolve(brickIDsHandle).mByteSize != numBricks * sizeof(int)) {
+					resourceManagers.mShaderBufferManager.discard(brickIDsHandle);
+					return;
+				}
+
+				// Clear the buffers...
+				resourceManagers.mShaderBufferManager.transact(brickIDsHandle, [numBricks](ShaderBuffer& buffer) {
+					buffer.clear(numBricks * sizeof(int), -1);
+					});
+			}
+
+			renderPasses.computePass([voxelNodesHandle, headerPointersHandle, brickIDsHandle, bricksPerAxis](const ResourceManagers& resourceManagers, const ECS& ecs) {
+				auto activeBrickShaderHandle = resourceManagers.mShaderManager.asyncLoad("ActiveBrickShader", ShaderBuilder{}
+					.setStage(types::shader::Stage::Compute, "vct/activebricks.compute")
+				);
+				if (!resourceManagers.mShaderManager.isValid(activeBrickShaderHandle)) {
+					return;
+				}
+
+				auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>();
+				if (!volumeView) {
+					return;
+				}
+
+				const auto& [_, volume, volumeSpatial] = *volumeView;
+				MakeDefine(VOXELS_PER_BRICK_4);
+				MakeDefine(VOXELS_PER_BRICK_8);
+				MakeDefine(VOXELS_PER_BRICK_16);
+				ShaderDefines shaderDefines;
+				if (volume.mVoxelsPerBrick == 4) {
+					shaderDefines.set(VOXELS_PER_BRICK_4);
+				}
+				else if (volume.mVoxelsPerBrick == 8) {
+					shaderDefines.set(VOXELS_PER_BRICK_8);
+				}
+				else if (volume.mVoxelsPerBrick == 16) {
+					shaderDefines.set(VOXELS_PER_BRICK_16);
+				}
+				else {
+					NEO_LOG_E("Unsupported voxels per brick count %d", volume.mVoxelsPerBrick);
+					return;
+				}
+
+				auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(activeBrickShaderHandle, shaderDefines);
+
+				resolvedShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(voxelNodesHandle), types::shader::Access::Read);
+				resolvedShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerPointersHandle), types::shader::Access::Read);
+				resolvedShader.bindShaderBuffer("ActiveBricks", resourceManagers.mShaderBufferManager.resolve(brickIDsHandle), types::shader::Access::Read);
+				resolvedShader.bindUniform("volumeDimension", volume.mDimension);
+				resolvedShader.bindUniform("bricksPerAxis", bricksPerAxis);
+
+				resolvedShader.dispatch(glm::uvec3(bricksPerAxis));
+				ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
+				}, "Active Bricks");
 		}
 	}
 
 	std::pair<ShaderBufferHandle, ShaderBufferHandle> voxelize(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
 		TRACY_ZONE();
-		return _generateVoxelNodes(renderPasses, resourceManagers, ecs);
+		auto nodeBuffers = _generateVoxelNodes(renderPasses, resourceManagers, ecs);
+		_generateBricks(renderPasses, resourceManagers, ecs, nodeBuffers.first, nodeBuffers.second);
+		return nodeBuffers;
 	}
 
 	void debugVoxelNodes(FramebufferHandle outputHandle, glm::uvec2 viewport, RenderPasses& renderPasses, const ECS& ecs, ShaderBufferHandle headerBuffer, ShaderBufferHandle voxelNodesBuffer, ECS::Entity cameraEntity) {

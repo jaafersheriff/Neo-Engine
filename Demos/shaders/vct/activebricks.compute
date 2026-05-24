@@ -1,0 +1,56 @@
+#include "vct/voxels.glsl"
+
+layout(std430, binding = 0) coherent readonly buffer VoxelNodes {
+	VoxelNode nodes[];
+};
+
+layout(std430, binding = 1) coherent readonly buffer HeaderPointers {
+	int headerPointers[];
+};
+
+layout(std430, binding = 2) coherent writeonly buffer ActiveBricks {
+	int brickIDs[];
+};
+
+uniform int bricksPerAxis; 
+uniform int volumeDimension; 
+
+shared bool sharedBrickIsActive;
+
+#ifdef VOXELS_PER_BRICK_4
+layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
+#elif VOXELS_PER_BRICK_8
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+#elif VOXELS_PER_BRICK_16
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 16) in;
+#endif
+
+void main() {
+	if (gl_LocalInvocationIndex == 0) {
+		sharedBrickIsActive = false;
+	}
+	barrier();
+
+	ivec3 globalVoxelCoord = ivec3(gl_GlobalInvocationID);
+	int header = headerPointers[getFlattenedIndex(globalVoxelCoord, volumeDimension)];
+
+	// In a hashed linked list, a valid pointer means a voxel exists here
+	if (header != -1) {
+		sharedBrickIsActive = true; 
+	}
+	barrier();
+
+	if (gl_LocalInvocationIndex == 0) {
+		ivec3 macroBlockCoord = ivec3(gl_WorkGroupID);
+		
+		// Dynamically calculate the linear index based on the grid size
+        int linearMacroIdx = getFlattenedIndex(macroBlockCoord, bricksPerAxis);
+		
+		if (sharedBrickIsActive) {
+			brickIDs[linearMacroIdx] = 1; // Active, needs a unique ID next
+		} else {
+			brickIDs[linearMacroIdx] = -1; // Empty, skip in pass 2
+		}
+	}
+}
+
