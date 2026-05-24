@@ -49,16 +49,16 @@ namespace neo {
 			>;
 		void bindUniform(const char* name, const UniformVariant& uniform) const;
 		void bindTexture(const char* name, const Texture& texture) const;
-		void bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip = 0) const;
-		void bindShaderBuffer(const char* name, const ShaderBuffer& buffer, types::shader::Access accessType) const;
-		void bindShaderBuffer(const char* name, const Mesh& mesh, types::mesh::VertexType vertexType, types::shader::Access accessType) const;
+		[[nodiscard]] ShaderBarrier bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip = 0) const;
+		[[nodiscard]] ShaderBarrier bindShaderBuffer(const char* name, const ShaderBuffer& buffer, types::shader::Access accessType) const;
+		[[nodiscard]] ShaderBarrier bindShaderBuffer(const char* name, const Mesh& mesh, types::mesh::VertexType vertexType, types::shader::Access accessType) const;
 		// TODO - just make Index into a VertexType and then hide the internal Mesh details
-		void bindMeshIndices(const char* name, const Mesh& mesh, types::shader::Access accessType) const;
+		[[nodiscard]] ShaderBarrier bindMeshIndices(const char* name, const Mesh& mesh, types::shader::Access accessType) const;
 
 		void dispatch(glm::uvec3 workGroups) const;
 
 	private:
-		void _bindShaderBuffer(const char* name, unsigned int glTarget, uint32_t id, types::shader::Access accessType) const;
+		[[nodiscard]] ShaderBarrier _bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const;
 
 		bool isCompute = false;
 		uint32_t mPid = 0;

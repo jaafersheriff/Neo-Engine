@@ -66,6 +66,7 @@ namespace neo {
 				passDefines.set(TRANSPARENT);
 			}
 
+			const glm::mat4 P = ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj();
 			const auto& cameraSpatial = ecs.cGetComponent<SpatialComponent>(cameraEntity);
 			auto&& [lightEntity, _lightLight, light, lightSpatial] = *ecs.getSingleView<MainLightComponent, LightComponent, SpatialComponent>();
 
@@ -81,44 +82,6 @@ namespace neo {
 			}
 			else {
 				NEO_FAIL("Phong light needs a directional or point light component");
-			}
-
-			struct alignas(16) UBO {
-				glm::vec4 camPos;
-				glm::vec4 lightCol;
-				// DIRECTIONAL_LIGHT
-				glm::vec4 lightDir;
-				// POINT_LIGHT
-				glm::vec4 lightPos;
-				float lightRadiance;
-				int pad0;
-				int pad1;
-				int pad2;
-			};
-			UBO uboData;
-			ShaderBufferHandle uboHandle;
-			{
-				TRACY_GPUN("Update Phong UBO");
-				uboData.camPos = glm::vec4(cameraSpatial->getPosition(), 1.f);
-				uboData.lightCol = glm::vec4(light.mColor, 1.f);
-				if (directionalLight) {
-					uboData.lightDir = glm::vec4(-lightSpatial.getLookDir(), 0.f);
-				}
-				if (pointLight) {
-					uboData.lightPos = glm::vec4(lightSpatial.getPosition(), 1.f);
-					uboData.lightRadiance = light.mIntensity;
-				}
-				uboHandle = resourceManagers.mShaderBufferManager.asyncLoad("Phong UBO", ShaderBufferLoadDetails{
-					types::buffer::Target::Uniform,
-					sizeof(UBO),
-					reinterpret_cast<uint8_t*>(&uboData)
-					});
-				if (!resourceManagers.mShaderBufferManager.isValid(uboHandle)) {
-					return;
-				}
-				resourceManagers.mShaderBufferManager.transact(uboHandle, [uboData](ShaderBuffer& buffer) {
-					buffer.update(sizeof(UBO), reinterpret_cast<const uint8_t*>(&uboData));
-					});
 			}
 
 			ShaderDefines drawDefines(passDefines);
@@ -148,13 +111,6 @@ namespace neo {
 				auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
 				resolvedShader.bind();
 
-				// UBO 
-				resolvedShader.bindShaderBuffer("UBO", resourceManagers.mShaderBufferManager.resolve(uboHandle), types::shader::Access::Read);
-
-				// These are used by vert, no ubo ;(
-				resolvedShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
-				resolvedShader.bindUniform("V", cameraSpatial->getView());
-
 				resolvedShader.bindUniform("albedo", material.mAlbedoColor);
 				if (resourceManagers.mTextureManager.isValid(material.mAlbedoMap)) {
 					resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material.mAlbedoMap));
@@ -162,6 +118,21 @@ namespace neo {
 
 				if (resourceManagers.mTextureManager.isValid(material.mNormalMap)) {
 					resolvedShader.bindTexture("normalMap", resourceManagers.mTextureManager.resolve(material.mNormalMap));
+				}
+
+				// UBO candidates
+				{
+					resolvedShader.bindUniform("P", P);
+					resolvedShader.bindUniform("V", cameraSpatial->getView());
+					resolvedShader.bindUniform("camPos", cameraSpatial->getPosition());
+					resolvedShader.bindUniform("lightCol", light.mColor);
+					if (directionalLight) {
+						resolvedShader.bindUniform("lightDir", -lightSpatial.getLookDir());
+					}
+					if (pointLight) {
+						resolvedShader.bindUniform("lightPos", lightSpatial.getPosition());
+						resolvedShader.bindUniform("lightRadiance", light.mIntensity);
+					}
 				}
 
 				const auto& drawSpatial = view.get<const SpatialComponent>(entity);

@@ -13,8 +13,6 @@ namespace neo {
 				return GL_SHADER_IMAGE_ACCESS_BARRIER_BIT;
 			case types::shader::Barrier::StorageBuffer:
 				return GL_SHADER_STORAGE_BARRIER_BIT;
-			case types::shader::Barrier::UniformBuffer:
-				return GL_UNIFORM_BARRIER_BIT;
 			default:
 				NEO_FAIL("Invalid barrier type");
 				return 0;
