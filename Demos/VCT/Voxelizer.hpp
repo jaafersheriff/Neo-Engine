@@ -37,9 +37,10 @@ namespace VCT {
 			{
 				TRACY_ZONEN("VoxelNodes");
 				struct alignas(16) VoxelNode {
-					float albedoR, albedoG, albedoB, abledoA; // TODO - pack
-					float normalX, normalY, normalG; // TODO - pack
-					int header;
+					uint32_t albedo;
+					uint32_t normal; // w is unused hmmm
+					uint32_t emissive;
+					int32_t header;
 				};
 
 				voxelNodesHandle = resourceManagers.mShaderBufferManager.asyncLoad("VolumeNodes", ShaderBufferLoadDetails{
@@ -141,7 +142,6 @@ namespace VCT {
 
 						const auto& meshView = ecs.getView<
 							const VoxelizeComponent,
-							const OpaqueComponent, // Only want to voxelize opaque objects for now
 							const MeshComponent,
 							const MaterialComponent,
 							const SpatialComponent>();
@@ -161,9 +161,11 @@ namespace VCT {
 
 							const auto& material = ecs.cGetComponent<MaterialComponent>(entity);
 							auto innerBind = [&](auto& shader) {
+								shader.bind();
 								shader.bindUniform("M", meshSpatial->getModelMatrix());
 								shader.bindUniform("N", meshSpatial->getNormalMatrix());
 								shader.bindUniform("albedo", material->mAlbedoColor);
+								shader.bindUniform("emissive", material->mEmissiveFactor);
 								if (resourceManagers.mTextureManager.isValid(material->mAlbedoMap)) {
 									shader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
 								}
@@ -213,7 +215,7 @@ namespace VCT {
 		}
 
 		renderPasses.renderPass(outputHandle, viewport, blendState, [cameraEntity, voxelNodesBuffer, headerBuffer](const ResourceManagers& resourceManagers, const ECS& ecs) {
-
+			TRACY_GPUN("Debug VoxelNodes");
 			if (!resourceManagers.mShaderBufferManager.isValid(voxelNodesBuffer)
 				|| !resourceManagers.mShaderBufferManager.isValid(headerBuffer)) {
 				return;

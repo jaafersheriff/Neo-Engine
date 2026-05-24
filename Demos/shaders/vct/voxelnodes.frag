@@ -13,9 +13,9 @@ uniform int numVoxels;
 uniform int numNodes;
 
 uniform vec4 albedo;
-#ifdef ALBEDO_MAP
+uniform vec3 emissive;
+
 layout(binding = 0) uniform sampler2D albedoMap;
-#endif
 
 layout(std430, binding = 1) coherent buffer VoxelNodes {
 	VoxelNode nodes[];
@@ -45,22 +45,18 @@ void main() {
 	vec4 fAlbedo = albedo;
 #ifdef ALBEDO_MAP
 	fAlbedo *= srgbToLinear(texture(albedoMap, fragTex));
-#endif
 	alphaDiscard(fAlbedo.a);
+#endif
 
 	int oldHeader = atomicExchange(headerPointers[flattenedIndex], nodeIdx);
-	nodes[nodeIdx].aR = fAlbedo.r;
-	nodes[nodeIdx].aG = fAlbedo.g;
-	nodes[nodeIdx].aB = fAlbedo.b;
-	nodes[nodeIdx].aA = fAlbedo.a;
-	vec3 n = normalize(fragNor);
-	nodes[nodeIdx].nX = n.x;
-	nodes[nodeIdx].nY = n.y;
-	nodes[nodeIdx].nZ = n.z;
+	nodes[nodeIdx].albedo = packRGBA8(fAlbedo);
+	nodes[nodeIdx].emissive = packR11G11B10(emissive);
+	nodes[nodeIdx].normal = packNormal(fragNor);
 	nodes[nodeIdx].header = oldHeader;
 
 	// TODO - remove heheheheheh
 	// memoryBarrierBuffer();
 
 	outColor = vec3(targetVoxelIndex) / float(volumeDimension);
+	// outColor = fAlbedo.rgb;
 }

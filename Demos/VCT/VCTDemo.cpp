@@ -242,6 +242,32 @@ namespace VCT {
 					builder.attachComponent<ShadowCasterRenderComponent>();
 					ecs.submitEntity(std::move(builder));
 				});
+
+			auto createSphere = [&](const MaterialComponent& material, glm::vec3 pos, glm::vec3 scale) {
+				ecs.submitEntity(std::move(ECS::EntityBuilder{}
+					.attachComponent<TagComponent>("Sphere")
+					.attachComponent<MeshComponent>(MeshHandle("sphere"))
+					.attachComponent<MaterialComponent>(material)
+					.attachComponent<SpatialComponent>(pos, scale)
+					.attachComponent<BoundingBoxComponent>(glm::vec3(-0.5f), glm::vec3(0.5f))
+					.attachComponent<ForwardPBRRenderComponent>()
+					.attachComponent<OpaqueComponent>()
+					.attachComponent<ShadowCasterRenderComponent>()
+					.attachComponent<VoxelizeComponent>()
+				));
+			};
+			{
+				MaterialComponent material;
+				material.mAlbedoColor = glm::vec4(1.0);
+				material.mEmissiveFactor = glm::vec3(10.0, 0.0, 10.0);
+				createSphere(material, glm::vec3(-15.35f, 1.8f, -5.8f), glm::vec3(1.0f));
+			}
+			{
+				MaterialComponent material;
+				material.mAlbedoColor = glm::vec4(1.0);
+				material.mEmissiveFactor = glm::vec3(0.0, 10.0, 10.0);
+				createSphere(material, glm::vec3(-15.35f, 1.8f, 5.15f), glm::vec3(1.0f));
+			}
 		}
 	}
 
@@ -331,7 +357,7 @@ namespace VCT {
 		TextureHandle sceneColor = resourceManagers.mTextureManager.asyncLoad("Scene Color",
 			TextureBuilder{}
 			.setFormat(TextureFormat{ types::texture::Target::Texture2D,
-				types::InternalFormats::RGB16_UNORM,
+				types::InternalFormats::RGB16_F,
 				})
 			.setDimension(glm::u16vec3(viewport.mSize.x, viewport.mSize.y, 0))
 		);
@@ -361,6 +387,7 @@ namespace VCT {
 		}
 		else {
 			drawForwardPBR<OpaqueComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);
+			drawForwardPBR<AlphaTestComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);
 		}
 
 		auto previousHDRColorHandle = resourceManagers.mFramebufferManager.asyncLoad(
