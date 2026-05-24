@@ -59,8 +59,9 @@ namespace neo {
 			);
 			if (resourceManagers.mShaderManager.isValid(histogramClearHandle)) {
 				auto& clearShader = resourceManagers.mShaderManager.resolveDefines(histogramClearHandle, {});
-				auto imageBarrier2 = clearShader.bindImageTexture("histogram", resourceManagers.mTextureManager.resolve(histogramHandle), types::shader::Access::Write);
+				clearShader.bindImageTexture("histogram", resourceManagers.mTextureManager.resolve(histogramHandle), types::shader::Access::Write);
 				clearShader.dispatch({ 16, 16, 1 });
+				ShaderBarrier barrier(types::shader::Barrier::ImageAccess);
 			}
 		}, "Histogram clear");
 
@@ -79,9 +80,10 @@ namespace neo {
 				populateShader.bindUniform("inputResolution", glm::uvec2(previousFrame.mWidth, previousFrame.mHeight));
 				populateShader.bindUniform("minLogLum", params.mMinLogLuminance);
 				populateShader.bindUniform("inverseLogLumRange", 1.f / (params.mMaxLogLuminance - params.mMinLogLuminance + util::EP));
-				auto imageBarrier1 = populateShader.bindImageTexture("previousHDRColor", previousFrame, types::shader::Access::Read);
-				auto imageBarrier2 = populateShader.bindImageTexture("histogram", resourceManagers.mTextureManager.resolve(histogramHandle), types::shader::Access::ReadWrite);
+				populateShader.bindImageTexture("previousHDRColor", previousFrame, types::shader::Access::Read);
+				populateShader.bindImageTexture("histogram", resourceManagers.mTextureManager.resolve(histogramHandle), types::shader::Access::ReadWrite);
 				populateShader.dispatch({ std::ceil(previousFrame.mWidth / 16.f), std::ceil(previousFrame.mHeight / 16.f), 1 });
+				ShaderBarrier barrier(types::shader::Barrier::ImageAccess);
 			}
 		}, "Histogram populate");
 
@@ -113,9 +115,10 @@ namespace neo {
 				averageShader.bindUniform("minLogLum", params.mMinLogLuminance);
 				averageShader.bindUniform("logLumRange", params.mMaxLogLuminance - params.mMinLogLuminance);
 				averageShader.bindUniform("timeCoefficient", dt);
-				auto imageBarrier1 = averageShader.bindImageTexture("histogram", resourceManagers.mTextureManager.resolve(histogramHandle), types::shader::Access::Read);
-				auto imageBarrier2 = averageShader.bindImageTexture("dst", resourceManagers.mTextureManager.resolve(outputTexture), types::shader::Access::Write);
+				averageShader.bindImageTexture("histogram", resourceManagers.mTextureManager.resolve(histogramHandle), types::shader::Access::Read);
+				averageShader.bindImageTexture("dst", resourceManagers.mTextureManager.resolve(outputTexture), types::shader::Access::Write);
 				averageShader.dispatch({ 1, 1, 1 });
+				ShaderBarrier barrier(types::shader::Barrier::ImageAccess);
 			}
 		}, "Histogram average");
 

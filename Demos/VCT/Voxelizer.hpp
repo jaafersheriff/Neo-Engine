@@ -115,30 +115,9 @@ namespace VCT {
 						glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
 						glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
 
-						ShaderDefines defines;
+						ShaderDefines albedoDefines;
 						MakeDefine(ALBEDO_MAP);
-						defines.set(ALBEDO_MAP);
-
-						auto& albedoShader = resourceManagers.mShaderManager.resolveDefines(voxelNodeShaderHandle, {});
-						auto& albedoMapShader = resourceManagers.mShaderManager.resolveDefines(voxelNodeShaderHandle, defines);
-						auto outerBind = [&](auto& shader) {
-							shader.bind();
-							shader.bindUniform("volumeMin", glm::min(volumeWorldMin, volumeWorldMax));
-							shader.bindUniform("volumeMax", glm::max(volumeWorldMin, volumeWorldMax));
-							shader.bindUniform("volumeDimension", volume.mDimension);
-							shader.bindUniform("numVoxels", numVoxels);
-							shader.bindUniform("numNodes", numNodes);
-							shader.bindUniform("P", volumeCamera.getProj());
-							shader.bindUniform("V", volumeSpatial.getView());
-						};
-						outerBind(albedoShader);
-						outerBind(albedoMapShader);
-						auto bufferBarrierA  = albedoShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(voxelNodesHandle), types::shader::Access::ReadWrite);
-						auto bufferBarrierB  = albedoMapShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(voxelNodesHandle), types::shader::Access::ReadWrite);
-						auto headerBarrierA  = albedoShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerPointersHandle), types::shader::Access::ReadWrite);
-						auto headerBarrierB  = albedoMapShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerPointersHandle), types::shader::Access::ReadWrite);
-						auto counterBarrierA = albedoShader.bindShaderBuffer("NodeCounter", resourceManagers.mShaderBufferManager.resolve(atomicCounterHandle), types::shader::Access::ReadWrite);
-						auto counterBarrierB = albedoMapShader.bindShaderBuffer("NodeCounter", resourceManagers.mShaderBufferManager.resolve(atomicCounterHandle), types::shader::Access::ReadWrite);
+						albedoDefines.set(ALBEDO_MAP);
 
 						const auto& meshView = ecs.getView<
 							const VoxelizeComponent,
@@ -146,7 +125,6 @@ namespace VCT {
 							const MaterialComponent,
 							const SpatialComponent>();
 						for (auto entity : meshView) {
-							defines.reset();
 
 							auto meshSpatial = ecs.cGetComponent<SpatialComponent>(entity);
 							if (auto meshBB = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
@@ -160,20 +138,33 @@ namespace VCT {
 							}
 
 							const auto& material = ecs.cGetComponent<MaterialComponent>(entity);
-							auto innerBind = [&](auto& shader) {
-								shader.bind();
-								shader.bindUniform("M", meshSpatial->getModelMatrix());
-								shader.bindUniform("N", meshSpatial->getNormalMatrix());
-								shader.bindUniform("albedo", material->mAlbedoColor);
-								shader.bindUniform("emissive", material->mEmissiveFactor);
-								if (resourceManagers.mTextureManager.isValid(material->mAlbedoMap)) {
-									shader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
-								}
-							};
 
-							innerBind(resourceManagers.mTextureManager.isValid(material->mAlbedoMap) ? albedoMapShader : albedoShader);
+							auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(voxelNodeShaderHandle, resourceManagers.mTextureManager.isValid(material->mAlbedoMap) ? albedoDefines : ShaderDefines{});
+
+							resolvedShader.bindShaderBuffer("NodeCounter", resourceManagers.mShaderBufferManager.resolve(atomicCounterHandle), types::shader::Access::ReadWrite);
+							resolvedShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(voxelNodesHandle), types::shader::Access::ReadWrite);
+							resolvedShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerPointersHandle), types::shader::Access::ReadWrite);
+
+							resolvedShader.bindUniform("volumeMin", glm::min(volumeWorldMin, volumeWorldMax));
+							resolvedShader.bindUniform("volumeMax", glm::max(volumeWorldMin, volumeWorldMax));
+							resolvedShader.bindUniform("volumeDimension", volume.mDimension);
+							resolvedShader.bindUniform("numVoxels", numVoxels);
+							resolvedShader.bindUniform("numNodes", numNodes);
+							resolvedShader.bindUniform("P", volumeCamera.getProj());
+							resolvedShader.bindUniform("V", volumeSpatial.getView());
+
+							resolvedShader.bindUniform("M", meshSpatial->getModelMatrix());
+							resolvedShader.bindUniform("N", meshSpatial->getNormalMatrix());
+							resolvedShader.bindUniform("albedo", material->mAlbedoColor);
+							resolvedShader.bindUniform("emissive", material->mEmissiveFactor);
+							if (resourceManagers.mTextureManager.isValid(material->mAlbedoMap)) {
+								resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
+							}
+
 							resourceManagers.mMeshManager.resolve(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle).draw();
 						}
+
+						ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
 					}, "Generate VoxelNodes");
 			}
 
@@ -248,8 +239,8 @@ namespace VCT {
 			voxelNodeShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
 			voxelNodeShader.bindUniform("cameraPos", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getPosition());
 			voxelNodeShader.bindUniform("cameraDir", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getLookDir());
-			auto nodesBarrier = voxelNodeShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(voxelNodesBuffer), types::shader::Access::Read);
-			auto headerBarrier = voxelNodeShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerBuffer), types::shader::Access::Read);
+			voxelNodeShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(voxelNodesBuffer), types::shader::Access::Read);
+			voxelNodeShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerBuffer), types::shader::Access::Read);
 
 			auto& mesh = resourceManagers.mMeshManager.resolve(MeshHandle("cube"));
 			voxelNodeShader.bindUniform("M", volumeSpatial.getModelMatrix());

@@ -375,37 +375,39 @@ namespace neo {
 		glUniform1i(_getUniform(name), bindingLoc);
 	}
 
-	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip) const {
+	void ResolvedShaderInstance::bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip) const {
+		NEO_UNUSED(accessType);
 		GLint bindingLoc = 0;
 		auto binding = mBindings.find(HashedString(name));
 		if (binding != mBindings.end()) {
 			bindingLoc = binding->second;
 		}
 		glBindImageTexture(bindingLoc, texture.mTextureID, mip, GL_FALSE, 0, _getGLAccessType(accessType), GLHelper::getGLInternalFormat(texture.mFormat.mInternalFormat));
-		return ShaderBarrier(accessType > types::shader::Access::Read ? types::shader::Barrier::ImageAccess : types::shader::Barrier::None); // I'm really trusting the compiler to use copy elision here
+		// return ShaderBarrier(accessType > types::shader::Access::Read ? types::shader::Barrier::ImageAccess : types::shader::Barrier::None); // I'm really trusting the compiler to use copy elision here
 	}
 
-	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindShaderBuffer(const char* name, const ShaderBuffer& buffer, types::shader::Access accessType) const {
+	void ResolvedShaderInstance::bindShaderBuffer(const char* name, const ShaderBuffer& buffer, types::shader::Access accessType) const {
 		return _bindShaderBuffer(name, buffer.mBufferID, accessType);
 	}
 
-	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindShaderBuffer(const char* name, const Mesh& mesh, types::mesh::VertexType vertexType, types::shader::Access accessType) const {
+	void ResolvedShaderInstance::bindShaderBuffer(const char* name, const Mesh& mesh, types::mesh::VertexType vertexType, types::shader::Access accessType) const {
 		return _bindShaderBuffer(name, mesh.getVBO(vertexType).vboID, accessType);
 	}
 
-	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindMeshIndices(const char* name, const Mesh& mesh, types::shader::Access accessType) const {
+	void ResolvedShaderInstance::bindMeshIndices(const char* name, const Mesh& mesh, types::shader::Access accessType) const {
 		NEO_ASSERT(mesh.hasIBO(), "Trying to bind mesh indices but mesh doesn't have an IBO");
 		return _bindShaderBuffer(name, mesh.getIBO().vboID, accessType);
 	}
 
-	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::_bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const {
+	void ResolvedShaderInstance::_bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const {
+		NEO_UNUSED(accessType);
 		GLint bindingLoc = 0;
 		auto binding = mBindings.find(HashedString(name));
 		if (binding != mBindings.end()) {
 			bindingLoc = binding->second;
 		}
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingLoc, id);
-		return ShaderBarrier(accessType > types::shader::Access::Read ? types::shader::Barrier::StorageBuffer : types::shader::Barrier::None); // I'm really trusting the compiler to use copy elision here
+		// return ShaderBarrier(accessType > types::shader::Access::Read ? types::shader::Barrier::StorageBuffer : types::shader::Barrier::None); // I'm really trusting the compiler to use copy elision here
 	}
 
 }
