@@ -323,7 +323,7 @@ namespace VCT {
 		return VoxelizationResult{headerPointersHandle, voxelNodesHandle, brickIDsHandle, brickCounterHandle};
 	}
 
-	void debugVoxelNodes(FramebufferHandle outputHandle, glm::uvec2 viewport, RenderPasses& renderPasses, const ECS& ecs, VoxelizationResult buffers, ECS::Entity cameraEntity) {
+	void debugVoxelNodes(FramebufferHandle outputHandle, glm::uvec2 viewport, RenderPasses& renderPasses, const ECS& ecs, VoxelizationResult buffers, bool debugBricks, ECS::Entity cameraEntity) {
 		TRACY_ZONE();
 
 		RenderState blendState;
@@ -352,7 +352,7 @@ namespace VCT {
 		}
 		blendState.mWireframeable = false;
 
-		renderPasses.renderPass(outputHandle, viewport, blendState, [cameraEntity, buffers](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputHandle, viewport, blendState, [cameraEntity, buffers, debugBricks](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Debug VoxelNodes");
 			if (!resourceManagers.mShaderBufferManager.isValid(buffers.mVoxelNodes)
 				|| !resourceManagers.mShaderBufferManager.isValid(buffers.mHeaderPointers)
@@ -375,7 +375,13 @@ namespace VCT {
 				return;
 			}
 
-			auto voxelNodeShader = resourceManagers.mShaderManager.resolveDefines(voxelNodeDebugShaderHandle, {});
+			MakeDefine(DEBUG_BRICKS);
+			ShaderDefines defines;
+			if (debugBricks) {
+				defines.set(DEBUG_BRICKS);
+			}
+
+			auto voxelNodeShader = resourceManagers.mShaderManager.resolveDefines(voxelNodeDebugShaderHandle, defines);
 			voxelNodeShader.bind();
 
 			glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));

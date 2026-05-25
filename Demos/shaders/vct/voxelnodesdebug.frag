@@ -30,9 +30,7 @@ layout(std430, binding = 3) coherent readonly buffer BrickCounter {
 
 out vec4 outColor;
 
-#define DEBUG_BRICKS 1
-
-#if DEBUG_BRICKS
+#ifdef DEBUG_BRICKS
 vec3 brickColor(int id) {
 	if (id < 0) return vec3(0.0);
 
@@ -80,7 +78,7 @@ void main() {
 	ivec3 stepDir = ivec3(sign(rayDir));
 
 	// compute starting index
-#if DEBUG_BRICKS
+#ifdef DEBUG_BRICKS
 	vec3 brickSize = (volumeMax - volumeMin) / float(bricksPerAxis); // brick size world space
 	vec3 volumePos = (pos - volumeMin) / (volumeMax - volumeMin); // start pos volume space
 	ivec3 currentBrick = ivec3(clamp(floor(volumePos * float(bricksPerAxis)), vec3(0), vec3(bricksPerAxis - 1)));
@@ -126,7 +124,7 @@ void main() {
 		// Look up voxel contents
 		int index = getFlattenedIndex(currentIndex, maxDimension);
 
-#if DEBUG_BRICKS
+#ifdef DEBUG_BRICKS
 		int brickID = brickIDs[index];
 		if (brickID >= 0) {
 			// Active brick → show its assigned ID color

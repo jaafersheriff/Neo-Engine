@@ -318,6 +318,9 @@ namespace VCT {
 		}
 
 		ImGui::Checkbox("Debug Draw", &mDebugDraw);
+		if (mDebugDraw) {
+			ImGui::Checkbox("Debug bricks", &mDebugBricks);
+		}
 	}
 
 	void Demo::update(ECS& ecs, ResourceManagers&) {
@@ -383,7 +386,7 @@ namespace VCT {
 
 		if (mDebugDraw) {
 			drawWireframe<VolumeComponent>(sceneTargetHandle, viewport.mSize, renderPasses, cameraEntity);
-			debugVoxelNodes(sceneTargetHandle, viewport.mSize, renderPasses, ecs, voxelizeBuffers, cameraEntity);
+			debugVoxelNodes(sceneTargetHandle, viewport.mSize, renderPasses, ecs, voxelizeBuffers, mDebugBricks, cameraEntity);
 		}
 		else {
 			drawForwardPBR<OpaqueComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);

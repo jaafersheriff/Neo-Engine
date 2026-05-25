@@ -19,6 +19,7 @@ namespace VCT {
 
 	private:
 		bool mDebugDraw = false;
+		bool mDebugBricks = false;
 		AutoExposureParameters mAutoExposureParams = {
 			-8.f,
 			1.f,
