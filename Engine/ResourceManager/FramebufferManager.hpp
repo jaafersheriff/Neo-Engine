@@ -120,7 +120,7 @@ namespace neo {
 		void clear(const TextureManager& textureManager);
 		void tick(const TextureManager& textureManager);
 
-		void imguiEditor(std::function<void(const TextureHandle&)> textureFunc, TextureManager& textureManager);
+		void imguiEditor(std::function<void(const TextureHandle&, int, int)> textureFunc, TextureManager& textureManager);
 
 		// TODO - missing mutexes to match ResourceManagerIntereface, but that's not really a problem because this resource manager
 		// doesn't interop with anything threaded - yet. Just noting the divergence 

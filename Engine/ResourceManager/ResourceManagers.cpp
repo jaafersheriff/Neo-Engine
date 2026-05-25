@@ -23,7 +23,7 @@ namespace neo {
 
 	void ResourceManagers::_imguiEditor() {
 		TRACY_ZONE();
-		auto textureFunc = [&](const TextureHandle& textureHandle) {
+		auto textureFunc = [&](const TextureHandle& textureHandle, int arrayLayer = 0, int mip = 0) {
 			if (!mTextureManager.isValid(textureHandle)) {
 				ImGui::Text("Invalid texture");
 			}
@@ -32,18 +32,18 @@ namespace neo {
 				const float scale = 175.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
 				ImGui::TextureDescriptor descriptor;
 				descriptor.mTextureHandle = textureHandle.mHandle;
+				descriptor.mArrayLayer = arrayLayer;
+				descriptor.mMipLevel = mip;
 				ImGui::PushID(textureHandle.mHandle + static_cast<int>(util::genRandom()));
 
 				switch (texture.mFormat.mTarget) {
 				case types::texture::Target::Texture2D:
 				case types::texture::Target::Texture2DArray:
 					if (texture.mDepth > 1) {
-						int arrayLayer = descriptor.mArrayLayer;
 						ImGui::SliderInt("Array Layer", &arrayLayer, 0, texture.mDepth - 1);
 						descriptor.mArrayLayer = arrayLayer;
 					}
 					if (texture.mFormat.mMipCount > 1) {
-						int mip = descriptor.mMipLevel;
 						ImGui::SliderInt("Mip Level", &mip, 0, texture.mFormat.mMipCount - 1);
 						descriptor.mMipLevel = mip;;
 					}

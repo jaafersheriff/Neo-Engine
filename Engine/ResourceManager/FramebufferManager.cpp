@@ -170,8 +170,8 @@ namespace neo {
 			if (pfb.mResource.mFrameCount == 0) {
 				discardQueue.emplace_back(id);
 				if (!pfb.mResource.mExternallyOwned) {
-					for (auto& texId : pfb.mResource.mFramebuffer.mTextures) {
-						textureManager.discard(texId);
+					for (auto& attachment : pfb.mResource.mFramebuffer.mAttachments) {
+						textureManager.discard(attachment.mTextureHandle);
 					}
 				}
 				pfb.mResource.mFramebuffer.destroy();
@@ -190,7 +190,7 @@ namespace neo {
 		}
 	}
 
-	void FramebufferManager::imguiEditor(std::function<void(const TextureHandle&)> textureFunc, TextureManager& textureManager) {
+	void FramebufferManager::imguiEditor(std::function<void(const TextureHandle&, int, int)> textureFunc, TextureManager& textureManager) {
 		if (ImGui::BeginTable("##Framebuffers", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_PreciseWidths | ImGuiTableFlags_SizingStretchSame)) {
 			ImGui::TableSetupColumn("Name/Size", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending);
 			ImGui::TableSetupColumn("Attachments");
@@ -204,17 +204,17 @@ namespace neo {
 				else {
 					ImGui::Text(pfb.mResource.mExternallyOwned ? "%d" : "*%d", id);
 				}
-				if (textureManager.isValid(pfb.mResource.mFramebuffer.mTextures[0])) {
-					auto& firstTex = textureManager.resolve(pfb.mResource.mFramebuffer.mTextures[0]);
+				if (textureManager.isValid(pfb.mResource.mFramebuffer.mAttachments[0].mTextureHandle)) {
+					auto& firstTex = textureManager.resolve(pfb.mResource.mFramebuffer.mAttachments[0].mTextureHandle);
 					ImGui::Text("[%d, %d]", firstTex.mWidth, firstTex.mHeight);
 				}
 				ImGui::TableSetColumnIndex(1);
-				for (auto texId = pfb.mResource.mFramebuffer.mTextures.begin(); texId < pfb.mResource.mFramebuffer.mTextures.end(); texId++) {
-					if (textureManager.isValid(*texId)) {
-						ImGui::PushID(id + texId->mHandle);
-						textureFunc(*texId);
+				for (auto attachmentIt = pfb.mResource.mFramebuffer.mAttachments.begin(); attachmentIt < pfb.mResource.mFramebuffer.mAttachments.end(); attachmentIt++) {
+					if (textureManager.isValid(attachmentIt->mTextureHandle)) {
+						ImGui::PushID(id + attachmentIt->mTextureHandle.mHandle);
+						textureFunc(attachmentIt->mTextureHandle, 0, attachmentIt->mMip);
 						ImGui::PopID();
-						if (texId != std::prev(pfb.mResource.mFramebuffer.mTextures.end())) {
+						if (attachmentIt != std::prev(pfb.mResource.mFramebuffer.mAttachments.end())) {
 							ImGui::SameLine();
 						}
 					}
@@ -228,8 +228,8 @@ namespace neo {
 		mQueue.clear();
 		mCache.each([&textureManager](BackedResource<PooledFramebuffer>& pfb) {
 			if (!pfb.mResource.mExternallyOwned) {
-				for (auto& textureHandle : pfb.mResource.mFramebuffer.mTextures) {
-					textureManager.discard(textureHandle);
+				for (auto& attachment : pfb.mResource.mFramebuffer.mAttachments) {
+					textureManager.discard(attachment.mTextureHandle);
 				}
 			}
 			pfb.mResource.mFramebuffer.destroy();

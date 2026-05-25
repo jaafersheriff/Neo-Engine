@@ -52,7 +52,7 @@ namespace neo {
 		}, "Tonemap");
 
 		if (resourceManagers.mFramebufferManager.isValid(tonemapTargetHandle)) {
-			return resourceManagers.mFramebufferManager.resolve(tonemapTargetHandle).mTextures[0];
+			return resourceManagers.mFramebufferManager.resolve(tonemapTargetHandle).mAttachments[0].mTextureHandle;
 		}
 
 		return NEO_INVALID_HANDLE;

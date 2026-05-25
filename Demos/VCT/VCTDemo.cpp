@@ -404,7 +404,7 @@ namespace VCT {
 
 		TextureHandle averageLuminance = NEO_INVALID_HANDLE;
 		if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
-			averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mTextures[0], mAutoExposureParams);
+			averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mAttachments[0].mTextureHandle, mAutoExposureParams);
 		}
 		TextureHandle tonemappedHandle = tonemap(renderPasses, resourceManagers, viewport.mSize, sceneColor, averageLuminance);
 

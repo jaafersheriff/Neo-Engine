@@ -14,7 +14,11 @@ namespace neo {
 
 		uint32_t mFBOID = 0;
 		int mColorAttachments = 0;
-		std::vector<TextureHandle> mTextures;
+		struct Attachment {
+			TextureHandle mTextureHandle = NEO_INVALID_HANDLE;
+			int mMip = 0;
+		};
+		std::vector<Attachment> mAttachments;
 
 		void bind() const;
 		void clear(glm::vec4 clearColor, types::framebuffer::AttachmentBits clearFlags) const;
@@ -23,7 +27,7 @@ namespace neo {
 		void disableDraw() const;
 		void disableRead() const;
 
-		void attachTexture(TextureHandle id, const Texture& texture, const types::framebuffer::AttachmentTarget& target, uint8_t mip);
+		void attachTexture(TextureHandle textureHandle, const Texture& texture, const types::framebuffer::AttachmentTarget& target, uint8_t mip);
 		void initDrawBuffers();
 		void destroy();
 	};

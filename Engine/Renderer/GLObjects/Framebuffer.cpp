@@ -93,7 +93,7 @@ namespace neo {
 		glReadBuffer(GL_NONE);
 	}
 
-	void Framebuffer::attachTexture(TextureHandle id, const Texture& texture, const types::framebuffer::AttachmentTarget& target, uint8_t mip) {
+	void Framebuffer::attachTexture(TextureHandle textureHandle, const Texture& texture, const types::framebuffer::AttachmentTarget& target, uint8_t mip) {
 		types::framebuffer::AttachmentBit attachment;
 		switch (TextureFormat::deriveBaseFormat(texture.mFormat.mInternalFormat)) {
 			case types::texture::BaseFormats::Depth:
@@ -108,7 +108,7 @@ namespace neo {
 				break;
 		}
 
-		mTextures.emplace_back(id);
+		mAttachments.emplace_back(Attachment{ textureHandle, mip });
 		bind();
 		glFramebufferTexture2D(GL_FRAMEBUFFER, _getGLAttachment(attachment, mColorAttachments - 1), _getGLTarget(target), texture.mTextureID, mip);
 		CHECK_GL_FRAMEBUFFER();
