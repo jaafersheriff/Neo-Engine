@@ -127,16 +127,8 @@ namespace neo {
 		const uint32_t kb = 1024;
 		const uint32_t mb = kb * 1024;
 		mCache.each([kb, mb](const ShaderBufferHandle id, const BackedResource<ShaderBuffer>& buffer) {
-			char buf[32];
-			if (buffer.mResource.mByteSize >= mb) {
-				std::snprintf(buf, sizeof(buf), "%.2f MB", buffer.mResource.mByteSize / static_cast<double>(mb));
-			}
-			else if (buffer.mResource.mByteSize >= kb) {
-				std::snprintf(buf, sizeof(buf), "%.2f KB", buffer.mResource.mByteSize / static_cast<double>(kb));
-			}
-			else {
-				std::snprintf(buf, sizeof(buf), "%u Bytes", buffer.mResource.mByteSize);
-			}
+			char buf[64];
+			util::stringifyByteSize(buffer.mResource.mByteSize, buf, sizeof(buf));
 
 			if (buffer.mDebugName.has_value()) {
 				ImGui::Text("%s (%s)", buffer.mDebugName->c_str(), buf);

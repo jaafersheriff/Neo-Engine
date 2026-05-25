@@ -331,6 +331,16 @@ namespace VCT {
 				.setDimension(glm::u16vec3(volume.mVoxelsPerBrick, volume.mVoxelsPerBrick, volume.mVoxelsPerBrick * numBricks))
 			);
 
+			if (!resourceManagers.mTextureManager.isValid(bricksTextureHandle)) {
+				return;
+			}
+
+			// Resolution changed, destroy everything and try again next frame
+			if (resourceManagers.mTextureManager.resolve(bricksTextureHandle).mDepth != volume.mVoxelsPerBrick * numBricks) {
+				resourceManagers.mTextureManager.discard(bricksTextureHandle);
+				return;
+			}
+
 			NEO_UNUSED(renderPasses);
 			NEO_UNUSED(brickIDsHandle);
 			NEO_UNUSED(brickCounterHandle);

@@ -140,13 +140,7 @@ namespace neo {
 		}
 	}
 
-	// Texture::Texture(TextureFormat format, uint16_t dimension, const std::optional<std::string>& debugName, const void* data) : 
-	// 	Texture(format, glm::u16vec3(dimension, dimension, 0), debugName, data) {}
-
-	// Texture::Texture(TextureFormat format, glm::u16vec2 dimension, const std::optional<std::string>& debugName, const void* data) :
-	// 	Texture(format, glm::u16vec3(dimension.x, dimension.y, 0), debugName, data) {}
-
-	Texture::Texture(TextureFormat format, glm::u16vec3 dimension, uint16_t arraySize, const std::optional<std::string>& debugName, const void* data) :
+	Texture::Texture(TextureFormat format, glm::u16vec3 dimension, const std::optional<std::string>& debugName, const void* data) :
 		mFormat(format) {
 		switch (mFormat.mTarget) {
 		case types::texture::Target::Texture1D:
@@ -154,7 +148,7 @@ namespace neo {
 			break;
 		case types::texture::Target::Texture1DArray:
 			mWidth = dimension.x;
-			mDepth = arraySize;
+			mDepth = dimension.z;
 			break;
 		case types::texture::Target::Texture2D:
 			mWidth = dimension.x;
@@ -163,7 +157,7 @@ namespace neo {
 		case types::texture::Target::Texture2DArray:
 			mWidth = dimension.x;
 			mHeight = dimension.y;
-			mDepth = arraySize;
+			mDepth = dimension.z;
 			break;
 		case types::texture::Target::TextureCube:
 			mWidth = dimension.x;
@@ -172,7 +166,7 @@ namespace neo {
 		case types::texture::Target::TextureCubeArray:
 			mWidth = dimension.x;
 			mHeight = dimension.y;
-			mDepth = arraySize * 6;
+			mDepth = dimension.z * 6;
 			break;
 		case types::texture::Target::Texture3D:
 			mWidth = dimension.x;

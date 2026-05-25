@@ -13,8 +13,7 @@ namespace neo {
 
 	struct TextureBuilder {
 		TextureFormat mFormat;
-		glm::u16vec3 mDimensions = glm::u16vec3(1);
-		uint16_t mArraySize = 1;
+		glm::u16vec3 mDimensions = glm::u16vec3(1,1,0);
 		uint8_t* mData = nullptr;
 
 		TextureBuilder& setFormat(TextureFormat format) {
@@ -23,10 +22,6 @@ namespace neo {
 		}
 		TextureBuilder& setDimension(glm::u16vec3 dim) {
 			mDimensions = dim;
-			return *this;
-		}
-		TextureBuilder& setArraySize(uint16_t arraySize) {
-			mArraySize = arraySize;
 			return *this;
 		}
 		TextureBuilder& setData(uint8_t* data) {

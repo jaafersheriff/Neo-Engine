@@ -14,6 +14,17 @@
 namespace neo {
 	namespace util {
 
+		void stringifyByteSize(uint32_t byteSize, char* outStr, size_t outStrSize) {
+			static const char* suffixes[] = { "B", "KB", "MB", "GB" };
+			int suffixIndex = 0;
+			float size = static_cast<float>(byteSize);
+			while (size >= 1024.f && suffixIndex < ARRAYSIZE(suffixes) - 1) {
+				size /= 1024.f;
+				suffixIndex++;
+			}
+			snprintf(outStr, outStrSize, "%0.2f %s", size, suffixes[suffixIndex]);
+		}
+
 		void _log(LogSeverity severity, const char* sig, const char* format, ...) {
 			static_assert(std::is_same<neo::util::LogSeverity, decltype(severity)>::value, "Invalid log severity");
 			bool doTheLog = false;

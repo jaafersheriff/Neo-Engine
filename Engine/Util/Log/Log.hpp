@@ -41,5 +41,7 @@ namespace neo {
 		};
 
 		void _log(LogSeverity severity, const char* sig, const char* format, ...);
+
+		void stringifyByteSize(uint32_t byteSize, char* outStr, size_t outStrSize);
 	}
 }

@@ -48,6 +48,17 @@ namespace neo {
 			}
 		}
 
+		uint32_t _getByteSize(glm::u16vec3 dimension, types::InternalFormats internalFormat, types::ByteFormats byteFormat) {
+			// Base dimension
+			uint32_t byteSize = glm::max<glm::u16>(dimension.x, 1u) * glm::max<glm::u16>(dimension.y, 1u) * glm::max<glm::u16>(dimension.z, 1u);
+			// Components per pixel
+			byteSize *= _channelsPerPixel(TextureFormat::deriveBaseFormat(internalFormat));
+			// Pixel format
+			byteSize *= _bytesPerPixel(byteFormat);
+
+			return byteSize;
+		}
+
 		struct TextureLoader final : entt::resource_loader<TextureLoader, BackedResource<Texture>> {
 
 			std::shared_ptr<BackedResource<Texture>> load(TextureFiles& fileDetails, const std::optional<std::string>& debugName) const {
@@ -76,13 +87,13 @@ namespace neo {
 				}
 
 				std::vector<uint8_t*> data;
-				glm::u16vec3 dimensions(UINT16_MAX);
+				glm::u16vec3 dimension(UINT16_MAX);
 				bool successfulFileLoad = !images.empty();
 				for (auto& image : images) {
 					if (image) {
 						NEO_LOG_I("Loaded image %s [%d, %d]", image->mFilePath.c_str(), image->mWidth, image->mHeight);
-						dimensions.x = glm::min(dimensions.x, static_cast<uint16_t>(image->mWidth));
-						dimensions.y = glm::min(dimensions.y, static_cast<uint16_t>(image->mHeight));
+						dimension.x = glm::min(dimension.x, static_cast<uint16_t>(image->mWidth));
+						dimension.y = glm::min(dimension.y, static_cast<uint16_t>(image->mHeight));
 
 						// TODO - need to memcpy the data over lmao
 						data.push_back(image->mData);
@@ -96,7 +107,7 @@ namespace neo {
 				if (successfulFileLoad) {
 					TextureBuilder details;
 					details.mFormat = fileDetails.mFormat;
-					details.mDimensions = dimensions;
+					details.mDimensions = dimension;
 					if (fileDetails.mFilePaths.size() == 1) {
 						details.mData = data[0];
 					}
@@ -120,7 +131,7 @@ namespace neo {
 				if (debugName.has_value()) {
 					NEO_LOG_V("Uploading raw texture %s", debugName.value().c_str());
 				}
-				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.mArraySize, debugName, textureDetails.mData);
+				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, debugName, textureDetails.mData);
 				textureResource->mDebugName = debugName;
 				if (textureDetails.mFormat.mMipCount > 1) {
 					textureResource->mResource.genMips();
@@ -139,7 +150,6 @@ namespace neo {
 		mFallback = TextureLoader{}.load(TextureBuilder{
 			TextureFormat{},
 			glm::u16vec3(2, 2, 0),
-			1,
 			data
 		}, "Fallback Texture");
 	}
@@ -155,13 +165,7 @@ namespace neo {
 			[&](TextureBuilder& builder) {
 				TextureBuilder copy = builder;
 				if (builder.mData != nullptr) {
-					// Base dimension
-					uint32_t byteSize = glm::max<glm::u16>(builder.mDimensions.x, 1u) * glm::max<glm::u16>(builder.mDimensions.y, 1u) * glm::max<glm::u16>(builder.mDimensions.z, 1u);
-					// Components per pixel
-					byteSize *= _channelsPerPixel(TextureFormat::deriveBaseFormat(builder.mFormat.mInternalFormat));
-					// Pixel format
-					byteSize *= _bytesPerPixel(builder.mFormat.mType);
-
+					uint32_t byteSize = _getByteSize(builder.mDimensions, builder.mFormat.mInternalFormat, builder.mFormat.mType);
 					uint8_t* copiedData = new uint8_t[byteSize];
 					memcpy(copiedData, builder.mData, byteSize);
 					copy.mData = copiedData;
@@ -260,7 +264,21 @@ namespace neo {
 				node |= ImGui::TreeNode(static_cast<void*>(&handle), "%d", handle);
 			}
 			if (node) {
-				ImGui::Text("[%d, %d]", textureResource.mResource.mWidth, textureResource.mResource.mHeight);
+				uint32_t byteSize = _getByteSize(
+					glm::u16vec3(textureResource.mResource.mWidth, textureResource.mResource.mHeight, textureResource.mResource.mDepth)
+					, textureResource.mResource.mFormat.mInternalFormat
+					, textureResource.mResource.mFormat.mType
+				);
+
+				char buf[64];
+				util::stringifyByteSize(byteSize, buf, sizeof(buf));
+
+				if (textureResource.mResource.mDepth) {
+					ImGui::Text("[%d, %d, %d] (%s)", textureResource.mResource.mWidth, textureResource.mResource.mHeight, textureResource.mResource.mDepth, buf);
+				}
+				else {
+					ImGui::Text("[%d, %d] (%s)", textureResource.mResource.mWidth, textureResource.mResource.mHeight, buf);
+				}
 				textureFunc(handle);
 				ImGui::TreePop();
 			}
