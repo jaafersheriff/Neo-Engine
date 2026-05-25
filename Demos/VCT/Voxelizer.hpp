@@ -308,6 +308,33 @@ namespace VCT {
 
 			return std::make_pair(brickIDsHandle, brickCounterHandle);
 		}
+
+		void _generateBricks(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, ShaderBufferHandle headerPointersHandle, ShaderBufferHandle voxelNodesHandle, ShaderBufferHandle brickIDsHandle, ShaderBufferHandle brickCounterHandle) {
+			TRACY_ZONE();
+
+			if (!resourceManagers.mShaderBufferManager.isValid(headerPointersHandle)
+				|| !resourceManagers.mShaderBufferManager.isValid(voxelNodesHandle)) {
+				return;
+			}
+			auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>();
+			if (!volumeView) {
+				return;
+			}
+
+			const auto& [_, volume, volumeSpatial] = *volumeView;
+			int bricksPerAxis = (volume.mDimension + volume.mVoxelsPerBrick - 1) / volume.mVoxelsPerBrick; // ceil(dimension / voxelsPerBrick)
+			int numBricks = bricksPerAxis * bricksPerAxis * bricksPerAxis;
+
+			auto bricksTextureHandle = resourceManagers.mTextureManager.asyncLoad("BricksTexture", TextureBuilder{}
+				// TODO - mips go here
+				.setFormat(TextureFormat{ types::texture::Target::Texture2DArray, types::InternalFormats::RG32_F }) // packed f32
+				.setDimension(glm::u16vec3(volume.mVoxelsPerBrick, volume.mVoxelsPerBrick, volume.mVoxelsPerBrick * numBricks))
+			);
+
+			NEO_UNUSED(renderPasses);
+			NEO_UNUSED(brickIDsHandle);
+			NEO_UNUSED(brickCounterHandle);
+		}
 	}
 
 	struct VoxelizationResult {
@@ -320,6 +347,7 @@ namespace VCT {
 		TRACY_ZONE();
 		auto [headerPointersHandle, voxelNodesHandle] = _generateVoxelNodes(renderPasses, resourceManagers, ecs);
 		auto [brickIDsHandle, brickCounterHandle] = _generateBrickIDs(renderPasses, resourceManagers, ecs, headerPointersHandle, voxelNodesHandle);
+		_generateBricks(renderPasses, resourceManagers, ecs, headerPointersHandle, voxelNodesHandle, brickIDsHandle, brickCounterHandle);
 		return VoxelizationResult{headerPointersHandle, voxelNodesHandle, brickIDsHandle, brickCounterHandle};
 	}
 

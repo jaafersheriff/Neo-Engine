@@ -63,9 +63,9 @@ namespace neo {
 	public:
 
 		Texture() = default;
-		Texture(TextureFormat format,     uint16_t dimension, const std::optional<std::string>& debugName, const void* data = nullptr);
-		Texture(TextureFormat format, glm::u16vec2 dimension, const std::optional<std::string>& debugName, const void* data = nullptr);
-		Texture(TextureFormat format, glm::u16vec3 dimension, const std::optional<std::string>& debugName, const void* data = nullptr);
+		// Texture(TextureFormat format,     uint16_t dimension, uint16_t arraySize, const std::optional<std::string>& debugName, const void* data = nullptr);
+		// Texture(TextureFormat format, glm::u16vec2 dimension, uint16_t arraySize, const std::optional<std::string>& debugName, const void* data = nullptr);
+		Texture(TextureFormat format, glm::u16vec3 dimension, uint16_t arraySize, const std::optional<std::string>& debugName, const void* data = nullptr);
 
 		void bind() const;
 		void genMips();

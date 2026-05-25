@@ -132,9 +132,12 @@ namespace neo {
 
 			enum class Target : uint8_t {
 				Texture1D,
+				Texture1DArray,
 				Texture2D,
+				Texture2DArray,
 				Texture3D,
-				TextureCube
+				TextureCube,
+				TextureCubeArray
 			};
 
 			enum class Filters : uint8_t {

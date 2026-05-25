@@ -11,12 +11,18 @@ namespace neo {
 			switch (target) {
 			case types::texture::Target::Texture1D:
 				return GL_TEXTURE_1D;
+			case types::texture::Target::Texture1DArray:
+				return GL_TEXTURE_1D_ARRAY;
 			case types::texture::Target::Texture2D:
 				return GL_TEXTURE_2D;
+			case types::texture::Target::Texture2DArray:
+				return GL_TEXTURE_2D_ARRAY;
 			case types::texture::Target::Texture3D:
 				return GL_TEXTURE_3D;
 			case types::texture::Target::TextureCube:
 				return GL_TEXTURE_CUBE_MAP;
+			case types::texture::Target::TextureCubeArray:
+				return GL_TEXTURE_CUBE_MAP_ARRAY;
 			default:
 				NEO_FAIL("Invalid texture type");
 				return 0;
@@ -134,33 +140,55 @@ namespace neo {
 		}
 	}
 
-	Texture::Texture(TextureFormat format, uint16_t dimension, const std::optional<std::string>& debugName, const void* data) : 
-		Texture(format, glm::u16vec3(dimension, dimension, 0), debugName, data) {}
+	// Texture::Texture(TextureFormat format, uint16_t dimension, const std::optional<std::string>& debugName, const void* data) : 
+	// 	Texture(format, glm::u16vec3(dimension, dimension, 0), debugName, data) {}
 
-	Texture::Texture(TextureFormat format, glm::u16vec2 dimension, const std::optional<std::string>& debugName, const void* data) :
-		Texture(format, glm::u16vec3(dimension.x, dimension.y, 0), debugName, data) {}
+	// Texture::Texture(TextureFormat format, glm::u16vec2 dimension, const std::optional<std::string>& debugName, const void* data) :
+	// 	Texture(format, glm::u16vec3(dimension.x, dimension.y, 0), debugName, data) {}
 
-	Texture::Texture(TextureFormat format, glm::u16vec3 dimension, [[maybe_unused]] const std::optional<std::string>& debugName, const void* data) :
+	Texture::Texture(TextureFormat format, glm::u16vec3 dimension, uint16_t arraySize, const std::optional<std::string>& debugName, const void* data) :
 		mFormat(format) {
 		switch (mFormat.mTarget) {
-		case types::texture::Target::Texture3D:
-			mDepth = dimension.z;
-		case types::texture::Target::TextureCube:
-		case types::texture::Target::Texture2D:
-			mHeight = dimension.y;
 		case types::texture::Target::Texture1D:
 			mWidth = dimension.x;
 			break;
+		case types::texture::Target::Texture1DArray:
+			mWidth = dimension.x;
+			mDepth = arraySize;
+			break;
+		case types::texture::Target::Texture2D:
+			mWidth = dimension.x;
+			mHeight = dimension.y;
+			break;
+		case types::texture::Target::Texture2DArray:
+			mWidth = dimension.x;
+			mHeight = dimension.y;
+			mDepth = arraySize;
+			break;
+		case types::texture::Target::TextureCube:
+			mWidth = dimension.x;
+			mHeight = dimension.y;
+			break;
+		case types::texture::Target::TextureCubeArray:
+			mWidth = dimension.x;
+			mHeight = dimension.y;
+			mDepth = arraySize * 6;
+			break;
+		case types::texture::Target::Texture3D:
+			mWidth = dimension.x;
+			mHeight = dimension.y;
+			mDepth = dimension.z;
+			break;
 		default:
-			NEO_FAIL("Invalid texture class");
+			NEO_FAIL("Invalid texture target");
 			break;
 		}
 
 		glGenTextures(1, &mTextureID);
 		bind();
-		// if (debugName.has_value() && !debugName.value().empty()) {
-		// 	glObjectLabel(GL_TEXTURE, mTextureID, -1, debugName.value().c_str());
-		// }
+		if (debugName.has_value() && !debugName.value().empty()) {
+			glObjectLabel(GL_TEXTURE, mTextureID, -1, debugName.value().c_str());
+		}
 
 		// Apply format
 		GLenum target = _getGLTarget(format.mTarget);
@@ -169,15 +197,20 @@ namespace neo {
 		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, glFilters.second);
 		switch (mFormat.mTarget) {
 		case types::texture::Target::Texture3D:
+		case types::texture::Target::Texture2DArray:
 		case types::texture::Target::TextureCube:
+		case types::texture::Target::TextureCubeArray:
 			glTexParameteri(target, GL_TEXTURE_WRAP_R, _getGLWrap(mFormat.mWrap.mR));
+			[[fallthrough]];
 		case types::texture::Target::Texture2D:
+		case types::texture::Target::Texture1DArray:
 			glTexParameteri(target, GL_TEXTURE_WRAP_T, _getGLWrap(mFormat.mWrap.mT));
+			[[fallthrough]];
 		case types::texture::Target::Texture1D:
 			glTexParameteri(target, GL_TEXTURE_WRAP_S, _getGLWrap(mFormat.mWrap.mS));
 			break;
 		default:
-			NEO_FAIL("Invalid texture class");
+			NEO_FAIL("Invalid texture target");
 			break;
 		}
 		
@@ -196,16 +229,25 @@ namespace neo {
 		// Lock in storage
 		switch (mFormat.mTarget) {
 		case types::texture::Target::Texture1D:
-			glTexStorage1D(GL_TEXTURE_1D, mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth);
+			glTexStorage1D(_getGLTarget(mFormat.mTarget), mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth);
+			break;
+		case types::texture::Target::Texture1DArray:
+			glTexStorage2D(_getGLTarget(mFormat.mTarget), mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth, mDepth);
 			break;
 		case types::texture::Target::Texture2D:
-			glTexStorage2D(GL_TEXTURE_2D, mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
+			glTexStorage2D(_getGLTarget(mFormat.mTarget), mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
 			break;
-		case types::texture::Target::Texture3D:
-			glTexStorage3D(GL_TEXTURE_3D, mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight, mDepth);
+		case types::texture::Target::Texture2DArray:
+			glTexStorage3D(_getGLTarget(mFormat.mTarget), mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight, mDepth);
 			break;
 		case types::texture::Target::TextureCube:
-			glTexStorage2D(GL_TEXTURE_CUBE_MAP, mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
+			glTexStorage2D(_getGLTarget(mFormat.mTarget), mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight);
+			break;
+		case types::texture::Target::TextureCubeArray:
+			glTexStorage3D(_getGLTarget(mFormat.mTarget), mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight, mDepth);
+			break;
+		case types::texture::Target::Texture3D:
+			glTexStorage3D(_getGLTarget(mFormat.mTarget), mFormat.mMipCount, GLHelper::getGLInternalFormat(mFormat.mInternalFormat), mWidth, mHeight, mDepth);
 			break;
 		default:
 			NEO_FAIL("Invalid texture class");
@@ -217,13 +259,13 @@ namespace neo {
 			types::texture::BaseFormats baseFormat = TextureFormat::deriveBaseFormat(mFormat.mInternalFormat);
 			switch (mFormat.mTarget) {
 			case types::texture::Target::Texture1D:
-				glTexSubImage1D(GL_TEXTURE_1D, 0, 0, mWidth, _getGLBaseFormat(baseFormat), GLHelper::getGLByteFormat(mFormat.mType), data);
+				glTexSubImage1D(_getGLTarget(mFormat.mTarget), 0, 0, mWidth, _getGLBaseFormat(baseFormat), GLHelper::getGLByteFormat(mFormat.mType), data);
 				break;
 			case types::texture::Target::Texture2D:
-				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mWidth, mHeight, _getGLBaseFormat(baseFormat), GLHelper::getGLByteFormat(mFormat.mType), data);
+				glTexSubImage2D(_getGLTarget(mFormat.mTarget), 0, 0, 0, mWidth, mHeight, _getGLBaseFormat(baseFormat), GLHelper::getGLByteFormat(mFormat.mType), data);
 				break;
 			case types::texture::Target::Texture3D:
-				glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, mWidth, mHeight, mDepth, _getGLBaseFormat(baseFormat), GLHelper::getGLByteFormat(mFormat.mType), data);
+				glTexSubImage3D(_getGLTarget(mFormat.mTarget), 0, 0, 0, 0, mWidth, mHeight, mDepth, _getGLBaseFormat(baseFormat), GLHelper::getGLByteFormat(mFormat.mType), data);
 				break;
 			case types::texture::Target::TextureCube: {
 				// Danger!
@@ -235,11 +277,15 @@ namespace neo {
 				}
 				break;
 			}
+			case types::texture::Target::Texture1DArray:
+			case types::texture::Target::Texture2DArray:
+			case types::texture::Target::TextureCubeArray:
+				NEO_FAIL("TODO");
+				break;
 			default:
 				NEO_FAIL("Invalid texture class");
 				break;
 			}
-
 		}
 	}
 

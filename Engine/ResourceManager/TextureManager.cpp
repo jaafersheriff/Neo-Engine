@@ -120,7 +120,7 @@ namespace neo {
 				if (debugName.has_value()) {
 					NEO_LOG_V("Uploading raw texture %s", debugName.value().c_str());
 				}
-				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, debugName, textureDetails.mData);
+				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, textureDetails.mArraySize, debugName, textureDetails.mData);
 				textureResource->mDebugName = debugName;
 				if (textureDetails.mFormat.mMipCount > 1) {
 					textureResource->mResource.genMips();
@@ -139,6 +139,7 @@ namespace neo {
 		mFallback = TextureLoader{}.load(TextureBuilder{
 			TextureFormat{},
 			glm::u16vec3(2, 2, 0),
+			1,
 			data
 		}, "Fallback Texture");
 	}
