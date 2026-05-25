@@ -170,93 +170,151 @@ namespace VCT {
 			return std::make_pair(headerPointersHandle, voxelNodesHandle);
 		}
 
-		void _generateBricks(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const ShaderBufferHandle headerPointersHandle, const ShaderBufferHandle voxelNodesHandle) {
+		std::pair<ShaderBufferHandle, ShaderBufferHandle> _generateBrickIDs(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const ShaderBufferHandle headerPointersHandle, const ShaderBufferHandle voxelNodesHandle) {
 			TRACY_ZONE();
 
 			if (!resourceManagers.mShaderBufferManager.isValid(headerPointersHandle)
 				|| !resourceManagers.mShaderBufferManager.isValid(voxelNodesHandle)) {
-				return;
+				return {};
 			}
 			auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>();
 			if (!volumeView) {
-				return;
+				return {};
 			}
 
 			const auto& [_, volume, volumeSpatial] = *volumeView;
-			int bricksPerAxis = static_cast<int>(std::ceil((volume.mDimension + volume.mVoxelsPerBrick - 1) / static_cast<float>(volume.mVoxelsPerBrick)));
+			int bricksPerAxis = (volume.mDimension + volume.mVoxelsPerBrick - 1) / volume.mVoxelsPerBrick; // ceil(dimension / voxelsPerBrick)
 			int numBricks = bricksPerAxis * bricksPerAxis * bricksPerAxis;
 
 			ShaderBufferHandle brickIDsHandle;
 			{
-				brickIDsHandle = resourceManagers.mShaderBufferManager.asyncLoad("BrickIDs", ShaderBufferLoadDetails{
-					static_cast<uint32_t>(numBricks * sizeof(int)),
-					nullptr
-					});
+				{
+					brickIDsHandle = resourceManagers.mShaderBufferManager.asyncLoad("BrickIDs", ShaderBufferLoadDetails{
+						static_cast<uint32_t>(numBricks * sizeof(int)),
+						nullptr
+						});
 
 
-				if (!resourceManagers.mShaderBufferManager.isValid(brickIDsHandle)) {
-					return;
+					if (!resourceManagers.mShaderBufferManager.isValid(brickIDsHandle)) {
+						return;
+					}
+
+					// Resolution changed, destroy everything and try again next frame
+					if (resourceManagers.mShaderBufferManager.resolve(brickIDsHandle).mByteSize != numBricks * sizeof(int)) {
+						resourceManagers.mShaderBufferManager.discard(brickIDsHandle);
+						return;
+					}
+
+					// Clear the buffers...
+					resourceManagers.mShaderBufferManager.transact(brickIDsHandle, [numBricks](ShaderBuffer& buffer) {
+						buffer.clear(numBricks * sizeof(int), -1);
+						});
 				}
 
-				// Resolution changed, destroy everything and try again next frame
-				if (resourceManagers.mShaderBufferManager.resolve(brickIDsHandle).mByteSize != numBricks * sizeof(int)) {
-					resourceManagers.mShaderBufferManager.discard(brickIDsHandle);
-					return;
-				}
+				// First, walk through each voxel (and its nodes) to determine which bricks are active
+				renderPasses.computePass([headerPointersHandle, brickIDsHandle, bricksPerAxis](const ResourceManagers& resourceManagers, const ECS& ecs) {
+					TRACY_GPUN("Active Bricks");
+					auto activeBrickShaderHandle = resourceManagers.mShaderManager.asyncLoad("ActiveBrickShader", ShaderBuilder{}
+						.setStage(types::shader::Stage::Compute, "vct/activebricks.compute")
+					);
+					if (!resourceManagers.mShaderManager.isValid(activeBrickShaderHandle)) {
+						return;
+					}
 
-				// Clear the buffers...
-				resourceManagers.mShaderBufferManager.transact(brickIDsHandle, [numBricks](ShaderBuffer& buffer) {
-					buffer.clear(numBricks * sizeof(int), -1);
-					});
+					auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>();
+					if (!volumeView) {
+						return;
+					}
+
+					const auto& [_, volume, volumeSpatial] = *volumeView;
+
+					auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(activeBrickShaderHandle, {});
+
+					resolvedShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerPointersHandle), types::shader::Access::Read);
+					resolvedShader.bindShaderBuffer("ActiveBricks", resourceManagers.mShaderBufferManager.resolve(brickIDsHandle), types::shader::Access::ReadWrite);
+					resolvedShader.bindUniform("volumeDimension", volume.mDimension);
+					resolvedShader.bindUniform("brickDimension", volume.mVoxelsPerBrick);
+					resolvedShader.bindUniform("bricksPerAxis", bricksPerAxis);
+
+					const int localSize = 8;
+					int groupSize = (volume.mDimension + localSize - 1) / localSize;  // ceil(dimension / localSize)
+					resolvedShader.dispatch(glm::uvec3(groupSize));
+					ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
+					}, "Active Bricks");
 			}
 
-			renderPasses.computePass([voxelNodesHandle, headerPointersHandle, brickIDsHandle, bricksPerAxis](const ResourceManagers& resourceManagers, const ECS& ecs) {
-				auto activeBrickShaderHandle = resourceManagers.mShaderManager.asyncLoad("ActiveBrickShader", ShaderBuilder{}
-					.setStage(types::shader::Stage::Compute, "vct/activebricks.compute")
-				);
-				if (!resourceManagers.mShaderManager.isValid(activeBrickShaderHandle)) {
-					return;
-				}
+			ShaderBufferHandle brickCounterHandle;
+			{
+				{
+					brickCounterHandle = resourceManagers.mShaderBufferManager.asyncLoad("BrickCounter", ShaderBufferLoadDetails{
+						sizeof(uint32_t),
+						nullptr
+						});
 
-				auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>();
-				if (!volumeView) {
-					return;
-				}
+					if (!resourceManagers.mShaderBufferManager.isValid(brickCounterHandle)) {
+						return;
+					}
 
-				const auto& [_, volume, volumeSpatial] = *volumeView;
-				MakeDefine(VOXELS_PER_BRICK_4);
-				MakeDefine(VOXELS_PER_BRICK_8);
-				ShaderDefines shaderDefines;
-				if (volume.mVoxelsPerBrick == 4) {
-					shaderDefines.set(VOXELS_PER_BRICK_4);
+					// Clear the buffers...
+					resourceManagers.mShaderBufferManager.transact(brickCounterHandle, [numBricks](ShaderBuffer& buffer) {
+						uint32_t zero = 0u;;
+						buffer.update(sizeof(uint32_t), reinterpret_cast<uint8_t*>(&zero));
+						});
 				}
-				else if (volume.mVoxelsPerBrick == 8) {
-					shaderDefines.set(VOXELS_PER_BRICK_8);
-				}
-				else {
-					NEO_LOG_E("Unsupported voxels per brick count %d", volume.mVoxelsPerBrick);
-					return;
-				}
+				// Second, walk through each brick and assign it an ID
+				renderPasses.computePass([brickIDsHandle, brickCounterHandle, bricksPerAxis](const ResourceManagers& resourceManagers, const ECS& ecs) {
+					TRACY_GPUN("Count Bricks");
+					auto brickIDsShaderHandle = resourceManagers.mShaderManager.asyncLoad("BrickCountShader", ShaderBuilder{}
+						.setStage(types::shader::Stage::Compute, "vct/brickIDs.compute")
+					);
+					if (!resourceManagers.mShaderManager.isValid(brickIDsShaderHandle)) {
+						return;
+					}
 
-				auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(activeBrickShaderHandle, shaderDefines);
+					auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>();
+					if (!volumeView) {
+						return;
+					}
 
-				resolvedShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(voxelNodesHandle), types::shader::Access::Read);
-				resolvedShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerPointersHandle), types::shader::Access::Read);
-				resolvedShader.bindShaderBuffer("ActiveBricks", resourceManagers.mShaderBufferManager.resolve(brickIDsHandle), types::shader::Access::Read);
-				resolvedShader.bindUniform("volumeDimension", volume.mDimension);
-				resolvedShader.bindUniform("bricksPerAxis", bricksPerAxis);
+					const auto& [_, volume, volumeSpatial] = *volumeView;
 
-				resolvedShader.dispatch(glm::uvec3(bricksPerAxis));
-				ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
-				}, "Active Bricks");
+					MakeDefine(VOXELS_PER_BRICK_4);
+					MakeDefine(VOXELS_PER_BRICK_8);
+					ShaderDefines shaderDefines;
+					if (volume.mVoxelsPerBrick == 4) {
+						shaderDefines.set(VOXELS_PER_BRICK_4);
+					}
+					else if (volume.mVoxelsPerBrick == 8) {
+						shaderDefines.set(VOXELS_PER_BRICK_8);
+					}
+					else {
+						NEO_LOG_E("Unsupported voxels per brick count %d", volume.mVoxelsPerBrick);
+						return;
+					}
+
+					auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(brickIDsShaderHandle, shaderDefines);
+
+					resolvedShader.bindShaderBuffer("BrickIDs", resourceManagers.mShaderBufferManager.resolve(brickIDsHandle), types::shader::Access::Read);
+					resolvedShader.bindShaderBuffer("BrickCounter", resourceManagers.mShaderBufferManager.resolve(brickCounterHandle), types::shader::Access::ReadWrite);
+					resolvedShader.bindUniform("volumeDimension", volume.mDimension);
+					resolvedShader.bindUniform("brickDimension", volume.mVoxelsPerBrick);
+					resolvedShader.bindUniform("bricksPerAxis", bricksPerAxis);
+
+					int groupSize = (bricksPerAxis + volume.mVoxelsPerBrick - 1) / volume.mVoxelsPerBrick; // ceil(bricksPerAxis / boxelsPerBrick)
+					resolvedShader.dispatch(glm::uvec3(groupSize));
+					ShaderBarrier barrier(types::shader::Barrier::StorageBuffer);
+					}, "BrickIDs");
+			}
+
+			return std::make_pair(brickIDsHandle, brickCounterHandle);
 		}
 	}
 
 	std::pair<ShaderBufferHandle, ShaderBufferHandle> voxelize(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
 		TRACY_ZONE();
-		auto nodeBuffers = _generateVoxelNodes(renderPasses, resourceManagers, ecs);
-		_generateBricks(renderPasses, resourceManagers, ecs, nodeBuffers.first, nodeBuffers.second);
-		return nodeBuffers;
+		auto [headerPointersHandle, voxelNodesHandle] = _generateVoxelNodes(renderPasses, resourceManagers, ecs);
+		auto [brickIDsHandle, brickCounterHandle] = _generateBrickIDs(renderPasses, resourceManagers, ecs, headerPointersHandle, voxelNodesHandle);
+		return std::make_pair(headerPointersHandle, voxelNodesHandle);
 	}
 
 	void debugVoxelNodes(FramebufferHandle outputHandle, glm::uvec2 viewport, RenderPasses& renderPasses, const ECS& ecs, ShaderBufferHandle headerBuffer, ShaderBufferHandle voxelNodesBuffer, ECS::Entity cameraEntity) {
@@ -286,6 +344,7 @@ namespace VCT {
 				blendState.mCullFace = CullFace::Front;
 			}
 		}
+		blendState.mWireframeable = false;
 
 		renderPasses.renderPass(outputHandle, viewport, blendState, [cameraEntity, voxelNodesBuffer, headerBuffer](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Debug VoxelNodes");

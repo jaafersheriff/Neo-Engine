@@ -35,19 +35,18 @@ void main() {
 	ivec3 targetVoxelIndex = getVoxelIndex(fragPos, volumeMin, volumeMax, volumeDimension);
 	int flattenedIndex = getFlattenedIndex(targetVoxelIndex, volumeDimension);
 
-	int nodeIdx = int(atomicAdd(nodeCounter, 1));
-
-	if (nodeIdx >= numNodes) {
-		outColor = vec3(1,0,0);
-		discard;
-	}
-
 	vec4 fAlbedo = albedo;
 #ifdef ALBEDO_MAP
 	fAlbedo *= srgbToLinear(texture(albedoMap, fragTex));
 	alphaDiscard(fAlbedo.a);
 #endif
 
+	int nodeIdx = int(atomicAdd(nodeCounter, 1));
+
+	if (nodeIdx >= numNodes) {
+		outColor = vec3(1,0,0);
+		discard;
+	}
 	int oldHeader = atomicExchange(headerPointers[flattenedIndex], nodeIdx);
 	nodes[nodeIdx].albedo = packRGBA8(fAlbedo);
 	nodes[nodeIdx].emissive = packR11G11B10(emissive);
@@ -55,7 +54,7 @@ void main() {
 	nodes[nodeIdx].header = oldHeader;
 
 	// TODO - remove heheheheheh
-	// memoryBarrierBuffer();
+	memoryBarrierBuffer();
 
 	outColor = vec3(targetVoxelIndex) / float(volumeDimension);
 	// outColor = fAlbedo.rgb;

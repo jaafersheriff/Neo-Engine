@@ -1,9 +1,5 @@
 #include "vct/voxels.glsl"
 
-layout(std430, binding = 0) coherent readonly buffer VoxelNodes {
-	VoxelNode nodes[];
-};
-
 layout(std430, binding = 1) coherent readonly buffer HeaderPointers {
 	int headerPointers[];
 };
@@ -13,42 +9,37 @@ layout(std430, binding = 2) coherent writeonly buffer ActiveBricks {
 };
 
 uniform int bricksPerAxis; 
+uniform int brickDimension; 
 uniform int volumeDimension; 
 
-shared bool sharedBrickIsActive;
-
-#if defined(VOXELS_PER_BRICK_4)
-    layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
-#elif defined(VOXELS_PER_BRICK_8)
-    layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
-#endif
-
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 void main() {
-	if (gl_LocalInvocationIndex == 0) {
-		sharedBrickIsActive = false;
-	}
-	barrier();
+	ivec3 voxelCoord = ivec3(gl_GlobalInvocationID.xyz);
 
-	ivec3 globalVoxelCoord = ivec3(gl_GlobalInvocationID);
-	int header = headerPointers[getFlattenedIndex(globalVoxelCoord, volumeDimension)];
+	// Out of bounds guard
+	if (voxelCoord.x >= volumeDimension ||
+		voxelCoord.y >= volumeDimension ||
+		voxelCoord.z >= volumeDimension) {
 
-	// In a hashed linked list, a valid pointer means a voxel exists here
-	if (header != -1) {
-		sharedBrickIsActive = true; 
+		return;
 	}
-	barrier();
 
-	if (gl_LocalInvocationIndex == 0) {
-		ivec3 macroBlockCoord = ivec3(gl_WorkGroupID);
-		
-		// Dynamically calculate the linear index based on the grid size
-        int linearMacroIdx = getFlattenedIndex(macroBlockCoord, bricksPerAxis);
-		
-		if (sharedBrickIsActive) {
-			brickIDs[linearMacroIdx] = 1; // Active, needs a unique ID next
-		} else {
-			brickIDs[linearMacroIdx] = -1; // Empty, skip in pass 2
-		}
+	// Flatten voxel index
+	int voxelIndex = getFlattenedIndex(voxelCoord, volumeDimension);
+
+	// If this voxel has no nodes, skip
+	if (headerPointers[voxelIndex] == -1) {
+		return;
 	}
+
+	// Compute brick cell coordinate (integer division)
+	ivec3 brickCoord = ivec3(voxelCoord) / brickDimension;
+
+	// Flatten brick cell index
+	int brickIndex = getFlattenedIndex(brickCoord, bricksPerAxis);
+
+	// Mark brick as active
+	// No need for CAS — OR is enough because 1 means "active"
+	brickIDs[brickIndex] = 1;
 }
 

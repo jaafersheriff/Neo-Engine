@@ -119,6 +119,9 @@ void main() {
 			found = true;
 			break; // stop at first occupied voxel -> solid voxel appearance
 		}
+		else {
+			finalColor.r += 1.2;
+		}
 
 		// Advance to next voxel using Amanatides & Woo
 		if (tMaxX < tMaxY) {
@@ -155,6 +158,6 @@ void main() {
 		outColor = vec4(finalColor, 1.0);
 	}
 	else {
-		outColor = vec4(1, 0, 0, 0);
+		outColor = vec4(0);
 	}
 }

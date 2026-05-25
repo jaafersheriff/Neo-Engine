@@ -1,0 +1,40 @@
+#include "vct/voxels.glsl"
+
+layout(std430, binding = 0) coherent buffer BrickIDs {
+	int brickIDs[];
+};
+
+layout(std430, binding = 1) coherent buffer BrickCounter {
+	uint brickCounter;
+};
+
+uniform int bricksPerAxis; 
+uniform int volumeDimension; 
+
+#if defined(VOXELS_PER_BRICK_4)
+	layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
+#elif defined(VOXELS_PER_BRICK_8)
+	layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+#endif
+void main() {
+	ivec3 brickCoord = ivec3(gl_GlobalInvocationID.xyz);
+
+	// Bounds check
+	if (brickCoord.x >= bricksPerAxis ||
+		brickCoord.y >= bricksPerAxis ||
+		brickCoord.z >= bricksPerAxis) {
+		return;
+	}
+
+	// Flatten brick index
+	int brickIndex = getFlattenedIndex(brickCoord, bricksPerAxis);
+
+	if (brickIDs[brickIndex] == 1) {
+		// Active brick cell → allocate a compact brick ID
+		uint id = atomicAdd(brickCounter, 1u);
+
+		// Store the assigned brick ID
+		brickIDs[brickIndex] = int(id);
+	}
+}
+

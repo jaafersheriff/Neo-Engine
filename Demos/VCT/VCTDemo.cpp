@@ -189,7 +189,7 @@ namespace VCT {
 		inline void createSponzaScene(ECS& ecs, ResourceManagers& resourceManagers) {
 			destroyScene(ecs, resourceManagers);
 
-			createVolume(ecs, glm::vec3(1.f, 6.5f, -0.5f), glm::vec3(36.0, 15.0, 15.0));
+			createVolume(ecs, glm::vec3(-1.f, 9.f, -0.5f), glm::vec3(35.5f, 21.f, 17.3f));
 
 			SpatialComponent spatial(glm::vec3(75.f, 200.f, 20.f));
 			spatial.setLookDir(glm::normalize(glm::vec3(-0.28f, -0.96f, -0.06f)));
