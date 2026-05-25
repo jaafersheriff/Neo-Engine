@@ -196,13 +196,13 @@ namespace VCT {
 
 
 					if (!resourceManagers.mShaderBufferManager.isValid(brickIDsHandle)) {
-						return;
+						return {};
 					}
 
 					// Resolution changed, destroy everything and try again next frame
 					if (resourceManagers.mShaderBufferManager.resolve(brickIDsHandle).mByteSize != numBricks * sizeof(int)) {
 						resourceManagers.mShaderBufferManager.discard(brickIDsHandle);
-						return;
+						return {};
 					}
 
 					// Clear the buffers...
@@ -252,7 +252,7 @@ namespace VCT {
 						});
 
 					if (!resourceManagers.mShaderBufferManager.isValid(brickCounterHandle)) {
-						return;
+						return {};
 					}
 
 					// Clear the buffers...
@@ -310,14 +310,20 @@ namespace VCT {
 		}
 	}
 
-	std::pair<ShaderBufferHandle, ShaderBufferHandle> voxelize(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
+	struct VoxelizationResult {
+		ShaderBufferHandle mHeaderPointers;
+		ShaderBufferHandle mVoxelNodes;
+		ShaderBufferHandle mBrickIDs;
+		ShaderBufferHandle mBrickCounter;
+	};
+	VoxelizationResult voxelize(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
 		TRACY_ZONE();
 		auto [headerPointersHandle, voxelNodesHandle] = _generateVoxelNodes(renderPasses, resourceManagers, ecs);
 		auto [brickIDsHandle, brickCounterHandle] = _generateBrickIDs(renderPasses, resourceManagers, ecs, headerPointersHandle, voxelNodesHandle);
-		return std::make_pair(headerPointersHandle, voxelNodesHandle);
+		return VoxelizationResult{headerPointersHandle, voxelNodesHandle, brickIDsHandle, brickCounterHandle};
 	}
 
-	void debugVoxelNodes(FramebufferHandle outputHandle, glm::uvec2 viewport, RenderPasses& renderPasses, const ECS& ecs, ShaderBufferHandle headerBuffer, ShaderBufferHandle voxelNodesBuffer, ECS::Entity cameraEntity) {
+	void debugVoxelNodes(FramebufferHandle outputHandle, glm::uvec2 viewport, RenderPasses& renderPasses, const ECS& ecs, VoxelizationResult buffers, ECS::Entity cameraEntity) {
 		TRACY_ZONE();
 
 		RenderState blendState;
@@ -346,10 +352,12 @@ namespace VCT {
 		}
 		blendState.mWireframeable = false;
 
-		renderPasses.renderPass(outputHandle, viewport, blendState, [cameraEntity, voxelNodesBuffer, headerBuffer](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputHandle, viewport, blendState, [cameraEntity, buffers](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Debug VoxelNodes");
-			if (!resourceManagers.mShaderBufferManager.isValid(voxelNodesBuffer)
-				|| !resourceManagers.mShaderBufferManager.isValid(headerBuffer)) {
+			if (!resourceManagers.mShaderBufferManager.isValid(buffers.mVoxelNodes)
+				|| !resourceManagers.mShaderBufferManager.isValid(buffers.mHeaderPointers)
+				|| !resourceManagers.mShaderBufferManager.isValid(buffers.mBrickIDs)
+				|| !resourceManagers.mShaderBufferManager.isValid(buffers.mBrickCounter))  {
 				return;
 			}
 
@@ -372,16 +380,21 @@ namespace VCT {
 
 			glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
 			glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
+			int bricksPerAxis = (volume.mDimension + volume.mVoxelsPerBrick - 1) / volume.mVoxelsPerBrick; // ceil(dimension / voxelsPerBrick)
 
 			voxelNodeShader.bindUniform("volumeMin", glm::min(volumeWorldMin, volumeWorldMax));
 			voxelNodeShader.bindUniform("volumeMax", glm::max(volumeWorldMin, volumeWorldMax));
 			voxelNodeShader.bindUniform("volumeDimension", volume.mDimension);
+			voxelNodeShader.bindUniform("bricksPerAxis", bricksPerAxis);
+			voxelNodeShader.bindUniform("voxelsPerBrick", volume.mVoxelsPerBrick);
 			voxelNodeShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
 			voxelNodeShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
 			voxelNodeShader.bindUniform("cameraPos", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getPosition());
 			voxelNodeShader.bindUniform("cameraDir", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getLookDir());
-			voxelNodeShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(voxelNodesBuffer), types::shader::Access::Read);
-			voxelNodeShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(headerBuffer), types::shader::Access::Read);
+			voxelNodeShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(buffers.mVoxelNodes), types::shader::Access::Read);
+			voxelNodeShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(buffers.mHeaderPointers), types::shader::Access::Read);
+			voxelNodeShader.bindShaderBuffer("BrickIDs", resourceManagers.mShaderBufferManager.resolve(buffers.mBrickIDs), types::shader::Access::Read);
+			voxelNodeShader.bindShaderBuffer("BrickCounter", resourceManagers.mShaderBufferManager.resolve(buffers.mBrickCounter), types::shader::Access::Read);
 
 			auto& mesh = resourceManagers.mMeshManager.resolve(MeshHandle("cube"));
 			voxelNodeShader.bindUniform("M", volumeSpatial.getModelMatrix());
