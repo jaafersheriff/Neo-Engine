@@ -58,19 +58,41 @@ namespace neo {
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_STENCIL_TEST);
 		glEnable(GL_SCISSOR_TEST);
-		auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, {});
-		resolvedShader.bindUniform("P", ortho_projection);
 
+		MakeDefine(TEXTURE_2D);
+		MakeDefine(TEXTURE_2D_ARRAY);
+		MakeDefine(TEXTURE_3D);
+		ShaderDefines drawDefines;
 		for(auto &&[_, draw, __]: ecs.getView<ImGuiDrawComponent, ImGuiComponent>().each()) {
 			if (!resourceManagers.mMeshManager.isValid(draw.mMeshHandle)) {
 				return;
 			}
 
-			if (!resourceManagers.mTextureManager.isValid(draw.mTextureHandle)) {
+			if (!resourceManagers.mTextureManager.isValid(draw.mTextureDescriptor.mTextureHandle)) {
+				return;
+			}
+			drawDefines.reset();
+
+			const auto& resolvedTexture = resourceManagers.mTextureManager.resolve(draw.mTextureDescriptor.mTextureHandle);
+			if (resolvedTexture.mFormat.mTarget == types::texture::Target::Texture2D) {
+				drawDefines.set(TEXTURE_2D);
+			}
+			else if (resolvedTexture.mFormat.mTarget == types::texture::Target::Texture2DArray) {
+				drawDefines.set(TEXTURE_2D_ARRAY);
+			}
+			else if (resolvedTexture.mFormat.mTarget == types::texture::Target::Texture3D) {
+				drawDefines.set(TEXTURE_3D);
+			}
+			else {
+				NEO_FAIL("ImGui::Image supplied w/ unsupported texture type");
 				return;
 			}
 
-			resolvedShader.bindTexture("Texture", resourceManagers.mTextureManager.resolve(draw.mTextureHandle));
+			auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
+			resolvedShader.bindUniform("P", ortho_projection);
+			resolvedShader.bindTexture("Texture", resourceManagers.mTextureManager.resolve(draw.mTextureDescriptor.mTextureHandle));
+			resolvedShader.bindUniform("arrayLevel", draw.mTextureDescriptor.mArrayLayer);
+			resolvedShader.bindUniform("mipLevel", draw.mTextureDescriptor.mMipLevel);
 
 			glScissor(
 				draw.mScissorRect.x,

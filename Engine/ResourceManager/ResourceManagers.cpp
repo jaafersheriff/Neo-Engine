@@ -29,13 +29,31 @@ namespace neo {
 			}
 			else {
 				Texture& texture = mTextureManager.resolve(textureHandle);
-				if (texture.mFormat.mTarget != types::texture::Target::Texture2D) {
+				const float scale = 175.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
+				ImGui::TextureDescriptor descriptor;
+				descriptor.mTextureHandle = textureHandle.mHandle;
+				ImGui::PushID(textureHandle.mHandle + static_cast<int>(util::genRandom()));
+
+				switch (texture.mFormat.mTarget) {
+				case types::texture::Target::Texture2D:
+				case types::texture::Target::Texture2DArray:
+					if (texture.mDepth > 1) {
+						int arrayLayer = descriptor.mArrayLayer;
+						ImGui::SliderInt("Array Layer", &arrayLayer, 0, texture.mDepth - 1);
+						descriptor.mArrayLayer = arrayLayer;
+					}
+					if (texture.mFormat.mMipCount > 1) {
+						int mip = descriptor.mMipLevel;
+						ImGui::SliderInt("Mip Level", &mip, 0, texture.mFormat.mMipCount - 1);
+						descriptor.mMipLevel = mip;;
+					}
+					ImGui::Image(descriptor, ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
+					break;
+				default:
 					ImGui::Text("Non-2D texture");
+					break;
 				}
-				else {
-					float scale = 175.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
-					ImGui::Image(textureHandle.mHandle, ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
-				}
+				ImGui::PopID();
 			}
 		};
 		ImGui::Begin("Resources");

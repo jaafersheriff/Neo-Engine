@@ -211,7 +211,9 @@ namespace neo {
 				ImGui::TableSetColumnIndex(1);
 				for (auto texId = pfb.mResource.mFramebuffer.mTextures.begin(); texId < pfb.mResource.mFramebuffer.mTextures.end(); texId++) {
 					if (textureManager.isValid(*texId)) {
+						ImGui::PushID(id + texId->mHandle);
 						textureFunc(*texId);
+						ImGui::PopID();
 						if (texId != std::prev(pfb.mResource.mFramebuffer.mTextures.end())) {
 							ImGui::SameLine();
 						}

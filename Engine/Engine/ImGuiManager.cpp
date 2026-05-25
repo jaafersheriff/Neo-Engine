@@ -230,12 +230,12 @@ namespace neo {
 		int width, height;
 		ImGuiIO io = ImGui::GetIO();
 		io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-		ImGui::GetIO().Fonts->SetTexID(resourceManagers.mTextureManager.asyncLoad("ImGuiFont", TextureBuilder{}
-			.setFormat(TextureFormat{types::texture::Target::Texture2D, types::InternalFormats::RGBA32_F})
+		auto imFontHandle = resourceManagers.mTextureManager.asyncLoad("ImGuiFont", TextureBuilder{}
+			.setFormat(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGBA32_F })
 			.setDimension(glm::u16vec3(width, height, 0))
 			.setData(pixels)
-			).mHandle
 		);
+		ImGui::GetIO().Fonts->SetTexID(ImGui::TextureDescriptor(imFontHandle.mHandle));
 
 		for (int i = 0; i < MAX_IMGUI_MESHES; i++) {
 			MeshLoadDetails loadDetails;
@@ -370,7 +370,7 @@ namespace neo {
 
 					ImGuiDrawComponent draw;
 					draw.mMeshHandle = currentMesh;
-					draw.mTextureHandle = TextureHandle(cmd->GetTexID());
+					draw.mTextureDescriptor = cmd->GetTexID();
 					draw.mScissorRect = glm::vec4(
 						clipMin.x,
 						clipMax.y,

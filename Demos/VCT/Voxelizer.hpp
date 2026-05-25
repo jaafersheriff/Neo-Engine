@@ -14,6 +14,8 @@
 #include "Renderer/RenderingSystems/RenderPass.hpp"
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
+#include "Util/ServiceLocator.hpp"
+
 namespace VCT {
 
 	using namespace neo;
@@ -322,9 +324,11 @@ namespace VCT {
 			}
 
 			const auto& [_, volume, volumeSpatial] = *volumeView;
-			int bricksPerAxis = (volume.mDimension + volume.mVoxelsPerBrick - 1) / volume.mVoxelsPerBrick; // ceil(dimension / voxelsPerBrick)
-			int numBricks = bricksPerAxis * bricksPerAxis * bricksPerAxis;
+			const int bricksPerAxis = (volume.mDimension + volume.mVoxelsPerBrick - 1) / volume.mVoxelsPerBrick; // ceil(dimension / voxelsPerBrick)
+			const int numBricks = bricksPerAxis * bricksPerAxis * bricksPerAxis;
+			// const int maxLayers = ServiceLocator<Renderer>::ref().getDetails().mMaxTextureArrayLayers;
 
+			// TODO - i guess we're making a pool because array count is capped
 			auto bricksTextureHandle = resourceManagers.mTextureManager.asyncLoad("BricksTexture", TextureBuilder{}
 				// TODO - mips go here
 				.setFormat(TextureFormat{ types::texture::Target::Texture2DArray, types::InternalFormats::RG32_F }) // packed f32

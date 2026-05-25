@@ -45,7 +45,7 @@ namespace neo {
 					computePass.mDrawFunction(resourceManagers, ecs);
 				},
 				[&](const RenderPass& renderPass) {
-					renderStats.mRenderPasses.emplace_back(renderPass.mDebugName.value_or("Nameless compute pass"));
+					renderStats.mRenderPasses.emplace_back(renderPass.mDebugName.value_or("Nameless render pass"));
 
 					if (!resourceManagers.mFramebufferManager.isValid(renderPass.mTarget)) {
 						NEO_LOG_W("Unable to resolve target, skipping pass %s", renderPass.mDebugName.value_or("").c_str());
@@ -63,7 +63,7 @@ namespace neo {
 					renderPass.mDrawFunction(resourceManagers, ecs);
 				},
 				[&](const ClearPass& clearPass) {
-					renderStats.mRenderPasses.emplace_back(clearPass.mDebugName.value_or("Nameless render pass"));
+					renderStats.mRenderPasses.emplace_back(clearPass.mDebugName.value_or("Nameless clear"));
 
 					TRACY_GPUN("Clear");
 					if (!resourceManagers.mFramebufferManager.isValid(clearPass.mTarget)) {

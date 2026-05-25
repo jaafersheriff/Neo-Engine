@@ -71,6 +71,7 @@ namespace neo {
 		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
 		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
 		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z);
+		glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &mDetails.mMaxTextureArrayLayers);
 		char buf[512];
 		memcpy(buf, glGetString(GL_VENDOR), 512);
 		mDetails.mVendor = buf;
@@ -186,7 +187,11 @@ namespace neo {
 			if (resourceManager.mTextureManager.isValid(mSceneColorTextureHandle)) {
 #pragma warning(push)
 #pragma warning(disable: 4312)
-				ImGui::Image(mSceneColorTextureHandle.mHandle, {viewportSize.x, viewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));
+				ImGui::TextureDescriptor desc;
+				desc.mTextureHandle = mSceneColorTextureHandle.mHandle;
+				desc.mArrayLayer = 0;
+				desc.mMipLevel = 0;
+				ImGui::Image(desc, {viewportSize.x, viewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));
 #pragma warning(pop)
 			}
 		}
@@ -230,6 +235,16 @@ namespace neo {
 			ImGui::TextWrapped("Num Triangles: %d", mStats.mNumPrimitives);
 			ImGui::TextWrapped("Num Uniforms: %d", mStats.mNumUniforms);
 			ImGui::TextWrapped("Num Samplers: %d", mStats.mNumSamplers);
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNodeEx("Details")) {
+			ImGui::TextWrapped("Vendor: %s", mDetails.mVendor.c_str());
+			ImGui::TextWrapped("Renderer: %s", mDetails.mRenderer.c_str());
+			ImGui::TextWrapped("Shading Language: %s", mDetails.mShadingLanguage.c_str());
+			ImGui::TextWrapped("GLVersion: %d.%d", mDetails.mGLMajorVersion, mDetails.mGLMinorVersion);
+			ImGui::TextWrapped("GLSLVersion: %s", mDetails.mGLSLVersion.c_str());
+			ImGui::TextWrapped("Max Compute WorkGroup Size: [%d, %d, %d]", mDetails.mMaxComputeWorkGroupSize.x, mDetails.mMaxComputeWorkGroupSize.y, mDetails.mMaxComputeWorkGroupSize.z);
+			ImGui::TextWrapped("Max TextureArray Layers: %d", mDetails.mMaxTextureArrayLayers);
 			ImGui::TreePop();
 		}
 		if (ImGui::TreeNodeEx("Render Passes")) {
