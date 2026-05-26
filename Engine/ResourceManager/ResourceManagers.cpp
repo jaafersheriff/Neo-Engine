@@ -18,11 +18,10 @@ namespace neo {
 		mShaderBufferManager.clear();
 		mShaderManager.clear();
 		mTextureManager.clear();
-		mFramebufferManager.clear(mTextureManager); // Do this after textures
+		mFramebufferManager.clear(mTextureManager); // Do this aft
 	}
 
 	void ResourceManagers::_imguiEditor() {
-		TRACY_ZONE();
 		auto textureFunc = [&](const TextureHandle& textureHandle, int arrayLayer = 0, int mip = 0) {
 			if (!mTextureManager.isValid(textureHandle)) {
 				ImGui::Text("Invalid texture");
@@ -36,11 +35,15 @@ namespace neo {
 				descriptor.mMipLevel = mip;
 				ImGui::PushID(textureHandle.mHandle + static_cast<int>(util::genRandom()));
 
+				int maxDepth = texture.mDepth;
 				switch (texture.mFormat.mTarget) {
 				case types::texture::Target::Texture2D:
 				case types::texture::Target::Texture2DArray:
-					if (texture.mDepth > 1) {
-						ImGui::SliderInt("Array Layer", &arrayLayer, 0, texture.mDepth - 1);
+				case types::texture::Target::TextureCube:
+					maxDepth = 6;
+				case types::texture::Target::Texture3D:
+					if (texture.mDepth > 1 || texture.mFormat.mTarget == types::texture::Target::TextureCube) {
+						ImGui::SliderInt("Array Layer", &arrayLayer, 0, maxDepth - 1);
 						descriptor.mArrayLayer = arrayLayer;
 					}
 					if (texture.mFormat.mMipCount > 1) {
@@ -50,7 +53,7 @@ namespace neo {
 					ImGui::Image(descriptor, ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
 					break;
 				default:
-					ImGui::Text("Non-2D texture");
+					ImGui::Text("Unsupported texture");
 					break;
 				}
 				ImGui::PopID();

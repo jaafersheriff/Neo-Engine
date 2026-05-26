@@ -326,13 +326,13 @@ namespace VCT {
 			const auto& [_, volume, volumeSpatial] = *volumeView;
 			const int bricksPerAxis = (volume.mDimension + volume.mVoxelsPerBrick - 1) / volume.mVoxelsPerBrick; // ceil(dimension / voxelsPerBrick)
 			const int numBricks = bricksPerAxis * bricksPerAxis * bricksPerAxis;
-			// const int maxLayers = ServiceLocator<Renderer>::ref().getDetails().mMaxTextureArrayLayers;
+			const int numLayers = volume.mVoxelsPerBrick * numBricks;
 
 			// TODO - i guess we're making a pool because array count is capped
 			auto bricksTextureHandle = resourceManagers.mTextureManager.asyncLoad("BricksTexture", TextureBuilder{}
 				// TODO - mips go here
-				.setFormat(TextureFormat{ types::texture::Target::Texture2DArray, types::InternalFormats::RG32_F }) // packed f32
-				.setDimension(glm::u16vec3(volume.mVoxelsPerBrick, volume.mVoxelsPerBrick, volume.mVoxelsPerBrick * numBricks))
+				.setFormat(TextureFormat{ types::texture::Target::Texture3D, types::InternalFormats::RG32_F }) // packed f32
+				.setDimension(glm::u16vec3(volume.mVoxelsPerBrick, volume.mVoxelsPerBrick, numLayers))
 			);
 
 			if (!resourceManagers.mTextureManager.isValid(bricksTextureHandle)) {
@@ -340,7 +340,7 @@ namespace VCT {
 			}
 
 			// Resolution changed, destroy everything and try again next frame
-			if (resourceManagers.mTextureManager.resolve(bricksTextureHandle).mDepth != volume.mVoxelsPerBrick * numBricks) {
+			if (resourceManagers.mTextureManager.resolve(bricksTextureHandle).mDepth != numLayers) {
 				resourceManagers.mTextureManager.discard(bricksTextureHandle);
 				return;
 			}

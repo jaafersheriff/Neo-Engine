@@ -1,4 +1,5 @@
 #include "vct/voxels.glsl"
+#include "color.glsl"
 
 in vec4 fragPos;
 
@@ -138,7 +139,7 @@ void main() {
 			// Make a solid per-voxel color (averaging nodes if multiple), not continuous ray accumulation
 			vec3 voxelColor = vec3(0.0);
 			int nodeCount = 0;
-			int safety = 32;
+			int safety = 128;
 			while (header != -1 && safety-- > 0) {
 				vec4 albedo = unpackRGBA8(nodes[header].albedo);
 				vec3 emissive = unpackR11G11B10(nodes[header].emissive);
@@ -154,11 +155,9 @@ void main() {
 			}
 
 			finalColor = voxelColor;
+			// finalColor = magma_quintic(nodeCount / 128.0);
 			found = true;
 			break; // stop at first occupied voxel -> solid voxel appearance
-		}
-		else {
-			finalColor.r += 1.2;
 		}
 #endif
 

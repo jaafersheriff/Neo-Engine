@@ -61,6 +61,7 @@ namespace neo {
 
 		MakeDefine(TEXTURE_2D);
 		MakeDefine(TEXTURE_2D_ARRAY);
+		MakeDefine(TEXTURE_CUBE);
 		MakeDefine(TEXTURE_3D);
 		ShaderDefines drawDefines;
 		for(auto &&[_, draw, __]: ecs.getView<ImGuiDrawComponent, ImGuiComponent>().each()) {
@@ -79,6 +80,9 @@ namespace neo {
 			}
 			else if (resolvedTexture.mFormat.mTarget == types::texture::Target::Texture2DArray) {
 				drawDefines.set(TEXTURE_2D_ARRAY);
+			}
+			else if (resolvedTexture.mFormat.mTarget == types::texture::Target::TextureCube) {
+				drawDefines.set(TEXTURE_CUBE);
 			}
 			else if (resolvedTexture.mFormat.mTarget == types::texture::Target::Texture3D) {
 				drawDefines.set(TEXTURE_3D);

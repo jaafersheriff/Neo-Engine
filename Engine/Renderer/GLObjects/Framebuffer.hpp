@@ -16,6 +16,7 @@ namespace neo {
 		int mColorAttachments = 0;
 		struct Attachment {
 			TextureHandle mTextureHandle = NEO_INVALID_HANDLE;
+			types::framebuffer::AttachmentTarget mTarget = types::framebuffer::AttachmentTarget::Target2D;
 			int mMip = 0;
 		};
 		std::vector<Attachment> mAttachments;

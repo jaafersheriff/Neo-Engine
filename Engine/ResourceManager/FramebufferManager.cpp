@@ -212,7 +212,11 @@ namespace neo {
 				for (auto attachmentIt = pfb.mResource.mFramebuffer.mAttachments.begin(); attachmentIt < pfb.mResource.mFramebuffer.mAttachments.end(); attachmentIt++) {
 					if (textureManager.isValid(attachmentIt->mTextureHandle)) {
 						ImGui::PushID(id + attachmentIt->mTextureHandle.mHandle);
-						textureFunc(attachmentIt->mTextureHandle, 0, attachmentIt->mMip);
+						int layer = 0;
+						if (attachmentIt->mTarget >= types::framebuffer::AttachmentTarget::TargetCubeX_Positive && attachmentIt->mTarget <= types::framebuffer::AttachmentTarget::TargetCubeZ_Negative) {
+							layer = static_cast<int>(attachmentIt->mTarget) - static_cast<int>(types::framebuffer::AttachmentTarget::TargetCubeX_Positive);
+						}
+						textureFunc(attachmentIt->mTextureHandle, layer, attachmentIt->mMip);
 						ImGui::PopID();
 						if (attachmentIt != std::prev(pfb.mResource.mFramebuffer.mAttachments.end())) {
 							ImGui::SameLine();

@@ -1,3 +1,5 @@
+#include "cubemap.glsl"
+
 in vec2 fragTex;
 in vec4 fragCol;
 		
@@ -5,6 +7,8 @@ in vec4 fragCol;
 layout(binding = 0) uniform sampler2D Texture;
 #elif defined(TEXTURE_2D_ARRAY)
 layout(binding = 0) uniform sampler2DArray Texture;
+#elif defined(TEXTURE_CUBE)
+layout(binding = 0) uniform samplerCube Texture;
 #elif defined(TEXTURE_3D)
 layout(binding = 0) uniform sampler3D Texture;
 #endif
@@ -21,8 +25,12 @@ void main() {
 	texColor = textureLod(Texture, fragTex, float(mipLevel));
 #elif defined(TEXTURE_2D_ARRAY)
     texColor = textureLod(Texture, vec3(fragTex, float(arrayLevel)), float(mipLevel));
+#elif defined(TEXTURE_CUBE)
+    texColor = textureLod(Texture, cubemapSamplingCoords(fragTex, int(arrayLevel)), float(mipLevel));
+#elif defined(TEXTURE_3D)
+    texColor = textureLod(Texture, vec3(fragTex, float(arrayLevel)), float(mipLevel));
 #else
-	texColor = vec4(1, 0, 1, 1); // debug magenta
+	texColor = vec4(1, 0, 0, 1);
 #endif
 
 	color = fragCol * texColor;

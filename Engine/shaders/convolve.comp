@@ -2,6 +2,7 @@
 #include "ibl.glsl"
 #include "pbr.glsl"
 #include "color.glsl"
+#include "cubemap.glsl"
 
 layout(binding = 0, rgba16f) uniform imageCube dst;
 #ifdef EQUIRECTANGULAR
@@ -85,31 +86,7 @@ void main() {
     }
 
     vec2 baseUv = vec2(gl_GlobalInvocationID.xy + 0.5) / vec2(mipResolution);
-    baseUv = 2.0 * baseUv - 1.0;
-    baseUv.y *= -1.0;
-
-    vec3 R;
-    switch (gl_GlobalInvocationID.z) {
-    case 0:
-        R = vec3(1.0, baseUv.y, -baseUv.x);
-        break;
-    case 1:
-        R = vec3(-1.0, baseUv.y, baseUv.x);
-        break;
-    case 2:
-        R = vec3(baseUv.x, 1.0, -baseUv.y);
-        break;
-    case 3:
-        R = vec3(baseUv.x, -1.0, baseUv.y);
-        break;
-    case 4:
-        R = vec3(baseUv.x, baseUv.y, 1.0);
-        break;
-    case 5:
-    default:
-        R = vec3(-baseUv.x, baseUv.y, -1.0);
-    }
-    R = normalize(R);
+    vec3 R = cubemapSamplingCoords(baseUv, int(gl_GlobalInvocationID.z));
 
     if (mipLevel == 0) {
         vec3 color = sampleCubemap(R, 0);

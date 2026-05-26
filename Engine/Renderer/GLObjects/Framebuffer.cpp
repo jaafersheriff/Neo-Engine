@@ -108,7 +108,7 @@ namespace neo {
 				break;
 		}
 
-		mAttachments.emplace_back(Attachment{ textureHandle, mip });
+		mAttachments.emplace_back(Attachment{ textureHandle, target, mip });
 		bind();
 		glFramebufferTexture2D(GL_FRAMEBUFFER, _getGLAttachment(attachment, mColorAttachments - 1), _getGLTarget(target), texture.mTextureID, mip);
 		CHECK_GL_FRAMEBUFFER();
