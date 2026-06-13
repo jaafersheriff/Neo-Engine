@@ -34,6 +34,7 @@ namespace neo {
 			std::variant<
 			bool,
 			int,
+			uint16_t,
 			uint32_t,
 			double,
 			float,

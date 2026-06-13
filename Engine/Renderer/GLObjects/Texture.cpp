@@ -92,6 +92,10 @@ namespace neo {
 			case types::texture::BaseFormats::RG: return GL_RG;
 			case types::texture::BaseFormats::RGB: return GL_RGB;
 			case types::texture::BaseFormats::RGBA: return GL_RGBA;
+			case types::texture::BaseFormats::R_INTEGER: return GL_RED_INTEGER;
+			case types::texture::BaseFormats::RG_INTEGER: return GL_RG_INTEGER;
+			case types::texture::BaseFormats::RGB_INTEGER: return GL_RGB_INTEGER;
+			case types::texture::BaseFormats::RGBA_INTEGER: return GL_RGBA_INTEGER;
 			case types::texture::BaseFormats::Depth: return GL_DEPTH_COMPONENT;
 			case types::texture::BaseFormats::DepthStencil: return GL_DEPTH_STENCIL;
 			default:
@@ -105,29 +109,39 @@ namespace neo {
 		switch (format) {
 		case types::InternalFormats::R8_UNORM:
 		case types::InternalFormats::R16_UNORM:
-		case types::InternalFormats::R16_UI:
-		case types::InternalFormats::R32_UI:
 		case types::InternalFormats::R16_F:
 		case types::InternalFormats::R32_F:
 			return types::texture::BaseFormats::R;
+		case types::InternalFormats::R16_I:
+		case types::InternalFormats::R32_I:
+		case types::InternalFormats::R16_UI:
+		case types::InternalFormats::R32_UI:
+			return types::texture::BaseFormats::R_INTEGER;
 		case types::InternalFormats::RG8_UNORM:
 		case types::InternalFormats::RG16_UNORM:
-		case types::InternalFormats::RG16_UI:
 		case types::InternalFormats::RG16_F:
 		case types::InternalFormats::RG32_F:
 			return types::texture::BaseFormats::RG;
+		case types::InternalFormats::RG16_I:
+		case types::InternalFormats::RG16_UI:
+			return types::texture::BaseFormats::RG_INTEGER;
 		case types::InternalFormats::RGB8_UNORM:
 		case types::InternalFormats::RGB16_UNORM:
-		case types::InternalFormats::RGB16_UI:
 		case types::InternalFormats::RGB16_F:
 		case types::InternalFormats::RGB32_F:
 			return types::texture::BaseFormats::RGB;
+		case types::InternalFormats::RGB16_I:
+		case types::InternalFormats::RGB16_UI:
+			return types::texture::BaseFormats::RGB_INTEGER;
 		case types::InternalFormats::RGBA8_UNORM:
 		case types::InternalFormats::RGBA16_UNORM:
-		case types::InternalFormats::RGBA16_UI:
 		case types::InternalFormats::RGBA16_F:
 		case types::InternalFormats::RGBA32_F:
 			return types::texture::BaseFormats::RGBA;
+		case types::InternalFormats::RGBA16_I:
+		case types::InternalFormats::RGBA16_UI:
+		case types::InternalFormats::RGBA32_UI:
+			return types::texture::BaseFormats::RGBA_INTEGER;
 		case types::InternalFormats::D16:
 		case types::InternalFormats::D24:
 		case types::InternalFormats::D32:
@@ -289,6 +303,36 @@ namespace neo {
 
 	void Texture::genMips() {
 		glGenerateTextureMipmap(mTextureID);
+	}
+
+	void Texture::clear(const uint8_t* value) {
+		glClearTexImage(
+			mTextureID, 
+			0, 
+			_getGLBaseFormat(TextureFormat::deriveBaseFormat(mFormat.mInternalFormat)), 
+			GLHelper::getGLByteFormat(mFormat.mType), 
+			value
+		);
+	}
+
+	void Texture::clear(uint16_t mipLevel, glm::uvec3 offset, glm::uvec3 size, const uint8_t* value) {
+		if (offset.x + size.x > mWidth || offset.y + size.y > mHeight || offset.z + size.z > mDepth) {
+			NEO_FAIL("Invalid clear region");
+			return;
+		}
+		glClearTexSubImage(
+			mTextureID, 
+			mipLevel, 
+			offset.x, 
+			offset.y, 
+			offset.z, 
+			size.x, 
+			size.y, 
+			size.z, 
+			_getGLBaseFormat(TextureFormat::deriveBaseFormat(mFormat.mInternalFormat)), 
+			GLHelper::getGLByteFormat(mFormat.mType), 
+			value
+		);
 	}
 
 	void Texture::destroy() {

@@ -29,6 +29,7 @@ namespace neo {
 			RG16_UI,
 			RGB16_UI,
 			RGBA16_UI,
+			RGBA32_UI,
 			R32_UI,
 			R16_I,
 			RG16_I,
@@ -63,7 +64,7 @@ namespace neo {
 			enum class Barrier {
 				None,
 				ImageAccess,
-				AtomicCounter,
+				// AtomicCounter,
 				StorageBuffer,
 				// There's way more that are unsupported hehe
 			};
@@ -156,6 +157,10 @@ namespace neo {
 				RG,
 				RGB,
 				RGBA,
+				R_INTEGER,
+				RG_INTEGER,
+				RGB_INTEGER,
+				RGBA_INTEGER,
 				Depth,
 				DepthStencil
 			};

@@ -1,10 +1,3 @@
-struct VoxelNode {
-	uint albedo;
-    uint emissive;
-    uint normal;
-    int header;
-};
-
 uint packRGBA8(vec4 value) {
     // Clamp to ensure values stay within safely packable [0.0, 1.0] range
     uvec4 unnormalized = uvec4(saturate(value) * 255.0);
@@ -153,9 +146,9 @@ vec3 unpackNormal(uint packedVal) {
     return normalize(n);
 }
 
-ivec3 getVoxelIndex(vec3 worldPos, vec3 volumeWorldMin, vec3 volumeWorldMax, int volumeDimension) {
+uvec3 getVoxelIndex(vec3 worldPos, vec3 volumeWorldMin, vec3 volumeWorldMax, uint volumeDimension) {
     vec3 relativePos = (worldPos - volumeWorldMin) / (volumeWorldMax - volumeWorldMin);
-    return clamp(ivec3(floor(relativePos * float(volumeDimension))), ivec3(0), ivec3(volumeDimension-1));
+    return clamp(uvec3(floor(relativePos * float(volumeDimension))), uvec3(0), ivec3(volumeDimension-1));
 }
 
 uint generateMorton3D(ivec3 v) {

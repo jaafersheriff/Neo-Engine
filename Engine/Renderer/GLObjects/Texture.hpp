@@ -67,6 +67,8 @@ namespace neo {
 
 		void bind() const;
 		void genMips();
+		void clear(const uint8_t* value);
+		void clear(uint16_t mipLevel, glm::uvec3 offset, glm::uvec3 size, const uint8_t* value);
 		void destroy();
 
 		uint32_t mTextureID = 0;

@@ -5,7 +5,7 @@ in vec4 geomPos[];
 in vec3 geomNor[];
 in vec2 geomTex[];
 
-uniform int volumeDimension;
+uniform uint volumeDimension;
 
 out vec3 fragPos;
 out vec3 volumePos;

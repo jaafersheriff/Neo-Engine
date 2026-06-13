@@ -7,8 +7,8 @@ namespace neo {
 	namespace {
 		int32_t _getGLBarrierType(types::shader::Barrier barrierType) {
 			switch (barrierType) {
-			case types::shader::Barrier::AtomicCounter:
-				return GL_ATOMIC_COUNTER_BARRIER_BIT;
+			// case types::shader::Barrier::AtomicCounter:
+			// 	return GL_ATOMIC_COUNTER_BARRIER_BIT;
 			case types::shader::Barrier::ImageAccess:
 				return GL_SHADER_IMAGE_ACCESS_BARRIER_BIT;
 			case types::shader::Barrier::StorageBuffer:

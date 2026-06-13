@@ -33,14 +33,18 @@ namespace neo {
 		uint16_t _channelsPerPixel(types::texture::BaseFormats format) {
 			switch (format) {
 			case types::texture::BaseFormats::R:
+			case types::texture::BaseFormats::R_INTEGER:
 			case types::texture::BaseFormats::Depth:
 			case types::texture::BaseFormats::DepthStencil:
 				return 1;
 			case types::texture::BaseFormats::RG:
+			case types::texture::BaseFormats::RG_INTEGER:
 				return 2;
 			case types::texture::BaseFormats::RGB:
+			case types::texture::BaseFormats::RGB_INTEGER:
 				return 3;
 			case types::texture::BaseFormats::RGBA:
+			case types::texture::BaseFormats::RGBA_INTEGER:
 				return 4;
 			default:
 				NEO_FAIL("INVALID");
@@ -221,6 +225,28 @@ namespace neo {
 		}
 
 		{
+			std::vector<std::pair<TextureHandle, std::function<void(Texture&)>>> swapQueue;
+			{
+				std::lock_guard<std::mutex> lock(mTransactionQueueMutex);
+				std::swap(mTransactionQueue, swapQueue);
+				mTransactionQueue.clear();
+			}
+
+			if (!swapQueue.empty()) {
+				TRACY_GPUN("Transact");
+				for (auto&& [handle, func] : swapQueue) {
+					TRACY_GPUN("Transact Single");
+					if (isValid(handle)) {
+						func(mCache.handle(handle.mHandle).get().mResource);
+					}
+					else {
+						NEO_LOG_E("Attempting to transact on an invalid texture");
+					}
+				}
+			}
+		}
+
+		{
 			std::vector<ResourceLoadDetails_Internal> swapQueue;
 			{
 				std::lock_guard<std::mutex> lock(mLoadQueueMutex);
@@ -245,8 +271,6 @@ namespace neo {
 					}, loadDetails.mLoadDetails);
 			}
 		}
-
-		NEO_ASSERT(mTransactionQueue.empty(), "Texture transactions unsupported");
 	}
 
 	void TextureManager::_destroyImpl(BackedResource<Texture>& texture) {
