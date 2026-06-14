@@ -204,88 +204,84 @@ namespace VCT {
 		return VoxelizationResult{ pointersHandle, textureHandle };
 	}
 
-	// void debugVoxelNodes(FramebufferHandle outputHandle, glm::uvec2 viewport, RenderPasses& renderPasses, const ECS& ecs, VoxelizationResult buffers, bool debugBricks, ECS::Entity cameraEntity) {
-	// 	TRACY_ZONE();
+	void debugVoxelNodes(FramebufferHandle outputHandle, glm::uvec2 viewport, RenderPasses& renderPasses, const ECS& ecs, VoxelizationResult buffers, bool debugBricks, ECS::Entity cameraEntity) {
+		TRACY_ZONE();
 
-	// 	RenderState blendState;
-	// 	blendState.mBlendState = BlendState{
-	// 		BlendEquation::Add,
-	// 		BlendFuncSrc::Alpha,
-	// 		BlendFuncDst::OneMinusSrcAlpha
-	// 	};
-	// 	{
-	// 		auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent, BoundingBoxComponent>();
-	// 		if (!volumeView) {
-	// 			return;
-	// 		}
-	// 		const auto& [_, volume, volumeSpatial, volumeBB] = *volumeView;
-	// 		glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
-	// 		glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
+		RenderState blendState;
+		blendState.mBlendState = BlendState{
+			BlendEquation::Add,
+			BlendFuncSrc::Alpha,
+			BlendFuncDst::OneMinusSrcAlpha
+		};
+		{
+			auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent, BoundingBoxComponent>();
+			if (!volumeView) {
+				return;
+			}
+			const auto& [_, volume, volumeSpatial, volumeBB] = *volumeView;
+			glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
+			glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
 
-	// 		glm::vec3 camPos = ecs.cGetComponent<SpatialComponent>(cameraEntity)->getPosition();
-	// 		bool cameraInside =
-	// 			camPos.x >= glm::min(volumeWorldMin.x, volumeWorldMax.x) && camPos.x <= glm::max(volumeWorldMin.x, volumeWorldMax.x) &&
-	// 			camPos.y >= glm::min(volumeWorldMin.y, volumeWorldMax.y) && camPos.y <= glm::max(volumeWorldMin.y, volumeWorldMax.y) &&
-	// 			camPos.z >= glm::min(volumeWorldMin.z, volumeWorldMax.z) && camPos.z <= glm::max(volumeWorldMin.z, volumeWorldMax.z);
-	// 		if (cameraInside) {
-	// 			blendState.mCullFace = CullFace::Front;
-	// 		}
-	// 	}
-	// 	blendState.mWireframeable = false;
+			glm::vec3 camPos = ecs.cGetComponent<SpatialComponent>(cameraEntity)->getPosition();
+			bool cameraInside =
+				camPos.x >= glm::min(volumeWorldMin.x, volumeWorldMax.x) && camPos.x <= glm::max(volumeWorldMin.x, volumeWorldMax.x) &&
+				camPos.y >= glm::min(volumeWorldMin.y, volumeWorldMax.y) && camPos.y <= glm::max(volumeWorldMin.y, volumeWorldMax.y) &&
+				camPos.z >= glm::min(volumeWorldMin.z, volumeWorldMax.z) && camPos.z <= glm::max(volumeWorldMin.z, volumeWorldMax.z);
+			if (cameraInside) {
+				blendState.mCullFace = CullFace::Front;
+			}
+		}
+		blendState.mWireframeable = false;
 
-	// 	renderPasses.renderPass(outputHandle, viewport, blendState, [cameraEntity, buffers, debugBricks](const ResourceManagers& resourceManagers, const ECS& ecs) {
-	// 		TRACY_GPUN("Debug VoxelNodes");
-	// 		if (!resourceManagers.mShaderBufferManager.isValid(buffers.mVoxelNodes)
-	// 			|| !resourceManagers.mShaderBufferManager.isValid(buffers.mHeaderPointers)
-	// 			|| !resourceManagers.mShaderBufferManager.isValid(buffers.mBrickIDs)
-	// 			|| !resourceManagers.mShaderBufferManager.isValid(buffers.mBrickCounter))  {
-	// 			return;
-	// 		}
+		renderPasses.renderPass(outputHandle, viewport, blendState, [cameraEntity, buffers, debugBricks](const ResourceManagers& resourceManagers, const ECS& ecs) {
+			TRACY_GPUN("Debug VoxelNodes");
+			if (!resourceManagers.mTextureManager.isValid(buffers.mBrickPointers)
+				|| !resourceManagers.mTextureManager.isValid(buffers.mBricksTexture))  {
+				return;
+			}
 
-	// 		auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent, BoundingBoxComponent>();
-	// 		if (!volumeView) {
-	// 			return;
-	// 		}
-	// 		const auto& [_, volume, volumeSpatial, volumeBB] = *volumeView;
+			auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent, BoundingBoxComponent>();
+			if (!volumeView) {
+				return;
+			}
+			const auto& [_, volume, volumeSpatial, volumeBB] = *volumeView;
 
-	// 		auto voxelNodeDebugShaderHandle = resourceManagers.mShaderManager.asyncLoad("VoxelNodesDebugShader", ShaderBuilder{}
-	// 			.setStage(types::shader::Stage::Vertex, "model.vert")
-	// 			.setStage(types::shader::Stage::Fragment, "vct/voxelnodesdebug.frag")
-	// 		);
-	// 		if (!resourceManagers.mShaderManager.isValid(voxelNodeDebugShaderHandle)) {
-	// 			return;
-	// 		}
+			auto voxelNodeDebugShaderHandle = resourceManagers.mShaderManager.asyncLoad("VoxelNodesDebugShader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "model.vert")
+				.setStage(types::shader::Stage::Fragment, "vct/voxelnodesdebug.frag")
+			);
+			if (!resourceManagers.mShaderManager.isValid(voxelNodeDebugShaderHandle)) {
+				return;
+			}
 
-	// 		MakeDefine(DEBUG_BRICKS);
-	// 		ShaderDefines defines;
-	// 		if (debugBricks) {
-	// 			defines.set(DEBUG_BRICKS);
-	// 		}
+			MakeDefine(DEBUG_BRICKS);
+			ShaderDefines defines;
+			if (debugBricks) {
+				defines.set(DEBUG_BRICKS);
+			}
 
-	// 		auto voxelNodeShader = resourceManagers.mShaderManager.resolveDefines(voxelNodeDebugShaderHandle, defines);
-	// 		voxelNodeShader.bind();
+			auto voxelNodeShader = resourceManagers.mShaderManager.resolveDefines(voxelNodeDebugShaderHandle, defines);
+			voxelNodeShader.bind();
 
-	// 		glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
-	// 		glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
-	// 		int bricksPerAxis = (volume.mDimension + volume.mVoxelsPerBrick - 1) / volume.mVoxelsPerBrick; // ceil(dimension / voxelsPerBrick)
+			glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
+			glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
 
-	// 		voxelNodeShader.bindUniform("volumeMin", glm::min(volumeWorldMin, volumeWorldMax));
-	// 		voxelNodeShader.bindUniform("volumeMax", glm::max(volumeWorldMin, volumeWorldMax));
-	// 		voxelNodeShader.bindUniform("volumeDimension", volume.mDimension);
-	// 		voxelNodeShader.bindUniform("bricksPerAxis", bricksPerAxis);
-	// 		voxelNodeShader.bindUniform("voxelsPerBrick", volume.mVoxelsPerBrick);
-	// 		voxelNodeShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
-	// 		voxelNodeShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
-	// 		voxelNodeShader.bindUniform("cameraPos", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getPosition());
-	// 		voxelNodeShader.bindUniform("cameraDir", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getLookDir());
-	// 		voxelNodeShader.bindShaderBuffer("VoxelNodes", resourceManagers.mShaderBufferManager.resolve(buffers.mVoxelNodes), types::shader::Access::Read);
-	// 		voxelNodeShader.bindShaderBuffer("HeaderPointers", resourceManagers.mShaderBufferManager.resolve(buffers.mHeaderPointers), types::shader::Access::Read);
-	// 		voxelNodeShader.bindShaderBuffer("BrickIDs", resourceManagers.mShaderBufferManager.resolve(buffers.mBrickIDs), types::shader::Access::Read);
-	// 		voxelNodeShader.bindShaderBuffer("BrickCounter", resourceManagers.mShaderBufferManager.resolve(buffers.mBrickCounter), types::shader::Access::Read);
+			voxelNodeShader.bindUniform("volumeMin", glm::min(volumeWorldMin, volumeWorldMax));
+			voxelNodeShader.bindUniform("volumeMax", glm::max(volumeWorldMin, volumeWorldMax));
+			voxelNodeShader.bindUniform("volumeDimension", volume.mDimension);
+			voxelNodeShader.bindUniform("bricksPerAxis", volume.getLogicalBricksPerAxis());
+			voxelNodeShader.bindUniform("voxelsPerBrick", volume.mVoxelsPerBrick);
+			voxelNodeShader.bindUniform("P", ecs.cGetComponent<CameraComponent>(cameraEntity)->getProj());
+			voxelNodeShader.bindUniform("V", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getView());
+			voxelNodeShader.bindUniform("cameraPos", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getPosition());
+			voxelNodeShader.bindUniform("cameraDir", ecs.cGetComponent<SpatialComponent>(cameraEntity)->getLookDir());
 
-	// 		auto& mesh = resourceManagers.mMeshManager.resolve(MeshHandle("cube"));
-	// 		voxelNodeShader.bindUniform("M", volumeSpatial.getModelMatrix());
-	// 		mesh.draw();
-	// 	});
-	// }
+			voxelNodeShader.bindImageTexture("BrickPointers", resourceManagers.mTextureManager.resolve(buffers.mBrickPointers), types::shader::Access::Read);
+			voxelNodeShader.bindImageTexture("BrickTexture", resourceManagers.mTextureManager.resolve(buffers.mBricksTexture), types::shader::Access::Read);
+
+			auto& mesh = resourceManagers.mMeshManager.resolve(MeshHandle("cube"));
+			voxelNodeShader.bindUniform("M", volumeSpatial.getModelMatrix());
+			mesh.draw();
+		});
+	}
 }

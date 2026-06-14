@@ -6,29 +6,16 @@ in vec4 fragPos;
 uniform vec3 cameraPos;
 uniform vec3 cameraDir;
 
-uniform int volumeDimension;
+uniform uint volumeDimension;
 uniform vec3 volumeMin; // world space
 uniform vec3 volumeMax; // world space
 
-uniform int bricksPerAxis;
-uniform int voxelsPerBrick;
+uniform uint bricksPerAxis;
+uniform uint voxelsPerBrick;
+uniform ivec3 brickResolution; // Dimensions of the BrickTexture in terms of total bricks (e.g., 16x16x16 bricks)
 
-layout(std430, binding = 0) coherent readonly buffer VoxelNodes {
-	VoxelNode nodes[];
-};
-
-layout(std430, binding = 1) coherent readonly buffer HeaderPointers {
-	int headerPointers[];
-};
-
-layout(std430, binding = 2) coherent readonly buffer BrickIDs {
-	int brickIDs[];
-};
-
-layout(std430, binding = 3) coherent readonly buffer BrickCounter {
-	uint brickCounter;
-};
-
+layout(r32i, binding = 1) coherent uniform iimage3D BrickPointers;
+layout(rgba32ui, binding = 2) readonly uniform uimage3D BrickTexture; 
 out vec4 outColor;
 
 #ifdef DEBUG_BRICKS
@@ -61,7 +48,6 @@ bool rayAABBIntersect(vec3 rayOrigin, vec3 rayDir, vec3 boxMin, vec3 boxMax, out
 	return tFar >= tNear && tFar >= 0.0;
 }
 
-
 void main() {
 	vec3 rayOrigin = cameraPos;
 	vec3 rayDir = normalize(fragPos.xyz - cameraPos);
@@ -80,20 +66,20 @@ void main() {
 
 	// compute starting index
 #ifdef DEBUG_BRICKS
-	vec3 brickSize = (volumeMax - volumeMin) / float(bricksPerAxis); // brick size world space
+	vec3 brickSize = abs(volumeMax - volumeMin) / float(bricksPerAxis); // brick size world space
 	vec3 volumePos = (pos - volumeMin) / (volumeMax - volumeMin); // start pos volume space
 	ivec3 currentBrick = ivec3(clamp(floor(volumePos * float(bricksPerAxis)), vec3(0), vec3(bricksPerAxis - 1)));
 
 	vec3 stepSize = brickSize;
 	ivec3 currentIndex = currentBrick;
-	int maxDimension = bricksPerAxis;
+	int maxDimension = int(bricksPerAxis);
 #else
 	vec3 voxelSize = abs(volumeMax - volumeMin) / float(volumeDimension); // world space
 	ivec3 currentVoxel = ivec3(clamp(floor((pos - volumeMin) / voxelSize), vec3(0), vec3(float(volumeDimension) - 1.0))); 
 
 	vec3 stepSize = voxelSize;
 	ivec3 currentIndex = currentVoxel;
-	int maxDimension = volumeDimension;
+	int maxDimension = int(volumeDimension);
 #endif
 
 	vec3 nextBoundaryX = volumeMin + (vec3(currentIndex) + vec3(stepDir.x > 0 ? 1.0 : 0.0, 0.0, 0.0)) * stepSize.x;
@@ -122,42 +108,54 @@ void main() {
 			break;
 		}
 
-		// Look up voxel contents
-		int index = getFlattenedIndex(currentIndex, maxDimension);
 
 #ifdef DEBUG_BRICKS
-		int brickID = brickIDs[index];
+		// Indexing directly into the pointer map grid
+		int brickID = imageLoad(BrickPointers, currentIndex).r;
 		if (brickID >= 0) {
-			// Active brick → show its assigned ID color
 			found = true;
 			finalColor = brickColor(brickID);
 			break;
 		}
 #else
-		int header = headerPointers[index];
-		if (header != -1) {
-			// Make a solid per-voxel color (averaging nodes if multiple), not continuous ray accumulation
-			vec3 voxelColor = vec3(0.0);
-			int nodeCount = 0;
-			int safety = 128;
-			while (header != -1 && safety-- > 0) {
-				vec4 albedo = unpackRGBA8(nodes[header].albedo);
-				vec3 emissive = unpackR11G11B10(nodes[header].emissive);
-				vec3 normal = normalize(unpackNormal(nodes[header].normal));
-				voxelColor += albedo.rgb + emissive;
-				// voxelColor += (albedo.rgb + emissive) * saturate(dot(normal, normalize(vec3(-0.3, 0.8, -0.4))));
+		// 1. Calculate macro grid (brick) index and local voxel within that brick
+		ivec3 macroGridIdx = currentIndex / int(voxelsPerBrick);
+		ivec3 localVoxelIdx = currentIndex % int(voxelsPerBrick);
 
-				nodeCount++;
-				header = nodes[header].header;
-			}
-			if (nodeCount > 0) {
-				voxelColor /= float(nodeCount);
-			}
+		int brickIdx = imageLoad(BrickPointers, macroGridIdx).r;
 
-			finalColor = voxelColor;
-			// finalColor = magma_quintic(nodeCount / 128.0);
-			found = true;
-			break; // stop at first occupied voxel -> solid voxel appearance
+		// Check if brick is allocated (matching your initialization default of -1)
+		if (brickIdx == -1) {
+		}
+		else {
+			
+			// 2. Map the 1D flat brick ID into physical 3D brick grid coordinates
+			ivec3 brick3DOffset = ivec3(
+				brickIdx % brickResolution.x,
+				(brickIdx / brickResolution.x) % brickResolution.y,
+				brickIdx / (brickResolution.x * brickResolution.y)
+			);
+			
+			// 3. Match the allocation spacing: stride by (voxelsPerBrick + 2) due to padding 
+			ivec3 brickPhysicalStart = brick3DOffset * int(voxelsPerBrick + 2);
+			
+			// 4. Offset by 1 to skip the boundary padding texel and add local coordinate
+			ivec3 readTexelCoord = brickPhysicalStart + ivec3(1) + localVoxelIdx;
+
+			// 5. Read and decode the data exactly how you packed it
+			uvec4 packedData = imageLoad(BrickTexture, readTexelCoord);
+			
+			// If the voxel is completely unwritten/empty (checking albedo payload alpha or rgb)
+			if (packedData.g != 0u || packedData.b != 0u) {
+				vec4 albedo = unpackRGBA8(packedData.g);
+				vec3 emissive = unpackR11G11B10(packedData.b);
+				vec3 normal = normalize(unpackNormal(packedData.a));
+
+				// Visual representation of the voxel data
+				finalColor = albedo.rgb + emissive;
+				found = true;
+				break; 
+			}
 		}
 #endif
 

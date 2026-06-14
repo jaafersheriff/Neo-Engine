@@ -14,6 +14,8 @@ namespace VCT {
 			ImGui::SliderPowerOfTwo("Dimension", &mDimension, 1, 8192);
 			ImGui::SliderPowerOfTwo("Voxels Per Brick", &mVoxelsPerBrick, 2, 8);
 			ImGui::SliderPowerOfTwo("Max Bricks", &mMaxBricks, mDimension, 4096);
+			ImGui::Text("Logical bricks per Axis: %d", static_cast<int>(getLogicalBricksPerAxis()));
+			ImGui::Text("Physical bricks per Axis: %d", static_cast<int>(getPhysicalBricksPerAxis()));
 		}
 
 		uint16_t getLogicalBricksPerAxis() const {

@@ -28,7 +28,7 @@ void main() {
 #elif defined(TEXTURE_CUBE)
     texColor = textureLod(Texture, cubemapSamplingCoords(fragTex, int(arrayLevel)), float(mipLevel));
 #elif defined(TEXTURE_3D)
-    texColor = textureLod(Texture, vec3(fragTex, float(arrayLevel)), float(mipLevel));
+    texColor = vec4(textureLod(Texture, vec3(fragTex, float(arrayLevel)), float(mipLevel)).rgb, 1);
 #else
 	texColor = vec4(1, 0, 0, 1);
 #endif

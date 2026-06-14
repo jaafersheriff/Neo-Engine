@@ -72,7 +72,7 @@ void main() {
 	ivec3 brickPhysicalStart = brick3DOffset * (int(brickSize) + 2); // Padding
 	ivec3 writeTexelCoord = brickPhysicalStart + ivec3(1) + ivec3(localVoxelIdx); // +1 for padding
 	
-	//	// TODO - use atomicMaxExchange or something
+	// TODO - use atomicMaxExchange or something
 	imageStore(BrickTexture, writeTexelCoord, uvec4(
 		0u, // TODO - luminance/albedo
 		packRGBA8(fAlbedo),

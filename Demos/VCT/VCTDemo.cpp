@@ -386,7 +386,7 @@ namespace VCT {
 
 		if (mDebugDraw) {
 			drawWireframe<VolumeComponent>(sceneTargetHandle, viewport.mSize, renderPasses, cameraEntity);
-			// debugVoxelNodes(sceneTargetHandle, viewport.mSize, renderPasses, ecs, voxelizeBuffers, mDebugBricks, cameraEntity);
+			debugVoxelNodes(sceneTargetHandle, viewport.mSize, renderPasses, ecs, voxelizeBuffers, mDebugBricks, cameraEntity);
 		}
 		else {
 			drawForwardPBR<OpaqueComponent>(renderPasses, sceneTargetHandle, viewport.mSize, cameraEntity);
