@@ -21,6 +21,78 @@ namespace VCT {
 	using namespace neo;
 
 	namespace {
+		void _voxelize(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
+
+			RenderState renderState;
+			renderState.mDepthState = std::nullopt;
+			renderState.mCullFace = std::nullopt;
+			renderPasses.renderPass(brickTargetHandle, glm::uvec2(physicalBricksPerAxis), renderState,
+				[atomicCounterHandle, brickPointersHandle, bricksTextureHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
+					TRACY_GPUN("Generate Bricks");
+
+					if (!resourceManagers.mShaderManager.isValid(brickGenShaderHandle)) {
+						return;
+					}
+
+					const auto& [_, volume, volumeSpatial, volumeCamera, volumeBB] = *ecs.getSingleView<VolumeComponent, SpatialComponent, CameraComponent, BoundingBoxComponent>();
+					glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
+					glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
+
+					ShaderDefines albedoDefines;
+					MakeDefine(ALBEDO_MAP);
+					albedoDefines.set(ALBEDO_MAP);
+
+					const auto& meshView = ecs.getView<
+						const VoxelizeComponent,
+						const MeshComponent,
+						const MaterialComponent,
+						const SpatialComponent>();
+					for (auto entity : meshView) {
+
+						auto meshSpatial = ecs.cGetComponent<SpatialComponent>(entity);
+						if (auto meshBB = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
+							if (!volumeBB.intersect(volumeSpatial.getModelMatrix(), *meshBB, meshSpatial->getModelMatrix())) {
+								continue;
+							}
+						}
+
+						if (!resourceManagers.mMeshManager.isValid(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle)) {
+							continue;
+						}
+
+						const auto& material = ecs.cGetComponent<MaterialComponent>(entity);
+
+						auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(brickGenShaderHandle, resourceManagers.mTextureManager.isValid(material->mAlbedoMap) ? albedoDefines : ShaderDefines{});
+
+						resolvedShader.bindShaderBuffer("BrickCounter", resourceManagers.mShaderBufferManager.resolve(atomicCounterHandle), types::shader::Access::ReadWrite);
+						resolvedShader.bindImageTexture("BrickPointers", resourceManagers.mTextureManager.resolve(brickPointersHandle), types::shader::Access::ReadWrite);
+						resolvedShader.bindImageTexture("BrickTexture", resourceManagers.mTextureManager.resolve(bricksTextureHandle), types::shader::Access::ReadWrite);
+
+						resolvedShader.bindUniform("volumeMin", glm::min(volumeWorldMin, volumeWorldMax));
+						resolvedShader.bindUniform("volumeMax", glm::max(volumeWorldMin, volumeWorldMax));
+						resolvedShader.bindUniform("volumeDimension", volume.mDimension);
+						resolvedShader.bindUniform("brickSize", volume.mVoxelsPerBrick);
+						resolvedShader.bindUniform("maxBricks", volume.mMaxBricks);
+						resolvedShader.bindUniform("brickResolution", glm::ivec3(volume.getPhysicalBricksPerAxis()));
+						resolvedShader.bindUniform("P", volumeCamera.getProj());
+						resolvedShader.bindUniform("V", volumeSpatial.getView());
+
+						resolvedShader.bindUniform("M", meshSpatial->getModelMatrix());
+						resolvedShader.bindUniform("N", meshSpatial->getNormalMatrix());
+						resolvedShader.bindUniform("albedo", material->mAlbedoColor);
+						resolvedShader.bindUniform("emissive", material->mEmissiveFactor);
+						if (resourceManagers.mTextureManager.isValid(material->mAlbedoMap)) {
+							resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
+						}
+
+						resourceManagers.mMeshManager.resolve(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle).draw();
+					}
+
+					ShaderBarrier imageBarrier(types::shader::Barrier::ImageAccess);
+					ShaderBarrier shaderBarrier(types::shader::Barrier::StorageBuffer);
+				}, "Generate Bricks");
+		}
+
 		std::pair<TextureHandle, TextureHandle> _generateBricks(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_ZONE();
 			auto volumeView = ecs.getSingleView<VolumeComponent, SpatialComponent>();
@@ -33,7 +105,7 @@ namespace VCT {
 			const uint16_t physicalBricksPerAxis = volume.getPhysicalBricksPerAxis();
 			const uint16_t brickSize = volume.mVoxelsPerBrick + 2; // padding
 
-			auto brickPointersHandle = resourceManagers.mTextureManager.asyncLoad("brickPointers", TextureBuilder{}
+			auto brickPointersHandle = resourceManagers.mTextureManager.asyncLoad("BrickPointers", TextureBuilder{}
 				.setFormat(TextureFormat{ 
 					types::texture::Target::Texture3D, 
 					types::InternalFormats::R32_I, 
@@ -110,79 +182,11 @@ namespace VCT {
 
 			renderPasses.clear(brickTargetHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0.f)); // Probably unnecessary
 
-			RenderState renderState;
-			renderState.mDepthState = std::nullopt;
-			renderState.mCullFace = std::nullopt;
-			renderPasses.renderPass(brickTargetHandle, glm::uvec2(physicalBricksPerAxis), renderState,
-				[atomicCounterHandle, brickPointersHandle, bricksTextureHandle](const ResourceManagers& resourceManagers, const ECS& ecs) {
-					TRACY_GPUN("Generate Bricks");
-					const auto& [_, volume, volumeSpatial, volumeCamera, volumeBB] = *ecs.getSingleView<VolumeComponent, SpatialComponent, CameraComponent, BoundingBoxComponent>();
-
-					auto brickGenShaderHandle = resourceManagers.mShaderManager.asyncLoad("BrickGenShader", ShaderBuilder{}
-						.setStage(types::shader::Stage::Vertex, "vct/brickGen.vert")
-						.setStage(types::shader::Stage::Geometry, "vct/brickGen.geom")
-						.setStage(types::shader::Stage::Fragment, "vct/brickGen.frag")
-					);
-					if (!resourceManagers.mShaderManager.isValid(brickGenShaderHandle)) {
-						return;
-					}
-
-					glm::vec3 volumeWorldMin = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMin, 1.0));
-					glm::vec3 volumeWorldMax = glm::vec3(volumeSpatial.getModelMatrix() * glm::vec4(volumeBB.mMax, 1.0));
-
-					ShaderDefines albedoDefines;
-					MakeDefine(ALBEDO_MAP);
-					albedoDefines.set(ALBEDO_MAP);
-
-					const auto& meshView = ecs.getView<
-						const VoxelizeComponent,
-						const MeshComponent,
-						const MaterialComponent,
-						const SpatialComponent>();
-					for (auto entity : meshView) {
-
-						auto meshSpatial = ecs.cGetComponent<SpatialComponent>(entity);
-						if (auto meshBB = ecs.cGetComponent<BoundingBoxComponent>(entity)) {
-							if (!volumeBB.intersect(volumeSpatial.getModelMatrix(), *meshBB, meshSpatial->getModelMatrix())) {
-								continue;
-							}
-						}
-
-						if (!resourceManagers.mMeshManager.isValid(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle)) {
-							continue;
-						}
-
-						const auto& material = ecs.cGetComponent<MaterialComponent>(entity);
-
-						auto& resolvedShader = resourceManagers.mShaderManager.resolveDefines(brickGenShaderHandle, resourceManagers.mTextureManager.isValid(material->mAlbedoMap) ? albedoDefines : ShaderDefines{});
-
-						resolvedShader.bindShaderBuffer("BrickCounter", resourceManagers.mShaderBufferManager.resolve(atomicCounterHandle), types::shader::Access::ReadWrite);
-						resolvedShader.bindImageTexture("BrickPointers", resourceManagers.mTextureManager.resolve(brickPointersHandle), types::shader::Access::ReadWrite);
-						resolvedShader.bindImageTexture("BrickTexture", resourceManagers.mTextureManager.resolve(bricksTextureHandle), types::shader::Access::ReadWrite);
-
-						resolvedShader.bindUniform("volumeMin", glm::min(volumeWorldMin, volumeWorldMax));
-						resolvedShader.bindUniform("volumeMax", glm::max(volumeWorldMin, volumeWorldMax));
-						resolvedShader.bindUniform("volumeDimension", volume.mDimension);
-						resolvedShader.bindUniform("brickSize", volume.mVoxelsPerBrick);
-						resolvedShader.bindUniform("maxBricks", volume.mMaxBricks);
-						resolvedShader.bindUniform("brickResolution", glm::ivec3(volume.getLogicalBricksPerAxis()));
-						resolvedShader.bindUniform("P", volumeCamera.getProj());
-						resolvedShader.bindUniform("V", volumeSpatial.getView());
-
-						resolvedShader.bindUniform("M", meshSpatial->getModelMatrix());
-						resolvedShader.bindUniform("N", meshSpatial->getNormalMatrix());
-						resolvedShader.bindUniform("albedo", material->mAlbedoColor);
-						resolvedShader.bindUniform("emissive", material->mEmissiveFactor);
-						if (resourceManagers.mTextureManager.isValid(material->mAlbedoMap)) {
-							resolvedShader.bindTexture("albedoMap", resourceManagers.mTextureManager.resolve(material->mAlbedoMap));
-						}
-
-						resourceManagers.mMeshManager.resolve(ecs.cGetComponent<MeshComponent>(entity)->mMeshHandle).draw();
-					}
-
-					ShaderBarrier imageBarrier(types::shader::Barrier::ImageAccess);
-					ShaderBarrier shaderBarrier(types::shader::Barrier::StorageBuffer);
-				}, "Generate Bricks");
+			auto brickGenShaderHandle = resourceManagers.mShaderManager.asyncLoad("BrickGenShader", ShaderBuilder{}
+				.setStage(types::shader::Stage::Vertex, "vct/brickGen.vert")
+				.setStage(types::shader::Stage::Geometry, "vct/brickGen.geom")
+				.setStage(types::shader::Stage::Fragment, "vct/brickGen.frag")
+			);
 
 			return std::make_pair(brickPointersHandle, bricksTextureHandle);
 		}
