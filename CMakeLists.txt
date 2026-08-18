@@ -40,13 +40,15 @@ if(MSVC)
 		/FC
 		/MP
 		/Zc:rvalueCast
+		/bigobj
 	)
 	add_compile_definitions(
 		_CRT_SECURE_NO_WARNINGS
 		NOMINMAX
 		WIN32_LEAN_AND_MEAN
 )
-
+else() 
+	add_compile_options(-Wa,-mbig-obj)
 endif()
 
 add_compile_definitions(

@@ -21,6 +21,7 @@ namespace VCT {
 	using namespace neo;
 
 	namespace {
+		/*
 		void _voxelize(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
 
 			RenderState renderState;
@@ -92,6 +93,7 @@ namespace VCT {
 					ShaderBarrier shaderBarrier(types::shader::Barrier::StorageBuffer);
 				}, "Generate Bricks");
 		}
+		*/
 
 		std::pair<TextureHandle, TextureHandle> _generateBricks(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_ZONE();
@@ -108,17 +110,17 @@ namespace VCT {
 			auto brickPointersHandle = resourceManagers.mTextureManager.asyncLoad("BrickPointers", TextureBuilder{}
 				.setFormat(TextureFormat{ 
 					types::texture::Target::Texture3D, 
-					types::InternalFormats::R32_I, 
+					types::InternalFormats::R32_UI, 
 					TextureFilter{types::texture::Filters::Nearest, types::texture::Filters::Nearest, types::texture::Filters::Nearest},
 					TextureWrap{types::texture::Wraps::Clamp, types::texture::Wraps::Clamp, types::texture::Wraps::Clamp},
-					types::ByteFormats::Int
+					types::ByteFormats::UnsignedInt
 				})
 				.setDimension(glm::u16vec3(logicalBricksPerAxis))
 			);
 			auto bricksTextureHandle = resourceManagers.mTextureManager.asyncLoad("BricksTexture", TextureBuilder{}
 				.setFormat(TextureFormat{ 
 					types::texture::Target::Texture3D, 
-					types::InternalFormats::RGBA32_UI, // packed u32
+					types::InternalFormats::RGBA32_UI, // TODO - packed u32
 					TextureFilter{types::texture::Filters::Linear, types::texture::Filters::Linear, types::texture::Filters::Linear},
 					TextureWrap{types::texture::Wraps::Clamp, types::texture::Wraps::Clamp, types::texture::Wraps::Clamp},
 					types::ByteFormats::UnsignedByte

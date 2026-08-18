@@ -31,12 +31,20 @@ namespace neo {
 
 	void ShaderBuffer::_clear(uint32_t byteSize, uint32_t offset, types::InternalFormats internalFormat, types::ByteFormats format, const uint8_t* clearValue) {
 		TRACY_GPUN("glClearBufferSubData");
-		GLenum baseFormat;
-		if (format == types::ByteFormats::Float) {
+		GLenum baseFormat = GL_RED;
+
+		// ByteFormat -> BaseFormat
+		switch (format) {
+		case types::ByteFormats::Float:
 			baseFormat = GL_RED;
-		}
-		else {
+			break;
+		case types::ByteFormats::Int:
+		case types::ByteFormats::UnsignedInt:
 			baseFormat = GL_RED_INTEGER;
+			break;
+		default:
+			NEO_FAIL("Unsupported byte format");
+			break;
 		}
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, mBufferID);
 		glClearBufferSubData(
