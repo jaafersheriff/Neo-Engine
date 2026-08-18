@@ -10,7 +10,7 @@
 #include "Util/Profiler.hpp"
 #include "Util/ServiceLocator.hpp"
 
-#include <imgui.h>
+#include <ext/imgui_incl.hpp>
 #include <tracy/TracyOpenGL.hpp>
 
 using namespace neo;

@@ -89,8 +89,8 @@ PRIVATE
 	entt
 )
 target_compile_definitions(imgui
-PRIVATE
-	IMGUI_USER_CONFIG="imgui_config.hpp"
+PUBLIC
+	IMGUI_USER_CONFIG="ext/imgui_config.hpp"
 )
 
 ## entt

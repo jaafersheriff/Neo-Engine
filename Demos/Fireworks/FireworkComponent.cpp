@@ -1,6 +1,6 @@
 #include "FireworkComponent.hpp"
 
-#include <imgui.h>
+#include <ext/imgui_incl.hpp>
 
 using namespace neo;
 

@@ -94,7 +94,7 @@ namespace neo {
 				// (e.g. make Items[] an array of structure, store color/type etc.)
 				glm::vec3 color = util::sLogSeverityData.at(severity).second;
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(color.x, color.y, color.z, 1.0));
-				ImGui::TextWrapped(log);
+				ImGui::TextWrapped("%s", log);
 				ImGui::PopStyleColor();
 			}
 		}
