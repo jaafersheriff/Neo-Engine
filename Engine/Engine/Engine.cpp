@@ -68,9 +68,6 @@ namespace neo {
 
 		}
 
-		// The GL context is bound once, on the render thread, and stays there for the life of the
-		// engine. That is why the thread starts here rather than in run(): everything below this line
-		// that touches GL has to be handed to it.
 		mRenderThread.start();
 		mRenderThread.runSync([](void* context) {
 			ServiceLocator<Renderer>::ref().initGPUContext(*static_cast<WindowSurface*>(context));
@@ -85,7 +82,6 @@ namespace neo {
 		util::Profiler profiler(mWindow.getDetails().mRefreshRate);
 
 		ECS ecs;
-		// TODO - managers could just be added to the ecs probably..but how would that work with threading
 		ResourceManagers resourceManagers;
 
 		demos.setForceReload();
@@ -267,8 +263,10 @@ namespace neo {
 		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers);
 
 		mRenderThread.runSync([](void* context) {
+			ResourceManagers& managers = *static_cast<ResourceManagers*>(context);
+			managers._init();
 			ServiceLocator<Renderer>::ref().init();
-			static_cast<ResourceManagers*>(context)->_tick();
+			managers._tick();
 		}, &resourceManagers);
 
 		/* Init 'singleton' entities/components */
@@ -324,8 +322,7 @@ namespace neo {
 		NEO_LOG_I("Shutting down...");
 		ecs._clean();
 		Messenger::clean();
-		resourceManagers._clear();
-		ServiceLocator<Renderer>::ref().clean();
+		NEO_UNUSED(resourceManagers);
 		ServiceLocator<Renderer>::reset();
 		ServiceLocator<ImGuiManager>::ref().destroy();
 		mWindow.shutDown();
