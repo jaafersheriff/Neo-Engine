@@ -12,7 +12,7 @@ namespace neo {
 			: mFrameMouse(engineMouse)
 		{}
 
-		virtual void imGuiEditor() override {
+		void imGuiEditor() {
 			ImGui::Text("Position: [%0.2f, %0.2f]", mFrameMouse.getPos().x, mFrameMouse.getPos().y);
 			ImGui::Text("Speed:	[%0.2f, %0.2f, %0.2f]", mFrameMouse.getSpeed().x, mFrameMouse.getSpeed().y, mFrameMouse.getScrollSpeed());
 		}

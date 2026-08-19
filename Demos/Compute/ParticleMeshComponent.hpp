@@ -28,7 +28,7 @@ namespace Compute {
 			isDirty = true;
 		}
 
-		virtual void imGuiEditor() override {
+		void imGuiEditor() {
 			isDirty |= ImGui::DragInt("#Verts", &mNumParticles, 1.f, ServiceLocator<Renderer>::ref().getDetails().mMaxComputeWorkGroupSize.x, 1572864);
 			isDirty |= ImGui::Button("Reset");
 			ImGui::SliderFloat("Time scale", &timeScale, 0.f, 1000.f);

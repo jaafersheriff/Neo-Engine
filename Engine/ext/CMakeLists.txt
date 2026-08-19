@@ -109,6 +109,12 @@ PUBLIC
 PRIVATE
 )
 
+# Disable Empty-Type-Optimization so tag Components continue to bind
+target_compile_definitions(entt
+PUBLIC
+	ENTT_NO_ETO
+)
+
 ## par
 file(GLOB_RECURSE PAR_HPP_FILES 
 	par/par_shapes.h

@@ -9,7 +9,7 @@ namespace neo {
 			: mBias(bias)
 		{}
 
-		virtual void imGuiEditor() override {
+		void imGuiEditor() {
 			ImGui::SliderFloat("Bias", &mBias, 0.f, 10.f);
 		}
 		float mBias = 0.f;

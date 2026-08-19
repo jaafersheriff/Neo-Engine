@@ -13,7 +13,7 @@ namespace neo {
 		{}
 		glm::vec3 mSpeed;
 
-		virtual void imGuiEditor() override {
+		void imGuiEditor() {
 			ImGui::SliderFloat3("Speed", &mSpeed[0], -5.f, 5.f);
 		}
 

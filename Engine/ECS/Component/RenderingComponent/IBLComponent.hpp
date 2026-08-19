@@ -17,7 +17,7 @@ namespace neo {
 		mutable bool mDFGGenerated = false;
 		uint16_t mDFGLutResolution = 128;
 
-		virtual void imGuiEditor() override {
+		void imGuiEditor() {
 			if (ImGui::Button("Regenerate DFG Lut")) {
 				mDFGGenerated = false;
 			}

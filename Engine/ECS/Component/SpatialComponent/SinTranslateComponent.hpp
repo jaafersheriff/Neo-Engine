@@ -15,7 +15,7 @@ namespace neo {
 		{
 		}
 
-		virtual void imGuiEditor() override {
+		void imGuiEditor() {
 			ImGui::SliderFloat3("Offset", &mOffset[0], -10.f, 10.f);
 			ImGui::SliderFloat3("Base position", &mBasePosition[0], -100.f, 100.f);
 		}

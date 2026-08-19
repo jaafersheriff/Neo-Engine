@@ -20,27 +20,21 @@ namespace neo {
 		mCulledCount = 0;
 
 		const auto& cameras = ecs.getView<FrustumComponent, CameraComponent>();
-		// This is risky
-		uint32_t cameraCount = ecs.entityCount<FrustumComponent>();
+		const uint32_t cameraCount = ecs.entityCount<FrustumComponent>();
+		NEO_ASSERT(cameraCount <= CameraCulledComponent::kMaxCameras,
+			"Scene has %d frustums but CameraCulledComponent only tracks %d - the excess will never cull",
+			cameraCount, CameraCulledComponent::kMaxCameras);
 
-		CameraCulledComponent::CameraIDs cameraIDs;
-		cameraIDs.resize(cameraCount);
+		// Reused across entities: only the first `count` entries are ever read, so there is nothing
+		// to reset between iterations.
+		CameraCulledComponent::CameraIDs cameraIDs = {};
 
 		for (auto&& [entity, spatial, bb] : ecs.getView<SpatialComponent, BoundingBoxComponent>().each()) {
-			// Reset the camera ID
-			for (auto camera = cameraIDs.begin(); camera < cameraIDs.end(); camera++) {
-				*camera = ECS::NEO_INVALID_ENTITY;
-			}
-
-			// Populate the cameraIDs
-			int i = 0;
+			uint8_t count = 0;
 			for (auto&& [cameraEntity, frustum, _] : cameras.each()) {
 				if (frustum.isInFrustum(spatial, bb)) {
-					if (cameraIDs.size() <= i) {
-						cameraIDs.emplace_back(cameraEntity);
-					}
-					else {
-						cameraIDs[i++] = cameraEntity;
+					if (count < CameraCulledComponent::kMaxCameras) {
+						cameraIDs[count++] = cameraEntity;
 					}
 				}
 				else {
@@ -51,9 +45,10 @@ namespace neo {
 			// Shove it into ECS
 			if (auto* existingComp = ecs.getComponent<CameraCulledComponent>(entity)) {
 				existingComp->mCameraIDs = cameraIDs;
+				existingComp->mCameraCount = count;
 			}
 			else {
-				ecs.addComponent<CameraCulledComponent>(entity, cameraIDs);
+				ecs.addComponent<CameraCulledComponent>(entity, cameraIDs, count);
 			}
 		}
 	}
