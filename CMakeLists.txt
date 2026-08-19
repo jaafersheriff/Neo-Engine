@@ -39,6 +39,7 @@ if(MSVC)
 	add_compile_options(
 		/FC
 		/MP
+		/bigobj
 		/Zc:rvalueCast
 	)
 	add_compile_definitions(

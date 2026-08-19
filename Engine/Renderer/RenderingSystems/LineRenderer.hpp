@@ -38,7 +38,7 @@ namespace neo {
 			}
 			lineShader.bindUniform("M", M);
 
-			line->getMesh(resourceManagers.mMeshManager).draw();
+			line->getMesh(resourceManagers.mMeshManager, entity).draw();
 		}
 	}
 }

@@ -134,11 +134,12 @@ namespace neo {
 			[[nodiscard]] auto end() const { return mEntries.cend(); }
 
 		private:
-
-			void _ensure(ComponentTypeID type, const Entry& entry) {
-				if (!mEntries.contains(type)) {
-					mEntries.insert_or_assign(type, entry);
+			bool _ensure(ComponentTypeID type, const Entry& entry) {
+				if (mEntries.contains(type)) {
+					return false;
 				}
+				mEntries.insert_or_assign(type, entry);
+				return true;
 			}
 
 			void _clear() {
@@ -152,6 +153,7 @@ namespace neo {
 		template<typename CompT> static void _componentWidget(ECS& ecs, Entity e); // ECS& because this invokes a custom widget
 		template<typename CompT> static void _componentRemove(ECS& ecs, Entity e); // ECS& to make use of deferred deletion queue
 		template<typename CompT> static void _componentClone(const Registry& src, Registry& dst); // Raw registry to bypass deferred queues
+
 	};
 
 	template<typename CompT>
@@ -262,10 +264,15 @@ namespace neo {
 			component = new CompT();
 		}
 
-		mComponentRegistry._ensure(
-			entt::type_hash<CompT>::value(),
-			ComponentRegistry::Entry{ CompT::kName, &ECS::_componentWidget<CompT>, &ECS::_componentRemove<CompT>, &ECS::_componentClone<CompT> }
-		);
+		if (mComponentRegistry._ensure(
+				entt::type_hash<CompT>::value(),
+				ComponentRegistry::Entry{ CompT::kName, &ECS::_componentWidget<CompT>, &ECS::_componentRemove<CompT>, &ECS::_componentClone<CompT> })) {
+
+			// On the first successful _ensure, attach any message handlers
+			if constexpr (HasMessageHandlers_v<CompT>) {
+				CompT::registerMessageHandlers(*this);
+			}
+		}
 
 		{
 			std::lock_guard<std::mutex> lock(mAddComponentMutex);
