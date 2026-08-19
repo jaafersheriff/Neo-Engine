@@ -2,9 +2,12 @@
 
 #include "ECS/Component/Component.hpp"
 
+#include "ECS/ECS.hpp"
+
 #include "ResourceManager/MeshManager.hpp"
 
 namespace neo {
+	struct LineMeshUploadedMessage;
 
 	START_COMPONENT(LineMeshComponent);
 		// TODO - replace array of structs with struct of arrays hmmm
@@ -22,7 +25,9 @@ namespace neo {
 		LineMeshComponent(const MeshManager& meshManager, std::optional<glm::vec3> overrideColor = std::nullopt);
 		~LineMeshComponent();
 
-		const Mesh& LineMeshComponent::getMesh(const MeshManager& meshManager) const;
+		// Takes the owning entity so a completed upload can be reported back to the live ECS: this
+		// runs during render, which only ever holds a clone.
+		const Mesh& getMesh(const MeshManager& meshManager, ECS::Entity self) const;
 		const std::vector<Node>& getNodes() const { return mNodes; }
 
 		void addNode(const glm::vec3 pos, glm::vec3 col = glm::vec3(1.f));
@@ -31,6 +36,11 @@ namespace neo {
 		void removeNode(const glm::vec3 position);
 		void removeNode(const int index);
 		void clearNodes();
+
+		// See IBLComponent - same opt-in. The upload happens during render, which only ever holds a
+		// clone, so the cleared dirty flag has to travel back as a message.
+		static void registerMessageHandlers(ECS& ecs);
+		static void onUploaded(ECS& ecs, const LineMeshUploadedMessage& message);
 
 		void imGuiEditor();
 	END_COMPONENT();

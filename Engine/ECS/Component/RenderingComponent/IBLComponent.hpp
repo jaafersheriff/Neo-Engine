@@ -5,17 +5,30 @@
 #include "ResourceManager/TextureManager.hpp"
 
 namespace neo {
+	class ECS;
+	struct IBLConvolvedMessage;
+	struct IBLDFGLutGeneratedMessage;
+
 	START_COMPONENT(IBLComponent);
-		// Yikes -- these have to be mutable b/c they're set by the renderer which has a const ref to the ECS
-		// Use messaging instead?
-		mutable TextureHandle mConvolvedSkybox = NEO_INVALID_HANDLE;
-		mutable bool mConvolved = false;
+		// Filled in by the renderer, but through IBLConvolvedMessage / IBLDFGLutGeneratedMessage
+		// rather than a mutable write: the renderer only ever sees a clone of the ECS, so writing
+		// here directly would be discarded when the clone is refilled. The renderer owns the texture
+		// names; this just remembers what it was handed.
+		TextureHandle mConvolvedSkybox = NEO_INVALID_HANDLE;
+		bool mConvolved = false;
 		uint16_t mConvolvedCubemapResolution = 512;
 		uint16_t mSampleCount = 2048;
 
-		mutable TextureHandle mDFGLut = NEO_INVALID_HANDLE;
-		mutable bool mDFGGenerated = false;
+		TextureHandle mDFGLut = NEO_INVALID_HANDLE;
+		bool mDFGGenerated = false;
 		uint16_t mDFGLutResolution = 128;
+
+		// Opted into world-mutation message handling: ConvolveRenderer works on a clone of the ECS, so
+		// what it discovers has to travel back as a message. Wired up automatically the first time a
+		// demo attaches an IBLComponent - see ECS::addComponent.
+		static void registerMessageHandlers(ECS& ecs);
+		static void onConvolved(ECS& ecs, const IBLConvolvedMessage& message);
+		static void onDFGLutGenerated(ECS& ecs, const IBLDFGLutGeneratedMessage& message);
 
 		void imGuiEditor() {
 			if (ImGui::Button("Regenerate DFG Lut")) {

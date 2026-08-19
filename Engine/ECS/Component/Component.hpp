@@ -4,6 +4,7 @@
 #include <utility>
 
 namespace neo {
+	class ECS;
 
 	// An empty tag base, deliberately: no vtable, no members. A component is data, and everything the
 	// engine needs to *do* with one is dispatched statically through ECS::ComponentRegistry, which
@@ -25,6 +26,22 @@ namespace neo {
 
 	template<typename CompT>
 	inline constexpr bool HasImGuiEditor_v = HasImGuiEditor<CompT>::value;
+
+	// A component whose state the renderer discovers - and therefore has to write back through a
+	// message - opts in by declaring:
+	//     static void registerMessageHandlers(ECS&);
+	// It is called once, the first time anything attaches this component type, so a demo that uses
+	// the component gets the wiring for free and never sees it. The handlers themselves are statics
+	// on the component taking the ECS as their first argument, which is what EnTT's payload-connect
+	// delivers - see Messenger::addReceiver.
+	template<typename CompT, typename = void>
+	struct HasMessageHandlers : std::false_type {};
+
+	template<typename CompT>
+	struct HasMessageHandlers<CompT, std::void_t<decltype(CompT::registerMessageHandlers(std::declval<ECS&>()))>> : std::true_type {};
+
+	template<typename CompT>
+	inline constexpr bool HasMessageHandlers_v = HasMessageHandlers<CompT>::value;
 
 	// kName is static on purpose. The string is identical for every instance of a type and
 	// ComponentRegistry already keeps one copy per type, so as a member it cost 8 bytes on every

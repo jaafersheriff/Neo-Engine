@@ -134,11 +134,14 @@ namespace neo {
 			[[nodiscard]] auto end() const { return mEntries.cend(); }
 
 		private:
-			// One dense_map probe in the common case where the type has been seen before.
-			void _ensure(ComponentTypeID type, const Entry& entry) {
-				if (!mEntries.contains(type)) {
-					mEntries.insert_or_assign(type, entry);
+			// One dense_map probe in the common case where the type has been seen before. Returns
+			// true only on the first sighting, which is the hook for one-time per-type setup.
+			bool _ensure(ComponentTypeID type, const Entry& entry) {
+				if (mEntries.contains(type)) {
+					return false;
 				}
+				mEntries.insert_or_assign(type, entry);
+				return true;
 			}
 
 			void _clear() {
@@ -151,7 +154,8 @@ namespace neo {
 		// Type-erased entry points for ComponentRegistry
 		template<typename CompT> static void _componentWidget(ECS& ecs, Entity e);
 		template<typename CompT> static void _componentRemove(ECS& ecs, Entity e);
-		template<typename CompT> static void _componentClone(const Registry& src, Registry& dst); // Raw registry to bypass deferred queues
+		template<typename CompT> static void _componentClone(const Registry& src, Registry& dst);
+
 	};
 
 	template<typename CompT>
@@ -262,10 +266,15 @@ namespace neo {
 			component = new CompT();
 		}
 
-		mComponentRegistry._ensure(
-			entt::type_hash<CompT>::value(),
-			ComponentRegistry::Entry{ CompT::kName, &ECS::_componentWidget<CompT>, &ECS::_componentRemove<CompT>, &ECS::_componentClone<CompT> }
-		);
+		if (mComponentRegistry._ensure(
+				entt::type_hash<CompT>::value(),
+				ComponentRegistry::Entry{ CompT::kName, &ECS::_componentWidget<CompT>, &ECS::_componentRemove<CompT>, &ECS::_componentClone<CompT> })) {
+			// First time anything has attached this type. If it needs render-discovered state written
+			// back, this is where that gets wired up - the demo never has to know.
+			if constexpr (HasMessageHandlers_v<CompT>) {
+				CompT::registerMessageHandlers(*this);
+			}
+		}
 
 		{
 			std::lock_guard<std::mutex> lock(mAddComponentMutex);

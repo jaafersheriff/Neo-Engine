@@ -3,6 +3,9 @@
 
 #include "glm/glm.hpp"
 
+#include "ECS/ECS.hpp"
+#include "ResourceManager/ResourceManagerInterface.hpp"
+
 #include <memory>
 #include <typeindex>
 #include <functional>
@@ -51,7 +54,9 @@
 
 namespace neo {
 
-    class ECS;
+    class Texture;
+    using TextureHandle = ResourceHandle<Texture>;
+
     // TODO - just make this a system with single frame components
     struct Component;
     struct SpatialComponent;
@@ -87,4 +92,43 @@ namespace neo {
     // };
 
 
+
+    //==========================================================================
+    // World-mutating messages
+    //--------------------------------------------------------------------------
+    // These say "the renderer discovered something the world needs to remember". The renderer only
+    // ever holds a *clone* of the ECS, so writing the discovery down directly would be thrown away
+    // when the clone is next refilled - it has to travel back as a message.
+    //
+    // Sent and received exactly like every other message: Messenger::sendMessage to send, and the
+    // ECS registers itself as the receiver in ECS::_init, the same remove-then-add that Keyboard,
+    // Mouse and WindowSurface do in theirs. The handlers live in ECS.cpp.
+
+    /* The renderer finished convolving an IBL's skybox cubemap */
+    struct IBLConvolvedMessage : public Message {
+        ECS::Entity mEntity;
+        TextureHandle mConvolvedSkybox;
+        IBLConvolvedMessage(ECS::Entity entity, TextureHandle convolvedSkybox)
+            : mEntity(entity)
+            , mConvolvedSkybox(convolvedSkybox)
+        {}
+    };
+
+    /* The renderer finished generating an IBL's DFG LUT */
+    struct IBLDFGLutGeneratedMessage : public Message {
+        ECS::Entity mEntity;
+        TextureHandle mDFGLut;
+        IBLDFGLutGeneratedMessage(ECS::Entity entity, TextureHandle dfgLut)
+            : mEntity(entity)
+            , mDFGLut(dfgLut)
+        {}
+    };
+
+    /* A line mesh's nodes were uploaded to its mesh, so it is no longer dirty */
+    struct LineMeshUploadedMessage : public Message {
+        ECS::Entity mEntity;
+        LineMeshUploadedMessage(ECS::Entity entity)
+            : mEntity(entity)
+        {}
+    };
 }
