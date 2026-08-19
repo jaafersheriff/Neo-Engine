@@ -2,6 +2,7 @@
 
 #include "ResourceManagerInterface.hpp"
 
+#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 #include "Renderer/GLObjects/SourceShader.hpp"
 
 #include "Util/Util.hpp"
@@ -42,7 +43,7 @@ namespace neo {
 
 	protected:
 		[[nodiscard]] ShaderHandle _asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, const std::optional<std::string>& debugName) const;
-		void _destroyImpl(BackedResource<SourceShader>& sourceShader);
+		void _destroyImpl(CachedResource<SourceShader>& sourceShader);
 		void _tickImpl();
 	private:
 		std::thread* mHotReloader;
