@@ -48,9 +48,9 @@ namespace neo {
 			}
 		}
 
-		struct TextureLoader final : entt::resource_loader<TextureLoader, BackedResource<Texture>> {
+		struct TextureLoader final {
 
-			std::shared_ptr<BackedResource<Texture>> load(TextureFiles& fileDetails, const std::optional<std::string>& debugName) const {
+			std::optional<CachedResource<Texture>> load(TextureFiles& fileDetails, const std::optional<std::string>& debugName) const {
 				if (debugName.has_value()) {
 					NEO_LOG_V("Uploading texture files for %s", debugName.value().c_str());
 				}
@@ -67,7 +67,7 @@ namespace neo {
 						_fileName = Loader::ENGINE_RES_DIR + filePath;
 						if (!util::fileExists(_fileName.c_str())) {
 							NEO_LOG_E("Unable to find file %s", filePath.c_str());
-							return nullptr; // This works because STBIImageData does RAII dealloc
+							return std::nullopt; // This works because STBIImageData does RAII dealloc
 						}
 					}
 
@@ -113,17 +113,17 @@ namespace neo {
 				else {
 					NEO_LOG_E("Failed to load %s", debugName.has_value() ? debugName.value().c_str() : "");
 				}
-				return nullptr;
+				return std::nullopt;
 			}
 
-			std::shared_ptr<BackedResource<Texture>> load(TextureBuilder textureDetails, const std::optional<std::string>& debugName) const {
+			std::optional<CachedResource<Texture>> load(TextureBuilder textureDetails, const std::optional<std::string>& debugName) const {
 				if (debugName.has_value()) {
 					NEO_LOG_V("Uploading raw texture %s", debugName.value().c_str());
 				}
-				std::shared_ptr<BackedResource<Texture>> textureResource = std::make_shared<BackedResource<Texture>>(textureDetails.mFormat, textureDetails.mDimensions, debugName, textureDetails.mData);
-				textureResource->mDebugName = debugName;
+				CachedResource<Texture> textureResource(textureDetails.mFormat, textureDetails.mDimensions, debugName, textureDetails.mData);
+				textureResource.mDebugName = debugName;
 				if (textureDetails.mFormat.mMipCount > 1) {
-					textureResource->mResource.genMips();
+					textureResource.mResource.genMips();
 				}
 
 				return textureResource;
@@ -136,11 +136,13 @@ namespace neo {
 		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF, /**/ 0xFF, 0xFF, 0xFF, 0xFF,
 		                   0xFF, 0xFF, 0xFF, 0xFF, /**/ 0x00, 0x00, 0x00, 0xFF
 		};
-		mFallback = TextureLoader{}.load(TextureBuilder{
+		std::optional<CachedResource<Texture>> fallback = TextureLoader{}.load(TextureBuilder{
 			TextureFormat{},
 			glm::u16vec3(2, 2, 0),
 			data
 		}, "Fallback Texture");
+		NEO_ASSERT(fallback.has_value(), "Failed to load the fallback texture");
+		mFallback = std::make_shared<CachedResource<Texture>>(std::move(*fallback));
 	}
 
 	TextureManager::~TextureManager() {
@@ -200,8 +202,8 @@ namespace neo {
 			for (auto& id : swapQueue) {
 				TRACY_ZONEN("Destroy Single");
 				if (isValid(id)) {
-					_destroyImpl(mCache.handle(id.mHandle).get());
-					mCache.discard(id.mHandle);
+					_destroyImpl(*mCache.resolve(id));
+					mCache.erase(id);
 				}
 				else {
 					std::lock_guard<std::mutex> lock(mLoadQueueMutex);
@@ -228,11 +230,11 @@ namespace neo {
 				std::visit([&](auto&& arg) {
 					using T = std::decay_t<decltype(arg)>;
 					if constexpr (std::is_same_v<T, TextureBuilder>) {
-						mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
+						_insertLoaded(loadDetails, TextureLoader{}.load(arg, loadDetails.mDebugName));
 						delete[] arg.mData;
 					}
 					else if constexpr (std::is_same_v<T, TextureFiles>) {
-						mCache.load<TextureLoader>(loadDetails.mHandle.mHandle, arg, loadDetails.mDebugName);
+						_insertLoaded(loadDetails, TextureLoader{}.load(arg, loadDetails.mDebugName));
 					}
 					else {
 						static_assert(always_false_v<T>, "non-exhaustive visitor!");
@@ -244,12 +246,22 @@ namespace neo {
 		NEO_ASSERT(mTransactionQueue.empty(), "Texture transactions unsupported");
 	}
 
-	void TextureManager::_destroyImpl(BackedResource<Texture>& texture) {
+	void TextureManager::_insertLoaded(const ResourceLoadDetails_Internal& loadDetails, std::optional<CachedResource<Texture>>&& texture) {
+		if (texture.has_value()) {
+			mCache.insert(loadDetails.mHandle, std::move(*texture));
+		}
+		else {
+			NEO_LOG_E("Failed to load texture %s", loadDetails.mDebugName.value_or("").c_str());
+		}
+	}
+
+	void TextureManager::_destroyImpl(CachedResource<Texture>& texture) {
 		texture.mResource.destroy();
 	}
 
 	void TextureManager::imguiEditor(std::function<void(const TextureHandle&)> textureFunc) {
-		mCache.each([&](auto handle, BackedResource<Texture>& textureResource) {
+		for (CachedResource<Texture>& textureResource : mCache) {
+			HashedString::hash_type handle = textureResource.mHandle.mHandle;
 			ImGui::PushID(static_cast<int>(handle));
 			bool node = false;
 			if (textureResource.mDebugName.has_value()) {
@@ -264,7 +276,7 @@ namespace neo {
 				ImGui::TreePop();
 			}
 			ImGui::PopID();
-		});
+		}
 	}
 
 
