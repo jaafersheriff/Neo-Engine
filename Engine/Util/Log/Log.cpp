@@ -7,12 +7,19 @@
 #include "Util/ServiceLocator.hpp"
 #include "Util/Util.hpp"
 
-#include <GLFW/glfw3.h>
+#include <chrono>
 
 #define ARRAYSIZE(_ARR)	((int)(sizeof(_ARR) / sizeof(*(_ARR))))	 // Size of a static C-style array. Don't use on pointers!
 
 namespace neo {
 	namespace util {
+		namespace {
+			double _logTimestamp() {
+				using namespace std::chrono;
+				static const steady_clock::time_point start = steady_clock::now();
+				return duration_cast<duration<double>>(steady_clock::now() - start).count();
+			}
+		}
 
 		void _log(LogSeverity severity, const char* sig, const char* format, ...) {
 			static_assert(std::is_same<neo::util::LogSeverity, decltype(severity)>::value, "Invalid log severity");
@@ -32,10 +39,10 @@ namespace neo {
 				char buf[2048];
 
 				if (severity != neo::util::LogSeverity::Error) {
-					sprintf(buf, "%0.4f [%c] (%s): %s\n", glfwGetTime(), sLogSeverityData.at(severity).first, sig, inbuf);
+					sprintf(buf, "%0.4f [%c] (%s): %s\n", _logTimestamp(), sLogSeverityData.at(severity).first, sig, inbuf);
 				}
 				else {
-					sprintf(buf, "%0.4f [%c]: %s\n", glfwGetTime(), sLogSeverityData.at(severity).first, inbuf);
+					sprintf(buf, "%0.4f [%c]: %s\n", _logTimestamp(), sLogSeverityData.at(severity).first, inbuf);
 				}
 
 #ifdef DEBUG_MODE
