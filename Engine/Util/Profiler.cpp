@@ -17,21 +17,7 @@ void operator delete(void* ptr) noexcept {
 	free(ptr);
 }
 
-#define MAX_SAMPLES 400
-
 namespace neo {
-	namespace {
-		inline void _markTime(double time, std::vector<float>& list, int& offset) {
-			if (list.size() < MAX_SAMPLES) {
-				list.emplace_back(static_cast<float>(time));
-			}
-			else {
-				list[offset] = static_cast<float>(time);
-				offset = (offset + 1) % MAX_SAMPLES;
-			}
-		}
-	}
-
 	namespace util {
 		Profiler::GPUQuery::Scope::Scope(uint32_t handle) {
 			glBeginQuery(GL_TIME_ELAPSED, handle);
@@ -72,6 +58,12 @@ namespace neo {
 		}
 
 		void Profiler::GPUQuery::destroy() {
+			// Guarded so a second destroy is a no-op rather than a GL call. ~Renderer runs on the main
+			// thread after the render thread - and its GPU context - are gone, by which point clean()
+			// has already released these.
+			if (!_handlesValid()) {
+				return;
+			}
 			glDeleteQueries(2, mHandles.data());
 			mHandles = { 0,0 };
 		}
@@ -83,9 +75,6 @@ namespace neo {
 		Profiler::Profiler(int refreshRate) 
 			: mRefreshRate(refreshRate)
 		{
-			mCPUFrametime.reserve(MAX_SAMPLES);
-			mNeoCPUTime.reserve(MAX_SAMPLES);
-			mNeoGPUTime.reserve(MAX_SAMPLES);
 		}
 
 		Profiler::~Profiler() {
@@ -100,16 +89,16 @@ namespace neo {
 
 		void Profiler::markFrame(double _runTime) {
 			double tickTime = (_runTime - mBeginFrameTime) * 1000.0;
-			_markTime(tickTime, mNeoCPUTime, mNeoCPUTimeOffset);
+			mNeoCPUTime.mark(tickTime);
 		}
 
 		void Profiler::markFrameGPU(double _runTime) {
-			_markTime(_runTime, mNeoGPUTime, mNeoGPUTimeOffset);
+			mNeoGPUTime.mark(_runTime);
 		}
 
 		void Profiler::end(double _runTime) {
 			mTimeStep = (_runTime - mBeginFrameTime);
-			_markTime(mTimeStep * 1000.0, mCPUFrametime, mCPUFrametimeOffset); // Seconds to ms
+			mCPUFrametime.mark(mTimeStep * 1000.0); // Seconds to ms
 		}
 
 		void Profiler::imGuiEditor() const {
@@ -119,17 +108,17 @@ namespace neo {
 			if (ImPlot::BeginPlot(title)) {
 				ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoLabel);
 				ImPlot::SetupAxis(ImAxis_Y1, "ms", ImPlotAxisFlags_NoInitialFit);
-				ImPlot::SetupAxisLimits(ImAxis_X1, 0, MAX_SAMPLES, ImPlotCond_Always);
+				ImPlot::SetupAxisLimits(ImAxis_X1, 0, kMaxSamples, ImPlotCond_Always);
 				ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 2000.f / mRefreshRate, ImPlotCond_Always);
 
 				ImPlot::SetNextLineStyle(ImVec4(0.5f, 1.0f, 0.0f, 1.0f));
-				ImPlot::PlotLine("CPU", mCPUFrametime.data(), static_cast<int>(mCPUFrametime.size()), 1.0, 0.0, 0, mCPUFrametimeOffset);
+				ImPlot::PlotLine("CPU", mCPUFrametime.mSamples.data(), mCPUFrametime.mCount, 1.0, 0.0, 0, mCPUFrametime.mOffset);
 
 				ImPlot::SetNextLineStyle(ImVec4(0.11f, 0.63f, 0.2f, 1.0f));
-				ImPlot::PlotLine("CPU tick", mNeoCPUTime.data(), static_cast<int>(mNeoCPUTime.size()), 1.0, 0.0, 0, mNeoCPUTimeOffset);
+				ImPlot::PlotLine("CPU tick", mNeoCPUTime.mSamples.data(), mNeoCPUTime.mCount, 1.0, 0.0, 0, mNeoCPUTime.mOffset);
 
 				ImPlot::SetNextLineStyle(ImVec4(0.7f, 0.0f, 0.7f, 1.0f));
-				ImPlot::PlotLine("GPU tick", mNeoGPUTime.data(), static_cast<int>(mNeoGPUTime.size()), 1.0, 0.0, 0, mNeoGPUTimeOffset);
+				ImPlot::PlotLine("GPU tick", mNeoGPUTime.mSamples.data(), mNeoGPUTime.mCount, 1.0, 0.0, 0, mNeoGPUTime.mOffset);
 
 				ImPlot::EndPlot();
 			}

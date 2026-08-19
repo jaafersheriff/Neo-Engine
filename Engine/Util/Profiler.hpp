@@ -76,6 +76,21 @@ namespace neo {
 			double getDeltaTime() const { return mTimeStep; } // In seconds
 
 		private:
+			static constexpr int kMaxSamples = 400;
+
+			// A fixed ring of samples, deliberately not a std::vector.
+			struct Series {
+				void mark(double time) {
+					mSamples[mOffset] = static_cast<float>(time);
+					mOffset = (mOffset + 1) % kMaxSamples;
+					mCount = mCount < kMaxSamples ? mCount + 1 : kMaxSamples;
+				}
+
+				std::array<float, kMaxSamples> mSamples = {};
+				int mCount = 0;
+				int mOffset = 0;
+			};
+
 			int mRefreshRate = 60;
 
 			uint64_t mFrame = 0;
@@ -85,17 +100,12 @@ namespace neo {
 
 			double mBeginFrameTime = 0.0;
 
-			// Full CPU swap
-			std::vector<float> mCPUFrametime;
-			int mCPUFrametimeOffset = 0;
+			// Main thread only
+			Series mCPUFrametime; // Full CPU swap
+			Series mNeoCPUTime; // Neo CPU tick
 
-			// Neo CPU tick
-			std::vector<float> mNeoCPUTime;
-			int mNeoCPUTimeOffset = 0;
-
-			// Neo GPU render
-			std::vector<float> mNeoGPUTime;
-			int mNeoGPUTimeOffset = 0;
+			// Written by the render thread - see the note on Series
+			Series mNeoGPUTime;
 		};
 	}
 }
