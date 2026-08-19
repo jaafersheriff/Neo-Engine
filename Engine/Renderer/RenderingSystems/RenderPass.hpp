@@ -17,7 +17,7 @@ namespace neo {
 		void computePass(DrawFunction draw, std::optional<std::string> debugName = std::nullopt);
 
 	private:
-		void _execute(FrameStats& stats, const ResourceManagers& resourceManagers, const ECS& ecs, bool wireframe);
+		void _execute(const ResourceManagers& resourceManagers, const ECS& ecs, bool wireframe);
 		bool mWireframeOverride = false;
 
 		struct ComputePass {
