@@ -5,17 +5,25 @@
 #include "ResourceManager/TextureManager.hpp"
 
 namespace neo {
+	class ECS;
+	struct IBLConvolvedMessage;
+	struct IBLDFGLutGeneratedMessage;
+
 	START_COMPONENT(IBLComponent);
-		// Yikes -- these have to be mutable b/c they're set by the renderer which has a const ref to the ECS
-		// Use messaging instead?
-		mutable TextureHandle mConvolvedSkybox = NEO_INVALID_HANDLE;
-		mutable bool mConvolved = false;
+		// Filled in by the renderervia  IBLConvolvedMessage / IBLDFGLutGeneratedMessage
+		TextureHandle mConvolvedSkybox = NEO_INVALID_HANDLE;
+		bool mConvolved = false;
 		uint16_t mConvolvedCubemapResolution = 512;
 		uint16_t mSampleCount = 2048;
 
-		mutable TextureHandle mDFGLut = NEO_INVALID_HANDLE;
-		mutable bool mDFGGenerated = false;
+		TextureHandle mDFGLut = NEO_INVALID_HANDLE;
+		bool mDFGGenerated = false;
 		uint16_t mDFGLutResolution = 128;
+
+		// Message handlign
+		static void registerMessageHandlers(ECS& ecs);
+		static void onConvolved(ECS& ecs, const IBLConvolvedMessage& message);
+		static void onDFGLutGenerated(ECS& ecs, const IBLDFGLutGeneratedMessage& message);
 
 		void imGuiEditor() {
 			if (ImGui::Button("Regenerate DFG Lut")) {

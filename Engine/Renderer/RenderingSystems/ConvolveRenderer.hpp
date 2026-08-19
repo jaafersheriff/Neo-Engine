@@ -12,6 +12,9 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
+#include "Messaging/Message.hpp"
+#include "Messaging/Messenger.hpp"
+
 #include "Util/Util.hpp"
 #include "Util/ServiceLocator.hpp"
 
@@ -26,6 +29,7 @@ namespace neo {
 		if (!skyboxTuple) {
 			return;
 		}
+		const ECS::Entity iblEntity = std::get<0>(*skyboxTuple);
 		const SkyboxComponent& skybox = std::get<1>(*skyboxTuple);
 		const IBLComponent& ibl = std::get<2>(*skyboxTuple);
 
@@ -39,8 +43,8 @@ namespace neo {
 			return;
 		}
 
-		if (ibl.mDFGLut == NEO_INVALID_HANDLE) {
-			ibl.mDFGLut = resourceManagers.mTextureManager.asyncLoad(
+		// dfgLut is 'global', but still can communicate back to a Component via a Message
+		const TextureHandle dfgLut = resourceManagers.mTextureManager.asyncLoad(
 				HashedString("dfgLut"),
 				TextureBuilder{}
 				.setDimension(glm::u16vec3(ibl.mDFGLutResolution, ibl.mDFGLutResolution, 0))
@@ -51,14 +55,12 @@ namespace neo {
 					TextureWrap { types::texture::Wraps::Clamp, types::texture::Wraps::Clamp, types::texture::Wraps::Clamp },
 					types::ByteFormats::Float
 					})
-			);
-			return;
-		}
+		);
 
 		if (!ibl.mDFGGenerated) {
-			renderPasses.computePass([&ibl](const ResourceManagers& resourceManagers, const ECS&) {
+			renderPasses.computePass([&ibl, dfgLut, iblEntity](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("DFG LUT");
-				if (resourceManagers.mTextureManager.isValid(ibl.mDFGLut)) {
+				if (resourceManagers.mTextureManager.isValid(dfgLut)) {
 					auto dfgLutShaderHandle = resourceManagers.mShaderManager.asyncLoad("DFGLutShader", ShaderBuilder{}
 						.setStage(types::shader::Stage::Compute, "dfglut.comp")
 					);
@@ -66,20 +68,20 @@ namespace neo {
 						auto& dfgLutShader = resourceManagers.mShaderManager.resolveDefines(dfgLutShaderHandle, {});
 						dfgLutShader.bind();
 
-						auto barrier = dfgLutShader.bindImageTexture("dst", resourceManagers.mTextureManager.resolve(ibl.mDFGLut), types::shader::Access::Write);
+						auto barrier = dfgLutShader.bindImageTexture("dst", resourceManagers.mTextureManager.resolve(dfgLut), types::shader::Access::Write);
 						dfgLutShader.dispatch({
 							ibl.mDFGLutResolution / 8,
 							ibl.mDFGLutResolution / 8,
 							1
 							});
-						ibl.mDFGGenerated = true;
+						// Signal dfglut completion
+						Messenger::sendMessage<IBLDFGLutGeneratedMessage>(iblEntity, dfgLut);
 					}
 				}
 			}, "DFG LUT");
 		}
 
-		if (ibl.mConvolvedSkybox == NEO_INVALID_HANDLE) {
-			ibl.mConvolvedSkybox = resourceManagers.mTextureManager.asyncLoad(
+		const TextureHandle convolvedSkybox = resourceManagers.mTextureManager.asyncLoad(
 				HashedString("convolvedSkybox"),
 				TextureBuilder{}
 				.setDimension(glm::u16vec3(ibl.mConvolvedCubemapResolution, ibl.mConvolvedCubemapResolution, 0))
@@ -91,19 +93,17 @@ namespace neo {
 					types::ByteFormats::Float,
 					skyboxCubemap.mFormat.mMipCount
 				})
-			);
-			return;
-		}
+		);
 
 		if (!ibl.mConvolved) {
-			renderPasses.computePass([&ibl, &skyboxCubemap](const ResourceManagers& resourceManagers, const ECS&) {
+			renderPasses.computePass([&ibl, &skyboxCubemap, convolvedSkybox, iblEntity](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("Convolve");
-				if (resourceManagers.mTextureManager.isValid(ibl.mConvolvedSkybox)) {
+				if (resourceManagers.mTextureManager.isValid(convolvedSkybox)) {
 					auto convolveShaderHandle = resourceManagers.mShaderManager.asyncLoad("ConvolveShader", ShaderBuilder{}
 						.setStage(types::shader::Stage::Compute, "convolve.comp")
 					);
 					if (resourceManagers.mShaderManager.isValid(convolveShaderHandle)) {
-						const auto& convolvedCubemap = resourceManagers.mTextureManager.resolve(ibl.mConvolvedSkybox);
+						const auto& convolvedCubemap = resourceManagers.mTextureManager.resolve(convolvedSkybox);
 
 						ShaderDefines defines;
 						MakeDefine(EQUIRECTANGULAR);
@@ -132,7 +132,7 @@ namespace neo {
 								});
 						}
 
-						ibl.mConvolved = true;
+						Messenger::sendMessage<IBLConvolvedMessage>(iblEntity, convolvedSkybox);
 					}
 				}
 			}, "Convolve");

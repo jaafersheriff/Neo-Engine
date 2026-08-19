@@ -2,6 +2,8 @@
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
 #include "Renderer/GLObjects/Mesh.hpp"
+#include "Messaging/Message.hpp"
+#include "Messaging/Messenger.hpp"
 
 namespace neo {
 
@@ -43,7 +45,7 @@ namespace neo {
 		// TODO - destroy meshhandle
 	}
 
-	const Mesh& LineMeshComponent::getMesh(const MeshManager& meshManager) const {
+	const Mesh& LineMeshComponent::getMesh(const MeshManager& meshManager, ECS::Entity self) const {
 		if (!meshManager.isValid(mMeshHandle)) {
 			return meshManager.resolve(NEO_INVALID_HANDLE);
 		}
@@ -78,7 +80,10 @@ namespace neo {
 				);
 			});
 
+			// Could be called on the render thread which contains an ECS copy..
+			// Use a message to keep engine/render ECS in sync
 			mDirty = false;
+			Messenger::sendMessage<LineMeshUploadedMessage>(self);
 		}
 		return meshManager.resolve(mMeshHandle);
 	}
@@ -147,6 +152,18 @@ namespace neo {
 			if (edited) {
 				editNode(index, pos, col);
 			}
+		}
+	}
+
+
+	void LineMeshComponent::registerMessageHandlers(ECS& ecs) {
+		Messenger::removeReceiver<LineMeshUploadedMessage, &LineMeshComponent::onUploaded>(ecs);
+		Messenger::addReceiver<LineMeshUploadedMessage, &LineMeshComponent::onUploaded>(ecs);
+	}
+
+	void LineMeshComponent::onUploaded(ECS& ecs, const LineMeshUploadedMessage& message) {
+		if (auto* line = ecs.getComponent<LineMeshComponent>(message.mEntity)) {
+			line->mDirty = false;
 		}
 	}
 }
