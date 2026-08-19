@@ -57,7 +57,31 @@ namespace neo {
 		NEO_UNUSED(config);
 	}
 
-	void Renderer::init() {
+	void Renderer::initGPUContext(WindowSurface& window) {
+		glfwMakeContextCurrent(window.getWindow());
+
+		glewExperimental = GL_FALSE;
+		NEO_ASSERT(glewInit() == GLEW_OK, "Failed to init GLEW");
+
+		// Tracy's GPU context is per-thread and must be created on the thread that issues the queries.
+		TracyGpuContext;
+
+		{
+			char buf[512];
+			int bytes = sprintf(buf, "OpenGL Version: %d.%d", mDetails.mGLMajorVersion, mDetails.mGLMinorVersion);
+			TracyAppInfo(buf, bytes);
+			bytes = sprintf(buf, "Max Shading Language:  %s", mDetails.mShadingLanguage.c_str());
+			TracyAppInfo(buf, bytes);
+			bytes = sprintf(buf, "Used Shading Language: %s", mDetails.mGLSLVersion.c_str());
+			TracyAppInfo(buf, bytes);
+			bytes = sprintf(buf, "Vendor: %s", mDetails.mVendor.c_str());
+			TracyAppInfo(buf, bytes);
+			bytes = sprintf(buf, "Renderer: %s", mDetails.mRenderer.c_str());
+			TracyAppInfo(buf, bytes);
+			bytes = sprintf(buf, "Max Compute Work Group Size: [%d, %d, %d]", mDetails.mMaxComputeWorkGroupSize.x, mDetails.mMaxComputeWorkGroupSize.y, mDetails.mMaxComputeWorkGroupSize.z);
+			TracyAppInfo(buf, bytes);
+		}
+
 	#ifdef DEBUG_MODE
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -78,7 +102,9 @@ namespace neo {
 		mDetails.mRenderer = buf;
 		memcpy(buf, glGetString(GL_SHADING_LANGUAGE_VERSION), 512);
 		mDetails.mShadingLanguage = buf;
+	}
 
+	void Renderer::init() {
 		mShowBoundingBoxes = false;
 
 		mGPUQuery.destroy();

@@ -65,44 +65,17 @@ namespace neo {
 				glfwSetWindowIcon(mWindow.getWindow(), 1, icons);
 			}
 
-			/* Init GLEW */
-			glewExperimental = GL_FALSE;
-			NEO_ASSERT(glewInit() == GLEW_OK, "Failed to init GLEW");
 		}
+
+		mRenderThread.start();
+		mRenderThread.runSync([](void* context) {
+			// On a background thread because GL things
+			ServiceLocator<Renderer>::ref().initGPUContext(*static_cast<WindowSurface*>(context));
+			ServiceLocator<Renderer>::ref().init();
+		}, &mWindow);
+
 		ServiceLocator<ImGuiManager>::set();
-		ServiceLocator<ImGuiManager>::ref().init(mWindow.getWindow(), mWindow.getDetails().mDPIScale);
-
-		ServiceLocator<Renderer>::ref().init();
-
-		// TODO - this should all move to renderer::init ?
-		{
-			auto details = ServiceLocator<Renderer>::ref().getDetails();
-			/* Set max work group */
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &details.mMaxComputeWorkGroupSize.x);
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &details.mMaxComputeWorkGroupSize.y);
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &details.mMaxComputeWorkGroupSize.z);
-			char buf[512];
-			sprintf(buf, "%s", glGetString(GL_VENDOR));
-			details.mVendor = buf;
-			sprintf(buf, "%s", glGetString(GL_RENDERER));
-			details.mRenderer = buf;
-			sprintf(buf, "%s", glGetString(GL_SHADING_LANGUAGE_VERSION));
-			details.mShadingLanguage = buf;
-
-			int bytes = sprintf(buf, "OpenGL Version: %d.%d", details.mGLMajorVersion, details.mGLMinorVersion);;
-			TracyAppInfo(buf, bytes);
-			bytes = sprintf(buf, "Max Shading Language:  %s", details.mShadingLanguage.c_str());
-			TracyAppInfo(buf, bytes);
-			bytes = sprintf(buf, "Used Shading Language: %s", details.mGLSLVersion.c_str());
-			TracyAppInfo(buf, bytes);
-			bytes = sprintf(buf, "Vendor: %s", details.mVendor.c_str());
-			TracyAppInfo(buf, bytes);
-			bytes = sprintf(buf, "Renderer: %s", details.mRenderer.c_str());
-			TracyAppInfo(buf, bytes);
-			bytes = sprintf(buf, "Max Compute Work Group Size: [%d, %d, %d]", details.mMaxComputeWorkGroupSize.x, details.mMaxComputeWorkGroupSize.y, details.mMaxComputeWorkGroupSize.z);
-			TracyAppInfo(buf, bytes);
-		}
-		TracyGpuContext;
+		ServiceLocator<ImGuiManager>::ref().init(mWindow);
 	}
 
 	void Engine::run(DemoWrangler&& demos) {
@@ -114,7 +87,7 @@ namespace neo {
 		ResourceManagers resourceManagers;
 
 		demos.setForceReload();
-		
+
 		while (!mWindow.shouldClose()) {
 			TRACY_ZONEN("Engine::run");
 
@@ -195,7 +168,7 @@ namespace neo {
 				}
 
 				{
-					TRACY_GPUN("Frame Render");
+					TRACY_ZONEN("Frame Render");
 
 					if (!mWindow.isMinimized()) {
 						TRACY_ZONEN("Prepare ImGui draw data");
@@ -214,10 +187,31 @@ namespace neo {
 					{
 						ECS& renderECS = mRenderECS[mRenderECSIndex];
 						mRenderECSIndex ^= 1;
-						ecs._cloneInto(renderECS);
 
-						resourceManagers._tick();
-						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), profiler, renderECS, resourceManagers);
+						{
+							TRACY_ZONEN("Clone ECS");
+							ecs._cloneInto(renderECS);
+						}
+
+						struct RenderFrameJob {
+							ECS& mRenderECS;
+							WindowSurface& mWindow;
+							IDemo& mDemo;
+							util::Profiler& mProfiler;
+							ResourceManagers& mResourceManagers;
+						} renderFrameJob{ renderECS, mWindow, *demos.getCurrentDemo(), profiler, resourceManagers };
+
+						mRenderThread.dispatch([](void* context) {
+							RenderFrameJob& job = *static_cast<RenderFrameJob*>(context);
+							TRACY_GPUN("Frame Render");
+							job.mResourceManagers._tick();
+							ServiceLocator<Renderer>::ref().render(job.mWindow, &job.mDemo, job.mProfiler, job.mRenderECS, job.mResourceManagers);
+							job.mWindow.flip();
+							TracyGpuCollect;
+						}, &renderFrameJob);
+						// TODO : Immediately joined, temporarily
+						mRenderThread.wait();
+
 						Messenger::relayMessages(ecs);
 					}
 				}
@@ -226,27 +220,34 @@ namespace neo {
 				Messenger::relayMessages(ecs);
 			}
 
-			mWindow.flip();
-			TracyGpuCollect;
 			FrameMark;
 			profiler.end(glfwGetTime());
 		}
 
 		demos.getCurrentDemo()->destroy();
+		mRenderThread.runSync([](void* context) {
+			static_cast<ResourceManagers*>(context)->_clear();
+			ServiceLocator<Renderer>::ref().clean();
+		}, &resourceManagers);
+		mRenderThread.stop();
 		shutDown(ecs, resourceManagers);
 	}
 
 	void Engine::_swapDemo(DemoWrangler& demos, ECS& ecs, ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
 
-		/* Destry the old state*/
+		mRenderThread.wait();
+
+		/* Destroy the old state */
 		demos.getCurrentDemo()->destroy();
+		mRenderThread.runSync([](void* context) {
+			static_cast<ResourceManagers*>(context)->_clear();
+			ServiceLocator<Renderer>::ref().clean();
+		}, &resourceManagers);
 		ecs._clean();
 		for (auto& renderECS : mRenderECS) {
 			renderECS._clean();
 		}
-		resourceManagers._clear();
-		ServiceLocator<Renderer>::ref().clean();
 		Messenger::clean();
 
 		/* Init the new state */
@@ -257,11 +258,14 @@ namespace neo {
 		mMouse.init();
 		mKeyboard.init();
 		ServiceLocator<Renderer>::ref().setDemoConfig(config);
-		ServiceLocator<Renderer>::ref().init();
 		Loader::init(config.resDir, config.shaderDir);
 		_createPrefabs(resourceManagers);
 		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers);
-		resourceManagers._tick();
+
+		mRenderThread.runSync([](void* context) {
+			ServiceLocator<Renderer>::ref().init();
+			static_cast<ResourceManagers*>(context)->_tick();
+		}, &resourceManagers);
 
 		demos.getCurrentDemo()->init(ecs, resourceManagers);
 

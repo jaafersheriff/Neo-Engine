@@ -56,7 +56,6 @@ namespace neo {
 			glfwTerminate();
 			NEO_FAIL("Failed to create window");
 		}
-		glfwMakeContextCurrent(mWindow);
 		glfwSetWindowUserPointer(mWindow, &mDetails);
 
 		glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
