@@ -51,6 +51,11 @@ namespace neo {
 	};
 
 	ShaderManager::ShaderManager() {
+		mKillSwitch.store(false);
+		mHotReloader = new std::thread(&ShaderManager::_hotReloadFunc, this);
+	}
+
+	void ShaderManager::_initImpl() {
 
 		std::optional<CachedResource<SourceShader>> fallback = ShaderLoader{}.load(SourceShader::ShaderCode{
 			{types::shader::Stage::Vertex,
@@ -71,13 +76,9 @@ namespace neo {
 		mFallback = std::make_shared<CachedResource<SourceShader>>(std::move(*fallback));
 
 		mFallback->mResource.getResolvedInstance({});
-
-		mKillSwitch.store(false);
-		mHotReloader = new std::thread(&ShaderManager::_hotReloadFunc, this);
 	}
 
 	ShaderManager::~ShaderManager() {
-		mFallback->mResource.destroy();
 		mFallback.reset();
 
 		mKillSwitch.store(true);

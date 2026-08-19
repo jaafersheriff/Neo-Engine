@@ -44,6 +44,7 @@ namespace neo {
 	protected:
 		[[nodiscard]] ShaderHandle _asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, const std::optional<std::string>& debugName) const;
 		void _destroyImpl(CachedResource<SourceShader>& sourceShader);
+		void _initImpl();
 		void _tickImpl();
 	private:
 		std::thread* mHotReloader;

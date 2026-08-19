@@ -96,6 +96,7 @@ namespace neo {
 	protected:
 		[[nodiscard]] FramebufferHandle _asyncLoadImpl(FramebufferHandle handle, FramebufferAttachments attachments, const std::optional<std::string>& debugName) const;
 		void _destroyImpl(CachedResource<ManagedFramebuffer>& framebuffer);
+		void _initImpl();
 		void _tickImpl();
 
 	private:
