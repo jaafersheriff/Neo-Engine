@@ -59,7 +59,6 @@ file(GLOB IMGUI_HPP_FILES
 	imgui_config.hpp
 	imgui_incl.hpp
 	imgui/*.h
-	imgui_entt_entity_editor/*.hpp
 	ImGuizmo/*.h
 	implot/*.h
 )
@@ -75,7 +74,6 @@ target_include_directories(imgui
 PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/"
  	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/"
- 	"${CMAKE_CURRENT_SOURCE_DIR}/imgui_entt_entity_editor"
  	"${CMAKE_CURRENT_SOURCE_DIR}/ImGuizmo"
  	"${CMAKE_CURRENT_SOURCE_DIR}/implot"
 PRIVATE
