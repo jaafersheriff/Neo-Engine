@@ -54,7 +54,7 @@ namespace neo {
 			glm::vec3 pos = cameraSpatial.getPosition();
 
 			// Create new mouseray if one doesnt exist
-			ECS::Entity mouseRayEntity = entt::null;
+			ECS::Entity mouseRayEntity = ECS::NEO_INVALID_ENTITY;
 			MouseRayComponent mouseRay;
 			mouseRay.mDirection = dir;
 			mouseRay.mPosition = pos;

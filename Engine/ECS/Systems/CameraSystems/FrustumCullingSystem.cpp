@@ -29,7 +29,7 @@ namespace neo {
 		for (auto&& [entity, spatial, bb] : ecs.getView<SpatialComponent, BoundingBoxComponent>().each()) {
 			// Reset the camera ID
 			for (auto camera = cameraIDs.begin(); camera < cameraIDs.end(); camera++) {
-				*camera = static_cast<ECS::Entity>(std::numeric_limits<uint32_t>::max());
+				*camera = ECS::NEO_INVALID_ENTITY;
 			}
 
 			// Populate the cameraIDs

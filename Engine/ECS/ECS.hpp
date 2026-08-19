@@ -5,17 +5,9 @@
 #include "Util/Profiler.hpp"
 #include "Util/Util.hpp"
 
-#ifndef ENTT_ASSERT
-#define ENTT_ASSERT(condition, ...) NEO_ASSERT(condition, __VA_ARGS__)
-#endif
 #include <entt/entt.hpp>
 
 #include <ext/imgui_incl.hpp>
-#pragma warning( push )
-#pragma warning( disable : 4244 )
-#define MM_IEEE_ASSERT(x) NEO_UNUSED(x)
-#include <imgui_entt_entity_editor.hpp>
-#pragma warning( pop )
 
 #include <typeindex>
 #include <optional>
@@ -31,6 +23,10 @@ namespace neo {
 	public:
 		using Entity = entt::entity;
 		using Registry = entt::registry;
+		using ComponentTypeID = HashedString::hash_type;
+
+		static constexpr Entity NEO_INVALID_ENTITY = entt::null;
+
 		class EntityBuilder {
 			friend ECS;
 		public:
@@ -94,7 +90,39 @@ namespace neo {
 
 	private:
 		mutable Registry mRegistry;
-		mutable MM::EntityEditor<Entity> mEditor;
+
+		// ImGui tooling
+		class ComponentRegistry {
+			friend ECS;
+		public:
+			struct Entry {
+				const char* mName = nullptr;
+				void (*mWidget)(ECS&, Entity) = nullptr;
+				void (*mRemove)(ECS&, Entity) = nullptr;
+			};
+
+			[[nodiscard]] auto begin() const { return mEntries.cbegin(); }
+			[[nodiscard]] auto end() const { return mEntries.cend(); }
+
+		private:
+
+			void _ensure(ComponentTypeID type, const Entry& entry) {
+				if (!mEntries.contains(type)) {
+					mEntries.insert_or_assign(type, entry);
+				}
+			}
+
+			void _clear() {
+				mEntries.clear();
+			}
+
+			entt::dense_map<ComponentTypeID, Entry> mEntries;
+		};
+		ComponentRegistry mComponentRegistry;
+
+		// Type-erased entry points for ComponentRegistry
+		template<typename CompT> static void _componentWidget(ECS& ecs, Entity e);
+		template<typename CompT> static void _componentRemove(ECS& ecs, Entity e);
 
 		/* Active containers */
 		std::mutex mEntityCreationMutex;
@@ -114,10 +142,10 @@ namespace neo {
 		void _initSystems();
 		void _updateSystems(const ResourceManagers& resourceManagers);
 
-
 		void _flush();
 		void _clean();
 		void _imguiEdtor();
+		void _imguiComponentEditor(Entity e);
 	};
 
 	template<typename CompT>
@@ -228,20 +256,10 @@ namespace neo {
 			component = new CompT();
 		}
 
-		MM::EntityEditor<Entity>::ComponentInfo info;
-		info.name = component->mName;
-		info.create = [this](entt::registry& r, Entity e) {
-			NEO_UNUSED(r, e);
-			NEO_LOG_W("Component creation unsupported");
-		};
-		info.destroy = [this](entt::registry& r, Entity e) {
-			NEO_UNUSED(r);
-			removeComponent<CompT>(e);
-		};
-		info.widget = [this](entt::registry& r, Entity e) {
-			r.get<CompT>(e).imGuiEditor();
-		};
-		mEditor.registerComponent<CompT>(info);
+		mComponentRegistry._ensure(
+			entt::type_hash<CompT>::value(),
+			ComponentRegistry::Entry{ component->mName, &ECS::_componentWidget<CompT>, &ECS::_componentRemove<CompT> }
+		);
 
 		{
 			std::lock_guard<std::mutex> lock(mAddComponentMutex);
@@ -334,5 +352,16 @@ namespace neo {
 		// EnTT can only sort against a single component ;( and then FilterCompT will be sorted against SortCompT
 		mRegistry.sort<FilterCompT, SortCompT>();
 	}
-}
 
+	template<typename CompT>
+	void ECS::_componentWidget(ECS& ecs, Entity e) {
+		if (CompT* component = ecs.getComponent<CompT>(e)) {
+			component->imGuiEditor();
+		}
+	}
+
+	template<typename CompT>
+	void ECS::_componentRemove(ECS& ecs, Entity e) {
+		ecs.removeComponent<CompT>(e);
+	}
+}

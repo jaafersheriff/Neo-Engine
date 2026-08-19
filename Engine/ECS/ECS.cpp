@@ -91,11 +91,9 @@ namespace neo {
 	void ECS::_clean() {
 		NEO_LOG_I("Cleaning ECS...");
 		_flush();
-		mRegistry.each([this](auto entity) {
-			mRegistry.destroy(entity);
-		});
 		mRegistry.clear();
-		NEO_ASSERT(mRegistry.alive() == 0, "What");
+		NEO_ASSERT(mRegistry.storage<Entity>().free_list() == 0, "What");
+		mComponentRegistry._clear();
 		mSystems.clear();
 	}
 
@@ -113,7 +111,7 @@ namespace neo {
 					sprintf(title, "%d", static_cast<int>(entity));
 				}
 				if (ImGui::TreeNodeEx(title)) {
-					mEditor.renderEditor(mRegistry, entity);
+					_imguiComponentEditor(entity);
 					ImGui::TreePop();
 				}
 				});
@@ -130,14 +128,14 @@ namespace neo {
 				sprintf(title, "Selected: %d", static_cast<int>(selectedEntity));
 			}
 			if (ImGui::TreeNodeEx(title, ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_DefaultOpen)) {
-				mEditor.renderEditor(mRegistry, selectedEntity);
+				_imguiComponentEditor(selectedEntity);
 				ImGui::TreePop();
 			}
 		}
-		if (ImGui::TreeNodeEx(&mRegistry, 0, "All Entities: %d", static_cast<int>(mRegistry.alive()))) {
+		if (ImGui::TreeNodeEx(&mRegistry, 0, "All Entities: %d", static_cast<int>(mRegistry.storage<Entity>().free_list()))) {
 			getView<TagComponent>().each([this](Entity entity, TagComponent& tag) {
 				if (ImGui::TreeNodeEx(tag.mTag.c_str())) {
-					mEditor.renderEditor(mRegistry, entity);
+					_imguiComponentEditor(entity);
 					ImGui::TreePop();
 				}
 			});
@@ -173,5 +171,49 @@ namespace neo {
 			ImGui::TreePop();
 		}
 		ImGui::End();
+	}
+
+	void ECS::_imguiComponentEditor(Entity e) {
+		if (!mRegistry.valid(e)) {
+			ImGui::TextUnformatted("Invalid Entity");
+			return;
+		}
+
+		ImGui::PushID(static_cast<int>(entt::to_integral(e)));
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.65f, 0.15f, 0.15f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.3f, 0.3f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.f, 0.2f, 0.2f, 1.f));
+		if (ImGui::Button("Destroy Entity")) {
+			removeEntity(e);
+		}
+		ImGui::PopStyleColor(3);
+		ImGui::Separator();
+
+		for (const auto& [type, entry] : mComponentRegistry) {
+			const auto* storage = mRegistry.storage(type);
+			if (!storage || !storage->contains(e)) {
+				continue;
+			}
+
+			ImGui::PushID(type);
+			if (ImGui::Button("-")) {
+				entry.mRemove(*this, e);
+				ImGui::PopID();
+				continue; // Early out - the component is queued for removal
+			}
+			ImGui::SameLine();
+
+			if (ImGui::CollapsingHeader(entry.mName)) {
+				ImGui::Indent(30.f);
+				ImGui::PushID("Widget");
+				entry.mWidget(*this, e);
+				ImGui::PopID();
+				ImGui::Unindent(30.f);
+			}
+			ImGui::PopID();
+		}
+
+		ImGui::PopID();
 	}
 }
