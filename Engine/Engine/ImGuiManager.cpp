@@ -60,10 +60,10 @@ namespace neo {
 		colors[ImGuiCol_DragDropTarget] = texColimv;
 		colors[ImGuiCol_DockingPreview] = HEXTOIM(0x373f38);
 		colors[ImGuiCol_TabHovered] = HEXTOIM(0x373f38);
-		colors[ImGuiCol_TabActive] = HEXTOIM(0x394738);
+		colors[ImGuiCol_TabSelected] = HEXTOIM(0x394738);
 		colors[ImGuiCol_Tab] = HEXTOIM(0x1F2622);
-		colors[ImGuiCol_TabUnfocused] = HEXTOIM(0x1F2622);
-		colors[ImGuiCol_TabUnfocusedActive] = HEXTOIM(0x19201C);
+		colors[ImGuiCol_TabDimmed] = HEXTOIM(0x1F2622);
+		colors[ImGuiCol_TabDimmedSelected] = HEXTOIM(0x19201C);
 		colors[ImGuiCol_CheckMark] = texColimv;
 		colors[ImGuiCol_SliderGrab] = disabledTexColimv;
 		colors[ImGuiCol_SliderGrabActive] = texColimv;
@@ -144,11 +144,10 @@ namespace neo {
 		mViewport.mIsFocused = ImGui::IsWindowFocused();
 		mViewport.mIsHovered = ImGui::IsWindowHovered();
 
-		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
-		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
-		auto viewportOffset = ImGui::GetWindowPos();
-		glm::ivec2 offset = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
-		glm::ivec2 size = { viewportMaxRegion.x - viewportMinRegion.x, viewportMaxRegion.y - viewportMinRegion.y };
+		auto viewportOrigin = ImGui::GetCursorScreenPos();
+		auto viewportExtent = ImGui::GetContentRegionAvail();
+		glm::ivec2 offset = { viewportOrigin.x, viewportOrigin.y };
+		glm::ivec2 size = { viewportExtent.x, viewportExtent.y };
 		if (size.x != 0 && size.y != 0) {
 			if (glm::uvec2(size) != mViewport.mSize || glm::uvec2(offset) != mViewport.mOffset) {
 				mViewport.mOffset = glm::uvec2(offset);
