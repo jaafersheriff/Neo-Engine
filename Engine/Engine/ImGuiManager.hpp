@@ -14,6 +14,7 @@ struct GLFWwindow;
 #define MAX_IMGUI_MESHES 32
 
 namespace neo {
+	class WindowSurface;
 	class ECS;
 	class ResourceManagers;
 
@@ -31,7 +32,7 @@ namespace neo {
 		ImGuiManager(const ImGuiManager&) = delete;
 		ImGuiManager & operator=(const ImGuiManager&) = delete;
 
-		void init(GLFWwindow* window, float dpiScale);
+		void init(WindowSurface& window);
 		void update();
 		void reset();
 		void destroy();

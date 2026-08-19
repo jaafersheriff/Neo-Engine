@@ -157,7 +157,6 @@ namespace neo {
 	}
 
 	void SpatialComponent::_detNormalMatrix() const {
-		TRACY_ZONE();
 		if (mScale.x == mScale.y && mScale.y == mScale.z) {
 			mNormalMatrix = glm::mat3(getModelMatrix());
 		}
