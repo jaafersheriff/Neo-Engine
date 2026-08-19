@@ -201,7 +201,7 @@ namespace neo {
 			ImGui::TableSetupColumn("Attachments");
 			ImGui::TableHeadersRow();
 
-			for (CachedResource<ManagedFramebuffer>& fb : mCache) {
+			mCache.forEach([&](const CachedResource<ManagedFramebuffer>& fb) {
 				const HashedString::hash_type handle = fb.mHandle.mHandle;
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
@@ -224,7 +224,7 @@ namespace neo {
 						}
 					}
 				}
-			}
+			});
 			ImGui::EndTable();
 		}
 	}

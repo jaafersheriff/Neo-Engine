@@ -153,7 +153,7 @@ namespace neo {
 	}
 
 	void ShaderManager::imguiEditor() {
-		for (CachedResource<SourceShader>& entry : mCache) {
+		mCache.forEach([](const CachedResource<SourceShader>& entry) {
 			auto& shader = entry.mResource;
 			if (ImGui::TreeNode(shader.mName.c_str())) {
 				if (shader.mResolvedShaders.size()) {
@@ -176,7 +176,7 @@ namespace neo {
 				}
 				ImGui::TreePop();
 			}
-		}
+		});
 	}
 
 	void ShaderManager::_hotReloadFunc() {
@@ -191,10 +191,10 @@ namespace neo {
 
 			TRACY_ZONEN("Hot reload");
 
-			for (const CachedResource<SourceShader>& entry : mCache) {
+			mCache.forEach([this](const CachedResource<SourceShader>& entry) {
 				const SourceShader& shader = entry.mResource;
 				if (!shader.mConstructionArgs) {
-					continue;
+					return;
 				}
 				time_t lastModTime = shader.mModifiedTime;
 				for (auto& stage : *shader.mConstructionArgs) {
@@ -208,7 +208,7 @@ namespace neo {
 					// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
 					discard(entry.mHandle);
 				}
-			}
+			});
 		}
 	}
 }
