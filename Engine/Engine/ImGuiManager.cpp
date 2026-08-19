@@ -29,7 +29,8 @@ namespace {
 
 namespace neo {
 
-	void ImGuiManager::init(GLFWwindow* window, float dpiScale) {
+	void ImGuiManager::init(WindowSurface& window) {
+		const float dpiScale = window.getDetails().mDPIScale;
 		/* Init ImGui */
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -102,7 +103,7 @@ namespace neo {
 		style->AntiAliasedFill = false;
 
 		
-		ImGui_ImplGlfw_InitForOpenGL(window, false);
+		ImGui_ImplGlfw_InitForOpenGL(window.getWindow(), false);
 		ImGui::GetIO().BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
 		ImGui::GetPlatformIO().Renderer_RenderWindow = _renderWindow;
 	}

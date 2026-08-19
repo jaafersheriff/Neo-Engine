@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer/Renderer.hpp"
+#include "Renderer/RenderThread.hpp"
 #include "Util/Util.hpp"
 
 #include "ECS/ECS.hpp"
@@ -51,6 +52,10 @@ namespace neo {
 			   one to the render thread while the main thread refills the other. */
 			ECS mRenderECS[2];
 			uint8_t mRenderECSIndex = 0;
+
+			/* The worker that Stage 5 moves rendering onto. For now it runs the ECS clone, which is
+			   pure CPU work with no GL in it - enough to exercise the handshake with something real. */
+			RenderThread mRenderThread;
 
 			/* Debug */
 			bool mShowBoundingBoxes = false;

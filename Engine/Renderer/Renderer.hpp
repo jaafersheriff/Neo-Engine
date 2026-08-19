@@ -41,6 +41,10 @@ namespace neo {
 			RendererDetails getDetails() const { return mDetails; }
 
 			void setDemoConfig(IDemo::Config);
+
+			// Binds the GPU context to the calling thread and brings up everything that depends on it.
+			// Called once, from the render thread - nothing else may hold the context.
+			void initGPUContext(WindowSurface& window);
 			void init();
 			void render(WindowSurface&, IDemo* demo, util::Profiler& profiler, const ECS&, ResourceManagers& resourceManager);
 			void clean();
