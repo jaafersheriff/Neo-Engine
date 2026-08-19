@@ -13,6 +13,14 @@ namespace neo {
 		mFramebufferManager.tick(); // Do this after textures
 	}
 
+	void ResourceManagers::_init() {
+		mMeshManager.init();
+		mShaderBufferManager.init();
+		mShaderManager.init();
+		mTextureManager.init();
+		mFramebufferManager.init();
+	}
+
 	void ResourceManagers::_clear() {
 		mMeshManager.clear();
 		mShaderBufferManager.clear();

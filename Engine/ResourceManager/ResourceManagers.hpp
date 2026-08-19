@@ -26,6 +26,7 @@ namespace neo {
 		TextureManager mTextureManager;
 		FramebufferManager mFramebufferManager;
 	private:
+		void _init();
 		void _imguiEditor();
 		void _clear();
 		void _tick();
