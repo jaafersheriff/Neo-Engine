@@ -16,6 +16,10 @@ namespace neo {
 	class ResourceManagers {
 		friend Engine;
 	public:
+		ResourceManagers() {
+			mFramebufferManager.mTextureManager = &mTextureManager;
+		}
+
 		MeshManager mMeshManager;
 		ShaderBufferManager mShaderBufferManager;
 		ShaderManager mShaderManager;

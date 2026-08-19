@@ -6,20 +6,20 @@
 
 namespace neo {
 
-	struct ShaderBufferLoader final : entt::resource_loader<ShaderBufferLoader, BackedResource<ShaderBuffer>> {
+	struct ShaderBufferLoader final {
 
-		std::shared_ptr<BackedResource<ShaderBuffer>> load(ShaderBufferLoadDetails details, const std::optional<std::string>& debugName) const {
+		std::optional<CachedResource<ShaderBuffer>> load(ShaderBufferLoadDetails details, const std::optional<std::string>& debugName) const {
 			if (debugName.has_value()) {
 				NEO_LOG_V("Uploading shader buffer %s", debugName.value().c_str());
 			}
 			NEO_ASSERT(details.mByteSize != 0 && details.mData != nullptr, "Empty shader buffer");
-			if (details.mByteSize > 0) {
-				std::shared_ptr<BackedResource<ShaderBuffer>> resource = std::make_shared<BackedResource<ShaderBuffer>>(details.mByteSize, details.mData, debugName);
-				resource->mDebugName = debugName;
-				return resource;
+			if (details.mByteSize == 0) {
+				return std::nullopt;
 			}
 
-			return nullptr;
+			CachedResource<ShaderBuffer> resource(details.mByteSize, details.mData, debugName);
+			resource.mDebugName = debugName;
+			return resource;
 		}
 	};
 
@@ -30,7 +30,9 @@ namespace neo {
 		std::vector<uint8_t> data(16);
 		std::fill(data.begin(), data.end(), 0u);
 		fallbackDetails.mData = data.data();
-		mFallback = ShaderBufferLoader{}.load(fallbackDetails, "Fallback ShaderBuffer");
+		std::optional<CachedResource<ShaderBuffer>> fallback = ShaderBufferLoader{}.load(fallbackDetails, "Fallback ShaderBuffer");
+		NEO_ASSERT(fallback.has_value(), "Failed to load the fallback shader buffer");
+		mFallback = std::make_shared<CachedResource<ShaderBuffer>>(std::move(*fallback));
 	}
 
 	ShaderBufferManager::~ShaderBufferManager() {
@@ -71,7 +73,12 @@ namespace neo {
 			TRACY_GPUN("Load");
 			for (auto& details : swapQueue) {
 				TRACY_GPUN("Create Single");
-				mCache.load<ShaderBufferLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
+				if (std::optional<CachedResource<ShaderBuffer>> buffer = ShaderBufferLoader{}.load(details.mLoadDetails, details.mDebugName)) {
+					mCache.insert(details.mHandle, std::move(*buffer));
+				}
+				else {
+					NEO_LOG_E("Failed to load shader buffer %s", details.mDebugName.value_or("").c_str());
+				}
 				delete[] details.mLoadDetails.mData;
 			}
 		}
@@ -89,7 +96,7 @@ namespace neo {
 				for (auto&& [handle, func] : swapQueue) {
 					TRACY_GPUN("Transact Single");
 					if (isValid(handle)) {
-						func(mCache.handle(handle.mHandle).get().mResource);
+						func(mCache.resolve(handle)->mResource);
 					}
 					else {
 						NEO_LOG_E("Attempting to transact on an invalid shader buffer");
@@ -111,27 +118,26 @@ namespace neo {
 				for (auto& id : swapQueue) {
 					TRACY_GPUN("Destroy Single");
 					if (isValid(id)) {
-						_destroyImpl(mCache.handle(id.mHandle).get());
-						mCache.discard(id.mHandle);
+						_destroyImpl(*mCache.resolve(id));
+						mCache.erase(id);
 					}
 				}
 			}
 		}
 	}
 
-	void ShaderBufferManager::_destroyImpl(BackedResource<ShaderBuffer>& buffer) {
+	void ShaderBufferManager::_destroyImpl(CachedResource<ShaderBuffer>& buffer) {
 		buffer.mResource.destroy();
 	}
 
 	void ShaderBufferManager::imguiEditor() {
-		mCache.each([](const ShaderBufferHandle id, const BackedResource<ShaderBuffer>& buffer) {
-			NEO_UNUSED(buffer);
+		for (const CachedResource<ShaderBuffer>& buffer : mCache) {
 			if (buffer.mDebugName.has_value()) {
 				ImGui::Text("%s (%u bytes)", buffer.mDebugName->c_str(), buffer.mResource.mByteSize);
 			}
 			else {
-				ImGui::Text("%d (%u bytes)", id.mHandle, buffer.mResource.mByteSize);
+				ImGui::Text("%d (%u bytes)", buffer.mHandle.mHandle, buffer.mResource.mByteSize);
 			}
-		});
+		}
 	}
 }

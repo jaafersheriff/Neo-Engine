@@ -8,16 +8,16 @@
 
 namespace neo {
 
-	struct MeshLoader final : entt::resource_loader<MeshLoader, BackedResource<Mesh>> {
+	struct MeshLoader final {
 
-		std::shared_ptr<BackedResource<Mesh>> load(MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const {
+		std::optional<CachedResource<Mesh>> load(MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const {
 			if (debugName.has_value()) {
 				NEO_LOG_V("Uploading mesh %s", debugName.value().c_str());
 			}
-			std::shared_ptr<BackedResource<Mesh>> meshResource = std::make_shared<BackedResource<Mesh>>(meshDetails.mPrimtive);
-			meshResource->mResource.init(debugName);
+			CachedResource<Mesh> meshResource(meshDetails.mPrimtive);
+			meshResource.mResource.init(debugName);
 			for (auto&& [type, buffer] : meshDetails.mVertexBuffers) {
-				meshResource->mResource.addVertexBuffer(
+				meshResource.mResource.addVertexBuffer(
 					type,
 					buffer.mComponents,
 					buffer.mStride,
@@ -30,21 +30,23 @@ namespace neo {
 				);
 			}
 			if (meshDetails.mElementBuffer) {
-				meshResource->mResource.addElementBuffer(
+				meshResource.mResource.addElementBuffer(
 					meshDetails.mElementBuffer->mCount,
 					meshDetails.mElementBuffer->mFormat,
 					meshDetails.mElementBuffer->mByteSize,
 					meshDetails.mElementBuffer->mData
 				);
 			}
-			meshResource->mDebugName = debugName;
+			meshResource.mDebugName = debugName;
 			return meshResource;
 		}
 	};
 
 	MeshManager::MeshManager() {
 		auto cubeDetails = prefabs::generateCube();
-		mFallback = MeshLoader{}.load(*cubeDetails, "Fallback Cube");
+		std::optional<CachedResource<Mesh>> fallback = MeshLoader{}.load(*cubeDetails, "Fallback Cube");
+		NEO_ASSERT(fallback.has_value(), "Failed to load the fallback mesh");
+		mFallback = std::make_shared<CachedResource<Mesh>>(std::move(*fallback));
 		for (auto&& [type, buffer] : cubeDetails->mVertexBuffers) {
 			delete[] buffer.mData;
 		}
@@ -97,7 +99,12 @@ namespace neo {
 			TRACY_GPUN("Load");
 			for (auto& details : swapQueue) {
 				TRACY_GPUN("Create Single");
-				mCache.load<MeshLoader>(details.mHandle.mHandle, details.mLoadDetails, details.mDebugName);
+				if (std::optional<CachedResource<Mesh>> mesh = MeshLoader{}.load(details.mLoadDetails, details.mDebugName)) {
+					mCache.insert(details.mHandle, std::move(*mesh));
+				}
+				else {
+					NEO_LOG_E("Failed to load mesh %s", details.mDebugName.value_or("").c_str());
+				}
 				for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
 					delete[] buffer.mData;
 				}
@@ -120,7 +127,7 @@ namespace neo {
 				for (auto&& [handle, func] : swapQueue) {
 					TRACY_GPUN("Transact Single");
 					if (isValid(handle)) {
-						func(mCache.handle(handle.mHandle).get().mResource);
+						func(mCache.resolve(handle)->mResource);
 					}
 					else {
 						NEO_LOG_E("Attempting to transact on an invalid mesh");
@@ -142,27 +149,26 @@ namespace neo {
 				for (auto& id : swapQueue) {
 					TRACY_GPUN("Destroy Single");
 					if (isValid(id)) {
-						_destroyImpl(mCache.handle(id.mHandle).get());
-						mCache.discard(id.mHandle);
+						_destroyImpl(*mCache.resolve(id));
+						mCache.erase(id);
 					}
 				}
 			}
 		}
 	}
 
-	void MeshManager::_destroyImpl(BackedResource<Mesh>& mesh) {
+	void MeshManager::_destroyImpl(CachedResource<Mesh>& mesh) {
 		mesh.mResource.destroy();
 	}
 
 	void MeshManager::imguiEditor() {
-		mCache.each([](const MeshHandle id, const BackedResource<Mesh>& mesh) {
-			NEO_UNUSED(mesh);
+		for (const CachedResource<Mesh>& mesh : mCache) {
 			if (mesh.mDebugName.has_value()) {
-				ImGui::Text(mesh.mDebugName->c_str());
+				ImGui::Text("%s", mesh.mDebugName->c_str());
 			}
 			else {
-				ImGui::Text("%d", id.mHandle);
+				ImGui::Text("%d", mesh.mHandle.mHandle);
 			}
-		});
+		}
 	}
 }

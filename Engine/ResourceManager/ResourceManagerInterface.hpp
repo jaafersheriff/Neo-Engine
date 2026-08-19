@@ -2,7 +2,7 @@
 
 #include "Util/Util.hpp"
 
-#include <entt/resource/cache.hpp>
+#include "ResourceManager/ResourceCache.hpp"
 #include <string>
 #include <memory>
 #include <optional>
@@ -10,63 +10,59 @@
 #include <chrono>
 
 namespace neo {
-	namespace {
-		uint64_t getCurrentTimestamp() {
-			using namespace std::chrono;
-			return duration_cast<microseconds>(steady_clock::now().time_since_epoch()).count();
-		}
-	}
-
-	class ResourceManagers;
 
 	constexpr HashedString::hash_type NEO_INVALID_HANDLE = UINT32_MAX;
 
-	// CRTP
+	// The stable identifier for a resource, valid for as long as the resource lives
 	template<typename ResourceType>
 	struct ResourceHandle {
 		ResourceHandle()
 			: mHandle(NEO_INVALID_HANDLE)
 		{}
-		ResourceHandle(entt::id_type handle)
+		ResourceHandle(HashedString::hash_type handle)
 			: mHandle(handle)
 		{}
 		ResourceHandle(HashedString id)
 			: mHandle(id.value())
 		{}
 
-		entt::id_type mHandle;
+		HashedString::hash_type mHandle;
 
 		bool operator==(const ResourceHandle<ResourceType>& other) const noexcept {
 			return mHandle == other.mHandle;
 		}
-		bool operator==(const entt::id_type& other) const noexcept {
+		bool operator!=(const ResourceHandle<ResourceType>& other) const noexcept {
+			return !(mHandle == other.mHandle);
+		}
+		bool operator==(const HashedString::hash_type& other) const noexcept {
 			return mHandle == other;
 		}
-		bool operator!=(const entt::id_type& other) const noexcept {
+		bool operator!=(const HashedString::hash_type& other) const noexcept {
 			return !(mHandle == other);
 		}
-
 	};
+}
 
-	template<typename ResourceType>
-	struct BackedResource {
-		template<typename... Args>
-		BackedResource(Args... args)
-			: mResource(std::forward<Args>(args)...)
-			, mCreationTimeStamp(getCurrentTimestamp())
-		{}
-		ResourceType mResource;
-		std::optional<std::string> mDebugName;
-		const uint64_t mCreationTimeStamp;
-	};
+template<typename ResourceType>
+struct std::hash<neo::ResourceHandle<ResourceType>> {
+	size_t operator()(const neo::ResourceHandle<ResourceType>& handle) const noexcept {
+		return static_cast<size_t>(handle.mHandle);
+	}
+};
 
-	template<typename DerivedManager, typename ResourceType, typename ResourceLoadDetails>
+namespace neo {
+	class ResourceManagers;
+
+	// RetainFrames > 0 keeps a resource alive for that many frames after the last resolve().
+	template<typename DerivedManager, typename ResourceType, typename ResourceLoadDetails, uint8_t RetainFrames = 0>
 	class ResourceManagerInterface {
 		friend ResourceManagers;
 	public:
+		using Cache = ResourceCache<ResourceType, RetainFrames>;
+		static constexpr bool kTracksEviction = Cache::kTracksEviction;
 
 		bool isValid(const ResourceHandle<ResourceType>& id) const {
-			return id != NEO_INVALID_HANDLE && mCache.contains(id.mHandle);
+			return id != NEO_INVALID_HANDLE && mCache.contains(id);
 		}
 
 		bool isQueued(const ResourceHandle<ResourceType>& id) const {
@@ -170,13 +166,18 @@ namespace neo {
 				std::lock_guard<std::mutex> lock(mTransactionQueueMutex);
 				mTransactionQueue.clear();
 			}
-			mCache.each([this](BackedResource<ResourceType>& resource) {
+			for (CachedResource<ResourceType>& resource : mCache) {
 				static_cast<DerivedManager*>(this)->_destroyImpl(resource);
-			});
+			}
 			mCache.clear();
 		}
 
 		void tick() {
+			if constexpr (kTracksEviction) {
+				mCache.age([this](CachedResource<ResourceType>& entry) {
+					static_cast<DerivedManager*>(this)->_destroyImpl(entry);
+				});
+			}
 			static_cast<DerivedManager*>(this)->_tickImpl();
 		}
 		mutable std::mutex mLoadQueueMutex;
@@ -188,14 +189,13 @@ namespace neo {
 		mutable std::mutex mTransactionQueueMutex;
 		mutable std::vector<std::pair<ResourceHandle<ResourceType>, std::function<void(ResourceType&)>>> mTransactionQueue;
 
-		entt::resource_cache<BackedResource<ResourceType>> mCache;
-		std::shared_ptr<BackedResource<ResourceType>> mFallback;
+		Cache mCache;
+		std::shared_ptr<CachedResource<ResourceType>> mFallback;
 
 	private:
-		BackedResource<ResourceType>& _resolveFinal(const ResourceHandle<ResourceType>& id) const {
-			auto handle = mCache.handle(id.mHandle);
-			if (handle) {
-				return const_cast<BackedResource<ResourceType>&>(handle.get());
+		CachedResource<ResourceType>& _resolveFinal(const ResourceHandle<ResourceType>& id) const {
+			if (const auto* resource = mCache.resolve(id)) {
+				return const_cast<CachedResource<ResourceType>&>(*resource);
 			}
 			NEO_FAIL("Invalid resource requested! Did you check for validity?");
 			return *mFallback;

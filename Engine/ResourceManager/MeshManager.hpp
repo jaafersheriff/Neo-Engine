@@ -41,7 +41,7 @@ namespace neo {
 
 	protected:
 		[[nodiscard]] MeshHandle _asyncLoadImpl(MeshHandle id, MeshLoadDetails meshDetails, const std::optional<std::string>& debugName) const;
-		void _destroyImpl(BackedResource<Mesh>& mesh);
+		void _destroyImpl(CachedResource<Mesh>& mesh);
 		void _tickImpl();
 
 	};
