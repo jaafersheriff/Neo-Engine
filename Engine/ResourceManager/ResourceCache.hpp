@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <shared_mutex>
 #include <string>
 #include <utility>
 #include <vector>
@@ -48,49 +49,37 @@ namespace neo {
 		using Entry = CachedResource<ResourceType>;
 		static constexpr bool kTracksEviction = RetainFrames > 0;
 
-		// Iteration hands back whole entries and deliberately does NOT count as a use to avoid influencing pooling
-		template<typename EntryT>
-		class Iterator {
-		public:
-			Iterator(const std::unique_ptr<Entry>* entries, size_t index)
-				: mEntries(entries)
-				, mIndex(index)
-			{}
 
-			EntryT& operator*() const { return *mEntries[mIndex]; }
-			EntryT* operator->() const { return mEntries[mIndex].get(); }
-
-			Iterator& operator++() {
-				mIndex++;
-				return *this;
+		// Deliberately does NOT count as a use
+		template<typename Func>
+		void forEach(Func&& func) const {
+			std::shared_lock<std::shared_mutex> lock(mMutex);
+			for (const std::unique_ptr<Entry>& entry : mEntries) {
+				func(*entry);
 			}
-
-			bool operator==(const Iterator& other) const { return mIndex == other.mIndex; }
-			bool operator!=(const Iterator& other) const { return mIndex != other.mIndex; }
-
-		private:
-			const std::unique_ptr<Entry>* mEntries;
-			size_t mIndex;
-		};
-
-		using iterator = Iterator<Entry>;
-		using const_iterator = Iterator<const Entry>;
-
-		[[nodiscard]] iterator begin() { return iterator(mEntries.data(), 0); }
-		[[nodiscard]] iterator end() { return iterator(mEntries.data(), mEntries.size()); }
-		[[nodiscard]] const_iterator begin() const { return const_iterator(mEntries.data(), 0); }
-		[[nodiscard]] const_iterator end() const { return const_iterator(mEntries.data(), mEntries.size()); }
+		}
+		template<typename Func>
+		void forEach(Func&& func) {
+			std::shared_lock<std::shared_mutex> lock(mMutex);
+			for (const std::unique_ptr<Entry>& entry : mEntries) {
+				func(*entry);
+			}
+		}
 
 		[[nodiscard]] bool contains(Handle handle) const {
+			std::shared_lock<std::shared_mutex> lock(mMutex);
 			return mEntryPositions.contains(handle);
 		}
 
 		[[nodiscard]] size_t size() const {
+			std::shared_lock<std::shared_mutex> lock(mMutex);
 			return mEntries.size();
 		}
 
 		// The only path that counts as "still in use".
 		[[nodiscard]] const Entry* resolve(Handle handle) const {
+			// TODO - An evicting cache writes the counter here, so it needs the lock exclusively, not great for perf
+			std::conditional_t<kTracksEviction, std::unique_lock<std::shared_mutex>, std::shared_lock<std::shared_mutex>> lock(mMutex);
 			const EntryPosition entryPos = _getEntryPosition(handle);
 			if (entryPos == kInvalidEntryPosition) {
 				return nullptr;
@@ -104,6 +93,7 @@ namespace neo {
 		}
 
 		void insert(Handle handle, Entry&& entry) {
+			std::unique_lock<std::shared_mutex> lock(mMutex);
 			entry.mHandle = handle;
 
 			EntryPosition entryPos = _getEntryPosition(handle);
@@ -123,7 +113,40 @@ namespace neo {
 		}
 
 		void erase(Handle handle) {
-			const EntryPosition entryPos = _getEntryPosition(handle);
+			std::unique_lock<std::shared_mutex> lock(mMutex);
+			_eraseUnlocked(handle);
+		}
+
+		void clear() {
+			std::unique_lock<std::shared_mutex> lock(mMutex);
+			mEntryPositions.clear();
+			mEntries.clear();
+			mFramesUntilEviction.clear();
+		}
+
+		// Ages every entry by one frame. Anything that reaches zero is handed to destroy()
+		template<typename DestroyFunc>
+		void age(DestroyFunc&& destroy) {
+			static_assert(kTracksEviction, "Cache does not evict - nothing to age");
+			std::unique_lock<std::shared_mutex> lock(mMutex);
+			// Walk backwards: erase() swaps the last entry into the hole
+			for (size_t i = mEntries.size(); i-- > 0; ) {
+				if (mFramesUntilEviction[i] == 0) {
+					Entry& entry = *mEntries[i];
+					const Handle handle = entry.mHandle;
+					destroy(entry);
+					_eraseUnlocked(handle);
+				}
+				else {
+					mFramesUntilEviction[i]--;
+				}
+			}
+		}
+
+	private:
+		// Callers must already hold the lock exclusively
+		void _eraseUnlocked(Handle handle) {
+			auto entryPos = _getEntryPosition(handle);
 			if (entryPos == kInvalidEntryPosition) {
 				return;
 			}
@@ -144,31 +167,6 @@ namespace neo {
 			mEntryPositions.erase(handle);
 		}
 
-		void clear() {
-			mEntryPositions.clear();
-			mEntries.clear();
-			mFramesUntilEviction.clear();
-		}
-
-		// Ages every entry by one frame. Anything that reaches zero is handed to destroy() callback
-		template<typename DestroyFunc>
-		void age(DestroyFunc&& destroy) {
-			static_assert(kTracksEviction, "Cache does not evict - nothing to age");
-			// Walk backwards: erase() swaps the last entry into the hole
-			for (size_t i = mEntries.size(); i-- > 0; ) {
-				if (mFramesUntilEviction[i] == 0) {
-					Entry& entry = *mEntries[i];
-					const Handle handle = entry.mHandle;
-					destroy(entry);
-					erase(handle);
-				}
-				else {
-					mFramesUntilEviction[i]--;
-				}
-			}
-		}
-
-	private:
 		[[nodiscard]] EntryPosition _getEntryPosition(Handle handle) const {
 			const auto it = mEntryPositions.find(handle);
 			return it == mEntryPositions.cend() ? kInvalidEntryPosition : it->second;
@@ -183,6 +181,7 @@ namespace neo {
 			}
 		}
 
+		mutable std::shared_mutex mMutex;
 		entt::dense_map<Handle, EntryPosition> mEntryPositions;
 		// unique_ptr because resolve() hands back a pointer and render code holds references across
 		// passes - a flat vector would dangle every time the cache grows.

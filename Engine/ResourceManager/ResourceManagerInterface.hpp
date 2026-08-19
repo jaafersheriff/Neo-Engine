@@ -166,9 +166,9 @@ namespace neo {
 				std::lock_guard<std::mutex> lock(mTransactionQueueMutex);
 				mTransactionQueue.clear();
 			}
-			for (CachedResource<ResourceType>& resource : mCache) {
+			mCache.forEach([this](CachedResource<ResourceType>& resource) {
 				static_cast<DerivedManager*>(this)->_destroyImpl(resource);
-			}
+			});
 			mCache.clear();
 		}
 
