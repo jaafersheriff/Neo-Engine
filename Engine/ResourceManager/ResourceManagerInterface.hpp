@@ -170,6 +170,16 @@ namespace neo {
 				static_cast<DerivedManager*>(this)->_destroyImpl(resource);
 			});
 			mCache.clear();
+
+			if (mFallback) {
+				static_cast<DerivedManager*>(this)->_destroyImpl(*mFallback);
+				mFallback.reset();
+			}
+		}
+
+		void init() {
+			NEO_ASSERT(!mFallback, "Fallback resource already created");
+			static_cast<DerivedManager*>(this)->_initImpl();
 		}
 
 		void tick() {

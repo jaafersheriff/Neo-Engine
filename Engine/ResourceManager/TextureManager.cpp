@@ -133,6 +133,9 @@ namespace neo {
 	}
 
 	TextureManager::TextureManager() {
+	}
+
+	void TextureManager::_initImpl() {
 		uint8_t data[] = { 0x00, 0x00, 0x00, 0xFF, /**/ 0xFF, 0xFF, 0xFF, 0xFF,
 		                   0xFF, 0xFF, 0xFF, 0xFF, /**/ 0x00, 0x00, 0x00, 0xFF
 		};
@@ -146,7 +149,6 @@ namespace neo {
 	}
 
 	TextureManager::~TextureManager() {
-		mFallback->mResource.destroy();
 		mFallback.reset();
 	}
 

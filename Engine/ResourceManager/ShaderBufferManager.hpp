@@ -26,6 +26,7 @@ namespace neo {
 	protected:
 		[[nodiscard]] ShaderBufferHandle _asyncLoadImpl(ShaderBufferHandle id, ShaderBufferLoadDetails details, const std::optional<std::string>& debugName) const;
 		void _destroyImpl(CachedResource<ShaderBuffer>& buffer);
+		void _initImpl();
 		void _tickImpl();
 	};
 }

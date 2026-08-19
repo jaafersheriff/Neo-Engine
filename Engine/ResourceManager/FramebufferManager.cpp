@@ -81,6 +81,9 @@ namespace neo {
 	}
 
 	FramebufferManager::FramebufferManager() {
+	}
+
+	void FramebufferManager::_initImpl() {
 		// Fallback is the backbuffer, which a default-constructed Framebuffer already points at.
 		// Goodluck
 		mFallback = std::make_shared<CachedResource<ManagedFramebuffer>>();

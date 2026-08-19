@@ -84,7 +84,6 @@ namespace neo {
 		util::Profiler profiler(mWindow.getDetails().mRefreshRate);
 
 		ECS ecs;
-		// TODO - managers could just be added to the ecs probably..but how would that work with threading
 		ResourceManagers resourceManagers;
 
 		demos.setForceReload();
@@ -264,8 +263,10 @@ namespace neo {
 		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers);
 
 		mRenderThread.runSync([](void* context) {
+			ResourceManagers& managers = *static_cast<ResourceManagers*>(context);
+			managers._init();
 			ServiceLocator<Renderer>::ref().init();
-			static_cast<ResourceManagers*>(context)->_tick();
+			managers._tick();
 		}, &resourceManagers);
 
 		ecs.submitEntity(std::move(ECS::EntityBuilder{}.attachComponent<RendererParamsComponent>()));
@@ -320,8 +321,7 @@ namespace neo {
 		NEO_LOG_I("Shutting down...");
 		ecs._clean();
 		Messenger::clean();
-		resourceManagers._clear();
-		ServiceLocator<Renderer>::ref().clean();
+		NEO_UNUSED(resourceManagers);
 		ServiceLocator<Renderer>::reset();
 		ServiceLocator<ImGuiManager>::ref().destroy();
 		mWindow.shutDown();

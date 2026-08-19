@@ -43,6 +43,9 @@ namespace neo {
 	};
 
 	MeshManager::MeshManager() {
+	}
+
+	void MeshManager::_initImpl() {
 		auto cubeDetails = prefabs::generateCube();
 		std::optional<CachedResource<Mesh>> fallback = MeshLoader{}.load(*cubeDetails, "Fallback Cube");
 		NEO_ASSERT(fallback.has_value(), "Failed to load the fallback mesh");
@@ -56,7 +59,6 @@ namespace neo {
 	}
 
 	MeshManager::~MeshManager() {
-		mFallback->mResource.destroy();
 		mFallback.reset();
 	}
 

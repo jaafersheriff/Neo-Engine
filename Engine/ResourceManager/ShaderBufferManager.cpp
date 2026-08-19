@@ -24,6 +24,9 @@ namespace neo {
 	};
 
 	ShaderBufferManager::ShaderBufferManager() {
+	}
+
+	void ShaderBufferManager::_initImpl() {
 		// Small fallback buffer
 		ShaderBufferLoadDetails fallbackDetails;
 		fallbackDetails.mByteSize = 16;
@@ -36,7 +39,6 @@ namespace neo {
 	}
 
 	ShaderBufferManager::~ShaderBufferManager() {
-		mFallback->mResource.destroy();
 		mFallback.reset();
 	}
 
