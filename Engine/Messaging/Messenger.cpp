@@ -5,16 +5,37 @@
 
 namespace neo {
 
-    entt::dispatcher Messenger::mDispatcher;
+	 // Deliberately unlocked in case a Handler sends another message, which will then land on the pending queue
+	 entt::dispatcher Messenger::mDispatcher;
 
-    void Messenger::relayMessages(ECS& ecs) {
-        NEO_UNUSED(ecs);
-        TRACY_ZONE();
-        mDispatcher.update();
-    }
+	 std::mutex Messenger::mQueueMutex;
+	 std::deque<Messenger::PendingMessage> Messenger::mQueue;
 
-    void Messenger::clean() {
-        mDispatcher.clear();
-        mDispatcher = entt::dispatcher();
-    }
+	 void Messenger::relayMessages(ECS& ecs) {
+		  NEO_UNUSED(ecs);
+		  TRACY_ZONE();
+
+		  std::deque<PendingMessage> pending;
+		  {
+				std::lock_guard<std::mutex> lock(mQueueMutex);
+				std::swap(mQueue, pending);
+		  }
+		  for (PendingMessage& message : pending) {
+				message.mDrain(mDispatcher, message.mStorage);
+		  }
+
+		  mDispatcher.update();
+	 }
+
+	 void Messenger::clean() {
+		  {
+				std::lock_guard<std::mutex> lock(mQueueMutex);
+				for (PendingMessage& message : mQueue) {
+					 message.mDiscard(message.mStorage);
+				}
+				mQueue.clear();
+		  }
+		  mDispatcher.clear();
+		  mDispatcher = entt::dispatcher();
+	 }
 }
