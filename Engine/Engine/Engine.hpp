@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer/Renderer.hpp"
+#include "Renderer/RenderThread.hpp"
 #include "Util/Util.hpp"
 
 #include "ECS/ECS.hpp"
@@ -50,6 +51,8 @@ namespace neo {
 			// TODO - these should live in the Renderer..?
 			ECS mRenderECS[2];
 			uint8_t mRenderECSIndex = 0;
+
+			RenderThread mRenderThread;
 
 			/* Debug */
 			bool mShowBoundingBoxes = false;
