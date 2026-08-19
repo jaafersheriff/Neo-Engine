@@ -1,4 +1,5 @@
 #include "CSM/CSM.hpp"
+#include "CSMParamsComponent.hpp"
 #include "Engine/Engine.hpp"
 
 #include "PerspectiveUpdateSystem.hpp"
@@ -83,6 +84,8 @@ namespace CSM {
 	}
 
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
+		ecs.submitEntity(std::move(ECS::EntityBuilder{}.attachComponent<CSMParamsComponent>()));
+
 
 		/* Game objects */
 		ecs.submitEntity(std::move(_createCamera("main camera", 45.f, 1.f, 100.f, glm::vec3(0, 0.6f, 5))
@@ -174,13 +177,24 @@ namespace CSM {
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
+		auto paramsView = ecs.getComponent<CSMParamsComponent>();
+		if (!paramsView) {
+			return;
+		}
+		CSMParamsComponent& params = std::get<1>(*paramsView);
+
 		NEO_UNUSED(resourceManagers, ecs);
-		ImGui::Checkbox("DebugView", &mDebugView);
-		ImGui::Checkbox("Cascade lines", &mDrawCascadeLines);
-		ImGui::Checkbox("Cascade spheres", &mDrawCascadeSpheres);
+		ImGui::Checkbox("DebugView", &params.mDebugView);
+		ImGui::Checkbox("Cascade lines", &params.mDrawCascadeLines);
+		ImGui::Checkbox("Cascade spheres", &params.mDrawCascadeSpheres);
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
+		CSMParamsComponent params;
+		if (auto paramsView = ecs.cGetComponent<CSMParamsComponent>()) {
+			params = std::get<1>(*paramsView);
+		}
+
 		const auto viewport = std::get<1>(*ecs.cGetComponent<ViewportDetailsComponent>());
 		const auto [lightEntity, ___, ____] = *ecs.getSingleView<MainLightComponent, LightComponent>();
 
@@ -198,18 +212,18 @@ namespace CSM {
 		);
 
 		renderPasses.clear(outputTargetHandle, types::framebuffer::AttachmentBit::Color | types::framebuffer::AttachmentBit::Depth, glm::vec4(0.f, 0.f, 0.f, 1.f), "Clear output target");
-		renderPasses.renderPass(outputTargetHandle, viewport.mSize, RenderState{}, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, RenderState{}, [this, params](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Main pass");
 			const auto [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
-			drawCSMResolve<PhongRenderComponent>(resourceManagers, ecs, cameraEntity, mDebugView);
+			drawCSMResolve<PhongRenderComponent>(resourceManagers, ecs, cameraEntity, params.mDebugView);
 
 			drawLines<MockCameraComponent>(resourceManagers, ecs, cameraEntity);
-			if (mDrawCascadeLines) {
+			if (params.mDrawCascadeLines) {
 				drawLines<CSMCamera0Component>(resourceManagers, ecs, cameraEntity);
 				drawLines<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
 				drawLines<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);
 			}
-			if (mDrawCascadeSpheres) {
+			if (params.mDrawCascadeSpheres) {
 				drawWireframe<CSMCamera0Component>(resourceManagers, ecs, cameraEntity);
 				drawWireframe<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
 				drawWireframe<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);

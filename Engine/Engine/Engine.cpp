@@ -20,6 +20,7 @@ extern "C" {
 #include "ECS/Component/EngineComponents/DebugBoundingBox.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 #include "ECS/Component/RenderingComponent/ImGuiDrawComponent.hpp"
+#include "ECS/Component/RenderingComponent/RendererParamsComponent.hpp"
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/KeyboardComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
@@ -270,6 +271,8 @@ namespace neo {
 			static_cast<ResourceManagers*>(context)->_tick();
 		}, &resourceManagers);
 
+		/* Init 'singleton' entities/components */
+		ecs.submitEntity(std::move(ECS::EntityBuilder{}.attachComponent<RendererParamsComponent>()));
 		demos.getCurrentDemo()->init(ecs, resourceManagers);
 
 		/* Init systems */

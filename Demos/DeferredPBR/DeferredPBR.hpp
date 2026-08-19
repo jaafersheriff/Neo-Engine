@@ -21,30 +21,8 @@ namespace DeferredPBR {
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
 
 	private:
-		bool mDrawDirectionalShadows = true;
-		bool mDrawPointLightShadows = true;
-
+		// mPointLightCount only ever drives ImGui-side entity spawning, so it stays a plain member.
 		int mPointLightCount = 2;
-		float mLightDebugRadius = 0.1f;
 
-		bool mDrawIBL = true;
-
-		bool mDoTonemap = true;
-		AutoExposureParameters mAutoExposureParams = {
-			0.45f,
-			45.f,
-			0.02f
-		};
-
-		bool mDoBloom = true;
-		BloomParameters mBloomParams = {
-			0.004f,
-			3,
-			30.f
-		};
-
-		GBufferDebugParameters mGbufferDebugParams {
-			GBufferDebugParameters::DebugMode::Off
-		};
 	};
 }

@@ -1,4 +1,5 @@
 #include "Compute.hpp"
+#include "ComputeParamsComponent.hpp"
 #include "Engine/Engine.hpp"
 
 #include "ParticleMeshComponent.hpp"
@@ -41,6 +42,8 @@ namespace Compute {
 	}
 
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
+		ecs.submitEntity(std::move(ECS::EntityBuilder{}.attachComponent<ComputeParamsComponent>()));
+
 
 		/* Game objects */
 		ecs.submitEntity(std::move(_createCamera(45.f, 1.f, 1000.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f)
@@ -105,6 +108,11 @@ namespace Compute {
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
+		ComputeParamsComponent params;
+		if (auto paramsView = ecs.cGetComponent<ComputeParamsComponent>()) {
+			params = std::get<1>(*paramsView);
+		}
+
 		TRACY_GPUN("Compute::render");
 
 		// Update the mesh
@@ -159,7 +167,7 @@ namespace Compute {
 			BlendFuncSrc::Alpha,
 			BlendFuncDst::One
 		};
-		renderPasses.renderPass(outputTargetHandle, viewport.mSize, renderState, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, renderState, [this, params](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			TRACY_GPUN("Draw Particles");
 			auto particlesVisShaderHandle = resourceManagers.mShaderManager.asyncLoad("ParticleVis", ShaderBuilder{}
 				.setStage(types::shader::Stage::Vertex, "compute/particles.vert")
@@ -179,8 +187,8 @@ namespace Compute {
 				particlesVisShader.bindUniform("P", camera.getProj());
 				particlesVisShader.bindUniform("V", camSpatial.getView());
 			}
-			particlesVisShader.bindUniform("spriteSize", mSpriteSize);
-			particlesVisShader.bindUniform("spriteColor", mSpriteColor);
+			particlesVisShader.bindUniform("spriteSize", params.mSpriteSize);
+			particlesVisShader.bindUniform("spriteColor", params.mSpriteColor);
 
 			if (auto meshView = ecs.getSingleView<ParticleMeshComponent, SpatialComponent>()) {
 				auto&& [_, meshComponent, spatial] = *meshView;
@@ -191,8 +199,14 @@ namespace Compute {
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
+		auto paramsView = ecs.getComponent<ComputeParamsComponent>();
+		if (!paramsView) {
+			return;
+		}
+		ComputeParamsComponent& params = std::get<1>(*paramsView);
+
 		NEO_UNUSED(ecs, resourceManagers);
-		ImGui::SliderFloat("Sprite size", &mSpriteSize, 0.1f, 2.f);
-		ImGui::ColorEdit3("Sprite color", &mSpriteColor[0]);
+		ImGui::SliderFloat("Sprite size", &params.mSpriteSize, 0.1f, 2.f);
+		ImGui::ColorEdit3("Sprite color", &params.mSpriteColor[0]);
 	}
 }

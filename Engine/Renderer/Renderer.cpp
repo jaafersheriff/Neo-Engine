@@ -19,6 +19,7 @@
 #include "ECS/Component/HardwareComponent/MouseComponent.hpp"
 #include "ECS/Component/HardwareComponent/ViewportDetailsComponent.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
+#include "ECS/Component/RenderingComponent/RendererParamsComponent.hpp"
 
 #include "Messaging/Message.hpp"
 #include "Messaging/Messenger.hpp"
@@ -108,7 +109,6 @@ namespace neo {
 		memcpy(buf, glGetString(GL_SHADING_LANGUAGE_VERSION), 512);
 		mDetails.mShadingLanguage = buf;
 
-		mShowBoundingBoxes = false;
 
 		mGPUQuery.destroy();
 		mGPUQuery.init();
@@ -121,6 +121,13 @@ namespace neo {
 		TRACY_GPU();
 		if (window.isMinimized()) {
 			return;
+		}
+
+		// Read off the clone, so these are the values ImGui had settled on when the frame was handed
+		// over - nothing here can be edited mid-render.
+		RendererParamsComponent params;
+		if (auto rendererParams = ecs.cGetComponent<RendererParamsComponent>()) {
+			params = std::get<1>(*rendererParams);
 		}
 
 		profiler.markFrameGPU(mGPUQuery.getGPUTime());
@@ -167,7 +174,7 @@ namespace neo {
 			demo->render(renderPasses, resourceManagers, ecs, mSceneColorTextureHandle, sceneDepthTextureHandle);
 		}
 
-		if (mShowBoundingBoxes) {
+		if (params.mShowBoundingBoxes) {
 			TRACY_ZONEN("Bounding boxes");
 			auto debugDrawTarget = resourceManagers.mFramebufferManager.asyncLoad(
 				"DebugDraw Target",
@@ -201,12 +208,11 @@ namespace neo {
 			blit(renderPasses, FramebufferHandle(0), window.getDetails().mSize, mSceneColorTextureHandle, "Final Blit");
 		}
 
-		renderPasses._execute(mStats, resourceManagers, ecs, mWireframe);
+		renderPasses._execute(resourceManagers, ecs, params.mWireframe);
 	}
 
 	void Renderer::_imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager) {
 		TRACY_ZONE();
-		NEO_UNUSED(ecs);
 
 		ImGui::Begin("Viewport");
 		ServiceLocator<ImGuiManager>::ref().updateViewport();
@@ -261,20 +267,16 @@ namespace neo {
 			ImGui::TextWrapped("Num Samplers: %d", mStats.mNumSamplers);
 			ImGui::TreePop();
 		}
-		if (ImGui::TreeNodeEx("Render Passes")) {
-			for (const auto& pass : mStats.mRenderPasses) {
-				ImGui::TextWrapped("%s", pass.c_str());
-			}
-			ImGui::TreePop();
-		}
 
 
 		if (ImGui::Button("VSync")) {
 			window.toggleVSync();
 		}
 
-		if (ImGui::Checkbox("Show BoundingBoxes", &mShowBoundingBoxes)) {
-			if (mShowBoundingBoxes) {
+		auto rendererParams = ecs.getComponent<RendererParamsComponent>();
+		RendererParamsComponent* params = rendererParams ? &std::get<1>(*rendererParams) : nullptr;
+		if (params && ImGui::Checkbox("Show BoundingBoxes", &params->mShowBoundingBoxes)) {
+			if (params->mShowBoundingBoxes) {
 				for (auto boxEntity : ecs.getView<BoundingBoxComponent>()) {
 					ecs.addComponent<DebugBoundingBoxComponent>(boxEntity);
 				}
@@ -285,7 +287,9 @@ namespace neo {
 				}
 			}
 		}
-		ImGui::Checkbox("Wireframe", &mWireframe);
+		if (params) {
+			ImGui::Checkbox("Wireframe", &params->mWireframe);
+		}
 
 		ImGui::End();
 	}
