@@ -11,9 +11,9 @@
 #define HOT_RELOAD_MILLSECONDS 100
 
 namespace neo {
-	struct ShaderLoader final : entt::resource_loader<ShaderLoader, BackedResource<SourceShader>> {
+	struct ShaderLoader final {
 
-		std::shared_ptr<BackedResource<SourceShader>> load(const ShaderLoadDetails& shaderDetails, const std::optional<std::string>& debugName) const {
+		std::optional<CachedResource<SourceShader>> load(const ShaderLoadDetails& shaderDetails, const std::optional<std::string>& debugName) const {
 			NEO_ASSERT(debugName.has_value(), "Shaders need to come with a name please");
 			NEO_LOG_V("Uploading shader %s", debugName.value().c_str());
 			return util::visit(shaderDetails,
@@ -36,14 +36,14 @@ namespace neo {
 						}
 					}
 
-					auto result = std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
+					std::optional<CachedResource<SourceShader>> result(std::in_place, debugName->c_str(), shaderCode);
 
 					result->mResource.mConstructionArgs = SourceShader::ConstructionArgs(builder.mConstructionArgs.begin(), builder.mConstructionArgs.end());
 					result->mResource.mModifiedTime = lastModTime;
 					return result;
 				},
 				[&](const SourceShader::ShaderCode& shaderCode) {
-					return std::make_shared<BackedResource<SourceShader>>(debugName->c_str(), shaderCode);
+					return std::optional<CachedResource<SourceShader>>(std::in_place, debugName->c_str(), shaderCode);
 				},
 				[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
 			);
@@ -52,7 +52,7 @@ namespace neo {
 
 	ShaderManager::ShaderManager() {
 
-		mFallback = ShaderLoader{}.load(SourceShader::ShaderCode{
+		std::optional<CachedResource<SourceShader>> fallback = ShaderLoader{}.load(SourceShader::ShaderCode{
 			{types::shader::Stage::Vertex,
 				R"(
 					void main() {
@@ -67,6 +67,8 @@ namespace neo {
 					}
 				)"}
 			}, "Dummy");
+		NEO_ASSERT(fallback.has_value(), "Failed to load the fallback shader");
+		mFallback = std::make_shared<CachedResource<SourceShader>>(std::move(*fallback));
 
 		mFallback->mResource.getResolvedInstance({});
 
@@ -114,7 +116,12 @@ namespace neo {
 			}
 
 			for (auto& loadDetails : swapQueue) {
-				mCache.load<ShaderLoader>(loadDetails.mHandle.mHandle, loadDetails.mLoadDetails, loadDetails.mDebugName);
+				if (std::optional<CachedResource<SourceShader>> shader = ShaderLoader{}.load(loadDetails.mLoadDetails, loadDetails.mDebugName)) {
+					mCache.insert(loadDetails.mHandle, std::move(*shader));
+				}
+				else {
+					NEO_LOG_E("Failed to load shader %s", loadDetails.mDebugName.value_or("").c_str());
+				}
 			}
 		}
 
@@ -127,8 +134,8 @@ namespace neo {
 			}
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
-					_destroyImpl(mCache.handle(id.mHandle).get());
-					mCache.discard(id.mHandle);
+					_destroyImpl(*mCache.resolve(id));
+					mCache.erase(id);
 				}
 			}
 		}
@@ -136,7 +143,7 @@ namespace neo {
 		NEO_ASSERT(mTransactionQueue.empty(), "Shader transactions unsupported");
 	}
 
-	void ShaderManager::_destroyImpl(BackedResource<SourceShader>& sourceShader) {
+	void ShaderManager::_destroyImpl(CachedResource<SourceShader>& sourceShader) {
 		if (sourceShader.mResource.mConstructionArgs.has_value()) {
 			for (auto&& [type, charString] : sourceShader.mResource.mShaderSources) {
 				delete charString;
@@ -146,8 +153,8 @@ namespace neo {
 	}
 
 	void ShaderManager::imguiEditor() {
-		mCache.each([&](entt::id_type, BackedResource<SourceShader>& resource) {
-			auto& shader = resource.mResource;
+		for (CachedResource<SourceShader>& entry : mCache) {
+			auto& shader = entry.mResource;
 			if (ImGui::TreeNode(shader.mName.c_str())) {
 				if (shader.mResolvedShaders.size()) {
 					if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(shader.mResolvedShaders.size()))) {
@@ -169,7 +176,7 @@ namespace neo {
 				}
 				ImGui::TreePop();
 			}
-		});
+		}
 	}
 
 	void ShaderManager::_hotReloadFunc() {
@@ -184,28 +191,22 @@ namespace neo {
 
 			TRACY_ZONEN("Hot reload");
 
-			// Entt Cache doesn't support iterators :/ 
-			std::vector<entt::id_type> list;
-			list.reserve(mCache.size());
-			mCache.each([&list](const entt::id_type enttId) {
-				list.emplace_back(enttId);
-			});
-
-			for (auto id = list.begin(); id < list.end(); id++) {
-				if (auto resource = mCache.handle(*id); resource && resource->mResource.mConstructionArgs) {
-					time_t lastModTime = resource->mResource.mModifiedTime;
-					for (auto& stage : *resource->mResource.mConstructionArgs) {
-						if (!stage.empty()) {
-							lastModTime = std::max(lastModTime, Loader::getFileModTime(stage));
-						}
+			for (const CachedResource<SourceShader>& entry : mCache) {
+				const SourceShader& shader = entry.mResource;
+				if (!shader.mConstructionArgs) {
+					continue;
+				}
+				time_t lastModTime = shader.mModifiedTime;
+				for (auto& stage : *shader.mConstructionArgs) {
+					if (!stage.empty()) {
+						lastModTime = std::max(lastModTime, Loader::getFileModTime(stage));
 					}
-					if (lastModTime > resource->mResource.mModifiedTime) {
-						NEO_LOG_I("Hot reloading %s", resource->mResource.mName.c_str());
-						ShaderHandle handle(*id);
+				}
+				if (lastModTime > shader.mModifiedTime) {
+					NEO_LOG_I("Hot reloading %s", shader.mName.c_str());
 
-						// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
-						discard(handle);
-					}
+					// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
+					discard(entry.mHandle);
 				}
 			}
 		}

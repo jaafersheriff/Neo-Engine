@@ -2,18 +2,14 @@
 
 #include "Util/Util.hpp"
 
+#include "ResourceManager/ResourceManagerInterface.hpp"
 #include "ResourceManager/TextureManager.hpp"
 #include "Renderer/GLObjects/Framebuffer.hpp"
 
-#include <entt/resource/cache.hpp>
 #include <variant>
 #include <optional>
 #include <memory>
 
-// Framebuffers are weird because
-//   - They're pooled
-//   - They require textures (handles and backed resources) from another resource manager 
-// Keep the same interface, but it does it's own things internally
 namespace neo {
 	class ResourceManagers;
 	struct TextureFormat;
@@ -54,81 +50,58 @@ namespace neo {
 	};
 
 	using FramebufferExternalAttachments = std::vector<FramebufferAttachment>;
+	// What callers ask for
 	using FramebufferLoadDetails = std::variant<FramebufferBuilder, FramebufferExternalAttachments>;
-
-	struct PooledFramebuffer {
-		Framebuffer mFramebuffer;
-		uint8_t mFrameCount = 0;
-		bool mUsedThisFrame = false;
-		bool mExternallyOwned = false;
-	};
-	using FramebufferHandle = ResourceHandle<PooledFramebuffer>;
-	struct FramebufferQueueItem {
-		FramebufferHandle mHandle;
+	// What actually goes on the load queue
+	struct FramebufferAttachments {
 		std::vector<FramebufferAttachment> mAttachments;
 		bool mExternallyOwned = false;
-		std::optional<std::string> mDebugName;
 	};
 
-	class FramebufferManager {
+	struct ManagedFramebuffer {
+		Framebuffer mFramebuffer;
+		bool mExternallyOwned = false;
+	};
+	using FramebufferHandle = ResourceHandle<ManagedFramebuffer>;
+
+	class FramebufferManager final : public ResourceManagerInterface<FramebufferManager, ManagedFramebuffer, FramebufferAttachments, 5> {
 		friend ResourceManagers;
+		friend ResourceManagerInterface;
 	public:
 
-		FramebufferManager::FramebufferManager();
-		FramebufferManager::~FramebufferManager();
+		FramebufferManager();
+		~FramebufferManager();
 
-		bool isValid(FramebufferHandle id) const {
-			if (id == 0) {
-				return true; // Special-case backbuffer
-			}
-			return mCache.contains(id.mHandle);
+		// Handle 0 is the backbuffer, which no manager owns - it is always valid and never queued.
+		bool isValid(FramebufferHandle handle) const {
+			return handle == 0 || ResourceManagerInterface::isValid(handle);
 		}
 
-		bool isQueued(FramebufferHandle id) const {
-			if (id == 0) {
-				return false; // Special-case backbuffer
-			}
-
-			// TODO - this is a linear search :(
-			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
-			for (auto& res : mQueue) {
-				if (id == res.mHandle) {
-					return true;
-				}
-			}
-			return false;
+		bool isQueued(FramebufferHandle handle) const {
+			return handle != 0 && ResourceManagerInterface::isQueued(handle);
 		}
 
-		const Framebuffer& resolve(FramebufferHandle id) const {
-			if (id == 0) {
-				return *mFallback; // Special-case backbuffer
-			}
-			return _resolveFinal(id);
+		const Framebuffer& resolve(FramebufferHandle handle) const {
+			return _resolveFramebuffer(handle);
 		}
 
-		Framebuffer& resolve(FramebufferHandle id) {
-			if (id == 0) {
-				return *mFallback; // Special-case backbuffer
-			}
-			return _resolveFinal(id);
+		Framebuffer& resolve(FramebufferHandle handle) {
+			return _resolveFramebuffer(handle);
 		}
 
 		[[nodiscard]] FramebufferHandle asyncLoad(HashedString id, FramebufferLoadDetails details, const TextureManager& textureManager) const;
 
-	protected:
-
-		void clear(const TextureManager& textureManager);
-		void tick(const TextureManager& textureManager);
-
 		void imguiEditor(std::function<void(const TextureHandle&)> textureFunc, TextureManager& textureManager);
 
-		// TODO - missing mutexes to match ResourceManagerIntereface, but that's not really a problem because this resource manager
-		// doesn't interop with anything threaded - yet. Just noting the divergence 
-		mutable std::vector<FramebufferQueueItem> mQueue;
-		entt::resource_cache<BackedResource<PooledFramebuffer>> mCache;
-		std::shared_ptr<Framebuffer> mFallback;
+	protected:
+		[[nodiscard]] FramebufferHandle _asyncLoadImpl(FramebufferHandle handle, FramebufferAttachments attachments, const std::optional<std::string>& debugName) const;
+		void _destroyImpl(CachedResource<ManagedFramebuffer>& framebuffer);
+		void _tickImpl();
 
 	private:
-		Framebuffer& _resolveFinal(FramebufferHandle id) const;
+		Framebuffer& _resolveFramebuffer(FramebufferHandle handle) const;
+
+		// Required for cache eviction
+		const TextureManager* mTextureManager = nullptr;
 	};
 }

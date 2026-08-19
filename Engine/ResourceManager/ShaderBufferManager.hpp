@@ -14,7 +14,7 @@ namespace neo {
 	};
 	using ShaderBufferHandle = ResourceHandle<ShaderBuffer>;
 
-	class ShaderBufferManager final : public ResourceManagerInterface<ShaderBufferManager, ShaderBuffer, ShaderBufferLoadDetails> {
+	class ShaderBufferManager final : public ResourceManagerInterface<ShaderBufferManager, ShaderBuffer, ShaderBufferLoadDetails, 4> {
 		friend ResourceManagerInterface;
 	public:
 
@@ -25,7 +25,7 @@ namespace neo {
 
 	protected:
 		[[nodiscard]] ShaderBufferHandle _asyncLoadImpl(ShaderBufferHandle id, ShaderBufferLoadDetails details, const std::optional<std::string>& debugName) const;
-		void _destroyImpl(BackedResource<ShaderBuffer>& buffer);
+		void _destroyImpl(CachedResource<ShaderBuffer>& buffer);
 		void _tickImpl();
 	};
 }

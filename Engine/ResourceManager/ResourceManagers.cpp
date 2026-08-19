@@ -10,7 +10,7 @@ namespace neo {
 		mShaderBufferManager.tick();
 		mShaderManager.tick();
 		mTextureManager.tick();
-		mFramebufferManager.tick(mTextureManager); // Do this after textures
+		mFramebufferManager.tick(); // Do this after textures
 	}
 
 	void ResourceManagers::_clear() {
@@ -18,7 +18,7 @@ namespace neo {
 		mShaderBufferManager.clear();
 		mShaderManager.clear();
 		mTextureManager.clear();
-		mFramebufferManager.clear(mTextureManager); // Do this after textures
+		mFramebufferManager.clear(); // Do this after textures
 	}
 
 	void ResourceManagers::_imguiEditor() {
