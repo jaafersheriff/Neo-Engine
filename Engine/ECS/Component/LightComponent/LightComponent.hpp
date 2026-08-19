@@ -15,7 +15,7 @@ namespace neo {
 			, mIntensity(intensity)
 		{}
 
-		virtual void imGuiEditor() {
+		void imGuiEditor() {
 			ImGui::ColorEdit3("Color", &mColor[0]);
 			ImGui::SliderFloat("Intensity", &mIntensity, 0.f, 50.f);
 		}

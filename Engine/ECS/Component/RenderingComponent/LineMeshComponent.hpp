@@ -32,6 +32,6 @@ namespace neo {
 		void removeNode(const int index);
 		void clearNodes();
 
-		virtual void imGuiEditor() override;
+		void imGuiEditor();
 	END_COMPONENT();
 }

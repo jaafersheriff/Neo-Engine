@@ -97,6 +97,71 @@ namespace neo {
 		mSystems.clear();
 	}
 
+	void ECS::_cloneInto(ECS& dst) const {
+		TRACY_ZONE();
+
+		{
+			TRACY_ZONEN("Entities");
+			// see entt/entity/snapshot.hpp. Walking rbegin()..rend() covers live AND released slots, so
+			// indices, versions and the free list all come out matching.
+			const Registry::common_type& srcEntities = mRegistry.storage<Entity>();
+			auto& dstEntities = dst.mRegistry.storage<Entity>();
+			dstEntities.clear();
+			dstEntities.reserve(srcEntities.size());
+
+			Entity placeholder{};
+			for (auto it = srcEntities.rbegin(), last = srcEntities.rend(); it != last; ++it) {
+				dstEntities.generate(*it);
+				placeholder = (*it > placeholder) ? *it : placeholder;
+			}
+			dstEntities.start_from(entt::entt_traits<Entity>::next(placeholder));
+			dstEntities.free_list(srcEntities.free_list());
+		}
+
+		{
+			TRACY_ZONEN("Components");
+			// Every component type that has ever been attached is in here, so demo-local types are
+			// covered without anything to opt into.
+			for (const auto& [type, entry] : mComponentRegistry) {
+				NEO_UNUSED(type);
+				entry.mClone(mRegistry, dst.mRegistry);
+			}
+		}
+
+#if 0
+		// The component clone pairs two independent iterators - the packed entity array and the packed
+		// element array - and a mispairing would silently associate components with the wrong entities
+		// rather than crash. Check structurally that the clone really mirrors the source.
+		// This is O(entities + components) on top of the clone itself; drop it once the clone has been
+		// exercised across every demo.
+		{
+			TRACY_ZONEN("Validate clone");
+
+			const Registry::common_type& srcEntities = mRegistry.storage<Entity>();
+			const Registry::common_type& dstEntities = dst.mRegistry.storage<Entity>();
+			NEO_ASSERT(srcEntities.size() == dstEntities.size(), "Clone entity pool size mismatch");
+			NEO_ASSERT(srcEntities.free_list() == dstEntities.free_list(), "Clone live entity count mismatch");
+			for (auto s = srcEntities.rbegin(), d = dstEntities.rbegin(); s != srcEntities.rend(); ++s, ++d) {
+				NEO_ASSERT(*s == *d, "Clone entity order mismatch - identifiers did not survive");
+			}
+
+			for (const auto& [type, entry] : mComponentRegistry) {
+				NEO_UNUSED(entry);
+				const Registry::common_type* from = mRegistry.storage(type);
+				const Registry::common_type* to = dst.mRegistry.storage(type);
+				if (from == nullptr) {
+					continue;
+				}
+				NEO_ASSERT(to != nullptr, "Clone is missing a pool that the source has");
+				NEO_ASSERT(from->size() == to->size(), "Clone pool size mismatch");
+				for (auto s = from->rbegin(), d = to->rbegin(); s != from->rend(); ++s, ++d) {
+					NEO_ASSERT(*s == *d, "Clone pool entity order mismatch");
+				}
+			}
+		}
+#endif
+	}
+
 	void ECS::_imguiEdtor() {
 		TRACY_ZONE();
 		ImGui::Begin("ECS");

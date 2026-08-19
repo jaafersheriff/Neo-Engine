@@ -46,6 +46,12 @@ namespace neo {
 			Keyboard mKeyboard;
 			Mouse mMouse;
 
+			/* Render's view of the world: a deep copy taken once per frame, so the renderer never
+			   reads a registry the simulation is still mutating. Double-buffered because Stage 4 hands
+			   one to the render thread while the main thread refills the other. */
+			ECS mRenderECS[2];
+			uint8_t mRenderECSIndex = 0;
+
 			/* Debug */
 			bool mShowBoundingBoxes = false;
 			MouseRaySystem mMouseRaySystem;
