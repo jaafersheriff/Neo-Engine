@@ -162,13 +162,13 @@ namespace neo {
 	}
 
 	void MeshManager::imguiEditor() {
-		for (const CachedResource<Mesh>& mesh : mCache) {
+		mCache.forEach([](const CachedResource<Mesh>& mesh) {
 			if (mesh.mDebugName.has_value()) {
 				ImGui::Text("%s", mesh.mDebugName->c_str());
 			}
 			else {
 				ImGui::Text("%d", mesh.mHandle.mHandle);
 			}
-		}
+		});
 	}
 }
