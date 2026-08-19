@@ -13,8 +13,5 @@ namespace CSM {
 		virtual void render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) override;
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
 
-		bool mDebugView = true;
-		bool mDrawCascadeLines = true;
-		bool mDrawCascadeSpheres = false;
 	};
 }

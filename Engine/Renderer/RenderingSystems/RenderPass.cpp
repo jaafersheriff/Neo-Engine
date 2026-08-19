@@ -33,19 +33,16 @@ namespace neo {
 		});
 	}
 
-	void RenderPasses::_execute(FrameStats& renderStats, const ResourceManagers& resourceManagers, const ECS& ecs, bool wireframe) {
-		renderStats.mRenderPasses.clear();
+	void RenderPasses::_execute(const ResourceManagers& resourceManagers, const ECS& ecs, bool wireframe) {
 
 		TRACY_GPU();
 		for (const auto& pass : mPasses) {
 			util::visit(pass,
 				[&](const ComputePass& computePass) {
-					renderStats.mRenderPasses.emplace_back(computePass.mDebugName.value_or("Nameless compute pass"));
 
 					computePass.mDrawFunction(resourceManagers, ecs);
 				},
 				[&](const RenderPass& renderPass) {
-					renderStats.mRenderPasses.emplace_back(renderPass.mDebugName.value_or("Nameless compute pass"));
 
 					if (!resourceManagers.mFramebufferManager.isValid(renderPass.mTarget)) {
 						NEO_LOG_W("Unable to resolve target, skipping pass %s", renderPass.mDebugName.value_or("").c_str());
@@ -58,7 +55,6 @@ namespace neo {
 					renderPass.mDrawFunction(resourceManagers, ecs);
 				},
 				[&](const ClearPass& clearPass) {
-					renderStats.mRenderPasses.emplace_back(clearPass.mDebugName.value_or("Nameless render pass"));
 
 					TRACY_GPUN("Clear");
 					if (!resourceManagers.mFramebufferManager.isValid(clearPass.mTarget)) {

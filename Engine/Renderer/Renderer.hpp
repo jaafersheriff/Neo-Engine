@@ -36,6 +36,7 @@ namespace neo {
 			Renderer(Renderer &&) = delete;
 			Renderer & operator=(Renderer &&) = delete;
 
+			// Written by the render thread, read by the main thread's ImGui without synchronisation
 			FrameStats mStats = {};
 
 			RendererDetails getDetails() const { return mDetails; }
@@ -55,9 +56,9 @@ namespace neo {
 
 			RendererDetails mDetails = {};
 
+			// Assigned on the render thread, read by ImGui on main without synchronisation.
+			// Should be safe - the worst outcome is that isValid() fails and systems gracefully return early
 			TextureHandle mSceneColorTextureHandle;
-			bool mShowBoundingBoxes = false;
-			bool mWireframe = false;
 
 			util::Profiler::GPUQuery mGPUQuery;
 	};

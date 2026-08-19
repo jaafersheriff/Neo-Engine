@@ -1,4 +1,5 @@
 #include "DeferredPBR/DeferredPBR.hpp"
+#include "DeferredPBRParamsComponent.hpp"
 #include "Engine/Engine.hpp"
 
 #include "ECS/ECS.hpp"
@@ -75,6 +76,8 @@ namespace DeferredPBR {
 	}
 
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
+		ecs.submitEntity(std::move(ECS::EntityBuilder{}.attachComponent<DeferredPBRParamsComponent>()));
+
 
 		{
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}
@@ -318,13 +321,17 @@ namespace DeferredPBR {
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
-		NEO_UNUSED(ecs);
+		auto paramsView = ecs.getComponent<DeferredPBRParamsComponent>();
+		if (!paramsView) {
+			return;
+		}
+		DeferredPBRParamsComponent& params = std::get<1>(*paramsView);
 
-		mGbufferDebugParams.imguiEditor();
+		params.mGbufferDebugParams.imguiEditor();
 
-		if (ImGui::Checkbox("Directional Shadows", &mDrawDirectionalShadows)) {
+		if (ImGui::Checkbox("Directional Shadows", &params.mDrawDirectionalShadows)) {
 			auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent>();
-			if (mDrawDirectionalShadows) {
+			if (params.mDrawDirectionalShadows) {
 				CSMShadowMapComponent shadowCamera(2048, resourceManagers.mTextureManager);
 				ecs.addComponent<CSMShadowMapComponent>(std::get<0>(*lightView), shadowCamera);
 				auto csmCameras = createCSMCameras();
@@ -337,9 +344,9 @@ namespace DeferredPBR {
 				removeCSMCameras(ecs);
 			}
 		}
-		if (ImGui::Checkbox("Point Light Shadows", &mDrawPointLightShadows)) {
+		if (ImGui::Checkbox("Point Light Shadows", &params.mDrawPointLightShadows)) {
 			for (auto& entity : ecs.getView<PointLightComponent, SpatialComponent>()) {
-				if (mDrawPointLightShadows) {
+				if (params.mDrawPointLightShadows) {
 					PointLightShadowMapComponent shadowMap(256, resourceManagers.mTextureManager);
 					ecs.addComponent<PointLightShadowMapComponent>(entity, shadowMap);
 				}
@@ -348,23 +355,28 @@ namespace DeferredPBR {
 				}
 			}
 		}
-		ImGui::SliderFloat("Debug Radius", &mLightDebugRadius, 0.f, 10.f);
+		ImGui::SliderFloat("Debug Radius", &params.mLightDebugRadius, 0.f, 10.f);
 		if (ImGui::SliderInt("# Point Lights", &mPointLightCount, 0, 100)) {
 			_createPointLights(ecs, resourceManagers, mPointLightCount);
 		}
 
-		ImGui::Checkbox("IBL", &mDrawIBL);
-		ImGui::Checkbox("Tonemap", &mDoTonemap);
-		if (mDoTonemap) {
-			mAutoExposureParams.imguiEditor();
+		ImGui::Checkbox("IBL", &params.mDrawIBL);
+		ImGui::Checkbox("Tonemap", &params.mDoTonemap);
+		if (params.mDoTonemap) {
+			params.mAutoExposureParams.imguiEditor();
 		}
-		ImGui::Checkbox("Bloom", &mDoBloom);
-		if (mDoBloom) {
-			mBloomParams.imguiEditor();
+		ImGui::Checkbox("Bloom", &params.mDoBloom);
+		if (params.mDoBloom) {
+			params.mBloomParams.imguiEditor();
 		}
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
+		DeferredPBRParamsComponent params;
+		if (auto paramsView = ecs.cGetComponent<DeferredPBRParamsComponent>()) {
+			params = std::get<1>(*paramsView);
+		}
+
 		convolveCubemap(renderPasses, resourceManagers, ecs);
 
 		const auto& cameraTuple = ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
@@ -378,7 +390,7 @@ namespace DeferredPBR {
 		auto lightView = ecs.getSingleView<MainLightComponent, DirectionalLightComponent, CSMShadowMapComponent>();
 		if (lightView) {
 			auto& [lightEntity, __, ___, shadowCamera] = *lightView;
-			if (mDrawDirectionalShadows) {
+			if (params.mDrawDirectionalShadows) {
 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 					drawCSMShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, lightEntity, true);
 					drawCSMShadows<AlphaTestComponent>(renderPasses, resourceManagers, ecs, lightEntity);
@@ -390,7 +402,7 @@ namespace DeferredPBR {
 		auto pointLightView = ecs.getView<PointLightComponent, PointLightShadowMapComponent, SpatialComponent>();
 		for (auto& entity : pointLightView) {
 			const auto& shadowCamera = pointLightView.get<PointLightShadowMapComponent>(entity);
-			if (mDrawPointLightShadows) {
+			if (params.mDrawPointLightShadows) {
 				if (resourceManagers.mTextureManager.isValid(shadowCamera.mShadowMap)) {
 					drawPointLightShadows<OpaqueComponent>(renderPasses, resourceManagers, ecs, entity, true);
 					drawPointLightShadows<AlphaTestComponent>(renderPasses, resourceManagers, ecs, entity, false);
@@ -406,7 +418,7 @@ namespace DeferredPBR {
 			drawGBuffer<AlphaTestComponent>(resourceManagers, ecs, cameraEntity);
 		}, "GBuffer");
 
-		if (mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
+		if (params.mGbufferDebugParams.mDebugMode != GBufferDebugParameters::DebugMode::Off) {
 			auto outputHandle = resourceManagers.mFramebufferManager.asyncLoad("GBuffer Debug",
 				FramebufferExternalAttachments{
 					FramebufferAttachment{outputColor},
@@ -415,9 +427,9 @@ namespace DeferredPBR {
 				);
 			renderPasses.clear(outputHandle, types::framebuffer::AttachmentBit::Color, glm::vec4(0));
 
-			renderPasses.renderPass(outputHandle, viewport.mSize, sBlitRenderState, [gbufferHandle, this](const ResourceManagers& resourceManagers, const ECS&) {
+			renderPasses.renderPass(outputHandle, viewport.mSize, sBlitRenderState, [gbufferHandle, this, params](const ResourceManagers& resourceManagers, const ECS&) {
 				TRACY_GPUN("GBuffer debug");
-				drawGBufferDebug(resourceManagers, gbufferHandle, mGbufferDebugParams);
+				drawGBufferDebug(resourceManagers, gbufferHandle, params.mGbufferDebugParams);
 			}, "GBuffer debug");
 			return;
 		}
@@ -454,12 +466,12 @@ namespace DeferredPBR {
 		// Main lighting resolve
 		{
 			drawDirectionalLightResolve<MainLightComponent>(renderPasses, hdrColorTarget, viewport.mSize, cameraEntity, gbufferHandle);
-			drawPointLightResolve(renderPasses, hdrColorTarget, viewport.mSize, cameraEntity, gbufferHandle, mLightDebugRadius);
+			drawPointLightResolve(renderPasses, hdrColorTarget, viewport.mSize, cameraEntity, gbufferHandle, params.mLightDebugRadius);
 
 			// Extract IBL
 			std::optional<IBLComponent> ibl;
 			const auto iblTuple = ecs.getSingleView<SkyboxComponent, IBLComponent>();
-			if (iblTuple && mDrawIBL) {
+			if (iblTuple && params.mDrawIBL) {
 				const auto& _ibl = std::get<2>(*iblTuple);
 				if (_ibl.mConvolved && _ibl.mDFGGenerated) {
 					ibl = _ibl;
@@ -472,8 +484,8 @@ namespace DeferredPBR {
 		}
 
 		TextureHandle bloomResults = hdrColorTexture;
-		if (mDoBloom) {
-			bloomResults = bloom(renderPasses, resourceManagers, viewport.mSize, hdrColorTexture, mBloomParams);
+		if (params.mDoBloom) {
+			bloomResults = bloom(renderPasses, resourceManagers, viewport.mSize, hdrColorTexture, params.mBloomParams);
 		}
 
 		TextureHandle averageLuminance = NEO_INVALID_HANDLE;
@@ -489,12 +501,12 @@ namespace DeferredPBR {
 			blit(renderPasses, previousHDRColorHandle, viewport.mSize, bloomResults, "Blit previous frame");
 
 			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
-				averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mTextures[0], mAutoExposureParams);
+				averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mTextures[0], params.mAutoExposureParams);
 			}
 		}
 
 		TextureHandle tonemappedHandle = bloomResults;
-		if (mDoTonemap && resourceManagers.mTextureManager.isValid(bloomResults)) {
+		if (params.mDoTonemap && resourceManagers.mTextureManager.isValid(bloomResults)) {
 			tonemappedHandle = tonemap(renderPasses, resourceManagers, viewport.mSize, bloomResults, averageLuminance);
 		}
 
