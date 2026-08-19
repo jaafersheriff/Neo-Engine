@@ -13,6 +13,5 @@ namespace NormalVisualizer {
 		virtual void imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) override;
 
 	private:
-		float mMagnitude = 0.08f;
 	};
 }

@@ -1,6 +1,7 @@
 #include "Engine/Engine.hpp"
 
 #include "NormalVisualizer.hpp"
+#include "NormalVisualizerParamsComponent.hpp"
 
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraControllerComponent.hpp"
@@ -58,6 +59,8 @@ namespace NormalVisualizer {
 	}
 
 	void Demo::init(ECS& ecs, ResourceManagers& resourceManagers) {
+		ecs.submitEntity(std::move(ECS::EntityBuilder{}.attachComponent<NormalVisualizerParamsComponent>()));
+
 		/* Game objects */
 		ecs.submitEntity(_createCamera(45.f, 0.1f, 100.f, glm::vec3(0, 0.6f, 5), 0.4f, 7.f));
 		ecs.submitEntity(_createLight(glm::vec3(0.f, 2.f, 20.f), glm::vec3(1.f)));
@@ -85,6 +88,11 @@ namespace NormalVisualizer {
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
+		NormalVisualizerParamsComponent params;
+		if (auto paramsView = ecs.cGetComponent<NormalVisualizerParamsComponent>()) {
+			params = std::get<1>(*paramsView);
+		}
+
 
 		auto outputTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
 			"Output Target",
@@ -101,7 +109,7 @@ namespace NormalVisualizer {
 		const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
 		drawPhong<OpaqueComponent>(renderPasses, outputTargetHandle, viewport.mSize, cameraEntity);
 
-		renderPasses.renderPass(outputTargetHandle, viewport.mSize, RenderState{}, [this](const ResourceManagers& resourceManagers, const ECS& ecs) {
+		renderPasses.renderPass(outputTargetHandle, viewport.mSize, RenderState{}, [this, params](const ResourceManagers& resourceManagers, const ECS& ecs) {
 			const auto&& [cameraEntity, _, camera, cameraSpatial] = *ecs.getSingleView<MainCameraComponent, CameraComponent, SpatialComponent>();
 			auto normalShaderHandle = resourceManagers.mShaderManager.asyncLoad("NormalVisualizer", ShaderBuilder{}
 				.setStage(types::shader::Stage::Vertex, "normal.vert")
@@ -116,7 +124,7 @@ namespace NormalVisualizer {
 
 			for (const auto&& [__, mesh, material, spatial] : ecs.getView<MeshComponent, MaterialComponent, SpatialComponent>().each()) {
 
-				resolvedShader.bindUniform("magnitude", mMagnitude);
+				resolvedShader.bindUniform("magnitude", params.mMagnitude);
 
 				/* Load PV */
 				resolvedShader.bindUniform("P", camera.getProj());
@@ -132,7 +140,13 @@ namespace NormalVisualizer {
 	}
 
 	void Demo::imGuiEditor(ECS& ecs, ResourceManagers& resourceManagers) {
-		NEO_UNUSED(ecs, resourceManagers);
-		ImGui::SliderFloat("Magnitude", &mMagnitude, 0.f, 1.f);
+		NEO_UNUSED(resourceManagers);
+		auto paramsView = ecs.getComponent<NormalVisualizerParamsComponent>();
+		if (!paramsView) {
+			return;
+		}
+		NormalVisualizerParamsComponent& params = std::get<1>(*paramsView);
+
+		ImGui::SliderFloat("Magnitude", &params.mMagnitude, 0.f, 1.f);
 	}
 }
