@@ -47,7 +47,7 @@ namespace neo {
 		const Perspective& getPerspective() const;
 		const Orthographic& getOrthographic() const;
 		const glm::mat4& getProj() const;
-		virtual void imGuiEditor() override;
+		void imGuiEditor();
 
 	private:
 		CameraComponent(float near, float far, CameraType type);

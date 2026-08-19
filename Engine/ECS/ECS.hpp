@@ -91,6 +91,34 @@ namespace neo {
 	private:
 		mutable Registry mRegistry;
 
+		/* Active containers */
+		std::mutex mEntityCreationMutex;
+		std::vector<EntityBuilder> mEntityCreateQueue;
+
+		std::mutex mEntityKillMutex;
+		std::vector<Entity> mEntityKillQueue;
+
+		using ComponentModFunc = std::function<void(Registry&)>;
+		std::mutex mAddComponentMutex;
+		std::vector<ComponentModFunc> mAddComponentFuncs;
+
+		std::mutex mRemoveComponentMutex;
+		std::vector<ComponentModFunc> mRemoveComponentFuncs;
+
+		std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
+		void _initSystems();
+		void _updateSystems(const ResourceManagers& resourceManagers);
+
+		// Deep-copies this ECS's registry into dst, preserving entity identifiers exactly
+		void _cloneInto(ECS& dst) const;
+
+
+		void _flush();
+		void _clean();
+
+		void _imguiEdtor();
+		void _imguiComponentEditor(Entity e);
+
 		// ImGui tooling
 		class ComponentRegistry {
 			friend ECS;
@@ -99,6 +127,7 @@ namespace neo {
 				const char* mName = nullptr;
 				void (*mWidget)(ECS&, Entity) = nullptr;
 				void (*mRemove)(ECS&, Entity) = nullptr;
+				void (*mClone)(const Registry& src, Registry& dst) = nullptr;
 			};
 
 			[[nodiscard]] auto begin() const { return mEntries.cbegin(); }
@@ -119,33 +148,10 @@ namespace neo {
 			entt::dense_map<ComponentTypeID, Entry> mEntries;
 		};
 		ComponentRegistry mComponentRegistry;
-
-		// Type-erased entry points for ComponentRegistry
-		template<typename CompT> static void _componentWidget(ECS& ecs, Entity e);
-		template<typename CompT> static void _componentRemove(ECS& ecs, Entity e);
-
-		/* Active containers */
-		std::mutex mEntityCreationMutex;
-		std::vector<EntityBuilder> mEntityCreateQueue;
-
-		std::mutex mEntityKillMutex;
-		std::vector<Entity> mEntityKillQueue;
-
-		using ComponentModFunc = std::function<void(Registry&)>;
-		std::mutex mAddComponentMutex;
-		std::vector<ComponentModFunc> mAddComponentFuncs;
-
-		std::mutex mRemoveComponentMutex;
-		std::vector<ComponentModFunc> mRemoveComponentFuncs;
-
-		std::vector<std::pair<std::type_index, std::unique_ptr<System>>> mSystems;
-		void _initSystems();
-		void _updateSystems(const ResourceManagers& resourceManagers);
-
-		void _flush();
-		void _clean();
-		void _imguiEdtor();
-		void _imguiComponentEditor(Entity e);
+		// Type-erased entry points 
+		template<typename CompT> static void _componentWidget(ECS& ecs, Entity e); // ECS& because this invokes a custom widget
+		template<typename CompT> static void _componentRemove(ECS& ecs, Entity e); // ECS& to make use of deferred deletion queue
+		template<typename CompT> static void _componentClone(const Registry& src, Registry& dst); // Raw registry to bypass deferred queues
 	};
 
 	template<typename CompT>
@@ -155,7 +161,7 @@ namespace neo {
 	
 		auto view = mRegistry.view<CompT>();
 		if (view.size() > 1) {
-			NEO_LOG_E("Attempting to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->mName);
+			NEO_LOG_E("Attempting to get a single %s when multiple exist", CompT::kName);
 		}
 		if (view.size()) {
 			return { *view.each().begin() };
@@ -170,7 +176,7 @@ namespace neo {
 	
 		auto view = mRegistry.view<CompT>();
 		if (view.size() > 1) {
-			NEO_LOG_E("Attempting to get a single %s when multiple exist", mRegistry.try_get<CompT>(view.front())->mName);
+			NEO_LOG_E("Attempting to get a single %s when multiple exist", CompT::kName);
 		}
 		if (view.size()) {
 			return { *view.each().begin() };
@@ -258,14 +264,14 @@ namespace neo {
 
 		mComponentRegistry._ensure(
 			entt::type_hash<CompT>::value(),
-			ComponentRegistry::Entry{ component->mName, &ECS::_componentWidget<CompT>, &ECS::_componentRemove<CompT> }
+			ComponentRegistry::Entry{ CompT::kName, &ECS::_componentWidget<CompT>, &ECS::_componentRemove<CompT>, &ECS::_componentClone<CompT> }
 		);
 
 		{
 			std::lock_guard<std::mutex> lock(mAddComponentMutex);
 			mAddComponentFuncs.emplace_back([e, component](Registry& registry) mutable {
 				if (registry.try_get<CompT>(e)) {
-					NEO_LOG_E("Attempting to add a second %s to entity %d when one already exists", component->mName, e);
+					NEO_LOG_E("Attempting to add a second %s to entity %d when one already exists", CompT::kName, e);
 				}
 				else {
 					registry.emplace<CompT>(e, *component);
@@ -353,15 +359,46 @@ namespace neo {
 		mRegistry.sort<FilterCompT, SortCompT>();
 	}
 
+	// Invokes the CompT editor() of an instantiated ComponentT&
 	template<typename CompT>
 	void ECS::_componentWidget(ECS& ecs, Entity e) {
-		if (CompT* component = ecs.getComponent<CompT>(e)) {
-			component->imGuiEditor();
+		if constexpr (HasImGuiEditor_v<CompT>) {
+			if (CompT* component = ecs.getComponent<CompT>(e)) {
+				component->imGuiEditor();
+			}
+		}
+		else {
+			NEO_UNUSED(ecs, e);
 		}
 	}
 
 	template<typename CompT>
 	void ECS::_componentRemove(ECS& ecs, Entity e) {
 		ecs.removeComponent<CompT>(e);
+	}
+
+	// Clones a CompT, not an individual ComponentT&
+	template<typename CompT>
+	void ECS::_componentClone(const Registry& src, Registry& dst) {
+		// Assures the pool exists in dst, then clears it 
+		// Capacity survives, so a steady-state frame reuses the same memory every time.
+		auto& to = dst.storage<CompT>();
+		to.clear();
+
+		const auto* from = src.storage<CompT>();
+		if (from == nullptr || from->empty()) {
+			return;
+		}
+		to.reserve(from->size());
+
+		// Use reverse iterators to preesrve packed order, see entt/entity/snapshot.hpp
+		const Registry::common_type& entities = *from;
+		if constexpr (entt::component_traits<CompT, Entity>::page_size == 0u) {
+			// Empty component: EnTT stores no elements for it, so the entity list is the whole payload.
+			to.insert(entities.rbegin(), entities.rend());
+		}
+		else {
+			to.insert(entities.rbegin(), entities.rend(), from->rbegin());
+		}
 	}
 }

@@ -33,7 +33,7 @@ namespace Fireworks {
 	};
 
 	FireworkComponent(const neo::MeshManager& meshManager, uint32_t count);
-	virtual void imGuiEditor() override;
+	void imGuiEditor();
 
 	neo::MeshHandle mBuffer;
 	uint32_t mCount;

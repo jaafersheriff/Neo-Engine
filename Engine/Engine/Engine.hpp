@@ -46,6 +46,11 @@ namespace neo {
 			Keyboard mKeyboard;
 			Mouse mMouse;
 
+			// Double-buffered deep copies of the scene ECS
+			// TODO - these should live in the Renderer..?
+			ECS mRenderECS[2];
+			uint8_t mRenderECSIndex = 0;
+
 			/* Debug */
 			bool mShowBoundingBoxes = false;
 			MouseRaySystem mMouseRaySystem;

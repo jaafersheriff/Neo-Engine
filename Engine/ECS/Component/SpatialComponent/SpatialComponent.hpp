@@ -8,7 +8,7 @@
 namespace neo {
 
 	struct SpatialComponent : public Component, public Orientable {
-		const char* mName = "SpatialComponent";
+		static constexpr const char* kName = "SpatialComponent";
 
 			SpatialComponent();
 			SpatialComponent(const glm::vec3 &);
@@ -16,7 +16,7 @@ namespace neo {
 			SpatialComponent(const glm::vec3 &, const glm::vec3 &, const glm::vec3 &);
 			SpatialComponent(const glm::vec3 &, const glm::vec3 &, const glm::mat3 &);
 
-			virtual void imGuiEditor() override;
+			void imGuiEditor();
 
 			/* Update */
 			void move(const glm::vec3 &);
