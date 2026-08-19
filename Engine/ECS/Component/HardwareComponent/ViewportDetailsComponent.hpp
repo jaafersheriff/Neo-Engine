@@ -14,7 +14,7 @@ namespace neo {
 			, mPos(pos)
 		{}
 
-		virtual void imGuiEditor() override {
+		void imGuiEditor() {
 			ImGui::Text("Viewport Size: [%d, %d]", mSize.x, mSize.y);
 			ImGui::Text("Viewport Pos:  [%d, %d]", mPos.x, mPos.y);
 		}

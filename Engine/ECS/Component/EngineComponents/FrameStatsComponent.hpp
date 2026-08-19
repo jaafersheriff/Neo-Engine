@@ -12,7 +12,7 @@ namespace neo {
 			, mDT(dt)
 		{}
 
-		virtual void imGuiEditor() override {
+		void imGuiEditor() {
 			ImGui::TextWrapped("Run Time:   %0.3f", mRunTime);
 			ImGui::TextWrapped("Frame Time: %0.3f", mDT);
 

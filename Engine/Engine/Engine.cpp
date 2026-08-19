@@ -198,7 +198,7 @@ namespace neo {
 					TRACY_GPUN("Frame Render");
 
 					if (!mWindow.isMinimized()) {
-						TRACY_ZONEN("Prepare draw data");
+						TRACY_ZONEN("Prepare ImGui draw data");
 						if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
 							 // Current frame data gets generated now, then flushed and drawn next frame
 							ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
@@ -212,8 +212,12 @@ namespace neo {
 						Messenger::relayMessages(ecs);
 					}
 					{
+						ECS& renderECS = mRenderECS[mRenderECSIndex];
+						mRenderECSIndex ^= 1;
+						ecs._cloneInto(renderECS);
+
 						resourceManagers._tick();
-						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), profiler, ecs, resourceManagers);
+						ServiceLocator<Renderer>::ref().render(mWindow, demos.getCurrentDemo(), profiler, renderECS, resourceManagers);
 						Messenger::relayMessages(ecs);
 					}
 				}
@@ -238,6 +242,9 @@ namespace neo {
 		/* Destry the old state*/
 		demos.getCurrentDemo()->destroy();
 		ecs._clean();
+		for (auto& renderECS : mRenderECS) {
+			renderECS._clean();
+		}
 		resourceManagers._clear();
 		ServiceLocator<Renderer>::ref().clean();
 		Messenger::clean();

@@ -12,7 +12,7 @@ namespace neo {
 			: mColor(color)
 		{}
 
-		virtual void imGuiEditor() override {
+		void imGuiEditor() {
 			ImGui::ColorEdit3("Color", &mColor[0]);
 		}
 	END_COMPONENT();

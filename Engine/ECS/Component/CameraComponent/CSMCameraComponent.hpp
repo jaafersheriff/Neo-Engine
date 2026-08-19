@@ -9,7 +9,7 @@ namespace neo {
 	CSMCameraComponent() {}
 	
 	virtual int getLod() const = 0;
-	virtual void imGuiEditor() override {};
+	void imGuiEditor() {};
 
 	END_COMPONENT();
 
@@ -18,7 +18,7 @@ namespace neo {
 		CSMCamera0Component()
 			: CSMCameraComponent()
 		{}
-		const char* mName = "CSMCamera0Component";
+		static constexpr const char* kName = "CSMCamera0Component";
 
 		virtual int getLod() const override { return 0; }
 	};
@@ -26,7 +26,7 @@ namespace neo {
 		CSMCamera1Component()
 			: CSMCameraComponent()
 		{}
-		const char* mName = "CSMCamera1Component";
+		static constexpr const char* kName = "CSMCamera1Component";
 
 		virtual int getLod() const override { return 1; }
 	};
@@ -34,7 +34,7 @@ namespace neo {
 		CSMCamera2Component()
 			: CSMCameraComponent()
 		{}
-		const char* mName = "CSMCamera2Component";
+		static constexpr const char* kName = "CSMCamera2Component";
 
 		virtual int getLod() const override { return 2; }
 	};

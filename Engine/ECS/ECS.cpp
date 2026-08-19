@@ -97,6 +97,36 @@ namespace neo {
 		mSystems.clear();
 	}
 
+	void ECS::_cloneInto(ECS& dst) const {
+		TRACY_ZONE();
+
+		{
+			TRACY_ZONEN("Entities");
+			// see entt/entity/snapshot.hpp. Walking rbegin()..rend() covers live AND released slots, so
+			// indices, versions and the free list all come out matching.
+			const Registry::common_type& srcEntities = mRegistry.storage<Entity>();
+			auto& dstEntities = dst.mRegistry.storage<Entity>();
+			dstEntities.clear();
+			dstEntities.reserve(srcEntities.size());
+
+			Entity placeholder{};
+			for (auto it = srcEntities.rbegin(), last = srcEntities.rend(); it != last; ++it) {
+				dstEntities.generate(*it);
+				placeholder = (*it > placeholder) ? *it : placeholder;
+			}
+			dstEntities.start_from(entt::entt_traits<Entity>::next(placeholder));
+			dstEntities.free_list(srcEntities.free_list());
+		}
+
+		{
+			TRACY_ZONEN("Components");
+			for (const auto& [type, entry] : mComponentRegistry) {
+				NEO_UNUSED(type);
+				entry.mClone(mRegistry, dst.mRegistry);
+			}
+		}
+	}
+
 	void ECS::_imguiEdtor() {
 		TRACY_ZONE();
 		ImGui::Begin("ECS");

@@ -25,6 +25,6 @@ namespace neo {
 		float mPhi;
 
 		CameraControllerComponent(float ls, float ms);
-		virtual void imGuiEditor();
+		void imGuiEditor();
 	END_COMPONENT();
 }

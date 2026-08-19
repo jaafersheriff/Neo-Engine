@@ -24,7 +24,7 @@ namespace neo {
 		TextureHandle mOcclusionMap = NEO_INVALID_HANDLE;
 		float mOcclusionStrength = 1.f;
 
-		virtual void imGuiEditor() override {
+		void imGuiEditor() {
 			ImGui::ColorEdit4("Albedo", &mAlbedoColor[0]);
 			ImGui::SliderFloat("Metallness", &mMetallic, 0.f, 1.f); // This should be a bool?
 			ImGui::SliderFloat("Roughness", &mRoughness, 0.f, 1.f);
