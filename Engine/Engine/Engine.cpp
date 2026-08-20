@@ -183,46 +183,60 @@ namespace neo {
 						Messenger::relayMessages(ecs);
 					}
 					{
+						// Run before the wait, not after the dispatch. The wait below is bounded by when
+						// the previous frame's render finishes, so anything main does first shortens it
+						// rather than just relocating the idle. Safe to move because _endFrame's entity
+						// removals are queued - they do not land until the next _flush, so the clone
+						// sees the same world either way.
+						_endFrame(profiler, ecs);
+						Messenger::relayMessages(ecs);
+
+						// Fill the clone
 						ECS& renderECS = mRenderECS[mRenderECSIndex];
 						mRenderECSIndex ^= 1;
-
 						{
 							TRACY_ZONEN("Clone ECS");
 							ecs._cloneInto(renderECS);
 						}
 
+						// Wait for previous frame to complete
+						mRenderThread.wait();
+
+						// Update resource while neither the main thread nor the render thread rely on them
+						// TODO - why not just put this at the top of the following dispatch?
+						mRenderThread.runSync([](void* context) {
+							TRACY_GPUN("Resource Tick");
+							static_cast<ResourceManagers*>(context)->_tick();
+						}, &resourceManagers);
+
 						struct RenderFrameJob {
 							ECS& mRenderECS;
-							WindowSurface& mWindow;
 							IDemo& mDemo;
+							WindowSurface& mWindow;
 							util::Profiler& mProfiler;
 							ResourceManagers& mResourceManagers;
-						} renderFrameJob{ renderECS, mWindow, *demos.getCurrentDemo(), profiler, resourceManagers };
+						};
 
 						mRenderThread.dispatch([](void* context) {
-							RenderFrameJob& job = *static_cast<RenderFrameJob*>(context);
+							const std::unique_ptr<RenderFrameJob> job(static_cast<RenderFrameJob*>(context));
 							TRACY_GPUN("Frame Render");
-							job.mResourceManagers._tick();
-							ServiceLocator<Renderer>::ref().render(job.mWindow, &job.mDemo, job.mProfiler, job.mRenderECS, job.mResourceManagers);
-							job.mWindow.flip();
+							ServiceLocator<Renderer>::ref().render(job->mWindow, &job->mDemo, job->mProfiler, job->mRenderECS, job->mResourceManagers);
+							job->mWindow.flip();
 							TracyGpuCollect;
-						}, &renderFrameJob);
-						// Still immediately joined, so main and the worker never overlap. Letting main
-						// run ahead means moving this wait to just *before* the next frame's dispatch,
-						// so frame N renders out of one clone buffer while main fills the other.
-						mRenderThread.wait();
+						}, new RenderFrameJob{ renderECS, *demos.getCurrentDemo(), mWindow, profiler, resourceManagers });
 
 						Messenger::relayMessages(ecs);
 					}
 				}
 
-				_endFrame(profiler, ecs);
-				Messenger::relayMessages(ecs);
 			}
 
 			FrameMark;
 			profiler.end(glfwGetTime());
 		}
+
+		// A frame is still in flight now that the wait moved - drain it before tearing anything down.
+		mRenderThread.wait();
 
 		demos.getCurrentDemo()->destroy();
 		mRenderThread.runSync([](void* context) {

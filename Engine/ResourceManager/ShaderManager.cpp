@@ -163,13 +163,8 @@ namespace neo {
 					if (ImGui::TreeNode("##idk", "Variants (%d)", static_cast<int>(shader.mResolvedShaders.size()))) {
 						ImGui::Separator();
 						for (const auto& variant : shader.mResolvedShaders) {
-							// if (mConstructionArgs && ImGui::Button("Reload")) {
-							// Just destroy the variant and evict from the map, easy
-							// }
-							// else {
 							ImGui::Text("%s", variant.second.variant().size() ? variant.second.variant().c_str() : "No defines");
 							ImGui::Separator();
-							// }
 						}
 						ImGui::TreePop();
 					}
