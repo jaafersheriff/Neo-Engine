@@ -185,44 +185,54 @@ namespace neo {
 						Messenger::relayMessages(ecs);
 					}
 					{
+						_endFrame(profiler, ecs);
+						Messenger::relayMessages(ecs);
+
+						// Fill the clone
 						ECS& renderECS = mRenderECS[mRenderECSIndex];
 						mRenderECSIndex ^= 1;
-
 						{
 							TRACY_ZONEN("Clone ECS");
 							ecs._cloneInto(renderECS);
 						}
 
+						// Wait for previous frame to complete
+						mRenderThread.wait();
+
+						// Update resource while neither the main thread nor the render thread rely on them
+						// TODO - why not just put this at the top of the following dispatch?
+						mRenderThread.runSync([](void* context) {
+							TRACY_GPUN("Resource Tick");
+							static_cast<ResourceManagers*>(context)->_tick();
+						}, &resourceManagers);
+
 						struct RenderFrameJob {
 							ECS& mRenderECS;
-							WindowSurface& mWindow;
 							IDemo& mDemo;
+							WindowSurface& mWindow;
 							util::Profiler& mProfiler;
 							ResourceManagers& mResourceManagers;
-						} renderFrameJob{ renderECS, mWindow, *demos.getCurrentDemo(), profiler, resourceManagers };
+						};
 
 						mRenderThread.dispatch([](void* context) {
-							RenderFrameJob& job = *static_cast<RenderFrameJob*>(context);
+							const std::unique_ptr<RenderFrameJob> job(static_cast<RenderFrameJob*>(context));
 							TRACY_GPUN("Frame Render");
-							job.mResourceManagers._tick();
-							ServiceLocator<Renderer>::ref().render(job.mWindow, &job.mDemo, job.mProfiler, job.mRenderECS, job.mResourceManagers);
-							job.mWindow.flip();
+							ServiceLocator<Renderer>::ref().render(job->mWindow, &job->mDemo, job->mProfiler, job->mRenderECS, job->mResourceManagers);
+							job->mWindow.flip();
 							TracyGpuCollect;
-						}, &renderFrameJob);
-						// TODO : Immediately joined, temporarily
-						mRenderThread.wait();
+						}, new RenderFrameJob{ renderECS, *demos.getCurrentDemo(), mWindow, profiler, resourceManagers });
 
 						Messenger::relayMessages(ecs);
 					}
 				}
 
-				_endFrame(profiler, ecs);
-				Messenger::relayMessages(ecs);
 			}
 
 			FrameMark;
 			profiler.end(glfwGetTime());
 		}
+
+		mRenderThread.wait();
 
 		demos.getCurrentDemo()->destroy();
 		mRenderThread.runSync([](void* context) {
