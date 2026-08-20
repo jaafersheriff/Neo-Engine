@@ -133,6 +133,7 @@ namespace neo {
 				std::swap(swapQueue, mDiscardQueue);
 				mDiscardQueue.clear();
 			}
+			std::lock_guard<std::mutex> lock(mHotReloadMutex); // Hot reload sweep might be reading these same shaders on its own thread
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
 					_destroyImpl(*mCache.resolve(id));
@@ -192,24 +193,37 @@ namespace neo {
 
 			TRACY_ZONEN("Hot reload");
 
-			mCache.forEach([this](const CachedResource<SourceShader>& entry) {
-				const SourceShader& shader = entry.mResource;
-				if (!shader.mConstructionArgs) {
-					return;
-				}
-				time_t lastModTime = shader.mModifiedTime;
-				for (auto& stage : *shader.mConstructionArgs) {
+
+			struct ReloadCandidate {
+				ShaderHandle mHandle;
+				SourceShader::ConstructionArgs mConstructionArgs;
+				time_t mModifiedTime;
+				std::string mName;
+			};
+			std::vector<ReloadCandidate> reloadCandidates;
+
+			{
+				std::lock_guard<std::mutex> lock(mHotReloadMutex);
+				mCache.forEach([this, &reloadCandidates](const CachedResource<SourceShader>& entry) {
+					const SourceShader& shader = entry.mResource;
+					if (shader.mConstructionArgs) {
+						reloadCandidates.push_back({ entry.mHandle, *shader.mConstructionArgs, shader.mModifiedTime, shader.mName });
+					}
+				});
+			}
+
+			for (const ReloadCandidate& candidate : reloadCandidates) {
+				time_t lastModTime = candidate.mModifiedTime;
+				for (const std::string& stage : candidate.mConstructionArgs) {
 					if (!stage.empty()) {
 						lastModTime = std::max(lastModTime, Loader::getFileModTime(stage));
 					}
 				}
-				if (lastModTime > shader.mModifiedTime) {
-					NEO_LOG_I("Hot reloading %s", shader.mName.c_str());
-
-					// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
-					discard(entry.mHandle);
+				if (lastModTime > candidate.mModifiedTime) {
+					NEO_LOG_I("Hot reloading %s", candidate.mName.c_str());
+					discard(candidate.mHandle);
 				}
-			});
+			}
 		}
 	}
 }
