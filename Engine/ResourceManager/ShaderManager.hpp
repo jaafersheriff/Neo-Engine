@@ -8,6 +8,7 @@
 #include "Util/Util.hpp"
 
 #include <array>
+#include <mutex>
 #include <thread>
 #include <variant>
 
@@ -47,6 +48,17 @@ namespace neo {
 		void _initImpl();
 		void _tickImpl();
 	private:
+		std::mutex mHotReloadMutex;
+
+		// Reused across sweeps so the poll does not allocate. Only touched by the reload thread.
+		struct ReloadCandidate {
+			ShaderHandle mHandle;
+			SourceShader::ConstructionArgs mConstructionArgs;
+			time_t mModifiedTime;
+			std::string mName;
+		};
+		std::vector<ReloadCandidate> mReloadCandidates;
+
 		std::thread* mHotReloader;
 		std::atomic<bool> mKillSwitch = false;
 		void _hotReloadFunc();

@@ -133,6 +133,8 @@ namespace neo {
 				std::swap(swapQueue, mDiscardQueue);
 				mDiscardQueue.clear();
 			}
+			// Excludes the hot-reload sweep, which might be reading these same shaders on its own thread
+			std::lock_guard<std::mutex> lock(mHotReloadMutex);
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
 					_destroyImpl(*mCache.resolve(id));
@@ -192,24 +194,30 @@ namespace neo {
 
 			TRACY_ZONEN("Hot reload");
 
-			mCache.forEach([this](const CachedResource<SourceShader>& entry) {
-				const SourceShader& shader = entry.mResource;
-				if (!shader.mConstructionArgs) {
-					return;
-				}
-				time_t lastModTime = shader.mModifiedTime;
-				for (auto& stage : *shader.mConstructionArgs) {
+			mReloadCandidates.clear();
+			{
+				std::lock_guard<std::mutex> lock(mHotReloadMutex);
+				mCache.forEach([this](const CachedResource<SourceShader>& entry) {
+					const SourceShader& shader = entry.mResource;
+					if (shader.mConstructionArgs) {
+						mReloadCandidates.push_back({ entry.mHandle, *shader.mConstructionArgs, shader.mModifiedTime, shader.mName });
+					}
+				});
+			}
+
+			for (const ReloadCandidate& candidate : mReloadCandidates) {
+				time_t lastModTime = candidate.mModifiedTime;
+				for (const std::string& stage : candidate.mConstructionArgs) {
 					if (!stage.empty()) {
 						lastModTime = std::max(lastModTime, Loader::getFileModTime(stage));
 					}
 				}
-				if (lastModTime > shader.mModifiedTime) {
-					NEO_LOG_I("Hot reloading %s", shader.mName.c_str());
-
-					// This should really have a mutex on it, but how are you gunna be editing >1 file at a time come on now
-					discard(entry.mHandle);
+				if (lastModTime > candidate.mModifiedTime) {
+					NEO_LOG_I("Hot reloading %s", candidate.mName.c_str());
+					// Only queues - the teardown itself happens on the render thread in _tickImpl.
+					discard(candidate.mHandle);
 				}
-			});
+			}
 		}
 	}
 }
