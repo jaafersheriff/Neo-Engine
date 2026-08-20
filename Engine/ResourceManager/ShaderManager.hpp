@@ -8,6 +8,7 @@
 #include "Util/Util.hpp"
 
 #include <array>
+#include <mutex>
 #include <thread>
 #include <variant>
 
@@ -47,6 +48,7 @@ namespace neo {
 		void _initImpl();
 		void _tickImpl();
 	private:
+		std::mutex mHotReloadMutex;
 		std::thread* mHotReloader;
 		std::atomic<bool> mKillSwitch = false;
 		void _hotReloadFunc();
