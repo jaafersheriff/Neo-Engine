@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ext/entt_incl.hpp>
 #include <entt/locator/locator.hpp>
 
 #include <utility>
