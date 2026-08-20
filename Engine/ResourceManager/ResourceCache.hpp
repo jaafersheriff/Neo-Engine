@@ -152,6 +152,21 @@ namespace neo {
 			}
 		}
 
+		// Removes a resource from the lookup and hands ownership to the caller, under the exclusive
+		// lock. The resource itself is untouched - still alive, just unreachable through resolve().
+		// That split is the point: destroying it is deferred, but it stops being findable *now*, so
+		// nobody can acquire a fresh pointer to something already doomed.
+		[[nodiscard]] std::unique_ptr<Entry> extract(Handle handle) {
+			std::unique_lock<std::shared_mutex> lock(mMutex);
+			const Slot slot = _slot(handle);
+			if (slot == kInvalidSlot) {
+				return nullptr;
+			}
+			std::unique_ptr<Entry> extracted = std::move(mEntries[slot]);
+			_eraseUnlocked(handle);
+			return extracted;
+		}
+
 		void erase(Handle handle) {
 			std::unique_lock<std::shared_mutex> lock(mMutex);
 			_eraseUnlocked(handle);
@@ -164,21 +179,16 @@ namespace neo {
 			mFramesUntilEviction.clear();
 		}
 
-		// Ages every entry by one frame. Anything that reaches zero is handed to destroy() - the GL
-		// work belongs to the manager, not here - and then erased, so the caller never has to know
-		// how entries are stored. Invalidates iterators.
-		template<typename DestroyFunc>
-		void age(DestroyFunc&& destroy) {
+		// Ages every entry by one frame and reports the handles that expired. It deliberately does
+		// not destroy or erase anything - the caller retires them through extract(), so eviction and
+		// explicit discard take exactly the same path.
+		template<typename ExpiredFunc>
+		void age(ExpiredFunc&& onExpired) const {
 			static_assert(kTracksEviction, "Cache does not evict - nothing to age");
-			std::unique_lock<std::shared_mutex> lock(mMutex);
-			// Walk backwards: erase() swaps the last entry into the hole, and everything above the
-			// current position has already been visited, so nothing is skipped or aged twice.
-			for (size_t i = mEntries.size(); i-- > 0; ) {
+			std::shared_lock<std::shared_mutex> lock(mMutex);
+			for (size_t i = 0; i < mEntries.size(); i++) {
 				if (mFramesUntilEviction[i] == 0) {
-					Entry& entry = *mEntries[i];
-					const Handle handle = entry.mHandle;
-					destroy(entry);
-					_eraseUnlocked(handle);
+					onExpired(mEntries[i]->mHandle);
 				}
 				else {
 					mFramesUntilEviction[i]--;

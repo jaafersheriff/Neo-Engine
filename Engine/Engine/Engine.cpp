@@ -183,11 +183,7 @@ namespace neo {
 						Messenger::relayMessages(ecs);
 					}
 					{
-						// Run before the wait, not after the dispatch. The wait below is bounded by when
-						// the previous frame's render finishes, so anything main does first shortens it
-						// rather than just relocating the idle. Safe to move because _endFrame's entity
-						// removals are queued - they do not land until the next _flush, so the clone
-						// sees the same world either way.
+						// TODO - this shouldnt be in Frame Render, and probably shouldnt be guarded by isMinimzed, but it should be after imgui component resolve
 						_endFrame(profiler, ecs);
 						Messenger::relayMessages(ecs);
 
@@ -202,13 +198,6 @@ namespace neo {
 						// Wait for previous frame to complete
 						mRenderThread.wait();
 
-						// Update resource while neither the main thread nor the render thread rely on them
-						// TODO - why not just put this at the top of the following dispatch?
-						mRenderThread.runSync([](void* context) {
-							TRACY_GPUN("Resource Tick");
-							static_cast<ResourceManagers*>(context)->_tick();
-						}, &resourceManagers);
-
 						struct RenderFrameJob {
 							ECS& mRenderECS;
 							IDemo& mDemo;
@@ -219,8 +208,12 @@ namespace neo {
 
 						mRenderThread.dispatch([](void* context) {
 							const std::unique_ptr<RenderFrameJob> job(static_cast<RenderFrameJob*>(context));
+
+							job->mResourceManagers._tick();
+
 							TRACY_GPUN("Frame Render");
 							ServiceLocator<Renderer>::ref().render(job->mWindow, &job->mDemo, job->mProfiler, job->mRenderECS, job->mResourceManagers);
+
 							job->mWindow.flip();
 							TracyGpuCollect;
 						}, new RenderFrameJob{ renderECS, *demos.getCurrentDemo(), mWindow, profiler, resourceManagers });

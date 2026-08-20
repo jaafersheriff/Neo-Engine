@@ -137,8 +137,7 @@ namespace neo {
 			std::lock_guard<std::mutex> lock(mHotReloadMutex);
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
-					_destroyImpl(*mCache.resolve(id));
-					mCache.erase(id);
+					retire(id);
 				}
 			}
 		}

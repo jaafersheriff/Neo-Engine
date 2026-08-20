@@ -169,6 +169,17 @@ namespace neo {
 				std::lock_guard<std::mutex> lock(mTransactionQueueMutex);
 				mTransactionQueue.clear();
 			}
+			// Anything still waiting in the graveyards goes now - clear() is a quiesced teardown, so
+			// there is nobody left who could be holding a pointer.
+			for (std::unique_ptr<CachedResource<ResourceType>>& retired : mDoomed) {
+				static_cast<DerivedManager*>(this)->_destroyImpl(*retired);
+			}
+			mDoomed.clear();
+			for (std::unique_ptr<CachedResource<ResourceType>>& retired : mRetired) {
+				static_cast<DerivedManager*>(this)->_destroyImpl(*retired);
+			}
+			mRetired.clear();
+
 			mCache.forEach([this](CachedResource<ResourceType>& entry) {
 				static_cast<DerivedManager*>(this)->_destroyImpl(entry);
 			});
@@ -185,12 +196,38 @@ namespace neo {
 			static_cast<DerivedManager*>(this)->_initImpl();
 		}
 
-		void tick() {
-			if constexpr (kTracksEviction) {
-				mCache.age([this](CachedResource<ResourceType>& entry) {
-					static_cast<DerivedManager*>(this)->_destroyImpl(entry);
-				});
+		// Retires a resource: unpublished from the cache immediately, destroyed two ticks later.
+		//
+		// The two halves matter separately. Unpublishing under the cache's exclusive lock means the
+		// main thread can never resolve a handle that is already doomed. Deferring the destruction
+		// means a pointer it resolved *before* that has a full frame to fall out of scope. Together
+		// they are what let _tick run concurrently with the main thread at all - without them, tick
+		// can only run while main is blocked, which costs main the whole duration of the tick.
+		void retire(const ResourceHandle<ResourceType>& id) {
+			if (std::unique_ptr<CachedResource<ResourceType>> retired = mCache.extract(id)) {
+				mRetired.emplace_back(std::move(retired));
 			}
+		}
+
+		void tick() {
+			// Anything retired two ticks ago is now unreachable by everyone, so it can go.
+			for (std::unique_ptr<CachedResource<ResourceType>>& doomed : mDoomed) {
+				static_cast<DerivedManager*>(this)->_destroyImpl(*doomed);
+			}
+			mDoomed.clear();
+			std::swap(mDoomed, mRetired);
+
+			if constexpr (kTracksEviction) {
+				// Eviction retires through the same path as an explicit discard.
+				mExpiredScratch.clear();
+				mCache.age([this](const ResourceHandle<ResourceType>& id) {
+					mExpiredScratch.emplace_back(id);
+				});
+				for (const ResourceHandle<ResourceType>& id : mExpiredScratch) {
+					retire(id);
+				}
+			}
+
 			static_cast<DerivedManager*>(this)->_tickImpl();
 		}
 		mutable std::mutex mLoadQueueMutex;
@@ -204,6 +241,13 @@ namespace neo {
 
 		Cache mCache;
 		std::shared_ptr<CachedResource<ResourceType>> mFallback;
+
+		// The graveyard. mRetired collects this tick's retirements; mDoomed holds the previous
+		// tick's and is destroyed at the start of the next one, giving every retired resource at
+		// least a full frame between being unpublished and being freed.
+		std::vector<std::unique_ptr<CachedResource<ResourceType>>> mRetired;
+		std::vector<std::unique_ptr<CachedResource<ResourceType>>> mDoomed;
+		std::vector<ResourceHandle<ResourceType>> mExpiredScratch;
 
 	private:
 		CachedResource<ResourceType>& _resolveFinal(const ResourceHandle<ResourceType>& id) const {

@@ -204,8 +204,7 @@ namespace neo {
 			for (auto& id : swapQueue) {
 				TRACY_ZONEN("Destroy Single");
 				if (isValid(id)) {
-					_destroyImpl(*mCache.resolve(id));
-					mCache.erase(id);
+					retire(id);
 				}
 				else {
 					std::lock_guard<std::mutex> lock(mLoadQueueMutex);
