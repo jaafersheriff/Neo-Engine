@@ -11,6 +11,7 @@
 #include <mutex>
 #include <new>
 #include <type_traits>
+#include <ext/entt_incl.hpp>
 #include <entt/signal/dispatcher.hpp>
 
 namespace neo {
