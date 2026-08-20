@@ -48,7 +48,7 @@ namespace neo {
 		if (!mThread.joinable()) {
 			return;
 		}
-		TRACY_ZONEN("RenderThread::wait");
+		TRACY_ZONEN("Wait for previous frame");
 		std::unique_lock<std::mutex> lock(mMutex);
 		mWorkDone.wait(lock, [this] { return !mHasWork; });
 	}
