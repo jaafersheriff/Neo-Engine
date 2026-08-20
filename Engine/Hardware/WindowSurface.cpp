@@ -144,8 +144,6 @@ namespace neo {
 			Messenger::sendMessage<Mouse::MouseResetMessage>();
 		});
 
-		glfwSwapInterval(mDetails.mVSyncEnabled);
-
 		reset(name);
 
 		return 0;
@@ -223,8 +221,8 @@ namespace neo {
 	}
 
 	void WindowSurface::toggleVSync() {
+		// Only records the intent - flip() is what hands it to GLFW, see there.
 		mDetails.mVSyncEnabled = !mDetails.mVSyncEnabled;
-		glfwSwapInterval(mDetails.mVSyncEnabled);
 	}
 
 	int WindowSurface::shouldClose() const {
@@ -237,6 +235,7 @@ namespace neo {
 
 	void WindowSurface::flip() {
 		TRACY_GPU();
+		glfwSwapInterval(mDetails.mVSyncEnabled);
 		glfwSwapBuffers(mWindow);
 	}
 
