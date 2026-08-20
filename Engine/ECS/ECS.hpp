@@ -5,6 +5,7 @@
 #include "Util/Profiler.hpp"
 #include "Util/Util.hpp"
 
+#include <ext/entt_incl.hpp>
 #include <entt/entt.hpp>
 
 #include <ext/imgui_incl.hpp>
