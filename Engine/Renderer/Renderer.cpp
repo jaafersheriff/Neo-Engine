@@ -203,6 +203,8 @@ namespace neo {
 		}
 
 		renderPasses._execute(resourceManagers, ecs, params.mWireframe);
+
+		mPreviousStats = mStats;
 	}
 
 	void Renderer::_imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager) {
@@ -255,10 +257,10 @@ namespace neo {
 
 		ImGui::Begin("Renderer");
 		if (ImGui::TreeNodeEx("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::TextWrapped("Num Draws: %d", mStats.mNumDraws);
-			ImGui::TextWrapped("Num Triangles: %d", mStats.mNumPrimitives);
-			ImGui::TextWrapped("Num Uniforms: %d", mStats.mNumUniforms);
-			ImGui::TextWrapped("Num Samplers: %d", mStats.mNumSamplers);
+			ImGui::TextWrapped("Num Draws: %d", mPreviousStats.mNumDraws);
+			ImGui::TextWrapped("Num Triangles: %d", mPreviousStats.mNumPrimitives);
+			ImGui::TextWrapped("Num Uniforms: %d", mPreviousStats.mNumUniforms);
+			ImGui::TextWrapped("Num Samplers: %d", mPreviousStats.mNumSamplers);
 			ImGui::TreePop();
 		}
 
