@@ -9,6 +9,7 @@
 #include <mutex>
 #include <chrono>
 
+// The public face of the resource system
 namespace neo {
 
 	constexpr HashedString::hash_type NEO_INVALID_HANDLE = UINT32_MAX;
@@ -166,8 +167,17 @@ namespace neo {
 				std::lock_guard<std::mutex> lock(mTransactionQueueMutex);
 				mTransactionQueue.clear();
 			}
-			mCache.forEach([this](CachedResource<ResourceType>& resource) {
-				static_cast<DerivedManager*>(this)->_destroyImpl(resource);
+			for (std::unique_ptr<CachedResource<ResourceType>>& retired : mDoomed) {
+				static_cast<DerivedManager*>(this)->_destroyImpl(*retired);
+			}
+			mDoomed.clear();
+			for (std::unique_ptr<CachedResource<ResourceType>>& retired : mRetired) {
+				static_cast<DerivedManager*>(this)->_destroyImpl(*retired);
+			}
+			mRetired.clear();
+
+			mCache.forEach([this](CachedResource<ResourceType>& entry) {
+				static_cast<DerivedManager*>(this)->_destroyImpl(entry);
 			});
 			mCache.clear();
 
@@ -182,12 +192,31 @@ namespace neo {
 			static_cast<DerivedManager*>(this)->_initImpl();
 		}
 
-		void tick() {
-			if constexpr (kTracksEviction) {
-				mCache.age([this](CachedResource<ResourceType>& entry) {
-					static_cast<DerivedManager*>(this)->_destroyImpl(entry);
-				});
+		// Retires a resource: unpublished from the cache immediately, destroyed later
+		void retire(const ResourceHandle<ResourceType>& id) {
+			if (std::unique_ptr<CachedResource<ResourceType>> retired = mCache.extract(id)) {
+				mRetired.emplace_back(std::move(retired));
 			}
+		}
+
+		void tick() {
+			for (std::unique_ptr<CachedResource<ResourceType>>& doomed : mDoomed) {
+				static_cast<DerivedManager*>(this)->_destroyImpl(*doomed);
+			}
+			mDoomed.clear();
+			std::swap(mDoomed, mRetired);
+
+			if constexpr (kTracksEviction) {
+				// Eviction retires through the same path as an explicit discard.
+				mExpiredScratch.clear();
+				mCache.age([this](const ResourceHandle<ResourceType>& id) {
+					mExpiredScratch.emplace_back(id);
+				});
+				for (const ResourceHandle<ResourceType>& id : mExpiredScratch) {
+					retire(id);
+				}
+			}
+
 			static_cast<DerivedManager*>(this)->_tickImpl();
 		}
 		mutable std::mutex mLoadQueueMutex;
@@ -201,6 +230,11 @@ namespace neo {
 
 		Cache mCache;
 		std::shared_ptr<CachedResource<ResourceType>> mFallback;
+
+		// Graveyard
+		std::vector<std::unique_ptr<CachedResource<ResourceType>>> mRetired;
+		std::vector<std::unique_ptr<CachedResource<ResourceType>>> mDoomed;
+		std::vector<ResourceHandle<ResourceType>> mExpiredScratch;
 
 	private:
 		CachedResource<ResourceType>& _resolveFinal(const ResourceHandle<ResourceType>& id) const {
