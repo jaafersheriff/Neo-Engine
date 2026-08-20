@@ -120,8 +120,7 @@ namespace neo {
 				for (auto& id : swapQueue) {
 					TRACY_GPUN("Destroy Single");
 					if (isValid(id)) {
-						_destroyImpl(*mCache.resolve(id));
-						mCache.erase(id);
+						retire(id);
 					}
 				}
 			}

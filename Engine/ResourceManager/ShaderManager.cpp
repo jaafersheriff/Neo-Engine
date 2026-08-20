@@ -136,8 +136,7 @@ namespace neo {
 			std::lock_guard<std::mutex> lock(mHotReloadMutex); // Hot reload sweep might be reading these same shaders on its own thread
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
-					_destroyImpl(*mCache.resolve(id));
-					mCache.erase(id);
+					retire(id);
 				}
 			}
 		}
