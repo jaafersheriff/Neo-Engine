@@ -49,7 +49,6 @@ namespace neo {
 		using Entry = CachedResource<ResourceType>;
 		static constexpr bool kTracksEviction = RetainFrames > 0;
 
-
 		// Deliberately does NOT count as a use
 		template<typename Func>
 		void forEach(Func&& func) const {
@@ -96,9 +95,9 @@ namespace neo {
 			std::unique_lock<std::shared_mutex> lock(mMutex);
 			entry.mHandle = handle;
 
+			// Replace
 			EntryPosition entryPos = _getEntryPosition(handle);
 			if (entryPos != kInvalidEntryPosition) {
-				// Replace
 				mEntries[entryPos] = std::make_unique<Entry>(std::move(entry));
 				_markUsed(entryPos);
 				return;
@@ -110,6 +109,19 @@ namespace neo {
 			if constexpr (kTracksEviction) {
 				mFramesUntilEviction.emplace_back(RetainFrames);
 			}
+		}
+
+		// Removes a resource from the lookup and hands ownership to the caller making the resource unavailable through resolve()
+		// Used for deferred deferred deletion
+		[[nodiscard]] std::unique_ptr<Entry> extract(Handle handle) {
+			std::unique_lock<std::shared_mutex> lock(mMutex);
+			const EntryPosition entryPos = _getEntryPosition(handle);
+			if (entryPos == kInvalidEntryPosition) {
+				return nullptr;
+			}
+			std::unique_ptr<Entry> extracted = std::move(mEntries[entryPos]);
+			_eraseUnlocked(handle);
+			return extracted;
 		}
 
 		void erase(Handle handle) {
@@ -124,18 +136,14 @@ namespace neo {
 			mFramesUntilEviction.clear();
 		}
 
-		// Ages every entry by one frame. Anything that reaches zero is handed to destroy()
-		template<typename DestroyFunc>
-		void age(DestroyFunc&& destroy) {
+		// Ages every entry by one frame and expires the resource putting it in the deferred deferred deletion queue
+		template<typename ExpiredFunc>
+		void age(ExpiredFunc&& onExpired) const {
 			static_assert(kTracksEviction, "Cache does not evict - nothing to age");
-			std::unique_lock<std::shared_mutex> lock(mMutex);
-			// Walk backwards: erase() swaps the last entry into the hole
-			for (size_t i = mEntries.size(); i-- > 0; ) {
+			std::shared_lock<std::shared_mutex> lock(mMutex);
+			for (size_t i = 0; i < mEntries.size(); i++) {
 				if (mFramesUntilEviction[i] == 0) {
-					Entry& entry = *mEntries[i];
-					const Handle handle = entry.mHandle;
-					destroy(entry);
-					_eraseUnlocked(handle);
+					onExpired(mEntries[i]->mHandle);
 				}
 				else {
 					mFramesUntilEviction[i]--;
