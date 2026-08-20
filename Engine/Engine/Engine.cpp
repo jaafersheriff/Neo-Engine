@@ -12,6 +12,7 @@ extern "C" {
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
+#include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/EngineComponents/SingleFrameComponent.hpp"
 #include "ECS/Component/EngineComponents/AsyncJobComponent.hpp"
@@ -441,6 +442,19 @@ namespace neo {
 				}
 			}
 			NEO_ASSERT(jobFound, "Trying to remove a non-existant async job?");
+		}
+
+		{
+			TRACY_ZONEN("Resolve transforms");
+			// Resolve matrices all at once in the base ECS for the render thread's copy to use
+			for (auto&& [entity, spatial] : ecs.getView<SpatialComponent>().each()) {
+				spatial.getModelMatrix();
+				spatial.getNormalMatrix();
+			}
+			for (auto&& [entity, camera, spatial] : ecs.getView<CameraComponent, SpatialComponent>().each()) {
+				camera.getProj();
+				spatial.getView();
+			}
 		}
 
 		// Update display, mouse, keyboard 
