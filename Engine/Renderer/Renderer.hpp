@@ -36,7 +36,7 @@ namespace neo {
 			Renderer(Renderer &&) = delete;
 			Renderer & operator=(Renderer &&) = delete;
 
-			// Written by the render thread, read by the main thread's ImGui without synchronisation
+			// Written by the render thread, copied to mPreviousStats for reads on the main thread
 			FrameStats mStats = {};
 
 			RendererDetails getDetails() const { return mDetails; }
@@ -51,6 +51,7 @@ namespace neo {
 		private:
 			void _imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager);
 
+			FrameStats mPreviousStats = {};
 			RendererDetails mDetails = {};
 
 			// Assigned by render on the render thread, read by ImGui on main without synchronisation.
