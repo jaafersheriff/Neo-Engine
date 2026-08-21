@@ -22,7 +22,6 @@ PUBLIC
 	Neo
 PRIVATE
 	Demos
-	enkiTS 
 )
 
 set_target_properties(NeoMain PROPERTIES FOLDER "Neo")
