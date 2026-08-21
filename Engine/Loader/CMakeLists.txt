@@ -7,6 +7,7 @@ PUBLIC
 	par
 PRIVATE
 	Util
+	Jobs
 	libglew_static
 	ECS
 )
