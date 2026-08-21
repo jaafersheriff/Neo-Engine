@@ -157,3 +157,29 @@ PRIVATE
 )
 set_target_properties(tinygltf PROPERTIES FOLDER "Neo/ext/")
 target_compile_options(tinygltf PRIVATE "/WX-" "/W0")
+
+## enkiTS
+file(GLOB ENKITS_HPP_FILES 
+	enkiTS/src/TaskScheduler.h
+	enkiTS/src/LockLessMultiReadPipe.h
+)
+file(GLOB ENKITS_CPP_FILES 
+	enkiTS/src/TaskScheduler.cpp
+)
+add_library(enkiTS STATIC ${ENKITS_CPP_FILES} ${ENKITS_HPP_FILES} enki_incl.hpp)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/enkiTS/src FILES 
+	${ENKITS_HPP_FILES}
+	${ENKITS_CPP_FILES})
+set_target_properties(enkiTS PROPERTIES FOLDER "Neo/ext")
+target_include_directories(enkiTS
+PUBLIC
+	"${CMAKE_CURRENT_SOURCE_DIR}/enkiTS/src"
+PRIVATE
+)
+
+# Sizes the pipe and pinned-task arrays inside TaskScheduler
+target_compile_definitions(enkiTS
+PUBLIC
+	ENKITS_TASK_PRIORITIES_NUM=3
+)
+target_compile_options(enkiTS PRIVATE "/WX-" "/W0")
