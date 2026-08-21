@@ -5,6 +5,7 @@
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 
 #include "Util/Profiler.hpp"
+#include "Util/ServiceLocator.hpp"
 
 #include <ext/imgui_incl.hpp>
 
@@ -50,10 +51,7 @@ namespace neo {
 		}
 	};
 
-	ShaderManager::ShaderManager() {
-		mKillSwitch.store(false);
-		mHotReloader = new std::thread(&ShaderManager::_hotReloadFunc, this);
-	}
+	ShaderManager::ShaderManager() = default;
 
 	void ShaderManager::_initImpl() {
 
@@ -79,11 +77,14 @@ namespace neo {
 	}
 
 	ShaderManager::~ShaderManager() {
+		// No thread to join any more. The sweep was already quiesced by waitForHotReload, back when the
+		// JobSystem still existed.
+		NEO_ASSERT(!mHotReloadJob.isValid(), "Hot reload sweep outlived the JobSystem - waitForHotReload was skipped");
 		mFallback.reset();
+	}
 
-		mKillSwitch.store(true);
-		mHotReloader->join();
-		delete mHotReloader;
+	void ShaderManager::waitForHotReload() {
+		mHotReloadJob = JobHandle{};
 	}
 
 	const ResolvedShaderInstance& ShaderManager::resolveDefines(ShaderHandle handle, const ShaderDefines& defines) const {
@@ -133,7 +134,7 @@ namespace neo {
 				std::swap(swapQueue, mDiscardQueue);
 				mDiscardQueue.clear();
 			}
-			// Excludes the hot-reload sweep, which might be reading these same shaders on its own thread
+			// Excludes the hot-reload sweep, which might be reading these same shaders on a worker
 			std::lock_guard<std::mutex> lock(mHotReloadMutex);
 			for (auto& id : swapQueue) {
 				if (isValid(id)) {
@@ -143,6 +144,8 @@ namespace neo {
 		}
 
 		NEO_ASSERT(mTransactionQueue.empty(), "Shader transactions unsupported");
+
+		_kickHotReload();
 	}
 
 	void ShaderManager::_destroyImpl(CachedResource<SourceShader>& sourceShader) {
@@ -177,41 +180,50 @@ namespace neo {
 		});
 	}
 
-	void ShaderManager::_hotReloadFunc() {
-		tracy::SetThreadName("Shader Hot Reloader");
+	void ShaderManager::_kickHotReload() {
+		// Runs on the render thread, at the end of the render job. One sweep at a time: the handle is
+		// how we know the last one landed, and re-dispatching over a live sweep would race it on
+		// mReloadCandidates.
+		if (mHotReloadJob.isValid() && !mHotReloadJob.isComplete()) {
+			return;
+		}
+
+		const std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+		if (now - mLastHotReloadSweep < std::chrono::milliseconds(HOT_RELOAD_MILLSECONDS)) {
+			return;
+		}
+		mLastHotReloadSweep = now;
+
+		// Low priority: a mod-time sweep should fill an idle core, never push the frame around.
+		mHotReloadJob = ServiceLocator<JobSystem>::ref().dispatch([this] { _hotReloadSweep(); }, JobPriority::Low);
+	}
+
+	void ShaderManager::_hotReloadSweep() {
 		// Doesn't handle #includes
-		// Might break during swap demo
-		while (mKillSwitch.load() == false) {
-			{
-				TRACY_ZONEN("Sleep");
-				std::this_thread::sleep_for(std::chrono::milliseconds(HOT_RELOAD_MILLSECONDS));
-			}
+		TRACY_ZONEN("Hot reload");
 
-			TRACY_ZONEN("Hot reload");
-
-			mReloadCandidates.clear();
-			{
-				std::lock_guard<std::mutex> lock(mHotReloadMutex);
-				mCache.forEach([this](const CachedResource<SourceShader>& entry) {
-					const SourceShader& shader = entry.mResource;
-					if (shader.mConstructionArgs) {
-						mReloadCandidates.push_back({ entry.mHandle, *shader.mConstructionArgs, shader.mModifiedTime, shader.mName });
-					}
-				});
-			}
-
-			for (const ReloadCandidate& candidate : mReloadCandidates) {
-				time_t lastModTime = candidate.mModifiedTime;
-				for (const std::string& stage : candidate.mConstructionArgs) {
-					if (!stage.empty()) {
-						lastModTime = std::max(lastModTime, Loader::getFileModTime(stage));
-					}
+		mReloadCandidates.clear();
+		{
+			std::lock_guard<std::mutex> lock(mHotReloadMutex);
+			mCache.forEach([this](const CachedResource<SourceShader>& entry) {
+				const SourceShader& shader = entry.mResource;
+				if (shader.mConstructionArgs) {
+					mReloadCandidates.push_back({ entry.mHandle, *shader.mConstructionArgs, shader.mModifiedTime, shader.mName });
 				}
-				if (lastModTime > candidate.mModifiedTime) {
-					NEO_LOG_I("Hot reloading %s", candidate.mName.c_str());
-					// Only queues - the teardown itself happens on the render thread in _tickImpl.
-					discard(candidate.mHandle);
+			});
+		}
+
+		for (const ReloadCandidate& candidate : mReloadCandidates) {
+			time_t lastModTime = candidate.mModifiedTime;
+			for (const std::string& stage : candidate.mConstructionArgs) {
+				if (!stage.empty()) {
+					lastModTime = std::max(lastModTime, Loader::getFileModTime(stage));
 				}
+			}
+			if (lastModTime > candidate.mModifiedTime) {
+				NEO_LOG_I("Hot reloading %s", candidate.mName.c_str());
+				// Only queues - the teardown itself happens on the render thread in _tickImpl.
+				discard(candidate.mHandle);
 			}
 		}
 	}

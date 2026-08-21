@@ -182,23 +182,28 @@ namespace neo {
 					ecs._cloneInto(renderECS);
 
 					// Wait for previous frame to complete
-					mRenderJob.wait();
+					{
+						TRACY_ZONEN("Wait for previous frame");
+						mRenderJob.wait();
+					}
 
 					// Everything captured here outlives the frame: the clone is a member, and the demo,
 					// window, profiler and managers all outlive run(). These captures are what replace
 					// the hand-off struct this used to heap-allocate every single frame.
-					IDemo& demo = *demos.getCurrentDemo();
-					mRenderJob = ServiceLocator<JobSystem>::ref().dispatchOn(JobThread::Render,
-						[this, &renderECS, &demo, &profiler, &resourceManagers] {
-							resourceManagers._tick();
+					{
+						TRACY_ZONEN("Start next frame");
+						IDemo& demo = *demos.getCurrentDemo();
+						mRenderJob = ServiceLocator<JobSystem>::ref().dispatchOn(JobThread::Render,
+							[this, &renderECS, &demo, &profiler, &resourceManagers] {
+								resourceManagers._tick();
 
-							ServiceLocator<Renderer>::ref().render(mWindow, &demo, profiler, renderECS, resourceManagers);
+								ServiceLocator<Renderer>::ref().render(mWindow, &demo, profiler, renderECS, resourceManagers);
 
-							mWindow.flip();
-							TracyGpuCollect;
-						});
-
-					Messenger::relayMessages(ecs);
+								mWindow.flip();
+								TracyGpuCollect;
+							});
+						Messenger::relayMessages(ecs);
+					}
 				}
 			}
 

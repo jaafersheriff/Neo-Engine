@@ -22,6 +22,10 @@ namespace neo {
 	}
 
 	void ResourceManagers::_clear() {
+		// Before anything is torn down: the sweep reads the shader cache from a worker, and clear() is
+		// meant to be a quiesced teardown.
+		mShaderManager.waitForHotReload();
+
 		mMeshManager.clear();
 		mShaderBufferManager.clear();
 		mShaderManager.clear();

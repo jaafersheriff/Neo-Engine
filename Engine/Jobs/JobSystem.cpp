@@ -142,6 +142,7 @@ namespace neo {
 			}
 
 			void ExecuteRange(enki::TaskSetPartition, uint32_t) override {
+				TRACY_ZONEN("Job (detached)");
 				mFn();
 			}
 		};
@@ -173,7 +174,10 @@ namespace neo {
 	struct JobHandle::Task {
 		Task(enki::TaskScheduler& scheduler, JobFn fn, JobPriority priority)
 			: mScheduler(&scheduler)
-			, mTaskSet(1, [fn = std::move(fn)](enki::TaskSetPartition, uint32_t) { fn(); })
+			, mTaskSet(1, [fn = std::move(fn)](enki::TaskSetPartition, uint32_t) {
+				TRACY_ZONEN("Job");
+				fn();
+			})
 		{
 			mTaskSet.m_Priority = toEnkiPriority(priority);
 			mCompletable = &mTaskSet;
@@ -181,7 +185,10 @@ namespace neo {
 
 		Task(enki::TaskScheduler& scheduler, uint32_t threadNum, JobFn fn)
 			: mScheduler(&scheduler)
-			, mPinned(threadNum, std::move(fn))
+			, mPinned(threadNum, [fn = std::move(fn)] {
+				TRACY_ZONEN("Job (pinned)");
+				fn();
+			})
 		{
 			mCompletable = &mPinned;
 		}
@@ -335,6 +342,8 @@ namespace neo {
 		// The task set lives on this stack frame, which is safe precisely because this call blocks until
 		// every batch of it has run.
 		enki::TaskSet task(count, [&fn](enki::TaskSetPartition range, uint32_t threadNum) {
+			// One zone per batch, which is also the cheapest way to see how enki actually split the set.
+			TRACY_ZONEN("parallelFor");
 			fn(range.start, range.end, threadNum);
 		});
 		task.m_MinRange = std::max(1u, batchSize);
