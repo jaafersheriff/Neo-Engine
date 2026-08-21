@@ -9,6 +9,19 @@
 
 namespace neo {
 
+	namespace {
+		struct alignas(64) Collision {
+			ECS::Entity mEntity = ECS::NEO_INVALID_ENTITY;
+			float mCollisionDistance = FLT_MAX;
+		};
+
+		// Nearest wins, lowest entity identifier breaks a tie
+		bool isCloser(ECS::Entity entity, float distance, const Collision& best) {
+			return distance < best.mCollisionDistance
+				|| (distance == best.mCollisionDistance && entity < best.mEntity);
+		}
+	}
+
 	void SelectingSystem::update(ECS& ecs, const ResourceManagers& resourceManagers) {
 		NEO_UNUSED(resourceManagers);
 
@@ -20,22 +33,35 @@ namespace neo {
 			return;
 		}
 
-		auto&& [_, mouseRay] = *mouseRayComponent;
-		struct Collision {
-			ECS::Entity mEntity;
-			float mCollisionDistance = FLT_MAX;
-		};
-		auto selectables = ecs.getView<BoundingBoxComponent, SpatialComponent>();
+		const glm::vec3 rayPosition = std::get<1>(*mouseRayComponent).mPosition;
+		const glm::vec3 rayDirection = std::get<1>(*mouseRayComponent).mDirection;
+
+		JobSystem& jobSystem = ServiceLocator<JobSystem>::ref();
+		std::vector<Collision> hits(jobSystem.numThreads());
+
+		ecs.parallelForEach<BoundingBoxComponent, SpatialComponent>(
+			[&hits, &jobSystem, rayPosition, rayDirection](ECS::Entity entity, const BoundingBoxComponent& bb, const SpatialComponent& spatial) {
+				// Ignore static entities
+				if (bb.mStatic) {
+					return;
+				}
+
+				const auto intersection = bb.intersect(spatial.getModelMatrix(), rayPosition, rayDirection);
+				if (!intersection.has_value()) {
+					return;
+				}
+
+				Collision& best = hits[jobSystem.threadIndex()];
+				if (isCloser(entity, intersection.value(), best)) {
+					best.mEntity = entity;
+					best.mCollisionDistance = intersection.value();
+				}
+			});
+
 		Collision collision;
-		for (auto&& [entity, bb, spatial] : selectables.each()) {
-			// Ignore static entities
-			if (bb.mStatic) {
-				continue;
-			}
-			auto intersection = bb.intersect(spatial.getModelMatrix(), mouseRay.mPosition, mouseRay.mDirection);
-			if (intersection.has_value() && intersection.value() < collision.mCollisionDistance) {
-				collision.mEntity = entity;
-				collision.mCollisionDistance = intersection.value();
+		for (const Collision& hit : hits) {
+			if (isCloser(hit.mEntity, hit.mCollisionDistance, collision)) {
+				collision = hit;
 			}
 		}
 
