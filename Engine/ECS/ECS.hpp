@@ -2,7 +2,10 @@
 
 #include "ECS/Systems/System.hpp"
 
+#include "Jobs/JobSystem.hpp"
+
 #include "Util/Profiler.hpp"
+#include "Util/ServiceLocator.hpp"
 #include "Util/Util.hpp"
 
 #include <ext/entt_incl.hpp>
@@ -82,6 +85,31 @@ namespace neo {
 		template<typename... CompTs> std::optional<std::tuple<Entity, const CompTs&...>> getSingleView() const;
 
 		template<typename FilterCompT, typename SortCompT> void sort(std::function<bool(Entity left, Entity right)> compare) const;
+
+		/* Iterate a view across job system workers, or serially when there are too few entities for that
+		   to pay. The decision is made per call from the entity count, so a system that usually sees a
+		   dozen entities and occasionally sees fifty thousand needs no special casing.
+
+		   This is a template all the way down on purpose: the type erasure happens once per *batch*, at
+		   the job boundary, so the per-entity body still inlines.
+
+		   The contract, none of which is checked for you:
+		   - No structural changes inside the body. No addComponent, removeComponent, submitEntity or
+			 removeEntity - they are mutex-guarded queues, and going wide would turn them into a
+			 contention point, which is the opposite of the point.
+		   - No reading another entity's components. Each iteration touches only its own.
+		   - Accumulate into buckets indexed by JobSystem::threadIndex(), never a shared counter, and
+			 combine afterwards. A reduction must also combine deterministically - order of arrival is
+			 not stable between frames.
+		   - Nothing may depend on visit order. The wide path walks the leading pool's packed array
+			 forwards, which is the reverse of what iterating the view gives you, and the batches of it
+			 land in whatever order the workers get to them. */
+		template<typename... CompTs, typename Fn> void parallelForEach(Fn&& fn, uint32_t batchSize = sParallelBatchSize);
+
+		/* Both live in the ECS ImGui pane so they get chosen by measurement. Setting the threshold to 0
+		   forces every parallelForEach wide, which is how the two paths get compared. */
+		static uint32_t sParallelGoWideThreshold;
+		static uint32_t sParallelBatchSize;
 
 		/* Attach a system */
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
@@ -317,6 +345,57 @@ namespace neo {
 		// TODO -- maybe force const inputs rather than attaching it
 		// TODO -- otherwise view.get<> breaks
 		return mRegistry.view<CompTs...>();
+	}
+
+	template<typename... CompTs, typename Fn>
+	void ECS::parallelForEach(Fn&& fn, uint32_t batchSize) {
+		TRACY_ZONE();
+
+		auto view = getView<CompTs...>();
+
+		// A view is not randomly accessible, but the storage behind it is. A view over N component types
+		// is one leading pool - the smallest of them - plus a per-element test that the other N-1 pools
+		// hold the same entity, and a pool is a packed array. So the batches index that array and repeat
+		// the test themselves, instead of collecting the view into a vector the batches can index. The
+		// collect was a second full pass over every entity and measured as one, at roughly a third of
+		// the whole call on DrawStress.
+		const auto* pool = view.handle();
+
+		// Exactly what the view would iterate, not an estimate. A swap_only pool keeps its dead entities
+		// in the packed array past the free list, so only the live prefix counts; every other policy
+		// iterates the whole array and filters below. Derived here rather than taken from size_hint()
+		// because a single-component view only declares size_hint() for in-place pools, and this is the
+		// one formulation that compiles for any CompTs.
+		const uint32_t count = pool == nullptr
+			? 0u
+			: static_cast<uint32_t>(pool->policy() == entt::deletion_policy::swap_only ? pool->free_list() : pool->size());
+
+		if (count < sParallelGoWideThreshold) {
+			// Small views never touch the scheduler at all - waking workers to move forty entities costs
+			// more than moving them. Straight off the view, so the serial path stays the plain thing the
+			// wide path is checked against.
+			for (const Entity entity : view) {
+				fn(entity, view.template get<CompTs>(entity)...);
+			}
+			return;
+		}
+
+		// pool is non-null here: the only way it is null is an empty view, which count == 0 has already
+		// sent down the serial path - and parallelFor returns immediately on a count of 0 regardless, so
+		// forcing the threshold to 0 in the ImGui pane cannot reach a dereference either.
+		ServiceLocator<JobSystem>::ref().parallelFor(count, batchSize, [pool, &view, &fn](uint32_t begin, uint32_t end, uint32_t) {
+			for (uint32_t i = begin; i < end; ++i) {
+				const Entity entity = (*pool)[i];
+				// The test the view iterator would have applied, and it rejects three things at once:
+				// tombstones left behind by in-place deletion, entities the leading pool holds but the
+				// others do not, and slots a swap_only pool has already freed. Dropping it would hand fn
+				// a dead entity and make the get below undefined rather than loud.
+				if (!view.contains(entity)) {
+					continue;
+				}
+				fn(entity, view.template get<CompTs>(entity)...);
+			}
+		});
 	}
 
 	template<typename... CompTs>

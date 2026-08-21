@@ -5,6 +5,7 @@ target_link_libraries(ECS
 PUBLIC
 	Util
 	Messaging
+	Jobs
 	entt
 PRIVATE
 	Hardware
