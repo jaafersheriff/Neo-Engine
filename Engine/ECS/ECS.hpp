@@ -90,7 +90,6 @@ namespace neo {
 
 		/* Iterate a view across job system workers, or serially when there are too few entities 
 		   The contract, none of which is checked for you:
-		   - No structural changes inside the body (No addComponent, removeComponent, submitEntity or removeEntity) 
 		   - No reading another entity's components
 		   - Accumulate into buckets indexed by JobSystem::threadIndex()
 		   - Nothing may depend on visit order
@@ -152,6 +151,7 @@ namespace neo {
 
 		private:
 			bool _ensure(ComponentTypeID type, const Entry& entry) {
+				std::lock_guard<std::mutex> lock(mEnsureMutex);
 				if (mEntries.contains(type)) {
 					return false;
 				}
@@ -164,6 +164,7 @@ namespace neo {
 			}
 
 			entt::dense_map<ComponentTypeID, Entry> mEntries;
+			std::mutex mEnsureMutex;
 		};
 		ComponentRegistry mComponentRegistry;
 		// Type-erased entry points 
