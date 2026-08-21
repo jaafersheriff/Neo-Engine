@@ -22,6 +22,8 @@ namespace neo {
 	}
 
 	void ResourceManagers::_clear() {
+		mShaderManager.waitForHotReload();
+
 		mMeshManager.clear();
 		mShaderBufferManager.clear();
 		mShaderManager.clear();
