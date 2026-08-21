@@ -189,7 +189,9 @@ namespace neo {
 		if (!mTask) {
 			return;
 		}
-		mTask->mScheduler->WaitforTask(mTask->mCompletable);
+
+		// Waiting here does NOT pick up other work
+		mTask->mScheduler->WaitforTask(mTask->mCompletable, enki::TASK_PRIORITY_HIGH);
 	}
 
 	bool JobHandle::isComplete() const {
