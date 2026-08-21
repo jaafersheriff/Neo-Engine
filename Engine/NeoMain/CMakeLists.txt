@@ -22,7 +22,6 @@ PUBLIC
 	Neo
 PRIVATE
 	Demos
-	enkiTS # CP1a scaffolding - removed in CP1b
 )
 
 set_target_properties(NeoMain PROPERTIES FOLDER "Neo")
