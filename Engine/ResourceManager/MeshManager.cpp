@@ -107,6 +107,8 @@ namespace neo {
 				else {
 					NEO_LOG_E("Failed to load mesh %s", details.mDebugName.value_or("").c_str());
 				}
+				// Published (or failed) - the claim taken in asyncLoad ends here, not when it left the queue.
+				_finishPending(details.mHandle);
 				for (auto&& [type, buffer] : details.mLoadDetails.mVertexBuffers) {
 					delete[] buffer.mData;
 				}

@@ -124,6 +124,8 @@ namespace neo {
 				else {
 					NEO_LOG_E("Failed to load shader %s", loadDetails.mDebugName.value_or("").c_str());
 				}
+				// Published (or failed) - the claim taken in asyncLoad ends here, not when it left the queue.
+				_finishPending(loadDetails.mHandle);
 			}
 		}
 

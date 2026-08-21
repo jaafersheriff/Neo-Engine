@@ -161,6 +161,8 @@ namespace neo {
 				if (std::optional<CachedResource<ManagedFramebuffer>> framebuffer = FramebufferLoader{}.load(details.mLoadDetails, details.mDebugName, *mTextureManager)) {
 					mCache.insert(details.mHandle, std::move(*framebuffer));
 				}
+				// Published (or failed) - the claim taken in asyncLoad ends here, not when it left the queue.
+				_finishPending(details.mHandle);
 			}
 		}
 

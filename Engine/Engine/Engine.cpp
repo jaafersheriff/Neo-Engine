@@ -213,6 +213,9 @@ namespace neo {
 
 		// A frame is still in flight now that the wait moved - drain it before tearing anything down.
 		mRenderJob.wait();
+		// An in-flight scene load still holds the demo's node operators and walks the resource caches,
+		// both of which are about to go away.
+		ServiceLocator<JobSystem>::ref().waitForDetached();
 
 		demos.getCurrentDemo()->destroy();
 		ServiceLocator<JobSystem>::ref().runSyncOn(JobThread::Render, [&resourceManagers] {
@@ -226,6 +229,9 @@ namespace neo {
 		TRACY_ZONE();
 
 		mRenderJob.wait();
+		// Same as shutdown: nothing may still be loading into the state we are about to tear down. The
+		// AsyncJobComponent census in run() also gates this today; CP5 removes that and leaves this.
+		ServiceLocator<JobSystem>::ref().waitForDetached();
 
 		/* Destroy the old state */
 		demos.getCurrentDemo()->destroy();
