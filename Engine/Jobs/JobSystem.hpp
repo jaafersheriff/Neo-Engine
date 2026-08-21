@@ -25,7 +25,7 @@ namespace neo {
 
 	class JobHandle {
 	public:
-		JobHandle() = default;
+		JobHandle();
 		~JobHandle(); // Blocks for job to complete
 		JobHandle(JobHandle&&) noexcept;
 		JobHandle& operator=(JobHandle&&) noexcept;

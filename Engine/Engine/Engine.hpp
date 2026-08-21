@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Renderer/Renderer.hpp"
-#include "Renderer/RenderThread.hpp"
+#include "Jobs/JobSystem.hpp"
 #include "Util/Util.hpp"
 
 #include "ECS/ECS.hpp"
@@ -54,7 +54,8 @@ namespace neo {
 			ECS mRenderECS[2];
 			uint8_t mRenderECSIndex = 0;
 
-			RenderThread mRenderThread;
+			/* The frame in flight on the render job thread */
+			JobHandle mRenderJob;
 
 			/* Debug */
 			bool mShowBoundingBoxes = false;

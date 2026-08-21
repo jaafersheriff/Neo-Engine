@@ -74,12 +74,11 @@ namespace neo {
 
 		}
 
-		mRenderThread.start();
-		mRenderThread.runSync([](void* context) {
+		ServiceLocator<JobSystem>::ref().runSyncOn(JobThread::Render, [this] {
 			// On a background thread because GL things
-			ServiceLocator<Renderer>::ref().initGPUContext(*static_cast<WindowSurface*>(context));
+			ServiceLocator<Renderer>::ref().initGPUContext(mWindow);
 			ServiceLocator<Renderer>::ref().init();
-		}, &mWindow);
+		});
 
 		ServiceLocator<ImGuiManager>::set();
 		ServiceLocator<ImGuiManager>::ref().init(mWindow);
@@ -182,26 +181,19 @@ namespace neo {
 					ecs._cloneInto(renderECS);
 
 					// Wait for previous frame to complete
-					mRenderThread.wait();
+					mRenderJob.wait();
 
-					struct RenderFrameJob {
-						ECS& mRenderECS;
-						IDemo& mDemo;
-						WindowSurface& mWindow;
-						util::Profiler& mProfiler;
-						ResourceManagers& mResourceManagers;
-					};
+					IDemo& demo = *demos.getCurrentDemo();
+					mRenderJob = ServiceLocator<JobSystem>::ref().dispatchOn(JobThread::Render,
+						[this, &renderECS, &demo, &profiler, &resourceManagers] {
+							resourceManagers._tick();
 
-					mRenderThread.dispatch([](void* context) {
-						const std::unique_ptr<RenderFrameJob> job(static_cast<RenderFrameJob*>(context));
+							// TODO : Kinda risky handing all these out..
+							ServiceLocator<Renderer>::ref().render(mWindow, &demo, profiler, renderECS, resourceManagers);
 
-						job->mResourceManagers._tick();
-
-						ServiceLocator<Renderer>::ref().render(job->mWindow, &job->mDemo, job->mProfiler, job->mRenderECS, job->mResourceManagers);
-
-						job->mWindow.flip();
-						TracyGpuCollect;
-					}, new RenderFrameJob{ renderECS, *demos.getCurrentDemo(), mWindow, profiler, resourceManagers });
+							mWindow.flip();
+							TracyGpuCollect;
+						});
 
 					Messenger::relayMessages(ecs);
 				}
@@ -211,28 +203,28 @@ namespace neo {
 			profiler.end(glfwGetTime());
 		}
 
-		mRenderThread.wait();
+		// A frame is still in flight now that the wait moved - drain it before tearing anything down.
+		mRenderJob.wait();
 
 		demos.getCurrentDemo()->destroy();
-		mRenderThread.runSync([](void* context) {
-			static_cast<ResourceManagers*>(context)->_clear();
+		ServiceLocator<JobSystem>::ref().runSyncOn(JobThread::Render, [&resourceManagers] {
+			resourceManagers._clear();
 			ServiceLocator<Renderer>::ref().clean();
-		}, &resourceManagers);
-		mRenderThread.stop();
+		});
 		shutDown(ecs, resourceManagers);
 	}
 
 	void Engine::_swapDemo(DemoWrangler& demos, ECS& ecs, ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
 
-		mRenderThread.wait();
+		mRenderJob.wait();
 
 		/* Destroy the old state */
 		demos.getCurrentDemo()->destroy();
-		mRenderThread.runSync([](void* context) {
-			static_cast<ResourceManagers*>(context)->_clear();
+		ServiceLocator<JobSystem>::ref().runSyncOn(JobThread::Render, [&resourceManagers] {
+			resourceManagers._clear();
 			ServiceLocator<Renderer>::ref().clean();
-		}, &resourceManagers);
+		});
 		ecs._clean();
 		for (auto& renderECS : mRenderECS) {
 			renderECS._clean();
@@ -251,12 +243,11 @@ namespace neo {
 		_createPrefabs(resourceManagers);
 		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers);
 
-		mRenderThread.runSync([](void* context) {
-			ResourceManagers& managers = *static_cast<ResourceManagers*>(context);
-			managers._init();
+		ServiceLocator<JobSystem>::ref().runSyncOn(JobThread::Render, [&resourceManagers] {
+			resourceManagers._init();
 			ServiceLocator<Renderer>::ref().init();
-			managers._tick();
-		}, &resourceManagers);
+			resourceManagers._tick();
+		});
 
 		ecs.submitEntity(std::move(ECS::EntityBuilder{}.attachComponent<RendererParamsComponent>()));
 		demos.getCurrentDemo()->init(ecs, resourceManagers);
@@ -313,6 +304,7 @@ namespace neo {
 		NEO_UNUSED(resourceManagers);
 		ServiceLocator<Renderer>::reset();
 		ServiceLocator<ImGuiManager>::ref().destroy();
+		mRenderJob = JobHandle{}; // Release the render thread
 		ServiceLocator<JobSystem>::reset();
 		mWindow.shutDown();
 	}
