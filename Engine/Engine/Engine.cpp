@@ -15,7 +15,6 @@ extern "C" {
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/EngineComponents/SingleFrameComponent.hpp"
-#include "ECS/Component/EngineComponents/AsyncJobComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/DebugBoundingBox.hpp"
@@ -102,13 +101,7 @@ namespace neo {
 					TRACY_ZONEN("Frame Update");
 					profiler.begin(glfwGetTime());
 					if (demos.needsReload()) {
-						if (ecs.mRegistry.storage<AsyncJobComponent>().empty()) {
-							_swapDemo(demos, ecs, resourceManagers);
-						}
-						else {
-							NEO_LOG_V("Waiting for async jobs to complete...");
-							std::this_thread::sleep_for(std::chrono::milliseconds(100));
-						}
+						_swapDemo(demos, ecs, resourceManagers);
 					}
 
 					_startFrame(profiler, ecs, resourceManagers);
@@ -413,19 +406,6 @@ namespace neo {
 			ecs.removeEntity(entity);
 		}
 
-		for (auto&& [removeEntity, removeJob] : ecs.getView<RemoveAsyncJobComponent>().each()) {
-			bool jobFound = false;
-			for (auto&& [jobEntity, job] : ecs.getView<AsyncJobComponent>().each()) {
-				if (removeJob.mPid == job.mPid) {
-					ecs.removeEntity(removeEntity);
-					ecs.removeEntity(jobEntity);
-					jobFound = true;
-					break;
-				}
-			}
-			NEO_ASSERT(jobFound, "Trying to remove a non-existant async job?");
-		}
-
 		{
 			TRACY_ZONEN("Resolve transforms");
 			// Resolve matrices all at once in the base ECS for the render thread's copy to use
@@ -450,14 +430,6 @@ namespace neo {
 		TRACY_ZONE();
 
 		ImGui::Begin("Engine");
-		if (ImGui::TreeNodeEx("Async Jobs", ImGuiTreeNodeFlags_DefaultOpen)) {
-			glm::vec3 warningColor = util::sLogSeverityData.at(util::LogSeverity::Warning).second;
-			ImVec4 imguiColor(warningColor.x, warningColor.y, warningColor.z, 1.f);
-			for (auto&& [_, __, tag] : ecs.getView<AsyncJobComponent, TagComponent>().each()) {
-				ImGui::TextColored(imguiColor, "%s", tag.mTag.c_str());
-			}
-			ImGui::TreePop();
-		}
 		if (auto hardwareDetails = ecs.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
 			auto&& [entity, mouse, viewport] = hardwareDetails.value();
 			if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
