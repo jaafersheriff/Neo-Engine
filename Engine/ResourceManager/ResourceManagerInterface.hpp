@@ -8,6 +8,7 @@
 #include <optional>
 #include <mutex>
 #include <chrono>
+#include <unordered_set>
 
 // The public face of the resource system
 namespace neo {
@@ -66,21 +67,13 @@ namespace neo {
 			return id != NEO_INVALID_HANDLE && mCache.contains(id);
 		}
 
+		// True from the moment asyncLoad claims the handle until the tick that publishes it has finished
 		bool isQueued(const ResourceHandle<ResourceType>& id) const {
 			if (id == NEO_INVALID_HANDLE) {
 				return false;
 			}
-			// TODO - this is a linear search :(
-			// But maybe it's fine because we shouldn't be queueing up a bunch of stuff every single frame..
-			{
-				std::lock_guard<std::mutex> lock(mLoadQueueMutex);
-				for (auto& res : mLoadQueue) {
-					if (id == res.mHandle) {
-						return true;
-					}
-				}
-			}
-			return false;
+			std::lock_guard<std::mutex> lock(mPendingMutex);
+			return mPending.find(id) != mPending.end();
 		}
 
 		bool isDiscardQueued(const ResourceHandle<ResourceType>& id) const {
@@ -129,8 +122,16 @@ namespace neo {
 		}
 
 		[[nodiscard]] ResourceHandle<ResourceType> asyncLoad(ResourceHandle<ResourceType> id, ResourceLoadDetails details, std::optional<std::string> debugName = std::nullopt) const {
-			if (!isDiscardQueued(id) && (isValid(id) || isQueued(id))) {
-				return id;
+			// A discard already in flight means the caller wants this reloaded
+			if (!isDiscardQueued(id)) {
+				if (isValid(id)) {
+					return id;
+				}
+				std::lock_guard<std::mutex> lock(mPendingMutex);
+				if (!mPending.insert(id).second) {
+					// Somebody else got here first
+					return id;
+				}
 			}
 			return static_cast<const DerivedManager*>(this)->_asyncLoadImpl(id, details, debugName);
 		}
@@ -148,6 +149,11 @@ namespace neo {
 		}
 
 	protected:
+		void _finishPending(const ResourceHandle<ResourceType>& id) const {
+			std::lock_guard<std::mutex> lock(mPendingMutex);
+			mPending.erase(id);
+		}
+
 		struct ResourceLoadDetails_Internal {
 			ResourceHandle<ResourceType> mHandle;
 			ResourceLoadDetails mLoadDetails;
@@ -158,6 +164,10 @@ namespace neo {
 			{
 				std::lock_guard<std::mutex> lock(mLoadQueueMutex);
 				mLoadQueue.clear();
+			}
+			{
+				std::lock_guard<std::mutex> lock(mPendingMutex);
+				mPending.clear();
 			}
 			{
 				std::lock_guard<std::mutex> lock(mDiscardQueueMutex);
@@ -221,6 +231,9 @@ namespace neo {
 		}
 		mutable std::mutex mLoadQueueMutex;
 		mutable std::vector<ResourceLoadDetails_Internal> mLoadQueue;
+
+		mutable std::mutex mPendingMutex;
+		mutable std::unordered_set<ResourceHandle<ResourceType>> mPending;
 
 		mutable std::mutex mDiscardQueueMutex;
 		mutable std::vector<ResourceHandle<ResourceType>> mDiscardQueue;
