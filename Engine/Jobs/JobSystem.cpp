@@ -224,7 +224,20 @@ namespace neo {
 		if (!mTask) {
 			return;
 		}
-		mTask->mScheduler->WaitforTask(mTask->mCompletable);
+
+		// Waiting here does NOT pick up other work, and that is the point. This is what the frame
+		// handshake blocks on, so it has a deadline; a task is not preemptible once started, and a glTF
+		// parse runs for seconds. Letting main pull one in would stall the frame loop outright. Today a
+		// worker almost always claims a job first, so it has never actually happened - which is luck,
+		// not a design.
+		//
+		// Passing the highest priority as the floor is how enki expresses "run nothing else": no engine
+		// work is ever enqueued at JobPriority::High. Tasks pinned to the waiting thread still run,
+		// since enki gives those the high priority by default - that is wanted, and it is the same work
+		// pumpThisThread would do.
+		//
+		// parallelFor deliberately does not use this path. See the wait at the bottom of it.
+		mTask->mScheduler->WaitforTask(mTask->mCompletable, enki::TASK_PRIORITY_HIGH);
 	}
 
 	bool JobHandle::isComplete() const {
@@ -350,6 +363,9 @@ namespace neo {
 		task.m_Priority = toEnkiPriority(priority);
 
 		mImpl->mScheduler.AddTaskSetToPipe(&task);
+		// The opposite policy to JobHandle::wait, on purpose. The caller is blocked on exactly this task
+		// set, so running its batches here is not the waiter taking on unrelated work - it is the waiter
+		// doing the work it is waiting for, which strictly lowers the time to finish.
 		mImpl->mScheduler.WaitforTask(&task);
 	}
 
