@@ -99,6 +99,8 @@ namespace neo {
 		}
 
 		void Profiler::imGuiEditor() const {
+			TRACY_ZONE();
+
 			ImGui::Begin("Profiler");
 			char title[256];
 			sprintf(title, "(FrameTime (%0.3fms)", mTimeStep * 1000.0);
