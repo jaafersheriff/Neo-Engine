@@ -181,21 +181,26 @@ namespace neo {
 					ecs._cloneInto(renderECS);
 
 					// Wait for previous frame to complete
-					mRenderJob.wait();
+					{
+						TRACY_ZONEN("Wait for previous frame");
+						mRenderJob.wait();
+					}
 
-					IDemo& demo = *demos.getCurrentDemo();
-					mRenderJob = ServiceLocator<JobSystem>::ref().dispatchOn(JobThread::Render,
-						[this, &renderECS, &demo, &profiler, &resourceManagers] {
-							resourceManagers._tick();
+					{
+						TRACY_ZONEN("Start next frame");
+						IDemo& demo = *demos.getCurrentDemo();
+						mRenderJob = ServiceLocator<JobSystem>::ref().dispatchOn(JobThread::Render,
+							[this, &renderECS, &demo, &profiler, &resourceManagers] {
+								resourceManagers._tick();
 
-							// TODO : Kinda risky handing all these out..
-							ServiceLocator<Renderer>::ref().render(mWindow, &demo, profiler, renderECS, resourceManagers);
+								// TODO : Kinda risky handing all these out..
+								ServiceLocator<Renderer>::ref().render(mWindow, &demo, profiler, renderECS, resourceManagers);
 
-							mWindow.flip();
-							TracyGpuCollect;
-						});
-
-					Messenger::relayMessages(ecs);
+								mWindow.flip();
+								TracyGpuCollect;
+							});
+						Messenger::relayMessages(ecs);
+					}
 				}
 			}
 
