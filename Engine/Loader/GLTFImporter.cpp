@@ -9,6 +9,9 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
+#include "Jobs/JobSystem.hpp"
+#include "Util/ServiceLocator.hpp"
+
 #pragma warning(push)
 #pragma warning(disable: 4201)
 #include <glm/gtc/quaternion.hpp>
@@ -545,14 +548,17 @@ namespace {
 namespace neo {
 	namespace GLTFImporter {
 
+		std::atomic<uint32_t> sNextSceneLoadId = { 1 };
+
 		void loadScene(std::string _path, glm::mat4 baseTransform, ResourceManagers& resourceManagers, ECS& ecs, MeshNodeOp meshOperator, CameraNodeOp cameraOperator) {
 			std::string path = _path;
-			std::thread([path, baseTransform, &resourceManagers, &ecs, meshOperator, cameraOperator]() {
-				tracy::SetThreadName(path.c_str());
+			// Fire and forget 
+			ServiceLocator<JobSystem>::ref().run([path, baseTransform, &resourceManagers, &ecs, meshOperator, cameraOperator]() {
 				TRACY_ZONEN("GLTFImpoter::LoadScene");
 
+				const uint32_t sceneLoadId = sNextSceneLoadId.fetch_add(1, std::memory_order_relaxed);
 				{
-					AsyncJobComponent asyncJob(static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id())));
+					AsyncJobComponent asyncJob(sceneLoadId);
 					ecs.submitEntity(std::move(ECS::EntityBuilder{}
 						.attachComponent<TagComponent>(path)
 						.attachComponent<AsyncJobComponent>(asyncJob)
@@ -565,6 +571,7 @@ namespace neo {
 				std::string warn;
 
 				bool ret = false;
+				// Thread-local in stb, so it has to be set on worker thread
 				stbi_set_flip_vertically_on_load_thread(false);
 				NEO_LOG_I("Loading gltf %s", path.c_str());
 				if (path.size() > 5 && path.find(".gltf", path.size() - 5) != std::string::npos) {
@@ -610,14 +617,13 @@ namespace neo {
 					_processNode(path.c_str(), nodeID, resourceManagers, model, node, baseTransform, ecs, meshOperator, cameraOperator);
 				}
 
-				RemoveAsyncJobComponent asyncJob(static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id())));
+				RemoveAsyncJobComponent asyncJob(sceneLoadId);
 				ecs.submitEntity(std::move(ECS::EntityBuilder{}
 					.attachComponent<RemoveAsyncJobComponent>(asyncJob)
 				));
 
 				NEO_LOG_I("Successfully imported %s", path.c_str());
-			})
-				.detach();
+			}, JobPriority::Low);
 		}
 	}
 }
