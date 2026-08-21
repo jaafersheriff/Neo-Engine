@@ -49,7 +49,10 @@ namespace neo {
 	// Work that nobody needs to join does not need one of these at all - see JobSystem::run.
 	class JobHandle {
 	public:
-		JobHandle() = default;
+		// Every special member is out of line, including this one: Task is incomplete here, so anything
+		// the compiler defines inline would have to instantiate unique_ptr's deleter against it - which
+		// is an error even when the path is never taken.
+		JobHandle();
 		~JobHandle();
 		JobHandle(JobHandle&&) noexcept;
 		JobHandle& operator=(JobHandle&&) noexcept;

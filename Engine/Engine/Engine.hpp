@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Renderer/Renderer.hpp"
-#include "Renderer/RenderThread.hpp"
+#include "Jobs/JobSystem.hpp"
 #include "Util/Util.hpp"
 
 #include "ECS/ECS.hpp"
@@ -55,9 +55,11 @@ namespace neo {
 			ECS mRenderECS[2];
 			uint8_t mRenderECSIndex = 0;
 
-			/* The worker that Stage 5 moves rendering onto. For now it runs the ECS clone, which is
-			   pure CPU work with no GL in it - enough to exercise the handshake with something real. */
-			RenderThread mRenderThread;
+			/* The frame in flight on the render job thread. Waiting on it is the handshake that keeps
+			   the main thread exactly one frame ahead; assigning a new one waits on what it replaces,
+			   so the double buffer can never be overwritten from under the renderer. Released in
+			   shutDown() while the JobSystem is still alive, because ~JobHandle waits on it. */
+			JobHandle mRenderJob;
 
 			/* Debug */
 			bool mShowBoundingBoxes = false;

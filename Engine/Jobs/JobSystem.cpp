@@ -192,6 +192,8 @@ namespace neo {
 		enki::LambdaPinnedTask mPinned;
 	};
 
+	JobHandle::JobHandle() = default;
+
 	JobHandle::JobHandle(std::unique_ptr<Task> task)
 		: mTask(std::move(task))
 	{}
