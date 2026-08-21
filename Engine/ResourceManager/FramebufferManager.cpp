@@ -161,6 +161,7 @@ namespace neo {
 				if (std::optional<CachedResource<ManagedFramebuffer>> framebuffer = FramebufferLoader{}.load(details.mLoadDetails, details.mDebugName, *mTextureManager)) {
 					mCache.insert(details.mHandle, std::move(*framebuffer));
 				}
+				_finishPending(details.mHandle);
 			}
 		}
 
