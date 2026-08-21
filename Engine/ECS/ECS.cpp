@@ -7,6 +7,9 @@
 
 namespace neo {
 
+	uint32_t ECS::sParallelGoWideThreshold = 256;
+	uint32_t ECS::sParallelBatchSize = 64;
+
 	void ECS::_initSystems() {
 		for (auto& system : mSystems) {
 			system.second->init(*this);
@@ -130,6 +133,19 @@ namespace neo {
 	void ECS::_imguiEdtor() {
 		TRACY_ZONE();
 		ImGui::Begin("ECS");
+		if (ImGui::TreeNodeEx("Parallel iteration")) {
+			int threshold = static_cast<int>(sParallelGoWideThreshold);
+			if (ImGui::DragInt("Go wide above", &threshold, 8.f, 0, 1000000)) {
+				sParallelGoWideThreshold = static_cast<uint32_t>(threshold < 0 ? 0 : threshold);
+			}
+			ImGui::SetItemTooltip("Entities. 0 forces every parallelForEach wide");
+			int batch = static_cast<int>(sParallelBatchSize);
+			if (ImGui::DragInt("Batch size", &batch, 1.f, 1, 8192)) {
+				sParallelBatchSize = static_cast<uint32_t>(batch < 1 ? 1 : batch);
+			}
+			ImGui::SetItemTooltip("Entities per job. A floor, not an exact split");
+			ImGui::TreePop();
+		}
 		auto pinnedView = getView<PinnedComponent>();
 		if (!pinnedView.empty() && ImGui::TreeNodeEx("Pinned Entities", ImGuiTreeNodeFlags_DefaultOpen)) {
 			pinnedView.each([this](Entity entity, PinnedComponent&) {
