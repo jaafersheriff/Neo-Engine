@@ -4,7 +4,6 @@
 #include "Renderer/GLObjects/Texture.hpp"
 
 #include "ECS/ECS.hpp"
-#include "ECS/Component/EngineComponents/AsyncJobComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"
@@ -587,22 +586,11 @@ namespace {
 namespace neo {
 	namespace GLTFImporter {
 
-		std::atomic<uint32_t> sNextSceneLoadId = { 1 };
-
 		void loadScene(std::string _path, glm::mat4 baseTransform, ResourceManagers& resourceManagers, ECS& ecs, MeshNodeOp meshOperator, CameraNodeOp cameraOperator) {
 			std::string path = _path;
 			// Fire and forget 
 			ServiceLocator<JobSystem>::ref().run([path, baseTransform, &resourceManagers, &ecs, meshOperator, cameraOperator]() {
 				TRACY_ZONEN("GLTFImpoter::LoadScene");
-
-				const uint32_t sceneLoadId = sNextSceneLoadId.fetch_add(1, std::memory_order_relaxed);
-				{
-					AsyncJobComponent asyncJob(sceneLoadId);
-					ecs.submitEntity(std::move(ECS::EntityBuilder{}
-						.attachComponent<TagComponent>(path)
-						.attachComponent<AsyncJobComponent>(asyncJob)
-					));
-				}
 
 				tinygltf::Model model;
 				tinygltf::TinyGLTF loader;
@@ -652,11 +640,6 @@ namespace neo {
 				}
 
 				_processNodes(path.c_str(), model.scenes[model.defaultScene].nodes, resourceManagers, model, baseTransform, ecs, meshOperator, cameraOperator);
-
-				RemoveAsyncJobComponent asyncJob(sceneLoadId);
-				ecs.submitEntity(std::move(ECS::EntityBuilder{}
-					.attachComponent<RemoveAsyncJobComponent>(asyncJob)
-				));
 
 				NEO_LOG_I("Successfully imported %s", path.c_str());
 			}, JobPriority::Low);
