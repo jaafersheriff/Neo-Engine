@@ -6,4 +6,6 @@ PUBLIC
 PRIVATE
 	Util
 	enkiTS
+	imgui
+	TracyClient
 )

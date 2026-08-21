@@ -30,6 +30,8 @@ extern "C" {
 
 #include "Messaging/Messenger.hpp"
 
+#include "Jobs/JobSystem.hpp"
+
 #include "Loader/Loader.hpp"
 #include "Loader/STBIImageData.hpp"
 #include "Loader/MeshGenerator.hpp"
@@ -51,6 +53,9 @@ namespace neo {
 	void Engine::init() {
 
 		srand((unsigned int)(time(0)));
+
+		ServiceLocator<JobSystem>::set();
+		ServiceLocator<JobSystem>::ref().init();
 
 		ServiceLocator<Renderer>::set(4, 4);
 
@@ -137,6 +142,7 @@ namespace neo {
 								TRACY_ZONEN("Engine ImGui");
 								ecs._imguiEdtor();
 								resourceManagers._imguiEditor();
+								ServiceLocator<JobSystem>::ref().imguiEditor();
 								ServiceLocator<ImGuiManager>::ref().imGuiEditor();
 								ServiceLocator<Renderer>::ref()._imGuiEditor(mWindow, ecs, resourceManagers);
 								profiler.imGuiEditor();
@@ -307,11 +313,14 @@ namespace neo {
 		NEO_UNUSED(resourceManagers);
 		ServiceLocator<Renderer>::reset();
 		ServiceLocator<ImGuiManager>::ref().destroy();
+		ServiceLocator<JobSystem>::reset();
 		mWindow.shutDown();
 	}
 
 	void Engine::_startFrame(util::Profiler& profiler, ECS& ecs, ResourceManagers& resourceManagers) {
 		TRACY_ZONE();
+
+		ServiceLocator<JobSystem>::ref().pumpThisThread();
 
 		if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
 			ServiceLocator<ImGuiManager>::ref().update();
