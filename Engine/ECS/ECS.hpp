@@ -2,7 +2,10 @@
 
 #include "ECS/Systems/System.hpp"
 
+#include "Jobs/JobSystem.hpp"
+
 #include "Util/Profiler.hpp"
+#include "Util/ServiceLocator.hpp"
 #include "Util/Util.hpp"
 
 #include <ext/entt_incl.hpp>
@@ -82,6 +85,17 @@ namespace neo {
 		template<typename... CompTs> std::optional<std::tuple<Entity, const CompTs&...>> getSingleView() const;
 
 		template<typename FilterCompT, typename SortCompT> void sort(std::function<bool(Entity left, Entity right)> compare) const;
+
+		/* Iterate a view across job system workers, or serially when there are too few entities 
+		   The contract, none of which is checked for you:
+		   - No structural changes inside the body (No addComponent, removeComponent, submitEntity or removeEntity) 
+		   - No reading another entity's components
+		   - Accumulate into buckets indexed by JobSystem::threadIndex()
+		   - Nothing may depend on visit order
+		*/
+		template<typename... CompTs, typename Fn> void parallelForEach(Fn&& fn, uint32_t batchSize = sParallelBatchSize);
+		static uint32_t sParallelGoWideThreshold;
+		static uint32_t sParallelBatchSize;
 
 		/* Attach a system */
 		template <typename SysT, typename... Args> SysT& addSystem(Args &&...);
@@ -315,6 +329,38 @@ namespace neo {
 		// TODO -- maybe force const inputs rather than attaching it
 		// TODO -- otherwise view.get<> breaks
 		return mRegistry.view<CompTs...>();
+	}
+
+	template<typename... CompTs, typename Fn>
+	void ECS::parallelForEach(Fn&& fn, uint32_t batchSize) {
+		TRACY_ZONE();
+
+		auto view = getView<CompTs...>();
+
+		// A view is not randomly accessible, but the storage behind it is
+		const auto* pool = view.handle();
+
+		// Exactly what the view would iterate
+		const uint32_t count = pool == nullptr
+			? 0u
+			: static_cast<uint32_t>(pool->policy() == entt::deletion_policy::swap_only ? pool->free_list() : pool->size());
+
+		if (count < sParallelGoWideThreshold) {
+			for (const Entity entity : view) {
+				fn(entity, view.template get<CompTs>(entity)...);
+			}
+			return;
+		}
+
+		ServiceLocator<JobSystem>::ref().parallelFor(count, batchSize, [pool, &view, &fn](uint32_t begin, uint32_t end, uint32_t) {
+			for (uint32_t i = begin; i < end; ++i) {
+				const Entity entity = (*pool)[i];
+				if (!view.contains(entity)) {
+					continue;
+				}
+				fn(entity, view.template get<CompTs>(entity)...);
+			}
+		});
 	}
 
 	template<typename... CompTs>
