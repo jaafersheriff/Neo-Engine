@@ -5,11 +5,13 @@
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 #include "Renderer/GLObjects/SourceShader.hpp"
 
+#include "Jobs/JobSystem.hpp"
+
 #include "Util/Util.hpp"
 
 #include <array>
+#include <chrono>
 #include <mutex>
-#include <thread>
 #include <variant>
 
 namespace neo {
@@ -42,6 +44,9 @@ namespace neo {
 		const ResolvedShaderInstance& ShaderManager::resolveDefines(ShaderHandle handle, const ShaderDefines& defines) const;
 		void imguiEditor();
 
+		// Blocks on the hot reload sweep and releases its handle
+		void waitForHotReload();
+
 	protected:
 		[[nodiscard]] ShaderHandle _asyncLoadImpl(ShaderHandle id, ShaderLoadDetails shaderDetails, const std::optional<std::string>& debugName) const;
 		void _destroyImpl(CachedResource<SourceShader>& sourceShader);
@@ -49,8 +54,10 @@ namespace neo {
 		void _tickImpl();
 	private:
 		std::mutex mHotReloadMutex;
-		std::thread* mHotReloader;
-		std::atomic<bool> mKillSwitch = false;
-		void _hotReloadFunc();
+
+		JobHandle mHotReloadJob;
+		std::chrono::steady_clock::time_point mLastHotReloadSweep = {};
+		void _hotReloadSweep();
+		void _kickHotReload();
 	};
 }
