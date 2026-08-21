@@ -210,6 +210,7 @@ namespace neo {
 
 		// A frame is still in flight now that the wait moved - drain it before tearing anything down.
 		mRenderJob.wait();
+		ServiceLocator<JobSystem>::ref().waitForDetached();
 
 		demos.getCurrentDemo()->destroy();
 		ServiceLocator<JobSystem>::ref().runSyncOn(JobThread::Render, [&resourceManagers] {
@@ -223,6 +224,7 @@ namespace neo {
 		TRACY_ZONE();
 
 		mRenderJob.wait();
+		ServiceLocator<JobSystem>::ref().waitForDetached();
 
 		/* Destroy the old state */
 		demos.getCurrentDemo()->destroy();

@@ -122,6 +122,7 @@ namespace neo {
 				else {
 					NEO_LOG_E("Failed to load shader %s", loadDetails.mDebugName.value_or("").c_str());
 				}
+				_finishPending(loadDetails.mHandle);
 			}
 		}
 

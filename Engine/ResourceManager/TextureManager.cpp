@@ -207,13 +207,17 @@ namespace neo {
 					retire(id);
 				}
 				else {
-					std::lock_guard<std::mutex> lock(mLoadQueueMutex);
-					for (int i = 0; i < mLoadQueue.size(); i++) {
-						if (id == mLoadQueue[i].mHandle) {
-							mLoadQueue.erase(mLoadQueue.begin() + i);
-							break;
+					{
+						std::lock_guard<std::mutex> lock(mLoadQueueMutex);
+						for (int i = 0; i < mLoadQueue.size(); i++) {
+							if (id == mLoadQueue[i].mHandle) {
+								mLoadQueue.erase(mLoadQueue.begin() + i);
+								break;
+							}
 						}
 					}
+					// Discarded before it was ever loaded, clean up
+					_finishPending(id);
 				}
 			}
 		}
@@ -254,6 +258,7 @@ namespace neo {
 		else {
 			NEO_LOG_E("Failed to load texture %s", loadDetails.mDebugName.value_or("").c_str());
 		}
+		_finishPending(loadDetails.mHandle);
 	}
 
 	void TextureManager::_destroyImpl(CachedResource<Texture>& texture) {
