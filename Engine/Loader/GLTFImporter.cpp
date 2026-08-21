@@ -9,6 +9,9 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
+#include "Jobs/JobSystem.hpp"
+#include "Util/ServiceLocator.hpp"
+
 #pragma warning(push)
 #pragma warning(disable: 4201)
 #include <glm/gtc/quaternion.hpp>
@@ -545,14 +548,22 @@ namespace {
 namespace neo {
 	namespace GLTFImporter {
 
+		// Scene loads no longer own a thread each, so they can no longer be identified by one. A
+		// monotonic id also survives the job ending, which a recycled thread id does not.
+		std::atomic<uint32_t> sNextSceneLoadId = { 1 };
+
 		void loadScene(std::string _path, glm::mat4 baseTransform, ResourceManagers& resourceManagers, ECS& ecs, MeshNodeOp meshOperator, CameraNodeOp cameraOperator) {
 			std::string path = _path;
-			std::thread([path, baseTransform, &resourceManagers, &ecs, meshOperator, cameraOperator]() {
-				tracy::SetThreadName(path.c_str());
+			// Low priority: a scene load should soak up idle cores, never get in front of the frame.
+			// Fire and forget - nobody joins this, and the JobSystem owns the task until it finishes.
+			ServiceLocator<JobSystem>::ref().run([path, baseTransform, &resourceManagers, &ecs, meshOperator, cameraOperator]() {
+				// Deliberately no tracy::SetThreadName here any more. This runs on a shared worker, and
+				// naming it after the scene would rename that worker for the rest of the process.
 				TRACY_ZONEN("GLTFImpoter::LoadScene");
 
+				const uint32_t sceneLoadId = sNextSceneLoadId.fetch_add(1, std::memory_order_relaxed);
 				{
-					AsyncJobComponent asyncJob(static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id())));
+					AsyncJobComponent asyncJob(sceneLoadId);
 					ecs.submitEntity(std::move(ECS::EntityBuilder{}
 						.attachComponent<TagComponent>(path)
 						.attachComponent<AsyncJobComponent>(asyncJob)
@@ -565,6 +576,8 @@ namespace neo {
 				std::string warn;
 
 				bool ret = false;
+				// Thread-local in stb, and tinygltf decodes the images inside the Load*FromFile calls
+				// below - so it has to be set on whichever worker is about to run them, which is this one.
 				stbi_set_flip_vertically_on_load_thread(false);
 				NEO_LOG_I("Loading gltf %s", path.c_str());
 				if (path.size() > 5 && path.find(".gltf", path.size() - 5) != std::string::npos) {
@@ -610,14 +623,13 @@ namespace neo {
 					_processNode(path.c_str(), nodeID, resourceManagers, model, node, baseTransform, ecs, meshOperator, cameraOperator);
 				}
 
-				RemoveAsyncJobComponent asyncJob(static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id())));
+				RemoveAsyncJobComponent asyncJob(sceneLoadId);
 				ecs.submitEntity(std::move(ECS::EntityBuilder{}
 					.attachComponent<RemoveAsyncJobComponent>(asyncJob)
 				));
 
 				NEO_LOG_I("Successfully imported %s", path.c_str());
-			})
-				.detach();
+			}, JobPriority::Low);
 		}
 	}
 }
