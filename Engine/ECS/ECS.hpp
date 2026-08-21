@@ -13,6 +13,8 @@
 
 #include <ext/imgui_incl.hpp>
 
+#include <algorithm>
+#include <cstring>
 #include <typeindex>
 #include <optional>
 #include <mutex>
@@ -434,18 +436,36 @@ namespace neo {
 	// Clones a CompT, not an individual ComponentT&
 	template<typename CompT>
 	void ECS::_componentClone(const Registry& src, Registry& dst) {
-		// Assures the pool exists in dst, then clears it 
-		// Capacity survives, so a steady-state frame reuses the same memory every time.
+		// Assures the pool exists in dst
 		auto& to = dst.storage<CompT>();
-		to.clear();
 
 		const auto* from = src.storage<CompT>();
 		if (from == nullptr || from->empty()) {
+			to.clear();
 			return;
 		}
+
+		// Fast path, CompTs are copyable and src/dst buffers are same-sized
+		if constexpr (std::is_copy_assignable_v<CompT>) {
+			if (to.size() == from->size()
+				&& from->policy() == entt::deletion_policy::swap_and_pop
+				&& to.policy() == entt::deletion_policy::swap_and_pop
+				&& std::memcmp(to.data(), from->data(), from->size() * sizeof(Entity)) == 0) {
+				TRACY_ZONEN("Clone pool (in place)");
+				if constexpr (entt::component_traits<CompT, Entity>::page_size != 0u) {
+					std::copy(from->begin(), from->end(), to.begin());
+				}
+				// Empty component, so the entity array is the whole job. Nothing to do here
+				return;
+			}
+		}
+
+		TRACY_ZONEN("Clone pool (rebuild)");
+		// Cleared/reserve to avoid allocs, especially in steady-state frames
+		to.clear();
 		to.reserve(from->size());
 
-		// Use reverse iterators to preesrve packed order, see entt/entity/snapshot.hpp
+		// Use reverse iterators to preserve packed order, see entt/entity/snapshot.hpp
 		const Registry::common_type& entities = *from;
 		if constexpr (entt::component_traits<CompT, Entity>::page_size == 0u) {
 			// Empty component: EnTT stores no elements for it, so the entity list is the whole payload.

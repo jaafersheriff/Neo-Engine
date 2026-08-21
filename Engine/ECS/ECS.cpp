@@ -109,16 +109,24 @@ namespace neo {
 			// indices, versions and the free list all come out matching.
 			const Registry::common_type& srcEntities = mRegistry.storage<Entity>();
 			auto& dstEntities = dst.mRegistry.storage<Entity>();
-			dstEntities.clear();
-			dstEntities.reserve(srcEntities.size());
 
-			Entity placeholder{};
-			for (auto it = srcEntities.rbegin(), last = srcEntities.rend(); it != last; ++it) {
-				dstEntities.generate(*it);
-				placeholder = (*it > placeholder) ? *it : placeholder;
+			// Fast path - no Entity changes this frame
+			const bool matches = dstEntities.size() == srcEntities.size()
+				&& dstEntities.free_list() == srcEntities.free_list()
+				&& (srcEntities.empty() || std::memcmp(dstEntities.data(), srcEntities.data(), srcEntities.size() * sizeof(Entity)) == 0);
+
+			if (!matches) {
+				dstEntities.clear();
+				dstEntities.reserve(srcEntities.size());
+
+				Entity placeholder{};
+				for (auto it = srcEntities.rbegin(), last = srcEntities.rend(); it != last; ++it) {
+					dstEntities.generate(*it);
+					placeholder = (*it > placeholder) ? *it : placeholder;
+				}
+				dstEntities.start_from(entt::entt_traits<Entity>::next(placeholder));
+				dstEntities.free_list(srcEntities.free_list());
 			}
-			dstEntities.start_from(entt::entt_traits<Entity>::next(placeholder));
-			dstEntities.free_list(srcEntities.free_list());
 		}
 
 		{
