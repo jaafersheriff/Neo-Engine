@@ -28,3 +28,6 @@
 [submodule "Engine/ext/tracy"]
 	path = Engine/ext/tracy
 	url = https://github.com/wolfpld/tracy.git
+[submodule "Engine/ext/enkiTS"]
+	path = Engine/ext/enkiTS
+	url = https://github.com/dougbinks/enkiTS.git
