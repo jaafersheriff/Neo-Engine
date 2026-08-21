@@ -125,59 +125,36 @@ namespace neo {
 
 					/* Update imgui functions */
 					if (!mWindow.isMinimized() && ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-						TRACY_ZONEN("ImGui");
-						ServiceLocator<ImGuiManager>::ref().begin();
-
 						{
-							TRACY_ZONEN("Demo Imgui");
-							demos.imGuiEditor(ecs, resourceManagers);
-						}
-						ecs._imguiEdtor();
-						resourceManagers._imguiEditor();
-						ServiceLocator<ImGuiManager>::ref().imGuiEditor();
-						ServiceLocator<Renderer>::ref()._imGuiEditor(mWindow, ecs, resourceManagers);
-						profiler.imGuiEditor();
-						{
-							// TODO - move to its own function hehe
-							TRACY_ZONEN("Engine ImGui");
-							ImGui::Begin("Engine");
-							if (ImGui::TreeNodeEx("Async Jobs", ImGuiTreeNodeFlags_DefaultOpen)) {
-								glm::vec3 warningColor = util::sLogSeverityData.at(util::LogSeverity::Warning).second;
-								ImVec4 imguiColor(warningColor.x, warningColor.y, warningColor.z, 1.f);
-								for (auto&& [_, __, tag] : ecs.getView<AsyncJobComponent, TagComponent>().each()) {
-									ImGui::TextColored(imguiColor, "%s", tag.mTag.c_str());
-								}
-								ImGui::TreePop();
-							}
-							if (auto hardwareDetails = ecs.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
-								auto&& [entity, mouse, viewport] = hardwareDetails.value();
-								if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
-									viewport.imGuiEditor();
-									ImGui::TreePop();
-								}
-								if (ImGui::TreeNodeEx("Mouse", ImGuiTreeNodeFlags_DefaultOpen)) {
-									mouse.imGuiEditor();
-									ImGui::TreePop();
-								}
-							}
-							ImGui::End();
-						}
+							TRACY_ZONEN("ImGui Editors");
+							ServiceLocator<ImGuiManager>::ref().begin();
 
-						ServiceLocator<ImGuiManager>::ref().end();
-						Messenger::relayMessages(ecs);
+							{
+								TRACY_ZONEN("Demo Imgui");
+								demos.imGuiEditor(ecs, resourceManagers);
+							}
+							{
+								TRACY_ZONEN("Engine ImGui");
+								ecs._imguiEdtor();
+								resourceManagers._imguiEditor();
+								ServiceLocator<ImGuiManager>::ref().imGuiEditor();
+								ServiceLocator<Renderer>::ref()._imGuiEditor(mWindow, ecs, resourceManagers);
+								profiler.imGuiEditor();
+								_imguiEditor(ecs);
+							}
+
+							ServiceLocator<ImGuiManager>::ref().end();
+							Messenger::relayMessages(ecs);
+						}
 					}
-				}
 
-				{
-					TRACY_ZONEN("Frame Render");
+					{
+						TRACY_ZONEN("Prep ImGui draw data");
+						// Current frame data gets generated now, then flushed and drawn next frame
+						ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
 
-					if (!mWindow.isMinimized()) {
-						TRACY_ZONEN("Prepare ImGui draw data");
-						if (ServiceLocator<ImGuiManager>::ref().isEnabled()) {
-							 // Current frame data gets generated now, then flushed and drawn next frame
-							ServiceLocator<ImGuiManager>::ref().resolveDrawData(ecs, resourceManagers);
-
-							 // Last frame's data is about to be drawn, queue deletion now and it'll be flushed next frame
+						// Last frame's data is about to be drawn, queue deletion now and it'll be flushed next frame
+						{
 							TRACY_ZONEN("Remove draw data");
 							for (auto entity : ecs.getView<ImGuiComponent, ImGuiDrawComponent>()) {
 								ecs.removeEntity(entity);
@@ -185,46 +162,43 @@ namespace neo {
 						}
 						Messenger::relayMessages(ecs);
 					}
-					{
-						// TODO - this shouldnt be in Frame Render, and probably shouldnt be guarded by isMinimzed, but it should be after imgui component resolve
-						_endFrame(profiler, ecs);
-						Messenger::relayMessages(ecs);
 
-						// Fill the clone
-						ECS& renderECS = mRenderECS[mRenderECSIndex];
-						mRenderECSIndex ^= 1;
-						{
-							TRACY_ZONEN("Clone ECS");
-							ecs._cloneInto(renderECS);
-						}
-
-						// Wait for previous frame to complete
-						mRenderThread.wait();
-
-						struct RenderFrameJob {
-							ECS& mRenderECS;
-							IDemo& mDemo;
-							WindowSurface& mWindow;
-							util::Profiler& mProfiler;
-							ResourceManagers& mResourceManagers;
-						};
-
-						mRenderThread.dispatch([](void* context) {
-							const std::unique_ptr<RenderFrameJob> job(static_cast<RenderFrameJob*>(context));
-
-							job->mResourceManagers._tick();
-
-							TRACY_GPUN("Frame Render");
-							ServiceLocator<Renderer>::ref().render(job->mWindow, &job->mDemo, job->mProfiler, job->mRenderECS, job->mResourceManagers);
-
-							job->mWindow.flip();
-							TracyGpuCollect;
-						}, new RenderFrameJob{ renderECS, *demos.getCurrentDemo(), mWindow, profiler, resourceManagers });
-
-						Messenger::relayMessages(ecs);
-					}
+					_endFrame(profiler, ecs);
+					Messenger::relayMessages(ecs);
 				}
 
+				if (!mWindow.isMinimized()) {
+					TRACY_ZONEN("Frame Render");
+
+					// Fill the clone
+					ECS& renderECS = mRenderECS[mRenderECSIndex];
+					mRenderECSIndex ^= 1;
+					ecs._cloneInto(renderECS);
+
+					// Wait for previous frame to complete
+					mRenderThread.wait();
+
+					struct RenderFrameJob {
+						ECS& mRenderECS;
+						IDemo& mDemo;
+						WindowSurface& mWindow;
+						util::Profiler& mProfiler;
+						ResourceManagers& mResourceManagers;
+					};
+
+					mRenderThread.dispatch([](void* context) {
+						const std::unique_ptr<RenderFrameJob> job(static_cast<RenderFrameJob*>(context));
+
+						job->mResourceManagers._tick();
+
+						ServiceLocator<Renderer>::ref().render(job->mWindow, &job->mDemo, job->mProfiler, job->mRenderECS, job->mResourceManagers);
+
+						job->mWindow.flip();
+						TracyGpuCollect;
+					}, new RenderFrameJob{ renderECS, *demos.getCurrentDemo(), mWindow, profiler, resourceManagers });
+
+					Messenger::relayMessages(ecs);
+				}
 			}
 
 			FrameMark;
@@ -462,5 +436,32 @@ namespace neo {
 		mWindow.updateHardware();
 
 		profiler.markFrame(glfwGetTime());
+	}
+
+	void Engine::_imguiEditor(ECS& ecs) {
+		TRACY_ZONE();
+
+		ImGui::Begin("Engine");
+		if (ImGui::TreeNodeEx("Async Jobs", ImGuiTreeNodeFlags_DefaultOpen)) {
+			glm::vec3 warningColor = util::sLogSeverityData.at(util::LogSeverity::Warning).second;
+			ImVec4 imguiColor(warningColor.x, warningColor.y, warningColor.z, 1.f);
+			for (auto&& [_, __, tag] : ecs.getView<AsyncJobComponent, TagComponent>().each()) {
+				ImGui::TextColored(imguiColor, "%s", tag.mTag.c_str());
+			}
+			ImGui::TreePop();
+		}
+		if (auto hardwareDetails = ecs.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
+			auto&& [entity, mouse, viewport] = hardwareDetails.value();
+			if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
+				viewport.imGuiEditor();
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNodeEx("Mouse", ImGuiTreeNodeFlags_DefaultOpen)) {
+				mouse.imGuiEditor();
+				ImGui::TreePop();
+			}
+		}
+		ImGui::End();
+
 	}
 }

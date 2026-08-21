@@ -42,6 +42,8 @@ namespace neo {
 			void _createPrefabs(ResourceManagers& resourceManagers);
 			void _swapDemo(DemoWrangler& demoWranger, ECS& ecs, ResourceManagers& resourceManagers);
 
+			void _imguiEditor(ECS& ecs);
+
 			/* Hardware */
 			WindowSurface mWindow;
 			Keyboard mKeyboard;
