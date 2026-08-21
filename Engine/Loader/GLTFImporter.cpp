@@ -500,6 +500,52 @@ namespace {
 	}
 
 	void _processNode(
+		const char* path,
+		const int nodeID,
+		neo::ResourceManagers& resourceManagers,
+		const tinygltf::Model& model,
+		const tinygltf::Node& node,
+		glm::mat4 parentXform,
+		neo::ECS& ecs,
+		neo::GLTFImporter::MeshNodeOp meshNodeOperator,
+		neo::GLTFImporter::CameraNodeOp cameraNodeOperator
+	);
+
+	// Below this many siblings, scheduling costs more than it saves - most nodes are a couple of
+	// primitives. Each node is heavy enough that the batch size is one.
+	constexpr uint32_t kNodeGoWideThreshold = 8;
+
+	// Processes a list of sibling nodes, wide when the list is worth it. Safe to call from inside a
+	// job: enki is braided, so the worker that blocks here runs batches of this very set rather than
+	// idling. The node operators are all capture-less and submit through the ECS queues, and the
+	// resource managers claim handles atomically, so siblings do not interfere with each other.
+	void _processNodes(
+		const char* path,
+		const std::vector<int>& nodeIDs,
+		neo::ResourceManagers& resourceManagers,
+		const tinygltf::Model& model,
+		glm::mat4 parentXform,
+		neo::ECS& ecs,
+		neo::GLTFImporter::MeshNodeOp meshNodeOperator,
+		neo::GLTFImporter::CameraNodeOp cameraNodeOperator
+	) {
+		const uint32_t count = static_cast<uint32_t>(nodeIDs.size());
+		if (count < kNodeGoWideThreshold) {
+			for (int nodeID : nodeIDs) {
+				_processNode(path, nodeID, resourceManagers, model, model.nodes[nodeID], parentXform, ecs, meshNodeOperator, cameraNodeOperator);
+			}
+			return;
+		}
+
+		neo::ServiceLocator<neo::JobSystem>::ref().parallelFor(count, 1, [&](uint32_t begin, uint32_t end, uint32_t) {
+			for (uint32_t i = begin; i < end; ++i) {
+				const int nodeID = nodeIDs[i];
+				_processNode(path, nodeID, resourceManagers, model, model.nodes[nodeID], parentXform, ecs, meshNodeOperator, cameraNodeOperator);
+			}
+		}, neo::JobPriority::Low);
+	}
+
+	void _processNode(
 		const char* path, 
 		const int nodeID, 
 		neo::ResourceManagers& resourceManagers, 
@@ -522,9 +568,10 @@ namespace {
 
 		SpatialComponent nodeSpatial = _processSpatial(node, parentXform);
 
-		for (auto& child : node.children) {
-			_processNode(path, child, resourceManagers, model, model.nodes[child], nodeSpatial.getModelMatrix(), ecs, meshNodeOperator, cameraNodeOperator);
-		}
+		// Resolved once, before the children are handed out. getModelMatrix() is the lazy non-const
+		// getter, so calling it per child would have several workers racing to fill the same cache.
+		const glm::mat4 childXform = nodeSpatial.getModelMatrix();
+		_processNodes(path, node.children, resourceManagers, model, childXform, ecs, meshNodeOperator, cameraNodeOperator);
 
 		if (node.camera > -1) {
 			TRACY_ZONEN("CameraNodeOp");
@@ -618,10 +665,7 @@ namespace neo {
 					NEO_FAIL("%s has required extensions", path.c_str());
 				}
 
-				for (const auto& nodeID : model.scenes[model.defaultScene].nodes) {
-					const auto& node = model.nodes[nodeID];
-					_processNode(path.c_str(), nodeID, resourceManagers, model, node, baseTransform, ecs, meshOperator, cameraOperator);
-				}
+				_processNodes(path.c_str(), model.scenes[model.defaultScene].nodes, resourceManagers, model, baseTransform, ecs, meshOperator, cameraOperator);
 
 				RemoveAsyncJobComponent asyncJob(sceneLoadId);
 				ecs.submitEntity(std::move(ECS::EntityBuilder{}
