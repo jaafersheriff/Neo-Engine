@@ -96,9 +96,13 @@ namespace neo {
 		   the job boundary, so the per-entity body still inlines.
 
 		   The contract, none of which is checked for you:
-		   - No structural changes inside the body. No addComponent, removeComponent, submitEntity or
-			 removeEntity - they are mutex-guarded queues, and going wide would turn them into a
-			 contention point, which is the opposite of the point.
+		   - Structural changes are safe, but they are not free. addComponent, removeComponent,
+			 submitEntity and removeEntity all stage into mutex-guarded queues, and the per-type
+			 registry behind addComponent is guarded too, so calling one from a worker is correct -
+			 every worker just serialises on the same lock while it does. Keep them on paths that are
+			 rarely taken rather than on every entity. One caveat that is not about locking: the first
+			 sighting of a component type is what runs its registerMessageHandlers, so a type that has
+			 handlers wants to be seen on the main thread before it is ever added from a wide pass.
 		   - No reading another entity's components. Each iteration touches only its own.
 		   - Accumulate into buckets indexed by JobSystem::threadIndex(), never a shared counter, and
 			 combine afterwards. A reduction must also combine deterministically - order of arrival is
@@ -167,7 +171,14 @@ namespace neo {
 		private:
 			// One dense_map probe in the common case where the type has been seen before. Returns
 			// true only on the first sighting, which is the hook for one-time per-type setup.
+			//
+			// Locked because addComponent is reachable from a job worker, and this is the half of it
+			// that the queue's mutex does not cover: an insert here can rehash, so two workers meeting
+			// an unseen type at the same moment would corrupt the map. Only the mutating path takes the
+			// lock - begin()/end() do not, because the clone and the inspector walk this on the main
+			// thread at points where no wide pass is in flight.
 			bool _ensure(ComponentTypeID type, const Entry& entry) {
+				std::lock_guard<std::mutex> lock(mEnsureMutex);
 				if (mEntries.contains(type)) {
 					return false;
 				}
@@ -180,6 +191,7 @@ namespace neo {
 			}
 
 			entt::dense_map<ComponentTypeID, Entry> mEntries;
+			std::mutex mEnsureMutex;
 		};
 		ComponentRegistry mComponentRegistry;
 		// Type-erased entry points for ComponentRegistry
