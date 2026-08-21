@@ -3,7 +3,7 @@
 #include "DemoRegistration.hpp"
 
 // TODO - Temp scaffolding, remove
-#include <ext/enki_incl.hpp>
+#include "Jobs/JobSystem.hpp"
 #include "Util/Log/Log.hpp"
 
 #include <cstdlib>
@@ -11,7 +11,17 @@
 #include <memory>
 
 int main() {
-	NEO_LOG_I("enkiTS sees %u hardware threads", enki::GetNumHardwareThreads());
+	{
+		neo::JobSystem jobs;
+		jobs.init();
+		NEO_LOG_I("JobSystem: %u threads - main=%u, render=%u, %u compute workers, this thread is %u",
+			jobs.numThreads(),
+			jobs.threadIndexOf(neo::JobThread::Main),
+			jobs.threadIndexOf(neo::JobThread::Render),
+			jobs.numWorkers(),
+			jobs.threadIndex());
+		jobs.shutdown();
+	}
 
 	neo::Engine engine;
 	engine.init();

@@ -2,6 +2,7 @@
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/DemoInfra")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ECS")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Engine")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Jobs")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Loader")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Messaging")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/NeoMain")
@@ -31,6 +32,7 @@ target_link_libraries(Neo
 INTERFACE
 	ECS
 	Engine
+	Jobs
 	Loader
 	Messaging
 	Renderer
