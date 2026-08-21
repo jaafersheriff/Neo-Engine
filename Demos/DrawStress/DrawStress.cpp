@@ -75,6 +75,7 @@ namespace DrawStress {
 				.attachComponent<PhongRenderComponent>()
 				.attachComponent<OpaqueComponent>()
 				.attachComponent<MaterialComponent>(material)
+				.attachComponent<RotationComponent>(util::genRandomVec3(-util::PI, util::PI))
 			));
 		}
 
@@ -82,6 +83,7 @@ namespace DrawStress {
 		ecs.addSystem<CameraControllerSystem>();
 		ecs.addSystem<FrustumSystem>();
 		ecs.addSystem<FrustumCullingSystem>();
+		ecs.addSystem<RotationSystem>();
 	}
 
 	void Demo::render(RenderPasses& renderPasses, const ResourceManagers& resourceManagers, const ECS& ecs, const TextureHandle& outputColor, const TextureHandle& outputDepth) {
