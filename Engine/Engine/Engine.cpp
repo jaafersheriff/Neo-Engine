@@ -15,7 +15,6 @@ extern "C" {
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"
 #include "ECS/Component/EngineComponents/SingleFrameComponent.hpp"
-#include "ECS/Component/EngineComponents/AsyncJobComponent.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"
 #include "ECS/Component/CollisionComponent/BoundingBoxComponent.hpp"
 #include "ECS/Component/EngineComponents/DebugBoundingBox.hpp"
@@ -103,13 +102,12 @@ namespace neo {
 					TRACY_ZONEN("Frame Update");
 					profiler.begin(glfwGetTime());
 					if (demos.needsReload()) {
-						if (ecs.mRegistry.storage<AsyncJobComponent>().empty()) {
-							_swapDemo(demos, ecs, resourceManagers);
-						}
-						else {
-							NEO_LOG_V("Waiting for async jobs to complete...");
-							std::this_thread::sleep_for(std::chrono::milliseconds(100));
-						}
+						// _swapDemo halts and waits for outstanding work itself. Deliberately a stall
+						// rather than a gate that lets the loop keep drawing: a gate that re-checks every
+						// frame never completes if anything queues background work every frame, and a
+						// swap is a near-full teardown and rebuild on user input - nobody is counting
+						// frames across it.
+						_swapDemo(demos, ecs, resourceManagers);
 					}
 
 					_startFrame(profiler, ecs, resourceManagers);
@@ -229,9 +227,16 @@ namespace neo {
 		TRACY_ZONE();
 
 		mRenderJob.wait();
-		// Same as shutdown: nothing may still be loading into the state we are about to tear down. The
-		// AsyncJobComponent census in run() also gates this today; CP5 removes that and leaves this.
-		ServiceLocator<JobSystem>::ref().waitForDetached();
+		// Nothing may still be loading into the state we are about to tear down, so this is where a swap
+		// stalls until the scene loads land. It terminates because nothing dispatches detached work from
+		// inside detached work - if that ever changes, this becomes a spin.
+		{
+			JobSystem& jobs = ServiceLocator<JobSystem>::ref();
+			if (const uint32_t outstanding = jobs.detachedCount()) {
+				NEO_LOG_I("Waiting on %u async job(s) before swapping demo", outstanding);
+			}
+			jobs.waitForDetached();
+		}
 
 		/* Destroy the old state */
 		demos.getCurrentDemo()->destroy();
@@ -426,19 +431,6 @@ namespace neo {
 			ecs.removeEntity(entity);
 		}
 
-		for (auto&& [removeEntity, removeJob] : ecs.getView<RemoveAsyncJobComponent>().each()) {
-			bool jobFound = false;
-			for (auto&& [jobEntity, job] : ecs.getView<AsyncJobComponent>().each()) {
-				if (removeJob.mPid == job.mPid) {
-					ecs.removeEntity(removeEntity);
-					ecs.removeEntity(jobEntity);
-					jobFound = true;
-					break;
-				}
-			}
-			NEO_ASSERT(jobFound, "Trying to remove a non-existant async job?");
-		}
-
 		{
 			TRACY_ZONEN("Resolve transforms");
 			// Resolve matrices all at once in the base ECS for the render thread's copy to use
@@ -463,14 +455,6 @@ namespace neo {
 		TRACY_ZONE();
 
 		ImGui::Begin("Engine");
-		if (ImGui::TreeNodeEx("Async Jobs", ImGuiTreeNodeFlags_DefaultOpen)) {
-			glm::vec3 warningColor = util::sLogSeverityData.at(util::LogSeverity::Warning).second;
-			ImVec4 imguiColor(warningColor.x, warningColor.y, warningColor.z, 1.f);
-			for (auto&& [_, __, tag] : ecs.getView<AsyncJobComponent, TagComponent>().each()) {
-				ImGui::TextColored(imguiColor, "%s", tag.mTag.c_str());
-			}
-			ImGui::TreePop();
-		}
 		if (auto hardwareDetails = ecs.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
 			auto&& [entity, mouse, viewport] = hardwareDetails.value();
 			if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {
