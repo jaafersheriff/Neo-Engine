@@ -106,16 +106,28 @@ namespace neo {
 			// indices, versions and the free list all come out matching.
 			const Registry::common_type& srcEntities = mRegistry.storage<Entity>();
 			auto& dstEntities = dst.mRegistry.storage<Entity>();
-			dstEntities.clear();
-			dstEntities.reserve(srcEntities.size());
 
-			Entity placeholder{};
-			for (auto it = srcEntities.rbegin(), last = srcEntities.rend(); it != last; ++it) {
-				dstEntities.generate(*it);
-				placeholder = (*it > placeholder) ? *it : placeholder;
+			// Same reasoning as the component pools below: entities are created and destroyed far more
+			// rarely than this runs, so most frames rebuild an identical array. The packed array carries
+			// released slots as well as live ones, so comparing it and the free list together settles
+			// the whole structure - and unlike a component pool there are no elements to copy
+			// afterwards, which makes a match nothing at all to do.
+			const bool matches = dstEntities.size() == srcEntities.size()
+				&& dstEntities.free_list() == srcEntities.free_list()
+				&& (srcEntities.empty() || std::memcmp(dstEntities.data(), srcEntities.data(), srcEntities.size() * sizeof(Entity)) == 0);
+
+			if (!matches) {
+				dstEntities.clear();
+				dstEntities.reserve(srcEntities.size());
+
+				Entity placeholder{};
+				for (auto it = srcEntities.rbegin(), last = srcEntities.rend(); it != last; ++it) {
+					dstEntities.generate(*it);
+					placeholder = (*it > placeholder) ? *it : placeholder;
+				}
+				dstEntities.start_from(entt::entt_traits<Entity>::next(placeholder));
+				dstEntities.free_list(srcEntities.free_list());
 			}
-			dstEntities.start_from(entt::entt_traits<Entity>::next(placeholder));
-			dstEntities.free_list(srcEntities.free_list());
 		}
 
 		{

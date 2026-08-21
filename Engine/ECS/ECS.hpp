@@ -13,6 +13,8 @@
 
 #include <ext/imgui_incl.hpp>
 
+#include <algorithm>
+#include <cstring>
 #include <typeindex>
 #include <optional>
 #include <mutex>
@@ -467,15 +469,56 @@ namespace neo {
 
 	template<typename CompT>
 	void ECS::_componentClone(const Registry& src, Registry& dst) {
-		// Assures the pool exists in dst, then clears rather than destroys it - the packed capacity
-		// survives, so a steady-state frame reuses the same memory every time.
+		// Assures the pool exists in dst. Note it is deliberately not cleared yet - the fast path below
+		// needs to see what the destination is still holding from two frames ago.
 		auto& to = dst.storage<CompT>();
-		to.clear();
 
 		const auto* from = src.storage<CompT>();
 		if (from == nullptr || from->empty()) {
+			to.clear();
 			return;
 		}
+
+		// The expensive half of a rebuild is not the elements, it is the sparse array: clear() walks the
+		// packed array writing null into a sparse slot per entity, and insert() then walks it again
+		// writing the position back. Two passes of scattered writes across sparse pages, per pool, per
+		// frame - and both of them reconstruct a mapping that is usually bit-for-bit what was already
+		// there, because entities come and go far more slowly than their components change value.
+		//
+		// So compare first. If the destination's packed entity array already matches the source's, the
+		// sparse array matches too - a sparse slot holds nothing but the entity's packed position, and
+		// every pool here only ever contains what a previous clone put in it - and the whole structure
+		// can be left alone. What is left is a positional overwrite of the elements, which is sequential
+		// and the part that actually had to happen.
+		//
+		// EnTT offers nothing cheaper than this. A storage is move-only (copy construction and copy
+		// assignment are both deleted) and both the element payload and the sparse array are private
+		// paged containers, so there is no route from out here to a page-level memcpy of a pool.
+		if constexpr (std::is_copy_assignable_v<CompT>) {
+			// swap_and_pop is what every component pool gets, since the policy follows the type's
+			// in_place_delete trait and nothing in Neo sets it. Checked rather than assumed because the
+			// other two policies both break the comparison: in-place deletion leaves tombstones in the
+			// packed array whose elements are destroyed, and swap_only keeps dead entities past the
+			// free list. Either one would have this copy read from a dead slot.
+			if (to.size() == from->size()
+				&& from->policy() == entt::deletion_policy::swap_and_pop
+				&& to.policy() == entt::deletion_policy::swap_and_pop
+				&& std::memcmp(to.data(), from->data(), from->size() * sizeof(Entity)) == 0) {
+				TRACY_ZONEN("Clone pool (in place)");
+				if constexpr (entt::component_traits<CompT, Entity>::page_size != 0u) {
+					// Both iterators run the same direction over the same index space, so this pairs
+					// positionally with the entity array the memcmp just proved identical.
+					std::copy(from->begin(), from->end(), to.begin());
+				}
+				// An empty component has no elements at all, so a matching entity array is the whole job.
+				return;
+			}
+		}
+
+		TRACY_ZONEN("Clone pool (rebuild)");
+		// Cleared rather than destroyed - the packed capacity survives, so a steady-state frame reuses
+		// the same memory every time.
+		to.clear();
 		to.reserve(from->size());
 
 		// Two ranges over one packed index space: the sliced base walks the entity array, the storage
