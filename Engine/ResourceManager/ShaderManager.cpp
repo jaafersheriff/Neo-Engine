@@ -155,6 +155,7 @@ namespace neo {
 	}
 
 	void ShaderManager::imguiEditor() {
+		// Not thread safe.
 		mCache.forEach([](const CachedResource<SourceShader>& entry) {
 			auto& shader = entry.mResource;
 			if (ImGui::TreeNode(shader.mName.c_str())) {
