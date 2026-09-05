@@ -34,18 +34,17 @@ namespace neo {
 	void ResourceManagers::_imguiEditor() {
 		TRACY_ZONE();
 		auto textureFunc = [&](const TextureHandle& textureHandle) {
-			if (!mTextureManager.isValid(textureHandle)) {
+			const std::optional<TextureDescriptor> texture = mTextureManager.getDescriptor(textureHandle);
+			if (!texture.has_value()) {
 				ImGui::Text("Invalid texture");
 			}
+			else if (texture->mFormat.mTarget != types::texture::Target::Texture2D) {
+				ImGui::Text("Non-2D texture");
+			}
 			else {
-				Texture& texture = mTextureManager.resolve(textureHandle);
-				if (texture.mFormat.mTarget != types::texture::Target::Texture2D) {
-					ImGui::Text("Non-2D texture");
-				}
-				else {
-					float scale = 175.f / (texture.mWidth > texture.mHeight ? texture.mWidth : texture.mHeight);
-					ImGui::Image(textureHandle.mHandle, ImVec2(scale * texture.mWidth, scale * texture.mHeight), ImVec2(0, 1), ImVec2(1, 0));
-				}
+				float scale = 175.f / (texture->mWidth > texture->mHeight ? texture->mWidth : texture->mHeight);
+				// The handle, not the GL name - ImGui hands it back to the render thread to draw.
+				ImGui::Image(textureHandle.mHandle, ImVec2(scale * texture->mWidth, scale * texture->mHeight), ImVec2(0, 1), ImVec2(1, 0));
 			}
 		};
 		ImGui::Begin("Resources");

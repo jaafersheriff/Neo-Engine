@@ -59,7 +59,22 @@ namespace neo {
 		}
 	};
 
-	class Texture {
+	// Everything about a texture except the one field the driver cares about. A base rather than a
+	// separate struct with copies of the fields, so that Texture::mWidth and friends still name this
+	// storage - no call site changes, and no second copy that can drift out of step.
+	//
+	// The split is along the line that matters: a texture's shape is ordinary CPU data, mTextureID is
+	// GL state. Anything that only needs the shape can hold this by value and never touch the live
+	// object, which is what lets such a caller run somewhere other than the render thread.
+	struct TextureDescriptor {
+		TextureFormat mFormat;
+
+		uint16_t mWidth = 1;
+		uint16_t mHeight = 1;
+		uint16_t mDepth = 0;
+	};
+
+	class Texture : public TextureDescriptor {
 	public:
 
 		Texture() = default;
@@ -71,11 +86,9 @@ namespace neo {
 		void genMips();
 		void destroy();
 
-		uint32_t mTextureID = 0;
-		TextureFormat mFormat;
+		// Deliberately a slice - the description is exactly this object minus the GL name.
+		[[nodiscard]] TextureDescriptor getDescriptor() const { return *this; }
 
-		uint16_t mWidth = 1;
-		uint16_t mHeight = 1;
-		uint16_t mDepth = 0;
+		uint32_t mTextureID = 0;
 	};
 }

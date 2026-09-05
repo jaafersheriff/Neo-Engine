@@ -45,6 +45,18 @@ namespace neo {
 		~TextureManager();
 		void imguiEditor(std::function<void(const TextureHandle&)> textureFunc);
 
+		// The CPU-side shape of a texture, by value. Anything that needs a texture's dimensions or
+		// format wants this rather than resolve(): it copies out from under the cache's shared lock,
+		// so the caller never holds a pointer into the cache and never sees the GL object at all.
+		// nullopt for a handle the cache does not have, which folds what used to be a separate
+		// isValid() call into the same lock acquisition.
+		[[nodiscard]] std::optional<TextureDescriptor> getDescriptor(const TextureHandle& handle) const {
+			if (const CachedResource<Texture>* entry = mCache.resolve(handle)) {
+				return entry->mResource.getDescriptor();
+			}
+			return std::nullopt;
+		}
+
 	protected:
 		[[nodiscard]] TextureHandle _asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, const std::optional<std::string>& debugName) const;
 		void _destroyImpl(CachedResource<Texture>& texture);

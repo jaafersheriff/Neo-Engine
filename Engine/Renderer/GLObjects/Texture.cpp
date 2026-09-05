@@ -141,7 +141,7 @@ namespace neo {
 		Texture(format, glm::u16vec3(dimension.x, dimension.y, 0), debugName, data) {}
 
 	Texture::Texture(TextureFormat format, glm::u16vec3 dimension, [[maybe_unused]] const std::optional<std::string>& debugName, const void* data) :
-		mFormat(format) {
+		TextureDescriptor{ format } {
 		switch (mFormat.mTarget) {
 		case types::texture::Target::Texture3D:
 			mDepth = dimension.z;
