@@ -112,8 +112,9 @@ namespace neo {
 			}
 		}
 
-		// Removes a resource from the lookup and hands ownership to the caller making the resource unavailable through resolve()
-		// Used for deferred deferred deletion
+		// Removes a resource from the lookup and hands ownership to the caller, under the exclusive
+		// lock. The resource itself is untouched - what happens to it is the caller's business, and
+		// happens outside this lock, which is what keeps a GL delete from blocking the ImGui walk.
 		[[nodiscard]] std::unique_ptr<Entry> extract(Handle handle) {
 			std::unique_lock<std::shared_mutex> lock(mMutex);
 			const EntryPosition entryPos = _getEntryPosition(handle);

@@ -178,15 +178,6 @@ namespace neo {
 				std::lock_guard<std::mutex> lock(mTransactionQueueMutex);
 				mTransactionQueue.clear();
 			}
-			for (std::unique_ptr<CachedResource<ResourceType>>& retired : mDoomed) {
-				static_cast<DerivedManager*>(this)->_destroyImpl(*retired);
-			}
-			mDoomed.clear();
-			for (std::unique_ptr<CachedResource<ResourceType>>& retired : mRetired) {
-				static_cast<DerivedManager*>(this)->_destroyImpl(*retired);
-			}
-			mRetired.clear();
-
 			mCache.forEach([this](CachedResource<ResourceType>& entry) {
 				static_cast<DerivedManager*>(this)->_destroyImpl(entry);
 			});
@@ -203,28 +194,38 @@ namespace neo {
 			static_cast<DerivedManager*>(this)->_initImpl();
 		}
 
-		// Retires a resource: unpublished from the cache immediately, destroyed later
-		void retire(const ResourceHandle<ResourceType>& id) {
-			if (std::unique_ptr<CachedResource<ResourceType>> retired = mCache.extract(id)) {
-				mRetired.emplace_back(std::move(retired));
+		// Takes a resource out of the cache and destroys it, here and now.
+		//
+		// This used to defer the destruction by two ticks behind a pair of graveyard vectors, because
+		// the main thread could be holding a pointer it resolved just before the resource was
+		// unpublished, and no lock takes an already-returned pointer back. That is no longer possible:
+		// resolve() asserts it is on the render thread, so the render thread is the only one that can
+		// ever hold a resolved pointer - and this runs on that same thread, from tick(), with every
+		// pass of the previous frame returned. There is nobody left to wait for.
+		//
+		// The extract still has to happen under the cache's exclusive lock, because the ImGui panels
+		// walk the cache from main under the shared one. The destruction then happens outside it,
+		// since the entry is ours alone by that point.
+		void _destroyNow(const ResourceHandle<ResourceType>& id) {
+			if (std::unique_ptr<CachedResource<ResourceType>> destroyed = mCache.extract(id)) {
+				static_cast<DerivedManager*>(this)->_destroyImpl(*destroyed);
 			}
 		}
 
 		void tick() {
-			for (std::unique_ptr<CachedResource<ResourceType>>& doomed : mDoomed) {
-				static_cast<DerivedManager*>(this)->_destroyImpl(*doomed);
-			}
-			mDoomed.clear();
-			std::swap(mDoomed, mRetired);
-
 			if constexpr (kTracksEviction) {
-				// Eviction retires through the same path as an explicit discard.
-				mExpiredScratch.clear();
-				mCache.age([this](const ResourceHandle<ResourceType>& id) {
-					mExpiredScratch.emplace_back(id);
+				// Collected before destroying rather than destroyed inside the sweep: age() holds the
+				// cache lock shared and the extract below needs it exclusively. Local rather than a
+				// member - only the two evicting managers instantiate this, and an expiry is rare
+				// enough that the vector usually never allocates.
+				std::vector<ResourceHandle<ResourceType>> expired;
+				mCache.age([&expired](const ResourceHandle<ResourceType>& id) {
+					expired.emplace_back(id);
 				});
-				for (const ResourceHandle<ResourceType>& id : mExpiredScratch) {
-					retire(id);
+
+				// Eviction and explicit discard are the same operation now, so they share the path.
+				for (const ResourceHandle<ResourceType>& id : expired) {
+					_destroyNow(id);
 				}
 			}
 
@@ -244,11 +245,6 @@ namespace neo {
 
 		Cache mCache;
 		std::shared_ptr<CachedResource<ResourceType>> mFallback;
-
-		// Graveyard
-		std::vector<std::unique_ptr<CachedResource<ResourceType>>> mRetired;
-		std::vector<std::unique_ptr<CachedResource<ResourceType>>> mDoomed;
-		std::vector<ResourceHandle<ResourceType>> mExpiredScratch;
 
 	private:
 		CachedResource<ResourceType>& _resolveFinal(const ResourceHandle<ResourceType>& id) const {

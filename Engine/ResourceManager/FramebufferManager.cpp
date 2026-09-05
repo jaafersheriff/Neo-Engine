@@ -178,7 +178,7 @@ namespace neo {
 				for (auto& handle : swapQueue) {
 					TRACY_GPUN("Destroy Single");
 					if (ResourceManagerInterface::isValid(handle)) {
-						retire(handle);
+						_destroyNow(handle);
 					}
 				}
 			}

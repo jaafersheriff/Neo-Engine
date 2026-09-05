@@ -204,7 +204,7 @@ namespace neo {
 			for (auto& id : swapQueue) {
 				TRACY_ZONEN("Destroy Single");
 				if (isValid(id)) {
-					retire(id);
+					_destroyNow(id);
 				}
 				else {
 					{
