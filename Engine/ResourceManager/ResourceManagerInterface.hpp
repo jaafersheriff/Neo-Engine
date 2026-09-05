@@ -2,6 +2,7 @@
 
 #include "Util/Util.hpp"
 
+#include "Jobs/JobSystem.hpp"
 #include "ResourceManager/ResourceCache.hpp"
 #include <string>
 #include <memory>
@@ -251,6 +252,16 @@ namespace neo {
 
 	private:
 		CachedResource<ResourceType>& _resolveFinal(const ResourceHandle<ResourceType>& id) const {
+			// The whole of resolve() and getTimeStamp() funnels through here, so this is the one place
+			// the rule needs stating: a resolved resource is a live GL object, and GL belongs to the
+			// thread that owns the context. Anything elsewhere that only needs a resource's shape
+			// should be asking a manager for a descriptor instead - see TextureManager::getDescriptor.
+			//
+			// This is also what the cache's deferred destruction rests on. If the render thread is the
+			// only thread that can be holding a resolved pointer, then it is safe for that same thread
+			// to destroy one between frames, when every pass has returned.
+			NEO_ASSERT(isRenderThread(), "Resource resolved off the render thread - resolve() hands out a live GL object");
+
 			if (const auto* resource = mCache.resolve(id)) {
 				return const_cast<CachedResource<ResourceType>&>(*resource);
 			}

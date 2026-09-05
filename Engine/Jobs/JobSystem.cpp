@@ -16,6 +16,10 @@
 
 namespace neo {
 
+	namespace detail {
+		thread_local bool gIsRenderThread = false;
+	}
+
 	namespace {
 		// Main doesn't count as a pinned thread..
 		constexpr uint32_t kPinnedThreadCount = static_cast<uint32_t>(PinnedThread::COUNT) - 1;
@@ -37,6 +41,12 @@ namespace neo {
 			if (sFirstPinnedThread != 0 && threadNum >= sFirstPinnedThread) {
 				named = jobThreadName(static_cast<PinnedThread>(threadNum - sFirstPinnedThread + 1));
 			}
+
+			// The render thread is the first of the job threads, by the same arithmetic as the naming
+			// above. Every other thread the scheduler starts leaves this false, and main never gets
+			// this callback at all - it is the thread that called Initialize - so its copy stays at
+			// the false it was zero-initialised with.
+			detail::gIsRenderThread = sFirstJobThread != 0 && threadNum == sFirstJobThread;
 
 			char name[32] = {};
 			if (named != nullptr) {

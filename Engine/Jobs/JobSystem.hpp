@@ -6,7 +6,41 @@
 
 namespace neo {
 
-	// Pinned threads
+	namespace detail {
+		// Set once per thread when the scheduler starts it, and never written again.
+		extern thread_local bool gIsRenderThread;
+	}
+
+	// True only on the job thread that owns the GL context.
+	//
+	// Deliberately a free function over a thread-local rather than a JobSystem method: the caller that
+	// needs it most is the assert in ResourceManagerInterface::_resolveFinal, which runs tens of
+	// thousands of times a frame, and NEO_ASSERT is live in RelWithDebInfo. Inlined this is a
+	// thread-local load and a branch that always predicts; routed through the JobSystem it would be a
+	// cross-TU call into the scheduler on every resolve.
+	[[nodiscard]] inline bool isRenderThread() {
+		return detail::gIsRenderThread;
+	}
+
+	// The threads work can be aimed at. Main is enki's thread 0 - the thread that called init(). Every
+	// other job thread is one this class creates and parks in a loop that runs only the tasks pinned to
+	// it: it sleeps until something is pinned to it and never steals general work, which is what makes
+	// it safe to hand one of them the GL context. Physics joins this list when Jolt lands.
+	//
+	// "Pinned" is enkiTS's term for work aimed at a specific thread. It is not CPU affinity - nothing
+	// in Neo binds a thread to a core.
+	//
+	// Almost nothing should want a PinnedThread. It means "this must run where the GL context lives", so
+	// it is the renderer and the things that touch GPU resources; everything else calls run/dispatch
+	// and does not care where it lands.
+	//
+	// Note the ceiling that comes with that. A job running on the render thread can issue a
+	// parallelFor and go wide like any other task - enki is braided, and the render thread helps run
+	// the batches while it waits. What cannot go wide is GL itself: the context is bound to one thread
+	// and commands issued from anywhere else are invalid, so draw submission is single-threaded no
+	// matter how many workers are idle. That is an OpenGL constraint rather than a job system one, and
+	// a modern API lifts it - per-thread command buffers recorded on workers and submitted from one
+	// thread need nothing new here, only a different renderer.
 	enum class PinnedThread : uint8_t {
 		Main = 0,
 		Render,
