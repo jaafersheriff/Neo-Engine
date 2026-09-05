@@ -129,9 +129,8 @@ namespace neo {
 		const auto& lightSpatial = std::get<2>(*lightTuple);
 		const auto& shadowMap = std::get<5>(*lightTuple);
 		uint16_t shadowMapResolution = 1;
-		if (resourceManagers.mTextureManager.isValid(shadowMap.mShadowMap)) {
-			const auto& shadowTexture = resourceManagers.mTextureManager.resolve(shadowMap.mShadowMap);
-			shadowMapResolution = std::max(shadowTexture.mWidth, shadowTexture.mHeight);
+		if (const std::optional<TextureDescriptor> shadowTexture = resourceManagers.mTextureManager.getDescriptor(shadowMap.mShadowMap)) {
+			shadowMapResolution = std::max(shadowTexture->mWidth, shadowTexture->mHeight);
 		}
 
 		auto csmCamera0Tuple = ecs.getSingleView<SpatialComponent, CameraComponent, CSMCamera0Component>();

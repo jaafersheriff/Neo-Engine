@@ -59,7 +59,15 @@ namespace neo {
 		}
 	};
 
-	class Texture {
+	struct TextureDescriptor {
+		TextureFormat mFormat;
+
+		uint16_t mWidth = 1;
+		uint16_t mHeight = 1;
+		uint16_t mDepth = 0;
+	};
+
+	class Texture : public TextureDescriptor {
 	public:
 
 		Texture() = default;
@@ -71,11 +79,8 @@ namespace neo {
 		void genMips();
 		void destroy();
 
-		uint32_t mTextureID = 0;
-		TextureFormat mFormat;
+		[[nodiscard]] TextureDescriptor getDescriptor() const { return *this; }
 
-		uint16_t mWidth = 1;
-		uint16_t mHeight = 1;
-		uint16_t mDepth = 0;
+		uint32_t mTextureID = 0;
 	};
 }

@@ -150,7 +150,6 @@ namespace CSM {
 
 		/* Ground plane */
 		{
-			auto mesh = resourceManagers.mMeshManager.resolve(HashedString("quad"));
 			MaterialComponent material;
 			material.mAlbedoColor = glm::vec4(glm::vec3(0.7f), 1.f);
 			ecs.submitEntity(std::move(ECS::EntityBuilder{}

@@ -214,9 +214,8 @@ namespace neo {
 				else {
 					ImGui::Text(fb.mResource.mExternallyOwned ? "%d" : "*%d", handle);
 				}
-				if (textureManager.isValid(fb.mResource.mFramebuffer.mTextures[0])) {
-					auto& firstTex = textureManager.resolve(fb.mResource.mFramebuffer.mTextures[0]);
-					ImGui::Text("[%d, %d]", firstTex.mWidth, firstTex.mHeight);
+				if (const std::optional<TextureDescriptor> firstTex = textureManager.getDescriptor(fb.mResource.mFramebuffer.mTextures[0])) {
+					ImGui::Text("[%d, %d]", firstTex->mWidth, firstTex->mHeight);
 				}
 				ImGui::TableSetColumnIndex(1);
 				for (auto texId = fb.mResource.mFramebuffer.mTextures.begin(); texId < fb.mResource.mFramebuffer.mTextures.end(); texId++) {
