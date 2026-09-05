@@ -1,6 +1,9 @@
 #pragma once
 
 #include <ext/entt_incl.hpp>
+#include "Jobs/JobSystem.hpp"
+#include "Util/Assert.hpp"
+
 #include <entt/container/dense_map.hpp>
 
 #include <chrono>
@@ -93,6 +96,7 @@ namespace neo {
 		}
 
 		void insert(Handle handle, Entry&& entry) {
+			NEO_ASSERT(isRenderThread(), "Cache insert off the render thread - publishing a resource belongs to a tick");
 			std::unique_lock<std::shared_mutex> lock(mMutex);
 			entry.mHandle = handle;
 
@@ -112,9 +116,9 @@ namespace neo {
 			}
 		}
 
-		// Removes a resource from the lookup and hands ownership to the caller making the resource unavailable through resolve()
-		// Used for deferred deferred deletion
+		// Removes a resource from the lookup and hands ownership to the caller
 		[[nodiscard]] std::unique_ptr<Entry> extract(Handle handle) {
+			NEO_ASSERT(isRenderThread(), "Cache extract off the render thread - unpublishing a resource belongs to a tick");
 			std::unique_lock<std::shared_mutex> lock(mMutex);
 			const EntryPosition entryPos = _getEntryPosition(handle);
 			if (entryPos == kInvalidEntryPosition) {
@@ -126,11 +130,13 @@ namespace neo {
 		}
 
 		void erase(Handle handle) {
+			NEO_ASSERT(isRenderThread(), "Cache erase off the render thread - unpublishing a resource belongs to a tick");
 			std::unique_lock<std::shared_mutex> lock(mMutex);
 			_eraseUnlocked(handle);
 		}
 
 		void clear() {
+			NEO_ASSERT(isRenderThread(), "Cache clear off the render thread - this drops every entry the manager owns");
 			std::unique_lock<std::shared_mutex> lock(mMutex);
 			mEntryPositions.clear();
 			mEntries.clear();
@@ -141,6 +147,7 @@ namespace neo {
 		template<typename ExpiredFunc>
 		void age(ExpiredFunc&& onExpired) const {
 			static_assert(kTracksEviction, "Cache does not evict - nothing to age");
+			NEO_ASSERT(isRenderThread(), "Cache aged off the render thread - eviction is driven by the tick");
 			std::shared_lock<std::shared_mutex> lock(mMutex);
 			for (size_t i = 0; i < mEntries.size(); i++) {
 				if (mFramesUntilEviction[i] == 0) {
