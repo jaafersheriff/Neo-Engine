@@ -45,6 +45,14 @@ namespace neo {
 		~TextureManager();
 		void imguiEditor(std::function<void(const TextureHandle&)> textureFunc);
 
+		// Extract TextureFormat and resolution without the underlying resource
+		[[nodiscard]] std::optional<TextureDescriptor> getDescriptor(const TextureHandle& handle) const {
+			if (const CachedResource<Texture>* entry = mCache.resolve(handle)) {
+				return entry->mResource.getDescriptor();
+			}
+			return std::nullopt;
+		}
+
 	protected:
 		[[nodiscard]] TextureHandle _asyncLoadImpl(TextureHandle id, TextureLoadDetails textureDetails, const std::optional<std::string>& debugName) const;
 		void _destroyImpl(CachedResource<Texture>& texture);
