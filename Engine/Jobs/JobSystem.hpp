@@ -6,6 +6,15 @@
 
 namespace neo {
 
+	namespace detail {
+		// Set once per thread when the scheduler starts it
+		extern thread_local bool gIsRenderThread;
+	}
+
+	[[nodiscard]] inline bool isRenderThread() {
+		return detail::gIsRenderThread;
+	}
+
 	// Pinned threads
 	enum class PinnedThread : uint8_t {
 		Main = 0,
