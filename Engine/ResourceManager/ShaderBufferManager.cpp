@@ -121,7 +121,7 @@ namespace neo {
 				for (auto& id : swapQueue) {
 					TRACY_GPUN("Destroy Single");
 					if (isValid(id)) {
-						retire(id);
+						_destroyNow(id);
 					}
 				}
 			}

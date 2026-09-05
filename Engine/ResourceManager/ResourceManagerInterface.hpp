@@ -142,6 +142,7 @@ namespace neo {
 			mTransactionQueue.emplace_back(std::make_pair(handle, transaction));
 		}
 
+		// Queue the resource for removal
 		void discard(ResourceHandle<ResourceType> id) const {
 			if (!isDiscardQueued(id) && (isValid(id) || isQueued(id))) {
 				std::lock_guard<std::mutex> lock(mDiscardQueueMutex);
@@ -151,6 +152,7 @@ namespace neo {
 
 	protected:
 		void _finishPending(const ResourceHandle<ResourceType>& id) const {
+			NEO_ASSERT(isRenderThread(), "Pending load completed off the render thread - only a tick finishes a load");
 			std::lock_guard<std::mutex> lock(mPendingMutex);
 			mPending.erase(id);
 		}
@@ -162,6 +164,8 @@ namespace neo {
 		};
 
 		void clear() {
+			NEO_ASSERT(isRenderThread(), "ResourceManager cleared off the render thread - this destroys every GL object it owns");
+
 			{
 				std::lock_guard<std::mutex> lock(mLoadQueueMutex);
 				mLoadQueue.clear();
@@ -178,15 +182,6 @@ namespace neo {
 				std::lock_guard<std::mutex> lock(mTransactionQueueMutex);
 				mTransactionQueue.clear();
 			}
-			for (std::unique_ptr<CachedResource<ResourceType>>& retired : mDoomed) {
-				static_cast<DerivedManager*>(this)->_destroyImpl(*retired);
-			}
-			mDoomed.clear();
-			for (std::unique_ptr<CachedResource<ResourceType>>& retired : mRetired) {
-				static_cast<DerivedManager*>(this)->_destroyImpl(*retired);
-			}
-			mRetired.clear();
-
 			mCache.forEach([this](CachedResource<ResourceType>& entry) {
 				static_cast<DerivedManager*>(this)->_destroyImpl(entry);
 			});
@@ -199,32 +194,30 @@ namespace neo {
 		}
 
 		void init() {
+			NEO_ASSERT(isRenderThread(), "ResourceManager init off the render thread - _initImpl builds GL fallback resources");
 			NEO_ASSERT(!mFallback, "Fallback resource already created");
 			static_cast<DerivedManager*>(this)->_initImpl();
 		}
 
-		// Retires a resource: unpublished from the cache immediately, destroyed later
-		void retire(const ResourceHandle<ResourceType>& id) {
-			if (std::unique_ptr<CachedResource<ResourceType>> retired = mCache.extract(id)) {
-				mRetired.emplace_back(std::move(retired));
+		// Actually delete the resource
+		void _destroyNow(const ResourceHandle<ResourceType>& id) {
+			NEO_ASSERT(isRenderThread(), "Resource destroyed off the render thread - _destroyImpl is a GL delete");
+			if (std::unique_ptr<CachedResource<ResourceType>> destroyed = mCache.extract(id)) {
+				static_cast<DerivedManager*>(this)->_destroyImpl(*destroyed);
 			}
 		}
 
 		void tick() {
-			for (std::unique_ptr<CachedResource<ResourceType>>& doomed : mDoomed) {
-				static_cast<DerivedManager*>(this)->_destroyImpl(*doomed);
-			}
-			mDoomed.clear();
-			std::swap(mDoomed, mRetired);
+			NEO_ASSERT(isRenderThread(), "ResourceManager ticked off the render thread - a tick publishes and destroys GL objects");
 
 			if constexpr (kTracksEviction) {
-				// Eviction retires through the same path as an explicit discard.
-				mExpiredScratch.clear();
-				mCache.age([this](const ResourceHandle<ResourceType>& id) {
-					mExpiredScratch.emplace_back(id);
+				std::vector<ResourceHandle<ResourceType>> expired; // ResourceCache::age locks the cache, so track externally
+				mCache.age([&expired](const ResourceHandle<ResourceType>& id) {
+					expired.emplace_back(id);
 				});
-				for (const ResourceHandle<ResourceType>& id : mExpiredScratch) {
-					retire(id);
+
+				for (const ResourceHandle<ResourceType>& id : expired) {
+					_destroyNow(id);
 				}
 			}
 
@@ -244,11 +237,6 @@ namespace neo {
 
 		Cache mCache;
 		std::shared_ptr<CachedResource<ResourceType>> mFallback;
-
-		// Graveyard
-		std::vector<std::unique_ptr<CachedResource<ResourceType>>> mRetired;
-		std::vector<std::unique_ptr<CachedResource<ResourceType>>> mDoomed;
-		std::vector<ResourceHandle<ResourceType>> mExpiredScratch;
 
 	private:
 		CachedResource<ResourceType>& _resolveFinal(const ResourceHandle<ResourceType>& id) const {
