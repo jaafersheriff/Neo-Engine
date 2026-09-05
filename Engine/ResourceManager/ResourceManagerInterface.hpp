@@ -2,6 +2,7 @@
 
 #include "Util/Util.hpp"
 
+#include "Jobs/JobSystem.hpp"
 #include "ResourceManager/ResourceCache.hpp"
 #include <string>
 #include <memory>
@@ -251,6 +252,8 @@ namespace neo {
 
 	private:
 		CachedResource<ResourceType>& _resolveFinal(const ResourceHandle<ResourceType>& id) const {
+			NEO_ASSERT(isRenderThread(), "Resource resolved off the render thread - resolve() hands out a live GL object");
+
 			if (const auto* resource = mCache.resolve(id)) {
 				return const_cast<CachedResource<ResourceType>&>(*resource);
 			}
