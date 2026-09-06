@@ -5,7 +5,7 @@
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
 #include "Renderer/GLObjects/SourceShader.hpp"
 
-#include "Jobs/JobSystem.hpp"
+#include "Jobs/JobHandle.hpp"
 
 #include "Util/Util.hpp"
 

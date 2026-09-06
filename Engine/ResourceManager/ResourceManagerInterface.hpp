@@ -2,7 +2,7 @@
 
 #include "Util/Util.hpp"
 
-#include "Jobs/JobSystem.hpp"
+#include "Jobs/JobThread.hpp"
 #include "ResourceManager/ResourceCache.hpp"
 #include <string>
 #include <memory>

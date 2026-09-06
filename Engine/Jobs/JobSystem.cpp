@@ -1,5 +1,7 @@
 #include "Jobs/JobSystem.hpp"
 
+#include "Jobs/Internal/JobTask.hpp"
+
 #include <ext/enki_incl.hpp>
 #include <ext/imgui_incl.hpp>
 
@@ -53,15 +55,6 @@ namespace neo {
 				snprintf(name, sizeof(name), "Neo Worker %u", threadNum);
 			}
 			tracy::SetThreadName(name);
-		}
-
-		enki::TaskPriority toEnkiPriority(JobPriority priority) {
-			switch (priority) {
-				case JobPriority::High: return enki::TASK_PRIORITY_HIGH;
-				case JobPriority::Normal: return enki::TASK_PRIORITY_MED;
-				case JobPriority::Low: return enki::TASK_PRIORITY_LOW;
-			}
-			return enki::TASK_PRIORITY_MED;
 		}
 
 		// Parks a job thread so that it only ever runs work pinned to it
@@ -141,70 +134,6 @@ namespace neo {
 		};
 
 	}
-
-	// An in-flight joinable job
-	struct JobHandle::Task {
-		Task(enki::TaskScheduler& scheduler, JobFn fn, JobPriority priority)
-			: mScheduler(&scheduler)
-			, mTaskSet(1, [fn = std::move(fn)](enki::TaskSetPartition, uint32_t) {
-				TRACY_ZONEN("Job");
-				fn();
-			})
-		{
-			mTaskSet.m_Priority = toEnkiPriority(priority);
-			mCompletable = &mTaskSet;
-		}
-
-		Task(enki::TaskScheduler& scheduler, uint32_t threadNum, JobFn fn)
-			: mScheduler(&scheduler)
-			, mPinned(threadNum, [fn = std::move(fn)] {
-				TRACY_ZONEN("Job (pinned)");
-				fn();
-			})
-		{
-			mCompletable = &mPinned;
-		}
-
-		enki::TaskScheduler* mScheduler = nullptr;
-		enki::ICompletable* mCompletable = nullptr;
-		enki::TaskSet mTaskSet;
-		enki::LambdaPinnedTask mPinned;
-	};
-
-	JobHandle::JobHandle() = default;
-
-	JobHandle::JobHandle(std::unique_ptr<Task> task)
-		: mTask(std::move(task))
-	{}
-
-	JobHandle::JobHandle(JobHandle&&) noexcept = default;
-
-	JobHandle& JobHandle::operator=(JobHandle&& other) noexcept {
-		if (this != &other) {
-			// Whatever is being replaced still has to be joined before its task can be destroyed.
-			wait();
-			mTask = std::move(other.mTask);
-		}
-		return *this;
-	}
-
-	JobHandle::~JobHandle() {
-		wait();
-	}
-
-	void JobHandle::wait() {
-		if (!mTask) {
-			return;
-		}
-
-		// Waiting here does NOT pick up other work
-		mTask->mScheduler->WaitforTask(mTask->mCompletable, enki::TASK_PRIORITY_HIGH);
-	}
-
-	bool JobHandle::isComplete() const {
-		return !mTask || mTask->mCompletable->GetIsComplete();
-	}
-
 
 	struct JobSystem::Impl {
 		enki::TaskScheduler mScheduler;

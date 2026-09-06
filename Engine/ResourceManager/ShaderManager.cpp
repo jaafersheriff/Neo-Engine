@@ -1,5 +1,7 @@
 #include "ShaderManager.hpp"
 
+#include "Jobs/JobSystem.hpp"
+
 #include "Loader/Loader.hpp"
 
 #include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
