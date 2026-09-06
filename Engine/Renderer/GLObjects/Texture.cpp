@@ -95,38 +95,38 @@ namespace neo {
 		}
 	}
 
-	types::texture::BaseFormats TextureFormat::deriveBaseFormat(types::texture::InternalFormats format) {
+	types::texture::BaseFormats TextureFormat::deriveBaseFormat(types::InternalFormats format) {
 		switch (format) {
-		case types::texture::InternalFormats::R8_UNORM:
-		case types::texture::InternalFormats::R16_UNORM:
-		case types::texture::InternalFormats::R16_UI:
-		case types::texture::InternalFormats::R32_UI:
-		case types::texture::InternalFormats::R16_F:
-		case types::texture::InternalFormats::R32_F:
+		case types::InternalFormats::R8_UNORM:
+		case types::InternalFormats::R16_UNORM:
+		case types::InternalFormats::R16_UI:
+		case types::InternalFormats::R32_UI:
+		case types::InternalFormats::R16_F:
+		case types::InternalFormats::R32_F:
 			return types::texture::BaseFormats::R;
-		case types::texture::InternalFormats::RG8_UNORM:
-		case types::texture::InternalFormats::RG16_UNORM:
-		case types::texture::InternalFormats::RG16_UI:
-		case types::texture::InternalFormats::RG16_F:
-		case types::texture::InternalFormats::RG32_F:
+		case types::InternalFormats::RG8_UNORM:
+		case types::InternalFormats::RG16_UNORM:
+		case types::InternalFormats::RG16_UI:
+		case types::InternalFormats::RG16_F:
+		case types::InternalFormats::RG32_F:
 			return types::texture::BaseFormats::RG;
-		case types::texture::InternalFormats::RGB8_UNORM:
-		case types::texture::InternalFormats::RGB16_UNORM:
-		case types::texture::InternalFormats::RGB16_UI:
-		case types::texture::InternalFormats::RGB16_F:
-		case types::texture::InternalFormats::RGB32_F:
+		case types::InternalFormats::RGB8_UNORM:
+		case types::InternalFormats::RGB16_UNORM:
+		case types::InternalFormats::RGB16_UI:
+		case types::InternalFormats::RGB16_F:
+		case types::InternalFormats::RGB32_F:
 			return types::texture::BaseFormats::RGB;
-		case types::texture::InternalFormats::RGBA8_UNORM:
-		case types::texture::InternalFormats::RGBA16_UNORM:
-		case types::texture::InternalFormats::RGBA16_UI:
-		case types::texture::InternalFormats::RGBA16_F:
-		case types::texture::InternalFormats::RGBA32_F:
+		case types::InternalFormats::RGBA8_UNORM:
+		case types::InternalFormats::RGBA16_UNORM:
+		case types::InternalFormats::RGBA16_UI:
+		case types::InternalFormats::RGBA16_F:
+		case types::InternalFormats::RGBA32_F:
 			return types::texture::BaseFormats::RGBA;
-		case types::texture::InternalFormats::D16:
-		case types::texture::InternalFormats::D24:
-		case types::texture::InternalFormats::D32:
+		case types::InternalFormats::D16:
+		case types::InternalFormats::D24:
+		case types::InternalFormats::D32:
 			return types::texture::BaseFormats::Depth;
-		case types::texture::InternalFormats::D24S8:
+		case types::InternalFormats::D24S8:
 			return types::texture::BaseFormats::DepthStencil;
 		default:
 			NEO_FAIL("Invalid base format");

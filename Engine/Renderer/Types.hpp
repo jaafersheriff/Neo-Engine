@@ -16,6 +16,36 @@ namespace neo {
 			Float
 		};
 
+		// Lifted out of the texture namespace: shader buffers and image bindings describe their
+		// contents with the same formats, so this is not a texture-only concept.
+		enum class InternalFormats : uint8_t {
+			R8_UNORM,
+			RG8_UNORM,
+			RGB8_UNORM,
+			RGBA8_UNORM,
+			R16_UNORM,
+			RG16_UNORM,
+			RGB16_UNORM,
+			RGBA16_UNORM,
+			R16_UI,
+			RG16_UI,
+			RGB16_UI,
+			RGBA16_UI,
+			R32_UI,
+			R16_F,
+			RG16_F,
+			RGB16_F,
+			RGBA16_F,
+			R32_F,
+			RG32_F,
+			RGB32_F,
+			RGBA32_F,
+			D16,
+			D24,
+			D32,
+			D24S8
+		};
+
 		namespace shader {
 			enum class Stage : uint8_t {
 				Vertex,
@@ -115,33 +145,6 @@ namespace neo {
 				Mirrored
 			};
 
-			enum class InternalFormats : uint8_t {
-				R8_UNORM,
-				RG8_UNORM,
-				RGB8_UNORM,
-				RGBA8_UNORM,
-				R16_UNORM,
-				RG16_UNORM,
-				RGB16_UNORM,
-				RGBA16_UNORM,
-				R16_UI,
-				RG16_UI,
-				RGB16_UI,
-				RGBA16_UI,
-				R32_UI,
-				R16_F,
-				RG16_F,
-				RGB16_F,
-				RGBA16_F,
-				R32_F,
-				RG32_F,
-				RGB32_F,
-				RGBA32_F,
-				D16,
-				D24,
-				D32,
-				D24S8
-			};
 
 			enum class BaseFormats : uint8_t {
 				R,

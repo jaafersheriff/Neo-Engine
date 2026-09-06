@@ -48,7 +48,7 @@ namespace neo {
 				.setDimension(glm::u16vec3(baseDimension.x >> i, baseDimension.y >> i, 0))
 				.setFormat(TextureFormat{
 					types::texture::Target::Texture2D,
-					types::texture::InternalFormats::RGB16_F
+					types::InternalFormats::RGB16_F
 					}
 				)
 			));
@@ -129,7 +129,7 @@ namespace neo {
 			HashedString("BloomOutput"),
 			FramebufferBuilder{}
 			.setSize(dimension)
-			.attach({ types::texture::Target::Texture2D, types::texture::InternalFormats::RGB16_F }),
+			.attach({ types::texture::Target::Texture2D, types::InternalFormats::RGB16_F }),
 			resourceManagers.mTextureManager
 		);
 		// Mix results

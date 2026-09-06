@@ -32,7 +32,7 @@ namespace neo {
 
 	struct TextureFormat {
 		types::texture::Target mTarget = types::texture::Target::Texture2D;
-		types::texture::InternalFormats mInternalFormat = types::texture::InternalFormats::RGBA8_UNORM;
+		types::InternalFormats mInternalFormat = types::InternalFormats::RGBA8_UNORM;
 		TextureFilter mFilter = {
 			types::texture::Filters::Linear,
 			types::texture::Filters::Linear,
@@ -46,7 +46,7 @@ namespace neo {
 		types::ByteFormats mType = types::ByteFormats::UnsignedByte;
 		uint16_t mMipCount = 1;
 
-		static types::texture::BaseFormats deriveBaseFormat(types::texture::InternalFormats format);
+		static types::texture::BaseFormats deriveBaseFormat(types::InternalFormats format);
 
 		bool operator==(const TextureFormat& other) const noexcept {
 			return mTarget == other.mTarget

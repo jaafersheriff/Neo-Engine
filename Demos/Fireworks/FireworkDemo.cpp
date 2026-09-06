@@ -148,7 +148,7 @@ namespace Fireworks {
 		TextureHandle hdrColorTexture = resourceManagers.mTextureManager.asyncLoad("HDR Color",
 			TextureBuilder{}
 			.setDimension(glm::u16vec3(viewport.mSize, 0))
-			.setFormat(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F })
+			.setFormat(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGBA16_F })
 		);
 
 		auto sceneTargetHandle = resourceManagers.mFramebufferManager.asyncLoad(
@@ -176,7 +176,7 @@ namespace Fireworks {
 			"Previous HDR Color",
 			FramebufferBuilder{}
 			.setSize(viewport.mSize)
-			.attach(TextureFormat{ types::texture::Target::Texture2D, types::texture::InternalFormats::RGBA16_F }),
+			.attach(TextureFormat{ types::texture::Target::Texture2D, types::InternalFormats::RGBA16_F }),
 			resourceManagers.mTextureManager
 		);
 		blit(renderPasses, previousHDRColorHandle, viewport.mSize, bloomResults, "Blit Previous HDR Color");

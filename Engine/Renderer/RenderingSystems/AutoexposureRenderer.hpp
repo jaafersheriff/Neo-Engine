@@ -43,7 +43,7 @@ namespace neo {
 			.setDimension({ 256, 1, 0 })
 			.setFormat(TextureFormat{ 
 				types::texture::Target::Texture2D, 
-				types::texture::InternalFormats::R32_UI, 
+				types::InternalFormats::R32_UI, 
 				TextureFilter {types::texture::Filters::Nearest, types::texture::Filters::Nearest}, // R32UI needs nearest filter wahoo
 				TextureWrap{ types::texture::Wraps::Mirrored, types::texture::Wraps::Mirrored}
 			})
@@ -89,7 +89,7 @@ namespace neo {
 			.setDimension({ 1, 1, 0 })
 			.setFormat(TextureFormat{
 				types::texture::Target::Texture2D,
-				types::texture::InternalFormats::R16_F,
+				types::InternalFormats::R16_F,
 				TextureFilter { types::texture::Filters::Nearest, types::texture::Filters::Nearest } 
 			})
 		);
