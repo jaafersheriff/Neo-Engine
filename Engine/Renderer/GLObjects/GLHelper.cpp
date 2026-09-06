@@ -140,7 +140,13 @@ namespace neo {
 			case types::InternalFormats::RG16_UI: return GL_RG16UI;
 			case types::InternalFormats::RGB16_UI: return GL_RGB16UI;
 			case types::InternalFormats::RGBA16_UI: return GL_RGBA16UI;
+			case types::InternalFormats::RGBA32_UI: return GL_RGBA32UI;
 			case types::InternalFormats::R32_UI: return GL_R32UI;
+			case types::InternalFormats::R16_I: return GL_R16I;
+			case types::InternalFormats::RG16_I: return GL_RG16I;
+			case types::InternalFormats::RGB16_I: return GL_RGB16I;
+			case types::InternalFormats::RGBA16_I: return GL_RGBA16I;
+			case types::InternalFormats::R32_I: return GL_R32I;
 			case types::InternalFormats::R16_F: return GL_R16F;
 			case types::InternalFormats::RG16_F: return GL_RG16F;
 			case types::InternalFormats::RGB16_F: return GL_RGB16F;
