@@ -41,5 +41,8 @@ namespace neo {
 		};
 
 		void _log(LogSeverity severity, const char* sig, const char* format, ...);
+
+		// Formats a byte count into the largest unit it fits, for resource panels.
+		void stringifyByteSize(uint32_t byteSize, char* outStr, size_t outStrSize);
 	}
 }
