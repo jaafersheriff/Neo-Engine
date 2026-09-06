@@ -10,7 +10,7 @@
 namespace neo {
 
 	namespace {
-		struct alignas(64) Collision {
+		struct Collision {
 			ECS::Entity mEntity = ECS::NEO_INVALID_ENTITY;
 			float mCollisionDistance = FLT_MAX;
 		};
