@@ -29,7 +29,13 @@ namespace neo {
 			RG16_UI,
 			RGB16_UI,
 			RGBA16_UI,
+			RGBA32_UI,
 			R32_UI,
+			R16_I,
+			RG16_I,
+			RGB16_I,
+			RGBA16_I,
+			R32_I,
 			R16_F,
 			RG16_F,
 			RGB16_F,
@@ -127,9 +133,12 @@ namespace neo {
 
 			enum class Target : uint8_t {
 				Texture1D,
+				Texture1DArray,
 				Texture2D,
+				Texture2DArray,
 				Texture3D,
-				TextureCube
+				TextureCube,
+				TextureCubeArray
 			};
 
 			enum class Filters : uint8_t {
@@ -149,6 +158,10 @@ namespace neo {
 				RG,
 				RGB,
 				RGBA,
+				R_INTEGER,
+				RG_INTEGER,
+				RGB_INTEGER,
+				RGBA_INTEGER,
 				Depth,
 				DepthStencil
 			};
