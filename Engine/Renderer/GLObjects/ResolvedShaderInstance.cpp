@@ -15,6 +15,48 @@
 
 namespace neo {
 	namespace {
+		// Moved out of GLHelper: compiling and linking a shader is the only thing that ever wants
+		// these, and GLHelper is included far more widely than that.
+		#define GET_FILE_LINE (std::string(__FILE__) + ":" + std::to_string(__LINE__)).c_str()
+
+		void printShaderInfoLog(GLuint shader) {
+			GLint infologLength = 0;
+			GLint charsWritten = 0;
+			GLchar* infoLog;
+
+			GLHelper::checkError(GET_FILE_LINE);
+			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infologLength);
+			GLHelper::checkError(GET_FILE_LINE);
+
+			if (infologLength > 0) {
+				infoLog = new GLchar[infologLength + 1];
+				glGetShaderInfoLog(shader, infologLength, &charsWritten, infoLog);
+				infoLog[charsWritten + 1] = '\0';
+				NEO_LOG_E("Shader InfoLog:\n%s", infoLog);
+				delete[] infoLog;
+			}
+			GLHelper::checkError(GET_FILE_LINE);
+		}
+
+		void printProgramInfoLog(GLuint program) {
+			GLint infologLength = 0;
+			GLint charsWritten = 0;
+			GLchar* infoLog;
+
+			GLHelper::checkError(GET_FILE_LINE);
+			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infologLength);
+			GLHelper::checkError(GET_FILE_LINE);
+
+			if (infologLength > 0) {
+				infoLog = new GLchar[infologLength];
+				NEO_ASSERT(infoLog != NULL, "Could not allocate InfoLog buffer");
+				glGetProgramInfoLog(program, infologLength, &charsWritten, infoLog);
+				NEO_LOG_E("Program InfoLog:\n%s\n\n", infoLog);
+				delete[] infoLog;
+			}
+			GLHelper::checkError(GET_FILE_LINE);
+		}
+
 		int32_t _getGLAccessType(types::shader::Access accessType) {
 			switch (accessType) {
 			case types::shader::Access::Read:
@@ -222,7 +264,7 @@ namespace neo {
 		GLint linkSuccess;
 		glGetProgramiv(mPid, GL_LINK_STATUS, &linkSuccess);
 		if (!linkSuccess) {
-			GLHelper::printProgramInfoLog(mPid);
+			printProgramInfoLog(mPid);
 			return false;
 		}
 
@@ -251,7 +293,7 @@ namespace neo {
 		GLint compileSuccess;
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &compileSuccess);
 		if (!compileSuccess) {
-			GLHelper::printShaderInfoLog(shader);
+			printShaderInfoLog(shader);
 			glDeleteShader(shader);
 			return 0;
 		}
@@ -305,14 +347,16 @@ namespace neo {
 		util::visit(uniform, 
 			[&](bool b) { glUniform1i(_getUniform(name), b); },
 			[&](int i) { glUniform1i(_getUniform(name), i); },
-			[&](uint16_t i) { glUniform1ui(_getUniform(name), i); },
-			[&](uint32_t i) { glUniform1ui(_getUniform(name), i); },
+			[&](uint16_t i) { glUniform1ui(_getUniform(name), static_cast<GLuint>(i)); },
+			[&](uint32_t i) { glUniform1ui(_getUniform(name), static_cast<GLuint>(i)); },
 			[&](double d) { glUniform1f(_getUniform(name), static_cast<float>(d)); },
 			[&](float f) { glUniform1f(_getUniform(name), static_cast<float>(f)); },
 			[&](glm::vec2 v) { glUniform2f(_getUniform(name), v.x, v.y); },
 			[&](glm::ivec2 v) { glUniform2i(_getUniform(name), v.x, v.y); },
 			[&](glm::uvec2 v) { glUniform2ui(_getUniform(name), v.x, v.y); },
 			[&](glm::vec3 v) { glUniform3f(_getUniform(name), v.x, v.y, v.z); },
+			[&](glm::ivec3 v) { glUniform3i(_getUniform(name), v.x, v.y, v.z); },
+			[&](glm::uvec3 v) { glUniform3ui(_getUniform(name), v.x, v.y, v.z); },
 			[&](glm::vec4 v) { glUniform4f(_getUniform(name), v.x, v.y, v.z, v.w); },
 			[&](glm::mat3 m) { glUniformMatrix3fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
 			[&](glm::mat4 m) { glUniformMatrix4fv(_getUniform(name), 1, GL_FALSE, &m[0][0]); },
@@ -349,6 +393,11 @@ namespace neo {
 
 	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindShaderBuffer(const char* name, const Mesh& mesh, types::mesh::VertexType vertexType, types::shader::Access accessType) const {
 		return _bindShaderBuffer(name, mesh.getVBO(vertexType).vboID, accessType);
+	}
+
+	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::bindMeshIndices(const char* name, const Mesh& mesh, types::shader::Access accessType) const {
+		NEO_ASSERT(mesh.hasIBO(), "Trying to bind mesh indices but mesh doesn't have an IBO");
+		return _bindShaderBuffer(name, mesh.getIBO().vboID, accessType);
 	}
 
 	[[nodiscard]] ShaderBarrier ResolvedShaderInstance::_bindShaderBuffer(const char* name, uint32_t id, types::shader::Access accessType) const {

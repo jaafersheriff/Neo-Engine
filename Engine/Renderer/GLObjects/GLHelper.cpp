@@ -6,18 +6,6 @@
 namespace neo {
 
 	namespace GLHelper {
-		namespace {
-
-			/* For printing out the current file and line number */
-			template <typename T>
-			std::string NumberToString(T x)
-			{
-				std::ostringstream ss;
-				ss << x;
-				return ss.str();
-			}
-
-		}
 
 		void OpenGLMessageCallback(
 			unsigned source,
@@ -170,45 +158,6 @@ namespace neo {
 			if (glErr != GL_NO_ERROR) {
 				NEO_LOG_E("GL_ERROR at %s : %s.\n", str, errorString(glErr));
 			}
-		}
-
-		void printShaderInfoLog(GLuint shader) {
-			GLint infologLength = 0;
-			GLint charsWritten = 0;
-			GLchar *infoLog;
-
-			#define GET_FILE_LINE (std::string(__FILE__) + ":" + NumberToString(__LINE__)).c_str()
-			checkError(GET_FILE_LINE);
-			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infologLength);
-			checkError(GET_FILE_LINE);
-
-			if (infologLength > 0) {
-				infoLog = new GLchar[infologLength + 1];
-				glGetShaderInfoLog(shader, infologLength, &charsWritten, infoLog);
-				infoLog[charsWritten + 1] = '\0';
-				NEO_LOG_E("Shader InfoLog:\n%s", infoLog);
-				delete[] infoLog;
-			}
-			checkError(GET_FILE_LINE);
-		}
-
-		void printProgramInfoLog(GLuint program) {
-			GLint infologLength = 0;
-			GLint charsWritten = 0;
-			GLchar *infoLog;
-
-			checkError(GET_FILE_LINE);
-			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infologLength);
-			checkError(GET_FILE_LINE);
-
-			if (infologLength > 0) {
-				infoLog = new GLchar[infologLength];
-				NEO_ASSERT(infoLog != NULL, "Could not allocate InfoLog buffer");
-				glGetProgramInfoLog(program, infologLength, &charsWritten, infoLog);
-				NEO_LOG_E("Program InfoLog:\n%s\n\n", infoLog);
-				delete[] infoLog;
-			}
-			checkError(GET_FILE_LINE);
 		}
 
 		void checkFrameBuffer() {
