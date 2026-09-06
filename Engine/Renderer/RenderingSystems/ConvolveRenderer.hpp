@@ -118,12 +118,12 @@ namespace neo {
 						convolveShader.bind();
 
 						convolveShader.bindTexture("cubeMap", skyboxCubemap);
-						convolveShader.bindUniform("resolution", convolvedCubemap.mWidth);
+						convolveShader.bindUniform("resolution", static_cast<int>(convolvedCubemap.mWidth));
 						for (int mip = 0; mip < convolvedCubemap.mFormat.mMipCount; mip++) {
 							convolveShader.bindUniform("mipLevel", mip);
 							uint16_t mipResolution = convolvedCubemap.mWidth >> uint16_t(mip);
 							convolveShader.bindUniform("roughness", mip / static_cast<float>(convolvedCubemap.mFormat.mMipCount - 2));
-							convolveShader.bindUniform("sampleCount", ibl.mSampleCount);
+							convolveShader.bindUniform("sampleCount", static_cast<int>(ibl.mSampleCount));
 							auto barrier = convolveShader.bindImageTexture("dst", convolvedCubemap, types::shader::Access::Write, mip);
 							convolveShader.dispatch({
 								mipResolution / 8,
