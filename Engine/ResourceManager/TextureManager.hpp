@@ -13,7 +13,8 @@ namespace neo {
 
 	struct TextureBuilder {
 		TextureFormat mFormat;
-		glm::u16vec3 mDimensions = glm::u16vec3(0);
+		// 1x1 rather than 0x0 - a texture built without a dimension is at least valid
+		glm::u16vec3 mDimensions = glm::u16vec3(1, 1, 0);
 		uint8_t* mData = nullptr;
 
 		TextureBuilder& setFormat(TextureFormat format) {

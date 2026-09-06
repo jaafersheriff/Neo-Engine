@@ -1,5 +1,6 @@
 
 #define PI 3.141592653589
+#define INF 1e20
 #define EP 1e-5
 #define FP16_MAX 65504.0
 
