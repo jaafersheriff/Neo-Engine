@@ -265,7 +265,7 @@ namespace neo {
 		texture.mResource.destroy();
 	}
 
-	void TextureManager::imguiEditor(std::function<void(const TextureHandle&)> textureFunc) {
+	void TextureManager::imguiEditor(std::function<void(const TextureHandle&, uint32_t arrayLayer, uint32_t mipLevel)> textureFunc) {
 		mCache.forEach([&](const CachedResource<Texture>& textureResource) {
 			HashedString::hash_type handle = textureResource.mHandle.mHandle;
 			ImGui::PushID(static_cast<int>(handle));
@@ -278,7 +278,7 @@ namespace neo {
 			}
 			if (node) {
 				ImGui::Text("[%d, %d]", textureResource.mResource.mWidth, textureResource.mResource.mHeight);
-				textureFunc(handle);
+				textureFunc(handle, 0, 0);
 				ImGui::TreePop();
 			}
 			ImGui::PopID();

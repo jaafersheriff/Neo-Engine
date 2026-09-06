@@ -33,18 +33,31 @@ namespace neo {
 
 	void ResourceManagers::_imguiEditor() {
 		TRACY_ZONE();
-		auto textureFunc = [&](const TextureHandle& textureHandle) {
+		auto textureFunc = [&](const TextureHandle& textureHandle, uint32_t arrayLayer, uint32_t mipLevel) {
 			const std::optional<TextureDescriptor> texture = mTextureManager.getDescriptor(textureHandle);
 			if (!texture.has_value()) {
 				ImGui::Text("Invalid texture");
+				return;
 			}
-			else if (texture->mFormat.mTarget != types::texture::Target::Texture2D) {
-				ImGui::Text("Non-2D texture");
+			// Whatever ImGuiRenderer has a sampler variant for.
+			switch (texture->mFormat.mTarget) {
+			case types::texture::Target::Texture2D:
+			case types::texture::Target::Texture2DArray:
+			case types::texture::Target::TextureCube:
+			case types::texture::Target::Texture3D:
+				break;
+			default:
+				ImGui::Text("Unpreviewable texture target");
+				return;
 			}
-			else {
-				float scale = 175.f / (texture->mWidth > texture->mHeight ? texture->mWidth : texture->mHeight);
-				ImGui::Image(textureHandle.mHandle, ImVec2(scale * texture->mWidth, scale * texture->mHeight), ImVec2(0, 1), ImVec2(1, 0));
-			}
+
+			const float scale = 175.f / (texture->mWidth > texture->mHeight ? texture->mWidth : texture->mHeight);
+			ImGui::Image(
+				ImGui::TextureView(textureHandle.mHandle, arrayLayer, mipLevel),
+				ImVec2(scale * texture->mWidth, scale * texture->mHeight),
+				ImVec2(0, 1),
+				ImVec2(1, 0)
+			);
 		};
 		ImGui::Begin("Resources");
 		if (ImGui::TreeNodeEx(&mFramebufferManager, ImGuiTreeNodeFlags_DefaultOpen, "Framebuffers (%d)", mFramebufferManager.mCache.size())) {

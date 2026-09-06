@@ -154,7 +154,7 @@ namespace neo {
 		}, "Bloom mix");
 
 		if (resourceManagers.mFramebufferManager.isValid(bloomOutputHandle)) {
-			return resourceManagers.mFramebufferManager.resolve(bloomOutputHandle).mTextures[0];
+			return resourceManagers.mFramebufferManager.resolve(bloomOutputHandle).mAttachments[0].mTextureHandle;
 		}
 
 		return NEO_INVALID_HANDLE;

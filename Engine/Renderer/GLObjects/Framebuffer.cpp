@@ -5,8 +5,19 @@
 #include "Util/Util.hpp"
 #include "Util/Profiler.hpp"
 
+namespace {
+	// Moved out of GLHelper - this is the only caller, and GLHelper is included far more widely.
+	void checkFrameBuffer() {
+		GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (err != GL_FRAMEBUFFER_COMPLETE) {
+			const char* const errString = neo::GLHelper::errorString(err);
+			NEO_FAIL("OpenGL error '%s' '%d 0x%X'\n", errString, err, err);
+		}
+	}
+}
+
 #ifdef DEBUG_MODE
-#define CHECK_GL_FRAMEBUFFER() do {GLHelper::checkFrameBuffer(); } while(0)
+#define CHECK_GL_FRAMEBUFFER() do {checkFrameBuffer(); } while(0)
 #else
 #define CHECK_GL_FRAMEBUFFER()
 #endif
@@ -83,7 +94,7 @@ namespace neo {
 		glReadBuffer(GL_NONE);
 	}
 
-	void Framebuffer::attachTexture(TextureHandle id, const Texture& texture, const types::framebuffer::AttachmentTarget& target, uint8_t mip) {
+	void Framebuffer::attachTexture(TextureHandle textureHandle, const Texture& texture, const types::framebuffer::AttachmentTarget& target, uint8_t mip) {
 		types::framebuffer::AttachmentBit attachment;
 		switch (TextureFormat::deriveBaseFormat(texture.mFormat.mInternalFormat)) {
 			case types::texture::BaseFormats::Depth:
@@ -98,7 +109,7 @@ namespace neo {
 				break;
 		}
 
-		mTextures.emplace_back(id);
+		mAttachments.emplace_back(Attachment{ textureHandle, target, mip });
 		bind();
 		glFramebufferTexture2D(GL_FRAMEBUFFER, _getGLAttachment(attachment, mColorAttachments - 1), _getGLTarget(target), texture.mTextureID, mip);
 		CHECK_GL_FRAMEBUFFER();

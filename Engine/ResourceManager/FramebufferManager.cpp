@@ -8,7 +8,11 @@
 namespace neo {
 	namespace {
 		TextureHandle swizzleTextureId(FramebufferHandle srcHandle, TextureFormat format, types::framebuffer::AttachmentTarget target, uint8_t mip, glm::uvec2 dimension) {
-			HashedString::hash_type seed = srcHandle.mHandle ^ dimension.x ^ dimension.y;
+			// Combined rather than xored in: a plain xor of the two dimensions collides for any pair
+			// that shares the same bits, so differently-shaped targets could land on one handle.
+			HashedString::hash_type seed = srcHandle.mHandle;
+			seed ^= static_cast<uint32_t>(dimension.x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= static_cast<uint32_t>(dimension.y) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mInternalFormat) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mType) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			seed ^= static_cast<uint32_t>(format.mFilter.mMin) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -191,14 +195,14 @@ namespace neo {
 		NEO_ASSERT(mTextureManager != nullptr, "FramebufferManager was never given a TextureManager");
 		ManagedFramebuffer& managed = framebuffer.mResource;
 		if (!managed.mExternallyOwned) {
-			for (auto& textureHandle : managed.mFramebuffer.mTextures) {
-				mTextureManager->discard(textureHandle);
+			for (auto& attachment : managed.mFramebuffer.mAttachments) {
+				mTextureManager->discard(attachment.mTextureHandle);
 			}
 		}
 		managed.mFramebuffer.destroy();
 	}
 
-	void FramebufferManager::imguiEditor(std::function<void(const TextureHandle&)> textureFunc, TextureManager& textureManager) {
+	void FramebufferManager::imguiEditor(std::function<void(const TextureHandle&, uint32_t arrayLayer, uint32_t mipLevel)> textureFunc, TextureManager& textureManager) {
 		if (ImGui::BeginTable("##Framebuffers", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_PreciseWidths | ImGuiTableFlags_SizingStretchSame)) {
 			ImGui::TableSetupColumn("Name/Size", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending);
 			ImGui::TableSetupColumn("Attachments");
@@ -214,14 +218,20 @@ namespace neo {
 				else {
 					ImGui::Text(fb.mResource.mExternallyOwned ? "%d" : "*%d", handle);
 				}
-				if (const std::optional<TextureDescriptor> firstTex = textureManager.getDescriptor(fb.mResource.mFramebuffer.mTextures[0])) {
+				if (const std::optional<TextureDescriptor> firstTex = textureManager.getDescriptor(fb.mResource.mFramebuffer.mAttachments[0].mTextureHandle)) {
 					ImGui::Text("[%d, %d]", firstTex->mWidth, firstTex->mHeight);
 				}
 				ImGui::TableSetColumnIndex(1);
-				for (auto texId = fb.mResource.mFramebuffer.mTextures.begin(); texId < fb.mResource.mFramebuffer.mTextures.end(); texId++) {
-					if (textureManager.isValid(*texId)) {
-						textureFunc(*texId);
-						if (texId != std::prev(fb.mResource.mFramebuffer.mTextures.end())) {
+				const auto& attachments = fb.mResource.mFramebuffer.mAttachments;
+				for (auto it = attachments.begin(); it < attachments.end(); it++) {
+					if (textureManager.isValid(it->mTextureHandle)) {
+						// The cube face targets follow Target2D in the canonical GL face order, so the
+						// layer is just the distance from it.
+						const uint32_t arrayLayer = it->mTarget == types::framebuffer::AttachmentTarget::Target2D
+							? 0u
+							: static_cast<uint32_t>(it->mTarget) - 1u;
+						textureFunc(it->mTextureHandle, arrayLayer, it->mMip);
+						if (it != std::prev(attachments.end())) {
 							ImGui::SameLine();
 						}
 					}

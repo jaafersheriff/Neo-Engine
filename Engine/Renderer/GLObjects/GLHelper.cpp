@@ -160,12 +160,5 @@ namespace neo {
 			}
 		}
 
-		void checkFrameBuffer() {
-			GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-			if (err != GL_FRAMEBUFFER_COMPLETE) {
-				const char *const errString = errorString(err);
-				NEO_FAIL("OpenGL error '%s' '%d 0x%X'\n", errString, err, err);
-			}
-		}
 	}
 }

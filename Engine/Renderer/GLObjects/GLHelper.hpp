@@ -25,7 +25,7 @@ namespace neo {
 		);
 		uint32_t getGLByteFormat(types::ByteFormats format);
 		uint32_t getGLInternalFormat(types::InternalFormats format);
-		void checkFrameBuffer();
+		const char* errorString(uint32_t err);
 		void checkError(const char* str);
 	}
 
