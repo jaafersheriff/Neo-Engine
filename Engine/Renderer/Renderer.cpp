@@ -81,6 +81,8 @@ namespace neo {
 			TracyAppInfo(buf, bytes);
 			bytes = sprintf(buf, "Max Compute Work Group Size: [%d, %d, %d]", mDetails.mMaxComputeWorkGroupSize.x, mDetails.mMaxComputeWorkGroupSize.y, mDetails.mMaxComputeWorkGroupSize.z);
 			TracyAppInfo(buf, bytes);
+			bytes = sprintf(buf, "Max Texture Array Layers: %d", mDetails.mMaxTextureArrayLayers);
+			TracyAppInfo(buf, bytes);
 		}
 
 	#ifdef DEBUG_MODE
@@ -96,6 +98,7 @@ namespace neo {
 		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
 		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
 		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z);
+		glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &mDetails.mMaxTextureArrayLayers);
 		char buf[512];
 		memcpy(buf, glGetString(GL_VENDOR), 512);
 		mDetails.mVendor = buf;

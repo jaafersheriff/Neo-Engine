@@ -134,11 +134,13 @@ namespace neo {
 
 	void ShaderBufferManager::imguiEditor() {
 		mCache.forEach([](const CachedResource<ShaderBuffer>& buffer) {
+			char byteSize[64];
+			util::stringifyByteSize(buffer.mResource.mByteSize, byteSize, sizeof(byteSize));
 			if (buffer.mDebugName.has_value()) {
-				ImGui::Text("%s (%u bytes)", buffer.mDebugName->c_str(), buffer.mResource.mByteSize);
+				ImGui::Text("%s (%s)", buffer.mDebugName->c_str(), byteSize);
 			}
 			else {
-				ImGui::Text("%d (%u bytes)", buffer.mHandle.mHandle, buffer.mResource.mByteSize);
+				ImGui::Text("%d (%s)", buffer.mHandle.mHandle, byteSize);
 			}
 		});
 	}
