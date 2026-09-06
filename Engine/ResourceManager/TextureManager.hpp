@@ -43,7 +43,7 @@ namespace neo {
 
 		TextureManager();
 		~TextureManager();
-		void imguiEditor(std::function<void(const TextureHandle&)> textureFunc);
+		void imguiEditor(std::function<void(const TextureHandle&, uint32_t arrayLayer, uint32_t mipLevel)> textureFunc);
 
 		// Extract TextureFormat and resolution without the underlying resource
 		[[nodiscard]] std::optional<TextureDescriptor> getDescriptor(const TextureHandle& handle) const {

@@ -91,7 +91,7 @@ namespace neo {
 
 		[[nodiscard]] FramebufferHandle asyncLoad(HashedString id, FramebufferLoadDetails details, const TextureManager& textureManager) const;
 
-		void imguiEditor(std::function<void(const TextureHandle&)> textureFunc, TextureManager& textureManager);
+		void imguiEditor(std::function<void(const TextureHandle&, uint32_t arrayLayer, uint32_t mipLevel)> textureFunc, TextureManager& textureManager);
 
 	protected:
 		[[nodiscard]] FramebufferHandle _asyncLoadImpl(FramebufferHandle handle, FramebufferAttachments attachments, const std::optional<std::string>& debugName) const;

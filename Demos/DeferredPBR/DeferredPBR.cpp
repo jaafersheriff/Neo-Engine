@@ -448,7 +448,7 @@ namespace DeferredPBR {
 		blitDepth(
 			renderPasses,
 			resourceManagers,
-			resourceManagers.mFramebufferManager.resolve(gbufferHandle).mTextures[3], // Oof
+			resourceManagers.mFramebufferManager.resolve(gbufferHandle).mAttachments[3].mTextureHandle, // Oof
 			outputDepth,
 			viewport.mSize
 		);
@@ -456,7 +456,7 @@ namespace DeferredPBR {
 		FramebufferHandle hdrColorTarget = resourceManagers.mFramebufferManager.asyncLoad("HDR Target",
 			FramebufferExternalAttachments{
 				FramebufferAttachment{hdrColorTexture},
-				FramebufferAttachment{resourceManagers.mFramebufferManager.resolve(gbufferHandle).mTextures[3]}, // Oof
+				FramebufferAttachment{resourceManagers.mFramebufferManager.resolve(gbufferHandle).mAttachments[3].mTextureHandle}, // Oof
 			},
 			resourceManagers.mTextureManager
 		);
@@ -501,7 +501,7 @@ namespace DeferredPBR {
 			blit(renderPasses, previousHDRColorHandle, viewport.mSize, bloomResults, "Blit previous frame");
 
 			if (resourceManagers.mFramebufferManager.isValid(previousHDRColorHandle)) {
-				averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mTextures[0], params.mAutoExposureParams);
+				averageLuminance = calculateAutoexposure(renderPasses, resourceManagers, ecs, resourceManagers.mFramebufferManager.resolve(previousHDRColorHandle).mAttachments[0].mTextureHandle, params.mAutoExposureParams);
 			}
 		}
 

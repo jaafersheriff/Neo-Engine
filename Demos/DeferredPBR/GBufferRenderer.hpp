@@ -243,10 +243,10 @@ namespace DeferredPBR {
 			resolvedShader.bind();
 
 			auto& gbuffer = resourceManagers.mFramebufferManager.resolve(gbufferHandle);
-			resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[0]));
-			resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[1]));
-			resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[2]));
-			resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mTextures[3]));
+			resolvedShader.bindTexture("gAlbedoAO", resourceManagers.mTextureManager.resolve(gbuffer.mAttachments[0].mTextureHandle));
+			resolvedShader.bindTexture("gNormalRoughness", resourceManagers.mTextureManager.resolve(gbuffer.mAttachments[1].mTextureHandle));
+			resolvedShader.bindTexture("gEmissiveMetalness", resourceManagers.mTextureManager.resolve(gbuffer.mAttachments[2].mTextureHandle));
+			resolvedShader.bindTexture("gDepth", resourceManagers.mTextureManager.resolve(gbuffer.mAttachments[3].mTextureHandle));
 
 			resourceManagers.mMeshManager.resolve("quad").draw();
 		}
