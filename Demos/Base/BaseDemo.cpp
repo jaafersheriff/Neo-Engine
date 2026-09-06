@@ -141,7 +141,7 @@ namespace Base {
 		TextureHandle sceneColor = resourceManagers.mTextureManager.asyncLoad("Scene Color",
 			TextureBuilder{}
 			.setFormat(TextureFormat{ types::texture::Target::Texture2D,
-				types::texture::InternalFormats::RGB16_UNORM,
+				types::InternalFormats::RGB16_UNORM,
 			})
 			.setDimension(glm::u16vec3(viewport.mSize.x, viewport.mSize.y, 0))
 		);
