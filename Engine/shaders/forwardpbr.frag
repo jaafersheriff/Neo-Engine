@@ -155,7 +155,7 @@ void main() {
 
 #ifdef ENABLE_SHADOWS
 #	ifdef DIRECTIONAL_LIGHT
-	float visibility = getCSMShadowVisibility(1, shadowCoord, shadowMap, shadowMapResolution.x, 0.0001);
+	float visibility = getCSMShadowVisibility(1, shadowCoord, shadowMap, shadowMapResolution.x, 0.001);
 #	elif defined(POINT_LIGHT)
 	float visibility = getShadowVisibility(1, shadowMap, fragPos.xyz - lightPos, shadowMapResolution.x, shadowRange, 0.001);
 #	endif

@@ -13,7 +13,7 @@ namespace neo {
 
 	struct TextureBuilder {
 		TextureFormat mFormat;
-		glm::u16vec3 mDimensions = glm::u16vec3(0);
+		glm::u16vec3 mDimensions = glm::u16vec3(1, 1, 0);
 		uint8_t* mData = nullptr;
 
 		TextureBuilder& setFormat(TextureFormat format) {
