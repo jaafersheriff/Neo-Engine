@@ -72,5 +72,22 @@ namespace neo {
 			}
 			return std::nullopt; // No intersection
 		}
+
+		// Overlap test between two boxes in world space.
+		//
+		// Only correct while both model matrices are axis-aligned - it transforms the two corners and
+		// treats the result as an AABB, and a rotated box's corners do not bound it. Fine for the grid
+		// and volume tests this came over for; anything rotated wants the eight corners, or an OBB
+		// test on the separating axes.
+		bool intersect(const glm::mat4& modelMatrix, const BoundingBoxComponent& other, const glm::mat4& otherModelMatrix) const {
+			const glm::vec3 aMin = glm::vec3(modelMatrix * glm::vec4(mMin, 1.0));
+			const glm::vec3 aMax = glm::vec3(modelMatrix * glm::vec4(mMax, 1.0));
+			const glm::vec3 bMin = glm::vec3(otherModelMatrix * glm::vec4(other.mMin, 1.0));
+			const glm::vec3 bMax = glm::vec3(otherModelMatrix * glm::vec4(other.mMax, 1.0));
+
+			return (aMin.x <= bMax.x) && (aMax.x >= bMin.x)
+				&& (aMin.y <= bMax.y) && (aMax.y >= bMin.y)
+				&& (aMin.z <= bMax.z) && (aMax.z >= bMin.z);
+		}
 	END_COMPONENT();
 }
