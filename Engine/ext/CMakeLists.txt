@@ -52,6 +52,7 @@ endif()
 ## imgui
 file(GLOB IMGUI_CPP_FILES 
 	imgui/*.cpp
+	imgui_incl.cpp
 	ImGuizmo/*.cpp
 	implot/*.cpp
 )

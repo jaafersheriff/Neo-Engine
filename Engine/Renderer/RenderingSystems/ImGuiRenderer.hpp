@@ -58,19 +58,49 @@ namespace neo {
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_STENCIL_TEST);
 		glEnable(GL_SCISSOR_TEST);
-		auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, {});
-		resolvedShader.bindUniform("P", ortho_projection);
+		// The sampler type has to match the texture, so the variant is picked per draw rather than once
+		// for the pass - a panel previewing a cubemap and one previewing a 2D texture are different
+		// programs.
+		MakeDefine(TEXTURE_2D);
+		MakeDefine(TEXTURE_2D_ARRAY);
+		MakeDefine(TEXTURE_CUBE);
+		MakeDefine(TEXTURE_3D);
+		ShaderDefines drawDefines;
 
 		for(auto &&[_, draw, __]: ecs.getView<ImGuiDrawComponent, ImGuiComponent>().each()) {
 			if (!resourceManagers.mMeshManager.isValid(draw.mMeshHandle)) {
 				return;
 			}
 
-			if (!resourceManagers.mTextureManager.isValid(draw.mTextureHandle)) {
+			if (!resourceManagers.mTextureManager.isValid(draw.mTextureView.mTextureHandle)) {
+				return;
+			}
+			drawDefines.reset();
+
+			const auto& resolvedTexture = resourceManagers.mTextureManager.resolve(draw.mTextureView.mTextureHandle);
+			switch (resolvedTexture.mFormat.mTarget) {
+			case types::texture::Target::Texture2D:
+				drawDefines.set(TEXTURE_2D);
+				break;
+			case types::texture::Target::Texture2DArray:
+				drawDefines.set(TEXTURE_2D_ARRAY);
+				break;
+			case types::texture::Target::TextureCube:
+				drawDefines.set(TEXTURE_CUBE);
+				break;
+			case types::texture::Target::Texture3D:
+				drawDefines.set(TEXTURE_3D);
+				break;
+			default:
+				NEO_FAIL("ImGui::Image supplied with an unsupported texture target");
 				return;
 			}
 
-			resolvedShader.bindTexture("Texture", resourceManagers.mTextureManager.resolve(draw.mTextureHandle));
+			auto resolvedShader = resourceManagers.mShaderManager.resolveDefines(shaderHandle, drawDefines);
+			resolvedShader.bindUniform("P", ortho_projection);
+			resolvedShader.bindTexture("Texture", resolvedTexture);
+			resolvedShader.bindUniform("arrayLevel", draw.mTextureView.mArrayLayer);
+			resolvedShader.bindUniform("mipLevel", draw.mTextureView.mMipLevel);
 
 			glScissor(
 				draw.mScissorRect.x,
