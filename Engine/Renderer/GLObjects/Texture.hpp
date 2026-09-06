@@ -71,12 +71,14 @@ namespace neo {
 	public:
 
 		Texture() = default;
-		Texture(TextureFormat format,     uint16_t dimension, const std::optional<std::string>& debugName, const void* data = nullptr);
-		Texture(TextureFormat format, glm::u16vec2 dimension, const std::optional<std::string>& debugName, const void* data = nullptr);
+		// One constructor - the target decides which components of the dimension are read, and every
+		// caller already builds a u16vec3 through TextureBuilder.
 		Texture(TextureFormat format, glm::u16vec3 dimension, const std::optional<std::string>& debugName, const void* data = nullptr);
 
 		void bind() const;
 		void genMips();
+		void clear(const uint8_t* value);
+		void clear(uint16_t mipLevel, glm::uvec3 offset, glm::uvec3 size, const uint8_t* value);
 		void destroy();
 
 		[[nodiscard]] TextureDescriptor getDescriptor() const { return *this; }
