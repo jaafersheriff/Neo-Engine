@@ -271,7 +271,7 @@ namespace DeferredPBR {
 			if (ibl.has_value()) {
 				resolvedShader.bindTexture("ibl", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox));
 				resolvedShader.bindTexture("dfgLUT", resourceManagers.mTextureManager.resolve(ibl->mDFGLut));
-				resolvedShader.bindUniform("iblMips", resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox).mFormat.mMipCount);
+				resolvedShader.bindUniform("iblMips", static_cast<int>(resourceManagers.mTextureManager.resolve(ibl->mConvolvedSkybox).mFormat.mMipCount));
 			}
 
 			resourceManagers.mMeshManager.resolve(HashedString("quad")).draw();
