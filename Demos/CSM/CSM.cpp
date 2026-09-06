@@ -222,11 +222,13 @@ namespace CSM {
 				drawLines<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
 				drawLines<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);
 			}
-			if (params.mDrawCascadeSpheres) {
-				drawWireframe<CSMCamera0Component>(resourceManagers, ecs, cameraEntity);
-				drawWireframe<CSMCamera1Component>(resourceManagers, ecs, cameraEntity);
-				drawWireframe<CSMCamera2Component>(resourceManagers, ecs, cameraEntity);
-			}
 		}, "Draw scene");
+
+		if (params.mDrawCascadeSpheres) {
+			const auto [cameraEntity, _, __] = *ecs.getSingleView<MainCameraComponent, SpatialComponent>();
+			drawWireframe<CSMCamera0Component>(outputTargetHandle, viewport.mSize, renderPasses, cameraEntity);
+			drawWireframe<CSMCamera1Component>(outputTargetHandle, viewport.mSize, renderPasses, cameraEntity);
+			drawWireframe<CSMCamera2Component>(outputTargetHandle, viewport.mSize, renderPasses, cameraEntity);
+		}
 	}
 }
